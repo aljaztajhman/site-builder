@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import Anthropic from "@anthropic-ai/sdk";
 import { costEur, type AppConfig, type ModelStageName } from "@sb/config";
+import { toStructuredOutputSchema } from "./structured-schema.ts";
 
 /** The request shape the pipeline sends; a subset of the Messages API. */
 export interface ModelRequest {
@@ -149,7 +150,7 @@ export class AnthropicTransport implements ModelTransport {
     const outputConfig: Anthropic.OutputConfig = {};
     // Haiku 4.5 does not accept effort; the config simply omits it for that stage.
     if (stage.effort) outputConfig.effort = stage.effort;
-    if (req.schema) outputConfig.format = { type: "json_schema", schema: req.schema };
+    if (req.schema) outputConfig.format = { type: "json_schema", schema: toStructuredOutputSchema(req.schema) as Record<string, unknown> };
     const system: Anthropic.TextBlockParam[] = req.system.map((text, i) => ({
       type: "text",
       text,

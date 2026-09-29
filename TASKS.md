@@ -22,6 +22,8 @@ Phase 1 plan: docs/phases/PHASE-1.md. Tick only what has been run and checked.
 - [x] Docker Compose (Postgres, MinIO), Dockerfiles (web; worker on Playwright image), `railway/*.json`
 - [x] GitHub Actions: typecheck, lint, test on PRs; eval on manual trigger
 - [x] README (setup < 10 lines), .env.example
+- [x] Diff review (subagent): 12 findings fixed — param/path validation + CSP, login redirect, body limits, throttle, storage key guard, protected spec paths, publish under site slug, fact check blocks publish, stricter fact matching, version CAS, queued editor saves, spend-cap pricing, interrupted-job recovery, locked migrations
+- [x] Offline eval: 10/10 golden sites pass every check (eval/offline-report.md, eval/offline-contact-sheet.png)
 
 ## Needs the home PC (Docker, gh, railway, API key)
 - [ ] `docker compose up -d && pnpm i && pnpm dev` from a clean clone (Dockerfiles and compose are unverified: no Docker here)
@@ -37,3 +39,7 @@ Phase 1 plan: docs/phases/PHASE-1.md. Tick only what has been run and checked.
 - [ ] Header inline script (`js` class) conflicts with a strict CSP; revisit when adding CSP
 - [ ] Offline export verified in Chromium only; Firefox may block `file://` fonts from a parent folder (falls back to system fonts) — not verified
 - [ ] Newsreader font file is 62 KB (target 60)
+- [ ] CSP allows 'unsafe-inline' scripts (header js-class snippet); move it to nav.js or a hash
+- [ ] Railway bucket: confirm virtual-hosted vs path style in the bucket's Credentials tab; S3 keys are validated in code
+- [ ] team:grid looks uneven when only some members have portraits
+- [ ] Cormorant Garamond dropped (misplaced carons in the variable font); EB Garamond instead
