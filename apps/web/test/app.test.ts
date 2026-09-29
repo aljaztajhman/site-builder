@@ -96,6 +96,11 @@ describe("published sites", () => {
     expect((await app.request("/s/demo/../../etc/passwd")).status).not.toBe(200);
     expect((await app.request("/s/demo/..%2f..%2fsecret")).status).toBe(400);
     expect((await app.request("/s/..%2F./sites/x/uploads/a.svg")).status).toBe(400);
+    // The query may carry encoded slashes: the login redirect encodes next=/ as %2F.
+    expect((await app.request("/login?next=%2F")).status).toBe(200);
+    const redirect = await app.request("/");
+    expect(redirect.status).toBe(302);
+    expect((await app.request(redirect.headers.get("location")!)).status).toBe(200);
     expect((await app.request("/s/Demo!/index.html")).status).toBe(404);
   });
 });
