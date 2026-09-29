@@ -198,8 +198,16 @@ export interface ContentResult {
   structuredFallback: boolean;
 }
 
+/**
+ * The envelope only; each section's props schema is already in the cached section catalogue, so the
+ * full content schema (~15k tokens) isn't repeated in the uncached prompt.
+ */
 function plainJsonInstruction(): string {
-  return `Return only the JSON object {"chrome": ..., "pages": [...]} matching this schema:\n${JSON.stringify(contentJsonSchema())}`;
+  return `Return only one JSON object, no prose:
+{"chrome": {"header": {"variant": "bar"|"split-cta"|"stacked", "cta": "call"|"booking"|"directions"|"none", "tone"?: "default"|"alt"|"inverse"}, "footer": {"variant": "columns"|"compact"}, "mobileActionBar": boolean},
+ "pages": [{"id": "p_<word>", "kind": "home"|"standard", "slug": ""|"<ascii-kebab>", "nav": {"label": string ≤24, "show": boolean}, "seo": {"title": string ≤60, "description": string ≤160},
+   "sections": [{"id": "s_<word>", "type": <section type from the catalogue>, "variant": <one of its variants>, "tone"?: "default"|"alt"|"inverse", "props": <exactly its props schema>}]}]}
+The homepage has kind "home" and slug "". Use only section types, variants and props from the catalogue; respect every length limit.`;
 }
 
 function imageList(assets: SiteSpec["assets"], heroIds: string[]): string {
