@@ -1,0 +1,92 @@
+/**
+ * End-to-end check of a deployed environment on one generated site, the way an owner uses it:
+ * chat edit → fill the placeholders in the editor → publish → public page at /s/{slug}/ → export
+ * zip opened offline. Costs one chat edit (~€0.02).
+ *
+ *   REMOTE_URL=https://… REMOTE_PASSWORD=… pnpm tsx tools/eval/src/remote-smoke.ts <site-id>
+ */
+import { checkExportOffline, launchCheckBrowser } from "@sb/engine";
+import { fillPlaceholderOps } from "./placeholder-fill.ts";
+
+const base = process.env.REMOTE_URL;
+const password = process.env.REMOTE_PASSWORD;
+const siteId = process.argv[2];
+if (!base || !password || !siteId) {
+  console.error("usage: REMOTE_URL=… REMOTE_PASSWORD=… remote-smoke.ts <site-id>");
+  process.exit(2);
+}
+
+interface SiteState {
+  site: { status: string; slug: string; name: string };
+  version: number | null;
+  spec: { chrome: { header: { tone?: string } } } | null;
+  chat: { role: string; content: string }[];
+  blockers: string[];
+}
+
+let failed = false;
+const step = (name: string, ok: boolean, detail = "") => {
+  console.log(`${ok ? "PASS" : "FAIL"}  ${name}${detail ? ` — ${detail}` : ""}`);
+  if (!ok) failed = true;
+  return ok;
+};
+const stop = () => process.exit(failed ? 1 : 0);
+
+const login = await fetch(`${base}/login`, { method: "POST", body: new URLSearchParams({ password, next: "/" }), redirect: "manual" });
+const cookie = login.headers.get("set-cookie")?.split(";")[0] ?? "";
+if (!step("login", login.status === 302 && !!cookie, `HTTP ${login.status}`)) stop();
+
+const api = (p: string, init: RequestInit = {}) => fetch(`${base}${p}`, { ...init, headers: { cookie, "content-type": "application/json", ...init.headers } });
+const state = async () => (await (await api(`/api/sites/${siteId}`)).json()) as SiteState;
+
+let s = await state();
+if (!step("site is ready", s.site.status === "ready" && s.version !== null, `${s.site.status}, v${s.version}`)) stop();
+
+// Chat edit (the only model call): flip the header between dark and light, so the check needs a real change.
+const chatBefore = s.chat.length;
+const wasDark = s.spec?.chrome.header.tone === "inverse";
+const message = wasDark ? "Glava naj bo spet svetla, ne temna." : "Temnejša glava prosim.";
+const sent = await api(`/api/sites/${siteId}/chat`, { method: "POST", body: JSON.stringify({ message }) });
+step("chat edit accepted", sent.ok, `HTTP ${sent.status}`);
+const until = Date.now() + 3 * 60_000;
+while (Date.now() < until) {
+  s = await state();
+  if (s.chat.length >= chatBefore + 2 && s.site.status === "ready") break;
+  await new Promise((r) => setTimeout(r, 3000));
+}
+const reply = s.chat.at(-1);
+const isDark = s.spec?.chrome.header.tone === "inverse";
+step("chat edit applied", reply?.role === "assistant" && isDark !== wasDark, `header ${wasDark ? "dark → " : "light → "}${isDark ? "dark" : "light"}; reply: ${reply?.content.slice(0, 80) ?? "none"}`);
+
+// Owner fills the missing facts in the editor (direct edit, no model call).
+const ops = fillPlaceholderOps(s.spec);
+if (ops.length) {
+  const patched = await api(`/api/sites/${siteId}/patch`, { method: "POST", body: JSON.stringify({ baseVersion: s.version, ops, message: "smoke test: facts" }) });
+  step(`fill ${ops.length} placeholders`, patched.ok, `HTTP ${patched.status}${patched.ok ? "" : ` ${(await patched.text()).slice(0, 200)}`}`);
+}
+s = await state();
+if (!step("no publish blockers", s.blockers.length === 0, s.blockers.slice(0, 5).join(" | "))) stop();
+
+const pub = await api(`/api/sites/${siteId}/publish`, { method: "POST" });
+const pubBody = (await pub.json()) as { url?: string; version?: number };
+if (!step("publish", pub.ok && !!pubBody.url, `v${pubBody.version} → ${pubBody.url}`)) stop();
+
+// Public page, fetched without the session cookie.
+const page = await fetch(`${base}${pubBody.url}`);
+const html = await page.text();
+step("public page", page.ok && html.includes('lang="sl"'), `HTTP ${page.status}, ${html.length} B`);
+step("public page is noindex", (page.headers.get("x-robots-tag") ?? "").includes("noindex"));
+
+const exp = await api(`/api/sites/${siteId}/export`);
+const zip = new Uint8Array(await exp.arrayBuffer());
+if (step("export download", exp.ok && zip.length > 10_000, `${(zip.length / 1024).toFixed(0)} KB`)) {
+  const browser = await launchCheckBrowser();
+  try {
+    const r = await checkExportOffline(zip, s.site.slug, browser.browser);
+    step("export works offline (file://)", r.ok, r.ok ? `${r.files} files` : r.problems.slice(0, 3).join(" | "));
+  } finally {
+    await browser.close();
+  }
+}
+console.log(`\n${base}${pubBody.url}`);
+stop();
