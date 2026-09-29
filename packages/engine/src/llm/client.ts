@@ -106,15 +106,57 @@ export class ModelClient {
     return res;
   }
 
-  /** Calls with a JSON schema and parses the JSON text. Validation against zod is the caller's job. */
-  async callJson<T = unknown>(req: ModelRequest & { schema: Record<string, unknown> }): Promise<{ data: T; response: ModelResponse }> {
-    const response = await this.call(req);
-    try {
-      return { data: JSON.parse(extractJson(response.text)) as T, response };
-    } catch {
-      throw new ModelOutputError(`Model output for ${req.stage} is not valid JSON`, response);
+  /** Stages whose schema the API refused for structured output (too many unions etc.); they use plain JSON. */
+  private readonly plainJsonStages = new Set<ModelStageName>();
+
+  /**
+   * Calls with a JSON schema and returns the parsed, validated value. Uses structured output; if the
+   * API rejects the schema, falls back to plain JSON with the schema in the prompt (remembered per
+   * stage). Output that fails `parse` is retried once with the errors.
+   */
+  async callJson<T>(req: ModelRequest & { schema: Record<string, unknown> }, parse: (data: unknown) => T): Promise<{ data: T; response: ModelResponse }> {
+    let messages = req.messages;
+    const plainInstruction = `Answer with a single JSON object only, matching this JSON Schema:\n${JSON.stringify(req.schema)}`;
+    if (this.plainJsonStages.has(req.stage)) messages = appendToLastUser(messages, plainInstruction);
+    for (let attempt = 0; ; attempt++) {
+      const structured = !this.plainJsonStages.has(req.stage);
+      let response: ModelResponse;
+      try {
+        response = await this.call({ ...req, messages, ...(structured ? {} : { schema: undefined }) });
+      } catch (e) {
+        if (structured && isSchemaRejection(e)) {
+          this.plainJsonStages.add(req.stage);
+          messages = appendToLastUser(messages, plainInstruction);
+          continue;
+        }
+        throw e;
+      }
+      let problem: string;
+      try {
+        return { data: parse(JSON.parse(extractJson(response.text))), response };
+      } catch (e) {
+        problem = e instanceof SyntaxError ? "The answer was not valid JSON." : `The answer did not match the schema: ${(e as Error).message.slice(0, 1500)}`;
+      }
+      if (attempt >= 1) throw new ModelOutputError(`Model output for ${req.stage} is invalid: ${problem.slice(0, 300)}`, response);
+      messages = [...messages, { role: "assistant", content: response.text }, { role: "user", content: `${problem}\nReturn the corrected JSON object only.` }];
     }
   }
+}
+
+/** A 400 from the API refusing the JSON schema for structured output. */
+export function isSchemaRejection(e: unknown): boolean {
+  const err = e as { status?: number; message?: string };
+  return err.status === 400 && /schema|output_config|format|grammar|union/i.test(err.message ?? "");
+}
+
+function appendToLastUser(messages: Anthropic.MessageParam[], text: string): Anthropic.MessageParam[] {
+  const out = [...messages];
+  const last = out[out.length - 1];
+  if (!last || last.role !== "user") return [...out, { role: "user", content: text }];
+  const content: Anthropic.ContentBlockParam[] = typeof last.content === "string" ? [{ type: "text", text: last.content }] : [...last.content];
+  content.push({ type: "text", text });
+  out[out.length - 1] = { role: "user", content };
+  return out;
 }
 
 /** Tolerates a fenced block when structured output is off. */

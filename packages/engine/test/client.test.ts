@@ -51,8 +51,34 @@ describe("ModelClient", () => {
 
   it("parses JSON, tolerating a fenced block", async () => {
     const client = new ModelClient({ config, transport: fakeTransport([{ text: '```json\n{"a":1}\n```' }]), spentToday: async () => 0, onCall: async () => undefined });
-    const { data } = await client.callJson({ ...req, schema: { type: "object" } });
+    const { data } = await client.callJson({ ...req, schema: { type: "object" } }, (d) => d);
     expect(data).toEqual({ a: 1 });
+  });
+
+  it("falls back to plain JSON when the API rejects the schema, and remembers it per stage", async () => {
+    const seen: boolean[] = [];
+    const transport: ModelTransport = {
+      async send(r, stage) {
+        seen.push(!!r.schema);
+        if (r.schema) throw Object.assign(new Error("400 Schemas contains too many parameters with union types"), { status: 400 });
+        return { text: '{"a":1}', stopReason: "end_turn", model: stage.model, usage: { input_tokens: 1, output_tokens: 1, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 } };
+      },
+    };
+    const client = new ModelClient({ config, transport, spentToday: async () => 0, onCall: async () => undefined });
+    await client.callJson({ ...req, schema: { type: "object" } }, (d) => d);
+    await client.callJson({ ...req, schema: { type: "object" } }, (d) => d);
+    expect(seen).toEqual([true, false, false]);
+  });
+
+  it("retries once with the validation errors, then gives up", async () => {
+    const client = new ModelClient({ config, transport: fakeTransport([{ text: '{"a":"x"}' }, { text: '{"a":2}' }]), spentToday: async () => 0, onCall: async () => undefined });
+    const parse = (d: unknown) => {
+      if (typeof (d as { a: unknown }).a !== "number") throw new Error("a must be a number");
+      return d as { a: number };
+    };
+    expect((await client.callJson({ ...req, schema: { type: "object" } }, parse)).data).toEqual({ a: 2 });
+    const bad = new ModelClient({ config, transport: fakeTransport([{ text: "nope" }, { text: "nope" }]), spentToday: async () => 0, onCall: async () => undefined });
+    await expect(bad.callJson({ ...req, schema: { type: "object" } }, parse)).rejects.toBeInstanceOf(ModelOutputError);
   });
 });
 

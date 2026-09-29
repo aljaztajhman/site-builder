@@ -15,7 +15,7 @@ import {
   type SiteSpec,
 } from "@sb/spec";
 import type { ModelClient } from "./llm/client.ts";
-import { ModelOutputError } from "./llm/client.ts";
+import { ModelOutputError, isSchemaRejection } from "./llm/client.ts";
 import { Brief, Classification, briefJsonSchema, classificationJsonSchema, verifyBriefFacts, type Dropped } from "./brief.ts";
 import {
   ALT_SYSTEM,
@@ -44,8 +44,8 @@ export async function classify(client: ModelClient, description: string): Promis
     system: [CLASSIFY_SYSTEM],
     messages: [{ role: "user", content: description }],
     schema: classificationJsonSchema(),
-  });
-  return Classification.parse(data);
+  }, (d) => Classification.parse(d));
+  return data;
 }
 
 export async function makeBrief(
@@ -62,8 +62,8 @@ export async function makeBrief(
       },
     ],
     schema: briefJsonSchema(),
-  });
-  return verifyBriefFacts(Brief.parse(data), input.description);
+  }, (d) => Brief.parse(d));
+  return verifyBriefFacts(data, input.description);
 }
 
 // ---------- 2. Design direction ----------
@@ -100,8 +100,8 @@ export async function chooseDesign(
       },
     ],
     schema: toModelJsonSchema(DesignChoice),
-  });
-  const choice = DesignChoice.parse(data);
+  }, (d) => DesignChoice.parse(d));
+  const choice = data;
   return { design: designFromChoice(choice), reason: choice.reason };
 }
 
@@ -167,8 +167,8 @@ export async function altTexts(client: ModelClient, photos: { jpegBase64: string
     system: [ALT_SYSTEM],
     messages: [{ role: "user", content }],
     schema: toModelJsonSchema(AltOutput),
-  });
-  const out = AltOutput.parse(data);
+  }, (d) => AltOutput.parse(d));
+  const out = data;
   return photos.map((_, i) => {
     const r = out.images.find((x) => x.index === i);
     return { alt: r?.alt ?? "", focal: { x: r?.focalX ?? 0.5, y: r?.focalY ?? 0.5 }, heroSuitable: r?.heroSuitable ?? false };
@@ -200,11 +200,6 @@ export interface ContentResult {
 
 function plainJsonInstruction(): string {
   return `Return only the JSON object {"chrome": ..., "pages": [...]} matching this schema:\n${JSON.stringify(contentJsonSchema())}`;
-}
-
-function isSchemaRejection(e: unknown): boolean {
-  const err = e as { status?: number; message?: string };
-  return err.status === 400 && /schema|output_config|format|grammar/i.test(err.message ?? "");
 }
 
 function imageList(assets: SiteSpec["assets"], heroIds: string[]): string {
