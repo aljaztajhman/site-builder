@@ -7,7 +7,9 @@ import {
   RecordingTransport,
   ReplayTransport,
   applyChatEdit,
+  checkExportOffline,
   checkSite,
+  exportSite,
   generateSite,
   loadMedia,
   clientCorpus,
@@ -48,6 +50,8 @@ export interface FixtureResult {
   generationMs: number;
   timings: Record<string, number>;
   mobileShot: Uint8Array | null;
+  /** The export zip opened from file:// (checked once, after generation). */
+  exportCheck: { ok: boolean; bytes: number; pages: number; problems: string[] } | null;
   error?: string;
 }
 
@@ -114,6 +118,7 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
     generationMs: 0,
     timings: {},
     mobileShot: null,
+    exportCheck: null,
   };
   try {
     const site = await repo.createSite({ name: fixture.id, slug: fixture.id, intake: { description: fixture.brief.description, photoAssetIds: [], scope: opts.scope } });
@@ -173,6 +178,10 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
     result.direction = first.current.spec.design.direction;
     result.mobileShot = first.report.screenshots.mobile;
     result.checkpoints.push(summarise("generated", first.current.spec, first.current.version, first.report));
+    const { zip } = await exportSite({ repo, storage, config }, site.id);
+    const ex = await checkExportOffline(zip, first.current.spec.slug, opts.browser.browser);
+    result.exportCheck = { ok: ex.ok, bytes: ex.bytes, pages: ex.files, problems: ex.problems };
+    for (const p of ex.problems) result.checkpoints[0]!.failures.push(`export offline: ${p}`);
     await writeFile(path.join(dir, "home-360.png"), first.report.screenshots.mobileFull);
     await writeFile(path.join(dir, "home-1280.png"), first.report.screenshots.desktop);
     await writeFile(path.join(dir, "spec-generated.json"), JSON.stringify(first.current.spec, null, 2));

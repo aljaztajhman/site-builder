@@ -1,0 +1,417 @@
+{
+  "specVersion": 1,
+  "slug": "avtoservis-mrak",
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Avtoservis Mrak",
+    "type": "car-repair",
+    "phone": "+38641555730",
+    "email": {
+      "$placeholder": "email",
+      "note": "Če imate e-pošto, jo vpišite, sicer polje odstranite"
+    },
+    "address": {
+      "street": "Savska cesta 52",
+      "postalCode": "4000",
+      "city": "Kranj"
+    },
+    "hours": {
+      "entries": [
+        {
+          "from": "mon",
+          "to": "fri",
+          "open": "07:00",
+          "close": "16:00"
+        }
+      ],
+      "note": "Sobota po dogovoru."
+    },
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      }
+    }
+  },
+  "design": {
+    "direction": "bold-local",
+    "fontPair": "archivo-archivo",
+    "colors": {
+      "background": "#ffffff",
+      "surface": "#eef0f3",
+      "text": "#0e0f12",
+      "muted": "#474c55",
+      "primary": "#c8261b",
+      "onPrimary": "#ffffff",
+      "accent": "#e0301e",
+      "border": "#d3d7dd",
+      "inverse": "#111317",
+      "onInverse": "#ffffff"
+    },
+    "radius": 0,
+    "baseFontSize": 16,
+    "scale": 1.3,
+    "headingWeight": 800,
+    "headingCase": "uppercase",
+    "headingTracking": -0.01,
+    "density": "compact",
+    "shadow": "none",
+    "imagery": "natural"
+  },
+  "assets": {
+    "images": [
+      {
+        "id": "img_01",
+        "src": "uploads/01.jpg",
+        "width": 1600,
+        "height": 1200,
+        "alt": "Osebni avto na dvigalu v delavnici Avtoservisa Mrak"
+      },
+      {
+        "id": "img_02",
+        "src": "uploads/02.jpg",
+        "width": 1200,
+        "height": 1600,
+        "alt": "Mehanik pregleduje motor pod odprtim pokrovom"
+      },
+      {
+        "id": "img_03",
+        "src": "uploads/03.jpg",
+        "width": 1600,
+        "height": 1200,
+        "alt": "Regal z zloženimi pnevmatikami za hrambo"
+      }
+    ]
+  },
+  "chrome": {
+    "header": {
+      "variant": "split-cta",
+      "cta": "call"
+    },
+    "footer": {
+      "variant": "columns"
+    },
+    "mobileActionBar": true
+  },
+  "pages": [
+    {
+      "id": "p_home",
+      "kind": "home",
+      "slug": "",
+      "nav": {
+        "label": "Domov",
+        "show": true
+      },
+      "seo": {
+        "title": "Avtoservis Mrak, Kranj – servis vseh znamk",
+        "description": "Družinski avtoservis na Savski cesti v Kranju: redni servis, zavore, sklopke, jermeni, diagnostika, klima, menjava in hramba gum ter vlečna služba."
+      },
+      "sections": [
+        {
+          "id": "s_hero",
+          "type": "hero-type",
+          "variant": "with-facts",
+          "props": {
+            "eyebrow": "Avtoservis v Kranju",
+            "headline": "Servis vseh znamk v Kranju",
+            "intro": "Družinski servis od leta 2008, za osebna vozila in kombije do 3,5 t. Pred popravilom dobite predračun.",
+            "primary": {
+              "label": "Pokliči 041 555 730",
+              "target": {
+                "action": "call"
+              }
+            },
+            "secondary": {
+              "label": "Storitve in cene",
+              "target": {
+                "page": "p_storitve"
+              }
+            }
+          }
+        },
+        {
+          "id": "s_services",
+          "type": "services-cards",
+          "variant": "compact",
+          "tone": "alt",
+          "props": {
+            "title": "Kaj naredimo v delavnici",
+            "items": [
+              {
+                "image": "img_02",
+                "title": "Redni servis",
+                "text": "Po navodilih proizvajalca, tako da garancija vozila ostane. Menjava olja in filtrov.",
+                "link": {
+                  "label": "Cene storitev",
+                  "target": {
+                    "page": "p_storitve"
+                  }
+                }
+              },
+              {
+                "image": "img_01",
+                "title": "Popravila in diagnostika",
+                "text": "Zavore, sklopke, zobati jermeni, izpušni sistemi in računalniška diagnostika.",
+                "link": {
+                  "label": "Vse storitve",
+                  "target": {
+                    "page": "p_storitve"
+                  }
+                }
+              },
+              {
+                "image": "img_03",
+                "title": "Menjava in hramba gum",
+                "text": "Gume zamenjamo in jih do naslednje sezone shranimo pri nas.",
+                "link": {
+                  "label": "Cene gum",
+                  "target": {
+                    "page": "p_storitve",
+                    "section": "s_list"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_steps",
+          "type": "steps",
+          "variant": "horizontal",
+          "tone": "inverse",
+          "props": {
+            "heading": "Najprej predračun, potem popravilo",
+            "steps": [
+              {
+                "title": "Pokličite",
+                "text": "Večina strank nas pokliče. Dogovorimo se za termin, ko pripeljete vozilo."
+              },
+              {
+                "title": "Pregled in predračun",
+                "text": "Pred popravilom dobite predračun, da veste, koliko boste plačali."
+              },
+              {
+                "title": "Popravilo",
+                "text": "Popravimo, kar ste potrdili. Brez presenečenj na računu."
+              }
+            ],
+            "action": {
+              "label": "Pokliči servis",
+              "target": {
+                "action": "call"
+              }
+            }
+          }
+        },
+        {
+          "id": "s_about",
+          "type": "about",
+          "variant": "text-only",
+          "props": {
+            "heading": "Družinski servis od leta 2008",
+            "paragraphs": [
+              "Avtoservis Mrak vodi Rok Mrak. Servisiramo osebna vozila vseh znamk in kombije do 3,5 t, imamo pa tudi vlečno službo za vso Gorenjsko.",
+              "Delavnica je za trgovino s ploščicami, vhod je z dvorišča."
+            ],
+            "ownerName": "Rok Mrak",
+            "ownerRole": "vodja servisa"
+          }
+        },
+        {
+          "id": "s_contact",
+          "type": "contact",
+          "variant": "split-map",
+          "tone": "alt",
+          "props": {
+            "title": "Kje smo",
+            "intro": "Savska cesta 52, za trgovino s ploščicami. Vhod je z dvorišča."
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_storitve",
+      "kind": "standard",
+      "slug": "storitve",
+      "nav": {
+        "label": "Storitve in cene",
+        "show": true
+      },
+      "seo": {
+        "title": "Storitve in cene | Avtoservis Mrak, Kranj",
+        "description": "Redni servis, popravila, diagnostika za 30 €, polnjenje klime za 59 €, menjava gum za 20 € in hramba gum. Ostalo po predračunu."
+      },
+      "sections": [
+        {
+          "id": "s_storitve_header",
+          "type": "page-header",
+          "variant": "plain",
+          "props": {
+            "title": "Storitve in cene",
+            "intro": "Za popravila, ki niso v ceniku, dobite predračun pred začetkom dela."
+          }
+        },
+        {
+          "id": "s_list",
+          "type": "services-list",
+          "variant": "rows",
+          "props": {
+            "title": "Kaj servisiramo",
+            "items": [
+              {
+                "name": "Redni servis",
+                "description": "Po navodilih proizvajalca, tako da garancija ostane."
+              },
+              {
+                "name": "Menjava olja in filtrov",
+                "description": "Za osebna vozila vseh znamk in kombije do 3,5 t."
+              },
+              {
+                "name": "Zavore in sklopke",
+                "description": "Pregled in popravilo po predračunu."
+              },
+              {
+                "name": "Zobati jermeni",
+                "description": "Menjava po predračunu."
+              },
+              {
+                "name": "Izpušni sistemi",
+                "description": "Popravilo in menjava po predračunu."
+              },
+              {
+                "name": "Računalniška diagnostika",
+                "description": "Preberemo napake in povemo, kaj je treba popraviti.",
+                "price": {
+                  "amount": 30
+                }
+              },
+              {
+                "name": "Polnjenje klime",
+                "description": "Za osebna vozila in kombije.",
+                "price": {
+                  "amount": 59
+                }
+              },
+              {
+                "name": "Menjava gum",
+                "description": "Cena velja za komplet.",
+                "price": {
+                  "amount": 20,
+                  "unit": "komplet"
+                }
+              },
+              {
+                "name": "Hramba gum",
+                "description": "Gume shranimo do naslednje sezone.",
+                "price": {
+                  "amount": 40,
+                  "unit": "na sezono"
+                }
+              },
+              {
+                "name": "Vlečna služba",
+                "description": "Za vso Gorenjsko. Pokličite in pridemo po vozilo."
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_storitve_cta",
+          "type": "cta",
+          "variant": "band",
+          "tone": "inverse",
+          "props": {
+            "heading": "Najhitreje nas dobite po telefonu",
+            "text": "Odprto od ponedeljka do petka od 7.00 do 16.00, v soboto po dogovoru.",
+            "primary": {
+              "label": "Pokliči 041 555 730",
+              "target": {
+                "action": "call"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "nav": {
+        "label": "Zasebnost",
+        "show": false
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Avtoservis Mrak",
+        "description": "Kako Avtoservis Mrak obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "variant": "default",
+          "props": {
+            "kind": "privacy"
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "nav": {
+        "label": "Dostopnost",
+        "show": false
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Avtoservis Mrak",
+        "description": "Izjava o dostopnosti spletne strani Avtoservis Mrak."
+      },
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "variant": "default",
+          "props": {
+            "kind": "accessibility"
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "kind": "not-found",
+      "slug": "404",
+      "nav": {
+        "label": "Ni najdeno",
+        "show": false
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Avtoservis Mrak",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "variant": "default",
+          "props": {
+            "title": "Te strani ni mogoče najti",
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo."
+          }
+        }
+      ]
+    }
+  ]
+}

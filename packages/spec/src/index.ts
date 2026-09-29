@@ -13,3 +13,4 @@ export * from "./sections/index.ts";
 export * from "./validate.ts";
 export * from "./migrate.ts";
 export * from "./json-schema.ts";
+export * from "./starter.ts";

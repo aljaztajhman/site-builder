@@ -1,0 +1,491 @@
+{
+  "specVersion": 1,
+  "slug": "fizioterapija-pregib",
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Fizioterapija Pregib",
+    "type": "physio",
+    "phone": "+38651555642",
+    "email": "tina@pregib.example",
+    "address": {
+      "street": "Glavni trg 9",
+      "postalCode": "8000",
+      "city": "Novo mesto"
+    },
+    "hours": {
+      "entries": [
+        {
+          "from": "mon",
+          "to": "fri",
+          "open": "07:00",
+          "close": "20:00"
+        }
+      ],
+      "note": "Samo po predhodnem naročilu."
+    },
+    "bookingUrl": "https://pregib.example/narocanje",
+    "provider": {
+      "legalName": "Tina Zupan s.p.",
+      "registrationNumber": "6011223000",
+      "taxNumber": "60112233"
+    }
+  },
+  "design": {
+    "direction": "clean-swiss",
+    "fontPair": "inter-tight-inter",
+    "colors": {
+      "background": "#ffffff",
+      "surface": "#f1f4f8",
+      "text": "#111418",
+      "muted": "#4a5360",
+      "primary": "#0f6b63",
+      "onPrimary": "#ffffff",
+      "accent": "#148a7f",
+      "border": "#d5dbe3",
+      "inverse": "#111418",
+      "onInverse": "#ffffff"
+    },
+    "radius": 2,
+    "baseFontSize": 17,
+    "scale": 1.25,
+    "headingWeight": 700,
+    "headingCase": "normal",
+    "headingTracking": -0.015,
+    "density": "regular",
+    "shadow": "none",
+    "imagery": "natural"
+  },
+  "assets": {
+    "logo": {
+      "src": "uploads/logo.svg",
+      "width": 180,
+      "height": 48,
+      "file": "logo.svg"
+    },
+    "images": [
+      {
+        "id": "img_01",
+        "src": "uploads/01.jpg",
+        "width": 1600,
+        "height": 1200,
+        "alt": "Terapevtska miza v svetlem prostoru ambulante za fizioterapijo"
+      }
+    ]
+  },
+  "chrome": {
+    "header": {
+      "variant": "bar",
+      "cta": "booking"
+    },
+    "footer": {
+      "variant": "columns"
+    },
+    "mobileActionBar": true
+  },
+  "pages": [
+    {
+      "id": "p_home",
+      "kind": "home",
+      "slug": "",
+      "nav": {
+        "label": "Domov",
+        "show": true
+      },
+      "seo": {
+        "title": "Fizioterapija Pregib, Novo mesto",
+        "description": "Individualna fizioterapija na Glavnem trgu v Novem mestu: hrbet, vrat, koleno, rama, po operacijah in za športnike. Brez napotnice, naročanje online."
+      },
+      "sections": [
+        {
+          "id": "s_hero",
+          "type": "hero-split",
+          "variant": "image-right",
+          "props": {
+            "eyebrow": "Fizioterapija v Novem mestu",
+            "headline": "Ena ura, en pacient: fizioterapija za hrbet, vrat, koleno in ramo",
+            "intro": "Individualna obravnava na Glavnem trgu. Napotnica ni potrebna, storitve so samoplačniške. Termin rezervirate online ali po telefonu.",
+            "primary": {
+              "label": "Rezervirajte termin",
+              "target": {
+                "action": "booking"
+              }
+            },
+            "secondary": {
+              "label": "Pokličite",
+              "target": {
+                "action": "call"
+              }
+            },
+            "image": "img_01"
+          }
+        },
+        {
+          "id": "s_strip",
+          "type": "contact-strip",
+          "variant": "bar",
+          "props": {}
+        },
+        {
+          "id": "s_conditions",
+          "type": "services-list",
+          "variant": "rows",
+          "props": {
+            "title": "S čim pridete na terapijo",
+            "intro": "Najpogosteje pridejo ljudje s temi težavami.",
+            "items": [
+              {
+                "name": "Bolečine v hrbtu in vratu",
+                "description": "Pregled, manualna terapija in vaje, ki jih nadaljujete doma."
+              },
+              {
+                "name": "Poškodbe kolena in rame",
+                "description": "Terapija po poškodbi, da se gibljivost in moč postopoma vrneta."
+              },
+              {
+                "name": "Po operacijah",
+                "description": "Rehabilitacija s terapevtskimi vajami, prilagojenimi vašemu okrevanju."
+              },
+              {
+                "name": "Športniki",
+                "description": "Obravnava športnih poškodb, po potrebi z dry needlingom in kinesio tapingom."
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_how",
+          "type": "highlights",
+          "variant": "columns",
+          "tone": "alt",
+          "props": {
+            "heading": "Kako delam",
+            "items": [
+              {
+                "title": "Samo vi in terapevtka",
+                "text": "Delam individualno, ena ura je samo za enega pacienta."
+              },
+              {
+                "title": "Brez napotnice",
+                "text": "Napotnica ni potrebna, storitve so samoplačniške."
+              },
+              {
+                "title": "Samo po naročilu",
+                "text": "Termin rezervirate online ali po telefonu, od ponedeljka do petka."
+              },
+              {
+                "title": "Vhod z dvorišča",
+                "text": "Ambulanta je na Glavnem trgu 9, v 2. nadstropju, vhod je z dvorišča."
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_about",
+          "type": "about",
+          "variant": "text-only",
+          "props": {
+            "heading": "Tina Zupan, diplomirana fizioterapevtka",
+            "paragraphs": [
+              "Dvanajst let sem delala v bolnišnici, zadnja štiri leta imam svojo ambulanto v Novem mestu.",
+              "Pri delu uporabljam manualno terapijo, terapevtske vaje, dry needling in kinesio taping."
+            ],
+            "ownerName": "Tina Zupan",
+            "ownerRole": "dipl. fiziot."
+          }
+        },
+        {
+          "id": "s_booking",
+          "type": "booking",
+          "variant": "with-hours",
+          "props": {
+            "heading": "Rezervirajte termin tudi zvečer",
+            "text": "Prosti termini so objavljeni v spletnem naročanju. Če raje pokličete, sem dosegljiva na telefonu.",
+            "action": {
+              "label": "Rezervirajte online",
+              "target": {
+                "action": "booking"
+              }
+            },
+            "secondary": {
+              "label": "Pokličite",
+              "target": {
+                "action": "call"
+              }
+            }
+          }
+        },
+        {
+          "id": "s_contact",
+          "type": "contact",
+          "variant": "split-map",
+          "tone": "alt",
+          "props": {
+            "title": "Kje je ambulanta",
+            "intro": "Glavni trg 9, 2. nadstropje. Vhod je z dvorišča."
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_cenik",
+      "kind": "standard",
+      "slug": "cenik",
+      "nav": {
+        "label": "Storitve in cenik",
+        "show": true
+      },
+      "seo": {
+        "title": "Storitve in cenik | Fizioterapija Pregib",
+        "description": "Prva obravnava s pregledom, terapija, dry needling in paket terapij. Cene samoplačniških storitev fizioterapije v Novem mestu."
+      },
+      "sections": [
+        {
+          "id": "s_cenik_header",
+          "type": "page-header",
+          "variant": "plain",
+          "props": {
+            "title": "Storitve in cenik",
+            "intro": "Vse storitve so samoplačniške, napotnica ni potrebna."
+          }
+        },
+        {
+          "id": "s_methods",
+          "type": "services-list",
+          "variant": "rows",
+          "props": {
+            "title": "Metode, ki jih uporabljam",
+            "items": [
+              {
+                "name": "Manualna terapija",
+                "description": "Delo z rokami na sklepih, mišicah in mehkih tkivih."
+              },
+              {
+                "name": "Terapevtske vaje",
+                "description": "Vaje za gibljivost in moč, ki jih pokažem na obravnavi."
+              },
+              {
+                "name": "Dry needling",
+                "description": "Suho iglanje kot dodatek k terapiji.",
+                "price": {
+                  "amount": 30
+                }
+              },
+              {
+                "name": "Kinesio taping",
+                "description": "Elastični trakovi, ki podprejo mišice in sklepe med okrevanjem."
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_prices",
+          "type": "price-list",
+          "variant": "table",
+          "tone": "alt",
+          "props": {
+            "title": "Cenik",
+            "groups": [
+              {
+                "items": [
+                  {
+                    "name": "Prva obravnava s pregledom",
+                    "note": "60 min",
+                    "price": {
+                      "amount": 55
+                    }
+                  },
+                  {
+                    "name": "Terapija",
+                    "note": "45 min",
+                    "price": {
+                      "amount": 45
+                    }
+                  },
+                  {
+                    "name": "Dry needling",
+                    "note": "kot dodatek k terapiji",
+                    "price": {
+                      "amount": 30
+                    }
+                  },
+                  {
+                    "name": "Paket 5 terapij",
+                    "price": {
+                      "amount": 200
+                    }
+                  }
+                ]
+              }
+            ],
+            "footnote": "Storitve so samoplačniške."
+          }
+        },
+        {
+          "id": "s_faq",
+          "type": "faq",
+          "variant": "accordion",
+          "props": {
+            "title": "Pogosta vprašanja",
+            "items": [
+              {
+                "question": "Ali potrebujem napotnico?",
+                "answer": "Ne. Napotnica ni potrebna, storitve so samoplačniške."
+              },
+              {
+                "question": "Koliko časa traja obravnava?",
+                "answer": "Prva obravnava s pregledom traja 60 minut, terapija 45 minut. Delam individualno, ves čas ste samo vi."
+              },
+              {
+                "question": "Kako se naročim?",
+                "answer": "Termin rezervirate online ali pokličete. Sprejemam samo po predhodnem naročilu."
+              },
+              {
+                "question": "Kje je vhod v ambulanto?",
+                "answer": "Ambulanta je na Glavnem trgu 9 v 2. nadstropju. Vhod je z dvorišča."
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_cenik_booking",
+          "type": "booking",
+          "variant": "simple",
+          "tone": "inverse",
+          "props": {
+            "heading": "Izberite prost termin",
+            "text": "Termin lahko rezervirate online kadarkoli, tudi zvečer, ali pa pokličete.",
+            "action": {
+              "label": "Rezervirajte online",
+              "target": {
+                "action": "booking"
+              }
+            },
+            "secondary": {
+              "label": "Pokličite",
+              "target": {
+                "action": "call"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_kontakt",
+      "kind": "standard",
+      "slug": "kontakt",
+      "nav": {
+        "label": "Kontakt",
+        "show": true
+      },
+      "seo": {
+        "title": "Kontakt in delovni čas | Fizioterapija Pregib",
+        "description": "Fizioterapija Pregib, Glavni trg 9, Novo mesto, vhod z dvorišča. Od ponedeljka do petka, samo po predhodnem naročilu."
+      },
+      "sections": [
+        {
+          "id": "s_kontakt_header",
+          "type": "page-header",
+          "variant": "plain",
+          "props": {
+            "title": "Kontakt",
+            "intro": "Ambulanta je na Glavnem trgu 9 v 2. nadstropju, vhod je z dvorišča."
+          }
+        },
+        {
+          "id": "s_kontakt_contact",
+          "type": "contact",
+          "variant": "split-map",
+          "props": {
+            "title": "Naslov in telefon"
+          }
+        },
+        {
+          "id": "s_kontakt_hours",
+          "type": "opening-hours",
+          "variant": "table",
+          "tone": "alt",
+          "props": {
+            "title": "Delovni čas",
+            "note": "Sprejemam samo po predhodnem naročilu, online ali po telefonu."
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "nav": {
+        "label": "Zasebnost",
+        "show": false
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Fizioterapija Pregib",
+        "description": "Kako Fizioterapija Pregib obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "variant": "default",
+          "props": {
+            "kind": "privacy"
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "nav": {
+        "label": "Dostopnost",
+        "show": false
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Fizioterapija Pregib",
+        "description": "Izjava o dostopnosti spletne strani Fizioterapija Pregib."
+      },
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "variant": "default",
+          "props": {
+            "kind": "accessibility"
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "kind": "not-found",
+      "slug": "404",
+      "nav": {
+        "label": "Ni najdeno",
+        "show": false
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Fizioterapija Pregib",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "variant": "default",
+          "props": {
+            "title": "Te strani ni mogoče najti",
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo."
+          }
+        }
+      ]
+    }
+  ]
+}

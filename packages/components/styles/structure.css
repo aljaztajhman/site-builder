@@ -4,6 +4,12 @@
 .legal {
   max-width: 44rem;
 }
+/* Readable measure regardless of font width: ~30em keeps lines at or under 75 characters even in narrow fonts. */
+.legal p,
+.legal li,
+.legal dd {
+  max-width: 30em;
+}
 .legal__title {
   margin-bottom: 1.5rem;
 }

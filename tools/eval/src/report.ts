@@ -40,17 +40,17 @@ export function renderReport(results: FixtureResult[], config: AppConfig, meta: 
 
   lines.push(`## Sites`, "");
   lines.push(`Lighthouse thresholds: performance ≥ ${lh.performance}, accessibility ${lh.accessibility}, best practices ≥ ${lh.bestPractices}, SEO ≥ ${lh.seo}.`, "");
-  lines.push(`| Site | Type | Direction | LH P/A/BP/SEO | axe | 360 px width | Facts | Placeholders | Gen cost | Gen time | Pass |`);
-  lines.push(`|---|---|---|---|---|---|---|---|---|---|---|`);
+  lines.push(`| Site | Type | Direction | LH P/A/BP/SEO | axe | 360 px width | Facts | Placeholders | Export offline | Gen cost | Gen time | Pass |`);
+  lines.push(`|---|---|---|---|---|---|---|---|---|---|---|---|`);
   for (const r of results) {
     const g = r.checkpoints[0];
     if (!g) {
-      lines.push(`| ${r.id} | ${r.type} | — | — | — | — | — | — | — | — | error |`);
+      lines.push(`| ${r.id} | ${r.type} | — | — | — | — | — | — | — | — | — | error |`);
       continue;
     }
     const l = g.lighthouse;
     lines.push(
-      `| ${r.id} | ${r.type} | ${r.direction} | ${l ? `${l.performance}/${l.accessibility}/${l.bestPractices}/${l.seo}` : "—"} | ${g.axe} | ${g.maxScrollWidth360} | ${g.facts} | ${g.placeholders} | ${meta.mode === "offline" ? "—" : eur(r.generationEur)} | ${meta.mode === "offline" ? "—" : sec(r.generationMs)} | ${mark(g.failures.length === 0)} |`,
+      `| ${r.id} | ${r.type} | ${r.direction} | ${l ? `${l.performance}/${l.accessibility}/${l.bestPractices}/${l.seo}` : "—"} | ${g.axe} | ${g.maxScrollWidth360} | ${g.facts} | ${g.placeholders} | ${r.exportCheck ? `${mark(r.exportCheck.ok)} ${(r.exportCheck.bytes / 1e6).toFixed(1)} MB` : "—"} | ${meta.mode === "offline" ? "—" : eur(r.generationEur)} | ${meta.mode === "offline" ? "—" : sec(r.generationMs)} | ${mark(g.failures.length === 0)} |`,
     );
   }
   lines.push("");

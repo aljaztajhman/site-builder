@@ -4,6 +4,8 @@
  * the model.
  */
 
+import { EDITOR_STARTER_TEXT } from "@sb/spec/starter";
+
 type Json = null | boolean | number | string | Json[] | { [k: string]: Json };
 type Obj = { [k: string]: Json };
 type Schema = { [k: string]: unknown };
@@ -114,7 +116,12 @@ async function load(rerender = true): Promise<void> {
   state = await api<State>("");
   if (state.spec && !catalogue) catalogue = await api<Catalogue>("/catalogue");
   if (rerender) render();
-  else showToast();
+  else {
+    // Form autosave: keep the form, refresh only the version label.
+    const v = document.getElementById("ed-version");
+    if (v && state.version) v.textContent = `v${state.version}`;
+    showToast();
+  }
   schedulePoll();
 }
 
@@ -136,8 +143,8 @@ async function patch(ops: Op[], message: string, rerender = true): Promise<boole
     reloadPreview();
     return true;
   } catch (e) {
-    toast = `Ni shranjeno: ${(e as Error).message}`;
-    await load();
+    toast = rerender ? `Ni shranjeno: ${(e as Error).message}` : `Še ni shranjeno — dopolnite polja. (${(e as Error).message.split(String.fromCharCode(10))[0]})`;
+    await load(rerender);
     return false;
   } finally {
     busy = false;
@@ -222,13 +229,14 @@ function isPlaceholderSchema(s: Schema): boolean {
   return !!(s.properties as Obj | undefined)?.$placeholder;
 }
 
-function defaultFor(s: Schema, rootSchema: Schema, key: string): Json {
+/** Default value for a new field. `starter` fills text with the editor starter text (a publish blocker until replaced). */
+function defaultFor(s: Schema, rootSchema: Schema, key: string, starter = true): Json {
   s = resolve(s, rootSchema);
   if (Array.isArray(s.anyOf)) {
     const opts = s.anyOf as Schema[];
     const ph = opts.find((o) => isPlaceholderSchema(resolve(o, rootSchema)));
     if (ph) return { $placeholder: key === "price" ? "price" : key === "name" ? "name" : "text" };
-    return defaultFor(opts[0]!, rootSchema, key);
+    return defaultFor(opts[0]!, rootSchema, key, starter);
   }
   if ("const" in s) return s.const as Json;
   if (Array.isArray(s.enum)) return s.enum[0] as Json;
@@ -236,15 +244,15 @@ function defaultFor(s: Schema, rootSchema: Schema, key: string): Json {
     case "object": {
       const out: Obj = {};
       const req = new Set((s.required as string[]) ?? []);
-      for (const [k, sub] of Object.entries((s.properties ?? {}) as Record<string, Schema>)) if (req.has(k)) out[k] = defaultFor(sub, rootSchema, k);
+      for (const [k, sub] of Object.entries((s.properties ?? {}) as Record<string, Schema>)) if (req.has(k)) out[k] = defaultFor(sub, rootSchema, k, starter);
       return out;
     }
     case "array":
-      return Array.from({ length: Number(s.minItems ?? 0) }, () => defaultFor((s.items ?? {}) as Schema, rootSchema, key));
+      return Array.from({ length: Number(s.minItems ?? 0) }, () => defaultFor((s.items ?? {}) as Schema, rootSchema, key, starter));
     case "string": {
       if (typeof s.pattern === "string" && s.pattern.includes("img_")) return ((state.spec?.assets as Obj)?.images as Obj[])?.[0]?.id ?? "";
       if (typeof s.pattern === "string" && s.pattern.includes("p_")) return pages()[0]?.id ?? "";
-      return "Novo";
+      return starter ? (EDITOR_STARTER_TEXT[key] ?? EDITOR_STARTER_TEXT.text!).slice(0, Number(s.maxLength ?? 200)) : "";
     }
     case "number":
     case "integer":
@@ -304,10 +312,21 @@ const FIELD_LABEL: Record<string, string> = {
 const PH_KIND: Record<string, string> = { phone: "phone", email: "email", address: "address", hours: "hours", price: "price", name: "name", legalName: "legalName", registrationNumber: "registrationNumber", taxNumber: "taxNumber" };
 
 /**
- * Renders an editor for `value` by its JSON Schema. `onChange` receives the new value; the caller
- * debounces and saves. Placeholders ({$placeholder}) show as "missing" with a button to fill them.
+ * How a field reports changes. `edit` is a value change inside the form (debounced save, the form
+ * stays as it is); `structure` changes the form's shape (item added, removed, moved; optional field
+ * added; placeholder toggled) and saves at once, then re-renders.
  */
-function field(schema: Schema, rootSchema: Schema, value: Json | undefined, key: string, onChange: (v: Json | undefined) => void, optional = false): HTMLElement {
+interface Sink {
+  edit(v: Json | undefined): void;
+  structure(v: Json | undefined): void;
+}
+
+/**
+ * Renders an editor for `value` by its JSON Schema. Objects and arrays are edited in place, so all
+ * fields of one form share one live copy and a save always sends the current whole value.
+ * Placeholders ({$placeholder}) show as "missing" with a button to fill them.
+ */
+function field(schema: Schema, rootSchema: Schema, value: Json | undefined, key: string, sink: Sink, optional = false): HTMLElement {
   const s = resolve(schema, rootSchema);
   const title = FIELD_LABEL[key] ?? key;
   const box = h("div", { class: "field" });
@@ -319,23 +338,46 @@ function field(schema: Schema, rootSchema: Schema, value: Json | undefined, key:
     const isPh = value !== null && typeof value === "object" && !Array.isArray(value) && "$placeholder" in value;
     if (phIndex >= 0 && nonPh.length === 1) {
       if (isPh) {
-        return h(
-          "div",
-          { class: "field" },
+        // Show an empty editor without saving; the value is saved once it is valid.
+        const holder = h("div", { class: "field" });
+        holder.append(
           h("label", {}, title),
-          h("div", { class: "warn row" }, "Manjka — ", h("button", { class: "btn sm", type: "button", onClick: () => onChange(defaultFor(nonPh[0]!, rootSchema, key)) }, "Vnesi")),
+          h(
+            "div",
+            { class: "warn row" },
+            "Manjka — ",
+            h(
+              "button",
+              {
+                class: "btn sm",
+                type: "button",
+                onClick: () => {
+                  const f = field(nonPh[0]!, rootSchema, defaultFor(nonPh[0]!, rootSchema, key, false), key, sink);
+                  holder.replaceWith(f);
+                  linkLabels(f);
+                  f.querySelector<HTMLElement>("input, textarea, select")?.focus();
+                },
+              },
+              "Vnesi",
+            ),
+          ),
         );
+        return holder;
       }
-      const inner = field(nonPh[0]!, rootSchema, value, key, onChange);
-      inner.append(h("button", { class: "btn sm", type: "button", onClick: () => onChange({ $placeholder: PH_KIND[key] ?? "text" }) }, "Označi kot manjkajoče"));
+      const inner = field(nonPh[0]!, rootSchema, value, key, sink);
+      inner.append(h("button", { class: "btn sm", type: "button", onClick: () => sink.structure({ $placeholder: PH_KIND[key] ?? "text" }) }, "Označi kot manjkajoče"));
       return inner;
     }
     // Link targets and other unions: pick the branch whose keys match the value.
     const idx = Math.max(0, opts.findIndex((o) => value && typeof value === "object" && !Array.isArray(value) && Object.keys((o.properties ?? {}) as Obj).some((k) => k in (value as Obj))));
     const names = opts.map((o) => Object.keys((o.properties ?? {}) as Obj)[0] ?? "vrednost");
     const KIND: Record<string, string> = { page: "Stran na tej strani", action: "Dejanje (klic, pot, e-pošta, rezervacija)", url: "Zunanja povezava" };
-    const sel = h("select", { onChange: (e: Event) => onChange(defaultFor(opts[Number((e.target as HTMLSelectElement).value)]!, rootSchema, key)) }, ...names.map((n, i) => h("option", { value: String(i), selected: i === idx }, KIND[n] ?? n)));
-    box.append(h("label", {}, title), sel, field(opts[idx]!, rootSchema, value, key, onChange));
+    const sel = h(
+      "select",
+      { onChange: (e: Event) => sink.structure(defaultFor(opts[Number((e.target as HTMLSelectElement).value)]!, rootSchema, key)) },
+      ...names.map((n, i) => h("option", { value: String(i), selected: i === idx }, KIND[n] ?? n)),
+    );
+    box.append(h("label", {}, title), sel, field(opts[idx]!, rootSchema, value, key, sink));
     return box;
   }
 
@@ -345,7 +387,7 @@ function field(schema: Schema, rootSchema: Schema, value: Json | undefined, key:
       h("label", {}, title),
       h(
         "select",
-        { onChange: (e: Event) => onChange((e.target as HTMLSelectElement).value) },
+        { onChange: (e: Event) => sink.edit((e.target as HTMLSelectElement).value || undefined) },
         ...(optional ? [h("option", { value: "" }, "—")] : []),
         ...(s.enum as string[]).map((v) => h("option", { value: v, selected: v === value }, ENUM[v] ?? v)),
       ),
@@ -359,20 +401,26 @@ function field(schema: Schema, rootSchema: Schema, value: Json | undefined, key:
       const props = (s.properties ?? {}) as Record<string, Schema>;
       const req = new Set((s.required as string[]) ?? []);
       const obj = (value && typeof value === "object" && !Array.isArray(value) ? value : {}) as Obj;
+      const childSink = (k: string): Sink => ({
+        edit: (v) => {
+          if (v === undefined) delete obj[k];
+          else obj[k] = v;
+          sink.edit(obj);
+        },
+        structure: (v) => {
+          if (v === undefined) delete obj[k];
+          else obj[k] = v;
+          sink.structure(obj);
+        },
+      });
       for (const [k, sub] of Object.entries(props)) {
         if (k === "$placeholder") continue;
-        const has = k in obj;
-        if (!req.has(k) && !has) {
-          fs.append(h("button", { class: "btn sm", type: "button", onClick: () => onChange({ ...obj, [k]: defaultFor(sub, rootSchema, k) }) }, `+ ${FIELD_LABEL[k] ?? k}`), " ");
+        if (!req.has(k) && !(k in obj)) {
+          fs.append(h("button", { class: "btn sm", type: "button", onClick: () => childSink(k).structure(defaultFor(sub, rootSchema, k)) }, `+ ${FIELD_LABEL[k] ?? k}`), " ");
           continue;
         }
-        const child = field(sub, rootSchema, obj[k], k, (v) => {
-          const next = { ...obj };
-          if (v === undefined) delete next[k];
-          else next[k] = v;
-          onChange(next);
-        }, !req.has(k));
-        if (!req.has(k)) child.append(h("button", { class: "btn sm", type: "button", onClick: () => { const next = { ...obj }; delete next[k]; onChange(next); } }, "Odstrani"));
+        const child = field(sub, rootSchema, obj[k], k, childSink(k), !req.has(k));
+        if (!req.has(k)) child.append(h("button", { class: "btn sm", type: "button", onClick: () => childSink(k).structure(undefined) }, "Odstrani"));
         fs.append(child);
       }
       return fs;
@@ -381,18 +429,30 @@ function field(schema: Schema, rootSchema: Schema, value: Json | undefined, key:
       const arr = (Array.isArray(value) ? value : []) as Json[];
       const itemSchema = (s.items ?? {}) as Schema;
       const fs = h("fieldset", {}, h("legend", {}, `${title} (${arr.length})`));
+      const restructure = (fn: () => void) => {
+        fn();
+        sink.structure(arr);
+      };
       arr.forEach((item, i) => {
-        const set = (v: Json | undefined) => onChange(v === undefined ? arr.filter((_, j) => j !== i) : arr.map((x, j) => (j === i ? v : x)));
+        const itemSink: Sink = {
+          edit: (v) => {
+            arr[i] = v ?? null;
+            sink.edit(arr);
+          },
+          structure: (v) => restructure(() => (v === undefined ? arr.splice(i, 1) : (arr[i] = v))),
+        };
         const tools = h(
           "div",
           { class: "row" },
-          h("button", { class: "icon", type: "button", title: "Gor", disabled: i === 0, onClick: () => onChange(swap(arr, i, i - 1)) }, "↑"),
-          h("button", { class: "icon", type: "button", title: "Dol", disabled: i === arr.length - 1, onClick: () => onChange(swap(arr, i, i + 1)) }, "↓"),
-          h("button", { class: "icon", type: "button", title: "Odstrani", disabled: arr.length <= Number(s.minItems ?? 0), onClick: () => set(undefined) }, "✕"),
+          h("button", { class: "icon", type: "button", title: "Gor", disabled: i === 0, onClick: () => restructure(() => arr.splice(i - 1, 0, ...arr.splice(i, 1))) }, "↑"),
+          h("button", { class: "icon", type: "button", title: "Dol", disabled: i === arr.length - 1, onClick: () => restructure(() => arr.splice(i + 1, 0, ...arr.splice(i, 1))) }, "↓"),
+          h("button", { class: "icon", type: "button", title: "Odstrani", disabled: arr.length <= Number(s.minItems ?? 0), onClick: () => restructure(() => arr.splice(i, 1)) }, "✕"),
         );
-        fs.append(tools, field(itemSchema, rootSchema, item, key === "paragraphs" ? "text" : key, set));
+        fs.append(tools, field(itemSchema, rootSchema, item, key === "paragraphs" ? "text" : key, itemSink));
       });
-      if (arr.length < Number(s.maxItems ?? 99)) fs.append(h("button", { class: "btn sm", type: "button", onClick: () => onChange([...arr, defaultFor(itemSchema, rootSchema, key)]) }, "+ Dodaj"));
+      if (arr.length < Number(s.maxItems ?? 99)) {
+        fs.append(h("button", { class: "btn sm", type: "button", onClick: () => restructure(() => arr.push(defaultFor(itemSchema, rootSchema, key))) }, "+ Dodaj"));
+      }
       return fs;
     }
     case "string": {
@@ -401,12 +461,15 @@ function field(schema: Schema, rootSchema: Schema, value: Json | undefined, key:
         const imgs = ((state.spec?.assets as Obj)?.images ?? []) as Obj[];
         box.append(
           h("label", {}, title),
-          h("select", { onChange: (e: Event) => onChange((e.target as HTMLSelectElement).value) }, ...imgs.map((im) => h("option", { value: im.id as string, selected: im.id === value }, `${im.id} — ${String(im.alt).slice(0, 50)}`))),
+          h("select", { onChange: (e: Event) => sink.edit((e.target as HTMLSelectElement).value) }, ...imgs.map((im) => h("option", { value: im.id as string, selected: im.id === value }, `${im.id} — ${String(im.alt).slice(0, 50)}`))),
         );
         return box;
       }
       if (pattern.includes("p_")) {
-        box.append(h("label", {}, title), h("select", { onChange: (e: Event) => onChange((e.target as HTMLSelectElement).value) }, ...pages().map((p) => h("option", { value: p.id as string, selected: p.id === value }, ((p.nav as Obj).label as string) ?? p.id))));
+        box.append(
+          h("label", {}, title),
+          h("select", { onChange: (e: Event) => sink.edit((e.target as HTMLSelectElement).value) }, ...pages().map((p) => h("option", { value: p.id as string, selected: p.id === value }, ((p.nav as Obj).label as string) ?? p.id))),
+        );
         return box;
       }
       const max = Number(s.maxLength ?? 0);
@@ -416,23 +479,39 @@ function field(schema: Schema, rootSchema: Schema, value: Json | undefined, key:
         : h("input", { type: key === "email" ? "email" : key.toLowerCase().includes("url") ? "url" : "text", maxlength: max || undefined });
       input.value = typeof value === "string" ? value : "";
       const count = h("div", { class: "count" }, max ? `${input.value.length}/${max}` : "");
+      const hint = h("div", { class: "err", role: "status" });
+      const re = pattern ? new RegExp(pattern) : null;
+      const minLen = Number(s.minLength ?? 0);
       input.addEventListener("input", () => {
         count.textContent = max ? `${input.value.length}/${max}` : "";
-        onChange(input.value === "" && optional ? undefined : input.value);
+        const v = input.value;
+        if (v === "" && optional) {
+          hint.textContent = "";
+          input.removeAttribute("aria-invalid");
+          return sink.edit(undefined);
+        }
+        // Don't save values the schema would reject; say what is expected instead.
+        const bad = v.length < minLen ? "Polje ne sme biti prazno." : re && !re.test(v) ? `Neveljavna oblika${typeof s.description === "string" ? ` (${s.description})` : ""}.` : "";
+        hint.textContent = bad;
+        if (bad) input.setAttribute("aria-invalid", "true");
+        else {
+          input.removeAttribute("aria-invalid");
+          sink.edit(v);
+        }
       });
-      box.append(h("label", {}, title), input, count);
+      box.append(h("label", {}, title), input, count, hint);
       return box;
     }
     case "number":
     case "integer": {
       const input = h("input", { type: "number", step: s.type === "integer" ? "1" : "any", min: s.minimum as number | undefined, max: s.maximum as number | undefined, value: value ?? "" });
-      input.addEventListener("input", () => onChange(input.value === "" ? undefined : Number(input.value)));
+      input.addEventListener("input", () => sink.edit(input.value === "" ? undefined : Number(input.value)));
       box.append(h("label", {}, title), input);
       return box;
     }
     case "boolean": {
       const input = h("input", { type: "checkbox", checked: value === true });
-      input.addEventListener("change", () => onChange(input.checked));
+      input.addEventListener("change", () => sink.edit(input.checked));
       box.append(h("label", {}, input, " ", title));
       return box;
     }
@@ -441,13 +520,28 @@ function field(schema: Schema, rootSchema: Schema, value: Json | undefined, key:
   }
 }
 
-function swap<T>(arr: T[], i: number, j: number): T[] {
-  const out = [...arr];
-  [out[i], out[j]] = [out[j]!, out[i]!];
-  return out;
+/**
+ * Form root at a spec pointer: a live copy of the value; edits are debounced and saved without
+ * re-rendering (focus stays), structural changes save at once and re-render.
+ */
+function formAt(pointer: string, schema: Schema, value: Json, title: string, message: string): HTMLElement {
+  const live = structuredClone(value);
+  let timer: number | undefined;
+  const send = (v: Json | undefined, rerender: boolean) =>
+    patch([v === undefined ? { op: "remove", path: pointer } : { op: "replace", path: pointer, value: v }], message, rerender);
+  return field(schema, schema, live, title, {
+    edit: (v) => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => void send(v, false), 700);
+    },
+    structure: (v) => {
+      window.clearTimeout(timer);
+      void send(v, true);
+    },
+  });
 }
 
-/** Debounced save of one value at a pointer. The form keeps its local state until the save lands. */
+/** Debounced save of a single scalar at a pointer (page settings). */
 function autosave(pointer: string, message: string, delay = 700): (v: Json | undefined) => void {
   let timer: number | undefined;
   return (v) => {
@@ -507,7 +601,7 @@ function contentPane(): HTMLElement {
           h("select", { onChange: (e: Event) => { const v = (e.target as HTMLSelectElement).value; void patch([s.tone === undefined ? { op: "add", path: `${base}/tone`, value: v } : { op: "replace", path: `${base}/tone`, value: v }], "ozadje"); } },
             ...["default", "alt", "inverse"].map((t) => h("option", { value: t, selected: (s.tone ?? "default") === t }, { default: "Osnovno", alt: "Izmenično", inverse: "Obratno (temno)" }[t]!))),
         ),
-        field(info.props, info.props, s.props as Json, "props", autosave(`${base}/props`, `urejen razdelek ${s.type}`)),
+        formAt(`${base}/props`, info.props, s.props as Json, "props", `urejen razdelek ${s.type}`),
       );
     } else {
       pane.append(h("p", { class: "muted" }, "Ta razdelek ustvari sistem (pravna besedila, 404). Podatke uredite v zavihku Podatki."));
@@ -520,7 +614,7 @@ function factsPane(): HTMLElement {
   const pane = h("div", { class: "pane" });
   if (!state.spec || !catalogue) return pane;
   pane.append(h("p", { class: "muted" }, "Podatki se prikažejo v glavi, nogi, kontaktu in delovnem času. Manjkajoči podatki so označeni in preprečujejo objavo."));
-  pane.append(field(catalogue.business, catalogue.business, state.spec.business as Json, "Podatki o podjetju", autosave("/business", "podatki")));
+  pane.append(formAt("/business", catalogue.business, state.spec.business as Json, "Podatki o podjetju", "podatki"));
   const chrome = state.spec.chrome as Obj;
   const header = chrome.header as Obj;
   pane.append(
@@ -733,9 +827,9 @@ function render(): void {
     h("a", { href: "/" }, "← Strani"),
     h("h1", {}, (state.spec?.business as Obj | undefined)?.name as string ?? s.name),
     h("span", { class: "status" }, active ? `${s.status} …` : s.status),
-    state.version ? h("span", { class: "muted" }, `v${state.version}`) : null,
+    state.version ? h("span", { class: "muted", id: "ed-version" }, `v${state.version}`) : null,
     h("span", { class: "sp" }),
-    h("button", { class: "btn sm", type: "button", disabled: !prev, title: "Razveljavi zadnjo spremembo", onClick: () => prev && void api("/revert", { method: "POST", body: JSON.stringify({ version: prev.version }) }).then(() => { toast = "Razveljavljeno."; return load(); }).then(reloadPreview) }, "↶ Razveljavi"),
+    h("button", { class: "btn sm", type: "button", disabled: !prev, title: "Razveljavi zadnjo spremembo", onClick: () => void undo() }, "↶ Razveljavi"),
     h("button", { class: "btn sm", type: "button", "aria-pressed": device === "mobile", onClick: () => { device = "mobile"; render(); } }, "Telefon"),
     h("button", { class: "btn sm", type: "button", "aria-pressed": device === "desktop", onClick: () => { device = "desktop"; render(); } }, "Računalnik"),
     h("label", { style: { margin: 0, fontWeight: 400 } }, h("input", { type: "checkbox", checked: editMode, onChange: (e: Event) => { editMode = (e.target as HTMLInputElement).checked; frame = null; render(); } }), " Urejanje"),
@@ -749,7 +843,7 @@ function render(): void {
   const tabs: [typeof tab, string][] = [["content", "Vsebina"], ["facts", "Podatki"], ["design", "Oblikovanje"], ["pages", "Strani"], ["ai", "Pomočnik AI"], ["versions", "Različice"]];
   const panel = h("div", { class: "panel" },
     h("div", { class: "tabs", role: "tablist" }, ...tabs.map(([k, l]) => h("button", { role: "tab", "aria-selected": tab === k, onClick: () => { tab = k; render(); } }, l))),
-    state.blockers.length && state.spec ? h("div", { class: "pane" }, h("div", { class: "warn" }, `Pred objavo manjka ${state.placeholders.length} podatkov`, state.blockers.length > state.placeholders.length ? ` in ${state.blockers.length - state.placeholders.length} drugih težav` : "", ". Označeni so rumeno v predogledu.", h("details", {}, h("summary", {}, "Seznam"), h("ul", {}, ...state.blockers.slice(0, 30).map((b) => h("li", {}, b)))))) : null,
+    state.blockers.length && state.spec ? h("div", { class: "pane" }, h("div", { class: "warn" }, blockerSummary(state.placeholders.length, state.blockers.length - state.placeholders.length), h("details", {}, h("summary", {}, "Seznam"), h("ul", {}, ...state.blockers.slice(0, 30).map((b) => h("li", {}, b)))))) : null,
     !state.spec ? h("div", { class: "pane" }, h("p", {}, active ? "Stran se ustvarja …" : "Stran še nima vsebine."), h("div", { class: "log" }, ...state.events.map((e) => h("div", { class: e.level === "error" ? "err" : "" }, `${e.stage}: ${e.message}`)))) : null,
     state.spec ? { content: contentPane, facts: factsPane, design: designPane, pages: pagesPane, ai: aiPane, versions: versionsPane }[tab]() : null,
   );
@@ -772,6 +866,7 @@ function render(): void {
   }
   const shell = h("div", {}, h("style", {}, STYLE), top, h("div", { class: "ed" }, panel, stage));
   root.replaceChildren(shell);
+  linkLabels(shell);
   if (frame) {
     // Keep the selection highlight in sync when the frame survives a re-render.
     const doc = frame.contentDocument;
@@ -779,6 +874,54 @@ function render(): void {
     if (selected && editMode) doc?.getElementById(selected)?.setAttribute("data-sb-selected", "");
   }
   showToast();
+}
+
+/** Undo = revert to the version before the current one (read at click time, not render time). */
+async function undo(): Promise<void> {
+  const target = (state.version ?? 0) - 1;
+  if (target < 1) return;
+  try {
+    await api("/revert", { method: "POST", body: JSON.stringify({ version: target }) });
+    toast = "Razveljavljeno.";
+  } catch (e) {
+    toast = (e as Error).message;
+  }
+  await load();
+  reloadPreview();
+}
+
+let labelSeq = 0;
+/** Associates each form label with the control that follows it, so every field has an accessible name. */
+function linkLabels(scope: HTMLElement): void {
+  for (const label of scope.querySelectorAll("label")) {
+    if (label.htmlFor || label.querySelector("input, select, textarea")) continue;
+    let next = label.nextElementSibling;
+    while (next && !next.matches("input, select, textarea") && !next.querySelector("input, select, textarea")) next = next.nextElementSibling;
+    const control = next?.matches("input, select, textarea") ? next : next?.querySelector("input, select, textarea");
+    if (!control) continue;
+    if (!control.id) control.id = `f${++labelSeq}`;
+    label.htmlFor = control.id;
+  }
+}
+
+function items(n: number): string {
+  const form = new Intl.PluralRules("sl-SI").select(n);
+  return `${n} ${({ one: "postavko", two: "postavki", few: "postavke" } as Record<string, string>)[form] ?? "postavk"}`;
+}
+
+/** Banner text: missing facts (placeholders) and other things to fix (starter text, validation). */
+function blockerSummary(missing: number, other: number): string {
+  const parts: string[] = [];
+  if (missing) parts.push(`${missingPhrase(missing)} (označeni rumeno v predogledu)`);
+  if (other) parts.push(`uredite še ${items(other)} (začetno besedilo ali napake)`);
+  return `Pred objavo: ${parts.join("; ")}.`;
+}
+
+/** "manjka 1 podatek", "manjkata 2 podatka", "manjkajo 3 podatki", "manjka 5 podatkov" (Slovene plural rules). */
+function missingPhrase(n: number): string {
+  const form = new Intl.PluralRules("sl-SI").select(n);
+  const words: Record<string, string> = { one: "manjka {n} podatek", two: "manjkata {n} podatka", few: "manjkajo {n} podatki", other: "manjka {n} podatkov" };
+  return (words[form] ?? words.other!).replace("{n}", String(n));
 }
 
 function showToast(): void {

@@ -6,6 +6,7 @@ import { checkDesign } from "./design-rules.ts";
 import { findBannedCopy } from "./banned.ts";
 import { getAt, walkObjects, walkStrings } from "./pointer.ts";
 import type { PlaceholderKind } from "./common.ts";
+import { EDITOR_STARTER_TEXT } from "./starter.ts";
 
 export interface Issue {
   path: string;
@@ -120,6 +121,16 @@ export function semanticIssues(spec: SiteSpec): Issue[] {
   return issues;
 }
 
+const STARTER = new Set(Object.values(EDITOR_STARTER_TEXT));
+
+export function collectStarterText(spec: unknown): string[] {
+  const out: string[] = [];
+  walkStrings((spec as { pages?: unknown }).pages, (s, p) => {
+    if (STARTER.has(s)) out.push(`/pages${p}`);
+  });
+  return out;
+}
+
 export interface PlaceholderRef {
   path: string;
   kind: PlaceholderKind;
@@ -141,5 +152,6 @@ export function publishBlockers(spec: unknown): string[] {
   const v = validateSite(spec);
   const blockers = v.ok ? [] : v.issues.map((i) => `${i.path}: ${i.message}`);
   for (const p of collectPlaceholders(spec)) blockers.push(`${p.path}: unfilled placeholder (${p.kind})`);
+  for (const p of collectStarterText(spec)) blockers.push(`${p}: starter text not replaced`);
   return blockers;
 }

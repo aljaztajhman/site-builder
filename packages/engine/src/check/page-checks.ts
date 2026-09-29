@@ -81,8 +81,19 @@ export async function measurePage(page: Page, opts: { primaryMin: number; primar
       }
     }
     const crowdedTargets: string[] = [];
+    // Fixed/sticky bars (mobile action bar, consent notice) float over the page; spacing is only
+    // meaningful between targets in the same layer.
+    const layerOf = (el: Element): Element | null => {
+      for (let a: Element | null = el; a; a = a.parentElement) {
+        const pos = getComputedStyle(a).position;
+        if (pos === "fixed" || pos === "sticky") return a;
+      }
+      return null;
+    };
+    const layers = primary.map((p) => layerOf(p.el));
     for (let i = 0; i < primary.length; i++) {
       for (let j = i + 1; j < primary.length; j++) {
+        if (layers[i] !== layers[j]) continue;
         const a = primary[i]!.r;
         const b = primary[j]!.r;
         if (primary[i]!.el.contains(primary[j]!.el) || primary[j]!.el.contains(primary[i]!.el)) continue;

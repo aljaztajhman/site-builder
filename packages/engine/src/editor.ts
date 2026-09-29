@@ -11,6 +11,7 @@ import {
   sectionDef,
   toModelJsonSchema,
   validateSite,
+  EDITOR_STARTER_TEXT as DEFAULT_TEXT,
   type Issue,
   type SiteSpec,
 } from "@sb/spec";
@@ -83,22 +84,6 @@ export function switchDirection(spec: SiteSpec, directionId: string): Design {
 
 type Json = Record<string, unknown>;
 
-const DEFAULT_TEXT: Record<string, string> = {
-  headline: "Nov naslov",
-  title: "Nov naslov",
-  eyebrow: "Oznaka",
-  intro: "Kratek uvod, ki ga uredite.",
-  text: "Besedilo, ki ga uredite.",
-  body: "Besedilo, ki ga uredite.",
-  description: "Opis, ki ga uredite.",
-  label: "Več",
-  name: "Ime",
-  question: "Vprašanje?",
-  answer: "Odgovor, ki ga uredite.",
-  caption: "Opis slike",
-  role: "Vloga",
-  note: "Opomba",
-};
 
 /**
  * Minimal valid props for a new section, built from its JSON Schema. Missing facts become
@@ -137,7 +122,7 @@ export function defaultSection(spec: SiteSpec, type: string, id: string): Json |
         if (typeof s.pattern === "string" && s.pattern.includes("img_")) return images[imgIndex++ % Math.max(1, images.length)] ?? "img_missing";
         if (typeof s.pattern === "string" && s.pattern.includes("p_")) return home;
         const max = Number(s.maxLength ?? 200);
-        return (DEFAULT_TEXT[key] ?? "Besedilo").slice(0, max);
+        return (DEFAULT_TEXT[key] ?? DEFAULT_TEXT.text!).slice(0, max);
       }
       case "integer":
       case "number":

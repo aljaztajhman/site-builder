@@ -14,6 +14,7 @@ export { launchCheckBrowser, type CheckBrowser } from "./browser.ts";
 export { serveStatic, type StaticServer } from "./static-server.ts";
 export type { AxeViolation, MobileReport } from "./page-checks.ts";
 export type { LighthouseScores } from "./lighthouse.ts";
+export { checkExportOffline, type ExportCheck } from "./export-offline.ts";
 
 export interface PageCheck {
   file: string;

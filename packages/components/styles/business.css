@@ -220,7 +220,10 @@
 }
 .prices__footnote {
   margin-top: var(--space-block);
-  font-size: var(--fs-sm);
+  color: var(--c-muted);
+}
+.tone-inverse .prices__footnote {
+  color: var(--c-on-inverse);
 }
 .prices:not(.prices--multi) {
   max-width: 44rem;
@@ -465,6 +468,10 @@
 }
 .faq__item {
   border-bottom: 1px solid var(--b-rule);
+}
+/* Questions are tap targets: keep them at least 8 px apart. */
+.faq__item + .faq__item {
+  margin-top: 0.5rem;
 }
 .faq__title {
   font-size: var(--fs-lg);
