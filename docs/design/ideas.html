@@ -227,6 +227,14 @@ mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:var(--ink)}
 .dark .kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:14px;color:#b9ada1}
 .dark .kv b{color:#f2ece5;font-weight:600}
 
+/* ---------- Whole homepage embeds ---------- */
+.homes{display:grid;grid-template-columns:360px 1fr;gap:24px;align-items:start}
+.homes figure{margin:0;min-width:0}
+.homes figcaption{font-size:13px;color:var(--ink-3);margin-top:8px}
+.f360{width:360px;height:800px;border:1px solid var(--line-2);border-radius:14px;background:#fff;box-shadow:var(--shadow-float);display:block}
+.fdesk-wrap{width:100%;overflow:hidden;border:1px solid var(--line-2);border-radius:var(--r-3);background:#fff;box-shadow:var(--shadow-float);position:relative}
+.fdesk{width:1280px;height:3400px;border:0;transform-origin:0 0;display:block}
+@media (max-width:820px){.homes{grid-template-columns:1fr;justify-items:center}.f360{max-width:100%}}
 /* ---------- Don't-use list ---------- */
 .dont{display:grid;gap:10px}
 .dont .row{display:grid;grid-template-columns:1fr auto;gap:8px 14px;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-2)}
@@ -248,7 +256,7 @@ mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:var(--ink)}
   <div class="wrap">
     <span class="brand"><i></i>Site builder · design</span>
     <nav aria-label="Sections">
-      <a href="#now">Where we are</a><a href="#reference">Reference</a><a href="#principles">Principles</a><a href="#tokens">Tokens</a><a href="#components">Components</a><a href="#screens">Screens</a><a href="#sites">Generated sites</a><a href="#dont">Don't use</a><a href="#plan">Plan</a>
+      <a href="#now">Where we are</a><a href="#reference">Reference</a><a href="#principles">Principles</a><a href="#tokens">Tokens</a><a href="#components">Components</a><a href="#screens">Screens</a><a href="#sites">Generated sites</a><a href="#home">Homepage</a><a href="#dont">Don't use</a><a href="#plan">Plan</a>
     </nav>
     <span class="sp"></span>
     <div class="accents" role="group" aria-label="Try an accent colour">
@@ -661,6 +669,26 @@ mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:var(--ink)}
 </section>
 
 <!-- ================================================================ -->
+<section class="block" id="home">
+  <div class="wrap">
+    <p class="eyebrow">07b</p>
+    <h2>A whole homepage</h2>
+    <p class="lead">Pekarna Kvas in Warm Craft, built with the proposed families: split-cta header, photo-first hero with one button and the phone as a link, highlights as a running list instead of cards, products with prices, about with the baker, hours and contact side by side, an inverse CTA band, a ZEPT footer with marked placeholders, and the call bar on phones. Every fact comes from the fixture brief; missing ones are yellow placeholders. Photos are labelled stand-ins for the client's own photos.</p>
+    <p style="margin:8px 0 20px"><a class="btn sm" href="example-home.html" target="_blank" rel="noopener">Open the page on its own</a> <span class="muted" style="font-size:13px;margin-left:8px">docs/design/example-home.html, responsive, no JavaScript</span></p>
+    <div class="homes">
+      <figure>
+        <iframe class="f360" src="example-home.html" title="Pekarna Kvas at 360 px" loading="lazy"></iframe>
+        <figcaption>360 × 800, scroll inside the frame. The call bar stays fixed at the bottom.</figcaption>
+      </figure>
+      <figure>
+        <div class="fdesk-wrap"><iframe class="fdesk" src="example-home.html" title="Pekarna Kvas at 1280 px" loading="lazy"></iframe></div>
+        <figcaption>1280 px, scaled to fit. Same file, same CSS.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
 <section class="block" id="dont">
   <div class="wrap">
     <p class="eyebrow">08</p>
@@ -791,6 +819,9 @@ mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:var(--ink)}
 </footer>
 
 <script>
+  // Scale the desktop iframe to its container width.
+  function fitDesk(){document.querySelectorAll('.fdesk-wrap').forEach(w=>{const f=w.querySelector('.fdesk');const s=w.clientWidth/1280;f.style.transform='scale('+s+')';w.style.height=(3400*s)+'px';});}
+  fitDesk();addEventListener('resize',fitDesk);
   // Accent switcher for this page only.
   const root=document.documentElement;
   document.querySelectorAll('.accents button').forEach(b=>b.addEventListener('click',()=>{
