@@ -14,11 +14,11 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "eval": "tsx tools/eval/src/cli.ts",
+    "eval": "tsx --env-file-if-exists=.env tools/eval/src/cli.ts",
     "fonts": "tsx packages/render/scripts/build-fonts.ts",
     "fixtures:photos": "tsx tools/eval/src/fixtures/generate-photos.ts",
     "dev:lite": "pnpm --filter @sb/web dev",
-    "seed": "tsx tools/eval/src/seed.ts"
+    "seed": "tsx --env-file-if-exists=.env tools/eval/src/seed.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
