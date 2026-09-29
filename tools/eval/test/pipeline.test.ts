@@ -114,6 +114,20 @@ describe("pipeline with replayed model responses (no network)", () => {
     expect(events.rows.map((e) => e.message)).toContain("Critique answer unusable; kept the checked site");
   }, 180_000);
 
+  it("keeps the checked site when the critique request fails at the API", async () => {
+    const { fixture, golden, storage, site } = await seedSite("pekarna-kvas-critique-400");
+    const replay = new ReplayTransport(syntheticRecordings(fixture, golden));
+    const transport: typeof replay = Object.assign(Object.create(replay) as typeof replay, {
+      send: (req: Parameters<typeof replay.send>[0], stage: Parameters<typeof replay.send>[1]) =>
+        req.stage === "critique" ? Promise.reject(Object.assign(new Error("400 image dimensions exceed max allowed size"), { status: 400 })) : replay.send(req, stage),
+    });
+    const client = new ModelClient({ config, transport, spentToday: async () => 0, onCall: async () => undefined });
+    await generateSite({ config, repo, storage, client, browser, lighthouse: false }, site.id, null);
+    expect((await repo.getSite(site.id))?.status).toBe("ready");
+    const events = await db.query<{ message: string }>("select message from site_events where site_id = $1", [site.id]);
+    expect(events.rows.map((e) => e.message)).toContain("Critique failed; kept the checked site");
+  }, 180_000);
+
   it("rejects an edit that invents a phone number and keeps the spec", async () => {
     const fixture = loadFixture("pekarna-kvas");
     const golden = JSON.parse(await readFile(path.join(here, "../golden/pekarna-kvas.json"), "utf8")) as SiteSpec;

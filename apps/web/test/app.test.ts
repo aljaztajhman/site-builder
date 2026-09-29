@@ -103,6 +103,15 @@ describe("published sites", () => {
     expect((await app.request(redirect.headers.get("location")!)).status).toBe(200);
     expect((await app.request("/s/Demo!/index.html")).status).toBe(404);
   });
+
+  it("published pages allow only our own scripts plus the header snippet by hash (no 'unsafe-inline')", async () => {
+    const { createHash } = await import("node:crypto");
+    const { JS_FLAG } = await import("@sb/components");
+    const csp = (await app.request("/s/demo/")).headers.get("content-security-policy") ?? "";
+    const scriptSrc = csp.split(";").find((d) => d.trim().startsWith("script-src")) ?? "";
+    expect(scriptSrc).not.toContain("unsafe-inline");
+    expect(scriptSrc).toContain(`'sha256-${createHash("sha256").update(JS_FLAG).digest("base64")}'`);
+  });
 });
 
 describe("intake", () => {

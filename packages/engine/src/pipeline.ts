@@ -4,7 +4,7 @@ import { contentType } from "@sb/platform";
 import { mediaFiles, siteFiles, exportZip, sharedBundle } from "@sb/render";
 import { publishBlockers, type ImageAsset, type SiteSpec } from "@sb/spec";
 import type { Operation } from "fast-json-patch";
-import { ModelOutputError, type ModelClient } from "./llm/client.ts";
+import { ModelOutputError, SpendCapError, type ModelClient } from "./llm/client.ts";
 import { classify, makeBrief, chooseDesign, altTexts, generateContent, critique, applyPatches, editSpec } from "./stages.ts";
 import { extractSwatches, type Swatch } from "./palette.ts";
 import { processLogo, processPhoto, visionJpeg } from "./images.ts";
@@ -175,9 +175,10 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
         critique(client, { spec, mobilePng: check!.screenshots.mobileFull, desktopPng: check!.screenshots.desktop, failures: check!.failures, corpus }),
       );
     } catch (e) {
-      // The site already passed validation and checks; an unusable critique answer only means no polish.
-      if (!(e instanceof ModelOutputError)) throw e;
-      await log("critique", "Critique answer unusable; kept the checked site", e.message.slice(0, 300));
+      // The site already passed validation and checks; a failed critique only means no polish.
+      // The spend cap still stops the job.
+      if (e instanceof SpendCapError) throw e;
+      await log("critique", e instanceof ModelOutputError ? "Critique answer unusable; kept the checked site" : "Critique failed; kept the checked site", (e as Error).message.slice(0, 300));
       break;
     }
     await log("critique", `Round ${rounds}: ${c.issues.length} issues, ${c.patches.length} patches`, c.issues);

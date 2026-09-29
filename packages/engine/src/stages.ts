@@ -34,6 +34,7 @@ import {
 } from "./prompts.ts";
 import { assembleSpec, contentJsonSchema, contentOutputSchema, type ContentOutput } from "./assemble.ts";
 import type { Swatch } from "./palette.ts";
+import { fitImageForModel } from "./images.ts";
 import { checkFacts, type FactViolation } from "./facts.ts";
 import { protectedPathIssues } from "./editor.ts";
 
@@ -343,6 +344,7 @@ export async function critique(
   input: { spec: SiteSpec; mobilePng: Uint8Array; desktopPng: Uint8Array; failures: string[]; corpus: string },
 ): Promise<{ issues: string[]; patches: Operation[] }> {
   const png = (b: Uint8Array) => Buffer.from(b).toString("base64");
+  const [mobilePng, desktopPng] = await Promise.all([fitImageForModel(input.mobilePng), fitImageForModel(input.desktopPng)]);
   const res = await client.call({
     stage: "critique",
     system: [CRITIQUE_SYSTEM, sectionCatalogue()],
@@ -351,9 +353,9 @@ export async function critique(
         role: "user",
         content: [
           { type: "text", text: "Mobile homepage (360 px):" },
-          { type: "image", source: { type: "base64", media_type: "image/png", data: png(input.mobilePng) } },
+          { type: "image", source: { type: "base64", media_type: "image/png", data: png(mobilePng) } },
           { type: "text", text: "Desktop homepage (1280 px):" },
-          { type: "image", source: { type: "base64", media_type: "image/png", data: png(input.desktopPng) } },
+          { type: "image", source: { type: "base64", media_type: "image/png", data: png(desktopPng) } },
           {
             type: "text",
             text: `Automated checks reported:\n${input.failures.length ? input.failures.map((f) => `- ${f}`).join("\n") : "- nothing"}\n\nCurrent spec:\n${JSON.stringify(input.spec)}\n\nReturn JSON: {"issues": [...], "patches": [...]}`,
