@@ -30,7 +30,9 @@ export function storageFromEnv(): Storage {
     bucket: process.env.S3_BUCKET ?? required("BUCKET"),
     accessKeyId: process.env.S3_ACCESS_KEY_ID ?? required("ACCESS_KEY_ID"),
     secretAccessKey: process.env.S3_SECRET_ACCESS_KEY ?? required("SECRET_ACCESS_KEY"),
-    forcePathStyle: (process.env.S3_FORCE_PATH_STYLE ?? "true") === "true",
+    // MinIO (S3_* variables) needs path-style URLs; Railway buckets (BUCKET/ENDPOINT/...) use
+    // virtual-hosted style unless the bucket's Credentials tab says otherwise.
+    forcePathStyle: process.env.S3_FORCE_PATH_STYLE ? process.env.S3_FORCE_PATH_STYLE === "true" : Boolean(process.env.S3_ENDPOINT),
   });
 }
 

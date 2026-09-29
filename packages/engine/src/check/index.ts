@@ -6,7 +6,7 @@ import { collectPlaceholders, validateSite, type Issue, type SiteSpec } from "@s
 import { pageFile } from "@sb/render";
 import { checkFacts, type FactViolation } from "../facts.ts";
 import { launchCheckBrowser, type CheckBrowser } from "./browser.ts";
-import { measurePage, runAxe, type AxeViolation, type MobileReport } from "./page-checks.ts";
+import { loadLazyImages, measurePage, runAxe, type AxeViolation, type MobileReport } from "./page-checks.ts";
 import { runLighthouse, type LighthouseScores } from "./lighthouse.ts";
 import { serveStatic } from "./static-server.ts";
 
@@ -82,6 +82,7 @@ export async function checkSite(spec: SiteSpec, files: Map<string, Uint8Array>, 
       let shotMobileFull: Buffer | undefined;
       if (file === "index.html") {
         shotMobile = await mp.screenshot({ type: "png" });
+        await loadLazyImages(mp);
         shotMobileFull = await mp.screenshot({ type: "png", fullPage: true });
       }
       await mctx.close();
@@ -92,6 +93,7 @@ export async function checkSite(spec: SiteSpec, files: Map<string, Uint8Array>, 
       const d = await measurePage(dp, { primaryMin: t.primaryMin, primaryGap: t.primaryGap, absoluteMin: t.absoluteMin });
       const desktopAxe = await runAxe(dp);
       if (file === "index.html" && shotMobile && shotMobileFull) {
+        await loadLazyImages(dp);
         screenshots = { mobile: shotMobile, mobileFull: shotMobileFull, desktop: await dp.screenshot({ type: "png", fullPage: true }) };
       }
       await dctx.close();

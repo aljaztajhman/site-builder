@@ -29,7 +29,7 @@ export const FONTS = {
   inter: face("Inter", "inter", "sans-serif", [100, 900]),
   fraunces: face("Fraunces", "fraunces", "serif", [100, 900]),
   sourceSans3: face("Source Sans 3", "source-sans-3", "sans-serif", [200, 900]),
-  cormorant: face("Cormorant Garamond", "cormorant-garamond", "serif", [300, 700]),
+  ebGaramond: face("EB Garamond", "eb-garamond", "serif", [400, 800]),
   karla: face("Karla", "karla", "sans-serif", [200, 800]),
   archivo: face("Archivo", "archivo", "sans-serif", [100, 900]),
   manrope: face("Manrope", "manrope", "sans-serif", [200, 800]),
@@ -49,7 +49,7 @@ export const FONTS = {
 export const FONT_PAIRS: FontPair[] = [
   { id: "inter-tight-inter", label: "Inter Tight / Inter", heading: FONTS.interTight, body: FONTS.inter },
   { id: "fraunces-source-sans", label: "Fraunces / Source Sans 3", heading: FONTS.fraunces, body: FONTS.sourceSans3 },
-  { id: "cormorant-karla", label: "Cormorant Garamond / Karla", heading: FONTS.cormorant, body: FONTS.karla },
+  { id: "garamond-karla", label: "EB Garamond / Karla", heading: FONTS.ebGaramond, body: FONTS.karla },
   { id: "archivo-archivo", label: "Archivo / Archivo", heading: FONTS.archivo, body: FONTS.archivo },
   { id: "manrope-public-sans", label: "Manrope / Public Sans", heading: FONTS.manrope, body: FONTS.publicSans },
   { id: "bitter-nunito-sans", label: "Bitter / Nunito Sans", heading: FONTS.bitter, body: FONTS.nunitoSans },

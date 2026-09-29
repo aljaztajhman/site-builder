@@ -374,16 +374,13 @@ body.has-action-bar:not(:has(.action-bar)) {
   }
 }
 
-/* Consent notice: small, non-blocking, bottom corner. */
+/*
+ * Consent notice. Nothing third-party loads before an explicit click on each embed, so the notice
+ * never needs to block or cover content: on phones it sits in the page flow at the end; on wider
+ * screens it is a small card in the bottom corner.
+ */
 .consent {
-  position: fixed;
-  z-index: 60;
-  left: 1rem;
-  right: 1rem;
-  bottom: 1rem;
-  max-width: 26rem;
-  max-height: calc(100vh - 2rem);
-  overflow-y: auto;
+  margin: 1rem;
   padding: 1rem;
   background: var(--c-bg);
   color: var(--c-text);
@@ -407,7 +404,20 @@ body.has-action-bar:not(:has(.action-bar)) {
   font-size: var(--fs-sm);
 }
 @media (max-width: 47.99rem) {
-  body.has-action-bar .consent {
-    bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+  .consent,
+  .consent__actions .btn {
+    font-size: var(--fs-base);
+  }
+}
+@media (min-width: 48rem) {
+  .consent {
+    position: fixed;
+    z-index: 60;
+    right: 1rem;
+    bottom: 1rem;
+    margin: 0;
+    max-width: 26rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
   }
 }

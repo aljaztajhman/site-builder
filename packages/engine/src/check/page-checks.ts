@@ -167,3 +167,26 @@ export async function measurePage(page: Page, opts: { primaryMin: number; primar
     };
   }, opts);
 }
+
+/** Scrolls through the page so lazy images load, then back to the top (for full-page screenshots). */
+export async function loadLazyImages(page: Page): Promise<void> {
+  await page.evaluate("globalThis.__name = globalThis.__name || ((f) => f)");
+  await page.evaluate(async () => {
+    for (let y = 0; y < document.body.scrollHeight; y += Math.round(window.innerHeight * 0.8)) {
+      window.scrollTo(0, y);
+      await new Promise((r) => setTimeout(r, 50));
+    }
+    await Promise.all(
+      [...document.images]
+        .filter((i) => !i.complete)
+        .map(
+          (i) =>
+            new Promise((r) => {
+              i.addEventListener("load", r, { once: true });
+              setTimeout(r, 2000);
+            }),
+        ),
+    );
+    window.scrollTo(0, 0);
+  });
+}

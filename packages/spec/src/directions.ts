@@ -98,7 +98,7 @@ export const DIRECTIONS: Direction[] = [
     summary:
       "Near-black warm page, light high-contrast Garamond headings with generous spacing, brass accents, photos in thin frames, airy sections. Evening mood. Choose for restaurants, wine bars and upscale salons with atmospheric interior or food photos; avoid when photos are dark or few.",
     bestFor: ["restaurant", "hairdresser"],
-    fontPairs: ["cormorant-karla"],
+    fontPairs: ["garamond-karla"],
     palette: {
       background: "dark",
       fallback: {
@@ -270,7 +270,7 @@ export const DIRECTIONS: Direction[] = [
     summary:
       "White page led by large, light serif headlines like a quality newspaper, restrained sans body text, square framed photos, generous whitespace and one deep ink-red colour. Typography does the work. Choose for accountants, advisers and practices with few photos, or any client whose text is stronger than their pictures.",
     bestFor: ["accountant", "physio", "dental"],
-    fontPairs: ["newsreader-libre-franklin", "cormorant-karla"],
+    fontPairs: ["newsreader-libre-franklin", "garamond-karla"],
     palette: {
       background: "white",
       fallback: {
