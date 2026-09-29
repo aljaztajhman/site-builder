@@ -2,29 +2,38 @@
 
 Phase 1 plan: docs/phases/PHASE-1.md. Tick only what has been run and checked.
 
-## Local (this machine: no Docker, no gh, no railway, no API key)
+## Done on the work PC (no Docker, gh, railway or API key there)
 - [x] Portable Node 24 LTS + pnpm in `.tools/` (gitignored); git repo, `main` scaffold commit, `phase-1` worktree
 - [x] Workspace: TS strict, eslint, vitest with network blocked in unit tests
 - [x] Config in `config/app.config.json` (models, effort, prices, limits, targets)
-- [x] Spec core: schema v1, facts/placeholders, design tokens, validation, migrations framework, JSON Schema export
-- [x] Render core: page shell, tokens → CSS, shared bundle, export zip
-- [ ] Component groups: heroes, content, business, structure + chrome (~30 components)
-- [ ] 10 design directions + self-hosted subset fonts (č š ž ć đ test)
-- [ ] 10 fixtures + 5 edits each + stand-in photo generator
-- [ ] Platform: Postgres (pg + PGlite for tests/no-Docker dev), S3 storage (MinIO / Railway bucket / fs), pg-boss queue
-- [ ] Engine: model client with per-stage token + € logging, spend cap; pipeline stages 1–6; JSON Patch edits
-- [ ] Checks: axe, Lighthouse mobile, 360 px scroll + tap targets, banned patterns, fact check, critique pass
-- [ ] Web: access password, noindex, dashboard (intake → progress → preview → chat edit → publish → export), `/s/{slug}/`, `/health`
-- [ ] Worker service
-- [ ] `pnpm eval` (real calls; `--only`, `--replay`), report.md + contact-sheet.png
-- [ ] Offline check run over golden specs (no model calls) to prove components pass axe/Lighthouse/mobile checks
-- [ ] Docker Compose (Postgres, MinIO), Dockerfiles (web; worker on Playwright image), railway.json
-- [ ] GitHub Actions: typecheck, lint, test on PRs; eval on manual trigger
-- [ ] README (setup < 10 lines), .env.example
+- [x] Spec v1: facts/placeholders, design tokens, validation (structure, references, contrast, banned copy), migrations framework, JSON Schema export
+- [x] Render: page shell, tokens → CSS, shared bundle (`_shared/<hash>/`), preview = publish = export (byte-identical, tested)
+- [x] 27 section types + header (3 variants, tone), footer (2), mobile action bar, cookie consent; islands nav/consent/gallery
+- [x] 10 design directions, 19 subset fonts (č š ž ć đ test)
+- [x] 10 fixtures + 5 edits each + stand-in photo generator
+- [x] 10 golden specs (hand-authored, fact-checked) for offline eval and demos
+- [x] Platform: Postgres / PGlite, S3 / MinIO / fs storage, pg-boss queue (tested on PGlite)
+- [x] Engine: model client (per-stage token + € logging, daily cap), pipeline stages 1–6, fact verification, JSON Patch edits
+- [x] Checks: axe (360/1280), Lighthouse mobile, 360 px scroll, tap targets, text size, one-tap call/directions, banned patterns, facts, export offline
+- [x] Direct editor (no model calls): schema-driven forms, outline move/duplicate/delete/add, click-to-select + double-click inline text editing in the preview, facts, design, pages, versions/undo; starter text blocks publishing
+- [x] Web: access password, noindex, intake → progress → preview (mobile/desktop) → edit → publish → export, `/s/{slug}/`, `/health`
+- [x] Worker service; pipeline replay test (synthetic recordings, no network)
+- [x] `pnpm eval` (live / `--record` / `--replay` / `--offline`), report.md + contact-sheet.png
+- [x] Docker Compose (Postgres, MinIO), Dockerfiles (web; worker on Playwright image), `railway/*.json`
+- [x] GitHub Actions: typecheck, lint, test on PRs; eval on manual trigger
+- [x] README (setup < 10 lines), .env.example
 
 ## Needs the home PC (Docker, gh, railway, API key)
-- [ ] `docker compose up -d && pnpm i && pnpm dev` from a clean clone
-- [ ] Create private GitHub repo `site-builder`, push main + phase-1 branch, open PR, CI green
-- [ ] `pnpm eval` with real model calls; record fixtures for unit tests (`--record`)
-- [ ] Railway project: web, worker, Postgres, bucket; PR environments or `preview` env; access password variable; `/health` green
-- [ ] Generate ≥ 2 fixtures end to end on the deployed environment
+- [ ] `docker compose up -d && pnpm i && pnpm dev` from a clean clone (Dockerfiles and compose are unverified: no Docker here)
+- [ ] Push to private GitHub repo `site-builder`, open the phase 1 PR, CI green
+- [ ] `pnpm eval` with real model calls (budget €25/run); check the structured-output schema for content is accepted (fallback: `structuredOutputForContent: false`)
+- [ ] `pnpm eval --record` and replace synthetic recordings with real ones for unit tests
+- [ ] Tune prompts until the edit checks and cost/time targets hold; report real medians
+- [ ] Railway project: web, worker, Postgres, bucket; PR environments or `preview` env; `ACCESS_PASSWORD` variable; `/health` green; ≥ 2 fixtures generated on the deployed env
+- [ ] Estimate monthly Railway cost from real usage
+
+## Found / follow-ups
+- [ ] Accessibility statement date uses render date (changes on republish); make it a spec field if that matters
+- [ ] Header inline script (`js` class) conflicts with a strict CSP; revisit when adding CSP
+- [ ] Offline export verified in Chromium only; Firefox may block `file://` fonts from a parent folder (falls back to system fonts) — not verified
+- [ ] Newsreader font file is 62 KB (target 60)

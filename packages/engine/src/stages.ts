@@ -193,6 +193,17 @@ export interface ContentResult {
   attempts: number;
   /** Issues left after the last attempt (empty when valid). */
   issues: string[];
+  /** True when the API rejected the content schema for structured output and plain JSON was used. */
+  structuredFallback: boolean;
+}
+
+function plainJsonInstruction(): string {
+  return `Return only the JSON object {"chrome": ..., "pages": [...]} matching this schema:\n${JSON.stringify(contentJsonSchema())}`;
+}
+
+function isSchemaRejection(e: unknown): boolean {
+  const err = e as { status?: number; message?: string };
+  return err.status === 400 && /schema|output_config|format|grammar/i.test(err.message ?? "");
 }
 
 function imageList(assets: SiteSpec["assets"], heroIds: string[]): string {
@@ -216,7 +227,7 @@ export async function generateContent(client: ModelClient, input: ContentInput):
         `Design direction: ${dir.id}. Header ${dir.layout.header}, footer ${dir.layout.footer}. Preferred heroes: ${dir.layout.heroes.join(", ")}. Section rhythm: ${dir.layout.rhythm} (use the tone field: default/alt/inverse). Preferred variants: ${dir.layout.prefer.join(", ")}.`,
         `Photos (use each at most twice; alt text is already written):\n${imageList(input.assets, input.heroImageIds)}`,
         `Business facts available to components: phone ${input.brief.facts.phone ? "yes" : "missing"}, address ${input.brief.facts.address ? "yes" : "missing"}, hours ${input.brief.facts.hours ? "yes" : "missing"}, booking URL ${input.brief.facts.bookingUrl ? "yes" : "no — never use the booking action"}.`,
-        input.structuredOutput ? "" : `Return only the JSON object {"chrome": ..., "pages": [...]} matching the schema:\n${JSON.stringify(contentJsonSchema())}`,
+        input.structuredOutput ? "" : plainJsonInstruction(),
       ]
         .filter(Boolean)
         .join("\n\n"),
@@ -226,14 +237,30 @@ export async function generateContent(client: ModelClient, input: ContentInput):
   let attempts = 0;
   let lastIssues: string[];
   let spec: SiteSpec | undefined;
+  let structured = input.structuredOutput;
+  let structuredFallback = false;
   for (;;) {
     attempts++;
-    const res = await client.call({
-      stage: "content",
-      system: [CONTENT_SYSTEM, sectionCatalogue()],
-      messages,
-      ...(input.structuredOutput ? { schema: contentJsonSchema() } : {}),
-    });
+    let res;
+    try {
+      res = await client.call({
+        stage: "content",
+        system: [CONTENT_SYSTEM, sectionCatalogue()],
+        messages,
+        ...(structured ? { schema: contentJsonSchema() } : {}),
+      });
+    } catch (e) {
+      // The content schema is large (a union of every section). If the API rejects it for structured
+      // output, fall back to plain JSON with the schema in the prompt; validation catches the rest.
+      if (structured && isSchemaRejection(e)) {
+        structured = false;
+        structuredFallback = true;
+        attempts--;
+        messages[0] = { role: "user", content: `${messages[0]!.content as string}\n\n${plainJsonInstruction()}` };
+        continue;
+      }
+      throw e;
+    }
     let issues: string[];
     try {
       const parsed = schema.safeParse(JSON.parse(extract(res.text)));
@@ -250,7 +277,7 @@ export async function generateContent(client: ModelClient, input: ContentInput):
       issues = ["Output is not valid JSON."];
     }
     lastIssues = issues;
-    if (issues.length === 0 && spec) return { spec, attempts, issues: [] };
+    if (issues.length === 0 && spec) return { spec, attempts, issues: [], structuredFallback };
     if (attempts > input.retries) break;
     messages.push({ role: "assistant", content: res.text });
     messages.push({
@@ -259,7 +286,7 @@ export async function generateContent(client: ModelClient, input: ContentInput):
     });
   }
   if (!spec) throw new Error(`Content generation failed after ${attempts} attempts: ${lastIssues.slice(0, 5).join("; ")}`);
-  return { spec, attempts, issues: lastIssues };
+  return { spec, attempts, issues: lastIssues, structuredFallback };
 }
 
 function extract(text: string): string {

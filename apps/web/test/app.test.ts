@@ -120,3 +120,75 @@ describe("intake", () => {
     expect(res.status).toBe(429);
   });
 });
+
+describe("direct editor API (no model calls)", () => {
+  it("patches, adds sections, detects conflicts, reverts, blocks and allows publishing, exports", async () => {
+    const { readFile } = await import("node:fs/promises");
+    const golden = JSON.parse(await readFile(path.join(import.meta.dirname, "../../../tools/eval/golden/pekarna-kvas.json"), "utf8"));
+    const cookie = await login();
+    const json = { cookie, "content-type": "application/json" };
+    const site = await platform.repo.createSite({ name: "Pekarna Kvas", slug: "pekarna-kvas", intake: { description: "Pekarna Kvas", photoAssetIds: [], scope: "full" } });
+    await platform.repo.saveSpec(site.id, golden, "manual");
+    const before = sent.length;
+
+    const patched = await app.request(`/api/sites/${site.id}/patch`, {
+      method: "POST",
+      headers: json,
+      body: JSON.stringify({ baseVersion: 1, ops: [{ op: "replace", path: "/pages/0/sections/0/props/headline", value: "Kruh z drožmi iz Kamnika" }] }),
+    });
+    expect(patched.status).toBe(200);
+    expect(await patched.json()).toMatchObject({ ok: true, version: 2 });
+
+    const stale = await app.request(`/api/sites/${site.id}/patch`, { method: "POST", headers: json, body: JSON.stringify({ baseVersion: 1, ops: [{ op: "remove", path: "/pages/0/sections/1" }] }) });
+    expect(stale.status).toBe(409);
+
+    const invalid = await app.request(`/api/sites/${site.id}/patch`, { method: "POST", headers: json, body: JSON.stringify({ baseVersion: 2, ops: [{ op: "replace", path: "/pages/0/sections/0/props/headline", value: "Dobrodošli" }] }) });
+    expect(invalid.status).toBe(422);
+
+    const added = await app.request(`/api/sites/${site.id}/sections`, { method: "POST", headers: json, body: JSON.stringify({ baseVersion: 2, pageIndex: 0, index: 2, type: "faq" }) });
+    expect(added.status).toBe(200);
+    const state = await (await app.request(`/api/sites/${site.id}`, { headers: { cookie } })).json();
+    expect(state.version).toBe(3);
+    expect(state.spec.pages[0].sections[2].type).toBe("faq");
+    expect(state.blockers.some((b: string) => b.includes("starter text"))).toBe(true);
+
+    const blocked = await app.request(`/api/sites/${site.id}/publish`, { method: "POST", headers: { cookie } });
+    expect(blocked.status).toBe(422);
+
+    const reverted = await app.request(`/api/sites/${site.id}/revert`, { method: "POST", headers: json, body: JSON.stringify({ version: 2 }) });
+    expect(await reverted.json()).toMatchObject({ ok: true, version: 4 });
+
+    // Fill the three missing provider facts, then publishing works.
+    const fill = await app.request(`/api/sites/${site.id}/patch`, {
+      method: "POST",
+      headers: json,
+      body: JSON.stringify({
+        baseVersion: 4,
+        ops: [
+          { op: "replace", path: "/business/provider/legalName", value: "Pekarna Kvas, Jure Petek s.p." },
+          { op: "replace", path: "/business/provider/registrationNumber", value: "1234567000" },
+          { op: "replace", path: "/business/provider/taxNumber", value: "SI12345678" },
+          { op: "replace", path: "/pages/0/sections/2/props/items/4/price", value: { amount: 0.9 } },
+          { op: "remove", path: "/pages/0/sections/2/props/items/5" },
+        ],
+      }),
+    });
+    expect(fill.status).toBe(200);
+    const published = await app.request(`/api/sites/${site.id}/publish`, { method: "POST", headers: { cookie } });
+    expect(published.status).toBe(200);
+    const home = await app.request("/s/pekarna-kvas/");
+    expect(home.status).toBe(200);
+    const publishedHtml = await home.text();
+    expect(publishedHtml).toContain("Kruh z drožmi iz Kamnika");
+    // Preview equals published output, byte for byte.
+    const previewHtml = await (await app.request(`/preview/${site.id}/index.html`, { headers: { cookie } })).text();
+    expect(previewHtml).toBe(publishedHtml);
+
+    const zip = await app.request(`/api/sites/${site.id}/export`, { headers: { cookie } });
+    expect(zip.headers.get("content-type")).toBe("application/zip");
+    expect((await zip.arrayBuffer()).byteLength).toBeGreaterThan(10_000);
+
+    // None of this touched the model queue.
+    expect(sent.length).toBe(before);
+  }, 60_000);
+});

@@ -147,6 +147,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
       corpus,
     }),
   );
+  if (content.structuredFallback) await log("content", "Structured output rejected the content schema; used plain JSON");
   if (content.issues.length) await log("content", "Spec still has issues after retries", content.issues);
   let spec = content.spec;
   let version = await repo.saveSpec(siteId, spec, "generate");

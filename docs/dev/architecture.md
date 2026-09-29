@@ -27,4 +27,4 @@ Missing facts are `{ "$placeholder": kind }`; `publishBlockers` refuses to publi
 ## Known limits
 - Lighthouse runs on the homepage only (per checkpoint); axe and the mobile checks run on every page at 360 and 1280 px.
 - Every response carries `X-Robots-Tag: noindex`, including published sites, so Lighthouse SEO on the deployed URL loses the "is crawlable" audit; the eval serves files without the header, like a production host would.
-- The export uses self-hosted fonts via `../_shared/`; Firefox's `file://` same-directory rule blocks fonts from a parent folder, so offline Firefox falls back to system fonts (Chrome and Safari load them).
+- The export is checked offline (file://) in Chromium by `checkExportOffline` during eval: pages, images, fonts, stylesheet, no network. Other browsers are not verified; Firefox's file:// origin rules may block fonts from the parent `_shared/` folder, in which case system fonts are used.

@@ -93,3 +93,42 @@ describe("pipeline with replayed model responses (no network)", () => {
     expect((await repo.getSpec(site.id))!.version).toBe(1);
   });
 });
+
+describe("content stage", () => {
+  it("falls back to plain JSON when the API rejects the content schema", async () => {
+    const { generateContent, Brief } = await import("@sb/engine");
+    const fixture = loadFixture("pekarna-kvas");
+    const golden = JSON.parse(await readFile(path.join(here, "../golden/pekarna-kvas.json"), "utf8")) as SiteSpec;
+    const recs = syntheticRecordings(fixture, golden);
+    const brief = Brief.parse(JSON.parse(recs.find((r) => r.stage === "brief")!.response.text));
+    const content = recs.find((r) => r.stage === "content")!.response;
+    const seen: boolean[] = [];
+    const client = new ModelClient({
+      config,
+      spentToday: async () => 0,
+      onCall: async () => undefined,
+      transport: {
+        async send(req) {
+          seen.push(!!req.schema);
+          if (req.schema) throw Object.assign(new Error("output_config.format.schema: schema is too complex"), { status: 400 });
+          return content;
+        },
+      },
+    });
+    const r = await generateContent(client, {
+      slug: "pekarna-kvas",
+      brief,
+      design: golden.design,
+      assets: golden.assets,
+      scope: "full",
+      heroImageIds: [],
+      structuredOutput: true,
+      retries: 2,
+      corpus: fixture.brief.description,
+    });
+    expect(seen).toEqual([true, false]);
+    expect(r.structuredFallback).toBe(true);
+    expect(r.issues).toEqual([]);
+    expect(r.attempts).toBe(1);
+  });
+});
