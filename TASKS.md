@@ -48,7 +48,7 @@ Draft plan: docs/phases/PHASE-2.md — 5 decisions there are the owner's (sign-i
 
 ## Follow-ups (not blocking a phase)
 - [x] Worker ran one job at a time (two deployed intakes queued, 322 s wall each). Measured: worker 0.55 GB idle, 1.69 GB peak with one generate job (limit 8 GB) → generate jobs now run 2 in parallel (`limits.jobConcurrency`); edits and publishes stay sequential (same-site version conflicts)
-- [ ] Web and worker idle at ~0.5 GB each because they run TypeScript through `tsx` at runtime; a compiled build would cut the largest cost line
+- [x] Web idled at ~0.6 GB: not `tsx` itself but Lighthouse (~325 MB) and Playwright (~70 MB) loaded at startup by `@sb/engine`, plus pnpm → pnpm → tsx wrapper processes (~80 MB). Now imported on first check, and the containers start `node --import tsx` directly. Measured in the web image: **621 MB → 174 MB idle**; shutdown on SIGTERM 1 s. Worker idle drops the same way until its first check
 - [ ] Accessibility statement date uses render date (changes on republish); make it a spec field if that matters
 - [ ] CSP allows 'unsafe-inline' scripts (header `js`-class snippet); move it to nav.js or a hash
 - [ ] Offline export verified in Chromium only; Firefox may block `file://` fonts from a parent folder — not verified

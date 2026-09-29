@@ -1,4 +1,4 @@
-import lighthouse from "lighthouse";
+// Lighthouse is ~325 MB once loaded: imported on first use, so the web service (which never runs checks) stays small.
 
 export interface LighthouseScores {
   performance: number;
@@ -12,6 +12,7 @@ export interface LighthouseScores {
 
 /** Lighthouse mobile (default form factor and simulated throttling) against a Chromium debugging port. */
 export async function runLighthouse(url: string, port: number): Promise<LighthouseScores> {
+  const { default: lighthouse } = await import("lighthouse");
   const result = await lighthouse(url, {
     port,
     output: "json",

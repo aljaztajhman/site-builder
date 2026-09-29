@@ -8,4 +8,6 @@ RUN pnpm install --frozen-lockfile
 # Use the browsers baked into the image instead of downloading them again.
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 ENV NODE_ENV=production
-CMD ["pnpm", "start:worker"]
+# Node directly (not pnpm → pnpm → tsx → node): ~80 MB less, and SIGTERM reaches the app for a clean shutdown.
+WORKDIR /app/apps/worker
+CMD ["node", "--import", "tsx", "src/main.ts"]

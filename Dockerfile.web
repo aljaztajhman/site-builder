@@ -6,4 +6,6 @@ COPY . .
 RUN pnpm install --frozen-lockfile
 ENV NODE_ENV=production
 EXPOSE 3000
-CMD ["pnpm", "start:web"]
+# Node directly (not pnpm → pnpm → tsx → node): ~80 MB less, and SIGTERM reaches the app for a clean shutdown.
+WORKDIR /app/apps/web
+CMD ["node", "--import", "tsx", "src/main.ts"]
