@@ -63,7 +63,7 @@ mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:var(--ink)}
 
 /* ---------- What you get: definition list, not icon cards ---------- */
 .get{display:grid;gap:26px 40px;margin-top:28px}
-.get div{border-top:1px solid var(--line);padding-top:14px}
+.get>div{border-top:1px solid var(--line);padding-top:14px}
 .get p{color:var(--ink-2)}
 
 /* ---------- How it works: a row, no numbers, no icons ---------- */
@@ -106,6 +106,66 @@ footer .cols{display:grid;gap:24px}
 footer h3{font-family:var(--font-ui);font-size:14px;color:var(--ink);margin-bottom:8px;letter-spacing:0}
 footer ul{list-style:none;padding:0}footer ul li{margin:4px 0}
 footer .legal{margin-top:28px;padding-top:16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px 20px;color:var(--ink-3)}
+
+/* ---------- Vignettes: one small drawing per point, ink + accent only, animated once when in view ---------- */
+.vig{height:160px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-2);margin-bottom:16px;padding:16px;overflow:hidden;position:relative;display:grid;align-content:center;gap:10px}
+.v-sl .glyphs{display:flex;gap:6px;font:600 46px/1 var(--font-display);letter-spacing:-.03em}
+.v-sl .fmt{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.v-tel{padding:0}
+.v-tel svg{display:block}
+.v-tel .ph-body{fill:#fff;stroke:var(--ink);stroke-width:1.5}
+.v-tel .ln{fill:var(--line-2)}.v-tel .img{fill:var(--surface-2)}.v-tel .sep{stroke:var(--line)}
+.v-tel .b1{fill:var(--accent)}.v-tel .b2{fill:none;stroke:var(--ink);stroke-width:1.2}
+.v-tel .tap{fill:var(--ink);opacity:.18}.v-tel .ring{fill:none;stroke:var(--accent);stroke-width:1.5;opacity:0}
+.v-fact .fake{position:relative;font-size:14px;display:grid;gap:2px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-1);color:var(--ink-2)}
+.v-fact .stars{color:var(--ink-3);letter-spacing:2px;font-size:13px}
+.v-fact .strike{position:absolute;left:8px;right:8px;top:50%;height:2px;background:var(--ink);transform:rotate(-3deg) scaleX(1);transform-origin:left center}
+.v-fact .stamp{position:absolute;right:8px;bottom:-9px;font-size:11px;font-weight:600;background:var(--danger-soft,#f9e3e1);color:#b3261e;padding:1px 7px;border-radius:var(--r-1)}
+.v-fact .real{display:flex;justify-content:space-between;font-size:15px;padding-top:6px}
+.v-a11y ul{list-style:none;padding:0;margin:0;display:grid;gap:8px;font-size:14px}
+.v-a11y li{display:flex;gap:10px;align-items:center}
+.v-a11y svg{width:16px;height:16px;flex:none;fill:none;stroke:var(--accent);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.v-a11y path{stroke-dasharray:18;stroke-dashoffset:0}
+.v-fast .ld{height:8px;background:var(--surface-2);border-radius:4px;overflow:hidden}
+.v-fast .ld i{display:block;height:100%;width:100%;background:var(--accent);border-radius:4px;transform-origin:left}
+.v-fast .lh{display:flex;gap:18px;font-size:14px;color:var(--ink-2)}
+.v-fast .lh b{font-family:var(--font-display);font-size:22px;font-weight:600;color:var(--ink);letter-spacing:-.02em;margin-right:4px}
+.v-fast .chips{display:flex;flex-wrap:wrap;gap:6px}
+.v-fast .chips span{font-size:12px;font-weight:600;padding:2px 8px;border:1px solid var(--line-2);border-radius:var(--r-1);color:var(--ink-2)}
+.v-zip{grid-template-columns:1fr auto;align-items:center}
+.v-zip .zip{font-size:13px;line-height:1.5}
+.v-zip .fn{display:block;font-weight:600;margin-bottom:4px}
+.v-zip ul{list-style:none;padding:0 0 0 12px;margin:0;border-left:1px solid var(--line-2);color:var(--ink-2)}
+.v-zip .arrow{width:40px;height:40px;fill:none;stroke:var(--accent);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+/* Timeline rule under "Kako deluje" columns draws in sequence */
+.how div{position:relative}
+.how div::before{content:"";position:absolute;left:0;top:-1px;height:2px;width:100%;background:var(--accent);transform:scaleX(1);transform-origin:left}
+
+@media (prefers-reduced-motion:no-preference){
+  .v-sl .glyphs span{opacity:0;transform:translateY(8px)}
+  .in .v-sl .glyphs span{animation:rise .5s cubic-bezier(.2,.7,.2,1) forwards}
+  .in .v-sl .glyphs span:nth-child(2){animation-delay:.12s}.in .v-sl .glyphs span:nth-child(3){animation-delay:.24s}.in .v-sl .glyphs span:nth-child(4){animation-delay:.36s}.in .v-sl .glyphs span:nth-child(5){animation-delay:.48s}
+  .v-sl .fmt{opacity:0}.in .v-sl .fmt{animation:fade .6s .7s forwards}
+  .in .v-tel .ring{animation:ring 1s .6s ease-out 2}
+  .v-fact .strike{transform:rotate(-3deg) scaleX(0)}.in .v-fact .strike{animation:strike .5s .5s cubic-bezier(.2,.7,.2,1) forwards}
+  .v-fact .stamp{opacity:0}.in .v-fact .stamp{animation:fade .3s 1s forwards}
+  .v-a11y path{stroke-dashoffset:18}.in .v-a11y path{animation:draw .4s ease-out forwards}
+  .in .v-a11y li:nth-child(2) path{animation-delay:.2s}.in .v-a11y li:nth-child(3) path{animation-delay:.4s}.in .v-a11y li:nth-child(4) path{animation-delay:.6s}
+  .v-fast .ld i{transform:scaleX(0)}.in .v-fast .ld i{animation:load .7s .2s cubic-bezier(.2,.7,.2,1) forwards}
+  .v-fast .lh,.v-fast .chips{opacity:0}.in .v-fast .lh{animation:fade .5s .9s forwards}.in .v-fast .chips{animation:fade .5s 1.1s forwards}
+  .v-zip ul li{opacity:0;transform:translateX(-6px)}.in .v-zip ul li{animation:rise .4s forwards}
+  .in .v-zip ul li:nth-child(2){animation-delay:.1s}.in .v-zip ul li:nth-child(3){animation-delay:.2s}.in .v-zip ul li:nth-child(4){animation-delay:.3s}.in .v-zip ul li:nth-child(5){animation-delay:.4s}
+  .in .v-zip .arrow{animation:nudge 1.2s .6s ease-in-out 2}
+  .how div::before{transform:scaleX(0)}.in.how-sec .how div::before{animation:load .6s cubic-bezier(.2,.7,.2,1) forwards}
+  .in.how-sec .how div:nth-child(2)::before{animation-delay:.15s}.in.how-sec .how div:nth-child(3)::before{animation-delay:.3s}.in.how-sec .how div:nth-child(4)::before{animation-delay:.45s}.in.how-sec .how div:nth-child(5)::before{animation-delay:.6s}
+  @keyframes rise{to{opacity:1;transform:none}}
+  @keyframes fade{to{opacity:1}}
+  @keyframes strike{to{transform:rotate(-3deg) scaleX(1)}}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  @keyframes load{to{transform:scaleX(1)}}
+  @keyframes ring{0%{opacity:.9;r:6}100%{opacity:0;r:16}}
+  @keyframes nudge{0%,100%{transform:none}50%{transform:translateY(6px)}}
+}
 
 @media (min-width:48rem){
   :root{--gutter:32px;--section:96px}
@@ -164,17 +224,72 @@ footer .legal{margin-top:28px;padding-top:16px;border-top:1px solid var(--line);
     <h2 id="h-kaj">Kaj dobite</h2>
     <p class="lead">Stran, ki jo lahko pokažete strankam, ne osnutka, ki ga je treba še popraviti.</p>
     <div class="get">
-      <div><h3>Naravna slovenščina</h3><p>Besedila v slovenščini, ne prevodi. Datumi 29. 9. 2026, cene 12,50 €, telefon +386. Pisave, ki pravilno izpišejo č, š, ž, ć in đ.</p></div>
-      <div><h3>Narejena za telefon</h3><p>Večina vaših obiskovalcev pride s telefona. Klic in navodila za pot so na vsaki strani na en dotik, besedilo je berljivo, meni deluje z eno roko.</p></div>
-      <div><h3>Vaši podatki, nič izmišljenega</h3><p>Cene, delovni čas, naslov in imena so samo tisti, ki ste jih napisali. Kar manjka, je jasno označeno, dokler tega ne vpišete. Brez izmišljenih mnenj strank in nagrad.</p></div>
-      <div><h3>Dostopna in skladna</h3><p>Dostopnost po WCAG 2.2 AA. Brez sledenja pred privolitvijo, pisave na našem strežniku, zemljevidi se naložijo šele po kliku. Izjava o dostopnosti in podatki o ponudniku so vgrajeni.</p></div>
-      <div><h3>Hitra</h3><p>Statične strani skoraj brez JavaScripta. Slike v sodobnih formatih, prilagojene zaslonu.</p></div>
-      <div><h3>Vaša, tudi ko odidete</h3><p>Stran lahko kadarkoli prenesete kot datoteke in jo gostite drugje. Nobenih kreditov, ena cena na mesec.</p></div>
+      <div>
+        <div class="vig v-sl" aria-hidden="true">
+          <div class="glyphs"><span>č</span><span>š</span><span>ž</span><span>ć</span><span>đ</span></div>
+          <div class="fmt"><span>29. 9. 2026</span><span>12,50 €</span><span>+386 41 555 906</span></div>
+        </div>
+        <h3>Naravna slovenščina</h3><p>Besedila v slovenščini, ne prevodi. Datumi, cene in telefonske številke v slovenski obliki. Pisave, ki pravilno izpišejo č, š, ž, ć in đ.</p>
+      </div>
+      <div>
+        <div class="vig v-tel" aria-hidden="true">
+          <svg viewBox="0 0 220 150" width="100%" height="100%">
+            <rect class="ph-body" x="66" y="-34" width="88" height="180" rx="12"/>
+            <rect class="ln" x="76" y="12" width="52" height="6" rx="2"/>
+            <rect class="ln" x="76" y="24" width="66" height="4" rx="2"/>
+            <rect class="ln" x="76" y="32" width="58" height="4" rx="2"/>
+            <rect class="img" x="76" y="44" width="68" height="46" rx="3"/>
+            <rect class="ln" x="76" y="98" width="40" height="4" rx="2"/>
+            <line class="sep" x1="66" y1="112" x2="154" y2="112"/>
+            <rect class="b1" x="74" y="120" width="34" height="16" rx="3"/>
+            <rect class="b2" x="112" y="120" width="34" height="16" rx="3"/>
+            <circle class="tap" cx="91" cy="128" r="6"/>
+            <circle class="ring" cx="91" cy="128" r="6"/>
+          </svg>
+        </div>
+        <h3>Narejena za telefon</h3><p>Večina vaših obiskovalcev pride s telefona. Klic in navodila za pot so na vsaki strani na en dotik, meni deluje z eno roko.</p>
+      </div>
+      <div>
+        <div class="vig v-fact" aria-hidden="true">
+          <div class="fake"><span class="stars">★★★★★</span><span class="q">„Najboljša pekarna daleč naokoli“</span><i class="strike"></i><b class="stamp">ni v vašem opisu</b></div>
+          <div class="real"><span>Cimetov polž</span><mark class="ph">[cena]</mark></div>
+        </div>
+        <h3>Vaši podatki, nič izmišljenega</h3><p>Cene, delovni čas, naslov in imena so samo tisti, ki ste jih napisali. Kar manjka, je označeno, dokler tega ne vpišete. Brez izmišljenih mnenj strank in nagrad.</p>
+      </div>
+      <div>
+        <div class="vig v-a11y" aria-hidden="true">
+          <ul>
+            <li><svg viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7"/></svg>Kontrast besedila 4,5 : 1</li>
+            <li><svg viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7"/></svg>Brez sledenja pred privolitvijo</li>
+            <li><svg viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7"/></svg>Tipkovnica in bralnik zaslona</li>
+            <li><svg viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7"/></svg>Izjava o dostopnosti</li>
+          </ul>
+        </div>
+        <h3>Dostopna in skladna</h3><p>Dostopnost po WCAG 2.2 AA. Pisave na našem strežniku, zemljevidi se naložijo šele po kliku. Podatki o ponudniku so vgrajeni.</p>
+      </div>
+      <div>
+        <div class="vig v-fast" aria-hidden="true">
+          <div class="ld"><i></i></div>
+          <div class="lh"><span><b>98–100</b> hitrost</span><span><b>100</b> dostopnost</span></div>
+          <div class="chips"><span>HTML</span><span>CSS</span><span>JavaScript samo za meni</span></div>
+        </div>
+        <h3>Hitra</h3><p>Statične strani skoraj brez JavaScripta, slike v sodobnih formatih. Ocene so iz Googlovega Lighthouse na telefonu, izmerjene na devetih testnih straneh.</p>
+      </div>
+      <div>
+        <div class="vig v-zip" aria-hidden="true">
+          <div class="zip">
+            <span class="fn">pekarna-kvas.zip</span>
+            <ul><li>index.html</li><li>ponudba/index.html</li><li>site.css</li><li>fonts/</li><li>js/nav.js</li></ul>
+          </div>
+          <svg class="arrow" viewBox="0 0 24 24"><path d="M12 3v15M5 12l7 7 7-7"/></svg>
+        </div>
+        <h3>Vaša, tudi ko odidete</h3><p>Stran kadarkoli prenesete kot datoteke in jo gostite drugje, tudi brez povezave. Nobenih kreditov, ena cena na mesec.</p>
+      </div>
     </div>
   </div>
 </section>
 
-<section id="kako" aria-labelledby="h-kako">
+<section id="kako" class="how-sec" aria-labelledby="h-kako">
   <div class="wrap">
     <h2 id="h-kako">Kako deluje</h2>
     <div class="how">
@@ -261,6 +376,14 @@ footer .legal{margin-top:28px;padding-top:16px;border-top:1px solid var(--line);
   // Fit the desktop example to its container. No other JavaScript on this page.
   function fit(){document.querySelectorAll('.deskwrap').forEach(w=>{const f=w.querySelector('iframe');const s=w.clientWidth/1280;f.style.transform='scale('+s+')';w.style.height=(1500*s)+'px';});}
   fit();addEventListener('resize',fit);
+  // Play each section's vignette once, when it comes into view.
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.25});
+  document.querySelectorAll('#kaj, #kako').forEach(s=>io.observe(s));
+  // Type the example description into the prompt's placeholder; stops as soon as the field is used.
+  const ta=document.getElementById('opis');const full=ta.placeholder;let i=0,stop=false;
+  ta.addEventListener('focus',()=>{stop=true;ta.placeholder=full;},{once:true});
+  if(matchMedia('(prefers-reduced-motion: no-preference)').matches){ta.placeholder='';(function tick(){if(stop)return;ta.placeholder=full.slice(0,++i);if(i<full.length)setTimeout(tick,full[i-1]==='.'?260:28);})();}
+
 </script>
 </body>
 </html>
