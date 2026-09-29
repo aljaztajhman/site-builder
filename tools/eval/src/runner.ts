@@ -143,10 +143,11 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
       JSON.stringify({ description: fixture.brief.description, scope: opts.scope, photoAssetIds: photoIds, ...(logoAssetId ? { logoAssetId } : {}) }),
     ]);
 
-    if (opts.mode === "offline") {
+    // One transport per fixture: generation and edits share it, so recordings are numbered in call order.
+    const transport = opts.mode === "offline" ? null : transportFor(opts, fixture);
+    if (!transport) {
       await seedGolden(fixture, opts.goldenDir, repo, storage, site.id, config);
     } else {
-      const transport = transportFor(opts, fixture);
       const client = new ModelClient({
         config,
         transport,
@@ -187,10 +188,10 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
     await writeFile(path.join(dir, "home-1280.png"), first.report.screenshots.desktop);
     await writeFile(path.join(dir, "spec-generated.json"), JSON.stringify(first.current.spec, null, 2));
 
-    if (opts.mode !== "offline") {
+    if (transport) {
       const client = new ModelClient({
         config,
-        transport: transportFor(opts, fixture),
+        transport,
         spentToday: async () => (opts.spentSoFar() >= opts.maxEur ? Number.POSITIVE_INFINITY : 0),
         onCall: async (r) => {
           await repo.logModelCall({ siteId: site.id, jobId: "edit", stage: r.stage, model: r.model, inputTokens: r.usage.input_tokens, outputTokens: r.usage.output_tokens, cacheCreationTokens: r.usage.cache_creation_input_tokens, cacheReadTokens: r.usage.cache_read_input_tokens, costEur: r.costEur, durationMs: r.durationMs, ok: r.ok });

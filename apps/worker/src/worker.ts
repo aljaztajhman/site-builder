@@ -1,12 +1,17 @@
 import { loadConfig, type AppConfig } from "@sb/config";
-import { AnthropicTransport, ModelClient, ReplayTransport, applyChatEdit, generateSite, publishSite, type ModelTransport } from "@sb/engine";
+import { AnthropicTransport, ModelClient, ReplayTransport, applyChatEdit, generateSite, loadRecordings, publishSite, type ModelTransport } from "@sb/engine";
 import type { Platform } from "@sb/platform";
 
 /** Model client wired to the database: spend cap from today's logged calls, every call logged per stage. */
-export function modelClientFor(platform: Platform, config: AppConfig, ctx: { siteId: string | null; jobId: string | null }, transport?: ModelTransport): ModelClient {
+export function modelClientFor(
+  platform: Platform,
+  config: AppConfig,
+  ctx: { siteId: string | null; jobId: string | null },
+  transport: ModelTransport = defaultTransport("generate"),
+): ModelClient {
   return new ModelClient({
     config,
-    transport: transport ?? defaultTransport(),
+    transport,
     spentToday: () => platform.repo.spendToday(),
     onCall: async (r) => {
       await platform.repo.logModelCall({
@@ -27,10 +32,14 @@ export function modelClientFor(platform: Platform, config: AppConfig, ctx: { sit
   });
 }
 
-/** MODEL_REPLAY_DIR replays recorded responses instead of calling the API (demo and offline dev). */
-function defaultTransport(): ModelTransport {
+/**
+ * MODEL_REPLAY_DIR replays recorded responses instead of calling the API (demo and offline dev).
+ * Every job gets a fresh transport, so a generate job replays the generation calls and an edit job the edit calls.
+ */
+function defaultTransport(job: "generate" | "edit"): ModelTransport {
   const dir = process.env.MODEL_REPLAY_DIR;
-  return dir ? new ReplayTransport(dir) : new AnthropicTransport();
+  if (!dir) return new AnthropicTransport();
+  return new ReplayTransport(loadRecordings(dir).filter((r) => (r.stage === "edit") === (job === "edit")));
 }
 
 /** Registers the job handlers. Used by the worker service and, with PGlite, in-process by the web service. */
@@ -53,7 +62,7 @@ export async function startWorker(platform: Platform, config = loadConfig()): Pr
   });
 
   await queue.work("edit", async (job, jobId) => {
-    const client = modelClientFor(platform, config, { siteId: job.siteId, jobId });
+    const client = modelClientFor(platform, config, { siteId: job.siteId, jobId }, defaultTransport("edit"));
     try {
       await applyChatEdit({ repo, client }, job.siteId, job.messageId);
     } catch (e) {

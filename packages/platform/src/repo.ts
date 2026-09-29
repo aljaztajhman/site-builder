@@ -136,7 +136,7 @@ export class Repo {
   async failInterrupted(olderThanMinutes: number): Promise<string[]> {
     const { rows } = await this.db.query<{ id: string }>(
       `update sites set status = 'failed', updated_at = now()
-        where status in ('generating', 'editing', 'publishing') and updated_at < now() - make_interval(mins => $1::integer)
+        where status in ('generating', 'editing', 'publishing') and updated_at <= now() - make_interval(mins => $1::integer)
         returning id`,
       [olderThanMinutes],
     );

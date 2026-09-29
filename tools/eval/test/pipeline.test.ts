@@ -5,7 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 import { loadConfig } from "@sb/config";
-import { ModelClient, ReplayTransport, applyChatEdit, generateSite, launchCheckBrowser, type CallRecord, type CheckBrowser } from "@sb/engine";
+import { ModelClient, ReplayTransport, applyChatEdit, generateSite, launchCheckBrowser, loadRecordings, type CallRecord, type CheckBrowser } from "@sb/engine";
 import { Repo, createDb, createFsStorage, migrate, type Db } from "@sb/platform";
 import type { SiteSpec } from "@sb/spec";
 import { loadFixture } from "../src/fixtures/load.ts";
@@ -31,25 +31,32 @@ afterAll(async () => {
   await rm(dir, { recursive: true, force: true });
 });
 
+/** A pekarna-kvas site with small generated stand-in photos (no dependency on `pnpm fixtures:photos`) and the fixture logo. */
+async function seedSite(slug: string) {
+  const fixture = loadFixture("pekarna-kvas");
+  const golden = JSON.parse(await readFile(path.join(here, "../golden/pekarna-kvas.json"), "utf8")) as SiteSpec;
+  const storage = createFsStorage(path.join(dir, "storage"));
+  const site = await repo.createSite({ name: slug, slug, intake: { description: fixture.brief.description, photoAssetIds: [], scope: "full" } });
+
+  // Small generated stand-ins so the test doesn't depend on `pnpm fixtures:photos`.
+  const photoIds: string[] = [];
+  for (const [i, img] of golden.assets.images.entries()) {
+    const data = await sharp({ create: { width: img.width / 4, height: img.height / 4, channels: 3, background: ["#8a6d4b", "#c9a57a", "#6b4f33"][i]! } }).jpeg().toBuffer();
+    const key = `sites/${site.id}/uploads/p${i}.jpg`;
+    await storage.put(key, data, "image/jpeg");
+    photoIds.push((await repo.addAsset({ site_id: site.id, kind: "photo", storage_key: key, mime: "image/jpeg", width: null, height: null, bytes: data.length, original_name: null })).id);
+  }
+  const logo = await readFile(fixture.logoPath!);
+  await storage.put(`sites/${site.id}/uploads/logo.svg`, logo, "image/svg+xml");
+  const logoId = (await repo.addAsset({ site_id: site.id, kind: "logo", storage_key: `sites/${site.id}/uploads/logo.svg`, mime: "image/svg+xml", width: null, height: null, bytes: logo.length, original_name: null })).id;
+  await db.query("update sites set intake = $2 where id = $1", [site.id, JSON.stringify({ description: fixture.brief.description, scope: "full", photoAssetIds: photoIds, logoAssetId: logoId })]);
+
+  return { fixture, golden, storage, site };
+}
+
 describe("pipeline with replayed model responses (no network)", () => {
   it("generates, checks, critiques and applies a chat edit for pekarna-kvas", async () => {
-    const fixture = loadFixture("pekarna-kvas");
-    const golden = JSON.parse(await readFile(path.join(here, "../golden/pekarna-kvas.json"), "utf8")) as SiteSpec;
-    const storage = createFsStorage(path.join(dir, "storage"));
-    const site = await repo.createSite({ name: "pekarna-kvas", slug: "pekarna-kvas", intake: { description: fixture.brief.description, photoAssetIds: [], scope: "full" } });
-
-    // Small generated stand-ins so the test doesn't depend on `pnpm fixtures:photos`.
-    const photoIds: string[] = [];
-    for (const [i, img] of golden.assets.images.entries()) {
-      const data = await sharp({ create: { width: img.width / 4, height: img.height / 4, channels: 3, background: ["#8a6d4b", "#c9a57a", "#6b4f33"][i]! } }).jpeg().toBuffer();
-      const key = `sites/${site.id}/uploads/p${i}.jpg`;
-      await storage.put(key, data, "image/jpeg");
-      photoIds.push((await repo.addAsset({ site_id: site.id, kind: "photo", storage_key: key, mime: "image/jpeg", width: null, height: null, bytes: data.length, original_name: null })).id);
-    }
-    const logo = await readFile(fixture.logoPath!);
-    await storage.put(`sites/${site.id}/uploads/logo.svg`, logo, "image/svg+xml");
-    const logoId = (await repo.addAsset({ site_id: site.id, kind: "logo", storage_key: `sites/${site.id}/uploads/logo.svg`, mime: "image/svg+xml", width: null, height: null, bytes: logo.length, original_name: null })).id;
-    await db.query("update sites set intake = $2 where id = $1", [site.id, JSON.stringify({ description: fixture.brief.description, scope: "full", photoAssetIds: photoIds, logoAssetId: logoId })]);
+    const { fixture, golden, storage, site } = await seedSite("pekarna-kvas");
 
     const recordings = syntheticRecordings(fixture, golden, [
       { reply: "Glava je zdaj temna.", patches: [{ op: "add", path: "/chrome/header/tone", value: "inverse" }] },
@@ -77,6 +84,23 @@ describe("pipeline with replayed model responses (no network)", () => {
     expect((await repo.getSpec(site.id))!.spec.chrome.header.tone).toBe("inverse");
     expect((await repo.listChat(site.id)).at(-1)?.content).toBe("Glava je zdaj temna.");
     expect(calls.map((c) => c.stage)).toEqual(["classify", "brief", "design", "altText", "content", "critique", "edit"]);
+  }, 180_000);
+
+  it("replays the recorded pekarna-kvas run (real API responses): generation, then every scripted edit", async () => {
+    const { fixture, storage, site } = await seedSite("pekarna-kvas-rec");
+    const transport = new ReplayTransport(loadRecordings(path.join(here, "../recordings/pekarna-kvas")));
+    const calls: CallRecord[] = [];
+    const client = new ModelClient({ config, transport, spentToday: async () => 0, onCall: async (r) => void calls.push(r) });
+
+    const gen = await generateSite({ config, repo, storage, client, browser, lighthouse: false }, site.id, null);
+    expect(gen.check?.validation).toEqual([]);
+    expect(calls.map((c) => c.stage)).toEqual(["classify", "brief", "design", "altText", "content", "content", "critique", "critique"]);
+
+    for (const edit of fixture.edits) {
+      const msg = await repo.addChat(site.id, "user", edit.message);
+      await applyChatEdit({ repo, client }, site.id, Number(msg.id));
+    }
+    expect(transport.remaining).toBe(0);
   }, 180_000);
 
   it("rejects an edit that invents a phone number and keeps the spec", async () => {

@@ -17,7 +17,7 @@ if (inline) {
 }
 
 const app = createApp({ platform, config, auth });
-const port = Number(process.env.PORT ?? 3000);
+const port = Number(process.env.PORT || 3000);
 serve({ fetch: app.fetch, port, hostname: "0.0.0.0" }, (info) => console.log(`[web] http://localhost:${info.port}`));
 
 for (const sig of ["SIGINT", "SIGTERM"] as const) {
