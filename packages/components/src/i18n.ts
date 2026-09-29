@@ -1,0 +1,126 @@
+import type { Locale, PlaceholderKind } from "@sb/spec";
+
+/** UI strings used by components. Generated copy never lives here; only fixed interface labels. */
+const sl = {
+  skipToContent: "Skoči na vsebino",
+  menu: "Meni",
+  closeMenu: "Zapri meni",
+  mainNav: "Glavna navigacija",
+  call: "Pokliči",
+  directions: "Navodila za pot",
+  email: "Pošlji e-pošto",
+  book: "Rezerviraj termin",
+  openingHours: "Delovni čas",
+  contact: "Kontakt",
+  address: "Naslov",
+  phone: "Telefon",
+  emailLabel: "E-pošta",
+  closed: "zaprto",
+  from: "od",
+  showMap: "Prikaži zemljevid",
+  mapNotice: "Zemljevid naloži Google Maps, ki lahko nastavi piškotke. Naložimo ga šele, ko kliknete.",
+  openInMaps: "Odpri v Google Zemljevidih",
+  providerInfo: "Podatki o ponudniku",
+  registrationNumber: "Matična številka",
+  taxNumber: "Davčna številka",
+  vatId: "ID za DDV",
+  privacy: "Varstvo osebnih podatkov",
+  accessibility: "Izjava o dostopnosti",
+  cookieTitle: "Piškotki",
+  cookieText: "Stran uporablja samo nujne piškotke. Zunanje vsebine, kot je zemljevid, naložimo le z vašim dovoljenjem.",
+  cookieAccept: "Dovoli zunanje vsebine",
+  cookieDecline: "Samo nujni",
+  cookieSettings: "Nastavitve piškotkov",
+  galleryClose: "Zapri",
+  galleryPrev: "Prejšnja slika",
+  galleryNext: "Naslednja slika",
+  notFoundHome: "Na domačo stran",
+  legalReviewNote: "Predloga. Preden stran objavite, jo preglejte in prilagodite. To ni pravni nasvet.",
+  serviceArea: "Območje dela",
+  today: "Danes",
+  pageNavigation: "Navigacija po strani",
+  footerNav: "Povezave v nogi",
+  social: "Družbena omrežja",
+} as const;
+
+export type UiKey = keyof typeof sl;
+
+const en: Record<UiKey, string> = {
+  skipToContent: "Skip to content",
+  menu: "Menu",
+  closeMenu: "Close menu",
+  mainNav: "Main navigation",
+  call: "Call",
+  directions: "Directions",
+  email: "Send email",
+  book: "Book an appointment",
+  openingHours: "Opening hours",
+  contact: "Contact",
+  address: "Address",
+  phone: "Phone",
+  emailLabel: "Email",
+  closed: "closed",
+  from: "from",
+  showMap: "Show map",
+  mapNotice: "The map is loaded from Google Maps, which may set cookies. It loads only after you click.",
+  openInMaps: "Open in Google Maps",
+  providerInfo: "Provider information",
+  registrationNumber: "Registration number",
+  taxNumber: "Tax number",
+  vatId: "VAT ID",
+  privacy: "Privacy policy",
+  accessibility: "Accessibility statement",
+  cookieTitle: "Cookies",
+  cookieText: "This site uses only essential cookies. External content such as the map loads only with your permission.",
+  cookieAccept: "Allow external content",
+  cookieDecline: "Essential only",
+  cookieSettings: "Cookie settings",
+  galleryClose: "Close",
+  galleryPrev: "Previous image",
+  galleryNext: "Next image",
+  notFoundHome: "Go to the homepage",
+  legalReviewNote: "Template. Review and adapt this page before publishing. This is not legal advice.",
+  serviceArea: "Service area",
+  today: "Today",
+  pageNavigation: "Page navigation",
+  footerNav: "Footer links",
+  social: "Social media",
+};
+
+const DICTS: Partial<Record<Locale, Record<UiKey, string>>> = { sl, en };
+
+export function uiStrings(locale: Locale): (key: UiKey) => string {
+  const dict = DICTS[locale] ?? en;
+  return (key) => dict[key];
+}
+
+const PLACEHOLDER_LABELS: Record<"sl" | "en", Record<PlaceholderKind, string>> = {
+  sl: {
+    phone: "Vnesite telefonsko številko",
+    email: "Vnesite e-poštni naslov",
+    address: "Vnesite naslov",
+    price: "Vnesite ceno",
+    hours: "Vnesite delovni čas",
+    name: "Vnesite ime",
+    legalName: "Vnesite polno ime podjetja",
+    registrationNumber: "Vnesite matično številko",
+    taxNumber: "Vnesite davčno številko",
+    text: "Dopolnite besedilo",
+  },
+  en: {
+    phone: "Add phone number",
+    email: "Add email address",
+    address: "Add address",
+    price: "Add price",
+    hours: "Add opening hours",
+    name: "Add name",
+    legalName: "Add company legal name",
+    registrationNumber: "Add registration number",
+    taxNumber: "Add tax number",
+    text: "Add text",
+  },
+};
+
+export function placeholderLabel(kind: PlaceholderKind, locale: Locale): string {
+  return PLACEHOLDER_LABELS[locale === "sl" ? "sl" : "en"][kind];
+}

@@ -1,0 +1,74 @@
+/*
+ * Imagery treatments, chosen by the design direction via <body data-imagery="...">.
+ * `.media` is the <picture> wrapper produced by the Picture primitive.
+ */
+.media {
+  position: relative;
+  overflow: hidden;
+}
+.media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+[data-imagery="natural"] .media {
+  border-radius: 0;
+}
+
+[data-imagery="rounded"] .media {
+  border-radius: calc(var(--radius) * 1.5);
+}
+
+[data-imagery="framed"] .media {
+  padding: 0.5rem;
+  background: var(--c-bg);
+  border: 1px solid var(--c-border);
+}
+
+/* Photos run to the viewport edge on mobile; contained on desktop. */
+@media (max-width: 47.99rem) {
+  [data-imagery="full-bleed"] .s .media:not(.media--contained) {
+    margin-inline: -1rem;
+    width: calc(100% + 2rem);
+    max-width: none;
+  }
+}
+
+[data-imagery="monochrome"] .media img {
+  filter: grayscale(1) contrast(1.05);
+}
+
+[data-imagery="arched"] .media {
+  border-radius: 50% 50% var(--radius) var(--radius) / 30% 30% var(--radius) var(--radius);
+}
+
+[data-imagery="offset-block"] .media {
+  overflow: visible;
+  margin: 0 0.75rem 0.75rem 0;
+}
+[data-imagery="offset-block"] .media::before {
+  content: "";
+  position: absolute;
+  inset: 0.75rem -0.75rem -0.75rem 0.75rem;
+  background: var(--c-accent);
+  z-index: 0;
+}
+[data-imagery="offset-block"] .media img {
+  position: relative;
+  z-index: 1;
+}
+
+/* Duotone: greyscale photo tinted with the primary colour via a multiply layer. */
+[data-imagery="duotone"] .media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--c-primary);
+  mix-blend-mode: multiply;
+  opacity: 0.55;
+  pointer-events: none;
+}
+[data-imagery="duotone"] .media img {
+  filter: grayscale(1) contrast(1.1);
+}

@@ -1,0 +1,21 @@
+{
+  "name": "@sb/render",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "dependencies": {
+    "@sb/components": "workspace:*",
+    "@sb/config": "workspace:*",
+    "@sb/spec": "workspace:*",
+    "fflate": "^0.8.3",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "fontkit": "^2.0.4",
+    "subset-font": "^2.9.0"
+  }
+}

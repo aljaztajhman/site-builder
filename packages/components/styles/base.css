@@ -1,0 +1,308 @@
+/*
+ * Shared stylesheet for every generated site. Per-site design tokens arrive as CSS custom
+ * properties in an inline <style> (see @sb/render tokens.ts). Mobile first: base rules are for
+ * 360 px; wider layouts live in min-width queries.
+ *
+ * Banned by construction (a test greps for these): gradients, backdrop-filter, pill radii,
+ * monospace fonts, italic headings, heavy box shadows.
+ */
+
+/* ---------- Reset ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+body,
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+blockquote,
+dl,
+dd,
+ol,
+ul {
+  margin: 0;
+}
+ul[class],
+ol[class] {
+  padding: 0;
+  list-style: none;
+}
+img,
+picture,
+svg {
+  display: block;
+  max-width: 100%;
+}
+img {
+  height: auto;
+}
+button {
+  font: inherit;
+  color: inherit;
+}
+address {
+  font-style: normal;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* ---------- Page ---------- */
+body {
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: var(--font-body);
+  font-size: var(--fs-base);
+  line-height: 1.6;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  -webkit-font-smoothing: antialiased;
+}
+main {
+  display: block;
+}
+:where(h1, h2, h3, h4) {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-heading);
+  letter-spacing: var(--tracking-heading);
+  text-transform: var(--case-heading);
+  line-height: 1.12;
+  font-style: normal;
+  text-wrap: balance;
+  hyphens: manual;
+  overflow-wrap: break-word;
+}
+h1,
+.hero-title {
+  font-size: var(--fs-h1);
+}
+h2,
+.section-title {
+  font-size: var(--fs-h2);
+}
+h3 {
+  font-size: var(--fs-h3);
+  line-height: 1.25;
+}
+h4 {
+  font-size: var(--fs-lg);
+  line-height: 1.3;
+}
+p,
+li,
+dd {
+  max-width: 68ch;
+}
+.lead {
+  font-size: var(--fs-lg);
+  line-height: 1.5;
+  max-width: 60ch;
+}
+.muted {
+  color: var(--c-muted);
+}
+a {
+  color: inherit;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+}
+:focus-visible {
+  outline: 3px solid var(--c-primary);
+  outline-offset: 3px;
+}
+.tone-inverse :focus-visible {
+  outline-color: var(--c-on-inverse);
+}
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: 100;
+  padding: 0.75rem 1rem;
+  background: var(--c-bg);
+  color: var(--c-text);
+  border: 2px solid var(--c-text);
+  border-radius: var(--radius);
+}
+.skip-link:focus {
+  top: 1rem;
+}
+
+/* ---------- Layout ---------- */
+.container {
+  width: 100%;
+  max-width: 76rem;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+@media (min-width: 48rem) {
+  .container {
+    padding-inline: 2rem;
+  }
+}
+.s {
+  padding-block: var(--space-section);
+}
+.tone-default {
+  background: var(--c-bg);
+}
+.tone-alt {
+  background: var(--c-surface);
+}
+.tone-inverse {
+  background: var(--c-inverse);
+  color: var(--c-on-inverse);
+}
+.tone-inverse .muted,
+.tone-inverse .eyebrow {
+  color: var(--c-on-inverse);
+}
+.section-head {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: var(--space-block);
+  max-width: 44rem;
+}
+.eyebrow {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--c-muted);
+}
+.stack > * + * {
+  margin-top: 1rem;
+}
+.prose > * + * {
+  margin-top: 1em;
+}
+
+/* ---------- Buttons and links ---------- */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+  min-width: 3rem;
+  padding: 0.75rem 1.25rem;
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: var(--fs-base);
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+}
+@media (max-width: 29.99rem) {
+  .actions .btn {
+    flex: 1 1 100%;
+  }
+}
+.btn--primary {
+  background: var(--c-primary);
+  color: var(--c-on-primary);
+}
+.btn--primary:hover {
+  text-decoration: underline;
+}
+.btn--secondary {
+  background: transparent;
+  color: inherit;
+  border-color: currentColor;
+}
+.btn--secondary:hover {
+  text-decoration: underline;
+}
+.tone-inverse .btn--primary {
+  background: var(--c-on-inverse);
+  color: var(--c-inverse);
+}
+.text-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  font-weight: 600;
+}
+
+/* ---------- Facts ---------- */
+.ph {
+  display: inline;
+  padding: 0.05em 0.35em;
+  background: #fff3a8;
+  color: #3b2f00;
+  border: 1px dashed #7a6200;
+  border-radius: 3px;
+  font-size: 0.95em;
+}
+.hours__list {
+  display: grid;
+  gap: 0.25rem;
+}
+.hours__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 0.35rem;
+  border-bottom: 1px solid var(--c-border);
+}
+.tone-inverse .hours__row {
+  border-color: currentColor;
+}
+.hours__row dd {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.hours__note {
+  margin-top: 0.75rem;
+  font-size: var(--fs-sm);
+}
+.price {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+/* ---------- Cards (flat by default; subtle shadow only when the direction allows it) ---------- */
+.card {
+  background: var(--c-bg);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.tone-default .card {
+  background: var(--c-surface);
+}
+.tone-inverse .card {
+  background: transparent;
+  border-color: currentColor;
+}

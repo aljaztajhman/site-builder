@@ -1,0 +1,30 @@
+/* heroes group styles */
+
+/* hero-split */
+.hero-split {
+  display: grid;
+  gap: 2rem;
+  align-items: center;
+}
+.hero-split__text {
+  display: grid;
+  gap: 1rem;
+}
+.hero-split__text .actions {
+  margin-top: 0.5rem;
+}
+.hero-split__media {
+  aspect-ratio: 4 / 3;
+}
+@media (min-width: 48rem) {
+  .hero-split {
+    grid-template-columns: 1.1fr 1fr;
+    gap: 3rem;
+  }
+  .s-hero-split--image-left .hero-split__media {
+    order: -1;
+  }
+  .hero-split__media {
+    aspect-ratio: 4 / 5;
+  }
+}
