@@ -1,0 +1,18 @@
+{
+  "seq": 10,
+  "stage": "edit",
+  "model": "claude-sonnet-5-5",
+  "hash": "7c5bf9471e612c6c",
+  "origin": "recorded",
+  "response": {
+    "text": "Telefonska številka je v /business/phone. Slovenske številke so tu zapisane v mednarodni obliki: 04 555 98 76 postane +38645559876.\n\n{\"reply\":\"Telefonsko številko sem spremenil v 04 555 98 76.\",\"patches\":[{\"op\":\"replace\",\"path\":\"/business/phone\",\"value\":\"+38645559876\"}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 5692,
+      "output_tokens": 123,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 16309
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "seq": 3,
+  "stage": "altText",
+  "model": "claude-sonnet-5-5",
+  "hash": "efc3c5c1b51053cb",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"images\":[{\"index\":0,\"alt\":\"Pročelje stare gostilne z rdečo streho in košato lipo pred vhodom.\",\"focalX\":0.55,\"focalY\":0.5,\"heroSuitable\":true},{\"index\":1,\"alt\":\"Jedilnica z lesenimi mizami in pogrnjenimi prti.\",\"focalX\":0.5,\"focalY\":0.72,\"heroSuitable\":false},{\"index\":2,\"alt\":\"Krožnik ajdovih žgancev z ocvirki na leseni mizi.\",\"focalX\":0.5,\"focalY\":0.55,\"heroSuitable\":true},{\"index\":3,\"alt\":\"Trije orehovi štruklji na belem krožniku.\",\"focalX\":0.5,\"focalY\":0.55,\"heroSuitable\":true},{\"index\":4,\"alt\":\"Terasa pod košato lipo s tremi pogrnjenimi mizami.\",\"focalX\":0.5,\"focalY\":0.3,\"heroSuitable\":false},{\"index\":5,\"alt\":\"Skleda goste telečje obare na leseni mizi.\",\"focalX\":0.5,\"focalY\":0.55,\"heroSuitable\":true},{\"index\":6,\"alt\":\"Kuhar v beli uniformi stoji pri štedilniku v gostilniški kuhinji.\",\"focalX\":0.62,\"focalY\":0.65,\"heroSuitable\":true},{\"index\":7,\"alt\":\"Pogrnjena miza s kozarci rdečega vina za praznovanje.\",\"focalX\":0.5,\"focalY\":0.7,\"heroSuitable\":false}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 4803,
+      "output_tokens": 534,
+      "cache_creation_input_tokens": 573,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

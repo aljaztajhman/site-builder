@@ -1,0 +1,18 @@
+{
+  "seq": 10,
+  "stage": "edit",
+  "model": "claude-sonnet-5-5",
+  "hash": "0cceae372bf4991f",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"reply\":\"Dodal sem razdelek s pogostimi vprašanji na stran Storitve, z odgovoroma o garanciji in času rednega servisa.\",\"patches\":[{\"op\":\"add\",\"path\":\"/pages/1/sections/3\",\"value\":{\"id\":\"s_storitve_faq\",\"tone\":\"default\",\"type\":\"faq\",\"props\":{\"title\":\"Pogosta vprašanja\",\"items\":[{\"question\":\"Ali garancija ostane veljavna?\",\"answer\":\"Da, če redni servis opravimo po navodilih proizvajalca, garancija ostane veljavna.\"},{\"question\":\"Koliko časa traja redni servis?\",\"answer\":\"Redni servis je običajno narejen isti dan.\"}]},\"variant\":\"accordion\"}}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 5414,
+      "output_tokens": 249,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 16309
+    }
+  }
+}

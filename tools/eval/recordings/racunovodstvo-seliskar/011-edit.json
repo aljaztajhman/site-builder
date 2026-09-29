@@ -1,0 +1,18 @@
+{
+  "seq": 11,
+  "stage": "edit",
+  "model": "claude-sonnet-5-5",
+  "hash": "6715c1b3fcb3938b",
+  "origin": "recorded",
+  "response": {
+    "text": "Phone is in /business/phone. Format: existing is \"+38625554710\", so new is \"+38625554799\".\n\nThe request is in English, so the reply should be in English.\n\n{\"reply\": \"I changed the phone number to 02 555 47 99; it now updates everywhere on the site.\", \"patches\": [{\"op\": \"replace\", \"path\": \"/business/phone\", \"value\": \"+38625554799\"}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 4695,
+      "output_tokens": 125,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 16309
+    }
+  }
+}

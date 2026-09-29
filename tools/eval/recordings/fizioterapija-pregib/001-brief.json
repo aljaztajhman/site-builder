@@ -1,0 +1,18 @@
+{
+  "seq": 1,
+  "stage": "brief",
+  "model": "claude-sonnet-5-5",
+  "hash": "ac31428563d33f8b",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"businessType\":\"physio\",\"name\":\"Fizioterapija Pregib\",\"town\":\"Novo mesto\",\"summary\":\"Individualna fizioterapevtska ambulanta Tine Zupan v Novem mestu. Obravnava bolečine v hrbtu in vratu, poškodbe kolena in rame, stanja po operacijah ter športnike. Uporablja manualno terapijo, terapevtske vaje, dry needling in kinesio taping. Napotnica ni potrebna, storitve so samoplačniške.\",\"audience\":\"Odrasli z bolečinami v hrbtu in vratu, po poškodbah ali operacijah ter športniki v Novem mestu in okolici.\",\"tone\":\"professional\",\"offerings\":[{\"group\":\"Obravnave\",\"name\":\"Prva obravnava s pregledom\",\"description\":\"Pregled in prva obravnava, 60 minut.\",\"price\":{\"amount\":55,\"from\":false,\"unit\":null}},{\"group\":\"Obravnave\",\"name\":\"Terapija\",\"description\":\"Individualna terapija, 45 minut.\",\"price\":{\"amount\":45,\"from\":false,\"unit\":null}},{\"group\":\"Dodatki\",\"name\":\"Dry needling kot dodatek\",\"description\":\"Dodatek k terapiji.\",\"price\":{\"amount\":30,\"from\":false,\"unit\":null}},{\"group\":\"Paketi\",\"name\":\"Paket 5 terapij\",\"description\":null,\"price\":{\"amount\":200,\"from\":false,\"unit\":null}},{\"group\":\"Metode\",\"name\":\"Manualna terapija\",\"description\":null,\"price\":null},{\"group\":\"Metode\",\"name\":\"Terapevtske vaje\",\"description\":null,\"price\":null},{\"group\":\"Metode\",\"name\":\"Kinesio taping\",\"description\":null,\"price\":null}],\"highlights\":[\"Ena ura je samo za enega pacienta\",\"12 let dela v bolnišnici, zadnja štiri leta lastna ambulanta\",\"Napotnica ni potrebna\",\"Storitve so samoplačniške\",\"Delo samo po predhodnem naročilu\",\"Možnost spletnega naročanja\",\"Vhod z dvorišča, 2. nadstropje\"],\"facts\":{\"phone\":\"+38651555642\",\"email\":\"tina@pregib.example\",\"address\":{\"street\":\"Glavni trg 9\",\"postalCode\":\"8000\",\"city\":\"Novo mesto\"},\"hours\":[{\"from\":\"mon\",\"to\":\"fri\",\"open\":\"07:00\",\"close\":\"20:00\",\"closed\":false}],\"hoursNote\":\"Samo po predhodnem naročilu. Vhod z dvorišča, 2. nadstropje.\",\"bookingUrl\":\"https://pregib.example/narocanje\",\"social\":[],\"legalName\":\"Tina Zupan s.p.\",\"registrationNumber\":\"6011223000\",\"taxNumber\":\"60112233\",\"vatPayer\":null,\"serviceArea\":[],\"people\":[{\"name\":\"Tina Zupan\",\"role\":\"dipl. fiziot.\"}]},\"pages\":[{\"kind\":\"home\",\"slug\":\"\",\"navLabel\":\"Domov\",\"purpose\":\"Takoj viden gumb za naročanje in klic, kaj zdravimo, delovni čas, lokacija z navodilom za vhod, kratka predstavitev.\"},{\"kind\":\"standard\",\"slug\":\"storitve\",\"navLabel\":\"Storitve\",\"purpose\":\"Težave, ki jih obravnava, metode dela in potek prve obravnave.\"},{\"kind\":\"standard\",\"slug\":\"cenik\",\"navLabel\":\"Cenik\",\"purpose\":\"Cene obravnav, dodatka in paketa; samoplačniško, brez napotnice.\"},{\"kind\":\"standard\",\"slug\":\"o-nas\",\"navLabel\":\"O meni\",\"purpose\":\"Tina Zupan, izkušnje iz bolnišnice, individualni pristop.\"},{\"kind\":\"standard\",\"slug\":\"kontakt\",\"navLabel\":\"Kontakt\",\"purpose\":\"Naslov z opisom vhoda, delovni čas, telefon, e-pošta, naročanje, podatki izvajalke.\"}],\"missing\":[\"fotografije ambulante\",\"dodatne fotografije\",\"družbena omrežja\",\"ali je izvajalka DDV zavezanka\",\"poštna številka in navodila za parkiranje\"]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2276,
+      "output_tokens": 1388,
+      "cache_creation_input_tokens": 919,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

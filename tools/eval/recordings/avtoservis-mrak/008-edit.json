@@ -1,0 +1,18 @@
+{
+  "seq": 8,
+  "stage": "edit",
+  "model": "claude-sonnet-5-5",
+  "hash": "5feef7818b9eca82",
+  "origin": "recorded",
+  "response": {
+    "text": "The current header tone isn't set in the spec, so I use \"add\", which also replaces an existing value if there is one. The header object is {\"cta\":\"call\",\"variant\":\"split-cta\"}, so the path /chrome/header/tone works.\n\n{\"reply\": \"Glava strani je zdaj temna.\", \"patches\": [{\"op\": \"add\", \"path\": \"/chrome/header/tone\", \"value\": \"inverse\"}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 5355,
+      "output_tokens": 131,
+      "cache_creation_input_tokens": 16309,
+      "cache_read_input_tokens": 0
+    }
+  }
+}
