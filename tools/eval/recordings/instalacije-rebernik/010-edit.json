@@ -1,0 +1,18 @@
+{
+  "seq": 10,
+  "stage": "edit",
+  "model": "claude-sonnet-5-5",
+  "hash": "905ec2938bdab248",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"reply\":\"E-poštni naslov sem dodal med podatke o podjetju, zato se bo prikazal povsod, kjer se prikazujejo kontaktni podatki.\",\"patches\":[{\"op\":\"replace\",\"path\":\"/business/email\",\"value\":\"matej@rebernik-instalacije.example\"}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 5697,
+      "output_tokens": 105,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 16309
+    }
+  }
+}

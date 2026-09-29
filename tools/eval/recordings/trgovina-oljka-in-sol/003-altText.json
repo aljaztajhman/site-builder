@@ -1,0 +1,18 @@
+{
+  "seq": 3,
+  "stage": "altText",
+  "model": "claude-sonnet-5-5",
+  "hash": "4fd977e9658ed0b9",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"images\":[{\"index\":0,\"alt\":\"Police v trgovini, na katerih v treh vrstah stoji veliko steklenic oljčnega olja z belimi etiketami.\",\"focalX\":0.5,\"focalY\":0.4,\"heroSuitable\":true},{\"index\":1,\"alt\":\"Tri vrečke piranske soli z modrimi etiketami v leseni košari.\",\"focalX\":0.5,\"focalY\":0.56,\"heroSuitable\":false},{\"index\":2,\"alt\":\"Darilni paket, povezan z rdečim trakom, ob katerem sta steklenica olja in kozarec medu; v paketu je tudi sol.\",\"focalX\":0.5,\"focalY\":0.55,\"heroSuitable\":true},{\"index\":3,\"alt\":\"Obokan vhod v trgovino v kamniti hiši v starem mestnem jedru.\",\"focalX\":0.5,\"focalY\":0.62,\"heroSuitable\":true},{\"index\":4,\"alt\":\"Trgovinski pult s pršutom in kosom sira na vrhu.\",\"focalX\":0.45,\"focalY\":0.32,\"heroSuitable\":false}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 3009,
+      "output_tokens": 384,
+      "cache_creation_input_tokens": 573,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

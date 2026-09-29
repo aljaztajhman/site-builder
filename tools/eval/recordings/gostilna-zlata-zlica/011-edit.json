@@ -1,0 +1,18 @@
+{
+  "seq": 11,
+  "stage": "edit",
+  "model": "claude-sonnet-5-5",
+  "hash": "5c99617282c5f896",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"reply\":\"Naslov na domači strani je zdaj bolj neposreden in omenja nedeljsko kosilo.\",\"patches\":[{\"op\":\"replace\",\"path\":\"/pages/0/sections/0/props/headline\",\"value\":\"Domača hrana in nedeljsko kosilo v Škofji Loki\"}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 5693,
+      "output_tokens": 108,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 16309
+    }
+  }
+}

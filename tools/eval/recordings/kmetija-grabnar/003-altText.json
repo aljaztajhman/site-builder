@@ -1,0 +1,18 @@
+{
+  "seq": 3,
+  "stage": "altText",
+  "model": "claude-sonnet-5-5",
+  "hash": "50b5ef11d28f785b",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"images\":[{\"index\":0,\"alt\":\"Kmečka hiša z lesenim balkonom in rjavo streho, v ozadju se dvigajo gore.\",\"focalX\":0.5,\"focalY\":0.5,\"heroSuitable\":true},{\"index\":1,\"alt\":\"Soba z dvema lesenima posteljama s karirastima rdeče-belima prevlekama.\",\"focalX\":0.5,\"focalY\":0.62,\"heroSuitable\":false},{\"index\":2,\"alt\":\"Zajtrk na leseni mizi: sir, skuta, kozarec marmelade in kruh.\",\"focalX\":0.4,\"focalY\":0.5,\"heroSuitable\":true},{\"index\":3,\"alt\":\"Dve kravi pasejo na zelenem pašniku, za njima so gore in modro nebo.\",\"focalX\":0.5,\"focalY\":0.75,\"heroSuitable\":true},{\"index\":4,\"alt\":\"Jabolčni zavitek, narezan na kolobarje, na belem krožniku na leseni mizi.\",\"focalX\":0.5,\"focalY\":0.55,\"heroSuitable\":false},{\"index\":5,\"alt\":\"Dva otroka krmita koze na travniku pri ogradi, v ozadju so gore.\",\"focalX\":0.75,\"focalY\":0.85,\"heroSuitable\":true},{\"index\":6,\"alt\":\"Pogled s terase čez leseno ograjo na zeleno gorsko dolino in gore.\",\"focalX\":0.5,\"focalY\":0.5,\"heroSuitable\":true},{\"index\":7,\"alt\":\"Kozarci domače marmelade, postavljeni v vrsti na leseni polici.\",\"focalX\":0.5,\"focalY\":0.6,\"heroSuitable\":false}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 4803,
+      "output_tokens": 589,
+      "cache_creation_input_tokens": 573,
+      "cache_read_input_tokens": 0
+    }
+  }
+}
