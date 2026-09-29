@@ -1,5 +1,5 @@
 import type { AppConfig } from "@sb/config";
-import type { Repo, Storage } from "@sb/platform";
+import { VersionConflictError, type Repo, type Storage } from "@sb/platform";
 import { contentType } from "@sb/platform";
 import { mediaFiles, siteFiles, exportZip, sharedBundle } from "@sb/render";
 import { publishBlockers, type ImageAsset, type SiteSpec } from "@sb/spec";
@@ -10,6 +10,7 @@ import { extractSwatches, type Swatch } from "./palette.ts";
 import { processLogo, processPhoto, visionJpeg } from "./images.ts";
 import { checkSite, type CheckBrowser, type SiteCheckReport } from "./check/index.ts";
 import { typedText } from "./editor.ts";
+import { checkFacts } from "./facts.ts";
 
 export interface PipelineDeps {
   config: AppConfig;
@@ -178,8 +179,17 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
       await log("critique", "Critique patches rejected by validation", r.issues);
       break;
     }
+    try {
+      version = await repo.saveSpec(siteId, r.spec, "critique", c.issues.join("; ").slice(0, 500), undefined, version);
+    } catch (e) {
+      // The client edited the site while the critique ran; their edit wins.
+      if (e instanceof VersionConflictError) {
+        await log("critique", "Site changed during critique; critique patches not applied");
+        break;
+      }
+      throw e;
+    }
     spec = r.spec;
-    version = await repo.saveSpec(siteId, spec, "critique", c.issues.join("; ").slice(0, 500));
     check = await stageTime("check", runCheck);
     await log("check", check.failures.length ? "Checks found problems" : "All checks passed", { failures: check.failures, lighthouse: check.lighthouse });
   }
@@ -198,13 +208,15 @@ export class PublishBlockedError extends Error {
 export async function publishSite(deps: Pick<PipelineDeps, "repo" | "storage" | "config">, siteId: string, version?: number): Promise<{ version: number; files: number }> {
   const { repo, storage, config } = deps;
   const site = await repo.getSite(siteId);
-  const current = await repo.getSpec(siteId, version);
-  if (!site || !current) throw new Error(`Site ${siteId} has no spec`);
-  const blockers = publishBlockers(current.spec);
+  const stored = await repo.getSpec(siteId, version);
+  if (!site || !stored) throw new Error(`Site ${siteId} has no spec`);
+  // Published paths always use the site's own slug, never a value from the spec.
+  const current = { ...stored, spec: { ...stored.spec, slug: site.slug } };
+  const blockers = await siteBlockers(repo, siteId, current.spec);
   if (blockers.length) throw new PublishBlockedError(blockers);
   const media = await loadMedia(storage, siteId, current.spec, config.images.widths);
   const files = siteFiles(current.spec, media, { imageWidths: config.images.widths });
-  await storage.deletePrefix(`${publishedPrefix}/${current.spec.slug}/`);
+  await storage.deletePrefix(`${publishedPrefix}/${site.slug}/`);
   const hash = sharedBundle().hash;
   const sharedExists = (await storage.list(`${publishedPrefix}/_shared/${hash}/`)).length > 0;
   for (const [rel, data] of files) {
@@ -217,10 +229,21 @@ export async function publishSite(deps: Pick<PipelineDeps, "repo" | "storage" | 
 }
 
 export async function exportSite(deps: Pick<PipelineDeps, "repo" | "storage" | "config">, siteId: string, version?: number): Promise<{ filename: string; zip: Uint8Array }> {
-  const current = await deps.repo.getSpec(siteId, version);
-  if (!current) throw new Error(`Site ${siteId} has no spec`);
-  const media = await loadMedia(deps.storage, siteId, current.spec, deps.config.images.widths);
-  return { filename: `${current.spec.slug}-v${current.version}.zip`, zip: exportZip(current.spec, media, { imageWidths: deps.config.images.widths }) };
+  const site = await deps.repo.getSite(siteId);
+  const stored = await deps.repo.getSpec(siteId, version);
+  if (!site || !stored) throw new Error(`Site ${siteId} has no spec`);
+  const spec = { ...stored.spec, slug: site.slug };
+  const media = await loadMedia(deps.storage, siteId, spec, deps.config.images.widths);
+  return { filename: `${site.slug}-v${stored.version}.zip`, zip: exportZip(spec, media, { imageWidths: deps.config.images.widths }) };
+}
+
+/**
+ * Everything that blocks publishing: validation, unfilled placeholders, starter text, and any fact
+ * (phone, price, name, number …) that isn't in the client's own input.
+ */
+export async function siteBlockers(repo: Repo, siteId: string, spec: SiteSpec): Promise<string[]> {
+  const corpus = await clientCorpus(repo, siteId);
+  return [...publishBlockers(spec), ...checkFacts(spec, corpus).map((f) => `${f.path}: ${f.kind} "${f.value}" is not in the client's input`)];
 }
 
 /** Applies one chat message (already stored) to the current spec and stores the reply. */
@@ -229,14 +252,28 @@ export async function applyChatEdit(deps: Pick<PipelineDeps, "repo" | "client">,
   const msg = await repo.getChat(messageId);
   const current = await repo.getSpec(siteId);
   if (!msg || !current) throw new Error("Message or spec not found");
-  await repo.setStatus(siteId, "editing");
+  const before = (await repo.getSite(siteId))?.status;
+  // Don't mask a running generation; only mark "editing" when the site was idle.
+  if (before === "ready" || before === "failed") await repo.setStatus(siteId, "editing");
   try {
     const corpus = await clientCorpus(repo, siteId);
     const r = await editSpec(client, { spec: current.spec, message: msg.content, corpus });
-    const version = r.changed && r.issues.length === 0 ? await repo.saveSpec(siteId, r.spec, "edit", msg.content.slice(0, 500)) : null;
-    await repo.addChat(siteId, "assistant", r.reply, { version, issues: r.issues });
-    return { version, reply: r.reply, issues: r.issues };
+    let version: number | null = null;
+    let reply = r.reply;
+    const issues = [...r.issues];
+    if (r.changed && r.issues.length === 0) {
+      try {
+        version = await repo.saveSpec(siteId, r.spec, "edit", msg.content.slice(0, 500), undefined, current.version);
+      } catch (e) {
+        if (!(e instanceof VersionConflictError)) throw e;
+        // Never overwrite edits made while the model was working.
+        reply = "Stran se je medtem spremenila, zato sprememba ni bila shranjena. Prosim, pošljite zahtevo znova.";
+        issues.push("conflict: site changed during the edit");
+      }
+    }
+    await repo.addChat(siteId, "assistant", reply, { version, issues });
+    return { version, reply, issues };
   } finally {
-    await repo.setStatus(siteId, "ready");
+    if (before === "ready" || before === "failed") await repo.setStatus(siteId, "ready");
   }
 }

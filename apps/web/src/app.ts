@@ -1,7 +1,9 @@
 import { Hono, type Context } from "hono";
+import { bodyLimit } from "hono/body-limit";
 import type { AppConfig } from "@sb/config";
 import {
   PublishBlockedError,
+  siteBlockers,
   applyDirectEdit,
   defaultSection,
   editorCatalogue,
@@ -14,9 +16,9 @@ import {
   imageMeta,
   type Operation,
 } from "@sb/engine";
-import { contentType, type Platform } from "@sb/platform";
+import { VersionConflictError, contentType, type Platform } from "@sb/platform";
 import { renderPage, sharedBundle, pageFile } from "@sb/render";
-import { collectPlaceholders, publishBlockers, type SiteSpec } from "@sb/spec";
+import { collectPlaceholders, type SiteSpec } from "@sb/spec";
 import { issueSession, clearSession, passwordMatches, requireAuth, loginThrottle, type AuthSettings } from "./auth.ts";
 import { slugify } from "./slug.ts";
 import { loginPage, sitesPage, sitePage } from "./pages.tsx";
@@ -27,6 +29,17 @@ export interface AppOptions {
   config: AppConfig;
   auth: AuthSettings;
 }
+
+/** Same-origin path only: "/x" but not "//host", "/\host" or anything with whitespace. */
+export function safeNext(v: unknown): string {
+  return typeof v === "string" && /^\/(?![/\\])[^\s\\]*$/.test(v) ? v : "/";
+}
+
+const SAFE_SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+const SAFE_HASH = /^[0-9a-f]{10}$/;
+const SAFE_ID = /^site_[0-9a-f]{16}$/;
+/** One or more path segments of plain file names: no "..", no empty segments. */
+const SAFE_REST = /^([a-z0-9][a-z0-9._-]*\/)*[a-z0-9][a-z0-9._-]*$/i;
 
 const PUBLIC = (path: string) => path === "/health" || path === "/login" || path.startsWith("/s/") || path === "/favicon.ico";
 
@@ -41,12 +54,24 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
 
   // Deployed environments are public URLs: nothing here may be indexed, published sites included in phase 1.
   app.use("*", async (c, next) => {
+    // Encoded slashes or backslashes never belong in our URLs; they are how params escape their prefix.
+    if (/%2f|%5c/i.test(c.req.url)) return c.text("Bad request", 400);
     await next();
     c.header("X-Robots-Tag", "noindex, nofollow");
     c.header("X-Content-Type-Options", "nosniff");
     c.header("Referrer-Policy", "strict-origin-when-cross-origin");
+    // Published sites share the dashboard's origin: only our own scripts, and map embeds after consent.
+    c.header(
+      "Content-Security-Policy",
+      c.req.path.startsWith("/s/") || c.req.path.startsWith("/preview/")
+        ? "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-src https://www.google.com https://maps.google.com; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'"
+        : "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'",
+    );
   });
   app.use("*", requireAuth(auth, PUBLIC));
+  app.use("/login", bodyLimit({ maxSize: 16 * 1024 }));
+  app.use("/api/sites", bodyLimit({ maxSize: (config.limits.maxPhotos + 1) * config.limits.maxUploadBytes + 64 * 1024 }));
+  app.use("/api/sites/*", bodyLimit({ maxSize: 1024 * 1024 }));
 
   // ---------- Health ----------
   app.get("/health", async (c) => {
@@ -67,11 +92,12 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
   });
 
   // ---------- Auth ----------
-  app.get("/login", (c) => c.html(loginPage({ next: c.req.query("next") ?? "/" })));
+  app.get("/login", (c) => c.html(loginPage({ next: safeNext(c.req.query("next")) })));
   app.post("/login", async (c) => {
-    const ip = c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
+    // The rightmost X-Forwarded-For entry is the one our proxy added; the left ones are client-controlled.
+    const ip = c.req.header("x-forwarded-for")?.split(",").at(-1)?.trim() ?? "local";
     const body = await c.req.parseBody();
-    const next = typeof body.next === "string" && body.next.startsWith("/") && !body.next.startsWith("//") ? body.next : "/";
+    const next = safeNext(body.next);
     if (!throttle(ip)) return c.html(loginPage({ next, error: "Preveč poskusov. Poskusite čez nekaj minut." }), 429);
     if (typeof body.password !== "string" || !passwordMatches(body.password, auth.password)) {
       return c.html(loginPage({ next, error: "Napačno geslo." }), 401);
@@ -158,7 +184,7 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
       cost: await repo.siteCost(id),
       versions: await repo.listVersions(id),
       placeholders: current ? collectPlaceholders(current.spec) : [],
-      blockers: current ? publishBlockers(current.spec) : [],
+      blockers: current ? await siteBlockers(repo, id, current.spec) : [],
       spendToday: await repo.spendToday(),
       cap: config.limits.dailyModelSpendCapEur,
     });
@@ -181,7 +207,13 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
     if ("error" in ops) return c.json({ error: ops.error }, 400);
     const r = applyDirectEdit(current.spec, ops);
     if (!r.ok) return c.json({ error: "invalid", issues: r.issues.slice(0, 20) }, 422);
-    const version = await repo.saveSpec(siteId, r.spec, "manual", message.slice(0, 200), ops);
+    let version: number;
+    try {
+      version = await repo.saveSpec(siteId, r.spec, "manual", message.slice(0, 200), ops, current.version);
+    } catch (e) {
+      if (e instanceof VersionConflictError) return c.json({ error: "conflict", message: "Stran je bila medtem spremenjena. Osvežite urejevalnik." }, 409);
+      throw e;
+    }
     return c.json({ ok: true, version, adjustments: r.adjustments });
   };
 
@@ -309,7 +341,10 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
   // ---------- Preview: same renderer as publish, current (or ?v=) version ----------
   app.get("/preview/_shared/:hash/*", (c) => serveShared(c, c.req.param("hash"), c.req.path.split(`/_shared/${c.req.param("hash")}/`)[1] ?? ""));
   app.get("/preview/:id/media/:file", async (c) => {
-    const data = await storage.get(mediaKey(c.req.param("id"), c.req.param("file")));
+    const id = c.req.param("id");
+    const file = c.req.param("file");
+    if (!SAFE_ID.test(id) || !SAFE_REST.test(file) || file.includes("/")) return c.notFound();
+    const data = await storage.get(mediaKey(id, file));
     if (!data) return c.notFound();
     c.header("content-type", contentType(c.req.param("file")));
     c.header("cache-control", "private, max-age=3600");
@@ -317,7 +352,8 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
   });
   app.get("/preview/:id/:file", async (c) => {
     const v = c.req.query("v");
-    const current = await repo.getSpec(c.req.param("id"), v ? Number(v) : undefined);
+    if (!SAFE_ID.test(c.req.param("id"))) return c.notFound();
+    const current = await repo.getSpec(c.req.param("id"), v && /^d+$/.test(v) ? Number(v) : undefined);
     if (!current) return c.text("Predogled še ni pripravljen.", 404);
     const page = current.spec.pages.find((p) => pageFile(p) === c.req.param("file"));
     if (!page) return c.notFound();
@@ -327,12 +363,13 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
 
   // ---------- Published sites (public) ----------
   app.get("/s/_shared/:hash/*", (c) => serveShared(c, c.req.param("hash"), c.req.path.split(`/_shared/${c.req.param("hash")}/`)[1] ?? ""));
-  app.get("/s/:slug", (c) => c.redirect(`/s/${c.req.param("slug")}/`, 301));
+  app.get("/s/:slug", (c) => (SAFE_SLUG.test(c.req.param("slug")) ? c.redirect(`/s/${c.req.param("slug")}/`, 301) : c.notFound()));
   app.get("/s/:slug/*", async (c) => {
     const slug = c.req.param("slug");
+    if (!SAFE_SLUG.test(slug)) return c.notFound();
     let rest = c.req.path.slice(`/s/${slug}/`.length);
     if (rest === "" || rest.endsWith("/")) rest += "index.html";
-    if (rest.includes("..")) return c.notFound();
+    if (!SAFE_REST.test(rest)) return c.notFound();
     const data = await storage.get(`${publishedPrefix}/${slug}/${rest}`);
     if (data) {
       c.header("content-type", contentType(rest));
@@ -345,6 +382,7 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
   });
 
   async function serveShared(c: Context, hash: string, file: string) {
+    if (!SAFE_HASH.test(hash) || !SAFE_REST.test(file)) return c.notFound();
     const bundle = sharedBundle();
     let data: Uint8Array | null | undefined = hash === bundle.hash ? bundle.files.get(file) : undefined;
     // Older bundles stay available from storage so previously published sites keep working.

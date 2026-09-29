@@ -13,6 +13,7 @@ import {
   generateSite,
   loadMedia,
   clientCorpus,
+  processLogo,
   processPhoto,
   type CheckBrowser,
   type ModelTransport,
@@ -235,7 +236,10 @@ export async function seedGolden(fixture: Fixture, goldenDir: string, repo: Repo
     img.height = processed.height;
   }
   if (spec.assets.logo && fixture.logoPath) {
-    await storage.put(`sites/${siteId}/media/${spec.assets.logo.file}`, new Uint8Array(await readFile(fixture.logoPath)), "image/svg+xml");
+    // Same processing as the pipeline: the logo is served as a rasterised PNG.
+    const logo = await processLogo(new Uint8Array(await readFile(fixture.logoPath)), "image/svg+xml");
+    await storage.put(`sites/${siteId}/media/${logo.file}`, logo.data, "image/png");
+    spec.assets.logo = { ...spec.assets.logo, file: logo.file, width: logo.width, height: logo.height };
   }
   await repo.saveSpec(siteId, spec, "manual", "golden");
 }

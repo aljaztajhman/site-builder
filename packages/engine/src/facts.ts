@@ -1,5 +1,5 @@
 import { isPlaceholder, walkStrings, type SiteSpec } from "@sb/spec";
-import { numbersIn } from "./brief.ts";
+import { fold, numberTokens, numbersIn } from "./brief.ts";
 
 export interface FactViolation {
   path: string;
@@ -8,6 +8,9 @@ export interface FactViolation {
 }
 
 const digitsOf = (s: string) => s.replace(/\D/g, "");
+
+/** Legal-form tokens that may be added to a name without being "invented". */
+const LEGAL_FORMS = new Set(["d.o.o.", "d.o.o", "s.p.", "s.p", "d.d.", "d.d", "k.d.", "doo", "sp"]);
 
 /** Keys whose strings are structural, not visible copy. */
 const NON_COPY_KEYS = new Set(["id", "type", "variant", "tone", "page", "section", "action", "kind", "slug", "image", "network", "src", "file", "$placeholder"]);
@@ -20,17 +23,25 @@ const NON_COPY_KEYS = new Set(["id", "type", "variant", "tone", "page", "section
 export function checkFacts(spec: SiteSpec, corpus: string): FactViolation[] {
   const out: FactViolation[] = [];
   const text = corpus.toLowerCase();
-  const textDigits = digitsOf(corpus);
+  const folded = fold(corpus);
+  const tokens = numberTokens(corpus);
   const nums = numbersIn(corpus);
   const b = spec.business;
 
+  // The business name is shown everywhere; every word of it (legal forms aside) must be the client's.
+  const nameWords = fold(b.name)
+    .split(/[\s,]+/)
+    .map((w) => w.replace(/["'„“”«»]/g, ""))
+    .filter((w) => w.length >= 3 && !LEGAL_FORMS.has(w));
+  if (nameWords.some((w) => !folded.includes(w))) out.push({ path: "/business/name", kind: "name", value: b.name });
+
   if (!isPlaceholder(b.phone)) {
     const national = digitsOf(b.phone).replace(/^386/, "");
-    if (!textDigits.includes(national) && !textDigits.includes(`0${national}`)) out.push({ path: "/business/phone", kind: "phone", value: b.phone });
+    if (!tokens.has(national)) out.push({ path: "/business/phone", kind: "phone", value: b.phone });
   }
   if (!isPlaceholder(b.email) && !text.includes(b.email.toLowerCase())) out.push({ path: "/business/email", kind: "email", value: b.email });
   if (!isPlaceholder(b.address)) {
-    if (!text.includes(b.address.postalCode) && !text.includes(b.address.city.toLowerCase())) {
+    if (!nums.has(b.address.postalCode) || !folded.includes(fold(b.address.city))) {
       out.push({ path: "/business/address", kind: "address", value: `${b.address.postalCode} ${b.address.city}` });
     }
     const streetNum = /\d+\w?$/.exec(b.address.street)?.[0];
@@ -48,7 +59,7 @@ export function checkFacts(spec: SiteSpec, corpus: string): FactViolation[] {
   }
   for (const k of ["registrationNumber", "taxNumber"] as const) {
     const v = b.provider[k];
-    if (!isPlaceholder(v) && !textDigits.includes(digitsOf(v))) out.push({ path: `/business/provider/${k}`, kind: "number", value: v });
+    if (!isPlaceholder(v) && !tokens.has(digitsOf(v))) out.push({ path: `/business/provider/${k}`, kind: "number", value: v });
   }
   if (b.bookingUrl && !text.includes(b.bookingUrl.toLowerCase().replace(/^https?:\/\//, "").replace(/\/$/, ""))) {
     out.push({ path: "/business/bookingUrl", kind: "url", value: b.bookingUrl });
@@ -83,8 +94,8 @@ export function checkFacts(spec: SiteSpec, corpus: string): FactViolation[] {
     if (/^https?:\/\//.test(s)) return;
     for (const m of s.matchAll(/[\w.+-]+@[\w-]+\.[\w.]+/g)) if (!text.includes(m[0].toLowerCase())) out.push({ path: `/pages${p}`, kind: "email", value: m[0] });
     for (const m of s.matchAll(/(\+?\d[\d\s/-]{6,}\d)/g)) {
-      const d = digitsOf(m[0]);
-      if (d.length >= 7 && !textDigits.includes(d.replace(/^386/, "")) && !textDigits.includes(d)) out.push({ path: `/pages${p}`, kind: "phone", value: m[0] });
+      const d = digitsOf(m[0]).replace(/^(00)?386/, "").replace(/^0/, "");
+      if (d.length >= 7 && !tokens.has(d)) out.push({ path: `/pages${p}`, kind: "phone", value: m[0] });
     }
     for (const m of s.matchAll(/\d+(?:[.,]\d+)?/g)) {
       const n = String(Number(m[0].replace(",", ".")));

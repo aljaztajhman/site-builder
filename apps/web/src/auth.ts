@@ -66,14 +66,21 @@ export function requireAuth(s: AuthSettings, isPublic: (path: string) => boolean
   };
 }
 
-/** Naive in-memory login throttle per client address: 10 attempts per 10 minutes. */
-export function loginThrottle() {
+/**
+ * In-memory login throttle: 10 attempts per client per 10 minutes, and at most 200 attempts in total
+ * per 10 minutes (so rotating client addresses doesn't lift the limit). Old entries are pruned.
+ */
+export function loginThrottle(perClient = 10, total = 200, windowMs = 10 * 60_000) {
   const attempts = new Map<string, number[]>();
+  let all: number[] = [];
   return (key: string): boolean => {
     const now = Date.now();
-    const list = (attempts.get(key) ?? []).filter((t) => now - t < 10 * 60_000);
+    all = all.filter((t) => now - t < windowMs);
+    if (attempts.size > 1000) for (const [k, v] of attempts) if (v.every((t) => now - t >= windowMs)) attempts.delete(k);
+    const list = (attempts.get(key) ?? []).filter((t) => now - t < windowMs);
     list.push(now);
+    all.push(now);
     attempts.set(key, list);
-    return list.length <= 10;
+    return list.length <= perClient && all.length <= total;
   };
 }

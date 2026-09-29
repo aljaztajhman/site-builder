@@ -37,6 +37,10 @@ function defaultTransport(): ModelTransport {
 export async function startWorker(platform: Platform, config = loadConfig()): Promise<void> {
   const { repo, storage, queue } = platform;
 
+  // A job can't outlive the queue's 15-minute expiry; anything older still marked busy was interrupted.
+  await repo.failInterrupted(0);
+  setInterval(() => void repo.failInterrupted(20).catch((e: unknown) => console.error("[worker]", e)), 5 * 60_000).unref();
+
   await queue.work("generate", async (job, jobId) => {
     const client = modelClientFor(platform, config, { siteId: job.siteId, jobId });
     try {

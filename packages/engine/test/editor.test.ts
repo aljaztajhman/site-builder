@@ -91,6 +91,23 @@ describe("switchDirection", () => {
 
 describe("typedText", () => {
   it("collects every string value in operations", () => {
-    expect(typedText([{ op: "replace", path: "/a", value: { name: "Katja", price: { amount: 2 }, tags: ["x"] } }, { op: "remove", path: "/b" }])).toEqual(["Katja", "x"]);
+    expect(typedText([{ op: "replace", path: "/a", value: { name: "Katja", price: { amount: 2 }, tags: ["x"] } }, { op: "remove", path: "/b" }])).toEqual(["Katja", "2", "x"]);
+  });
+});
+
+describe("protected paths", () => {
+  it("refuses edits to the slug, version and asset identity, but allows alt text", () => {
+    const spec = golden();
+    for (const op of [
+      { op: "replace" as const, path: "/slug", value: "drug-salon" },
+      { op: "replace" as const, path: "/specVersion", value: 2 },
+      { op: "replace" as const, path: "/assets/logo/file", value: "../../x" },
+      { op: "replace" as const, path: "/assets/images/0/src", value: "sites/other/uploads/a.jpg" },
+      { op: "remove" as const, path: "/assets/images/0" },
+    ]) {
+      const r = applyDirectEdit(spec, [op]);
+      expect(r.ok, op.path).toBe(false);
+    }
+    expect(applyDirectEdit(spec, [{ op: "replace", path: "/assets/images/0/alt", value: "Hlebci kruha na polici" }]).ok).toBe(true);
   });
 });

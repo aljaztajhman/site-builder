@@ -72,6 +72,17 @@ export interface ModelCallRow {
   ok: boolean;
 }
 
+/** A save was based on a version that is no longer current (someone else saved in between). */
+export class VersionConflictError extends Error {
+  constructor(
+    readonly siteId: string,
+    readonly baseVersion: number | null,
+  ) {
+    super(`Site ${siteId} changed since version ${baseVersion}`);
+    this.name = "VersionConflictError";
+  }
+}
+
 export function newId(prefix: string): string {
   return `${prefix}_${randomBytes(8).toString("hex")}`;
 }
@@ -118,6 +129,21 @@ export class Repo {
     await this.db.query("update sites set status = $2, updated_at = now() where id = $1", [id, status]);
   }
 
+  /**
+   * Sites left "generating"/"editing"/"publishing" by a job that died (deploy, crash). Jobs don't
+   * retry (they cost money), so these are marked failed with an event and can be re-run by the user.
+   */
+  async failInterrupted(olderThanMinutes: number): Promise<string[]> {
+    const { rows } = await this.db.query<{ id: string }>(
+      `update sites set status = 'failed', updated_at = now()
+        where status in ('generating', 'editing', 'publishing') and updated_at < now() - make_interval(mins => $1::integer)
+        returning id`,
+      [olderThanMinutes],
+    );
+    for (const r of rows) await this.addEvent({ siteId: r.id, stage: "error", level: "error", message: "Opravilo je bilo prekinjeno (ponovni zagon strežnika). Poskusite znova." });
+    return rows.map((r) => r.id);
+  }
+
   async setBrief(id: string, brief: unknown, name?: string): Promise<void> {
     await this.db.query("update sites set brief = $2, name = coalesce($3, name), updated_at = now() where id = $1", [
       id,
@@ -133,17 +159,24 @@ export class Repo {
     source: "generate" | "critique" | "edit" | "manual" | "revert",
     message?: string,
     patch?: unknown,
+    /** The version this change was based on. When given and no longer current, nothing is saved. */
+    baseVersion?: number | null,
   ): Promise<number> {
-    const { rows } = await this.db.query<{ v: number }>(
-      "select coalesce(max(version), 0) + 1 as v from spec_versions where site_id = $1",
-      [siteId],
+    // One statement: claim the next version on the site row (row lock serialises concurrent saves)
+    // and insert it. current_version is always the highest version, so +1 is the next free number.
+    const { rows } = await this.db.query<{ version: number }>(
+      `with claimed as (
+         update sites set current_version = coalesce(current_version, 0) + 1, updated_at = now()
+          where id = $1 and ($6::integer is null or current_version = $6)
+          returning current_version as v
+       )
+       insert into spec_versions (site_id, version, spec, source, message, patch)
+       select $1, v, $2, $3, $4, $5 from claimed
+       returning version`,
+      [siteId, JSON.stringify(spec), source, message ?? null, patch === undefined ? null : JSON.stringify(patch), baseVersion ?? null],
     );
-    const version = Number(rows[0]!.v);
-    await this.db.query("insert into spec_versions (site_id, version, spec, source, message, patch) values ($1, $2, $3, $4, $5, $6)",
-      [siteId, version, JSON.stringify(spec), source, message ?? null, patch === undefined ? null : JSON.stringify(patch)],
-    );
-    await this.db.query("update sites set current_version = $2, updated_at = now() where id = $1", [siteId, version]);
-    return version;
+    if (!rows[0]) throw new VersionConflictError(siteId, baseVersion ?? null);
+    return Number(rows[0].version);
   }
 
   async getSpec(siteId: string, version?: number): Promise<{ version: number; spec: SiteSpec } | null> {

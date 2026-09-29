@@ -94,7 +94,9 @@ describe("published sites", () => {
     expect(await missing.text()).toBe("<h1>Ni</h1>");
     // URL normalisation resolves ".." before routing; it must never reach storage outside published/.
     expect((await app.request("/s/demo/../../etc/passwd")).status).not.toBe(200);
-    expect((await app.request("/s/demo/..%2f..%2fsecret")).status).toBe(404);
+    expect((await app.request("/s/demo/..%2f..%2fsecret")).status).toBe(400);
+    expect((await app.request("/s/..%2F./sites/x/uploads/a.svg")).status).toBe(400);
+    expect((await app.request("/s/Demo!/index.html")).status).toBe(404);
   });
 });
 
@@ -127,7 +129,8 @@ describe("direct editor API (no model calls)", () => {
     const golden = JSON.parse(await readFile(path.join(import.meta.dirname, "../../../tools/eval/golden/pekarna-kvas.json"), "utf8"));
     const cookie = await login();
     const json = { cookie, "content-type": "application/json" };
-    const site = await platform.repo.createSite({ name: "Pekarna Kvas", slug: "pekarna-kvas", intake: { description: "Pekarna Kvas", photoAssetIds: [], scope: "full" } });
+    const brief = JSON.parse(await readFile(path.join(import.meta.dirname, "../../../tools/eval/fixtures/pekarna-kvas/brief.json"), "utf8"));
+    const site = await platform.repo.createSite({ name: "Pekarna Kvas", slug: "pekarna-kvas", intake: { description: brief.description, photoAssetIds: [], scope: "full" } });
     await platform.repo.saveSpec(site.id, golden, "manual");
     const before = sent.length;
 
@@ -175,7 +178,7 @@ describe("direct editor API (no model calls)", () => {
     });
     expect(fill.status).toBe(200);
     const published = await app.request(`/api/sites/${site.id}/publish`, { method: "POST", headers: { cookie } });
-    expect(published.status).toBe(200);
+    expect(published.status, JSON.stringify(await published.clone().json())).toBe(200);
     const home = await app.request("/s/pekarna-kvas/");
     expect(home.status).toBe(200);
     const publishedHtml = await home.text();
@@ -191,4 +194,12 @@ describe("direct editor API (no model calls)", () => {
     // None of this touched the model queue.
     expect(sent.length).toBe(before);
   }, 60_000);
+});
+
+describe("login redirect", () => {
+  it("only follows same-origin paths", async () => {
+    const { safeNext } = await import("../src/app.ts");
+    expect(safeNext("/sites/x")).toBe("/sites/x");
+    for (const bad of ["//evil.com", "/\\evil.com", "https://evil.com", "/ x", 42, undefined]) expect(safeNext(bad)).toBe("/");
+  });
 });

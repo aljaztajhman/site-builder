@@ -59,7 +59,6 @@ let device: "mobile" | "desktop" = "mobile";
 let editMode = true;
 let toast = "";
 let pollTimer: number | undefined;
-let busy = false;
 
 // ---------- DOM helper ----------
 type Child = Node | string | null | undefined | false;
@@ -132,9 +131,17 @@ function schedulePoll(): void {
 }
 
 /** Sends direct-edit operations. No model call. */
-async function patch(ops: Op[], message: string, rerender = true): Promise<boolean> {
-  if (!state.spec || busy) return false;
-  busy = true;
+/** Saves wait their turn: each is sent after the previous one has landed and the version is fresh. */
+let saveChain: Promise<unknown> = Promise.resolve();
+
+function patch(ops: Op[], message: string, rerender = true): Promise<boolean> {
+  const run = saveChain.then(() => sendPatch(ops, message, rerender));
+  saveChain = run.catch(() => undefined);
+  return run;
+}
+
+async function sendPatch(ops: Op[], message: string, rerender: boolean): Promise<boolean> {
+  if (!state.spec) return false;
   try {
     const r = await api<{ version: number; adjustments: string[] }>("/patch", { method: "POST", body: JSON.stringify({ baseVersion: state.version, ops, message }) });
     toast = r.adjustments.length ? `Shranjeno. ${r.adjustments.join("; ")}` : "Shranjeno.";
@@ -146,8 +153,6 @@ async function patch(ops: Op[], message: string, rerender = true): Promise<boole
     toast = rerender ? `Ni shranjeno: ${(e as Error).message}` : `Še ni shranjeno — dopolnite polja. (${(e as Error).message.split(String.fromCharCode(10))[0]})`;
     await load(rerender);
     return false;
-  } finally {
-    busy = false;
   }
 }
 

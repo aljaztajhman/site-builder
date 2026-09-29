@@ -33,7 +33,8 @@
   padding-block: 0.5rem;
 }
 .site-header__brand {
-  flex: 1 1 auto;
+  /* Basis 0: long names wrap inside the brand instead of pushing the menu button to a new row. */
+  flex: 1 1 0;
   min-width: 2.75rem;
   display: inline-flex;
   align-items: center;

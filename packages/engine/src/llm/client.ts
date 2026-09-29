@@ -88,11 +88,14 @@ export class ModelClient {
     const stage = this.stageConfig(req.stage);
     const started = Date.now();
     const res = await this.opts.transport.send(req, stage);
+    // Price by the model the API reports; if it reports an ID we have no price for (e.g. a dated
+    // alias), use the requested model's price so the call is still logged and counted against the cap.
+    const priced = this.opts.config.pricesUsdPerMTok[res.model] ? res.model : stage.model;
     const record: CallRecord = {
       stage: req.stage,
       model: res.model,
       usage: res.usage,
-      costEur: costEur(this.opts.config, res.model, res.usage),
+      costEur: costEur(this.opts.config, priced, res.usage),
       durationMs: Date.now() - started,
       ok: res.stopReason !== "refusal" && res.stopReason !== "max_tokens",
     };

@@ -40,7 +40,7 @@ export const LogoAsset = z.strictObject({
   width: z.number().int().positive(),
   height: z.number().int().positive(),
   /** File name under media/ as rendered (svg or png). */
-  file: z.string().max(120),
+  file: z.string().regex(/^logo\.(png|svg)$/),
 });
 
 export const Chrome = z.strictObject({

@@ -34,6 +34,7 @@ import {
 import { assembleSpec, contentJsonSchema, contentOutputSchema, type ContentOutput } from "./assemble.ts";
 import type { Swatch } from "./palette.ts";
 import { checkFacts, type FactViolation } from "./facts.ts";
+import { protectedPathIssues } from "./editor.ts";
 
 // ---------- 1. Intake -> brief ----------
 
@@ -310,6 +311,8 @@ export interface PatchResult {
 /** Applies RFC 6902 operations to a copy, then validates. Never mutates the input. */
 export function applyPatches(spec: SiteSpec, ops: Operation[], corpus: string): PatchResult {
   if (ops.length === 0) return { spec, applied: 0, issues: [] };
+  const guarded = protectedPathIssues(ops);
+  if (guarded.length) return { spec, applied: 0, issues: guarded.map((i) => `${i.path}: ${i.message}`) };
   const errors = jsonpatch.validate(ops, spec);
   if (errors) return { spec, applied: 0, issues: [`invalid patch: ${errors.message} (${errors.operation?.op} ${errors.operation?.path})`] };
   let next: SiteSpec;

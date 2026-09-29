@@ -87,3 +87,21 @@ describe("fs storage", () => {
     await rm(dir, { recursive: true, force: true });
   });
 });
+
+describe("spec versions", () => {
+  it("compare-and-swap: a save based on a stale version is refused", async () => {
+    const { VersionConflictError } = await import("../src/index.ts");
+    const site = await repo.createSite({ name: "x", slug: await repo.uniqueSlug("cas"), intake: { description: "x", photoAssetIds: [], scope: "home" } });
+    expect(await repo.saveSpec(site.id, { specVersion: 1 } as never, "generate")).toBe(1);
+    expect(await repo.saveSpec(site.id, { specVersion: 1 } as never, "manual", "a", undefined, 1)).toBe(2);
+    await expect(repo.saveSpec(site.id, { specVersion: 1 } as never, "edit", "stale", undefined, 1)).rejects.toBeInstanceOf(VersionConflictError);
+    expect((await repo.getSpec(site.id))?.version).toBe(2);
+  });
+
+  it("marks interrupted jobs as failed", async () => {
+    const site = await repo.createSite({ name: "x", slug: await repo.uniqueSlug("stuck"), intake: { description: "x", photoAssetIds: [], scope: "home" } });
+    await repo.setStatus(site.id, "generating");
+    expect(await repo.failInterrupted(0)).toContain(site.id);
+    expect((await repo.getSite(site.id))?.status).toBe("failed");
+  });
+});

@@ -1,3 +1,4 @@
+import type pg from "pg";
 import type { Db } from "./db.ts";
 
 /** Append-only list of SQL migrations. Never edit an applied one; add a new entry. */
@@ -92,21 +93,45 @@ export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
   },
 ];
 
+type Query = (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>;
+
+/**
+ * Applies pending migrations. On Postgres all statements run on one dedicated connection (so BEGIN
+ * and COMMIT wrap the same session) under an advisory lock, so web and worker starting together
+ * never migrate at the same time.
+ */
 export async function migrate(db: Db): Promise<number[]> {
-  await db.query(`create table if not exists schema_migrations (id integer primary key, name text not null, applied_at timestamptz not null default now())`);
-  const { rows } = await db.query<{ id: number }>("select id from schema_migrations");
+  if (db.kind === "postgres") {
+    const client = await (db.raw as pg.Pool).connect();
+    const q: Query = async (sql, params) => ({ rows: (await client.query(sql, params)).rows as Record<string, unknown>[] });
+    try {
+      await q("select pg_advisory_lock($1)", [MIGRATION_LOCK]);
+      return await runMigrations(q);
+    } finally {
+      await q("select pg_advisory_unlock($1)", [MIGRATION_LOCK]).catch(() => undefined);
+      client.release();
+    }
+  }
+  return runMigrations((sql, params) => db.query(sql, params));
+}
+
+const MIGRATION_LOCK = 727_274_001;
+
+async function runMigrations(q: Query): Promise<number[]> {
+  await q(`create table if not exists schema_migrations (id integer primary key, name text not null, applied_at timestamptz not null default now())`);
+  const { rows } = await q("select id from schema_migrations");
   const applied = new Set(rows.map((r) => Number(r.id)));
   const ran: number[] = [];
   for (const m of MIGRATIONS) {
     if (applied.has(m.id)) continue;
-    await db.query("begin");
+    await q("begin");
     try {
-      for (const stmt of splitSql(m.sql)) await db.query(stmt);
-      await db.query("insert into schema_migrations (id, name) values ($1, $2)", [m.id, m.name]);
-      await db.query("commit");
+      for (const stmt of splitSql(m.sql)) await q(stmt);
+      await q("insert into schema_migrations (id, name) values ($1, $2)", [m.id, m.name]);
+      await q("commit");
       ran.push(m.id);
     } catch (e) {
-      await db.query("rollback");
+      await q("rollback");
       throw e;
     }
   }

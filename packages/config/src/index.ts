@@ -63,8 +63,16 @@ export function loadConfig(file = process.env.APP_CONFIG_PATH ?? path.join(repoR
   if (cached && !process.env.APP_CONFIG_PATH) return cached;
   const raw = JSON.parse(readFileSync(file, "utf8")) as unknown;
   const config = AppConfigSchema.parse(raw);
+  // Every model a stage can use must have a price, or its spend couldn't be counted against the cap.
+  for (const [stage, m] of Object.entries(config.models)) {
+    if (!config.pricesUsdPerMTok[m.model]) throw new Error(`config: no price for ${m.model} (stage ${stage})`);
+  }
   const cap = process.env.DAILY_SPEND_CAP_EUR;
-  if (cap !== undefined && cap !== "") config.limits.dailyModelSpendCapEur = Number(cap);
+  if (cap !== undefined && cap !== "") {
+    const n = Number(cap);
+    if (!Number.isFinite(n) || n < 0) throw new Error("DAILY_SPEND_CAP_EUR must be a non-negative number of euros, e.g. 10");
+    config.limits.dailyModelSpendCapEur = n;
+  }
   cached = config;
   return config;
 }

@@ -25,13 +25,13 @@ export async function processPhoto(id: string, data: Uint8Array, widths: number[
   return { width, height, variants };
 }
 
-/** Logo for the header: SVG kept as is (rendered via <img>, so scripts never run); rasters become a 2x PNG. */
+/**
+ * Logo for the header, always a 2x PNG. SVG uploads are rasterised too: an uploaded SVG served from
+ * our origin could carry script, and a PNG is safe everywhere (preview, published site, export).
+ */
 export async function processLogo(data: Uint8Array, mime: string): Promise<{ file: string; data: Uint8Array; width: number; height: number }> {
-  if (mime === "image/svg+xml") {
-    const meta = await sharp(data).metadata();
-    return { file: "logo.svg", data, width: meta.width ?? 160, height: meta.height ?? 48 };
-  }
-  const out = await sharp(data).resize({ height: 96, withoutEnlargement: true }).png().toBuffer({ resolveWithObject: true });
+  const input = mime === "image/svg+xml" ? sharp(data, { density: 300 }) : sharp(data);
+  const out = await input.resize({ height: 96, withoutEnlargement: mime !== "image/svg+xml" }).png().toBuffer({ resolveWithObject: true });
   return { file: "logo.png", data: out.data, width: Math.round(out.info.width / 2), height: Math.round(out.info.height / 2) };
 }
 

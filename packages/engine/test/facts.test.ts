@@ -57,3 +57,22 @@ describe("checkFacts", () => {
     expect(checkFacts(s, corpus)).toEqual([]);
   });
 });
+
+describe("checkFacts, stricter matching", () => {
+  it("flags an invented business name, allowing legal forms and missing diacritics", () => {
+    expect(checkFacts(spec({ business: { name: "Frizerstvo Lana d.o.o." } }), corpus)).toEqual([]);
+    expect(checkFacts(spec({ business: { name: "FRIZERSTVO LANA" } }), corpus.normalize("NFKD").replace(/[\u0300-\u036f]/g, ""))).toEqual([]);
+    expect(checkFacts(spec({ business: { name: "Salon Lepote Lana" } }), corpus).map((v) => v.kind)).toContain("name");
+  });
+
+  it("needs both the postal code and the city", () => {
+    const guessed = spec({ business: { address: { street: "Ljubljanska cesta 8", postalCode: "3001", city: "Celje" } } });
+    expect(checkFacts(guessed, corpus).map((v) => v.path)).toContain("/business/address");
+  });
+
+  it("does not match a phone across two separate numbers in the text", () => {
+    const text = "Pokličite 041 555 ali pa 301 za več.";
+    const s = spec({ business: { name: "Frizerstvo Lana", phone: "+38641555301", email: { $placeholder: "email" }, address: { $placeholder: "address" }, hours: { $placeholder: "hours" } } });
+    expect(checkFacts(s, `Frizerstvo Lana. ${text}`).map((v) => v.kind)).toContain("phone");
+  });
+});

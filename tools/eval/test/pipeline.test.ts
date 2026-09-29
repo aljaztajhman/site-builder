@@ -69,7 +69,7 @@ describe("pipeline with replayed model responses (no network)", () => {
     expect(spec.design.direction).toBe("warm-craft");
     expect(spec.business.phone).toBe("+38641555906");
     expect(spec.assets.images.map((i) => i.alt)).toEqual(golden.assets.images.map((i) => i.alt));
-    expect(await storage.list(`sites/${site.id}/media/`)).toEqual(expect.arrayContaining([`sites/${site.id}/media/img_01-360.avif`, `sites/${site.id}/media/logo.svg`]));
+    expect(await storage.list(`sites/${site.id}/media/`)).toEqual(expect.arrayContaining([`sites/${site.id}/media/img_01-360.avif`, `sites/${site.id}/media/logo.png`]));
 
     const msg = await repo.addChat(site.id, "user", "Temnejša glava prosim.");
     const edit = await applyChatEdit({ repo, client }, site.id, Number(msg.id));

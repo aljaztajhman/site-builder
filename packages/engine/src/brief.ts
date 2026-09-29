@@ -100,6 +100,26 @@ export function numbersIn(text: string): Set<string> {
   return out;
 }
 
+/** Lower case without diacritics, for tolerant comparisons ("Škofja" ~ "skofja"). */
+export function fold(s: string): string {
+  return s.toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/đ/g, "d");
+}
+
+/**
+ * Every number-like run in the text ("041 555 906", "01/555 01 23", "SI12345678") as its own digit
+ * string, plus its national phone form (without 00386/386/leading 0). Facts are matched against
+ * whole runs, so digits from two different numbers can't combine into a match.
+ */
+export function numberTokens(text: string): Set<string> {
+  const out = new Set<string>();
+  for (const m of text.matchAll(/\+?\d[\d \t/.()-]*\d|\d/g)) {
+    const d = m[0].replace(/\D/g, "");
+    out.add(d);
+    out.add(d.replace(/^(00)?386/, "").replace(/^0/, ""));
+  }
+  return out;
+}
+
 export interface Dropped {
   field: string;
   value: string;
@@ -112,15 +132,16 @@ export interface Dropped {
  */
 export function verifyBriefFacts(brief: Brief, sourceText: string): { brief: Brief; dropped: Dropped[] } {
   const text = normaliseText(sourceText);
-  const textDigits = digits(sourceText);
+  const tokens = numberTokens(sourceText);
   const nums = numbersIn(sourceText);
+  const folded = fold(sourceText);
   const dropped: Dropped[] = [];
   const b: Brief = structuredClone(brief);
   const f = b.facts;
 
   if (f.phone) {
     const national = digits(f.phone).replace(/^386/, "");
-    if (!(textDigits.includes(national) || textDigits.includes(`0${national}`))) {
+    if (!tokens.has(national)) {
       dropped.push({ field: "phone", value: f.phone });
       f.phone = null;
     } else f.phone = toE164(f.phone) ?? f.phone;
@@ -135,7 +156,7 @@ export function verifyBriefFacts(brief: Brief, sourceText: string): { brief: Bri
   }
   if (f.address) {
     const streetWord = f.address.street.toLowerCase().split(/\s+/)[0] ?? "";
-    if (!text.includes(f.address.postalCode) && !text.includes(f.address.city.toLowerCase())) {
+    if (!nums.has(f.address.postalCode) || !folded.includes(fold(f.address.city))) {
       dropped.push({ field: "address", value: `${f.address.street}, ${f.address.postalCode} ${f.address.city}` });
       f.address = null;
     } else if (!text.includes(streetWord)) {
@@ -145,7 +166,7 @@ export function verifyBriefFacts(brief: Brief, sourceText: string): { brief: Bri
   }
   for (const k of ["registrationNumber", "taxNumber"] as const) {
     const v = f[k];
-    if (v && !textDigits.includes(digits(v))) {
+    if (v && !tokens.has(digits(v))) {
       dropped.push({ field: k, value: v });
       f[k] = null;
     }

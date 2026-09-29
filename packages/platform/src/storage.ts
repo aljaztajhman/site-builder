@@ -33,6 +33,13 @@ export interface S3Settings {
   forcePathStyle: boolean;
 }
 
+/** Keys are relative paths of plain segments: no "..", ".", empty segments, backslashes or leading "/". */
+export function assertSafeKey(key: string): void {
+  if (!key || key.startsWith("/") || key.includes("\\") || key.split("/").some((seg, i, all) => seg === ".." || seg === "." || (seg === "" && i < all.length - 1))) {
+    throw new Error(`Unsafe storage key: ${key}`);
+  }
+}
+
 export function createS3Storage(s: S3Settings): Storage {
   const client = new S3Client({
     endpoint: s.endpoint,
@@ -43,9 +50,11 @@ export function createS3Storage(s: S3Settings): Storage {
   return {
     kind: "s3",
     async put(key, data, contentType) {
+      assertSafeKey(key);
       await client.send(new PutObjectCommand({ Bucket: s.bucket, Key: key, Body: data, ContentType: contentType }));
     },
     async get(key) {
+      assertSafeKey(key);
       try {
         const r = await client.send(new GetObjectCommand({ Bucket: s.bucket, Key: key }));
         return r.Body ? new Uint8Array(await r.Body.transformToByteArray()) : null;
@@ -81,6 +90,7 @@ export function createS3Storage(s: S3Settings): Storage {
 export function createFsStorage(root: string): Storage {
   const abs = path.resolve(root);
   const file = (key: string) => {
+    assertSafeKey(key);
     const p = path.resolve(abs, key);
     if (!p.startsWith(abs + path.sep)) throw new Error(`Key escapes storage root: ${key}`);
     return p;
@@ -103,8 +113,9 @@ export function createFsStorage(root: string): Storage {
       await writeFile(p, data);
     },
     async get(key) {
+      const p = file(key);
       try {
-        return new Uint8Array(await readFile(file(key)));
+        return new Uint8Array(await readFile(p));
       } catch {
         return null;
       }

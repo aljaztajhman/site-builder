@@ -1,5 +1,5 @@
 import type { Recording } from "@sb/engine";
-import type { ModelStageName } from "@sb/config";
+import { loadConfig, type ModelStageName } from "@sb/config";
 import type { SiteSpec } from "@sb/spec";
 import type { Fixture } from "./fixtures/schema.ts";
 
@@ -9,6 +9,7 @@ import type { Fixture } from "./fixtures/schema.ts";
  * marked origin "synthetic"; `pnpm eval --record` replaces them with real recordings.
  */
 export function syntheticRecordings(fixture: Fixture, golden: SiteSpec, edits: { reply: string; patches: unknown[] }[] = []): Recording[] {
+  const config = loadConfig();
   const f = fixture.brief.facts;
   const d = golden.design;
   const contentPages = golden.pages.filter((p) => p.kind === "home" || p.kind === "standard");
@@ -82,7 +83,7 @@ export function syntheticRecordings(fixture: Fixture, golden: SiteSpec, edits: {
     response: {
       text: JSON.stringify(r.body),
       stopReason: "end_turn",
-      model: r.stage === "classify" ? "claude-haiku-4-5-20251001" : "claude-sonnet-5-5",
+      model: config.models[r.stage].model,
       usage: { input_tokens: 0, output_tokens: 0, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 },
     },
   }));

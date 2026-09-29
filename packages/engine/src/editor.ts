@@ -29,7 +29,27 @@ export interface DirectEditResult {
   adjustments: string[];
 }
 
+/**
+ * Paths no edit may touch: the version, the slug (it names published storage) and asset identity
+ * (ids, files, sizes are set by the image pipeline). Alt text and focal points stay editable.
+ */
+export function protectedPathIssues(ops: Operation[]): Issue[] {
+  const blocked = (p: string) =>
+    p === "" ||
+    /^\/(specVersion|slug)(\/|$)/.test(p) ||
+    /^\/assets(\/logo(\/|$)|\/images\/?$|\/images\/[^/]+\/?$|\/images\/[^/]+\/(id|src|width|height)(\/|$)|\/?$)/.test(p);
+  const issues: Issue[] = [];
+  for (const op of ops) {
+    for (const p of [op.path, "from" in op ? (op as { from: string }).from : undefined]) {
+      if (p !== undefined && blocked(p)) issues.push({ path: p, code: "structure", message: "this part of the site can't be edited" });
+    }
+  }
+  return issues;
+}
+
 export function applyDirectEdit(spec: SiteSpec, ops: Operation[]): DirectEditResult {
+  const guarded = protectedPathIssues(ops);
+  if (guarded.length) return { ok: false, spec, issues: guarded, adjustments: [] };
   const invalid = jsonpatch.validate(ops, spec);
   if (invalid) {
     return { ok: false, spec, issues: [{ path: invalid.operation?.path ?? "", code: "schema", message: invalid.message }], adjustments: [] };
@@ -162,7 +182,8 @@ export function editorCatalogue(spec: SiteSpec) {
 export function typedText(ops: Operation[]): string[] {
   const out: string[] = [];
   const walk = (v: unknown) => {
-    if (typeof v === "string") out.push(v);
+    // Numbers too: a price or capacity typed in the editor is the client's own fact.
+    if (typeof v === "string" || typeof v === "number") out.push(String(v));
     else if (Array.isArray(v)) v.forEach(walk);
     else if (v && typeof v === "object") Object.values(v).forEach(walk);
   };
