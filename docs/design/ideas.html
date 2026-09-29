@@ -256,7 +256,7 @@ mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:var(--ink)}
   <div class="wrap">
     <span class="brand"><i></i>Site builder · design</span>
     <nav aria-label="Sections">
-      <a href="#now">Where we are</a><a href="#reference">Reference</a><a href="#principles">Principles</a><a href="#tokens">Tokens</a><a href="#components">Components</a><a href="#screens">Screens</a><a href="#sites">Generated sites</a><a href="#home">Homepage</a><a href="#dont">Don't use</a><a href="#plan">Plan</a>
+      <a href="#now">Where we are</a><a href="#reference">Reference</a><a href="#principles">Principles</a><a href="#tokens">Tokens</a><a href="#components">Components</a><a href="#screens">Screens</a><a href="#product-home">Homepage</a><a href="#sites">Generated sites</a><a href="#home">Example site</a><a href="#dont">Don't use</a><a href="#plan">Plan</a>
     </nav>
     <span class="sp"></span>
     <div class="accents" role="group" aria-label="Try an accent colour">
@@ -592,6 +592,26 @@ mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:var(--ink)}
 </section>
 
 <!-- ================================================================ -->
+<section class="block" id="product-home">
+  <div class="wrap">
+    <p class="eyebrow">06b</p>
+    <h2>The product homepage</h2>
+    <p class="lead">The page a business owner lands on. Built on the product tokens, in Slovene, against the give-away list: no badge above the headline, no three icon cards, no stat row, no testimonials, no logo bar, one accent, left-aligned, no em-dashes. The prompt box is the hero and the generated example site sits next to it in a phone frame, so the product demonstrates itself. Numbers on the page are measured (154 s median, accessibility 100); the price is the bottom of the configured range and says so; the product name and provider details are placeholders.</p>
+    <p style="margin:8px 0 20px"><a class="btn sm" href="homepage.html" target="_blank" rel="noopener">Open the page on its own</a> <span class="muted" style="font-size:13px;margin-left:8px">docs/design/homepage.html, responsive, JavaScript only to scale the embedded example</span></p>
+    <div class="homes">
+      <figure>
+        <iframe class="f360" src="homepage.html" title="Product homepage at 360 px" loading="lazy"></iframe>
+        <figcaption>360 × 800, scroll inside the frame.</figcaption>
+      </figure>
+      <figure>
+        <div class="fdesk-wrap" data-h="5000"><iframe class="fdesk" src="homepage.html" title="Product homepage at 1280 px" loading="lazy" style="height:5000px"></iframe></div>
+        <figcaption>1280 px, scaled to fit.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
 <section class="block" id="sites">
   <div class="wrap">
     <p class="eyebrow">07</p>
@@ -820,7 +840,7 @@ mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:var(--ink)}
 
 <script>
   // Scale the desktop iframe to its container width.
-  function fitDesk(){document.querySelectorAll('.fdesk-wrap').forEach(w=>{const f=w.querySelector('.fdesk');const s=w.clientWidth/1280;f.style.transform='scale('+s+')';w.style.height=(3400*s)+'px';});}
+  function fitDesk(){document.querySelectorAll('.fdesk-wrap').forEach(w=>{const f=w.querySelector('.fdesk');const s=w.clientWidth/1280;const H=+(w.dataset.h||3400);f.style.transform='scale('+s+')';w.style.height=(H*s)+'px';});}
   fitDesk();addEventListener('resize',fitDesk);
   // Accent switcher for this page only.
   const root=document.documentElement;
