@@ -20,6 +20,8 @@ export interface LegalFacts {
   date: string;
   /** Placeholder for the client's list of known accessibility limitations. */
   limitations: ReactNode;
+  /** The site has a contact form (its data is described in the privacy policy). */
+  contactForm: boolean;
 }
 
 export const IP_URL = "https://www.ip-rs.si/";
@@ -65,11 +67,18 @@ function privacySl(f: LegalFacts) {
         <li>Hramba: dnevniki se hranijo le toliko časa, kot je potrebno za zagotavljanje varnosti, nato se samodejno izbrišejo.</li>
       </ul>
 
-      <h3>Ko nas pokličete ali nam pišete</h3>
+      <h3>{f.contactForm ? "Ko nas pokličete, nam pišete ali izpolnite obrazec" : "Ko nas pokličete ali nam pišete"}</h3>
       <p>
         Če nas pokličete ali nam pošljete e-pošto, obdelujemo podatke, ki nam jih sami posredujete (na primer ime, telefonsko
         številko, e-poštni naslov in vsebino sporočila), da vam lahko odgovorimo.
       </p>
+      {f.contactForm && (
+        <p>
+          Če izpolnite kontaktni obrazec na tej strani, prejmemo vaše ime, e-poštni naslov, telefonsko številko (če jo vpišete) in
+          sporočilo. Za zaščito pred zlorabami strežnik en dan hrani zgoščeno obliko vašega naslova IP, iz katere naslova ni mogoče
+          razbrati, nato jo izbriše.
+        </p>
+      )}
       <ul>
         <li>
           Pravna podlaga: ukrepi na vašo zahtevo pred sklenitvijo pogodbe ali izvajanje pogodbe (točka (b)) oziroma naš zakoniti
@@ -150,11 +159,18 @@ function privacyEn(f: LegalFacts) {
         <li>Retention: logs are kept only as long as needed for security and are then deleted automatically.</li>
       </ul>
 
-      <h3>When you call or email us</h3>
+      <h3>{f.contactForm ? "When you call, email us or use the contact form" : "When you call or email us"}</h3>
       <p>
         If you call or email us, we process the data you give us (for example your name, phone number, email address and the
         content of your message) so that we can reply.
       </p>
+      {f.contactForm && (
+        <p>
+          If you fill in the contact form on this site, we receive your name, email address, phone number (if you give one) and your
+          message. To prevent abuse, the server keeps a hashed form of your IP address, from which the address cannot be read, for
+          one day and then deletes it.
+        </p>
+      )}
       <ul>
         <li>
           Legal basis: steps taken at your request before entering into a contract, or performing a contract (Article 6(1)(b)), or

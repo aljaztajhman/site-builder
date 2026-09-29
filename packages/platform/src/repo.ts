@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import type { SiteSpec } from "@sb/spec";
+import { SPEC_VERSION, migrateSpec, type SiteSpec } from "@sb/spec";
 import type { Db } from "./db.ts";
 
 export type SiteStatus = "new" | "generating" | "ready" | "editing" | "publishing" | "failed";
@@ -88,6 +88,16 @@ export function newId(prefix: string): string {
 }
 
 /** Data access. Plain SQL; every query is parameterised. */
+export interface FormMessageRow {
+  id: string;
+  section_id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  message: string;
+  created_at: string;
+}
+
 export class Repo {
   constructor(readonly db: Db) {}
 
@@ -188,7 +198,10 @@ export class Repo {
     );
     const r = rows[0];
     if (!r) return null;
-    return { version: Number(r.version), spec: typeof r.spec === "string" ? (JSON.parse(r.spec) as SiteSpec) : r.spec };
+    const stored = (typeof r.spec === "string" ? JSON.parse(r.spec) : r.spec) as { specVersion?: unknown };
+    // Specs are stored as written; older versions are migrated on read, so every caller sees the current version.
+    const spec = typeof stored.specVersion === "number" && stored.specVersion < SPEC_VERSION ? migrateSpec(stored) : (stored as SiteSpec);
+    return { version: Number(r.version), spec };
   }
 
   /** Operations of every manual (direct editor) change, oldest first. */
@@ -206,6 +219,41 @@ export class Repo {
       [siteId],
     );
     return rows;
+  }
+
+  // ---------- Contact form messages ----------
+
+  async addFormMessage(m: { siteId: string; sectionId: string; name: string; email: string; phone: string | null; message: string; senderKey: string }): Promise<string> {
+    const { rows } = await this.db.query<{ id: string }>(
+      "insert into form_messages (site_id, section_id, name, email, phone, message, sender_key) values ($1, $2, $3, $4, $5, $6, $7) returning id",
+      [m.siteId, m.sectionId, m.name, m.email, m.phone, m.message, m.senderKey],
+    );
+    // The sender key only serves the rate limits (10 minutes, 1 day); the privacy policy promises it's gone after a day.
+    await this.db.query("update form_messages set sender_key = '' where sender_key <> '' and created_at < now() - interval '1 day'");
+    return String(rows[0]!.id);
+  }
+
+  /** Messages a site received in the last `minutes`, optionally from one sender (rate limits). */
+  async countFormMessages(siteId: string, minutes: number, senderKey?: string): Promise<number> {
+    const { rows } = await this.db.query<{ n: string | number }>(
+      `select count(*) as n from form_messages where site_id = $1 and created_at > now() - make_interval(mins => $2::integer)${senderKey ? " and sender_key = $3" : ""}`,
+      senderKey ? [siteId, minutes, senderKey] : [siteId, minutes],
+    );
+    return Number(rows[0]?.n ?? 0);
+  }
+
+  async listFormMessages(siteId: string): Promise<FormMessageRow[]> {
+    const { rows } = await this.db.query<FormMessageRow>(
+      "select id, section_id, name, email, phone, message, created_at from form_messages where site_id = $1 order by id desc limit 500",
+      [siteId],
+    );
+    return rows.map((r) => ({ ...r, id: String(r.id) }));
+  }
+
+  async deleteFormMessage(siteId: string, id: string): Promise<boolean> {
+    if (!/^\d+$/.test(id)) return false;
+    const { rows } = await this.db.query("delete from form_messages where site_id = $1 and id = $2 returning id", [siteId, id]);
+    return rows.length > 0;
   }
 
   async markPublished(siteId: string, version: number): Promise<void> {

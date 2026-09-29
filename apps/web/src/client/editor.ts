@@ -44,6 +44,7 @@ interface State {
   versions: { version: number; source: string; message: string | null; created_at: string }[];
   placeholders: { path: string; kind: string }[];
   blockers: string[];
+  messages: number;
   spendToday: number;
   cap: number;
 }
@@ -839,6 +840,7 @@ function render(): void {
     h("button", { class: "btn sm", type: "button", "aria-pressed": device === "desktop", onClick: () => { device = "desktop"; render(); } }, "Računalnik"),
     h("label", { style: { margin: 0, fontWeight: 400 } }, h("input", { type: "checkbox", checked: editMode, onChange: (e: Event) => { editMode = (e.target as HTMLInputElement).checked; frame = null; render(); } }), " Urejanje"),
     state.spec ? h("a", { class: "btn sm", href: previewUrl(), target: "_blank" }, "Odpri predogled") : null,
+    h("a", { class: "btn sm", href: `/sites/${siteId}/messages` }, `Sporočila (${state.messages})`),
     state.spec ? h("a", { class: "btn sm", href: `/api/sites/${siteId}/export` }, "Izvozi .zip") : null,
     h("button", { class: "btn sm primary", type: "button", disabled: !state.spec || state.blockers.length > 0, title: state.blockers.length ? "Najprej izpolnite manjkajoče podatke" : "", onClick: async () => { try { const r = await api<{ url: string }>("/publish", { method: "POST", body: "{}" }); toast = `Objavljeno: ${r.url}`; } catch (e) { toast = (e as Error).message; } await load(); } }, "Objavi"),
     s.published_version ? h("a", { href: `/s/${s.slug}/`, target: "_blank" }, `/s/${s.slug}/`) : null,

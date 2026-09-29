@@ -26,3 +26,15 @@ describe("migrateSpec", () => {
     expect(() => migrateSpec(null)).toThrow();
   });
 });
+
+describe("migration 1 → 2 (contact-form section type)", () => {
+  it("turns a stored v1 site into a valid v2 site unchanged apart from the version", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { validateSite } = await import("../src/index.ts");
+    const golden = JSON.parse(readFileSync(new URL("../../../tools/eval/golden/pekarna-kvas.json", import.meta.url), "utf8")) as Record<string, unknown>;
+    const v1 = { ...golden, specVersion: 1 };
+    const v2 = migrateSpec(v1);
+    expect(v2).toEqual({ ...golden, specVersion: 2 });
+    expect(validateSite(v2).ok).toBe(true);
+  });
+});

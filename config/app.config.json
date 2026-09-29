@@ -24,7 +24,9 @@
     "critiqueIterations": 2,
     "maxPhotos": 12,
     "maxUploadBytes": 15000000,
-    "jobConcurrency": 2
+    "jobConcurrency": 2,
+    "formMessagesPerSenderPer10Min": 5,
+    "formMessagesPerSitePerDay": 100
   },
   "targets": {
     "homepagePreviewEur": 0.3,

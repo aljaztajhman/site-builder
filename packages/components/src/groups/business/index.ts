@@ -4,6 +4,7 @@ import { Contact, Faq, OpeningHours } from "./Info.tsx";
 import { Gallery, Products, Rooms, ServiceArea, Team } from "./Media.tsx";
 import { Menu, PriceList } from "./Prices.tsx";
 import { ServicesCards, ServicesList } from "./Services.tsx";
+import { ContactForm } from "./Form.tsx";
 
 // Renderers for the "business" section group, keyed by section type.
 export const businessRenderers = {
@@ -13,6 +14,7 @@ export const businessRenderers = {
   menu: Menu,
   "opening-hours": OpeningHours,
   contact: Contact,
+  "contact-form": ContactForm,
   faq: Faq,
   team: Team,
   gallery: Gallery,
@@ -27,5 +29,6 @@ export const businessLcp: LcpResolvers = {};
 /** Islands (packages/components/islands) a section needs on the page. */
 export const businessIslands: Partial<Record<SectionType, string[]>> = {
   contact: ["consent.js"],
+  "contact-form": ["form.js"],
   gallery: ["gallery.js"],
 };

@@ -6,6 +6,7 @@ import type { ReactElement } from "react";
 import {
   businessDefs,
   contactSection,
+  contactFormSection,
   formatPhone,
   faqSection,
   gallerySection,
@@ -186,6 +187,12 @@ const fixtures = {
       ],
     },
   }),
+  "contact-form": contactFormSection.schema.parse({
+    id: "s_enquiry",
+    type: "contact-form",
+    variant: "stacked",
+    props: { title: "Pošljite povpraševanje", intro: "Odgovorimo v enem delovnem dnevu.", askPhone: true, messageHint: "Opišite, kaj potrebujete." },
+  }),
   "service-area": serviceAreaSection.schema.parse({
     id: "s_area",
     type: "service-area",
@@ -202,6 +209,7 @@ describe("business group registration", () => {
   it("declares islands for the map and the gallery, and no LCP resolvers", () => {
     expect(businessIslands.contact).toEqual(["consent.js"]);
     expect(businessIslands.gallery).toEqual(["gallery.js"]);
+    expect(businessIslands["contact-form"]).toEqual(["form.js"]);
     expect(businessLcp).toEqual({});
   });
 
@@ -548,5 +556,49 @@ describe("gallery island", () => {
     expect(js).not.toMatch(/^\s*import /m);
     expect(js).toContain("showModal");
     expect(js).toContain("data-label-close");
+  });
+});
+
+describe("contact-form", () => {
+  const tag = (out: string, re: RegExp) => out.match(re)?.[0] ?? "";
+
+  it("renders a working plain-HTML form: visible labels bound to fields, correct types and autocomplete", () => {
+    const out = render(fixtures["contact-form"]);
+    const form = tag(out, /<form [^>]*>/);
+    expect(form).toContain('method="post"');
+    expect(form).toContain('action="_submit"');
+    expect(form).toContain("data-contact-form");
+    for (const [name, type, auto] of [["name", "text", "name"], ["email", "email", "email"], ["phone", "tel", "tel"]] as const) {
+      expect(out).toContain(`<label for="s_enquiry-${name}">`);
+      const input = tag(out, new RegExp(`<input id="s_enquiry-${name}"[^>]*>`));
+      expect(input).toContain(`type="${type}"`);
+      expect(input).toMatch(new RegExp(`autocomplete="${auto}"`, "i"));
+      expect(input).toContain(`name="${name}"`);
+    }
+    const textarea = tag(out, /<textarea [^>]*>/);
+    expect(textarea).toContain('name="message"');
+    expect(textarea).toContain("required");
+    expect(textarea).toContain('aria-describedby="s_enquiry-hint"');
+    expect(out).toContain('<input type="hidden" name="section" value="s_enquiry"/>');
+    expect(out).toContain('role="status" aria-live="polite" data-form-status=""');
+    expect(out).toContain("(obvezno)");
+    expect(out).toContain("(neobvezno)");
+  });
+
+  it("hides the honeypot from people and assistive tech, and leaves out the phone when not asked", () => {
+    const out = render({ ...fixtures["contact-form"], props: { ...fixtures["contact-form"].props, askPhone: false } });
+    const hp = tag(out, /<div class="cform__hp" aria-hidden="true">.*?<\/div>/s);
+    const input = tag(hp, /<input [^>]*>/);
+    expect(input).toContain('name="website"');
+    expect(input).toContain('tabindex="-1"');
+    expect(out).not.toContain('name="phone"');
+  });
+
+  it("links the privacy page when the site has one", () => {
+    const privacyPage = { ...testSpec().pages[0]!, id: "p_privacy", kind: "privacy" as const, slug: "zasebnost" };
+    const ctx = testCtx(testSpec({ pages: [...testSpec().pages, privacyPage] }));
+    const out = render(fixtures["contact-form"], ctx);
+    expect(tag(out, /<p class="cform__privacy">.*?<\/p>/s)).toContain(`${"Varstvo osebnih podatkov"}</a>`);
+    expect(render(fixtures["contact-form"])).not.toMatch(/cform__privacy[^<]*<a /);
   });
 });

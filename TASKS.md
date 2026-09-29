@@ -31,7 +31,9 @@ Draft plan: docs/phases/PHASE-2.md — 5 decisions there are the owner's (sign-i
 - [ ] Accounts: email + magic link sign-in, sessions, one owner per site (replaces the shared access password for clients; keep it for the internal dashboard)
 - [ ] Free preview limits from PRODUCT.md: homepage only, watermarked, not publishable, email-verified, rate-limited per email/IP; limits in config
 - [ ] Visual editor: evaluate Puck against the current direct editor (schema-driven forms + inline text); decide, then build the chosen path. Must stay spec-only (every edit is a spec change)
-- [ ] Contact forms: form component, server endpoint, spam protection (honeypot + rate limit, no third-party captcha before consent), email via Resend, submissions stored per site
+- [x] Contact forms (2026-09-29): `contact-form` section (spec v2, identity migration, stored specs migrated on read), plain-HTML form + `form.js` island, public `_submit` endpoint (published forms only, honeypot, per-sender and per-site rate limits, IP kept only as a keyed hash, cleared after a day), messages page with delete in the dashboard, privacy policy text when a site has a form, CSP `form-action`/`connect-src 'self'`. Tested: unit + endpoint (12), Chromium end to end over HTTP (JS at 360 px, no JS, preview sends nothing, CSP regression caught), offline eval 10/10 with a form on racunovodstvo-seliskar (LH 99/100/100/100, axe 0), live chat edit "add a contact form" → valid `contact-form` first try (€0.05); `remote-smoke.ts` submits and deletes a test message
+- [ ] Contact form email notification to the owner (Resend) — waits on the sending-domain decision
+- [ ] Contact form in an offline export shows a note and sends nothing; a site moved to another host needs its own form handling
 - [ ] Transactional email via Resend (magic links, form notifications); domain + DNS records
 - [ ] Mobile owner flows: the dashboard usable at 360 px (owners manage the site from a phone)
 - [ ] Eval: add auth/limits checks to the deployed smoke test (`remote-smoke.ts`)

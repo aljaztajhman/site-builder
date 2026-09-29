@@ -14,6 +14,7 @@ function legalFacts(ctx: RenderCtx): LegalFacts {
     email: <EmailLink ctx={ctx} />,
     phone: <PhoneLink ctx={ctx} />,
     date: formatDate(new Date()),
+    contactForm: ctx.site.pages.some((p) => p.sections.some((s) => s.type === "contact-form")),
     limitations: (
       <Ph
         p={{

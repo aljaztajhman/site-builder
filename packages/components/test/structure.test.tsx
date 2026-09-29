@@ -30,6 +30,19 @@ describe("legal", () => {
   const privacy = legal.schema.parse({ id: "s_privacy", type: "legal", variant: "default", props: { kind: "privacy" } });
   const a11y = legal.schema.parse({ id: "s_a11y", type: "legal", variant: "default", props: { kind: "accessibility" } });
 
+  it("describes the contact form's data only when the site has a form", () => {
+    expect(html(<Legal section={privacy} ctx={testCtx()} index={0} />)).not.toContain("kontaktni obrazec");
+    const spec = testSpec();
+    const withForm = testSpec({
+      pages: [{ ...spec.pages[0]!, sections: [...spec.pages[0]!.sections, { id: "s_form", type: "contact-form", variant: "stacked", props: { title: "Pišite nam", askPhone: false } }] }, ...spec.pages.slice(1)],
+    });
+    const out = html(<Legal section={privacy} ctx={testCtx(withForm)} index={0} />);
+    expect(out).toContain("Ko nas pokličete, nam pišete ali izpolnite obrazec");
+    expect(out).toContain("zgoščeno obliko vašega naslova IP");
+    const en = html(<Legal section={privacy} ctx={{ ...testCtx(withForm), locale: "en", t: uiStrings("en") }} index={0} />);
+    expect(en).toContain("use the contact form");
+  });
+
   it("renders the privacy policy from the business facts with a review notice", () => {
     const out = html(<Legal section={privacy} ctx={testCtx()} index={0} />);
     expect(out).toMatch(/<h1 id="s_privacy-title"[^>]*>Varstvo osebnih podatkov<\/h1>/);

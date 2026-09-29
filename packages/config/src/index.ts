@@ -34,6 +34,9 @@ export const AppConfigSchema = z.object({
     maxUploadBytes: z.number().int().positive(),
     /** Generate jobs one worker runs at once; each peaks at ~1.1 GB (Chromium checks). */
     jobConcurrency: z.number().int().min(1).max(8),
+    /** Contact form rate limits: per visitor (hashed IP) and per site. */
+    formMessagesPerSenderPer10Min: z.number().int().positive(),
+    formMessagesPerSitePerDay: z.number().int().positive(),
   }),
   targets: z.object({
     homepagePreviewEur: z.number(),

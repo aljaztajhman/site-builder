@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { SPEC_VERSION } from "@sb/spec";
 import { createDb, createFsStorage, createQueue, migrate, Repo, type Db } from "../src/index.ts";
 
 let db: Db;
@@ -33,7 +34,8 @@ describe("repo", () => {
     const v2 = await repo.saveSpec(site.id, { specVersion: 1, slug: "b" } as never, "edit", "temnejša glava");
     expect([v1, v2]).toEqual([1, 2]);
     expect((await repo.getSpec(site.id))?.version).toBe(2);
-    expect((await repo.getSpec(site.id, 1))?.spec).toEqual({ specVersion: 1 });
+    // Stored at v1, read back migrated to the current version.
+    expect((await repo.getSpec(site.id, 1))?.spec).toEqual({ specVersion: SPEC_VERSION });
 
     await repo.addEvent({ siteId: site.id, stage: "brief", message: "ok" });
     expect((await repo.listEvents(site.id)).map((e) => e.stage)).toEqual(["brief"]);

@@ -91,6 +91,26 @@ export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
     name: "spec_versions.patch",
     sql: `alter table spec_versions add column patch jsonb`,
   },
+  {
+    id: 3,
+    name: "form_messages",
+    // sender_key is a keyed hash of the visitor's IP, used only for rate limits; the IP itself is never stored.
+    sql: `
+      create table form_messages (
+        id bigserial primary key,
+        site_id text not null references sites(id) on delete cascade,
+        section_id text not null,
+        name text not null,
+        email text not null,
+        phone text,
+        message text not null,
+        sender_key text not null,
+        created_at timestamptz not null default now()
+      );
+      create index form_messages_site on form_messages(site_id, id);
+      create index form_messages_sender on form_messages(site_id, sender_key, created_at);
+    `,
+  },
 ];
 
 type Query = (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>;
