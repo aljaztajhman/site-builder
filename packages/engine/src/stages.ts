@@ -34,7 +34,7 @@ import {
 } from "./prompts.ts";
 import { assembleSpec, contentJsonSchema, contentOutputSchema, type ContentOutput } from "./assemble.ts";
 import type { Swatch } from "./palette.ts";
-import { fitImageForModel } from "./images.ts";
+import { fitImageForModel, sliceScreenshot } from "./images.ts";
 import { checkFacts, type FactViolation } from "./facts.ts";
 import { protectedPathIssues } from "./editor.ts";
 
@@ -338,13 +338,22 @@ export function applyPatches(spec: SiteSpec, ops: Operation[], corpus: string): 
 }
 
 // ---------- 5. Critique ----------
+/** Screenshot slices for the critique: ≤ 1568 px long edge and ~1.15 MP each, the sizes the API keeps legible. */
+const CRITIQUE_SLICES = { mobile: { height: 1560, max: 6 }, desktop: { height: 900, max: 2 } } as const;
+
 
 export async function critique(
   client: ModelClient,
   input: { spec: SiteSpec; mobilePng: Uint8Array; desktopPng: Uint8Array; failures: string[]; corpus: string },
 ): Promise<{ issues: string[]; patches: Operation[] }> {
-  const png = (b: Uint8Array) => Buffer.from(b).toString("base64");
-  const [mobilePng, desktopPng] = await Promise.all([fitImageForModel(input.mobilePng), fitImageForModel(input.desktopPng)]);
+  const image = (b: Uint8Array) => ({ type: "image" as const, source: { type: "base64" as const, media_type: "image/png" as const, data: Buffer.from(b).toString("base64") } });
+  // Legible slices: the whole mobile page (it's what most visitors see), the top of the desktop page.
+  const [mobile, desktop] = await Promise.all([
+    sliceScreenshot(await fitImageForModel(input.mobilePng), CRITIQUE_SLICES.mobile.height, CRITIQUE_SLICES.mobile.max),
+    sliceScreenshot(await fitImageForModel(input.desktopPng), CRITIQUE_SLICES.desktop.height, CRITIQUE_SLICES.desktop.max),
+  ]);
+  const label = (what: string, s: { tiles: unknown[]; truncated: boolean }) =>
+    `${what}${s.tiles.length > 1 ? `, top to bottom in ${s.tiles.length} consecutive slices` : ""}${s.truncated ? " (the page continues below the last slice)" : ""}:`;
   const res = await client.call({
     stage: "critique",
     system: [CRITIQUE_SYSTEM, sectionCatalogue()],
@@ -352,10 +361,10 @@ export async function critique(
       {
         role: "user",
         content: [
-          { type: "text", text: "Mobile homepage (360 px):" },
-          { type: "image", source: { type: "base64", media_type: "image/png", data: png(mobilePng) } },
-          { type: "text", text: "Desktop homepage (1280 px):" },
-          { type: "image", source: { type: "base64", media_type: "image/png", data: png(desktopPng) } },
+          { type: "text", text: label("Mobile homepage (360 px)", mobile) },
+          ...mobile.tiles.map(image),
+          { type: "text", text: label("Desktop homepage (1280 px)", desktop) },
+          ...desktop.tiles.map(image),
           {
             type: "text",
             text: `Automated checks reported:\n${input.failures.length ? input.failures.map((f) => `- ${f}`).join("\n") : "- nothing"}\n\nCurrent spec:\n${JSON.stringify(input.spec)}\n\nReturn JSON: {"issues": [...], "patches": [...]}`,
