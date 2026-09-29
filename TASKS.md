@@ -19,7 +19,7 @@ Status against "Done means" (2026-09-29):
 - [x] Deployed: login redirect 400 fixed (#3), live after Railway's deploy pause lifted; verified `/` → 302 → `/login?next=%2F` 200, traversal guard still 400
 - [ ] Deployed: full manual flow on the live URL — intake with own photos, preview mobile/desktop, chat edit, publish, open `/s/{slug}/`, download export, open export offline
 - [x] Deployed: ≥ 2 fixtures generated end to end (pekarna-kvas €0.24, gostilna-zlata-zlica €0.16; all checks pass)
-- [ ] Deployed: Postgres volume still in `sfo` — migrate to `ams` in the Railway dashboard (service config already `ams`; web, worker, bucket in `ams`)
+- [x] Deployed: everything in EU West (Amsterdam). Railway had no migrate button for the volume, so (owner's call) the `sfo` volume was deleted and a new one created in `ams` (2026-09-29); test data lost, the 2 test sites regenerated
 - [ ] Deployed: production environment tracking `main` (only `preview` exists; it now tracks `main`)
 - [x] Monthly Railway cost from measured usage (3 h window, 2026-09-29): memory avg 1.37 GB (worker 0.74, web 0.56, Postgres 0.07) ≈ $13.70, CPU avg 0.02 vCPU ≈ $0.40 → **≈ $15/month + plan fee** at $10/GB·month and $20/vCPU·month (Railway docs); volume and bucket hold < 1 GB (their per-GB prices not confirmed). Budget €50/month
 
@@ -54,6 +54,7 @@ Draft plan: docs/phases/PHASE-2.md — 5 decisions there are the owner's (sign-i
 - [ ] Newsreader font file is 62 KB (target 60)
 - [ ] team:grid looks uneven when only some members have portraits
 - [ ] Railway bucket: confirm virtual-hosted vs path style in the bucket's Credentials tab; S3 keys are validated in code
+- [ ] Railway PR environments are on (`site-builder-pr-5` appeared): each open PR runs a full copy of web, worker and Postgres; decide whether to keep them (cost) or keep only `preview`
 - [ ] Worker replay mode (`MODEL_REPLAY_DIR`) replays the same recorded edit for every chat message; fine for demos only
 
 ## Done (phase 1 build)
