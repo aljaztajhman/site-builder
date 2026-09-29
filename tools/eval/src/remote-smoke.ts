@@ -1,7 +1,7 @@
 /**
  * End-to-end check of a deployed environment on one generated site, the way an owner uses it:
- * chat edit → fill the placeholders in the editor → publish → public page at /s/{slug}/ → export
- * zip opened offline. Costs one chat edit (~€0.02).
+ * chat edit → fill the placeholders in the editor → publish → public page at /s/{slug}/ → contact form
+ * (if the site has one; the test message is deleted) → export zip opened offline. Costs one chat edit (~€0.02).
  *
  *   REMOTE_URL=https://… REMOTE_PASSWORD=… pnpm tsx tools/eval/src/remote-smoke.ts <site-id>
  */
@@ -76,6 +76,24 @@ const page = await fetch(`${base}${pubBody.url}`);
 const html = await page.text();
 step("public page", page.ok && html.includes('lang="sl"'), `HTTP ${page.status}, ${html.length} B`);
 step("public page is noindex", (page.headers.get("x-robots-tag") ?? "").includes("noindex"));
+
+// Contact form, when the site has one: a visitor's message reaches the owner, then the test message is deleted.
+const formId = (s.spec as unknown as { pages: { sections: { id: string; type: string }[] }[] } | null)?.pages
+  .flatMap((p) => p.sections)
+  .find((x) => x.type === "contact-form")?.id;
+if (formId) {
+  const before = ((await (await api(`/api/sites/${siteId}`)).json()) as { messages: number }).messages;
+  const sentForm = await fetch(`${base}/s/${s.site.slug}/_submit`, {
+    method: "POST",
+    headers: { accept: "application/json" },
+    body: new URLSearchParams({ section: formId, name: "Smoke Test", email: "smoke@primer.si", message: "Samodejni preizkus obrazca." }),
+  });
+  const after = ((await (await api(`/api/sites/${siteId}`)).json()) as { messages: number }).messages;
+  step("contact form delivers to the owner", sentForm.ok && after === before + 1, `HTTP ${sentForm.status}, messages ${before} → ${after}`);
+  const list = await (await api(`/sites/${siteId}/messages`)).text();
+  const mid = /messages\/(\d+)\/delete/.exec(list)?.[1];
+  if (mid) await api(`/sites/${siteId}/messages/${mid}/delete`, { method: "POST" });
+}
 
 const exp = await api(`/api/sites/${siteId}/export`);
 const zip = new Uint8Array(await exp.arrayBuffer());

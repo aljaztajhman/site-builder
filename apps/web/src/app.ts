@@ -23,6 +23,7 @@ import { issueSession, clearSession, passwordMatches, requireAuth, loginThrottle
 import { slugify } from "./slug.ts";
 import { loginPage, sitesPage, sitePage } from "./pages.tsx";
 import { clientBundle } from "./client-bundle.ts";
+import { registerFormRoutes } from "./forms.tsx";
 import { createHash } from "node:crypto";
 import { JS_FLAG } from "@sb/components";
 
@@ -70,7 +71,7 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
     c.header(
       "Content-Security-Policy",
       c.req.path.startsWith("/s/") || c.req.path.startsWith("/preview/")
-        ? `default-src 'self'; script-src 'self' '${JS_FLAG_HASH}'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-src https://www.google.com https://maps.google.com; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'`
+        ? `default-src 'self'; script-src 'self' '${JS_FLAG_HASH}'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-src https://www.google.com https://maps.google.com; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'self'`
         : "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'",
     );
   });
@@ -78,6 +79,8 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
   app.use("/login", bodyLimit({ maxSize: 16 * 1024 }));
   app.use("/api/sites", bodyLimit({ maxSize: (config.limits.maxPhotos + 1) * config.limits.maxUploadBytes + 64 * 1024 }));
   app.use("/api/sites/*", bodyLimit({ maxSize: 1024 * 1024 }));
+  // Contact forms: public submit next to published sites, owner's messages in the dashboard.
+  registerFormRoutes(app, { repo, config, secret: auth.secret });
 
   // ---------- Health ----------
   app.get("/health", async (c) => {
@@ -191,6 +194,7 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
       versions: await repo.listVersions(id),
       placeholders: current ? collectPlaceholders(current.spec) : [],
       blockers: current ? await siteBlockers(repo, id, current.spec) : [],
+      messages: (await repo.listFormMessages(id)).length,
       spendToday: await repo.spendToday(),
       cap: config.limits.dailyModelSpendCapEur,
     });

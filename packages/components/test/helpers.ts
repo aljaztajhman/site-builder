@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import type { ReactElement } from "react";
-import { DIRECTIONS, isPlaceholder, mapsUrl, type Business, type Page, type SiteSpec } from "@sb/spec";
+import { DIRECTIONS, SPEC_VERSION, isPlaceholder, mapsUrl, type Business, type Page, type SiteSpec } from "@sb/spec";
 import { uiStrings } from "../src/i18n.ts";
 import type { RenderCtx } from "../src/types.ts";
 
@@ -41,7 +41,7 @@ const dir = DIRECTIONS[0]!;
 
 export function testSpec(overrides: Partial<SiteSpec> = {}): SiteSpec {
   return {
-    specVersion: 1,
+    specVersion: SPEC_VERSION,
     slug: "salon-lipa",
     locales: { default: "sl", enabled: ["sl"] },
     business: FULL_BUSINESS,

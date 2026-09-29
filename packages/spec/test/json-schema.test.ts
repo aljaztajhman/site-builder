@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SECTION_DEFS, siteSpecJsonSchema, toModelJsonSchema } from "../src/index.ts";
+import { SECTION_DEFS, SPEC_VERSION, siteSpecJsonSchema, toModelJsonSchema } from "../src/index.ts";
 
 type Node = Record<string, unknown>;
 
@@ -26,7 +26,7 @@ function assertStructuredOutputCompatible(schema: Record<string, unknown>): void
 describe("model JSON Schema export", () => {
   it("exports the whole site spec with its version field (for prompts; not sent as a structured-output schema)", () => {
     const schema = siteSpecJsonSchema() as { properties: Record<string, { const?: number }>; required: string[] };
-    expect(schema.properties.specVersion?.const).toBe(1);
+    expect(schema.properties.specVersion?.const).toBe(SPEC_VERSION);
     expect(schema.required).toContain("specVersion");
   });
 

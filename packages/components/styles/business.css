@@ -995,3 +995,101 @@
 [data-imagery="offset-block"] .s-services-cards--compact .svc-card__media::before {
   content: none;
 }
+
+/* ---------- contact-form ---------- */
+.cform {
+  display: grid;
+  gap: var(--space-block);
+}
+.cform__form {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 36rem;
+}
+.cform__field {
+  display: grid;
+  gap: 0.375rem;
+}
+.cform__field > label {
+  font-weight: 600;
+}
+.cform__req {
+  font-weight: 400;
+  font-size: var(--fs-sm);
+  color: var(--c-muted);
+}
+/* 16 px text (no zoom on phones); borders use the muted text colour, which is contrast-checked against the page. */
+.cform input,
+.cform textarea {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--c-muted);
+  border-radius: var(--radius);
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: var(--font-body);
+  font-size: max(1rem, var(--fs-base));
+  line-height: 1.4;
+}
+.cform textarea {
+  min-height: 8rem;
+  resize: vertical;
+}
+.tone-alt .cform input,
+.tone-alt .cform textarea {
+  background: var(--c-surface);
+}
+.tone-inverse .cform input,
+.tone-inverse .cform textarea {
+  background: transparent;
+  color: var(--c-on-inverse);
+  border-color: var(--c-on-inverse);
+}
+.tone-inverse .cform__req {
+  color: var(--c-on-inverse);
+}
+/* Body size, not small print: the mobile checklist keeps running text at 16 px or more. */
+.cform__hint,
+.cform__privacy {
+  color: var(--c-muted);
+  margin: 0;
+}
+.tone-inverse .cform__hint,
+.tone-inverse .cform__privacy {
+  color: var(--c-on-inverse);
+}
+.cform__privacy a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+}
+.cform__submit {
+  justify-self: start;
+}
+@media (max-width: 29.99rem) {
+  .cform__submit {
+    justify-self: stretch;
+  }
+}
+.cform__status {
+  margin: 0;
+  font-weight: 600;
+}
+.cform__status:empty {
+  display: none;
+}
+/* Honeypot: off-screen, not display:none (some bots skip hidden fields). */
+.cform__hp {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+@media (min-width: 48rem) {
+  .s-contact-form--split .cform {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    align-items: start;
+  }
+}

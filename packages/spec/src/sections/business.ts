@@ -175,6 +175,24 @@ export const contactSection = defineSection(
   }),
 );
 
+export const contactFormSection = defineSection(
+  {
+    type: "contact-form",
+    group: "business",
+    variants: ["stacked", "split"],
+    description:
+      "An enquiry form the visitor fills in: name, email, optional phone and a message; the owner receives it in the dashboard. Use when the client wants enquiries, quotes or reservation requests by message. stacked: heading above the form. split: heading and intro beside the form on desktop. At most one per page; pair it with contact details, never replace the phone.",
+    images: "none",
+    mobile: "One column; full-width fields with visible labels, 16 px text so phones don't zoom, a full-width 48 px submit button.",
+    a11y: "Heading is an h2. Every field has a visible <label>, correct type (email, tel) and autocomplete; required fields are marked in text; the result is announced in a live region.",
+  },
+  z.strictObject({
+    ...head,
+    askPhone: z.boolean().describe("Also ask for a phone number (optional for the visitor)"),
+    messageHint: text(120).optional().describe("Short hint under the message field, e.g. what to include in a quote request"),
+  }),
+);
+
 export const faqSection = defineSection(
   {
     type: "faq",
@@ -324,6 +342,7 @@ export const businessSchemas = [
   menuSection.schema,
   openingHoursSection.schema,
   contactSection.schema,
+  contactFormSection.schema,
   faqSection.schema,
   teamSection.schema,
   gallerySection.schema,
@@ -339,6 +358,7 @@ export const businessDefs = [
   menuSection,
   openingHoursSection,
   contactSection,
+  contactFormSection,
   faqSection,
   teamSection,
   gallerySection,

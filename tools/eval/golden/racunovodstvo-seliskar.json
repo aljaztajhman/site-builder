@@ -1,5 +1,5 @@
 {
-  "specVersion": 1,
+  "specVersion": 2,
   "slug": "racunovodstvo-seliskar",
   "locales": {
     "default": "sl",
@@ -160,6 +160,17 @@
             ],
             "ownerName": "Branka Seliškar",
             "ownerRole": "direktorica"
+          }
+        },
+        {
+          "id": "s_enquiry",
+          "type": "contact-form",
+          "variant": "split",
+          "props": {
+            "title": "Pošljite povpraševanje",
+            "intro": "Opišite, kaj potrebujete, in pripravimo ponudbo. Odgovorimo v enem delovnem dnevu.",
+            "askPhone": true,
+            "messageHint": "Na primer: vrsta dejavnosti, število računov na mesec, ali ste zavezanec za DDV."
           }
         },
         {
