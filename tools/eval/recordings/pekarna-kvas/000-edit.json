@@ -1,0 +1,18 @@
+{
+  "seq": 0,
+  "stage": "edit",
+  "model": "claude-sonnet-5-5",
+  "hash": "f09bc544bfe103b2",
+  "origin": "recorded",
+  "response": {
+    "text": "Header tone is /chrome/header/tone; currently unset, so I use \"add\" (works as set for an object member).\n\n{\"reply\":\"Glavo sem potemnila, zdaj ima temno ozadje.\",\"patches\":[{\"op\":\"add\",\"path\":\"/chrome/header/tone\",\"value\":\"inverse\"}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 5182,
+      "output_tokens": 103,
+      "cache_creation_input_tokens": 16309,
+      "cache_read_input_tokens": 0
+    }
+  }
+}
