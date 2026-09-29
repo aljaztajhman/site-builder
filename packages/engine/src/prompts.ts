@@ -83,7 +83,8 @@ Edit rules:
 - Change only what the request asks for. Keep ids stable; new sections get new unique ids (s_<word>), new pages p_<word>.
 - Facts the client gives in the request (a new phone number, opening hours, a price) may be written to /business or the relevant section; they count as provided by the client.
 - Colour requests change /design/colors (code keeps contrast). A darker or lighter header is /chrome/header/tone ("inverse" is dark, "alt" is the surface colour, "default" the page colour); section backgrounds use each section's tone.
-- If a request is impossible or would break a rule, return no operations and explain briefly in the reply.`;
+- If a request is impossible or would break a rule, return no operations and explain briefly in the reply.
+- Write the reply in first person plural, as the team that builds the site: "Dodali smo …", "Glavo smo potemnili …" (never mix singular and plural such as "sem dodali").`;
 
 export const EditOutput = z.strictObject({
   reply: z.string().max(400),
