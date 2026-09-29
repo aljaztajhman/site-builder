@@ -1,0 +1,18 @@
+{
+  "seq": 3,
+  "stage": "altText",
+  "model": "claude-sonnet-5-5",
+  "hash": "799f5a01ea6ecdcb",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"images\":[{\"index\":0,\"alt\":\"Svetla zobozdravniška ordinacija z zobozdravniškim stolom in svetilko nad njim.\",\"focalX\":0.5,\"focalY\":0.68,\"heroSuitable\":true},{\"index\":1,\"alt\":\"Čakalnica s štirimi zelenimi stoli v vrsti in veliko zeleno rastlino ob strani.\",\"focalX\":0.42,\"focalY\":0.8,\"heroSuitable\":false},{\"index\":2,\"alt\":\"Zobozdravnica v beli halji stoji ob zobozdravniškem stolu v ordinaciji pred pregledom.\",\"focalX\":0.65,\"focalY\":0.65,\"heroSuitable\":true}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 1813,
+      "output_tokens": 248,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 573
+    }
+  }
+}

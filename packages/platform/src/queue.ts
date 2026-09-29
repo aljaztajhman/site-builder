@@ -26,7 +26,7 @@ export interface JobData {
 
 export interface Queue {
   send<Q extends QueueName>(name: Q, data: JobData[Q]): Promise<string>;
-  work<Q extends QueueName>(name: Q, handler: (data: JobData[Q], jobId: string) => Promise<void>): Promise<void>;
+  work<Q extends QueueName>(name: Q, handler: (data: JobData[Q], jobId: string) => Promise<void>, opts?: { concurrency?: number }): Promise<void>;
   ping(): Promise<void>;
   stop(): Promise<void>;
 }
@@ -52,8 +52,8 @@ export async function createQueue(db: Db, databaseUrl: string): Promise<Queue> {
       if (!id) throw new Error(`Queue ${name} rejected the job`);
       return id;
     },
-    async work(name, handler) {
-      await boss.work<JobData[typeof name]>(name, { pollingIntervalSeconds: 1 }, async (jobs) => {
+    async work(name, handler, opts) {
+      await boss.work<JobData[typeof name]>(name, { pollingIntervalSeconds: 1, localConcurrency: opts?.concurrency ?? 1 }, async (jobs) => {
         for (const job of jobs) await handler(job.data, job.id);
       });
     },

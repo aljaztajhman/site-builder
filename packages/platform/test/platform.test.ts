@@ -70,6 +70,30 @@ describe("queue (pg-boss on PGlite)", () => {
     expect(await got).toEqual({ siteId: "site_x", version: 3 });
     await queue.stop();
   }, 30_000);
+
+  it("runs jobs in parallel with concurrency 2", async () => {
+    const queue = await createQueue(db, "pglite://memory");
+    let running = 0;
+    let peak = 0;
+    let done = 0;
+    const finished = new Promise<void>((resolve) => {
+      void queue.work(
+        "generate",
+        async () => {
+          peak = Math.max(peak, ++running);
+          await new Promise((r) => setTimeout(r, 1500));
+          running--;
+          if (++done === 2) resolve();
+        },
+        { concurrency: 2 },
+      );
+    });
+    await queue.send("generate", { siteId: "site_a", scope: "home" });
+    await queue.send("generate", { siteId: "site_b", scope: "home" });
+    await finished;
+    expect(peak).toBe(2);
+    await queue.stop();
+  }, 30_000);
 });
 
 describe("fs storage", () => {

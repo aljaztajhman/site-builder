@@ -23,7 +23,8 @@
     "contentRetries": 2,
     "critiqueIterations": 2,
     "maxPhotos": 12,
-    "maxUploadBytes": 15000000
+    "maxUploadBytes": 15000000,
+    "jobConcurrency": 2
   },
   "targets": {
     "homepagePreviewEur": 0.3,
