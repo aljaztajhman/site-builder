@@ -1,0 +1,20 @@
+{
+  "name": "@sb/engine",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.129.0",
+    "@axe-core/playwright": "^4.13.0",
+    "@sb/components": "workspace:*",
+    "@sb/config": "workspace:*",
+    "@sb/render": "workspace:*",
+    "@sb/spec": "workspace:*",
+    "fast-json-patch": "^3.1.1",
+    "lighthouse": "^13.5.0",
+    "playwright": "^1.63.0",
+    "sharp": "^0.35.5",
+    "zod": "^4.6.5"
+  }
+}
