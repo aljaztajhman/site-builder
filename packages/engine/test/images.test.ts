@@ -17,3 +17,22 @@ describe("fitImageForModel", () => {
     expect(await fitImageForModel(small)).toBe(small);
   });
 });
+
+describe("sliceScreenshot", () => {
+  it("cuts a long page into consecutive slices and says when it stops early", async () => {
+    const { sliceScreenshot } = await import("../src/index.ts");
+    const r = await sliceScreenshot(await png(360, 5000), 1560, 6);
+    const heights = await Promise.all(r.tiles.map(async (t) => (await sharp(t).metadata()).height));
+    expect(heights).toEqual([1560, 1560, 1560, 320]);
+    expect(r.truncated).toBe(false);
+    const capped = await sliceScreenshot(await png(1280, 5000), 900, 2);
+    expect(capped.tiles.length).toBe(2);
+    expect(capped.truncated).toBe(true);
+  });
+
+  it("leaves a short page as one untouched image", async () => {
+    const { sliceScreenshot } = await import("../src/index.ts");
+    const short = await png(360, 1200);
+    expect((await sliceScreenshot(short, 1560, 6)).tiles).toEqual([short]);
+  });
+});

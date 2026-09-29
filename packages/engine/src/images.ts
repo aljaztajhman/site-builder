@@ -53,3 +53,19 @@ export async function fitImageForModel(png: Uint8Array, maxSide = 7900): Promise
   if (width <= maxSide && height <= maxSide) return png;
   return new Uint8Array(await sharp(png).resize({ width: maxSide, height: maxSide, fit: "inside" }).png().toBuffer());
 }
+
+/**
+ * Cuts a full-page screenshot into top-to-bottom slices the model can read. The API scales every
+ * image to ≤ 1568 px on its long edge, so one 360×5000 screenshot arrives ~110 px wide; slices of
+ * ≤ 1560 px keep the text legible. Returns at most `maxTiles` slices and whether the page went on.
+ */
+export async function sliceScreenshot(png: Uint8Array, tileHeight: number, maxTiles: number): Promise<{ tiles: Uint8Array[]; truncated: boolean }> {
+  const { width = 0, height = 0 } = await sharp(png).metadata();
+  if (height <= tileHeight) return { tiles: [png], truncated: false };
+  const tiles: Uint8Array[] = [];
+  for (let top = 0; top < height && tiles.length < maxTiles; top += tileHeight) {
+    const h = Math.min(tileHeight, height - top);
+    tiles.push(new Uint8Array(await sharp(png).extract({ left: 0, top, width, height: h }).png().toBuffer()));
+  }
+  return { tiles, truncated: tiles.length * tileHeight < height };
+}
