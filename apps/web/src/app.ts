@@ -54,8 +54,9 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
 
   // Deployed environments are public URLs: nothing here may be indexed, published sites included in phase 1.
   app.use("*", async (c, next) => {
-    // Encoded slashes or backslashes never belong in our URLs; they are how params escape their prefix.
-    if (/%2f|%5c/i.test(c.req.url)) return c.text("Bad request", 400);
+    // Encoded slashes or backslashes never belong in our paths; they are how params escape their prefix.
+    // Only the path: the query legitimately carries them (login?next=%2F).
+    if (/%2f|%5c/i.test(c.req.url.split("?")[0]!)) return c.text("Bad request", 400);
     await next();
     c.header("X-Robots-Tag", "noindex, nofollow");
     c.header("X-Content-Type-Options", "nosniff");
