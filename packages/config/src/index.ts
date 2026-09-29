@@ -59,7 +59,7 @@ export const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)
 let cached: AppConfig | undefined;
 
 /** Loads config/app.config.json. DAILY_SPEND_CAP_EUR overrides the spend cap for deployments. */
-export function loadConfig(file = process.env.APP_CONFIG_PATH ?? path.join(repoRoot, "config/app.config.json")): AppConfig {
+export function loadConfig(file = process.env.APP_CONFIG_PATH || path.join(repoRoot, "config/app.config.json")): AppConfig {
   if (cached && !process.env.APP_CONFIG_PATH) return cached;
   const raw = JSON.parse(readFileSync(file, "utf8")) as unknown;
   const config = AppConfigSchema.parse(raw);

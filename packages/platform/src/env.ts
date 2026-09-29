@@ -23,13 +23,13 @@ function required(name: string): string {
  * Railway buckets expose BUCKET/ENDPOINT/ACCESS_KEY_ID/SECRET_ACCESS_KEY/REGION; those names are accepted too.
  */
 export function storageFromEnv(): Storage {
-  if ((process.env.STORAGE_DRIVER ?? "s3") === "fs") return createFsStorage(process.env.STORAGE_DIR ?? ".data/storage");
+  if ((process.env.STORAGE_DRIVER || "s3") === "fs") return createFsStorage(process.env.STORAGE_DIR || ".data/storage");
   return createS3Storage({
-    endpoint: process.env.S3_ENDPOINT ?? required("ENDPOINT"),
-    region: process.env.S3_REGION ?? process.env.REGION ?? "auto",
-    bucket: process.env.S3_BUCKET ?? required("BUCKET"),
-    accessKeyId: process.env.S3_ACCESS_KEY_ID ?? required("ACCESS_KEY_ID"),
-    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY ?? required("SECRET_ACCESS_KEY"),
+    endpoint: process.env.S3_ENDPOINT || required("ENDPOINT"),
+    region: process.env.S3_REGION || process.env.REGION || "auto",
+    bucket: process.env.S3_BUCKET || required("BUCKET"),
+    accessKeyId: process.env.S3_ACCESS_KEY_ID || required("ACCESS_KEY_ID"),
+    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || required("SECRET_ACCESS_KEY"),
     // MinIO (S3_* variables) needs path-style URLs; Railway buckets (BUCKET/ENDPOINT/...) use
     // virtual-hosted style unless the bucket's Credentials tab says otherwise.
     forcePathStyle: process.env.S3_FORCE_PATH_STYLE ? process.env.S3_FORCE_PATH_STYLE === "true" : Boolean(process.env.S3_ENDPOINT),

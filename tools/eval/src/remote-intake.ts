@@ -3,6 +3,8 @@
  * log in, upload description + photos + logo, wait for generation, report status and cost.
  *
  *   REMOTE_URL=https://… REMOTE_PASSWORD=… pnpm tsx tools/eval/src/remote-intake.ts <fixture-id> [<fixture-id> …]
+ *
+ * Needs the fixture photos: `pnpm fixtures:photos`.
  */
 import { readFile } from "node:fs/promises";
 import { loadFixture } from "./fixtures/load.ts";

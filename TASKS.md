@@ -26,13 +26,16 @@ Phase 1 plan: docs/phases/PHASE-1.md. Tick only what has been run and checked.
 - [x] Offline eval: 10/10 golden sites pass every check (eval/offline-report.md, eval/offline-contact-sheet.png)
 
 ## Needs the home PC (Docker, gh, railway, API key)
-- [ ] `docker compose up -d && pnpm i && pnpm dev` from a clean clone (Dockerfiles and compose are unverified: no Docker here)
-- [ ] Push to private GitHub repo `site-builder`, open the phase 1 PR, CI green
-- [ ] `pnpm eval` with real model calls (budget €25/run); check the structured-output schema for content is accepted (fallback: `structuredOutputForContent: false`)
-- [ ] `pnpm eval --record` and replace synthetic recordings with real ones for unit tests
+- [x] `docker compose up -d && pnpm i && pnpm dev` from a clean clone — fixed on the way: `minio/minio` is gone from Docker Hub (now `pgsty/minio` fork, pinned), `tsx watch` hangs on Windows when stdin is a pipe (dev scripts use `node --watch --import tsx`), empty `APP_CONFIG_PATH=`/`PORT=`/`S3_*=` from .env.example were read as values, `POSTGRES_PORT` for machines with a local Postgres on 5432. Local intake (pekarna-kvas, replay) → ready v3, all checks pass; chat edit replay → v4
+- [x] Push to private GitHub repo `site-builder`, open the phase 1 PR, CI green (PR #1, merged)
+- [x] Structured-output schema for content: rejected by the API (union limit) → content uses plain JSON + zod validation + one retry
+- [ ] `pnpm eval` with real model calls on all 10 fixtures (budget €25/run). Done so far: pekarna-kvas only — €0.40, 6/6 checkpoints, 1 of 5 edits fails its check, generation 277 s (target ≤ 240 s; check stage 200 s of it)
+- [ ] `pnpm eval --record` for the other fixtures (pekarna-kvas recorded; replay test uses it: generation + all 5 edits). Recordings were numbered per phase and couldn't replay; the runner now shares one transport per fixture
 - [ ] Tune prompts until the edit checks and cost/time targets hold; report real medians
-- [ ] Railway project: web, worker, Postgres, bucket; PR environments or `preview` env; `ACCESS_PASSWORD` variable; `/health` green; ≥ 2 fixtures generated on the deployed env
+- [x] Railway project `site-builder`, env `preview`: web + worker (Dockerfiles, branch `phase-1`), Postgres, bucket `site-files`; `ACCESS_PASSWORD` set; `/health` green; noindex header
+- [ ] ≥ 2 fixtures generated on the deployed env (`tools/eval/src/remote-intake.ts`; run `pnpm fixtures:photos` first)
 - [ ] Estimate monthly Railway cost from real usage
+- [ ] Point the Railway services at `main` (or a PR environment) now that phase 1 is merged; they still track `phase-1`
 
 ## Found / follow-ups
 - [ ] Accessibility statement date uses render date (changes on republish); make it a spec field if that matters
@@ -43,3 +46,5 @@ Phase 1 plan: docs/phases/PHASE-1.md. Tick only what has been run and checked.
 - [ ] Railway bucket: confirm virtual-hosted vs path style in the bucket's Credentials tab; S3 keys are validated in code
 - [ ] team:grid looks uneven when only some members have portraits
 - [ ] Cormorant Garamond dropped (misplaced carons in the variable font); EB Garamond instead
+- [ ] Railway web/worker/Postgres run in `sfo` (US West) while the bucket is in `ams`; for Slovene users and GDPR, move services to an EU region (Postgres move = volume migration)
+- [ ] Worker replay mode (`MODEL_REPLAY_DIR`) replays the same recorded edit for every chat message; fine for demos only

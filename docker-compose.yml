@@ -6,15 +6,17 @@ services:
       POSTGRES_USER: sitebuilder
       POSTGRES_PASSWORD: sitebuilder
       POSTGRES_DB: sitebuilder
-    ports: ["5432:5432"]
+    # POSTGRES_PORT (.env) when 5432 is taken by a local Postgres install.
+    ports: ["${POSTGRES_PORT:-5432}:5432"]
     volumes: [pgdata:/var/lib/postgresql/data]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U sitebuilder"]
       interval: 5s
       retries: 10
 
+  # minio/minio stopped being published on Docker Hub; pgsty/minio is a maintained fork (same CLI, ships mc).
   minio:
-    image: minio/minio:latest
+    image: pgsty/minio:RELEASE.2026-08-04T00-00-00Z
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: sitebuilder
@@ -28,7 +30,7 @@ services:
 
   # Creates the bucket once MinIO is up.
   minio-init:
-    image: minio/mc:latest
+    image: pgsty/minio:RELEASE.2026-08-04T00-00-00Z
     depends_on:
       minio:
         condition: service_healthy
