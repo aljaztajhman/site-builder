@@ -19,7 +19,7 @@ Phase 1 plan: docs/phases/PHASE-1.md. Tick only what has been run and checked.
 - [x] Web: access password, noindex, intake → progress → preview (mobile/desktop) → edit → publish → export, `/s/{slug}/`, `/health`
 - [x] Worker service; pipeline replay test (synthetic recordings, no network)
 - [x] `pnpm eval` (live / `--record` / `--replay` / `--offline`), report.md + contact-sheet.png
-- [x] Docker Compose (Postgres, MinIO), Dockerfiles (web; worker on Playwright image), `railway/*.json`
+- [x] Docker Compose (Postgres, MinIO), Dockerfiles (web; worker on Playwright image); Railway service settings set via API (config-as-code is deprecated on Railway)
 - [x] GitHub Actions: typecheck, lint, test on PRs; eval on manual trigger
 - [x] README (setup < 10 lines), .env.example
 - [x] Diff review (subagent): 12 findings fixed — param/path validation + CSP, login redirect, body limits, throttle, storage key guard, protected spec paths, publish under site slug, fact check blocks publish, stricter fact matching, version CAS, queued editor saves, spend-cap pricing, interrupted-job recovery, locked migrations
