@@ -1,0 +1,41 @@
+{
+  "id": "gostilna-zlata-zlica",
+  "businessType": "restaurant",
+  "description": "Gostilna Pri Zlati Žlici je družinska gostilna v starem delu Škofje Loke, Kapucinski trg 7, 4220 Škofja Loka. Vodi jo že tretja generacija družine Bizjak. V kuhinji je glavni kuhar Marko Bizjak, za strežbo in rezervacije skrbi njegova sestra Nina Bizjak.\n\nKuhamo domače jedi iz sestavin lokalnih kmetov: ajdove žgance z ocvirki, ričet, telečjo obaro, pečenke in orehove štruklje. Vsak dan pripravimo dnevno malico (juha, glavna jed, solata) za 11,50 €, ob nedeljah pa nedeljsko kosilo s štirimi hodi za 19 €. Nekaj cen z jedilnega lista: ajdovi žganci z ocvirki in kislim mlekom 9,80 €, telečja obara 8,50 €, orehovi štruklji 5,20 €.\n\nPoleti je odprta terasa pod lipo s 40 sedeži. Za skupine do 60 oseb sprejemamo rezervacije za praznovanja, obletnice in pogostitve po pogrebu.\n\nOdprto: od torka do sobote od 10.00 do 22.00, v nedeljo od 11.00 do 17.00, ob ponedeljkih zaprto.\n\nRezervacije: 04 555 12 34 ali rezervacije@zlata-zlica.example.\n\nPodjetje: Gostinstvo Bizjak d.o.o., matična številka 8765432000, ID za DDV SI87654321.",
+  "logo": null,
+  "photos": [
+    { "file": "photos/01.jpg", "subject": "pročelje stare gostilne z lipo pred vhodom" },
+    { "file": "photos/02.jpg", "subject": "jedilnica z lesenimi mizami in pogrnjenimi prti" },
+    { "file": "photos/03.jpg", "subject": "krožnik ajdovih žgancev z ocvirki" },
+    { "file": "photos/04.jpg", "subject": "orehovi štruklji na belem krožniku" },
+    { "file": "photos/05.jpg", "subject": "terasa pod lipo s pogrnjenimi mizami" },
+    { "file": "photos/06.jpg", "subject": "skleda telečje obare na mizi" },
+    { "file": "photos/07.jpg", "subject": "kuhar pri štedilniku v gostilniški kuhinji" },
+    { "file": "photos/08.jpg", "subject": "pogrnjena miza s kozarci vina za praznovanje" }
+  ],
+  "facts": {
+    "name": "Gostilna Pri Zlati Žlici",
+    "phone": "+38645551234",
+    "email": "rezervacije@zlata-zlica.example",
+    "address": { "street": "Kapucinski trg 7", "postalCode": "4220", "city": "Škofja Loka" },
+    "hours": [
+      { "from": "mon", "to": "mon", "closed": true },
+      { "from": "tue", "to": "sat", "open": "10:00", "close": "22:00" },
+      { "from": "sun", "to": "sun", "open": "11:00", "close": "17:00" }
+    ],
+    "prices": [
+      { "item": "dnevno malico", "amount": 11.5 },
+      { "item": "nedeljsko kosilo s štirimi hodi", "amount": 19 },
+      { "item": "ajdovi žganci z ocvirki in kislim mlekom", "amount": 9.8 },
+      { "item": "telečja obara", "amount": 8.5 },
+      { "item": "orehovi štruklji", "amount": 5.2 }
+    ],
+    "people": [
+      { "name": "Marko Bizjak", "role": "glavni kuhar" },
+      { "name": "Nina Bizjak", "role": "strežba in rezervacije" }
+    ],
+    "legal": { "legalName": "Gostinstvo Bizjak d.o.o.", "registrationNumber": "8765432000", "taxNumber": "SI87654321" },
+    "other": ["tretja generacija", "terasa pod lipo s 40 sedeži", "skupine do 60 oseb"]
+  },
+  "missing": []
+}

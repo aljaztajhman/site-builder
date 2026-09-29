@@ -1,0 +1,31 @@
+name: Eval (real model calls, manual only)
+on:
+  workflow_dispatch:
+    inputs:
+      only:
+        description: "Fixture id to run (empty = all 10)"
+        required: false
+        default: ""
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @sb/engine exec playwright install --with-deps chromium
+      - run: pnpm fixtures:photos
+      - name: Run eval
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: pnpm eval ${{ inputs.only && format('--only {0}', inputs.only) || '' }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval
+          path: eval/

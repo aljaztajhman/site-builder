@@ -14,5 +14,8 @@
     "@sb/render": "workspace:*",
     "@sb/spec": "workspace:*",
     "tsx": "^4.23.15"
+  },
+  "exports": {
+    "./worker": "./src/worker.ts"
   }
 }

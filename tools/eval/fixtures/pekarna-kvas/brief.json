@@ -1,0 +1,41 @@
+{
+  "id": "pekarna-kvas",
+  "businessType": "bakery",
+  "description": "Živjo! Pekarna Kvas je naša mala družinska pekarna v Kamniku, Šutna 30, 1241 Kamnik, čisto na začetku stare ulice. Pečem jaz, Jure Petek, v trgovini pa je večinoma moja žena Katja. Kruh pečemo samo z drožmi (kvasom, ki ga gojimo sami) in ga pustimo vzhajati čez noč, zato je bolj okusen in dlje ostane svež. Moko kupujemo pri mlinu v bližini.\n\nVsak dan imamo pirin kruh z drožmi, rženi kruh, polnozrnate žemlje, rogljičke z maslom in cimetove polže. Ob petkih in sobotah pečemo še orehovo potico in kvašene krofe. Potico se lahko naroči tudi za praznike in praznovanja.\n\nCene: pirin kruh z drožmi 4,20 €, rženi kruh 3,90 €, rogljiček z maslom 1,30 €, orehova potica (1 kg) od 18 €.\n\nOdprto: pon–pet 6.30–18.00, sobota 6.30–12.00, nedelja 7.00–10.00.\n\nNaročila po telefonu 041 555 906 ali na pekarna@pekarna-kvas.example, najmanj dva dni prej. Slike sem naredil sam z mobitelom, upam da so dovolj dobre, če ne bomo poslali nove. Rad bi da se na strani vidi, da je vse ročno delo, brez aditivov in brez zamrznjenega testa.",
+  "logo": "logo.svg",
+  "photos": [
+    { "file": "photos/01.jpg", "subject": "hlebci kruha z drožmi na leseni polici" },
+    { "file": "photos/02.jpg", "subject": "pek oblikuje testo na pomokani mizi" },
+    { "file": "photos/03.jpg", "subject": "rogljički in cimetovi polži na pladnju" }
+  ],
+  "facts": {
+    "name": "Pekarna Kvas",
+    "phone": "+38641555906",
+    "email": "pekarna@pekarna-kvas.example",
+    "address": { "street": "Šutna 30", "postalCode": "1241", "city": "Kamnik" },
+    "hours": [
+      { "from": "mon", "to": "fri", "open": "06:30", "close": "18:00" },
+      { "from": "sat", "to": "sat", "open": "06:30", "close": "12:00" },
+      { "from": "sun", "to": "sun", "open": "07:00", "close": "10:00" }
+    ],
+    "prices": [
+      { "item": "pirin kruh z drožmi", "amount": 4.2 },
+      { "item": "rženi kruh", "amount": 3.9 },
+      { "item": "rogljiček z maslom", "amount": 1.3 },
+      { "item": "orehova potica (1 kg)", "amount": 18, "from": true }
+    ],
+    "people": [
+      { "name": "Jure Petek", "role": "pek" },
+      { "name": "Katja", "role": "trgovina" }
+    ],
+    "other": [
+      "samo z drožmi",
+      "vzhajati čez noč",
+      "Moko kupujemo pri mlinu v bližini",
+      "Ob petkih in sobotah pečemo še orehovo potico in kvašene krofe",
+      "najmanj dva dni prej",
+      "brez aditivov in brez zamrznjenega testa"
+    ]
+  },
+  "missing": ["legal"]
+}

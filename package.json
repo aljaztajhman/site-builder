@@ -3,7 +3,9 @@
   "private": true,
   "type": "module",
   "packageManager": "pnpm@12.6.0",
-  "engines": { "node": ">=24" },
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "dev": "concurrently -k -n web,worker -c blue,magenta \"pnpm --filter @sb/web dev\" \"pnpm --filter @sb/worker dev\"",
     "start:web": "pnpm --filter @sb/web start",
@@ -14,7 +16,9 @@
     "test:watch": "vitest",
     "eval": "tsx tools/eval/src/cli.ts",
     "fonts": "tsx packages/render/scripts/build-fonts.ts",
-    "fixtures:photos": "tsx tools/eval/src/fixtures/generate-photos.ts"
+    "fixtures:photos": "tsx tools/eval/src/fixtures/generate-photos.ts",
+    "dev:lite": "pnpm --filter @sb/web dev",
+    "seed": "tsx tools/eval/src/seed.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

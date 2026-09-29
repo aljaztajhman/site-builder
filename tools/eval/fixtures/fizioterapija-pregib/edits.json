@@ -1,0 +1,32 @@
+[
+  {
+    "message": "Make the booking button more prominent: add a booking section on the homepage.",
+    "lang": "en",
+    "intent": "Add a booking section to the homepage that links to the booking URL.",
+    "check": { "kind": "hasSectionType", "type": "booking", "page": "home" }
+  },
+  {
+    "message": "Dodaj pogosta vprašanja: napotnica ni potrebna, s seboj prinesite izvide, oblecite se udobno.",
+    "lang": "sl",
+    "intent": "Add an FAQ section with the three answers given.",
+    "check": { "kind": "hasSectionType", "type": "faq", "page": "any" }
+  },
+  {
+    "message": "Use a warmer palette.",
+    "lang": "en",
+    "intent": "Shift the primary colour toward warmer hues.",
+    "check": { "kind": "colorWarmer", "path": "/design/colors/primary" }
+  },
+  {
+    "message": "Nova cena za dry needling kot dodatek je 38 €.",
+    "lang": "sl",
+    "intent": "Change the dry needling price from 30 € to 38 €.",
+    "check": { "kind": "textContains", "text": "38" }
+  },
+  {
+    "message": "Krajši uvod na domači strani.",
+    "lang": "sl",
+    "intent": "Shorten the introductory copy on the homepage (hero and first text block).",
+    "check": { "kind": "manual" }
+  }
+]

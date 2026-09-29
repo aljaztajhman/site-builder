@@ -196,6 +196,9 @@ importers:
       '@hono/node-server':
         specifier: ^2.1.3
         version: 2.1.3(hono@4.13.11)
+      '@sb/components':
+        specifier: workspace:*
+        version: link:../../packages/components
       '@sb/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -211,6 +214,12 @@ importers:
       '@sb/spec':
         specifier: workspace:*
         version: link:../../packages/spec
+      '@sb/worker':
+        specifier: workspace:*
+        version: link:../worker
+      esbuild:
+        specifier: ^0.28.2
+        version: 0.28.2
       hono:
         specifier: ^4.13.11
         version: 4.13.11
@@ -291,6 +300,9 @@ importers:
       '@sb/config':
         specifier: workspace:*
         version: link:../config
+      '@sb/platform':
+        specifier: workspace:*
+        version: link:../platform
       '@sb/render':
         specifier: workspace:*
         version: link:../render

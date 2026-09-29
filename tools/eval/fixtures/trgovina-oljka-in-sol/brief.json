@@ -1,0 +1,38 @@
+{
+  "id": "trgovina-oljka-in-sol",
+  "businessType": "shop",
+  "description": "Oljka in sol je majhna trgovina z istrskimi dobrotami v starem mestnem jedru Kopra, na naslovu Kidričeva ulica 22, 6000 Koper. Prodajamo samo izdelke manjših pridelovalcev iz slovenske Istre in Krasa: ekstra deviško oljčno olje, piransko sol, med, vino, pršut, sire, suhe fige, marmelade iz fig in domače testenine.\n\nVeliko kupcev so turisti, zato imamo tudi darilne pakete (gift box), ki jih sestavimo po vaši želji in lepo zavijemo. Za podjetja pripravimo poslovna darila v večjih količinah.\n\nNekaj cen: oljčno olje 0,5 l 14 €, piranska sol 1 kg 4,50 €, darilni paket od 25 €.\n\nOdprto imamo od ponedeljka do petka od 8.00 do 19.00, v soboto od 8.00 do 13.00, ob nedeljah je zaprto. Poleti (julij in avgust) smo odprti tudi ob nedeljah od 9.00 do 12.00.\n\nNaročila za darilne pakete sprejemamo po telefonu 05 555 18 60 ali na narocila@oljka-in-sol.example, paket potem prevzamete v trgovini (click & collect). Online shopa zaenkrat nimamo.\n\nPodjetje: Oljka in sol, trgovina, d.o.o., matična številka 9123456000, ID za DDV SI91234567.",
+  "logo": null,
+  "photos": [
+    { "file": "photos/01.jpg", "subject": "police s steklenicami oljčnega olja v trgovini" },
+    { "file": "photos/02.jpg", "subject": "vrečke piranske soli v leseni košari" },
+    { "file": "photos/03.jpg", "subject": "darilni paket z oljem, soljo in medom" },
+    { "file": "photos/04.jpg", "subject": "vhod v trgovino v kamniti hiši v starem mestnem jedru" },
+    { "file": "photos/05.jpg", "subject": "pult s pršutom in sirom" }
+  ],
+  "facts": {
+    "name": "Oljka in sol",
+    "phone": "+38655551860",
+    "email": "narocila@oljka-in-sol.example",
+    "address": { "street": "Kidričeva ulica 22", "postalCode": "6000", "city": "Koper" },
+    "hours": [
+      { "from": "mon", "to": "fri", "open": "08:00", "close": "19:00" },
+      { "from": "sat", "to": "sat", "open": "08:00", "close": "13:00" },
+      { "from": "sun", "to": "sun", "closed": true }
+    ],
+    "prices": [
+      { "item": "oljčno olje 0,5 l", "amount": 14 },
+      { "item": "piranska sol 1 kg", "amount": 4.5 },
+      { "item": "darilni paket", "amount": 25, "from": true }
+    ],
+    "legal": { "legalName": "Oljka in sol, trgovina, d.o.o.", "registrationNumber": "9123456000", "taxNumber": "SI91234567" },
+    "other": [
+      "slovenske Istre in Krasa",
+      "Poleti (julij in avgust) smo odprti tudi ob nedeljah od 9.00 do 12.00",
+      "poslovna darila",
+      "click & collect",
+      "Online shopa zaenkrat nimamo"
+    ]
+  },
+  "missing": ["people"]
+}

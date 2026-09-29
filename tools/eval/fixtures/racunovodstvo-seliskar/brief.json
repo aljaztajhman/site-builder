@@ -1,0 +1,24 @@
+{
+  "id": "racunovodstvo-seliskar",
+  "businessType": "accountant",
+  "description": "Računovodstvo Seliškar d.o.o., Slovenska ulica 41, 9000 Murska Sobota.\n\nRačunovodski servis za samostojne podjetnike (s.p.), manjša podjetja (d.o.o.) in društva. Delamo od leta 2004. Direktorica je Branka Seliškar, poleg nje sta zaposleni še dve računovodkinji.\n\nStoritve:\n- vodenje poslovnih knjig in davčne evidence,\n- obračun plač in potnih stroškov,\n- obračun DDV in poročanje FURS,\n- letna poročila za AJPES in davčni obračuni,\n- pomoč pri odprtju s.p. ali d.o.o.,\n- davčno svetovanje za začetnike.\n\nDokumente lahko stranke pošiljajo po e-pošti ali jih prinesejo osebno. Stranke sprejemamo tudi v madžarskem jeziku. Večina naših strank je iz Pomurja, delamo pa za podjetja po vsej Sloveniji.\n\nCene so po dogovoru in so odvisne od števila prejetih in izdanih računov, zato jih ne bi objavljali. Delovnega časa tudi ne bi pisali, ker se stranke vedno prej najavijo po telefonu.\n\nTelefon: 02 555 47 10\nE-pošta: pisarna@racunovodstvo-seliskar.example\nMatična številka: 6543210000\nID za DDV: SI65432109\n\nFotografij nimamo, logotipa tudi ne.",
+  "logo": null,
+  "photos": [],
+  "facts": {
+    "name": "Računovodstvo Seliškar d.o.o.",
+    "phone": "+38625554710",
+    "email": "pisarna@racunovodstvo-seliskar.example",
+    "address": { "street": "Slovenska ulica 41", "postalCode": "9000", "city": "Murska Sobota" },
+    "people": [{ "name": "Branka Seliškar", "role": "direktorica" }],
+    "legal": { "legalName": "Računovodstvo Seliškar d.o.o.", "registrationNumber": "6543210000", "taxNumber": "SI65432109" },
+    "other": [
+      "od leta 2004",
+      "še dve računovodkinji",
+      "tudi v madžarskem jeziku",
+      "iz Pomurja",
+      "po vsej Sloveniji",
+      "po e-pošti ali jih prinesejo osebno"
+    ]
+  },
+  "missing": ["prices", "hours", "photos"]
+}

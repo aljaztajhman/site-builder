@@ -1,0 +1,38 @@
+{
+  "id": "frizerstvo-lana",
+  "businessType": "hairdresser",
+  "description": "Pozdravljeni! Sem Lana Vidmar in že devet let vodim Frizerstvo Lana. Salon je na naslovu Stanetova ulica 14, 3000 Celje, v pritličju, parkirišče je za stavbo. Delava dve: jaz in moja sodelavka Petra Kos, ki je specialistka za barvanje in pramene. Strižemo ženske, moške in otroke, poleg tega delamo barvanje, pramene, fen frizure in svečane pričeske za poroke in maturantske plese. Uporabljamo barve brez amoniaka, kar stranke z občutljivim lasiščem zelo cenijo.\n\nCene: žensko striženje s fenom 28 €, moško striženje 15 €, otroško striženje (do 10 let) 10 €, barvanje od 45 €, svečana pričeska od 40 €.\n\nOdprto imamo od torka do petka od 8.00 do 19.00, v soboto od 7.00 do 13.00, v nedeljo in ponedeljek je zaprto. Naročanje po telefonu 041 555 213 ali po mailu lana@frizerstvo-lana.example. Brez naročila težko pridete na vrsto, zato raje pokličite. Na strani bi rada imela tudi nekaj slik iz salona in najinega dela, da ljudje vidijo, kako izgleda pri nas.",
+  "logo": "logo.svg",
+  "photos": [
+    { "file": "photos/01.jpg", "subject": "notranjost frizerskega salona z dvema stoloma in ogledaloma" },
+    { "file": "photos/02.jpg", "subject": "frizerka striže stranko s srednje dolgimi lasmi" },
+    { "file": "photos/03.jpg", "subject": "dolgi pramenasto barvani lasje od zadaj" },
+    { "file": "photos/04.jpg", "subject": "svečana pričeska s kitami za poroko" },
+    { "file": "photos/05.jpg", "subject": "polica s frizerskimi izdelki in škarjami" }
+  ],
+  "facts": {
+    "name": "Frizerstvo Lana",
+    "phone": "+38641555213",
+    "email": "lana@frizerstvo-lana.example",
+    "address": { "street": "Stanetova ulica 14", "postalCode": "3000", "city": "Celje" },
+    "hours": [
+      { "from": "mon", "to": "mon", "closed": true },
+      { "from": "tue", "to": "fri", "open": "08:00", "close": "19:00" },
+      { "from": "sat", "to": "sat", "open": "07:00", "close": "13:00" },
+      { "from": "sun", "to": "sun", "closed": true }
+    ],
+    "prices": [
+      { "item": "žensko striženje s fenom", "amount": 28 },
+      { "item": "moško striženje", "amount": 15 },
+      { "item": "otroško striženje", "amount": 10 },
+      { "item": "barvanje", "amount": 45, "from": true },
+      { "item": "svečana pričeska", "amount": 40, "from": true }
+    ],
+    "people": [
+      { "name": "Lana Vidmar", "role": "lastnica, frizerka" },
+      { "name": "Petra Kos", "role": "frizerka, barvanje in pramene" }
+    ],
+    "other": ["že devet let", "parkirišče je za stavbo", "barve brez amoniaka", "do 10 let"]
+  },
+  "missing": ["legal"]
+}

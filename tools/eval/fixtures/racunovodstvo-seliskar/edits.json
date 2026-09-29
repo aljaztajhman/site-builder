@@ -1,0 +1,32 @@
+[
+  {
+    "message": "Dodaj uradne ure: od ponedeljka do četrtka od 8.00 do 16.00, v petek od 8.00 do 13.00.",
+    "lang": "sl",
+    "intent": "Add office hours, which were missing.",
+    "check": { "kind": "textContains", "text": "16.00" }
+  },
+  {
+    "message": "Add a short FAQ: yes, we work with sole traders; yes, documents can be sent by email.",
+    "lang": "en",
+    "intent": "Add an FAQ section with the two answers given.",
+    "check": { "kind": "hasSectionType", "type": "faq", "page": "any" }
+  },
+  {
+    "message": "Temnejša glava.",
+    "lang": "sl",
+    "intent": "Make the site header visibly darker.",
+    "check": { "kind": "manual" }
+  },
+  {
+    "message": "Change the phone number to 02 555 47 99.",
+    "lang": "en",
+    "intent": "Replace the business phone number.",
+    "check": { "kind": "equals", "path": "/business/phone", "value": "+38625554799" }
+  },
+  {
+    "message": "Na domači strani dodaj poziv, naj nas pokličejo za brezplačen prvi posvet.",
+    "lang": "sl",
+    "intent": "Add a call to action on the homepage offering a free first consultation.",
+    "check": { "kind": "textContains", "text": "brezplač" }
+  }
+]

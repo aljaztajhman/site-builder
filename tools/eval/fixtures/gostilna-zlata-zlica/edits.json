@@ -1,0 +1,32 @@
+[
+  {
+    "message": "Remove the gallery.",
+    "lang": "en",
+    "intent": "Delete the gallery section; photos may stay in other sections.",
+    "check": { "kind": "noSectionType", "type": "gallery" }
+  },
+  {
+    "message": "Dodaj pogosta vprašanja: psi so dobrodošli na terasi, parkirišče je na Kapucinskem trgu, za skupine nad 10 oseb prosimo za rezervacijo.",
+    "lang": "sl",
+    "intent": "Add an FAQ section with the three answers given.",
+    "check": { "kind": "hasSectionType", "type": "faq", "page": "any" }
+  },
+  {
+    "message": "Spremeni telefonsko številko v 04 555 98 76.",
+    "lang": "sl",
+    "intent": "Replace the business phone number.",
+    "check": { "kind": "equals", "path": "/business/phone", "value": "+38645559876" }
+  },
+  {
+    "message": "Make the homepage headline more direct and mention the Sunday lunch.",
+    "lang": "en",
+    "intent": "Rewrite the hero headline so it names the Sunday lunch.",
+    "check": { "kind": "textContains", "text": "nedeljsk" }
+  },
+  {
+    "message": "Na jedilni list dodaj še jagodne cmoke za 6,40 €.",
+    "lang": "sl",
+    "intent": "Add a new menu item with its price, provided by the client.",
+    "check": { "kind": "textContains", "text": "cmok" }
+  }
+]

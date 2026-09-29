@@ -1,0 +1,32 @@
+{
+  "id": "fizioterapija-pregib",
+  "businessType": "physio",
+  "description": "Fizioterapija Pregib, Glavni trg 9, 8000 Novo mesto (vhod z dvorišča, 2. nadstropje).\n\nSem Tina Zupan, dipl. fiziot., 12 let sem delala v bolnišnici, zadnja štiri leta imam svojo ambulanto. Delam individualno, ena ura je samo za enega pacienta. Najpogosteje pridejo ljudje z bolečinami v hrbtu in vratu, po poškodbah kolena in rame, po operacijah ter športniki. Uporabljam manualno terapijo, terapevtske vaje, dry needling in kinesio taping. Napotnica ni potrebna, storitve so samoplačniške.\n\nCenik:\nprva obravnava s pregledom (60 min) 55 €\nterapija (45 min) 45 €\ndry needling kot dodatek 30 €\npaket 5 terapij 200 €\n\nDelam od ponedeljka do petka od 7.00 do 20.00, samo po predhodnem naročilu. Termine si lahko rezervirate online na https://pregib.example/narocanje ali pokličete 051 555 642. Mail: tina@pregib.example.\n\nIzvajalka: Tina Zupan s.p., matična številka 6011223000, davčna številka 60112233.\n\nNa strani bi rada, da je gumb za naročanje zelo viden, ker večina strank rezervira preko telefona zvečer.",
+  "logo": "logo.svg",
+  "photos": [{ "file": "photos/01.jpg", "subject": "terapevtska miza v svetlem prostoru za fizioterapijo" }],
+  "facts": {
+    "name": "Fizioterapija Pregib",
+    "phone": "+38651555642",
+    "email": "tina@pregib.example",
+    "address": { "street": "Glavni trg 9", "postalCode": "8000", "city": "Novo mesto" },
+    "hours": [{ "from": "mon", "to": "fri", "open": "07:00", "close": "20:00" }],
+    "bookingUrl": "https://pregib.example/narocanje",
+    "prices": [
+      { "item": "prva obravnava s pregledom (60 min)", "amount": 55 },
+      { "item": "terapija (45 min)", "amount": 45 },
+      { "item": "dry needling kot dodatek", "amount": 30 },
+      { "item": "paket 5 terapij", "amount": 200 }
+    ],
+    "people": [{ "name": "Tina Zupan", "role": "dipl. fiziot." }],
+    "legal": { "legalName": "Tina Zupan s.p.", "registrationNumber": "6011223000", "taxNumber": "60112233" },
+    "other": [
+      "vhod z dvorišča, 2. nadstropje",
+      "12 let sem delala v bolnišnici",
+      "zadnja štiri leta imam svojo ambulanto",
+      "ena ura je samo za enega pacienta",
+      "Napotnica ni potrebna",
+      "samo po predhodnem naročilu"
+    ]
+  },
+  "missing": []
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "message": "Use a warmer palette, more olive and terracotta.",
+    "lang": "en",
+    "intent": "Shift the primary colour toward warm olive/terracotta hues.",
+    "check": { "kind": "colorWarmer", "path": "/design/colors/primary" }
+  },
+  {
+    "message": "Odstrani galerijo.",
+    "lang": "sl",
+    "intent": "Delete the gallery section.",
+    "check": { "kind": "noSectionType", "type": "gallery" }
+  },
+  {
+    "message": "Add a products section with olive oil, Piran salt and the gift boxes.",
+    "lang": "en",
+    "intent": "Add a products section listing the three products from the brief with their prices.",
+    "check": { "kind": "hasSectionType", "type": "products", "page": "any" }
+  },
+  {
+    "message": "Spremeni telefonsko številko na 05 555 18 69.",
+    "lang": "sl",
+    "intent": "Replace the business phone number.",
+    "check": { "kind": "equals", "path": "/business/phone", "value": "+38655551869" }
+  },
+  {
+    "message": "Mention on the homepage that we now ship gift boxes across Slovenia, free shipping over 75 €.",
+    "lang": "en",
+    "intent": "Add the new shipping offer (free over 75 €) to the homepage copy.",
+    "check": { "kind": "textContains", "text": "75" }
+  }
+]

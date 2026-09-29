@@ -1,0 +1,32 @@
+[
+  {
+    "message": "Dodaj pogosta vprašanja o subvencijah Eko sklada: pomagamo pri vlogi, subvencijo je treba oddati pred začetkom del.",
+    "lang": "sl",
+    "intent": "Add an FAQ section about Eko sklad subsidies with the two answers given.",
+    "check": { "kind": "hasSectionType", "type": "faq", "page": "any" }
+  },
+  {
+    "message": "Add a section listing the towns we cover.",
+    "lang": "en",
+    "intent": "Add a service-area section with the towns from the brief.",
+    "check": { "kind": "hasSectionType", "type": "service-area", "page": "any" }
+  },
+  {
+    "message": "Barve naj bodo temnejše, bolj resne.",
+    "lang": "sl",
+    "intent": "Darken the primary colour.",
+    "check": { "kind": "colorDarker", "path": "/design/colors/primary" }
+  },
+  {
+    "message": "I set up an email after all: matej@rebernik-instalacije.example",
+    "lang": "en",
+    "intent": "Add the business email, which was missing.",
+    "check": { "kind": "equals", "path": "/business/email", "value": "matej@rebernik-instalacije.example" }
+  },
+  {
+    "message": "Dodaj, da imamo 24-urno intervencijo pri puščanju vode.",
+    "lang": "sl",
+    "intent": "Add the new 24-hour emergency call-out for water leaks to the copy.",
+    "check": { "kind": "textContains", "text": "intervencij" }
+  }
+]

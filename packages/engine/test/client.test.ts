@@ -1,0 +1,75 @@
+import { describe, expect, it } from "vitest";
+import { loadConfig } from "@sb/config";
+import { ModelClient, ModelOutputError, ReplayTransport, SpendCapError, requestHash, type CallRecord, type ModelRequest, type ModelResponse, type ModelTransport } from "../src/index.ts";
+
+const config = loadConfig();
+
+function fakeTransport(responses: Partial<ModelResponse>[]): ModelTransport & { seen: ModelRequest[] } {
+  const seen: ModelRequest[] = [];
+  return {
+    seen,
+    async send(req, stage) {
+      seen.push(req);
+      const r = responses.shift() ?? {};
+      return {
+        text: r.text ?? "{}",
+        stopReason: r.stopReason ?? "end_turn",
+        model: r.model ?? stage.model,
+        usage: r.usage ?? { input_tokens: 1_000_000, output_tokens: 100_000, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 },
+      };
+    },
+  };
+}
+
+const req: ModelRequest = { stage: "brief", system: ["sys"], messages: [{ role: "user", content: "hi" }] };
+
+describe("ModelClient", () => {
+  it("logs tokens and € per stage using config prices", async () => {
+    const calls: CallRecord[] = [];
+    const client = new ModelClient({ config, transport: fakeTransport([{}]), spentToday: async () => 0, onCall: async (r) => void calls.push(r) });
+    await client.call(req);
+    expect(calls).toHaveLength(1);
+    const p = config.pricesUsdPerMTok[config.models.brief.model]!;
+    expect(calls[0]!.stage).toBe("brief");
+    expect(calls[0]!.costEur).toBeCloseTo((p.input + p.output * 0.1) * config.eurPerUsd, 6);
+  });
+
+  it("refuses to call once the daily cap is reached", async () => {
+    const t = fakeTransport([{}]);
+    const client = new ModelClient({ config, transport: t, spentToday: async () => config.limits.dailyModelSpendCapEur, onCall: async () => undefined });
+    await expect(client.call(req)).rejects.toBeInstanceOf(SpendCapError);
+    expect(t.seen).toHaveLength(0);
+  });
+
+  it("logs and then rejects truncated or refused output", async () => {
+    const calls: CallRecord[] = [];
+    const client = new ModelClient({ config, transport: fakeTransport([{ stopReason: "max_tokens" }, { stopReason: "refusal" }]), spentToday: async () => 0, onCall: async (r) => void calls.push(r) });
+    await expect(client.call(req)).rejects.toBeInstanceOf(ModelOutputError);
+    await expect(client.call(req)).rejects.toBeInstanceOf(ModelOutputError);
+    expect(calls.map((c) => c.ok)).toEqual([false, false]);
+  });
+
+  it("parses JSON, tolerating a fenced block", async () => {
+    const client = new ModelClient({ config, transport: fakeTransport([{ text: '```json\n{"a":1}\n```' }]), spentToday: async () => 0, onCall: async () => undefined });
+    const { data } = await client.callJson({ ...req, schema: { type: "object" } });
+    expect(data).toEqual({ a: 1 });
+  });
+});
+
+describe("ReplayTransport", () => {
+  const response: ModelResponse = { text: "{}", stopReason: "end_turn", model: "claude-sonnet-5-5", usage: { input_tokens: 1, output_tokens: 1, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 } };
+  const rec = (stage: ModelRequest["stage"], hash = "x") => ({ seq: 0, stage, model: "claude-sonnet-5-5", hash, origin: "synthetic" as const, response });
+
+  it("replays in order and checks the stage", async () => {
+    const t = new ReplayTransport([rec("classify"), rec("brief")]);
+    await t.send({ ...req, stage: "classify" }, config.models.classify);
+    await expect(t.send({ ...req, stage: "design" }, config.models.design)).rejects.toThrow(/stage brief/);
+  });
+
+  it("strict mode rejects a changed prompt", async () => {
+    const good = requestHash(req, config.models.brief.model);
+    const t = new ReplayTransport([rec("brief", good), rec("brief", "stale")], true);
+    await t.send(req, config.models.brief);
+    await expect(t.send(req, config.models.brief)).rejects.toThrow(/re-record/);
+  });
+});
