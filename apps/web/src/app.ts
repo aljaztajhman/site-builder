@@ -23,6 +23,11 @@ import { issueSession, clearSession, passwordMatches, requireAuth, loginThrottle
 import { slugify } from "./slug.ts";
 import { loginPage, sitesPage, sitePage } from "./pages.tsx";
 import { clientBundle } from "./client-bundle.ts";
+import { createHash } from "node:crypto";
+import { JS_FLAG } from "@sb/components";
+
+/** CSP source for the one inline script sites contain, so script-src needs no 'unsafe-inline'. */
+const JS_FLAG_HASH = `sha256-${createHash("sha256").update(JS_FLAG).digest("base64")}`;
 
 export interface AppOptions {
   platform: Platform;
@@ -65,7 +70,7 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
     c.header(
       "Content-Security-Policy",
       c.req.path.startsWith("/s/") || c.req.path.startsWith("/preview/")
-        ? "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-src https://www.google.com https://maps.google.com; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'"
+        ? `default-src 'self'; script-src 'self' '${JS_FLAG_HASH}'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-src https://www.google.com https://maps.google.com; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'`
         : "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'",
     );
   });

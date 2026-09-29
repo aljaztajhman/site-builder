@@ -47,10 +47,12 @@ Draft plan: docs/phases/PHASE-2.md — 5 decisions there are the owner's (sign-i
 - [ ] Domain registration via the Openprovider API
 
 ## Follow-ups (not blocking a phase)
+- [x] A long homepage (kmetija-grabnar, home-scope eval) failed generation: its full-page screenshot exceeded the API's 8000 px limit (400). Screenshots over the limit are shrunk to fit; any critique failure except the spend cap now keeps the checked site
+- [ ] Critique screenshots of long pages are illegible: the API scales every image to ≤ 1568 px on the long edge, so a 360×5000 page reaches the model at ~110 px wide. Tile the full page into ≤ 1568 px slices (cost ↑, eval before/after)
 - [x] Worker ran one job at a time (two deployed intakes queued, 322 s wall each). Measured: worker 0.55 GB idle, 1.69 GB peak with one generate job (limit 8 GB) → generate jobs now run 2 in parallel (`limits.jobConcurrency`); edits and publishes stay sequential (same-site version conflicts)
 - [x] Web idled at ~0.6 GB: not `tsx` itself but Lighthouse (~325 MB) and Playwright (~70 MB) loaded at startup by `@sb/engine`, plus pnpm → pnpm → tsx wrapper processes (~80 MB). Now imported on first check, and the containers start `node --import tsx` directly. Measured in the web image: **621 MB → 174 MB idle**; shutdown on SIGTERM 1 s. Worker idle drops the same way until its first check
 - [ ] Accessibility statement date uses render date (changes on republish); make it a spec field if that matters
-- [ ] CSP allows 'unsafe-inline' scripts (header `js`-class snippet); move it to nav.js or a hash
+- [x] CSP for published pages: script-src drops 'unsafe-inline'; the one inline snippet (header `js` class) is allowed by its SHA-256 hash (tested)
 - [ ] Offline export verified in Chromium only; Firefox may block `file://` fonts from a parent folder — not verified
 - [ ] Newsreader font file is 62 KB (target 60)
 - [ ] team:grid looks uneven when only some members have portraits

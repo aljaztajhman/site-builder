@@ -8,7 +8,8 @@ const CTA_LABEL: Record<"call" | "booking" | "directions", UiKey> = { call: "cal
  * Marks the document as JS-capable before the header paints, so the mobile menu starts collapsed
  * without a layout shift. nav.js sets the same class; without JS the nav stays visible.
  */
-const JS_FLAG = 'document.documentElement.classList.add("js")';
+/** The only inline script on a site (marks JS as available before first paint); the CSP allows it by hash. */
+export const JS_FLAG = 'document.documentElement.classList.add("js")';
 
 export const NAV_ID = "site-nav";
 

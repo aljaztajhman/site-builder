@@ -46,3 +46,10 @@ export async function imageMeta(data: Uint8Array): Promise<{ width: number; heig
   if (!m.width || !m.height || !m.format) throw new Error("Unreadable image");
   return { width: m.width, height: m.height, format: m.format };
 }
+
+/** The API rejects images over 8000 px on any side (a long homepage's full-page screenshot). Smaller images pass through unchanged. */
+export async function fitImageForModel(png: Uint8Array, maxSide = 7900): Promise<Uint8Array> {
+  const { width = 0, height = 0 } = await sharp(png).metadata();
+  if (width <= maxSide && height <= maxSide) return png;
+  return new Uint8Array(await sharp(png).resize({ width: maxSide, height: maxSide, fit: "inside" }).png().toBuffer());
+}
