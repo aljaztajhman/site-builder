@@ -1,0 +1,251 @@
+/* heroes group styles */
+
+/* ---------- hero-split ---------- */
+.hero-split {
+  display: grid;
+  gap: 2rem;
+  align-items: center;
+}
+.hero-split__text {
+  display: grid;
+  gap: 1rem;
+}
+.hero-split__text .actions {
+  margin-top: 0.5rem;
+}
+.hero-split__media {
+  aspect-ratio: 4 / 3;
+}
+@media (min-width: 48rem) {
+  .hero-split {
+    grid-template-columns: 1.1fr 1fr;
+    gap: 3rem;
+  }
+  .s-hero-split--image-left .hero-split__media {
+    order: -1;
+  }
+  .hero-split__media {
+    aspect-ratio: 4 / 5;
+  }
+}
+
+/* ---------- hero-image ---------- */
+/* Text always sits on a solid inverse panel, never on the photo. */
+.s-hero-image {
+  padding-top: 1rem;
+}
+.hero-image {
+  display: grid;
+}
+.hero-image__media {
+  aspect-ratio: 4 / 3;
+}
+.hero-image__panel {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: 1rem;
+  padding: 1.5rem 1.25rem 1.75rem;
+}
+.hero-image__panel .actions {
+  margin-top: 0.5rem;
+}
+@media (max-width: 47.99rem) {
+  /* Photo and panel form one block: square the seam, round the panel's bottom like the photo's top. */
+  .s-hero-image .hero-image__media {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  .hero-image__panel {
+    border-radius: 0 0 var(--radius) var(--radius);
+  }
+  /* The offset accent block would poke out between photo and panel. */
+  [data-imagery="offset-block"] .s-hero-image .hero-image__media {
+    margin: 0;
+  }
+  [data-imagery="offset-block"] .s-hero-image .hero-image__media::before {
+    content: none;
+  }
+  [data-imagery="rounded"] .hero-image__panel {
+    border-radius: 0 0 calc(var(--radius) * 1.5) calc(var(--radius) * 1.5);
+  }
+  /* Edge-to-edge photo: the panel runs to the edges with it. */
+  [data-imagery="full-bleed"] .s-hero-image {
+    padding-top: 0;
+  }
+  [data-imagery="full-bleed"] .hero-image__panel {
+    border-radius: 0;
+    margin-inline: -1rem;
+    padding-inline: 1rem;
+  }
+}
+@media (min-width: 48rem) {
+  .s-hero-image {
+    padding-top: 2rem;
+  }
+  .hero-image__panel {
+    padding: 2.5rem;
+    border-radius: var(--radius);
+  }
+  .s-hero-image--overlay-bottom .hero-image__media {
+    aspect-ratio: 16 / 9;
+  }
+  .s-hero-image--overlay-bottom .hero-image__panel {
+    width: min(40rem, calc(100% - 4rem));
+    margin-top: -7rem;
+    margin-left: 2rem;
+  }
+  /* overlay-left: panel and photo share one grid cell; the photo fills whatever height the row gets. */
+  .s-hero-image--overlay-left .hero-image > * {
+    grid-area: 1 / 1;
+  }
+  .s-hero-image--overlay-left .hero-image__media {
+    aspect-ratio: auto;
+    align-self: stretch;
+    min-height: 32rem;
+  }
+  .s-hero-image--overlay-left .hero-image__media img {
+    position: absolute;
+    inset: 0;
+  }
+  .s-hero-image--overlay-left .hero-image__panel {
+    align-self: center;
+    justify-self: start;
+    width: min(30rem, 58%);
+    margin: 3rem 0 3rem 2.5rem;
+  }
+}
+@media (min-width: 64rem) {
+  .s-hero-image--overlay-bottom .hero-image__media {
+    aspect-ratio: 2 / 1;
+  }
+  .s-hero-image--overlay-bottom .hero-image__panel {
+    margin-top: -9rem;
+    margin-left: 3rem;
+  }
+  .s-hero-image--overlay-left .hero-image__media {
+    min-height: 36rem;
+  }
+  .s-hero-image--overlay-left .hero-image__panel {
+    margin-left: 3rem;
+  }
+}
+
+/* ---------- hero-type ---------- */
+/* Typography-led: the headline carries the page. Left-aligned, asymmetric on desktop. */
+.s-hero-type {
+  padding-block: calc(var(--space-section) * 1.15) var(--space-section);
+}
+.hero-type {
+  display: grid;
+  gap: 1.5rem;
+}
+.hero-type__head {
+  display: grid;
+  gap: 1rem;
+}
+.hero-type .hero-title {
+  max-width: 22ch;
+}
+.hero-type__body {
+  display: grid;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid currentColor;
+}
+.hero-type__body .actions {
+  margin-top: 0.5rem;
+}
+.hero-facts {
+  display: grid;
+  gap: 1.25rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--c-border);
+}
+.tone-inverse .hero-facts {
+  border-color: currentColor;
+}
+.hero-facts__item {
+  display: grid;
+  gap: 0.25rem;
+}
+.hero-facts dt {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--c-muted);
+}
+.tone-inverse .hero-facts dt {
+  color: var(--c-on-inverse);
+}
+.hero-facts dd {
+  max-width: none;
+}
+.hero-facts__phone {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  font-size: var(--fs-lg);
+  font-weight: 600;
+}
+.hero-facts .hours {
+  max-width: 22rem;
+}
+@media (min-width: 64rem) {
+  .hero-type {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 2rem;
+    row-gap: 2.5rem;
+  }
+  .s-hero-type--large .hero-title {
+    font-size: calc(var(--fs-h1) * 1.3);
+  }
+  .s-hero-type--large .hero-type__head {
+    grid-column: 1 / span 11;
+  }
+  .s-hero-type--large .hero-type__body {
+    grid-column: 6 / -1;
+  }
+  .s-hero-type--with-facts .hero-type__head,
+  .s-hero-type--with-facts .hero-type__body {
+    grid-column: 1 / span 7;
+  }
+  .s-hero-type--with-facts .hero-facts {
+    grid-column: 9 / -1;
+    grid-row: 1 / span 2;
+    align-self: start;
+    padding: 0 0 0 2rem;
+    border-top: 0;
+    border-left: 1px solid var(--c-border);
+  }
+  .tone-inverse.s-hero-type--with-facts .hero-facts {
+    border-color: currentColor;
+  }
+}
+
+/* ---------- page-header ---------- */
+.s-page-header {
+  padding-bottom: calc(var(--space-section) * 0.6);
+}
+.page-header {
+  display: grid;
+  gap: 1rem;
+}
+.page-header > * {
+  max-width: 48rem;
+}
+.page-header__title {
+  font-size: var(--fs-h1);
+}
+.s-page-header:not(.page-header--has-image) .page-header {
+  padding-bottom: calc(var(--space-block) * 0.75);
+  border-bottom: 2px solid currentColor;
+}
+.page-header__media {
+  margin-top: var(--space-block);
+  aspect-ratio: 3 / 2;
+}
+@media (min-width: 48rem) {
+  .page-header__media {
+    aspect-ratio: 5 / 2;
+  }
+}

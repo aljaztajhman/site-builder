@@ -1,0 +1,25 @@
+{
+  "id": "instalacije-rebernik",
+  "businessType": "builder",
+  "description": "Inštalacije Rebernik. Vodovod, ogrevanje, toplotne črpalke, prenove kopalnic.\n\nSem Matej Rebernik, inštalater z mojstrskim izpitom. Delam s štirimi sodelavci, od leta 2011 kot samostojni podjetnik. Naš sedež je Ormoška cesta 18, 2250 Ptuj, ampak delamo večinoma na terenu: Ptuj, Ormož, Slovenska Bistrica, Lenart in okolica Maribora.\n\nKaj delamo:\n- vodovodne in odtočne inštalacije v novogradnjah in pri prenovah\n- talno in radiatorsko ogrevanje\n- montaža in servis toplotnih črpalk zrak-voda\n- zamenjava starih kotlov na olje s toplotno črpalko\n- prenove kopalnic na ključ (skupaj s keramikom)\n\nPri zamenjavi kotla strankam pomagamo tudi pri vlogi za subvencijo Eko sklada. Za vsako delo najprej pridemo na ogled in pripravimo pisno ponudbo, ogled je brezplačen.\n\nCen ne objavljamo, ker je vsak objekt drugačen. Slik za zdaj nimam, bom jih poslal kasneje. Maila ne uporabljam, najlažje me dobite na telefon 041 555 118, če ne dvignem, vas pokličem nazaj isti dan.\n\nMatej Rebernik s.p., matična številka 3987654000, davčna številka 39876543.",
+  "logo": null,
+  "photos": [],
+  "facts": {
+    "name": "Inštalacije Rebernik",
+    "phone": "+38641555118",
+    "address": { "street": "Ormoška cesta 18", "postalCode": "2250", "city": "Ptuj" },
+    "people": [{ "name": "Matej Rebernik", "role": "inštalater z mojstrskim izpitom" }],
+    "legal": { "legalName": "Matej Rebernik s.p.", "registrationNumber": "3987654000", "taxNumber": "39876543" },
+    "other": [
+      "s štirimi sodelavci",
+      "od leta 2011",
+      "Ptuj, Ormož, Slovenska Bistrica, Lenart in okolica Maribora",
+      "toplotnih črpalk zrak-voda",
+      "skupaj s keramikom",
+      "subvencijo Eko sklada",
+      "ogled je brezplačen",
+      "vas pokličem nazaj isti dan"
+    ]
+  },
+  "missing": ["prices", "hours", "photos", "email"]
+}

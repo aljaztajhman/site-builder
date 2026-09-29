@@ -1,0 +1,49 @@
+[
+  {
+    "message": "Temnejša glava prosim, zdaj je preveč bleda.",
+    "lang": "sl",
+    "intent": "Make the site header dark (header tone inverse).",
+    "check": {
+      "kind": "equals",
+      "path": "/chrome/header/tone",
+      "value": "inverse"
+    }
+  },
+  {
+    "message": "Add an FAQ: potica for Sunday can be ordered until Thursday; we don't bake gluten-free bread.",
+    "lang": "en",
+    "intent": "Add an FAQ section with the two answers given.",
+    "check": {
+      "kind": "hasSectionType",
+      "type": "faq",
+      "page": "any"
+    }
+  },
+  {
+    "message": "Toplejše barve, kot skorja kruha.",
+    "lang": "sl",
+    "intent": "Shift the primary colour toward warm crust-brown hues.",
+    "check": {
+      "kind": "colorWarmer",
+      "path": "/design/colors/primary"
+    }
+  },
+  {
+    "message": "Change the Saturday hours to 6.30–13.00.",
+    "lang": "en",
+    "intent": "Change Saturday closing time from 12.00 to 13.00.",
+    "check": {
+      "kind": "textContains",
+      "text": "13.00"
+    }
+  },
+  {
+    "message": "Odstrani galerijo, slik je dovolj drugod.",
+    "lang": "sl",
+    "intent": "Delete the gallery section.",
+    "check": {
+      "kind": "noSectionType",
+      "type": "gallery"
+    }
+  }
+]

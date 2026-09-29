@@ -1,0 +1,32 @@
+[
+  {
+    "message": "Uporabi toplejše barve, bolj lesene.",
+    "lang": "sl",
+    "intent": "Shift the primary colour toward warm, wood-like hues.",
+    "check": { "kind": "colorWarmer", "path": "/design/colors/primary" }
+  },
+  {
+    "message": "Remove the gallery, the photos in the other sections are enough.",
+    "lang": "en",
+    "intent": "Delete the gallery section.",
+    "check": { "kind": "noSectionType", "type": "gallery" }
+  },
+  {
+    "message": "Dodaj pogosta vprašanja: hišni ljubljenčki žal niso dovoljeni, prihod je od 14.00, odhod do 10.00.",
+    "lang": "sl",
+    "intent": "Add an FAQ section with the house rules given.",
+    "check": { "kind": "hasSectionType", "type": "faq", "page": "any" }
+  },
+  {
+    "message": "Change the email to info@grabnar-luce.example",
+    "lang": "en",
+    "intent": "Replace the business email address.",
+    "check": { "kind": "equals", "path": "/business/email", "value": "info@grabnar-luce.example" }
+  },
+  {
+    "message": "Krajši uvod na domači strani.",
+    "lang": "sl",
+    "intent": "Shorten the introductory copy on the homepage (hero and first text block).",
+    "check": { "kind": "manual" }
+  }
+]

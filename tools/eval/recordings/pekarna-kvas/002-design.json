@@ -1,0 +1,18 @@
+{
+  "seq": 2,
+  "stage": "design",
+  "model": "claude-sonnet-5-5",
+  "hash": "65971300cb6fbe99",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"direction\":\"warm-craft\",\"fontPair\":\"fraunces-source-sans\",\"primary\":\"#9a5a1f\",\"accent\":\"#917050\",\"radius\":6,\"baseFontSize\":17,\"scale\":1.25,\"headingWeight\":600,\"headingCase\":\"normal\",\"headingTracking\":-0.01,\"density\":\"regular\",\"shadow\":\"none\",\"reason\":\"Family sourdough bakery with a warm tone. Warm Craft fits with Fraunces headings and the logo's toasted-brown #9a5a1f as the button colour, plus a muted photo brown as accent. White page, offset photo blocks.\"}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 275,
+      "output_tokens": 202,
+      "cache_creation_input_tokens": 4169,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

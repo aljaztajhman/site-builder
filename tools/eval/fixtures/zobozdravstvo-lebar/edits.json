@@ -1,0 +1,32 @@
+[
+  {
+    "message": "Naslov na domači strani naj bo bolj neposreden.",
+    "lang": "sl",
+    "intent": "Rewrite the hero headline to state plainly what the practice offers.",
+    "check": { "kind": "manual" }
+  },
+  {
+    "message": "We decided to publish two prices after all: check-up 45 €, teeth whitening 250 €.",
+    "lang": "en",
+    "intent": "Add the two prices the client now provides (prices were missing).",
+    "check": { "kind": "textContains", "text": "250" }
+  },
+  {
+    "message": "Dodaj predstavitev ekipe: dr. Lebar in asistentka Maja.",
+    "lang": "sl",
+    "intent": "Add a team section with the two people from the brief.",
+    "check": { "kind": "hasSectionType", "type": "team", "page": "any" }
+  },
+  {
+    "message": "Use a darker primary colour, it looks too light.",
+    "lang": "en",
+    "intent": "Darken the primary colour.",
+    "check": { "kind": "colorDarker", "path": "/design/colors/primary" }
+  },
+  {
+    "message": "Ob petkih smo po novem odprti do 15.00.",
+    "lang": "sl",
+    "intent": "Change Friday closing time from 14.00 to 15.00.",
+    "check": { "kind": "textContains", "text": "15.00" }
+  }
+]

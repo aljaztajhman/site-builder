@@ -1,0 +1,18 @@
+{
+  "seq": 4,
+  "stage": "edit",
+  "model": "claude-sonnet-5-5",
+  "hash": "152fe1642647a99b",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"reply\":\"Sobotni delovni čas je zdaj od 6.30 do 13.00.\",\"patches\":[{\"op\":\"replace\",\"path\":\"/business/hours/entries/1/close\",\"value\":\"13:00\"}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 5358,
+      "output_tokens": 74,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 16309
+    }
+  }
+}

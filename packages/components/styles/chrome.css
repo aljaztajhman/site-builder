@@ -1,0 +1,424 @@
+/* ---------- Chrome: header, footer, mobile action bar, consent notice ---------- */
+
+.site-footer [hidden],
+.consent[hidden] {
+  display: none !important;
+}
+
+/* Header. Mobile first: brand + menu button in one row, the nav opens below it. */
+.site-header {
+  background: var(--c-bg);
+  color: var(--c-text);
+  border-bottom: 1px solid var(--c-border);
+}
+/* Header tones re-map the palette inside the header, so every rule below keeps a checked contrast pair. */
+.site-header--alt {
+  --c-bg: var(--c-surface);
+}
+.site-header--inverse {
+  --c-bg: var(--c-inverse);
+  --c-surface: var(--c-inverse);
+  --c-text: var(--c-on-inverse);
+  --c-muted: var(--c-on-inverse);
+  --c-primary: var(--c-on-inverse);
+  --c-on-primary: var(--c-inverse);
+  --c-border: var(--c-inverse);
+}
+.site-header__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  min-height: 4rem;
+  padding-block: 0.5rem;
+}
+.site-header__brand {
+  /* Basis 0: long names wrap inside the brand instead of pushing the menu button to a new row. */
+  flex: 1 1 0;
+  min-width: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  color: var(--c-text);
+  text-decoration: none;
+}
+.site-header__name {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-heading);
+  letter-spacing: var(--tracking-heading);
+  text-transform: var(--case-heading);
+  font-size: var(--fs-lg);
+  line-height: 1.2;
+  overflow-wrap: break-word;
+  hyphens: manual;
+}
+.site-header__logo {
+  width: auto;
+  max-width: 100%;
+  max-height: 2.5rem;
+}
+.site-header__cta {
+  order: 2;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.875rem;
+}
+/* Phones: the header CTA gets its own full-width row so it never squeezes the logo or name. */
+@media (max-width: 47.99rem) {
+  .site-header__cta {
+    order: 4;
+    flex: 1 1 100%;
+  }
+}
+.site-header__cta--wide-only {
+  display: none;
+}
+.nav-toggle {
+  order: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  color: var(--c-text);
+  border: 2px solid currentColor;
+  border-radius: var(--radius);
+  font-weight: 600;
+  cursor: pointer;
+}
+.nav-toggle__icon,
+.nav-toggle__icon::before,
+.nav-toggle__icon::after {
+  display: block;
+  width: 1.125rem;
+  height: 2px;
+  background: currentColor;
+}
+.nav-toggle__icon {
+  position: relative;
+}
+.nav-toggle__icon::before,
+.nav-toggle__icon::after {
+  content: "";
+  position: absolute;
+  left: 0;
+}
+.nav-toggle__icon::before {
+  top: -6px;
+}
+.nav-toggle__icon::after {
+  top: 6px;
+}
+.nav-toggle[aria-expanded="true"] .nav-toggle__icon {
+  background: transparent;
+}
+.nav-toggle[aria-expanded="true"] .nav-toggle__icon::before {
+  top: 0;
+  transform: rotate(45deg);
+}
+.nav-toggle[aria-expanded="true"] .nav-toggle__icon::after {
+  top: 0;
+  transform: rotate(-45deg);
+}
+/* Without JS there is no toggle: the nav is simply listed under the brand row. */
+html:not(.js) .nav-toggle {
+  display: none;
+}
+.site-nav {
+  order: 4;
+  flex: 1 1 100%;
+}
+.site-nav__list {
+  display: grid;
+  border-top: 1px solid var(--c-border);
+}
+.site-nav__list a {
+  display: flex;
+  align-items: center;
+  min-height: 3rem;
+  padding-block: 0.5rem;
+  border-bottom: 1px solid var(--c-border);
+  font-weight: 600;
+  text-decoration: none;
+}
+.site-nav__list a:hover,
+.site-nav__list a[aria-current="page"] {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+@media (max-width: 47.99rem) {
+  html.js .site-nav:not(.is-open) {
+    display: none;
+  }
+  /* Keep focused elements clear of the fixed action bar. */
+  html {
+    scroll-padding-bottom: 5rem;
+  }
+}
+@media (min-width: 48rem) {
+  .site-header__inner {
+    flex-wrap: nowrap;
+    gap: 1rem 2rem;
+    min-height: 4.5rem;
+  }
+  .site-header__brand {
+    flex: 0 1 auto;
+    margin-right: auto;
+  }
+  .nav-toggle {
+    display: none;
+  }
+  .site-nav {
+    order: 2;
+    flex: 0 1 auto;
+  }
+  .site-nav__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.5rem;
+    border: 0;
+  }
+  .site-nav__list a {
+    min-height: 2.75rem;
+    padding-block: 0;
+    border: 0;
+  }
+  .site-header__cta,
+  .site-header__cta--wide-only {
+    order: 3;
+    display: inline-flex;
+    flex: none;
+  }
+
+  /* split-cta: brand and nav form a group on the left, a larger CTA stands alone on the right. */
+  .site-header--split-cta .site-header__brand {
+    margin-right: 0;
+  }
+  .site-header--split-cta .site-nav {
+    margin-right: auto;
+  }
+  .site-header--split-cta .site-header__cta {
+    min-height: 3rem;
+    padding: 0.75rem 1.5rem;
+    font-size: var(--fs-lg);
+  }
+
+  /* stacked: brand and CTA on the first row, the nav on its own row under a rule. */
+  .site-header--stacked .site-header__inner {
+    flex-wrap: wrap;
+    padding-bottom: 0;
+  }
+  .site-header--stacked .site-nav {
+    order: 4;
+    flex: 1 1 100%;
+    border-top: 1px solid var(--c-border);
+  }
+  .site-header--stacked .site-header__name {
+    font-size: var(--fs-h3);
+  }
+}
+
+/* Footer */
+.site-footer {
+  background: var(--c-surface);
+  color: var(--c-text);
+  hyphens: manual;
+  border-top: 1px solid var(--c-border);
+  padding-block: 3rem 1.5rem;
+  font-size: var(--fs-sm);
+}
+.site-footer__grid {
+  display: grid;
+  gap: 2rem;
+}
+.site-footer__heading {
+  font-family: var(--font-body);
+  font-size: var(--fs-base);
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  margin-bottom: 0.75rem;
+}
+.site-footer__name {
+  font-weight: 700;
+  font-size: var(--fs-base);
+}
+.site-footer__block > * + * {
+  margin-top: 0.5rem;
+}
+.site-footer__block > .site-footer__heading + * {
+  margin-top: 0;
+}
+.site-footer__link,
+.site-footer__consent {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+}
+/* Footer links are tap targets too: at least 44 px and 8 px apart. */
+.site-footer__links {
+  display: grid;
+  gap: 0.5rem;
+}
+.site-footer__dl {
+  display: grid;
+  gap: 0.5rem;
+}
+.site-footer__dl dt {
+  font-weight: 600;
+}
+.site-footer__dl dd {
+  overflow-wrap: anywhere;
+}
+.site-footer__bottom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  margin-top: 2.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--c-border);
+}
+.site-footer__consent {
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--c-text);
+  font-size: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  cursor: pointer;
+}
+@media (min-width: 48rem) {
+  .site-footer--columns .site-footer__grid {
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    gap: 2rem 3rem;
+  }
+}
+
+/* Compact footer: the same facts in dense rows, headings kept for screen readers only. */
+.site-footer--compact {
+  padding-block: 2rem 1rem;
+}
+.site-footer--compact .site-footer__grid {
+  gap: 1rem;
+}
+.site-footer--compact .site-footer__facts,
+.site-footer--compact .site-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+}
+.site-footer--compact .site-footer__dl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.5rem;
+}
+.site-footer--compact .site-footer__dl > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.35rem;
+}
+.site-footer--compact .site-footer__dl dt::after {
+  content: ":";
+}
+.site-footer--compact .site-footer__bottom {
+  margin-top: 1rem;
+}
+@media (min-width: 48rem) {
+  .site-footer--compact .site-footer__contact {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 1.5rem;
+  }
+  .site-footer--compact .site-footer__contact > * + * {
+    margin-top: 0;
+  }
+}
+
+/* Mobile action bar: call + directions, fixed at the bottom below 48rem. */
+.action-bar {
+  position: fixed;
+  z-index: 50;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem calc(0.5rem + env(safe-area-inset-bottom, 0px));
+  background: var(--c-bg);
+  color: var(--c-text);
+  border-top: 1px solid var(--c-border);
+}
+.action-bar__btn {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 3rem;
+  padding-inline: 0.75rem;
+}
+body.has-action-bar {
+  padding-bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px));
+}
+body.has-action-bar:not(:has(.action-bar)) {
+  padding-bottom: 0;
+}
+@media (min-width: 48rem) {
+  .action-bar {
+    display: none;
+  }
+  body.has-action-bar {
+    padding-bottom: 0;
+  }
+}
+
+/*
+ * Consent notice. Nothing third-party loads before an explicit click on each embed, so the notice
+ * never needs to block or cover content: on phones it sits in the page flow at the end; on wider
+ * screens it is a small card in the bottom corner.
+ */
+.consent {
+  margin: 1rem;
+  padding: 1rem;
+  background: var(--c-bg);
+  color: var(--c-text);
+  border: 1px solid var(--c-text);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  font-size: var(--fs-sm);
+}
+.consent__title {
+  font-size: var(--fs-base);
+  margin-bottom: 0.25rem;
+}
+.consent__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+.consent__actions .btn {
+  flex: 1 1 9rem;
+  font-size: var(--fs-sm);
+}
+@media (max-width: 47.99rem) {
+  .consent,
+  .consent__actions .btn {
+    font-size: var(--fs-base);
+  }
+}
+@media (min-width: 48rem) {
+  .consent {
+    position: fixed;
+    z-index: 60;
+    right: 1rem;
+    bottom: 1rem;
+    margin: 0;
+    max-width: 26rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+  }
+}

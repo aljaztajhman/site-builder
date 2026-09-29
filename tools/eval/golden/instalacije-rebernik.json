@@ -1,0 +1,442 @@
+{
+  "specVersion": 1,
+  "slug": "instalacije-rebernik",
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Inštalacije Rebernik",
+    "type": "builder",
+    "phone": "+38641555118",
+    "email": {
+      "$placeholder": "email"
+    },
+    "address": {
+      "street": "Ormoška cesta 18",
+      "postalCode": "2250",
+      "city": "Ptuj"
+    },
+    "provider": {
+      "legalName": "Matej Rebernik s.p.",
+      "registrationNumber": "3987654000",
+      "taxNumber": "39876543"
+    },
+    "serviceArea": [
+      "Ptuj",
+      "Ormož",
+      "Slovenska Bistrica",
+      "Lenart",
+      "okolica Maribora"
+    ]
+  },
+  "design": {
+    "direction": "industrial",
+    "fontPair": "space-grotesk-plex",
+    "colors": {
+      "background": "#15171a",
+      "surface": "#1e2125",
+      "text": "#eef0f2",
+      "muted": "#a7adb4",
+      "primary": "#f2c200",
+      "onPrimary": "#15171a",
+      "accent": "#f2c200",
+      "border": "#363a40",
+      "inverse": "#2b2f35",
+      "onInverse": "#ffffff"
+    },
+    "radius": 0,
+    "baseFontSize": 17,
+    "scale": 1.25,
+    "headingWeight": 700,
+    "headingCase": "uppercase",
+    "headingTracking": 0.01,
+    "density": "compact",
+    "shadow": "none",
+    "imagery": "monochrome"
+  },
+  "assets": {
+    "images": []
+  },
+  "chrome": {
+    "header": {
+      "variant": "bar",
+      "cta": "call"
+    },
+    "footer": {
+      "variant": "compact"
+    },
+    "mobileActionBar": true
+  },
+  "pages": [
+    {
+      "id": "p_home",
+      "kind": "home",
+      "slug": "",
+      "nav": {
+        "label": "Domov",
+        "show": true
+      },
+      "seo": {
+        "title": "Inštalacije Rebernik, Ptuj – vodovod in ogrevanje",
+        "description": "Vodovod, talno in radiatorsko ogrevanje, toplotne črpalke zrak-voda in prenove kopalnic na ključ. Ptuj, Ormož, Slovenska Bistrica, Lenart in okolica Maribora."
+      },
+      "sections": [
+        {
+          "id": "s_hero",
+          "type": "hero-type",
+          "variant": "with-facts",
+          "props": {
+            "eyebrow": "Inštalater s Ptuja",
+            "headline": "Vodovod, ogrevanje, toplotne črpalke in prenove kopalnic",
+            "intro": "Za vsako delo najprej pridemo na ogled in pripravimo pisno ponudbo. Ogled je brezplačen. Če ne dvignem, vas pokličem nazaj isti dan.",
+            "primary": {
+              "label": "Pokličite za ogled",
+              "target": {
+                "action": "call"
+              }
+            },
+            "secondary": {
+              "label": "Kaj delamo",
+              "target": {
+                "page": "p_home",
+                "section": "s_services"
+              }
+            }
+          }
+        },
+        {
+          "id": "s_services",
+          "type": "services-list",
+          "variant": "two-column",
+          "props": {
+            "title": "Kaj delamo",
+            "items": [
+              {
+                "name": "Vodovod in odtoki",
+                "description": "Vodovodne in odtočne inštalacije v novogradnjah in pri prenovah."
+              },
+              {
+                "name": "Talno in radiatorsko ogrevanje",
+                "description": "Napeljava ogrevanja v novogradnjah in pri prenovah."
+              },
+              {
+                "name": "Toplotne črpalke zrak-voda",
+                "description": "Montaža in servis toplotnih črpalk."
+              },
+              {
+                "name": "Zamenjava kotla na olje",
+                "description": "Star kotel na olje zamenjamo s toplotno črpalko in pomagamo pri vlogi za subvencijo Eko sklada."
+              },
+              {
+                "name": "Prenove kopalnic na ključ",
+                "description": "Celotna prenova kopalnice, skupaj s keramikom."
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_steps",
+          "type": "steps",
+          "variant": "horizontal",
+          "tone": "inverse",
+          "props": {
+            "heading": "Od klica do pisne ponudbe",
+            "steps": [
+              {
+                "title": "Pokličete",
+                "text": "Najlažje me dobite na telefon. Če ne dvignem, vas pokličem nazaj isti dan."
+              },
+              {
+                "title": "Brezplačen ogled",
+                "text": "Pridemo na ogled objekta, ker je vsak objekt drugačen."
+              },
+              {
+                "title": "Pisna ponudba",
+                "text": "Po ogledu pripravimo pisno ponudbo za vaše delo."
+              }
+            ],
+            "action": {
+              "label": "Pokličite za ogled",
+              "target": {
+                "action": "call"
+              }
+            }
+          }
+        },
+        {
+          "id": "s_eko",
+          "type": "text",
+          "variant": "two-column",
+          "props": {
+            "heading": "Namesto kotla na olje toplotna črpalka",
+            "paragraphs": [
+              "Stare kotle na olje menjamo s toplotnimi črpalkami zrak-voda. Pri zamenjavi kotla vam pomagamo tudi pri vlogi za subvencijo Eko sklada."
+            ]
+          }
+        },
+        {
+          "id": "s_area",
+          "type": "service-area",
+          "variant": "list",
+          "tone": "alt",
+          "props": {
+            "title": "Kje delamo",
+            "intro": "Sedež imamo na Ptuju, delamo pa večinoma na terenu.",
+            "action": {
+              "label": "Pokličite",
+              "target": {
+                "action": "call"
+              }
+            }
+          }
+        },
+        {
+          "id": "s_about",
+          "type": "about",
+          "variant": "text-only",
+          "props": {
+            "heading": "Mojstrski izpit in štirje sodelavci",
+            "paragraphs": [
+              "Sem Matej Rebernik, inštalater z mojstrskim izpitom. Od leta 2011 delam kot samostojni podjetnik, danes s štirimi sodelavci.",
+              "Kopalnice prenavljamo skupaj s keramikom, tako da vse dobite iz ene roke."
+            ],
+            "ownerName": "Matej Rebernik",
+            "ownerRole": "inštalater z mojstrskim izpitom"
+          }
+        },
+        {
+          "id": "s_cta",
+          "type": "cta",
+          "variant": "split",
+          "tone": "inverse",
+          "props": {
+            "heading": "Ogled je brezplačen",
+            "text": "Cen ne objavljamo, ker je vsak objekt drugačen. Pokličite in dogovorimo se za ogled.",
+            "primary": {
+              "label": "Pokličite",
+              "target": {
+                "action": "call"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_storitve",
+      "kind": "standard",
+      "slug": "storitve",
+      "nav": {
+        "label": "Storitve",
+        "show": true
+      },
+      "seo": {
+        "title": "Storitve | Inštalacije Rebernik",
+        "description": "Vodovodne in odtočne inštalacije, talno in radiatorsko ogrevanje, toplotne črpalke zrak-voda, zamenjava kotlov in prenove kopalnic na ključ."
+      },
+      "sections": [
+        {
+          "id": "s_storitve_header",
+          "type": "page-header",
+          "variant": "plain",
+          "props": {
+            "title": "Storitve",
+            "intro": "Vodovod, ogrevanje, toplotne črpalke in prenove kopalnic. Za vsako delo najprej pridemo na brezplačen ogled."
+          }
+        },
+        {
+          "id": "s_storitve_list",
+          "type": "services-list",
+          "variant": "rows",
+          "props": {
+            "title": "Dela, ki jih opravljamo",
+            "items": [
+              {
+                "name": "Vodovodne in odtočne inštalacije",
+                "description": "V novogradnjah in pri prenovah."
+              },
+              {
+                "name": "Talno ogrevanje",
+                "description": "Napeljava talnega ogrevanja v novogradnjah in pri prenovah."
+              },
+              {
+                "name": "Radiatorsko ogrevanje",
+                "description": "Napeljava in prenova radiatorskega ogrevanja."
+              },
+              {
+                "name": "Toplotne črpalke zrak-voda",
+                "description": "Montaža in servis."
+              },
+              {
+                "name": "Zamenjava kotla na olje",
+                "description": "Star kotel na olje zamenjamo s toplotno črpalko, pomagamo pri vlogi za subvencijo Eko sklada."
+              },
+              {
+                "name": "Prenove kopalnic na ključ",
+                "description": "Skupaj s keramikom."
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_storitve_faq",
+          "type": "faq",
+          "variant": "accordion",
+          "tone": "alt",
+          "props": {
+            "title": "Pogosta vprašanja",
+            "items": [
+              {
+                "question": "Koliko stane ogled?",
+                "answer": "Ogled je brezplačen. Po ogledu pripravimo pisno ponudbo."
+              },
+              {
+                "question": "Zakaj cen ne objavite?",
+                "answer": "Vsak objekt je drugačen, zato ceno izveste po ogledu, v pisni ponudbi."
+              },
+              {
+                "question": "Ali pomagate pri subvenciji Eko sklada?",
+                "answer": "Da. Pri zamenjavi kotla na olje s toplotno črpalko vam pomagamo pri vlogi za subvencijo."
+              },
+              {
+                "question": "Kako vas dobim?",
+                "answer": "Najlažje po telefonu. Če ne dvignem, vas pokličem nazaj isti dan."
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_storitve_cta",
+          "type": "cta",
+          "variant": "band",
+          "tone": "inverse",
+          "props": {
+            "heading": "Dogovorite se za brezplačen ogled",
+            "text": "Pridemo na teren od Ptuja do okolice Maribora.",
+            "primary": {
+              "label": "Pokličite",
+              "target": {
+                "action": "call"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_kontakt",
+      "kind": "standard",
+      "slug": "kontakt",
+      "nav": {
+        "label": "Kontakt",
+        "show": true
+      },
+      "seo": {
+        "title": "Kontakt | Inštalacije Rebernik",
+        "description": "Inštalacije Rebernik, Ormoška cesta 18, Ptuj. Najlažje nas dobite po telefonu, ogled je brezplačen."
+      },
+      "sections": [
+        {
+          "id": "s_kontakt_header",
+          "type": "page-header",
+          "variant": "plain",
+          "props": {
+            "title": "Kontakt",
+            "intro": "Najlažje me dobite na telefon. Če ne dvignem, vas pokličem nazaj isti dan."
+          }
+        },
+        {
+          "id": "s_kontakt_contact",
+          "type": "contact",
+          "variant": "stacked",
+          "props": {
+            "title": "Sedež na Ptuju",
+            "intro": "Večinoma smo na terenu, zato se za obisk sedeža prej dogovorite po telefonu."
+          }
+        },
+        {
+          "id": "s_kontakt_area",
+          "type": "service-area",
+          "variant": "inline",
+          "tone": "alt",
+          "props": {
+            "title": "Kje delamo"
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "nav": {
+        "label": "Zasebnost",
+        "show": false
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Inštalacije Rebernik",
+        "description": "Kako Inštalacije Rebernik obdelujejo osebne podatke obiskovalcev spletne strani."
+      },
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "variant": "default",
+          "props": {
+            "kind": "privacy"
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "nav": {
+        "label": "Dostopnost",
+        "show": false
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Inštalacije Rebernik",
+        "description": "Izjava o dostopnosti spletne strani Inštalacije Rebernik."
+      },
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "variant": "default",
+          "props": {
+            "kind": "accessibility"
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "kind": "not-found",
+      "slug": "404",
+      "nav": {
+        "label": "Ni najdeno",
+        "show": false
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Inštalacije Rebernik",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "variant": "default",
+          "props": {
+            "title": "Te strani ni mogoče najti",
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo."
+          }
+        }
+      ]
+    }
+  ]
+}

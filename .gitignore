@@ -12,3 +12,4 @@ coverage/
 eval/runs/
 test-results/
 playwright-report/
+.claude/launch.json

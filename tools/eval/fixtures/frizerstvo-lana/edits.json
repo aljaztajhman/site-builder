@@ -1,0 +1,51 @@
+[
+  {
+    "message": "Temnejša glava, prosim.",
+    "lang": "sl",
+    "intent": "Make the site header dark (header tone inverse).",
+    "check": {
+      "kind": "equals",
+      "path": "/chrome/header/tone",
+      "value": "inverse"
+    }
+  },
+  {
+    "message": "Use a warmer palette.",
+    "lang": "en",
+    "intent": "Shift the primary colour toward warmer hues.",
+    "check": {
+      "kind": "colorWarmer",
+      "path": "/design/colors/primary"
+    }
+  },
+  {
+    "message": "Dodaj pogosta vprašanja. Naročanje je obvezno, barve so brez amoniaka, plačilo je možno tudi s kartico.",
+    "lang": "sl",
+    "intent": "Add an FAQ section using the three answers given.",
+    "check": {
+      "kind": "hasSectionType",
+      "type": "faq",
+      "page": "any"
+    }
+  },
+  {
+    "message": "Change the phone number to 041 555 287.",
+    "lang": "en",
+    "intent": "Replace the business phone number.",
+    "check": {
+      "kind": "equals",
+      "path": "/business/phone",
+      "value": "+38641555287"
+    }
+  },
+  {
+    "message": "Dodaj še podatke podjetja v nogo: Lana Vidmar s.p., matična številka 6612345000, davčna številka 51234567.",
+    "lang": "sl",
+    "intent": "Fill the provider information (legal name, registration and tax number) that was missing.",
+    "check": {
+      "kind": "equals",
+      "path": "/business/provider/registrationNumber",
+      "value": "6612345000"
+    }
+  }
+]

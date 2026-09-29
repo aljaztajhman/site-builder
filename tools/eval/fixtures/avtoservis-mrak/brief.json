@@ -1,0 +1,34 @@
+{
+  "id": "avtoservis-mrak",
+  "businessType": "car-repair",
+  "description": "Avtoservis Mrak, Kranj. Smo druzinski servis, delamo od leta 2008, vodi ga Rok Mrak. Naslov: Savska cesta 52, 4000 Kranj (za trgovino s ploscicami, vhod z dvorisca).\n\nServisramo osebna vozila vseh znamk in kombije do 3,5 t. Redni servis po navodilih proizvajalca, tako da garancija ostane, menjava olja in filtrov, zavore, sklopke, zobati jermeni, izpusni sistemi, racunalniska diagnostika, polnjenje klime. Imamo tudi menjavo in hrambo gum ter vlecno sluzbo za Gorenjsko.\n\nNekaj cen: diagnostika 30 eur, polnjenje klime 59 eur, menjava gum 20 eur za komplet, hramba gum 40 eur na sezono. Ostalo po predracunu, ki ga dobite pred popravilom, brez presenecenj.\n\nOdprto pon-pet od 7.00 do 16.00, sobota po dogovoru.\n\nNajhitreje nas dobite na 041 555 730, maila nimamo. Na strani naj bo cim bolj vidna telefonska stevilka, ker vecina strank klice.",
+  "logo": null,
+  "photos": [
+    { "file": "photos/01.jpg", "subject": "osebni avto na dvigalu v avtomehanični delavnici" },
+    { "file": "photos/02.jpg", "subject": "mehanik pregleduje motor pod odprtim pokrovom" },
+    { "file": "photos/03.jpg", "subject": "regal z zloženimi pnevmatikami za hrambo" }
+  ],
+  "facts": {
+    "name": "Avtoservis Mrak",
+    "phone": "+38641555730",
+    "address": { "street": "Savska cesta 52", "postalCode": "4000", "city": "Kranj" },
+    "hours": [{ "from": "mon", "to": "fri", "open": "07:00", "close": "16:00" }],
+    "prices": [
+      { "item": "diagnostika", "amount": 30 },
+      { "item": "polnjenje klime", "amount": 59 },
+      { "item": "menjava gum", "amount": 20 },
+      { "item": "hramba gum", "amount": 40 }
+    ],
+    "people": [{ "name": "Rok Mrak", "role": "vodja servisa" }],
+    "other": [
+      "od leta 2008",
+      "vhod z dvorisca",
+      "kombije do 3,5 t",
+      "garancija ostane",
+      "vlecno sluzbo za Gorenjsko",
+      "sobota po dogovoru",
+      "predracunu"
+    ]
+  },
+  "missing": ["email", "legal"]
+}

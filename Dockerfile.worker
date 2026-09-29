@@ -1,0 +1,11 @@
+# Worker service: pipeline jobs (model calls, sharp, Chromium checks with axe and Lighthouse).
+# Based on the official Playwright image so Chromium and its system libraries are present.
+FROM mcr.microsoft.com/playwright:v1.63.0-noble
+RUN corepack enable
+WORKDIR /app
+COPY . .
+RUN pnpm install --frozen-lockfile
+# Use the browsers baked into the image instead of downloading them again.
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+ENV NODE_ENV=production
+CMD ["pnpm", "start:worker"]

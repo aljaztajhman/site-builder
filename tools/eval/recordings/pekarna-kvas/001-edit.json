@@ -1,0 +1,18 @@
+{
+  "seq": 1,
+  "stage": "edit",
+  "model": "claude-sonnet-5-5",
+  "hash": "133498218b67143d",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"reply\":\"Na strani Naročila sem dodal razdelek z pogostimi vprašanji o naročilu potice za nedeljo in o brezglutenskem kruhu.\",\"patches\":[{\"op\":\"add\",\"path\":\"/pages/2/sections/-\",\"value\":{\"id\":\"s_nar_faq\",\"tone\":\"default\",\"type\":\"faq\",\"props\":{\"title\":\"Pogosta vprašanja\",\"items\":[{\"question\":\"Do kdaj naročim potico za nedeljo?\",\"answer\":\"Potico za nedeljo lahko naročite do četrtka, po telefonu ali e-pošti.\"},{\"question\":\"Ali pečete brezglutenski kruh?\",\"answer\":\"Ne, brezglutenskega kruha ne pečemo.\"}]},\"variant\":\"accordion\"}}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 5206,
+      "output_tokens": 631,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 16309
+    }
+  }
+}

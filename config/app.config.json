@@ -1,0 +1,45 @@
+{
+  "$comment": "Model IDs, effort levels, token prices, plan limits and pricing. Code reads these through @sb/config; never hard-code them.",
+  "models": {
+    "classify": { "model": "claude-haiku-4-5-20251001", "maxTokens": 1024 },
+    "brief": { "model": "claude-sonnet-5-5", "effort": "medium", "maxTokens": 8000 },
+    "design": { "model": "claude-sonnet-5-5", "effort": "medium", "maxTokens": 4000 },
+    "altText": { "model": "claude-sonnet-5-5", "effort": "low", "maxTokens": 2000 },
+    "content": { "model": "claude-sonnet-5-5", "effort": "medium", "maxTokens": 32000 },
+    "critique": { "model": "claude-sonnet-5-5", "effort": "medium", "maxTokens": 8000 },
+    "edit": { "model": "claude-sonnet-5-5", "effort": "medium", "maxTokens": 8000 },
+    "fullBuild": { "model": "claude-opus-5-5", "effort": "medium", "maxTokens": 32000 }
+  },
+  "useFullBuildModel": false,
+  "structuredOutputForContent": false,
+  "pricesUsdPerMTok": {
+    "claude-haiku-4-5-20251001": { "input": 1.0, "output": 5.0, "cacheWrite5m": 1.25, "cacheRead": 0.1 },
+    "claude-sonnet-5-5": { "input": 2.0, "output": 10.0, "cacheWrite5m": 2.5, "cacheRead": 0.2 },
+    "claude-opus-5-5": { "input": 4.0, "output": 20.0, "cacheWrite5m": 5.0, "cacheRead": 0.2 }
+  },
+  "eurPerUsd": 0.86,
+  "limits": {
+    "dailyModelSpendCapEur": 10,
+    "contentRetries": 2,
+    "critiqueIterations": 2,
+    "maxPhotos": 12,
+    "maxUploadBytes": 15000000
+  },
+  "targets": {
+    "homepagePreviewEur": 0.3,
+    "homepagePreviewSeconds": 60,
+    "fullSiteEur": 1.5,
+    "fullSiteSeconds": 240
+  },
+  "checks": {
+    "lighthouse": { "performance": 90, "accessibility": 100, "bestPractices": 95, "seo": 95 },
+    "viewports": { "mobile": { "width": 360, "height": 800 }, "desktop": { "width": 1280, "height": 800 } },
+    "tapTarget": { "primaryMin": 44, "primaryGap": 8, "absoluteMin": 24 }
+  },
+  "images": { "widths": [360, 720, 1080, 1600], "avifQuality": 55, "webpQuality": 72 },
+  "plans": {
+    "$comment": "Phase 1 has no billing; kept here so later phases read from config.",
+    "freePreview": { "pages": ["home"], "model": "claude-sonnet-5-5", "effort": "medium", "watermark": true, "publishable": false },
+    "paid": { "monthlyEurRange": [12, 19], "aiEdits": "fair-use" }
+  }
+}
