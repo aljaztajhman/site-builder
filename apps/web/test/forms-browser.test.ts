@@ -67,6 +67,9 @@ afterAll(async () => {
   await rm(dir, { recursive: true, force: true });
 });
 
+// Sites scroll smoothly unless reduced motion is asked for; on slow CI runners that keeps the button
+// moving while Playwright scrolls it into view, so the tests ask for reduced motion.
+const STILL = { reducedMotion: "reduce" as const };
 type Page = Awaited<ReturnType<CheckBrowser["browser"]["newPage"]>>;
 const fill = async (page: Page, message: string) => {
   await page.getByLabel("Ime in priimek").fill("Ana Novak");
@@ -78,7 +81,7 @@ const fill = async (page: Page, message: string) => {
 
 describe("contact form in a browser", () => {
   it("submits in place on a phone with JavaScript, with no CSP violations", async () => {
-    const ctx = await cb.browser.newContext({ viewport: { width: 360, height: 800 }, isMobile: true, hasTouch: true });
+    const ctx = await cb.browser.newContext({ ...STILL, viewport: { width: 360, height: 800 }, isMobile: true, hasTouch: true });
     const page = await ctx.newPage();
     const problems: string[] = [];
     page.on("console", (m) => m.type() === "error" && problems.push(m.text()));
@@ -96,7 +99,7 @@ describe("contact form in a browser", () => {
   }, 60_000);
 
   it("posts normally without JavaScript and shows a thank-you page", async () => {
-    const ctx = await cb.browser.newContext({ javaScriptEnabled: false });
+    const ctx = await cb.browser.newContext({ ...STILL, javaScriptEnabled: false });
     const page = await ctx.newPage();
     const slug = (await platform.repo.getSite(siteId))!.slug;
     await page.goto(`${base}/s/${slug}/`);
@@ -110,7 +113,7 @@ describe("contact form in a browser", () => {
   }, 60_000);
 
   it("sends nothing from the dashboard preview and says so", async () => {
-    const ctx = await cb.browser.newContext();
+    const ctx = await cb.browser.newContext(STILL);
     const [name, value] = cookie.split("=") as [string, string];
     await ctx.addCookies([{ name, value, url: base }]);
     const page = await ctx.newPage();
