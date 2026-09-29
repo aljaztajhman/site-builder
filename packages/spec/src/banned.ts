@@ -21,7 +21,8 @@ export const BANNED_HEADLINE: { pattern: RegExp; label: string }[] = [
   { pattern: /\bwillkommen\b/iu, label: '"Willkommen" headline' },
 ];
 
-export const EMOJI = /\p{Extended_Pictographic}/u;
+/** Emoji and pictographs. The typographic ©, ® and ™ are Extended_Pictographic too but are allowed. */
+export const EMOJI = /(?![©®™])\p{Extended_Pictographic}/u;
 
 /** "01", "01 /", "02." style numbered labels. */
 export const NUMBERED_LABEL = /^\s*0\d(\s*[/.–-]|\s|$)/;

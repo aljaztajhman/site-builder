@@ -21,7 +21,11 @@ export function minifyCss(css: string): string {
   return css
     .replace(/\/\*[\s\S]*?\*\//g, "")
     .replace(/\s+/g, " ")
-    .replace(/\s*([{};:,>])\s*/g, "$1")
+    // Never remove the space before ":": ".tone-inverse :focus-visible" is a descendant selector.
+    .replace(/\s*([{};,>])\s*/g, "$1")
+    .replace(/:\s+/g, ":")
+    // Inside declaration blocks (innermost braces) the space before ":" can go too.
+    .replace(/\{([^{}]*)\}/g, (_, body: string) => `{${body.replace(/\s+:/g, ":")}}`)
     .replace(/;}/g, "}")
     .trim();
 }

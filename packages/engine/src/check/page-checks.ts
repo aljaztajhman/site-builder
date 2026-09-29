@@ -48,6 +48,8 @@ export interface MobileReport {
  * Runs in the page; keep the function self-contained.
  */
 export async function measurePage(page: Page, opts: { primaryMin: number; primaryGap: number; absoluteMin: number }): Promise<MobileReport> {
+  // tsx/esbuild wrap named functions with a __name() helper that doesn't exist in the page.
+  await page.evaluate("globalThis.__name = globalThis.__name || ((f) => f)");
   return page.evaluate((o) => {
     const describe = (el: Element) => {
       const id = el.id ? `#${el.id}` : "";
@@ -129,7 +131,8 @@ export async function measurePage(page: Page, opts: { primaryMin: number; primar
         if (blur > 12) banned.push(`heavy shadow: ${describe(el)}`);
       }
     }
-    if (/\p{Extended_Pictographic}/u.test(document.body.innerText)) banned.push("emoji in text");
+    const emoji = /(?![©®™])\p{Extended_Pictographic}/u.exec(document.body.innerText);
+    if (emoji) banned.push(`emoji in text: ${emoji[0]}`);
     const sections = [...document.querySelectorAll("main > section")];
     const centred = sections.filter((s) => {
       const heads = [...s.querySelectorAll("h1, h2, p")].filter(visible);

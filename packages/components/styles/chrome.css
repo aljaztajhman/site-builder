@@ -247,6 +247,12 @@ html:not(.js) .nav-toggle {
   display: inline-flex;
   align-items: center;
   min-height: 2.75rem;
+  min-width: 2.75rem;
+}
+/* Footer links are tap targets too: at least 44 px and 8 px apart. */
+.site-footer__links {
+  display: grid;
+  gap: 0.5rem;
 }
 .site-footer__dl {
   display: grid;
@@ -296,7 +302,7 @@ html:not(.js) .nav-toggle {
 .site-footer--compact .site-footer__links {
   display: flex;
   flex-wrap: wrap;
-  gap: 0 1.5rem;
+  gap: 0.5rem 1.5rem;
 }
 .site-footer--compact .site-footer__dl {
   display: flex;
