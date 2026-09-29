@@ -34,6 +34,13 @@ Draft plan: docs/phases/PHASE-2.md — 5 decisions there are the owner's (sign-i
 - [ ] Mobile owner flows: the dashboard usable at 360 px (owners manage the site from a phone)
 - [ ] Eval: add auth/limits checks to the deployed smoke test (`remote-intake.ts`)
 
+## Design system overhaul (branch claude/design-system-overhaul)
+- [x] docs/design/ideas.html: proposal for product tokens/components/screens, generated-site hero and header families, and the researched AI-site give-away list (38 tells with code/critique/new status; Slovene copy rules)
+- [ ] Owner decisions: accent, display face, product name, order of work, approve give-away additions to docs/PRODUCT.md
+- [ ] Product UI: shared stylesheet with the tokens, rewrite pages.tsx and editor.ts styles in place; check with screenshots at 360/1280 and axe
+- [ ] Generated sites: hero families (facts-first, photo-first, type-only, split) and header families per direction; spec version bump + migration + test; eval contact sheet must show no two directions sharing hero and header family
+- [ ] Give-aways into code: no U+2014 in copy, Slovene filler additions, accent-coloured single-side borders, eyebrow case and tracking cap, off-black/off-white bounds, one primary action per hero
+
 ## Later: phase 3 — CMS collections
 - [ ] Collections the client edits: blog, services, price list (cenik), team, events; spec migration + components + editor forms
 - [ ] Per-collection list/detail pages, RSS for the blog, sitemap entries

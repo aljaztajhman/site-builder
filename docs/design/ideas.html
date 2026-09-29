@@ -1,0 +1,802 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Design system proposal</title>
+<meta name="description" content="Design ideas for the site builder: product UI, generated-site directions, and the list of AI-site give-aways we refuse to produce.">
+<style>
+/* Fonts come from the repo (packages/render/assets/fonts), so this page renders with the same files the generated sites use. */
+@font-face{font-family:"Bricolage Grotesque";src:url("../../packages/render/assets/fonts/bricolage-grotesque.woff2") format("woff2");font-weight:200 800;font-display:swap}
+@font-face{font-family:"Figtree";src:url("../../packages/render/assets/fonts/figtree.woff2") format("woff2");font-weight:300 900;font-display:swap}
+@font-face{font-family:"Inter Tight";src:url("../../packages/render/assets/fonts/inter-tight.woff2") format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"Archivo";src:url("../../packages/render/assets/fonts/archivo.woff2") format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"Fraunces";src:url("../../packages/render/assets/fonts/fraunces.woff2") format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"EB Garamond";src:url("../../packages/render/assets/fonts/eb-garamond.woff2") format("woff2");font-weight:400 800;font-display:swap}
+@font-face{font-family:"Karla";src:url("../../packages/render/assets/fonts/karla.woff2") format("woff2");font-weight:200 800;font-display:swap}
+@font-face{font-family:"Source Sans 3";src:url("../../packages/render/assets/fonts/source-sans-3.woff2") format("woff2");font-weight:200 900;font-display:swap}
+
+/* ---------- Proposed product tokens (this page uses them on itself) ---------- */
+:root{
+  --canvas:#f5f3ef;          /* warm neutral page, not white, not cream-yellow */
+  --surface:#ffffff;
+  --surface-2:#ecE9e3;
+  --ink:#151412;
+  --ink-2:#4d4a44;
+  --ink-3:#8a857c;
+  --line:#dcd8d0;
+  --line-2:#c9c4ba;
+  --accent:#156b4a;          /* default: deep green. Switchable below. */
+  --accent-ink:#ffffff;
+  --accent-soft:#e3efe8;
+  --ok:#156b4a;--warn:#9a5b00;--warn-soft:#fbefd9;--danger:#b3261e;--danger-soft:#f9e3e1;
+  --ph:#fff1a8;              /* placeholder mark */
+  --r-1:4px;--r-2:8px;--r-3:12px;
+  --shadow-float:0 8px 24px rgb(20 20 18 / .10), 0 1px 2px rgb(20 20 18 / .08); /* the only shadow: floating things */
+  --font-display:"Bricolage Grotesque","Inter Tight",system-ui,sans-serif;
+  --font-ui:"Figtree","Inter",system-ui,sans-serif;
+  --ease:cubic-bezier(.2,.7,.2,1);
+  color-scheme:light;
+}
+:root[data-accent="orange"]{--accent:#c8471b;--accent-soft:#f8e4dc}
+:root[data-accent="blue"]{--accent:#1f4fd8;--accent-soft:#e2e8fb}
+:root[data-accent="ink"]{--accent:#151412;--accent-soft:#e6e3dd}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--canvas);color:var(--ink);font:16px/1.55 var(--font-ui);-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:600;letter-spacing:-.02em;line-height:1.08;margin:0}
+h1{font-size:clamp(40px,7vw,72px);font-weight:560;letter-spacing:-.035em}
+h2{font-size:clamp(28px,4vw,40px);margin-bottom:12px}
+h3{font-size:20px;letter-spacing:-.01em;margin-bottom:6px}
+p{margin:0 0 12px}
+a{color:inherit;text-underline-offset:3px}
+code{font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;background:var(--surface-2);padding:1px 5px;border-radius:var(--r-1)} /* code on this doc page only: monospace is banned in generated sites and product UI */
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+section.block{padding:72px 0;border-top:1px solid var(--line)}
+.lead{font-size:20px;line-height:1.45;max-width:64ch;color:var(--ink-2)}
+.eyebrow{font-size:13px;font-weight:600;letter-spacing:.02em;color:var(--ink-3);margin-bottom:10px}
+.grid{display:grid;gap:20px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-3);padding:20px}
+.note{background:var(--surface-2);border-radius:var(--r-2);padding:12px 14px;font-size:14px;color:var(--ink-2)}
+.muted{color:var(--ink-3)}
+small{font-size:13px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;color:var(--ink-2);font-size:13px}
+tr:last-child td{border-bottom:0}
+ul{padding-left:20px;margin:0 0 12px}li{margin:4px 0}
+.tag{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:var(--r-1);background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
+.tag.code{background:var(--accent-soft);color:var(--accent)}
+.tag.critique{background:var(--warn-soft);color:var(--warn)}
+.tag.new{background:var(--danger-soft);color:var(--danger)}
+.tag.ok{background:var(--accent-soft);color:var(--accent)}
+
+/* ---------- Top bar ---------- */
+.top{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--canvas) 92%,transparent);backdrop-filter:none;border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:16px;min-height:56px;flex-wrap:wrap}
+.top .brand{font-family:var(--font-display);font-weight:700;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
+.top .brand i{width:12px;height:12px;background:var(--accent);border-radius:2px;display:inline-block}
+.top nav{display:flex;gap:2px;flex-wrap:wrap;font-size:14px}
+.top nav a{text-decoration:none;padding:6px 10px;border-radius:var(--r-1);color:var(--ink-2)}
+.top nav a:hover{background:var(--surface-2);color:var(--ink)}
+.sp{flex:1}
+.accents{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--ink-3)}
+.accents button{width:28px;height:28px;border-radius:var(--r-1);border:1px solid var(--line-2);cursor:pointer;padding:0}
+.accents button[aria-pressed=true]{outline:2px solid var(--ink);outline-offset:2px}
+
+/* ---------- Hero of this doc ---------- */
+.hero{padding:88px 0 56px}
+.hero .meta{display:flex;gap:16px;flex-wrap:wrap;font-size:14px;color:var(--ink-3);margin-top:28px}
+
+/* ---------- Proposed UI components ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:var(--r-2);border:1px solid var(--line-2);background:var(--surface);color:var(--ink);font:600 15px/1 var(--font-ui);cursor:pointer;text-decoration:none;transition:background .15s var(--ease),border-color .15s var(--ease)}
+.btn:hover{background:var(--surface-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.quiet{border-color:transparent;background:transparent}
+.btn.quiet:hover{background:var(--surface-2)}
+.btn.danger{color:var(--danger);border-color:var(--line-2)}
+.btn.sm{min-height:34px;padding:0 12px;font-size:14px}
+.btn.lg{min-height:52px;padding:0 22px;font-size:16px}
+.btn:focus-visible,.field:focus-visible,.seg button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.field{width:100%;min-height:44px;padding:10px 12px;border:1px solid var(--line-2);border-radius:var(--r-2);background:var(--surface);font:inherit;color:inherit}
+textarea.field{min-height:120px;resize:vertical;line-height:1.5}
+.label{display:block;font-weight:600;font-size:14px;margin:0 0 6px}
+.help{font-size:13px;color:var(--ink-3);margin-top:6px}
+.seg{display:inline-flex;background:var(--surface-2);border-radius:var(--r-2);padding:3px;gap:2px}
+.seg button{border:0;background:transparent;font:600 14px/1 var(--font-ui);padding:9px 12px;border-radius:6px;cursor:pointer;color:var(--ink-2);min-height:36px}
+.seg button[aria-pressed=true]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgb(0 0 0/.06)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:3px 9px;border-radius:var(--r-1);background:var(--surface-2);color:var(--ink-2)}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ink-3)}
+.pill.live::before{background:var(--ok)}.pill.live{color:var(--ok);background:var(--accent-soft)}
+.pill.busy::before{background:var(--warn)}.pill.busy{color:var(--warn);background:var(--warn-soft)}
+.pill.err::before{background:var(--danger)}.pill.err{color:var(--danger);background:var(--danger-soft)}
+.drop{border:1.5px dashed var(--line-2);border-radius:var(--r-2);padding:18px;text-align:left;display:flex;gap:12px;align-items:center;background:var(--surface)}
+.drop .thumb{width:44px;height:44px;border-radius:var(--r-1);background:var(--surface-2);flex:none}
+mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:var(--ink)}
+.toast{display:inline-flex;align-items:center;gap:10px;background:var(--ink);color:#fff;padding:10px 14px;border-radius:var(--r-2);font-size:14px;box-shadow:var(--shadow-float)}
+.chat{display:flex;flex-direction:column;gap:8px}
+.msg{padding:10px 12px;border-radius:var(--r-2);font-size:14px;max-width:85%;background:var(--surface-2)}
+.msg.user{align-self:flex-end;background:var(--ink);color:#fff}
+.stages{list-style:none;padding:0;margin:0;display:grid;gap:0;border:1px solid var(--line);border-radius:var(--r-2);overflow:hidden;background:var(--surface)}
+.stages li{display:grid;grid-template-columns:22px 1fr auto auto;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line);font-size:14px}
+.stages li:last-child{border-bottom:0}
+.stages i{width:10px;height:10px;border-radius:50%;border:2px solid var(--line-2);display:inline-block;justify-self:center}
+.stages li.done i{background:var(--ok);border-color:var(--ok)}
+.stages li.run i{border-color:var(--accent);border-top-color:transparent;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.stages .num{color:var(--ink-3);font-variant-numeric:tabular-nums}
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.sw{border:1px solid var(--line);border-radius:var(--r-2);overflow:hidden;background:var(--surface);font-size:12px}
+.sw i{display:block;height:56px}
+.sw b{display:block;padding:6px 8px 0}.sw span{display:block;padding:0 8px 8px;color:var(--ink-3)}
+.type-row{display:grid;grid-template-columns:110px 1fr;gap:16px;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--line)}
+.type-row small{color:var(--ink-3)}
+.compare{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.compare figure{margin:0}
+.compare figcaption{font-size:13px;color:var(--ink-3);margin-top:8px}
+
+/* ---------- Before: the current dashboard, reproduced from apps/web/src/pages.tsx ---------- */
+.before{font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#f6f7f9;color:#16181d;border:1px solid var(--line);border-radius:var(--r-2);overflow:hidden}
+.before .b-top{display:flex;gap:12px;align-items:center;padding:10px 16px;background:#fff;border-bottom:1px solid #d9dde3}
+.before .b-top h4{font:600 16px system-ui;margin:0 12px 0 0}
+.before .b-card{background:#fff;border:1px solid #d9dde3;border-radius:8px;padding:16px;margin:16px}
+.before label{display:block;font-weight:600;margin:10px 0 4px;font-size:15px}
+.before textarea,.before select{width:100%;padding:7px 9px;border:1px solid #d9dde3;border-radius:6px;font:inherit;background:#fff;font-size:14px}
+.before .b-btn{display:inline-block;min-height:36px;padding:8px 12px;border:1px solid #1f5eff;background:#1f5eff;color:#fff;border-radius:6px;font:inherit;font-size:14px;margin-top:10px}
+.before table{font-size:14px}.before td,.before th{padding:6px 8px;border-bottom:1px solid #d9dde3}
+.before .b-status{display:inline-block;padding:2px 8px;border-radius:99px;background:#eef1f5;font-size:12px}
+
+/* ---------- Screens ---------- */
+.screen{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-3);overflow:hidden}
+.screen .s-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--line);min-height:52px}
+.screen .s-top .brand{font-family:var(--font-display);font-weight:700;display:flex;align-items:center;gap:8px}
+.screen .s-top .brand i{width:10px;height:10px;background:var(--accent);border-radius:2px}
+.site-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;padding:16px}
+.site-card{border:1px solid var(--line);border-radius:var(--r-2);overflow:hidden;background:var(--surface)}
+.site-card .shot{aspect-ratio:4/3;background:var(--surface-2);position:relative;overflow:hidden}
+.site-card .shot .mini{position:absolute;inset:14px 24px 0;background:#fff;border-radius:4px 4px 0 0;padding:10px;display:grid;gap:6px;align-content:start}
+.mini b{display:block;height:8px;width:60%;background:var(--ink);border-radius:2px}
+.mini s{display:block;height:5px;background:var(--line-2);border-radius:2px;text-decoration:none}
+.mini u{display:block;height:12px;width:50%;border-radius:2px;text-decoration:none}
+.site-card .body{padding:10px 12px;display:grid;gap:4px}
+.site-card .body strong{font-weight:600}
+.site-card .body small{color:var(--ink-3)}
+.intake{padding:28px 20px 24px;max-width:720px;margin:0 auto}
+.intake h3{font-size:clamp(26px,4vw,34px);font-weight:560;letter-spacing:-.025em;margin-bottom:14px}
+.prompt{border:1px solid var(--line-2);border-radius:var(--r-3);background:var(--surface);box-shadow:var(--shadow-float)}
+.prompt textarea{width:100%;border:0;background:transparent;padding:16px 16px 6px;font:17px/1.5 var(--font-ui);min-height:130px;resize:none;color:inherit}
+.prompt .bar{display:flex;gap:8px;align-items:center;padding:8px 10px 10px;flex-wrap:wrap}
+.editor{display:grid;grid-template-columns:320px 1fr;min-height:560px}
+.editor .side{border-right:1px solid var(--line);display:flex;flex-direction:column;background:var(--surface)}
+.editor .side .tabs{display:flex;gap:2px;padding:8px;border-bottom:1px solid var(--line);font-size:13px;flex-wrap:wrap}
+.editor .side .tabs span{padding:6px 9px;border-radius:var(--r-1);color:var(--ink-2)}
+.editor .side .tabs span.on{background:var(--surface-2);color:var(--ink);font-weight:600}
+.outline{list-style:none;margin:0;padding:8px;display:grid;gap:4px}
+.outline li{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r-1);font-size:14px}
+.outline li.sel{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.outline li i{width:16px;height:12px;border:1.5px solid currentColor;border-radius:2px;opacity:.6}
+.editor .canvas{background:var(--surface-2);display:flex;flex-direction:column}
+.editor .canvas .bar{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--surface)}
+.editor .canvas .stage{flex:1;display:flex;justify-content:center;padding:20px 360px 20px 20px;overflow:auto}
+.phone{width:200px;background:#fff;border:1px solid var(--line-2);border-radius:8px;overflow:hidden;box-shadow:var(--shadow-float);font-size:8px;line-height:1.3}
+.screen .ai{position:absolute;right:16px;bottom:16px;width:320px;max-width:calc(100% - 32px);background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r-3);box-shadow:var(--shadow-float);padding:12px}
+.rel{position:relative}
+/* editor at 360 */
+.m360{width:360px;max-width:100%;background:var(--surface);border:1px solid var(--line-2);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-float);font-size:14px}
+.m360 .s-top{display:flex;align-items:center;gap:10px;padding:8px 12px;min-height:46px;border-bottom:1px solid var(--line)}
+.m360 .sheet{border-top:1px solid var(--line);padding:10px 12px;background:var(--surface)}
+.m360 .sheet .handle{width:36px;height:4px;background:var(--line-2);border-radius:2px;margin:0 auto 10px}
+
+/* ---------- Generated-site mock heroes at 360 ---------- */
+.site{width:360px;max-width:100%;border:1px solid var(--line-2);border-radius:10px;overflow:hidden;background:#fff;color:#111;line-height:1.5;box-shadow:var(--shadow-float)}
+.site .hd{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;min-height:60px}
+.site .hd .menu{border:1.5px solid currentColor;padding:8px 12px;border-radius:var(--r-1);font-weight:600;font-size:14px;display:inline-flex;gap:8px;align-items:center}
+.site .hd .call{width:44px;height:44px;border-radius:var(--r-1);display:inline-grid;place-items:center;border:1.5px solid currentColor;font-weight:600;font-size:13px}
+.site .bar{display:flex;gap:8px;padding:10px 12px;border-top:1px solid #ddd;background:#fff}
+.site .bar a{flex:1;text-align:center;padding:12px;border-radius:var(--r-1);font-weight:600;text-decoration:none;border:1.5px solid #111;color:#111;font-size:14px}
+.site .bar a.p{background:var(--sp);border-color:var(--sp);color:#fff}
+.site .body{padding:0 16px 16px}
+.site .photo{background:linear-gradient(0deg,#0000,#0000),#b8b1a6;aspect-ratio:4/3;display:grid;place-items:center;color:#fff;font-size:12px;position:relative}
+.site .photo::after{content:"foto stranke";position:absolute;bottom:8px;left:8px;background:#0007;padding:2px 6px;border-radius:2px;font-size:10px}
+/* bold local */
+.bold{--sp:#c8261b;font-family:"Archivo",system-ui,sans-serif}
+.bold h4{font:800 32px/1 "Archivo",sans-serif;text-transform:uppercase;letter-spacing:-.02em;margin:0 0 12px}
+.bold .facts{background:#111317;color:#fff;padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;font-size:14px}
+.bold .facts b{display:block;font-size:12px;color:#c6c9cf;font-weight:600}
+.bold .facts a{color:#fff;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+/* warm craft */
+.warm{--sp:#b4441f;font-family:"Source Sans 3",system-ui,sans-serif;font-size:15px}
+.warm h4{font:600 30px/1.08 "Fraunces",serif;letter-spacing:-.02em;margin:0 0 10px}
+.warm .photo{aspect-ratio:5/4;background:#a67c5b;margin:0 0 0 16px;border-radius:6px 0 0 6px}
+.warm .strip{display:flex;gap:18px;font-size:14px;color:#5b504a;margin:12px 0}
+.warm .strip b{color:#221b17;font-weight:600}
+/* dark elegant */
+.dark{--sp:#c9a46a;background:#14110f;color:#f2ece5;font-family:"Karla",system-ui,sans-serif;font-size:15px}
+.dark .hd{border-bottom:1px solid #3a322b}
+.dark h4{font:500 34px/1.06 "EB Garamond",serif;margin:0 0 12px;letter-spacing:0}
+.dark .bar{background:#14110f;border-color:#3a322b}
+.dark .bar a{border-color:#f2ece5;color:#f2ece5}
+.dark .bar a.p{color:#14110f}
+.dark .photo{background:#3a2f28;border:1px solid #6b5a48;outline:1px solid #6b5a48;outline-offset:6px;margin:14px 8px 14px}
+.dark .rule{border-top:1px solid #3a322b;margin:14px 0}
+.dark .kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:14px;color:#b9ada1}
+.dark .kv b{color:#f2ece5;font-weight:600}
+
+/* ---------- Don't-use list ---------- */
+.dont{display:grid;gap:10px}
+.dont .row{display:grid;grid-template-columns:1fr auto;gap:8px 14px;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-2)}
+.dont .row strong{font-weight:600}
+.dont .row .d{font-size:14px;color:var(--ink-2);grid-column:1/-1}
+.dont .row .m{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-start;justify-content:flex-end}
+.dont .row .src{font-size:12px;color:var(--ink-3);grid-column:1/-1}
+.dont .row .src a{color:var(--ink-3)}
+.legend{display:flex;gap:8px 18px;flex-wrap:wrap;font-size:13px;margin:12px 0 18px}.legend>span{display:inline-flex;gap:6px;align-items:center}
+
+@media (max-width:900px){.editor{grid-template-columns:1fr}.editor .side{border-right:0;border-bottom:1px solid var(--line)}.screen .ai{position:static;width:auto;margin:12px}}
+@media (max-width:600px){section.block{padding:48px 0}.hero{padding:56px 0 36px}.type-row{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <span class="brand"><i></i>Site builder · design</span>
+    <nav aria-label="Sections">
+      <a href="#now">Where we are</a><a href="#reference">Reference</a><a href="#principles">Principles</a><a href="#tokens">Tokens</a><a href="#components">Components</a><a href="#screens">Screens</a><a href="#sites">Generated sites</a><a href="#dont">Don't use</a><a href="#plan">Plan</a>
+    </nav>
+    <span class="sp"></span>
+    <div class="accents" role="group" aria-label="Try an accent colour">
+      <span>Accent</span>
+      <button data-accent="green" aria-pressed="true" style="background:#156b4a" title="Deep green"></button>
+      <button data-accent="orange" aria-pressed="false" style="background:#c8471b" title="Brick orange"></button>
+      <button data-accent="blue" aria-pressed="false" style="background:#1f4fd8" title="Cobalt"></button>
+      <button data-accent="ink" aria-pressed="false" style="background:#151412" title="Ink only"></button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Design system proposal · v0 · draft for discussion</p>
+    <h1>Quiet chrome,<br>loud content.</h1>
+    <p class="lead" style="margin-top:24px">Two things need a design system: the product itself (login, intake, editor, publish) and the websites it generates. Today the product looks like a 2014 admin panel, and the generated sites all share one skeleton. This page proposes tokens, components and screens for the product, a way to raise the ceiling of the generated sites, and a hard list of AI-site give-aways we refuse to produce.</p>
+    <div class="meta">
+      <span>Branch <code>claude/design-system-overhaul</code></span>
+      <span>29. 9. 2026</span>
+      <span>This page is styled with the proposed product tokens, using the repo's own subset fonts</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="block" id="now">
+  <div class="wrap">
+    <p class="eyebrow">01</p>
+    <h2>Where we are</h2>
+    <p class="lead">Honest inventory, from the code and the last eval contact sheet.</p>
+
+    <div class="grid g3" style="margin-top:28px">
+      <div class="card">
+        <h3>The product has no identity</h3>
+        <p><code>system-ui</code> at 15 px, grey <code>#f6f7f9</code> page, white cards with 1 px borders, a default blue <code>#1f5eff</code>, a data table of sites and a <code>&lt;select&gt;</code> for scope. Functional, invisible. The name in the top bar is "Graditelj strani".</p>
+        <p class="muted"><small>apps/web/src/pages.tsx, apps/web/src/client/editor.ts</small></p>
+      </div>
+      <div class="card">
+        <h3>Every generated hero is the same hero</h3>
+        <p>On the contact sheet, 9 of 9 sites open with: eyebrow → H1 → paragraph → two stacked full-width buttons → photo. 9 of 9 headers are logo + an outlined "Meni" button. Directions differ in font and colour, not in structure. That sameness is itself a give-away.</p>
+        <p class="muted"><small>eval/contact-sheet.png</small></p>
+      </div>
+      <div class="card">
+        <h3>The good parts to keep</h3>
+        <p>Real photos only, no invented facts, contrast enforced in code, 100 accessibility, 360-px first, self-hosted fonts, the mobile call/directions bar, and a banned-patterns list that already blocks most of the "AI look". The system is sound. It needs taste on top.</p>
+      </div>
+    </div>
+
+    <div class="compare" style="margin-top:28px">
+      <figure>
+        <div class="before" aria-label="Current intake form, reproduced">
+          <div class="b-top"><h4>Graditelj strani</h4><span style="color:#5b6270;font-size:14px">Poraba danes: €0.41 / €10.00</span></div>
+          <div class="b-card">
+            <div style="font-weight:600;font-size:18px;margin-bottom:6px">Nova stran</div>
+            <label>Opis podjetja</label>
+            <textarea rows="3" placeholder="Kdo ste, kaj ponujate, kje ste, kontakt, delovni čas, cene …"></textarea>
+            <label>Logotip (neobvezno)</label>
+            <div style="font-size:13px;color:#5b6270">Choose file · No file chosen</div>
+            <label>Obseg</label>
+            <select><option>Samo domača stran (hitri predogled)</option></select>
+            <span class="b-btn">Ustvari</span>
+          </div>
+          <div class="b-card" style="margin-top:0">
+            <table><tr><th>Ime</th><th>Stanje</th><th>Objavljeno</th></tr><tr><td style="color:#1f5eff">Pekarna Kvas</td><td><span class="b-status">ready</span></td><td>—</td></tr></table>
+          </div>
+        </div>
+        <figcaption>Before: the current intake and site list, reproduced from the real CSS.</figcaption>
+      </figure>
+      <figure>
+        <div class="screen">
+          <div class="s-top"><span class="brand"><i></i>Stran</span><span class="sp"></span><span class="pill">€0,41 danes</span></div>
+          <div class="intake">
+            <h3>Opišite svoje podjetje.<br>Stran naredimo mi.</h3>
+            <div class="prompt">
+              <textarea aria-label="Opis podjetja" placeholder="Pekarna v Kamniku, odprta od leta 1996. Kruh z lastnimi drožmi, rogljički, torte po naročilu. Šutna 12, odprto pon–sob 6.00–13.00 …"></textarea>
+              <div class="bar">
+                <button class="btn sm">＋ Fotografije</button>
+                <button class="btn sm">＋ Logotip</button>
+                <span class="sp"></span>
+                <span class="seg"><button aria-pressed="true">Domača stran</button><button aria-pressed="false">Cela stran</button></span>
+                <button class="btn primary">Ustvari</button>
+              </div>
+            </div>
+            <p class="help">Predogled domače strani v približno minuti. Brez fotografij uporabimo tipografsko postavitev.</p>
+          </div>
+        </div>
+        <figcaption>After: the prompt is the product. One field, attachments inline, scope as a switch, one action.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="block" id="reference">
+  <div class="wrap">
+    <p class="eyebrow">02</p>
+    <h2>What Base44 gets right, and what we don't copy</h2>
+    <div class="grid g2" style="margin-top:20px">
+      <div class="card">
+        <h3>Borrow the posture</h3>
+        <ul>
+          <li><strong>One canvas.</strong> A warm off-white page with a faint dot grid, not pure white, not grey. Everything sits on it; cards are rare.</li>
+          <li><strong>One huge headline.</strong> A tight grotesk at 72 px+ with negative tracking does the branding. No illustration needed.</li>
+          <li><strong>One accent.</strong> An orange dot in the logo and almost nowhere else. Buttons are ink-black.</li>
+          <li><strong>The input is the hero.</strong> The first thing you see is the box where you type. The product demonstrates itself.</li>
+          <li><strong>Big preview, thin chrome.</strong> Inside the app the generated thing fills the screen; controls are small and at the edges.</li>
+          <li><strong>Confidence in copy.</strong> Short, declarative, no hedging.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Leave the surface</h3>
+        <ul>
+          <li>Pill buttons, em-dashes in every second sentence, "Seamlessly collaborate", "Beautiful by default", a "1 week to launch / $1M ARR" stat row, a founder testimonial. Several of these are on the give-away list below.</li>
+          <li>Base44 sells to builders worldwide. We sell to a hairdresser in Celje who manages the site from a phone. Our register is plainer, our Slovene is natural, and our facts are the client's facts.</li>
+          <li>We don't need a dark mode, a video generator or a 3-D hero. We need the intake to feel effortless and the editor to feel safe.</li>
+        </ul>
+        <p class="note">Rule of thumb: copy the restraint, not the tricks.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="block" id="principles">
+  <div class="wrap">
+    <p class="eyebrow">03</p>
+    <h2>Principles</h2>
+    <div class="grid g3" style="margin-top:20px">
+      <div class="card"><h3>1. Quiet chrome, loud content</h3><p>The dashboard's job is to show the client's site. UI is ink on a warm canvas, hairline borders, no cards inside cards. The preview is the only thing with a shadow.</p></div>
+      <div class="card"><h3>2. One canvas, one ink, one accent</h3><p>Warm neutral canvas, near-black ink, a single accent used for the primary action and state, never for decoration. Try the four accents in the top bar.</p></div>
+      <div class="card"><h3>3. Type does the talking</h3><p>A display face with character (Bricolage Grotesque) for headings, a clean humanist sans (Figtree) for UI. Big sizes, tight leading, generous margins. No icons where a word will do.</p></div>
+      <div class="card"><h3>4. Borders, not shadows</h3><p>Structure comes from 1 px lines and background steps. Exactly one shadow token, reserved for things that float: the prompt box, the phone frame, the chat drawer, toasts.</p></div>
+      <div class="card"><h3>5. Phone first, on both sides</h3><p>Owners manage the site from a phone. Every product screen is designed at 360 px first: bottom sheets, 44 px targets, one primary action per screen.</p></div>
+      <div class="card"><h3>6. Nothing generic</h3><p>If a pattern is on the "don't use" list, the component can't produce it. Variety is enforced by structure (hero families, header families), not by hoping the model picks differently.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="block" id="tokens">
+  <div class="wrap">
+    <p class="eyebrow">04</p>
+    <h2>Product tokens</h2>
+    <p class="lead">For the dashboard, not for generated sites (those keep their per-direction tokens in the spec). These are the values this page is rendered with.</p>
+
+    <h3 style="margin-top:32px">Colour</h3>
+    <div class="swatches">
+      <div class="sw"><i style="background:var(--canvas)"></i><b>canvas</b><span>#f5f3ef · page</span></div>
+      <div class="sw"><i style="background:var(--surface)"></i><b>surface</b><span>#ffffff · inputs, cards</span></div>
+      <div class="sw"><i style="background:var(--surface-2)"></i><b>surface-2</b><span>#ece9e3 · tabs, notes</span></div>
+      <div class="sw"><i style="background:var(--line)"></i><b>line</b><span>#dcd8d0 · hairlines</span></div>
+      <div class="sw"><i style="background:var(--ink)"></i><b>ink</b><span>#151412 · text, buttons</span></div>
+      <div class="sw"><i style="background:var(--ink-2)"></i><b>ink-2</b><span>#4d4a44 · secondary</span></div>
+      <div class="sw"><i style="background:var(--ink-3)"></i><b>ink-3</b><span>#8a857c · hints, meta</span></div>
+      <div class="sw"><i style="background:var(--accent)"></i><b>accent</b><span>primary action, live state</span></div>
+      <div class="sw"><i style="background:var(--accent-soft)"></i><b>accent-soft</b><span>selected, success bg</span></div>
+      <div class="sw"><i style="background:var(--warn)"></i><b>warn</b><span>#9a5b00 · generating</span></div>
+      <div class="sw"><i style="background:var(--danger)"></i><b>danger</b><span>#b3261e · errors, delete</span></div>
+      <div class="sw"><i style="background:var(--ph)"></i><b>placeholder</b><span>#fff1a8 · unfilled fact</span></div>
+    </div>
+    <p class="note" style="margin-top:14px">Accent options: deep green <code>#156b4a</code> (default here: local, calm, not a SaaS blue), brick orange <code>#c8471b</code> (warmer, closer to Base44's energy), cobalt <code>#1f4fd8</code> (what we have now), or ink-only (buttons black, accent reserved for state). All four pass 4.5:1 on canvas with white text. My pick: green.</p>
+
+    <h3 style="margin-top:32px">Type</h3>
+    <div class="type-row"><small>display 72 / 560</small><div style="font:560 56px/1 var(--font-display);letter-spacing:-.035em">Pekarna Kvas</div></div>
+    <div class="type-row"><small>h2 40 / 600</small><div style="font:600 36px/1.08 var(--font-display);letter-spacing:-.02em">Opišite svoje podjetje</div></div>
+    <div class="type-row"><small>h3 20 / 600</small><div style="font:600 20px/1.2 var(--font-display);letter-spacing:-.01em">Fotografije (do 12)</div></div>
+    <div class="type-row"><small>body 16 / 400</small><div>Predogled domače strani v približno minuti. Šč, ž, ć, đ se izpišejo pravilno.</div></div>
+    <div class="type-row"><small>ui 14 / 600</small><div style="font:600 14px var(--font-ui)">Ustvari · Objavi · Prenesi izvoz</div></div>
+    <div class="type-row"><small>meta 13 / 400</small><div style="font-size:13px;color:var(--ink-3)">v12 · 29. 9. 2026 14.32 · €0,23</div></div>
+    <p class="muted" style="margin-top:10px"><small>Both faces are already subset and shipped in packages/render/assets/fonts. Alternative display face if Bricolage feels too playful: Inter Tight at 600 with -0.03em tracking.</small></p>
+
+    <h3 style="margin-top:32px">Space, radius, elevation, motion</h3>
+    <div class="grid g3">
+      <div class="card"><strong>Space</strong><p>4-px grid. Component padding 12/16, section gaps 24/32, page gutters 20 (360 px) and 32+. Max content width 1180.</p></div>
+      <div class="card"><strong>Radius</strong><p>4 (tags, small controls), 8 (buttons, inputs, cards), 12 (large containers). No pills. Circles only for status dots and avatars.</p></div>
+      <div class="card"><strong>Elevation</strong><p>Hairline borders everywhere. One shadow token, for floating elements only. No hover-lift, no glow.</p></div>
+      <div class="card"><strong>Motion</strong><p>150 ms ease-out on colour and background; 200 ms on sheets and drawers. No entrance animations, no parallax. Respects reduced motion.</p></div>
+      <div class="card"><strong>Focus and targets</strong><p>2 px ink outline with 2 px offset. Every control at least 44 px on touch, 34 px in dense toolbars on desktop only.</p></div>
+      <div class="card"><strong>Language</strong><p>UI in Slovene, short and declarative: "Ustvari", "Objavi", "Prenesi". Numbers and dates in Slovene format. No exclamation marks.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="block" id="components">
+  <div class="wrap">
+    <p class="eyebrow">05</p>
+    <h2>Components</h2>
+    <p class="lead">Live HTML, not pictures. Everything below is built from the tokens above.</p>
+
+    <div class="grid g2" style="margin-top:28px">
+      <div class="card">
+        <h3>Buttons</h3>
+        <p style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn primary">Ustvari</button><button class="btn">Predogled</button><button class="btn quiet">Prekliči</button><button class="btn danger">Izbriši</button></p>
+        <p style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn primary lg">Objavi stran</button><button class="btn sm">Prenesi izvoz</button><button class="btn sm" disabled style="opacity:.5">Objavi</button></p>
+        <p class="help">One primary per screen. Secondary is outlined ink. Destructive is outlined red, never filled.</p>
+      </div>
+      <div class="card">
+        <h3>Fields</h3>
+        <label class="label" for="f1">Telefon</label>
+        <input class="field" id="f1" type="tel" inputmode="tel" value="+386 41 555 730">
+        <p class="help">Shown on every page in the call bar.</p>
+        <label class="label" for="f2" style="margin-top:12px">Naslov strani</label>
+        <input class="field" id="f2" type="text" value="Kruh z lastnimi drožmi, ki vzhaja čez noč">
+        <p class="help" style="display:flex;justify-content:space-between"><span>Do 60 znakov</span><span>42/60</span></p>
+      </div>
+      <div class="card">
+        <h3>Photo drop</h3>
+        <div class="drop"><span class="thumb"></span><div><strong>Dodajte fotografije</strong><div class="help" style="margin-top:2px">Do 12 · JPG, PNG, WebP · brez fotografij uporabimo tipografsko postavitev</div></div></div>
+        <p class="help" style="margin-top:10px">Client photos only. No stock photos, ever. Thumbnails appear inline after upload with an editable Slovene alt text.</p>
+      </div>
+      <div class="card">
+        <h3>Status</h3>
+        <p style="display:flex;gap:8px;flex-wrap:wrap"><span class="pill live">Objavljeno</span><span class="pill busy">Ustvarjam …</span><span class="pill">Osnutek</span><span class="pill err">Napaka</span></p>
+        <p style="margin-top:8px"><span class="seg"><button aria-pressed="true">Telefon</button><button aria-pressed="false">Namizje</button></span></p>
+        <p style="margin-top:10px">Manjkajoč podatek: <mark class="ph">[davčna številka]</mark> je označen, dokler ga ne vpišete. Stran z manjkajočimi podatki ni objavljiva.</p>
+      </div>
+      <div class="card">
+        <h3>Generation progress</h3>
+        <ul class="stages">
+          <li class="done"><i></i>Razumevanje opisa<span class="num">9,6 s</span><span class="num">€0,02</span></li>
+          <li class="done"><i></i>Oblikovna smer<span class="num">3,8 s</span><span class="num">€0,01</span></li>
+          <li class="done"><i></i>Fotografije<span class="num">11,9 s</span><span class="num">€0,01</span></li>
+          <li class="run"><i></i>Besedila in postavitev<span class="num">42 s</span><span class="num">€0,12</span></li>
+          <li><i></i>Preverjanje na telefonu<span class="num"></span><span class="num"></span></li>
+        </ul>
+        <p class="help">Real stage names, real seconds, real cost. This is our honesty advantage over credit-based builders.</p>
+      </div>
+      <div class="card">
+        <h3>Chat and toast</h3>
+        <div class="chat">
+          <div class="msg user">Spremeni telefonsko na 041 555 731</div>
+          <div class="msg">Spremenjeno. Nova številka je v glavi, nogi in klicni vrstici. <span class="muted">v13 · €0,02</span></div>
+        </div>
+        <p style="margin-top:12px"><span class="toast">Shranjeno kot v13 <button class="btn sm quiet" style="color:#fff;min-height:28px">Razveljavi</button></span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="block" id="screens">
+  <div class="wrap">
+    <p class="eyebrow">06</p>
+    <h2>Screens</h2>
+    <p class="lead">Six screens, desktop and 360 px. Structure only; copy is illustrative.</p>
+
+    <h3 style="margin-top:32px">Sites</h3>
+    <div class="screen">
+      <div class="s-top"><span class="brand"><i></i>Stran</span><span class="sp"></span><span class="pill">€0,41 / €10 danes</span><button class="btn sm primary">Nova stran</button></div>
+      <div class="site-cards">
+        <div class="site-card"><div class="shot"><div class="mini"><b></b><s style="width:80%"></s><s style="width:70%"></s><u style="background:#b4441f"></u></div></div><div class="body"><strong>Pekarna Kvas</strong><span class="pill live">Objavljeno</span><small>v12 · 29. 9. 2026</small></div></div>
+        <div class="site-card"><div class="shot"><div class="mini"><b style="width:80%"></b><s style="width:90%"></s><s style="width:60%"></s><u style="background:#c8261b"></u></div></div><div class="body"><strong>Avtoservis Mrak</strong><span class="pill busy">Ustvarjam …</span><small>domača stran · 38 s</small></div></div>
+        <div class="site-card"><div class="shot" style="background:#14110f"><div class="mini" style="background:#1f1a17"><b style="background:#f2ece5"></b><s style="width:75%;background:#3a322b"></s><s style="width:55%;background:#3a322b"></s><u style="background:#c9a46a"></u></div></div><div class="body"><strong>Gostilna Pri Zlati Žlici</strong><span class="pill">Osnutek</span><small>v3 · 4 manjkajoči podatki</small></div></div>
+        <div class="site-card" style="border-style:dashed;display:grid;place-items:center;min-height:180px;color:var(--ink-3)">＋ Nova stran</div>
+      </div>
+    </div>
+    <p class="help">Cards with a live thumbnail of the published homepage replace the table. Status, version and blockers at a glance.</p>
+
+    <h3 style="margin-top:32px">Editor, desktop</h3>
+    <div class="screen rel">
+      <div class="s-top"><span class="brand"><i></i>Pekarna Kvas</span><span class="pill live">Objavljeno · v12</span><span class="sp"></span><span class="seg"><button aria-pressed="true">Telefon</button><button aria-pressed="false">Namizje</button></span><button class="btn sm">Različice</button><button class="btn sm">Izvoz</button><button class="btn sm primary">Objavi</button></div>
+      <div class="editor">
+        <aside class="side">
+          <div class="tabs"><span class="on">Vsebina</span><span>Podatki</span><span>Oblika</span><span>Strani</span></div>
+          <ul class="outline">
+            <li><i></i>Glava</li>
+            <li class="sel"><i></i>Uvod: Kruh z lastnimi drožmi</li>
+            <li><i></i>Ponudba</li>
+            <li><i></i>O pekarni</li>
+            <li><i></i>Delovni čas</li>
+            <li><i></i>Kontakt</li>
+            <li><i></i>Noga</li>
+          </ul>
+          <div style="padding:8px 12px 12px;border-top:1px solid var(--line)">
+            <label class="label" for="e1">Naslov</label>
+            <input class="field" id="e1" value="Kruh z lastnimi drožmi, ki vzhaja čez noč">
+            <label class="label" for="e2" style="margin-top:10px">Postavitev</label>
+            <span class="seg"><button aria-pressed="true">Foto levo</button><button aria-pressed="false">Foto desno</button><button aria-pressed="false">Samo besedilo</button></span>
+          </div>
+        </aside>
+        <div class="canvas">
+          <div class="bar"><span class="muted" style="font-size:13px">Domov</span><span class="muted">·</span><span class="muted" style="font-size:13px">360 × 800</span><span class="sp"></span><span class="muted" style="font-size:13px">Kliknite besedilo za urejanje</span></div>
+          <div class="stage">
+            <div class="phone">
+              <div style="display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid #ddd"><b style="font-family:Fraunces,serif;font-size:10px">Kvas</b><span style="border:1px solid #111;padding:2px 5px;border-radius:2px;font-weight:600">Meni</span></div>
+              <div style="padding:10px 8px 6px"><div style="font-size:7px;color:#666">Kamnik, Šutna</div><div style="font:600 15px/1.1 Fraunces,serif;margin:4px 0;outline:2px solid var(--accent);outline-offset:2px;border-radius:2px">Kruh z lastnimi drožmi, ki vzhaja čez noč</div><div style="color:#444">Mala družinska pekarna na začetku stare ulice Šutna.</div></div>
+              <div style="background:#a67c5b;height:80px;margin:6px 0 6px 8px;border-radius:4px 0 0 4px"></div>
+              <div style="display:flex;gap:6px;padding:6px 8px"><span style="flex:1;background:#b4441f;color:#fff;text-align:center;padding:6px;border-radius:2px;font-weight:600">Pokliči</span><span style="flex:1;border:1px solid #111;text-align:center;padding:6px;border-radius:2px;font-weight:600">Navodila za pot</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ai">
+        <div class="chat">
+          <div class="msg user">Dodaj rubriko s pogostimi vprašanji o naročilu tort</div>
+          <div class="msg">Dodal sem 3 vprašanja pod Ponudbo. Preverite odgovore. <span class="muted">v13 · €0,02</span></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px"><input class="field" placeholder="Kaj naj spremenim?" aria-label="Sporočilo pomočniku"><button class="btn primary">Pošlji</button></div>
+      </div>
+    </div>
+    <p class="help">Left: outline plus the selected section's form (schema-driven, direct edits, no tokens). Centre: the real render at 360 or 1280, with click-to-edit text. Bottom right: the AI drawer, collapsible. Cost and version on every AI answer.</p>
+
+    <h3 style="margin-top:32px">Editor at 360 px, and the other screens</h3>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr));align-items:start">
+      <div>
+        <div class="m360">
+          <div class="s-top"><span class="brand" style="font-family:var(--font-display);font-weight:700">Pekarna Kvas</span><span class="sp"></span><button class="btn sm primary">Objavi</button></div>
+          <div style="background:var(--surface-2);padding:14px;display:flex;justify-content:center">
+            <div class="phone" style="width:180px"><div style="display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid #ddd"><b style="font-family:Fraunces,serif;font-size:10px">Kvas</b><span style="border:1px solid #111;padding:2px 5px;border-radius:2px;font-weight:600">Meni</span></div><div style="padding:10px 8px 6px"><div style="font:600 14px/1.1 Fraunces,serif;margin:4px 0">Kruh z lastnimi drožmi, ki vzhaja čez noč</div><div style="color:#444">Mala družinska pekarna na začetku stare ulice Šutna.</div></div><div style="background:#a67c5b;height:60px;margin:6px 0 0 8px;border-radius:4px 0 0 4px"></div></div>
+          </div>
+          <div class="sheet">
+            <div class="handle"></div>
+            <div style="display:flex;gap:6px;overflow:auto;padding-bottom:8px"><span class="pill" style="background:var(--accent-soft);color:var(--accent)">Vsebina</span><span class="pill">Podatki</span><span class="pill">Oblika</span><span class="pill">Pomočnik</span></div>
+            <label class="label" for="m1">Naslov</label>
+            <input class="field" id="m1" value="Kruh z lastnimi drožmi, ki vzhaja čez noč">
+            <div style="display:flex;gap:8px;margin-top:10px"><button class="btn" style="flex:1">Nazaj</button><button class="btn primary" style="flex:1">Shrani</button></div>
+          </div>
+        </div>
+        <p class="help">At 360 px the preview stays on top and the editor is a bottom sheet with a swipeable tab row. The AI assistant is one of the tabs, not a separate page.</p>
+      </div>
+      <div class="grid" style="gap:14px">
+        <div class="card"><strong>Login</strong><p>Wordmark, one field, one button, on the canvas. In phase 2 the password becomes an email field and a "Pošljemo vam povezavo" message. No card around it.</p></div>
+        <div class="card"><strong>Generating</strong><p>The stage list from Components, left; a skeleton of the phone frame that fills in as sections arrive, right. On a phone: stages first, then the preview. The cost counter is visible the whole time.</p></div>
+        <div class="card"><strong>Publish</strong><p>A checklist, not a modal: placeholders left (with links to fix them), checks passed (Lighthouse, axe, 360 px), the URL, and the export button. Publish is disabled with a reason, never silently.</p></div>
+        <div class="card"><strong>Versions</strong><p>A plain list: v13 · pomočnik · "Dodaj FAQ" · 14.32 · €0,02. "Obnovi" on every row. Restore is itself a new version.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="block" id="sites">
+  <div class="wrap">
+    <p class="eyebrow">07</p>
+    <h2>Generated sites: raise the ceiling</h2>
+    <p class="lead">The directions are fine. The skeleton under them is the problem. Proposal: give each direction its own opening move, header family and section rhythm, so two sites from different directions differ in structure, not only in font.</p>
+
+    <table style="margin-top:24px">
+      <tr><th style="width:34%">Same on 9 of 9 sites today</th><th>Proposal</th></tr>
+      <tr><td>Hero = eyebrow, H1, paragraph, two stacked full-width buttons, photo below</td><td>Four hero families, each direction gets one or two: <strong>facts-first</strong> (a dark fact band with phone, hours and address directly under a short headline), <strong>photo-first</strong> (photo at the very top, headline over the bottom third or just under it), <strong>type-only</strong> (one big headline, one button, phone as an underlined text link), <strong>split</strong> (what we have, kept for directions where it fits). The second button becomes a text link in most families.</td></tr>
+      <tr><td>Header = logo left, outlined "Meni" button right</td><td>Three header families: <strong>bar</strong> (logo, phone icon-button, menu), <strong>stacked</strong> (centred wordmark, thin rule, menu below it on desktop), <strong>split-cta</strong> (logo, menu, filled call button). Menu is a word without a box in two of the three.</td></tr>
+      <tr><td>Every section is a full-width block with the same padding</td><td>Rhythm per direction is already in the spec (<code>flat</code>, <code>alternate</code>, <code>inverse-accents</code>) but visually weak. Make it strong: inverse bands full-bleed, alternate sections with a real background step, flat sections separated by hairlines and bigger type.</td></tr>
+      <tr><td>Photos in the same 4:3 box</td><td>The eight imagery treatments exist (framed, offset-block, arched, duotone, full-bleed …). Use them more aggressively and make the hero photo ratio a direction property: 5:4 offset for Warm Craft, 16:9 full-bleed for Alpine, framed portrait for Dark Elegant.</td></tr>
+      <tr><td>Headline sizes cluster around 32 px on mobile</td><td>Allow the display size to go to 40–44 px on 360 px for short headlines (the content stage knows the length), and 64–80 px on desktop. Tight leading (1.02–1.08).</td></tr>
+      <tr><td>Two buttons, both 48 px full width</td><td>One primary. The second action is a text link with an underline, or the phone number itself. Two identical buttons is a give-away.</td></tr>
+    </table>
+
+    <h3 style="margin-top:36px">Three "after" heroes at 360 px</h3>
+    <p class="muted">Static HTML mocks using the directions' own fonts and fallback colours. Same rules: client photos only, no invented facts, contrast enforced, call bar kept.</p>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr));justify-items:center;margin-top:16px">
+
+      <figure style="margin:0">
+        <div class="site bold">
+          <div class="hd"><b style="font-size:15px;letter-spacing:.02em">AVTOSERVIS MRAK</b><div style="display:flex;gap:8px"><span class="call">☏</span><span class="menu">Meni</span></div></div>
+          <div class="body" style="padding-top:8px">
+            <h4>Servis vseh znamk. Isti dan.</h4>
+            <p style="margin:0 0 14px;color:#474c55">Družinski servis v Kranju. Redni servis po navodilih proizvajalca, gume, klima, diagnostika, vleka.</p>
+          </div>
+          <div class="facts">
+            <div><b>Telefon</b><a href="#">041 555 730</a></div>
+            <div><b>Odprto</b>pon–pet 7.00–17.00</div>
+            <div><b>Kje</b>Savska cesta 12, Kranj</div>
+            <div><b>Vleka</b>24 h</div>
+          </div>
+          <div class="photo">delavnica</div>
+          <div class="bar"><a class="p" href="#">Pokliči</a><a href="#">Navodila za pot</a></div>
+        </div>
+        <figcaption class="help">Bold Local, facts-first: the fact band is the hero. Uppercase heavy Archivo, square corners, one signal colour.</figcaption>
+      </figure>
+
+      <figure style="margin:0">
+        <div class="site warm">
+          <div class="hd"><b style="font-family:Fraunces,serif;font-size:20px">Kvas</b><span class="menu" style="border:0;padding:8px 0;text-decoration:underline;text-underline-offset:4px">Meni</span></div>
+          <div class="photo">pekarna, izložba</div>
+          <div class="body" style="padding-top:16px">
+            <div style="font-size:13px;color:#5b504a;margin-bottom:6px">Kamnik, Šutna 12</div>
+            <h4>Kruh z lastnimi drožmi, ki vzhaja čez noč</h4>
+            <p style="margin:0 0 12px;color:#5b504a">Mala družinska pekarna na začetku stare ulice Šutna. Vse pečemo ročno.</p>
+            <a class="btn" style="background:var(--sp);border-color:var(--sp);color:#fff;border-radius:6px" href="#">Poglejte ponudbo</a>
+            <div class="strip"><span><b>Odprto</b> pon–sob 6.00–13.00</span><span><b>Nedelja</b> zaprto</span></div>
+          </div>
+          <div class="bar"><a class="p" href="#">Pokliči</a><a href="#">Navodila za pot</a></div>
+        </div>
+        <figcaption class="help">Warm Craft, photo-first: the photo opens the page, offset to the right edge; one button; hours as a plain strip.</figcaption>
+      </figure>
+
+      <figure style="margin:0">
+        <div class="site dark">
+          <div class="hd" style="justify-content:center;flex-direction:column;gap:6px;padding:18px 16px 12px"><b style="font-family:'EB Garamond',serif;font-size:22px;font-weight:500">Gostilna Pri Zlati Žlici</b><span style="font-size:12px;letter-spacing:.06em;color:#b9ada1;text-transform:uppercase">Škofja Loka · od 1961</span></div>
+          <div class="body" style="padding-top:12px">
+            <h4>Domače jedi iz sestavin lokalnih kmetov</h4>
+            <p style="margin:0 0 6px;color:#b9ada1">Tretja generacija družine Bizjak. Poleti terasa pod lipo.</p>
+          </div>
+          <div class="photo">terasa pod lipo</div>
+          <div class="body">
+            <div class="kv"><b>Rezervacije</b><a href="#" style="color:#f2ece5">04 512 33 44</a><b>Kuhinja</b><span>tor–ned 11.00–21.00</span></div>
+            <div class="rule"></div>
+            <a href="#" style="color:var(--sp);font-weight:600;text-decoration:underline;text-underline-offset:4px">Poglejte jedilnik</a>
+          </div>
+          <div class="bar"><a class="p" href="#" style="background:var(--sp);border-color:var(--sp)">Pokliči</a><a href="#">Navodila za pot</a></div>
+        </div>
+        <figcaption class="help">Dark Elegant, type-led: stacked centred wordmark (the one place centring is allowed), framed photo, key facts as a list, brass only for links.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="block" id="dont">
+  <div class="wrap">
+    <p class="eyebrow">08</p>
+    <h2>Don't use this: the AI-site give-aways</h2>
+        <p class="lead">Compiled from external opinion, not from our own guesses: 16 web searches, about 25 pages read, including a scored survey of 500 Show HN landing pages, designers' "spot the slop" guides, and Reddit-derived playbooks. Ranked by how many distinct sources named the tell. Each item is marked with what happens to it here.</p>
+    <div class="legend">
+      <span><span class="tag code">code</span> impossible by construction (token range, schema, stylesheet test, no JS)</span>
+      <span><span class="tag critique">critique</span> caught by the screenshot critique pass or a copy check</span>
+      <span><span class="tag new">new</span> not covered yet, becomes a rule in this overhaul</span>
+      <span><span class="tag">watch</span> we are close to it, needs care</span>
+    </div>
+    <p class="note" style="margin-bottom:20px">Caveats from the research: no first-hand Reddit or Hacker News thread could be opened, so those tells arrive second-hand. Several sources sell "anti-slop" tools and have an incentive to call defaults slop. The share figures come from one survey of 500 pages. None of the sources cover Slovene copy; the Slovene word list further down is our own inference.</p>
+
+    <h3>Visual and structural tells</h3>
+    <div class="dont">
+      <div class="row"><strong>1 · Purple, indigo or violet as the primary, and purple-to-blue gradients</strong><span class="m"><span class="tag">16 sources</span><span class="tag code">code</span></span><span class="d">The single most-named tell, traced to Tailwind's indigo defaults. Gradients fail our stylesheet test; the primary comes from the client's logo; no fallback palette is purple. Add: when the logo yields a hue in 250–290°, the design stage must justify it or fall back.</span></div>
+      <div class="row"><strong>2 · Three identical feature cards with icons</strong><span class="m"><span class="tag">11</span><span class="tag critique">critique</span></span><span class="d">Icon, two-word title, one sentence, equal length, in a row of three. Already on the PRODUCT.md list; the components have no icon-card variant. Keep it that way when the services and highlights sections get new variants.</span></div>
+      <div class="row"><strong>3 · Inter, Roboto or Geist everywhere</strong><span class="m"><span class="tag">10</span><span class="tag code">code</span></span><span class="d">"Change the font first" is the most-cited fix. Generated sites use ten curated pairs; only one uses Inter. The product UI moves from system-ui to Bricolage Grotesque and Figtree.</span></div>
+      <div class="row"><strong>4 · Everything centred: centred hero, centred CTA, centred sections</strong><span class="m"><span class="tag">9</span><span class="tag code">code</span></span><span class="d">23.5% of surveyed pages. A stylesheet test rejects centred section defaults; only listed variants (the stacked wordmark, a CTA band) may centre.</span></div>
+      <div class="row"><strong>5 · Category-level copy that fits any competitor</strong><span class="m"><span class="tag">9</span><span class="tag critique">critique</span></span><span class="d">The "cover the logo" test: if the page still makes sense for a rival, it is generic. Our copy is built from the client's facts, and filler phrases are rejected in code. Add the cover-the-logo question to the critique prompt.</span></div>
+      <div class="row"><strong>6 · One radius on everything, pill buttons, rounded-2xl cards</strong><span class="m"><span class="tag">7</span><span class="tag code">code</span></span><span class="d">Radius token capped at 12 px, pills rejected by the stylesheet test. Product UI uses three radii by role (4, 8, 12).</span></div>
+      <div class="row"><strong>7 · Gradients on backgrounds, titles and borders</strong><span class="m"><span class="tag">7</span><span class="tag code">code</span></span><span class="d">28% of surveyed pages. Any gradient function in the stylesheet fails the test.</span></div>
+      <div class="row"><strong>8 · Dark mode with neon glow: purple or cyan accent, radial halos, glowing shadows</strong><span class="m"><span class="tag">7</span><span class="tag code">code</span></span><span class="d">Only one shadow token exists, so glows are impossible. Dark Elegant uses warm near-black with brass, not neon.</span></div>
+      <div class="row"><strong>9 · Coloured left or top border on cards</strong><span class="m"><span class="tag">6</span><span class="tag new">new</span></span><span class="d">Called "almost as reliable a sign as em-dashes". Not banned yet. Add to the stylesheet test: no accent-coloured single-side borders on cards or list items.</span></div>
+      <div class="row"><strong>10 · Emoji as icons</strong><span class="m"><span class="tag">6</span><span class="tag code">code</span></span><span class="d">Any pictograph in generated copy is rejected.</span></div>
+      <div class="row"><strong>11 · Soft grey shadows on floating cards, or border + shadow + tint stacked on one card</strong><span class="m"><span class="tag">5</span><span class="tag code">code</span></span><span class="d">Shadow is "none" or one subtle token per site. Product UI: borders only, one shadow for floating elements.</span></div>
+      <div class="row"><strong>12 · A badge or pill above the H1 ("New", "Live", "AI-powered")</strong><span class="m"><span class="tag">5</span><span class="tag new">new</span></span><span class="d">Our heroes have a plain-text eyebrow, never a pill. Make it explicit in the component contract, and make the eyebrow optional per hero family so it stops appearing on 9 of 9 sites.</span></div>
+      <div class="row"><strong>13 · Glassmorphism, frosted panels</strong><span class="m"><span class="tag">5</span><span class="tag code">code</span></span><span class="d">17.1% of surveyed pages. backdrop-filter fails the stylesheet test.</span></div>
+      <div class="row"><strong>14 · Cream or beige page, serif headings, rust or sage accent</strong><span class="m"><span class="tag">5</span><span class="tag">watch</span></span><span class="d">The newer "tasteful" default that anti-purple advice produced; a Reddit comment calls beige-and-green alone a giveaway. Cream backgrounds are banned here, but Warm Craft (Fraunces, terracotta, pale sage surface) sits next to this tell. Keep the white page, let the offset photo block and layout carry the character, and take the accent from the logo before reaching for terracotta.</span></div>
+      <div class="row"><strong>15 · ALL-CAPS tracked-out eyebrow labels above every heading</strong><span class="m"><span class="tag">5</span><span class="tag new">new</span></span><span class="d">Eyebrows stay sentence case in every direction. Uppercase is a heading-only token, allowed in Bold Local and Industrial. Cap letter-spacing at 0.04 em (today 0.08).</span></div>
+      <div class="row"><strong>16 · Hover-lift and scroll animations on every card</strong><span class="m"><span class="tag">5</span><span class="tag code">code</span></span><span class="d">Generated sites ship no animation JS and nothing depends on hover. Product UI: 150 ms colour transitions only, no entrance animations.</span></div>
+      <div class="row"><strong>17 · Uniform padding, radius and card height; flat type hierarchy</strong><span class="m"><span class="tag">5</span><span class="tag new">new</span></span><span class="d">This is the sameness on our own contact sheet. Fixed by section 07: hero and header families, bigger display sizes, section rhythm that is visible.</span></div>
+      <div class="row"><strong>18 · Italic serif accent word inside a sans headline</strong><span class="m"><span class="tag">4</span><span class="tag code">code</span></span><span class="d">Italic headings fail the stylesheet test.</span></div>
+      <div class="row"><strong>19 · Gradient blob or spotlight behind the hero</strong><span class="m"><span class="tag">4</span><span class="tag code">code</span></span><span class="d">Covered by the gradient ban.</span></div>
+      <div class="row"><strong>20 · Unmodified shadcn/ui: slate cards, stock border-radius-shadow</strong><span class="m"><span class="tag">4</span><span class="tag code">code</span></span><span class="d">23.5% of surveyed pages. We render with our own component library, no UI kit.</span></div>
+      <div class="row"><strong>21 · Invented statistics: "10,000+ users", "47%", "3×", metric rows</strong><span class="m"><span class="tag">4</span><span class="tag code">code</span></span><span class="d">No component has a stats prop. Facts come only from the client's input.</span></div>
+      <div class="row"><strong>22 · Low-contrast grey body text</strong><span class="m"><span class="tag">4</span><span class="tag code">code</span></span><span class="d">4.5:1 enforced for every text and background pair, including muted text.</span></div>
+      <div class="row"><strong>23 · Cookie-cutter section order: hero, logos, features, testimonial, pricing, FAQ, CTA</strong><span class="m"><span class="tag">4</span><span class="tag new">new</span></span><span class="d">Logos and testimonials can't exist here. Add: each direction carries a preferred section order for its business types, and the critique flags the generic order.</span></div>
+      <div class="row"><strong>24 · Mad-lib headlines: "The X for modern Y", "Scale without limits", "Dobrodošli"</strong><span class="m"><span class="tag">3</span><span class="tag critique">critique</span></span><span class="d">"Dobrodošli" and "Welcome to" are rejected in code. Add Slovene equivalents of the mad-lib forms (see copy list).</span></div>
+      <div class="row"><strong>25 · Numbered "01 / 02 / 03" labels and 1-2-3 step rows</strong><span class="m"><span class="tag">3</span><span class="tag code">code</span></span><span class="d">Numbered labels are rejected; the steps component carries order in the list, draws no numbers.</span></div>
+      <div class="row"><strong>26 · Stock photos, generic illustrations, unrelated team photos</strong><span class="m"><span class="tag">3</span><span class="tag code">code</span></span><span class="d">Client photos only. With few photos the layout becomes typography-led.</span></div>
+      <div class="row"><strong>27 · No empty, loading or error states</strong><span class="m"><span class="tag">3</span><span class="tag new">new</span></span><span class="d">Product UI: every list has an empty state, generation has the stage list, every failure has a message with a next action. Part of the component set above.</span></div>
+      <div class="row"><strong>28 · Wide letter-spacing, also on body text</strong><span class="m"><span class="tag">3</span><span class="tag code">code</span></span><span class="d">Tracking is a heading-only token; tighten its ceiling to 0.04 em.</span></div>
+      <div class="row"><strong>29 · Placeholder people and brands: John Doe, Sarah Johnson, Acme</strong><span class="m"><span class="tag">2</span><span class="tag code">code</span></span><span class="d">Names and prices are placeholders until the client fills them; unfilled placeholders block publishing.</span></div>
+      <div class="row"><strong>30 · "Trusted by" logo bar, invented testimonials</strong><span class="m"><span class="tag">2</span><span class="tag code">code</span></span><span class="d">No such components exist.</span></div>
+      <div class="row"><strong>31 · Pulsing status dot, "Live" pill on things that aren't live</strong><span class="m"><span class="tag">2</span><span class="tag new">new</span></span><span class="d">Product UI: status dots are static; "Objavljeno" appears only when a version is actually published.</span></div>
+      <div class="row"><strong>32 · Marquee or ticker bars</strong><span class="m"><span class="tag">2</span><span class="tag code">code</span></span><span class="d">No animation JS in generated sites.</span></div>
+      <div class="row"><strong>33 · Nested cards</strong><span class="m"><span class="tag">2</span><span class="tag new">new</span></span><span class="d">Product UI principle 1. For generated sites: a section on a surface tone never contains bordered cards.</span></div>
+      <div class="row"><strong>34 · Decorative dot or grid backgrounds</strong><span class="m"><span class="tag">2</span><span class="tag new">new</span></span><span class="d">Base44 uses one; we don't. Not in generated sites, not in the product.</span></div>
+      <div class="row"><strong>35 · Generic dashboard mockup or blob illustration in the hero</strong><span class="m"><span class="tag">2</span><span class="tag code">code</span></span><span class="d">Client photos only.</span></div>
+      <div class="row"><strong>36 · Chevron arrow appended to every button, icons in coloured circles</strong><span class="m"><span class="tag">1+1</span><span class="tag new">new</span></span><span class="d">Buttons are words. No decorative arrows, no icon-in-circle pattern in any component.</span></div>
+      <div class="row"><strong>37 · Pure #000 background with #fff text</strong><span class="m"><span class="tag">1</span><span class="tag new">new</span></span><span class="d">Dark Elegant already uses #14110f. Add a rule: page backgrounds stay off-black and off-white (lightness bounds in the design rules).</span></div>
+      <div class="row"><strong>38 · Two identical full-width buttons stacked under every headline</strong><span class="m"><span class="tag">ours</span><span class="tag new">new</span></span><span class="d">Our own finding from the contact sheet, not from the sources. One primary action per hero; the second is a text link or the phone number.</span></div>
+    </div>
+    <p class="note" style="margin-top:14px">Two things the sources cleared: bento grids (0.1% of complaints, often defended) and aurora or mesh backgrounds when chosen deliberately. One source's framing is the useful one: <em>a tell is an unspecified default, not a banned colour</em>. Cobalt chosen on purpose is fine; indigo because the model didn't decide is not.</p>
+
+    <h3 style="margin-top:36px">Copy tells</h3>
+    <div class="grid g2">
+      <div class="card">
+        <h3>From the sources (English)</h3>
+        <ul>
+          <li><strong>Em-dashes</strong>, named as the canonical text-side tell.</li>
+          <li><strong>Forced contrast</strong> as a slogan: "Not X. Y."</li>
+          <li><strong>Rule-of-three fragments</strong>: "Save time. Work smarter. Scale faster."</li>
+          <li><strong>Unfalsifiable, equal-length claims</strong> nobody can check.</li>
+          <li><strong>Vocabulary</strong>: seamless, streamline, unlock, unleash, unveil, supercharge, empower, elevate, leverage, robust, world-class, cutting-edge, game-changer, transformative, "in today's fast-paced world", "at the forefront", firstly/secondly/lastly.</li>
+          <li><strong>Timid corporate register</strong> and headlines that read like a template with the nouns swapped.</li>
+          <li>Caveat from the sources: skilled humans use some of these too; word lists produce false positives. Use them as a check, not as the whole judgement.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Slovene rules to add <span class="tag new">new</span></h3>
+        <p class="muted"><small>Our inference: the structural tells are language-independent; the words are calques of the English list. Extend packages/spec/src/banned.ts.</small></p>
+        <ul>
+          <li><strong>No em-dash (U+2014)</strong> anywhere in generated copy. Slovene uses the spaced en-dash (pomišljaj, " – ") or a comma. One regex, code-enforced.</li>
+          <li><strong>No "Ne X. Y." contrast slogans</strong> and no three-fragment headline runs ("Hitro. Zanesljivo. Domače.").</li>
+          <li><strong>Filler to add</strong>: brezhibno, celovit pristop, dvignite/povzdignite na višjo raven, odklenite, opolnomočimo, inovativne rešitve, vrhunski, po meri vaših potreb, z vami na vsakem koraku, v današnjem hitrem tempu, sanje se uresničijo, izkusite.</li>
+          <li><strong>Mad-lib headline shapes</strong>: "Vaš X za Y", "Več kot le X", "X na višji ravni", "Kjer se X sreča z Y".</li>
+          <li><strong>Every headline must contain a fact the client gave</strong> (place, product, year, method, person). The critique already asks for this in spirit; make it a check: at least one noun from the brief's facts.</li>
+          <li><strong>No exclamation marks</strong> in generated copy or product UI.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="margin-top:36px">What the sources say reads as human-made</h3>
+    <div class="grid g3">
+      <div class="card"><strong>Show the real thing</strong><p>Real photos of the shop, the workshop, the people. One specific claim with a number, a name or a date. We already do this by construction; the design has to give the photo and the fact the space they deserve.</p></div>
+      <div class="card"><strong>Choose, don't default</strong><p>One deliberately chosen accent per viewport, off-black not black, a typeface with an opinion, two to four effects per page and the rest plain.</p></div>
+      <div class="card"><strong>Vary on purpose</strong><p>Bigger jumps in the type scale, an off-centre hero, a non-uniform grid, primary elements visibly larger than secondary ones, sections ordered by the strongest argument rather than by template.</p></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="block" id="plan">
+  <div class="wrap">
+    <p class="eyebrow">09</p>
+    <h2>Plan</h2>
+    <div class="grid g2" style="margin-top:20px">
+      <div class="card">
+        <h3>Decisions for you</h3>
+        <ol>
+          <li><strong>Accent</strong>: green, orange, blue or ink-only (top bar toggle).</li>
+          <li><strong>Display face</strong>: Bricolage Grotesque (this page) or Inter Tight (safer).</li>
+          <li><strong>Product name</strong> for the wordmark. "Graditelj strani" is a description, not a name. Needed before the login screen is worth designing.</li>
+          <li><strong>Order</strong>: product UI first (small, 1 PR, replaces two CSS strings), then generated-site hero and header families (spec change, version bump, migration, eval), then the editor redesign as part of phase 2 rather than before it.</li>
+          <li><strong>Approve the additions</strong> to the banned-patterns list in docs/PRODUCT.md from section 08.</li>
+        </ol>
+      </div>
+      <div class="card">
+        <h3>What each step ships with</h3>
+        <ul>
+          <li><strong>Product UI</strong>: tokens as CSS variables in one shared stylesheet for apps/web, components rewritten in place, no new framework. Check: screenshots at 360 and 1280, axe on every page, the existing smoke test.</li>
+          <li><strong>Site heroes and headers</strong>: new variants in packages/spec sections and packages/components, direction layout preferences updated, the eval contact sheet as the check (no two directions may share a hero family and header family).</li>
+          <li><strong>Give-aways</strong>: each new item either becomes a grep in the stylesheet test, a schema constraint, or a line in the critique prompt. The list itself lands in PRODUCT.md.</li>
+          <li><strong>Editor</strong>: the 360-px bottom-sheet layout, with the Puck decision from phase 2.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer style="padding:32px 0 48px;border-top:1px solid var(--line)">
+  <div class="wrap muted"><small>docs/design/ideas.html · rendered with the repo's subset fonts · no external requests</small></div>
+</footer>
+
+<script>
+  // Accent switcher for this page only.
+  const root=document.documentElement;
+  document.querySelectorAll('.accents button').forEach(b=>b.addEventListener('click',()=>{
+    root.dataset.accent=b.dataset.accent;
+    document.querySelectorAll('.accents button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+  }));
+</script>
+</body>
+</html>
