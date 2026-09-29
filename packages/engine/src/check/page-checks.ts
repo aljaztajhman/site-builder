@@ -1,5 +1,4 @@
 import type { Page } from "playwright";
-import { AxeBuilder } from "@axe-core/playwright";
 
 export interface AxeViolation {
   id: string;
@@ -10,6 +9,7 @@ export interface AxeViolation {
 }
 
 export async function runAxe(page: Page): Promise<AxeViolation[]> {
+  const { AxeBuilder } = await import("@axe-core/playwright");
   const r = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa", "best-practice"]).analyze();
   return r.violations.map((v) => ({
     id: v.id,

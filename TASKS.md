@@ -17,7 +17,8 @@ Status against "Done means" (2026-09-29):
 - [x] Eval: critique answers that were unusable failed the whole generation (a self-corrected double answer; a 420-char note against a 300 limit). JSON extraction now takes the last complete answer of the main shape; critique notes are trimmed; an unusable critique keeps the checked site with a logged warning
 - [ ] Eval: homepage-preview target (≤ €0.30, ≤ 60 s) never measured — run `pnpm eval --scope home`
 - [x] Deployed: login redirect 400 fixed (#3), live after Railway's deploy pause lifted; verified `/` → 302 → `/login?next=%2F` 200, traversal guard still 400
-- [ ] Deployed: full manual flow on the live URL — intake with own photos, preview mobile/desktop, chat edit, publish, open `/s/{slug}/`, download export, open export offline
+- [x] Deployed: full flow on the live URL, scripted as `tools/eval/src/remote-smoke.ts` (2026-09-29, gostilna-zlata-zlica): login → chat edit (header light → dark) → fill placeholders in the editor → publish → public `/s/gostilna-pri-zlati/` 200 + noindex → export 1.3 MB opens offline. All steps pass
+- [ ] Owner's own check on the live URL with their own photos (intake form, mobile/desktop preview toggle in a real browser)
 - [x] Deployed: ≥ 2 fixtures generated end to end (pekarna-kvas €0.24, gostilna-zlata-zlica €0.16; all checks pass)
 - [x] Deployed: everything in EU West (Amsterdam). Railway had no migrate button for the volume, so (owner's call) the `sfo` volume was deleted and a new one created in `ams` (2026-09-29); test data lost, the 2 test sites regenerated
 - [ ] Deployed: production environment tracking `main` (only `preview` exists; it now tracks `main`)
@@ -32,7 +33,7 @@ Draft plan: docs/phases/PHASE-2.md — 5 decisions there are the owner's (sign-i
 - [ ] Contact forms: form component, server endpoint, spam protection (honeypot + rate limit, no third-party captcha before consent), email via Resend, submissions stored per site
 - [ ] Transactional email via Resend (magic links, form notifications); domain + DNS records
 - [ ] Mobile owner flows: the dashboard usable at 360 px (owners manage the site from a phone)
-- [ ] Eval: add auth/limits checks to the deployed smoke test (`remote-intake.ts`)
+- [ ] Eval: add auth/limits checks to the deployed smoke test (`remote-smoke.ts`)
 
 ## Later: phase 3 — CMS collections
 - [ ] Collections the client edits: blog, services, price list (cenik), team, events; spec migration + components + editor forms
@@ -47,7 +48,7 @@ Draft plan: docs/phases/PHASE-2.md — 5 decisions there are the owner's (sign-i
 
 ## Follow-ups (not blocking a phase)
 - [x] Worker ran one job at a time (two deployed intakes queued, 322 s wall each). Measured: worker 0.55 GB idle, 1.69 GB peak with one generate job (limit 8 GB) → generate jobs now run 2 in parallel (`limits.jobConcurrency`); edits and publishes stay sequential (same-site version conflicts)
-- [ ] Web and worker idle at ~0.5 GB each because they run TypeScript through `tsx` at runtime; a compiled build would cut the largest cost line
+- [x] Web idled at ~0.6 GB: not `tsx` itself but Lighthouse (~325 MB) and Playwright (~70 MB) loaded at startup by `@sb/engine`, plus pnpm → pnpm → tsx wrapper processes (~80 MB). Now imported on first check, and the containers start `node --import tsx` directly. Measured in the web image: **621 MB → 174 MB idle**; shutdown on SIGTERM 1 s. Worker idle drops the same way until its first check
 - [ ] Accessibility statement date uses render date (changes on republish); make it a spec field if that matters
 - [ ] CSP allows 'unsafe-inline' scripts (header `js`-class snippet); move it to nav.js or a hash
 - [ ] Offline export verified in Chromium only; Firefox may block `file://` fonts from a parent folder — not verified
