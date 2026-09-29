@@ -14,7 +14,7 @@ export function pagesText(pages: Iterable<string>): string {
         .replace(/<script[\s\S]*?<\/script>/gi, " ")
         .replace(/<style[\s\S]*?<\/style>/gi, " ")
         .replace(/<[^>]+>/g, " ")
-        .replace(/&nbsp;|&#160;| /g, " ")
+        .replace(/&nbsp;|&#160;|\u00a0/g, " ")
         .replace(/&amp;/g, "&")
         .replace(/&quot;/g, '"')
         .replace(/&#x27;|&#39;/g, "'")

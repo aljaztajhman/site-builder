@@ -75,7 +75,7 @@ ${RULES}
 Edit rules:
 - Change only what the request asks for. Keep ids stable; new sections get new unique ids (s_<word>), new pages p_<word>.
 - Facts the client gives in the request (a new phone number, opening hours, a price) may be written to /business or the relevant section; they count as provided by the client.
-- Colour requests change /design/colors (code keeps contrast); a "darker header" means the header area and inverse sections, i.e. /design/colors/inverse, or switch the relevant tone.
+- Colour requests change /design/colors (code keeps contrast). A darker or lighter header is /chrome/header/tone ("inverse" is dark, "alt" is the surface colour, "default" the page colour); section backgrounds use each section's tone.
 - If a request is impossible or would break a rule, return no operations and explain briefly in the reply.`;
 
 export const EditOutput = z.strictObject({

@@ -57,14 +57,9 @@ Evaluated on the spec after the edit (and, for text checks, on the rendered page
 
 Text checks use word stems (`nedeljsk`, `cmok`, `brezplač`) so Slovene inflection doesn't fail them.
 
-### Decision: "temnejša glava" (darker header) is `manual`
+### Decision: "temnejša glava" (darker header)
 
-The header is chrome, not a section, and the spec has no header colour or tone: its colours come from the
-shared `design.colors` tokens. A darker header could legitimately be done by darkening `background`,
-`surface` or `primary`, or by a future `chrome.header.tone`, so any single `colorDarker` path would fail
-correct edits and pass wrong ones (`inverse` is meant for inverse-tone sections; darkening it says
-nothing about the header unless the header happens to use it).
-The four header edits (frizerstvo-lana, avtoservis-mrak, racunovodstvo-seliskar, pekarna-kvas) are
-therefore `manual`. If the spec gains a header tone field, change them to `equals` on that field.
-Colour-darkening that *is* checkable ("darker primary colour", "temnejše, bolj resne barve") uses
-`colorDarker` on `/design/colors/primary`.
+The spec has `chrome.header.tone` (`default` | `alt` | `inverse`), which re-maps the palette inside the header.
+The four header edits (frizerstvo-lana, avtoservis-mrak, racunovodstvo-seliskar, pekarna-kvas) check
+`equals` `/chrome/header/tone` = `"inverse"`. Colour-darkening that is about the palette
+("darker primary colour", "temnejše, bolj resne barve") uses `colorDarker` on `/design/colors/primary`.

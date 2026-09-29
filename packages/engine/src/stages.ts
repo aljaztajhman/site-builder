@@ -224,7 +224,7 @@ export async function generateContent(client: ModelClient, input: ContentInput):
   ];
 
   let attempts = 0;
-  let lastIssues: string[] = [];
+  let lastIssues: string[];
   let spec: SiteSpec | undefined;
   for (;;) {
     attempts++;
@@ -234,7 +234,7 @@ export async function generateContent(client: ModelClient, input: ContentInput):
       messages,
       ...(input.structuredOutput ? { schema: contentJsonSchema() } : {}),
     });
-    let issues: string[] = [];
+    let issues: string[];
     try {
       const parsed = schema.safeParse(JSON.parse(extract(res.text)));
       if (!parsed.success) {

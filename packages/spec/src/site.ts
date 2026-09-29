@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ImageRef, Locale, PageRef, text } from "./common.ts";
+import { ImageRef, Locale, PageRef, Tone, text } from "./common.ts";
 import { Business } from "./business.ts";
 import { Design } from "./design.ts";
 import { Section } from "./sections/index.ts";
@@ -47,6 +47,8 @@ export const Chrome = z.strictObject({
   header: z.strictObject({
     variant: z.enum(["bar", "split-cta", "stacked"]),
     cta: z.enum(["call", "booking", "directions", "none"]),
+    /** Header background: page colour (default), surface (alt) or dark inverse. */
+    tone: Tone.optional(),
   }),
   footer: z.strictObject({ variant: z.enum(["columns", "compact"]) }),
   /** Sticky call/directions bar on mobile for local businesses. */

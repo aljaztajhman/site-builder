@@ -23,14 +23,16 @@ export function formatDate(d: Date): string {
   return `${d.getDate()}.${NBSP}${d.getMonth() + 1}.${NBSP}${d.getFullYear()}`;
 }
 
-/** +38641123456 -> +386 41 123 456; +38612345678 -> +386 1 234 56 78 (Ljubljana landline). */
+/** Slovene mobile and non-geographic prefixes (two digits after +386). */
+const MOBILE_PREFIXES = new Set(["30", "31", "40", "41", "49", "50", "51", "64", "65", "68", "69", "70", "71", "80", "81", "82", "83", "89", "90"]);
+
+/** +38641123456 -> +386 41 123 456 (mobile); +38615550123 -> +386 1 555 01 23 (landline, one-digit area code). */
 export function formatPhone(e164: string): string {
   if (!e164.startsWith("+386")) return e164;
   const rest = e164.slice(4);
-  const groups =
-    rest.length === 8 && /^[1-7]/.test(rest)
-      ? [rest.slice(0, 1), rest.slice(1, 4), rest.slice(4, 6), rest.slice(6)]
-      : [rest.slice(0, 2), rest.slice(2, 5), rest.slice(5)];
+  const groups = MOBILE_PREFIXES.has(rest.slice(0, 2))
+    ? [rest.slice(0, 2), rest.slice(2, 5), rest.slice(5)]
+    : [rest.slice(0, 1), rest.slice(1, 4), rest.slice(4, 6), rest.slice(6)];
   return `+386 ${groups.filter(Boolean).join(" ")}`;
 }
 

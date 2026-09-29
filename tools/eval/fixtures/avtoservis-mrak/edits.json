@@ -2,31 +2,50 @@
   {
     "message": "Make the header darker.",
     "lang": "en",
-    "intent": "Make the site header visibly darker.",
-    "check": { "kind": "manual" }
+    "intent": "Make the site header dark (header tone inverse).",
+    "check": {
+      "kind": "equals",
+      "path": "/chrome/header/tone",
+      "value": "inverse"
+    }
   },
   {
     "message": "Dodaj pogosta vprasanja: garancija ostane, ce servis delamo po navodilih proizvajalca, redni servis je obicajno narejen isti dan.",
     "lang": "sl",
     "intent": "Add an FAQ section with the two answers given.",
-    "check": { "kind": "hasSectionType", "type": "faq", "page": "any" }
+    "check": {
+      "kind": "hasSectionType",
+      "type": "faq",
+      "page": "any"
+    }
   },
   {
     "message": "We have an email now: servis@avtoservis-mrak.example",
     "lang": "en",
     "intent": "Add the business email, which was missing.",
-    "check": { "kind": "equals", "path": "/business/email", "value": "servis@avtoservis-mrak.example" }
+    "check": {
+      "kind": "equals",
+      "path": "/business/email",
+      "value": "servis@avtoservis-mrak.example"
+    }
   },
   {
     "message": "Spremeni telefonsko na 041 555 731",
     "lang": "sl",
     "intent": "Replace the business phone number.",
-    "check": { "kind": "equals", "path": "/business/phone", "value": "+38641555731" }
+    "check": {
+      "kind": "equals",
+      "path": "/business/phone",
+      "value": "+38641555731"
+    }
   },
   {
     "message": "Dodajte se ceno za menjavo akumulatorja: od 90 eur z montazo.",
     "lang": "sl",
     "intent": "Add a new priced service (battery replacement, from 90 €).",
-    "check": { "kind": "textContains", "text": "akumulator" }
+    "check": {
+      "kind": "textContains",
+      "text": "akumulator"
+    }
   }
 ]

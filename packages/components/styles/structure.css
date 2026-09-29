@@ -1,1 +1,127 @@
-/* structure group styles */
+/* ---------- Structure group: legal, not-found, contact-strip ---------- */
+
+/* Legal pages */
+.legal {
+  max-width: 44rem;
+}
+.legal__title {
+  margin-bottom: 1.5rem;
+}
+.legal__notice {
+  margin-bottom: 2rem;
+  padding: 1rem 1.25rem;
+  border: 2px solid currentColor;
+  border-left-width: 6px;
+  border-radius: var(--radius);
+  font-weight: 600;
+}
+.legal__body h2 {
+  font-size: var(--fs-h3);
+  margin-top: 2.5rem;
+}
+.legal__body h3 {
+  font-size: var(--fs-lg);
+  margin-top: 1.75rem;
+}
+.legal__body > h2 + *,
+.legal__body > h3 + * {
+  margin-top: 0.75rem;
+}
+.legal__body ul {
+  padding-left: 1.25rem;
+}
+.legal__body li + li {
+  margin-top: 0.35rem;
+}
+.legal__body a {
+  overflow-wrap: anywhere;
+}
+
+/* 404 */
+.not-found {
+  max-width: 40rem;
+  padding-block: var(--space-block);
+}
+.not-found .lead {
+  margin-top: 1rem;
+}
+
+/* Contact strip: phone, address + directions, weekly hours. */
+.s-contact-strip--bar {
+  padding-block: var(--space-block);
+}
+.contact-strip__title {
+  margin-bottom: var(--space-block);
+}
+.contact-strip__list {
+  display: grid;
+  gap: 0;
+  hyphens: manual;
+}
+.s-contact-strip--bar .contact-strip__item {
+  padding-block: 1rem;
+  border-bottom: 1px solid var(--c-border);
+}
+.s-contact-strip--bar .contact-strip__item:last-child {
+  border-bottom: 0;
+}
+.tone-inverse.s-contact-strip--bar .contact-strip__item {
+  border-color: currentColor;
+}
+.contact-strip__label {
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  margin-bottom: 0.25rem;
+}
+.contact-strip__value {
+  margin-bottom: 0.25rem;
+}
+.contact-strip__action {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  font-weight: 600;
+}
+.contact-strip__phone {
+  font-size: var(--fs-lg);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.contact-strip__item .hours__list {
+  max-width: 20rem;
+}
+.contact-strip__item .hours__row {
+  padding-block: 0.2rem;
+}
+
+/* cards: each fact in its own card */
+.s-contact-strip--cards .contact-strip__list {
+  gap: 1rem;
+}
+.s-contact-strip--cards .contact-strip__item {
+  padding: 1.25rem;
+}
+
+@media (min-width: 48rem) {
+  .contact-strip__list {
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 2rem;
+  }
+  .s-contact-strip--bar .contact-strip__item {
+    border-bottom: 0;
+    padding-block: 0;
+  }
+  .s-contact-strip--bar .contact-strip__item + .contact-strip__item {
+    border-left: 1px solid var(--c-border);
+    padding-left: 2rem;
+  }
+  .tone-inverse.s-contact-strip--bar .contact-strip__item + .contact-strip__item {
+    border-color: currentColor;
+  }
+  .s-contact-strip--cards .contact-strip__list {
+    gap: 1.5rem;
+  }
+}

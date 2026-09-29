@@ -1,1 +1,358 @@
 /* content group styles */
+
+/* ---------- text ---------- */
+.text-block__body {
+  max-width: 65ch;
+}
+@media (min-width: 64rem) {
+  .s-text--two-column .text-block {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: 4rem;
+    align-items: start;
+  }
+  .s-text--two-column .section-head {
+    margin-bottom: 0;
+  }
+}
+
+/* ---------- image-text ---------- */
+.image-text {
+  display: grid;
+  gap: 1.5rem;
+  align-items: center;
+}
+.image-text__media {
+  aspect-ratio: 4 / 3;
+}
+.image-text__text .section-head {
+  margin-bottom: 1.25rem;
+}
+.image-text__link {
+  margin-top: 1rem;
+}
+@media (min-width: 48rem) {
+  .image-text {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 3rem;
+  }
+  .s-image-text--image-right .image-text__media {
+    order: 2;
+  }
+}
+@media (min-width: 64rem) {
+  .image-text {
+    gap: 4.5rem;
+  }
+}
+
+/* ---------- highlights ---------- */
+/* Typographic points separated by rules. No icons, no cards. */
+.highlights {
+  display: grid;
+}
+.s-highlights--list .highlights {
+  max-width: 60rem;
+}
+.highlights__item {
+  max-width: none;
+  display: grid;
+  gap: 0.5rem;
+  padding-block: 1.25rem;
+  border-top: 1px solid var(--c-border);
+}
+.s-highlights--list .highlights__item:last-child {
+  border-bottom: 1px solid var(--c-border);
+}
+.tone-inverse .highlights__item {
+  border-color: currentColor;
+}
+.highlights__title {
+  font-size: var(--fs-h3);
+}
+@media (min-width: 48rem) {
+  .s-highlights--list .highlights__item {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    gap: 2.5rem;
+    align-items: baseline;
+    padding-block: 1.5rem;
+  }
+  .s-highlights--columns .highlights {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 3rem;
+    row-gap: 1rem;
+  }
+  .s-highlights--columns .highlights__item {
+    border-top: 2px solid currentColor;
+    padding-bottom: 1.5rem;
+  }
+}
+
+/* ---------- steps ---------- */
+/* A timeline: order comes from the <ol>, markers are plain squares on a line (no numbers). */
+.steps {
+  display: grid;
+}
+.steps__item {
+  max-width: none;
+  position: relative;
+  display: grid;
+  gap: 0.5rem;
+  margin-left: 0.4375rem;
+  padding: 0 0 2rem 1.75rem;
+  border-left: 2px solid var(--c-border);
+}
+.steps__item:last-child {
+  padding-bottom: 0;
+  border-left-color: transparent;
+}
+.steps__item::before {
+  content: "";
+  position: absolute;
+  top: 0.35em;
+  left: calc(-0.5rem - 1px);
+  width: 1rem;
+  height: 1rem;
+  background: var(--c-primary);
+  border-radius: calc(var(--radius) / 3);
+}
+.tone-inverse .steps__item {
+  border-left-color: currentColor;
+}
+.tone-inverse .steps__item:last-child {
+  border-left-color: transparent;
+}
+.tone-inverse .steps__item::before {
+  background: currentColor;
+}
+.steps__title {
+  font-size: var(--fs-h3);
+}
+.steps__actions {
+  margin-top: var(--space-block);
+}
+@media (min-width: 64rem) {
+  .s-steps--vertical .steps {
+    max-width: 48rem;
+  }
+  .s-steps--horizontal .steps {
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+  }
+  .s-steps--horizontal .steps__item,
+  .s-steps--horizontal .steps__item:last-child {
+    align-content: start;
+    margin-left: 0;
+    padding: 2rem 2rem 0 0;
+    border-left: 0;
+    border-top: 2px solid var(--c-border);
+  }
+  .tone-inverse.s-steps--horizontal .steps__item {
+    border-top-color: currentColor;
+  }
+  .s-steps--horizontal .steps__item::before {
+    top: calc(-0.5rem - 1px);
+    left: 0;
+  }
+}
+
+/* ---------- cta ---------- */
+.cta {
+  display: grid;
+  gap: 1.5rem;
+}
+.cta__text {
+  display: grid;
+  gap: 0.75rem;
+  max-width: 44rem;
+}
+.cta__lead {
+  font-size: var(--fs-lg);
+  line-height: 1.5;
+}
+.cta .actions {
+  margin-top: 0;
+}
+.s-cta--band {
+  padding-block: calc(var(--space-section) * 0.7);
+}
+/* On the page background the band needs its own edges. */
+.s-cta--band.tone-default {
+  border-block: 1px solid var(--c-border);
+}
+.s-cta--split .cta {
+  padding-top: var(--space-block);
+  border-top: 2px solid currentColor;
+}
+@media (min-width: 64rem) {
+  .s-cta--band .cta {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 3rem;
+  }
+  .s-cta--band .actions {
+    flex-wrap: nowrap;
+  }
+}
+@media (min-width: 48rem) {
+  /* split: big heading left, text and buttons right. */
+  .s-cta--split .cta {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    column-gap: 4rem;
+    row-gap: 1.25rem;
+    align-items: start;
+  }
+  .s-cta--split .cta__text {
+    display: contents;
+  }
+  .s-cta--split .cta__title {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    font-size: var(--fs-h1);
+  }
+  .s-cta--split .cta__lead,
+  .s-cta--split .actions {
+    grid-column: 2;
+  }
+}
+
+/* ---------- booking ---------- */
+.booking {
+  display: grid;
+  gap: 2rem;
+}
+.booking__text {
+  display: grid;
+  gap: 1rem;
+  max-width: 44rem;
+}
+.booking__text .actions {
+  margin-top: 0.5rem;
+}
+.s-booking--simple .booking__text {
+  padding-left: 1.25rem;
+  border-left: 4px solid var(--c-primary);
+}
+.tone-inverse.s-booking--simple .booking__text {
+  border-left-color: currentColor;
+}
+.booking__facts {
+  padding: 1.5rem 1.25rem;
+}
+.booking__facts-title {
+  margin-bottom: 0.75rem;
+}
+.booking__phone {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  margin-top: 1rem;
+  max-width: none;
+}
+.booking__phone-label {
+  font-weight: 600;
+}
+.booking__phone-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  font-size: var(--fs-lg);
+  font-weight: 600;
+}
+@media (min-width: 48rem) {
+  .s-booking--with-hours .booking {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: 4rem;
+    align-items: start;
+  }
+  .booking__facts {
+    padding: 2rem;
+  }
+}
+
+/* ---------- about ---------- */
+.about {
+  display: grid;
+  gap: 2rem;
+}
+.about__media {
+  aspect-ratio: 4 / 3;
+}
+.about__text {
+  max-width: 44rem;
+}
+.about .prose > p:first-child {
+  font-size: var(--fs-lg);
+  line-height: 1.5;
+}
+.about__owner {
+  display: grid;
+  gap: 0.125rem;
+  margin-top: 1.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--c-border);
+  max-width: 22rem;
+}
+.tone-inverse .about__owner {
+  border-color: currentColor;
+}
+.about__owner-name {
+  font-weight: 700;
+}
+@media (min-width: 48rem) {
+  .about--has-image .about {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: 3rem;
+    align-items: start;
+  }
+  .about__media {
+    aspect-ratio: 4 / 5;
+  }
+}
+@media (min-width: 64rem) {
+  .about--has-image .about {
+    gap: 5rem;
+  }
+}
+
+/* ---------- announcement ---------- */
+/* Static notice: no marquee, no dismiss. */
+.s-announcement--bar {
+  padding-block: 0.75rem;
+  border-bottom: 1px solid var(--c-border);
+}
+.s-announcement--bar .announcement {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 1rem;
+  row-gap: 0.25rem;
+}
+.announcement__title {
+  font-size: var(--fs-base);
+  line-height: 1.4;
+}
+.s-announcement--bar .announcement__text {
+  flex: 1 1 18rem;
+}
+.s-announcement--card .announcement {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 44rem;
+  padding: 1.25rem 1.25rem 1.25rem 1.5rem;
+  border-left: 4px solid var(--c-primary);
+}
+.tone-inverse.s-announcement--card .announcement {
+  border-left-color: currentColor;
+}
+.s-announcement--card .announcement__title {
+  font-size: var(--fs-h3);
+  line-height: 1.25;
+}
+@media (min-width: 48rem) {
+  .s-announcement--card .announcement {
+    padding: 1.75rem 2rem;
+  }
+}
