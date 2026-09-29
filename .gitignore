@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.tools/
+.worktrees/
+.env
+.env.*
+!.env.example
+.data/
+coverage/
+*.log
+.turbo/
+eval/runs/
+test-results/
+playwright-report/
