@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { BANNED_PHRASES, DIRECTIONS, SECTION_DEFS, toModelJsonSchema } from "@sb/spec";
+import { BANNED_PHRASES, Business, DIRECTIONS, SECTION_DEFS, toModelJsonSchema } from "@sb/spec";
 
 /**
  * Static prompt parts. They must be byte-stable across calls so prompt caching works:
@@ -28,6 +28,13 @@ export function sectionCatalogue(): string {
     ].join("\n");
   });
   return `# Section components\n\n${lines.join("\n\n")}`;
+}
+
+/** Schema of /business for edits: facts the client gives in chat (hours, address, phone) must match it exactly. */
+export function businessSchema(): string {
+  return `# Business facts (/business)
+
+Schema: ${JSON.stringify(toModelJsonSchema(Business))}`;
 }
 
 export function directionsCatalogue(): string {
@@ -92,7 +99,8 @@ export const EditOutput = z.strictObject({
 export type EditOutput = z.infer<typeof EditOutput>;
 
 export const CritiqueOutput = z.strictObject({
-  issues: z.array(z.string().max(300)).max(20),
+  // Notes for the log, never rendered: trimmed rather than rejected. Patches are validated in full.
+  issues: z.array(z.string().transform((t) => t.slice(0, 300))).transform((a) => a.slice(0, 20)),
   patches: EditOutput.shape.patches,
 });
 export type CritiqueOutput = z.infer<typeof CritiqueOutput>;

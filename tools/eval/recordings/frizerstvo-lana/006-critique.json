@@ -2,15 +2,15 @@
   "seq": 6,
   "stage": "critique",
   "model": "claude-sonnet-5-5",
-  "hash": "fce6f8c535cdb188",
+  "hash": "055b0e825aa81fe8",
   "origin": "recorded",
   "response": {
-    "text": "{\"issues\":[\"Opening hours note is shown twice on the homepage. The opening-hours section repeats the note that already appears in the contact-strip, and on desktop it renders twice inside the section itself.\",\"The homepage shows opening hours twice (contact-strip and opening-hours section), which is redundant on a short mobile page.\",\"The 'Zakaj v salon Lana' highlights repeat facts from the services list and the hero (svečane pričeske, barve brez amoniaka).\",\"The About page states 'devet let' (nine years). This is not among the hard-checked facts, but it is a number in the copy. I cannot verify it against the brief, so it is not patched.\",\"The hero image is a low-detail placeholder-like duotone photo with a caption cropped in the desktop hero. This is an image issue, not a spec issue.\"],\"patches\":[{\"op\":\"remove\",\"path\":\"/pages/0/sections/4\"},{\"op\":\"replace\",\"path\":\"/pages/0/sections/3/props/items\",\"value\":[{\"title\":\"Specialistka za barvanje\",\"text\":\"Petra Kos je specialistka za barvanje in pramene.\"},{\"title\":\"Barve brez amoniaka\",\"text\":\"Primerne so tudi za občutljivo lasišče.\"},{\"title\":\"Parkirišče in pritličje\",\"text\":\"Salon je v pritličju, parkirišče je za stavbo.\"}]}]}",
+    "text": "{\"issues\":[\"The homepage repeats the opening hours. The contact-strip cards already show them, and a separate opening-hours section shows them again with the same note, so the note appears twice and the section is redundant.\",\"The hero says 'že devet let', but the brief's facts about the salon's age appear only in the about copy. Copy must not invent numbers, so this needs checking. The number of years also appears on the O nas page and in its SEO description. I'm assuming it came from the brief and leaving it unchanged.\",\"The homepage highlights section repeats content already visible: 'Za vso družino' duplicates the hero and services, and 'Poroke in plesi' duplicates the services list. Only the parking point is new.\",\"The opening-hours section's own note repeats the same sentence as the note inside the hours block, so it shows twice in a row on mobile and desktop.\"],\"patches\":[{\"op\":\"remove\",\"path\":\"/pages/0/sections/5\"},{\"op\":\"remove\",\"path\":\"/pages/0/sections/4\"},{\"op\":\"add\",\"path\":\"/pages/0/sections/4\",\"value\":{\"id\":\"s_homehigh\",\"type\":\"highlights\",\"variant\":\"list\",\"props\":{\"heading\":\"Dobro je vedeti\",\"items\":[{\"title\":\"Parkirišče\",\"text\":\"Salon je v pritličju, parkirišče je za stavbo.\"},{\"title\":\"Naročanje\",\"text\":\"Brez naročila težko pridete na vrsto, zato raje pokličite.\"}]}}}]}",
     "stopReason": "end_turn",
     "model": "claude-sonnet-5-5",
     "usage": {
-      "input_tokens": 9461,
-      "output_tokens": 451,
+      "input_tokens": 8985,
+      "output_tokens": 480,
       "cache_creation_input_tokens": 16293,
       "cache_read_input_tokens": 0
     }

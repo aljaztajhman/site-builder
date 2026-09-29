@@ -1,0 +1,18 @@
+{
+  "seq": 6,
+  "stage": "edit",
+  "model": "claude-sonnet-5-5",
+  "hash": "65e1ee13d42952a7",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"reply\":\"Uradne ure sem vpisal med podatke o podjetju in dodal razdelek z uradnimi urami na stran Kontakt.\",\"patches\":[{\"op\":\"replace\",\"path\":\"/business/hours\",\"value\":{\"entries\":[{\"from\":\"mon\",\"to\":\"thu\",\"open\":\"08:00\",\"close\":\"16:00\"},{\"from\":\"fri\",\"to\":\"fri\",\"open\":\"08:00\",\"close\":\"13:00\"}]}},{\"op\":\"add\",\"path\":\"/pages/3/sections/2\",\"value\":{\"id\":\"s_kontakt_hours\",\"tone\":\"default\",\"type\":\"opening-hours\",\"props\":{\"title\":\"Uradne ure\",\"note\":\"Stranke se vedno prej najavijo po telefonu.\"},\"variant\":\"table\"}}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 4560,
+      "output_tokens": 247,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 18426
+    }
+  }
+}

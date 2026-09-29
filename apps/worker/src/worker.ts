@@ -50,6 +50,7 @@ export async function startWorker(platform: Platform, config = loadConfig()): Pr
   await repo.failInterrupted(0);
   setInterval(() => void repo.failInterrupted(20).catch((e: unknown) => console.error("[worker]", e)), 5 * 60_000).unref();
 
+  // Generations run in parallel (one site each); each peaks at ~1.1 GB with its Chromium checks.
   await queue.work("generate", async (job, jobId) => {
     const client = modelClientFor(platform, config, { siteId: job.siteId, jobId });
     try {
@@ -59,8 +60,9 @@ export async function startWorker(platform: Platform, config = loadConfig()): Pr
       await repo.addEvent({ siteId: job.siteId, jobId, stage: "error", level: "error", message: (e as Error).message });
       console.error("[generate]", e);
     }
-  });
+  }, { concurrency: config.limits.jobConcurrency });
 
+  // Edits and publishes stay sequential: two at once on the same site would conflict on the spec version.
   await queue.work("edit", async (job, jobId) => {
     const client = modelClientFor(platform, config, { siteId: job.siteId, jobId }, defaultTransport("edit"));
     try {

@@ -15,7 +15,7 @@ import {
   type SiteSpec,
 } from "@sb/spec";
 import type { ModelClient } from "./llm/client.ts";
-import { ModelOutputError, isSchemaRejection } from "./llm/client.ts";
+import { ModelOutputError, extractJson, isSchemaRejection } from "./llm/client.ts";
 import { Brief, Classification, briefJsonSchema, classificationJsonSchema, verifyBriefFacts, type Dropped } from "./brief.ts";
 import {
   ALT_SYSTEM,
@@ -30,6 +30,7 @@ import {
   PATCH_FORMAT,
   directionsCatalogue,
   sectionCatalogue,
+  businessSchema,
 } from "./prompts.ts";
 import { assembleSpec, contentJsonSchema, contentOutputSchema, type ContentOutput } from "./assemble.ts";
 import type { Swatch } from "./palette.ts";
@@ -293,17 +294,19 @@ export async function generateContent(client: ModelClient, input: ContentInput):
   return { spec, attempts, issues: lastIssues, structuredFallback };
 }
 
-function extract(text: string): string {
-  const fenced = /```(?:json)?\s*([\s\S]*?)```/.exec(text);
-  if (fenced) return fenced[1]!;
-  const i = text.indexOf("{");
-  return i > 0 ? text.slice(i) : text;
-}
+const extract = extractJson;
 
 const issueLine = (i: Issue) => `${i.path}: ${i.message}`;
 const factLine = (f: FactViolation) => `${f.path}: ${f.kind} "${f.value}" is not in the client's input — remove it or use a placeholder`;
 
 // ---------- Patches (critique and chat edits) ----------
+
+/** enforceDesign for a patched design; left as is when it no longer parses, so validation reports why. */
+function repairDesign(design: unknown): SiteSpec["design"] {
+  const parsed = Design.safeParse(design);
+  const dir = parsed.success ? DIRECTIONS.find((d) => d.id === parsed.data.direction) : undefined;
+  return parsed.success && dir ? enforceDesign(parsed.data, dir) : (design as SiteSpec["design"]);
+}
 
 export interface PatchResult {
   spec: SiteSpec;
@@ -325,9 +328,11 @@ export function applyPatches(spec: SiteSpec, ops: Operation[], corpus: string): 
     return { spec, applied: 0, issues: [`patch failed: ${(e as Error).message}`] };
   }
   next = migrateSpec(next);
+  // Design edits get the same repair as generation: banned backgrounds replaced, contrast fixed in code.
+  if (ops.some((o) => o.path === "/design" || o.path.startsWith("/design/"))) next = { ...next, design: repairDesign(next.design) };
   const v = validateSite(next);
-  const issues = v.ok ? [] : v.issues.map(issueLine);
-  issues.push(...checkFacts(next, corpus).map(factLine));
+  // Fact checks walk the spec's structure, so they only run on a spec that validates.
+  const issues = v.ok ? checkFacts(v.spec, corpus).map(factLine) : v.issues.map(issueLine);
   return { spec: v.ok && issues.length === 0 ? v.spec : next, applied: ops.length, issues };
 }
 
@@ -389,7 +394,7 @@ export async function editSpec(
   let attempts = 0;
   for (;;) {
     attempts++;
-    const res = await client.call({ stage: "edit", system: [EDIT_SYSTEM, sectionCatalogue()], messages });
+    const res = await client.call({ stage: "edit", system: [EDIT_SYSTEM, sectionCatalogue(), businessSchema()], messages });
     let issues: string[];
     let reply = "";
     try {

@@ -32,6 +32,8 @@ export const AppConfigSchema = z.object({
     critiqueIterations: z.number().int().min(0),
     maxPhotos: z.number().int().positive(),
     maxUploadBytes: z.number().int().positive(),
+    /** Generate jobs one worker runs at once; each peaks at ~1.1 GB (Chromium checks). */
+    jobConcurrency: z.number().int().min(1).max(8),
   }),
   targets: z.object({
     homepagePreviewEur: z.number(),

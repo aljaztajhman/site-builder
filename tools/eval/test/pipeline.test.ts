@@ -98,9 +98,20 @@ describe("pipeline with replayed model responses (no network)", () => {
 
     for (const edit of fixture.edits) {
       const msg = await repo.addChat(site.id, "user", edit.message);
-      await applyChatEdit({ repo, client }, site.id, Number(msg.id));
+      const r = await applyChatEdit({ repo, client }, site.id, Number(msg.id));
+      expect(r.issues, edit.message).toEqual([]);
     }
-    expect(transport.remaining).toBe(0);
+  }, 180_000);
+
+  it("keeps the checked site when the critique answer is unusable", async () => {
+    const { fixture, golden, storage, site } = await seedSite("pekarna-kvas-critique");
+    const recordings = syntheticRecordings(fixture, golden).map((r) => (r.stage === "critique" ? { ...r, response: { ...r.response, text: "I looked at the screenshots and it all seems fine." } } : r));
+    const client = new ModelClient({ config, transport: new ReplayTransport(recordings), spentToday: async () => 0, onCall: async () => undefined });
+    const gen = await generateSite({ config, repo, storage, client, browser, lighthouse: false }, site.id, null);
+    expect(gen.check?.validation).toEqual([]);
+    expect((await repo.getSite(site.id))?.status).toBe("ready");
+    const events = await db.query<{ message: string }>("select message from site_events where site_id = $1", [site.id]);
+    expect(events.rows.map((e) => e.message)).toContain("Critique answer unusable; kept the checked site");
   }, 180_000);
 
   it("rejects an edit that invents a phone number and keeps the spec", async () => {

@@ -112,13 +112,18 @@ export class ModelClient {
   /**
    * Calls with a JSON schema and returns the parsed, validated value. Uses structured output; if the
    * API rejects the schema, falls back to plain JSON with the schema in the prompt (remembered per
-   * stage). Output that fails `parse` is retried once with the errors.
+   * stage). Output that fails `parse` is retried with the errors, at most `retries` times (PRODUCT.md: max 2).
    */
-  async callJson<T>(req: ModelRequest & { schema: Record<string, unknown> }, parse: (data: unknown) => T): Promise<{ data: T; response: ModelResponse }> {
+  async callJson<T>(
+    req: ModelRequest & { schema: Record<string, unknown> },
+    parse: (data: unknown) => T,
+    retries = 2,
+  ): Promise<{ data: T; response: ModelResponse }> {
+    let failures = 0;
     let messages = req.messages;
     const plainInstruction = `Answer with a single JSON object only, matching this JSON Schema:\n${JSON.stringify(req.schema)}`;
     if (this.plainJsonStages.has(req.stage)) messages = appendToLastUser(messages, plainInstruction);
-    for (let attempt = 0; ; attempt++) {
+    for (;;) {
       const structured = !this.plainJsonStages.has(req.stage);
       let response: ModelResponse;
       try {
@@ -137,7 +142,7 @@ export class ModelClient {
       } catch (e) {
         problem = e instanceof SyntaxError ? "The answer was not valid JSON." : `The answer did not match the schema: ${(e as Error).message.slice(0, 1500)}`;
       }
-      if (attempt >= 1) throw new ModelOutputError(`Model output for ${req.stage} is invalid: ${problem.slice(0, 300)}`, response);
+      if (++failures > retries) throw new ModelOutputError(`Model output for ${req.stage} is invalid: ${problem.slice(0, 300)}`, response);
       messages = [...messages, { role: "assistant", content: response.text }, { role: "user", content: `${problem}\nReturn the corrected JSON object only.` }];
     }
   }
@@ -160,11 +165,57 @@ function appendToLastUser(messages: Anthropic.MessageParam[], text: string): Ant
 }
 
 /** Tolerates a fenced block when structured output is off. */
+/**
+ * The JSON value in a model answer. Models sometimes add prose, or answer twice ("Wait: … Corrected
+ * output: {…}"), so this takes the last complete top-level JSON value that parses and has the same
+ * shape (top-level keys) as the main answer, ignoring fragments quoted in prose. Falls back to the text
+ * from the first bracket, so parse errors still say why.
+ */
 export function extractJson(text: string): string {
+  const parsed = topLevelJson(text).flatMap((raw) => {
+    try {
+      return [{ raw, shape: shapeOf(JSON.parse(raw)) }];
+    } catch {
+      return [];
+    }
+  });
+  if (parsed.length) {
+    const main = parsed.reduce((a, b) => (b.raw.length > a.raw.length ? b : a));
+    return parsed.filter((c) => c.shape === main.shape).at(-1)!.raw;
+  }
   const fenced = /```(?:json)?\s*([\s\S]*?)```/.exec(text);
   if (fenced) return fenced[1]!.trim();
   const start = text.search(/[[{]/);
   return start > 0 ? text.slice(start) : text;
+}
+
+const shapeOf = (v: unknown): string => (Array.isArray(v) ? "[]" : v && typeof v === "object" ? Object.keys(v).sort().join(",") : typeof v);
+
+/** Balanced top-level {…} / […] spans, string- and escape-aware. */
+function topLevelJson(text: string): string[] {
+  const out: string[] = [];
+  let depth = 0;
+  let start = -1;
+  let inString = false;
+  let escaped = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i]!;
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (ch === "\\") escaped = true;
+      else if (ch === '"') inString = false;
+      continue;
+    }
+    if (depth > 0 && ch === '"') inString = true;
+    else if (ch === "{" || ch === "[") {
+      if (depth === 0) start = i;
+      depth++;
+    } else if ((ch === "}" || ch === "]") && depth > 0) {
+      depth--;
+      if (depth === 0) out.push(text.slice(start, i + 1));
+    }
+  }
+  return out;
 }
 
 /** Stable hash of a request, for recordings. Ignores nothing: any prompt change invalidates a recording. */

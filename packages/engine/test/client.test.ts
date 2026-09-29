@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { loadConfig } from "@sb/config";
-import { ModelClient, ModelOutputError, ReplayTransport, SpendCapError, requestHash, type CallRecord, type ModelRequest, type ModelResponse, type ModelTransport } from "../src/index.ts";
+import { ModelClient, ModelOutputError, ReplayTransport, SpendCapError, extractJson, requestHash, type CallRecord, type ModelRequest, type ModelResponse, type ModelTransport } from "../src/index.ts";
 
 const config = loadConfig();
 
@@ -70,14 +70,14 @@ describe("ModelClient", () => {
     expect(seen).toEqual([true, false, false]);
   });
 
-  it("retries once with the validation errors, then gives up", async () => {
-    const client = new ModelClient({ config, transport: fakeTransport([{ text: '{"a":"x"}' }, { text: '{"a":2}' }]), spentToday: async () => 0, onCall: async () => undefined });
+  it("retries up to twice with the validation errors, then gives up", async () => {
+    const client = new ModelClient({ config, transport: fakeTransport([{ text: '{"a":"x"}' }, { text: '{"a":"y"}' }, { text: '{"a":2}' }]), spentToday: async () => 0, onCall: async () => undefined });
     const parse = (d: unknown) => {
       if (typeof (d as { a: unknown }).a !== "number") throw new Error("a must be a number");
       return d as { a: number };
     };
     expect((await client.callJson({ ...req, schema: { type: "object" } }, parse)).data).toEqual({ a: 2 });
-    const bad = new ModelClient({ config, transport: fakeTransport([{ text: "nope" }, { text: "nope" }]), spentToday: async () => 0, onCall: async () => undefined });
+    const bad = new ModelClient({ config, transport: fakeTransport([{ text: "nope" }, { text: "nope" }, { text: "nope" }]), spentToday: async () => 0, onCall: async () => undefined });
     await expect(bad.callJson({ ...req, schema: { type: "object" } }, parse)).rejects.toBeInstanceOf(ModelOutputError);
   });
 });
@@ -97,5 +97,26 @@ describe("ReplayTransport", () => {
     const t = new ReplayTransport([rec("brief", good), rec("brief", "stale")], true);
     await t.send(req, config.models.brief);
     await expect(t.send(req, config.models.brief)).rejects.toThrow(/re-record/);
+  });
+});
+
+describe("extractJson", () => {
+  it("takes the corrected answer when the model answers twice (live eval, pekarna-kvas critique)", async () => {
+    const { readFileSync } = await import("node:fs");
+    const text = readFileSync(new URL("./fixtures/critique-self-corrected.txt", import.meta.url), "utf8");
+    expect(() => JSON.parse(text.slice(text.indexOf("{")))).toThrow();
+    const out = JSON.parse(extractJson(text)) as { issues: string[]; patches: { path: string }[] };
+    expect(text.lastIndexOf(extractJson(text))).toBeGreaterThan(text.indexOf("Corrected output"));
+    expect(out.patches.some((p) => p.path.endsWith("/price"))).toBe(false);
+  });
+
+  it("handles braces and quotes inside strings, prose around the JSON, and fences", () => {
+    expect(JSON.parse(extractJson('Here: {"reply":"a } and \\" {","patches":[]} done.'))).toEqual({ reply: 'a } and " {', patches: [] });
+    expect(JSON.parse(extractJson('```json\n{"a":1}\n```'))).toEqual({ a: 1 });
+    expect(JSON.parse(extractJson('{"reply":"long answer text here","patches":[{"op":"add"}]}\nI used {"x":1} as a fallback.'))).toEqual({ reply: "long answer text here", patches: [{ op: "add" }] });
+  });
+
+  it("returns the raw text from the first bracket when nothing parses, so the error says why", () => {
+    expect(extractJson('Sure: {"a": 1,')).toBe('{"a": 1,');
   });
 });
