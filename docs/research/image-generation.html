@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Image Generation Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..800&family=Public+Sans:ital,wght@0,400..700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column (~70ch) that lets tables run wider; the answer first, then the evidence, then the decisions. */
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --fg: #16181d;
+  --muted: #596070;
+  --line: #d9dde5;
+  --accent: #2a43c2;
+  --accent-soft: #e7eafb;
+  --ok: #1d7549;
+  --ok-soft: #e1f2e8;
+  --warn: #8f5500;
+  --warn-soft: #faedd6;
+  --no: #ae2a20;
+  --no-soft: #fae3e0;
+  --code-bg: #eceef3;
+  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Mono", Consolas, monospace;
+  --fs-sm: 0.8125rem;
+  --fs-base: 1rem;
+  --fs-md: 1.125rem;
+  --fs-lg: 1.5rem;
+  --fs-xl: 2.25rem;
+  --measure: 70ch;
+  --wide: 76rem;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1115; --surface: #171a20; --fg: #e7e9ee; --muted: #9ba2b1; --line: #2b303a;
+    --accent: #95a5ff; --accent-soft: #1d2447;
+    --ok: #6fd39c; --ok-soft: #12291d; --warn: #f0b660; --warn-soft: #2e2210; --no: #ff8f84; --no-soft: #33161a;
+    --code-bg: #1e222a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1115; --surface: #171a20; --fg: #e7e9ee; --muted: #9ba2b1; --line: #2b303a;
+  --accent: #95a5ff; --accent-soft: #1d2447;
+  --ok: #6fd39c; --ok-soft: #12291d; --warn: #f0b660; --warn-soft: #2e2210; --no: #ff8f84; --no-soft: #33161a;
+  --code-bg: #1e222a;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: var(--fs-base);
+  line-height: 1.6;
+}
+.page {
+  max-width: var(--wide);
+  margin: 0 auto;
+  padding-inline: 16px;
+  padding-block: 2.5rem 4rem;
+  display: grid;
+  gap: 3.5rem;
+}
+@media (min-width: 48rem) { .page { padding-inline: 2rem; } }
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-stretch: 112%;
+  line-height: 1.15;
+  text-wrap: balance;
+  margin: 0;
+}
+h1 { font-size: var(--fs-xl); font-weight: 800; letter-spacing: -0.01em; }
+h2 { font-size: var(--fs-lg); font-weight: 750; }
+h3 { font-size: var(--fs-md); font-weight: 700; }
+p, ul, ol { margin: 0; }
+.prose { max-width: var(--measure); display: grid; gap: 0.9rem; }
+.prose ul, .prose ol { padding-left: 1.25rem; display: grid; gap: 0.4rem; }
+a { color: var(--accent); text-underline-offset: 0.18em; }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+strong { font-weight: 650; }
+.muted { color: var(--muted); }
+.label {
+  font-family: var(--font-display);
+  font-stretch: 112%;
+  font-size: var(--fs-sm);
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+code, pre, kbd { font-family: var(--font-mono); font-size: 0.875em; }
+code { background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 3px; overflow-wrap: anywhere; }
+pre {
+  background: var(--code-bg);
+  padding: 0.9rem 1rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 0;
+  line-height: 1.5;
+}
+pre code { background: none; padding: 0; overflow-wrap: normal; }
+
+section { display: grid; gap: 1.25rem; min-width: 0; }
+.section-head { display: grid; gap: 0.35rem; max-width: var(--measure); }
+
+/* Masthead */
+.masthead { display: grid; gap: 0.75rem; max-width: var(--measure); }
+.meta { display: flex; flex-wrap: wrap; gap: 0.35rem 1.25rem; color: var(--muted); font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
+
+/* The answer panel: the one set-off block on the page */
+.answer {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--accent);
+  border-radius: 6px;
+  padding: 1.5rem;
+  display: grid;
+  gap: 1rem;
+  max-width: 60rem;
+}
+.answer ol { padding-left: 1.25rem; display: grid; gap: 0.65rem; }
+
+/* Tables */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.9375rem; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; vertical-align: top; padding: 0.7rem 0.85rem; border-bottom: 1px solid var(--line); }
+tbody tr:last-child td { border-bottom: 0; }
+th {
+  font-family: var(--font-display);
+  font-stretch: 112%;
+  font-size: var(--fs-sm);
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+  background: var(--bg);
+}
+td.num, th.num { text-align: right; white-space: nowrap; }
+.t-models { min-width: 58rem; }
+.t-lanes { min-width: 52rem; }
+.t-mcp { min-width: 56rem; }
+.t-cost { min-width: 34rem; }
+td small { display: block; color: var(--muted); font-size: var(--fs-sm); line-height: 1.45; margin-top: 0.2rem; }
+
+/* Verdict chips: state encoded in colour and word */
+.chip {
+  display: inline-block;
+  font-size: var(--fs-sm);
+  font-weight: 650;
+  line-height: 1.3;
+  padding: 0.12rem 0.5rem;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.chip.ok { background: var(--ok-soft); color: var(--ok); }
+.chip.warn { background: var(--warn-soft); color: var(--warn); }
+.chip.no { background: var(--no-soft); color: var(--no); }
+.chip.pick { background: var(--accent-soft); color: var(--accent); }
+
+/* Two-up blocks that stack on phones */
+.split { display: grid; gap: 1.25rem; }
+@media (min-width: 56rem) { .split { grid-template-columns: 1fr 1fr; align-items: start; } }
+.split > * { min-width: 0; }
+
+.box {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 1.25rem;
+  display: grid;
+  gap: 0.75rem;
+  align-content: start;
+}
+
+/* Placeholder mock: how a "photo brief" placeholder would look on a client site */
+.ph {
+  aspect-ratio: 3 / 2;
+  max-width: 100%;
+  border: 2px dashed var(--muted);
+  border-radius: 4px;
+  display: grid;
+  place-content: center;
+  gap: 0.35rem;
+  padding: 1rem;
+  text-align: center;
+  background: var(--bg);
+}
+.ph strong { font-family: var(--font-display); font-stretch: 112%; font-size: var(--fs-md); }
+.ph span { color: var(--muted); font-size: var(--fs-sm); }
+
+/* Steps: a real sequence, so numbered */
+ol.steps { counter-reset: step; list-style: none; padding: 0; display: grid; gap: 1rem; max-width: 60rem; }
+.steps > li { counter-increment: step; display: grid; grid-template-columns: 2rem 1fr; gap: 0.25rem 0.75rem; }
+.steps > li::before {
+  content: counter(step);
+  font-family: var(--font-display);
+  font-stretch: 112%;
+  font-weight: 750;
+  color: var(--accent);
+  font-size: var(--fs-md);
+  line-height: 1.5;
+}
+.steps > li > * { grid-column: 2; min-width: 0; }
+.steps > li > :first-child { grid-row: 1; }
+
+/* Decisions */
+.decisions { display: grid; gap: 1rem; }
+.decision { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 1.25rem; display: grid; gap: 0.75rem; }
+.decision ul { list-style: none; padding: 0; display: grid; gap: 0.5rem; }
+.decision li { display: grid; grid-template-columns: auto 1fr; gap: 0.6rem; align-items: baseline; }
+.decision li .chip { justify-self: start; }
+.decision .why { color: var(--muted); max-width: var(--measure); }
+
+.sources { font-size: var(--fs-sm); display: grid; gap: 0.3rem; padding-left: 1.25rem; overflow-wrap: anywhere; }
+footer { color: var(--muted); font-size: var(--fs-sm); max-width: var(--measure); }
+
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+<main class="page">
+
+<header class="masthead">
+  <p class="label">Site builder · research</p>
+  <h1>Image generation plan</h1>
+  <p>How we get real images (not only icons) from an image model, how Claude Code drives it for you, and where generated images may and may not appear on a client's site.</p>
+  <div class="meta">
+    <span>29. 9. 2026</span>
+    <span>Status: proposal, nothing built</span>
+    <span>Branch <code>claude/image-generation-integration-896eb6</code></span>
+  </div>
+</header>
+
+<section class="answer" id="answer" aria-labelledby="answer-title">
+  <h2 id="answer-title">Short answer</h2>
+  <ol>
+    <li><strong>Connect Claude Code to fal.ai's hosted MCP server.</strong> Claude can't make photos, but one fal key reaches the strongest image models (OpenAI, Google, FLUX, Recraft, Seedream, Ideogram). Prepaid credit is a hard spending cap. Claude writes the prompt, runs the model, downloads the image into the repo and opens it to check before keeping it.</li>
+    <li><strong>Icons need no model.</strong> Use the Lucide set (ISC licence) as inline SVG: consistent, a few hundred bytes each, and zero cost.</li>
+    <li><strong>First job: realistic fixture photos.</strong> Run a 30-image comparison of three models, then replace the 36 SVG colour-field stand-ins with the winner's photos and re-record the evals. €5.50–7.80 in total.</li>
+    <li><strong>On client sites, keep "client photos only" for now.</strong> Add a shot list that tells owners which photos to take, and upscale-only edits of their own photos. Since 2. 8. 2026 a photoreal generated image on a business's site probably needs a visible AI label (EU AI Act, Art. 50). A picture that looks like the business can still mislead customers even with the label.</li>
+    <li><strong>What only you can do:</strong> create the fal.ai account, add prepaid credit, and create an API key. I can't create accounts or enter payment details. Four more choices are in <a href="#decisions">Decisions for you</a>.</li>
+  </ol>
+</section>
+
+<section id="uses">
+  <div class="section-head">
+    <h2>What we need images for</h2>
+    <p>"Images" is eight different jobs. Some need a model, some need code, and two must never be generated. The rule that decides it: <strong>does the picture claim to show this business?</strong> If yes, only the client's own photo may fill it.</p>
+  </div>
+  <div class="table-wrap">
+    <table class="t-lanes">
+      <thead>
+        <tr><th>Job</th><th>Example</th><th>Under today's rules</th><th>Made with</th><th>Proposal</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Eval stand-in photos</strong></td>
+          <td>36 photos for the 10 fictional fixture businesses: bread counter, workshop, treatment room</td>
+          <td><span class="chip ok">Allowed</span><small>Fixtures are fiction; PHASE-1 asks for generated stand-ins</small></td>
+          <td>Image model, driven by Claude Code</td>
+          <td>Do first. Today's stand-ins are SVG colour fields with a caption, so alt text, critique and image weight (LCP) are tested against unrealistic pictures.</td>
+        </tr>
+        <tr>
+          <td><strong>Functional icons</strong></td>
+          <td>Phone, map pin, clock, menu, arrow in the header, contact block and mobile action bar</td>
+          <td><span class="chip ok">Allowed</span><small>Banned only as emoji or as the three-icon-card row</small></td>
+          <td>Open-source SVG set, not a model</td>
+          <td>Use one set (Lucide or Tabler) inline as SVG. A model draws each icon differently; a set is consistent, tiny and licensed.</td>
+        </tr>
+        <tr>
+          <td><strong>Shot list for the owner</strong></td>
+          <td>"Kruh na pultu, ležeče, dnevna svetloba" shown in the dashboard when a site has few photos</td>
+          <td><span class="chip ok">Allowed</span><small>No image is invented; the owner supplies it</small></td>
+          <td>The brief stage (Sonnet), no image model</td>
+          <td>Do. The cheapest way to better sites: tell the owner which 3–6 photos to take on their phone.</td>
+        </tr>
+        <tr>
+          <td><strong>Edits to the client's own photos</strong></td>
+          <td>Extend a portrait phone photo to a wide hero, upscale an 800 px photo, straighten and relight</td>
+          <td><span class="chip warn">Grey zone</span><small>Still their photo, but an edit that adds or removes things invents facts</small></td>
+          <td>Image editing model</td>
+          <td>Allow only extend, upscale, relight and small clean-ups. Keep the original, show before and after, the owner approves each edit.</td>
+        </tr>
+        <tr>
+          <td><strong>Generic mood images</strong></td>
+          <td>"Flour on a wooden worktable" for a bakery that uploaded no photos</td>
+          <td><span class="chip no">Not allowed</span><small>PRODUCT.md: "Client photos only; no stock photos"</small></td>
+          <td>Image model</td>
+          <td>Your decision (below). If allowed: owner opts in, stylised illustration by default, photoreal only with a visible AI label, never where the business itself is shown.</td>
+        </tr>
+        <tr>
+          <td><strong>Pictures of the business itself</strong></td>
+          <td>"Our salon", "our team", "our cakes", "our finished bathroom"</td>
+          <td><span class="chip no">Never</span><small>Invents facts; misleading to customers</small></td>
+          <td>Only the client's photos</td>
+          <td>Enforce in code: team, gallery, services and about slots accept client photos only.</td>
+        </tr>
+        <tr>
+          <td><strong>Our own product site and dashboard</strong></td>
+          <td>Landing page for the builder, empty states, onboarding illustrations</td>
+          <td><span class="chip ok">Allowed</span><small>Our own marketing, no client facts involved</small></td>
+          <td>Image model or vector model, via Claude Code</td>
+          <td>Use when the landing page is built.</td>
+        </tr>
+        <tr>
+          <td><strong>Logos for businesses without one</strong></td>
+          <td>A simple mark for an s.p. that has none</td>
+          <td><span class="chip warn">Out of scope</span><small>Trademark look-alike risk</small></td>
+          <td>Vector model (SVG output)</td>
+          <td>Later, if at all. The header already works with the business name set in type.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="split">
+    <div class="box">
+      <p class="label">Shot list card, as the owner would see it</p>
+      <div class="ph" role="img" aria-label="Example of a shot-list card asking the owner for a photo">
+        <strong>Kruh na pultu</strong>
+        <span>Ležeče 3 : 2 · dnevna svetloba · brez ljudi v ospredju</span>
+        <span>Za naslovni del strani</span>
+      </div>
+    </div>
+    <div class="box prose">
+      <p class="label">Why the rule is "does it claim to show the business"</p>
+      <p>A visitor reads every photo on a bakery's site as that bakery's bread. A generated loaf is then an invented fact, the same as an invented opening hour, and CLAUDE.md already forbids those.</p>
+      <p>Even a photoreal detail shot (flour, a stone wall) on a business's site probably counts as a deep fake under the AI Act guidelines, so it needs a visible label. Stylised illustration avoids that. See <a href="#rules">Law and licences</a>.</p>
+    </div>
+  </div>
+</section>
+
+<section id="claude">
+  <div class="section-head">
+    <h2>What Claude can do on its own</h2>
+  </div>
+  <div class="split">
+    <div class="box prose">
+      <p class="label">Can</p>
+      <ul>
+        <li>Write SVG by hand: icons, simple marks, patterns, diagrams, placeholder frames.</li>
+        <li>Look at images. Claude Code's Read tool opens PNG and JPG files, so after an image model returns a file, Claude checks it (wrong hands, text glitches, off-brief) and retries with a better prompt.</li>
+        <li>Write the prompts. A good image prompt is mostly art direction, which Claude does well.</li>
+      </ul>
+    </div>
+    <div class="box prose">
+      <p class="label">Can't</p>
+      <ul>
+        <li>Output pixels. No Anthropic model generates raster images, so photographs need a second model from another company.</li>
+        <li>Hand-drawn SVG "photos" look like clip art. Fine for icons, not for a hero image.</li>
+      </ul>
+    </div>
+  </div>
+  <p class="prose">So the setup is: Claude Code is the art director, an image model is the camera, and an MCP server is the cable between them. Claude writes the prompt, calls the model through MCP, saves the file into the repo, opens it to check, and iterates.</p>
+</section>
+
+<section id="models">
+  <div class="section-head">
+    <h2>Image models, September 2026</h2>
+    <p>Prices are USD per image from each provider's own pricing page, unless marked. Rank is the Artificial Analysis text-to-image arena on 29. 9. 2026 (people's preference in blind comparisons, all subjects, not photoreal only).</p>
+  </div>
+  <div class="table-wrap">
+    <table class="t-models">
+      <thead>
+        <tr><th>Model (API id)</th><th class="num">Price per image</th><th class="num">Rank</th><th>Good at</th><th>EU, data, terms</th><th>Use for</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>OpenAI GPT Image 2.5</strong><small><code>gpt-image-2.5-flare</code> (fast), <code>gpt-image-2.5-sunburst</code> (precise edits)</small></td>
+          <td class="num">$0.013 medium<br>$0.053 high<br>$0.21 max<small>fal's estimate; OpenAI prices by token ($30 / 1M output)</small></td>
+          <td class="num">1–2<small>at max quality</small></td>
+          <td>Best overall quality and editing: masks, reference images, transparent PNG, up to 3840 px</td>
+          <td>EU endpoint needs OpenAI sales approval (+10 %). No training on API data by default. C2PA. You own the output.</td>
+          <td><span class="chip pick">Compare</span></td>
+        </tr>
+        <tr>
+          <td><strong>Google Nano Banana 2</strong><small><code>gemini-3.1-flash-image</code></small></td>
+          <td class="num">$0.045 at 0.5K<br>$0.067 at 1K<br>$0.101 at 2K<br>$0.151 at 4K<small>$0.08 at 1K via fal</small></td>
+          <td class="num">6</td>
+          <td>Up to 14 reference images, conversational edits, wide ratios (21 : 9, 4 : 1), good for extending a photo to a hero</td>
+          <td>SynthID and C2PA on every image. Google claims no ownership. Indemnity for GA models on Vertex AI. EU processing on Vertex reported, not confirmed here.</td>
+          <td><span class="chip pick">Compare</span></td>
+        </tr>
+        <tr>
+          <td><strong>Google Nano Banana 2 Lite</strong><small><code>gemini-3.1-flash-lite-image</code></small></td>
+          <td class="num">$0.0336<small>1K only</small></td>
+          <td class="num">–</td>
+          <td>Cheapest Google image model</td>
+          <td>As above</td>
+          <td>Drafts</td>
+        </tr>
+        <tr>
+          <td><strong>Google Nano Banana Pro</strong><small><code>gemini-3-pro-image</code></small></td>
+          <td class="num">$0.134 at 1–2K<br>$0.24 at 4K</td>
+          <td class="num">11</td>
+          <td>More detail and better lettering than Flash</td>
+          <td>As above</td>
+          <td>Not needed</td>
+        </tr>
+        <tr>
+          <td><strong>Black Forest Labs FLUX.2</strong><small><code>flux-2-pro</code>, <code>-max</code>, <code>-flex</code>, <code>-klein</code></small></td>
+          <td class="num">pro from $0.03<small>edits from $0.045; max $0.07, flex $0.05, klein from $0.014</small></td>
+          <td class="num">22–26</td>
+          <td>Cheap, fast, solid photoreal; outpainting tool</td>
+          <td>German company with an EU endpoint, but the standard EU API terms give it a perpetual licence to train on your inputs and outputs. Forbids removing Content Credentials.</td>
+          <td><span class="chip pick">Compare</span><small>Never client photos on standard terms</small></td>
+        </tr>
+        <tr>
+          <td><strong>Recraft V4.1</strong><small><code>recraftv4_1</code>, <code>_vector</code>, <code>_flash</code></small></td>
+          <td class="num">$0.035 raster<br>$0.08 SVG<br>$0.007 flash<small>crisp upscale $0.004, background removal $0.01, erase $0.002</small></td>
+          <td class="num">27–31</td>
+          <td>Native SVG output, illustration styles, cheap utilities</td>
+          <td>Paid plans own the output; on the free plan Recraft owns it and bans commercial use. API data not used for training (Recraft's docs).</td>
+          <td>Illustrations, if allowed; upscaling</td>
+        </tr>
+        <tr>
+          <td><strong>ByteDance Seedream 5.0</strong>, <strong>Alibaba Qwen-Image 3</strong></td>
+          <td class="num">$0.027–0.0675<br>$0.04–0.075<small>fal prices; official pages didn't render</small></td>
+          <td class="num">15–37<br>18</td>
+          <td>Cheap, decent quality</td>
+          <td>No confirmed EU region; terms unconfirmed</td>
+          <td>Development only</td>
+        </tr>
+        <tr>
+          <td><strong>Ideogram 4.0</strong></td>
+          <td class="num">~$0.015 per MP<small>fal; direct price unconfirmed</small></td>
+          <td class="num">35–39</td>
+          <td>Lettering inside images</td>
+          <td>Terms unconfirmed</td>
+          <td>Rarely needed</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="prose muted">Gone or unavailable: Imagen 4 was shut down on 17. 8. 2026, and <code>gemini-2.5-flash-image</code> shuts down on 2. 10. 2026. Many tutorials and community MCP servers still default to these two. Midjourney has no API. Adobe's Firefly API is sold through sales only. Stability's models score 759–839 in the arena against the leader's 1195.</p>
+</section>
+
+<section id="connect">
+  <div class="section-head">
+    <h2>Connecting Claude Code</h2>
+    <p>Every option below is an MCP server: Claude Code gets new tools such as "run model" and calls them itself. All commands are Claude Code's own <code>claude mcp add</code>. Keys go in environment variables, never in the repo.</p>
+  </div>
+  <div class="table-wrap">
+    <table class="t-mcp">
+      <thead>
+        <tr><th>Service</th><th>How it connects</th><th>Returns</th><th>Models and cost</th><th>Verdict</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>fal.ai</strong><small>official, hosted</small></td>
+          <td>HTTP, API key in a Bearer header</td>
+          <td>CDN links; Claude downloads them with curl</td>
+          <td>OpenAI, Nano Banana, FLUX.2, Recraft, Seedream, Ideogram and more. Pay per image, mostly at the provider's price (Nano Banana 2 costs $0.08 there, $0.067 direct). Has a <code>get_pricing</code> tool.</td>
+          <td><span class="chip pick">Recommended</span></td>
+        </tr>
+        <tr>
+          <td><strong>Black Forest Labs</strong><small>official, hosted</small></td>
+          <td>HTTP, sign-in in the browser (no key to handle)</td>
+          <td>Links</td>
+          <td>FLUX.2 only. Billed to your BFL credits. Trains on inputs and outputs under standard terms.</td>
+          <td><span class="chip ok">Fallback</span></td>
+        </tr>
+        <tr>
+          <td><strong>Hugging Face</strong><small>official, hosted; also in Claude's connector directory</small></td>
+          <td>HTTP, Hugging Face sign-in</td>
+          <td>Images inline</td>
+          <td>Runs public demo apps such as FLUX.1-schnell on free GPUs: 5 minutes a day on a free account, 40 on PRO ($9/month). Lower quality than the paid models.</td>
+          <td><span class="chip ok">Free trials</span></td>
+        </tr>
+        <tr>
+          <td><strong>mcp-image</strong><small>community, MIT</small></td>
+          <td>Local Node process (<code>npx</code>), your own Gemini or OpenAI key</td>
+          <td>Files on disk</td>
+          <td>Gemini (default), OpenAI, Seedream at the provider's direct price</td>
+          <td><span class="chip ok">Fallback</span><small>If you'd rather pay Google or OpenAI directly</small></td>
+        </tr>
+        <tr>
+          <td><strong>Recraft</strong><small>official, hosted</small></td>
+          <td>HTTP, sign-in in the browser</td>
+          <td>Links</td>
+          <td>Raster and SVG generation, vectorise, upscale, background removal. Uses your Recraft subscription.</td>
+          <td><span class="chip warn">Only for vector work</span></td>
+        </tr>
+        <tr>
+          <td><strong>Replicate</strong>, <strong>Ideogram</strong><small>official, hosted</small></td>
+          <td>HTTP / SSE, token or sign-in</td>
+          <td>Links (Replicate's need an auth header to download)</td>
+          <td>Replicate: thousands of models. Ideogram: its own models on your subscription.</td>
+          <td><span class="chip warn">Not needed</span><small>fal covers the same models</small></td>
+        </tr>
+        <tr>
+          <td><strong>Google Vertex AI "genmedia"</strong><small>Google sample, not a supported product</small></td>
+          <td>Local Go program, Google Cloud project and login</td>
+          <td>Files on disk</td>
+          <td>Nano Banana models on Vertex. The installer is bash-only, so it's awkward on Windows.</td>
+          <td><span class="chip warn">Not needed</span></td>
+        </tr>
+        <tr>
+          <td><strong>Figma Weave</strong><small>already attached to this session</small></td>
+          <td>Through the Figma connector</td>
+          <td>Links</td>
+          <td>Nano Banana, video models and more on Weave credits; billing changes on 6. 10. 2026. The connector here is signed in with a work account and isn't linked to Weave.</td>
+          <td><span class="chip no">Don't use</span><small>Keep this project off an employer's account</small></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="split">
+    <div class="box prose">
+      <h3>Setting up fal.ai</h3>
+      <ol class="steps">
+        <li><p><strong>You:</strong> create an account at fal.ai, add prepaid credit ($10 covers everything planned on this page), and create an API key.</p></li>
+        <li><p><strong>You:</strong> save the key as a Windows user environment variable named <code>FAL_KEY</code> (Settings → System → About → Advanced system settings → Environment Variables, which keeps it out of shell history). Restart the Claude app so it sees the variable.</p></li>
+        <li>
+          <p><strong>Me, in a small PR:</strong> add <code>.mcp.json</code> to the repo. Claude Code fills in <code>${FAL_KEY}</code> from your environment, so no secret goes into git, and every worktree gets the server. Claude Code asks you once to approve it.</p>
+<pre><code>{
+  "mcpServers": {
+    "fal-ai": {
+      "type": "http",
+      "url": "https://mcp.fal.ai/mcp",
+      "headers": { "Authorization": "Bearer ${FAL_KEY}" }
+    }
+  }
+}</code></pre>
+          <p class="muted">Or, for your account only, in PowerShell (this stores the key in <code>~/.claude.json</code>):</p>
+<pre><code>claude mcp add --scope user --transport http fal-ai https://mcp.fal.ai/mcp --header "Authorization: Bearer $env:FAL_KEY"</code></pre>
+        </li>
+      </ol>
+    </div>
+    <div class="box prose">
+      <h3>What Claude Code then does per image</h3>
+      <ol class="steps">
+        <li><p>Checks the current price with fal's <code>get_pricing</code> and states the total before starting.</p></li>
+        <li><p>Writes the prompt from the brief, for example the subject of each fixture photo in <code>brief.json</code>.</p></li>
+        <li><p>Runs the model, downloads the result into the repo, and opens it to look for wrong hands, garbled text, or a picture that misses the brief.</p></li>
+        <li><p>Keeps it or retries with a better prompt, and records model, prompt and cost in a manifest next to the images.</p></li>
+        <li><p>Stops at the budget you set. The prepaid credit is the hard limit.</p></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section id="pipeline">
+  <div class="section-head">
+    <h2>In the product pipeline</h2>
+    <p>Claude Code with MCP is for us, at development time. Client sites need the same model called from the worker, through our own code, so it follows the engineering rules in CLAUDE.md. Sketch only; nothing here is built.</p>
+  </div>
+  <ol class="steps">
+    <li>
+      <h3>One adapter, provider chosen in config</h3>
+      <p><code>packages/engine/src/imagegen/</code> with <code>generate(prompt, aspect, size)</code> and <code>edit(image, instruction, aspect)</code>. Each returns bytes, size, model id and cost. The provider, model id, size and quality live in <code>config/app.config.json</code> next to the Claude models; per-image prices go in a <code>pricesUsdPerImage</code> table.</p>
+    </li>
+    <li>
+      <h3>Spec v2: every image knows where it came from</h3>
+      <p><code>ImageAsset</code> gains <code>origin: "client" | "edited" | "generated"</code> and, for the last two, the model, prompt and source image. The v1 → v2 migration sets <code>origin: "client"</code> on every existing image, with a test. Validation rejects a non-client image in slots that show the business (team, gallery, services, about).</p>
+    </li>
+    <li>
+      <h3>Marked in the file and on the page</h3>
+      <p>Our sharp step re-encodes every image and drops metadata by default, so any C2PA or IPTC marking the provider embedded is lost. We write it back: the IPTC <code>DigitalSourceType</code> as XMP via sharp's <code>withXmp()</code> (0.34.3+). sharp documents XMP output for WebP, JPEG and PNG but not AVIF, so the AVIF variant needs a test or a different writer. Generated images also get a visible Slovene label where the rules below require one.</p>
+    </li>
+    <li>
+      <h3>Cost logged and capped like every model call</h3>
+      <p>Stages <code>image.generate</code> and <code>image.edit</code> log count and € per call and count toward <code>dailyModelSpendCapEur</code>. A per-site limit (<code>limits.maxGeneratedImages</code>) keeps one intake from generating dozens.</p>
+    </li>
+    <li>
+      <h3>Tests without the network</h3>
+      <p>Unit tests replay recorded responses (small PNGs plus JSON) with the network blocked, as the Claude calls do today. Only <code>pnpm eval</code> calls the real image API. New eval checks: no generated image in a business slot, label present, file weight within the LCP budget.</p>
+    </li>
+    <li>
+      <h3>Client photos are personal data</h3>
+      <p>Sending an owner's photo (faces, staff, customers) to an editing API makes that provider a sub-processor. Prefer an EU processing region, sign its data processing terms, and name it in the privacy-policy template.</p>
+    </li>
+  </ol>
+</section>
+
+<section id="rules">
+  <div class="section-head">
+    <h2>Law and licences</h2>
+    <p>Research, not legal advice. The EU rules changed this summer, and they decide how far client-facing generation can go.</p>
+  </div>
+  <div class="split">
+    <div class="box prose">
+      <p class="label">EU AI Act, Article 50: in force since 2. 8. 2026</p>
+      <ul>
+        <li><strong>We are likely both provider and deployer.</strong> A product that generates images under its own name is a provider and must mark outputs in a machine-readable, detectable way. Because we choose what gets published, we are also a deployer, and so is the client. No passage covers website builders specifically.</li>
+        <li><strong>A photoreal loaf on a bakery site probably counts as a deep fake.</strong> The Commission's July guidelines include objects, consumer goods, buildings and places that plausibly exist, even invented ones, and need no intent to deceive. Deep fakes need a visible disclosure; the provider's hidden watermark doesn't count.</li>
+        <li><strong>Stylised illustration probably doesn't.</strong> Icon-scale graphics are outside the marking duty.</li>
+        <li><strong>Upscaling and relighting</strong> can fall under the exception for standard editing that doesn't substantially alter the input (my reading). Extending a photo adds invented content, so treat that as generated.</li>
+        <li><strong>No grace period for us.</strong> The Digital Omnibus (Regulation 2026/1744) gives only systems already on the market before 2. 8. 2026 until 2. 12. 2026 for marking. Fines reach €15 m or 3 % of turnover, the lower of the two for SMEs.</li>
+        <li><strong>Code of Practice</strong> (final 10. 6. 2026, voluntary, ~190 signatories): for images, signed metadata plus an invisible watermark, and the EU "AI" icon for deployers.</li>
+      </ul>
+    </div>
+    <div class="box prose">
+      <p class="label">Misleading customers, copyright, provider terms</p>
+      <ul>
+        <li><strong>A label doesn't cure a misleading picture.</strong> Under the Unfair Commercial Practices Directive (Art. 6) and Slovenia's ZVPot-1 (Art. 47–49), the overall impression counts. An AI image that looks like the shop, the staff or the product is the highest-risk case, and liability can reach whoever acts on the trader's behalf.</li>
+        <li><strong>Nobody may own a prompt-only image.</strong> ZASP needs a human author, and EU courts have leaned that way. Don't promise clients exclusivity or copyright.</li>
+        <li><strong>Our pipeline strips the provider's marks.</strong> sharp drops metadata, and any re-encode breaks a C2PA signature. Black Forest Labs' EU terms forbid removing Content Credentials. We must write our own marking and test whether the invisible watermark survives AVIF at quality 55.</li>
+        <li><strong>Output ownership:</strong> OpenAI, Google and Black Forest Labs leave the output to the customer. Recraft's free plan keeps ownership and bans commercial use. Indemnities: Google's covers GA models on Vertex AI; Adobe's needs an enterprise contract; Black Forest Labs has none.</li>
+        <li><strong>Stock photos</strong> aren't the client's either. Unsplash's API requires hotlinking and credit; Pexels allows commercial use. Same misleading-picture risk.</li>
+        <li><strong>Icon sets are clear:</strong> Lucide (ISC), Tabler, Phosphor, Heroicons (MIT), Material Symbols (Apache 2.0). Ship a third-party licences file with the export.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="box prose">
+    <p class="label">Rules I'd add to PRODUCT.md if generation reaches client sites</p>
+    <ol>
+      <li>Never generate the business: people, staff, premises, finished work, or its own products and food. Enforced by the spec, not by the prompt.</li>
+      <li>Development and eval use is unrestricted. Fixtures are fiction and never reach the public.</li>
+      <li>Client-facing generation stays off until you decide. If on: stylised illustration by default; any photoreal image carries a visible Slovene label and the EU AI icon, rendered by the component so the client can't remove it and preview equals published.</li>
+      <li>Upscale and relight count as edits. Extending or removing content counts as generated.</li>
+      <li>Every image records its origin, model and prompt in the spec; generated files get IPTC <code>DigitalSourceType</code> written back after sharp.</li>
+      <li>Providers must mark outputs (C2PA plus watermark) and grant commercial rights on the plan we pay for.</li>
+      <li>Publishing is blocked when a generated image lacks its label or sits in a slot that shows the business.</li>
+      <li>A Slovenian lawyer reviews our provider/deployer position before client-facing generation launches.</li>
+    </ol>
+  </div>
+</section>
+
+<section id="cost">
+  <div class="section-head">
+    <h2>What it costs</h2>
+    <p>At <code>eurPerUsd</code> 0.86 from <code>config/app.config.json</code>. Fixture numbers include 50 % retries.</p>
+  </div>
+  <div class="table-wrap">
+    <table class="t-cost">
+      <thead>
+        <tr><th>Item</th><th>Count</th><th class="num">€</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Model comparison: 10 fixture subjects × Nano Banana 2 ($0.08 on fal), FLUX.2 pro ($0.03), GPT Image 2.5 high (~$0.053)</td><td>30 images</td><td class="num">1.40</td></tr>
+        <tr><td>Realistic fixture photos with the winning model</td><td>36 + 18 retries</td><td class="num">1.40–3.70</td></tr>
+        <tr><td>Re-recording the evals, because alt text and critique see new photos (last full run)</td><td>1 run</td><td class="num">2.71</td></tr>
+        <tr><td><strong>One-off total for the first job</strong></td><td></td><td class="num"><strong>5.50–7.80</strong></td></tr>
+        <tr><td>Per client site, if you allow mood images: 3 × Nano Banana 2 at 1K</td><td>3 images</td><td class="num">0.17</td></tr>
+        <tr><td>Same with FLUX.2 pro</td><td>3 images</td><td class="num">0.08</td></tr>
+        <tr><td>Extending one client photo to a hero ratio (Nano Banana 2)</td><td>1 edit</td><td class="num">0.06</td></tr>
+        <tr><td>AI upscale of one small client photo (Recraft crisp upscale)</td><td>1 edit</td><td class="num">0.003</td></tr>
+        <tr><td>Icons (Lucide) and the shot list (a few hundred tokens on the existing brief call)</td><td></td><td class="num">~0</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="prose muted">For scale: the homepage preview costs €0.087 today (median, 10 fixtures) against a €0.30 target. Three generated images at 1K would bring it to about €0.26, so image generation is affordable in the preview but uses most of the headroom.</p>
+</section>
+
+<section id="decisions">
+  <div class="section-head">
+    <h2>Decisions for you</h2>
+    <p>Each has my recommendation first. The first is needed before anything else can start; the other three can wait until the comparison images are in.</p>
+  </div>
+  <div class="decisions">
+    <article class="decision">
+      <h3>Which image service Claude Code connects to</h3>
+      <ul>
+        <li><span class="chip pick">Recommended</span><span><strong>fal.ai</strong>: one key, every strong model, prepaid credit as the cap.</span></li>
+        <li><span class="chip ok">Option</span><span><strong>Black Forest Labs</strong>: sign-in instead of a key, FLUX.2 only, trains on what you send.</span></li>
+        <li><span class="chip ok">Option</span><span><strong>Hugging Face</strong>: free, 5 GPU-minutes a day, weaker images.</span></li>
+        <li><span class="chip ok">Option</span><span><strong>mcp-image with a Gemini key</strong>: direct Google prices, community-maintained.</span></li>
+      </ul>
+      <p class="why">fal lets us compare OpenAI, Google and FLUX on our own fixtures before committing to one vendor for the product.</p>
+    </article>
+    <article class="decision">
+      <h3>Generated images on client sites</h3>
+      <ul>
+        <li><span class="chip pick">Recommended</span><span><strong>Keep "client photos only"</strong>, and add the shot list and upscale-only edits.</span></li>
+        <li><span class="chip warn">Option</span><span><strong>Allow stylised illustrations</strong> that the owner opts into, never in slots that show the business.</span></li>
+        <li><span class="chip no">Option</span><span><strong>Allow photoreal mood images</strong> with a visible AI label.</span></li>
+      </ul>
+      <p class="why">Photoreal images on a business's site probably need an AI label since August and can still mislead customers. "Your real business, no stock" is also part of what sets the product apart. Revisit after a lawyer's view and the comparison images.</p>
+    </article>
+    <article class="decision">
+      <h3>Edits to the client's own photos</h3>
+      <ul>
+        <li><span class="chip pick">Recommended</span><span><strong>Upscale and relight only</strong>, with the original kept and the owner approving.</span></li>
+        <li><span class="chip warn">Option</span><span><strong>Also extend and remove objects</strong>, marked as AI-edited.</span></li>
+        <li><span class="chip ok">Option</span><span><strong>No edits</strong>; sharp crops as today.</span></li>
+      </ul>
+      <p class="why">Upscaling fixes the most common problem (small phone photos) and likely falls under the standard-editing exception. Extending adds invented content and brings the labelling duty with it.</p>
+    </article>
+    <article class="decision">
+      <h3>Where the fixture photos live</h3>
+      <ul>
+        <li><span class="chip pick">Recommended</span><span><strong>Commit them</strong> as JPEGs at 1600 px (roughly 5–10 MB for all 36).</span></li>
+        <li><span class="chip ok">Option</span><span><strong>Generate on demand</strong>, not committed, as today.</span></li>
+        <li><span class="chip ok">Option</span><span><strong>Keep them in the Railway bucket</strong> and download on setup.</span></li>
+      </ul>
+      <p class="why">Eval recordings depend on the exact photos. Committed files keep evals repeatable and offline, and each regeneration would cost money and change the results.</p>
+    </article>
+  </div>
+</section>
+
+<section id="next">
+  <div class="section-head">
+    <h2>What happens after you choose</h2>
+    <p>With the recommendations, in order. Each step is its own PR with a check.</p>
+  </div>
+  <ol class="steps">
+    <li><p><strong>You:</strong> fal.ai account, $10 credit, <code>FAL_KEY</code> set.</p></li>
+    <li><p><strong>Me:</strong> <code>.mcp.json</code> for fal; the 30-image comparison as a contact sheet for you to pick from.</p></li>
+    <li><p><strong>Me:</strong> realistic fixture photos with a manifest (model, prompt, cost), eval re-recorded, <code>pnpm eval</code> numbers reported against the current run.</p></li>
+    <li><p><strong>Me:</strong> shot list in the brief stage and dashboard; Lucide icons for phone, directions and hours; tests for both.</p></li>
+    <li><p><strong>Later, only if you allow it:</strong> spec v2 with image origin, the image adapter in the engine, labels, marking, publish gate, and a lawyer's review before launch.</p></li>
+  </ol>
+</section>
+
+<section id="sources">
+  <div class="section-head">
+    <h2>Sources</h2>
+    <p class="muted">Checked 29. 9. 2026. Prices, shutdown dates, the fal and Black Forest Labs MCP setups, Claude Code's variable expansion, Hugging Face quotas and the Article 50 dates were read on the official pages. Items marked "reported" or "unconfirmed" above were not.</p>
+  </div>
+  <ul class="sources">
+    <li><a href="https://developers.openai.com/api/docs/guides/image-generation">OpenAI: image generation guide</a> · <a href="https://developers.openai.com/api/docs/pricing">OpenAI pricing</a> · <a href="https://fal.ai/models/openai/gpt-image-2.5/sunburst/text-to-image">fal: GPT Image 2.5 per-image estimate</a></li>
+    <li><a href="https://ai.google.dev/gemini-api/docs/pricing">Gemini API pricing</a> · <a href="https://ai.google.dev/gemini-api/docs/deprecations">Gemini API deprecations</a> · <a href="https://ai.google.dev/gemini-api/docs/image-generation">Gemini image generation</a></li>
+    <li><a href="https://docs.bfl.ai/quick_start/pricing">Black Forest Labs pricing</a> · <a href="https://bfl.ai/legal/eu-api-service-terms">BFL EU API service terms §2(b)</a> · <a href="https://bfl.ai/legal/eu-developer-terms-of-service">BFL EU developer terms</a></li>
+    <li><a href="https://www.recraft.ai/docs/api-reference/pricing">Recraft API pricing</a> · <a href="https://www.recraft.ai/docs/plans-and-billing/commercial-rights-and-ownership.md">Recraft ownership by plan</a></li>
+    <li><a href="https://artificialanalysis.ai/image/leaderboard/text-to-image">Artificial Analysis text-to-image leaderboard</a></li>
+    <li><a href="https://fal.ai/docs/model-apis/mcp">fal MCP server</a> · <a href="https://docs.bfl.ai/api_integration/mcp_integration">BFL MCP server</a> · <a href="https://github.com/huggingface/hf-mcp-server">Hugging Face MCP server</a> · <a href="https://huggingface.co/docs/hub/spaces-zerogpu">ZeroGPU quotas</a> · <a href="https://github.com/shinpr/mcp-image">mcp-image</a> · <a href="https://www.recraft.ai/docs/mcp-reference/remote-server.md">Recraft MCP</a> · <a href="https://mcp.replicate.com/">Replicate MCP</a> · <a href="https://ideogram.ai/features/mcp/">Ideogram MCP</a> · <a href="https://github.com/GoogleCloudPlatform/genmedia-creative-studio/tree/main/experiments/mcp-genmedia">Google genmedia MCP</a></li>
+    <li><a href="https://code.claude.com/docs/en/mcp">Claude Code: MCP, scopes and variable expansion</a> · <a href="https://platform.claude.com/docs/en/docs/build-with-claude/vision">Claude vision (image input only)</a></li>
+    <li><a href="https://digital-strategy.ec.europa.eu/en/policies/code-practice-ai-generated-content">European Commission: Code of Practice on AI-generated content</a> · <a href="https://ec.europa.eu/newsroom/dae/redirection/document/131215">Article 50 guidelines C(2026) 5054</a> · <a href="https://lawandtechnology.eu/en/digital-omnibus-on-ai-official-journal-regulation-2026-1744/">Digital Omnibus, Regulation 2026/1744</a></li>
+    <li><a href="https://www.legislation.gov.uk/eudr/2005/29/article/6">Unfair Commercial Practices Directive, Art. 6</a> · <a href="https://www.uradni-list.si/glasilo-uradni-list-rs/vsebina/2022-01-3083">ZVPot-1, Uradni list RS 130/22</a></li>
+    <li><a href="https://sharp.pixelplumbing.com/api-output">sharp output options (<code>withXmp</code>, metadata)</a> · <a href="https://help.bfl.ai/articles/3705384267-c2pa-in-flux-generated-images">BFL: C2PA in FLUX images</a> · <a href="https://docs.cloud.google.com/vertex-ai/generative-ai/docs/content-credentials">Google: content credentials</a></li>
+    <li><a href="https://help.unsplash.com/en/articles/2511245-unsplash-api-guidelines">Unsplash API guidelines</a> · <a href="https://www.pexels.com/license/">Pexels licence</a> · <a href="https://lucide.dev/license">Lucide licence</a></li>
+  </ul>
+</section>
+
+<footer>
+  <p>Research, not legal advice. Nothing on this page has been built; every recommendation waits for your choice above.</p>
+</footer>
+
+</main>
+</body>
+</html>
