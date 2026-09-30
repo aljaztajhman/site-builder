@@ -32,7 +32,7 @@ No Docker? Set `DATABASE_URL=pglite://./.data/pg` and `STORAGE_DRIVER=fs` in `.e
 - `packages/render` — spec → static HTML (preview, publish and export use the same function).
 - `packages/engine` — generation pipeline, model client (per-stage token/€ logging, spend cap), direct editor, checks.
 - `packages/platform` — Postgres/PGlite, S3/MinIO/fs storage, pg-boss queue.
-- `apps/web` — dashboard, API, preview, published sites at `/s/{slug}/`, `/health`.
+- `apps/web` — landing page at `/`, dashboard at `/sites`, API, preview, published sites at `/s/{slug}/`, `/health`.
 - `apps/worker` — pipeline jobs (Playwright image in production).
 - `tools/eval` — fixtures, eval runner, report.
 

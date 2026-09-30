@@ -21,7 +21,7 @@ import { renderPage, sharedBundle, pageFile } from "@sb/render";
 import { collectPlaceholders, type SiteSpec } from "@sb/spec";
 import { issueSession, clearSession, hasSession, passwordMatches, requireAuth, loginThrottle, type AuthSettings } from "./auth.ts";
 import { slugify } from "./slug.ts";
-import { loginPage, sitesPage, sitePage, intakePage } from "./pages.tsx";
+import { DASHBOARD, loginPage, sitesPage, sitePage, intakePage } from "./pages.tsx";
 import { homePage } from "./home.tsx";
 import { clientBundle } from "./client-bundle.ts";
 import { uiAssets } from "./ui/assets.ts";
@@ -38,9 +38,9 @@ export interface AppOptions {
   auth: AuthSettings;
 }
 
-/** Same-origin path only: "/x" but not "//host", "/\host" or anything with whitespace. */
+/** Same-origin path only: "/x" but not "//host", "/\host" or anything with whitespace. Default: the sites list. */
 export function safeNext(v: unknown): string {
-  return typeof v === "string" && /^\/(?![/\\])[^\s\\]*$/.test(v) ? v : "/";
+  return typeof v === "string" && /^\/(?![/\\])[^\s\\]*$/.test(v) ? v : DASHBOARD;
 }
 
 const SAFE_SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
@@ -50,7 +50,7 @@ const SAFE_ID = /^site_[0-9a-f]{16}$/;
 const SAFE_REST = /^([a-z0-9][a-z0-9._-]*\/)*[a-z0-9][a-z0-9._-]*$/i;
 
 // The UI stylesheet and fonts are public: the login and landing pages need them. "/" is the landing
-// page without a session and the dashboard with one.
+// page for everyone; the dashboard is /sites.
 const PUBLIC = (path: string) =>
   path === "/" || path === "/health" || path === "/login" || path.startsWith("/s/") || path.startsWith("/assets/ui/") || path === "/assets/home.js" || path === "/favicon.ico";
 
@@ -124,7 +124,7 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
   });
   app.post("/logout", (c) => {
     clearSession(c);
-    return c.redirect("/login");
+    return c.redirect("/");
   });
 
   for (const name of ["editor", "dashboard", "home"] as const) {
@@ -144,9 +144,11 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
   });
   app.get("/favicon.ico", (c) => c.redirect(`/assets/ui/${uiAssets().hash}/icon.svg`, 301));
 
+  // ---------- Landing page ----------
+  app.get("/", (c) => c.html(homePage({ config, signedIn: hasSession(c, auth) })));
+
   // ---------- Dashboard ----------
-  app.get("/", async (c) => {
-    if (!hasSession(c, auth)) return c.html(homePage({ config }));
+  app.get(DASHBOARD, async (c) => {
     const sites = await repo.listSites();
     return c.html(sitesPage({ sites, spendToday: await repo.spendToday(), cap: config.limits.dailyModelSpendCapEur, maxPhotos: config.limits.maxPhotos }));
   });

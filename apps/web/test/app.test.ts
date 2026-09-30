@@ -52,6 +52,7 @@ describe("access control", () => {
   });
 
   it("redirects the dashboard and rejects the API without a session", async () => {
+    expect((await app.request("/sites")).status).toBe(302);
     expect((await app.request("/new")).status).toBe(302);
     expect((await app.request("/sites/site_0000000000000000")).status).toBe(302);
     expect((await app.request("/api/sites/x")).status).toBe(401);
@@ -62,7 +63,7 @@ describe("access control", () => {
     const bad = await app.request("/login", { method: "POST", body: new URLSearchParams({ password: "nope" }) });
     expect(bad.status).toBe(401);
     const cookie = await login();
-    const res = await app.request("/", { headers: { cookie } });
+    const res = await app.request("/sites", { headers: { cookie } });
     expect(res.status).toBe(200);
     expect(await res.text()).toContain("Nova stran");
   });
@@ -70,10 +71,11 @@ describe("access control", () => {
   it("rejects a forged session cookie", async () => {
     const cookie = `${SESSION_COOKIE}=9999999999.forged`;
     expect((await app.request("/new", { headers: { cookie } })).status).toBe(302);
-    // "/" is public, but a forged session gets the landing page, not the dashboard.
+    expect((await app.request("/sites", { headers: { cookie } })).status).toBe(302);
+    // A forged session doesn't count as signed in on the landing page either.
     const home = await (await app.request("/", { headers: { cookie } })).text();
-    expect(home).toContain('data-home-intake=""');
-    expect(home).not.toContain("Nova stran");
+    expect(home).toContain('href="/login"');
+    expect(home).not.toContain("Moje strani");
   });
 });
 
@@ -166,11 +168,21 @@ describe("landing page", () => {
     for (const p of ["/", "/login"]) expect((await app.request(p)).headers.get("content-security-policy"), p).toContain("frame-ancestors 'none'");
   });
 
-  it("is the dashboard with a session", async () => {
+  it("stays the landing page with a session, linking to the sites list; the dashboard is /sites", async () => {
     const cookie = await login();
-    const page = await (await app.request("/", { headers: { cookie } })).text();
-    expect(page).not.toContain("data-home-intake");
-    expect(page).toContain('action="/logout"');
+    const home = await (await app.request("/", { headers: { cookie } })).text();
+    expect(home).toContain('data-home-intake=""');
+    expect(home).toMatch(/<a class="btn quiet sm login" href="\/sites">Moje strani<\/a>/);
+    expect(home).not.toContain('href="/login"');
+    const dashboard = await (await app.request("/sites", { headers: { cookie } })).text();
+    expect(dashboard).not.toContain("data-home-intake");
+    expect(dashboard).toContain('action="/logout"');
+    expect(dashboard).toContain('class="brand" href="/sites"');
+    // Signing in without a destination lands on the sites list; signing out on the landing page.
+    const signIn = await app.request("/login", { method: "POST", body: new URLSearchParams({ password: PASSWORD }) });
+    expect(signIn.headers.get("location")).toBe("/sites");
+    const signOut = await app.request("/logout", { method: "POST", headers: { cookie } });
+    expect(signOut.headers.get("location")).toBe("/");
   });
 });
 
@@ -229,7 +241,7 @@ describe("intake", () => {
     const sites = await platform.repo.listSites();
     expect(sites[0]!.slug).toBe("frizerski-salon-lipa");
     // The dashboard lists it as a card that opens the editor.
-    const list = await (await app.request("/", { headers: { cookie } })).text();
+    const list = await (await app.request("/sites", { headers: { cookie } })).text();
     expect(list).toContain(`href="/sites/${sites[0]!.id}"`);
     expect(list).toContain("Ustvarjam …");
   });
@@ -323,6 +335,6 @@ describe("login redirect", () => {
   it("only follows same-origin paths", async () => {
     const { safeNext } = await import("../src/app.ts");
     expect(safeNext("/sites/x")).toBe("/sites/x");
-    for (const bad of ["//evil.com", "/\\evil.com", "https://evil.com", "/ x", 42, undefined]) expect(safeNext(bad)).toBe("/");
+    for (const bad of ["//evil.com", "/\\evil.com", "https://evil.com", "/ x", 42, undefined]) expect(safeNext(bad)).toBe("/sites");
   });
 });
