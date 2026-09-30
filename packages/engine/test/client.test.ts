@@ -86,10 +86,15 @@ describe("ReplayTransport", () => {
   const response: ModelResponse = { text: "{}", stopReason: "end_turn", model: "claude-sonnet-5-5", usage: { input_tokens: 1, output_tokens: 1, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 } };
   const rec = (stage: ModelRequest["stage"], hash = "x") => ({ seq: 0, stage, model: "claude-sonnet-5-5", hash, origin: "synthetic" as const, response });
 
-  it("replays in order and checks the stage", async () => {
-    const t = new ReplayTransport([rec("classify"), rec("brief")]);
-    await t.send({ ...req, stage: "classify" }, config.models.classify);
-    await expect(t.send({ ...req, stage: "design" }, config.models.design)).rejects.toThrow(/stage brief/);
+  it("replays each stage's recordings in order, whatever the order across stages", async () => {
+    const texts = (t: string) => ({ ...response, text: t });
+    const t = new ReplayTransport([rec("classify"), { ...rec("brief"), response: texts("b1") }, rec("altText"), { ...rec("brief"), response: texts("b2") }]);
+    // altText runs beside brief and design, so it may come first.
+    expect((await t.send({ ...req, stage: "altText" }, config.models.altText)).text).toBe("{}");
+    expect((await t.send(req, config.models.brief)).text).toBe("b1");
+    expect((await t.send(req, config.models.brief)).text).toBe("b2");
+    await expect(t.send({ ...req, stage: "design" }, config.models.design)).rejects.toThrow(/No recording left for stage design/);
+    expect(t.remaining).toBe(1);
   });
 
   it("strict mode rejects a changed prompt", async () => {

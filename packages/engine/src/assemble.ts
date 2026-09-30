@@ -107,6 +107,41 @@ export function systemPages(name: string): Page[] {
   ];
 }
 
+/**
+ * Section ids must be unique across the site, but the model names sections per page and reuses
+ * `s_head`, `s_cta` … on every page (every recorded full-site answer did). Later duplicates get the
+ * page as a suffix, and links to them (`{page, section}`) follow, so no regeneration is needed.
+ */
+export function uniqueSectionIds(pages: Page[]): Page[] {
+  const seen = new Set<string>();
+  const renamed = new Map<string, string>(); // `${pageId} ${oldId}` -> new id
+  const out = pages.map((page) => ({
+    ...page,
+    sections: page.sections.map((s) => {
+      if (!seen.has(s.id)) {
+        seen.add(s.id);
+        return s;
+      }
+      const base = `${s.id}_${page.id.replace(/^p_/, "")}`;
+      let id = base;
+      for (let n = 2; seen.has(id); n++) id = `${base}_${n}`;
+      seen.add(id);
+      renamed.set(`${page.id} ${s.id}`, id);
+      return { ...s, id };
+    }),
+  }));
+  if (renamed.size === 0) return out;
+  const relink = (v: unknown): unknown => {
+    if (Array.isArray(v)) return v.map(relink);
+    if (!v || typeof v !== "object") return v;
+    const o = v as Record<string, unknown>;
+    const next = Object.fromEntries(Object.entries(o).map(([k, x]) => [k, relink(x)]));
+    if (typeof o.page === "string" && typeof o.section === "string") next.section = renamed.get(`${o.page} ${o.section}`) ?? o.section;
+    return next;
+  };
+  return out.map((page) => ({ ...page, sections: page.sections.map((s) => ({ ...s, props: relink(s.props) }) as typeof s) }));
+}
+
 export function assembleSpec(input: {
   slug: string;
   brief: Brief;
@@ -115,7 +150,7 @@ export function assembleSpec(input: {
   content: ContentOutput;
 }): SiteSpec {
   const modelPages = input.content.pages.filter((p) => p.kind === "home" || p.kind === "standard");
-  // Home first, keep the model's order for the rest.
+  // Home first, keep the model's order for the rest. The homepage keeps its section ids.
   modelPages.sort((a, b) => (a.kind === "home" ? -1 : b.kind === "home" ? 1 : 0));
   return {
     specVersion: SPEC_VERSION,
@@ -125,6 +160,6 @@ export function assembleSpec(input: {
     design: input.design,
     assets: input.assets,
     chrome: input.content.chrome,
-    pages: [...modelPages, ...systemPages(input.brief.name)],
+    pages: [...uniqueSectionIds(modelPages), ...systemPages(input.brief.name)],
   };
 }

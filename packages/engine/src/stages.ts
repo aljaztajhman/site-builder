@@ -251,7 +251,7 @@ export async function generateContent(client: ModelClient, input: ContentInput):
     try {
       res = await client.call({
         stage: "content",
-        system: [CONTENT_SYSTEM, sectionCatalogue()],
+        system: [sectionCatalogue(), CONTENT_SYSTEM],
         messages,
         ...(structured ? { schema: contentJsonSchema() } : {}),
       });
@@ -356,7 +356,7 @@ export async function critique(
     `${what}${s.tiles.length > 1 ? `, top to bottom in ${s.tiles.length} consecutive slices` : ""}${s.truncated ? " (the page continues below the last slice)" : ""}:`;
   const res = await client.call({
     stage: "critique",
-    system: [CRITIQUE_SYSTEM, sectionCatalogue()],
+    system: [sectionCatalogue(), CRITIQUE_SYSTEM],
     messages: [
       {
         role: "user",
@@ -367,7 +367,15 @@ export async function critique(
           ...desktop.tiles.map(image),
           {
             type: "text",
-            text: `Automated checks reported:\n${input.failures.length ? input.failures.map((f) => `- ${f}`).join("\n") : "- nothing"}\n\nCurrent spec:\n${JSON.stringify(input.spec)}\n\nReturn JSON: {"issues": [...], "patches": [...]}`,
+            text: [
+              input.spec.chrome.mobileActionBar ? "On phones a fixed bar with call and directions buttons stays at the bottom of the screen (hidden in the slices above)." : "",
+              `Automated checks reported:\n${input.failures.length ? input.failures.map((f) => `- ${f}`).join("\n") : "- nothing"}`,
+              `The client's own text (every fact on the site comes from here):\n"""\n${input.corpus}\n"""`,
+              `Current spec:\n${JSON.stringify(input.spec)}`,
+              `Return JSON: {"issues": [...], "patches": [...]}`,
+            ]
+              .filter(Boolean)
+              .join("\n\n"),
           },
         ],
       },
@@ -391,33 +399,48 @@ export interface EditResult {
   issues: string[];
 }
 
+/** Shown when the model's patches never validated: its own reply would claim a change that wasn't saved. */
+export const EDIT_FAILED_REPLY = "Te spremembe nismo mogli shraniti, stran je ostala nespremenjena. Poskusite jo opisati drugače ali jo uredite neposredno.";
+
+export interface ChatTurn {
+  role: "user" | "assistant";
+  content: string;
+}
+
 export async function editSpec(
   client: ModelClient,
-  input: { spec: SiteSpec; message: string; corpus: string; retries?: number },
+  input: { spec: SiteSpec; message: string; corpus: string; retries?: number; history?: ChatTurn[] },
 ): Promise<EditResult> {
+  // Earlier turns give follow-ups ("še krajše", "vrni prejšnje") their meaning; their changes are already in the spec.
+  const history = (input.history ?? []).map((t) => `${t.role === "user" ? "Client" : "We"}: ${t.content}`).join("\n");
   const messages: Anthropic.MessageParam[] = [
     {
       role: "user",
-      content: `Current site spec:\n${JSON.stringify(input.spec)}\n\nClient's request:\n"""\n${input.message}\n"""\n\n${PATCH_FORMAT}`,
+      content: [
+        `Current site spec:\n${JSON.stringify(input.spec)}`,
+        history ? `Earlier messages in this conversation (their changes are already in the spec above):\n"""\n${history}\n"""` : "",
+        `Client's request:\n"""\n${input.message}\n"""`,
+        PATCH_FORMAT,
+      ]
+        .filter(Boolean)
+        .join("\n\n"),
     },
   ];
   const retries = input.retries ?? 1;
   let attempts = 0;
   for (;;) {
     attempts++;
-    const res = await client.call({ stage: "edit", system: [EDIT_SYSTEM, sectionCatalogue(), businessSchema()], messages });
+    const res = await client.call({ stage: "edit", system: [sectionCatalogue(), `${EDIT_SYSTEM}\n\n${businessSchema()}`], messages });
     let issues: string[];
-    let reply = "";
     try {
       const out = EditOutput.parse(JSON.parse(extract(res.text)));
-      reply = out.reply;
       const r = applyPatches(input.spec, out.patches as Operation[], input.corpus);
       issues = r.issues;
-      if (issues.length === 0) return { reply, spec: r.spec, changed: r.applied > 0, attempts, issues: [] };
+      if (issues.length === 0) return { reply: out.reply, spec: r.spec, changed: r.applied > 0, attempts, issues: [] };
     } catch (e) {
       issues = [`Output is not valid: ${(e as Error).message.slice(0, 200)}`];
     }
-    if (attempts > retries) return { reply: reply || "Sprememba ni uspela.", spec: input.spec, changed: false, attempts, issues };
+    if (attempts > retries) return { reply: EDIT_FAILED_REPLY, spec: input.spec, changed: false, attempts, issues };
     messages.push({ role: "assistant", content: res.text });
     messages.push({ role: "user", content: `Applying your patches failed validation. Return corrected JSON:\n${issues.map((i) => `- ${i}`).join("\n")}` });
   }

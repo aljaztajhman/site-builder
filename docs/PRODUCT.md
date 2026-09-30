@@ -2,11 +2,11 @@
 
 ## What it is
 
-An AI website builder for Slovenian small businesses and sole traders (s.p.). The client gives a description, logo and photos; the platform produces a finished, mobile-first website they can edit, publish, host and connect to a domain. Websites only, not web apps.
+An AI website builder for Slovenian small businesses and sole traders (s.p.). The client gives a description, logo and photos; the platform produces a finished website, equally good on desktop and phone, they can edit, publish, host and connect to a domain. Websites only, not web apps.
 
 ## Who it's for
 
-Slovenian SMEs and s.p.: hairdressers, restaurants and gostilne, tourist farms, car repair, dental and physio practices, accountants, builders and installers, local shops and bakeries. Most owners are non-technical and will manage the site from a phone. Most of their visitors arrive on a phone.
+Slovenian SMEs and s.p.: hairdressers, restaurants and gostilne, tourist farms, car repair, dental and physio practices, accountants, builders and installers, local shops and bakeries. Most owners are non-technical and will often manage the site from a phone. Visitors come on phones and on desktops; the site has to look excellent on both (responsive, not mobile-first; owner's direction 2026-09-30).
 
 ## Why they'd pick it over Wix, Framer, Durable or Hostinger
 

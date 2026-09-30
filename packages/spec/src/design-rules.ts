@@ -87,6 +87,11 @@ export function enforceDesign(design: Design, dir: Direction): Design {
   if (isCreamOrOffWhite(c.background) || (dir.palette.background === "dark" && luminance(c.background) > 0.05)) c.background = fb.background;
   if (dir.palette.background === "tint" && luminance(c.background) < 0.6) c.background = fb.background;
   if (isWarmCream(c.surface)) c.surface = fb.surface;
+  // Body text must pass on both the page and the section surface, so the surface stays on the page's
+  // side of light/dark. A mid-grey surface on a white page left no text colour that passes on both
+  // (live eval, "Barve naj bodo temnejše, bolj resne": the edit was rejected instead of repaired).
+  const lightPage = luminance(c.background) > 0.5;
+  if (lightPage ? luminance(c.surface) < 0.4 : luminance(c.surface) > 0.08) c.surface = fb.surface;
   // Contrast: adjust foregrounds, never the page background.
   for (let pass = 0; pass < 3; pass++) {
     c.text = ensureContrast(c.text, c.surface, 4.5);

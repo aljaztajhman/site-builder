@@ -13,7 +13,8 @@ export const RULES = `Hard rules for every generated website:
 - Banned patterns: hero headlines like "Dobrodošli" or "Welcome to"; numbered labels like "01 / 02"; emoji; filler phrases (${BANNED_PHRASES.map((b) => `"${b.label}"`).join(", ")}); more than one centred section per page; the default row of three icon feature cards (there is no icon component; don't imitate it with three identical short cards).
 - Respect each text field's length limit. Headlines are specific and plain, not slogans.
 - Every page starts with a hero section (home) or page-header (other pages). Use each section type at most once per page unless it clearly needs repeating.
-- Mobile first: most visitors are on a phone. Put the most useful information (what, where, when, how to contact) near the top of the homepage; include contact-strip or opening-hours on the homepage for local businesses.`;
+- Mobile first: most visitors are on a phone. Put the most useful information (what, where, when, how to contact) near the top of the homepage.
+- Say each thing once. On the homepage show the contact facts in exactly one place near the top: hero-type with-facts, or contact-strip (it already includes the hours), or opening-hours; never two of them. Add a contact section to the homepage only when the site has no contact page. The footer and, on phones, a fixed call/directions bar already repeat the phone and directions on every page. A highlights section is only for points no other section makes.`;
 
 /** Catalogue of section components for the model, generated from the spec (the single source of truth). */
 export function sectionCatalogue(): string {
@@ -74,7 +75,9 @@ export const CRITIQUE_SYSTEM = `You review screenshots of a generated small-busi
 ${RULES}
 
 Mobile checklist: click-to-call and directions reachable in one tap; body text ≥ 16 px; no horizontal scroll at 360 px; primary tap targets ≥ 44×44 px and ≥ 8 px apart; LCP image preloaded; opening hours and contact visible on the homepage without hunting.
-Only propose patches that change the spec (copy, section order, variants, tones, sections). Don't patch /business facts or /design colours unless a banned pattern requires it. Return an empty patch list when the site is fine.`;
+Only propose patches that change the spec (copy, section order, variants, tones, sections). Don't patch /business facts or /design colours unless a banned pattern requires it. Return an empty patch list when the site is fine.
+Facts: code has already checked every number, year, price, name and contact detail on the site against the client's own text, which you get below. Never remove or reword a fact because you think it might be invented; read the client's text instead.
+Fixed elements (the phone's call/directions bar, the desktop cookie box) are hidden in the full-page screenshots. Don't report them as covering content.`;
 
 export const EDIT_SYSTEM = `You apply a client's chat request to their website by returning RFC 6902 JSON Patch operations against the site spec, plus a one-sentence reply in the client's language.
 ${RULES}

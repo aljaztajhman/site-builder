@@ -62,6 +62,11 @@ export function evaluateEditCheck(check: EditCheck, before: SiteSpec, after: Sit
       const pass = dist(b.h) < dist(a.h) - 5 || (WARM(b.h) && WARM(a.h) && b.s > a.s + 0.05);
       return { pass, detail: `hue ${a.h.toFixed(0)}→${b.h.toFixed(0)}, sat ${a.s.toFixed(2)}→${b.s.toFixed(2)}` };
     }
+    case "colorHueIn": {
+      const b = hexToHsl(getAt(after, check.path) as string);
+      const inRange = check.from <= check.to ? b.h >= check.from && b.h <= check.to : b.h >= check.from || b.h <= check.to;
+      return { pass: inRange && b.s >= check.minSaturation, detail: `${check.name}: hue ${b.h.toFixed(0)} (${check.from}–${check.to}), sat ${b.s.toFixed(2)}` };
+    }
     case "textContains": {
       const pass = renderedText.includes(check.text.toLowerCase());
       return { pass, detail: `"${check.text}" ${pass ? "found" : "not found"}` };

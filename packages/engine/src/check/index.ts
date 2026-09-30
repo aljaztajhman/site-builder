@@ -6,7 +6,7 @@ import { collectPlaceholders, validateSite, type Issue, type SiteSpec } from "@s
 import { pageFile } from "@sb/render";
 import { checkFacts, type FactViolation } from "../facts.ts";
 import { launchCheckBrowser, type CheckBrowser } from "./browser.ts";
-import { loadLazyImages, measurePage, runAxe, type AxeViolation, type MobileReport } from "./page-checks.ts";
+import { hideFixedForFullPage, loadLazyImages, measurePage, runAxe, type AxeViolation, type MobileReport } from "./page-checks.ts";
 import { runLighthouse, type LighthouseScores } from "./lighthouse.ts";
 import { serveStatic } from "./static-server.ts";
 
@@ -29,6 +29,7 @@ export interface SiteCheckReport {
   placeholders: number;
   pages: PageCheck[];
   lighthouse: LighthouseScores | null;
+  /** mobile: the first viewport as a visitor sees it. mobileFull, desktop: whole page, fixed elements (action bar, consent box) hidden. */
   screenshots: { mobile: Uint8Array; mobileFull: Uint8Array; desktop: Uint8Array };
   /** Human-readable reasons the site fails the phase 1 bar; empty means pass. */
   failures: string[];
@@ -83,6 +84,7 @@ export async function checkSite(spec: SiteSpec, files: Map<string, Uint8Array>, 
       if (file === "index.html") {
         shotMobile = await mp.screenshot({ type: "png" });
         await loadLazyImages(mp);
+        await hideFixedForFullPage(mp);
         shotMobileFull = await mp.screenshot({ type: "png", fullPage: true });
       }
       await mctx.close();
@@ -94,6 +96,7 @@ export async function checkSite(spec: SiteSpec, files: Map<string, Uint8Array>, 
       const desktopAxe = await runAxe(dp);
       if (file === "index.html" && shotMobile && shotMobileFull) {
         await loadLazyImages(dp);
+        await hideFixedForFullPage(dp);
         screenshots = { mobile: shotMobile, mobileFull: shotMobileFull, desktop: await dp.screenshot({ type: "png", fullPage: true }) };
       }
       await dctx.close();
