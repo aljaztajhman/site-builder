@@ -15,7 +15,11 @@ export interface Composition {
   buttonsFirstScreen: number;
   /** Lines of the page's h1. */
   headlineLines: number;
-  /** Tallest horizontal band (px) in the first two screens with no text, image or control in it. */
+  /**
+   * Tallest horizontal band (px) in the first two screens with no text, image or control in it, on one
+   * background: where the background colour changes between sections, the band is split, since a
+   * section edge reads as structure, not dead space.
+   */
   largestGapPx: number;
 }
 
@@ -80,6 +84,14 @@ export async function measureComposition(page: Page): Promise<Composition> {
       const top = fixed ? r.top : r.top + window.scrollY, bottom = fixed ? r.bottom : r.bottom + window.scrollY;
       if (bottom <= 0 || top >= limit) continue;
       spans.push([Math.max(0, top), Math.min(limit, bottom)]);
+    }
+    // Section edges where the background colour changes split a band in two.
+    let prevBg = null;
+    for (const sec of document.querySelectorAll("main > section, main > .s, footer")) {
+      const bg = getComputedStyle(sec).backgroundColor;
+      const top = sec.getBoundingClientRect().top + window.scrollY;
+      if (prevBg !== null && bg !== prevBg && top > 0 && top < limit) spans.push([top, top]);
+      prevBg = bg;
     }
     spans.sort((a, b) => a[0] - b[0]);
     let gap = 0, reach = 0;

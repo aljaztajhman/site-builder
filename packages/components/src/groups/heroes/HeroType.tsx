@@ -39,7 +39,7 @@ export function HeroType({ section, ctx }: SectionProps<"hero-type">) {
       <div className="hero-type">
         <div className="hero-type__head">
           {props.eyebrow && <p className="eyebrow">{props.eyebrow}</p>}
-          <h1 id={titleId(section.id)} className="hero-title">
+          <h1 id={titleId(section.id)} className={props.headline.length > 44 ? "hero-title hero-title--long" : "hero-title"}>
             {props.headline}
           </h1>
         </div>

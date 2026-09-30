@@ -35,8 +35,9 @@
   }
 }
 
-[data-imagery="monochrome"] .media img {
-  filter: grayscale(1) contrast(1.05);
+/* monochrome and duotone once recoloured stand-in photos; real photos stay true to colour, so these only shape them. */
+[data-imagery="monochrome"] .media {
+  border-radius: 0;
 }
 
 [data-imagery="arched"] .media {
@@ -59,16 +60,6 @@
   z-index: 1;
 }
 
-/* Duotone: greyscale photo tinted with the primary colour via a multiply layer. */
-[data-imagery="duotone"] .media::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--c-primary);
-  mix-blend-mode: multiply;
-  opacity: 0.55;
-  pointer-events: none;
-}
-[data-imagery="duotone"] .media img {
-  filter: grayscale(1) contrast(1.1);
+[data-imagery="duotone"] .media {
+  border-radius: calc(var(--radius) * 1.5);
 }

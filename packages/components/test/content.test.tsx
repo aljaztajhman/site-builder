@@ -178,12 +178,13 @@ describe("cta", () => {
   });
 
   for (const variant of ctaSection.variants) {
-    it(`renders ${variant} left-aligned with both buttons`, () => {
+    it(`renders ${variant} left-aligned with one button and the second action as a text link`, () => {
       const out = html(<Cta section={{ ...section, variant }} ctx={testCtx()} index={3} />);
       expect(out).toContain(`s-cta--${variant} tone-inverse`);
       expectH2(out, "s_cta");
       expect(out).toContain('class="btn btn--primary"');
-      expect(out).toContain('class="btn btn--secondary"');
+      expect(out).toContain('class="text-link"');
+      expect(out).not.toContain("btn--secondary");
     });
   }
 

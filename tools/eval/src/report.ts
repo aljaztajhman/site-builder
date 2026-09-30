@@ -77,7 +77,7 @@ export function renderReport(results: FixtureResult[], config: AppConfig, meta: 
     lines.push("Scores: impression / hierarchy / imagery / spacing / clutter / distinctiveness. Review sheets for a human look: `eval/look/<site>.png`.", "");
     lines.push(`| Site | Phone | Phone note | Desktop | Desktop note | Top fix |`, `|---|---|---|---|---|---|`);
     const row = (s: NonNullable<typeof judged[number]["judge"]>["phone"]) => `**${mean(s).toFixed(1)}** (${[s.impression, s.hierarchy, s.imagery, s.spacing, s.clutter, s.distinctiveness].join("/")})`;
-    const esc = (t: string) => t.replace(/|/g, "/");
+    const esc = (t: string) => t.replace(/\|/g, "/").replace(/\s+/g, " ");
     for (const r of results) {
       if (r.judge) lines.push(`| ${r.id} | ${row(r.judge.phone)} | ${esc(r.judge.phoneNote)} | ${row(r.judge.desktop)} | ${esc(r.judge.desktopNote)} | ${esc(r.judge.fixes[0] ?? "—")} |`);
       else if (r.judgeError) lines.push(`| ${r.id} | — | judge failed: ${esc(r.judgeError)} | — | — | — |`);

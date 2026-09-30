@@ -13,9 +13,9 @@ function fluid(min: number, max: number): string {
 
 const SPACE: Record<Design["density"], [number, number, number]> = {
   // section padding mobile, desktop, block gap
-  compact: [40, 72, 24],
-  regular: [56, 104, 32],
-  airy: [72, 136, 40],
+  compact: [32, 64, 24],
+  regular: [44, 88, 32],
+  airy: [56, 112, 40],
 };
 
 export function fontStack(f: FontFace): string {

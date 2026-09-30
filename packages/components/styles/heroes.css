@@ -16,16 +16,22 @@
 .hero-split__media {
   aspect-ratio: 4 / 3;
 }
+/* Phones: the photo opens the page, the headline follows. */
+@media (max-width: 47.99rem) {
+  .hero-split__media {
+    order: -1;
+  }
+}
 @media (min-width: 48rem) {
   .hero-split {
-    grid-template-columns: 1.1fr 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 3rem;
   }
   .s-hero-split--image-left .hero-split__media {
     order: -1;
   }
   .hero-split__media {
-    aspect-ratio: 4 / 5;
+    aspect-ratio: 1 / 1;
   }
 }
 
@@ -198,6 +204,9 @@
   }
   .s-hero-type--large .hero-title {
     font-size: calc(var(--fs-h1) * 1.3);
+  }
+  .s-hero-type--large .hero-title--long {
+    font-size: calc(var(--fs-h1) * 1.05);
   }
   .s-hero-type--large .hero-type__head {
     grid-column: 1 / span 11;

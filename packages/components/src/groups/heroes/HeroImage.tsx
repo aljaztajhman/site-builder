@@ -16,7 +16,7 @@ export function HeroImage({ section, ctx, index }: SectionProps<"hero-image">) {
         <Picture id={props.image} ctx={ctx} className="hero-image__media" sizes={HERO_IMAGE_SIZES} priority={index === 0} />
         <div className="hero-image__panel tone-inverse">
           {props.eyebrow && <p className="eyebrow">{props.eyebrow}</p>}
-          <h1 id={titleId(section.id)} className="hero-title">
+          <h1 id={titleId(section.id)} className={props.headline.length > 44 ? "hero-title hero-title--long" : "hero-title"}>
             {props.headline}
           </h1>
           <p className="lead">{props.intro}</p>
