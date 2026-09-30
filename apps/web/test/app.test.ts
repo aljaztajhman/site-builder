@@ -52,7 +52,8 @@ describe("access control", () => {
   });
 
   it("redirects the dashboard and rejects the API without a session", async () => {
-    expect((await app.request("/")).status).toBe(302);
+    expect((await app.request("/new")).status).toBe(302);
+    expect((await app.request("/sites/site_0000000000000000")).status).toBe(302);
     expect((await app.request("/api/sites/x")).status).toBe(401);
     expect((await app.request("/preview/x/index.html")).status).toBe(302);
   });
@@ -67,8 +68,12 @@ describe("access control", () => {
   });
 
   it("rejects a forged session cookie", async () => {
-    const res = await app.request("/", { headers: { cookie: `${SESSION_COOKIE}=9999999999.forged` } });
-    expect(res.status).toBe(302);
+    const cookie = `${SESSION_COOKIE}=9999999999.forged`;
+    expect((await app.request("/new", { headers: { cookie } })).status).toBe(302);
+    // "/" is public, but a forged session gets the landing page, not the dashboard.
+    const home = await (await app.request("/", { headers: { cookie } })).text();
+    expect(home).toContain('data-home-intake=""');
+    expect(home).not.toContain("Nova stran");
   });
 });
 
@@ -117,6 +122,58 @@ describe("product UI", () => {
   });
 });
 
+describe("landing page", () => {
+  it("is / without a session: the designed page, its own stylesheet and script, price from config", async () => {
+    const res = await app.request("/");
+    expect(res.status).toBe(200);
+    expect(res.headers.get("x-robots-tag")).toContain("noindex");
+    const page = await res.text();
+    expect(page).toContain("Opišite svoje podjetje.<br/>Spletna stran je narejena.");
+    for (const id of ["zacni", "kaj", "kako", "primer", "cena", "vprasanja"]) expect(page, id).toContain(`id="${id}"`);
+    const [low, high] = loadConfig().plans.paid.monthlyEurRange;
+    expect(page).toContain(`od ${low}\u00a0€`);
+    expect(page).toContain(`(${low}–${high}\u00a0€)`);
+    // The prompt goes to the intake form; the description never lands in the URL (no name attribute).
+    const formTag = page.match(/<form class="prompt"[^>]*>/)?.[0] ?? "";
+    expect(formTag).toContain('action="/new"');
+    expect(formTag).toContain('method="get"');
+    expect(page).not.toMatch(/<textarea[^>]*name=/);
+    expect(page).toContain('href="/login"');
+    expect(page).not.toContain("<style");
+    expect(page).not.toMatch(/<script>(?!<\/script>)/);
+
+    const css = page.match(/href="(\/assets\/ui\/([0-9a-f]{10})\/home\.css)"/);
+    expect(css, "landing page links its stylesheet").not.toBeNull();
+    const cssRes = await app.request(css![1]!);
+    expect(cssRes.status).toBe(200);
+    expect(await cssRes.text()).toContain(".vig{");
+    const js = await app.request("/assets/home.js");
+    expect(js.status).toBe(200);
+    expect(js.headers.get("content-type")).toContain("javascript");
+    expect(await js.text()).toContain("sb-intake-draft");
+  });
+
+  it("serves the example site so the landing page can frame it, and nothing else may be framed", async () => {
+    const page = await (await app.request("/")).text();
+    const src = page.match(/<iframe src="(\/assets\/ui\/([0-9a-f]{10})\/example-home\.html)"/);
+    expect(src).not.toBeNull();
+    const ex = await app.request(src![1]!);
+    expect(ex.status).toBe(200);
+    expect(ex.headers.get("content-type")).toContain("text/html");
+    expect(ex.headers.get("content-security-policy")).toContain("frame-ancestors 'self'");
+    expect(await ex.text()).toContain('url("fonts/fraunces.woff2")');
+    for (const f of ["fonts/fraunces.woff2", "fonts/source-sans-3.woff2"]) expect((await app.request(`/assets/ui/${src![2]}/${f}`)).status, f).toBe(200);
+    for (const p of ["/", "/login"]) expect((await app.request(p)).headers.get("content-security-policy"), p).toContain("frame-ancestors 'none'");
+  });
+
+  it("is the dashboard with a session", async () => {
+    const cookie = await login();
+    const page = await (await app.request("/", { headers: { cookie } })).text();
+    expect(page).not.toContain("data-home-intake");
+    expect(page).toContain('action="/logout"');
+  });
+});
+
 describe("health", () => {
   it("reports database, storage and queue", async () => {
     const res = await app.request("/health");
@@ -143,7 +200,7 @@ describe("published sites", () => {
     expect((await app.request("/s/..%2F./sites/x/uploads/a.svg")).status).toBe(400);
     // The query may carry encoded slashes: the login redirect encodes next=/ as %2F.
     expect((await app.request("/login?next=%2F")).status).toBe(200);
-    const redirect = await app.request("/");
+    const redirect = await app.request("/new");
     expect(redirect.status).toBe(302);
     expect((await app.request(redirect.headers.get("location")!)).status).toBe(200);
     expect((await app.request("/s/Demo!/index.html")).status).toBe(404);

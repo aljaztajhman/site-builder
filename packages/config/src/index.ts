@@ -53,7 +53,10 @@ export const AppConfigSchema = z.object({
     tapTarget: z.object({ primaryMin: z.number(), primaryGap: z.number(), absoluteMin: z.number() }),
   }),
   images: z.object({ widths: z.array(z.number().int().positive()), avifQuality: z.number(), webpQuality: z.number() }),
-  plans: z.record(z.string(), z.unknown()),
+  /** No billing yet; the landing page quotes the paid plan's monthly range from here. */
+  plans: z.looseObject({
+    paid: z.looseObject({ monthlyEurRange: z.tuple([z.number().positive(), z.number().positive()]) }),
+  }),
 });
 export type AppConfig = z.infer<typeof AppConfigSchema>;
 export type ModelStageName = keyof AppConfig["models"];

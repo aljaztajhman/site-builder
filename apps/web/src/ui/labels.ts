@@ -1,6 +1,7 @@
 /** Slovene labels and formats shared by the server-rendered pages and the editor bundle (no Node imports). */
 
-export const PRODUCT_NAME = "Graditelj strani";
+/** Working wordmark from the designs (docs/design/ideas.html, homepage.html); the real name is the owner's call (`sb-brand-name`). */
+export const PRODUCT_NAME = "Stran";
 
 const TZ = "Europe/Ljubljana";
 const eur = new Intl.NumberFormat("sl-SI", { style: "currency", currency: "EUR" });

@@ -1,7 +1,17 @@
 /**
- * Intake page, progressive only: the form works without it. Shows how many files each attach
- * button holds and keeps the form from being sent twice while photos upload.
+ * Intake page, progressive only: the form works without it. Takes over what was typed on the landing
+ * page, shows how many files each attach button holds and keeps the form from being sent twice while
+ * photos upload.
  */
+import { takeIntakeDraft } from "./intake-draft.ts";
+
+const description = document.querySelector<HTMLTextAreaElement>("form[data-intake] textarea[name=description]");
+const draft = description ? takeIntakeDraft() : null;
+if (description && draft) {
+  if (draft.description && !description.value) description.value = draft.description;
+  const target = draft.attach && document.querySelector<HTMLInputElement>(`form[data-intake] input[type=file][name=${draft.attach}]`);
+  (target || description).focus();
+}
 
 for (const input of document.querySelectorAll<HTMLInputElement>(".attach input[type=file]")) {
   input.addEventListener("change", () => {
