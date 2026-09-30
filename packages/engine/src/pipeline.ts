@@ -66,6 +66,8 @@ export interface GenerateResult {
   check: SiteCheckReport | null;
   critiqueRounds: number;
   timings: Record<string, number>;
+  /** From the start of the job to the first saved version, which the editor already shows as the preview. */
+  firstVersionMs: number;
 }
 
 /** Pipeline steps 1–5 from docs/PRODUCT.md. Every model call is logged per stage with tokens and €. */
@@ -74,6 +76,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
   const site = await repo.getSite(siteId);
   if (!site) throw new Error(`Site ${siteId} not found`);
   const log = logger(repo, siteId, jobId);
+  const started = Date.now();
   const timings: Record<string, number> = {};
   const stageTime = async <T>(stage: string, fn: () => Promise<T>) => {
     const t = Date.now();
@@ -87,31 +90,37 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
   const photos = intake.photoAssetIds.map((id) => assets.find((a) => a.id === id)).filter((a): a is NonNullable<typeof a> => !!a);
   const logo = intake.logoAssetId ? assets.find((a) => a.id === intake.logoAssetId) : undefined;
 
-  // 1. Intake -> brief
-  const cls = await stageTime("classify", () => classify(client, intake.description));
-  const { brief, dropped } = await stageTime("brief", () =>
-    makeBrief(client, { description: intake.description, businessType: cls.businessType, photoCount: photos.length, hasLogo: !!logo, scope: intake.scope }),
-  );
-  if (dropped.length) await log("brief", "Dropped facts not found in the client's text", dropped);
-  await repo.setBrief(siteId, brief, brief.name);
-
-  // 2. Design direction (palette extracted in code)
   const originals = new Map<string, Uint8Array>();
   for (const a of [...photos, ...(logo ? [logo] : [])]) {
     const data = await storage.get(a.storage_key);
     if (!data) throw new Error(`Upload ${a.id} missing from storage`);
     originals.set(a.id, data);
   }
-  const swatches: Swatch[] = [];
-  if (logo) swatches.push(...(await extractSwatches(originals.get(logo.id)!, "logo", 3)));
-  for (const p of photos.slice(0, 3)) swatches.push(...(await extractSwatches(originals.get(p.id)!, "photo", 2)));
-  const { design } = await stageTime("design", () => chooseDesign(client, { brief, swatches, photoCount: photos.length }));
+
+  // Steps 1–2 (brief, design) and step 3 (images) don't depend on each other: they run side by side,
+  // so photo processing and alt text (up to ~20 s with many photos) are off the path to the first preview.
+  const planning = (async () => {
+    // 1. Intake -> brief
+    const cls = await stageTime("classify", () => classify(client, intake.description));
+    const { brief, dropped } = await stageTime("brief", () =>
+      makeBrief(client, { description: intake.description, businessType: cls.businessType, photoCount: photos.length, hasLogo: !!logo, scope: intake.scope }),
+    );
+    if (dropped.length) await log("brief", "Dropped facts not found in the client's text", dropped);
+    await repo.setBrief(siteId, brief, brief.name);
+
+    // 2. Design direction (palette extracted in code)
+    const swatches: Swatch[] = [];
+    if (logo) swatches.push(...(await extractSwatches(originals.get(logo.id)!, "logo", 3)));
+    for (const p of photos.slice(0, 3)) swatches.push(...(await extractSwatches(originals.get(p.id)!, "photo", 2)));
+    const { design } = await stageTime("design", () => chooseDesign(client, { brief, swatches, photoCount: photos.length }));
+    return { brief, design };
+  })();
 
   // 3. Images: variants + Slovene alt text
   const images: ImageAsset[] = [];
   let logoAsset: SiteSpec["assets"]["logo"];
   const heroIds: string[] = [];
-  await stageTime("images", async () => {
+  const imaging = stageTime("images", async () => {
     const vision: { jpegBase64: string }[] = [];
     for (const [i, p] of photos.entries()) {
       const id = `img_${String(i + 1).padStart(2, "0")}`;
@@ -132,6 +141,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
       logoAsset = { src: logo.storage_key, width: l.width, height: l.height, file: l.file };
     }
   });
+  const [{ brief, design }] = await Promise.all([planning, imaging]);
 
   // 4. Content and assembly (validate; retry with errors)
   const corpus = await clientCorpus(repo, siteId);
@@ -152,6 +162,8 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
   if (content.issues.length) await log("content", "Spec still has issues after retries", content.issues);
   let spec = content.spec;
   let version = await repo.saveSpec(siteId, spec, "generate");
+  const firstVersionMs = Date.now() - started;
+  await log("preview", "First version saved; the editor shows it while checks and critique run", { ms: firstVersionMs, version });
 
   // 5. Check + critique (max N iterations)
   let check: SiteCheckReport | null = null;
@@ -203,7 +215,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     await log("check", check.failures.length ? "Checks found problems" : "All checks passed", { failures: check.failures, lighthouse: check.lighthouse });
   }
   await repo.setStatus(siteId, "ready");
-  return { version, check, critiqueRounds: rounds, timings };
+  return { version, check, critiqueRounds: rounds, timings, firstVersionMs };
 }
 
 export class PublishBlockedError extends Error {
@@ -255,6 +267,9 @@ export async function siteBlockers(repo: Repo, siteId: string, spec: SiteSpec): 
   return [...publishBlockers(spec), ...checkFacts(spec, corpus).map((f) => `${f.path}: ${f.kind} "${f.value}" is not in the client's input`)];
 }
 
+/** Earlier chat messages (user and assistant) sent with an edit request. */
+const CHAT_HISTORY_TURNS = 6;
+
 /** Applies one chat message (already stored) to the current spec and stores the reply. */
 export async function applyChatEdit(deps: Pick<PipelineDeps, "repo" | "client">, siteId: string, messageId: number): Promise<{ version: number | null; reply: string; issues: string[] }> {
   const { repo, client } = deps;
@@ -266,7 +281,12 @@ export async function applyChatEdit(deps: Pick<PipelineDeps, "repo" | "client">,
   if (before === "ready" || before === "failed") await repo.setStatus(siteId, "editing");
   try {
     const corpus = await clientCorpus(repo, siteId);
-    const r = await editSpec(client, { spec: current.spec, message: msg.content, corpus });
+    // The last few exchanges before this message, so a follow-up can refer to them.
+    const history = (await repo.listChat(siteId))
+      .filter((c) => Number(c.id) < Number(msg.id))
+      .slice(-CHAT_HISTORY_TURNS)
+      .map((c) => ({ role: c.role === "user" ? ("user" as const) : ("assistant" as const), content: c.content }));
+    const r = await editSpec(client, { spec: current.spec, message: msg.content, corpus, history });
     let version: number | null = null;
     let reply = r.reply;
     const issues = [...r.issues];

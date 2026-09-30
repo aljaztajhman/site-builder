@@ -2,8 +2,8 @@
   {
     "message": "Use a warmer palette, more olive and terracotta.",
     "lang": "en",
-    "intent": "Shift the primary colour toward warm olive/terracotta hues.",
-    "check": { "kind": "colorWarmer", "path": "/design/colors/primary" }
+    "intent": "Olive and terracotta: the primary may turn olive; the accent must be terracotta (owner's decision sb-olive-check, 2026-09-30).",
+    "check": { "kind": "colorHueIn", "path": "/design/colors/accent", "name": "terracotta", "from": 5, "to": 32, "minSaturation": 0.3 }
   },
   {
     "message": "Odstrani galerijo.",

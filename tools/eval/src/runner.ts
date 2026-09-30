@@ -1,3 +1,4 @@
+import { rmSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { loadConfig, type AppConfig } from "@sb/config";
@@ -24,6 +25,7 @@ import { siteFiles } from "@sb/render";
 import { validateSite, type SiteSpec } from "@sb/spec";
 import type { Fixture } from "./fixtures/schema.ts";
 import { evaluateEditCheck, pagesText, type EditCheckResult } from "./edit-checks.ts";
+import { homepageShape, type HomepageShape } from "./homepage-metrics.ts";
 
 export type Mode = "live" | "record" | "replay" | "offline";
 
@@ -49,7 +51,11 @@ export interface FixtureResult {
   generationEur: number;
   editsEur: number;
   generationMs: number;
+  /** Job start to the first saved version (what the editor shows as the preview). */
+  firstVersionMs: number | null;
   timings: Record<string, number>;
+  /** The generated homepage (after critique), for the repetition and sameness numbers. */
+  home: HomepageShape | null;
   mobileShot: Uint8Array | null;
   /** The export zip opened from file:// (checked once, after generation). */
   exportCheck: { ok: boolean; bytes: number; pages: number; problems: string[] } | null;
@@ -73,6 +79,8 @@ function transportFor(opts: RunOptions, fixture: Fixture): ModelTransport {
   const dir = path.join(opts.recordingsDir, fixture.id);
   if (opts.mode === "replay") return new ReplayTransport(dir);
   const live = new AnthropicTransport();
+  // A re-record replaces the fixture's recordings; leftovers from a longer earlier run would replay as stale answers.
+  if (opts.mode === "record") rmSync(dir, { recursive: true, force: true });
   return opts.mode === "record" ? new RecordingTransport(live, dir) : live;
 }
 
@@ -117,7 +125,9 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
     generationEur: 0,
     editsEur: 0,
     generationMs: 0,
+    firstVersionMs: null,
     timings: {},
+    home: null,
     mobileShot: null,
     exportCheck: null,
   };
@@ -173,11 +183,13 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
       const gen = await generateSite({ config, repo, storage, client, browser: opts.browser, lighthouse: opts.lighthouse }, site.id, null);
       result.generationMs = Date.now() - t0;
       result.timings = gen.timings;
+      result.firstVersionMs = gen.firstVersionMs;
       result.generationEur = (await repo.siteCost(site.id)).reduce((a, c) => a + c.eur, 0);
     }
 
     const first = await checkCurrent(config, repo, storage, site.id, opts);
     result.direction = first.current.spec.design.direction;
+    result.home = homepageShape(first.current.spec);
     result.mobileShot = first.report.screenshots.mobile;
     result.checkpoints.push(summarise("generated", first.current.spec, first.current.version, first.report));
     const { zip } = await exportSite({ repo, storage, config }, site.id);

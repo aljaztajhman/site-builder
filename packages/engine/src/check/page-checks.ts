@@ -190,3 +190,21 @@ export async function loadLazyImages(page: Page): Promise<void> {
     window.scrollTo(0, 0);
   });
 }
+
+/**
+ * Hides position:fixed elements (mobile action bar, desktop consent box) before a full-page
+ * screenshot. Chromium draws them once, at their place in the first viewport, so on a long page
+ * they seem to cover content in the middle; the critique read that as a layout bug. Returns how
+ * many were hidden, so the caller can say so. Only the screenshot changes, never the page files.
+ */
+export async function hideFixedForFullPage(page: Page): Promise<number> {
+  return page.evaluate(`(() => {
+    let n = 0;
+    for (const el of document.querySelectorAll("body *")) {
+      if (getComputedStyle(el).position !== "fixed") continue;
+      el.style.setProperty("visibility", "hidden", "important");
+      n++;
+    }
+    return n;
+  })()`);
+}

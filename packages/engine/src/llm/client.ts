@@ -6,7 +6,10 @@ import { toStructuredOutputSchema } from "./structured-schema.ts";
 /** The request shape the pipeline sends; a subset of the Messages API. */
 export interface ModelRequest {
   stage: ModelStageName;
-  /** Static, cacheable system blocks first (prompt, catalogue, directions); cached with cache_control. */
+  /**
+   * Static, cacheable system blocks, most shared first: each block ends with a cache breakpoint
+   * (max 3), so stages that start with the same block (the section catalogue) share its cache entry.
+   */
   system: string[];
   messages: Anthropic.MessageParam[];
   /** JSON Schema for structured output. Omit for free text. */
@@ -244,12 +247,10 @@ export class AnthropicTransport implements ModelTransport {
     // Haiku 4.5 does not accept effort; the config simply omits it for that stage.
     if (stage.effort) outputConfig.effort = stage.effort;
     if (req.schema) outputConfig.format = { type: "json_schema", schema: toStructuredOutputSchema(req.schema) as Record<string, unknown> };
-    const system: Anthropic.TextBlockParam[] = req.system.map((text, i) => ({
-      type: "text",
-      text,
-      // One breakpoint after the last static block caches the whole static prefix.
-      ...(i === req.system.length - 1 ? { cache_control: { type: "ephemeral" as const } } : {}),
-    }));
+    // A breakpoint after every static block: content, critique and edit all start with the section
+    // catalogue, so they read one cache entry for it instead of each writing their own (API max: 4).
+    if (req.system.length > 3) throw new Error(`At most 3 system blocks (cache breakpoints), got ${req.system.length}`);
+    const system: Anthropic.TextBlockParam[] = req.system.map((text) => ({ type: "text", text, cache_control: { type: "ephemeral" as const } }));
     const stream = this.client.messages.stream({
       model: stage.model,
       max_tokens: stage.maxTokens,

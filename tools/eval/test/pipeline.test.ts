@@ -31,6 +31,22 @@ afterAll(async () => {
   await rm(dir, { recursive: true, force: true });
 });
 
+/**
+ * Model calls in order, except that altText runs beside classify/brief/design, so its place
+ * among those isn't fixed; everything from content on is strictly ordered.
+ */
+function expectStages(calls: CallRecord[], expected: string[]): void {
+  const stages = calls.map((c) => c.stage as string);
+  const planning = ["classify", "brief", "design", "altText"];
+  const split = (s: string[]) => [s.filter((x) => planning.includes(x)), s.filter((x) => !planning.includes(x))] as const;
+  const [gotPlan, gotRest] = split(stages);
+  const [wantPlan, wantRest] = split(expected);
+  expect(gotPlan.filter((s) => s !== "altText")).toEqual(wantPlan.filter((s) => s !== "altText"));
+  expect(gotPlan.filter((s) => s === "altText")).toEqual(wantPlan.filter((s) => s === "altText"));
+  expect(stages.slice(gotPlan.length)).toEqual(gotRest);
+  expect(gotRest).toEqual(wantRest);
+}
+
 /** A pekarna-kvas site with small generated stand-in photos (no dependency on `pnpm fixtures:photos`) and the fixture logo. */
 async function seedSite(slug: string) {
   const fixture = loadFixture("pekarna-kvas");
@@ -70,7 +86,8 @@ describe("pipeline with replayed model responses (no network)", () => {
     expect(gen.check?.pages.flatMap((p) => p.axe)).toEqual([]);
     expect(gen.check?.pages.every((p) => !p.mobile.horizontalScroll)).toBe(true);
     expect(gen.critiqueRounds).toBe(1);
-    expect(calls.map((c) => c.stage)).toEqual(["classify", "brief", "design", "altText", "content", "critique"]);
+    expectStages(calls, ["classify", "brief", "design", "altText", "content", "critique"]);
+    expect(gen.firstVersionMs).toBeGreaterThan(0);
 
     const spec = (await repo.getSpec(site.id))!.spec;
     expect(spec.design.direction).toBe("warm-craft");
@@ -83,7 +100,7 @@ describe("pipeline with replayed model responses (no network)", () => {
     expect(edit.issues).toEqual([]);
     expect((await repo.getSpec(site.id))!.spec.chrome.header.tone).toBe("inverse");
     expect((await repo.listChat(site.id)).at(-1)?.content).toBe("Glava je zdaj temna.");
-    expect(calls.map((c) => c.stage)).toEqual(["classify", "brief", "design", "altText", "content", "critique", "edit"]);
+    expectStages(calls, ["classify", "brief", "design", "altText", "content", "critique", "edit"]);
   }, 180_000);
 
   it("replays the recorded pekarna-kvas run (real API responses): generation, then every scripted edit", async () => {
@@ -94,7 +111,8 @@ describe("pipeline with replayed model responses (no network)", () => {
 
     const gen = await generateSite({ config, repo, storage, client, browser, lighthouse: false }, site.id, null);
     expect(gen.check?.validation).toEqual([]);
-    expect(calls.map((c) => c.stage)).toEqual(["classify", "brief", "design", "altText", "content", "content", "critique", "critique"]);
+    // Recorded with two content calls (section ids reused across pages); assembly now fixes the ids, so one is enough.
+    expectStages(calls, ["classify", "brief", "design", "altText", "content", "critique", "critique"]);
 
     for (const edit of fixture.edits) {
       const msg = await repo.addChat(site.id, "user", edit.message);

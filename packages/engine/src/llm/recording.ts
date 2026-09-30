@@ -34,12 +34,13 @@ export class RecordingTransport implements ModelTransport {
 }
 
 /**
- * Replays recordings in order. Each call must match the next recording's stage; when `strict`,
- * the request hash must match too (a prompt change then needs a re-record).
+ * Replays recordings per stage, in order within each stage: some stages run side by side (images
+ * next to brief and design), so the order across stages isn't fixed. When `strict`, the request
+ * hash must match too (a prompt change then needs a re-record).
  */
 export class ReplayTransport implements ModelTransport {
   private readonly recordings: Recording[];
-  private next = 0;
+  private readonly used = new Set<number>();
   readonly hashMismatches: { seq: number; stage: string }[] = [];
 
   constructor(
@@ -50,20 +51,20 @@ export class ReplayTransport implements ModelTransport {
   }
 
   async send(req: ModelRequest, stage: AppConfig["models"][ModelStageName]): Promise<ModelResponse> {
-    const rec = this.recordings[this.next];
-    if (!rec) throw new Error(`No recording left for stage ${req.stage} (call ${this.next})`);
-    if (rec.stage !== req.stage) throw new Error(`Recording ${rec.seq} is for stage ${rec.stage}, got ${req.stage}`);
+    const i = this.recordings.findIndex((r, n) => !this.used.has(n) && r.stage === req.stage);
+    const rec = this.recordings[i];
+    if (!rec) throw new Error(`No recording left for stage ${req.stage} (call ${this.used.size})`);
     const hash = requestHash(req, stage.model);
     if (hash !== rec.hash) {
       if (this.strict) throw new Error(`Request for ${req.stage} changed since recording ${rec.seq}; re-record with pnpm eval --record`);
       this.hashMismatches.push({ seq: rec.seq, stage: rec.stage });
     }
-    this.next += 1;
+    this.used.add(i);
     return rec.response;
   }
 
   get remaining(): number {
-    return this.recordings.length - this.next;
+    return this.recordings.length - this.used.size;
   }
 }
 

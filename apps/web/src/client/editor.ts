@@ -6,6 +6,7 @@
 
 import { EDITOR_STARTER_TEXT } from "@sb/spec/starter";
 import { formatDateTime, formatEur, siteStatus } from "../ui/labels.ts";
+import { undoTarget } from "./versions.ts";
 
 type Json = null | boolean | number | string | Json[] | { [k: string]: Json };
 type Obj = { [k: string]: Json };
@@ -40,7 +41,7 @@ interface State {
   version: number | null;
   spec: Obj | null;
   events: { id: string; stage: string; level: string; message: string; created_at: string; data: unknown }[];
-  chat: { id: string; role: string; content: string; result: unknown }[];
+  chat: { id: string; role: string; content: string; result: unknown; created_at: string }[];
   cost: { stage: string; calls: number; input: number; output: number; cacheRead: number; cacheWrite: number; eur: number; ms: number }[];
   versions: { version: number; source: string; message: string | null; created_at: string }[];
   placeholders: { path: string; kind: string }[];
@@ -103,10 +104,37 @@ async function load(rerender = true): Promise<void> {
   schedulePoll();
 }
 
+/**
+ * A chat message is waiting for its reply: the worker may not have marked the site "editing" yet.
+ * Bounded in time, so a lost job can't keep the send button disabled.
+ */
+const awaitingReply = (): boolean => {
+  const last = state.chat.at(-1);
+  return last?.role === "user" && Date.now() - Date.parse(last.created_at) < 3 * 60_000;
+};
+
+/** What a poll can change on screen; re-render only when it differs, so typing isn't wiped every 2 s. */
+const pollSignature = (): string => [state.site.status, state.version, state.chat.length, state.events.length].join("|");
+
 function schedulePoll(): void {
   window.clearTimeout(pollTimer);
-  const active = state.site.status === "generating" || state.site.status === "editing";
-  if (active) pollTimer = window.setTimeout(() => void load().then(() => state.version !== frameVersion && reloadPreview()), 2000);
+  const active = state.site.status === "generating" || state.site.status === "editing" || awaitingReply();
+  if (active) pollTimer = window.setTimeout(() => void poll(), 2000);
+}
+
+async function poll(): Promise<void> {
+  const before = pollSignature();
+  try {
+    state = await api<State>("");
+    if (state.spec && !catalogue) catalogue = await api<Catalogue>("/catalogue");
+  } catch {
+    // A failed request (deploy, network blip) must not stop polling; try again on the next tick.
+    pollTimer = window.setTimeout(() => void poll(), 5000);
+    return;
+  }
+  if (pollSignature() !== before) render();
+  if (state.version !== frameVersion) reloadPreview();
+  schedulePoll();
 }
 
 /** Sends direct-edit operations. No model call. */
@@ -699,7 +727,7 @@ const n0 = (n: number) => n.toLocaleString("sl-SI");
 
 function aiPane(): HTMLElement {
   const pane = h("div", { class: "pane" });
-  const busy = state.site.status === "editing";
+  const busy = state.site.status === "editing" || awaitingReply();
   pane.append(h("p", { class: "help" }, "Pomočnik doda ali spremeni vsebino po vašem opisu, npr. »dodaj pogosta vprašanja o parkiranju«. Vsako sporočilo stane nekaj centov. Besedila, vrstni red in podatke lahko brez stroškov urejate tudi neposredno."));
   const chat = h("div", { class: "chat" }, ...state.chat.map((m) => h("div", { class: `msg ${m.role}` }, m.content)));
   if (busy) chat.append(h("div", { class: "msg", role: "status" }, "Urejam stran …"));
@@ -901,7 +929,7 @@ let lastWidth = 0;
 function topItems(): Child[] {
   const s = state.site;
   const status = siteStatus(s);
-  const prev = state.versions.find((v) => v.version === (state.version ?? 0) - 1);
+  const prev = undoTarget(state.versions, state.version);
   const head: Child[] = [
     h("a", { class: "btn quiet sm", href: "/sites" }, "← Strani"),
     h("h1", { class: "site-name" }, ((state.spec?.business as Obj | undefined)?.name as string | undefined) ?? s.name),
@@ -915,7 +943,7 @@ function topItems(): Child[] {
   return [
     ...head,
     h("span", { class: "actions" },
-      h("button", { class: "btn quiet sm", type: "button", disabled: !prev, title: "Vrne prejšnjo različico", onClick: () => void undo() }, "Razveljavi"),
+      h("button", { class: "btn quiet sm", type: "button", disabled: prev === null, title: prev === null ? "" : `Vrne različico ${prev}`, onClick: () => void undo() }, "Razveljavi"),
       h("button", { class: "btn quiet sm", type: "button", "aria-pressed": String(tab === "versions"), onClick: () => { tab = "versions"; render(); } }, "Različice"),
       moreMenu(),
       h("button", {
@@ -1058,10 +1086,10 @@ function sizeFrame(): void {
   }
 }
 
-/** Undo = revert to the version before the current one (read at click time, not render time). */
+/** Undo = revert to undoTarget (read at click time, not render time). */
 async function undo(): Promise<void> {
-  const target = (state.version ?? 0) - 1;
-  if (target < 1) return;
+  const target = undoTarget(state.versions, state.version);
+  if (target === null) return;
   try {
     await api("/revert", { method: "POST", body: JSON.stringify({ version: target }) });
     toast = "Razveljavljeno.";

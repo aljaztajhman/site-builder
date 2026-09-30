@@ -1,6 +1,7 @@
 import sharp, { type OverlayOptions } from "sharp";
 import type { AppConfig } from "@sb/config";
 import type { FixtureResult, Mode } from "./runner.ts";
+import { skeletonSimilarity, type HomepageShape } from "./homepage-metrics.ts";
 
 const median = (xs: number[]) => {
   if (!xs.length) return NaN;
@@ -32,7 +33,14 @@ export function renderReport(results: FixtureResult[], config: AppConfig, meta: 
     const mMs = median(gens.map((r) => r.generationMs));
     lines.push(`- Median generation cost ${eur(mEur)} (target ≤ ${eur(target.eur)}) ${mark(mEur <= target.eur)}`);
     lines.push(`- Median generation time ${sec(mMs)} (target ≤ ${target.s} s) ${mark(mMs <= target.s * 1000)}`);
+    const firsts = gens.map((r) => r.firstVersionMs).filter((ms): ms is number => ms !== null);
+    if (firsts.length) lines.push(`- Median time to first preview ${sec(median(firsts))} (first saved version; checks and critique continue after it)`);
     lines.push(`- Median edit cost ${eur(median(gens.map((r) => r.editsEur / Math.max(1, r.checkpoints.length - 1))))} per edit`);
+  }
+  const homes = results.map((r) => r.home).filter((h): h is HomepageShape => h !== null);
+  if (homes.length) {
+    lines.push(`- Homepages repeating the contact facts (2+ contact blocks): ${homes.filter((h) => h.contactBlocks >= 2).length}/${homes.length}`);
+    if (homes.length > 1) lines.push(`- Homepage skeleton similarity across sites: ${skeletonSimilarity(homes).toFixed(2)} (0 = nothing shared, 1 = same section order)`);
   }
   const errors = results.filter((r) => r.error);
   if (errors.length) lines.push(`- **Errors:** ${errors.map((r) => r.id).join(", ")}`);
@@ -40,17 +48,17 @@ export function renderReport(results: FixtureResult[], config: AppConfig, meta: 
 
   lines.push(`## Sites`, "");
   lines.push(`Lighthouse thresholds: performance ≥ ${lh.performance}, accessibility ${lh.accessibility}, best practices ≥ ${lh.bestPractices}, SEO ≥ ${lh.seo}.`, "");
-  lines.push(`| Site | Type | Direction | LH P/A/BP/SEO | axe | 360 px width | Facts | Placeholders | Export offline | Gen cost | Gen time | Pass |`);
-  lines.push(`|---|---|---|---|---|---|---|---|---|---|---|---|`);
+  lines.push(`| Site | Type | Direction | LH P/A/BP/SEO | axe | 360 px width | Facts | Placeholders | Export offline | Gen cost | Gen time | First preview | Pass |`);
+  lines.push(`|---|---|---|---|---|---|---|---|---|---|---|---|---|`);
   for (const r of results) {
     const g = r.checkpoints[0];
     if (!g) {
-      lines.push(`| ${r.id} | ${r.type} | — | — | — | — | — | — | — | — | — | error |`);
+      lines.push(`| ${r.id} | ${r.type} | — | — | — | — | — | — | — | — | — | — | error |`);
       continue;
     }
     const l = g.lighthouse;
     lines.push(
-      `| ${r.id} | ${r.type} | ${r.direction} | ${l ? `${l.performance}/${l.accessibility}/${l.bestPractices}/${l.seo}` : "—"} | ${g.axe} | ${g.maxScrollWidth360} | ${g.facts} | ${g.placeholders} | ${r.exportCheck ? `${mark(r.exportCheck.ok)} ${(r.exportCheck.bytes / 1e6).toFixed(1)} MB` : "—"} | ${meta.mode === "offline" ? "—" : eur(r.generationEur)} | ${meta.mode === "offline" ? "—" : sec(r.generationMs)} | ${mark(g.failures.length === 0)} |`,
+      `| ${r.id} | ${r.type} | ${r.direction} | ${l ? `${l.performance}/${l.accessibility}/${l.bestPractices}/${l.seo}` : "—"} | ${g.axe} | ${g.maxScrollWidth360} | ${g.facts} | ${g.placeholders} | ${r.exportCheck ? `${mark(r.exportCheck.ok)} ${(r.exportCheck.bytes / 1e6).toFixed(1)} MB` : "—"} | ${meta.mode === "offline" ? "—" : eur(r.generationEur)} | ${meta.mode === "offline" ? "—" : sec(r.generationMs)} | ${r.firstVersionMs === null ? "—" : sec(r.firstVersionMs)} | ${mark(g.failures.length === 0)} |`,
     );
   }
   lines.push("");
@@ -66,6 +74,9 @@ export function renderReport(results: FixtureResult[], config: AppConfig, meta: 
       for (const c of r.costByStage) lines.push(`| ${c.stage} | ${c.calls} | ${c.input} | ${c.output} | ${c.cacheRead} | ${c.cacheWrite} | ${c.eur.toFixed(4)} | ${sec(c.ms)} |`);
       lines.push(`| **total** | | | | | | **${r.costByStage.reduce((a, c) => a + c.eur, 0).toFixed(4)}** | |`, "");
       if (Object.keys(r.timings).length) lines.push(`Stage wall times: ${Object.entries(r.timings).map(([k, v]) => `${k} ${sec(v)}`).join(", ")}.`, "");
+    }
+    if (r.home) {
+      lines.push(`Homepage: ${r.home.sections.join(" › ")} (${r.home.contactBlocks} contact block${r.home.contactBlocks === 1 ? "" : "s"}).`, "");
     }
     lines.push(`| Checkpoint | LH P/A/BP/SEO | axe | Valid | Edit check | Failures |`, `|---|---|---|---|---|---|`);
     for (const c of r.checkpoints) {
