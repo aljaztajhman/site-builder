@@ -154,7 +154,7 @@ describe("owner's messages in the dashboard", () => {
     const cookie = await login();
     const page = await (await app.request(`/sites/${id}/messages`, { headers: { cookie } })).text();
     expect(page).toContain("Prosim za termin v petek.");
-    expect(page).toContain("Sporočila iz kontaktnega obrazca (1)");
+    expect(page).toMatch(/<h1>Sporočila <span[^>]*>1<\/span><\/h1>/);
     const api = (await (await app.request(`/api/sites/${id}`, { headers: { cookie } })).json()) as { messages: number };
     expect(api.messages).toBe(1);
     const [m] = await platform.repo.listFormMessages(id);

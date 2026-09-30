@@ -21,8 +21,9 @@ import { renderPage, sharedBundle, pageFile } from "@sb/render";
 import { collectPlaceholders, type SiteSpec } from "@sb/spec";
 import { issueSession, clearSession, passwordMatches, requireAuth, loginThrottle, type AuthSettings } from "./auth.ts";
 import { slugify } from "./slug.ts";
-import { loginPage, sitesPage, sitePage } from "./pages.tsx";
+import { loginPage, sitesPage, sitePage, intakePage } from "./pages.tsx";
 import { clientBundle } from "./client-bundle.ts";
+import { uiAssets } from "./ui/assets.ts";
 import { registerFormRoutes } from "./forms.tsx";
 import { createHash } from "node:crypto";
 import { JS_FLAG } from "@sb/components";
@@ -47,7 +48,8 @@ const SAFE_ID = /^site_[0-9a-f]{16}$/;
 /** One or more path segments of plain file names: no "..", no empty segments. */
 const SAFE_REST = /^([a-z0-9][a-z0-9._-]*\/)*[a-z0-9][a-z0-9._-]*$/i;
 
-const PUBLIC = (path: string) => path === "/health" || path === "/login" || path.startsWith("/s/") || path === "/favicon.ico";
+// The UI stylesheet and fonts are public: the login page needs them.
+const PUBLIC = (path: string) => path === "/health" || path === "/login" || path.startsWith("/s/") || path.startsWith("/assets/ui/") || path === "/favicon.ico";
 
 const IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
 const LOGO_TYPES = new Set([...IMAGE_TYPES, "image/svg+xml"]);
@@ -119,30 +121,51 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
     return c.redirect("/login");
   });
 
-  app.get("/assets/editor.js", async (c) => {
-    c.header("content-type", "text/javascript; charset=utf-8");
-    return c.body(await clientBundle());
+  for (const name of ["editor", "dashboard"] as const) {
+    app.get(`/assets/${name}.js`, async (c) => {
+      c.header("content-type", "text/javascript; charset=utf-8");
+      return c.body(await clientBundle(name));
+    });
+  }
+  app.get("/assets/ui/:hash/*", (c) => {
+    const { hash, files } = uiAssets();
+    const file = files.get(c.req.path.slice(`/assets/ui/${c.req.param("hash")}/`.length));
+    if (!file) return c.notFound();
+    // An old hash still gets the current file, just not cached for good.
+    c.header("cache-control", c.req.param("hash") === hash ? "public, max-age=31536000, immutable" : "no-cache");
+    c.header("content-type", file.type);
+    return c.body(file.data as Uint8Array<ArrayBuffer>);
   });
+  app.get("/favicon.ico", (c) => c.redirect(`/assets/ui/${uiAssets().hash}/icon.svg`, 301));
 
   // ---------- Dashboard ----------
   app.get("/", async (c) => {
     const sites = await repo.listSites();
     return c.html(sitesPage({ sites, spendToday: await repo.spendToday(), cap: config.limits.dailyModelSpendCapEur, maxPhotos: config.limits.maxPhotos }));
   });
+  app.get("/new", async (c) =>
+    c.html(intakePage({ spendToday: await repo.spendToday(), cap: config.limits.dailyModelSpendCapEur, maxPhotos: config.limits.maxPhotos, hasSites: (await repo.listSites()).length > 0 })),
+  );
 
   app.post("/api/sites", async (c) => {
     const body = await c.req.parseBody({ all: true });
     const description = typeof body.description === "string" ? body.description.trim() : "";
-    if (description.length < 30) return c.text("Opis mora imeti vsaj 30 znakov.", 400);
+    // The intake again, with the description kept and the reason on top.
+    const refuse = async (error: string) =>
+      c.html(
+        intakePage({ spendToday: await repo.spendToday(), cap: config.limits.dailyModelSpendCapEur, maxPhotos: config.limits.maxPhotos, hasSites: (await repo.listSites()).length > 0, error, description }),
+        400,
+      );
+    if (description.length < 30) return refuse("Opis mora imeti vsaj 30 znakov.");
     const scope = body.scope === "full" ? "full" : "home";
     const photos = ([] as unknown[]).concat(body["photos"] ?? []).filter((f): f is File => f instanceof File && f.size > 0);
     const logo = body.logo instanceof File && body.logo.size > 0 ? body.logo : undefined;
-    if (photos.length > config.limits.maxPhotos) return c.text(`Največ ${config.limits.maxPhotos} fotografij.`, 400);
+    if (photos.length > config.limits.maxPhotos) return refuse(`Največ ${config.limits.maxPhotos} fotografij. Izberite jih znova.`);
     for (const f of [...photos, ...(logo ? [logo] : [])]) {
-      if (f.size > config.limits.maxUploadBytes) return c.text(`Datoteka ${f.name} je prevelika.`, 400);
+      if (f.size > config.limits.maxUploadBytes) return refuse(`Datoteka ${f.name} je prevelika. Izberite fotografije znova.`);
     }
-    for (const f of photos) if (!IMAGE_TYPES.has(f.type)) return c.text(`Nepodprta vrsta slike: ${f.name}`, 400);
-    if (logo && !LOGO_TYPES.has(logo.type)) return c.text("Logotip mora biti SVG, PNG, JPEG, WebP ali AVIF.", 400);
+    for (const f of photos) if (!IMAGE_TYPES.has(f.type)) return refuse(`Nepodprta vrsta slike: ${f.name}. Izberite fotografije znova.`);
+    if (logo && !LOGO_TYPES.has(logo.type)) return refuse("Logotip mora biti SVG, PNG, JPEG, WebP ali AVIF.");
 
     const slug = await repo.uniqueSlug(slugify(description) || "stran");
     const site = await repo.createSite({ name: slug, slug, intake: { description, photoAssetIds: [], scope } });
@@ -363,7 +386,7 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
   app.get("/preview/:id/:file", async (c) => {
     const v = c.req.query("v");
     if (!SAFE_ID.test(c.req.param("id"))) return c.notFound();
-    const current = await repo.getSpec(c.req.param("id"), v && /^d+$/.test(v) ? Number(v) : undefined);
+    const current = await repo.getSpec(c.req.param("id"), v && /^\d+$/.test(v) ? Number(v) : undefined);
     if (!current) return c.text("Predogled še ni pripravljen.", 404);
     const page = current.spec.pages.find((p) => pageFile(p) === c.req.param("file"));
     if (!page) return c.notFound();

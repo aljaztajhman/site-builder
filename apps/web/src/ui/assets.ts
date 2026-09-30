@@ -1,0 +1,38 @@
+import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { FONTS_DIR } from "@sb/render";
+
+/**
+ * The product UI's stylesheet, its two fonts (the same subset files generated sites use) and the
+ * tab icon. Served under /assets/ui/<hash>/… without a session, because the login page needs them,
+ * and cached for good since the hash changes with the content.
+ */
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const FONTS = ["bricolage-grotesque", "figtree"] as const;
+// The wordmark's accent square.
+const ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="2" fill="#156b4a"/></svg>`;
+
+export interface UiFile {
+  data: Uint8Array;
+  type: string;
+}
+
+let cached: { hash: string; files: Map<string, UiFile> } | undefined;
+
+export function uiAssets(): { hash: string; files: Map<string, UiFile> } {
+  // In development the stylesheet is read on every request, so edits show on reload.
+  if (cached && process.env.NODE_ENV === "production") return cached;
+  const files = new Map<string, UiFile>();
+  files.set("app.css", { data: readFileSync(path.join(here, "app.css")), type: "text/css; charset=utf-8" });
+  for (const f of FONTS) files.set(`fonts/${f}.woff2`, { data: readFileSync(path.join(FONTS_DIR, `${f}.woff2`)), type: "font/woff2" });
+  files.set("icon.svg", { data: new TextEncoder().encode(ICON), type: "image/svg+xml" });
+  const h = createHash("sha256");
+  for (const [name, f] of files) h.update(name).update(f.data);
+  cached = { hash: h.digest("hex").slice(0, 10), files };
+  return cached;
+}
+
+export const uiUrl = (file: string): string => `/assets/ui/${uiAssets().hash}/${file}`;

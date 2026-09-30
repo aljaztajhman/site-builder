@@ -5,6 +5,7 @@
  */
 
 import { EDITOR_STARTER_TEXT } from "@sb/spec/starter";
+import { formatDateTime, formatEur, siteStatus } from "../ui/labels.ts";
 
 type Json = null | boolean | number | string | Json[] | { [k: string]: Json };
 type Obj = { [k: string]: Json };
@@ -35,7 +36,7 @@ interface Catalogue {
 }
 
 interface State {
-  site: { id: string; name: string; slug: string; status: string; published_version: number | null; published_at: string | null };
+  site: { id: string; name: string; slug: string; status: string; published_version: number | null; published_at: string | null; intake?: { scope?: string } };
   version: number | null;
   spec: Obj | null;
   events: { id: string; stage: string; level: string; message: string; created_at: string; data: unknown }[];
@@ -77,29 +78,6 @@ function h<K extends keyof HTMLElementTagNameMap>(tag: K, attrs: Record<string, 
   return el;
 }
 
-const STYLE = `
-.ed{display:grid;grid-template-columns:420px 1fr;height:calc(100vh - 57px)}
-.panel{overflow:auto;border-right:1px solid var(--line);background:var(--panel)}
-.tabs{display:flex;flex-wrap:wrap;gap:4px;padding:8px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:2}
-.tabs button{border:0;background:none;padding:6px 10px;border-radius:6px;cursor:pointer;font:inherit}
-.tabs button[aria-selected=true]{background:#e8eefc;color:#1f3fb0;font-weight:600}
-.pane{padding:12px 14px}
-.outline{list-style:none;margin:0;padding:0}
-.outline li{display:flex;align-items:center;gap:4px;padding:6px;border:1px solid var(--line);border-radius:6px;margin-bottom:6px;background:#fff;cursor:pointer}
-.outline li.sel{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
-.outline .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.icon{border:1px solid var(--line);background:#fff;border-radius:4px;min-width:28px;height:28px;cursor:pointer}
-fieldset{border:1px solid var(--line);border-radius:6px;padding:8px 10px;margin:8px 0}legend{font-weight:600;font-size:13px}
-.count{font-size:12px;color:var(--muted);text-align:right}
-.stage{display:flex;flex-direction:column;align-items:center;overflow:auto;background:#e9ecf1;padding:16px}
-.frame-wrap{background:#fff;box-shadow:0 1px 3px rgb(0 0 0/.15)}
-.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#16181d;color:#fff;padding:8px 14px;border-radius:6px;z-index:10;max-width:90vw}
-.chat{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}.msg{padding:8px;border-radius:6px;background:#f1f3f6}.msg.user{background:#e8eefc}
-.log{font-size:12px;max-height:260px;overflow:auto;background:#fafbfc;border:1px solid var(--line);border-radius:6px;padding:6px}
-.warn{background:#fff8e1;border:1px solid #f1d27a;border-radius:6px;padding:8px;font-size:13px}
-@media (max-width:900px){.ed{grid-template-columns:1fr;height:auto}.panel{border-right:0}}
-`;
 
 // ---------- API ----------
 async function api<T = unknown>(path: string, init?: RequestInit): Promise<T> {
@@ -128,7 +106,7 @@ async function load(rerender = true): Promise<void> {
 function schedulePoll(): void {
   window.clearTimeout(pollTimer);
   const active = state.site.status === "generating" || state.site.status === "editing";
-  if (active) pollTimer = window.setTimeout(() => void load().then(reloadPreview), 2000);
+  if (active) pollTimer = window.setTimeout(() => void load().then(() => state.version !== frameVersion && reloadPreview()), 2000);
 }
 
 /** Sends direct-edit operations. No model call. */
@@ -151,7 +129,7 @@ async function sendPatch(ops: Op[], message: string, rerender: boolean): Promise
     reloadPreview();
     return true;
   } catch (e) {
-    toast = rerender ? `Ni shranjeno: ${(e as Error).message}` : `Še ni shranjeno — dopolnite polja. (${(e as Error).message.split(String.fromCharCode(10))[0]})`;
+    toast = rerender ? `Ni shranjeno: ${(e as Error).message}` : `Še ni shranjeno: dopolnite polja. (${(e as Error).message.split(String.fromCharCode(10))[0]})`;
     await load(rerender);
     return false;
   }
@@ -271,6 +249,7 @@ function defaultFor(s: Schema, rootSchema: Schema, key: string, starter = true):
 }
 
 const FIELD_LABEL: Record<string, string> = {
+  props: "Vsebina razdelka",
   headline: "Naslov",
   title: "Naslov",
   eyebrow: "Nadnaslov",
@@ -350,8 +329,8 @@ function field(schema: Schema, rootSchema: Schema, value: Json | undefined, key:
           h("label", {}, title),
           h(
             "div",
-            { class: "warn row" },
-            "Manjka — ",
+            { class: "note warn row" },
+            h("span", { class: "sp" }, "Manjka. Dokler podatka ne vpišete, stran ni objavljiva."),
             h(
               "button",
               {
@@ -394,7 +373,7 @@ function field(schema: Schema, rootSchema: Schema, value: Json | undefined, key:
       h(
         "select",
         { onChange: (e: Event) => sink.edit((e.target as HTMLSelectElement).value || undefined) },
-        ...(optional ? [h("option", { value: "" }, "—")] : []),
+        ...(optional ? [h("option", { value: "" }, "Brez")] : []),
         ...(s.enum as string[]).map((v) => h("option", { value: v, selected: v === value }, ENUM[v] ?? v)),
       ),
     );
@@ -450,9 +429,9 @@ function field(schema: Schema, rootSchema: Schema, value: Json | undefined, key:
         const tools = h(
           "div",
           { class: "row" },
-          h("button", { class: "icon", type: "button", title: "Gor", disabled: i === 0, onClick: () => restructure(() => arr.splice(i - 1, 0, ...arr.splice(i, 1))) }, "↑"),
-          h("button", { class: "icon", type: "button", title: "Dol", disabled: i === arr.length - 1, onClick: () => restructure(() => arr.splice(i + 1, 0, ...arr.splice(i, 1))) }, "↓"),
-          h("button", { class: "icon", type: "button", title: "Odstrani", disabled: arr.length <= Number(s.minItems ?? 0), onClick: () => restructure(() => arr.splice(i, 1)) }, "✕"),
+          h("button", { class: "icon", type: "button", title: "Gor", "aria-label": "Premakni gor", disabled: i === 0, onClick: () => restructure(() => arr.splice(i - 1, 0, ...arr.splice(i, 1))) }, "↑"),
+          h("button", { class: "icon", type: "button", title: "Dol", "aria-label": "Premakni dol", disabled: i === arr.length - 1, onClick: () => restructure(() => arr.splice(i + 1, 0, ...arr.splice(i, 1))) }, "↓"),
+          h("button", { class: "icon", type: "button", title: "Odstrani", "aria-label": "Odstrani", disabled: arr.length <= Number(s.minItems ?? 0), onClick: () => restructure(() => arr.splice(i, 1)) }, "✕"),
         );
         fs.append(tools, field(itemSchema, rootSchema, item, key === "paragraphs" ? "text" : key, itemSink));
       });
@@ -467,7 +446,7 @@ function field(schema: Schema, rootSchema: Schema, value: Json | undefined, key:
         const imgs = ((state.spec?.assets as Obj)?.images ?? []) as Obj[];
         box.append(
           h("label", {}, title),
-          h("select", { onChange: (e: Event) => sink.edit((e.target as HTMLSelectElement).value) }, ...imgs.map((im) => h("option", { value: im.id as string, selected: im.id === value }, `${im.id} — ${String(im.alt).slice(0, 50)}`))),
+          h("select", { onChange: (e: Event) => sink.edit((e.target as HTMLSelectElement).value) }, ...imgs.map((im) => h("option", { value: im.id as string, selected: im.id === value }, `${im.id}: ${String(im.alt).slice(0, 50)}`))),
         );
         return box;
       }
@@ -557,6 +536,13 @@ function autosave(pointer: string, message: string, delay = 700): (v: Json | und
 }
 
 // ---------- Panes ----------
+const HEADER_VARIANT: Record<string, string> = { bar: "Vrstica", "split-cta": "Z gumbom na desni", stacked: "Ime na sredini" };
+const FOOTER_VARIANT: Record<string, string> = { columns: "Stolpci", compact: "Strnjena" };
+const TONE: Record<string, string> = { default: "Osnovno", alt: "Izmenično", inverse: "Obratno (temno)" };
+
+/** A select with its label; `linkLabels` ties them together. */
+const labelled = (title: string, control: HTMLElement) => h("div", {}, h("label", {}, title), control);
+
 function contentPane(): HTMLElement {
   const pane = h("div", { class: "pane" });
   if (!state.spec) return pane;
@@ -570,25 +556,30 @@ function contentPane(): HTMLElement {
   secs.forEach((s, i) => {
     const id = s.id as string;
     const system = s.type === "legal" || s.type === "not-found";
+    const name = label(s.type as string);
     list.append(
       h(
         "li",
         { class: id === selected ? "sel" : "", onClick: () => select(id) },
-        h("span", { class: "t" }, h("strong", {}, label(s.type as string)), " ", h("span", { class: "muted" }, sectionTitle(s))),
-        !system && h("button", { class: "icon", title: "Premakni gor", disabled: i === 0, onClick: (e: Event) => { e.stopPropagation(); void patch([{ op: "move", from: `/pages/${pi}/sections/${i}`, path: `/pages/${pi}/sections/${i - 1}` }], "premik"); } }, "↑"),
-        !system && h("button", { class: "icon", title: "Premakni dol", disabled: i === secs.length - 1, onClick: (e: Event) => { e.stopPropagation(); void patch([{ op: "move", from: `/pages/${pi}/sections/${i}`, path: `/pages/${pi}/sections/${i + 1}` }], "premik"); } }, "↓"),
-        !system && h("button", { class: "icon", title: "Podvoji", onClick: (e: Event) => { e.stopPropagation(); void patch([{ op: "add", path: `/pages/${pi}/sections/${i + 1}`, value: { ...structuredClone(s), id: newSectionId(s.type as string) } }], "podvojen razdelek"); } }, "⧉"),
-        !system && h("button", { class: "icon", title: "Izbriši", onClick: (e: Event) => { e.stopPropagation(); if (confirm(`Izbrišem razdelek »${label(s.type as string)}«?`)) void patch([{ op: "remove", path: `/pages/${pi}/sections/${i}` }], "izbrisan razdelek"); } }, "✕"),
+        h("span", { class: "t" }, h("strong", {}, name), h("span", { class: "muted" }, sectionTitle(s))),
+        !system && h("button", { class: "icon", type: "button", title: "Premakni gor", "aria-label": `Premakni gor: ${name}`, disabled: i === 0, onClick: (e: Event) => { e.stopPropagation(); void patch([{ op: "move", from: `/pages/${pi}/sections/${i}`, path: `/pages/${pi}/sections/${i - 1}` }], "premik"); } }, "↑"),
+        !system && h("button", { class: "icon", type: "button", title: "Premakni dol", "aria-label": `Premakni dol: ${name}`, disabled: i === secs.length - 1, onClick: (e: Event) => { e.stopPropagation(); void patch([{ op: "move", from: `/pages/${pi}/sections/${i}`, path: `/pages/${pi}/sections/${i + 1}` }], "premik"); } }, "↓"),
+        !system && h("button", { class: "icon", type: "button", title: "Podvoji", "aria-label": `Podvoji: ${name}`, onClick: (e: Event) => { e.stopPropagation(); void patch([{ op: "add", path: `/pages/${pi}/sections/${i + 1}`, value: { ...structuredClone(s), id: newSectionId(s.type as string) } }], "podvojen razdelek"); } }, "⧉"),
+        !system && h("button", { class: "icon", type: "button", title: "Izbriši", "aria-label": `Izbriši: ${name}`, onClick: (e: Event) => { e.stopPropagation(); if (confirm(`Izbrišem razdelek »${name}«?`)) void patch([{ op: "remove", path: `/pages/${pi}/sections/${i}` }], "izbrisan razdelek"); } }, "✕"),
       ),
     );
   });
-  pane.append(h("h3", {}, "Razdelki"), list);
+  pane.append(h("h2", {}, "Razdelki"), list);
 
   if (catalogue && currentPage()?.kind !== "privacy" && currentPage()?.kind !== "accessibility" && currentPage()?.kind !== "not-found") {
     const addable = catalogue.sections.filter((c) => c.canAdd);
     const sel = h("select", {}, ...addable.map((c) => h("option", { value: c.type }, label(c.type))));
     const at = selected ? secs.findIndex((s) => s.id === selected) + 1 : secs.length;
-    pane.append(h("div", { class: "row" }, sel, h("button", { class: "btn", type: "button", onClick: () => void post("/sections", { pageIndex: pi, index: at, type: sel.value }, "Razdelek dodan.") }, "+ Dodaj razdelek")));
+    pane.append(
+      h("label", { class: "sr-only" }, "Nov razdelek"),
+      h("div", { class: "add-row" }, sel, h("button", { class: "btn", type: "button", onClick: () => void post("/sections", { pageIndex: pi, index: at, type: sel.value }, "Razdelek dodan.") }, "+ Dodaj")),
+      h("p", { class: "help" }, selected ? "Nov razdelek pride pod izbranega." : "Nov razdelek pride na konec strani."),
+    );
   }
 
   const si = secs.findIndex((s) => s.id === selected);
@@ -596,16 +587,14 @@ function contentPane(): HTMLElement {
   if (s && catalogue) {
     const info = sectionInfo(s.type as string);
     const base = `/pages/${pi}/sections/${si}`;
-    pane.append(h("h3", {}, label(s.type as string)));
+    pane.append(h("h2", {}, label(s.type as string)));
     if (info) {
       pane.append(
-        h("p", { class: "muted" }, "Dvojni klik na besedilo v predogledu ga uredi neposredno."),
-        h("div", { class: "row" },
-          h("label", {}, "Različica"),
-          h("select", { onChange: (e: Event) => void patch([{ op: "replace", path: `${base}/variant`, value: (e.target as HTMLSelectElement).value }], "različica") }, ...info.variants.map((v) => h("option", { value: v, selected: v === s.variant }, v))),
-          h("label", {}, "Ozadje"),
-          h("select", { onChange: (e: Event) => { const v = (e.target as HTMLSelectElement).value; void patch([s.tone === undefined ? { op: "add", path: `${base}/tone`, value: v } : { op: "replace", path: `${base}/tone`, value: v }], "ozadje"); } },
-            ...["default", "alt", "inverse"].map((t) => h("option", { value: t, selected: (s.tone ?? "default") === t }, { default: "Osnovno", alt: "Izmenično", inverse: "Obratno (temno)" }[t]!))),
+        h("p", { class: "help" }, "Dvakrat kliknite besedilo v predogledu, da ga uredite neposredno."),
+        h("div", { class: "pair" },
+          labelled("Različica", h("select", { onChange: (e: Event) => void patch([{ op: "replace", path: `${base}/variant`, value: (e.target as HTMLSelectElement).value }], "različica") }, ...info.variants.map((v) => h("option", { value: v, selected: v === s.variant }, v)))),
+          labelled("Ozadje", h("select", { onChange: (e: Event) => { const v = (e.target as HTMLSelectElement).value; void patch([s.tone === undefined ? { op: "add", path: `${base}/tone`, value: v } : { op: "replace", path: `${base}/tone`, value: v }], "ozadje"); } },
+            ...["default", "alt", "inverse"].map((t) => h("option", { value: t, selected: (s.tone ?? "default") === t }, TONE[t]!)))),
         ),
         formAt(`${base}/props`, info.props, s.props as Json, "props", `urejen razdelek ${s.type}`),
       );
@@ -619,21 +608,19 @@ function contentPane(): HTMLElement {
 function factsPane(): HTMLElement {
   const pane = h("div", { class: "pane" });
   if (!state.spec || !catalogue) return pane;
-  pane.append(h("p", { class: "muted" }, "Podatki se prikažejo v glavi, nogi, kontaktu in delovnem času. Manjkajoči podatki so označeni in preprečujejo objavo."));
+  pane.append(h("p", { class: "help" }, "Podatki se prikažejo v glavi, nogi, kontaktu in delovnem času. Manjkajoči podatki so označeni in preprečujejo objavo."));
   pane.append(formAt("/business", catalogue.business, state.spec.business as Json, "Podatki o podjetju", "podatki"));
   const chrome = state.spec.chrome as Obj;
   const header = chrome.header as Obj;
   pane.append(
-    h("h3", {}, "Glava in noga"),
-    h("label", {}, "Glava"),
-    h("select", { onChange: (e: Event) => void patch([{ op: "replace", path: "/chrome/header/variant", value: (e.target as HTMLSelectElement).value }], "glava") }, ...["bar", "split-cta", "stacked"].map((v) => h("option", { value: v, selected: v === header.variant }, v))),
-    h("label", {}, "Gumb v glavi"),
-    h("select", { onChange: (e: Event) => void patch([{ op: "replace", path: "/chrome/header/cta", value: (e.target as HTMLSelectElement).value }], "gumb v glavi") }, ...["call", "booking", "directions", "none"].map((v) => h("option", { value: v, selected: v === header.cta }, { call: "Pokliči", booking: "Rezervacija", directions: "Navodila za pot", none: "Brez" }[v]!))),
-    h("label", {}, "Ozadje glave"),
-    h("select", { onChange: (e: Event) => { const v = (e.target as HTMLSelectElement).value; void patch([{ op: header.tone === undefined ? "add" : "replace", path: "/chrome/header/tone", value: v }], "ozadje glave"); } }, ...["default", "alt", "inverse"].map((v) => h("option", { value: v, selected: v === (header.tone ?? "default") }, { default: "Kot stran", alt: "Izmenično", inverse: "Temno" }[v]!))),
-    h("label", {}, "Noga"),
-    h("select", { onChange: (e: Event) => void patch([{ op: "replace", path: "/chrome/footer/variant", value: (e.target as HTMLSelectElement).value }], "noga") }, ...["columns", "compact"].map((v) => h("option", { value: v, selected: v === (chrome.footer as Obj).variant }, v))),
-    h("label", {}, h("input", { type: "checkbox", checked: chrome.mobileActionBar === true, onChange: (e: Event) => void patch([{ op: "replace", path: "/chrome/mobileActionBar", value: (e.target as HTMLInputElement).checked }], "vrstica za klic") }), " Spodnja vrstica za klic in pot na telefonu"),
+    h("h2", {}, "Glava in noga"),
+    h("div", { class: "pair" },
+      labelled("Glava", h("select", { onChange: (e: Event) => void patch([{ op: "replace", path: "/chrome/header/variant", value: (e.target as HTMLSelectElement).value }], "glava") }, ...["bar", "split-cta", "stacked"].map((v) => h("option", { value: v, selected: v === header.variant }, HEADER_VARIANT[v]!)))),
+      labelled("Gumb v glavi", h("select", { onChange: (e: Event) => void patch([{ op: "replace", path: "/chrome/header/cta", value: (e.target as HTMLSelectElement).value }], "gumb v glavi") }, ...["call", "booking", "directions", "none"].map((v) => h("option", { value: v, selected: v === header.cta }, { call: "Pokliči", booking: "Rezervacija", directions: "Navodila za pot", none: "Brez" }[v]!)))),
+      labelled("Ozadje glave", h("select", { onChange: (e: Event) => { const v = (e.target as HTMLSelectElement).value; void patch([{ op: header.tone === undefined ? "add" : "replace", path: "/chrome/header/tone", value: v }], "ozadje glave"); } }, ...["default", "alt", "inverse"].map((v) => h("option", { value: v, selected: v === (header.tone ?? "default") }, { default: "Kot stran", alt: "Izmenično", inverse: "Temno" }[v]!)))),
+      labelled("Noga", h("select", { onChange: (e: Event) => void patch([{ op: "replace", path: "/chrome/footer/variant", value: (e.target as HTMLSelectElement).value }], "noga") }, ...["columns", "compact"].map((v) => h("option", { value: v, selected: v === (chrome.footer as Obj).variant }, FOOTER_VARIANT[v]!)))),
+    ),
+    h("label", {}, h("input", { type: "checkbox", checked: chrome.mobileActionBar === true, onChange: (e: Event) => void patch([{ op: "replace", path: "/chrome/mobileActionBar", value: (e.target as HTMLInputElement).checked }], "vrstica za klic") }), "Spodnja vrstica za klic in pot na telefonu"),
   );
   return pane;
 }
@@ -647,17 +634,17 @@ function designPane(): HTMLElement {
   pane.append(
     h("label", {}, "Smer oblikovanja"),
     h("select", { onChange: (e: Event) => void post("/direction", { direction: (e.target as HTMLSelectElement).value }, "Smer zamenjana.") }, ...catalogue.directions.map((x) => h("option", { value: x.id, selected: x.id === d.direction }, x.name))),
-    h("p", { class: "muted" }, dir?.summary ?? ""),
+    h("p", { class: "help" }, dir?.summary ?? ""),
     h("label", {}, "Pisave"),
     h("select", { onChange: (e: Event) => set("fontPair", (e.target as HTMLSelectElement).value) }, ...(dir?.fontPairs ?? []).map((id) => h("option", { value: id, selected: id === d.fontPair }, catalogue!.fontPairs.find((f) => f.id === id)?.label ?? id))),
   );
   const colors = d.colors as Obj;
   const NAMES: Record<string, string> = { background: "Ozadje strani", surface: "Izmenično ozadje", text: "Besedilo", muted: "Drugotno besedilo", primary: "Glavna barva (gumbi)", onPrimary: "Besedilo na gumbih", accent: "Poudarek", border: "Obrobe", inverse: "Temni razdelki", onInverse: "Besedilo na temnem" };
-  const fs = h("fieldset", {}, h("legend", {}, "Barve (kontrast se preveri samodejno)"));
+  const fs = h("fieldset", { class: "colors" }, h("legend", {}, "Barve (kontrast se preveri samodejno)"));
   for (const [k, v] of Object.entries(colors)) {
-    const input = h("input", { type: "color", value: v as string });
+    const input = h("input", { type: "color", value: v as string, "aria-label": NAMES[k] ?? k });
     input.addEventListener("change", () => set(`colors/${k}`, input.value));
-    fs.append(h("div", { class: "row" }, input, h("span", {}, NAMES[k] ?? k), h("code", { class: "muted" }, v as string)));
+    fs.append(h("div", { class: "row" }, input, h("span", { class: "sp" }, NAMES[k] ?? k), h("span", { class: "hex" }, v as string)));
   }
   pane.append(fs);
   const r = (dir?.ranges ?? {}) as Record<string, [number, number] | string[]>;
@@ -665,11 +652,11 @@ function designPane(): HTMLElement {
     const [lo, hi] = (r[k] as [number, number]) ?? [0, 100];
     const input = h("input", { type: "number", min: lo, max: hi, step, value: d[k] as number });
     input.addEventListener("change", () => set(k, Number(input.value)));
-    return h("div", {}, h("label", {}, `${title} (${lo}–${hi})`), input);
+    return labelled(`${title} (${lo}–${hi})`, input);
   };
   const choice = (k: string, title: string) =>
-    h("div", {}, h("label", {}, title), h("select", { onChange: (e: Event) => set(k, (e.target as HTMLSelectElement).value) }, ...((r[k] as string[]) ?? []).map((v) => h("option", { value: v, selected: v === d[k] }, v))));
-  pane.append(num("radius", "Zaobljenost (px)", "1"), num("baseFontSize", "Osnovna velikost pisave", "1"), num("scale", "Razmerje velikosti naslovov", "0.005"), num("headingWeight", "Debelina naslovov", "50"), num("headingTracking", "Razmik črk v naslovih (em)", "0.005"), choice("density", "Gostota"), choice("shadow", "Senca"), choice("headingCase", "Velike črke v naslovih"));
+    labelled(title, h("select", { onChange: (e: Event) => set(k, (e.target as HTMLSelectElement).value) }, ...((r[k] as string[]) ?? []).map((v) => h("option", { value: v, selected: v === d[k] }, v))));
+  pane.append(h("div", { class: "pair" }, num("radius", "Zaobljenost (px)", "1"), num("baseFontSize", "Velikost pisave", "1"), num("scale", "Razmerje naslovov", "0.005"), num("headingWeight", "Debelina naslovov", "50"), num("headingTracking", "Razmik črk (em)", "0.005"), choice("density", "Gostota"), choice("shadow", "Senca"), choice("headingCase", "Velike črke")));
   return pane;
 }
 
@@ -680,20 +667,20 @@ function pagesPane(): HTMLElement {
     const nav = p.nav as Obj;
     const seo = p.seo as Obj;
     const system = p.kind !== "home" && p.kind !== "standard";
-    const fs = h("fieldset", {}, h("legend", {}, `${nav.label} — ${pageFileOf(p)}`));
+    const fs = h("fieldset", {}, h("legend", {}, `${nav.label} · ${pageFileOf(p)}`));
     const text = (ptr: string, title: string, val: string, max: number) => {
       const input = h("input", { type: "text", maxlength: max, value: val });
       const save = autosave(ptr, "nastavitve strani");
       input.addEventListener("input", () => save(input.value));
-      return h("div", {}, h("label", {}, title), input);
+      return labelled(title, input);
     };
-    fs.append(text(`/pages/${i}/nav/label`, "Ime v meniju", nav.label as string, 24), text(`/pages/${i}/seo/title`, "SEO naslov", seo.title as string, 60), text(`/pages/${i}/seo/description`, "SEO opis", seo.description as string, 160));
+    fs.append(text(`/pages/${i}/nav/label`, "Ime v meniju", nav.label as string, 24), text(`/pages/${i}/seo/title`, "Naslov za iskalnike", seo.title as string, 60), text(`/pages/${i}/seo/description`, "Opis za iskalnike", seo.description as string, 160));
     if (!system) {
       fs.append(
-        h("label", {}, h("input", { type: "checkbox", checked: nav.show === true, onChange: (e: Event) => void patch([{ op: "replace", path: `/pages/${i}/nav/show`, value: (e.target as HTMLInputElement).checked }], "meni") }), " Prikaži v meniju"),
+        h("label", {}, h("input", { type: "checkbox", checked: nav.show === true, onChange: (e: Event) => void patch([{ op: "replace", path: `/pages/${i}/nav/show`, value: (e.target as HTMLInputElement).checked }], "meni") }), "Prikaži v meniju"),
         h("div", { class: "row" },
-          h("button", { class: "btn sm", type: "button", disabled: i <= 1 || p.kind === "home", onClick: () => void patch([{ op: "move", from: `/pages/${i}`, path: `/pages/${i - 1}` }], "vrstni red strani") }, "↑"),
-          h("button", { class: "btn sm", type: "button", disabled: p.kind === "home" || pages()[i + 1]?.kind !== "standard", onClick: () => void patch([{ op: "move", from: `/pages/${i}`, path: `/pages/${i + 1}` }], "vrstni red strani") }, "↓"),
+          h("button", { class: "btn sm", type: "button", "aria-label": `Premakni stran ${nav.label} gor`, disabled: i <= 1 || p.kind === "home", onClick: () => void patch([{ op: "move", from: `/pages/${i}`, path: `/pages/${i - 1}` }], "vrstni red strani") }, "↑ Gor"),
+          h("button", { class: "btn sm", type: "button", "aria-label": `Premakni stran ${nav.label} dol`, disabled: p.kind === "home" || pages()[i + 1]?.kind !== "standard", onClick: () => void patch([{ op: "move", from: `/pages/${i}`, path: `/pages/${i + 1}` }], "vrstni red strani") }, "↓ Dol"),
           p.kind === "standard" && h("button", { class: "btn sm danger", type: "button", onClick: () => { if (confirm(`Izbrišem stran ${nav.label}?`)) { pageIndex = 0; void patch([{ op: "remove", path: `/pages/${i}` }], "izbrisana stran"); } } }, "Izbriši stran"),
         ),
       );
@@ -702,46 +689,123 @@ function pagesPane(): HTMLElement {
   });
   const slug = h("input", { type: "text", placeholder: "npr. cenik" });
   const name = h("input", { type: "text", placeholder: "npr. Cenik", maxlength: 24 });
-  pane.append(h("h3", {}, "Nova stran"), h("label", {}, "Ime v meniju"), name, h("label", {}, "Naslov datoteke (brez šumnikov)"), slug,
+  pane.append(h("h2", {}, "Nova stran"), labelled("Ime v meniju", name), labelled("Naslov datoteke (brez šumnikov)", slug),
     h("p", {}, h("button", { class: "btn", type: "button", onClick: () => void post("/pages", { slug: slug.value.trim(), label: name.value.trim() }, "Stran dodana.") }, "+ Dodaj stran")));
   return pane;
 }
 
+const COST_STAGE: Record<string, string> = { classify: "Vrsta dejavnosti", brief: "Razumevanje opisa", design: "Oblikovna smer", altText: "Opisi fotografij", content: "Besedila in postavitev", critique: "Samopregled", edit: "Pomočnik" };
+const n0 = (n: number) => n.toLocaleString("sl-SI");
+
 function aiPane(): HTMLElement {
   const pane = h("div", { class: "pane" });
-  pane.append(h("p", { class: "muted" }, "Pomočnik z umetno inteligenco je za nove vsebine (npr. »dodaj pogosta vprašanja«). Vsako sporočilo porabi žetone. Besedila, vrstni red in podatke urejajte neposredno — brez porabe."));
+  const busy = state.site.status === "editing";
+  pane.append(h("p", { class: "help" }, "Pomočnik doda ali spremeni vsebino po vašem opisu, npr. »dodaj pogosta vprašanja o parkiranju«. Vsako sporočilo stane nekaj centov. Besedila, vrstni red in podatke lahko brez stroškov urejate tudi neposredno."));
   const chat = h("div", { class: "chat" }, ...state.chat.map((m) => h("div", { class: `msg ${m.role}` }, m.content)));
+  if (busy) chat.append(h("div", { class: "msg", role: "status" }, "Urejam stran …"));
   const input = h("textarea", { rows: 3, placeholder: "Npr. dodaj pogosta vprašanja o parkiranju" });
+  const total = state.cost.reduce((a, c) => a + c.eur, 0);
   pane.append(
-    chat,
+    ...(state.chat.length || busy ? [chat] : []),
+    h("label", {}, "Kaj naj spremenim?"),
     input,
-    h("div", { class: "row" },
-      h("button", { class: "btn primary", type: "button", disabled: !state.spec || state.site.status === "editing", onClick: async () => { if (!input.value.trim()) return; try { await api("/chat", { method: "POST", body: JSON.stringify({ message: input.value }) }); input.value = ""; toast = "Poslano pomočniku."; } catch (e) { toast = (e as Error).message; } await load(); } }, "Pošlji"),
-      h("button", { class: "btn", type: "button", disabled: state.site.status === "generating", onClick: () => { if (confirm("Ustvarim celotno stran znova? To porabi žetone in zamenja trenutno vsebino z novo različico.")) void post("/generate", { scope: "full" }, "Ustvarjanje se je začelo."); } }, "Ustvari celotno stran"),
+    h("div", { class: "row", style: { marginTop: "10px" } },
+      h("button", { class: "btn primary", type: "button", disabled: !state.spec || busy, onClick: async () => { if (!input.value.trim()) return; try { await api("/chat", { method: "POST", body: JSON.stringify({ message: input.value }) }); input.value = ""; toast = "Poslano pomočniku."; } catch (e) { toast = (e as Error).message; } await load(); } }, "Pošlji"),
+      h("span", { class: "help num", style: { margin: 0 } }, `Danes ${formatEur(state.spendToday)} od ${formatEur(state.cap)}`),
     ),
-    h("h3", {}, "Stroški modela"),
-    h("table", {}, h("tr", {}, h("th", {}, "Faza"), h("th", {}, "Klici"), h("th", {}, "Vhod"), h("th", {}, "Izhod"), h("th", {}, "Predpomnilnik"), h("th", {}, "€")),
-      ...state.cost.map((c) => h("tr", {}, h("td", {}, c.stage), h("td", {}, String(c.calls)), h("td", {}, String(c.input)), h("td", {}, String(c.output)), h("td", {}, `${c.cacheRead}/${c.cacheWrite}`), h("td", {}, c.eur.toFixed(4)))),
-      h("tr", {}, h("th", {}, "Skupaj"), h("td", {}), h("td", {}), h("td", {}), h("td", {}), h("th", {}, state.cost.reduce((a, c) => a + c.eur, 0).toFixed(4)))),
-    h("h3", {}, "Dnevnik"),
-    h("div", { class: "log" }, ...state.events.slice(-80).map((e) => h("div", { class: e.level === "error" ? "err" : "" }, `${new Date(e.created_at).toLocaleTimeString("sl-SI")} ${e.stage}: ${e.message}`))),
+    h("details", { class: "more" },
+      h("summary", {}, `Poraba za to stran: ${formatEur(total)}`),
+      h("table", {},
+        h("tr", {}, h("th", {}, "Faza"), h("th", { class: "num" }, "Klici"), h("th", { class: "num" }, "Vhod"), h("th", { class: "num" }, "Izhod"), h("th", { class: "num" }, "€")),
+        ...state.cost.map((c) => h("tr", {}, h("td", {}, COST_STAGE[c.stage] ?? c.stage), h("td", { class: "num" }, n0(c.calls)), h("td", { class: "num" }, n0(c.input + c.cacheRead + c.cacheWrite)), h("td", { class: "num" }, n0(c.output)), h("td", { class: "num" }, c.eur.toLocaleString("sl-SI", { minimumFractionDigits: 3, maximumFractionDigits: 3 })))),
+      ),
+      h("p", { class: "help" }, "Vhod vključuje žetone iz predpomnilnika."),
+    ),
+    h("details", { class: "more" },
+      h("summary", {}, "Dnevnik"),
+      h("div", { class: "log" }, ...state.events.slice(-80).map((e) => h("div", { class: e.level === "error" ? "err" : "" }, `${new Date(e.created_at).toLocaleTimeString("sl-SI")} ${e.stage}: ${e.message}`))),
+    ),
+    h("details", { class: "more" },
+      h("summary", {}, "Ustvari celotno stran znova"),
+      h("p", { class: "help" }, "Vse strani naredimo znova iz vašega opisa. Trenutna vsebina ostane med različicami, zato jo lahko obnovite. Stane približno toliko kot ustvarjanje nove strani."),
+      h("button", { class: "btn", type: "button", disabled: state.site.status === "generating", onClick: () => { if (confirm("Ustvarim celotno stran znova? To porabi žetone in zamenja trenutno vsebino z novo različico.")) void post("/generate", { scope: "full" }, "Ustvarjanje se je začelo."); } }, "Ustvari znova"),
+    ),
   );
   return pane;
 }
 
 function versionsPane(): HTMLElement {
-  const SRC: Record<string, string> = { generate: "ustvarjeno", critique: "samopregled", edit: "pomočnik", manual: "urejanje", revert: "povrnjeno" };
+  const SRC: Record<string, string> = { generate: "ustvarjeno", critique: "samopregled", edit: "pomočnik", manual: "urejanje", revert: "obnovljeno" };
   return h("div", { class: "pane" },
-    h("table", {}, ...state.versions.map((v) => h("tr", {},
-      h("td", {}, `v${v.version}`),
-      h("td", {}, SRC[v.source] ?? v.source, v.message ? h("div", { class: "muted" }, v.message.slice(0, 80)) : null),
-      h("td", {}, v.version === state.version ? h("strong", {}, "trenutna") : h("button", { class: "btn sm", type: "button", onClick: () => void api("/revert", { method: "POST", body: JSON.stringify({ version: v.version }) }).then(() => { toast = `Povrnjeno na v${v.version}.`; return load(); }).then(reloadPreview) }, "Povrni")),
+    h("p", { class: "help" }, "Vsaka sprememba je nova različica. Tudi obnova je nova različica, zato se nič ne izgubi."),
+    h("ol", { class: "versions" }, ...state.versions.map((v) => h("li", {},
+      h("b", {}, `v${v.version}`),
+      h("div", { class: "what" }, h("span", {}, `${SRC[v.source] ?? v.source} · ${formatDateTime(v.created_at)}`), v.message ? h("span", { class: "muted" }, v.message.slice(0, 120)) : null),
+      v.version === state.version
+        ? h("span", { class: "pill plain" }, "trenutna")
+        : h("button", { class: "btn sm", type: "button", "aria-label": `Obnovi različico ${v.version}`, onClick: () => void api("/revert", { method: "POST", body: JSON.stringify({ version: v.version }) }).then(() => { toast = `Obnovljena različica ${v.version}.`; return load(); }).then(reloadPreview) }, "Obnovi"),
     ))),
   );
 }
 
+// ---------- Generation progress: real stage names, real seconds ----------
+const STAGES: [string, string][] = [
+  ["classify", "Vrsta dejavnosti"],
+  ["brief", "Razumevanje opisa"],
+  ["design", "Oblikovna smer"],
+  ["images", "Fotografije"],
+  ["content", "Besedila in postavitev"],
+  ["check", "Preverjanje na telefonu in namizju"],
+  ["critique", "Samopregled in popravki"],
+];
+
+function progress(): HTMLElement {
+  // The latest run starts at its last "classify start" event.
+  const starts = state.events.map((e) => e.stage === "classify" && e.message === "start");
+  const run = state.events.slice(Math.max(0, starts.lastIndexOf(true)));
+  const list = h("ol", { class: "stages", "aria-label": "Potek ustvarjanja" });
+  for (const [key, name] of STAGES) {
+    const begun = run.filter((e) => e.stage === key && e.message === "start").length;
+    const done = run.filter((e) => e.stage === key && e.message === "done");
+    const ms = done.reduce((a, e) => a + Number((e.data as { ms?: number } | null)?.ms ?? 0), 0);
+    const cls = begun > done.length ? "run" : done.length ? "done" : "";
+    list.append(
+      h("li", { class: cls },
+        h("i", { "aria-hidden": "true" }),
+        h("span", {}, name, h("span", { class: "sr-only" }, cls === "run" ? " (poteka)" : cls === "done" ? " (končano)" : " (čaka)")),
+        h("span", { class: "num" }, ms ? `${(ms / 1000).toLocaleString("sl-SI", { maximumFractionDigits: ms < 10_000 ? 1 : 0 })} s` : ""),
+      ),
+    );
+  }
+  return list;
+}
+
+function statusBlock(): HTMLElement | null {
+  const s = state.site;
+  if (s.status === "generating") {
+    return h("div", { class: "pane" },
+      h("h2", { class: "pane-title" }, state.spec ? "Stran preverjamo" : "Stran se ustvarja"),
+      progress(),
+      h("p", { class: "help" }, state.spec ? "Predogled je pripravljen. Ko preverjanje najde kaj za popraviti, se pokaže nova različica. Urejate lahko že zdaj." : "Predogled se pokaže, ko so besedila gotova. Stran lahko zaprete, ustvarjanje teče naprej."),
+    );
+  }
+  if (s.status === "failed") {
+    const last = [...state.events].reverse().find((e) => e.level === "error");
+    return h("div", { class: "pane" },
+      h("div", { class: "note bad", role: "alert" },
+        h("p", {}, h("strong", {}, "Ustvarjanje ni uspelo."), state.spec ? " Zadnja dobra različica ostaja, urejate jo lahko naprej." : " Poskusite znova; če se ponovi, nam pišite."),
+        last ? h("details", {}, h("summary", {}, "Podrobnosti"), h("p", {}, last.message)) : null,
+        h("button", { class: "btn sm", type: "button", onClick: () => void post("/generate", { scope: state.site.intake?.scope === "full" ? "full" : "home" }, "Ustvarjanje se je začelo.") }, "Poskusi znova"),
+      ),
+    );
+  }
+  return null;
+}
+
 // ---------- Preview ----------
 let frame: HTMLIFrameElement | null = null;
+/** The spec version the preview frame shows, so polling reloads it only when there is something new. */
+let frameVersion: number | null = null;
 
 function previewUrl(): string {
   const p = currentPage();
@@ -752,6 +816,7 @@ function reloadPreview(): void {
   if (!frame || !state.spec) return;
   const y = frame.contentWindow?.scrollY ?? 0;
   frame.addEventListener("load", () => frame?.contentWindow?.scrollTo(0, y), { once: true });
+  frameVersion = state.version;
   frame.src = previewUrl();
 }
 
@@ -760,7 +825,7 @@ function attachEditing(): void {
   const doc = frame?.contentDocument;
   if (!doc || !editMode) return;
   const style = doc.createElement("style");
-  style.textContent = `main section{cursor:pointer} main section:hover{outline:2px dashed #1f5eff;outline-offset:-2px} main section[data-sb-selected]{outline:3px solid #1f5eff;outline-offset:-3px} [contenteditable]{outline:2px solid #f59e0b!important;cursor:text}`;
+  style.textContent = `main section{cursor:pointer} main section:hover{outline:2px dashed #156b4a;outline-offset:-2px} main section[data-sb-selected]{outline:3px solid #156b4a;outline-offset:-3px} [contenteditable]{outline:2px solid #9a5b00!important;outline-offset:2px;cursor:text}`;
   doc.head.append(style);
   if (selected) doc.getElementById(selected)?.setAttribute("data-sb-selected", "");
   doc.addEventListener("click", (e) => {
@@ -825,62 +890,172 @@ function select(id: string, scroll = true): void {
 }
 
 // ---------- Layout ----------
-function render(): void {
+/**
+ * The shell (app bar, panel, canvas) is built once. Re-renders replace the bar, the panel and the
+ * canvas bar; the preview frame stays in the page, so it keeps its scroll position and doesn't
+ * reload on every click (moving an iframe in the DOM reloads it).
+ */
+let shell: { top: HTMLElement; ed: HTMLElement; panel: HTMLElement; bar: HTMLElement; stage: HTMLElement } | null = null;
+let lastWidth = 0;
+
+function topItems(): Child[] {
   const s = state.site;
-  const active = s.status === "generating" || s.status === "editing";
+  const status = siteStatus(s);
   const prev = state.versions.find((v) => v.version === (state.version ?? 0) - 1);
-  const top = h("div", { class: "top" },
-    h("a", { href: "/" }, "← Strani"),
-    h("h1", {}, (state.spec?.business as Obj | undefined)?.name as string ?? s.name),
-    h("span", { class: "status" }, active ? `${s.status} …` : s.status),
-    state.version ? h("span", { class: "muted", id: "ed-version" }, `v${state.version}`) : null,
+  const head: Child[] = [
+    h("a", { class: "btn quiet sm", href: "/" }, "← Strani"),
+    h("h1", { class: "site-name" }, ((state.spec?.business as Obj | undefined)?.name as string | undefined) ?? s.name),
+    h("span", { class: `pill ${status.tone}` }, status.label),
+    state.version ? h("span", { class: "muted num ver", id: "ed-version" }, `v${state.version}`) : null,
     h("span", { class: "sp" }),
-    h("button", { class: "btn sm", type: "button", disabled: !prev, title: "Razveljavi zadnjo spremembo", onClick: () => void undo() }, "↶ Razveljavi"),
-    h("button", { class: "btn sm", type: "button", "aria-pressed": device === "mobile", onClick: () => { device = "mobile"; render(); } }, "Telefon"),
-    h("button", { class: "btn sm", type: "button", "aria-pressed": device === "desktop", onClick: () => { device = "desktop"; render(); } }, "Računalnik"),
-    h("label", { style: { margin: 0, fontWeight: 400 } }, h("input", { type: "checkbox", checked: editMode, onChange: (e: Event) => { editMode = (e.target as HTMLInputElement).checked; frame = null; render(); } }), " Urejanje"),
-    state.spec ? h("a", { class: "btn sm", href: previewUrl(), target: "_blank" }, "Odpri predogled") : null,
-    h("a", { class: "btn sm", href: `/sites/${siteId}/messages` }, `Sporočila (${state.messages})`),
-    state.spec ? h("a", { class: "btn sm", href: `/api/sites/${siteId}/export` }, "Izvozi .zip") : null,
-    h("button", { class: "btn sm primary", type: "button", disabled: !state.spec || state.blockers.length > 0, title: state.blockers.length ? "Najprej izpolnite manjkajoče podatke" : "", onClick: async () => { try { const r = await api<{ url: string }>("/publish", { method: "POST", body: "{}" }); toast = `Objavljeno: ${r.url}`; } catch (e) { toast = (e as Error).message; } await load(); } }, "Objavi"),
-    s.published_version ? h("a", { href: `/s/${s.slug}/`, target: "_blank" }, `/s/${s.slug}/`) : null,
-    h("span", { class: "muted" }, `€${state.spendToday.toFixed(2)} / €${state.cap.toFixed(2)} danes`),
-  );
+    h("span", { class: "pill plain spend num", title: "Poraba modela danes in dnevna omejitev" }, `${formatEur(state.spendToday)} / ${formatEur(state.cap)} danes`),
+  ];
+  // Nothing to undo, open or publish before the first version exists.
+  if (!state.spec) return head;
+  return [
+    ...head,
+    h("span", { class: "actions" },
+      h("button", { class: "btn quiet sm", type: "button", disabled: !prev, title: "Vrne prejšnjo različico", onClick: () => void undo() }, "Razveljavi"),
+      h("button", { class: "btn quiet sm", type: "button", "aria-pressed": String(tab === "versions"), onClick: () => { tab = "versions"; render(); } }, "Različice"),
+      moreMenu(),
+      h("button", {
+        class: "btn sm primary",
+        type: "button",
+        disabled: state.blockers.length > 0,
+        title: state.blockers.length ? "Najprej izpolnite manjkajoče podatke" : "",
+        onClick: async () => { try { const r = await api<{ url: string }>("/publish", { method: "POST", body: "{}" }); toast = `Objavljeno: ${r.url}`; } catch (e) { toast = (e as Error).message; } await load(); },
+      }, "Objavi"),
+    ),
+  ];
+}
 
-  const tabs: [typeof tab, string][] = [["content", "Vsebina"], ["facts", "Podatki"], ["design", "Oblikovanje"], ["pages", "Strani"], ["ai", "Pomočnik AI"], ["versions", "Različice"]];
-  const panel = h("div", { class: "panel" },
-    h("div", { class: "tabs", role: "tablist" }, ...tabs.map(([k, l]) => h("button", { role: "tab", "aria-selected": tab === k, onClick: () => { tab = k; render(); } }, l))),
-    state.blockers.length && state.spec ? h("div", { class: "pane" }, h("div", { class: "warn" }, blockerSummary(state.placeholders.length, state.blockers.length - state.placeholders.length), h("details", {}, h("summary", {}, "Seznam"), h("ul", {}, ...state.blockers.slice(0, 30).map((b) => h("li", {}, b)))))) : null,
-    !state.spec ? h("div", { class: "pane" }, h("p", {}, active ? "Stran se ustvarja …" : "Stran še nima vsebine."), h("div", { class: "log" }, ...state.events.map((e) => h("div", { class: e.level === "error" ? "err" : "" }, `${e.stage}: ${e.message}`)))) : null,
-    state.spec ? { content: contentPane, facts: factsPane, design: designPane, pages: pagesPane, ai: aiPane, versions: versionsPane }[tab]() : null,
+/** Secondary actions in one menu, so the app bar fits a phone in two rows. Stays open across re-renders. */
+let menuOpen = false;
+function moreMenu(): HTMLElement {
+  const s = state.site;
+  const menu = h("details", { class: "menu", open: menuOpen },
+    h("summary", { class: "btn quiet sm" }, "Več"),
+    h("div", { class: "list" },
+      h("a", { href: `/sites/${siteId}/messages` }, state.messages ? `Sporočila (${state.messages})` : "Sporočila"),
+      h("a", { href: `/api/sites/${siteId}/export` }, "Izvozi kot datoteke (.zip)"),
+      h("a", { href: previewUrl(), target: "_blank" }, "Odpri predogled v zavihku"),
+      s.published_version ? h("a", { href: `/s/${s.slug}/`, target: "_blank" }, "Odpri objavljeno stran") : null,
+    ),
   );
+  menu.addEventListener("toggle", () => (menuOpen = menu.open));
+  return menu;
+}
 
-  const width = device === "mobile" ? 360 : 1280;
-  const stage = h("div", { class: "stage" });
-  if (state.spec) {
-    const avail = Math.max(320, (stage.clientWidth || window.innerWidth - 460) - 32);
-    const scale = device === "desktop" ? Math.min(1, avail / 1280) : 1;
-    const f = frame && frame.dataset.width === String(width) ? frame : h("iframe", { title: "Predogled strani", "data-width": String(width), style: { width: `${width}px`, height: `${Math.round(820 / scale)}px`, border: "0", display: "block" } });
-    f.style.transform = `scale(${scale})`;
-    f.style.transformOrigin = "top left";
-    if (f !== frame) {
-      frame = f;
-      f.addEventListener("load", attachEditing);
-      f.src = previewUrl();
-    }
-    const wrap = h("div", { class: "frame-wrap", style: { width: `${width * scale}px`, height: `${820}px`, overflow: "hidden" } }, f);
-    stage.append(wrap);
+// A click outside the menu, or Escape, closes it.
+document.addEventListener("click", (e) => {
+  const open = document.querySelector<HTMLDetailsElement>("details.menu[open]");
+  if (open && !open.contains(e.target as Node)) open.open = false;
+});
+document.addEventListener("keydown", (e) => {
+  const open = document.querySelector<HTMLDetailsElement>("details.menu[open]");
+  if (e.key === "Escape" && open) {
+    open.open = false;
+    open.querySelector("summary")?.focus();
   }
-  const shell = h("div", {}, h("style", {}, STYLE), top, h("div", { class: "ed" }, panel, stage));
-  root.replaceChildren(shell);
-  linkLabels(shell);
-  if (frame) {
-    // Keep the selection highlight in sync when the frame survives a re-render.
-    const doc = frame.contentDocument;
-    doc?.querySelectorAll("[data-sb-selected]").forEach((n) => n.removeAttribute("data-sb-selected"));
-    if (selected && editMode) doc?.getElementById(selected)?.setAttribute("data-sb-selected", "");
+});
+
+function barItems(): Child[] {
+  const p = currentPage();
+  if (!state.spec) return [];
+  return [
+    h("div", { class: "seg", role: "group", "aria-label": "Velikost predogleda" },
+      h("button", { type: "button", "aria-pressed": String(device === "mobile"), onClick: () => { device = "mobile"; render(); } }, "Telefon"),
+      h("button", { type: "button", "aria-pressed": String(device === "desktop"), onClick: () => { device = "desktop"; render(); } }, "Namizje"),
+    ),
+    h("label", { class: "toggle" }, h("input", { type: "checkbox", checked: editMode, onChange: (e: Event) => { editMode = (e.target as HTMLInputElement).checked; frame = null; render(); } }), "Urejanje s klikom"),
+    h("span", { class: "sp" }),
+    h("span", { class: "muted where" }, `${p ? (p.nav as Obj).label : ""} · ${device === "mobile" ? "360" : "1280"} px`),
+  ];
+}
+
+function render(): void {
+  if (!shell) {
+    // Labelled, so they stay distinct from the header and main of the site inside the preview frame.
+    const top = h("header", { class: "top", "aria-label": "Urejevalnik" });
+    const panel = h("section", { class: "panel", "aria-label": "Urejanje" });
+    const bar = h("div", { class: "bar" });
+    const stage = h("div", { class: "stage" });
+    const ed = h("main", { class: "ed", "aria-label": "Urejanje strani" }, panel, h("section", { class: "canvas", "aria-label": "Predogled" }, bar, stage));
+    root.replaceChildren(h("div", { class: "shell" }, top, ed));
+    shell = { top, ed, panel, bar, stage };
+    lastWidth = window.innerWidth;
+    // Only width changes resize the frame: phone keyboards change the height while typing.
+    window.addEventListener("resize", () => {
+      if (window.innerWidth === lastWidth) return;
+      lastWidth = window.innerWidth;
+      sizeFrame();
+    });
   }
+  document.title = `${((state.spec?.business as Obj | undefined)?.name as string | undefined) ?? state.site.name} · urejanje`;
+  shell.top.replaceChildren(...topItems().filter((c): c is Node => c instanceof Node));
+
+  // Versions open from the app bar ("Različice"), so the five tabs fit the panel.
+  const tabs: [typeof tab, string][] = [["content", "Vsebina"], ["facts", "Podatki"], ["design", "Oblika"], ["pages", "Strani"], ["ai", "Pomočnik"]];
+  shell.panel.replaceChildren(
+    ...[
+      statusBlock(),
+      state.spec ? h("div", { class: "tabs", role: "tablist", "aria-label": "Urejanje" }, ...tabs.map(([k, l]) => h("button", { role: "tab", type: "button", "aria-selected": String(tab === k), onClick: () => { tab = k; render(); } }, l))) : null,
+      state.blockers.length && state.spec
+        ? h("div", { class: "pane tight" }, h("div", { class: "note warn" }, h("p", {}, blockerSummary(state.placeholders.length, state.blockers.length - state.placeholders.length)), h("details", {}, h("summary", {}, "Seznam"), h("ul", {}, ...state.blockers.slice(0, 30).map((b) => h("li", {}, b))))))
+        : null,
+      !state.spec && state.site.status !== "generating" && state.site.status !== "failed" ? h("div", { class: "pane" }, h("p", { class: "muted" }, "Stran še nima vsebine.")) : null,
+      state.spec ? { content: contentPane, facts: factsPane, design: designPane, pages: pagesPane, ai: aiPane, versions: versionsPane }[tab]() : null,
+    ].filter((c): c is HTMLElement => c !== null),
+  );
+  shell.bar.replaceChildren(...barItems().filter((c): c is Node => c instanceof Node));
+  shell.bar.hidden = !state.spec;
+  shell.ed.classList.toggle("nospec", !state.spec);
+  renderStage();
+  linkLabels(shell.panel);
+  linkLabels(shell.bar);
+  // Keep the selection highlight in sync with the frame that survives re-renders.
+  const doc = frame?.contentDocument;
+  doc?.querySelectorAll("[data-sb-selected]").forEach((n) => n.removeAttribute("data-sb-selected"));
+  if (selected && editMode) doc?.getElementById(selected)?.setAttribute("data-sb-selected", "");
   showToast();
+}
+
+function renderStage(): void {
+  const stage = shell!.stage;
+  if (!state.spec) {
+    frame = null;
+    stage.replaceChildren(h("div", { class: "frame skeleton" }, state.site.status === "generating" ? "Predogled se pokaže, ko so besedila gotova." : "Predogleda še ni."));
+    sizeFrame();
+    return;
+  }
+  const width = String(device === "mobile" ? 360 : 1280);
+  if (!frame || frame.dataset.width !== width || !frame.isConnected) {
+    const f = h("iframe", { title: "Predogled strani", "data-width": width });
+    f.addEventListener("load", attachEditing);
+    frame = f;
+    frameVersion = state.version;
+    f.src = previewUrl();
+    stage.replaceChildren(h("div", { class: "frame" }, f));
+  }
+  sizeFrame();
+}
+
+/** Fits the preview into the canvas: 360 px phones at full size where they fit, 1280 px desktops scaled down. */
+function sizeFrame(): void {
+  const stage = shell?.stage;
+  const wrap = stage?.querySelector<HTMLElement>(".frame");
+  if (!stage || !wrap) return;
+  const narrow = window.innerWidth <= 900;
+  const width = device === "mobile" ? 360 : 1280;
+  const pad = narrow ? 24 : 40;
+  const scale = Math.min(1, Math.max(0.2, (stage.clientWidth - pad - 2) / width));
+  const avail = narrow ? Math.round(window.innerHeight * 0.7) : stage.clientHeight - pad - 2;
+  const height = Math.max(360, device === "mobile" ? Math.min(avail, 800) : avail);
+  wrap.style.width = `${Math.round(width * scale) + 2}px`;
+  wrap.style.height = `${height + 2}px`;
+  if (frame) {
+    Object.assign(frame.style, { display: "block", border: "0", width: `${width}px`, height: `${Math.round(height / scale)}px`, transform: `scale(${scale})`, transformOrigin: "0 0" });
+  }
 }
 
 /** Undo = revert to the version before the current one (read at click time, not render time). */

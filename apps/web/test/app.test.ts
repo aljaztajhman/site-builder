@@ -72,6 +72,51 @@ describe("access control", () => {
   });
 });
 
+describe("product UI", () => {
+  it("serves the stylesheet, fonts and icon without a session, cached by content hash", async () => {
+    const login = await (await app.request("/login")).text();
+    const css = login.match(/href="(\/assets\/ui\/([0-9a-f]{10})\/app\.css)"/);
+    expect(css, "login page links the shared stylesheet").not.toBeNull();
+    const res = await app.request(css![1]!);
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toContain("text/css");
+    expect(res.headers.get("cache-control")).toContain("immutable");
+    expect(await res.text()).toContain("--accent:");
+    for (const f of ["fonts/figtree.woff2", "fonts/bricolage-grotesque.woff2"]) {
+      const font = await app.request(`/assets/ui/${css![2]}/${f}`);
+      expect(font.status, f).toBe(200);
+      expect(font.headers.get("content-type")).toBe("font/woff2");
+    }
+    expect((await app.request(`/assets/ui/${css![2]}/icon.svg`)).headers.get("content-type")).toBe("image/svg+xml");
+    // An old hash still gets the file, but not cached for good; unknown files and traversal get nothing.
+    expect((await app.request("/assets/ui/0000000000/app.css")).headers.get("cache-control")).toBe("no-cache");
+    expect((await app.request(`/assets/ui/${css![2]}/nope.css`)).status).toBe(404);
+    expect((await app.request(`/assets/ui/${css![2]}/..%2f..%2fapp.ts`)).status).toBe(400);
+    // Dashboard pages carry no inline <style>: everything comes from the one stylesheet.
+    expect(login).not.toContain("<style");
+  });
+
+  it("shows the intake as the whole page when there are no sites, and at /new", async () => {
+    const cookie = await login();
+    expect((await app.request("/new")).status).toBe(302);
+    const page = await (await app.request("/new", { headers: { cookie } })).text();
+    expect(page).toContain('action="/api/sites"');
+    expect(page).toContain('name="description"');
+    expect(page).toMatch(/id="scope-home"[^>]*checked/);
+  });
+
+  it("keeps the description and says why when the intake is refused", async () => {
+    const cookie = await login();
+    const form = new FormData();
+    form.set("description", "Prekratko.");
+    const res = await app.request("/api/sites", { method: "POST", body: form, headers: { cookie } });
+    expect(res.status).toBe(400);
+    const page = await res.text();
+    expect(page).toContain("Opis mora imeti vsaj 30 znakov.");
+    expect(page).toContain(">Prekratko.</textarea>");
+  });
+});
+
 describe("health", () => {
   it("reports database, storage and queue", async () => {
     const res = await app.request("/health");
@@ -126,6 +171,10 @@ describe("intake", () => {
     expect(sent.at(-1)).toMatchObject({ name: "generate", data: { scope: "home" } });
     const sites = await platform.repo.listSites();
     expect(sites[0]!.slug).toBe("frizerski-salon-lipa");
+    // The dashboard lists it as a card that opens the editor.
+    const list = await (await app.request("/", { headers: { cookie } })).text();
+    expect(list).toContain(`href="/sites/${sites[0]!.id}"`);
+    expect(list).toContain("Ustvarjam …");
   });
 
   it("refuses AI work once the daily spend cap is reached", async () => {
@@ -197,6 +246,9 @@ describe("direct editor API (no model calls)", () => {
     expect(home.status).toBe(200);
     const publishedHtml = await home.text();
     expect(publishedHtml).toContain("Kruh z drožmi iz Kamnika");
+    // ?v= shows an earlier version: v1 still has the golden headline.
+    const v1 = await (await app.request(`/preview/${site.id}/index.html?v=1`, { headers: { cookie } })).text();
+    expect(v1).not.toContain("Kruh z drožmi iz Kamnika");
     // Preview equals published output, byte for byte.
     const previewHtml = await (await app.request(`/preview/${site.id}/index.html`, { headers: { cookie } })).text();
     expect(previewHtml).toBe(publishedHtml);
