@@ -903,7 +903,7 @@ function topItems(): Child[] {
   const status = siteStatus(s);
   const prev = state.versions.find((v) => v.version === (state.version ?? 0) - 1);
   const head: Child[] = [
-    h("a", { class: "btn quiet sm", href: "/" }, "← Strani"),
+    h("a", { class: "btn quiet sm", href: "/sites" }, "← Strani"),
     h("h1", { class: "site-name" }, ((state.spec?.business as Obj | undefined)?.name as string | undefined) ?? s.name),
     h("span", { class: `pill ${status.tone}` }, status.label),
     state.version ? h("span", { class: "muted num ver", id: "ed-version" }, `v${state.version}`) : null,

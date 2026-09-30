@@ -28,8 +28,12 @@ export function Doc({ title, children, script }: { title: string; children: Reac
 
 export const html = (el: ReactNode): string => `<!doctype html>${renderToStaticMarkup(el as never)}`;
 
-export const Brand = () => (
-  <a className="brand" href="/">
+/** The sites list; "/" is the public landing page. */
+export const DASHBOARD = "/sites";
+
+/** Wordmark: in the app bar it goes to the sites list, on the login page to the landing page. */
+export const Brand = ({ href = DASHBOARD }: { href?: string }) => (
+  <a className="brand" href={href}>
     <i aria-hidden="true" />
     {PRODUCT_NAME}
   </a>
@@ -60,7 +64,7 @@ export function loginPage({ next, error }: { next: string; error?: string }): st
   return html(
     <Doc title="Prijava">
       <main className="login">
-        <Brand />
+        <Brand href="/" />
         <h1>Prijava</h1>
         <form method="post" action="/login">
           <input type="hidden" name="next" value={next} />
@@ -141,7 +145,7 @@ function Intake({ maxPhotos, hasSites, error, description }: IntakeProps) {
         </p>
       </form>
       {hasSites && (
-        <a className="back" href="/">
+        <a className="back" href={DASHBOARD}>
           ← Vse strani
         </a>
       )}

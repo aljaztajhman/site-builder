@@ -4,7 +4,8 @@ import { uiUrl } from "./ui/assets.ts";
 import { PRODUCT_NAME } from "./ui/labels.ts";
 
 /**
- * The product's landing page, shown at / to visitors without a session (docs/design/homepage.html).
+ * The product's landing page at / (docs/design/homepage.html), for everyone; signed in, the header
+ * links to the sites list instead of the login.
  * Stylesheet ui/home.css, script client/home.ts; the example site is ui/example-home.html.
  * The prompt goes to the intake form (/new, behind the access password until public previews exist);
  * home.ts carries the typed description across the login.
@@ -22,7 +23,7 @@ const Brand = () => (
 const EXAMPLE_TEXT =
   "Frizerski salon Lana v Celju, Prešernova 4. Striženje, barvanje in svečane pričeske. Odprto tor–pet 8.00–18.00, sobota 8.00–13.00. Naročila na 041 555 730 …";
 
-export function homePage({ config }: { config: AppConfig }): string {
+export function homePage({ config, signedIn }: { config: AppConfig; signedIn: boolean }): string {
   const [low, high] = config.plans.paid.monthlyEurRange;
   const example = uiUrl("example-home.html");
   return html(
@@ -50,8 +51,8 @@ export function homePage({ config }: { config: AppConfig }): string {
               <a href="#vprasanja">Vprašanja</a>
             </nav>
             <span className="sp" />
-            <a className="btn quiet sm login" href="/login">
-              Prijava
+            <a className="btn quiet sm login" href={signedIn ? "/sites" : "/login"}>
+              {signedIn ? "Moje strani" : "Prijava"}
             </a>
             <a className="btn primary sm" href="#zacni">
               Naredite predogled
