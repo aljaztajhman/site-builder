@@ -84,84 +84,6 @@ export function loginPage({ next, error }: { next: string; error?: string }): st
   );
 }
 
-interface IntakeProps {
-  spendToday: number;
-  cap: number;
-  maxPhotos: number;
-  hasSites: boolean;
-  error?: string;
-  description?: string;
-}
-
-function Intake({ maxPhotos, hasSites, error, description }: IntakeProps) {
-  return (
-    <main className="intake">
-      <form method="post" action="/api/sites" encType="multipart/form-data" data-intake="">
-        <h1>
-          Opišite svoje podjetje.
-          <br />
-          Stran naredimo mi.
-        </h1>
-        {error && (
-          <p className="note bad" role="alert">
-            {error}
-          </p>
-        )}
-        <div className="prompt">
-          <label htmlFor="d" className="sr-only">
-            Opis podjetja
-          </label>
-          <textarea
-            id="d"
-            name="description"
-            required
-            minLength={30}
-            aria-describedby="d-help"
-            defaultValue={description}
-            placeholder="Pekarna v Kamniku, odprta od leta 1996. Kruh z lastnimi drožmi, rogljički, torte po naročilu. Šutna 12, odprto pon–sob 6.00–13.00 …"
-          />
-          <div className="bar">
-            <label className="btn sm attach">
-              <input className="sr-only" type="file" name="photos" accept="image/jpeg,image/png,image/webp,image/avif" multiple />+ Fotografije
-            </label>
-            <label className="btn sm attach">
-              <input className="sr-only" type="file" name="logo" accept="image/svg+xml,image/png,image/jpeg,image/webp" />+ Logotip
-            </label>
-            <span className="sp" />
-            <fieldset className="seg">
-              <legend className="sr-only">Obseg</legend>
-              <input type="radio" id="scope-home" name="scope" value="home" defaultChecked />
-              <label htmlFor="scope-home">Domača stran</label>
-              <input type="radio" id="scope-full" name="scope" value="full" />
-              <label htmlFor="scope-full">Celotna stran</label>
-            </fieldset>
-            <button className="btn primary" type="submit">
-              Ustvari
-            </button>
-          </div>
-        </div>
-        <p id="d-help" className="help">
-          {`Napišite, kdo ste, kaj ponujate, kje ste in kako vas dosežejo. Česar ne napišete, si ne izmislimo: manjkajoči podatki ostanejo označeni, dokler jih ne vpišete. Do ${maxPhotos} fotografij (JPG, PNG, WebP, AVIF) in logotip. Domača stran je navadno gotova v približno dveh minutah, celotna v približno treh.`}
-        </p>
-      </form>
-      {hasSites && (
-        <a className="back" href={DASHBOARD}>
-          ← Vse strani
-        </a>
-      )}
-    </main>
-  );
-}
-
-export function intakePage(props: IntakeProps): string {
-  return html(
-    <Doc title="Nova stran" script="/assets/dashboard.js">
-      <TopBar spend={{ today: props.spendToday, cap: props.cap }} />
-      <Intake {...props} />
-    </Doc>,
-  );
-}
-
 function SiteCard({ site }: { site: SiteRow }) {
   const status = siteStatus(site);
   const scope = site.intake?.scope === "full" ? "celotna stran" : "domača stran";
@@ -193,9 +115,7 @@ function SiteCard({ site }: { site: SiteRow }) {
   );
 }
 
-export function sitesPage({ sites, spendToday, cap, maxPhotos }: { sites: SiteRow[]; spendToday: number; cap: number; maxPhotos: number }): string {
-  // No sites yet: the intake is the whole page.
-  if (sites.length === 0) return intakePage({ spendToday, cap, maxPhotos, hasSites: false });
+export function sitesPage({ sites, spendToday, cap }: { sites: SiteRow[]; spendToday: number; cap: number }): string {
   return html(
     <Doc title="Strani">
       <TopBar spend={{ today: spendToday, cap }} />
@@ -203,15 +123,21 @@ export function sitesPage({ sites, spendToday, cap, maxPhotos }: { sites: SiteRo
         <div className="head">
           <h1>Strani</h1>
           <span className="muted num">{sites.length}</span>
-          <a className="btn primary" href="/new">
+          <a className="btn primary" href="/#zacni">
             Nova stran
           </a>
         </div>
-        <ul className="cards">
-          {sites.map((s) => (
-            <SiteCard key={s.id} site={s} />
-          ))}
-        </ul>
+        {sites.length ? (
+          <ul className="cards">
+            {sites.map((s) => (
+              <SiteCard key={s.id} site={s} />
+            ))}
+          </ul>
+        ) : (
+          <p className="empty-list">
+            Še nimate nobene strani. <a href="/#zacni">Opišite svoje podjetje</a> na domači strani in predogled je narejen v približno dveh minutah.
+          </p>
+        )}
       </main>
     </Doc>,
   );

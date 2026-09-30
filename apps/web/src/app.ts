@@ -21,7 +21,7 @@ import { renderPage, sharedBundle, pageFile } from "@sb/render";
 import { collectPlaceholders, type SiteSpec } from "@sb/spec";
 import { issueSession, clearSession, hasSession, passwordMatches, requireAuth, loginThrottle, type AuthSettings } from "./auth.ts";
 import { slugify } from "./slug.ts";
-import { DASHBOARD, loginPage, sitesPage, sitePage, intakePage } from "./pages.tsx";
+import { DASHBOARD, loginPage, sitesPage, sitePage } from "./pages.tsx";
 import { homePage } from "./home.tsx";
 import { clientBundle } from "./client-bundle.ts";
 import { uiAssets } from "./ui/assets.ts";
@@ -127,7 +127,7 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
     return c.redirect("/");
   });
 
-  for (const name of ["editor", "dashboard", "home"] as const) {
+  for (const name of ["editor", "home"] as const) {
     app.get(`/assets/${name}.js`, async (c) => {
       c.header("content-type", "text/javascript; charset=utf-8");
       return c.body(await clientBundle(name));
@@ -150,21 +150,16 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
   // ---------- Dashboard ----------
   app.get(DASHBOARD, async (c) => {
     const sites = await repo.listSites();
-    return c.html(sitesPage({ sites, spendToday: await repo.spendToday(), cap: config.limits.dailyModelSpendCapEur, maxPhotos: config.limits.maxPhotos }));
+    return c.html(sitesPage({ sites, spendToday: await repo.spendToday(), cap: config.limits.dailyModelSpendCapEur }));
   });
-  app.get("/new", async (c) =>
-    c.html(intakePage({ spendToday: await repo.spendToday(), cap: config.limits.dailyModelSpendCapEur, maxPhotos: config.limits.maxPhotos, hasSites: (await repo.listSites()).length > 0 })),
-  );
+  // The landing page's prompt box is the only intake; old links land on it.
+  app.get("/new", (c) => c.redirect("/#zacni"));
 
   app.post("/api/sites", async (c) => {
     const body = await c.req.parseBody({ all: true });
     const description = typeof body.description === "string" ? body.description.trim() : "";
-    // The intake again, with the description kept and the reason on top.
-    const refuse = async (error: string) =>
-      c.html(
-        intakePage({ spendToday: await repo.spendToday(), cap: config.limits.dailyModelSpendCapEur, maxPhotos: config.limits.maxPhotos, hasSites: (await repo.listSites()).length > 0, error, description }),
-        400,
-      );
+    // The landing page again, with the description kept and the reason above the prompt.
+    const refuse = (error: string) => c.html(homePage({ config, signedIn: true, error, description }), 400);
     if (description.length < 30) return refuse("Opis mora imeti vsaj 30 znakov.");
     const scope = body.scope === "full" ? "full" : "home";
     const photos = ([] as unknown[]).concat(body["photos"] ?? []).filter((f): f is File => f instanceof File && f.size > 0);
@@ -197,7 +192,7 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
       ]);
     } catch (e) {
       await repo.setStatus(site.id, "failed");
-      return c.text((e as Error).message, 400);
+      return refuse((e as Error).message);
     }
     await repo.setStatus(site.id, "generating");
     await queue.send("generate", { siteId: site.id, scope });

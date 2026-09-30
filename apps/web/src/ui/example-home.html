@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>Pekarna Kvas, Kamnik</title>
-<meta name="description" content="Primer domače strani v smeri Warm Craft s predlaganimi družinami odsekov. Dejstva iz fixture pekarna-kvas; fotografije so označena mesta za fotografije stranke.">
+<meta name="description" content="Primer domače strani v smeri Warm Craft s predlaganimi družinami odsekov. Dejstva iz fixture pekarna-kvas; fotografije so ustvarjene z UI in označene, kot bi bile na strani stranke.">
 <style>
 @font-face{font-family:"Fraunces";src:url("fonts/fraunces.woff2") format("woff2");font-weight:100 900;font-display:swap}
 @font-face{font-family:"Source Sans 3";src:url("fonts/source-sans-3.woff2") format("woff2");font-weight:200 900;font-display:swap}
@@ -39,9 +39,10 @@ section{padding:var(--section) 0}
 .btn.ghost{background:transparent;color:inherit;border-color:currentColor}
 .link{font-weight:600;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1.5px}
 mark.ph{background:var(--c-ph);color:var(--c-text);padding:0 4px;border-radius:2px}
-.photo{background:#b99a7e;color:#fff;display:grid;place-items:center;text-align:center;font-size:14px;padding:12px;position:relative;line-height:1.3}
-.photo::after{content:"fotografija stranke";position:absolute;left:8px;bottom:8px;font-size:11px;background:rgb(0 0 0/.45);padding:2px 6px;border-radius:2px}
-.photo.p2{background:#8b6a4e}.photo.p3{background:#c98a5a}
+.photo{position:relative;overflow:hidden;margin:0;background:#b99a7e}
+.photo img{width:100%;height:100%;object-fit:cover}
+/* Generated photos are labelled on the page, as they are on clients' sites. */
+.photo figcaption{position:absolute;left:8px;bottom:8px;font-size:11px;line-height:1.3;color:#fff;background:rgb(0 0 0/.6);padding:2px 6px;border-radius:2px}
 
 /* ---------- Header: split-cta family ---------- */
 .hd{border-bottom:1px solid var(--c-border);background:var(--c-bg)}
@@ -148,7 +149,7 @@ footer.ft .legal{margin-top:28px;padding-top:16px;border-top:1px solid var(--c-b
 
 <section class="hero" aria-labelledby="h1">
   <div class="wrap" style="padding:0">
-    <div class="photo" role="img" aria-label="Hlebci kruha z drožmi na leseni polici">hlebci kruha z drožmi<br>na leseni polici</div>
+    <figure class="photo"><img src="example/pekarna-01-960.webp" srcset="example/pekarna-01-480.webp 480w, example/pekarna-01-960.webp 960w" sizes="(min-width: 64rem) 50vw, 100vw" width="960" height="640" alt="Hlebci kruha z drožmi na leseni polici" fetchpriority="high"><figcaption>ustvarjeno z UI</figcaption></figure>
     <div class="txt">
       <p class="eyebrow">Kamnik, Šutna 30</p>
       <h1 id="h1">Kruh z lastnimi drožmi, pečen vsak dan</h1>
@@ -176,9 +177,9 @@ footer.ft .legal{margin-top:28px;padding-top:16px;border-top:1px solid var(--c-b
     <h2 id="h-p">Vsak dan v pekarni</h2>
     <p class="muted" style="max-width:60ch">Pirin in rženi kruh, polnozrnate žemlje, rogljički z maslom in cimetovi polži.</p>
     <ul class="prod">
-      <li><div class="photo" role="img" aria-label="Hlebci kruha z drožmi na leseni polici">hlebci na polici</div><b>Pirin kruh z drožmi</b><span>4,20 €</span></li>
+      <li><figure class="photo"><img src="example/pekarna-01-960.webp" srcset="example/pekarna-01-480.webp 480w, example/pekarna-01-960.webp 960w" sizes="(min-width: 64rem) 25vw, 50vw" width="960" height="640" alt="Hlebci kruha z drožmi na leseni polici" loading="lazy"><figcaption>ustvarjeno z UI</figcaption></figure><b>Pirin kruh z drožmi</b><span>4,20 €</span></li>
       <li><div class="noimg" aria-hidden="true">brez fotografije</div><b>Rženi kruh</b><span>3,90 €</span></li>
-      <li><div class="photo p3" role="img" aria-label="Rogljički in cimetovi polži na pladnju">rogljički in polži</div><b>Rogljiček z maslom</b><span>1,30 €</span></li>
+      <li><figure class="photo"><img src="example/pekarna-03-960.webp" srcset="example/pekarna-03-480.webp 480w, example/pekarna-03-960.webp 960w" sizes="(min-width: 64rem) 25vw, 50vw" width="960" height="640" alt="Rogljički in cimetovi polži na pekaču" loading="lazy"><figcaption>ustvarjeno z UI</figcaption></figure><b>Rogljiček z maslom</b><span>1,30 €</span></li>
       <li><div class="noimg" aria-hidden="true">brez fotografije</div><b>Cimetov polž</b><span><mark class="ph">[cena]</mark></span></li>
     </ul>
     <p class="weekend"><b>Petek in sobota:</b> orehova potica in kvašeni krofi. Orehova potica (1 kg) od 18 €.</p>
@@ -187,7 +188,7 @@ footer.ft .legal{margin-top:28px;padding-top:16px;border-top:1px solid var(--c-b
 
 <section id="o-nas" class="tone-alt" aria-labelledby="h-o">
   <div class="wrap about">
-    <div class="photo p2" role="img" aria-label="Pek oblikuje testo na pomokani mizi">pek oblikuje testo<br>na pomokani mizi</div>
+    <figure class="photo p2"><img src="example/pekarna-02-960.webp" srcset="example/pekarna-02-480.webp 480w, example/pekarna-02-960.webp 960w" sizes="(min-width: 64rem) 50vw, 100vw" width="960" height="1440" alt="Pek oblikuje testo na pomokani mizi" loading="lazy" style="object-position:50% 60%"><figcaption>ustvarjeno z UI</figcaption></figure>
     <div>
       <h2 id="h-o">Peče Jure, v trgovini je Katja</h2>
       <p>Družinska pekarna. Kruh pečemo samo z drožmi, ki jih gojimo sami, in ga pustimo vzhajati čez noč. Moko kupujemo pri mlinu v bližini.</p>
