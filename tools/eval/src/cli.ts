@@ -1,11 +1,13 @@
 /**
- * pnpm eval [--only <id>[,<id>]] [--record | --replay | --offline] [--scope full|home] [--no-lighthouse] [--max-eur 25]
+ * pnpm eval [--only <id>[,<id>]] [--record | --replay | --offline] [--scope full|home] [--no-lighthouse] [--max-eur 25] [--judge | --no-judge]
  *
  * live (default): real model calls, the only place outside the app that spends money.
  * --record:       live, and writes every model exchange to tools/eval/recordings/<id>/ for unit tests.
  * --replay:       replays those recordings (no network, no cost).
  * --offline:      no model at all: checks hand-authored golden specs from tools/eval/golden/.
- * Writes eval/report.md and eval/contact-sheet.png.
+ * --judge:        score each generated homepage with the vision judge (default for live and --record;
+ *                 opt-in for --offline and --replay, since it is a real model call).
+ * Writes eval/report.md, eval/contact-sheet.png and the review sheets in eval/look/ (look.ts).
  */
 import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
@@ -17,6 +19,7 @@ import { launchCheckBrowser } from "@sb/engine";
 import { loadFixtures } from "./fixtures/load.ts";
 import { runFixture, type FixtureResult, type Mode } from "./runner.ts";
 import { contactSheet, renderReport } from "./report.ts";
+import { desktopContactSheet, reviewSheet } from "./look.ts";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "../../..");
@@ -31,9 +34,10 @@ const mode: Mode = flag("offline") ? "offline" : flag("replay") ? "replay" : fla
 const scope = value("scope") === "home" ? "home" : "full";
 const maxEur = Number(value("max-eur") ?? 25);
 const only = value("only")?.split(",").map((s) => s.trim());
+const judge = flag("judge") || ((mode === "live" || mode === "record") && !flag("no-judge"));
 const outDir = path.join(repoRoot, "eval");
 
-if ((mode === "live" || mode === "record") && !process.env.ANTHROPIC_API_KEY) {
+if ((mode === "live" || mode === "record" || judge) && !process.env.ANTHROPIC_API_KEY) {
   console.error("ANTHROPIC_API_KEY is not set. Use --offline (golden specs) or --replay (recordings) to run without the API.");
   process.exit(2);
 }
@@ -73,8 +77,9 @@ try {
       lighthouse: !flag("no-lighthouse"),
       maxEur,
       spentSoFar: () => spent,
+      judge,
     });
-    const cost = r.costByStage.reduce((a, c) => a + c.eur, 0);
+    const cost = r.costByStage.reduce((a, c) => a + c.eur, 0) + r.judgeEur;
     spent += cost;
     results.push(r);
     const failing = r.checkpoints.filter((c) => c.failures.length).length;
@@ -88,4 +93,6 @@ try {
 const report = renderReport(results, config, { mode, scope, startedAt, totalEur: spent, wallMs: Date.now() - t0 });
 await writeFile(path.join(outDir, "report.md"), report);
 await writeFile(path.join(outDir, "contact-sheet.png"), await contactSheet(results));
+for (const r of results) await reviewSheet(r.id);
+await desktopContactSheet(results.map((r) => r.id));
 console.log(`\nWrote ${path.join(outDir, "report.md")} and contact-sheet.png. Model spend €${spent.toFixed(2)}.`);

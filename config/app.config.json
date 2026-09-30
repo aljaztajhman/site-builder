@@ -8,7 +8,8 @@
     "content": { "model": "claude-sonnet-5-5", "effort": "medium", "maxTokens": 32000 },
     "critique": { "model": "claude-sonnet-5-5", "effort": "medium", "maxTokens": 8000 },
     "edit": { "model": "claude-sonnet-5-5", "effort": "medium", "maxTokens": 8000 },
-    "fullBuild": { "model": "claude-opus-5-5", "effort": "medium", "maxTokens": 32000 }
+    "fullBuild": { "model": "claude-opus-5-5", "effort": "medium", "maxTokens": 32000 },
+    "judge": { "model": "claude-sonnet-5-5", "effort": "medium", "maxTokens": 4000 }
   },
   "useFullBuildModel": false,
   "structuredOutputForContent": false,
@@ -37,7 +38,12 @@
   "checks": {
     "lighthouse": { "performance": 90, "accessibility": 100, "bestPractices": 95, "seo": 95 },
     "viewports": { "mobile": { "width": 360, "height": 800 }, "desktop": { "width": 1280, "height": 800 } },
-    "tapTarget": { "primaryMin": 44, "primaryGap": 8, "absoluteMin": 24 }
+    "tapTarget": { "primaryMin": 44, "primaryGap": 8, "absoluteMin": 24 },
+    "composition": {
+      "$comment": "Report-only targets for the generated homepage's first screen (eval), phone 360×800 and desktop 1280×800. Photo share applies only when the client gave photos. They don't fail a checkpoint.",
+      "mobile": { "minImageShareWithPhotos": 0.25, "maxButtons": 3, "maxHeadlineLines": 4, "maxGapPx": 96 },
+      "desktop": { "minImageShareWithPhotos": 0.3, "maxButtons": 3, "maxHeadlineLines": 3, "maxGapPx": 160 }
+    }
   },
   "images": { "widths": [360, 720, 1080, 1600], "avifQuality": 55, "webpQuality": 72 },
   "imageGen": {

@@ -6,7 +6,8 @@
  * Each photo is an SVG scene composed in code (colour fields, soft shapes suggesting the subject,
  * film grain) rendered with sharp, with a caption naming the subject so a vision model can write
  * sensible alt text. Deterministic: seeded by fixture id + photo index. Existing files are kept
- * unless --force is given. The photos are generated, not committed (see tools/eval/.gitignore).
+ * unless --force is given, so the committed realistic photos (pnpm fixtures:ai-photos) are never replaced;
+ * this only fills a fixture that has none.
  */
 import { existsSync, mkdirSync } from "node:fs";
 import path from "node:path";

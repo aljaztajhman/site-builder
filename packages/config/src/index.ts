@@ -24,6 +24,13 @@ const ImageGenModel = z
     message: "set exactly one of usdPerImage or usdPerMegapixel",
   });
 
+const CompositionTarget = z.object({
+  minImageShareWithPhotos: z.number().min(0).max(1),
+  maxButtons: z.number().int().min(0),
+  maxHeadlineLines: z.number().int().min(1),
+  maxGapPx: z.number().int().min(0),
+});
+
 export const AppConfigSchema = z.object({
   models: z.object({
     classify: ModelStage,
@@ -34,6 +41,8 @@ export const AppConfigSchema = z.object({
     critique: ModelStage,
     edit: ModelStage,
     fullBuild: ModelStage,
+    /** Eval only: scores generated homepages from screenshots (tools/eval/src/judge.ts). */
+    judge: ModelStage,
   }),
   useFullBuildModel: z.boolean(),
   structuredOutputForContent: z.boolean(),
@@ -64,6 +73,8 @@ export const AppConfigSchema = z.object({
       desktop: z.object({ width: z.number(), height: z.number() }),
     }),
     tapTarget: z.object({ primaryMin: z.number(), primaryGap: z.number(), absoluteMin: z.number() }),
+    /** Report-only first-screen targets for the eval (see config $comment). */
+    composition: z.object({ mobile: CompositionTarget, desktop: CompositionTarget }),
   }),
   images: z.object({ widths: z.array(z.number().int().positive()), avifQuality: z.number(), webpQuality: z.number() }),
   /** Development only (fixture photos); client sites use client photos only (PRODUCT.md). */

@@ -2,6 +2,21 @@ import sharp, { type OverlayOptions } from "sharp";
 import type { AppConfig } from "@sb/config";
 import type { FixtureResult, Mode } from "./runner.ts";
 import { skeletonSimilarity, type HomepageShape } from "./homepage-metrics.ts";
+import type { Composition } from "@sb/engine";
+import { mean } from "./judge.ts";
+
+type Target = AppConfig["checks"]["composition"]["mobile"];
+/** Which first-screen targets a homepage misses at one viewport. */
+export function compositionMisses(c: Composition, t: Target, hasPhotos: boolean): string[] {
+  const out: string[] = [];
+  if (hasPhotos && c.imageShare < t.minImageShareWithPhotos) out.push(`photo ${Math.round(c.imageShare * 100)} % < ${Math.round(t.minImageShareWithPhotos * 100)} %`);
+  if (c.buttonsFirstScreen > t.maxButtons) out.push(`${c.buttonsFirstScreen} buttons > ${t.maxButtons}`);
+  if (c.headlineLines > t.maxHeadlineLines) out.push(`headline ${c.headlineLines} lines > ${t.maxHeadlineLines}`);
+  if (c.largestGapPx > t.maxGapPx) out.push(`empty band ${c.largestGapPx} px > ${t.maxGapPx}`);
+  return out;
+}
+const compCell = (c: Composition) =>
+  `${Math.round(c.imageShare * 100)} % · ${c.firstImageAt === null ? "—" : c.firstImageAt.toFixed(2)} · ${c.buttonsFirstScreen} · ${c.headlineLines} · ${c.largestGapPx}`;
 
 const median = (xs: number[]) => {
   if (!xs.length) return NaN;
@@ -42,9 +57,48 @@ export function renderReport(results: FixtureResult[], config: AppConfig, meta: 
     lines.push(`- Homepages repeating the contact facts (2+ contact blocks): ${homes.filter((h) => h.contactBlocks >= 2).length}/${homes.length}`);
     if (homes.length > 1) lines.push(`- Homepage skeleton similarity across sites: ${skeletonSimilarity(homes).toFixed(2)} (0 = nothing shared, 1 = same section order)`);
   }
+  const comps = results.filter((r) => r.composition);
+  if (comps.length) {
+    const t = config.checks.composition;
+    const okM = comps.filter((r) => compositionMisses(r.composition!.mobile, t.mobile, r.photoCount > 0).length === 0).length;
+    const okD = comps.filter((r) => compositionMisses(r.composition!.desktop, t.desktop, r.photoCount > 0).length === 0).length;
+    lines.push(`- First screen meets the composition targets: phone ${okM}/${comps.length}, desktop ${okD}/${comps.length} (report-only; table below)`);
+  }
+  const judged = results.filter((r) => r.judge);
+  if (judged.length) {
+    const m = (xs: number[]) => median(xs).toFixed(1);
+    lines.push(`- Vision judge (1–5, 3 = ordinary small-business site): phone median ${m(judged.map((r) => mean(r.judge!.phone)))}, desktop median ${m(judged.map((r) => mean(r.judge!.desktop)))} (${judged.length} sites, ${eur(judged.reduce((a, r) => a + r.judgeEur, 0))})`);
+  }
   const errors = results.filter((r) => r.error);
   if (errors.length) lines.push(`- **Errors:** ${errors.map((r) => r.id).join(", ")}`);
   lines.push("");
+  if (judged.length || results.some((r) => r.judgeError)) {
+    lines.push(`## Vision judge`, "");
+    lines.push("Scores: impression / hierarchy / imagery / spacing / clutter / distinctiveness. Review sheets for a human look: `eval/look/<site>.png`.", "");
+    lines.push(`| Site | Phone | Phone note | Desktop | Desktop note | Top fix |`, `|---|---|---|---|---|---|`);
+    const row = (s: NonNullable<typeof judged[number]["judge"]>["phone"]) => `**${mean(s).toFixed(1)}** (${[s.impression, s.hierarchy, s.imagery, s.spacing, s.clutter, s.distinctiveness].join("/")})`;
+    const esc = (t: string) => t.replace(/|/g, "/");
+    for (const r of results) {
+      if (r.judge) lines.push(`| ${r.id} | ${row(r.judge.phone)} | ${esc(r.judge.phoneNote)} | ${row(r.judge.desktop)} | ${esc(r.judge.desktopNote)} | ${esc(r.judge.fixes[0] ?? "—")} |`);
+      else if (r.judgeError) lines.push(`| ${r.id} | — | judge failed: ${esc(r.judgeError)} | — | — | — |`);
+    }
+    lines.push("");
+  }
+  if (comps.length) {
+    const t = config.checks.composition;
+    lines.push(`## First screen`, "");
+    lines.push(
+      `Measured on the rendered homepage before scrolling: photo share · first photo at (screens) · buttons · headline lines · largest empty band (px). Targets: phone photo ≥ ${Math.round(t.mobile.minImageShareWithPhotos * 100)} % (with photos), ≤ ${t.mobile.maxButtons} buttons, ≤ ${t.mobile.maxHeadlineLines} lines, band ≤ ${t.mobile.maxGapPx} px; desktop photo ≥ ${Math.round(t.desktop.minImageShareWithPhotos * 100)} %, ≤ ${t.desktop.maxButtons} buttons, ≤ ${t.desktop.maxHeadlineLines} lines, band ≤ ${t.desktop.maxGapPx} px.`,
+      "",
+    );
+    lines.push(`| Site | Photos | Phone 360×800 | Misses | Desktop 1280×800 | Misses |`, `|---|---|---|---|---|---|`);
+    for (const r of comps) {
+      const m = compositionMisses(r.composition!.mobile, t.mobile, r.photoCount > 0);
+      const d = compositionMisses(r.composition!.desktop, t.desktop, r.photoCount > 0);
+      lines.push(`| ${r.id} | ${r.photoCount} | ${compCell(r.composition!.mobile)} | ${m.join("; ") || "✓"} | ${compCell(r.composition!.desktop)} | ${d.join("; ") || "✓"} |`);
+    }
+    lines.push("");
+  }
 
   lines.push(`## Sites`, "");
   lines.push(`Lighthouse thresholds: performance ≥ ${lh.performance}, accessibility ${lh.accessibility}, best practices ≥ ${lh.bestPractices}, SEO ≥ ${lh.seo}.`, "");
