@@ -19,9 +19,10 @@ import {
 import { VersionConflictError, contentType, type Platform } from "@sb/platform";
 import { renderPage, sharedBundle, pageFile } from "@sb/render";
 import { collectPlaceholders, type SiteSpec } from "@sb/spec";
-import { issueSession, clearSession, passwordMatches, requireAuth, loginThrottle, type AuthSettings } from "./auth.ts";
+import { issueSession, clearSession, hasSession, passwordMatches, requireAuth, loginThrottle, type AuthSettings } from "./auth.ts";
 import { slugify } from "./slug.ts";
 import { loginPage, sitesPage, sitePage, intakePage } from "./pages.tsx";
+import { homePage } from "./home.tsx";
 import { clientBundle } from "./client-bundle.ts";
 import { uiAssets } from "./ui/assets.ts";
 import { registerFormRoutes } from "./forms.tsx";
@@ -48,8 +49,10 @@ const SAFE_ID = /^site_[0-9a-f]{16}$/;
 /** One or more path segments of plain file names: no "..", no empty segments. */
 const SAFE_REST = /^([a-z0-9][a-z0-9._-]*\/)*[a-z0-9][a-z0-9._-]*$/i;
 
-// The UI stylesheet and fonts are public: the login page needs them.
-const PUBLIC = (path: string) => path === "/health" || path === "/login" || path.startsWith("/s/") || path.startsWith("/assets/ui/") || path === "/favicon.ico";
+// The UI stylesheet and fonts are public: the login and landing pages need them. "/" is the landing
+// page without a session and the dashboard with one.
+const PUBLIC = (path: string) =>
+  path === "/" || path === "/health" || path === "/login" || path.startsWith("/s/") || path.startsWith("/assets/ui/") || path === "/assets/home.js" || path === "/favicon.ico";
 
 const IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
 const LOGO_TYPES = new Set([...IMAGE_TYPES, "image/svg+xml"]);
@@ -74,7 +77,10 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
       "Content-Security-Policy",
       c.req.path.startsWith("/s/") || c.req.path.startsWith("/preview/")
         ? `default-src 'self'; script-src 'self' '${JS_FLAG_HASH}'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-src https://www.google.com https://maps.google.com; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'self'`
-        : "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'",
+        : `default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors ${
+            // The landing page frames its example site (/assets/ui/<hash>/example-home.html).
+            c.req.path.startsWith("/assets/ui/") ? "'self'" : "'none'"
+          }`,
     );
   });
   app.use("*", requireAuth(auth, PUBLIC));
@@ -121,7 +127,7 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
     return c.redirect("/login");
   });
 
-  for (const name of ["editor", "dashboard"] as const) {
+  for (const name of ["editor", "dashboard", "home"] as const) {
     app.get(`/assets/${name}.js`, async (c) => {
       c.header("content-type", "text/javascript; charset=utf-8");
       return c.body(await clientBundle(name));
@@ -140,6 +146,7 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
 
   // ---------- Dashboard ----------
   app.get("/", async (c) => {
+    if (!hasSession(c, auth)) return c.html(homePage({ config }));
     const sites = await repo.listSites();
     return c.html(sitesPage({ sites, spendToday: await repo.spendToday(), cap: config.limits.dailyModelSpendCapEur, maxPhotos: config.limits.maxPhotos }));
   });

@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="sl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Pekarna Kvas, Kamnik</title>
+<meta name="description" content="Primer domače strani v smeri Warm Craft s predlaganimi družinami odsekov. Dejstva iz fixture pekarna-kvas; fotografije so označena mesta za fotografije stranke.">
+<style>
+@font-face{font-family:"Fraunces";src:url("fonts/fraunces.woff2") format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"Source Sans 3";src:url("fonts/source-sans-3.woff2") format("woff2");font-weight:200 900;font-display:swap}
+
+/* Warm Craft tokens (fallback palette from packages/spec/src/directions.ts, radius 6, base 17) */
+:root{
+  --c-bg:#ffffff;--c-surface:#edf2ef;--c-text:#221b17;--c-muted:#5b504a;--c-primary:#b4441f;--c-on-primary:#ffffff;
+  --c-accent:#c65a2e;--c-border:#d9e0dc;--c-inverse:#2b211c;--c-on-inverse:#ffffff;--c-ph:#fff1a8;
+  --font-heading:"Fraunces",Georgia,serif;--font-body:"Source Sans 3",system-ui,sans-serif;
+  --fs-base:17px;--radius:6px;--gutter:20px;--section:56px;--max:1120px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--c-bg);color:var(--c-text);font:var(--fs-base)/1.6 var(--font-body);overflow-wrap:break-word;hyphens:auto;-webkit-font-smoothing:antialiased;padding-bottom:72px}
+h1,h2,h3,p,ul,dl,dd,figure{margin:0}
+ul[class]{padding:0;list-style:none}
+img,svg{display:block;max-width:100%}
+address{font-style:normal}
+a{color:inherit}
+h1,h2,h3{font-family:var(--font-heading);font-weight:600;letter-spacing:-.02em;line-height:1.08}
+h1{font-size:clamp(34px,9vw,60px);font-weight:560;line-height:1.02}
+h2{font-size:clamp(28px,6vw,40px);margin-bottom:12px}
+h3{font-size:21px;margin-bottom:4px}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 var(--gutter)}
+section{padding:var(--section) 0}
+.tone-alt{background:var(--c-surface)}
+.tone-inverse{background:var(--c-inverse);color:var(--c-on-inverse)}
+.muted{color:var(--c-muted)}
+.eyebrow{font-size:15px;color:var(--c-muted);margin-bottom:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 20px;border-radius:var(--radius);background:var(--c-primary);color:var(--c-on-primary);font-weight:600;text-decoration:none;border:1.5px solid var(--c-primary)}
+.btn.ghost{background:transparent;color:inherit;border-color:currentColor}
+.link{font-weight:600;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1.5px}
+mark.ph{background:var(--c-ph);color:var(--c-text);padding:0 4px;border-radius:2px}
+.photo{background:#b99a7e;color:#fff;display:grid;place-items:center;text-align:center;font-size:14px;padding:12px;position:relative;line-height:1.3}
+.photo::after{content:"fotografija stranke";position:absolute;left:8px;bottom:8px;font-size:11px;background:rgb(0 0 0/.45);padding:2px 6px;border-radius:2px}
+.photo.p2{background:#8b6a4e}.photo.p3{background:#c98a5a}
+
+/* ---------- Header: split-cta family ---------- */
+.hd{border-bottom:1px solid var(--c-border);background:var(--c-bg)}
+.hd .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:64px}
+.hd .logo{font-family:var(--font-heading);font-weight:700;font-size:26px;letter-spacing:-.02em;text-decoration:none;display:flex;align-items:center;gap:10px}
+.hd .logo i{width:30px;height:20px;border-radius:50% 50% 45% 45%/60% 60% 40% 40%;background:#9a5a1f;display:inline-block}
+.hd nav{display:none}
+.hd .right{display:flex;gap:8px;align-items:center}.hd .desk-cta{display:none}
+.hd .call{width:48px;height:48px;border-radius:var(--radius);border:1.5px solid var(--c-text);display:grid;place-items:center;text-decoration:none}
+.hd .menu{min-height:48px;padding:0 14px;border-radius:var(--radius);border:1.5px solid var(--c-text);background:none;font:600 16px var(--font-body);color:inherit;display:inline-flex;align-items:center;gap:8px}
+.hd .menu span{width:18px;height:2px;background:currentColor;box-shadow:0 -6px 0 currentColor,0 6px 0 currentColor}
+
+/* ---------- Hero: photo-first ---------- */
+.hero{padding:0 0 40px}
+.hero .photo{aspect-ratio:5/4;margin:0 0 0 var(--gutter);border-radius:var(--radius) 0 0 var(--radius);font-size:15px}
+.hero .txt{padding:24px var(--gutter) 0}
+.hero p.intro{font-size:19px;margin:14px 0 22px;max-width:36ch}
+.hero .acts{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:center}
+.hero .facts{display:flex;flex-wrap:wrap;gap:6px 22px;margin-top:24px;font-size:16px;color:var(--c-muted)}
+.hero .facts b{color:var(--c-text);font-weight:600}
+
+/* ---------- Highlights: not cards, a running list ---------- */
+.hl{display:grid;gap:22px;margin-top:20px}
+.hl li{border-top:1px solid var(--c-border);padding-top:14px}
+.hl h3{font-size:22px}
+
+/* ---------- Products ---------- */
+.prod{display:grid;grid-template-columns:1fr 1fr;gap:20px 16px;margin-top:22px}
+.prod li .photo{aspect-ratio:1;border-radius:var(--radius);margin-bottom:10px;font-size:13px}
+.prod li .noimg{aspect-ratio:1;border-radius:var(--radius);background:var(--c-surface);display:grid;place-items:center;color:var(--c-muted);font-size:14px;margin-bottom:10px}
+.prod li b{display:block;font-weight:600;line-height:1.3}
+.prod li span{color:var(--c-muted)}
+.weekend{margin-top:20px;padding:14px 16px;border-left:0;background:var(--c-surface);border-radius:var(--radius)}
+
+/* ---------- About ---------- */
+.about{display:grid;gap:22px}
+.about .photo{aspect-ratio:4/3;border-radius:var(--radius)}
+.about blockquote{margin:0;font-family:var(--font-heading);font-size:22px;line-height:1.3;font-weight:500}
+.about blockquote footer{font-family:var(--font-body);font-size:16px;color:var(--c-muted);margin-top:10px;font-weight:400}
+
+/* ---------- Hours + contact ---------- */
+.hc{display:grid;gap:28px}
+dl.hours{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;margin-top:12px;font-variant-numeric:tabular-nums}
+dl.hours dt{font-weight:600}
+.contact address{display:grid;gap:8px;margin-top:12px}
+.contact a{text-underline-offset:4px}
+
+/* ---------- CTA band ---------- */
+.cta .wrap{display:grid;gap:16px}
+.cta h2{margin:0}
+.cta .btn{background:var(--c-on-inverse);color:var(--c-inverse);border-color:var(--c-on-inverse);justify-self:start}
+
+/* ---------- Footer: columns ---------- */
+footer.ft{border-top:1px solid var(--c-border);padding:40px 0 32px;font-size:15px;color:var(--c-muted)}
+footer.ft .cols{display:grid;gap:24px}
+footer.ft h3{font-family:var(--font-body);font-size:14px;letter-spacing:0;color:var(--c-text);margin-bottom:8px}
+footer.ft ul li{margin:4px 0}
+footer.ft .legal{margin-top:28px;padding-top:16px;border-top:1px solid var(--c-border);display:flex;flex-wrap:wrap;gap:8px 20px}
+
+/* ---------- Mobile action bar ---------- */
+.bar{position:fixed;left:0;right:0;bottom:0;display:flex;gap:8px;padding:10px var(--gutter);background:var(--c-bg);border-top:1px solid var(--c-border);z-index:5}
+.bar a{flex:1;min-height:48px;display:inline-flex;align-items:center;justify-content:center;border-radius:var(--radius);font-weight:600;text-decoration:none;border:1.5px solid var(--c-text)}
+.bar a.p{background:var(--c-primary);border-color:var(--c-primary);color:var(--c-on-primary)}
+
+@media (min-width:48rem){
+  :root{--gutter:32px;--section:80px}
+  body{padding-bottom:0}
+  .bar{display:none}
+  .hd nav{display:flex;gap:26px;font-weight:600}
+  .hd nav a{text-decoration:none}
+  .hd .menu,.hd .call{display:none}
+  .hd .desk-cta{display:inline-flex}
+  .hero{padding:0 0 64px}
+  .hero .wrap{display:grid;grid-template-columns:1.1fr 1fr;gap:48px;align-items:center}
+  .hero .photo{margin:0;aspect-ratio:4/5;border-radius:0 var(--radius) var(--radius) 0;margin-left:calc(-1 * var(--gutter));height:calc(100% + 0px);min-height:560px}
+  .hero .txt{padding:64px 0}
+  .hl{grid-template-columns:repeat(4,1fr);gap:28px}
+  .prod{grid-template-columns:repeat(4,1fr);gap:28px}
+  .about{grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+  .hc{grid-template-columns:1fr 1fr;gap:56px}
+  .cta .wrap{grid-template-columns:1fr auto;align-items:center}
+  footer.ft .cols{grid-template-columns:2fr 1fr 1fr 1fr}
+}
+@media (min-width:64rem){
+  h1{font-size:64px}
+}
+</style>
+</head>
+<body>
+
+<header class="hd">
+  <div class="wrap">
+    <a class="logo" href="#"><i aria-hidden="true"></i>Kvas</a>
+    <nav aria-label="Glavni meni"><a href="#ponudba">Ponudba</a><a href="#o-nas">O pekarni</a><a href="#narocila">Naročila</a><a href="#kontakt">Kontakt</a></nav>
+    <div class="right">
+      <a class="btn desk-cta" href="tel:+38641555906">Pokličite 041 555 906</a>
+      <a class="call" href="tel:+38641555906" aria-label="Pokličite 041 555 906">☏</a>
+      <button class="menu" type="button" aria-expanded="false" aria-controls="m"><span aria-hidden="true"></span>Meni</button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section class="hero" aria-labelledby="h1">
+  <div class="wrap" style="padding:0">
+    <div class="photo" role="img" aria-label="Hlebci kruha z drožmi na leseni polici">hlebci kruha z drožmi<br>na leseni polici</div>
+    <div class="txt">
+      <p class="eyebrow">Kamnik, Šutna 30</p>
+      <h1 id="h1">Kruh z lastnimi drožmi, pečen vsak dan</h1>
+      <p class="intro">Mala družinska pekarna na začetku stare ulice Šutna. Testo vzhaja čez noč, vse delamo ročno.</p>
+      <div class="acts"><a class="btn" href="#ponudba">Poglejte ponudbo</a><a class="link" href="tel:+38641555906">041 555 906</a></div>
+      <div class="facts"><span><b>Pon–pet</b> 6.30–18.00</span><span><b>Sobota</b> 6.30–12.00</span><span><b>Nedelja</b> 7.00–10.00</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="tone-alt" aria-labelledby="h-hl">
+  <div class="wrap">
+    <h2 id="h-hl">Kaj je drugače pri nas</h2>
+    <ul class="hl">
+      <li><h3>Samo droži</h3><p>Kruh pečemo z drožmi, ki jih gojimo sami.</p></li>
+      <li><h3>Vzhajanje čez noč</h3><p>Kruh je bolj okusen in dlje ostane svež.</p></li>
+      <li><h3>Moka iz bližnjega mlina</h3><p>Moko kupujemo pri mlinu v bližini.</p></li>
+      <li><h3>Ročno delo</h3><p>Brez aditivov in brez zamrznjenega testa.</p></li>
+    </ul>
+  </div>
+</section>
+
+<section id="ponudba" aria-labelledby="h-p">
+  <div class="wrap">
+    <h2 id="h-p">Vsak dan v pekarni</h2>
+    <p class="muted" style="max-width:60ch">Pirin in rženi kruh, polnozrnate žemlje, rogljički z maslom in cimetovi polži.</p>
+    <ul class="prod">
+      <li><div class="photo" role="img" aria-label="Hlebci kruha z drožmi na leseni polici">hlebci na polici</div><b>Pirin kruh z drožmi</b><span>4,20 €</span></li>
+      <li><div class="noimg" aria-hidden="true">brez fotografije</div><b>Rženi kruh</b><span>3,90 €</span></li>
+      <li><div class="photo p3" role="img" aria-label="Rogljički in cimetovi polži na pladnju">rogljički in polži</div><b>Rogljiček z maslom</b><span>1,30 €</span></li>
+      <li><div class="noimg" aria-hidden="true">brez fotografije</div><b>Cimetov polž</b><span><mark class="ph">[cena]</mark></span></li>
+    </ul>
+    <p class="weekend"><b>Petek in sobota:</b> orehova potica in kvašeni krofi. Orehova potica (1 kg) od 18 €.</p>
+  </div>
+</section>
+
+<section id="o-nas" class="tone-alt" aria-labelledby="h-o">
+  <div class="wrap about">
+    <div class="photo p2" role="img" aria-label="Pek oblikuje testo na pomokani mizi">pek oblikuje testo<br>na pomokani mizi</div>
+    <div>
+      <h2 id="h-o">Peče Jure, v trgovini je Katja</h2>
+      <p>Družinska pekarna. Kruh pečemo samo z drožmi, ki jih gojimo sami, in ga pustimo vzhajati čez noč. Moko kupujemo pri mlinu v bližini.</p>
+      <blockquote style="margin-top:20px">Vse je ročno delo, brez aditivov in brez zamrznjenega testa.<footer>Jure Petek, pek</footer></blockquote>
+    </div>
+  </div>
+</section>
+
+<section id="kontakt" aria-labelledby="h-h">
+  <div class="wrap hc">
+    <div>
+      <h2 id="h-h">Odpiralni čas</h2>
+      <dl class="hours">
+        <dt>Pon–pet</dt><dd>6.30–18.00</dd>
+        <dt>Sobota</dt><dd>6.30–12.00</dd>
+        <dt>Nedelja</dt><dd>7.00–10.00</dd>
+      </dl>
+      <p class="muted" style="margin-top:12px">Naročila po telefonu ali e-pošti najmanj dva dni prej.</p>
+    </div>
+    <div class="contact">
+      <h2>Kje smo</h2>
+      <address>
+        <span>Šutna 30, 1241 Kamnik</span>
+        <a href="tel:+38641555906">041 555 906</a>
+        <a href="mailto:pekarna@pekarna-kvas.example">pekarna@pekarna-kvas.example</a>
+        <a class="link" href="https://www.google.com/maps/search/?api=1&query=%C5%A0utna+30%2C+1241+Kamnik" rel="noopener">Navodila za pot</a>
+      </address>
+    </div>
+  </div>
+</section>
+
+<section id="narocila" class="tone-inverse cta" aria-labelledby="h-c">
+  <div class="wrap">
+    <div>
+      <h2 id="h-c">Potica za praznike in praznovanja</h2>
+      <p style="margin-top:8px;max-width:52ch">Orehovo potico naročite vsaj dva dni prej po telefonu ali e-pošti.</p>
+    </div>
+    <a class="btn" href="tel:+38641555906">Pokličite 041 555 906</a>
+  </div>
+</section>
+
+</main>
+
+<footer class="ft">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <h3>Pekarna Kvas</h3>
+        <p>Šutna 30, 1241 Kamnik<br><a href="tel:+38641555906">041 555 906</a><br><a href="mailto:pekarna@pekarna-kvas.example">pekarna@pekarna-kvas.example</a></p>
+      </div>
+      <div><h3>Strani</h3><ul><li><a href="#ponudba">Ponudba</a></li><li><a href="#o-nas">O pekarni</a></li><li><a href="#narocila">Naročila</a></li><li><a href="#kontakt">Kontakt</a></li></ul></div>
+      <div><h3>Odprto</h3><ul><li>Pon–pet 6.30–18.00</li><li>Sobota 6.30–12.00</li><li>Nedelja 7.00–10.00</li></ul></div>
+      <div><h3>Podatki o ponudniku</h3><ul><li><mark class="ph">[polno ime podjetja]</mark></li><li>Matična št. <mark class="ph">[matična številka]</mark></li><li>Davčna št. <mark class="ph">[davčna številka]</mark></li></ul></div>
+    </div>
+    <div class="legal"><span>© 2026 Pekarna Kvas</span><a href="#">Zasebnost</a><a href="#">Izjava o dostopnosti</a><a href="#">Piškotki</a></div>
+  </div>
+</footer>
+
+<div class="bar" aria-label="Hitre povezave">
+  <a class="p" href="tel:+38641555906">Pokliči</a>
+  <a href="https://www.google.com/maps/search/?api=1&query=%C5%A0utna+30%2C+1241+Kamnik" rel="noopener">Navodila za pot</a>
+</div>
+
+</body>
+</html>
