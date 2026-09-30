@@ -114,12 +114,13 @@ export function ActionLink(props: { link: Link; ctx: RenderCtx; kind?: "primary"
   );
 }
 
+/** One primary action; a second one is a text link beside it, so two buttons never compete (with the phone's call bar, that made four). */
 export function Actions({ primary, secondary, ctx }: { primary?: Link | undefined; secondary?: Link | undefined; ctx: RenderCtx }) {
   if (!primary && !secondary) return null;
   return (
     <div className="actions">
       {primary && <ActionLink link={primary} ctx={ctx} kind="primary" />}
-      {secondary && <ActionLink link={secondary} ctx={ctx} kind="secondary" />}
+      {secondary && <ActionLink link={secondary} ctx={ctx} kind={primary ? "text" : "primary"} />}
     </div>
   );
 }

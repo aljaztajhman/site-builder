@@ -366,6 +366,27 @@ body.has-action-bar {
 body.has-action-bar:not(:has(.action-bar)) {
   padding-bottom: 0;
 }
+/* The hero already offers call and directions: the bar slides in after it (the hero's own links cover the first screen). */
+@supports (animation-timeline: scroll()) {
+  @media (max-width: 47.99rem) and (prefers-reduced-motion: no-preference) {
+    .action-bar--after-hero {
+      animation: action-bar-in linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 70vh;
+    }
+  }
+}
+@keyframes action-bar-in {
+  0%,
+  60% {
+    transform: translateY(110%);
+    visibility: hidden;
+  }
+  100% {
+    transform: none;
+    visibility: visible;
+  }
+}
 @media (min-width: 48rem) {
   .action-bar {
     display: none;
@@ -377,8 +398,8 @@ body.has-action-bar:not(:has(.action-bar)) {
 
 /*
  * Consent notice. Nothing third-party loads before an explicit click on each embed, so the notice
- * never needs to block or cover content: on phones it sits in the page flow at the end; on wider
- * screens it is a small card in the bottom corner.
+ * never needs to block or cover content: it sits in the page flow at the end, at every width (a fixed
+ * card covered the desktop content in the first screen).
  */
 .consent {
   margin: 1rem;
@@ -412,13 +433,6 @@ body.has-action-bar:not(:has(.action-bar)) {
 }
 @media (min-width: 48rem) {
   .consent {
-    position: fixed;
-    z-index: 60;
-    right: 1rem;
-    bottom: 1rem;
-    margin: 0;
-    max-width: 26rem;
-    max-height: calc(100vh - 2rem);
-    overflow-y: auto;
+    max-width: 40rem;
   }
 }

@@ -27,6 +27,19 @@ import { DEFAULT_IMAGE_WIDTHS, variantFile, variantHeight, variantWidths } from 
 import { sharedBundle } from "./shared.ts";
 import { jsonLd } from "./jsonld.ts";
 
+/**
+ * The page's first section puts both a phone link and a directions link on screen (its two actions, or
+ * the facts of hero-type with-facts), so the call bar can wait until it has scrolled away without
+ * breaking "call and directions in one tap".
+ */
+function heroOffersCallAndDirections(first: { type: string; variant: string; props: unknown } | undefined): boolean {
+  if (!first) return false;
+  if (first.type === "hero-type" && first.variant === "with-facts") return true;
+  const p = first.props as { primary?: { target?: { action?: string } }; secondary?: { target?: { action?: string } } };
+  const actions = [p.primary?.target?.action, p.secondary?.target?.action];
+  return actions.includes("call") && actions.includes("directions");
+}
+
 export interface RenderOptions {
   locale?: Locale;
   imageWidths?: number[];
@@ -147,7 +160,7 @@ export function renderPage(spec: SiteSpec, page: Page, opts: RenderOptions = {})
         })}
       </main>
       <Footer ctx={ctx} />
-      {localized.chrome.mobileActionBar && <MobileActionBar ctx={ctx} />}
+      {localized.chrome.mobileActionBar && <MobileActionBar ctx={ctx} afterHero={heroOffersCallAndDirections(localizedPage.sections[0])} />}
       {needsConsent && <CookieConsent ctx={ctx} />}
       {[...islands].sort().map((f) => (
         <script key={f} src={ctx.shared(`js/${f}`)} defer />

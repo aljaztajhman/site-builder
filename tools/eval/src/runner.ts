@@ -18,6 +18,7 @@ import {
   processPhoto,
   type CheckBrowser,
   type ModelTransport,
+  type Composition,
   type SiteCheckReport,
 } from "@sb/engine";
 import { Repo, createDb, createFsStorage, migrate, type Storage } from "@sb/platform";
@@ -26,6 +27,7 @@ import { validateSite, type SiteSpec } from "@sb/spec";
 import type { Fixture } from "./fixtures/schema.ts";
 import { evaluateEditCheck, pagesText, type EditCheckResult } from "./edit-checks.ts";
 import { homepageShape, type HomepageShape } from "./homepage-metrics.ts";
+import { judgeHomepage, type JudgeOutput } from "./judge.ts";
 
 export type Mode = "live" | "record" | "replay" | "offline";
 
@@ -57,6 +59,16 @@ export interface FixtureResult {
   /** The generated homepage (after critique), for the repetition and sameness numbers. */
   home: HomepageShape | null;
   mobileShot: Uint8Array | null;
+  /** Desktop first screen (1280×800) as a visitor sees it, for the desktop contact sheet. */
+  desktopShot: Uint8Array | null;
+  /** First-screen composition of the generated homepage at phone and desktop size. */
+  composition: { mobile: Composition; desktop: Composition } | null;
+  /** Photos the client gave (the photo-share target only applies when there are some). */
+  photoCount: number;
+  /** Vision judge's scores for the generated homepage (--judge), and what it cost. */
+  judge: JudgeOutput | null;
+  judgeError?: string;
+  judgeEur: number;
   /** The export zip opened from file:// (checked once, after generation). */
   exportCheck: { ok: boolean; bytes: number; pages: number; problems: string[] } | null;
   error?: string;
@@ -72,6 +84,8 @@ export interface RunOptions {
   lighthouse: boolean;
   /** Abort once the run's total model spend passes this (CLAUDE.md: stop before €30). */
   maxEur: number;
+  /** Score the generated homepage with the vision judge (a real model call, not recorded). */
+  judge: boolean;
   spentSoFar: () => number;
 }
 
@@ -129,6 +143,11 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
     timings: {},
     home: null,
     mobileShot: null,
+    desktopShot: null,
+    composition: null,
+    photoCount: fixture.photos.length,
+    judge: null,
+    judgeEur: 0,
     exportCheck: null,
   };
   try {
@@ -191,6 +210,8 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
     result.direction = first.current.spec.design.direction;
     result.home = homepageShape(first.current.spec);
     result.mobileShot = first.report.screenshots.mobile;
+    result.desktopShot = first.report.screenshots.desktopFirst;
+    result.composition = first.report.composition;
     result.checkpoints.push(summarise("generated", first.current.spec, first.current.version, first.report));
     const { zip } = await exportSite({ repo, storage, config }, site.id);
     const ex = await checkExportOffline(zip, first.current.spec.slug, opts.browser.browser);
@@ -198,6 +219,25 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
     for (const p of ex.problems) result.checkpoints[0]!.failures.push(`export offline: ${p}`);
     await writeFile(path.join(dir, "home-360.png"), first.report.screenshots.mobileFull);
     await writeFile(path.join(dir, "home-1280.png"), first.report.screenshots.desktop);
+    // First screens as a visitor sees them (sticky bar included), for the review sheets.
+    await writeFile(path.join(dir, "home-360-first.png"), first.report.screenshots.mobile);
+    await writeFile(path.join(dir, "home-1280-first.png"), first.report.screenshots.desktopFirst);
+    if (opts.judge) {
+      // Its own live client: judge calls are never recorded or replayed, and their cost stays out of the site's.
+      const judgeClient = new ModelClient({
+        config,
+        transport: new AnthropicTransport(),
+        spentToday: async () => (opts.spentSoFar() >= opts.maxEur ? Number.POSITIVE_INFINITY : 0),
+        onCall: async (r) => {
+          result.judgeEur += r.costEur;
+        },
+      });
+      try {
+        result.judge = await judgeHomepage(judgeClient, dir, { businessType: fixture.brief.businessType, direction: result.direction, photos: fixture.photos.length });
+      } catch (e) {
+        result.judgeError = (e as Error).message.slice(0, 300);
+      }
+    }
     await writeFile(path.join(dir, "spec-generated.json"), JSON.stringify(first.current.spec, null, 2));
 
     if (transport) {

@@ -8,12 +8,14 @@ import { checkFacts, type FactViolation } from "../facts.ts";
 import { launchCheckBrowser, type CheckBrowser } from "./browser.ts";
 import { hideFixedForFullPage, loadLazyImages, measurePage, runAxe, type AxeViolation, type MobileReport } from "./page-checks.ts";
 import { runLighthouse, type LighthouseScores } from "./lighthouse.ts";
+import { measureComposition, type Composition } from "./composition.ts";
 import { serveStatic } from "./static-server.ts";
 
 export { launchCheckBrowser, type CheckBrowser } from "./browser.ts";
 export { serveStatic, type StaticServer } from "./static-server.ts";
 export type { AxeViolation, MobileReport } from "./page-checks.ts";
 export type { LighthouseScores } from "./lighthouse.ts";
+export type { Composition } from "./composition.ts";
 export { checkExportOffline, type ExportCheck } from "./export-offline.ts";
 
 export interface PageCheck {
@@ -29,8 +31,13 @@ export interface SiteCheckReport {
   placeholders: number;
   pages: PageCheck[];
   lighthouse: LighthouseScores | null;
-  /** mobile: the first viewport as a visitor sees it. mobileFull, desktop: whole page, fixed elements (action bar, consent box) hidden. */
-  screenshots: { mobile: Uint8Array; mobileFull: Uint8Array; desktop: Uint8Array };
+  /**
+   * mobile, desktopFirst: the first screen as a visitor sees it (fixed bars included).
+   * mobileFull, desktop: the whole page, fixed elements (action bar, consent box) hidden.
+   */
+  screenshots: { mobile: Uint8Array; mobileFull: Uint8Array; desktop: Uint8Array; desktopFirst: Uint8Array };
+  /** Homepage first-screen composition at the phone and desktop viewports (null when the homepage wasn't checked). */
+  composition: { mobile: Composition; desktop: Composition } | null;
   /** Human-readable reasons the site fails the phase 1 bar; empty means pass. */
   failures: string[];
 }
@@ -71,6 +78,8 @@ export async function checkSite(spec: SiteSpec, files: Map<string, Uint8Array>, 
     const files = opts.pages ?? spec.pages.map((p) => pageFile(p));
     const pages: PageCheck[] = [];
     let screenshots: SiteCheckReport["screenshots"] | undefined;
+    let mobileComposition: Composition | undefined;
+    let composition: SiteCheckReport["composition"] = null;
 
     for (const file of files) {
       const url = `${server.url}/${spec.slug}/${file}`;
@@ -82,6 +91,7 @@ export async function checkSite(spec: SiteSpec, files: Map<string, Uint8Array>, 
       let shotMobile: Buffer | undefined;
       let shotMobileFull: Buffer | undefined;
       if (file === "index.html") {
+        mobileComposition = await measureComposition(mp);
         shotMobile = await mp.screenshot({ type: "png" });
         await loadLazyImages(mp);
         await hideFixedForFullPage(mp);
@@ -95,9 +105,12 @@ export async function checkSite(spec: SiteSpec, files: Map<string, Uint8Array>, 
       const d = await measurePage(dp, { primaryMin: t.primaryMin, primaryGap: t.primaryGap, absoluteMin: t.absoluteMin });
       const desktopAxe = await runAxe(dp);
       if (file === "index.html" && shotMobile && shotMobileFull) {
+        const desktopComposition = await measureComposition(dp);
+        if (mobileComposition) composition = { mobile: mobileComposition, desktop: desktopComposition };
+        const desktopFirst = await dp.screenshot({ type: "png" });
         await loadLazyImages(dp);
         await hideFixedForFullPage(dp);
-        screenshots = { mobile: shotMobile, mobileFull: shotMobileFull, desktop: await dp.screenshot({ type: "png", fullPage: true }) };
+        screenshots = { mobile: shotMobile, mobileFull: shotMobileFull, desktop: await dp.screenshot({ type: "png", fullPage: true }), desktopFirst };
       }
       await dctx.close();
       const axeAll = mergeAxe(axe, desktopAxe);
@@ -111,7 +124,8 @@ export async function checkSite(spec: SiteSpec, files: Map<string, Uint8Array>, 
       placeholders,
       pages,
       lighthouse: lh,
-      screenshots: screenshots ?? { mobile: new Uint8Array(), mobileFull: new Uint8Array(), desktop: new Uint8Array() },
+      screenshots: screenshots ?? { mobile: new Uint8Array(), mobileFull: new Uint8Array(), desktop: new Uint8Array(), desktopFirst: new Uint8Array() },
+      composition,
       failures: [],
     };
     report.failures = failuresOf(spec, report, opts.config);

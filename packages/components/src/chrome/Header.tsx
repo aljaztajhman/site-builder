@@ -19,8 +19,11 @@ export function Header({ ctx }: { ctx: RenderCtx }) {
   const home = site.pages.find((p) => p.kind === "home");
   const navPages = site.pages.filter((p) => p.nav.show);
   const ctaHref = cta === "none" ? null : ctx.href({ action: cta });
-  // The mobile action bar already carries call and directions; don't repeat them in the narrow header.
-  const ctaWideOnly = site.chrome.mobileActionBar && (cta === "call" || cta === "directions");
+  // On phones, don't repeat an action that is already on screen: the action bar carries call and
+  // directions, and the page's first section often opens with the same action (e.g. booking).
+  const heroProps = page.sections[0]?.props as { primary?: { target?: { action?: string } }; secondary?: { target?: { action?: string } } } | undefined;
+  const heroHasCta = cta !== "none" && [heroProps?.primary?.target?.action, heroProps?.secondary?.target?.action].includes(cta);
+  const ctaWideOnly = (site.chrome.mobileActionBar && (cta === "call" || cta === "directions")) || heroHasCta;
   const logo = site.assets.logo;
 
   return (

@@ -87,6 +87,9 @@ h1,
 .hero-title {
   font-size: var(--fs-h1);
 }
+.hero-title--long {
+  font-size: calc(var(--fs-h1) * 0.8);
+}
 h2,
 .section-title {
   font-size: var(--fs-h2);
@@ -164,6 +167,16 @@ a {
 }
 .s {
   padding-block: var(--space-section);
+}
+/* The first section starts closer to the header: a full section gap above the hero read as an empty band. */
+main > .s:first-child {
+  padding-top: calc(var(--space-section) * 0.5);
+}
+/* Two neighbouring sections on the same background share one gap instead of stacking two paddings. */
+.s.tone-default + .s.tone-default,
+.s.tone-alt + .s.tone-alt,
+.s.tone-inverse + .s.tone-inverse {
+  padding-top: 0;
 }
 .tone-default {
   background: var(--c-bg);
@@ -252,6 +265,14 @@ a {
   align-items: center;
   min-height: 2.75rem;
   font-weight: 600;
+}
+.actions {
+  align-items: center;
+  column-gap: 1.5rem;
+}
+.actions .text-link {
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
 }
 
 /* ---------- Facts ---------- */
