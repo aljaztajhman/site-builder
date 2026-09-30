@@ -47,6 +47,6 @@ AI website builder for Slovenian small businesses. Product brief: docs/PRODUCT.m
 
 ## Rules for generated sites
 
-- Mobile first. Build and test at 360 px wide before desktop. Follow the mobile checklist in docs/PRODUCT.md.
+- Responsive, not mobile-first: every site must be excellent at desktop widths (1280 px and up) and on phones (360 px). Build, look at and test both. The mobile checklist in docs/PRODUCT.md still applies in full.
 - The banned-patterns list in docs/PRODUCT.md is a hard list. Enforce it in code wherever possible (token ranges, component variants that can't produce the pattern); the critique pass catches the rest.
 - Never invent facts: no testimonials, reviews, ratings, awards, client logos, statistics, certifications, prices, opening hours, addresses, names or phone numbers that aren't in the client's input. Use a marked placeholder instead. A site with unfilled required placeholders can't be published.

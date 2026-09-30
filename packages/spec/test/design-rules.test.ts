@@ -162,3 +162,22 @@ describe("checkDesign", () => {
     );
   });
 });
+
+describe("section surface stays on the page's side of light/dark", () => {
+  it("repairs a mid-grey surface on a white page instead of failing text contrast (live eval, 'Barve naj bodo temnejše, bolj resne')", () => {
+    const dir = DIRECTIONS.find((d) => d.id === "bold-local")!;
+    const darkened = baseDesign(dir, { ...dir.palette.fallback, surface: "#5f5a55", primary: "#b8420a", inverse: "#1c1917" });
+    expect(checkDesign(darkened, dir).length).toBeGreaterThan(0);
+    const fixed = enforceDesign(darkened, dir);
+    expect(fixed.colors.surface).toBe(dir.palette.fallback.surface);
+    expect(checkDesign(fixed, dir)).toEqual([]);
+  });
+
+  it("keeps a light surface the model chose, and a dark surface on a dark page", () => {
+    const light = DIRECTIONS.find((d) => d.id === "warm-craft")!;
+    expect(enforceDesign(baseDesign(light, { ...light.palette.fallback, surface: "#eef0f2" }), light).colors.surface).toBe("#eef0f2");
+    const dark = DIRECTIONS.find((d) => d.palette.background === "dark")!;
+    expect(enforceDesign(baseDesign(dark, { ...dark.palette.fallback, surface: "#1f1a17" }), dark).colors.surface).toBe("#1f1a17");
+    expect(enforceDesign(baseDesign(dark, { ...dark.palette.fallback, surface: "#9a9a9a" }), dark).colors.surface).toBe(dark.palette.fallback.surface);
+  });
+});
