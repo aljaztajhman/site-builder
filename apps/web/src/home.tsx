@@ -7,8 +7,9 @@ import { PRODUCT_NAME } from "./ui/labels.ts";
  * The product's landing page at / (docs/design/homepage.html), for everyone; signed in, the header
  * links to the sites list instead of the login.
  * Stylesheet ui/home.css, script client/home.ts; the example site is ui/example-home.html.
- * The prompt goes to the intake form (/new, behind the access password until public previews exist);
- * home.ts carries the typed description across the login.
+ * The prompt box is the intake, the only way to start a site: signed in, it posts the description,
+ * photos, logo and scope to /api/sites; signed out, it goes to the login, and home.ts carries the typed
+ * text across it (sessionStorage, never the URL) back to this page.
  */
 
 const wholeEur = new Intl.NumberFormat("sl-SI", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
@@ -20,10 +21,29 @@ const Brand = () => (
   </a>
 );
 
+/** Homepage only (the free preview) or the whole site. Signed out, the choice rides along in the draft (home.ts). */
+const Scope = () => (
+  <fieldset className="seg">
+    <legend className="sr-only">Obseg</legend>
+    <input type="radio" id="scope-home" name="scope" value="home" defaultChecked />
+    <label htmlFor="scope-home">Domača stran</label>
+    <input type="radio" id="scope-full" name="scope" value="full" />
+    <label htmlFor="scope-full">Celotna stran</label>
+  </fieldset>
+);
+
 const EXAMPLE_TEXT =
   "Frizerski salon Lana v Celju, Prešernova 4. Striženje, barvanje in svečane pričeske. Odprto tor–pet 8.00–18.00, sobota 8.00–13.00. Naročila na 041 555 730 …";
 
-export function homePage({ config, signedIn }: { config: AppConfig; signedIn: boolean }): string {
+export interface HomeProps {
+  config: AppConfig;
+  signedIn: boolean;
+  /** A refused intake: the reason, shown above the prompt, and the description, kept. */
+  error?: string;
+  description?: string;
+}
+
+export function homePage({ config, signedIn, error, description }: HomeProps): string {
   const [low, high] = config.plans.paid.monthlyEurRange;
   const example = uiUrl("example-home.html");
   return html(
@@ -33,7 +53,7 @@ export function homePage({ config, signedIn }: { config: AppConfig; signedIn: bo
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="robots" content="noindex, nofollow" />
         <title>Spletna stran za vaše podjetje</title>
-        <meta name="description" content="Opišete podjetje, dobite spletno stran v naravni slovenščini, narejeno za telefon." />
+        <meta name="description" content="Opišete podjetje, dobite spletno stran v naravni slovenščini, enako dobro na telefonu in računalniku." />
         <link rel="preload" href={uiUrl("fonts/figtree.woff2")} as="font" type="font/woff2" crossOrigin="" />
         <link rel="preload" href={uiUrl("fonts/bricolage-grotesque.woff2")} as="font" type="font/woff2" crossOrigin="" />
         <link rel="stylesheet" href={uiUrl("home.css")} />
@@ -70,34 +90,67 @@ export function homePage({ config, signedIn }: { config: AppConfig; signedIn: bo
                   Spletna stran je narejena.
                 </h1>
                 <p className="lead">
-                  Za frizerje, gostilne, servise, ambulante, obrtnike in trgovine. Napišete, kdo ste in kaj ponujate, dodate logotip in svoje fotografije. Domača stran je gotova v
-                  približno dveh minutah, v naravni slovenščini, narejena najprej za telefon.
+                  Za frizerje, gostilne, servise, ambulante, obrtnike in trgovine. Napišete, kdo ste in kaj ponujate, dodate logotip in svoje fotografije. Predogled domače strani
+                  vidite v manj kot minuti, v naravni slovenščini, enako dober na telefonu in računalniku.
                 </p>
-                <form className="prompt" method="get" action="/new" data-home-intake="">
-                  <label htmlFor="opis" className="sr-only">
-                    Opis podjetja
-                  </label>
-                  <textarea id="opis" placeholder={EXAMPLE_TEXT} />
-                  <div className="bar">
-                    <button className="btn sm" type="submit" data-attach="photos">
-                      ＋ Fotografije
-                    </button>
-                    <button className="btn sm" type="submit" data-attach="logo">
-                      ＋ Logotip
-                    </button>
-                    <span className="sp" />
-                    <button className="btn primary" type="submit">
-                      Naredite predogled
-                    </button>
-                  </div>
-                </form>
+                {error && (
+                  <p className="note bad" role="alert">
+                    {error}
+                  </p>
+                )}
+                {signedIn ? (
+                  <form className="prompt" method="post" action="/api/sites" encType="multipart/form-data" data-home-intake="" data-intake="">
+                    <label htmlFor="opis" className="sr-only">
+                      Opis podjetja
+                    </label>
+                    <textarea id="opis" name="description" required minLength={30} placeholder={EXAMPLE_TEXT} defaultValue={description} aria-describedby="opis-help" />
+                    <div className="bar">
+                      <label className="btn sm attach">
+                        <input className="sr-only" type="file" name="photos" accept="image/jpeg,image/png,image/webp,image/avif" multiple />＋ Fotografije
+                      </label>
+                      <label className="btn sm attach">
+                        <input className="sr-only" type="file" name="logo" accept="image/svg+xml,image/png,image/jpeg,image/webp" />＋ Logotip
+                      </label>
+                      <span className="sp" />
+                      <Scope />
+                      <button className="btn primary" type="submit">
+                        Ustvari
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  // Signed out: files can't survive a login, so the prompt goes to the login and home.ts keeps the text.
+                  <form className="prompt" method="get" action="/login" data-home-intake="">
+                    <input type="hidden" name="next" value="/" />
+                    <label htmlFor="opis" className="sr-only">
+                      Opis podjetja
+                    </label>
+                    <textarea id="opis" placeholder={EXAMPLE_TEXT} aria-describedby="opis-help" />
+                    <div className="bar">
+                      <button className="btn sm" type="submit" data-attach="photos">
+                        ＋ Fotografije
+                      </button>
+                      <button className="btn sm" type="submit" data-attach="logo">
+                        ＋ Logotip
+                      </button>
+                      <span className="sp" />
+                      <Scope />
+                      <button className="btn primary" type="submit">
+                        Ustvari
+                      </button>
+                    </div>
+                  </form>
+                )}
+                <p className="under" id="opis-help">
+                  {`Napišite, kdo ste, kaj ponujate, kje ste in kako vas dosežejo. Česar ne napišete, si ne izmislimo. Do ${config.limits.maxPhotos} fotografij in logotip.`}
+                </p>
                 <p className="under">Brezplačen predogled domače strani. Potrebujete le e-poštni naslov, kartice ne.</p>
               </div>
               <div>
                 <div className="phone" inert>
                   <iframe src={example} title="Primer strani: Pekarna Kvas" loading="lazy" />
                 </div>
-                <p className="phone-cap">Pekarna Kvas iz Kamnika: stran iz enega opisa in treh fotografij s telefona.</p>
+                <p className="phone-cap">Primer: izmišljena Pekarna Kvas iz Kamnika, stran iz enega opisa in treh fotografij. Fotografije v primeru so ustvarjene z UI in tako tudi označene.</p>
               </div>
             </div>
           </section>
@@ -141,8 +194,8 @@ export function homePage({ config, signedIn }: { config: AppConfig; signedIn: bo
                       <circle className="ring" cx="91" cy="128" r="6" />
                     </svg>
                   </div>
-                  <h3>Narejena za telefon</h3>
-                  <p>Večina vaših obiskovalcev pride s telefona. Klic in navodila za pot so na vsaki strani na en dotik, meni deluje z eno roko.</p>
+                  <h3>Na telefonu in računalniku</h3>
+                  <p>Stran je enako dobra na velikem zaslonu in na telefonu. Na telefonu sta klic in navodila za pot na vsaki strani na en dotik, meni deluje z eno roko.</p>
                 </div>
                 <div>
                   <div className="vig v-fact" aria-hidden="true">
@@ -249,7 +302,7 @@ export function homePage({ config, signedIn }: { config: AppConfig; signedIn: bo
                 </div>
                 {/* eval/report-home.md, 2026-09-29: 10 fixtures, median 109.8 s, Lighthouse accessibility 100 on every page. */}
                 <p className="note">
-                  V zadnjem preizkusu na desetih podjetjih je bila domača stran gotova v srednjem času 110 sekund. Vsaka stran je dosegla oceno dostopnosti 100 v Googlovem Lighthouse.
+                  V zadnjem preizkusu na desetih podjetjih (30. 9. 2026) je bil predogled domače strani viden v srednjem času 23 sekund, preverjena stran pa v 73 sekundah. Vsaka stran je dosegla oceno dostopnosti 100 v Googlovem Lighthouse.
                 </p>
               </div>
             </div>
@@ -259,7 +312,7 @@ export function homePage({ config, signedIn }: { config: AppConfig; signedIn: bo
             <div className="wrap">
               <h2 id="h-primer">Primer</h2>
               <p className="lead">
-                Pekarna Kvas, Kamnik. Vse na strani je iz opisa, ki ga je napisal pek. Cena cimetovega polža manjka, zato je označena in stran brez nje ni objavljiva.
+                Pekarna Kvas iz Kamnika (izmišljen primer). Vse na strani je iz opisa pekarne. Cena cimetovega polža manjka, zato je označena in stran brez nje ni objavljiva.
               </p>
               <div className="ex">
                 <div className="deskwrap" inert>

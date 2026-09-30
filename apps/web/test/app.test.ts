@@ -103,16 +103,28 @@ describe("product UI", () => {
     expect(login).not.toContain("<style");
   });
 
-  it("shows the intake as the whole page when there are no sites, and at /new", async () => {
+  it("has one intake, the landing page's prompt: /new and the empty sites list lead there", async () => {
     const cookie = await login();
-    expect((await app.request("/new")).status).toBe(302);
-    const page = await (await app.request("/new", { headers: { cookie } })).text();
-    expect(page).toContain('action="/api/sites"');
-    expect(page).toContain('name="description"');
-    expect(page).toMatch(/id="scope-home"[^>]*checked/);
+    const moved = await app.request("/new", { headers: { cookie } });
+    expect(moved.status).toBe(302);
+    expect(moved.headers.get("location")).toBe("/#zacni");
+    const sites = await (await app.request("/sites", { headers: { cookie } })).text();
+    expect(sites).not.toContain('action="/api/sites"');
+    expect(sites).toContain('href="/#zacni"');
+    const home = await (await app.request("/", { headers: { cookie } })).text();
+    const formTag = home.match(/<form class="prompt"[^>]*>/)?.[0] ?? "";
+    expect(formTag).toContain('action="/api/sites"');
+    expect(formTag).toContain('method="post"');
+    expect(formTag.toLowerCase()).toContain('enctype="multipart/form-data"');
+    expect(home).toMatch(/<textarea[^>]*name="description"/);
+    const photos = home.match(/<input[^>]*name="photos"[^>]*>/)?.[0] ?? "";
+    expect(photos).toContain('type="file"');
+    expect(photos).toContain("multiple");
+    expect(home).toMatch(/<input[^>]*type="file"[^>]*name="logo"/);
+    expect(home).toMatch(/id="scope-home"[^>]*checked/);
   });
 
-  it("keeps the description and says why when the intake is refused", async () => {
+  it("keeps the description and says why on the landing page when the intake is refused", async () => {
     const cookie = await login();
     const form = new FormData();
     form.set("description", "Prekratko.");
@@ -121,6 +133,7 @@ describe("product UI", () => {
     const page = await res.text();
     expect(page).toContain("Opis mora imeti vsaj 30 znakov.");
     expect(page).toContain(">Prekratko.</textarea>");
+    expect(page).toContain('id="zacni"');
   });
 });
 
@@ -135,11 +148,13 @@ describe("landing page", () => {
     const [low, high] = loadConfig().plans.paid.monthlyEurRange;
     expect(page).toContain(`od ${low}\u00a0€`);
     expect(page).toContain(`(${low}–${high}\u00a0€)`);
-    // The prompt goes to the intake form; the description never lands in the URL (no name attribute).
+    // Signed out the prompt goes to the login and back to /; the description never lands in the URL (no name attribute).
     const formTag = page.match(/<form class="prompt"[^>]*>/)?.[0] ?? "";
-    expect(formTag).toContain('action="/new"');
+    expect(formTag).toContain('action="/login"');
     expect(formTag).toContain('method="get"');
+    expect(page).toContain('<input type="hidden" name="next" value="/"/>');
     expect(page).not.toMatch(/<textarea[^>]*name=/);
+    expect(page).not.toMatch(/type="file"/);
     expect(page).toContain('href="/login"');
     expect(page).not.toContain("<style");
     expect(page).not.toMatch(/<script>(?!<\/script>)/);
