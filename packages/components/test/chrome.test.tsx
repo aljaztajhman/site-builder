@@ -70,6 +70,13 @@ describe("Header", () => {
     expect(noBar).not.toContain("site-header__cta--wide-only");
   });
 
+  it("keeps a booking CTA for wide screens only when the page opens with the same action (no duplicate on phones)", () => {
+    const s = spec({ chrome: chrome({ cta: "booking" }) });
+    const hero = { id: "s_hero", type: "hero-type", variant: "large", props: { headline: "Fizioterapija", intro: "Uvod.", primary: { label: "Rezervirajte termin", target: { action: "booking" } } } };
+    const withHero = { ...s, pages: [{ ...s.pages[0]!, sections: [hero, ...s.pages[0]!.sections] } as unknown as typeof s.pages[number], ...s.pages.slice(1)] };
+    expect(html(<Header ctx={testCtx(withHero, withHero.pages[0])} />)).toContain("site-header__cta--wide-only");
+  });
+
   it("renders a booking CTA and hides a CTA whose fact is missing", () => {
     const booking = html(<Header ctx={testCtx(spec({ chrome: chrome({ cta: "booking" }) }))} />);
     expect(booking).toMatch(/href="https:\/\/booking.example.com\/lipa" rel="noopener" target="_blank">Rezerviraj termin</);
