@@ -42,8 +42,13 @@ Draft plan: docs/phases/PHASE-2.md — 5 decisions there are the owner's (sign-i
 
 ## Design system overhaul (branch claude/design-system-overhaul)
 - [x] docs/design/ideas.html: proposal for product tokens/components/screens, generated-site hero and header families, and the researched AI-site give-away list (38 tells with code/critique/new status; Slovene copy rules)
-- [ ] Owner decisions: accent, display face, product name, order of work, approve give-away additions to docs/PRODUCT.md
-- [ ] Product UI: shared stylesheet with the tokens, rewrite pages.tsx and editor.ts styles in place; check with screenshots at 360/1280 and axe
+- [ ] Owner decisions: accent (`sb-ui-accent`), display face (`sb-ui-display-face`), product name (`sb-brand-name`), approve give-away additions to docs/PRODUCT.md. The product UI ships with the doc's picks (green, Bricolage Grotesque); each is one token to change
+- [x] Product UI (2026-09-30): one stylesheet `apps/web/src/ui/app.css` with the ideas.html tokens (canvas, ink, green accent, hairlines, one float shadow, radii 4/8/12, Bricolage + Figtree from the repo's subset fonts), served at `/assets/ui/<hash>/` without a session; no inline CSS left in dashboard pages. Login (wordmark, one field), intake as the prompt box (attach buttons, scope switch, one action; `/new`, and the whole page when there are no sites; refused intakes keep the text and say why), sites as cards with a live 360-px thumbnail, editor restyled (app bar with "Več" menu, generation progress with real stage names and seconds, failure note with "Poskusi znova", versions list, AI pane with cost and log folded), messages page. Checked: screenshots at 360 and 1280 of login, sites, intake, editor (phone and desktop preview, section form, AI, design, versions, menu), generating, checking, failed, messages; axe 0 violations on all of them; no horizontal scroll at 360; typecheck, lint, 495 tests
+- [x] Editor: the preview frame reloaded (and lost its scroll) on every re-render, e.g. every click on a section; it now stays in the page, and polling reloads it only when the version changes
+- [x] Preview `?v=` never selected a version (regex `/^d+$/` instead of `/^\d+$/`); fixed, tested
+- [ ] Editor at 360 px: preview on top, panel below. The bottom-sheet editor from ideas.html is part of the phase 2 editor work (`sb-editor`)
+- [ ] Editor shows section variant ids raw (`grid`, `photo-left`); give them Slovene names
+- [ ] Product homepage (docs/design/homepage.html) not built: it quotes a price (`sb-pricing`), a name (`sb-brand-name`) and a public free preview (`sb-preview-gate`); GO-TO-MARKET plans the landing page as a site from our own engine
 - [ ] Generated sites: hero families (facts-first, photo-first, type-only, split) and header families per direction; spec version bump + migration + test; eval contact sheet must show no two directions sharing hero and header family
 - [ ] Give-aways into code: no U+2014 in copy, Slovene filler additions, accent-coloured single-side borders, eyebrow case and tracking cap, off-black/off-white bounds, one primary action per hero
 

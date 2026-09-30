@@ -1,32 +1,22 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import type { ReactNode } from "react";
 import type { SiteRow } from "@sb/platform";
+import { uiUrl } from "./ui/assets.ts";
+import { PRODUCT_NAME, formatDate, formatEur, siteStatus } from "./ui/labels.ts";
 
-const CSS = `
-:root{--bg:#f6f7f9;--panel:#fff;--text:#16181d;--muted:#5b6270;--line:#d9dde3;--accent:#1f5eff;--danger:#b42318;--ok:#067647;font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--text);background:var(--bg)}
-*{box-sizing:border-box}body{margin:0}a{color:var(--accent)}
-.top{display:flex;gap:12px;align-items:center;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
-.top h1{font-size:16px;margin:0 12px 0 0}.top .sp{flex:1}
-.btn{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:6px 12px;border:1px solid var(--line);background:#fff;border-radius:6px;cursor:pointer;font:inherit;color:inherit;text-decoration:none}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}.btn.danger{color:var(--danger)}.btn:disabled{opacity:.5;cursor:default}
-.btn.sm{min-height:28px;padding:2px 8px;font-size:13px}
-.wrap{max-width:1100px;margin:24px auto;padding:0 16px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:16px}
-label{display:block;font-weight:600;margin:10px 0 4px}input[type=text],input[type=password],input[type=number],input[type=url],input[type=email],textarea,select{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:6px;font:inherit;background:#fff}
-textarea{min-height:70px;resize:vertical}.muted{color:var(--muted)}.err{color:var(--danger)}.okc{color:var(--ok)}
-table{border-collapse:collapse;width:100%}td,th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}
-.status{display:inline-block;padding:2px 8px;border-radius:99px;background:#eef1f5;font-size:12px}
-`;
-
-function Doc({ title, children, script }: { title: string; children: ReactNode; script?: string }) {
+/** Page shell for every dashboard page: the shared stylesheet (apps/web/src/ui/app.css), no inline CSS. */
+export function Doc({ title, children, script }: { title: string; children: ReactNode; script?: string }) {
   return (
     <html lang="sl">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="robots" content="noindex, nofollow" />
-        <title>{title}</title>
-        <style dangerouslySetInnerHTML={{ __html: CSS }} />
+        <title>{`${title} · ${PRODUCT_NAME}`}</title>
+        <link rel="preload" href={uiUrl("fonts/figtree.woff2")} as="font" type="font/woff2" crossOrigin="" />
+        <link rel="preload" href={uiUrl("fonts/bricolage-grotesque.woff2")} as="font" type="font/woff2" crossOrigin="" />
+        <link rel="stylesheet" href={uiUrl("app.css")} />
+        <link rel="icon" href={uiUrl("icon.svg")} type="image/svg+xml" />
       </head>
       <body>
         {children}
@@ -36,100 +26,189 @@ function Doc({ title, children, script }: { title: string; children: ReactNode; 
   );
 }
 
-const html = (el: ReactNode) => `<!doctype html>${renderToStaticMarkup(el as never)}`;
+export const html = (el: ReactNode): string => `<!doctype html>${renderToStaticMarkup(el as never)}`;
+
+export const Brand = () => (
+  <a className="brand" href="/">
+    <i aria-hidden="true" />
+    {PRODUCT_NAME}
+  </a>
+);
+
+/** App bar: wordmark, then page-specific items; the spend counter and sign-out on every dashboard page. */
+export function TopBar({ children, spend }: { children?: ReactNode; spend?: { today: number; cap: number } }) {
+  return (
+    <header className="top">
+      <Brand />
+      {children}
+      <span className="sp" />
+      {spend && (
+        <span className="pill plain spend num" title="Poraba modela danes in dnevna omejitev">
+          {`${formatEur(spend.today)} / ${formatEur(spend.cap)} danes`}
+        </span>
+      )}
+      <form method="post" action="/logout">
+        <button className="btn quiet sm" type="submit">
+          Odjava
+        </button>
+      </form>
+    </header>
+  );
+}
 
 export function loginPage({ next, error }: { next: string; error?: string }): string {
   return html(
     <Doc title="Prijava">
-      <div className="wrap" style={{ maxWidth: 420 }}>
-        <div className="card">
-          <h1 style={{ fontSize: 20 }}>Prijava</h1>
-          <form method="post" action="/login">
-            <input type="hidden" name="next" value={next} />
-            <label htmlFor="pw">Geslo za dostop</label>
-            <input id="pw" type="password" name="password" autoComplete="current-password" required autoFocus />
-            {error && <p className="err">{error}</p>}
-            <p>
-              <button className="btn primary" type="submit">
-                Prijava
-              </button>
+      <main className="login">
+        <Brand />
+        <h1>Prijava</h1>
+        <form method="post" action="/login">
+          <input type="hidden" name="next" value={next} />
+          <label htmlFor="pw">Geslo za dostop</label>
+          <input id="pw" type="password" name="password" autoComplete="current-password" required autoFocus aria-describedby={error ? "pw-err" : undefined} aria-invalid={error ? true : undefined} />
+          {error && (
+            <p id="pw-err" className="help err" role="alert">
+              {error}
             </p>
-          </form>
-        </div>
-      </div>
+          )}
+          <button className="btn primary block" type="submit">
+            Prijava
+          </button>
+        </form>
+      </main>
     </Doc>,
   );
 }
 
+interface IntakeProps {
+  spendToday: number;
+  cap: number;
+  maxPhotos: number;
+  hasSites: boolean;
+  error?: string;
+  description?: string;
+}
+
+function Intake({ maxPhotos, hasSites, error, description }: IntakeProps) {
+  return (
+    <main className="intake">
+      <form method="post" action="/api/sites" encType="multipart/form-data" data-intake="">
+        <h1>
+          Opišite svoje podjetje.
+          <br />
+          Stran naredimo mi.
+        </h1>
+        {error && (
+          <p className="note bad" role="alert">
+            {error}
+          </p>
+        )}
+        <div className="prompt">
+          <label htmlFor="d" className="sr-only">
+            Opis podjetja
+          </label>
+          <textarea
+            id="d"
+            name="description"
+            required
+            minLength={30}
+            aria-describedby="d-help"
+            defaultValue={description}
+            placeholder="Pekarna v Kamniku, odprta od leta 1996. Kruh z lastnimi drožmi, rogljički, torte po naročilu. Šutna 12, odprto pon–sob 6.00–13.00 …"
+          />
+          <div className="bar">
+            <label className="btn sm attach">
+              <input className="sr-only" type="file" name="photos" accept="image/jpeg,image/png,image/webp,image/avif" multiple />+ Fotografije
+            </label>
+            <label className="btn sm attach">
+              <input className="sr-only" type="file" name="logo" accept="image/svg+xml,image/png,image/jpeg,image/webp" />+ Logotip
+            </label>
+            <span className="sp" />
+            <fieldset className="seg">
+              <legend className="sr-only">Obseg</legend>
+              <input type="radio" id="scope-home" name="scope" value="home" defaultChecked />
+              <label htmlFor="scope-home">Domača stran</label>
+              <input type="radio" id="scope-full" name="scope" value="full" />
+              <label htmlFor="scope-full">Celotna stran</label>
+            </fieldset>
+            <button className="btn primary" type="submit">
+              Ustvari
+            </button>
+          </div>
+        </div>
+        <p id="d-help" className="help">
+          {`Napišite, kdo ste, kaj ponujate, kje ste in kako vas dosežejo. Česar ne napišete, si ne izmislimo: manjkajoči podatki ostanejo označeni, dokler jih ne vpišete. Do ${maxPhotos} fotografij (JPG, PNG, WebP, AVIF) in logotip. Domača stran je navadno gotova v približno dveh minutah, celotna v približno treh.`}
+        </p>
+      </form>
+      {hasSites && (
+        <a className="back" href="/">
+          ← Vse strani
+        </a>
+      )}
+    </main>
+  );
+}
+
+export function intakePage(props: IntakeProps): string {
+  return html(
+    <Doc title="Nova stran" script="/assets/dashboard.js">
+      <TopBar spend={{ today: props.spendToday, cap: props.cap }} />
+      <Intake {...props} />
+    </Doc>,
+  );
+}
+
+function SiteCard({ site }: { site: SiteRow }) {
+  const status = siteStatus(site);
+  const scope = site.intake?.scope === "full" ? "celotna stran" : "domača stran";
+  const meta = site.current_version
+    ? [`v${site.current_version}`, site.published_version && site.published_version !== site.current_version ? `objavljena v${site.published_version}` : null, formatDate(site.updated_at)]
+    : [scope, formatDate(site.created_at)];
+  return (
+    <li className="site-card">
+      <div className="shot" inert>
+        {site.current_version ? (
+          <iframe src={`/preview/${site.id}/index.html?v=${site.current_version}`} title={`Predogled: ${site.name}`} loading="lazy" />
+        ) : (
+          <p className="empty">{site.status === "failed" ? "Ustvarjanje ni uspelo." : site.status === "generating" ? "Stran se ustvarja …" : "Še brez vsebine."}</p>
+        )}
+      </div>
+      <div className="body">
+        <h2>
+          <a href={`/sites/${site.id}`}>{site.name}</a>
+        </h2>
+        <span className={`pill ${status.tone}`}>{status.label}</span>
+        <span className="meta num">{meta.filter(Boolean).join(" · ")}</span>
+        {site.published_version ? (
+          <a className="pub" href={`/s/${site.slug}/`}>
+            {`/s/${site.slug}/`}
+          </a>
+        ) : null}
+      </div>
+    </li>
+  );
+}
+
 export function sitesPage({ sites, spendToday, cap, maxPhotos }: { sites: SiteRow[]; spendToday: number; cap: number; maxPhotos: number }): string {
+  // No sites yet: the intake is the whole page.
+  if (sites.length === 0) return intakePage({ spendToday, cap, maxPhotos, hasSites: false });
   return html(
     <Doc title="Strani">
-      <div className="top">
-        <h1>Graditelj strani</h1>
-        <span className="muted">
-          Poraba danes: €{spendToday.toFixed(2)} / €{cap.toFixed(2)}
-        </span>
-        <span className="sp" />
-        <form method="post" action="/logout">
-          <button className="btn sm" type="submit">
-            Odjava
-          </button>
-        </form>
-      </div>
-      <div className="wrap">
-        <div className="card">
-          <h2 style={{ marginTop: 0 }}>Nova stran</h2>
-          <form method="post" action="/api/sites" encType="multipart/form-data">
-            <label htmlFor="d">Opis podjetja</label>
-            <textarea id="d" name="description" rows={8} required minLength={30} placeholder="Kdo ste, kaj ponujate, kje ste, kontakt, delovni čas, cene …" />
-            <label htmlFor="logo">Logotip (neobvezno)</label>
-            <input id="logo" type="file" name="logo" accept="image/svg+xml,image/png,image/jpeg,image/webp" />
-            <label htmlFor="photos">Fotografije (do {maxPhotos})</label>
-            <input id="photos" type="file" name="photos" accept="image/jpeg,image/png,image/webp,image/avif" multiple />
-            <label htmlFor="scope">Obseg</label>
-            <select id="scope" name="scope" defaultValue="home">
-              <option value="home">Samo domača stran (hitri predogled)</option>
-              <option value="full">Celotna stran</option>
-            </select>
-            <p>
-              <button className="btn primary" type="submit">
-                Ustvari
-              </button>
-            </p>
-          </form>
+      <TopBar spend={{ today: spendToday, cap }} />
+      <main className="wrap sites">
+        <div className="head">
+          <h1>Strani</h1>
+          <span className="muted num">{sites.length}</span>
+          <a className="btn primary" href="/new">
+            Nova stran
+          </a>
         </div>
-        <div className="card">
-          <h2 style={{ marginTop: 0 }}>Strani</h2>
-          {sites.length === 0 ? (
-            <p className="muted">Še ni strani.</p>
-          ) : (
-            <table>
-              <thead>
-                <tr>
-                  <th>Ime</th>
-                  <th>Stanje</th>
-                  <th>Objavljeno</th>
-                  <th>Ustvarjeno</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sites.map((s) => (
-                  <tr key={s.id}>
-                    <td>
-                      <a href={`/sites/${s.id}`}>{s.name}</a>
-                    </td>
-                    <td>
-                      <span className="status">{s.status}</span>
-                    </td>
-                    <td>{s.published_version ? <a href={`/s/${s.slug}/`}>/s/{s.slug}/</a> : "—"}</td>
-                    <td className="muted">{new Date(s.created_at).toLocaleString("sl-SI")}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-      </div>
+        <ul className="cards">
+          {sites.map((s) => (
+            <SiteCard key={s.id} site={s} />
+          ))}
+        </ul>
+      </main>
     </Doc>,
   );
 }
@@ -138,7 +217,7 @@ export function sitePage({ site }: { site: SiteRow }): string {
   return html(
     <Doc title={site.name} script="/assets/editor.js">
       <div id="app" data-site-id={site.id}>
-        <p className="wrap muted">Nalagam urejevalnik …</p>
+        <p className="loading">Nalagam urejevalnik …</p>
       </div>
     </Doc>,
   );

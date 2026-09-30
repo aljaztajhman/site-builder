@@ -2,11 +2,12 @@ import { createHmac } from "node:crypto";
 import type { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { renderToStaticMarkup } from "react-dom/server";
-import type { ReactNode } from "react";
 import type { AppConfig } from "@sb/config";
 import { uiStrings } from "@sb/components";
 import type { Repo, SiteRow } from "@sb/platform";
 import type { SiteSpec } from "@sb/spec";
+import { Doc, TopBar, html } from "./pages.tsx";
+import { formatDateTime } from "./ui/labels.ts";
 
 /**
  * Contact forms on published sites: the public submit endpoint (next to the published pages, so the
@@ -149,56 +150,50 @@ export function registerFormRoutes(app: Hono, deps: { repo: Repo; config: AppCon
 }
 
 function messagesPage({ site, messages }: { site: SiteRow; messages: Awaited<ReturnType<Repo["listFormMessages"]>> }): string {
-  const when = (iso: string) => new Date(iso).toLocaleString("sl-SI", { timeZone: "Europe/Ljubljana", dateStyle: "short", timeStyle: "short" });
-  const body: ReactNode = (
-    <html lang="sl">
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="robots" content="noindex, nofollow" />
-        <title>{`Sporočila · ${site.name}`}</title>
-        <style
-          dangerouslySetInnerHTML={{
-            __html:
-              "body{margin:0;font:15px/1.5 system-ui,-apple-system,'Segoe UI',sans-serif;color:#16181d;background:#f6f7f9}.wrap{max-width:46rem;margin:0 auto;padding:1.5rem 1rem}a{color:#1f5eff}h1{font-size:1.3rem}article{background:#fff;border:1px solid #d9dde3;border-radius:8px;padding:1rem;margin-bottom:1rem}.meta{color:#5b6270;font-size:.85rem}.msg{white-space:pre-wrap;overflow-wrap:anywhere}dl{display:grid;grid-template-columns:auto 1fr;gap:.25rem .75rem;margin:.5rem 0}dt{color:#5b6270}dd{margin:0;overflow-wrap:anywhere}button{min-height:36px;padding:.25rem .75rem;border:1px solid #d9dde3;background:#fff;border-radius:6px;color:#b42318;cursor:pointer;font:inherit}",
-          }}
-        />
-      </head>
-      <body>
-        <div className="wrap">
-          <p>
-            <a href={`/sites/${site.id}`}>← {site.name}</a>
-          </p>
-          <h1>Sporočila iz kontaktnega obrazca ({messages.length})</h1>
-          {messages.length === 0 && <p className="meta">Še ni sporočil. Prikažejo se tukaj, ko obiskovalec objavljene strani izpolni obrazec.</p>}
-          {messages.map((m) => (
-            <article key={m.id}>
-              <p className="meta">{when(m.created_at)}</p>
-              <dl>
-                <dt>Ime</dt>
-                <dd>{m.name}</dd>
-                <dt>E-pošta</dt>
-                <dd>
-                  <a href={`mailto:${m.email}`}>{m.email}</a>
-                </dd>
-                {m.phone && (
-                  <>
-                    <dt>Telefon</dt>
-                    <dd>
-                      <a href={`tel:${m.phone.replace(/[^\d+]/g, "")}`}>{m.phone}</a>
-                    </dd>
-                  </>
-                )}
-              </dl>
-              <p className="msg">{m.message}</p>
-              <form method="post" action={`/sites/${site.id}/messages/${m.id}/delete`}>
-                <button type="submit">Izbriši</button>
-              </form>
-            </article>
-          ))}
-        </div>
-      </body>
-    </html>
+  return html(
+    <Doc title={`Sporočila · ${site.name}`}>
+      <TopBar>
+        <a className="btn quiet sm" href={`/sites/${site.id}`}>
+          {`← ${site.name}`}
+        </a>
+      </TopBar>
+      <main className="messages">
+        <h1>
+          Sporočila <span className="muted num">{messages.length}</span>
+        </h1>
+        <p className="muted">
+          {messages.length === 0
+            ? "Še ni sporočil. Prikažejo se tukaj, ko obiskovalec objavljene strani izpolni kontaktni obrazec."
+            : "Iz kontaktnega obrazca na objavljeni strani. Obiskovalcu odgovorite po e-pošti ali telefonu."}
+        </p>
+        {messages.map((m) => (
+          <article className="message" key={m.id}>
+            <p className="when num">{formatDateTime(m.created_at)}</p>
+            <dl>
+              <dt>Ime</dt>
+              <dd>{m.name}</dd>
+              <dt>E-pošta</dt>
+              <dd>
+                <a href={`mailto:${m.email}`}>{m.email}</a>
+              </dd>
+              {m.phone && (
+                <>
+                  <dt>Telefon</dt>
+                  <dd>
+                    <a href={`tel:${m.phone.replace(/[^\d+]/g, "")}`}>{m.phone}</a>
+                  </dd>
+                </>
+              )}
+            </dl>
+            <p className="text">{m.message}</p>
+            <form method="post" action={`/sites/${site.id}/messages/${m.id}/delete`}>
+              <button className="btn sm danger" type="submit">
+                Izbriši
+              </button>
+            </form>
+          </article>
+        ))}
+      </main>
+    </Doc>,
   );
-  return `<!doctype html>${renderToStaticMarkup(body as never)}`;
 }
