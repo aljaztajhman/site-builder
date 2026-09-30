@@ -82,6 +82,13 @@ Product work (not started):
 - [ ] Referral codes and an optional "Izdelano z …" footer link as a spec field (with billing)
 - [ ] Email-to-edit via Resend inbound (after phase 2); chalkboard-photo menu update (after price-list editing)
 
+## Images (docs/research/image-generation.html; decisions in the Decision Inbox)
+- [x] fal.ai MCP server for Claude Code: `.mcp.json` + `tools/mcp/fal-headers.ps1` (reads `FAL_KEY` from the Windows user environment at connect time, no app restart). Verified: helper output accepted by mcp.fal.ai (initialize 200, tools/list 200)
+- [ ] Model comparison: 10 fixture subjects × Nano Banana 2, FLUX.2 pro, GPT Image 2.5 high (~€1.40) → contact sheet for the owner
+- [ ] Realistic fixture photos with the chosen model + manifest (model, prompt, cost); re-record evals (~€1.40–3.70 + €2.71)
+- [ ] Shot list for owners (brief stage + dashboard); Lucide icons for phone, directions, hours
+- [ ] Client-facing generation/edits: only after the owner's decisions (spec v2 image origin, marking after sharp, publish gate, legal review)
+
 ## Follow-ups (not blocking a phase)
 - [x] A long homepage (kmetija-grabnar, home-scope eval) failed generation: its full-page screenshot exceeded the API's 8000 px limit (400). Screenshots over the limit are shrunk to fit; any critique failure except the spend cap now keeps the checked site
 - [x] Critique screenshots of long pages were illegible (API scales images to ≤ 1568 px long edge; a 360×5000 page arrived ~110 px wide). Now the whole mobile page in ≤ 1560 px slices (max 6) and the desktop top (2 × 900 px). Measured: ~9–10k input tokens per critique call vs ~6k, +€0.005–0.01 per call; kmetija-grabnar 6/6

@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "fal-ai": {
+      "type": "http",
+      "url": "https://mcp.fal.ai/mcp",
+      "headers": { "Authorization": "Bearer ${FAL_KEY:-}" },
+      "headersHelper": "powershell -NoProfile -ExecutionPolicy Bypass -File tools/mcp/fal-headers.ps1"
+    }
+  }
+}
