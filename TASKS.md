@@ -86,8 +86,9 @@ Product work (not started):
 
 ## Images (docs/research/image-generation.html; decisions in the Decision Inbox)
 - [x] fal.ai MCP server for Claude Code: `.mcp.json` + `tools/mcp/fal-headers.ps1` (reads `FAL_KEY` from the Windows user environment at connect time, no app restart). Verified: helper output accepted by mcp.fal.ai (initialize 200, tools/list 200)
-- [ ] Model comparison: 10 fixture subjects × Nano Banana 2, FLUX.2 pro, GPT Image 2.5 high (~€1.40) → contact sheet for the owner
-- [ ] Realistic fixture photos with the chosen model + manifest (model, prompt, cost); re-record evals (~€1.40–3.70 + €2.71)
+- [x] Model comparison (2026-09-30): `pnpm fixtures:ai-photos compare`, 10 fixture subjects × Nano Banana 2, FLUX.2 pro, GPT Image 2.5 high over fal's REST API; 30/30 generated, €1.77 at config prices (NB2 €0.069, FLUX €0.041, GPT €0.068 per image; median 14 / 13 / 20 s). Contact sheet `docs/research/image-model-comparison.jpg`. Looked at each: FLUX drew a "GOSTILNA" sign and house number "14" despite "no lettering" and looks like stock photography; NB2 has correct hands but pseudo-text on a background chalkboard and outputs only 1264 px at 1K; GPT Image had no legible lettering and looks most like an owner's phone photo. Pick: `sb-images-model`
+- [ ] Realistic fixture photos with the chosen model: `pnpm fixtures:ai-photos generate --model <name>` (36 photos, ~€2.45 with GPT Image) + `photo-manifest.json` (model, prompt, cost); waits on `sb-images-model` and `sb-images-fixture-storage` (photos are gitignored today); then re-record evals (€2.71 last run)
+- [ ] fal cost is estimated from config prices; the account's actual spend isn't readable with this key (billing API 403). Compare against the fal dashboard once
 - [ ] Shot list for owners (brief stage + dashboard); Lucide icons for phone, directions, hours
 - [ ] Client-facing generation/edits: only after the owner's decisions (spec v2 image origin, marking after sharp, publish gate, legal review)
 

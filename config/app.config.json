@@ -40,6 +40,30 @@
     "tapTarget": { "primaryMin": 44, "primaryGap": 8, "absoluteMin": 24 }
   },
   "images": { "widths": [360, 720, 1080, 1600], "avifQuality": 55, "webpQuality": 72 },
+  "imageGen": {
+    "$comment": "Development only: realistic eval fixture photos via fal.ai (pnpm fixtures:ai-photos). Not used by the pipeline; client sites use client photos only. Prices from fal's pricing API on 2026-09-30; gpt-image-2.5 is token-billed, so its per-megapixel price is fal's 1024x1024 high-quality estimate ($0.05268) scaled by area.",
+    "landscape": { "width": 1536, "height": 1024 },
+    "models": {
+      "nano-banana-2": {
+        "endpoint": "fal-ai/nano-banana-2",
+        "sizeParam": "aspect_ratio",
+        "params": { "resolution": "1K", "output_format": "jpeg" },
+        "usdPerImage": 0.08
+      },
+      "flux-2-pro": {
+        "endpoint": "fal-ai/flux-2-pro",
+        "sizeParam": "image_size",
+        "params": { "output_format": "jpeg" },
+        "usdPerMegapixel": 0.03
+      },
+      "gpt-image-2.5": {
+        "endpoint": "openai/gpt-image-2.5/flare/text-to-image",
+        "sizeParam": "image_size",
+        "params": { "quality": "high", "output_format": "jpeg" },
+        "usdPerMegapixel": 0.0502
+      }
+    }
+  },
   "plans": {
     "$comment": "Phase 1 has no billing; kept here so later phases read from config.",
     "freePreview": { "pages": ["home"], "model": "claude-sonnet-5-5", "effort": "medium", "watermark": true, "publishable": false },

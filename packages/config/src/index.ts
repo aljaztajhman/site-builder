@@ -10,6 +10,19 @@ const ModelStage = z.object({
   maxTokens: z.number().int().positive(),
 });
 const Price = z.object({ input: z.number(), output: z.number(), cacheWrite5m: z.number(), cacheRead: z.number() });
+/** An image model on fal.ai. Priced per image or per output megapixel, as fal bills it. */
+const ImageGenModel = z
+  .object({
+    endpoint: z.string(),
+    /** How the model takes the output shape: an aspect ratio string ("3:2") or explicit { width, height }. */
+    sizeParam: z.enum(["aspect_ratio", "image_size"]),
+    params: z.record(z.string(), z.unknown()),
+    usdPerImage: z.number().nonnegative().optional(),
+    usdPerMegapixel: z.number().nonnegative().optional(),
+  })
+  .refine((m) => (m.usdPerImage === undefined) !== (m.usdPerMegapixel === undefined), {
+    message: "set exactly one of usdPerImage or usdPerMegapixel",
+  });
 
 export const AppConfigSchema = z.object({
   models: z.object({
@@ -53,6 +66,11 @@ export const AppConfigSchema = z.object({
     tapTarget: z.object({ primaryMin: z.number(), primaryGap: z.number(), absoluteMin: z.number() }),
   }),
   images: z.object({ widths: z.array(z.number().int().positive()), avifQuality: z.number(), webpQuality: z.number() }),
+  /** Development only (fixture photos); client sites use client photos only (PRODUCT.md). */
+  imageGen: z.object({
+    landscape: z.object({ width: z.number().int().positive(), height: z.number().int().positive() }),
+    models: z.record(z.string(), ImageGenModel),
+  }),
   /** No billing yet; the landing page quotes the paid plan's monthly range from here. */
   plans: z.looseObject({
     paid: z.looseObject({ monthlyEurRange: z.tuple([z.number().positive(), z.number().positive()]) }),
