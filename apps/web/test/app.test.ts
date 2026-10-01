@@ -131,7 +131,7 @@ describe("product UI", () => {
     const res = await app.request("/api/sites", { method: "POST", body: form, headers: { cookie } });
     expect(res.status).toBe(400);
     const page = await res.text();
-    expect(page).toContain("Opis mora imeti vsaj 30 znakov.");
+    expect(page).toContain("Opis naj ima vsaj 40 znakov");
     expect(page).toContain(">Prekratko.</textarea>");
     expect(page).toContain('id="zacni"');
   });
@@ -155,13 +155,18 @@ describe("landing page", () => {
     expect(paid.billingEnabled).toBe(false);
     expect(page).toContain("Načrtovane cene, z DDV. Plačevanja še ni, zato zaenkrat ničesar ne zaračunamo.");
     expect(page).not.toMatch(/od \d+\u00a0€/);
-    // Signed out the prompt goes to the login and back to /; the description never lands in the URL (no name attribute).
+    // Signed out the prompt is the intake too (the first homepage needs no account): a POST, never the URL.
     const formTag = page.match(/<form class="prompt"[^>]*>/)?.[0] ?? "";
-    expect(formTag).toContain('action="/login"');
-    expect(formTag).toContain('method="get"');
-    expect(page).toContain('<input type="hidden" name="next" value="/"/>');
-    expect(page).not.toMatch(/<textarea[^>]*name=/);
-    expect(page).not.toMatch(/type="file"/);
+    expect(formTag).toContain('action="/api/sites"');
+    expect(formTag).toContain('method="post"');
+    expect(page).toMatch(/<textarea[^>]*name="description"/);
+    expect(page).toMatch(/<input[^>]*type="file"[^>]*name="photos"/);
+    // No whole-site switch without paid rights; the copy says what's true.
+    expect(page).not.toContain('id="scope-full"');
+    expect(page).toContain("Prva domača stran je brezplačna, brez prijave.");
+    expect(page).not.toContain("Potrebujete le e-poštni naslov");
+    expect(page).not.toContain("vodnim žigom");
+    expect(page).toContain('href="/zasebnost"');
     expect(page).toContain('href="/login"');
     expect(page).not.toContain("<style");
     expect(page).not.toMatch(/<script>(?!<\/script>)/);
@@ -180,13 +185,13 @@ describe("landing page", () => {
   it("calls the prices planned only while billing is off", () => {
     const config = loadConfig();
     const withBilling = { ...config, plans: { ...config.plans, paid: { ...config.plans.paid, billingEnabled: true } } };
-    const page = homePage({ config: withBilling, signedIn: false, csrf: "t", fullSite: false });
+    const page = homePage({ config: withBilling, signedIn: false, csrf: "t", fullSite: false, allowance: "", botSiteKey: null });
     expect(page).not.toContain("Načrtovane cene");
     expect(page).not.toContain("Plačevanja še ni");
     expect(page).toContain("Cene so z DDV. Letno naročnino plačate po računu z bančnim nakazilom.");
     expect(page).toContain("Pri letni naročnini bo domena vključena v ceno.");
     const noDomain = { ...config, plans: { ...config.plans, paid: { ...config.plans.paid, yearlyIncludesDomain: false } } };
-    const page2 = homePage({ config: noDomain, signedIn: false, csrf: "t", fullSite: false });
+    const page2 = homePage({ config: noDomain, signedIn: false, csrf: "t", fullSite: false, allowance: "", botSiteKey: null });
     expect(page2).not.toContain("domena vključena");
     expect(page2).not.toContain("Pri letni naročnini bo domena");
   });
@@ -288,6 +293,7 @@ describe("intake", () => {
   it("refuses AI work once the daily spend cap is reached", async () => {
     const { cookie } = await login();
     const site = (await platform.repo.listSites())[0]!;
+    await platform.repo.setStatus(site.id, "ready");
     await platform.repo.logModelCall({ siteId: site.id, jobId: null, stage: "brief", model: "claude-sonnet-5-5", inputTokens: 1, outputTokens: 1, cacheCreationTokens: 0, cacheReadTokens: 0, costEur: 1000, durationMs: 1, ok: true });
     const res = await app.request(`/api/sites/${site.id}/generate`, { method: "POST", body: "{}", headers: { cookie, "content-type": "application/json" } });
     expect(res.status).toBe(429);

@@ -5,17 +5,21 @@
  * and can't open this site → export zip opened offline. Costs one chat edit (~€0.02). Each run leaves
  * one account smoke-<time>@stranko-smoke.example behind.
  *
- *   REMOTE_URL=https://… REMOTE_PASSWORD=… pnpm tsx tools/eval/src/remote-smoke.ts <site-id>
+ * With --limits it then checks the free generation limits (remote-limits.ts; ~€0.40 more, --homepages
+ * adds the free account's two extra homepages, ~€0.5).
+ *
+ *   REMOTE_URL=https://… REMOTE_PASSWORD=… pnpm tsx tools/eval/src/remote-smoke.ts <site-id> [--limits [--homepages]]
  */
 import { checkExportOffline, launchCheckBrowser } from "@sb/engine";
 import { fillPlaceholderOps } from "./placeholder-fill.ts";
 import { csrfIn, remoteAdmin, remoteBrowser, useSignInLink } from "./remote-session.ts";
+import { runLimitChecks } from "./remote-limits.ts";
 
 const base = process.env.REMOTE_URL;
 const password = process.env.REMOTE_PASSWORD;
 const siteId = process.argv[2];
 if (!base || !password || !siteId) {
-  console.error("usage: REMOTE_URL=… REMOTE_PASSWORD=… remote-smoke.ts <site-id>");
+  console.error("usage: REMOTE_URL=… REMOTE_PASSWORD=… remote-smoke.ts <site-id> [--limits [--homepages]]");
   process.exit(2);
 }
 
@@ -127,5 +131,6 @@ if (step("export download", exp.ok && zip.length > 10_000, `${(zip.length / 1024
     await browser.close();
   }
 }
+if (process.argv.includes("--limits")) await runLimitChecks({ base, admin, siteId, step, homepages: process.argv.includes("--homepages") });
 console.log(`\n${base}${pubBody.url}`);
 stop();

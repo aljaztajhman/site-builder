@@ -125,6 +125,18 @@ export const AppConfigSchema = z.object({
       perIpPerHour: z.number().int().positive(),
     }),
   }),
+  /** Free generation limits, allowances, spending pools and job cost estimates (see config $comment). */
+  tiers: z.object({
+    anonymous: z.object({ homepages: z.number().int().min(0), keepDays: z.number().positive() }),
+    free: z.object({ homepages: z.number().int().min(0), chatEdits: z.number().int().min(0) }),
+    paid: z.object({ allowancePercentOfMonthlyPrice: z.number().min(0).max(100), firstMonthExtraEur: z.number().min(0) }),
+    perIpGenerationsPerDay: z.number().int().positive(),
+    pools: z
+      .object({ anonymous: z.number().min(0).max(1), free: z.number().min(0).max(1), paid: z.number().min(0).max(1), warnAt: z.number().gt(0).max(1) })
+      .refine((p) => p.anonymous + p.free + p.paid <= 1 + 1e-9, { message: "the pools are shares of the daily cap and must add up to at most 1" }),
+    estimatesEur: z.object({ homepage: z.number().positive(), fullSite: z.number().positive(), chatEdit: z.number().positive() }),
+    junk: z.object({ minDescriptionChars: z.number().int().min(1), minClassifierConfidence: z.number().min(0).max(1) }),
+  }),
   plans: z.looseObject({
     paid: PaidPlan,
   }),

@@ -28,6 +28,14 @@ export interface PipelineDeps {
   images?: ImageGenerator;
 }
 
+/** The classifier couldn't place the description (below tiers.junk.minClassifierConfidence): stopped before the brief. */
+export class JunkIntakeError extends Error {
+  constructor(readonly confidence: number) {
+    super(`The classifier couldn't place the description (confidence ${confidence.toFixed(2)}); stopped before any further model call`);
+    this.name = "JunkIntakeError";
+  }
+}
+
 export const mediaKey = (siteId: string, file: string) => `sites/${siteId}/media/${file}`;
 export const uploadKey = (siteId: string, assetId: string) => `sites/${siteId}/uploads/${assetId}`;
 
@@ -104,9 +112,18 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
   // Steps 1–2 (brief, design) and step 3 (images) don't depend on each other: they run side by side,
   // so photo processing and alt text (up to ~20 s with many photos) are off the path to the first preview.
   const slots = generatedImageCount(config, photos.length, !!deps.images, intake.scope);
+  // 1. Classify first. The intake may have asked the classifier already (its junk check). Junk, a
+  // description the classifier can't place (config tiers.junk), gets no Sonnet or image call: the brief
+  // and the photos' alt texts both wait for this.
+  const classified = stageTime("classify", async () => intake.classification ?? (await classify(client, intake.description))).then((cls) => {
+    if (cls.confidence < config.tiers.junk.minClassifierConfidence) throw new JunkIntakeError(cls.confidence);
+    return cls;
+  });
+  // Awaited below by both branches; without a handler now, an early rejection would be unhandled.
+  classified.catch(() => undefined);
   const planning = (async () => {
     // 1. Intake -> brief
-    const cls = await stageTime("classify", () => classify(client, intake.description));
+    const cls = await classified;
     const { brief, dropped } = await stageTime("brief", () =>
       makeBrief(client, { description: intake.description, businessType: cls.businessType, photoCount: photos.length, generatedSlots: slots.wanted, hasLogo: !!logo, scope: intake.scope }),
     );
@@ -145,6 +162,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     }
     // The variants exist now; the editor's live preview shows the photos before the alt texts are back.
     if (images.length) await log("images", "Photos ready", { ids: images.map((i) => i.id) });
+    await classified;
     const alts = await altTexts(client, vision);
     alts.forEach((a, i) => {
       images[i]!.alt = a.alt.slice(0, 180);

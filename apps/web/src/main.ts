@@ -1,7 +1,7 @@
 import { serve } from "@hono/node-server";
 import { loadConfig } from "@sb/config";
 import { mailerFromEnv, platformFromEnv } from "@sb/platform";
-import { startWorker } from "@sb/worker/worker";
+import { intakeClassifier, startWorker } from "@sb/worker/worker";
 import { createApp } from "./app.ts";
 import { authSettingsFromEnv } from "./auth.ts";
 
@@ -22,7 +22,8 @@ const mailer = mailerFromEnv();
 if (mailer.kind === "console") console.log("[web] RESEND_API_KEY not set: sign-in links are printed here instead of emailed (development)");
 if (mailer.kind === "disabled") console.error("[web] RESEND_API_KEY not set: owners can't sign in by email until it is (admin password still works)");
 
-const app = createApp({ platform, config, auth, mailer, ...(appUrl ? { appUrl } : {}) });
+// The intake's junk check asks the classifier before a generation is queued (fails open: the pipeline asks again).
+const app = createApp({ platform, config, auth, mailer, classifyIntake: intakeClassifier(platform, config), ...(appUrl ? { appUrl } : {}) });
 const port = Number(process.env.PORT || 3000);
 serve({ fetch: app.fetch, port, hostname: "0.0.0.0" }, (info) => console.log(`[web] http://localhost:${info.port}`));
 

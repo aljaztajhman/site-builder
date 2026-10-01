@@ -2,7 +2,7 @@ import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypt
 import type { Context, MiddlewareHandler } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import type { AppConfig } from "@sb/config";
-import type { AccountRow, Repo, SiteRow } from "@sb/platform";
+import type { AccountRow, Repo, SiteRow, Tier } from "@sb/platform";
 import { hasSession, type AuthSettings } from "./auth.ts";
 import { DASHBOARD } from "./pages.tsx";
 
@@ -25,7 +25,7 @@ export const DEVICE_COOKIE = "sb_device";
 export const ACCOUNT_COOKIE = "sb_account";
 
 export type Viewer = { kind: "admin" } | { kind: "account"; account: AccountRow; paidSince: string | null } | { kind: "anonymous" };
-export type Tier = "admin" | "paid" | "free" | "anonymous";
+export type { Tier };
 
 export const tierOf = (v: Viewer): Tier => (v.kind === "admin" ? "admin" : v.kind === "account" ? (v.paidSince ? "paid" : "free") : "anonymous");
 export const signedIn = (v: Viewer): boolean => v.kind !== "anonymous";
@@ -146,17 +146,25 @@ const PUBLIC = (path: string) =>
   path.startsWith("/login/") ||
   path === "/logout" ||
   path === "/zasebnost" ||
+  // The intake: the first homepage needs no account (the limits decide who may generate).
+  path === "/api/sites" ||
   path.startsWith("/s/") ||
   path.startsWith("/assets/") ||
   path.startsWith("/preview/_shared/") ||
   path === "/favicon.ico";
 
-/** The viewer may see this site (its preview, state and editor). */
-export function canView(v: Viewer, site: SiteRow): boolean {
+/**
+ * The viewer may see this site (its preview, state and editor): the admin, the owning account, or the
+ * device that made an unclaimed anonymous preview.
+ */
+export function canView(v: Viewer, site: SiteRow, deviceId: string): boolean {
   if (v.kind === "admin") return true;
-  if (v.kind === "account") return site.account_id === v.account.id;
-  return false;
+  if (v.kind === "account" && site.account_id === v.account.id) return true;
+  return site.account_id === null && !!site.device_id && site.device_id === deviceId;
 }
+
+/** Where an anonymous visitor signs in and comes back to. */
+export const signInUrl = (next: string): string => `/login?next=${encodeURIComponent(next)}`;
 
 /** Sign-in for pages, 401 for the API. */
 function needSignIn(c: Context) {
@@ -181,8 +189,13 @@ export function siteAccess(repo: Repo): MiddlewareHandler<AppEnv> {
     const m = SITE_PATH.exec(path);
     if (m) {
       const site = await repo.getSite(m[1]!);
-      if (site && canView(viewer, site)) {
+      if (site && canView(viewer, site, c.get("deviceId"))) {
         c.set("site", site);
+        // An anonymous preview can be looked at; changing it needs an account. Its generation (a retry
+        // after a failure) is the limits' call.
+        if (viewer.kind === "anonymous" && c.req.method !== "GET" && c.req.method !== "HEAD" && !/^\/api\/sites\/[^/]+\/generate$/.test(path)) {
+          return refusalJson(c, { status: 401, code: "sign_in_required", message: "Za urejanje se prijavite z e-pošto. Predogled ostane vaš.", signIn: signInUrl(`/sites/${site.id}`) });
+        }
         return next();
       }
       if (viewer.kind === "anonymous") return needSignIn(c);
@@ -194,13 +207,15 @@ export function siteAccess(repo: Repo): MiddlewareHandler<AppEnv> {
 }
 
 export interface Refusal {
-  status: 401 | 403 | 409 | 429 | 503;
+  status: 400 | 401 | 403 | 409 | 429 | 503;
   code: string;
   /** Slovene, for the owner. */
   message: string;
+  /** Where signing in would help (anonymous visitors): the sign-in page, coming back here. */
+  signIn?: string;
 }
 
-export const refusalJson = (c: Context, r: Refusal) => c.json({ error: r.code, code: r.code, message: r.message }, r.status);
+export const refusalJson = (c: Context, r: Refusal) => c.json({ error: r.code, code: r.code, message: r.message, ...(r.signIn ? { signIn: r.signIn } : {}) }, r.status);
 
 /** Publishing and export are paid-tier rights (allow-listed accounts before billing) and the admin's. */
 export function publishRefusal(v: Viewer): Refusal | null {

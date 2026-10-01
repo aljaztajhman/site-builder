@@ -82,6 +82,16 @@
     "deviceCookieDays": 365,
     "magicLink": { "ttlMinutes": 15, "perEmailPerHour": 3, "perIpPerHour": 10 }
   },
+  "tiers": {
+    "$comment": "Free generation limits (docs/plans/free-generation-limits.md; owner's decisions sb-free-tiers = 1-2-10, sb-ai-allowance = first-month, sb-bot-check = Turnstile). Every model and image job is checked before it is queued, against its estimated cost; the real cost comes from the per-call log. anonymous: homepages per device, unclaimed previews deleted after keepDays. free (email account): homepages and chat edits in total, not per month; the anonymous preview carries over without using one. paid (and allow-listed before billing): a monthly € allowance of allowancePercentOfMonthlyPrice % of plans.paid.monthlyEur, plus firstMonthExtraEur in the first month; months run from the day the account got paid rights. perIpGenerationsPerDay: anonymous and free generations per keyed IP hash in 24 h (loose: mobile networks share IPs). pools: each tier's share of limits.dailyModelSpendCapEur per UTC day (admin jobs use the paid pool); a warning at warnAt of a pool. estimatesEur: what a job may cost, held until its calls are logged (measured: homepage with 2 generated pictures €0.26, full site with 3 ~€0.43, chat edit ~€0.012). junk: shorter descriptions, or a classifier confidence below the minimum, are refused before any Sonnet or image call.",
+    "anonymous": { "homepages": 1, "keepDays": 7 },
+    "free": { "homepages": 2, "chatEdits": 10 },
+    "paid": { "allowancePercentOfMonthlyPrice": 10, "firstMonthExtraEur": 3 },
+    "perIpGenerationsPerDay": 5,
+    "pools": { "anonymous": 0.3, "free": 0.2, "paid": 0.5, "warnAt": 0.8 },
+    "estimatesEur": { "homepage": 0.3, "fullSite": 0.5, "chatEdit": 0.03 },
+    "junk": { "minDescriptionChars": 40, "minClassifierConfidence": 0.5 }
+  },
   "plans": {
     "$comment": "Phase 1 has no billing; kept here so later phases read from config.",
     "freePreview": { "pages": ["home"], "model": "claude-sonnet-5-5", "effort": "medium", "watermark": true, "publishable": false },

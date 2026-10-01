@@ -1,8 +1,9 @@
 /**
  * Landing page, progressive only: the page reads fine without it. Scales the desktop example to its
  * column, plays each section's drawing once in view, types the example description into the prompt,
- * and runs the prompt box, which is the intake: signed out it keeps what was typed across the login,
- * signed in it restores that text, counts attached files and blocks a second submit while photos upload.
+ * and runs the prompt box, which is the intake for everyone: it keeps what was typed across the login
+ * and restores it, counts attached files, loads the bot check (no account) when the visitor starts on
+ * the form, and blocks a second submit while photos upload.
  */
 import { INTAKE_DRAFT_KEY, takeIntakeDraft, type IntakeDraft } from "./intake-draft.ts";
 
@@ -37,9 +38,8 @@ for (const s of document.querySelectorAll("#kaj, #kako")) io.observe(s);
 
 const form = document.querySelector<HTMLFormElement>("form[data-home-intake]");
 const ta = form?.querySelector("textarea");
-const signedIn = !!form?.hasAttribute("data-intake");
 // Back from the login with what was typed before it: fill it in and open the control that was asked for.
-const draft = form && ta && signedIn ? takeIntakeDraft() : null;
+const draft = form && ta ? takeIntakeDraft() : null;
 if (form && ta && draft) {
   if (draft.description && !ta.value) ta.value = draft.description;
   if (draft.scope) form.querySelector<HTMLInputElement>(`input[name=scope][value=${draft.scope}]`)?.click();
@@ -72,25 +72,37 @@ if (form && ta && !draft && !ta.value) {
 
 }
 
-if (form && ta && !signedIn) {
-  // Signed out the form goes to the login with nothing but next=/ in the URL; the text travels in this tab's sessionStorage.
-  form.addEventListener("submit", (e) => {
-    const attach = (e.submitter as HTMLElement | null)?.dataset.attach;
-    const scope = form.querySelector<HTMLInputElement>("input[name=scope]:checked")?.value;
-    const saved: IntakeDraft = {
-      description: ta.value.trim(),
-      attach: attach === "photos" || attach === "logo" ? attach : undefined,
-      scope: scope === "full" ? "full" : "home",
-    };
-    try {
-      sessionStorage.setItem(INTAKE_DRAFT_KEY, JSON.stringify(saved));
-    } catch {
-      // Storage blocked: the prompt simply starts empty after the login.
-    }
-  });
+if (ta) {
+  // Going to the login from here with something typed: the text waits in this tab's sessionStorage (never the URL).
+  for (const a of document.querySelectorAll<HTMLAnchorElement>('a[href^="/login"]')) {
+    a.addEventListener("click", () => {
+      if (!ta.value.trim()) return;
+      const saved: IntakeDraft = { description: ta.value.trim(), scope: "home" };
+      try {
+        sessionStorage.setItem(INTAKE_DRAFT_KEY, JSON.stringify(saved));
+      } catch {
+        // Storage blocked: the prompt simply starts empty after the login.
+      }
+    });
+  }
 }
 
-if (form && signedIn) {
+// Turnstile, on the form without an account: Cloudflare's script loads only once the visitor starts on
+// the form (not on every visit to the page). It puts its token in the form as cf-turnstile-response.
+const bot = form?.querySelector<HTMLElement>("[data-turnstile-src]");
+let botLoading = false;
+const loadBot = () => {
+  if (!bot || botLoading) return;
+  botLoading = true;
+  const s = document.createElement("script");
+  s.src = bot.dataset.turnstileSrc!;
+  s.async = true;
+  document.head.append(s);
+};
+const botToken = () => form?.querySelector<HTMLInputElement>("input[name=cf-turnstile-response]")?.value ?? "";
+if (form && bot) for (const ev of ["focusin", "pointerdown", "input"]) form.addEventListener(ev, loadBot, { once: true });
+
+if (form) {
   for (const input of form.querySelectorAll<HTMLInputElement>(".attach input[type=file]")) {
     input.addEventListener("change", () => {
       const label = input.closest("label")!;
@@ -99,8 +111,31 @@ if (form && signedIn) {
       else delete label.dataset.count;
     });
   }
-  form.addEventListener("submit", () => {
+  let waitedForBot = false;
+  form.addEventListener("submit", (e) => {
     const button = form.querySelector<HTMLButtonElement>("button[type=submit]");
+    // The bot check needs a moment for its token: wait for it once (at most 15 s), then send. Without a
+    // token the server refuses and the page comes back with the text kept.
+    if (bot && !botToken() && !waitedForBot) {
+      e.preventDefault();
+      waitedForBot = true;
+      loadBot();
+      if (button) {
+        button.disabled = true;
+        button.textContent = "Preverjam …";
+      }
+      const started = Date.now();
+      const wait = () => {
+        if (!botToken() && Date.now() - started < 15_000) return void window.setTimeout(wait, 200);
+        if (button) {
+          button.disabled = false;
+          button.textContent = "Ustvari";
+        }
+        form.requestSubmit();
+      };
+      wait();
+      return;
+    }
     if (!button) return;
     // Disabled after the submit event has been handled, so the button's value still counts.
     window.setTimeout(() => {

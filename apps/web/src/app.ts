@@ -19,26 +19,16 @@ import {
   PhotoError,
   type Operation,
 } from "@sb/engine";
-import { VersionConflictError, contentType, mailerFromEnv, type Mailer, type Platform } from "@sb/platform";
+import { VersionConflictError, contentType, mailerFromEnv, newId, type Mailer, type Platform, type Tier } from "@sb/platform";
 import { renderPage, sharedBundle, pageFile } from "@sb/render";
 import { blockerText, collectPlaceholders, sectionDef, type SiteSpec } from "@sb/spec";
 import type { AuthSettings } from "./auth.ts";
-import {
-  csrfOk,
-  fullSiteRefusal,
-  identity,
-  publishRefusal,
-  refusalJson,
-  sameOriginOnly,
-  signedIn,
-  siteAccess,
-  tierOf,
-  type AppEnv,
-  type Refusal,
-  type Viewer,
-} from "./access.ts";
+import { csrfOk, fullSiteRefusal, identity, publishRefusal, refusalJson, sameOriginOnly, signedIn, siteAccess, type AppEnv, type Refusal } from "./access.ts";
+import { accessInfo, allowanceFor, reserveJob } from "./limits.ts";
+import { TOKEN_FIELD, TURNSTILE_ORIGIN, botCheckFromEnv, type BotCheck } from "./turnstile.ts";
 import { registerLoginRoutes } from "./login.tsx";
 import { registerAdminRoutes } from "./admin.tsx";
+import { registerPrivacyRoute } from "./privacy.tsx";
 import { slugify } from "./slug.ts";
 import { DASHBOARD, sitesPage, sitePage } from "./pages.tsx";
 import { homePage } from "./home.tsx";
@@ -61,7 +51,16 @@ export interface AppOptions {
   mailer?: Mailer;
   /** Public origin for links in emails, e.g. https://stranko.example (APP_URL, or Railway's public domain). */
   appUrl?: string;
+  /** Bot check on the anonymous intake (Turnstile); from env when not given. */
+  botCheck?: BotCheck;
+  /**
+   * The classifier (Haiku) for the junk check at intake, before anything else is spent; its call is
+   * logged against the job. Absent (tests), the pipeline's own classification is the only check.
+   */
+  classifyIntake?: ClassifyIntake;
 }
+
+export type ClassifyIntake = (description: string, ctx: { siteId: string; tier: Tier; accountId: string | null; aiJobId: string }) => Promise<{ businessType: string; confidence: number }>;
 
 const SAFE_SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const SAFE_HASH = /^[0-9a-f]{10}$/;
@@ -73,30 +72,14 @@ const IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avi
 const LOGO_TYPES = new Set([...IMAGE_TYPES, "image/svg+xml"]);
 const EXT: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/avif": "avif", "image/svg+xml": "svg" };
 
-const SPEND_CAP: Refusal = { status: 429, code: "spend_cap", message: "Današnja omejitev porabe je dosežena. Jutri spet deluje; do takrat stran urejate neposredno." };
-
-/** What the viewer may do on a site they can open (GET /api/sites/:id → access). */
-function siteAccessInfo(v: Viewer) {
-  const ai = !aiRefusal(v);
-  const publish = !publishRefusal(v);
-  return { viewer: tierOf(v), can: { edit: signedIn(v), chat: ai, regenerate: ai, publish, export: publish, fullSite: !fullSiteRefusal(v) } };
-}
-
-/**
- * Model work (new site, "Ustvari znova", chat edits) until the free tiers have their limits: the admin
- * and allow-listed accounts only.
- */
-function aiRefusal(v: Viewer): Refusal | null {
-  const tier = tierOf(v);
-  if (tier === "admin" || tier === "paid") return null;
-  if (tier === "anonymous") return { status: 401, code: "sign_in_required", message: "Prijavite se z e-pošto." };
-  return { status: 403, code: "ai_not_open", message: "Ustvarjanje in spremembe s pomočnikom so zaenkrat na voljo prvim uporabnikom. Stran lahko urejate neposredno." };
-}
-
 export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono<AppEnv> {
   const { repo, storage, queue, db } = platform;
   const app = new Hono<AppEnv>();
   const mailer = opts.mailer ?? mailerFromEnv();
+  const botCheck = opts.botCheck ?? botCheckFromEnv(process.env, auth.secureCookies);
+  const limits = { repo, config, secret: auth.secret };
+  // The landing page and the intake's refusal page carry the Turnstile widget (its script and frame).
+  const turnstileCsp = (path: string) => botCheck.mode === "on" && (path === "/" || path === "/api/sites");
 
   // Deployed environments are public URLs: nothing here may be indexed, published sites included in phase 1.
   app.use("*", async (c, next) => {
@@ -112,7 +95,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       "Content-Security-Policy",
       c.req.path.startsWith("/s/") || c.req.path.startsWith("/preview/")
         ? `default-src 'self'; script-src 'self' '${JS_FLAG_HASH}'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-src https://www.google.com https://maps.google.com; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'self'`
-        : `default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors ${
+        : `default-src 'self'; ${turnstileCsp(c.req.path) ? `script-src 'self' ${TURNSTILE_ORIGIN}; frame-src 'self' ${TURNSTILE_ORIGIN}` : "frame-src 'self'"}; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors ${
             // The landing page frames its example site (/assets/ui/<hash>/example-home.html).
             c.req.path.startsWith("/assets/ui/") ? "'self'" : "'none'"
           }`,
@@ -133,8 +116,22 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   // Contact forms: public submit next to published sites, owner's messages in the dashboard.
   registerFormRoutes(app, { repo, config, secret: auth.secret });
   // Sign-in (magic link for owners, password for the admin) and the admin's page.
-  registerLoginRoutes(app, { repo, config, auth, mailer, ...(opts.appUrl ? { appUrl: opts.appUrl } : {}) });
+  registerLoginRoutes(app, {
+    repo,
+    config,
+    auth,
+    mailer,
+    ...(opts.appUrl ? { appUrl: opts.appUrl } : {}),
+    // The anonymous preview carries over: previews made on this device, or on the one that asked for the link.
+    onSignIn: async (c, accountId, link) => {
+      for (const device of new Set([c.get("deviceId"), link.deviceId].filter((d): d is string => !!d))) {
+        const claimed = await repo.usage.claimDevice(device, accountId);
+        if (claimed.length) console.log(`[web] ${claimed.length} anonymous preview(s) claimed by ${accountId}`);
+      }
+    },
+  });
   registerAdminRoutes(app, { repo, config, ...(opts.appUrl ? { appUrl: opts.appUrl } : {}) });
+  registerPrivacyRoute(app, config);
 
   // ---------- Health ----------
   app.get("/health", async (c) => {
@@ -172,11 +169,23 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   app.get("/favicon.ico", (c) => c.redirect(`/assets/ui/${uiAssets().hash}/icon.svg`, 301));
 
   // ---------- Landing page ----------
-  const landing = (c: Context<AppEnv>, extra: { error?: string; description?: string } = {}) => {
+  const landing = async (c: Context<AppEnv>, extra: { error?: string; description?: string } = {}) => {
     const viewer = c.get("viewer");
-    return homePage({ config, signedIn: signedIn(viewer), csrf: c.get("csrf"), fullSite: !fullSiteRefusal(viewer), ...extra });
+    const anonymous = viewer.kind === "anonymous";
+    const previous = anonymous ? (await repo.usage.deviceSites(c.get("deviceId")))[0] : undefined;
+    return homePage({
+      config,
+      signedIn: signedIn(viewer),
+      csrf: c.get("csrf"),
+      fullSite: !fullSiteRefusal(viewer),
+      allowance: (await allowanceFor(limits, viewer, c.get("deviceId"))).text,
+      botSiteKey: anonymous && botCheck.mode === "on" ? botCheck.siteKey : null,
+      anonymousClosed: anonymous && botCheck.mode === "unavailable",
+      ...(previous ? { previous: `/sites/${previous.id}` } : {}),
+      ...extra,
+    });
   };
-  app.get("/", (c) => c.html(landing(c)));
+  app.get("/", async (c) => c.html(await landing(c)));
 
   // ---------- Dashboard ----------
   app.get(DASHBOARD, async (c) => {
@@ -190,24 +199,29 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
         cap: config.limits.dailyModelSpendCapEur,
         csrf: c.get("csrf"),
         admin,
-        ...(viewer.kind === "account" ? { account: { email: viewer.account.email, note: viewer.paidSince ? "Imate dostop do celotne strani." : null } } : {}),
+        // An owner sees what is left of their allowance (limits.ts), in Slovene.
+        ...(viewer.kind === "account" ? { account: { email: viewer.account.email, note: (await allowanceFor(limits, viewer, c.get("deviceId"))).text } } : {}),
       }),
     );
   });
   // The landing page's prompt box is the only intake; old links land on it.
   app.get("/new", (c) => c.redirect("/#zacni"));
 
+  // The intake. In order, before anything is spent: the form token, the scope, the description's length,
+  // the files, the bot check (anonymous), the limits (which hold the job's estimated cost), then the
+  // classifier (Haiku, ~€0.0006) refuses what it can't place. Every refusal keeps the text in the form.
   app.post("/api/sites", async (c) => {
     const body = await c.req.parseBody({ all: true });
     const description = typeof body.description === "string" ? body.description.trim() : "";
     // The landing page again, with the description kept and the reason above the prompt.
-    const refuse = (error: string, status: 400 | Refusal["status"] = 400) => c.html(landing(c, { error, description }), status);
+    const refuse = async (error: string, status: Refusal["status"] = 400) => c.html(await landing(c, { error, description }), status);
     if (!csrfOk(c, body as Record<string, unknown>)) return refuse("Obrazec je potekel. Pošljite ga še enkrat.", 403);
     const viewer = c.get("viewer");
     const scope = body.scope === "full" ? "full" : "home";
-    const denied = aiRefusal(viewer) ?? (scope === "full" ? fullSiteRefusal(viewer) : null);
-    if (denied) return refuse(denied.message, denied.status);
-    if (description.length < 30) return refuse("Opis mora imeti vsaj 30 znakov.");
+    const fullDenied = scope === "full" ? fullSiteRefusal(viewer) : null;
+    if (fullDenied) return refuse(fullDenied.message, fullDenied.status);
+    const minChars = config.tiers.junk.minDescriptionChars;
+    if (description.length < minChars) return refuse(`Opis naj ima vsaj ${minChars} znakov: kdo ste, kaj ponujate, kje ste in kako vas dosežejo.`);
     const photos = ([] as unknown[]).concat(body["photos"] ?? []).filter((f): f is File => f instanceof File && f.size > 0);
     const logo = body.logo instanceof File && body.logo.size > 0 ? body.logo : undefined;
     if (photos.length > config.limits.maxPhotos) return refuse(`Največ ${config.limits.maxPhotos} fotografij. Izberite jih znova.`);
@@ -217,8 +231,40 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     for (const f of photos) if (!IMAGE_TYPES.has(f.type)) return refuse(`Nepodprta vrsta slike: ${f.name}. Izberite fotografije znova.`);
     if (logo && !LOGO_TYPES.has(logo.type)) return refuse("Logotip mora biti SVG, PNG, JPEG, WebP ali AVIF.");
 
+    if (viewer.kind === "anonymous") {
+      if (botCheck.mode === "unavailable") return refuse("Brezplačni predogled brez prijave trenutno ni na voljo. Prijavite se z e-pošto.", 503);
+      if (!(await botCheck.verify(body[TOKEN_FIELD]))) return refuse("Preverjanje, da niste robot, ni uspelo. Počakajte trenutek in pošljite znova.", 403);
+    }
+    const siteId = newId("site");
+    const grant = await reserveJob(limits, c, { kind: "generate", scope, siteId });
+    if (!grant.ok) return refuse(grant.refusal.message, grant.refusal.status);
+    const accountId = viewer.kind === "account" ? viewer.account.id : null;
+
+    // Junk: the classifier can't place it. Its cost is logged against the job; the job is refused, so it
+    // doesn't use up the visitor's preview. If the classifier can't be asked, the pipeline asks it again.
+    let classification: { businessType: string; confidence: number } | undefined;
+    if (opts.classifyIntake) {
+      try {
+        classification = await opts.classifyIntake(description, { siteId, tier: grant.tier, accountId, aiJobId: grant.aiJobId });
+      } catch (e) {
+        console.warn("[web] intake classification failed; the pipeline classifies again:", (e as Error).message.slice(0, 200));
+      }
+      if (classification && classification.confidence < config.tiers.junk.minClassifierConfidence) {
+        await repo.usage.finishJob(grant.aiJobId, "refused");
+        return refuse("Iz opisa ne znamo razbrati, kakšno podjetje imate. Napišite, kaj ponujate, kje ste in kako vas dosežejo.");
+      }
+    }
+
     const slug = await repo.uniqueSlug(slugify(description) || "stran");
-    const site = await repo.createSite({ name: slug, slug, intake: { description, photoAssetIds: [], scope }, accountId: viewer.kind === "account" ? viewer.account.id : null });
+    const site = await repo.createSite({
+      id: siteId,
+      name: slug,
+      slug,
+      intake: { description, photoAssetIds: [], scope },
+      accountId,
+      // An anonymous preview belongs to this device until someone signs in on it.
+      deviceId: viewer.kind === "anonymous" ? c.get("deviceId") : null,
+    });
     const stored = async (f: File, kind: "photo" | "logo") => {
       const data = new Uint8Array(await f.arrayBuffer());
       const meta = await imageMeta(data).catch(() => null);
@@ -234,14 +280,15 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       const logoRow = logo ? await stored(logo, "logo") : undefined;
       await db.query("update sites set intake = $2 where id = $1", [
         site.id,
-        JSON.stringify({ description, scope, photoAssetIds: photoRows.map((r) => r.id), ...(logoRow ? { logoAssetId: logoRow.id } : {}) }),
+        JSON.stringify({ description, scope, photoAssetIds: photoRows.map((r) => r.id), ...(logoRow ? { logoAssetId: logoRow.id } : {}), ...(classification ? { classification } : {}) }),
       ]);
+      await repo.setStatus(site.id, "generating");
+      await queue.send("generate", { siteId: site.id, scope, aiJobId: grant.aiJobId });
     } catch (e) {
+      await repo.usage.finishJob(grant.aiJobId, "failed");
       await repo.setStatus(site.id, "failed");
       return refuse((e as Error).message);
     }
-    await repo.setStatus(site.id, "generating");
-    await queue.send("generate", { siteId: site.id, scope });
     return c.redirect(`/sites/${site.id}`, 303);
   });
 
@@ -263,8 +310,8 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     const after = Number(c.req.query("after") ?? 0);
     const checklist = current ? await siteChecklist(repo, id, current.spec) : [];
     return c.json({
-      // What this viewer may do here; refusals from the action endpoints carry { code, message } too.
-      access: siteAccessInfo(viewer),
+      // What this viewer may do here and has left; refusals from the action endpoints carry { code, message } too.
+      access: await accessInfo(limits, viewer, c.get("deviceId"), site),
       site,
       pulse,
       version: current?.version ?? null,
@@ -428,12 +475,16 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     const body = (await c.req.json().catch(() => ({}))) as { message?: string };
     const message = (body.message ?? "").trim();
     if (!message || message.length > 2000) return c.json({ error: "message required (max 2000 chars)" }, 400);
-    const denied = aiRefusal(c.get("viewer"));
-    if (denied) return refusalJson(c, denied);
     if (!(await repo.getSpec(id))) return c.json({ error: "no spec yet" }, 409);
-    if ((await repo.spendToday()) >= config.limits.dailyModelSpendCapEur) return refusalJson(c, SPEND_CAP);
-    const msg = await repo.addChat(id, "user", message);
-    await queue.send("edit", { siteId: id, messageId: Number(msg.id) });
+    const grant = await reserveJob(limits, c, { kind: "edit", scope: "home", siteId: id });
+    if (!grant.ok) return refusalJson(c, grant.refusal);
+    try {
+      const msg = await repo.addChat(id, "user", message);
+      await queue.send("edit", { siteId: id, messageId: Number(msg.id), aiJobId: grant.aiJobId });
+    } catch (e) {
+      await repo.usage.finishJob(grant.aiJobId, "failed");
+      throw e;
+    }
     return c.json({ ok: true });
   });
 
@@ -443,14 +494,19 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     if (!site) return c.json({ error: "not found" }, 404);
     const body = (await c.req.json().catch(() => ({}))) as { scope?: string };
     const scope = body.scope === "full" ? "full" : "home";
-    const viewer = c.get("viewer");
-    const denied = aiRefusal(viewer) ?? (scope === "full" ? fullSiteRefusal(viewer) : null);
+    const denied = scope === "full" ? fullSiteRefusal(c.get("viewer")) : null;
     if (denied) return refusalJson(c, denied);
-    if ((await repo.spendToday()) >= config.limits.dailyModelSpendCapEur) return refusalJson(c, SPEND_CAP);
     if (site.status === "generating") return refusalJson(c, { status: 409, code: "busy", message: "Stran se že ustvarja." });
-    await db.query("update sites set intake = jsonb_set(intake, '{scope}', to_jsonb($2::text)) where id = $1", [id, scope]);
-    await repo.setStatus(id, "generating");
-    await queue.send("generate", { siteId: id, scope });
+    const grant = await reserveJob(limits, c, { kind: "generate", scope, siteId: id });
+    if (!grant.ok) return refusalJson(c, grant.refusal);
+    try {
+      await db.query("update sites set intake = jsonb_set(intake, '{scope}', to_jsonb($2::text)) where id = $1", [id, scope]);
+      await repo.setStatus(id, "generating");
+      await queue.send("generate", { siteId: id, scope, aiJobId: grant.aiJobId });
+    } catch (e) {
+      await repo.usage.finishJob(grant.aiJobId, "failed");
+      throw e;
+    }
     return c.json({ ok: true });
   });
 

@@ -1,9 +1,9 @@
 import type { Context, Hono } from "hono";
 import type { AppConfig } from "@sb/config";
-import { isDisposableEmailDomain, normaliseEmail, type AccountRow, type AllowListRow, type Repo } from "@sb/platform";
+import { POOLS, isDisposableEmailDomain, normaliseEmail, type AccountRow, type AllowListRow, type Pool, type Repo } from "@sb/platform";
 import { csrfOk, hashToken, newToken, type AppEnv } from "./access.ts";
 import { Doc, TopBar, html } from "./pages.tsx";
-import { formatDate, formatDateTime } from "./ui/labels.ts";
+import { formatDate, formatDateTime, formatEur } from "./ui/labels.ts";
 
 /**
  * The admin's page (ACCESS_PASSWORD only, see access.ts): the allow-list of emails with paid-tier
@@ -19,20 +19,48 @@ export interface AdminDeps {
 export function registerAdminRoutes(app: Hono<AppEnv>, deps: AdminDeps): void {
   const { repo, config } = deps;
 
-  const show = async (c: Context<AppEnv>, flash?: { text: string; bad?: boolean }, status: 200 | 400 | 403 = 200) =>
-    c.html(
+  const show = async (c: Context<AppEnv>, flash?: { text: string; bad?: boolean }, status: 200 | 400 | 403 = 200) => {
+    const cap = config.limits.dailyModelSpendCapEur;
+    const pools = [];
+    for (const pool of POOLS) pools.push({ pool, size: config.tiers.pools[pool] * cap, ...(await repo.usage.pool(pool)) });
+    return c.html(
       adminPage({
         csrf: c.get("csrf"),
         allowList: await repo.accounts.allowList(),
         accounts: await repo.accounts.list(),
         spendToday: await repo.spendToday(),
-        cap: config.limits.dailyModelSpendCapEur,
+        cap,
+        pools,
+        holds: await repo.usage.holds(),
+        warnAt: config.tiers.pools.warnAt,
         ...(flash ? { flash } : {}),
       }),
       status,
     );
+  };
 
   app.get("/admin", (c) => show(c));
+
+  // Pause a pool for some hours (a hold the size of the pool), or end the holds. The deployed smoke test
+  // uses this to empty the free pools and check that paid jobs still run.
+  app.post("/admin/pools/hold", async (c) => {
+    const body = (await c.req.parseBody()) as Record<string, unknown>;
+    if (!csrfOk(c, body)) return show(c, { text: "Obrazec je potekel. Poskusite znova.", bad: true }, 403);
+    const pool = POOLS.find((p) => p === body.pool);
+    const hours = Number(body.hours ?? 1);
+    if (!pool || !Number.isFinite(hours) || hours <= 0 || hours > 48) return show(c, { text: "Neveljaven bazen ali čas.", bad: true }, 400);
+    await repo.usage.hold(pool, config.tiers.pools[pool] * config.limits.dailyModelSpendCapEur, Math.round(hours * 60));
+    console.log(`[admin] pool ${pool} held for ${hours} h`);
+    return show(c, { text: `Bazen »${POOL_LABEL[pool]}« je ustavljen za ${hours} h.` });
+  });
+  app.post("/admin/pools/release", async (c) => {
+    const body = (await c.req.parseBody()) as Record<string, unknown>;
+    if (!csrfOk(c, body)) return show(c, { text: "Obrazec je potekel. Poskusite znova.", bad: true }, 403);
+    const pool = POOLS.find((p) => p === body.pool);
+    const n = await repo.usage.releaseHolds(pool);
+    console.log(`[admin] ${n} pool hold(s) released${pool ? ` (${pool})` : ""}`);
+    return show(c, { text: n ? "Bazen spet deluje." : "Ni bilo ustavljenih bazenov." });
+  });
 
   app.post("/admin/allow-list", async (c) => {
     const body = (await c.req.parseBody()) as Record<string, unknown>;
@@ -74,16 +102,21 @@ export function registerAdminRoutes(app: Hono<AppEnv>, deps: AdminDeps): void {
   });
 }
 
+const POOL_LABEL: Record<Pool, string> = { anonymous: "brez prijave", free: "brezplačni računi", paid: "naročniki in skrbnik" };
+
 interface AdminProps {
   csrf: string;
   allowList: AllowListRow[];
   accounts: (AccountRow & { allowed_since: string | null; sites: number })[];
   spendToday: number;
   cap: number;
+  pools: { pool: Pool; size: number; spent: number; held: number }[];
+  warnAt: number;
+  holds: { pool: Pool; eur: number; until: string }[];
   flash?: { text: string; bad?: boolean };
 }
 
-export function adminPage({ csrf, allowList, accounts, spendToday, cap, flash }: AdminProps): string {
+export function adminPage({ csrf, allowList, accounts, spendToday, cap, pools, holds, warnAt, flash }: AdminProps): string {
   return html(
     <Doc title="Skrbnik">
       <TopBar spend={{ today: spendToday, cap }} csrf={csrf} admin>
@@ -98,6 +131,37 @@ export function adminPage({ csrf, allowList, accounts, spendToday, cap, flash }:
             {flash.text}
           </p>
         )}
+        <h2>Poraba danes</h2>
+        <p className="muted">{`Vsak bazen je delež dnevne omejitve (${formatEur(cap)}). »Zadržano« je ocena za opravila, ki še tečejo. Ko porabljeno doseže ${Math.round(warnAt * 100)} % bazena, delavec to zapiše v dnevnik.`}</p>
+        {pools.map((p) => {
+          const hold = holds.find((h) => h.pool === p.pool);
+          return (
+            <article className="message" key={p.pool}>
+              <dl>
+                <dt>Bazen</dt>
+                <dd>{POOL_LABEL[p.pool]}</dd>
+                <dt>Porabljeno</dt>
+                <dd className="num">{`${formatEur(p.spent)} od ${formatEur(p.size)}`}</dd>
+                <dt>Zadržano</dt>
+                <dd className="num">{formatEur(p.held)}</dd>
+                {hold && (
+                  <>
+                    <dt>Ustavljen</dt>
+                    <dd>{`do ${formatDateTime(hold.until)}`}</dd>
+                  </>
+                )}
+              </dl>
+              <form method="post" action={hold ? "/admin/pools/release" : "/admin/pools/hold"}>
+                <input type="hidden" name="_csrf" value={csrf} />
+                <input type="hidden" name="pool" value={p.pool} />
+                {!hold && <input type="hidden" name="hours" value="24" />}
+                <button className={hold ? "btn sm" : "btn sm danger"} type="submit">
+                  {hold ? "Spet zaženi" : "Ustavi za 24 h"}
+                </button>
+              </form>
+            </article>
+          );
+        })}
         <h2>Dostop do celotne strani</h2>
         <p className="muted">Naslovi s tega seznama dobijo pravice naročnine (celotna stran, objava, prenos), dokler plačevanja še ni. Velja za račun s tem naslovom, tudi če se še ni prijavil.</p>
         <form method="post" action="/admin/allow-list" className="message">

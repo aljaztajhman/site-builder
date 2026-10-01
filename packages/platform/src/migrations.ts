@@ -158,6 +158,44 @@ export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
       create index sites_account on sites(account_id);
     `,
   },
+  {
+    id: 5,
+    name: "generation_limits",
+    // ai_jobs: one row per model job a viewer starts (generate, chat edit), written before it is queued, so
+    // its estimated cost is held until its calls are logged; also the admin's pool holds (kind 'hold').
+    // sites.device_id: the device that made an unclaimed anonymous preview. ip_key: keyed hash, cleared after a day.
+    sql: `
+      alter table sites add column device_id text;
+      create index sites_device on sites(device_id);
+
+      create table ai_jobs (
+        id bigserial primary key,
+        kind text not null,
+        scope text,
+        tier text not null,
+        pool text not null,
+        account_id text,
+        device_id text,
+        ip_key text not null default '',
+        site_id text,
+        estimate_eur numeric(12, 6) not null,
+        status text not null default 'queued',
+        created_at timestamptz not null default now(),
+        expires_at timestamptz,
+        finished_at timestamptz
+      );
+      create index ai_jobs_account on ai_jobs(account_id, kind);
+      create index ai_jobs_device on ai_jobs(device_id, kind);
+      create index ai_jobs_ip on ai_jobs(ip_key, created_at);
+      create index ai_jobs_queued on ai_jobs(status, pool);
+
+      alter table model_calls add column tier text;
+      alter table model_calls add column account_id text;
+      alter table model_calls add column ai_job_id bigint;
+      create index model_calls_ai_job on model_calls(ai_job_id);
+      create index model_calls_account on model_calls(account_id, created_at);
+    `,
+  },
 ];
 
 type Query = (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>;

@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import { SPEC_VERSION, migrateSpec, type SiteSpec } from "@sb/spec";
 import type { Db } from "./db.ts";
 import { Accounts } from "./accounts.ts";
+import { Usage, type Tier } from "./usage.ts";
 
 export type SiteStatus = "new" | "generating" | "ready" | "editing" | "publishing" | "failed";
 
@@ -13,8 +14,10 @@ export interface SiteRow {
   current_version: number | null;
   published_version: number | null;
   published_at: string | null;
-  /** The owner's account; null for sites the admin made. */
+  /** The owner's account; null for sites the admin made and for unclaimed anonymous previews. */
   account_id: string | null;
+  /** The device that made an unclaimed anonymous preview (deleted after tiers.anonymous.keepDays); null once claimed. */
+  device_id: string | null;
   intake: Intake;
   brief: unknown;
   created_at: string;
@@ -27,6 +30,8 @@ export interface Intake {
   photoAssetIds: string[];
   /** Facts the client typed in structured fields, if any (none in phase 1's form). */
   scope: "home" | "full";
+  /** The classifier's answer when the intake already asked it (junk check); the pipeline then doesn't ask again. */
+  classification?: { businessType: string; confidence: number };
 }
 
 export interface AssetRow {
@@ -73,6 +78,10 @@ export interface ModelCallRow {
   costEur: number;
   durationMs: number;
   ok: boolean;
+  /** Whose spend it is: the tier's pool, the account's allowance, the job that held its estimate. */
+  tier?: Tier | null;
+  accountId?: string | null;
+  aiJobId?: string | number | null;
 }
 
 /** A save was based on a version that is no longer current (someone else saved in between). */
@@ -105,15 +114,19 @@ export class Repo {
   /** Accounts, allow-list, magic-link tokens and sessions. */
   readonly accounts: Accounts;
 
+  /** Model spend per tier, queued jobs and their held estimates, anonymous previews. */
+  readonly usage: Usage;
+
   constructor(readonly db: Db) {
     this.accounts = new Accounts(db);
+    this.usage = new Usage(db);
   }
 
-  async createSite(input: { name: string; slug: string; intake: Intake; accountId?: string | null }): Promise<SiteRow> {
-    const id = newId("site");
+  async createSite(input: { id?: string; name: string; slug: string; intake: Intake; accountId?: string | null; deviceId?: string | null }): Promise<SiteRow> {
+    const id = input.id ?? newId("site");
     const { rows } = await this.db.query<SiteRow>(
-      "insert into sites (id, slug, name, intake, account_id) values ($1, $2, $3, $4, $5) returning *",
-      [id, input.slug, input.name, JSON.stringify(input.intake), input.accountId ?? null],
+      "insert into sites (id, slug, name, intake, account_id, device_id) values ($1, $2, $3, $4, $5, $6) returning *",
+      [id, input.slug, input.name, JSON.stringify(input.intake), input.accountId ?? null, input.deviceId ?? null],
     );
     return rows[0]!;
   }
@@ -338,9 +351,9 @@ export class Repo {
 
   async logModelCall(c: ModelCallRow): Promise<void> {
     await this.db.query(
-      `insert into model_calls (site_id, job_id, stage, model, input_tokens, output_tokens, cache_creation_tokens, cache_read_tokens, cost_eur, duration_ms, ok)
-       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-      [c.siteId, c.jobId, c.stage, c.model, c.inputTokens, c.outputTokens, c.cacheCreationTokens, c.cacheReadTokens, c.costEur, c.durationMs, c.ok],
+      `insert into model_calls (site_id, job_id, stage, model, input_tokens, output_tokens, cache_creation_tokens, cache_read_tokens, cost_eur, duration_ms, ok, tier, account_id, ai_job_id)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+      [c.siteId, c.jobId, c.stage, c.model, c.inputTokens, c.outputTokens, c.cacheCreationTokens, c.cacheReadTokens, c.costEur, c.durationMs, c.ok, c.tier ?? null, c.accountId ?? null, c.aiJobId ?? null],
     );
   }
 
