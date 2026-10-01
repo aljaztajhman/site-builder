@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="sl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>D · Mirno · Šola plavanja Mladi Val (design sketch)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&amp;family=Figtree:wght@400;500;600&amp;display=swap">
+<style>
+/* D · Mirno: calm, editorial, photo-led. White page, deep teal ink, a serif at magazine scale, photos layered like prints. Speaks to the parent. */
+*{box-sizing:border-box}
+body{margin:0}
+.pg{--ink:#0f2a2e;--teal:#0b6e75;--mist:#eaf5f5;--line:#c5dcdc;--soft:#42595c;
+  font-family:Figtree,system-ui,sans-serif;font-size:18px;line-height:1.6;color:var(--ink);background:#fff;-webkit-font-smoothing:antialiased;overflow:hidden}
+.pg :where(h1,h2,h3){font-family:Newsreader,Georgia,serif;font-weight:500;margin:0;letter-spacing:-.025em}
+.pg :where(p){margin:0}
+.pg :where(a){color:inherit}
+.wrap{max-width:1320px;margin:0 auto;padding:0 48px;position:relative}
+.ph{background:#fff3a6;color:#3b2f00;border:1px dashed #8a6d00;border-radius:2px;padding:0 .3em;font-weight:500;white-space:nowrap;font-family:Figtree,sans-serif}
+.ai{position:absolute;left:12px;bottom:12px;font-size:12px;line-height:1;padding:6px 8px;border-radius:2px;background:#0f2a2e;color:#fff}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:56px;padding:0 28px;border-radius:4px;font-weight:600;font-size:18px;text-decoration:none;background:var(--teal);color:#fff}
+.lnk{font-weight:600;text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:1.5px}
+
+/* header: nav, centred wordmark, phone link */
+.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:32px;padding-top:28px;padding-bottom:24px;border-bottom:1px solid var(--line)}
+.nav{display:flex;gap:28px;font-weight:500;font-size:16px}
+.nav a{text-decoration:none;padding:12px 0}
+.brand{text-align:center;text-decoration:none;line-height:1.1}
+.brand b{display:block;font-family:Newsreader,serif;font-weight:500;font-size:32px;letter-spacing:-.02em}
+.brand span{font-size:14px;color:var(--soft)}
+.top .lnk{justify-self:end;padding:12px 0}
+.menu{display:none}
+
+/* hero */
+.hero{padding:72px 0 0}
+.hero-head{display:grid;grid-template-columns:minmax(0,9fr) minmax(0,3fr);gap:56px;align-items:end}
+.hero h1{font-size:clamp(46px,6.4vw,92px);line-height:.98;letter-spacing:-.035em;text-wrap:balance}
+.lead{font-size:19px;line-height:1.55;color:var(--soft)}
+.acts{display:flex;flex-wrap:wrap;align-items:center;gap:12px 28px;margin-top:28px}
+.hero-pics{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,9fr);gap:56px;margin-top:72px;align-items:start;position:relative}
+.when{padding-top:4px}
+.when p{font-size:16px;color:var(--soft)}
+.when b{display:block;font-family:Newsreader,serif;font-weight:400;font-size:clamp(64px,7vw,100px);line-height:.9;letter-spacing:-.04em;color:var(--teal);margin:12px 0 16px}
+.wide{position:relative;margin:0 calc((100vw - min(100vw,1320px))/-2 - 48px) 0 0}
+.wide img{display:block;width:100%;aspect-ratio:2/1;object-fit:cover;object-position:center 60%}
+.wide .ai{left:auto;right:16px}
+.print{position:absolute;left:calc(25% - 72px);bottom:-96px;width:280px;margin:0;border:10px solid #fff;background:#fff}
+.print img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover}
+.print .ai{left:8px;bottom:8px}
+
+/* facts */
+.facts{padding:176px 0 0}
+.facts-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:40px;border-top:1px solid var(--ink);padding-top:28px}
+.fact .k{font-size:15px;color:var(--soft)}
+.fact .v{font-family:Newsreader,serif;font-size:30px;line-height:1.15;letter-spacing:-.02em;margin-top:8px}
+.fact .d{margin-top:8px;font-size:16px}
+
+/* approach: one large statement */
+.about{padding:152px 0 144px}
+.about-grid{display:grid;grid-template-columns:minmax(0,8fr) minmax(0,4fr);gap:72px;align-items:end}
+.eyebrow{font-size:15px;color:var(--soft);margin-bottom:28px}
+.about h2{font-size:clamp(34px,4.9vw,72px);line-height:1.04;letter-spacing:-.03em}
+.about .txt{font-size:20px;color:var(--soft);max-width:28em;margin-top:36px}
+.about .lnk{display:inline-block;margin-top:28px}
+.tall{position:relative;margin:0}
+.tall img{display:block;width:100%;aspect-ratio:3/4;object-fit:cover}
+
+/* first visit */
+.steps{background:var(--mist);padding:120px 0 128px}
+.steps-head{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:72px;align-items:start}
+.steps h2{font-size:clamp(34px,4vw,56px);line-height:1.04}
+.steps ol{list-style:none;margin:0;padding:0}
+.steps li{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:40px;align-items:baseline;padding:28px 0;border-top:1px solid var(--line)}
+.steps li:first-child{border-top:1px solid var(--ink)}
+.steps li:last-child{border-bottom:1px solid var(--line)}
+.steps h3{font-size:32px;line-height:1.1}
+
+/* questions */
+.faq{padding:128px 0 136px}
+.faq-grid{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:72px;align-items:start}
+.faq h2{font-size:clamp(34px,4vw,56px);line-height:1.04}
+.qa{margin:0;border-top:1px solid var(--ink)}
+.qa div{padding:26px 0 28px;border-bottom:1px solid var(--line)}
+.qa dt{font-family:Newsreader,serif;font-size:27px;line-height:1.2;letter-spacing:-.015em}
+.qa dd{margin:8px 0 0;color:var(--soft)}
+
+/* contact */
+.cta{position:relative;background:var(--ink);color:#fff}
+.cta-grid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);align-items:stretch}
+.cta-txt{padding:120px 72px 128px 0}
+.cta h2{font-size:clamp(38px,5.4vw,80px);line-height:1;letter-spacing:-.03em}
+.cta ul{list-style:none;margin:44px 0 44px;padding:0;border-top:1px solid #3d5a5e;max-width:520px}
+.cta li{display:grid;grid-template-columns:110px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid #3d5a5e}
+.cta li span{color:#a9cfd2}
+.btn-w{background:#fff;color:var(--ink)}
+.cta-pic{position:relative;margin:0 calc((100vw - min(100vw,1320px))/-2 - 48px) 0 0}
+.cta-pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+
+/* footer */
+.foot{padding:40px 0 56px;font-size:15px;color:var(--soft)}
+.foot-grid{display:flex;flex-wrap:wrap;gap:20px 56px;align-items:baseline}
+.foot strong{font-family:Newsreader,serif;font-weight:500;font-size:24px;color:var(--ink)}
+.foot nav{display:flex;gap:24px;margin-left:auto}
+.bar{display:none}
+
+@media (max-width:900px){
+  .top{grid-template-columns:1fr auto}
+  .nav,.top .lnk{display:none}
+  .brand{text-align:left}
+  .menu{display:block;font-weight:600;text-decoration:underline;text-underline-offset:5px;padding:12px 0}
+  .hero-head{grid-template-columns:1fr;gap:28px}
+  .hero-pics{grid-template-columns:1fr;gap:0;margin-top:48px}
+  .when{order:2;padding:112px 0 0}
+  .wide{margin:0 -48px}
+  .wide img{aspect-ratio:4/3}
+  .print{left:0;bottom:auto;top:calc(75vw - 96px);width:44%}
+  .facts{padding-top:56px}
+  .facts-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .about-grid{grid-template-columns:1fr;gap:48px}
+  .tall{max-width:70%}
+  .steps-head,.faq-grid{grid-template-columns:1fr;gap:36px}
+  .cta-grid{grid-template-columns:1fr}
+  .cta-txt{padding:80px 0}
+  .cta-pic{margin:0 -48px;aspect-ratio:16/9}
+}
+@media (max-width:640px){
+  .pg{font-size:17px}
+  .wrap{padding:0 20px}
+  .top{padding-top:14px;padding-bottom:12px}
+  .brand b{font-size:26px}
+  .brand span{font-size:13px}
+  .hero{padding-top:36px}
+  .lead{font-size:18px}
+  .acts{flex-direction:column;align-items:stretch;gap:8px;margin-top:24px}
+  .acts .lnk{align-self:flex-start;padding:12px 0}
+  .hero-pics{margin-top:36px}
+  .wide{margin:0 -20px}
+  .print{border-width:6px;width:46%;top:calc(75vw - 72px)}
+  .when{padding-top:96px}
+  .facts{padding-top:44px}
+  .facts-grid{grid-template-columns:1fr;gap:20px;padding-top:20px}
+  .fact .v{font-size:27px}
+  .about{padding:80px 0}
+  .about .txt{font-size:18px;margin-top:24px}
+  .steps{padding:72px 0 80px}
+  .steps li{grid-template-columns:1fr;gap:6px;padding:22px 0}
+  .steps h3{font-size:27px}
+  .faq{padding:72px 0 80px}
+  .qa div{padding:20px 0 22px}
+  .qa dt{font-size:23px}
+  .cta-txt{padding:64px 0}
+  .cta ul{margin:32px 0}
+  .cta li{grid-template-columns:86px 1fr}
+  .cta .btn{width:100%}
+  .cta-pic{margin:0 -20px;aspect-ratio:4/3}
+  .foot nav{margin-left:0}
+  .bar{display:grid;grid-template-columns:1fr 1fr;gap:8px;position:sticky;bottom:0;padding:8px 12px;background:#fff;border-top:1px solid var(--line)}
+  .bar a{display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:4px;font-weight:600;font-size:16px;text-decoration:none;border:1.5px solid var(--ink)}
+  .bar a:first-child{background:var(--teal);border-color:var(--teal);color:#fff}
+}
+</style>
+</head>
+<body>
+<div class="pg">
+
+<div class="wrap">
+<div class="top">
+<nav class="nav" aria-label="Glavni meni"><a href="#vadba">Vadba</a><a href="#obisk">Prvi obisk</a><a href="#vprasanja">Vprašanja</a><a href="#kontakt">Kontakt</a></nav>
+<a class="brand" href="#"><b>Mladi Val</b><span>Šola plavanja, Celje</span></a>
+<a class="lnk" href="#kontakt">Pokličite nas</a>
+<a class="menu" href="#kontakt">Meni</a>
+</div>
+</div>
+
+<header class="hero">
+<div class="wrap">
+<div class="hero-head">
+<h1>Vaš otrok se bo v vodi počutil varno in sproščeno</h1>
+<div>
+<p class="lead">Šola plavanja Mladi Val v Celju uči otroke plavati. Vadba poteka vsak popoldan ob 17.00.</p>
+<div class="acts"><a class="btn" href="#kontakt">Pokličite nas</a><a class="lnk" href="#kontakt">Pišite nam</a></div>
+</div>
+</div>
+<div class="hero-pics">
+<div class="when"><p>Vadba vsak popoldan ob</p><b>17.00</b><p>Celje</p></div>
+<figure class="wide"><img src="img/hall.jpg" alt="Bazen v popoldanski svetlobi"><span class="ai">Ustvarjeno z UI</span></figure>
+<figure class="print"><img src="img/goggles.jpg" alt="Otroška plavalna očala in kapa na robu bazena"><span class="ai">Ustvarjeno z UI</span></figure>
+</div>
+</div>
+</header>
+
+<section class="facts" aria-label="Osnovni podatki">
+<div class="wrap">
+<div class="facts-grid">
+<div class="fact"><p class="k">Kdaj</p><p class="v">Vsak popoldan ob 17.00</p></div>
+<div class="fact"><p class="k">Kje</p><p class="v">Celje</p><p class="d"><mark class="ph">[naslov bazena]</mark></p></div>
+<div class="fact"><p class="k">Za koga</p><p class="v">Otroci</p><p class="d"><mark class="ph">[starost otrok]</mark></p></div>
+<div class="fact"><p class="k">Telefon</p><p class="v"><mark class="ph">[telefon]</mark></p></div>
+</div>
+</div>
+</section>
+
+<section class="about" id="vadba">
+<div class="wrap about-grid">
+<div>
+<p class="eyebrow">Vadba</p>
+<h2>Želimo, da se otrok v vodi najprej počuti varno. Sproščenost in zamahi pridejo potem.</h2>
+<p class="txt">Ko voda ni več tuja, je učenje plavanja veliko lažje. Zato se nam ne mudi.</p>
+<a class="lnk" href="#kontakt">Dogovorite se za prvi obisk</a>
+</div>
+<figure class="tall"><img src="img/ladder.jpg" alt="Stopnice in ograja v plitvem delu bazena"><span class="ai">Ustvarjeno z UI</span></figure>
+</div>
+</section>
+
+<section class="steps" id="obisk">
+<div class="wrap steps-head">
+<h2>Do prve ure v treh korakih</h2>
+<ol>
+<li><h3>Pokličite ali pišite</h3><p>Povejte nam, da bi otroka radi pripeljali na plavanje.</p></li>
+<li><h3>Dogovorimo se</h3><p>Skupaj izberemo dan, ko pridete prvič.</p></li>
+<li><h3>Ob 17.00 ob bazenu</h3><p>Vadba poteka vsak popoldan ob 17.00 v Celju.</p></li>
+</ol>
+</div>
+</section>
+
+<section class="faq" id="vprasanja">
+<div class="wrap faq-grid">
+<h2>Vprašanja staršev</h2>
+<dl class="qa">
+<div><dt>Kdaj poteka vadba?</dt><dd>Vsak popoldan ob 17.00.</dd></div>
+<div><dt>Kje poteka vadba?</dt><dd>V Celju. <mark class="ph">[naslov bazena]</mark></dd></div>
+<div><dt>Koliko mora biti otrok star?</dt><dd><mark class="ph">[starost otrok]</mark></dd></div>
+<div><dt>Kaj naj otrok prinese s seboj?</dt><dd><mark class="ph">[seznam opreme]</mark></dd></div>
+</dl>
+</div>
+</section>
+
+<section class="cta" id="kontakt">
+<div class="wrap cta-grid">
+<div class="cta-txt">
+<h2>Pokličite, pa se dogovorimo za prvi obisk</h2>
+<ul>
+<li><span>Telefon</span> <b><mark class="ph">[telefon]</mark></b></li>
+<li><span>E-pošta</span> <b><mark class="ph">[e-pošta]</mark></b></li>
+<li><span>Naslov</span> <b><mark class="ph">[naslov bazena]</mark>, Celje</b></li>
+<li><span>Vadba</span> <b>vsak popoldan ob 17.00</b></li>
+</ul>
+<a class="btn btn-w" href="#">Pokličite nas</a>
+</div>
+<figure class="cta-pic"><img src="img/water.jpg" alt="Gladina vode v bazenu"><span class="ai">Ustvarjeno z UI</span></figure>
+</div>
+</section>
+
+<footer class="foot">
+<div class="wrap foot-grid">
+<strong>Mladi Val</strong>
+<span>Šola plavanja Mladi Val, Celje</span>
+<span><mark class="ph">[naziv in naslov podjetja]</mark> <mark class="ph">[matična št.]</mark> <mark class="ph">[davčna št.]</mark></span>
+<nav aria-label="Pravno"><a href="#">Zasebnost</a><a href="#">Izjava o dostopnosti</a></nav>
+</div>
+</footer>
+
+<div class="bar"><a href="#">Pokliči</a><a href="#">Navodila za pot</a></div>
+
+</div>
+</body>
+</html>
