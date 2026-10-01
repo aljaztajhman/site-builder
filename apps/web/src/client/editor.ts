@@ -1657,7 +1657,8 @@ document.addEventListener("keydown", (e) => {
 
 function barItems(): Child[] {
   const p = currentPage();
-  if (!state.spec) return [];
+  // While the first version is generated the live preview can be watched at either size, too.
+  if (!state.spec && state.site.status !== "generating") return [];
   return [
     h("div", { class: "seg", role: "group", "aria-label": "Velikost predogleda" },
       h("button", { type: "button", "aria-pressed": String(device === "mobile"), onClick: () => { device = "mobile"; render(); } }, "Telefon"),
@@ -1706,7 +1707,7 @@ function render(): void {
     ].filter((c): c is HTMLElement => c !== null),
   );
   shell.bar.replaceChildren(...barItems().filter((c): c is Node => c instanceof Node));
-  shell.bar.hidden = !state.spec;
+  shell.bar.hidden = !state.spec && state.site.status !== "generating";
   shell.ed.classList.toggle("nospec", !state.spec);
   shell.ed.classList.toggle("generating", state.site.status === "generating");
   renderStage();

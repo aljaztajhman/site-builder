@@ -122,6 +122,12 @@ describe("generation progress in a browser", () => {
           expect(await page.locator(".sk-hero-pic .sk-ai").textContent()).toBe("Ustvarjeno z UI");
           await page.waitForTimeout(1000);
           await shot(page, "3-picture-1280");
+
+          // The size switch works before the first version exists: the live preview at desktop width.
+          await page.getByRole("button", { name: "Računalnik" }).click();
+          await expect.poll(async () => (await page.locator(".frame.live").boundingBox())!.width, { timeout: 5000 }).toBeGreaterThan(640);
+          await expect.poll(() => page.locator(".sk-hero").evaluate((n) => getComputedStyle(n).gridTemplateColumns.split(" ").length)).toBe(2);
+          await shot(page, "4-desktop-1280");
         } else {
           await page.waitForTimeout(1200);
           await shot(page, "3-picture-360");

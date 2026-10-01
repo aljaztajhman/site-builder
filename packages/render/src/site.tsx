@@ -32,6 +32,12 @@ import { jsonLd } from "./jsonld.ts";
  * the facts of hero-type with-facts), so the call bar can wait until it has scrolled away without
  * breaking "call and directions in one tap".
  */
+/** The hero has its own call button (then the call bar, on screen from the start, would repeat it right below). */
+function heroOffersCall(first: { type: string; variant: string; props: unknown } | undefined): boolean {
+  const p = (first?.props ?? {}) as { primary?: { target?: { action?: string } }; secondary?: { target?: { action?: string } } };
+  return p.primary?.target?.action === "call" || p.secondary?.target?.action === "call";
+}
+
 function heroOffersCallAndDirections(first: { type: string; variant: string; props: unknown } | undefined): boolean {
   if (!first) return false;
   if (first.type === "hero-type" && first.variant === "with-facts") return true;
@@ -147,8 +153,11 @@ export function renderPage(spec: SiteSpec, page: Page, opts: RenderOptions = {})
   const fontsBase = ctx.shared("fonts/");
   const preloadFonts = fontFiles(design).filter((f) => f === `${pair.heading.file}.woff2` || f === `${pair.body.file}.woff2`);
 
+  const bar = localized.chrome.mobileActionBar === true;
+  // Bar on screen from the start and a call button in the hero: on a phone the hero's one is hidden (chrome.css).
+  const barCoversHeroCall = bar && heroOffersCall(first) && !heroOffersCallAndDirections(first);
   const body = renderToStaticMarkup(
-    <body data-imagery={design.imagery} className={localized.chrome.mobileActionBar ? "has-action-bar" : undefined}>
+    <body data-imagery={design.imagery} className={bar ? (barCoversHeroCall ? "has-action-bar bar-covers-hero-call" : "has-action-bar") : undefined}>
       <a className="skip-link" href="#main">
         {ctx.t("skipToContent")}
       </a>
@@ -160,7 +169,7 @@ export function renderPage(spec: SiteSpec, page: Page, opts: RenderOptions = {})
         })}
       </main>
       <Footer ctx={ctx} />
-      {localized.chrome.mobileActionBar && <MobileActionBar ctx={ctx} afterHero={heroOffersCallAndDirections(localizedPage.sections[0])} />}
+      {bar && <MobileActionBar ctx={ctx} afterHero={heroOffersCallAndDirections(first)} />}
       {needsConsent && <CookieConsent ctx={ctx} />}
       {[...islands].sort().map((f) => (
         <script key={f} src={ctx.shared(`js/${f}`)} defer />
