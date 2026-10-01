@@ -374,6 +374,15 @@ describe("direct editor API (no model calls)", () => {
     const previewHtml = await (await app.request(`/preview/${site.id}/index.html`, { headers: { cookie } })).text();
     expect(previewHtml).toBe(publishedHtml);
 
+    // Layout thumbnails: one section alone, in the variant asked for, with its own content.
+    const thumb = await (await app.request(`/preview/${site.id}/index.html?section=s_about&variant=text-only`, { headers: { cookie } })).text();
+    expect(thumb.match(/<section id="s_[a-z_]+"/g)).toEqual(['<section id="s_about"']);
+    expect(thumb).toContain("s-about--text-only");
+    expect(thumb).toContain(golden.pages[0].sections.find((s: { id: string }) => s.id === "s_about").props.heading);
+    for (const bad of ["section=s_about&variant=grid", "section=s_nope&variant=text-only", "section=s_about"]) {
+      expect((await app.request(`/preview/${site.id}/index.html?${bad}`, { headers: { cookie } })).status, bad).toBe(404);
+    }
+
     const zip = await app.request(`/api/sites/${site.id}/export`, { headers: { cookie } });
     expect(zip.headers.get("content-type")).toBe("application/zip");
     expect((await zip.arrayBuffer()).byteLength).toBeGreaterThan(10_000);
