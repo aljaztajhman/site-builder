@@ -228,6 +228,15 @@ export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
       create index model_calls_account on model_calls(account_id, created_at);
     `,
   },
+  {
+    id: 7,
+    name: "publish_lock",
+    // Set while one publish writes its release: a second publish of the same site waits its turn instead
+    // of deleting the first one's half-written files. A stale value (a crashed publish) expires.
+    sql: `
+      alter table sites add column publishing_since timestamptz;
+    `,
+  },
 ];
 
 type Query = (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>;

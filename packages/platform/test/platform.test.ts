@@ -36,9 +36,10 @@ describe("migrations", () => {
       await run(byName("accounts"), 4);
       // This PR's environment also ran "generation_limits" as 5 (now 6; 5 is "accounts").
       await run(byName("generation_limits"), 5);
-      // Runs main's 4 (its table didn't exist), doesn't run "accounts" or "generation_limits" again, moves their records.
+      // Runs main's 4 (its table didn't exist) and anything newer, doesn't run "accounts" or "generation_limits" again, moves their records.
       const ran = await migrate(old);
-      expect(ran).toEqual([byName("version retention").id]);
+      // Migrations added after these branches (id > 6) run as usual.
+      expect(ran).toEqual([byName("version retention").id, ...MIGRATIONS.filter((m) => m.id > 6).map((m) => m.id)]);
       const { rows } = await old.query<{ id: number; name: string }>("select id, name from schema_migrations order by id");
       expect(rows.map((r) => [Number(r.id), r.name])).toEqual(MIGRATIONS.map((m) => [m.id, m.name]));
       expect((await old.query("select to_regclass('site_publishes') as t")).rows[0]).toEqual({ t: "site_publishes" });
@@ -112,6 +113,21 @@ describe("queue (pg-boss on PGlite)", () => {
     const queue = await createQueue(db, "pglite://memory");
     const { rows } = await db.query<{ retry_limit: number }>("select retry_limit from pgboss.queue where name = 'edit'");
     expect(rows[0]?.retry_limit).toBe(0);
+    await queue.stop();
+  }, 30_000);
+
+  it("marks only sites without a waiting or running job as interrupted", async () => {
+    const queue = await createQueue(db, "pglite://memory");
+    const waiting = await repo.createSite({ name: "W", slug: "cakajoca", intake: { description: "x", photoAssetIds: [], scope: "home" } });
+    const dead = await repo.createSite({ name: "D", slug: "prekinjena", intake: { description: "x", photoAssetIds: [], scope: "home" } });
+    await repo.setStatus(waiting.id, "generating");
+    await repo.setStatus(dead.id, "generating");
+    // Queued behind other work (no worker for this queue in the tests): still live.
+    await queue.send("alt", { siteId: waiting.id, imageIds: [] });
+    const failed = await repo.failInterrupted(0);
+    expect(failed).toContain(dead.id);
+    expect(failed).not.toContain(waiting.id);
+    expect((await repo.getSite(waiting.id))?.status).toBe("generating");
     await queue.stop();
   }, 30_000);
 

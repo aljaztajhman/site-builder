@@ -201,6 +201,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     }),
   );
   if (content.structuredFallback) await log("content", "Structured output rejected the content schema; used plain JSON");
+  if (content.repairs.length) await log("content", "Repaired the content answer before validation", content.repairs);
   if (content.issues.length) await log("content", "Spec still has issues after retries", content.issues);
   let spec = content.spec;
   // A regeneration keeps the business facts of the version it replaces (typed in the editor since the intake).
@@ -337,6 +338,14 @@ export class PublishBlockedError extends Error {
 }
 
 /** Step 6: render static files to storage as a new release and switch the live site to it (published.ts). */
+/** Another publish of the same site is writing its release right now. */
+export class PublishBusyError extends Error {
+  constructor() {
+    super("Another publish of this site is in progress");
+    this.name = "PublishBusyError";
+  }
+}
+
 export async function publishSite(deps: Pick<PipelineDeps, "repo" | "storage" | "config">, siteId: string, version?: number): Promise<{ version: number; files: number }> {
   const { repo, storage, config } = deps;
   const site = await repo.getSite(siteId);
@@ -346,13 +355,19 @@ export async function publishSite(deps: Pick<PipelineDeps, "repo" | "storage" | 
   const current = { ...stored, spec: { ...stored.spec, slug: site.slug } };
   const checklist = await siteChecklist(repo, siteId, current.spec);
   if (checklist.length) throw new PublishBlockedError(checklist);
-  const media = await loadMedia(storage, siteId, current.spec, config.images.widths);
-  const files = siteFiles(current.spec, media, { imageWidths: config.images.widths });
-  const release = newReleaseId(current.version);
-  await writeRelease(storage, site.slug, release, files);
-  await repo.markPublished(siteId, current.version, release);
-  await repo.addEvent({ siteId, stage: "publish", message: `Published version ${current.version}`, data: { files: files.size, release } });
-  return { version: current.version, files: files.size };
+  // Two publishes at once (two tabs, a retry after a timeout) would each clean up the other's release.
+  if (!(await repo.claimPublish(siteId))) throw new PublishBusyError();
+  try {
+    const media = await loadMedia(storage, siteId, current.spec, config.images.widths);
+    const files = siteFiles(current.spec, media, { imageWidths: config.images.widths });
+    const release = newReleaseId(current.version);
+    await writeRelease(storage, site.slug, release, files);
+    await repo.markPublished(siteId, current.version, release);
+    await repo.addEvent({ siteId, stage: "publish", message: `Published version ${current.version}`, data: { files: files.size, release } });
+    return { version: current.version, files: files.size };
+  } finally {
+    await repo.releasePublish(siteId);
+  }
 }
 
 export async function exportSite(deps: Pick<PipelineDeps, "repo" | "storage" | "config">, siteId: string, version?: number): Promise<{ filename: string; zip: Uint8Array }> {

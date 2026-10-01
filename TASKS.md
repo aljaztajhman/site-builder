@@ -12,7 +12,7 @@ Nothing is opened to the public until every item here is done (owner, 2026-10-01
 - [ ] Owner: Cloudflare account (free) and a Turnstile widget for the app's domain; on Railway (web): `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`. Until then the deployed app refuses previews without an account (signed-in owners can still generate). For the smoke test on `preview`, Cloudflare's test keys work (always pass): site `1x00000000000000000000AA`, secret `1x0000000000000000000000000000000AA`
 - [ ] Owner: `ANTHROPIC_API_KEY` on the Railway web service too (the intake's junk check asks the classifier before queueing; without it the worker's pipeline does it, after the job is queued)
 - [ ] Junk threshold (`tiers.junk.minClassifierConfidence` 0.5) is uncalibrated: the 10 fixtures classify at 0.95–0.99; nothing measured on junk or on businesses outside the 10 types (a florist, a yoga studio). An eval with ~20 such descriptions (Haiku, < €0.02) before launch
-- [ ] Editor (being rebuilt) and the limits: show `access.allowance.text`, hide edit/publish controls when `access.can.*` is false (an anonymous visitor sees the full editor today; every change is refused with a sign-in message), link `access.signIn`, show `access.expiresAt`; owners now get `spendToday`/`cap` = null (the old editor's pill shows 0,00 €)
+- [x] Editor (being rebuilt) and the limits (done 2026-10-01, see "Editor and accounts" below; confirmed in the audit): show `access.allowance.text`, hide edit/publish controls when `access.can.*` is false (an anonymous visitor sees the full editor today; every change is refused with a sign-in message), link `access.signIn`, show `access.expiresAt`; owners now get `spendToday`/`cap` = null (the old editor's pill shows 0,00 €)
 - [ ] Photo descriptions (`alt` job, Sonnet vision) run without a limit (direct editing is never limited); they count in the tier's pool. Watch it: a script could upload photos repeatedly (cost per photo not measured; one vision call each)
 - [ ] Free previews were planned with a watermark (PRODUCT.md, config `plans.freePreview.watermark`); none is rendered. Decide whether one is wanted (`sb-preview-gate` didn't mention it); the landing copy no longer promises it
 
@@ -103,6 +103,68 @@ Backlog:
 - [ ] "Warmer" colour edits can't warm the page surface: cream is banned and warm-craft's surface is a cool grey-green (#edf2ef). Live eval 2026-09-30: pekarna "Toplejše barve, kot skorja kruha" warmed muted/accent/border/inverse but left primary (already crust brown) and surface, so the edit check fails (the only failure, 1/47). Give warm directions a warm, non-cream surface range
 - [ ] Measure the edit-stage cache hit rate in production; owners' edits minutes apart may miss the 5-minute cache (1-hour TTL writes cost 2×)
 
+## Audit 2026-10-01 (branch claude/happy-franklin-ta0u11; details, cost and prompt review: docs/plans/audit-2026-10-01.md)
+Fixed, each with a test that fails on the old code (714 → 766 tests; typecheck, lint clean):
+- [x] Two "generate" clicks at once started two paid generations; the status is now claimed in one statement
+- [x] A chat edit (and the alt job) set a site back to "ready" while a generation started meanwhile; status changes are now conditional
+- [x] Two publishes at once could delete each other's release files (live site 404s); a per-site publish lock (migration 7, `sites.publishing_since`, expires after 10 min), 409 in Slovene, retention skips a publishing site
+- [x] pg-boss queue options were never updated on an existing database (`retryLimit: 0` only applied to new queues)
+- [x] Fact check missed translations (an English overlay could publish an invented phone), social URLs, the hours note, the ZEPT legal name and all but the first street word
+- [x] An old fact violation blocked every later chat edit and critique round; only new violations block edits now (publishing still lists all)
+- [x] "Ustvari znova" dropped the owner's facts whenever the regenerated spec had any unrelated issue
+- [x] A browser/Lighthouse failure in the checks marked a usable, saved site "failed"
+- [x] Image decompression bombs: sharp now refuses > 60 MP before decoding (a 1.5 MB file could take 1.5 GB)
+- [x] Session secret without SESSION_SECRET was SHA-256 of ACCESS_PASSWORD, and every visitor's device cookie made it guessable offline; now scrypt (signs everyone out once on deploy)
+- [x] Render-time placeholders never blocked publishing: the accessibility statement showed an unfillable "[Dopolnite besedilo]" on every published site; opening-hours/service-area sections without the fact now block
+- [x] `javascript:`/`data:` link URLs passed `z.url()`; only http(s) rendered and validated; JSON-LD `sameAs` from social
+- [x] Half-written shared bundles stayed incomplete forever; written per missing file
+- [x] Contact form never sent on a site with slug "preview"; translation pointer `/constructor/name` crashed rendering; greeting allowed in eyebrows; hard-coded Slovene plurals in labels
+- [x] Content answers repaired in code before a paid retry (key whitespace, null properties, SEO length; item in "Images")
+- [x] Worker start marked every busy site failed, including jobs still queued or running on an overlapping deploy; now only sites with no live pg-boss job
+- [x] JSON and edit retry counts moved to config (`limits.jsonRetries`, `limits.editRetries`)
+- [x] CI/eval workflows: read-only token, concurrency, no shell interpolation of `inputs.only`, FAL_KEY passed; Playwright pinned to the worker image's 1.63.0; unused workspace deps removed; `.nvmrc`; `.dockerignore` covers `.env.*`
+- [x] Editor: a failed reload lost the "not saved" toast, a failed first load left a blank page; outline keyboard-operable; one persistent live region for toasts; inline edit could save twice
+Open, found by the audit (decide or build; none needs a model call unless marked):
+- [ ] Owner: set `SESSION_SECRET` on Railway web now (the scrypt fallback helps; a random secret is the fix). Also confirm Railway appends the real client IP as the last `X-Forwarded-For` entry (`clientIp` assumes it; IP limits depend on it)
+- [ ] Alt-text vision jobs have no per-user limit: a free account can loop "replace photo" and spend the global daily cap, stopping AI for every tier until midnight UTC. Reserve an `ai_jobs` row per alt job under the tier pool (escalates the item in "Mandatory before public launch")
+- [ ] Generated picture ids are reused (`img_gN` on regeneration, `img_NN` after a removal), so old versions show new pictures (item above in "Engine and editor review"); needs never-reused ids and a retention change
+- [ ] Queued estimates: `endStaleJobs(30)` measures from creation, so a job waiting > 30 min in a backlog stops counting against limits; add `started_at` or use the pg-boss state
+- [ ] Graceful shutdown waits 10 s; a running generation is cut off and its site stays "generating" until the next start. Drain on SIGTERM (Railway's window) and mark site + ai_job on interruption
+- [ ] Spend cap is check-then-call: parallel stages/jobs can overshoot by ~€1–2; generated pictures keep going after the job failed; a fal success whose download fails is logged at €0
+- [ ] SpendCapError during the critique still marks a usable, saved site "failed" (kept as decided earlier; reconsider: the owner sees "Napaka" on a fine site)
+- [ ] Fact check hours/prices are loose: an hour passes if that number appears anywhere, a price if the number appears anywhere (e.g. €16 from "8–16"). Needs entity pairing (price ↔ offering, time ↔ day)
+- [ ] Magic link claims the current device's anonymous previews too: someone can send their own link to a victim and take the victim's previews (the confirm page shows their address). Decide: claim only the requesting device's previews (cross-device hand-off then stops)
+- [ ] Owner decision: export runs no publish checklist (the zip can carry placeholders and unchecked facts). Same checklist as publishing, or a warning?
+- [ ] Public 500s return the raw error text (pg constraint names, S3 errors) and `/health` returns DB/storage error text; return a Slovene generic message and log the detail (check the editor toasts and the smoke test)
+- [ ] `loginThrottle` has one global bucket: 200 junk POSTs lock the admin out for 10 min. Upload bodies are buffered whole (up to ~195 MB per request)
+- [ ] A 404 under a nested path (`/s/x/storitve/missing`) renders unstyled (root 404.html with relative `../_shared` paths)
+- [ ] Footer year and the accessibility statement date come from render time (server UTC): preview, publish and export differ; extends the item in "Follow-ups"
+- [ ] No rule guarantees exactly one hero (the page's h1) per page; a chat edit can leave 0 or 2. Validation rule is small but changes what the model must produce: `pnpm eval --only` on 2–3 fixtures first
+- [ ] Beige page backgrounds (#ece3d0) pass the cream check; tightening `isCreamOrOffWhite` changes design repair: run the design tests and an eval
+- [ ] CTAs are informal ("Pokliči", "Rezerviraj termin") while all copy uses vikanje
+- [ ] Locales de/hr/it are allowed but have no UI strings (English under `lang="de"`); restrict to sl/en until translated
+- [ ] Privacy policy points to "Nastavitve piškotkov" in the footer, but that button isn't on the privacy page itself
+- [ ] `businessFromBrief` forces an hours placeholder for every non-builder, even when the client said not to publish hours
+- [ ] Dockerfiles: run as root, install dev dependencies, copy everything before `pnpm install` (no layer cache). Needs a `docker build` and a Railway deploy to verify
+- [ ] Island scripts (`packages/components/islands/*.js`, shipped on every site) are neither linted nor typechecked
+- [ ] `eval/report.md` and `contact-sheet.png` are overwritten by every eval mode, `--offline` included; the live baseline gets replaced by accident
+- [ ] Dead/duplicated code: the worker's `publish` queue handler (nothing sends it), `Repo.spendToday` vs `UsageQueries.spentToday`, `applyPatches` vs `applyDirectEdit`, `escapePointer` vs `escapeToken`, unused i18n keys
+Cost (docs/plans/audit-2026-10-01.md has the numbers):
+- [ ] Owner: compare fal's billed price per picture with config (config books $0.079 per 1536×1024 picture; fal's public table says $0.041 high / $0.010 medium). The daily cap and pools count the booked price
+- [ ] Pictures at medium quality: ~€0.027 less per picture; compare sheet + judge first (`pnpm fixtures:ai-photos compare`, ~€0.09)
+- [ ] Reuse brief, design, alt text and pictures on "Ustvari znova", retry and homepage → full site (€0.07–0.18 per rebuild; a failed job's pictures are paid again today)
+- [ ] 1-hour cache TTL for the section catalogue, after measuring the production cache hit rate (item in "Engine and editor review"); drop unread cache breakpoints on brief/design/alt
+- [ ] Content retries as RFC 6902 patches instead of the whole JSON again (mechanical repairs are done) (~300 vs 3–5k output tokens)
+- [ ] Second critique round only when the re-check reports failures (3 of 4 second rounds returned nothing)
+- [ ] Eval: cache fal pictures by prompt hash (€0.54 of a €2.97 run), judge via the Batch API, critique gets only the homepage spec
+Prompts (each needs `pnpm eval --only …` runs before merging; proposed text in docs/plans/audit-2026-10-01.md):
+- [ ] Catalogue text drives sameness: eyebrow "e.g. the town or trade", contact-strip "right after the hero", cta "near the end"; RULES "Mobile first" and no rule on call-button count
+- [ ] `imageIdeas` and `imageGen.pipeline.style`: no landscape unless the business sells the place, unstaged phone-photo style, hero composition, no body parts
+- [ ] Critique: priorities, no Slovene "corrections" of correct words, never delete content for component failures, JSON only, pass hero-suitable photo ids
+- [ ] Slovene style block (no English words, plural not dual under vikanje, „…", no em dash) for content, edit and critique
+- [ ] Directions: stale black-and-white/duotone promises, `Imagery: monochrome/duotone` printed to the model, editorial's homepage hero list; drop the design prompt's "Avoid" list (enforced by tokens)
+- [ ] Alt text with business context and `heroSuitable` criteria; judge ignores required placeholders and the call bar; brief without the full RULES; edit prompt gets the editor's Slovene section names; classifier confidence defined
+
 ## Design system overhaul (branch claude/design-system-overhaul)
 - [x] docs/design/ideas.html: proposal for product tokens/components/screens, generated-site hero and header families, and the researched AI-site give-away list (38 tells with code/critique/new status; Slovene copy rules)
 - [x] Owner decisions (2026-10-01): accent deep green #156b4a (`sb-ui-accent`) and display face Bricolage Grotesque (`sb-ui-display-face`), both the picks the product UI already ships with; nothing to change
@@ -177,12 +239,12 @@ Product work (not started):
 - [x] More visuals for photo-less sites (`sb-images-more`: pictures + icons, 2026-10-01). Pictures (branch claude/photo-led): `fillUpTo` per scope (homepage preview 2, full site 3), the brief gets the slot count, the design step counts generated pictures (photo-led direction), the content step must open on a hero-suitable picture. Live `pnpm eval --scope home`, 4 fixtures with 0–1 photos: all 4 open on hero-split with a picture (3 generated, fizioterapija its own photo plus one generated below), generation €0.18–0.26 (target €0.30), first preview 40–47 s, judge phone 2.8–3.0 / desktop 2.8–3.2. Icons: #36
 - [x] Generated copy in first person (owner, 2026-10-01: "Obravnave izvaja … Tina Kos" read as third person): RULES now say the site speaks as the business, first person, vikanje; plural by default, singular only for one person working alone, one form for the whole site incl. calls to action. Live eval --scope home: fizioterapija-pregib all singular ("Sem Tina Zupan … me pokličite"), frizerstvo-lana all plural ("Strižemo … pokličite nas"), 12/12 checkpoints, €0.59 for three runs. Recordings are stale for this prompt (replay still runs)
 - [ ] Generated pictures read as stock (judge on the generated heroes: "stock-looking tools photo", a vineyard on a plumber's site). Tighten the brief's imageIdeas toward the client's own trade and town; the label stays (AI Act)
-- [ ] Two sections of the same type get the same landmark label: fizioterapija-pregib had booking:with-hours, a chat edit added a second booking section, axe `landmark-unique` on edits 1–5 (eval 2026-10-01). Give repeated sections unique labels, or reject a duplicate in edit validation
+- [x] (2026-10-01, audit branch: a repeated landmark name gets a hidden "(2)", "(3)"; pages without repeats render byte-identical; test over all 10 goldens, axe `landmark-unique` clean in Chromium) Two sections of the same type get the same landmark label: fizioterapija-pregib had booking:with-hours, a chat edit added a second booking section, axe `landmark-unique` on edits 1–5 (eval 2026-10-01). Give repeated sections unique labels, or reject a duplicate in edit validation
 - [x] Two call buttons stacked on a phone (owner, 2026-10-01: "Pokličite nas" in the hero right above the bar's "Pokliči", seen often): when the bar shows from the start and the hero has a call button, the hero's is hidden below 48rem (body class bar-covers-hero-call, data-action on action links); desktop keeps it. Render test + Chromium check at 360 and 1280
 - [x] Generation screen: the Telefon/Računalnik switch works before the first version exists (owner, 2026-10-01); the live preview takes the desktop layout
 - [ ] Judge on 4 sites: the call action appears 3× on the first phone screen (hero button, contact strip, fixed bar). Revisit the one-contact-block rule with the fixed bar in mind
 - [x] Re-record eval recordings after the claude/photo-led prompt changes (2026-10-01, `sb-images-fixture-storage` = commit): `eval/report.md` record, full, 10/10 generated. Checkpoints 57/60 (the 3 misses are Lighthouse performance 85/87/88 while the machine ran at 98–100 % CPU), edits 46 pass / 1 fail / 3 manual, median generation €0.149 and 125.5 s, first preview 51.9 s, judge phone 3.2 / desktop 3.2. Was (2026-09-29): 54/54 with zobozdravstvo-lebar erroring, edits 38/5/2, €0.228, 154.3 s, no judge. Tests updated with it: pekarna-kvas replay now has one critique call; the assembly test adds the generated pictures and pins two rejected first answers (below)
-- [ ] 2/10 first full-site content answers were rejected in the 2026-10-01 recording and cost a retry: instalacije-rebernik (home SEO title over 60 characters; then a generated picture in services-cards; 3 content calls, €0.127) and kmetija-grabnar (a `" link"` key with a leading space; 2 calls, €0.111). Consider a deterministic repair (shorten the SEO title, trim keys) before spending a full retry
+- [x] (2026-10-01, audit branch: `repairContentOutput` trims key whitespace, drops null properties and shortens SEO title/description at a word boundary before validation, logged per site. kmetija-grabnar's first answer now validates without a retry; instalacije-rebernik's title is repaired but the same answer also puts a generated picture in services-cards, a real issue that still costs one retry. kmetija-grabnar's replay is now out of step with its recording: re-record it on the next `pnpm eval --record`) 2/10 first full-site content answers were rejected in the 2026-10-01 recording and cost a retry: instalacije-rebernik (home SEO title over 60 characters; then a generated picture in services-cards; 3 content calls, €0.127) and kmetija-grabnar (a `" link"` key with a leading space; 2 calls, €0.111). Consider a deterministic repair (shorten the SEO title, trim keys) before spending a full retry
 - [ ] Trgovina-oljka-in-sol edit "warmer palette, more olive and terracotta" fails its check (terracotta hue 72, wanted 5–32), eval 2026-10-01
 - [ ] Pekarna Kvas logo shows "KAMNI" (judge, 2026-10-01: "clipped logo"). The fixture's own `logo.svg` cuts it: "PEKARNA · KAMNIK" with 3.5 letter-spacing runs past its 280 px viewBox. Fix the fixture (it changes critique screenshots, so re-record pekarna-kvas after)
 - [ ] Shot list for owners (brief stage + dashboard)

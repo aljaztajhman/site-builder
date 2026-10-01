@@ -455,6 +455,16 @@ describe("direct editor API (no model calls)", () => {
     const previewHtml = await (await app.request(`/preview/${site.id}/index.html`, { headers: { cookie } })).text();
     expect(previewHtml).toBe(publishedHtml);
 
+    // Two publishes at once: one writes its release, the other is told to wait; the live site stays whole.
+    const twice = await Promise.all([1, 2].map(() => app.request(`/api/sites/${site.id}/publish`, { method: "POST", headers: { cookie } })));
+    expect(twice.map((r) => r.status).sort()).toEqual([200, 409]);
+    expect(((await twice.find((r) => r.status === 409)!.json()) as { message: string }).message).toMatch(/že objavlja/);
+    expect((await app.request("/s/pekarna-kvas/")).status).toBe(200);
+    expect((await platform.repo.getSite(site.id))?.publishing_since).toBeNull();
+    // A publish that crashed long ago doesn't hold the site forever.
+    await platform.db.query("update sites set publishing_since = now() - interval '1 hour' where id = $1", [site.id]);
+    expect((await app.request(`/api/sites/${site.id}/publish`, { method: "POST", headers: { cookie } })).status).toBe(200);
+
     // Layout thumbnails: one section alone, in the variant asked for, with its own content.
     const thumb = await (await app.request(`/preview/${site.id}/index.html?section=s_about&variant=text-only`, { headers: { cookie } })).text();
     expect(thumb.match(/<section id="s_[a-z_]+"/g)).toEqual(['<section id="s_about"']);

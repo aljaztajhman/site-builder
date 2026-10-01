@@ -18,6 +18,8 @@ export interface SiteRow {
   account_id: string | null;
   /** The device that made an unclaimed anonymous preview (deleted after tiers.anonymous.keepDays); null once claimed. */
   device_id: string | null;
+  /** Set while a publish writes its release (claimPublish); null otherwise. */
+  publishing_since: string | null;
   intake: Intake;
   brief: unknown;
   created_at: string;
@@ -197,9 +199,13 @@ export class Repo {
    * retry (they cost money), so these are marked failed with an event and can be re-run by the user.
    */
   async failInterrupted(olderThanMinutes: number): Promise<string[]> {
+    // A site whose job still waits in the queue or runs (an overlapping deploy, a backlog) isn't
+    // interrupted. pg-boss expires a job whose worker died (15 min), so it stops counting as live.
+    const queue = (await this.db.query<{ t: string | null }>("select to_regclass('pgboss.job')::text as t")).rows[0]?.t;
+    const live = queue ? "and not exists (select 1 from pgboss.job j where j.state in ('created', 'retry', 'active') and j.data->>'siteId' = sites.id)" : "";
     const { rows } = await this.db.query<{ id: string }>(
       `update sites set status = 'failed', updated_at = now()
-        where status in ('generating', 'editing', 'publishing') and updated_at <= now() - make_interval(mins => $1::integer)
+        where status in ('generating', 'editing', 'publishing') and updated_at <= now() - make_interval(mins => $1::integer) ${live}
         returning id`,
       [olderThanMinutes],
     );
@@ -410,6 +416,21 @@ export class Repo {
   }
 
   /** Makes `version` the live one and records the publish (retention keeps every published version). */
+  /** Claims the site for one publish; false while another publish (younger than `staleMinutes`) holds it. */
+  async claimPublish(siteId: string, staleMinutes = 10): Promise<boolean> {
+    const { rows } = await this.db.query(
+      `update sites set publishing_since = now()
+        where id = $1 and (publishing_since is null or publishing_since < now() - make_interval(mins => $2::integer))
+        returning id`,
+      [siteId, staleMinutes],
+    );
+    return rows.length > 0;
+  }
+
+  async releasePublish(siteId: string): Promise<void> {
+    await this.db.query("update sites set publishing_since = null where id = $1", [siteId]);
+  }
+
   async markPublished(siteId: string, version: number, release?: string): Promise<void> {
     await this.db.query(
       `with publish as (insert into site_publishes (site_id, version, release) values ($1, $2, $3))

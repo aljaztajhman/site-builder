@@ -4,6 +4,7 @@ import { bodyLimit } from "hono/body-limit";
 import type { AppConfig } from "@sb/config";
 import {
   PublishBlockedError,
+  PublishBusyError,
   siteChecklist,
   applyDirectEdit,
   defaultSection,
@@ -629,6 +630,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       return c.json({ ok: true, version: r.version, url: `/s/${site?.slug}/` });
     } catch (e) {
       if (e instanceof PublishBlockedError) return c.json({ error: "blocked", blockers: e.blockers, checklist: e.checklist }, 422);
+      if (e instanceof PublishBusyError) return c.json({ error: "busy", message: "Stran se že objavlja. Počakajte trenutek in poskusite znova." }, 409);
       throw e;
     }
   });

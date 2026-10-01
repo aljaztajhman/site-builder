@@ -2,6 +2,7 @@ export * from "./llm/client.ts";
 export * from "./llm/recording.ts";
 export * from "./brief.ts";
 export * from "./assemble.ts";
+export * from "./repair.ts";
 export * from "./facts.ts";
 export * from "./palette.ts";
 export * from "./images.ts";

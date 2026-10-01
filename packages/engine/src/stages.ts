@@ -34,6 +34,7 @@ import {
   businessSchema,
 } from "./prompts.ts";
 import { assembleSpec, contentJsonSchema, contentOutputSchema, type ContentOutput } from "./assemble.ts";
+import { repairContentOutput } from "./repair.ts";
 import type { Swatch } from "./palette.ts";
 import { fitImageForModel, sliceScreenshot } from "./images.ts";
 import { checkFacts, type FactViolation } from "./facts.ts";
@@ -205,6 +206,8 @@ export interface ContentResult {
   issues: string[];
   /** True when the API rejected the content schema for structured output and plain JSON was used. */
   structuredFallback: boolean;
+  /** Mechanical fixes made to the answer that produced `spec` before validation (see repairContentOutput). */
+  repairs: string[];
 }
 
 /**
@@ -266,6 +269,7 @@ export async function generateContent(client: ModelClient, input: ContentInput):
   let spec: SiteSpec | undefined;
   // The issues of the attempt that produced `spec`; a later answer that didn't parse doesn't replace them.
   let specIssues: string[] = [];
+  let specRepairs: string[] = [];
   let structured = input.structuredOutput;
   let structuredFallback = false;
   for (;;) {
@@ -292,7 +296,9 @@ export async function generateContent(client: ModelClient, input: ContentInput):
     }
     let issues: string[];
     try {
-      const parsed = schema.safeParse(JSON.parse(extractJson(res.text)));
+      const data: unknown = JSON.parse(extractJson(res.text));
+      const repairs = repairContentOutput(data);
+      const parsed = schema.safeParse(data);
       if (!parsed.success) {
         issues = parsed.error.issues.slice(0, 25).map((i) => `/${i.path.join("/")}: ${i.message}`);
       } else {
@@ -302,12 +308,13 @@ export async function generateContent(client: ModelClient, input: ContentInput):
         const facts = checkFacts(spec, input.corpus);
         issues.push(...facts.map(factLine));
         specIssues = issues;
+        specRepairs = repairs;
       }
     } catch {
       issues = ["Output is not valid JSON."];
     }
     lastIssues = issues;
-    if (issues.length === 0 && spec) return { spec, attempts, issues: [], structuredFallback };
+    if (issues.length === 0 && spec) return { spec, attempts, issues: [], structuredFallback, repairs: specRepairs };
     if (attempts > input.retries) break;
     messages.push({ role: "assistant", content: res.text });
     messages.push({
@@ -316,7 +323,7 @@ export async function generateContent(client: ModelClient, input: ContentInput):
     });
   }
   if (!spec) throw new Error(`Content generation failed after ${attempts} attempts: ${lastIssues.slice(0, 5).join("; ")}`);
-  return { spec, attempts, issues: specIssues, structuredFallback };
+  return { spec, attempts, issues: specIssues, structuredFallback, repairs: specRepairs };
 }
 
 const issueLine = (i: Issue) => `${i.path}: ${i.message}`;
