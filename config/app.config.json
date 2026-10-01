@@ -99,7 +99,7 @@
     "perIpGenerationsPerDay": 5,
     "pools": { "anonymous": 0.3, "free": 0.2, "paid": 0.5, "warnAt": 0.8 },
     "estimatesEur": { "homepage": 0.3, "fullSite": 0.5, "chatEdit": 0.03 },
-    "junk": { "minDescriptionChars": 40, "minClassifierConfidence": 0.5 }
+    "junk": { "minDescriptionChars": 20, "minClassifierConfidence": 0 }
   },
   "plans": {
     "$comment": "Phase 1 has no billing; kept here so later phases read from config.",
