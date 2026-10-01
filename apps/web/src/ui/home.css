@@ -111,6 +111,11 @@ mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:var(--ink)}
 .plan ul{margin:16px 0 20px;display:grid;gap:8px;padding-left:0;list-style:none}
 .plan ul li{padding-left:18px;position:relative}
 .plan ul li::before{content:"";position:absolute;left:0;top:11px;width:8px;height:2px;background:var(--ink)}
+.plan .yearly{font-weight:600;margin-bottom:10px}
+.plan .extra{margin:0 0 20px;border-top:1px solid var(--line);font-size:16px}
+.plan .extra div{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 16px;padding:10px 0;border-bottom:1px solid var(--line)}
+.plan .extra dt{color:var(--ink-2)}
+.plan .extra dd{margin-left:auto;font-weight:600;font-variant-numeric:tabular-nums}
 .plan .fine{font-size:14px;margin-top:14px}
 
 /* ---------- FAQ ---------- */

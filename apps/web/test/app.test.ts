@@ -6,6 +6,7 @@ import { loadConfig } from "@sb/config";
 import { Repo, createDb, createFsStorage, migrate, type Platform, type Queue } from "@sb/platform";
 import { createApp } from "../src/app.ts";
 import { SESSION_COOKIE } from "../src/auth.ts";
+import { homePage } from "../src/home.tsx";
 
 const PASSWORD = "test-password-1234";
 let platform: Platform;
@@ -145,9 +146,16 @@ describe("landing page", () => {
     const page = await res.text();
     expect(page).toContain("Opišite svoje podjetje.<br/>Spletna stran je narejena.");
     for (const id of ["zacni", "kaj", "kako", "primer", "cena", "vprasanja"]) expect(page, id).toContain(`id="${id}"`);
-    const [low, high] = loadConfig().plans.paid.monthlyEurRange;
-    expect(page).toContain(`od ${low}\u00a0€`);
-    expect(page).toContain(`(${low}–${high}\u00a0€)`);
+    const paid = loadConfig().plans.paid;
+    const eur = (n: number) => `${n}\u00a0€`;
+    expect(page).toContain(`${eur(paid.monthlyEur)} <small>na mesec</small>`);
+    expect(page).toContain(`ali ${eur(paid.yearlyEur)} na leto, domena vključena`);
+    expect(page).toContain(`<dt>Prvo leto za prvih ${paid.foundingOffer.customers} strank</dt><dd>${eur(paid.foundingOffer.firstYearEur)}</dd>`);
+    expect(page).toContain(`<dd>${eur(paid.setupService.eur)} enkratno</dd>`);
+    // No billing yet: the prices are planned and nothing is charged.
+    expect(paid.billingEnabled).toBe(false);
+    expect(page).toContain("Načrtovane cene, z DDV. Plačevanja še ni, zato zaenkrat ničesar ne zaračunamo.");
+    expect(page).not.toMatch(/od \d+\u00a0€/);
     // Signed out the prompt goes to the login and back to /; the description never lands in the URL (no name attribute).
     const formTag = page.match(/<form class="prompt"[^>]*>/)?.[0] ?? "";
     expect(formTag).toContain('action="/login"');
@@ -168,6 +176,20 @@ describe("landing page", () => {
     expect(js.status).toBe(200);
     expect(js.headers.get("content-type")).toContain("javascript");
     expect(await js.text()).toContain("sb-intake-draft");
+  });
+
+  it("calls the prices planned only while billing is off", () => {
+    const config = loadConfig();
+    const withBilling = { ...config, plans: { ...config.plans, paid: { ...config.plans.paid, billingEnabled: true } } };
+    const page = homePage({ config: withBilling, signedIn: false });
+    expect(page).not.toContain("Načrtovane cene");
+    expect(page).not.toContain("Plačevanja še ni");
+    expect(page).toContain("Cene so z DDV. Letno naročnino plačate po računu z bančnim nakazilom.");
+    expect(page).toContain("Pri letni naročnini bo domena vključena v ceno.");
+    const noDomain = { ...config, plans: { ...config.plans, paid: { ...config.plans.paid, yearlyIncludesDomain: false } } };
+    const page2 = homePage({ config: noDomain, signedIn: false });
+    expect(page2).not.toContain("domena vključena");
+    expect(page2).not.toContain("Pri letni naročnini bo domena");
   });
 
   it("serves the example site so the landing page can frame it, and nothing else may be framed", async () => {

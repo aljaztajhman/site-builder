@@ -1,19 +1,19 @@
 # Go-to-market: finding, converting and keeping customers (draft)
 
-Draft of 2026-09-29. Proposals, not decisions: the owner's choices are in the Decision Inbox (section 14). Numbers carry a source in section 15. Anything marked *assumption* is a guess to replace with measurement.
+Draft of 2026-09-29; the owner's decisions of 2026-09-30 and 2026-10-01 are applied (section 14). Anything not marked decided is a proposal. Numbers carry a source in section 15. Anything marked *assumption* is a guess to replace with measurement.
 
 ## 1. The plan in ten lines
 
 1. **Sell a finished website, not an AI tool.** Owners want to be found and called, not to build. AI is how we're fast and cheap, not the headline.
 2. **The competitor is "Facebook is enough" and the freelancer**, not Wix. A small site from a Slovenian freelancer costs €250–1,500 plus €20–60/month; we price against that, not against Hostinger's €3.
 3. **Brand: Izvesek** (recommended), the hanging sign above a craftsman's shop. `izvesek.si`, `.com` and `.eu` were free on 2026-09-29.
-4. **First 15 customers by hand, in person, in one town**: the owner sees their own site before their coffee is finished. They become design partners, case studies and the first real testimonials.
+4. **First 15 customers by hand, in person, in one town** (decided, `sb-first-market`: restaurants, hairdressers and tradespeople; the town is still to be named by the owner): the owner sees their own site before their coffee is finished. They become design partners, case studies and the first real testimonials.
 5. **Then the people owners already trust**: accountants (4,455 firms), OZS's 62 regional chambers and their trade sections, SPOT points, print shops and photographers.
 6. **Then search**: a free "check your website" tool and honest Slovene content feeding the free preview. Google is 93 % of search in Slovenia.
 7. **Conversion is the preview**: first look in ≤ 40 s, their own facts and photos, one short checklist from publishing, and a phone number on every screen.
 8. **Retention is proof**: a monthly "42 people tapped Call" report, holiday-hours reminders, edits from the phone.
 9. **Stand out where a global builder won't bother for a two-million market**: real Slovene, nothing invented, the domain in the owner's name, export any time, a person who answers the phone, one price with VAT included.
-10. **No money before a legal entity** (taking payment unregistered counts as undeclared work). A free waitlist with a reserved founding price until then; yearly invoices by bank transfer the day the entity exists; billing and custom domains before CMS collections.
+10. **No money before a legal entity** (taking payment unregistered counts as undeclared work). Billing is built first, then the business is registered before the first charge (decided, `sb-legal-entity`). A free waitlist with a reserved founding price until then; yearly invoices by bank transfer once the entity exists; billing and custom domains before CMS collections (decided, `sb-roadmap-order`).
 
 ## 2. Who buys, and when
 
@@ -122,15 +122,14 @@ Before buying: a trademark search for "Izvesek" at SIPO and EUIPO TMview, classe
 
 ## 5. Offer and pricing
 
-Config holds €12–19/month today.
+Decided (`sb-pricing`, 2026-10-01); the numbers live in config (`plans.paid`). Billing isn't built yet and stays switched off in config until the legal entity exists (`sb-legal-entity`), so until then these are planned prices and the landing page says so.
 
 - **One plan.** Full site, edits (chat, editor, phone), hosting, SSL, forms, export. No tier table; the decision is yes or no.
-- **Prices shown with VAT.** Many s.p. aren't VAT-registered (threshold €60,000) and can't deduct it, and ZEPT requires prices on websites to include tax anyway. Proposal: **€15/month or €150/year, VAT included, `.si` domain included on yearly.** Same price whether or not we're VAT-registered.
+- **€15/month or €150/year, VAT included, the domain included on yearly.** Many s.p. aren't VAT-registered (threshold €60,000) and can't deduct it, and ZEPT requires prices on websites to include tax anyway. Same price whether or not we're VAT-registered.
 - **Yearly by invoice and bank transfer (UPN QR).** Slovenian small businesses are used to a yearly hosting invoice. Bank transfers also avoid the fiscal-verification question that online card payments raise (section 9). Card/SEPA for monthly later, with Stripe.
-- **Free until you publish.** The preview and editing are free; payment starts at publish.
 - **Founding customers** (first 100): first year €99, then the normal price. Reserved on the waitlist before the entity exists (no payment), paid by invoice after.
-- **"Uredimo namesto vas"** (we set it up with you): €79 one-off. A 20-minute call, we fill the missing facts, connect the domain, set up the Google Business Profile. For owners who won't self-serve; during launch it's also the best customer research we can get.
-- **30 days money back**, and "cancel any time, take your site with you".
+- **"Uredimo namesto vas"** (we set it up with you): €79 one-off, optional. A 20-minute call, we fill the missing facts, connect the domain, set up the Google Business Profile. For owners who won't self-serve; during launch it's also the best customer research we can get.
+- *Proposals, not part of the decision:* **free until you publish** (the preview and editing are free; payment starts at publish); **30 days money back**, and "cancel any time, take your site with you".
 
 **Unit economics** (*assumptions* until billing runs). €150/year incl. VAT is €123 net. AI edits, domain, payment costs and a share of hosting ≈ €20–25/year per customer, so ~€100/year gross margin. Infrastructure (~€15–50/month) is covered by 5 customers. **~450 customers ≈ one founder's full-time income.** ~15 % of s.p. close every year, so even a perfect product loses customers. At a 2–3 year life a customer is worth ~€200–300 margin, so channels must acquire one for **≤ €60–80**.
 
@@ -138,7 +137,7 @@ Config holds €12–19/month today.
 
 | # | Channel | When | Cost | First step |
 |---|---|---|---|---|
-| 1 | **Founder in person, one town**: build their site on a tablet from photos taken there | now | time | pick the town; list 40 businesses from 3 verticals; 10 visits a day |
+| 1 | **Founder in person, one town** (decided, `sb-first-market`): build their site on a tablet from photos taken there | now | time | town: to be named by the owner; list 40 restaurants, hairdressers and tradespeople there; 10 visits a day |
 | 2 | **Warm network**: friends' and family businesses; each happy one names 3 more | now | time | list 20 names |
 | 3 | **Accountants** (4,455 firms): trusted by every s.p., see every new one | pre-launch | 20–30 % recurring referral fee | one-pager; free site for the accountant's own firm; pitch 10 in the region |
 | 4 | **Workshops**: "V 60 minutah do spletne strani" at OOZ chambers, SPOT points, libraries, tourist boards; people leave with a live preview | launch | time; halls often free | offer to 3 OOZ and 2 SPOT points |
@@ -255,7 +254,7 @@ Then vertical pages ("Spletna stran za frizerski salon", "… za gostilno", "…
 
 Added to TASKS.md; none started.
 
-- **Order**: billing (yearly invoice first) and custom domains before CMS collections. Owners who already have a domain can't switch without custom domains, and nothing can be sold without billing. Pull only price-list/menu editing forward. Decision: `sb-roadmap-order`.
+- **Order**: billing (yearly invoice first) and custom domains before CMS collections. Owners who already have a domain can't switch without custom domains, and nothing can be sold without billing. Pull only price-list/menu editing forward, for restaurants and hairdressers. Decided (`sb-roadmap-order`, 2026-10-01).
 - Preview shown before email confirmation; the facts-to-fill checklist (phase 2).
 - Intake from photos of printed material and from an existing website's URL.
 - Cookieless visit and tap counting + the monthly report email.
@@ -269,29 +268,29 @@ Added to TASKS.md; none started.
 | Weeks | Do | Done when |
 |---|---|---|
 | 1–2 | Choose the name; trademark search; buy domains; set up email; landing page and waitlist built with our engine | waitlist collecting |
-| 1–2 | Pick the town and 3 verticals; list 40 businesses | list exists |
+| 1–2 | Owner names the town (verticals decided: restaurants, hairdressers, tradespeople); list 40 businesses | list exists |
 | 3–6 | Visit, demo, recruit **10–15 design partners**: full site free until billing, for an interview and, if they're happy, a real testimonial (uses the allow-list, `sb-full-access`) | 10 sites live |
 | 3–6 | Articles 1–3; build the website checker | published |
 | 5–8 | Pitch 10 accountants, 3 OOZ and Mozaik podjetnih; first workshop | 2 partners, 1 workshop |
-| 7–10 | Register the legal entity; convert waitlist reservations by yearly invoice | first paying customers |
+| 7–10 | Build billing (yearly invoice first); register the legal entity before the first charge (the accountant chooses s.p. or d.o.o.); convert waitlist reservations by yearly invoice | first paying customers |
 | 9–12 | 3 case studies; state-of-websites study; press pitch; referral live | 1 published story |
-| 11–13 | Google Ads test (€300); cost per paying customer | number known |
+| 11–13 | Cost per paying customer from the unpaid channels; any ad test needs a new budget decision | number known |
 
 **90-day targets** (*assumptions*): 10–15 live design-partner sites, 3 case studies, 300 on the waitlist, 30 paying founding customers if the entity exists by week 10.
 
-**Money in the 90 days**, all the owner's call: domains ~€40/year, trademark filing at SIPO (fee to check), 100 test letters ~€100, printed cards ~€50, Google Ads test €300, Meta test €200. **≈ €700–900.**
+**Money in the 90 days** (decided, `sb-gtm-budget` = minimal, 2026-09-30): **domains ~€40/year and the trademark filing at SIPO (fee to check), nothing else.** No test letters (~€100), printed cards (~€50), Google Ads test (€300) or Meta test (€200) in the 90 days; each needs a new budget decision.
 
 ## 14. Decisions for the owner
 
 In the Decision Inbox, each with a recommendation:
 
 - `sb-brand-name`: the name (Izvesek recommended)
-- `sb-first-market`: where the first 15 customers come from
-- `sb-roadmap-order`: billing and custom domains before CMS collections
-- `sb-pricing`: price, yearly invoice, founding offer, paid setup
+- `sb-first-market`: decided 2026-10-01, one town in person, 3 verticals (restaurants, hairdressers, tradespeople). **Open: the town, to be named by the owner**
+- `sb-roadmap-order`: decided 2026-10-01, billing and custom domains before CMS collections; only price-list/menu editing comes forward
+- `sb-pricing`: decided 2026-10-01, €15/month or €150/year incl. VAT, domain included on yearly, yearly by invoice and bank transfer, founding first year €99 for the first 100, optional €79 setup (section 5)
 - `sb-preview-gate`: email confirmation before or after the preview
-- `sb-legal-entity`: when to register so selling can start
-- `sb-gtm-budget`: the ~€900 of 90-day spending
+- `sb-legal-entity`: decided 2026-10-01, register after billing is built, before the first charge
+- `sb-gtm-budget`: decided 2026-09-30, minimal: domains and trademark only (~€40 + SIPO fee)
 
 ## 15. Numbers and sources
 

@@ -31,6 +31,30 @@ const CompositionTarget = z.object({
   maxGapPx: z.number().int().min(0),
 });
 
+/**
+ * The one paid plan (owner's decision `sb-pricing`, docs/GO-TO-MARKET.md §5). Prices in euros, VAT
+ * included. No billing code exists yet: `billingEnabled` stays false until the legal entity is
+ * registered, and the landing page shows these as planned prices.
+ */
+const PaidPlan = z
+  .looseObject({
+    billingEnabled: z.boolean(),
+    /** Prices are shown and charged with VAT, whether or not we're VAT-registered. */
+    vatIncluded: z.literal(true),
+    monthlyEur: z.number().positive(),
+    yearlyEur: z.number().positive(),
+    /** The yearly plan includes the customer's domain. */
+    yearlyIncludesDomain: z.boolean(),
+    /** How the yearly plan is paid: an invoice settled by bank transfer. */
+    yearlyPayment: z.enum(["invoice-bank-transfer"]),
+    /** The first `customers` customers pay `firstYearEur` for their first year, then the yearly price. */
+    foundingOffer: z.strictObject({ customers: z.number().int().positive(), firstYearEur: z.number().positive() }),
+    /** Optional one-off "we set it up with you" service. */
+    setupService: z.strictObject({ eur: z.number().positive() }),
+  })
+  .refine((p) => p.yearlyEur < 12 * p.monthlyEur, { message: "the yearly price must be below 12 monthly payments" })
+  .refine((p) => p.foundingOffer.firstYearEur < p.yearlyEur, { message: "the founding first year must be below the yearly price" });
+
 export const AppConfigSchema = z.object({
   models: z.object({
     classify: ModelStage,
@@ -91,9 +115,8 @@ export const AppConfigSchema = z.object({
     landscape: z.object({ width: z.number().int().positive(), height: z.number().int().positive() }),
     models: z.record(z.string(), ImageGenModel),
   }),
-  /** No billing yet; the landing page quotes the paid plan's monthly range from here. */
   plans: z.looseObject({
-    paid: z.looseObject({ monthlyEurRange: z.tuple([z.number().positive(), z.number().positive()]) }),
+    paid: PaidPlan,
   }),
 });
 export type AppConfig = z.infer<typeof AppConfigSchema>;
