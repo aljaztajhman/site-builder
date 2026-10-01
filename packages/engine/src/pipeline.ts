@@ -175,7 +175,12 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
       logoAsset = { src: logo.storage_key, width: l.width, height: l.height, file: l.file };
     }
   });
-  const [{ brief, design, generated }] = await Promise.all([planning, imaging]);
+  // Both branches finish before either's failure is passed on, so a stopped job (junk, spend cap) leaves
+  // no photo processing running behind it.
+  const [planned, imaged] = await Promise.allSettled([planning, imaging]);
+  if (planned.status === "rejected") throw planned.reason;
+  if (imaged.status === "rejected") throw imaged.reason;
+  const { brief, design, generated } = planned.value;
   // Generated pictures come after the client's photos; landscape, so they can carry a hero.
   images.push(...generated);
   heroIds.push(...generated.map((g) => g.id));
