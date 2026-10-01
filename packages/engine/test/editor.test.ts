@@ -104,6 +104,9 @@ describe("protected paths", () => {
       { op: "replace" as const, path: "/assets/logo/file", value: "../../x" },
       { op: "replace" as const, path: "/assets/images/0/src", value: "sites/other/uploads/a.jpg" },
       { op: "remove" as const, path: "/assets/images/0" },
+      // origin decides the "Ustvarjeno z UI" label: no edit may set or remove it.
+      { op: "add" as const, path: "/assets/images/0/origin", value: "client" },
+      { op: "remove" as const, path: "/assets/images/0/origin" },
     ]) {
       const r = applyDirectEdit(spec, [op]);
       expect(r.ok, op.path).toBe(false);
