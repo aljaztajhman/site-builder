@@ -5,7 +5,7 @@
   "hash": "0bf37d239ca87dba",
   "origin": "recorded",
   "response": {
-    "text": "{\"businessType\": \"shop\", \"confidence\": 0.98}",
+    "text": "{\"businessType\": \"shop\", \"confidence\": 0.99}",
     "stopReason": "end_turn",
     "model": "claude-haiku-4-5-20251001",
     "usage": {

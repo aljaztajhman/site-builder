@@ -308,11 +308,19 @@
   "zobozdravstvo-lebar/02": {
     "model": "gpt-image-2.5",
     "endpoint": "openai/gpt-image-2.5/flare/text-to-image",
-    "prompt": "A small dental waiting room with a row of green chairs, a potted plant and a low table with magazines, calm and bright. Realistic photograph taken with a good smartphone by the owner of a small business in Slovenia, for their own website. Natural available light, unstaged, true-to-life colours, ordinary everyday setting with small imperfections. No text, no lettering on signs or packaging, no logos, no watermark, no borders.",
+    "prompt": "A small dental waiting room with a row of green chairs, a potted plant and a low wooden side table with a glass water jug and cups, nothing printed in view, calm and bright. Realistic photograph taken with a good smartphone by the owner of a small business in Slovenia, for their own website. Natural available light, unstaged, true-to-life colours, ordinary everyday setting with small imperfections. No text, no lettering on signs or packaging, no logos, no watermark, no borders.",
     "width": 1024,
     "height": 1536,
     "eur": 0.0679,
-    "createdAt": "2026-09-30T21:13:14.151Z"
+    "createdAt": "2026-10-01T14:00:38.577Z",
+    "rejected": [
+      {
+        "reason": "magazine covers on the table showed pseudo-lettering (mastheads); the prompt asked for magazines",
+        "prompt": "A small dental waiting room with a row of green chairs, a potted plant and a low table with magazines, calm and bright. Realistic photograph taken with a good smartphone by the owner of a small business in Slovenia, for their own website. Natural available light, unstaged, true-to-life colours, ordinary everyday setting with small imperfections. No text, no lettering on signs or packaging, no logos, no watermark, no borders.",
+        "eur": 0.0679,
+        "createdAt": "2026-09-30T21:13:14.151Z"
+      }
+    ]
   },
   "zobozdravstvo-lebar/03": {
     "model": "gpt-image-2.5",

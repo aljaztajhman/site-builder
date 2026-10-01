@@ -1,0 +1,18 @@
+{
+  "seq": 2,
+  "stage": "altText",
+  "model": "claude-sonnet-5-5",
+  "hash": "901daf73bcccc512",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"images\":[{\"index\":0,\"alt\":\"Veliki hrustljavi hlebi na kvasu, naloženi na lesenih policah v pekarni, skozi okno se vidi cerkvica.\",\"focalX\":0.35,\"focalY\":0.45,\"heroSuitable\":true},{\"index\":1,\"alt\":\"Pek z moko na rokah oblikuje hlebec testa na lesenem pultu, ob njem je pletena košara za vzhajanje.\",\"focalX\":0.55,\"focalY\":0.55,\"heroSuitable\":false},{\"index\":2,\"alt\":\"Pekač s svežimi zlatimi rogljički in cimetovimi polžki na lesenem pultu v pekarni.\",\"focalX\":0.5,\"focalY\":0.55,\"heroSuitable\":true}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 1645,
+      "output_tokens": 268,
+      "cache_creation_input_tokens": 573,
+      "cache_read_input_tokens": 0
+    }
+  }
+}
