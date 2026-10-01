@@ -131,7 +131,7 @@ describe("product UI", () => {
     const res = await app.request("/api/sites", { method: "POST", body: form, headers: { cookie } });
     expect(res.status).toBe(400);
     const page = await res.text();
-    expect(page).toContain("Opis naj ima vsaj 40 znakov");
+    expect(page).toContain(`Opis naj ima vsaj ${loadConfig().tiers.junk.minDescriptionChars} znakov`);
     expect(page).toContain(">Prekratko.</textarea>");
     expect(page).toContain('id="zacni"');
   });
