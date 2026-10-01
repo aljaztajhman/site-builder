@@ -81,3 +81,19 @@ describe("edit job that fails", () => {
     expect(r.status).toBe("ready");
   });
 });
+
+describe("prune job (nightly version retention)", () => {
+  it("removes old versions of every site, or of one site, and logs it", async () => {
+    const id = await site("urejanje-arhiv", "ready");
+    const spec = (await platform.repo.getSpec(id))!.spec;
+    for (let i = 0; i < 4; i++) await platform.repo.saveSpec(id, spec, "manual", "urejen razdelek hero");
+    // A month old, all on one day: the last of that day (also the current one) stays.
+    await platform.db.query("update spec_versions set created_at = now() - interval '30 days' where site_id = $1", [id]);
+    await handlers.prune!({}, "job-prune");
+    expect((await platform.repo.listVersions(id)).map((v) => v.version)).toEqual([5]);
+    expect((await platform.repo.listEvents(id)).some((e) => e.stage === "retention")).toBe(true);
+    // One site on its own; nothing more to remove.
+    await handlers.prune!({ siteId: id }, "job-prune-one");
+    expect((await platform.repo.listVersions(id)).map((v) => v.version)).toEqual([5]);
+  });
+});

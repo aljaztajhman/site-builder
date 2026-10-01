@@ -464,7 +464,11 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     const id = c.req.param("id");
     const body = (await c.req.json().catch(() => ({}))) as { version?: number };
     const target = typeof body.version === "number" ? await repo.getSpec(id, body.version) : null;
-    if (!target) return c.json({ error: "version not found" }, 404);
+    // Retention may have removed it since the list was loaded; the editor shows this and reloads the list.
+    if (!target) {
+      const gone = typeof body.version === "number" ? { message: `Različice ${body.version} ni več med shranjenimi. Seznam različic je osvežen.` } : {};
+      return c.json({ error: "version not found", ...gone }, 404);
+    }
     const version = await repo.saveSpec(id, target.spec, "revert", `povrnjeno na različico ${target.version}`);
     return c.json({ ok: true, version });
   });
@@ -547,8 +551,13 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   app.get("/preview/:id/:file", async (c) => {
     const v = c.req.query("v");
     if (!SAFE_ID.test(c.req.param("id"))) return c.notFound();
-    const current = await repo.getSpec(c.req.param("id"), v && /^\d+$/.test(v) ? Number(v) : undefined);
-    if (!current) return c.text("Predogled še ni pripravljen.", 404);
+    // ?v=N of a version retention removed shows the nearest older kept one (as undo does).
+    const asked = v && /^\d+$/.test(v) ? await repo.nearestVersion(c.req.param("id"), Number(v)) : undefined;
+    const current = asked === null ? null : await repo.getSpec(c.req.param("id"), asked);
+    if (!current) {
+      const gone = asked === null && (await repo.getSite(c.req.param("id")))?.current_version != null;
+      return c.text(gone ? "Te različice ni več med shranjenimi." : "Predogled še ni pripravljen.", 404);
+    }
     const page = current.spec.pages.find((p) => pageFile(p) === c.req.param("file"));
     if (!page) return c.notFound();
     c.header("cache-control", "no-store");

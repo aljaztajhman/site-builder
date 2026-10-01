@@ -101,6 +101,17 @@ export const AppConfigSchema = z.object({
     composition: z.object({ mobile: CompositionTarget, desktop: CompositionTarget }),
   }),
   images: z.object({ widths: z.array(z.number().int().positive()), avifQuality: z.number(), webpQuality: z.number() }),
+  /** Spec version retention: the nightly prune job (see config $comment). */
+  versions: z.object({
+    retention: z.object({
+      /** Whole local days before today whose versions are all kept; older days keep their last version. */
+      keepAllDays: z.number().int().min(1),
+      /** IANA zone that decides where a day starts, for retention and for the cron schedule. */
+      timeZone: z.string().min(1),
+      /** When the prune job runs (pg-boss cron, in timeZone). */
+      cron: z.string().min(1),
+    }),
+  }),
   /** fal.ai images: eval fixture photos, and generated mood images for client sites with too few photos (see config $comment). */
   imageGen: z.object({
     pipeline: z.object({

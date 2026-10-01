@@ -13,6 +13,8 @@ import {
   describePhotos,
   generateSite,
   loadRecordings,
+  pruneAllSites,
+  pruneSite,
   publishSite,
   type ModelTransport,
 } from "@sb/engine";
@@ -206,4 +208,14 @@ export async function startWorker(platform: Platform, config = loadConfig()): Pr
       await repo.addEvent({ siteId: job.siteId, jobId, stage: "publish", level: "error", message: (e as Error).message });
     }
   });
+
+  // Version retention, nightly (config versions.retention). No model calls; each site logs what went.
+  await queue.work("prune", async (job) => {
+    const results = job.siteId ? [await pruneSite({ repo, storage, config }, job.siteId)] : await pruneAllSites({ repo, storage, config });
+    const versions = results.reduce((n, r) => n + r.removed.length, 0);
+    const mb = results.reduce((n, r) => n + r.bytes, 0) / 1e6;
+    const failed = results.filter((r) => "error" in r && r.error).length;
+    console.log(`[prune] ${results.length} site(s): ${versions} version(s) removed (${mb.toFixed(1)} MB), ${results.reduce((n, r) => n + r.files.length, 0)} file(s)${failed ? `, ${failed} failed` : ""}`);
+  });
+  await queue.schedule?.("prune", config.versions.retention.cron, {}, { tz: config.versions.retention.timeZone });
 }

@@ -46,6 +46,10 @@
     }
   },
   "images": { "widths": [360, 720, 1080, 1600], "avifQuality": 55, "webpQuality": 72 },
+  "versions": {
+    "$comment": "Spec version retention (owner's decision sb-autosave-versions = prune, 2026-10-01). Every editor autosave stores a full version. A nightly job (cron, read in timeZone) keeps every version from today and the keepAllDays whole days before it, then only the last version of each older day, plus every version that was ever published and the current one. Versions never change; files only pruned versions used are removed with them.",
+    "retention": { "keepAllDays": 7, "timeZone": "Europe/Ljubljana", "cron": "30 3 * * *" }
+  },
   "imageGen": {
     "$comment": "Images from fal.ai: eval fixture photos (pnpm fixtures:ai-photos) and, for client sites with fewer than pipeline.fillUpTo photos, up to that many generated mood images, labelled on the site (owner's decisions 2026-09-30 and 2026-10-01). A homepage preview uses 2 (hero + one image-text; keeps it under the €0.30 preview target), a full site 3. Needs FAL_KEY; without it the pipeline skips generation. Prices from fal's pricing API on 2026-09-30; gpt-image-2.5 is token-billed, so its per-megapixel price is fal's 1024x1024 high-quality estimate ($0.05268) scaled by area.",
     "pipeline": {

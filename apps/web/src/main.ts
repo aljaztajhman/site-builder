@@ -4,6 +4,7 @@ import { mailerFromEnv, platformFromEnv } from "@sb/platform";
 import { intakeClassifier, startWorker } from "@sb/worker/worker";
 import { createApp } from "./app.ts";
 import { authSettingsFromEnv } from "./auth.ts";
+import { missingEnv, missingEnvLine } from "./env-check.ts";
 
 const config = loadConfig();
 const auth = authSettingsFromEnv();
@@ -19,8 +20,9 @@ if (inline) {
 // Links in sign-in emails point here. Railway provides its public domain; APP_URL overrides it (custom domain).
 const appUrl = process.env.APP_URL || (process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : undefined);
 const mailer = mailerFromEnv();
-if (mailer.kind === "console") console.log("[web] RESEND_API_KEY not set: sign-in links are printed here instead of emailed (development)");
-if (mailer.kind === "disabled") console.error("[web] RESEND_API_KEY not set: owners can't sign in by email until it is (admin password still works)");
+// Optional variables never stop the server: what's missing is named once, and only its feature is off.
+const missing = missingEnvLine(missingEnv());
+if (missing) console.warn(missing);
 
 // The intake's junk check asks the classifier before a generation is queued (fails open: the pipeline asks again).
 const app = createApp({ platform, config, auth, mailer, classifyIntake: intakeClassifier(platform, config), ...(appUrl ? { appUrl } : {}) });

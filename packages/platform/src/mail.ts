@@ -74,20 +74,21 @@ export function memoryMailer(): Mailer & { sent: MailMessage[] } {
   };
 }
 
+const disabled = (): Mailer => ({
+  kind: "disabled",
+  async send() {
+    throw new MailUnavailableError();
+  },
+});
+
+/**
+ * Never throws: a half-configured environment (a key without EMAIL_FROM) sends nothing rather than
+ * stopping the server; the startup log names what is missing (apps/web/src/env-check.ts).
+ */
 export function mailerFromEnv(env: NodeJS.ProcessEnv = process.env): Mailer {
   const key = env.RESEND_API_KEY;
-  if (key) {
-    const from = env.EMAIL_FROM;
-    if (!from) throw new Error("EMAIL_FROM must be set together with RESEND_API_KEY (e.g. Stranko <prijava@stranko.einvoicecheck.eu>)");
-    return resendMailer({ apiKey: key, from });
-  }
-  if (env.NODE_ENV === "production") {
-    return {
-      kind: "disabled",
-      async send() {
-        throw new MailUnavailableError();
-      },
-    };
-  }
+  const from = env.EMAIL_FROM;
+  if (key && from) return resendMailer({ apiKey: key, from });
+  if (key || env.NODE_ENV === "production") return disabled();
   return consoleMailer();
 }
