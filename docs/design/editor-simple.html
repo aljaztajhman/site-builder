@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Simple editor</title>
+<style>
+@font-face{font-family:"Bricolage Grotesque";src:url("../../packages/render/assets/fonts/bricolage-grotesque.woff2") format("woff2");font-weight:200 800;font-display:swap}
+@font-face{font-family:"Figtree";src:url("../../packages/render/assets/fonts/figtree.woff2") format("woff2");font-weight:300 900;font-display:swap}
+:root{
+  --canvas:#f5f3ef;--surface:#fff;--surface-2:#ece9e3;
+  --ink:#151412;--ink-2:#4d4a44;--ink-3:#6b665e;
+  --line:#dcd8d0;--line-2:#c9c4ba;
+  --accent:#156b4a;--accent-soft:#e3efe8;--warn:#9a5b00;--warn-soft:#fbefd9;
+  --r-1:4px;--r-2:8px;--r-3:12px;
+  --shadow-float:0 8px 24px rgb(20 20 18/.10),0 1px 2px rgb(20 20 18/.08);
+  --font-display:"Bricolage Grotesque",system-ui,sans-serif;--font-ui:"Figtree",system-ui,sans-serif;
+  /* the generated site inside the mockups (industrial direction) */
+  --s-bg:#16181c;--s-text:#eef0f2;--s-muted:#a7adb4;--s-yellow:#f2c200;--s-line:#363a40;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--canvas);color:var(--ink);font:17px/1.55 var(--font-ui);-webkit-font-smoothing:antialiased}
+main{max-width:1180px;margin:0 auto;padding:40px 16px 80px}
+h1,h2,h3{font-family:var(--font-display);font-weight:600;letter-spacing:-.025em;line-height:1.1;margin:0 0 12px}
+h1{font-size:clamp(34px,6vw,56px);letter-spacing:-.035em}
+h2{font-size:clamp(26px,4vw,36px);margin-top:56px}
+h3{font-size:20px;margin-top:24px}
+p,li{max-width:72ch}
+.lead{font-size:20px;color:var(--ink-2)}
+.muted{color:var(--ink-3)}
+code{font-size:.9em;background:var(--surface-2);padding:1px 5px;border-radius:4px}
+table{border-collapse:collapse;width:100%;font-size:15px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-2);overflow:hidden}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;background:var(--surface-2)}
+.answer{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-3);padding:20px 24px;margin:24px 0}
+.answer ol{margin:0;padding-left:20px}
+.answer li{margin:6px 0}
+.principles{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;padding:0;list-style:none}
+.principles li{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-2);padding:16px}
+.principles b{display:block;font-family:var(--font-display);font-size:18px;margin-bottom:4px}
+figure{margin:24px 0}
+figcaption{font-size:14px;color:var(--ink-3);margin-top:8px}
+
+/* ---------- mockup chrome ---------- */
+.screen{background:var(--canvas);border:1px solid var(--line-2);border-radius:var(--r-3);overflow:hidden;box-shadow:var(--shadow-float);font-size:14px}
+.appbar{display:flex;align-items:center;gap:12px;height:56px;padding:0 16px;background:var(--surface);border-bottom:1px solid var(--line)}
+.appbar .back{color:var(--ink-2)}
+.appbar .name{font-family:var(--font-display);font-weight:600;font-size:17px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;background:var(--surface-2);font-size:13px;color:var(--ink-2)}
+.chip.warn{background:var(--warn-soft);color:var(--warn);font-weight:600}
+.seg{display:inline-flex;padding:3px;border-radius:var(--r-2);background:var(--surface-2)}
+.seg span{padding:5px 10px;border-radius:6px;color:var(--ink-2)}
+.seg span.on{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgb(0 0 0/.08)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:36px;padding:0 14px;border-radius:var(--r-2);border:1px solid var(--line-2);background:var(--surface);font-weight:600;white-space:nowrap}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.icon{width:36px;padding:0}
+.spacer{flex:1}
+
+.ws{display:grid;grid-template-columns:1fr 340px;height:620px}
+.canvas{position:relative;display:flex;flex-direction:column;align-items:center;padding:20px 20px 0;background:var(--surface-2);overflow:hidden}
+.canvas>.site{flex:1 1 auto;min-height:0}
+.askwrap{flex:none;width:100%;display:grid;justify-items:center;gap:8px;padding:12px 0 16px}
+.panel{background:var(--surface);border-left:1px solid var(--line);padding:16px;overflow:hidden}
+.panel h4{font-family:var(--font-display);font-size:18px;margin:0 0 4px}
+.panel .hint{color:var(--ink-3);font-size:13px;margin:0 0 14px}
+.field{margin:0 0 12px}
+.field label{display:block;font-weight:600;font-size:13px;margin-bottom:4px}
+.input{border:1px solid var(--line-2);border-radius:var(--r-2);padding:8px 10px;background:var(--surface)}
+.more{color:var(--accent);font-weight:600;font-size:13px}
+.layouts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.layouts div{height:62px;border:1px solid var(--line);border-radius:var(--r-1);background:var(--s-bg);position:relative}
+.layouts div.on{outline:2px solid var(--accent);outline-offset:1px}
+.layouts div::after{content:"";position:absolute;left:8px;right:8px;top:10px;height:5px;background:var(--s-muted);opacity:.5;box-shadow:0 12px 0 var(--s-muted),0 24px 0 var(--s-muted),0 36px 0 var(--s-muted)}
+
+/* the site inside the canvas */
+.site{position:relative;width:420px;background:var(--s-bg);color:var(--s-text);border-radius:var(--r-2);box-shadow:var(--shadow-float);overflow:hidden;font-size:12px}
+.site.phone{width:100%;border-radius:0;box-shadow:none}
+.site .hdr{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--s-line);font-weight:800;letter-spacing:.02em}
+.site .hdr span:last-child{border:1px solid var(--s-text);padding:4px 8px;font-weight:600}
+.site .sec{position:relative;padding:18px 16px}
+.site .eyebrow{color:var(--s-muted);font-weight:600;font-size:11px}
+.site .h{font-family:var(--font-display);font-weight:800;font-size:24px;line-height:1.05;text-transform:uppercase;margin:6px 0 8px}
+.site .h2{font-family:var(--font-display);font-weight:800;font-size:18px;text-transform:uppercase;margin:0 0 8px}
+.site .row{padding:8px 0;border-top:1px solid var(--s-line)}
+.site .row b{display:block;text-transform:uppercase}
+.site .cta{display:inline-block;background:var(--s-yellow);color:#111;font-weight:700;padding:8px 12px;margin-top:6px}
+.site .pic{height:110px;background:linear-gradient(135deg,#6b4a32,#b0794e 45%,#3d3f44);margin:0 16px 4px;position:relative}
+.site .pic i{position:absolute;right:6px;top:6px;background:rgb(0 0 0/.7);color:#fff;font-style:normal;font-size:9px;padding:1px 5px;border-radius:3px}
+/* selection and in-place controls */
+.sel{outline:2px solid #3b82f6;outline-offset:-2px}
+.tb{position:absolute;top:-17px;left:12px;display:flex;gap:2px;padding:3px;background:var(--surface);color:var(--ink);border:1px solid var(--line-2);border-radius:var(--r-2);box-shadow:var(--shadow-float);font-size:12px;z-index:2}
+.tb span{padding:3px 8px;border-radius:5px;font-weight:600}
+.tb span+span{border-left:1px solid var(--line)}
+.ins{position:absolute;left:50%;bottom:-11px;transform:translateX(-50%);width:22px;height:22px;border-radius:50%;background:#3b82f6;color:#fff;display:grid;place-items:center;font-weight:700;font-size:15px;z-index:2}
+.typing{border-bottom:2px solid #3b82f6}
+/* the assistant bar */
+.ask{width:min(560px,100%);display:flex;align-items:center;gap:8px;padding:6px 6px 6px 14px;background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r-3);box-shadow:var(--shadow-float)}
+.ask .ph{flex:1;color:var(--ink-3)}
+.ask .btn{min-height:32px}
+.sugg{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;width:min(560px,100%)}
+.sugg span{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:12px;color:var(--ink-2)}
+
+/* phone mockups */
+.phones{display:flex;gap:32px;flex-wrap:wrap}
+.phones figure{width:300px;margin:24px 0 0}
+.phone-frame{width:300px;height:620px;display:flex;flex-direction:column;background:var(--canvas);border:1px solid var(--line-2);border-radius:28px;overflow:hidden;box-shadow:var(--shadow-float);font-size:13px}
+.phone-frame .appbar{height:52px;padding:0 12px;gap:8px}
+.phone-frame .appbar .name{font-size:15px}
+.phone-frame .view{position:relative;flex:1;overflow:hidden;background:var(--s-bg)}
+.dock{display:flex;gap:6px;align-items:center;padding:8px;background:var(--surface);border-top:1px solid var(--line)}
+.dock .askm{flex:1;border:1px solid var(--line-2);border-radius:var(--r-2);padding:8px 10px;color:var(--ink-3);font-size:12px}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgb(0 0 0/.18);padding:8px 14px 14px;color:var(--ink)}
+.sheet .grab{width:36px;height:4px;border-radius:2px;background:var(--line-2);margin:0 auto 10px}
+.sheet h4{font-family:var(--font-display);margin:0 0 8px;font-size:16px}
+.sheet .opts{display:flex;gap:6px;flex-wrap:wrap}
+.sheet .opts span{border:1px solid var(--line-2);border-radius:var(--r-2);padding:6px 10px;font-weight:600;font-size:12px}
+@media (max-width:900px){.ws{grid-template-columns:1fr;height:auto}.panel{border-left:0;border-top:1px solid var(--line)}.canvas{min-height:560px}}
+</style>
+</head>
+<body>
+<main>
+<p class="muted">Design proposal · editor · 2026-10-01 · decision <code>sb-editor-simple</code> in the Decision Inbox</p>
+<h1>Simple editor: point at it, or say it</h1>
+<p class="lead">The owner's note: "make it as simple as possible and easy to understand; it feels like a lot is going on". The editor can already do a lot. The problem is that it shows all of it at once.</p>
+
+<div class="answer">
+<h3 style="margin-top:0">Short answer</h3>
+<ol>
+<li><b>The site is the editor.</b> Tap a text to type, tap a picture to swap it, tap a section to get its toolbar right on the page. The six tabs go.</li>
+<li><b>One box for everything else.</b> "Kaj naj spremenimo?" sits under the preview on every screen: "dodaj delovni čas", "toplejše barve", "nova stran za cenik". The assistant moves from a hidden tab to the centre of the screen. This is how we can be the most powerful and the easiest at once.</li>
+<li><b>The panel shows only what you clicked.</b> Nothing selected: what's left before publishing, and three shortcuts (Podatki, Oblika, Strani).</li>
+<li><b>Nothing internal on screen.</b> Euro spend, version numbers, pixel widths, hex codes, character counters and the "Urejanje s klikom" checkbox all leave the owner's view.</li>
+<li><b>Measured, not guessed.</b> Six everyday owner tasks are scripted in the browser, with the taps counted before and after. Target: each one done in 3 taps or fewer, on a phone.</li>
+</ol>
+</div>
+
+<h2>What makes it feel busy today</h2>
+<p class="muted">Counted on the current editor (instalacije-rebernik, 1280 and 375 px, 2026-10-01).</p>
+<table>
+<tr><th>Where</th><th>Today</th><th>Why it costs attention</th></tr>
+<tr><td>App bar</td><td>Back, name, status, <code>v1</code>, "0,00 € / 10,00 € danes", Razveljavi, Različice, Več, Objavi</td><td>Nine items; two are internal (version, model spend). On a phone it wraps to three rows before the site starts.</td></tr>
+<tr><td>Panel tabs</td><td>Vsebina, Podatki, Fotografije, Oblika, Strani, Pomočnik, in two rows</td><td>The owner has to know where a thing lives. The phone number is in "Podatki", its heading in "Vsebina", its photo in "Fotografije".</td></tr>
+<tr><td>Canvas bar</td><td>Telefon/Namizje, "Urejanje s klikom" checkbox, "Domov · 360 px"</td><td>A mode switch most owners won't understand, and a pixel width they don't need.</td></tr>
+<tr><td>Checklist banner</td><td>Yellow box on every tab: "manjka 1 podatek …; uredite še 9 postavk (začetno besedilo ali napake)"</td><td>Repeated everywhere, worded for us, not for the owner.</td></tr>
+<tr><td>Section list</td><td>7 rows × 4 icon buttons (↑ ↓ ⧉ ✕) + a type dropdown + "+ Dodaj"</td><td>28 small targets that mean the same thing for every row.</td></tr>
+<tr><td>Forms</td><td>Every field shown; "Označi kot manjkajoče" under each; "20/80" counters; "+ Nadnaslov", "+ Država" …</td><td>Most owners need two fields out of ten.</td></tr>
+<tr><td>Oblika</td><td>Direction select, font pair names, 10 colours with hex codes</td><td>Designer vocabulary. Owners say "make it warmer", not "#f2c200".</td></tr>
+<tr><td>Pomočnik</td><td>Hidden in the sixth tab; cost text, "Poraba", "Dnevnik", "Ustvari celotno stran znova"</td><td>Our strongest feature is the hardest to find, next to technical logs.</td></tr>
+</table>
+
+<h2>Five rules</h2>
+<ul class="principles">
+<li><b>Point at it</b>Anything visible on the page is edited by tapping it on the page. The panel follows the selection.</li>
+<li><b>Or say it</b>Anything else is one sentence in the box under the preview. The direct edits stay free; the box costs cents and says so once, not on every screen.</li>
+<li><b>Show what's needed now</b>Optional fields stay behind "Več možnosti". A field you empty becomes "missing" by itself; no separate button.</li>
+<li><b>Nothing internal</b>No €, no version numbers, no px, no hex, no logs in the owner's view. They live in an admin view for us.</li>
+<li><b>One word per thing</b>"Razdelek", "Stran", "Podatki", "Oblika", "Objavi". The same words in the panel, the toolbar and the assistant's replies.</li>
+</ul>
+
+<h2>Desktop</h2>
+<figure>
+<div class="screen">
+  <div class="appbar">
+    <span class="back">← Moje strani</span>
+    <span class="name">Inštalacije Rebernik</span>
+    <span class="chip">Osnutek</span>
+    <span class="spacer"></span>
+    <span class="seg"><span class="on">Telefon</span><span>Računalnik</span></span>
+    <span class="btn icon" title="Razveljavi">↶</span>
+    <span class="chip warn">Še 1 podatek do objave</span>
+    <span class="btn primary">Objavi</span>
+  </div>
+  <div class="ws">
+    <div class="canvas">
+      <div class="site">
+        <div class="hdr"><span>INŠTALACIJE REBERNIK</span><span>☰ Meni</span></div>
+        <div class="sec"><div class="eyebrow">Inštalater s Ptuja</div><div class="h">Vodovod, ogrevanje, toplotne črpalke</div><div>Za vsako delo najprej pridemo na ogled.</div><span class="cta">Pokličite</span></div>
+        <div class="pic"><i>Ustvarjeno z UI</i></div>
+        <div class="sec sel">
+          <div class="tb"><span>↑</span><span>↓</span><span>Postavitev</span><span>Ozadje</span><span>⋯</span></div>
+          <div class="h2"><span class="typing">Kaj delamo</span></div>
+          <div class="row"><b>Vodovod in odtoki</b>V novogradnjah in pri prenovah.</div>
+          <div class="row"><b>Talno ogrevanje</b>Napeljava v novogradnjah in pri prenovah.</div>
+          <div class="ins">+</div>
+        </div>
+      </div>
+      <div class="askwrap"><div class="sugg"><span>Dodaj pogosta vprašanja</span><span>Toplejše barve</span><span>Krajši uvod</span></div>
+      <div class="ask"><span class="ph">Kaj naj spremenimo? Npr. »dodaj delovni čas ob sobotah«</span><span class="btn primary">Pošlji</span></div></div>
+    </div>
+    <div class="panel">
+      <h4>Storitve</h4>
+      <p class="hint">Besedilo urejate kar na strani. Tu so postavitev in seznam.</p>
+      <div class="layouts"><div></div><div class="on"></div></div>
+      <div class="field"><label>Naslov</label><div class="input">Kaj delamo</div></div>
+      <div class="field"><label>Storitve (5)</label><div class="input">Vodovod in odtoki · Talno ogrevanje · …</div></div>
+      <span class="more">Več možnosti</span>
+    </div>
+  </div>
+</div>
+<figcaption>The services section is selected. Its toolbar sits on the page (move, layout, background, ⋯ for duplicate and delete); the heading is being typed in place; "+" adds a section below. The panel shows only this section's layout and list. The assistant box and three suggestions sit under the preview. The checklist became one chip next to "Objavi".</figcaption>
+</figure>
+
+<h3>Nothing selected</h3>
+<p>The panel shows what's left before publishing, worded as tasks ("Vpišite e-pošto"), then three shortcuts:</p>
+<ul>
+<li><b>Podatki</b>: name, phone, address, hours, legal data. The legal data sits in a collapsed group.</li>
+<li><b>Oblika</b>: style cards with a thumbnail, one main colour, three font choices shown as sample text. All 10 colours behind "Napredno".</li>
+<li><b>Strani</b>: list, add, rename.</li>
+</ul>
+<p>The page switcher ("Stran: Domov ▾") sits in the canvas bar.</p>
+
+<h2>Phone</h2>
+<div class="phones">
+<figure>
+<div class="phone-frame">
+  <div class="appbar"><span class="back">←</span><span class="name">Rebernik</span><span class="spacer"></span><span class="btn icon">↶</span><span class="btn primary">Objavi</span></div>
+  <div class="view">
+    <div class="site phone">
+      <div class="hdr"><span>INŠTALACIJE REBERNIK</span><span>☰</span></div>
+      <div class="sec"><div class="eyebrow">Inštalater s Ptuja</div><div class="h">Vodovod, ogrevanje, toplotne črpalke</div><span class="cta">Pokličite</span></div>
+      <div class="pic"><i>Ustvarjeno z UI</i></div>
+      <div class="sec"><div class="h2">Kaj delamo</div><div class="row"><b>Vodovod in odtoki</b></div></div>
+    </div>
+  </div>
+  <div class="dock"><span class="askm">Kaj naj spremenimo?</span><span class="btn icon">⚙</span></div>
+</div>
+<figcaption>Default: the site fills the screen. One app-bar row. The box at the bottom; ⚙ opens Podatki, Oblika and Strani.</figcaption>
+</figure>
+<figure>
+<div class="phone-frame">
+  <div class="appbar"><span class="back">←</span><span class="name">Rebernik</span><span class="spacer"></span><span class="btn icon">↶</span><span class="btn primary">Objavi</span></div>
+  <div class="view">
+    <div class="site phone">
+      <div class="hdr"><span>INŠTALACIJE REBERNIK</span><span>☰</span></div>
+      <div class="pic" style="margin-top:12px"><i>Ustvarjeno z UI</i></div>
+    </div>
+    <div class="sheet"><div class="grab"></div><h4>Slika</h4><div class="opts"><span>Zamenjaj s svojo</span><span>Opis za slepe</span><span>Odstrani</span></div><p class="muted" style="font-size:12px;margin:10px 0 0">To sliko smo ustvarili z UI. Ko jo zamenjate s svojo, oznaka izgine.</p></div>
+  </div>
+</div>
+<figcaption>Tap a picture: a small sheet with three actions. Same for a section (Premakni, Postavitev, Več) and for a phone number or the opening hours (opens just that field).</figcaption>
+</figure>
+</div>
+
+<h2>What moves where</h2>
+<table>
+<tr><th>Today</th><th>Proposed</th></tr>
+<tr><td>Vsebina tab: section list, ↑ ↓ ⧉ ✕ per row, add-section dropdown</td><td>Toolbar on the selected section in the preview; "+" between sections opens a picker with thumbnails. The list stays as a compact outline under "Strani" for reordering many sections at once.</td></tr>
+<tr><td>Podatki tab</td><td>Shortcut "Podatki"; tapping a phone, address or hours on the page opens that field directly.</td></tr>
+<tr><td>Fotografije tab</td><td>Tap a picture → Zamenjaj / Opis / Odstrani. "Vse fotografije" stays reachable from Podatki for bulk upload.</td></tr>
+<tr><td>Oblika tab</td><td>Shortcut "Oblika": style cards, main colour, font choice; "Napredno" holds the 10 colours.</td></tr>
+<tr><td>Strani tab</td><td>Page switcher in the canvas bar; "Strani" shortcut for add, rename, order.</td></tr>
+<tr><td>Pomočnik tab</td><td>The box under the preview, always visible, with 2–3 suggestions from the checklist and the site. Replies appear above the box; history under "⋯".</td></tr>
+<tr><td>Različice, Izvozi, Sporočila, Odpri v zavihku</td><td>"⋯" menu in the app bar ("Zgodovina", "Prenesi stran", "Sporočila"). Sporočila also gets a count badge when there are new ones.</td></tr>
+<tr><td>Checklist banner on every tab</td><td>One chip next to "Objavi": "Še 1 podatek do objave". Tapping it, or "Objavi" while something is missing, lists the tasks.</td></tr>
+<tr><td>€ spend, v1, "360 px", hex codes, "20/80", "Dnevnik", "Poraba", "Urejanje s klikom"</td><td>Gone from the owner's view. Counters appear only near the limit. Spend and logs move to an admin view. Click-editing is always on; "Predogled" opens the clean page.</td></tr>
+</table>
+
+<h2>How we build it (each step shippable)</h2>
+<ol>
+<li><b>Remove the noise.</b> Spend pill, version number, px label, click-edit checkbox, counters under 80 %, "Označi kot manjkajoče" (emptying a field marks it), checklist banner → chip. Small, safe, immediate.</li>
+<li><b>The assistant box under the preview</b>, with suggestions; the Pomočnik tab goes.</li>
+<li><b>Section toolbar and "+" on the page</b>, tap-a-picture actions; the Vsebina and Fotografije tabs go.</li>
+<li><b>Panel by selection</b>, plus the three shortcuts (Podatki, Oblika, Strani); the tab row goes.</li>
+<li><b>Oblika for owners</b>: style cards, one colour, fonts as samples, advanced folded.</li>
+<li><b>Phone layout</b>: full-screen site, one-row app bar, dock with the box.</li>
+</ol>
+<p><b>The check for every step:</b> a browser script runs six owner tasks at 375 and 1280 px and counts taps. The target is 3 or fewer each, and no task may get worse. The six tasks: change the phone number, change Saturday hours, replace a generated picture with one's own, add an FAQ, make the colours warmer, publish. The script also runs axe and checks for horizontal scroll. Today's counts are measured first and become the baseline.</p>
+</main>
+</body>
+</html>
