@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="sl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>N · Markacija (turistična kmetija) · design template</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&amp;family=Nunito+Sans:opsz,wght@6..12,400;6..12,700;6..12,800&amp;display=swap">
+<style>
+/* N · Markacija: tourism and places with a view. The view fills the first screen; a mountain ridge cuts every dark section; destinations hang on a red trail signpost; bullets are the Slovenian trail blaze (red ring, white centre). Photos are shown as a mosaic, because the owner asked for many. */
+*{box-sizing:border-box}
+body{margin:0}
+.pg{--forest:#1d3a2a;--pine:#2f5a3f;--red:#c8202a;--meadow:#eaf3e4;--ink:#17241b;--soft:#48584c;--line:#d5e0d2;--pale:#d6e6d3;
+  font-family:'Nunito Sans',system-ui,sans-serif;font-size:19px;line-height:1.5;color:var(--ink);background:#fff;-webkit-font-smoothing:antialiased;overflow-x:clip}
+.pg :where(h1,h2,h3){font-family:Fraunces,Georgia,serif;font-weight:900;margin:0;letter-spacing:-.025em}
+.pg :where(p){margin:0}
+.pg :where(a){color:inherit}
+.wrap{max-width:1320px;margin:0 auto;padding:0 40px;position:relative}
+.ph{background:#fff3a6;color:#3b2f00;border:1px dashed #8a6d00;border-radius:3px;padding:0 .3em;font-weight:700;white-space:nowrap;font-size:.8em}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:60px;padding:0 30px;border-radius:8px;font-weight:800;font-size:19px;text-decoration:none;background:var(--red);color:#fff}
+.btn.sm{min-height:44px;padding:0 20px;font-size:17px;background:#fff;color:var(--forest)}
+.lnk{font-weight:800;text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:2px}
+.blaze{display:inline-block;flex:none;width:26px;height:26px;border-radius:50%;background:#fff;border:8px solid var(--red)}
+.ridge{display:block;width:100%;height:90px;margin-bottom:-1px}
+
+/* hero */
+.hero{position:relative;min-height:860px;display:flex;flex-direction:column;color:#fff;background:var(--forest)}
+.hero-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 55%}
+.hero-shade{position:absolute;inset:0;background:#10241a;opacity:.42}
+.top{display:flex;align-items:center;gap:36px;padding-top:24px;padding-bottom:24px;width:100%}
+.brand{display:flex;align-items:center;gap:14px;text-decoration:none;margin-right:auto;font-family:Fraunces,serif;font-weight:900;font-size:28px}
+.nav{display:flex;gap:30px;font-weight:700;font-size:17px}
+.nav a{text-decoration:none;padding:12px 0}
+.menu{display:none;font-weight:800;text-decoration:underline;text-underline-offset:5px;padding:12px 0}
+.hero-grid{display:grid;grid-template-columns:minmax(0,8fr) minmax(0,4fr);gap:48px;align-items:end;margin-top:auto;padding-top:80px;padding-bottom:150px;width:100%}
+.where{font-weight:800;font-size:18px}
+.hero h1{font-size:clamp(46px,8.2vw,120px);line-height:.92;letter-spacing:-.035em;margin-top:16px}
+.lead{font-size:22px;line-height:1.45;max-width:27em;margin-top:28px;font-weight:700}
+.acts{display:flex;align-items:center;gap:30px;margin-top:36px}
+.post{position:relative;padding:8px 0 8px 34px;display:grid;gap:18px;justify-items:start}
+.post::before{content:"";position:absolute;left:10px;top:-18px;bottom:-110px;width:14px;border-radius:7px 7px 0 0;background:#5b3d24}
+.sign{position:relative;display:flex;align-items:center;gap:12px;background:var(--red);color:#fff;font-family:Fraunces,serif;font-weight:900;font-size:25px;line-height:1.05;padding:14px 46px 14px 16px;clip-path:polygon(0 0,calc(100% - 26px) 0,100% 50%,calc(100% - 26px) 100%,0 100%)}
+.sign small{display:block;font-family:'Nunito Sans',sans-serif;font-weight:700;font-size:15px}
+.sign .blaze{width:20px;height:20px;border-width:6px;border-color:#fff;background:var(--red)}
+.sign:nth-child(1){transform:rotate(-2deg)}
+.sign:nth-child(2){transform:rotate(1.5deg);margin-left:10px}
+.sign:nth-child(3){transform:rotate(-1deg)}
+.hero .ridge{position:absolute;left:0;bottom:0}
+
+/* rooms and prices */
+.rooms{padding:72px 0 120px}
+.rooms-grid{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,7fr);gap:88px;align-items:center}
+.room{margin:0}
+.room img{display:block;width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:8px}
+.rooms h2{font-size:clamp(40px,5.6vw,80px);line-height:.94}
+.rooms .txt{font-size:21px;color:var(--soft);margin-top:22px;max-width:27em}
+.rates{margin:40px 0 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px}
+.rate{border-top:4px solid var(--forest);padding-top:18px}
+.rate dt{font-weight:800;font-size:18px}
+.rate dd{margin:6px 0 0;font-family:Fraunces,serif;font-weight:900;font-size:clamp(56px,6.4vw,92px);line-height:.95;letter-spacing:-.03em;color:var(--forest)}
+.rate small{display:block;font-family:'Nunito Sans',sans-serif;font-weight:700;font-size:17px;letter-spacing:0;color:var(--soft);margin-top:8px}
+.free{display:flex;align-items:center;gap:14px;margin-top:32px;font-weight:800;font-size:20px}
+
+/* photo mosaic */
+.mosaic{display:grid;grid-template-columns:7fr 5fr;gap:12px}
+.mosaic2{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
+.mosaic img,.mosaic2 img{display:block;width:100%;height:100%;object-fit:cover}
+.mosaic figure{margin:0;height:460px}
+.mosaic2 figure{margin:0;height:340px}
+
+/* from the farm */
+.farm{background:var(--meadow);padding:120px 0}
+.farm-grid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,4fr);gap:88px;align-items:center}
+.eyebrow{font-weight:800;font-size:18px;color:var(--pine);margin-bottom:16px}
+.farm h2{font-size:clamp(34px,4.8vw,68px);line-height:1}
+.farm .txt{margin-top:26px;font-size:21px;color:var(--soft);max-width:26em}
+.jars{margin:0}
+.jars img{display:block;width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:8px}
+
+/* weekend */
+.weekend{background:var(--red);color:#fff;padding:80px 0 88px}
+.weekend-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:72px;align-items:center}
+.weekend .k{font-weight:800;font-size:18px}
+.weekend h2{font-size:clamp(36px,4.8vw,68px);line-height:.96;margin-top:8px}
+.weekend .t{font-family:Fraunces,serif;font-weight:900;font-size:clamp(44px,5.6vw,80px);line-height:1;letter-spacing:-.03em}
+.weekend .d{margin-top:16px;font-size:20px;font-weight:700;max-width:26em}
+
+/* children and trails */
+.out{padding:120px 0}
+.out-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:88px;align-items:start}
+.out h2{font-size:clamp(32px,3.8vw,52px);line-height:1}
+.out .txt{margin-top:18px;font-size:21px;color:var(--soft)}
+.trails{list-style:none;margin:28px 0 0;padding:0;border-top:1px solid var(--line)}
+.trails li{display:flex;align-items:center;gap:16px;padding:18px 0;border-bottom:1px solid var(--line);font-family:Fraunces,serif;font-weight:900;font-size:28px}
+.trails small{font-family:'Nunito Sans',sans-serif;font-weight:700;font-size:17px;color:var(--soft);margin-left:auto}
+
+/* contact */
+.visit{background:var(--forest);color:#fff}
+.visit-grid{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,5fr);gap:88px;align-items:start;padding-top:48px;padding-bottom:120px}
+.visit h2{font-size:clamp(36px,4.6vw,64px);line-height:1}
+.hosts{margin-top:32px;border-top:1px solid #456b53}
+.hosts div{display:flex;justify-content:space-between;gap:24px;align-items:baseline;padding:18px 0;border-bottom:1px solid #456b53}
+.hosts b{font-family:Fraunces,serif;font-weight:900;font-size:28px}
+.hosts span{color:var(--pale)}
+.tel{display:inline-block;font-family:Fraunces,serif;font-weight:900;font-size:clamp(46px,5.6vw,80px);line-height:1;letter-spacing:-.03em;text-decoration:none;margin-top:12px}
+.visit ul{list-style:none;margin:22px 0 32px;padding:0;display:grid;gap:8px;color:var(--pale)}
+
+/* footer */
+.foot{background:#142a1e;color:var(--pale);padding:40px 0 56px;font-size:16px}
+.foot-grid{display:flex;flex-wrap:wrap;gap:16px 48px;align-items:baseline}
+.foot strong{font-family:Fraunces,serif;font-weight:900;font-size:24px;color:#fff}
+.foot nav{display:flex;gap:24px;margin-left:auto}
+.bar{display:none}
+
+@media (max-width:900px){
+  .nav{display:none}.menu{display:block}
+  .hero-grid{grid-template-columns:1fr;gap:48px;padding-bottom:140px}
+  .rooms-grid,.farm-grid,.weekend-grid,.out-grid,.visit-grid{grid-template-columns:1fr;gap:48px}
+  .room,.jars{max-width:70%}
+  .mosaic figure{height:300px}
+  .mosaic2 figure{height:220px}
+}
+@media (max-width:640px){
+  .pg{font-size:17px}
+  .wrap{padding:0 20px}
+  .top{padding-top:14px;padding-bottom:14px}
+  .top .btn{display:none}
+  .brand{font-size:23px}
+  .hero{min-height:0}
+  .hero-grid{padding-top:120px;padding-bottom:110px;gap:40px}
+  .lead{font-size:18px;margin-top:18px}
+  .acts{flex-direction:column;align-items:stretch;gap:8px;margin-top:26px}
+  .acts .lnk{align-self:flex-start;padding:12px 0}
+  .sign{font-size:21px;padding:12px 40px 12px 14px}
+  .ridge{height:48px}
+  .rooms{padding:48px 0 72px}
+  .rates{gap:20px}
+  .rate small{font-size:15px}
+  .mosaic{grid-template-columns:1fr;gap:8px}
+  .mosaic2{grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+  .mosaic2 figure:last-child{grid-column:1/-1}
+  .mosaic figure{height:240px}
+  .mosaic2 figure{height:170px}
+  .farm{padding:72px 0}
+  .farm .txt{font-size:18px}
+  .weekend{padding:56px 0 64px}
+  .out{padding:72px 0}
+  .trails li{font-size:23px;flex-wrap:wrap}
+  .trails small{margin-left:42px;width:100%}
+  .visit-grid{padding-top:24px;padding-bottom:72px}
+  .hosts b{font-size:24px}
+  .visit .btn{width:100%}
+  .foot nav{margin-left:0}
+  .bar{display:grid;grid-template-columns:1fr 1fr;gap:8px;position:sticky;bottom:0;z-index:5;padding:8px 12px;background:#142a1e}
+  .bar a{display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:8px;font-weight:800;font-size:16px;text-decoration:none;color:#fff;border:2px solid #456b53}
+  .bar a:first-child{background:var(--red);border-color:var(--red)}
+}
+</style>
+</head>
+<body>
+<div class="pg">
+
+<header class="hero">
+<img class="hero-bg" src="../../../tools/eval/fixtures/kmetija-grabnar/photos/07.jpg" alt="Pogled s terase na gorsko dolino">
+<div class="hero-shade"></div>
+<div class="wrap top">
+<a class="brand" href="#"><span class="blaze"></span>Kmetija Grabnar</a>
+<nav class="nav" aria-label="Glavni meni"><a href="#sobe">Sobe in cene</a><a href="#kmetija">Z naše kmetije</a><a href="#poti">Poti</a><a href="#kontakt">Rezervacije</a></nav>
+<a class="menu" href="#kontakt">Meni</a>
+<a class="btn sm" href="tel:+38631555408">031 555 408</a>
+</div>
+<div class="wrap hero-grid">
+<div>
+<p class="where">Turistična kmetija v Zgornji Savinjski dolini</p>
+<h1>Razgled na gore iz vsake sobe</h1>
+<p class="lead">4 sobe in apartma, zajtrk z naše kmetije, planinske poti se začnejo pri hiši.</p>
+<div class="acts"><a class="btn" href="tel:+38631555408">Rezervirajte</a><a class="lnk" href="#sobe">Sobe in cene</a></div>
+</div>
+<div class="post" aria-label="Od kmetije vodijo poti">
+<p class="sign"><span class="blaze"></span>Raduha</p>
+<p class="sign"><span class="blaze"></span>Logarska dolina</p>
+<p class="sign"><span class="blaze"></span><span>Smučišče<small>10 min</small></span></p>
+</div>
+</div>
+<svg class="ridge" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true"><path fill="#ffffff" d="M0 90V58l70-22 46 14 88-46 62 38 54-18 96 44 82-52 60 26 110-40 74 36 66-20 92 46 84-58 70 34 58-16 100 40 90-48 78 30 60-12v84z"></path></svg>
+</header>
+
+<section class="rooms" id="sobe">
+<div class="wrap rooms-grid">
+<figure class="room"><img src="../../../tools/eval/fixtures/kmetija-grabnar/photos/02.jpg" alt="Soba z lesenima posteljama in kariranimi prevlekami"></figure>
+<div>
+<h2>4 sobe in apartma za 4 osebe</h2>
+<p class="txt">Vse z lastno kopalnico in pogledom na gore.</p>
+<dl class="rates">
+<div class="rate"><dt>Nočitev z zajtrkom</dt><dd>38 €<small>na osebo</small></dd></div>
+<div class="rate"><dt>Polpenzion</dt><dd>52 €<small>na osebo</small></dd></div>
+</dl>
+<p class="free"><span class="blaze"></span>Otroci do 6 let so brezplačni.</p>
+</div>
+</div>
+</section>
+
+<section aria-label="Fotografije">
+<div class="mosaic">
+<figure><img src="../../../tools/eval/fixtures/kmetija-grabnar/photos/01.jpg" alt="Kmečka hiša z lesenim balkonom in gorami v ozadju"></figure>
+<figure><img src="../../../tools/eval/fixtures/kmetija-grabnar/photos/04.jpg" alt="Krave na pašniku pod gorami"></figure>
+</div>
+<div class="mosaic2">
+<figure><img src="../../../tools/eval/fixtures/kmetija-grabnar/photos/03.jpg" alt="Zajtrk na mizi s sirom, skuto, marmelado in kruhom"></figure>
+<figure><img src="../../../tools/eval/fixtures/kmetija-grabnar/photos/06.jpg" alt="Otroka krmita koze pri ogradi"></figure>
+<figure><img src="../../../tools/eval/fixtures/kmetija-grabnar/photos/05.jpg" alt="Jabolčni zavitek na krožniku"></figure>
+</div>
+</section>
+
+<section class="farm" id="kmetija">
+<div class="wrap farm-grid">
+<div>
+<p class="eyebrow">Zajtrk</p>
+<h2>Mleko, sir, skuta, marmelade in kruh iz krušne peči, vse z naše kmetije</h2>
+<p class="txt">Otroci lahko pomagajo pri krmljenju koz in zajcev, kar jim je najbolj všeč.</p>
+</div>
+<figure class="jars"><img src="../../../tools/eval/fixtures/kmetija-grabnar/photos/08.jpg" alt="Kozarci domače marmelade na polici"></figure>
+</div>
+</section>
+
+<section class="weekend">
+<div class="wrap weekend-grid">
+<div><p class="k">Izletniška kmetija</p><h2>Ob sobotah in nedeljah kuhamo kosila</h2></div>
+<div><p class="t">11.00–19.00</p><p class="d">Juha, pečenka, štruklji, jabolčni zavitek. Za skupine kuhamo tudi med tednom po dogovoru.</p></div>
+</div>
+</section>
+
+<section class="out" id="poti">
+<div class="wrap out-grid">
+<div>
+<h2>Iz kmetije vodijo planinske poti</h2>
+<ul class="trails">
+<li><span class="blaze"></span>Raduha</li>
+<li><span class="blaze"></span>Logarska dolina</li>
+<li><span class="blaze"></span>Smučišče<small>pozimi, 10 min stran</small></li>
+</ul>
+</div>
+<div>
+<h2>Kako do nas</h2>
+<p class="txt">Podveža 41, 3334 Luče. Do nas pripeljete po asfaltu, zadnjih 800 m je makadam.</p>
+<p class="txt"><a class="lnk" href="#">Navodila za pot</a></p>
+</div>
+</div>
+</section>
+
+<section class="visit" id="kontakt">
+<svg class="ridge" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true"><rect width="1440" height="90" fill="#ffffff"></rect><path fill="#1d3a2a" d="M0 90V58l70-22 46 14 88-46 62 38 54-18 96 44 82-52 60 26 110-40 74 36 66-20 92 46 84-58 70 34 58-16 100 40 90-48 78 30 60-12v84z"></path></svg>
+<div class="wrap visit-grid">
+<div>
+<h2>Na kmetiji sva od leta 1996</h2>
+<div class="hosts">
+<div><b>Mojca Grabnar</b><span>gostje in kuhinja</span></div>
+<div><b>Tone Grabnar</b><span>živina in gozd</span></div>
+</div>
+</div>
+<div>
+<h2>Rezervacije</h2>
+<a class="tel" href="tel:+38631555408">031 555 408</a>
+<ul>
+<li>mojca@kmetija-grabnar.example</li>
+<li>Podveža 41, 3334 Luče</li>
+</ul>
+<a class="btn" href="tel:+38631555408">Pokličite</a>
+</div>
+</div>
+</section>
+
+<footer class="foot">
+<div class="wrap foot-grid">
+<strong>Kmetija Grabnar</strong>
+<span>Turistična kmetija Grabnar, Podveža 41, 3334 Luče</span>
+<span><mark class="ph">[naziv nosilca dejavnosti]</mark> <mark class="ph">[matična št.]</mark> <mark class="ph">[davčna št.]</mark></span>
+<nav aria-label="Pravno"><a href="#">Zasebnost</a><a href="#">Izjava o dostopnosti</a></nav>
+</div>
+</footer>
+
+<div class="bar"><a href="tel:+38631555408">Pokliči</a><a href="#">Navodila za pot</a></div>
+
+</div>
+</body>
+</html>

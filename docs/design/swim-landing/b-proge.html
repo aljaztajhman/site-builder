@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="sl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>B · Proge · Šola plavanja Mladi Val (design sketch)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap">
+<style>
+/* B · Proge: type-led poster. White ground, cobalt, lane-rope red. The hour is the hero; pool lane markings (ropes, T-lines) are the only decoration. */
+*{box-sizing:border-box}
+body{margin:0}
+.pg{--ink:#0b1a4a;--cobalt:#1238d6;--red:#e5352b;--tint:#e8f3fc;--line:#b9c6ea;
+  font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:18px;line-height:1.55;color:var(--ink);background:#fff;-webkit-font-smoothing:antialiased;overflow-x:clip}
+.pg :where(h1,h2,h3){font-family:'Space Grotesk','Arial',sans-serif;font-weight:700;margin:0;letter-spacing:-.03em}
+.pg :where(p){margin:0}
+.pg :where(a){color:inherit}
+.wrap{max-width:1360px;margin:0 auto;padding:0 40px;position:relative}
+.ph{background:#fff3a6;color:#3b2f00;border:1px dashed #8a6d00;border-radius:2px;padding:0 .3em;font-weight:500;white-space:nowrap}
+.ai{position:absolute;left:12px;bottom:12px;font-size:12px;line-height:1;padding:6px 8px;border-radius:2px;background:#0b1a4a;color:#fff}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:60px;padding:0 32px;border-radius:2px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:19px;text-decoration:none;background:var(--cobalt);color:#fff}
+.btn.sm{min-height:44px;padding:0 20px;font-size:16px}
+.lnk{font-weight:600;text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:2px}
+.rope{display:block;width:100%;height:16px}
+
+/* header */
+.top{display:flex;align-items:center;gap:40px;padding-top:24px;padding-bottom:24px}
+.brand{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:24px;letter-spacing:-.03em;text-decoration:none;margin-right:auto}
+.brand span{font-weight:500;color:var(--cobalt)}
+.nav{display:flex;gap:32px;font-weight:500;font-size:16px}
+.nav a{text-decoration:none;padding:12px 0}
+.menu{display:none;font-weight:600;text-decoration:underline;text-underline-offset:5px;padding:12px 0}
+
+/* hero: one sentence, the hour blown up */
+.hero{position:relative}
+.hero-grid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,4fr);gap:56px;align-items:stretch}
+.hero-txt{padding:56px 0 88px;display:flex;flex-direction:column}
+.where{font-weight:500;font-size:17px;color:var(--cobalt)}
+.hero h1{display:flex;flex-direction:column;margin-top:28px}
+.h-a,.h-c{font-size:clamp(34px,4.6vw,68px);line-height:1;font-weight:700}
+.h-b{font-size:clamp(132px,21.5vw,320px);line-height:.8;letter-spacing:-.07em;color:var(--cobalt);margin:.04em 0 .1em -.04em;font-variant-numeric:tabular-nums}
+.lead{font-size:20px;line-height:1.5;max-width:27em;margin-top:36px}
+.acts{display:flex;align-items:center;gap:32px;margin-top:36px}
+.hero-shot{position:relative;margin:0 calc((100vw - min(100vw,1360px))/-2 - 40px) 0 0;min-height:560px}
+.hero-shot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hero .rope{position:relative;margin-top:-8px}
+
+/* timetable */
+.board{padding:104px 0 112px}
+.rows{border-top:3px solid var(--ink)}
+.row{display:grid;grid-template-columns:2fr 6fr 4fr;gap:32px;align-items:baseline;padding:28px 0;border-bottom:1px solid var(--line)}
+.row .k{font-weight:500;font-size:17px;color:var(--cobalt)}
+.row .v{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(30px,4vw,56px);line-height:1.02;letter-spacing:-.035em}
+.row .d{font-size:17px}
+
+/* approach: cobalt block, photo hangs out of it */
+.about{background:var(--cobalt);color:#fff;padding:120px 0 0;margin-bottom:120px}
+.about-grid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:64px;align-items:end}
+.about-txt{padding-bottom:120px}
+.eyebrow{font-weight:500;font-size:17px;margin-bottom:24px;color:#c9d6ff}
+.about h2{font-size:clamp(38px,5.2vw,78px);line-height:.96;letter-spacing:-.04em}
+.about .txt{font-size:21px;line-height:1.5;max-width:26em;margin-top:32px}
+.about .lnk{display:inline-block;margin-top:32px}
+.shot{position:relative;margin:0 0 -120px}
+.shot img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover}
+
+/* first visit: three lanes with T-lines */
+.steps{padding:120px 0 128px}
+.steps h2{font-size:clamp(34px,4.2vw,60px);line-height:1}
+.lanes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:64px}
+.lane{position:relative;padding:44px 40px 8px 28px;border-left:6px solid var(--ink)}
+.lane::before{content:"";position:absolute;left:-23px;top:0;width:40px;height:6px;background:var(--ink)}
+.lane h3{font-size:30px;line-height:1.08}
+.lane p{margin-top:12px;max-width:20em}
+
+/* questions */
+.faq{background:var(--tint);padding:112px 0 120px}
+.faq h2{font-size:clamp(34px,4.2vw,60px);line-height:1}
+.qa{margin:56px 0 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 64px;border-top:3px solid var(--ink)}
+.qa div{padding:28px 0 32px;border-bottom:1px solid var(--line)}
+.qa dt{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:24px;line-height:1.15;letter-spacing:-.02em}
+.qa dd{margin:10px 0 0}
+
+/* contact */
+.cta{padding:128px 0 120px}
+.cta h2{font-size:clamp(56px,11.2vw,172px);line-height:.86;letter-spacing:-.06em}
+.cta h2 span{color:var(--cobalt)}
+.cta-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:64px;align-items:end;margin-top:72px}
+.cta ul{list-style:none;margin:0;padding:0;border-top:3px solid var(--ink)}
+.cta li{display:grid;grid-template-columns:120px 1fr;gap:16px;padding:16px 0;border-bottom:1px solid var(--line)}
+.cta li span{color:var(--cobalt);font-weight:500}
+.cta-act{display:flex;flex-direction:column;align-items:flex-start;gap:20px}
+.cta-act p{font-size:21px;max-width:20em}
+
+/* footer */
+.foot{background:var(--ink);color:#d3dcf7;padding:48px 0 56px;font-size:15px}
+.foot-grid{display:flex;flex-wrap:wrap;gap:20px 56px;align-items:baseline}
+.foot strong{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;color:#fff;letter-spacing:-.03em}
+.foot nav{display:flex;gap:24px;margin-left:auto}
+.bar{display:none}
+
+@media (max-width:900px){
+  .nav{display:none}.menu{display:block}
+  .hero-grid{grid-template-columns:1fr;gap:0}
+  .hero-txt{padding:32px 0 48px}
+  .hero-shot{margin:0 -40px;min-height:0;aspect-ratio:16/10}
+  .row{grid-template-columns:1fr;gap:6px}
+  .about-grid{grid-template-columns:1fr;gap:0}
+  .about-txt{padding-bottom:56px}
+  .lanes{grid-template-columns:1fr;gap:40px}
+  .qa{grid-template-columns:1fr}
+  .cta-grid{grid-template-columns:1fr;gap:40px}
+}
+@media (max-width:640px){
+  .pg{font-size:17px}
+  .wrap{padding:0 20px}
+  .top{padding-top:14px;padding-bottom:14px;gap:16px}
+  .top .btn{display:none}
+  .brand{font-size:21px}
+  .hero-txt{padding:20px 0 40px}
+  .hero h1{margin-top:18px}
+  .lead{font-size:18px;margin-top:24px}
+  .acts{flex-direction:column;align-items:stretch;gap:8px;margin-top:28px}
+  .acts .lnk{align-self:flex-start;padding:12px 0}
+  .hero-shot{margin:0 -20px;aspect-ratio:5/4}
+  .board{padding:64px 0 72px}
+  .row{padding:20px 0}
+  .about{padding-top:72px;margin-bottom:112px}
+  .about .txt{font-size:18px}
+  .shot{margin:0 0 -64px}
+  .steps{padding:0 0 80px}
+  .lanes{margin-top:40px}
+  .lane{padding:36px 0 4px 24px}
+  .lane h3{font-size:26px}
+  .faq{padding:72px 0 80px}
+  .qa{margin-top:36px}
+  .qa div{padding:20px 0 24px}
+  .qa dt{font-size:21px}
+  .cta{padding:80px 0 72px}
+  .cta-grid{margin-top:40px}
+  .cta li{grid-template-columns:92px 1fr}
+  .cta-act .btn{width:100%}
+  .foot nav{margin-left:0}
+  .bar{display:grid;grid-template-columns:1fr 1fr;gap:8px;position:sticky;bottom:0;padding:8px 12px;background:#fff;border-top:3px solid var(--ink)}
+  .bar a{display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:2px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;text-decoration:none;border:2px solid var(--ink)}
+  .bar a:first-child{background:var(--cobalt);border-color:var(--cobalt);color:#fff}
+}
+</style>
+</head>
+<body>
+<div class="pg">
+
+<div class="wrap top">
+<a class="brand" href="#">Mladi Val <span>šola plavanja</span></a>
+<nav class="nav" aria-label="Glavni meni"><a href="#vadba">Vadba</a><a href="#obisk">Prvi obisk</a><a href="#vprasanja">Vprašanja</a><a href="#kontakt">Kontakt</a></nav>
+<a class="menu" href="#kontakt">Meni</a>
+<a class="btn sm" href="#kontakt">Pokliči</a>
+</div>
+
+<header class="hero">
+<div class="wrap hero-grid">
+<div class="hero-txt">
+<p class="where">Celje</p>
+<h1><span class="h-a">Vsak popoldan ob</span><span class="h-b">17.00</span><span class="h-c">učimo otroke plavati.</span></h1>
+<p class="lead">Šola plavanja Mladi Val v Celju. Vaš otrok se bo v vodi počutil varno in sproščeno.</p>
+<div class="acts"><a class="btn" href="#kontakt">Pokličite nas</a><a class="lnk" href="#kontakt">Pišite nam</a></div>
+</div>
+<figure class="hero-shot"><img src="img/lanes.jpg" alt="Plavalne proge v bazenu, pogled od zgoraj"><span class="ai">Ustvarjeno z UI</span></figure>
+</div>
+<svg class="rope" aria-hidden="true"><defs><pattern id="ropeB" width="104" height="16" patternUnits="userSpaceOnUse"><rect x="0" y="0" width="24" height="16" rx="6" fill="#e5352b"></rect><rect x="26" y="0" width="24" height="16" rx="6" fill="#e5352b"></rect><rect x="52" y="1" width="24" height="14" rx="6" fill="#ffffff" stroke="#0b1a4a" stroke-width="2"></rect><rect x="78" y="0" width="24" height="16" rx="6" fill="#1238d6"></rect></pattern></defs><rect x="0" y="0" width="100%" height="16" fill="url(#ropeB)"></rect></svg>
+</header>
+
+<section class="board" aria-label="Osnovni podatki">
+<div class="wrap">
+<div class="rows">
+<div class="row"><p class="k">Kdaj</p><p class="v">Vsak popoldan ob 17.00</p><p class="d">Vadba traja <mark class="ph">[trajanje vadbe]</mark></p></div>
+<div class="row"><p class="k">Kje</p><p class="v">Celje</p><p class="d"><mark class="ph">[naslov bazena]</mark></p></div>
+<div class="row"><p class="k">Za koga</p><p class="v">Otroci</p><p class="d"><mark class="ph">[starost otrok]</mark></p></div>
+<div class="row"><p class="k">Telefon</p><p class="v"><mark class="ph">[telefon]</mark></p><p class="d"><a class="lnk" href="#kontakt">Pišite nam</a></p></div>
+</div>
+</div>
+</section>
+
+<section class="about" id="vadba">
+<div class="wrap about-grid">
+<div class="about-txt">
+<p class="eyebrow">Vadba</p>
+<h2>Najprej zaupanje v vodo, potem zamahi</h2>
+<p class="txt">Želimo, da se vaš otrok v vodi počuti varno in sproščeno. Ko voda ni več tuja, pridejo zamahi skoraj sami.</p>
+<a class="lnk" href="#kontakt">Dogovorite se za prvi obisk</a>
+</div>
+<figure class="shot"><img src="img/goggles.jpg" alt="Otroška plavalna očala in kapa na robu bazena"><span class="ai">Ustvarjeno z UI</span></figure>
+</div>
+</section>
+
+<section class="steps" id="obisk">
+<div class="wrap">
+<h2>Do prve ure v treh korakih</h2>
+<div class="lanes">
+<div class="lane"><h3>Pokličite ali pišite</h3><p>Povejte nam, da bi otroka radi pripeljali na plavanje.</p></div>
+<div class="lane"><h3>Dogovorimo se</h3><p>Skupaj izberemo dan, ko pridete prvič.</p></div>
+<div class="lane"><h3>Ob 17.00 ob bazenu</h3><p>Vadba poteka vsak popoldan ob 17.00 v Celju.</p></div>
+</div>
+</div>
+</section>
+
+<section class="faq" id="vprasanja">
+<div class="wrap">
+<h2>Vprašanja staršev</h2>
+<dl class="qa">
+<div><dt>Kdaj poteka vadba?</dt><dd>Vsak popoldan ob 17.00.</dd></div>
+<div><dt>Kje poteka vadba?</dt><dd>V Celju. <mark class="ph">[naslov bazena]</mark></dd></div>
+<div><dt>Koliko mora biti otrok star?</dt><dd><mark class="ph">[starost otrok]</mark></dd></div>
+<div><dt>Kaj naj otrok prinese s seboj?</dt><dd><mark class="ph">[seznam opreme]</mark></dd></div>
+</dl>
+</div>
+</section>
+
+<section class="cta" id="kontakt">
+<div class="wrap">
+<h2>Se vidimo<br>ob <span>17.00</span></h2>
+<div class="cta-grid">
+<div class="cta-act">
+<p>Pokličite, pa se dogovorimo za prvi obisk.</p>
+<a class="btn" href="#">Pokličite nas</a>
+</div>
+<ul>
+<li><span>Telefon</span> <b><mark class="ph">[telefon]</mark></b></li>
+<li><span>E-pošta</span> <b><mark class="ph">[e-pošta]</mark></b></li>
+<li><span>Naslov</span> <b><mark class="ph">[naslov bazena]</mark>, Celje</b></li>
+</ul>
+</div>
+</div>
+</section>
+
+<footer class="foot">
+<div class="wrap foot-grid">
+<strong>Mladi Val</strong>
+<span>Šola plavanja Mladi Val, Celje</span>
+<span><mark class="ph">[naziv in naslov podjetja]</mark> <mark class="ph">[matična št.]</mark> <mark class="ph">[davčna št.]</mark></span>
+<nav aria-label="Pravno"><a href="#">Zasebnost</a><a href="#">Izjava o dostopnosti</a></nav>
+</div>
+</footer>
+
+<div class="bar"><a href="#">Pokliči</a><a href="#">Navodila za pot</a></div>
+
+</div>
+</body>
+</html>

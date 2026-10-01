@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="sl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>O · Nasmeh (zobozdravstvo) · design template</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;700;800&amp;display=swap">
+<style>
+/* O · Nasmeh: health practices. Calm on purpose: white, mint and teal, rounded type, round photos, one coral arc that reads as a smile. The reassuring fact is the headline. The wow is the surgery hours drawn as a week chart instead of a table. */
+*{box-sizing:border-box}
+body{margin:0}
+.pg{--teal:#0c7a70;--deep:#0f2f38;--mint:#dff4ee;--mint2:#c6eadf;--coral:#ff7a66;--soft:#44606a;--line:#cfe3de;
+  font-family:Figtree,system-ui,sans-serif;font-size:19px;line-height:1.55;color:var(--deep);background:#fff;-webkit-font-smoothing:antialiased;overflow-x:clip}
+.pg :where(h1,h2,h3){font-weight:800;margin:0;letter-spacing:-.03em}
+.pg :where(p){margin:0}
+.pg :where(a){color:inherit}
+.wrap{max-width:1280px;margin:0 auto;padding:0 40px;position:relative}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:60px;padding:0 30px;border-radius:12px;font-weight:700;font-size:19px;text-decoration:none;background:var(--teal);color:#fff}
+.btn.sm{min-height:44px;padding:0 20px;font-size:17px;border-radius:10px}
+.btn-light{background:#fff;color:var(--deep)}
+.lnk{font-weight:700;text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:2px}
+
+/* header */
+.top{display:flex;align-items:center;gap:36px;padding-top:22px;padding-bottom:22px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;margin-right:auto;font-weight:800;font-size:24px;letter-spacing:-.03em}
+.brand svg{width:40px;height:24px}
+.nav{display:flex;gap:30px;font-weight:500;font-size:17px}
+.nav a{text-decoration:none;padding:12px 0}
+.menu{display:none;font-weight:700;text-decoration:underline;text-underline-offset:5px;padding:12px 0}
+
+/* hero */
+.hero{padding:40px 0 112px}
+.hero-grid{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,5fr);gap:64px;align-items:center}
+.where{font-weight:700;font-size:17px;color:var(--teal)}
+.hero h1{font-size:clamp(40px,5.9vw,86px);line-height:1;letter-spacing:-.04em;margin-top:16px}
+.lead{font-size:21px;line-height:1.5;color:var(--soft);margin-top:26px;max-width:26em}
+.acts{display:flex;align-items:center;gap:30px;margin-top:34px}
+.face{position:relative;aspect-ratio:1/1;width:100%;max-width:560px;justify-self:end;margin:0}
+.face::before{content:"";position:absolute;inset:-7%;border-radius:50%;background:var(--mint)}
+.face img{position:relative;display:block;width:100%;height:100%;object-fit:cover;border-radius:50%}
+.face svg{position:absolute;left:-6%;right:-6%;bottom:-13%;width:112%}
+.chip{position:absolute;left:-12%;top:12%;background:var(--deep);color:#fff;font-weight:700;font-size:17px;line-height:1.25;padding:14px 18px;border-radius:14px;transform:rotate(-4deg);max-width:210px}
+
+/* hours as a chart */
+.hours{background:var(--mint);padding:112px 0 120px}
+.hours-head{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,5fr);gap:64px;align-items:end}
+.hours h2{font-size:clamp(38px,5vw,72px);line-height:.98}
+.hours-head p{color:var(--soft);font-size:20px;max-width:24em}
+.chart{margin-top:56px;display:grid;gap:10px}
+.scale,.day{display:grid;grid-template-columns:150px minmax(0,1fr);align-items:center;gap:20px}
+.ticks{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));font-weight:700;font-size:15px;color:var(--soft)}
+.ticks span{transform:translateX(-50%);width:max-content}
+.day b{font-weight:800;font-size:21px}
+.track{position:relative;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));height:60px;background:#fff;border-radius:14px;overflow:hidden}
+.track i{grid-row:1;border-left:1px solid var(--line)}
+.track i:first-child{border-left:0}
+.track em{grid-row:1;z-index:1;display:flex;align-items:center;justify-content:center;margin:7px 0;border-radius:10px;background:var(--teal);color:#fff;font-style:normal;font-weight:700;font-size:18px;white-space:nowrap}
+.am{grid-column:1/span 7}
+.pm{grid-column:6/span 7}
+
+/* services */
+.care{padding:120px 0}
+.care-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:88px;align-items:start}
+.care h2{font-size:clamp(38px,5vw,72px);line-height:.98}
+.care .note{margin-top:28px;background:var(--deep);color:#fff;border-radius:20px;padding:28px 30px 30px;font-size:19px}
+.care .note b{display:block;font-size:22px;margin-bottom:6px}
+.list{list-style:none;margin:0;padding:0;border-top:2px solid var(--deep)}
+.list li{position:relative;padding:22px 0 22px 44px;border-bottom:1px solid var(--line);font-weight:800;font-size:25px;line-height:1.2;letter-spacing:-.02em}
+.list li::before{content:"";position:absolute;left:4px;top:30px;width:18px;height:9px;border:5px solid var(--coral);border-top:0;border-radius:0 0 20px 20px}
+.list small{display:block;font-weight:400;font-size:17px;letter-spacing:0;color:var(--soft);margin-top:4px}
+
+/* team */
+.team{padding:0 0 128px}
+.team-grid{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,5fr) minmax(0,3fr);gap:56px;align-items:center}
+.round{margin:0}
+.round img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:50%}
+.team h2{font-size:clamp(34px,4.2vw,58px);line-height:1}
+.who{margin-top:28px;border-top:2px solid var(--deep)}
+.who div{padding:18px 0;border-bottom:1px solid var(--line)}
+.who b{display:block;font-size:25px;letter-spacing:-.02em}
+.who span{color:var(--soft)}
+.wait{margin:0}
+.wait img{display:block;width:100%;aspect-ratio:3/5;object-fit:cover;border-radius:999px 999px 16px 16px}
+
+/* contact */
+.visit{background:var(--teal);color:#fff;padding:104px 0 112px}
+.visit-grid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:72px;align-items:end}
+.visit h2{font-size:clamp(34px,4vw,56px);line-height:1}
+.tel{display:inline-block;font-weight:800;font-size:clamp(48px,7.6vw,112px);line-height:1;letter-spacing:-.05em;text-decoration:none;margin-top:14px}
+.visit ul{list-style:none;margin:0 0 30px;padding:0;display:grid;gap:8px;font-size:19px}
+
+/* footer */
+.foot{background:var(--deep);color:#c7dcd9;padding:40px 0 56px;font-size:16px}
+.foot-grid{display:flex;flex-wrap:wrap;gap:16px 48px;align-items:baseline}
+.foot strong{font-weight:800;font-size:22px;color:#fff;letter-spacing:-.03em}
+.foot nav{display:flex;gap:24px;margin-left:auto}
+.bar{display:none}
+
+@media (max-width:900px){
+  .nav{display:none}.menu{display:block}
+  .hero-grid{grid-template-columns:1fr;gap:72px}
+  .face{justify-self:center;max-width:420px;width:82%}
+  .hours-head,.care-grid,.visit-grid{grid-template-columns:1fr;gap:32px}
+  .team-grid{grid-template-columns:1fr 1fr;gap:32px}
+  .team-grid>div{grid-column:1/-1;order:-1}
+}
+@media (max-width:640px){
+  .pg{font-size:17px}
+  .wrap{padding:0 20px}
+  .top{padding-top:12px;padding-bottom:12px}
+  .top .btn{display:none}
+  .brand{font-size:21px}
+  .hero{padding:16px 0 96px}
+  .lead{font-size:18px;margin-top:18px}
+  .acts{flex-direction:column;align-items:stretch;gap:8px;margin-top:26px}
+  .acts .lnk{align-self:flex-start;padding:12px 0}
+  .chip{left:-8%;top:4%;font-size:14px;padding:10px 13px;max-width:160px}
+  .hours{padding:72px 0 80px}
+  .chart{margin-top:32px;gap:16px}
+  .scale{display:none}
+  .day{grid-template-columns:1fr;gap:6px}
+  .day b{font-size:18px}
+  .track{height:52px}
+  .track em{font-size:16px}
+  .care{padding:72px 0}
+  .list li{font-size:21px;padding:18px 0 18px 40px}
+  .list li::before{top:25px}
+  .team{padding-bottom:80px}
+  .who b{font-size:22px}
+  .visit{padding:64px 0 72px}
+  .visit .btn{width:100%}
+  .foot nav{margin-left:0}
+  .bar{display:grid;grid-template-columns:1fr 1fr;gap:8px;position:sticky;bottom:0;z-index:5;padding:8px 12px;background:#fff;border-top:1px solid var(--line)}
+  .bar a{display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:12px;font-weight:700;font-size:16px;text-decoration:none;border:2px solid var(--deep)}
+  .bar a:first-child{background:var(--teal);border-color:var(--teal);color:#fff}
+}
+</style>
+</head>
+<body>
+<div class="pg">
+
+<div class="wrap top">
+<a class="brand" href="#"><svg viewBox="0 0 40 24" fill="none" stroke="#ff7a66" stroke-width="6" stroke-linecap="round" aria-hidden="true"><path d="M4 5c5 18 27 18 32 0"></path></svg>Zobozdravstvo Lebar</a>
+<nav class="nav" aria-label="Glavni meni"><a href="#cas">Ordinacijski čas</a><a href="#storitve">Storitve</a><a href="#kontakt">Naročanje</a></nav>
+<a class="menu" href="#kontakt">Meni</a>
+<a class="btn sm" href="tel:+38625553120">02 555 31 20</a>
+</div>
+
+<header class="hero">
+<div class="wrap hero-grid">
+<div>
+<p class="where">Gosposvetska cesta 36, Maribor</p>
+<h1>Prvi obisk je le pogovor in pregled, brez posegov</h1>
+<p class="lead">Zasebna zobna ambulanta v središču Maribora. Posebej smo pozorni na paciente, ki jih je strah zobozdravnika.</p>
+<div class="acts"><a class="btn" href="tel:+38625553120">Naročite se</a><a class="lnk" href="mailto:info@zobozdravstvo-lebar.example">Pišite nam</a></div>
+</div>
+<figure class="face">
+<img src="../../../tools/eval/fixtures/zobozdravstvo-lebar/photos/01.jpg" alt="Svetla zobozdravniška ordinacija z zobozdravniškim stolom">
+<svg viewBox="0 0 600 150" fill="none" stroke="#ff7a66" stroke-width="22" stroke-linecap="round" aria-hidden="true"><path d="M40 20c110 150 410 150 520 0"></path></svg>
+<p class="chip">Otroke sprejemamo od 3. leta starosti.</p>
+</figure>
+</div>
+</header>
+
+<section class="hours" id="cas">
+<div class="wrap">
+<div class="hours-head">
+<h2>Ordinacijski čas</h2>
+<p>Dvakrat na teden delamo popoldne, trikrat dopoldne. Naročite se po telefonu ali e-pošti.</p>
+</div>
+<div class="chart">
+<div class="scale" aria-hidden="true"><span></span><div class="ticks"><span>7.00</span><span></span><span>9.00</span><span></span><span>11.00</span><span></span><span>13.00</span><span></span><span>15.00</span><span></span><span>17.00</span><span></span></div></div>
+<div class="day"><b>Ponedeljek</b><div class="track"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><em class="pm">12.00–19.00</em></div></div>
+<div class="day"><b>Torek</b><div class="track"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><em class="am">7.00–14.00</em></div></div>
+<div class="day"><b>Sreda</b><div class="track"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><em class="pm">12.00–19.00</em></div></div>
+<div class="day"><b>Četrtek</b><div class="track"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><em class="am">7.00–14.00</em></div></div>
+<div class="day"><b>Petek</b><div class="track"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><em class="am">7.00–14.00</em></div></div>
+</div>
+</div>
+</section>
+
+<section class="care" id="storitve">
+<div class="wrap care-grid">
+<div>
+<h2>Kaj delamo</h2>
+<p class="note"><b>Samoplačniška ambulanta</b>Nismo koncesionarji ZZZS. Cena je odvisna od načrta zdravljenja, zato jo dobite po pregledu.</p>
+</div>
+<ul class="list">
+<li>Preventivni pregledi in čiščenje zobnega kamna</li>
+<li>Zalivke</li>
+<li>Beljenje zob</li>
+<li>Prevleke, mostički in proteze</li>
+<li>Vsaditve (implantati)<small>Sodelujemo z zunanjim oralnim kirurgom, protetični del opravimo pri nas.</small></li>
+<li>Otroci od 3. leta starosti</li>
+</ul>
+</div>
+</section>
+
+<section class="team">
+<div class="wrap team-grid">
+<figure class="round"><img src="../../../tools/eval/fixtures/zobozdravstvo-lebar/photos/03.jpg" alt="Zobozdravnica v beli halji pri pregledu"></figure>
+<div>
+<h2>Kdo vas sprejme</h2>
+<div class="who">
+<div><b>dr. Urška Lebar, dr. dent. med.</b><span>specialistka stomatološke protetike</span></div>
+<div><b>Maja Horvat</b><span>zobna asistentka</span></div>
+</div>
+</div>
+<figure class="wait"><img src="../../../tools/eval/fixtures/zobozdravstvo-lebar/photos/02.jpg" alt="Čakalnica z zelenimi stoli in rastlino"></figure>
+</div>
+</section>
+
+<section class="visit" id="kontakt">
+<div class="wrap visit-grid">
+<div>
+<h2>Naročanje</h2>
+<a class="tel" href="tel:+38625553120">02 555 31 20</a>
+</div>
+<div>
+<ul>
+<li>info@zobozdravstvo-lebar.example</li>
+<li>Gosposvetska cesta 36, 2000 Maribor</li>
+<li>V prvem nadstropju, z dvigalom.</li>
+</ul>
+<div class="acts"><a class="btn btn-light" href="tel:+38625553120">Pokličite</a><a class="lnk" href="#">Navodila za pot</a></div>
+</div>
+</div>
+</section>
+
+<footer class="foot">
+<div class="wrap foot-grid">
+<strong>Zobozdravstvo Lebar</strong>
+<span>Lebar zobozdravstvo d.o.o., Gosposvetska cesta 36, 2000 Maribor</span>
+<span>Matična številka 7788990000 · davčna številka SI77889900</span>
+<nav aria-label="Pravno"><a href="#">Zasebnost</a><a href="#">Izjava o dostopnosti</a></nav>
+</div>
+</footer>
+
+<div class="bar"><a href="tel:+38625553120">Pokliči</a><a href="#">Navodila za pot</a></div>
+
+</div>
+</body>
+</html>

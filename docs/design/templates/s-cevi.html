@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="sl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>S · Cevi (inštalacije) · design template</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&amp;family=Public+Sans:wght@400;600;700&amp;display=swap">
+<style>
+/* S · Cevi: field trades with no photos. The picture is drawn: a radiator fed by a red hot pipe and drained by a blue cold one; the two pipes then run through the page as dividers, step line and service-area map. Phone number at poster size, because the owner only takes calls. */
+*{box-sizing:border-box}
+body{margin:0}
+.pg{--ink:#101820;--hot:#d63c22;--cold:#1f6fe0;--steel:#e6ebf0;--soft:#465361;--line:#d3dae1;--pale:#b8c4d0;
+  font-family:'Public Sans',system-ui,sans-serif;font-size:18px;line-height:1.55;color:var(--ink);background:#fff;-webkit-font-smoothing:antialiased;overflow-x:clip}
+.pg :where(h1,h2,h3){font-family:'Space Grotesk',Arial,sans-serif;font-weight:700;margin:0;letter-spacing:-.035em}
+.pg :where(p){margin:0}
+.pg :where(a){color:inherit}
+.wrap{max-width:1320px;margin:0 auto;padding:0 40px;position:relative}
+.lnk{font-weight:700;text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:2px}
+.pipes{display:block;width:100%;height:44px}
+
+/* header */
+.top{display:flex;align-items:center;gap:36px;padding-top:22px;padding-bottom:22px}
+.brand{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:24px;letter-spacing:-.03em;text-decoration:none;margin-right:auto}
+.brand i{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--hot);margin-right:4px}
+.brand i + i{background:var(--cold);margin-right:12px}
+.nav{display:flex;gap:30px;font-weight:600;font-size:16px}
+.nav a{text-decoration:none;padding:12px 0}
+.menu{display:none;font-weight:700;text-decoration:underline;text-underline-offset:5px;padding:12px 0}
+
+/* hero */
+.hero-grid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:48px;align-items:center;padding-top:40px;padding-bottom:72px}
+.where{font-weight:700;font-size:16px;color:var(--cold)}
+.hero h1{font-size:clamp(42px,6.8vw,100px);line-height:.94;letter-spacing:-.05em;margin-top:16px}
+.lead{font-size:20px;line-height:1.55;color:var(--soft);margin-top:26px;max-width:28em}
+.call{display:inline-flex;flex-direction:column;margin-top:36px;padding:18px 28px 20px;border-radius:10px;background:var(--hot);color:#fff;text-decoration:none}
+.call span{font-weight:700;font-size:16px}
+.call b{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(40px,5vw,68px);line-height:1;letter-spacing:-.04em;margin-top:4px;white-space:nowrap}
+.back{margin-top:16px;font-weight:600;color:var(--soft)}
+.rad{display:block;width:100%;max-width:540px;justify-self:end;overflow:visible}
+
+/* services */
+.work{padding:112px 0 120px}
+.work-grid{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:72px;align-items:start}
+.work h2{font-size:clamp(40px,5.6vw,80px);line-height:.94}
+.work .txt{margin-top:24px;font-size:20px;color:var(--soft)}
+.jobs{list-style:none;margin:0;padding:0;border-top:3px solid var(--ink)}
+.jobs li{display:grid;grid-template-columns:56px 1fr;gap:20px;align-items:center;padding:22px 0;border-bottom:1px solid var(--line)}
+.jobs svg{width:56px;height:40px}
+.jobs b{display:block;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(23px,2.6vw,34px);line-height:1.1;letter-spacing:-.03em}
+.jobs small{display:block;font-size:17px;color:var(--soft);margin-top:4px}
+
+/* subsidy */
+.eko{background:var(--cold);color:#fff;padding:80px 0 88px}
+.eko h2{font-size:clamp(30px,4.4vw,62px);line-height:1.02;max-width:17em}
+
+/* how it goes */
+.flow{background:var(--steel);padding:112px 0 120px}
+.flow h2{font-size:clamp(38px,5vw,72px);line-height:.96}
+.line{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:48px;margin-top:72px}
+.line::before{content:"";position:absolute;left:0;right:0;top:17px;height:14px;border-radius:7px;background:var(--hot)}
+.stop{position:relative;padding-top:80px}
+.stop::before{content:"";position:absolute;left:0;top:0;width:48px;height:48px;border-radius:50%;background:#fff;border:10px solid var(--ink)}
+.stop h3{font-size:32px;line-height:1.05}
+.stop p{margin-top:10px;color:var(--soft);max-width:20em}
+
+/* where */
+.area{padding:112px 0 120px}
+.area h2{font-size:clamp(38px,5vw,72px);line-height:.96}
+.area .txt{margin-top:20px;font-size:20px;color:var(--soft);max-width:28em}
+.map{position:relative;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;margin-top:72px}
+.map::before{content:"";position:absolute;left:0;right:0;top:11px;height:14px;border-radius:7px;background:var(--cold)}
+.town{position:relative;padding-top:60px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(20px,2.3vw,30px);line-height:1.08;letter-spacing:-.03em}
+.town::before{content:"";position:absolute;left:0;top:0;width:36px;height:36px;border-radius:50%;background:#fff;border:8px solid var(--ink)}
+.town small{display:block;font-family:'Public Sans',sans-serif;font-weight:600;font-size:15px;letter-spacing:0;color:var(--soft);margin-top:6px}
+
+/* contact */
+.visit{background:var(--ink);color:#fff;padding:0 0 112px}
+.visit-in{padding-top:88px}
+.visit h2{font-size:clamp(28px,3.2vw,44px);line-height:1.08}
+.tel{display:inline-block;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(54px,13vw,196px);line-height:.9;letter-spacing:-.06em;text-decoration:none;color:#fff;margin-top:20px}
+.visit-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:48px;margin-top:56px;border-top:1px solid #33414f;padding-top:24px}
+.visit .k{font-weight:700;font-size:15px;color:var(--pale)}
+.visit .v{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:24px;line-height:1.15;margin-top:6px}
+
+/* footer */
+.foot{background:var(--ink);color:var(--pale);padding:0 0 56px;font-size:15px}
+.foot-grid{display:flex;flex-wrap:wrap;gap:16px 48px;align-items:baseline;border-top:1px solid #33414f;padding-top:32px}
+.foot strong{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;color:#fff}
+.foot nav{display:flex;gap:24px;margin-left:auto}
+.bar{display:none}
+
+@media (max-width:900px){
+  .nav{display:none}.menu{display:block}
+  .hero-grid{grid-template-columns:1fr;gap:40px;padding-top:16px}
+  .rad{justify-self:center;max-width:420px}
+  .work-grid{grid-template-columns:1fr;gap:36px}
+  .line{grid-template-columns:1fr;gap:32px}
+  .line::before{left:17px;right:auto;top:0;bottom:0;width:14px;height:auto}
+  .stop{padding:0 0 0 76px;min-height:56px}
+  .map{grid-template-columns:1fr;gap:26px}
+  .map::before{left:11px;right:auto;top:0;bottom:0;width:14px;height:auto}
+  .town{padding:2px 0 2px 60px;min-height:40px}
+  .visit-grid{grid-template-columns:1fr;gap:24px}
+}
+@media (max-width:640px){
+  .pg{font-size:17px}
+  .wrap{padding:0 20px}
+  .top{padding-top:12px;padding-bottom:12px}
+  .brand{font-size:21px}
+  .lead{font-size:18px;margin-top:18px}
+  .call{display:flex;margin-top:28px;padding:16px 20px 18px}
+  .work{padding:64px 0 72px}
+  .jobs li{grid-template-columns:44px 1fr;gap:14px;padding:18px 0}
+  .jobs svg{width:44px;height:32px}
+  .eko{padding:56px 0 64px}
+  .flow{padding:72px 0 80px}
+  .line{margin-top:40px}
+  .stop h3{font-size:26px}
+  .area{padding:72px 0 80px}
+  .map{margin-top:40px}
+  .visit-in{padding-top:56px}
+  .visit{padding-bottom:72px}
+  .foot nav{margin-left:0}
+  .bar{display:grid;grid-template-columns:1fr;position:sticky;bottom:0;z-index:5;padding:8px 12px;background:var(--ink)}
+  .bar a{display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:8px;font-weight:700;font-size:17px;text-decoration:none;background:var(--hot);color:#fff}
+}
+</style>
+</head>
+<body>
+<div class="pg">
+
+<div class="wrap top">
+<a class="brand" href="#"><i></i><i></i>Inštalacije Rebernik</a>
+<nav class="nav" aria-label="Glavni meni"><a href="#delo">Kaj delamo</a><a href="#potek">Kako poteka</a><a href="#teren">Kje delamo</a><a href="#kontakt">Kontakt</a></nav>
+<a class="menu" href="#kontakt">Meni</a>
+</div>
+
+<header class="hero">
+<div class="wrap hero-grid">
+<div>
+<p class="where">Ptuj z okolico, od leta 2011</p>
+<h1>Vodovod, ogrevanje in toplotne črpalke</h1>
+<p class="lead">Matej Rebernik, inštalater z mojstrskim izpitom, s štirimi sodelavci. Za vsako delo najprej pridemo na ogled in pripravimo pisno ponudbo. Ogled je brezplačen.</p>
+<a class="call" href="tel:+38641555118"><span>Pokličite za ogled</span><b>041 555 118</b></a>
+<p class="back">Če ne dvignem, vas pokličem nazaj isti dan.</p>
+</div>
+<svg class="rad" viewBox="0 0 540 520" fill="none" aria-hidden="true">
+<path d="M60 -80V118H128" stroke="#d63c22" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M452 402H500V620" stroke="#1f6fe0" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"></path>
+<rect x="128" y="96" width="324" height="44" rx="22" fill="#101820"></rect>
+<rect x="128" y="380" width="324" height="44" rx="22" fill="#101820"></rect>
+<rect x="138" y="70" width="40" height="380" rx="20" fill="#e6ebf0" stroke="#101820" stroke-width="8"></rect>
+<rect x="190" y="70" width="40" height="380" rx="20" fill="#e6ebf0" stroke="#101820" stroke-width="8"></rect>
+<rect x="242" y="70" width="40" height="380" rx="20" fill="#e6ebf0" stroke="#101820" stroke-width="8"></rect>
+<rect x="294" y="70" width="40" height="380" rx="20" fill="#e6ebf0" stroke="#101820" stroke-width="8"></rect>
+<rect x="346" y="70" width="40" height="380" rx="20" fill="#e6ebf0" stroke="#101820" stroke-width="8"></rect>
+<rect x="398" y="70" width="40" height="380" rx="20" fill="#e6ebf0" stroke="#101820" stroke-width="8"></rect>
+<circle cx="60" cy="30" r="26" fill="#ffffff" stroke="#101820" stroke-width="8"></circle>
+<path d="M60 12v36M42 30h36" stroke="#101820" stroke-width="8" stroke-linecap="round"></path>
+<rect x="96" y="100" width="36" height="36" rx="8" fill="#101820"></rect>
+</svg>
+</div>
+<svg class="pipes" aria-hidden="true"><defs><pattern id="pipeS" width="220" height="44" patternUnits="userSpaceOnUse"><rect x="0" y="5" width="220" height="14" fill="#d63c22"></rect><rect x="0" y="25" width="220" height="14" fill="#1f6fe0"></rect><rect x="96" y="0" width="12" height="44" rx="3" fill="#101820"></rect></pattern></defs><rect width="100%" height="44" fill="url(#pipeS)"></rect></svg>
+</header>
+
+<section class="work" id="delo">
+<div class="wrap work-grid">
+<div>
+<h2>Kaj delamo</h2>
+<p class="txt">V novogradnjah in pri prenovah.</p>
+</div>
+<ul class="jobs">
+<li><svg viewBox="0 0 56 40" fill="none" stroke="#1f6fe0" stroke-width="10" stroke-linecap="round" aria-hidden="true"><path d="M5 12h46M28 12v24"></path></svg><div><b>Vodovodne in odtočne inštalacije</b></div></li>
+<li><svg viewBox="0 0 56 40" fill="none" stroke="#d63c22" stroke-width="10" stroke-linecap="round" aria-hidden="true"><path d="M5 12h46M28 12v24"></path></svg><div><b>Talno in radiatorsko ogrevanje</b></div></li>
+<li><svg viewBox="0 0 56 40" fill="none" stroke="#d63c22" stroke-width="10" stroke-linecap="round" aria-hidden="true"><path d="M5 12h46M28 12v24"></path></svg><div><b>Toplotne črpalke zrak-voda</b><small>Montaža in servis.</small></div></li>
+<li><svg viewBox="0 0 56 40" fill="none" stroke="#d63c22" stroke-width="10" stroke-linecap="round" aria-hidden="true"><path d="M5 12h46M28 12v24"></path></svg><div><b>Zamenjava kotla na olje s toplotno črpalko</b></div></li>
+<li><svg viewBox="0 0 56 40" fill="none" stroke="#1f6fe0" stroke-width="10" stroke-linecap="round" aria-hidden="true"><path d="M5 12h46M28 12v24"></path></svg><div><b>Prenove kopalnic na ključ</b><small>Skupaj s keramikom.</small></div></li>
+</ul>
+</div>
+</section>
+
+<section class="eko">
+<div class="wrap"><h2>Pri zamenjavi kotla vam pomagamo tudi pri vlogi za subvencijo Eko sklada.</h2></div>
+</section>
+
+<section class="flow" id="potek">
+<div class="wrap">
+<h2>Kako poteka</h2>
+<div class="line">
+<div class="stop"><h3>Pokličete</h3><p>Najlažje me dobite na telefon. Če ne dvignem, vas pokličem nazaj isti dan.</p></div>
+<div class="stop"><h3>Pridemo na ogled</h3><p>Ogled je brezplačen.</p></div>
+<div class="stop"><h3>Dobite pisno ponudbo</h3><p>Cen ne objavljamo, ker je vsak objekt drugačen.</p></div>
+</div>
+</div>
+</section>
+
+<section class="area" id="teren">
+<div class="wrap">
+<h2>Kje delamo</h2>
+<p class="txt">Sedež imamo na Ptuju, delamo pa večinoma na terenu.</p>
+<div class="map">
+<p class="town">Ptuj<small>sedež</small></p>
+<p class="town">Ormož</p>
+<p class="town">Slovenska Bistrica</p>
+<p class="town">Lenart</p>
+<p class="town">Okolica Maribora</p>
+</div>
+</div>
+</section>
+
+<section class="visit" id="kontakt">
+<svg class="pipes" aria-hidden="true"><rect width="100%" height="44" fill="url(#pipeS)"></rect></svg>
+<div class="wrap visit-in">
+<h2>Najlažje me dobite na telefon</h2>
+<a class="tel" href="tel:+38641555118">041 555 118</a>
+<div class="visit-grid">
+<div><p class="k">Če ne dvignem</p><p class="v">Pokličem nazaj isti dan</p></div>
+<div><p class="k">Sedež</p><p class="v">Ormoška cesta 18, 2250 Ptuj</p></div>
+<div><p class="k">Ogled</p><p class="v">Brezplačen, s pisno ponudbo</p></div>
+</div>
+</div>
+</section>
+
+<footer class="foot">
+<div class="wrap">
+<div class="foot-grid">
+<strong>Inštalacije Rebernik</strong>
+<span>Matej Rebernik s.p., Ormoška cesta 18, 2250 Ptuj</span>
+<span>Matična številka 3987654000 · davčna številka 39876543</span>
+<nav aria-label="Pravno"><a href="#">Zasebnost</a><a href="#">Izjava o dostopnosti</a></nav>
+</div>
+</div>
+</footer>
+
+<div class="bar"><a href="tel:+38641555118">Pokliči 041 555 118</a></div>
+
+</div>
+</body>
+</html>

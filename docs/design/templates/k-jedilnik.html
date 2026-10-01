@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="sl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>K · Jedilnik (gostilna) · design template</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600;700&amp;family=Figtree:wght@400;500;600&amp;display=swap">
+<style>
+/* K · Jedilnik: the inn as a printed menu. Bottle green and brass, a classic serif, a framed menu card laid over a full-bleed photo of the house, dishes as round plates, prices set large. Motif: a brass spoon, taken from the inn's name. */
+*{box-sizing:border-box}
+body{margin:0}
+.pg{--green:#16382b;--green2:#0f2a20;--brass:#d2ab55;--ink:#1b241f;--soft:#4d5a52;--line:#d6ddd7;--leaf:#cfe0d5;
+  font-family:Figtree,system-ui,sans-serif;font-size:18px;line-height:1.55;color:var(--ink);background:#fff;-webkit-font-smoothing:antialiased;overflow-x:clip}
+.pg :where(h1,h2,h3){font-family:'EB Garamond',Georgia,serif;font-weight:600;margin:0;letter-spacing:-.015em}
+.pg :where(p){margin:0}
+.pg :where(a){color:inherit}
+.wrap{max-width:1280px;margin:0 auto;padding:0 40px;position:relative}
+.ph{background:#fff3a6;color:#3b2f00;border:1px dashed #8a6d00;border-radius:3px;padding:0 .3em;font-weight:500;white-space:nowrap;font-family:Figtree,sans-serif;font-size:.8em}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:58px;padding:0 28px;border-radius:4px;font-weight:600;font-size:18px;text-decoration:none;background:var(--green);color:#fff}
+.btn-brass{background:var(--brass);color:var(--green2)}
+.lnk{font-weight:600;text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:1.5px}
+.spoon{display:block;width:22px;height:104px}
+
+/* header */
+.top{display:flex;align-items:center;gap:36px;padding-top:18px;padding-bottom:18px}
+.brand{display:flex;align-items:center;gap:14px;text-decoration:none;margin-right:auto;font-family:'EB Garamond',serif;font-weight:600;font-size:30px;letter-spacing:-.01em;color:var(--green)}
+.brand svg{width:12px;height:52px}
+.nav{display:flex;gap:30px;font-weight:500;font-size:16px}
+.nav a{text-decoration:none;padding:12px 0}
+.top .lnk{padding:12px 0}
+.menu{display:none;font-weight:600;text-decoration:underline;text-underline-offset:5px;padding:12px 0}
+
+/* hero: photo with the menu card on it */
+.hero{position:relative;min-height:720px;display:flex;align-items:flex-end;background:var(--green2)}
+.hero-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 45%}
+.card{position:relative;width:min(590px,100%);margin-bottom:-72px;background:#fff;padding:56px 56px 52px;outline:1px solid var(--brass);outline-offset:-14px}
+.where{font-weight:500;font-size:16px;color:var(--soft)}
+.card h1{font-size:clamp(40px,4.9vw,70px);line-height:.98;letter-spacing:-.025em;margin-top:14px}
+.lead{font-size:19px;line-height:1.5;margin-top:22px;color:var(--soft)}
+.acts{display:flex;flex-wrap:wrap;align-items:center;gap:14px 28px;margin-top:30px}
+
+/* today */
+.today{background:var(--green);color:#fff;padding:136px 0 88px}
+.today-grid{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:64px;align-items:center}
+.offer .k{font-weight:500;font-size:16px;color:var(--leaf)}
+.offer h2{font-size:clamp(34px,3.8vw,54px);line-height:1;margin-top:8px}
+.offer .d{margin-top:10px;color:var(--leaf)}
+.offer .p{font-family:'EB Garamond',serif;font-weight:500;font-size:clamp(64px,7.4vw,108px);line-height:.95;letter-spacing:-.03em;color:var(--brass);margin-top:14px}
+
+/* dishes */
+.menu-sec{padding:128px 0 120px}
+.menu-head{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,5fr);gap:64px;align-items:end}
+.menu-sec h2{font-size:clamp(44px,6.4vw,92px);line-height:.94;letter-spacing:-.03em}
+.menu-head p{color:var(--soft);font-size:19px;max-width:26em}
+.plates{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:48px;margin-top:72px}
+.plate{margin:0}
+.plate img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:50%}
+.plate:nth-child(2){transform:translateY(56px)}
+.plate figcaption{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-top:24px;padding-top:16px;border-top:1px solid var(--ink)}
+.plate b{font-family:'EB Garamond',serif;font-weight:600;font-size:27px;line-height:1.12}
+.plate span{font-family:'EB Garamond',serif;font-weight:600;font-size:27px;white-space:nowrap;color:var(--green)}
+.also{margin:128px 0 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 64px;border-top:1px solid var(--ink)}
+.also div{display:flex;align-items:baseline;gap:12px;padding:18px 0;border-bottom:1px solid var(--line)}
+.also dt{font-family:'EB Garamond',serif;font-weight:600;font-size:25px}
+.also i{flex:1;border-bottom:1.5px dotted #9aa89f;transform:translateY(-5px)}
+.also dd{margin:0}
+
+/* terrace and groups */
+.lipa{background:var(--green2);color:#fff;padding:120px 0}
+.lipa-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:88px;align-items:center}
+.tall{position:relative;margin:0}
+.tall img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover}
+.tall .small{position:absolute;right:-56px;bottom:-48px;width:46%;aspect-ratio:3/4;border:10px solid var(--green2)}
+.lipa .n{font-family:'EB Garamond',serif;font-weight:500;font-size:clamp(96px,12vw,176px);line-height:.8;letter-spacing:-.04em;color:var(--brass)}
+.lipa h2{font-size:clamp(34px,4.2vw,60px);line-height:1;margin-top:14px}
+.lipa .txt{margin-top:24px;font-size:20px;color:var(--leaf);max-width:25em}
+.lipa .btn{margin-top:32px}
+
+/* family */
+.family{padding:128px 0}
+.family-grid{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,5fr);gap:88px;align-items:center}
+.family h2{font-size:clamp(40px,5.4vw,78px);line-height:.96;letter-spacing:-.025em}
+.who{margin-top:40px;border-top:1px solid var(--ink)}
+.who div{display:flex;align-items:baseline;justify-content:space-between;gap:24px;padding:20px 0;border-bottom:1px solid var(--line)}
+.who b{font-family:'EB Garamond',serif;font-weight:600;font-size:30px}
+.who span{color:var(--soft);text-align:right}
+.cook{margin:0}
+.cook img{display:block;width:100%;aspect-ratio:5/4;object-fit:cover}
+
+/* visit */
+.visit{background:var(--green);color:#fff;padding:112px 0 120px}
+.visit-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:88px;align-items:start}
+.visit h2{font-size:clamp(34px,4vw,56px);line-height:1}
+.hours{margin:28px 0 0;border-top:1px solid var(--brass)}
+.hours div{display:flex;justify-content:space-between;gap:24px;padding:16px 0;border-bottom:1px solid #2f5646;font-size:20px}
+.hours dd{margin:0;font-family:'EB Garamond',serif;font-weight:600;font-size:24px}
+.tel{display:inline-block;font-family:'EB Garamond',serif;font-weight:500;font-size:clamp(48px,6.4vw,92px);line-height:1;letter-spacing:-.03em;text-decoration:none;color:var(--brass);margin-top:20px}
+.visit ul{list-style:none;margin:20px 0 32px;padding:0;display:grid;gap:6px;color:var(--leaf)}
+
+/* footer */
+.foot{background:var(--green2);color:var(--leaf);padding:40px 0 56px;font-size:15px}
+.foot-grid{display:flex;flex-wrap:wrap;gap:16px 48px;align-items:baseline}
+.foot strong{font-family:'EB Garamond',serif;font-weight:600;font-size:24px;color:#fff}
+.foot nav{display:flex;gap:24px;margin-left:auto}
+.bar{display:none}
+
+@media (max-width:900px){
+  .nav,.top .lnk{display:none}.menu{display:block}
+  .today-grid{grid-template-columns:1fr;gap:40px}
+  .today .spoon{display:none}
+  .menu-head{grid-template-columns:1fr;gap:20px}
+  .plates{grid-template-columns:1fr 1fr;gap:32px}
+  .plate:nth-child(2){transform:none}
+  .also{grid-template-columns:1fr;margin-top:64px}
+  .lipa-grid,.family-grid,.visit-grid{grid-template-columns:1fr;gap:72px}
+  .tall .small{right:-20px}
+}
+@media (max-width:640px){
+  .pg{font-size:17px}
+  .wrap{padding:0 20px}
+  .top{padding-top:10px;padding-bottom:10px}
+  .brand{font-size:25px}
+  .brand svg{height:40px;width:10px}
+  .hero{min-height:0;display:block;padding-top:240px}
+  .card{margin-bottom:-56px;padding:40px 30px 36px;outline-offset:-10px}
+  .lead{font-size:18px}
+  .acts .btn{width:100%}
+  .acts .lnk{padding:12px 0}
+  .today{padding:104px 0 64px}
+  .menu-sec{padding:72px 0}
+  .plates{grid-template-columns:1fr;gap:40px;margin-top:40px}
+  .plate img{width:82%}
+  .plate b,.plate span{font-size:24px}
+  .lipa{padding:72px 0 80px}
+  .tall .small{right:0;bottom:-36px;border-width:6px}
+  .family{padding:72px 0}
+  .who b{font-size:25px}
+  .visit{padding:72px 0 80px}
+  .hours div{font-size:18px}
+  .visit .btn{width:100%}
+  .foot nav{margin-left:0}
+  .bar{display:grid;grid-template-columns:1fr 1fr;gap:8px;position:sticky;bottom:0;z-index:5;padding:8px 12px;background:var(--green2)}
+  .bar a{display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:4px;font-weight:600;font-size:16px;text-decoration:none;color:#fff;border:1.5px solid #3d6654}
+  .bar a:first-child{background:var(--brass);border-color:var(--brass);color:var(--green2)}
+}
+</style>
+</head>
+<body>
+<div class="pg">
+
+<div class="wrap top">
+<a class="brand" href="#"><svg viewBox="0 0 22 104" aria-hidden="true"><ellipse cx="11" cy="19" rx="10.5" ry="18" fill="#d2ab55"></ellipse><path d="M8.5 34h5l1.5 62a4 4 0 0 1-8 0z" fill="#d2ab55"></path></svg>Pri Zlati Žlici</a>
+<nav class="nav" aria-label="Glavni meni"><a href="#jedi">Jedilni list</a><a href="#terasa">Terasa in skupine</a><a href="#obisk">Odprto</a></nav>
+<a class="lnk" href="tel:+38645551234">04 555 12 34</a>
+<a class="menu" href="#obisk">Meni</a>
+</div>
+
+<header class="hero">
+<img class="hero-bg" src="../../../tools/eval/fixtures/gostilna-zlata-zlica/photos/01.jpg" alt="Pročelje stare gostilne z lipo pred vhodom">
+<div class="wrap">
+<div class="card">
+<p class="where">Kapucinski trg 7, Škofja Loka</p>
+<h1>Domače jedi iz sestavin lokalnih kmetov</h1>
+<p class="lead">Družinska gostilna v starem delu Škofje Loke. Vodi jo že tretja generacija družine Bizjak.</p>
+<div class="acts"><a class="btn" href="tel:+38645551234">Rezervirajte mizo</a><a class="lnk" href="#jedi">Jedilni list</a></div>
+</div>
+</div>
+</header>
+
+<section class="today" aria-label="Malica in nedeljsko kosilo">
+<div class="wrap today-grid">
+<div class="offer"><p class="k">Vsak dan</p><h2>Dnevna malica</h2><p class="d">Juha, glavna jed, solata</p><p class="p">11,50 €</p></div>
+<svg class="spoon" viewBox="0 0 22 104" aria-hidden="true"><ellipse cx="11" cy="19" rx="10.5" ry="18" fill="#d2ab55"></ellipse><path d="M8.5 34h5l1.5 62a4 4 0 0 1-8 0z" fill="#d2ab55"></path></svg>
+<div class="offer"><p class="k">Ob nedeljah</p><h2>Nedeljsko kosilo</h2><p class="d">Štirje hodi</p><p class="p">19 €</p></div>
+</div>
+</section>
+
+<section class="menu-sec" id="jedi">
+<div class="wrap">
+<div class="menu-head">
+<h2>Z jedilnega lista</h2>
+<p>Ajdovi žganci, ričet, telečja obara, pečenke in orehovi štruklji. Kuhamo iz sestavin lokalnih kmetov.</p>
+</div>
+<div class="plates">
+<figure class="plate"><img src="../../../tools/eval/fixtures/gostilna-zlata-zlica/photos/03.jpg" alt="Krožnik ajdovih žgancev z ocvirki"><figcaption><b>Ajdovi žganci z ocvirki in kislim mlekom</b><span>9,80 €</span></figcaption></figure>
+<figure class="plate"><img src="../../../tools/eval/fixtures/gostilna-zlata-zlica/photos/06.jpg" alt="Skleda telečje obare na mizi"><figcaption><b>Telečja obara</b><span>8,50 €</span></figcaption></figure>
+<figure class="plate"><img src="../../../tools/eval/fixtures/gostilna-zlata-zlica/photos/04.jpg" alt="Orehovi štruklji na belem krožniku"><figcaption><b>Orehovi štruklji</b><span>5,20 €</span></figcaption></figure>
+</div>
+<dl class="also">
+<div><dt>Ričet</dt><i></i><dd><mark class="ph">[cena]</mark></dd></div>
+<div><dt>Pečenke</dt><i></i><dd><mark class="ph">[cena]</mark></dd></div>
+</dl>
+</div>
+</section>
+
+<section class="lipa" id="terasa">
+<div class="wrap lipa-grid">
+<figure class="tall"><img src="../../../tools/eval/fixtures/gostilna-zlata-zlica/photos/05.jpg" alt="Terasa pod lipo s pogrnjenimi mizami"><img class="small" src="../../../tools/eval/fixtures/gostilna-zlata-zlica/photos/08.jpg" alt="Pogrnjena miza s kozarci vina za praznovanje"></figure>
+<div>
+<p class="n">40</p>
+<h2>sedežev na terasi pod lipo</h2>
+<p class="txt">Terasa je odprta poleti. Za skupine do 60 oseb sprejemamo rezervacije za praznovanja, obletnice in pogostitve po pogrebu.</p>
+<a class="btn btn-brass" href="tel:+38645551234">Rezervirajte za skupino</a>
+</div>
+</div>
+</section>
+
+<section class="family">
+<div class="wrap family-grid">
+<div>
+<h2>Tretja generacija družine Bizjak</h2>
+<div class="who">
+<div><b>Marko Bizjak</b><span>glavni kuhar</span></div>
+<div><b>Nina Bizjak</b><span>strežba in rezervacije</span></div>
+</div>
+</div>
+<figure class="cook"><img src="../../../tools/eval/fixtures/gostilna-zlata-zlica/photos/07.jpg" alt="Kuhar pri štedilniku v gostilniški kuhinji"></figure>
+</div>
+</section>
+
+<section class="visit" id="obisk">
+<div class="wrap visit-grid">
+<div>
+<h2>Odprto</h2>
+<dl class="hours">
+<div><dt>Torek–sobota</dt><dd>10.00–22.00</dd></div>
+<div><dt>Nedelja</dt><dd>11.00–17.00</dd></div>
+<div><dt>Ponedeljek</dt><dd>zaprto</dd></div>
+</dl>
+</div>
+<div>
+<h2>Rezervacije</h2>
+<a class="tel" href="tel:+38645551234">04 555 12 34</a>
+<ul>
+<li>rezervacije@zlata-zlica.example</li>
+<li>Kapucinski trg 7, 4220 Škofja Loka</li>
+</ul>
+<div class="acts"><a class="btn btn-brass" href="tel:+38645551234">Pokličite</a><a class="lnk" href="#">Navodila za pot</a></div>
+</div>
+</div>
+</section>
+
+<footer class="foot">
+<div class="wrap foot-grid">
+<strong>Pri Zlati Žlici</strong>
+<span>Gostinstvo Bizjak d.o.o., Kapucinski trg 7, 4220 Škofja Loka</span>
+<span>Matična številka 8765432000 · ID za DDV SI87654321</span>
+<nav aria-label="Pravno"><a href="#">Zasebnost</a><a href="#">Izjava o dostopnosti</a></nav>
+</div>
+</footer>
+
+<div class="bar"><a href="tel:+38645551234">Pokliči</a><a href="#">Navodila za pot</a></div>
+
+</div>
+</body>
+</html>
