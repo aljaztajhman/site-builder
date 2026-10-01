@@ -1,6 +1,6 @@
 /**
  * Landing page, progressive only: the page reads fine without it. Scales the desktop example to its
- * column, plays each section's drawing once in view, types the example description into the prompt,
+ * column, plays each section's drawing once in view, plays the hero demo,
  * and runs the prompt box, which is the intake for everyone: it keeps what was typed across the login
  * and restores it, counts attached files, loads the bot check (no account) when the visitor starts on
  * the form, and blocks a second submit while photos upload.
@@ -39,7 +39,7 @@ for (const s of document.querySelectorAll("#kako, .win")) io.observe(s);
 /**
  * The hero demo: the description is typed, "Ustvari" pressed, the build steps tick, the example site
  * appears on a phone, then the frame widens to a computer and the same page re-flows. Loops while in
- * view. Without JavaScript, or with reduced motion, the phone view stays (no data-step).
+ * view, with a pause button. Without JavaScript the phone view stays (no data-step).
  */
 const demo = document.querySelector<HTMLElement>("[data-demo]");
 if (demo) {
@@ -58,45 +58,70 @@ if (demo) {
   };
   size();
   addEventListener("resize", size);
-  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    let timers: number[] = [];
-    const at = (ms: number, run: () => void) => timers.push(window.setTimeout(run, ms));
-    const scrollSite = (top: number) => {
-      try {
-        frame.contentWindow?.scrollTo({ top, behavior: "smooth" });
-      } catch {
-        // Not loaded yet: the demo goes on without the scroll.
-      }
-    };
-    const play = () => {
-      timers.forEach(clearTimeout);
-      timers = [];
-      demo.dataset.step = "type";
-      text.textContent = "";
+  // Reduced motion (e.g. Windows with animation effects off): the same story in cuts and fades, no sliding or resizing.
+  const calm = matchMedia("(prefers-reduced-motion: reduce)");
+  const setCalm = () => demo.classList.toggle("calm", calm.matches);
+  setCalm();
+  calm.addEventListener("change", setCalm);
+  let timers: number[] = [];
+  let paused = false;
+  let onScreen = false;
+  const at = (ms: number, run: () => void) => timers.push(window.setTimeout(run, ms));
+  const scrollSite = (top: number) => {
+    try {
+      frame.contentWindow?.scrollTo({ top, behavior: calm.matches ? "auto" : "smooth" });
+    } catch {
+      // Not loaded yet: the demo goes on without the scroll.
+    }
+  };
+  const stop = () => {
+    timers.forEach(clearTimeout);
+    timers = [];
+  };
+  const play = () => {
+    stop();
+    demo.dataset.step = "type";
+    text.textContent = "";
+    scrollSite(0);
+    const typing = Math.round(full.length / 3) * 40;
+    for (let i = 3; i <= full.length + 2; i += 3) at((i / 3) * 40, () => (text.textContent = full.slice(0, i)));
+    at(typing + 500, () => (demo.dataset.step = "build"));
+    at(typing + 3100, () => (demo.dataset.step = "phone"));
+    at(typing + 5600, () => scrollSite(320));
+    at(typing + 8000, () => {
       scrollSite(0);
-      const typing = Math.round(full.length / 3) * 40;
-      for (let i = 3; i <= full.length + 2; i += 3) at((i / 3) * 40, () => (text.textContent = full.slice(0, i)));
-      at(typing + 500, () => (demo.dataset.step = "build"));
-      at(typing + 3100, () => (demo.dataset.step = "phone"));
-      at(typing + 5600, () => scrollSite(320));
-      at(typing + 8000, () => {
-        scrollSite(0);
-        demo.dataset.step = "desk";
-      });
-      at(typing + 14500, play);
-    };
-    const stop = () => {
-      timers.forEach(clearTimeout);
-      timers = [];
-    };
-    // Only while the hero is on screen.
-    new IntersectionObserver((entries) => {
-      for (const e of entries) {
-        if (e.isIntersecting) play();
-        else stop();
+      demo.dataset.step = "desk";
+    });
+    at(typing + 14500, play);
+  };
+  const update = () => {
+    if (onScreen && !paused && !document.hidden) {
+      if (!timers.length) play();
+    } else stop();
+  };
+  // A loop that runs on its own needs a way to stop it (WCAG 2.2.2).
+  const pause = demo.querySelector<HTMLButtonElement>(".demo-pause");
+  if (pause) {
+    pause.hidden = false;
+    pause.addEventListener("click", () => {
+      paused = !paused;
+      pause.setAttribute("aria-pressed", String(paused));
+      pause.textContent = paused ? "Predvajaj" : "Ustavi";
+      if (paused) {
+        stop();
+        // Paused shows the finished site, not a half-typed description.
+        text.textContent = full;
+        demo.dataset.step = "phone";
       }
-    }, { threshold: 0.3 }).observe(demo);
+      update();
+    });
   }
+  // Only while the hero is on screen and the tab is visible.
+  new IntersectionObserver((entries) => {
+    for (const e of entries) onScreen = e.isIntersecting;
+    update();
+  }, { threshold: 0.3 }).observe(demo);
+  document.addEventListener("visibilitychange", update);
 }
 
 const form = document.querySelector<HTMLFormElement>("form[data-home-intake]");
@@ -110,30 +135,7 @@ if (form && ta && draft) {
   ta.scrollIntoView({ block: "center" });
   (target || ta).focus();
 }
-if (form && ta && !draft && !ta.value) {
-  // Type the example description into the placeholder; stops as soon as the field is used.
-  const full = ta.placeholder;
-  let i = 0;
-  let stop = false;
-  ta.addEventListener(
-    "focus",
-    () => {
-      stop = true;
-      ta.placeholder = full;
-    },
-    { once: true },
-  );
-  if (matchMedia("(prefers-reduced-motion: no-preference)").matches) {
-    ta.placeholder = "";
-    const tick = () => {
-      if (stop) return;
-      ta.placeholder = full.slice(0, ++i);
-      if (i < full.length) setTimeout(tick, full[i - 1] === "." ? 260 : 28);
-    };
-    tick();
-  }
-
-}
+// The prompt's placeholder stays still: the hero demo beside it does the typing, two at once compete.
 
 if (ta) {
   // Going to the login from here with something typed: the text waits in this tab's sessionStorage (never the URL).

@@ -114,6 +114,14 @@ mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:var(--ink)}
 @keyframes dot-done{to{background:var(--accent);border-color:var(--accent)}}
 @keyframes caret{50%{opacity:0}}
 .demo .phone-cap{max-width:none;margin-top:14px}
+.demo{position:relative}
+.demo-pause{display:block;margin:10px 0 0 auto;min-height:32px;padding:0 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--surface);color:var(--ink-2);font:600 13px/1 var(--font-ui);cursor:pointer}
+.demo-pause:hover{color:var(--ink)}
+.demo-pause[hidden]{display:none}
+@media (pointer:coarse){.demo-pause{min-height:44px}}
+/* Reduced motion: cuts and fades only. */
+.demo.calm .demo-device,.demo.calm .demo-screen iframe,.demo.calm .demo-chrome,.demo.calm .demo-prompt{transition:opacity .4s,visibility .4s}
+.demo.calm[data-step=type] .demo-device,.demo.calm[data-step=build] .demo-device{transform:translate(-50%,-50%)}
 .phone-cap{font-size:14px;color:var(--ink-3);text-align:left;margin-top:10px;justify-self:center;max-width:300px}
 
 /* ---------- What you get: three outcomes shown with the real example, then promises and a comparison ---------- */
@@ -260,7 +268,7 @@ footer .legal{margin-top:28px;padding-top:16px;border-top:1px solid var(--line);
   :root{--gutter:32px;--section:96px}
   .hd nav,.hd .login{display:inline-flex}
   .hero{padding:72px 0 88px}
-  .hero .wrap{grid-template-columns:1.1fr .9fr;align-items:center;gap:56px}
+  .hero .wrap{grid-template-columns:1.25fr .75fr;align-items:center;gap:56px}
   .phone{justify-self:end}
   .win{grid-template-columns:1.1fr 1fr;gap:64px;margin-top:72px}
   .win.flip .win-vis{order:2}
