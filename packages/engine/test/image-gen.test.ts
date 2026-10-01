@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { loadConfig } from "@sb/config";
-import { ImageGenerator, SpendCapError, StandInImageTransport, imageCostEur, requestBody, type CallRecord, type ImageTransport } from "../src/index.ts";
+import { ImageGenerator, SpendCapError, generatedImageCount, StandInImageTransport, imageCostEur, requestBody, type CallRecord, type ImageTransport } from "../src/index.ts";
 
 const config = loadConfig();
 const model = config.imageGen.models[config.imageGen.pipeline.model]!;
@@ -32,5 +32,19 @@ describe("image generation", () => {
     const gen = new ImageGenerator({ config, transport, spentToday: async () => 0, onCall: async (r) => void calls.push(r) });
     await expect(gen.generate("x")).rejects.toThrow(/HTTP 500/);
     expect(calls).toEqual([expect.objectContaining({ stage: "imageGen", ok: false, costEur: 0 })]);
+  });
+});
+
+describe("generated image count", () => {
+  const fill = config.imageGen.pipeline.fillUpTo;
+  it("fills up to the configured count when a generator exists", () => {
+    expect(generatedImageCount(config, 0, true)).toEqual({ wanted: fill, skipped: null });
+    expect(generatedImageCount(config, fill, true)).toEqual({ wanted: 0, skipped: null });
+  });
+  it("says why when pictures are wanted but no image service is configured", () => {
+    const r = generatedImageCount(config, 0, false);
+    expect(r.wanted).toBe(0);
+    expect(r.skipped).toContain("FAL_KEY");
+    expect(generatedImageCount(config, fill, false)).toEqual({ wanted: 0, skipped: null });
   });
 });

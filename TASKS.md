@@ -132,6 +132,8 @@ Product work (not started):
 - [x] Realistic fixture photos with GPT Image 2.5 (`sb-images-model`, recommended pick): 36 photos committed with `photo-manifest.json` (model, prompt, cost) in PR #23
 - [ ] Re-record the eval model recordings against the new fixture photos (€2.71 last run); waits on Anthropic credits
 - [ ] fal cost is estimated from config prices; the account's actual spend isn't readable with this key (billing API 403). Compare against the fal dashboard once
+- [ ] FAL_KEY missing on Railway worker (found 2026-10-01): Frizerstvo Lana (no photos) generated with no pictures, and nothing said why. The skip is now logged in the site's generation log and as a worker startup warning. Owner sets FAL_KEY on the worker (`preview`), then regenerate
+- [ ] More visuals for photo-less sites (owner, 2026-10-01: "not impressive, won't convert"): design stage is told photoCount=0 and picks typography-led directions even when generated pictures follow; fillUpTo is 2. See decision `sb-images-more`
 - [ ] Shot list for owners (brief stage + dashboard); Lucide icons for phone, directions, hours
 - [x] Client-facing generation/edits: generated pictures in the pipeline with origin + "Ustvarjeno z UI" label (spec v3, PR #24); the owner replaces them with their own photos in the editor (PR #25)
 
