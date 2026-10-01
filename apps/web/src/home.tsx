@@ -44,7 +44,7 @@ export interface HomeProps {
 }
 
 export function homePage({ config, signedIn, error, description }: HomeProps): string {
-  const [low, high] = config.plans.paid.monthlyEurRange;
+  const paid = config.plans.paid;
   const example = uiUrl("example-home.html");
   return html(
     <html lang="sl">
@@ -354,9 +354,10 @@ export function homePage({ config, signedIn, error, description }: HomeProps): s
                 <div className="plan">
                   <h3>Naročnina</h3>
                   <div className="amt">
-                    {`od ${wholeEur.format(low)} `}
+                    {`${wholeEur.format(paid.monthlyEur)} `}
                     <small>na mesec</small>
                   </div>
+                  <p className="yearly">{`ali ${wholeEur.format(paid.yearlyEur)} na leto${paid.yearlyIncludesDomain ? ", domena vključena" : ""}`}</p>
                   <p className="muted">Celotna stran in vse, kar potrebujete, da jo vodite sami.</p>
                   <ul>
                     <li>Vse strani: ponudba, cenik, o nas, kontakt</li>
@@ -364,10 +365,25 @@ export function homePage({ config, signedIn, error, description }: HomeProps): s
                     <li>Objava in gostovanje</li>
                     <li>Prenos strani kot datoteke, kadarkoli</li>
                   </ul>
+                  <dl className="extra">
+                    <div>
+                      <dt>{`Prvo leto za prvih ${paid.foundingOffer.customers} strank`}</dt>
+                      <dd>{wholeEur.format(paid.foundingOffer.firstYearEur)}</dd>
+                    </div>
+                    <div>
+                      <dt>Postavitev skupaj z vami, po želji</dt>
+                      <dd>{`${wholeEur.format(paid.setupService.eur)} enkratno`}</dd>
+                    </div>
+                  </dl>
                   <a className="btn primary" href="#zacni">
                     Začnite s predogledom
                   </a>
-                  <p className="muted fine">{`Končna cena je še odprta; ${wholeEur.format(low)} je spodnja meja razpona v nastavitvah (${low}–${wholeEur.format(high)}).`}</p>
+                  {/* No billing until the legal entity exists (config plans.paid.billingEnabled, TASKS: billing phase). */}
+                  <p className="muted fine">
+                    {paid.billingEnabled
+                      ? "Cene so z DDV. Letno naročnino plačate po računu z bančnim nakazilom."
+                      : "Načrtovane cene, z DDV. Plačevanja še ni, zato zaenkrat ničesar ne zaračunamo. Letno naročnino boste plačali po računu z bančnim nakazilom."}
+                  </p>
                 </div>
               </div>
             </div>
@@ -377,7 +393,7 @@ export function homePage({ config, signedIn, error, description }: HomeProps): s
             <div className="wrap">
               <h2 id="h-faq">Pogosta vprašanja</h2>
               <div className="faq">
-                {FAQ.map(([q, a]) => (
+                {faq(config).map(([q, a]) => (
                   <details key={q}>
                     <summary>{q}</summary>
                     <p>{a}</p>
@@ -443,7 +459,7 @@ export function homePage({ config, signedIn, error, description }: HomeProps): s
                 {`© ${new Date().getFullYear()} `}
                 <mark className="ph">[ime izdelka]</mark>
               </span>
-              {/* Written once the legal entity exists (TASKS: phase 4). */}
+              {/* Written once the legal entity exists (TASKS: billing phase). */}
               <span>Zasebnost</span>
               <span>Pogoji uporabe</span>
               <span>Izjava o dostopnosti</span>
@@ -456,7 +472,7 @@ export function homePage({ config, signedIn, error, description }: HomeProps): s
   );
 }
 
-const FAQ: [string, string][] = [
+const faq = (config: AppConfig): [string, string][] => [
   ["Nimam dobrih fotografij. Ali je to težava?", "Ne. Če nam pošljete manj kot dve fotografiji, stran dopolnimo z največ dvema splošnima slikama, ustvarjenima z umetno inteligenco: material, orodje, sestavine ali pokrajina vašega kraja. Na strani sta označeni in nikoli ne prikazujeta vas, vaših prostorov ali vašega dela. Kupljenih slik ne uporabljamo."],
   [
     "Ali si bo stran izmislila podatke?",
@@ -471,5 +487,8 @@ const FAQ: [string, string][] = [
     "Kaj je s piškotki in GDPR?",
     "Stran pred vašo privolitvijo ne nalaga nobenih sledilnih skript. Pisave so na našem strežniku, zemljevidi in videi se naložijo šele po kliku. Politika zasebnosti in izjava o dostopnosti sta pripravljeni kot predlogi, ki jih pregledate sami.",
   ],
-  ["Ali dobim svojo domeno?", "Stran dobi svoj naslov takoj. Povezava lastne domene in registracija nove domene sta v pripravi."],
+  [
+    "Ali dobim svojo domeno?",
+    `Stran dobi svoj naslov takoj. Povezava lastne domene in registracija nove domene sta v pripravi.${config.plans.paid.yearlyIncludesDomain ? " Pri letni naročnini bo domena vključena v ceno." : ""}`,
+  ],
 ];

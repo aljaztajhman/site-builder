@@ -7,7 +7,7 @@
 import { EDITOR_STARTER_TEXT } from "@sb/spec/starter";
 import { COLOR_LABEL, DIRECTION_LABEL, ENUM_LABEL, SECTION_LABEL, TOKEN_LABEL, VARIANT_LABEL, blockerMessage, describePath, fieldLabel, issueText, type BlockerLike } from "@sb/spec/labels";
 import { formatDateTime, formatEur, siteStatus } from "../ui/labels.ts";
-import { undoTarget } from "./versions.ts";
+import { groupVersions, undoTarget, type ListedVersion } from "./versions.ts";
 
 type Json = null | boolean | number | string | Json[] | { [k: string]: Json };
 type Obj = { [k: string]: Json };
@@ -909,27 +909,48 @@ function photosPane(): HTMLElement {
   return pane;
 }
 
+/**
+ * Oblika for owners: the style as cards, one main colour, the fonts. The other colours and the
+ * numbers wait under "Napredno"; code keeps contrast and each style's ranges either way.
+ */
 function designPane(): HTMLElement {
   const pane = h("div", { class: "pane" }, paneHead("Oblika"));
   if (!state.spec || !catalogue) return pane;
   const d = state.spec.design as Obj;
   const dir = catalogue.directions.find((x) => x.id === d.direction);
   const set = (k: string, v: Json) => void patch([{ op: "replace", path: `/design/${k}`, value: v }], `oblikovanje ${k}`);
+  const colors = d.colors as Obj;
+
+  const main = h("input", { type: "color", value: colors.primary as string, "aria-label": "Glavna barva" });
+  main.addEventListener("change", () => set("colors/primary", main.value));
   pane.append(
-    h("label", {}, "Smer oblikovanja"),
-    h("select", { onChange: (e: Event) => void post("/direction", { direction: (e.target as HTMLSelectElement).value }, "Smer zamenjana.") }, ...catalogue.directions.map((x) => h("option", { value: x.id, selected: x.id === d.direction }, DIRECTION_LABEL[x.id]?.name ?? x.name))),
-    h("p", { class: "help" }, dir ? (DIRECTION_LABEL[dir.id]?.summary ?? dir.summary) : ""),
+    withPath("/design/colors/primary", h("div", { class: "row main-color" }, main, h("span", {}, h("strong", {}, "Glavna barva"), h("span", { class: "muted" }, " gumbi in poudarki")))),
     h("label", {}, "Pisave"),
     h("select", { onChange: (e: Event) => set("fontPair", (e.target as HTMLSelectElement).value) }, ...(dir?.fontPairs ?? []).map((id) => h("option", { value: id, selected: id === d.fontPair }, catalogue!.fontPairs.find((f) => f.id === id)?.label ?? id))),
   );
-  const colors = d.colors as Obj;
-  const fs = h("fieldset", { class: "colors" }, h("legend", {}, "Barve (kontrast se preveri samodejno)"));
+
+  pane.append(
+    h("h2", {}, "Slog"),
+    h("div", { class: "styles", role: "group", "aria-label": "Slog" }, ...catalogue.directions.map((x) => {
+      const chosen = x.id === d.direction;
+      return h("button", {
+        type: "button",
+        class: "style-card",
+        "aria-pressed": String(chosen),
+        onClick: () => { if (!chosen) void post("/direction", { direction: x.id }, "Slog zamenjan."); },
+      }, h("strong", {}, DIRECTION_LABEL[x.id]?.name ?? x.name), h("span", {}, DIRECTION_LABEL[x.id]?.summary ?? x.summary));
+    })),
+  );
+
+  const advanced = h("details", { class: "more-fields" }, h("summary", {}, "Napredno: vse barve, velikosti, zaobljenost"));
+  const fs = h("fieldset", { class: "colors" }, h("legend", {}, "Barve (kontrast preverimo sami)"));
   for (const [k, v] of Object.entries(colors)) {
+    if (k === "primary") continue;
     const input = h("input", { type: "color", value: v as string, "aria-label": COLOR_LABEL[k] ?? k });
     input.addEventListener("change", () => set(`colors/${k}`, input.value));
-    fs.append(withPath(`/design/colors/${k}`, h("div", { class: "row" }, input, h("span", { class: "sp" }, COLOR_LABEL[k] ?? k), h("span", { class: "hex" }, v as string))));
+    fs.append(withPath(`/design/colors/${k}`, h("div", { class: "row" }, input, h("span", { class: "sp" }, COLOR_LABEL[k] ?? k))));
   }
-  pane.append(fs);
+  advanced.append(fs);
   const r = (dir?.ranges ?? {}) as Record<string, [number, number] | string[]>;
   const num = (k: string, title: string, step: string) => {
     const [lo, hi] = (r[k] as [number, number]) ?? [0, 100];
@@ -939,7 +960,10 @@ function designPane(): HTMLElement {
   };
   const choice = (k: string, title: string) =>
     labelled(title, h("select", { onChange: (e: Event) => set(k, (e.target as HTMLSelectElement).value) }, ...((r[k] as string[]) ?? []).map((v) => h("option", { value: v, selected: v === d[k] }, TOKEN_LABEL[k]?.[v] ?? v))));
-  pane.append(h("div", { class: "pair" }, num("radius", "Zaobljenost (px)", "1"), num("baseFontSize", "Velikost pisave", "1"), num("scale", "Razmerje naslovov", "0.005"), num("headingWeight", "Debelina naslovov", "50"), num("headingTracking", "Razmik črk (em)", "0.005"), choice("density", "Gostota"), choice("shadow", "Senca"), choice("headingCase", "Velike črke")));
+  advanced.append(h("div", { class: "pair" }, num("radius", "Zaobljenost (px)", "1"), num("baseFontSize", "Velikost pisave", "1"), num("scale", "Razmerje naslovov", "0.005"), num("headingWeight", "Debelina naslovov", "50"), num("headingTracking", "Razmik črk (em)", "0.005"), choice("density", "Gostota"), choice("shadow", "Senca"), choice("headingCase", "Velike črke")));
+  // Colours a checklist entry points at open the advanced part.
+  if (checklistOpen) advanced.open = true;
+  pane.append(advanced);
   return pane;
 }
 
@@ -1086,16 +1110,36 @@ function renderDock(): void {
 
 function versionsPane(): HTMLElement {
   const SRC: Record<string, string> = { generate: "ustvarjeno", critique: "samopregled", edit: "pomočnik", manual: "urejanje", revert: "obnovljeno" };
+  // Retention may have removed a version since the list loaded: the server says so, and the list reloads.
+  const restore = (version: number) => void queued(async () => {
+    try {
+      await api("/revert", { method: "POST", body: JSON.stringify({ version }) });
+      toast = `Obnovljena različica ${version}.`;
+    } catch (e) {
+      toast = (e as Error).message;
+    }
+    await load();
+    reloadPreview();
+  });
+  const action = (v: ListedVersion, label: string) =>
+    v.version === state.version
+      ? h("span", { class: "pill plain" }, "trenutna")
+      : h("button", { class: "btn sm", type: "button", "aria-label": label, onClick: () => restore(v.version) }, "Obnovi");
+  const published = (v: ListedVersion) => (v.version === state.site.published_version ? " · objavljena" : v.published ? " · bila objavljena" : "");
   return h("div", { class: "pane" },
     paneHead("Zgodovina sprememb"),
-    h("p", { class: "help" }, "Vsaka sprememba je nova različica. Tudi obnova je nova različica, zato se nič ne izgubi."),
-    h("ol", { class: "versions" }, ...state.versions.map((v) => h("li", {},
-      h("b", {}, `v${v.version}`),
-      h("div", { class: "what" }, h("span", {}, `${SRC[v.source] ?? v.source} · ${formatDateTime(v.created_at)}`), v.message ? h("span", { class: "muted" }, v.message.slice(0, 120)) : null),
-      v.version === state.version
-        ? h("span", { class: "pill plain" }, "trenutna")
-        : h("button", { class: "btn sm", type: "button", "aria-label": `Obnovi različico ${v.version}`, onClick: () => void queued(() => api("/revert", { method: "POST", body: JSON.stringify({ version: v.version }) }).then(() => { toast = `Obnovljena različica ${v.version}.`; return load(); }).then(reloadPreview)) }, "Obnovi"),
-    ))),
+    h("p", { class: "help" }, "Vsaka sprememba je nova različica, tudi obnova. Zaporedna urejanja so združena, »Obnovi« vrne zadnje. Nedavne hranimo vse, starejše po eno na dan, objavljene vse."),
+    h("ol", { class: "versions" }, ...groupVersions(state.versions).map((item) => item.type === "one"
+      ? h("li", {},
+          h("b", {}, `v${item.row.version}`),
+          h("div", { class: "what" }, h("span", {}, `${SRC[item.row.source] ?? item.row.source} · ${formatDateTime(item.row.created_at)}${published(item.row)}`), item.row.message ? h("span", { class: "muted" }, item.row.message.slice(0, 120)) : null),
+          action(item.row, `Obnovi različico ${item.row.version}`),
+        )
+      : h("li", {},
+          h("b", { title: item.range }, `v${item.newest.version}`),
+          h("div", { class: "what" }, h("span", {}, item.label), h("span", { class: "muted" }, `${SRC.manual} · ${item.day} · ${item.range}`)),
+          action(item.newest, `Obnovi različico ${item.newest.version}, zadnjo od: ${item.label}`),
+        ))),
   );
 }
 

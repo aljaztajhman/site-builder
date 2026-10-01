@@ -222,3 +222,48 @@ describe("editor in a browser", () => {
     }
   }, 60_000);
 });
+
+describe("versions list in a browser", () => {
+  it("shows a typing session as one row, keeps the chat edit and the generation apart, and restores the group's last state", async () => {
+    const id = await bakery("razlicice");
+    const golden = await spec(id);
+    // v1 is the generation; then 5 text autosaves, a chat edit and a move, minutes apart.
+    const save = async (source: "edit" | "manual", message: string, headline: string) => {
+      const s = structuredClone(golden);
+      (s.pages[0]!.sections[0]!.props as { headline: string }).headline = headline;
+      await platform.repo.saveSpec(id, s, source, message);
+    };
+    for (let i = 0; i < 5; i++) await save("manual", "urejen razdelek hero", `Kruh z drožmi ${i}`); // v2–v6
+    await save("edit", "Dodaj praznični delovni čas", "Kruh z drožmi 4"); // v7
+    await save("manual", "premik", "Kruh z drožmi 4"); // v8
+    await platform.db.query("update spec_versions set created_at = now() - make_interval(mins => 60 - version) where site_id = $1", [id]);
+    await platform.db.query("update spec_versions set created_at = created_at - interval '30 minutes' where site_id = $1 and version = 1", [id]);
+
+    for (const width of [375, 1280]) {
+      const { page, close } = await open(id, width);
+      try {
+        await page.locator("details.menu > summary").click();
+        await page.getByRole("button", { name: "Zgodovina sprememb" }).click();
+        const rows = page.locator("ol.versions > li");
+        await rows.first().waitFor();
+        const texts = (await rows.allInnerTexts()).map((t) => t.replace(/\s+/g, " ").trim());
+        // v8 (current), v7 (chat), v2–v6 as one row, v1.
+        expect(texts).toHaveLength(4);
+        expect(texts[0]).toMatch(/^v8 urejanje · .* premik trenutna$/);
+        expect(texts[1]).toMatch(/^v7 pomočnik · .*Dodaj praznični delovni čas Obnovi$/);
+        expect(texts[2]).toMatch(/^v6 5 sprememb besedila, \d\d:\d\d–\d\d:\d\d urejanje · .* · v2–v6 Obnovi$/);
+        expect(texts[3]).toMatch(/^v1 ustvarjeno · /);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+        if (width === 375) continue;
+        // "Obnovi" on the group restores its last save (v6).
+        await page.getByRole("button", { name: /^Obnovi različico 6, zadnjo od: 5 sprememb besedila/ }).click();
+        await page.locator("ol.versions > li", { hasText: "povrnjeno na različico 6" }).waitFor();
+        const current = await platform.repo.getSpec(id);
+        expect(current?.version).toBe(9);
+        expect((current!.spec.pages[0]!.sections[0]!.props as { headline: string }).headline).toBe("Kruh z drožmi 4");
+      } finally {
+        await close();
+      }
+    }
+  }, 90_000);
+});

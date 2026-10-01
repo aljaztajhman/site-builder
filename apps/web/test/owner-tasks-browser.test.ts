@@ -28,10 +28,13 @@ let cookie: string;
 
 type Width = 375 | 1280;
 type Task = "phone" | "saturday" | "photo" | "faq" | "colour" | "publish";
-/** Taps per task and controls on the first screen; budgets only go down (docs/design/editor-simple.html: target ≤ 3 taps). */
+/**
+ * Taps per task and controls on the first screen; budgets only go down (docs/design/editor-simple.html: target ≤ 3 taps).
+ * Before the simple editor (2026-10-01): taps 2/2/3/3/2/1 at both widths, controls 23 (375) and 54 (1280).
+ */
 const BUDGET: Record<Width, Record<Task | "controls", number>> = {
-  375: { phone: 99, saturday: 99, photo: 99, faq: 99, colour: 99, publish: 99, controls: 999 },
-  1280: { phone: 99, saturday: 99, photo: 99, faq: 99, colour: 99, publish: 99, controls: 999 },
+  375: { phone: 1, saturday: 2, photo: 3, faq: 2, colour: 2, publish: 1, controls: 14 },
+  1280: { phone: 1, saturday: 2, photo: 3, faq: 2, colour: 2, publish: 1, controls: 24 },
 };
 
 beforeAll(async () => {
