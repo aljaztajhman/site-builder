@@ -239,6 +239,8 @@ describe("every business section and variant", () => {
           expect(out).not.toContain("<h1");
           expect(out).not.toContain("<iframe");
           expect(out).not.toMatch(/\p{Extended_Pictographic}/u);
+          // Icons only label the contact facts; services, prices, menus and the rest stay words only.
+          if (type !== "contact") expect(out).not.toContain("<svg");
         }
       });
     }
@@ -379,6 +381,18 @@ describe("contact", () => {
     expect(out).toContain("Trubarjeva cesta 12<br/>1000 Ljubljana");
     expect(out).toContain('href="https://www.google.com/maps/search/?api=1&amp;query=Trubarjeva%20cesta%2012%2C%201000%20Ljubljana%2C%20Slovenija"');
     expect(out).toContain("8.00–19.00");
+  });
+
+  it("puts a hidden line icon before each fact label, in every variant and with missing facts", () => {
+    for (const variant of contactSection.variants) {
+      for (const ctx of [testCtx(), sparseCtx()]) {
+        const out = render({ ...fixtures.contact, variant }, ctx);
+        const labels = [...out.matchAll(/<dt class="fact-label">(<svg [^>]*>)[\s\S]*?<\/svg>([^<]+)<\/dt>/g)];
+        expect(labels.map((m) => m[2])).toEqual(["Telefon", "E-pošta", "Naslov", "Delovni čas"]);
+        for (const m of labels) expect(m[1]).toContain('aria-hidden="true"');
+        expect(out.match(/<svg /g)).toHaveLength(4);
+      }
+    }
   });
 
   it("gates the map behind a click: no iframe, only data attributes, a button and a plain link", () => {

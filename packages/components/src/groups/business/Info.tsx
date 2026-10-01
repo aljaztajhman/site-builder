@@ -3,6 +3,7 @@ import {
   AddressText,
   EmailLink,
   HoursList,
+  Icon,
   PhoneLink,
   Ph,
   Section,
@@ -70,19 +71,28 @@ export function Contact({ section, ctx }: SectionProps<"contact">) {
           <SectionHead id={section.id} eyebrow={props.eyebrow} title={props.title} intro={props.intro} />
           <dl className="contact__facts">
             <div className="contact__fact">
-              <dt>{ctx.t("phone")}</dt>
+              <dt className="fact-label">
+                <Icon name="phone" />
+                {ctx.t("phone")}
+              </dt>
               <dd>
                 <PhoneLink ctx={ctx} className="contact__link contact__phone" />
               </dd>
             </div>
             <div className="contact__fact">
-              <dt>{ctx.t("emailLabel")}</dt>
+              <dt className="fact-label">
+                <Icon name="mail" />
+                {ctx.t("emailLabel")}
+              </dt>
               <dd>
                 <EmailLink ctx={ctx} className="contact__link" />
               </dd>
             </div>
             <div className="contact__fact">
-              <dt>{ctx.t("address")}</dt>
+              <dt className="fact-label">
+                <Icon name="map-pin" />
+                {ctx.t("address")}
+              </dt>
               <dd>
                 <AddressText ctx={ctx} />
                 {directions && (
@@ -94,7 +104,10 @@ export function Contact({ section, ctx }: SectionProps<"contact">) {
             </div>
             {b.hours !== undefined && (
               <div className="contact__fact contact__fact--hours">
-                <dt>{ctx.t("openingHours")}</dt>
+                <dt className="fact-label">
+                  <Icon name="clock" />
+                  {ctx.t("openingHours")}
+                </dt>
                 <dd>
                   <HoursList ctx={ctx} short />
                 </dd>

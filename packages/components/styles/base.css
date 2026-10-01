@@ -127,6 +127,20 @@ a {
 .tone-inverse :focus-visible {
   outline-color: var(--c-on-inverse);
 }
+/*
+ * Line icon (primitives Icon): only beside a fact label (phone, e-mail, address, hours) and in the call bar.
+ * Sized to the text it sits with, coloured by it (currentColor), never on a background of its own.
+ */
+.icon {
+  flex: none;
+  width: 1.15em;
+  height: 1.15em;
+}
+.fact-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
 .visually-hidden {
   position: absolute !important;
   width: 1px;

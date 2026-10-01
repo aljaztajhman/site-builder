@@ -141,6 +141,11 @@ describe("contact-strip", () => {
       expect(out).toContain(">Navodila za pot</a>");
       expect(out).toContain("<dt>Pon–pet</dt><dd>8.00–19.00</dd>");
       expect(out).toContain("<dd>zaprto</dd>");
+      const labels = [...out.matchAll(/<h3 class="contact-strip__label fact-label">(<svg [^>]*>)[\s\S]*?<\/svg>([^<]+)<\/h3>/g)];
+      expect(labels.map((m) => m[2])).toEqual(["Telefon", "Naslov", "Delovni čas"]);
+      for (const m of labels) expect(m[1]).toContain('aria-hidden="true"');
+      // Only the labels carry icons: not the directions link, not the phone number.
+      expect(count(out, /<svg /g)).toBe(3);
     });
   }
 

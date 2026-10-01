@@ -151,6 +151,7 @@ describe("steps", () => {
       expect(out).toContain('<ol class="steps"');
       expect(count(out, /<li class="steps__item">/g)).toBe(3);
       expect(out).not.toMatch(/>\s*0\d/);
+      expect(out).not.toContain("<svg");
       expect(out).toContain('href="https://booking.example.com/lipa"');
     });
   }

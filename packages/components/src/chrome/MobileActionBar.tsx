@@ -1,3 +1,4 @@
+import { Icon } from "../primitives/index.tsx";
 import type { RenderCtx } from "../types.ts";
 
 /**
@@ -14,11 +15,13 @@ export function MobileActionBar({ ctx, afterHero = false }: { ctx: RenderCtx; af
     <nav className={afterHero ? "action-bar action-bar--after-hero" : "action-bar"} aria-label={ctx.t("quickContact")}>
       {call && (
         <a className="btn btn--primary action-bar__btn" href={call}>
+          <Icon name="phone" />
           {ctx.t("call")}
         </a>
       )}
       {directions && (
         <a className="btn btn--secondary action-bar__btn" href={directions} rel="noopener" target="_blank">
+          <Icon name="map-pin" />
           {ctx.t("directions")}
         </a>
       )}
