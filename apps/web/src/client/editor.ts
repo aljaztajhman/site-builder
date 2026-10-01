@@ -649,7 +649,7 @@ function contentPane(): HTMLElement {
   if (s && catalogue) {
     const info = sectionInfo(s.type as string);
     const base = `/pages/${pi}/sections/${si}`;
-    pane.append(h("h2", {}, label(s.type as string)));
+    pane.append(h("h2", { id: "selected-head" }, label(s.type as string)));
     if (info) {
       pane.append(
         h("p", { class: "help" }, "Tapnite besedilo izbranega razdelka v predogledu in ga popravite kar tam."),
@@ -1084,6 +1084,45 @@ function select(id: string, scroll = true): void {
   tab = "content";
   render();
   if (scroll) frame?.contentDocument?.getElementById(id)?.scrollIntoView({ block: "start" });
+  // Show the section's form: below the outline, out of sight in the phone sheet or after a tap in the preview.
+  if (narrowScreen() || !scroll) document.getElementById("selected-head")?.scrollIntoView({ block: "start" });
+}
+
+// ---------- Phone: the editor is a bottom sheet over the preview, peeking or full ----------
+let sheet: "peek" | "full" = "peek";
+const narrowScreen = (): boolean => window.matchMedia("(max-width: 900px)").matches;
+
+function setSheet(next: "peek" | "full"): void {
+  sheet = next;
+  if (!shell) return;
+  shell.panel.dataset.sheet = next;
+  const handle = shell.panel.querySelector<HTMLButtonElement>(".sheet-handle");
+  handle?.setAttribute("aria-expanded", String(next === "full"));
+  handle?.setAttribute("aria-label", next === "full" ? "Pomanjšaj urejanje" : "Razširi urejanje");
+}
+
+/** Tap toggles peek and full; dragging up or down picks one. Hidden on wide screens. */
+function sheetHandle(): HTMLElement {
+  const b = h("button", { type: "button", class: "sheet-handle", "aria-expanded": String(sheet === "full"), "aria-label": sheet === "full" ? "Pomanjšaj urejanje" : "Razširi urejanje" }, h("span", { "aria-hidden": "true" }));
+  let startY: number | null = null;
+  let dragged = false;
+  b.addEventListener("pointerdown", (e) => {
+    startY = e.clientY;
+    dragged = false;
+  });
+  b.addEventListener("pointerup", (e) => {
+    const dy = startY === null ? 0 : e.clientY - startY;
+    startY = null;
+    if (Math.abs(dy) > 30) {
+      dragged = true;
+      setSheet(dy < 0 ? "full" : "peek");
+    }
+  });
+  b.addEventListener("click", () => {
+    if (dragged) dragged = false;
+    else setSheet(sheet === "full" ? "peek" : "full");
+  });
+  return b;
 }
 
 // ---------- Layout ----------
@@ -1188,6 +1227,9 @@ function render(): void {
     // Labelled, so they stay distinct from the header and main of the site inside the preview frame.
     const top = h("header", { class: "top", "aria-label": "Urejevalnik" });
     const panel = h("section", { class: "panel", "aria-label": "Urejanje" });
+    panel.addEventListener("focusin", (e) => {
+      if (narrowScreen() && (e.target as HTMLElement).matches("input:not([type=checkbox]):not([type=color]):not([type=file]), textarea, select")) setSheet("full");
+    });
     const bar = h("div", { class: "bar" });
     const stage = h("div", { class: "stage" });
     const ed = h("main", { class: "ed", "aria-label": "Urejanje strani" }, panel, h("section", { class: "canvas", "aria-label": "Predogled" }, bar, stage));
@@ -1198,16 +1240,20 @@ function render(): void {
     window.addEventListener("resize", () => {
       if (window.innerWidth === lastWidth) return;
       lastWidth = window.innerWidth;
+      document.documentElement.style.setProperty("--top-h", `${top.offsetHeight}px`);
       sizeFrame();
     });
   }
   document.title = `${((state.spec?.business as Obj | undefined)?.name as string | undefined) ?? state.site.name} · urejanje`;
   shell.top.replaceChildren(...topItems().filter((c): c is Node => c instanceof Node));
+  document.documentElement.style.setProperty("--top-h", `${shell.top.offsetHeight}px`);
 
   // Versions open from the app bar ("Različice"), so the five tabs fit the panel.
   const tabs: [typeof tab, string][] = [["content", "Vsebina"], ["facts", "Podatki"], ["photos", "Fotografije"], ["design", "Oblika"], ["pages", "Strani"], ["ai", "Pomočnik"]];
+  shell.panel.dataset.sheet = sheet;
   shell.panel.replaceChildren(
     ...[
+      state.spec ? sheetHandle() : null,
       statusBlock(),
       state.spec ? h("div", { class: "tabs", role: "tablist", "aria-label": "Urejanje" }, ...tabs.map(([k, l]) => h("button", { role: "tab", type: "button", "aria-selected": String(tab === k), onClick: () => { tab = k; render(); } }, l))) : null,
       checklistBlock(),
@@ -1257,8 +1303,8 @@ function sizeFrame(): void {
   const width = device === "mobile" ? 360 : 1280;
   const pad = narrow ? 24 : 40;
   const scale = Math.min(1, Math.max(0.2, (stage.clientWidth - pad - 2) / width));
-  const avail = narrow ? Math.round(window.innerHeight * 0.7) : stage.clientHeight - pad - 2;
-  const height = Math.max(360, device === "mobile" ? Math.min(avail, 800) : avail);
+  const avail = stage.clientHeight - pad - 2;
+  const height = Math.max(narrow ? 200 : 360, device === "mobile" ? Math.min(avail, 800) : avail);
   wrap.style.width = `${Math.round(width * scale) + 2}px`;
   wrap.style.height = `${height + 2}px`;
   if (frame) {
@@ -1317,6 +1363,7 @@ function checklistBlock(): HTMLElement | null {
 
 function openChecklist(): void {
   checklistOpen = true;
+  setSheet("full");
   render();
   const box = document.getElementById("checklist");
   box?.scrollIntoView({ block: "nearest" });
@@ -1325,6 +1372,7 @@ function openChecklist(): void {
 
 /** Opens the tab, page and section a spec path belongs to, then the field itself. */
 function goTo(path: string): void {
+  setSheet("full");
   const [, head, a, b, c] = path.split("/");
   if (head === "pages" && b === "sections") {
     const pi = Number(a);
