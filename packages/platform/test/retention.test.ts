@@ -182,7 +182,8 @@ describe("migration 4 (version retention)", () => {
            ('site_a', 'publish', 'Published version 2'), ('site_a', 'publish', 'Published version 7'),
            ('site_a', 'publish', 'Cannot publish: 2 blocking issue(s)'), ('site_a', 'edit', 'Published version 5')`,
       );
-      expect(await migrate(old)).toEqual([4]);
+      // Migration 4 and every later one run.
+      expect(await migrate(old)).toEqual(MIGRATIONS.filter((m) => m.id >= 4).map((m) => m.id));
       const { rows } = await old.query<{ site_id: string; version: number }>("select site_id, version from site_publishes order by site_id, version");
       expect(rows).toEqual([
         { site_id: "site_a", version: 2 },

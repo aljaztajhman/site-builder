@@ -1,10 +1,11 @@
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
-import type { Context, MiddlewareHandler } from "hono";
+import type { Context } from "hono";
 import { getCookie, setCookie, deleteCookie } from "hono/cookie";
 
 export const SESSION_COOKIE = "sb_session";
 const MAX_AGE_S = 60 * 60 * 24 * 14;
 
+/** The admin (product owner): ACCESS_PASSWORD, a signed stateless cookie. Business owners use magic links (login.tsx). */
 export interface AuthSettings {
   password: string;
   /** Signing key; derived from the password when SESSION_SECRET is not set. */
@@ -55,15 +56,6 @@ export function hasSession(c: Context, s: AuthSettings): boolean {
   const expected = sign(issued, s.secret);
   if (mac.length !== expected.length || !timingSafeEqual(Buffer.from(mac), Buffer.from(expected))) return false;
   return Date.now() / 1000 - Number(issued) < MAX_AGE_S;
-}
-
-/** Everything except public paths requires the access password session. */
-export function requireAuth(s: AuthSettings, isPublic: (path: string) => boolean): MiddlewareHandler {
-  return async (c, next) => {
-    if (isPublic(c.req.path) || hasSession(c, s)) return next();
-    if (c.req.path.startsWith("/api/")) return c.json({ error: "unauthorized" }, 401);
-    return c.redirect(`/login?next=${encodeURIComponent(c.req.path)}`);
-  };
 }
 
 /**

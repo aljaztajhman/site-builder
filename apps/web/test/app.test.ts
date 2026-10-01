@@ -7,6 +7,7 @@ import { Repo, createDb, createFsStorage, migrate, type Platform, type Queue } f
 import { createApp } from "../src/app.ts";
 import { SESSION_COOKIE } from "../src/auth.ts";
 import { homePage } from "../src/home.tsx";
+import { adminBrowser, type Browser } from "./session-helpers.ts";
 
 const PASSWORD = "test-password-1234";
 let platform: Platform;
@@ -35,14 +36,8 @@ afterAll(async () => {
   await rm(dir, { recursive: true, force: true });
 });
 
-async function login(): Promise<string> {
-  const res = await app.request("/login", { method: "POST", body: new URLSearchParams({ password: PASSWORD, next: "/" }) });
-  expect(res.status).toBe(302);
-  const cookie = res.headers.get("set-cookie") ?? "";
-  expect(cookie).toContain(`${SESSION_COOKIE}=`);
-  expect(cookie).toMatch(/HttpOnly/i);
-  return cookie.split(";")[0]!;
-}
+/** The admin in a browser: session and device cookies, and the form token. */
+const login = (): Promise<Browser> => adminBrowser(app.request.bind(app), PASSWORD);
 
 describe("access control", () => {
   it("sends noindex on every response, public or not", async () => {
@@ -63,7 +58,10 @@ describe("access control", () => {
   it("rejects a wrong password and accepts the right one", async () => {
     const bad = await app.request("/login", { method: "POST", body: new URLSearchParams({ password: "nope" }) });
     expect(bad.status).toBe(401);
-    const cookie = await login();
+    const good = await app.request("/login", { method: "POST", body: new URLSearchParams({ password: PASSWORD, next: "/" }) });
+    expect(good.status).toBe(302);
+    expect(good.headers.getSetCookie().find((c) => c.startsWith(`${SESSION_COOKIE}=`))).toMatch(/HttpOnly/i);
+    const { cookie } = await login();
     const res = await app.request("/sites", { headers: { cookie } });
     expect(res.status).toBe(200);
     expect(await res.text()).toContain("Nova stran");
@@ -105,7 +103,7 @@ describe("product UI", () => {
   });
 
   it("has one intake, the landing page's prompt: /new and the empty sites list lead there", async () => {
-    const cookie = await login();
+    const { cookie } = await login();
     const moved = await app.request("/new", { headers: { cookie } });
     expect(moved.status).toBe(302);
     expect(moved.headers.get("location")).toBe("/#zacni");
@@ -126,8 +124,9 @@ describe("product UI", () => {
   });
 
   it("keeps the description and says why on the landing page when the intake is refused", async () => {
-    const cookie = await login();
+    const { cookie, csrf } = await login();
     const form = new FormData();
+    form.set("_csrf", csrf);
     form.set("description", "Prekratko.");
     const res = await app.request("/api/sites", { method: "POST", body: form, headers: { cookie } });
     expect(res.status).toBe(400);
@@ -181,13 +180,13 @@ describe("landing page", () => {
   it("calls the prices planned only while billing is off", () => {
     const config = loadConfig();
     const withBilling = { ...config, plans: { ...config.plans, paid: { ...config.plans.paid, billingEnabled: true } } };
-    const page = homePage({ config: withBilling, signedIn: false });
+    const page = homePage({ config: withBilling, signedIn: false, csrf: "t", fullSite: false });
     expect(page).not.toContain("Načrtovane cene");
     expect(page).not.toContain("Plačevanja še ni");
     expect(page).toContain("Cene so z DDV. Letno naročnino plačate po računu z bančnim nakazilom.");
     expect(page).toContain("Pri letni naročnini bo domena vključena v ceno.");
     const noDomain = { ...config, plans: { ...config.plans, paid: { ...config.plans.paid, yearlyIncludesDomain: false } } };
-    const page2 = homePage({ config: noDomain, signedIn: false });
+    const page2 = homePage({ config: noDomain, signedIn: false, csrf: "t", fullSite: false });
     expect(page2).not.toContain("domena vključena");
     expect(page2).not.toContain("Pri letni naročnini bo domena");
   });
@@ -206,7 +205,7 @@ describe("landing page", () => {
   });
 
   it("stays the landing page with a session, linking to the sites list; the dashboard is /sites", async () => {
-    const cookie = await login();
+    const { cookie, csrf } = await login();
     const home = await (await app.request("/", { headers: { cookie } })).text();
     expect(home).toContain('data-home-intake=""');
     expect(home).toMatch(/<a class="btn quiet sm login" href="\/sites">Moje strani<\/a>/);
@@ -218,7 +217,9 @@ describe("landing page", () => {
     // Signing in without a destination lands on the sites list; signing out on the landing page.
     const signIn = await app.request("/login", { method: "POST", body: new URLSearchParams({ password: PASSWORD }) });
     expect(signIn.headers.get("location")).toBe("/sites");
-    const signOut = await app.request("/logout", { method: "POST", headers: { cookie } });
+    // Signing out is a form with the CSRF token; without it nothing happens.
+    expect((await app.request("/logout", { method: "POST", headers: { cookie } })).status).toBe(403);
+    const signOut = await app.request("/logout", { method: "POST", headers: { cookie }, body: new URLSearchParams({ _csrf: csrf }) });
     expect(signOut.headers.get("location")).toBe("/");
   });
 });
@@ -267,8 +268,9 @@ describe("published sites", () => {
 
 describe("intake", () => {
   it("creates a site and queues generation", async () => {
-    const cookie = await login();
+    const { cookie, csrf } = await login();
     const form = new FormData();
+    form.set("_csrf", csrf);
     form.set("description", "Frizerski salon Lipa v Ljubljani, Trubarjeva cesta 12. Striženje in barvanje.");
     form.set("scope", "home");
     const res = await app.request("/api/sites", { method: "POST", body: form, headers: { cookie } });
@@ -283,8 +285,26 @@ describe("intake", () => {
     expect(list).toContain("Ustvarjam …");
   });
 
+  it("takes more than 1 MB of photos (the site API's 1 MB JSON limit doesn't apply to the intake)", async () => {
+    const { readFile, readdir } = await import("node:fs/promises");
+    const { cookie, csrf } = await login();
+    const dir = path.join(import.meta.dirname, "../../../tools/eval/fixtures/gostilna-zlata-zlica/photos");
+    const form = new FormData();
+    form.set("_csrf", csrf);
+    form.set("description", "Gostilna Zlata žlica v Šentjurju, domača hrana, malice med tednom in nedeljska kosila.");
+    let bytes = 0;
+    for (const f of (await readdir(dir)).filter((n) => n.endsWith(".jpg"))) {
+      const data = await readFile(path.join(dir, f));
+      bytes += data.length;
+      form.append("photos", new File([data], f, { type: "image/jpeg" }));
+    }
+    expect(bytes).toBeGreaterThan(1024 * 1024);
+    const res = await app.request("/api/sites", { method: "POST", body: form, headers: { cookie } });
+    expect(res.status).toBe(303);
+  }, 60_000);
+
   it("refuses AI work once the daily spend cap is reached", async () => {
-    const cookie = await login();
+    const { cookie } = await login();
     const site = (await platform.repo.listSites())[0]!;
     await platform.repo.logModelCall({ siteId: site.id, jobId: null, stage: "brief", model: "claude-sonnet-5-5", inputTokens: 1, outputTokens: 1, cacheCreationTokens: 0, cacheReadTokens: 0, costEur: 1000, durationMs: 1, ok: true });
     const res = await app.request(`/api/sites/${site.id}/generate`, { method: "POST", body: "{}", headers: { cookie, "content-type": "application/json" } });
@@ -295,7 +315,7 @@ describe("intake", () => {
 describe("photos in the editor", () => {
   it("adds the owner's photo, replaces a picture with it, queues the description, and explains refusals", async () => {
     const { readFile } = await import("node:fs/promises");
-    const cookie = await login();
+    const { cookie } = await login();
     const golden = JSON.parse(await readFile(path.join(import.meta.dirname, "../../../tools/eval/golden/pekarna-kvas.json"), "utf8"));
     const site = await platform.repo.createSite({ name: "foto", slug: "foto", intake: { description: "x", photoAssetIds: [], scope: "home" } });
     const v1 = await platform.repo.saveSpec(site.id, { ...golden, slug: "foto" }, "generate");
@@ -333,7 +353,7 @@ describe("direct editor API (no model calls)", () => {
   it("patches, adds sections, detects conflicts, reverts, blocks and allows publishing, exports", async () => {
     const { readFile } = await import("node:fs/promises");
     const golden = JSON.parse(await readFile(path.join(import.meta.dirname, "../../../tools/eval/golden/pekarna-kvas.json"), "utf8"));
-    const cookie = await login();
+    const { cookie } = await login();
     const json = { cookie, "content-type": "application/json" };
     const brief = JSON.parse(await readFile(path.join(import.meta.dirname, "../../../tools/eval/fixtures/pekarna-kvas/brief.json"), "utf8"));
     const site = await platform.repo.createSite({ name: "Pekarna Kvas", slug: "pekarna-kvas", intake: { description: brief.description, photoAssetIds: [], scope: "full" } });

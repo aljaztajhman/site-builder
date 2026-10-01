@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { SPEC_VERSION, migrateSpec, type SiteSpec } from "@sb/spec";
 import type { Db } from "./db.ts";
+import { Accounts } from "./accounts.ts";
 
 export type SiteStatus = "new" | "generating" | "ready" | "editing" | "publishing" | "failed";
 
@@ -12,6 +13,8 @@ export interface SiteRow {
   current_version: number | null;
   published_version: number | null;
   published_at: string | null;
+  /** The owner's account; null for sites the admin made. */
+  account_id: string | null;
   intake: Intake;
   brief: unknown;
   created_at: string;
@@ -122,13 +125,18 @@ export interface FormMessageRow {
 }
 
 export class Repo {
-  constructor(readonly db: Db) {}
+  /** Accounts, allow-list, magic-link tokens and sessions. */
+  readonly accounts: Accounts;
 
-  async createSite(input: { name: string; slug: string; intake: Intake }): Promise<SiteRow> {
+  constructor(readonly db: Db) {
+    this.accounts = new Accounts(db);
+  }
+
+  async createSite(input: { name: string; slug: string; intake: Intake; accountId?: string | null }): Promise<SiteRow> {
     const id = newId("site");
     const { rows } = await this.db.query<SiteRow>(
-      "insert into sites (id, slug, name, intake) values ($1, $2, $3, $4) returning *",
-      [id, input.slug, input.name, JSON.stringify(input.intake)],
+      "insert into sites (id, slug, name, intake, account_id) values ($1, $2, $3, $4, $5) returning *",
+      [id, input.slug, input.name, JSON.stringify(input.intake), input.accountId ?? null],
     );
     return rows[0]!;
   }
@@ -153,8 +161,11 @@ export class Repo {
     return rows[0] ?? null;
   }
 
-  async listSites(): Promise<SiteRow[]> {
-    const { rows } = await this.db.query<SiteRow>("select * from sites order by created_at desc limit 200");
+  /** Newest first: every site (admin), or one account's. */
+  async listSites(filter: { accountId?: string } = {}): Promise<SiteRow[]> {
+    const { rows } = filter.accountId
+      ? await this.db.query<SiteRow>("select * from sites where account_id = $1 order by created_at desc limit 200", [filter.accountId])
+      : await this.db.query<SiteRow>("select * from sites order by created_at desc limit 200");
     return rows;
   }
 

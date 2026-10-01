@@ -38,12 +38,16 @@ const EXAMPLE_TEXT =
 export interface HomeProps {
   config: AppConfig;
   signedIn: boolean;
+  /** This browser's CSRF token for the intake form. */
+  csrf: string;
+  /** The viewer may make a whole site (paid tier, admin); everyone else gets the homepage, so no switch. */
+  fullSite: boolean;
   /** A refused intake: the reason, shown above the prompt, and the description, kept. */
   error?: string;
   description?: string;
 }
 
-export function homePage({ config, signedIn, error, description }: HomeProps): string {
+export function homePage({ config, signedIn, csrf, fullSite, error, description }: HomeProps): string {
   const paid = config.plans.paid;
   const example = uiUrl("example-home.html");
   return html(
@@ -100,6 +104,8 @@ export function homePage({ config, signedIn, error, description }: HomeProps): s
                 )}
                 {signedIn ? (
                   <form className="prompt" method="post" action="/api/sites" encType="multipart/form-data" data-home-intake="" data-intake="">
+                    <input type="hidden" name="_csrf" value={csrf} />
+                    {!fullSite && <input type="hidden" name="scope" value="home" />}
                     <label htmlFor="opis" className="sr-only">
                       Opis podjetja
                     </label>
@@ -112,7 +118,7 @@ export function homePage({ config, signedIn, error, description }: HomeProps): s
                         <input className="sr-only" type="file" name="logo" accept="image/svg+xml,image/png,image/jpeg,image/webp" />＋ Logotip
                       </label>
                       <span className="sp" />
-                      <Scope />
+                      {fullSite && <Scope />}
                       <button className="btn primary" type="submit">
                         Ustvari
                       </button>

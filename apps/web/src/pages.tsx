@@ -39,48 +39,33 @@ export const Brand = ({ href = DASHBOARD }: { href?: string }) => (
   </a>
 );
 
-/** App bar: wordmark, then page-specific items; the spend counter and sign-out on every dashboard page. */
-export function TopBar({ children, spend }: { children?: ReactNode; spend?: { today: number; cap: number } }) {
+/**
+ * App bar: wordmark, then page-specific items; sign-out on every dashboard page. The admin also sees
+ * today's model spend against the cap and a link to the admin page; owners never see internal numbers.
+ */
+export function TopBar({ children, spend, csrf, admin }: { children?: ReactNode; spend?: { today: number; cap: number }; csrf: string; admin?: boolean }) {
   return (
     <header className="top">
       <Brand />
       {children}
       <span className="sp" />
-      {spend && (
+      {admin && spend && (
         <span className="pill plain spend num" title="Poraba modela danes in dnevna omejitev">
           {`${formatEur(spend.today)} / ${formatEur(spend.cap)} danes`}
         </span>
       )}
+      {admin && (
+        <a className="btn quiet sm" href="/admin">
+          Skrbnik
+        </a>
+      )}
       <form method="post" action="/logout">
+        <input type="hidden" name="_csrf" value={csrf} />
         <button className="btn quiet sm" type="submit">
           Odjava
         </button>
       </form>
     </header>
-  );
-}
-
-export function loginPage({ next, error }: { next: string; error?: string }): string {
-  return html(
-    <Doc title="Prijava">
-      <main className="login">
-        <Brand href="/" />
-        <h1>Prijava</h1>
-        <form method="post" action="/login">
-          <input type="hidden" name="next" value={next} />
-          <label htmlFor="pw">Geslo za dostop</label>
-          <input id="pw" type="password" name="password" autoComplete="current-password" required autoFocus aria-describedby={error ? "pw-err" : undefined} aria-invalid={error ? true : undefined} />
-          {error && (
-            <p id="pw-err" className="help err" role="alert">
-              {error}
-            </p>
-          )}
-          <button className="btn primary block" type="submit">
-            Prijava
-          </button>
-        </form>
-      </main>
-    </Doc>,
   );
 }
 
@@ -115,13 +100,30 @@ function SiteCard({ site }: { site: SiteRow }) {
   );
 }
 
-export function sitesPage({ sites, spendToday, cap }: { sites: SiteRow[]; spendToday: number; cap: number }): string {
+export interface SitesPageProps {
+  sites: SiteRow[];
+  spendToday: number;
+  cap: number;
+  csrf: string;
+  /** The admin sees every site; an owner only theirs. */
+  admin: boolean;
+  /** For an owner: the signed-in address and what their plan allows, in Slovene. */
+  account?: { email: string; note: string | null };
+}
+
+export function sitesPage({ sites, spendToday, cap, csrf, admin, account }: SitesPageProps): string {
   return html(
-    <Doc title="Strani">
-      <TopBar spend={{ today: spendToday, cap }} />
+    <Doc title={admin ? "Strani" : "Moje strani"}>
+      <TopBar spend={{ today: spendToday, cap }} csrf={csrf} admin={admin} />
       <main className="wrap sites">
+        {account && (
+          <p className="muted">
+            {`Prijavljeni ste kot ${account.email}.`}
+            {account.note ? ` ${account.note}` : ""}
+          </p>
+        )}
         <div className="head">
-          <h1>Strani</h1>
+          <h1>{admin ? "Strani" : "Moje strani"}</h1>
           <span className="muted num">{sites.length}</span>
           <a className="btn primary" href="/#zacni">
             Nova stran

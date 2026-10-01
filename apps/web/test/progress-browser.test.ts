@@ -9,6 +9,7 @@ import { loadConfig } from "@sb/config";
 import { launchCheckBrowser, mediaKey, processPhoto, type CheckBrowser } from "@sb/engine";
 import { Repo, createDb, createFsStorage, migrate, type Platform, type Queue } from "@sb/platform";
 import { createApp } from "../src/app.ts";
+import { adminCookie } from "./session-helpers.ts";
 
 /**
  * The generation screen in Chromium: every running stage counts up, the picture step is listed, and the
@@ -35,8 +36,7 @@ beforeAll(async () => {
   server = serve({ fetch: app.fetch, port: 0, hostname: "127.0.0.1" });
   await new Promise<void>((r) => server.once("listening", () => r()));
   base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
-  const login = await fetch(`${base}/login`, { method: "POST", body: new URLSearchParams({ password: PASSWORD, next: "/" }), redirect: "manual" });
-  cookie = (login.headers.get("set-cookie") ?? "").split(";")[0]!;
+  cookie = await adminCookie((p, init) => fetch(`${base}${p}`, init), PASSWORD);
   cb = await launchCheckBrowser();
 }, 120_000);
 

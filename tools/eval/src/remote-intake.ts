@@ -8,6 +8,7 @@
  */
 import { readFile } from "node:fs/promises";
 import { loadFixture } from "./fixtures/load.ts";
+import { remoteAdmin } from "./remote-session.ts";
 
 const base = process.env.REMOTE_URL;
 const password = process.env.REMOTE_PASSWORD;
@@ -17,18 +18,19 @@ if (!base || !password || ids.length === 0) {
   process.exit(2);
 }
 
-const login = await fetch(`${base}/login`, { method: "POST", body: new URLSearchParams({ password, next: "/" }), redirect: "manual" });
-const cookie = login.headers.get("set-cookie")?.split(";")[0];
-if (login.status !== 302 || !cookie) throw new Error(`login failed: ${login.status}`);
+const admin = await remoteAdmin(base, password);
+if (!admin.ok) throw new Error(`login failed: ${admin.status}`);
+const cookie = admin.cookie;
 
 async function intake(id: string): Promise<string> {
   const f = loadFixture(id);
   const form = new FormData();
+  form.set("_csrf", admin.csrf);
   form.set("description", f.brief.description);
   form.set("scope", "full");
   for (const p of f.photos) form.append("photos", new Blob([await readFile(p.path)], { type: "image/jpeg" }), p.file.split("/").pop());
   if (f.logoPath) form.set("logo", new Blob([await readFile(f.logoPath)], { type: "image/svg+xml" }), "logo.svg");
-  const res = await fetch(`${base}/api/sites`, { method: "POST", body: form, headers: { cookie: cookie! }, redirect: "manual" });
+  const res = await fetch(`${base}/api/sites`, { method: "POST", body: form, headers: { cookie }, redirect: "manual" });
   const loc = res.headers.get("location");
   if (res.status !== 303 || !loc) throw new Error(`${id}: intake failed ${res.status} ${await res.text()}`);
   return loc.split("/").pop()!;
@@ -41,7 +43,7 @@ for (const s of sites) console.log(`${s.id}: ${base}/sites/${s.siteId}`);
 for (;;) {
   const states = await Promise.all(
     sites.map(async (s) => {
-      const r = (await (await fetch(`${base}/api/sites/${s.siteId}`, { headers: { cookie: cookie! } })).json()) as {
+      const r = (await (await fetch(`${base}/api/sites/${s.siteId}`, { headers: { cookie } })).json()) as {
         site: { status: string };
         version: number | null;
         cost: { stage: string; eur: number }[];
