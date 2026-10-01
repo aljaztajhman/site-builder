@@ -10,6 +10,7 @@ import { launchCheckBrowser, mediaKey, processPhoto, type CheckBrowser } from "@
 import { Repo, createDb, createFsStorage, migrate, type Platform, type Queue } from "@sb/platform";
 import type { SiteSpec } from "@sb/spec";
 import { createApp } from "../src/app.ts";
+import { adminCookie } from "./session-helpers.ts";
 
 /**
  * Six everyday owner tasks in the editor, in Chromium at phone and desktop width, counting taps
@@ -47,8 +48,7 @@ beforeAll(async () => {
   server = serve({ fetch: app.fetch, port: 0, hostname: "127.0.0.1" });
   await new Promise<void>((r) => server.once("listening", () => r()));
   base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
-  const login = await fetch(`${base}/login`, { method: "POST", body: new URLSearchParams({ password: PASSWORD, next: "/" }), redirect: "manual" });
-  cookie = (login.headers.get("set-cookie") ?? "").split(";")[0]!;
+  cookie = await adminCookie((p, init) => fetch(`${base}${p}`, init), PASSWORD);
   cb = await launchCheckBrowser();
 }, 120_000);
 
