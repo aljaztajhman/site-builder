@@ -348,6 +348,8 @@ export function issueMessage(issue: IssueLike): string {
   if (/Invalid (string: must match pattern|format)|Invalid (email|url|URL)/.test(m)) return "nima pravilne oblike";
   if (/expected .*, received undefined/.test(m)) return "manjka";
   if (/can't be edited/.test(m)) return "tega dela strani ni mogoče urejati";
+  // The editor's guard ("test" op): the section or page moved before the save arrived.
+  if (/Test operation failed/i.test(m)) return "razdelek ali stran se je medtem premaknila; sprememba ni shranjena, poskusite znova";
   if (/^unknown page/.test(m)) return "povezava kaže na stran, ki je ni več";
   if (/^unknown image/.test(m)) return "fotografije ni več";
   if (/is AI-generated and may only be used in/.test(m)) return "slike, ustvarjene z UI, so dovoljene le v uvodu, glavi strani in razdelku slika in besedilo";

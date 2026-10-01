@@ -149,18 +149,101 @@ async function poll(): Promise<void> {
   schedulePoll();
 }
 
-/** Sends direct-edit operations. No model call. */
-/** Saves wait their turn: each is sent after the previous one has landed and the version is fresh. */
+/**
+ * Saves wait their turn: each is sent after the previous one has landed and the version is fresh.
+ * Form edits waiting out their autosave delay go first, so a move, an added section, an undo or a
+ * publish never overtakes text the owner just typed.
+ */
 let saveChain: Promise<unknown> = Promise.resolve();
 
-function patch(ops: Op[], message: string, rerender = true): Promise<boolean> {
-  const run = saveChain.then(() => sendPatch(ops, message, rerender));
-  saveChain = run.catch(() => undefined);
-  return run;
+function queued<T>(run: () => Promise<T>): Promise<T> {
+  flushPending();
+  const p = saveChain.then(run);
+  saveChain = p.catch(() => undefined);
+  return p;
 }
 
-async function sendPatch(ops: Op[], message: string, rerender: boolean): Promise<boolean> {
+/** Form saves not sent yet, keyed by form. */
+const pendingSaves = new Map<number, () => void>();
+let pendingSeq = 0;
+
+function flushPending(): void {
+  const all = [...pendingSaves.values()];
+  pendingSaves.clear();
+  for (const go of all) go();
+}
+
+/** Waits `delay` ms after the last change before saving, unless another save starts first. */
+function debounced(save: (v: Json | undefined) => void, delay = 700): { push(v: Json | undefined): void; cancel(): void } {
+  const key = ++pendingSeq;
+  let timer: number | undefined;
+  const cancel = () => {
+    window.clearTimeout(timer);
+    pendingSaves.delete(key);
+  };
+  return {
+    push(v) {
+      cancel();
+      const go = () => {
+        cancel();
+        save(v);
+      };
+      pendingSaves.set(key, go);
+      timer = window.setTimeout(go, delay);
+    },
+    cancel,
+  };
+}
+
+/**
+ * Where a form saves, found again when the save is sent: sections and pages move, so an index taken
+ * when the form was drawn can point at another section by then. The guard ("test" op) makes the
+ * server refuse rather than write into the wrong place if the spec still changed in between.
+ */
+type Where = () => { pointer: string; guard?: Op } | null;
+const at = (pointer: string): Where => () => ({ pointer });
+
+function inSection(id: string, rest: string): Where {
+  return () => {
+    for (const [pi, p] of pages().entries()) {
+      const si = ((p.sections ?? []) as Obj[]).findIndex((s) => s.id === id);
+      if (si >= 0) return { pointer: `/pages/${pi}/sections/${si}${rest}`, guard: { op: "test", path: `/pages/${pi}/sections/${si}/id`, value: id } };
+    }
+    return null;
+  };
+}
+
+function inPage(id: string, rest: string): Where {
+  return () => {
+    const pi = pages().findIndex((p) => p.id === id);
+    return pi < 0 ? null : { pointer: `/pages/${pi}${rest}`, guard: { op: "test", path: `/pages/${pi}/id`, value: id } };
+  };
+}
+
+/** Guards for operations addressed by index: the server refuses them if the section or page moved. */
+const isSection = (pi: number, si: number, id: string): Op => ({ op: "test", path: `/pages/${pi}/sections/${si}/id`, value: id });
+const isPage = (pi: number, id: string): Op => ({ op: "test", path: `/pages/${pi}/id`, value: id });
+
+/** Operations that put `v` at `where` (or remove it), or null when that place is gone. */
+function opsAt(where: Where, v: Json | undefined): Op[] | null {
+  const w = where();
+  if (!w) return null;
+  return [...(w.guard ? [w.guard] : []), v === undefined ? { op: "remove", path: w.pointer } : { op: "replace", path: w.pointer, value: v }];
+}
+
+/** Sends direct-edit operations (no model call). A function is evaluated when the save is sent. */
+function patch(ops: Op[] | (() => Op[] | null), message: string, rerender = true): Promise<boolean> {
+  return queued(() => sendPatch(ops, message, rerender));
+}
+
+async function sendPatch(opsOrFn: Op[] | (() => Op[] | null), message: string, rerender: boolean): Promise<boolean> {
   if (!state.spec) return false;
+  const ops = typeof opsOrFn === "function" ? opsOrFn() : opsOrFn;
+  if (!ops) {
+    toast = "Tega dela strani ni več, sprememba ni shranjena.";
+    await load();
+    return false;
+  }
   try {
     const r = await api<{ version: number; adjustments: string[] }>("/patch", { method: "POST", body: JSON.stringify({ baseVersion: state.version, ops, message }) });
     toast = r.adjustments.length ? `Shranjeno. ${r.adjustments.join("; ")}` : "Shranjeno.";
@@ -175,15 +258,17 @@ async function sendPatch(ops: Op[], message: string, rerender: boolean): Promise
   }
 }
 
-async function post(path: string, body: unknown, ok: string): Promise<void> {
-  try {
-    await api(path, { method: "POST", body: JSON.stringify({ baseVersion: state.version, ...(body as object) }) });
-    toast = ok;
-  } catch (e) {
-    toast = (e as Error).message;
-  }
-  await load();
-  reloadPreview();
+function post(path: string, body: unknown, ok: string): Promise<void> {
+  return queued(async () => {
+    try {
+      await api(path, { method: "POST", body: JSON.stringify({ baseVersion: state.version, ...(body as object) }) });
+      toast = ok;
+    } catch (e) {
+      toast = (e as Error).message;
+    }
+    await load();
+    reloadPreview();
+  });
 }
 
 // ---------- Spec helpers ----------
@@ -479,30 +564,23 @@ function fieldBody(schema: Schema, rootSchema: Schema, value: Json | undefined, 
  * Form root at a spec pointer: a live copy of the value; edits are debounced and saved without
  * re-rendering (focus stays), structural changes save at once and re-render.
  */
-function formAt(pointer: string, schema: Schema, value: Json, title: string, message: string): HTMLElement {
+function formAt(where: Where, schema: Schema, value: Json, title: string, message: string): HTMLElement {
   const live = structuredClone(value);
-  let timer: number | undefined;
-  const send = (v: Json | undefined, rerender: boolean) =>
-    patch([v === undefined ? { op: "remove", path: pointer } : { op: "replace", path: pointer, value: v }], message, rerender);
+  const send = (v: Json | undefined, rerender: boolean) => patch(() => opsAt(where, v), message, rerender);
+  const later = debounced((v) => void send(v, false));
   return field(schema, schema, live, title, {
-    edit: (v) => {
-      window.clearTimeout(timer);
-      timer = window.setTimeout(() => void send(v, false), 700);
-    },
+    edit: (v) => later.push(v),
     structure: (v) => {
-      window.clearTimeout(timer);
+      later.cancel();
       void send(v, true);
     },
-  }, false, pointer);
+  }, false, where()?.pointer ?? "");
 }
 
-/** Debounced save of a single scalar at a pointer (page settings). */
-function autosave(pointer: string, message: string, delay = 700): (v: Json | undefined) => void {
-  let timer: number | undefined;
-  return (v) => {
-    window.clearTimeout(timer);
-    timer = window.setTimeout(() => void patch([v === undefined ? { op: "remove", path: pointer } : { op: "replace", path: pointer, value: v }], message, false), delay);
-  };
+/** Debounced save of a single scalar (page settings). */
+function autosave(where: Where, message: string, delay = 700): (v: Json | undefined) => void {
+  const later = debounced((v) => void patch(() => opsAt(where, v), message, false), delay);
+  return (v) => later.push(v);
 }
 
 // ---------- Panes ----------
@@ -534,10 +612,10 @@ function contentPane(): HTMLElement {
         "li",
         { class: id === selected ? "sel" : "", onClick: () => select(id) },
         h("span", { class: "t" }, h("strong", {}, name), h("span", { class: "muted" }, sectionTitle(s))),
-        !system && h("button", { class: "icon", type: "button", title: "Premakni gor", "aria-label": `Premakni gor: ${name}`, disabled: i === 0, onClick: (e: Event) => { e.stopPropagation(); void patch([{ op: "move", from: `/pages/${pi}/sections/${i}`, path: `/pages/${pi}/sections/${i - 1}` }], "premik"); } }, "↑"),
-        !system && h("button", { class: "icon", type: "button", title: "Premakni dol", "aria-label": `Premakni dol: ${name}`, disabled: i === secs.length - 1, onClick: (e: Event) => { e.stopPropagation(); void patch([{ op: "move", from: `/pages/${pi}/sections/${i}`, path: `/pages/${pi}/sections/${i + 1}` }], "premik"); } }, "↓"),
-        !system && h("button", { class: "icon", type: "button", title: "Podvoji", "aria-label": `Podvoji: ${name}`, onClick: (e: Event) => { e.stopPropagation(); void patch([{ op: "add", path: `/pages/${pi}/sections/${i + 1}`, value: { ...structuredClone(s), id: newSectionId(s.type as string) } }], "podvojen razdelek"); } }, "⧉"),
-        !system && h("button", { class: "icon", type: "button", title: "Izbriši", "aria-label": `Izbriši: ${name}`, onClick: (e: Event) => { e.stopPropagation(); if (confirm(`Izbrišem razdelek »${name}«?`)) void patch([{ op: "remove", path: `/pages/${pi}/sections/${i}` }], "izbrisan razdelek"); } }, "✕"),
+        !system && h("button", { class: "icon", type: "button", title: "Premakni gor", "aria-label": `Premakni gor: ${name}`, disabled: i === 0, onClick: (e: Event) => { e.stopPropagation(); void patch([isSection(pi, i, id), { op: "move", from: `/pages/${pi}/sections/${i}`, path: `/pages/${pi}/sections/${i - 1}` }], "premik"); } }, "↑"),
+        !system && h("button", { class: "icon", type: "button", title: "Premakni dol", "aria-label": `Premakni dol: ${name}`, disabled: i === secs.length - 1, onClick: (e: Event) => { e.stopPropagation(); void patch([isSection(pi, i, id), { op: "move", from: `/pages/${pi}/sections/${i}`, path: `/pages/${pi}/sections/${i + 1}` }], "premik"); } }, "↓"),
+        !system && h("button", { class: "icon", type: "button", title: "Podvoji", "aria-label": `Podvoji: ${name}`, onClick: (e: Event) => { e.stopPropagation(); void patch([isSection(pi, i, id), { op: "add", path: `/pages/${pi}/sections/${i + 1}`, value: { ...structuredClone(s), id: newSectionId(s.type as string) } }], "podvojen razdelek"); } }, "⧉"),
+        !system && h("button", { class: "icon", type: "button", title: "Izbriši", "aria-label": `Izbriši: ${name}`, onClick: (e: Event) => { e.stopPropagation(); if (confirm(`Izbrišem razdelek »${name}«?`)) void patch([isSection(pi, i, id), { op: "remove", path: `/pages/${pi}/sections/${i}` }], "izbrisan razdelek"); } }, "✕"),
       ),
     );
   });
@@ -564,11 +642,11 @@ function contentPane(): HTMLElement {
       pane.append(
         h("p", { class: "help" }, "Tapnite besedilo izbranega razdelka v predogledu in ga popravite kar tam."),
         h("div", { class: "pair" },
-          labelled("Različica", h("select", { onChange: (e: Event) => void patch([{ op: "replace", path: `${base}/variant`, value: (e.target as HTMLSelectElement).value }], "različica") }, ...info.variants.map((v) => h("option", { value: v, selected: v === s.variant }, VARIANT_LABEL[s.type as string]?.[v] ?? v)))),
-          labelled("Ozadje", h("select", { onChange: (e: Event) => { const v = (e.target as HTMLSelectElement).value; void patch([s.tone === undefined ? { op: "add", path: `${base}/tone`, value: v } : { op: "replace", path: `${base}/tone`, value: v }], "ozadje"); } },
+          labelled("Različica", h("select", { onChange: (e: Event) => void patch([isSection(pi, si, String(s.id)), { op: "replace", path: `${base}/variant`, value: (e.target as HTMLSelectElement).value }], "različica") }, ...info.variants.map((v) => h("option", { value: v, selected: v === s.variant }, VARIANT_LABEL[s.type as string]?.[v] ?? v)))),
+          labelled("Ozadje", h("select", { onChange: (e: Event) => { const v = (e.target as HTMLSelectElement).value; void patch([isSection(pi, si, String(s.id)), s.tone === undefined ? { op: "add", path: `${base}/tone`, value: v } : { op: "replace", path: `${base}/tone`, value: v }], "ozadje"); } },
             ...["default", "alt", "inverse"].map((t) => h("option", { value: t, selected: (s.tone ?? "default") === t }, TONE[t]!)))),
         ),
-        formAt(`${base}/props`, info.props, s.props as Json, "props", `urejen razdelek ${s.type}`),
+        formAt(inSection(String(s.id), "/props"), info.props, s.props as Json, "props", `urejen razdelek ${s.type}`),
       );
     } else {
       pane.append(h("p", { class: "muted" }, "Ta razdelek ustvari sistem (pravna besedila, 404). Podatke uredite v zavihku Podatki."));
@@ -581,7 +659,7 @@ function factsPane(): HTMLElement {
   const pane = h("div", { class: "pane" });
   if (!state.spec || !catalogue) return pane;
   pane.append(h("p", { class: "help" }, "Podatki se prikažejo v glavi, nogi, kontaktu in delovnem času. Manjkajoči podatki so označeni in preprečujejo objavo."));
-  pane.append(formAt("/business", catalogue.business, state.spec.business as Json, "Podatki o podjetju", "podatki"));
+  pane.append(formAt(at("/business"), catalogue.business, state.spec.business as Json, "Podatki o podjetju", "podatki"));
   const chrome = state.spec.chrome as Obj;
   const header = chrome.header as Obj;
   pane.append(
@@ -612,13 +690,17 @@ function fileButton(text: string, multiple: boolean, onFiles: (files: File[]) =>
 }
 
 /** Uploads photos (or one in place of `replace`); the server makes the variants and queues the descriptions. */
-async function uploadPhotos(files: File[], replace?: string): Promise<void> {
+function uploadPhotos(files: File[], replace?: string): Promise<void> {
+  toast = replace ? "Nalagam fotografijo …" : "Nalagam fotografije …";
+  showToast();
+  return queued(() => sendPhotos(files, replace));
+}
+
+async function sendPhotos(files: File[], replace?: string): Promise<void> {
   const form = new FormData();
   for (const f of files) form.append("photos", f, f.name);
   if (replace) form.set("replace", replace);
   if (state.version) form.set("baseVersion", String(state.version));
-  toast = replace ? "Nalagam fotografijo …" : "Nalagam fotografije …";
-  showToast();
   try {
     const r = await fetch(`/api/sites/${siteId}/photos`, { method: "POST", body: form });
     const body = (await r.json().catch(() => ({}))) as { error?: string; message?: string; added?: string[] };
@@ -720,20 +802,21 @@ function pagesPane(): HTMLElement {
     const seo = p.seo as Obj;
     const system = p.kind !== "home" && p.kind !== "standard";
     const fs = h("fieldset", {}, h("legend", {}, `${nav.label} · ${pageFileOf(p)}`));
-    const text = (ptr: string, title: string, val: string, max: number) => {
+    const text = (key: string, title: string, val: string, max: number) => {
+      const ptr = `/pages/${i}/${key}`;
       const input = h("input", { type: "text", maxlength: max, value: val });
-      const save = autosave(ptr, "nastavitve strani");
+      const save = autosave(inPage(String(p.id), `/${key}`), "nastavitve strani");
       input.addEventListener("input", () => save(input.value));
       return withPath(ptr, labelled(title, input));
     };
-    fs.append(text(`/pages/${i}/nav/label`, "Ime v meniju", nav.label as string, 24), text(`/pages/${i}/seo/title`, "Naslov za iskalnike", seo.title as string, 60), text(`/pages/${i}/seo/description`, "Opis za iskalnike", seo.description as string, 160));
+    fs.append(text("nav/label", "Ime v meniju", nav.label as string, 24), text("seo/title", "Naslov za iskalnike", seo.title as string, 60), text("seo/description", "Opis za iskalnike", seo.description as string, 160));
     if (!system) {
       fs.append(
         h("label", {}, h("input", { type: "checkbox", checked: nav.show === true, onChange: (e: Event) => void patch([{ op: "replace", path: `/pages/${i}/nav/show`, value: (e.target as HTMLInputElement).checked }], "meni") }), "Prikaži v meniju"),
         h("div", { class: "row" },
-          h("button", { class: "btn sm", type: "button", "aria-label": `Premakni stran ${nav.label} gor`, disabled: i <= 1 || p.kind === "home", onClick: () => void patch([{ op: "move", from: `/pages/${i}`, path: `/pages/${i - 1}` }], "vrstni red strani") }, "↑ Gor"),
-          h("button", { class: "btn sm", type: "button", "aria-label": `Premakni stran ${nav.label} dol`, disabled: p.kind === "home" || pages()[i + 1]?.kind !== "standard", onClick: () => void patch([{ op: "move", from: `/pages/${i}`, path: `/pages/${i + 1}` }], "vrstni red strani") }, "↓ Dol"),
-          p.kind === "standard" && h("button", { class: "btn sm danger", type: "button", onClick: () => { if (confirm(`Izbrišem stran ${nav.label}?`)) { pageIndex = 0; void patch([{ op: "remove", path: `/pages/${i}` }], "izbrisana stran"); } } }, "Izbriši stran"),
+          h("button", { class: "btn sm", type: "button", "aria-label": `Premakni stran ${nav.label} gor`, disabled: i <= 1 || p.kind === "home", onClick: () => void patch([isPage(i, String(p.id)), { op: "move", from: `/pages/${i}`, path: `/pages/${i - 1}` }], "vrstni red strani") }, "↑ Gor"),
+          h("button", { class: "btn sm", type: "button", "aria-label": `Premakni stran ${nav.label} dol`, disabled: p.kind === "home" || pages()[i + 1]?.kind !== "standard", onClick: () => void patch([isPage(i, String(p.id)), { op: "move", from: `/pages/${i}`, path: `/pages/${i + 1}` }], "vrstni red strani") }, "↓ Dol"),
+          p.kind === "standard" && h("button", { class: "btn sm danger", type: "button", onClick: () => { if (confirm(`Izbrišem stran ${nav.label}?`)) { pageIndex = 0; void patch([isPage(i, String(p.id)), { op: "remove", path: `/pages/${i}` }], "izbrisana stran"); } } }, "Izbriši stran"),
         ),
       );
     }
@@ -795,7 +878,7 @@ function versionsPane(): HTMLElement {
       h("div", { class: "what" }, h("span", {}, `${SRC[v.source] ?? v.source} · ${formatDateTime(v.created_at)}`), v.message ? h("span", { class: "muted" }, v.message.slice(0, 120)) : null),
       v.version === state.version
         ? h("span", { class: "pill plain" }, "trenutna")
-        : h("button", { class: "btn sm", type: "button", "aria-label": `Obnovi različico ${v.version}`, onClick: () => void api("/revert", { method: "POST", body: JSON.stringify({ version: v.version }) }).then(() => { toast = `Obnovljena različica ${v.version}.`; return load(); }).then(reloadPreview) }, "Obnovi"),
+        : h("button", { class: "btn sm", type: "button", "aria-label": `Obnovi različico ${v.version}`, onClick: () => void queued(() => api("/revert", { method: "POST", body: JSON.stringify({ version: v.version }) }).then(() => { toast = `Obnovljena različica ${v.version}.`; return load(); }).then(reloadPreview)) }, "Obnovi"),
     ))),
   );
 }
@@ -931,7 +1014,7 @@ function inlineEdit(el: HTMLElement): void {
   const finish = (save: boolean) => {
     target.removeAttribute("contenteditable");
     const next = (target.textContent ?? "").replace(/\s+/g, " ").trim();
-    if (save && next && next !== text) void patch([{ op: "replace", path: ptr, value: next }], "urejeno besedilo");
+    if (save && next && next !== text) void patch([isSection(pageIndex, si, sec.id), { op: "replace", path: ptr, value: next }], "urejeno besedilo");
     else target.textContent = text;
   };
   target.addEventListener("blur", () => finish(true), { once: true });
@@ -985,13 +1068,16 @@ function topItems(): Child[] {
         "aria-describedby": state.checklist.length ? "checklist-summary" : undefined,
         onClick: async () => {
           if (state.checklist.length) return openChecklist();
-          try {
-            const r = await api<{ url: string }>("/publish", { method: "POST", body: "{}" });
-            toast = `Objavljeno: ${r.url}`;
-          } catch (e) {
-            toast = `Ni objavljeno. ${(e as Error).message}`;
-          }
-          await load();
+          // Publishes the version on screen, after any text still waiting to be saved.
+          await queued(async () => {
+            try {
+              const r = await api<{ url: string }>("/publish", { method: "POST", body: "{}" });
+              toast = `Objavljeno: ${r.url}`;
+            } catch (e) {
+              toast = `Ni objavljeno. ${(e as Error).message}`;
+            }
+            await load();
+          });
         },
       }, "Objavi"),
     ),
@@ -1126,17 +1212,20 @@ function sizeFrame(): void {
 }
 
 /** Undo = revert to undoTarget (read at click time, not render time). */
-async function undo(): Promise<void> {
-  const target = undoTarget(state.versions, state.version);
-  if (target === null) return;
-  try {
-    await api("/revert", { method: "POST", body: JSON.stringify({ version: target }) });
-    toast = "Razveljavljeno.";
-  } catch (e) {
-    toast = (e as Error).message;
-  }
-  await load();
-  reloadPreview();
+function undo(): Promise<void> {
+  return queued(async () => {
+    // Read when the turn comes: text typed just before is saved first, and that is what gets undone.
+    const target = undoTarget(state.versions, state.version);
+    if (target === null) return;
+    try {
+      await api("/revert", { method: "POST", body: JSON.stringify({ version: target }) });
+      toast = "Razveljavljeno.";
+    } catch (e) {
+      toast = (e as Error).message;
+    }
+    await load();
+    reloadPreview();
+  });
 }
 
 let labelSeq = 0;

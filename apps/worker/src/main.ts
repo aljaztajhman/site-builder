@@ -3,7 +3,7 @@ import { startWorker } from "./worker.ts";
 
 const platform = await platformFromEnv();
 await startWorker(platform);
-console.log("[worker] listening for generate, edit and publish jobs");
+console.log("[worker] listening for generate, edit, alt (photo descriptions) and publish jobs");
 
 for (const sig of ["SIGINT", "SIGTERM"] as const) {
   process.on(sig, () => {
