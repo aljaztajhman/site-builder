@@ -1,7 +1,7 @@
 import type pg from "pg";
 import type { Db } from "./db.ts";
 
-/** Append-only list of SQL migrations. Never edit an applied one; add a new entry. */
+/** Append-only list of SQL migrations. Never edit or rename an applied one (the name identifies it); add a new entry. */
 export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
   {
     id: 1,
@@ -256,17 +256,23 @@ const MIGRATION_LOCK = 727_274_001;
 
 async function runMigrations(q: Query): Promise<number[]> {
   await q(`create table if not exists schema_migrations (id integer primary key, name text not null, applied_at timestamptz not null default now())`);
-  const { rows } = await q("select id from schema_migrations");
-  const applied = new Set(rows.map((r) => Number(r.id)));
+  const { rows } = await q("select id, name from schema_migrations");
+  const byId = new Map(rows.map((r) => [Number(r.id), String(r.name)]));
+  // A migration is known by its name, so never rename one. A database that ran a branch before a merge
+  // gave its migration another number (a Railway PR environment) has it recorded under the old id: its
+  // SQL is not run again, only the record moves, and the migration that now owns that id still runs.
+  const appliedNames = new Set(rows.map((r) => String(r.name)));
   const ran: number[] = [];
   for (const m of MIGRATIONS) {
-    if (applied.has(m.id)) continue;
+    if (byId.get(m.id) === m.name) continue;
+    const run = !appliedNames.has(m.name);
     await q("begin");
     try {
-      for (const stmt of splitSql(m.sql)) await q(stmt);
-      await q("insert into schema_migrations (id, name) values ($1, $2)", [m.id, m.name]);
+      if (run) for (const stmt of splitSql(m.sql)) await q(stmt);
+      await q("delete from schema_migrations where name = $1 and id <> $2", [m.name, m.id]);
+      await q("insert into schema_migrations (id, name) values ($1, $2) on conflict (id) do update set name = excluded.name", [m.id, m.name]);
       await q("commit");
-      ran.push(m.id);
+      if (run) ran.push(m.id);
     } catch (e) {
       await q("rollback");
       throw e;

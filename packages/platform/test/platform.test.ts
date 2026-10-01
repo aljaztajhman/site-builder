@@ -22,9 +22,37 @@ describe("migrations", () => {
     expect(await migrate(db)).toEqual([]);
   });
 
-  it("have unique, increasing ids (two branches adding the same id would skip one on deployed databases)", () => {
+  it("heal a database that ran a branch's migration under the number a merge gave to another (Railway PR environments)", async () => {
+    const old = await createDb("pglite://memory");
+    try {
+      // Before the merge with main this branch's "accounts" was migration 4; main's 4 is "version retention".
+      await old.query("create table schema_migrations (id integer primary key, name text not null, applied_at timestamptz not null default now())");
+      const byName = (name: string) => MIGRATIONS.find((m) => m.name === name)!;
+      const run = async (m: (typeof MIGRATIONS)[number], id: number) => {
+        for (const stmt of m.sql.split(/;\s*\n/).map((s) => s.trim().replace(/;$/, "")).filter(Boolean)) await old.query(stmt);
+        await old.query("insert into schema_migrations (id, name) values ($1, $2)", [id, m.name]);
+      };
+      for (const m of MIGRATIONS.filter((m) => m.id < 4)) await run(m, m.id);
+      await run(byName("accounts"), 4);
+      // This PR's environment also ran "generation_limits" as 5 (now 6; 5 is "accounts").
+      await run(byName("generation_limits"), 5);
+      // Runs main's 4 (its table didn't exist), doesn't run "accounts" or "generation_limits" again, moves their records.
+      const ran = await migrate(old);
+      expect(ran).toEqual([byName("version retention").id]);
+      const { rows } = await old.query<{ id: number; name: string }>("select id, name from schema_migrations order by id");
+      expect(rows.map((r) => [Number(r.id), r.name])).toEqual(MIGRATIONS.map((m) => [m.id, m.name]));
+      expect((await old.query("select to_regclass('site_publishes') as t")).rows[0]).toEqual({ t: "site_publishes" });
+      // And it stays settled.
+      expect(await migrate(old)).toEqual([]);
+    } finally {
+      await old.close();
+    }
+  });
+
+  it("have unique, increasing ids and unique names", () => {
     const ids = MIGRATIONS.map((m) => m.id);
     expect(ids).toEqual([...new Set(ids)].sort((a, b) => a - b));
+    expect(new Set(MIGRATIONS.map((m) => m.name)).size).toBe(MIGRATIONS.length);
   });
 });
 
