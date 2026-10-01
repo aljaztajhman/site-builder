@@ -201,6 +201,65 @@ export function MaybeText({ value, ctx }: { value: string | Placeholder; ctx: Re
   return isPlaceholder(value) ? <Ph p={value} ctx={ctx} /> : <>{value}</>;
 }
 
+/*
+ * Icon paths copied from Lucide (lucide-static 1.49.0, https://lucide.dev), ISC License:
+ * Copyright (c) 2026 Lucide Icons and Contributors. Permission to use, copy, modify, and/or distribute
+ * this software for any purpose with or without fee is hereby granted, provided that the above copyright
+ * notice and this permission notice appear in all copies.
+ * `clock` is derived from Feather, MIT License: Copyright (c) 2013-present Cole Bemis.
+ */
+const ICON_PATHS = {
+  phone: (
+    <path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384" />
+  ),
+  "map-pin": (
+    <>
+      <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" />
+      <circle cx="12" cy="10" r="3" />
+    </>
+  ),
+  clock: (
+    <>
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 6v6l4 2" />
+    </>
+  ),
+  mail: (
+    <>
+      <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" />
+      <rect x="2" y="4" width="20" height="16" rx="2" />
+    </>
+  ),
+} as const;
+
+export type IconName = keyof typeof ICON_PATHS;
+
+/**
+ * Small line icon for functional fact rows only (phone, address, e-mail, hours, the call bar).
+ * Never decorative: no background, no circle, no colour of its own (currentColor), hidden from
+ * assistive tech because the label next to it already says what it is. Inline SVG, so it works
+ * offline and under the CSP. width/height attributes keep its box before the stylesheet loads.
+ */
+export function Icon({ name }: { name: IconName }) {
+  return (
+    <svg
+      className="icon"
+      viewBox="0 0 24 24"
+      width="20"
+      height="20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      {ICON_PATHS[name]}
+    </svg>
+  );
+}
+
 /** Section heading block: optional eyebrow, the h2 title, optional intro. */
 export function SectionHead(props: { id: string; eyebrow?: string | undefined; title: string; intro?: string | undefined; level?: 1 | 2 }) {
   const H = props.level === 1 ? "h1" : "h2";
