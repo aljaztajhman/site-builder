@@ -1,5 +1,5 @@
 /**
- * pnpm eval [--only <id>[,<id>]] [--record | --replay | --offline] [--scope full|home] [--no-lighthouse] [--max-eur 25] [--judge | --no-judge]
+ * pnpm eval [--only <id>[,<id>]] [--record | --replay | --offline] [--scope full|home] [--photos <n>] [--no-lighthouse] [--max-eur 25] [--judge | --no-judge]
  *
  * live (default): real model calls, the only place outside the app that spends money.
  * --record:       live, and writes every model exchange to tools/eval/recordings/<id>/ for unit tests.
@@ -7,6 +7,7 @@
  * --offline:      no model at all: checks hand-authored golden specs from tools/eval/golden/.
  * --judge:        score each generated homepage with the vision judge (default for live and --record;
  *                 opt-in for --offline and --replay, since it is a real model call).
+ * --photos <n>:   give each fixture only its first n photos (0: a site without photos, which gets generated pictures).
  * Writes eval/report.md, eval/contact-sheet.png and the review sheets in eval/look/ (look.ts).
  */
 import { existsSync } from "node:fs";
@@ -42,7 +43,10 @@ if ((mode === "live" || mode === "record" || judge) && !process.env.ANTHROPIC_AP
   process.exit(2);
 }
 
-const fixtures = loadFixtures().filter((f) => !only || only.includes(f.id));
+const photoLimit = value("photos") === undefined ? undefined : Number(value("photos"));
+const fixtures = loadFixtures()
+  .filter((f) => !only || only.includes(f.id))
+  .map((f) => (photoLimit === undefined ? f : { ...f, photos: f.photos.slice(0, photoLimit) }));
 if (fixtures.length === 0) {
   console.error(`No fixtures match ${only?.join(",")}`);
   process.exit(2);

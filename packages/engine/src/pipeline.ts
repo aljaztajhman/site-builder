@@ -103,19 +103,19 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
 
   // Steps 1–2 (brief, design) and step 3 (images) don't depend on each other: they run side by side,
   // so photo processing and alt text (up to ~20 s with many photos) are off the path to the first preview.
+  const slots = generatedImageCount(config, photos.length, !!deps.images, intake.scope);
   const planning = (async () => {
     // 1. Intake -> brief
     const cls = await stageTime("classify", () => classify(client, intake.description));
     const { brief, dropped } = await stageTime("brief", () =>
-      makeBrief(client, { description: intake.description, businessType: cls.businessType, photoCount: photos.length, hasLogo: !!logo, scope: intake.scope }),
+      makeBrief(client, { description: intake.description, businessType: cls.businessType, photoCount: photos.length, generatedSlots: slots.wanted, hasLogo: !!logo, scope: intake.scope }),
     );
     if (dropped.length) await log("brief", "Dropped facts not found in the client's text", dropped);
     await repo.setBrief(siteId, brief, brief.name);
 
     // 3b. Too few photos: generated mood images, beside the design step (they don't need it).
-    const { wanted, skipped } = generatedImageCount(config, photos.length, !!deps.images);
-    if (skipped) await log("imageGen", skipped);
-    const ideas = brief.imageIdeas.slice(0, wanted);
+    if (slots.skipped) await log("imageGen", slots.skipped);
+    const ideas = brief.imageIdeas.slice(0, slots.wanted);
     const generating: Promise<ImageAsset[]> = ideas.length ? stageTime("imageGen", () => generateImages(deps, siteId, ideas, log)) : Promise.resolve([]);
     // Awaited only after the design call: without a handler now, an early rejection (spend cap) would crash the process.
     generating.catch(() => undefined);
@@ -124,7 +124,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     const swatches: Swatch[] = [];
     if (logo) swatches.push(...(await extractSwatches(originals.get(logo.id)!, "logo", 3)));
     for (const p of photos.slice(0, 3)) swatches.push(...(await extractSwatches(originals.get(p.id)!, "photo", 2)));
-    const { design } = await stageTime("design", () => chooseDesign(client, { brief, swatches, photoCount: photos.length }));
+    const { design } = await stageTime("design", () => chooseDesign(client, { brief, swatches, photoCount: photos.length, generatedCount: ideas.length }));
     return { brief, design, generated: await generating };
   })();
 
@@ -247,8 +247,8 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
  * How many mood images to generate for a site with `photoCount` client photos. When some are wanted but
  * no image service is configured (no FAL_KEY), says so: a silent skip left sites without any picture.
  */
-export function generatedImageCount(config: AppConfig, photoCount: number, hasGenerator: boolean): { wanted: number; skipped: string | null } {
-  const missing = config.imageGen.pipeline.enabled ? Math.max(0, config.imageGen.pipeline.fillUpTo - photoCount) : 0;
+export function generatedImageCount(config: AppConfig, photoCount: number, hasGenerator: boolean, scope: "home" | "full"): { wanted: number; skipped: string | null } {
+  const missing = config.imageGen.pipeline.enabled ? Math.max(0, config.imageGen.pipeline.fillUpTo[scope] - photoCount) : 0;
   if (!missing) return { wanted: 0, skipped: null };
   if (!hasGenerator) return { wanted: 0, skipped: `${missing} generated picture(s) wanted, but no image service is configured (FAL_KEY); built without them` };
   return { wanted: missing, skipped: null };
