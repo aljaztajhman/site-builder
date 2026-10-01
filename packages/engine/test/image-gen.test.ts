@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { loadConfig } from "@sb/config";
+import { direction as directionById } from "@sb/spec";
 import { ImageGenerator, SpendCapError, generatedImageCount, heroRule, photoLine, StandInImageTransport, imageCostEur, requestBody, type CallRecord, type ImageTransport } from "../src/index.ts";
 
 const config = loadConfig();
@@ -60,9 +61,16 @@ describe("pictures in the prompts", () => {
     expect(photoLine(0, 3)).toContain("show pictures");
     expect(photoLine(4, 0)).not.toContain("generated");
   });
-  it("asks for a picture hero only when a hero-suitable picture exists", () => {
-    expect(heroRule([])).toBe("");
-    expect(heroRule(["gen_01"])).toContain("gen_01");
-    expect(heroRule(["gen_01"])).toContain("not hero-type");
+  it("asks for the direction's picture hero only when a hero-suitable picture exists", () => {
+    const softStudio = directionById("soft-studio").layout.heroes;
+    expect(heroRule([], softStudio)).toBe("");
+    const rule = heroRule(["img_g1"], softStudio);
+    expect(rule).toContain("img_g1");
+    expect(rule).toContain("not hero-type");
+    for (const h of softStudio) expect(rule).toContain(h);
+  });
+  it("leaves a typographic direction its type hero", () => {
+    expect(directionById("editorial").layout.heroes.some((h) => h.startsWith("hero-split") || h.startsWith("hero-image"))).toBe(false);
+    expect(heroRule(["img_g1"], directionById("editorial").layout.heroes)).toBe("");
   });
 });

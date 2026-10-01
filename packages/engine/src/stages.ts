@@ -229,11 +229,14 @@ function imageList(assets: SiteSpec["assets"], heroIds: string[]): string {
     .join("\n");
 }
 
-/** With a hero-suitable picture the homepage opens on it; a text-only hero wastes the picture. */
-export function heroRule(heroImageIds: string[]): string {
-  return heroImageIds.length
-    ? `Homepage hero: hero-split or hero-image with one of the hero-suitable pictures (${heroImageIds.join(", ")}), not hero-type. Put the other pictures in image-text or page-header with-image sections.`
-    : "";
+/**
+ * With a hero-suitable picture the homepage opens on it (a text-only hero wastes the picture), in one of the
+ * direction's own picture heroes. A typographic direction (no picture hero) keeps its type hero.
+ */
+export function heroRule(heroImageIds: string[], directionHeroes: string[]): string {
+  const pictureHeroes = directionHeroes.filter((h) => h.startsWith("hero-split:") || h.startsWith("hero-image:"));
+  if (!heroImageIds.length || !pictureHeroes.length) return "";
+  return `Homepage hero: ${pictureHeroes.join(" or ")} with one of the hero-suitable pictures (${heroImageIds.join(", ")}), not hero-type. Put the other pictures in image-text or page-header with-image sections.`;
 }
 
 export async function generateContent(client: ModelClient, input: ContentInput): Promise<ContentResult> {
@@ -249,7 +252,7 @@ export async function generateContent(client: ModelClient, input: ContentInput):
         `Pages to produce (page ids p_<slug or "home">):\n${pages.map((p) => `- ${p.kind} "${p.slug}" nav "${p.navLabel}": ${p.purpose}`).join("\n")}`,
         `Design direction: ${dir.id}. Header ${dir.layout.header}, footer ${dir.layout.footer}. Preferred heroes: ${dir.layout.heroes.join(", ")}. Section rhythm: ${dir.layout.rhythm} (use the tone field: default/alt/inverse). Preferred variants: ${dir.layout.prefer.join(", ")}.`,
         `Photos (use each at most twice; alt text is already written):\n${imageList(input.assets, input.heroImageIds)}`,
-        heroRule(input.heroImageIds),
+        heroRule(input.heroImageIds, dir.layout.heroes),
         `Business facts available to components: phone ${input.brief.facts.phone ? "yes" : "missing"}, address ${input.brief.facts.address ? "yes" : "missing"}, hours ${input.brief.facts.hours ? "yes" : "missing"}, booking URL ${input.brief.facts.bookingUrl ? "yes" : "no — never use the booking action"}.`,
         input.structuredOutput ? "" : plainJsonInstruction(),
       ]
