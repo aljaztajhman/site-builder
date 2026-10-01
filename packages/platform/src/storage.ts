@@ -1,4 +1,4 @@
-import { mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, rename, rm, rmdir, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import {
   DeleteObjectsCommand,
@@ -87,6 +87,9 @@ export function createS3Storage(s: S3Settings): Storage {
   };
 }
 
+/** A put in progress (createFsStorage writes to a temporary file first). */
+const TMP_FILE = /\.\d+-[a-z0-9]+\.tmp$/;
+
 export function createFsStorage(root: string): Storage {
   const abs = path.resolve(root);
   const file = (key: string) => {
@@ -110,7 +113,10 @@ export function createFsStorage(root: string): Storage {
     async put(key, data) {
       const p = file(key);
       await mkdir(path.dirname(p), { recursive: true });
-      await writeFile(p, data);
+      // Write, then rename into place: a reader never sees a half-written file (S3 PUTs are atomic too).
+      const tmp = `${p}.${process.pid}-${Math.random().toString(36).slice(2, 8)}.tmp`;
+      await writeFile(tmp, data);
+      await rename(tmp, p);
     },
     async get(key) {
       const p = file(key);
@@ -122,10 +128,19 @@ export function createFsStorage(root: string): Storage {
     },
     async list(prefix) {
       const all = await walk(abs);
-      return all.map((p) => path.relative(abs, p).split(path.sep).join("/")).filter((k) => k.startsWith(prefix)).sort();
+      return all
+        .map((p) => path.relative(abs, p).split(path.sep).join("/"))
+        .filter((k) => k.startsWith(prefix) && !TMP_FILE.test(k))
+        .sort();
     },
     async deletePrefix(prefix) {
-      for (const k of await this.list(prefix)) await rm(file(k), { force: true });
+      const dirs = new Set<string>();
+      for (const k of await this.list(prefix)) {
+        await rm(file(k), { force: true });
+        for (let d = path.dirname(file(k)); d.startsWith(abs + path.sep); d = path.dirname(d)) dirs.add(d);
+      }
+      // Remove the folders left empty, deepest first (S3 has no folders to leave behind).
+      for (const d of [...dirs].sort((a, b) => b.length - a.length)) await rmdir(d).catch(() => undefined);
     },
     async ping() {
       await mkdir(abs, { recursive: true });

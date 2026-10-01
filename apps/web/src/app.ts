@@ -11,6 +11,7 @@ import {
   mediaKey,
   publishSite,
   publishedPrefix,
+  publishedBase,
   switchDirection,
   uploadKey,
   imageMeta,
@@ -439,13 +440,15 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
     let rest = c.req.path.slice(`/s/${slug}/`.length);
     if (rest === "" || rest.endsWith("/")) rest += "index.html";
     if (!SAFE_REST.test(rest)) return c.notFound();
-    const data = await storage.get(`${publishedPrefix}/${slug}/${rest}`);
+    // The live release (published.ts): a publish in progress never shows half a site.
+    const base = await publishedBase(storage, slug);
+    const data = await storage.get(`${base}${rest}`);
     if (data) {
       c.header("content-type", contentType(rest));
       c.header("cache-control", rest.startsWith("media/") ? "public, max-age=31536000, immutable" : "public, max-age=60");
       return c.body(data as Uint8Array<ArrayBuffer>);
     }
-    const notFound = await storage.get(`${publishedPrefix}/${slug}/404.html`);
+    const notFound = await storage.get(`${base}404.html`);
     if (notFound) return c.body(notFound as Uint8Array<ArrayBuffer>, 404, { "content-type": "text/html; charset=utf-8" });
     return c.text("Stran ne obstaja.", 404);
   });
