@@ -90,6 +90,11 @@ mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:var(--ink)}
 .plan ul{margin:16px 0 20px;display:grid;gap:8px;padding-left:0;list-style:none}
 .plan ul li{padding-left:18px;position:relative}
 .plan ul li::before{content:"";position:absolute;left:0;top:11px;width:8px;height:2px;background:var(--ink)}
+.plan .yearly{font-weight:600;margin-bottom:10px}
+.plan .extra{margin:0 0 20px;border-top:1px solid var(--line);font-size:16px}
+.plan .extra div{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 16px;padding:10px 0;border-bottom:1px solid var(--line)}
+.plan .extra dt{color:var(--ink-2)}
+.plan .extra dd{margin-left:auto;font-weight:600;font-variant-numeric:tabular-nums}
 
 /* ---------- FAQ ---------- */
 .faq{margin-top:20px;border-top:1px solid var(--line)}
@@ -334,11 +339,13 @@ footer .legal{margin-top:28px;padding-top:16px;border-top:1px solid var(--line);
       </div>
       <div class="plan">
         <h3>Naročnina</h3>
-        <div class="amt">od 12 € <small>na mesec</small></div>
+        <div class="amt">15 € <small>na mesec</small></div>
+        <p class="yearly">ali 150 € na leto, domena vključena</p>
         <p class="muted">Celotna stran in vse, kar potrebujete, da jo vodite sami.</p>
         <ul><li>Vse strani: ponudba, cenik, o nas, kontakt</li><li>Urejanje s klikom ali s pogovorom, brez kreditov</li><li>Objava in gostovanje</li><li>Prenos strani kot datoteke, kadarkoli</li></ul>
+        <dl class="extra"><div><dt>Prvo leto za prvih 100 strank</dt><dd>99 €</dd></div><div><dt>Postavitev skupaj z vami, po želji</dt><dd>79 € enkratno</dd></div></dl>
         <a class="btn primary" href="#zacni">Začnite s predogledom</a>
-        <p class="muted" style="font-size:14px;margin-top:14px">Končna cena je še odprta; 12 € je spodnja meja razpona v nastavitvah (12–19 €).</p>
+        <p class="muted" style="font-size:14px;margin-top:14px">Načrtovane cene, z DDV. Plačevanja še ni, zato zaenkrat ničesar ne zaračunamo. Letno naročnino boste plačali po računu z bančnim nakazilom.</p>
       </div>
     </div>
   </div>
@@ -353,7 +360,7 @@ footer .legal{margin-top:28px;padding-top:16px;border-top:1px solid var(--line);
       <details><summary>Ali lahko stran urejam sam, s telefona?</summary><p>Da. Urejevalnik deluje na telefonu. Besedilo popravite s klikom, večje spremembe opišete v pogovoru. Vsaka sprememba je shranjena kot različica, ki jo lahko obnovite.</p></details>
       <details><summary>Kaj če želim oditi?</summary><p>Stran prenesete kot datoteke, ki delujejo na katerem koli gostovanju, tudi brez povezave. Nič ni zaklenjeno.</p></details>
       <details><summary>Kaj je s piškotki in GDPR?</summary><p>Stran pred vašo privolitvijo ne nalaga nobenih sledilnih skript. Pisave so na našem strežniku, zemljevidi in videi se naložijo šele po kliku. Politika zasebnosti in izjava o dostopnosti sta pripravljeni kot predlogi, ki jih pregledate sami.</p></details>
-      <details><summary>Ali dobim svojo domeno?</summary><p>Stran dobi svoj naslov takoj. Povezava lastne domene in registracija nove domene sta v pripravi.</p></details>
+      <details><summary>Ali dobim svojo domeno?</summary><p>Stran dobi svoj naslov takoj. Povezava lastne domene in registracija nove domene sta v pripravi. Pri letni naročnini bo domena vključena v ceno.</p></details>
     </div>
   </div>
 </section>

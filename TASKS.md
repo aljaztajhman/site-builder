@@ -27,7 +27,7 @@ Status against "Done means" (2026-09-29):
 - [ ] Owner's own check on the live URL with their own photos (intake form, mobile/desktop preview toggle in a real browser)
 - [x] Deployed: ≥ 2 fixtures generated end to end (pekarna-kvas €0.24, gostilna-zlata-zlica €0.16; all checks pass)
 - [x] Deployed: everything in EU West (Amsterdam). Railway had no migrate button for the volume, so (owner's call) the `sfo` volume was deleted and a new one created in `ams` (2026-09-29); test data lost, the 2 test sites regenerated
-- [ ] Deployed: production environment tracking `main` (only `preview` exists; it now tracks `main`)
+- [ ] Deployed: production environment tracking `main`: create it when the first real customer gets a real site (`sb-production-env` = phase2, 2026-09-30). Until then the one `preview` environment stays, tracking `main`
 - [x] Monthly Railway cost from measured usage (3 h window, 2026-09-29): memory avg 1.37 GB (worker 0.74, web 0.56, Postgres 0.07) ≈ $13.70, CPU avg 0.02 vCPU ≈ $0.40 → **≈ $15/month + plan fee** at $10/GB·month and $20/vCPU·month (Railway docs); volume and bucket hold < 1 GB (their per-GB prices not confirmed). Budget €50/month
 
 ## Next: phase 2 — auth, preview limits, visual editor, contact forms
@@ -89,7 +89,8 @@ Backlog:
 
 ## Design system overhaul (branch claude/design-system-overhaul)
 - [x] docs/design/ideas.html: proposal for product tokens/components/screens, generated-site hero and header families, and the researched AI-site give-away list (38 tells with code/critique/new status; Slovene copy rules)
-- [ ] Owner decisions: accent (`sb-ui-accent`), display face (`sb-ui-display-face`), approve give-away additions to docs/PRODUCT.md. The product UI ships with the doc's picks (green, Bricolage Grotesque); each is one token to change
+- [x] Owner decisions (2026-10-01): accent deep green #156b4a (`sb-ui-accent`) and display face Bricolage Grotesque (`sb-ui-display-face`), both the picks the product UI already ships with; nothing to change
+- [ ] Owner decision: approve the give-away additions to docs/PRODUCT.md
 - [x] Product UI (2026-09-30): one stylesheet `apps/web/src/ui/app.css` with the ideas.html tokens (canvas, ink, green accent, hairlines, one float shadow, radii 4/8/12, Bricolage + Figtree from the repo's subset fonts), served at `/assets/ui/<hash>/` without a session; no inline CSS left in dashboard pages. Login (wordmark, one field), intake as the prompt box (attach buttons, scope switch, one action; `/new`, and the whole page when there are no sites; refused intakes keep the text and say why), sites as cards with a live 360-px thumbnail, editor restyled (app bar with "Več" menu, generation progress with real stage names and seconds, failure note with "Poskusi znova", versions list, AI pane with cost and log folded), messages page. Checked: screenshots at 360 and 1280 of login, sites, intake, editor (phone and desktop preview, section form, AI, design, versions, menu), generating, checking, failed, messages; axe 0 violations on all of them; no horizontal scroll at 360; typecheck, lint, 495 tests
 - [x] Product UI live on Railway `preview` (2026-09-30, PR #14, web-preview-31c6.up.railway.app): hashed stylesheet and fonts served (immutable cache, noindex), login, sites (4 cards), intake, editor (phone, desktop, "Več" menu) and messages at 360 and 1280: fonts loaded, axe 0, no horizontal scroll, no console errors. Read-only check, no model calls
 - [ ] Deployed Pekarna Kvas (v2) shows "Napaka": its critique failed on 2026-09-29 19:00 (note over 300 chars), before critique failures kept the site; the status stays `failed` although v2 is fine. The editor says so and offers "Poskusi znova"; a job that fails after a version exists could leave the status at `ready`
@@ -99,33 +100,37 @@ Backlog:
 - [x] Editor shows section variant ids raw: Slovene variant names (`VARIANT_LABEL`)
 - [x] Generation screen looked frozen (owner, 2026-10-01): the generated-picture step (20–40 s) was not in the step list, so nothing ran on screen. Now listed; the running step is highlighted and counts up every second on the server clock; the preview frame is a live skeleton that fills in with the run's name, town, summary and services (after the brief), the direction's colours and each picture as it lands (new events: design chosen, photos ready, image ready); on phones it shows above the step list. Tested in Chromium (apps/web/test/progress-browser.test.ts) at 1280 and 360
 - [ ] Simple editor (owner, 2026-10-01: "a lot going on; the best, the most powerful and the easiest"): proposal docs/design/editor-simple.html; edit on the page (section toolbar, tap-a-picture, tap-a-fact), the assistant box under the preview, panel by selection, nothing internal on screen; 6 shippable steps, each checked by a tap-count script over 6 owner tasks at 375/1280 (target ≤ 3 taps). Waits on `sb-editor-simple`
-- [x] Product landing page (2026-09-30): docs/design/homepage.html served at `/` to visitors without a session (signed in, `/` stays the dashboard); `home.css` + `client/home.ts` (no inline CSS/JS, CSP unchanged), the Pekarna Kvas example framed from `/assets/ui/<hash>/example-home.html` (only `/assets/ui/` allows same-origin framing). The prompt goes to `/new`; the typed text rides in sessionStorage through the login and fills the intake (never in the URL); "+ Fotografije"/"+ Logotip" focus that control. Paid price from `config.plans.paid.monthlyEurRange`. Working wordmark is now the designs' "Stran" everywhere (was "Graditelj strani", which wrapped the 360-px header). Deviations from the design: `--ink-3` darker (contrast), copy numbers corrected to eval/report-home.md (about two minutes, 10 fixtures, median 110 s, not "a minute"/154 s), chat reply in first person plural, footer e-mail and legal links as placeholders (no pages yet). Checked: full-page pixel diff vs the design 0.60 % at 1280 and 1.34 % at 360 (all in the changed copy/footer), axe 0, no horizontal scroll, no console errors, prompt → login → intake hand-off, no-JS render, vignettes play once in view; 498 tests
+- [x] Product landing page (2026-09-30): docs/design/homepage.html served at `/` to visitors without a session (signed in, `/` stays the dashboard); `home.css` + `client/home.ts` (no inline CSS/JS, CSP unchanged), the Pekarna Kvas example framed from `/assets/ui/<hash>/example-home.html` (only `/assets/ui/` allows same-origin framing). The prompt goes to `/new`; the typed text rides in sessionStorage through the login and fills the intake (never in the URL); "+ Fotografije"/"+ Logotip" focus that control. Paid price from `config.plans.paid` (then a monthly range; since `sb-pricing` the decided prices). Working wordmark is now the designs' "Stran" everywhere (was "Graditelj strani", which wrapped the 360-px header). Deviations from the design: `--ink-3` darker (contrast), copy numbers corrected to eval/report-home.md (about two minutes, 10 fixtures, median 110 s, not "a minute"/154 s), chat reply in first person plural, footer e-mail and legal links as placeholders (no pages yet). Checked: full-page pixel diff vs the design 0.60 % at 1280 and 1.34 % at 360 (all in the changed copy/footer), axe 0, no horizontal scroll, no console errors, prompt → login → intake hand-off, no-JS render, vignettes play once in view; 498 tests
 - [x] Landing page live on Railway `preview` (2026-09-30, PR #17, web-preview-31c6.up.railway.app/): full-page heights equal the design (8473 px at 360, 5235 at 1280), both example frames load, fonts load, axe 0, no horizontal scroll, no console errors, noindex; `/new` and `/sites/…` still redirect to login, API 401, `/health` ok; web and worker deployments SUCCESS. Read-only check, no model calls
 - [x] Landing page always at `/`, signed in or not (2026-09-30): with a session it hid behind the dashboard, so the owner never saw it. The dashboard moved to `/sites`; signed in, the landing header says "Moje strani" instead of "Prijava"; login without a destination goes to `/sites`, logout to `/`
-- [ ] Landing page claims not true yet: "Potrebujete le e-poštni naslov, kartice ne" / free preview (today `/new` is behind the access password; `sb-preview-gate`, phase 2 accounts), "od 12 €" (`sb-pricing`), footer provider data, contact e-mail and Zasebnost / Pogoji / Izjava o dostopnosti pages (`sb-legal-entity`, `sb-email-domain`)
+- [ ] Landing page claims not true yet: "Potrebujete le e-poštni naslov, kartice ne" / free preview (today `/new` is behind the access password; `sb-preview-gate`, phase 2 accounts), footer provider data, contact e-mail and Zasebnost / Pogoji / Izjava o dostopnosti pages (`sb-legal-entity`, `sb-email-domain`)
 - [ ] Generated sites: hero families (facts-first, photo-first, type-only, split) and header families per direction; spec version bump + migration + test; eval contact sheet must show no two directions sharing hero and header family
 - [ ] Give-aways into code: no U+2014 in copy, Slovene filler additions, accent-coloured single-side borders, eyebrow case and tracking cap, off-black/off-white bounds, one primary action per hero
 
-## Later: phase 3 — CMS collections
-- [ ] Collections the client edits: blog, services, price list (cenik), team, events; spec migration + components + editor forms
-- [ ] Per-collection list/detail pages, RSS for the blog, sitemap entries
-- [ ] Slovene formatting for dates, prices and plurals in every collection view
-
-## Later: phase 4 — billing and domains
-- [ ] Legal entity first (no billing before it exists)
-- [ ] Stripe: flat monthly plan, trial = free preview, dunning, invoices with Slovene VAT rules
+## Later: phase 3 — billing and domains
+Before CMS collections (`sb-roadmap-order` = swap, 2026-10-01).
+- [ ] Build billing; register the legal entity (the accountant chooses s.p. or d.o.o.) before the first charge (`sb-legal-entity` = later, 2026-10-01). Billing stays off in config (`plans.paid.billingEnabled: false`) until the entity exists; nothing is charged before then
+- [ ] Charge what `config.plans.paid` says (`sb-pricing`, 2026-10-01): €15/month or €150/year incl. VAT, domain included on yearly; yearly by invoice and bank transfer (UPN QR) first; the first 100 customers pay €99 for year one; optional €79 "we set it up with you" service
+- [ ] Stripe for the monthly plan (after yearly invoices): trial = free preview, dunning, invoices with Slovene VAT rules
 - [ ] Platform domain, `{slug}.<domain>` subdomains, Cloudflare for SaaS for customer domains
 - [ ] Domain registration via the Openprovider API
-- [ ] Ask the accountant before building billing: do online card payments (Stripe) need fiscal verification of invoices (davčno potrjevanje)? Bank-transfer invoices don't. Yearly invoice + UPN QR may come first (docs/GO-TO-MARKET.md §5, §9)
+- [ ] Ask the accountant before building billing: do online card payments (Stripe) need fiscal verification of invoices (davčno potrjevanje)? Bank-transfer invoices don't. Yearly invoice + UPN QR comes first (docs/GO-TO-MARKET.md §5, §9)
 - [ ] Register customer domains in the customer's name (the "domain held hostage" complaint is our selling point)
+- [ ] Price-list and menu editing for restaurants and hairdressers: the only part of CMS collections pulled forward (`sb-roadmap-order`)
+
+## Later: phase 4 — CMS collections
+- [ ] Collections the client edits: blog, services, price list (cenik; its editing comes forward into phase 3), team, events; spec migration + components + editor forms
+- [ ] Per-collection list/detail pages, RSS for the blog, sitemap entries
+- [ ] Slovene formatting for dates, prices and plurals in every collection view
 
 ## Go-to-market (docs/GO-TO-MARKET.md; decisions in the Decision Inbox)
 Owner:
 - [ ] Name decided: Stranko (`sb-brand-name`, 2026-09-30; shown in the product UI since 2026-10-01). Still to do: trademark search at SIPO/EUIPO, buy the domains (unblocks `sb-email-domain`)
-- [ ] Decide first market (`sb-first-market`), roadmap order (`sb-roadmap-order`), pricing (`sb-pricing`), legal entity timing (`sb-legal-entity`), 90-day budget (`sb-gtm-budget`)
+- [x] Decided (2026-10-01; budget 2026-09-30): first market one town in person, restaurants, hairdressers and tradespeople (`sb-first-market`); billing and domains before CMS (`sb-roadmap-order`); €15/month or €150/year (`sb-pricing`); entity after billing is built, before the first charge (`sb-legal-entity`); 90-day budget minimal, domains and trademark only, ~€40 + SIPO fee (`sb-gtm-budget`). Applied in docs/GO-TO-MARKET.md, docs/PRODUCT.md and config
+- [ ] Town for the first market: to be named by the owner (`sb-first-market`)
 - [ ] Recruit 10–15 design partners in person (full sites via the allow-list, `sb-full-access`)
 Product work (not started):
-- [ ] Landing page and waitlist (with reserved founding price, no payment) generated by our own engine; check pricing/FAQ sections exist
+- [ ] Landing page and waitlist (with reserved founding price, €99 for the first year, no payment) generated by our own engine; check pricing/FAQ sections exist
 - [ ] Preview before email confirmation (`sb-preview-gate`); required placeholders shown as a "še N podatkov do objave" checklist
 - [ ] Intake from photos of printed material (menu, price list, flyer, business card) and from an existing website URL
 - [ ] Cookieless per-site counts (visits, Call and Directions taps, form sends) and a monthly report email
@@ -146,6 +151,7 @@ Product work (not started):
 - [ ] Judge on 4 sites: the call action appears 3× on the first phone screen (hero button, contact strip, fixed bar). Revisit the one-contact-block rule with the fixed bar in mind
 - [ ] Re-record eval recordings: brief and design prompts changed (claude/photo-led); replay still runs (hash mismatches don't fail it). Waits on `sb-images-fixture-storage`
 - [ ] Shot list for owners (brief stage + dashboard)
+- [ ] AI edits to owners' own photos (`sb-images-photo-edits` = upscale-relight, 2026-10-01; not built): upscale and relight only, no extending or object removal; the original is kept; the owner approves each edit before it's used; ~€0.003 per upscale (model and price in config, cost logged per call)
 - [x] Lucide line icons (2026-10-01, branch claude/fact-icons): `Icon` primitive (phone, map-pin, clock, mail; inline SVG, currentColor, aria-hidden) only on fact labels in hero-type with-facts, contact, contact-strip, and on the phone call bar's two buttons. Not in services, highlights, steps, header, footer (tested). Call bar buttons now size from their content so icon + "Navodila za pot" stays on one line at 360 px (all 10 goldens: 48–50 px tall, was wrapping to 66–71 px with equal halves). Offline check on 3 goldens: axe 0, LH accessibility 100, 360 px width ok
 - [x] Client-facing generation/edits: generated pictures in the pipeline with origin + "Ustvarjeno z UI" label (spec v3, PR #24); the owner replaces them with their own photos in the editor (PR #25)
 

@@ -79,6 +79,17 @@
   "plans": {
     "$comment": "Phase 1 has no billing; kept here so later phases read from config.",
     "freePreview": { "pages": ["home"], "model": "claude-sonnet-5-5", "effort": "medium", "watermark": true, "publishable": false },
-    "paid": { "monthlyEurRange": [12, 19], "aiEdits": "fair-use" }
+    "paid": {
+      "$comment": "Owner's decision sb-pricing (2026-10-01). Whole euros, VAT included, the same whether or not we're VAT-registered. billingEnabled stays false until the legal entity exists (sb-legal-entity: registered after billing is built, before the first charge); while it's false the landing page calls these planned prices.",
+      "billingEnabled": false,
+      "vatIncluded": true,
+      "monthlyEur": 15,
+      "yearlyEur": 150,
+      "yearlyIncludesDomain": true,
+      "yearlyPayment": "invoice-bank-transfer",
+      "foundingOffer": { "customers": 100, "firstYearEur": 99 },
+      "setupService": { "eur": 79 },
+      "aiEdits": "fair-use"
+    }
   }
 }

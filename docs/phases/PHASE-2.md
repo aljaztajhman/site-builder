@@ -10,7 +10,7 @@ Goal: a business owner can sign up from their phone, get a free homepage preview
 - [ ] **Who gets a full site in phase 2**, with no billing yet. Proposal: an allow-list of emails the owner manages; everyone else gets the free homepage preview only.
 - [ ] **Visual editor.** Evaluate Puck against extending the current direct editor (schema-driven forms plus inline text in the preview). Proposal: a 1-day spike on Puck, then decide on evidence: does it keep every edit a spec change, and does it work at 360 px?
 - [ ] **Email provider and sending domain.** PRODUCT.md names Resend. It needs a domain we control for SPF/DKIM, which means buying one (the owner's call and payment).
-- [ ] **Production environment.** Proposal: a Railway `production` environment tracking `main`, with `preview` for PR branches.
+- [x] **Production environment.** Decided (`sb-production-env`, 2026-09-30): keep the one `preview` environment (tracking `main`) until the first real customer gets a real site; create `production` then.
 
 ## Scope
 
@@ -23,7 +23,7 @@ Goal: a business owner can sign up from their phone, get a free homepage preview
 
 ## Out of scope
 
-Billing, custom domains, domain registration, CMS collections (phase 3), additional locales.
+Billing, custom domains, domain registration (phase 3), CMS collections (phase 4), additional locales.
 
 ## Done means
 

@@ -88,15 +88,19 @@ Hard list. Add to it whenever a new default shows up in eval screenshots.
 - Heavy drop shadows on every card
 - Filler copy: "vrhunska kakovost", "celovite rešitve", "vaš zanesljiv partner", "z dolgoletnimi izkušnjami", "strast do …"
 
-## Pricing (in config, will change)
+## Pricing (in config, `plans`)
 
 - Free preview: homepage only, Sonnet 5.5 at medium effort, watermarked, not publishable, email-verified, rate-limited.
-- Paid: flat monthly (€12–19 range), fair-use AI edits, no credits. Full site, editor, CMS, publishing, domains, export.
-- No billing until a legal entity exists.
+- Paid, one plan (owner's decision `sb-pricing`, 2026-10-01): €15/month or €150/year, VAT included. The domain is included on the yearly plan. Yearly is paid by invoice and bank transfer. Fair-use AI edits, no credits. Full site, editor, CMS, publishing, domains, export.
+- Founding offer: the first 100 customers pay €99 for their first year, then the normal price.
+- Optional "we set it up with you" service: €79 one-off.
+- Billing is built first; the business is registered (the accountant chooses s.p. or d.o.o.) before the first charge (`sb-legal-entity`, 2026-10-01). Billing stays switched off in config (`plans.paid.billingEnabled: false`) until then: nothing is charged before the entity exists.
 
 ## Roadmap
 
 1. Engine, preview, chat edits, publish, export; on GitHub and running on Railway.
 2. Auth, preview limits, visual editor (evaluate Puck), contact forms with email via Resend.
-3. CMS collections the client edits: blog, services, price list, team, events.
-4. Billing (Stripe), custom domains, domain registration.
+3. Billing (yearly invoice and bank transfer first, Stripe for card payments later), custom domains, domain registration. Price-list and menu editing for restaurants and hairdressers comes forward from phase 4 into this phase.
+4. CMS collections the client edits: blog, services, price list, team, events.
+
+Billing and custom domains come before CMS collections (owner's decision `sb-roadmap-order`, 2026-10-01): nothing can be sold without billing, and owners who already have a domain can't move to us without custom domains.
