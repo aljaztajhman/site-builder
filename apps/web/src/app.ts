@@ -3,7 +3,7 @@ import { bodyLimit } from "hono/body-limit";
 import type { AppConfig } from "@sb/config";
 import {
   PublishBlockedError,
-  siteBlockers,
+  siteChecklist,
   applyDirectEdit,
   defaultSection,
   editorCatalogue,
@@ -20,7 +20,7 @@ import {
 } from "@sb/engine";
 import { VersionConflictError, contentType, type Platform } from "@sb/platform";
 import { renderPage, sharedBundle, pageFile } from "@sb/render";
-import { collectPlaceholders, type SiteSpec } from "@sb/spec";
+import { blockerText, collectPlaceholders, type SiteSpec } from "@sb/spec";
 import { issueSession, clearSession, hasSession, passwordMatches, requireAuth, loginThrottle, type AuthSettings } from "./auth.ts";
 import { slugify } from "./slug.ts";
 import { DASHBOARD, loginPage, sitesPage, sitePage } from "./pages.tsx";
@@ -216,6 +216,7 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
     if (!site) return c.json({ error: "not found" }, 404);
     const current = await repo.getSpec(id);
     const after = Number(c.req.query("after") ?? 0);
+    const checklist = current ? await siteChecklist(repo, id, current.spec) : [];
     return c.json({
       site,
       version: current?.version ?? null,
@@ -225,7 +226,9 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
       cost: await repo.siteCost(id),
       versions: await repo.listVersions(id),
       placeholders: current ? collectPlaceholders(current.spec) : [],
-      blockers: current ? await siteBlockers(repo, id, current.spec) : [],
+      // The pre-publish checklist (structured, the editor words it in Slovene) and the same as English lines.
+      checklist,
+      blockers: checklist.map(blockerText),
       messages: (await repo.listFormMessages(id)).length,
       spendToday: await repo.spendToday(),
       cap: config.limits.dailyModelSpendCapEur,
@@ -392,7 +395,7 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
       const site = await repo.getSite(c.req.param("id"));
       return c.json({ ok: true, version: r.version, url: `/s/${site?.slug}/` });
     } catch (e) {
-      if (e instanceof PublishBlockedError) return c.json({ error: "blocked", blockers: e.blockers }, 422);
+      if (e instanceof PublishBlockedError) return c.json({ error: "blocked", blockers: e.blockers, checklist: e.checklist }, 422);
       throw e;
     }
   });

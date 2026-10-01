@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./starter": "./src/starter.ts"
+    "./starter": "./src/starter.ts",
+    "./labels": "./src/labels.ts"
   },
   "dependencies": {
     "zod": "^4.6.5"

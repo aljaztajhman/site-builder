@@ -45,8 +45,8 @@ describe("applyDirectEdit", () => {
     ]);
     expect(r.ok).toBe(true);
     expect(checkDesign(r.spec.design, DIRECTIONS.find((d) => d.id === r.spec.design.direction))).toEqual([]);
-    expect(r.adjustments.join(" ")).toMatch(/text colour adjusted/);
-    expect(r.adjustments.join(" ")).toMatch(/radius set to 8/);
+    expect(r.adjustments.join(" ")).toMatch(/Besedilo: barva popravljena na #[0-9a-f]{6} zaradi berljivosti/);
+    expect(r.adjustments.join(" ")).toMatch(/Zaobljenost: nastavljeno na 8, kot dovoljuje smer »Toplo in domače«/);
   });
 });
 
