@@ -143,7 +143,7 @@ Product work (not started):
 - [x] CSP for published pages: script-src drops 'unsafe-inline'; the one inline snippet (header `js` class) is allowed by its SHA-256 hash (tested)
 - [ ] Offline export verified in Chromium only; Firefox may block `file://` fonts from a parent folder — not verified
 - [ ] Newsreader font file is 62 KB (target 60)
-- [ ] team:grid looks uneven when only some members have portraits
+- [x] Team with only some portraits (2026-10-01): members without one get a same-size tile with their initials (none for a placeholder name; titles like "dr." skipped), with the direction's photo shape, so names and roles line up in grid and list. Checked: component tests; looked at the dentist golden at 1280 and 360 px (before: Maja's entry started beside Urška's portrait with bare text)
 - [ ] Railway bucket: confirm virtual-hosted vs path style in the bucket's Credentials tab; S3 keys are validated in code
 - [ ] Railway PR environments are on (`site-builder-pr-5` appeared): each open PR runs a full copy of web, worker and Postgres; decide whether to keep them (cost) or keep only `preview`
 - [ ] Worker replay mode (`MODEL_REPLAY_DIR`) replays the same recorded edit for every chat message; fine for demos only
