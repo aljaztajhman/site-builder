@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="sl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>T · Etiketa (trgovina) · design template</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&amp;family=Karla:wght@400;500;700;800&amp;display=swap">
+<style>
+/* T · Etiketa: small shops that sell things you can hold. Olive green and terracotta, a bookish serif, and everything set like a bottle label: a framed label card for the headline, each product on its own label with the price, photos in a stone-doorway arch. Motif: an olive branch drawn in code. */
+*{box-sizing:border-box}
+body{margin:0}
+.pg{--olive:#414f1f;--olive2:#2f3a15;--terra:#b9492f;--ink:#23281a;--soft:#4d5440;--leaf:#e9eeda;--line:#cfd6bb;--pale:#dfe6c8;
+  font-family:Karla,system-ui,sans-serif;font-size:19px;line-height:1.5;color:var(--ink);background:#fff;-webkit-font-smoothing:antialiased;overflow-x:clip}
+.pg :where(h1,h2,h3){font-family:Lora,Georgia,serif;font-weight:700;margin:0;letter-spacing:-.02em}
+.pg :where(p){margin:0}
+.pg :where(a){color:inherit}
+.wrap{max-width:1280px;margin:0 auto;padding:0 40px;position:relative}
+.ph{background:#fff3a6;color:#3b2f00;border:1px dashed #8a6d00;border-radius:3px;padding:0 .3em;font-weight:500;white-space:nowrap;font-size:.8em}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:60px;padding:0 30px;border-radius:6px;font-weight:800;font-size:19px;text-decoration:none;background:var(--terra);color:#fff}
+.btn.sm{min-height:44px;padding:0 20px;font-size:17px;background:#fff;color:var(--olive2)}
+.btn-light{background:#fff;color:var(--terra)}
+.lnk{font-weight:800;text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:2px}
+.branch{display:block;width:132px;height:58px}
+/* the label */
+.label{position:relative;background:#fff;color:var(--ink);padding:54px 52px 50px}
+.label::before{content:"";position:absolute;inset:12px;border:1.5px solid var(--olive);pointer-events:none}
+.label::after{content:"";position:absolute;inset:17px;border:1px solid var(--olive);pointer-events:none}
+
+/* hero */
+.hero{background:var(--olive);color:#fff}
+.top{display:flex;align-items:center;gap:36px;padding-top:22px;padding-bottom:22px}
+.brand{font-family:Lora,serif;font-weight:700;font-size:29px;text-decoration:none;margin-right:auto}
+.nav{display:flex;gap:30px;font-weight:700;font-size:17px}
+.nav a{text-decoration:none;padding:12px 0}
+.menu{display:none;font-weight:800;text-decoration:underline;text-underline-offset:5px;padding:12px 0}
+.hero-grid{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,5fr);gap:64px;align-items:end;padding-top:32px}
+.hero .label{margin-bottom:88px}
+.where{font-weight:700;font-size:17px;color:var(--olive);margin-top:18px}
+.hero h1{font-size:clamp(38px,5.2vw,74px);line-height:1;letter-spacing:-.03em;margin-top:12px}
+.lead{font-size:20px;line-height:1.5;color:var(--soft);margin-top:22px}
+.acts{display:flex;flex-wrap:wrap;align-items:center;gap:14px 30px;margin-top:30px}
+.door{position:relative;margin:0}
+.door>img{display:block;width:100%;aspect-ratio:5/6;object-fit:cover;border-radius:999px 999px 0 0}
+.door .dot{position:absolute;left:-72px;bottom:64px;width:220px;height:220px;border-radius:50%;border:8px solid var(--olive);overflow:hidden}
+.door .dot img{display:block;width:100%;height:100%;object-fit:cover}
+
+/* shelves */
+.shelf{padding:120px 0 112px}
+.shelf-head{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,5fr);gap:64px;align-items:end}
+.shelf h2{font-size:clamp(40px,5.6vw,80px);line-height:.98}
+.shelf-head p{color:var(--soft);font-size:20px;max-width:25em}
+.labels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;margin-top:64px}
+.lab{position:relative;border:1.5px solid var(--olive);padding:40px 30px 36px;text-align:center;display:flex;flex-direction:column;align-items:center;min-height:330px}
+.lab::before{content:"";position:absolute;inset:7px;border:1px solid var(--olive);pointer-events:none}
+.lab .branch{width:92px;height:40px}
+.lab h3{font-size:30px;line-height:1.08;margin-top:16px}
+.lab .q{margin-top:8px;color:var(--soft);font-weight:500}
+.lab .p{font-family:Lora,serif;font-weight:700;font-size:clamp(44px,4.6vw,64px);line-height:1;color:var(--terra);margin-top:auto;padding-top:24px}
+.rest{margin-top:72px;padding-top:28px;border-top:1.5px solid var(--olive);display:grid;grid-template-columns:minmax(0,3fr) minmax(0,9fr);gap:40px;align-items:baseline}
+.rest .k{font-weight:700;color:var(--olive)}
+.rest .v{font-family:Lora,serif;font-weight:600;font-size:clamp(26px,3.4vw,46px);line-height:1.15;letter-spacing:-.02em}
+
+/* gift boxes */
+.gift{background:var(--terra);color:#fff;padding:112px 0}
+.gift-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:88px;align-items:center}
+.box{margin:0}
+.box img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:50%;border:10px solid #fff}
+.gift h2{font-size:clamp(38px,5vw,72px);line-height:.98}
+.gift .txt{margin-top:24px;font-size:21px;max-width:25em}
+.gift .p{font-family:Lora,serif;font-weight:700;font-size:clamp(56px,7vw,100px);line-height:1;margin-top:28px}
+.gift .acts{margin-top:28px}
+
+/* the shop */
+.shop{background:var(--leaf);padding:120px 0}
+.shop-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:88px;align-items:center}
+.front{position:relative;margin:0}
+.front>img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:999px 999px 0 0}
+.front .dot{position:absolute;right:-48px;bottom:48px;width:200px;height:200px;border-radius:50%;border:8px solid var(--leaf);overflow:hidden}
+.front .dot img{display:block;width:100%;height:100%;object-fit:cover}
+.shop h2{font-size:clamp(38px,5vw,72px);line-height:.98}
+.hours{margin:32px 0 0;border-top:1.5px solid var(--olive)}
+.hours div{display:flex;justify-content:space-between;gap:24px;padding:16px 0;border-bottom:1px solid var(--line);font-size:21px}
+.hours dd{margin:0;font-family:Lora,serif;font-weight:700}
+.shop .summer{margin-top:20px;font-weight:700;color:var(--olive)}
+
+/* contact */
+.visit{background:var(--olive);color:#fff;padding:104px 0 112px}
+.visit-grid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:72px;align-items:end}
+.visit h2{font-size:clamp(30px,3.4vw,46px);line-height:1.08}
+.tel{display:inline-block;font-family:Lora,serif;font-weight:700;font-size:clamp(48px,7.4vw,108px);line-height:1;letter-spacing:-.03em;text-decoration:none;margin-top:14px}
+.visit ul{list-style:none;margin:0 0 30px;padding:0;display:grid;gap:8px;color:var(--pale)}
+
+/* footer */
+.foot{background:var(--olive2);color:var(--pale);padding:40px 0 56px;font-size:16px}
+.foot-grid{display:flex;flex-wrap:wrap;gap:16px 48px;align-items:baseline}
+.foot strong{font-family:Lora,serif;font-weight:700;font-size:24px;color:#fff}
+.foot nav{display:flex;gap:24px;margin-left:auto}
+.bar{display:none}
+
+@media (max-width:900px){
+  .nav{display:none}.menu{display:block}
+  .hero-grid{grid-template-columns:1fr;gap:0;padding-top:12px}
+  .hero .label{margin-bottom:56px}
+  .door{width:74%;margin-left:auto}
+  .door .dot{width:150px;height:150px;left:-56px}
+  .shelf-head,.gift-grid,.shop-grid,.visit-grid{grid-template-columns:1fr;gap:40px}
+  .labels{grid-template-columns:1fr;max-width:440px}
+  .lab{min-height:0}
+  .rest{grid-template-columns:1fr;gap:10px}
+  .box{max-width:70%}
+  .front{max-width:78%}
+}
+@media (max-width:640px){
+  .pg{font-size:17px}
+  .wrap{padding:0 20px}
+  .top{padding-top:12px;padding-bottom:12px}
+  .top .btn{display:none}
+  .brand{font-size:25px}
+  .label{padding:40px 30px 36px}
+  .label::before{inset:9px}.label::after{inset:13px}
+  .lead{font-size:18px}
+  .acts .btn{width:100%}
+  .acts .lnk{padding:12px 0}
+  .door .dot{width:124px;height:124px;left:-60px;bottom:36px;border-width:6px}
+  .shelf{padding:72px 0}
+  .labels{margin-top:36px;gap:16px}
+  .lab .p{padding-top:20px}
+  .rest{margin-top:48px}
+  .gift{padding:72px 0}
+  .gift .txt{font-size:18px}
+  .shop{padding:72px 0}
+  .front .dot{width:130px;height:130px;right:-40px;border-width:6px}
+  .hours div{font-size:18px}
+  .visit{padding:64px 0 72px}
+  .visit .btn{width:100%}
+  .foot nav{margin-left:0}
+  .bar{display:grid;grid-template-columns:1fr 1fr;gap:8px;position:sticky;bottom:0;z-index:5;padding:8px 12px;background:var(--olive2)}
+  .bar a{display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:6px;font-weight:800;font-size:16px;text-decoration:none;color:#fff;border:2px solid #6a7a45}
+  .bar a:first-child{background:var(--terra);border-color:var(--terra)}
+}
+</style>
+</head>
+<body>
+<div class="pg">
+
+<header class="hero">
+<div class="wrap top">
+<a class="brand" href="#">Oljka in sol</a>
+<nav class="nav" aria-label="Glavni meni"><a href="#police">Na policah</a><a href="#darila">Darilni paketi</a><a href="#trgovina">Odprto</a></nav>
+<a class="menu" href="#trgovina">Meni</a>
+<a class="btn sm" href="tel:+38655551860">05 555 18 60</a>
+</div>
+<div class="wrap hero-grid">
+<div class="label">
+<svg class="branch" viewBox="0 0 132 58" fill="none" aria-hidden="true"><path d="M4 44C36 40 82 30 128 8" stroke="#414f1f" stroke-width="3" stroke-linecap="round"></path><ellipse cx="30" cy="30" rx="15" ry="5.5" transform="rotate(-38 30 30)" fill="#414f1f"></ellipse><ellipse cx="40" cy="50" rx="15" ry="5.5" transform="rotate(22 40 50)" fill="#414f1f"></ellipse><ellipse cx="62" cy="22" rx="15" ry="5.5" transform="rotate(-42 62 22)" fill="#414f1f"></ellipse><ellipse cx="74" cy="42" rx="15" ry="5.5" transform="rotate(18 74 42)" fill="#414f1f"></ellipse><ellipse cx="96" cy="10" rx="14" ry="5" transform="rotate(-44 96 10)" fill="#414f1f"></ellipse><ellipse cx="106" cy="30" rx="14" ry="5" transform="rotate(14 106 30)" fill="#414f1f"></ellipse><circle cx="52" cy="40" r="7" fill="#b9492f"></circle><circle cx="88" cy="28" r="6" fill="#b9492f"></circle></svg>
+<p class="where">Kidričeva ulica 22, Koper</p>
+<h1>Istrske dobrote manjših pridelovalcev</h1>
+<p class="lead">Majhna trgovina v starem mestnem jedru Kopra. Prodajamo samo izdelke manjših pridelovalcev iz slovenske Istre in Krasa.</p>
+<div class="acts"><a class="btn" href="#darila">Darilni paketi</a><a class="lnk" href="#police">Kaj prodajamo</a></div>
+</div>
+<figure class="door"><img src="../../../tools/eval/fixtures/trgovina-oljka-in-sol/photos/01.jpg" alt="Police s steklenicami oljčnega olja v trgovini"><span class="dot"><img src="../../../tools/eval/fixtures/trgovina-oljka-in-sol/photos/02.jpg" alt="Vrečke piranske soli v leseni košari"></span></figure>
+</div>
+</header>
+
+<section class="shelf" id="police">
+<div class="wrap">
+<div class="shelf-head">
+<h2>Na policah</h2>
+<p>Vse je od manjših pridelovalcev iz slovenske Istre in Krasa. Spletne trgovine za zdaj nimamo, pridite pogledat.</p>
+</div>
+<div class="labels">
+<div class="lab"><svg class="branch" viewBox="0 0 132 58" fill="none" aria-hidden="true"><path d="M4 44C36 40 82 30 128 8" stroke="#414f1f" stroke-width="3" stroke-linecap="round"></path><ellipse cx="30" cy="30" rx="15" ry="5.5" transform="rotate(-38 30 30)" fill="#414f1f"></ellipse><ellipse cx="40" cy="50" rx="15" ry="5.5" transform="rotate(22 40 50)" fill="#414f1f"></ellipse><ellipse cx="62" cy="22" rx="15" ry="5.5" transform="rotate(-42 62 22)" fill="#414f1f"></ellipse><ellipse cx="74" cy="42" rx="15" ry="5.5" transform="rotate(18 74 42)" fill="#414f1f"></ellipse><ellipse cx="96" cy="10" rx="14" ry="5" transform="rotate(-44 96 10)" fill="#414f1f"></ellipse><ellipse cx="106" cy="30" rx="14" ry="5" transform="rotate(14 106 30)" fill="#414f1f"></ellipse><circle cx="52" cy="40" r="7" fill="#b9492f"></circle><circle cx="88" cy="28" r="6" fill="#b9492f"></circle></svg><h3>Ekstra deviško oljčno olje</h3><p class="q">0,5 l</p><p class="p">14 €</p></div>
+<div class="lab"><svg class="branch" viewBox="0 0 132 58" fill="none" aria-hidden="true"><path d="M4 44C36 40 82 30 128 8" stroke="#414f1f" stroke-width="3" stroke-linecap="round"></path><ellipse cx="30" cy="30" rx="15" ry="5.5" transform="rotate(-38 30 30)" fill="#414f1f"></ellipse><ellipse cx="40" cy="50" rx="15" ry="5.5" transform="rotate(22 40 50)" fill="#414f1f"></ellipse><ellipse cx="62" cy="22" rx="15" ry="5.5" transform="rotate(-42 62 22)" fill="#414f1f"></ellipse><ellipse cx="74" cy="42" rx="15" ry="5.5" transform="rotate(18 74 42)" fill="#414f1f"></ellipse><ellipse cx="96" cy="10" rx="14" ry="5" transform="rotate(-44 96 10)" fill="#414f1f"></ellipse><ellipse cx="106" cy="30" rx="14" ry="5" transform="rotate(14 106 30)" fill="#414f1f"></ellipse><circle cx="52" cy="40" r="7" fill="#b9492f"></circle><circle cx="88" cy="28" r="6" fill="#b9492f"></circle></svg><h3>Piranska sol</h3><p class="q">1 kg</p><p class="p">4,50 €</p></div>
+<div class="lab"><svg class="branch" viewBox="0 0 132 58" fill="none" aria-hidden="true"><path d="M4 44C36 40 82 30 128 8" stroke="#414f1f" stroke-width="3" stroke-linecap="round"></path><ellipse cx="30" cy="30" rx="15" ry="5.5" transform="rotate(-38 30 30)" fill="#414f1f"></ellipse><ellipse cx="40" cy="50" rx="15" ry="5.5" transform="rotate(22 40 50)" fill="#414f1f"></ellipse><ellipse cx="62" cy="22" rx="15" ry="5.5" transform="rotate(-42 62 22)" fill="#414f1f"></ellipse><ellipse cx="74" cy="42" rx="15" ry="5.5" transform="rotate(18 74 42)" fill="#414f1f"></ellipse><ellipse cx="96" cy="10" rx="14" ry="5" transform="rotate(-44 96 10)" fill="#414f1f"></ellipse><ellipse cx="106" cy="30" rx="14" ry="5" transform="rotate(14 106 30)" fill="#414f1f"></ellipse><circle cx="52" cy="40" r="7" fill="#b9492f"></circle><circle cx="88" cy="28" r="6" fill="#b9492f"></circle></svg><h3>Darilni paket</h3><p class="q">sestavimo ga po vaši želji</p><p class="p">od 25 €</p></div>
+</div>
+<div class="rest"><p class="k">Imamo tudi</p><p class="v">Med, vino, pršut, sire, suhe fige, marmelade iz fig in domače testenine</p></div>
+</div>
+</section>
+
+<section class="gift" id="darila">
+<div class="wrap gift-grid">
+<figure class="box"><img src="../../../tools/eval/fixtures/trgovina-oljka-in-sol/photos/03.jpg" alt="Darilni paket z oljem, soljo in medom"></figure>
+<div>
+<h2>Darilni paketi po vaši želji</h2>
+<p class="txt">Sestavimo jih in lepo zavijemo. Za podjetja pripravimo poslovna darila v večjih količinah. Naročite po telefonu ali e-pošti, paket prevzamete v trgovini.</p>
+<p class="p">od 25 €</p>
+<div class="acts"><a class="btn btn-light" href="tel:+38655551860">Naročite paket</a><a class="lnk" href="mailto:narocila@oljka-in-sol.example">narocila@oljka-in-sol.example</a></div>
+</div>
+</div>
+</section>
+
+<section class="shop" id="trgovina">
+<div class="wrap shop-grid">
+<figure class="front"><img src="../../../tools/eval/fixtures/trgovina-oljka-in-sol/photos/04.jpg" alt="Vhod v trgovino v kamniti hiši v starem mestnem jedru"><span class="dot"><img src="../../../tools/eval/fixtures/trgovina-oljka-in-sol/photos/05.jpg" alt="Pult s pršutom in sirom"></span></figure>
+<div>
+<h2>Odprto</h2>
+<dl class="hours">
+<div><dt>Ponedeljek–petek</dt><dd>8.00–19.00</dd></div>
+<div><dt>Sobota</dt><dd>8.00–13.00</dd></div>
+<div><dt>Nedelja</dt><dd>zaprto</dd></div>
+</dl>
+<p class="summer">Julija in avgusta smo odprti tudi ob nedeljah, 9.00–12.00.</p>
+</div>
+</div>
+</section>
+
+<section class="visit">
+<div class="wrap visit-grid">
+<div>
+<h2>Naročila darilnih paketov</h2>
+<a class="tel" href="tel:+38655551860">05 555 18 60</a>
+</div>
+<div>
+<ul>
+<li>narocila@oljka-in-sol.example</li>
+<li>Kidričeva ulica 22, 6000 Koper</li>
+</ul>
+<div class="acts"><a class="btn" href="tel:+38655551860">Pokličite</a><a class="lnk" href="#">Navodila za pot</a></div>
+</div>
+</div>
+</section>
+
+<footer class="foot">
+<div class="wrap foot-grid">
+<strong>Oljka in sol</strong>
+<span>Oljka in sol, trgovina, d.o.o., Kidričeva ulica 22, 6000 Koper</span>
+<span>Matična številka 9123456000 · ID za DDV SI91234567</span>
+<nav aria-label="Pravno"><a href="#">Zasebnost</a><a href="#">Izjava o dostopnosti</a></nav>
+</div>
+</footer>
+
+<div class="bar"><a href="tel:+38655551860">Pokliči</a><a href="#">Navodila za pot</a></div>
+
+</div>
+</body>
+</html>

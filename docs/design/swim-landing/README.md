@@ -1,6 +1,6 @@
 # Landing page directions: Šola plavanja Mladi Val
 
-Nine design sketches for the same homepage, made because the generated site for this swimming school looked like a default template (owner, 2026-10-01). They are design targets, not engine output: plain HTML and CSS written by hand. Implementing them in the engine is a separate task.
+Nine design sketches for the same homepage, made because the generated site for this swimming school looked like a default template (owner, 2026-10-01). They are design targets, not engine output: plain HTML and CSS written by hand. Implementing them in the engine is a separate task. Templates for the other trades (bakery, inn, hairdresser, car repair, tourist farm, dentist, physio, accountant, installer, deli) and the rules all of them share are in `../templates/`.
 
 - Canvas with all eighteen artboards (desktop 1440 px and phone 390 px per direction): https://claude.ai/artifact/GBMesX76huidKKUswuk1i5 (private to the owner)
 - Same pages in this folder, responsive, no JavaScript: `a-globina.html`, `b-proge.html`, `c-val.html`, `d-mirno.html` (round one), `e-gladina.html`, `f-lido.html`, `g-crke.html`, `h-deska.html`, `i-popoldan.html` (round two)

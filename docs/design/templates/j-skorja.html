@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="sl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>J · Skorja (pekarna) · design template</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@600;800;900&amp;family=Karla:wght@400;500;700;800&amp;display=swap">
+<style>
+/* J · Skorja: food and craft. Dark roast hero, the product in an oven-arch photo that runs off the bottom edge, a fat slab serif, prices on a ruled board, one wheat-yellow accent. Motif: the three scoring cuts from the bakery's own logo. */
+*{box-sizing:border-box}
+body{margin:0}
+.pg{--roast:#24130a;--roast2:#35200f;--crust:#8a4a1c;--wheat:#f4b942;--flour:#f1e2d2;--soft:#5c4636;--line:#e2d3c5;
+  font-family:Karla,system-ui,sans-serif;font-size:19px;line-height:1.5;color:var(--roast);background:#fff;-webkit-font-smoothing:antialiased;overflow-x:clip}
+.pg :where(h1,h2,h3){font-family:Bitter,Georgia,serif;font-weight:900;margin:0;letter-spacing:-.02em}
+.pg :where(p){margin:0}
+.pg :where(a){color:inherit}
+.wrap{max-width:1280px;margin:0 auto;padding:0 40px;position:relative}
+.ph{background:#fff3a6;color:#3b2f00;border:1px dashed #8a6d00;border-radius:3px;padding:0 .3em;font-weight:500;white-space:nowrap;font-family:Karla,sans-serif;font-size:.85em}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:60px;padding:0 30px;border-radius:8px;font-weight:800;font-size:19px;text-decoration:none;background:var(--wheat);color:var(--roast)}
+.btn.sm{min-height:44px;padding:0 20px;font-size:17px}
+.btn-dark{background:var(--roast);color:#fff}
+.lnk{font-weight:800;text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:2px}
+.score{display:block;width:74px;height:40px;margin-bottom:22px}
+
+/* hero */
+.hero{background:var(--roast);color:#fff}
+.top{display:flex;align-items:center;gap:36px;padding-top:24px;padding-bottom:24px}
+.brand{display:flex;align-items:center;gap:14px;text-decoration:none;margin-right:auto;font-family:Bitter,serif;font-weight:900;font-size:30px}
+.brand svg{width:54px;height:38px}
+.nav{display:flex;gap:30px;font-weight:700;font-size:17px}
+.nav a{text-decoration:none;padding:12px 0}
+.menu{display:none;font-weight:800;text-decoration:underline;text-underline-offset:5px;padding:12px 0}
+.hero-grid{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,5fr);gap:56px;align-items:end;padding-top:40px}
+.hero-txt{padding-bottom:96px}
+.where{font-weight:700;font-size:18px;color:var(--wheat)}
+.hero h1{font-size:clamp(44px,7.2vw,106px);line-height:.96;letter-spacing:-.03em;margin-top:18px}
+.lead{font-size:22px;line-height:1.45;max-width:25em;margin-top:28px;color:var(--flour)}
+.acts{display:flex;align-items:center;gap:30px;margin-top:36px}
+.oven{position:relative;margin:0}
+.oven img{display:block;width:100%;aspect-ratio:5/6;object-fit:cover;border-radius:999px 999px 0 0}
+.seal{position:absolute;left:-58px;bottom:72px;width:196px;height:196px;border-radius:50%;background:var(--wheat);color:var(--roast);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-weight:800;font-size:16px;line-height:1.15;transform:rotate(-9deg)}
+.seal b{font-family:Bitter,serif;font-weight:900;font-size:64px;line-height:1;letter-spacing:-.03em}
+
+/* price board */
+.shelf{padding:120px 0 112px}
+.shelf-grid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,4fr);gap:88px;align-items:center}
+.shelf h2{font-size:clamp(38px,5vw,72px);line-height:.98}
+.board{margin:40px 0 0;border-top:3px solid var(--roast)}
+.board div{display:flex;align-items:baseline;gap:14px;padding:20px 0;border-bottom:1px solid var(--line)}
+.board dt{font-family:Bitter,serif;font-weight:800;font-size:clamp(22px,2.2vw,30px);line-height:1.15}
+.board i{flex:1;border-bottom:2px dotted #b9a594;transform:translateY(-6px)}
+.board dd{margin:0;font-family:Bitter,serif;font-weight:900;font-size:clamp(22px,2.2vw,30px);white-space:nowrap}
+.tray{margin:0}
+.tray img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:12px}
+
+/* friday and saturday */
+.special{background:var(--wheat)}
+.special-grid{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,6fr) auto;gap:48px;align-items:center;padding-top:56px;padding-bottom:60px}
+.special .when{font-family:Bitter,serif;font-weight:900;font-size:clamp(26px,2.6vw,36px);line-height:1.05}
+.special h2{font-size:clamp(30px,3.6vw,52px);line-height:1}
+.special p.d{margin-top:12px;font-size:19px;max-width:30em}
+
+/* how we bake */
+.craft{background:var(--roast);color:#fff;padding:120px 0}
+.craft-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:88px;align-items:center}
+.hands{margin:0}
+.hands img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:12px}
+.craft h2{font-size:clamp(36px,4.6vw,64px);line-height:1}
+.facts{margin-top:44px;display:grid;gap:0}
+.fact{padding:24px 0;border-top:1px solid #5a3d28}
+.fact h3{font-size:30px;line-height:1.1;color:var(--wheat)}
+.fact p{margin-top:8px;color:var(--flour);max-width:26em}
+
+/* the two of them */
+.people{padding:120px 0 112px}
+.people blockquote{margin:0;font-family:Bitter,serif;font-weight:800;font-size:clamp(28px,4vw,56px);line-height:1.12;letter-spacing:-.02em;max-width:19em}
+.people p.by{margin-top:24px;color:var(--soft);font-weight:500}
+
+/* hours and contact */
+.visit{border-top:3px solid var(--roast);padding:88px 0 112px}
+.visit-grid{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,5fr);gap:88px;align-items:start}
+.visit h2{font-size:clamp(34px,4vw,56px);line-height:1}
+.hours{margin:32px 0 0}
+.hours div{display:flex;justify-content:space-between;gap:24px;padding:16px 0;border-bottom:1px solid var(--line);font-size:22px}
+.hours dt{font-weight:500}
+.hours dd{margin:0;font-family:Bitter,serif;font-weight:800}
+.tel{display:inline-block;font-family:Bitter,serif;font-weight:900;font-size:clamp(40px,4.6vw,64px);line-height:1;letter-spacing:-.02em;text-decoration:none;margin-top:22px;padding:6px 0}
+.visit ul{list-style:none;margin:24px 0 32px;padding:0;display:grid;gap:8px}
+.visit .acts{margin-top:0}
+
+/* footer */
+.foot{background:var(--roast);color:var(--flour);padding:44px 0 56px;font-size:16px}
+.foot-grid{display:flex;flex-wrap:wrap;gap:20px 56px;align-items:baseline}
+.foot strong{font-family:Bitter,serif;font-weight:900;font-size:24px;color:#fff}
+.foot nav{display:flex;gap:24px;margin-left:auto}
+.bar{display:none}
+
+@media (max-width:900px){
+  .nav{display:none}.menu{display:block}
+  .hero-grid{grid-template-columns:1fr;gap:0;padding-top:16px}
+  .hero-txt{padding-bottom:48px}
+  .oven{width:78%;margin-left:auto}
+  .seal{left:-64px;bottom:40px;width:150px;height:150px;font-size:13px}
+  .seal b{font-size:46px}
+  .shelf-grid,.craft-grid,.visit-grid{grid-template-columns:1fr;gap:48px}
+  .special-grid{grid-template-columns:1fr;gap:20px}
+}
+@media (max-width:640px){
+  .pg{font-size:17px}
+  .wrap{padding:0 20px}
+  .top{padding-top:14px;padding-bottom:14px;gap:16px}
+  .top .btn{display:none}
+  .brand{font-size:25px}
+  .brand svg{width:44px;height:31px}
+  .lead{font-size:18px;margin-top:20px}
+  .acts{flex-direction:column;align-items:stretch;gap:8px;margin-top:26px}
+  .acts .lnk{align-self:flex-start;padding:12px 0}
+  .seal{left:-68px;width:128px;height:128px;font-size:11px}
+  .seal b{font-size:40px}
+  .shelf{padding:72px 0}
+  .board{margin-top:28px}
+  .board div{padding:16px 0;gap:10px}
+  .special-grid{padding-top:40px;padding-bottom:44px}
+  .special .btn{width:100%}
+  .craft{padding:72px 0}
+  .fact h3{font-size:26px}
+  .people{padding:72px 0}
+  .visit{padding:56px 0 72px}
+  .hours div{font-size:19px;padding:14px 0}
+  .foot nav{margin-left:0}
+  .bar{display:grid;grid-template-columns:1fr 1fr;gap:8px;position:sticky;bottom:0;z-index:5;padding:8px 12px;background:var(--roast)}
+  .bar a{display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:8px;font-weight:800;font-size:16px;text-decoration:none;color:#fff;border:2px solid #6b4a33}
+  .bar a:first-child{background:var(--wheat);border-color:var(--wheat);color:var(--roast)}
+}
+</style>
+</head>
+<body>
+<div class="pg">
+
+<header class="hero">
+<div class="wrap top">
+<a class="brand" href="#"><svg viewBox="0 0 54 38" aria-hidden="true"><ellipse cx="27" cy="20" rx="26" ry="17" fill="#f4b942"></ellipse><path d="M12 13l7 10M24 9l7 11M36 9l6 10" stroke="#24130a" stroke-width="4" stroke-linecap="round" fill="none"></path></svg>Kvas</a>
+<nav class="nav" aria-label="Glavni meni"><a href="#ponudba">Ponudba</a><a href="#peka">Kako pečemo</a><a href="#obisk">Odprto</a></nav>
+<a class="menu" href="#obisk">Meni</a>
+<a class="btn sm" href="tel:+38641555906">041 555 906</a>
+</div>
+<div class="wrap hero-grid">
+<div class="hero-txt">
+<p class="where">Pekarna Kvas, Šutna 30, Kamnik</p>
+<h1>Kruh z drožmi, ki vzhaja čez noč</h1>
+<p class="lead">Mala družinska pekarna na začetku stare ulice. Vse je ročno delo, brez aditivov in brez zamrznjenega testa.</p>
+<div class="acts"><a class="btn" href="#ponudba">Poglejte ponudbo</a><a class="lnk" href="tel:+38641555906">Naročite po telefonu</a></div>
+</div>
+<figure class="oven"><img src="../../../tools/eval/fixtures/pekarna-kvas/photos/01.jpg" alt="Hlebci kruha z drožmi na leseni polici"><p class="seal">pon–sob odprto od<b>6.30</b></p></figure>
+</div>
+</header>
+
+<section class="shelf" id="ponudba">
+<div class="wrap shelf-grid">
+<div>
+<svg class="score" viewBox="0 0 74 40" fill="none" stroke="#8a4a1c" stroke-width="7" stroke-linecap="round" aria-hidden="true"><path d="M6 6l14 28M30 6l14 28M54 6l14 28"></path></svg>
+<h2>Vsak dan na polici</h2>
+<dl class="board">
+<div><dt>Pirin kruh z drožmi</dt><i></i><dd>4,20 €</dd></div>
+<div><dt>Rženi kruh</dt><i></i><dd>3,90 €</dd></div>
+<div><dt>Polnozrnate žemlje</dt><i></i><dd><mark class="ph">[cena]</mark></dd></div>
+<div><dt>Rogljiček z maslom</dt><i></i><dd>1,30 €</dd></div>
+<div><dt>Cimetovi polži</dt><i></i><dd><mark class="ph">[cena]</mark></dd></div>
+</dl>
+</div>
+<figure class="tray"><img src="../../../tools/eval/fixtures/pekarna-kvas/photos/03.jpg" alt="Rogljički in cimetovi polži na pladnju"></figure>
+</div>
+</section>
+
+<section class="special">
+<div class="wrap special-grid">
+<p class="when">Ob petkih in sobotah</p>
+<div><h2>Orehova potica in kvašeni krofi</h2><p class="d">Potica (1 kg) od 18 €. Naročite jo lahko tudi za praznike in praznovanja, najmanj dva dni prej.</p></div>
+<a class="btn btn-dark" href="tel:+38641555906">Naročite potico</a>
+</div>
+</section>
+
+<section class="craft" id="peka">
+<div class="wrap craft-grid">
+<figure class="hands"><img src="../../../tools/eval/fixtures/pekarna-kvas/photos/02.jpg" alt="Pek oblikuje testo na pomokani mizi"></figure>
+<div>
+<svg class="score" viewBox="0 0 74 40" fill="none" stroke="#f4b942" stroke-width="7" stroke-linecap="round" aria-hidden="true"><path d="M6 6l14 28M30 6l14 28M54 6l14 28"></path></svg>
+<h2>Kruh pečemo samo z drožmi</h2>
+<div class="facts">
+<div class="fact"><h3>Kvas gojimo sami</h3><p>Brez aditivov in brez zamrznjenega testa.</p></div>
+<div class="fact"><h3>Vzhaja čez noč</h3><p>Zato je kruh bolj okusen in dlje ostane svež.</p></div>
+<div class="fact"><h3>Moka iz mlina v bližini</h3><p>Vse je ročno delo.</p></div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="people">
+<div class="wrap">
+<blockquote>Pečem jaz, Jure Petek, v trgovini pa je večinoma moja žena Katja.</blockquote>
+<p class="by">Jure Petek, pek</p>
+</div>
+</section>
+
+<section class="visit" id="obisk">
+<div class="wrap visit-grid">
+<div>
+<h2>Odprto</h2>
+<dl class="hours">
+<div><dt>Ponedeljek–petek</dt><dd>6.30–18.00</dd></div>
+<div><dt>Sobota</dt><dd>6.30–12.00</dd></div>
+<div><dt>Nedelja</dt><dd>7.00–10.00</dd></div>
+</dl>
+</div>
+<div>
+<h2>Naročila</h2>
+<a class="tel" href="tel:+38641555906">041 555 906</a>
+<ul>
+<li>pekarna@pekarna-kvas.example</li>
+<li>Šutna 30, 1241 Kamnik</li>
+<li>Naročila sprejemamo najmanj dva dni prej.</li>
+</ul>
+<div class="acts"><a class="btn" href="tel:+38641555906">Pokličite</a><a class="lnk" href="#">Navodila za pot</a></div>
+</div>
+</div>
+</section>
+
+<footer class="foot">
+<div class="wrap foot-grid">
+<strong>Kvas</strong>
+<span>Pekarna Kvas, Šutna 30, 1241 Kamnik</span>
+<span><mark class="ph">[naziv podjetja]</mark> <mark class="ph">[matična št.]</mark> <mark class="ph">[davčna št.]</mark></span>
+<nav aria-label="Pravno"><a href="#">Zasebnost</a><a href="#">Izjava o dostopnosti</a></nav>
+</div>
+</footer>
+
+<div class="bar"><a href="tel:+38641555906">Pokliči</a><a href="#">Navodila za pot</a></div>
+
+</div>
+</body>
+</html>

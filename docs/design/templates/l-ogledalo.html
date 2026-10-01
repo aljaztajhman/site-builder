@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="sl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>L · Ogledalo (frizerstvo) · design template</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;700;800&amp;family=DM+Sans:wght@400;500;700&amp;display=swap">
+<style>
+/* L · Ogledalo: beauty and personal care. A fashion-magazine page in the salon's own wine red: the name as a wall-sized blush wordmark behind three photos in mirror arches of different heights, a price list set like a masthead. */
+*{box-sizing:border-box}
+body{margin:0}
+.pg{--wine:#7a2e3a;--dark:#2b1418;--blush:#f6e3e7;--rose:#e9c3cb;--soft:#5e4449;--line:#e6d3d7;
+  font-family:'DM Sans',system-ui,sans-serif;font-size:18px;line-height:1.55;color:var(--dark);background:#fff;-webkit-font-smoothing:antialiased;overflow-x:clip}
+.pg :where(h1,h2,h3){font-family:'Inter Tight','Arial Narrow',sans-serif;font-weight:800;margin:0;letter-spacing:-.035em}
+.pg :where(p){margin:0}
+.pg :where(a){color:inherit}
+.wrap{max-width:1320px;margin:0 auto;padding:0 40px;position:relative}
+.ph{background:#fff3a6;color:#3b2f00;border:1px dashed #8a6d00;border-radius:3px;padding:0 .3em;font-weight:500;white-space:nowrap;font-size:.8em;letter-spacing:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:58px;padding:0 28px;border-radius:6px;font-weight:700;font-size:18px;text-decoration:none;background:var(--wine);color:#fff}
+.btn.sm{min-height:44px;padding:0 20px;font-size:16px;border-radius:6px}
+.btn-light{background:#fff;color:var(--wine)}
+.lnk{font-weight:700;text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:2px}
+.arch{margin:0}
+.arch img{display:block;width:100%;height:100%;object-fit:cover;border-radius:999px 999px 8px 8px}
+
+/* header */
+.top{display:flex;align-items:center;gap:36px;padding-top:22px;padding-bottom:22px;position:relative;z-index:2}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;margin-right:auto;font-family:'Inter Tight',sans-serif;font-weight:800;font-size:24px;letter-spacing:.06em}
+.brand i{width:34px;height:34px;border-radius:50%;background:var(--wine)}
+.brand span{font-family:'DM Sans',sans-serif;font-weight:500;font-size:15px;letter-spacing:0;color:var(--soft)}
+.nav{display:flex;gap:30px;font-weight:500;font-size:16px}
+.nav a{text-decoration:none;padding:12px 0}
+.menu{display:none;font-weight:700;text-decoration:underline;text-underline-offset:5px;padding:12px 0}
+
+/* hero */
+.hero{position:relative;padding:8px 0 120px}
+.wall{position:absolute;right:-.04em;top:-.2em;font-family:'Inter Tight',sans-serif;font-weight:800;font-size:clamp(150px,34vw,500px);line-height:1;letter-spacing:-.06em;color:var(--blush);white-space:nowrap}
+.hero-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:56px;align-items:center}
+.where{font-weight:500;font-size:16px;color:var(--wine)}
+.hero h1{font-size:clamp(46px,7vw,104px);line-height:.92;letter-spacing:-.05em;margin-top:16px}
+.lead{font-size:20px;line-height:1.5;margin-top:26px;color:var(--soft);max-width:24em}
+.acts{display:flex;align-items:center;gap:28px;margin-top:34px}
+.mirrors{display:grid;grid-template-columns:5fr 6fr 5fr;gap:20px;align-items:end;padding-top:56px}
+.mirrors .arch:nth-child(1){aspect-ratio:5/8;transform:translateY(-36px)}
+.mirrors .arch:nth-child(2){aspect-ratio:6/11}
+.mirrors .arch:nth-child(3){aspect-ratio:5/8;transform:translateY(48px)}
+
+/* booking */
+.book{background:var(--wine);color:#fff;padding:72px 0}
+.book-grid{display:grid;grid-template-columns:minmax(0,8fr) auto;gap:56px;align-items:center}
+.book h2{font-size:clamp(30px,3.9vw,56px);line-height:1.02;letter-spacing:-.04em}
+
+/* price list */
+.prices{padding:128px 0}
+.prices-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:72px;align-items:start}
+.prices h2{font-size:clamp(72px,12vw,176px);line-height:.84;letter-spacing:-.06em;color:var(--wine)}
+.prices .note{margin-top:28px;color:var(--soft);max-width:19em;font-size:19px}
+.list{margin:12px 0 0;border-top:3px solid var(--dark)}
+.list div{display:flex;align-items:baseline;justify-content:space-between;gap:24px;padding:20px 0;border-bottom:1px solid var(--line)}
+.list dt{font-family:'Inter Tight',sans-serif;font-weight:700;font-size:clamp(21px,2.1vw,28px);letter-spacing:-.02em;line-height:1.15}
+.list dt small{display:block;font-family:'DM Sans',sans-serif;font-weight:400;font-size:15px;letter-spacing:0;color:var(--soft);margin-top:2px}
+.list dd{margin:0;font-family:'Inter Tight',sans-serif;font-weight:800;font-size:clamp(24px,2.6vw,36px);letter-spacing:-.03em;white-space:nowrap}
+
+/* the two of us */
+.team{background:var(--blush);padding:120px 0}
+.team-grid{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,5fr);gap:88px;align-items:center}
+.salon{position:relative;margin:0}
+.salon>img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:260px 260px 8px 8px}
+.salon .arch{position:absolute;right:-48px;bottom:-56px;width:34%;aspect-ratio:5/8;border:10px solid var(--blush);border-radius:999px 999px 16px 16px;overflow:hidden}
+.salon .arch img{border-radius:0}
+.team h2{font-size:clamp(38px,5vw,72px);line-height:.94}
+.who{margin-top:36px}
+.who div{padding:22px 0;border-top:1px solid var(--rose)}
+.who b{display:block;font-family:'Inter Tight',sans-serif;font-weight:800;font-size:34px;letter-spacing:-.03em;line-height:1.1}
+.who span{color:var(--soft)}
+
+/* visit */
+.visit{padding:128px 0 120px}
+.visit-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:88px;align-items:start}
+.visit h2{font-size:clamp(34px,4vw,56px);line-height:1}
+.hours{margin:28px 0 0;border-top:3px solid var(--dark)}
+.hours div{display:flex;justify-content:space-between;gap:24px;padding:16px 0;border-bottom:1px solid var(--line);font-size:20px}
+.hours dd{margin:0;font-family:'Inter Tight',sans-serif;font-weight:700}
+.tel{display:inline-block;font-family:'Inter Tight',sans-serif;font-weight:800;font-size:clamp(48px,6.6vw,96px);line-height:1;letter-spacing:-.05em;text-decoration:none;color:var(--wine);margin-top:16px}
+.visit ul{list-style:none;margin:20px 0 32px;padding:0;display:grid;gap:6px;color:var(--soft)}
+
+/* footer */
+.foot{background:var(--dark);color:#e7d6d9;padding:40px 0 56px;font-size:15px}
+.foot-grid{display:flex;flex-wrap:wrap;gap:16px 48px;align-items:baseline}
+.foot strong{font-family:'Inter Tight',sans-serif;font-weight:800;font-size:22px;letter-spacing:.06em;color:#fff}
+.foot nav{display:flex;gap:24px;margin-left:auto}
+.bar{display:none}
+
+@media (max-width:900px){
+  .nav{display:none}.menu{display:block}
+  .brand span{display:none}
+  .hero{padding-bottom:88px}
+  .hero-grid{grid-template-columns:1fr;gap:24px}
+  .wall{top:auto;bottom:.1em;right:-.02em}
+  .book-grid,.prices-grid,.team-grid,.visit-grid{grid-template-columns:1fr;gap:40px}
+  .team-grid{gap:96px}
+  .salon .arch{right:-12px}
+}
+@media (max-width:640px){
+  .pg{font-size:17px}
+  .wrap{padding:0 20px}
+  .top{padding-top:12px;padding-bottom:12px}
+  .top .btn{display:none}
+  .hero{padding-bottom:72px}
+  .lead{font-size:18px;margin-top:18px}
+  .acts{flex-direction:column;align-items:stretch;gap:8px;margin-top:24px}
+  .acts .lnk{align-self:flex-start;padding:12px 0}
+  .mirrors{gap:10px;padding-top:40px}
+  .mirrors .arch:nth-child(1){transform:translateY(-20px)}
+  .mirrors .arch:nth-child(3){transform:translateY(28px)}
+  .book{padding:56px 0}
+  .book .btn{width:100%}
+  .prices{padding:72px 0}
+  .prices .note{margin-top:16px}
+  .list div{padding:16px 0}
+  .team{padding:72px 0 104px}
+  .salon>img{border-radius:160px 160px 8px 8px}
+  .salon .arch{border-width:6px;bottom:-44px;right:0}
+  .who b{font-size:28px}
+  .visit{padding:72px 0 80px}
+  .hours div{font-size:18px}
+  .visit .btn{width:100%}
+  .foot nav{margin-left:0}
+  .bar{display:grid;grid-template-columns:1fr 1fr;gap:8px;position:sticky;bottom:0;z-index:5;padding:8px 12px;background:#fff;border-top:1px solid var(--line)}
+  .bar a{display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:6px;font-weight:700;font-size:16px;text-decoration:none;border:2px solid var(--dark)}
+  .bar a:first-child{background:var(--wine);border-color:var(--wine);color:#fff}
+}
+</style>
+</head>
+<body>
+<div class="pg">
+
+<div class="wrap top">
+<a class="brand" href="#"><i></i>LANA<span>frizerstvo</span></a>
+<nav class="nav" aria-label="Glavni meni"><a href="#cenik">Cenik</a><a href="#salon">Salon</a><a href="#obisk">Odprto</a></nav>
+<a class="menu" href="#obisk">Meni</a>
+<a class="btn sm" href="tel:+38641555213">041 555 213</a>
+</div>
+
+<header class="hero">
+<p class="wall" aria-hidden="true">Lana</p>
+<div class="wrap hero-grid">
+<div>
+<p class="where">Stanetova ulica 14, Celje</p>
+<h1>Barvamo brez amoniaka</h1>
+<p class="lead">Frizerstvo Lana že devet let striže ženske, moške in otroke. Barvanje, prameni, fen frizure in svečane pričeske za poroke in maturantske plese.</p>
+<div class="acts"><a class="btn" href="tel:+38641555213">Naročite se</a><a class="lnk" href="#cenik">Cenik</a></div>
+</div>
+<div class="mirrors">
+<figure class="arch"><img src="../../../tools/eval/fixtures/frizerstvo-lana/photos/04.jpg" alt="Svečana pričeska s kitami za poroko"></figure>
+<figure class="arch"><img src="../../../tools/eval/fixtures/frizerstvo-lana/photos/03.jpg" alt="Dolgi pramenasto barvani lasje od zadaj"></figure>
+<figure class="arch"><img src="../../../tools/eval/fixtures/frizerstvo-lana/photos/02.jpg" alt="Frizerka striže stranko s srednje dolgimi lasmi"></figure>
+</div>
+</div>
+</header>
+
+<section class="book">
+<div class="wrap book-grid">
+<h2>Brez naročila težko pridete na vrsto, zato raje pokličite.</h2>
+<a class="btn btn-light" href="tel:+38641555213">041 555 213</a>
+</div>
+</section>
+
+<section class="prices" id="cenik">
+<div class="wrap prices-grid">
+<div>
+<h2>Cenik</h2>
+<p class="note">Uporabljamo barve brez amoniaka, kar stranke z občutljivim lasiščem zelo cenijo.</p>
+</div>
+<dl class="list">
+<div><dt>Žensko striženje s fenom</dt><dd>28 €</dd></div>
+<div><dt>Moško striženje</dt><dd>15 €</dd></div>
+<div><dt>Otroško striženje<small>do 10 let</small></dt><dd>10 €</dd></div>
+<div><dt>Barvanje</dt><dd>od 45 €</dd></div>
+<div><dt>Svečana pričeska<small>za poroke in maturantske plese</small></dt><dd>od 40 €</dd></div>
+<div><dt>Prameni</dt><dd><mark class="ph">[cena]</mark></dd></div>
+<div><dt>Fen frizura</dt><dd><mark class="ph">[cena]</mark></dd></div>
+</dl>
+</div>
+</section>
+
+<section class="team" id="salon">
+<div class="wrap team-grid">
+<figure class="salon"><img src="../../../tools/eval/fixtures/frizerstvo-lana/photos/01.jpg" alt="Notranjost frizerskega salona z dvema stoloma in ogledaloma"><span class="arch"><img src="../../../tools/eval/fixtures/frizerstvo-lana/photos/05.jpg" alt="Polica s frizerskimi izdelki in škarjami"></span></figure>
+<div>
+<h2>V salonu delava dve</h2>
+<div class="who">
+<div><b>Lana Vidmar</b><span>lastnica, frizerka</span></div>
+<div><b>Petra Kos</b><span>frizerka, specialistka za barvanje in pramene</span></div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="visit" id="obisk">
+<div class="wrap visit-grid">
+<div>
+<h2>Odprto</h2>
+<dl class="hours">
+<div><dt>Torek–petek</dt><dd>8.00–19.00</dd></div>
+<div><dt>Sobota</dt><dd>7.00–13.00</dd></div>
+<div><dt>Nedelja in ponedeljek</dt><dd>zaprto</dd></div>
+</dl>
+</div>
+<div>
+<h2>Naročanje</h2>
+<a class="tel" href="tel:+38641555213">041 555 213</a>
+<ul>
+<li>lana@frizerstvo-lana.example</li>
+<li>Stanetova ulica 14, 3000 Celje</li>
+<li>V pritličju, parkirišče je za stavbo.</li>
+</ul>
+<div class="acts"><a class="btn" href="tel:+38641555213">Pokličite</a><a class="lnk" href="#">Navodila za pot</a></div>
+</div>
+</div>
+</section>
+
+<footer class="foot">
+<div class="wrap foot-grid">
+<strong>LANA</strong>
+<span>Frizerstvo Lana, Stanetova ulica 14, 3000 Celje</span>
+<span><mark class="ph">[naziv podjetja]</mark> <mark class="ph">[matična št.]</mark> <mark class="ph">[davčna št.]</mark></span>
+<nav aria-label="Pravno"><a href="#">Zasebnost</a><a href="#">Izjava o dostopnosti</a></nav>
+</div>
+</footer>
+
+<div class="bar"><a href="tel:+38641555213">Pokliči</a><a href="#">Navodila za pot</a></div>
+
+</div>
+</body>
+</html>
