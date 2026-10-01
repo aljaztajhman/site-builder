@@ -33,9 +33,15 @@ matične and davčne številke. Phone numbers use the `555` block; emails use th
 - `edits.json` — five chat edits `{ message, lang, intent, check }`, applied in sequence. An edit may
   introduce new facts (a new phone number, prices, hours); from that edit on they count as client input.
 - `logo.svg` — hand-drawn simple marks for three fixtures.
-- `photos/NN.jpg` — generated stand-ins, not committed. Run `pnpm fixtures:photos` (add `--force` to
-  regenerate, `--only <id>` for one fixture). Each is an SVG scene suggesting the subject with a caption
-  "<subject> (nadomestna fotografija)", deterministic per fixture id and index; `02`, `05`, `08` are portrait.
+- `photos/NN.jpg` — realistic photos made with GPT Image 2.5 (high) from `photo-prompts.json`, committed as
+  JPEG at ≤ 1600 px on the long edge (decision `sb-images-fixture-storage`); `02`, `05`, `08` are portrait.
+  `photo-manifest.json` records model, prompt and € per photo, plus rejected attempts and why. Each one was
+  looked at: no legible lettering, signs or house numbers (the alt-text model and fact checker could read
+  them as facts). To replace one, set `"reject": "<reason>"` on its manifest entry and run
+  `pnpm fixtures:ai-photos generate --model gpt-image-2.5 --only <id>`: it regenerates that photo and moves
+  the old attempt into `rejected` (`--force` regenerates the whole fixture). Every regeneration changes the
+  eval recordings' request hashes: re-record after it. `pnpm fixtures:photos` still makes the old SVG stand-ins,
+  only for photos that are missing (its `--force` would overwrite the committed ones).
 
 `src/fixtures/schema.ts` is the schema, `src/fixtures/load.ts` loads and validates (`loadFixtures()`,
 `loadFixture(id)`), `test/fixtures.test.ts` checks facts against descriptions.

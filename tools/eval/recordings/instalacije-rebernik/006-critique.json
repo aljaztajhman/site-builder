@@ -1,0 +1,18 @@
+{
+  "seq": 6,
+  "stage": "critique",
+  "model": "claude-sonnet-5-5",
+  "hash": "a9e3aedf55445330",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"issues\":[\"The homepage looks fine against the banned patterns and the mobile checklist.\",\"The hero, contact strip and services appear once each, and the contact facts show in one place near the top.\",\"There is no horizontal scroll and no numbered labels, emoji or filler phrases, and all copy matches the client's text.\",\"Hours were not given, so the contact strip correctly omits them.\"],\"patches\":[]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 10545,
+      "output_tokens": 131,
+      "cache_creation_input_tokens": 1067,
+      "cache_read_input_tokens": 15890
+    }
+  }
+}

@@ -2,15 +2,15 @@
   "seq": 2,
   "stage": "design",
   "model": "claude-sonnet-5-5",
-  "hash": "f805f31b0b7ab12a",
+  "hash": "9eddddefda7074ac",
   "origin": "recorded",
   "response": {
-    "text": "{\"direction\":\"warm-craft\",\"fontPair\":\"fraunces-source-sans\",\"primary\":\"#6e5038\",\"accent\":\"#95b0cc\",\"radius\":6,\"baseFontSize\":17,\"scale\":1.25,\"headingWeight\":600,\"headingCase\":\"normal\",\"headingTracking\":-0.01,\"density\":\"regular\",\"shadow\":\"none\",\"reason\":\"Family-run gostilna with warm tone and 8 photos suits Warm Craft. The brown from the photos (#6e5038) gives earthy buttons, and the soft blue (#95b0cc) adds a cool accent against the white page.\"}",
+    "text": "{\"direction\":\"warm-craft\",\"fontPair\":\"fraunces-source-sans\",\"primary\":\"#6e4b32\",\"accent\":\"#2a3314\",\"radius\":6,\"baseFontSize\":17,\"scale\":1.25,\"headingWeight\":600,\"headingCase\":\"normal\",\"headingTracking\":-0.01,\"density\":\"regular\",\"shadow\":\"none\",\"reason\":\"A family inn with warm tone and 8 client photos suits Warm Craft: Fraunces headings and photos on offset blocks. Primary is the warm brown from the photos, with deep olive from the linden terrace as accent.\"}",
     "stopReason": "end_turn",
     "model": "claude-sonnet-5-5",
     "usage": {
-      "input_tokens": 245,
-      "output_tokens": 200,
+      "input_tokens": 267,
+      "output_tokens": 195,
       "cache_creation_input_tokens": 4169,
       "cache_read_input_tokens": 0
     }

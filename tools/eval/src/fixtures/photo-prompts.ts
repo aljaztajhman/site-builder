@@ -38,6 +38,25 @@ export function fullPrompt(prompts: PhotoPrompts, key: string): string {
   return `${p} ${prompts.style}`;
 }
 
+/** One photo in photo-manifest.json. Set `reject` (the reason) by hand to have `generate` replace the photo. */
+export interface ManifestEntry {
+  model: string;
+  endpoint: string;
+  prompt: string;
+  width: number;
+  height: number;
+  eur: number;
+  createdAt: string;
+  reject?: string;
+  rejected?: { reason: string; prompt: string; eur: number; createdAt: string }[];
+}
+
+/** The entry for a newly generated photo: a photo marked `reject` moves into `rejected` with its reason and cost. */
+export function nextManifestEntry(prev: ManifestEntry | undefined, made: Omit<ManifestEntry, "reject" | "rejected">): ManifestEntry {
+  const rejected = [...(prev?.rejected ?? []), ...(prev?.reject ? [{ reason: prev.reject, prompt: prev.prompt, eur: prev.eur, createdAt: prev.createdAt }] : [])];
+  return { ...made, ...(rejected.length ? { rejected } : {}) };
+}
+
 // Request bodies, sizes and prices are shared with the pipeline's image generation.
 import { imageCostEur, outputSize, type ImageGenModelConfig } from "@sb/engine";
 export { imageCostEur, outputSize, requestBody, type ImageGenModelConfig } from "@sb/engine";

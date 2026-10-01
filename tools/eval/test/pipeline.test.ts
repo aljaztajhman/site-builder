@@ -111,8 +111,8 @@ describe("pipeline with replayed model responses (no network)", () => {
 
     const gen = await generateSite({ config, repo, storage, client, browser, lighthouse: false }, site.id, null);
     expect(gen.check?.validation).toEqual([]);
-    // Recorded with two content calls (section ids reused across pages); assembly now fixes the ids, so one is enough.
-    expectStages(calls, ["classify", "brief", "design", "altText", "content", "critique", "critique"]);
+    // Recorded 2026-10-01: the first content answer validated, and the critique found nothing to patch (one call).
+    expectStages(calls, ["classify", "brief", "design", "altText", "content", "critique"]);
 
     for (const edit of fixture.edits) {
       const msg = await repo.addChat(site.id, "user", edit.message);

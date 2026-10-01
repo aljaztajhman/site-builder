@@ -5,7 +5,7 @@
   "hash": "58e2f864021cb096",
   "origin": "recorded",
   "response": {
-    "text": "{\"businessType\": \"restaurant\", \"confidence\": 0.99}",
+    "text": "{\"businessType\": \"restaurant\", \"confidence\": 0.98}",
     "stopReason": "end_turn",
     "model": "claude-haiku-4-5-20251001",
     "usage": {
