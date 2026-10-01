@@ -21,7 +21,7 @@ import {
 } from "@sb/engine";
 import { VersionConflictError, contentType, type Platform } from "@sb/platform";
 import { renderPage, sharedBundle, pageFile } from "@sb/render";
-import { blockerText, collectPlaceholders, type SiteSpec } from "@sb/spec";
+import { blockerText, collectPlaceholders, sectionDef, type SiteSpec } from "@sb/spec";
 import { issueSession, clearSession, hasSession, passwordMatches, requireAuth, loginThrottle, type AuthSettings } from "./auth.ts";
 import { slugify } from "./slug.ts";
 import { DASHBOARD, loginPage, sitesPage, sitePage } from "./pages.tsx";
@@ -428,6 +428,17 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
     const page = current.spec.pages.find((p) => pageFile(p) === c.req.param("file"));
     if (!page) return c.notFound();
     c.header("cache-control", "no-store");
+    // ?section=…&variant=…: that section alone in another variant, for the editor's layout thumbnails.
+    // Same renderer and the same page URL depth, so media and shared assets resolve as in the preview.
+    const sectionId = c.req.query("section");
+    const variant = c.req.query("variant");
+    if (sectionId !== undefined || variant !== undefined) {
+      const section = page.sections.find((s) => s.id === sectionId);
+      if (!section || !variant || !(sectionDef(section.type).variants as readonly string[]).includes(variant)) return c.notFound();
+      const alone = { ...page, sections: [{ ...section, variant } as typeof section] };
+      const spec = { ...current.spec, pages: current.spec.pages.map((p) => (p.id === page.id ? alone : p)) };
+      return c.html(renderPage(spec, alone, { imageWidths: config.images.widths }));
+    }
     return c.html(renderPage(current.spec, page, { imageWidths: config.images.widths }));
   });
 
