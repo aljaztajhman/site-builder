@@ -77,8 +77,17 @@ export const AppConfigSchema = z.object({
     composition: z.object({ mobile: CompositionTarget, desktop: CompositionTarget }),
   }),
   images: z.object({ widths: z.array(z.number().int().positive()), avifQuality: z.number(), webpQuality: z.number() }),
-  /** Development only (fixture photos); client sites use client photos only (PRODUCT.md). */
+  /** fal.ai images: eval fixture photos, and generated mood images for client sites with too few photos (see config $comment). */
   imageGen: z.object({
+    pipeline: z.object({
+      enabled: z.boolean(),
+      /** A key of `models`. */
+      model: z.string(),
+      /** Generate images until the site has this many photos (client photos count first). */
+      fillUpTo: z.number().int().min(0).max(4),
+      /** Appended to every generated image's prompt. */
+      style: z.string().min(1),
+    }),
     landscape: z.object({ width: z.number().int().positive(), height: z.number().int().positive() }),
     models: z.record(z.string(), ImageGenModel),
   }),

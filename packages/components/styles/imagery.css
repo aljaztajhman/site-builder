@@ -11,6 +11,21 @@
   height: 100%;
   object-fit: cover;
 }
+/* AI-generated pictures are labelled on the page (EU AI Act Art. 50); the alt text says it too. */
+.media--ai::after {
+  content: attr(data-ai-label);
+  position: absolute;
+  z-index: 2;
+  /* Top right: hero overlay panels sit at the bottom or the left and would hide it. */
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 3px;
+  background: rgb(0 0 0 / 0.65);
+  color: #fff;
+  font: 600 0.75rem/1.3 var(--font-body);
+  pointer-events: none;
+}
 
 [data-imagery="natural"] .media {
   border-radius: 0;

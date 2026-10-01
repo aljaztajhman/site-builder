@@ -4,7 +4,10 @@ import path from "node:path";
 import { loadConfig, type AppConfig } from "@sb/config";
 import {
   AnthropicTransport,
+  FalImageTransport,
+  ImageGenerator,
   ModelClient,
+  StandInImageTransport,
   RecordingTransport,
   ReplayTransport,
   applyChatEdit,
@@ -198,8 +201,20 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
           });
         },
       });
+      // Generated images for fixtures with too few photos: fal when live (FAL_KEY), flat stand-ins when replaying.
+      const imageTransport = opts.mode === "replay" ? new StandInImageTransport() : process.env.FAL_KEY ? new FalImageTransport() : null;
+      const images = imageTransport
+        ? new ImageGenerator({
+            config,
+            transport: imageTransport,
+            spentToday: async () => (opts.spentSoFar() >= opts.maxEur ? Number.POSITIVE_INFINITY : 0),
+            onCall: async (r) => {
+              await repo.logModelCall({ siteId: site.id, jobId: null, stage: r.stage, model: r.model, inputTokens: 0, outputTokens: 0, cacheCreationTokens: 0, cacheReadTokens: 0, costEur: r.costEur, durationMs: r.durationMs, ok: r.ok });
+            },
+          })
+        : undefined;
       const t0 = Date.now();
-      const gen = await generateSite({ config, repo, storage, client, browser: opts.browser, lighthouse: opts.lighthouse }, site.id, null);
+      const gen = await generateSite({ config, repo, storage, client, browser: opts.browser, lighthouse: opts.lighthouse, ...(images ? { images } : {}) }, site.id, null);
       result.generationMs = Date.now() - t0;
       result.timings = gen.timings;
       result.firstVersionMs = gen.firstVersionMs;

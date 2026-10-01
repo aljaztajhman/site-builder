@@ -4,6 +4,7 @@ import type Anthropic from "@anthropic-ai/sdk";
 import {
   DIRECTIONS,
   Design,
+  GENERATED_IMAGE_SECTIONS,
   direction as directionById,
   enforceDesign,
   contrast,
@@ -212,10 +213,13 @@ function plainJsonInstruction(): string {
 The homepage has kind "home" and slug "". Use only section types, variants and props from the catalogue; respect every length limit.`;
 }
 
+/** How a generated picture may be used; validation enforces the slots. */
+const GENERATED_NOTE = `, AI-generated mood picture: use it only in ${GENERATED_IMAGE_SECTIONS.join(", ")}, never presented as the business's own place, people, products or work`;
+
 function imageList(assets: SiteSpec["assets"], heroIds: string[]): string {
   if (!assets.images.length) return "No photos. Use typography-led sections only (hero-type, page-header plain); never reference an image id.";
   return assets.images
-    .map((i: ImageAsset) => `${i.id} (${i.width}×${i.height}${heroIds.includes(i.id) ? ", hero-suitable" : ""}): ${i.alt}`)
+    .map((i: ImageAsset) => `${i.id} (${i.width}×${i.height}${heroIds.includes(i.id) ? ", hero-suitable" : ""}${i.origin === "generated" ? GENERATED_NOTE : ""}): ${i.alt}`)
     .join("\n");
 }
 

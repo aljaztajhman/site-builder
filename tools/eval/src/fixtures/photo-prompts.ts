@@ -38,40 +38,9 @@ export function fullPrompt(prompts: PhotoPrompts, key: string): string {
   return `${p} ${prompts.style}`;
 }
 
-export type ImageGenModelConfig = AppConfig["imageGen"]["models"][string];
-
-/** Output size for a photo: the configured landscape size, or the same rotated for portrait. */
-export function outputSize(config: AppConfig, portrait: boolean): { width: number; height: number } {
-  const { width, height } = config.imageGen.landscape;
-  return portrait ? { width: height, height: width } : { width, height };
-}
-
-/** Request body for fal's model endpoint. */
-export function requestBody(
-  config: AppConfig,
-  model: ImageGenModelConfig,
-  prompt: string,
-  portrait: boolean,
-): Record<string, unknown> {
-  const size = outputSize(config, portrait);
-  const shape =
-    model.sizeParam === "aspect_ratio"
-      ? { aspect_ratio: ratio(size.width, size.height) }
-      : { image_size: size };
-  return { ...model.params, ...shape, prompt, num_images: 1 };
-}
-
-function ratio(w: number, h: number): string {
-  const gcd = (a: number, b: number): number => (b ? gcd(b, a % b) : a);
-  const g = gcd(w, h);
-  return `${w / g}:${h / g}`;
-}
-
-/** € cost of one image from config prices; per-megapixel models use the delivered size. */
-export function imageCostEur(config: AppConfig, model: ImageGenModelConfig, width: number, height: number): number {
-  const usd = model.usdPerImage ?? (model.usdPerMegapixel ?? 0) * ((width * height) / 1_000_000);
-  return usd * config.eurPerUsd;
-}
+// Request bodies, sizes and prices are shared with the pipeline's image generation.
+import { imageCostEur, outputSize, type ImageGenModelConfig } from "@sb/engine";
+export { imageCostEur, outputSize, requestBody, type ImageGenModelConfig } from "@sb/engine";
 
 /** € estimate before a run, at the requested size. */
 export function estimateEur(config: AppConfig, model: ImageGenModelConfig, portrait: boolean): number {

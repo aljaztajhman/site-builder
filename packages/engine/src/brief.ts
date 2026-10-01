@@ -67,6 +67,19 @@ export const Brief = z.strictObject({
     .min(1)
     .max(6),
   missing: z.array(z.string().max(80)).max(12).describe("Facts the client should still provide, in Slovene"),
+  /**
+   * Subjects for generated mood photos when the client gave too few (see BRIEF_SYSTEM). Never people,
+   * premises or the client's own work. Optional so briefs recorded before it still parse.
+   */
+  imageIdeas: z
+    .array(
+      z.strictObject({
+        subject: z.string().max(300).describe("One concrete scene, in English, for an image model"),
+        alt: z.string().max(150).describe("The same picture described in Slovene, as alt text"),
+      }),
+    )
+    .max(3)
+    .default([]),
 });
 export type Brief = z.infer<typeof Brief>;
 

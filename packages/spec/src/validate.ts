@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { SiteSpec } from "./site.ts";
+import { GENERATED_IMAGE_SECTIONS, SiteSpec } from "./site.ts";
 import { SECTION_DEFS } from "./sections/index.ts";
 import { DIRECTIONS } from "./directions.ts";
 import { checkDesign } from "./design-rules.ts";
@@ -91,6 +91,19 @@ export function semanticIssues(spec: SiteSpec): Issue[] {
   walkStrings(spec.pages, (s, p) => {
     if (/^img_/.test(s) && !imageIds.has(s)) add(`/pages${p}`, "reference", `unknown image ${s}`);
   });
+  // AI-generated images are atmosphere, never the business itself: only in a few section types.
+  const generated = new Set(spec.assets.images.filter((i) => i.origin === "generated").map((i) => i.id));
+  const allowed = new Set<string>(GENERATED_IMAGE_SECTIONS);
+  if (generated.size) {
+    spec.pages.forEach((page, pi) =>
+      page.sections.forEach((s, si) => {
+        if (allowed.has(s.type)) return;
+        walkStrings(s.props, (v, p) => {
+          if (generated.has(v)) add(`/pages/${pi}/sections/${si}/props${p}`, "reference", `${v} is AI-generated and may only be used in ${GENERATED_IMAGE_SECTIONS.join(", ")}`);
+        });
+      }),
+    );
+  }
   walkObjects(spec.pages, (o, p) => {
     if (typeof o.page === "string" && /^p_/.test(o.page) && !pageIds.has(o.page)) add(`/pages${p}/page`, "reference", `unknown page ${o.page}`);
     if (o.action === "booking" && !spec.business.bookingUrl) add(`/pages${p}/action`, "reference", "booking link without business.bookingUrl");
