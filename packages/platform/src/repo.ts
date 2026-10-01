@@ -72,6 +72,29 @@ export interface ModelCallRow {
   ok: boolean;
 }
 
+/** One row of a site's version list. */
+export interface VersionListRow {
+  version: number;
+  source: string;
+  message: string | null;
+  created_at: string;
+  /** Published at some point (every publish is kept by retention). */
+  published: boolean;
+}
+
+/** Which versions retention keeps (config `versions.retention`). */
+export interface RetentionPolicy {
+  keepAllDays: number;
+  timeZone: string;
+}
+
+/** A version retention removed: what it referenced (its spec's `assets`, raw as stored) and its stored size. */
+export interface PrunedVersion {
+  version: number;
+  assets: unknown;
+  bytes: number;
+}
+
 /** A save was based on a version that is no longer current (someone else saved in between). */
 export class VersionConflictError extends Error {
   constructor(
@@ -204,10 +227,14 @@ export class Repo {
     return { version: Number(r.version), spec };
   }
 
-  /** Operations of every manual (direct editor) change, oldest first. */
+  /** Operations of every manual (direct editor) change, oldest first, including those of pruned versions. */
   async manualPatches(siteId: string): Promise<unknown[]> {
     const { rows } = await this.db.query<{ patch: unknown }>(
-      "select patch from spec_versions where site_id = $1 and source = 'manual' and patch is not null order by version",
+      `select patch from (
+         select version, patch from spec_versions where site_id = $1 and source = 'manual' and patch is not null
+         union all
+         select version, patch from pruned_patches where site_id = $1
+       ) p order by version`,
       [siteId],
     );
     return rows.map((r) => (typeof r.patch === "string" ? JSON.parse(r.patch) : r.patch));
@@ -226,12 +253,95 @@ export class Repo {
     return r ? { status: r.status, version: r.version === null ? null : Number(r.version), chat: Number(r.chat), lastEvent: Number(r.last_event) } : null;
   }
 
-  async listVersions(siteId: string): Promise<{ version: number; source: string; message: string | null; created_at: string }[]> {
-    const { rows } = await this.db.query<{ version: number; source: string; message: string | null; created_at: string }>(
-      "select version, source, message, created_at from spec_versions where site_id = $1 order by version desc",
+  /** The kept versions, newest first. `published`: this version was published at some point (or is live). */
+  async listVersions(siteId: string): Promise<VersionListRow[]> {
+    const { rows } = await this.db.query<VersionListRow>(
+      `select v.version, v.source, v.message, v.created_at,
+              (v.version = s.published_version or exists (select 1 from site_publishes p where p.site_id = v.site_id and p.version = v.version)) as published
+         from spec_versions v join sites s on s.id = v.site_id
+        where v.site_id = $1 order by v.version desc`,
       [siteId],
     );
-    return rows;
+    return rows.map((r) => ({ ...r, version: Number(r.version), published: r.published === true }));
+  }
+
+  /** The highest kept version at or below `version` (retention may have pruned that one), or null. */
+  async nearestVersion(siteId: string, version: number): Promise<number | null> {
+    const { rows } = await this.db.query<{ v: number | null }>("select max(version) as v from spec_versions where site_id = $1 and version <= $2", [siteId, version]);
+    return rows[0]?.v === null || rows[0]?.v === undefined ? null : Number(rows[0].v);
+  }
+
+  /** Sites that have a version older than `before`, so retention may have something to remove there. */
+  async sitesWithVersionsBefore(before: Date): Promise<string[]> {
+    const { rows } = await this.db.query<{ id: string }>(
+      "select s.id from sites s where exists (select 1 from spec_versions v where v.site_id = s.id and v.created_at < $1) order by s.id",
+      [before.toISOString()],
+    );
+    return rows.map((r) => r.id);
+  }
+
+  /**
+   * Retention (config `versions.retention`): removes the versions of one site that are older than today
+   * and the `keepAllDays` whole days before it, except the last version of each day, every version that
+   * was ever published, and the current one. Days are local days in `timeZone`. Versions themselves never
+   * change; the direct-editor operations of removed manual versions move to pruned_patches, so the text
+   * the owner typed stays part of the fact corpus.
+   *
+   * One statement: it locks the site row (a save waits until it is done) and archives and deletes
+   * together. Running it again removes nothing more. Returns what each removed version referenced
+   * (`assets`, raw as stored) and its stored size, so the caller can remove files nothing else uses.
+   */
+  async pruneVersions(siteId: string, policy: RetentionPolicy, now = new Date()): Promise<PrunedVersion[]> {
+    const { rows } = await this.db.query<{ version: number; assets: unknown; bytes: number | string }>(
+      `with site as (
+         select id, current_version, published_version from sites where id = $1 for update
+       ),
+       v as (
+         select version, (created_at at time zone $2::text)::date as day from spec_versions where site_id = $1
+       ),
+       last_of_day as (
+         select max(version) as version from v group by day
+       ),
+       doomed as (
+         select v.version from v, site
+          where v.day < ($3::timestamptz at time zone $2::text)::date - $4::integer
+            and v.version not in (select version from last_of_day)
+            and v.version is distinct from site.current_version
+            and v.version is distinct from site.published_version
+            and not exists (select 1 from site_publishes p where p.site_id = $1 and p.version = v.version)
+       ),
+       archived as (
+         insert into pruned_patches (site_id, version, patch)
+         select site_id, version, patch from spec_versions
+          where site_id = $1 and version in (select version from doomed) and source = 'manual' and patch is not null
+         on conflict do nothing
+       ),
+       removed as (
+         delete from spec_versions where site_id = $1 and version in (select version from doomed)
+         returning version, spec -> 'assets' as assets, pg_column_size(spec) as bytes
+       )
+       select version, assets, bytes from removed order by version`,
+      [siteId, policy.timeZone, now.toISOString(), policy.keepAllDays],
+    );
+    return rows.map((r) => ({ version: Number(r.version), assets: typeof r.assets === "string" ? JSON.parse(r.assets) : r.assets, bytes: Number(r.bytes) }));
+  }
+
+  /** What every kept version references (`assets` as stored), for deciding which files are still used. */
+  async versionAssets(siteId: string): Promise<{ version: number; assets: unknown }[]> {
+    const { rows } = await this.db.query<{ version: number; assets: unknown }>(
+      "select version, spec -> 'assets' as assets from spec_versions where site_id = $1 order by version",
+      [siteId],
+    );
+    return rows.map((r) => ({ version: Number(r.version), assets: typeof r.assets === "string" ? JSON.parse(r.assets) : r.assets }));
+  }
+
+  /** Version count and size: as Postgres stores them (compressed) and as JSON text, for retention reports. */
+  async versionStats(siteId: string): Promise<{ versions: number; bytes: number; jsonBytes: number }> {
+    const { rows } = await this.db.query<{ n: number | string; bytes: number | string | null; json_bytes: number | string | null }>(
+      "select count(*) as n, sum(pg_column_size(spec)) as bytes, sum(octet_length(spec::text)) as json_bytes from spec_versions where site_id = $1",
+      [siteId],
+    );
+    return { versions: Number(rows[0]?.n ?? 0), bytes: Number(rows[0]?.bytes ?? 0), jsonBytes: Number(rows[0]?.json_bytes ?? 0) };
   }
 
   // ---------- Contact form messages ----------
@@ -269,8 +379,13 @@ export class Repo {
     return rows.length > 0;
   }
 
-  async markPublished(siteId: string, version: number): Promise<void> {
-    await this.db.query("update sites set published_version = $2, published_at = now(), updated_at = now() where id = $1", [siteId, version]);
+  /** Makes `version` the live one and records the publish (retention keeps every published version). */
+  async markPublished(siteId: string, version: number, release?: string): Promise<void> {
+    await this.db.query(
+      `with publish as (insert into site_publishes (site_id, version, release) values ($1, $2, $3))
+       update sites set published_version = $2, published_at = now(), updated_at = now() where id = $1`,
+      [siteId, version, release ?? null],
+    );
   }
 
   async addAsset(a: Omit<AssetRow, "id"> & { id?: string }): Promise<AssetRow> {
@@ -286,6 +401,13 @@ export class Repo {
   async listAssets(siteId: string): Promise<AssetRow[]> {
     const { rows } = await this.db.query<AssetRow>("select * from assets where site_id = $1 order by created_at, id", [siteId]);
     return rows;
+  }
+
+  /** Forgets uploads whose files were removed (retention). Returns how many rows went. */
+  async deleteAssetsByKey(siteId: string, storageKeys: string[]): Promise<number> {
+    if (storageKeys.length === 0) return 0;
+    const { rows } = await this.db.query("delete from assets where site_id = $1 and storage_key = any($2::text[]) returning id", [siteId, storageKeys]);
+    return rows.length;
   }
 
   async addEvent(e: { siteId: string; jobId?: string | null; stage: string; level?: EventRow["level"]; message: string; data?: unknown }): Promise<void> {

@@ -312,7 +312,7 @@ export async function publishSite(deps: Pick<PipelineDeps, "repo" | "storage" | 
   const files = siteFiles(current.spec, media, { imageWidths: config.images.widths });
   const release = newReleaseId(current.version);
   await writeRelease(storage, site.slug, release, files);
-  await repo.markPublished(siteId, current.version);
+  await repo.markPublished(siteId, current.version, release);
   await repo.addEvent({ siteId, stage: "publish", message: `Published version ${current.version}`, data: { files: files.size, release } });
   return { version: current.version, files: files.size };
 }

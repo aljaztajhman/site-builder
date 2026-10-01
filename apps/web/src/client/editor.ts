@@ -7,7 +7,7 @@
 import { EDITOR_STARTER_TEXT } from "@sb/spec/starter";
 import { COLOR_LABEL, DIRECTION_LABEL, ENUM_LABEL, SECTION_LABEL, TOKEN_LABEL, VARIANT_LABEL, blockerMessage, describePath, fieldLabel, issueText, type BlockerLike } from "@sb/spec/labels";
 import { formatDateTime, formatEur, siteStatus } from "../ui/labels.ts";
-import { undoTarget } from "./versions.ts";
+import { groupVersions, undoTarget, type ListedVersion } from "./versions.ts";
 
 type Json = null | boolean | number | string | Json[] | { [k: string]: Json };
 type Obj = { [k: string]: Json };
@@ -946,15 +946,35 @@ function aiPane(): HTMLElement {
 
 function versionsPane(): HTMLElement {
   const SRC: Record<string, string> = { generate: "ustvarjeno", critique: "samopregled", edit: "pomočnik", manual: "urejanje", revert: "obnovljeno" };
+  // Retention may have removed a version since the list loaded: the server says so, and the list reloads.
+  const restore = (version: number) => void queued(async () => {
+    try {
+      await api("/revert", { method: "POST", body: JSON.stringify({ version }) });
+      toast = `Obnovljena različica ${version}.`;
+    } catch (e) {
+      toast = (e as Error).message;
+    }
+    await load();
+    reloadPreview();
+  });
+  const action = (v: ListedVersion, label: string) =>
+    v.version === state.version
+      ? h("span", { class: "pill plain" }, "trenutna")
+      : h("button", { class: "btn sm", type: "button", "aria-label": label, onClick: () => restore(v.version) }, "Obnovi");
+  const published = (v: ListedVersion) => (v.version === state.site.published_version ? " · objavljena" : v.published ? " · bila objavljena" : "");
   return h("div", { class: "pane" },
-    h("p", { class: "help" }, "Vsaka sprememba je nova različica. Tudi obnova je nova različica, zato se nič ne izgubi."),
-    h("ol", { class: "versions" }, ...state.versions.map((v) => h("li", {},
-      h("b", {}, `v${v.version}`),
-      h("div", { class: "what" }, h("span", {}, `${SRC[v.source] ?? v.source} · ${formatDateTime(v.created_at)}`), v.message ? h("span", { class: "muted" }, v.message.slice(0, 120)) : null),
-      v.version === state.version
-        ? h("span", { class: "pill plain" }, "trenutna")
-        : h("button", { class: "btn sm", type: "button", "aria-label": `Obnovi različico ${v.version}`, onClick: () => void queued(() => api("/revert", { method: "POST", body: JSON.stringify({ version: v.version }) }).then(() => { toast = `Obnovljena različica ${v.version}.`; return load(); }).then(reloadPreview)) }, "Obnovi"),
-    ))),
+    h("p", { class: "help" }, "Vsaka sprememba je nova različica, tudi obnova. Zaporedna urejanja so združena, »Obnovi« vrne zadnje. Nedavne hranimo vse, starejše po eno na dan, objavljene vse."),
+    h("ol", { class: "versions" }, ...groupVersions(state.versions).map((item) => item.type === "one"
+      ? h("li", {},
+          h("b", {}, `v${item.row.version}`),
+          h("div", { class: "what" }, h("span", {}, `${SRC[item.row.source] ?? item.row.source} · ${formatDateTime(item.row.created_at)}${published(item.row)}`), item.row.message ? h("span", { class: "muted" }, item.row.message.slice(0, 120)) : null),
+          action(item.row, `Obnovi različico ${item.row.version}`),
+        )
+      : h("li", {},
+          h("b", { title: item.range }, `v${item.newest.version}`),
+          h("div", { class: "what" }, h("span", {}, item.label), h("span", { class: "muted" }, `${SRC.manual} · ${item.day} · ${item.range}`)),
+          action(item.newest, `Obnovi različico ${item.newest.version}, zadnjo od: ${item.label}`),
+        ))),
   );
 }
 

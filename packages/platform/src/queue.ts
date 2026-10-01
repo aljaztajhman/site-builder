@@ -2,7 +2,7 @@ import { PgBoss, fromPglite } from "pg-boss";
 import type { PGlite } from "@electric-sql/pglite";
 import type { Db } from "./db.ts";
 
-export const QUEUES = ["generate", "edit", "publish", "alt"] as const;
+export const QUEUES = ["generate", "edit", "publish", "alt", "prune"] as const;
 export type QueueName = (typeof QUEUES)[number];
 
 export interface GenerateJob {
@@ -23,16 +23,27 @@ export interface AltJob {
   siteId: string;
   imageIds: string[];
 }
+/** Version retention (nightly): every site with old versions, or one site. */
+export interface PruneJob {
+  siteId?: string;
+}
 export interface JobData {
   generate: GenerateJob;
   edit: EditJob;
   publish: PublishJob;
   alt: AltJob;
+  prune: PruneJob;
 }
 
 export interface Queue {
   send<Q extends QueueName>(name: Q, data: JobData[Q]): Promise<string>;
   work<Q extends QueueName>(name: Q, handler: (data: JobData[Q], jobId: string) => Promise<void>, opts?: { concurrency?: number }): Promise<void>;
+  /**
+   * Sends `data` to `name` on a cron schedule read in `tz` (stored in the database, so one schedule
+   * for all instances; calling it again updates it). A run missed while nothing was up is sent once
+   * when the next instance starts. Absent on test doubles.
+   */
+  schedule?<Q extends QueueName>(name: Q, cron: string, data: JobData[Q], opts: { tz: string }): Promise<void>;
   ping(): Promise<void>;
   stop(): Promise<void>;
 }
@@ -62,6 +73,9 @@ export async function createQueue(db: Db, databaseUrl: string): Promise<Queue> {
       await boss.work<JobData[typeof name]>(name, { pollingIntervalSeconds: 1, localConcurrency: opts?.concurrency ?? 1 }, async (jobs) => {
         for (const job of jobs) await handler(job.data, job.id);
       });
+    },
+    async schedule(name, cron, data, opts) {
+      await boss.schedule(name, cron, data as object, { tz: opts.tz, missed: "once" });
     },
     async ping() {
       await boss.getQueue("generate");
