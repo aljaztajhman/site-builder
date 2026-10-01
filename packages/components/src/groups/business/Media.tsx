@@ -1,4 +1,4 @@
-import { plural } from "@sb/spec";
+import { isPlaceholder, plural, type Placeholder } from "@sb/spec";
 import { ActionLink, MaybeText, Ph, Picture, PriceText, Section, SectionHead, cx } from "../../primitives/index.tsx";
 import type { SectionProps } from "../../types.ts";
 import { largestWebp } from "./shared.tsx";
@@ -6,18 +6,32 @@ import { largestWebp } from "./shared.tsx";
 export const TEAM_GRID_SIZES = "(min-width: 64rem) 17rem, (min-width: 48rem) 33vw, 50vw";
 export const TEAM_LIST_SIZES = "(min-width: 48rem) 8rem, 6rem";
 
+/** "Urška Lebar" -> "UL"; titles and abbreviations ("dr.", "dent.") are skipped. No initials for a placeholder name. */
+export function initials(name: string | Placeholder): string {
+  if (isPlaceholder(name)) return "";
+  const words = name.split(/[\s,]+/).filter((w) => /^\p{L}/u.test(w) && !w.includes("."));
+  return words.slice(0, 2).map((w) => w.charAt(0).toLocaleUpperCase("sl-SI")).join("");
+}
+
 export function Team({ section, ctx }: SectionProps<"team">) {
   const { props } = section;
   const grid = section.variant === "grid";
+  // Some members with a portrait and some without: the others get a tile of the same size with their
+  // initials, so names and roles line up across the row instead of jumping to the top.
+  const mixed = props.members.some((m) => m.image) && props.members.some((m) => !m.image);
   return (
     <Section id={section.id} type={section.type} variant={section.variant} tone={section.tone}>
       <SectionHead id={section.id} eyebrow={props.eyebrow} title={props.title} intro={props.intro} />
       <ul className={cx("team", props.members.some((m) => m.bio) && "team--bios")}>
         {props.members.map((m, i) => (
-          <li className={cx("team__member", !m.image && "team__member--text")} key={i}>
-            {m.image && (
+          <li className={cx("team__member", !m.image && !mixed && "team__member--text")} key={i}>
+            {m.image ? (
               <Picture id={m.image} ctx={ctx} className="media--contained team__photo" sizes={grid ? TEAM_GRID_SIZES : TEAM_LIST_SIZES} />
-            )}
+            ) : mixed ? (
+              <span className="media media--contained team__photo team__initials" aria-hidden="true">
+                {initials(m.name)}
+              </span>
+            ) : null}
             <div className="team__text">
               <h3 className="team__name">
                 <MaybeText value={m.name} ctx={ctx} />

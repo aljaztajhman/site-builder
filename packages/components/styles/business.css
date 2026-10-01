@@ -570,6 +570,19 @@
   padding-top: 0.75rem;
   border-top: 2px solid currentColor;
 }
+/* In place of a portrait when only some members have one (same box, so the row lines up). */
+.team__initials {
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, currentColor 7%, transparent);
+  font-family: var(--font-heading);
+  font-size: var(--fs-h3);
+  line-height: 1;
+  letter-spacing: 0.04em;
+}
+.s-team--grid .team__initials {
+  font-size: clamp(1.75rem, 6vw, 2.75rem);
+}
 /* With bios, phones get the photo beside the text instead of two cramped columns. */
 @media (max-width: 47.99rem) {
   .s-team--grid .team--bios {
