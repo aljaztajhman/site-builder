@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { DIRECTIONS, SECTION_DEFS, checkDesign, publishBlockers, sectionDef, validateSite, type SiteSpec } from "@sb/spec";
+import { DIRECTIONS, SECTION_DEFS, checkDesign, issueMessage, publishBlockers, sectionDef, validateSite, type SiteSpec } from "@sb/spec";
 import { applyDirectEdit, defaultSection, editorCatalogue, switchDirection, typedText } from "../src/index.ts";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -47,6 +47,20 @@ describe("applyDirectEdit", () => {
     expect(checkDesign(r.spec.design, DIRECTIONS.find((d) => d.id === r.spec.design.direction))).toEqual([]);
     expect(r.adjustments.join(" ")).toMatch(/Besedilo: barva popravljena na #[0-9a-f]{6} zaradi berljivosti/);
     expect(r.adjustments.join(" ")).toMatch(/Zaobljenost: nastavljeno na 8, kot dovoljuje smer »Toplo in domače«/);
+  });
+});
+
+describe("guarded edits", () => {
+  it("applies an edit whose guard matches and refuses one whose section moved, in words the owner reads", () => {
+    const spec = golden();
+    const guard = (si: number, id: string) => ({ op: "test" as const, path: `/pages/0/sections/${si}/id`, value: id });
+    const ok = applyDirectEdit(spec, [guard(3, "s_about"), { op: "replace", path: "/pages/0/sections/3/props/heading", value: "Drožmi iz domače kleti" }]);
+    expect(ok.ok).toBe(true);
+    // s_about is no longer at index 2: nothing is written there.
+    const moved = applyDirectEdit(spec, [guard(2, "s_about"), { op: "replace", path: "/pages/0/sections/2/props/heading", value: "x" }]);
+    expect(moved.ok).toBe(false);
+    expect(moved.spec).toBe(spec);
+    expect(issueMessage(moved.issues[0]!)).toMatch(/^razdelek ali stran se je medtem premaknila/);
   });
 });
 
