@@ -55,7 +55,7 @@ const root = document.getElementById("app")!;
 const siteId = root.dataset.siteId!;
 let state: State;
 let catalogue: Catalogue | null = null;
-let tab: "content" | "facts" | "design" | "pages" | "ai" | "versions" = "content";
+let tab: "content" | "facts" | "photos" | "design" | "pages" | "ai" | "versions" = "content";
 let pageIndex = 0;
 let selected: string | null = null;
 let device: "mobile" | "desktop" = "mobile";
@@ -653,6 +653,87 @@ function factsPane(): HTMLElement {
   return pane;
 }
 
+// ---------- Photos: add the owner's own, replace generated ones, describe each ----------
+const PHOTO_ACCEPT = "image/jpeg,image/png,image/webp,image/avif";
+
+/** A button that opens the file picker; the files go straight to `onFiles`. */
+function fileButton(text: string, multiple: boolean, onFiles: (files: File[]) => void, primary = false): HTMLElement {
+  const input = h("input", { type: "file", class: "sr-only", accept: PHOTO_ACCEPT, ...(multiple ? { multiple: true } : {}) }) as HTMLInputElement;
+  input.addEventListener("change", () => {
+    const files = [...(input.files ?? [])];
+    input.value = "";
+    if (files.length) onFiles(files);
+  });
+  return h("label", { class: primary ? "btn sm primary file-btn" : "btn sm file-btn" }, input, text);
+}
+
+/** Uploads photos (or one in place of `replace`); the server makes the variants and queues the descriptions. */
+async function uploadPhotos(files: File[], replace?: string): Promise<void> {
+  const form = new FormData();
+  for (const f of files) form.append("photos", f, f.name);
+  if (replace) form.set("replace", replace);
+  if (state.version) form.set("baseVersion", String(state.version));
+  toast = replace ? "Nalagam fotografijo …" : "Nalagam fotografije …";
+  showToast();
+  try {
+    const r = await fetch(`/api/sites/${siteId}/photos`, { method: "POST", body: form });
+    const body = (await r.json().catch(() => ({}))) as { error?: string; message?: string; added?: string[] };
+    if (!r.ok) throw new Error(body.message ?? body.error ?? r.statusText);
+    toast = replace ? "Slika je zamenjana. Opis pripravljamo …" : `Dodano: ${body.added?.length ?? files.length}. Opis pripravljamo …`;
+  } catch (e) {
+    toast = (e as Error).message;
+  }
+  await load();
+  reloadPreview();
+}
+
+/** Where an image is shown, as section names. */
+function photoUses(imageId: string): string[] {
+  const out: string[] = [];
+  for (const page of (state.spec?.pages ?? []) as Obj[]) {
+    for (const s of (page.sections ?? []) as Obj[]) {
+      if (JSON.stringify(s.props ?? {}).includes(`"${imageId}"`)) out.push(`${label(String(s.type))}${page.kind === "home" ? "" : ` (${String((page.nav as Obj)?.label ?? page.slug)})`}`);
+    }
+  }
+  return out;
+}
+
+function photosPane(): HTMLElement {
+  const pane = h("div", { class: "pane" });
+  if (!state.spec) return pane;
+  const images = ((state.spec.assets as Obj).images ?? []) as Obj[];
+  const generated = images.filter((im) => im.origin === "generated").length;
+  pane.append(
+    h("p", { class: "help" }, generated ? "Slike z oznako »Ustvarjeno z UI« smo dodali, ker je bilo vaših fotografij premalo. Zamenjajte jih s svojimi, ko jih imate." : "Fotografije na vaši strani. Vsaka potrebuje kratek opis za obiskovalce, ki slik ne vidijo."),
+    h("div", { class: "row" }, fileButton("Dodaj fotografije", true, (files) => void uploadPhotos(files), true)),
+  );
+  const list = h("ul", { class: "photos" });
+  images.forEach((im, i) => {
+    const id = String(im.id);
+    const uses = photoUses(id);
+    const alt = String(im.alt ?? "");
+    const altField = h("textarea", { rows: 2, maxlength: 180, placeholder: "Npr. Pek vzame hlebce iz krušne peči" }) as HTMLTextAreaElement;
+    altField.value = alt;
+    altField.addEventListener("change", () => void patch([{ op: "replace", path: `/assets/images/${i}/alt`, value: altField.value.trim() }], "opis slike"));
+    list.append(
+      h("li", { class: "photo" },
+        h("img", { src: `/preview/${siteId}/media/${id}-360.webp`, alt: "", loading: "lazy", width: 120, height: 90 }),
+        h("div", { class: "photo-body" },
+          h("div", { class: "row" },
+            im.origin === "generated" ? h("span", { class: "pill busy" }, "Ustvarjeno z UI") : h("span", { class: "pill plain" }, "Vaša fotografija"),
+            h("span", { class: "muted photo-uses" }, uses.length ? `Na strani: ${uses.join(", ")}` : "Na strani še ni uporabljena"),
+          ),
+          labelled("Opis slike", altField),
+          !alt && uses.length ? h("p", { class: "note warn" }, "Brez opisa strani ni mogoče objaviti. Opis pripravljamo samodejno; lahko ga napišete sami.") : null,
+          h("div", { class: "row" }, fileButton(im.origin === "generated" ? "Zamenjaj s svojo fotografijo" : "Zamenjaj", false, (files) => void uploadPhotos(files, id))),
+        ),
+      ),
+    );
+  });
+  pane.append(list);
+  return pane;
+}
+
 function designPane(): HTMLElement {
   const pane = h("div", { class: "pane" });
   if (!state.spec || !catalogue) return pane;
@@ -1023,7 +1104,7 @@ function render(): void {
   shell.top.replaceChildren(...topItems().filter((c): c is Node => c instanceof Node));
 
   // Versions open from the app bar ("Različice"), so the five tabs fit the panel.
-  const tabs: [typeof tab, string][] = [["content", "Vsebina"], ["facts", "Podatki"], ["design", "Oblika"], ["pages", "Strani"], ["ai", "Pomočnik"]];
+  const tabs: [typeof tab, string][] = [["content", "Vsebina"], ["facts", "Podatki"], ["photos", "Fotografije"], ["design", "Oblika"], ["pages", "Strani"], ["ai", "Pomočnik"]];
   shell.panel.replaceChildren(
     ...[
       statusBlock(),
@@ -1032,7 +1113,7 @@ function render(): void {
         ? h("div", { class: "pane tight" }, h("div", { class: "note warn" }, h("p", {}, blockerSummary(state.placeholders.length, state.blockers.length - state.placeholders.length)), h("details", {}, h("summary", {}, "Seznam"), h("ul", {}, ...state.blockers.slice(0, 30).map((b) => h("li", {}, b))))))
         : null,
       !state.spec && state.site.status !== "generating" && state.site.status !== "failed" ? h("div", { class: "pane" }, h("p", { class: "muted" }, "Stran še nima vsebine.")) : null,
-      state.spec ? { content: contentPane, facts: factsPane, design: designPane, pages: pagesPane, ai: aiPane, versions: versionsPane }[tab]() : null,
+      state.spec ? { content: contentPane, facts: factsPane, photos: photosPane, design: designPane, pages: pagesPane, ai: aiPane, versions: versionsPane }[tab]() : null,
     ].filter((c): c is HTMLElement => c !== null),
   );
   shell.bar.replaceChildren(...barItems().filter((c): c is Node => c instanceof Node));

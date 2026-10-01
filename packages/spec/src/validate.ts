@@ -166,5 +166,15 @@ export function publishBlockers(spec: unknown): string[] {
   const blockers = v.ok ? [] : v.issues.map((i) => `${i.path}: ${i.message}`);
   for (const p of collectPlaceholders(spec)) blockers.push(`${p.path}: unfilled placeholder (${p.kind})`);
   for (const p of collectStarterText(spec)) blockers.push(`${p}: starter text not replaced`);
+  // A photo the pages show needs a description (alt text) for screen readers.
+  if (v.spec) {
+    const shown = new Set<string>();
+    walkStrings(v.spec.pages, (s) => {
+      if (/^img_/.test(s)) shown.add(s);
+    });
+    v.spec.assets.images.forEach((img, i) => {
+      if (shown.has(img.id) && !img.alt.trim()) blockers.push(`/assets/images/${i}/alt: photo ${img.id} has no description`);
+    });
+  }
   return blockers;
 }

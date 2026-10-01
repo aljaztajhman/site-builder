@@ -270,6 +270,43 @@ describe("intake", () => {
   });
 });
 
+describe("photos in the editor", () => {
+  it("adds the owner's photo, replaces a picture with it, queues the description, and explains refusals", async () => {
+    const { readFile } = await import("node:fs/promises");
+    const cookie = await login();
+    const golden = JSON.parse(await readFile(path.join(import.meta.dirname, "../../../tools/eval/golden/pekarna-kvas.json"), "utf8"));
+    const site = await platform.repo.createSite({ name: "foto", slug: "foto", intake: { description: "x", photoAssetIds: [], scope: "home" } });
+    const v1 = await platform.repo.saveSpec(site.id, { ...golden, slug: "foto" }, "generate");
+    await platform.repo.setStatus(site.id, "ready");
+    const jpeg = await readFile(path.join(import.meta.dirname, "../../../tools/eval/fixtures/pekarna-kvas/photos/03.jpg"));
+    const form = new FormData();
+    form.append("photos", new Blob([jpeg], { type: "image/jpeg" }), "pec.jpg");
+    form.set("replace", "img_02");
+    form.set("baseVersion", String(v1));
+    const res = await app.request(`/api/sites/${site.id}/photos`, { method: "POST", body: form, headers: { cookie } });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ ok: true, added: ["img_04"], replaced: "img_02" });
+    expect(sent.at(-1)).toEqual({ name: "alt", data: { siteId: site.id, imageIds: ["img_04"] } });
+    // Busy until the description job is done, so the editor keeps polling.
+    expect((await platform.repo.getSite(site.id))!.status).toBe("editing");
+    const spec = (await platform.repo.getSpec(site.id))!.spec;
+    expect(spec.assets.images.map((i: { id: string }) => i.id)).toEqual(["img_01", "img_03", "img_04"]);
+    expect((await app.request(`/preview/${site.id}/media/img_04-360.webp`, { headers: { cookie } })).status).toBe(200);
+
+    const bad = new FormData();
+    bad.append("photos", new Blob([new Uint8Array([1, 2, 3])], { type: "image/gif" }), "a.gif");
+    const refused = await app.request(`/api/sites/${site.id}/photos`, { method: "POST", body: bad, headers: { cookie } });
+    expect(refused.status).toBe(400);
+    expect(((await refused.json()) as { error: string }).error).toMatch(/Nepodprta vrsta slike/);
+    const stale = new FormData();
+    stale.append("photos", new Blob([jpeg], { type: "image/jpeg" }), "b.jpg");
+    stale.set("baseVersion", String(v1));
+    expect((await app.request(`/api/sites/${site.id}/photos`, { method: "POST", body: stale, headers: { cookie } })).status).toBe(409);
+    // Without a session the API refuses.
+    expect((await app.request(`/api/sites/${site.id}/photos`, { method: "POST", body: new FormData() })).status).toBe(401);
+  });
+});
+
 describe("direct editor API (no model calls)", () => {
   it("patches, adds sections, detects conflicts, reverts, blocks and allows publishing, exports", async () => {
     const { readFile } = await import("node:fs/promises");
