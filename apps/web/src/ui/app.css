@@ -101,8 +101,21 @@ legend{padding:0 4px;font-weight:600;font-size:13px;color:var(--ink-2)}
 .menu>summary::after{content:"";width:7px;height:7px;margin:-3px 0 0 2px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg)}
 .menu[open]>summary{background:var(--surface-2)}
 .menu .list{position:absolute;top:calc(100% + 6px);right:0;z-index:10;display:grid;min-width:250px;max-width:calc(100vw - 32px);padding:6px;background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r-2);box-shadow:var(--shadow-float)}
-.menu .list a{display:flex;align-items:center;min-height:44px;padding:0 12px;border-radius:var(--r-1);font-size:15px;text-decoration:none}
-.menu .list a:hover{background:var(--surface-2)}
+.menu .list a,.menu .list button{display:flex;align-items:center;width:100%;min-height:44px;padding:0 12px;border:0;border-radius:var(--r-1);background:none;color:var(--ink);font:400 15px/1.3 var(--font-ui);text-align:left;text-decoration:none;cursor:pointer}
+.menu .list a:hover,.menu .list button:hover{background:var(--surface-2)}
+.menu .list button:disabled{color:var(--ink-3);cursor:default}
+.menu>summary.icon-btn::after{display:none}
+/* Small square icon buttons in the app bar (undo, ⋯). */
+.icon-btn{min-width:36px;padding:0;font-size:18px}
+/* "Še 3 do objave": what blocks publishing, one tap from the list. */
+.chip{display:inline-flex;align-items:center;min-height:32px;padding:0 12px;border:0;border-radius:999px;background:var(--surface-2);color:var(--ink-2);font:600 13px/1.2 var(--font-ui);white-space:nowrap;cursor:pointer}
+.chip.warn{background:var(--warn-soft);color:var(--warn)}
+.chip.warn:hover{background:#f7e2bd}
+@media (pointer:coarse){.chip{min-height:44px}}
+/* A text button: secondary actions inside forms and replies. */
+.linkish{display:inline-flex;align-items:center;min-height:32px;padding:0;border:0;background:none;color:var(--ink-2);font:500 14px/1.3 var(--font-ui);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.linkish:hover{color:var(--ink)}
+@media (pointer:coarse){.linkish{min-height:44px}}
 .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:20;max-width:min(560px,calc(100vw - 32px));padding:11px 16px;border-radius:var(--r-2);background:var(--ink);color:#fff;font-size:15px;box-shadow:var(--shadow-float)}
 
 /* ---------- App bar ---------- */
@@ -154,13 +167,29 @@ legend{padding:0 4px;font-weight:600;font-size:13px;color:var(--ink-2)}
 /* ---------- Editor ---------- */
 .shell{display:flex;flex-direction:column;height:100dvh}
 .top .site-name{min-width:0;max-width:36ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:18px;letter-spacing:-.015em}
-.ed{flex:1;min-height:0;display:grid;grid-template-columns:400px minmax(0,1fr)}
+.ed{flex:1;min-height:0;display:grid;grid-template-columns:400px minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
 .ed .panel{overflow:auto;background:var(--surface);border-right:1px solid var(--line)}
-/* Six tabs in two rows of three: one row overflowed the 400 px panel and scrolled out of sight. */
-.ed .tabs{position:sticky;top:0;z-index:2;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px;padding:8px;background:var(--surface);border-bottom:1px solid var(--line)}
-.ed .tabs button{min-height:36px;padding:0 6px;border:0;border-radius:var(--r-1);background:transparent;color:var(--ink-2);font:500 14px/1 var(--font-ui);cursor:pointer}
-.ed .tabs button:hover{background:var(--surface-2)}
-.ed .tabs button[aria-selected=true]{background:var(--surface-2);color:var(--ink);font-weight:600}
+/* Nothing selected: a hint, four shortcuts, the page's sections. */
+.ed .hint{margin:4px 0 14px;color:var(--ink-2);font-size:15px}
+.shortcuts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.shortcut{display:grid;gap:2px;min-height:64px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-2);background:var(--surface);color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.shortcut:hover{border-color:var(--line-field)}
+.shortcut strong{font-size:15px}
+.shortcut span{font-size:13px;line-height:1.3;color:var(--ink-3)}
+/* Adding a section: one tap on its name. */
+.add-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.add-grid button{min-height:48px;padding:8px 12px;border:1px solid var(--line);border-radius:var(--r-2);background:var(--surface);color:var(--ink);font:600 14px/1.25 var(--font-ui);text-align:left;cursor:pointer}
+.add-grid button:hover{border-color:var(--line-field)}
+/* Oblika: styles as cards, one main colour. */
+.styles{display:grid;gap:6px;margin-bottom:16px}
+.style-card{display:grid;gap:2px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-2);background:var(--surface);color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.style-card:hover{border-color:var(--line-field)}
+.style-card[aria-pressed=true]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.style-card strong{font-size:15px}
+.style-card span{font-size:13px;line-height:1.35;color:var(--ink-3);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.main-color{gap:12px;margin:4px 0 14px}
+.main-color input[type=color]{width:52px;height:44px;padding:2px}
+.image-big{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;margin:4px 0 12px;border-radius:var(--r-2);background:var(--surface-2)}
 .ed .pane{padding:12px 16px 24px}
 .ed .pane.tight{padding-bottom:0}
 .ed .pane>fieldset:first-of-type{margin-top:4px}
@@ -169,13 +198,37 @@ legend{padding:0 4px;font-weight:600;font-size:13px;color:var(--ink-2)}
 .ed .pair{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
 .ed .add-row{display:flex;gap:8px;margin-top:4px}
 .ed .add-row select{flex:1;min-width:0}
-.ed .canvas .toggle{margin:0;font-size:14px;font-weight:500;min-height:36px}
+
 .ed .canvas .where{white-space:nowrap}
 .ed .field{margin-bottom:4px}
 .ed .field>.btn.sm,.ed fieldset>.btn.sm{margin-top:8px}
-.ed .canvas{display:flex;flex-direction:column;min-width:0;background:var(--surface-2)}
+.ed .field>.linkish{margin-top:2px}
+.ed .field.missing input,.ed .field.missing textarea{border-color:var(--warn);background:#fffaf0}
+.ed .field.missing .note{margin-top:6px}
+.ed .more-fields{margin-top:8px}
+.ed .more-fields>summary{display:inline-flex;align-items:center;min-height:36px;color:var(--ink-2);font-size:14px;font-weight:600;cursor:pointer}
+.ed .more-fields[open]>summary{margin-bottom:6px}
+.ed .pane-head{display:grid;justify-items:start;gap:4px;margin-bottom:8px}
+.ed .pane-head .btn{margin-left:-12px}
+/* The assistant box under the preview. */
+.ask-dock{flex:none;display:grid;justify-items:center;gap:8px;padding:10px 16px 14px;background:var(--surface-2)}
+.ask-dock[hidden]{display:none}
+.ask-dock>*{width:min(640px,100%)}
+.ask{display:flex;align-items:flex-end;gap:8px;padding:6px 6px 6px 14px;background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r-3);box-shadow:var(--shadow-float)}
+.ask:focus-within{border-color:var(--ink)}
+.ask textarea{flex:1;min-width:0;min-height:36px;max-height:140px;padding:7px 0;border:0;background:none;resize:none;font:16px/1.4 var(--font-ui);outline:none}
+.ask-status{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink-2)}
+.ask-status:empty{display:none}
+.ask-status .reply{flex:1;min-width:0;padding:8px 12px;border-radius:var(--r-2);background:var(--surface);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.busy-dot{width:10px;height:10px;border:2px solid var(--warn);border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite}
+.sugg{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+.sugg:empty{display:none}
+.sugg button{min-height:32px;padding:0 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink-2);font:500 13px/1.2 var(--font-ui);cursor:pointer}
+.sugg button:hover{border-color:var(--line-field);color:var(--ink)}
+@media (pointer:coarse){.sugg button{min-height:44px}}
+.ed .canvas{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--surface-2)}
 .ed .canvas .bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;min-height:52px;padding:8px 16px;background:var(--surface);border-bottom:1px solid var(--line);font-size:14px}
-.ed .stage{flex:1;display:flex;flex-direction:column;align-items:center;overflow:auto;padding:20px}
+.ed .stage{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;overflow:auto;padding:20px}
 .ed .frame{flex:none;overflow:hidden;background:#fff;border:1px solid var(--line-2);border-radius:var(--r-3);box-shadow:var(--shadow-float)}
 .ed .frame.skeleton{display:grid;place-items:center;padding:24px;text-align:center;color:var(--ink-3);font-size:15px}
 /* Live preview while generating: a skeleton page that fills in with the run's real name, colours and pictures. */
@@ -262,22 +315,30 @@ details.more>summary{padding:12px 0;font-weight:600;cursor:pointer}
 /* Phones and narrow windows: the preview fills the screen, the editor is a bottom sheet over it
    (peek: tabs and the start of the form; full: almost the whole screen). */
 @media (max-width:900px){
-  :root{--sheet-peek:44dvh;--sheet-handle:28px}
+  :root{--sheet-peek:44dvh;--sheet-handle:28px;--sheet-closed:76px}
   .ed{display:flex;flex-direction:column}
   .ed .canvas{order:-1;flex:1;min-height:0;padding-bottom:var(--sheet-peek)}
+  .ed[data-sheet=closed] .canvas{padding-bottom:var(--sheet-closed)}
   .ed .stage{padding:12px}
   .ed .panel{position:fixed;left:0;right:0;bottom:0;z-index:15;height:var(--sheet-peek);overflow:auto;overscroll-behavior:contain;border-right:0;border-top:1px solid var(--line-2);border-radius:var(--r-3) var(--r-3) 0 0;box-shadow:0 -8px 24px rgb(20 20 18/.12);transition:height .2s ease-out}
   /* Full stops under the app bar, so undo and publish stay in reach (--top-h is measured by the editor). */
   .ed .panel[data-sheet=full]{height:calc(100dvh - var(--top-h,0px))}
+  /* Closed: the handle and the first line of the panel ("Tapnite karkoli …"), nothing to scroll. */
+  .ed .panel[data-sheet=closed]{height:var(--sheet-closed);overflow:hidden}
   .sheet-handle{display:flex;position:sticky;top:0;z-index:3;align-items:center;justify-content:center;width:100%;height:var(--sheet-handle);padding:0;border:0;background:var(--surface);cursor:grab;touch-action:none}
   .sheet-handle span{width:40px;height:4px;border-radius:2px;background:var(--line-2)}
-  .ed .tabs{top:var(--sheet-handle)}
   #selected-head{scroll-margin-top:calc(var(--sheet-handle) + 100px)}
   .toast{top:12px;bottom:auto}
   .ed.nospec .panel{position:static;height:auto;overflow:visible;border-radius:0;box-shadow:none}
-  .top .spend,.top .ver,.ed .canvas .where{display:none}
-  .top .actions{width:100%}
-  .top .actions .btn.primary{margin-left:auto}
+  /* One app-bar row on a phone: back, name, undo, what's left, ⋯, publish. */
+  .top{flex-wrap:nowrap;gap:4px;padding:6px 8px}
+  .top .site-name{flex:1;font-size:16px}
+  .top>.pill,.top .back .label,.top .chip .label,.top>.sp{display:none}
+  .top .actions{flex:none;gap:2px}
+  .chip{padding:0 10px}
+  /* A phone shows the phone layout; the size switch and the suggestions would only take preview space. */
+  .ed .canvas .bar,.sugg{display:none}
+  .ask-dock{padding:8px}
   .ed.nospec:not(.generating) .canvas{display:none}
   /* Generating on a phone: the live preview on top, the step list below it. */
   .ed.nospec.generating .canvas{flex:none;height:62dvh;padding-bottom:0}
