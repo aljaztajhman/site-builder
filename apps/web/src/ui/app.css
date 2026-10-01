@@ -223,6 +223,10 @@ legend{padding:0 4px;font-weight:600;font-size:13px;color:var(--ink-2)}
 .busy-dot{width:10px;height:10px;border:2px solid var(--warn);border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite}
 .sugg{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
 .sugg:empty{display:none}
+.ask-note{margin:0;font-size:13px;color:var(--ink-3);text-align:center}
+.ask-note[hidden]{display:none}
+.ask textarea:disabled{background:none;color:var(--ink-3)}
+.ed .guest .btn{margin:4px 0 12px}
 .sugg button{min-height:32px;padding:0 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink-2);font:500 13px/1.2 var(--font-ui);cursor:pointer}
 .sugg button:hover{border-color:var(--line-field);color:var(--ink)}
 @media (pointer:coarse){.sugg button{min-height:44px}}
