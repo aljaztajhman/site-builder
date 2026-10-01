@@ -84,7 +84,7 @@ Backlog:
 
 ## Design system overhaul (branch claude/design-system-overhaul)
 - [x] docs/design/ideas.html: proposal for product tokens/components/screens, generated-site hero and header families, and the researched AI-site give-away list (38 tells with code/critique/new status; Slovene copy rules)
-- [ ] Owner decisions: accent (`sb-ui-accent`), display face (`sb-ui-display-face`), product name (`sb-brand-name`), approve give-away additions to docs/PRODUCT.md. The product UI ships with the doc's picks (green, Bricolage Grotesque); each is one token to change
+- [ ] Owner decisions: accent (`sb-ui-accent`), display face (`sb-ui-display-face`), approve give-away additions to docs/PRODUCT.md. The product UI ships with the doc's picks (green, Bricolage Grotesque); each is one token to change
 - [x] Product UI (2026-09-30): one stylesheet `apps/web/src/ui/app.css` with the ideas.html tokens (canvas, ink, green accent, hairlines, one float shadow, radii 4/8/12, Bricolage + Figtree from the repo's subset fonts), served at `/assets/ui/<hash>/` without a session; no inline CSS left in dashboard pages. Login (wordmark, one field), intake as the prompt box (attach buttons, scope switch, one action; `/new`, and the whole page when there are no sites; refused intakes keep the text and say why), sites as cards with a live 360-px thumbnail, editor restyled (app bar with "Več" menu, generation progress with real stage names and seconds, failure note with "Poskusi znova", versions list, AI pane with cost and log folded), messages page. Checked: screenshots at 360 and 1280 of login, sites, intake, editor (phone and desktop preview, section form, AI, design, versions, menu), generating, checking, failed, messages; axe 0 violations on all of them; no horizontal scroll at 360; typecheck, lint, 495 tests
 - [x] Product UI live on Railway `preview` (2026-09-30, PR #14, web-preview-31c6.up.railway.app): hashed stylesheet and fonts served (immutable cache, noindex), login, sites (4 cards), intake, editor (phone, desktop, "Več" menu) and messages at 360 and 1280: fonts loaded, axe 0, no horizontal scroll, no console errors. Read-only check, no model calls
 - [ ] Deployed Pekarna Kvas (v2) shows "Napaka": its critique failed on 2026-09-29 19:00 (note over 300 chars), before critique failures kept the site; the status stays `failed` although v2 is fine. The editor says so and offers "Poskusi znova"; a job that fails after a version exists could leave the status at `ready`
@@ -114,7 +114,7 @@ Backlog:
 
 ## Go-to-market (docs/GO-TO-MARKET.md; decisions in the Decision Inbox)
 Owner:
-- [ ] Decide name (`sb-brand-name`), trademark search at SIPO/EUIPO, buy domains (unblocks `sb-email-domain`)
+- [ ] Name decided: Stranko (`sb-brand-name`, 2026-09-30; shown in the product UI since 2026-10-01). Still to do: trademark search at SIPO/EUIPO, buy the domains (unblocks `sb-email-domain`)
 - [ ] Decide first market (`sb-first-market`), roadmap order (`sb-roadmap-order`), pricing (`sb-pricing`), legal entity timing (`sb-legal-entity`), 90-day budget (`sb-gtm-budget`)
 - [ ] Recruit 10–15 design partners in person (full sites via the allow-list, `sb-full-access`)
 Product work (not started):
