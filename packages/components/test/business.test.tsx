@@ -25,6 +25,7 @@ import {
 } from "@sb/spec";
 import { businessIslands, businessLcp, businessRenderers } from "../src/groups/business/index.ts";
 import { largestWebp } from "../src/groups/business/shared.tsx";
+import { initials } from "../src/groups/business/Media.tsx";
 import type { RenderCtx } from "../src/types.ts";
 import { FULL_BUSINESS, SPARSE_BUSINESS, html, testCtx, testSpec } from "./helpers.ts";
 
@@ -432,6 +433,28 @@ describe("team", () => {
     expect(out).toContain('<h3 class="team__name"><mark class="ph" data-ph="name"');
     expect(out).toContain('alt="Ekipa salona"');
     expect(out).toContain("team--bios");
+  });
+
+  it("gives members without a portrait a same-size initials tile when others have one", () => {
+    const s = fixtures.team;
+    const mixed = { ...s, props: { ...s.props, members: [s.props.members[0]!, { name: "Maja Horvat, dr. dent. med.", role: "Zobozdravnica" }, s.props.members[1]!] } };
+    const out = render(teamSection.schema.parse(mixed));
+    expect(out).toContain('<span class="media media--contained team__photo team__initials" aria-hidden="true">MH</span>');
+    // A placeholder name gets the tile but no invented letters.
+    expect(out).toContain('<span class="media media--contained team__photo team__initials" aria-hidden="true"></span>');
+    expect(out).not.toContain("team__member--text");
+    // Nobody with a portrait: plain text members, no tiles.
+    const none = { ...s, props: { ...s.props, members: [{ name: "Ana Novak", role: "Frizerka" }, { name: "Eva Kos", role: "Frizerka" }] } };
+    const plain = render(teamSection.schema.parse(none));
+    expect(plain).not.toContain("team__initials");
+    expect(plain.match(/team__member--text/g)).toHaveLength(2);
+  });
+
+  it("makes initials from the first two words, skipping titles", () => {
+    expect(initials("Urška Lebar")).toBe("UL");
+    expect(initials("dr. Žiga Čeh")).toBe("ŽČ");
+    expect(initials("Maja")).toBe("M");
+    expect(initials({ $placeholder: "name" })).toBe("");
   });
 
   it("rejects an empty name (the model must use a placeholder)", () => {
