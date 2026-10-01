@@ -113,6 +113,38 @@ export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
   },
   {
     id: 4,
+    name: "version retention",
+    // site_publishes: every publish, so retention keeps every version that was ever published (not only
+    // the live one). Backfilled from the publish log and the live version.
+    // pruned_patches: the direct-editor operations of pruned manual versions. The fact check reads the
+    // text the owner typed from them (Repo.manualPatches), so pruning never turns a typed fact into an
+    // "invented" one.
+    sql: `
+      create table site_publishes (
+        id bigserial primary key,
+        site_id text not null references sites(id) on delete cascade,
+        version integer not null,
+        release text,
+        created_at timestamptz not null default now()
+      );
+      create index site_publishes_site on site_publishes(site_id, version);
+      insert into site_publishes (site_id, version, created_at)
+        select site_id, substring(message from '^Published version ([0-9]+)$')::integer, created_at
+          from site_events where stage = 'publish' and message ~ '^Published version [0-9]+$';
+      insert into site_publishes (site_id, version, created_at)
+        select s.id, s.published_version, coalesce(s.published_at, now()) from sites s
+         where s.published_version is not null
+           and not exists (select 1 from site_publishes p where p.site_id = s.id and p.version = s.published_version);
+      create table pruned_patches (
+        site_id text not null references sites(id) on delete cascade,
+        version integer not null,
+        patch jsonb not null,
+        primary key (site_id, version)
+      );
+    `,
+  },
+  {
+    id: 5,
     name: "accounts",
     // Owner accounts (magic link only). Tokens and sessions are stored as SHA-256 hashes of the random
     // value the browser holds. ip_key is a keyed hash of the requester's IP for rate limits, cleared after a day.

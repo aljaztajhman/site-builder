@@ -20,6 +20,8 @@ export interface Storage {
   get(key: string): Promise<Uint8Array | null>;
   list(prefix: string): Promise<string[]>;
   deletePrefix(prefix: string): Promise<void>;
+  /** Deletes exactly these keys; missing ones are ignored. */
+  delete(keys: string[]): Promise<void>;
   /** Throws when the backend is unreachable. Used by /health. */
   ping(): Promise<void>;
 }
@@ -75,6 +77,14 @@ export function createS3Storage(s: S3Settings): Storage {
     },
     async deletePrefix(prefix) {
       const keys = await this.list(prefix);
+      for (let i = 0; i < keys.length; i += 1000) {
+        await client.send(
+          new DeleteObjectsCommand({ Bucket: s.bucket, Delete: { Objects: keys.slice(i, i + 1000).map((Key) => ({ Key })) } }),
+        );
+      }
+    },
+    async delete(keys) {
+      keys.forEach(assertSafeKey);
       for (let i = 0; i < keys.length; i += 1000) {
         await client.send(
           new DeleteObjectsCommand({ Bucket: s.bucket, Delete: { Objects: keys.slice(i, i + 1000).map((Key) => ({ Key })) } }),
@@ -141,6 +151,10 @@ export function createFsStorage(root: string): Storage {
       }
       // Remove the folders left empty, deepest first (S3 has no folders to leave behind).
       for (const d of [...dirs].sort((a, b) => b.length - a.length)) await rmdir(d).catch(() => undefined);
+    },
+    async delete(keys) {
+      // Folders stay: a put may be about to write into one (deletePrefix removes whole trees instead).
+      for (const k of keys) await rm(file(k), { force: true });
     },
     async ping() {
       await mkdir(abs, { recursive: true });
