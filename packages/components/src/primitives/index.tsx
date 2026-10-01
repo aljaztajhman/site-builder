@@ -75,8 +75,11 @@ export function Picture(props: {
 }) {
   const img = props.ctx.image(props.id);
   const focal = img.asset.focal;
+  // AI-generated pictures carry a visible label (EU AI Act Art. 50) and say so in their alt text.
+  const generated = img.asset.origin === "generated";
+  const alt = props.alt ?? img.alt;
   return (
-    <picture className={cx("media", props.className)}>
+    <picture className={cx("media", generated && "media--ai", props.className)} {...(generated ? { "data-ai-label": props.ctx.t("aiGenerated") } : {})}>
       {img.sources.map((s) => (
         <source key={s.type} type={s.type} srcSet={s.srcSet} sizes={props.sizes} />
       ))}
@@ -84,7 +87,7 @@ export function Picture(props: {
         src={img.src}
         width={img.width}
         height={img.height}
-        alt={props.alt ?? img.alt}
+        alt={generated && alt ? `${alt} (${props.ctx.t("aiGeneratedAlt")})` : alt}
         loading={props.priority ? "eager" : "lazy"}
         decoding={props.priority ? "sync" : "async"}
         fetchPriority={props.priority ? "high" : undefined}

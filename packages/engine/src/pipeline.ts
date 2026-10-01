@@ -8,6 +8,7 @@ import { ModelOutputError, SpendCapError, type ModelClient } from "./llm/client.
 import { classify, makeBrief, chooseDesign, altTexts, generateContent, critique, applyPatches, editSpec } from "./stages.ts";
 import { extractSwatches, type Swatch } from "./palette.ts";
 import { processLogo, processPhoto, visionJpeg } from "./images.ts";
+import type { ImageGenerator } from "./image-gen.ts";
 import { checkSite, type CheckBrowser, type SiteCheckReport } from "./check/index.ts";
 import { typedText } from "./editor.ts";
 import { checkFacts } from "./facts.ts";
@@ -21,6 +22,8 @@ export interface PipelineDeps {
   browser?: CheckBrowser;
   /** Skip Lighthouse in the app pipeline when speed matters; eval always runs it. */
   lighthouse?: boolean;
+  /** Generates mood images when the client gave too few photos (config imageGen.pipeline); absent = never. */
+  images?: ImageGenerator;
 }
 
 export const mediaKey = (siteId: string, file: string) => `sites/${siteId}/media/${file}`;
@@ -108,12 +111,19 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     if (dropped.length) await log("brief", "Dropped facts not found in the client's text", dropped);
     await repo.setBrief(siteId, brief, brief.name);
 
+    // 3b. Too few photos: generated mood images, beside the design step (they don't need it).
+    const wanted = deps.images && config.imageGen.pipeline.enabled ? Math.max(0, config.imageGen.pipeline.fillUpTo - photos.length) : 0;
+    const ideas = brief.imageIdeas.slice(0, wanted);
+    const generating: Promise<ImageAsset[]> = ideas.length ? stageTime("imageGen", () => generateImages(deps, siteId, ideas, log)) : Promise.resolve([]);
+    // Awaited only after the design call: without a handler now, an early rejection (spend cap) would crash the process.
+    generating.catch(() => undefined);
+
     // 2. Design direction (palette extracted in code)
     const swatches: Swatch[] = [];
     if (logo) swatches.push(...(await extractSwatches(originals.get(logo.id)!, "logo", 3)));
     for (const p of photos.slice(0, 3)) swatches.push(...(await extractSwatches(originals.get(p.id)!, "photo", 2)));
     const { design } = await stageTime("design", () => chooseDesign(client, { brief, swatches, photoCount: photos.length }));
-    return { brief, design };
+    return { brief, design, generated: await generating };
   })();
 
   // 3. Images: variants + Slovene alt text
@@ -141,7 +151,10 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
       logoAsset = { src: logo.storage_key, width: l.width, height: l.height, file: l.file };
     }
   });
-  const [{ brief, design }] = await Promise.all([planning, imaging]);
+  const [{ brief, design, generated }] = await Promise.all([planning, imaging]);
+  // Generated pictures come after the client's photos; landscape, so they can carry a hero.
+  images.push(...generated);
+  heroIds.push(...generated.map((g) => g.id));
 
   // 4. Content and assembly (validate; retry with errors)
   const corpus = await clientCorpus(repo, siteId);
@@ -216,6 +229,34 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
   }
   await repo.setStatus(siteId, "ready");
   return { version, check, critiqueRounds: rounds, timings, firstVersionMs };
+}
+
+/**
+ * One generated image per idea, stored and processed like an upload, marked `origin: "generated"` so the
+ * site labels it and validation keeps it to hero and image-text slots. A failed image is logged and
+ * skipped; the site is built from what arrived. The spend cap still stops the job.
+ */
+async function generateImages(deps: PipelineDeps, siteId: string, ideas: { subject: string; alt: string }[], log: Log): Promise<ImageAsset[]> {
+  const { config, storage } = deps;
+  const results = await Promise.allSettled(
+    ideas.map(async (idea, i): Promise<ImageAsset> => {
+      const id = `img_g${i + 1}`;
+      const img = await deps.images!.generate(idea.subject);
+      const key = `sites/${siteId}/generated/${id}.jpg`;
+      await storage.put(key, img.data, "image/jpeg");
+      const processed = await processPhoto(id, img.data, config.images.widths, { avif: config.images.avifQuality, webp: config.images.webpQuality });
+      for (const v of processed.variants) await storage.put(mediaKey(siteId, v.file), v.data, contentType(v.file));
+      return { id, src: key, width: processed.width, height: processed.height, alt: idea.alt.slice(0, 180), origin: "generated" };
+    }),
+  );
+  const out: ImageAsset[] = [];
+  for (const [i, r] of results.entries()) {
+    if (r.status === "fulfilled") out.push(r.value);
+    else if (r.reason instanceof SpendCapError) throw r.reason;
+    else await log("imageGen", `Image ${i + 1} not generated; building without it`, String((r.reason as Error)?.message ?? r.reason).slice(0, 300));
+  }
+  await log("imageGen", `${out.length} of ${ideas.length} generated images`, out.map((o) => ({ id: o.id, alt: o.alt })));
+  return out;
 }
 
 export class PublishBlockedError extends Error {

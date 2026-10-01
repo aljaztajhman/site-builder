@@ -27,6 +27,9 @@ The landing page at `/` is the only intake: its prompt box posts the description
 ## Cost controls
 `ModelClient` checks today's spend (sum of `model_calls.cost_eur` since UTC midnight) against `limits.dailyModelSpendCapEur` (or `DAILY_SPEND_CAP_EUR`) before every call and logs every call's tokens and € by stage. Jobs don't auto-retry (`retryLimit: 0`). Static prompt parts are the system blocks, most shared first, each ending in a cache breakpoint: content, critique and edit all start with the section catalogue (~16k tokens), so one generation writes it to the cache once and the later stages read it. Stage prompts (rules) come second. Keep new stages in that order, or they write their own copy of the catalogue.
 
+## Generated images
+When the owner gives fewer than `imageGen.pipeline.fillUpTo` photos, the brief's `imageIdeas` (subjects that never show people, premises, signs or the owner's work) become images from fal.ai (`ImageGenerator`, model and style in config), generated beside the design step. They are stored under `sites/<id>/generated/` and processed like uploads, with `origin: "generated"` on the asset (spec v3). Validation allows them only in hero-split, hero-image, image-text and page-header. The Picture primitive adds an "Ustvarjeno z UI" badge and an alt-text note (EU AI Act Art. 50). Each image is logged in `model_calls` (stage `imageGen`, priced from config), so it counts against the daily cap. Without `FAL_KEY` (or with `pipeline.enabled: false`) nothing is generated; replays use flat stand-ins.
+
 ## Generation timing
 Brief and design (classify → brief → design) and the image stage (photo variants, alt text) run side by side; content waits for both. The first saved version is logged as stage `preview` with its time; the editor shows it at once while checks and the critique continue, and a critique result arrives as a new version (dropped if the owner edited in between). The eval reports the median time to that first version.
 

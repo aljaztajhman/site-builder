@@ -33,6 +33,7 @@ function brief(over: Partial<Brief["facts"]> = {}, offerings: Brief["offerings"]
     },
     pages: [{ kind: "home", slug: "", navLabel: "Domov", purpose: "x" }],
     missing: [],
+    imageIdeas: [],
   };
 }
 

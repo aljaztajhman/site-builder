@@ -31,13 +31,14 @@ export interface DirectEditResult {
 
 /**
  * Paths no edit may touch: the version, the slug (it names published storage) and asset identity
- * (ids, files, sizes are set by the image pipeline). Alt text and focal points stay editable.
+ * (ids, files, sizes are set by the image pipeline; origin decides the "Ustvarjeno z UI" label, so no
+ * edit may remove it). Alt text and focal points stay editable.
  */
 export function protectedPathIssues(ops: Operation[]): Issue[] {
   const blocked = (p: string) =>
     p === "" ||
     /^\/(specVersion|slug)(\/|$)/.test(p) ||
-    /^\/assets(\/logo(\/|$)|\/images\/?$|\/images\/[^/]+\/?$|\/images\/[^/]+\/(id|src|width|height)(\/|$)|\/?$)/.test(p);
+    /^\/assets(\/logo(\/|$)|\/images\/?$|\/images\/[^/]+\/?$|\/images\/[^/]+\/(id|src|width|height|origin)(\/|$)|\/?$)/.test(p);
   const issues: Issue[] = [];
   for (const op of ops) {
     for (const p of [op.path, "from" in op ? (op as { from: string }).from : undefined]) {

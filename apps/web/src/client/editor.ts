@@ -474,7 +474,7 @@ function field(schema: Schema, rootSchema: Schema, value: Json | undefined, key:
         const imgs = ((state.spec?.assets as Obj)?.images ?? []) as Obj[];
         box.append(
           h("label", {}, title),
-          h("select", { onChange: (e: Event) => sink.edit((e.target as HTMLSelectElement).value) }, ...imgs.map((im) => h("option", { value: im.id as string, selected: im.id === value }, `${im.id}: ${String(im.alt).slice(0, 50)}`))),
+          h("select", { onChange: (e: Event) => sink.edit((e.target as HTMLSelectElement).value) }, ...imgs.map((im) => h("option", { value: im.id as string, selected: im.id === value }, `${im.origin === "generated" ? "Ustvarjeno z UI" : "Fotografija"}: ${String(im.alt).slice(0, 50)}`))),
         );
         return box;
       }

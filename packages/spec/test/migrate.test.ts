@@ -33,8 +33,35 @@ describe("migration 1 → 2 (contact-form section type)", () => {
     const { validateSite } = await import("../src/index.ts");
     const golden = JSON.parse(readFileSync(new URL("../../../tools/eval/golden/pekarna-kvas.json", import.meta.url), "utf8")) as Record<string, unknown>;
     const v1 = { ...golden, specVersion: 1 };
-    const v2 = migrateSpec(v1);
+    const v2 = migrateSpec(v1, MIGRATIONS, 2);
     expect(v2).toEqual({ ...golden, specVersion: 2 });
-    expect(validateSite(v2).ok).toBe(true);
+    expect(validateSite(migrateSpec(v2)).ok).toBe(true);
+  });
+});
+
+describe("migration 2 → 3 (image origin)", () => {
+  it("turns a stored v2 site into a valid v3 site unchanged apart from the version; its photos count as the client's", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { validateSite } = await import("../src/index.ts");
+    const golden = JSON.parse(readFileSync(new URL("../../../tools/eval/golden/pekarna-kvas.json", import.meta.url), "utf8")) as { assets: { images: { origin?: string }[] } };
+    const v3 = migrateSpec({ ...golden, specVersion: 2 });
+    expect(v3).toEqual({ ...golden, specVersion: 3 });
+    expect(validateSite(v3).ok).toBe(true);
+    expect(v3.assets.images.every((i) => i.origin === undefined)).toBe(true);
+  });
+});
+
+describe("generated images", () => {
+  it("may fill a hero but not a products section (pekarna-kvas uses img_01 in both)", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { validateSite } = await import("../src/index.ts");
+    type Spec = { assets: { images: { id: string; origin?: string }[] }; pages: { sections: { type: string }[] }[] };
+    const spec = JSON.parse(readFileSync(new URL("../../../tools/eval/golden/pekarna-kvas.json", import.meta.url), "utf8")) as Spec;
+    spec.assets.images[0]!.origin = "generated";
+    const r = validateSite(spec);
+    expect(r.ok).toBe(false);
+    const home = spec.pages[0]!.sections;
+    const flagged = r.issues.filter((i) => i.message.includes("AI-generated")).map((i) => home[Number(/sections\/(\d+)/.exec(i.path)![1])]!.type);
+    expect(flagged).toEqual(["products"]);
   });
 });

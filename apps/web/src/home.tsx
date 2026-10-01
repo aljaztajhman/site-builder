@@ -282,7 +282,7 @@ export function homePage({ config, signedIn, error, description }: HomeProps): s
               <div className="how">
                 <div>
                   <h3>Opišete</h3>
-                  <p>Nekaj stavkov o podjetju, logotip in fotografije, ki jih imate. Če jih nimate, stran gradimo iz tipografije, ne iz kupljenih slik.</p>
+                  <p>Nekaj stavkov o podjetju, logotip in fotografije, ki jih imate. Če jih nimate dovolj, dodamo največ dve splošni sliki, ustvarjeni z umetno inteligenco, in ju na strani označimo.</p>
                 </div>
                 <div>
                   <h3>Preberemo</h3>
@@ -457,7 +457,7 @@ export function homePage({ config, signedIn, error, description }: HomeProps): s
 }
 
 const FAQ: [string, string][] = [
-  ["Nimam dobrih fotografij. Ali je to težava?", "Ne. Brez fotografij stran gradimo iz tipografije in barv vašega logotipa. Kupljenih ali izmišljenih slik ne uporabljamo, ker se to na strani vidi."],
+  ["Nimam dobrih fotografij. Ali je to težava?", "Ne. Če nam pošljete manj kot dve fotografiji, stran dopolnimo z največ dvema splošnima slikama, ustvarjenima z umetno inteligenco: material, orodje, sestavine ali pokrajina vašega kraja. Na strani sta označeni in nikoli ne prikazujeta vas, vaših prostorov ali vašega dela. Kupljenih slik ne uporabljamo."],
   [
     "Ali si bo stran izmislila podatke?",
     "Ne. Cene, delovni čas, naslov, imena in telefonske številke pridejo samo iz vašega opisa. Kar manjka, je na strani rumeno označeno in stran z manjkajočimi podatki ni objavljiva.",

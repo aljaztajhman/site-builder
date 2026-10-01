@@ -1,5 +1,17 @@
 import { loadConfig, type AppConfig } from "@sb/config";
-import { AnthropicTransport, ModelClient, ReplayTransport, applyChatEdit, generateSite, loadRecordings, publishSite, type ModelTransport } from "@sb/engine";
+import {
+  AnthropicTransport,
+  FalImageTransport,
+  ImageGenerator,
+  ModelClient,
+  ReplayTransport,
+  StandInImageTransport,
+  applyChatEdit,
+  generateSite,
+  loadRecordings,
+  publishSite,
+  type ModelTransport,
+} from "@sb/engine";
 import type { Platform } from "@sb/platform";
 
 /** Model client wired to the database: spend cap from today's logged calls, every call logged per stage. */
@@ -33,6 +45,25 @@ export function modelClientFor(
 }
 
 /**
+ * Generated mood images for sites with too few photos: fal.ai when FAL_KEY is set, flat stand-ins when
+ * replaying recordings (demos), none otherwise. Every image is logged with its € and counts against the cap.
+ */
+export function imageGeneratorFor(platform: Platform, config: AppConfig, ctx: { siteId: string | null; jobId: string | null }): ImageGenerator | undefined {
+  if (!config.imageGen.pipeline.enabled) return undefined;
+  const transport = process.env.MODEL_REPLAY_DIR ? new StandInImageTransport() : process.env.FAL_KEY ? new FalImageTransport() : null;
+  if (!transport) return undefined;
+  return new ImageGenerator({
+    config,
+    transport,
+    spentToday: () => platform.repo.spendToday(),
+    onCall: async (r) => {
+      await platform.repo.logModelCall({ siteId: ctx.siteId, jobId: ctx.jobId, stage: r.stage, model: r.model, inputTokens: 0, outputTokens: 0, cacheCreationTokens: 0, cacheReadTokens: 0, costEur: r.costEur, durationMs: r.durationMs, ok: r.ok });
+      console.log(`[image] ${r.model} €${r.costEur.toFixed(4)} ${r.durationMs}ms${r.ok ? "" : " failed"}`);
+    },
+  });
+}
+
+/**
  * MODEL_REPLAY_DIR replays recorded responses instead of calling the API (demo and offline dev).
  * Every job gets a fresh transport, so a generate job replays the generation calls and an edit job the edit calls.
  */
@@ -54,7 +85,8 @@ export async function startWorker(platform: Platform, config = loadConfig()): Pr
   await queue.work("generate", async (job, jobId) => {
     const client = modelClientFor(platform, config, { siteId: job.siteId, jobId });
     try {
-      await generateSite({ config, repo, storage, client }, job.siteId, jobId);
+      const images = imageGeneratorFor(platform, config, { siteId: job.siteId, jobId });
+      await generateSite({ config, repo, storage, client, ...(images ? { images } : {}) }, job.siteId, jobId);
     } catch (e) {
       await repo.setStatus(job.siteId, "failed");
       await repo.addEvent({ siteId: job.siteId, jobId, stage: "error", level: "error", message: (e as Error).message });

@@ -31,7 +31,8 @@ export interface ModelResponse {
 }
 
 export interface CallRecord {
-  stage: ModelStageName;
+  /** A model stage, or "imageGen" for a generated image (no tokens, priced per image). */
+  stage: ModelStageName | "imageGen";
   model: string;
   usage: ModelUsage;
   costEur: number;

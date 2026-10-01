@@ -12,7 +12,7 @@ const config = loadConfig();
 let browser: CheckBrowser;
 beforeAll(async () => {
   browser = await launchCheckBrowser();
-}, 60_000);
+}, 120_000);
 afterAll(async () => {
   await browser?.close();
 });
