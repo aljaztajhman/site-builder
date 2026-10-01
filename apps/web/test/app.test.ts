@@ -175,7 +175,7 @@ describe("landing page", () => {
     expect(css, "landing page links its stylesheet").not.toBeNull();
     const cssRes = await app.request(css![1]!);
     expect(cssRes.status).toBe(200);
-    expect(await cssRes.text()).toContain(".vig{");
+    expect(await cssRes.text()).toContain(".win{");
     const js = await app.request("/assets/home.js");
     expect(js.status).toBe(200);
     expect(js.headers.get("content-type")).toContain("javascript");

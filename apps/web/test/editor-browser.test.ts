@@ -193,6 +193,22 @@ describe("editor in a browser", () => {
     }
   }, 60_000);
 
+  it("shows one call button on a phone: the bar's, not the hero's right above it", async () => {
+    const id = await bakery("en-klic");
+    const { page, close } = await open(id, 1280);
+    try {
+      const site = page.frameLocator('iframe[title="Predogled strani"]');
+      // The preview is 360 px wide: the bakery's hero has "Pokličite" and the bar is on screen from the start.
+      await expect.poll(() => site.locator(".action-bar [data-action='call'], .action-bar a[href^='tel:']").first().isVisible()).toBe(true);
+      expect(await site.locator("main > :first-child [data-action='call']").isVisible()).toBe(false);
+      // At desktop width there is no bar, so the hero keeps its button.
+      await page.getByRole("button", { name: "Računalnik" }).click();
+      await expect.poll(() => site.locator("main > :first-child [data-action='call']").isVisible(), { timeout: 10_000 }).toBe(true);
+    } finally {
+      await close();
+    }
+  }, 60_000);
+
   it("keeps the side panel on a wide screen (no sheet)", async () => {
     const id = await bakery("urejanje-siroko");
     const { page, close } = await open(id, 1280);

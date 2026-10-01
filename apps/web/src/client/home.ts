@@ -23,7 +23,7 @@ const fit = () => {
 fit();
 addEventListener("resize", fit);
 
-// Play each section's vignette once, when it comes into view.
+// Play each outcome row and the "Kako deluje" timeline once, when it comes into view.
 const io = new IntersectionObserver(
   (entries) => {
     for (const e of entries) {
@@ -34,7 +34,7 @@ const io = new IntersectionObserver(
   },
   { threshold: 0.25 },
 );
-for (const s of document.querySelectorAll("#kaj, #kako")) io.observe(s);
+for (const s of document.querySelectorAll("#kako, .win")) io.observe(s);
 
 const form = document.querySelector<HTMLFormElement>("form[data-home-intake]");
 const ta = form?.querySelector("textarea");
