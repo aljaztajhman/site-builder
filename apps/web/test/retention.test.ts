@@ -9,6 +9,7 @@ import type { SiteSpec } from "@sb/spec";
 import { createApp } from "../src/app.ts";
 import { SESSION_COOKIE } from "../src/auth.ts";
 import { groupVersions, undoTarget, type ListedVersion } from "../src/client/versions.ts";
+import { adminCookie } from "./session-helpers.ts";
 
 /**
  * Everything that points at a version number, after retention removed some: undo, "Obnovi", preview ?v=
@@ -30,8 +31,7 @@ beforeAll(async () => {
   const queue: Queue = { send: async () => "job", work: async () => undefined, ping: async () => undefined, stop: async () => undefined };
   platform = { db, repo: new Repo(db), storage: createFsStorage(dir), queue, close: () => db.close() };
   app = createApp({ platform, config, auth: { password: PASSWORD, secret: "s".repeat(32), secureCookies: false } });
-  const res = await app.request("/login", { method: "POST", body: new URLSearchParams({ password: PASSWORD, next: "/" }) });
-  cookie = (res.headers.get("set-cookie") ?? "").split(";")[0]!;
+  cookie = await adminCookie((p, init) => app.request(p, init), PASSWORD);
   expect(cookie).toContain(`${SESSION_COOKIE}=`);
 }, 60_000);
 afterAll(async () => {

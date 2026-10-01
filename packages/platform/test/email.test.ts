@@ -44,7 +44,9 @@ describe("mail transports", () => {
 
   it("chooses Resend with a key, the console in development, and nothing (with a clear error) when deployed without a key", async () => {
     expect(mailerFromEnv({ RESEND_API_KEY: "re_x", EMAIL_FROM: "a@b.si" }).kind).toBe("resend");
-    expect(() => mailerFromEnv({ RESEND_API_KEY: "re_x" })).toThrow(/EMAIL_FROM/);
+    // Half configured: sends nothing, never stops the server.
+    expect(mailerFromEnv({ RESEND_API_KEY: "re_x", NODE_ENV: "production" }).kind).toBe("disabled");
+    expect(mailerFromEnv({ RESEND_API_KEY: "re_x" }).kind).toBe("disabled");
     expect(mailerFromEnv({ NODE_ENV: "development" }).kind).toBe("console");
     const off = mailerFromEnv({ NODE_ENV: "production" });
     expect(off.kind).toBe("disabled");
