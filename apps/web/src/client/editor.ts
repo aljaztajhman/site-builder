@@ -46,7 +46,10 @@ interface Pulse {
 
 interface State {
   pulse: Pulse;
-  site: { id: string; name: string; slug: string; status: string; published_version: number | null; published_at: string | null; intake?: { scope?: string } };
+  site: {
+    id: string; name: string; slug: string; status: string; published_version: number | null; published_at: string | null; intake?: { scope?: string };
+    brief?: { name?: string; town?: string | null; summary?: string; offerings?: { name: string }[] } | null;
+  };
   version: number | null;
   spec: Obj | null;
   events: { id: string; stage: string; level: string; message: string; created_at: string; data: unknown }[];
@@ -60,6 +63,8 @@ interface State {
   messages: number;
   spendToday: number;
   cap: number;
+  /** Server time of this response (ISO). */
+  now: string;
 }
 
 const root = document.getElementById("app")!;
@@ -108,11 +113,26 @@ async function api<T = unknown>(path: string, init?: RequestInit): Promise<T> {
   return body;
 }
 
+/** Server clock minus this browser's, from the last state fetch; running-stage seconds use server time. */
+let clockSkew = 0;
+
+async function fetchState(): Promise<State> {
+  const s = await api<State>("");
+  const skew = Date.parse(s.now) - Date.now();
+  clockSkew = Number.isFinite(skew) ? skew : 0;
+  return s;
+}
+
+/** Running-stage seconds count up once a second without re-rendering anything else. */
+window.setInterval(() => {
+  for (const el of document.querySelectorAll<HTMLElement>("[data-since]")) el.textContent = elapsed(el.dataset.since!);
+}, 1000);
+
 /** The spec on screen (null before the first load), for wording errors. */
 const currentSpec = (): unknown => (typeof state === "undefined" ? null : state.spec);
 
 async function load(rerender = true): Promise<void> {
-  state = await api<State>("");
+  state = await fetchState();
   if (state.spec && !catalogue) catalogue = await api<Catalogue>("/catalogue");
   if (rerender) render();
   else {
@@ -149,7 +169,7 @@ async function poll(): Promise<void> {
     // The pulse is one small query; the full state (spec, versions, events, chat, checklist) only when it moved.
     const pulse = await api<Pulse>("/pulse");
     if (pulseKey(pulse) === before) return schedulePoll();
-    state = await api<State>("");
+    state = await fetchState();
     if (state.spec && !catalogue) catalogue = await api<Catalogue>("/catalogue");
   } catch {
     // A failed request (deploy, network blip) must not stop polling; try again on the next tick.
@@ -943,40 +963,148 @@ const STAGES: [string, string][] = [
   ["classify", "Vrsta dejavnosti"],
   ["brief", "Razumevanje opisa"],
   ["design", "Oblikovna smer"],
+  ["imageGen", "Ustvarjanje slik"],
   ["images", "Fotografije"],
   ["content", "Besedila in postavitev"],
   ["check", "Preverjanje na telefonu in namizju"],
   ["critique", "Samopregled in popravki"],
 ];
+/** Stages that only some runs have: listed once they start. */
+const OPTIONAL_STAGES = new Set(["imageGen"]);
+/** Which running stage the live preview names when several run side by side (the one the owner waits on). */
+const ACTIVITY_ORDER = ["content", "imageGen", "images", "design", "brief", "classify", "check", "critique"];
+
+type RunEvent = State["events"][number];
+
+/** The latest run's events: from its last "classify start". */
+function currentRun(): RunEvent[] {
+  const starts = state.events.map((e) => e.stage === "classify" && e.message === "start");
+  return state.events.slice(Math.max(0, starts.lastIndexOf(true)));
+}
+
+/** Seconds since `since` on the server's clock, as "8 s" or "1:05". */
+function elapsed(since: string): string {
+  const s = Math.max(0, Math.floor((Date.now() + clockSkew - Date.parse(since)) / 1000));
+  return s < 60 ? `${s} s` : `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+}
+
+/** Running stages with the time each started, in pipeline order. */
+function runningStages(run: RunEvent[]): { key: string; since: string }[] {
+  const out: { key: string; since: string }[] = [];
+  for (const [key] of STAGES) {
+    const starts = run.filter((e) => e.stage === key && e.message === "start");
+    const done = run.filter((e) => e.stage === key && e.message === "done").length;
+    if (starts.length > done) out.push({ key, since: starts.at(-1)!.created_at });
+  }
+  return out;
+}
 
 function progress(): HTMLElement {
-  // The latest run starts at its last "classify start" event.
-  const starts = state.events.map((e) => e.stage === "classify" && e.message === "start");
-  const run = state.events.slice(Math.max(0, starts.lastIndexOf(true)));
+  const run = currentRun();
+  const running = new Map(runningStages(run).map((r) => [r.key, r.since]));
   const list = h("ol", { class: "stages", "aria-label": "Potek ustvarjanja" });
   for (const [key, name] of STAGES) {
     const begun = run.filter((e) => e.stage === key && e.message === "start").length;
+    if (!begun && OPTIONAL_STAGES.has(key)) continue;
     const done = run.filter((e) => e.stage === key && e.message === "done");
     const ms = done.reduce((a, e) => a + Number((e.data as { ms?: number } | null)?.ms ?? 0), 0);
-    const cls = begun > done.length ? "run" : done.length ? "done" : "";
+    const since = running.get(key);
+    const cls = since ? "run" : done.length ? "done" : "";
     list.append(
       h("li", { class: cls },
         h("i", { "aria-hidden": "true" }),
         h("span", {}, name, h("span", { class: "sr-only" }, cls === "run" ? " (poteka)" : cls === "done" ? " (končano)" : " (čaka)")),
-        h("span", { class: "num" }, ms ? `${(ms / 1000).toLocaleString("sl-SI", { maximumFractionDigits: ms < 10_000 ? 1 : 0 })} s` : ""),
+        // A running stage counts up every second, so a long step never looks stuck.
+        since
+          ? h("span", { class: "num", "data-since": since }, elapsed(since))
+          : h("span", { class: "num" }, ms ? `${(ms / 1000).toLocaleString("sl-SI", { maximumFractionDigits: ms < 10_000 ? 1 : 0 })} s` : ""),
       ),
     );
   }
   return list;
 }
 
+/** What the run has produced so far, for the live preview while the content is written. */
+function liveData() {
+  const run = currentRun();
+  const briefDone = run.some((e) => e.stage === "brief" && e.message === "done");
+  const brief = briefDone ? state.site.brief ?? null : null;
+  const design = run.findLast((e) => e.stage === "design" && e.message === "Direction chosen")?.data as { direction: string; colors: Record<string, string> } | undefined;
+  const photos = (run.find((e) => e.stage === "images" && e.message === "Photos ready")?.data as { ids?: string[] } | undefined)?.ids ?? [];
+  const generated = run.filter((e) => e.stage === "imageGen" && e.message === "Image ready").map((e) => e.data as { id: string; alt: string });
+  const running = runningStages(run).sort((a, b) => ACTIVITY_ORDER.indexOf(a.key) - ACTIVITY_ORDER.indexOf(b.key));
+  return {
+    name: brief?.name ?? null,
+    town: brief?.town ?? null,
+    summary: brief?.summary ?? null,
+    offerings: (brief?.offerings ?? []).map((o) => o.name).slice(0, 4),
+    direction: design ? DIRECTION_LABEL[design.direction]?.name ?? null : null,
+    colors: design?.colors ?? null,
+    images: [...photos.map((id) => ({ id, alt: "", generated: false })), ...generated.map((g) => ({ ...g, generated: true }))].slice(0, 2),
+    activity: running[0] ? { name: STAGES.find(([k]) => k === running[0]!.key)![1], since: running[0].since } : null,
+  };
+}
+
+/** Pictures already faded in once; a re-render shows them without fading again. */
+const shownImages = new Set<string>();
+
+/**
+ * The preview frame while the site is generated: a skeleton page that fills in with what the run has
+ * actually produced (name, colours, pictures), so the owner sees it moving long before the text is ready.
+ */
+function liveSkeleton(): HTMLElement {
+  const d = liveData();
+  const bars = (...widths: number[]) => widths.map((w) => h("span", { class: "sk-bar", style: { width: `${w}%` } }));
+  const picture = (i: number, cls: string) => {
+    const img = d.images[i];
+    if (!img) return h("div", { class: `${cls} sk-block` });
+    const fresh = !shownImages.has(img.id);
+    shownImages.add(img.id);
+    return h("div", { class: `${cls} sk-pic` },
+      h("img", { src: `/preview/${siteId}/media/${img.id}-720.webp`, alt: "", class: fresh ? "fresh" : null }),
+      img.generated ? h("span", { class: "sk-ai" }, "Ustvarjeno z UI") : null,
+    );
+  };
+  const page = h("div", { class: `frame skeleton live${d.colors ? " colored" : ""}`, "aria-hidden": "true" },
+    h("div", { class: "sk-head" },
+      d.name ? h("span", { class: "sk-name" }, d.name) : h("span", { class: "sk-bar", style: { width: "38%" } }),
+      h("span", { class: "sk-btn" }),
+    ),
+    h("div", { class: "sk-hero" },
+      picture(0, "sk-hero-pic"),
+      h("div", { class: "sk-hero-text" },
+        d.town ? h("span", { class: "sk-eyebrow" }, d.town) : h("span", { class: "sk-bar", style: { width: "30%" } }),
+        h("span", { class: "sk-bar sk-h" }), h("span", { class: "sk-bar sk-h", style: { width: "70%" } }),
+        d.summary ? h("p", { class: "sk-summary" }, d.summary) : bars(92, 85, 60),
+        h("span", { class: "sk-btn wide" }),
+      ),
+    ),
+    h("div", { class: "sk-section" },
+      h("span", { class: "sk-bar sk-h", style: { width: "55%" } }),
+      d.offerings.length ? h("ul", { class: "sk-offers" }, d.offerings.map((o) => h("li", {}, o))) : bars(90, 80, 86),
+    ),
+    d.images[1] ? picture(1, "sk-second") : null,
+    d.direction ? h("p", { class: "sk-direction" }, `Oblikovna smer: ${d.direction}`) : null,
+    d.activity ? h("p", { class: "sk-activity" }, h("i", {}), `${d.activity.name} … `, h("span", { "data-since": d.activity.since }, elapsed(d.activity.since))) : null,
+  );
+  if (d.colors) {
+    const c = d.colors;
+    const vars: Record<string, string | undefined> = { "--sk-bg": c.background, "--sk-surface": c.surface, "--sk-text": c.text, "--sk-muted": c.muted, "--sk-primary": c.primary, "--sk-line": c.border };
+    for (const [k, v] of Object.entries(vars)) if (v) page.style.setProperty(k, v);
+  }
+  // Rebuilt only when something new arrived, so the shimmer and the counters run on undisturbed.
+  page.dataset.sig = JSON.stringify({ ...d, activity: d.activity?.name ?? null });
+  return page;
+}
+
 function statusBlock(): HTMLElement | null {
   const s = state.site;
   if (s.status === "generating") {
+    const runStart = currentRun()[0]?.created_at;
     return h("div", { class: "pane" },
-      h("h2", { class: "pane-title" }, state.spec ? "Stran preverjamo" : "Stran se ustvarja"),
+      h("h2", { class: "pane-title" }, state.spec ? "Stran preverjamo" : "Stran se ustvarja", runStart ? h("span", { class: "elapsed", "data-since": runStart }, elapsed(runStart)) : null),
       progress(),
-      h("p", { class: "help" }, state.spec ? "Predogled je pripravljen. Ko preverjanje najde kaj za popraviti, se pokaže nova različica. Urejate lahko že zdaj." : "Predogled se pokaže, ko so besedila gotova. Stran lahko zaprete, ustvarjanje teče naprej."),
+      h("p", { class: "help" }, state.spec ? "Predogled je pripravljen. Ko preverjanje najde kaj za popraviti, se pokaže nova različica. Urejate lahko že zdaj." : "Predogled se sestavlja sproti. Stran lahko zaprete, ustvarjanje teče naprej."),
     );
   }
   if (s.status === "failed") {
@@ -1264,6 +1392,7 @@ function render(): void {
   shell.bar.replaceChildren(...barItems().filter((c): c is Node => c instanceof Node));
   shell.bar.hidden = !state.spec;
   shell.ed.classList.toggle("nospec", !state.spec);
+  shell.ed.classList.toggle("generating", state.site.status === "generating");
   renderStage();
   linkLabels(shell.panel);
   linkLabels(shell.bar);
@@ -1278,7 +1407,11 @@ function renderStage(): void {
   const stage = shell!.stage;
   if (!state.spec) {
     frame = null;
-    stage.replaceChildren(h("div", { class: "frame skeleton" }, state.site.status === "generating" ? "Predogled se pokaže, ko so besedila gotova." : "Predogleda še ni."));
+    if (state.site.status === "generating") {
+      const live = liveSkeleton();
+      const current = stage.querySelector<HTMLElement>(".frame.live");
+      if (current?.dataset.sig !== live.dataset.sig) stage.replaceChildren(live);
+    } else stage.replaceChildren(h("div", { class: "frame skeleton" }, "Predogleda še ni."));
     sizeFrame();
     return;
   }

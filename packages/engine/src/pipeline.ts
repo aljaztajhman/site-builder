@@ -125,6 +125,8 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     if (logo) swatches.push(...(await extractSwatches(originals.get(logo.id)!, "logo", 3)));
     for (const p of photos.slice(0, 3)) swatches.push(...(await extractSwatches(originals.get(p.id)!, "photo", 2)));
     const { design } = await stageTime("design", () => chooseDesign(client, { brief, swatches, photoCount: photos.length, generatedCount: ideas.length }));
+    // The editor's live preview recolours its skeleton with these while the content is written.
+    await log("design", "Direction chosen", { direction: design.direction, colors: design.colors });
     return { brief, design, generated: await generating };
   })();
 
@@ -141,6 +143,8 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
       images.push({ id, src: p.storage_key, width: processed.width, height: processed.height, alt: "" });
       vision.push({ jpegBase64: await visionJpeg(originals.get(p.id)!) });
     }
+    // The variants exist now; the editor's live preview shows the photos before the alt texts are back.
+    if (images.length) await log("images", "Photos ready", { ids: images.map((i) => i.id) });
     const alts = await altTexts(client, vision);
     alts.forEach((a, i) => {
       images[i]!.alt = a.alt.slice(0, 180);
@@ -269,6 +273,8 @@ async function generateImages(deps: PipelineDeps, siteId: string, ideas: { subje
       await storage.put(key, img.data, "image/jpeg");
       const processed = await processPhoto(id, img.data, config.images.widths, { avif: config.images.avifQuality, webp: config.images.webpQuality });
       for (const v of processed.variants) await storage.put(mediaKey(siteId, v.file), v.data, contentType(v.file));
+      // One event per picture as it lands, so the editor's live preview shows each one at once.
+      await log("imageGen", "Image ready", { id, alt: idea.alt.slice(0, 180) });
       return { id, src: key, width: processed.width, height: processed.height, alt: idea.alt.slice(0, 180), origin: "generated" };
     }),
   );

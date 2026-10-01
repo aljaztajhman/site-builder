@@ -236,6 +236,8 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
       messages: (await repo.listFormMessages(id)).length,
       spendToday: await repo.spendToday(),
       cap: config.limits.dailyModelSpendCapEur,
+      // Server time, so the editor's running-stage seconds don't depend on the visitor's clock.
+      now: new Date().toISOString(),
     });
   });
 
