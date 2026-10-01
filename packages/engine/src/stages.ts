@@ -53,7 +53,7 @@ export async function classify(client: ModelClient, description: string): Promis
 
 export async function makeBrief(
   client: ModelClient,
-  input: { description: string; businessType: string; photoCount: number; hasLogo: boolean; scope: "home" | "full" },
+  input: { description: string; businessType: string; photoCount: number; generatedSlots: number; hasLogo: boolean; scope: "home" | "full" },
 ): Promise<{ brief: Brief; dropped: Dropped[] }> {
   const { data } = await client.callJson({
     stage: "brief",
@@ -61,7 +61,7 @@ export async function makeBrief(
     messages: [
       {
         role: "user",
-        content: `Business type (classified): ${input.businessType}\nPhotos provided: ${input.photoCount}\nLogo provided: ${input.hasLogo ? "yes" : "no"}\nScope: ${input.scope === "home" ? "homepage preview (plan all pages anyway)" : "full site"}\n\nClient's description:\n"""\n${input.description}\n"""`,
+        content: `Business type (classified): ${input.businessType}\nPhotos provided: ${input.photoCount}\nGenerated pictures allowed: ${input.generatedSlots}\nLogo provided: ${input.hasLogo ? "yes" : "no"}\nScope: ${input.scope === "home" ? "homepage preview (plan all pages anyway)" : "full site"}\n\nClient's description:\n"""\n${input.description}\n"""`,
       },
     ],
     schema: briefJsonSchema(),
@@ -87,9 +87,15 @@ const DesignChoice = z.strictObject({
   reason: z.string().max(300),
 });
 
+/** What the design step hears about pictures: generated mood pictures count, so a photo-less site still gets a photo-led direction. */
+export function photoLine(photoCount: number, generatedCount: number): string {
+  const has = `Photos: ${photoCount} from the client${generatedCount ? `, plus ${generatedCount} generated mood picture(s) on the way` : ""}.`;
+  return `${has} ${photoCount + generatedCount ? "Prefer a direction whose heroes and imagery show pictures." : "No pictures: prefer a typography-led direction and heroes."}`;
+}
+
 export async function chooseDesign(
   client: ModelClient,
-  input: { brief: Brief; swatches: Swatch[]; photoCount: number },
+  input: { brief: Brief; swatches: Swatch[]; photoCount: number; generatedCount: number },
 ): Promise<{ design: Design; reason: string }> {
   const { data } = await client.callJson({
     stage: "design",
@@ -97,7 +103,7 @@ export async function chooseDesign(
     messages: [
       {
         role: "user",
-        content: `Business: ${input.brief.name} (${input.brief.businessType}), tone ${input.brief.tone}.\nSummary: ${input.brief.summary}\nPhotos: ${input.photoCount}${input.photoCount < 2 ? " (few photos: prefer a typography-led direction and heroes)" : ""}.\nBrand colours extracted in code (hex, share, source): ${
+        content: `Business: ${input.brief.name} (${input.brief.businessType}), tone ${input.brief.tone}.\nSummary: ${input.brief.summary}\n${photoLine(input.photoCount, input.generatedCount)}\nBrand colours extracted in code (hex, share, source): ${
           input.swatches.length ? input.swatches.map((s) => `${s.hex} ${(s.weight * 100).toFixed(0)}% ${s.source}`).join(", ") : "none"
         }`,
       },
@@ -223,6 +229,13 @@ function imageList(assets: SiteSpec["assets"], heroIds: string[]): string {
     .join("\n");
 }
 
+/** With a hero-suitable picture the homepage opens on it; a text-only hero wastes the picture. */
+export function heroRule(heroImageIds: string[]): string {
+  return heroImageIds.length
+    ? `Homepage hero: hero-split or hero-image with one of the hero-suitable pictures (${heroImageIds.join(", ")}), not hero-type. Put the other pictures in image-text or page-header with-image sections.`
+    : "";
+}
+
 export async function generateContent(client: ModelClient, input: ContentInput): Promise<ContentResult> {
   const dir = directionById(input.design.direction);
   const schema = contentOutputSchema();
@@ -236,6 +249,7 @@ export async function generateContent(client: ModelClient, input: ContentInput):
         `Pages to produce (page ids p_<slug or "home">):\n${pages.map((p) => `- ${p.kind} "${p.slug}" nav "${p.navLabel}": ${p.purpose}`).join("\n")}`,
         `Design direction: ${dir.id}. Header ${dir.layout.header}, footer ${dir.layout.footer}. Preferred heroes: ${dir.layout.heroes.join(", ")}. Section rhythm: ${dir.layout.rhythm} (use the tone field: default/alt/inverse). Preferred variants: ${dir.layout.prefer.join(", ")}.`,
         `Photos (use each at most twice; alt text is already written):\n${imageList(input.assets, input.heroImageIds)}`,
+        heroRule(input.heroImageIds),
         `Business facts available to components: phone ${input.brief.facts.phone ? "yes" : "missing"}, address ${input.brief.facts.address ? "yes" : "missing"}, hours ${input.brief.facts.hours ? "yes" : "missing"}, booking URL ${input.brief.facts.bookingUrl ? "yes" : "no — never use the booking action"}.`,
         input.structuredOutput ? "" : plainJsonInstruction(),
       ]

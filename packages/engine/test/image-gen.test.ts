@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { loadConfig } from "@sb/config";
-import { ImageGenerator, SpendCapError, generatedImageCount, StandInImageTransport, imageCostEur, requestBody, type CallRecord, type ImageTransport } from "../src/index.ts";
+import { ImageGenerator, SpendCapError, generatedImageCount, heroRule, photoLine, StandInImageTransport, imageCostEur, requestBody, type CallRecord, type ImageTransport } from "../src/index.ts";
 
 const config = loadConfig();
 const model = config.imageGen.models[config.imageGen.pipeline.model]!;
@@ -36,15 +36,33 @@ describe("image generation", () => {
 });
 
 describe("generated image count", () => {
-  const fill = config.imageGen.pipeline.fillUpTo;
+  const fill = config.imageGen.pipeline.fillUpTo.full;
   it("fills up to the configured count when a generator exists", () => {
-    expect(generatedImageCount(config, 0, true)).toEqual({ wanted: fill, skipped: null });
-    expect(generatedImageCount(config, fill, true)).toEqual({ wanted: 0, skipped: null });
+    expect(generatedImageCount(config, 0, true, "full")).toEqual({ wanted: fill, skipped: null });
+    expect(generatedImageCount(config, fill, true, "full")).toEqual({ wanted: 0, skipped: null });
+  });
+  it("uses fewer pictures for a homepage preview than for a full site", () => {
+    expect(config.imageGen.pipeline.fillUpTo.home).toBeLessThan(fill);
+    expect(generatedImageCount(config, 0, true, "home").wanted).toBe(config.imageGen.pipeline.fillUpTo.home);
   });
   it("says why when pictures are wanted but no image service is configured", () => {
-    const r = generatedImageCount(config, 0, false);
+    const r = generatedImageCount(config, 0, false, "full");
     expect(r.wanted).toBe(0);
     expect(r.skipped).toContain("FAL_KEY");
-    expect(generatedImageCount(config, fill, false)).toEqual({ wanted: 0, skipped: null });
+    expect(generatedImageCount(config, fill, false, "full")).toEqual({ wanted: 0, skipped: null });
+  });
+});
+
+describe("pictures in the prompts", () => {
+  it("counts generated pictures when the design step chooses a direction", () => {
+    expect(photoLine(0, 0)).toContain("typography-led");
+    expect(photoLine(0, 3)).toContain("3 generated mood picture(s)");
+    expect(photoLine(0, 3)).toContain("show pictures");
+    expect(photoLine(4, 0)).not.toContain("generated");
+  });
+  it("asks for a picture hero only when a hero-suitable picture exists", () => {
+    expect(heroRule([])).toBe("");
+    expect(heroRule(["gen_01"])).toContain("gen_01");
+    expect(heroRule(["gen_01"])).toContain("not hero-type");
   });
 });

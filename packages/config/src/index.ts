@@ -83,8 +83,8 @@ export const AppConfigSchema = z.object({
       enabled: z.boolean(),
       /** A key of `models`. */
       model: z.string(),
-      /** Generate images until the site has this many photos (client photos count first). */
-      fillUpTo: z.number().int().min(0).max(4),
+      /** Generate images until the site has this many photos (client photos count first), per generation scope. */
+      fillUpTo: z.strictObject({ home: z.number().int().min(0).max(4), full: z.number().int().min(0).max(4) }),
       /** Appended to every generated image's prompt. */
       style: z.string().min(1),
     }),

@@ -34,6 +34,7 @@ afterAll(async () => {
 const IDEAS = [
   { subject: "Copper pipes and brass fittings laid out on a workbench", alt: "Bakrene cevi in medeninasti priključki na delovni mizi" },
   { subject: "A modern heat pump unit beside a house wall on a sunny day", alt: "Toplotna črpalka ob steni hiše" },
+  { subject: "A neatly insulated boiler room with valves and copper pipes", alt: "Urejena kotlovnica z ventili" },
 ];
 
 /** The fixture's synthetic answers, with image ideas in the brief and a hero that uses the first generated picture. */
@@ -80,14 +81,16 @@ async function run(id: string, photos: number, heroImage: string | null) {
 describe("generated images for sites with too few photos", () => {
   it("generates up to fillUpTo labelled pictures for a site without photos and uses one as the hero", async () => {
     const { spec, calls, stand, storage, site } = await run("instalacije-rebernik", 0, "img_g1");
-    expect(config.imageGen.pipeline.fillUpTo).toBe(2);
-    expect(stand.calls).toBe(2);
+    // The run is a homepage preview: its fill count, not the full site's.
+    const fill = config.imageGen.pipeline.fillUpTo.home;
+    expect(fill).toBe(2);
+    expect(stand.calls).toBe(fill);
     const generated = spec.assets.images.filter((i) => i.origin === "generated");
-    expect(generated.map((g) => [g.id, g.alt])).toEqual(IDEAS.map((idea, i) => [`img_g${i + 1}`, idea.alt]));
+    expect(generated.map((g) => [g.id, g.alt])).toEqual(IDEAS.slice(0, fill).map((idea, i) => [`img_g${i + 1}`, idea.alt]));
     expect(validateSite(spec).ok).toBe(true);
     // Each image is logged with its € so it counts against the daily cap.
     const imageCalls = calls.filter((c) => c.stage === "imageGen");
-    expect(imageCalls).toHaveLength(2);
+    expect(imageCalls).toHaveLength(fill);
     expect(imageCalls.every((c) => c.ok && c.costEur > 0)).toBe(true);
     // Stored and processed like an upload; the page labels it.
     expect(await storage.get(`sites/${site.id}/generated/img_g1.jpg`)).not.toBeNull();
