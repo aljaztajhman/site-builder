@@ -121,6 +121,36 @@ describe("pipeline with replayed model responses (no network)", () => {
     }
   }, 180_000);
 
+  it("regenerating keeps the business facts the owner typed in the editor", async () => {
+    const { fixture, golden, storage, site } = await seedSite("pekarna-kvas-regen");
+    const run = async () => {
+      const client = new ModelClient({ config, transport: new ReplayTransport(syntheticRecordings(fixture, golden)), spentToday: async () => 0, onCall: async () => undefined });
+      return generateSite({ config, repo, storage, client, browser, lighthouse: false }, site.id, null);
+    };
+    await run();
+    // The owner fills the provider data for publishing and corrects the phone number in the editor.
+    const current = (await repo.getSpec(site.id))!;
+    const ops = [
+      { op: "replace", path: "/business/phone", value: "+38641000111" },
+      { op: "replace", path: "/business/provider/legalName", value: "Pekarna Kvas d.o.o." },
+      { op: "replace", path: "/business/provider/taxNumber", value: "12345678" },
+      { op: "replace", path: "/business/provider/registrationNumber", value: "1234567000" },
+    ];
+    const edited = structuredClone(current.spec);
+    edited.business.phone = "+38641000111";
+    edited.business.provider = { ...edited.business.provider, legalName: "Pekarna Kvas d.o.o.", taxNumber: "12345678", registrationNumber: "1234567000" };
+    await repo.saveSpec(site.id, edited, "manual", "podatki", ops, current.version);
+
+    const again = await run();
+    const spec = (await repo.getSpec(site.id))!.spec;
+    expect(spec.business.phone).toBe("+38641000111");
+    expect(spec.business.provider).toMatchObject({ legalName: "Pekarna Kvas d.o.o.", taxNumber: "12345678", registrationNumber: "1234567000" });
+    // The kept facts count as the client's own: the fact check passes.
+    expect(again.check?.facts).toEqual([]);
+    const events = await db.query<{ message: string }>("select message from site_events where site_id = $1", [site.id]);
+    expect(events.rows.map((e) => e.message)).toContain("Kept the business facts of the previous version");
+  }, 180_000);
+
   it("keeps the checked site when the critique answer is unusable", async () => {
     const { fixture, golden, storage, site } = await seedSite("pekarna-kvas-critique");
     const recordings = syntheticRecordings(fixture, golden).map((r) => (r.stage === "critique" ? { ...r, response: { ...r.response, text: "I looked at the screenshots and it all seems fine." } } : r));

@@ -129,11 +129,32 @@ describe("editor in a browser", () => {
     }
   }, 60_000);
 
+  it("shows the selected section in each layout and switches to the one tapped", async () => {
+    const id = await bakery("urejanje-postavitev");
+    const { page, close } = await open(id);
+    try {
+      await page.locator(".outline li", { hasText: "O nas" }).click();
+      const options = page.locator(".variants .variant");
+      await expect.poll(() => options.count()).toBe(2);
+      // Each thumbnail is the section itself, in that layout.
+      for (const [i, variant] of ["image-side", "text-only"].entries()) {
+        const section = page.frameLocator(".variants iframe").nth(i).locator("main section");
+        await expect.poll(() => section.getAttribute("class"), { timeout: 10_000 }).toContain(`s-about--${variant}`);
+        expect(await section.count()).toBe(1);
+      }
+      await page.locator(".variant", { hasText: "Samo besedilo" }).click();
+      await expect.poll(async () => home(await spec(id)).sections.find((s) => s.id === "s_about")?.variant, { timeout: 10_000 }).toBe("text-only");
+      await expect.poll(() => page.locator('.variant[aria-pressed="true"]').textContent()).toBe("Samo besedilo");
+    } finally {
+      await close();
+    }
+  }, 60_000);
+
   it("edits text in place with one tap once its section is selected", async () => {
     const id = await bakery("urejanje-dotik");
     const { page, close } = await open(id);
     try {
-      const preview = page.frameLocator("iframe");
+      const preview = page.frameLocator("iframe[title=\"Predogled strani\"]");
       const title = preview.locator("#s_about h2");
       await title.click(); // selects the section
       await title.click(); // edits its text

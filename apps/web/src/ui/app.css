@@ -250,3 +250,12 @@ details.more>summary{padding:12px 0;font-weight:600;cursor:pointer}
 .checklist li button:hover span{text-decoration:underline}
 .btn.blocked{opacity:.6}
 .flash{outline:3px solid var(--warn);outline-offset:4px;border-radius:var(--r-1);transition:outline-color .3s}
+/* Layout thumbnails of the selected section ("Postavitev"): real content, drawn at desktop width and scaled. */
+.variants{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0 0 14px;padding:0;border:0}
+.variants legend{padding:0;margin-bottom:6px;font-weight:600;font-size:14px}
+.variant{display:grid;gap:6px;padding:6px;border:1px solid var(--line);border-radius:var(--r-2);background:var(--surface);color:var(--ink);font:500 14px/1.3 var(--font-ui);text-align:left;cursor:pointer}
+.variant:hover{border-color:var(--line-field)}
+.variant[aria-pressed=true]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.variant[aria-pressed=true] .name::after{content:" · izbrana";color:var(--accent);font-weight:600}
+.variant .thumb{position:relative;display:block;height:120px;overflow:hidden;border-radius:var(--r-1);background:#fff;outline:1px solid var(--line)}
+.variant iframe{position:absolute;top:0;left:0;width:1024px;height:800px;border:0;transform-origin:0 0;pointer-events:none}

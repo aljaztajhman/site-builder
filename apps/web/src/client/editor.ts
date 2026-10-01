@@ -653,11 +653,9 @@ function contentPane(): HTMLElement {
     if (info) {
       pane.append(
         h("p", { class: "help" }, "Tapnite besedilo izbranega razdelka v predogledu in ga popravite kar tam."),
-        h("div", { class: "pair" },
-          labelled("Različica", h("select", { onChange: (e: Event) => void patch([isSection(pi, si, String(s.id)), { op: "replace", path: `${base}/variant`, value: (e.target as HTMLSelectElement).value }], "različica") }, ...info.variants.map((v) => h("option", { value: v, selected: v === s.variant }, VARIANT_LABEL[s.type as string]?.[v] ?? v)))),
-          labelled("Ozadje", h("select", { onChange: (e: Event) => { const v = (e.target as HTMLSelectElement).value; void patch([isSection(pi, si, String(s.id)), s.tone === undefined ? { op: "add", path: `${base}/tone`, value: v } : { op: "replace", path: `${base}/tone`, value: v }], "ozadje"); } },
-            ...["default", "alt", "inverse"].map((t) => h("option", { value: t, selected: (s.tone ?? "default") === t }, TONE[t]!)))),
-        ),
+        variantPicker(s, pi, si, info.variants),
+        labelled("Ozadje", h("select", { onChange: (e: Event) => { const v = (e.target as HTMLSelectElement).value; void patch([isSection(pi, si, String(s.id)), s.tone === undefined ? { op: "add", path: `${base}/tone`, value: v } : { op: "replace", path: `${base}/tone`, value: v }], "ozadje"); } },
+          ...["default", "alt", "inverse"].map((t) => h("option", { value: t, selected: (s.tone ?? "default") === t }, TONE[t]!)))),
         formAt(inSection(String(s.id), "/props"), info.props, s.props as Json, "props", `urejen razdelek ${s.type}`),
       );
     } else {
@@ -665,6 +663,51 @@ function contentPane(): HTMLElement {
     }
   }
   return pane;
+}
+
+/** Width the layout thumbnails are drawn at: the narrowest full desktop layout (sites switch at 768 and 1024 px), where variants differ most. */
+const THUMB_WIDTH = 1024;
+
+/**
+ * "Druga postavitev": the selected section in each of its layouts, with its own content, rendered by
+ * the preview route (same components as the published site; no model call). A tap switches to it.
+ */
+function variantPicker(s: Obj, pi: number, si: number, variants: string[]): HTMLElement {
+  const type = String(s.type);
+  const page = pages()[pi]!;
+  const box = h("fieldset", { class: "variants" }, h("legend", {}, "Postavitev"));
+  for (const v of variants) {
+    const name = VARIANT_LABEL[type]?.[v] ?? v;
+    const chosen = v === s.variant;
+    const frame = h("iframe", {
+      title: `Postavitev »${name}«`,
+      tabindex: "-1",
+      "aria-hidden": "true",
+      loading: "lazy",
+      src: `/preview/${siteId}/${pageFileOf(page)}?v=${state.version ?? ""}&section=${encodeURIComponent(String(s.id))}&variant=${encodeURIComponent(v)}`,
+    });
+    // Only the section: the site's header, footer, call bar and cookie notice are hidden in the thumbnail.
+    frame.addEventListener("load", () => {
+      const d = frame.contentDocument;
+      if (!d) return;
+      const style = d.createElement("style");
+      style.textContent = ".site-header,footer,.action-bar,.consent,.skip-link{display:none!important}";
+      d.head.append(style);
+    });
+    const thumb = h("span", { class: "thumb" }, frame);
+    new ResizeObserver(() => (frame.style.transform = `scale(${thumb.clientWidth / THUMB_WIDTH})`)).observe(thumb);
+    box.append(
+      h("button", {
+        type: "button",
+        class: "variant",
+        "aria-pressed": String(chosen),
+        onClick: () => {
+          if (!chosen) void patch([isSection(pi, si, String(s.id)), { op: "replace", path: `/pages/${pi}/sections/${si}/variant`, value: v }], "postavitev");
+        },
+      }, thumb, h("span", { class: "name" }, name)),
+    );
+  }
+  return box;
 }
 
 function factsPane(): HTMLElement {
@@ -874,7 +917,7 @@ function aiPane(): HTMLElement {
     ),
     h("details", { class: "more" },
       h("summary", {}, "Ustvari celotno stran znova"),
-      h("p", { class: "help" }, "Vse strani naredimo znova iz vašega opisa. Trenutna vsebina ostane med različicami, zato jo lahko obnovite. Stane približno toliko kot ustvarjanje nove strani."),
+      h("p", { class: "help" }, "Vse strani naredimo znova iz vašega opisa. Podatki o podjetju, ki ste jih vpisali (ime, telefon, naslov, delovni čas, podatki o ponudniku), ostanejo; besedila in postavitev so nova. Trenutna vsebina ostane med različicami, zato jo lahko obnovite. Stane približno toliko kot ustvarjanje nove strani."),
       h("button", { class: "btn", type: "button", disabled: state.site.status === "generating", onClick: () => { if (confirm("Ustvarim celotno stran znova? To porabi žetone in zamenja trenutno vsebino z novo različico.")) void post("/generate", { scope: "full" }, "Ustvarjanje se je začelo."); } }, "Ustvari znova"),
     ),
   );
