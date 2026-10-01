@@ -37,7 +37,15 @@ interface Catalogue {
   fontPairs: { id: string; label: string }[];
 }
 
+interface Pulse {
+  status: string;
+  version: number | null;
+  chat: number;
+  lastEvent: number;
+}
+
 interface State {
+  pulse: Pulse;
   site: { id: string; name: string; slug: string; status: string; published_version: number | null; published_at: string | null; intake?: { scope?: string } };
   version: number | null;
   spec: Obj | null;
@@ -126,7 +134,8 @@ const awaitingReply = (): boolean => {
 };
 
 /** What a poll can change on screen; re-render only when it differs, so typing isn't wiped every 2 s. */
-const pollSignature = (): string => [state.site.status, state.version, state.chat.length, state.events.length].join("|");
+const pollSignature = (): string => pulseKey(state.pulse);
+const pulseKey = (p: Pulse): string => [p.status, p.version, p.chat, p.lastEvent].join("|");
 
 function schedulePoll(): void {
   window.clearTimeout(pollTimer);
@@ -137,6 +146,9 @@ function schedulePoll(): void {
 async function poll(): Promise<void> {
   const before = pollSignature();
   try {
+    // The pulse is one small query; the full state (spec, versions, events, chat, checklist) only when it moved.
+    const pulse = await api<Pulse>("/pulse");
+    if (pulseKey(pulse) === before) return schedulePoll();
     state = await api<State>("");
     if (state.spec && !catalogue) catalogue = await api<Catalogue>("/catalogue");
   } catch {

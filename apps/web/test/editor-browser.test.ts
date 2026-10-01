@@ -111,6 +111,24 @@ describe("editor in a browser", () => {
     }
   }, 60_000);
 
+  it("picks up a change the worker saves while the site is busy, from the small poll", async () => {
+    const id = await bakery("urejanje-pulz");
+    await platform.repo.setStatus(id, "editing");
+    const { page, close } = await open(id);
+    try {
+      await expect.poll(() => page.locator("#ed-version").textContent()).toBe("v1");
+      // As the edit job would: a new version, then back to ready.
+      const s = await spec(id);
+      (home(s).sections.find((x) => x.id === "s_about")!.props as { heading: string }).heading = "Shranil pomočnik";
+      await platform.repo.saveSpec(id, s, "edit", "pomočnik");
+      await platform.repo.setStatus(id, "ready");
+      await expect.poll(() => page.locator("#ed-version").textContent(), { timeout: 10_000 }).toBe("v2");
+      await expect.poll(() => page.frameLocator('iframe[title="Predogled strani"]').locator("#s_about h2").textContent(), { timeout: 10_000 }).toBe("Shranil pomočnik");
+    } finally {
+      await close();
+    }
+  }, 60_000);
+
   it("edits text in place with one tap once its section is selected", async () => {
     const id = await bakery("urejanje-dotik");
     const { page, close } = await open(id);
