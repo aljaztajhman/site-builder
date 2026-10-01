@@ -83,16 +83,17 @@ if (demo) {
     demo.dataset.step = "type";
     text.textContent = "";
     scrollSite(0);
-    const typing = Math.round(full.length / 3) * 40;
-    for (let i = 3; i <= full.length + 2; i += 3) at((i / 3) * 40, () => (text.textContent = full.slice(0, i)));
-    at(typing + 500, () => (demo.dataset.step = "build"));
-    at(typing + 3100, () => (demo.dataset.step = "phone"));
-    at(typing + 5600, () => scrollSite(320));
-    at(typing + 8000, () => {
+    // Tempo: about a third slower than the first version (owner, 2026-10-01).
+    const typing = Math.round(full.length / 3) * 55;
+    for (let i = 3; i <= full.length + 2; i += 3) at((i / 3) * 55, () => (text.textContent = full.slice(0, i)));
+    at(typing + 800, () => (demo.dataset.step = "build"));
+    at(typing + 4300, () => (demo.dataset.step = "phone"));
+    at(typing + 7600, () => scrollSite(320));
+    at(typing + 10800, () => {
       scrollSite(0);
       demo.dataset.step = "desk";
     });
-    at(typing + 14500, play);
+    at(typing + 19000, play);
   };
   const update = () => {
     if (onScreen && !paused && !document.hidden) {
