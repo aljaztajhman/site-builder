@@ -15,7 +15,6 @@ import {
   loadRecordings,
   pruneAllSites,
   pruneSite,
-  publishSite,
   type ModelTransport,
 } from "@sb/engine";
 import type { Platform, Tier } from "@sb/platform";
@@ -198,14 +197,6 @@ export async function startWorker(platform: Platform, config = loadConfig()): Pr
       console.error("[alt]", e);
     } finally {
       await repo.setStatusIf(job.siteId, "editing", "ready");
-    }
-  });
-
-  await queue.work("publish", async (job, jobId) => {
-    try {
-      await publishSite({ repo, storage, config }, job.siteId, job.version);
-    } catch (e) {
-      await repo.addEvent({ siteId: job.siteId, jobId, stage: "publish", level: "error", message: (e as Error).message });
     }
   });
 

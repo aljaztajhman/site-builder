@@ -135,20 +135,20 @@ Open, found by the audit (decide or build; none needs a model call unless marked
 - [ ] Fact check hours/prices are loose: an hour passes if that number appears anywhere, a price if the number appears anywhere (e.g. €16 from "8–16"). Needs entity pairing (price ↔ offering, time ↔ day)
 - [ ] Magic link claims the current device's anonymous previews too: someone can send their own link to a victim and take the victim's previews (the confirm page shows their address). Decide: claim only the requesting device's previews (cross-device hand-off then stops)
 - [ ] Owner decision: export runs no publish checklist (the zip can carry placeholders and unchecked facts). Same checklist as publishing, or a warning?
-- [ ] Public 500s return the raw error text (pg constraint names, S3 errors) and `/health` returns DB/storage error text; return a Slovene generic message and log the detail (check the editor toasts and the smoke test)
-- [ ] `loginThrottle` has one global bucket: 200 junk POSTs lock the admin out for 10 min. Upload bodies are buffered whole (up to ~195 MB per request)
+- [x] (2026-10-01: a Slovene generic message on 500, `/health` says only "error"; detail in the log; test) Public 500s return the raw error text (pg constraint names, S3 errors) and `/health` returns DB/storage error text; return a Slovene generic message and log the detail (check the editor toasts and the smoke test)
+- [x] (2026-10-01: attempts over a client's own limit no longer count toward the global cap; test) `loginThrottle` has one global bucket: 200 junk POSTs lock the admin out for 10 min. Upload bodies are buffered whole (up to ~195 MB per request)
 - [ ] A 404 under a nested path (`/s/x/storitve/missing`) renders unstyled (root 404.html with relative `../_shared` paths)
 - [ ] Footer year and the accessibility statement date come from render time (server UTC): preview, publish and export differ; extends the item in "Follow-ups"
 - [ ] No rule guarantees exactly one hero (the page's h1) per page; a chat edit can leave 0 or 2. Validation rule is small but changes what the model must produce: `pnpm eval --only` on 2–3 fixtures first
 - [ ] Beige page backgrounds (#ece3d0) pass the cream check; tightening `isCreamOrOffWhite` changes design repair: run the design tests and an eval
-- [ ] CTAs are informal ("Pokliči", "Rezerviraj termin") while all copy uses vikanje
+- [x] (2026-10-01: component strings in vikanje — "Pokličite", "Rezervirajte termin", "Pošljite sporočilo" …; the phone bar says "Klic" because "Pokličite" wrapped at 360 px on racunovodstvo-seliskar (71 px tall); checked on all 10 goldens at 360 and 1280: bar buttons ≤ 49.6 px, no scroll; editor choice "Klic") CTAs are informal ("Pokliči", "Rezerviraj termin") while all copy uses vikanje
 - [ ] Locales de/hr/it are allowed but have no UI strings (English under `lang="de"`); restrict to sl/en until translated
-- [ ] Privacy policy points to "Nastavitve piškotkov" in the footer, but that button isn't on the privacy page itself
+- [x] (2026-10-01: the privacy page loads the consent island, notice closed until the footer button opens it; checked in Chromium on the 9 goldens with the island; test) Privacy policy points to "Nastavitve piškotkov" in the footer, but that button isn't on the privacy page itself
 - [ ] `businessFromBrief` forces an hours placeholder for every non-builder, even when the client said not to publish hours
 - [ ] Dockerfiles: run as root, install dev dependencies, copy everything before `pnpm install` (no layer cache). Needs a `docker build` and a Railway deploy to verify
-- [ ] Island scripts (`packages/components/islands/*.js`, shipped on every site) are neither linted nor typechecked
-- [ ] `eval/report.md` and `contact-sheet.png` are overwritten by every eval mode, `--offline` included; the live baseline gets replaced by accident
-- [ ] Dead/duplicated code: the worker's `publish` queue handler (nothing sends it), `Repo.spendToday` vs `UsageQueries.spentToday`, `applyPatches` vs `applyDirectEdit`, `escapePointer` vs `escapeToken`, unused i18n keys
+- [ ] Island scripts (`packages/components/islands/*.js`, shipped on every site) are linted since 2026-10-01 (no findings); still not typechecked
+- [x] (2026-10-01: each mode/scope writes its own committed baseline only on a run over every fixture; `--only`, `--photos` and `--replay` write to `eval/runs/`; test) `eval/report.md` and `contact-sheet.png` are overwritten by every eval mode, `--offline` included; the live baseline gets replaced by accident
+- [ ] Dead/duplicated code (the worker's unused `publish` queue and the duplicate `spendToday` SQL removed 2026-10-01); left: `applyPatches` vs `applyDirectEdit`, `escapePointer` vs `escapeToken`, unused i18n keys
 Cost (docs/plans/audit-2026-10-01.md has the numbers):
 - [ ] Owner: compare fal's billed price per picture with config (config books $0.079 per 1536×1024 picture; fal's public table says $0.041 high / $0.010 medium). The daily cap and pools count the booked price
 - [ ] Pictures at medium quality: ~€0.027 less per picture; compare sheet + judge first (`pnpm fixtures:ai-photos compare`, ~€0.09)

@@ -76,7 +76,7 @@ const fill = async (page: Page, message: string) => {
   await page.getByLabel("E-pošta").fill("ana@primer.si");
   await page.getByLabel("Telefon").fill("041 555 906");
   await page.getByLabel("Sporočilo").fill(message);
-  await page.getByRole("button", { name: "Pošlji sporočilo" }).click();
+  await page.getByRole("button", { name: "Pošljite sporočilo" }).click();
 };
 
 describe("contact form in a browser", () => {

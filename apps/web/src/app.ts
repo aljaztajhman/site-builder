@@ -182,7 +182,9 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
         await fn();
         checks[name] = "ok";
       } catch (e) {
-        checks[name] = `error: ${(e as Error).message.slice(0, 120)}`;
+        // Public URL: the detail (hostnames, driver messages) goes to the log only.
+        checks[name] = "error";
+        console.error(`[health] ${name}:`, (e as Error).message);
       }
     };
     await run("database", () => db.query("select 1"));
@@ -724,7 +726,8 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     // Hono's own refusals (a body over a limit: 413) keep their status.
     if (e instanceof HTTPException) return e.getResponse();
     console.error("[web]", e);
-    return c.json({ error: "internal error", message: e.message.slice(0, 300) }, 500);
+    // Constraint names and storage errors stay in the log; the editor shows this sentence.
+    return c.json({ error: "internal error", message: "Prišlo je do napake na strežniku. Poskusite znova." }, 500);
   });
 
   return app;

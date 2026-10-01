@@ -115,7 +115,7 @@ export function Footer({ ctx }: { ctx: RenderCtx }) {
           <p>
             © {new Date().getFullYear()} {isPlaceholder(p.legalName) ? b.name : p.legalName}
           </p>
-          {/* Shown by consent.js, which is only on pages with consent-gated embeds. */}
+          {/* Shown by consent.js: on pages with consent-gated embeds, and on the privacy page of a site that has them. */}
           <button type="button" className="site-footer__consent" data-consent-open="" hidden>
             {ctx.t("cookieSettings")}
           </button>

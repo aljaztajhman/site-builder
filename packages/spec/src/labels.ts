@@ -158,7 +158,7 @@ export function fieldLabel(key: string, parent?: string): string {
 /** Values of enums the forms show as choices. */
 export const ENUM_LABEL: Record<string, string> = {
   // Actions (buttons and links).
-  call: "Pokliči",
+  call: "Klic",
   directions: "Navodila za pot",
   email: "E-pošta",
   booking: "Rezervacija",

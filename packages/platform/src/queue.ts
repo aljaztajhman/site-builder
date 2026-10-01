@@ -2,7 +2,7 @@ import { PgBoss, fromPglite } from "pg-boss";
 import type { PGlite } from "@electric-sql/pglite";
 import type { Db } from "./db.ts";
 
-export const QUEUES = ["generate", "edit", "publish", "alt", "prune"] as const;
+export const QUEUES = ["generate", "edit", "alt", "prune"] as const;
 export type QueueName = (typeof QUEUES)[number];
 
 export interface GenerateJob {
@@ -17,10 +17,6 @@ export interface EditJob {
   messageId: number;
   aiJobId?: string;
 }
-export interface PublishJob {
-  siteId: string;
-  version: number;
-}
 /** Alt text from the vision model for photos the owner added in the editor. */
 export interface AltJob {
   siteId: string;
@@ -33,7 +29,6 @@ export interface PruneJob {
 export interface JobData {
   generate: GenerateJob;
   edit: EditJob;
-  publish: PublishJob;
   alt: AltJob;
   prune: PruneJob;
 }

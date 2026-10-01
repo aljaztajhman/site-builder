@@ -52,7 +52,7 @@ describe("Header", () => {
       expect(out).toContain('<a href="storitve.html">Storitve</a>');
       // Legal pages are not in the main nav.
       expect(out).not.toContain("zasebnost.html");
-      expect(out).toMatch(/class="btn btn--primary site-header__cta[^"]*" href="tel:\+38641123456">Pokliči</);
+      expect(out).toMatch(/class="btn btn--primary site-header__cta[^"]*" href="tel:\+38641123456">Pokličite</);
       // Header buttons and nav are words: the only icons are on fact labels and the phone call bar.
       expect(out).not.toContain("<svg");
       expect(out).toContain('classList.add("js")');
@@ -82,7 +82,7 @@ describe("Header", () => {
 
   it("renders a booking CTA and hides a CTA whose fact is missing", () => {
     const booking = html(<Header ctx={testCtx(spec({ chrome: chrome({ cta: "booking" }) }))} />);
-    expect(booking).toMatch(/href="https:\/\/booking.example.com\/lipa" rel="noopener" target="_blank">Rezerviraj termin</);
+    expect(booking).toMatch(/href="https:\/\/booking.example.com\/lipa" rel="noopener" target="_blank">Rezervirajte termin</);
     expect(booking).not.toContain("wide-only");
     const none = html(<Header ctx={testCtx(spec({ chrome: chrome({ cta: "none" }) }))} />);
     expect(none).not.toContain("site-header__cta");
@@ -169,7 +169,7 @@ describe("MobileActionBar", () => {
   it("renders call and directions as two buttons", () => {
     const out = html(<MobileActionBar ctx={testCtx(spec())} />);
     expect(out).toMatch(/^<nav class="action-bar" aria-label="Hitri kontakt">/);
-    expect(out).toMatch(/href="tel:\+38641123456"><svg class="icon" [^>]*aria-hidden="true"[^>]*>[\s\S]*?<\/svg>Pokliči<\/a>/);
+    expect(out).toMatch(/href="tel:\+38641123456"><svg class="icon" [^>]*aria-hidden="true"[^>]*>[\s\S]*?<\/svg>Klic<\/a>/);
     expect(out).toMatch(
       /href="https:\/\/www.google.com\/maps[^"]*" rel="noopener" target="_blank"><svg class="icon" [^>]*aria-hidden="true"[^>]*>[\s\S]*?<\/svg>Navodila za pot<\/a>/,
     );
@@ -191,7 +191,7 @@ describe("CookieConsent", () => {
     expect(out).toMatch(/^<section id="consent" class="consent" aria-labelledby="consent-title" data-consent-notice="" hidden="">/);
     expect(out).toContain('<h2 id="consent-title" class="consent__title">Piškotki</h2>');
     expect(out).toContain('<button type="button" class="btn btn--secondary" data-consent="denied">Samo nujni</button>');
-    expect(out).toContain('<button type="button" class="btn btn--secondary" data-consent="granted">Dovoli zunanje vsebine</button>');
+    expect(out).toContain('<button type="button" class="btn btn--secondary" data-consent="granted">Dovolite zunanje vsebine</button>');
     expect(out).toContain('href="zasebnost.html"');
     expect(out).not.toContain('role="dialog"');
   });

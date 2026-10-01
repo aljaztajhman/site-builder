@@ -21,6 +21,7 @@ import { loadFixtures } from "./fixtures/load.ts";
 import { runFixture, type FixtureResult, type Mode } from "./runner.ts";
 import { contactSheet, renderReport } from "./report.ts";
 import { desktopContactSheet, reviewSheet } from "./look.ts";
+import { reportPaths } from "./report-paths.ts";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "../../..");
@@ -95,8 +96,10 @@ try {
 }
 
 const report = renderReport(results, config, { mode, scope, startedAt, totalEur: spent, wallMs: Date.now() - t0 });
-await writeFile(path.join(outDir, "report.md"), report);
-await writeFile(path.join(outDir, "contact-sheet.png"), await contactSheet(results));
+const out = reportPaths({ mode, scope, ...(only ? { only } : {}), ...(photoLimit !== undefined ? { photos: photoLimit } : {}) });
+await mkdir(path.dirname(path.join(outDir, out.report)), { recursive: true });
+await writeFile(path.join(outDir, out.report), report);
+await writeFile(path.join(outDir, out.contactSheet), await contactSheet(results));
 for (const r of results) await reviewSheet(r.id);
 await desktopContactSheet(results.map((r) => r.id));
-console.log(`\nWrote ${path.join(outDir, "report.md")} and contact-sheet.png. Model spend €${spent.toFixed(2)}.`);
+console.log(`\nWrote ${path.join(outDir, out.report)} and ${out.contactSheet}. Model spend €${spent.toFixed(2)}.`);

@@ -16,7 +16,7 @@ export function MobileActionBar({ ctx, afterHero = false }: { ctx: RenderCtx; af
       {call && (
         <a className="btn btn--primary action-bar__btn" href={call}>
           <Icon name="phone" />
-          {ctx.t("call")}
+          {ctx.t("callShort")}
         </a>
       )}
       {directions && (

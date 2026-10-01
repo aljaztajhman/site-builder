@@ -5,7 +5,7 @@ import path from "node:path";
 import { loadConfig } from "@sb/config";
 import { Repo, createDb, createFsStorage, migrate, type Platform, type Queue } from "@sb/platform";
 import { createApp } from "../src/app.ts";
-import { SESSION_COOKIE } from "../src/auth.ts";
+import { SESSION_COOKIE, loginThrottle } from "../src/auth.ts";
 import { homePage } from "../src/home.tsx";
 import { adminBrowser, type Browser } from "./session-helpers.ts";
 
@@ -65,6 +65,16 @@ describe("access control", () => {
     const res = await app.request("/sites", { headers: { cookie } });
     expect(res.status).toBe(200);
     expect(await res.text()).toContain("Nova stran");
+  });
+
+  it("throttles login per client, and one client hammering the form doesn't lock out everyone", () => {
+    const allow = loginThrottle(10, 200);
+    const flood = Array.from({ length: 500 }, () => allow("attacker"));
+    expect(flood.filter(Boolean)).toHaveLength(10);
+    expect(allow("admin")).toBe(true);
+    // Many clients together still hit the overall cap.
+    const many = Array.from({ length: 300 }, (_, i) => allow(`ip${i % 30}`));
+    expect(many.filter(Boolean).length).toBeLessThanOrEqual(200 - 11);
   });
 
   it("rejects a forged session cookie", async () => {
@@ -234,6 +244,26 @@ describe("health", () => {
     const res = await app.request("/health");
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ status: "ok", checks: { database: "ok", storage: "ok", queue: "ok" } });
+  });
+
+  it("keeps internal error detail out of public responses", async () => {
+    const detail = "connect ECONNREFUSED minio.internal:9000";
+    const broken = { ...platform.storage, ping: () => Promise.reject(new Error(detail)), get: () => Promise.reject(new Error(detail)) };
+    const other = createApp({ platform: { ...platform, storage: broken }, config: loadConfig(), auth: { password: PASSWORD, secret: "s".repeat(32), secureCookies: false } });
+    const errors = console.error;
+    console.error = () => undefined;
+    try {
+      const health = await other.request("/health");
+      expect(health.status).toBe(503);
+      expect(await health.text()).not.toContain("minio");
+      const page = await other.request("/s/demo/");
+      expect(page.status).toBe(500);
+      const body = await page.text();
+      expect(body).not.toContain("minio");
+      expect(body).toContain("Poskusite znova");
+    } finally {
+      console.error = errors;
+    }
   });
 });
 

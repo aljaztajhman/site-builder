@@ -100,10 +100,10 @@ describe("queue (pg-boss on PGlite)", () => {
   it("delivers a job to a worker", async () => {
     const queue = await createQueue(db, "pglite://memory");
     const got = new Promise<unknown>((resolve) => {
-      void queue.work("publish", async (data) => resolve(data));
+      void queue.work("alt", async (data) => resolve(data));
     });
-    await queue.send("publish", { siteId: "site_x", version: 3 });
-    expect(await got).toEqual({ siteId: "site_x", version: 3 });
+    await queue.send("alt", { siteId: "site_x", imageIds: ["img_01"] });
+    expect(await got).toEqual({ siteId: "site_x", imageIds: ["img_01"] });
     await queue.stop();
   }, 30_000);
 

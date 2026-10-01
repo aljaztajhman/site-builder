@@ -507,11 +507,9 @@ export class Repo {
   }
 
   /** € spent on model calls since UTC midnight. */
-  async spendToday(): Promise<number> {
-    const { rows } = await this.db.query<{ total: string | number | null }>(
-      "select coalesce(sum(cost_eur), 0) as total from model_calls where created_at >= date_trunc('day', now() at time zone 'utc') at time zone 'utc'",
-    );
-    return Number(rows[0]?.total ?? 0);
+  /** Model spend today (UTC day), all tiers. */
+  spendToday(): Promise<number> {
+    return this.usage.spentToday();
   }
 
   async siteCost(siteId: string): Promise<{ stage: string; calls: number; input: number; output: number; cacheRead: number; cacheWrite: number; eur: number; ms: number }[]> {
