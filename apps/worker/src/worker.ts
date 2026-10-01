@@ -5,6 +5,7 @@ import {
   ImageGenerator,
   ModelClient,
   ReplayTransport,
+  SpendCapError,
   StandInImageTransport,
   applyChatEdit,
   describePhotos,
@@ -14,6 +15,10 @@ import {
   type ModelTransport,
 } from "@sb/engine";
 import type { Platform } from "@sb/platform";
+
+/** Replies to the owner when a chat edit fails outright (the details go to the event log). */
+const EDIT_ERROR_REPLY = "Sprememba ni uspela, stran je ostala nespremenjena. Poskusite znova čez nekaj minut ali jo uredite neposredno.";
+const EDIT_SPEND_CAP_REPLY = "Današnja omejitev porabe pomočnika je dosežena, zato sprememba ni bila narejena. Jutri spet deluje; do takrat stran urejate neposredno.";
 
 /** Model client wired to the database: spend cap from today's logged calls, every call logged per stage. */
 export function modelClientFor(
@@ -101,8 +106,11 @@ export async function startWorker(platform: Platform, config = loadConfig()): Pr
     try {
       await applyChatEdit({ repo, client }, job.siteId, job.messageId);
     } catch (e) {
-      await repo.addChat(job.siteId, "assistant", `Napaka: ${(e as Error).message}`, { error: true });
-      await repo.setStatus(job.siteId, "ready");
+      // The owner reads this reply; the technical error goes to the log. applyChatEdit already put back
+      // the status it set, and a generation running meanwhile keeps its own.
+      const reply = e instanceof SpendCapError ? EDIT_SPEND_CAP_REPLY : EDIT_ERROR_REPLY;
+      await repo.addChat(job.siteId, "assistant", reply, { error: true });
+      await repo.addEvent({ siteId: job.siteId, jobId, stage: "edit", level: "error", message: `Edit failed: ${(e as Error).message.slice(0, 300)}` });
       console.error("[edit]", e);
     }
   });
