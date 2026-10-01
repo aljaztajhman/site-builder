@@ -224,6 +224,9 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
                       </div>
                     </div>
                   </div>
+                  <button className="demo-pause" type="button" aria-pressed="false" hidden>
+                    Ustavi
+                  </button>
                   <figcaption className="phone-cap">
                     {`Primer: izmišljena trgovina Oljka in sol iz Kopra. Stran je ${PRODUCT_NAME} naredil iz njenega opisa in petih fotografij; manjkajočo ceno smo vpisali, kot bi jo lastnik. Fotografije so ustvarjene z UI.`}
                   </figcaption>
