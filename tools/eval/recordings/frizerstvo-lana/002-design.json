@@ -2,15 +2,15 @@
   "seq": 2,
   "stage": "design",
   "model": "claude-sonnet-5-5",
-  "hash": "29ffcb457772c400",
+  "hash": "cfc6b19ab70e7822",
   "origin": "recorded",
   "response": {
-    "text": "{\"direction\":\"soft-studio\",\"fontPair\":\"lora-dm-sans\",\"primary\":\"#7a2e3a\",\"accent\":\"#ceb1b6\",\"radius\":6,\"baseFontSize\":17,\"scale\":1.25,\"headingWeight\":500,\"headingCase\":\"normal\",\"headingTracking\":0,\"density\":\"airy\",\"shadow\":\"subtle\",\"reason\":\"Warm, personal hairdresser with a burgundy logo colour that suits Soft Studio's muted rose palette. Duotone photos in the brand colour keep the 5 mixed photos consistent, and the soft serif headings feel calm and welcoming.\"}",
+    "text": "{\"direction\":\"soft-studio\",\"fontPair\":\"lora-dm-sans\",\"primary\":\"#7a2e3a\",\"accent\":\"#ceb1b6\",\"radius\":6,\"baseFontSize\":17,\"scale\":1.24,\"headingWeight\":520,\"headingCase\":\"normal\",\"headingTracking\":0,\"density\":\"regular\",\"shadow\":\"none\",\"reason\":\"Soft Studio suits a friendly hairdresser with five mixed-quality photos: duotone toning in the logo's burgundy keeps them consistent, and the hero shows the pictures. The logo burgundy is primary, with its dusty rose as accent.\"}",
     "stopReason": "end_turn",
     "model": "claude-sonnet-5-5",
     "usage": {
-      "input_tokens": 260,
-      "output_tokens": 207,
+      "input_tokens": 295,
+      "output_tokens": 205,
       "cache_creation_input_tokens": 4169,
       "cache_read_input_tokens": 0
     }

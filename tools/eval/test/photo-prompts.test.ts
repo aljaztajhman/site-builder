@@ -1,14 +1,19 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import sharp from "sharp";
 import { loadConfig } from "@sb/config";
-import { loadFixtures } from "../src/fixtures/load.ts";
+import { FIXTURES_DIR, loadFixtures } from "../src/fixtures/load.ts";
 import {
   estimateEur,
   fullPrompt,
   imageCostEur,
   isPortrait,
   loadPhotoPrompts,
+  nextManifestEntry,
   photoKey,
   requestBody,
+  type ManifestEntry,
 } from "../src/fixtures/photo-prompts.ts";
 
 const config = loadConfig();
@@ -65,5 +70,52 @@ describe("image requests and cost", () => {
     );
     expect(total).toBeGreaterThan(0);
     expect(total).toBeLessThan(3);
+  });
+});
+
+describe("photo manifest entries", () => {
+  const made = { model: "m", endpoint: "e", prompt: "new", width: 1536, height: 1024, eur: 0.07, createdAt: "2026-10-02" };
+  const old = { ...made, prompt: "old", createdAt: "2026-10-01" };
+
+  it("moves a photo marked reject into rejected, with its reason, prompt and cost", () => {
+    const next = nextManifestEntry({ ...old, reject: "lettering on a sign" }, made);
+    expect(next).toEqual({ ...made, rejected: [{ reason: "lettering on a sign", prompt: "old", eur: 0.07, createdAt: "2026-10-01" }] });
+    const again = nextManifestEntry({ ...next, reject: "wrong subject" }, { ...made, createdAt: "2026-10-03" });
+    expect(again.rejected?.map((r) => r.reason)).toEqual(["lettering on a sign", "wrong subject"]);
+    expect(again.reject).toBeUndefined();
+  });
+
+  it("replaces an unmarked entry (--force) without recording a rejection", () => {
+    expect(nextManifestEntry(old, made)).toEqual(made);
+    expect(nextManifestEntry(undefined, made)).toEqual(made);
+  });
+});
+
+describe("committed fixture photos", () => {
+  const manifest = JSON.parse(readFileSync(path.join(FIXTURES_DIR, "photo-manifest.json"), "utf8")) as Record<string, ManifestEntry>;
+  const files = new Map(loadFixtures().flatMap((f) => f.photos.map((p) => [photoKey(f.id, p.file), p.path] as const)));
+
+  it("records model, the current prompt and € for every photo (rejected attempts with a reason, none pending)", () => {
+    expect(Object.keys(manifest).sort()).toEqual([...keys].sort());
+    for (const k of keys) {
+      const e = manifest[k]!;
+      expect(Object.keys(config.imageGen.models), k).toContain(e.model);
+      expect(e.prompt, k).toBe(fullPrompt(prompts, k));
+      expect(e.eur, k).toBeGreaterThan(0);
+      expect(e.reject, `${k} is marked reject but was not regenerated`).toBeUndefined();
+      for (const r of e.rejected ?? []) {
+        expect(r.reason.length, k).toBeGreaterThan(0);
+        expect(r.eur, k).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it("are JPEGs at most 1600 px on the long edge, in the prompt's orientation", async () => {
+    for (const k of keys) {
+      const meta = await sharp(files.get(k)!).metadata();
+      expect(meta.format, k).toBe("jpeg");
+      expect(Math.max(meta.width ?? 0, meta.height ?? 0), k).toBeLessThanOrEqual(1600);
+      expect((meta.height ?? 0) > (meta.width ?? 0), k).toBe(isPortrait(k));
+    }
   });
 });

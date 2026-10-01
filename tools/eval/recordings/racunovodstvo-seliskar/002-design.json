@@ -2,15 +2,15 @@
   "seq": 2,
   "stage": "design",
   "model": "claude-sonnet-5-5",
-  "hash": "92b914a33437a0df",
+  "hash": "cec6373ba1bf314e",
   "origin": "recorded",
   "response": {
-    "text": "{\"direction\":\"editorial\",\"fontPair\":\"newsreader-libre-franklin\",\"primary\":\"#8b1e2d\",\"accent\":null,\"radius\":0,\"baseFontSize\":18,\"scale\":1.333,\"headingWeight\":450,\"headingCase\":\"normal\",\"headingTracking\":-0.01,\"density\":\"airy\",\"shadow\":\"none\",\"reason\":\"No photos and no brand colours, so a typography-led editorial direction suits an established accountant since 2004. Deep ink-red gives a serious, professional tone with light serif headlines and generous whitespace.\"}",
+    "text": "{\"direction\":\"clean-swiss\",\"fontPair\":\"inter-tight-inter\",\"primary\":\"#1f4e8c\",\"accent\":null,\"radius\":1,\"baseFontSize\":16,\"scale\":1.25,\"headingWeight\":650,\"headingCase\":\"normal\",\"headingTracking\":-0.015,\"density\":\"regular\",\"shadow\":\"none\",\"reason\":\"Accountant with no brand colours and generated mood photos: clean Swiss gives an orderly, exact, professional look with a hero-split that shows imagery, and a calm trustworthy blue as the single brand colour.\"}",
     "stopReason": "end_turn",
     "model": "claude-sonnet-5-5",
     "usage": {
-      "input_tokens": 165,
-      "output_tokens": 185,
+      "input_tokens": 225,
+      "output_tokens": 189,
       "cache_creation_input_tokens": 4169,
       "cache_read_input_tokens": 0
     }

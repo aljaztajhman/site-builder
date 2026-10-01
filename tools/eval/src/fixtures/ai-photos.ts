@@ -6,7 +6,9 @@
  *     Writes eval/runs/photo-compare/<stamp>/: <model>/<fixture>-NN.jpg, manifest.json, contact-sheet.png.
  *   pnpm fixtures:ai-photos generate --model <name> [--only <fixture id>] [--force] [--max-eur 5]
  *     Every fixture photo into tools/eval/fixtures/<id>/photos/NN.jpg (replacing the SVG stand-ins),
- *     plus tools/eval/fixtures/photo-manifest.json.
+ *     plus tools/eval/fixtures/photo-manifest.json. Photos with a manifest entry are kept unless --force,
+ *     or unless someone looked at one and set its entry's "reject" to the reason: then it is regenerated
+ *     and the old attempt moves into "rejected" (reason, prompt, €).
  *
  * Needs FAL_KEY. States the € estimate first and stops before starting if it exceeds --max-eur.
  * Every call logs model, seconds and € (from config prices); the manifest records model, prompt and cost.
@@ -24,9 +26,11 @@ import {
   imageCostEur,
   isPortrait,
   loadPhotoPrompts,
+  nextManifestEntry,
   photoKey,
   requestBody,
   type ImageGenModelConfig,
+  type ManifestEntry,
 } from "./photo-prompts.ts";
 
 interface Job {
@@ -211,8 +215,8 @@ async function main() {
     const manifest = readManifest();
     jobs = [...subjects.entries()]
       .filter(([key]) => !only || key.startsWith(`${only}/`))
-      // Keep photos this script already made unless --force; SVG stand-ins are always replaced.
-      .filter(([key, s]) => force || !(existsSync(s.path) && manifest[key]))
+      // Keep photos this script already made unless --force or marked `reject`; SVG stand-ins are always replaced.
+      .filter(([key, s]) => force || !(existsSync(s.path) && manifest[key]) || !!manifest[key]?.reject)
       .map(([key, s]) => ({ key, subject: s.subject, modelName: name, model, out: s.path }));
   }
 
@@ -236,7 +240,7 @@ async function main() {
   } else {
     const manifest = readManifest();
     for (const r of results.filter((x) => !x.error)) {
-      manifest[r.key] = { model: r.model, endpoint: r.endpoint, prompt: r.prompt, width: r.width, height: r.height, eur: Number(r.eur.toFixed(4)), createdAt: new Date().toISOString() };
+      manifest[r.key] = nextManifestEntry(manifest[r.key], { model: r.model, endpoint: r.endpoint, prompt: r.prompt, width: r.width, height: r.height, eur: Number(r.eur.toFixed(4)), createdAt: new Date().toISOString() });
     }
     writeFileSync(MANIFEST, JSON.stringify(sortKeys(manifest), null, 2) + "\n");
     console.log(`\nWrote ${results.length - failed} photos and ${MANIFEST}`);
@@ -247,8 +251,8 @@ async function main() {
 
 const MANIFEST = path.join(FIXTURES_DIR, "photo-manifest.json");
 
-function readManifest(): Record<string, unknown> {
-  return existsSync(MANIFEST) ? (JSON.parse(readFileSync(MANIFEST, "utf8")) as Record<string, unknown>) : {};
+function readManifest(): Record<string, ManifestEntry> {
+  return existsSync(MANIFEST) ? (JSON.parse(readFileSync(MANIFEST, "utf8")) as Record<string, ManifestEntry>) : {};
 }
 
 function sortKeys<T>(o: Record<string, T>): Record<string, T> {
