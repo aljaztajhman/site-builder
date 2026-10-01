@@ -129,7 +129,11 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   // Photo uploads in the editor take files; every other site API call is small JSON.
   const photosLimit = bodyLimit({ maxSize: config.limits.maxPhotos * config.limits.maxUploadBytes + 64 * 1024 });
   const jsonLimit = bodyLimit({ maxSize: 1024 * 1024 });
-  app.use("/api/sites/*", (c, next) => (/^\/api\/sites\/[^/]+\/photos$/.test(c.req.path) ? photosLimit(c, next) : jsonLimit(c, next)));
+  // Hono's "/api/sites/*" also matches "/api/sites" itself: the intake has its own limit above (without
+  // this, the 1 MB JSON limit refused every intake with more than 1 MB of photos).
+  app.use("/api/sites/*", (c, next) =>
+    c.req.path === "/api/sites" ? next() : /^\/api\/sites\/[^/]+\/photos$/.test(c.req.path) ? photosLimit(c, next) : jsonLimit(c, next),
+  );
   // Contact forms: public submit next to published sites, owner's messages in the dashboard.
   registerFormRoutes(app, { repo, config, secret: auth.secret });
   // Sign-in (magic link for owners, password for the admin) and the admin's page.
