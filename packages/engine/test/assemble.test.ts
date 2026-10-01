@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { validateSite, type Page } from "@sb/spec";
-import { Brief, assembleSpec, checkFacts, contentOutputSchema, designFromChoice, extractJson, uniqueSectionIds, verifyBriefFacts, type ContentOutput } from "../src/index.ts";
+import { loadConfig } from "@sb/config";
+import { validateSite, type ImageAsset, type Page } from "@sb/spec";
+import { Brief, assembleSpec, checkFacts, contentOutputSchema, designFromChoice, extractJson, generatedImageCount, uniqueSectionIds, verifyBriefFacts, type ContentOutput } from "../src/index.ts";
 
+const config = loadConfig();
 const evalDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../tools/eval");
 const recordingsDir = path.join(evalDir, "recordings");
 
@@ -29,26 +31,43 @@ describe("uniqueSectionIds", () => {
 });
 
 describe("assembleSpec on recorded full-site answers", () => {
-  // Every recorded first content answer (10/10 fixtures, 2026-09-29) failed validation only on
-  // section ids reused across pages, which cost a second full content call each time.
+  // 2026-09-29: every recorded first content answer (10/10) failed validation only on section ids reused
+  // across pages, which cost a second full content call each time; assembly now renames them.
+  // Re-recorded 2026-10-01: 8/10 first answers validate. Two were rejected for the model's own mistakes and
+  // the pipeline's retry fixed them; they are pinned here so any other first-answer failure still fails.
+  const rejectedFirstAnswers: Record<string, string[]> = {
+    "instalacije-rebernik": ["/pages/0/seo/title: Too big: expected string to have <=60 characters"],
+    "kmetija-grabnar": ['/pages/0/sections/3/props: Unrecognized key: " link"'],
+  };
+
   for (const id of readdirSync(recordingsDir)) {
-    it(`${id}: the first content answer validates without a retry`, () => {
-      const files = readdirSync(path.join(recordingsDir, id)).sort();
-      const answer = (stage: string) => {
-        const f = files.find((x) => x.endsWith(`-${stage}.json`));
-        return f ? (JSON.parse(readFileSync(path.join(recordingsDir, id, f), "utf8")) as { response: { text: string } }).response.text : undefined;
-      };
-      const description = (JSON.parse(readFileSync(path.join(evalDir, "fixtures", id, "brief.json"), "utf8")) as { description: string }).description;
-      const { brief } = verifyBriefFacts(Brief.parse(JSON.parse(extractJson(answer("brief")!))), description);
-      const design = designFromChoice(JSON.parse(extractJson(answer("design")!)));
-      const alt = answer("altText");
-      const count = alt ? (JSON.parse(extractJson(alt)) as { images: unknown[] }).images.length : 0;
-      const images = Array.from({ length: count }, (_, i) => ({ id: `img_${String(i + 1).padStart(2, "0")}`, src: "x", width: 1600, height: 1067, alt: "x" }));
-      const content = contentOutputSchema().parse(JSON.parse(extractJson(answer("content")!))) as ContentOutput;
-      const spec = assembleSpec({ slug: id, brief, design, assets: { images }, content });
+    const files = readdirSync(path.join(recordingsDir, id)).sort();
+    const answers = (stage: string) =>
+      files.filter((x) => x.endsWith(`-${stage}.json`)).map((f) => (JSON.parse(readFileSync(path.join(recordingsDir, id, f), "utf8")) as { response: { text: string } }).response.text);
+    const fixture = JSON.parse(readFileSync(path.join(evalDir, "fixtures", id, "brief.json"), "utf8")) as { description: string; photos: unknown[] };
+    const { brief } = verifyBriefFacts(Brief.parse(JSON.parse(extractJson(answers("brief")[0]!))), fixture.description);
+    const design = designFromChoice(JSON.parse(extractJson(answers("design")[0]!)));
+    const alt = answers("altText")[0];
+    const count = alt ? (JSON.parse(extractJson(alt)) as { images: unknown[] }).images.length : 0;
+    const photos: ImageAsset[] = Array.from({ length: count }, (_, i) => ({ id: `img_${String(i + 1).padStart(2, "0")}`, src: "x", width: 1600, height: 1067, alt: "x" }));
+    // The pictures the pipeline generates for a site with too few photos (the eval records them live).
+    const wanted = generatedImageCount(config, fixture.photos.length, true, "full").wanted;
+    const generated: ImageAsset[] = brief.imageIdeas.slice(0, wanted).map((idea, i) => ({ id: `img_g${i + 1}`, src: "x", width: 1536, height: 1024, alt: idea.alt.slice(0, 180), origin: "generated" }));
+    const issues = (text: string): string[] => {
+      const parsed = contentOutputSchema().safeParse(JSON.parse(extractJson(text)));
+      if (!parsed.success) return parsed.error.issues.map((i) => `/${i.path.join("/")}: ${i.message}`);
+      const spec = assembleSpec({ slug: id, brief, design, assets: { images: [...photos, ...generated] }, content: parsed.data as ContentOutput });
       const v = validateSite(spec);
-      expect(v.ok ? [] : v.issues.map((i) => `${i.path}: ${i.message}`)).toEqual([]);
-      expect(checkFacts(spec, description)).toEqual([]);
+      return [...(v.ok ? [] : v.issues.map((i) => `${i.path}: ${i.message}`)), ...checkFacts(spec, fixture.description).map((f) => `${f.path}: ${f.kind} "${f.value}"`)];
+    };
+    const content = answers("content");
+
+    it(`${id}: the first content answer validates without a retry${rejectedFirstAnswers[id] ? " (except the pinned model mistake)" : ""}`, () => {
+      expect(issues(content[0]!)).toEqual(rejectedFirstAnswers[id] ?? []);
+    });
+
+    it(`${id}: the content answer the pipeline kept validates`, () => {
+      expect(issues(content.at(-1)!)).toEqual([]);
     });
   }
 });
