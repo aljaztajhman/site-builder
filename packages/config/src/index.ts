@@ -115,6 +115,16 @@ export const AppConfigSchema = z.object({
     landscape: z.object({ width: z.number().int().positive(), height: z.number().int().positive() }),
     models: z.record(z.string(), ImageGenModel),
   }),
+  /** Owner accounts: magic-link sign-in, sessions, the device cookie (see config $comment). */
+  accounts: z.object({
+    sessionDays: z.number().positive(),
+    deviceCookieDays: z.number().positive(),
+    magicLink: z.object({
+      ttlMinutes: z.number().positive().max(60),
+      perEmailPerHour: z.number().int().positive(),
+      perIpPerHour: z.number().int().positive(),
+    }),
+  }),
   plans: z.looseObject({
     paid: PaidPlan,
   }),

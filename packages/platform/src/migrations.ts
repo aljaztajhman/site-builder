@@ -111,6 +111,53 @@ export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
       create index form_messages_sender on form_messages(site_id, sender_key, created_at);
     `,
   },
+  {
+    id: 4,
+    name: "accounts",
+    // Owner accounts (magic link only). Tokens and sessions are stored as SHA-256 hashes of the random
+    // value the browser holds. ip_key is a keyed hash of the requester's IP for rate limits, cleared after a day.
+    sql: `
+      create table accounts (
+        id text primary key,
+        email text not null,
+        email_key text not null unique,
+        created_at timestamptz not null default now(),
+        last_login_at timestamptz
+      );
+
+      create table allow_list (
+        email_key text primary key,
+        email text not null,
+        note text,
+        added_at timestamptz not null default now()
+      );
+
+      create table login_tokens (
+        token_hash text primary key,
+        email text not null,
+        email_key text not null,
+        next text,
+        device_id text,
+        ip_key text not null default '',
+        created_at timestamptz not null default now(),
+        expires_at timestamptz not null,
+        used_at timestamptz
+      );
+      create index login_tokens_email on login_tokens(email_key, created_at);
+      create index login_tokens_ip on login_tokens(ip_key, created_at);
+
+      create table sessions (
+        token_hash text primary key,
+        account_id text not null references accounts(id) on delete cascade,
+        created_at timestamptz not null default now(),
+        expires_at timestamptz not null
+      );
+      create index sessions_account on sessions(account_id);
+
+      alter table sites add column account_id text references accounts(id) on delete set null;
+      create index sites_account on sites(account_id);
+    `,
+  },
 ];
 
 type Query = (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>;

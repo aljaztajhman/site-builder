@@ -76,6 +76,12 @@
       }
     }
   },
+  "accounts": {
+    "$comment": "Owner accounts (sb-signin: email magic link only, no passwords). Session and device cookies are httpOnly, SameSite=Lax, Secure when deployed. Magic links are random, stored hashed, single-use; requests are rate-limited per normalised email and per keyed IP hash (the IP itself is never stored).",
+    "sessionDays": 30,
+    "deviceCookieDays": 365,
+    "magicLink": { "ttlMinutes": 15, "perEmailPerHour": 3, "perIpPerHour": 10 }
+  },
   "plans": {
     "$comment": "Phase 1 has no billing; kept here so later phases read from config.",
     "freePreview": { "pages": ["home"], "model": "claude-sonnet-5-5", "effort": "medium", "watermark": true, "publishable": false },

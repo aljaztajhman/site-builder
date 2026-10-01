@@ -8,6 +8,7 @@ import { Repo, createDb, createFsStorage, migrate, type Platform, type Queue } f
 import type { SiteSpec } from "@sb/spec";
 import { createApp } from "../src/app.ts";
 import { parseSubmission } from "../src/forms.tsx";
+import { adminBrowser } from "./session-helpers.ts";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const PASSWORD = "test-password-1234";
@@ -24,10 +25,7 @@ const submit = (slug: string, fields: Record<string, string> = {}, ip = "203.0.1
     headers: { "x-forwarded-for": ip, ...(json ? { accept: "application/json" } : {}) },
   });
 
-async function login(): Promise<string> {
-  const res = await app.request("/login", { method: "POST", body: new URLSearchParams({ password: PASSWORD, next: "/" }) });
-  return (res.headers.get("set-cookie") ?? "").split(";")[0]!;
-}
+const login = () => adminBrowser(app.request.bind(app), PASSWORD);
 
 /** A published site whose homepage has a contact form (askPhone as given). */
 async function publishedSite(slug: string, askPhone = true): Promise<string> {
@@ -151,14 +149,16 @@ describe("owner's messages in the dashboard", () => {
     const id = await publishedSite("forma-g");
     await submit("forma-g", { message: "Prosim za termin v petek." }, "192.0.2.50");
     expect((await app.request(`/sites/${id}/messages`)).status).toBe(302);
-    const cookie = await login();
+    const { cookie, csrf } = await login();
     const page = await (await app.request(`/sites/${id}/messages`, { headers: { cookie } })).text();
     expect(page).toContain("Prosim za termin v petek.");
     expect(page).toMatch(/<h1>Sporočila <span[^>]*>1<\/span><\/h1>/);
     const api = (await (await app.request(`/api/sites/${id}`, { headers: { cookie } })).json()) as { messages: number };
     expect(api.messages).toBe(1);
     const [m] = await platform.repo.listFormMessages(id);
-    const del = await app.request(`/sites/${id}/messages/${m!.id}/delete`, { method: "POST", headers: { cookie } });
+    // The delete form carries the CSRF token; a post without it deletes nothing.
+    expect((await app.request(`/sites/${id}/messages/${m!.id}/delete`, { method: "POST", headers: { cookie } })).status).toBe(403);
+    const del = await app.request(`/sites/${id}/messages/${m!.id}/delete`, { method: "POST", headers: { cookie }, body: new URLSearchParams({ _csrf: csrf }) });
     expect(del.status).toBe(303);
     expect(await platform.repo.listFormMessages(id)).toEqual([]);
   });

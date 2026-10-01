@@ -19,18 +19,36 @@ import {
   PhotoError,
   type Operation,
 } from "@sb/engine";
-import { VersionConflictError, contentType, type Platform } from "@sb/platform";
+import { VersionConflictError, contentType, mailerFromEnv, type Mailer, type Platform } from "@sb/platform";
 import { renderPage, sharedBundle, pageFile } from "@sb/render";
 import { blockerText, collectPlaceholders, sectionDef, type SiteSpec } from "@sb/spec";
-import { issueSession, clearSession, hasSession, passwordMatches, requireAuth, loginThrottle, type AuthSettings } from "./auth.ts";
+import type { AuthSettings } from "./auth.ts";
+import {
+  csrfOk,
+  fullSiteRefusal,
+  identity,
+  publishRefusal,
+  refusalJson,
+  sameOriginOnly,
+  signedIn,
+  siteAccess,
+  tierOf,
+  type AppEnv,
+  type Refusal,
+  type Viewer,
+} from "./access.ts";
+import { registerLoginRoutes } from "./login.tsx";
+import { registerAdminRoutes } from "./admin.tsx";
 import { slugify } from "./slug.ts";
-import { DASHBOARD, loginPage, sitesPage, sitePage } from "./pages.tsx";
+import { DASHBOARD, sitesPage, sitePage } from "./pages.tsx";
 import { homePage } from "./home.tsx";
 import { clientBundle } from "./client-bundle.ts";
 import { uiAssets } from "./ui/assets.ts";
 import { registerFormRoutes } from "./forms.tsx";
 import { createHash } from "node:crypto";
 import { JS_FLAG } from "@sb/components";
+
+export { safeNext } from "./access.ts";
 
 /** CSP source for the one inline script sites contain, so script-src needs no 'unsafe-inline'. */
 const JS_FLAG_HASH = `sha256-${createHash("sha256").update(JS_FLAG).digest("base64")}`;
@@ -39,11 +57,10 @@ export interface AppOptions {
   platform: Platform;
   config: AppConfig;
   auth: AuthSettings;
-}
-
-/** Same-origin path only: "/x" but not "//host", "/\host" or anything with whitespace. Default: the sites list. */
-export function safeNext(v: unknown): string {
-  return typeof v === "string" && /^\/(?![/\\])[^\s\\]*$/.test(v) ? v : DASHBOARD;
+  /** Sends sign-in links; from env (Resend, or the console in development) when not given. */
+  mailer?: Mailer;
+  /** Public origin for links in emails, e.g. https://stranko.example (APP_URL, or Railway's public domain). */
+  appUrl?: string;
 }
 
 const SAFE_SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
@@ -52,19 +69,34 @@ const SAFE_ID = /^site_[0-9a-f]{16}$/;
 /** One or more path segments of plain file names: no "..", no empty segments. */
 const SAFE_REST = /^([a-z0-9][a-z0-9._-]*\/)*[a-z0-9][a-z0-9._-]*$/i;
 
-// The UI stylesheet and fonts are public: the login and landing pages need them. "/" is the landing
-// page for everyone; the dashboard is /sites.
-const PUBLIC = (path: string) =>
-  path === "/" || path === "/health" || path === "/login" || path.startsWith("/s/") || path.startsWith("/assets/ui/") || path === "/assets/home.js" || path === "/favicon.ico";
-
 const IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
 const LOGO_TYPES = new Set([...IMAGE_TYPES, "image/svg+xml"]);
 const EXT: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/avif": "avif", "image/svg+xml": "svg" };
 
-export function createApp({ platform, config, auth }: AppOptions): Hono {
+const SPEND_CAP: Refusal = { status: 429, code: "spend_cap", message: "Današnja omejitev porabe je dosežena. Jutri spet deluje; do takrat stran urejate neposredno." };
+
+/** What the viewer may do on a site they can open (GET /api/sites/:id → access). */
+function siteAccessInfo(v: Viewer) {
+  const ai = !aiRefusal(v);
+  const publish = !publishRefusal(v);
+  return { viewer: tierOf(v), can: { edit: signedIn(v), chat: ai, regenerate: ai, publish, export: publish, fullSite: !fullSiteRefusal(v) } };
+}
+
+/**
+ * Model work (new site, "Ustvari znova", chat edits) until the free tiers have their limits: the admin
+ * and allow-listed accounts only.
+ */
+function aiRefusal(v: Viewer): Refusal | null {
+  const tier = tierOf(v);
+  if (tier === "admin" || tier === "paid") return null;
+  if (tier === "anonymous") return { status: 401, code: "sign_in_required", message: "Prijavite se z e-pošto." };
+  return { status: 403, code: "ai_not_open", message: "Ustvarjanje in spremembe s pomočnikom so zaenkrat na voljo prvim uporabnikom. Stran lahko urejate neposredno." };
+}
+
+export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono<AppEnv> {
   const { repo, storage, queue, db } = platform;
-  const app = new Hono();
-  const throttle = loginThrottle();
+  const app = new Hono<AppEnv>();
+  const mailer = opts.mailer ?? mailerFromEnv();
 
   // Deployed environments are public URLs: nothing here may be indexed, published sites included in phase 1.
   app.use("*", async (c, next) => {
@@ -86,8 +118,13 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
           }`,
     );
   });
-  app.use("*", requireAuth(auth, PUBLIC));
+  app.use("*", identity({ repo, auth, config }));
+  app.use("*", sameOriginOnly);
+  app.use("*", siteAccess(repo));
   app.use("/login", bodyLimit({ maxSize: 16 * 1024 }));
+  app.use("/login/*", bodyLimit({ maxSize: 16 * 1024 }));
+  app.use("/logout", bodyLimit({ maxSize: 16 * 1024 }));
+  app.use("/admin/*", bodyLimit({ maxSize: 16 * 1024 }));
   app.use("/api/sites", bodyLimit({ maxSize: (config.limits.maxPhotos + 1) * config.limits.maxUploadBytes + 64 * 1024 }));
   // Photo uploads in the editor take files; every other site API call is small JSON.
   const photosLimit = bodyLimit({ maxSize: config.limits.maxPhotos * config.limits.maxUploadBytes + 64 * 1024 });
@@ -95,6 +132,9 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
   app.use("/api/sites/*", (c, next) => (/^\/api\/sites\/[^/]+\/photos$/.test(c.req.path) ? photosLimit(c, next) : jsonLimit(c, next)));
   // Contact forms: public submit next to published sites, owner's messages in the dashboard.
   registerFormRoutes(app, { repo, config, secret: auth.secret });
+  // Sign-in (magic link for owners, password for the admin) and the admin's page.
+  registerLoginRoutes(app, { repo, config, auth, mailer, ...(opts.appUrl ? { appUrl: opts.appUrl } : {}) });
+  registerAdminRoutes(app, { repo, config, ...(opts.appUrl ? { appUrl: opts.appUrl } : {}) });
 
   // ---------- Health ----------
   app.get("/health", async (c) => {
@@ -112,25 +152,6 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
     await run("queue", () => queue.ping());
     const ok = Object.values(checks).every((v) => v === "ok");
     return c.json({ status: ok ? "ok" : "degraded", checks }, ok ? 200 : 503);
-  });
-
-  // ---------- Auth ----------
-  app.get("/login", (c) => c.html(loginPage({ next: safeNext(c.req.query("next")) })));
-  app.post("/login", async (c) => {
-    // The rightmost X-Forwarded-For entry is the one our proxy added; the left ones are client-controlled.
-    const ip = c.req.header("x-forwarded-for")?.split(",").at(-1)?.trim() ?? "local";
-    const body = await c.req.parseBody();
-    const next = safeNext(body.next);
-    if (!throttle(ip)) return c.html(loginPage({ next, error: "Preveč poskusov. Poskusite čez nekaj minut." }), 429);
-    if (typeof body.password !== "string" || !passwordMatches(body.password, auth.password)) {
-      return c.html(loginPage({ next, error: "Napačno geslo." }), 401);
-    }
-    issueSession(c, auth);
-    return c.redirect(next);
-  });
-  app.post("/logout", (c) => {
-    clearSession(c);
-    return c.redirect("/");
   });
 
   for (const name of ["editor", "home"] as const) {
@@ -151,12 +172,27 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
   app.get("/favicon.ico", (c) => c.redirect(`/assets/ui/${uiAssets().hash}/icon.svg`, 301));
 
   // ---------- Landing page ----------
-  app.get("/", (c) => c.html(homePage({ config, signedIn: hasSession(c, auth) })));
+  const landing = (c: Context<AppEnv>, extra: { error?: string; description?: string } = {}) => {
+    const viewer = c.get("viewer");
+    return homePage({ config, signedIn: signedIn(viewer), csrf: c.get("csrf"), fullSite: !fullSiteRefusal(viewer), ...extra });
+  };
+  app.get("/", (c) => c.html(landing(c)));
 
   // ---------- Dashboard ----------
   app.get(DASHBOARD, async (c) => {
-    const sites = await repo.listSites();
-    return c.html(sitesPage({ sites, spendToday: await repo.spendToday(), cap: config.limits.dailyModelSpendCapEur }));
+    const viewer = c.get("viewer");
+    const admin = viewer.kind === "admin";
+    const sites = await repo.listSites(viewer.kind === "account" ? { accountId: viewer.account.id } : {});
+    return c.html(
+      sitesPage({
+        sites,
+        spendToday: admin ? await repo.spendToday() : 0,
+        cap: config.limits.dailyModelSpendCapEur,
+        csrf: c.get("csrf"),
+        admin,
+        ...(viewer.kind === "account" ? { account: { email: viewer.account.email, note: viewer.paidSince ? "Imate dostop do celotne strani." : null } } : {}),
+      }),
+    );
   });
   // The landing page's prompt box is the only intake; old links land on it.
   app.get("/new", (c) => c.redirect("/#zacni"));
@@ -165,9 +201,13 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
     const body = await c.req.parseBody({ all: true });
     const description = typeof body.description === "string" ? body.description.trim() : "";
     // The landing page again, with the description kept and the reason above the prompt.
-    const refuse = (error: string) => c.html(homePage({ config, signedIn: true, error, description }), 400);
-    if (description.length < 30) return refuse("Opis mora imeti vsaj 30 znakov.");
+    const refuse = (error: string, status: 400 | Refusal["status"] = 400) => c.html(landing(c, { error, description }), status);
+    if (!csrfOk(c, body as Record<string, unknown>)) return refuse("Obrazec je potekel. Pošljite ga še enkrat.", 403);
+    const viewer = c.get("viewer");
     const scope = body.scope === "full" ? "full" : "home";
+    const denied = aiRefusal(viewer) ?? (scope === "full" ? fullSiteRefusal(viewer) : null);
+    if (denied) return refuse(denied.message, denied.status);
+    if (description.length < 30) return refuse("Opis mora imeti vsaj 30 znakov.");
     const photos = ([] as unknown[]).concat(body["photos"] ?? []).filter((f): f is File => f instanceof File && f.size > 0);
     const logo = body.logo instanceof File && body.logo.size > 0 ? body.logo : undefined;
     if (photos.length > config.limits.maxPhotos) return refuse(`Največ ${config.limits.maxPhotos} fotografij. Izberite jih znova.`);
@@ -178,7 +218,7 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
     if (logo && !LOGO_TYPES.has(logo.type)) return refuse("Logotip mora biti SVG, PNG, JPEG, WebP ali AVIF.");
 
     const slug = await repo.uniqueSlug(slugify(description) || "stran");
-    const site = await repo.createSite({ name: slug, slug, intake: { description, photoAssetIds: [], scope } });
+    const site = await repo.createSite({ name: slug, slug, intake: { description, photoAssetIds: [], scope }, accountId: viewer.kind === "account" ? viewer.account.id : null });
     const stored = async (f: File, kind: "photo" | "logo") => {
       const data = new Uint8Array(await f.arrayBuffer());
       const meta = await imageMeta(data).catch(() => null);
@@ -213,6 +253,8 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
 
   app.get("/api/sites/:id", async (c) => {
     const id = c.req.param("id");
+    const viewer = c.get("viewer");
+    const admin = viewer.kind === "admin";
     // Read first: anything that changes while the rest is read makes the next pulse differ.
     const pulse = await repo.pulse(id);
     const site = await repo.getSite(id);
@@ -221,6 +263,8 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
     const after = Number(c.req.query("after") ?? 0);
     const checklist = current ? await siteChecklist(repo, id, current.spec) : [];
     return c.json({
+      // What this viewer may do here; refusals from the action endpoints carry { code, message } too.
+      access: siteAccessInfo(viewer),
       site,
       pulse,
       version: current?.version ?? null,
@@ -234,8 +278,9 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
       checklist,
       blockers: checklist.map(blockerText),
       messages: (await repo.listFormMessages(id)).length,
-      spendToday: await repo.spendToday(),
-      cap: config.limits.dailyModelSpendCapEur,
+      // The platform's own spend: the admin's business, null for owners.
+      spendToday: admin ? await repo.spendToday() : null,
+      cap: admin ? config.limits.dailyModelSpendCapEur : null,
       // Server time, so the editor's running-stage seconds don't depend on the visitor's clock.
       now: new Date().toISOString(),
     });
@@ -383,8 +428,10 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
     const body = (await c.req.json().catch(() => ({}))) as { message?: string };
     const message = (body.message ?? "").trim();
     if (!message || message.length > 2000) return c.json({ error: "message required (max 2000 chars)" }, 400);
+    const denied = aiRefusal(c.get("viewer"));
+    if (denied) return refusalJson(c, denied);
     if (!(await repo.getSpec(id))) return c.json({ error: "no spec yet" }, 409);
-    if ((await repo.spendToday()) >= config.limits.dailyModelSpendCapEur) return c.json({ error: "Dnevna omejitev porabe je dosežena." }, 429);
+    if ((await repo.spendToday()) >= config.limits.dailyModelSpendCapEur) return refusalJson(c, SPEND_CAP);
     const msg = await repo.addChat(id, "user", message);
     await queue.send("edit", { siteId: id, messageId: Number(msg.id) });
     return c.json({ ok: true });
@@ -394,9 +441,13 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
     const id = c.req.param("id");
     const site = await repo.getSite(id);
     if (!site) return c.json({ error: "not found" }, 404);
-    if ((await repo.spendToday()) >= config.limits.dailyModelSpendCapEur) return c.json({ error: "Dnevna omejitev porabe je dosežena." }, 429);
     const body = (await c.req.json().catch(() => ({}))) as { scope?: string };
     const scope = body.scope === "full" ? "full" : "home";
+    const viewer = c.get("viewer");
+    const denied = aiRefusal(viewer) ?? (scope === "full" ? fullSiteRefusal(viewer) : null);
+    if (denied) return refusalJson(c, denied);
+    if ((await repo.spendToday()) >= config.limits.dailyModelSpendCapEur) return refusalJson(c, SPEND_CAP);
+    if (site.status === "generating") return refusalJson(c, { status: 409, code: "busy", message: "Stran se že ustvarja." });
     await db.query("update sites set intake = jsonb_set(intake, '{scope}', to_jsonb($2::text)) where id = $1", [id, scope]);
     await repo.setStatus(id, "generating");
     await queue.send("generate", { siteId: id, scope });
@@ -404,6 +455,8 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
   });
 
   app.post("/api/sites/:id/publish", async (c) => {
+    const denied = publishRefusal(c.get("viewer"));
+    if (denied) return refusalJson(c, denied);
     try {
       const r = await publishSite({ repo, storage, config }, c.req.param("id"));
       const site = await repo.getSite(c.req.param("id"));
@@ -415,6 +468,8 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
   });
 
   app.get("/api/sites/:id/export", async (c) => {
+    const denied = publishRefusal(c.get("viewer"));
+    if (denied) return refusalJson(c, denied);
     const { filename, zip } = await exportSite({ repo, storage, config }, c.req.param("id"));
     c.header("content-type", "application/zip");
     c.header("content-disposition", `attachment; filename="${filename}"`);

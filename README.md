@@ -8,7 +8,7 @@ AI website builder for Slovenian small businesses. Product brief: `docs/PRODUCT.
 cp .env.example .env        # add ANTHROPIC_API_KEY
 docker compose up -d        # Postgres + MinIO
 pnpm i
-pnpm dev                    # web on http://localhost:3000 (password: ACCESS_PASSWORD) + worker
+pnpm dev                    # web on http://localhost:3000 + worker; admin: ACCESS_PASSWORD, owners: email link (printed in the console)
 ```
 
 No Docker? Set `DATABASE_URL=pglite://./.data/pg` and `STORAGE_DRIVER=fs` in `.env`, then `pnpm dev:lite`.

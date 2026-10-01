@@ -10,6 +10,7 @@ import { launchCheckBrowser, type CheckBrowser } from "@sb/engine";
 import { Repo, createDb, createFsStorage, migrate, type Platform, type Queue } from "@sb/platform";
 import type { SiteSpec } from "@sb/spec";
 import { createApp } from "../src/app.ts";
+import { adminCookie } from "./session-helpers.ts";
 import { fillPlaceholderOps } from "../../../tools/eval/src/placeholder-fill.ts";
 
 /**
@@ -46,8 +47,7 @@ beforeAll(async () => {
   siteId = site.id;
   await platform.repo.saveSpec(site.id, spec, "generate");
 
-  const login = await fetch(`${base}/login`, { method: "POST", body: new URLSearchParams({ password: PASSWORD, next: "/" }), redirect: "manual" });
-  cookie = (login.headers.get("set-cookie") ?? "").split(";")[0]!;
+  cookie = await adminCookie((p, init) => fetch(`${base}${p}`, init), PASSWORD);
   // The owner fills the missing facts in the editor (a manual edit counts as client input).
   const patch = await fetch(`${base}/api/sites/${site.id}/patch`, {
     method: "POST",

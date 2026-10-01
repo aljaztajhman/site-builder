@@ -7,6 +7,7 @@ import { uiStrings } from "@sb/components";
 import type { Repo, SiteRow } from "@sb/platform";
 import type { SiteSpec } from "@sb/spec";
 import { Doc, TopBar, html } from "./pages.tsx";
+import { csrfOk, type AppEnv } from "./access.ts";
 import { formatDateTime } from "./ui/labels.ts";
 
 /**
@@ -85,7 +86,7 @@ const resultPage = (lang: string, text: string, back: string) =>
     ) as never,
   )}`;
 
-export function registerFormRoutes(app: Hono, deps: { repo: Repo; config: AppConfig; secret: string; now?: () => Date }): void {
+export function registerFormRoutes(app: Hono<AppEnv>, deps: { repo: Repo; config: AppConfig; secret: string; now?: () => Date }): void {
   const { repo, config } = deps;
   const senderKey = (ip: string) => createHmac("sha256", deps.secret).update(`form:${ip}`).digest("hex").slice(0, 32);
 
@@ -139,20 +140,21 @@ export function registerFormRoutes(app: Hono, deps: { repo: Repo; config: AppCon
   app.get("/sites/:id/messages", async (c) => {
     const site = await repo.getSite(c.req.param("id"));
     if (!site) return c.notFound();
-    return c.html(messagesPage({ site, messages: await repo.listFormMessages(site.id) }));
+    return c.html(messagesPage({ site, messages: await repo.listFormMessages(site.id), csrf: c.get("csrf"), admin: c.get("viewer").kind === "admin" }));
   });
   app.post("/sites/:id/messages/:mid/delete", async (c) => {
     const site = await repo.getSite(c.req.param("id"));
     if (!site) return c.notFound();
+    if (!csrfOk(c, (await c.req.parseBody()) as Record<string, unknown>)) return c.text("Obrazec je potekel. Osvežite stran in poskusite znova.", 403);
     await repo.deleteFormMessage(site.id, c.req.param("mid"));
     return c.redirect(`/sites/${site.id}/messages`, 303);
   });
 }
 
-function messagesPage({ site, messages }: { site: SiteRow; messages: Awaited<ReturnType<Repo["listFormMessages"]>> }): string {
+function messagesPage({ site, messages, csrf, admin }: { site: SiteRow; messages: Awaited<ReturnType<Repo["listFormMessages"]>>; csrf: string; admin: boolean }): string {
   return html(
     <Doc title={`Sporočila · ${site.name}`}>
-      <TopBar>
+      <TopBar csrf={csrf} admin={admin}>
         <a className="btn quiet sm" href={`/sites/${site.id}`}>
           {`← ${site.name}`}
         </a>
@@ -187,6 +189,7 @@ function messagesPage({ site, messages }: { site: SiteRow; messages: Awaited<Ret
             </dl>
             <p className="text">{m.message}</p>
             <form method="post" action={`/sites/${site.id}/messages/${m.id}/delete`}>
+              <input type="hidden" name="_csrf" value={csrf} />
               <button className="btn sm danger" type="submit">
                 Izbriši
               </button>
