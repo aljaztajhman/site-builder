@@ -20,4 +20,22 @@ describe("phone call bar", () => {
     // Other pages open with a page header, so the bar is there from the start.
     expect(renderPage(both, both.pages[1]!)).toContain('class="action-bar"');
   });
+
+  it("hides the hero's own call button on a phone when the bar shows it from the start", () => {
+    const spec = golden("pekarna-kvas");
+    const home = spec.pages[0]!;
+    // pekarna's hero: "Pokličite" + a page link, the bar from the start: two call buttons stacked on a phone.
+    const out = renderPage(spec, home);
+    expect(out).toContain('class="has-action-bar bar-covers-hero-call"');
+    expect(out).toMatch(/<a href="tel:[^"]+" data-action="call" class="btn btn--primary"/);
+    // The hero offers call and directions: the bar waits for it to scroll away, so the hero keeps its button.
+    const both = structuredClone(spec);
+    const hero = both.pages[0]!.sections[0]! as { props: Record<string, unknown> };
+    hero.props = { ...hero.props, secondary: { label: "Navodila za pot", target: { action: "directions" } } };
+    expect(renderPage(both, both.pages[0]!)).toContain('<body data-imagery="offset-block" class="has-action-bar">');
+    // No bar: nothing hidden.
+    const noBar = structuredClone(spec);
+    noBar.chrome.mobileActionBar = false;
+    expect(renderPage(noBar, noBar.pages[0]!)).not.toContain("bar-covers-hero-call");
+  });
 });

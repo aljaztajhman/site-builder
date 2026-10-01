@@ -106,9 +106,11 @@ export function ActionLink(props: { link: Link; ctx: RenderCtx; kind?: "primary"
   if (!href) return null;
   const external = "url" in props.link.target || ("action" in props.link.target && props.link.target.action === "directions");
   const kind = props.kind ?? "primary";
+  const action = "action" in props.link.target ? props.link.target.action : undefined;
   return (
     <a
       href={href}
+      data-action={action}
       className={cx(kind === "text" ? "text-link" : `btn btn--${kind}`, props.className)}
       {...(external ? { rel: "noopener", target: "_blank" } : {})}
     >
