@@ -87,6 +87,10 @@ export async function startWorker(platform: Platform, config = loadConfig()): Pr
   await repo.failInterrupted(0);
   setInterval(() => void repo.failInterrupted(20).catch((e: unknown) => console.error("[worker]", e)), 5 * 60_000).unref();
 
+  if (config.imageGen.pipeline.enabled && !process.env.FAL_KEY && !process.env.MODEL_REPLAY_DIR) {
+    console.warn("[worker] FAL_KEY not set: sites with too few photos get no generated pictures");
+  }
+
   // Generations run in parallel (one site each); each peaks at ~1.1 GB with its Chromium checks.
   await queue.work("generate", async (job, jobId) => {
     const client = modelClientFor(platform, config, { siteId: job.siteId, jobId });

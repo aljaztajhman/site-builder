@@ -113,7 +113,8 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     await repo.setBrief(siteId, brief, brief.name);
 
     // 3b. Too few photos: generated mood images, beside the design step (they don't need it).
-    const wanted = deps.images && config.imageGen.pipeline.enabled ? Math.max(0, config.imageGen.pipeline.fillUpTo - photos.length) : 0;
+    const { wanted, skipped } = generatedImageCount(config, photos.length, !!deps.images);
+    if (skipped) await log("imageGen", skipped);
     const ideas = brief.imageIdeas.slice(0, wanted);
     const generating: Promise<ImageAsset[]> = ideas.length ? stageTime("imageGen", () => generateImages(deps, siteId, ideas, log)) : Promise.resolve([]);
     // Awaited only after the design call: without a handler now, an early rejection (spend cap) would crash the process.
@@ -240,6 +241,17 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
   }
   await repo.setStatus(siteId, "ready");
   return { version, check, critiqueRounds: rounds, timings, firstVersionMs };
+}
+
+/**
+ * How many mood images to generate for a site with `photoCount` client photos. When some are wanted but
+ * no image service is configured (no FAL_KEY), says so: a silent skip left sites without any picture.
+ */
+export function generatedImageCount(config: AppConfig, photoCount: number, hasGenerator: boolean): { wanted: number; skipped: string | null } {
+  const missing = config.imageGen.pipeline.enabled ? Math.max(0, config.imageGen.pipeline.fillUpTo - photoCount) : 0;
+  if (!missing) return { wanted: 0, skipped: null };
+  if (!hasGenerator) return { wanted: 0, skipped: `${missing} generated picture(s) wanted, but no image service is configured (FAL_KEY); built without them` };
+  return { wanted: missing, skipped: null };
 }
 
 /**
