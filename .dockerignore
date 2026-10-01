@@ -5,5 +5,11 @@ node_modules
 .worktrees
 .data
 .env
+.env.*
+!.env.example
 eval
 tools/eval/fixtures/*/photos
+coverage
+test-results
+playwright-report
+.claude

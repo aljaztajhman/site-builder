@@ -75,6 +75,10 @@ export const AppConfigSchema = z.object({
   limits: z.object({
     dailyModelSpendCapEur: z.number().nonnegative(),
     contentRetries: z.number().int().min(0),
+    /** Paid retries after an answer fails its schema (classify, brief, design, critique, alt text). PRODUCT.md: max 2. */
+    jsonRetries: z.number().int().min(0).max(2),
+    /** Paid retries of a chat edit whose patches fail validation. */
+    editRetries: z.number().int().min(0).max(2),
     critiqueIterations: z.number().int().min(0),
     maxPhotos: z.number().int().positive(),
     maxUploadBytes: z.number().int().positive(),

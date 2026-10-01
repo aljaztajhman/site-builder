@@ -32,6 +32,14 @@ export function isPlaceholder(v: unknown): v is Placeholder {
   return typeof v === "object" && v !== null && "$placeholder" in v;
 }
 
+/**
+ * The only link URLs a site renders: http(s). z.url() also accepts javascript:, data: and the like, so
+ * validation reports them and the renderer drops them. mailto: and tel: are built from business facts.
+ */
+export function isWebUrl(url: string): boolean {
+  return /^https?:\/\//i.test(url);
+}
+
 /** A value or a marked placeholder. */
 export function orPlaceholder<T extends z.ZodType>(schema: T) {
   return z.union([schema, Placeholder]);

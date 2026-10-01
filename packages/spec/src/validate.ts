@@ -5,7 +5,7 @@ import { DIRECTIONS } from "./directions.ts";
 import { checkDesign } from "./design-rules.ts";
 import { findBannedCopy } from "./banned.ts";
 import { getAt, walkObjects, walkStrings } from "./pointer.ts";
-import type { PlaceholderKind } from "./common.ts";
+import { isWebUrl, type PlaceholderKind } from "./common.ts";
 import { EDITOR_STARTER_TEXT } from "./starter.ts";
 
 export interface Issue {
@@ -112,6 +112,16 @@ export function semanticIssues(spec: SiteSpec): Issue[] {
     add("/chrome/header/cta", "reference", "booking CTA without business.bookingUrl");
   }
 
+  // Link URLs: z.url() also accepts javascript:, data: and the like; the renderer drops anything not http(s).
+  const webUrl = (path: string, url: string) => {
+    if (!isWebUrl(url)) add(path, "reference", "link URL must start with http:// or https://");
+  };
+  walkObjects(spec.pages, (o, p) => {
+    if (typeof o.url === "string") webUrl(`/pages${p}/url`, o.url);
+  });
+  if (spec.business.bookingUrl !== undefined) webUrl("/business/bookingUrl", spec.business.bookingUrl);
+  spec.business.social?.forEach((s, i) => webUrl(`/business/social/${i}/url`, s.url));
+
   // Design rules: direction ranges, contrast, banned backgrounds.
   const dir = DIRECTIONS.find((d) => d.id === spec.design.direction);
   for (const d of checkDesign(spec.design, dir)) add(d.path, "design", d.message);
@@ -162,7 +172,8 @@ export function collectPlaceholders(spec: unknown): PlaceholderRef[] {
 
 /**
  * One thing that stands between the site and publishing. `detail` is the validation message, the
- * placeholder kind, the fact kind, or the image id; the editor turns it into Slovene (labels.ts).
+ * placeholder kind (or "serviceArea" for a missing service area), the fact kind, or the image id; the
+ * editor turns it into Slovene (labels.ts).
  */
 export interface PublishBlocker {
   path: string;
@@ -180,6 +191,13 @@ export function publishChecklist(spec: unknown): PublishBlocker[] {
   const out: PublishBlocker[] = v.ok ? [] : v.issues.map((i) => ({ path: i.path, kind: "invalid" as const, detail: i.message, code: i.code }));
   for (const p of collectPlaceholders(spec)) out.push({ path: p.path, kind: "placeholder", detail: p.kind });
   for (const p of collectStarterText(spec)) out.push({ path: p, kind: "starter", detail: "starter text" });
+  if (v.spec) {
+    // Sections that show a business fact the spec doesn't have render a placeholder at render time.
+    const types = new Set(v.spec.pages.flatMap((p) => p.sections.map((s) => s.type)));
+    const b = v.spec.business;
+    if (types.has("opening-hours") && b.hours === undefined) out.push({ path: "/business/hours", kind: "placeholder", detail: "hours" });
+    if (types.has("service-area") && !b.serviceArea?.length) out.push({ path: "/business/serviceArea", kind: "placeholder", detail: "serviceArea" });
+  }
   // A photo the pages show needs a description (alt text) for screen readers.
   if (v.spec) {
     const shown = new Set<string>();

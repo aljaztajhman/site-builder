@@ -64,7 +64,10 @@ export async function createQueue(db: Db, databaseUrl: string): Promise<Queue> {
   await boss.start();
   for (const q of QUEUES) {
     // Model calls are billed: no automatic retries. A failed job is reported and can be re-run by the user.
-    await boss.createQueue(q, { retryLimit: 0, expireInSeconds: 15 * 60 }).catch(() => undefined);
+    // Existing queues are updated too: createQueue leaves an existing queue's options as they were.
+    const options = { retryLimit: 0, expireInSeconds: 15 * 60 };
+    if (await boss.getQueue(q)) await boss.updateQueue(q, options);
+    else await boss.createQueue(q, options);
   }
   return {
     async send(name, data) {

@@ -22,6 +22,21 @@ describe("applyPatches", () => {
     expect(r.issues.join(" ")).toMatch(/business\/hours/);
   });
 
+  it("doesn't let a violation the site already had block an unrelated edit, but still catches a new one", () => {
+    const spec = structuredClone(golden("pekarna-kvas"));
+    // Left after generation's retries: a number the client never wrote.
+    const home = spec.pages[0]!;
+    const hero = home.sections[0]!.props as Record<string, unknown>;
+    hero.headline = "Kruh peki že 777 dni";
+    const c = corpus("pekarna-kvas");
+    const unrelated = applyPatches(spec, [{ op: "add", path: "/chrome/header/tone", value: "inverse" }], c);
+    expect(unrelated.issues).toEqual([]);
+    expect(unrelated.spec.chrome.header.tone).toBe("inverse");
+    const invented = applyPatches(spec, [{ op: "replace", path: "/business/phone", value: "+38641999111" }], c);
+    expect(invented.issues.join(" ")).toMatch(/business\/phone/);
+    expect(invented.issues.join(" ")).not.toMatch(/777/);
+  });
+
   it("repairs a warmer palette with a cream surface instead of rejecting it (live eval, pekarna-kvas)", () => {
     const spec = golden("pekarna-kvas");
     const ops: Operation[] = [

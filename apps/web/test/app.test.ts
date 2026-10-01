@@ -308,6 +308,18 @@ describe("intake", () => {
     expect(res.status).toBe(303);
   }, 60_000);
 
+  it("starts one generation when generate is clicked twice at once", async () => {
+    const { cookie } = await login();
+    const site = (await platform.repo.listSites())[0]!;
+    await platform.repo.setStatus(site.id, "ready");
+    const before = sent.length;
+    const post = () => app.request(`/api/sites/${site.id}/generate`, { method: "POST", body: "{}", headers: { cookie, "content-type": "application/json" } });
+    const statuses = (await Promise.all([post(), post()])).map((r) => r.status).sort();
+    expect(statuses).toEqual([200, 409]);
+    expect(sent.slice(before).filter((m) => m.name === "generate")).toHaveLength(1);
+    expect((await platform.repo.getSite(site.id))?.status).toBe("generating");
+  });
+
   it("refuses AI work once the daily spend cap is reached", async () => {
     const { cookie } = await login();
     const site = (await platform.repo.listSites())[0]!;
@@ -315,6 +327,8 @@ describe("intake", () => {
     await platform.repo.logModelCall({ siteId: site.id, jobId: null, stage: "brief", model: "claude-sonnet-5-5", inputTokens: 1, outputTokens: 1, cacheCreationTokens: 0, cacheReadTokens: 0, costEur: 1000, durationMs: 1, ok: true });
     const res = await app.request(`/api/sites/${site.id}/generate`, { method: "POST", body: "{}", headers: { cookie, "content-type": "application/json" } });
     expect(res.status).toBe(429);
+    // The refused request gives the site its status back.
+    expect((await platform.repo.getSite(site.id))?.status).toBe("ready");
   });
 });
 

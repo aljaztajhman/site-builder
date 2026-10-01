@@ -1,4 +1,4 @@
-import { createHash, createHmac, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, scryptSync, timingSafeEqual } from "node:crypto";
 import type { Context } from "hono";
 import { getCookie, setCookie, deleteCookie } from "hono/cookie";
 
@@ -18,7 +18,9 @@ export function authSettingsFromEnv(): AuthSettings {
   if (!password || password.length < 12) throw new Error("ACCESS_PASSWORD must be set (at least 12 characters)");
   return {
     password,
-    secret: process.env.SESSION_SECRET || createHash("sha256").update(`sb-session:${password}`).digest("hex"),
+    // Without SESSION_SECRET the key comes from the password through a slow KDF: every visitor's
+    // device cookie is an HMAC under it, so a fast hash would let anyone guess the password offline.
+    secret: process.env.SESSION_SECRET || scryptSync(password, "sb-session", 32, { N: 1 << 16, r: 8, p: 1, maxmem: 128 * 1024 * 1024 }).toString("hex"),
     secureCookies: process.env.NODE_ENV === "production",
   };
 }

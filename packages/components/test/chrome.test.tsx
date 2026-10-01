@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
+import vm from "node:vm";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import type { Page, SiteSpec } from "@sb/spec";
@@ -144,6 +145,24 @@ describe("Footer", () => {
     expect(out).toContain(">Družbena omrežja</h2>");
     expect(out).not.toContain("<script");
   });
+
+  it("drops social links that are not http(s)", () => {
+    const b = {
+      ...FULL_BUSINESS,
+      social: [
+        { network: "instagram" as const, url: "javascript:alert(1)" },
+        { network: "facebook" as const, url: "data:text/html,x" },
+      ],
+    };
+    const out = html(<Footer ctx={testCtx(spec({ business: b }))} />);
+    expect(out).not.toContain("javascript:");
+    expect(out).not.toContain("data:text");
+    expect(out).not.toContain(">Družbena omrežja</h2>");
+    const mixed = { ...b, social: [...b.social, { network: "youtube" as const, url: "https://www.youtube.com/@salonlipa" }] };
+    const out2 = html(<Footer ctx={testCtx(spec({ business: mixed }))} />);
+    expect(out2).toContain('href="https://www.youtube.com/@salonlipa"');
+    expect(out2).not.toContain("javascript:");
+  });
 });
 
 describe("MobileActionBar", () => {
@@ -194,6 +213,35 @@ describe("islands", () => {
     for (const s of ['"sb-consent"', "data-embed-src", "data-embed-title", "data-embed-load", "data-consent-open", '"lazy"', "no-referrer-when-downgrade"]) {
       expect(js).toContain(s);
     }
+  });
+
+  it("form.js holds submissions only in the dashboard preview (/preview/<id>/…), not on a site whose slug is preview", async () => {
+    const submit = async (pathname: string) => {
+      let handler: ((e: { preventDefault(): void }) => Promise<void>) | undefined;
+      const status = { textContent: "", setAttribute() {} };
+      const form = {
+        action: "_submit",
+        getAttribute: (n: string) => n,
+        querySelector: (q: string) => (q === "[data-form-status]" ? status : null),
+        addEventListener: (_t: string, fn: typeof handler) => (handler = fn),
+        reset() {},
+      };
+      const calls: string[] = [];
+      const ctx: Record<string, unknown> = {
+        document: { querySelectorAll: () => [form] },
+        location: { protocol: "https:", pathname },
+        fetch: async (url: string) => (calls.push(url), { ok: true, status: 200 }),
+        FormData: class {},
+        URLSearchParams: class {},
+      };
+      ctx.window = ctx;
+      vm.runInNewContext(read("form.js"), ctx);
+      await handler!({ preventDefault() {} });
+      return { sent: calls.length > 0, status: status.textContent };
+    };
+    expect(await submit("/preview/3f2a9c/kontakt.html")).toEqual({ sent: false, status: "data-msg-preview" });
+    expect(await submit("/s/preview/kontakt.html")).toEqual({ sent: true, status: "data-msg-sent" });
+    expect(await submit("/s/salon-lipa/kontakt.html")).toEqual({ sent: true, status: "data-msg-sent" });
   });
 });
 

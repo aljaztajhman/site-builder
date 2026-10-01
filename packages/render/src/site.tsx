@@ -13,6 +13,7 @@ import {
 } from "@sb/components";
 import {
   isPlaceholder,
+  isWebUrl,
   mapsUrl,
   setAt,
   fontPair,
@@ -106,7 +107,7 @@ export function makeCtx(spec: SiteSpec, page: Page, opts: RenderOptions = {}): R
 
   const href = (t: LinkTarget): string | null => {
     if ("page" in t) return pageHref(t.page) + (t.section ? `#${t.section}` : "");
-    if ("url" in t) return t.url;
+    if ("url" in t) return isWebUrl(t.url) ? t.url : null;
     switch (t.action) {
       case "call":
         return isPlaceholder(b.phone) ? null : `tel:${b.phone}`;
@@ -115,7 +116,7 @@ export function makeCtx(spec: SiteSpec, page: Page, opts: RenderOptions = {}): R
       case "directions":
         return isPlaceholder(b.address) ? null : mapsUrl(b.address);
       case "booking":
-        return b.bookingUrl ?? null;
+        return b.bookingUrl !== undefined && isWebUrl(b.bookingUrl) ? b.bookingUrl : null;
     }
   };
 

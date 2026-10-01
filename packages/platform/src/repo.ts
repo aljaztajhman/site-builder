@@ -186,6 +186,12 @@ export class Repo {
     await this.db.query("update sites set status = $2, updated_at = now() where id = $1", [id, status]);
   }
 
+  /** Sets `to` only while the site is still in one of `from`; false when another job moved it meanwhile. */
+  async setStatusIf(id: string, from: SiteStatus | SiteStatus[], to: SiteStatus): Promise<boolean> {
+    const { rows } = await this.db.query("update sites set status = $3, updated_at = now() where id = $1 and status = any($2::text[]) returning id", [id, [from].flat(), to]);
+    return rows.length > 0;
+  }
+
   /**
    * Sites left "generating"/"editing"/"publishing" by a job that died (deploy, crash). Jobs don't
    * retry (they cost money), so these are marked failed with an event and can be re-run by the user.

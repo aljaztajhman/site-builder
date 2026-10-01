@@ -43,16 +43,15 @@ export function newReleaseId(version: number, now = Date.now()): string {
 export async function writeRelease(storage: Storage, slug: string, release: string, files: Map<string, Uint8Array>): Promise<{ previous: string | null }> {
   if (!RELEASE_ID.test(release)) throw new Error(`Bad release id ${release}`);
   const base = `${releasesPrefix(slug)}${release}/`;
-  const sharedDone = new Set<string>();
+  const sharedKeys = new Map<string, Set<string>>();
   for (const [rel, data] of files) {
     if (rel.startsWith("_shared/")) {
-      // Content-addressed: a bundle already in storage is identical, so it is written once.
+      // Content-addressed: a file already in storage is identical, so it is written once. Checked per
+      // file, not per bundle, so a publish that died half-way through a bundle gets it completed.
       const dir = rel.split("/").slice(0, 2).join("/");
-      if (!sharedDone.has(dir)) {
-        sharedDone.add(dir);
-        if ((await storage.list(`${publishedPrefix}/${dir}/`)).length > 0) sharedDone.add(`${dir}:exists`);
-      }
-      if (!sharedDone.has(`${dir}:exists`)) await storage.put(`${publishedPrefix}/${rel}`, data, contentType(rel));
+      let stored = sharedKeys.get(dir);
+      if (!stored) sharedKeys.set(dir, (stored = new Set(await storage.list(`${publishedPrefix}/${dir}/`))));
+      if (!stored.has(`${publishedPrefix}/${rel}`)) await storage.put(`${publishedPrefix}/${rel}`, data, contentType(rel));
       continue;
     }
     if (!rel.startsWith(`${slug}/`)) throw new Error(`File ${rel} is outside site ${slug}`);

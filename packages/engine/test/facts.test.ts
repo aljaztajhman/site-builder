@@ -75,4 +75,47 @@ describe("checkFacts, stricter matching", () => {
     const s = spec({ business: { name: "Frizerstvo Lana", phone: "+38641555301", email: { $placeholder: "email" }, address: { $placeholder: "address" }, hours: { $placeholder: "hours" } } });
     expect(checkFacts(s, `Frizerstvo Lana. ${text}`).map((v) => v.kind)).toContain("phone");
   });
+
+  it("flags invented social links, legal name, hours note and street name", () => {
+    const s = spec({
+      business: {
+        address: { street: "Cesta svobode 8", postalCode: "3000", city: "Celje" },
+        hours: { entries: [{ from: "mon", to: "fri", open: "08:00", close: "19:00" }], note: "Ob sobotah 9–12." },
+        social: [{ network: "facebook", url: "https://facebook.com/frizerstvolana" }],
+        provider: { legalName: "Frizerstvo Ana Novak s.p.", registrationNumber: { $placeholder: "registrationNumber" }, taxNumber: { $placeholder: "taxNumber" } },
+      } as Partial<SiteSpec["business"]>,
+    });
+    const paths = checkFacts(s, corpus).map((v) => `${v.path}:${v.value}`);
+    expect(paths).toEqual(
+      expect.arrayContaining([
+        "/business/address/street:Cesta svobode 8",
+        "/business/hours/note:9",
+        "/business/social/0:https://facebook.com/frizerstvolana",
+        "/business/provider/legalName:Frizerstvo Ana Novak s.p.",
+      ]),
+    );
+  });
+
+  it("passes the same facts when the client gave them, street type abbreviated", () => {
+    const own = `${corpus} Lana Kos s.p. Facebook: facebook.com/frizerstvolana. Ob sobotah 9–12.`.replace("Ljubljanska cesta 8", "Ljubljanska c. 8");
+    const s = spec({
+      business: {
+        hours: { entries: [{ from: "mon", to: "fri", open: "08:00", close: "19:00" }], note: "Ob sobotah 9–12." },
+        social: [{ network: "facebook", url: "https://www.facebook.com/frizerstvolana/" }],
+        provider: { legalName: "Lana Kos s.p.", registrationNumber: { $placeholder: "registrationNumber" }, taxNumber: { $placeholder: "taxNumber" } },
+      } as Partial<SiteSpec["business"]>,
+    });
+    expect(checkFacts(s, own)).toEqual([]);
+  });
+
+  it("checks translations as they are shown", () => {
+    const s = {
+      ...spec({ sections: [{ id: "s_text", type: "text", props: { title: "Striženje", paragraphs: ["Pokličite 041 555 301."] } }] }),
+      locales: { default: "sl", enabled: ["sl", "en"] },
+      translations: { en: { "/business/phone": "+38640999999", "/pages/0/sections/0/props/title": "20 years of experience" } },
+    } as unknown as SiteSpec;
+    const found = checkFacts(s, corpus).map((v) => `${v.kind}:${v.path}`);
+    expect(found).toEqual(expect.arrayContaining(["phone:/translations/en/business/phone", "number:/translations/en/pages/0/sections/0/props/title"]));
+    expect(found.filter((f) => !f.includes("/translations/"))).toEqual([]);
+  });
 });

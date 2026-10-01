@@ -1,4 +1,4 @@
-import { isPlaceholder, walkStrings, type SiteSpec } from "@sb/spec";
+import { isPlaceholder, setAt, walkStrings, type SiteSpec } from "@sb/spec";
 import { fold, numberTokens, numbersIn } from "./brief.ts";
 
 export interface FactViolation {
@@ -11,6 +11,9 @@ const digitsOf = (s: string) => s.replace(/\D/g, "");
 
 /** Legal-form tokens that may be added to a name without being "invented". */
 const LEGAL_FORMS = new Set(["d.o.o.", "d.o.o", "s.p.", "s.p", "d.d.", "d.d", "k.d.", "doo", "sp"]);
+
+/** Street-type words the client may abbreviate or leave out ("Ljubljanska c. 8"). */
+const STREET_KINDS = new Set(["cesta", "ulica", "trg", "pot", "nabrezje", "naselje"]);
 
 /** Keys whose strings are structural, not visible copy. */
 const NON_COPY_KEYS = new Set(["id", "type", "variant", "tone", "page", "section", "action", "kind", "slug", "image", "network", "src", "file", "$placeholder"]);
@@ -46,7 +49,9 @@ export function checkFacts(spec: SiteSpec, corpus: string): FactViolation[] {
     }
     const streetNum = /\d+\w?$/.exec(b.address.street)?.[0];
     const streetName = b.address.street.replace(/\s*\d+\w?$/, "").toLowerCase();
-    if ((streetNum && !nums.has(streetNum.replace(/\D/g, ""))) || !text.includes(streetName.split(" ")[0] ?? streetName)) {
+    // Every word of the street name, not only the first ("Cesta svobode" when the client wrote "Celjska cesta").
+    const streetWords = fold(streetName).split(/\s+/).filter((w) => w.length >= 3 && !STREET_KINDS.has(w));
+    if ((streetNum && !nums.has(streetNum.replace(/\D/g, ""))) || streetWords.some((w) => !folded.includes(w))) {
       out.push({ path: "/business/address/street", kind: "address", value: b.address.street });
     }
   }
@@ -56,6 +61,14 @@ export function checkFacts(spec: SiteSpec, corpus: string): FactViolation[] {
         if (t && !nums.has(String(Number(t.split(":")[0])))) out.push({ path: `/business/hours/entries/${i}`, kind: "hours", value: t });
       }
     });
+    for (const m of b.hours.note?.matchAll(/\d+(?:[.,]\d+)?/g) ?? []) {
+      if (!nums.has(String(Number(m[0].replace(",", ".")))) && !nums.has(m[0])) out.push({ path: "/business/hours/note", kind: "hours", value: m[0] });
+    }
+  }
+  // The legal name fills a required ZEPT field: an invented one must not clear the publish gate.
+  if (!isPlaceholder(b.provider.legalName)) {
+    const legalWords = fold(b.provider.legalName).split(/[\s,]+/).filter((w) => w.length >= 3 && !LEGAL_FORMS.has(w));
+    if (legalWords.some((w) => !folded.includes(w))) out.push({ path: "/business/provider/legalName", kind: "name", value: b.provider.legalName });
   }
   for (const k of ["registrationNumber", "taxNumber"] as const) {
     const v = b.provider[k];
@@ -64,6 +77,9 @@ export function checkFacts(spec: SiteSpec, corpus: string): FactViolation[] {
   if (b.bookingUrl && !text.includes(b.bookingUrl.toLowerCase().replace(/^https?:\/\//, "").replace(/\/$/, ""))) {
     out.push({ path: "/business/bookingUrl", kind: "url", value: b.bookingUrl });
   }
+  (b.social ?? []).forEach((so, i) => {
+    if (!text.includes(so.url.toLowerCase().replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, ""))) out.push({ path: `/business/social/${i}`, kind: "url", value: so.url });
+  });
 
   // Structured facts inside sections: prices and people's names.
   const visit = (v: unknown, p: string, key: string) => {
@@ -102,6 +118,19 @@ export function checkFacts(spec: SiteSpec, corpus: string): FactViolation[] {
       if (!nums.has(n) && !nums.has(m[0])) out.push({ path: `/pages${p}`, kind: "number", value: m[0] });
     }
   });
+  // Translations overlay any string of the spec when rendered; check each locale as it is shown.
+  for (const [locale, map] of Object.entries(spec.translations ?? {})) {
+    const shown = structuredClone({ ...spec, translations: undefined });
+    for (const [ptr, value] of Object.entries(map ?? {})) {
+      try {
+        setAt(shown, ptr, value);
+      } catch {
+        // A pointer that doesn't resolve is a validation issue, reported there.
+      }
+    }
+    const base = new Set(out.map((f) => `${f.path}|${f.value}`));
+    for (const f of checkFacts(shown, corpus)) if (!base.has(`${f.path}|${f.value}`)) out.push({ ...f, path: `/translations/${locale}${f.path}` });
+  }
   return dedupe(out);
 }
 

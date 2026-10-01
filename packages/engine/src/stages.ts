@@ -264,6 +264,8 @@ export async function generateContent(client: ModelClient, input: ContentInput):
   let attempts = 0;
   let lastIssues: string[];
   let spec: SiteSpec | undefined;
+  // The issues of the attempt that produced `spec`; a later answer that didn't parse doesn't replace them.
+  let specIssues: string[] = [];
   let structured = input.structuredOutput;
   let structuredFallback = false;
   for (;;) {
@@ -290,7 +292,7 @@ export async function generateContent(client: ModelClient, input: ContentInput):
     }
     let issues: string[];
     try {
-      const parsed = schema.safeParse(JSON.parse(extract(res.text)));
+      const parsed = schema.safeParse(JSON.parse(extractJson(res.text)));
       if (!parsed.success) {
         issues = parsed.error.issues.slice(0, 25).map((i) => `/${i.path.join("/")}: ${i.message}`);
       } else {
@@ -299,6 +301,7 @@ export async function generateContent(client: ModelClient, input: ContentInput):
         issues = v.ok ? [] : v.issues.map(issueLine);
         const facts = checkFacts(spec, input.corpus);
         issues.push(...facts.map(factLine));
+        specIssues = issues;
       }
     } catch {
       issues = ["Output is not valid JSON."];
@@ -313,10 +316,8 @@ export async function generateContent(client: ModelClient, input: ContentInput):
     });
   }
   if (!spec) throw new Error(`Content generation failed after ${attempts} attempts: ${lastIssues.slice(0, 5).join("; ")}`);
-  return { spec, attempts, issues: lastIssues, structuredFallback };
+  return { spec, attempts, issues: specIssues, structuredFallback };
 }
-
-const extract = extractJson;
 
 const issueLine = (i: Issue) => `${i.path}: ${i.message}`;
 const factLine = (f: FactViolation) => `${f.path}: ${f.kind} "${f.value}" is not in the client's input — remove it or use a placeholder`;
@@ -353,8 +354,12 @@ export function applyPatches(spec: SiteSpec, ops: Operation[], corpus: string): 
   // Design edits get the same repair as generation: banned backgrounds replaced, contrast fixed in code.
   if (ops.some((o) => o.path === "/design" || o.path.startsWith("/design/"))) next = { ...next, design: repairDesign(next.design) };
   const v = validateSite(next);
-  // Fact checks walk the spec's structure, so they only run on a spec that validates.
-  const issues = v.ok ? checkFacts(v.spec, corpus).map(factLine) : v.issues.map(issueLine);
+  // Fact checks walk the spec's structure, so they only run on a spec that validates. A violation the
+  // site already had (left after generation's retries) doesn't block an unrelated edit; publishing
+  // still lists it. Matched by kind and value, so a moved section doesn't make it "new".
+  const known = new Set<string>();
+  if (v.ok && validateSite(spec).ok) for (const f of checkFacts(spec, corpus)) known.add(`${f.kind}|${f.value}`);
+  const issues = v.ok ? checkFacts(v.spec, corpus).filter((f) => !known.has(`${f.kind}|${f.value}`)).map(factLine) : v.issues.map(issueLine);
   return { spec: v.ok && issues.length === 0 ? v.spec : next, applied: ops.length, issues };
 }
 
@@ -403,7 +408,7 @@ export async function critique(
     ],
   });
   try {
-    const out = CritiqueOutput.parse(JSON.parse(extract(res.text)));
+    const out = CritiqueOutput.parse(JSON.parse(extractJson(res.text)));
     return { issues: out.issues, patches: out.patches as Operation[] };
   } catch (e) {
     throw new ModelOutputError(`Critique output is not valid: ${(e as Error).message.slice(0, 200)}`, res);
@@ -447,14 +452,14 @@ export async function editSpec(
         .join("\n\n"),
     },
   ];
-  const retries = input.retries ?? 1;
+  const retries = input.retries ?? client.limits.editRetries;
   let attempts = 0;
   for (;;) {
     attempts++;
     const res = await client.call({ stage: "edit", system: [sectionCatalogue(), `${EDIT_SYSTEM}\n\n${businessSchema()}`], messages });
     let issues: string[];
     try {
-      const out = EditOutput.parse(JSON.parse(extract(res.text)));
+      const out = EditOutput.parse(JSON.parse(extractJson(res.text)));
       const r = applyPatches(input.spec, out.patches as Operation[], input.corpus);
       issues = r.issues;
       if (issues.length === 0) return { reply: out.reply, spec: r.spec, changed: r.applied > 0, attempts, issues: [] };

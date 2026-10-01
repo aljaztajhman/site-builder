@@ -20,7 +20,7 @@ import {
   PhotoError,
   type Operation,
 } from "@sb/engine";
-import { VersionConflictError, contentType, mailerFromEnv, newId, type Mailer, type Platform, type Tier } from "@sb/platform";
+import { VersionConflictError, contentType, mailerFromEnv, newId, type Mailer, type Platform, type SiteStatus, type Tier } from "@sb/platform";
 import { renderPage, sharedBundle, pageFile } from "@sb/render";
 import { blockerText, collectPlaceholders, sectionDef, type SiteSpec } from "@sb/spec";
 import type { AuthSettings } from "./auth.ts";
@@ -351,15 +351,21 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     }
 
     const slug = await repo.uniqueSlug(slugify(description) || "stran");
-    const site = await repo.createSite({
-      id: siteId,
-      name: slug,
-      slug,
-      intake: { description, photoAssetIds: [], scope },
-      accountId,
-      // An anonymous preview belongs to this device until someone signs in on it.
-      deviceId: viewer.kind === "anonymous" ? c.get("deviceId") : null,
-    });
+    const site = await repo
+      .createSite({
+        id: siteId,
+        name: slug,
+        slug,
+        intake: { description, photoAssetIds: [], scope },
+        accountId,
+        // An anonymous preview belongs to this device until someone signs in on it.
+        deviceId: viewer.kind === "anonymous" ? c.get("deviceId") : null,
+      })
+      .catch(async (e: unknown) => {
+        // Two intakes with the same slug at once: the loser gives its reserved job back.
+        await repo.usage.finishJob(aiJobId, "failed");
+        throw e;
+      });
     const stored = async (f: File, kind: "photo" | "logo") => {
       const data = new Uint8Array(await f.arrayBuffer());
       const meta = await imageMeta(data).catch(() => null);
@@ -595,15 +601,20 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     const scope = body.scope === "full" ? "full" : "home";
     const denied = scope === "full" ? fullSiteRefusal(c.get("viewer")) : null;
     if (denied) return refusalJson(c, denied);
-    if (site.status === "generating") return refusalJson(c, { status: 409, code: "busy", message: "Stran se že ustvarja." });
+    // Claimed in one statement: two clicks at once must not start two paid generations.
+    const idle: SiteStatus[] = ["new", "ready", "editing", "publishing", "failed"];
+    if (!(await repo.setStatusIf(id, idle, "generating"))) return refusalJson(c, { status: 409, code: "busy", message: "Stran se že ustvarja." });
     const grant = await reserveJob(limits, c, { kind: "generate", scope, siteId: id });
-    if (!grant.ok) return refusalJson(c, grant.refusal);
+    if (!grant.ok) {
+      await repo.setStatusIf(id, "generating", site.status);
+      return refusalJson(c, grant.refusal);
+    }
     try {
       await db.query("update sites set intake = jsonb_set(intake, '{scope}', to_jsonb($2::text)) where id = $1", [id, scope]);
-      await repo.setStatus(id, "generating");
       await queue.send("generate", { siteId: id, scope, aiJobId: grant.aiJobId });
     } catch (e) {
       await repo.usage.finishJob(grant.aiJobId, "failed");
+      await repo.setStatusIf(id, "generating", site.status);
       throw e;
     }
     return c.json({ ok: true });

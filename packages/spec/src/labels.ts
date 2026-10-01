@@ -1,9 +1,10 @@
 /**
  * Slovene names for everything the editor shows the owner: section types and variants, form fields,
  * enum values, directions, design tokens, colours, and where a spec path points. No zod import, so the
- * dashboard's browser bundle can use it (`@sb/spec/labels`). test/labels.test.ts checks that every
+ * dashboard's browser bundle can use it (`@sb/spec/labels`; format.ts has no zod import either). test/labels.test.ts checks that every
  * type, variant, field key, enum value and direction in the spec has a name here.
  */
+import { plural } from "./format.ts";
 
 export const SECTION_LABEL: Record<string, string> = {
   "hero-split": "Uvod s fotografijo",
@@ -210,6 +211,8 @@ export const PLACEHOLDER_LABEL: Record<string, string> = {
   registrationNumber: "matična številka",
   taxNumber: "davčna številka",
   text: "besedilo",
+  // Not a placeholder kind: a service-area section with no business.serviceArea (publishChecklist).
+  serviceArea: "območje dela",
 };
 
 /** Owner-facing names and summaries of the design directions (the English ones are for the model). */
@@ -343,7 +346,10 @@ export function issueMessage(issue: IssueLike): string {
   if ((r = /expected string to have <=(\d+) characters/.exec(m))) return `je predolgo (največ ${r[1]} znakov)`;
   if ((r = /expected string to have >=(\d+) characters/.exec(m))) return r[1] === "1" ? "ne sme biti prazno" : `je prekratko (vsaj ${r[1]} znakov)`;
   if ((r = /expected array to have <=(\d+) items/.exec(m))) return `ima preveč postavk (največ ${r[1]})`;
-  if ((r = /expected array to have >=(\d+) items/.exec(m))) return `potrebuje vsaj ${r[1]} ${Number(r[1]) === 1 ? "postavko" : Number(r[1]) === 2 ? "postavki" : Number(r[1]) < 5 ? "postavke" : "postavk"}`;
+  if ((r = /expected array to have >=(\d+) items/.exec(m))) {
+    const n = Number(r[1]);
+    return `potrebuje vsaj ${n} ${plural(n, { one: "postavko", two: "postavki", few: "postavke", other: "postavk" })}`;
+  }
   if (/expected number to be [<>]=?/.test(m) || /Too (big|small): expected (number|int)/.test(m)) return "je zunaj dovoljenega razpona";
   if (/Invalid (string: must match pattern|format)|Invalid (email|url|URL)/.test(m)) return "nima pravilne oblike";
   if (/expected .*, received undefined/.test(m)) return "manjka";
@@ -354,6 +360,7 @@ export function issueMessage(issue: IssueLike): string {
   if (/^unknown image/.test(m)) return "fotografije ni več";
   if (/is AI-generated and may only be used in/.test(m)) return "slike, ustvarjene z UI, so dovoljene le v uvodu, glavi strani in razdelku slika in besedilo";
   if (/booking (link|CTA) without business.bookingUrl/.test(m)) return "gumb za rezervacijo potrebuje povezavo za rezervacije (Podatki o podjetju)";
+  if (/^link URL must start with http/.test(m)) return "spletni naslov se mora začeti s https:// (ali http://)";
   if (/centred sections on one page/.test(m)) return "na strani je lahko le en sredinsko poravnan razdelek";
   if (issue.code === "banned") {
     // findBannedCopy: `${rule}: "${text}"`.

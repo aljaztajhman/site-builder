@@ -197,7 +197,7 @@ export async function startWorker(platform: Platform, config = loadConfig()): Pr
       await repo.addEvent({ siteId: job.siteId, jobId, stage: "altText", level: "warn", message: `Photo descriptions not written: ${(e as Error).message.slice(0, 200)}` });
       console.error("[alt]", e);
     } finally {
-      if ((await repo.getSite(job.siteId))?.status === "editing") await repo.setStatus(job.siteId, "ready");
+      await repo.setStatusIf(job.siteId, "editing", "ready");
     }
   });
 

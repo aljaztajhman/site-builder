@@ -106,6 +106,15 @@ describe("queue (pg-boss on PGlite)", () => {
     await queue.stop();
   }, 30_000);
 
+  it("brings an existing queue's options back to no retries (billed jobs never retry)", async () => {
+    await (await createQueue(db, "pglite://memory")).stop();
+    await db.query("update pgboss.queue set retry_limit = 3 where name = 'edit'");
+    const queue = await createQueue(db, "pglite://memory");
+    const { rows } = await db.query<{ retry_limit: number }>("select retry_limit from pgboss.queue where name = 'edit'");
+    expect(rows[0]?.retry_limit).toBe(0);
+    await queue.stop();
+  }, 30_000);
+
   it("runs jobs in parallel with concurrency 2", async () => {
     const queue = await createQueue(db, "pglite://memory");
     let running = 0;

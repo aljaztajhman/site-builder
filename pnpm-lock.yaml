@@ -251,9 +251,6 @@ importers:
       '@sb/platform':
         specifier: workspace:*
         version: link:../../packages/platform
-      '@sb/render':
-        specifier: workspace:*
-        version: link:../../packages/render
       '@sb/spec':
         specifier: workspace:*
         version: link:../../packages/spec
@@ -294,9 +291,6 @@ importers:
       '@axe-core/playwright':
         specifier: ^4.13.0
         version: 4.13.0(playwright-core@1.63.0)
-      '@sb/components':
-        specifier: workspace:*
-        version: link:../components
       '@sb/config':
         specifier: workspace:*
         version: link:../config
@@ -319,7 +313,7 @@ importers:
         specifier: ^13.5.0
         version: 13.5.0(@opentelemetry/core@2.11.0(@opentelemetry/api@1.9.1))(supports-color@10.2.2)
       playwright:
-        specifier: ^1.63.0
+        specifier: 1.63.0
         version: 1.63.0
       sharp:
         specifier: ^0.35.5
@@ -358,9 +352,6 @@ importers:
       '@sb/components':
         specifier: workspace:*
         version: link:../components
-      '@sb/config':
-        specifier: workspace:*
-        version: link:../config
       '@sb/spec':
         specifier: workspace:*
         version: link:../spec
@@ -468,7 +459,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/spec
       playwright:
-        specifier: ^1.63.0
+        specifier: 1.63.0
         version: 1.63.0
       sharp:
         specifier: ^0.35.5
