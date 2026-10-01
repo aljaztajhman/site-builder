@@ -77,7 +77,7 @@ describe("editor in a browser", () => {
       const heading = page.locator('[data-path$="/props/heading"] input');
       await heading.fill("Drožmi iz domače kleti");
       // Within the 0.7 s autosave delay the owner moves the section up: its index changes under the pending save.
-      await page.getByRole("button", { name: "Premakni gor: O nas" }).click();
+      await page.frameLocator('iframe[title="Predogled strani"]').getByRole("button", { name: "Premakni gor: O nas" }).click();
       // Both land: the text in s_about, and the move (sent after the text, so it can't overtake it).
       await expect
         .poll(async () => {
@@ -116,14 +116,14 @@ describe("editor in a browser", () => {
     await platform.repo.setStatus(id, "editing");
     const { page, close } = await open(id);
     try {
-      await expect.poll(() => page.locator("#ed-version").textContent()).toBe("v1");
+      const about = page.frameLocator('iframe[title="Predogled strani"]').locator("#s_about h2");
+      await expect.poll(() => about.textContent(), { timeout: 10_000 }).not.toBe("Shranil pomočnik");
       // As the edit job would: a new version, then back to ready.
       const s = await spec(id);
       (home(s).sections.find((x) => x.id === "s_about")!.props as { heading: string }).heading = "Shranil pomočnik";
       await platform.repo.saveSpec(id, s, "edit", "pomočnik");
       await platform.repo.setStatus(id, "ready");
-      await expect.poll(() => page.locator("#ed-version").textContent(), { timeout: 10_000 }).toBe("v2");
-      await expect.poll(() => page.frameLocator('iframe[title="Predogled strani"]').locator("#s_about h2").textContent(), { timeout: 10_000 }).toBe("Shranil pomočnik");
+      await expect.poll(() => about.textContent(), { timeout: 10_000 }).toBe("Shranil pomočnik");
     } finally {
       await close();
     }
@@ -150,7 +150,7 @@ describe("editor in a browser", () => {
     }
   }, 60_000);
 
-  it("on a phone, edits in a bottom sheet over the preview: peek, full, and the tapped section's form", async () => {
+  it("on a phone, the site fills the screen; the editor sheet opens on a tap: closed, peek, full", async () => {
     const id = await bakery("urejanje-list");
     const { page, close } = await open(id, 375);
     try {
@@ -158,11 +158,12 @@ describe("editor in a browser", () => {
       const sheet = () => panel.getAttribute("data-sheet");
       const box = async () => (await panel.boundingBox())!;
       expect(await panel.evaluate((p) => getComputedStyle(p).position)).toBe("fixed");
-      expect(await sheet()).toBe("peek");
-      // The preview sits above the peeking sheet, not under it.
+      // Nothing tapped yet: a slim strip, the preview above it gets most of the screen.
+      expect(await sheet()).toBe("closed");
       const frame = (await page.locator(".canvas .frame").boundingBox())!;
       expect(frame.y + frame.height).toBeLessThanOrEqual((await box()).y + 1);
-      expect((await box()).height).toBeLessThan(900 * 0.5);
+      expect((await box()).height).toBeLessThan(100);
+      expect(frame.height).toBeGreaterThan(400);
 
       await page.getByRole("button", { name: "Razširi urejanje" }).click();
       expect(await sheet()).toBe("full");
@@ -171,11 +172,12 @@ describe("editor in a browser", () => {
       await expect.poll(async () => Math.round((await box()).y)).toBe(Math.round(bar.y + bar.height));
       expect((await box()).height).toBeGreaterThan(900 * 0.6);
       await page.getByRole("button", { name: "Pomanjšaj urejanje" }).click();
-      expect(await sheet()).toBe("peek");
+      expect(await sheet()).toBe("closed");
 
-      // A tap on a section in the preview brings its form into view inside the sheet.
+      // A tap on a section in the preview opens the sheet halfway with its form in view.
       await page.frameLocator('iframe[title="Predogled strani"]').locator("#s_about h2").click();
-      const head = page.locator("#selected-head");
+      await expect.poll(() => sheet()).toBe("peek");
+      const head = page.locator("#selected-head h2");
       await expect.poll(() => head.textContent()).toBe("O nas");
       await expect.poll(async () => {
         const h = (await head.boundingBox())!;

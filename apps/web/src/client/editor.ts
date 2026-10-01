@@ -71,11 +71,14 @@ const root = document.getElementById("app")!;
 const siteId = root.dataset.siteId!;
 let state: State;
 let catalogue: Catalogue | null = null;
-let tab: "content" | "facts" | "photos" | "design" | "pages" | "ai" | "versions" = "content";
+/** What the panel shows: "content" is the page (or the selected section); the rest open from shortcuts, taps and the ⋯ menu. */
+type Tab = "content" | "facts" | "photos" | "design" | "pages" | "versions" | "chat" | "diag" | "add" | "image";
+let tab: Tab = "content";
 let pageIndex = 0;
 let selected: string | null = null;
 let device: "mobile" | "desktop" = "mobile";
-let editMode = true;
+/** Tapping the preview always edits; "Predogled v novem zavihku" (⋯ menu) shows the clean page. */
+const editMode = true;
 let toast = "";
 let pollTimer: number | undefined;
 
@@ -135,12 +138,7 @@ async function load(rerender = true): Promise<void> {
   state = await fetchState();
   if (state.spec && !catalogue) catalogue = await api<Catalogue>("/catalogue");
   if (rerender) render();
-  else {
-    // Form autosave: keep the form, refresh only the version label.
-    const v = document.getElementById("ed-version");
-    if (v && state.version) v.textContent = `v${state.version}`;
-    showToast();
-  }
+  else showToast();
   schedulePoll();
 }
 
@@ -410,6 +408,18 @@ function fieldBody(schema: Schema, rootSchema: Schema, value: Json | undefined, 
     const nonPh = opts.filter((_, i) => i !== phIndex);
     const isPh = value !== null && typeof value === "object" && !Array.isArray(value) && "$placeholder" in value;
     if (phIndex >= 0 && nonPh.length === 1) {
+      const inner0 = nonPh[0]!;
+      // A text fact: emptying the field marks it missing, a missing one is just an empty field to type in.
+      if (inner0.type === "string" && !Array.isArray(inner0.enum)) {
+        const missing = { $placeholder: PH_KIND[key] ?? "text" } as Json;
+        const phSink: Sink = { edit: (v) => sink.edit(v === undefined ? missing : v), structure: sink.structure };
+        const f = field(inner0, rootSchema, isPh ? "" : value, key, phSink, true, ptr, parent);
+        if (isPh) {
+          f.classList.add("missing");
+          f.append(h("p", { class: "note warn" }, "Manjka. Dokler ga ne vpišete, strani ni mogoče objaviti."));
+        }
+        return f;
+      }
       if (isPh) {
         // Show an empty editor without saving; the value is saved once it is valid.
         const holder = h("div", { class: "field" });
@@ -438,7 +448,7 @@ function fieldBody(schema: Schema, rootSchema: Schema, value: Json | undefined, 
         return holder;
       }
       const inner = field(nonPh[0]!, rootSchema, value, key, sink, false, ptr, parent);
-      inner.append(h("button", { class: "btn sm", type: "button", onClick: () => sink.structure({ $placeholder: PH_KIND[key] ?? "text" }) }, "Označi kot manjkajoče"));
+      inner.append(h("button", { class: "linkish", type: "button", onClick: () => sink.structure({ $placeholder: PH_KIND[key] ?? "text" }) }, "Tega podatka nimam"));
       return inner;
     }
     // Link targets and other unions: pick the branch whose keys match the value.
@@ -485,16 +495,19 @@ function fieldBody(schema: Schema, rootSchema: Schema, value: Json | undefined, 
           sink.structure(obj);
         },
       });
+      // Optional fields not in use wait under "Več možnosti", so the form shows what the site has.
+      const more = h("details", { class: "more-fields" }, h("summary", {}, "Več možnosti"));
       for (const [k, sub] of Object.entries(props)) {
         if (k === "$placeholder") continue;
         if (!req.has(k) && !(k in obj)) {
-          fs.append(h("button", { class: "btn sm", type: "button", onClick: () => childSink(k).structure(defaultFor(sub, rootSchema, k)) }, `+ ${fieldLabel(k, key)}`), " ");
+          more.append(h("button", { class: "btn sm", type: "button", onClick: () => childSink(k).structure(defaultFor(sub, rootSchema, k)) }, `+ ${fieldLabel(k, key)}`), " ");
           continue;
         }
         const child = field(sub, rootSchema, obj[k], k, childSink(k), !req.has(k), `${ptr}/${esc(k)}`, key);
-        if (!req.has(k)) child.append(h("button", { class: "btn sm", type: "button", onClick: () => childSink(k).structure(undefined) }, "Odstrani"));
+        if (!req.has(k)) child.append(h("button", { class: "linkish", type: "button", onClick: () => childSink(k).structure(undefined) }, "Odstrani"));
         fs.append(child);
       }
+      if (more.childElementCount > 1) fs.append(more);
       return fs;
     }
     case "array": {
@@ -550,12 +563,14 @@ function fieldBody(schema: Schema, rootSchema: Schema, value: Json | undefined, 
         ? h("textarea", { maxlength: max || undefined, rows: Math.min(8, Math.ceil(max / 90)) })
         : h("input", { type: key === "email" ? "email" : key.toLowerCase().includes("url") ? "url" : "text", maxlength: max || undefined });
       input.value = typeof value === "string" ? value : "";
-      const count = h("div", { class: "count" }, max ? `${input.value.length}/${max}` : "");
+      // The counter shows only near the limit.
+      const countText = () => (max && input.value.length >= max * 0.8 ? `${input.value.length}/${max}` : "");
+      const count = h("div", { class: "count" }, countText());
       const hint = h("div", { class: "err", role: "status" });
       const re = pattern ? new RegExp(pattern) : null;
       const minLen = Number(s.minLength ?? 0);
       input.addEventListener("input", () => {
-        count.textContent = max ? `${input.value.length}/${max}` : "";
+        count.textContent = countText();
         const v = input.value;
         if (v === "" && optional) {
           hint.textContent = "";
@@ -625,64 +640,123 @@ const labelled = (title: string, control: HTMLElement) => h("div", {}, h("label"
 /** Marks a form block as the place for a spec path, so the pre-publish checklist can open it. */
 const withPath = (path: string, el: HTMLElement) => ((el.dataset.path = path), el);
 
+/** Nothing selected: what to do next, four shortcuts and the sections of this page. */
+const SHORTCUTS: [Tab, string, string][] = [
+  ["facts", "Podatki", "Ime, telefon, naslov, delovni čas"],
+  ["photos", "Fotografije", "Dodajte svoje, zamenjajte ustvarjene"],
+  ["design", "Oblika", "Slog, barve in pisave"],
+  ["pages", "Strani", "Meni, nove strani, iskalniki"],
+];
+
 function contentPane(): HTMLElement {
+  if (!state.spec) return h("div", { class: "pane" });
+  const si = sections().findIndex((s) => s.id === selected);
+  return si >= 0 ? sectionPane(si) : homePane();
+}
+
+function homePane(): HTMLElement {
   const pane = h("div", { class: "pane" });
-  if (!state.spec) return pane;
   pane.append(
-    h("label", {}, "Stran"),
-    h("select", { onChange: (e: Event) => { pageIndex = Number((e.target as HTMLSelectElement).value); selected = null; render(); reloadPreview(); } }, ...pages().map((p, i) => h("option", { value: String(i), selected: i === pageIndex }, `${(p.nav as Obj).label} (${pageFileOf(p)})`))),
+    h("p", { class: "hint" }, "Tapnite karkoli na strani in to uredite. Ali pa v polje pod predogledom napišite, kaj naj spremenimo."),
+    h("div", { class: "shortcuts" }, ...SHORTCUTS.map(([k, title, desc]) =>
+      h("button", { type: "button", class: "shortcut", onClick: () => { tab = k; selected = null; setSheet("full"); render(); } }, h("strong", {}, title), h("span", {}, desc)))),
   );
-  const secs = sections();
-  const pi = pageIndex;
-  const list = h("ul", { class: "outline" });
-  secs.forEach((s, i) => {
-    const id = s.id as string;
-    const system = s.type === "legal" || s.type === "not-found";
-    const name = label(s.type as string);
-    list.append(
-      h(
-        "li",
-        { class: id === selected ? "sel" : "", onClick: () => select(id) },
-        h("span", { class: "t" }, h("strong", {}, name), h("span", { class: "muted" }, sectionTitle(s))),
-        !system && h("button", { class: "icon", type: "button", title: "Premakni gor", "aria-label": `Premakni gor: ${name}`, disabled: i === 0, onClick: (e: Event) => { e.stopPropagation(); void patch([isSection(pi, i, id), { op: "move", from: `/pages/${pi}/sections/${i}`, path: `/pages/${pi}/sections/${i - 1}` }], "premik"); } }, "↑"),
-        !system && h("button", { class: "icon", type: "button", title: "Premakni dol", "aria-label": `Premakni dol: ${name}`, disabled: i === secs.length - 1, onClick: (e: Event) => { e.stopPropagation(); void patch([isSection(pi, i, id), { op: "move", from: `/pages/${pi}/sections/${i}`, path: `/pages/${pi}/sections/${i + 1}` }], "premik"); } }, "↓"),
-        !system && h("button", { class: "icon", type: "button", title: "Podvoji", "aria-label": `Podvoji: ${name}`, onClick: (e: Event) => { e.stopPropagation(); void patch([isSection(pi, i, id), { op: "add", path: `/pages/${pi}/sections/${i + 1}`, value: { ...structuredClone(s), id: newSectionId(s.type as string) } }], "podvojen razdelek"); } }, "⧉"),
-        !system && h("button", { class: "icon", type: "button", title: "Izbriši", "aria-label": `Izbriši: ${name}`, onClick: (e: Event) => { e.stopPropagation(); if (confirm(`Izbrišem razdelek »${name}«?`)) void patch([isSection(pi, i, id), { op: "remove", path: `/pages/${pi}/sections/${i}` }], "izbrisan razdelek"); } }, "✕"),
-      ),
-    );
-  });
-  pane.append(h("h2", {}, "Razdelki"), list);
-
-  if (catalogue && currentPage()?.kind !== "privacy" && currentPage()?.kind !== "accessibility" && currentPage()?.kind !== "not-found") {
-    const addable = catalogue.sections.filter((c) => c.canAdd);
-    const sel = h("select", {}, ...addable.map((c) => h("option", { value: c.type }, label(c.type))));
-    const at = selected ? secs.findIndex((s) => s.id === selected) + 1 : secs.length;
+  if (pages().length > 1) {
     pane.append(
-      h("label", { class: "sr-only" }, "Nov razdelek"),
-      h("div", { class: "add-row" }, sel, h("button", { class: "btn", type: "button", onClick: () => void post("/sections", { pageIndex: pi, index: at, type: sel.value }, "Razdelek dodan.") }, "+ Dodaj")),
-      h("p", { class: "help" }, selected ? "Nov razdelek pride pod izbranega." : "Nov razdelek pride na konec strani."),
+      h("label", {}, "Stran"),
+      h("select", { onChange: (e: Event) => { pageIndex = Number((e.target as HTMLSelectElement).value); selected = null; render(); reloadPreview(); } },
+        ...pages().map((p, i) => h("option", { value: String(i), selected: i === pageIndex }, String((p.nav as Obj).label)))),
     );
   }
-
-  const si = secs.findIndex((s) => s.id === selected);
-  const s = secs[si];
-  if (s && catalogue) {
-    const info = sectionInfo(s.type as string);
-    const base = `/pages/${pi}/sections/${si}`;
-    pane.append(h("h2", { id: "selected-head" }, label(s.type as string)));
-    if (info) {
-      pane.append(
-        h("p", { class: "help" }, "Tapnite besedilo izbranega razdelka v predogledu in ga popravite kar tam."),
-        variantPicker(s, pi, si, info.variants),
-        labelled("Ozadje", h("select", { onChange: (e: Event) => { const v = (e.target as HTMLSelectElement).value; void patch([isSection(pi, si, String(s.id)), s.tone === undefined ? { op: "add", path: `${base}/tone`, value: v } : { op: "replace", path: `${base}/tone`, value: v }], "ozadje"); } },
-          ...["default", "alt", "inverse"].map((t) => h("option", { value: t, selected: (s.tone ?? "default") === t }, TONE[t]!)))),
-        formAt(inSection(String(s.id), "/props"), info.props, s.props as Json, "props", `urejen razdelek ${s.type}`),
-      );
-    } else {
-      pane.append(h("p", { class: "muted" }, "Ta razdelek ustvari sistem (pravna besedila, 404). Podatke uredite v zavihku Podatki."));
-    }
-  }
+  const secs = sections();
+  pane.append(
+    h("h2", {}, "Na tej strani"),
+    h("ul", { class: "outline" }, ...secs.map((s) =>
+      h("li", { onClick: () => select(String(s.id)) }, h("span", { class: "t" }, h("strong", {}, label(String(s.type))), h("span", { class: "muted" }, sectionTitle(s)))))),
+  );
+  if (canAddSections()) pane.append(h("button", { class: "btn", type: "button", onClick: () => openAdd(secs.length) }, "+ Dodaj razdelek"));
   return pane;
+}
+
+function sectionPane(si: number): HTMLElement {
+  const pi = pageIndex;
+  const s = sections()[si]!;
+  const info = sectionInfo(String(s.type));
+  const base = `/pages/${pi}/sections/${si}`;
+  const pane = h("div", { class: "pane" },
+    h("div", { class: "pane-head", id: "selected-head" },
+      h("button", { class: "btn quiet sm", type: "button", onClick: () => { selected = null; render(); } }, "← Vsi razdelki"),
+      h("h2", { class: "pane-title" }, label(String(s.type))),
+    ),
+  );
+  if (!info || !catalogue) {
+    pane.append(h("p", { class: "muted" }, "Ta razdelek ustvari sistem (pravna besedila, 404). Podatke uredite pod »Podatki«."));
+    return pane;
+  }
+  pane.append(
+    h("p", { class: "help" }, "Besedilo popravite kar na strani: tapnite ga. Premik, podvajanje in brisanje so na vrhu razdelka v predogledu."),
+    variantPicker(s, pi, si, info.variants),
+    labelled("Ozadje", h("select", { onChange: (e: Event) => { const v = (e.target as HTMLSelectElement).value; void patch([isSection(pi, si, String(s.id)), s.tone === undefined ? { op: "add", path: `${base}/tone`, value: v } : { op: "replace", path: `${base}/tone`, value: v }], "ozadje"); } },
+      ...["default", "alt", "inverse"].map((t) => h("option", { value: t, selected: (s.tone ?? "default") === t }, TONE[t]!)))),
+    formAt(inSection(String(s.id), "/props"), info.props, s.props as Json, "props", `urejen razdelek ${s.type}`),
+  );
+  return pane;
+}
+
+const canAddSections = (): boolean => !!catalogue && ["home", "standard"].includes(String(currentPage()?.kind));
+
+// ---------- Adding a section: where it goes is chosen first (the "+" under a section, or the end) ----------
+let addAt = 0;
+
+function openAdd(at: number): void {
+  addAt = at;
+  tab = "add";
+  setSheet("full");
+  render();
+}
+
+function addPane(): HTMLElement {
+  const secs = sections();
+  const after = secs[addAt - 1];
+  const pane = h("div", { class: "pane" },
+    paneHead("Dodaj razdelek"),
+    h("p", { class: "help" }, after && addAt < secs.length ? `Nov razdelek pride pod »${label(String(after.type))}«.` : "Nov razdelek pride na konec strani."),
+  );
+  const addable = (catalogue?.sections ?? []).filter((c) => c.canAdd);
+  pane.append(h("div", { class: "add-grid" }, ...addable.map((c) =>
+    h("button", {
+      type: "button",
+      onClick: async () => {
+        const at = addAt;
+        await post("/sections", { pageIndex, index: at, type: c.type }, "Razdelek dodan.");
+        const added = sections()[at];
+        if (added?.type === c.type) select(String(added.id));
+      },
+    }, label(c.type)))));
+  return pane;
+}
+
+// ---------- A tapped picture: replace it, describe it ----------
+let imageId: string | null = null;
+
+function imagePane(): HTMLElement {
+  const images = ((state.spec?.assets as Obj | undefined)?.images ?? []) as Obj[];
+  const i = images.findIndex((im) => im.id === imageId);
+  const im = images[i];
+  if (!im) return photosPane();
+  const id = String(im.id);
+  const generated = im.origin === "generated";
+  const alt = h("textarea", { rows: 2, maxlength: 180, placeholder: "Npr. Pek vzame hlebce iz krušne peči" }) as HTMLTextAreaElement;
+  alt.value = String(im.alt ?? "");
+  alt.addEventListener("change", () => void patch([{ op: "replace", path: `/assets/images/${i}/alt`, value: alt.value.trim() }], "opis slike"));
+  return h("div", { class: "pane" },
+    paneHead("Slika"),
+    h("img", { class: "image-big", src: `/preview/${siteId}/media/${id}-720.webp`, alt: "", width: 360, height: 240 }),
+    generated ? h("p", { class: "note warn" }, "To sliko smo ustvarili z UI, ker je bilo vaših fotografij premalo. Ko jo zamenjate s svojo, oznaka izgine.") : null,
+    h("div", { class: "row" }, fileButton(generated ? "Zamenjaj s svojo fotografijo" : "Zamenjaj", false, (files) => void uploadPhotos(files, id), true)),
+    withPath(`/assets/images/${i}/alt`, labelled("Opis za obiskovalce, ki slik ne vidijo", alt)),
+    h("button", { class: "linkish", type: "button", onClick: () => { tab = "photos"; render(); } }, "Vse fotografije"),
+  );
 }
 
 /** Width the layout thumbnails are drawn at: the narrowest full desktop layout (sites switch at 768 and 1024 px), where variants differ most. */
@@ -731,9 +805,9 @@ function variantPicker(s: Obj, pi: number, si: number, variants: string[]): HTML
 }
 
 function factsPane(): HTMLElement {
-  const pane = h("div", { class: "pane" });
+  const pane = h("div", { class: "pane" }, paneHead("Podatki"));
   if (!state.spec || !catalogue) return pane;
-  pane.append(h("p", { class: "help" }, "Podatki se prikažejo v glavi, nogi, kontaktu in delovnem času. Manjkajoči podatki so označeni in preprečujejo objavo."));
+  pane.append(h("p", { class: "help" }, "Prikažejo se v glavi, nogi, kontaktu in pri delovnem času."));
   pane.append(formAt(at("/business"), catalogue.business, state.spec.business as Json, "Podatki o podjetju", "podatki"));
   const chrome = state.spec.chrome as Obj;
   const header = chrome.header as Obj;
@@ -800,7 +874,7 @@ function photoUses(imageId: string): string[] {
 }
 
 function photosPane(): HTMLElement {
-  const pane = h("div", { class: "pane" });
+  const pane = h("div", { class: "pane" }, paneHead("Fotografije"));
   if (!state.spec) return pane;
   const images = ((state.spec.assets as Obj).images ?? []) as Obj[];
   const generated = images.filter((im) => im.origin === "generated").length;
@@ -836,7 +910,7 @@ function photosPane(): HTMLElement {
 }
 
 function designPane(): HTMLElement {
-  const pane = h("div", { class: "pane" });
+  const pane = h("div", { class: "pane" }, paneHead("Oblika"));
   if (!state.spec || !catalogue) return pane;
   const d = state.spec.design as Obj;
   const dir = catalogue.directions.find((x) => x.id === d.direction);
@@ -870,7 +944,7 @@ function designPane(): HTMLElement {
 }
 
 function pagesPane(): HTMLElement {
-  const pane = h("div", { class: "pane" });
+  const pane = h("div", { class: "pane" }, paneHead("Strani"));
   if (!state.spec) return pane;
   pages().forEach((p, i) => {
     const nav = p.nav as Obj;
@@ -907,46 +981,113 @@ function pagesPane(): HTMLElement {
 const COST_STAGE: Record<string, string> = { classify: "Vrsta dejavnosti", brief: "Razumevanje opisa", design: "Oblikovna smer", altText: "Opisi fotografij", imageGen: "Ustvarjene slike", content: "Besedila in postavitev", critique: "Samopregled", edit: "Pomočnik" };
 const n0 = (n: number) => n.toLocaleString("sl-SI");
 
-function aiPane(): HTMLElement {
-  const pane = h("div", { class: "pane" });
+/** A panel opened from the ⋯ menu or the assistant box: its title and a way back to editing. */
+function paneHead(title: string): HTMLElement {
+  return h("div", { class: "pane-head" },
+    h("button", { class: "btn quiet sm", type: "button", onClick: () => { tab = "content"; render(); } }, "← Nazaj"),
+    h("h2", { class: "pane-title" }, title),
+  );
+}
+
+/** The whole conversation with the assistant (the box under the preview shows only the latest reply). */
+function chatPane(): HTMLElement {
   const busy = state.site.status === "editing" || awaitingReply();
-  pane.append(h("p", { class: "help" }, "Pomočnik doda ali spremeni vsebino po vašem opisu, npr. »dodaj pogosta vprašanja o parkiranju«. Vsako sporočilo stane nekaj centov. Besedila, vrstni red in podatke lahko brez stroškov urejate tudi neposredno."));
   const chat = h("div", { class: "chat" }, ...state.chat.map((m) => h("div", { class: `msg ${m.role}` }, m.content)));
   if (busy) chat.append(h("div", { class: "msg", role: "status" }, "Urejam stran …"));
-  const input = h("textarea", { rows: 3, placeholder: "Npr. dodaj pogosta vprašanja o parkiranju" });
+  return h("div", { class: "pane" }, paneHead("Pogovor s pomočnikom"), state.chat.length || busy ? chat : h("p", { class: "muted" }, "Še nič. Napišite, kaj naj spremenimo, v polje pod predogledom."));
+}
+
+/** Model spend and the generation log: for us, not part of everyday editing. */
+function diagPane(): HTMLElement {
   const total = state.cost.reduce((a, c) => a + c.eur, 0);
-  pane.append(
-    ...(state.chat.length || busy ? [chat] : []),
-    h("label", {}, "Kaj naj spremenim?"),
-    input,
-    h("div", { class: "row", style: { marginTop: "10px" } },
-      h("button", { class: "btn primary", type: "button", disabled: !state.spec || busy, onClick: async () => { if (!input.value.trim()) return; try { await api("/chat", { method: "POST", body: JSON.stringify({ message: input.value }) }); input.value = ""; toast = "Poslano pomočniku."; } catch (e) { toast = (e as Error).message; } await load(); } }, "Pošlji"),
-      h("span", { class: "help num", style: { margin: 0 } }, `Danes ${formatEur(state.spendToday)} od ${formatEur(state.cap)}`),
+  return h("div", { class: "pane" },
+    paneHead("Poraba in dnevnik"),
+    h("p", { class: "help num" }, `Danes ${formatEur(state.spendToday)} od ${formatEur(state.cap)} (vse strani). Ta stran skupaj: ${formatEur(total)}.`),
+    h("table", {},
+      h("tr", {}, h("th", {}, "Faza"), h("th", { class: "num" }, "Klici"), h("th", { class: "num" }, "Vhod"), h("th", { class: "num" }, "Izhod"), h("th", { class: "num" }, "€")),
+      ...state.cost.map((c) => h("tr", {}, h("td", {}, COST_STAGE[c.stage] ?? c.stage), h("td", { class: "num" }, n0(c.calls)), h("td", { class: "num" }, n0(c.input + c.cacheRead + c.cacheWrite)), h("td", { class: "num" }, n0(c.output)), h("td", { class: "num" }, c.eur.toLocaleString("sl-SI", { minimumFractionDigits: 3, maximumFractionDigits: 3 })))),
     ),
-    h("details", { class: "more" },
-      h("summary", {}, `Poraba za to stran: ${formatEur(total)}`),
-      h("table", {},
-        h("tr", {}, h("th", {}, "Faza"), h("th", { class: "num" }, "Klici"), h("th", { class: "num" }, "Vhod"), h("th", { class: "num" }, "Izhod"), h("th", { class: "num" }, "€")),
-        ...state.cost.map((c) => h("tr", {}, h("td", {}, COST_STAGE[c.stage] ?? c.stage), h("td", { class: "num" }, n0(c.calls)), h("td", { class: "num" }, n0(c.input + c.cacheRead + c.cacheWrite)), h("td", { class: "num" }, n0(c.output)), h("td", { class: "num" }, c.eur.toLocaleString("sl-SI", { minimumFractionDigits: 3, maximumFractionDigits: 3 })))),
-      ),
-      h("p", { class: "help" }, "Vhod vključuje žetone iz predpomnilnika."),
-    ),
-    h("details", { class: "more" },
-      h("summary", {}, "Dnevnik"),
-      h("div", { class: "log" }, ...state.events.slice(-80).map((e) => h("div", { class: e.level === "error" ? "err" : "" }, `${new Date(e.created_at).toLocaleTimeString("sl-SI")} ${e.stage}: ${e.message}`))),
-    ),
-    h("details", { class: "more" },
-      h("summary", {}, "Ustvari celotno stran znova"),
-      h("p", { class: "help" }, "Vse strani naredimo znova iz vašega opisa. Podatki o podjetju, ki ste jih vpisali (ime, telefon, naslov, delovni čas, podatki o ponudniku), ostanejo; besedila in postavitev so nova. Trenutna vsebina ostane med različicami, zato jo lahko obnovite. Stane približno toliko kot ustvarjanje nove strani."),
-      h("button", { class: "btn", type: "button", disabled: state.site.status === "generating", onClick: () => { if (confirm("Ustvarim celotno stran znova? To porabi žetone in zamenja trenutno vsebino z novo različico.")) void post("/generate", { scope: "full" }, "Ustvarjanje se je začelo."); } }, "Ustvari znova"),
-    ),
+    h("p", { class: "help" }, "Vhod vključuje žetone iz predpomnilnika."),
+    h("h2", {}, "Dnevnik"),
+    h("div", { class: "log" }, ...state.events.slice(-80).map((e) => h("div", { class: e.level === "error" ? "err" : "" }, `${new Date(e.created_at).toLocaleTimeString("sl-SI")} ${e.stage}: ${e.message}`))),
   );
-  return pane;
+}
+
+// ---------- The assistant box under the preview: say what to change ----------
+/** Built once and kept, so a re-render never wipes what the owner is typing. */
+let dock: { root: HTMLElement; input: HTMLTextAreaElement; status: HTMLElement; chips: HTMLElement; send: HTMLButtonElement } | null = null;
+
+/** A few things owners ask for, offered while the box is empty; a tap fills the box, it doesn't send. */
+function suggestions(): string[] {
+  const out: string[] = [];
+  const types = new Set(sections().map((s) => String(s.type)));
+  if (!types.has("faq")) out.push("Dodaj pogosta vprašanja");
+  out.push("Toplejše barve", "Krajši uvod na vrhu strani");
+  if (!types.has("opening-hours") && !(state.spec?.business as Obj | undefined)?.hours) out.push("Dodaj delovni čas");
+  return out.slice(0, 3);
+}
+
+async function sendToAssistant(): Promise<void> {
+  if (!dock) return;
+  const message = dock.input.value.trim();
+  if (!message) return dock.input.focus();
+  dock.send.disabled = true;
+  try {
+    await api("/chat", { method: "POST", body: JSON.stringify({ message }) });
+    dock.input.value = "";
+    toast = "Poslano. Spremembo pokažemo v predogledu.";
+  } catch (e) {
+    toast = (e as Error).message;
+  }
+  await load();
+}
+
+function buildDock(): HTMLElement {
+  const input = h("textarea", { rows: 1, id: "ask", placeholder: "Kaj naj spremenimo?", "aria-label": "Kaj naj spremenimo?" }) as HTMLTextAreaElement;
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      void sendToAssistant();
+    }
+  });
+  input.addEventListener("input", () => {
+    input.style.height = "auto";
+    input.style.height = `${Math.min(input.scrollHeight, 140)}px`;
+    renderDock();
+  });
+  const send = h("button", { class: "btn primary sm", type: "button", onClick: () => void sendToAssistant() }, "Pošlji") as HTMLButtonElement;
+  const status = h("div", { class: "ask-status", role: "status" });
+  const chips = h("div", { class: "sugg" });
+  const root = h("div", { class: "ask-dock" }, status, chips, h("div", { class: "ask" }, input, send));
+  dock = { root, input, status, chips, send };
+  return root;
+}
+
+/** Updates the box's status line, latest reply and suggestions; the typed text stays. */
+function renderDock(): void {
+  if (!dock) return;
+  dock.root.hidden = !state.spec;
+  const busy = state.site.status === "editing" || awaitingReply();
+  const last = state.chat.at(-1);
+  dock.send.disabled = busy || state.site.status === "generating";
+  dock.status.replaceChildren(
+    ...(busy
+      ? [h("span", { class: "busy-dot", "aria-hidden": "true" }), "Urejam stran …"]
+      : last?.role === "assistant"
+        ? [h("span", { class: "reply" }, last.content), h("button", { class: "linkish", type: "button", onClick: () => { tab = "chat"; setSheet("full"); render(); } }, "Pogovor")]
+        : []),
+  );
+  dock.chips.replaceChildren(
+    ...(busy || dock.input.value.trim()
+      ? []
+      : suggestions().map((s) => h("button", { type: "button", onClick: () => { dock!.input.value = s; dock!.input.focus(); renderDock(); } }, s))),
+  );
 }
 
 function versionsPane(): HTMLElement {
   const SRC: Record<string, string> = { generate: "ustvarjeno", critique: "samopregled", edit: "pomočnik", manual: "urejanje", revert: "obnovljeno" };
   return h("div", { class: "pane" },
+    paneHead("Zgodovina sprememb"),
     h("p", { class: "help" }, "Vsaka sprememba je nova različica. Tudi obnova je nova različica, zato se nič ne izgubi."),
     h("ol", { class: "versions" }, ...state.versions.map((v) => h("li", {},
       h("b", {}, `v${v.version}`),
@@ -1138,20 +1279,62 @@ function reloadPreview(): void {
   frame.src = previewUrl();
 }
 
-/** Edit mode helpers run inside the preview document at runtime; the rendered HTML itself is unchanged. */
+/** The editing layer in the preview: styles and the section toolbar are added at runtime; the rendered HTML is unchanged. */
+const EDIT_CSS = `main section{cursor:pointer} main section:hover{outline:2px dashed #156b4a;outline-offset:-2px}
+main section[data-sb-selected]{position:relative;outline:3px solid #156b4a;outline-offset:-3px}
+[contenteditable]{outline:2px solid #9a5b00!important;outline-offset:2px;cursor:text}
+.sb-tools{position:absolute;top:8px;left:8px;z-index:2147483000;display:flex;gap:2px;padding:4px;background:#fff;border:1px solid #c9c4ba;border-radius:8px;box-shadow:0 8px 24px rgb(20 20 18/.16)}
+.sb-tools button,.sb-add{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;min-width:40px;min-height:40px;padding:0 10px;border-radius:6px;font:600 14px/1 system-ui,-apple-system,"Segoe UI",sans-serif;color:#151412;cursor:pointer}
+.sb-tools button:hover{background:#ece9e3}
+.sb-tools button:disabled{color:#b5b0a7;cursor:default;background:none}
+.sb-add{position:absolute;left:50%;bottom:8px;z-index:2147483000;transform:translateX(-50%);padding:0 16px;border-radius:999px;background:#156b4a;color:#fff;box-shadow:0 8px 24px rgb(20 20 18/.2)}
+.sb-tools button:focus-visible,.sb-add:focus-visible{outline:2px solid #156b4a;outline-offset:2px}
+@media (pointer:coarse){.sb-tools button,.sb-add{min-height:44px;min-width:44px}}`;
+
+/** Which business fact a tap in the preview points at, if any: those live in Podatki, not in a section. */
+function factAt(t: HTMLElement): string | null {
+  const href = t.closest("a")?.getAttribute("href") ?? "";
+  if (href.startsWith("tel:")) return "/business/phone";
+  if (href.startsWith("mailto:")) return "/business/email";
+  if (/google\.[a-z.]+\/maps|maps\.apple\.com|openstreetmap/.test(href) || t.closest("address")) return "/business/address";
+  if (t.closest(".hours")) return "/business/hours";
+  return null;
+}
+
 function attachEditing(): void {
   const doc = frame?.contentDocument;
   if (!doc || !editMode) return;
   const style = doc.createElement("style");
-  style.textContent = `main section{cursor:pointer} main section:hover{outline:2px dashed #156b4a;outline-offset:-2px} main section[data-sb-selected]{outline:3px solid #156b4a;outline-offset:-3px} [contenteditable]{outline:2px solid #9a5b00!important;outline-offset:2px;cursor:text}`;
+  style.textContent = EDIT_CSS;
   doc.head.append(style);
-  if (selected) doc.getElementById(selected)?.setAttribute("data-sb-selected", "");
+  decorate();
+  frame?.contentWindow?.addEventListener("scroll", placeTools, { passive: true });
+  frame?.contentWindow?.addEventListener("resize", placeTools);
   doc.addEventListener("click", (e) => {
     const t = e.target as HTMLElement;
-    if (t.closest("[contenteditable]")) return;
+    if (t.closest("[contenteditable], .sb-tools, .sb-add")) return;
     const link = t.closest("a");
     if (link) e.preventDefault();
     const sec = t.closest("main section[id]");
+    const fact = factAt(t);
+    if (fact) {
+      e.preventDefault();
+      if (sec) selected = sec.id;
+      goTo(fact);
+      return;
+    }
+    // A picture opens its own panel: replace it or describe it.
+    const img = t.closest("img");
+    const id = img ? /\/media\/(img_[a-z0-9_]+)-\d+\./.exec(img.currentSrc || img.src)?.[1] : undefined;
+    if (id) {
+      e.preventDefault();
+      if (sec) selected = sec.id;
+      imageId = id;
+      tab = "image";
+      setSheet("full");
+      render();
+      return;
+    }
     // First tap selects the section, a tap on its text then edits that text in place (works by touch;
     // a double-click does both).
     if (sec && sec.id === selected && t.closest(INLINE_TEXT)) {
@@ -1160,9 +1343,83 @@ function attachEditing(): void {
     } else if (sec) select(sec.id, false);
     else if (t.closest("header, footer")) {
       tab = "facts";
+      setSheet("full");
       render();
     }
   }, true);
+}
+
+/** Marks the selected section in the preview and gives it its toolbar (move, duplicate, delete) and "+". */
+function decorate(): void {
+  const doc = frame?.contentDocument;
+  if (!doc?.body) return;
+  doc.querySelectorAll(".sb-tools, .sb-add").forEach((n) => n.remove());
+  doc.querySelectorAll("[data-sb-selected]").forEach((n) => n.removeAttribute("data-sb-selected"));
+  const secs = sections();
+  const si = secs.findIndex((s) => s.id === selected);
+  const s = secs[si];
+  const el = s ? doc.getElementById(String(s.id)) : null;
+  if (!el || !s) return;
+  el.setAttribute("data-sb-selected", "");
+  if (s.type === "legal" || s.type === "not-found") return;
+  const pi = pageIndex;
+  const id = String(s.id);
+  const name = label(String(s.type));
+  const button = (text: string, aria: string, run: () => void, disabled = false) => {
+    const b = doc.createElement("button");
+    b.type = "button";
+    b.textContent = text;
+    b.title = aria;
+    b.setAttribute("aria-label", aria);
+    b.disabled = disabled;
+    b.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      run();
+    });
+    return b;
+  };
+  const tools = doc.createElement("div");
+  tools.className = "sb-tools";
+  tools.setAttribute("role", "toolbar");
+  tools.setAttribute("aria-label", `Razdelek ${name}`);
+  tools.append(
+    button("↑", `Premakni gor: ${name}`, () => void patch([isSection(pi, si, id), { op: "move", from: `/pages/${pi}/sections/${si}`, path: `/pages/${pi}/sections/${si - 1}` }], "premik"), si === 0),
+    button("↓", `Premakni dol: ${name}`, () => void patch([isSection(pi, si, id), { op: "move", from: `/pages/${pi}/sections/${si}`, path: `/pages/${pi}/sections/${si + 1}` }], "premik"), si === secs.length - 1),
+    button("Podvoji", `Podvoji: ${name}`, () => void patch([isSection(pi, si, id), { op: "add", path: `/pages/${pi}/sections/${si + 1}`, value: { ...structuredClone(s), id: newSectionId(String(s.type)) } }], "podvojen razdelek")),
+    button("Izbriši", `Izbriši: ${name}`, () => {
+      if (!confirm(`Izbrišem razdelek »${name}«?`)) return;
+      selected = null;
+      void patch([isSection(pi, si, id), { op: "remove", path: `/pages/${pi}/sections/${si}` }], "izbrisan razdelek");
+    }),
+  );
+  el.prepend(tools);
+  if (canAddSections()) {
+    const add = button("+ Dodaj razdelek", `Dodaj razdelek pod: ${name}`, () => openAdd(si + 1));
+    add.className = "sb-add";
+    el.append(add);
+  }
+  placeTools();
+}
+
+/**
+ * Keeps the toolbar at the top and "+" at the bottom of the part of the selected section that is on
+ * screen, so a tall section never hides them.
+ */
+function placeTools(): void {
+  const doc = frame?.contentDocument;
+  const win = frame?.contentWindow;
+  const el = doc?.querySelector<HTMLElement>("[data-sb-selected]");
+  if (!doc || !win || !el) return;
+  const r = el.getBoundingClientRect();
+  const tools = el.querySelector<HTMLElement>(":scope > .sb-tools");
+  const add = el.querySelector<HTMLElement>(":scope > .sb-add");
+  const room = Math.max(0, r.height - 56);
+  // The site's fixed call bar covers the bottom of a phone screen; "+" stays above it.
+  const bar = doc.querySelector<HTMLElement>(".action-bar");
+  const barHeight = bar && win.getComputedStyle(bar).position === "fixed" ? bar.getBoundingClientRect().height : 0;
+  if (tools) tools.style.top = `${Math.min(room, Math.max(8, -r.top + 8))}px`;
+  if (add) add.style.bottom = `${Math.min(room, Math.max(8, r.bottom - (win.innerHeight - barHeight) + 8))}px`;
 }
 
 /** Elements whose text can be edited in place. */
@@ -1210,28 +1467,36 @@ function inlineEdit(el: HTMLElement): void {
 function select(id: string, scroll = true): void {
   selected = id;
   tab = "content";
+  checklistOpen = false;
+  if (sheet === "closed") setSheet("peek");
   render();
   if (scroll) frame?.contentDocument?.getElementById(id)?.scrollIntoView({ block: "start" });
   // Show the section's form: below the outline, out of sight in the phone sheet or after a tap in the preview.
   if (narrowScreen() || !scroll) document.getElementById("selected-head")?.scrollIntoView({ block: "start" });
 }
 
-// ---------- Phone: the editor is a bottom sheet over the preview, peeking or full ----------
-let sheet: "peek" | "full" = "peek";
+// ---------- Phone: the site fills the screen; the editor is a bottom sheet: closed, peeking or full ----------
+/** Closed is a slim strip (handle and one line): the site gets the screen until something is tapped. */
+let sheet: "closed" | "peek" | "full" = "closed";
 const narrowScreen = (): boolean => window.matchMedia("(max-width: 900px)").matches;
+const handleLabel = (): string => (sheet === "full" ? "Pomanjšaj urejanje" : "Razširi urejanje");
 
-function setSheet(next: "peek" | "full"): void {
+function setSheet(next: "closed" | "peek" | "full"): void {
+  const changed = next !== sheet;
   sheet = next;
   if (!shell) return;
   shell.panel.dataset.sheet = next;
+  shell.ed.dataset.sheet = next;
   const handle = shell.panel.querySelector<HTMLButtonElement>(".sheet-handle");
   handle?.setAttribute("aria-expanded", String(next === "full"));
-  handle?.setAttribute("aria-label", next === "full" ? "Pomanjšaj urejanje" : "Razširi urejanje");
+  handle?.setAttribute("aria-label", handleLabel());
+  // The preview gets the room the sheet leaves; resize it once the sheet has moved.
+  if (changed && narrowScreen()) window.setTimeout(sizeFrame, 220);
 }
 
-/** Tap toggles peek and full; dragging up or down picks one. Hidden on wide screens. */
+/** Tap opens it fully, or closes it from full; dragging up or down moves it one step. Hidden on wide screens. */
 function sheetHandle(): HTMLElement {
-  const b = h("button", { type: "button", class: "sheet-handle", "aria-expanded": String(sheet === "full"), "aria-label": sheet === "full" ? "Pomanjšaj urejanje" : "Razširi urejanje" }, h("span", { "aria-hidden": "true" }));
+  const b = h("button", { type: "button", class: "sheet-handle", "aria-expanded": String(sheet === "full"), "aria-label": handleLabel() }, h("span", { "aria-hidden": "true" }));
   let startY: number | null = null;
   let dragged = false;
   b.addEventListener("pointerdown", (e) => {
@@ -1243,12 +1508,12 @@ function sheetHandle(): HTMLElement {
     startY = null;
     if (Math.abs(dy) > 30) {
       dragged = true;
-      setSheet(dy < 0 ? "full" : "peek");
+      setSheet(dy < 0 ? (sheet === "closed" ? "peek" : "full") : sheet === "full" ? "peek" : "closed");
     }
   });
   b.addEventListener("click", () => {
     if (dragged) dragged = false;
-    else setSheet(sheet === "full" ? "peek" : "full");
+    else setSheet(sheet === "full" ? "closed" : "full");
   });
   return b;
 }
@@ -1267,20 +1532,20 @@ function topItems(): Child[] {
   const status = siteStatus(s);
   const prev = undoTarget(state.versions, state.version);
   const head: Child[] = [
-    h("a", { class: "btn quiet sm", href: "/sites" }, "← Strani"),
+    h("a", { class: "btn quiet sm back", href: "/sites", "aria-label": "Moje strani" }, h("span", { "aria-hidden": "true" }, "←"), h("span", { class: "label" }, " Moje strani")),
     h("h1", { class: "site-name" }, ((state.spec?.business as Obj | undefined)?.name as string | undefined) ?? s.name),
     h("span", { class: `pill ${status.tone}` }, status.label),
-    state.version ? h("span", { class: "muted num ver", id: "ed-version" }, `v${state.version}`) : null,
     h("span", { class: "sp" }),
-    h("span", { class: "pill plain spend num", title: "Poraba modela danes in dnevna omejitev" }, `${formatEur(state.spendToday)} / ${formatEur(state.cap)} danes`),
   ];
   // Nothing to undo, open or publish before the first version exists.
   if (!state.spec) return head;
+  const todo = state.checklist.length;
   return [
     ...head,
     h("span", { class: "actions" },
-      h("button", { class: "btn quiet sm", type: "button", disabled: prev === null, title: prev === null ? "" : `Vrne različico ${prev}`, onClick: () => void undo() }, "Razveljavi"),
-      h("button", { class: "btn quiet sm", type: "button", "aria-pressed": String(tab === "versions"), onClick: () => { tab = "versions"; render(); } }, "Različice"),
+      h("button", { class: "btn quiet sm icon-btn", type: "button", "aria-label": "Razveljavi", title: "Razveljavi", disabled: prev === null, onClick: () => void undo() }, "↶"),
+      // What is left before publishing, as one chip instead of a banner on every screen.
+      todo ? h("button", { class: "chip warn", type: "button", id: "checklist-summary", "aria-label": `Še ${todo} do objave`, onClick: () => openChecklist() }, `Še ${todo}`, h("span", { class: "label" }, " do objave")) : null,
       moreMenu(),
       // While something blocks publishing the button stays tappable and opens the checklist: a disabled
       // button with a tooltip explains nothing on a phone.
@@ -1306,17 +1571,27 @@ function topItems(): Child[] {
   ];
 }
 
-/** Secondary actions in one menu, so the app bar fits a phone in two rows. Stays open across re-renders. */
+/** Everything that isn't everyday editing, in one menu. Stays open across re-renders. */
 let menuOpen = false;
 function moreMenu(): HTMLElement {
   const s = state.site;
+  const go = (t: Tab) => () => { menuOpen = false; tab = t; selected = null; setSheet("full"); render(); };
   const menu = h("details", { class: "menu", open: menuOpen },
-    h("summary", { class: "btn quiet sm" }, "Več"),
+    h("summary", { class: "btn quiet sm icon-btn", "aria-label": "Več možnosti", title: "Več možnosti" }, "⋯"),
     h("div", { class: "list" },
       h("a", { href: `/sites/${siteId}/messages` }, state.messages ? `Sporočila (${state.messages})` : "Sporočila"),
-      h("a", { href: `/api/sites/${siteId}/export` }, "Izvozi kot datoteke (.zip)"),
-      h("a", { href: previewUrl(), target: "_blank" }, "Odpri predogled v zavihku"),
+      h("button", { type: "button", onClick: go("versions") }, "Zgodovina sprememb"),
+      h("a", { href: previewUrl(), target: "_blank" }, "Predogled v novem zavihku"),
       s.published_version ? h("a", { href: `/s/${s.slug}/`, target: "_blank" }, "Odpri objavljeno stran") : null,
+      h("a", { href: `/api/sites/${siteId}/export` }, "Prenesi stran (.zip)"),
+      h("button", {
+        type: "button",
+        disabled: s.status === "generating",
+        onClick: () => {
+          if (confirm("Ustvarim celotno stran znova? Podatki o podjetju ostanejo, besedila in postavitev so nova. Trenutna vsebina ostane v zgodovini, zato jo lahko obnovite.")) void post("/generate", { scope: "full" }, "Ustvarjanje se je začelo.");
+        },
+      }, "Ustvari celotno stran znova"),
+      h("button", { type: "button", onClick: go("diag") }, "Poraba in dnevnik"),
     ),
   );
   menu.addEventListener("toggle", () => (menuOpen = menu.open));
@@ -1342,11 +1617,10 @@ function barItems(): Child[] {
   return [
     h("div", { class: "seg", role: "group", "aria-label": "Velikost predogleda" },
       h("button", { type: "button", "aria-pressed": String(device === "mobile"), onClick: () => { device = "mobile"; render(); } }, "Telefon"),
-      h("button", { type: "button", "aria-pressed": String(device === "desktop"), onClick: () => { device = "desktop"; render(); } }, "Namizje"),
+      h("button", { type: "button", "aria-pressed": String(device === "desktop"), onClick: () => { device = "desktop"; render(); } }, "Računalnik"),
     ),
-    h("label", { class: "toggle" }, h("input", { type: "checkbox", checked: editMode, onChange: (e: Event) => { editMode = (e.target as HTMLInputElement).checked; frame = null; render(); } }), "Urejanje s klikom"),
     h("span", { class: "sp" }),
-    h("span", { class: "muted where" }, `${p ? (p.nav as Obj).label : ""} · ${device === "mobile" ? "360" : "1280"} px`),
+    h("span", { class: "muted where" }, p ? String((p.nav as Obj).label) : ""),
   ];
 }
 
@@ -1360,7 +1634,7 @@ function render(): void {
     });
     const bar = h("div", { class: "bar" });
     const stage = h("div", { class: "stage" });
-    const ed = h("main", { class: "ed", "aria-label": "Urejanje strani" }, panel, h("section", { class: "canvas", "aria-label": "Predogled" }, bar, stage));
+    const ed = h("main", { class: "ed", "aria-label": "Urejanje strani" }, panel, h("section", { class: "canvas", "aria-label": "Predogled" }, bar, stage, buildDock()));
     root.replaceChildren(h("div", { class: "shell" }, top, ed));
     shell = { top, ed, panel, bar, stage };
     lastWidth = window.innerWidth;
@@ -1376,17 +1650,15 @@ function render(): void {
   shell.top.replaceChildren(...topItems().filter((c): c is Node => c instanceof Node));
   document.documentElement.style.setProperty("--top-h", `${shell.top.offsetHeight}px`);
 
-  // Versions open from the app bar ("Različice"), so the five tabs fit the panel.
-  const tabs: [typeof tab, string][] = [["content", "Vsebina"], ["facts", "Podatki"], ["photos", "Fotografije"], ["design", "Oblika"], ["pages", "Strani"], ["ai", "Pomočnik"]];
   shell.panel.dataset.sheet = sheet;
+  shell.ed.dataset.sheet = sheet;
   shell.panel.replaceChildren(
     ...[
       state.spec ? sheetHandle() : null,
       statusBlock(),
-      state.spec ? h("div", { class: "tabs", role: "tablist", "aria-label": "Urejanje" }, ...tabs.map(([k, l]) => h("button", { role: "tab", type: "button", "aria-selected": String(tab === k), onClick: () => { tab = k; render(); } }, l))) : null,
       checklistBlock(),
       !state.spec && state.site.status !== "generating" && state.site.status !== "failed" ? h("div", { class: "pane" }, h("p", { class: "muted" }, "Stran še nima vsebine.")) : null,
-      state.spec ? { content: contentPane, facts: factsPane, photos: photosPane, design: designPane, pages: pagesPane, ai: aiPane, versions: versionsPane }[tab]() : null,
+      state.spec ? { content: contentPane, facts: factsPane, photos: photosPane, design: designPane, pages: pagesPane, versions: versionsPane, chat: chatPane, diag: diagPane, add: addPane, image: imagePane }[tab]() : null,
     ].filter((c): c is HTMLElement => c !== null),
   );
   shell.bar.replaceChildren(...barItems().filter((c): c is Node => c instanceof Node));
@@ -1394,12 +1666,11 @@ function render(): void {
   shell.ed.classList.toggle("nospec", !state.spec);
   shell.ed.classList.toggle("generating", state.site.status === "generating");
   renderStage();
+  renderDock();
   linkLabels(shell.panel);
   linkLabels(shell.bar);
-  // Keep the selection highlight in sync with the frame that survives re-renders.
-  const doc = frame?.contentDocument;
-  doc?.querySelectorAll("[data-sb-selected]").forEach((n) => n.removeAttribute("data-sb-selected"));
-  if (selected && editMode) doc?.getElementById(selected)?.setAttribute("data-sb-selected", "");
+  // Keep the selection and its toolbar in sync with the frame that survives re-renders.
+  decorate();
   showToast();
 }
 
@@ -1479,19 +1750,21 @@ function linkLabels(scope: HTMLElement): void {
 // ---------- Pre-publish checklist: each entry says what is missing, where, and opens the field ----------
 let checklistOpen = false;
 
+/** Opened from the "Še N do objave" chip, or by Objavi while something is missing; closed otherwise. */
 function checklistBlock(): HTMLElement | null {
   const list = state.checklist;
-  if (!list.length || !state.spec) return null;
+  if (!checklistOpen || !list.length || !state.spec) return null;
   const spec = state.spec;
   const missing = list.filter((b) => b.kind === "placeholder").length;
-  const details = h("details", { class: "checklist", open: checklistOpen },
-    h("summary", {}, "Kaj še manjka"),
-    h("ol", {}, ...list.slice(0, 40).map((b) =>
-      h("li", {}, h("button", { type: "button", onClick: () => goTo(b.path) }, h("strong", {}, describePath(spec, b.path)), h("span", {}, blockerMessage(b)))))),
-  );
-  details.addEventListener("toggle", () => (checklistOpen = details.open));
   return h("div", { class: "pane tight", id: "checklist" },
-    h("div", { class: "note warn" }, h("p", { id: "checklist-summary" }, blockerSummary(missing, list.length - missing)), details));
+    h("div", { class: "note warn checklist" },
+      h("div", { class: "row" },
+        h("p", { class: "sp" }, h("strong", {}, blockerSummary(missing, list.length - missing))),
+        h("button", { class: "btn quiet sm", type: "button", "aria-label": "Zapri seznam", onClick: () => { checklistOpen = false; render(); } }, "✕"),
+      ),
+      h("ol", {}, ...list.slice(0, 40).map((b) =>
+        h("li", {}, h("button", { type: "button", onClick: () => goTo(b.path) }, h("strong", {}, describePath(spec, b.path)), h("span", {}, blockerMessage(b)))))),
+    ));
 }
 
 function openChecklist(): void {
@@ -1544,12 +1817,12 @@ function items(n: number): string {
   return `${n} ${({ one: "postavko", two: "postavki", few: "postavke" } as Record<string, string>)[form] ?? "postavk"}`;
 }
 
-/** Banner text: missing facts (placeholders) and other things to fix (starter text, validation). */
+/** The checklist's heading: missing facts (yellow in the preview) and other things to fix. */
 function blockerSummary(missing: number, other: number): string {
   const parts: string[] = [];
-  if (missing) parts.push(`${missingPhrase(missing)} (označeni rumeno v predogledu)`);
-  if (other) parts.push(`uredite še ${items(other)} (začetno besedilo ali napake)`);
-  return `Pred objavo: ${parts.join("; ")}.`;
+  if (missing) parts.push(`${missingPhrase(missing)} (rumeno v predogledu)`);
+  if (other) parts.push(`preverite še ${items(other)}`);
+  return `Pred objavo: ${parts.join(", ")}. Tapnite postavko, odpre se pravo polje.`;
 }
 
 /** "manjka 1 podatek", "manjkata 2 podatka", "manjkajo 3 podatki", "manjka 5 podatkov" (Slovene plural rules). */
