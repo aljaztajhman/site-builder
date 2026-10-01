@@ -2,7 +2,7 @@ import type { AppConfig } from "@sb/config";
 import { VersionConflictError, type Repo, type Storage } from "@sb/platform";
 import { contentType } from "@sb/platform";
 import { mediaFiles, siteFiles, exportZip } from "@sb/render";
-import { blockerText, publishChecklist, type ImageAsset, type PublishBlocker, type SiteSpec } from "@sb/spec";
+import { blockerText, publishChecklist, validateSite, type ImageAsset, type PublishBlocker, type SiteSpec } from "@sb/spec";
 import type { Operation } from "fast-json-patch";
 import { ModelOutputError, SpendCapError, type ModelClient } from "./llm/client.ts";
 import { classify, makeBrief, chooseDesign, altTexts, generateContent, critique, applyPatches, editSpec } from "./stages.ts";
@@ -13,6 +13,7 @@ import { checkSite, type CheckBrowser, type SiteCheckReport } from "./check/inde
 import { typedText } from "./editor.ts";
 import { checkFacts } from "./facts.ts";
 import { newReleaseId, writeRelease } from "./published.ts";
+import { keepOwnerFacts } from "./owner-facts.ts";
 
 export interface PipelineDeps {
   config: AppConfig;
@@ -174,6 +175,16 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
   if (content.structuredFallback) await log("content", "Structured output rejected the content schema; used plain JSON");
   if (content.issues.length) await log("content", "Spec still has issues after retries", content.issues);
   let spec = content.spec;
+  // A regeneration keeps the business facts of the version it replaces (typed in the editor since the intake).
+  const replaced = await repo.getSpec(siteId);
+  if (replaced) {
+    const merged = keepOwnerFacts(replaced.spec, spec);
+    const v = validateSite(merged.spec);
+    if (merged.kept.length && v.ok) {
+      spec = v.spec;
+      await log("content", "Kept the business facts of the previous version", merged.kept);
+    } else if (merged.kept.length) await log("content", "Previous business facts don't fit the new site; used the regenerated ones", v.issues.slice(0, 5));
+  }
   let version = await repo.saveSpec(siteId, spec, "generate");
   const firstVersionMs = Date.now() - started;
   await log("preview", "First version saved; the editor shows it while checks and critique run", { ms: firstVersionMs, version });

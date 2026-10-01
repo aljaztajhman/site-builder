@@ -862,7 +862,7 @@ function aiPane(): HTMLElement {
     ),
     h("details", { class: "more" },
       h("summary", {}, "Ustvari celotno stran znova"),
-      h("p", { class: "help" }, "Vse strani naredimo znova iz vašega opisa. Trenutna vsebina ostane med različicami, zato jo lahko obnovite. Stane približno toliko kot ustvarjanje nove strani."),
+      h("p", { class: "help" }, "Vse strani naredimo znova iz vašega opisa. Podatki o podjetju, ki ste jih vpisali (ime, telefon, naslov, delovni čas, podatki o ponudniku), ostanejo; besedila in postavitev so nova. Trenutna vsebina ostane med različicami, zato jo lahko obnovite. Stane približno toliko kot ustvarjanje nove strani."),
       h("button", { class: "btn", type: "button", disabled: state.site.status === "generating", onClick: () => { if (confirm("Ustvarim celotno stran znova? To porabi žetone in zamenja trenutno vsebino z novo različico.")) void post("/generate", { scope: "full" }, "Ustvarjanje se je začelo."); } }, "Ustvari znova"),
     ),
   );
