@@ -90,8 +90,8 @@ Hard list. Add to it whenever a new default shows up in eval screenshots.
 
 ## Pricing (in config, `plans`)
 
-- Free preview: homepage only, Sonnet 5.5 at medium effort, watermarked, not publishable, email-verified, rate-limited.
-- Paid, one plan (owner's decision `sb-pricing`, 2026-10-01): €15/month or €150/year, VAT included. The domain is included on the yearly plan. Yearly is paid by invoice and bank transfer. Fair-use AI edits, no credits. Full site, editor, CMS, publishing, domains, export.
+- Free preview (owner's decisions `sb-preview-gate`, `sb-free-tiers` = 1-2-10): homepage only, Sonnet 5.5 at medium effort, not publishable. One homepage without an account (kept 7 days unless the visitor signs up), then with a free account (email magic link) 2 more homepages and 10 chat edits in total. Bot check (Turnstile) on the form without an account, per-device and per-IP limits, a daily € pool per tier. Numbers in config `tiers`; design in docs/plans/free-generation-limits.md. (A watermark was planned; it isn't built.)
+- Paid, one plan (owner's decision `sb-pricing`, 2026-10-01): €15/month or €150/year, VAT included. The domain is included on the yearly plan. Yearly is paid by invoice and bank transfer. AI work (regenerations, chat edits) within a monthly allowance of 10 % of the monthly price, plus €3 in the first month (`sb-ai-allowance`); direct editing is never limited; no credits. Full site, editor, CMS, publishing, domains, export. Before billing, allow-listed accounts get these rights (`sb-full-access`).
 - Founding offer: the first 100 customers pay €99 for their first year, then the normal price.
 - Optional "we set it up with you" service: €79 one-off.
 - Billing is built first; the business is registered (the accountant chooses s.p. or d.o.o.) before the first charge (`sb-legal-entity`, 2026-10-01). Billing stays switched off in config (`plans.paid.billingEnabled: false`) until then: nothing is charged before the entity exists.

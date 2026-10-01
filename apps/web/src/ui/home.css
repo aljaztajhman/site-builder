@@ -75,6 +75,9 @@ mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:var(--ink)}
 .seg input:focus-visible+label{outline:2px solid var(--ink);outline-offset:2px}
 @media (pointer:coarse){.seg label{min-height:44px}}
 @media (max-width:40rem){.prompt .bar .seg{order:3;width:100%}.prompt .bar .seg label{flex:1;justify-content:center}.prompt .bar .btn.primary{order:4;width:100%}}
+/* Turnstile (bot check without an account): flexible width, at least 300 px; inside the box at 360 px. */
+.prompt .bot{padding:4px 10px 0}
+.hero .note{max-width:640px;margin:0 0 12px;padding:12px 14px;border-radius:var(--r-2);background:var(--surface-2);color:var(--ink-2);font-size:15px}
 .hero .note.bad{max-width:640px;margin:0 0 12px;padding:12px 14px;border-radius:var(--r-2);background:var(--danger-soft);color:#7a1a14;font-size:15px}
 .under{font-size:15px;color:var(--ink-3);margin-top:12px}
 .phone{width:300px;max-width:100%;aspect-ratio:300/620;border:1px solid var(--line-2);border-radius:22px;overflow:hidden;background:#fff;box-shadow:var(--shadow-float);position:relative;justify-self:center}

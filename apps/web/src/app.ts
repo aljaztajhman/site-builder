@@ -1,4 +1,5 @@
 import { Hono, type Context } from "hono";
+import { HTTPException } from "hono/http-exception";
 import { bodyLimit } from "hono/body-limit";
 import type { AppConfig } from "@sb/config";
 import {
@@ -19,26 +20,17 @@ import {
   PhotoError,
   type Operation,
 } from "@sb/engine";
-import { VersionConflictError, contentType, mailerFromEnv, type Mailer, type Platform } from "@sb/platform";
+import { VersionConflictError, contentType, mailerFromEnv, newId, type Mailer, type Platform, type Tier } from "@sb/platform";
 import { renderPage, sharedBundle, pageFile } from "@sb/render";
 import { blockerText, collectPlaceholders, sectionDef, type SiteSpec } from "@sb/spec";
 import type { AuthSettings } from "./auth.ts";
-import {
-  csrfOk,
-  fullSiteRefusal,
-  identity,
-  publishRefusal,
-  refusalJson,
-  sameOriginOnly,
-  signedIn,
-  siteAccess,
-  tierOf,
-  type AppEnv,
-  type Refusal,
-  type Viewer,
-} from "./access.ts";
+import { csrfOk, fullSiteRefusal, identity, publishRefusal, refusalJson, sameOriginOnly, signedIn, siteAccess, type AppEnv, type Refusal } from "./access.ts";
+import { accessInfo, allowanceFor, reserveJob } from "./limits.ts";
+import { TOKEN_FIELD, TURNSTILE_ORIGIN, botCheckFromEnv, type BotCheck } from "./turnstile.ts";
 import { registerLoginRoutes } from "./login.tsx";
 import { registerAdminRoutes } from "./admin.tsx";
+import { registerPrivacyRoute } from "./privacy.tsx";
+import { descriptionHash, readTicket, signTicket } from "./upload-ticket.ts";
 import { slugify } from "./slug.ts";
 import { DASHBOARD, sitesPage, sitePage } from "./pages.tsx";
 import { homePage } from "./home.tsx";
@@ -61,7 +53,16 @@ export interface AppOptions {
   mailer?: Mailer;
   /** Public origin for links in emails, e.g. https://stranko.example (APP_URL, or Railway's public domain). */
   appUrl?: string;
+  /** Bot check on the anonymous intake (Turnstile); from env when not given. */
+  botCheck?: BotCheck;
+  /**
+   * The classifier (Haiku) for the junk check at intake, before anything else is spent; its call is
+   * logged against the job. Absent (tests), the pipeline's own classification is the only check.
+   */
+  classifyIntake?: ClassifyIntake;
 }
+
+export type ClassifyIntake = (description: string, ctx: { siteId: string; tier: Tier; accountId: string | null; aiJobId: string }) => Promise<{ businessType: string; confidence: number }>;
 
 const SAFE_SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const SAFE_HASH = /^[0-9a-f]{10}$/;
@@ -73,30 +74,14 @@ const IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avi
 const LOGO_TYPES = new Set([...IMAGE_TYPES, "image/svg+xml"]);
 const EXT: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/avif": "avif", "image/svg+xml": "svg" };
 
-const SPEND_CAP: Refusal = { status: 429, code: "spend_cap", message: "Današnja omejitev porabe je dosežena. Jutri spet deluje; do takrat stran urejate neposredno." };
-
-/** What the viewer may do on a site they can open (GET /api/sites/:id → access). */
-function siteAccessInfo(v: Viewer) {
-  const ai = !aiRefusal(v);
-  const publish = !publishRefusal(v);
-  return { viewer: tierOf(v), can: { edit: signedIn(v), chat: ai, regenerate: ai, publish, export: publish, fullSite: !fullSiteRefusal(v) } };
-}
-
-/**
- * Model work (new site, "Ustvari znova", chat edits) until the free tiers have their limits: the admin
- * and allow-listed accounts only.
- */
-function aiRefusal(v: Viewer): Refusal | null {
-  const tier = tierOf(v);
-  if (tier === "admin" || tier === "paid") return null;
-  if (tier === "anonymous") return { status: 401, code: "sign_in_required", message: "Prijavite se z e-pošto." };
-  return { status: 403, code: "ai_not_open", message: "Ustvarjanje in spremembe s pomočnikom so zaenkrat na voljo prvim uporabnikom. Stran lahko urejate neposredno." };
-}
-
 export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono<AppEnv> {
   const { repo, storage, queue, db } = platform;
   const app = new Hono<AppEnv>();
   const mailer = opts.mailer ?? mailerFromEnv();
+  const botCheck = opts.botCheck ?? botCheckFromEnv(process.env, auth.secureCookies);
+  const limits = { repo, config, secret: auth.secret };
+  // The landing page and the intake's refusal page carry the Turnstile widget (its script and frame).
+  const turnstileCsp = (path: string) => botCheck.mode === "on" && (path === "/" || path === "/api/sites");
 
   // Deployed environments are public URLs: nothing here may be indexed, published sites included in phase 1.
   app.use("*", async (c, next) => {
@@ -112,7 +97,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       "Content-Security-Policy",
       c.req.path.startsWith("/s/") || c.req.path.startsWith("/preview/")
         ? `default-src 'self'; script-src 'self' '${JS_FLAG_HASH}'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-src https://www.google.com https://maps.google.com; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'self'`
-        : `default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors ${
+        : `default-src 'self'; ${turnstileCsp(c.req.path) ? `script-src 'self' ${TURNSTILE_ORIGIN}; frame-src 'self' ${TURNSTILE_ORIGIN}` : "frame-src 'self'"}; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors ${
             // The landing page frames its example site (/assets/ui/<hash>/example-home.html).
             c.req.path.startsWith("/assets/ui/") ? "'self'" : "'none'"
           }`,
@@ -125,11 +110,44 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   app.use("/login/*", bodyLimit({ maxSize: 16 * 1024 }));
   app.use("/logout", bodyLimit({ maxSize: 16 * 1024 }));
   app.use("/admin/*", bodyLimit({ maxSize: 16 * 1024 }));
-  app.use("/api/sites", bodyLimit({ maxSize: (config.limits.maxPhotos + 1) * config.limits.maxUploadBytes + 64 * 1024 }));
+  app.use("/api/intake/*", bodyLimit({ maxSize: 16 * 1024 }));
+  // The intake. Without an account nothing of the body is read before its upload ticket (the bot check
+  // and the limits passed; upload-ticket.ts) is checked and taken, and the body is capped: a declared
+  // size over tiers.anonymous.uploads.maxTotalBytes is refused unread, an undeclared one is cut off as
+  // it streams past it.
+  const uploads = config.tiers.anonymous.uploads;
+  const tooBig = `Brez prijave lahko pošljete skupaj največ ${Math.floor(uploads.maxTotalBytes / 1e6)} MB fotografij in logotipa. Izberite manj ali manjše fotografije.`;
+  const signedInLimit = bodyLimit({ maxSize: (config.limits.maxPhotos + 1) * config.limits.maxUploadBytes + 64 * 1024 });
+  const anonymousLimit = bodyLimit({
+    maxSize: uploads.maxTotalBytes,
+    onError: async (c) => {
+      const t = (c as Context<AppEnv>).get("ticket");
+      if (t) await repo.usage.finishJob(t.j, "failed");
+      return c.html(await landing(c as Context<AppEnv>, { error: tooBig }), 413);
+    },
+  });
+  app.use("/api/sites", async (c, next) => {
+    if (c.req.method !== "POST") return next();
+    if (c.get("viewer").kind !== "anonymous") return signedInLimit(c, next);
+    const refuse = async (error: string, status: 403 | 413) => c.html(await landing(c, { error }), status);
+    const expired = "Obrazec je potekel. Pošljite ga še enkrat.";
+    const given = c.req.query("ticket");
+    const t = readTicket(auth.secret, given);
+    if (!t) return refuse(given ? expired : "Za predogled brez prijave mora biti v brskalniku vklopljen JavaScript (preverjanje, da niste robot). Lahko se tudi prijavite z e-pošto.", 403);
+    if (t.d !== c.get("deviceId")) return refuse(expired, 403);
+    const declared = Number(c.req.header("content-length"));
+    if (Number.isFinite(declared) && declared > uploads.maxTotalBytes) {
+      await repo.usage.finishJob(t.j, "failed");
+      return refuse(tooBig, 413);
+    }
+    if (!(await repo.usage.claimTicketJob(t.j, t.d, t.s))) return refuse(expired, 403);
+    c.set("ticket", t);
+    return anonymousLimit(c, next);
+  });
   // Photo uploads in the editor take files; every other site API call is small JSON.
   const photosLimit = bodyLimit({ maxSize: config.limits.maxPhotos * config.limits.maxUploadBytes + 64 * 1024 });
   const jsonLimit = bodyLimit({ maxSize: 1024 * 1024 });
-  // Hono's "/api/sites/*" also matches "/api/sites" itself: the intake has its own limit above (without
+  // Hono's "/api/sites/*" also matches "/api/sites" itself: the intake has its own limits above (without
   // this, the 1 MB JSON limit refused every intake with more than 1 MB of photos).
   app.use("/api/sites/*", (c, next) =>
     c.req.path === "/api/sites" ? next() : /^\/api\/sites\/[^/]+\/photos$/.test(c.req.path) ? photosLimit(c, next) : jsonLimit(c, next),
@@ -137,8 +155,22 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   // Contact forms: public submit next to published sites, owner's messages in the dashboard.
   registerFormRoutes(app, { repo, config, secret: auth.secret });
   // Sign-in (magic link for owners, password for the admin) and the admin's page.
-  registerLoginRoutes(app, { repo, config, auth, mailer, ...(opts.appUrl ? { appUrl: opts.appUrl } : {}) });
+  registerLoginRoutes(app, {
+    repo,
+    config,
+    auth,
+    mailer,
+    ...(opts.appUrl ? { appUrl: opts.appUrl } : {}),
+    // The anonymous preview carries over: previews made on this device, or on the one that asked for the link.
+    onSignIn: async (c, accountId, link) => {
+      for (const device of new Set([c.get("deviceId"), link.deviceId].filter((d): d is string => !!d))) {
+        const claimed = await repo.usage.claimDevice(device, accountId);
+        if (claimed.length) console.log(`[web] ${claimed.length} anonymous preview(s) claimed by ${accountId}`);
+      }
+    },
+  });
   registerAdminRoutes(app, { repo, config, ...(opts.appUrl ? { appUrl: opts.appUrl } : {}) });
+  registerPrivacyRoute(app, config);
 
   // ---------- Health ----------
   app.get("/health", async (c) => {
@@ -176,11 +208,24 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   app.get("/favicon.ico", (c) => c.redirect(`/assets/ui/${uiAssets().hash}/icon.svg`, 301));
 
   // ---------- Landing page ----------
-  const landing = (c: Context<AppEnv>, extra: { error?: string; description?: string } = {}) => {
+  const landing = async (c: Context<AppEnv>, extra: { error?: string; description?: string } = {}) => {
     const viewer = c.get("viewer");
-    return homePage({ config, signedIn: signedIn(viewer), csrf: c.get("csrf"), fullSite: !fullSiteRefusal(viewer), ...extra });
+    const anonymous = viewer.kind === "anonymous";
+    const previous = anonymous ? (await repo.usage.deviceSites(c.get("deviceId")))[0] : undefined;
+    return homePage({
+      config,
+      signedIn: signedIn(viewer),
+      csrf: c.get("csrf"),
+      fullSite: !fullSiteRefusal(viewer),
+      allowance: (await allowanceFor(limits, viewer, c.get("deviceId"))).text,
+      botSiteKey: anonymous && botCheck.mode === "on" ? botCheck.siteKey : null,
+      anonymousClosed: anonymous && botCheck.mode === "unavailable",
+      ...(anonymous ? { anonymousUpload: { ticketUrl: "/api/intake/ticket", maxPhotos: config.tiers.anonymous.uploads.maxPhotos, maxTotalBytes: config.tiers.anonymous.uploads.maxTotalBytes } } : {}),
+      ...(previous ? { previous: `/sites/${previous.id}` } : {}),
+      ...extra,
+    });
   };
-  app.get("/", (c) => c.html(landing(c)));
+  app.get("/", async (c) => c.html(await landing(c)));
 
   // ---------- Dashboard ----------
   app.get(DASHBOARD, async (c) => {
@@ -194,35 +239,126 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
         cap: config.limits.dailyModelSpendCapEur,
         csrf: c.get("csrf"),
         admin,
-        ...(viewer.kind === "account" ? { account: { email: viewer.account.email, note: viewer.paidSince ? "Imate dostop do celotne strani." : null } } : {}),
+        // An owner sees what is left of their allowance (limits.ts), in Slovene.
+        ...(viewer.kind === "account" ? { account: { email: viewer.account.email, note: (await allowanceFor(limits, viewer, c.get("deviceId"))).text } } : {}),
       }),
     );
   });
   // The landing page's prompt box is the only intake; old links land on it.
   app.get("/new", (c) => c.redirect("/#zacni"));
 
+  // Junk: the classifier can't place it. Its cost is logged against the job; the job is refused, so it
+  // doesn't use up the visitor's preview. If the classifier can't be asked, the pipeline asks it again.
+  const JUNK = "Iz opisa ne znamo razbrati, kakšno podjetje imate. Napišite, kaj ponujate, kje ste in kako vas dosežejo.";
+  const classifyFor = async (description: string, ctx: { siteId: string; tier: Tier; accountId: string | null; aiJobId: string }) => {
+    if (!opts.classifyIntake) return { classification: undefined, junk: false };
+    let classification: { businessType: string; confidence: number } | undefined;
+    try {
+      classification = await opts.classifyIntake(description, ctx);
+    } catch (e) {
+      console.warn("[web] intake classification failed; the pipeline classifies again:", (e as Error).message.slice(0, 200));
+    }
+    const junk = !!classification && classification.confidence < config.tiers.junk.minClassifierConfidence;
+    if (junk) await repo.usage.finishJob(ctx.aiJobId, "refused");
+    return { classification, junk };
+  };
+  const tooShort = (n: number) => `Opis naj ima vsaj ${n} znakov: kdo ste, kaj ponujate, kje ste in kako vas dosežejo.`;
+
+  // A preview without an account, step 1 (upload-ticket.ts): only the text fields. The form token, the
+  // description's length, the bot check, the limits (which reserve the job) and the junk check, then a
+  // signed one-time ticket for the upload. Refusals are JSON; the page keeps the text and shows the message.
+  app.post("/api/intake/ticket", async (c) => {
+    const viewer = c.get("viewer");
+    const body = (await c.req.parseBody()) as Record<string, unknown>;
+    const description = typeof body.description === "string" ? body.description.trim() : "";
+    if (viewer.kind !== "anonymous") return refusalJson(c, { status: 400, code: "signed_in", message: "Prijavljeni ste: pošljite obrazec še enkrat." });
+    if (!csrfOk(c, body)) return refusalJson(c, { status: 403, code: "form_expired", message: "Obrazec je potekel. Osvežite stran in pošljite še enkrat." });
+    const minChars = config.tiers.junk.minDescriptionChars;
+    if (description.length < minChars) return refusalJson(c, { status: 400, code: "too_short", message: tooShort(minChars) });
+    if (botCheck.mode === "unavailable") return refusalJson(c, { status: 503, code: "bot_check_unavailable", message: "Brezplačni predogled brez prijave trenutno ni na voljo. Prijavite se z e-pošto.", signIn: "/login" });
+    if (!(await botCheck.verify(body[TOKEN_FIELD]))) return refusalJson(c, { status: 403, code: "bot_check_failed", message: "Preverjanje, da niste robot, ni uspelo. Počakajte trenutek in pošljite znova." });
+    const deviceId = c.get("deviceId");
+    // An earlier ticket this device never used (a dropped upload) doesn't use up its preview.
+    await repo.usage.releaseUnclaimedTickets(deviceId);
+    const grant = await reserveJob(limits, c, { kind: "generate", scope: "home" });
+    if (!grant.ok) return refusalJson(c, grant.refusal);
+    const siteId = newId("site");
+    const { classification, junk } = await classifyFor(description, { siteId, tier: grant.tier, accountId: null, aiJobId: grant.aiJobId });
+    if (junk) return refusalJson(c, { status: 400, code: "junk_intake", message: JUNK });
+    const ticket = signTicket(auth.secret, {
+      j: grant.aiJobId,
+      s: siteId,
+      d: deviceId,
+      h: descriptionHash(description),
+      e: Date.now() + uploads.ticketMinutes * 60_000,
+      ...(classification ? { c: classification } : {}),
+    });
+    return c.json({ ok: true, ticket });
+  });
+
+  // The intake. In order, before anything is spent: the form token, the scope, the description's length,
+  // the files, then (signed in) the limits, which hold the job's estimated cost, and the classifier
+  // (Haiku, ~€0.0006), which refuses what it can't place. Without an account the bot check, the limits
+  // and the classifier already ran for the ticket (step 1 above). Every refusal keeps the text in the form.
   app.post("/api/sites", async (c) => {
+    const viewer = c.get("viewer");
+    // Without an account: the ticket the gate above checked and took. Any refusal from here gives its job back.
+    const ticket = viewer.kind === "anonymous" ? c.get("ticket") : undefined;
     const body = await c.req.parseBody({ all: true });
     const description = typeof body.description === "string" ? body.description.trim() : "";
     // The landing page again, with the description kept and the reason above the prompt.
-    const refuse = (error: string, status: 400 | Refusal["status"] = 400) => c.html(landing(c, { error, description }), status);
+    const refuse = async (error: string, status: Refusal["status"] = 400) => {
+      if (ticket) await repo.usage.finishJob(ticket.j, "failed");
+      return c.html(await landing(c, { error, description }), status);
+    };
+    if (viewer.kind === "anonymous" && !ticket) return refuse("Obrazec je potekel. Pošljite ga še enkrat.", 403);
     if (!csrfOk(c, body as Record<string, unknown>)) return refuse("Obrazec je potekel. Pošljite ga še enkrat.", 403);
-    const viewer = c.get("viewer");
     const scope = body.scope === "full" ? "full" : "home";
-    const denied = aiRefusal(viewer) ?? (scope === "full" ? fullSiteRefusal(viewer) : null);
-    if (denied) return refuse(denied.message, denied.status);
-    if (description.length < 30) return refuse("Opis mora imeti vsaj 30 znakov.");
+    const fullDenied = scope === "full" ? fullSiteRefusal(viewer) : null;
+    if (fullDenied) return refuse(fullDenied.message, fullDenied.status);
+    const minChars = config.tiers.junk.minDescriptionChars;
+    if (description.length < minChars) return refuse(tooShort(minChars));
+    // The text that passed the ticket's junk check is the text that is generated from.
+    if (ticket && descriptionHash(description) !== ticket.h) return refuse("Opis se je spremenil, ko smo ga že preverili. Pošljite ga še enkrat.", 403);
     const photos = ([] as unknown[]).concat(body["photos"] ?? []).filter((f): f is File => f instanceof File && f.size > 0);
     const logo = body.logo instanceof File && body.logo.size > 0 ? body.logo : undefined;
-    if (photos.length > config.limits.maxPhotos) return refuse(`Največ ${config.limits.maxPhotos} fotografij. Izberite jih znova.`);
+    const maxPhotos = ticket ? uploads.maxPhotos : config.limits.maxPhotos;
+    const maxFile = ticket ? uploads.maxFileBytes : config.limits.maxUploadBytes;
+    if (photos.length > maxPhotos) return refuse(`Največ ${maxPhotos} fotografij${ticket ? " brez prijave" : ""}. Izberite jih znova.`);
     for (const f of [...photos, ...(logo ? [logo] : [])]) {
-      if (f.size > config.limits.maxUploadBytes) return refuse(`Datoteka ${f.name} je prevelika. Izberite fotografije znova.`);
+      if (f.size > maxFile) return refuse(`Datoteka ${f.name} je prevelika (največ ${Math.floor(maxFile / 1e6)} MB). Izberite fotografije znova.`);
     }
     for (const f of photos) if (!IMAGE_TYPES.has(f.type)) return refuse(`Nepodprta vrsta slike: ${f.name}. Izberite fotografije znova.`);
     if (logo && !LOGO_TYPES.has(logo.type)) return refuse("Logotip mora biti SVG, PNG, JPEG, WebP ali AVIF.");
 
+    const accountId = viewer.kind === "account" ? viewer.account.id : null;
+    let siteId: string;
+    let aiJobId: string;
+    let classification: { businessType: string; confidence: number } | undefined;
+    if (ticket) {
+      siteId = ticket.s;
+      aiJobId = ticket.j;
+      classification = ticket.c;
+    } else {
+      siteId = newId("site");
+      const grant = await reserveJob(limits, c, { kind: "generate", scope, siteId });
+      if (!grant.ok) return refuse(grant.refusal.message, grant.refusal.status);
+      aiJobId = grant.aiJobId;
+      const checked = await classifyFor(description, { siteId, tier: grant.tier, accountId, aiJobId });
+      if (checked.junk) return refuse(JUNK);
+      classification = checked.classification;
+    }
+
     const slug = await repo.uniqueSlug(slugify(description) || "stran");
-    const site = await repo.createSite({ name: slug, slug, intake: { description, photoAssetIds: [], scope }, accountId: viewer.kind === "account" ? viewer.account.id : null });
+    const site = await repo.createSite({
+      id: siteId,
+      name: slug,
+      slug,
+      intake: { description, photoAssetIds: [], scope },
+      accountId,
+      // An anonymous preview belongs to this device until someone signs in on it.
+      deviceId: viewer.kind === "anonymous" ? c.get("deviceId") : null,
+    });
     const stored = async (f: File, kind: "photo" | "logo") => {
       const data = new Uint8Array(await f.arrayBuffer());
       const meta = await imageMeta(data).catch(() => null);
@@ -238,14 +374,15 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       const logoRow = logo ? await stored(logo, "logo") : undefined;
       await db.query("update sites set intake = $2 where id = $1", [
         site.id,
-        JSON.stringify({ description, scope, photoAssetIds: photoRows.map((r) => r.id), ...(logoRow ? { logoAssetId: logoRow.id } : {}) }),
+        JSON.stringify({ description, scope, photoAssetIds: photoRows.map((r) => r.id), ...(logoRow ? { logoAssetId: logoRow.id } : {}), ...(classification ? { classification } : {}) }),
       ]);
+      await repo.setStatus(site.id, "generating");
+      await queue.send("generate", { siteId: site.id, scope, aiJobId });
     } catch (e) {
+      await repo.usage.finishJob(aiJobId, "failed");
       await repo.setStatus(site.id, "failed");
       return refuse((e as Error).message);
     }
-    await repo.setStatus(site.id, "generating");
-    await queue.send("generate", { siteId: site.id, scope });
     return c.redirect(`/sites/${site.id}`, 303);
   });
 
@@ -267,8 +404,8 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     const after = Number(c.req.query("after") ?? 0);
     const checklist = current ? await siteChecklist(repo, id, current.spec) : [];
     return c.json({
-      // What this viewer may do here; refusals from the action endpoints carry { code, message } too.
-      access: siteAccessInfo(viewer),
+      // What this viewer may do here and has left; refusals from the action endpoints carry { code, message } too.
+      access: await accessInfo(limits, viewer, c.get("deviceId"), site),
       site,
       pulse,
       version: current?.version ?? null,
@@ -436,12 +573,16 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     const body = (await c.req.json().catch(() => ({}))) as { message?: string };
     const message = (body.message ?? "").trim();
     if (!message || message.length > 2000) return c.json({ error: "message required (max 2000 chars)" }, 400);
-    const denied = aiRefusal(c.get("viewer"));
-    if (denied) return refusalJson(c, denied);
     if (!(await repo.getSpec(id))) return c.json({ error: "no spec yet" }, 409);
-    if ((await repo.spendToday()) >= config.limits.dailyModelSpendCapEur) return refusalJson(c, SPEND_CAP);
-    const msg = await repo.addChat(id, "user", message);
-    await queue.send("edit", { siteId: id, messageId: Number(msg.id) });
+    const grant = await reserveJob(limits, c, { kind: "edit", scope: "home", siteId: id });
+    if (!grant.ok) return refusalJson(c, grant.refusal);
+    try {
+      const msg = await repo.addChat(id, "user", message);
+      await queue.send("edit", { siteId: id, messageId: Number(msg.id), aiJobId: grant.aiJobId });
+    } catch (e) {
+      await repo.usage.finishJob(grant.aiJobId, "failed");
+      throw e;
+    }
     return c.json({ ok: true });
   });
 
@@ -451,14 +592,19 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     if (!site) return c.json({ error: "not found" }, 404);
     const body = (await c.req.json().catch(() => ({}))) as { scope?: string };
     const scope = body.scope === "full" ? "full" : "home";
-    const viewer = c.get("viewer");
-    const denied = aiRefusal(viewer) ?? (scope === "full" ? fullSiteRefusal(viewer) : null);
+    const denied = scope === "full" ? fullSiteRefusal(c.get("viewer")) : null;
     if (denied) return refusalJson(c, denied);
-    if ((await repo.spendToday()) >= config.limits.dailyModelSpendCapEur) return refusalJson(c, SPEND_CAP);
     if (site.status === "generating") return refusalJson(c, { status: 409, code: "busy", message: "Stran se že ustvarja." });
-    await db.query("update sites set intake = jsonb_set(intake, '{scope}', to_jsonb($2::text)) where id = $1", [id, scope]);
-    await repo.setStatus(id, "generating");
-    await queue.send("generate", { siteId: id, scope });
+    const grant = await reserveJob(limits, c, { kind: "generate", scope, siteId: id });
+    if (!grant.ok) return refusalJson(c, grant.refusal);
+    try {
+      await db.query("update sites set intake = jsonb_set(intake, '{scope}', to_jsonb($2::text)) where id = $1", [id, scope]);
+      await repo.setStatus(id, "generating");
+      await queue.send("generate", { siteId: id, scope, aiJobId: grant.aiJobId });
+    } catch (e) {
+      await repo.usage.finishJob(grant.aiJobId, "failed");
+      throw e;
+    }
     return c.json({ ok: true });
   });
 
@@ -557,7 +703,12 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     return c.body(data as Uint8Array<ArrayBuffer>);
   }
 
-  app.onError((e, c) => {
+  app.onError(async (e, c) => {
+    // An anonymous upload that failed after taking its ticket gives the reserved job back.
+    const ticket = c.get("ticket");
+    if (ticket) await repo.usage.finishJob(ticket.j, "failed").catch(() => undefined);
+    // Hono's own refusals (a body over a limit: 413) keep their status.
+    if (e instanceof HTTPException) return e.getResponse();
     console.error("[web]", e);
     return c.json({ error: "internal error", message: e.message.slice(0, 300) }, 500);
   });

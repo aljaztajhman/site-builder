@@ -68,7 +68,7 @@ describe("deployed without the new optional variables", () => {
     const web = await start("apps/web/src/main.ts", { PORT: String(port), STORAGE_DIR: path.join(dir, "web") }, /\[web\] http:\/\/localhost:\d+/);
     const base = `http://127.0.0.1:${port}`;
     const line = web.output().split("\n").find((l) => l.startsWith("[web] not set:")) ?? "";
-    for (const name of ["SESSION_SECRET", "RESEND_API_KEY", "EMAIL_FROM", "APP_URL"]) expect(line, name).toContain(name);
+    for (const name of ["SESSION_SECRET", "RESEND_API_KEY", "EMAIL_FROM", "APP_URL", "TURNSTILE_SITE_KEY", "TURNSTILE_SECRET_KEY"]) expect(line, name).toContain(name);
 
     expect((await fetch(`${base}/health`)).status).toBe(200);
     const page = await fetch(`${base}/login`);
@@ -87,6 +87,16 @@ describe("deployed without the new optional variables", () => {
     const email = await fetch(`${base}/login/email`, { method: "POST", body: new URLSearchParams({ email: "ana@siol.net", _csrf: csrf }), headers: { cookie: `sb_device=${device}` } });
     expect(email.status).toBe(503);
     expect(await email.text()).toContain("Prijava po e-pošti trenutno ni na voljo.");
+
+    // Previews without an account refuse (no Turnstile keys), up front on the page and at the intake.
+    expect(await (await fetch(`${base}/`, { headers: { cookie: `sb_device=${device}` } })).text()).toContain("Predogled brez prijave trenutno ni na voljo.");
+    const ticket = await fetch(`${base}/api/intake/ticket`, {
+      method: "POST",
+      body: new URLSearchParams({ _csrf: csrf, description: "Pekarna Kvas v Kamniku, Šutna 30. Kruh z drožmi, rogljički in potica." }),
+      headers: { cookie: `sb_device=${device}` },
+    });
+    expect(ticket.status).toBe(503);
+    expect(await ticket.json()).toMatchObject({ code: "bot_check_unavailable", message: "Brezplačni predogled brez prijave trenutno ni na voljo. Prijavite se z e-pošto." });
     expect((await fetch(`${base}/health`)).status).toBe(200);
   }, 120_000);
 

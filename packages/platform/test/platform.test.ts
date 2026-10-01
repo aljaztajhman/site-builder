@@ -34,10 +34,11 @@ describe("migrations", () => {
       };
       for (const m of MIGRATIONS.filter((m) => m.id < 4)) await run(m, m.id);
       await run(byName("accounts"), 4);
-      // Runs main's 4 (its table didn't exist), doesn't run "accounts" again (its tables exist), moves its record.
+      // This PR's environment also ran "generation_limits" as 5 (now 6; 5 is "accounts").
+      await run(byName("generation_limits"), 5);
+      // Runs main's 4 (its table didn't exist), doesn't run "accounts" or "generation_limits" again, moves their records.
       const ran = await migrate(old);
-      expect(ran).toContain(byName("version retention").id);
-      expect(ran).not.toContain(byName("accounts").id);
+      expect(ran).toEqual([byName("version retention").id]);
       const { rows } = await old.query<{ id: number; name: string }>("select id, name from schema_migrations order by id");
       expect(rows.map((r) => [Number(r.id), r.name])).toEqual(MIGRATIONS.map((m) => [m.id, m.name]));
       expect((await old.query("select to_regclass('site_publishes') as t")).rows[0]).toEqual({ t: "site_publishes" });

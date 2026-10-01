@@ -1,7 +1,7 @@
 import { serve } from "@hono/node-server";
 import { loadConfig } from "@sb/config";
 import { mailerFromEnv, platformFromEnv } from "@sb/platform";
-import { startWorker } from "@sb/worker/worker";
+import { intakeClassifier, startWorker } from "@sb/worker/worker";
 import { createApp } from "./app.ts";
 import { authSettingsFromEnv } from "./auth.ts";
 import { missingEnv, missingEnvLine } from "./env-check.ts";
@@ -24,7 +24,8 @@ const mailer = mailerFromEnv();
 const missing = missingEnvLine(missingEnv());
 if (missing) console.warn(missing);
 
-const app = createApp({ platform, config, auth, mailer, ...(appUrl ? { appUrl } : {}) });
+// The intake's junk check asks the classifier before a generation is queued (fails open: the pipeline asks again).
+const app = createApp({ platform, config, auth, mailer, classifyIntake: intakeClassifier(platform, config), ...(appUrl ? { appUrl } : {}) });
 const port = Number(process.env.PORT || 3000);
 serve({ fetch: app.fetch, port, hostname: "0.0.0.0" }, (info) => console.log(`[web] http://localhost:${info.port}`));
 

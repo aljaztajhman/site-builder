@@ -7,9 +7,13 @@ export interface QueryResult<T> {
   rows: T[];
 }
 
+export type Query = <T = Record<string, unknown>>(sql: string, params?: unknown[]) => Promise<QueryResult<T>>;
+
 /** The small database surface the app uses; satisfied by a pg Pool and by PGlite. */
 export interface Db {
   query<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<QueryResult<T>>;
+  /** Runs `fn` in one transaction on one connection: committed when it resolves, rolled back when it throws. */
+  transaction<T>(fn: (query: Query) => Promise<T>): Promise<T>;
   close(): Promise<void>;
   /** "postgres" for a server, "pglite" for the embedded engine (tests and Docker-less dev). */
   kind: "postgres" | "pglite";
@@ -39,6 +43,10 @@ export async function createDb(url: string): Promise<Db> {
         const r = await lite.query<T>(sql, params as never[]);
         return { rows: r.rows };
       },
+      transaction: <T>(fn: (query: Query) => Promise<T>) =>
+        lite.transaction(async (tx) =>
+          fn((async <R>(sql: string, params?: unknown[]) => ({ rows: (await tx.query<R>(sql, params as never[])).rows })) as Query),
+        ),
       close: () => lite.close(),
     };
   }
@@ -53,6 +61,20 @@ export async function createDb(url: string): Promise<Db> {
     query: async <T>(sql: string, params?: unknown[]) => {
       const r = await pool.query(sql, params);
       return { rows: r.rows as T[] };
+    },
+    async transaction<T>(fn: (query: Query) => Promise<T>): Promise<T> {
+      const client = await pool.connect();
+      try {
+        await client.query("begin");
+        const r = await fn((async <R>(sql: string, params?: unknown[]) => ({ rows: (await client.query(sql, params)).rows as R[] })) as Query);
+        await client.query("commit");
+        return r;
+      } catch (e) {
+        await client.query("rollback").catch(() => undefined);
+        throw e;
+      } finally {
+        client.release();
+      }
     },
     close: () => pool.end(),
   };

@@ -227,7 +227,7 @@ describe("one owner per site", () => {
     expect(state.access.viewer).toBe("admin");
     expect(typeof state.spendToday).toBe("number");
     const owner = (await (await req(`/api/sites/${site}`, { headers: { cookie: ana.cookie } })).json()) as { access: { viewer: string; can: Record<string, boolean> }; spendToday: number | null; cap: number | null };
-    expect(owner.access).toEqual({ viewer: "free", can: { edit: true, chat: false, regenerate: false, publish: false, export: false, fullSite: false } });
+    expect(owner.access).toMatchObject({ viewer: "free", can: { edit: true, chat: true, regenerate: true, publish: false, export: false, fullSite: false } });
     expect(owner.spendToday).toBeNull();
     expect(owner.cap).toBeNull();
   });
@@ -245,9 +245,10 @@ describe("allow-list (full sites before billing)", () => {
     expect(refused.code).toBe("paid_only");
     expect(refused.message).toMatch(/naročnine/);
     expect((await req(`/api/sites/${site}/export`, { headers: { cookie: eva.cookie } })).status).toBe(403);
-    const chat = await req(`/api/sites/${site}/chat`, { method: "POST", headers: { cookie: eva.cookie, "content-type": "application/json" }, body: JSON.stringify({ message: "Temnejša glava" }) });
-    expect(chat.status).toBe(403);
-    expect(((await chat.json()) as { code: string }).code).toBe("ai_not_open");
+    // A whole site isn't a free right.
+    const full = await req(`/api/sites/${site}/generate`, { method: "POST", headers: { cookie: eva.cookie, "content-type": "application/json" }, body: JSON.stringify({ scope: "full" }) });
+    expect(full.status).toBe(403);
+    expect(((await full.json()) as { code: string }).code).toBe("full_site_paid");
 
     const admin = await adminBrowser(req, PASSWORD);
     // The admin's forms carry the token too.
@@ -259,7 +260,7 @@ describe("allow-list (full sites before billing)", () => {
     expect(page).toContain("eva.partner+x@siol.net");
 
     const state = (await (await req(`/api/sites/${site}`, { headers: { cookie: eva.cookie } })).json()) as { access: { viewer: string; can: Record<string, boolean> } };
-    expect(state.access).toEqual({ viewer: "paid", can: { edit: true, chat: true, regenerate: true, publish: true, export: true, fullSite: true } });
+    expect(state.access).toMatchObject({ viewer: "paid", can: { edit: true, chat: true, regenerate: true, publish: true, export: true, fullSite: true } });
     const queued = await req(`/api/sites/${site}/chat`, { method: "POST", headers: { cookie: eva.cookie, "content-type": "application/json" }, body: JSON.stringify({ message: "Temnejša glava" }) });
     expect(queued.status).toBe(200);
     expect(sent.at(-1)).toMatchObject({ name: "edit", data: { siteId: site } });
