@@ -213,6 +213,19 @@ export class Repo {
     return rows.map((r) => (typeof r.patch === "string" ? JSON.parse(r.patch) : r.patch));
   }
 
+  /** What the editor's poll compares: one small query instead of the whole site state. */
+  async pulse(siteId: string): Promise<{ status: string; version: number | null; chat: number; lastEvent: number } | null> {
+    const { rows } = await this.db.query<{ status: string; version: number | null; chat: string | number; last_event: string | number }>(
+      `select s.status, s.current_version as version,
+              (select count(*) from chat_messages c where c.site_id = s.id) as chat,
+              (select coalesce(max(e.id), 0) from site_events e where e.site_id = s.id) as last_event
+         from sites s where s.id = $1`,
+      [siteId],
+    );
+    const r = rows[0];
+    return r ? { status: r.status, version: r.version === null ? null : Number(r.version), chat: Number(r.chat), lastEvent: Number(r.last_event) } : null;
+  }
+
   async listVersions(siteId: string): Promise<{ version: number; source: string; message: string | null; created_at: string }[]> {
     const { rows } = await this.db.query<{ version: number; source: string; message: string | null; created_at: string }>(
       "select version, source, message, created_at from spec_versions where site_id = $1 order by version desc",

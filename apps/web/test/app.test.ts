@@ -318,6 +318,25 @@ describe("direct editor API (no model calls)", () => {
     await platform.repo.saveSpec(site.id, golden, "manual");
     const before = sent.length;
 
+    // The editor's poll: a small pulse that moves with status, versions, chat and events.
+    {
+      const site = await platform.repo.createSite({ name: "Pulz", slug: "pulz", intake: { description: "x", photoAssetIds: [], scope: "home" } });
+      const pulse = async () => (await (await app.request(`/api/sites/${site.id}/pulse`, { headers: { cookie } })).json()) as { status: string; version: number | null; chat: number; lastEvent: number };
+      expect(await pulse()).toEqual({ status: "new", version: null, chat: 0, lastEvent: 0 });
+      await platform.repo.saveSpec(site.id, { ...golden, slug: "pulz" }, "generate");
+      await platform.repo.setStatus(site.id, "editing");
+      await platform.repo.addChat(site.id, "user", "Temnejša glava");
+      await platform.repo.addEvent({ siteId: site.id, stage: "edit", message: "start" });
+      const p = await pulse();
+      expect(p).toMatchObject({ status: "editing", version: 1, chat: 1 });
+      expect(p.lastEvent).toBeGreaterThan(0);
+      // The full state carries the same pulse, so the editor knows what it has.
+      const full = (await (await app.request(`/api/sites/${site.id}`, { headers: { cookie } })).json()) as { pulse: typeof p };
+      expect(full.pulse).toEqual(p);
+      expect((await app.request(`/api/sites/site_nope/pulse`, { headers: { cookie } })).status).toBe(404);
+      expect((await app.request(`/api/sites/${site.id}/pulse`)).status).toBe(401);
+    }
+
     const patched = await app.request(`/api/sites/${site.id}/patch`, {
       method: "POST",
       headers: json,

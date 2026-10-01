@@ -213,13 +213,16 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
 
   app.get("/api/sites/:id", async (c) => {
     const id = c.req.param("id");
+    // Read first: anything that changes while the rest is read makes the next pulse differ.
+    const pulse = await repo.pulse(id);
     const site = await repo.getSite(id);
-    if (!site) return c.json({ error: "not found" }, 404);
+    if (!site || !pulse) return c.json({ error: "not found" }, 404);
     const current = await repo.getSpec(id);
     const after = Number(c.req.query("after") ?? 0);
     const checklist = current ? await siteChecklist(repo, id, current.spec) : [];
     return c.json({
       site,
+      pulse,
       version: current?.version ?? null,
       spec: current?.spec ?? null,
       events: await repo.listEvents(id, after),
@@ -234,6 +237,14 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
       spendToday: await repo.spendToday(),
       cap: config.limits.dailyModelSpendCapEur,
     });
+  });
+
+  // What the editor polls every 2 s while the site is busy; it loads the full state only when this changes.
+  app.get("/api/sites/:id/pulse", async (c) => {
+    const pulse = await repo.pulse(c.req.param("id"));
+    if (!pulse) return c.json({ error: "not found" }, 404);
+    c.header("cache-control", "no-store");
+    return c.json(pulse);
   });
 
   app.get("/api/sites/:id/catalogue", async (c) => {
