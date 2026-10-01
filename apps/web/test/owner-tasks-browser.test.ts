@@ -77,7 +77,8 @@ async function seed(golden: string): Promise<string> {
     (hero.props as { image: string }).image = "img_g1";
   }
   const site = await platform.repo.createSite({ name: spec.slug, slug: spec.slug, intake: { description: brief.description, photoAssetIds: [], scope: "home" } });
-  const widths = loadConfig().images.widths;
+  // One small width is enough for the preview to show the photos; all four made this test take minutes in CI.
+  const widths = [360];
   for (const [i, im] of spec.assets.images.entries()) {
     const photo = brief.photos[i % brief.photos.length]!;
     const processed = await processPhoto(im.id, new Uint8Array(await readFile(path.join(fixture, ...photo.file.split("/")))), widths, { avif: 40, webp: 60 });

@@ -79,6 +79,38 @@ mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:var(--ink)}
 .under{font-size:15px;color:var(--ink-3);margin-top:12px}
 .phone{width:300px;max-width:100%;aspect-ratio:300/620;border:1px solid var(--line-2);border-radius:22px;overflow:hidden;background:#fff;box-shadow:var(--shadow-float);position:relative;justify-self:center}
 .phone iframe{width:360px;height:744px;border:0;transform:scale(.8333);transform-origin:0 0;display:block}
+/* ---------- Hero demo: description → build → phone → computer, the same rendered example resized live ---------- */
+.demo{margin:0;min-width:0}
+.demo-stage{position:relative;height:var(--stage-h,600px)}
+.demo-device{position:absolute;left:50%;top:50%;width:var(--pw,280px);height:var(--ph,560px);transform:translate(-50%,-50%);display:flex;flex-direction:column;overflow:hidden;background:#fff;border:1px solid var(--line-2);border-radius:26px;box-shadow:var(--shadow-float);transition:width 1.1s cubic-bezier(.65,0,.35,1),height 1.1s cubic-bezier(.65,0,.35,1),border-radius 1.1s,opacity .5s,transform .5s}
+.demo-chrome{flex:none;display:flex;align-items:center;gap:6px;height:0;padding:0 12px;overflow:hidden;background:var(--surface-2);transition:height 1.1s cubic-bezier(.65,0,.35,1)}
+.demo-chrome i{width:8px;height:8px;border-radius:50%;background:var(--line-2)}
+.demo-screen{position:relative;flex:1;min-height:0;overflow:hidden}
+.demo-screen iframe{display:block;border:0;width:360px;height:calc(var(--ph,560px) / var(--ps,.7778));transform:scale(var(--ps,.7778));transform-origin:0 0;transition:width 1.1s cubic-bezier(.65,0,.35,1),height 1.1s cubic-bezier(.65,0,.35,1),transform 1.1s cubic-bezier(.65,0,.35,1)}
+.demo[data-step=desk] .demo-device{width:var(--dw,100%);height:var(--dh,340px);border-radius:10px}
+.demo[data-step=desk] .demo-chrome{height:24px}
+.demo[data-step=desk] .demo-screen iframe{width:1280px;height:calc((var(--dh,340px) - 24px) / var(--ds,.4));transform:scale(var(--ds,.4))}
+.demo[data-step=type] .demo-device,.demo[data-step=build] .demo-device{opacity:0;transform:translate(-50%,-46%) scale(.96)}
+.demo-prompt{position:absolute;left:0;right:0;top:50%;padding:16px;background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r-3);box-shadow:var(--shadow-float);opacity:0;visibility:hidden;transform:translateY(-50%);transition:top .7s cubic-bezier(.65,0,.35,1),opacity .4s,visibility .4s}
+.demo[data-step=type] .demo-prompt,.demo[data-step=build] .demo-prompt{opacity:1;visibility:visible}
+.demo[data-step=build] .demo-prompt{top:24%}
+.demo-text{min-height:6.2em;margin:0;font-size:16px;line-height:1.55;color:var(--ink)}
+.demo[data-step=type] .demo-text::after{content:"";display:inline-block;width:2px;height:1.1em;margin-left:1px;vertical-align:-.2em;background:var(--ink);animation:caret .8s step-end infinite}
+.demo-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px}
+.demo-chip{padding:6px 10px;border:1px solid var(--line-2);border-radius:var(--r-2);font-size:14px;font-weight:600}
+.demo-go{padding:9px 18px;border-radius:var(--r-2);background:var(--accent);color:#fff;font-weight:600;font-size:15px;transition:transform .15s,background .15s}
+.demo[data-step=build] .demo-go{transform:scale(.95);background:#0f5139}
+.demo-steps{position:absolute;left:0;right:0;top:52%;display:grid;gap:8px;margin:0;padding:0;list-style:none;opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s}
+.demo[data-step=build] .demo-steps{opacity:1;visibility:visible}
+.demo-steps li{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--r-2);background:var(--surface);font-size:15px;color:var(--ink-3)}
+.demo-steps li::before{content:"";flex:none;width:10px;height:10px;border:2px solid var(--line-2);border-radius:50%}
+.demo[data-step=build] .demo-steps li{animation:step-done .3s forwards}
+.demo[data-step=build] .demo-steps li:nth-child(2){animation-delay:.5s}.demo[data-step=build] .demo-steps li:nth-child(3){animation-delay:1s}.demo[data-step=build] .demo-steps li:nth-child(4){animation-delay:1.5s}
+@keyframes step-done{to{color:var(--ink)}}
+.demo[data-step=build] .demo-steps li::before{animation:dot-done .3s forwards;animation-delay:inherit}
+@keyframes dot-done{to{background:var(--accent);border-color:var(--accent)}}
+@keyframes caret{50%{opacity:0}}
+.demo .phone-cap{max-width:none;margin-top:14px}
 .phone-cap{font-size:14px;color:var(--ink-3);text-align:left;margin-top:10px;justify-self:center;max-width:300px}
 
 /* ---------- What you get: three outcomes shown with the real example, then promises and a comparison ---------- */
@@ -225,7 +257,7 @@ footer .legal{margin-top:28px;padding-top:16px;border-top:1px solid var(--line);
   :root{--gutter:32px;--section:96px}
   .hd nav,.hd .login{display:inline-flex}
   .hero{padding:72px 0 88px}
-  .hero .wrap{grid-template-columns:1.25fr .75fr;align-items:center;gap:56px}
+  .hero .wrap{grid-template-columns:1.1fr .9fr;align-items:center;gap:56px}
   .phone{justify-self:end}
   .win{grid-template-columns:1.1fr 1fr;gap:64px;margin-top:72px}
   .win.flip .win-vis{order:2}

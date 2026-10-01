@@ -12,6 +12,13 @@ import { PRODUCT_NAME } from "./ui/labels.ts";
  * text across it (sessionStorage, never the URL) back to this page.
  */
 
+/**
+ * What the hero demo types: the opening of the shop's own description, from which the pipeline made the
+ * example (tools/eval/fixtures/trgovina-oljka-in-sol/brief.json, shortened).
+ */
+const DEMO_PROMPT =
+  "Oljka in sol je majhna trgovina z istrskimi dobrotami v starem mestnem jedru Kopra, Kidričeva ulica 22. Prodajamo oljčno olje, piransko sol, med, vino, pršut in sire manjših pridelovalcev …";
+
 const wholeEur = new Intl.NumberFormat("sl-SI", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
 
 const Brand = () => (
@@ -46,6 +53,9 @@ export interface HomeProps {
 export function homePage({ config, signedIn, error, description }: HomeProps): string {
   const paid = config.plans.paid;
   const example = uiUrl("example-home.html");
+  // Example sites rendered by our engine (pnpm examples:build): a different business in each place.
+  const shopExample = uiUrl("examples/trgovina-oljka-in-sol/index.html");
+  const dentistExample = uiUrl("examples/zobozdravstvo-lebar/index.html");
   return html(
     <html lang="sl">
       <head>
@@ -147,10 +157,39 @@ export function homePage({ config, signedIn, error, description }: HomeProps): s
                 <p className="under">Brezplačen predogled domače strani. Potrebujete le e-poštni naslov, kartice ne.</p>
               </div>
               <div>
-                <div className="phone" inert>
-                  <iframe src={example} title="Primer strani: Pekarna Kvas" loading="lazy" />
-                </div>
-                <p className="phone-cap">Primer: izmišljena Pekarna Kvas iz Kamnika, stran iz enega opisa in treh fotografij. Fotografije v primeru so ustvarjene z UI in tako tudi označene.</p>
+                {/* From description to site: typed, built, shown on a phone, then widened to a computer (home.ts plays it). */}
+                <figure className="demo" data-demo="">
+                  <div className="demo-stage">
+                    <div className="demo-prompt" aria-hidden="true">
+                      <p className="demo-text" data-text={DEMO_PROMPT}>
+                        {DEMO_PROMPT}
+                      </p>
+                      <div className="demo-bar">
+                        <span className="demo-chip">＋ 5 fotografij</span>
+                        <span className="demo-go">Ustvari</span>
+                      </div>
+                    </div>
+                    <ol className="demo-steps" aria-hidden="true">
+                      <li>Razumevanje opisa</li>
+                      <li>Oblikovna smer in barve</li>
+                      <li>Fotografije</li>
+                      <li>Besedila in postavitev</li>
+                    </ol>
+                    <div className="demo-device" inert>
+                      <span className="demo-chrome" aria-hidden="true">
+                        <i />
+                        <i />
+                        <i />
+                      </span>
+                      <div className="demo-screen">
+                        <iframe src={shopExample} title="Primer strani: trgovina Oljka in sol" loading="lazy" />
+                      </div>
+                    </div>
+                  </div>
+                  <figcaption className="phone-cap">
+                    {`Primer: izmišljena trgovina Oljka in sol iz Kopra. Stran je ${PRODUCT_NAME} naredil iz njenega opisa in petih fotografij; manjkajočo ceno smo vpisali, kot bi jo lastnik. Fotografije so ustvarjene z UI.`}
+                  </figcaption>
+                </figure>
               </div>
             </div>
           </section>
@@ -165,12 +204,12 @@ export function homePage({ config, signedIn, error, description }: HomeProps): s
                 <div className="win-vis call-vis" aria-hidden="true">
                   <div className="phone-wrap">
                     <div className="phone sm" inert>
-                      <iframe src={example} title="" tabIndex={-1} loading="lazy" />
+                      <iframe src={dentistExample} title="" tabIndex={-1} loading="lazy" />
                     </div>
                     <i className="tap" />
                     <div className="calling">
                       <b>Klicanje …</b>
-                      <span>Pekarna Kvas</span>
+                      <span>Zobozdravstvo Lebar</span>
                     </div>
                   </div>
                 </div>
