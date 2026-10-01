@@ -158,121 +158,143 @@ export function homePage({ config, signedIn, error, description }: HomeProps): s
           <section id="kaj" aria-labelledby="h-kaj">
             <div className="wrap">
               <h2 id="h-kaj">Kaj dobite</h2>
-              <p className="lead">Stran, ki jo lahko pokažete strankam, ne osnutka, ki ga je treba še popraviti.</p>
-              <div className="get">
-                <div>
-                  <div className="vig v-sl" aria-hidden="true">
-                    <div className="glyphs">
-                      <span>č</span>
-                      <span>š</span>
-                      <span>ž</span>
-                      <span>ć</span>
-                      <span>đ</span>
+              <p className="lead">Stran, ki jo danes pokažete strankam. In ki jih pripelje do vas.</p>
+
+              {/* Three outcomes, each shown with the real example site or the real editor, played once in view. */}
+              <div className="win">
+                <div className="win-vis call-vis" aria-hidden="true">
+                  <div className="phone-wrap">
+                    <div className="phone sm" inert>
+                      <iframe src={example} title="" tabIndex={-1} loading="lazy" />
                     </div>
-                    <div className="fmt">
-                      <span>29. 9. 2026</span>
-                      <span>12,50 €</span>
-                      <span>+386 41 555 906</span>
+                    <i className="tap" />
+                    <div className="calling">
+                      <b>Klicanje …</b>
+                      <span>Pekarna Kvas</span>
                     </div>
                   </div>
-                  <h3>Naravna slovenščina</h3>
-                  <p>Besedila v slovenščini, ne prevodi. Datumi, cene in telefonske številke v slovenski obliki. Pisave, ki pravilno izpišejo č, š, ž, ć in đ.</p>
                 </div>
-                <div>
-                  <div className="vig v-tel" aria-hidden="true">
-                    <svg viewBox="0 0 220 150" width="100%" height="100%">
-                      <rect className="ph-body" x="66" y="-34" width="88" height="180" rx="12" />
-                      <rect className="ln" x="76" y="12" width="52" height="6" rx="2" />
-                      <rect className="ln" x="76" y="24" width="66" height="4" rx="2" />
-                      <rect className="ln" x="76" y="32" width="58" height="4" rx="2" />
-                      <rect className="img" x="76" y="44" width="68" height="46" rx="3" />
-                      <rect className="ln" x="76" y="98" width="40" height="4" rx="2" />
-                      <line className="sep" x1="66" y1="112" x2="154" y2="112" />
-                      <rect className="b1" x="74" y="120" width="34" height="16" rx="3" />
-                      <rect className="b2" x="112" y="120" width="34" height="16" rx="3" />
-                      <circle className="tap" cx="91" cy="128" r="6" />
-                      <circle className="ring" cx="91" cy="128" r="6" />
-                    </svg>
-                  </div>
-                  <h3>Na telefonu in računalniku</h3>
-                  <p>Stran je enako dobra na velikem zaslonu in na telefonu. Na telefonu sta klic in navodila za pot na vsaki strani na en dotik, meni deluje z eno roko.</p>
-                </div>
-                <div>
-                  <div className="vig v-fact" aria-hidden="true">
-                    <div className="fake">
-                      <span className="stars">★★★★★</span>
-                      <span className="q">„Najboljša pekarna daleč naokoli“</span>
-                      <i className="strike" />
-                      <b className="stamp">ni v vašem opisu</b>
-                    </div>
-                    <div className="real">
-                      <span>Cimetov polž</span>
-                      <mark className="ph">[cena]</mark>
-                    </div>
-                  </div>
-                  <h3>Vaši podatki, nič izmišljenega</h3>
+                <div className="win-text">
+                  <h3>Stranka vas pokliče z enim dotikom</h3>
                   <p>
-                    Cene, delovni čas, naslov in imena so samo tisti, ki ste jih napisali. Kar manjka, je označeno, dokler tega ne vpišete. Brez izmišljenih mnenj strank in nagrad.
+                    Klic in navodila za pot sta na dnu zaslona na vsaki strani. Delovni čas in naslov sta takoj na vrhu domače strani. Kdor vas najde na telefonu, vas pokliče,
+                    namesto da išče naprej.
                   </p>
-                </div>
-                <div>
-                  <div className="vig v-a11y" aria-hidden="true">
-                    <ul>
-                      {["Kontrast besedila 4,5 : 1", "Brez sledenja pred privolitvijo", "Tipkovnica in bralnik zaslona", "Izjava o dostopnosti"].map((t) => (
-                        <li key={t}>
-                          <svg viewBox="0 0 16 16">
-                            <path d="M3 8.5l3 3 7-7" />
-                          </svg>
-                          {t}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <h3>Dostopna in skladna</h3>
-                  <p>Dostopnost po WCAG 2.2 AA. Pisave na našem strežniku, zemljevidi se naložijo šele po kliku. Podatki o ponudniku so vgrajeni.</p>
-                </div>
-                <div>
-                  <div className="vig v-fast" aria-hidden="true">
-                    <div className="ld">
-                      <i />
-                    </div>
-                    <div className="lh">
-                      <span>
-                        <b>98–100</b> hitrost
-                      </span>
-                      <span>
-                        <b>100</b> dostopnost
-                      </span>
-                    </div>
-                    <div className="chips">
-                      <span>HTML</span>
-                      <span>CSS</span>
-                      <span>JavaScript samo za meni</span>
-                    </div>
-                  </div>
-                  <h3>Hitra</h3>
-                  <p>Statične strani skoraj brez JavaScripta, slike v sodobnih formatih. Ocene so iz Googlovega Lighthouse na telefonu, izmerjene na devetih testnih straneh.</p>
-                </div>
-                <div>
-                  <div className="vig v-zip" aria-hidden="true">
-                    <div className="zip">
-                      <span className="fn">pekarna-kvas.zip</span>
-                      <ul>
-                        <li>index.html</li>
-                        <li>ponudba/index.html</li>
-                        <li>site.css</li>
-                        <li>fonts/</li>
-                        <li>js/nav.js</li>
-                      </ul>
-                    </div>
-                    <svg className="arrow" viewBox="0 0 24 24">
-                      <path d="M12 3v15M5 12l7 7 7-7" />
-                    </svg>
-                  </div>
-                  <h3>Vaša, tudi ko odidete</h3>
-                  <p>Stran kadarkoli prenesete kot datoteke in jo gostite drugje, tudi brez povezave. Nobenih kreditov, ena cena na mesec.</p>
+                  <p className="proof">Vsako stran preverimo na telefonu: gumbi dovolj veliki za palec, nič ne uhaja čez rob.</p>
                 </div>
               </div>
+
+              <div className="win flip">
+                <div className="win-vis search-vis" aria-hidden="true">
+                  <div className="q">
+                    <svg viewBox="0 0 24 24">
+                      <circle cx="11" cy="11" r="6" />
+                      <path d="M20 20l-4.5-4.5" />
+                    </svg>
+                    <span className="typed">pekarna kamnik</span>
+                  </div>
+                  <div className="result">
+                    <span className="url">Pekarna Kvas › Kamnik</span>
+                    <span className="title">Pekarna Kvas · Kruh z drožmi, Kamnik</span>
+                    <span className="desc">Kruh z lastnimi drožmi, pečen vsak dan. Mala družinska pekarna na začetku stare ulice Šutna.</span>
+                    <span className="facts">
+                      <b>Odprto</b> · zapre ob 18.00 · Šutna 30, Kamnik
+                    </span>
+                  </div>
+                </div>
+                <div className="win-text">
+                  <h3>Na iskalniku ste videti kot pravo podjetje</h3>
+                  <p>
+                    Za vsako stran pripravimo naslov in opis za iskalnike ter podatke, ki jih iskalniki znajo prebrati: ime, naslov, telefon in delovni čas. Iz vašega opisa, brez
+                    dodatnega dela.
+                  </p>
+                  <p className="proof">Kako visoko se prikažete, odloči iskalnik. Vse, kar je odvisno od strani, je pripravljeno.</p>
+                </div>
+              </div>
+
+              <div className="win">
+                <div className="win-vis edit-vis" aria-hidden="true">
+                  <div className="hours">
+                    <span className="h">Delovni čas</span>
+                    <span className="row">
+                      <span>Pon–pet</span>
+                      <span>6.30–18.00</span>
+                    </span>
+                    <span className="row sat">
+                      <span>Sobota</span>
+                      <span className="val">
+                        <s>6.30–12.00</s>
+                        <b>7.00–12.00</b>
+                      </span>
+                    </span>
+                    <span className="row">
+                      <span>Nedelja</span>
+                      <span>7.00–10.00</span>
+                    </span>
+                  </div>
+                  <div className="say">Ob sobotah odpiramo ob sedmih</div>
+                  <div className="done">Spremenjeno na strani</div>
+                </div>
+                <div className="win-text">
+                  <h3>Spremembe naredite sami, v minuti</h3>
+                  <p>
+                    Tapnite besedilo na strani in ga popravite. Ali pa napišite, kaj naj spremenimo: nov delovni čas, nova cena, dopust. Brez pisanja agenciji in čakanja na
+                    odgovor.
+                  </p>
+                  <p className="proof">Vsaka sprememba se shrani. Prejšnjo različico obnovite z enim klikom.</p>
+                </div>
+              </div>
+
+              {/* The assurances, in the owner's words: no jargon, each one checkable on the example. */}
+              <ul className="promises">
+                <li>
+                  <b>Naravna slovenščina.</b> Besedila, datumi, cene in telefonske številke v slovenski obliki, ne prevod.
+                </li>
+                <li>
+                  <b>Nič izmišljenega.</b> Cene, ure, imena in mnenja so samo vaši. Kar manjka, je označeno, dokler ne vpišete.
+                </li>
+                <li>
+                  <b>Hitra in dostopna.</b> Hitro se naloži tudi na slabem signalu in je berljiva za vse, tudi z bralnikom zaslona.
+                </li>
+                <li>
+                  <b>Brez vohunjenja za obiskovalci.</b> Nobenega sledenja, preden obiskovalec privoli.
+                </li>
+                <li>
+                  <b>Vaša, tudi ko odidete.</b> Stran kadarkoli prenesete kot datoteke in jo gostite, kjer želite.
+                </li>
+              </ul>
+
+              {/* Primerjam.si (2026): business-card site from a freelancer €500–810, average €690; maintenance average €63/month (docs/GO-TO-MARKET.md §15). */}
+              <div className="versus">
+                <div>
+                  <h3>Pri oblikovalcu</h3>
+                  <ul>
+                    <li>
+                      <b>{wholeEur.format(690)}</b> povprečno za izdelavo
+                    </li>
+                    <li>
+                      <b>{wholeEur.format(63)}</b> na mesec za vzdrževanje
+                    </li>
+                    <li>Popravke naročite in počakate</li>
+                  </ul>
+                </div>
+                <div className="us">
+                  <h3>{PRODUCT_NAME}</h3>
+                  <ul>
+                    <li>
+                      <b>Brezplačen</b> predogled v manj kot minuti
+                    </li>
+                    <li>
+                      <b>{wholeEur.format(config.plans.paid.monthlyEur)}</b> na mesec{config.plans.paid.billingEnabled ? "" : " (načrtovana cena)"}
+                    </li>
+                    <li>Popravke naredite sami, takoj</li>
+                  </ul>
+                  <a className="btn primary" href="#zacni">
+                    Preizkusite brezplačno
+                  </a>
+                </div>
+              </div>
+              <p className="src">Cene pri oblikovalcu: povprečje za predstavitveno stran, primerjam.si, 2026.</p>
             </div>
           </section>
 
