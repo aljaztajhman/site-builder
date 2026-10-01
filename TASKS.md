@@ -134,7 +134,8 @@ Product work (not started):
 - [ ] fal cost is estimated from config prices; the account's actual spend isn't readable with this key (billing API 403). Compare against the fal dashboard once
 - [ ] FAL_KEY missing on Railway worker (found 2026-10-01): Frizerstvo Lana (no photos) generated with no pictures, and nothing said why. The skip is now logged in the site's generation log and as a worker startup warning. Owner sets FAL_KEY on the worker (`preview`), then regenerate
 - [ ] More visuals for photo-less sites (owner, 2026-10-01: "not impressive, won't convert"): design stage is told photoCount=0 and picks typography-led directions even when generated pictures follow; fillUpTo is 2. See decision `sb-images-more`
-- [ ] Shot list for owners (brief stage + dashboard); Lucide icons for phone, directions, hours
+- [ ] Shot list for owners (brief stage + dashboard)
+- [x] Lucide line icons (2026-10-01, branch claude/fact-icons): `Icon` primitive (phone, map-pin, clock, mail; inline SVG, currentColor, aria-hidden) only on fact labels in hero-type with-facts, contact, contact-strip, and on the phone call bar's two buttons. Not in services, highlights, steps, header, footer (tested). Call bar buttons now size from their content so icon + "Navodila za pot" stays on one line at 360 px (all 10 goldens: 48–50 px tall, was wrapping to 66–71 px with equal halves). Offline check on 3 goldens: axe 0, LH accessibility 100, 360 px width ok
 - [x] Client-facing generation/edits: generated pictures in the pipeline with origin + "Ustvarjeno z UI" label (spec v3, PR #24); the owner replaces them with their own photos in the editor (PR #25)
 
 ## Follow-ups (not blocking a phase)

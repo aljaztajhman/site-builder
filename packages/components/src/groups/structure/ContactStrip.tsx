@@ -1,5 +1,5 @@
 import { formatAddress, isPlaceholder } from "@sb/spec";
-import { HoursList, PhoneLink, Ph, Section, cx, titleId } from "../../primitives/index.tsx";
+import { HoursList, Icon, PhoneLink, Ph, Section, cx, titleId } from "../../primitives/index.tsx";
 import type { SectionProps } from "../../types.ts";
 
 /**
@@ -18,11 +18,17 @@ export function ContactStrip({ section, ctx }: SectionProps<"contact-strip">) {
       </h2>
       <ul className="contact-strip__list" role="list">
         <li className={cx("contact-strip__item", section.variant === "cards" && "card")}>
-          <h3 className="contact-strip__label">{ctx.t("phone")}</h3>
+          <h3 className="contact-strip__label fact-label">
+            <Icon name="phone" />
+            {ctx.t("phone")}
+          </h3>
           <PhoneLink ctx={ctx} className="contact-strip__action contact-strip__phone" />
         </li>
         <li className={cx("contact-strip__item", section.variant === "cards" && "card")}>
-          <h3 className="contact-strip__label">{ctx.t("address")}</h3>
+          <h3 className="contact-strip__label fact-label">
+            <Icon name="map-pin" />
+            {ctx.t("address")}
+          </h3>
           {isPlaceholder(b.address) ? (
             <Ph p={b.address} ctx={ctx} />
           ) : (
@@ -38,7 +44,10 @@ export function ContactStrip({ section, ctx }: SectionProps<"contact-strip">) {
         </li>
         {b.hours !== undefined && (
           <li className={cx("contact-strip__item", section.variant === "cards" && "card")}>
-            <h3 className="contact-strip__label">{ctx.t("openingHours")}</h3>
+            <h3 className="contact-strip__label fact-label">
+              <Icon name="clock" />
+              {ctx.t("openingHours")}
+            </h3>
             <HoursList ctx={ctx} short />
           </li>
         )}

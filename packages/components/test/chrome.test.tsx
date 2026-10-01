@@ -52,6 +52,8 @@ describe("Header", () => {
       // Legal pages are not in the main nav.
       expect(out).not.toContain("zasebnost.html");
       expect(out).toMatch(/class="btn btn--primary site-header__cta[^"]*" href="tel:\+38641123456">Pokliči</);
+      // Header buttons and nav are words: the only icons are on fact labels and the phone call bar.
+      expect(out).not.toContain("<svg");
       expect(out).toContain('classList.add("js")');
     });
   }
@@ -123,6 +125,7 @@ describe("Footer", () => {
       expect(out).toContain(`© ${new Date().getFullYear()} Frizerski salon Lipa, Ana Novak s.p.`);
       expect(out).toMatch(/<button type="button" class="site-footer__consent" data-consent-open="" hidden="">Nastavitve piškotkov<\/button>/);
       expect(count(out, /<h2/g)).toBe(3);
+      expect(out).not.toContain("<svg");
     });
   }
 
@@ -147,9 +150,12 @@ describe("MobileActionBar", () => {
   it("renders call and directions as two buttons", () => {
     const out = html(<MobileActionBar ctx={testCtx(spec())} />);
     expect(out).toMatch(/^<nav class="action-bar" aria-label="Hitri kontakt">/);
-    expect(out).toContain('href="tel:+38641123456">Pokliči</a>');
-    expect(out).toMatch(/href="https:\/\/www.google.com\/maps[^"]*" rel="noopener" target="_blank">Navodila za pot<\/a>/);
+    expect(out).toMatch(/href="tel:\+38641123456"><svg class="icon" [^>]*aria-hidden="true"[^>]*>[\s\S]*?<\/svg>Pokliči<\/a>/);
+    expect(out).toMatch(
+      /href="https:\/\/www.google.com\/maps[^"]*" rel="noopener" target="_blank"><svg class="icon" [^>]*aria-hidden="true"[^>]*>[\s\S]*?<\/svg>Navodila za pot<\/a>/,
+    );
     expect(count(out, /action-bar__btn/g)).toBe(2);
+    expect(count(out, /<svg /g)).toBe(2);
   });
 
   it("hides a button whose fact is missing, and renders nothing when both are", () => {

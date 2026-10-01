@@ -1,4 +1,4 @@
-import { ActionLink, Actions, AddressText, HoursList, PhoneLink, Section, titleId } from "../../primitives/index.tsx";
+import { ActionLink, Actions, AddressText, HoursList, Icon, PhoneLink, Section, titleId } from "../../primitives/index.tsx";
 import type { RenderCtx, SectionProps } from "../../types.ts";
 
 /** Phone, address with a directions link, and opening hours, straight from the business facts. */
@@ -7,13 +7,19 @@ function HeroFacts({ ctx }: { ctx: RenderCtx }) {
   return (
     <dl className="hero-facts">
       <div className="hero-facts__item">
-        <dt>{ctx.t("phone")}</dt>
+        <dt className="fact-label">
+          <Icon name="phone" />
+          {ctx.t("phone")}
+        </dt>
         <dd>
           <PhoneLink ctx={ctx} className="hero-facts__phone" />
         </dd>
       </div>
       <div className="hero-facts__item">
-        <dt>{ctx.t("address")}</dt>
+        <dt className="fact-label">
+          <Icon name="map-pin" />
+          {ctx.t("address")}
+        </dt>
         <dd>
           <AddressText ctx={ctx} />
           <ActionLink link={{ label: ctx.t("directions"), target: { action: "directions" } }} ctx={ctx} kind="text" />
@@ -21,7 +27,10 @@ function HeroFacts({ ctx }: { ctx: RenderCtx }) {
       </div>
       {hours && (
         <div className="hero-facts__item">
-          <dt>{ctx.t("openingHours")}</dt>
+          <dt className="fact-label">
+            <Icon name="clock" />
+            {ctx.t("openingHours")}
+          </dt>
           <dd>
             <HoursList ctx={ctx} hours={hours} short />
           </dd>

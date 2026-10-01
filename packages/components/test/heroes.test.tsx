@@ -129,6 +129,18 @@ describe("hero-type", () => {
     expect(out).not.toContain('class="ph"');
   });
 
+  it("labels each fact with a hidden line icon, and only the facts", () => {
+    for (const ctx of [testCtx(), sparseCtx()]) {
+      const out = html(<HeroType section={{ ...section, variant: "with-facts" }} ctx={ctx} index={0} />);
+      const labels = [...out.matchAll(/<dt class="fact-label">(<svg [^>]*>)[\s\S]*?<\/svg>([^<]+)<\/dt>/g)];
+      expect(labels.map((m) => m[2])).toEqual(["Telefon", "Naslov", "Delovni čas"]);
+      for (const m of labels) expect(m[1]).toContain('aria-hidden="true"');
+      expect(count(out, /<svg /g)).toBe(3);
+    }
+    // No icons on the headline, the buttons or the large variant.
+    expect(html(<HeroType section={section} ctx={testCtx()} index={0} />)).not.toContain("<svg");
+  });
+
   it("shows placeholders for missing facts and no broken links", () => {
     const out = html(<HeroType section={{ ...section, variant: "with-facts" }} ctx={sparseCtx()} index={0} />);
     expect(out).not.toContain("tel:");

@@ -354,8 +354,12 @@ html:not(.js) .nav-toggle {
   color: var(--c-text);
   border-top: 1px solid var(--c-border);
 }
+/*
+ * Each button grows from its own content width, so icon + "Navodila za pot" stays on one line at 360 px
+ * (equal halves are ~132 px of content: the label alone fits, label + icon does not). Spare width is shared.
+ */
 .action-bar__btn {
-  flex: 1 1 0;
+  flex: 1 1 auto;
   min-width: 0;
   min-height: 3rem;
   padding-inline: 0.75rem;
