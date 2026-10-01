@@ -217,12 +217,23 @@ details.more>summary{padding:12px 0;font-weight:600;cursor:pointer}
 .colors{display:grid;gap:6px;margin-top:6px}
 .colors .row{gap:10px}
 .colors .hex{font-size:13px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.sheet-handle{display:none}
+/* Phones and narrow windows: the preview fills the screen, the editor is a bottom sheet over it
+   (peek: tabs and the start of the form; full: almost the whole screen). */
 @media (max-width:900px){
-  .shell{height:auto}
+  :root{--sheet-peek:44dvh;--sheet-handle:28px}
   .ed{display:flex;flex-direction:column}
-  .ed .canvas{order:-1;border-bottom:1px solid var(--line)}
+  .ed .canvas{order:-1;flex:1;min-height:0;padding-bottom:var(--sheet-peek)}
   .ed .stage{padding:12px}
-  .ed .panel{overflow:visible;border-right:0}
+  .ed .panel{position:fixed;left:0;right:0;bottom:0;z-index:15;height:var(--sheet-peek);overflow:auto;overscroll-behavior:contain;border-right:0;border-top:1px solid var(--line-2);border-radius:var(--r-3) var(--r-3) 0 0;box-shadow:0 -8px 24px rgb(20 20 18/.12);transition:height .2s ease-out}
+  /* Full stops under the app bar, so undo and publish stay in reach (--top-h is measured by the editor). */
+  .ed .panel[data-sheet=full]{height:calc(100dvh - var(--top-h,0px))}
+  .sheet-handle{display:flex;position:sticky;top:0;z-index:3;align-items:center;justify-content:center;width:100%;height:var(--sheet-handle);padding:0;border:0;background:var(--surface);cursor:grab;touch-action:none}
+  .sheet-handle span{width:40px;height:4px;border-radius:2px;background:var(--line-2)}
+  .ed .tabs{top:var(--sheet-handle)}
+  #selected-head{scroll-margin-top:calc(var(--sheet-handle) + 100px)}
+  .toast{top:12px;bottom:auto}
+  .ed.nospec .panel{position:static;height:auto;overflow:visible;border-radius:0;box-shadow:none}
   .top .spend,.top .ver,.ed .canvas .where{display:none}
   .top .actions{width:100%}
   .top .actions .btn.primary{margin-left:auto}

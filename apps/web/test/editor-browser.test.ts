@@ -150,6 +150,58 @@ describe("editor in a browser", () => {
     }
   }, 60_000);
 
+  it("on a phone, edits in a bottom sheet over the preview: peek, full, and the tapped section's form", async () => {
+    const id = await bakery("urejanje-list");
+    const { page, close } = await open(id, 375);
+    try {
+      const panel = page.locator(".ed .panel");
+      const sheet = () => panel.getAttribute("data-sheet");
+      const box = async () => (await panel.boundingBox())!;
+      expect(await panel.evaluate((p) => getComputedStyle(p).position)).toBe("fixed");
+      expect(await sheet()).toBe("peek");
+      // The preview sits above the peeking sheet, not under it.
+      const frame = (await page.locator(".canvas .frame").boundingBox())!;
+      expect(frame.y + frame.height).toBeLessThanOrEqual((await box()).y + 1);
+      expect((await box()).height).toBeLessThan(900 * 0.5);
+
+      await page.getByRole("button", { name: "Razširi urejanje" }).click();
+      expect(await sheet()).toBe("full");
+      // Full stops under the app bar, so undo and publish stay visible.
+      const bar = (await page.locator("header.top").boundingBox())!;
+      await expect.poll(async () => Math.round((await box()).y)).toBe(Math.round(bar.y + bar.height));
+      expect((await box()).height).toBeGreaterThan(900 * 0.6);
+      await page.getByRole("button", { name: "Pomanjšaj urejanje" }).click();
+      expect(await sheet()).toBe("peek");
+
+      // A tap on a section in the preview brings its form into view inside the sheet.
+      await page.frameLocator('iframe[title="Predogled strani"]').locator("#s_about h2").click();
+      const head = page.locator("#selected-head");
+      await expect.poll(() => head.textContent()).toBe("O nas");
+      await expect.poll(async () => {
+        const h = (await head.boundingBox())!;
+        const p = await box();
+        return h.y >= p.y && h.y + h.height <= p.y + p.height;
+      }).toBe(true);
+      // Typing opens it fully (room above the keyboard).
+      await page.locator('[data-path$="/props/heading"] input').click();
+      expect(await sheet()).toBe("full");
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+    } finally {
+      await close();
+    }
+  }, 60_000);
+
+  it("keeps the side panel on a wide screen (no sheet)", async () => {
+    const id = await bakery("urejanje-siroko");
+    const { page, close } = await open(id, 1280);
+    try {
+      expect(await page.locator(".ed .panel").evaluate((p) => getComputedStyle(p).position)).not.toBe("fixed");
+      expect(await page.locator(".sheet-handle").isVisible()).toBe(false);
+    } finally {
+      await close();
+    }
+  }, 60_000);
+
   it("edits text in place with one tap once its section is selected", async () => {
     const id = await bakery("urejanje-dotik");
     const { page, close } = await open(id);
