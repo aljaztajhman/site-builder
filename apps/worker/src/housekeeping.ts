@@ -15,11 +15,14 @@ export interface Log {
 /** One housekeeping pass. Returns what it removed. */
 export async function cleanupExpired(platform: Pick<Platform, "repo" | "storage">, config: AppConfig): Promise<{ sites: string[]; staleJobs: number }> {
   const { repo, storage } = platform;
-  const sites = await repo.usage.expiredAnonymousSites(config.tiers.anonymous.keepDays);
-  for (const id of sites) {
-    // Files first: a site row without files is harmless, files without a row would never be found again.
-    await storage.deletePrefix(`sites/${id}/`);
-    await repo.db.query("delete from sites where id = $1 and account_id is null", [id]);
+  const sites: string[] = [];
+  for (const id of await repo.usage.expiredAnonymousSites(config.tiers.anonymous.keepDays)) {
+    // The row first, and only while still unclaimed: someone signing in this very moment keeps their site.
+    // Then its files (uploads, media); a failure there is logged and the next pass can't find them again.
+    const { rows } = await repo.db.query("delete from sites where id = $1 and account_id is null returning id", [id]);
+    if (!rows.length) continue;
+    sites.push(id);
+    await storage.deletePrefix(`sites/${id}/`).catch((e: unknown) => console.error(`[worker] files of expired preview ${id} not deleted:`, (e as Error).message));
   }
   const staleJobs = await repo.usage.endStaleJobs(30);
   await repo.usage.clearOldIpKeys();
