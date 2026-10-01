@@ -160,12 +160,26 @@ export function collectPlaceholders(spec: unknown): PlaceholderRef[] {
   return out;
 }
 
-/** A site can be published only when it validates and every placeholder is filled. */
-export function publishBlockers(spec: unknown): string[] {
+/**
+ * One thing that stands between the site and publishing. `detail` is the validation message, the
+ * placeholder kind, the fact kind, or the image id; the editor turns it into Slovene (labels.ts).
+ */
+export interface PublishBlocker {
+  path: string;
+  kind: "invalid" | "placeholder" | "starter" | "alt" | "fact";
+  detail: string;
+  /** Validation issue code (kind "invalid"). */
+  code?: Issue["code"];
+  /** The value in question (kind "fact"). */
+  value?: string;
+}
+
+/** The checklist behind publishBlockers: validation, placeholders, starter text, missing photo descriptions. */
+export function publishChecklist(spec: unknown): PublishBlocker[] {
   const v = validateSite(spec);
-  const blockers = v.ok ? [] : v.issues.map((i) => `${i.path}: ${i.message}`);
-  for (const p of collectPlaceholders(spec)) blockers.push(`${p.path}: unfilled placeholder (${p.kind})`);
-  for (const p of collectStarterText(spec)) blockers.push(`${p}: starter text not replaced`);
+  const out: PublishBlocker[] = v.ok ? [] : v.issues.map((i) => ({ path: i.path, kind: "invalid" as const, detail: i.message, code: i.code }));
+  for (const p of collectPlaceholders(spec)) out.push({ path: p.path, kind: "placeholder", detail: p.kind });
+  for (const p of collectStarterText(spec)) out.push({ path: p, kind: "starter", detail: "starter text" });
   // A photo the pages show needs a description (alt text) for screen readers.
   if (v.spec) {
     const shown = new Set<string>();
@@ -173,8 +187,29 @@ export function publishBlockers(spec: unknown): string[] {
       if (/^img_/.test(s)) shown.add(s);
     });
     v.spec.assets.images.forEach((img, i) => {
-      if (shown.has(img.id) && !img.alt.trim()) blockers.push(`/assets/images/${i}/alt: photo ${img.id} has no description`);
+      if (shown.has(img.id) && !img.alt.trim()) out.push({ path: `/assets/images/${i}/alt`, kind: "alt", detail: img.id });
     });
   }
-  return blockers;
+  return out;
+}
+
+/** A checklist entry as one English line, for logs, API errors and the eval report. */
+export function blockerText(b: PublishBlocker): string {
+  switch (b.kind) {
+    case "placeholder":
+      return `${b.path}: unfilled placeholder (${b.detail})`;
+    case "starter":
+      return `${b.path}: starter text not replaced`;
+    case "alt":
+      return `${b.path}: photo ${b.detail} has no description`;
+    case "fact":
+      return `${b.path}: ${b.detail} "${b.value ?? ""}" is not in the client's input`;
+    default:
+      return `${b.path}: ${b.detail}`;
+  }
+}
+
+/** A site can be published only when it validates and every placeholder is filled. */
+export function publishBlockers(spec: unknown): string[] {
+  return publishChecklist(spec).map(blockerText);
 }

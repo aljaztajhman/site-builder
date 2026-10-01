@@ -156,8 +156,9 @@ legend{padding:0 4px;font-weight:600;font-size:13px;color:var(--ink-2)}
 .top .site-name{min-width:0;max-width:36ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:18px;letter-spacing:-.015em}
 .ed{flex:1;min-height:0;display:grid;grid-template-columns:400px minmax(0,1fr)}
 .ed .panel{overflow:auto;background:var(--surface);border-right:1px solid var(--line)}
-.ed .tabs{position:sticky;top:0;z-index:2;display:flex;gap:2px;overflow-x:auto;padding:8px;background:var(--surface);border-bottom:1px solid var(--line);scrollbar-width:none}
-.ed .tabs button{flex:none;min-height:36px;padding:0 9px;border:0;border-radius:var(--r-1);background:transparent;color:var(--ink-2);font:500 14px/1 var(--font-ui);cursor:pointer}
+/* Six tabs in two rows of three: one row overflowed the 400 px panel and scrolled out of sight. */
+.ed .tabs{position:sticky;top:0;z-index:2;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px;padding:8px;background:var(--surface);border-bottom:1px solid var(--line)}
+.ed .tabs button{min-height:36px;padding:0 6px;border:0;border-radius:var(--r-1);background:transparent;color:var(--ink-2);font:500 14px/1 var(--font-ui);cursor:pointer}
 .ed .tabs button:hover{background:var(--surface-2)}
 .ed .tabs button[aria-selected=true]{background:var(--surface-2);color:var(--ink);font-weight:600}
 .ed .pane{padding:12px 16px 24px}
@@ -240,3 +241,12 @@ details.more>summary{padding:12px 0;font-weight:600;cursor:pointer}
 .file-btn{position:relative}
 .file-btn:has(input:focus-visible){outline:2px solid var(--ink);outline-offset:2px}
 @media (max-width:30rem){.photo{grid-template-columns:1fr}.photo img{width:100%;height:auto;aspect-ratio:4/3}}
+/* Pre-publish checklist: every entry opens its field. */
+.checklist ol{margin:8px 0 0;padding:0;list-style:none}
+.checklist li+li{border-top:1px solid rgb(92 55 0 / .15)}
+.checklist li button{display:grid;gap:2px;width:100%;min-height:44px;padding:8px 0;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.checklist li button strong{font-size:13px;font-weight:600}
+.checklist li button span{font-size:14px}
+.checklist li button:hover span{text-decoration:underline}
+.btn.blocked{opacity:.6}
+.flash{outline:3px solid var(--warn);outline-offset:4px;border-radius:var(--r-1);transition:outline-color .3s}

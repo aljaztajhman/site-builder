@@ -5,6 +5,7 @@
  */
 
 import { EDITOR_STARTER_TEXT } from "@sb/spec/starter";
+import { COLOR_LABEL, DIRECTION_LABEL, ENUM_LABEL, SECTION_LABEL, TOKEN_LABEL, VARIANT_LABEL, blockerMessage, describePath, fieldLabel, issueText, type BlockerLike } from "@sb/spec/labels";
 import { formatDateTime, formatEur, siteStatus } from "../ui/labels.ts";
 import { undoTarget } from "./versions.ts";
 
@@ -45,6 +46,8 @@ interface State {
   cost: { stage: string; calls: number; input: number; output: number; cacheRead: number; cacheWrite: number; eur: number; ms: number }[];
   versions: { version: number; source: string; message: string | null; created_at: string }[];
   placeholders: { path: string; kind: string }[];
+  /** What stands between the site and publishing; worded in Slovene here (labels.ts). */
+  checklist: BlockerLike[];
   blockers: string[];
   messages: number;
   spendToday: number;
@@ -83,13 +86,22 @@ function h<K extends keyof HTMLElementTagNameMap>(tag: K, attrs: Record<string, 
 // ---------- API ----------
 async function api<T = unknown>(path: string, init?: RequestInit): Promise<T> {
   const r = await fetch(`/api/sites/${siteId}${path}`, { headers: { "content-type": "application/json" }, ...init });
-  const body = (await r.json().catch(() => ({}))) as T & { error?: string; message?: string; issues?: { path: string; message: string }[]; blockers?: string[] };
+  const body = (await r.json().catch(() => ({}))) as T & { error?: string; message?: string; issues?: { path: string; code: string; message: string }[]; checklist?: BlockerLike[] };
   if (!r.ok) {
-    const detail = body.issues?.map((i) => `${i.path}: ${i.message}`).join("\n") ?? body.blockers?.slice(0, 8).join("\n") ?? body.message ?? body.error ?? r.statusText;
+    const spec = currentSpec();
+    const detail =
+      body.issues?.slice(0, 3).map((i) => issueText(spec, i)).join("; ") ??
+      body.checklist?.slice(0, 3).map((b) => `${describePath(spec, b.path)}: ${blockerMessage(b)}`).join(" ") ??
+      body.message ??
+      body.error ??
+      r.statusText;
     throw new Error(detail);
   }
   return body;
 }
+
+/** The spec on screen (null before the first load), for wording errors. */
+const currentSpec = (): unknown => (typeof state === "undefined" ? null : state.spec);
 
 async function load(rerender = true): Promise<void> {
   state = await api<State>("");
@@ -157,7 +169,7 @@ async function sendPatch(ops: Op[], message: string, rerender: boolean): Promise
     reloadPreview();
     return true;
   } catch (e) {
-    toast = rerender ? `Ni shranjeno: ${(e as Error).message}` : `Še ni shranjeno: dopolnite polja. (${(e as Error).message.split(String.fromCharCode(10))[0]})`;
+    toast = rerender ? `Ni shranjeno. ${(e as Error).message}` : `Še ni shranjeno: ${(e as Error).message}`;
     await load(rerender);
     return false;
   }
@@ -181,36 +193,7 @@ const sections = () => ((currentPage()?.sections ?? []) as Obj[]);
 const esc = (s: string) => s.replace(/~/g, "~0").replace(/\//g, "~1");
 const pageFileOf = (p: Obj) => `${(p.slug as string) || "index"}.html`;
 const sectionInfo = (type: string) => catalogue?.sections.find((s) => s.type === type);
-const TYPE_LABEL: Record<string, string> = {
-  "hero-split": "Uvod s fotografijo",
-  "hero-image": "Uvod čez fotografijo",
-  "hero-type": "Uvod (besedilo)",
-  "page-header": "Glava strani",
-  text: "Besedilo",
-  "image-text": "Slika in besedilo",
-  highlights: "Poudarki",
-  steps: "Koraki",
-  cta: "Poziv k dejanju",
-  booking: "Rezervacija",
-  about: "O nas",
-  announcement: "Obvestilo",
-  "services-list": "Storitve (seznam)",
-  "services-cards": "Storitve (kartice)",
-  "price-list": "Cenik",
-  menu: "Jedilnik",
-  "opening-hours": "Delovni čas",
-  contact: "Kontakt",
-  faq: "Pogosta vprašanja",
-  team: "Ekipa",
-  gallery: "Galerija",
-  products: "Izdelki",
-  rooms: "Sobe in ponudba",
-  "service-area": "Območje dela",
-  "contact-strip": "Hitri kontakt",
-  legal: "Pravno besedilo",
-  "not-found": "Stran ne obstaja",
-};
-const label = (t: string) => TYPE_LABEL[t] ?? t;
+const label = (t: string) => SECTION_LABEL[t] ?? t;
 
 function sectionTitle(s: Obj): string {
   const p = (s.props ?? {}) as Obj;
@@ -276,52 +259,6 @@ function defaultFor(s: Schema, rootSchema: Schema, key: string, starter = true):
   }
 }
 
-const FIELD_LABEL: Record<string, string> = {
-  props: "Vsebina razdelka",
-  headline: "Naslov",
-  title: "Naslov",
-  eyebrow: "Nadnaslov",
-  intro: "Uvod",
-  text: "Besedilo",
-  body: "Besedilo",
-  paragraphs: "Odstavki",
-  description: "Opis",
-  items: "Postavke",
-  primary: "Glavni gumb",
-  secondary: "Drugi gumb",
-  link: "Povezava",
-  label: "Besedilo gumba",
-  target: "Cilj",
-  image: "Fotografija",
-  images: "Fotografije",
-  price: "Cena",
-  amount: "Znesek (€)",
-  unit: "Enota",
-  from: "Cena od",
-  name: "Ime",
-  role: "Vloga",
-  question: "Vprašanje",
-  answer: "Odgovor",
-  phone: "Telefon",
-  email: "E-pošta",
-  address: "Naslov",
-  street: "Ulica in hišna številka",
-  postalCode: "Poštna številka",
-  city: "Kraj",
-  hours: "Delovni čas",
-  entries: "Obdobja",
-  open: "Odprto od (HH:MM)",
-  close: "Odprto do (HH:MM)",
-  closed: "Zaprto",
-  note: "Opomba",
-  provider: "Podatki o ponudniku (ZEPT)",
-  legalName: "Polno ime podjetja",
-  registrationNumber: "Matična številka",
-  taxNumber: "Davčna številka",
-  vatPayer: "Zavezanec za DDV",
-  bookingUrl: "Povezava za rezervacije",
-};
-
 const PH_KIND: Record<string, string> = { phone: "phone", email: "email", address: "address", hours: "hours", price: "price", name: "name", legalName: "legalName", registrationNumber: "registrationNumber", taxNumber: "taxNumber" };
 
 /**
@@ -339,9 +276,15 @@ interface Sink {
  * fields of one form share one live copy and a save always sends the current whole value.
  * Placeholders ({$placeholder}) show as "missing" with a button to fill them.
  */
-function field(schema: Schema, rootSchema: Schema, value: Json | undefined, key: string, sink: Sink, optional = false): HTMLElement {
+function field(schema: Schema, rootSchema: Schema, value: Json | undefined, key: string, sink: Sink, optional = false, ptr = "", parent?: string): HTMLElement {
+  const el = fieldBody(schema, rootSchema, value, key, sink, optional, ptr, parent);
+  if (ptr && !el.dataset.path) el.dataset.path = ptr;
+  return el;
+}
+
+function fieldBody(schema: Schema, rootSchema: Schema, value: Json | undefined, key: string, sink: Sink, optional: boolean, ptr: string, parent: string | undefined): HTMLElement {
   const s = resolve(schema, rootSchema);
-  const title = FIELD_LABEL[key] ?? key;
+  const title = fieldLabel(key, parent);
   const box = h("div", { class: "field" });
 
   if (Array.isArray(s.anyOf)) {
@@ -365,7 +308,7 @@ function field(schema: Schema, rootSchema: Schema, value: Json | undefined, key:
                 class: "btn sm",
                 type: "button",
                 onClick: () => {
-                  const f = field(nonPh[0]!, rootSchema, defaultFor(nonPh[0]!, rootSchema, key, false), key, sink);
+                  const f = field(nonPh[0]!, rootSchema, defaultFor(nonPh[0]!, rootSchema, key, false), key, sink, false, ptr, parent);
                   holder.replaceWith(f);
                   linkLabels(f);
                   f.querySelector<HTMLElement>("input, textarea, select")?.focus();
@@ -377,7 +320,7 @@ function field(schema: Schema, rootSchema: Schema, value: Json | undefined, key:
         );
         return holder;
       }
-      const inner = field(nonPh[0]!, rootSchema, value, key, sink);
+      const inner = field(nonPh[0]!, rootSchema, value, key, sink, false, ptr, parent);
       inner.append(h("button", { class: "btn sm", type: "button", onClick: () => sink.structure({ $placeholder: PH_KIND[key] ?? "text" }) }, "Označi kot manjkajoče"));
       return inner;
     }
@@ -390,19 +333,18 @@ function field(schema: Schema, rootSchema: Schema, value: Json | undefined, key:
       { onChange: (e: Event) => sink.structure(defaultFor(opts[Number((e.target as HTMLSelectElement).value)]!, rootSchema, key)) },
       ...names.map((n, i) => h("option", { value: String(i), selected: i === idx }, KIND[n] ?? n)),
     );
-    box.append(h("label", {}, title), sel, field(opts[idx]!, rootSchema, value, key, sink));
+    box.append(h("label", {}, title), sel, field(opts[idx]!, rootSchema, value, key, sink, false, ptr, parent));
     return box;
   }
 
   if (Array.isArray(s.enum)) {
-    const ENUM: Record<string, string> = { call: "Pokliči", directions: "Navodila za pot", email: "E-pošta", booking: "Rezervacija" };
     box.append(
       h("label", {}, title),
       h(
         "select",
         { onChange: (e: Event) => sink.edit((e.target as HTMLSelectElement).value || undefined) },
         ...(optional ? [h("option", { value: "" }, "Brez")] : []),
-        ...(s.enum as string[]).map((v) => h("option", { value: v, selected: v === value }, ENUM[v] ?? v)),
+        ...(s.enum as string[]).map((v) => h("option", { value: v, selected: v === value }, ENUM_LABEL[v] ?? v)),
       ),
     );
     return box;
@@ -429,10 +371,10 @@ function field(schema: Schema, rootSchema: Schema, value: Json | undefined, key:
       for (const [k, sub] of Object.entries(props)) {
         if (k === "$placeholder") continue;
         if (!req.has(k) && !(k in obj)) {
-          fs.append(h("button", { class: "btn sm", type: "button", onClick: () => childSink(k).structure(defaultFor(sub, rootSchema, k)) }, `+ ${FIELD_LABEL[k] ?? k}`), " ");
+          fs.append(h("button", { class: "btn sm", type: "button", onClick: () => childSink(k).structure(defaultFor(sub, rootSchema, k)) }, `+ ${fieldLabel(k, key)}`), " ");
           continue;
         }
-        const child = field(sub, rootSchema, obj[k], k, childSink(k), !req.has(k));
+        const child = field(sub, rootSchema, obj[k], k, childSink(k), !req.has(k), `${ptr}/${esc(k)}`, key);
         if (!req.has(k)) child.append(h("button", { class: "btn sm", type: "button", onClick: () => childSink(k).structure(undefined) }, "Odstrani"));
         fs.append(child);
       }
@@ -461,7 +403,7 @@ function field(schema: Schema, rootSchema: Schema, value: Json | undefined, key:
           h("button", { class: "icon", type: "button", title: "Dol", "aria-label": "Premakni dol", disabled: i === arr.length - 1, onClick: () => restructure(() => arr.splice(i + 1, 0, ...arr.splice(i, 1))) }, "↓"),
           h("button", { class: "icon", type: "button", title: "Odstrani", "aria-label": "Odstrani", disabled: arr.length <= Number(s.minItems ?? 0), onClick: () => restructure(() => arr.splice(i, 1)) }, "✕"),
         );
-        fs.append(tools, field(itemSchema, rootSchema, item, key === "paragraphs" ? "text" : key, itemSink));
+        fs.append(tools, field(itemSchema, rootSchema, item, key === "paragraphs" ? "text" : key, itemSink, false, `${ptr}/${i}`, parent));
       });
       if (arr.length < Number(s.maxItems ?? 99)) {
         fs.append(h("button", { class: "btn sm", type: "button", onClick: () => restructure(() => arr.push(defaultFor(itemSchema, rootSchema, key))) }, "+ Dodaj"));
@@ -551,7 +493,7 @@ function formAt(pointer: string, schema: Schema, value: Json, title: string, mes
       window.clearTimeout(timer);
       void send(v, true);
     },
-  });
+  }, false, pointer);
 }
 
 /** Debounced save of a single scalar at a pointer (page settings). */
@@ -570,6 +512,8 @@ const TONE: Record<string, string> = { default: "Osnovno", alt: "Izmenično", in
 
 /** A select with its label; `linkLabels` ties them together. */
 const labelled = (title: string, control: HTMLElement) => h("div", {}, h("label", {}, title), control);
+/** Marks a form block as the place for a spec path, so the pre-publish checklist can open it. */
+const withPath = (path: string, el: HTMLElement) => ((el.dataset.path = path), el);
 
 function contentPane(): HTMLElement {
   const pane = h("div", { class: "pane" });
@@ -618,9 +562,9 @@ function contentPane(): HTMLElement {
     pane.append(h("h2", {}, label(s.type as string)));
     if (info) {
       pane.append(
-        h("p", { class: "help" }, "Dvakrat kliknite besedilo v predogledu, da ga uredite neposredno."),
+        h("p", { class: "help" }, "Tapnite besedilo izbranega razdelka v predogledu in ga popravite kar tam."),
         h("div", { class: "pair" },
-          labelled("Različica", h("select", { onChange: (e: Event) => void patch([{ op: "replace", path: `${base}/variant`, value: (e.target as HTMLSelectElement).value }], "različica") }, ...info.variants.map((v) => h("option", { value: v, selected: v === s.variant }, v)))),
+          labelled("Različica", h("select", { onChange: (e: Event) => void patch([{ op: "replace", path: `${base}/variant`, value: (e.target as HTMLSelectElement).value }], "različica") }, ...info.variants.map((v) => h("option", { value: v, selected: v === s.variant }, VARIANT_LABEL[s.type as string]?.[v] ?? v)))),
           labelled("Ozadje", h("select", { onChange: (e: Event) => { const v = (e.target as HTMLSelectElement).value; void patch([s.tone === undefined ? { op: "add", path: `${base}/tone`, value: v } : { op: "replace", path: `${base}/tone`, value: v }], "ozadje"); } },
             ...["default", "alt", "inverse"].map((t) => h("option", { value: t, selected: (s.tone ?? "default") === t }, TONE[t]!)))),
         ),
@@ -723,7 +667,7 @@ function photosPane(): HTMLElement {
             im.origin === "generated" ? h("span", { class: "pill busy" }, "Ustvarjeno z UI") : h("span", { class: "pill plain" }, "Vaša fotografija"),
             h("span", { class: "muted photo-uses" }, uses.length ? `Na strani: ${uses.join(", ")}` : "Na strani še ni uporabljena"),
           ),
-          labelled("Opis slike", altField),
+          withPath(`/assets/images/${i}/alt`, labelled("Opis slike", altField)),
           !alt && uses.length ? h("p", { class: "note warn" }, "Brez opisa strani ni mogoče objaviti. Opis pripravljamo samodejno; lahko ga napišete sami.") : null,
           h("div", { class: "row" }, fileButton(im.origin === "generated" ? "Zamenjaj s svojo fotografijo" : "Zamenjaj", false, (files) => void uploadPhotos(files, id))),
         ),
@@ -742,18 +686,17 @@ function designPane(): HTMLElement {
   const set = (k: string, v: Json) => void patch([{ op: "replace", path: `/design/${k}`, value: v }], `oblikovanje ${k}`);
   pane.append(
     h("label", {}, "Smer oblikovanja"),
-    h("select", { onChange: (e: Event) => void post("/direction", { direction: (e.target as HTMLSelectElement).value }, "Smer zamenjana.") }, ...catalogue.directions.map((x) => h("option", { value: x.id, selected: x.id === d.direction }, x.name))),
-    h("p", { class: "help" }, dir?.summary ?? ""),
+    h("select", { onChange: (e: Event) => void post("/direction", { direction: (e.target as HTMLSelectElement).value }, "Smer zamenjana.") }, ...catalogue.directions.map((x) => h("option", { value: x.id, selected: x.id === d.direction }, DIRECTION_LABEL[x.id]?.name ?? x.name))),
+    h("p", { class: "help" }, dir ? (DIRECTION_LABEL[dir.id]?.summary ?? dir.summary) : ""),
     h("label", {}, "Pisave"),
     h("select", { onChange: (e: Event) => set("fontPair", (e.target as HTMLSelectElement).value) }, ...(dir?.fontPairs ?? []).map((id) => h("option", { value: id, selected: id === d.fontPair }, catalogue!.fontPairs.find((f) => f.id === id)?.label ?? id))),
   );
   const colors = d.colors as Obj;
-  const NAMES: Record<string, string> = { background: "Ozadje strani", surface: "Izmenično ozadje", text: "Besedilo", muted: "Drugotno besedilo", primary: "Glavna barva (gumbi)", onPrimary: "Besedilo na gumbih", accent: "Poudarek", border: "Obrobe", inverse: "Temni razdelki", onInverse: "Besedilo na temnem" };
   const fs = h("fieldset", { class: "colors" }, h("legend", {}, "Barve (kontrast se preveri samodejno)"));
   for (const [k, v] of Object.entries(colors)) {
-    const input = h("input", { type: "color", value: v as string, "aria-label": NAMES[k] ?? k });
+    const input = h("input", { type: "color", value: v as string, "aria-label": COLOR_LABEL[k] ?? k });
     input.addEventListener("change", () => set(`colors/${k}`, input.value));
-    fs.append(h("div", { class: "row" }, input, h("span", { class: "sp" }, NAMES[k] ?? k), h("span", { class: "hex" }, v as string)));
+    fs.append(withPath(`/design/colors/${k}`, h("div", { class: "row" }, input, h("span", { class: "sp" }, COLOR_LABEL[k] ?? k), h("span", { class: "hex" }, v as string))));
   }
   pane.append(fs);
   const r = (dir?.ranges ?? {}) as Record<string, [number, number] | string[]>;
@@ -764,7 +707,7 @@ function designPane(): HTMLElement {
     return labelled(`${title} (${lo}–${hi})`, input);
   };
   const choice = (k: string, title: string) =>
-    labelled(title, h("select", { onChange: (e: Event) => set(k, (e.target as HTMLSelectElement).value) }, ...((r[k] as string[]) ?? []).map((v) => h("option", { value: v, selected: v === d[k] }, v))));
+    labelled(title, h("select", { onChange: (e: Event) => set(k, (e.target as HTMLSelectElement).value) }, ...((r[k] as string[]) ?? []).map((v) => h("option", { value: v, selected: v === d[k] }, TOKEN_LABEL[k]?.[v] ?? v))));
   pane.append(h("div", { class: "pair" }, num("radius", "Zaobljenost (px)", "1"), num("baseFontSize", "Velikost pisave", "1"), num("scale", "Razmerje naslovov", "0.005"), num("headingWeight", "Debelina naslovov", "50"), num("headingTracking", "Razmik črk (em)", "0.005"), choice("density", "Gostota"), choice("shadow", "Senca"), choice("headingCase", "Velike črke")));
   return pane;
 }
@@ -781,7 +724,7 @@ function pagesPane(): HTMLElement {
       const input = h("input", { type: "text", maxlength: max, value: val });
       const save = autosave(ptr, "nastavitve strani");
       input.addEventListener("input", () => save(input.value));
-      return labelled(title, input);
+      return withPath(ptr, labelled(title, input));
     };
     fs.append(text(`/pages/${i}/nav/label`, "Ime v meniju", nav.label as string, 24), text(`/pages/${i}/seo/title`, "Naslov za iskalnike", seo.title as string, 60), text(`/pages/${i}/seo/description`, "Opis za iskalnike", seo.description as string, 160));
     if (!system) {
@@ -803,7 +746,7 @@ function pagesPane(): HTMLElement {
   return pane;
 }
 
-const COST_STAGE: Record<string, string> = { classify: "Vrsta dejavnosti", brief: "Razumevanje opisa", design: "Oblikovna smer", altText: "Opisi fotografij", content: "Besedila in postavitev", critique: "Samopregled", edit: "Pomočnik" };
+const COST_STAGE: Record<string, string> = { classify: "Vrsta dejavnosti", brief: "Razumevanje opisa", design: "Oblikovna smer", altText: "Opisi fotografij", imageGen: "Ustvarjene slike", content: "Besedila in postavitev", critique: "Samopregled", edit: "Pomočnik" };
 const n0 = (n: number) => n.toLocaleString("sl-SI");
 
 function aiPane(): HTMLElement {
@@ -943,23 +886,30 @@ function attachEditing(): void {
     const link = t.closest("a");
     if (link) e.preventDefault();
     const sec = t.closest("main section[id]");
-    if (sec) select(sec.id, false);
+    // First tap selects the section, a tap on its text then edits that text in place (works by touch;
+    // a double-click does both).
+    if (sec && sec.id === selected && t.closest(INLINE_TEXT)) {
+      e.preventDefault();
+      inlineEdit(t);
+    } else if (sec) select(sec.id, false);
     else if (t.closest("header, footer")) {
       tab = "facts";
       render();
     }
   }, true);
-  doc.addEventListener("dblclick", (e) => inlineEdit(e.target as HTMLElement));
 }
 
-/** Double-click text in the preview: find the string in the section's props that it shows, edit it in place. */
+/** Elements whose text can be edited in place. */
+const INLINE_TEXT = "h1,h2,h3,h4,p,li,dt,dd,summary,a,span,figcaption,th,td";
+
+/** Text tapped in the selected section: find the string in the section's props that it shows, edit it in place. */
 function inlineEdit(el: HTMLElement): void {
   const sec = el.closest("main section[id]");
   if (!sec) return;
   const si = sections().findIndex((s) => s.id === sec.id);
   if (si < 0) return;
-  const target = el.closest("h1,h2,h3,h4,p,li,dt,dd,summary,a,span,figcaption,th,td") as HTMLElement | null;
-  if (!target) return;
+  const target = el.closest(INLINE_TEXT) as HTMLElement | null;
+  if (!target || target.isContentEditable) return;
   const text = (target.textContent ?? "").trim();
   const matches: string[] = [];
   const walk = (v: Json, ptr: string) => {
@@ -971,7 +921,7 @@ function inlineEdit(el: HTMLElement): void {
   walk(sections()[si]!.props as Json, `/pages/${pageIndex}/sections/${si}/props`);
   if (matches.length !== 1) {
     select(sec.id);
-    toast = "To besedilo uredite v obrazcu na levi.";
+    toast = "To besedilo uredite v obrazcu razdelka.";
     render();
     return;
   }
@@ -1027,12 +977,22 @@ function topItems(): Child[] {
       h("button", { class: "btn quiet sm", type: "button", disabled: prev === null, title: prev === null ? "" : `Vrne različico ${prev}`, onClick: () => void undo() }, "Razveljavi"),
       h("button", { class: "btn quiet sm", type: "button", "aria-pressed": String(tab === "versions"), onClick: () => { tab = "versions"; render(); } }, "Različice"),
       moreMenu(),
+      // While something blocks publishing the button stays tappable and opens the checklist: a disabled
+      // button with a tooltip explains nothing on a phone.
       h("button", {
-        class: "btn sm primary",
+        class: state.checklist.length ? "btn sm primary blocked" : "btn sm primary",
         type: "button",
-        disabled: state.blockers.length > 0,
-        title: state.blockers.length ? "Najprej izpolnite manjkajoče podatke" : "",
-        onClick: async () => { try { const r = await api<{ url: string }>("/publish", { method: "POST", body: "{}" }); toast = `Objavljeno: ${r.url}`; } catch (e) { toast = (e as Error).message; } await load(); },
+        "aria-describedby": state.checklist.length ? "checklist-summary" : undefined,
+        onClick: async () => {
+          if (state.checklist.length) return openChecklist();
+          try {
+            const r = await api<{ url: string }>("/publish", { method: "POST", body: "{}" });
+            toast = `Objavljeno: ${r.url}`;
+          } catch (e) {
+            toast = `Ni objavljeno. ${(e as Error).message}`;
+          }
+          await load();
+        },
       }, "Objavi"),
     ),
   ];
@@ -1109,9 +1069,7 @@ function render(): void {
     ...[
       statusBlock(),
       state.spec ? h("div", { class: "tabs", role: "tablist", "aria-label": "Urejanje" }, ...tabs.map(([k, l]) => h("button", { role: "tab", type: "button", "aria-selected": String(tab === k), onClick: () => { tab = k; render(); } }, l))) : null,
-      state.blockers.length && state.spec
-        ? h("div", { class: "pane tight" }, h("div", { class: "note warn" }, h("p", {}, blockerSummary(state.placeholders.length, state.blockers.length - state.placeholders.length)), h("details", {}, h("summary", {}, "Seznam"), h("ul", {}, ...state.blockers.slice(0, 30).map((b) => h("li", {}, b))))))
-        : null,
+      checklistBlock(),
       !state.spec && state.site.status !== "generating" && state.site.status !== "failed" ? h("div", { class: "pane" }, h("p", { class: "muted" }, "Stran še nima vsebine.")) : null,
       state.spec ? { content: contentPane, facts: factsPane, photos: photosPane, design: designPane, pages: pagesPane, ai: aiPane, versions: versionsPane }[tab]() : null,
     ].filter((c): c is HTMLElement => c !== null),
@@ -1193,6 +1151,67 @@ function linkLabels(scope: HTMLElement): void {
     if (!control.id) control.id = `f${++labelSeq}`;
     label.htmlFor = control.id;
   }
+}
+
+// ---------- Pre-publish checklist: each entry says what is missing, where, and opens the field ----------
+let checklistOpen = false;
+
+function checklistBlock(): HTMLElement | null {
+  const list = state.checklist;
+  if (!list.length || !state.spec) return null;
+  const spec = state.spec;
+  const missing = list.filter((b) => b.kind === "placeholder").length;
+  const details = h("details", { class: "checklist", open: checklistOpen },
+    h("summary", {}, "Kaj še manjka"),
+    h("ol", {}, ...list.slice(0, 40).map((b) =>
+      h("li", {}, h("button", { type: "button", onClick: () => goTo(b.path) }, h("strong", {}, describePath(spec, b.path)), h("span", {}, blockerMessage(b)))))),
+  );
+  details.addEventListener("toggle", () => (checklistOpen = details.open));
+  return h("div", { class: "pane tight", id: "checklist" },
+    h("div", { class: "note warn" }, h("p", { id: "checklist-summary" }, blockerSummary(missing, list.length - missing)), details));
+}
+
+function openChecklist(): void {
+  checklistOpen = true;
+  render();
+  const box = document.getElementById("checklist");
+  box?.scrollIntoView({ block: "nearest" });
+  box?.querySelector<HTMLElement>("li button")?.focus({ preventScroll: true });
+}
+
+/** Opens the tab, page and section a spec path belongs to, then the field itself. */
+function goTo(path: string): void {
+  const [, head, a, b, c] = path.split("/");
+  if (head === "pages" && b === "sections") {
+    const pi = Number(a);
+    const sec = ((pages()[pi]?.sections ?? []) as Obj[])[Number(c)];
+    const pageChanged = pi !== pageIndex;
+    pageIndex = pi;
+    selected = sec ? String(sec.id) : null;
+    tab = "content";
+    render();
+    if (pageChanged) reloadPreview();
+    else if (selected) frame?.contentDocument?.getElementById(selected)?.scrollIntoView({ block: "start" });
+  } else {
+    tab = head === "pages" ? "pages" : head === "business" || head === "chrome" ? "facts" : head === "assets" ? "photos" : head === "design" ? "design" : "content";
+    render();
+  }
+  focusPath(path);
+}
+
+/** Scrolls to and focuses the form block for `path` (or its closest marked ancestor) and flashes it. */
+function focusPath(path: string): void {
+  let best: HTMLElement | null = null;
+  for (const n of shell?.panel.querySelectorAll<HTMLElement>("[data-path]") ?? []) {
+    const p = n.dataset.path!;
+    if ((path === p || path.startsWith(`${p}/`)) && p.length > (best?.dataset.path?.length ?? -1)) best = n;
+  }
+  if (!best) return;
+  const target = best;
+  target.scrollIntoView({ block: "center" });
+  target.classList.add("flash");
+  window.setTimeout(() => target.classList.remove("flash"), 2000);
+  target.querySelector<HTMLElement>("input, textarea, select, button")?.focus({ preventScroll: true });
 }
 
 function items(n: number): string {

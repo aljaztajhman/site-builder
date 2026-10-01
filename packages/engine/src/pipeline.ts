@@ -2,7 +2,7 @@ import type { AppConfig } from "@sb/config";
 import { VersionConflictError, type Repo, type Storage } from "@sb/platform";
 import { contentType } from "@sb/platform";
 import { mediaFiles, siteFiles, exportZip, sharedBundle } from "@sb/render";
-import { publishBlockers, type ImageAsset, type SiteSpec } from "@sb/spec";
+import { blockerText, publishChecklist, type ImageAsset, type PublishBlocker, type SiteSpec } from "@sb/spec";
 import type { Operation } from "fast-json-patch";
 import { ModelOutputError, SpendCapError, type ModelClient } from "./llm/client.ts";
 import { classify, makeBrief, chooseDesign, altTexts, generateContent, critique, applyPatches, editSpec } from "./stages.ts";
@@ -260,9 +260,12 @@ async function generateImages(deps: PipelineDeps, siteId: string, ideas: { subje
 }
 
 export class PublishBlockedError extends Error {
-  constructor(readonly blockers: string[]) {
+  readonly blockers: string[];
+  constructor(readonly checklist: PublishBlocker[]) {
+    const blockers = checklist.map(blockerText);
     super(`Cannot publish: ${blockers.length} blocking issue(s), e.g. ${blockers.slice(0, 3).join("; ")}`);
     this.name = "PublishBlockedError";
+    this.blockers = blockers;
   }
 }
 
@@ -274,8 +277,8 @@ export async function publishSite(deps: Pick<PipelineDeps, "repo" | "storage" | 
   if (!site || !stored) throw new Error(`Site ${siteId} has no spec`);
   // Published paths always use the site's own slug, never a value from the spec.
   const current = { ...stored, spec: { ...stored.spec, slug: site.slug } };
-  const blockers = await siteBlockers(repo, siteId, current.spec);
-  if (blockers.length) throw new PublishBlockedError(blockers);
+  const checklist = await siteChecklist(repo, siteId, current.spec);
+  if (checklist.length) throw new PublishBlockedError(checklist);
   const media = await loadMedia(storage, siteId, current.spec, config.images.widths);
   const files = siteFiles(current.spec, media, { imageWidths: config.images.widths });
   await storage.deletePrefix(`${publishedPrefix}/${site.slug}/`);
@@ -303,9 +306,14 @@ export async function exportSite(deps: Pick<PipelineDeps, "repo" | "storage" | "
  * Everything that blocks publishing: validation, unfilled placeholders, starter text, and any fact
  * (phone, price, name, number …) that isn't in the client's own input.
  */
-export async function siteBlockers(repo: Repo, siteId: string, spec: SiteSpec): Promise<string[]> {
+export async function siteChecklist(repo: Repo, siteId: string, spec: SiteSpec): Promise<PublishBlocker[]> {
   const corpus = await clientCorpus(repo, siteId);
-  return [...publishBlockers(spec), ...checkFacts(spec, corpus).map((f) => `${f.path}: ${f.kind} "${f.value}" is not in the client's input`)];
+  return [...publishChecklist(spec), ...checkFacts(spec, corpus).map((f): PublishBlocker => ({ path: f.path, kind: "fact", detail: f.kind, value: f.value }))];
+}
+
+/** siteChecklist as English lines. */
+export async function siteBlockers(repo: Repo, siteId: string, spec: SiteSpec): Promise<string[]> {
+  return (await siteChecklist(repo, siteId, spec)).map(blockerText);
 }
 
 /** Earlier chat messages (user and assistant) sent with an edit request. */

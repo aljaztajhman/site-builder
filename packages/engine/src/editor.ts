@@ -1,7 +1,10 @@
 import jsonpatch, { type Operation } from "fast-json-patch";
 import {
   Business,
+  COLOR_LABEL,
+  DESIGN_LABEL,
   DIRECTIONS,
+  DIRECTION_LABEL,
   Design,
   FONT_PAIRS,
   SECTION_DEFS,
@@ -9,6 +12,7 @@ import {
   enforceDesign,
   migrateSpec,
   sectionDef,
+  TOKEN_LABEL,
   toModelJsonSchema,
   validateSite,
   EDITOR_STARTER_TEXT as DEFAULT_TEXT,
@@ -25,7 +29,7 @@ export interface DirectEditResult {
   ok: boolean;
   spec: SiteSpec;
   issues: Issue[];
-  /** Human-readable notes on automatic corrections (e.g. contrast fixed). */
+  /** Slovene notes for the owner on automatic corrections (e.g. contrast fixed). */
   adjustments: string[];
 }
 
@@ -70,10 +74,13 @@ export function applyDirectEdit(spec: SiteSpec, ops: Operation[]): DirectEditRes
       const fixed = enforceDesign(parsed.data, dir);
       for (const [k, v] of Object.entries(fixed.colors)) {
         const before = (parsed.data.colors as Record<string, string>)[k];
-        if (before !== v) adjustments.push(`${k} colour adjusted to ${v} for contrast`);
+        if (before !== v) adjustments.push(`${COLOR_LABEL[k] ?? k}: barva popravljena na ${v} zaradi berljivosti`);
       }
       for (const k of ["radius", "baseFontSize", "scale", "headingWeight", "headingTracking", "headingCase", "density", "shadow", "fontPair", "imagery"] as const) {
-        if (parsed.data[k] !== fixed[k]) adjustments.push(`${k} set to ${String(fixed[k])} (allowed by ${dir.name})`);
+        if (parsed.data[k] !== fixed[k]) {
+          const shown = TOKEN_LABEL[k]?.[String(fixed[k])] ?? (k === "fontPair" ? FONT_PAIRS.find((p) => p.id === fixed[k])?.label : undefined) ?? String(fixed[k]);
+          adjustments.push(`${DESIGN_LABEL[k] ?? k}: nastavljeno na ${shown}, kot dovoljuje smer »${DIRECTION_LABEL[dir.id]?.name ?? dir.name}«`);
+        }
       }
       next.design = fixed;
     }
