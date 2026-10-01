@@ -30,6 +30,9 @@ The landing page at `/` is the only intake: its prompt box posts the description
 ## Generated images
 When the owner gives fewer than `imageGen.pipeline.fillUpTo` photos, the brief's `imageIdeas` (subjects that never show people, premises, signs or the owner's work) become images from fal.ai (`ImageGenerator`, model and style in config), generated beside the design step. They are stored under `sites/<id>/generated/` and processed like uploads, with `origin: "generated"` on the asset (spec v3). Validation allows them only in hero-split, hero-image, image-text and page-header. The Picture primitive adds an "Ustvarjeno z UI" badge and an alt-text note (EU AI Act Art. 50). Each image is logged in `model_calls` (stage `imageGen`, priced from config), so it counts against the daily cap. Without `FAL_KEY` (or with `pipeline.enabled: false`) nothing is generated; replays use flat stand-ins.
 
+## Photos after generation
+The editor's "Fotografije" tab posts files to `POST /api/sites/:id/photos` (optionally `replace=<image id>`). The web process stores the originals, makes the variants and saves one spec version (`addPhotos`); a replace relinks every section and removes the replaced image. Descriptions come from the worker's `alt` job (`describePhotos`, vision model), applied only where the alt is still empty; the site shows "editing" meanwhile so the editor polls. A photo the pages show without a description is a publish blocker.
+
 ## Generation timing
 Brief and design (classify → brief → design) and the image stage (photo variants, alt text) run side by side; content waits for both. The first saved version is logged as stage `preview` with its time; the editor shows it at once while checks and the critique continue, and a critique result arrives as a new version (dropped if the owner edited in between). The eval reports the median time to that first version.
 

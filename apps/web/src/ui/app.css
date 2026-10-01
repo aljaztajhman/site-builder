@@ -229,3 +229,14 @@ details.more>summary{padding:12px 0;font-weight:600;cursor:pointer}
 }
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* ---------- Editor photos ---------- */
+.photos{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:12px}
+.photo{display:grid;grid-template-columns:120px minmax(0,1fr);gap:12px;padding:12px;border:1px solid var(--line);border-radius:var(--r-2);background:var(--surface)}
+.photo img{width:120px;height:90px;object-fit:cover;border-radius:var(--r-1);background:var(--surface-2)}
+.photo-body{display:grid;gap:8px;min-width:0}
+.photo-body label{margin:0 0 4px}
+.photo-uses{font-size:13px}
+.file-btn{position:relative}
+.file-btn:has(input:focus-visible){outline:2px solid var(--ink);outline-offset:2px}
+@media (max-width:30rem){.photo{grid-template-columns:1fr}.photo img{width:100%;height:auto;aspect-ratio:4/3}}

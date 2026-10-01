@@ -7,6 +7,7 @@ import {
   ReplayTransport,
   StandInImageTransport,
   applyChatEdit,
+  describePhotos,
   generateSite,
   loadRecordings,
   publishSite,
@@ -103,6 +104,20 @@ export async function startWorker(platform: Platform, config = loadConfig()): Pr
       await repo.addChat(job.siteId, "assistant", `Napaka: ${(e as Error).message}`, { error: true });
       await repo.setStatus(job.siteId, "ready");
       console.error("[edit]", e);
+    }
+  });
+
+  // Alt text for photos the owner added in the editor. Without the model (no key, spend cap, no credit)
+  // the alt stays empty: the editor asks the owner and publishing waits for it.
+  await queue.work("alt", async (job, jobId) => {
+    const client = modelClientFor(platform, config, { siteId: job.siteId, jobId }, defaultTransport("generate"));
+    try {
+      await describePhotos({ repo, storage, client }, job.siteId, job.imageIds);
+    } catch (e) {
+      await repo.addEvent({ siteId: job.siteId, jobId, stage: "altText", level: "warn", message: `Photo descriptions not written: ${(e as Error).message.slice(0, 200)}` });
+      console.error("[alt]", e);
+    } finally {
+      if ((await repo.getSite(job.siteId))?.status === "editing") await repo.setStatus(job.siteId, "ready");
     }
   });
 

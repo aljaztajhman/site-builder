@@ -6,6 +6,7 @@ export * from "./facts.ts";
 export * from "./palette.ts";
 export * from "./images.ts";
 export * from "./image-gen.ts";
+export * from "./photos.ts";
 export * from "./prompts.ts";
 export * from "./stages.ts";
 export * from "./pipeline.ts";

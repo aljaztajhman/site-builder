@@ -14,6 +14,8 @@ import {
   switchDirection,
   uploadKey,
   imageMeta,
+  addPhotos,
+  PhotoError,
   type Operation,
 } from "@sb/engine";
 import { VersionConflictError, contentType, type Platform } from "@sb/platform";
@@ -86,7 +88,10 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
   app.use("*", requireAuth(auth, PUBLIC));
   app.use("/login", bodyLimit({ maxSize: 16 * 1024 }));
   app.use("/api/sites", bodyLimit({ maxSize: (config.limits.maxPhotos + 1) * config.limits.maxUploadBytes + 64 * 1024 }));
-  app.use("/api/sites/*", bodyLimit({ maxSize: 1024 * 1024 }));
+  // Photo uploads in the editor take files; every other site API call is small JSON.
+  const photosLimit = bodyLimit({ maxSize: config.limits.maxPhotos * config.limits.maxUploadBytes + 64 * 1024 });
+  const jsonLimit = bodyLimit({ maxSize: 1024 * 1024 });
+  app.use("/api/sites/*", (c, next) => (/^\/api\/sites\/[^/]+\/photos$/.test(c.req.path) ? photosLimit(c, next) : jsonLimit(c, next)));
   // Contact forms: public submit next to published sites, owner's messages in the dashboard.
   registerFormRoutes(app, { repo, config, secret: auth.secret });
 
@@ -320,6 +325,30 @@ export function createApp({ platform, config, auth }: AppOptions): Hono {
       },
       `smer ${body.direction}`,
     );
+  });
+
+  // The owner's photos: add, or put one in place of an existing picture (e.g. a generated one).
+  // Variants are made here; alt text comes from the worker's vision model (job "alt") or the owner.
+  app.post("/api/sites/:id/photos", async (c) => {
+    const id = c.req.param("id");
+    const site = await repo.getSite(id);
+    if (!site) return c.json({ error: "not found" }, 404);
+    const body = await c.req.parseBody({ all: true });
+    const files = ([] as unknown[]).concat(body["photos"] ?? []).filter((f): f is File => f instanceof File && f.size > 0);
+    const replace = typeof body.replace === "string" && body.replace ? body.replace : undefined;
+    const baseVersion = typeof body.baseVersion === "string" && /^\d+$/.test(body.baseVersion) ? Number(body.baseVersion) : undefined;
+    try {
+      const uploads = await Promise.all(files.map(async (f) => ({ data: new Uint8Array(await f.arrayBuffer()), mime: f.type, name: f.name })));
+      const r = await addPhotos({ repo, storage, config }, id, uploads, { ...(replace ? { replace } : {}), ...(baseVersion !== undefined ? { baseVersion } : {}) });
+      // The editor polls while the site is busy; the alt job sets it back to ready.
+      if (site.status === "ready" || site.status === "failed") await repo.setStatus(id, "editing");
+      await queue.send("alt", { siteId: id, imageIds: r.added });
+      return c.json({ ok: true, ...r });
+    } catch (e) {
+      if (e instanceof PhotoError) return c.json({ error: e.message }, 400);
+      if (e instanceof VersionConflictError) return c.json({ error: "conflict", message: "Stran je bila medtem spremenjena. Osvežite urejevalnik." }, 409);
+      throw e;
+    }
   });
 
   app.post("/api/sites/:id/revert", async (c) => {
