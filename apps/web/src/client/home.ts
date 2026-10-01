@@ -1,8 +1,9 @@
 /**
  * Landing page, progressive only: the page reads fine without it. Scales the desktop example to its
  * column, plays each section's drawing once in view, types the example description into the prompt,
- * and runs the prompt box, which is the intake: signed out it keeps what was typed across the login,
- * signed in it restores that text, counts attached files and blocks a second submit while photos upload.
+ * and runs the prompt box, which is the intake for everyone: it keeps what was typed across the login
+ * and restores it, counts attached files, loads the bot check (no account) when the visitor starts on
+ * the form, and blocks a second submit while photos upload.
  */
 import { INTAKE_DRAFT_KEY, takeIntakeDraft, type IntakeDraft } from "./intake-draft.ts";
 
@@ -100,9 +101,8 @@ if (demo) {
 
 const form = document.querySelector<HTMLFormElement>("form[data-home-intake]");
 const ta = form?.querySelector("textarea");
-const signedIn = !!form?.hasAttribute("data-intake");
 // Back from the login with what was typed before it: fill it in and open the control that was asked for.
-const draft = form && ta && signedIn ? takeIntakeDraft() : null;
+const draft = form && ta ? takeIntakeDraft() : null;
 if (form && ta && draft) {
   if (draft.description && !ta.value) ta.value = draft.description;
   if (draft.scope) form.querySelector<HTMLInputElement>(`input[name=scope][value=${draft.scope}]`)?.click();
@@ -135,25 +135,37 @@ if (form && ta && !draft && !ta.value) {
 
 }
 
-if (form && ta && !signedIn) {
-  // Signed out the form goes to the login with nothing but next=/ in the URL; the text travels in this tab's sessionStorage.
-  form.addEventListener("submit", (e) => {
-    const attach = (e.submitter as HTMLElement | null)?.dataset.attach;
-    const scope = form.querySelector<HTMLInputElement>("input[name=scope]:checked")?.value;
-    const saved: IntakeDraft = {
-      description: ta.value.trim(),
-      attach: attach === "photos" || attach === "logo" ? attach : undefined,
-      scope: scope === "full" ? "full" : "home",
-    };
-    try {
-      sessionStorage.setItem(INTAKE_DRAFT_KEY, JSON.stringify(saved));
-    } catch {
-      // Storage blocked: the prompt simply starts empty after the login.
-    }
-  });
+if (ta) {
+  // Going to the login from here with something typed: the text waits in this tab's sessionStorage (never the URL).
+  for (const a of document.querySelectorAll<HTMLAnchorElement>('a[href^="/login"]')) {
+    a.addEventListener("click", () => {
+      if (!ta.value.trim()) return;
+      const saved: IntakeDraft = { description: ta.value.trim(), scope: "home" };
+      try {
+        sessionStorage.setItem(INTAKE_DRAFT_KEY, JSON.stringify(saved));
+      } catch {
+        // Storage blocked: the prompt simply starts empty after the login.
+      }
+    });
+  }
 }
 
-if (form && signedIn) {
+// Turnstile, on the form without an account: Cloudflare's script loads only once the visitor starts on
+// the form (not on every visit to the page). It puts its token in the form as cf-turnstile-response.
+const bot = form?.querySelector<HTMLElement>("[data-turnstile-src]");
+let botLoading = false;
+const loadBot = () => {
+  if (!bot || botLoading) return;
+  botLoading = true;
+  const s = document.createElement("script");
+  s.src = bot.dataset.turnstileSrc!;
+  s.async = true;
+  document.head.append(s);
+};
+const botToken = () => form?.querySelector<HTMLInputElement>("input[name=cf-turnstile-response]")?.value ?? "";
+if (form && bot) for (const ev of ["focusin", "pointerdown", "input"]) form.addEventListener(ev, loadBot, { once: true });
+
+if (form) {
   for (const input of form.querySelectorAll<HTMLInputElement>(".attach input[type=file]")) {
     input.addEventListener("change", () => {
       const label = input.closest("label")!;
@@ -162,13 +174,76 @@ if (form && signedIn) {
       else delete label.dataset.count;
     });
   }
-  form.addEventListener("submit", () => {
-    const button = form.querySelector<HTMLButtonElement>("button[type=submit]");
+  const button = form.querySelector<HTMLButtonElement>("button[type=submit]");
+  const busy = (label: string | null) => {
     if (!button) return;
-    // Disabled after the submit event has been handled, so the button's value still counts.
-    window.setTimeout(() => {
-      button.disabled = true;
-      button.textContent = "Nalagam …";
-    });
+    button.disabled = label !== null;
+    button.textContent = label ?? "Ustvari";
+  };
+  /** A refusal above the form; the text stays in it. */
+  const say = (text: string) => {
+    let note = document.querySelector<HTMLElement>(".hero .note.bad");
+    if (!note) {
+      note = document.createElement("p");
+      note.className = "note bad";
+      note.setAttribute("role", "alert");
+      form.before(note);
+    }
+    note.textContent = text;
+  };
+  const waitForBot = async () => {
+    const started = Date.now();
+    while (!botToken() && Date.now() - started < 15_000) await new Promise((r) => window.setTimeout(r, 200));
+  };
+  // Without an account (data-ticket): the caps first, then the text alone for a ticket (bot check and
+  // limits on the server, before any file is sent), then the form with its files, carrying the ticket.
+  const ticketUrl = form.dataset.ticket;
+  let sending = false;
+  form.addEventListener("submit", (e) => {
+    if (!ticketUrl) {
+      // Signed in: the form goes as it is. Disabled after the submit event, so the button's value still counts.
+      window.setTimeout(() => busy("Nalagam …"));
+      return;
+    }
+    e.preventDefault();
+    if (sending) return;
+    const maxPhotos = Number(form.dataset.maxPhotos);
+    const maxBytes = Number(form.dataset.maxBytes);
+    const photos = form.querySelector<HTMLInputElement>("input[name=photos]")?.files?.length ?? 0;
+    const bytes = [...form.querySelectorAll<HTMLInputElement>("input[type=file]")].reduce((n, i) => n + [...(i.files ?? [])].reduce((m, f) => m + f.size, 0), 0);
+    if (photos > maxPhotos || bytes > maxBytes) return say(`Brez prijave lahko pošljete največ ${maxPhotos} fotografij, skupaj do ${Math.floor(maxBytes / 1e6)} MB. Izberite manj ali manjše.`);
+    sending = true;
+    busy("Preverjam …");
+    void (async () => {
+      try {
+        if (bot) {
+          loadBot();
+          await waitForBot();
+        }
+        const fields = new URLSearchParams({
+          _csrf: form.querySelector<HTMLInputElement>("input[name=_csrf]")?.value ?? "",
+          description: ta?.value ?? "",
+          "cf-turnstile-response": botToken(),
+        });
+        const res = await fetch(ticketUrl, { method: "POST", body: fields, headers: { accept: "application/json" } });
+        const r = (await res.json().catch(() => ({}))) as { ticket?: string; message?: string };
+        if (!res.ok || !r.ticket) {
+          say(r.message ?? "Pošiljanje ni uspelo. Poskusite znova.");
+          // A Turnstile token works once: a fresh one for the next try.
+          (window as { turnstile?: { reset(): void } }).turnstile?.reset();
+          busy(null);
+          sending = false;
+          return;
+        }
+        busy("Nalagam …");
+        form.action = `/api/sites?ticket=${encodeURIComponent(r.ticket)}`;
+        // The native submit: no submit event again, the files go as multipart.
+        form.submit();
+      } catch {
+        say("Pošiljanje ni uspelo. Preverite povezavo in poskusite znova.");
+        busy(null);
+        sending = false;
+      }
+    })();
   });
 }

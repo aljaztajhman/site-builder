@@ -6,10 +6,10 @@ Goal: a business owner can sign up from their phone, get a free homepage preview
 
 ## Decisions needed before starting (owner)
 
-- [ ] **Sign-in method.** Proposal: email magic link only (no passwords to store, works on phones). Alternative: magic link + Google.
-- [ ] **Who gets a full site in phase 2**, with no billing yet. Proposal: an allow-list of emails the owner manages; everyone else gets the free homepage preview only.
+- [x] **Sign-in method.** Proposal: email magic link only (no passwords to store, works on phones). Alternative: magic link + Google. Decided (`sb-signin`): magic link only.
+- [x] **Who gets a full site in phase 2**, with no billing yet. Proposal: an allow-list of emails the owner manages; everyone else gets the free homepage preview only. Decided (`sb-full-access`): the allow-list, with paid-tier rights.
 - [ ] **Visual editor.** Evaluate Puck against extending the current direct editor (schema-driven forms plus inline text in the preview). Proposal: a 1-day spike on Puck, then decide on evidence: does it keep every edit a spec change, and does it work at 360 px?
-- [ ] **Email provider and sending domain.** PRODUCT.md names Resend. It needs a domain we control for SPF/DKIM, which means buying one (the owner's call and payment).
+- [x] **Email provider and sending domain.** PRODUCT.md names Resend. It needs a domain we control for SPF/DKIM, which means buying one (the owner's call and payment). Decided (`sb-email-domain`): Resend, sending from a subdomain of the owner's einvoicecheck.eu (DNS records in TASKS.md).
 - [x] **Production environment.** Decided (`sb-production-env`, 2026-09-30): keep the one `preview` environment (tracking `main`) until the first real customer gets a real site; create `production` then.
 
 ## Scope

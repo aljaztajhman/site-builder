@@ -1,6 +1,6 @@
 # Free generation limits (plan, mandatory before public launch)
 
-Status: plan only, nothing built. Owner's direction (2026-10-01): one free homepage without an account, more with an account, and more again by how much someone pays. Nobody can keep generating for free. The open numbers are decisions in the Decision Inbox (`sb-free-tiers`, `sb-bot-check`, `sb-ai-allowance`).
+Status: built (2026-10-01, PRs claude/accounts and claude/generation-limits); the deployed smoke test waits on the merge and Turnstile keys. Owner's direction (2026-10-01): one free homepage without an account, more with an account, and more again by how much someone pays. Nobody can keep generating for free. Decisions: `sb-free-tiers` = 1-2-10, `sb-bot-check` = Turnstile, `sb-ai-allowance` = first-month (10 % of the monthly price + €3 in the first month), `sb-preview-gate`, `sb-full-access`, `sb-signin`.
 
 ## Why
 
@@ -61,14 +61,14 @@ The €0.30 homepage target (PRODUCT.md) is the anonymous-tier budget today. Rai
 
 ## Done means (launch blockers)
 
-- [ ] Tiers, allowances, pool sizes and job cost estimates in config, none in code
-- [ ] Allowance check before every generate and edit job; real cost deducted after; tested with recorded fixtures (no real calls)
-- [ ] Anonymous: 1 homepage per device, loose per-IP limit, 7-day expiry, a claim on sign-up; tested
-- [ ] Free account: magic link (`sb-signin`: magic link), email normalisation and disposable-domain block, allowance counter shown in Slovene ("še 2 brezplačni ustvarjanji")
-- [ ] Paid / allow-list: monthly € allowance with a reset, refusal message and no silent failure
-- [ ] Spending pools per tier under the global cap; an exhausted free pool never blocks paid jobs; tested
-- [ ] Bot check per `sb-bot-check`, named in the privacy policy
-- [ ] Junk-intake refusal before the first Sonnet call
-- [ ] Daily spend-per-tier log line and 80 % pool warning
-- [ ] Deployed smoke test (`remote-smoke.ts`): a second anonymous generation from the same device is refused, a free account stops after its allowance, and a paid job still runs with the free pools empty
-- [ ] Landing page claims match the limits (today it promises a free preview without a card, and that preview sits behind the access password)
+- [x] Tiers, allowances, pool sizes and job cost estimates in config, none in code (`tiers` in config/app.config.json, validated: pool shares add up to at most 1)
+- [x] Allowance check before every generate and edit job; real cost deducted after; tested without real calls (`reserveJob` before every `queue.send("generate" | "edit")`; the estimate is held in `ai_jobs` until the job's logged calls replace it; `apps/web/test/limits.test.ts`, `packages/platform/test/usage.test.ts`; a stand-in classifier and logged costs, no recordings needed)
+- [x] Anonymous: 1 homepage per device, loose per-IP limit, 7-day expiry, a claim on sign-up; tested (endpoint tests incl. 10 simultaneous requests → 1 preview; worker housekeeping test deletes the expired preview and its files; Chromium end to end `apps/web/test/limits-browser.test.ts`)
+- [x] Free account: magic link (`sb-signin`: magic link), email normalisation and disposable-domain block, allowance counter shown in Slovene ("Še 2 brezplačni ustvarjanji domače strani in 10 sprememb s pomočnikom."; landing page, sites list, `GET /api/sites/:id` → `access.allowance.text`). The editor (being rebuilt) doesn't show it yet
+- [x] Paid / allow-list: monthly € allowance with a reset, refusal message and no silent failure (10 % of `plans.paid.monthlyEur` + €3 in the first month, months from the allow-list date; tested incl. the reset)
+- [x] Spending pools per tier under the global cap; an exhausted free pool never blocks paid jobs; tested (endpoint test and Chromium)
+- [x] Bot check per `sb-bot-check`, named in the privacy policy (`/zasebnost`): Turnstile, tested with Cloudflare's test keys against a siteverify stand-in and in Chromium with a stand-in script. Not live: no Cloudflare account or keys yet
+- [x] Junk-intake refusal before the first Sonnet call (under 40 characters at once; the classifier at the intake, and again first thing in the pipeline, before the brief and the photos' alt text; tested). The confidence threshold (0.5) is not calibrated on real junk: all 10 fixtures classify at 0.95–0.99
+- [x] Daily spend-per-tier log line and 80 % pool warning (worker; tested, and seen in a local server's log)
+- [ ] Deployed smoke test (`remote-smoke.ts --limits`): a second anonymous generation from the same device is refused, a free account stops after its allowance, and a paid job still runs with the free pools empty. Written; run only against a local server with replayed model answers (2026-10-01): every limits step passed except the two that need a generated preview (replayed full-site recordings don't make a homepage), so the 10-edit stop wasn't reached there (the endpoint tests cover it). Not run against Railway: needs this merged, deployed, and Turnstile test keys on `preview`
+- [x] Landing page claims match the limits: no account needed for the first homepage, what a free account adds, no card, kept 7 days, a FAQ entry; "vodnim žigom" (no watermark exists) and "Potrebujete le e-poštni naslov" removed

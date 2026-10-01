@@ -1,7 +1,7 @@
 import type pg from "pg";
 import type { Db } from "./db.ts";
 
-/** Append-only list of SQL migrations. Never edit an applied one; add a new entry. */
+/** Append-only list of SQL migrations. Never edit or rename an applied one (the name identifies it); add a new entry. */
 export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
   {
     id: 1,
@@ -143,6 +143,91 @@ export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
       );
     `,
   },
+  {
+    id: 5,
+    name: "accounts",
+    // Owner accounts (magic link only). Tokens and sessions are stored as SHA-256 hashes of the random
+    // value the browser holds. ip_key is a keyed hash of the requester's IP for rate limits, cleared after a day.
+    sql: `
+      create table accounts (
+        id text primary key,
+        email text not null,
+        email_key text not null unique,
+        created_at timestamptz not null default now(),
+        last_login_at timestamptz
+      );
+
+      create table allow_list (
+        email_key text primary key,
+        email text not null,
+        note text,
+        added_at timestamptz not null default now()
+      );
+
+      create table login_tokens (
+        token_hash text primary key,
+        email text not null,
+        email_key text not null,
+        next text,
+        device_id text,
+        ip_key text not null default '',
+        created_at timestamptz not null default now(),
+        expires_at timestamptz not null,
+        used_at timestamptz
+      );
+      create index login_tokens_email on login_tokens(email_key, created_at);
+      create index login_tokens_ip on login_tokens(ip_key, created_at);
+
+      create table sessions (
+        token_hash text primary key,
+        account_id text not null references accounts(id) on delete cascade,
+        created_at timestamptz not null default now(),
+        expires_at timestamptz not null
+      );
+      create index sessions_account on sessions(account_id);
+
+      alter table sites add column account_id text references accounts(id) on delete set null;
+      create index sites_account on sites(account_id);
+    `,
+  },
+  {
+    id: 6,
+    name: "generation_limits",
+    // ai_jobs: one row per model job a viewer starts (generate, chat edit), written before it is queued, so
+    // its estimated cost is held until its calls are logged; also the admin's pool holds (kind 'hold').
+    // sites.device_id: the device that made an unclaimed anonymous preview. ip_key: keyed hash, cleared after a day.
+    sql: `
+      alter table sites add column device_id text;
+      create index sites_device on sites(device_id);
+
+      create table ai_jobs (
+        id bigserial primary key,
+        kind text not null,
+        scope text,
+        tier text not null,
+        pool text not null,
+        account_id text,
+        device_id text,
+        ip_key text not null default '',
+        site_id text,
+        estimate_eur numeric(12, 6) not null,
+        status text not null default 'queued',
+        created_at timestamptz not null default now(),
+        expires_at timestamptz,
+        finished_at timestamptz
+      );
+      create index ai_jobs_account on ai_jobs(account_id, kind);
+      create index ai_jobs_device on ai_jobs(device_id, kind);
+      create index ai_jobs_ip on ai_jobs(ip_key, created_at);
+      create index ai_jobs_queued on ai_jobs(status, pool);
+
+      alter table model_calls add column tier text;
+      alter table model_calls add column account_id text;
+      alter table model_calls add column ai_job_id bigint;
+      create index model_calls_ai_job on model_calls(ai_job_id);
+      create index model_calls_account on model_calls(account_id, created_at);
+    `,
+  },
 ];
 
 type Query = (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>;
@@ -171,17 +256,23 @@ const MIGRATION_LOCK = 727_274_001;
 
 async function runMigrations(q: Query): Promise<number[]> {
   await q(`create table if not exists schema_migrations (id integer primary key, name text not null, applied_at timestamptz not null default now())`);
-  const { rows } = await q("select id from schema_migrations");
-  const applied = new Set(rows.map((r) => Number(r.id)));
+  const { rows } = await q("select id, name from schema_migrations");
+  const byId = new Map(rows.map((r) => [Number(r.id), String(r.name)]));
+  // A migration is known by its name, so never rename one. A database that ran a branch before a merge
+  // gave its migration another number (a Railway PR environment) has it recorded under the old id: its
+  // SQL is not run again, only the record moves, and the migration that now owns that id still runs.
+  const appliedNames = new Set(rows.map((r) => String(r.name)));
   const ran: number[] = [];
   for (const m of MIGRATIONS) {
-    if (applied.has(m.id)) continue;
+    if (byId.get(m.id) === m.name) continue;
+    const run = !appliedNames.has(m.name);
     await q("begin");
     try {
-      for (const stmt of splitSql(m.sql)) await q(stmt);
-      await q("insert into schema_migrations (id, name) values ($1, $2)", [m.id, m.name]);
+      if (run) for (const stmt of splitSql(m.sql)) await q(stmt);
+      await q("delete from schema_migrations where name = $1 and id <> $2", [m.name, m.id]);
+      await q("insert into schema_migrations (id, name) values ($1, $2) on conflict (id) do update set name = excluded.name", [m.id, m.name]);
       await q("commit");
-      ran.push(m.id);
+      if (run) ran.push(m.id);
     } catch (e) {
       await q("rollback");
       throw e;

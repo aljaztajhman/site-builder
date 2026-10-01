@@ -9,10 +9,13 @@ export interface GenerateJob {
   siteId: string;
   /** "home" renders the homepage preview only; "full" the whole site. */
   scope: "home" | "full";
+  /** The ai_jobs row that holds this job's estimate (tier, account); its calls are logged against it. */
+  aiJobId?: string;
 }
 export interface EditJob {
   siteId: string;
   messageId: number;
+  aiJobId?: string;
 }
 export interface PublishJob {
   siteId: string;

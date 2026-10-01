@@ -1,18 +1,25 @@
 /**
  * End-to-end check of a deployed environment on one generated site, the way an owner uses it:
  * chat edit → fill the placeholders in the editor → publish → public page at /s/{slug}/ → contact form
- * (if the site has one; the test message is deleted) → export zip opened offline. Costs one chat edit (~€0.02).
+ * (if the site has one; the test message is deleted) → an owner account signs in with a one-time link
+ * and can't open this site → export zip opened offline. Costs one chat edit (~€0.02). Each run leaves
+ * one account smoke-<time>@stranko-smoke.example behind.
  *
- *   REMOTE_URL=https://… REMOTE_PASSWORD=… pnpm tsx tools/eval/src/remote-smoke.ts <site-id>
+ * With --limits it then checks the free generation limits (remote-limits.ts; ~€0.40 more, --homepages
+ * adds the free account's two extra homepages, ~€0.5).
+ *
+ *   REMOTE_URL=https://… REMOTE_PASSWORD=… pnpm tsx tools/eval/src/remote-smoke.ts <site-id> [--limits [--homepages]]
  */
 import { checkExportOffline, launchCheckBrowser } from "@sb/engine";
 import { fillPlaceholderOps } from "./placeholder-fill.ts";
+import { csrfIn, remoteAdmin, remoteBrowser, useSignInLink } from "./remote-session.ts";
+import { runLimitChecks } from "./remote-limits.ts";
 
 const base = process.env.REMOTE_URL;
 const password = process.env.REMOTE_PASSWORD;
 const siteId = process.argv[2];
 if (!base || !password || !siteId) {
-  console.error("usage: REMOTE_URL=… REMOTE_PASSWORD=… remote-smoke.ts <site-id>");
+  console.error("usage: REMOTE_URL=… REMOTE_PASSWORD=… remote-smoke.ts <site-id> [--limits [--homepages]]");
   process.exit(2);
 }
 
@@ -32,9 +39,9 @@ const step = (name: string, ok: boolean, detail = "") => {
 };
 const stop = () => process.exit(failed ? 1 : 0);
 
-const login = await fetch(`${base}/login`, { method: "POST", body: new URLSearchParams({ password, next: "/" }), redirect: "manual" });
-const cookie = login.headers.get("set-cookie")?.split(";")[0] ?? "";
-if (!step("login", login.status === 302 && !!cookie, `HTTP ${login.status}`)) stop();
+const admin = await remoteAdmin(base, password);
+const cookie = admin.cookie;
+if (!step("login", admin.ok, `HTTP ${admin.status}`)) stop();
 
 const api = (p: string, init: RequestInit = {}) => fetch(`${base}${p}`, { ...init, headers: { cookie, "content-type": "application/json", ...init.headers } });
 const state = async () => (await (await api(`/api/sites/${siteId}`)).json()) as SiteState;
@@ -92,7 +99,25 @@ if (formId) {
   step("contact form delivers to the owner", sentForm.ok && after === before + 1, `HTTP ${sentForm.status}, messages ${before} → ${after}`);
   const list = await (await api(`/sites/${siteId}/messages`)).text();
   const mid = /messages\/(\d+)\/delete/.exec(list)?.[1];
-  if (mid) await api(`/sites/${siteId}/messages/${mid}/delete`, { method: "POST" });
+  if (mid) {
+    const del = await fetch(`${base}/sites/${siteId}/messages/${mid}/delete`, { method: "POST", headers: { cookie }, body: new URLSearchParams({ _csrf: csrfIn(list) }), redirect: "manual" });
+    step("test message deleted (form with CSRF token)", del.status === 303, `HTTP ${del.status}`);
+  }
+}
+
+// Accounts: a fresh owner signs in with a link the admin makes (the script has no inbox) and sees only their own sites.
+const ownerEmail = `smoke-${Date.now()}@stranko-smoke.example`;
+const made = await api("/admin/login-link", { method: "POST", body: JSON.stringify({ email: ownerEmail }) });
+const link = made.ok ? ((await made.json()) as { url: string }).url : "";
+if (step("admin makes a sign-in link", !!link, `HTTP ${made.status}`)) {
+  const owner = await useSignInLink(await remoteBrowser(base), link);
+  step("owner signs in with the link", owner.ok, `→ ${owner.location}`);
+  const mine = await fetch(`${base}/sites`, { headers: { cookie: owner.cookie }, redirect: "manual" });
+  step("owner's sites page", mine.status === 200, `HTTP ${mine.status}`);
+  const other = await fetch(`${base}/api/sites/${siteId}`, { headers: { cookie: owner.cookie } });
+  step("someone else's site is a 404 for the owner", other.status === 404, `HTTP ${other.status}`);
+  const again = await useSignInLink(await remoteBrowser(base), link);
+  step("a sign-in link works once", !again.ok);
 }
 
 const exp = await api(`/api/sites/${siteId}/export`);
@@ -106,5 +131,6 @@ if (step("export download", exp.ok && zip.length > 10_000, `${(zip.length / 1024
     await browser.close();
   }
 }
+if (process.argv.includes("--limits")) await runLimitChecks({ base, admin, siteId, step, homepages: process.argv.includes("--homepages") });
 console.log(`\n${base}${pubBody.url}`);
 stop();

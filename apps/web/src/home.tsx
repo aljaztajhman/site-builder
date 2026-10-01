@@ -2,14 +2,17 @@ import type { AppConfig } from "@sb/config";
 import { html } from "./pages.tsx";
 import { uiUrl } from "./ui/assets.ts";
 import { PRODUCT_NAME } from "./ui/labels.ts";
+import { TURNSTILE_SCRIPT } from "./turnstile.ts";
+import { chatEdits, moreHomepages } from "./limits.ts";
 
 /**
  * The product's landing page at / (docs/design/homepage.html), for everyone; signed in, the header
  * links to the sites list instead of the login.
  * Stylesheet ui/home.css, script client/home.ts; the example site is ui/example-home.html.
- * The prompt box is the intake, the only way to start a site: signed in, it posts the description,
- * photos, logo and scope to /api/sites; signed out, it goes to the login, and home.ts carries the typed
- * text across it (sessionStorage, never the URL) back to this page.
+ * The prompt box is the intake, the only way to start a site, signed in or not: it posts the
+ * description, photos, logo (and, for those who may, the scope) to /api/sites, where the limits decide.
+ * Without an account the form carries the Turnstile widget. Going to the login from here, home.ts
+ * carries the typed text across it (sessionStorage, never the URL) back to this page.
  */
 
 /**
@@ -28,7 +31,7 @@ const Brand = () => (
   </a>
 );
 
-/** Homepage only (the free preview) or the whole site. Signed out, the choice rides along in the draft (home.ts). */
+/** Homepage only or the whole site; shown only to those who may make a whole site. */
 const Scope = () => (
   <fieldset className="seg">
     <legend className="sr-only">Obseg</legend>
@@ -45,12 +48,26 @@ const EXAMPLE_TEXT =
 export interface HomeProps {
   config: AppConfig;
   signedIn: boolean;
+  /** This browser's CSRF token for the intake form. */
+  csrf: string;
+  /** The viewer may make a whole site (paid tier, admin); everyone else gets the homepage, so no switch. */
+  fullSite: boolean;
+  /** What the viewer has left, one Slovene sentence (limits.ts), under the prompt. */
+  allowance: string;
+  /** Turnstile's site key when the anonymous intake is bot-checked; null otherwise. */
+  botSiteKey: string | null;
+  /** Deployed without Turnstile keys: previews without an account are refused, so say so up front. */
+  anonymousClosed?: boolean;
+  /** This device's anonymous preview, when it already made one. */
+  previous?: string;
+  /** Without an account: where the upload ticket comes from, and the upload's caps (home.ts checks them first). */
+  anonymousUpload?: { ticketUrl: string; maxPhotos: number; maxTotalBytes: number };
   /** A refused intake: the reason, shown above the prompt, and the description, kept. */
   error?: string;
   description?: string;
 }
 
-export function homePage({ config, signedIn, error, description }: HomeProps): string {
+export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteKey, anonymousClosed, previous, anonymousUpload, error, description }: HomeProps): string {
   const paid = config.plans.paid;
   const example = uiUrl("example-home.html");
   // Example sites rendered by our engine (pnpm examples:build): a different business in each place.
@@ -108,53 +125,74 @@ export function homePage({ config, signedIn, error, description }: HomeProps): s
                     {error}
                   </p>
                 )}
-                {signedIn ? (
-                  <form className="prompt" method="post" action="/api/sites" encType="multipart/form-data" data-home-intake="" data-intake="">
-                    <label htmlFor="opis" className="sr-only">
-                      Opis podjetja
-                    </label>
-                    <textarea id="opis" name="description" required minLength={30} placeholder={EXAMPLE_TEXT} defaultValue={description} aria-describedby="opis-help" />
-                    <div className="bar">
-                      <label className="btn sm attach">
-                        <input className="sr-only" type="file" name="photos" accept="image/jpeg,image/png,image/webp,image/avif" multiple />＋ Fotografije
-                      </label>
-                      <label className="btn sm attach">
-                        <input className="sr-only" type="file" name="logo" accept="image/svg+xml,image/png,image/jpeg,image/webp" />＋ Logotip
-                      </label>
-                      <span className="sp" />
-                      <Scope />
-                      <button className="btn primary" type="submit">
-                        Ustvari
-                      </button>
-                    </div>
-                  </form>
-                ) : (
-                  // Signed out: files can't survive a login, so the prompt goes to the login and home.ts keeps the text.
-                  <form className="prompt" method="get" action="/login" data-home-intake="">
-                    <input type="hidden" name="next" value="/" />
-                    <label htmlFor="opis" className="sr-only">
-                      Opis podjetja
-                    </label>
-                    <textarea id="opis" placeholder={EXAMPLE_TEXT} aria-describedby="opis-help" />
-                    <div className="bar">
-                      <button className="btn sm" type="submit" data-attach="photos">
-                        ＋ Fotografije
-                      </button>
-                      <button className="btn sm" type="submit" data-attach="logo">
-                        ＋ Logotip
-                      </button>
-                      <span className="sp" />
-                      <Scope />
-                      <button className="btn primary" type="submit">
-                        Ustvari
-                      </button>
-                    </div>
-                  </form>
+                {previous && error && (
+                  <p className="note">
+                    Vaš brezplačni predogled: <a href={previous}>odprite ga</a>.
+                  </p>
                 )}
+                {previous && !error && (
+                  <p className="note">
+                    Brezplačni predogled ste že naredili: <a href={previous}>odprite ga</a>. <a href="/login">Prijavite se z e-pošto</a>
+                    {`: predogled ostane vaš in naredite lahko še ${moreHomepages(config.tiers.free.homepages)}.`}
+                  </p>
+                )}
+                {anonymousClosed && (
+                  <p className="note">
+                    Predogled brez prijave trenutno ni na voljo. <a href="/login">Prijavite se z e-pošto</a> in ga naredite po prijavi.
+                  </p>
+                )}
+                {/* One intake for everyone: the first homepage needs no account; the server decides what is left. */}
+                <form
+                  className="prompt"
+                  method="post"
+                  action="/api/sites"
+                  encType="multipart/form-data"
+                  data-home-intake=""
+                  data-intake=""
+                  data-ticket={anonymousUpload?.ticketUrl}
+                  data-max-photos={anonymousUpload?.maxPhotos}
+                  data-max-bytes={anonymousUpload?.maxTotalBytes}
+                >
+                  <input type="hidden" name="_csrf" value={csrf} />
+                  {!fullSite && <input type="hidden" name="scope" value="home" />}
+                  <label htmlFor="opis" className="sr-only">
+                    Opis podjetja
+                  </label>
+                  <textarea
+                    id="opis"
+                    name="description"
+                    required
+                    minLength={config.tiers.junk.minDescriptionChars}
+                    placeholder={EXAMPLE_TEXT}
+                    defaultValue={description}
+                    aria-describedby="opis-help"
+                  />
+                  {botSiteKey && (
+                    // Turnstile (bot check for previews without an account). home.ts loads Cloudflare's script only once the visitor starts on the form.
+                    <div className="bot" data-turnstile-src={TURNSTILE_SCRIPT}>
+                      <div className="cf-turnstile" data-sitekey={botSiteKey} data-size="flexible" data-theme="light" />
+                    </div>
+                  )}
+                  <div className="bar">
+                    <label className="btn sm attach">
+                      <input className="sr-only" type="file" name="photos" accept="image/jpeg,image/png,image/webp,image/avif" multiple />＋ Fotografije
+                    </label>
+                    <label className="btn sm attach">
+                      <input className="sr-only" type="file" name="logo" accept="image/svg+xml,image/png,image/jpeg,image/webp" />＋ Logotip
+                    </label>
+                    <span className="sp" />
+                    {fullSite && <Scope />}
+                    <button className="btn primary" type="submit">
+                      Ustvari
+                    </button>
+                  </div>
+                </form>
                 <p className="under" id="opis-help">
                   {`Napišite, kdo ste, kaj ponujate, kje ste in kako vas dosežejo. Česar ne napišete, si ne izmislimo. Do ${config.limits.maxPhotos} fotografij in logotip.`}
                 </p>
-                <p className="under">Brezplačen predogled domače strani. Potrebujete le e-poštni naslov, kartice ne.</p>
+                <p className="under" data-allowance="">
+                  {signedIn ? allowance : `${allowance} Kartice ne potrebujete. Predogled brez prijave hranimo ${config.tiers.anonymous.keepDays} dni.`}
+                </p>
               </div>
               <div>
                 {/* From description to site: typed, built, shown on a phone, then widened to a computer (home.ts plays it). */}
@@ -402,11 +440,12 @@ export function homePage({ config, signedIn, error, description }: HomeProps): s
                 <div className="plan">
                   <h3>Predogled</h3>
                   <div className="amt">{wholeEur.format(0)}</div>
-                  <p className="muted">Domača stran z vodnim žigom, da vidite, kaj dobite.</p>
+                  <p className="muted">Domača stran iz vašega opisa, da vidite, kaj dobite. Objava je del naročnine.</p>
                   <ul>
-                    <li>Domača stran iz vašega opisa</li>
+                    <li>Prva domača stran brez prijave</li>
+                    <li>{`Z e-pošto še ${moreHomepages(config.tiers.free.homepages)} in ${chatEdits(config.tiers.free.chatEdits)}`}</li>
                     <li>Pogled na telefonu in namizju</li>
-                    <li>Potrebujete le e-poštni naslov</li>
+                    <li>Kartice ne potrebujete</li>
                   </ul>
                   <a className="btn" href="#zacni">
                     Naredite predogled
@@ -520,8 +559,8 @@ export function homePage({ config, signedIn, error, description }: HomeProps): s
                 {`© ${new Date().getFullYear()} `}
                 <mark className="ph">[ime izdelka]</mark>
               </span>
+              <a href="/zasebnost">Zasebnost</a>
               {/* Written once the legal entity exists (TASKS: billing phase). */}
-              <span>Zasebnost</span>
               <span>Pogoji uporabe</span>
               <span>Izjava o dostopnosti</span>
             </div>
@@ -534,6 +573,10 @@ export function homePage({ config, signedIn, error, description }: HomeProps): s
 }
 
 const faq = (config: AppConfig): [string, string][] => [
+  [
+    "Koliko predogledov lahko naredim brezplačno?",
+    `Prvo domačo stran naredite brez prijave; hranimo jo ${config.tiers.anonymous.keepDays} dni. Ko se prijavite z e-pošto, ostane vaša in lahko naredite še ${moreHomepages(config.tiers.free.homepages)} in ${chatEdits(config.tiers.free.chatEdits)}. Besedila in fotografije urejate neposredno, brez omejitev. Celotna stran, objava in prenos so del naročnine.`,
+  ],
   ["Nimam dobrih fotografij. Ali je to težava?", "Ne. Če nam pošljete manj kot dve fotografiji, stran dopolnimo z največ dvema splošnima slikama, ustvarjenima z umetno inteligenco: material, orodje, sestavine ali pokrajina vašega kraja. Na strani sta označeni in nikoli ne prikazujeta vas, vaših prostorov ali vašega dela. Kupljenih slik ne uporabljamo."],
   [
     "Ali si bo stran izmislila podatke?",

@@ -3,11 +3,13 @@ import {
   AnthropicTransport,
   FalImageTransport,
   ImageGenerator,
+  JunkIntakeError,
   ModelClient,
   ReplayTransport,
   SpendCapError,
   StandInImageTransport,
   applyChatEdit,
+  classify,
   describePhotos,
   generateSite,
   loadRecordings,
@@ -16,25 +18,35 @@ import {
   publishSite,
   type ModelTransport,
 } from "@sb/engine";
-import type { Platform } from "@sb/platform";
+import type { Platform, Tier } from "@sb/platform";
+import { cleanupExpired, spendMonitor } from "./housekeeping.ts";
 
 /** Replies to the owner when a chat edit fails outright (the details go to the event log). */
 const EDIT_ERROR_REPLY = "Sprememba ni uspela, stran je ostala nespremenjena. Poskusite znova čez nekaj minut ali jo uredite neposredno.";
 const EDIT_SPEND_CAP_REPLY = "Današnja omejitev porabe pomočnika je dosežena, zato sprememba ni bila narejena. Jutri spet deluje; do takrat stran urejate neposredno.";
+/** A description the classifier couldn't place (shown on the generation screen). */
+export const JUNK_REPLY = "Iz opisa ne znamo razbrati, kakšno podjetje imate. Napišite, kaj ponujate, kje ste in kako vas dosežejo, in poskusite znova.";
+
+/** Whose model calls these are: the site and queue job, and for the limits the tier, account and ai_jobs row. */
+export interface CallContext {
+  siteId: string | null;
+  jobId: string | null;
+  tier?: Tier | null;
+  accountId?: string | null;
+  aiJobId?: string | null;
+}
+
+const owner = (ctx: CallContext) => ({ tier: ctx.tier ?? null, accountId: ctx.accountId ?? null, aiJobId: ctx.aiJobId ?? null });
 
 /** Model client wired to the database: spend cap from today's logged calls, every call logged per stage. */
-export function modelClientFor(
-  platform: Platform,
-  config: AppConfig,
-  ctx: { siteId: string | null; jobId: string | null },
-  transport: ModelTransport = defaultTransport("generate"),
-): ModelClient {
+export function modelClientFor(platform: Platform, config: AppConfig, ctx: CallContext, transport: ModelTransport = defaultTransport("generate")): ModelClient {
   return new ModelClient({
     config,
     transport,
     spentToday: () => platform.repo.spendToday(),
     onCall: async (r) => {
       await platform.repo.logModelCall({
+        ...owner(ctx),
         siteId: ctx.siteId,
         jobId: ctx.jobId,
         stage: r.stage,
@@ -56,7 +68,7 @@ export function modelClientFor(
  * Generated mood images for sites with too few photos: fal.ai when FAL_KEY is set, flat stand-ins when
  * replaying recordings (demos), none otherwise. Every image is logged with its € and counts against the cap.
  */
-export function imageGeneratorFor(platform: Platform, config: AppConfig, ctx: { siteId: string | null; jobId: string | null }): ImageGenerator | undefined {
+export function imageGeneratorFor(platform: Platform, config: AppConfig, ctx: CallContext): ImageGenerator | undefined {
   if (!config.imageGen.pipeline.enabled) return undefined;
   const transport = process.env.MODEL_REPLAY_DIR ? new StandInImageTransport() : process.env.FAL_KEY ? new FalImageTransport() : null;
   if (!transport) return undefined;
@@ -65,10 +77,19 @@ export function imageGeneratorFor(platform: Platform, config: AppConfig, ctx: { 
     transport,
     spentToday: () => platform.repo.spendToday(),
     onCall: async (r) => {
-      await platform.repo.logModelCall({ siteId: ctx.siteId, jobId: ctx.jobId, stage: r.stage, model: r.model, inputTokens: 0, outputTokens: 0, cacheCreationTokens: 0, cacheReadTokens: 0, costEur: r.costEur, durationMs: r.durationMs, ok: r.ok });
+      await platform.repo.logModelCall({ ...owner(ctx), siteId: ctx.siteId, jobId: ctx.jobId, stage: r.stage, model: r.model, inputTokens: 0, outputTokens: 0, cacheCreationTokens: 0, cacheReadTokens: 0, costEur: r.costEur, durationMs: r.durationMs, ok: r.ok });
       console.log(`[image] ${r.model} €${r.costEur.toFixed(4)} ${r.durationMs}ms${r.ok ? "" : " failed"}`);
     },
   });
+}
+
+/**
+ * The intake's junk check (web process): the classifier (Haiku), logged against the job that holds the
+ * generation's estimate, before the job is queued. Needs ANTHROPIC_API_KEY on the web service too.
+ */
+export function intakeClassifier(platform: Platform, config: AppConfig) {
+  return (description: string, ctx: { siteId: string; tier: Tier; accountId: string | null; aiJobId: string }) =>
+    classify(modelClientFor(platform, config, { siteId: ctx.siteId, jobId: null, tier: ctx.tier, accountId: ctx.accountId, aiJobId: ctx.aiJobId }), description);
 }
 
 /**
@@ -93,38 +114,83 @@ export async function startWorker(platform: Platform, config = loadConfig()): Pr
     console.warn("[worker] FAL_KEY not set: sites with too few photos get no generated pictures");
   }
 
+  // Housekeeping (hourly): expired anonymous previews and their files, IP hashes, stale held estimates.
+  // Spend (every 10 minutes): the daily line per pool and the 80 % warning.
+  const monitor = spendMonitor(repo, config);
+  const housekeeping = async () => {
+    const r = await cleanupExpired(platform, config);
+    if (r.sites.length || r.staleJobs) console.log(`[worker] housekeeping: ${r.sites.length} expired anonymous preview(s) deleted, ${r.staleJobs} stale job(s) ended`);
+  };
+  const spend = async () => {
+    await monitor.daily();
+    await monitor.check();
+  };
+  await housekeeping().catch((e: unknown) => console.error("[worker] housekeeping", e));
+  await spend().catch((e: unknown) => console.error("[worker] spend", e));
+  setInterval(() => void housekeeping().catch((e: unknown) => console.error("[worker] housekeeping", e)), 60 * 60_000).unref();
+  setInterval(() => void spend().catch((e: unknown) => console.error("[worker] spend", e)), 10 * 60_000).unref();
+
+  /** Whose job this is: its ai_jobs row (tier, account), or for jobs started without one, the site's owner. */
+  const contextFor = async (siteId: string, jobId: string, aiJobId?: string): Promise<CallContext> => {
+    const charge = aiJobId ? await repo.usage.getJob(aiJobId) : null;
+    const o = charge ? { tier: charge.tier, accountId: charge.account_id } : await repo.usage.siteOwner(siteId);
+    return { siteId, jobId, tier: o.tier, accountId: o.accountId, aiJobId: charge?.id ?? null };
+  };
+  /** The job is over: its logged calls replace its held estimate. */
+  const finish = async (aiJobId: string | null | undefined, status: "done" | "failed" | "refused") => {
+    if (!aiJobId) return;
+    await repo.usage.finishJob(aiJobId, status);
+    await monitor.check().catch((e: unknown) => console.error("[worker] spend", e));
+  };
+
   // Generations run in parallel (one site each); each peaks at ~1.1 GB with its Chromium checks.
   await queue.work("generate", async (job, jobId) => {
-    const client = modelClientFor(platform, config, { siteId: job.siteId, jobId });
+    const ctx = await contextFor(job.siteId, jobId, job.aiJobId);
+    const client = modelClientFor(platform, config, ctx);
+    const before = (await repo.getSite(job.siteId))?.current_version ?? null;
     try {
-      const images = imageGeneratorFor(platform, config, { siteId: job.siteId, jobId });
+      const images = imageGeneratorFor(platform, config, ctx);
       await generateSite({ config, repo, storage, client, ...(images ? { images } : {}) }, job.siteId, jobId);
+      await finish(ctx.aiJobId, "done");
     } catch (e) {
       await repo.setStatus(job.siteId, "failed");
+      if (e instanceof JunkIntakeError) {
+        // Refused, not failed: it doesn't use up the visitor's free generation.
+        await repo.addEvent({ siteId: job.siteId, jobId, stage: "error", level: "error", message: JUNK_REPLY, data: { confidence: e.confidence } });
+        await finish(ctx.aiJobId, "refused");
+        return;
+      }
       await repo.addEvent({ siteId: job.siteId, jobId, stage: "error", level: "error", message: (e as Error).message });
+      // A generation that saved a version (the owner has a preview) counts even if a later stage failed.
+      const after = (await repo.getSite(job.siteId))?.current_version ?? null;
+      await finish(ctx.aiJobId, after !== before ? "done" : "failed");
       console.error("[generate]", e);
     }
   }, { concurrency: config.limits.jobConcurrency });
 
   // Edits and publishes stay sequential: two at once on the same site would conflict on the spec version.
   await queue.work("edit", async (job, jobId) => {
-    const client = modelClientFor(platform, config, { siteId: job.siteId, jobId }, defaultTransport("edit"));
+    const ctx = await contextFor(job.siteId, jobId, job.aiJobId);
+    const client = modelClientFor(platform, config, ctx, defaultTransport("edit"));
     try {
       await applyChatEdit({ repo, client }, job.siteId, job.messageId);
+      await finish(ctx.aiJobId, "done");
     } catch (e) {
       // The owner reads this reply; the technical error goes to the log. applyChatEdit already put back
-      // the status it set, and a generation running meanwhile keeps its own.
+      // the status it set, and a generation running meanwhile keeps its own. A failed edit isn't counted.
       const reply = e instanceof SpendCapError ? EDIT_SPEND_CAP_REPLY : EDIT_ERROR_REPLY;
       await repo.addChat(job.siteId, "assistant", reply, { error: true });
       await repo.addEvent({ siteId: job.siteId, jobId, stage: "edit", level: "error", message: `Edit failed: ${(e as Error).message.slice(0, 300)}` });
+      await finish(ctx.aiJobId, "failed");
       console.error("[edit]", e);
     }
   });
 
   // Alt text for photos the owner added in the editor. Without the model (no key, spend cap, no credit)
-  // the alt stays empty: the editor asks the owner and publishing waits for it.
+  // the alt stays empty: the editor asks the owner and publishing waits for it. Direct editing is never
+  // limited, so this job holds no estimate; its calls still count in the owner's tier pool.
   await queue.work("alt", async (job, jobId) => {
-    const client = modelClientFor(platform, config, { siteId: job.siteId, jobId }, defaultTransport("generate"));
+    const client = modelClientFor(platform, config, await contextFor(job.siteId, jobId), defaultTransport("generate"));
     try {
       await describePhotos({ repo, storage, client }, job.siteId, job.imageIds);
     } catch (e) {

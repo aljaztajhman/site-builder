@@ -126,6 +126,37 @@ export const AppConfigSchema = z.object({
     landscape: z.object({ width: z.number().int().positive(), height: z.number().int().positive() }),
     models: z.record(z.string(), ImageGenModel),
   }),
+  /** Owner accounts: magic-link sign-in, sessions, the device cookie (see config $comment). */
+  accounts: z.object({
+    sessionDays: z.number().positive(),
+    deviceCookieDays: z.number().positive(),
+    magicLink: z.object({
+      ttlMinutes: z.number().positive().max(60),
+      perEmailPerHour: z.number().int().positive(),
+      perIpPerHour: z.number().int().positive(),
+    }),
+  }),
+  /** Free generation limits, allowances, spending pools and job cost estimates (see config $comment). */
+  tiers: z.object({
+    anonymous: z.object({
+      homepages: z.number().int().min(0),
+      keepDays: z.number().positive(),
+      uploads: z.object({
+        ticketMinutes: z.number().positive().max(60),
+        maxTotalBytes: z.number().int().positive(),
+        maxPhotos: z.number().int().min(0),
+        maxFileBytes: z.number().int().positive(),
+      }),
+    }),
+    free: z.object({ homepages: z.number().int().min(0), chatEdits: z.number().int().min(0) }),
+    paid: z.object({ allowancePercentOfMonthlyPrice: z.number().min(0).max(100), firstMonthExtraEur: z.number().min(0) }),
+    perIpGenerationsPerDay: z.number().int().positive(),
+    pools: z
+      .object({ anonymous: z.number().min(0).max(1), free: z.number().min(0).max(1), paid: z.number().min(0).max(1), warnAt: z.number().gt(0).max(1) })
+      .refine((p) => p.anonymous + p.free + p.paid <= 1 + 1e-9, { message: "the pools are shares of the daily cap and must add up to at most 1" }),
+    estimatesEur: z.object({ homepage: z.number().positive(), fullSite: z.number().positive(), chatEdit: z.number().positive() }),
+    junk: z.object({ minDescriptionChars: z.number().int().min(1), minClassifierConfidence: z.number().min(0).max(1) }),
+  }),
   plans: z.looseObject({
     paid: PaidPlan,
   }),
