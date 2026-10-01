@@ -8,7 +8,8 @@ import { Repo, createDb, createFsStorage, migrate, type Db } from "@sb/platform"
 import { JunkIntakeError, ModelClient, generateSite, type ModelRequest, type ModelResponse } from "../src/index.ts";
 
 /** Junk intake: a description the classifier can't place gets no Sonnet call, not even the photos' alt text. */
-const config = loadConfig();
+// The junk check is off in production config (owner, 2026-10-01); the mechanism is still tested at this value.
+const config = { ...loadConfig(), tiers: { ...loadConfig().tiers, junk: { minDescriptionChars: 40, minClassifierConfidence: 0.5 } } };
 let db: Db;
 let repo: Repo;
 let dir: string;

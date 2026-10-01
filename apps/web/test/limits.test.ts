@@ -21,6 +21,8 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const PASSWORD = "test-password-1234";
 // A higher daily cap, so the pools (shares of it) have room for every test in this file; the shares are config's.
 const config = structuredClone(loadConfig());
+// The junk check is off in production config (owner, 2026-10-01); the mechanism is still tested at these values.
+config.tiers.junk = { minDescriptionChars: 40, minClassifierConfidence: 0.5 };
 config.limits.dailyModelSpendCapEur = 100;
 const mail = memoryMailer();
 const sent: { name: keyof JobData; data: JobData[keyof JobData] }[] = [];
