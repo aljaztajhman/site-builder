@@ -1,7 +1,7 @@
 import type { AppConfig } from "@sb/config";
 import { VersionConflictError, type Repo, type Storage } from "@sb/platform";
 import { contentType } from "@sb/platform";
-import { mediaFiles, siteFiles, exportZip, sharedBundle } from "@sb/render";
+import { mediaFiles, siteFiles, exportZip } from "@sb/render";
 import { blockerText, publishChecklist, type ImageAsset, type PublishBlocker, type SiteSpec } from "@sb/spec";
 import type { Operation } from "fast-json-patch";
 import { ModelOutputError, SpendCapError, type ModelClient } from "./llm/client.ts";
@@ -12,6 +12,7 @@ import type { ImageGenerator } from "./image-gen.ts";
 import { checkSite, type CheckBrowser, type SiteCheckReport } from "./check/index.ts";
 import { typedText } from "./editor.ts";
 import { checkFacts } from "./facts.ts";
+import { newReleaseId, writeRelease } from "./published.ts";
 
 export interface PipelineDeps {
   config: AppConfig;
@@ -28,7 +29,6 @@ export interface PipelineDeps {
 
 export const mediaKey = (siteId: string, file: string) => `sites/${siteId}/media/${file}`;
 export const uploadKey = (siteId: string, assetId: string) => `sites/${siteId}/uploads/${assetId}`;
-export const publishedPrefix = "published";
 
 export async function loadMedia(storage: Storage, siteId: string, spec: SiteSpec, widths: number[]): Promise<Map<string, Uint8Array>> {
   const media = new Map<string, Uint8Array>();
@@ -269,7 +269,7 @@ export class PublishBlockedError extends Error {
   }
 }
 
-/** Step 6: render static files to storage under published/{slug}/ and published/_shared/{hash}/. */
+/** Step 6: render static files to storage as a new release and switch the live site to it (published.ts). */
 export async function publishSite(deps: Pick<PipelineDeps, "repo" | "storage" | "config">, siteId: string, version?: number): Promise<{ version: number; files: number }> {
   const { repo, storage, config } = deps;
   const site = await repo.getSite(siteId);
@@ -281,15 +281,10 @@ export async function publishSite(deps: Pick<PipelineDeps, "repo" | "storage" | 
   if (checklist.length) throw new PublishBlockedError(checklist);
   const media = await loadMedia(storage, siteId, current.spec, config.images.widths);
   const files = siteFiles(current.spec, media, { imageWidths: config.images.widths });
-  await storage.deletePrefix(`${publishedPrefix}/${site.slug}/`);
-  const hash = sharedBundle().hash;
-  const sharedExists = (await storage.list(`${publishedPrefix}/_shared/${hash}/`)).length > 0;
-  for (const [rel, data] of files) {
-    if (rel.startsWith("_shared/") && sharedExists) continue;
-    await storage.put(`${publishedPrefix}/${rel}`, data, contentType(rel));
-  }
+  const release = newReleaseId(current.version);
+  await writeRelease(storage, site.slug, release, files);
   await repo.markPublished(siteId, current.version);
-  await repo.addEvent({ siteId, stage: "publish", message: `Published version ${current.version}`, data: { files: files.size } });
+  await repo.addEvent({ siteId, stage: "publish", message: `Published version ${current.version}`, data: { files: files.size, release } });
   return { version: current.version, files: files.size };
 }
 

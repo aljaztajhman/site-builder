@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { SPEC_VERSION } from "@sb/spec";
@@ -107,8 +107,15 @@ describe("fs storage", () => {
     expect(new TextDecoder().decode((await s.get("sites/a/one.txt"))!)).toBe("1");
     expect(await s.get("missing")).toBeNull();
     expect(await s.list("sites/a/")).toEqual(["sites/a/one.txt", "sites/a/sub/two.txt"]);
+    await s.put("sites/b/keep.txt", new TextEncoder().encode("3"), "text/plain");
     await s.deletePrefix("sites/a/");
-    expect(await s.list("sites/")).toEqual([]);
+    expect(await s.list("sites/")).toEqual(["sites/b/keep.txt"]);
+    // No empty folders left behind, and nothing outside the prefix touched.
+    expect(await readdir(path.join(dir, "sites"))).toEqual(["b"]);
+    // Writes land whole (temporary file, then rename) and the temporary file never lists.
+    await s.put("sites/b/keep.txt", new TextEncoder().encode("4"), "text/plain");
+    expect(await readdir(path.join(dir, "sites", "b"))).toEqual(["keep.txt"]);
+    expect(new TextDecoder().decode((await s.get("sites/b/keep.txt"))!)).toBe("4");
     await expect(s.put("../escape.txt", new Uint8Array(), "text/plain")).rejects.toThrow();
     await rm(dir, { recursive: true, force: true });
   });
