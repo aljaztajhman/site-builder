@@ -10,6 +10,7 @@ export * from "./photos.ts";
 export * from "./prompts.ts";
 export * from "./stages.ts";
 export * from "./pipeline.ts";
+export * from "./published.ts";
 export * from "./check/index.ts";
 export * from "./editor.ts";
 export type { Operation } from "fast-json-patch";
