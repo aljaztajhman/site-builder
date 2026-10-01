@@ -95,7 +95,8 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     // Published sites share the dashboard's origin: only our own scripts, and map embeds after consent.
     c.header(
       "Content-Security-Policy",
-      c.req.path.startsWith("/s/") || c.req.path.startsWith("/preview/")
+      // The landing page's example sites are rendered sites too (/assets/ui/<hash>/examples/…).
+      c.req.path.startsWith("/s/") || c.req.path.startsWith("/preview/") || /^\/assets\/ui\/[0-9a-f]+\/examples\//.test(c.req.path)
         ? `default-src 'self'; script-src 'self' '${JS_FLAG_HASH}'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-src https://www.google.com https://maps.google.com; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'self'`
         : `default-src 'self'; ${turnstileCsp(c.req.path) ? `script-src 'self' ${TURNSTILE_ORIGIN}; frame-src 'self' ${TURNSTILE_ORIGIN}` : "frame-src 'self'"}; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors ${
             // The landing page frames its example site (/assets/ui/<hash>/example-home.html).

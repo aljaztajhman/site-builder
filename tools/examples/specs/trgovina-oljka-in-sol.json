@@ -1,0 +1,590 @@
+{
+  "slug": "trgovina-oljka-in-sol",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Oljka in sol – istrske dobrote v Kopru",
+        "description": "Trgovina z izdelki manjših pridelovalcev iz slovenske Istre in Krasa v starem mestnem jedru Kopra. Darilni paketi in poslovna darila."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "type": "hero-split",
+          "props": {
+            "image": "img_01",
+            "intro": "Oljčno olje, piranska sol, med, pršut in še več. Prodajamo samo izdelke manjših pridelovalcev iz slovenske Istre in Krasa.",
+            "eyebrow": "Koper, staro mestno jedro",
+            "primary": {
+              "label": "Poglejte izdelke",
+              "target": {
+                "page": "p_izdelki"
+              }
+            },
+            "headline": "Istrske dobrote manjših pridelovalcev",
+            "secondary": {
+              "label": "Darilni paketi",
+              "target": {
+                "page": "p_darila"
+              }
+            }
+          },
+          "variant": "image-left"
+        },
+        {
+          "id": "s_strip",
+          "tone": "alt",
+          "type": "contact-strip",
+          "props": {
+            "title": "Obiščite nas"
+          },
+          "variant": "bar"
+        },
+        {
+          "id": "s_products",
+          "type": "products",
+          "props": {
+            "intro": "Cene so navedene tam, kjer jih imamo potrjene. Za ostale nas pokličite ali se oglasite v trgovini.",
+            "items": [
+              {
+                "name": "Ekstra deviško oljčno olje",
+                "image": "img_01",
+                "price": {
+                  "unit": "0,5 l",
+                  "amount": 14
+                },
+                "description": "Izdelek manjših pridelovalcev iz slovenske Istre in Krasa."
+              },
+              {
+                "name": "Piranska sol",
+                "image": "img_02",
+                "price": {
+                  "unit": "1 kg",
+                  "amount": 4.5
+                }
+              },
+              {
+                "name": "Pršut in siri",
+                "image": "img_05",
+                "price": {
+                  "note": "Vpišite ceno",
+                  "$placeholder": "price"
+                }
+              }
+            ],
+            "title": "Nekaj izdelkov iz trgovine",
+            "eyebrow": "Iz naše police"
+          },
+          "variant": "grid"
+        },
+        {
+          "id": "s_gift",
+          "tone": "alt",
+          "type": "image-text",
+          "props": {
+            "link": {
+              "label": "Več o darilih",
+              "target": {
+                "page": "p_darila"
+              }
+            },
+            "image": "img_03",
+            "eyebrow": "Darila",
+            "heading": "Darilni paketi po vaši želji",
+            "paragraphs": [
+              "Paket sestavimo skupaj z vami in ga lepo zavijemo. Naročilo po telefonu ali e-pošti, prevzem v trgovini.",
+              "Za podjetja pripravimo poslovna darila v večjih količinah."
+            ]
+          },
+          "variant": "image-left"
+        },
+        {
+          "id": "s_place",
+          "type": "image-text",
+          "props": {
+            "link": {
+              "label": "Navodila za pot",
+              "target": {
+                "action": "directions"
+              }
+            },
+            "image": "img_04",
+            "eyebrow": "Kje smo",
+            "heading": "Trgovina v starem mestnem jedru",
+            "paragraphs": [
+              "Najdete nas v kamniti hiši v ozki ulici starega Kopra. Pridite po olje, sol ali darilo."
+            ]
+          },
+          "variant": "image-right"
+        }
+      ]
+    },
+    {
+      "id": "p_izdelki",
+      "nav": {
+        "show": true,
+        "label": "Izdelki"
+      },
+      "seo": {
+        "title": "Izdelki – Oljka in sol, Koper",
+        "description": "Oljčno olje, piranska sol, med, vino, pršut, siri, suhe fige in testenine manjših pridelovalcev iz slovenske Istre in Krasa."
+      },
+      "kind": "standard",
+      "slug": "izdelki",
+      "sections": [
+        {
+          "id": "s_head",
+          "type": "page-header",
+          "props": {
+            "image": "img_05",
+            "intro": "Samo izdelki manjših pridelovalcev iz slovenske Istre in Krasa.",
+            "title": "Izdelki",
+            "eyebrow": "Istra in Kras"
+          },
+          "variant": "with-image"
+        },
+        {
+          "id": "s_products_izdelki",
+          "type": "products",
+          "props": {
+            "intro": "Cene, ki jih tu ne vidite, vam povemo v trgovini ali po telefonu.",
+            "items": [
+              {
+                "name": "Ekstra deviško oljčno olje",
+                "image": "img_01",
+                "price": {
+                  "unit": "0,5 l",
+                  "amount": 14
+                },
+                "description": "Izdelek manjših pridelovalcev iz slovenske Istre in Krasa."
+              },
+              {
+                "name": "Piranska sol",
+                "image": "img_02",
+                "price": {
+                  "unit": "1 kg",
+                  "amount": 4.5
+                }
+              },
+              {
+                "name": "Med",
+                "price": {
+                  "note": "Vpišite ceno",
+                  "$placeholder": "price"
+                }
+              },
+              {
+                "name": "Vino",
+                "price": {
+                  "note": "Vpišite ceno",
+                  "$placeholder": "price"
+                }
+              },
+              {
+                "name": "Pršut",
+                "image": "img_05",
+                "price": {
+                  "note": "Vpišite ceno",
+                  "$placeholder": "price"
+                }
+              },
+              {
+                "name": "Siri",
+                "price": {
+                  "note": "Vpišite ceno",
+                  "$placeholder": "price"
+                }
+              },
+              {
+                "name": "Suhe fige",
+                "price": {
+                  "note": "Vpišite ceno",
+                  "$placeholder": "price"
+                }
+              },
+              {
+                "name": "Marmelade iz fig",
+                "price": {
+                  "note": "Vpišite ceno",
+                  "$placeholder": "price"
+                }
+              },
+              {
+                "name": "Domače testenine",
+                "price": {
+                  "note": "Vpišite ceno",
+                  "$placeholder": "price"
+                }
+              }
+            ],
+            "title": "Kaj najdete pri nas"
+          },
+          "variant": "grid"
+        },
+        {
+          "id": "s_cta",
+          "tone": "inverse",
+          "type": "cta",
+          "props": {
+            "text": "Pokličite nas ali se oglasite v trgovini v starem mestnem jedru Kopra.",
+            "heading": "Iščete določen izdelek?",
+            "primary": {
+              "label": "Pokličite nas",
+              "target": {
+                "action": "call"
+              }
+            },
+            "secondary": {
+              "label": "Navodila za pot",
+              "target": {
+                "action": "directions"
+              }
+            }
+          },
+          "variant": "band"
+        }
+      ]
+    },
+    {
+      "id": "p_darila",
+      "nav": {
+        "show": true,
+        "label": "Darila"
+      },
+      "seo": {
+        "title": "Darilni paketi in poslovna darila – Koper",
+        "description": "Darilni paketi po vaši želji in poslovna darila v večjih količinah. Naročilo po telefonu ali e-pošti, prevzem v trgovini v Kopru."
+      },
+      "kind": "standard",
+      "slug": "darila",
+      "sections": [
+        {
+          "id": "s_head_darila",
+          "type": "page-header",
+          "props": {
+            "intro": "Istrske dobrote, lepo zavite. Za zasebnike in podjetja.",
+            "title": "Darilni paketi in poslovna darila",
+            "eyebrow": "Darila"
+          },
+          "variant": "plain"
+        },
+        {
+          "id": "s_box",
+          "type": "image-text",
+          "props": {
+            "link": {
+              "label": "Naročite po e-pošti",
+              "target": {
+                "action": "email"
+              }
+            },
+            "image": "img_03",
+            "heading": "Darilni paket (gift box)",
+            "paragraphs": [
+              "Sestavimo ga po vaši želji in lepo zavijemo. Cena paketa je od 25 €.",
+              "Naročilo po telefonu ali e-pošti, prevzem v trgovini."
+            ]
+          },
+          "variant": "image-left"
+        },
+        {
+          "id": "s_biz",
+          "tone": "alt",
+          "type": "text",
+          "props": {
+            "heading": "Poslovna darila",
+            "paragraphs": [
+              "Za podjetja pripravimo darila v večjih količinah. Za ponudbo nas pokličite ali nam pišite."
+            ]
+          },
+          "variant": "narrow"
+        },
+        {
+          "id": "s_steps",
+          "type": "steps",
+          "props": {
+            "steps": [
+              {
+                "text": "Povejte nam, kaj želite v paketu in koliko daril potrebujete.",
+                "title": "Pokličite ali pišite"
+              },
+              {
+                "text": "Izdelke izberemo in darilo lepo zavijemo.",
+                "title": "Paket pripravimo"
+              },
+              {
+                "text": "Paket prevzamete v trgovini v starem mestnem jedru Kopra.",
+                "title": "Prevzem v trgovini"
+              }
+            ],
+            "action": {
+              "label": "Pokličite nas",
+              "target": {
+                "action": "call"
+              }
+            },
+            "heading": "Kako naročite (click & collect)"
+          },
+          "variant": "vertical"
+        }
+      ]
+    },
+    {
+      "id": "p_kontakt",
+      "nav": {
+        "show": true,
+        "label": "Kontakt"
+      },
+      "seo": {
+        "title": "Kontakt – Oljka in sol, Koper",
+        "description": "Kidričeva ulica 22, Koper. Delovni čas, telefon in e-pošta trgovine Oljka in sol."
+      },
+      "kind": "standard",
+      "slug": "kontakt",
+      "sections": [
+        {
+          "id": "s_head_kontakt",
+          "type": "page-header",
+          "props": {
+            "intro": "Trgovina v starem mestnem jedru Kopra. Naročila sprejemamo po telefonu in e-pošti.",
+            "title": "Kontakt"
+          },
+          "variant": "plain"
+        },
+        {
+          "id": "s_contact",
+          "type": "contact",
+          "props": {
+            "title": "Kako do nas"
+          },
+          "variant": "split-map"
+        },
+        {
+          "id": "s_hours",
+          "tone": "alt",
+          "type": "opening-hours",
+          "props": {
+            "note": "Julija in avgusta smo odprti tudi ob nedeljah od 9.00 do 12.00.",
+            "title": "Delovni čas"
+          },
+          "variant": "compact"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Oljka in sol",
+        "description": "Kako Oljka in sol obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Oljka in sol",
+        "description": "Izjava o dostopnosti spletne strani Oljka in sol."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Oljka in sol",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "images": [
+      {
+        "id": "img_01",
+        "alt": "Lesene police s steklenicami zlatega oljčnega olja, kozarci in košaro česna, ob oknu z razgledom na vas s cerkvijo.",
+        "src": "sites/site_1129a87d269512bd/uploads/photo0.jpg",
+        "focal": {
+          "x": 0.35,
+          "y": 0.35
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_02",
+        "alt": "Pletena košara z lanenimi vrečkami in papirnatimi embalažami morske soli na lesenem pultu.",
+        "src": "sites/site_1129a87d269512bd/uploads/photo1.jpg",
+        "focal": {
+          "x": 0.45,
+          "y": 0.6
+        },
+        "width": 1024,
+        "height": 1536
+      },
+      {
+        "id": "img_03",
+        "alt": "Darilna škatla s steklenico oljčnega olja, vrečko morske soli in kozarcem medu v lesni volni na leseni mizi.",
+        "src": "sites/site_1129a87d269512bd/uploads/photo2.jpg",
+        "focal": {
+          "x": 0.55,
+          "y": 0.55
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_04",
+        "alt": "Vhod v trgovino v kamniti hiši z lesenimi vrati, lonci z oljkami in rožami ter klopjo v ozki tlakovani ulici.",
+        "src": "sites/site_1129a87d269512bd/uploads/photo3.jpg",
+        "focal": {
+          "x": 0.4,
+          "y": 0.5
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_05",
+        "alt": "Narezan pršut in kosi sira na lesenih deskah s nožem na pultu v trgovini.",
+        "src": "sites/site_1129a87d269512bd/uploads/photo4.jpg",
+        "focal": {
+          "x": 0.3,
+          "y": 0.55
+        },
+        "width": 1024,
+        "height": 1536
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "variant": "columns"
+    },
+    "header": {
+      "cta": "call",
+      "variant": "split-cta"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.25,
+    "colors": {
+      "text": "#221b17",
+      "muted": "#5b504a",
+      "accent": "#b28e6a",
+      "border": "#d9e0dc",
+      "inverse": "#2b211c",
+      "primary": "#6f4e2a",
+      "surface": "#edf2ef",
+      "onInverse": "#ffffff",
+      "onPrimary": "#ffffff",
+      "background": "#ffffff"
+    },
+    "radius": 6,
+    "shadow": "none",
+    "density": "regular",
+    "imagery": "offset-block",
+    "fontPair": "fraunces-source-sans",
+    "direction": "warm-craft",
+    "headingCase": "normal",
+    "baseFontSize": 17,
+    "headingWeight": 600,
+    "headingTracking": -0.01
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Oljka in sol",
+    "type": "shop",
+    "email": "narocila@oljka-in-sol.example",
+    "hours": {
+      "note": "Julija in avgusta smo odprti tudi ob nedeljah od 9.00 do 12.00.",
+      "entries": [
+        {
+          "to": "fri",
+          "from": "mon",
+          "open": "08:00",
+          "close": "19:00"
+        },
+        {
+          "to": "sat",
+          "from": "sat",
+          "open": "08:00",
+          "close": "13:00"
+        },
+        {
+          "to": "sun",
+          "from": "sun",
+          "closed": true
+        }
+      ]
+    },
+    "phone": "+38655551860",
+    "address": {
+      "city": "Koper",
+      "street": "Kidričeva ulica 22",
+      "postalCode": "6000"
+    },
+    "provider": {
+      "legalName": "Oljka in sol, trgovina, d.o.o.",
+      "taxNumber": "SI91234567",
+      "registrationNumber": "9123456000"
+    }
+  },
+  "specVersion": 3
+}

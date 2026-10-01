@@ -36,6 +36,69 @@ const io = new IntersectionObserver(
 );
 for (const s of document.querySelectorAll("#kako, .win")) io.observe(s);
 
+/**
+ * The hero demo: the description is typed, "Ustvari" pressed, the build steps tick, the example site
+ * appears on a phone, then the frame widens to a computer and the same page re-flows. Loops while in
+ * view. Without JavaScript, or with reduced motion, the phone view stays (no data-step).
+ */
+const demo = document.querySelector<HTMLElement>("[data-demo]");
+if (demo) {
+  const stage = demo.querySelector<HTMLElement>(".demo-stage")!;
+  const frame = demo.querySelector<HTMLIFrameElement>(".demo-screen iframe")!;
+  const text = demo.querySelector<HTMLElement>(".demo-text")!;
+  const full = text.dataset.text ?? text.textContent ?? "";
+  // Phone and computer sizes from the column width: the site is shown at 360 and at 1280 px, scaled.
+  const size = () => {
+    const w = stage.clientWidth;
+    const pw = Math.min(280, w - 24);
+    const ph = Math.round(pw * 1.95);
+    const dh = Math.round(w * 0.62) + 24;
+    const vars: Record<string, string> = { "--pw": `${pw}px`, "--ph": `${ph}px`, "--ps": String(pw / 360), "--dw": `${w}px`, "--dh": `${dh}px`, "--ds": String(w / 1280), "--stage-h": `${Math.max(ph, dh) + 24}px` };
+    for (const [k, v] of Object.entries(vars)) demo.style.setProperty(k, v);
+  };
+  size();
+  addEventListener("resize", size);
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    let timers: number[] = [];
+    const at = (ms: number, run: () => void) => timers.push(window.setTimeout(run, ms));
+    const scrollSite = (top: number) => {
+      try {
+        frame.contentWindow?.scrollTo({ top, behavior: "smooth" });
+      } catch {
+        // Not loaded yet: the demo goes on without the scroll.
+      }
+    };
+    const play = () => {
+      timers.forEach(clearTimeout);
+      timers = [];
+      demo.dataset.step = "type";
+      text.textContent = "";
+      scrollSite(0);
+      const typing = Math.round(full.length / 3) * 40;
+      for (let i = 3; i <= full.length + 2; i += 3) at((i / 3) * 40, () => (text.textContent = full.slice(0, i)));
+      at(typing + 500, () => (demo.dataset.step = "build"));
+      at(typing + 3100, () => (demo.dataset.step = "phone"));
+      at(typing + 5600, () => scrollSite(320));
+      at(typing + 8000, () => {
+        scrollSite(0);
+        demo.dataset.step = "desk";
+      });
+      at(typing + 14500, play);
+    };
+    const stop = () => {
+      timers.forEach(clearTimeout);
+      timers = [];
+    };
+    // Only while the hero is on screen.
+    new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) play();
+        else stop();
+      }
+    }, { threshold: 0.3 }).observe(demo);
+  }
+}
+
 const form = document.querySelector<HTMLFormElement>("form[data-home-intake]");
 const ta = form?.querySelector("textarea");
 // Back from the login with what was typed before it: fill it in and open the control that was asked for.
