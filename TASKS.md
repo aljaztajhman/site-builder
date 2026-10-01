@@ -3,6 +3,11 @@
 Product brief and roadmap: docs/PRODUCT.md. Phase plans: docs/phases/. Tick only what has been run and checked.
 Work top-down: finish the current phase's "Done means" before starting the next phase.
 
+## Mandatory before public launch
+
+Nothing is opened to the public until every item here is done (owner, 2026-10-01).
+- [ ] **Free generation limits** (plan: docs/plans/free-generation-limits.md; not started). One free homepage without an account, more with a free account, a monthly € AI allowance on paid plans; spending pools per tier under the global cap; rate limits per device, IP hash and email; bot check; junk-intake refusal; deployed smoke test. Numbers wait on `sb-free-tiers`, `sb-bot-check`, `sb-ai-allowance`. Today the only guard is the €10/day global cap, which one script can use up in ~40 previews
+
 ## Now: close phase 1 (docs/phases/PHASE-1.md "Done means")
 
 Status against "Done means" (2026-09-29):
@@ -29,7 +34,7 @@ Status against "Done means" (2026-09-29):
 
 Draft plan: docs/phases/PHASE-2.md — 5 decisions there are the owner's (sign-in method, who gets full sites before billing, Puck vs current editor, email domain, production env). Scope:
 - [ ] Accounts: email + magic link sign-in, sessions, one owner per site (replaces the shared access password for clients; keep it for the internal dashboard)
-- [ ] Free preview limits from PRODUCT.md: homepage only, watermarked, not publishable, email-verified, rate-limited per email/IP; limits in config
+- [ ] Free preview limits: now a launch blocker, see "Mandatory before public launch" and docs/plans/free-generation-limits.md
 - [ ] Visual editor: evaluate Puck against the current direct editor (schema-driven forms + inline text); decide, then build the chosen path. Must stay spec-only (every edit is a spec change)
 - [x] Contact forms (2026-09-29): `contact-form` section (spec v2, identity migration, stored specs migrated on read), plain-HTML form + `form.js` island, public `_submit` endpoint (published forms only, honeypot, per-sender and per-site rate limits, IP kept only as a keyed hash, cleared after a day), messages page with delete in the dashboard, privacy policy text when a site has a form, CSP `form-action`/`connect-src 'self'`. Tested: unit + endpoint (12), Chromium end to end over HTTP (JS at 360 px, no JS, preview sends nothing, CSP regression caught), offline eval 10/10 with a form on racunovodstvo-seliskar (LH 99/100/100/100, axe 0), live chat edit "add a contact form" → valid `contact-form` first try (€0.05); `remote-smoke.ts` submits and deletes a test message
 - [ ] Contact form email notification to the owner (Resend) — waits on the sending-domain decision
