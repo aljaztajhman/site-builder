@@ -57,10 +57,12 @@ interface Save {
 /** A site whose versions were saved at the given instants, oldest first. */
 async function siteWith(slug: string, base: SiteSpec, saves: Save[]): Promise<string> {
   const site = await platform.repo.createSite({ name: slug, slug, intake: { description: "x", photoAssetIds: [], scope: "home" } });
-  for (const s of saves) {
-    const v = await platform.repo.saveSpec(site.id, withHeadline({ ...base, slug }, s.headline), s.source, s.message);
-    await platform.db.query("update spec_versions set created_at = $3 where site_id = $1 and version = $2", [site.id, v, s.at]);
-  }
+  const versions: number[] = [];
+  for (const s of saves) versions.push(await platform.repo.saveSpec(site.id, withHeadline({ ...base, slug }, s.headline), s.source, s.message));
+  await platform.db.query(
+    "update spec_versions v set created_at = t.at from (select unnest($2::integer[]) as version, unnest($3::timestamptz[]) as at) t where v.site_id = $1 and v.version = t.version",
+    [site.id, versions, saves.map((s) => s.at)],
+  );
   await platform.repo.setStatus(site.id, "ready");
   return site.id;
 }
