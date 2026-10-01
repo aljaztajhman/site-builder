@@ -61,8 +61,17 @@ interface State {
   checklist: BlockerLike[];
   blockers: string[];
   messages: number;
-  spendToday: number;
-  cap: number;
+  /** Model spend today and the cap: the admin only (null for owners). */
+  spendToday: number | null;
+  cap: number | null;
+  /** What this viewer may do here and has left (apps/web/src/limits.ts AccessInfo); absent before accounts. */
+  access?: {
+    viewer: "anonymous" | "free" | "paid" | "admin";
+    can: { edit: boolean; chat: boolean; regenerate: boolean; publish: boolean; export: boolean; fullSite: boolean };
+    allowance: { text: string };
+    expiresAt: string | null;
+    signIn: string | null;
+  };
   /** Server time of this response (ISO). */
   now: string;
 }
@@ -71,6 +80,8 @@ const root = document.getElementById("app")!;
 const siteId = root.dataset.siteId!;
 let state: State;
 let catalogue: Catalogue | null = null;
+/** Whether the viewer may do this here; true when the server sends no access info. */
+const can = (k: "edit" | "chat" | "regenerate" | "publish" | "export"): boolean => state.access?.can[k] ?? true;
 /** What the panel shows: "content" is the page (or the selected section); the rest open from shortcuts, taps and the ⋯ menu. */
 type Tab = "content" | "facts" | "photos" | "design" | "pages" | "versions" | "chat" | "diag" | "add" | "image";
 let tab: Tab = "content";
@@ -1026,7 +1037,7 @@ function diagPane(): HTMLElement {
   const total = state.cost.reduce((a, c) => a + c.eur, 0);
   return h("div", { class: "pane" },
     paneHead("Poraba in dnevnik"),
-    h("p", { class: "help num" }, `Danes ${formatEur(state.spendToday)} od ${formatEur(state.cap)} (vse strani). Ta stran skupaj: ${formatEur(total)}.`),
+    h("p", { class: "help num" }, state.spendToday !== null && state.cap !== null ? `Danes ${formatEur(state.spendToday)} od ${formatEur(state.cap)} (vse strani). Ta stran skupaj: ${formatEur(total)}.` : `Ta stran skupaj: ${formatEur(total)}.`),
     h("table", {},
       h("tr", {}, h("th", {}, "Faza"), h("th", { class: "num" }, "Klici"), h("th", { class: "num" }, "Vhod"), h("th", { class: "num" }, "Izhod"), h("th", { class: "num" }, "€")),
       ...state.cost.map((c) => h("tr", {}, h("td", {}, COST_STAGE[c.stage] ?? c.stage), h("td", { class: "num" }, n0(c.calls)), h("td", { class: "num" }, n0(c.input + c.cacheRead + c.cacheWrite)), h("td", { class: "num" }, n0(c.output)), h("td", { class: "num" }, c.eur.toLocaleString("sl-SI", { minimumFractionDigits: 3, maximumFractionDigits: 3 })))),
@@ -1039,7 +1050,7 @@ function diagPane(): HTMLElement {
 
 // ---------- The assistant box under the preview: say what to change ----------
 /** Built once and kept, so a re-render never wipes what the owner is typing. */
-let dock: { root: HTMLElement; input: HTMLTextAreaElement; status: HTMLElement; chips: HTMLElement; send: HTMLButtonElement } | null = null;
+let dock: { root: HTMLElement; input: HTMLTextAreaElement; status: HTMLElement; chips: HTMLElement; send: HTMLButtonElement; note: HTMLElement } | null = null;
 
 /** A few things owners ask for, offered while the box is empty; a tap fills the box, it doesn't send. */
 function suggestions(): string[] {
@@ -1082,8 +1093,9 @@ function buildDock(): HTMLElement {
   const send = h("button", { class: "btn primary sm", type: "button", onClick: () => void sendToAssistant() }, "Pošlji") as HTMLButtonElement;
   const status = h("div", { class: "ask-status", role: "status" });
   const chips = h("div", { class: "sugg" });
-  const root = h("div", { class: "ask-dock" }, status, chips, h("div", { class: "ask" }, input, send));
-  dock = { root, input, status, chips, send };
+  const note = h("p", { class: "ask-note" });
+  const root = h("div", { class: "ask-dock" }, status, chips, h("div", { class: "ask" }, input, send), note);
+  dock = { root, input, status, chips, send, note };
   return root;
 }
 
@@ -1093,7 +1105,14 @@ function renderDock(): void {
   dock.root.hidden = !state.spec;
   const busy = state.site.status === "editing" || awaitingReply();
   const last = state.chat.at(-1);
-  dock.send.disabled = busy || state.site.status === "generating";
+  const allowed = can("chat");
+  dock.send.disabled = busy || state.site.status === "generating" || !allowed;
+  dock.input.disabled = !allowed;
+  dock.input.placeholder = allowed ? "Kaj naj spremenimo?" : state.access?.viewer === "anonymous" ? "Pomočnik je na voljo po prijavi" : "Spremembe s pomočnikom ste porabili";
+  // What's left, in one sentence (the admin has no limits, so no note).
+  const left = state.access && state.access.viewer !== "admin" ? state.access.allowance.text : "";
+  dock.note.textContent = left;
+  dock.note.hidden = !left;
   dock.status.replaceChildren(
     ...(busy
       ? [h("span", { class: "busy-dot", "aria-hidden": "true" }), "Urejam stran …"]
@@ -1102,9 +1121,22 @@ function renderDock(): void {
         : []),
   );
   dock.chips.replaceChildren(
-    ...(busy || dock.input.value.trim()
+    ...(busy || dock.input.value.trim() || !allowed
       ? []
       : suggestions().map((s) => h("button", { type: "button", onClick: () => { dock!.input.value = s; dock!.input.focus(); renderDock(); } }, s))),
+  );
+}
+
+/** A preview made without an account: what it is, how long it stays, and the one step to keep and edit it. */
+function guestPane(): HTMLElement {
+  const a = state.access;
+  const until = a?.expiresAt ? new Date(a.expiresAt).toLocaleDateString("sl-SI", { day: "numeric", month: "long" }) : null;
+  return h("div", { class: "pane guest" },
+    h("h2", { class: "pane-title" }, "Vaš brezplačni predogled"),
+    h("p", {}, "Prijavite se z e-pošto, pa stran shranimo pod vaše ime. Potem jo urejate s tapom na besedilo, s pomočnikom in jo, ko bo pripravljena, objavite."),
+    until ? h("p", { class: "help" }, `Brez prijave predogled hranimo do ${until}.`) : null,
+    a?.signIn ? h("a", { class: "btn primary", href: a.signIn }, "Shrani in uredi") : null,
+    a?.allowance.text ? h("p", { class: "help" }, a.allowance.text) : null,
   );
 }
 
@@ -1347,7 +1379,7 @@ function factAt(t: HTMLElement): string | null {
 
 function attachEditing(): void {
   const doc = frame?.contentDocument;
-  if (!doc || !editMode) return;
+  if (!doc || !editMode || !can("edit")) return;
   const style = doc.createElement("style");
   style.textContent = EDIT_CSS;
   doc.head.append(style);
@@ -1583,6 +1615,7 @@ function topItems(): Child[] {
   ];
   // Nothing to undo, open or publish before the first version exists.
   if (!state.spec) return head;
+  if (!can("edit")) return [...head, state.access?.signIn ? h("a", { class: "btn sm primary", href: state.access.signIn }, "Shrani in uredi") : null];
   const todo = state.checklist.length;
   return [
     ...head,
@@ -1598,6 +1631,11 @@ function topItems(): Child[] {
         type: "button",
         "aria-describedby": state.checklist.length ? "checklist-summary" : undefined,
         onClick: async () => {
+          // A free account can build and edit, not publish yet: say so instead of a refusal after the tap.
+          if (!can("publish")) {
+            toast = "Objava je na voljo z naročnino. Med preizkusom jo omogočamo izbranim podjetjem.";
+            return showToast();
+          }
           if (state.checklist.length) return openChecklist();
           // Publishes the version on screen, after any text still waiting to be saved.
           await queued(async () => {
@@ -1627,15 +1665,15 @@ function moreMenu(): HTMLElement {
       h("button", { type: "button", onClick: go("versions") }, "Zgodovina sprememb"),
       h("a", { href: previewUrl(), target: "_blank" }, "Predogled v novem zavihku"),
       s.published_version ? h("a", { href: `/s/${s.slug}/`, target: "_blank" }, "Odpri objavljeno stran") : null,
-      h("a", { href: `/api/sites/${siteId}/export` }, "Prenesi stran (.zip)"),
-      h("button", {
+      can("export") ? h("a", { href: `/api/sites/${siteId}/export` }, "Prenesi stran (.zip)") : null,
+      !can("regenerate") ? null : h("button", {
         type: "button",
         disabled: s.status === "generating",
         onClick: () => {
           if (confirm("Ustvarim celotno stran znova? Podatki o podjetju ostanejo, besedila in postavitev so nova. Trenutna vsebina ostane v zgodovini, zato jo lahko obnovite.")) void post("/generate", { scope: "full" }, "Ustvarjanje se je začelo.");
         },
       }, "Ustvari celotno stran znova"),
-      h("button", { type: "button", onClick: go("diag") }, "Poraba in dnevnik"),
+      !state.access || state.access.viewer === "admin" ? h("button", { type: "button", onClick: go("diag") }, "Poraba in dnevnik") : null,
     ),
   );
   menu.addEventListener("toggle", () => (menuOpen = menu.open));
@@ -1703,7 +1741,8 @@ function render(): void {
       statusBlock(),
       checklistBlock(),
       !state.spec && state.site.status !== "generating" && state.site.status !== "failed" ? h("div", { class: "pane" }, h("p", { class: "muted" }, "Stran še nima vsebine.")) : null,
-      state.spec ? { content: contentPane, facts: factsPane, photos: photosPane, design: designPane, pages: pagesPane, versions: versionsPane, chat: chatPane, diag: diagPane, add: addPane, image: imagePane }[tab]() : null,
+      state.spec && !can("edit") ? guestPane() : null,
+      state.spec && can("edit") ? { content: contentPane, facts: factsPane, photos: photosPane, design: designPane, pages: pagesPane, versions: versionsPane, chat: chatPane, diag: diagPane, add: addPane, image: imagePane }[tab]() : null,
     ].filter((c): c is HTMLElement => c !== null),
   );
   shell.bar.replaceChildren(...barItems().filter((c): c is Node => c instanceof Node));
