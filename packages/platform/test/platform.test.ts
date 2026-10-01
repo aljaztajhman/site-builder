@@ -3,7 +3,7 @@ import { mkdtemp, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { SPEC_VERSION } from "@sb/spec";
-import { createDb, createFsStorage, createQueue, migrate, Repo, type Db } from "../src/index.ts";
+import { MIGRATIONS, createDb, createFsStorage, createQueue, migrate, Repo, type Db } from "../src/index.ts";
 
 let db: Db;
 let repo: Repo;
@@ -20,6 +20,11 @@ afterAll(async () => {
 describe("migrations", () => {
   it("are idempotent", async () => {
     expect(await migrate(db)).toEqual([]);
+  });
+
+  it("have unique, increasing ids (two branches adding the same id would skip one on deployed databases)", () => {
+    const ids = MIGRATIONS.map((m) => m.id);
+    expect(ids).toEqual([...new Set(ids)].sort((a, b) => a - b));
   });
 });
 

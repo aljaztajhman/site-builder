@@ -112,12 +112,21 @@ async function shot(page: Page, name: string) {
   await page.screenshot({ path: path.join(out, `${name}.png`), fullPage: false });
 }
 
-/** Types a description on the landing page and presses "Ustvari"; resolves after the next page loads. */
+/**
+ * Types a description on the landing page and presses "Ustvari". Resolves when the next page has loaded,
+ * or (without an account, refused at the ticket) when the refusal shows above the form on the same page.
+ */
 async function create(page: Page, description: string, scope?: "full") {
   await page.goto(`${base}/#zacni`);
   await page.locator("#opis").fill(description);
   if (scope) await page.locator("label[for=scope-full]").click();
-  await Promise.all([page.waitForNavigation(), page.getByRole("button", { name: "Ustvari" }).click()]);
+  const navigated = page.waitForNavigation({ timeout: 30_000 }).then(() => "page");
+  const refused = page.locator(".note.bad").waitFor({ timeout: 30_000 }).then(() => "note");
+  navigated.catch(() => undefined);
+  refused.catch(() => undefined);
+  await page.getByRole("button", { name: "Ustvari" }).click();
+  await Promise.race([navigated, refused]);
+  await page.waitForLoadState();
 }
 
 const DESCRIPTION = "Pekarna Kvas v Kamniku, Šutna 30. Kruh z drožmi, rogljički in potica. Odprto vsak dan od 7.00 do 13.00.";

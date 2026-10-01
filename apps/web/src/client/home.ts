@@ -111,36 +111,76 @@ if (form) {
       else delete label.dataset.count;
     });
   }
-  let waitedForBot = false;
+  const button = form.querySelector<HTMLButtonElement>("button[type=submit]");
+  const busy = (label: string | null) => {
+    if (!button) return;
+    button.disabled = label !== null;
+    button.textContent = label ?? "Ustvari";
+  };
+  /** A refusal above the form; the text stays in it. */
+  const say = (text: string) => {
+    let note = document.querySelector<HTMLElement>(".hero .note.bad");
+    if (!note) {
+      note = document.createElement("p");
+      note.className = "note bad";
+      note.setAttribute("role", "alert");
+      form.before(note);
+    }
+    note.textContent = text;
+  };
+  const waitForBot = async () => {
+    const started = Date.now();
+    while (!botToken() && Date.now() - started < 15_000) await new Promise((r) => window.setTimeout(r, 200));
+  };
+  // Without an account (data-ticket): the caps first, then the text alone for a ticket (bot check and
+  // limits on the server, before any file is sent), then the form with its files, carrying the ticket.
+  const ticketUrl = form.dataset.ticket;
+  let sending = false;
   form.addEventListener("submit", (e) => {
-    const button = form.querySelector<HTMLButtonElement>("button[type=submit]");
-    // The bot check needs a moment for its token: wait for it once (at most 15 s), then send. Without a
-    // token the server refuses and the page comes back with the text kept.
-    if (bot && !botToken() && !waitedForBot) {
-      e.preventDefault();
-      waitedForBot = true;
-      loadBot();
-      if (button) {
-        button.disabled = true;
-        button.textContent = "Preverjam …";
-      }
-      const started = Date.now();
-      const wait = () => {
-        if (!botToken() && Date.now() - started < 15_000) return void window.setTimeout(wait, 200);
-        if (button) {
-          button.disabled = false;
-          button.textContent = "Ustvari";
-        }
-        form.requestSubmit();
-      };
-      wait();
+    if (!ticketUrl) {
+      // Signed in: the form goes as it is. Disabled after the submit event, so the button's value still counts.
+      window.setTimeout(() => busy("Nalagam …"));
       return;
     }
-    if (!button) return;
-    // Disabled after the submit event has been handled, so the button's value still counts.
-    window.setTimeout(() => {
-      button.disabled = true;
-      button.textContent = "Nalagam …";
-    });
+    e.preventDefault();
+    if (sending) return;
+    const maxPhotos = Number(form.dataset.maxPhotos);
+    const maxBytes = Number(form.dataset.maxBytes);
+    const photos = form.querySelector<HTMLInputElement>("input[name=photos]")?.files?.length ?? 0;
+    const bytes = [...form.querySelectorAll<HTMLInputElement>("input[type=file]")].reduce((n, i) => n + [...(i.files ?? [])].reduce((m, f) => m + f.size, 0), 0);
+    if (photos > maxPhotos || bytes > maxBytes) return say(`Brez prijave lahko pošljete največ ${maxPhotos} fotografij, skupaj do ${Math.floor(maxBytes / 1e6)} MB. Izberite manj ali manjše.`);
+    sending = true;
+    busy("Preverjam …");
+    void (async () => {
+      try {
+        if (bot) {
+          loadBot();
+          await waitForBot();
+        }
+        const fields = new URLSearchParams({
+          _csrf: form.querySelector<HTMLInputElement>("input[name=_csrf]")?.value ?? "",
+          description: ta?.value ?? "",
+          "cf-turnstile-response": botToken(),
+        });
+        const res = await fetch(ticketUrl, { method: "POST", body: fields, headers: { accept: "application/json" } });
+        const r = (await res.json().catch(() => ({}))) as { ticket?: string; message?: string };
+        if (!res.ok || !r.ticket) {
+          say(r.message ?? "Pošiljanje ni uspelo. Poskusite znova.");
+          // A Turnstile token works once: a fresh one for the next try.
+          (window as { turnstile?: { reset(): void } }).turnstile?.reset();
+          busy(null);
+          sending = false;
+          return;
+        }
+        busy("Nalagam …");
+        form.action = `/api/sites?ticket=${encodeURIComponent(r.ticket)}`;
+        // The native submit: no submit event again, the files go as multipart.
+        form.submit();
+      } catch {
+        say("Pošiljanje ni uspelo. Preverite povezavo in poskusite znova.");
+        busy(null);
+        sending = false;
+      }
+    })();
   });
 }

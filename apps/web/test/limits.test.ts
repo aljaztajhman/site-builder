@@ -82,15 +82,50 @@ let ipCounter = 0;
 /** A fresh client address, so the per-IP limit only trips where a test means it to. */
 const freshIp = () => `203.0.113.${++ipCounter}`;
 
-/** The landing page's form, as a browser posts it. */
-async function intake(r: Req, b: Browser, opts: { description?: string; token?: string | null; ip?: string; scope?: string } = {}) {
+const anonymousOf = (b: Browser) => !/sb_(account|session)=/.test(b.cookie);
+
+/** Without an account, step 1 (as home.ts does it): the text alone for an upload ticket. */
+async function askTicket(r: Req, b: Browser, opts: { description?: string; token?: string | null; ip?: string } = {}) {
+  const fields = new URLSearchParams({ _csrf: b.csrf, description: opts.description ?? DESCRIPTION });
+  if (opts.token !== null) fields.set("cf-turnstile-response", opts.token ?? DUMMY_TOKEN);
+  return r("/api/intake/ticket", { method: "POST", body: fields, headers: { cookie: b.cookie, "x-forwarded-for": opts.ip ?? freshIp() } });
+}
+
+/** The landing page's form as a browser posts it: without an account, a ticket first, then the form carrying it. */
+async function intake(r: Req, b: Browser, opts: { description?: string; token?: string | null; ip?: string; scope?: string; photos?: File[] } = {}) {
+  const ip = opts.ip ?? freshIp();
+  let path = "/api/sites";
+  if (anonymousOf(b)) {
+    const ticket = await askTicket(r, b, { ...opts, ip });
+    if (ticket.status !== 200) return ticket;
+    path = `/api/sites?ticket=${encodeURIComponent(((await ticket.json()) as { ticket: string }).ticket)}`;
+  }
   const form = new FormData();
   form.set("_csrf", b.csrf);
   form.set("description", opts.description ?? DESCRIPTION);
   if (opts.scope) form.set("scope", opts.scope);
-  if (opts.token !== null) form.set("cf-turnstile-response", opts.token ?? DUMMY_TOKEN);
-  return r("/api/sites", { method: "POST", body: form, headers: { cookie: b.cookie, "x-forwarded-for": opts.ip ?? freshIp() } });
+  for (const p of opts.photos ?? []) form.append("photos", p);
+  return r(path, { method: "POST", body: form, headers: { cookie: b.cookie, "x-forwarded-for": ip } });
 }
+
+/** A request body that records how much of it the server read (nothing is pulled until it is read). */
+function trackedBody(totalBytes: number, chunkBytes = 64 * 1024) {
+  let pulled = 0;
+  const stream = new ReadableStream<Uint8Array>(
+    {
+      pull(controller) {
+        if (pulled >= totalBytes) return controller.close();
+        const n = Math.min(chunkBytes, totalBytes - pulled);
+        pulled += n;
+        controller.enqueue(new Uint8Array(n).fill(65));
+      },
+    },
+    { highWaterMark: 0 },
+  );
+  return { stream, pulled: () => pulled };
+}
+const streamed = (r: Req, path: string, b: Browser, body: ReadableStream<Uint8Array>, headers: Record<string, string> = {}) =>
+  r(path, { method: "POST", body, duplex: "half", headers: { cookie: b.cookie, "content-type": "multipart/form-data; boundary=xyz", ...headers } } as RequestInit);
 const siteOf = (res: Response) => res.headers.get("location")!.split("/").at(-1)!;
 const json = (cookie: string) => ({ cookie, "content-type": "application/json" });
 const chat = (b: Browser, siteId: string) => req(`/api/sites/${siteId}/chat`, { method: "POST", headers: json(b.cookie), body: JSON.stringify({ message: "Temnejša glava prosim" }) });
@@ -162,11 +197,10 @@ describe("anonymous: one homepage per device", () => {
     const other = await newBrowser(req);
     expect((await req(`/api/sites/${id}`, { headers: { cookie: other.cookie } })).status).toBe(401);
 
+    // Refused at the ticket, before any file is sent (the page keeps the text: limits-browser.test.ts).
     const second = await intake(req, b, { description: `${DESCRIPTION} Druga.` });
     expect(second.status).toBe(429);
-    const refused = await second.text();
-    expect(refused).toContain("Brezplačni predogled brez prijave ste že naredili.");
-    expect(refused).toContain(`${DESCRIPTION} Druga.</textarea>`);
+    expect(await second.json()).toMatchObject({ code: "anonymous_used", message: expect.stringContaining("Brezplačni predogled brez prijave ste že naredili."), signIn: "/login?next=%2F%23zacni" });
     // The landing page links the preview it already made.
     expect(await (await req("/", { headers: { cookie: b.cookie } })).text()).toContain(`href="/sites/${id}"`);
     expect(sent).toHaveLength(0);
@@ -176,8 +210,91 @@ describe("anonymous: one homepage per device", () => {
     const b = await newBrowser(req);
     const results = await Promise.all(Array.from({ length: 10 }, (_, i) => intake(req, b, { description: `${DESCRIPTION} ${i}` })));
     expect(results.filter((r) => r.status === 303)).toHaveLength(1);
-    expect(results.filter((r) => r.status === 429)).toHaveLength(9);
+    // The rest: refused at the ticket (the preview is taken), or their ticket was ended by a newer one.
+    for (const r of results.filter((x) => x.status !== 303)) expect([403, 429]).toContain(r.status);
     await runQueued();
+  });
+
+  describe("uploads without an account", () => {
+    it("are refused before any of the body is read when there is no valid ticket", async () => {
+      const b = await newBrowser(req);
+      for (const path of ["/api/sites", "/api/sites?ticket=forged.ticket"]) {
+        const body = trackedBody(30_000_000);
+        const res = await streamed(req, path, b, body.stream, { "x-forwarded-for": freshIp() });
+        expect(res.status, path).toBe(403);
+        expect(await res.text()).toContain(path === "/api/sites" ? "vklopljen JavaScript" : "Obrazec je potekel");
+        expect(body.pulled(), path).toBe(0);
+      }
+      expect(sent).toHaveLength(0);
+    });
+
+    it("refuse a declared size over the cap unread, and give the reserved job back", async () => {
+      const b = await newBrowser(req);
+      const ticket = ((await (await askTicket(req, b)).json()) as { ticket: string }).ticket;
+      const body = trackedBody(1000);
+      const res = await streamed(req, `/api/sites?ticket=${encodeURIComponent(ticket)}`, b, body.stream, { "content-length": String(config.tiers.anonymous.uploads.maxTotalBytes + 1) });
+      expect(res.status).toBe(413);
+      expect(await res.text()).toContain(`skupaj največ ${Math.floor(config.tiers.anonymous.uploads.maxTotalBytes / 1e6)} MB`);
+      expect(body.pulled()).toBe(0);
+      // The device's preview isn't used up.
+      expect((await intake(req, b)).status).toBe(303);
+      await runQueued();
+    });
+
+    it("cut off an undeclared body as it streams past the cap", async () => {
+      const b = await newBrowser(req);
+      const ticket = ((await (await askTicket(req, b)).json()) as { ticket: string }).ticket;
+      const cap = config.tiers.anonymous.uploads.maxTotalBytes;
+      const body = trackedBody(cap * 4);
+      const res = await streamed(req, `/api/sites?ticket=${encodeURIComponent(ticket)}`, b, body.stream);
+      expect(res.status).toBe(413);
+      // Read up to the cap (and the chunk that crossed it), not the 100 MB sent.
+      expect(body.pulled()).toBeGreaterThan(cap);
+      expect(body.pulled()).toBeLessThanOrEqual(cap + 2 * 64 * 1024);
+      expect((await intake(req, b)).status).toBe(303);
+      await runQueued();
+    });
+
+    it("refuse more photos, or a bigger file, than an upload without an account may hold", async () => {
+      const u = config.tiers.anonymous.uploads;
+      const photo = (bytes: number, i: number) => new File([new Uint8Array(bytes)], `p${i}.jpg`, { type: "image/jpeg" });
+      const b = await newBrowser(req);
+      const many = await intake(req, b, { photos: Array.from({ length: u.maxPhotos + 1 }, (_, i) => photo(1000, i)) });
+      expect(many.status).toBe(400);
+      expect(await many.text()).toContain(`Največ ${u.maxPhotos} fotografij brez prijave.`);
+      const big = await intake(req, b, { photos: [photo(u.maxFileBytes + 1, 0)] });
+      expect(big.status).toBe(400);
+      expect(await big.text()).toContain(`(največ ${Math.floor(u.maxFileBytes / 1e6)} MB)`);
+      // Neither used up the preview.
+      expect((await intake(req, b)).status).toBe(303);
+      await runQueued();
+    });
+
+    it("take a ticket once, only on the device it was issued to, and only for the text it checked", async () => {
+      const b = await newBrowser(req);
+      const ticket = ((await (await askTicket(req, b)).json()) as { ticket: string }).ticket;
+      const post = (who: Browser, description = DESCRIPTION) => {
+        const form = new FormData();
+        form.set("_csrf", who.csrf);
+        form.set("description", description);
+        return req(`/api/sites?ticket=${encodeURIComponent(ticket)}`, { method: "POST", body: form, headers: { cookie: who.cookie } });
+      };
+      expect((await post(await newBrowser(req))).status).toBe(403);
+      const swapped = await post(b, `${DESCRIPTION} In še nekaj drugega.`);
+      expect(swapped.status).toBe(403);
+      expect(await swapped.text()).toContain("Opis se je spremenil");
+      // That refusal gave the job back; a fresh ticket works once.
+      const fresh = ((await (await askTicket(req, b)).json()) as { ticket: string }).ticket;
+      const once = (t: string) => {
+        const form = new FormData();
+        form.set("_csrf", b.csrf);
+        form.set("description", DESCRIPTION);
+        return req(`/api/sites?ticket=${encodeURIComponent(t)}`, { method: "POST", body: form, headers: { cookie: b.cookie } });
+      };
+      expect((await once(fresh)).status).toBe(303);
+      expect((await once(fresh)).status).toBe(403);
+      await runQueued();
+    });
   });
 
   it("allows only a few previews a day from one network (keyed IP hash, never the IP)", async () => {

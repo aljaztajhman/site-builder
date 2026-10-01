@@ -191,7 +191,7 @@ export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
     `,
   },
   {
-    id: 5,
+    id: 6,
     name: "generation_limits",
     // ai_jobs: one row per model job a viewer starts (generate, chat edit), written before it is queued, so
     // its estimated cost is held until its calls are logged; also the admin's pool holds (kind 'hold').

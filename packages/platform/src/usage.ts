@@ -133,6 +133,28 @@ export class Usage extends UsageQueries {
     await this.db.query("update ai_jobs set site_id = $2 where id = $1", [id, siteId]);
   }
 
+  /**
+   * An anonymous upload ticket's job, taken for its upload: once (one statement), by the device it was
+   * issued to, while still queued. False when it was used, released or isn't this device's.
+   */
+  async claimTicketJob(id: string, deviceId: string, siteId: string): Promise<boolean> {
+    if (!/^\d+$/.test(id)) return false;
+    const { rows } = await this.db.query(
+      "update ai_jobs set site_id = $3 where id = $1 and device_id = $2 and kind = 'generate' and status = 'queued' and site_id is null returning id",
+      [id, deviceId, siteId],
+    );
+    return rows.length > 0;
+  }
+
+  /** A new ticket for this device ends its earlier unused ones (an abandoned upload doesn't use up the preview). */
+  async releaseUnclaimedTickets(deviceId: string): Promise<number> {
+    const { rows } = await this.db.query(
+      "update ai_jobs set status = 'failed', finished_at = now() where device_id = $1 and kind = 'generate' and status = 'queued' and site_id is null returning id",
+      [deviceId],
+    );
+    return rows.length;
+  }
+
   /** The job is over: its logged calls are now its whole cost. Only a queued job changes. */
   async finishJob(id: string | number, status: Exclude<AiJobStatus, "queued">): Promise<void> {
     await this.db.query("update ai_jobs set status = $2, finished_at = now() where id = $1 and status = 'queued'", [id, status]);

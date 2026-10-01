@@ -53,12 +53,14 @@ export interface HomeProps {
   anonymousClosed?: boolean;
   /** This device's anonymous preview, when it already made one. */
   previous?: string;
+  /** Without an account: where the upload ticket comes from, and the upload's caps (home.ts checks them first). */
+  anonymousUpload?: { ticketUrl: string; maxPhotos: number; maxTotalBytes: number };
   /** A refused intake: the reason, shown above the prompt, and the description, kept. */
   error?: string;
   description?: string;
 }
 
-export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteKey, anonymousClosed, previous, error, description }: HomeProps): string {
+export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteKey, anonymousClosed, previous, anonymousUpload, error, description }: HomeProps): string {
   const paid = config.plans.paid;
   const example = uiUrl("example-home.html");
   return html(
@@ -130,7 +132,17 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
                   </p>
                 )}
                 {/* One intake for everyone: the first homepage needs no account; the server decides what is left. */}
-                <form className="prompt" method="post" action="/api/sites" encType="multipart/form-data" data-home-intake="" data-intake="">
+                <form
+                  className="prompt"
+                  method="post"
+                  action="/api/sites"
+                  encType="multipart/form-data"
+                  data-home-intake=""
+                  data-intake=""
+                  data-ticket={anonymousUpload?.ticketUrl}
+                  data-max-photos={anonymousUpload?.maxPhotos}
+                  data-max-bytes={anonymousUpload?.maxTotalBytes}
+                >
                   <input type="hidden" name="_csrf" value={csrf} />
                   {!fullSite && <input type="hidden" name="scope" value="home" />}
                   <label htmlFor="opis" className="sr-only">

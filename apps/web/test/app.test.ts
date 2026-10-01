@@ -290,6 +290,24 @@ describe("intake", () => {
     expect(list).toContain("Ustvarjam …");
   });
 
+  it("takes more than 1 MB of photos (the site API's 1 MB JSON limit doesn't apply to the intake)", async () => {
+    const { readFile, readdir } = await import("node:fs/promises");
+    const { cookie, csrf } = await login();
+    const dir = path.join(import.meta.dirname, "../../../tools/eval/fixtures/gostilna-zlata-zlica/photos");
+    const form = new FormData();
+    form.set("_csrf", csrf);
+    form.set("description", "Gostilna Zlata žlica v Šentjurju, domača hrana, malice med tednom in nedeljska kosila.");
+    let bytes = 0;
+    for (const f of (await readdir(dir)).filter((n) => n.endsWith(".jpg"))) {
+      const data = await readFile(path.join(dir, f));
+      bytes += data.length;
+      form.append("photos", new File([data], f, { type: "image/jpeg" }));
+    }
+    expect(bytes).toBeGreaterThan(1024 * 1024);
+    const res = await app.request("/api/sites", { method: "POST", body: form, headers: { cookie } });
+    expect(res.status).toBe(303);
+  }, 60_000);
+
   it("refuses AI work once the daily spend cap is reached", async () => {
     const { cookie } = await login();
     const site = (await platform.repo.listSites())[0]!;

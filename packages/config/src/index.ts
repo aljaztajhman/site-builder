@@ -138,7 +138,16 @@ export const AppConfigSchema = z.object({
   }),
   /** Free generation limits, allowances, spending pools and job cost estimates (see config $comment). */
   tiers: z.object({
-    anonymous: z.object({ homepages: z.number().int().min(0), keepDays: z.number().positive() }),
+    anonymous: z.object({
+      homepages: z.number().int().min(0),
+      keepDays: z.number().positive(),
+      uploads: z.object({
+        ticketMinutes: z.number().positive().max(60),
+        maxTotalBytes: z.number().int().positive(),
+        maxPhotos: z.number().int().min(0),
+        maxFileBytes: z.number().int().positive(),
+      }),
+    }),
     free: z.object({ homepages: z.number().int().min(0), chatEdits: z.number().int().min(0) }),
     paid: z.object({ allowancePercentOfMonthlyPrice: z.number().min(0).max(100), firstMonthExtraEur: z.number().min(0) }),
     perIpGenerationsPerDay: z.number().int().positive(),

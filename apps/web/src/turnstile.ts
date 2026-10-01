@@ -46,14 +46,11 @@ export function turnstile(opts: { siteKey: string; secretKey: string; fetch?: ty
   };
 }
 
+/** Never throws; a missing key is named in the server's startup line (env-check.ts). */
 export function botCheckFromEnv(env: NodeJS.ProcessEnv, deployed: boolean, doFetch?: typeof fetch): BotCheck {
   const siteKey = env.TURNSTILE_SITE_KEY;
   const secretKey = env.TURNSTILE_SECRET_KEY;
   if (siteKey && secretKey) return turnstile({ siteKey, secretKey, ...(doFetch ? { fetch: doFetch } : {}) });
-  if (deployed) {
-    console.error("[web] TURNSTILE_SITE_KEY / TURNSTILE_SECRET_KEY not set: anonymous previews are refused until they are (signed-in owners can still generate)");
-    return { mode: "unavailable", siteKey: null, verify: async () => false };
-  }
-  console.log("[web] TURNSTILE keys not set: the anonymous intake skips the bot check (development only)");
+  if (deployed) return { mode: "unavailable", siteKey: null, verify: async () => false };
   return { mode: "skip", siteKey: null, verify: async () => true };
 }

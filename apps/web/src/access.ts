@@ -5,6 +5,7 @@ import type { AppConfig } from "@sb/config";
 import type { AccountRow, Repo, SiteRow, Tier } from "@sb/platform";
 import { hasSession, type AuthSettings } from "./auth.ts";
 import { DASHBOARD } from "./pages.tsx";
+import type { UploadTicket } from "./upload-ticket.ts";
 
 /** Same-origin path only: "/x" but not "//host", "/\host" or anything with whitespace. Default: the sites list. */
 export function safeNext(v: unknown): string {
@@ -38,6 +39,8 @@ export interface AppEnv {
     csrf: string;
     /** The site the path names, loaded and access-checked by `siteAccess`. */
     site: SiteRow;
+    /** An anonymous upload's ticket, checked and taken before its body is read (app.ts, upload-ticket.ts). */
+    ticket: UploadTicket | undefined;
   };
 }
 
@@ -148,6 +151,7 @@ const PUBLIC = (path: string) =>
   path === "/zasebnost" ||
   // The intake: the first homepage needs no account (the limits decide who may generate).
   path === "/api/sites" ||
+  path === "/api/intake/ticket" ||
   path.startsWith("/s/") ||
   path.startsWith("/assets/") ||
   path.startsWith("/preview/_shared/") ||

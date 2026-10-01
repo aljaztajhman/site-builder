@@ -19,12 +19,26 @@ const DESCRIPTION = "Pekarna Kvas v Kamniku, Šutna 30. Kruh z drožmi, rogljič
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+/**
+ * The landing page's form as home.ts sends it. Without an account: the text alone for an upload ticket
+ * (bot check, limits, junk check), then the form carrying it. `html` holds the refusal (page or JSON).
+ */
 async function intake(b: RemoteBrowser, description: string): Promise<{ status: number; location: string | null; html: string }> {
+  let path = "/api/sites";
+  if (!/sb_(account|session)=/.test(b.cookie)) {
+    const t = await fetch(`${b.base}/api/intake/ticket`, {
+      method: "POST",
+      body: new URLSearchParams({ _csrf: b.csrf, description, "cf-turnstile-response": DUMMY_TOKEN }),
+      headers: { cookie: b.cookie, accept: "application/json" },
+    });
+    const body = (await t.json().catch(() => ({}))) as { ticket?: string; message?: string };
+    if (!t.ok || !body.ticket) return { status: t.status, location: null, html: body.message ?? "" };
+    path = `/api/sites?ticket=${encodeURIComponent(body.ticket)}`;
+  }
   const form = new FormData();
   form.set("_csrf", b.csrf);
   form.set("description", description);
-  form.set("cf-turnstile-response", DUMMY_TOKEN);
-  const res = await fetch(`${b.base}/api/sites`, { method: "POST", body: form, headers: { cookie: b.cookie }, redirect: "manual" });
+  const res = await fetch(`${b.base}${path}`, { method: "POST", body: form, headers: { cookie: b.cookie }, redirect: "manual" });
   return { status: res.status, location: res.headers.get("location"), html: res.status === 303 ? "" : await res.text() };
 }
 
