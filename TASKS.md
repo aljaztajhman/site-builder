@@ -124,10 +124,11 @@ Product work (not started):
 ## Images (docs/research/image-generation.html; decisions in the Decision Inbox)
 - [x] fal.ai MCP server for Claude Code: `.mcp.json` + `tools/mcp/fal-headers.ps1` (reads `FAL_KEY` from the Windows user environment at connect time, no app restart). Verified: helper output accepted by mcp.fal.ai (initialize 200, tools/list 200)
 - [x] Model comparison (2026-09-30): `pnpm fixtures:ai-photos compare`, 10 fixture subjects × Nano Banana 2, FLUX.2 pro, GPT Image 2.5 high over fal's REST API; 30/30 generated, €1.77 at config prices (NB2 €0.069, FLUX €0.041, GPT €0.068 per image; median 14 / 13 / 20 s). Contact sheet `docs/research/image-model-comparison.jpg`. Looked at each: FLUX drew a "GOSTILNA" sign and house number "14" despite "no lettering" and looks like stock photography; NB2 has correct hands but pseudo-text on a background chalkboard and outputs only 1264 px at 1K; GPT Image had no legible lettering and looks most like an owner's phone photo. Pick: `sb-images-model`
-- [ ] Realistic fixture photos with the chosen model: `pnpm fixtures:ai-photos generate --model <name>` (36 photos, ~€2.45 with GPT Image) + `photo-manifest.json` (model, prompt, cost); waits on `sb-images-model` and `sb-images-fixture-storage` (photos are gitignored today); then re-record evals (€2.71 last run)
+- [x] Realistic fixture photos with GPT Image 2.5 (`sb-images-model`, recommended pick): 36 photos committed with `photo-manifest.json` (model, prompt, cost) in PR #23
+- [ ] Re-record the eval model recordings against the new fixture photos (€2.71 last run); waits on Anthropic credits
 - [ ] fal cost is estimated from config prices; the account's actual spend isn't readable with this key (billing API 403). Compare against the fal dashboard once
 - [ ] Shot list for owners (brief stage + dashboard); Lucide icons for phone, directions, hours
-- [ ] Client-facing generation/edits: only after the owner's decisions (spec v2 image origin, marking after sharp, publish gate, legal review)
+- [x] Client-facing generation/edits: generated pictures in the pipeline with origin + "Ustvarjeno z UI" label (spec v3, PR #24); the owner replaces them with their own photos in the editor (PR #25)
 
 ## Follow-ups (not blocking a phase)
 - [x] A long homepage (kmetija-grabnar, home-scope eval) failed generation: its full-page screenshot exceeded the API's 8000 px limit (400). Screenshots over the limit are shrunk to fit; any critique failure except the spend cap now keeps the checked site
