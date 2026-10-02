@@ -1,5 +1,5 @@
 {
-  "specVersion": 3,
+  "specVersion": 4,
   "slug": "instalacije-rebernik",
   "locales": {
     "default": "sl",
@@ -45,7 +45,7 @@
       "accent": "#f2c200",
       "border": "#363a40",
       "inverse": "#2b2f35",
-      "onInverse": "#ffffff"
+      "onInverse": "#f5f5f5"
     },
     "radius": 0,
     "baseFontSize": 17,

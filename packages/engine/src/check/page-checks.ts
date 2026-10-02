@@ -127,8 +127,39 @@ export async function measurePage(page: Page, opts: { primaryMin: number; primar
       if (lines >= 3) lineLengths.push(Math.round(chars / lines));
     }
     const banned: string[] = [];
+    // Accent colours as computed rgb() strings, for the single-side border check.
+    const probe = document.createElement("i");
+    document.body.appendChild(probe);
+    const accents = new Set(
+      ["--c-primary", "--c-accent"].flatMap((v) => {
+        const value = getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+        if (!value) return [];
+        probe.style.color = value;
+        return [getComputedStyle(probe).color];
+      }),
+    );
+    probe.remove();
     for (const el of document.querySelectorAll("body *")) {
       const cs = getComputedStyle(el);
+      if (visible(el)) {
+        const sides = (["Top", "Right", "Bottom", "Left"] as const).map((s) => ({
+          width: cs.getPropertyValue(`border-${s.toLowerCase()}-style`) === "none" ? 0 : parseFloat(cs.getPropertyValue(`border-${s.toLowerCase()}-width`)) || 0,
+          color: cs.getPropertyValue(`border-${s.toLowerCase()}-color`),
+        }));
+        const widest = Math.max(...sides.map((s) => s.width));
+        const stripes = sides.filter((s) => s.width === widest);
+        // One side drawn (or one side clearly heavier than the rest), in the primary or accent colour that
+        // isn't simply the element's own text colour: the "coloured left border on cards" tell.
+        if (widest >= 2 && stripes.length === 1 && sides.filter((s) => s.width > widest / 2).length === 1) {
+          const c = stripes[0]!.color;
+          if (accents.has(c) && c !== cs.color) banned.push(`accent single-side border: ${describe(el)}`);
+        }
+      }
+      if (el.matches(".eyebrow") && visible(el)) {
+        if (cs.textTransform === "uppercase") banned.push(`uppercase eyebrow: ${describe(el)}`);
+        const ls = parseFloat(cs.letterSpacing);
+        if (ls > 0.04 * parseFloat(cs.fontSize) + 0.01) banned.push(`tracked-out eyebrow: ${describe(el)}`);
+      }
       if (/gradient\(/.test(cs.backgroundImage)) banned.push(`gradient: ${describe(el)}`);
       if (cs.backdropFilter && cs.backdropFilter !== "none") banned.push(`backdrop-filter: ${describe(el)}`);
       if (/mono/i.test(cs.fontFamily) && visible(el) && (el.textContent ?? "").trim()) banned.push(`monospace: ${describe(el)}`);
@@ -144,6 +175,12 @@ export async function measurePage(page: Page, opts: { primaryMin: number; primar
     }
     const emoji = /(?![©®™])\p{Extended_Pictographic}/u.exec(document.body.innerText);
     if (emoji) banned.push(`emoji in text: ${emoji[0]}`);
+    const emDash = /.{0,20}—.{0,20}/.exec(document.body.innerText);
+    if (emDash) banned.push(`em dash in text: "${emDash[0]}"`);
+    // One primary action per hero: a second action is a text link, never a second button.
+    const hero = document.querySelector("main > section");
+    const heroButtons = hero ? [...hero.querySelectorAll(".btn")].filter(visible) : [];
+    if (heroButtons.length > 1) banned.push(`${heroButtons.length} buttons in the hero: ${heroButtons.map(describe).join(", ")}`);
     const sections = [...document.querySelectorAll("main > section")];
     const centred = sections.filter((s) => {
       const heads = [...s.querySelectorAll("h1, h2, p")].filter(visible);

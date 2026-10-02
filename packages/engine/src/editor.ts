@@ -11,6 +11,7 @@ import {
   direction as directionById,
   enforceDesign,
   migrateSpec,
+  repairSiteCopy,
   sectionDef,
   TOKEN_LABEL,
   toModelJsonSchema,
@@ -67,6 +68,7 @@ export function applyDirectEdit(spec: SiteSpec, ops: Operation[]): DirectEditRes
   }
   next = migrateSpec(next);
   const adjustments: string[] = [];
+  if (repairSiteCopy(next).length) adjustments.push("Besedilo: dolgi pomišljaj (—) smo zamenjali s pomišljajem ( – )");
   if (ops.some((o) => o.path.startsWith("/design"))) {
     const dir = DIRECTIONS.find((d) => d.id === next.design.direction);
     const parsed = Design.safeParse(next.design);
@@ -86,8 +88,15 @@ export function applyDirectEdit(spec: SiteSpec, ops: Operation[]): DirectEditRes
     }
   }
   const v = validateSite(next);
-  if (!v.ok) return { ok: false, spec, issues: v.issues, adjustments };
-  return { ok: true, spec: v.spec, issues: [], adjustments };
+  if (v.ok) return { ok: true, spec: v.spec, issues: [], adjustments };
+  // Copy rules added after a site was made (new filler phrases, all-caps eyebrows) must not lock it: a
+  // banned-copy issue the site already had, at the same place, doesn't block an unrelated edit. The
+  // publish checklist still lists it.
+  const key = (i: Issue) => `${i.path}|${i.message}`;
+  const before = new Set(validateSite(spec).issues.filter((i) => i.code === "banned").map(key));
+  const fresh = v.issues.filter((i) => !(i.code === "banned" && before.has(key(i))));
+  if (fresh.length === 0 && v.spec) return { ok: true, spec: v.spec, issues: [], adjustments };
+  return { ok: false, spec, issues: fresh, adjustments };
 }
 
 /** Switching direction resets tokens to the direction's defaults (keeping the brand primary colour). */

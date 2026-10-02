@@ -9,6 +9,7 @@ import {
   enforceDesign,
   contrast,
   migrateSpec,
+  repairSiteCopy,
   toModelJsonSchema,
   validateSite,
   type ImageAsset,
@@ -303,6 +304,8 @@ export async function generateContent(client: ModelClient, input: ContentInput):
         issues = parsed.error.issues.slice(0, 25).map((i) => `/${i.path.join("/")}: ${i.message}`);
       } else {
         spec = assembleSpec({ slug: input.slug, brief: input.brief, design: input.design, assets: input.assets, content: parsed.data as ContentOutput });
+        // Copy rules fixed in code rather than by a paid retry: em dashes become en dashes.
+        repairs.push(...repairSiteCopy(spec));
         const v = validateSite(spec);
         issues = v.ok ? [] : v.issues.map(issueLine);
         const facts = checkFacts(spec, input.corpus);
@@ -358,6 +361,7 @@ export function applyPatches(spec: SiteSpec, ops: Operation[], corpus: string): 
     return { spec, applied: 0, issues: [`patch failed: ${(e as Error).message}`] };
   }
   next = migrateSpec(next);
+  repairSiteCopy(next);
   // Design edits get the same repair as generation: banned backgrounds replaced, contrast fixed in code.
   if (ops.some((o) => o.path === "/design" || o.path.startsWith("/design/"))) next = { ...next, design: repairDesign(next.design) };
   const v = validateSite(next);

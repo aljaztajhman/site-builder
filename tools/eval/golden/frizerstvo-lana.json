@@ -1,5 +1,5 @@
 {
-  "specVersion": 3,
+  "specVersion": 4,
   "slug": "frizerstvo-lana",
   "locales": { "default": "sl", "enabled": ["sl"] },
   "business": {
@@ -35,7 +35,7 @@
       "accent": "#b0607a",
       "border": "#e6d9de",
       "inverse": "#3a2a30",
-      "onInverse": "#ffffff"
+      "onInverse": "#f5f5f5"
     },
     "radius": 6,
     "baseFontSize": 17,
