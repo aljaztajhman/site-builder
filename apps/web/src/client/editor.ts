@@ -877,9 +877,10 @@ async function sendPhotos(files: File[], replace?: string): Promise<void> {
   if (state.version) form.set("baseVersion", String(state.version));
   try {
     const r = await fetch(`/api/sites/${siteId}/photos`, { method: "POST", body: form });
-    const body = (await r.json().catch(() => ({}))) as { error?: string; message?: string; added?: string[] };
+    const body = (await r.json().catch(() => ({}))) as { error?: string; message?: string; added?: string[]; altRefused?: { message: string } };
     if (!r.ok) throw new Error(body.message ?? body.error ?? r.statusText);
-    toast = replace ? "Slika je zamenjana. Opis pripravljamo …" : `Dodano: ${body.added?.length ?? files.length}. Opis pripravljamo …`;
+    // Saved either way; over the owner's limit the description isn't written for them, and the server says why.
+    toast = body.altRefused ? body.altRefused.message : replace ? "Slika je zamenjana. Opis pripravljamo …" : `Dodano: ${body.added?.length ?? files.length}. Opis pripravljamo …`;
   } catch (e) {
     toast = (e as Error).message;
   }

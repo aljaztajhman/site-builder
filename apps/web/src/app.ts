@@ -559,9 +559,20 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     try {
       const uploads = await Promise.all(files.map(async (f) => ({ data: new Uint8Array(await f.arrayBuffer()), mime: f.type, name: f.name })));
       const r = await addPhotos({ repo, storage, config }, id, uploads, { ...(replace ? { replace } : {}), ...(baseVersion !== undefined ? { baseVersion } : {}) });
-      // The editor polls while the site is busy; the alt job sets it back to ready.
-      if (site.status === "ready" || site.status === "failed") await repo.setStatus(id, "editing");
-      await queue.send("alt", { siteId: id, imageIds: r.added });
+      if (!r.added.length) return c.json({ ok: true, ...r });
+      // The photos are saved (direct editing, never limited); describing them is a model job under the
+      // owner's limits. Refused, the owner writes the descriptions and the editor says why.
+      const grant = await reserveJob(limits, c, { kind: "alt", scope: "home", siteId: id, photos: r.added.length });
+      if (!grant.ok) return c.json({ ok: true, ...r, altRefused: { code: grant.refusal.code, message: grant.refusal.message } });
+      try {
+        // The editor polls while the site is busy; the alt job sets it back to ready.
+        if (site.status === "ready" || site.status === "failed") await repo.setStatus(id, "editing");
+        await queue.send("alt", { siteId: id, imageIds: r.added, aiJobId: grant.aiJobId });
+      } catch (e) {
+        await repo.usage.finishJob(grant.aiJobId, "failed");
+        await repo.setStatusIf(id, "editing", site.status);
+        throw e;
+      }
       return c.json({ ok: true, ...r });
     } catch (e) {
       if (e instanceof PhotoError) return c.json({ error: e.message }, 400);

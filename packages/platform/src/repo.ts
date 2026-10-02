@@ -124,6 +124,9 @@ export class VersionConflictError extends Error {
   }
 }
 
+/** The editor's failure note when a job was cut off by a restart (it offers "Poskusi znova"). */
+export const INTERRUPTED_MESSAGE = "Opravilo je bilo prekinjeno (ponovni zagon strežnika). Poskusite znova.";
+
 export function newId(prefix: string): string {
   return `${prefix}_${randomBytes(8).toString("hex")}`;
 }
@@ -213,7 +216,7 @@ export class Repo {
         returning id`,
       [olderThanMinutes],
     );
-    for (const r of rows) await this.addEvent({ siteId: r.id, stage: "error", level: "error", message: "Opravilo je bilo prekinjeno (ponovni zagon strežnika). Poskusite znova." });
+    for (const r of rows) await this.addEvent({ siteId: r.id, stage: "error", level: "error", message: INTERRUPTED_MESSAGE });
     return rows.map((r) => r.id);
   }
 
