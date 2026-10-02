@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { BusinessType, Day, toModelJsonSchema } from "@sb/spec";
+import { clientHours, dayRange, fold, hoursPaired, priceMentions, pricePaired } from "./fact-pairing.ts";
 
 const Time = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/);
 
@@ -113,10 +114,8 @@ export function numbersIn(text: string): Set<string> {
   return out;
 }
 
-/** Lower case without diacritics, for tolerant comparisons ("Škofja" ~ "skofja"). */
-export function fold(s: string): string {
-  return s.toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/đ/g, "d");
-}
+/** Lower case without diacritics; lives with the fact pairing, exported here as before. */
+export { fold };
 
 /**
  * Every number-like run in the text ("041 555 906", "01/555 01 23", "SI12345678") as its own digit
@@ -161,8 +160,9 @@ export interface Dropped {
 
 /**
  * Removes facts the client did not state. Phones must match digits in the text, emails and URLs
- * must appear verbatim, addresses need their postal code and street name, prices their amount,
- * people their name, hours their times. Returns the cleaned brief and what was dropped.
+ * must appear verbatim, addresses need their postal code and street name, prices the amount the
+ * client gave for that offering, people their name, hours the times the client gave for those days.
+ * Returns the cleaned brief and what was dropped.
  */
 export function verifyBriefFacts(brief: Brief, sourceText: string): { brief: Brief; dropped: Dropped[] } {
   const text = normaliseText(sourceText);
@@ -210,8 +210,14 @@ export function verifyBriefFacts(brief: Brief, sourceText: string): { brief: Bri
     f.legalName = null;
   }
   if (f.hours) {
+    // Every time must be one the client gave for those days (not a number from elsewhere in the text).
+    const known = clientHours(sourceText);
     const times = f.hours.flatMap((h) => [h.open, h.close]).filter((t): t is string => !!t);
-    const ok = times.every((t) => nums.has(String(Number(t.split(":")[0]))));
+    const ok = f.hours.every((h) => {
+      if (h.closed) return true;
+      const r = hoursPaired(dayRange(h.from, h.to), h.open ?? undefined, h.close ?? undefined, known);
+      return r.open && r.close;
+    });
     if (!ok) {
       dropped.push({ field: "hours", value: times.join(",") });
       f.hours = null;
@@ -227,8 +233,10 @@ export function verifyBriefFacts(brief: Brief, sourceText: string): { brief: Bri
     if (!keep) dropped.push({ field: "social", value: s.url });
     return keep;
   });
+  // A price must be one the client gave for that offering ("moško striženje 15 €"), not any number.
+  const mentions = priceMentions(sourceText);
   for (const o of b.offerings) {
-    if (o.price && !nums.has(String(o.price.amount))) {
+    if (o.price && !pricePaired(o.price.amount, o.name, o.group ?? "", mentions)) {
       dropped.push({ field: `price:${o.name}`, value: String(o.price.amount) });
       o.price = null;
     }

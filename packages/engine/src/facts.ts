@@ -1,10 +1,13 @@
 import { isPlaceholder, setAt, walkStrings, type SiteSpec } from "@sb/spec";
-import { fold, numberTokens, numbersIn } from "./brief.ts";
+import { numberTokens, numbersIn } from "./brief.ts";
+import { clientHours, clockTimes, dayRange, fold, hoursPaired, parseHours, priceMentions, pricePaired, pricesFor, unnamedAmounts, type ClientHours, type PriceMention } from "./fact-pairing.ts";
 
 export interface FactViolation {
   path: string;
   kind: "phone" | "email" | "address" | "hours" | "price" | "name" | "number" | "url";
   value: string;
+  /** Why it failed when the value is in the input but for something else (another offering, other days). */
+  detail?: string;
 }
 
 const digitsOf = (s: string) => s.replace(/\D/g, "");
@@ -18,17 +21,69 @@ const STREET_KINDS = new Set(["cesta", "ulica", "trg", "pot", "nabrezje", "nasel
 /** Keys whose strings are structural, not visible copy. */
 const NON_COPY_KEYS = new Set(["id", "type", "variant", "tone", "page", "section", "action", "kind", "slug", "image", "network", "src", "file", "$placeholder"]);
 
+const EMAIL_RE = /[\w.+-]+@[\w-]+\.[\w.]+/g;
+const URL_RE = /https?:\/\/\S+|www\.\S+/g;
+/** A phone or registration number in running text: at least seven digits in one run. */
+const PHONE_RE = /(\+?\d[\d \t/-]{6,}\d)/g;
+
+const PRICE_ELSEWHERE = "is a price the client gave for something else, not for this offering";
+const PRICE_NONE = "is not a price the client gave";
+const HOURS_DAYS = "is not a time the client gave for these days";
+const HOURS_NONE = "is not a time the client gave";
+
+/** The client's text, parsed once per check. */
+interface Corpus {
+  text: string;
+  folded: string;
+  tokens: Set<string>;
+  /** Every number, for addresses and postal codes. */
+  nums: Set<string>;
+  /** Numbers outside phone numbers, e-mails and links: a number in copy can't come from those. */
+  copyNums: Set<string>;
+  prices: PriceMention[];
+  priceAmounts: Set<number>;
+  /** Prices given without saying what for; they count for any offering. */
+  unnamed: Set<number>;
+  hours: ClientHours;
+}
+
+function corpusOf(corpus: string): Corpus {
+  const blank = (s: string) => " ".repeat(s.length);
+  const masked = corpus
+    .replace(EMAIL_RE, blank)
+    .replace(URL_RE, blank)
+    .replace(PHONE_RE, (m) => (digitsOf(m).length >= 8 ? blank(m) : m));
+  const prices = priceMentions(corpus);
+  return {
+    text: corpus.toLowerCase(),
+    folded: fold(corpus),
+    tokens: numberTokens(corpus),
+    nums: numbersIn(corpus),
+    copyNums: numbersIn(masked),
+    prices,
+    priceAmounts: new Set(prices.map((p) => p.amount)),
+    unnamed: unnamedAmounts(prices),
+    hours: clientHours(corpus),
+  };
+}
+
 /**
  * Checks that every phone number, email, address, opening hour, price, person's name and number
  * shown on the site comes from the client's input (brief text plus chat messages) or is a marked
  * placeholder. `corpus` is everything the client wrote.
+ *
+ * Prices and opening times are paired, not just found: a price must be one the client gave for that
+ * offering, an opening time one the client gave for those days (see fact-pairing.ts). A number the
+ * client wrote only in another role (a phone number, a year, an address, another day's hours) does
+ * not count.
  */
 export function checkFacts(spec: SiteSpec, corpus: string): FactViolation[] {
+  return check(spec, corpusOf(corpus), false);
+}
+
+function check(spec: SiteSpec, c: Corpus, translated: boolean): FactViolation[] {
   const out: FactViolation[] = [];
-  const text = corpus.toLowerCase();
-  const folded = fold(corpus);
-  const tokens = numberTokens(corpus);
-  const nums = numbersIn(corpus);
+  const { text, folded, tokens, nums } = c;
   const b = spec.business;
 
   // The business name is shown everywhere; every word of it (legal forms aside) must be the client's.
@@ -56,14 +111,15 @@ export function checkFacts(spec: SiteSpec, corpus: string): FactViolation[] {
     }
   }
   if (b.hours && !isPlaceholder(b.hours)) {
+    // Each opening and closing time must be one the client gave for every day of the entry.
     b.hours.entries.forEach((e, i) => {
-      for (const t of [e.open, e.close]) {
-        if (t && !nums.has(String(Number(t.split(":")[0])))) out.push({ path: `/business/hours/entries/${i}`, kind: "hours", value: t });
+      if (e.closed) return;
+      const ok = hoursPaired(dayRange(e.from, e.to), e.open, e.close, c.hours);
+      for (const [t, fine] of [[e.open, ok.open], [e.close, ok.close]] as const) {
+        if (t && !fine) out.push({ path: `/business/hours/entries/${i}`, kind: "hours", value: t, ...(c.hours.any.has(t) ? { detail: HOURS_DAYS } : {}) });
       }
     });
-    for (const m of b.hours.note?.matchAll(/\d+(?:[.,]\d+)?/g) ?? []) {
-      if (!nums.has(String(Number(m[0].replace(",", ".")))) && !nums.has(m[0])) out.push({ path: "/business/hours/note", kind: "hours", value: m[0] });
-    }
+    if (b.hours.note) for (const f of copyFacts(b.hours.note, c, "hours")) out.push({ path: "/business/hours/note", ...f });
   }
   // The legal name fills a required ZEPT field: an invented one must not clear the publish gate.
   if (!isPlaceholder(b.provider.legalName)) {
@@ -81,13 +137,22 @@ export function checkFacts(spec: SiteSpec, corpus: string): FactViolation[] {
     if (!text.includes(so.url.toLowerCase().replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, ""))) out.push({ path: `/business/social/${i}`, kind: "url", value: so.url });
   });
 
-  // Structured facts inside sections: prices and people's names.
-  const visit = (v: unknown, p: string, key: string) => {
-    if (Array.isArray(v)) return v.forEach((x, i) => visit(x, `${p}/${i}`, key));
+  // Structured prices: the price the client gave for that offering. A translation only changes the
+  // names, never the amounts, so the translated pass leaves prices to the original.
+  const visit = (v: unknown, p: string, owner: string) => {
+    if (Array.isArray(v)) return v.forEach((x, i) => visit(x, `${p}/${i}`, owner));
     if (!v || typeof v !== "object") return;
     const o = v as Record<string, unknown>;
-    if (key === "price" && typeof o.amount === "number" && !nums.has(String(o.amount))) out.push({ path: p, kind: "price", value: String(o.amount) });
-    for (const [k, x] of Object.entries(o)) visit(x, `${p}/${k}`, k);
+    const name = typeof o.name === "string" ? o.name : typeof o.title === "string" ? o.title : "";
+    const price = o.price as { amount?: unknown } | undefined;
+    if (!translated && price && typeof price.amount === "number") {
+      const context = [owner, typeof o.note === "string" ? o.note : ""].join(" ");
+      if (!pricePaired(price.amount, name, context, c.prices)) {
+        const elsewhere = c.priceAmounts.has(Math.round(price.amount * 100) / 100);
+        out.push({ path: `${p}/price`, kind: "price", value: String(price.amount), ...(elsewhere ? { detail: PRICE_ELSEWHERE } : {}) });
+      }
+    }
+    for (const [k, x] of Object.entries(o)) visit(x, `${p}/${k}`, Array.isArray(x) && name ? name : owner);
   };
   visit(spec.pages, "/pages", "");
   spec.pages.forEach((page, pi) =>
@@ -108,15 +173,7 @@ export function checkFacts(spec: SiteSpec, corpus: string): FactViolation[] {
   walkStrings(spec.pages, (s, p, key) => {
     if (NON_COPY_KEYS.has(key)) return;
     if (/^https?:\/\//.test(s)) return;
-    for (const m of s.matchAll(/[\w.+-]+@[\w-]+\.[\w.]+/g)) if (!text.includes(m[0].toLowerCase())) out.push({ path: `/pages${p}`, kind: "email", value: m[0] });
-    for (const m of s.matchAll(/(\+?\d[\d\s/-]{6,}\d)/g)) {
-      const d = digitsOf(m[0]).replace(/^(00)?386/, "").replace(/^0/, "");
-      if (d.length >= 7 && !tokens.has(d)) out.push({ path: `/pages${p}`, kind: "phone", value: m[0] });
-    }
-    for (const m of s.matchAll(/\d+(?:[.,]\d+)?/g)) {
-      const n = String(Number(m[0].replace(",", ".")));
-      if (!nums.has(n) && !nums.has(m[0])) out.push({ path: `/pages${p}`, kind: "number", value: m[0] });
-    }
+    for (const f of copyFacts(s, c, "number")) out.push({ path: `/pages${p}`, ...f });
   });
   // Translations overlay any string of the spec when rendered; check each locale as it is shown.
   for (const [locale, map] of Object.entries(spec.translations ?? {})) {
@@ -129,9 +186,67 @@ export function checkFacts(spec: SiteSpec, corpus: string): FactViolation[] {
       }
     }
     const base = new Set(out.map((f) => `${f.path}|${f.value}`));
-    for (const f of checkFacts(shown, corpus)) if (!base.has(`${f.path}|${f.value}`)) out.push({ ...f, path: `/translations/${locale}${f.path}` });
+    for (const f of check(shown, c, true)) if (!base.has(`${f.path}|${f.value}`)) out.push({ ...f, path: `/translations/${locale}${f.path}` });
   }
   return dedupe(out);
+}
+
+/**
+ * Facts in one string of copy. Each fact is blanked out once checked, so its digits aren't checked
+ * again as plain numbers. `numberKind` is what a leftover number is reported as.
+ */
+function copyFacts(s: string, c: Corpus, numberKind: FactViolation["kind"]): Omit<FactViolation, "path">[] {
+  const out: Omit<FactViolation, "path">[] = [];
+  let f = fold(s);
+  // Offsets from parsing `s` only line up with `f` when folding kept the length (it does for letters with diacritics).
+  const source = f.length === s.length ? s : f;
+  const blank = (start: number, end: number) => {
+    f = f.slice(0, start) + " ".repeat(end - start) + f.slice(end);
+  };
+  for (const m of [...f.matchAll(EMAIL_RE)]) {
+    if (!c.folded.includes(m[0])) out.push({ kind: "email", value: s.slice(m.index, m.index + m[0].length) });
+    blank(m.index, m.index + m[0].length);
+  }
+  for (const m of [...f.matchAll(PHONE_RE)]) {
+    const d = digitsOf(m[0]).replace(/^(00)?386/, "").replace(/^0/, "");
+    if (d.length < 7) continue;
+    if (!c.tokens.has(d)) out.push({ kind: "phone", value: m[0] });
+    blank(m.index, m.index + m[0].length);
+  }
+  // Prices: paired with what the copy says they are for (the last three words before the price, so a
+  // long sentence's other offerings don't count); copy that names nothing the client priced ("cene že
+  // od 10 €", "nad 75 € brez poštnine", English copy) still needs an amount the client gave as a price.
+  for (const m of priceMentions(f)) {
+    const best = pricesFor(m.words.slice(-3).join(" "), "", c.prices);
+    const ok = (best.size ? best.has(m.amount) : c.priceAmounts.has(m.amount)) || c.unnamed.has(m.amount);
+    if (!ok) out.push({ kind: "price", value: m.raw, ...(c.priceAmounts.has(m.amount) ? { detail: PRICE_ELSEWHERE } : { detail: PRICE_NONE }) });
+    blank(m.start, m.end);
+  }
+  // Opening times: with days, the client's times for those days; without, a time the client wrote.
+  const { paired, unpaired } = parseHours(source);
+  for (const { days, time } of paired) {
+    const r = hoursPaired(days, time.open, time.close, c.hours);
+    if (time.open && !r.open) out.push({ kind: "hours", value: time.openRaw ?? time.open, detail: HOURS_DAYS });
+    if (time.close && !r.close) out.push({ kind: "hours", value: time.closeRaw ?? time.close, detail: HOURS_DAYS });
+    if (time.at && !c.hours.any.has(time.at)) out.push({ kind: "hours", value: time.openRaw ?? time.at, detail: HOURS_NONE });
+    blank(time.start, time.end);
+  }
+  for (const time of unpaired) {
+    if (!time.explicit) continue;
+    for (const [t, raw] of [[time.open, time.openRaw], [time.close, time.closeRaw], [time.at, time.openRaw]] as const) {
+      if (t && !c.hours.any.has(t)) out.push({ kind: "hours", value: raw ?? t, detail: HOURS_NONE });
+    }
+    blank(time.start, time.end);
+  }
+  for (const t of clockTimes(f)) {
+    if (!c.hours.any.has(t.time)) out.push({ kind: "hours", value: t.raw, detail: HOURS_NONE });
+    blank(t.start, t.end);
+  }
+  for (const m of f.matchAll(/\d+(?:[.,]\d+)?/g)) {
+    const n = String(Number(m[0].replace(",", ".")));
+    if (!c.copyNums.has(n) && !c.copyNums.has(m[0])) out.push({ kind: numberKind, value: m[0] });
+  }
+  return out;
 }
 
 function dedupe(v: FactViolation[]): FactViolation[] {

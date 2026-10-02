@@ -136,7 +136,12 @@ describe("switchDirection", () => {
 
 describe("typedText", () => {
   it("collects every string value in operations", () => {
-    expect(typedText([{ op: "replace", path: "/a", value: { name: "Katja", price: { amount: 2 }, tags: ["x"] } }, { op: "remove", path: "/b" }])).toEqual(["Katja", "2", "x"]);
+    expect(typedText([{ op: "replace", path: "/a", value: { name: "Katja", price: { amount: 2 }, tags: ["x"] } }, { op: "remove", path: "/b" }])).toEqual(["Katja: 2 €", "Katja", "2", "x"]);
+  });
+
+  it("writes a typed hours row as days with times, for the fact check's day pairing", () => {
+    const rows = typedText([{ op: "replace", path: "/business/hours", value: { entries: [{ from: "mon", to: "fri", open: "08:00", close: "19:00" }, { from: "sun", to: "sun", closed: true }] } }]);
+    expect(rows.filter((r) => r.includes("\n"))).toEqual(["\nPonedeljek–petek 8.00–19.00.\n", "\nNedelja zaprto.\n"]);
   });
 });
 
