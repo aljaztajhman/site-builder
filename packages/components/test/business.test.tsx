@@ -383,8 +383,11 @@ describe("contact", () => {
     expect(out).toContain("8.00–19.00");
   });
 
-  it("puts a hidden line icon before each fact label, in every variant and with missing facts", () => {
-    for (const variant of contactSection.variants) {
+  // call-out has no map and no icons: the phone is the object (its own tests in motifs.test.tsx).
+  const mapVariants = contactSection.variants.filter((v) => v !== "call-out");
+
+  it("puts a hidden line icon before each fact label, in every variant with a map and with missing facts", () => {
+    for (const variant of mapVariants) {
       for (const ctx of [testCtx(), sparseCtx()]) {
         const out = render({ ...fixtures.contact, variant }, ctx);
         const labels = [...out.matchAll(/<dt class="fact-label">(<svg [^>]*>)[\s\S]*?<\/svg>([^<]+)<\/dt>/g)];
@@ -396,7 +399,7 @@ describe("contact", () => {
   });
 
   it("gates the map behind a click: no iframe, only data attributes, a button and a plain link", () => {
-    for (const variant of contactSection.variants) {
+    for (const variant of mapVariants) {
       const out = render({ ...fixtures.contact, variant });
       expect(out).not.toContain("<iframe");
       expect(out).toContain(

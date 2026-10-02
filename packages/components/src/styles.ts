@@ -7,4 +7,5 @@ export const STYLE_FILES = [
   "content.css",
   "business.css",
   "structure.css",
+  "motifs.css",
 ] as const;

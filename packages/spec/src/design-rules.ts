@@ -36,6 +36,7 @@ export const CONTRAST_RULES: [keyof Colors, keyof Colors, number][] = [
   ["onInverse", "inverse", 4.5],
   ["accent", "background", 3],
   ["accent", "inverse", 3],
+  ["onBand", "band", 4.5],
 ];
 
 export interface DesignIssue {
@@ -47,9 +48,14 @@ export function checkDesign(design: Design, dir: Direction | undefined): DesignI
   const issues: DesignIssue[] = [];
   const c = design.colors;
   for (const [fg, bg, min] of CONTRAST_RULES) {
-    const r = contrast(c[fg], c[bg]);
+    const a = c[fg];
+    const b = c[bg];
+    // band and onBand are optional; a band without its text colour is reported below.
+    if (a === undefined || b === undefined) continue;
+    const r = contrast(a, b);
     if (r < min) issues.push({ path: `/design/colors/${fg}`, message: `${fg} on ${bg} contrast ${r.toFixed(2)} < ${min}` });
   }
+  if ((c.band === undefined) !== (c.onBand === undefined)) issues.push({ path: "/design/colors/onBand", message: "band and onBand go together" });
   if (isCreamOrOffWhite(c.background)) issues.push({ path: "/design/colors/background", message: "cream or off-white page background is banned" });
   if (isWarmCream(c.surface))
     issues.push({ path: "/design/colors/surface", message: "cream section background is banned" });
@@ -79,6 +85,11 @@ export function checkDesign(design: Design, dir: Direction | undefined): DesignI
   if (bgKind === "dark" && luminance(c.background) > 0.05) issues.push({ path: "/design/colors/background", message: "direction requires a dark page" });
   if (bgKind === "tint" && luminance(c.background) < 0.6) issues.push({ path: "/design/colors/background", message: "direction requires a light tinted page" });
   return issues;
+}
+
+/** White or near-black, whichever reads better on `bg`. */
+function bestText(bg: string): string {
+  return contrast("#ffffff", bg) >= contrast("#111111", bg) ? "#ffffff" : "#111111";
 }
 
 const clamp = (v: number, [lo, hi]: [number, number]) => Math.min(hi, Math.max(lo, v));
@@ -133,6 +144,8 @@ export function enforceDesign(design: Design, dir: Direction): Design {
     clampOffBlackWhite(c);
     // A mid-tone inverse can leave no off-white or off-black text that passes; darken the inverse instead.
     if (contrast(c.onInverse, c.inverse) < 4.5) c.inverse = clampLuminance(ensureContrast(c.inverse, c.onInverse, 4.5), OFF_BLACK_MIN);
+    if (c.band !== undefined) c.onBand = ensureContrast(c.onBand ?? bestText(c.band), c.band, 4.5);
   }
+  if (c.band === undefined) delete c.onBand;
   return out;
 }

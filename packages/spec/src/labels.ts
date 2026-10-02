@@ -10,6 +10,7 @@ export const SECTION_LABEL: Record<string, string> = {
   "hero-split": "Uvod s fotografijo",
   "hero-image": "Uvod čez fotografijo",
   "hero-type": "Uvod (besedilo)",
+  "hero-signature": "Uvod z glavnim podatkom",
   "page-header": "Glava strani",
   text: "Besedilo",
   "image-text": "Slika in besedilo",
@@ -41,6 +42,7 @@ export const VARIANT_LABEL: Record<string, Record<string, string>> = {
   "hero-split": { "image-right": "Fotografija desno", "image-left": "Fotografija levo" },
   "hero-image": { "overlay-bottom": "Besedilo spodaj", "overlay-left": "Besedilo levo" },
   "hero-type": { large: "Velik naslov", "with-facts": "Z glavnimi podatki" },
+  "hero-signature": { photo: "Čez fotografijo", drawing: "Z risbo", arch: "S fotografijo v loku" },
   "page-header": { plain: "Samo naslov", "with-image": "S fotografijo" },
   text: { narrow: "Ozek stolpec", "two-column": "Dva stolpca" },
   "image-text": { "image-left": "Slika levo", "image-right": "Slika desno" },
@@ -52,10 +54,10 @@ export const VARIANT_LABEL: Record<string, Record<string, string>> = {
   announcement: { bar: "Vrstica", card: "Kartica" },
   "services-list": { rows: "Vrstice", "two-column": "Dva stolpca" },
   "services-cards": { grid: "Mreža", compact: "Strnjeno" },
-  "price-list": { table: "Tabela", grouped: "Po skupinah" },
+  "price-list": { table: "Tabela", grouped: "Po skupinah", tags: "Cene kot znaki" },
   menu: { classic: "Klasično", "two-column": "Dva stolpca" },
   "opening-hours": { table: "Tabela", compact: "Strnjeno" },
-  contact: { "split-map": "Z zemljevidom ob strani", stacked: "Eno pod drugim" },
+  contact: { "split-map": "Z zemljevidom ob strani", stacked: "Eno pod drugim", "call-out": "Velika telefonska številka" },
   "contact-form": { stacked: "Eno pod drugim", split: "Obrazec ob strani" },
   faq: { accordion: "Odgovori se odprejo ob kliku", list: "Vsi odgovori vidni" },
   team: { grid: "Mreža", list: "Seznam" },
@@ -91,6 +93,9 @@ export const FIELD_LABEL: Record<string, string> = {
   email: "E-pošta",
   entries: "Obdobja",
   eyebrow: "Nadnaslov",
+  fact: "Glavni podatek",
+  factLabel: "Besedilo nad podatkom",
+  factNote: "Opomba pod podatkom",
   features: "Posebnosti",
   footnote: "Opomba pod seznamom",
   from: "Od",
@@ -162,6 +167,9 @@ export const ENUM_LABEL: Record<string, string> = {
   directions: "Navodila za pot",
   email: "E-pošta",
   booking: "Rezervacija",
+  // Hero objects (hero-signature fact).
+  phone: "Telefonska številka",
+  opening: "Ura odprtja",
   // Menu tags.
   vegetarian: "Vegetarijansko",
   vegan: "Vegansko",
@@ -226,6 +234,9 @@ export const DIRECTION_LABEL: Record<string, { name: string; summary: string }> 
   editorial: { name: "Časopisno", summary: "Bela stran z velikimi tankimi naslovi kot v kakovostnem časopisu, veliko belega prostora in ena temno rdeča barva. Za svetovalce in pisarne z malo fotografijami ali z močnim besedilom." },
   "playful-modern": { name: "Igrivo in sodobno", summary: "Bela stran, debeli igrivi naslovi, živa jagodna barva, bledo vijolični pasovi in močno zaobljeni robovi. Prijazno in sveže. Za pekarne, frizerje in trgovine za mlajše stranke." },
   industrial: { name: "Industrijsko", summary: "Temno siva stran, tehnični naslovi, varnostno rumeni gumbi, oglati robovi in gosta postavitev. Robustno in brez olepšav. Za gradbince, inštalaterje, električarje in delavnice." },
+  tablica: { name: "Tablica", summary: "Asfalt in signalno rumena, debeli naslovi z velikimi črkami, fotografija delavnice čez celo širino in telefonska številka kot registrska tablica. Cene so tablice, med razdelki tekalna plast gume. Za avtoservise, vulkanizerje in vleko." },
+  cevi: { name: "Cevi", summary: "Bela stran brez fotografij, narisan radiator z rdečo in modro cevjo, telefonska številka v rdečem polju; cevi tečejo naprej kot ločnice, koraki in območje dela. Za inštalaterje, vodovodarje in ogrevanje." },
+  skorja: { name: "Skorja", summary: "Temno pražen uvod, izdelek na fotografiji v loku krušne peči in ura odprtja na okroglem žigu, debela pisava s serifi, cene na deski s pikicami in tri zareze hlebca kot znak razdelkov. Za pekarne, slaščičarne, mesnice in pražarne." },
   "soft-studio": { name: "Mehko in osebno", summary: "Bela stran, nežni knjižni naslovi, umirjena rožnata barva in rahlo rožnati pasovi. Mirno in osebno. Za frizerske, kozmetične in masažne salone ter male butike." },
 };
 
@@ -263,6 +274,8 @@ export const COLOR_LABEL: Record<string, string> = {
   border: "Obrobe",
   inverse: "Temni razdelki",
   onInverse: "Besedilo na temnem",
+  band: "Barvni pasovi",
+  onBand: "Besedilo na barvnem pasu",
 };
 
 export const PAGE_FIELD_LABEL: Record<string, string> = {

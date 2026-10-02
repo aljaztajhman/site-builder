@@ -36,6 +36,67 @@ export function formatPhone(e164: string): string {
   return `+386 ${groups.filter(Boolean).join(" ")}`;
 }
 
+/**
+ * The number as people dial it at home, for numbers set at poster size: +38641555730 -> 041 555 730,
+ * +38642123456 -> 04 212 34 56. Numbers outside Slovenia keep the international form.
+ */
+export function formatPhoneNational(e164: string): string {
+  if (!e164.startsWith("+386")) return formatPhone(e164);
+  const rest = e164.slice(4);
+  const groups = MOBILE_PREFIXES.has(rest.slice(0, 2))
+    ? [`0${rest.slice(0, 2)}`, rest.slice(2, 5), rest.slice(5)]
+    : [`0${rest.slice(0, 1)}`, rest.slice(1, 4), rest.slice(4, 6), rest.slice(6)];
+  return groups.filter(Boolean).join(" ");
+}
+
+/** Registration-area codes of Slovenian number plates, by the area's seat. Other towns get no code. */
+const PLATE_CODES: Record<string, string> = {
+  ljubljana: "LJ",
+  maribor: "MB",
+  celje: "CE",
+  kranj: "KR",
+  "novo mesto": "NM",
+  koper: "KP",
+  "nova gorica": "GO",
+  "murska sobota": "MS",
+  postojna: "PO",
+  "slovenj gradec": "SG",
+  "krško": "KK",
+};
+
+/** The plate code of the town in an address ("Kranj" -> "KR"), or null when the town is not an area seat. */
+export function plateCode(city: string): string | null {
+  return PLATE_CODES[city.trim().toLocaleLowerCase("sl")] ?? null;
+}
+
+const DAY_ORDER: Day[] = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+
+/**
+ * The earliest opening time of the week and the days it holds for, for a seal like "pon–sob odprto od 6.30":
+ * { time: "6.30", days: "pon–sob" }. Days are "every day" when all seven open then. Null without open days.
+ */
+export function earliestOpening(h: Hours, locale: Locale = "sl"): { time: string; days: string; everyDay: boolean } | null {
+  const open = h.entries.filter((e) => !e.closed && e.open);
+  if (!open.length) return null;
+  const min = open.map((e) => e.open!).sort()[0]!;
+  const days = new Set<number>();
+  for (const e of open.filter((x) => x.open === min)) {
+    const a = DAY_ORDER.indexOf(e.from);
+    const b = DAY_ORDER.indexOf(e.to);
+    for (let i = a; i <= (b < a ? a : b); i++) days.add(i);
+  }
+  const sorted = [...days].sort((x, y) => x - y);
+  const runs: [number, number][] = [];
+  for (const d of sorted) {
+    const last = runs[runs.length - 1];
+    if (last && d === last[1] + 1) last[1] = d;
+    else runs.push([d, d]);
+  }
+  const name = (i: number) => dayName(DAY_ORDER[i]!, locale, true);
+  const text = runs.map(([a, b]) => (a === b ? name(a) : `${name(a)}–${name(b)}`)).join(", ");
+  return { time: formatTime(min), days: text, everyDay: sorted.length === 7 };
+}
+
 export function formatAddress(a: Address): string {
   return `${a.street}, ${a.postalCode} ${a.city}`;
 }

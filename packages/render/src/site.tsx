@@ -8,11 +8,13 @@ import {
   SECTION_ISLANDS,
   lcpImageFor,
   rendererFor,
+  signatureOffersDirections,
   uiStrings,
   type RenderCtx,
   type ResolvedImage,
 } from "@sb/components";
 import {
+  DIRECTIONS,
   isPlaceholder,
   isWebUrl,
   mapsUrl,
@@ -22,6 +24,7 @@ import {
   type LinkTarget,
   type Locale,
   type Page,
+  type SectionOf,
   type SiteSpec,
 } from "@sb/spec";
 import { fontFaceCss, fontFiles, tokensCss } from "./tokens.ts";
@@ -44,6 +47,7 @@ function heroOffersCall(first: { type: string; variant: string; props: unknown }
 function heroOffersCallAndDirections(first: { type: string; variant: string; props: unknown } | undefined): boolean {
   if (!first) return false;
   if (first.type === "hero-type" && first.variant === "with-facts") return true;
+  if (first.type === "hero-signature") return signatureOffersDirections(first as SectionOf<"hero-signature">);
   const p = first.props as { primary?: { target?: { action?: string } }; secondary?: { target?: { action?: string } } };
   const actions = [p.primary?.target?.action, p.secondary?.target?.action];
   return actions.includes("call") && actions.includes("directions");
@@ -163,11 +167,13 @@ export function renderPage(spec: SiteSpec, page: Page, opts: RenderOptions = {})
   const fontsBase = ctx.shared("fonts/");
   const preloadFonts = fontFiles(design).filter((f) => f === `${pair.heading.file}.woff2` || f === `${pair.body.file}.woff2`);
 
+  // Trade templates draw their motif (dividers, bullets, plates) from CSS keyed on this attribute.
+  const motif = DIRECTIONS.find((d) => d.id === design.direction)?.template?.motif;
   const bar = localized.chrome.mobileActionBar === true;
   // Bar on screen from the start and a call button in the hero: on a phone the hero's one is hidden (chrome.css).
   const barCoversHeroCall = bar && heroOffersCall(first) && !heroOffersCallAndDirections(first);
   const renderBody = (suffixes: ReadonlyMap<string, string>) => renderToStaticMarkup(
-    <body data-imagery={design.imagery} className={bar ? (barCoversHeroCall ? "has-action-bar bar-covers-hero-call" : "has-action-bar") : undefined}>
+    <body data-imagery={design.imagery} data-motif={motif} className={bar ? (barCoversHeroCall ? "has-action-bar bar-covers-hero-call" : "has-action-bar") : undefined}>
       <a className="skip-link" href="#main">
         {ctx.t("skipToContent")}
       </a>

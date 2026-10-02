@@ -2,10 +2,10 @@ import type { AppConfig } from "@sb/config";
 import { VersionConflictError, type Repo, type Storage } from "@sb/platform";
 import { contentType } from "@sb/platform";
 import { mediaFiles, siteFiles, exportZip } from "@sb/render";
-import { blockerText, publishChecklist, validateSite, type ImageAsset, type PublishBlocker, type SiteSpec } from "@sb/spec";
+import { blockerText, direction as directionById, publishChecklist, templateFor, validateSite, type ImageAsset, type PublishBlocker, type SiteSpec } from "@sb/spec";
 import type { Operation } from "fast-json-patch";
 import { ModelOutputError, SpendCapError, type ModelClient } from "./llm/client.ts";
-import { classify, makeBrief, chooseDesign, altTexts, generateContent, critique, applyPatches, editSpec } from "./stages.ts";
+import { classify, makeBrief, chooseDesign, altTexts, generateContent, critique, applyPatches, editSpec, drawsInsteadOfPhotos } from "./stages.ts";
 import { extractSwatches, type Swatch } from "./palette.ts";
 import { processLogo, processPhoto, visionJpeg } from "./images.ts";
 import type { ImageGenerator } from "./image-gen.ts";
@@ -130,10 +130,14 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     if (dropped.length) await log("brief", "Dropped facts not found in the client's text", dropped);
     await repo.setBrief(siteId, brief, brief.name);
 
-    // 3b. Too few photos: generated mood images, beside the design step (they don't need it).
+    // 3b. Too few photos: generated mood images, beside the design step (they don't need it). When the trade's
+    // template draws instead of showing pictures (template S), they wait for the design: chosen, it needs none.
     if (slots.skipped) await log("imageGen", slots.skipped);
     const ideas = brief.imageIdeas.slice(0, slots.wanted);
-    const generating: Promise<ImageAsset[]> = ideas.length ? stageTime("imageGen", () => generateImages(deps, siteId, ideas, log)) : Promise.resolve([]);
+    const template = templateFor(brief.businessType, photos.length);
+    const waitForDesign = ideas.length > 0 && template !== undefined && drawsInsteadOfPhotos(template);
+    const startImages = (): Promise<ImageAsset[]> => (ideas.length ? stageTime("imageGen", () => generateImages(deps, siteId, ideas, log)) : Promise.resolve([]));
+    let generating: Promise<ImageAsset[]> = waitForDesign ? Promise.resolve([]) : startImages();
     // Awaited only after the design call: without a handler now, an early rejection (spend cap) would crash the process.
     generating.catch(() => undefined);
 
@@ -144,6 +148,10 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     const { design } = await stageTime("design", () => chooseDesign(client, { brief, swatches, photoCount: photos.length, generatedCount: ideas.length }));
     // The editor's live preview recolours its skeleton with these while the content is written.
     await log("design", "Direction chosen", { direction: design.direction, colors: design.colors });
+    if (waitForDesign) {
+      if (drawsInsteadOfPhotos(directionById(design.direction))) await log("imageGen", `${design.direction} draws the trade instead of showing pictures; no pictures generated`);
+      else generating = startImages();
+    }
     return { brief, design, generated: await generating };
   })();
 

@@ -1,4 +1,5 @@
 import type { Direction } from "./design.ts";
+import type { BusinessType } from "./business.ts";
 
 /**
  * Curated design directions. Each must look clearly different from the others on the eval contact sheet
@@ -436,7 +437,197 @@ export const DIRECTIONS: Direction[] = [
       prefer: ["price-list:grouped", "booking:simple", "services-list:rows", "team:grid", "gallery:grid", "about:image-side"],
     },
   },
+  // ---------- Trade templates (docs/design/templates, owner's decision sb-landing-directions = start-three) ----------
+  {
+    id: "tablica",
+    name: "Tablica (number plate)",
+    summary:
+      "Trades that live on the phone: asphalt and signal yellow, heavy uppercase Archivo, the workshop photo full-bleed under a flat dark overlay, the phone number drawn as a Slovenian registration plate with the town's code, prices as plates and a tyre tread between sections. Choose for car repair, tyre shops, towing and any trade whose customers call; works with or without photos.",
+    bestFor: ["car-repair", "builder"],
+    fontPairs: ["archivo-public-sans"],
+    palette: {
+      background: "white",
+      fallback: {
+        background: "#ffffff",
+        surface: "#eef0f3",
+        text: "#15181c",
+        muted: "#4a525c",
+        primary: "#15181c",
+        onPrimary: "#ffffff",
+        accent: "#b38f00",
+        border: "#d9dee4",
+        inverse: "#15181c",
+        onInverse: "#f5f5f5",
+        band: "#ffcc00",
+        onBand: "#15181c",
+      },
+      primaryHue: null,
+      primarySaturation: [0, 1],
+    },
+    ranges: {
+      radius: [4, 6],
+      baseFontSize: [17, 18],
+      scale: [1.25, 1.333],
+      headingWeight: [850, 900],
+      headingTracking: [-0.03, -0.01],
+      headingCase: ["uppercase"],
+      density: ["regular"],
+      shadow: ["none"],
+    },
+    imagery: "natural",
+    template: {
+      id: "M",
+      motif: "plate",
+      display: [40, 100],
+      h2: [36, 84],
+      firstFor: ["car-repair"],
+      minPhotos: 0,
+      homepage: [
+        "hero-signature:photo tone inverse: fact phone, the best workshop photo (none: leave image out); factLabel how the client wants to be reached; the hero adds address and hours itself",
+        "services-list:two-column: every service the client lists, a short name and one plain line each",
+        "price-list:tags tone inverse: only the prices the client gave, one group without a name; footnote only if the client said how the rest is priced",
+        "image-text:image-left: a second photo with one thing the client stressed (tyres, towing, the family business)",
+        "contact:call-out tone band: the closing call; the title says to call",
+      ],
+    },
+    layout: {
+      headerTone: "inverse",
+      header: "bar",
+      footer: "compact",
+      heroes: ["hero-signature:photo"],
+      rhythm: "inverse-accents",
+      prefer: ["services-list:two-column", "price-list:tags", "image-text:image-left", "contact:call-out"],
+    },
+  },
+  {
+    id: "cevi",
+    name: "Cevi (pipes)",
+    summary:
+      "Field trades with no photos: white page, tight Space Grotesk, a radiator drawn in code fed by a red hot pipe and a blue cold pipe, the phone number in a red block, the two pipes running on as dividers, a step line with valves and a service-area line with stops. Choose for installers, plumbers and heating trades, especially without photos.",
+    bestFor: ["builder"],
+    fontPairs: ["space-grotesk-public-sans"],
+    palette: {
+      background: "white",
+      fallback: {
+        background: "#ffffff",
+        surface: "#e6ebf0",
+        text: "#101820",
+        muted: "#465361",
+        primary: "#d63c22",
+        onPrimary: "#ffffff",
+        accent: "#1f6fe0",
+        border: "#d3dae1",
+        inverse: "#101820",
+        onInverse: "#f5f5f5",
+        band: "#1f6fe0",
+        onBand: "#ffffff",
+      },
+      primaryHue: null,
+      primarySaturation: [0, 1],
+    },
+    ranges: {
+      radius: [8, 10],
+      baseFontSize: [17, 18],
+      scale: [1.25, 1.333],
+      headingWeight: [700, 700],
+      headingTracking: [-0.04, -0.02],
+      headingCase: ["normal"],
+      density: ["regular"],
+      shadow: ["none"],
+    },
+    imagery: "natural",
+    template: {
+      id: "S",
+      motif: "pipes",
+      display: [40, 96],
+      h2: [34, 72],
+      firstFor: ["builder"],
+      minPhotos: 0,
+      homepage: [
+        "hero-signature:drawing: fact phone; factLabel what the call is for (e.g. a free site visit); factNote the client's call-back promise if there is one; no image",
+        "services-list:rows: every service the client lists, a short name and one plain line each",
+        "text:narrow tone band: one statement the client made that matters for the decision (a subsidy, a guarantee) as the heading, one short paragraph",
+        "steps:horizontal tone alt: how a job goes, from the client's own words (call, visit, written offer)",
+        "service-area:list: where the client works (the places come from the business facts)",
+        "contact:call-out tone inverse: the closing call; the title in the client's voice",
+      ],
+    },
+    layout: {
+      header: "bar",
+      footer: "compact",
+      heroes: ["hero-signature:drawing"],
+      rhythm: "inverse-accents",
+      prefer: ["services-list:rows", "steps:horizontal", "service-area:list", "contact:call-out"],
+    },
+  },
+  {
+    id: "skorja",
+    name: "Skorja (crust)",
+    summary:
+      "Food makers: a dark roast hero with the product photo in a tall oven arch and the opening time on a round wheat seal, a fat Bitter slab serif, prices on a ruled board with dotted leaders, a wheat band for the weekly special and the loaf's three scoring cuts as section mark. Choose for bakeries, pastry shops, butchers and coffee roasters with at least one good product photo.",
+    bestFor: ["bakery", "shop"],
+    fontPairs: ["bitter-karla"],
+    palette: {
+      background: "white",
+      fallback: {
+        background: "#ffffff",
+        surface: "#eef1f0",
+        text: "#24130a",
+        muted: "#5c4636",
+        primary: "#8a4a1c",
+        onPrimary: "#ffffff",
+        accent: "#a0561f",
+        border: "#e2d3c5",
+        inverse: "#24130a",
+        onInverse: "#f5f5f5",
+        band: "#f4b942",
+        onBand: "#24130a",
+      },
+      primaryHue: null,
+      primarySaturation: [0, 1],
+    },
+    ranges: {
+      radius: [8, 12],
+      baseFontSize: [18, 19],
+      scale: [1.25, 1.333],
+      headingWeight: [850, 900],
+      headingTracking: [-0.03, -0.01],
+      headingCase: ["normal"],
+      density: ["regular", "airy"],
+      shadow: ["none"],
+    },
+    imagery: "rounded",
+    template: {
+      id: "J",
+      motif: "crust",
+      display: [40, 84],
+      h2: [34, 64],
+      firstFor: ["bakery"],
+      minPhotos: 1,
+      homepage: [
+        "hero-signature:arch tone inverse: fact opening (phone when the client gave no hours), the best product photo; primary a link to the offer section, secondary a call or order link",
+        "price-list:grouped: what is on the shelf every day, one group without a name, prices only as the client gave them (placeholders for the rest)",
+        "cta:band tone band: the weekly or seasonal special the client named, with one order button",
+        "image-text:image-left tone inverse: how the client makes it, with the second photo",
+        "about:text-only: the owner's own sentence about who works there, as the heading, and one short paragraph",
+        "contact:call-out: orders and visits; the title names what to call for",
+      ],
+    },
+    layout: {
+      headerTone: "inverse",
+      header: "bar",
+      footer: "compact",
+      heroes: ["hero-signature:arch"],
+      rhythm: "alternate",
+      prefer: ["price-list:grouped", "cta:band", "image-text:image-left", "about:text-only", "contact:call-out"],
+    },
+  },
 ];
+
+/** The template direction that is the first choice for a business type, if the photos allow it. */
+export function templateFor(businessType: BusinessType, photoCount: number): Direction | undefined {
+  return DIRECTIONS.find((d) => d.template && d.template.firstFor.includes(businessType) && photoCount >= d.template.minPhotos);
+}
 
 export function direction(id: string): Direction {
   const d = DIRECTIONS.find((x) => x.id === id);

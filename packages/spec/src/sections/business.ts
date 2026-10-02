@@ -71,12 +71,12 @@ export const priceList = defineSection(
   {
     type: "price-list",
     group: "business",
-    variants: ["table", "grouped"],
+    variants: ["table", "grouped", "tags"],
     description:
-      "Cenik: up to eight groups of items with prices. table: one real table per group. grouped: groups as definition lists, two columns on desktop. Every price comes from the client's input; missing prices are placeholders.",
+      "Cenik: up to eight groups of items with prices. table: one real table per group. grouped: groups as definition lists, two columns on desktop. tags: every price as a large object drawn by the direction's motif (a number plate, a label) with the item's name under it; for two to eight items. Every price comes from the client's input; missing prices are placeholders.",
     images: "none",
-    mobile: "Two columns (item, price) that fit 360 px without a scroll container; long item names wrap, prices stay on one line, aligned right.",
-    a11y: "table: <table> with the group name as caption (h3) and row headers. grouped: h3 per group and a <dl>. Prices use tabular numbers.",
+    mobile: "Two columns (item, price) that fit 360 px without a scroll container; long item names wrap, prices stay on one line, aligned right. tags: two objects per row.",
+    a11y: "table: <table> with the group name as caption (h3) and row headers. grouped: h3 per group and a <dl>. tags: a list, each item's name an h3 after its price. Prices use tabular numbers.",
   },
   z.strictObject({
     ...head,
@@ -163,11 +163,11 @@ export const contactSection = defineSection(
   {
     type: "contact",
     group: "business",
-    variants: ["split-map", "stacked"],
+    variants: ["split-map", "stacked", "call-out"],
     description:
-      "Contact details from the business facts: click-to-call phone, email, address with a directions link, opening hours, and a map that loads only after the visitor clicks. split-map: details beside the map on desktop. stacked: details in columns, map below. No form.",
+      "Contact details from the business facts: click-to-call phone, email, address with a directions link, opening hours, and a map that loads only after the visitor clicks. split-map: details beside the map on desktop. stacked: details in columns, map below. call-out: closing section for businesses that live on calls, the phone number at poster size as the direction's call object, then address, hours and e-mail in a row; no map. No form.",
     images: "none",
-    mobile: "Details first, each link at least 44 px tall; call and directions buttons full width; the map placeholder follows.",
+    mobile: "Details first, each link at least 44 px tall; call and directions buttons full width; the map placeholder follows. call-out: the number wraps to the screen width, facts stack.",
     a11y: "Heading is an h2. Details are a <dl>. The map is a button-activated embed (no third-party request before the click) with a plain link to Google Maps.",
   },
   z.strictObject({

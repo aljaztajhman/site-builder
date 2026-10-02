@@ -28,6 +28,9 @@ export const MIGRATIONS: Record<number, (spec: RawSpec) => RawSpec> = {
     if (design.success && dir) out.design = { ...design.data, colors: enforceDesign(design.data, dir).colors };
     return out;
   },
+  // 4 → 5: trade templates. Additive: the "band" tone, optional colours band/onBand, heading weight up to 900,
+  // the hero-signature section, price-list "tags" and contact "call-out". Every v4 spec is a valid v5 spec.
+  4: (spec) => spec,
 };
 
 export function migrateSpec(input: unknown, migrations = MIGRATIONS, target: number = SPEC_VERSION): SiteSpec {

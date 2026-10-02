@@ -200,7 +200,8 @@ describe("off-black and off-white colours", () => {
 
 describe(`migration 3 → 4 (give-away rules), current version ${SPEC_VERSION}`, () => {
   it("repairs em dashes and pure white text in a stored v3 site and leaves everything else", () => {
-    const v4 = golden();
+    // The golden specs are stored at the current version; as v4 they are what this step produces.
+    const v4 = { ...golden(), specVersion: 4 } as unknown as SiteSpec;
     const v3 = structuredClone(v4) as unknown as Record<string, unknown> & SiteSpec;
     v3.specVersion = 3 as never;
     v3.design.colors.onInverse = "#ffffff";
@@ -211,7 +212,7 @@ describe(`migration 3 → 4 (give-away rules), current version ${SPEC_VERSION}`,
     expect((out.pages[0]!.sections[0]!.props as { intro: string }).intro).toBe("Kruh z drožmi – vsak dan od 7.00–12.00.");
     expect(out.design.colors.onInverse).toBe("#f5f5f5");
     expect(luminance(out.design.colors.text)).toBeGreaterThanOrEqual(OFF_BLACK_MIN);
-    expect(validateSite(out).ok).toBe(true);
+    expect(validateSite(migrateSpec(out)).ok).toBe(true);
     // The input is not changed.
     expect(v3.design.colors.onInverse).toBe("#ffffff");
     // Nothing else moves.
@@ -219,7 +220,8 @@ describe(`migration 3 → 4 (give-away rules), current version ${SPEC_VERSION}`,
   });
 
   it("leaves a stored site that already follows the rules unchanged apart from the version", () => {
-    const v4 = golden();
+    // The golden specs are stored at the current version; as v4 they are what this step produces.
+    const v4 = { ...golden(), specVersion: 4 } as unknown as SiteSpec;
     expect(migrateSpec({ ...v4, specVersion: 3 }, MIGRATIONS, 4)).toEqual(v4);
   });
 });
