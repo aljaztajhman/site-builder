@@ -1,6 +1,15 @@
 import type pg from "pg";
 import type { Db } from "./db.ts";
 
+/**
+ * SQL (`s` is the site): its current version was saved by a generation ('generate' or its 'critique') after
+ * the site's last run started (every run logs "classify start" first), so the last run saved it.
+ */
+const SAVED_BY_LAST_RUN = `exists (
+        select 1 from spec_versions v
+         where v.site_id = s.id and v.version = s.current_version and v.source in ('generate', 'critique')
+           and v.created_at >= (select max(e.created_at) from site_events e where e.site_id = s.id and e.stage = 'classify' and e.message = 'start'))`;
+
 /** Append-only list of SQL migrations. Never edit or rename an applied one (the name identifies it); add a new entry. */
 export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
   {
@@ -281,6 +290,30 @@ export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
     sql: `
       alter table ai_jobs add column started_at timestamptz;
       alter table ai_jobs add column units integer not null default 1;
+    `,
+  },
+  {
+    id: 11,
+    name: "model_calls.pending",
+    // A paid call's reservation under the daily cap (Usage.reserveCall): a model_calls row at the call's
+    // estimate, pending until the call is over, then settled to its real cost or deleted. Every sum of
+    // cost_eur (the cap, the pools, a job's cost) counts calls in flight. One never settled (its process
+    // died mid-call) stays booked at its estimate: we may have been billed.
+    sql: `alter table model_calls add column pending boolean not null default false`,
+  },
+  {
+    id: 12,
+    name: "sites.failed_after_save",
+    // A generation that failed after it saved a version (e.g. the deployed Pekarna Kvas, whose critique failed
+    // on 2026-09-29) left a usable site "failed"; the worker now leaves such a site "ready". Sites still
+    // failed whose current version a generation saved after its last run started get the same.
+    sql: `
+      insert into site_events (site_id, stage, level, message)
+      select s.id, 'check', 'warn', 'Status set back to ready: the failed generation had saved this version'
+        from sites s
+       where s.status = 'failed' and ${SAVED_BY_LAST_RUN};
+      update sites s set status = 'ready', updated_at = now()
+       where s.status = 'failed' and ${SAVED_BY_LAST_RUN};
     `,
   },
 ];

@@ -5,7 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 import { loadConfig } from "@sb/config";
-import { ModelClient, ReplayTransport, applyChatEdit, generateSite, launchCheckBrowser, loadRecordings, type CallRecord, type CheckBrowser } from "@sb/engine";
+import { CRITIQUE_SKIPPED_NOTE, ModelClient, ReplayTransport, SpendCapError, applyChatEdit, generateSite, launchCheckBrowser, loadRecordings, type CallRecord, type CheckBrowser, type SpendLedger } from "@sb/engine";
 import { Repo, createDb, createFsStorage, migrate, type Db } from "@sb/platform";
 import type { SiteSpec } from "@sb/spec";
 import { loadFixture } from "../src/fixtures/load.ts";
@@ -174,6 +174,27 @@ describe("pipeline with replayed model responses (no network)", () => {
     expect((await repo.getSite(site.id))?.status).toBe("ready");
     const events = await db.query<{ message: string }>("select message from site_events where site_id = $1", [site.id]);
     expect(events.rows.map((e) => e.message)).toContain("Critique failed; kept the checked site");
+  }, 180_000);
+
+  it("keeps the saved site ready and skips the critique quietly when the spend cap is reached before it", async () => {
+    const { fixture, golden, storage, site } = await seedSite("pekarna-kvas-critique-cap");
+    const logged: CallRecord[] = [];
+    // The cap is reached by the time the critique wants its call: its reservation is refused.
+    const ledger: SpendLedger = {
+      async reserve(c) {
+        if (c.stage === "critique") throw new SpendCapError(c.capEur, c.capEur);
+        return { settle: async (r) => void logged.push(r), release: async () => undefined };
+      },
+    };
+    const client = new ModelClient({ config, transport: new ReplayTransport(syntheticRecordings(fixture, golden)), ledger });
+    const gen = await generateSite({ config, repo, storage, client, browser, lighthouse: false }, site.id, null);
+    expect(gen.critiqueSkipped).toBe("spend_cap");
+    expect(logged.map((c) => c.stage)).not.toContain("critique");
+    expect((await repo.getSite(site.id))?.status).toBe("ready");
+    expect((await repo.getSpec(site.id))?.version).toBe(gen.version);
+    const events = await db.query<{ stage: string; level: string; message: string }>("select stage, level, message from site_events where site_id = $1", [site.id]);
+    expect(events.rows).toContainEqual({ stage: "critique", level: "info", message: CRITIQUE_SKIPPED_NOTE });
+    expect(events.rows.filter((e) => e.level === "error")).toEqual([]);
   }, 180_000);
 
   it("keeps the saved version ready when the checks themselves fail to run", async () => {

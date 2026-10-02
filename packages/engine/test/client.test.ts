@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { loadConfig } from "@sb/config";
-import { ModelClient, ModelOutputError, ReplayTransport, SpendCapError, extractJson, requestHash, type CallRecord, type ModelRequest, type ModelResponse, type ModelTransport } from "../src/index.ts";
+import { ModelClient, ModelOutputError, ReplayTransport, SpendCapError, estimateCallEur, extractJson, requestHash, type CallRecord, type ModelRequest, type ModelResponse, type ModelTransport, type SpendLedger } from "../src/index.ts";
 
 const config = loadConfig();
 
@@ -39,6 +39,51 @@ describe("ModelClient", () => {
     const client = new ModelClient({ config, transport: t, spentToday: async () => config.limits.dailyModelSpendCapEur, onCall: async () => undefined });
     await expect(client.call(req)).rejects.toBeInstanceOf(SpendCapError);
     expect(t.seen).toHaveLength(0);
+  });
+
+  it("reserves the call's estimate first: two parallel calls near the cap, only one is sent", async () => {
+    const estimate = estimateCallEur(config, config.models.brief, req);
+    const cap = config.limits.dailyModelSpendCapEur;
+    // Room for one estimate, not two.
+    const t = fakeTransport([{}, {}]);
+    const calls: CallRecord[] = [];
+    const client = new ModelClient({ config, transport: t, spentToday: async () => cap - 1.5 * estimate, onCall: async (r) => void calls.push(r) });
+    const results = await Promise.allSettled([client.call(req), client.call(req)]);
+    expect(results.map((r) => r.status).sort()).toEqual(["fulfilled", "rejected"]);
+    expect((results.find((r) => r.status === "rejected") as PromiseRejectedResult).reason).toBeInstanceOf(SpendCapError);
+    expect(t.seen).toHaveLength(1);
+    expect(calls).toHaveLength(1);
+    // Settled: the estimate is free again, so the next call fits.
+    await client.call(req);
+    expect(t.seen).toHaveLength(2);
+  });
+
+  it("frees the reservation when the request fails, and logs nothing", async () => {
+    const calls: CallRecord[] = [];
+    const ledgerLog: string[] = [];
+    let failing = true;
+    const transport: ModelTransport = { send: async (r, s) => (failing ? Promise.reject(new Error("connection reset")) : fakeTransport([{}]).send(r, s)) };
+    const ledger: SpendLedger = {
+      async reserve(c) {
+        ledgerLog.push(`reserve ${c.stage} ${c.estimateEur > 0}`);
+        return { settle: async (r) => void (ledgerLog.push("settle"), calls.push(r)), release: async () => void ledgerLog.push("release") };
+      },
+    };
+    const client = new ModelClient({ config, transport, ledger });
+    await expect(client.call(req)).rejects.toThrow(/connection reset/);
+    failing = false;
+    await client.call(req);
+    expect(ledgerLog).toEqual(["reserve brief true", "release", "reserve brief true", "settle"]);
+    expect(calls).toHaveLength(1);
+  });
+
+  it("estimates input from the request's text and images, output at the stage's maxTokens", () => {
+    const p = config.pricesUsdPerMTok[config.models.critique.model]!;
+    const { charsPerToken, tokensPerImage } = config.limits.spendReservation;
+    const image = { type: "image" as const, source: { type: "base64" as const, media_type: "image/png" as const, data: "A".repeat(500_000) } };
+    const critiqueReq: ModelRequest = { stage: "critique", system: ["x".repeat(1000)], messages: [{ role: "user", content: [image, image, { type: "text", text: "y".repeat(1500) }] }] };
+    const input = Math.ceil(2500 / charsPerToken) + 2 * tokensPerImage;
+    expect(estimateCallEur(config, config.models.critique, critiqueReq)).toBeCloseTo(((input * p.input + config.models.critique.maxTokens * p.output) / 1e6) * config.eurPerUsd, 9);
   });
 
   it("logs and then rejects truncated or refused output", async () => {

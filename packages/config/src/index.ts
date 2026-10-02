@@ -74,6 +74,11 @@ export const AppConfigSchema = z.object({
   eurPerUsd: z.number().positive(),
   limits: z.object({
     dailyModelSpendCapEur: z.number().nonnegative(),
+    /**
+     * How a model call's cost is estimated before it is sent, to reserve it under the daily cap: input from
+     * the request's text at `charsPerToken` plus `tokensPerImage` per image, output at the stage's maxTokens.
+     */
+    spendReservation: z.object({ charsPerToken: z.number().positive(), tokensPerImage: z.number().int().positive() }),
     contentRetries: z.number().int().min(0),
     /** Paid retries after an answer fails its schema (classify, brief, design, critique, alt text). PRODUCT.md: max 2. */
     jsonRetries: z.number().int().min(0).max(2),
