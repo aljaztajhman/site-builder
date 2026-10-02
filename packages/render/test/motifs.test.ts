@@ -41,6 +41,8 @@ describe("template tokens", () => {
     expect(ledger).toMatch(/--motif-tear:url\("data:image\/svg\+xml,<svg[^;]*fill="#ffffff"/);
     expect(ledger).toContain("--motif-ink:#c2362b");
     expect(ledger).toMatch(/--fs-display:clamp\(2\.5rem, [^)]*, 5rem\)/);
+    // Jedilnik: the spoon brand mark in brass (the band colour).
+    expect(decodeURIComponent(tokensCss(designFor("jedilnik")))).toMatch(/--motif-brand:url\("data:image\/svg\+xml,<svg[^;]*fill="#d2ab55"/);
   });
 
   it("draws the motif in the site's own colours after an edit", () => {

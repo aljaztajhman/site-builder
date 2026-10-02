@@ -60,13 +60,15 @@ describe("trade templates in the pipeline", () => {
     expect(drawsInsteadOfPhotos(directionById("editorial"))).toBe(false);
     expect(heroRule(["img_01"], directionById("racun").layout.heroes)).toBe("");
     expect(drawsInsteadOfPhotos(directionById("etiketa"))).toBe(false);
+    expect(heroRule(["img_01"], directionById("jedilnik").layout.heroes)).toContain("hero-signature:card with one of the hero-suitable pictures");
+    expect(heroRule(["img_01"], directionById("ogledalo").layout.heroes)).toContain("hero-signature:mirrors with one of the hero-suitable pictures");
     expect(heroRule(["img_01"], directionById("etiketa").layout.heroes)).toContain("hero-signature:label with one of the hero-suitable pictures");
   });
 
   it("tells the design and critique steps every template by name and what its motif draws", () => {
-    expect(DESIGN_SYSTEM).toContain("Trade templates (tablica, cevi, skorja, racun, etiketa)");
-    expect(CRITIQUE_SYSTEM).toContain("design directions tablica, cevi, skorja, racun, etiketa");
-    expect(CRITIQUE_SYSTEM).toContain("(number plates, pipes, scoring cuts, a paper receipt and wall-sized figures, bottle labels and an olive branch)");
+    expect(DESIGN_SYSTEM).toContain("Trade templates (tablica, cevi, skorja, racun, etiketa, jedilnik, ogledalo)");
+    expect(CRITIQUE_SYSTEM).toContain("design directions tablica, cevi, skorja, racun, etiketa, jedilnik, ogledalo");
+    expect(CRITIQUE_SYSTEM).toContain("bottle labels and an olive branch, a brass spoon and dishes as round plates, mirror arches and the name as a wall-sized wordmark)");
   });
 
   it("fixes the header: dark over the dark hero (not under a logo), no call button above the phone object", () => {

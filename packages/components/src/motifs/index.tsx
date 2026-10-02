@@ -155,3 +155,13 @@ export function Branch({ className }: { className?: string }) {
     </svg>
   );
 }
+
+/** A spoon (motif spoon): the bowl and the tapering handle, in the band colour (brass). Decorative. */
+export function Spoon({ className }: { className?: string }) {
+  return (
+    <svg className={cx("spoon", className)} viewBox="0 0 22 104" aria-hidden="true" focusable="false">
+      <ellipse cx="11" cy="19" rx="10.5" ry="18" />
+      <path d="M8.5 34h5l1.5 62a4 4 0 0 1-8 0z" />
+    </svg>
+  );
+}

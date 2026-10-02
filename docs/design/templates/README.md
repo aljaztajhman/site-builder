@@ -146,6 +146,15 @@ R and T are directions `racun` and `etiketa` (branch claude/templates-rt). Compa
 - A template may list the colour pairs it sets as text (`textPairs`, e.g. Račun's green figures on white); they are held at 4.5:1 by checkDesign and enforceDesign.
 - Pipeline: hero variants that draw (drawing, receipt) get no generated pictures; the design and critique prompts name every template from the directions list.
 
+## In the engine (K and L, spec v8)
+
+K and L are directions `jedilnik` and `ogledalo` (branch claude/templates-kl, on top of R and T).
+
+- Spec v8 (additive migration): hero-signature `card` (the house full-bleed, a white menu card with a thin brass rule hanging into the next section, the address from the facts) and `mirrors` (two or three photos in mirror arches, optional `images`, the business's own name wall-sized behind as `wordmark`, validated to be a word of the name); price-list `offers`; products `plates`; image-text `pair` (a second photo over the corner, an optional `figure` the client gave inside the heading); team `photo` (the people as ruled rows beside a photo, optional `image` and `inset`).
+- K's brass is the band colour (on the greens 5.93:1 and more; a template text pair), so the offers' prices, the seat count, the number to call and the buttons on green follow a colour edit. The spoon is an inline SVG in the band colour; the brand mark the same spoon as an SVG token.
+- L's price list is set like a masthead (motif CSS on `price-list:grouped`, no new variant); the team photo sits in a tall mirror arch with a small arch over its corner.
+- The contact call-out has no map, so it no longer loads the consent script or shows a cookie notice.
+
 ## Checked
 
 All ten rendered in Chromium at 1440 × 900 and 390 × 844, as plain HTML and through the canvas's own runtime: no horizontal scroll, no failed requests or broken images, every button, call link, plate and bar link at least 44 px tall on the phone. Contrast computed for 69 text and background colour pairs: lowest 4.64:1 (S, white on the red block, after darkening the red from 4.01:1), all others 4.76:1 or more. White text over the photo overlays in M and N is not measured per pixel. Not checked: axe, Lighthouse, other browsers.

@@ -27,9 +27,9 @@ export const imageText = defineSection(
   {
     type: "image-text",
     group: "content",
-    variants: ["image-left", "image-right", "round"],
+    variants: ["image-left", "image-right", "round", "pair"],
     description:
-      "One photo beside a heading, up to three paragraphs and an optional link. Use to present one service, room, product or place with its own photo. Alternate image-left and image-right when used more than once on a page. round: the photo in a disc with a ring, the link as the section's one button; for an offer on a coloured band (gift boxes, a seasonal special).",
+      "One photo beside a heading, up to three paragraphs and an optional link. Use to present one service, room, product or place with its own photo. Alternate image-left and image-right when used more than once on a page. round: the photo in a disc with a ring, the link as the section's one button; for an offer on a coloured band (gift boxes, a seasonal special). pair: a tall photo with a second photo (inset) overlapping its corner, an optional number the client gave set wall-sized above the heading (figure: \"40\" with the heading \"sedežev na terasi\"), the link as the section's one button.",
     images: "required",
     mobile: "Photo first at 4:3 (round: a disc at 70 % of the width), then heading and text. The link is at least 44 px tall.",
     a11y: "Heading is an h2. Photo alt text comes from the asset.",
@@ -40,6 +40,8 @@ export const imageText = defineSection(
     paragraphs: z.array(text(500)).min(1).max(3),
     link: Link.optional(),
     image: ImageRef,
+    inset: ImageRef.optional().describe("pair only: a second photo overlapping the first one's corner."),
+    figure: text(8).optional().describe("pair only: one number from the client's input, set wall-sized above the heading, which reads on from it."),
   }),
 );
 

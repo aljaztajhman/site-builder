@@ -13,7 +13,43 @@ export function initials(name: string | Placeholder): string {
   return words.slice(0, 2).map((w) => w.charAt(0).toLocaleUpperCase("sl-SI")).join("");
 }
 
-export function Team({ section, ctx }: SectionProps<"team">) {
+/** photo: the team photo at 5/11 of the container on desktop, the screen width on phones; the inset a third of it. */
+export const TEAM_PHOTO_SIZES = "(min-width: 64rem) 32rem, 100vw";
+export const TEAM_INSET_SIZES = "(min-width: 64rem) 12rem, 34vw";
+
+/** photo: the heading and the people as ruled rows (name, role) beside one photo, a second photo over its corner. */
+function TeamPhoto({ section, ctx, index }: SectionProps<"team">) {
+  const { props } = section;
+  return (
+    <Section id={section.id} type={section.type} variant={section.variant} tone={section.tone}>
+      <div className={cx("team-photo", props.image && "team-photo--has-image")}>
+        <div className="team-photo__text">
+          <SectionHead id={section.id} eyebrow={props.eyebrow} title={props.title} intro={props.intro} />
+          <ul className="team-rows">
+            {props.members.map((m, i) => (
+              <li className="team-rows__member" key={i}>
+                <h3 className="team-rows__name">
+                  <MaybeText value={m.name} ctx={ctx} />
+                </h3>
+                <p className="team-rows__role muted">{m.role}</p>
+                {m.bio && <p className="team-rows__bio">{m.bio}</p>}
+              </li>
+            ))}
+          </ul>
+        </div>
+        {props.image && (
+          <figure className="team-photo__figure">
+            <Picture id={props.image} ctx={ctx} className="team-photo__media media--contained" sizes={TEAM_PHOTO_SIZES} priority={index === 0} />
+            {props.inset && <Picture id={props.inset} ctx={ctx} className="team-photo__inset media--contained" sizes={TEAM_INSET_SIZES} />}
+          </figure>
+        )}
+      </div>
+    </Section>
+  );
+}
+
+export function Team({ section, ctx, index }: SectionProps<"team">) {
+  if (section.variant === "photo") return <TeamPhoto section={section} ctx={ctx} index={index} />;
   const { props } = section;
   const grid = section.variant === "grid";
   // Some members with a portrait and some without: the others get a tile of the same size with their
@@ -85,7 +121,52 @@ export function Gallery({ section, ctx }: SectionProps<"gallery">) {
 export const PRODUCT_GRID_SIZES = "(min-width: 64rem) 17rem, (min-width: 48rem) 33vw, 50vw";
 export const PRODUCT_LIST_SIZES = "5rem";
 
-export function Products({ section, ctx }: SectionProps<"products">) {
+/** plates: a plate photo at a third of the container on desktop, half the screen on a tablet, 82 % on phones. */
+export const PRODUCT_PLATE_SIZES = "(min-width: 64rem) 22rem, (min-width: 40rem) 45vw, 82vw";
+
+/** plates: dishes with a photo as round plates, the rest as a ruled list with dotted leaders. */
+function ProductPlates({ section, ctx }: SectionProps<"products">) {
+  const { props } = section;
+  const plated = props.items.filter((p) => p.image);
+  const listed = props.items.filter((p) => !p.image);
+  return (
+    <Section id={section.id} type={section.type} variant={section.variant} tone={section.tone}>
+      <SectionHead id={section.id} eyebrow={props.eyebrow} title={props.title} intro={props.intro} />
+      {plated.length > 0 && (
+        <ul className="plates">
+          {plated.map((p, i) => (
+            <li className="plates__item" key={i}>
+              <Picture id={p.image!} ctx={ctx} className="plates__media disc media--contained" sizes={PRODUCT_PLATE_SIZES} />
+              <div className="plates__caption">
+                <h3 className="plates__name">{p.name}</h3>
+                {p.price && (
+                  <p className="plates__price">
+                    <PriceText price={p.price} ctx={ctx} />
+                  </p>
+                )}
+              </div>
+              {p.description && <p className="plates__desc muted">{p.description}</p>}
+            </li>
+          ))}
+        </ul>
+      )}
+      {listed.length > 0 && (
+        <ul className="plates-list">
+          {listed.map((p, i) => (
+            <li className="plates-list__item" key={i}>
+              <h3 className="plates-list__name">{p.name}</h3>
+              <span className="plates-list__leader" aria-hidden="true" />
+              <p className="plates-list__price">{p.price ? <PriceText price={p.price} ctx={ctx} /> : p.unit ?? null}</p>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Section>
+  );
+}
+
+export function Products({ section, ctx, index }: SectionProps<"products">) {
+  if (section.variant === "plates") return <ProductPlates section={section} ctx={ctx} index={index} />;
   const { props } = section;
   const grid = section.variant === "grid";
   return (

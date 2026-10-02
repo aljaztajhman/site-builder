@@ -24,6 +24,8 @@ const MOTIF_WORDS: Record<Motif, string> = {
   crust: "scoring cuts",
   ledger: "a paper receipt and wall-sized figures",
   label: "bottle labels and an olive branch",
+  spoon: "a brass spoon and dishes as round plates",
+  mirror: "mirror arches and the name as a wall-sized wordmark",
 };
 const TEMPLATES = DIRECTIONS.filter((d) => d.template);
 const TEMPLATE_IDS = TEMPLATES.map((d) => d.id).join(", ");

@@ -5,13 +5,15 @@ import { DIRECTIONS, MOTIFS, SECTION_DEFS, checkDesign, contrast, earliestOpenin
 describe("trade template directions (docs/design/templates)", () => {
   const templates = DIRECTIONS.filter((d) => d.template);
 
-  it("implements M, S, J, R and T, one motif each", () => {
+  it("implements M, S, J, R, T, K and L, one motif each", () => {
     expect(templates.map((d) => [d.id, d.template!.id, d.template!.motif])).toEqual([
       ["tablica", "M", "plate"],
       ["cevi", "S", "pipes"],
       ["skorja", "J", "crust"],
       ["racun", "R", "ledger"],
       ["etiketa", "T", "label"],
+      ["jedilnik", "K", "spoon"],
+      ["ogledalo", "L", "mirror"],
     ]);
     expect(new Set(templates.map((d) => d.template!.motif)).size).toBe(templates.length);
     for (const d of templates) expect(MOTIFS).toContain(d.template!.motif);
@@ -71,6 +73,9 @@ describe("trade template directions (docs/design/templates)", () => {
     expect(templateFor("accountant", 0)?.id).toBe("racun");
     expect(templateFor("shop", 1)?.id).toBe("etiketa");
     expect(templateFor("shop", 0)).toBeUndefined();
+    expect(templateFor("restaurant", 1)?.id).toBe("jedilnik");
+    expect(templateFor("hairdresser", 3)?.id).toBe("ogledalo");
+    expect(templateFor("hairdresser", 2)).toBeUndefined();
     expect(templateFor("dental", 3)).toBeUndefined();
   });
 
@@ -148,7 +153,7 @@ describe("hero-signature receipt (R) and the hero rules", () => {
       return validateSite(spec).issues.map((i) => `${i.path} ${i.message}`);
     };
     expect(issues((h) => delete h.props.factLabel)).toEqual(["/pages/0/sections/0/props/factLabel factLabel is required when the hero shows the phone"]);
-    expect(issues((h) => (h.props.fact = "address"))).toEqual(["/pages/0/sections/0/props/fact fact address is only shown by the label variant"]);
+    expect(issues((h) => (h.props.fact = "address"))).toEqual(["/pages/0/sections/0/props/fact fact address is only shown by the label and card variants"]);
     expect(issues((h) => (h.variant = "drawing"))).toEqual(["/pages/0/sections/0/props/receipt receipt is only shown by the receipt variant"]);
   });
 
@@ -193,7 +198,7 @@ describe("hero-signature label (T)", () => {
 describe("variants that need a prop to look different", () => {
   it("name a real variant and an optional prop of the section", () => {
     const declared = SECTION_DEFS.filter((d) => d.variantNeeds);
-    expect(declared.map((d) => d.type).sort()).toEqual(["about", "hero-signature", "opening-hours"]);
+    expect(declared.map((d) => d.type).sort()).toEqual(["about", "hero-signature", "opening-hours", "team"]);
     for (const d of declared) {
       for (const [variant, prop] of Object.entries(d.variantNeeds!)) {
         expect(d.variants as readonly string[], `${d.type}:${variant}`).toContain(variant);

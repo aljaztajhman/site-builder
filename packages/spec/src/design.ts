@@ -51,9 +51,11 @@ type Range = [number, number];
  * line and service-area line), crust (a loaf's three scoring cuts as section mark, the photo in an oven
  * arch, the opening time on a round seal), ledger (a tilted paper receipt with check marks, a torn edge and a
  * double-ruled total, ruled rows, wall-sized figures), label (a bottle label: a framed card with a double inner
- * rule and an olive branch, prices on labels, photos in arches and discs).
+ * rule and an olive branch, prices on labels, photos in arches and discs), spoon (a brass spoon as brand mark and
+ * divider, a menu card over the house, dishes as round plates, prices at headline size), mirror (the name as a
+ * wall-sized wordmark, photos in mirror arches of different heights, a price list set like a masthead).
  */
-export const MOTIFS = ["plate", "pipes", "crust", "ledger", "label"] as const;
+export const MOTIFS = ["plate", "pipes", "crust", "ledger", "label", "spoon", "mirror"] as const;
 export type Motif = (typeof MOTIFS)[number];
 
 export interface DirectionTemplate {

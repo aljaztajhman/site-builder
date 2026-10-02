@@ -128,8 +128,14 @@ export function motifVars(motif: Motif, c: Colors): Record<string, string> {
         "--motif-ink": "#c2362b",
       };
     case "label":
-      // The label's frame, branch and photo shapes take the site's tokens directly in the shared stylesheet.
+    case "mirror":
+      // The frames, branch, arches and wordmark take the site's tokens directly in the shared stylesheet.
       return {};
+    case "spoon":
+      return {
+        // A brass spoon (the inn's name): the brand mark and the divider between the offers, in the band colour.
+        "--motif-brand": svgUrl(`<svg xmlns="http://www.w3.org/2000/svg" width="22" height="104" viewBox="0 0 22 104"><ellipse cx="11" cy="19" rx="10.5" ry="18" fill="${band}"/><path d="M8.5 34h5l1.5 62a4 4 0 0 1-8 0z" fill="${band}"/></svg>`),
+      };
   }
 }
 

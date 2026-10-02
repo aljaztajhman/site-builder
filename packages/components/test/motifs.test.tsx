@@ -4,6 +4,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { SIGNATURE_PHOTO_VARIANTS, direction, heroSignature, type Business, type Design, type SectionOf } from "@sb/spec";
 import { HERO_SIGNATURE_SIZES, HeroSignature, signatureOffersDirections } from "../src/groups/heroes/HeroSignature.tsx";
+import { Products, Team } from "../src/groups/business/Media.tsx";
+import { ImageText } from "../src/groups/content/ImageText.tsx";
 import { heroLcp } from "../src/groups/heroes/index.ts";
 import { PriceList } from "../src/groups/business/Prices.tsx";
 import { Contact } from "../src/groups/business/Info.tsx";
@@ -32,7 +34,7 @@ function templateDesign(id: string): Design {
 const KRANJ: Business = { ...FULL_BUSINESS, phone: "+38641555730", address: { street: "Savska cesta 52", postalCode: "4000", city: "Kranj" } };
 const ctxFor = (dir: string, business: Business = KRANJ) => testCtx(testSpec({ design: templateDesign(dir), business }));
 
-const hero = (variant: "photo" | "drawing" | "arch" | "receipt" | "label", props: Partial<SectionOf<"hero-signature">["props"]> = {}): SectionOf<"hero-signature"> =>
+const hero = (variant: SectionOf<"hero-signature">["variant"], props: Partial<SectionOf<"hero-signature">["props"]> = {}): SectionOf<"hero-signature"> =>
   heroSignature.schema.parse({
     id: "s_hero",
     type: "hero-signature",
@@ -198,6 +200,149 @@ describe("hero-signature label (Etiketa)", () => {
     expect(out).not.toContain("<img");
     expect(out).toContain("hsig hsig--label");
     expect(out).not.toContain("hsig--has-image");
+  });
+});
+
+describe("hero-signature card (Jedilnik)", () => {
+  const LOKA: Business = { ...FULL_BUSINESS, name: "Gostilna Pri Zlati Žlici", address: { street: "Kapucinski trg 7", postalCode: "4220", city: "Škofja Loka" } };
+  const card = (props: Partial<SectionOf<"hero-signature">["props"]> = {}) =>
+    hero("card", {
+      headline: "Domače jedi iz sestavin lokalnih kmetov",
+      intro: "Družinska gostilna v starem delu Škofje Loke.",
+      fact: "address",
+      factLabel: undefined,
+      primary: { label: "Rezervirajte mizo", target: { action: "call" } },
+      secondary: { label: "Jedilni list", target: { page: "p_storitve" } },
+      ...props,
+    });
+
+  it("lays the menu card over the house photo: the address from the facts, one call button and a link", () => {
+    const out = html(<HeroSignature section={card()} ctx={ctxFor("jedilnik", LOKA)} index={0} />);
+    expect(out).toContain("s-hero-signature--card tone-default");
+    expect(out).toMatch(/<picture class="media hsig__bg media--contained">/);
+    expect(out).toContain('<div class="label-card label-card--rule hsig__card"><p class="hsig__where">Kapucinski trg 7, Škofja Loka</p>');
+    expect(out.match(/btn btn--primary/g)).toHaveLength(1);
+    expect(out).toMatch(/data-action="call" class="btn btn--primary">Rezervirajte mizo<\/a>/);
+    expect(out).toContain('class="text-link">Jedilni list</a>');
+    expect(heroLcp["hero-signature"]?.(card())).toEqual({ image: "img_salon", sizes: "100vw" });
+  });
+
+  it("stands on the dark ground without a photo", () => {
+    const out = html(<HeroSignature section={card({ image: undefined })} ctx={ctxFor("jedilnik", LOKA)} index={0} />);
+    expect(out).toContain('class="hsig hsig--card"');
+    expect(out).not.toContain("<img");
+  });
+});
+
+describe("hero-signature mirrors (Ogledalo)", () => {
+  const CELJE: Business = { ...FULL_BUSINESS, name: "Frizerstvo Lana", phone: "+38641555213", address: { street: "Stanetova ulica 14", postalCode: "3000", city: "Celje" } };
+  const mirrors = (props: Partial<SectionOf<"hero-signature">["props"]> = {}) =>
+    hero("mirrors", {
+      headline: "Barvamo brez amoniaka",
+      fact: "phone",
+      factLabel: "Naročite se",
+      wordmark: "Lana",
+      images: ["img_salon", "img_team", "img_detail"],
+      image: undefined,
+      secondary: { label: "Cenik", target: { page: "p_storitve" } },
+      ...props,
+    });
+
+  it("sets the name wall-sized behind (hidden from screen readers), three photos in arches, the call as the button", () => {
+    const out = html(<HeroSignature section={mirrors()} ctx={ctxFor("ogledalo", CELJE)} index={0} />);
+    expect(out).toContain('<p class="hsig__wall" aria-hidden="true">Lana</p>');
+    expect(out).toContain('<p class="eyebrow hsig__eyebrow">Stanetova ulica 14, Celje</p>');
+    expect(out).toContain('<div class="hsig__mirrors" data-count="3">');
+    expect(out.match(/class="media hsig__mirror arch-top media--contained"/g)).toHaveLength(3);
+    // Only the first mirror is the LCP image.
+    expect(out.match(/fetchPriority="high"/g)).toHaveLength(1);
+    expect(heroLcp["hero-signature"]?.(mirrors())).toEqual({ image: "img_salon", sizes: "(min-width: 64rem) 15rem, 32vw" });
+    expect(out).toMatch(/<a href="tel:\+38641555213" data-action="call" class="btn btn--primary">Naročite se<\/a>/);
+    expect(out.match(/href="tel:/g)).toHaveLength(1);
+  });
+
+  it("rejects a wordmark that isn't the business's own name, and images or a wordmark on another variant", async () => {
+    const { validateSite } = await import("@sb/spec");
+    const golden = JSON.parse(readFileSync(path.join(here, "../../../tools/eval/golden/frizerstvo-lana.json"), "utf8"));
+    const { migrateSpec } = await import("@sb/spec");
+    const spec = migrateSpec(golden);
+    expect(validateSite(spec).issues).toEqual([]);
+    const h = spec.pages[0]!.sections[0]! as SectionOf<"hero-signature">;
+    h.props.wordmark = "Lepota";
+    expect(validateSite(spec).issues.map((i) => i.message)).toContain("wordmark must be one word of the business name");
+    h.props.wordmark = "lana";
+    expect(validateSite(spec).issues).toEqual([]);
+    h.variant = "arch";
+    expect(validateSite(spec).issues.map((i) => i.message)).toEqual(expect.arrayContaining(["images are only shown by the mirrors variant", "wordmark is only shown by the mirrors variant"]));
+  });
+});
+
+describe("price-list offers (Jedilnik)", () => {
+  const offers: SectionOf<"price-list"> = {
+    id: "s_today",
+    type: "price-list",
+    variant: "offers",
+    tone: "inverse",
+    props: { title: "Malica in nedeljsko kosilo", groups: [{ name: "Vsak dan", items: [{ name: "Dnevna malica", note: "Juha, glavna jed, solata", price: { amount: 11.5 } }] }, { name: "Ob nedeljah", items: [{ name: "Nedeljsko kosilo", price: { $placeholder: "price" } }] }] },
+  };
+
+  it("sets each offer with when, what and the price at headline size, a spoon between them, the heading for screen readers", () => {
+    const out = html(<PriceList section={offers} ctx={ctxFor("jedilnik")} index={1} />);
+    expect(out).toContain('<h2 id="s_today-title" class="section-title">Malica in nedeljsko kosilo</h2>');
+    expect(out).toMatch(/<p class="offers__when">Vsak dan<\/p><h3 class="offers__name">Dnevna malica<\/h3><p class="offers__note">Juha, glavna jed, solata<\/p><p class="offers__price"><span class="price">11,50\s€<\/span><\/p>/);
+    expect(out.match(/<svg class="spoon offers__spoon"/g)).toHaveLength(1);
+    expect(out).toContain('data-ph="price"');
+  });
+
+  it("draws no spoon outside Jedilnik", () => {
+    expect(html(<PriceList section={offers} ctx={testCtx()} index={1} />)).not.toContain("spoon");
+  });
+});
+
+describe("products plates, image-text pair, team photo (Jedilnik, Ogledalo)", () => {
+  it("plates: dishes with a photo on round plates, the rest on a ruled list with leaders and price placeholders", () => {
+    const section: SectionOf<"products"> = {
+      id: "s_dishes",
+      type: "products",
+      variant: "plates",
+      props: { title: "Z jedilnega lista", items: [{ name: "Telečja obara", price: { amount: 8.5 }, image: "img_salon" }, { name: "Ričet", price: { $placeholder: "price" } }] },
+    };
+    const out = html(<Products section={section} ctx={ctxFor("jedilnik")} index={2} />);
+    expect(out).toMatch(/<li class="plates__item"><picture class="media plates__media disc media--contained">[\s\S]*<h3 class="plates__name">Telečja obara<\/h3><p class="plates__price"><span class="price">8,50\s€<\/span>/);
+    expect(out).toMatch(/<li class="plates-list__item"><h3 class="plates-list__name">Ričet<\/h3><span class="plates-list__leader" aria-hidden="true"><\/span><p class="plates-list__price"><mark class="ph" data-ph="price"/);
+  });
+
+  it("pair: the client's number inside the h2 on its own line, the second photo over the corner, the link as the one button", () => {
+    const section: SectionOf<"image-text"> = {
+      id: "s_terrace",
+      type: "image-text",
+      variant: "pair",
+      tone: "inverse",
+      props: { heading: "sedežev na terasi pod lipo", figure: "40", paragraphs: ["Terasa je odprta poleti."], link: { label: "Rezervirajte za skupino", target: { action: "call" } }, image: "img_salon", inset: "img_team" },
+    };
+    const out = html(<ImageText section={section} ctx={ctxFor("jedilnik")} index={3} />);
+    expect(out).toContain('<h2 id="s_terrace-title" class="section-title"><span class="image-text__figure">40</span> sedežev na terasi pod lipo</h2>');
+    expect(out).toContain('<picture class="media image-text__inset media--contained">');
+    expect(out).toMatch(/data-action="call" class="btn btn--primary image-text__link">Rezervirajte za skupino<\/a>/);
+    expect(out.match(/<h2/g)).toHaveLength(1);
+  });
+
+  it("team photo: the people as ruled rows beside the photo and its inset; names from the facts or placeholders", () => {
+    const section: SectionOf<"team"> = {
+      id: "s_team",
+      type: "team",
+      variant: "photo",
+      tone: "alt",
+      props: { title: "V salonu delava dve", members: [{ name: "Lana Vidmar", role: "lastnica, frizerka" }, { name: { $placeholder: "name" }, role: "frizerka" }], image: "img_salon", inset: "img_team" },
+    };
+    const out = html(<Team section={section} ctx={ctxFor("ogledalo")} index={3} />);
+    expect(out).toContain('<div class="team-photo team-photo--has-image">');
+    expect(out).toMatch(/<li class="team-rows__member"><h3 class="team-rows__name">Lana Vidmar<\/h3><p class="team-rows__role muted">lastnica, frizerka<\/p><\/li>/);
+    expect(out).toContain('data-ph="name"');
+    expect(out).toContain('<picture class="media team-photo__inset media--contained">');
+    const noPhoto = html(<Team section={{ ...section, props: { ...section.props, image: undefined, inset: undefined } }} ctx={ctxFor("ogledalo")} index={3} />);
+    expect(noPhoto).toContain('<div class="team-photo">');
+    expect(noPhoto).not.toContain("<img");
   });
 });
 

@@ -15,7 +15,7 @@ One branch and PR per one or two templates, each based on the previous (stacked)
 | Branch | Templates | Spec |
 | --- | --- | --- |
 | claude/templates-rt | R Račun, T Etiketa | v7 |
-| claude/templates-kl | K Jedilnik, L Ogledalo | v8 |
+| claude/templates-kl | K Jedilnik, L Ogledalo | v8 (built on claude/templates-rt) |
 | claude/templates-o | O Nasmeh | v9 |
 | claude/templates-np | N Markacija, P Pregib | v10 |
 
@@ -77,8 +77,8 @@ One branch and PR per one or two templates, each based on the previous (stacked)
 
 - [x] R: claude/templates-rt. templates:compare R passes at 1440, 1280, 390, 360; eval --offline 0 failures, LH 100/100/100/100, axe 0; lowest text contrast 6.75:1
 - [x] T: claude/templates-rt. templates:compare T passes at all four widths; eval --offline 0 failures, LH 97/100/100/100, axe 0; lowest text contrast 5.18:1; phone first screen 10 % photo (report-only target 25 %, same as the hand-made page)
-- [ ] K
-- [ ] L
+- [x] K: claude/templates-kl. templates:compare K passes at all four widths; eval --offline 0 failures, LH 95/100/100/100, axe 0; lowest text contrast 5.93:1 (brass on green)
+- [x] L: claude/templates-kl. templates:compare L passes at all four widths; eval --offline 0 failures, LH 98/100/100/100, axe 0; lowest text contrast 7.11:1; first screen 21 % photo (report-only targets 25/30 %)
 - [ ] O
 - [ ] N
 - [ ] P

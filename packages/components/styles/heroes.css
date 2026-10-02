@@ -572,6 +572,152 @@ main > .s-hero-signature:first-child {
   }
 }
 
+/* card: the house full-bleed with no overlay; the headline on a white card with a thin inner rule that hangs
+   into the next section (which makes room for it). On a phone a strip of the photo shows above the card. */
+.s-hero-signature--card.s {
+  position: relative;
+  z-index: 1;
+  padding-block: 0;
+}
+.hsig--card {
+  background: var(--c-inverse);
+  padding-top: 2.5rem;
+}
+.hsig--card.hsig--has-image {
+  padding-top: 15rem;
+}
+.hsig--card .hsig__bg img {
+  object-position: center 45%;
+}
+.hsig--card .hsig__body {
+  padding-block: 0;
+}
+.hsig--card .hsig__card {
+  display: grid;
+  justify-items: start;
+  gap: 0.875rem;
+  width: min(36.875rem, 100%);
+  margin-bottom: -3.5rem;
+  padding: 2.5rem 1.75rem 2.25rem;
+}
+.hsig--card .hsig__title,
+.hsig--card .hsig__title--long {
+  max-width: none;
+  font-size: var(--fs-display, calc(var(--fs-h1) * 1.3));
+  line-height: 0.98;
+}
+/* .s.x + .s.s: outranks the shared rule that lets two sections on the same ground share one gap. */
+.s.s-hero-signature--card + .s.s {
+  padding-top: calc(var(--space-section) + 3.5rem);
+}
+@media (min-width: 64rem) {
+  .hsig--card.hsig--has-image {
+    display: flex;
+    align-items: flex-end;
+    min-height: 45rem;
+    padding-top: 6rem;
+  }
+  .hsig--card .hsig__body {
+    width: 100%;
+  }
+  .hsig--card .hsig__card {
+    margin-bottom: -4.5rem;
+    padding: 3.5rem 3.5rem 3.25rem;
+  }
+  .s.s-hero-signature--card + .s.s {
+    padding-top: calc(var(--space-section) + 4.5rem);
+  }
+}
+
+/* mirrors: white ground, the name wall-sized in the alternate colour behind everything, the headline left, two
+   or three photos in mirror arches of different heights right (they stay side by side on a phone). */
+.s-hero-signature--mirrors.s {
+  position: relative;
+  overflow: clip;
+}
+.hsig--mirrors {
+  display: grid;
+  gap: 1.5rem;
+  padding-top: 0.75rem;
+}
+.hsig__wall {
+  position: absolute;
+  z-index: 0;
+  right: -0.02em;
+  bottom: 0.1em;
+  max-width: none;
+  font-family: var(--font-heading);
+  font-weight: var(--fw-heading);
+  font-size: clamp(9.375rem, 34vw, 31.25rem);
+  line-height: 1;
+  letter-spacing: -0.06em;
+  color: var(--c-surface);
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+.hsig--mirrors .hsig__text,
+.hsig__mirrors {
+  position: relative;
+  z-index: 1;
+}
+.hsig--mirrors .hsig__title,
+.hsig--mirrors .hsig__title--long {
+  max-width: none;
+  font-size: var(--fs-display, calc(var(--fs-h1) * 1.3));
+  line-height: 0.92;
+}
+.hsig__mirrors {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr) minmax(0, 5fr);
+  gap: 0.625rem;
+  align-items: end;
+  padding-block: 1.25rem 1.75rem;
+}
+.hsig__mirrors[data-count="2"] {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+.hsig__mirrors[data-count="1"] {
+  grid-template-columns: minmax(0, 1fr);
+  width: 60%;
+  justify-self: end;
+}
+.hsig__mirror {
+  display: block;
+  aspect-ratio: 5 / 8;
+}
+.hsig__mirrors[data-count="3"] .hsig__mirror:nth-child(1) {
+  translate: 0 -1.25rem;
+}
+.hsig__mirrors[data-count="3"] .hsig__mirror:nth-child(2) {
+  aspect-ratio: 6 / 11;
+}
+.hsig__mirrors[data-count="3"] .hsig__mirror:nth-child(3) {
+  translate: 0 1.75rem;
+}
+@media (min-width: 64rem) {
+  .hsig--mirrors {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: 3.5rem;
+    align-items: center;
+  }
+  .hsig__wall {
+    top: -0.2em;
+    bottom: auto;
+    right: -0.04em;
+  }
+  .hsig__mirrors {
+    gap: 1.25rem;
+    padding-block: 3.5rem 4.5rem;
+  }
+  .hsig__mirrors[data-count="3"] .hsig__mirror:nth-child(1) {
+    translate: 0 -2.25rem;
+  }
+  .hsig__mirrors[data-count="3"] .hsig__mirror:nth-child(3) {
+    translate: 0 3rem;
+  }
+}
+
 /* The seal: the earliest opening time on a round, slightly turned stamp in the band colour. */
 .seal {
   display: flex;

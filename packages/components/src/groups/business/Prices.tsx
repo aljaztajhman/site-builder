@@ -1,7 +1,7 @@
 import { PriceText, Section, SectionHead, cx, titleId } from "../../primitives/index.tsx";
 import type { RenderCtx, SectionProps } from "../../types.ts";
 import { TAG_KEYS, itemId } from "./shared.tsx";
-import { Branch, PlateStrip, motifOf } from "../../motifs/index.tsx";
+import { Branch, PlateStrip, Spoon, motifOf } from "../../motifs/index.tsx";
 
 /**
  * An item the owner marked as not available right now: it stays listed, says so in words (the price is
@@ -91,8 +91,48 @@ function PriceLabels({ section, ctx }: Omit<SectionProps<"price-list">, "index">
   );
 }
 
+/**
+ * Standing offers (a daily lunch, a Sunday menu) at headline size: each group one offer, its name saying when,
+ * the item and what it includes, the price large; a spoon between them in Jedilnik. The heading is for screen
+ * readers: the band itself is the statement.
+ */
+function PriceOffers({ section, ctx }: Omit<SectionProps<"price-list">, "index">) {
+  const { props } = section;
+  const spoon = motifOf(ctx) === "spoon";
+  const offers = props.groups.flatMap((g) => g.items.map((it) => ({ when: g.name, it })));
+  return (
+    <Section id={section.id} type={section.type} variant={section.variant} tone={section.tone}>
+      <h2 id={titleId(section.id)} className="section-title">
+        {props.title}
+      </h2>
+      <ul className={cx("offers", spoon && "offers--spoon")} role="list">
+        {offers.map(({ when, it }, i) => (
+          <li className={cx("offers__item", it.unavailable && "is-unavailable")} key={i}>
+            {spoon && i > 0 && <Spoon className="offers__spoon" />}
+            <div className="offers__body">
+              {when && <p className="offers__when">{when}</p>}
+              <h3 className="offers__name">{it.name}</h3>
+              {it.note && <p className="offers__note">{it.note}</p>}
+              {it.unavailable && (
+                <p>
+                  <Unavailable ctx={ctx} className="prices__flag" />
+                </p>
+              )}
+              <p className="offers__price">
+                <PriceText price={it.price} ctx={ctx} />
+              </p>
+            </div>
+          </li>
+        ))}
+      </ul>
+      {props.footnote && <p className="prices__footnote muted">{props.footnote}</p>}
+    </Section>
+  );
+}
+
 export function PriceList({ section, ctx, index }: SectionProps<"price-list">) {
   if (section.variant === "tags") return <PriceTags section={section} ctx={ctx} index={index} />;
+  if (section.variant === "offers") return <PriceOffers section={section} ctx={ctx} />;
   const { props } = section;
   const table = section.variant === "table";
   return (

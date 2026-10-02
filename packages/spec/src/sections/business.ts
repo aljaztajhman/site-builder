@@ -73,9 +73,9 @@ export const priceList = defineSection(
   {
     type: "price-list",
     group: "business",
-    variants: ["table", "grouped", "tags"],
+    variants: ["table", "grouped", "tags", "offers"],
     description:
-      "Cenik: up to eight groups of items with prices. table: one real table per group. grouped: groups as definition lists, two columns on desktop. tags: every price as a large object drawn by the direction's motif (a number plate, a label) with the item's name under it; for two to eight items. Every price comes from the client's input; missing prices are placeholders.",
+      "Cenik: up to eight groups of items with prices. table: one real table per group. grouped: groups as definition lists, two columns on desktop. tags: every price as a large object drawn by the direction's motif (a number plate, a label) with the item's name under it; for two to eight items. offers: two or three standing offers (a daily lunch, a Sunday menu) on a dark band, each group one offer: the group name says when (\"Vsak dan\"), the item is the offer with what it includes as its note, the price at headline size; the heading is read by screen readers only. Every price comes from the client's input; missing prices are placeholders.",
     images: "none",
     mobile: "Two columns (item, price) that fit 360 px without a scroll container; long item names wrap, prices stay on one line, aligned right. tags: two objects per row.",
     a11y: "table: <table> with the group name as caption (h3) and row headers. grouped: h3 per group and a <dl>. tags: a list, each item's name an h3 after its price. Prices use tabular numbers.",
@@ -224,12 +224,13 @@ export const teamSection = defineSection(
   {
     type: "team",
     group: "business",
-    variants: ["grid", "list"],
+    variants: ["grid", "list", "photo"],
     description:
-      "People who work there: name, role, optional short bio and portrait. grid: portraits in a grid. list: one person per row with a small portrait. Names only from the client's input, otherwise a name placeholder.",
+      "People who work there: name, role, optional short bio and portrait. grid: portraits in a grid. list: one person per row with a small portrait. photo: the heading and the people as ruled rows (name left, role right) beside one photo of the team at work or the room (image), with an optional second photo (inset) overlapping its corner. Names only from the client's input, otherwise a name placeholder.",
     images: "optional",
     mobile: "grid: two portraits per row. list: small portrait beside name and role.",
     a11y: "Heading is an h2; each person's name an h3. Portrait alt text comes from the asset.",
+    variantNeeds: { photo: "image" },
   },
   z.strictObject({
     ...head,
@@ -244,6 +245,8 @@ export const teamSection = defineSection(
       )
       .min(1)
       .max(12),
+    image: ImageRef.optional().describe("photo only: the team at work or the room, beside the people."),
+    inset: ImageRef.optional().describe("photo only: a second, smaller photo overlapping the first one's corner."),
   }),
 );
 
@@ -271,9 +274,9 @@ export const productsSection = defineSection(
   {
     type: "products",
     group: "business",
-    variants: ["grid", "list"],
+    variants: ["grid", "list", "plates"],
     description:
-      "Shop or bakery products: name, optional description, price, quantity and photo. grid: product cards with photos. list: compact rows with a small photo. Only products and prices from the client's input.",
+      "Shop or bakery products: name, optional description, price, quantity and photo. grid: product cards with photos. list: compact rows with a small photo. plates: dishes with a top-down photo as round plates (three in a row, the middle one lower), the name and price on a rule under each; items without a photo follow as a ruled list with dotted leaders. Only products and prices from the client's input.",
     images: "optional",
     mobile: "grid: two products per row. list: one per row, price aligned right.",
     a11y: "Heading is an h2; each product name an h3 inside a list. Prices use tabular numbers.",
