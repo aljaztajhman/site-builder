@@ -5,7 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadConfig } from "@sb/config";
 import { ImageGenerator, ModelClient, ReplayTransport, StandInImageTransport, generateSite, launchCheckBrowser, loadMedia, type CallRecord, type CheckBrowser, type Recording } from "@sb/engine";
-import { Repo, createDb, createFsStorage, migrate, type Db } from "@sb/platform";
+import { Repo, createDb, createFsStorage, migrate, type Db, type SiteRow } from "@sb/platform";
 import { renderPage } from "@sb/render";
 import { migrateSpec, validateSite, type SiteSpec } from "@sb/spec";
 import { loadFixture } from "../src/fixtures/load.ts";
@@ -55,11 +55,12 @@ function recordings(id: string, golden: SiteSpec, heroImage: string | null): Rec
   });
 }
 
-async function run(id: string, photos: number, heroImage: string | null) {
+async function run(id: string, photos: number, heroImage: string | null, opts: { slug?: string; again?: { site: SiteRow; stand: StandInImageTransport } } = {}) {
+  const again = opts.again;
   const golden = migrateSpec(JSON.parse(await readFile(path.join(here, `../golden/${id}.json`), "utf8"))) as SiteSpec;
   const storage = createFsStorage(path.join(dir, id));
-  const site = await repo.createSite({ name: id, slug: id, intake: { description: loadFixture(id).brief.description, photoAssetIds: [], scope: "home" } });
-  if (photos) {
+  const site = again?.site ?? (await repo.createSite({ name: id, slug: opts.slug ?? id, intake: { description: loadFixture(id).brief.description, photoAssetIds: [], scope: "home" } }));
+  if (photos && !again) {
     const ids: string[] = [];
     for (const [i, p] of loadFixture(id).photos.slice(0, photos).entries()) {
       const key = `sites/${site.id}/uploads/p${i}.jpg`;
@@ -71,7 +72,7 @@ async function run(id: string, photos: number, heroImage: string | null) {
   const calls: CallRecord[] = [];
   const onCall = async (r: CallRecord) => void calls.push(r);
   const client = new ModelClient({ config, transport: new ReplayTransport(recordings(id, golden, heroImage)), spentToday: async () => 0, onCall });
-  const stand = new StandInImageTransport();
+  const stand = again?.stand ?? new StandInImageTransport();
   const images = new ImageGenerator({ config, transport: stand, spentToday: async () => 0, onCall });
   await generateSite({ config, repo, storage, client, browser, lighthouse: false, images }, site.id, null);
   const spec = (await repo.getSpec(site.id))!.spec;
@@ -100,6 +101,34 @@ describe("generated images for sites with too few photos", () => {
     expect(html).toContain('class="media media--ai hero-split__media" data-ai-label="Ustvarjeno z UI"');
     expect(html).toContain("(slika je ustvarjena z umetno inteligenco)");
   }, 180_000);
+
+  it("gives a regeneration's pictures new ids, so restoring the version before it brings its own pictures back", async () => {
+    const first = await run("instalacije-rebernik", 0, "img_g1", { slug: "regen-restore" });
+    const before = await repo.getSpec(first.site.id);
+    const generatedIds = (spec: SiteSpec) => spec.assets.images.filter((i) => i.origin === "generated").map((i) => i.id);
+    expect(generatedIds(before!.spec)).toEqual(["img_g1", "img_g2"]);
+    const oldMedia = await loadMedia(first.storage, first.site.id, before!.spec, config.images.widths);
+    const oldOriginal = await first.storage.get(`sites/${first.site.id}/generated/img_g1.jpg`);
+
+    // "Ustvari znova": the same site, the same stand-in (so its pictures differ from the first run's).
+    const again = await run("instalacije-rebernik", 0, "img_g3", { again: { site: first.site, stand: first.stand } });
+    expect(first.stand.calls).toBe(4);
+    expect(generatedIds(again.spec)).toEqual(["img_g3", "img_g4"]);
+    const newMedia = await loadMedia(again.storage, first.site.id, again.spec, config.images.widths);
+    expect(Buffer.from(newMedia.get("img_g3-360.webp")!).equals(Buffer.from(oldMedia.get("img_g1-360.webp")!))).toBe(false);
+
+    // Restore (as POST /api/sites/:id/revert does): the old version's pictures, byte for byte.
+    await repo.saveSpec(first.site.id, before!.spec, "revert", `povrnjeno na različico ${before!.version}`);
+    const restored = (await repo.getSpec(first.site.id))!.spec;
+    const restoredMedia = await loadMedia(again.storage, first.site.id, restored, config.images.widths);
+    expect([...restoredMedia.keys()].sort()).toEqual([...oldMedia.keys()].sort());
+    for (const [file, data] of oldMedia) expect(Buffer.from(restoredMedia.get(file)!).equals(Buffer.from(data)), file).toBe(true);
+    expect(Buffer.from((await again.storage.get(`sites/${first.site.id}/generated/img_g1.jpg`))!).equals(Buffer.from(oldOriginal!))).toBe(true);
+    // Preview and published site render from the same files: the restored page shows img_g1, not img_g3.
+    const html = renderPage(restored, restored.pages[0]!, { imageWidths: config.images.widths });
+    expect(html).toContain("media/img_g1-");
+    expect(html).not.toContain("img_g3");
+  }, 300_000);
 
   it("generates nothing when the owner gave enough photos, even with ideas in the brief", async () => {
     const { spec, calls, stand } = await run("pekarna-kvas", 3, null);

@@ -249,6 +249,29 @@ export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
        where exists (select 1 from spec_versions n where n.site_id = v.site_id and n.version = v.version + 1 and n.source = 'generate');
     `,
   },
+  {
+    id: 9,
+    name: "sites.image_seq",
+    // The highest image number ever issued on a site, so an id is never issued twice (Repo.claimImageNumbers):
+    // photo_seq for the owner's img_NN, generated_seq for generated img_gN. Their files are named by the id,
+    // so a reissued id overwrote the pictures older versions show. Backfilled from every stored version and
+    // the intake photos (the pipeline numbers those img_01..N).
+    sql: `
+      alter table sites add column photo_seq integer not null default 0;
+      alter table sites add column generated_seq integer not null default 0;
+      update sites s set
+        photo_seq = greatest(
+          case when jsonb_typeof(s.intake -> 'photoAssetIds') = 'array' then jsonb_array_length(s.intake -> 'photoAssetIds') else 0 end,
+          coalesce((select max(substring(img ->> 'id' from '^img_([0-9]{1,9})$')::integer)
+             from spec_versions v
+             cross join lateral jsonb_array_elements(case when jsonb_typeof(v.spec -> 'assets' -> 'images') = 'array' then v.spec -> 'assets' -> 'images' else '[]'::jsonb end) img
+            where v.site_id = s.id), 0)),
+        generated_seq = coalesce((select max(substring(img ->> 'id' from '^img_g([0-9]{1,9})$')::integer)
+             from spec_versions v
+             cross join lateral jsonb_array_elements(case when jsonb_typeof(v.spec -> 'assets' -> 'images') = 'array' then v.spec -> 'assets' -> 'images' else '[]'::jsonb end) img
+            where v.site_id = s.id), 0);
+    `,
+  },
 ];
 
 type Query = (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>;
