@@ -5,6 +5,7 @@ import type { ModelClient } from "./llm/client.ts";
 import { imageMeta, processPhoto, visionJpeg } from "./images.ts";
 import { altTexts } from "./stages.ts";
 import { mediaKey, uploadKey } from "./pipeline.ts";
+import { claimImageIds } from "./image-ids.ts";
 
 /**
  * The owner's photos after generation: add new ones, or put one in place of an existing picture
@@ -26,18 +27,6 @@ export class PhotoError extends Error {
     super(message);
     this.name = "PhotoError";
   }
-}
-
-/** The next free img_NN id (generated images use img_gN and don't take numbers). */
-export function nextImageIds(spec: SiteSpec, count: number): string[] {
-  const used = new Set(spec.assets.images.map((i) => i.id));
-  let n = Math.max(0, ...spec.assets.images.map((i) => Number(/^img_(\d+)$/.exec(i.id)?.[1] ?? 0)));
-  const out: string[] = [];
-  while (out.length < count) {
-    const id = `img_${String(++n).padStart(2, "0")}`;
-    if (!used.has(id)) out.push(id);
-  }
-  return out;
 }
 
 /** Sections (as "page › type") that show the image. */
@@ -104,7 +93,7 @@ export async function addPhotos(
     if (!(await imageMeta(f.data).catch(() => null))) throw new PhotoError(`Slike ${f.name} ni mogoče prebrati.`);
   }
 
-  const ids = nextImageIds(spec, files.length);
+  const ids = await claimImageIds(repo, siteId, "photo", files.length, spec.assets.images);
   const images: ImageAsset[] = [];
   for (const [i, f] of files.entries()) {
     const id = ids[i]!;
