@@ -16,7 +16,7 @@ export { serveStatic, type StaticServer } from "./static-server.ts";
 export type { AxeViolation, MobileReport } from "./page-checks.ts";
 export type { LighthouseScores } from "./lighthouse.ts";
 export type { Composition } from "./composition.ts";
-export { checkExportOffline, type ExportCheck } from "./export-offline.ts";
+export { checkExportOffline, unzipTo, type ExportCheck } from "./export-offline.ts";
 
 export interface PageCheck {
   file: string;

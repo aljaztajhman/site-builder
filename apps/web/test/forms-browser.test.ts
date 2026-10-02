@@ -2,11 +2,11 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import type { AddressInfo } from "node:net";
 import { serve, type ServerType } from "@hono/node-server";
 import { loadConfig } from "@sb/config";
-import { launchCheckBrowser, type CheckBrowser } from "@sb/engine";
+import { launchCheckBrowser, unzipTo, type CheckBrowser } from "@sb/engine";
 import { Repo, createDb, createFsStorage, migrate, type Platform, type Queue } from "@sb/platform";
 import type { SiteSpec } from "@sb/spec";
 import { createApp } from "../src/app.ts";
@@ -123,5 +123,28 @@ describe("contact form in a browser", () => {
     await expect.poll(() => page.locator("[data-form-status]").textContent()).toContain("V predogledu se sporočila ne pošiljajo.");
     expect((await platform.repo.listFormMessages(siteId)).length).toBe(before);
     await ctx.close();
+  }, 60_000);
+
+  it("sends nothing from an offline export (file://) and says so", async () => {
+    const res = await fetch(`${base}/api/sites/${siteId}/export?anyway=1`, { headers: { cookie } });
+    expect(res.headers.get("content-type")).toBe("application/zip");
+    const out = await mkdtemp(path.join(tmpdir(), "sb-forms-offline-"));
+    try {
+      await unzipTo(new Uint8Array(await res.arrayBuffer()), out);
+      const slug = (await platform.repo.getSite(siteId))!.slug;
+      const ctx = await cb.browser.newContext({ ...STILL, offline: true });
+      const page = await ctx.newPage();
+      const requests: string[] = [];
+      page.on("request", (r) => requests.push(r.url()));
+      const before = (await platform.repo.listFormMessages(siteId)).length;
+      await page.goto(pathToFileURL(path.join(out, slug, "index.html")).href);
+      await fill(page, "Iz izvožene kopije.");
+      await expect.poll(() => page.locator("[data-form-status]").textContent()).toContain("Ta kopija strani je brez strežnika, zato obrazec tukaj ne pošilja sporočil.");
+      expect(requests.filter((u) => !u.startsWith("file:"))).toEqual([]);
+      expect((await platform.repo.listFormMessages(siteId)).length).toBe(before);
+      await ctx.close();
+    } finally {
+      await rm(out, { recursive: true, force: true });
+    }
   }, 60_000);
 });

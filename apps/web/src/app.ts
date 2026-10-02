@@ -50,7 +50,7 @@ export interface AppOptions {
   platform: Platform;
   config: AppConfig;
   auth: AuthSettings;
-  /** Sends sign-in links; from env (Resend, or the console in development) when not given. */
+  /** Sends sign-in links and contact-form emails; from env (Resend, or the console in development) when not given. */
   mailer?: Mailer;
   /** Public origin for links in emails, e.g. https://stranko.example (APP_URL, or Railway's public domain). */
   appUrl?: string;
@@ -158,7 +158,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     c.req.path === "/api/sites" ? next() : /^\/api\/sites\/[^/]+\/photos$/.test(c.req.path) ? photosLimit(c, next) : jsonLimit(c, next),
   );
   // Contact forms: public submit next to published sites, owner's messages in the dashboard.
-  registerFormRoutes(app, { repo, config, secret: auth.secret });
+  registerFormRoutes(app, { repo, config, secret: auth.secret, mailer, ...(opts.appUrl ? { appUrl: opts.appUrl } : {}) });
   // Sign-in (magic link for owners, password for the admin) and the admin's page.
   registerLoginRoutes(app, {
     repo,

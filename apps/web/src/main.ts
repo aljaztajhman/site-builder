@@ -3,6 +3,7 @@ import { loadConfig } from "@sb/config";
 import { mailerFromEnv, platformFromEnv } from "@sb/platform";
 import { drainMs, intakeClassifier, startWorker } from "@sb/worker/worker";
 import { createApp } from "./app.ts";
+import { retryFormNotifications } from "./form-email.ts";
 import { authSettingsFromEnv } from "./auth.ts";
 import { missingEnv, missingEnvLine } from "./env-check.ts";
 
@@ -27,12 +28,20 @@ const app = createApp({ platform, config, auth, mailer, classifyIntake: intakeCl
 const port = Number(process.env.PORT || 3000);
 serve({ fetch: app.fetch, port, hostname: "0.0.0.0" }, (info) => console.log(`[web] http://localhost:${info.port}`));
 
+// Contact-form emails that failed or timed out are retried here (the web service holds the mail settings).
+const formRetry = setInterval(
+  () => void retryFormNotifications({ repo: platform.repo, config, mailer, ...(appUrl ? { appUrl } : {}) }).catch((e: unknown) => console.error("[web] form email retry", e)),
+  config.formEmail.retryEveryMinutes * 60_000,
+);
+formRetry.unref();
+
 // In-process job handlers drain like the worker service's (apps/worker/src/main.ts) before the database closes.
 let stopping = false;
 for (const sig of ["SIGINT", "SIGTERM"] as const) {
   process.on(sig, () => {
     if (stopping) return;
     stopping = true;
+    clearInterval(formRetry);
     void (worker ? worker.shutdown(drainMs(config)).catch((e: unknown) => console.error("[web] worker shutdown", e)) : Promise.resolve())
       .finally(() => void platform.close().finally(() => process.exit(0)));
   });
