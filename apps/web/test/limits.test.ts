@@ -24,6 +24,8 @@ const config = structuredClone(loadConfig());
 // The junk check is off in production config (owner, 2026-10-01); the mechanism is still tested at these values.
 config.tiers.junk = { minDescriptionChars: 40, minClassifierConfidence: 0.5 };
 config.limits.dailyModelSpendCapEur = 100;
+// A small per-account cap on photo descriptions, so the loop below stays short; the mechanism is config's.
+config.tiers.altText.photosPerDay = { free: 3, paid: 5 };
 const mail = memoryMailer();
 const sent: { name: keyof JobData; data: JobData[keyof JobData] }[] = [];
 let platform: Platform;
@@ -577,6 +579,105 @@ describe("spending pools", () => {
     expect(after.held).toBe(0);
     expect(await platform.repo.usage.jobCost(aiJobId)).toBeCloseTo(0.1106, 6);
   });
+});
+
+describe("photo descriptions (alt jobs)", () => {
+  type PhotoAnswer = { ok: boolean; added: string[]; altRefused?: { code: string; message: string } };
+  let jpeg: Uint8Array;
+  /** "Zamenjaj" in the editor: the site's first picture replaced by an owner's photo. */
+  const replacePhoto = async (b: Browser, siteId: string): Promise<PhotoAnswer> => {
+    jpeg ??= await readFile(path.join(here, "../../../tools/eval/fixtures/pekarna-kvas/photos/03.jpg"));
+    const current = (await platform.repo.getSpec(siteId))!;
+    const form = new FormData();
+    form.append("photos", new Blob([jpeg as BlobPart], { type: "image/jpeg" }), "pec.jpg");
+    form.set("replace", current.spec.assets.images[0]!.id);
+    form.set("baseVersion", String(current.version));
+    const res = await req(`/api/sites/${siteId}/photos`, { method: "POST", body: form, headers: { cookie: b.cookie } });
+    expect(res.status).toBe(200);
+    return (await res.json()) as PhotoAnswer;
+  };
+  const altJobs = () => sent.filter((j) => j.name === "alt");
+
+  it("a free account replacing photos in a loop stops at its cap; the photos still change, and other tiers keep working", async () => {
+    const t = config.tiers;
+    const free = await ownerSignIn(req, mail.sent, "fotografinja@siol.net");
+    const freeSite = siteOf(await intake(req, free));
+    await platform.repo.accounts.allow("fotostudio@siol.net", "fotostudio@siol.net", null);
+    const paid = await ownerSignIn(req, mail.sent, "fotostudio@siol.net");
+    const paidSite = siteOf(await intake(req, paid));
+    await runQueued(0.05);
+    const freeBefore = (await platform.repo.usage.pool("free")).spent;
+
+    for (let i = 0; i < t.altText.photosPerDay.free; i++) {
+      const r = await replacePhoto(free, freeSite);
+      expect(r.altRefused, `photo ${i + 1}`).toBeUndefined();
+      const job = altJobs().at(-1)!.data as { imageIds: string[]; aiJobId: string };
+      expect(job.imageIds).toEqual(r.added);
+      // Each one holds its estimate under the free pool until its call is logged.
+      expect(await platform.repo.usage.getJob(job.aiJobId)).toMatchObject({ kind: "alt", tier: "free", pool: "free", units: 1, estimate_eur: t.estimatesEur.altTextPerPhoto, status: "queued" });
+      expect((await platform.repo.getSite(freeSite))!.status).toBe("editing");
+      await runQueued(0.002);
+    }
+    // Their calls count in the free pool.
+    expect((await platform.repo.usage.pool("free")).spent - freeBefore).toBeCloseTo(0.002 * t.altText.photosPerDay.free, 6);
+
+    // Over the cap: the photo is still replaced (direct editing), only the description isn't written.
+    const queuedBefore = sent.length;
+    const over = await replacePhoto(free, freeSite);
+    expect(over.added).toHaveLength(1);
+    expect(over.altRefused).toEqual({
+      code: "alt_limit",
+      message: "Fotografija je dodana, opisa pa ne napišemo samodejno: danes ste porabili vse samodejne opise fotografij. Opis napišite sami pri fotografiji; brez njega strani ni mogoče objaviti.",
+    });
+    expect(sent.length).toBe(queuedBefore);
+    expect((await platform.repo.getSpec(freeSite))!.spec.assets.images.map((i) => i.id)).toContain(over.added[0]);
+    expect((await platform.repo.getSite(freeSite))!.status).toBe("ready");
+    // Writing the description is direct editing: never limited.
+    const images = (await platform.repo.getSpec(freeSite))!.spec.assets.images;
+    const k = images.findIndex((i) => i.id === over.added[0]);
+    const described = await req(`/api/sites/${freeSite}/patch`, { method: "POST", headers: json(free.cookie), body: JSON.stringify({ ops: [{ op: "replace", path: `/assets/images/${k}/alt`, value: "Hlebci kruha na polici" }] }) });
+    expect(described.status).toBe(200);
+    // The same account's chat edits are a separate allowance.
+    expect((await chat(free, freeSite)).status).toBe(200);
+    await runQueued(0.01);
+
+    // Another free account and a paid account still get their descriptions.
+    const other = await ownerSignIn(req, mail.sent, "druga.fotografinja@siol.net");
+    const otherSite = siteOf(await intake(req, other));
+    await runQueued(0.05);
+    expect((await replacePhoto(other, otherSite)).altRefused).toBeUndefined();
+    expect((await replacePhoto(paid, paidSite)).altRefused).toBeUndefined();
+    expect((await platform.repo.usage.getJob((altJobs().at(-1)!.data as { aiJobId: string }).aiJobId))!.tier).toBe("paid");
+    await runQueued(0.002);
+
+    // The cap is per 24 hours.
+    await platform.db.query("update ai_jobs set created_at = now() - interval '25 hours' where kind = 'alt' and account_id = (select id from accounts where email_key = 'fotografinja@siol.net')");
+    expect((await replacePhoto(free, freeSite)).altRefused).toBeUndefined();
+    await runQueued(0.002);
+    // Every replace makes the photo's variants (sharp): slow on a busy machine.
+  }, 180_000);
+
+  it("an empty free pool stops free accounts' descriptions, never paid ones; queued failures don't count", async () => {
+    const free = await ownerSignIn(req, mail.sent, "bazen@siol.net");
+    const freeSite = siteOf(await intake(req, free));
+    await platform.repo.accounts.allow("bazen.placnik@siol.net", "bazen.placnik@siol.net", null);
+    const paid = await ownerSignIn(req, mail.sent, "bazen.placnik@siol.net");
+    const paidSite = siteOf(await intake(req, paid));
+    await runQueued(0.05);
+
+    await platform.repo.usage.hold("free", config.tiers.pools.free * config.limits.dailyModelSpendCapEur, 60);
+    expect((await replacePhoto(free, freeSite)).altRefused).toMatchObject({ code: "pool_empty", message: expect.stringMatching(/^Fotografija je dodana, opisa pa ne napišemo samodejno: današnja omejitev porabe pomočnika je dosežena\./) });
+    expect((await replacePhoto(paid, paidSite)).altRefused).toBeUndefined();
+    await runQueued(0.002);
+    await platform.repo.usage.releaseHolds("free");
+
+    // A description job that failed (no model, an error) doesn't use up the cap.
+    for (let i = 0; i < config.tiers.altText.photosPerDay.free + 1; i++) {
+      expect((await replacePhoto(free, freeSite)).altRefused, `photo ${i + 1}`).toBeUndefined();
+      for (const job of sent.splice(0)) await platform.repo.usage.finishJob((job.data as { aiJobId: string }).aiJobId, "failed");
+      await platform.repo.setStatus(freeSite, "ready");
+    }
+  }, 180_000);
 });
 
 describe("privacy policy", () => {

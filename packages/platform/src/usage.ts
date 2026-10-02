@@ -12,8 +12,10 @@ export const POOLS: readonly Pool[] = ["anonymous", "free", "paid"];
 /** The admin's jobs share the paid pool: a flood of free previews never blocks them. */
 export const poolOf = (tier: Tier): Pool => (tier === "admin" ? "paid" : tier);
 
-export type AiJobKind = "generate" | "edit" | "hold";
-export type AiJobStatus = "queued" | "done" | "failed" | "refused" | "released";
+/** "alt": photo descriptions (the vision model) for photos the owner added in the editor. */
+export type AiJobKind = "generate" | "edit" | "alt" | "hold";
+/** "interrupted": the worker stopped (deploy, crash) before the job finished; like "failed", it isn't counted. */
+export type AiJobStatus = "queued" | "done" | "failed" | "refused" | "released" | "interrupted";
 
 export interface AiJobRow {
   id: string;
@@ -28,7 +30,17 @@ export interface AiJobRow {
   status: AiJobStatus;
   created_at: string;
   expires_at: string | null;
+  /** When a worker began it; null while it waits in the queue. */
+  started_at: string | null;
+  /** What it covers for the per-account caps: photos for "alt", 1 otherwise. */
+  units: number;
 }
+
+/**
+ * SQL: the job's pg-boss job still waits or runs (`j` is the ai_jobs row). pg-boss fails a job whose
+ * worker stopped sending heartbeats, so a dead process's job stops being live within a minute or two.
+ */
+const LIVE_IN_QUEUE = "exists (select 1 from pgboss.job q where q.state in ('created', 'retry', 'active') and q.data->>'aiJobId' = j.id::text)";
 
 export interface Spend {
   /** € logged. */
@@ -73,10 +85,11 @@ export class UsageQueries {
   }
 
   /**
-   * Jobs of one kind that count against an allowance: queued or done (failed and refused jobs don't).
-   * With `allStatuses`, every attempt counts (the per-IP limit).
+   * Jobs of one kind that count against an allowance: queued or done (failed, refused and interrupted jobs
+   * don't). With `allStatuses`, every attempt counts (the per-IP limit). With `units`, their units are
+   * summed instead (photos of "alt" jobs).
    */
-  async countJobs(f: { kind: "generate" | "edit"; tiers: Tier[]; accountId?: string; deviceId?: string; ipKey?: string; sinceHours?: number; allStatuses?: boolean }): Promise<number> {
+  async countJobs(f: { kind: "generate" | "edit" | "alt"; tiers: Tier[]; accountId?: string; deviceId?: string; ipKey?: string; sinceHours?: number; allStatuses?: boolean; units?: boolean }): Promise<number> {
     const where = ["kind = $1", "tier = any($2::text[])"];
     const params: unknown[] = [f.kind, f.tiers];
     const add = (sql: string, v: unknown) => {
@@ -88,16 +101,16 @@ export class UsageQueries {
     if (f.ipKey) add("ip_key = ?", f.ipKey);
     if (f.sinceHours) add("created_at > now() - make_interval(hours => ?::integer)", f.sinceHours);
     if (!f.allStatuses) where.push("status in ('queued', 'done')");
-    const { rows } = await this.q<{ n: string | number }>(`select count(*) as n from ai_jobs where ${where.join(" and ")}`, params);
+    const { rows } = await this.q<{ n: string | number }>(`select ${f.units ? "coalesce(sum(units), 0)" : "count(*)"} as n from ai_jobs where ${where.join(" and ")}`, params);
     return Number(rows[0]?.n ?? 0);
   }
 
-  async insertJob(j: { kind: AiJobKind; scope?: string | null; tier: Tier; accountId?: string | null; deviceId?: string | null; ipKey?: string; siteId?: string | null; estimateEur: number; expiresInMinutes?: number }): Promise<string> {
+  async insertJob(j: { kind: AiJobKind; scope?: string | null; tier: Tier; accountId?: string | null; deviceId?: string | null; ipKey?: string; siteId?: string | null; estimateEur: number; expiresInMinutes?: number; units?: number }): Promise<string> {
     const { rows } = await this.q<{ id: string | number }>(
-      `insert into ai_jobs (kind, scope, tier, pool, account_id, device_id, ip_key, site_id, estimate_eur, expires_at)
-       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, case when $10::integer is null then null else now() + make_interval(mins => $10::integer) end)
+      `insert into ai_jobs (kind, scope, tier, pool, account_id, device_id, ip_key, site_id, estimate_eur, expires_at, units)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, case when $10::integer is null then null else now() + make_interval(mins => $10::integer) end, $11)
        returning id`,
-      [j.kind, j.scope ?? null, j.tier, poolOf(j.tier), j.accountId ?? null, j.deviceId ?? null, j.ipKey ?? "", j.siteId ?? null, j.estimateEur, j.expiresInMinutes ?? null],
+      [j.kind, j.scope ?? null, j.tier, poolOf(j.tier), j.accountId ?? null, j.deviceId ?? null, j.ipKey ?? "", j.siteId ?? null, j.estimateEur, j.expiresInMinutes ?? null, j.units ?? 1],
     );
     return String(rows[0]!.id);
   }
@@ -158,6 +171,18 @@ export class Usage extends UsageQueries {
   /** The job is over: its logged calls are now its whole cost. Only a queued job changes. */
   async finishJob(id: string | number, status: Exclude<AiJobStatus, "queued">): Promise<void> {
     await this.db.query("update ai_jobs set status = $2, finished_at = now() where id = $1 and status = 'queued'", [id, status]);
+  }
+
+  /** A worker began the job: from now on it is stale only when it runs too long (endStaleJobs). */
+  async startJob(id: string | number): Promise<void> {
+    if (!/^\d+$/.test(String(id))) return;
+    await this.db.query("update ai_jobs set started_at = now() where id = $1 and status = 'queued' and started_at is null", [id]);
+  }
+
+  /** The SQL that says a job is still waiting or running in pg-boss, or "false" when there is no queue (tests, seeds). */
+  private async liveInQueue(): Promise<string> {
+    const queue = (await this.db.query<{ t: string | null }>("select to_regclass('pgboss.job')::text as t")).rows[0]?.t;
+    return queue ? LIVE_IN_QUEUE : "false";
   }
 
   /** € logged by one job's calls. */
@@ -244,15 +269,40 @@ export class Usage extends UsageQueries {
 
   // ---------- Housekeeping ----------
 
-  /** Queued jobs no worker finished (deploy, crash) stop holding money; expired holds end. */
+  /**
+   * Queued jobs no worker finished (deploy, crash) stop holding money; expired holds end. A started job is
+   * stale `minutes` after it started (not after it was queued: a backlog doesn't end a job that hasn't run
+   * yet). A job that never started is stale `minutes` after it was queued only when pg-boss has no waiting
+   * or running job for it (an unused upload ticket, a send that never happened).
+   */
   async endStaleJobs(minutes: number): Promise<number> {
+    const live = await this.liveInQueue();
     const { rows } = await this.db.query(
-      `update ai_jobs set status = case when kind = 'hold' then 'released' else 'failed' end, finished_at = now()
-        where status = 'queued' and ((kind = 'hold' and expires_at <= now()) or (kind <> 'hold' and created_at < now() - make_interval(mins => $1::integer)))
+      `update ai_jobs j set status = case when kind = 'hold' then 'released' else 'failed' end, finished_at = now()
+        where status = 'queued' and (
+          (kind = 'hold' and expires_at <= now())
+          or (kind <> 'hold' and started_at is not null and started_at < now() - make_interval(mins => $1::integer))
+          or (kind <> 'hold' and started_at is null and created_at < now() - make_interval(mins => $1::integer) and not ${live})
+        )
         returning id`,
       [minutes],
     );
     return rows.length;
+  }
+
+  /**
+   * Started jobs whose pg-boss job is no longer waiting or running (its worker died, or shut down and failed
+   * it) are marked interrupted: they hold nothing and aren't counted. Without a queue table nothing changes.
+   */
+  async interruptOrphans(): Promise<string[]> {
+    const live = await this.liveInQueue();
+    if (live === "false") return [];
+    const { rows } = await this.db.query<{ id: string | number }>(
+      `update ai_jobs j set status = 'interrupted', finished_at = now()
+        where status = 'queued' and kind <> 'hold' and started_at is not null and not ${live}
+        returning id`,
+    );
+    return rows.map((r) => String(r.id));
   }
 
   /** IP keys serve only the 24-hour limit; the privacy policy says they're gone after a day. */

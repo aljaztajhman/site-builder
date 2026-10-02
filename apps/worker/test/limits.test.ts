@@ -95,6 +95,25 @@ describe("jobs and their ai_jobs rows", () => {
   });
 });
 
+describe("photo descriptions (alt job)", () => {
+  it("starts and finishes its ai_jobs row: done when there was nothing to describe, failed (not counted) when the model couldn't", async () => {
+    const empty = await platform.repo.createSite({ name: "a", slug: "opisi-prazno", intake: { description: "x", photoAssetIds: [], scope: "home" }, accountId: null });
+    const done = await platform.repo.usage.insertJob({ kind: "alt", tier: "free", accountId: "acct_alt", siteId: empty.id, estimateEur: 0.005, units: 1 });
+    await handlers.alt!({ siteId: empty.id, imageIds: ["img_01"], aiJobId: done }, "q-alt-1");
+    expect(await platform.repo.usage.getJob(done)).toMatchObject({ status: "done", started_at: expect.anything() });
+
+    const site = await platform.repo.createSite({ name: "b", slug: "opisi-napaka", intake: { description: "x", photoAssetIds: [], scope: "home" } });
+    const spec = { specVersion: 3, assets: { images: [{ id: "img_01", src: "uploads/manjka.jpg", width: 10, height: 10, alt: "" }] } };
+    await platform.repo.saveSpec(site.id, spec as never, "generate");
+    await platform.repo.setStatus(site.id, "editing");
+    const failed = await platform.repo.usage.insertJob({ kind: "alt", tier: "free", accountId: "acct_alt", siteId: site.id, estimateEur: 0.005, units: 1 });
+    await handlers.alt!({ siteId: site.id, imageIds: ["img_01"], aiJobId: failed }, "q-alt-2");
+    expect((await platform.repo.usage.getJob(failed))!.status).toBe("failed");
+    expect((await platform.repo.getSite(site.id))!.status).toBe("ready");
+    expect(await platform.repo.usage.countJobs({ kind: "alt", tiers: ["free"], accountId: "acct_alt", units: true })).toBe(1);
+  });
+});
+
 describe("housekeeping", () => {
   it("deletes unclaimed anonymous previews after keepDays with their files, keeps claimed and admin sites, clears IP hashes and stale holds", async () => {
     const { repo, storage, db } = platform;
