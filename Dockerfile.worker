@@ -1,13 +1,35 @@
 # Worker service: pipeline jobs (model calls, sharp, Chromium checks with axe and Lighthouse).
-# Based on the official Playwright image so Chromium and its system libraries are present.
-FROM mcr.microsoft.com/playwright:v1.63.0-noble
+# Based on the official Playwright image so Chromium and its system libraries are present (both stages, so
+# native modules such as sharp are installed for the system they run on).
+# Two stages: dependencies are installed from the manifests and lockfile alone (a layer Docker reuses until
+# one of them changes), production dependencies only; the runtime image gets those plus the source, runs
+# as the image's unprivileged `pwuser` and has no pnpm store.
+
+FROM mcr.microsoft.com/playwright:v1.63.0-noble AS deps
 RUN corepack enable
 WORKDIR /app
-COPY . .
-RUN pnpm install --frozen-lockfile
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/web/package.json apps/web/
+COPY apps/worker/package.json apps/worker/
+COPY packages/components/package.json packages/components/
+COPY packages/config/package.json packages/config/
+COPY packages/engine/package.json packages/engine/
+COPY packages/platform/package.json packages/platform/
+COPY packages/render/package.json packages/render/
+COPY packages/spec/package.json packages/spec/
+COPY tools/eval/package.json tools/eval/
+# The worker and the workspace packages it imports; tsx (a dependency) runs the TypeScript source.
+RUN pnpm install --frozen-lockfile --prod --filter "@sb/worker..."
+
+FROM mcr.microsoft.com/playwright:v1.63.0-noble
 # Use the browsers baked into the image instead of downloading them again.
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 ENV NODE_ENV=production
+WORKDIR /app
+# node_modules of the root and of every package (pnpm links them); the source, owned by root, read-only to the app.
+COPY --from=deps /app /app
+COPY . .
+USER pwuser
 # Node directly (not pnpm → pnpm → tsx → node): ~80 MB less, and SIGTERM reaches the app for a clean shutdown.
 WORKDIR /app/apps/worker
 CMD ["node", "--import", "tsx", "src/main.ts"]
