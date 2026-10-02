@@ -20,7 +20,8 @@
     "fixtures:ai-photos": "tsx tools/eval/src/fixtures/ai-photos.ts",
     "examples:build": "tsx tools/eval/src/examples/build.ts",
     "dev:lite": "pnpm --filter @sb/web dev",
-    "seed": "tsx --env-file-if-exists=.env tools/eval/src/seed.ts"
+    "seed": "tsx --env-file-if-exists=.env tools/eval/src/seed.ts",
+    "templates:compare": "tsx tools/eval/src/templates-compare.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

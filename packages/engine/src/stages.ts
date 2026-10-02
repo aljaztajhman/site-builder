@@ -5,6 +5,7 @@ import {
   DIRECTIONS,
   Design,
   GENERATED_IMAGE_SECTIONS,
+  SIGNATURE_PHOTO_VARIANTS,
   direction as directionById,
   enforceDesign,
   templateFor,
@@ -109,9 +110,15 @@ export function templateLine(businessType: BusinessType, photoCount: number): st
   return `Trade template: ${t.id} (${t.name}) is hand-made for this trade. Choose it whenever the business fits its description.${draws}`;
 }
 
-/** A direction whose heroes all draw the trade (template S): generated mood pictures would go unused. */
+/** "hero-signature:<variant>" with a photo (photo, arch, label), as opposed to one that draws (drawing, receipt). */
+function signatureWithPhoto(hero: string): boolean {
+  const [type, variant] = hero.split(":");
+  return type === "hero-signature" && SIGNATURE_PHOTO_VARIANTS.includes(variant ?? "");
+}
+
+/** A direction whose heroes all draw the trade (templates S and R): generated mood pictures would go unused. */
 export function drawsInsteadOfPhotos(dir: Direction): boolean {
-  return dir.layout.heroes.every((h) => h.endsWith(":drawing"));
+  return dir.layout.heroes.every((h) => h.startsWith("hero-signature:") && !signatureWithPhoto(h));
 }
 
 export async function chooseDesign(
@@ -258,7 +265,7 @@ function imageList(assets: SiteSpec["assets"], heroIds: string[]): string {
  * direction's own picture heroes. A typographic direction (no picture hero) keeps its type hero.
  */
 export function heroRule(heroImageIds: string[], directionHeroes: string[]): string {
-  const pictureHeroes = directionHeroes.filter((h) => h.startsWith("hero-split:") || h.startsWith("hero-image:") || h === "hero-signature:photo" || h === "hero-signature:arch");
+  const pictureHeroes = directionHeroes.filter((h) => h.startsWith("hero-split:") || h.startsWith("hero-image:") || signatureWithPhoto(h));
   if (!heroImageIds.length || !pictureHeroes.length) return "";
   return `Homepage hero: ${pictureHeroes.join(" or ")} with one of the hero-suitable pictures (${heroImageIds.join(", ")}), not hero-type. Put the other pictures in image-text or page-header with-image sections.`;
 }

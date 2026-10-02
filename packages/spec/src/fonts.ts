@@ -61,6 +61,9 @@ export const FONT_PAIRS: FontPair[] = [
   { id: "archivo-public-sans", label: "Archivo / Public Sans", heading: FONTS.archivo, body: FONTS.publicSans },
   { id: "space-grotesk-public-sans", label: "Space Grotesk / Public Sans", heading: FONTS.spaceGrotesk, body: FONTS.publicSans },
   { id: "bitter-karla", label: "Bitter / Karla", heading: FONTS.bitter, body: FONTS.karla },
+  // R Račun, T Etiketa.
+  { id: "ibm-plex-sans", label: "IBM Plex Sans", heading: FONTS.ibmPlexSans, body: FONTS.ibmPlexSans },
+  { id: "lora-karla", label: "Lora / Karla", heading: FONTS.lora, body: FONTS.karla },
 ];
 
 export function fontPair(id: string): FontPair {

@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { direction, heroSignature, type Business, type Design, type SectionOf } from "@sb/spec";
-import { HeroSignature, signatureOffersDirections } from "../src/groups/heroes/HeroSignature.tsx";
+import { SIGNATURE_PHOTO_VARIANTS, direction, heroSignature, type Business, type Design, type SectionOf } from "@sb/spec";
+import { HERO_SIGNATURE_SIZES, HeroSignature, signatureOffersDirections } from "../src/groups/heroes/HeroSignature.tsx";
 import { heroLcp } from "../src/groups/heroes/index.ts";
 import { PriceList } from "../src/groups/business/Prices.tsx";
 import { Contact } from "../src/groups/business/Info.tsx";
@@ -32,7 +32,7 @@ function templateDesign(id: string): Design {
 const KRANJ: Business = { ...FULL_BUSINESS, phone: "+38641555730", address: { street: "Savska cesta 52", postalCode: "4000", city: "Kranj" } };
 const ctxFor = (dir: string, business: Business = KRANJ) => testCtx(testSpec({ design: templateDesign(dir), business }));
 
-const hero = (variant: "photo" | "drawing" | "arch", props: Partial<SectionOf<"hero-signature">["props"]> = {}): SectionOf<"hero-signature"> =>
+const hero = (variant: "photo" | "drawing" | "arch" | "receipt" | "label", props: Partial<SectionOf<"hero-signature">["props"]> = {}): SectionOf<"hero-signature"> =>
   heroSignature.schema.parse({
     id: "s_hero",
     type: "hero-signature",
@@ -105,6 +105,59 @@ describe("hero-signature", () => {
   it("limits the headline to 60 characters and the fact to phone or opening", () => {
     expect(() => hero("photo", { headline: "x".repeat(61) })).toThrow();
     expect(() => hero("photo", { fact: "email" as never })).toThrow();
+  });
+});
+
+describe("hero-signature receipt (Račun)", () => {
+  const SOBOTA: Business = { ...FULL_BUSINESS, name: "Računovodstvo Seliškar d.o.o.", phone: "+38625554710", email: "pisarna@racunovodstvo-seliskar.example", address: { street: "Slovenska ulica 41", postalCode: "9000", city: "Murska Sobota" } };
+  const receipt = (props: Partial<SectionOf<"hero-signature">["props"]> = {}) =>
+    hero("receipt", {
+      headline: "Računovodstvo za s.p., d.o.o. in društva",
+      factLabel: "Pokličite nas",
+      factNote: "Odvisna je od števila prejetih in izdanih računov.",
+      secondary: { label: "Pišite nam", target: { action: "email" } },
+      receipt: { title: "Kaj uredimo za vas", lines: ["Plače in potni stroški", "DDV in poročanje FURS"], total: { label: "Cena", value: "po dogovoru" } },
+      ...props,
+    });
+
+  it("lists what the office does on a receipt with the business name from the facts, the call as the one button", () => {
+    const out = html(<HeroSignature section={receipt()} ctx={ctxFor("racun", SOBOTA)} index={0} />);
+    expect(out).toMatch(/<h1 id="s_hero-title" class="hsig__title[^"]*">Računovodstvo za s.p., d.o.o. in društva<\/h1>/);
+    // The address line comes from the facts, not from props.
+    expect(out).toContain('<p class="eyebrow hsig__eyebrow">Slovenska ulica 41, Murska Sobota</p>');
+    expect(out.match(/btn btn--primary/g)).toHaveLength(1);
+    expect(out).toMatch(/<a href="tel:\+38625554710" data-action="call" class="btn btn--primary">Pokličite nas<\/a>/);
+    expect(out).toMatch(/<a href="mailto:pisarna@racunovodstvo-seliskar\.example" data-action="email" class="text-link">Pišite nam<\/a>/);
+    expect(out).toContain('<p class="receipt__title" id="s_hero-receipt">Kaj uredimo za vas</p><p class="receipt__sub">Računovodstvo Seliškar d.o.o.</p>');
+    expect(out).toContain('<ul class="receipt__lines" aria-labelledby="s_hero-receipt"><li>Plače in potni stroški</li><li>DDV in poročanje FURS</li></ul>');
+    expect(out).toContain('<p class="receipt__total"><span>Cena</span><span>po dogovoru</span></p>');
+    expect(out).toContain('<p class="receipt__fine">Odvisna je od števila prejetih in izdanih računov.</p>');
+    expect(out).toContain('<span class="receipt__tear" aria-hidden="true"></span>');
+    expect(out).not.toContain("<img");
+    expect(out).not.toContain("<h2");
+    expect(heroLcp["hero-signature"]?.(receipt())).toBeNull();
+  });
+
+  it("agrees with the spec on which variants show a photo (the pipeline plans pictures by it)", () => {
+    const withPhoto = Object.entries(HERO_SIGNATURE_SIZES).filter(([, sizes]) => sizes !== null).map(([v]) => v);
+    expect(withPhoto.sort()).toEqual([...SIGNATURE_PHOTO_VARIANTS].sort());
+    expect(Object.keys(HERO_SIGNATURE_SIZES).sort()).toEqual([...heroSignature.variants].sort());
+  });
+
+  it("never adds a second call, and shows the phone placeholder instead of a broken button", () => {
+    const twice = html(<HeroSignature section={receipt({ primary: { label: "Pokličite", target: { action: "call" } } })} ctx={ctxFor("racun", SOBOTA)} index={0} />);
+    expect(twice.match(/href="tel:/g)).toHaveLength(1);
+    const sparse = html(<HeroSignature section={receipt()} ctx={ctxFor("racun", SPARSE_BUSINESS)} index={0} />);
+    expect(sparse).not.toContain("tel:");
+    expect(sparse).toContain('data-ph="phone"');
+    expect(sparse).not.toContain("hsig__eyebrow");
+  });
+
+  it("leaves the receipt out when there is none, and takes the model's own eyebrow over the address", () => {
+    const out = html(<HeroSignature section={receipt({ receipt: undefined, eyebrow: "Računovodstvo v Pomurju" })} ctx={ctxFor("racun", SOBOTA)} index={0} />);
+    expect(out).not.toContain("receipt__");
+    expect(out).toContain("Računovodstvo v Pomurju");
+    expect(out).not.toContain("Slovenska ulica 41");
   });
 });
 

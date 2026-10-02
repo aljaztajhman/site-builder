@@ -91,21 +91,47 @@ describe("migration 5 → 6 (owner-edited price lists and menus)", () => {
     const { validateSite } = await import("../src/index.ts");
     for (const id of ["frizerstvo-lana", "gostilna-zlata-zlica"]) {
       const golden = await read(id);
-      const v6 = migrateSpec({ ...golden, specVersion: 5 });
+      const v6 = migrateSpec({ ...golden, specVersion: 5 }, MIGRATIONS, 6);
       expect(v6, id).toEqual({ ...golden, specVersion: 6 });
-      expect(validateSite(v6).issues, id).toEqual([]);
+      expect(validateSite(migrateSpec(v6)).issues, id).toEqual([]);
     }
   });
 
   it("accepts what v6 adds: an item or dish marked unavailable (a boolean)", async () => {
     const { validateSite, priceList, menuSection } = await import("../src/index.ts");
-    const golden = await read("frizerstvo-lana");
+    const golden = migrateSpec(await read("frizerstvo-lana"));
     const spec = structuredClone(golden);
     const prices = spec.pages[1]!.sections.find((s) => s.type === "price-list")!;
     (prices.props as { groups: { items: { unavailable?: boolean }[] }[] }).groups[0]!.items[1]!.unavailable = true;
     expect(validateSite(spec).issues).toEqual([]);
     expect(priceList.schema.safeParse({ ...prices, props: { title: "Cenik", groups: [{ items: [{ name: "A", price: { amount: 1 }, unavailable: "yes" }] }] } }).success).toBe(false);
     expect(menuSection.schema.safeParse({ id: "s_m", type: "menu", variant: "classic", props: { title: "Jedi", categories: [{ name: "Juhe", dishes: [{ name: "Ričet", price: { amount: 6 }, unavailable: true }] }] } }).success).toBe(true);
+  });
+});
+
+describe("migration 6 → 7 (trade templates R and T)", () => {
+  const read = async (id: string) => {
+    const { readFileSync } = await import("node:fs");
+    return JSON.parse(readFileSync(new URL(`../../../tools/eval/golden/${id}.json`, import.meta.url), "utf8")) as SiteSpec;
+  };
+
+  it("turns stored v6 sites into valid v7 sites unchanged apart from the version", async () => {
+    const { validateSite } = await import("../src/index.ts");
+    for (const id of ["avtoservis-mrak", "pekarna-kvas", "frizerstvo-lana"]) {
+      const golden = await read(id);
+      const v7 = migrateSpec({ ...golden, specVersion: 6 });
+      expect(v7, id).toEqual({ ...golden, specVersion: 7 });
+      expect(validateSite(v7).issues, id).toEqual([]);
+    }
+  });
+
+  it("accepts what v7 adds (the receipt hero, figures, the founding year) and only from v7 on", async () => {
+    const { validateSite } = await import("../src/index.ts");
+    const spec = migrateSpec(await read("racunovodstvo-seliskar"));
+    expect(validateSite(spec).issues).toEqual([]);
+    expect(spec.pages[0]!.sections.map((s) => s.variant)).toEqual(["receipt", "figures", "rows", "figure", "call-out"]);
+    // A stored spec must be migrated before it validates: the schema takes only the current version.
+    expect(validateSite({ ...spec, specVersion: 6 }).ok).toBe(false);
   });
 });
 

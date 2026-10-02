@@ -287,6 +287,24 @@ describe("about", () => {
   it("limits paragraphs to 4", () => {
     expect(() => aboutSection.schema.parse({ ...section, props: { ...section.props, paragraphs: Array(5).fill("Besedilo.") } })).toThrow();
   });
+
+  it("renders figure: the client's number wall-sized beside the heading, the owner and the text, no photo", () => {
+    const fig = aboutSection.schema.parse({ ...section, variant: "figure", props: { ...section.props, figure: { label: "Delamo od leta", value: "2004" } } });
+    const out = html(<About section={fig} ctx={testCtx()} index={1} />);
+    expectH2(out, "s_about");
+    expect(out).toContain('<p class="figure"><span class="figure__label">Delamo od leta</span><span class="figure__value">2004</span></p>');
+    expect(out).toContain("Ana Novak");
+    expect(out).not.toContain("<img");
+    // Without a figure it is the plain text-only story.
+    const none = html(<About section={{ ...fig, props: { ...section.props } }} ctx={testCtx()} index={1} />);
+    expect(none).not.toContain("figure__value");
+    expect(none).not.toContain("<img");
+  });
+
+  it("keeps the figure short: a number as the client wrote it", () => {
+    expect(() => aboutSection.schema.parse({ ...section, variant: "figure", props: { ...section.props, figure: { label: "Od leta", value: "123456789" } } })).toThrow();
+    expect(() => aboutSection.schema.parse({ ...section, variant: "figure", props: { ...section.props, figure: { value: "2004" } } })).toThrow();
+  });
 });
 
 describe("announcement", () => {

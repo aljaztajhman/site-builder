@@ -103,3 +103,32 @@ export function Radiator({ className }: { className?: string }) {
     </svg>
   );
 }
+
+/**
+ * A paper receipt listing what the business does (motif ledger): a title, the business name from the facts,
+ * one checked line per item, an optional double-ruled total and fine print. The lines are copy from the
+ * client's own list; the check marks, torn edge and offset shadow are drawn by CSS from the site's tokens.
+ */
+export function Receipt({ ctx, id, title, lines, total, note, className }: { ctx: RenderCtx; id: string; title: string; lines: string[]; total?: { label: string; value: string } | undefined; note?: string | undefined; className?: string }) {
+  return (
+    <div className={cx("receipt", className)}>
+      <p className="receipt__title" id={`${id}-receipt`}>
+        {title}
+      </p>
+      <p className="receipt__sub">{ctx.site.business.name}</p>
+      <ul className="receipt__lines" aria-labelledby={`${id}-receipt`}>
+        {lines.map((line, i) => (
+          <li key={i}>{line}</li>
+        ))}
+      </ul>
+      {total && (
+        <p className="receipt__total">
+          <span>{total.label}</span>
+          <span>{total.value}</span>
+        </p>
+      )}
+      {note && <p className="receipt__fine">{note}</p>}
+      <span className="receipt__tear" aria-hidden="true" />
+    </div>
+  );
+}

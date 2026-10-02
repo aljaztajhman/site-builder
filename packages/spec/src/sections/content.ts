@@ -47,11 +47,11 @@ export const highlightsSection = defineSection(
   {
     type: "highlights",
     group: "content",
-    variants: ["list", "columns"],
+    variants: ["list", "columns", "figures"],
     description:
-      "Two to six short points, each a bold title and one or two sentences, set typographically with rules (no icons). list: one point per row. columns: two columns on desktop. Use for concrete reasons to choose the business or what a visit includes; each point must come from the client's input.",
+      "Two to six short points, each a bold title and one or two sentences, set typographically with rules (no icons). list: one point per row. columns: two columns on desktop. figures: each title is one short word, abbreviation or number from the client's input (\"s.p.\", \"12 let\") set at poster size, its text a short label under it on a rule; the heading is a small label. Use for concrete reasons to choose the business or what a visit includes; each point must come from the client's input.",
     images: "none",
-    mobile: "One column; each point is separated by a rule.",
+    mobile: "One column; each point is separated by a rule. figures: the titles wrap to the screen width, side by side when they fit.",
     a11y: "Heading is an h2, each point an h3 inside a list.",
   },
   z.strictObject({
@@ -140,11 +140,11 @@ export const aboutSection = defineSection(
   {
     type: "about",
     group: "content",
-    variants: ["image-side", "text-only"],
+    variants: ["image-side", "text-only", "figure"],
     description:
-      "The business's own story, told only with what the client wrote: heading, up to four paragraphs, an optional photo (image-side) and optionally the owner's name and role. Never invent history, years or numbers.",
+      "The business's own story, told only with what the client wrote: heading, up to four paragraphs, an optional photo (image-side) and optionally the owner's name and role. figure: no photo; one number the client gave (the founding year) set wall-sized beside the heading and text (props.figure). Never invent history, years or numbers.",
     images: "optional",
-    mobile: "Photo first at 4:3 (image-side; 4:5 beside the text on desktop), then the text. image-side without an image renders like text-only.",
+    mobile: "Photo first at 4:3 (image-side; 4:5 beside the text on desktop), then the text. image-side without an image renders like text-only. figure: the number first, then the text.",
     a11y: "Heading is an h2. Photo alt text comes from the asset.",
   },
   z.strictObject({
@@ -154,6 +154,13 @@ export const aboutSection = defineSection(
     image: ImageRef.optional(),
     ownerName: orPlaceholder(text(60)).optional().describe("Only if the client named the owner; otherwise a name placeholder or omit."),
     ownerRole: text(60).optional().describe('e.g. "lastnica salona"'),
+    figure: z
+      .strictObject({
+        label: text(32).describe('What the number is, e.g. "Delamo od leta"'),
+        value: text(8).describe('The number exactly as the client wrote it, e.g. "2004"'),
+      })
+      .optional()
+      .describe("figure only: one number from the client's input, never estimated or rounded."),
   }),
 );
 

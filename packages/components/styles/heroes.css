@@ -444,6 +444,68 @@ main > .s-hero-signature:first-child {
   }
 }
 
+/* receipt: type on the page beside a solid field in the band colour that runs to the right edge (38 %) and
+   holds the tilted receipt; on a phone the field is a full-width band under the actions. */
+.s-hero-signature--receipt.s {
+  padding-block: 0;
+}
+.hsig--receipt {
+  overflow: clip;
+}
+.hsig--receipt .hsig__grid {
+  display: grid;
+  gap: 1.75rem;
+  padding-top: 1.5rem;
+}
+/* The headline keeps the full display size: the text column is wide and the receipt carries the detail. */
+.hsig--receipt .hsig__title,
+.hsig--receipt .hsig__title--long {
+  max-width: none;
+  font-size: var(--fs-display, calc(var(--fs-h1) * 1.3));
+}
+.hsig--receipt .actions {
+  margin-top: 0.75rem;
+}
+.hsig__paper {
+  position: relative;
+  z-index: 0;
+  padding-block: 2.25rem 4rem;
+}
+.hsig__paper::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0 calc(50% - 50vw);
+  background: var(--c-band, var(--c-primary));
+}
+@media (min-width: 64rem) {
+  .hsig--receipt {
+    position: relative;
+  }
+  .hsig--receipt::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 38%;
+    background: var(--c-band, var(--c-primary));
+  }
+  .hsig--receipt .hsig__grid {
+    position: relative;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: 4.5rem;
+    align-items: center;
+    padding-block: 3.5rem 6.5rem;
+  }
+  .hsig__paper {
+    padding: 0;
+  }
+  .hsig__paper::before {
+    content: none;
+  }
+}
+
 /* The seal: the earliest opening time on a round, slightly turned stamp in the band colour. */
 .seal {
   display: flex;
