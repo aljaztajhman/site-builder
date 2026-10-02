@@ -61,7 +61,7 @@ const LIVE = "j.status = 'queued' and (j.expires_at is null or j.expires_at > no
 export class UsageQueries {
   constructor(protected readonly q: Query) {}
 
-  /** € spent by every model and image call since UTC midnight (the global cap's measure). */
+  /** € spent by every model and image call since UTC midnight, calls in flight at their reservation (the global cap's measure). */
   async spentToday(): Promise<number> {
     const { rows } = await this.q<{ n: string | number }>(`select coalesce(sum(cost_eur), 0) as n from model_calls where created_at >= ${TODAY}`);
     return Number(rows[0]?.n ?? 0);
@@ -117,6 +117,28 @@ export class UsageQueries {
 }
 
 const QUOTA_LOCK = 727_274_002;
+const SPEND_LOCK = 727_274_003;
+
+/** Whose paid call it is (as on its model_calls row). */
+export interface CallOwner {
+  siteId: string | null;
+  jobId: string | null;
+  tier?: Tier | null;
+  accountId?: string | null;
+  aiJobId?: string | number | null;
+}
+
+/** What a settled call cost. */
+export interface CallCost {
+  model: string;
+  inputTokens: number;
+  outputTokens: number;
+  cacheCreationTokens: number;
+  cacheReadTokens: number;
+  costEur: number;
+  durationMs: number;
+  ok: boolean;
+}
 
 export class Usage extends UsageQueries {
   constructor(private readonly db: Db) {
@@ -133,6 +155,42 @@ export class Usage extends UsageQueries {
       await q("select pg_advisory_xact_lock($1)", [QUOTA_LOCK]);
       return fn(new UsageQueries(q));
     });
+  }
+
+  // ---------- Paid calls under the daily cap: reserve, then settle or release ----------
+
+  /**
+   * Reserves a paid call's estimate under the daily cap (UTC day), atomically: under one lock across
+   * processes, today's € (logged and reserved) is read and, if the estimate fits, a pending model_calls row
+   * at the estimate is written, so two calls can't both take the last room. Otherwise today's € comes back.
+   */
+  async reserveCall(c: CallOwner & { stage: string; model: string; estimateEur: number; capEur: number }): Promise<{ id: string } | { spent: number }> {
+    return this.db.transaction(async (q) => {
+      await q("select pg_advisory_xact_lock($1)", [SPEND_LOCK]);
+      const spent = await new UsageQueries(q).spentToday();
+      if (spent + c.estimateEur > c.capEur) return { spent };
+      const { rows } = await q<{ id: string | number }>(
+        `insert into model_calls (site_id, job_id, stage, model, input_tokens, output_tokens, cost_eur, duration_ms, ok, pending, tier, account_id, ai_job_id)
+         values ($1, $2, $3, $4, 0, 0, $5, 0, false, true, $6, $7, $8) returning id`,
+        [c.siteId, c.jobId, c.stage, c.model, c.estimateEur, c.tier ?? null, c.accountId ?? null, c.aiJobId ?? null],
+      );
+      return { id: String(rows[0]!.id) };
+    });
+  }
+
+  /** The call is over and billed: its reservation becomes the call's row, at its real tokens and cost. */
+  async settleCall(id: string, c: CallCost): Promise<void> {
+    await this.db.query(
+      `update model_calls set model = $2, input_tokens = $3, output_tokens = $4, cache_creation_tokens = $5, cache_read_tokens = $6,
+              cost_eur = $7, duration_ms = $8, ok = $9, pending = false
+        where id = $1 and pending`,
+      [id, c.model, c.inputTokens, c.outputTokens, c.cacheCreationTokens, c.cacheReadTokens, c.costEur, c.durationMs, c.ok],
+    );
+  }
+
+  /** The call cost nothing: its reservation goes. */
+  async releaseCall(id: string): Promise<void> {
+    await this.db.query("delete from model_calls where id = $1 and pending", [id]);
   }
 
   async getJob(id: string | number): Promise<AiJobRow | null> {

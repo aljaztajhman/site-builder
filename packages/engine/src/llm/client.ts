@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import Anthropic from "@anthropic-ai/sdk";
-import { costEur, type AppConfig, type ModelStageName } from "@sb/config";
+import { costEur, type AppConfig, type ModelStageConfig, type ModelStageName } from "@sb/config";
 import { toStructuredOutputSchema } from "./structured-schema.ts";
 
 /** The request shape the pipeline sends; a subset of the Messages API. */
@@ -47,9 +47,85 @@ export interface ModelTransport {
 
 export class SpendCapError extends Error {
   constructor(spent: number, cap: number) {
-    super(`Daily model spend cap reached: €${spent.toFixed(2)} of €${cap.toFixed(2)}. Generation is paused until tomorrow (UTC).`);
+    super(`Daily model spend cap reached: €${spent.toFixed(2)} of €${cap.toFixed(2)} spent or reserved. Generation is paused until tomorrow (UTC).`);
     this.name = "SpendCapError";
   }
+}
+
+/** A paid call's estimated cost, reserved under the daily cap until the call is over. */
+export interface SpendReservation {
+  /** The provider billed the call: book `record` (its real cost, tokens, stage) in place of the estimate. */
+  settle(record: CallRecord): Promise<void>;
+  /** The call cost nothing (it failed before the provider billed it): free the estimate, log nothing. */
+  release(): Promise<void>;
+}
+
+/**
+ * Where paid calls book their cost. `reserve` is atomic: two calls near the cap can't both take the last
+ * room, so parallel stages and jobs no longer overshoot it by what they had in flight.
+ */
+export interface SpendLedger {
+  /** Reserves `estimateEur` under `capEur` (today, UTC). Throws SpendCapError when it doesn't fit. */
+  reserve(call: { stage: CallRecord["stage"]; model: string; estimateEur: number; capEur: number }): Promise<SpendReservation>;
+}
+
+/**
+ * A ledger over a spend reading and a call log, atomic within this process only (eval runs, tests):
+ * reservations in flight are counted in memory. The worker uses the database's ledger instead.
+ */
+export function localLedger(spentToday: () => Promise<number>, onCall: (record: CallRecord) => Promise<void>): SpendLedger {
+  let pending = 0;
+  return {
+    async reserve({ estimateEur, capEur }) {
+      const spent = await spentToday();
+      // No await from here to `pending +=`: a reservation made meanwhile is already counted.
+      if (spent + pending + estimateEur > capEur) throw new SpendCapError(spent + pending, capEur);
+      pending += estimateEur;
+      let open = true;
+      const close = () => {
+        if (open) pending -= estimateEur;
+        open = false;
+      };
+      return {
+        // Logged before the estimate is freed, so the call is never counted at zero in between.
+        settle: async (record) => {
+          await onCall(record);
+          close();
+        },
+        release: async () => close(),
+      };
+    },
+  };
+}
+
+/** A ledger, or the spend reading and call log a local one is built from. */
+export type SpendSource = { ledger: SpendLedger } | { spentToday: () => Promise<number>; onCall: (record: CallRecord) => Promise<void> };
+
+export const ledgerOf = (s: SpendSource): SpendLedger => ("ledger" in s ? s.ledger : localLedger(s.spentToday, s.onCall));
+
+/**
+ * What a model call may cost, reserved before it is sent: the request's text at
+ * `limits.spendReservation.charsPerToken` plus a fixed count per image, all at the uncached input price,
+ * and the stage's whole maxTokens of output (thinking included), the most it can bill.
+ */
+export function estimateCallEur(config: AppConfig, stage: ModelStageConfig, req: ModelRequest): number {
+  const price = config.pricesUsdPerMTok[stage.model];
+  if (!price) throw new Error(`No price configured for model ${stage.model}`);
+  const { charsPerToken, tokensPerImage } = config.limits.spendReservation;
+  let chars = req.system.reduce((n, s) => n + s.length, 0) + (req.schema ? JSON.stringify(req.schema).length : 0);
+  let images = 0;
+  for (const m of req.messages) {
+    if (typeof m.content === "string") chars += m.content.length;
+    else
+      for (const b of m.content) {
+        if (b.type === "text") chars += b.text.length;
+        // Base64 data says nothing about an image's tokens.
+        else if (b.type === "image" || b.type === "document") images++;
+        else chars += JSON.stringify(b).length;
+      }
+  }
+  const input = Math.ceil(chars / charsPerToken) + images * tokensPerImage;
+  return ((input * price.input + stage.maxTokens * price.output) / 1_000_000) * config.eurPerUsd;
 }
 
 export class ModelOutputError extends Error {
@@ -62,21 +138,23 @@ export class ModelOutputError extends Error {
   }
 }
 
-export interface ModelClientOptions {
-  config: AppConfig;
-  transport: ModelTransport;
-  /** € already spent today (from the database). Checked before every call. */
-  spentToday: () => Promise<number>;
-  /** Persist one call's tokens and cost (per stage). Called for failed calls too when usage is known. */
-  onCall: (record: CallRecord) => Promise<void>;
-}
+/**
+ * `ledger` reserves each call's estimate under the daily cap and books its tokens and € per stage (also
+ * for calls whose answer is unusable, when usage is known). Or, for a local ledger: `spentToday` (€ already
+ * spent today) and `onCall` (persist one call's record).
+ */
+export type ModelClientOptions = { config: AppConfig; transport: ModelTransport } & SpendSource;
 
 /**
  * The one entry point for model calls. Enforces the daily spend cap, logs tokens and € per stage,
  * and resolves the model/effort for each stage from config.
  */
 export class ModelClient {
-  constructor(private readonly opts: ModelClientOptions) {}
+  private readonly ledger: SpendLedger;
+
+  constructor(private readonly opts: ModelClientOptions) {
+    this.ledger = ledgerOf(opts);
+  }
 
   /** Retry limits from config, for stages that loop over `call` themselves. */
   get limits(): AppConfig["limits"] {
@@ -92,12 +170,18 @@ export class ModelClient {
   }
 
   async call(req: ModelRequest): Promise<ModelResponse> {
-    const cap = this.opts.config.limits.dailyModelSpendCapEur;
-    const spent = await this.opts.spentToday();
-    if (spent >= cap) throw new SpendCapError(spent, cap);
+    const { config } = this.opts;
     const stage = this.stageConfig(req.stage);
+    const reservation = await this.ledger.reserve({ stage: req.stage, model: stage.model, estimateEur: estimateCallEur(config, stage, req), capEur: config.limits.dailyModelSpendCapEur });
     const started = Date.now();
-    const res = await this.opts.transport.send(req, stage);
+    let res: ModelResponse;
+    try {
+      res = await this.opts.transport.send(req, stage);
+    } catch (e) {
+      // No answer, so no usage to book.
+      await reservation.release();
+      throw e;
+    }
     // Price by the model the API reports; if it reports an ID we have no price for (e.g. a dated
     // alias), use the requested model's price so the call is still logged and counted against the cap.
     const priced = this.opts.config.pricesUsdPerMTok[res.model] ? res.model : stage.model;
@@ -109,7 +193,7 @@ export class ModelClient {
       durationMs: Date.now() - started,
       ok: res.stopReason !== "refusal" && res.stopReason !== "max_tokens",
     };
-    await this.opts.onCall(record);
+    await reservation.settle(record);
     if (res.stopReason === "refusal") throw new ModelOutputError(`Model declined the ${req.stage} request`, res);
     if (res.stopReason === "max_tokens") throw new ModelOutputError(`Model output for ${req.stage} hit max_tokens`, res);
     return res;

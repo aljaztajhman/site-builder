@@ -21,6 +21,11 @@
   "eurPerUsd": 0.86,
   "limits": {
     "dailyModelSpendCapEur": 10,
+    "spendReservation": {
+      "$comment": "Every paid call reserves its estimated cost under the daily cap before it is sent (atomically, so parallel calls can't both take the last room) and books its real cost after. Model calls: input from the request's text at charsPerToken (Slovene and JSON run below 3) plus tokensPerImage per image (the API's ~1.15-megapixel resize, about 1,600 tokens), output at the stage's maxTokens, all at uncached prices: an upper bound for the output, an estimate for the input. Generated pictures reserve their configured price.",
+      "charsPerToken": 2.5,
+      "tokensPerImage": 1600
+    },
     "contentRetries": 2,
     "jsonRetries": 2,
     "editRetries": 1,

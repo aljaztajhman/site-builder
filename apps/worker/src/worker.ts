@@ -16,6 +16,7 @@ import {
   pruneAllSites,
   pruneSite,
   type ModelTransport,
+  type SpendLedger,
 } from "@sb/engine";
 import { INTERRUPTED_MESSAGE, type Platform, type Tier } from "@sb/platform";
 import { cleanupExpired, spendMonitor } from "./housekeeping.ts";
@@ -37,49 +38,44 @@ export interface CallContext {
 
 const owner = (ctx: CallContext) => ({ tier: ctx.tier ?? null, accountId: ctx.accountId ?? null, aiJobId: ctx.aiJobId ?? null });
 
-/** Model client wired to the database: spend cap from today's logged calls, every call logged per stage. */
-export function modelClientFor(platform: Platform, config: AppConfig, ctx: CallContext, transport: ModelTransport = defaultTransport("generate")): ModelClient {
-  return new ModelClient({
-    config,
-    transport,
-    spentToday: () => platform.repo.spendToday(),
-    onCall: async (r) => {
-      await platform.repo.logModelCall({
-        ...owner(ctx),
-        siteId: ctx.siteId,
-        jobId: ctx.jobId,
-        stage: r.stage,
-        model: r.model,
-        inputTokens: r.usage.input_tokens,
-        outputTokens: r.usage.output_tokens,
-        cacheCreationTokens: r.usage.cache_creation_input_tokens,
-        cacheReadTokens: r.usage.cache_read_input_tokens,
-        costEur: r.costEur,
-        durationMs: r.durationMs,
-        ok: r.ok,
-      });
-      console.log(`[model] ${r.stage} ${r.model} in=${r.usage.input_tokens} out=${r.usage.output_tokens} cacheR=${r.usage.cache_read_input_tokens} cacheW=${r.usage.cache_creation_input_tokens} €${r.costEur.toFixed(4)} ${r.durationMs}ms`);
+/**
+ * The database's spend ledger for one job's paid calls: each reserves its estimate under the daily cap
+ * before it is sent (atomic across processes, Usage.reserveCall), then its row is settled to the real
+ * tokens and € (per stage, with the job's tier, account and ai_jobs row) or released when nothing was billed.
+ */
+export function spendLedgerFor(platform: Pick<Platform, "repo">, ctx: CallContext): SpendLedger {
+  const usage = platform.repo.usage;
+  return {
+    async reserve({ stage, model, estimateEur, capEur }) {
+      const r = await usage.reserveCall({ ...owner(ctx), siteId: ctx.siteId, jobId: ctx.jobId, stage, model, estimateEur, capEur });
+      if (!("id" in r)) throw new SpendCapError(r.spent, capEur);
+      return {
+        async settle(c) {
+          const u = c.usage;
+          await usage.settleCall(r.id, { model: c.model, inputTokens: u.input_tokens, outputTokens: u.output_tokens, cacheCreationTokens: u.cache_creation_input_tokens, cacheReadTokens: u.cache_read_input_tokens, costEur: c.costEur, durationMs: c.durationMs, ok: c.ok });
+          if (c.stage === "imageGen") console.log(`[image] ${c.model} €${c.costEur.toFixed(4)} ${c.durationMs}ms${c.ok ? "" : " failed"}`);
+          else console.log(`[model] ${c.stage} ${c.model} in=${u.input_tokens} out=${u.output_tokens} cacheR=${u.cache_read_input_tokens} cacheW=${u.cache_creation_input_tokens} €${c.costEur.toFixed(4)} ${c.durationMs}ms`);
+        },
+        release: () => usage.releaseCall(r.id),
+      };
     },
-  });
+  };
+}
+
+/** Model client wired to the database: every call reserved under the daily cap, then logged per stage. */
+export function modelClientFor(platform: Platform, config: AppConfig, ctx: CallContext, transport: ModelTransport = defaultTransport("generate")): ModelClient {
+  return new ModelClient({ config, transport, ledger: spendLedgerFor(platform, ctx) });
 }
 
 /**
  * Generated mood images for sites with too few photos: fal.ai when FAL_KEY is set, flat stand-ins when
- * replaying recordings (demos), none otherwise. Every image is logged with its € and counts against the cap.
+ * replaying recordings (demos), none otherwise. Every image is reserved at its price under the cap and logged with its €.
  */
 export function imageGeneratorFor(platform: Platform, config: AppConfig, ctx: CallContext): ImageGenerator | undefined {
   if (!config.imageGen.pipeline.enabled) return undefined;
   const transport = process.env.MODEL_REPLAY_DIR ? new StandInImageTransport() : process.env.FAL_KEY ? new FalImageTransport() : null;
   if (!transport) return undefined;
-  return new ImageGenerator({
-    config,
-    transport,
-    spentToday: () => platform.repo.spendToday(),
-    onCall: async (r) => {
-      await platform.repo.logModelCall({ ...owner(ctx), siteId: ctx.siteId, jobId: ctx.jobId, stage: r.stage, model: r.model, inputTokens: 0, outputTokens: 0, cacheCreationTokens: 0, cacheReadTokens: 0, costEur: r.costEur, durationMs: r.durationMs, ok: r.ok });
-      console.log(`[image] ${r.model} €${r.costEur.toFixed(4)} ${r.durationMs}ms${r.ok ? "" : " failed"}`);
-    },
-  });
+  return new ImageGenerator({ config, transport, ledger: spendLedgerFor(platform, ctx) });
 }
 
 /**
@@ -252,21 +248,31 @@ export async function startWorker(platform: Platform, config = loadConfig(), job
     const before = (await repo.getSite(job.siteId))?.current_version ?? null;
     try {
       const images = imageGeneratorFor(platform, config, ctx);
-      await run.generateSite({ config, repo, storage, client, ...(images ? { images } : {}) }, job.siteId, jobId);
+      const r = await run.generateSite({ config, repo, storage, client, ...(images ? { images } : {}) }, job.siteId, jobId);
+      if (r.critiqueSkipped) console.log(`[generate] ${job.siteId}: finished with the critique skipped (${r.critiqueSkipped})`);
       await finish(ctx.aiJobId, "done");
     } catch (e) {
-      await repo.setStatus(job.siteId, "failed");
       if (e instanceof JunkIntakeError) {
         // Refused, not failed: it doesn't use up the visitor's free generation.
+        await repo.setStatus(job.siteId, "failed");
         await repo.addEvent({ siteId: job.siteId, jobId, stage: "error", level: "error", message: JUNK_REPLY, data: { confidence: e.confidence } });
         await finish(ctx.aiJobId, "refused");
         return;
       }
-      await repo.addEvent({ siteId: job.siteId, jobId, stage: "error", level: "error", message: (e as Error).message });
-      // A generation that saved a version (the owner has a preview) counts even if a later stage failed.
-      const after = (await repo.getSite(job.siteId))?.current_version ?? null;
-      await finish(ctx.aiJobId, after !== before ? "done" : "failed");
       console.error("[generate]", e);
+      const after = (await repo.getSite(job.siteId))?.current_version ?? null;
+      if (after !== before) {
+        // The job saved a version before it failed: the owner has a usable site, so it stays "ready" (no
+        // "Napaka"), the failure goes to the log, and the generation counts. A chat edit running on the
+        // saved version keeps its own status.
+        await repo.setStatusIf(job.siteId, "generating", "ready");
+        await repo.addEvent({ siteId: job.siteId, jobId, stage: "check", level: "warn", message: `Stopped after the version was saved; kept it without the remaining steps: ${(e as Error).message.slice(0, 300)}` });
+        await finish(ctx.aiJobId, "done");
+        return;
+      }
+      await repo.setStatus(job.siteId, "failed");
+      await repo.addEvent({ siteId: job.siteId, jobId, stage: "error", level: "error", message: (e as Error).message });
+      await finish(ctx.aiJobId, "failed");
     }
   }), { concurrency: config.limits.jobConcurrency });
 

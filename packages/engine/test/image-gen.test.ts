@@ -1,7 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { loadConfig } from "@sb/config";
 import { direction as directionById } from "@sb/spec";
-import { ImageGenerator, SpendCapError, generatedImageCount, heroRule, photoLine, StandInImageTransport, imageCostEur, requestBody, type CallRecord, type ImageTransport } from "../src/index.ts";
+import { FalImageTransport, ImageBilledError, ImageGenerator, SpendCapError, generatedImageCount, heroRule, photoLine, StandInImageTransport, imageCostEur, requestBody, type CallRecord, type ImageTransport } from "../src/index.ts";
 
 const config = loadConfig();
 const model = config.imageGen.models[config.imageGen.pipeline.model]!;
@@ -33,6 +33,56 @@ describe("image generation", () => {
     const gen = new ImageGenerator({ config, transport, spentToday: async () => 0, onCall: async (r) => void calls.push(r) });
     await expect(gen.generate("x")).rejects.toThrow(/HTTP 500/);
     expect(calls).toEqual([expect.objectContaining({ stage: "imageGen", ok: false, costEur: 0 })]);
+  });
+
+  it("books an image fal made but we couldn't download at its price (we were billed)", async () => {
+    const urls: string[] = [];
+    vi.stubGlobal("fetch", async (url: string) => {
+      urls.push(url);
+      if (url.startsWith("https://fal.run/")) return new Response(JSON.stringify({ images: [{ url: "https://fal.media/files/x.jpg" }] }), { status: 200 });
+      return new Response("gone", { status: 503 });
+    });
+    try {
+      const calls: CallRecord[] = [];
+      const gen = new ImageGenerator({ config, transport: new FalImageTransport("test-key"), spentToday: async () => 0, onCall: async (r) => void calls.push(r) });
+      const err = await gen.generate("x").catch((e: unknown) => e);
+      expect(err).toBeInstanceOf(ImageBilledError);
+      expect((err as Error).message).toMatch(/download failed \(HTTP 503\)/);
+      // One request, the download tried twice; nothing sent again to fal.
+      expect(urls).toEqual([`https://fal.run/${model.endpoint}`, "https://fal.media/files/x.jpg", "https://fal.media/files/x.jpg"]);
+      const { width, height } = config.imageGen.landscape;
+      expect(calls).toEqual([expect.objectContaining({ stage: "imageGen", ok: false, costEur: imageCostEur(config, model, width, height) })]);
+      expect(calls[0]!.costEur).toBeGreaterThan(0);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("starts no picture once the job has stopped, and frees a reservation the stop overtook", async () => {
+    const stand = new StandInImageTransport();
+    const calls: CallRecord[] = [];
+    const gen = new ImageGenerator({ config, transport: stand, spentToday: async () => 0, onCall: async (r) => void calls.push(r) });
+    const stopped = new AbortController();
+    stopped.abort(new Error("job failed"));
+    await expect(gen.generate("x", { signal: stopped.signal })).rejects.toThrow(/job failed/);
+
+    // Stopped while the reservation was being made: released, nothing sent, nothing booked.
+    const late = new AbortController();
+    const log: string[] = [];
+    const racing = new ImageGenerator({
+      config,
+      transport: stand,
+      ledger: {
+        async reserve() {
+          late.abort(new Error("job failed meanwhile"));
+          return { settle: async () => void log.push("settle"), release: async () => void log.push("release") };
+        },
+      },
+    });
+    await expect(racing.generate("x", { signal: late.signal })).rejects.toThrow(/meanwhile/);
+    expect(log).toEqual(["release"]);
+    expect(stand.calls).toBe(0);
+    expect(calls).toEqual([]);
   });
 });
 
