@@ -36,7 +36,8 @@ export const FONTS = {
   publicSans: face("Public Sans", "public-sans", "sans-serif", [100, 900]),
   bitter: face("Bitter", "bitter", "serif", [100, 900]),
   nunitoSans: face("Nunito Sans", "nunito-sans", "sans-serif", [200, 1000]),
-  newsreader: face("Newsreader", "newsreader", "serif", [200, 800]),
+  // Headings only (editorial: 400–500); cut to 300–700 to keep the file under the 60 KB per-family budget.
+  newsreader: face("Newsreader", "newsreader", "serif", [300, 700]),
   libreFranklin: face("Libre Franklin", "libre-franklin", "sans-serif", [100, 900]),
   bricolage: face("Bricolage Grotesque", "bricolage-grotesque", "sans-serif", [200, 800]),
   figtree: face("Figtree", "figtree", "sans-serif", [300, 900]),
