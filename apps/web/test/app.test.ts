@@ -246,6 +246,17 @@ describe("health", () => {
     expect(await res.json()).toEqual({ status: "ok", checks: { database: "ok", storage: "ok", queue: "ok" } });
   });
 
+  it("echoes the caller's own IP as the limits see it (the proxy's rightmost entry) only when asked", async () => {
+    const res = await app.request("/health?ip=1", { headers: { "x-forwarded-for": "1.2.3.4, 203.0.113.7" } });
+    expect((await res.json()).you).toEqual({ ip: "203.0.113.7", forwarded: ["1.2.3.4", "203.0.113.7"], realIp: null });
+    expect(await (await app.request("/health")).json()).not.toHaveProperty("you");
+  });
+
+  it("takes the visitor from X-Real-IP, as Railway's edge sets it, not the edge address at the end of X-Forwarded-For", async () => {
+    const res = await app.request("/health?ip=1", { headers: { "x-forwarded-for": "95.143.153.82, 152.233.13.164", "x-real-ip": "95.143.153.82" } });
+    expect((await res.json()).you.ip).toBe("95.143.153.82");
+  });
+
   it("keeps internal error detail out of public responses", async () => {
     const detail = "connect ECONNREFUSED minio.internal:9000";
     const broken = { ...platform.storage, ping: () => Promise.reject(new Error(detail)), get: () => Promise.reject(new Error(detail)) };

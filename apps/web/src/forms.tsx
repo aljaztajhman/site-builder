@@ -4,21 +4,20 @@ import { bodyLimit } from "hono/body-limit";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { AppConfig } from "@sb/config";
 import { uiStrings } from "@sb/components";
-import type { Repo, SiteRow } from "@sb/platform";
+import type { Mailer, Repo, SiteRow } from "@sb/platform";
 import type { SiteSpec } from "@sb/spec";
 import { Doc, TopBar, html } from "./pages.tsx";
 import { csrfOk, type AppEnv } from "./access.ts";
 import { formatDateTime } from "./ui/labels.ts";
+import { EMAIL, notifyOwner } from "./form-email.ts";
 
 /**
  * Contact forms on published sites: the public submit endpoint (next to the published pages, so the
  * rendered form can post to the relative `_submit`) and the owner's message list in the dashboard.
- * Email notification to the owner is not wired yet (needs a sending domain).
+ * Each stored message is also emailed to the site's owner account (form-email.ts).
  */
 
 const SAFE_SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
-// No characters that would add fields to the owner's mailto: link (?, &) or break out of an attribute.
-const EMAIL = /^[^\s@?&<>"',;:]+@[^\s@?&<>"',;:]+\.[^\s@?&<>"',;:]{2,}$/;
 const PHONE = /^[+\d\s()/.-]{0,40}$/;
 // Control characters other than tab and newlines never belong in a message.
 // eslint-disable-next-line no-control-regex -- matching control characters is the point
@@ -86,7 +85,14 @@ const resultPage = (lang: string, text: string, back: string) =>
     ) as never,
   )}`;
 
-export function registerFormRoutes(app: Hono<AppEnv>, deps: { repo: Repo; config: AppConfig; secret: string; now?: () => Date }): void {
+/** Waits for `p` at most `ms`; it keeps running after that (a slow send is still recorded when it ends). */
+async function waitAtMost(p: Promise<unknown>, ms: number): Promise<void> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  await Promise.race([p, new Promise<void>((resolve) => (timer = setTimeout(resolve, ms)))]);
+  clearTimeout(timer);
+}
+
+export function registerFormRoutes(app: Hono<AppEnv>, deps: { repo: Repo; config: AppConfig; secret: string; mailer: Mailer; appUrl?: string }): void {
   const { repo, config } = deps;
   const senderKey = (ip: string) => createHmac("sha256", deps.secret).update(`form:${ip}`).digest("hex").slice(0, 32);
 
@@ -120,11 +126,14 @@ export function registerFormRoutes(app: Hono<AppEnv>, deps: { repo: Repo; config
     const limits = config.limits;
     if (
       (await repo.countFormMessages(site.id, 10, key)) >= limits.formMessagesPerSenderPer10Min ||
-      (await repo.countFormMessages(site.id, 24 * 60)) >= limits.formMessagesPerSitePerDay
+      (await repo.countFormMessages(site.id, 24 * 60)) >= limits.formMessagesPerSitePerDay ||
+      (await repo.countFormMessagesFromSender(key, 24 * 60)) >= limits.formMessagesPerSenderPerDay
     ) {
       return reply(429, "formTooMany", "rate_limited");
     }
-    await repo.addFormMessage({
+    // Stored first: a failed send never loses the message (it stays in the owner's list and is retried).
+    const notify = (await repo.siteOwnerEmail(site.id)) !== null;
+    const id = await repo.addFormMessage({
       siteId: site.id,
       sectionId: parsed.value.section,
       name: parsed.value.name,
@@ -132,7 +141,10 @@ export function registerFormRoutes(app: Hono<AppEnv>, deps: { repo: Repo; config
       phone: section.askPhone ? parsed.value.phone : null,
       message: parsed.value.message,
       senderKey: key,
+      notify,
     });
+    // The visitor gets the same answer whether or not the email went out.
+    if (notify) await waitAtMost(notifyOwner(deps, id, 0), config.formEmail.waitMs);
     return reply(200, "formSent");
   });
 
@@ -166,7 +178,9 @@ function messagesPage({ site, messages, csrf, admin }: { site: SiteRow; messages
         <p className="muted">
           {messages.length === 0
             ? "Še ni sporočil. Prikažejo se tukaj, ko obiskovalec objavljene strani izpolni kontaktni obrazec."
-            : "Iz kontaktnega obrazca na objavljeni strani. Obiskovalcu odgovorite po e-pošti ali telefonu."}
+            : site.account_id
+              ? "Iz kontaktnega obrazca na objavljeni strani. Vsako sporočilo vam pošljemo tudi po e-pošti. Obiskovalcu odgovorite po e-pošti ali telefonu."
+              : "Iz kontaktnega obrazca na objavljeni strani. Obiskovalcu odgovorite po e-pošti ali telefonu."}
         </p>
         {messages.map((m) => (
           <article className="message" key={m.id}>
@@ -188,6 +202,8 @@ function messagesPage({ site, messages, csrf, admin }: { site: SiteRow; messages
               )}
             </dl>
             <p className="text">{m.message}</p>
+            {m.notify_status === "failed" && <p className="muted">E-poštnega obvestila o tem sporočilu nismo mogli poslati. Sporočilo je shranjeno tukaj.</p>}
+            {m.notify_status === "pending" && <p className="muted">E-poštnega obvestila o tem sporočilu še nismo poslali. Poskusili bomo znova.</p>}
             <form method="post" action={`/sites/${site.id}/messages/${m.id}/delete`}>
               <input type="hidden" name="_csrf" value={csrf} />
               <button className="btn sm danger" type="submit">

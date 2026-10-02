@@ -25,7 +25,7 @@ import { VersionConflictError, contentType, mailerFromEnv, newId, type Mailer, t
 import { renderPage, sharedBundle, pageFile, notFoundPlacement, rebaseRelativeUrls } from "@sb/render";
 import { blockerText, collectPlaceholders, sectionDef, type SiteSpec } from "@sb/spec";
 import type { AuthSettings } from "./auth.ts";
-import { csrfOk, fullSiteRefusal, identity, publishRefusal, refusalJson, sameOriginOnly, signedIn, siteAccess, tierOf, type AppEnv, type Refusal } from "./access.ts";
+import { clientIp, csrfOk, fullSiteRefusal, identity, publishRefusal, refusalJson, sameOriginOnly, signedIn, siteAccess, tierOf, type AppEnv, type Refusal } from "./access.ts";
 import { accessInfo, allowanceFor, previewBadge, reserveJob } from "./limits.ts";
 import { TOKEN_FIELD, TURNSTILE_ORIGIN, botCheckFromEnv, type BotCheck } from "./turnstile.ts";
 import { registerLoginRoutes } from "./login.tsx";
@@ -50,7 +50,7 @@ export interface AppOptions {
   platform: Platform;
   config: AppConfig;
   auth: AuthSettings;
-  /** Sends sign-in links; from env (Resend, or the console in development) when not given. */
+  /** Sends sign-in links and contact-form emails; from env (Resend, or the console in development) when not given. */
   mailer?: Mailer;
   /** Public origin for links in emails, e.g. https://stranko.example (APP_URL, or Railway's public domain). */
   appUrl?: string;
@@ -158,7 +158,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     c.req.path === "/api/sites" ? next() : /^\/api\/sites\/[^/]+\/photos$/.test(c.req.path) ? photosLimit(c, next) : jsonLimit(c, next),
   );
   // Contact forms: public submit next to published sites, owner's messages in the dashboard.
-  registerFormRoutes(app, { repo, config, secret: auth.secret });
+  registerFormRoutes(app, { repo, config, secret: auth.secret, mailer, ...(opts.appUrl ? { appUrl: opts.appUrl } : {}) });
   // Sign-in (magic link for owners, password for the admin) and the admin's page.
   registerLoginRoutes(app, {
     repo,
@@ -195,7 +195,9 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     await run("storage", () => storage.ping());
     await run("queue", () => queue.ping());
     const ok = Object.values(checks).every((v) => v === "ok");
-    return c.json({ status: ok ? "ok" : "degraded", checks }, ok ? 200 : 503);
+    // `?ip=1` echoes the caller's own address as the IP limits see it, so the proxy setup can be checked from outside.
+    const you = c.req.query("ip") === "1" ? { you: { ip: clientIp(c), forwarded: (c.req.header("x-forwarded-for") ?? "").split(",").map((s) => s.trim()).filter(Boolean), realIp: c.req.header("x-real-ip") ?? null } } : {};
+    return c.json({ status: ok ? "ok" : "degraded", checks, ...you }, ok ? 200 : 503);
   });
 
   for (const name of ["editor", "home"] as const) {

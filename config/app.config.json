@@ -34,7 +34,15 @@
     "maxUploadBytes": 15000000,
     "jobConcurrency": 2,
     "formMessagesPerSenderPer10Min": 5,
-    "formMessagesPerSitePerDay": 100
+    "formMessagesPerSitePerDay": 100,
+    "formMessagesPerSenderPerDay": 30
+  },
+  "formEmail": {
+    "$comment": "Contact-form email to the site's owner account (Resend; nothing when the site has no owner account). The message is stored first; the submit waits at most waitMs for the send, then answers the visitor the same either way. A failed or slow send stays pending and the web process retries it every retryEveryMinutes, at most maxAttempts sends in all, for messages received within retryWithinHours (under Resend's 24 h idempotency window); then it is marked failed and the owner's message list says the email didn't go out. Resend's idempotency key (form message id) keeps a retry from sending twice within 24 h. Visitor limits: limits.formMessages*.",
+    "waitMs": 4000,
+    "retryEveryMinutes": 5,
+    "maxAttempts": 5,
+    "retryWithinHours": 23
   },
   "targets": {
     "homepagePreviewEur": 0.3,

@@ -1,5 +1,5 @@
 /**
- * Transactional email. Resend when RESEND_API_KEY is set (sender EMAIL_FROM, a verified subdomain);
+ * Transactional email (sign-in links, contact-form messages to site owners). Resend when RESEND_API_KEY is set (sender EMAIL_FROM, a verified subdomain);
  * in development without a key the message, magic link included, is printed to the server console.
  * A deployed environment (NODE_ENV=production) without a key sends nothing and says so: printing
  * sign-in links into production logs would hand accounts to anyone who can read them.
@@ -10,6 +10,8 @@ export interface MailMessage {
   subject: string;
   text: string;
   html?: string;
+  /** Where the recipient's reply goes (Resend's `reply_to`): one plain address, validated by the caller. */
+  replyTo?: string;
   /** Resend drops a second send with the same key within 24 h. */
   idempotencyKey?: string;
 }
@@ -30,7 +32,7 @@ export class MailUnavailableError extends Error {
 export const RESEND_ENDPOINT = "https://api.resend.com/emails";
 
 /** Resend's send-email API (POST /emails, Bearer key). Never logs the key or the message body. */
-export function resendMailer(opts: { apiKey: string; from: string; fetch?: typeof fetch }): Mailer {
+export function resendMailer(opts: { apiKey: string; from: string; fetch?: typeof fetch; timeoutMs?: number }): Mailer {
   const doFetch = opts.fetch ?? fetch;
   return {
     kind: "resend",
@@ -42,7 +44,9 @@ export function resendMailer(opts: { apiKey: string; from: string; fetch?: typeo
           "content-type": "application/json",
           ...(m.idempotencyKey ? { "idempotency-key": m.idempotencyKey } : {}),
         },
-        body: JSON.stringify({ from: opts.from, to: [m.to], subject: m.subject, text: m.text, ...(m.html ? { html: m.html } : {}) }),
+        body: JSON.stringify({ from: opts.from, to: [m.to], subject: m.subject, text: m.text, ...(m.html ? { html: m.html } : {}), ...(m.replyTo ? { reply_to: m.replyTo } : {}) }),
+        // A hung connection must not hold a visitor's form submit (or a sign-in) open.
+        signal: AbortSignal.timeout(opts.timeoutMs ?? 10_000),
       });
       if (!res.ok) {
         const detail = await res.text().catch(() => "");
@@ -57,7 +61,7 @@ export function consoleMailer(log: (line: string) => void = console.log): Mailer
   return {
     kind: "console",
     async send(m) {
-      log(`[mail] no RESEND_API_KEY, not sent. To: ${m.to}\nSubject: ${m.subject}\n${m.text}`);
+      log(`[mail] no RESEND_API_KEY, not sent. To: ${m.to}${m.replyTo ? ` (Reply-To: ${m.replyTo})` : ""}\nSubject: ${m.subject}\n${m.text}`);
     },
   };
 }

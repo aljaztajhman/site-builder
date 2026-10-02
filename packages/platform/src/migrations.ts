@@ -294,6 +294,22 @@ export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
   },
   {
     id: 11,
+    name: "form_messages.notify",
+    // The owner's email notification for each contact-form message. notify_status: 'none' (nobody to tell:
+    // the site has no owner account, or the message came before notifications existed), 'pending' (being
+    // sent, or waiting for a retry), 'sent', 'failed' (attempts used up). notify_attempts counts sends tried;
+    // notify_at is the last attempt. The message itself is always stored first, so a failed send loses nothing.
+    // form_messages_sender_all serves the per-visitor limit across all sites.
+    sql: `
+      alter table form_messages add column notify_status text not null default 'none';
+      alter table form_messages add column notify_attempts integer not null default 0;
+      alter table form_messages add column notify_at timestamptz;
+      create index form_messages_notify on form_messages(notify_status, created_at);
+      create index form_messages_sender_all on form_messages(sender_key, created_at);
+    `,
+  },
+  {
+    id: 12,
     name: "model_calls.pending",
     // A paid call's reservation under the daily cap (Usage.reserveCall): a model_calls row at the call's
     // estimate, pending until the call is over, then settled to its real cost or deleted. Every sum of
@@ -302,7 +318,7 @@ export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
     sql: `alter table model_calls add column pending boolean not null default false`,
   },
   {
-    id: 12,
+    id: 13,
     name: "sites.failed_after_save",
     // A generation that failed after it saved a version (e.g. the deployed Pekarna Kvas, whose critique failed
     // on 2026-09-29) left a usable site "failed"; the worker now leaves such a site "ready". Sites still
