@@ -15,6 +15,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "eval": "tsx --env-file-if-exists=.env tools/eval/src/cli.ts",
+    "check:firefox": "tsx tools/eval/src/firefox-export.ts",
     "fonts": "tsx packages/render/scripts/build-fonts.ts",
     "fixtures:photos": "tsx tools/eval/src/fixtures/generate-photos.ts",
     "fixtures:ai-photos": "tsx tools/eval/src/fixtures/ai-photos.ts",
