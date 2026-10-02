@@ -136,6 +136,8 @@ describe("eval fixtures", () => {
           expect(noWs(e.message)).toContain(String(c.value));
         }
         if (c.kind === "noSectionType" && c.type === "gallery") expect(b.photos.length).toBeGreaterThanOrEqual(3);
+        // The amounts that must not land are the ones the message gives.
+        if (c.kind === "pricePlaceholders") for (const a of c.amounts) expect(e.message).toContain(`${a} €`);
       }
     });
 

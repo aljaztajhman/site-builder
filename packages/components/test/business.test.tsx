@@ -27,6 +27,7 @@ import { businessIslands, businessLcp, businessRenderers } from "../src/groups/b
 import { largestWebp } from "../src/groups/business/shared.tsx";
 import { initials } from "../src/groups/business/Media.tsx";
 import type { RenderCtx } from "../src/types.ts";
+import { uiStrings } from "../src/i18n.ts";
 import { FULL_BUSINESS, SPARSE_BUSINESS, html, testCtx, testSpec } from "./helpers.ts";
 
 const NBSP = " ";
@@ -328,6 +329,43 @@ describe("price-list", () => {
     const bad = { ...s, props: { ...s.props, groups: [{ name: "X", items: [{ name: "Brez cene" }] }] } };
     expect(priceList.schema.safeParse(bad).success).toBe(false);
   });
+
+  /** What the owner's editor can set: "od", a unit, and an item marked unavailable. */
+  const edited = (variant: "table" | "grouped" | "tags") =>
+    priceList.schema.parse({
+      ...fixtures["price-list"],
+      variant,
+      props: {
+        title: "Cenik",
+        groups: [
+          { name: "Striženje", items: [{ name: "Žensko striženje", price: { amount: 28 } }, { name: "Pramenčki", price: { amount: 12.5, from: true, unit: "/ pramen" }, unavailable: true }] },
+          { name: "Nega", items: [{ name: "Maska", note: "15 minut", price: { amount: 1200.5 } }] },
+        ],
+      },
+    });
+
+  for (const variant of ["table", "grouped", "tags"] as const) {
+    it(`${variant}: Slovene prices with »od« and unit, and an unavailable item said in words`, () => {
+      const out = render(edited(variant));
+      expect(out).toContain(`<span class="price">od 12,50${NBSP}€ / pramen</span>`);
+      // Slovene CLDR groups thousands only from five digits: 1200,50 €, 12.500 €.
+      expect(out).toContain(`1200,50${NBSP}€`);
+      // Only the marked item: one note, one row or item class, nothing else struck through.
+      expect(out.match(/Trenutno ni na voljo/g)).toHaveLength(1);
+      expect(out.match(/is-unavailable/g)).toHaveLength(1);
+      const row = variant === "table" ? /<tr class="is-unavailable">[\s\S]*?<\/tr>/ : variant === "grouped" ? /<div class="prices__row is-unavailable">[\s\S]*?<\/div>/ : /<li class="price-tags__item is-unavailable">[\s\S]*?<\/li>/;
+      const marked = row.exec(out)?.[0] ?? "";
+      expect(marked).toContain("Pramenčki");
+      expect(marked).toContain('class="unavailable ');
+      expect(marked).not.toContain("Žensko");
+    });
+  }
+
+  it("says »Currently unavailable« on the English page", () => {
+    const out = render(edited("grouped"), { ...testCtx(), locale: "en", t: uiStrings("en") });
+    expect(out).toContain("Currently unavailable");
+    expect(out).not.toContain("Trenutno ni na voljo");
+  });
 });
 
 describe("menu", () => {
@@ -338,6 +376,15 @@ describe("menu", () => {
     expect(out).toContain("vegetarijansko, brez glutena");
     expect(out).toContain('<span class="visually-hidden">Oznake: </span>');
     expect(out).toContain('data-ph="price"');
+  });
+
+  it("marks an unavailable dish in words and keeps the others as they were", () => {
+    const s = fixtures.menu;
+    const out = render({ ...s, variant: "two-column", props: { ...s.props, categories: [{ name: "Juhe", dishes: [{ name: "Goveja juha", price: { amount: 4.5 } }, { name: "Gobova juha", price: { amount: 5.2 }, unavailable: true }] }] } });
+    expect(out).toContain('<li class="menu__dish is-unavailable">');
+    expect(out.match(/is-unavailable/g)).toHaveLength(1);
+    expect(out).toContain('<p><span class="unavailable menu__flag">Trenutno ni na voljo</span></p>');
+    expect(out).toContain(`5,20${NBSP}€`);
   });
 
   it("rejects tags outside the fixed list", () => {

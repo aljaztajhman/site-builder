@@ -302,6 +302,27 @@
   }
 }
 
+/* ---------- price-list and menu: an item the owner marked as not available right now ---------- */
+/* Still listed and said in words; the price is struck through. Text colour, never a faded one (contrast). */
+.unavailable {
+  display: inline-block;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  line-height: 1.3;
+}
+.prices__flag {
+  display: block;
+  margin-top: 0.2rem;
+}
+.menu__flag,
+.price-tags__flag {
+  margin-top: 0.1rem;
+}
+.is-unavailable .price {
+  text-decoration: line-through;
+  text-decoration-thickness: 0.08em;
+}
+
 /* ---------- opening-hours ---------- */
 .oh {
   display: grid;

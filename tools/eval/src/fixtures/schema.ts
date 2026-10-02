@@ -127,6 +127,9 @@ export const EditCheck = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("colorHueIn"), path: ColorPath, name: z.string(), from: z.number().min(0).max(360), to: z.number().min(0).max(360), minSaturation: z.number().min(0).max(1) }),
   z.strictObject({ kind: z.literal("textContains"), text: z.string().min(2) }),
   z.strictObject({ kind: z.literal("textAbsent"), text: z.string().min(2) }),
+  // Prices the fact check can't accept (sb-english-prices = strict: written in English for Slovene offerings)
+  // stay price placeholders: none of these amounts on the site, at least one price placeholder.
+  z.strictObject({ kind: z.literal("pricePlaceholders"), amounts: z.array(z.number().positive()).min(1) }),
   z.strictObject({
     kind: z.literal("sectionCountDelta"),
     type: FixtureSectionType,

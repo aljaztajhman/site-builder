@@ -57,9 +57,9 @@ describe("migration 4 → 5 (trade templates)", () => {
     const { readFileSync } = await import("node:fs");
     const { validateSite } = await import("../src/index.ts");
     const golden = JSON.parse(readFileSync(new URL("../../../tools/eval/golden/avtoservis-mrak.json", import.meta.url), "utf8")) as Record<string, unknown>;
-    const v5 = migrateSpec({ ...golden, specVersion: 4 });
+    const v5 = migrateSpec({ ...golden, specVersion: 4 }, MIGRATIONS, 5);
     expect(v5).toEqual({ ...golden, specVersion: 5 });
-    expect(validateSite(v5).ok).toBe(true);
+    expect(validateSite(migrateSpec(v5)).ok).toBe(true);
   });
 
   it("accepts what v5 adds: the band tone, band colours, hero-signature, price tags and the call-out", async () => {
@@ -78,6 +78,34 @@ describe("migration 4 → 5 (trade templates)", () => {
     expect(r.issues).toEqual([]);
     // As a v4 spec, the same content is rejected: v5 is what makes it valid.
     expect(validateSite({ ...spec, specVersion: 4 }).ok).toBe(false);
+  });
+});
+
+describe("migration 5 → 6 (owner-edited price lists and menus)", () => {
+  const read = async (id: string) => {
+    const { readFileSync } = await import("node:fs");
+    return JSON.parse(readFileSync(new URL(`../../../tools/eval/golden/${id}.json`, import.meta.url), "utf8")) as SiteSpec;
+  };
+
+  it("turns stored v5 sites (a price list, a menu) into valid v6 sites unchanged apart from the version", async () => {
+    const { validateSite } = await import("../src/index.ts");
+    for (const id of ["frizerstvo-lana", "gostilna-zlata-zlica"]) {
+      const golden = await read(id);
+      const v6 = migrateSpec({ ...golden, specVersion: 5 });
+      expect(v6, id).toEqual({ ...golden, specVersion: 6 });
+      expect(validateSite(v6).issues, id).toEqual([]);
+    }
+  });
+
+  it("accepts what v6 adds: an item or dish marked unavailable (a boolean)", async () => {
+    const { validateSite, priceList, menuSection } = await import("../src/index.ts");
+    const golden = await read("frizerstvo-lana");
+    const spec = structuredClone(golden);
+    const prices = spec.pages[1]!.sections.find((s) => s.type === "price-list")!;
+    (prices.props as { groups: { items: { unavailable?: boolean }[] }[] }).groups[0]!.items[1]!.unavailable = true;
+    expect(validateSite(spec).issues).toEqual([]);
+    expect(priceList.schema.safeParse({ ...prices, props: { title: "Cenik", groups: [{ items: [{ name: "A", price: { amount: 1 }, unavailable: "yes" }] }] } }).success).toBe(false);
+    expect(menuSection.schema.safeParse({ id: "s_m", type: "menu", variant: "classic", props: { title: "Jedi", categories: [{ name: "Juhe", dishes: [{ name: "Ričet", price: { amount: 6 }, unavailable: true }] }] } }).success).toBe(true);
   });
 });
 

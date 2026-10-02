@@ -143,6 +143,7 @@ export const FIELD_LABEL: Record<string, string> = {
   title: "Naslov",
   to: "Do",
   type: "Vrsta dejavnosti",
+  unavailable: "Trenutno ni na voljo",
   unit: "Enota",
   url: "Spletni naslov",
   vatPayer: "Zavezanec za DDV",
@@ -309,6 +310,22 @@ function fieldChain(segs: string[]): string[] {
 }
 
 /**
+ * Inside a price list or menu, groups and items by their names ("Barvanje in pričeske › Pramene › Cena"),
+ * the way the owner sees them in the editor; null elsewhere.
+ */
+function listChain(section: Record<string, unknown>, after: string[]): string[] | null {
+  const keys: [string, string] | null = section.type === "price-list" ? ["groups", "items"] : section.type === "menu" ? ["categories", "dishes"] : null;
+  if (!keys || after[0] !== keys[0] || !/^\d+$/.test(after[1] ?? "")) return null;
+  const g = Number(after[1]);
+  const group = obj((obj(section.props)?.[keys[0]] as unknown[] | undefined)?.[g]);
+  const out = [typeof group?.name === "string" ? group.name : `Skupina ${g + 1}`];
+  if (after[2] !== keys[1] || !/^\d+$/.test(after[3] ?? "")) return [...out, ...fieldChain(after.slice(2))];
+  const i = Number(after[3]);
+  const item = obj((group?.[keys[1]] as unknown[] | undefined)?.[i]);
+  return [...out, typeof item?.name === "string" ? item.name : `${i + 1}.`, ...fieldChain(after.slice(4))];
+}
+
+/**
  * Where a JSON pointer into the spec points, in words the owner knows: "Domov › Cenik › Postavke (2.) ›
  * Cena", "Podatki o podjetju › Telefon", "Fotografije › Hlebci na polici".
  */
@@ -325,6 +342,8 @@ export function describePath(spec: unknown, path: string): string {
       if (!section) return pageName;
       const name = SECTION_LABEL[String(section.type)] ?? String(section.type);
       const after = rest[0] === "props" ? rest.slice(1) : rest;
+      const listed = listChain(section, after);
+      if (listed) return [pageName, name, ...listed].join(" › ");
       return [pageName, name, ...fieldChain(after)].join(" › ");
     }
     const key = [b, c].filter(Boolean).join("/");

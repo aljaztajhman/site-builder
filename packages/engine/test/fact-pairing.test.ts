@@ -328,7 +328,7 @@ describe("fact pairing on the fixtures' scripted edits", () => {
     expect(checkFacts(oljka, corpusOf("trgovina-oljka-in-sol", "Mention on the homepage that we now ship gift boxes across Slovenia, free shipping over 75 €."))).toEqual([]);
   });
 
-  it("can't pair an English price with a Slovene offering name (known limit: the price becomes an unchecked fact)", () => {
+  it("doesn't pair an English price with a Slovene offering name (sb-english-prices = strict: it stays a placeholder until the owner types it)", () => {
     const mentions = priceMentions(corpusOf("zobozdravstvo-lebar", "We decided to publish two prices after all: check-up 45 €, teeth whitening 250 €."));
     expect(pricePaired(250, "Beljenje zob", "", mentions)).toBe(false);
     expect(pricePaired(250, "Teeth whitening (beljenje zob)", "", mentions)).toBe(true);

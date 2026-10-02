@@ -97,6 +97,16 @@ describe("describePath", () => {
     expect(describePath(spec, "/design/colors/primary")).toBe("Oblika › Glavna barva (gumbi)");
     expect(describePath(spec, "/assets/images/0/alt")).toMatch(/^Fotografija ».+«$/);
   });
+
+  it("names price-list and menu groups and items as the editor shows them", async () => {
+    const { readFileSync } = await import("node:fs");
+    const read = (id: string) => JSON.parse(readFileSync(new URL(`../../../tools/eval/golden/${id}.json`, import.meta.url), "utf8")) as unknown;
+    const salon = read("frizerstvo-lana");
+    expect(describePath(salon, "/pages/1/sections/1/props/groups/1/items/1/price")).toBe("Cenik › Cenik › Barvanje in pričeske › Pramene › Cena");
+    expect(describePath(salon, "/pages/1/sections/1/props/groups/0/name")).toBe("Cenik › Cenik › Striženje › Ime");
+    expect(describePath(salon, "/pages/1/sections/1/props/title")).toBe("Cenik › Cenik › Naslov");
+    expect(describePath(read("gostilna-zlata-zlica"), "/pages/1/sections/1/props/categories/2/dishes/2/price")).toBe("Jedilnik › Jedilnik › Z jedilnega lista › Ričet › Cena");
+  });
 });
 
 describe("issueMessage", () => {

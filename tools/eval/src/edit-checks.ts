@@ -1,4 +1,4 @@
-import { getAt, hexToHsl, luminance, type SiteSpec } from "@sb/spec";
+import { formatPrice, getAt, hexToHsl, luminance, walkObjects, type SiteSpec } from "@sb/spec";
 import type { EditCheck } from "./fixtures/schema.ts";
 
 export interface EditCheckResult {
@@ -74,6 +74,19 @@ export function evaluateEditCheck(check: EditCheck, before: SiteSpec, after: Sit
     case "textAbsent": {
       const pass = !renderedText.includes(check.text.toLowerCase());
       return { pass, detail: `"${check.text}" ${pass ? "absent" : "still present"}` };
+    }
+    case "pricePlaceholders": {
+      // Structured prices with those amounts, the amounts as the site prints them, and the price placeholders left.
+      const structured: number[] = [];
+      let placeholders = 0;
+      walkObjects(after.pages, (o) => {
+        if (o.$placeholder === "price") placeholders += 1;
+        const amount = (o.price as { amount?: unknown } | undefined)?.amount;
+        if (typeof amount === "number" && check.amounts.includes(amount)) structured.push(amount);
+      });
+      const printed = check.amounts.filter((a) => renderedText.includes(formatPrice(a).replace(/\s/g, " ").toLowerCase()));
+      const landed = [...new Set([...structured, ...printed])];
+      return { pass: landed.length === 0 && placeholders > 0, detail: `${placeholders} price placeholder(s); ${landed.length ? `landed: ${landed.join(", ")} €` : "none of the amounts landed"}` };
     }
     case "manual":
       return { pass: null, detail: "needs a human look (see screenshot)" };
