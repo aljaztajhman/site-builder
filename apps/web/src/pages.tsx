@@ -69,7 +69,7 @@ export function TopBar({ children, spend, csrf, admin }: { children?: ReactNode;
   );
 }
 
-function SiteCard({ site }: { site: SiteRow }) {
+function SiteCard({ site, badge }: { site: SiteRow; badge: string | null }) {
   const status = siteStatus(site);
   const scope = site.intake?.scope === "full" ? "celotna stran" : "domača stran";
   const meta = site.current_version
@@ -83,6 +83,8 @@ function SiteCard({ site }: { site: SiteRow }) {
         ) : (
           <p className="empty">{site.status === "failed" ? "Ustvarjanje ni uspelo." : site.status === "generating" ? "Stran se ustvarja …" : "Še brez vsebine."}</p>
         )}
+        {/* Outside the frame: the site's own HTML never carries it (preview = published output). */}
+        {site.current_version && badge ? <span className="preview-badge">{badge}</span> : null}
       </div>
       <div className="body">
         <h2>
@@ -109,9 +111,11 @@ export interface SitesPageProps {
   admin: boolean;
   /** For an owner: the signed-in address and what their plan allows, in Slovene. */
   account?: { email: string; note: string | null };
+  /** The free-preview badge for a site's thumbnail (limits.ts previewBadge); none when absent. */
+  badgeFor?: (site: SiteRow) => string | null;
 }
 
-export function sitesPage({ sites, spendToday, cap, csrf, admin, account }: SitesPageProps): string {
+export function sitesPage({ sites, spendToday, cap, csrf, admin, account, badgeFor }: SitesPageProps): string {
   return html(
     <Doc title={admin ? "Strani" : "Moje strani"}>
       <TopBar spend={{ today: spendToday, cap }} csrf={csrf} admin={admin} />
@@ -132,7 +136,7 @@ export function sitesPage({ sites, spendToday, cap, csrf, admin, account }: Site
         {sites.length ? (
           <ul className="cards">
             {sites.map((s) => (
-              <SiteCard key={s.id} site={s} />
+              <SiteCard key={s.id} site={s} badge={badgeFor?.(s) ?? null} />
             ))}
           </ul>
         ) : (

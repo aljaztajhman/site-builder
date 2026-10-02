@@ -15,7 +15,7 @@ Goal: a business owner can sign up from their phone, get a free homepage preview
 ## Scope
 
 - **Accounts.** Magic-link sign-in and sign-out, sessions (httpOnly, secure, SameSite=Lax), one owner per site, sites listed per account. The shared `ACCESS_PASSWORD` stays for the internal admin dashboard only.
-- **Free preview.** Homepage only, Sonnet 5.5 at medium effort, watermarked, not publishable, email-verified. Rate limits per email and per IP, and a global daily cap, all in config. The €0.30 / 60 s homepage target must hold (measure with `pnpm eval --scope home`).
+- **Free preview.** Homepage only, Sonnet 5.5 at medium effort, watermarked (a small badge in the app beside the preview, not in the site's HTML: `sb-preview-watermark`), not publishable, email-verified. Rate limits per email and per IP, and a global daily cap, all in config. The €0.30 / 60 s homepage target must hold (measure with `pnpm eval --scope home`).
 - **Editor.** The chosen path from the decision above. Every edit stays a spec change (no hand-edited output); undo and versions keep working; the whole dashboard is usable at 360 px, because owners manage the site from a phone.
 - **Contact forms.** A form section component (visible labels, `tel`/`email` input types, autocomplete), a server endpoint, spam protection (honeypot, per-IP rate limit, no third-party captcha before consent), submissions stored per site and emailed to the owner. Consent text and privacy-policy link on the form.
 - **Transactional email** via Resend: magic links and form notifications, Slovene templates.

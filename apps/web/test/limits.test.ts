@@ -7,9 +7,9 @@ import { loadConfig } from "@sb/config";
 import { Repo, createDb, createFsStorage, memoryMailer, migrate, type JobData, type Platform, type Queue } from "@sb/platform";
 import type { SiteSpec } from "@sb/spec";
 import { createApp, type ClassifyIntake } from "../src/app.ts";
-import { allowancePeriod, monthlyAllowance } from "../src/limits.ts";
+import { allowancePeriod, monthlyAllowance, previewBadge } from "../src/limits.ts";
 import { SITEVERIFY_URL, turnstile, type BotCheck } from "../src/turnstile.ts";
-import { adminBrowser, csrfIn, newBrowser, ownerSignIn, type Browser, type Req } from "./session-helpers.ts";
+import { adminBrowser, csrfIn, linkFor, newBrowser, ownerSignIn, setCookies, type Browser, type Req } from "./session-helpers.ts";
 
 /**
  * Free generation limits at the API (docs/plans/free-generation-limits.md): anonymous → one homepage per
@@ -153,7 +153,7 @@ async function runQueued(costEur = 0.05): Promise<void> {
 
 const state = async (b: Browser, id: string) =>
   (await (await req(`/api/sites/${id}`, { headers: { cookie: b.cookie } })).json()) as {
-    access: { viewer: string; can: Record<string, boolean>; allowance: Record<string, unknown> & { text: string }; expiresAt: string | null; signIn: string | null };
+    access: { viewer: string; can: Record<string, boolean>; allowance: Record<string, unknown> & { text: string }; expiresAt: string | null; signIn: string | null; badge: string | null };
   };
 
 describe("anonymous: one homepage per device", () => {
@@ -373,7 +373,67 @@ describe("junk intake", () => {
   });
 });
 
+describe("free-preview badge (sb-preview-watermark)", () => {
+  it("only free tiers' unpublished previews get it, config switches it, and the site's HTML never carries it", async () => {
+    const draft = { published_version: null };
+    expect(previewBadge(config, "anonymous", draft)).toBe("Predogled · Stranko");
+    expect(previewBadge(config, "free", draft)).toBe("Predogled · Stranko");
+    expect(previewBadge(config, "paid", draft)).toBeNull();
+    expect(previewBadge(config, "admin", draft)).toBeNull();
+    expect(previewBadge(config, "free", { published_version: 3 })).toBeNull();
+    const off = structuredClone(config);
+    off.plans.freePreview.watermark = "off";
+    expect(previewBadge(off, "anonymous", draft)).toBeNull();
+    expect(loadConfig().plans.freePreview.watermark).toBe("app-badge");
+
+    // An anonymous preview: the editor's state says so; the preview HTML (= published output) doesn't.
+    const b = await newBrowser(req);
+    const id = siteOf(await intake(req, b));
+    await runQueued();
+    expect((await state(b, id)).access.badge).toBe("Predogled · Stranko");
+    const html = await (await req(`/preview/${id}/index.html`, { headers: { cookie: b.cookie } })).text();
+    expect(html).toContain("<html");
+    expect(html).not.toContain("Predogled · Stranko");
+    expect(html).not.toContain("preview-badge");
+    // The admin sees the same preview without it.
+    const admin = await adminBrowser(req, PASSWORD);
+    expect((await state(admin, id)).access.badge).toBeNull();
+  });
+});
+
 describe("free account", () => {
+  it("a magic link claims the previews of the device that asked for it, never those of the device that opens it", async () => {
+    // Device A (the attacker, or the owner's laptop) and device B (the victim, or the owner's phone) each made a preview.
+    const a = await newBrowser(req);
+    const b = await newBrowser(req);
+    const fromA = siteOf(await intake(req, a));
+    const fromB = siteOf(await intake(req, b));
+    await runQueued();
+    const deviceB = (await platform.repo.getSite(fromB))!.device_id;
+    expect(deviceB).toBeTruthy();
+
+    // A asks for a link; B opens it and presses "Prijava".
+    const email = "napadalec.a@siol.net";
+    const asked = await req("/login/email", { method: "POST", body: new URLSearchParams({ email, _csrf: a.csrf, next: "/sites" }), headers: { cookie: a.cookie, "x-forwarded-for": freshIp() } });
+    expect(asked.status).toBe(200);
+    const url = new URL(linkFor(mail.sent, email));
+    const page = await req(`${url.pathname}${url.search}`, { headers: { cookie: b.cookie } });
+    expect(page.status).toBe(200);
+    const done = await req("/login/link", { method: "POST", body: new URLSearchParams({ t: url.searchParams.get("t")!, _csrf: csrfIn(await page.text()) }), headers: { cookie: b.cookie }, redirect: "manual" });
+    expect(done.status).toBe(303);
+
+    const account = (await platform.repo.accounts.byKey(email))!;
+    expect((await platform.repo.getSite(fromA))!.account_id).toBe(account.id);
+    // B's preview stays B's: unclaimed, still tied to B's device, not in the account's list.
+    const stillB = (await platform.repo.getSite(fromB))!;
+    expect(stillB.account_id).toBeNull();
+    expect(stillB.device_id).toBe(deviceB);
+    const session = setCookies(done).sb_account!;
+    const list = await (await req("/sites", { headers: { cookie: `${b.cookie}; sb_account=${session}` } })).text();
+    expect(list).toContain(`href="/sites/${fromA}"`);
+    expect(list).not.toContain(`href="/sites/${fromB}"`);
+  });
+
   it("claims the anonymous preview on sign-up, then gets 2 homepages and 10 chat edits in total", async () => {
     const b = await newBrowser(req);
     const made = await intake(req, b);
@@ -390,7 +450,7 @@ describe("free account", () => {
     // The claimed preview doesn't use one of the two.
     expect(list).toContain("Še 2 brezplačni ustvarjanji domače strani in 10 sprememb s pomočnikom.");
     const s = await state(owner, preview);
-    expect(s.access).toMatchObject({ viewer: "free", expiresAt: null, signIn: null, can: { edit: true, chat: true, regenerate: true, publish: false, fullSite: false } });
+    expect(s.access).toMatchObject({ viewer: "free", expiresAt: null, signIn: null, badge: "Predogled · Stranko", can: { edit: true, chat: true, regenerate: true, publish: false, fullSite: false } });
     expect(s.access.allowance).toMatchObject({ homepagesLeft: 2, homepagesTotal: 2, chatEditsLeft: 10, chatEditsTotal: 10 });
 
     // A whole site isn't a free right; the homepage twice is.
