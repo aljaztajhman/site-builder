@@ -58,6 +58,12 @@ export interface RenderOptions {
   imageWidths?: number[];
   /** Override the shared bundle hash (tests). */
   sharedHash?: string;
+  /**
+   * Directory levels below the page's own directory that the document is served at. Only the 404 page
+   * uses it: a miss at /s/x/storitve/missing is answered with the 404 page one level down, so every
+   * relative path climbs one more "../". 0 (the default) is the page's own place.
+   */
+  depth?: number;
 }
 
 export function pageFile(page: Pick<Page, "slug">): string {
@@ -79,7 +85,8 @@ export function localeDir(spec: SiteSpec, locale: Locale): string {
 
 export function makeCtx(spec: SiteSpec, page: Page, opts: RenderOptions = {}): RenderCtx {
   const locale = opts.locale ?? spec.locales.default;
-  const up = localeDir(spec, locale) ? "../" : "";
+  const down = "../".repeat(opts.depth ?? 0);
+  const up = down + (localeDir(spec, locale) ? "../" : "");
   const hash = opts.sharedHash ?? sharedBundle().hash;
   const widths = opts.imageWidths ?? DEFAULT_IMAGE_WIDTHS;
   const media = (file: string) => `${up}media/${file}`;
@@ -108,7 +115,7 @@ export function makeCtx(spec: SiteSpec, page: Page, opts: RenderOptions = {}): R
   const pageHref = (pageId: string) => {
     const p = spec.pages.find((x) => x.id === pageId);
     if (!p) throw new Error(`Unknown page ${pageId}`);
-    return pageFile(p);
+    return down + pageFile(p);
   };
 
   const href = (t: LinkTarget): string | null => {

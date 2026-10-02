@@ -22,7 +22,7 @@ import {
   type Operation,
 } from "@sb/engine";
 import { VersionConflictError, contentType, mailerFromEnv, newId, type Mailer, type Platform, type SiteStatus, type Tier } from "@sb/platform";
-import { renderPage, sharedBundle, pageFile } from "@sb/render";
+import { renderPage, sharedBundle, pageFile, notFoundPlacement, rebaseRelativeUrls } from "@sb/render";
 import { blockerText, collectPlaceholders, sectionDef, type SiteSpec } from "@sb/spec";
 import type { AuthSettings } from "./auth.ts";
 import { csrfOk, fullSiteRefusal, identity, publishRefusal, refusalJson, sameOriginOnly, signedIn, siteAccess, tierOf, type AppEnv, type Refusal } from "./access.ts";
@@ -688,7 +688,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       return c.text(gone ? "Te različice ni več med shranjenimi." : "Predogled še ni pripravljen.", 404);
     }
     const page = current.spec.pages.find((p) => pageFile(p) === c.req.param("file"));
-    if (!page) return c.notFound();
+    if (!page) return previewNotFound(c, current.spec, 0);
     c.header("cache-control", "no-store");
     // ?section=…&variant=…: that section alone in another variant, for the editor's layout thumbnails.
     // Same renderer and the same page URL depth, so media and shared assets resolve as in the preview.
@@ -703,6 +703,22 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     }
     return c.html(renderPage(current.spec, page, { imageWidths: config.images.widths }));
   });
+  // Deeper paths are never pages (pages are files at the site root): the 404 page, rendered for that depth.
+  app.get("/preview/:id/*", async (c) => {
+    const id = c.req.param("id");
+    if (!SAFE_ID.test(id)) return c.notFound();
+    const current = await repo.getSpec(id);
+    if (!current) return c.notFound();
+    return previewNotFound(c, current.spec, notFoundPlacement(c.req.path.slice(`/preview/${id}/`.length)).depth);
+  });
+
+  /** A missing page in the preview: the site's own 404 page with status 404, as the published site answers. */
+  function previewNotFound(c: Context, spec: SiteSpec, depth: number) {
+    const page = spec.pages.find((p) => p.kind === "not-found");
+    if (!page) return c.notFound();
+    c.header("cache-control", "no-store");
+    return c.html(renderPage(spec, page, { imageWidths: config.images.widths, depth }), 404);
+  }
 
   // ---------- Published sites (public) ----------
   app.get("/s/_shared/:hash/*", (c) => serveShared(c, c.req.param("hash"), c.req.path.split(`/_shared/${c.req.param("hash")}/`)[1] ?? ""));
@@ -721,8 +737,20 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       c.header("cache-control", rest.startsWith("media/") ? "public, max-age=31536000, immutable" : "public, max-age=60");
       return c.body(data as Uint8Array<ArrayBuffer>);
     }
-    const notFound = await storage.get(`${base}404.html`);
-    if (notFound) return c.body(notFound as Uint8Array<ArrayBuffer>, 404, { "content-type": "text/html; charset=utf-8" });
+    // The 404 page of the locale directory asked for (en/…), else the site's; its relative paths are
+    // rebased to the depth of the miss so it is styled and its links work (/s/x/storitve/missing).
+    const first = rest.split("/")[0]!;
+    const localeDir = rest.includes("/") && /^[a-z]{2}$/.test(first) ? `${first}/` : null;
+    let place = notFoundPlacement(rest, localeDir ? [localeDir] : []);
+    let notFound = await storage.get(`${base}${place.dir}404.html`);
+    if (!notFound && place.dir) {
+      place = notFoundPlacement(rest);
+      notFound = await storage.get(`${base}404.html`);
+    }
+    if (notFound) {
+      const html = place.depth ? rebaseRelativeUrls(new TextDecoder().decode(notFound), "../".repeat(place.depth)) : notFound;
+      return c.body(html as string | Uint8Array<ArrayBuffer>, 404, { "content-type": "text/html; charset=utf-8" });
+    }
     return c.text("Stran ne obstaja.", 404);
   });
 
