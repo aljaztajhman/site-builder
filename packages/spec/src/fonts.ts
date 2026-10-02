@@ -67,6 +67,8 @@ export const FONT_PAIRS: FontPair[] = [
   // K Jedilnik, L Ogledalo.
   { id: "garamond-figtree", label: "EB Garamond / Figtree", heading: FONTS.ebGaramond, body: FONTS.figtree },
   { id: "inter-tight-dm-sans", label: "Inter Tight / DM Sans", heading: FONTS.interTight, body: FONTS.dmSans },
+  // O Nasmeh.
+  { id: "figtree-figtree", label: "Figtree", heading: FONTS.figtree, body: FONTS.figtree },
 ];
 
 export function fontPair(id: string): FontPair {

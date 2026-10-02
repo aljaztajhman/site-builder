@@ -44,6 +44,10 @@ export const MIGRATIONS: Record<number, (spec: RawSpec) => RawSpec> = {
   // "photo" with optional image and inset; image-text "pair" with optional inset and figure. Every v7 spec is a
   // valid v8 spec.
   7: (spec) => spec,
+  // 8 → 9: trade template O (Nasmeh). Additive: hero-signature "disc"; opening-hours "week"; services-list "aside"
+  // with an optional note; a service's description optional (validation still requires it outside aside). Every v8
+  // spec is a valid v9 spec.
+  8: (spec) => spec,
 };
 
 export function migrateSpec(input: unknown, migrations = MIGRATIONS, target: number = SPEC_VERSION): SiteSpec {

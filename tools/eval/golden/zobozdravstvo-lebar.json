@@ -1,5 +1,5 @@
 {
-  "specVersion": 8,
+  "specVersion": 9,
   "slug": "zobozdravstvo-lebar",
   "locales": {
     "default": "sl",
@@ -52,29 +52,31 @@
     }
   },
   "design": {
-    "direction": "clinical-calm",
-    "fontPair": "manrope-public-sans",
+    "direction": "nasmeh",
+    "fontPair": "figtree-figtree",
     "colors": {
-      "background": "#f1f6fb",
-      "surface": "#ffffff",
-      "text": "#102230",
-      "muted": "#4a5d6b",
-      "primary": "#0e6a88",
+      "background": "#ffffff",
+      "surface": "#dff4ee",
+      "text": "#0f2f38",
+      "muted": "#44606a",
+      "primary": "#0c7a70",
       "onPrimary": "#ffffff",
-      "accent": "#1479a0",
-      "border": "#d3e0ea",
-      "inverse": "#0c2331",
-      "onInverse": "#f5f5f5"
+      "accent": "#e4573f",
+      "border": "#cfe3de",
+      "inverse": "#0f2f38",
+      "onInverse": "#ecf3f1",
+      "band": "#0c7a70",
+      "onBand": "#ffffff"
     },
     "radius": 12,
-    "baseFontSize": 17,
-    "scale": 1.22,
-    "headingWeight": 700,
+    "baseFontSize": 18,
+    "scale": 1.25,
+    "headingWeight": 800,
     "headingCase": "normal",
-    "headingTracking": -0.015,
-    "density": "airy",
-    "shadow": "subtle",
-    "imagery": "rounded"
+    "headingTracking": -0.03,
+    "density": "regular",
+    "shadow": "none",
+    "imagery": "natural"
   },
   "assets": {
     "images": [
@@ -104,10 +106,10 @@
   "chrome": {
     "header": {
       "variant": "bar",
-      "cta": "call"
+      "cta": "none"
     },
     "footer": {
-      "variant": "columns"
+      "variant": "compact"
     },
     "mobileActionBar": true
   },
@@ -127,141 +129,93 @@
       "sections": [
         {
           "id": "s_hero",
-          "type": "hero-split",
-          "variant": "image-right",
+          "type": "hero-signature",
+          "variant": "disc",
           "props": {
-            "eyebrow": "Zobna ambulanta v Mariboru",
-            "headline": "Prvi obisk je vedno le pogovor in pregled, brez posegov",
-            "intro": "Zasebna samoplačniška ambulanta na Gosposvetski cesti. Posebej smo pozorni na paciente, ki jih je strah zobozdravnika.",
-            "primary": {
-              "label": "Pokliči za termin",
-              "target": {
-                "action": "call"
-              }
-            },
+            "headline": "Prvi obisk je le pogovor in pregled, brez posegov",
+            "intro": "Zasebna zobna ambulanta v središču Maribora. Posebej smo pozorni na paciente, ki jih je strah zobozdravnika.",
+            "fact": "phone",
+            "factLabel": "Naročite se",
+            "factNote": "Otroke sprejemamo od 3. leta starosti.",
             "secondary": {
-              "label": "Storitve",
+              "label": "Pišite nam",
               "target": {
-                "page": "p_home",
-                "section": "s_services"
+                "action": "email"
               }
             },
             "image": "img_01"
           }
         },
         {
-          "id": "s_booking",
-          "type": "booking",
-          "variant": "with-hours",
-          "props": {
-            "heading": "Naročanje in ordinacijski čas",
-            "text": "Na pregled se naročite po telefonu ali e-pošti. Ambulanta je v prvem nadstropju, do nje pripelje dvigalo.",
-            "action": {
-              "label": "Pokliči ambulanto",
-              "target": {
-                "action": "call"
-              }
-            },
-            "secondary": {
-              "label": "Pišite nam",
-              "target": {
-                "action": "email"
-              }
-            }
-          }
-        },
-        {
-          "id": "s_services",
-          "type": "services-list",
-          "variant": "two-column",
+          "id": "s_hours",
+          "type": "opening-hours",
+          "variant": "week",
           "tone": "alt",
           "props": {
-            "title": "Kaj delamo v ambulanti",
-            "intro": "Vse storitve so samoplačniške. Cena je odvisna od načrta zdravljenja, ki ga pripravimo po pregledu.",
-            "items": [
-              {
-                "name": "Preventivni pregledi",
-                "description": "Redni pregled zob in čiščenje zobnega kamna."
-              },
-              {
-                "name": "Zalivke",
-                "description": "Popravilo zob, načetih od kariesa."
-              },
-              {
-                "name": "Beljenje zob",
-                "description": "Beljenje opravimo po pregledu zob."
-              },
-              {
-                "name": "Prevleke in mostički",
-                "description": "Protetika je specializacija dr. Urške Lebar."
-              },
-              {
-                "name": "Proteze",
-                "description": "Po pregledu pripravimo načrt zdravljenja."
-              },
-              {
-                "name": "Vsaditve",
-                "description": "Vsaditev opravi zunanji oralni kirurg, protetični del naredimo pri nas."
-              }
-            ]
+            "title": "Ordinacijski čas",
+            "note": "Naročite se po telefonu ali e-pošti."
           }
         },
         {
-          "id": "s_steps",
-          "type": "steps",
-          "variant": "vertical",
+          "id": "s_care",
+          "type": "services-list",
+          "variant": "aside",
           "props": {
-            "heading": "Če vas je strah zobozdravnika",
-            "steps": [
+            "title": "Kaj delamo",
+            "note": {
+              "title": "Samoplačniška ambulanta",
+              "text": "Nismo koncesionarji ZZZS. Cene so odvisne od načrta zdravljenja."
+            },
+            "items": [
               {
-                "title": "Pogovor",
-                "text": "Na prvem obisku se najprej pogovorimo o tem, kaj vas skrbi in kaj želite."
+                "name": "Preventivni pregledi in čiščenje zobnega kamna"
               },
               {
-                "title": "Pregled brez posegov",
-                "text": "Pregledamo zobe, a na prvem obisku ne naredimo nobenega posega."
+                "name": "Zalivke"
               },
               {
-                "title": "Načrt zdravljenja",
-                "text": "Skupaj se dogovorimo za načrt in ceno, šele nato začnemo."
+                "name": "Beljenje zob"
+              },
+              {
+                "name": "Prevleke, mostički in proteze"
+              },
+              {
+                "name": "Vsaditve (implantati)",
+                "description": "Sodelujemo z zunanjim oralnim kirurgom, protetični del opravimo pri nas."
+              },
+              {
+                "name": "Otroci od 3. leta starosti"
               }
-            ],
-            "action": {
-              "label": "Naročite se na pogovor",
-              "target": {
-                "action": "call"
-              }
-            }
+            ]
           }
         },
         {
           "id": "s_team",
           "type": "team",
-          "variant": "list",
-          "tone": "alt",
+          "variant": "photo",
           "props": {
-            "title": "Kdo vas bo sprejel",
+            "title": "Kdo vas sprejme",
             "members": [
               {
                 "name": "Urška Lebar",
-                "role": "dr. dent. med., specialistka stomatološke protetike",
-                "bio": "Vodi ambulanto.",
-                "image": "img_03"
+                "role": "dr. dent. med., specialistka stomatološke protetike"
               },
               {
                 "name": "Maja Horvat",
                 "role": "zobna asistentka"
               }
-            ]
+            ],
+            "image": "img_03",
+            "inset": "img_02"
           }
         },
         {
-          "id": "s_contact",
+          "id": "s_call",
           "type": "contact",
-          "variant": "split-map",
+          "variant": "call-out",
+          "tone": "band",
           "props": {
-            "title": "Ambulanta v središču Maribora",
-            "intro": "Gosposvetska cesta 36, prvo nadstropje. V stavbi je dvigalo."
+            "title": "Naročanje"
           }
         }
       ]

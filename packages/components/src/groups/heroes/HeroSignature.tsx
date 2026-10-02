@@ -13,6 +13,9 @@ export const HERO_SIGNATURE_LABEL_SIZES = "(min-width: 64rem) 32rem, 74vw";
 /** mirrors: three arches side by side in 7/12 of the container on desktop, about a third of the screen on phones. */
 export const HERO_SIGNATURE_MIRROR_SIZES = "(min-width: 64rem) 15rem, 32vw";
 
+/** disc: the round photo at 5/11 of the container on desktop (at most 35 rem), 82 % of the screen on phones. */
+export const HERO_SIGNATURE_DISC_SIZES = "(min-width: 64rem) 35rem, 82vw";
+
 /** The photo's sizes per variant; null where the variant shows no photo (it draws instead). */
 export const HERO_SIGNATURE_SIZES: Record<SectionOf<"hero-signature">["variant"], string | null> = {
   photo: HERO_SIGNATURE_PHOTO_SIZES,
@@ -20,6 +23,7 @@ export const HERO_SIGNATURE_SIZES: Record<SectionOf<"hero-signature">["variant"]
   label: HERO_SIGNATURE_LABEL_SIZES,
   card: HERO_SIGNATURE_PHOTO_SIZES,
   mirrors: HERO_SIGNATURE_MIRROR_SIZES,
+  disc: HERO_SIGNATURE_DISC_SIZES,
   drawing: null,
   receipt: null,
 };
@@ -209,6 +213,32 @@ export function HeroSignature({ section, ctx, index }: SectionProps<"hero-signat
                 <Picture key={id} id={id} ctx={ctx} className="hsig__mirror arch-top media--contained" sizes={HERO_SIGNATURE_MIRROR_SIZES} priority={index === 0 && i === 0} />
               ))}
             </div>
+          )}
+        </div>
+      </Section>
+    );
+  }
+
+  if (variant === "disc") {
+    // White ground, the promise as the headline; the photo round on a disc in the alternate colour with the
+    // motif's arc under it, factNote on a small tilted chip over its edge.
+    return (
+      <Section id={section.id} type={section.type} variant={variant} tone={section.tone}>
+        <div className={image ? "hsig hsig--disc hsig--has-image" : "hsig hsig--disc"}>
+          <div className="hsig__text">
+            {(props.eyebrow ?? streetCity) && <p className="eyebrow hsig__eyebrow">{props.eyebrow ?? streetCity}</p>}
+            {title}
+            <p className="lead hsig__lead">{props.intro}</p>
+            {buttons}
+          </div>
+          {image ? (
+            <figure className="hsig__face">
+              <Picture id={image} ctx={ctx} className="hsig__face-media disc media--contained" sizes={HERO_SIGNATURE_DISC_SIZES} priority={index === 0} />
+              <span className="hsig__arc" aria-hidden="true" />
+              {props.factNote && <figcaption className="hsig__chip">{props.factNote}</figcaption>}
+            </figure>
+          ) : (
+            props.factNote && <p className="hsig__chip hsig__chip--alone">{props.factNote}</p>
           )}
         </div>
       </Section>

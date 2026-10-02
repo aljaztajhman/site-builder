@@ -53,9 +53,10 @@ type Range = [number, number];
  * double-ruled total, ruled rows, wall-sized figures), label (a bottle label: a framed card with a double inner
  * rule and an olive branch, prices on labels, photos in arches and discs), spoon (a brass spoon as brand mark and
  * divider, a menu card over the house, dishes as round plates, prices at headline size), mirror (the name as a
- * wall-sized wordmark, photos in mirror arches of different heights, a price list set like a masthead).
+ * wall-sized wordmark, photos in mirror arches of different heights, a price list set like a masthead), smile (a
+ * smile arc as brand mark, under the round hero photo and as list bullets; the opening hours as a week chart).
  */
-export const MOTIFS = ["plate", "pipes", "crust", "ledger", "label", "spoon", "mirror"] as const;
+export const MOTIFS = ["plate", "pipes", "crust", "ledger", "label", "spoon", "mirror", "smile"] as const;
 export type Motif = (typeof MOTIFS)[number];
 
 export interface DirectionTemplate {
