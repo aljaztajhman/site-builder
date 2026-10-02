@@ -70,6 +70,10 @@ describe("repo", () => {
     expect((await repo.getSpec(site.id))?.version).toBe(2);
     // Stored at v1, read back migrated to the current version.
     expect((await repo.getSpec(site.id, 1))?.spec).toEqual({ specVersion: SPEC_VERSION });
+    // A spec stored with a locale sites can no longer use (German: no UI strings) reads as sl/en.
+    const german = { specVersion: SPEC_VERSION, locales: { default: "de", enabled: ["de", "en"] }, translations: { de: { "/x": "a" }, en: { "/x": "b" } } };
+    const v3 = await repo.saveSpec(site.id, german as never, "manual");
+    expect((await repo.getSpec(site.id, v3))?.spec).toEqual({ specVersion: SPEC_VERSION, locales: { default: "sl", enabled: ["sl", "en"] }, translations: { en: { "/x": "b" } } });
 
     await repo.addEvent({ siteId: site.id, stage: "brief", message: "ok" });
     expect((await repo.listEvents(site.id)).map((e) => e.stage)).toEqual(["brief"]);

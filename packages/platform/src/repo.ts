@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { SPEC_VERSION, migrateSpec, type SiteSpec } from "@sb/spec";
+import { SPEC_VERSION, migrateSpec, withSiteLocales, type SiteSpec } from "@sb/spec";
 import type { Db } from "./db.ts";
 import { Accounts } from "./accounts.ts";
 import { Usage, type Tier } from "./usage.ts";
@@ -269,7 +269,8 @@ export class Repo {
     const stored = (typeof r.spec === "string" ? JSON.parse(r.spec) : r.spec) as { specVersion?: unknown };
     // Specs are stored as written; older versions are migrated on read, so every caller sees the current version.
     const spec = typeof stored.specVersion === "number" && stored.specVersion < SPEC_VERSION ? migrateSpec(stored) : (stored as SiteSpec);
-    return { version: Number(r.version), spec };
+    // A locale sites can no longer use (de/hr/it) reads as sl/en, so old sites still render, edit and publish.
+    return { version: Number(r.version), spec: withSiteLocales(spec) };
   }
 
   /** Operations of every manual (direct editor) change, oldest first, including those of pruned versions. */

@@ -15,3 +15,4 @@ export * from "./migrate.ts";
 export * from "./json-schema.ts";
 export * from "./starter.ts";
 export * from "./labels.ts";
+export * from "./locales.ts";

@@ -1,4 +1,4 @@
-import type { Locale, PlaceholderKind } from "@sb/spec";
+import { isSiteLocale, type Locale, type PlaceholderKind, type SiteLocale } from "@sb/spec";
 
 /** UI strings used by components. Generated copy never lives here; only fixed interface labels. */
 const sl = {
@@ -178,10 +178,11 @@ const en: Record<UiKey, string> = {
   everyDay: "Every day",
 };
 
-const DICTS: Partial<Record<Locale, Record<UiKey, string>>> = { sl, en };
+// One dictionary per locale a site may use (SITE_LOCALES); adding a locale there needs its strings here.
+const DICTS: Record<SiteLocale, Record<UiKey, string>> = { sl, en };
 
 export function uiStrings(locale: Locale): (key: UiKey) => string {
-  const dict = DICTS[locale] ?? en;
+  const dict = isSiteLocale(locale) ? DICTS[locale] : en;
   return (key) => dict[key];
 }
 

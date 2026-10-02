@@ -1,8 +1,17 @@
 import { z } from "zod";
 
-/** Locales the spec can carry. `sl` is the default; others are overlays (see SiteSpec.translations). */
+/**
+ * Locales the spec schema can carry. `sl` is the default; others are overlays (see SiteSpec.translations).
+ * Sites may only use SITE_LOCALES (validateSpec enforces it, withSiteLocales falls back on read); the others
+ * stay in the schema so specs written before the restriction still parse without a version bump.
+ */
 export const Locale = z.enum(["sl", "en", "de", "hr", "it"]);
 export type Locale = z.infer<typeof Locale>;
+
+/** Locales a site may use: those with UI strings, day names and placeholder labels (components i18n). */
+export const SITE_LOCALES = ["sl", "en"] as const satisfies readonly Locale[];
+export type SiteLocale = (typeof SITE_LOCALES)[number];
+export const isSiteLocale = (l: string): l is SiteLocale => (SITE_LOCALES as readonly string[]).includes(l);
 
 /**
  * A marked placeholder for a fact the client has not provided.
