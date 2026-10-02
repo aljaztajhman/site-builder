@@ -248,7 +248,7 @@ describe("health", () => {
 
   it("echoes the caller's own IP as the limits see it (the proxy's rightmost entry) only when asked", async () => {
     const res = await app.request("/health?ip=1", { headers: { "x-forwarded-for": "1.2.3.4, 203.0.113.7" } });
-    expect((await res.json()).you).toEqual({ ip: "203.0.113.7", forwardedEntries: 2 });
+    expect((await res.json()).you).toEqual({ ip: "203.0.113.7", forwarded: ["1.2.3.4", "203.0.113.7"], realIp: null });
     expect(await (await app.request("/health")).json()).not.toHaveProperty("you");
   });
 
