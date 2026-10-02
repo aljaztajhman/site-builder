@@ -18,8 +18,8 @@ const LEGAL_FORMS = new Set(["d.o.o.", "d.o.o", "s.p.", "s.p", "d.d.", "d.d", "k
 /** Street-type words the client may abbreviate or leave out ("Ljubljanska c. 8"). */
 const STREET_KINDS = new Set(["cesta", "ulica", "trg", "pot", "nabrezje", "naselje"]);
 
-/** Keys whose strings are structural, not visible copy. */
-const NON_COPY_KEYS = new Set(["id", "type", "variant", "tone", "page", "section", "action", "kind", "slug", "image", "network", "src", "file", "$placeholder"]);
+/** Keys whose strings are structural, not visible copy; "date" is the accessibility statement's day, set in code (its digits would read as a phone). */
+const NON_COPY_KEYS = new Set(["id", "type", "variant", "tone", "page", "section", "action", "kind", "slug", "image", "network", "src", "file", "$placeholder", "date"]);
 
 const IMAGE_REF_RE = /^img_[a-z0-9_-]+$/;
 const EMAIL_RE = /[\w.+-]+@[\w-]+\.[\w.]+/g;

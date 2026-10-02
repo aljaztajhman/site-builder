@@ -16,6 +16,8 @@ export const legal = defineSection(
   },
   z.strictObject({
     kind: z.enum(["privacy", "accessibility"]),
+    /** accessibility: the day the statement was prepared, set when the site is made (YYYY-MM-DD). */
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   }),
 );
 

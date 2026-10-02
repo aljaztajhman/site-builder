@@ -19,6 +19,20 @@ export function formatTime(hhmm: string): string {
   return `${Number(h)}.${m}`;
 }
 
+/** The sites' own time zone: the day a statement is dated and the footer's year are Slovenian days. */
+export const SITE_TIME_ZONE = "Europe/Ljubljana";
+
+/** `d` as YYYY-MM-DD on the sites' calendar. */
+export function isoDay(d: Date, timeZone: string = SITE_TIME_ZONE): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+}
+
+/** A YYYY-MM-DD day as a local Date (noon, so no time zone moves it to another day). */
+export function dayDate(iso: string): Date {
+  const [y, m, d] = iso.split("-").map(Number) as [number, number, number];
+  return new Date(y, m - 1, d, 12);
+}
+
 export function formatDate(d: Date): string {
   return `${d.getDate()}.${NBSP}${d.getMonth() + 1}.${NBSP}${d.getFullYear()}`;
 }

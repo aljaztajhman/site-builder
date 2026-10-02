@@ -57,6 +57,11 @@ describe("checkFacts", () => {
     expect(checkFacts(s, corpus)).toEqual([]);
   });
 
+  it("reads the accessibility statement's date as a date, not a phone number in copy", () => {
+    const s = spec({ sections: [{ id: "s_legal_accessibility", type: "legal", variant: "default", props: { kind: "accessibility", date: "2026-10-03" } }] });
+    expect(checkFacts(s, corpus)).toEqual([]);
+  });
+
   it("reads an image reference under any key as an id, not a number in copy", () => {
     const s = spec({
       sections: [

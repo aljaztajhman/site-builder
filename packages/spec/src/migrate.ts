@@ -52,6 +52,10 @@ export const MIGRATIONS: Record<number, (spec: RawSpec) => RawSpec> = {
   // "bend" (fact address also on bend); price-list "rates" with an optional image; opening-hours "poster"; gallery
   // "wall". Every v9 spec is a valid v10 spec.
   9: (spec) => spec,
+  // 10 → 11: the footer's year and the accessibility statement's date in the spec (chrome.footer.year, legal
+  // date), so preview, published page and export agree. Additive and optional: a v10 site without them renders
+  // them from the day it is rendered, as before.
+  10: (spec) => spec,
 };
 
 export function migrateSpec(input: unknown, migrations = MIGRATIONS, target: number = SPEC_VERSION): SiteSpec {

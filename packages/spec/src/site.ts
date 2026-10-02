@@ -4,7 +4,7 @@ import { Business } from "./business.ts";
 import { Design } from "./design.ts";
 import { Section } from "./sections/index.ts";
 
-export const SPEC_VERSION = 10 as const;
+export const SPEC_VERSION = 11 as const;
 
 export const PageKind = z.enum(["home", "standard", "privacy", "accessibility", "not-found"]);
 export type PageKind = z.infer<typeof PageKind>;
@@ -61,7 +61,11 @@ export const Chrome = z.strictObject({
     /** Header background: page colour (default), surface (alt) or dark inverse. */
     tone: Tone.optional(),
   }),
-  footer: z.strictObject({ variant: z.enum(["columns", "compact"]) }),
+  footer: z.strictObject({
+    variant: z.enum(["columns", "compact"]),
+    /** The year after "©", set when the site is made (preview, published page and export agree). */
+    year: z.number().int().min(2000).max(2100).optional().describe("Set by the system; leave out."),
+  }),
   /** Sticky call/directions bar on mobile for local businesses. */
   mobileActionBar: z.boolean(),
 });
