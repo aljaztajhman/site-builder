@@ -5,13 +5,24 @@
   "use strict";
   if (typeof HTMLDialogElement !== "function" || !("showModal" in HTMLDialogElement.prototype)) return;
 
+  /**
+   * @param {string} tag
+   * @param {string} className
+   * @param {Record<string, string>} [attrs]
+   * @returns {HTMLElement}
+   */
   function el(tag, className, attrs) {
     var node = document.createElement(tag);
     if (className) node.className = className;
-    if (attrs) for (var k in attrs) node.setAttribute(k, attrs[k]);
+    if (attrs) for (var k in attrs) node.setAttribute(k, attrs[k] || "");
     return node;
   }
 
+  /**
+   * @param {string} label
+   * @param {string} extraClass
+   * @param {string} attr
+   */
   function button(label, extraClass, attr) {
     var b = el("button", "btn btn--secondary" + (extraClass ? " " + extraClass : ""), { type: "button" });
     b.setAttribute(attr, "");
@@ -19,31 +30,39 @@
     return b;
   }
 
+  /** @param {HTMLElement} list */
   function setup(list) {
+    /** @type {HTMLAnchorElement[]} */
     var links = Array.prototype.slice.call(list.querySelectorAll("a[data-gallery-item]"));
     if (!links.length) return;
+    /** @type {HTMLDialogElement | null} */
     var dialog = null;
+    /** @type {HTMLImageElement | null} */
     var img = null;
+    /** @type {HTMLElement | null} */
     var caption = null;
+    /** @type {HTMLElement | null} */
     var status = null;
     var current = 0;
     var previousOverflow = "";
 
+    /** @returns {HTMLDialogElement} */
     function build() {
-      dialog = el("dialog", "lightbox tone-inverse", { "aria-label": list.getAttribute("data-label-dialog") || "" });
+      var box = /** @type {HTMLDialogElement} */ (el("dialog", "lightbox tone-inverse", { "aria-label": list.getAttribute("data-label-dialog") || "" }));
+      dialog = box;
       var top = el("div", "lightbox__top");
       var close = button(list.getAttribute("data-label-close") || "Close", "lightbox__close", "data-lightbox-close");
       top.appendChild(close);
 
       var figure = el("figure", "lightbox__figure");
-      img = el("img", "lightbox__img", { decoding: "async", alt: "" });
+      img = /** @type {HTMLImageElement} */ (el("img", "lightbox__img", { decoding: "async", alt: "" }));
       caption = el("figcaption", "lightbox__caption");
       figure.appendChild(img);
       figure.appendChild(caption);
       status = el("p", "visually-hidden", { "aria-live": "polite" });
 
-      dialog.appendChild(top);
-      dialog.appendChild(figure);
+      box.appendChild(top);
+      box.appendChild(figure);
       if (links.length > 1) {
         var nav = el("div", "lightbox__nav");
         var prev = button(list.getAttribute("data-label-prev") || "Previous", "lightbox__prev", "data-lightbox-prev");
@@ -56,18 +75,18 @@
         });
         nav.appendChild(prev);
         nav.appendChild(next);
-        dialog.appendChild(nav);
+        box.appendChild(nav);
       }
-      dialog.appendChild(status);
+      box.appendChild(status);
 
       close.addEventListener("click", function () {
-        dialog.close();
+        box.close();
       });
       // A click on the dialog's own box (outside the photo and buttons) closes it.
-      dialog.addEventListener("click", function (e) {
-        if (e.target === dialog) dialog.close();
+      box.addEventListener("click", function (e) {
+        if (e.target === box) box.close();
       });
-      dialog.addEventListener("keydown", function (e) {
+      box.addEventListener("keydown", function (e) {
         if (links.length < 2) return;
         if (e.key === "ArrowLeft") {
           e.preventDefault();
@@ -78,26 +97,34 @@
         }
       });
       // Escape (native cancel) and every other close path end here: restore scroll and focus.
-      dialog.addEventListener("close", function () {
+      box.addEventListener("close", function () {
         document.documentElement.style.overflow = previousOverflow;
         var link = links[current];
         if (link) link.focus();
       });
-      document.body.appendChild(dialog);
+      document.body.appendChild(box);
+      return box;
     }
 
+    /**
+     * @param {number} i
+     * @param {boolean} announce
+     */
     function show(i, announce) {
       current = (i + links.length) % links.length;
       var link = links[current];
+      if (!link || !img || !caption || !status) return;
       var thumb = link.querySelector("img");
       var fig = link.closest("figure");
       var cap = fig ? fig.querySelector("figcaption") : null;
       var alt = thumb ? thumb.getAttribute("alt") || "" : "";
-      img.src = link.getAttribute("href");
+      img.src = link.getAttribute("href") || "";
       img.alt = alt;
-      if (thumb && thumb.getAttribute("width") && thumb.getAttribute("height")) {
-        img.setAttribute("width", thumb.getAttribute("width"));
-        img.setAttribute("height", thumb.getAttribute("height"));
+      var w = thumb ? thumb.getAttribute("width") : null;
+      var h = thumb ? thumb.getAttribute("height") : null;
+      if (w && h) {
+        img.setAttribute("width", w);
+        img.setAttribute("height", h);
       }
       caption.textContent = cap ? cap.textContent : "";
       caption.hidden = !cap;
@@ -107,20 +134,21 @@
     list.addEventListener("click", function (e) {
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       var target = e.target;
-      var link = target && target.closest ? target.closest("a[data-gallery-item]") : null;
-      if (!link || links.indexOf(link) < 0) return;
+      var link = target instanceof Element ? target.closest("a[data-gallery-item]") : null;
+      var at = link instanceof HTMLAnchorElement ? links.indexOf(link) : -1;
+      if (at < 0) return;
       e.preventDefault();
-      if (!dialog) build();
-      show(links.indexOf(link), false);
-      status.textContent = "";
+      var box = dialog || build();
+      show(at, false);
+      if (status) status.textContent = "";
       previousOverflow = document.documentElement.style.overflow;
       document.documentElement.style.overflow = "hidden";
-      dialog.showModal();
+      box.showModal();
     });
   }
 
   function init() {
-    Array.prototype.forEach.call(document.querySelectorAll("[data-gallery]"), setup);
+    /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll("[data-gallery]")).forEach(setup);
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
