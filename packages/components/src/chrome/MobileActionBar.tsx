@@ -3,13 +3,6 @@ import { Icon, type IconName } from "../primitives/index.tsx";
 import type { UiKey } from "../i18n.ts";
 import type { RenderCtx } from "../types.ts";
 
-/**
- * Fixed call / directions bar below 48rem (a template may ask for booking and call instead). Each button needs its
- * fact; with none, nothing renders.
- * The page shell adds `has-action-bar` to <body> so content is padded clear of the bar.
- * `afterHero`: the page's first section already offers call and directions, so the bar slides in only once it
- * has scrolled away (CSS scroll timeline; without support, or with reduced motion, it is always there).
- */
 type BarAction = "call" | "directions" | "booking";
 
 /** Each action's label, and its shorter one when three share the bar at 360 px. */
@@ -28,6 +21,13 @@ export function barActions(ctx: RenderCtx): BarAction[] {
   return wanted.filter((a) => ctx.href({ action: a }) !== null).slice(0, 3);
 }
 
+/**
+ * Fixed call / directions bar below 48rem (a template may put a booking first). Each button needs its fact; with
+ * none, nothing renders.
+ * The page shell adds `has-action-bar` to <body> so content is padded clear of the bar.
+ * `afterHero`: the page's first section already offers call and directions, so the bar slides in only once it
+ * has scrolled away (CSS scroll timeline; without support, or with reduced motion, it is always there).
+ */
 export function MobileActionBar({ ctx, afterHero = false }: { ctx: RenderCtx; afterHero?: boolean }) {
   const actions = barActions(ctx);
   if (actions.length === 0) return null;

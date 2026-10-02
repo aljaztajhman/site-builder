@@ -185,7 +185,7 @@ export function renderPage(spec: SiteSpec, page: Page, opts: RenderOptions = {})
   // one is hidden (chrome.css), so one screen never shows two of the same.
   const afterHero = heroOffersCallAndDirections(first);
   const shown = heroActions(first);
-  const covered = bar && !afterHero ? barActions(ctx).filter((a) => shown.includes(a)) : [];
+  const covered = bar && !afterHero ? barActions(ctx).filter((a) => a !== "directions" && shown.includes(a)) : [];
   const bodyClass = bar ? ["has-action-bar", ...covered.map((a) => `bar-covers-hero-${a}`)].join(" ") : undefined;
   const renderBody = (suffixes: ReadonlyMap<string, string>) => renderToStaticMarkup(
     <body data-imagery={design.imagery} data-motif={motif} className={bodyClass}>
