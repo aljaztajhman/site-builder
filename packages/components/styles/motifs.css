@@ -482,7 +482,10 @@ a.plate:hover .plate__num {
 /* ---------- layout fixes shared by the templates ---------- */
 /* The section after the pipes hero keeps its own top gap (the divider closes the hero). */
 [data-motif="pipes"] main > .s.s-hero-signature + .s.s {
-  padding-top: var(--space-section);
+  padding-top: calc(var(--space-section) * 0.75);
+}
+[data-motif="pipes"] .hsig--drawing {
+  padding-bottom: 2rem;
 }
 /* A heading beside a photo gets less room than a full-width one. */
 [data-motif] .image-text .section-title {

@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { direction, heroSignature, type Business, type Design, type SectionOf } from "@sb/spec";
-import { HeroSignature } from "../src/groups/heroes/HeroSignature.tsx";
+import { HeroSignature, signatureOffersDirections } from "../src/groups/heroes/HeroSignature.tsx";
 import { heroLcp } from "../src/groups/heroes/index.ts";
 import { PriceList } from "../src/groups/business/Prices.tsx";
 import { Contact } from "../src/groups/business/Info.tsx";
@@ -51,6 +51,17 @@ describe("hero-signature", () => {
     expect(out).toContain("hsig__strip tone-band");
     expect(out).toContain("Savska cesta 52, 4000 Kranj");
     expect(heroLcp["hero-signature"]?.(hero("photo"))).toEqual({ image: "img_salon", sizes: "100vw" });
+  });
+
+  it("offers directions beside the phone object, so the phone's call bar can wait below the hero", () => {
+    const out = html(<HeroSignature section={hero("drawing")} ctx={ctxFor("cevi")} index={0} />);
+    expect(out).toMatch(/<a href="https:\/\/www\.google\.com\/maps[^"]*"[^>]*class="text-link"[^>]*>Navodila za pot<\/a>/);
+    expect(signatureOffersDirections(hero("drawing"))).toBe(true);
+    // A link of the model's own replaces it; then the bar is needed from the start.
+    const own = hero("drawing", { primary: { label: "Kje delamo", target: { page: "p_storitve" } } });
+    expect(signatureOffersDirections(own)).toBe(false);
+    expect(html(<HeroSignature section={own} ctx={ctxFor("cevi")} index={0} />)).not.toContain("Navodila za pot");
+    expect(signatureOffersDirections(hero("arch", { fact: "opening" }))).toBe(false);
   });
 
   it("never adds a second call: a call link next to the phone object is dropped", () => {

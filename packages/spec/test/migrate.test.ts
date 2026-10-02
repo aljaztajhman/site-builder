@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MIGRATIONS, SPEC_VERSION, migrateSpec } from "../src/index.ts";
+import { MIGRATIONS, SPEC_VERSION, migrateSpec, type SiteSpec } from "../src/index.ts";
 
 describe("migrateSpec", () => {
   it("passes the current version through unchanged", () => {
@@ -65,7 +65,7 @@ describe("migration 4 → 5 (trade templates)", () => {
   it("accepts what v5 adds: the band tone, band colours, hero-signature, price tags and the call-out", async () => {
     const { readFileSync } = await import("node:fs");
     const { validateSite, direction } = await import("../src/index.ts");
-    const golden = JSON.parse(readFileSync(new URL("../../../tools/eval/golden/avtoservis-mrak.json", import.meta.url), "utf8")) as import("../src/index.ts").SiteSpec;
+    const golden = JSON.parse(readFileSync(new URL("../../../tools/eval/golden/avtoservis-mrak.json", import.meta.url), "utf8")) as SiteSpec;
     const t = direction("tablica");
     const spec = structuredClone(golden);
     spec.design = { ...spec.design, direction: t.id, fontPair: t.fontPairs[0]!, colors: { ...t.palette.fallback }, radius: 6, baseFontSize: 18, scale: 1.25, headingWeight: 900, headingCase: "uppercase", headingTracking: -0.02, density: "regular", shadow: "none", imagery: t.imagery };
