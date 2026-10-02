@@ -1048,7 +1048,7 @@ export const DIRECTIONS: Direction[] = [
     template: {
       id: "P",
       motif: "bend",
-      display: [44, 96],
+      display: [44, 88],
       h2: [36, 72],
       firstFor: ["physio"],
       minPhotos: 0,
