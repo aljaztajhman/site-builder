@@ -1,4 +1,8 @@
 import { SPEC_VERSION, type SiteSpec } from "./site.ts";
+import { repairSiteCopy } from "./banned.ts";
+import { Design } from "./design.ts";
+import { enforceDesign } from "./design-rules.ts";
+import { DIRECTIONS } from "./directions.ts";
 
 type RawSpec = Record<string, unknown>;
 
@@ -11,6 +15,19 @@ export const MIGRATIONS: Record<number, (spec: RawSpec) => RawSpec> = {
   1: (spec) => spec,
   // 2 → 3: optional `origin` on images ("generated" for AI images). Additive: every v2 spec is a valid v3 spec.
   2: (spec) => spec,
+  // 3 → 4: give-away rules (sb-giveaway-additions). The schema is unchanged; stored copy and colours are
+  // brought inside the new rules mechanically so existing sites stay valid: em dashes in pages and
+  // translations become en dashes, pure black and pure white text and surface colours become off-black and
+  // off-white (contrast kept). New filler phrases and all-caps eyebrows can't be fixed mechanically; the
+  // editor's checklist lists them.
+  3: (spec) => {
+    const out = structuredClone(spec);
+    repairSiteCopy(out);
+    const design = Design.safeParse(out.design);
+    const dir = design.success ? DIRECTIONS.find((d) => d.id === design.data.direction) : undefined;
+    if (design.success && dir) out.design = { ...design.data, colors: enforceDesign(design.data, dir).colors };
+    return out;
+  },
 };
 
 export function migrateSpec(input: unknown, migrations = MIGRATIONS, target: number = SPEC_VERSION): SiteSpec {

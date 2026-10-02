@@ -229,12 +229,10 @@
 .booking__text .actions {
   margin-top: 0.5rem;
 }
+/* A rule in the text colour above the block, as the split CTA has. Never an accent stripe on one side (banned give-away). */
 .s-booking--simple .booking__text {
-  padding-left: 1.25rem;
-  border-left: 4px solid var(--c-primary);
-}
-.tone-inverse.s-booking--simple .booking__text {
-  border-left-color: currentColor;
+  padding-top: var(--space-block);
+  border-top: 2px solid currentColor;
 }
 .booking__facts {
   padding: 1.5rem 1.25rem;
@@ -341,11 +339,10 @@
   display: grid;
   gap: 0.5rem;
   max-width: 44rem;
-  padding: 1.25rem 1.25rem 1.25rem 1.5rem;
-  border-left: 4px solid var(--c-primary);
-}
-.tone-inverse.s-announcement--card .announcement {
-  border-left-color: currentColor;
+  padding: 1.25rem;
+  /* Framed on every side in the text colour: an accent stripe on one side is a banned give-away. */
+  border: 2px solid currentColor;
+  border-radius: var(--radius);
 }
 .s-announcement--card .announcement__title {
   font-size: var(--fs-h3);

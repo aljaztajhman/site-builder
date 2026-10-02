@@ -108,14 +108,18 @@ describe("repairContentOutput", () => {
 });
 
 describe("generateContent", () => {
-  it("keeps the repaired kmetija-grabnar first answer without a retry and reports the repairs", async () => {
+  /** The kmetija-grabnar content run with the recorded first answer, optionally changed. */
+  async function grabnarContent(change?: (answer: { pages: { sections: { props: Record<string, unknown> }[] }[] }) => void) {
     const config = loadConfig();
     const fixture = JSON.parse(readFileSync(path.join(evalDir, "fixtures/kmetija-grabnar/brief.json"), "utf8")) as { description: string; photos: unknown[] };
     const { brief } = verifyBriefFacts(Brief.parse(recorded("kmetija-grabnar/001-brief.json")), fixture.description);
     const photos: ImageAsset[] = (recorded("kmetija-grabnar/003-altText.json") as { images: unknown[] }).images.map((_, i) => ({ id: `img_${String(i + 1).padStart(2, "0")}`, src: "x", width: 1600, height: 1067, alt: "x" }));
     const wanted = generatedImageCount(config, fixture.photos.length, true, "full").wanted;
     const generated: ImageAsset[] = brief.imageIdeas.slice(0, wanted).map((idea, i) => ({ id: `img_g${i + 1}`, src: "x", width: 1536, height: 1024, alt: idea.alt.slice(0, 180), origin: "generated" }));
-    const answers = [response("kmetija-grabnar/004-content.json")];
+    const recordedAnswer = response("kmetija-grabnar/004-content.json");
+    const answer = recorded("kmetija-grabnar/004-content.json") as Parameters<NonNullable<typeof change>>[0];
+    change?.(answer);
+    const answers = [change ? { ...recordedAnswer, text: JSON.stringify(answer) } : recordedAnswer];
     let calls = 0;
     const client = new ModelClient({
       config,
@@ -134,6 +138,22 @@ describe("generateContent", () => {
       retries: 2,
       corpus: fixture.description,
     });
+    return { r, calls };
+  }
+
+  it("replaces em dashes in the answer instead of paying for a retry", async () => {
+    const { r, calls } = await grabnarContent((a) => {
+      a.pages[0]!.sections[0]!.props.intro = `${String(a.pages[0]!.sections[0]!.props.intro)} — vse leto.`;
+    });
+    expect(calls).toBe(1);
+    expect(r.issues).toEqual([]);
+    expect(r.repairs).toContain("/pages/0/sections/0/props/intro: em dash replaced");
+    expect(JSON.stringify(r.spec.pages)).not.toContain("—");
+    expect(r.spec.pages[0]!.sections[0]!.props).toMatchObject({ intro: expect.stringMatching(/ – vse leto\.$/) });
+  });
+
+  it("keeps the repaired kmetija-grabnar first answer without a retry and reports the repairs", async () => {
+    const { r, calls } = await grabnarContent();
     expect(calls).toBe(1);
     expect(r.attempts).toBe(1);
     expect(r.issues).toEqual([]);

@@ -84,6 +84,33 @@ export function ensureContrast(fg: string, bg: string, min: number): string {
 }
 
 /**
+ * Off-black and off-white bounds (WCAG relative luminance). Pure #000 text or surfaces and pure #fff text
+ * are an AI-site give-away (docs/PRODUCT.md). OFF_BLACK_MIN admits #0e0e0e and lighter; OFF_WHITE_MAX
+ * admits #f5f5f5 and darker. A pure white page stays allowed: the white directions require it.
+ */
+export const OFF_BLACK_MIN = 0.004;
+export const OFF_WHITE_MAX = 0.92;
+
+/**
+ * Moves `hex` along its lightness (hue and saturation kept) until its luminance is within [lo, hi].
+ * Returns it unchanged when it already is.
+ */
+export function clampLuminance(hex: string, lo: number, hi = 1): string {
+  const lum = luminance(hex);
+  if (lum >= lo && lum <= hi) return hex;
+  const hsl = hexToHsl(hex);
+  const up = lum < lo;
+  for (let i = 1; i <= 200; i++) {
+    const l = up ? hsl.l + i * 0.005 : hsl.l - i * 0.005;
+    if (l < 0 || l > 1) break;
+    const candidate = hslToHex({ ...hsl, l });
+    const cl = luminance(candidate);
+    if (cl >= lo && cl <= hi) return candidate;
+  }
+  return hex;
+}
+
+/**
  * Banned: cream or off-white page backgrounds. Light backgrounds must be pure white
  * or a clearly tinted cool colour; warm near-whites and greyish near-whites are rejected.
  */

@@ -86,7 +86,12 @@ Hard list. Add to it whenever a new default shows up in eval screenshots.
 - The default row of three icon feature cards
 - Everything centred
 - Heavy drop shadows on every card
-- Filler copy: "vrhunska kakovost", "celovite rešitve", "vaš zanesljiv partner", "z dolgoletnimi izkušnjami", "strast do …"
+- Filler copy: "vrhunska kakovost", "celovite rešitve", "vaš zanesljiv partner", "z dolgoletnimi izkušnjami", "strast do …", "brezhibno", "celovit pristop", "dvignite/povzdignite na višjo raven", "odklenite", "opolnomočimo", "inovativne rešitve", "vrhunski", "po meri vaših potreb", "z vami na vsakem koraku", "v današnjem hitrem tempu", "sanje se uresničijo", "izkusite"
+- The em dash (U+2014) anywhere in generated copy. Slovene uses „…" quotes and the spaced en dash ( – ) or a comma; code replaces em dashes mechanically
+- Accent-coloured single-side borders: a primary or accent stripe on one side of a card, quote, notice or list item
+- Uppercase or tracked-out eyebrow labels: eyebrows are sentence case with letter-spacing at most 0.04 em (uppercase stays a heading-only token where a direction allows it)
+- Pure black (#000) text or surfaces, and pure white (#fff) text: text and surface colours stay off-black, text stays off-white (lightness bounds in the design rules; a pure white page in the white directions is fine)
+- More than one primary action in a hero, such as two identical full-width buttons stacked under the headline; the second action is a text link or the phone number
 
 ## Pricing (in config, `plans`)
 

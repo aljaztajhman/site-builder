@@ -200,4 +200,29 @@ describe("heroes group", () => {
   it("has a renderer for every hero type", () => {
     expect(Object.keys(heroRenderers).sort()).toEqual(["hero-image", "hero-split", "hero-type", "page-header"]);
   });
+
+  it("renders one primary action per hero; the second is a text link, never a second button (give-away)", () => {
+    const actions = {
+      eyebrow: "Kamnik",
+      headline: "Kruh z drožmi iz krušne peči",
+      intro: "Pečemo vsak dan.",
+      primary: { label: "Pokličite", target: { action: "call" } },
+      secondary: { label: "Kje smo", target: { action: "directions" } },
+    };
+    const outs = [
+      ...heroSplit.variants.map((variant) =>
+        html(<HeroSplit section={heroSplit.schema.parse({ id: "s_h", type: "hero-split", variant, props: { ...actions, image: "img_salon" } })} ctx={testCtx()} index={0} />),
+      ),
+      ...heroImage.variants.map((variant) =>
+        html(<HeroImage section={heroImage.schema.parse({ id: "s_h", type: "hero-image", variant, props: { ...actions, image: "img_salon" } })} ctx={testCtx()} index={0} />),
+      ),
+      ...heroType.variants.map((variant) => html(<HeroType section={heroType.schema.parse({ id: "s_h", type: "hero-type", variant, props: actions })} ctx={testCtx()} index={0} />)),
+    ];
+    for (const out of outs) {
+      expect(count(out, /class="btn\b/g), out).toBe(1);
+      expect(out).toMatch(/<a href="tel:\+38641123456" data-action="call" class="btn btn--primary">Pokličite<\/a>/);
+      expect(out).not.toContain("btn--secondary");
+      expect(out).toMatch(/<a href="[^"]+" data-action="directions" class="text-link"[^>]*>Kje smo<\/a>/);
+    }
+  });
 });

@@ -35,6 +35,7 @@ describe("migration 1 → 2 (contact-form section type)", () => {
     const v1 = { ...golden, specVersion: 1 };
     const v2 = migrateSpec(v1, MIGRATIONS, 2);
     expect(v2).toEqual({ ...golden, specVersion: 2 });
+    expect(migrateSpec(v2).specVersion).toBe(SPEC_VERSION);
     expect(validateSite(migrateSpec(v2)).ok).toBe(true);
   });
 });
@@ -44,9 +45,9 @@ describe("migration 2 → 3 (image origin)", () => {
     const { readFileSync } = await import("node:fs");
     const { validateSite } = await import("../src/index.ts");
     const golden = JSON.parse(readFileSync(new URL("../../../tools/eval/golden/pekarna-kvas.json", import.meta.url), "utf8")) as { assets: { images: { origin?: string }[] } };
-    const v3 = migrateSpec({ ...golden, specVersion: 2 });
+    const v3 = migrateSpec({ ...golden, specVersion: 2 }, MIGRATIONS, 3);
     expect(v3).toEqual({ ...golden, specVersion: 3 });
-    expect(validateSite(v3).ok).toBe(true);
+    expect(validateSite(migrateSpec(v3)).ok).toBe(true);
     expect(v3.assets.images.every((i) => i.origin === undefined)).toBe(true);
   });
 });
