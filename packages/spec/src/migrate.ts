@@ -31,6 +31,9 @@ export const MIGRATIONS: Record<number, (spec: RawSpec) => RawSpec> = {
   // 4 → 5: trade templates. Additive: the "band" tone, optional colours band/onBand, heading weight up to 900,
   // the hero-signature section, price-list "tags" and contact "call-out". Every v4 spec is a valid v5 spec.
   4: (spec) => spec,
+  // 5 → 6: owner-edited price lists and menus (sb-roadmap-order). Additive: optional `unavailable` on
+  // price-list items and menu dishes. Every v5 spec is a valid v6 spec.
+  5: (spec) => spec,
 };
 
 export function migrateSpec(input: unknown, migrations = MIGRATIONS, target: number = SPEC_VERSION): SiteSpec {

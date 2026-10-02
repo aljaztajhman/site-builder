@@ -124,6 +124,14 @@ describe("price-list tags", () => {
     expect(out).toContain('data-ph="price"');
   });
 
+  it("keeps the plate for an item the owner marked unavailable, says so under its name", () => {
+    const off: SectionOf<"price-list"> = { ...section, props: { ...section.props, groups: [{ items: [{ name: "Diagnostika", price: { amount: 30 }, unavailable: true }, { name: "Menjava olja", price: { amount: 45, from: true } }] }] } };
+    const out = html(<PriceList section={off} ctx={ctxFor("tablica")} index={1} />);
+    expect(out.match(/<p class="price-tag plate">/g)).toHaveLength(2);
+    expect(out).toMatch(/<li class="price-tags__item is-unavailable">[\s\S]*Diagnostika<\/h3><p><span class="unavailable price-tags__flag">Trenutno ni na voljo<\/span><\/p><\/li>/);
+    expect(out).toMatch(/od 45\s€/);
+  });
+
   it("is a plain large price elsewhere", () => {
     const out = html(<PriceList section={section} ctx={testCtx()} index={1} />);
     expect(out).toContain('<p class="price-tag">');

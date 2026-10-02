@@ -387,3 +387,32 @@ details.more>summary{padding:12px 0;font-weight:600;cursor:pointer}
 .variant[aria-pressed=true] .name::after{content:" · izbrana";color:var(--accent);font-weight:600}
 .variant .thumb{position:relative;display:block;height:120px;overflow:hidden;border-radius:var(--r-1);background:#fff;outline:1px solid var(--line)}
 .variant iframe{position:absolute;top:0;left:0;width:1024px;height:800px;border:0;transform-origin:0 0;pointer-events:none}
+
+/* ---------- Price lists and menus (client/price-editor.ts): groups, items, up/down instead of drag ---------- */
+.pl-head-title{margin:24px 0 0;font-size:16px}
+.pl-group{margin:16px 0;padding:4px 12px 12px;border:1px solid var(--line);border-radius:var(--r-2);background:var(--surface)}
+.pl-ghead{display:flex;gap:8px;align-items:flex-end}
+.pl-gname{flex:1;min-width:0}
+.pl-move{display:flex;gap:4px;flex:none}
+.pl-move .icon{min-width:44px;height:44px;font-size:18px}
+.pl-items{display:grid;gap:6px;margin:12px 0 4px;padding:0;list-style:none}
+.pl-item{min-width:0;border:1px solid var(--line);border-radius:var(--r-2);background:var(--surface)}
+.pl-item.is-open{border-color:var(--line-field)}
+.pl-row{display:flex;align-items:center;gap:4px;padding-right:4px}
+.pl-sum{flex:1;min-width:0;min-height:52px;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px;margin:0;padding:8px 10px;border:0;border-radius:var(--r-2);background:none;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.pl-sum:hover{background:var(--canvas)}
+.pl-sum:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
+.pl-name{flex:1 1 12ch;min-width:0;font-weight:600;font-size:15px;line-height:1.3;overflow-wrap:anywhere}
+.pl-price{font-size:15px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pl-price.missing{color:var(--warn);font-weight:600}
+.pl-off{flex-basis:100%;font-size:13px;color:var(--ink-3)}
+.pl-item.is-off .pl-price{text-decoration:line-through}
+.pl-body{padding:0 12px 12px;border-top:1px solid var(--line)}
+.pl-price-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:10px}
+.pl-shown{margin-top:6px}
+.pl-shown.warn{color:var(--warn);font-weight:600}
+.pl-tags{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:8px}
+.pl-tags legend{grid-column:1/-1}
+.pl-tags label{font-size:14px}
+.pl-gtools,.pl-btools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}
+.pl-btools .help{margin:0}

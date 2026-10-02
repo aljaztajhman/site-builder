@@ -8,6 +8,8 @@ import { EDITOR_STARTER_TEXT } from "@sb/spec/starter";
 import { COLOR_LABEL, DIRECTION_LABEL, ENUM_LABEL, SECTION_LABEL, TOKEN_LABEL, VARIANT_LABEL, blockerMessage, describePath, fieldLabel, issueText, type BlockerLike } from "@sb/spec/labels";
 import { formatDateTime, formatEur, siteStatus } from "../ui/labels.ts";
 import { groupVersions, undoTarget, type ListedVersion } from "./versions.ts";
+import { isPriceListType } from "@sb/spec/price-edit";
+import { itemKeyForPath, priceEditor, type PriceEditorState } from "./price-editor.ts";
 
 type Json = null | boolean | number | string | Json[] | { [k: string]: Json };
 type Obj = { [k: string]: Json };
@@ -281,12 +283,15 @@ function opsAt(where: Where, v: Json | undefined): Op[] | null {
   return [...(w.guard ? [w.guard] : []), v === undefined ? { op: "remove", path: w.pointer } : { op: "replace", path: w.pointer, value: v }];
 }
 
-/** Sends direct-edit operations (no model call). A function is evaluated when the save is sent. */
-function patch(ops: Op[] | (() => Op[] | null), message: string, rerender = true): Promise<boolean> {
-  return queued(() => sendPatch(ops, message, rerender));
+/**
+ * Sends direct-edit operations (no model call). A function is evaluated when the save is sent. With
+ * `section`, only that section of the preview is swapped for its re-rendered HTML (no reload, no flash).
+ */
+function patch(ops: Op[] | (() => Op[] | null), message: string, rerender = true, section?: string): Promise<boolean> {
+  return queued(() => sendPatch(ops, message, rerender, section));
 }
 
-async function sendPatch(opsOrFn: Op[] | (() => Op[] | null), message: string, rerender: boolean): Promise<boolean> {
+async function sendPatch(opsOrFn: Op[] | (() => Op[] | null), message: string, rerender: boolean, section?: string): Promise<boolean> {
   if (!state.spec) return false;
   const ops = typeof opsOrFn === "function" ? opsOrFn() : opsOrFn;
   if (!ops) {
@@ -294,12 +299,15 @@ async function sendPatch(opsOrFn: Op[] | (() => Op[] | null), message: string, r
     await load();
     return false;
   }
+  // Nothing to change (e.g. an optional field emptied that was already empty).
+  if (ops.every((o) => o.op === "test")) return true;
   try {
     const r = await api<{ version: number; adjustments: string[] }>("/patch", { method: "POST", body: JSON.stringify({ baseVersion: state.version, ops, message }) });
     toast = r.adjustments.length ? `Shranjeno. ${r.adjustments.join("; ")}` : "Shranjeno.";
     // Form autosaves keep the form (and its focus) in place; everything else re-renders.
     await load(rerender || r.adjustments.length > 0);
-    reloadPreview();
+    if (section) await refreshSection(section);
+    else reloadPreview();
     return true;
   } catch (e) {
     toast = rerender ? `Ni shranjeno. ${(e as Error).message}` : `Še ni shranjeno: ${(e as Error).message}`;
@@ -718,14 +726,69 @@ function sectionPane(si: number): HTMLElement {
     pane.append(h("p", { class: "muted" }, "Ta razdelek ustvari sistem (pravna besedila, 404). Podatke uredite pod »Podatki«."));
     return pane;
   }
+  const tone = labelled("Ozadje", h("select", { onChange: (e: Event) => { const v = (e.target as HTMLSelectElement).value; void patch([isSection(pi, si, String(s.id)), s.tone === undefined ? { op: "add", path: `${base}/tone`, value: v } : { op: "replace", path: `${base}/tone`, value: v }], "ozadje"); } },
+    ...["default", "alt", "inverse", "band"].map((t) => h("option", { value: t, selected: (s.tone ?? "default") === t }, TONE[t]!))));
+  // Price lists and menus: groups and items in their own editor, the list first (that is what owners come to change).
+  if (isPriceListType(s.type)) {
+    pane.append(priceListPane(String(s.id), info.props), variantPicker(s, pi, si, info.variants), tone);
+    return pane;
+  }
   pane.append(
     h("p", { class: "help" }, "Besedilo popravite kar na strani: tapnite ga. Premik, podvajanje in brisanje so na vrhu razdelka v predogledu."),
     variantPicker(s, pi, si, info.variants),
-    labelled("Ozadje", h("select", { onChange: (e: Event) => { const v = (e.target as HTMLSelectElement).value; void patch([isSection(pi, si, String(s.id)), s.tone === undefined ? { op: "add", path: `${base}/tone`, value: v } : { op: "replace", path: `${base}/tone`, value: v }], "ozadje"); } },
-      ...["default", "alt", "inverse", "band"].map((t) => h("option", { value: t, selected: (s.tone ?? "default") === t }, TONE[t]!)))),
+    tone,
     formAt(inSection(String(s.id), "/props"), info.props, s.props as Json, "props", `urejen razdelek ${s.type}`),
   );
   return pane;
+}
+
+// ---------- Price lists and menus (price-editor.ts): what is open survives the redraw after each structural save ----------
+const priceUi: PriceEditorState = { open: null, focus: null };
+
+/** Where a section is now (page, index), found by id when a save goes out. */
+function sectionAt(id: string): { page: number; section: number; id: string } | null {
+  for (const [pi, p] of pages().entries()) {
+    const si = ((p.sections ?? []) as Obj[]).findIndex((s) => s.id === id);
+    if (si >= 0) return { page: pi, section: si, id };
+  }
+  return null;
+}
+
+function priceListPane(id: string, props: Schema): HTMLElement {
+  const type = String(sections().find((s) => s.id === id)?.type);
+  return priceEditor({
+    h,
+    sectionId: id,
+    spec: () => state.spec,
+    at: () => sectionAt(id),
+    save: (build, message, structural) => void patch(build as () => Op[] | null, `${label(type)}: ${message}`, structural, id),
+    later: (send) => {
+      const d = debounced(() => send(), 450);
+      return { push: () => d.push(null), cancel: d.cancel };
+    },
+    props: props as { properties?: Record<string, { maxLength?: number }>; required?: string[] },
+    ui: priceUi,
+  });
+}
+
+/**
+ * Swaps one section of the preview for its re-rendered HTML from the preview route (the same renderer as
+ * the published site), so a price typed in the panel shows without reloading the page. Falls back to a reload.
+ */
+async function refreshSection(id: string): Promise<void> {
+  const doc = frame?.contentDocument;
+  const old = doc?.getElementById(id);
+  if (!frame || !doc || !old) return reloadPreview();
+  try {
+    const r = await fetch(previewUrl(), { cache: "no-store" });
+    const fresh = r.ok ? new DOMParser().parseFromString(await r.text(), "text/html").getElementById(id) : null;
+    if (!fresh) return reloadPreview();
+    old.replaceWith(doc.importNode(fresh, true));
+    frameVersion = state.version;
+    decorate();
+  } catch {
+    reloadPreview();
+  }
 }
 
 const canAddSections = (): boolean => !!catalogue && ["home", "standard"].includes(String(currentPage()?.kind));
@@ -1426,6 +1489,16 @@ function attachEditing(): void {
       render();
       return;
     }
+    // A tap on an item of a price list or menu opens that item's fields in the panel.
+    const priced = sec ? sections().find((s) => s.id === sec.id) : undefined;
+    if (sec && priced && isPriceListType(priced.type)) {
+      const row = t.closest(PRICE_ROWS);
+      if (row) {
+        e.preventDefault();
+        openPriceItem(sec, row);
+        return;
+      }
+    }
     // First tap selects the section, a tap on its text then edits that text in place (works by touch;
     // a double-click does both).
     if (sec && sec.id === selected && t.closest(INLINE_TEXT)) {
@@ -1511,6 +1584,21 @@ function placeTools(): void {
   const barHeight = bar && win.getComputedStyle(bar).position === "fixed" ? bar.getBoundingClientRect().height : 0;
   if (tools) tools.style.top = `${Math.min(room, Math.max(8, -r.top + 8))}px`;
   if (add) add.style.bottom = `${Math.min(room, Math.max(8, r.bottom - (win.innerHeight - barHeight) + 8))}px`;
+}
+
+/** A price list's or menu's groups and items as every variant renders them, in spec order. */
+const PRICE_GROUPS = ".prices__table, .prices__group, .price-tags__group, .menu__cat";
+const PRICE_ROWS = ".prices__table tr, .prices__row, .price-tags__item, .menu__dish";
+
+/** Opens the panel's fields for the item tapped in the preview (found by its place in the rendered list). */
+function openPriceItem(sec: Element, row: Element): void {
+  const group = row.closest(PRICE_GROUPS);
+  const g = group ? [...sec.querySelectorAll(PRICE_GROUPS)].indexOf(group) : -1;
+  const i = group ? [...group.querySelectorAll(PRICE_ROWS)].indexOf(row) : -1;
+  priceUi.open = g >= 0 && i >= 0 ? `${sec.id}:${g}:${i}` : null;
+  if (narrowScreen()) setSheet("full");
+  select(sec.id, false);
+  document.querySelector(".pl-item.is-open")?.scrollIntoView({ block: "center" });
 }
 
 /** Elements whose text can be edited in place. */
@@ -1932,6 +2020,8 @@ function goTo(path: string): void {
     pageIndex = pi;
     selected = sec ? String(sec.id) : null;
     tab = "content";
+    // A price-list or menu entry (a missing price): open that item's fields.
+    if (sec && isPriceListType(sec.type)) priceUi.open = itemKeyForPath(String(sec.id), sec.type, path) ?? priceUi.open;
     render();
     if (pageChanged) reloadPreview();
     else if (selected) frame?.contentDocument?.getElementById(selected)?.scrollIntoView({ block: "start" });

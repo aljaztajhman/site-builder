@@ -12,6 +12,8 @@ const head = {
 };
 
 const PRICE_RULE = "Only prices given in the client's input. Otherwise a price placeholder; never estimate.";
+/** Spec v6: the owner marks an item as not available right now (the editor's "Trenutno ni na voljo"); it stays listed with a note. */
+const UNAVAILABLE_RULE = "true only when the client says this item is not available right now; it stays listed with a note. Leave out otherwise.";
 
 export const servicesList = defineSection(
   {
@@ -90,6 +92,7 @@ export const priceList = defineSection(
                 name: text(80),
                 note: text(120).optional().describe("Short detail, e.g. duration or what is included"),
                 price: Price.describe(PRICE_RULE),
+                unavailable: z.boolean().optional().describe(UNAVAILABLE_RULE),
               }),
             )
             .min(1)
@@ -129,6 +132,7 @@ export const menuSection = defineSection(
                 description: text(160).optional(),
                 price: Price.describe(PRICE_RULE),
                 tags: z.array(MenuTag).max(4).optional().describe("Only tags the client's input supports"),
+                unavailable: z.boolean().optional().describe(UNAVAILABLE_RULE),
               }),
             )
             .min(1)

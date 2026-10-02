@@ -1,7 +1,15 @@
 import { PriceText, Section, SectionHead, cx, titleId } from "../../primitives/index.tsx";
-import type { SectionProps } from "../../types.ts";
+import type { RenderCtx, SectionProps } from "../../types.ts";
 import { TAG_KEYS, itemId } from "./shared.tsx";
 import { PlateStrip, motifOf } from "../../motifs/index.tsx";
+
+/**
+ * An item the owner marked as not available right now: it stays listed, says so in words (the price is
+ * also struck through, which a screen reader doesn't announce), sentence case like every label.
+ */
+function Unavailable({ ctx, className }: { ctx: RenderCtx; className: string }) {
+  return <span className={cx("unavailable", className)}>{ctx.t("unavailable")}</span>;
+}
 
 /** Every price as a large object drawn by the direction's motif (a number plate in Tablica), the name under it. */
 function PriceTags({ section, ctx }: SectionProps<"price-list">) {
@@ -17,7 +25,7 @@ function PriceTags({ section, ctx }: SectionProps<"price-list">) {
             {g.name && <h3 className="prices__group-title">{g.name}</h3>}
             <ul className="price-tags" role="list">
               {g.items.map((it, ii) => (
-                <li className="price-tags__item" key={ii}>
+                <li className={cx("price-tags__item", it.unavailable && "is-unavailable")} key={ii}>
                   <p className={cx("price-tag", plate && "plate")}>
                     {plate && <PlateStrip />}
                     <span className="price-tag__value">
@@ -25,6 +33,11 @@ function PriceTags({ section, ctx }: SectionProps<"price-list">) {
                     </span>
                   </p>
                   <Name className="price-tags__name">{it.name}</Name>
+                  {it.unavailable && (
+                    <p>
+                      <Unavailable ctx={ctx} className="price-tags__flag" />
+                    </p>
+                  )}
                   {it.note && <p className="price-tags__note muted">{it.note}</p>}
                 </li>
               ))}
@@ -55,9 +68,10 @@ export function PriceList({ section, ctx, index }: SectionProps<"price-list">) {
               )}
               <tbody>
                 {g.items.map((it, ii) => (
-                  <tr key={ii}>
+                  <tr key={ii} className={it.unavailable ? "is-unavailable" : undefined}>
                     <th scope="row">
                       <span className="prices__name">{it.name}</span>
+                      {it.unavailable && <Unavailable ctx={ctx} className="prices__flag" />}
                       {it.note && <span className="prices__note muted">{it.note}</span>}
                     </th>
                     <td>
@@ -76,9 +90,10 @@ export function PriceList({ section, ctx, index }: SectionProps<"price-list">) {
               )}
               <dl className="prices__dl">
                 {g.items.map((it, ii) => (
-                  <div className="prices__row" key={ii}>
+                  <div className={cx("prices__row", it.unavailable && "is-unavailable")} key={ii}>
                     <dt>
                       <span className="prices__name">{it.name}</span>
+                      {it.unavailable && <Unavailable ctx={ctx} className="prices__flag" />}
                       {it.note && <span className="prices__note muted">{it.note}</span>}
                     </dt>
                     <dd>
@@ -109,12 +124,17 @@ export function Menu({ section, ctx }: SectionProps<"menu">) {
             </h3>
             <ul className="menu__dishes" aria-labelledby={itemId(section.id, ci, "cat")}>
               {c.dishes.map((d, di) => (
-                <li className="menu__dish" key={di}>
+                <li className={cx("menu__dish", d.unavailable && "is-unavailable")} key={di}>
                   <p className="menu__line">
                     <span className="menu__name">{d.name}</span>
                     <span className="menu__leader" aria-hidden="true" />
                     <PriceText price={d.price} ctx={ctx} />
                   </p>
+                  {d.unavailable && (
+                    <p>
+                      <Unavailable ctx={ctx} className="menu__flag" />
+                    </p>
+                  )}
                   {d.description && <p className="menu__desc muted">{d.description}</p>}
                   {d.tags && d.tags.length > 0 && (
                     <p className="menu__tags">

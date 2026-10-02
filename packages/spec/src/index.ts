@@ -16,3 +16,4 @@ export * from "./json-schema.ts";
 export * from "./starter.ts";
 export * from "./labels.ts";
 export * from "./locales.ts";
+export * from "./price-edit.ts";

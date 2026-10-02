@@ -17,4 +17,8 @@ export const EDITOR_STARTER_TEXT: Record<string, string> = {
   caption: "Opis slike",
   role: "Vloga",
   note: "Opomba",
+  // The price-list and menu editor's new rows and groups (keys no schema field uses).
+  priceItem: "Nova postavka",
+  menuDish: "Nova jed",
+  priceGroup: "Nova skupina",
 };

@@ -1,5 +1,5 @@
 {
-  "specVersion": 5,
+  "specVersion": 6,
   "slug": "frizerstvo-lana",
   "locales": { "default": "sl", "enabled": ["sl"] },
   "business": {

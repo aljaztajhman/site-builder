@@ -45,6 +45,8 @@ const sl = {
   social: "Družbena omrežja",
   priceItem: "Postavka",
   priceLabel: "Cena",
+  /** An item the owner marked as not available right now (price lists, menus). */
+  unavailable: "Trenutno ni na voljo",
   day: "Dan",
   hoursLabel: "Ura",
   map: "Zemljevid",
@@ -134,6 +136,7 @@ const en: Record<UiKey, string> = {
   social: "Social media",
   priceItem: "Item",
   priceLabel: "Price",
+  unavailable: "Currently unavailable",
   day: "Day",
   hoursLabel: "Hours",
   map: "Map",

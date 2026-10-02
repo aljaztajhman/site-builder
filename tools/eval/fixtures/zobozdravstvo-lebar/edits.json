@@ -8,8 +8,8 @@
   {
     "message": "We decided to publish two prices after all: check-up 45 €, teeth whitening 250 €.",
     "lang": "en",
-    "intent": "Add the two prices the client now provides (prices were missing).",
-    "check": { "kind": "textContains", "text": "250" }
+    "intent": "Prices written in English for Slovene offerings stay price placeholders (owner decision sb-english-prices = strict, 2026-10-02); the owner types them in the editor.",
+    "check": { "kind": "pricePlaceholders", "amounts": [45, 250] }
   },
   {
     "message": "Dodaj predstavitev ekipe: dr. Lebar in asistentka Maja.",
