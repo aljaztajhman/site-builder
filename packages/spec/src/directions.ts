@@ -1062,7 +1062,7 @@ export const DIRECTIONS: Direction[] = [
         "contact-strip:cards: where, when and how to reach them",
       ],
       textPairs: [["accent", "inverse"]],
-      phoneBar: ["booking", "call"],
+      phoneBar: ["booking", "call", "directions"],
     },
     layout: {
       header: "bar",

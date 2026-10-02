@@ -10,6 +10,8 @@ const sl = {
   /** Phone call bar: a noun, so the call and "Navodila za pot" fit on one line at 360 px (formal "Pokličite" wraps). */
   callShort: "Klic",
   directions: "Navodila za pot",
+  /** Phone bar with three buttons: the shortest word that still says it. */
+  directionsShort: "Pot",
   email: "Pošljite e-pošto",
   book: "Rezervirajte termin",
   /** Phone bar: short, so it fits beside the call at 360 px. */
@@ -103,6 +105,7 @@ const en: Record<UiKey, string> = {
   call: "Call",
   callShort: "Call",
   directions: "Directions",
+  directionsShort: "Map",
   email: "Send email",
   book: "Book an appointment",
   bookShort: "Book",

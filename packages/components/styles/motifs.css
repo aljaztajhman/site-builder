@@ -1309,6 +1309,10 @@ a.plate:hover .plate__num {
 }
 
 /* ---------- bend: Pregib (P), practices that sell appointments ---------- */
+/* The headline as tight as the template sets it (the token range stops at -0.04em). */
+[data-motif="bend"] .hsig__title {
+  letter-spacing: -0.045em;
+}
 /* Buttons in the accent (orange) with dark text on every ground, the phone bar's first one too. */
 [data-motif="bend"] .btn--primary,
 [data-motif="bend"] :is(.tone-inverse, .tone-band, .tone-default, .tone-alt) .btn--primary {

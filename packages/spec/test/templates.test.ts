@@ -68,6 +68,15 @@ describe("trade template directions (docs/design/templates)", () => {
     }
   });
 
+  it("keeps call and directions on every template's phone bar, at most three actions", () => {
+    for (const d of templates) {
+      const bar = d.template!.phoneBar ?? ["call", "directions"];
+      expect(bar, d.id).toContain("call");
+      expect(bar, d.id).toContain("directions");
+      expect(bar.length, d.id).toBeLessThanOrEqual(3);
+    }
+  });
+
   it("is the first choice for its trade when the photos allow it", () => {
     expect(templateFor("car-repair", 0)?.id).toBe("tablica");
     expect(templateFor("builder", 0)?.id).toBe("cevi");

@@ -170,15 +170,16 @@ describe("gallery wall", () => {
 });
 
 describe("phone bar", () => {
-  it("books first and calls second in Pregib", () => {
+  it("books first in Pregib, then call and directions under short labels so three fit at 360 px", () => {
     const ctx = ctxFor("pregib", NOVO_MESTO);
-    expect(barActions(ctx)).toEqual(["booking", "call"]);
+    expect(barActions(ctx)).toEqual(["booking", "call", "directions"]);
     const out = html(<MobileActionBar ctx={ctx} />);
-    expect(out).toMatch(/<a class="btn btn--primary action-bar__btn" href="https:\/\/pregib\.example\/narocanje"><svg[^>]*>[\s\S]*?<\/svg>Rezerviraj<\/a><a class="btn btn--secondary action-bar__btn" href="tel:\+38651555642"><svg[^>]*>[\s\S]*?<\/svg>Klic<\/a>/);
+    expect(out).toMatch(/<a class="btn btn--primary action-bar__btn" href="https:\/\/pregib\.example\/narocanje"><svg[^>]*>[\s\S]*?<\/svg>Rezerviraj<\/a><a class="btn btn--secondary action-bar__btn" href="tel:\+38651555642"><svg[^>]*>[\s\S]*?<\/svg>Klic<\/a><a class="btn btn--secondary action-bar__btn" href="https:\/\/www\.google\.com\/maps[^"]*" rel="noopener" target="_blank"><svg[^>]*>[\s\S]*?<\/svg>Pot<\/a>/);
   });
 
-  it("falls back to the facts it has: no booking link means call only, then directions", () => {
-    expect(barActions(ctxFor("pregib", { ...NOVO_MESTO, bookingUrl: undefined }))).toEqual(["call"]);
+  it("falls back to the facts it has, with the long labels when two remain", () => {
+    expect(barActions(ctxFor("pregib", { ...NOVO_MESTO, bookingUrl: undefined }))).toEqual(["call", "directions"]);
+    expect(html(<MobileActionBar ctx={ctxFor("pregib", { ...NOVO_MESTO, bookingUrl: undefined })} />)).toContain("Navodila za pot</a>");
     expect(barActions(ctxFor("markacija", LUCE))).toEqual(["call", "directions"]);
     expect(barActions(testCtx())).toEqual(["call", "directions"]);
   });

@@ -12,16 +12,20 @@ import type { RenderCtx } from "../types.ts";
  */
 type BarAction = "call" | "directions" | "booking";
 
-const BAR: Record<BarAction, { label: UiKey; icon: IconName; external: boolean }> = {
-  call: { label: "callShort", icon: "phone", external: false },
-  directions: { label: "directions", icon: "map-pin", external: true },
-  booking: { label: "bookShort", icon: "calendar", external: false },
+/** Each action's label, and its shorter one when three share the bar at 360 px. */
+const BAR: Record<BarAction, { label: UiKey; short: UiKey; icon: IconName; external: boolean }> = {
+  call: { label: "callShort", short: "callShort", icon: "phone", external: false },
+  directions: { label: "directions", short: "directionsShort", icon: "map-pin", external: true },
+  booking: { label: "bookShort", short: "bookShort", icon: "calendar", external: false },
 };
 
-/** The bar's actions: the template's (a practice that sells appointments books first), else call and directions. */
+/**
+ * The bar's actions: the template's (a practice that sells appointments books first, then call and directions),
+ * else call and directions. Call and directions stay one tap away on every page, whatever the template adds.
+ */
 export function barActions(ctx: RenderCtx): BarAction[] {
   const wanted = DIRECTIONS.find((d) => d.id === ctx.site.design.direction)?.template?.phoneBar ?? ["call", "directions"];
-  return wanted.filter((a) => ctx.href({ action: a }) !== null).slice(0, 2);
+  return wanted.filter((a) => ctx.href({ action: a }) !== null).slice(0, 3);
 }
 
 export function MobileActionBar({ ctx, afterHero = false }: { ctx: RenderCtx; afterHero?: boolean }) {
@@ -30,7 +34,8 @@ export function MobileActionBar({ ctx, afterHero = false }: { ctx: RenderCtx; af
   return (
     <nav className={afterHero ? "action-bar action-bar--after-hero" : "action-bar"} aria-label={ctx.t("quickContact")}>
       {actions.map((a, i) => {
-        const { label, icon, external } = BAR[a];
+        const { label: long, short, icon, external } = BAR[a];
+        const label = actions.length > 2 ? short : long;
         return (
           <a
             key={a}

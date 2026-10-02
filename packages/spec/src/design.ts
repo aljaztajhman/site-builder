@@ -80,7 +80,7 @@ export interface DirectionTemplate {
    * poster-size figures and prices), as [text, ground]. Held at 4.5:1 like body text (checkDesign, enforceDesign).
    */
   textPairs?: [keyof Colors, keyof Colors][];
-  /** The phone bar's actions, first is the primary one (default call, then directions). */
+  /** The phone bar's actions, up to three, first is the primary one (default call, then directions). Keep call and directions. */
   phoneBar?: ("call" | "directions" | "booking")[];
 }
 

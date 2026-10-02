@@ -71,6 +71,24 @@ describe("checkFacts", () => {
   });
 });
 
+describe("checkFacts, numbers written as words", () => {
+  const words = (text: string) => `${corpus} ${text}`;
+  const figures = (title: string) => spec({ sections: [{ id: "s_f", type: "highlights", variant: "figures", props: { heading: "V številkah", items: [{ title, text: "imam svojo ambulanto" }, { title: "18 €", text: "moško striženje" }] } }] });
+
+  it("passes a figure the client wrote as a word, in any case form", () => {
+    expect(checkFacts(figures("4 leta"), words("Zadnja štiri leta imam svojo ambulanto."))).toEqual([]);
+    expect(checkFacts(figures("12 let"), words("Dvanajst let sem delala v bolnišnici."))).toEqual([]);
+    expect(checkFacts(figures("5 terapij"), words("Paket petih terapij."))).toEqual([]);
+  });
+
+  it("still flags a number the client never wrote, as digits or as a word", () => {
+    expect(checkFacts(figures("4 leta"), words("Tri leta imam svojo ambulanto.")).map((v) => v.value)).toEqual(["4"]);
+    // Words inside longer words are not numbers: "petek" is not 5, "trideset" is 30 not 3.
+    expect(checkFacts(figures("5 dni"), words("Odprto v petek.")).map((v) => v.value)).toEqual(["5"]);
+    expect(checkFacts(figures("3 leta"), words("Trideset let izkušenj.")).map((v) => v.value)).toEqual(["3"]);
+  });
+});
+
 describe("checkFacts, stricter matching", () => {
   it("flags an invented business name, allowing legal forms and missing diacritics", () => {
     expect(checkFacts(spec({ business: { name: "Frizerstvo Lana d.o.o." } }), corpus)).toEqual([]);
