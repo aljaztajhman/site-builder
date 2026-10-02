@@ -357,7 +357,7 @@ export async function generateContent(client: ModelClient, input: ContentInput):
 }
 
 const issueLine = (i: Issue) => `${i.path}: ${i.message}`;
-const factLine = (f: FactViolation) => `${f.path}: ${f.kind} "${f.value}" is not in the client's input — remove it or use a placeholder`;
+const factLine = (f: FactViolation) => `${f.path}: ${f.kind} "${f.value}" ${f.detail ?? "is not in the client's input"} — remove it or use a placeholder`;
 
 // ---------- Patches (critique and chat edits) ----------
 

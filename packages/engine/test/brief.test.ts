@@ -73,6 +73,20 @@ describe("verifyBriefFacts", () => {
     expect(dropped.map((d) => d.field).sort()).toEqual(["email", "hours", "people", "phone", "price:Potica", "registrationNumber", "taxNumber"]);
   });
 
+  it("drops a price given for another offering and hours given for other days", () => {
+    const { dropped, brief: b } = verifyBriefFacts(
+      brief({ hours: [{ from: "sat", to: "sat", open: "06:30", close: "18:00", closed: false }] }, [
+        { group: "Kruh", name: "Pirin kruh", description: null, price: { amount: 3.9, from: false, unit: null } },
+        { group: "Kruh", name: "Rženi kruh", description: null, price: { amount: 3.9, from: false, unit: null } },
+        { group: null, name: "Žemlja", description: null, price: { amount: 30, from: false, unit: null } },
+      ]),
+      description,
+    );
+    expect(b.facts.hours).toBeNull();
+    expect(b.offerings.map((o) => o.price?.amount ?? null)).toEqual([null, 3.9, null]);
+    expect(dropped.map((d) => d.field)).toEqual(["hours", "price:Pirin kruh", "price:Žemlja"]);
+  });
+
   it("drops an address whose street is not in the text", () => {
     const { brief: b } = verifyBriefFacts(brief({ address: { street: "Glavni trg 1", postalCode: "1241", city: "Kamnik" } }), description);
     expect(b.facts.address).toBeNull();

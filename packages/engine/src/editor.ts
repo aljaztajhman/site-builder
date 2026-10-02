@@ -17,6 +17,11 @@ import {
   toModelJsonSchema,
   validateSite,
   EDITOR_STARTER_TEXT as DEFAULT_TEXT,
+  DAYS,
+  capitalize,
+  dayName,
+  formatTime,
+  type Day,
   type Issue,
   type SiteSpec,
 } from "@sb/spec";
@@ -195,15 +200,41 @@ export function editorCatalogue(spec: SiteSpec) {
   };
 }
 
-/** Strings a client typed through the editor, for the fact-check corpus. */
+const DAY_SET = new Set<string>(DAYS);
+
+/**
+ * Strings a client typed through the editor, for the fact-check corpus. The fact check pairs prices
+ * with offerings and times with days, so a priced item also gives "Name: 18 €" and an opening-hours
+ * row "Ponedeljek–petek 8.00–19.00." as its own paragraph. A price set on its own path gives
+ * "Cena: 18 €", which counts for any offering (the owner typed it into that item's price field).
+ */
 export function typedText(ops: Operation[]): string[] {
   const out: string[] = [];
   const walk = (v: unknown) => {
     // Numbers too: a price or capacity typed in the editor is the client's own fact.
     if (typeof v === "string" || typeof v === "number") out.push(String(v));
     else if (Array.isArray(v)) v.forEach(walk);
-    else if (v && typeof v === "object") Object.values(v).forEach(walk);
+    else if (v && typeof v === "object") {
+      const o = v as Record<string, unknown>;
+      const name = typeof o.name === "string" ? o.name : typeof o.title === "string" ? o.title : null;
+      const amount = (o.price as { amount?: unknown } | undefined)?.amount;
+      if (name && typeof amount === "number") out.push(`${name}: ${amount} €`);
+      if (typeof o.from === "string" && typeof o.to === "string" && DAY_SET.has(o.from) && DAY_SET.has(o.to)) {
+        const days = o.from === o.to ? capitalize(dayName(o.from as Day)) : `${capitalize(dayName(o.from as Day))}–${dayName(o.to as Day)}`;
+        const open = typeof o.open === "string" ? o.open : null;
+        const close = typeof o.close === "string" ? o.close : null;
+        out.push(`\n${days} ${o.closed === true || !open || !close ? "zaprto" : `${formatTime(open)}–${formatTime(close)}`}.\n`);
+      }
+      Object.values(o).forEach(walk);
+    }
   };
-  for (const o of ops) if ("value" in o) walk(o.value);
+  for (const o of ops) {
+    if (!("value" in o)) continue;
+    // A price typed straight into a price field: the op doesn't say for what, so it names nothing
+    // (its own paragraph, so the line before can't name it either).
+    const typedPrice = typeof o.value === "number" ? o.value : (o.value as { amount?: unknown } | null)?.amount;
+    if (/\/price(\/amount)?$/.test(o.path) && typeof typedPrice === "number") out.push(`\nCena: ${typedPrice} €`);
+    walk(o.value);
+  }
   return out;
 }
