@@ -196,7 +196,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     await run("queue", () => queue.ping());
     const ok = Object.values(checks).every((v) => v === "ok");
     // `?ip=1` echoes the caller's own address as the IP limits see it, so the proxy setup can be checked from outside.
-    const you = c.req.query("ip") === "1" ? { you: { ip: clientIp(c), forwardedEntries: (c.req.header("x-forwarded-for") ?? "").split(",").filter((s) => s.trim()).length } } : {};
+    const you = c.req.query("ip") === "1" ? { you: { ip: clientIp(c), forwarded: (c.req.header("x-forwarded-for") ?? "").split(",").map((s) => s.trim()).filter(Boolean), realIp: c.req.header("x-real-ip") ?? null } } : {};
     return c.json({ status: ok ? "ok" : "degraded", checks, ...you }, ok ? 200 : 503);
   });
 
