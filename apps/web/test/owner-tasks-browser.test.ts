@@ -211,13 +211,15 @@ describe("owner tasks in the editor", () => {
         const ui = await open(id, width);
         try {
           await t.run(ui);
-          await expect.poll(() => t.done(id), { timeout: 15_000 }).toBe(true);
+          // Generous: replacing the photo makes the server encode AVIF and WebP at four widths (about 10 s on
+          // 4 cores), and a busy CI runner took over 15 s. Taps are the measure here, not seconds.
+          await expect.poll(() => t.done(id), { timeout: 45_000 }).toBe(true);
           (results[width] ??= {})[task] = ui.taps();
           expect(ui.taps()).toBeLessThanOrEqual(BUDGET[width][task]);
         } finally {
           await ui.close();
         }
-      }, 60_000);
+      }, 90_000);
     }
   }
   it("writes the numbers", async () => {
