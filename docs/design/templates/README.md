@@ -127,6 +127,15 @@ Checked against docs/PRODUCT.md and docs/design/ideas.html, not against the comp
 - K's hero card, R's receipt and T's label are text containers laid over or beside a full-bleed element; they are not cards-in-cards.
 - L's wall wordmark and E's submerged line (swim set) are decorative duplicates of text, marked `aria-hidden`.
 
+## In the engine (M, S and J, spec v4)
+
+Owner's decision `sb-landing-directions` = start-three (2026-10-02). M, S and J are design directions `tablica`, `cevi` and `skorja` in `packages/spec/src/directions.ts`, each with a `template` block: the motif, display and h2 sizes, the trades it is the first choice for, the photos it needs and the homepage outline the content step follows.
+
+- Spec v4 (additive migration): the `band` tone with optional `band`/`onBand` colours (contrast checked like the others), heading weight up to 900, the `hero-signature` section (variants photo, drawing, arch; the fact shown is the phone or the earliest opening time, always from the business facts), price-list `tags` and contact `call-out`.
+- Rendering: `<body data-motif>` and `packages/components/styles/motifs.css`; the motif's repeating pieces (tyre tread, pipes, T-joints, scoring cuts) are SVG images that `packages/render/src/tokens.ts` builds from the site's colours. Plate, seal and radiator are components in `packages/components/src/motifs/`.
+- Pipeline: the design step is told the trade's template; a template keeps its own palette; the content step gets the outline; the header is set in code (dark over a dark hero unless there is a logo, no header call button above a phone object); a template that draws (S) gets no generated pictures.
+- Still outside the rules above and not built: clip-path shapes (N, P), centred label text (T), the other seven templates, the swim set's motion and photo-filled type, logo colours for template palettes.
+
 ## Checked
 
 All ten rendered in Chromium at 1440 × 900 and 390 × 844, as plain HTML and through the canvas's own runtime: no horizontal scroll, no failed requests or broken images, every button, call link, plate and bar link at least 44 px tall on the phone. Contrast computed for 69 text and background colour pairs: lowest 4.64:1 (S, white on the red block, after darkening the red from 4.01:1), all others 4.76:1 or more. White text over the photo overlays in M and N is not measured per pixel. Not checked: axe, Lighthouse, other browsers.

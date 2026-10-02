@@ -1,8 +1,44 @@
 import { PriceText, Section, SectionHead, cx, titleId } from "../../primitives/index.tsx";
 import type { SectionProps } from "../../types.ts";
 import { TAG_KEYS, itemId } from "./shared.tsx";
+import { PlateStrip, motifOf } from "../../motifs/index.tsx";
 
-export function PriceList({ section, ctx }: SectionProps<"price-list">) {
+/** Every price as a large object drawn by the direction's motif (a number plate in Tablica), the name under it. */
+function PriceTags({ section, ctx }: SectionProps<"price-list">) {
+  const { props } = section;
+  const plate = motifOf(ctx) === "plate";
+  return (
+    <Section id={section.id} type={section.type} variant={section.variant} tone={section.tone}>
+      <SectionHead id={section.id} eyebrow={props.eyebrow} title={props.title} intro={props.intro} />
+      {props.groups.map((g, gi) => {
+        const Name = g.name ? "h4" : "h3";
+        return (
+          <div className="price-tags__group" key={gi}>
+            {g.name && <h3 className="prices__group-title">{g.name}</h3>}
+            <ul className="price-tags" role="list">
+              {g.items.map((it, ii) => (
+                <li className="price-tags__item" key={ii}>
+                  <p className={cx("price-tag", plate && "plate")}>
+                    {plate && <PlateStrip />}
+                    <span className="price-tag__value">
+                      <PriceText price={it.price} ctx={ctx} />
+                    </span>
+                  </p>
+                  <Name className="price-tags__name">{it.name}</Name>
+                  {it.note && <p className="price-tags__note muted">{it.note}</p>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
+      {props.footnote && <p className="prices__footnote muted">{props.footnote}</p>}
+    </Section>
+  );
+}
+
+export function PriceList({ section, ctx, index }: SectionProps<"price-list">) {
+  if (section.variant === "tags") return <PriceTags section={section} ctx={ctx} index={index} />;
   const { props } = section;
   const table = section.variant === "table";
   return (

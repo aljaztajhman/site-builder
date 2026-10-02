@@ -39,7 +39,7 @@ describe("assembleSpec on recorded full-site answers", () => {
   // services-cards, which the schema failure hid; that isn't mechanical, so it still needs the retry and is
   // pinned here, so any other first-answer failure still fails.
   const rejectedFirstAnswers: Record<string, string[]> = {
-    "instalacije-rebernik": ["/pages/0/sections/2/props/items/1/image: img_g2 is AI-generated and may only be used in hero-split, hero-image, image-text, page-header"],
+    "instalacije-rebernik": ["/pages/0/sections/2/props/items/1/image: img_g2 is AI-generated and may only be used in hero-split, hero-image, hero-signature, image-text, page-header"],
   };
 
   for (const id of readdirSync(recordingsDir)) {

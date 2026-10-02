@@ -4,3 +4,4 @@ export * from "./primitives/index.tsx";
 export * from "./registry.ts";
 export * from "./chrome/index.tsx";
 export { STYLE_FILES } from "./styles.ts";
+export * from "./motifs/index.tsx";

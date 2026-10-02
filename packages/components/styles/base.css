@@ -206,6 +206,32 @@ main > .s:first-child {
 .tone-inverse .eyebrow {
   color: var(--c-on-inverse);
 }
+/* Band: the direction's saturated colour (signal yellow, wheat, cold blue); primary on sites without one. */
+.s.tone-band + .s.tone-band {
+  padding-top: 0;
+}
+.tone-band {
+  background: var(--c-band, var(--c-primary));
+  color: var(--c-on-band, var(--c-on-primary));
+}
+.tone-band .muted,
+.tone-band .eyebrow {
+  color: var(--c-on-band, var(--c-on-primary));
+}
+.tone-band :focus-visible {
+  outline-color: var(--c-on-band, var(--c-on-primary));
+}
+.tone-band .btn--primary {
+  background: var(--c-on-band, var(--c-on-primary));
+  color: var(--c-band, var(--c-primary));
+}
+.tone-band .hours__row,
+.tone-band .card {
+  border-color: currentColor;
+}
+.tone-band .card {
+  background: transparent;
+}
 .section-head {
   display: grid;
   gap: 0.75rem;

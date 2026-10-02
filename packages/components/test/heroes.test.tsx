@@ -198,6 +198,6 @@ describe("page-header", () => {
 
 describe("heroes group", () => {
   it("has a renderer for every hero type", () => {
-    expect(Object.keys(heroRenderers).sort()).toEqual(["hero-image", "hero-split", "hero-type", "page-header"]);
+    expect(Object.keys(heroRenderers).sort()).toEqual(["hero-image", "hero-signature", "hero-split", "hero-type", "page-header"]);
   });
 });

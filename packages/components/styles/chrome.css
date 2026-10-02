@@ -24,6 +24,15 @@
   --c-on-primary: var(--c-inverse);
   --c-border: var(--c-inverse);
 }
+.site-header--band {
+  --c-bg: var(--c-band, var(--c-primary));
+  --c-surface: var(--c-band, var(--c-primary));
+  --c-text: var(--c-on-band, var(--c-on-primary));
+  --c-muted: var(--c-on-band, var(--c-on-primary));
+  --c-primary: var(--c-on-band, var(--c-on-primary));
+  --c-on-primary: var(--c-band, var(--c-primary));
+  --c-border: var(--c-band, var(--c-primary));
+}
 .site-header__inner {
   display: flex;
   flex-wrap: wrap;

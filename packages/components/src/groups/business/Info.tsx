@@ -11,6 +11,7 @@ import {
   titleId,
 } from "../../primitives/index.tsx";
 import type { RenderCtx, SectionProps } from "../../types.ts";
+import { CallObject } from "../../motifs/index.tsx";
 
 const MISSING_HOURS: Placeholder = { $placeholder: "hours" };
 
@@ -56,7 +57,57 @@ export function OpeningHours({ section, ctx }: SectionProps<"opening-hours">) {
   );
 }
 
-export function Contact({ section, ctx }: SectionProps<"contact">) {
+/**
+ * Closing call for businesses that live on calls: the phone at poster size as the direction's call object,
+ * then address, hours and e-mail (when there is one) in a row. No map.
+ */
+function ContactCallOut({ section, ctx }: SectionProps<"contact">) {
+  const { props } = section;
+  const b = ctx.site.business;
+  const directions = ctx.href({ action: "directions" });
+  return (
+    <Section id={section.id} type={section.type} variant={section.variant} tone={section.tone}>
+      <div className="callout">
+        <SectionHead id={section.id} eyebrow={props.eyebrow} title={props.title} intro={props.intro} />
+        <p className="callout__call">
+          <CallObject ctx={ctx} size="poster" />
+        </p>
+        <dl className="callout__facts">
+          <div className="callout__fact">
+            <dt>{ctx.t("address")}</dt>
+            <dd>
+              <AddressText ctx={ctx} />
+              {directions && (
+                <a href={directions} className="text-link" rel="noopener" target="_blank">
+                  {ctx.t("directions")}
+                </a>
+              )}
+            </dd>
+          </div>
+          {b.hours !== undefined && (
+            <div className="callout__fact">
+              <dt>{ctx.t("openingHours")}</dt>
+              <dd>
+                <HoursList ctx={ctx} short />
+              </dd>
+            </div>
+          )}
+          {!isPlaceholder(b.email) && (
+            <div className="callout__fact">
+              <dt>{ctx.t("emailLabel")}</dt>
+              <dd>
+                <EmailLink ctx={ctx} className="text-link" />
+              </dd>
+            </div>
+          )}
+        </dl>
+      </div>
+    </Section>
+  );
+}
+
+export function Contact({ section, ctx, index }: SectionProps<"contact">) {
+  if (section.variant === "call-out") return <ContactCallOut section={section} ctx={ctx} index={index} />;
   const { props } = section;
   const b = ctx.site.business;
   const directions = ctx.href({ action: "directions" });

@@ -1,0 +1,483 @@
+/*
+ * Trade motifs (docs/design/templates M, S, J), keyed on <body data-motif>. Template directions draw these
+ * instead of icons and stock ornaments. Colours come only from the site's tokens; the repeating pieces
+ * (dividers, bullets, section marks) are SVG images that @sb/render tokens.ts builds from the same tokens.
+ * Round shapes here are drawn objects (seal, valves, stops, the plate's dot), never buttons.
+ */
+
+/* ---------- every motif ---------- */
+[data-motif] .section-head {
+  max-width: 60rem;
+}
+[data-motif] :where(h2) {
+  line-height: 1;
+}
+/* The footer stands on the dark ground, like the hero and the closing band. */
+[data-motif] .site-footer {
+  --c-surface: var(--c-inverse);
+  --c-text: var(--c-on-inverse);
+  --c-muted: var(--c-on-inverse);
+  --c-primary: var(--c-on-inverse);
+  --c-border: color-mix(in srgb, var(--c-on-inverse) 30%, transparent);
+}
+/* The phone bar on the dark ground; the call button in the band colour (pipes keeps its hot red). */
+[data-motif] .action-bar {
+  --c-bg: var(--c-inverse);
+  --c-text: var(--c-on-inverse);
+  --c-border: var(--c-inverse);
+}
+[data-motif="plate"] .action-bar,
+[data-motif="crust"] .action-bar {
+  --c-primary: var(--c-band);
+  --c-on-primary: var(--c-on-band);
+}
+/* The phone number at poster size, as a plain link (pipes and crust). */
+.bignum {
+  display: inline-block;
+  max-width: 100%;
+  padding-block: 0.08em;
+  font-family: var(--font-heading);
+  font-weight: var(--fw-heading);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+  text-decoration: none;
+  font-variant-numeric: tabular-nums;
+}
+.bignum:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 0.05em;
+}
+.bignum--hero {
+  font-size: clamp(2.25rem, 1.5rem + 3.4vw, 4rem);
+}
+.bignum--poster {
+  font-size: clamp(2.75rem, 0.5rem + 11vw, 10.5rem);
+}
+
+/* ---------- plate: Tablica (M), trades that live on the phone ---------- */
+.plate {
+  display: inline-flex;
+  align-items: stretch;
+  max-width: 100%;
+  overflow: hidden;
+  background: var(--plate-ground);
+  color: var(--plate-ink);
+  border: 0.045em solid var(--plate-ink);
+  border-radius: 0.14em;
+  font-family: var(--font-heading);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.plate--hero {
+  font-size: clamp(1.875rem, 0.6rem + 5.6vw, 5.5rem);
+}
+.plate--poster {
+  font-size: clamp(1.875rem, 0.2rem + 7.6vw, 7rem);
+}
+.plate__eu {
+  display: flex;
+  flex: none;
+  align-items: flex-end;
+  justify-content: center;
+  width: 0.6em;
+  padding-bottom: 0.1em;
+  background: var(--plate-eu);
+  color: var(--plate-ground);
+}
+.plate__eu span {
+  font-family: var(--font-body);
+  font-size: 0.17em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.plate__num,
+.plate .price-tag__value {
+  display: flex;
+  align-items: center;
+  gap: 0.2em;
+  padding: 0.16em 0.3em 0.14em 0.26em;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.plate__dot {
+  flex: none;
+  width: 0.1em;
+  height: 0.1em;
+  border-radius: 50%;
+  background: currentColor;
+}
+a.plate:hover .plate__num {
+  text-decoration: underline;
+  text-decoration-thickness: 0.05em;
+}
+.price-tag.plate {
+  font-size: clamp(1.625rem, 0.9rem + 2.6vw, 3.25rem);
+}
+[data-motif="plate"] .hsig__eyebrow,
+[data-motif="plate"] .hsig__fact-label {
+  color: var(--c-band);
+}
+[data-motif="plate"] .hsig__title {
+  line-height: 0.9;
+}
+[data-motif="plate"] .hsig__strip-item dd {
+  font-family: var(--font-heading);
+  font-weight: 800;
+}
+/* Services: square signal bullets on a heavy top rule. */
+[data-motif="plate"] .svc-list {
+  border-top: 4px solid currentColor;
+}
+[data-motif="plate"] .s-services-list--two-column .svc-list {
+  padding-top: 0.25rem;
+}
+[data-motif="plate"] .svc-list__name {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+[data-motif="plate"] .svc-list__name::before {
+  content: "";
+  flex: none;
+  width: 0.75em;
+  height: 0.75em;
+  background: var(--c-band);
+  border: 2px solid currentColor;
+}
+[data-motif="plate"] .svc-list__body {
+  padding-left: 1.6rem;
+}
+[data-motif="plate"] .callout__facts {
+  border-top-width: 4px;
+}
+
+/* ---------- pipes: Cevi (S), field trades without photos ---------- */
+[data-motif="pipes"] .site-header__brand::before {
+  content: "";
+  flex: none;
+  width: 2.125rem;
+  height: 0.875rem;
+  margin-right: 0.625rem;
+  background: var(--motif-brand) no-repeat left center / contain;
+}
+[data-motif="pipes"] .hsig__eyebrow {
+  color: var(--c-accent);
+}
+[data-motif="pipes"] .hsig__title {
+  letter-spacing: -0.05em;
+}
+[data-motif="pipes"] .tone-default .hsig__lead {
+  color: var(--c-muted);
+}
+.callblock {
+  display: inline-flex;
+  flex-direction: column;
+  max-width: 100%;
+  padding: 1rem 1.375rem 1.125rem;
+  border-radius: var(--radius);
+  background: var(--c-primary);
+  color: var(--c-on-primary);
+  text-decoration: none;
+}
+.callblock__label {
+  font-weight: 700;
+}
+.callblock__num {
+  margin-top: 0.25rem;
+  font-family: var(--font-heading);
+  font-weight: var(--fw-heading);
+  font-size: clamp(2.25rem, 1.3rem + 4.2vw, 4.25rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+}
+.callblock:hover .callblock__num {
+  text-decoration: underline;
+  text-decoration-thickness: 0.05em;
+}
+@media (max-width: 29.99rem) {
+  .callblock {
+    display: flex;
+    align-self: stretch;
+  }
+}
+.radiator__hot {
+  stroke: var(--c-primary);
+}
+.radiator__cold {
+  stroke: var(--c-band, var(--c-accent));
+}
+.radiator__bar {
+  fill: var(--c-text);
+}
+.radiator__fin {
+  fill: var(--c-surface);
+  stroke: var(--c-text);
+}
+.radiator__valve {
+  fill: var(--c-bg);
+  stroke: var(--c-text);
+}
+.radiator__line {
+  stroke: var(--c-text);
+}
+/* Services: T-joints as bullets, hot and cold, heading on the left on desktop. */
+[data-motif="pipes"] .svc-list {
+  border-top: 3px solid currentColor;
+}
+[data-motif="pipes"] .svc-list__name {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: clamp(1.375rem, 1rem + 1.5vw, 2.125rem);
+  line-height: 1.1;
+}
+[data-motif="pipes"] .svc-list__name::before {
+  content: "";
+  flex: none;
+  width: 2.75rem;
+  height: 2rem;
+  background: var(--motif-bullet) no-repeat center / contain;
+}
+[data-motif="pipes"] .svc-list__item:nth-child(even) .svc-list__name::before {
+  background-image: var(--motif-bullet-2);
+}
+[data-motif="pipes"] .svc-list__body {
+  padding-left: 3.75rem;
+}
+/* Steps on a hot pipe with valves. */
+[data-motif="pipes"] .steps__item,
+[data-motif="pipes"] .steps__item:last-child {
+  margin-left: 1.125rem;
+  padding: 0 0 2.25rem 2.25rem;
+  border-left: 0.75rem solid var(--c-primary);
+}
+[data-motif="pipes"] .steps__item:last-child {
+  padding-bottom: 0.5rem;
+}
+[data-motif="pipes"] .steps__item::before {
+  top: 0;
+  left: -1.625rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: var(--c-bg);
+  border: 0.5rem solid var(--c-text);
+}
+/* Service area: places as stops on a cold pipe. */
+[data-motif="pipes"] .area {
+  grid-template-columns: minmax(0, 1fr);
+}
+[data-motif="pipes"] .area__list {
+  position: relative;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+  border: 0;
+}
+[data-motif="pipes"] .area__list::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0.6875rem;
+  width: 0.75rem;
+  border-radius: 0.375rem;
+  background: var(--c-band, var(--c-accent));
+}
+[data-motif="pipes"] .area__list li {
+  position: relative;
+  min-height: 2.25rem;
+  padding: 0.2rem 0 0 3.5rem;
+  border: 0;
+  font-family: var(--font-heading);
+  font-weight: var(--fw-heading);
+  font-size: clamp(1.25rem, 0.9rem + 1.4vw, 1.875rem);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+[data-motif="pipes"] .area__list li::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2.125rem;
+  height: 2.125rem;
+  border-radius: 50%;
+  background: var(--c-bg);
+  border: 0.5rem solid var(--c-text);
+}
+@media (min-width: 64rem) {
+  [data-motif="pipes"] .s-services-list .container {
+    display: grid;
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    column-gap: 4.5rem;
+    align-items: start;
+  }
+  [data-motif="pipes"] .s-services-list--rows .svc-list__item {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "name price"
+      "body body";
+  }
+  [data-motif="pipes"] .s-steps--horizontal .steps__item,
+  [data-motif="pipes"] .s-steps--horizontal .steps__item:last-child {
+    margin: 0;
+    padding: 4rem 2rem 0 0;
+    border-left: 0;
+    border-top: 0.75rem solid var(--c-primary);
+  }
+  [data-motif="pipes"] .s-steps--horizontal .steps__item::before {
+    top: -1.625rem;
+    left: 0;
+  }
+  [data-motif="pipes"] .s-service-area--list .area__list {
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-template-columns: none;
+    gap: 1rem;
+  }
+  [data-motif="pipes"] .area__list::before {
+    top: 0.6875rem;
+    bottom: auto;
+    left: 0;
+    right: 0;
+    width: auto;
+    height: 0.75rem;
+  }
+  [data-motif="pipes"] .area__list li {
+    padding: 3.5rem 1rem 0 0;
+  }
+}
+
+/* ---------- dividers: a tyre tread (plate) or the two pipes (pipes) where the ground changes ---------- */
+[data-motif="plate"] main > .s,
+[data-motif="pipes"] main > .s {
+  position: relative;
+}
+[data-motif="plate"] .hsig__strip {
+  padding-top: var(--motif-divider-h);
+}
+[data-motif="plate"] main > .s:not(.tone-inverse) + .s.tone-inverse,
+[data-motif="plate"] main > .s:not(.tone-band) + .s.tone-band,
+[data-motif="pipes"] main > .s:not(.tone-inverse) + .s.tone-inverse {
+  padding-top: calc(var(--space-section) + var(--motif-divider-h));
+}
+[data-motif="pipes"] main > .s-hero-signature {
+  padding-bottom: var(--motif-divider-h);
+}
+[data-motif="plate"] .hsig__strip::before,
+[data-motif="plate"] main > .s:not(.tone-inverse) + .s.tone-inverse::before,
+[data-motif="plate"] main > .s:not(.tone-band) + .s.tone-band::before,
+[data-motif="pipes"] main > .s:not(.tone-inverse) + .s.tone-inverse::before,
+[data-motif="pipes"] main > .s-hero-signature::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--motif-divider-h);
+  background: var(--motif-divider) repeat-x left top / var(--motif-divider-w) var(--motif-divider-h);
+}
+[data-motif="pipes"] main > .s-hero-signature::after {
+  top: auto;
+  bottom: 0;
+}
+
+/* ---------- crust: Skorja (J), food makers ---------- */
+[data-motif="crust"] .section-head::before {
+  content: "";
+  display: block;
+  width: 4.625rem;
+  height: 2.5rem;
+  margin-bottom: 0.5rem;
+  background: var(--motif-mark) no-repeat left center / contain;
+}
+[data-motif="crust"] .tone-inverse .section-head::before {
+  background-image: var(--motif-mark-inverse);
+}
+[data-motif="crust"] .tone-band .section-head::before {
+  content: none;
+}
+[data-motif="crust"] .hsig__eyebrow {
+  color: var(--c-band);
+}
+[data-motif="crust"] .tone-inverse .btn--primary {
+  background: var(--c-band);
+  color: var(--c-on-band);
+}
+[data-motif="crust"] .tone-band .btn--primary {
+  background: var(--c-inverse);
+  color: var(--c-on-inverse);
+}
+/* Prices on a ruled board with dotted leaders, at heading size. */
+[data-motif="crust"] .prices:not(.prices--multi) {
+  max-width: 52rem;
+}
+[data-motif="crust"] .prices__dl {
+  border-top: 3px solid currentColor;
+}
+[data-motif="crust"] .prices__row {
+  gap: 0.875rem;
+  padding-block: 1.125rem;
+}
+[data-motif="crust"] .prices__row::after {
+  content: "";
+  order: 1;
+  flex: 1 1 1.5rem;
+  min-width: 1.5rem;
+  border-bottom: 2px dotted currentColor;
+  opacity: 0.4;
+  transform: translateY(-0.35em);
+}
+[data-motif="crust"] .prices__row dt,
+[data-motif="crust"] .prices__row dd {
+  font-family: var(--font-heading);
+  font-size: clamp(1.25rem, 1rem + 0.9vw, 1.875rem);
+  line-height: 1.15;
+}
+[data-motif="crust"] .prices__row dt {
+  order: 0;
+  font-weight: 800;
+}
+[data-motif="crust"] .prices__row dd {
+  order: 2;
+  font-weight: var(--fw-heading);
+}
+[data-motif="crust"] .prices__row .price {
+  font-weight: inherit;
+  white-space: nowrap;
+}
+[data-motif="crust"] .prices__note {
+  font-family: var(--font-body);
+  font-weight: 400;
+}
+/* The owner's own sentence as a pull quote. */
+[data-motif="crust"] .s-about--text-only .section-title {
+  max-width: 22ch;
+  font-size: clamp(1.75rem, 1rem + 3.2vw, 3.5rem);
+  line-height: 1.12;
+}
+
+/* ---------- layout fixes shared by the templates ---------- */
+/* The section after the pipes hero keeps its own top gap (the divider closes the hero). */
+[data-motif="pipes"] main > .s-hero-signature + .s {
+  padding-top: var(--space-section);
+}
+/* A heading beside a photo gets less room than a full-width one. */
+[data-motif] .image-text .section-title {
+  font-size: calc(var(--fs-h2) * 0.72);
+}
+/* Hours in the hero strip and the call-out: the time follows the days, not pushed to the far edge. */
+.hsig__strip .hours__row,
+.callout .hours__row {
+  justify-content: flex-start;
+  gap: 1.25rem;
+}
+.hsig__strip .hours__row dt,
+.callout .hours__row dt {
+  min-width: 5.5rem;
+}

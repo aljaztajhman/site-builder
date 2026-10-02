@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
   Chrome,
+  DIRECTIONS,
   SECTION_DEFS,
   SPEC_VERSION,
   PageRef,
@@ -145,6 +146,23 @@ export function uniqueSectionIds(pages: Page[]): Page[] {
   return out.map((page) => ({ ...page, sections: page.sections.map((s) => ({ ...s, props: relink(s.props) }) as typeof s) }));
 }
 
+/**
+ * Trade templates fix their header: its background (dark over a dark hero, unless there is a logo), and no header call button when
+ * the hero's object already is the phone number (one primary action per screen).
+ */
+export function templateChrome(design: Design, content: ContentOutput, hasLogo = false): SiteSpec["chrome"] {
+  const dir = DIRECTIONS.find((d) => d.id === design.direction);
+  if (!dir?.template) return content.chrome;
+  const home = content.pages.find((p) => p.kind === "home");
+  const hero = home?.sections[0];
+  const heroIsPhone = hero?.type === "hero-signature" && hero.props.fact === "phone";
+  const header = { ...content.chrome.header };
+  // A logo is drawn for a light ground (pekarna-kvas: dark lettering); with one the header stays as the model set it.
+  if (dir.layout.headerTone && !hasLogo) header.tone = dir.layout.headerTone;
+  if (heroIsPhone && header.cta === "call") header.cta = "none";
+  return { ...content.chrome, header };
+}
+
 export function assembleSpec(input: {
   slug: string;
   brief: Brief;
@@ -162,7 +180,7 @@ export function assembleSpec(input: {
     business: businessFromBrief(input.brief),
     design: input.design,
     assets: input.assets,
-    chrome: input.content.chrome,
+    chrome: templateChrome(input.design, input.content, input.assets.logo !== undefined),
     pages: [...uniqueSectionIds(modelPages), ...systemPages(input.brief.name)],
   };
 }

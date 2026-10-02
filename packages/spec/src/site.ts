@@ -4,7 +4,7 @@ import { Business } from "./business.ts";
 import { Design } from "./design.ts";
 import { Section } from "./sections/index.ts";
 
-export const SPEC_VERSION = 3 as const;
+export const SPEC_VERSION = 4 as const;
 
 export const PageKind = z.enum(["home", "standard", "privacy", "accessibility", "not-found"]);
 export type PageKind = z.infer<typeof PageKind>;
@@ -44,7 +44,7 @@ export type ImageAsset = z.infer<typeof ImageAsset>;
  * The only sections a generated image may appear in: atmosphere beside a headline or text. Never
  * galleries, team, services, products, rooms or about, where a picture reads as the business itself.
  */
-export const GENERATED_IMAGE_SECTIONS = ["hero-split", "hero-image", "image-text", "page-header"] as const;
+export const GENERATED_IMAGE_SECTIONS = ["hero-split", "hero-image", "hero-signature", "image-text", "page-header"] as const;
 
 export const LogoAsset = z.strictObject({
   src: z.string().max(300),

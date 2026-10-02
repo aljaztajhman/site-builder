@@ -1,4 +1,4 @@
-import { fontPair, type Design, type FontFace } from "@sb/spec";
+import { DIRECTIONS, fontPair, type Colors, type Design, type FontFace, type Motif } from "@sb/spec";
 
 const px = (n: number) => `${Math.round(n * 100) / 100}px`;
 const rem = (n: number) => `${Math.round((n / 16) * 1000) / 1000}rem`;
@@ -34,6 +34,7 @@ export function tokensCss(design: Design): string {
   const h2 = [Math.min(b * s ** 2, 30), b * s ** 3.5];
   const h3 = [b * s, b * s ** 1.5];
   const [spMob, spDesk, block] = SPACE[design.density];
+  const template = DIRECTIONS.find((d) => d.id === design.direction)?.template;
   const vars: Record<string, string> = {
     "--c-bg": c.background,
     "--c-surface": c.surface,
@@ -61,10 +62,61 @@ export function tokensCss(design: Design): string {
     "--space-block": rem(block),
     "--shadow": design.shadow === "subtle" ? "0 1px 2px rgb(0 0 0 / 0.06), 0 2px 8px rgb(0 0 0 / 0.05)" : "none",
   };
+  // Trade templates: band colours, display sizes and the motif's drawn pieces in the site's own colours.
+  if (template) {
+    vars["--c-band"] = c.band ?? c.primary;
+    vars["--c-on-band"] = c.onBand ?? c.onPrimary;
+    vars["--fs-display"] = fluid(template.display[0], template.display[1]);
+    vars["--fs-h2"] = fluid(template.h2[0], template.h2[1]);
+    Object.assign(vars, motifVars(template.motif, c));
+  } else if (c.band !== undefined) {
+    vars["--c-band"] = c.band;
+    vars["--c-on-band"] = c.onBand ?? c.onPrimary;
+  }
   const scheme = luminanceLight(c.background) ? "light" : "dark";
   return `:root{color-scheme:${scheme};${Object.entries(vars)
     .map(([k, v]) => `${k}:${v}`)
     .join(";")}}`;
+}
+
+const svgUrl = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+
+/**
+ * The motif's repeating pieces as SVG images coloured with the site's tokens, so the shared stylesheet
+ * draws them without a colour of its own (dividers between sections, list bullets, section marks).
+ */
+export function motifVars(motif: Motif, c: Colors): Record<string, string> {
+  const band = c.band ?? c.primary;
+  switch (motif) {
+    case "plate":
+      return {
+        // Tyre tread: dark chevrons on the band colour.
+        "--motif-divider": svgUrl(`<svg xmlns="http://www.w3.org/2000/svg" width="40" height="28"><rect width="40" height="28" fill="${band}"/><path d="M0 0h10l10 14 10-14h10v6L26 28H14L0 6z" fill="${c.inverse}"/></svg>`),
+        "--motif-divider-h": "28px",
+        "--motif-divider-w": "40px",
+        // A Slovenian plate's own colours (fixed by the plate, not by the brand): white, black, the EU blue.
+        "--plate-ground": "#ffffff",
+        "--plate-ink": "#111111",
+        "--plate-eu": "#0b3fa8",
+      };
+    case "pipes":
+      return {
+        // Hot and cold pipe side by side with a flange every 220 px.
+        "--motif-divider": svgUrl(`<svg xmlns="http://www.w3.org/2000/svg" width="220" height="44"><rect y="5" width="220" height="14" fill="${c.primary}"/><rect y="25" width="220" height="14" fill="${band}"/><rect x="96" width="12" height="44" rx="3" fill="${c.text}"/></svg>`),
+        "--motif-divider-h": "44px",
+        "--motif-divider-w": "220px",
+        // T-joints as list bullets, hot and cold.
+        "--motif-bullet": svgUrl(`<svg xmlns="http://www.w3.org/2000/svg" width="56" height="40" viewBox="0 0 56 40"><path d="M5 12h46M28 12v24" stroke="${c.primary}" stroke-width="10" stroke-linecap="round" fill="none"/></svg>`),
+        "--motif-bullet-2": svgUrl(`<svg xmlns="http://www.w3.org/2000/svg" width="56" height="40" viewBox="0 0 56 40"><path d="M5 12h46M28 12v24" stroke="${band}" stroke-width="10" stroke-linecap="round" fill="none"/></svg>`),
+        "--motif-brand": svgUrl(`<svg xmlns="http://www.w3.org/2000/svg" width="34" height="14"><circle cx="7" cy="7" r="6" fill="${c.primary}"/><circle cx="22" cy="7" r="6" fill="${band}"/></svg>`),
+      };
+    case "crust":
+      return {
+        // The loaf's three scoring cuts, above section headings.
+        "--motif-mark": svgUrl(`<svg xmlns="http://www.w3.org/2000/svg" width="74" height="40" viewBox="0 0 74 40"><path d="M6 6l14 28M30 6l14 28M54 6l14 28" stroke="${c.accent}" stroke-width="7" stroke-linecap="round" fill="none"/></svg>`),
+        "--motif-mark-inverse": svgUrl(`<svg xmlns="http://www.w3.org/2000/svg" width="74" height="40" viewBox="0 0 74 40"><path d="M6 6l14 28M30 6l14 28M54 6l14 28" stroke="${band}" stroke-width="7" stroke-linecap="round" fill="none"/></svg>`),
+      };
+  }
 }
 
 function luminanceLight(hex: string): boolean {

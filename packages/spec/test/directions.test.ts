@@ -34,7 +34,7 @@ const SCHEMA_LIMITS = {
   radius: [0, 12],
   baseFontSize: [16, 19],
   scale: [1.125, 1.414],
-  headingWeight: [400, 850],
+  headingWeight: [400, 900],
   headingTracking: [-0.04, 0.08],
 } as const;
 

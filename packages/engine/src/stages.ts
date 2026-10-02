@@ -7,6 +7,9 @@ import {
   GENERATED_IMAGE_SECTIONS,
   direction as directionById,
   enforceDesign,
+  templateFor,
+  type BusinessType,
+  type Direction,
   contrast,
   migrateSpec,
   toModelJsonSchema,
@@ -94,6 +97,22 @@ export function photoLine(photoCount: number, generatedCount: number): string {
   return `${has} ${photoCount + generatedCount ? "Prefer a direction whose heroes and imagery show pictures." : "No pictures: prefer a typography-led direction and heroes."}`;
 }
 
+/**
+ * The hand-made trade template for this business type (docs/design/templates), named to the design step as
+ * the first choice when the business fits it. Empty when the trade has none or the photos don't allow it.
+ */
+export function templateLine(businessType: BusinessType, photoCount: number): string {
+  const t = templateFor(businessType, photoCount);
+  if (!t) return "";
+  const draws = drawsInsteadOfPhotos(t) ? " It draws the trade instead of showing pictures; with it no generated pictures are made." : "";
+  return `Trade template: ${t.id} (${t.name}) is hand-made for this trade. Choose it whenever the business fits its description.${draws}`;
+}
+
+/** A direction whose heroes all draw the trade (template S): generated mood pictures would go unused. */
+export function drawsInsteadOfPhotos(dir: Direction): boolean {
+  return dir.layout.heroes.every((h) => h.endsWith(":drawing"));
+}
+
 export async function chooseDesign(
   client: ModelClient,
   input: { brief: Brief; swatches: Swatch[]; photoCount: number; generatedCount: number },
@@ -104,7 +123,7 @@ export async function chooseDesign(
     messages: [
       {
         role: "user",
-        content: `Business: ${input.brief.name} (${input.brief.businessType}), tone ${input.brief.tone}.\nSummary: ${input.brief.summary}\n${photoLine(input.photoCount, input.generatedCount)}\nBrand colours extracted in code (hex, share, source): ${
+        content: `Business: ${input.brief.name} (${input.brief.businessType}), tone ${input.brief.tone}.\nSummary: ${input.brief.summary}\n${photoLine(input.photoCount, input.generatedCount)}\n${templateLine(input.brief.businessType, input.photoCount)}\nBrand colours extracted in code (hex, share, source): ${
           input.swatches.length ? input.swatches.map((s) => `${s.hex} ${(s.weight * 100).toFixed(0)}% ${s.source}`).join(", ") : "none"
         }`,
       },
@@ -118,8 +137,9 @@ export async function chooseDesign(
 /** Builds full tokens from the direction's fallback palette and the chosen brand colours; code enforces ranges and contrast. */
 export function designFromChoice(choice: z.infer<typeof DesignChoice>): Design {
   const dir = directionById(choice.direction);
-  const colors = { ...dir.palette.fallback, primary: choice.primary, accent: choice.accent ?? choice.primary };
-  colors.onPrimary = contrast("#ffffff", colors.primary) >= contrast("#111111", colors.primary) ? "#ffffff" : "#111111";
+  // A trade template keeps its own palette (it comes from the trade: asphalt and signal yellow, hot and cold pipes, roast and wheat).
+  const colors = dir.template ? { ...dir.palette.fallback } : { ...dir.palette.fallback, primary: choice.primary, accent: choice.accent ?? choice.primary };
+  if (!dir.template) colors.onPrimary = contrast("#ffffff", colors.primary) >= contrast("#111111", colors.primary) ? "#ffffff" : "#111111";
   const draft: Design = {
     direction: dir.id,
     fontPair: choice.fontPair,
@@ -144,7 +164,7 @@ function clampToSchema(d: Design): Design {
     radius: c(d.radius, 0, 12),
     baseFontSize: c(d.baseFontSize, 16, 19),
     scale: c(d.scale, 1.125, 1.414),
-    headingWeight: c(d.headingWeight, 400, 850),
+    headingWeight: c(d.headingWeight, 400, 900),
     headingTracking: c(d.headingTracking, -0.04, 0.08),
   };
 }
@@ -237,9 +257,15 @@ function imageList(assets: SiteSpec["assets"], heroIds: string[]): string {
  * direction's own picture heroes. A typographic direction (no picture hero) keeps its type hero.
  */
 export function heroRule(heroImageIds: string[], directionHeroes: string[]): string {
-  const pictureHeroes = directionHeroes.filter((h) => h.startsWith("hero-split:") || h.startsWith("hero-image:"));
+  const pictureHeroes = directionHeroes.filter((h) => h.startsWith("hero-split:") || h.startsWith("hero-image:") || h === "hero-signature:photo" || h === "hero-signature:arch");
   if (!heroImageIds.length || !pictureHeroes.length) return "";
   return `Homepage hero: ${pictureHeroes.join(" or ")} with one of the hero-suitable pictures (${heroImageIds.join(", ")}), not hero-type. Put the other pictures in image-text or page-header with-image sections.`;
+}
+
+/** The template's homepage outline for the content step; empty for other directions. */
+export function templateOutline(dir: Direction): string {
+  if (!dir.template) return "";
+  return `Homepage outline of the ${dir.name} template, top to bottom. Follow it: these sections in this order, with these variants and tones, and no others on the homepage; leave a section out only when the facts it needs are missing. A closing contact section in the outline is allowed although the top already shows contact facts.\n${dir.template.homepage.map((s, i) => `${i + 1}. ${s}`).join("\n")}`;
 }
 
 export async function generateContent(client: ModelClient, input: ContentInput): Promise<ContentResult> {
@@ -253,7 +279,8 @@ export async function generateContent(client: ModelClient, input: ContentInput):
         `Build the ${input.scope === "home" ? "homepage only (other pages come later; nav may list only the homepage)" : "full site"} for this brief.`,
         `Brief (facts are verified; anything null is missing and must be a placeholder or left out):\n${JSON.stringify(input.brief)}`,
         `Pages to produce (page ids p_<slug or "home">):\n${pages.map((p) => `- ${p.kind} "${p.slug}" nav "${p.navLabel}": ${p.purpose}`).join("\n")}`,
-        `Design direction: ${dir.id}. Header ${dir.layout.header}, footer ${dir.layout.footer}. Preferred heroes: ${dir.layout.heroes.join(", ")}. Section rhythm: ${dir.layout.rhythm} (use the tone field: default/alt/inverse). Preferred variants: ${dir.layout.prefer.join(", ")}.`,
+        `Design direction: ${dir.id}. Header ${dir.layout.header}, footer ${dir.layout.footer}. Preferred heroes: ${dir.layout.heroes.join(", ")}. Section rhythm: ${dir.layout.rhythm} (use the tone field: default/alt/inverse/band; band is the direction's saturated colour). Preferred variants: ${dir.layout.prefer.join(", ")}.`,
+        templateOutline(dir),
         `Photos (use each at most twice; alt text is already written):\n${imageList(input.assets, input.heroImageIds)}`,
         heroRule(input.heroImageIds, dir.layout.heroes),
         `Business facts available to components: phone ${input.brief.facts.phone ? "yes" : "missing"}, address ${input.brief.facts.address ? "yes" : "missing"}, hours ${input.brief.facts.hours ? "yes" : "missing"}, booking URL ${input.brief.facts.bookingUrl ? "yes" : "no — never use the booking action"}.`,

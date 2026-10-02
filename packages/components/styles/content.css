@@ -116,13 +116,16 @@
   background: var(--c-primary);
   border-radius: calc(var(--radius) / 3);
 }
-.tone-inverse .steps__item {
+.tone-inverse .steps__item,
+.tone-band .steps__item {
   border-left-color: currentColor;
 }
-.tone-inverse .steps__item:last-child {
+.tone-inverse .steps__item:last-child,
+.tone-band .steps__item:last-child {
   border-left-color: transparent;
 }
-.tone-inverse .steps__item::before {
+.tone-inverse .steps__item::before,
+.tone-band .steps__item::before {
   background: currentColor;
 }
 .steps__title {
@@ -147,7 +150,8 @@
     border-left: 0;
     border-top: 2px solid var(--c-border);
   }
-  .tone-inverse.s-steps--horizontal .steps__item {
+  .tone-inverse.s-steps--horizontal .steps__item,
+  .tone-band.s-steps--horizontal .steps__item {
     border-top-color: currentColor;
   }
   .s-steps--horizontal .steps__item::before {

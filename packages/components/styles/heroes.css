@@ -258,3 +258,229 @@
     aspect-ratio: 5 / 2;
   }
 }
+
+/* ---------- hero-signature (trade templates M, S, J) ---------- */
+/* The strongest fact as an object; the motif's look lives in motifs.css. The section manages its own padding. */
+.s-hero-signature {
+  padding-block: 0;
+}
+main > .s-hero-signature:first-child {
+  padding-top: 0;
+}
+.hsig {
+  position: relative;
+}
+.hsig__text {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+}
+.hsig__title {
+  font-size: var(--fs-display, calc(var(--fs-h1) * 1.3));
+  line-height: 0.94;
+  max-width: 14ch;
+}
+.hsig__title--long {
+  font-size: calc(var(--fs-display, calc(var(--fs-h1) * 1.3)) * 0.8);
+  max-width: 18ch;
+}
+.hsig__lead {
+  max-width: 34rem;
+}
+.hsig__fact {
+  display: grid;
+  gap: 0.75rem;
+  justify-items: start;
+  margin-top: 1.75rem;
+}
+.hsig__fact-label {
+  font-weight: 700;
+}
+.hsig__note {
+  font-weight: 600;
+  max-width: 30rem;
+}
+.hsig__links {
+  margin-top: 0.75rem;
+}
+
+/* photo: the photo fills the hero under a flat overlay; text sits on the overlay. */
+.hsig--photo {
+  background: var(--c-inverse);
+  color: var(--c-on-inverse);
+  overflow: hidden;
+}
+.hsig .hsig__bg {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  border-radius: 0;
+}
+.hsig .hsig__bg::before {
+  content: none;
+}
+.hsig__shade {
+  position: absolute;
+  inset: 0;
+  background: var(--c-inverse);
+  opacity: 0.72;
+}
+.hsig__body {
+  position: relative;
+  z-index: 1;
+  padding-block: 2.5rem 3.5rem;
+}
+.hsig__strip {
+  position: relative;
+  z-index: 1;
+}
+.hsig__strip-list {
+  display: grid;
+  gap: 1.25rem;
+  padding-block: 1.5rem 1.75rem;
+}
+.hsig__strip-item dt {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+.hsig__strip-item dd {
+  display: grid;
+  justify-items: start;
+  max-width: none;
+  font-weight: 600;
+  font-size: var(--fs-lg);
+  line-height: 1.3;
+}
+.hsig__strip .hours__row {
+  border-color: currentColor;
+}
+@media (min-width: 48rem) {
+  .hsig__strip-list {
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 1.25rem 3rem;
+  }
+}
+@media (min-width: 64rem) {
+  .hsig__body {
+    padding-block: 4.5rem 6rem;
+  }
+  .hsig__strip-list {
+    padding-block: 2.25rem 2.5rem;
+  }
+}
+
+/* drawing: type on the left, the trade drawn on the right. */
+.hsig--drawing {
+  display: grid;
+  gap: 2.5rem;
+  align-items: center;
+  padding-block: 1.5rem 3rem;
+}
+.hsig__drawing {
+  width: min(100%, 24rem);
+  justify-self: center;
+  overflow: visible;
+}
+@media (min-width: 64rem) {
+  .hsig--drawing {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: 3rem;
+    padding-block: 2.5rem 4.5rem;
+  }
+  .hsig__drawing {
+    width: 100%;
+    max-width: 34rem;
+    justify-self: end;
+  }
+}
+
+/* arch: the photo in a tall arch on the right, standing on the hero's bottom edge, the seal over it. */
+.hsig--arch {
+  display: grid;
+  gap: 2.5rem;
+  padding-top: 1.5rem;
+}
+.hsig--arch:not(.hsig--has-image) {
+  padding-bottom: 3rem;
+}
+.hsig--arch .hsig__title {
+  max-width: none;
+}
+.hsig__arch {
+  position: relative;
+  width: 78%;
+  justify-self: end;
+}
+.hsig__arch > .hsig__arch-media {
+  display: block;
+  aspect-ratio: 5 / 6;
+  margin: 0;
+  border-radius: 100vw 100vw 0 0;
+}
+.hsig__arch > .hsig__arch-media::before {
+  content: none;
+}
+.hsig__arch .hsig__seal {
+  position: absolute;
+  left: -3.75rem;
+  bottom: 2rem;
+}
+@media (min-width: 64rem) {
+  .hsig--arch {
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    gap: 3.5rem;
+    align-items: end;
+    padding-top: 2.5rem;
+  }
+  .hsig--arch .hsig__text {
+    padding-bottom: 6rem;
+  }
+  .hsig__arch {
+    width: 100%;
+  }
+  .hsig__arch .hsig__seal {
+    left: -4.5rem;
+    bottom: 4.5rem;
+  }
+}
+
+/* The seal: the earliest opening time on a round, slightly turned stamp in the band colour. */
+.seal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 9rem;
+  height: 9rem;
+  padding: 1rem;
+  border-radius: 50%;
+  background: var(--c-band, var(--c-primary));
+  color: var(--c-on-band, var(--c-on-primary));
+  transform: rotate(-9deg);
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+.seal__days {
+  font-size: 0.875rem;
+}
+.seal__time {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-heading);
+  font-size: 2.75rem;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+@media (min-width: 64rem) {
+  .seal {
+    width: 12rem;
+    height: 12rem;
+  }
+  .seal__days {
+    font-size: 1rem;
+  }
+  .seal__time {
+    font-size: 4rem;
+  }
+}

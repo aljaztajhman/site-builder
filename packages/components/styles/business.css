@@ -8,6 +8,9 @@
 .tone-inverse {
   --b-rule: color-mix(in srgb, var(--c-on-inverse) 40%, transparent);
 }
+.tone-band {
+  --b-rule: color-mix(in srgb, var(--c-on-band, var(--c-on-primary)) 40%, transparent);
+}
 
 /* List items in these layouts are grid cells, not text measures. */
 :where(.svc-list, .svc-cards, .menu__dishes, .team, .gallery, .products, .rooms, .area__list) > li {
@@ -1104,5 +1107,93 @@
   .s-contact-form--split .cform {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
     align-items: start;
+  }
+}
+
+/* ---------- price-list tags: every price as a large object, the name under it ---------- */
+.price-tags__group + .price-tags__group {
+  margin-top: var(--space-block);
+}
+.price-tags {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.75rem 1rem;
+}
+.price-tags__item {
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: 0.5rem;
+  max-width: none;
+}
+.price-tag {
+  display: inline-flex;
+  max-width: 100%;
+  font-family: var(--font-heading);
+  font-weight: var(--fw-heading);
+  font-size: clamp(1.75rem, 1.2rem + 2.4vw, 3.25rem);
+  line-height: 1;
+}
+.price-tag .price {
+  font-weight: inherit;
+}
+.price-tags__name {
+  font-size: var(--fs-lg);
+  line-height: 1.25;
+}
+.price-tags__note {
+  font-size: var(--fs-base);
+}
+.tone-inverse .price-tags__note {
+  color: var(--c-on-inverse);
+}
+@media (min-width: 64rem) {
+  .price-tags {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 2rem 1.75rem;
+  }
+}
+
+/* ---------- contact call-out: the phone at poster size, then the facts in a row ---------- */
+.callout {
+  display: grid;
+  gap: 1.5rem;
+}
+.callout .section-head {
+  margin-bottom: 0;
+}
+.callout__call {
+  max-width: none;
+}
+.callout__facts {
+  display: grid;
+  gap: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 3px solid currentColor;
+}
+.callout__fact {
+  display: grid;
+  gap: 0.35rem;
+  align-content: start;
+}
+.callout__fact dt {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+.callout__fact dd {
+  display: grid;
+  justify-items: start;
+  max-width: none;
+  font-size: var(--fs-lg);
+  line-height: 1.35;
+}
+.callout .hours {
+  width: 100%;
+  max-width: 22rem;
+}
+@media (min-width: 48rem) {
+  .callout__facts {
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 2.5rem;
   }
 }

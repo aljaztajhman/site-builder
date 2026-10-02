@@ -83,7 +83,11 @@ export const Price = orPlaceholder(
 );
 export type Price = z.infer<typeof Price>;
 
-export const Tone = z.enum(["default", "alt", "inverse"]);
+/**
+ * Section background: the page colour, the alternate surface, the dark inverse colour, or the
+ * direction's saturated band colour (design.colors.band, falling back to primary when a site has none).
+ */
+export const Tone = z.enum(["default", "alt", "inverse", "band"]);
 export type Tone = z.infer<typeof Tone>;
 
 export const HexColor = z.string().regex(/^#[0-9a-f]{6}$/);

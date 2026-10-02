@@ -11,6 +11,9 @@ export const MIGRATIONS: Record<number, (spec: RawSpec) => RawSpec> = {
   1: (spec) => spec,
   // 2 → 3: optional `origin` on images ("generated" for AI images). Additive: every v2 spec is a valid v3 spec.
   2: (spec) => spec,
+  // 3 → 4: trade templates. Additive: the "band" tone, optional colours band/onBand, heading weight up to 900,
+  // the hero-signature section, price-list "tags" and contact "call-out". Every v3 spec is a valid v4 spec.
+  3: (spec) => spec,
 };
 
 export function migrateSpec(input: unknown, migrations = MIGRATIONS, target: number = SPEC_VERSION): SiteSpec {

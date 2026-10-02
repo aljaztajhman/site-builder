@@ -85,6 +85,8 @@ const sl = {
   formPrivacy: "Podatke uporabimo samo za odgovor na vaše sporočilo.",
   formHoneypot: "Tega polja ne izpolnjujte",
   formBack: "Nazaj na stran",
+  openFrom: "odprto od",
+  everyDay: "Vsak dan",
 } as const;
 
 export type UiKey = keyof typeof sl;
@@ -172,6 +174,8 @@ const en: Record<UiKey, string> = {
   formPrivacy: "We use your details only to reply to your message.",
   formHoneypot: "Leave this field empty",
   formBack: "Back to the page",
+  openFrom: "open from",
+  everyDay: "Every day",
 };
 
 const DICTS: Partial<Record<Locale, Record<UiKey, string>>> = { sl, en };

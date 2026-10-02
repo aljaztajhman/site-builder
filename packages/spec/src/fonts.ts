@@ -57,6 +57,10 @@ export const FONT_PAIRS: FontPair[] = [
   { id: "bricolage-figtree", label: "Bricolage Grotesque / Figtree", heading: FONTS.bricolage, body: FONTS.figtree },
   { id: "space-grotesk-plex", label: "Space Grotesk / IBM Plex Sans", heading: FONTS.spaceGrotesk, body: FONTS.ibmPlexSans },
   { id: "lora-dm-sans", label: "Lora / DM Sans", heading: FONTS.lora, body: FONTS.dmSans },
+  // Trade templates (docs/design/templates): M Tablica, S Cevi, J Skorja.
+  { id: "archivo-public-sans", label: "Archivo / Public Sans", heading: FONTS.archivo, body: FONTS.publicSans },
+  { id: "space-grotesk-public-sans", label: "Space Grotesk / Public Sans", heading: FONTS.spaceGrotesk, body: FONTS.publicSans },
+  { id: "bitter-karla", label: "Bitter / Karla", heading: FONTS.bitter, body: FONTS.karla },
 ];
 
 export function fontPair(id: string): FontPair {

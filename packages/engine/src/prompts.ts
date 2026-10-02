@@ -47,7 +47,10 @@ export function directionsCatalogue(): string {
       `Best for: ${d.bestFor.join(", ")}. Font pairs: ${d.fontPairs.join(", ")}. Page background: ${d.palette.background}. Imagery: ${d.imagery}.`,
       `Ranges: radius ${d.ranges.radius.join("–")}, base font ${d.ranges.baseFontSize.join("–")}px, scale ${d.ranges.scale.join("–")}, heading weight ${d.ranges.headingWeight.join("–")}, tracking ${d.ranges.headingTracking.join("–")}em, heading case ${d.ranges.headingCase.join("/")}, density ${d.ranges.density.join("/")}, shadow ${d.ranges.shadow.join("/")}.`,
       `Layout: header ${d.layout.header}, footer ${d.layout.footer}, heroes ${d.layout.heroes.join(", ")}, rhythm ${d.layout.rhythm}, prefers ${d.layout.prefer.join(", ")}.`,
-    ].join("\n"),
+      d.template ? `Hand-made trade template ${d.template.id}: first choice for ${d.template.firstFor.join(", ")}${d.template.minPhotos ? ` with at least ${d.template.minPhotos} photo` : ", with or without photos"}. Its own palette and type are fixed; primary and accent are ignored.` : "",
+    ]
+      .filter(Boolean)
+      .join("\n"),
   ).join("\n\n")}`;
 }
 
@@ -66,7 +69,8 @@ Brief rules:
 - imageIdeas: exactly as many as "Generated pictures allowed" in the message (0: an empty list). Atmosphere pictures we can generate for this business: materials, tools, ingredients or products the client names, or the landscape around their town. Never people's faces, staff or customers; never the client's own premises, shop front, rooms, signs or any text; never results of the client's work (haircuts, repairs, dishes they cook, finished jobs) — a generated picture must not pass for the business itself. subject: one concrete scene in English; alt: the same in Slovene.`;
 
 export const DESIGN_SYSTEM = `You are the art director for small-business websites. Pick one curated design direction and fill its tokens inside the direction's ranges. Colours: choose primary (and optionally accent) from the brand colours extracted from the logo and photos when they are usable; otherwise from the direction. Code enforces contrast and ranges afterwards, so pick what looks right, not what merely passes.
-Avoid: cream or off-white page backgrounds, pill shapes, gradients, glassmorphism, heavy shadows, italic accent words, monospace labels.`;
+Avoid: cream or off-white page backgrounds, pill shapes, gradients, glassmorphism, heavy shadows, italic accent words, monospace labels.
+Trade templates (tablica, cevi, skorja) are hand-made for their trades and look far more specific than the general directions: when the message names one and the business fits its description, choose it.`;
 
 export const ALT_SYSTEM = `You write alt text in Slovene for photos on a small-business website. Describe what matters for a visitor who can't see the image, in one sentence of at most 150 characters, without "slika" or "fotografija" at the start. If a photo is a placeholder with a caption, describe the captioned subject. Also give the focal point (x, y from 0 to 1) and whether the photo works as a large hero image.`;
 
@@ -79,7 +83,8 @@ ${RULES}
 Mobile checklist: click-to-call and directions reachable in one tap; body text ≥ 16 px; no horizontal scroll at 360 px; primary tap targets ≥ 44×44 px and ≥ 8 px apart; LCP image preloaded; opening hours and contact visible on the homepage without hunting.
 Only propose patches that change the spec (copy, section order, variants, tones, sections). Don't patch /business facts or /design colours unless a banned pattern requires it. Return an empty patch list when the site is fine.
 Facts: code has already checked every number, year, price, name and contact detail on the site against the client's own text, which you get below. Never remove or reword a fact because you think it might be invented; read the client's text instead.
-Fixed elements (the phone's call/directions bar, the desktop cookie box) are hidden in the full-page screenshots. Don't report them as covering content.`;
+Fixed elements (the phone's call/directions bar, the desktop cookie box) are hidden in the full-page screenshots. Don't report them as covering content.
+Trade templates (design directions tablica, cevi, skorja) are hand-made designs: their hero-signature section, the order of sections, band and inverse tones, very large headlines and phone numbers, and the drawn motif (number plates, pipes, scoring cuts) are intended. Keep them; fix only real problems.`;
 
 export const EDIT_SYSTEM = `You apply a client's chat request to their website by returning RFC 6902 JSON Patch operations against the site spec, plus a one-sentence reply in the client's language.
 ${RULES}

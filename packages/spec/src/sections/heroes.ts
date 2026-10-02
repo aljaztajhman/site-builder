@@ -86,6 +86,30 @@ export const pageHeader = defineSection(
   }),
 );
 
+export const heroSignature = defineSection(
+  {
+    type: "hero-signature",
+    group: "heroes",
+    variants: ["photo", "drawing", "arch"],
+    description:
+      "Homepage hero built around the business's strongest fact, shown as a designed object drawn by the direction's motif: the phone number (as a registration plate, a red call block) or the earliest opening time (on a round seal). The fact itself comes from the business facts, never from props. Display-size headline. photo: one wide photo full-bleed under a flat dark overlay, text on it (a flat dark ground without a photo). drawing: no photo; type beside a drawing of the trade (a radiator and pipes). arch: dark ground, the photo in a tall oven arch on the right running into the bottom edge, with the seal over it. Use only when the design direction lists it.",
+    images: "optional",
+    mobile: "One column: label, headline, intro, then the fact object at full width (a tap target at least 48 px tall); the arch photo follows the text, the drawing sits below it at a smaller size.",
+    a11y: "Headline is the page h1. The phone object is one tel: link with an accessible name (\"Pokličite 041 555 730\"). Drawings and the plate's decorations are aria-hidden. Text on the photo sits on a flat overlay of at least 70 %.",
+  },
+  z.strictObject({
+    eyebrow: text(40).optional().describe(EYEBROW_RULE),
+    headline: text(60).describe(`${HEADLINE_RULE} Short: two to six words; it is set very large.`),
+    intro: text(220),
+    fact: z.enum(["phone", "opening"]).describe('Which business fact becomes the hero object: "phone" (the number, the main action) or "opening" (the earliest opening time on a seal; only when the business has hours).'),
+    factLabel: text(48).describe('Short line that introduces the fact, from the client\'s wording, e.g. "Najhitreje nas dobite po telefonu", "Pokličite za ogled". No numbers, times or days: the object shows them.'),
+    factNote: text(120).optional().describe('One short sentence under the object, only from the client\'s words, e.g. "Če ne dvignem, vas pokličem nazaj isti dan."'),
+    primary: Link.optional().describe("Optional. With fact phone the object already is the call action: add at most one link and never another call."),
+    secondary: Link.optional(),
+    image: ImageRef.optional().describe("photo and arch: the photo. drawing: leave out."),
+  }),
+);
+
 /** Add new hero section definitions here and to the tuple below. */
-export const heroSchemas = [heroSplit.schema, heroImage.schema, heroType.schema, pageHeader.schema] as const;
-export const heroDefs = [heroSplit, heroImage, heroType, pageHeader];
+export const heroSchemas = [heroSplit.schema, heroImage.schema, heroType.schema, pageHeader.schema, heroSignature.schema] as const;
+export const heroDefs = [heroSplit, heroImage, heroType, pageHeader, heroSignature];

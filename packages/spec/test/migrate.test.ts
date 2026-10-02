@@ -44,10 +44,39 @@ describe("migration 2 → 3 (image origin)", () => {
     const { readFileSync } = await import("node:fs");
     const { validateSite } = await import("../src/index.ts");
     const golden = JSON.parse(readFileSync(new URL("../../../tools/eval/golden/pekarna-kvas.json", import.meta.url), "utf8")) as { assets: { images: { origin?: string }[] } };
-    const v3 = migrateSpec({ ...golden, specVersion: 2 });
+    const v3 = migrateSpec({ ...golden, specVersion: 2 }, MIGRATIONS, 3);
     expect(v3).toEqual({ ...golden, specVersion: 3 });
-    expect(validateSite(v3).ok).toBe(true);
+    expect(validateSite(migrateSpec(v3)).ok).toBe(true);
     expect(v3.assets.images.every((i) => i.origin === undefined)).toBe(true);
+  });
+});
+
+describe("migration 3 → 4 (trade templates)", () => {
+  it("turns a stored v3 site into a valid v4 site unchanged apart from the version", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { validateSite } = await import("../src/index.ts");
+    const golden = JSON.parse(readFileSync(new URL("../../../tools/eval/golden/avtoservis-mrak.json", import.meta.url), "utf8")) as Record<string, unknown>;
+    const v4 = migrateSpec({ ...golden, specVersion: 3 });
+    expect(v4).toEqual({ ...golden, specVersion: 4 });
+    expect(validateSite(v4).ok).toBe(true);
+  });
+
+  it("accepts what v4 adds: the band tone, band colours, hero-signature, price tags and the call-out", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { validateSite, direction } = await import("../src/index.ts");
+    const golden = JSON.parse(readFileSync(new URL("../../../tools/eval/golden/avtoservis-mrak.json", import.meta.url), "utf8")) as import("../src/index.ts").SiteSpec;
+    const t = direction("tablica");
+    const spec = structuredClone(golden);
+    spec.design = { ...spec.design, direction: t.id, fontPair: t.fontPairs[0]!, colors: { ...t.palette.fallback }, radius: 6, baseFontSize: 18, scale: 1.25, headingWeight: 900, headingCase: "uppercase", headingTracking: -0.02, density: "regular", shadow: "none", imagery: t.imagery };
+    spec.pages[0]!.sections = [
+      { id: "s_hero", type: "hero-signature", variant: "photo", tone: "inverse", props: { headline: "Servis vseh znamk v Kranju", intro: "Družinski servis od leta 2008.", fact: "phone", factLabel: "Najhitreje nas dobite po telefonu", image: "img_01" } },
+      { id: "s_cene", type: "price-list", variant: "tags", tone: "inverse", props: { title: "Nekaj cen", groups: [{ items: [{ name: "Diagnostika", price: { amount: 30 } }] }] } },
+      { id: "s_klic", type: "contact", variant: "call-out", tone: "band", props: { title: "Pokličite" } },
+    ];
+    const r = validateSite(spec);
+    expect(r.issues).toEqual([]);
+    // As a v3 spec, the same content is rejected: v4 is what makes it valid.
+    expect(validateSite({ ...spec, specVersion: 3 }).ok).toBe(false);
   });
 });
 
