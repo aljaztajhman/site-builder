@@ -50,8 +50,13 @@ export const newToken = (): string => randomBytes(32).toString("base64url");
 const mac = (secret: string, value: string): string => createHmac("sha256", secret).update(value).digest("base64url");
 const same = (a: string, b: string): boolean => a.length === b.length && timingSafeEqual(Buffer.from(a), Buffer.from(b));
 
-/** The rightmost X-Forwarded-For entry is the one our proxy added; the left ones are client-controlled. */
-export const clientIp = (c: Context): string => c.req.header("x-forwarded-for")?.split(",").at(-1)?.trim() || "local";
+/**
+ * The visitor's IP. Railway's edge sets X-Real-IP to the visitor and rewrites X-Forwarded-For to
+ * "visitor, edge" (both overwrite whatever the client sent; checked live 2026-10-02 with /health?ip=1).
+ * The rightmost X-Forwarded-For entry is Railway's edge, so it is only a fallback for local runs without X-Real-IP.
+ */
+export const clientIp = (c: Context): string =>
+  c.req.header("x-real-ip")?.trim() || c.req.header("x-forwarded-for")?.split(",").at(-1)?.trim() || "local";
 /** A keyed hash of the client's IP for rate limits; the IP itself is never stored (cleared after a day). */
 export const ipKey = (secret: string, ip: string): string => createHmac("sha256", secret).update(`ip:${ip}`).digest("hex").slice(0, 32);
 

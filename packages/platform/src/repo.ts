@@ -139,8 +139,13 @@ export interface FormMessageRow {
   email: string;
   phone: string | null;
   message: string;
+  /** The owner's email about it (migration 11). */
+  notify_status: FormNotifyStatus;
   created_at: string;
 }
+
+/** 'none': nobody to email; 'pending': being sent or waiting for a retry; 'sent'; 'failed': attempts used up. */
+export type FormNotifyStatus = "none" | "pending" | "sent" | "failed";
 
 export class Repo {
   /** Accounts, allow-list, magic-link tokens and sessions. */
@@ -420,10 +425,11 @@ export class Repo {
 
   // ---------- Contact form messages ----------
 
-  async addFormMessage(m: { siteId: string; sectionId: string; name: string; email: string; phone: string | null; message: string; senderKey: string }): Promise<string> {
+  /** `notify`: the owner gets an email about it (stored as 'pending' until it is sent); otherwise 'none'. */
+  async addFormMessage(m: { siteId: string; sectionId: string; name: string; email: string; phone: string | null; message: string; senderKey: string; notify?: boolean }): Promise<string> {
     const { rows } = await this.db.query<{ id: string }>(
-      "insert into form_messages (site_id, section_id, name, email, phone, message, sender_key) values ($1, $2, $3, $4, $5, $6, $7) returning id",
-      [m.siteId, m.sectionId, m.name, m.email, m.phone, m.message, m.senderKey],
+      "insert into form_messages (site_id, section_id, name, email, phone, message, sender_key, notify_status) values ($1, $2, $3, $4, $5, $6, $7, $8) returning id",
+      [m.siteId, m.sectionId, m.name, m.email, m.phone, m.message, m.senderKey, m.notify ? "pending" : "none"],
     );
     // The sender key only serves the rate limits (10 minutes, 1 day); the privacy policy promises it's gone after a day.
     await this.db.query("update form_messages set sender_key = '' where sender_key <> '' and created_at < now() - interval '1 day'");
@@ -439,12 +445,70 @@ export class Repo {
     return Number(rows[0]?.n ?? 0);
   }
 
+  /** Messages one sender (keyed IP hash) sent to any site in the last `minutes` (the cross-site limit). */
+  async countFormMessagesFromSender(senderKey: string, minutes: number): Promise<number> {
+    const { rows } = await this.db.query<{ n: string | number }>(
+      "select count(*) as n from form_messages where sender_key = $1 and created_at > now() - make_interval(mins => $2::integer)",
+      [senderKey, minutes],
+    );
+    return Number(rows[0]?.n ?? 0);
+  }
+
   async listFormMessages(siteId: string): Promise<FormMessageRow[]> {
     const { rows } = await this.db.query<FormMessageRow>(
-      "select id, section_id, name, email, phone, message, created_at from form_messages where site_id = $1 order by id desc limit 500",
+      "select id, section_id, name, email, phone, message, notify_status, created_at from form_messages where site_id = $1 order by id desc limit 500",
       [siteId],
     );
     return rows.map((r) => ({ ...r, id: String(r.id) }));
+  }
+
+  /** The address that gets a site's contact-form emails: its owner account's, or null (admin-made, unclaimed). */
+  async siteOwnerEmail(siteId: string): Promise<string | null> {
+    const { rows } = await this.db.query<{ email: string }>("select a.email from sites s join accounts a on a.id = s.account_id where s.id = $1", [siteId]);
+    return rows[0]?.email ?? null;
+  }
+
+  /**
+   * Takes a pending notification for one send attempt: counts the attempt and stamps it. `attempts` is the
+   * count the caller saw, so of two processes (two web replicas, the submit and the retry pass) only one
+   * gets it. Null when someone else took it, it was sent, or it never needed sending.
+   */
+  async claimFormNotification(id: string, attempts: number): Promise<(FormMessageRow & { site_id: string; notify_attempts: number }) | null> {
+    const { rows } = await this.db.query<FormMessageRow & { site_id: string; notify_attempts: number }>(
+      `update form_messages set notify_attempts = notify_attempts + 1, notify_at = now()
+        where id = $1 and notify_status = 'pending' and notify_attempts = $2
+        returning id, site_id, section_id, name, email, phone, message, notify_status, notify_attempts, created_at`,
+      [id, attempts],
+    );
+    const r = rows[0];
+    return r ? { ...r, id: String(r.id), notify_attempts: Number(r.notify_attempts) } : null;
+  }
+
+  async setFormNotification(id: string, status: FormNotifyStatus): Promise<void> {
+    await this.db.query("update form_messages set notify_status = $2 where id = $1", [id, status]);
+  }
+
+  /**
+   * Notifications due for another attempt: pending, under `maxAttempts`, the last attempt at least
+   * `retryAfterMinutes` ago, received within `withinHours`. Older pending ones are given up ('failed'):
+   * the message stays in the owner's list either way.
+   */
+  async dueFormNotifications(o: { maxAttempts: number; retryAfterMinutes: number; withinHours: number; limit: number }): Promise<{ id: string; attempts: number }[]> {
+    await this.db.query(
+      `update form_messages set notify_status = 'failed'
+        where notify_status = 'pending' and (created_at < now() - make_interval(hours => $1::integer) or notify_attempts >= $2)
+          and (notify_at is null or notify_at < now() - make_interval(mins => $3::integer))`,
+      [o.withinHours, o.maxAttempts, o.retryAfterMinutes],
+    );
+    const { rows } = await this.db.query<{ id: string; notify_attempts: number }>(
+      `select id, notify_attempts from form_messages
+        where notify_status = 'pending' and notify_attempts < $1
+          and created_at > now() - make_interval(hours => $2::integer)
+          and (notify_at is null or notify_at < now() - make_interval(mins => $3::integer))
+        order by id limit $4`,
+      [o.maxAttempts, o.withinHours, o.retryAfterMinutes, o.limit],
+    );
+    return rows.map((r) => ({ id: String(r.id), attempts: Number(r.notify_attempts) }));
   }
 
   async deleteFormMessage(siteId: string, id: string): Promise<boolean> {
