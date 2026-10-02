@@ -23,9 +23,12 @@ export interface LimitDeps {
 }
 
 export interface JobAsk {
-  kind: "generate" | "edit";
+  /** "alt": photo descriptions for photos the owner added in the editor (the photos themselves are never limited). */
+  kind: "generate" | "edit" | "alt";
   scope: "home" | "full";
   siteId?: string | null;
+  /** Photos an "alt" job describes. */
+  photos?: number;
 }
 
 // ---------- Slovene counts ----------
@@ -79,8 +82,43 @@ function poolRefusal(pool: Pool, signIn: string | undefined): Refusal {
 }
 
 /** The estimated € a job may cost (config). */
-export const estimateOf = (config: AppConfig, ask: Pick<JobAsk, "kind" | "scope">): number =>
-  ask.kind === "edit" ? config.tiers.estimatesEur.chatEdit : ask.scope === "full" ? config.tiers.estimatesEur.fullSite : config.tiers.estimatesEur.homepage;
+export const estimateOf = (config: AppConfig, ask: Pick<JobAsk, "kind" | "scope" | "photos">): number =>
+  ask.kind === "alt"
+    ? config.tiers.estimatesEur.altTextPerPhoto * Math.max(1, ask.photos ?? 1)
+    : ask.kind === "edit"
+      ? config.tiers.estimatesEur.chatEdit
+      : ask.scope === "full"
+        ? config.tiers.estimatesEur.fullSite
+        : config.tiers.estimatesEur.homepage;
+
+/** Photo descriptions refused: the photo stays (adding photos is direct editing); the owner writes the description. */
+const altRefusal = (code: string, reason: string): Refusal =>
+  msg(429, code, `Fotografija je dodana, opisa pa ne napišemo samodejno: ${reason} Opis napišite sami pri fotografiji; brez njega strani ni mogoče objaviti.`);
+
+/** Why photo descriptions can't be written by the model now, or null. Reads only through `u` (inside the quota lock). */
+async function altRefusalFor(u: UsageQueries, config: AppConfig, who: Who, ask: JobAsk): Promise<Refusal | null> {
+  const t = config.tiers;
+  const cap = config.limits.dailyModelSpendCapEur;
+  const estimate = estimateOf(config, ask);
+  const photos = Math.max(1, ask.photos ?? 1);
+  const v = who.viewer;
+  if ((await u.spentToday()) >= cap) return altRefusal("spend_cap", "današnja omejitev porabe pomočnika je dosežena.");
+  if (who.tier === "anonymous") return msg(401, "sign_in_required", "Za fotografije se prijavite z e-pošto. Predogled ostane vaš.", who.signIn);
+  if (v.kind === "account" && (who.tier === "free" || who.tier === "paid")) {
+    // Per account, whatever its tier was when the photos were described.
+    const used = await u.countJobs({ kind: "alt", tiers: ["free", "paid"], accountId: v.account.id, sinceHours: 24, units: true });
+    if (used + photos > t.altText.photosPerDay[who.tier]) return altRefusal("alt_limit", "danes ste porabili vse samodejne opise fotografij.");
+  }
+  if (who.tier === "paid" && v.kind === "account" && v.paidSince) {
+    const a = monthlyAllowance(config, new Date(v.paidSince), who.now);
+    const s = await u.accountSpend(v.account.id, a.start);
+    if (s.spent + s.held + estimate > a.eur + 1e-9) return altRefusal("allowance_used", "pomočnik je ta mesec porabil vse, kar vključuje naročnina.");
+  }
+  const pool = poolOf(who.tier);
+  const p = await u.pool(pool);
+  if (p.spent + p.held + estimate > t.pools[pool] * cap + 1e-9) return altRefusal("pool_empty", "današnja omejitev porabe pomočnika je dosežena.");
+  return null;
+}
 
 interface Who {
   viewer: Viewer;
@@ -93,6 +131,7 @@ interface Who {
 
 /** Why this job can't start now, or null. Reads only through `u` (inside the quota lock). */
 async function refusalFor(u: UsageQueries, config: AppConfig, who: Who, ask: JobAsk): Promise<Refusal | null> {
+  if (ask.kind === "alt") return altRefusalFor(u, config, who, ask);
   const t = config.tiers;
   const cap = config.limits.dailyModelSpendCapEur;
   const estimate = estimateOf(config, ask);
@@ -155,6 +194,7 @@ export async function reserveJob(deps: LimitDeps, c: Context<AppEnv>, ask: JobAs
       ipKey: (tier === "anonymous" || tier === "free") && ask.kind === "generate" ? who.ipKey : "",
       siteId: ask.siteId ?? null,
       estimateEur: estimateOf(deps.config, ask),
+      units: ask.kind === "alt" ? Math.max(1, ask.photos ?? 1) : 1,
     });
     return { ok: true as const, aiJobId, tier };
   });

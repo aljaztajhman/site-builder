@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { SPEC_VERSION, migrateSpec, type SiteSpec } from "@sb/spec";
+import { SPEC_VERSION, migrateSpec, withSiteLocales, type SiteSpec } from "@sb/spec";
 import type { Db } from "./db.ts";
 import { Accounts } from "./accounts.ts";
 import { Usage, type Tier } from "./usage.ts";
@@ -124,6 +124,9 @@ export class VersionConflictError extends Error {
   }
 }
 
+/** The editor's failure note when a job was cut off by a restart (it offers "Poskusi znova"). */
+export const INTERRUPTED_MESSAGE = "Opravilo je bilo prekinjeno (ponovni zagon strežnika). Poskusite znova.";
+
 export function newId(prefix: string): string {
   return `${prefix}_${randomBytes(8).toString("hex")}`;
 }
@@ -213,7 +216,7 @@ export class Repo {
         returning id`,
       [olderThanMinutes],
     );
-    for (const r of rows) await this.addEvent({ siteId: r.id, stage: "error", level: "error", message: "Opravilo je bilo prekinjeno (ponovni zagon strežnika). Poskusite znova." });
+    for (const r of rows) await this.addEvent({ siteId: r.id, stage: "error", level: "error", message: INTERRUPTED_MESSAGE });
     return rows.map((r) => r.id);
   }
 
@@ -292,7 +295,8 @@ export class Repo {
     const stored = (typeof r.spec === "string" ? JSON.parse(r.spec) : r.spec) as { specVersion?: unknown };
     // Specs are stored as written; older versions are migrated on read, so every caller sees the current version.
     const spec = typeof stored.specVersion === "number" && stored.specVersion < SPEC_VERSION ? migrateSpec(stored) : (stored as SiteSpec);
-    return { version: Number(r.version), spec };
+    // A locale sites can no longer use (de/hr/it) reads as sl/en, so old sites still render, edit and publish.
+    return { version: Number(r.version), spec: withSiteLocales(spec) };
   }
 
   /** Operations of every manual (direct editor) change, oldest first, including those of pruned versions. */

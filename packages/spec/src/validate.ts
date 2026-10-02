@@ -5,7 +5,7 @@ import { DIRECTIONS } from "./directions.ts";
 import { checkDesign } from "./design-rules.ts";
 import { findBannedCopy } from "./banned.ts";
 import { getAt, walkObjects, walkStrings } from "./pointer.ts";
-import { isWebUrl, type PlaceholderKind } from "./common.ts";
+import { SITE_LOCALES, isSiteLocale, isWebUrl, type PlaceholderKind } from "./common.ts";
 import { EDITOR_STARTER_TEXT } from "./starter.ts";
 
 export interface Issue {
@@ -130,8 +130,11 @@ export function semanticIssues(spec: SiteSpec): Issue[] {
   for (const v of findBannedCopy(spec.pages, "/pages")) add(v.path, "banned", `${v.rule}: "${v.text}"`);
   for (const v of findBannedCopy(spec.translations ?? {}, "/translations")) add(v.path, "banned", `${v.rule}: "${v.text}"`);
 
-  // Locales and translation overlays.
+  // Locales and translation overlays. Only locales with UI strings (a German site would get English buttons).
   if (!spec.locales.enabled.includes(spec.locales.default)) add("/locales", "structure", "default locale must be enabled");
+  for (const locale of new Set([spec.locales.default, ...spec.locales.enabled])) {
+    if (!isSiteLocale(locale)) add("/locales", "structure", `locale ${locale} is not available; sites can use ${SITE_LOCALES.join(", ")}`);
+  }
   for (const [locale, map] of Object.entries(spec.translations ?? {})) {
     if (!spec.locales.enabled.includes(locale as SiteSpec["locales"]["default"])) {
       add(`/translations/${locale}`, "translation", `locale ${locale} not enabled`);

@@ -40,8 +40,12 @@ export type ContentOutput = { chrome: SiteSpec["chrome"]; pages: Page[] };
 
 export const contentJsonSchema = () => toModelJsonSchema(contentOutputSchema());
 
-/** Business facts from the verified brief. Every missing fact becomes a required placeholder. */
-export function businessFromBrief(brief: Brief): Business {
+/**
+ * Business facts from the verified brief. Every missing fact becomes a required placeholder, except hours
+ * where the business has none to show: builders (they work on site) and clients who asked for no hours on
+ * the site (`hoursWithheld`, from clientWithholdsHours). Stated hours are always used.
+ */
+export function businessFromBrief(brief: Brief, opts: { hoursWithheld?: boolean } = {}): Business {
   const f = brief.facts;
   const hours = f.hours?.length
     ? {
@@ -55,8 +59,7 @@ export function businessFromBrief(brief: Brief): Business {
     phone: f.phone && /^\+\d{8,15}$/.test(f.phone) ? f.phone : { $placeholder: "phone" },
     email: f.email ?? { $placeholder: "email" },
     address: f.address && /^\d{4}$/.test(f.address.postalCode) ? { ...f.address } : { $placeholder: "address" },
-    // Businesses that work on site (builders) may have no hours; all others get a placeholder.
-    hours: hours ?? (brief.businessType === "builder" ? undefined : { $placeholder: "hours" }),
+    hours: hours ?? (brief.businessType === "builder" || opts.hoursWithheld ? undefined : { $placeholder: "hours" }),
     ...(f.bookingUrl ? { bookingUrl: f.bookingUrl } : {}),
     ...(f.social.length ? { social: f.social } : {}),
     ...(f.serviceArea.length ? { serviceArea: f.serviceArea } : {}),
@@ -170,15 +173,26 @@ export function assembleSpec(input: {
   design: Design;
   assets: SiteSpec["assets"];
   content: ContentOutput;
+  /** The client asked for no opening hours on the site (clientWithholdsHours over their text). */
+  hoursWithheld?: boolean;
 }): SiteSpec {
-  const modelPages = input.content.pages.filter((p) => p.kind === "home" || p.kind === "standard");
+  const business = businessFromBrief(input.brief, { hoursWithheld: input.hoursWithheld });
+  let modelPages = input.content.pages.filter((p) => p.kind === "home" || p.kind === "standard");
+  // Hours the client won't publish: an opening-hours section would show (and block publishing on) a
+  // placeholder nobody will fill, so it goes, unless it is all a page has.
+  if (input.hoursWithheld && business.hours === undefined) {
+    modelPages = modelPages.map((p) => {
+      const sections = p.sections.filter((s) => s.type !== "opening-hours");
+      return sections.length && sections.length !== p.sections.length ? { ...p, sections } : p;
+    });
+  }
   // Home first, keep the model's order for the rest. The homepage keeps its section ids.
   modelPages.sort((a, b) => (a.kind === "home" ? -1 : b.kind === "home" ? 1 : 0));
   return {
     specVersion: SPEC_VERSION,
     slug: input.slug,
     locales: { default: "sl", enabled: ["sl"] },
-    business: businessFromBrief(input.brief),
+    business,
     design: input.design,
     assets: input.assets,
     chrome: templateChrome(input.design, input.content, input.assets.logo !== undefined),

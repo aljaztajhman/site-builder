@@ -130,6 +130,15 @@ export const AppConfigSchema = z.object({
     landscape: z.object({ width: z.number().int().positive(), height: z.number().int().positive() }),
     models: z.record(z.string(), ImageGenModel),
   }),
+  /** The job worker's shutdown and recovery (see config $comment). */
+  worker: z.object({
+    /** Seconds a stopping worker lets running jobs finish when RAILWAY_DEPLOYMENT_DRAINING_SECONDS is not set. */
+    drainSeconds: z.number().min(1),
+    /** Seconds of Railway's draining window kept for marking unfinished jobs interrupted and closing. */
+    drainReserveSeconds: z.number().min(0),
+    /** pg-boss heartbeat of running jobs: a killed worker's job stops counting as live after about this long. */
+    heartbeatSeconds: z.number().int().min(10),
+  }),
   /** Owner accounts: magic-link sign-in, sessions, the device cookie (see config $comment). */
   accounts: z.object({
     sessionDays: z.number().positive(),
@@ -155,10 +164,12 @@ export const AppConfigSchema = z.object({
     free: z.object({ homepages: z.number().int().min(0), chatEdits: z.number().int().min(0) }),
     paid: z.object({ allowancePercentOfMonthlyPrice: z.number().min(0).max(100), firstMonthExtraEur: z.number().min(0) }),
     perIpGenerationsPerDay: z.number().int().positive(),
+    /** Photo descriptions (the vision model) per account in 24 h; the admin has no count, only the paid pool. */
+    altText: z.object({ photosPerDay: z.object({ free: z.number().int().min(0), paid: z.number().int().min(0) }) }),
     pools: z
       .object({ anonymous: z.number().min(0).max(1), free: z.number().min(0).max(1), paid: z.number().min(0).max(1), warnAt: z.number().gt(0).max(1) })
       .refine((p) => p.anonymous + p.free + p.paid <= 1 + 1e-9, { message: "the pools are shares of the daily cap and must add up to at most 1" }),
-    estimatesEur: z.object({ homepage: z.number().positive(), fullSite: z.number().positive(), chatEdit: z.number().positive() }),
+    estimatesEur: z.object({ homepage: z.number().positive(), fullSite: z.number().positive(), chatEdit: z.number().positive(), altTextPerPhoto: z.number().positive() }),
     junk: z.object({ minDescriptionChars: z.number().int().min(1), minClassifierConfidence: z.number().min(0).max(1) }),
   }),
   plans: z.looseObject({

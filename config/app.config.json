@@ -82,6 +82,12 @@
       }
     }
   },
+  "worker": {
+    "$comment": "Shutdown and recovery of the job worker. On SIGTERM it takes no new jobs and lets running ones finish for Railway's draining window (the service variable RAILWAY_DEPLOYMENT_DRAINING_SECONDS, Railway's default 0 s) minus drainReserveSeconds, or drainSeconds when that variable isn't set (docker compose stop waits 10 s); jobs still running then are marked interrupted (site 'failed' with a retry, ai_jobs 'interrupted', not counted). A worker killed without that (SIGKILL, crash) stops its jobs' pg-boss heartbeat; after heartbeatSeconds pg-boss fails them and the next recovery pass (at start and every minute) marks them the same way.",
+    "drainSeconds": 8,
+    "drainReserveSeconds": 5,
+    "heartbeatSeconds": 60
+  },
   "accounts": {
     "$comment": "Owner accounts (sb-signin: email magic link only, no passwords). Session and device cookies are httpOnly, SameSite=Lax, Secure when deployed. Magic links are random, stored hashed, single-use; requests are rate-limited per normalised email and per keyed IP hash (the IP itself is never stored).",
     "sessionDays": 30,
@@ -89,7 +95,7 @@
     "magicLink": { "ttlMinutes": 15, "perEmailPerHour": 3, "perIpPerHour": 10 }
   },
   "tiers": {
-    "$comment": "Free generation limits (docs/plans/free-generation-limits.md; owner's decisions sb-free-tiers = 1-2-10, sb-ai-allowance = first-month, sb-bot-check = Turnstile). Every model and image job is checked before it is queued, against its estimated cost; the real cost comes from the per-call log. anonymous: homepages per device, unclaimed previews deleted after keepDays. free (email account): homepages and chat edits in total, not per month; the anonymous preview carries over without using one. paid (and allow-listed before billing): a monthly € allowance of allowancePercentOfMonthlyPrice % of plans.paid.monthlyEur, plus firstMonthExtraEur in the first month; months run from the day the account got paid rights. perIpGenerationsPerDay: anonymous and free generations per keyed IP hash in 24 h (loose: mobile networks share IPs). pools: each tier's share of limits.dailyModelSpendCapEur per UTC day (admin jobs use the paid pool); a warning at warnAt of a pool. estimatesEur: what a job may cost, held until its calls are logged (measured: homepage with 2 generated pictures €0.26, full site with 3 ~€0.43, chat edit ~€0.012). junk: shorter descriptions, or a classifier confidence below the minimum, are refused before any Sonnet or image call.",
+    "$comment": "Free generation limits (docs/plans/free-generation-limits.md; owner's decisions sb-free-tiers = 1-2-10, sb-ai-allowance = first-month, sb-bot-check = Turnstile). Every model and image job is checked before it is queued, against its estimated cost; the real cost comes from the per-call log. anonymous: homepages per device, unclaimed previews deleted after keepDays. free (email account): homepages and chat edits in total, not per month; the anonymous preview carries over without using one. paid (and allow-listed before billing): a monthly € allowance of allowancePercentOfMonthlyPrice % of plans.paid.monthlyEur, plus firstMonthExtraEur in the first month; months run from the day the account got paid rights. perIpGenerationsPerDay: anonymous and free generations per keyed IP hash in 24 h (loose: mobile networks share IPs). pools: each tier's share of limits.dailyModelSpendCapEur per UTC day (admin jobs use the paid pool); a warning at warnAt of a pool. estimatesEur: what a job may cost, held until its calls are logged (measured: homepage with 2 generated pictures €0.26, full site with 3 ~€0.43, chat edit ~€0.012; photo descriptions are one vision call for all of a job's photos: 1 photo €0.002, 3 €0.006, 8 €0.015 in the evals, so altTextPerPhoto €0.005 leaves room for one paid retry). junk: shorter descriptions, or a classifier confidence below the minimum, are refused before any Sonnet or image call.",
     "anonymous": {
       "homepages": 1,
       "keepDays": 7,
@@ -99,8 +105,12 @@
     "free": { "homepages": 2, "chatEdits": 10 },
     "paid": { "allowancePercentOfMonthlyPrice": 10, "firstMonthExtraEur": 3 },
     "perIpGenerationsPerDay": 5,
+    "altText": {
+      "$comment": "Photo descriptions (alt job, the vision model) for photos an owner adds in the editor: photos per account in 24 h, on top of the tier's pool (and a paid account's allowance). Adding and replacing photos is never limited; over the cap the owner writes the description. Anonymous visitors can't add photos; the admin has no count.",
+      "photosPerDay": { "free": 20, "paid": 100 }
+    },
     "pools": { "anonymous": 0.3, "free": 0.2, "paid": 0.5, "warnAt": 0.8 },
-    "estimatesEur": { "homepage": 0.3, "fullSite": 0.5, "chatEdit": 0.03 },
+    "estimatesEur": { "homepage": 0.3, "fullSite": 0.5, "chatEdit": 0.03, "altTextPerPhoto": 0.005 },
     "junk": { "minDescriptionChars": 20, "minClassifierConfidence": 0 }
   },
   "plans": {

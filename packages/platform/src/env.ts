@@ -1,3 +1,4 @@
+import { loadConfig } from "@sb/config";
 import { createDb, type Db } from "./db.ts";
 import { migrate } from "./migrations.ts";
 import { createQueue, type Queue } from "./queue.ts";
@@ -41,7 +42,8 @@ export async function platformFromEnv(opts: { queue?: boolean } = {}): Promise<P
   const db = await createDb(url);
   await migrate(db);
   const storage = storageFromEnv();
-  const queue = opts.queue === false ? nullQueue() : await createQueue(db, url);
+  // Web and worker both set the queues' options on start, so both read the heartbeat from the same config.
+  const queue = opts.queue === false ? nullQueue() : await createQueue(db, url, { heartbeatSeconds: loadConfig().worker.heartbeatSeconds });
   return {
     db,
     repo: new Repo(db),

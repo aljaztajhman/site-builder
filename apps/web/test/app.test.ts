@@ -366,6 +366,8 @@ describe("photos in the editor", () => {
   it("adds the owner's photo, replaces a picture with it, queues the description, and explains refusals", async () => {
     const { readFile } = await import("node:fs/promises");
     const { cookie } = await login();
+    // The spend-cap test above logged €1000 today; photo descriptions are model work under that cap.
+    await platform.db.query("delete from model_calls");
     const golden = JSON.parse(await readFile(path.join(import.meta.dirname, "../../../tools/eval/golden/pekarna-kvas.json"), "utf8"));
     const site = await platform.repo.createSite({ name: "foto", slug: "foto", intake: { description: "x", photoAssetIds: [], scope: "home" } });
     const v1 = await platform.repo.saveSpec(site.id, { ...golden, slug: "foto" }, "generate");
@@ -378,7 +380,7 @@ describe("photos in the editor", () => {
     const res = await app.request(`/api/sites/${site.id}/photos`, { method: "POST", body: form, headers: { cookie } });
     expect(res.status).toBe(200);
     expect(await res.json()).toMatchObject({ ok: true, added: ["img_04"], replaced: "img_02" });
-    expect(sent.at(-1)).toEqual({ name: "alt", data: { siteId: site.id, imageIds: ["img_04"] } });
+    expect(sent.at(-1)).toEqual({ name: "alt", data: { siteId: site.id, imageIds: ["img_04"], aiJobId: expect.any(String) } });
     // Busy until the description job is done, so the editor keeps polling.
     expect((await platform.repo.getSite(site.id))!.status).toBe("editing");
     const spec = (await platform.repo.getSpec(site.id))!.spec;
@@ -503,6 +505,17 @@ describe("direct editor API (no model calls)", () => {
     // Preview equals published output, byte for byte.
     const previewHtml = await (await app.request(`/preview/${site.id}/index.html`, { headers: { cookie } })).text();
     expect(previewHtml).toBe(publishedHtml);
+    // A miss at any depth gets the 404 page with paths for that depth (styled, links work), same in the preview.
+    for (const [missing, up] of [["nic.html", ""], ["storitve/nic", "../"], ["a/b/nic.html", "../../"]] as const) {
+      const live = await app.request(`/s/pekarna-kvas/${missing}`);
+      expect(live.status, missing).toBe(404);
+      const liveHtml = await live.text();
+      expect(liveHtml, missing).toContain(`<link rel="stylesheet" href="${up}../_shared/`);
+      expect(liveHtml, missing).toContain(`href="${up}index.html"`);
+      const preview = await app.request(`/preview/${site.id}/${missing}`, { headers: { cookie } });
+      expect(preview.status, missing).toBe(404);
+      expect(await preview.text(), missing).toBe(liveHtml);
+    }
 
     // Two publishes at once: one writes its release, the other is told to wait; the live site stays whole.
     const twice = await Promise.all([1, 2].map(() => app.request(`/api/sites/${site.id}/publish`, { method: "POST", headers: { cookie } })));

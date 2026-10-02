@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { toE164, verifyBriefFacts, type Brief } from "../src/index.ts";
+import { readFileSync, readdirSync } from "node:fs";
+import { clientWithholdsHours, toE164, verifyBriefFacts, type Brief } from "../src/index.ts";
 
 const description =
   "Pekarna Kvas, Šutna 30, 1241 Kamnik. Pokličite 041 555 210 ali pišite na info@pekarna-kvas.example. " +
@@ -86,5 +87,42 @@ describe("toE164", () => {
     expect(toE164("+386 41 555 210")).toBe("+38641555210");
     expect(toE164("00386 41 555 210")).toBe("+38641555210");
     expect(toE164("123")).toBeNull();
+  });
+});
+
+describe("clientWithholdsHours", () => {
+  it("reads the wish in the client's own words", () => {
+    for (const text of [
+      "Delovnega časa tudi ne bi pisali, ker se stranke vedno prej najavijo po telefonu.",
+      "Delovnega casa ne objavljamo.",
+      "Prosim, ne navajajte delovnega časa na strani.",
+      "Urnika ne bi objavljal, ker sem večinoma na terenu.",
+      "Smo brez stalnega delovnega časa, pokličite.",
+      "Nimamo fiksnega delovnega časa.",
+      "Delovni čas: po dogovoru.",
+      "Uradne ure so samo po predhodnem dogovoru.",
+    ])
+      expect(clientWithholdsHours(text), text).toBe(true);
+  });
+
+  it("doesn't read it into stated hours or wishes about other facts", () => {
+    for (const text of [
+      "Delovni čas: pon–pet 8.00–16.00, sobota ne.",
+      "Odprto pon-pet od 7.00 do 16.00, sobota po dogovoru.",
+      "Cen ne bi objavljali. Delovni čas je od 8. do 16. ure.",
+      "Cene so po dogovoru in so odvisne od števila računov, zato jih ne bi objavljali.",
+      "Za skupine kuhamo tudi med tednom po dogovoru.",
+      "Ordinacijski čas: ponedeljek in sreda od 12.00 do 19.00.",
+    ])
+      expect(clientWithholdsHours(text), text).toBe(false);
+  });
+
+  it("finds it in exactly one of the ten fixtures: the accountant who asked for no hours", () => {
+    const dir = new URL("../../../tools/eval/fixtures/", import.meta.url);
+    const hits = readdirSync(dir, { withFileTypes: true })
+      .filter((d) => d.isDirectory())
+      .filter((d) => clientWithholdsHours((JSON.parse(readFileSync(new URL(`${d.name}/brief.json`, dir), "utf8")) as { description: string }).description))
+      .map((d) => d.name);
+    expect(hits).toEqual(["racunovodstvo-seliskar"]);
   });
 });

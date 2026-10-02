@@ -70,6 +70,10 @@ describe("repo", () => {
     expect((await repo.getSpec(site.id))?.version).toBe(2);
     // Stored at v1, read back migrated to the current version.
     expect((await repo.getSpec(site.id, 1))?.spec).toEqual({ specVersion: SPEC_VERSION });
+    // A spec stored with a locale sites can no longer use (German: no UI strings) reads as sl/en.
+    const german = { specVersion: SPEC_VERSION, locales: { default: "de", enabled: ["de", "en"] }, translations: { de: { "/x": "a" }, en: { "/x": "b" } } };
+    const v3 = await repo.saveSpec(site.id, german as never, "manual");
+    expect((await repo.getSpec(site.id, v3))?.spec).toEqual({ specVersion: SPEC_VERSION, locales: { default: "sl", enabled: ["sl", "en"] }, translations: { en: { "/x": "b" } } });
 
     await repo.addEvent({ siteId: site.id, stage: "brief", message: "ok" });
     expect((await repo.listEvents(site.id)).map((e) => e.stage)).toEqual(["brief"]);
@@ -128,6 +132,41 @@ describe("queue (pg-boss on PGlite)", () => {
     expect(failed).toContain(dead.id);
     expect(failed).not.toContain(waiting.id);
     expect((await repo.getSite(waiting.id))?.status).toBe("generating");
+    await queue.stop();
+  }, 30_000);
+
+  it("ends a stale job measured from when it started: a job waiting in a backlog keeps holding its estimate", async () => {
+    const queue = await createQueue(db, "pglite://memory");
+    const job = (n: string) => repo.usage.insertJob({ kind: "generate", scope: "home", tier: "free", accountId: `acct_${n}`, estimateEur: 0.3 });
+    // Queued two hours ago and still waiting behind other work (no worker for it in the tests).
+    const waiting = await job("waiting");
+    await queue.send("generate", { siteId: "site_backlog", scope: "home", aiJobId: waiting });
+    // Queued two hours ago, started 5 minutes ago: running, not stale.
+    const running = await job("running");
+    await repo.usage.startJob(running);
+    // Started 31 minutes ago and never finished: its worker is gone.
+    const stuck = await job("stuck");
+    await repo.usage.startJob(stuck);
+    // Never queued (an anonymous upload ticket nobody used).
+    const ticket = await job("ticket");
+    await db.query("update ai_jobs set created_at = now() - interval '2 hours' where id = any($1::bigint[])", [[waiting, running, stuck, ticket]]);
+    await db.query("update ai_jobs set started_at = now() - interval '5 minutes' where id = $1", [running]);
+    await db.query("update ai_jobs set started_at = now() - interval '31 minutes' where id = $1", [stuck]);
+
+    expect(await repo.usage.endStaleJobs(30)).toBe(2);
+    const status = async (id: string) => (await repo.usage.getJob(id))!.status;
+    expect({ waiting: await status(waiting), running: await status(running), stuck: await status(stuck), ticket: await status(ticket) }).toEqual({ waiting: "queued", running: "queued", stuck: "failed", ticket: "failed" });
+    // The waiting job's estimate is still held against the free pool.
+    expect((await repo.usage.pool("free")).held).toBeCloseTo(0.6, 6);
+
+    // A started job whose queue job is gone (its worker died; pg-boss failed it) is interrupted at once;
+    // one whose queue job still waits or runs is left alone.
+    expect(await repo.usage.interruptOrphans()).toEqual([running]);
+    await repo.usage.startJob(waiting);
+    expect(await repo.usage.interruptOrphans()).toEqual([]);
+    await db.query("update pgboss.job set state = 'failed' where data->>'aiJobId' = $1", [waiting]);
+    expect(await repo.usage.interruptOrphans()).toEqual([waiting]);
+    expect(await repo.usage.countJobs({ kind: "generate", tiers: ["free"], accountId: "acct_waiting" })).toBe(0);
     await queue.stop();
   }, 30_000);
 
