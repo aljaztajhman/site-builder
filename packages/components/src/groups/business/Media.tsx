@@ -1,5 +1,5 @@
 import { isPlaceholder, plural, type Placeholder } from "@sb/spec";
-import { ActionLink, MaybeText, Ph, Picture, PriceText, Section, SectionHead, cx } from "../../primitives/index.tsx";
+import { ActionLink, MaybeText, Ph, Picture, PriceText, Section, SectionHead, cx, titleId } from "../../primitives/index.tsx";
 import type { SectionProps } from "../../types.ts";
 import { largestWebp } from "./shared.tsx";
 import { motifOf } from "../../motifs/index.tsx";
@@ -88,14 +88,32 @@ export function Team({ section, ctx, index }: SectionProps<"team">) {
 export const GALLERY_GRID_SIZES = "(min-width: 64rem) 18rem, (min-width: 48rem) 33vw, 50vw";
 export const GALLERY_MOSAIC_SIZES = "(min-width: 64rem) 24rem, (min-width: 48rem) 33vw, 50vw";
 
+/**
+ * wall: edge to edge, a wide and a narrow photo (7/12 and 5/12) above rows of three; on phones the first two at
+ * full width, the rest two to a row.
+ */
+export const GALLERY_WALL_SIZES = ["(min-width: 40rem) 58vw, 100vw", "(min-width: 40rem) 42vw, 100vw", "(min-width: 40rem) 33vw, 50vw"] as const;
+
+export function gallerySizes(variant: SectionProps<"gallery">["section"]["variant"], i: number): string {
+  if (variant === "wall") return GALLERY_WALL_SIZES[Math.min(i, 2)]!;
+  return variant === "mosaic" ? GALLERY_MOSAIC_SIZES : GALLERY_GRID_SIZES;
+}
+
 export function Gallery({ section, ctx }: SectionProps<"gallery">) {
   const { props } = section;
-  const sizes = section.variant === "mosaic" ? GALLERY_MOSAIC_SIZES : GALLERY_GRID_SIZES;
+  const wall = section.variant === "wall";
   return (
-    <Section id={section.id} type={section.type} variant={section.variant} tone={section.tone}>
-      <SectionHead id={section.id} eyebrow={props.eyebrow} title={props.title} intro={props.intro} />
+    <Section id={section.id} type={section.type} variant={section.variant} tone={section.tone} bleed={wall}>
+      {wall ? (
+        // The photos are the statement; the heading names them for screen readers (hidden in CSS).
+        <h2 id={titleId(section.id)} className="section-title">
+          {props.title}
+        </h2>
+      ) : (
+        <SectionHead id={section.id} eyebrow={props.eyebrow} title={props.title} intro={props.intro} />
+      )}
       <ul
-        className="gallery"
+        className={cx("gallery", wall && "gallery--wall")}
         data-gallery=""
         data-label-dialog={props.title}
         data-label-close={ctx.t("galleryClose")}
@@ -109,7 +127,7 @@ export function Gallery({ section, ctx }: SectionProps<"gallery">) {
             <li className="gallery__item" key={i}>
               <figure className="gallery__figure">
                 <a className="gallery__link" href={largestWebp(img)} data-gallery-item="" aria-label={label}>
-                  <Picture id={g.image} ctx={ctx} className="media--contained gallery__media" sizes={sizes} />
+                  <Picture id={g.image} ctx={ctx} className="media--contained gallery__media" sizes={gallerySizes(section.variant, i)} />
                 </a>
                 {g.caption && <figcaption className="gallery__caption">{g.caption}</figcaption>}
               </figure>

@@ -17,7 +17,7 @@ One branch and PR per one or two templates, each based on the previous (stacked)
 | claude/templates-rt | R Račun, T Etiketa | v7 |
 | claude/templates-kl | K Jedilnik, L Ogledalo | v8 (built on claude/templates-rt) |
 | claude/templates-o | O Nasmeh | v9 (built on claude/templates-kl) |
-| claude/templates-np | N Markacija, P Pregib | v10 |
+| claude/templates-np | N Markacija, P Pregib | v10 (built on claude/templates-o) |
 
 ## Decisions per template (from the analyses, checked against the HTML)
 

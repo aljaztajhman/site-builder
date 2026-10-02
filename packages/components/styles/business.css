@@ -1603,3 +1603,180 @@
     gap: 2.5rem;
   }
 }
+/* ---------- price-list rates: two to four prices at headline size on heavy rules, beside a photo ---------- */
+.rates {
+  display: grid;
+  gap: 2.5rem;
+  align-items: center;
+}
+.rates__media {
+  width: 70%;
+  aspect-ratio: 3 / 4;
+}
+.rates__list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+  margin: 0;
+}
+.rates__item {
+  padding-top: 1.125rem;
+  border-top: 4px solid currentColor;
+}
+.rates__name {
+  font-weight: 800;
+}
+.rates__note {
+  display: block;
+  font-weight: 400;
+}
+.rates__price {
+  display: grid;
+  justify-items: start;
+  margin: 0.375rem 0 0;
+}
+.rates__amount {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-heading);
+  font-size: clamp(3rem, 1.6rem + 4.2vw, 5.75rem);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+  font-variant-numeric: proportional-nums;
+}
+.rates__unit {
+  margin-top: 0.5rem;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--c-muted);
+}
+.rates__footnote {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  margin-top: 2rem;
+  font-size: var(--fs-lg);
+  font-weight: 800;
+}
+@media (min-width: 64rem) {
+  .rates--image {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+    gap: 5.5rem;
+  }
+  .rates__media {
+    width: 100%;
+  }
+  .rates__list {
+    gap: 2rem;
+  }
+}
+
+/* ---------- opening-hours poster: the heading beside the times at poster size ---------- */
+.oh--poster {
+  display: grid;
+  gap: 1.75rem;
+}
+.oh--poster .section-head {
+  margin-bottom: 0;
+}
+.oh-poster {
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+}
+.oh-poster__days {
+  font-weight: 800;
+}
+.oh-poster__time {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-weight: var(--fw-heading);
+  font-size: clamp(2.5rem, 1.2rem + 4.2vw, 5rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+  font-variant-numeric: proportional-nums;
+}
+.oh--poster .oh__note {
+  max-width: 34rem;
+  margin-top: 1rem;
+  font-size: var(--fs-lg);
+  font-weight: 700;
+}
+@media (min-width: 64rem) {
+  .oh--poster {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: 4.5rem;
+    align-items: center;
+  }
+}
+
+/* ---------- gallery wall: five photos edge to edge, a wide and a narrow one above rows of three ---------- */
+.s-gallery--wall {
+  padding-block: 0;
+}
+.s-gallery--wall .section-title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+.gallery--wall {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+.gallery--wall .gallery__item:nth-child(-n + 2) {
+  grid-column: 1 / -1;
+}
+.gallery--wall .gallery__item:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+.gallery--wall .gallery__media {
+  height: 10.625rem;
+  aspect-ratio: auto;
+}
+.gallery--wall .gallery__item:nth-child(-n + 2) .gallery__media {
+  height: 15rem;
+}
+.gallery--wall .gallery__figure {
+  position: relative;
+}
+.gallery--wall .gallery__caption {
+  position: absolute;
+  left: 0.5rem;
+  bottom: 0.5rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius);
+  background: var(--c-inverse);
+  color: var(--c-on-inverse);
+  font-size: var(--fs-sm);
+}
+@media (min-width: 40rem) {
+  .gallery--wall {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+  .gallery--wall .gallery__item {
+    grid-column: span 4;
+  }
+  .gallery--wall .gallery__item:nth-child(1) {
+    grid-column: span 7;
+  }
+  .gallery--wall .gallery__item:nth-child(2) {
+    grid-column: span 5;
+  }
+  .gallery--wall .gallery__item:last-child:nth-child(odd) {
+    grid-column: span 4;
+  }
+  .gallery--wall .gallery__media {
+    height: clamp(13.75rem, 24vw, 21.25rem);
+  }
+  .gallery--wall .gallery__item:nth-child(-n + 2) .gallery__media {
+    height: clamp(18.75rem, 32vw, 28.75rem);
+  }
+}

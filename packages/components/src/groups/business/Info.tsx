@@ -106,6 +106,16 @@ export function OpeningHours({ section, ctx, index }: SectionProps<"opening-hour
           <HoursList ctx={ctx} hours={hours} short />
         ) : section.variant === "week" ? (
           <WeekChart hours={hours} ctx={ctx} labelledBy={titleId(section.id)} />
+        ) : section.variant === "poster" ? (
+          // The times at poster size, the days small above them (a business open on a few days only).
+          <dl className="oh-poster">
+            {hoursRows(hours, ctx.locale).map((r, i) => (
+              <div className="oh-poster__row" key={i}>
+                <dt className="oh-poster__days">{capitalize(r.days)}</dt>
+                <dd className="oh-poster__time">{r.value}</dd>
+              </div>
+            ))}
+          </dl>
         ) : (
           <HoursTable hours={hours} ctx={ctx} labelledBy={titleId(section.id)} />
         )}
@@ -128,7 +138,7 @@ export function OpeningHours({ section, ctx, index }: SectionProps<"opening-hour
           <div className="oh__text">{text}</div>
         </div>
       ) : (
-        <div className="oh">{text}</div>
+        <div className={section.variant === "poster" ? "oh oh--poster" : "oh"}>{text}</div>
       )}
     </Section>
   );

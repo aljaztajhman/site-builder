@@ -12,6 +12,8 @@ const sl = {
   directions: "Navodila za pot",
   email: "Pošljite e-pošto",
   book: "Rezervirajte termin",
+  /** Phone bar: short, so it fits beside the call at 360 px. */
+  bookShort: "Rezerviraj",
   openingHours: "Delovni čas",
   contact: "Kontakt",
   address: "Naslov",
@@ -103,6 +105,7 @@ const en: Record<UiKey, string> = {
   directions: "Directions",
   email: "Send email",
   book: "Book an appointment",
+  bookShort: "Book",
   openingHours: "Opening hours",
   contact: "Contact",
   address: "Address",

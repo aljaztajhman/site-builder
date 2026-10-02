@@ -123,11 +123,11 @@ async function checkEngine(page: Page): Promise<Omit<WidthCheck, "width">> {
           })
           .map((el) => `${el.tagName.toLowerCase()}.${[...el.classList].join(".")} "${(el.textContent ?? "").trim().slice(0, 30)}"`)
       : [];
-    // On a phone the engine hides the hero's call button when the sticky call bar shows it from the start
-    // (body.bar-covers-hero-call): the bar's call is then the hero's one primary action.
-    if (heroPrimaryActions.length === 0 && document.body.classList.contains("bar-covers-hero-call")) {
-      const call = document.querySelector('.action-bar a[href^="tel:"]');
-      if (call && call.getBoundingClientRect().height > 0) heroPrimaryActions.push(`action bar call "${(call.textContent ?? "").trim()}"`);
+    // On a phone the engine hides the hero's call (or booking) button when the sticky bar shows it from the start
+    // (body.bar-covers-hero-*): the bar's primary button is then the hero's one primary action.
+    if (heroPrimaryActions.length === 0 && [...document.body.classList].some((c) => c.startsWith("bar-covers-hero-"))) {
+      const first = document.querySelector(".action-bar a.btn--primary");
+      if (first && first.getBoundingClientRect().height > 0) heroPrimaryActions.push(`action bar "${(first.textContent ?? "").trim()}"`);
     }
     // What sticks out past the viewport when the page scrolls sideways (the deepest elements first).
     const overflow = [...document.querySelectorAll("body *")]

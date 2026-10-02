@@ -67,9 +67,9 @@ describe("trade templates in the pipeline", () => {
   });
 
   it("tells the design and critique steps every template by name and what its motif draws", () => {
-    expect(DESIGN_SYSTEM).toContain("Trade templates (tablica, cevi, skorja, racun, etiketa, jedilnik, ogledalo, nasmeh)");
-    expect(CRITIQUE_SYSTEM).toContain("design directions tablica, cevi, skorja, racun, etiketa, jedilnik, ogledalo, nasmeh");
-    expect(CRITIQUE_SYSTEM).toContain("mirror arches and the name as a wall-sized wordmark, a smile arc and the hours as a week chart)");
+    expect(DESIGN_SYSTEM).toContain("Trade templates (tablica, cevi, skorja, racun, etiketa, jedilnik, ogledalo, nasmeh, markacija, pregib)");
+    expect(CRITIQUE_SYSTEM).toContain("design directions tablica, cevi, skorja, racun, etiketa, jedilnik, ogledalo, nasmeh, markacija, pregib");
+    expect(CRITIQUE_SYSTEM).toContain("mirror arches and the name as a wall-sized wordmark, a smile arc and the hours as a week chart, trail blazes, signs on a post and a mountain ridge, the logo's bent line and cut corners)");
   });
 
   it("fixes the header: dark over the dark hero (not under a logo), no call button above the phone object", () => {

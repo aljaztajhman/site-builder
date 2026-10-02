@@ -1,6 +1,6 @@
 import { formatAddress, isPlaceholder, type Link, type SectionOf } from "@sb/spec";
 import { ActionLink, Actions, HoursList, Picture, Ph, Section, titleId } from "../../primitives/index.tsx";
-import { Branch, CallObject, Radiator, Receipt, Seal, motifOf } from "../../motifs/index.tsx";
+import { Branch, CallObject, Limb, Radiator, Receipt, Seal, motifOf } from "../../motifs/index.tsx";
 import type { RenderCtx, SectionProps } from "../../types.ts";
 
 /** photo: the photo fills the hero at every width. */
@@ -16,6 +16,9 @@ export const HERO_SIGNATURE_MIRROR_SIZES = "(min-width: 64rem) 15rem, 32vw";
 /** disc: the round photo at 5/11 of the container on desktop (at most 35 rem), 82 % of the screen on phones. */
 export const HERO_SIGNATURE_DISC_SIZES = "(min-width: 64rem) 35rem, 82vw";
 
+/** bend: the photo with a cut corner at 5/12 of the container on desktop, 72 % of the screen on phones. */
+export const HERO_SIGNATURE_BEND_SIZES = "(min-width: 64rem) 31rem, 72vw";
+
 /** The photo's sizes per variant; null where the variant shows no photo (it draws instead). */
 export const HERO_SIGNATURE_SIZES: Record<SectionOf<"hero-signature">["variant"], string | null> = {
   photo: HERO_SIGNATURE_PHOTO_SIZES,
@@ -24,6 +27,8 @@ export const HERO_SIGNATURE_SIZES: Record<SectionOf<"hero-signature">["variant"]
   card: HERO_SIGNATURE_PHOTO_SIZES,
   mirrors: HERO_SIGNATURE_MIRROR_SIZES,
   disc: HERO_SIGNATURE_DISC_SIZES,
+  view: HERO_SIGNATURE_PHOTO_SIZES,
+  bend: HERO_SIGNATURE_BEND_SIZES,
   drawing: null,
   receipt: null,
 };
@@ -49,6 +54,18 @@ export function signatureLink(section: SectionOf<"hero-signature">): Link {
 /** A phone hero that shows directions too, so it puts call and directions on the first screen. */
 export function signatureOffersDirections(section: SectionOf<"hero-signature">): boolean {
   return section.props.fact === "phone" && signatureLink(section) === DIRECTIONS_LINK;
+}
+
+/** Variants whose phone fact is a plain button (labelled factLabel) rather than the motif's call object. */
+const CALL_BUTTON_VARIANTS: readonly string[] = ["receipt", "card", "mirrors", "disc", "view", "bend"];
+
+/** The actions the hero shows as buttons or links (data-action), for the phone bar to avoid repeating them. */
+export function signatureActions(section: SectionOf<"hero-signature">): string[] {
+  const { props } = section;
+  const given = [props.primary, props.secondary].flatMap((l) => (l && "action" in l.target ? [l.target.action] : []));
+  if (props.fact !== "phone") return given;
+  if (!CALL_BUTTON_VARIANTS.includes(section.variant)) return given.filter((a) => a !== "call");
+  return ["call", ...given.filter((a) => a !== "call")];
 }
 
 /** The band under the photo hero: hours and address with a directions link (no phone: the plate shows it). */
@@ -240,6 +257,68 @@ export function HeroSignature({ section, ctx, index }: SectionProps<"hero-signat
           ) : (
             props.factNote && <p className="hsig__chip hsig__chip--alone">{props.factNote}</p>
           )}
+        </div>
+      </Section>
+    );
+  }
+
+  if (variant === "view") {
+    // The landscape full-bleed under the flat overlay, the headline at the bottom left, the trail signs on a
+    // wooden post beside it; the next section draws the mountain ridge over the hero's bottom edge.
+    const where = props.eyebrow ?? streetCity;
+    const signs = props.signs ?? [];
+    return (
+      <Section id={section.id} type={section.type} variant={variant} tone={section.tone ?? "inverse"} bleed>
+        <div className={image ? "hsig hsig--view hsig--has-image" : "hsig hsig--view"}>
+          {image && <Picture id={image} ctx={ctx} className="hsig__bg media--contained" sizes={HERO_SIGNATURE_PHOTO_SIZES} priority={index === 0} />}
+          {image && <div className="hsig__shade" aria-hidden="true" />}
+          <div className="container hsig__grid">
+            <div className="hsig__text">
+              {where && <p className="eyebrow hsig__eyebrow">{where}</p>}
+              {title}
+              <p className="lead hsig__lead">{props.intro}</p>
+              {buttons}
+            </div>
+            {signs.length > 0 && (
+              <ul className="hsig__post" role="list">
+                {signs.map((sign, i) => (
+                  <li className="hsig__sign" key={i}>
+                    <span className="blaze blaze--sign" aria-hidden="true" />
+                    <span>
+                      {sign.label}
+                      {sign.note && <small className="hsig__sign-note">{sign.note}</small>}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      </Section>
+    );
+  }
+
+  if (variant === "bend") {
+    // White ground, the logo's bent line drawn wide behind the headline, the photo with a cut corner hanging into
+    // the next section (which makes room for it); the address from the facts above the headline.
+    const where = props.fact === "address" ? (isPlaceholder(address) ? <Ph p={address} ctx={ctx} /> : streetCity) : props.eyebrow;
+    return (
+      <Section id={section.id} type={section.type} variant={variant} tone={section.tone} bleed>
+        <div className={image ? "hsig hsig--bend hsig--has-image" : "hsig hsig--bend"}>
+          <Limb className="hsig__limb" />
+          <div className="container hsig__grid">
+            <div className="hsig__text">
+              {where && <p className="hsig__where">{where}</p>}
+              {title}
+              <p className="lead hsig__lead">{props.intro}</p>
+              {buttons}
+            </div>
+            {image && (
+              <figure className="hsig__fold">
+                <Picture id={image} ctx={ctx} className="hsig__fold-media media--contained" sizes={HERO_SIGNATURE_BEND_SIZES} priority={index === 0} />
+              </figure>
+            )}
+          </div>
         </div>
       </Section>
     );

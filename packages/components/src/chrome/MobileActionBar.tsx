@@ -1,30 +1,49 @@
-import { Icon } from "../primitives/index.tsx";
+import { DIRECTIONS } from "@sb/spec";
+import { Icon, type IconName } from "../primitives/index.tsx";
+import type { UiKey } from "../i18n.ts";
 import type { RenderCtx } from "../types.ts";
 
 /**
- * Fixed call / directions bar below 48rem. Each button needs its fact; with neither, nothing renders.
+ * Fixed call / directions bar below 48rem (a template may ask for booking and call instead). Each button needs its
+ * fact; with none, nothing renders.
  * The page shell adds `has-action-bar` to <body> so content is padded clear of the bar.
  * `afterHero`: the page's first section already offers call and directions, so the bar slides in only once it
  * has scrolled away (CSS scroll timeline; without support, or with reduced motion, it is always there).
  */
+type BarAction = "call" | "directions" | "booking";
+
+const BAR: Record<BarAction, { label: UiKey; icon: IconName; external: boolean }> = {
+  call: { label: "callShort", icon: "phone", external: false },
+  directions: { label: "directions", icon: "map-pin", external: true },
+  booking: { label: "bookShort", icon: "calendar", external: false },
+};
+
+/** The bar's actions: the template's (a practice that sells appointments books first), else call and directions. */
+export function barActions(ctx: RenderCtx): BarAction[] {
+  const wanted = DIRECTIONS.find((d) => d.id === ctx.site.design.direction)?.template?.phoneBar ?? ["call", "directions"];
+  return wanted.filter((a) => ctx.href({ action: a }) !== null).slice(0, 2);
+}
+
 export function MobileActionBar({ ctx, afterHero = false }: { ctx: RenderCtx; afterHero?: boolean }) {
-  const call = ctx.href({ action: "call" });
-  const directions = ctx.href({ action: "directions" });
-  if (!call && !directions) return null;
+  const actions = barActions(ctx);
+  if (actions.length === 0) return null;
   return (
     <nav className={afterHero ? "action-bar action-bar--after-hero" : "action-bar"} aria-label={ctx.t("quickContact")}>
-      {call && (
-        <a className="btn btn--primary action-bar__btn" href={call}>
-          <Icon name="phone" />
-          {ctx.t("callShort")}
-        </a>
-      )}
-      {directions && (
-        <a className="btn btn--secondary action-bar__btn" href={directions} rel="noopener" target="_blank">
-          <Icon name="map-pin" />
-          {ctx.t("directions")}
-        </a>
-      )}
+      {actions.map((a, i) => {
+        const { label, icon, external } = BAR[a];
+        return (
+          <a
+            key={a}
+            className={i === 0 ? "btn btn--primary action-bar__btn" : "btn btn--secondary action-bar__btn"}
+            href={ctx.href({ action: a })!}
+            rel={external ? "noopener" : undefined}
+            target={external ? "_blank" : undefined}
+          >
+            <Icon name={icon} />
+            {ctx.t(label)}
+          </a>
+        );
+      })}
     </nav>
   );
 }

@@ -48,6 +48,10 @@ export const MIGRATIONS: Record<number, (spec: RawSpec) => RawSpec> = {
   // with an optional note; a service's description optional (validation still requires it outside aside). Every v8
   // spec is a valid v9 spec.
   8: (spec) => spec,
+  // 9 → 10: trade templates N (Markacija) and P (Pregib). Additive: hero-signature "view" with optional signs and
+  // "bend" (fact address also on bend); price-list "rates" with an optional image; opening-hours "poster"; gallery
+  // "wall". Every v9 spec is a valid v10 spec.
+  9: (spec) => spec,
 };
 
 export function migrateSpec(input: unknown, migrations = MIGRATIONS, target: number = SPEC_VERSION): SiteSpec {

@@ -1,4 +1,5 @@
-import { PriceText, Section, SectionHead, cx, titleId } from "../../primitives/index.tsx";
+import { formatPrice, isPlaceholder, type Price } from "@sb/spec";
+import { Ph, Picture, PriceText, Section, SectionHead, cx, titleId } from "../../primitives/index.tsx";
 import type { RenderCtx, SectionProps } from "../../types.ts";
 import { TAG_KEYS, itemId } from "./shared.tsx";
 import { Branch, PlateStrip, Spoon, motifOf } from "../../motifs/index.tsx";
@@ -18,7 +19,7 @@ function Unavailable({ ctx, className }: { ctx: RenderCtx; className: string }) 
 function PriceTags({ section, ctx }: SectionProps<"price-list">) {
   const { props } = section;
   const motif = motifOf(ctx);
-  if (motif === "label") return <PriceLabels section={section} ctx={ctx} />;
+  if (motif === "label" || motif === "bend") return <PriceLabels section={section} ctx={ctx} fold={motif === "bend"} />;
   const plate = motif === "plate";
   return (
     <Section id={section.id} type={section.type} variant={section.variant} tone={section.tone}>
@@ -55,8 +56,11 @@ function PriceTags({ section, ctx }: SectionProps<"price-list">) {
   );
 }
 
-/** Prices on bottle labels (Etiketa): each item a framed label with the branch, its name, the note and the price. */
-function PriceLabels({ section, ctx }: Omit<SectionProps<"price-list">, "index">) {
+/**
+ * Prices on bottle labels (Etiketa): each item a framed label with the branch, its name, the note and the price.
+ * fold (Pregib): the same order on a card with one cut corner, the price at the foot.
+ */
+function PriceLabels({ section, ctx, fold = false }: Omit<SectionProps<"price-list">, "index"> & { fold?: boolean }) {
   const { props } = section;
   return (
     <Section id={section.id} type={section.type} variant={section.variant} tone={section.tone}>
@@ -68,8 +72,8 @@ function PriceLabels({ section, ctx }: Omit<SectionProps<"price-list">, "index">
             {g.name && <h3 className="prices__group-title">{g.name}</h3>}
             <ul className="price-labels" role="list">
               {g.items.map((it, ii) => (
-                <li className={cx("price-label label-card", it.unavailable && "is-unavailable")} key={ii}>
-                  <Branch />
+                <li className={cx("price-label", fold ? "price-label--fold" : "label-card", it.unavailable && "is-unavailable")} key={ii}>
+                  {!fold && <Branch />}
                   <Name className="price-label__name">{it.name}</Name>
                   {it.note && <p className="price-label__note">{it.note}</p>}
                   {it.unavailable && (
@@ -130,9 +134,61 @@ function PriceOffers({ section, ctx }: Omit<SectionProps<"price-list">, "index">
   );
 }
 
+/** rates: the photo beside it, at most 26 rem on desktop and 70 % of the screen on phones. */
+export const PRICE_RATES_SIZES = "(min-width: 64rem) 26rem, 70vw";
+
+/** A rate's amount large, its unit ("na osebo") small under it. */
+function RateValue({ price, ctx }: { price: Price; ctx: RenderCtx }) {
+  if (isPlaceholder(price)) return <Ph p={price} ctx={ctx} />;
+  return (
+    <>
+      <span className="rates__amount">
+        {price.from ? `${ctx.t("from")} ` : ""}
+        {formatPrice(price.amount, ctx.locale)}
+      </span>
+      {price.unit && <span className="rates__unit">{price.unit}</span>}
+    </>
+  );
+}
+
+/**
+ * Two to four prices at headline size on heavy rules (rooms per night), beside a photo of what they buy; the
+ * footnote as a marked line under them (a trail blaze in Markacija).
+ */
+function PriceRates({ section, ctx }: Omit<SectionProps<"price-list">, "index">) {
+  const { props } = section;
+  const items = props.groups.flatMap((g) => g.items);
+  return (
+    <Section id={section.id} type={section.type} variant={section.variant} tone={section.tone}>
+      <div className={cx("rates", props.image && "rates--image")}>
+        {props.image && <Picture id={props.image} ctx={ctx} className="rates__media media--contained" sizes={PRICE_RATES_SIZES} />}
+        <div className="rates__body">
+          <SectionHead id={section.id} eyebrow={props.eyebrow} title={props.title} intro={props.intro} />
+          <dl className="rates__list">
+            {items.map((it, i) => (
+              <div className={cx("rates__item", it.unavailable && "is-unavailable")} key={i}>
+                <dt className="rates__name">
+                  {it.name}
+                  {it.note && <span className="rates__note muted">{it.note}</span>}
+                  {it.unavailable && <Unavailable ctx={ctx} className="prices__flag" />}
+                </dt>
+                <dd className="rates__price">
+                  <RateValue price={it.price} ctx={ctx} />
+                </dd>
+              </div>
+            ))}
+          </dl>
+          {props.footnote && <p className="rates__footnote">{props.footnote}</p>}
+        </div>
+      </div>
+    </Section>
+  );
+}
+
 export function PriceList({ section, ctx, index }: SectionProps<"price-list">) {
   if (section.variant === "tags") return <PriceTags section={section} ctx={ctx} index={index} />;
   if (section.variant === "offers") return <PriceOffers section={section} ctx={ctx} />;
+  if (section.variant === "rates") return <PriceRates section={section} ctx={ctx} />;
   const { props } = section;
   const table = section.variant === "table";
   return (

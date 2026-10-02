@@ -8,6 +8,8 @@ import {
   islandsFor,
   lcpImageFor,
   rendererFor,
+  barActions,
+  signatureActions,
   signatureOffersDirections,
   uiStrings,
   type RenderCtx,
@@ -33,17 +35,19 @@ import { sharedBundle } from "./shared.ts";
 import { jsonLd } from "./jsonld.ts";
 import { landmarkSuffixes } from "./landmarks.ts";
 
+/** The actions the page's first section offers as buttons or links (call, booking, directions, e-mail). */
+function heroActions(first: { type: string; variant: string; props: unknown } | undefined): string[] {
+  if (!first) return [];
+  if (first.type === "hero-signature") return signatureActions(first as SectionOf<"hero-signature">);
+  const p = first.props as { primary?: { target?: { action?: string } }; secondary?: { target?: { action?: string } } };
+  return [p.primary?.target?.action, p.secondary?.target?.action].filter((a): a is string => a !== undefined);
+}
+
 /**
  * The page's first section puts both a phone link and a directions link on screen (its two actions, or
  * the facts of hero-type with-facts), so the call bar can wait until it has scrolled away without
  * breaking "call and directions in one tap".
  */
-/** The hero has its own call button (then the call bar, on screen from the start, would repeat it right below). */
-function heroOffersCall(first: { type: string; variant: string; props: unknown } | undefined): boolean {
-  const p = (first?.props ?? {}) as { primary?: { target?: { action?: string } }; secondary?: { target?: { action?: string } } };
-  return p.primary?.target?.action === "call" || p.secondary?.target?.action === "call";
-}
-
 function heroOffersCallAndDirections(first: { type: string; variant: string; props: unknown } | undefined): boolean {
   if (!first) return false;
   if (first.type === "hero-type" && first.variant === "with-facts") return true;
@@ -177,10 +181,14 @@ export function renderPage(spec: SiteSpec, page: Page, opts: RenderOptions = {})
   // Trade templates draw their motif (dividers, bullets, plates) from CSS keyed on this attribute.
   const motif = DIRECTIONS.find((d) => d.id === design.direction)?.template?.motif;
   const bar = localized.chrome.mobileActionBar === true;
-  // Bar on screen from the start and a call button in the hero: on a phone the hero's one is hidden (chrome.css).
-  const barCoversHeroCall = bar && heroOffersCall(first) && !heroOffersCallAndDirections(first);
+  // Bar on screen from the start with an action the hero also offers (its call, a booking): on a phone the hero's
+  // one is hidden (chrome.css), so one screen never shows two of the same.
+  const afterHero = heroOffersCallAndDirections(first);
+  const shown = heroActions(first);
+  const covered = bar && !afterHero ? barActions(ctx).filter((a) => shown.includes(a)) : [];
+  const bodyClass = bar ? ["has-action-bar", ...covered.map((a) => `bar-covers-hero-${a}`)].join(" ") : undefined;
   const renderBody = (suffixes: ReadonlyMap<string, string>) => renderToStaticMarkup(
-    <body data-imagery={design.imagery} data-motif={motif} className={bar ? (barCoversHeroCall ? "has-action-bar bar-covers-hero-call" : "has-action-bar") : undefined}>
+    <body data-imagery={design.imagery} data-motif={motif} className={bodyClass}>
       <a className="skip-link" href="#main">
         {ctx.t("skipToContent")}
       </a>
@@ -194,7 +202,7 @@ export function renderPage(spec: SiteSpec, page: Page, opts: RenderOptions = {})
         </LandmarkSuffixes.Provider>
       </main>
       <Footer ctx={ctx} />
-      {bar && <MobileActionBar ctx={ctx} afterHero={heroOffersCallAndDirections(first)} />}
+      {bar && <MobileActionBar ctx={ctx} afterHero={afterHero} />}
       {needsConsent && <CookieConsent ctx={ctx} onRequest={consentOnRequest} />}
       {[...islands].sort().map((f) => (
         <script key={f} src={ctx.shared(`js/${f}`)} defer />

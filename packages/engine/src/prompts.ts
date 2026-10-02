@@ -27,6 +27,8 @@ const MOTIF_WORDS: Record<Motif, string> = {
   spoon: "a brass spoon and dishes as round plates",
   mirror: "mirror arches and the name as a wall-sized wordmark",
   smile: "a smile arc and the hours as a week chart",
+  trail: "trail blazes, signs on a post and a mountain ridge",
+  bend: "the logo's bent line and cut corners",
 };
 const TEMPLATES = DIRECTIONS.filter((d) => d.template);
 const TEMPLATE_IDS = TEMPLATES.map((d) => d.id).join(", ");

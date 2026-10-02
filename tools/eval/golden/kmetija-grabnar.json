@@ -1,5 +1,5 @@
 {
-  "specVersion": 9,
+  "specVersion": 10,
   "slug": "kmetija-grabnar",
   "locales": {
     "default": "sl",
@@ -41,27 +41,29 @@
     }
   },
   "design": {
-    "direction": "alpine-nature",
-    "fontPair": "bitter-nunito-sans",
+    "direction": "markacija",
+    "fontPair": "fraunces-nunito-sans",
     "colors": {
-      "background": "#eef5ef",
-      "surface": "#ffffff",
-      "text": "#13261a",
-      "muted": "#44574a",
-      "primary": "#2d6a3a",
+      "background": "#ffffff",
+      "surface": "#eaf3e4",
+      "text": "#17241b",
+      "muted": "#48584c",
+      "primary": "#c8202a",
       "onPrimary": "#ffffff",
-      "accent": "#3a8049",
-      "border": "#cfdcd2",
-      "inverse": "#12241a",
-      "onInverse": "#f5f5f5"
+      "accent": "#5a9468",
+      "border": "#d5e0d2",
+      "inverse": "#1d3a2a",
+      "onInverse": "#f2f6f0",
+      "band": "#c8202a",
+      "onBand": "#ffffff"
     },
-    "radius": 4,
-    "baseFontSize": 17,
+    "radius": 8,
+    "baseFontSize": 18,
     "scale": 1.3,
-    "headingWeight": 700,
+    "headingWeight": 900,
     "headingCase": "normal",
-    "headingTracking": -0.01,
-    "density": "regular",
+    "headingTracking": -0.035,
+    "density": "airy",
     "shadow": "none",
     "imagery": "full-bleed"
   },
@@ -128,10 +130,10 @@
   "chrome": {
     "header": {
       "variant": "bar",
-      "cta": "call"
+      "cta": "none"
     },
     "footer": {
-      "variant": "columns"
+      "variant": "compact"
     },
     "mobileActionBar": true
   },
@@ -151,142 +153,168 @@
       "sections": [
         {
           "id": "s_hero",
-          "type": "hero-image",
-          "variant": "overlay-bottom",
+          "type": "hero-signature",
+          "variant": "view",
           "props": {
-            "headline": "Sobe z razgledom na gore v Lučah",
-            "intro": "Domač zajtrk s kmetije, kosila ob koncih tedna in planinske poti od hiše.",
-            "primary": {
-              "label": "Pokliči za rezervacijo",
-              "target": {
-                "action": "call"
-              }
-            },
+            "eyebrow": "V Zgornji Savinjski dolini",
+            "headline": "Razgled na gore iz vsake sobe",
+            "intro": "4 sobe in apartma, zajtrk z naše kmetije, planinske poti se začnejo pri hiši.",
+            "fact": "phone",
+            "factLabel": "Rezervirajte",
             "secondary": {
               "label": "Sobe in cene",
               "target": {
                 "page": "p_sobe"
               }
             },
-            "image": "img_01"
-          }
-        },
-        {
-          "id": "s_strip",
-          "type": "contact-strip",
-          "variant": "bar",
-          "props": {}
-        },
-        {
-          "id": "s_highlights",
-          "type": "highlights",
-          "variant": "columns",
-          "tone": "alt",
-          "props": {
-            "heading": "Kaj vas čaka pri nas",
-            "items": [
+            "image": "img_07",
+            "signs": [
               {
-                "title": "Pogled na gore iz vsake sobe",
-                "text": "Vse sobe in apartma imajo lastno kopalnico in pogled na gore."
+                "label": "Raduha"
               },
               {
-                "title": "Zajtrk s kmetije",
-                "text": "Mleko, sir, skuta, marmelade in kruh iz krušne peči, vse z naše kmetije."
+                "label": "Logarska dolina"
               },
               {
-                "title": "Koze in zajci",
-                "text": "Otroci lahko pomagajo pri krmljenju koz in zajcev."
-              },
-              {
-                "title": "Poti na Raduho in v Logarsko dolino",
-                "text": "Planinske poti se začnejo kar pri kmetiji."
-              },
-              {
-                "title": "Smučišče v bližini",
-                "text": "Pozimi je manjše smučišče le 10 min stran."
-              },
-              {
-                "title": "Otroci do 6 let brezplačno",
-                "text": "Za najmlajše goste nočitve ne zaračunamo."
+                "label": "Smučišče",
+                "note": "10 min"
               }
             ]
           }
         },
         {
-          "id": "s_lunch",
-          "type": "image-text",
-          "variant": "image-left",
+          "id": "s_rates",
+          "type": "price-list",
+          "variant": "rates",
           "props": {
-            "heading": "Kosila ob sobotah in nedeljah",
-            "paragraphs": [
-              "Ob koncih tedna je odprta izletniška kmetija, od 11.00 do 19.00. Kuhamo juho, pečenko, štruklje in jabolčni zavitek. Za skupine kuhamo tudi med tednom, po dogovoru."
-            ],
-            "link": {
-              "label": "Pokliči za skupino",
-              "target": {
-                "action": "call"
+            "title": "4 sobe in apartma za 4 osebe",
+            "intro": "Vse z lastno kopalnico in pogledom na gore.",
+            "groups": [
+              {
+                "items": [
+                  {
+                    "name": "Nočitev z zajtrkom",
+                    "price": {
+                      "amount": 38,
+                      "unit": "na osebo"
+                    }
+                  },
+                  {
+                    "name": "Polpenzion",
+                    "price": {
+                      "amount": 52,
+                      "unit": "na osebo"
+                    }
+                  }
+                ]
               }
-            },
-            "image": "img_05"
+            ],
+            "footnote": "Otroci do 6 let so brezplačni.",
+            "image": "img_02"
           }
         },
         {
-          "id": "s_about",
-          "type": "about",
-          "variant": "text-only",
-          "props": {
-            "heading": "Na kmetiji od leta 1996",
-            "paragraphs": [
-              "Kmetijo imava z možem Tonetom od leta 1996. Jaz skrbim za goste in kuhinjo, Tone Grabnar pa za živino in gozd."
-            ],
-            "ownerName": "Mojca Grabnar",
-            "ownerRole": "gostje in kuhinja"
-          },
-          "tone": "alt"
-        },
-        {
-          "id": "s_gallery",
+          "id": "s_wall",
           "type": "gallery",
-          "variant": "mosaic",
+          "variant": "wall",
           "props": {
-            "title": "Razgled, živali in domača hrana",
+            "title": "Kmetija, živali in domača hrana",
             "images": [
               {
-                "image": "img_07",
-                "caption": "Pogled s terase na dolino"
+                "image": "img_01"
               },
               {
-                "image": "img_02",
-                "caption": "Ena od sob"
+                "image": "img_04"
               },
               {
-                "image": "img_04",
-                "caption": "Krave na pašniku"
+                "image": "img_03"
               },
               {
-                "image": "img_06",
-                "caption": "Krmljenje koz"
+                "image": "img_06"
               },
               {
-                "image": "img_08",
-                "caption": "Domača marmelada"
-              },
-              {
-                "image": "img_03",
-                "caption": "Zajtrk"
+                "image": "img_05"
               }
             ]
           }
         },
         {
-          "id": "s_contact",
-          "type": "contact",
-          "variant": "split-map",
+          "id": "s_farm",
+          "type": "image-text",
+          "variant": "image-right",
+          "tone": "alt",
           "props": {
-            "title": "Kako pridete do nas",
-            "intro": "Do kmetije pripeljete po asfaltu, le zadnjih 800 m je makadam."
-          },
-          "tone": "alt"
+            "eyebrow": "Zajtrk",
+            "heading": "Mleko, sir, skuta, marmelade in kruh iz krušne peči, vse z naše kmetije",
+            "paragraphs": [
+              "Otroci lahko pomagajo pri krmljenju koz in zajcev, kar jim je najbolj všeč."
+            ],
+            "image": "img_08"
+          }
+        },
+        {
+          "id": "s_weekend",
+          "type": "opening-hours",
+          "variant": "poster",
+          "tone": "band",
+          "props": {
+            "eyebrow": "Izletniška kmetija",
+            "title": "Ob sobotah in nedeljah kuhamo kosila",
+            "note": "Juha, pečenka, štruklji, jabolčni zavitek. Za skupine kuhamo tudi med tednom po dogovoru."
+          }
+        },
+        {
+          "id": "s_trails",
+          "type": "services-list",
+          "variant": "aside",
+          "props": {
+            "title": "Iz kmetije vodijo planinske poti",
+            "items": [
+              {
+                "name": "Raduha"
+              },
+              {
+                "name": "Logarska dolina"
+              },
+              {
+                "name": "Smučišče",
+                "description": "Pozimi, 10 min stran."
+              }
+            ],
+            "note": {
+              "title": "Kako do nas",
+              "text": "Do nas pripeljete po asfaltu, zadnjih 800 m je makadam."
+            }
+          }
+        },
+        {
+          "id": "s_hosts",
+          "type": "team",
+          "variant": "list",
+          "tone": "inverse",
+          "props": {
+            "title": "Na kmetiji sva od leta 1996",
+            "members": [
+              {
+                "name": "Mojca Grabnar",
+                "role": "gostje in kuhinja"
+              },
+              {
+                "name": "Tone Grabnar",
+                "role": "živina in gozd"
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_book",
+          "type": "contact",
+          "variant": "call-out",
+          "tone": "inverse",
+          "props": {
+            "title": "Rezervacije",
+            "intro": "Rezervacije sprejemamo po telefonu ali e-pošti."
+          }
         }
       ]
     },

@@ -182,6 +182,34 @@ describe("migration 8 → 9 (trade template O)", () => {
   });
 });
 
+describe("migration 9 → 10 (trade templates N and P)", () => {
+  it("turns stored v9 sites into valid v10 sites unchanged apart from the version, and accepts what v10 adds", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { validateSite } = await import("../src/index.ts");
+    const read = (id: string) => JSON.parse(readFileSync(new URL(`../../../tools/eval/golden/${id}.json`, import.meta.url), "utf8")) as SiteSpec;
+    for (const id of ["zobozdravstvo-lebar", "gostilna-zlata-zlica", "avtoservis-mrak"]) {
+      const golden = read(id);
+      const v10 = migrateSpec({ ...golden, specVersion: 9 }, MIGRATIONS, 10);
+      expect(v10, id).toEqual({ ...golden, specVersion: 10 });
+      expect(validateSite(migrateSpec(v10)).issues, id).toEqual([]);
+    }
+    const farm = migrateSpec(read("kmetija-grabnar"));
+    expect(validateSite(farm).issues).toEqual([]);
+    expect(farm.pages[0]!.sections.map((s) => `${s.type}:${s.variant}`)).toEqual(["hero-signature:view", "price-list:rates", "gallery:wall", "image-text:image-right", "opening-hours:poster", "services-list:aside", "team:list", "contact:call-out"]);
+    const physio = migrateSpec(read("fizioterapija-pregib"));
+    expect(validateSite(physio).issues).toEqual([]);
+    expect(physio.pages[0]!.sections.map((s) => `${s.type}:${s.variant}`)).toEqual(["hero-signature:bend", "highlights:figures", "services-list:aside", "text:narrow", "price-list:tags", "cta:band", "contact-strip:cards"]);
+  });
+
+  it("validates a stored v9 spec only after migration (the schema takes only the current version)", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { validateSite } = await import("../src/index.ts");
+    const farm = JSON.parse(readFileSync(new URL("../../../tools/eval/golden/kmetija-grabnar.json", import.meta.url), "utf8")) as SiteSpec;
+    expect(validateSite({ ...farm, specVersion: 9 }).ok).toBe(false);
+    expect(validateSite(migrateSpec({ ...farm, specVersion: 9 })).ok).toBe(true);
+  });
+});
+
 describe("generated images", () => {
   it("may fill a hero but not a products section (pekarna-kvas uses img_01 in both)", async () => {
     const { readFileSync } = await import("node:fs");

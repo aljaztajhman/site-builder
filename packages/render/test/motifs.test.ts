@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { DIRECTIONS, direction, migrateSpec, type Design, type SiteSpec } from "@sb/spec";
 import { renderPage, tokensCss } from "../src/index.ts";
+import { mix } from "../src/tokens.ts";
 
 function designFor(id: string): Design {
   const d = direction(id);
@@ -43,6 +44,38 @@ describe("template tokens", () => {
     expect(ledger).toMatch(/--fs-display:clamp\(2\.5rem, [^)]*, 5rem\)/);
     // Jedilnik: the spoon brand mark in brass (the band colour).
     expect(decodeURIComponent(tokensCss(designFor("jedilnik")))).toMatch(/--motif-brand:url\("data:image\/svg\+xml,<svg[^;]*fill="#d2ab55"/);
+  });
+
+  it("draws the trail blaze in its fixed red and white, the ridge as a mask, the signs and cut corners as shape tokens", () => {
+    // Decode only the SVG payloads: the shape tokens hold literal percentages.
+    const raw = tokensCss(designFor("markacija"));
+    const trail = raw.replace(/data:image\/svg\+xml,([^"]+)/g, (_, svg: string) => `data:image/svg+xml,${decodeURIComponent(svg)}`);
+    expect(trail).toMatch(/--motif-bullet:url\("data:image\/svg\+xml,<svg[^;]*fill="#ffffff" stroke="#c8202a"/);
+    expect(trail).toMatch(/--motif-blaze-sign:url\("data:image\/svg\+xml,<svg[^;]*fill="#c8202a" stroke="#ffffff"/);
+    expect(trail).toContain('<path d="M0 90V58l70-22');
+    expect(trail).toContain("--shape-sign:polygon(0 0, calc(100% - 1.625rem) 0, 100% 50%, calc(100% - 1.625rem) 100%, 0 100%)");
+    const bend = tokensCss(designFor("pregib"));
+    // The limb is the primary at 20 % on the page: #0f6b63 over white.
+    expect(bend).toContain(`--motif-limb:${mix("#0f6b63", "#ffffff", 0.2)}`);
+    expect(mix("#0f6b63", "#ffffff", 0.2)).toBe("#cfe1e0");
+    expect(bend).toContain("--shape-fold:polygon(0 0, 100% 0, 100% calc(100% - var(--fold, 4rem)), calc(100% - var(--fold, 4rem)) 100%, 0 100%)");
+  });
+
+  it("hides the hero's own booking and call on phones when the bar shows them from the start, never what the bar lacks", () => {
+    const read = (id: string) => migrateSpec(JSON.parse(readFileSync(new URL(`../../../tools/eval/golden/${id}.json`, import.meta.url), "utf8")) as unknown) as SiteSpec;
+    const physio = read("fizioterapija-pregib");
+    const p = renderPage(physio, physio.pages[0]!);
+    expect(p).toContain('class="has-action-bar bar-covers-hero-booking bar-covers-hero-call"');
+    expect(p).toMatch(/<nav class="action-bar"[^>]*><a class="btn btn--primary action-bar__btn" href="https:\/\/pregib\.example\/narocanje">/);
+    // A phone-fact hero with a call button and a page link (Ogledalo): the bar's call replaces the hero's on phones.
+    const salon = read("frizerstvo-lana");
+    expect(renderPage(salon, salon.pages[0]!)).toContain('class="has-action-bar bar-covers-hero-call"');
+    // No booking link: the bar can't cover the hero's booking, so nothing of it is hidden.
+    const noBooking = { ...physio, business: { ...physio.business, bookingUrl: undefined } };
+    const hero = noBooking.pages[0]!.sections[0]!;
+    if (hero.type === "hero-signature") hero.props.primary = { label: "Pokličite", target: { action: "call" } };
+    if (hero.type === "hero-signature") delete hero.props.secondary;
+    expect(renderPage(noBooking, noBooking.pages[0]!)).toContain('class="has-action-bar bar-covers-hero-call"');
   });
 
   it("draws the motif in the site's own colours after an edit", () => {
