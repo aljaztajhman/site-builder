@@ -21,7 +21,7 @@ import {
 } from "@sb/spec";
 import type { ModelClient } from "./llm/client.ts";
 import { ModelOutputError, extractJson, isSchemaRejection } from "./llm/client.ts";
-import { Brief, Classification, briefJsonSchema, classificationJsonSchema, verifyBriefFacts, type Dropped } from "./brief.ts";
+import { Brief, Classification, briefJsonSchema, classificationJsonSchema, clientWithholdsHours, verifyBriefFacts, type Dropped } from "./brief.ts";
 import {
   ALT_SYSTEM,
   BRIEF_SYSTEM,
@@ -330,7 +330,7 @@ export async function generateContent(client: ModelClient, input: ContentInput):
       if (!parsed.success) {
         issues = parsed.error.issues.slice(0, 25).map((i) => `/${i.path.join("/")}: ${i.message}`);
       } else {
-        spec = assembleSpec({ slug: input.slug, brief: input.brief, design: input.design, assets: input.assets, content: parsed.data as ContentOutput });
+        spec = assembleSpec({ slug: input.slug, brief: input.brief, design: input.design, assets: input.assets, content: parsed.data as ContentOutput, hoursWithheld: clientWithholdsHours(input.corpus) });
         // Copy rules fixed in code rather than by a paid retry: em dashes become en dashes.
         repairs.push(...repairSiteCopy(spec));
         const v = validateSite(spec);

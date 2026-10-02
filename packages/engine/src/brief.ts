@@ -133,6 +133,27 @@ export function numberTokens(text: string): Set<string> {
   return out;
 }
 
+const HOURS_TERM = /\b(?:(?:delovn|ordinacijsk|uradn|odpiraln|poslovn)\w*\s+(?:cas|ur)\w*|urnik\w*)/;
+const HOURS_WITHHELD = [
+  // "delovnega časa ne bi pisali", "urnika ne objavljamo", "ne navajajte delovnega časa"
+  /\bne\s+(?:bi\s+|bomo\s+|bo\s+|smo\s+|zelim\w*\s+|zelel\w*\s+)?(?:objav|pis|naved|navaj|prikaz|zapis|dajt|daja|kaz|omenj)\w*/,
+  // "brez delovnega časa", "nimamo stalnega delovnega časa"
+  /\b(?:brez|nimamo)\s+(?:objave\s+|stalnega\s+|fiksnega\s+|rednega\s+)?(?:delovn|ordinacijsk|uradn|urnik)/,
+  // "delovni čas po dogovoru"
+  /(?:cas|ure|urnik)\w*\s*(?:(?:je|so)\s+)?:?\s*(?:samo\s+|le\s+)?po\s+(?:predhodnem\s+)?dogovoru\b/,
+];
+
+/**
+ * The client asked for no opening hours on the site ("Delovnega časa tudi ne bi pisali"), or has none
+ * ("delovni čas po dogovoru"). Read from their own text, one sentence at a time, so the site gets no hours
+ * placeholder to fill (businessFromBrief). Only matters when the brief has no hours: stated hours win.
+ */
+export function clientWithholdsHours(text: string): boolean {
+  return fold(text)
+    .split(/[.!?](?=\s|$)|\n/)
+    .some((sentence) => HOURS_TERM.test(sentence) && HOURS_WITHHELD.some((re) => re.test(sentence)));
+}
+
 export interface Dropped {
   field: string;
   value: string;
