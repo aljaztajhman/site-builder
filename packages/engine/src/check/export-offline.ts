@@ -14,6 +14,18 @@ export interface ExportCheck {
   problems: string[];
 }
 
+/** Writes an export's files under `dir`, as a client unpacking the download would; returns them by name. */
+export async function unzipTo(zip: Uint8Array, dir: string): Promise<Record<string, Uint8Array>> {
+  const files = unzipSync(zip);
+  for (const [name, data] of Object.entries(files)) {
+    const p = path.resolve(dir, name);
+    if (!p.startsWith(path.resolve(dir) + path.sep)) throw new Error(`zip entry outside the folder: ${name}`);
+    await mkdir(path.dirname(p), { recursive: true });
+    await writeFile(p, data);
+  }
+  return files;
+}
+
 /**
  * Unzips an export and opens every page from file:// with no server, as a client would after
  * downloading it: the stylesheet must apply, every image must load, the self-hosted fonts must load,
@@ -21,12 +33,7 @@ export interface ExportCheck {
  */
 export async function checkExportOffline(zip: Uint8Array, slug: string, browser: Browser): Promise<ExportCheck> {
   const dir = await mkdtemp(path.join(tmpdir(), "sb-export-"));
-  const files = unzipSync(zip);
-  for (const [name, data] of Object.entries(files)) {
-    const p = path.join(dir, name);
-    await mkdir(path.dirname(p), { recursive: true });
-    await writeFile(p, data);
-  }
+  const files = await unzipTo(zip, dir);
   const pages = Object.keys(files).filter((f) => f.startsWith(`${slug}/`) && f.endsWith(".html"));
   const result: ExportCheck = { ok: true, files: pages.length, bytes: zip.length, pages: [], problems: [] };
   const ctx = await browser.newContext({ viewport: { width: 360, height: 800 }, offline: true });

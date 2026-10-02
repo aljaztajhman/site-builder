@@ -283,6 +283,22 @@ export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
       alter table ai_jobs add column units integer not null default 1;
     `,
   },
+  {
+    id: 11,
+    name: "form_messages.notify",
+    // The owner's email notification for each contact-form message. notify_status: 'none' (nobody to tell:
+    // the site has no owner account, or the message came before notifications existed), 'pending' (being
+    // sent, or waiting for a retry), 'sent', 'failed' (attempts used up). notify_attempts counts sends tried;
+    // notify_at is the last attempt. The message itself is always stored first, so a failed send loses nothing.
+    // form_messages_sender_all serves the per-visitor limit across all sites.
+    sql: `
+      alter table form_messages add column notify_status text not null default 'none';
+      alter table form_messages add column notify_attempts integer not null default 0;
+      alter table form_messages add column notify_at timestamptz;
+      create index form_messages_notify on form_messages(notify_status, created_at);
+      create index form_messages_sender_all on form_messages(sender_key, created_at);
+    `,
+  },
 ];
 
 type Query = (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>;

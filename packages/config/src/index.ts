@@ -87,6 +87,16 @@ export const AppConfigSchema = z.object({
     /** Contact form rate limits: per visitor (hashed IP) and per site. */
     formMessagesPerSenderPer10Min: z.number().int().positive(),
     formMessagesPerSitePerDay: z.number().int().positive(),
+    /** Per visitor (hashed IP) across every site, so one sender can't flood many owners' inboxes. */
+    formMessagesPerSenderPerDay: z.number().int().positive(),
+  }),
+  /** The owner's email about each contact-form message (see config $comment). */
+  formEmail: z.object({
+    waitMs: z.number().int().positive(),
+    retryEveryMinutes: z.number().int().positive(),
+    maxAttempts: z.number().int().min(1).max(10),
+    /** Below Resend's 24 h idempotency window, so a retry never sends twice. */
+    retryWithinHours: z.number().int().min(1).max(23),
   }),
   targets: z.object({
     homepagePreviewEur: z.number(),

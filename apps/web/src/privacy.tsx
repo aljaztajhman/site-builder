@@ -36,7 +36,7 @@ export function privacyPage(config: AppConfig): string {
           <ul>
             <li>Vaš e-poštni naslov, ko se prijavite, in čas prijave. Prijava poteka s povezavo po e-pošti; gesla ne hranimo.</li>
             <li>Opis podjetja, fotografije, logotip in stran, ki jo naredimo, z vsemi različicami in spremembami, ki jih naredite.</li>
-            <li>Sporočila, ki jih obiskovalci vaše objavljene strani pošljejo prek kontaktnega obrazca.</li>
+            <li>Sporočila, ki jih obiskovalci vaše objavljene strani pošljejo prek kontaktnega obrazca. Vsako vam pošljemo tudi na e-poštni naslov vašega računa.</li>
             <li>Vaša sporočila pomočniku in njegove odgovore, pri strani, na katero se nanašajo.</li>
             <li>Za vsako ustvarjanje in spremembo s pomočnikom čas in stroške, da lahko omejimo brezplačno uporabo.</li>
             <li>{`Predogled brez prijave in njegove datoteke izbrišemo po ${t.anonymous.keepDays} dneh, razen če se v tem času prijavite; potem je vaš.`}</li>
@@ -72,7 +72,7 @@ export function privacyPage(config: AppConfig): string {
               obdela vaš naslov IP in podatke o brskalniku.
             </li>
             <li>
-              <strong>Resend</strong> pošlje e-pošto s povezavo za prijavo.
+              <strong>Resend</strong> pošlje e-pošto s povezavo za prijavo in sporočila iz kontaktnih obrazcev lastnikom strani.
             </li>
             <li>
               <strong>Anthropic</strong> (jezikovni model) in <strong>fal.ai</strong> (ustvarjanje slik) obdelata opis in fotografije, da naredimo stran.
