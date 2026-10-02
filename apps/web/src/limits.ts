@@ -45,6 +45,9 @@ const MORE_HOMEPAGES: Forms = { one: "domačo stran", two: "domači strani", few
 export const moreHomepages = (n: number): string => count(n, MORE_HOMEPAGES);
 /** "10 sprememb s pomočnikom". */
 export const chatEdits = (n: number): string => count(n, EDITS);
+/** After "starejša od …" (genitive): "1 dneva", "7 dni". */
+const DAYS_AFTER_OD: Forms = { one: "dneva", two: "dni", few: "dni", other: "dni" };
+export const daysAfterOd = (n: number): string => count(n, DAYS_AFTER_OD);
 const FULL_SITES: Forms ={ one: "ustvarjanje celotne strani", two: "ustvarjanji celotne strani", few: "ustvarjanja celotne strani", other: "ustvarjanj celotne strani" };
 
 // ---------- Paid allowance ----------
