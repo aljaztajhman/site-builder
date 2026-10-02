@@ -5,7 +5,7 @@ import path from "node:path";
 import { loadConfig } from "@sb/config";
 import { Repo, createDb, createFsStorage, migrate, type Platform, type Queue } from "@sb/platform";
 import { createApp } from "../src/app.ts";
-import { SESSION_COOKIE } from "../src/auth.ts";
+import { SESSION_COOKIE, loginThrottle } from "../src/auth.ts";
 import { homePage } from "../src/home.tsx";
 import { adminBrowser, type Browser } from "./session-helpers.ts";
 
@@ -65,6 +65,16 @@ describe("access control", () => {
     const res = await app.request("/sites", { headers: { cookie } });
     expect(res.status).toBe(200);
     expect(await res.text()).toContain("Nova stran");
+  });
+
+  it("throttles login per client, and one client hammering the form doesn't lock out everyone", () => {
+    const allow = loginThrottle(10, 200);
+    const flood = Array.from({ length: 500 }, () => allow("attacker"));
+    expect(flood.filter(Boolean)).toHaveLength(10);
+    expect(allow("admin")).toBe(true);
+    // Many clients together still hit the overall cap.
+    const many = Array.from({ length: 300 }, (_, i) => allow(`ip${i % 30}`));
+    expect(many.filter(Boolean).length).toBeLessThanOrEqual(200 - 11);
   });
 
   it("rejects a forged session cookie", async () => {
@@ -235,6 +245,26 @@ describe("health", () => {
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ status: "ok", checks: { database: "ok", storage: "ok", queue: "ok" } });
   });
+
+  it("keeps internal error detail out of public responses", async () => {
+    const detail = "connect ECONNREFUSED minio.internal:9000";
+    const broken = { ...platform.storage, ping: () => Promise.reject(new Error(detail)), get: () => Promise.reject(new Error(detail)) };
+    const other = createApp({ platform: { ...platform, storage: broken }, config: loadConfig(), auth: { password: PASSWORD, secret: "s".repeat(32), secureCookies: false } });
+    const errors = console.error;
+    console.error = () => undefined;
+    try {
+      const health = await other.request("/health");
+      expect(health.status).toBe(503);
+      expect(await health.text()).not.toContain("minio");
+      const page = await other.request("/s/demo/");
+      expect(page.status).toBe(500);
+      const body = await page.text();
+      expect(body).not.toContain("minio");
+      expect(body).toContain("Poskusite znova");
+    } finally {
+      console.error = errors;
+    }
+  });
 });
 
 describe("published sites", () => {
@@ -308,6 +338,18 @@ describe("intake", () => {
     expect(res.status).toBe(303);
   }, 60_000);
 
+  it("starts one generation when generate is clicked twice at once", async () => {
+    const { cookie } = await login();
+    const site = (await platform.repo.listSites())[0]!;
+    await platform.repo.setStatus(site.id, "ready");
+    const before = sent.length;
+    const post = () => app.request(`/api/sites/${site.id}/generate`, { method: "POST", body: "{}", headers: { cookie, "content-type": "application/json" } });
+    const statuses = (await Promise.all([post(), post()])).map((r) => r.status).sort();
+    expect(statuses).toEqual([200, 409]);
+    expect(sent.slice(before).filter((m) => m.name === "generate")).toHaveLength(1);
+    expect((await platform.repo.getSite(site.id))?.status).toBe("generating");
+  });
+
   it("refuses AI work once the daily spend cap is reached", async () => {
     const { cookie } = await login();
     const site = (await platform.repo.listSites())[0]!;
@@ -315,6 +357,8 @@ describe("intake", () => {
     await platform.repo.logModelCall({ siteId: site.id, jobId: null, stage: "brief", model: "claude-sonnet-5-5", inputTokens: 1, outputTokens: 1, cacheCreationTokens: 0, cacheReadTokens: 0, costEur: 1000, durationMs: 1, ok: true });
     const res = await app.request(`/api/sites/${site.id}/generate`, { method: "POST", body: "{}", headers: { cookie, "content-type": "application/json" } });
     expect(res.status).toBe(429);
+    // The refused request gives the site its status back.
+    expect((await platform.repo.getSite(site.id))?.status).toBe("ready");
   });
 });
 
@@ -440,6 +484,16 @@ describe("direct editor API (no model calls)", () => {
     // Preview equals published output, byte for byte.
     const previewHtml = await (await app.request(`/preview/${site.id}/index.html`, { headers: { cookie } })).text();
     expect(previewHtml).toBe(publishedHtml);
+
+    // Two publishes at once: one writes its release, the other is told to wait; the live site stays whole.
+    const twice = await Promise.all([1, 2].map(() => app.request(`/api/sites/${site.id}/publish`, { method: "POST", headers: { cookie } })));
+    expect(twice.map((r) => r.status).sort()).toEqual([200, 409]);
+    expect(((await twice.find((r) => r.status === 409)!.json()) as { message: string }).message).toMatch(/že objavlja/);
+    expect((await app.request("/s/pekarna-kvas/")).status).toBe(200);
+    expect((await platform.repo.getSite(site.id))?.publishing_since).toBeNull();
+    // A publish that crashed long ago doesn't hold the site forever.
+    await platform.db.query("update sites set publishing_since = now() - interval '1 hour' where id = $1", [site.id]);
+    expect((await app.request(`/api/sites/${site.id}/publish`, { method: "POST", headers: { cookie } })).status).toBe(200);
 
     // Layout thumbnails: one section alone, in the variant asked for, with its own content.
     const thumb = await (await app.request(`/preview/${site.id}/index.html?section=s_about&variant=text-only`, { headers: { cookie } })).text();

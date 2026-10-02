@@ -80,6 +80,17 @@ describe("publishing a release", () => {
     expect(await liveRelease(storage, "b")).toBeNull();
   });
 
+  it("completes a shared bundle that an interrupted publish left half-written", async () => {
+    await storage.put("published/_shared/half01/site.css", enc.encode("body{}"), "text/css");
+    const files = new Map<string, Uint8Array>([
+      ["c/index.html", enc.encode("c")],
+      ["_shared/half01/site.css", enc.encode("body{}")],
+      ["_shared/half01/nav.js", enc.encode("1")],
+    ]);
+    await writeRelease(storage, "c", newReleaseId(1), files);
+    expect((await storage.list("published/_shared/half01/")).sort()).toEqual(["published/_shared/half01/nav.js", "published/_shared/half01/site.css"]);
+  });
+
   it("makes release ids that sort by version and never repeat", () => {
     const a = newReleaseId(7, 1_000);
     const b = newReleaseId(7, 1_000);

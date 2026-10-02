@@ -33,7 +33,8 @@ export interface CopyViolation {
   text: string;
 }
 
-const HEADLINE_KEYS = new Set(["headline", "title"]);
+/** Keys where a greeting ("Dobrodošli", "Welcome to …") is banned: the headline and the line above it. */
+const HEADLINE_KEYS = new Set(["headline", "title", "eyebrow"]);
 const LABEL_KEYS = new Set(["eyebrow", "label"]);
 
 /** Walks every string in `value` and reports banned copy. `path` is a JSON Pointer. */

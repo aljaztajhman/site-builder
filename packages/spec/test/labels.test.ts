@@ -121,6 +121,17 @@ describe("issueMessage", () => {
     expect(filler && issueMessage(filler)).toBe("vsebuje prazno frazo »vrhunska kakovost«; napišite konkretno, kaj ponujate");
   });
 
+  it("uses Slovene plural forms for item counts (one, two, few, other)", () => {
+    const min = (n: number) => issueMessage({ path: "/x", code: "schema", message: `Too small: expected array to have >=${n} items` });
+    expect(min(1)).toBe("potrebuje vsaj 1 postavko");
+    expect(min(2)).toBe("potrebuje vsaj 2 postavki");
+    expect(min(3)).toBe("potrebuje vsaj 3 postavke");
+    expect(min(5)).toBe("potrebuje vsaj 5 postavk");
+    expect(min(101)).toBe("potrebuje vsaj 101 postavko");
+    expect(min(102)).toBe("potrebuje vsaj 102 postavki");
+    expect(min(104)).toBe("potrebuje vsaj 104 postavke");
+  });
+
   it("falls back to a plain sentence, never English", () => {
     expect(issueMessage({ path: "/x", code: "schema", message: "Something odd" })).toBe("ni veljavno");
   });
@@ -138,5 +149,16 @@ describe("publish checklist", () => {
     expect(blockerMessage(list.find((b) => b.kind === "alt")!)).toMatch(/^Fotografija nima opisa/);
     expect(blockerMessage({ path: "/business/phone", kind: "fact", detail: "phone", value: "01 234 56 78" })).toMatch(/^»01 234 56 78« ni iz vašega opisa/);
     expect(blockerMessage({ path: "/pages/0/sections/0/props/title", kind: "starter", detail: "starter text" })).toBe("Začetno besedilo še ni zamenjano.");
+  });
+
+  it("names the facts sections need at render time (hours, service area)", () => {
+    const spec = golden();
+    delete spec.business.hours;
+    spec.pages[0]!.sections.push({ id: "s_area", type: "service-area", variant: "list", props: { title: "Kam dostavljamo" } } as SiteSpec["pages"][number]["sections"][number]);
+    const list = publishChecklist(spec);
+    const hours = list.find((b) => b.path === "/business/hours")!;
+    const area = list.find((b) => b.path === "/business/serviceArea")!;
+    expect(`${describePath(spec, hours.path)}: ${blockerMessage(hours)}`).toBe("Podatki o podjetju › Delovni čas: Manjka delovni čas.");
+    expect(`${describePath(spec, area.path)}: ${blockerMessage(area)}`).toBe("Podatki o podjetju › Območje dela: Manjka območje dela.");
   });
 });

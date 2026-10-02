@@ -201,6 +201,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     }),
   );
   if (content.structuredFallback) await log("content", "Structured output rejected the content schema; used plain JSON");
+  if (content.repairs.length) await log("content", "Repaired the content answer before validation", content.repairs);
   if (content.issues.length) await log("content", "Spec still has issues after retries", content.issues);
   let spec = content.spec;
   // A regeneration keeps the business facts of the version it replaces (typed in the editor since the intake).
@@ -208,8 +209,9 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
   if (replaced) {
     const merged = keepOwnerFacts(replaced.spec, spec);
     const v = validateSite(merged.spec);
-    if (merged.kept.length && v.ok) {
-      spec = v.spec;
+    // An already invalid regenerated spec can't be made worse by the owner's own facts: keep them.
+    if (merged.kept.length && (v.ok || !validateSite(spec).ok)) {
+      spec = v.ok ? v.spec : merged.spec;
       await log("content", "Kept the business facts of the previous version", merged.kept);
     } else if (merged.kept.length) await log("content", "Previous business facts don't fit the new site; used the regenerated ones", v.issues.slice(0, 5));
   }
@@ -229,7 +231,15 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
       ...(deps.browser ? { browser: deps.browser } : {}),
     });
   };
-  check = await stageTime("check", runCheck);
+  try {
+    check = await stageTime("check", runCheck);
+  } catch (e) {
+    // A browser or Lighthouse failure leaves a saved, valid version: the site is usable (publishing
+    // runs its own checklist), it just gets no critique.
+    await log("check", "Checks failed to run; kept the saved version without critique", (e as Error).message.slice(0, 300));
+    await repo.setStatus(siteId, "ready");
+    return { version, check: null, critiqueRounds: 0, timings, firstVersionMs };
+  }
   await log("check", check.failures.length ? "Checks found problems" : "All checks passed", { failures: check.failures, lighthouse: check.lighthouse });
   while (rounds < config.limits.critiqueIterations) {
     rounds++;
@@ -263,7 +273,13 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
       throw e;
     }
     spec = r.spec;
-    check = await stageTime("check", runCheck);
+    try {
+      check = await stageTime("check", runCheck);
+    } catch (e) {
+      await log("check", "Checks failed to run after the critique; kept the critique's version", (e as Error).message.slice(0, 300));
+      check = null;
+      break;
+    }
     await log("check", check.failures.length ? "Checks found problems" : "All checks passed", { failures: check.failures, lighthouse: check.lighthouse });
   }
   await repo.setStatus(siteId, "ready");
@@ -322,6 +338,14 @@ export class PublishBlockedError extends Error {
 }
 
 /** Step 6: render static files to storage as a new release and switch the live site to it (published.ts). */
+/** Another publish of the same site is writing its release right now. */
+export class PublishBusyError extends Error {
+  constructor() {
+    super("Another publish of this site is in progress");
+    this.name = "PublishBusyError";
+  }
+}
+
 export async function publishSite(deps: Pick<PipelineDeps, "repo" | "storage" | "config">, siteId: string, version?: number): Promise<{ version: number; files: number }> {
   const { repo, storage, config } = deps;
   const site = await repo.getSite(siteId);
@@ -331,13 +355,19 @@ export async function publishSite(deps: Pick<PipelineDeps, "repo" | "storage" | 
   const current = { ...stored, spec: { ...stored.spec, slug: site.slug } };
   const checklist = await siteChecklist(repo, siteId, current.spec);
   if (checklist.length) throw new PublishBlockedError(checklist);
-  const media = await loadMedia(storage, siteId, current.spec, config.images.widths);
-  const files = siteFiles(current.spec, media, { imageWidths: config.images.widths });
-  const release = newReleaseId(current.version);
-  await writeRelease(storage, site.slug, release, files);
-  await repo.markPublished(siteId, current.version, release);
-  await repo.addEvent({ siteId, stage: "publish", message: `Published version ${current.version}`, data: { files: files.size, release } });
-  return { version: current.version, files: files.size };
+  // Two publishes at once (two tabs, a retry after a timeout) would each clean up the other's release.
+  if (!(await repo.claimPublish(siteId))) throw new PublishBusyError();
+  try {
+    const media = await loadMedia(storage, siteId, current.spec, config.images.widths);
+    const files = siteFiles(current.spec, media, { imageWidths: config.images.widths });
+    const release = newReleaseId(current.version);
+    await writeRelease(storage, site.slug, release, files);
+    await repo.markPublished(siteId, current.version, release);
+    await repo.addEvent({ siteId, stage: "publish", message: `Published version ${current.version}`, data: { files: files.size, release } });
+    return { version: current.version, files: files.size };
+  } finally {
+    await repo.releasePublish(siteId);
+  }
 }
 
 export async function exportSite(deps: Pick<PipelineDeps, "repo" | "storage" | "config">, siteId: string, version?: number): Promise<{ filename: string; zip: Uint8Array }> {
@@ -374,7 +404,7 @@ export async function applyChatEdit(deps: Pick<PipelineDeps, "repo" | "client">,
   if (!msg || !current) throw new Error("Message or spec not found");
   const before = (await repo.getSite(siteId))?.status;
   // Don't mask a running generation; only mark "editing" when the site was idle.
-  if (before === "ready" || before === "failed") await repo.setStatus(siteId, "editing");
+  const marked = before === "ready" || before === "failed" ? await repo.setStatusIf(siteId, before, "editing") : false;
   try {
     const corpus = await clientCorpus(repo, siteId);
     // The last few exchanges before this message, so a follow-up can refer to them.
@@ -399,6 +429,7 @@ export async function applyChatEdit(deps: Pick<PipelineDeps, "repo" | "client">,
     await repo.addChat(siteId, "assistant", reply, { version, issues });
     return { version, reply, issues };
   } finally {
-    if (before === "ready" || before === "failed") await repo.setStatus(siteId, "ready");
+    // A generation started while the model worked keeps its "generating".
+    if (marked) await repo.setStatusIf(siteId, "editing", "ready");
   }
 }

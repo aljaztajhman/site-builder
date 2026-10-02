@@ -1,4 +1,5 @@
 import sharp from "sharp";
+import { MAX_INPUT_PIXELS } from "./images.ts";
 import { hexToHsl, rgbToHex, type Rgb } from "@sb/spec";
 
 export interface Swatch {
@@ -13,7 +14,7 @@ export interface Swatch {
  * near-black and grey pixels are skipped (backgrounds and outlines), so the brand colour wins.
  */
 export async function extractSwatches(data: Uint8Array, source: Swatch["source"], max = 4): Promise<Swatch[]> {
-  const { data: px, info } = await sharp(data, { density: 72 })
+  const { data: px, info } = await sharp(data, { density: 72, limitInputPixels: MAX_INPUT_PIXELS })
     .flatten({ background: "#ffffff" })
     .resize(64, 64, { fit: "inside" })
     .removeAlpha()

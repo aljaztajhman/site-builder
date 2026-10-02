@@ -1,7 +1,8 @@
 // Contact form: submits in place and announces the result in the form's live region.
 // Without this script the form still posts normally and the server answers with a thank-you page.
 // Contract: <form data-contact-form data-msg-*> ... <p data-form-status role="status"> ... </form>
-// In the dashboard preview (/preview/…) and in an offline export (file://) nothing is sent.
+// In the dashboard preview (/preview/<site id>/…) and in an offline export (file://) nothing is sent.
+// The preview test is anchored to the path start: a published site with the slug "preview" lives at /s/preview/….
 (() => {
   const forms = document.querySelectorAll("form[data-contact-form]");
   forms.forEach((form) => {
@@ -17,7 +18,7 @@
         e.preventDefault();
         return say("offline", "info");
       }
-      if (/\/preview\//.test(location.pathname)) {
+      if (/^\/preview\//.test(location.pathname)) {
         e.preventDefault();
         return say("preview", "info");
       }

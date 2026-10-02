@@ -70,6 +70,8 @@ export async function checkSite(spec: SiteSpec, files: Map<string, Uint8Array>, 
   const cb = opts.browser ?? (await launchCheckBrowser());
   const t = opts.config.checks.tapTarget;
   const vp = opts.config.checks.viewports;
+  // A page that fails to load or an axe error must not leave contexts open in a shared browser.
+  const contexts: { close(): Promise<void> }[] = [];
   try {
     const v = validateSite(spec);
     const validation = v.ok ? [] : v.issues;
@@ -84,6 +86,7 @@ export async function checkSite(spec: SiteSpec, files: Map<string, Uint8Array>, 
     for (const file of files) {
       const url = `${server.url}/${spec.slug}/${file}`;
       const mctx = await cb.browser.newContext({ viewport: vp.mobile, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
+      contexts.push(mctx);
       const mp = await mctx.newPage();
       await mp.goto(url, { waitUntil: "networkidle" });
       const mobile = await measurePage(mp, { primaryMin: t.primaryMin, primaryGap: t.primaryGap, absoluteMin: t.absoluteMin });
@@ -100,6 +103,7 @@ export async function checkSite(spec: SiteSpec, files: Map<string, Uint8Array>, 
       await mctx.close();
 
       const dctx = await cb.browser.newContext({ viewport: vp.desktop, deviceScaleFactor: 1 });
+      contexts.push(dctx);
       const dp = await dctx.newPage();
       await dp.goto(url, { waitUntil: "networkidle" });
       const d = await measurePage(dp, { primaryMin: t.primaryMin, primaryGap: t.primaryGap, absoluteMin: t.absoluteMin });
@@ -131,6 +135,7 @@ export async function checkSite(spec: SiteSpec, files: Map<string, Uint8Array>, 
     report.failures = failuresOf(spec, report, opts.config);
     return report;
   } finally {
+    await Promise.all(contexts.map((x) => x.close().catch(() => undefined)));
     await server.close();
     if (own) await cb.close();
     await rm(dir, { recursive: true, force: true });

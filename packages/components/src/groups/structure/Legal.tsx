@@ -5,7 +5,6 @@ import { accessibilityBody, privacyBody, type LegalFacts } from "./legal-text.ts
 
 function legalFacts(ctx: RenderCtx): LegalFacts {
   const b = ctx.site.business;
-  const sl = ctx.locale === "sl";
   return {
     name: b.name,
     legal: <MaybeText value={b.provider.legalName} ctx={ctx} />,
@@ -15,15 +14,6 @@ function legalFacts(ctx: RenderCtx): LegalFacts {
     phone: <PhoneLink ctx={ctx} />,
     date: formatDate(new Date()),
     contactForm: ctx.site.pages.some((p) => p.sections.some((s) => s.type === "contact-form")),
-    limitations: (
-      <Ph
-        p={{
-          $placeholder: "text",
-          note: sl ? "Navedite druge znane omejitve ali zapišite, da jih ni." : "List other known limitations, or state that there are none.",
-        }}
-        ctx={ctx}
-      />
-    ),
   };
 }
 

@@ -22,6 +22,8 @@
   "limits": {
     "dailyModelSpendCapEur": 10,
     "contentRetries": 2,
+    "jsonRetries": 2,
+    "editRetries": 1,
     "critiqueIterations": 2,
     "maxPhotos": 12,
     "maxUploadBytes": 15000000,

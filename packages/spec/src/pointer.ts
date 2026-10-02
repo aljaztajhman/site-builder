@@ -12,23 +12,24 @@ export function escapeToken(k: string): string {
   return k.replace(/~/g, "~0").replace(/\//g, "~1");
 }
 
+/** Follows own properties only, so "/constructor/name" or "/__proto__/x" never resolve through the prototype. */
 export function getAt(doc: unknown, p: string): unknown {
   let cur: unknown = doc;
   for (const key of parsePointer(p)) {
-    if (cur === null || typeof cur !== "object") return undefined;
+    if (cur === null || typeof cur !== "object" || !Object.hasOwn(cur, key)) return undefined;
     cur = (cur as Record<string, unknown>)[key];
   }
   return cur;
 }
 
-/** Sets a string leaf in place. Throws when the parent does not exist. */
+/** Sets a string leaf in place. Throws when the parent does not exist (own properties only, as getAt). */
 export function setAt(doc: unknown, p: string, value: unknown): void {
   const keys = parsePointer(p);
   const last = keys.pop();
   if (last === undefined) throw new Error("Cannot set the document root");
   let cur: unknown = doc;
   for (const key of keys) {
-    if (cur === null || typeof cur !== "object") throw new Error(`No parent for ${p}`);
+    if (cur === null || typeof cur !== "object" || !Object.hasOwn(cur, key)) throw new Error(`No parent for ${p}`);
     cur = (cur as Record<string, unknown>)[key];
   }
   if (cur === null || typeof cur !== "object") throw new Error(`No parent for ${p}`);

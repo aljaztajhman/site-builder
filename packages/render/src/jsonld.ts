@@ -1,4 +1,4 @@
-import { isPlaceholder, type BusinessType, type SiteSpec } from "@sb/spec";
+import { isPlaceholder, isWebUrl, type BusinessType, type SiteSpec } from "@sb/spec";
 
 const SCHEMA_TYPE: Record<BusinessType, string> = {
   hairdresser: "HairSalon",
@@ -53,6 +53,8 @@ export function jsonLd(spec: SiteSpec): string {
         closes: e.close,
       }));
   }
+  const sameAs = (b.social ?? []).map((s) => s.url).filter(isWebUrl);
+  if (sameAs.length) data.sameAs = sameAs;
   // "<" escaped so the JSON can never close the script element.
   return JSON.stringify(data).replace(/</g, "\\u003c");
 }

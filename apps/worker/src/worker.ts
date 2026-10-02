@@ -15,7 +15,6 @@ import {
   loadRecordings,
   pruneAllSites,
   pruneSite,
-  publishSite,
   type ModelTransport,
 } from "@sb/engine";
 import type { Platform, Tier } from "@sb/platform";
@@ -106,7 +105,7 @@ function defaultTransport(job: "generate" | "edit"): ModelTransport {
 export async function startWorker(platform: Platform, config = loadConfig()): Promise<void> {
   const { repo, storage, queue } = platform;
 
-  // A job can't outlive the queue's 15-minute expiry; anything older still marked busy was interrupted.
+  // Sites marked busy with no waiting or running job (pg-boss expires a dead one after 15 minutes) were interrupted.
   await repo.failInterrupted(0);
   setInterval(() => void repo.failInterrupted(20).catch((e: unknown) => console.error("[worker]", e)), 5 * 60_000).unref();
 
@@ -197,15 +196,7 @@ export async function startWorker(platform: Platform, config = loadConfig()): Pr
       await repo.addEvent({ siteId: job.siteId, jobId, stage: "altText", level: "warn", message: `Photo descriptions not written: ${(e as Error).message.slice(0, 200)}` });
       console.error("[alt]", e);
     } finally {
-      if ((await repo.getSite(job.siteId))?.status === "editing") await repo.setStatus(job.siteId, "ready");
-    }
-  });
-
-  await queue.work("publish", async (job, jobId) => {
-    try {
-      await publishSite({ repo, storage, config }, job.siteId, job.version);
-    } catch (e) {
-      await repo.addEvent({ siteId: job.siteId, jobId, stage: "publish", level: "error", message: (e as Error).message });
+      await repo.setStatusIf(job.siteId, "editing", "ready");
     }
   });
 

@@ -1,6 +1,7 @@
 // Consent-gated embeds (maps). Nothing loads before a click or a stored "granted" choice.
 // Contract: <div class="embed" data-embed-src data-embed-title> ... <button data-embed-load> ... </div>
 // Notice: [data-consent-notice] with [data-consent="granted|denied"] buttons; [data-consent-open] reopens it.
+// With [data-consent-on-request] (a page with nothing to gate) the notice opens only from [data-consent-open].
 // The choice is kept in localStorage ("sb-consent"), not in a cookie.
 (() => {
   const KEY = "sb-consent";
@@ -62,5 +63,5 @@
   d.querySelectorAll("[data-consent-open]").forEach((b) => (b.hidden = false));
   const c = get();
   if (c === "granted") loadAll();
-  else if (!c && notice) notice.hidden = false;
+  else if (!c && notice && !notice.hasAttribute("data-consent-on-request")) notice.hidden = false;
 })();

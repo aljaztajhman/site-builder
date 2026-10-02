@@ -1,4 +1,4 @@
-import { createHash, createHmac, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, scryptSync, timingSafeEqual } from "node:crypto";
 import type { Context } from "hono";
 import { getCookie, setCookie, deleteCookie } from "hono/cookie";
 
@@ -18,7 +18,9 @@ export function authSettingsFromEnv(): AuthSettings {
   if (!password || password.length < 12) throw new Error("ACCESS_PASSWORD must be set (at least 12 characters)");
   return {
     password,
-    secret: process.env.SESSION_SECRET || createHash("sha256").update(`sb-session:${password}`).digest("hex"),
+    // Without SESSION_SECRET the key comes from the password through a slow KDF: every visitor's
+    // device cookie is an HMAC under it, so a fast hash would let anyone guess the password offline.
+    secret: process.env.SESSION_SECRET || scryptSync(password, "sb-session", 32, { N: 1 << 16, r: 8, p: 1, maxmem: 128 * 1024 * 1024 }).toString("hex"),
     secureCookies: process.env.NODE_ENV === "production",
   };
 }
@@ -60,7 +62,9 @@ export function hasSession(c: Context, s: AuthSettings): boolean {
 
 /**
  * In-memory login throttle: 10 attempts per client per 10 minutes, and at most 200 attempts in total
- * per 10 minutes (so rotating client addresses doesn't lift the limit). Old entries are pruned.
+ * per 10 minutes (so rotating client addresses doesn't lift the limit). Only attempts within a client's
+ * own limit count toward the total, so one client hammering the form can't lock everyone out.
+ * Old entries are pruned.
  */
 export function loginThrottle(perClient = 10, total = 200, windowMs = 10 * 60_000) {
   const attempts = new Map<string, number[]>();
@@ -71,8 +75,9 @@ export function loginThrottle(perClient = 10, total = 200, windowMs = 10 * 60_00
     if (attempts.size > 1000) for (const [k, v] of attempts) if (v.every((t) => now - t >= windowMs)) attempts.delete(k);
     const list = (attempts.get(key) ?? []).filter((t) => now - t < windowMs);
     list.push(now);
-    all.push(now);
     attempts.set(key, list);
-    return list.length <= perClient && all.length <= total;
+    if (list.length > perClient) return false;
+    all.push(now);
+    return all.length <= total;
   };
 }

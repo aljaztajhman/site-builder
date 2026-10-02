@@ -7,6 +7,13 @@ on:
         required: false
         default: ""
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   eval:
     runs-on: ubuntu-latest
@@ -23,7 +30,9 @@ jobs:
       - name: Run eval
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: pnpm eval ${{ inputs.only && format('--only {0}', inputs.only) || '' }}
+          FAL_KEY: ${{ secrets.FAL_KEY }}
+          ONLY: ${{ inputs.only }}
+        run: pnpm eval ${ONLY:+--only "$ONLY"}
       - uses: actions/upload-artifact@v4
         if: always()
         with:

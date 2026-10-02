@@ -7,9 +7,15 @@ export interface ProcessedImage {
   variants: { file: string; data: Uint8Array }[];
 }
 
+/**
+ * Largest decoded image accepted (pixels). A small file can declare a huge canvas and take gigabytes
+ * to decode; 48–50 MP phone photos pass, 100+ MP modes and crafted files are refused.
+ */
+export const MAX_INPUT_PIXELS = 60_000_000;
+
 /** Normalises orientation and writes AVIF + WebP variants at the configured widths. */
 export async function processPhoto(id: string, data: Uint8Array, widths: number[], quality: { avif: number; webp: number }): Promise<ProcessedImage> {
-  const base = sharp(data, { failOn: "error" }).rotate();
+  const base = sharp(data, { failOn: "error", limitInputPixels: MAX_INPUT_PIXELS }).rotate();
   const meta = await base.metadata();
   // After rotate(), width/height of the output follow the EXIF orientation.
   const swap = (meta.orientation ?? 1) >= 5;
@@ -30,20 +36,21 @@ export async function processPhoto(id: string, data: Uint8Array, widths: number[
  * our origin could carry script, and a PNG is safe everywhere (preview, published site, export).
  */
 export async function processLogo(data: Uint8Array, mime: string): Promise<{ file: string; data: Uint8Array; width: number; height: number }> {
-  const input = mime === "image/svg+xml" ? sharp(data, { density: 300 }) : sharp(data);
+  const input = mime === "image/svg+xml" ? sharp(data, { density: 300, limitInputPixels: MAX_INPUT_PIXELS }) : sharp(data, { limitInputPixels: MAX_INPUT_PIXELS });
   const out = await input.resize({ height: 96, withoutEnlargement: mime !== "image/svg+xml" }).png().toBuffer({ resolveWithObject: true });
   return { file: "logo.png", data: out.data, width: Math.round(out.info.width / 2), height: Math.round(out.info.height / 2) };
 }
 
 /** Small JPEG for the vision model: enough for alt text and critique, cheap in tokens. */
 export async function visionJpeg(data: Uint8Array, maxSide = 768): Promise<string> {
-  const buf = await sharp(data).rotate().resize(maxSide, maxSide, { fit: "inside", withoutEnlargement: true }).jpeg({ quality: 70 }).toBuffer();
+  const buf = await sharp(data, { limitInputPixels: MAX_INPUT_PIXELS }).rotate().resize(maxSide, maxSide, { fit: "inside", withoutEnlargement: true }).jpeg({ quality: 70 }).toBuffer();
   return buf.toString("base64");
 }
 
 export async function imageMeta(data: Uint8Array): Promise<{ width: number; height: number; format: string }> {
   const m = await sharp(data).metadata();
   if (!m.width || !m.height || !m.format) throw new Error("Unreadable image");
+  if (m.width * m.height > MAX_INPUT_PIXELS) throw new Error("Image too large");
   return { width: m.width, height: m.height, format: m.format };
 }
 

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import sharp from "sharp";
-import { fitImageForModel } from "../src/index.ts";
+import { crc32 } from "node:zlib";
+import { fitImageForModel, imageMeta, processPhoto, visionJpeg } from "../src/index.ts";
 
 const png = (width: number, height: number) => sharp({ create: { width, height, channels: 3, background: "#888" } }).png().toBuffer().then((b) => new Uint8Array(b));
 
@@ -34,5 +35,23 @@ describe("sliceScreenshot", () => {
     const { sliceScreenshot } = await import("../src/index.ts");
     const short = await png(360, 1200);
     expect((await sliceScreenshot(short, 1560, 6)).tiles).toEqual([short]);
+  });
+});
+
+describe("decompression bombs", () => {
+  // A 1×1 PNG whose header claims 12000×12000 px: tiny on disk, ~430 MB if decoded and under sharp's own default limit.
+  const bomb = async () => {
+    const b = Buffer.from(await png(1, 1));
+    b.writeUInt32BE(12000, 16);
+    b.writeUInt32BE(12000, 20);
+    b.writeUInt32BE(crc32(b.subarray(12, 29)), 29);
+    return new Uint8Array(b);
+  };
+
+  it("are refused before decoding", async () => {
+    const data = await bomb();
+    await expect(imageMeta(data)).rejects.toThrow(/too large/);
+    await expect(processPhoto("img_01", data, [480], { avif: 50, webp: 75 })).rejects.toThrow();
+    await expect(visionJpeg(data)).rejects.toThrow();
   });
 });

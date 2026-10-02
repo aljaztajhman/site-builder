@@ -146,8 +146,15 @@ window.setInterval(() => {
 const currentSpec = (): unknown => (typeof state === "undefined" ? null : state.spec);
 
 async function load(rerender = true): Promise<void> {
-  state = await fetchState();
-  if (state.spec && !catalogue) catalogue = await api<Catalogue>("/catalogue");
+  const loaded = typeof state !== "undefined";
+  try {
+    state = await fetchState();
+    if (state.spec && !catalogue) catalogue = await api<Catalogue>("/catalogue");
+  } catch (e) {
+    // Nothing on screen yet: the caller shows the failure. Otherwise keep the last state and say so.
+    if (!loaded) throw e;
+    toast ||= `Povezave ni. ${(e as Error).message}`;
+  }
   if (rerender) render();
   else showToast();
   schedulePoll();
@@ -683,7 +690,12 @@ function homePane(): HTMLElement {
   pane.append(
     h("h2", {}, "Na tej strani"),
     h("ul", { class: "outline" }, ...secs.map((s) =>
-      h("li", { onClick: () => select(String(s.id)) }, h("span", { class: "t" }, h("strong", {}, label(String(s.type))), h("span", { class: "muted" }, sectionTitle(s)))))),
+      h("li", {
+        role: "button",
+        tabindex: "0",
+        onClick: () => select(String(s.id)),
+        onKeydown: (e: KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(String(s.id)); } },
+      }, h("span", { class: "t" }, h("strong", {}, label(String(s.type))), h("span", { class: "muted" }, sectionTitle(s)))))),
   );
   if (canAddSections()) pane.append(h("button", { class: "btn", type: "button", onClick: () => openAdd(secs.length) }, "+ Dodaj razdelek"));
   return pane;
@@ -826,7 +838,7 @@ function factsPane(): HTMLElement {
     h("h2", {}, "Glava in noga"),
     h("div", { class: "pair" },
       labelled("Glava", h("select", { onChange: (e: Event) => void patch([{ op: "replace", path: "/chrome/header/variant", value: (e.target as HTMLSelectElement).value }], "glava") }, ...["bar", "split-cta", "stacked"].map((v) => h("option", { value: v, selected: v === header.variant }, HEADER_VARIANT[v]!)))),
-      labelled("Gumb v glavi", h("select", { onChange: (e: Event) => void patch([{ op: "replace", path: "/chrome/header/cta", value: (e.target as HTMLSelectElement).value }], "gumb v glavi") }, ...["call", "booking", "directions", "none"].map((v) => h("option", { value: v, selected: v === header.cta }, { call: "Pokliči", booking: "Rezervacija", directions: "Navodila za pot", none: "Brez" }[v]!)))),
+      labelled("Gumb v glavi", h("select", { onChange: (e: Event) => void patch([{ op: "replace", path: "/chrome/header/cta", value: (e.target as HTMLSelectElement).value }], "gumb v glavi") }, ...["call", "booking", "directions", "none"].map((v) => h("option", { value: v, selected: v === header.cta }, { call: "Klic", booking: "Rezervacija", directions: "Navodila za pot", none: "Brez" }[v]!)))),
       labelled("Ozadje glave", h("select", { onChange: (e: Event) => { const v = (e.target as HTMLSelectElement).value; void patch([{ op: header.tone === undefined ? "add" : "replace", path: "/chrome/header/tone", value: v }], "ozadje glave"); } }, ...["default", "alt", "inverse"].map((v) => h("option", { value: v, selected: v === (header.tone ?? "default") }, { default: "Kot stran", alt: "Izmenično", inverse: "Temno" }[v]!)))),
       labelled("Noga", h("select", { onChange: (e: Event) => void patch([{ op: "replace", path: "/chrome/footer/variant", value: (e.target as HTMLSelectElement).value }], "noga") }, ...["columns", "compact"].map((v) => h("option", { value: v, selected: v === (chrome.footer as Obj).variant }, FOOTER_VARIANT[v]!)))),
     ),
@@ -1527,17 +1539,22 @@ function inlineEdit(el: HTMLElement): void {
   const ptr = matches[0]!;
   target.setAttribute("contenteditable", "plaintext-only");
   target.focus();
+  let done = false;
+  const onKey = (e: KeyboardEvent) => {
+    if (e.key === "Enter") { e.preventDefault(); target.blur(); }
+    if (e.key === "Escape") { finish(false); }
+  };
   const finish = (save: boolean) => {
+    if (done) return;
+    done = true;
+    target.removeEventListener("keydown", onKey);
     target.removeAttribute("contenteditable");
     const next = (target.textContent ?? "").replace(/\s+/g, " ").trim();
     if (save && next && next !== text) void patch([isSection(pageIndex, si, sec.id), { op: "replace", path: ptr, value: next }], "urejeno besedilo");
     else target.textContent = text;
   };
   target.addEventListener("blur", () => finish(true), { once: true });
-  target.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") { e.preventDefault(); target.blur(); }
-    if (e.key === "Escape") { finish(false); }
-  });
+  target.addEventListener("keydown", onKey);
 }
 
 function select(id: string, scroll = true): void {
@@ -1916,17 +1933,25 @@ function missingPhrase(n: number): string {
   return (words[form] ?? words.other!).replace("{n}", String(n));
 }
 
+/** One live region for the whole session, shown and hidden, so screen readers keep announcing it. */
+const toastEl = document.body.appendChild(h("div", { class: "toast", role: "status", hidden: true }));
+let toastTimer: number | undefined;
+
 function showToast(): void {
   if (!toast) return;
-  document.querySelector(".toast")?.remove();
-  document.body.append(h("div", { class: "toast", role: "status" }, toast));
+  toastEl.textContent = toast;
+  toastEl.hidden = false;
   const t = toast;
-  window.setTimeout(() => {
+  window.clearTimeout(toastTimer);
+  toastTimer = window.setTimeout(() => {
     if (toast === t) {
       toast = "";
-      document.querySelector(".toast")?.remove();
+      toastEl.hidden = true;
     }
   }, 4000);
 }
 
-void load();
+load().catch((e: unknown) => {
+  const message = e instanceof Error ? e.message : String(e);
+  root.replaceChildren(h("p", { role: "alert", class: "hint" }, `Urejevalnika ni bilo mogoče naložiti: ${message}. Osvežite stran.`));
+});

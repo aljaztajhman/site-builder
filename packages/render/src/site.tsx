@@ -3,6 +3,7 @@ import {
   CookieConsent,
   Footer,
   Header,
+  LandmarkSuffixes,
   MobileActionBar,
   SECTION_ISLANDS,
   lcpImageFor,
@@ -13,6 +14,7 @@ import {
 } from "@sb/components";
 import {
   isPlaceholder,
+  isWebUrl,
   mapsUrl,
   setAt,
   fontPair,
@@ -26,6 +28,7 @@ import { fontFaceCss, fontFiles, tokensCss } from "./tokens.ts";
 import { DEFAULT_IMAGE_WIDTHS, variantFile, variantHeight, variantWidths } from "./images.ts";
 import { sharedBundle } from "./shared.ts";
 import { jsonLd } from "./jsonld.ts";
+import { landmarkSuffixes } from "./landmarks.ts";
 
 /**
  * The page's first section puts both a phone link and a directions link on screen (its two actions, or
@@ -106,7 +109,7 @@ export function makeCtx(spec: SiteSpec, page: Page, opts: RenderOptions = {}): R
 
   const href = (t: LinkTarget): string | null => {
     if ("page" in t) return pageHref(t.page) + (t.section ? `#${t.section}` : "");
-    if ("url" in t) return t.url;
+    if ("url" in t) return isWebUrl(t.url) ? t.url : null;
     switch (t.action) {
       case "call":
         return isPlaceholder(b.phone) ? null : `tel:${b.phone}`;
@@ -115,7 +118,7 @@ export function makeCtx(spec: SiteSpec, page: Page, opts: RenderOptions = {}): R
       case "directions":
         return isPlaceholder(b.address) ? null : mapsUrl(b.address);
       case "booking":
-        return b.bookingUrl ?? null;
+        return b.bookingUrl !== undefined && isWebUrl(b.bookingUrl) ? b.bookingUrl : null;
     }
   };
 
@@ -142,6 +145,13 @@ export function renderPage(spec: SiteSpec, page: Page, opts: RenderOptions = {})
 
   const islands = new Set<string>(["nav.js"]);
   for (const s of localizedPage.sections) for (const i of SECTION_ISLANDS[s.type] ?? []) islands.add(i);
+  // The privacy policy says consent can be withdrawn with the footer's "cookie settings" button, which consent.js
+  // reveals: on a site with consent-gated embeds the privacy page loads it too, with the notice closed until asked for.
+  const consentOnRequest =
+    localizedPage.kind === "privacy" &&
+    !islands.has("consent.js") &&
+    localized.pages.some((p) => p.sections.some((s) => SECTION_ISLANDS[s.type]?.includes("consent.js")));
+  if (consentOnRequest) islands.add("consent.js");
   const needsConsent = islands.has("consent.js");
 
   const first = localizedPage.sections[0];
@@ -156,26 +166,33 @@ export function renderPage(spec: SiteSpec, page: Page, opts: RenderOptions = {})
   const bar = localized.chrome.mobileActionBar === true;
   // Bar on screen from the start and a call button in the hero: on a phone the hero's one is hidden (chrome.css).
   const barCoversHeroCall = bar && heroOffersCall(first) && !heroOffersCallAndDirections(first);
-  const body = renderToStaticMarkup(
+  const renderBody = (suffixes: ReadonlyMap<string, string>) => renderToStaticMarkup(
     <body data-imagery={design.imagery} className={bar ? (barCoversHeroCall ? "has-action-bar bar-covers-hero-call" : "has-action-bar") : undefined}>
       <a className="skip-link" href="#main">
         {ctx.t("skipToContent")}
       </a>
       <Header ctx={ctx} />
       <main id="main" tabIndex={-1}>
-        {localizedPage.sections.map((section, index) => {
-          const C = rendererFor(section.type);
-          return <C key={section.id} section={section} ctx={ctx} index={index} />;
-        })}
+        <LandmarkSuffixes.Provider value={suffixes}>
+          {localizedPage.sections.map((section, index) => {
+            const C = rendererFor(section.type);
+            return <C key={section.id} section={section} ctx={ctx} index={index} />;
+          })}
+        </LandmarkSuffixes.Provider>
       </main>
       <Footer ctx={ctx} />
       {bar && <MobileActionBar ctx={ctx} afterHero={heroOffersCallAndDirections(first)} />}
-      {needsConsent && <CookieConsent ctx={ctx} />}
+      {needsConsent && <CookieConsent ctx={ctx} onRequest={consentOnRequest} />}
       {[...islands].sort().map((f) => (
         <script key={f} src={ctx.shared(`js/${f}`)} defer />
       ))}
     </body>,
   );
+  // Sections are named by their headings; when two share a heading text (e.g. a second booking section
+  // from an edit), render again with a hidden "(2)" on the repeat so every landmark name stays unique.
+  const firstBody = renderBody(new Map());
+  const suffixes = landmarkSuffixes(firstBody, localizedPage.sections.map((s) => s.id));
+  const body = suffixes.size ? renderBody(suffixes) : firstBody;
 
   const head = renderToStaticMarkup(
     <head>

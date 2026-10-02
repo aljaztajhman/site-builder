@@ -9,3 +9,5 @@ globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
   return realFetch(input, init);
 }) as typeof fetch;
 process.env.ANTHROPIC_API_KEY = "";
+process.env.FAL_KEY = "";
+process.env.RESEND_API_KEY = "";

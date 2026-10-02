@@ -176,6 +176,37 @@ describe("pipeline with replayed model responses (no network)", () => {
     expect(events.rows.map((e) => e.message)).toContain("Critique failed; kept the checked site");
   }, 180_000);
 
+  it("keeps the saved version ready when the checks themselves fail to run", async () => {
+    const { fixture, golden, storage, site } = await seedSite("pekarna-kvas-check-crash");
+    const client = new ModelClient({ config, transport: new ReplayTransport(syntheticRecordings(fixture, golden)), spentToday: async () => 0, onCall: async () => undefined });
+    const broken = { browser: { newContext: () => Promise.reject(new Error("Target page, context or browser has been closed")) }, port: 0, close: async () => undefined } as unknown as CheckBrowser;
+    const gen = await generateSite({ config, repo, storage, client, browser: broken, lighthouse: false }, site.id, null);
+    expect(gen.check).toBeNull();
+    expect(gen.critiqueRounds).toBe(0);
+    expect((await repo.getSite(site.id))?.status).toBe("ready");
+    expect((await repo.getSpec(site.id))?.version).toBe(gen.version);
+    const events = await db.query<{ message: string }>("select message from site_events where site_id = $1", [site.id]);
+    expect(events.rows.map((e) => e.message)).toContain("Checks failed to run; kept the saved version without critique");
+  }, 180_000);
+
+  it("a chat edit doesn't set a site back to ready while a generation started meanwhile", async () => {
+    const { fixture, golden, site } = await seedSite("pekarna-kvas-edit-race");
+    await repo.saveSpec(site.id, { ...golden, slug: site.slug }, "generate");
+    await repo.setStatus(site.id, "ready");
+    const replay = new ReplayTransport(syntheticRecordings(fixture, golden, [{ reply: "Glava je zdaj temna.", patches: [{ op: "add", path: "/chrome/header/tone", value: "inverse" }] }]));
+    const transport: typeof replay = Object.assign(Object.create(replay) as typeof replay, {
+      // The owner presses "Ustvari znova" while the edit's model call runs.
+      send: async (req: Parameters<typeof replay.send>[0], stage: Parameters<typeof replay.send>[1]) => {
+        if (req.stage === "edit") await repo.setStatus(site.id, "generating");
+        return replay.send(req, stage);
+      },
+    });
+    const client = new ModelClient({ config, transport, spentToday: async () => 0, onCall: async () => undefined });
+    const msg = await repo.addChat(site.id, "user", "Temnejša glava prosim.");
+    await applyChatEdit({ repo, client }, site.id, Number(msg.id));
+    expect((await repo.getSite(site.id))?.status).toBe("generating");
+  }, 60_000);
+
   it("rejects an edit that invents a phone number and keeps the spec", async () => {
     const fixture = loadFixture("pekarna-kvas");
     const golden = JSON.parse(await readFile(path.join(here, "../golden/pekarna-kvas.json"), "utf8")) as SiteSpec;

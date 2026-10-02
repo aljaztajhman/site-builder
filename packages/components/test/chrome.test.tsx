@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
+import vm from "node:vm";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import type { Page, SiteSpec } from "@sb/spec";
@@ -51,7 +52,7 @@ describe("Header", () => {
       expect(out).toContain('<a href="storitve.html">Storitve</a>');
       // Legal pages are not in the main nav.
       expect(out).not.toContain("zasebnost.html");
-      expect(out).toMatch(/class="btn btn--primary site-header__cta[^"]*" href="tel:\+38641123456">Pokliči</);
+      expect(out).toMatch(/class="btn btn--primary site-header__cta[^"]*" href="tel:\+38641123456">Pokličite</);
       // Header buttons and nav are words: the only icons are on fact labels and the phone call bar.
       expect(out).not.toContain("<svg");
       expect(out).toContain('classList.add("js")');
@@ -81,7 +82,7 @@ describe("Header", () => {
 
   it("renders a booking CTA and hides a CTA whose fact is missing", () => {
     const booking = html(<Header ctx={testCtx(spec({ chrome: chrome({ cta: "booking" }) }))} />);
-    expect(booking).toMatch(/href="https:\/\/booking.example.com\/lipa" rel="noopener" target="_blank">Rezerviraj termin</);
+    expect(booking).toMatch(/href="https:\/\/booking.example.com\/lipa" rel="noopener" target="_blank">Rezervirajte termin</);
     expect(booking).not.toContain("wide-only");
     const none = html(<Header ctx={testCtx(spec({ chrome: chrome({ cta: "none" }) }))} />);
     expect(none).not.toContain("site-header__cta");
@@ -144,13 +145,31 @@ describe("Footer", () => {
     expect(out).toContain(">Družbena omrežja</h2>");
     expect(out).not.toContain("<script");
   });
+
+  it("drops social links that are not http(s)", () => {
+    const b = {
+      ...FULL_BUSINESS,
+      social: [
+        { network: "instagram" as const, url: "javascript:alert(1)" },
+        { network: "facebook" as const, url: "data:text/html,x" },
+      ],
+    };
+    const out = html(<Footer ctx={testCtx(spec({ business: b }))} />);
+    expect(out).not.toContain("javascript:");
+    expect(out).not.toContain("data:text");
+    expect(out).not.toContain(">Družbena omrežja</h2>");
+    const mixed = { ...b, social: [...b.social, { network: "youtube" as const, url: "https://www.youtube.com/@salonlipa" }] };
+    const out2 = html(<Footer ctx={testCtx(spec({ business: mixed }))} />);
+    expect(out2).toContain('href="https://www.youtube.com/@salonlipa"');
+    expect(out2).not.toContain("javascript:");
+  });
 });
 
 describe("MobileActionBar", () => {
   it("renders call and directions as two buttons", () => {
     const out = html(<MobileActionBar ctx={testCtx(spec())} />);
     expect(out).toMatch(/^<nav class="action-bar" aria-label="Hitri kontakt">/);
-    expect(out).toMatch(/href="tel:\+38641123456"><svg class="icon" [^>]*aria-hidden="true"[^>]*>[\s\S]*?<\/svg>Pokliči<\/a>/);
+    expect(out).toMatch(/href="tel:\+38641123456"><svg class="icon" [^>]*aria-hidden="true"[^>]*>[\s\S]*?<\/svg>Klic<\/a>/);
     expect(out).toMatch(
       /href="https:\/\/www.google.com\/maps[^"]*" rel="noopener" target="_blank"><svg class="icon" [^>]*aria-hidden="true"[^>]*>[\s\S]*?<\/svg>Navodila za pot<\/a>/,
     );
@@ -172,7 +191,7 @@ describe("CookieConsent", () => {
     expect(out).toMatch(/^<section id="consent" class="consent" aria-labelledby="consent-title" data-consent-notice="" hidden="">/);
     expect(out).toContain('<h2 id="consent-title" class="consent__title">Piškotki</h2>');
     expect(out).toContain('<button type="button" class="btn btn--secondary" data-consent="denied">Samo nujni</button>');
-    expect(out).toContain('<button type="button" class="btn btn--secondary" data-consent="granted">Dovoli zunanje vsebine</button>');
+    expect(out).toContain('<button type="button" class="btn btn--secondary" data-consent="granted">Dovolite zunanje vsebine</button>');
     expect(out).toContain('href="zasebnost.html"');
     expect(out).not.toContain('role="dialog"');
   });
@@ -194,6 +213,35 @@ describe("islands", () => {
     for (const s of ['"sb-consent"', "data-embed-src", "data-embed-title", "data-embed-load", "data-consent-open", '"lazy"', "no-referrer-when-downgrade"]) {
       expect(js).toContain(s);
     }
+  });
+
+  it("form.js holds submissions only in the dashboard preview (/preview/<id>/…), not on a site whose slug is preview", async () => {
+    const submit = async (pathname: string) => {
+      let handler: ((e: { preventDefault(): void }) => Promise<void>) | undefined;
+      const status = { textContent: "", setAttribute() {} };
+      const form = {
+        action: "_submit",
+        getAttribute: (n: string) => n,
+        querySelector: (q: string) => (q === "[data-form-status]" ? status : null),
+        addEventListener: (_t: string, fn: typeof handler) => (handler = fn),
+        reset() {},
+      };
+      const calls: string[] = [];
+      const ctx: Record<string, unknown> = {
+        document: { querySelectorAll: () => [form] },
+        location: { protocol: "https:", pathname },
+        fetch: async (url: string) => (calls.push(url), { ok: true, status: 200 }),
+        FormData: class {},
+        URLSearchParams: class {},
+      };
+      ctx.window = ctx;
+      vm.runInNewContext(read("form.js"), ctx);
+      await handler!({ preventDefault() {} });
+      return { sent: calls.length > 0, status: status.textContent };
+    };
+    expect(await submit("/preview/3f2a9c/kontakt.html")).toEqual({ sent: false, status: "data-msg-preview" });
+    expect(await submit("/s/preview/kontakt.html")).toEqual({ sent: true, status: "data-msg-sent" });
+    expect(await submit("/s/salon-lipa/kontakt.html")).toEqual({ sent: true, status: "data-msg-sent" });
   });
 });
 

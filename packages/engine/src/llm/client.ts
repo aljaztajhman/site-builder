@@ -78,6 +78,11 @@ export interface ModelClientOptions {
 export class ModelClient {
   constructor(private readonly opts: ModelClientOptions) {}
 
+  /** Retry limits from config, for stages that loop over `call` themselves. */
+  get limits(): AppConfig["limits"] {
+    return this.opts.config.limits;
+  }
+
   stageConfig(stage: ModelStageName) {
     const { config } = this.opts;
     if (config.useFullBuildModel && (stage === "content" || stage === "brief")) {
@@ -121,7 +126,7 @@ export class ModelClient {
   async callJson<T>(
     req: ModelRequest & { schema: Record<string, unknown> },
     parse: (data: unknown) => T,
-    retries = 2,
+    retries = this.opts.config.limits.jsonRetries,
   ): Promise<{ data: T; response: ModelResponse }> {
     let failures = 0;
     let messages = req.messages;

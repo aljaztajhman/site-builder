@@ -20,13 +20,16 @@ function modelSectionUnion() {
   return z.discriminatedUnion("type", schemas as unknown as [z.ZodObject, ...z.ZodObject[]]);
 }
 
+/** Page SEO text limits, as in Page in @sb/spec; repairContentOutput shortens longer answers to these. */
+export const SEO_LIMITS = { title: 60, description: 160 } as const;
+
 export function contentOutputSchema() {
   const ModelPage = z.strictObject({
     id: PageRef,
     kind: z.enum(["home", "standard"]),
     slug: z.string().regex(/^$|^[a-z0-9]+(-[a-z0-9]+)*$/).max(40),
     nav: z.strictObject({ label: text(24), show: z.boolean() }),
-    seo: z.strictObject({ title: text(60), description: text(160) }),
+    seo: z.strictObject({ title: text(SEO_LIMITS.title), description: text(SEO_LIMITS.description) }),
     sections: z.array(modelSectionUnion()).min(1).max(14),
   });
   return z.strictObject({ chrome: Chrome, pages: z.array(ModelPage).min(1).max(8) });

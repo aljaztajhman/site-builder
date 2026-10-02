@@ -380,7 +380,7 @@ body.has-action-bar:not(:has(.action-bar)) {
     }
   }
 }
-/* The bar is on screen from the start: on a phone the hero's own call button would sit right above its "Pokliči". */
+/* The bar is on screen from the start: on a phone the hero's own call button would sit right above its "Klic". */
 @media (max-width: 47.99rem) {
   body.bar-covers-hero-call main > :first-child [data-action="call"] {
     display: none;

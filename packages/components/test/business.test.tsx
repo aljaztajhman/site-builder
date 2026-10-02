@@ -403,9 +403,9 @@ describe("contact", () => {
         'data-embed-src="https://www.google.com/maps?q=Trubarjeva%20cesta%2012%2C%201000%20Ljubljana%2C%20Slovenija&amp;output=embed"',
       );
       expect(out).toContain('data-embed-title="Zemljevid: Frizerski salon Lipa"');
-      expect(out).toContain('<button type="button" class="btn btn--secondary" data-embed-load="true">Prikaži zemljevid</button>');
+      expect(out).toContain('<button type="button" class="btn btn--secondary" data-embed-load="true">Prikažite zemljevid</button>');
       expect(out).toContain("Zemljevid naloži Google Maps");
-      expect(out).toContain(">Odpri v Google Zemljevidih</a>");
+      expect(out).toContain(">Odprite v Google Zemljevidih</a>");
     }
   });
 
@@ -485,7 +485,7 @@ describe("gallery", () => {
     expect(out).toContain('href="media/img_detail-720.webp"');
     expect(out.match(/data-gallery-item=""/g)).toHaveLength(3);
     expect(out).toContain('<figcaption class="gallery__caption">Pult ob vhodu</figcaption>');
-    expect(out).toContain('data-label-close="Zapri"');
+    expect(out).toContain('data-label-close="Zaprite"');
     expect(out).toContain('data-label-prev="Prejšnja slika"');
     expect(out).toContain('data-label-next="Naslednja slika"');
   });
@@ -494,7 +494,7 @@ describe("gallery", () => {
     const spec = testSpec();
     spec.assets.images[1]!.alt = "";
     const out = render(fixtures.gallery, testCtx(spec));
-    expect(out).toContain('href="media/img_detail-720.webp" data-gallery-item="" aria-label="Povečaj sliko"');
+    expect(out).toContain('href="media/img_detail-720.webp" data-gallery-item="" aria-label="Povečajte sliko"');
   });
 
   it("needs at least two photos", () => {

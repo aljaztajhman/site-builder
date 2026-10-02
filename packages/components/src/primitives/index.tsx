@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { createContext, useContext, type ReactNode } from "react";
 import {
   formatAddress,
   formatPhone,
@@ -25,6 +25,19 @@ export function titleId(sectionId: string): string {
   return `${sectionId}-title`;
 }
 
+/** Id of the hidden text that tells a repeated landmark name apart (see LandmarkSuffixes). */
+export function landmarkSuffixId(sectionId: string): string {
+  return `${sectionId}-landmark`;
+}
+
+/**
+ * Section id → text appended to that section's landmark name. Every section is a region named by its
+ * own heading; two sections with the same heading text on one page (e.g. a second booking section
+ * added by an edit) would be two regions with one name (axe `landmark-unique`). The page renderer
+ * finds such repeats and gives each later one a suffix like "(2)"; the first keeps its plain name.
+ */
+export const LandmarkSuffixes = createContext<ReadonlyMap<string, string>>(new Map());
+
 /**
  * Wrapper for every section: landmark, tone, variant classes and the width container.
  * Classes: `s s-{type} s-{type}--{variant} tone-{tone}`.
@@ -41,12 +54,19 @@ export function Section(props: {
   children: ReactNode;
 }) {
   const { id, type, variant, tone = "default", labelled = true, className, bleed, children } = props;
+  const suffixes = useContext(LandmarkSuffixes);
+  const suffix = labelled ? suffixes.get(id) : undefined;
   return (
     <section
       id={id}
       className={cx("s", `s-${type}`, `s-${type}--${variant}`, `tone-${tone}`, className)}
-      aria-labelledby={labelled ? titleId(id) : undefined}
+      aria-labelledby={labelled ? (suffix ? `${titleId(id)} ${landmarkSuffixId(id)}` : titleId(id)) : undefined}
     >
+      {suffix && (
+        <span id={landmarkSuffixId(id)} hidden>
+          {suffix}
+        </span>
+      )}
       {bleed ? children : <div className="container">{children}</div>}
     </section>
   );

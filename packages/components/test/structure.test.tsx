@@ -69,8 +69,11 @@ describe("legal", () => {
     expect(out).toContain("Inšpektorat Republike Slovenije");
     expect(out).toContain("inspektorat-za-informacijsko-druzbo");
     expect(out).toContain(formatDate(new Date()));
-    // Known limitations are left for the client to fill in.
-    expect(out).toContain('data-ph="text"');
+    // No placeholder the spec has no field for: with every fact present the statement is complete.
+    expect(out).toContain("Znane omejitve");
+    expect(out).toContain("Vsebine tretjih oseb, na primer vdelani zemljevidi, morda niso v celoti dostopne.");
+    expect(out).not.toContain('class="ph"');
+    expect(html(<Legal section={a11y} ctx={enCtx()} index={0} />)).not.toContain('class="ph"');
   });
 
   it("renders missing facts as placeholders and drops broken links", () => {

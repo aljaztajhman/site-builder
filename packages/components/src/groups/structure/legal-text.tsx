@@ -18,8 +18,6 @@ export interface LegalFacts {
   phone: ReactNode;
   /** Formatted date of this version of the statement. */
   date: string;
-  /** Placeholder for the client's list of known accessibility limitations. */
-  limitations: ReactNode;
   /** The site has a contact form (its data is described in the privacy policy). */
   contactForm: boolean;
 }
@@ -249,7 +247,6 @@ function accessibilitySl(f: LegalFacts) {
         Vsebine tretjih oseb, na primer vdelani zemljevidi, morda niso v celoti dostopne. Naslov in povezava do navodil za pot sta
         zato vedno na voljo tudi kot besedilo.
       </p>
-      <p>{f.limitations}</p>
 
       <h2>Povratne informacije in kontakt</h2>
       <p>
@@ -297,7 +294,6 @@ function accessibilityEn(f: LegalFacts) {
         Third-party content such as embedded maps may not be fully accessible. The address and a directions link are therefore
         always available as text.
       </p>
-      <p>{f.limitations}</p>
 
       <h2>Feedback and contact</h2>
       <p>

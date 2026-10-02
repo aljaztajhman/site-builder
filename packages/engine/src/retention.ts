@@ -41,12 +41,13 @@ export async function pruneSite(deps: Deps, siteId: string, now = new Date()): P
   const site = await repo.getSite(siteId);
   if (!site) return { siteId, removed: [], bytes: 0, files: [], skipped: "no such site" };
   if (BUSY.has(site.status)) return { siteId, removed: [], bytes: 0, files: [], skipped: `a job is running (${site.status})` };
+  if (site.publishing_since) return { siteId, removed: [], bytes: 0, files: [], skipped: "a publish is running" };
   const pruned = await repo.pruneVersions(siteId, config.versions.retention, now);
   if (pruned.length === 0) return { siteId, removed: [], bytes: 0, files: [] };
 
   const unused = await unusedFiles(deps, site, pruned);
   const fresh = await repo.getSite(siteId);
-  const files = fresh && !BUSY.has(fresh.status) ? unused : [];
+  const files = fresh && !BUSY.has(fresh.status) && !fresh.publishing_since ? unused : [];
   if (files.length) {
     await storage.delete(files);
     await repo.deleteAssetsByKey(siteId, files);

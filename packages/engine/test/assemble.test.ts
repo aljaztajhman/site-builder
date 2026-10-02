@@ -4,7 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadConfig } from "@sb/config";
 import { validateSite, type ImageAsset, type Page } from "@sb/spec";
-import { Brief, assembleSpec, checkFacts, contentOutputSchema, designFromChoice, extractJson, generatedImageCount, uniqueSectionIds, verifyBriefFacts, type ContentOutput } from "../src/index.ts";
+import { Brief, assembleSpec, checkFacts, contentOutputSchema, designFromChoice, extractJson, generatedImageCount, repairContentOutput, uniqueSectionIds, verifyBriefFacts, type ContentOutput } from "../src/index.ts";
 
 const config = loadConfig();
 const evalDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../tools/eval");
@@ -33,11 +33,13 @@ describe("uniqueSectionIds", () => {
 describe("assembleSpec on recorded full-site answers", () => {
   // 2026-09-29: every recorded first content answer (10/10) failed validation only on section ids reused
   // across pages, which cost a second full content call each time; assembly now renames them.
-  // Re-recorded 2026-10-01: 8/10 first answers validate. Two were rejected for the model's own mistakes and
-  // the pipeline's retry fixed them; they are pinned here so any other first-answer failure still fails.
+  // Re-recorded 2026-10-01: 8/10 first answers validated. Two were rejected and cost a retry:
+  // kmetija-grabnar for `" link": null` (now repaired: key trimmed, null dropped) and instalacije-rebernik
+  // for a 64-character home SEO title (now shortened). The latter also puts a generated picture in
+  // services-cards, which the schema failure hid; that isn't mechanical, so it still needs the retry and is
+  // pinned here, so any other first-answer failure still fails.
   const rejectedFirstAnswers: Record<string, string[]> = {
-    "instalacije-rebernik": ["/pages/0/seo/title: Too big: expected string to have <=60 characters"],
-    "kmetija-grabnar": ['/pages/0/sections/3/props: Unrecognized key: " link"'],
+    "instalacije-rebernik": ["/pages/0/sections/2/props/items/1/image: img_g2 is AI-generated and may only be used in hero-split, hero-image, image-text, page-header"],
   };
 
   for (const id of readdirSync(recordingsDir)) {
@@ -54,7 +56,10 @@ describe("assembleSpec on recorded full-site answers", () => {
     const wanted = generatedImageCount(config, fixture.photos.length, true, "full").wanted;
     const generated: ImageAsset[] = brief.imageIdeas.slice(0, wanted).map((idea, i) => ({ id: `img_g${i + 1}`, src: "x", width: 1536, height: 1024, alt: idea.alt.slice(0, 180), origin: "generated" }));
     const issues = (text: string): string[] => {
-      const parsed = contentOutputSchema().safeParse(JSON.parse(extractJson(text)));
+      // As generateContent does: mechanical repairs, then validation.
+      const data: unknown = JSON.parse(extractJson(text));
+      repairContentOutput(data);
+      const parsed = contentOutputSchema().safeParse(data);
       if (!parsed.success) return parsed.error.issues.map((i) => `/${i.path.join("/")}: ${i.message}`);
       const spec = assembleSpec({ slug: id, brief, design, assets: { images: [...photos, ...generated] }, content: parsed.data as ContentOutput });
       const v = validateSite(spec);

@@ -1,4 +1,4 @@
-import { isPlaceholder } from "@sb/spec";
+import { isPlaceholder, isWebUrl } from "@sb/spec";
 import type { RenderCtx } from "../types.ts";
 import { AddressText, EmailLink, MaybeText, PhoneLink, cx } from "../primitives/index.tsx";
 
@@ -27,6 +27,8 @@ export function Footer({ ctx }: { ctx: RenderCtx }) {
   const links = [...navPages, ...legalPages.filter((x) => !navPages.includes(x))];
   const taxLabel = p.vatPayer ? ctx.t("vatId") : ctx.t("taxNumber");
   const headingClass = compact ? "visually-hidden" : "site-footer__heading";
+  // Only http(s) links: z.url() also accepts javascript: and data:.
+  const social = (b.social ?? []).filter((s) => isWebUrl(s.url));
 
   return (
     <footer className={cx("site-footer", `site-footer--${variant}`)}>
@@ -93,11 +95,11 @@ export function Footer({ ctx }: { ctx: RenderCtx }) {
             </nav>
           )}
 
-          {b.social && b.social.length > 0 && (
+          {social.length > 0 && (
             <div className="site-footer__block site-footer__social">
               <h2 className={headingClass}>{ctx.t("social")}</h2>
               <ul className="site-footer__links" role="list">
-                {b.social.map((s) => (
+                {social.map((s) => (
                   <li key={s.url}>
                     <a className="site-footer__link" href={s.url} rel="noopener">
                       {NETWORK_LABEL[s.network]}
@@ -113,7 +115,7 @@ export function Footer({ ctx }: { ctx: RenderCtx }) {
           <p>
             © {new Date().getFullYear()} {isPlaceholder(p.legalName) ? b.name : p.legalName}
           </p>
-          {/* Shown by consent.js, which is only on pages with consent-gated embeds. */}
+          {/* Shown by consent.js: on pages with consent-gated embeds, and on the privacy page of a site that has them. */}
           <button type="button" className="site-footer__consent" data-consent-open="" hidden>
             {ctx.t("cookieSettings")}
           </button>
