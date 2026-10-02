@@ -6,8 +6,9 @@ import { mediaKey } from "./pipeline.ts";
 
 /**
  * Version retention (config `versions.retention`, owner's decision `sb-autosave-versions` = prune):
- * the nightly job keeps every recent version, the last one of each older day, every published version
- * and the current one (Repo.pruneVersions), then removes the files only the removed versions used.
+ * the nightly job keeps every recent version, the last one of each older day, every published version,
+ * every version an "Ustvari znova" replaced (`sb-keep-replaced`) and the current one (Repo.pruneVersions),
+ * then removes the files only the removed versions used.
  *
  * Files are removed only when nothing kept can need them:
  * - never the published release (published/…): releases are complete copies, written and cleaned up by publishSite;

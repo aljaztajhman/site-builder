@@ -162,6 +162,13 @@ export const AppConfigSchema = z.object({
     junk: z.object({ minDescriptionChars: z.number().int().min(1), minClassifierConfidence: z.number().min(0).max(1) }),
   }),
   plans: z.looseObject({
+    freePreview: z.looseObject({
+      /**
+       * `sb-preview-watermark`: "app-badge" shows a small badge in the app around the preview frame of a
+       * free, unpublished preview; never inside the rendered site (preview = published output). "off": none.
+       */
+      watermark: z.enum(["app-badge", "off"]),
+    }),
     paid: PaidPlan,
   }),
 });

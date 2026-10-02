@@ -106,7 +106,7 @@ describe("editor by viewer", () => {
       await page.getByRole("button", { name: "Objavi" }).click();
       await expect.poll(() => page.locator(".toast").textContent()).toContain("z naročnino");
       await page.locator("details.menu > summary").click();
-      expect(await page.getByRole("link", { name: "Prenesi stran (.zip)" }).count()).toBe(0);
+      expect(await page.locator("details.menu .list").getByText("Prenesi stran (.zip)").count()).toBe(0);
       expect(await page.getByRole("button", { name: "Poraba in dnevnik" }).count()).toBe(0);
     } finally {
       await context.close();
@@ -125,8 +125,109 @@ describe("editor by viewer", () => {
       await page.locator(".shortcut").first().waitFor();
       expect(await page.locator(".ask-note").isVisible()).toBe(false);
       await page.locator("details.menu > summary").click();
-      expect(await page.getByRole("link", { name: "Prenesi stran (.zip)" }).count()).toBe(1);
+      expect(await page.getByRole("button", { name: "Prenesi stran (.zip)" }).count()).toBe(1);
       expect(await page.getByRole("button", { name: "Poraba in dnevnik" }).count()).toBe(1);
+      // A paid viewer's preview has no free-preview badge.
+      expect(await page.locator(".preview-badge").count()).toBe(0);    } finally {
+      await context.close();
+    }
+  }, 60_000);
+
+  it("export shows the publish checklist as a warning first; \"Izvozi vseeno\" downloads the zip (sb-export-checklist)", async () => {
+    const context = await cb.browser.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: "reduce", acceptDownloads: true });
+    const page = await context.newPage();
+    try {
+      const [name, value] = (await adminCookie((p, init) => fetch(`${base}${p}`, init), PASSWORD)).split("=") as [string, string];
+      await context.addCookies([{ name, value, url: base }]);
+      // The golden bakery still misses its provider data and a price: the publish checklist isn't empty.
+      const id = await site({});
+      await page.goto(`${base}/sites/${id}`);
+      await preview(page).locator("main").waitFor();
+      const todo = Number(/\d+/.exec((await page.locator("#checklist-summary").textContent()) ?? "")?.[0]);
+      expect(todo).toBeGreaterThan(0);
+      await page.locator("details.menu > summary").click();
+      await page.getByRole("button", { name: "Prenesi stran (.zip)" }).click();
+      const box = page.locator("#checklist");
+      await box.waitFor();
+      expect(await box.locator("strong").first().textContent()).toMatch(/^Stran še ni pripravljena za objavo: .*Če jo izvozite zdaj, ostanejo te napake tudi v datotekah\./);
+      expect(await box.locator("li").count()).toBe(todo);
+      expect(await box.textContent()).not.toMatch(/—/);
+      if (process.env.SB_SCREENSHOT_DIR) await page.screenshot({ path: path.join(process.env.SB_SCREENSHOT_DIR, "export-warning-1280.png") });
+      const [download] = await Promise.all([page.waitForEvent("download"), page.getByRole("link", { name: "Izvozi vseeno" }).click()]);
+      expect(download.suggestedFilename()).toBe(`dostop-${seq}-v1.zip`);
+      // A plain export link opened in the browser lands back here with the warning open.
+      await page.goto(`${base}/api/sites/${id}/export`);
+      await page.locator("#checklist").getByRole("link", { name: "Izvozi vseeno" }).waitFor();
+      expect(new URL(page.url()).pathname).toBe(`/sites/${id}`);
+      expect(new URL(page.url()).search).toBe("");
+    } finally {
+      await context.close();
+    }
+  }, 60_000);
+});
+
+describe("free-preview badge (sb-preview-watermark)", () => {
+  const shots = process.env.SB_SCREENSHOT_DIR;
+  const badge = (page: Awaited<ReturnType<CheckBrowser["browser"]["newPage"]>>) => page.locator(".frame-box > .preview-badge");
+
+  for (const width of [1280, 360]) {
+    it(`a preview without an account shows "Predogled · Stranko" beside the frame, not inside the site (${width} px)`, async () => {
+      const context = await cb.browser.newContext({ viewport: { width, height: width > 900 ? 900 : 780 }, reducedMotion: "reduce" });
+      const page = await context.newPage();
+      try {
+        await page.goto(`${base}/login`);
+        const device = (await context.cookies()).find((c) => c.name === "sb_device")!.value.split(".")[0]!;
+        const id = await site({ deviceId: device });
+        await page.goto(`${base}/sites/${id}`);
+        await preview(page).locator("main").waitFor();
+        await badge(page).waitFor();
+        expect(await badge(page).textContent()).toBe("Predogled · Stranko");
+        // Not in the site: neither the frame's document nor the preview HTML carries it.
+        expect(await preview(page).locator("body").textContent()).not.toContain("Predogled · Stranko");
+        const html = await (await page.request.get(`${base}/preview/${id}/index.html`)).text();
+        expect(html).not.toContain("Predogled · Stranko");
+        // A tab on the frame's top-right corner: it ends where the frame begins (covers nothing of the site)
+        // and starts inside the stage.
+        const b = (await badge(page).boundingBox())!;
+        const f = (await page.locator(".frame-box > .frame").boundingBox())!;
+        const s = (await page.locator(".stage").boundingBox())!;
+        expect(b.x + b.width).toBeLessThanOrEqual(f.x + f.width);
+        expect(b.x + b.width).toBeGreaterThan(f.x + f.width - 40);
+        expect(Math.abs(b.y + b.height - f.y)).toBeLessThanOrEqual(1);
+        expect(b.y).toBeGreaterThanOrEqual(s.y);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+        if (shots) await page.screenshot({ path: path.join(shots, `badge-anonymous-${width}.png`) });
+      } finally {
+        await context.close();
+      }
+    }, 60_000);
+  }
+
+  it("a free account sees it in the editor and on the sites list until the site is published", async () => {
+    const context = await cb.browser.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: "reduce" });
+    const page = await context.newPage();
+    try {
+      await page.goto(`${base}/login`);
+      await page.locator("#email").fill("mojca@siol.net");
+      await Promise.all([page.waitForNavigation(), page.getByRole("button", { name: "Pošlji povezavo" }).click()]);
+      await page.goto(linkFor(mail.sent, "mojca@siol.net"));
+      await Promise.all([page.waitForNavigation(), page.getByRole("button", { name: "Prijava" }).click()]);
+      const { rows } = await platform.db.query<{ id: string }>("select id from accounts where email = $1", ["mojca@siol.net"]);
+      const id = await site({ accountId: rows[0]!.id });
+      await page.goto(`${base}/sites/${id}`);
+      await preview(page).locator("main").waitFor();
+      await badge(page).waitFor();
+      await page.goto(`${base}/sites`);
+      expect(await page.locator(".site-card .shot .preview-badge").textContent()).toBe("Predogled · Stranko");
+      if (shots) await page.screenshot({ path: path.join(shots, "badge-sites-list-1280.png") });
+      // Published (e.g. by the admin for a design partner): no badge anywhere.
+      await platform.repo.markPublished(id, 1, "test");
+      await page.reload();
+      expect(await page.locator(".preview-badge").count()).toBe(0);
+      await page.goto(`${base}/sites/${id}`);
+      await preview(page).locator("main").waitFor();
+      await page.waitForTimeout(300);
+      expect(await page.locator(".preview-badge").count()).toBe(0);
     } finally {
       await context.close();
     }

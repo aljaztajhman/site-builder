@@ -237,6 +237,18 @@ export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
       alter table sites add column publishing_since timestamptz;
     `,
   },
+  {
+    id: 8,
+    name: "spec_versions.keep_reason",
+    // Why retention keeps a version forever regardless of its day; null = the normal rules. 'replaced': the
+    // version an "Ustvari znova" (a generation) replaced (sb-keep-replaced). Backfilled for every kept
+    // version that a generation followed.
+    sql: `
+      alter table spec_versions add column keep_reason text;
+      update spec_versions v set keep_reason = 'replaced'
+       where exists (select 1 from spec_versions n where n.site_id = v.site_id and n.version = v.version + 1 and n.source = 'generate');
+    `,
+  },
 ];
 
 type Query = (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>;

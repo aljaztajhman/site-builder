@@ -25,8 +25,8 @@ import { VersionConflictError, contentType, mailerFromEnv, newId, type Mailer, t
 import { renderPage, sharedBundle, pageFile } from "@sb/render";
 import { blockerText, collectPlaceholders, sectionDef, type SiteSpec } from "@sb/spec";
 import type { AuthSettings } from "./auth.ts";
-import { csrfOk, fullSiteRefusal, identity, publishRefusal, refusalJson, sameOriginOnly, signedIn, siteAccess, type AppEnv, type Refusal } from "./access.ts";
-import { accessInfo, allowanceFor, reserveJob } from "./limits.ts";
+import { csrfOk, fullSiteRefusal, identity, publishRefusal, refusalJson, sameOriginOnly, signedIn, siteAccess, tierOf, type AppEnv, type Refusal } from "./access.ts";
+import { accessInfo, allowanceFor, previewBadge, reserveJob } from "./limits.ts";
 import { TOKEN_FIELD, TURNSTILE_ORIGIN, botCheckFromEnv, type BotCheck } from "./turnstile.ts";
 import { registerLoginRoutes } from "./login.tsx";
 import { registerAdminRoutes } from "./admin.tsx";
@@ -74,6 +74,9 @@ const SAFE_REST = /^([a-z0-9][a-z0-9._-]*\/)*[a-z0-9][a-z0-9._-]*$/i;
 const IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
 const LOGO_TYPES = new Set([...IMAGE_TYPES, "image/svg+xml"]);
 const EXT: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/avif": "avif", "image/svg+xml": "svg" };
+
+/** An export with something on the publish checklist, not confirmed yet. */
+export const EXPORT_CHECKLIST_MESSAGE = "Stran še ni pripravljena za objavo: nekateri podatki manjkajo ali niso preverjeni. Preverite seznam ali stran izvozite vseeno.";
 
 export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono<AppEnv> {
   const { repo, storage, queue, db } = platform;
@@ -163,12 +166,13 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     auth,
     mailer,
     ...(opts.appUrl ? { appUrl: opts.appUrl } : {}),
-    // The anonymous preview carries over: previews made on this device, or on the one that asked for the link.
-    onSignIn: async (c, accountId, link) => {
-      for (const device of new Set([c.get("deviceId"), link.deviceId].filter((d): d is string => !!d))) {
-        const claimed = await repo.usage.claimDevice(device, accountId);
-        if (claimed.length) console.log(`[web] ${claimed.length} anonymous preview(s) claimed by ${accountId}`);
-      }
+    // The anonymous previews carry over from the device that asked for the link (stored with the token,
+    // `sb-magic-link-claim` = requesting-device), never from the device that opens it: otherwise anyone
+    // could send their own link to a victim and take the victim's previews.
+    onSignIn: async (_c, accountId, link) => {
+      if (!link.deviceId) return;
+      const claimed = await repo.usage.claimDevice(link.deviceId, accountId);
+      if (claimed.length) console.log(`[web] ${claimed.length} anonymous preview(s) claimed by ${accountId}`);
     },
   });
   registerAdminRoutes(app, { repo, config, ...(opts.appUrl ? { appUrl: opts.appUrl } : {}) });
@@ -243,6 +247,8 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
         cap: config.limits.dailyModelSpendCapEur,
         csrf: c.get("csrf"),
         admin,
+        // Free, unpublished previews carry the small badge beside their thumbnail (never inside it).
+        badgeFor: (site) => previewBadge(config, tierOf(viewer), site),
         // An owner sees what is left of their allowance (limits.ts), in Slovene.
         ...(viewer.kind === "account" ? { account: { email: viewer.account.email, note: (await allowanceFor(limits, viewer, c.get("deviceId"))).text } } : {}),
       }),
@@ -637,10 +643,23 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     }
   });
 
+  // Export runs the publish checklist as a warning (`sb-export-checklist` = warn): with something on it the
+  // zip comes only after the owner confirmed ("Izvozi vseeno", ?anyway=1). The checked version is the one exported.
   app.get("/api/sites/:id/export", async (c) => {
     const denied = publishRefusal(c.get("viewer"));
     if (denied) return refusalJson(c, denied);
-    const { filename, zip } = await exportSite({ repo, storage, config }, c.req.param("id"));
+    const id = c.req.param("id");
+    const current = await repo.getSpec(id);
+    if (!current) return c.json({ error: "no spec yet" }, 404);
+    if (c.req.query("anyway") !== "1") {
+      const checklist = await siteChecklist(repo, id, current.spec);
+      if (checklist.length) {
+        // A browser following the link (not the editor's check) gets the editor with the warning open.
+        if (/text\/html/.test(c.req.header("accept") ?? "")) return c.redirect(`/sites/${id}?export=1`, 303);
+        return c.json({ error: "checklist", message: EXPORT_CHECKLIST_MESSAGE, checklist, blockers: checklist.map(blockerText) }, 409);
+      }
+    }
+    const { filename, zip } = await exportSite({ repo, storage, config }, id, current.version);
     c.header("content-type", "application/zip");
     c.header("content-disposition", `attachment; filename="${filename}"`);
     return c.body(zip as Uint8Array<ArrayBuffer>);

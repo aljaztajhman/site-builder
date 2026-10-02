@@ -234,6 +234,13 @@ legend{padding:0 4px;font-weight:600;font-size:13px;color:var(--ink-2)}
 .ed .canvas .bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;min-height:52px;padding:8px 16px;background:var(--surface);border-bottom:1px solid var(--line);font-size:14px}
 .ed .stage{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;overflow:auto;padding:20px}
 .ed .frame{flex:none;overflow:hidden;background:#fff;border:1px solid var(--line-2);border-radius:var(--r-3);box-shadow:var(--shadow-float)}
+/* Free-preview badge (sb-preview-watermark): app chrome on the frame's corner, never inside the site's HTML. */
+.preview-badge{position:absolute;z-index:2;padding:2px 8px;border:1px solid var(--line-2);border-radius:var(--r-1);background:var(--surface);color:var(--ink-2);font:600 12px/1.4 var(--font-ui);white-space:nowrap;pointer-events:none;user-select:none}
+.ed .frame-box{position:relative;flex:none}
+/* A tab on the frame's top-right corner, outside the site: nothing of the page is covered. */
+.ed .frame-box>.preview-badge{bottom:100%;right:14px;border-bottom:0;border-radius:var(--r-1) var(--r-1) 0 0}
+.ed .stage.badged{padding-top:42px}
+.site-card .shot .preview-badge{top:8px;right:8px}
 .ed .frame.skeleton{display:grid;place-items:center;padding:24px;text-align:center;color:var(--ink-3);font-size:15px}
 /* Live preview while generating: a skeleton page that fills in with the run's real name, colours and pictures. */
 .ed .frame.live{--sk-bg:#fff;--sk-surface:#f3f2ef;--sk-text:#2a2825;--sk-muted:#6b665e;--sk-primary:#b9b4ab;--sk-line:#e4e1db;
@@ -324,6 +331,7 @@ details.more>summary{padding:12px 0;font-weight:600;cursor:pointer}
   .ed .canvas{order:-1;flex:1;min-height:0;padding-bottom:var(--sheet-peek)}
   .ed[data-sheet=closed] .canvas{padding-bottom:var(--sheet-closed)}
   .ed .stage{padding:12px}
+  .ed .stage.badged{padding-top:34px}
   .ed .panel{position:fixed;left:0;right:0;bottom:0;z-index:15;height:var(--sheet-peek);overflow:auto;overscroll-behavior:contain;border-right:0;border-top:1px solid var(--line-2);border-radius:var(--r-3) var(--r-3) 0 0;box-shadow:0 -8px 24px rgb(20 20 18/.12);transition:height .2s ease-out}
   /* Full stops under the app bar, so undo and publish stay in reach (--top-h is measured by the editor). */
   .ed .panel[data-sheet=full]{height:calc(100dvh - var(--top-h,0px))}
@@ -362,6 +370,7 @@ details.more>summary{padding:12px 0;font-weight:600;cursor:pointer}
 @media (max-width:30rem){.photo{grid-template-columns:1fr}.photo img{width:100%;height:auto;aspect-ratio:4/3}}
 /* Pre-publish checklist: every entry opens its field. */
 .checklist ol{margin:8px 0 0;padding:0;list-style:none}
+.checklist .export-anyway{margin:4px 0 4px}
 .checklist li+li{border-top:1px solid rgb(92 55 0 / .15)}
 .checklist li button{display:grid;gap:2px;width:100%;min-height:44px;padding:8px 0;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
 .checklist li button strong{font-size:13px;font-weight:600}
