@@ -204,7 +204,7 @@ Prompts (each needs `pnpm eval --only …` runs before merging; proposed text in
   - One primary action per hero: already true in components (`Actions`: second action is a text link); now a component test over every hero variant and a page check (> 1 button in the first section)
   - Direct edits: a banned-copy issue a stored site already had (e.g. new filler) no longer blocks an unrelated edit; publishing still lists it
   - Prompt text changed without an eval (listed in the PR): RULES banned line (em dash, capital eyebrows), one critique line on filler calques. Needs `pnpm eval --only` runs before trusting generation quality
-  - Ran: typecheck, lint, `pnpm test` 813 passed (one browser suite's afterAll timed out under full-suite load, as 3 did on main before the change; passes alone); all pages of the 10 golden sites through the new page checks: no give-aways found
+  - Ran: typecheck, lint, `pnpm test` 822 passed in 65 files (after merging main; an earlier run had one browser suite's afterAll time out under load, as 3 did on main before the change); all pages of the 10 golden sites through the new page checks: no give-aways found
 
 ## Later: phase 3 — billing and domains
 Before CMS collections (`sb-roadmap-order` = swap, 2026-10-01).
