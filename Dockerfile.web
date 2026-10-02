@@ -1,10 +1,31 @@
 # Web service: dashboard, API, preview and published sites at /s/{slug}/.
-FROM node:24-slim
+# Two stages: dependencies are installed from the manifests and lockfile alone (a layer Docker reuses until
+# one of them changes), production dependencies only; the runtime image gets those plus the source, runs
+# as the unprivileged `node` user and has no pnpm store.
+
+FROM node:24-slim AS deps
 RUN corepack enable
 WORKDIR /app
-COPY . .
-RUN pnpm install --frozen-lockfile
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/web/package.json apps/web/
+COPY apps/worker/package.json apps/worker/
+COPY packages/components/package.json packages/components/
+COPY packages/config/package.json packages/config/
+COPY packages/engine/package.json packages/engine/
+COPY packages/platform/package.json packages/platform/
+COPY packages/render/package.json packages/render/
+COPY packages/spec/package.json packages/spec/
+COPY tools/eval/package.json tools/eval/
+# The web app and the workspace packages it imports; tsx (a dependency) runs the TypeScript source.
+RUN pnpm install --frozen-lockfile --prod --filter "@sb/web..."
+
+FROM node:24-slim
 ENV NODE_ENV=production
+WORKDIR /app
+# node_modules of the root and of every package (pnpm links them); the source, owned by root, read-only to the app.
+COPY --from=deps /app /app
+COPY . .
+USER node
 EXPOSE 3000
 # Node directly (not pnpm → pnpm → tsx → node): ~80 MB less, and SIGTERM reaches the app for a clean shutdown.
 WORKDIR /app/apps/web
