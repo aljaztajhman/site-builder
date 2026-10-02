@@ -36,7 +36,8 @@ export const MIGRATIONS: Record<number, (spec: RawSpec) => RawSpec> = {
   5: (spec) => spec,
   // 6 → 7: trade templates R (Račun) and T (Etiketa). Additive: hero-signature variants "receipt" and "label",
   // fact "address", optional factLabel (still required for phone and opening, checked in validate.ts), optional
-  // receipt and inset; highlights "figures"; about "figure" with optional figure. Every v6 spec is a valid v7 spec.
+  // receipt and inset; highlights "figures"; about "figure" with optional figure; image-text "round"; opening-hours
+  // "photo" with optional image and inset. Every v6 spec is a valid v7 spec.
   6: (spec) => spec,
 };
 

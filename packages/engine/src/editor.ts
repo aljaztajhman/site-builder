@@ -189,6 +189,7 @@ export function editorCatalogue(spec: SiteSpec) {
       type: d.type,
       group: d.group,
       variants: d.variants,
+      variantNeeds: d.variantNeeds ?? {},
       description: d.description,
       images: d.images,
       props: toModelJsonSchema(d.props),

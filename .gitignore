@@ -9,7 +9,11 @@ dist/
 coverage/
 *.log
 .turbo/
-eval/runs/
+eval/runs/*
+# Template comparisons (pnpm templates:compare): the side-by-side pictures and checks are kept for review.
+!eval/runs/templates-*/
+eval/runs/templates-*/site/
+eval/runs/templates-*/*.png
 test-results/
 playwright-report/
 .claude/launch.json

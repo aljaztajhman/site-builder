@@ -47,12 +47,16 @@ beforeAll(async () => {
   siteId = site.id;
   await platform.repo.saveSpec(site.id, spec, "generate");
   cookie = await adminCookie((p, init) => fetch(`${base}${p}`, init), PASSWORD);
-  const patch = await fetch(`${base}/api/sites/${site.id}/patch`, {
-    method: "POST",
-    headers: { cookie, "content-type": "application/json" },
-    body: JSON.stringify({ baseVersion: 1, ops: fillPlaceholderOps(spec), message: "facts" }),
-  });
-  expect(patch.status, await patch.clone().text()).toBe(200);
+  // Fill whatever facts the golden site leaves as placeholders, so it can be published.
+  const ops = fillPlaceholderOps(spec);
+  if (ops.length) {
+    const patch = await fetch(`${base}/api/sites/${site.id}/patch`, {
+      method: "POST",
+      headers: { cookie, "content-type": "application/json" },
+      body: JSON.stringify({ baseVersion: 1, ops, message: "facts" }),
+    });
+    expect(patch.status, await patch.clone().text()).toBe(200);
+  }
   const pub = await fetch(`${base}/api/sites/${site.id}/publish`, { method: "POST", headers: { cookie, "content-type": "application/json" }, body: "{}" });
   expect(pub.status, await pub.clone().text()).toBe(200);
   cb = await launchCheckBrowser();

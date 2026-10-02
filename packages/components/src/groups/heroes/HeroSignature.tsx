@@ -1,6 +1,6 @@
 import { formatAddress, isPlaceholder, type Link, type SectionOf } from "@sb/spec";
 import { ActionLink, Actions, HoursList, Picture, Ph, Section, titleId } from "../../primitives/index.tsx";
-import { CallObject, Radiator, Receipt, Seal, motifOf } from "../../motifs/index.tsx";
+import { Branch, CallObject, Radiator, Receipt, Seal, motifOf } from "../../motifs/index.tsx";
 import type { RenderCtx, SectionProps } from "../../types.ts";
 
 /** photo: the photo fills the hero at every width. */
@@ -165,6 +165,38 @@ export function HeroSignature({ section, ctx, index }: SectionProps<"hero-signat
               </div>
             )}
           </div>
+        </div>
+      </Section>
+    );
+  }
+
+  if (variant === "label") {
+    // The headline on a white label card, the address from the facts on it like a bottle's origin line;
+    // the photo in a tall arch beside it, the inset as a disc over the arch's edge.
+    const address = ctx.site.business.address;
+    const where = props.fact === "address" ? (isPlaceholder(address) ? <Ph p={address} ctx={ctx} /> : `${address.street}, ${address.city}`) : props.factLabel;
+    return (
+      <Section id={section.id} type={section.type} variant={variant} tone={section.tone ?? "inverse"}>
+        <div className={image ? "hsig hsig--label hsig--has-image" : "hsig hsig--label"}>
+          <div className="label-card hsig__card">
+            <Branch />
+            {props.eyebrow && <p className="eyebrow hsig__eyebrow">{props.eyebrow}</p>}
+            {where && <p className="hsig__where">{where}</p>}
+            {title}
+            <p className="lead hsig__lead">{props.intro}</p>
+            {phone ? links : <Actions primary={props.primary} secondary={props.secondary} ctx={ctx} />}
+            {phone && <CallObject ctx={ctx} />}
+          </div>
+          {image && (
+            <figure className="hsig__door">
+              <Picture id={image} ctx={ctx} className="hsig__door-media arch-top media--contained" sizes={HERO_SIGNATURE_LABEL_SIZES} priority={index === 0} />
+              {props.inset && (
+                <span className="hsig__dot disc">
+                  <Picture id={props.inset} ctx={ctx} className="hsig__dot-media media--contained" sizes="(min-width: 64rem) 14rem, 9rem" />
+                </span>
+              )}
+            </figure>
+          )}
         </div>
       </Section>
     );

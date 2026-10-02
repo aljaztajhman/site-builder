@@ -32,14 +32,13 @@ One branch and PR per one or two templates, each based on the previous (stacked)
 - Golden: hours must be absent (the owner said not to show hours), not a placeholder.
 
 ### T Etiketa (deli, trgovina-oljka-in-sol)
-- Direction `etiketa`, motif `label`, font pair Lora / Karla, display [38, 76] at body 18.
-- Hero: `hero-signature:label` (new variant): olive ground, white label card with a double inner rule and a drawn olive branch, the photo in a tall arch, a second round photo (optional `inset` image) overlapping it. Fact: address? No: the label card's fact line is the address from the facts (eyebrow-like line rendered from business.address).
-- Products: `price-list:tags` drawn as bottle labels (name, note, price; centred inside the label only, in motifs.css).
-- Rest of the range: one large sentence (`text:narrow` with motif CSS).
-- Gift boxes: band (terracotta) with a round photo.
-- Shop: arch photo with hours.
-- Leaf surface #e9eeda sits on the cream detector's hue edge (75.0); use a greener tint.
-- Accent cannot pass 3:1 on both white and the olive #414f1f: inverse is the darker olive #2f3a15.
+- Direction `etiketa`, motif `label`, font pair Lora / Karla, display [36, 72] at body 18 (the hand-made page has 67 px at 1280; the 4× display test holds it at 72).
+- Hero: `hero-signature:label` with fact `address` (new): olive ground, white label card with a double inner rule and an olive branch (inline SVG in the site's colours), the address from the facts on the card, the photo in a tall arch, `inset` as a disc over its edge.
+- Products: `price-list:tags` drawn as bottle labels in the label motif (branch, name, note, price; centred inside the label only, in motifs.css).
+- Rest of the range: `text:narrow` under the label motif (short label left, one large serif sentence right).
+- Gift boxes: `image-text:round` on the terracotta band, the link as the section's one button.
+- Shop: `opening-hours:photo` (new) with the shop front in an arch and a detail disc.
+- Colours: inverse #3b4819 (template #414f1f: no accent passes 3:1 on both #414f1f and white), accent #869850, surface #e3ebd3 (the template's #e9eeda sits on the cream detector's hue edge, 75.0).
 
 ### K Jedilnik (inn, gostilna-zlata-zlica, 8 photos)
 - Motif `spoon` (bowl ellipse cx11 cy19 rx10.5 ry18 + handle M8.5 34h5l1.5 62a4 4 0 0 1-8 0z, viewBox 22×104), EB Garamond 600 / Figtree. Colours: primary/inverse greens #16382b/#0f2a20, brass #d2ab55 as band (on green 5.9-7.1:1; on white only decorative), accent a darker brass.
@@ -76,8 +75,8 @@ One branch and PR per one or two templates, each based on the previous (stacked)
 
 ## Progress
 
-- [ ] R
-- [ ] T
+- [x] R: claude/templates-rt. templates:compare R passes at 1440, 1280, 390, 360; eval --offline 0 failures, LH 100/100/100/100, axe 0; lowest text contrast 6.75:1
+- [x] T: claude/templates-rt. templates:compare T passes at all four widths; eval --offline 0 failures, LH 97/100/100/100, axe 0; lowest text contrast 5.18:1; phone first screen 10 % photo (report-only target 25 %, same as the hand-made page)
 - [ ] K
 - [ ] L
 - [ ] O

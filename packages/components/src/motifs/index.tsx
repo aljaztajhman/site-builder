@@ -132,3 +132,26 @@ export function Receipt({ ctx, id, title, lines, total, note, className }: { ctx
     </div>
   );
 }
+
+const LEAVES: [number, number, number, number, number][] = [
+  [30, 30, 15, 5.5, -38],
+  [40, 50, 15, 5.5, 22],
+  [62, 22, 15, 5.5, -42],
+  [74, 42, 15, 5.5, 18],
+  [96, 10, 14, 5, -44],
+  [106, 30, 14, 5, 14],
+];
+
+/** An olive branch (motif label): leaves in the label's frame colour, two olives in the primary colour. Decorative. */
+export function Branch({ className }: { className?: string }) {
+  return (
+    <svg className={cx("branch", className)} viewBox="0 0 132 58" fill="none" aria-hidden="true" focusable="false">
+      <path className="branch__stem" d="M4 44C36 40 82 30 128 8" strokeWidth="3" strokeLinecap="round" />
+      {LEAVES.map(([cx_, cy, rx, ry, a]) => (
+        <ellipse key={`${cx_}-${cy}`} className="branch__leaf" cx={cx_} cy={cy} rx={rx} ry={ry} transform={`rotate(${a} ${cx_} ${cy})`} />
+      ))}
+      <circle className="branch__olive" cx="52" cy="40" r="7" />
+      <circle className="branch__olive" cx="88" cy="28" r="6" />
+    </svg>
+  );
+}

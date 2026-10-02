@@ -21,6 +21,7 @@ const STREET_KINDS = new Set(["cesta", "ulica", "trg", "pot", "nabrezje", "nasel
 /** Keys whose strings are structural, not visible copy. */
 const NON_COPY_KEYS = new Set(["id", "type", "variant", "tone", "page", "section", "action", "kind", "slug", "image", "network", "src", "file", "$placeholder"]);
 
+const IMAGE_REF_RE = /^img_[a-z0-9_-]+$/;
 const EMAIL_RE = /[\w.+-]+@[\w-]+\.[\w.]+/g;
 const URL_RE = /https?:\/\/\S+|www\.\S+/g;
 /** A phone or registration number in running text: at least seven digits in one run. */
@@ -173,6 +174,8 @@ function check(spec: SiteSpec, c: Corpus, translated: boolean): FactViolation[] 
   walkStrings(spec.pages, (s, p, key) => {
     if (NON_COPY_KEYS.has(key)) return;
     if (/^https?:\/\//.test(s)) return;
+    // An image reference under any key (image, inset, …) is an id, not copy.
+    if (IMAGE_REF_RE.test(s)) return;
     for (const f of copyFacts(s, c, "number")) out.push({ path: `/pages${p}`, ...f });
   });
   // Translations overlay any string of the spec when rendered; check each locale as it is shown.

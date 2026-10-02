@@ -31,10 +31,26 @@
 .image-text__link {
   margin-top: 1rem;
 }
+/* round: the photo in a disc with a ring in the text colour of its ground, the link as the section's button. */
+.s-image-text--round .image-text__media {
+  width: 70%;
+  aspect-ratio: 1;
+  border: 0.5rem solid currentColor;
+}
+.s-image-text--round .image-text__link {
+  margin-top: 1.5rem;
+}
 @media (min-width: 48rem) {
   .image-text {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 3rem;
+  }
+  .s-image-text--round .image-text {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  }
+  .s-image-text--round .image-text__media {
+    width: 100%;
+    border-width: 0.625rem;
   }
   .s-image-text--image-right .image-text__media {
     order: 2;

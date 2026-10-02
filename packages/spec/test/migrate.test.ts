@@ -125,11 +125,14 @@ describe("migration 6 → 7 (trade templates R and T)", () => {
     }
   });
 
-  it("accepts what v7 adds (the receipt hero, figures, the founding year) and only from v7 on", async () => {
+  it("accepts what v7 adds (the receipt and label heroes, figures, the founding year, a round photo, hours with photos) and only from v7 on", async () => {
     const { validateSite } = await import("../src/index.ts");
     const spec = migrateSpec(await read("racunovodstvo-seliskar"));
     expect(validateSite(spec).issues).toEqual([]);
     expect(spec.pages[0]!.sections.map((s) => s.variant)).toEqual(["receipt", "figures", "rows", "figure", "call-out"]);
+    const shop = migrateSpec(await read("trgovina-oljka-in-sol"));
+    expect(validateSite(shop).issues).toEqual([]);
+    expect(shop.pages[0]!.sections.map((s) => s.variant)).toEqual(["label", "tags", "narrow", "round", "photo", "call-out"]);
     // A stored spec must be migrated before it validates: the schema takes only the current version.
     expect(validateSite({ ...spec, specVersion: 6 }).ok).toBe(false);
   });

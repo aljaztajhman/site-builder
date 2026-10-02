@@ -161,6 +161,46 @@ describe("hero-signature receipt (Račun)", () => {
   });
 });
 
+describe("hero-signature label (Etiketa)", () => {
+  const KOPER: Business = { ...FULL_BUSINESS, name: "Oljka in sol", phone: "+38655551860", address: { street: "Kidričeva ulica 22", postalCode: "6000", city: "Koper" } };
+  const label = (props: Partial<SectionOf<"hero-signature">["props"]> = {}) =>
+    hero("label", {
+      headline: "Istrske dobrote manjših pridelovalcev",
+      intro: "Majhna trgovina v starem mestnem jedru Kopra.",
+      fact: "address",
+      factLabel: undefined,
+      primary: { label: "Darilni paketi", target: { page: "p_storitve" } },
+      secondary: { label: "Kaj prodajamo", target: { page: "p_storitve" } },
+      image: "img_salon",
+      inset: "img_team",
+      ...props,
+    });
+
+  it("sets the headline on a label card with the address from the facts, the photo in an arch and the inset in a disc", () => {
+    const out = html(<HeroSignature section={label()} ctx={ctxFor("etiketa", KOPER)} index={0} />);
+    expect(out).toContain("s-hero-signature--label tone-inverse");
+    expect(out).toMatch(/<div class="label-card hsig__card"><svg class="branch"[^>]*aria-hidden="true"/);
+    expect(out).toContain('<p class="hsig__where">Kidričeva ulica 22, Koper</p>');
+    expect(out).toMatch(/<h1 id="s_hero-title" class="hsig__title[^"]*">Istrske dobrote manjših pridelovalcev<\/h1>/);
+    expect(out.match(/btn btn--primary/g)).toHaveLength(1);
+    expect(out).toContain('class="text-link">Kaj prodajamo</a>');
+    expect(out).toMatch(/<figure class="hsig__door"><picture class="media hsig__door-media arch-top media--contained">/);
+    expect(out).toMatch(/<span class="hsig__dot disc"><picture class="media hsig__dot-media media--contained">/);
+    // The arch photo is the LCP image; the inset loads lazily.
+    expect(out.match(/fetchPriority="high"/g)).toHaveLength(1);
+    expect(heroLcp["hero-signature"]?.(label())).toEqual({ image: "img_salon", sizes: "(min-width: 64rem) 32rem, 74vw" });
+    expect(out).not.toContain("tel:");
+  });
+
+  it("shows an address placeholder instead of an invented one, and works without photos", () => {
+    const out = html(<HeroSignature section={label({ image: undefined, inset: undefined })} ctx={ctxFor("etiketa", SPARSE_BUSINESS)} index={0} />);
+    expect(out).toContain('data-ph="address"');
+    expect(out).not.toContain("<img");
+    expect(out).toContain("hsig hsig--label");
+    expect(out).not.toContain("hsig--has-image");
+  });
+});
+
 describe("price-list tags", () => {
   const section: SectionOf<"price-list"> = {
     id: "s_cene",
@@ -185,6 +225,14 @@ describe("price-list tags", () => {
     expect(out).toMatch(/od 45\s€/);
   });
 
+  it("sets every price on a bottle label in Etiketa: branch, name, the quantity, then the price", () => {
+    const out = html(<PriceList section={{ ...section, tone: undefined }} ctx={ctxFor("etiketa")} index={1} />);
+    expect(out).toContain('<ul class="price-labels" role="list">');
+    expect(out).toMatch(/<li class="price-label label-card"><svg class="branch"[^>]*>[\s\S]*?<\/svg><h3 class="price-label__name">Diagnostika<\/h3><p class="price-label__price"><span class="price">30\s€<\/span><\/p><\/li>/);
+    expect(out).toMatch(/<h3 class="price-label__name">Menjava gum<\/h3><p class="price-label__note">za komplet<\/p><p class="price-label__price"><mark class="ph" data-ph="price"/);
+    expect(out).not.toContain("plate");
+  });
+
   it("is a plain large price elsewhere", () => {
     const out = html(<PriceList section={section} ctx={testCtx()} index={1} />);
     expect(out).toContain('<p class="price-tag">');
@@ -206,6 +254,13 @@ describe("contact call-out", () => {
     expect(cevi).toContain('<a class="bignum bignum--poster" href="tel:+38641555730">041 555 730</a>');
   });
 
+  it("leaves the hours to an opening-hours section on the same page (say each thing once)", () => {
+    const ctx = ctxFor("etiketa");
+    const withHours = { ...ctx, page: { ...ctx.page, sections: [section, { id: "s_oh", type: "opening-hours", variant: "photo", props: { title: "Odprto" } }] } } as typeof ctx;
+    expect(html(<Contact section={section} ctx={withHours} index={5} />)).not.toContain("Delovni čas");
+    expect(html(<Contact section={section} ctx={ctx} index={5} />)).toContain("Delovni čas");
+  });
+
   it("leaves out an e-mail the owner doesn't have", () => {
     const out = html(<Contact section={section} ctx={ctxFor("cevi", { ...KRANJ, email: { $placeholder: "email" } })} index={5} />);
     expect(out).not.toContain("E-pošta");
@@ -221,10 +276,18 @@ describe("motifs.css", () => {
     for (const m of css.matchAll(/#[0-9a-f]{3,6}\b|rgb\(/gi)) expect.fail(`raw colour ${m[0]}`);
   });
 
-  it("rounds only drawn objects (seal, valves, stops, the plate's dot), never buttons", () => {
+  it("rounds only drawn objects (seal, valves, stops, the plate's dot) and photos in a disc, never buttons", () => {
     for (const m of css.matchAll(/([^{}]+)\{[^}]*border-radius:\s*50%/g)) {
-      expect(m[1]!.trim()).toMatch(/plate__dot|steps__item::before|area__list li::before/);
+      expect(m[1]!.trim()).toMatch(/^(?:[^,]*plate__dot|[^,]*steps__item::before|[^,]*area__list li::before|\.disc,\s*\.media\.disc)$/);
       expect(m[1]).not.toMatch(/btn/);
     }
+  });
+
+  it("never puts a disc or an arch on a button or a link", () => {
+    for (const m of css.matchAll(/([^{}]+)\{/g)) {
+      if (/\.(disc|arch-top)\b/.test(m[1]!)) expect(m[1]).not.toMatch(/btn|\ba\b|button|text-link/);
+    }
+    const src = ["HeroSignature.tsx", "../business/Info.tsx", "../content/ImageText.tsx"].map((f) => readFileSync(path.join(here, "../src/groups/heroes", f), "utf8")).join("\n");
+    for (const m of src.matchAll(/className=\{?"([^"]*\b(?:disc|arch-top)\b[^"]*)"/g)) expect(m[1]).not.toMatch(/btn|text-link/);
   });
 });

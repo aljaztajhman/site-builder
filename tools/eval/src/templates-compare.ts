@@ -43,6 +43,8 @@ export interface WidthCheck {
   width: number;
   scrollWidth: number;
   horizontalScroll: boolean;
+  /** Elements reaching past the right edge (the cause of a horizontal scroll, or clipped content). */
+  overflow: string[];
   brokenImages: string[];
   smallPrimaryTargets: string[];
   tinyTargets: string[];
@@ -54,7 +56,7 @@ export interface WidthCheck {
 /** The problems in one width's check, as lines; empty when it passes. */
 export function failures(c: WidthCheck): string[] {
   const out: string[] = [];
-  if (c.horizontalScroll) out.push(`horizontal scroll (${c.scrollWidth} px)`);
+  if (c.horizontalScroll) out.push(`horizontal scroll (${c.scrollWidth} px): ${c.overflow.join(", ")}`);
   for (const b of c.brokenImages) out.push(`broken image ${b}`);
   for (const t of c.smallPrimaryTargets) out.push(`tap target below 44 px: ${t}`);
   for (const t of c.tinyTargets) out.push(`tap target below 24 px: ${t}`);
@@ -127,7 +129,13 @@ async function checkEngine(page: Page): Promise<Omit<WidthCheck, "width">> {
       const call = document.querySelector('.action-bar a[href^="tel:"]');
       if (call && call.getBoundingClientRect().height > 0) heroPrimaryActions.push(`action bar call "${(call.textContent ?? "").trim()}"`);
     }
-    return { brokenImages, heroPrimaryActions, h1: document.querySelectorAll("h1").length };
+    // What sticks out past the viewport when the page scrolls sideways (the deepest elements first).
+    const overflow = [...document.querySelectorAll("body *")]
+      .filter((el) => el.getBoundingClientRect().right > window.innerWidth + 0.5 && el.getBoundingClientRect().width > 0)
+      .filter((el) => ![...el.children].some((c) => c.getBoundingClientRect().right > window.innerWidth + 0.5))
+      .slice(0, 5)
+      .map((el) => `${el.tagName.toLowerCase()}.${[...el.classList].join(".")} right ${Math.round(el.getBoundingClientRect().right)}`);
+    return { brokenImages, heroPrimaryActions, h1: document.querySelectorAll("h1").length, overflow };
   });
   return {
     scrollWidth: m.scrollWidth,

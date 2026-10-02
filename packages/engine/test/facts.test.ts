@@ -56,6 +56,19 @@ describe("checkFacts", () => {
     });
     expect(checkFacts(s, corpus)).toEqual([]);
   });
+
+  it("reads an image reference under any key as an id, not a number in copy", () => {
+    const s = spec({
+      sections: [
+        { id: "s_hero", type: "hero-signature", variant: "label", props: { headline: "Striženje v Celju", image: "img_01", inset: "img_02" } },
+        { id: "s_hours", type: "opening-hours", variant: "photo", props: { title: "Odprto", image: "img_04", inset: "img_05" } },
+      ],
+    });
+    expect(checkFacts(s, corpus)).toEqual([]);
+    // A number written in copy is still checked.
+    const copy = spec({ sections: [{ id: "s_hero", type: "hero-signature", variant: "label", props: { headline: "img_02 in 05 let", inset: "img_05" } }] });
+    expect(checkFacts(copy, corpus).map((v) => v.value)).toContain("05");
+  });
 });
 
 describe("checkFacts, stricter matching", () => {

@@ -27,11 +27,11 @@ export const imageText = defineSection(
   {
     type: "image-text",
     group: "content",
-    variants: ["image-left", "image-right"],
+    variants: ["image-left", "image-right", "round"],
     description:
-      "One photo beside a heading, up to three paragraphs and an optional link. Use to present one service, room, product or place with its own photo. Alternate image-left and image-right when used more than once on a page.",
+      "One photo beside a heading, up to three paragraphs and an optional link. Use to present one service, room, product or place with its own photo. Alternate image-left and image-right when used more than once on a page. round: the photo in a disc with a ring, the link as the section's one button; for an offer on a coloured band (gift boxes, a seasonal special).",
     images: "required",
-    mobile: "Photo first at 4:3, then heading and text. The link is at least 44 px tall.",
+    mobile: "Photo first at 4:3 (round: a disc at 70 % of the width), then heading and text. The link is at least 44 px tall.",
     a11y: "Heading is an h2. Photo alt text comes from the asset.",
   },
   z.strictObject({
@@ -145,6 +145,7 @@ export const aboutSection = defineSection(
       "The business's own story, told only with what the client wrote: heading, up to four paragraphs, an optional photo (image-side) and optionally the owner's name and role. figure: no photo; one number the client gave (the founding year) set wall-sized beside the heading and text (props.figure). Never invent history, years or numbers.",
     images: "optional",
     mobile: "Photo first at 4:3 (image-side; 4:5 beside the text on desktop), then the text. image-side without an image renders like text-only. figure: the number first, then the text.",
+    variantNeeds: { "image-side": "image", figure: "figure" },
     a11y: "Heading is an h2. Photo alt text comes from the asset.",
   },
   z.strictObject({

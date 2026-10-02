@@ -128,21 +128,8 @@ export function motifVars(motif: Motif, c: Colors): Record<string, string> {
         "--motif-ink": "#c2362b",
       };
     case "label":
-      // An olive branch: leaves in the label's frame colour (inverse), two olives in the primary colour.
-      return {
-        "--motif-branch": svgUrl(
-          `<svg xmlns="http://www.w3.org/2000/svg" width="132" height="58" viewBox="0 0 132 58"><path d="M4 44C36 40 82 30 128 8" stroke="${c.inverse}" stroke-width="3" stroke-linecap="round" fill="none"/>${[
-            [30, 30, 15, 5.5, -38],
-            [40, 50, 15, 5.5, 22],
-            [62, 22, 15, 5.5, -42],
-            [74, 42, 15, 5.5, 18],
-            [96, 10, 14, 5, -44],
-            [106, 30, 14, 5, 14],
-          ]
-            .map(([cx, cy, rx, ry, a]) => `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" transform="rotate(${a} ${cx} ${cy})" fill="${c.inverse}"/>`)
-            .join("")}<circle cx="52" cy="40" r="7" fill="${c.primary}"/><circle cx="88" cy="28" r="6" fill="${c.primary}"/></svg>`,
-        ),
-      };
+      // The label's frame, branch and photo shapes take the site's tokens directly in the shared stylesheet.
+      return {};
   }
 }
 

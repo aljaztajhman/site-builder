@@ -1,7 +1,7 @@
 import { PriceText, Section, SectionHead, cx, titleId } from "../../primitives/index.tsx";
 import type { RenderCtx, SectionProps } from "../../types.ts";
 import { TAG_KEYS, itemId } from "./shared.tsx";
-import { PlateStrip, motifOf } from "../../motifs/index.tsx";
+import { Branch, PlateStrip, motifOf } from "../../motifs/index.tsx";
 
 /**
  * An item the owner marked as not available right now: it stays listed, says so in words (the price is
@@ -11,10 +11,15 @@ function Unavailable({ ctx, className }: { ctx: RenderCtx; className: string }) 
   return <span className={cx("unavailable", className)}>{ctx.t("unavailable")}</span>;
 }
 
-/** Every price as a large object drawn by the direction's motif (a number plate in Tablica), the name under it. */
+/**
+ * Every price as a large object drawn by the direction's motif: a number plate in Tablica with the name under
+ * it, a bottle label in Etiketa (branch, name, quantity, then the price, read top to bottom like a label).
+ */
 function PriceTags({ section, ctx }: SectionProps<"price-list">) {
   const { props } = section;
-  const plate = motifOf(ctx) === "plate";
+  const motif = motifOf(ctx);
+  if (motif === "label") return <PriceLabels section={section} ctx={ctx} />;
+  const plate = motif === "plate";
   return (
     <Section id={section.id} type={section.type} variant={section.variant} tone={section.tone}>
       <SectionHead id={section.id} eyebrow={props.eyebrow} title={props.title} intro={props.intro} />
@@ -39,6 +44,42 @@ function PriceTags({ section, ctx }: SectionProps<"price-list">) {
                     </p>
                   )}
                   {it.note && <p className="price-tags__note muted">{it.note}</p>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
+      {props.footnote && <p className="prices__footnote muted">{props.footnote}</p>}
+    </Section>
+  );
+}
+
+/** Prices on bottle labels (Etiketa): each item a framed label with the branch, its name, the note and the price. */
+function PriceLabels({ section, ctx }: Omit<SectionProps<"price-list">, "index">) {
+  const { props } = section;
+  return (
+    <Section id={section.id} type={section.type} variant={section.variant} tone={section.tone}>
+      <SectionHead id={section.id} eyebrow={props.eyebrow} title={props.title} intro={props.intro} />
+      {props.groups.map((g, gi) => {
+        const Name = g.name ? "h4" : "h3";
+        return (
+          <div className="price-tags__group" key={gi}>
+            {g.name && <h3 className="prices__group-title">{g.name}</h3>}
+            <ul className="price-labels" role="list">
+              {g.items.map((it, ii) => (
+                <li className={cx("price-label label-card", it.unavailable && "is-unavailable")} key={ii}>
+                  <Branch />
+                  <Name className="price-label__name">{it.name}</Name>
+                  {it.note && <p className="price-label__note">{it.note}</p>}
+                  {it.unavailable && (
+                    <p>
+                      <Unavailable ctx={ctx} className="price-tags__flag" />
+                    </p>
+                  )}
+                  <p className="price-label__price">
+                    <PriceText price={it.price} ctx={ctx} />
+                  </p>
                 </li>
               ))}
             </ul>

@@ -149,17 +149,20 @@ export const openingHoursSection = defineSection(
   {
     type: "opening-hours",
     group: "business",
-    variants: ["table", "compact"],
+    variants: ["table", "compact", "photo"],
     description:
-      "Opening hours from the business facts (never written in props), with a heading and an optional note. table: full day names in a table. compact: short day names in a narrow list. Use on the homepage or contact page.",
-    images: "none",
-    mobile: "Day left, hours right, one row per day range, fits 360 px.",
-    a11y: "Heading is an h2. table: <table> with row headers for the days.",
+      "Opening hours from the business facts (never written in props), with a heading and an optional note. table: full day names in a table. compact: short day names in a narrow list. photo: the hours beside a photo of the shop front or room in a tall arch, with an optional second photo (inset) as a disc over its edge. Use on the homepage or contact page.",
+    images: "optional",
+    mobile: "Day left, hours right, one row per day range, fits 360 px. photo: the arch photo first at 78 % of the width, then the hours.",
+    variantNeeds: { photo: "image" },
+    a11y: "Heading is an h2. table and photo: <table> with row headers for the days. Photo alt text comes from the asset.",
   },
   z.strictObject({
     eyebrow: head.eyebrow,
     title: head.title,
-    note: text(200).optional().describe("e.g. how to book outside opening hours; not the hours themselves"),
+    note: text(200).optional().describe("e.g. how to book outside opening hours, or hours the client gave for a season; not the regular hours themselves"),
+    image: ImageRef.optional().describe("photo only: the shop front or the room, in a tall arch."),
+    inset: ImageRef.optional().describe("photo only: a second photo, shown round over the edge of the first (a detail)."),
   }),
 );
 
