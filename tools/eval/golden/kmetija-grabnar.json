@@ -1,5 +1,5 @@
 {
-  "specVersion": 3,
+  "specVersion": 5,
   "slug": "kmetija-grabnar",
   "locales": {
     "default": "sl",
@@ -53,7 +53,7 @@
       "accent": "#3a8049",
       "border": "#cfdcd2",
       "inverse": "#12241a",
-      "onInverse": "#ffffff"
+      "onInverse": "#f5f5f5"
     },
     "radius": 4,
     "baseFontSize": 17,

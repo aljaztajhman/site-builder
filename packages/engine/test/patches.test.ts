@@ -37,6 +37,13 @@ describe("applyPatches", () => {
     expect(invented.issues.join(" ")).not.toMatch(/777/);
   });
 
+  it("replaces em dashes in a chat edit or critique patch instead of rejecting it", () => {
+    const spec = golden("pekarna-kvas");
+    const r = applyPatches(spec, [{ op: "replace", path: "/pages/0/sections/0/props/intro", value: "Pečemo vsak dan — tudi ob sobotah." }], corpus("pekarna-kvas"));
+    expect(r.issues).toEqual([]);
+    expect(r.spec.pages[0]!.sections[0]!.props).toMatchObject({ intro: "Pečemo vsak dan – tudi ob sobotah." });
+  });
+
   it("repairs a warmer palette with a cream surface instead of rejecting it (live eval, pekarna-kvas)", () => {
     const spec = golden("pekarna-kvas");
     const ops: Operation[] = [

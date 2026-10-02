@@ -104,6 +104,33 @@ describe("version retention", () => {
     expect(await kept(other)).toEqual([2, 3]);
   });
 
+  it("keeps the version an \"Ustvari znova\" replaced forever, also when the regeneration was the same day (sb-keep-replaced)", async () => {
+    const id = await siteWith([
+      { at: "2026-09-10T08:00:00Z", source: "generate" }, // v1  first generation (replaces nothing)
+      { at: "2026-09-10T08:01:00Z", source: "critique" }, // v2
+      { at: "2026-09-10T09:00:00Z" }, //                     v3
+      { at: "2026-09-10T09:30:00Z" }, //                     v4  the owner's last edit, replaced the same day
+      { at: "2026-09-10T10:00:00Z", source: "generate" }, // v5  "Ustvari znova"
+      { at: "2026-09-10T10:01:00Z", source: "critique" }, // v6  last of 09-10
+      { at: "2026-09-30T08:00:00Z" }, //                     v7  current
+    ]);
+    const rows = await db.query<{ version: number; keep_reason: string | null }>("select version, keep_reason from spec_versions where site_id = $1 order by version", [id]);
+    expect(rows.rows.filter((r) => r.keep_reason === "replaced").map((r) => Number(r.version))).toEqual([4]);
+    // 20 days later v4 is not the last of its day, yet it stays; the rest of the day goes as before.
+    expect((await repo.pruneVersions(id, policy, NOW)).map((r) => r.version)).toEqual([1, 2, 3, 5]);
+    expect(await kept(id)).toEqual([4, 6, 7]);
+    // A year on, still there.
+    expect((await repo.pruneVersions(id, policy, new Date("2027-10-01T01:30:00Z"))).map((r) => r.version)).toEqual([]);
+    expect(await repo.getSpec(id, 4)).not.toBeNull();
+  });
+
+  it("a stale generate save (version conflict) marks nothing", async () => {
+    const id = await siteWith([{ at: "2026-09-10T08:00:00Z" }, { at: "2026-09-10T08:01:00Z" }]);
+    await expect(repo.saveSpec(id, { specVersion: 1 } as never, "generate", undefined, undefined, 1)).rejects.toThrow();
+    const { rows } = await db.query<{ n: number | string }>("select count(*) as n from spec_versions where site_id = $1 and keep_reason is not null", [id]);
+    expect(Number(rows[0]!.n)).toBe(0);
+  });
+
   it("is idempotent: a second run the same night, or later that day, removes nothing", async () => {
     const id = await siteWith([{ at: "2026-09-15T08:00:00Z" }, { at: "2026-09-15T08:01:00Z" }, { at: "2026-09-15T08:02:00Z" }, { at: "2026-09-29T08:00:00Z" }]);
     expect((await repo.pruneVersions(id, policy, NOW)).map((r) => r.version)).toEqual([1, 2]);
@@ -189,6 +216,35 @@ describe("migration 4 (version retention)", () => {
         { site_id: "site_a", version: 2 },
         { site_id: "site_a", version: 7 },
         { site_id: "site_b", version: 3 },
+      ]);
+    } finally {
+      await old.close();
+    }
+  });
+});
+
+describe("migration 8 (spec_versions.keep_reason)", () => {
+  it("marks every existing version that a generation replaced", async () => {
+    const old = await createDb("pglite://memory");
+    try {
+      await old.query("create table schema_migrations (id integer primary key, name text not null, applied_at timestamptz not null default now())");
+      for (const m of MIGRATIONS.filter((m) => m.id < 8)) {
+        for (const stmt of m.sql.split(/;\s*\n/).map((s) => s.trim().replace(/;$/, "")).filter(Boolean)) await old.query(stmt);
+        await old.query("insert into schema_migrations (id, name) values ($1, $2)", [m.id, m.name]);
+      }
+      await old.query("insert into sites (id, slug, name, current_version) values ('site_a', 'a', 'A', 6), ('site_b', 'b', 'B', 1)");
+      // site_a: v3 and v6 are regenerations (replacing v2 and v5); v1 and site_b's v1 are first generations.
+      await old.query(
+        `insert into spec_versions (site_id, version, spec, source) values
+           ('site_a', 1, '{}', 'generate'), ('site_a', 2, '{}', 'manual'), ('site_a', 3, '{}', 'generate'),
+           ('site_a', 4, '{}', 'critique'), ('site_a', 5, '{}', 'manual'), ('site_a', 6, '{}', 'generate'),
+           ('site_b', 1, '{}', 'generate')`,
+      );
+      expect(await migrate(old)).toEqual(MIGRATIONS.filter((m) => m.id >= 8).map((m) => m.id));
+      const { rows } = await old.query<{ site_id: string; version: number }>("select site_id, version from spec_versions where keep_reason = 'replaced' order by site_id, version");
+      expect(rows.map((r) => [r.site_id, Number(r.version)])).toEqual([
+        ["site_a", 2],
+        ["site_a", 5],
       ]);
     } finally {
       await old.close();

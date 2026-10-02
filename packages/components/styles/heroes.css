@@ -323,7 +323,7 @@ main > .s-hero-signature:first-child {
   position: absolute;
   inset: 0;
   background: var(--c-inverse);
-  opacity: 0.72;
+  opacity: 0.68;
 }
 .hsig__body {
   position: relative;
@@ -427,7 +427,7 @@ main > .s-hero-signature:first-child {
 }
 @media (min-width: 64rem) {
   .hsig--arch {
-    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
     gap: 3.5rem;
     align-items: end;
     padding-top: 2.5rem;

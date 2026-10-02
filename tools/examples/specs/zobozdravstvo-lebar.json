@@ -577,7 +577,7 @@
       "inverse": "#0c2331",
       "primary": "#2f6f7e",
       "surface": "#ffffff",
-      "onInverse": "#ffffff",
+      "onInverse": "#f5f5f5",
       "onPrimary": "#ffffff",
       "background": "#f1f6fb"
     },
@@ -642,5 +642,5 @@
       "registrationNumber": "7788990000"
     }
   },
-  "specVersion": 3
+  "specVersion": 4
 }

@@ -238,10 +238,12 @@ main > .s:first-child {
   margin-bottom: var(--space-block);
   max-width: 44rem;
 }
+/* Sentence case, tracking at most 0.04em, in every direction: uppercase is a heading-only token (banned give-away). */
 .eyebrow {
   font-size: var(--fs-sm);
   font-weight: 600;
   letter-spacing: 0.02em;
+  text-transform: none;
   color: var(--c-muted);
 }
 .stack > * + * {

@@ -71,6 +71,8 @@ interface State {
     allowance: { text: string };
     expiresAt: string | null;
     signIn: string | null;
+    /** The free-preview badge beside the frame, or null. */
+    badge?: string | null;
   };
   /** Server time of this response (ISO). */
   now: string;
@@ -1682,7 +1684,7 @@ function moreMenu(): HTMLElement {
       h("button", { type: "button", onClick: go("versions") }, "Zgodovina sprememb"),
       h("a", { href: previewUrl(), target: "_blank" }, "Predogled v novem zavihku"),
       s.published_version ? h("a", { href: `/s/${s.slug}/`, target: "_blank" }, "Odpri objavljeno stran") : null,
-      can("export") ? h("a", { href: `/api/sites/${siteId}/export` }, "Prenesi stran (.zip)") : null,
+      can("export") ? h("button", { type: "button", id: "export-start", onClick: () => { menuOpen = false; void startExport(); } }, "Prenesi stran (.zip)") : null,
       !can("regenerate") ? null : h("button", {
         type: "button",
         disabled: s.status === "generating",
@@ -1784,6 +1786,7 @@ function renderStage(): void {
       const current = stage.querySelector<HTMLElement>(".frame.live");
       if (current?.dataset.sig !== live.dataset.sig) stage.replaceChildren(live);
     } else stage.replaceChildren(h("div", { class: "frame skeleton" }, "Predogleda še ni."));
+    syncBadge(null);
     sizeFrame();
     return;
   }
@@ -1794,9 +1797,25 @@ function renderStage(): void {
     frame = f;
     frameVersion = state.version;
     f.src = previewUrl();
-    stage.replaceChildren(h("div", { class: "frame" }, f));
+    stage.replaceChildren(h("div", { class: "frame-box" }, h("div", { class: "frame" }, f)));
   }
+  syncBadge(stage.querySelector<HTMLElement>(".frame-box"));
   sizeFrame();
+}
+
+/**
+ * The free-preview badge (`sb-preview-watermark`): on the frame's corner, in the editor's own page, never
+ * in the site inside the frame (preview = published output). The server decides when (access.badge).
+ */
+function syncBadge(box: HTMLElement | null): void {
+  const text = box ? (state.access?.badge ?? null) : null;
+  // The stage makes room above the frame for it (app.css .stage.badged).
+  shell?.stage.classList.toggle("badged", !!text);
+  if (!box) return;
+  let badge = box.querySelector<HTMLElement>(":scope > .preview-badge");
+  if (!text) return badge?.remove();
+  if (!badge) badge = box.appendChild(h("span", { class: "preview-badge" }));
+  if (badge.textContent !== text) badge.textContent = text;
 }
 
 /** Fits the preview into the canvas: 360 px phones at full size where they fit, 1280 px desktops scaled down. */
@@ -1808,7 +1827,9 @@ function sizeFrame(): void {
   const width = device === "mobile" ? 360 : 1280;
   const pad = narrow ? 24 : 40;
   const scale = Math.min(1, Math.max(0.2, (stage.clientWidth - pad - 2) / width));
-  const avail = stage.clientHeight - pad - 2;
+  // The stage's own vertical padding: more at the top while the free-preview badge sits above the frame.
+  const cs = getComputedStyle(stage);
+  const avail = stage.clientHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0) - 2;
   const height = Math.max(narrow ? 200 : 360, device === "mobile" ? Math.min(avail, 800) : avail);
   wrap.style.width = `${Math.round(width * scale) + 2}px`;
   wrap.style.height = `${height + 2}px`;
@@ -1850,25 +1871,47 @@ function linkLabels(scope: HTMLElement): void {
 
 // ---------- Pre-publish checklist: each entry says what is missing, where, and opens the field ----------
 let checklistOpen = false;
+/** "export": the same checklist, opened by "Prenesi stran" as a warning with "Izvozi vseeno" (sb-export-checklist). */
+let checklistFor: "publish" | "export" = "publish";
 
-/** Opened from the "Še N do objave" chip, or by Objavi while something is missing; closed otherwise. */
+/** Opened from the "Še N do objave" chip, by Objavi or by an export while something is missing; closed otherwise. */
 function checklistBlock(): HTMLElement | null {
   const list = state.checklist;
   if (!checklistOpen || !list.length || !state.spec) return null;
   const spec = state.spec;
   const missing = list.filter((b) => b.kind === "placeholder").length;
+  const exporting = checklistFor === "export";
   return h("div", { class: "pane tight", id: "checklist" },
     h("div", { class: "note warn checklist" },
       h("div", { class: "row" },
-        h("p", { class: "sp" }, h("strong", {}, blockerSummary(missing, list.length - missing))),
+        h("p", { class: "sp" }, h("strong", {}, exporting ? exportSummary(missing, list.length - missing) : blockerSummary(missing, list.length - missing))),
         h("button", { class: "btn quiet sm", type: "button", "aria-label": "Zapri seznam", onClick: () => { checklistOpen = false; render(); } }, "✕"),
       ),
+      // Above the list, so a long checklist doesn't hide the way on.
+      exporting
+        ? h("div", { class: "row export-anyway" },
+            h("a", { class: "btn sm", id: "export-anyway", href: `/api/sites/${siteId}/export?anyway=1`, onClick: () => { checklistOpen = false; window.setTimeout(render, 0); } }, "Izvozi vseeno"),
+          )
+        : null,
       h("ol", {}, ...list.slice(0, 40).map((b) =>
         h("li", {}, h("button", { type: "button", onClick: () => goTo(b.path) }, h("strong", {}, describePath(spec, b.path)), h("span", {}, blockerMessage(b)))))),
     ));
 }
 
-function openChecklist(): void {
+/** "Prenesi stran (.zip)": straight to the download when nothing is on the checklist, else the checklist as a warning first. */
+async function startExport(): Promise<void> {
+  // Text still waiting to be saved goes first, and the checklist is read fresh: the zip is the version on screen.
+  await queued(() => load(false));
+  if (!state.checklist.length) {
+    render();
+    window.location.href = `/api/sites/${siteId}/export`;
+    return;
+  }
+  openChecklist("export");
+}
+
+function openChecklist(forWhat: "publish" | "export" = "publish"): void {
+  checklistFor = forWhat;
   checklistOpen = true;
   setSheet("full");
   render();
@@ -1926,6 +1969,14 @@ function blockerSummary(missing: number, other: number): string {
   return `Pred objavo: ${parts.join(", ")}. Tapnite postavko, odpre se pravo polje.`;
 }
 
+/** The same checklist before an export: a warning, the download stays possible. */
+function exportSummary(missing: number, other: number): string {
+  const parts: string[] = [];
+  if (missing) parts.push(`${missingPhrase(missing)} (rumeno v predogledu)`);
+  if (other) parts.push(`preverite še ${items(other)}`);
+  return `Stran še ni pripravljena za objavo: ${parts.join(", ")}. Če jo izvozite zdaj, ostanejo te napake tudi v datotekah. Tapnite postavko, odpre se pravo polje.`;
+}
+
 /** "manjka 1 podatek", "manjkata 2 podatka", "manjkajo 3 podatki", "manjka 5 podatkov" (Slovene plural rules). */
 function missingPhrase(n: number): string {
   const form = new Intl.PluralRules("sl-SI").select(n);
@@ -1951,7 +2002,16 @@ function showToast(): void {
   }, 4000);
 }
 
-load().catch((e: unknown) => {
-  const message = e instanceof Error ? e.message : String(e);
-  root.replaceChildren(h("p", { role: "alert", class: "hint" }, `Urejevalnika ni bilo mogoče naložiti: ${message}. Osvežite stran.`));
-});
+load()
+  .then(() => {
+    // An export link opened while something was on the checklist comes back here (?export=1): show the warning.
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("export") !== "1") return;
+    url.searchParams.delete("export");
+    history.replaceState(null, "", url.pathname + url.search + url.hash);
+    if (can("export") && state.checklist.length) openChecklist("export");
+  })
+  .catch((e: unknown) => {
+    const message = e instanceof Error ? e.message : String(e);
+    root.replaceChildren(h("p", { role: "alert", class: "hint" }, `Urejevalnika ni bilo mogoče naložiti: ${message}. Osvežite stran.`));
+  });

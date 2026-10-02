@@ -160,10 +160,8 @@
 }
 .prices__group-title {
   padding-top: 0.75rem;
-  border-top: 3px solid var(--c-primary);
-}
-.tone-inverse .prices__group-title {
-  border-top-color: currentColor;
+  /* Text colour, not the accent: accent-coloured single-side borders are a banned give-away. */
+  border-top: 3px solid currentColor;
 }
 .prices__table {
   width: 100%;

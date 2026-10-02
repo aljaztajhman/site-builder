@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { loadConfig } from "@sb/config";
 import { Repo, createDb, createFsStorage, migrate, type Platform, type Queue } from "@sb/platform";
-import { createApp } from "../src/app.ts";
+import { EXPORT_CHECKLIST_MESSAGE, createApp } from "../src/app.ts";
 import { SESSION_COOKIE, loginThrottle } from "../src/auth.ts";
 import { homePage } from "../src/home.tsx";
 import { adminBrowser, type Browser } from "./session-helpers.ts";
@@ -452,6 +452,25 @@ describe("direct editor API (no model calls)", () => {
 
     const blocked = await app.request(`/api/sites/${site.id}/publish`, { method: "POST", headers: { cookie } });
     expect(blocked.status).toBe(422);
+
+    // Export warns with the same checklist (sb-export-checklist = warn) and works once confirmed.
+    const publishList = ((await blocked.json()) as { checklist: unknown[] }).checklist;
+    const warned = await app.request(`/api/sites/${site.id}/export`, { headers: { cookie } });
+    expect(warned.status).toBe(409);
+    const warning = (await warned.json()) as { error: string; message: string; checklist: unknown[]; blockers: string[] };
+    expect(warning).toMatchObject({ error: "checklist", message: EXPORT_CHECKLIST_MESSAGE });
+    expect(warning.checklist).toEqual(publishList);
+    expect(warning.checklist).toEqual(state.checklist);
+    expect(warning.message).not.toMatch(/—/);
+    // A browser following the link lands in the editor with the warning open.
+    const followed = await app.request(`/api/sites/${site.id}/export`, { headers: { cookie, accept: "text/html,application/xhtml+xml" }, redirect: "manual" });
+    expect(followed.status).toBe(303);
+    expect(followed.headers.get("location")).toBe(`/sites/${site.id}?export=1`);
+    const anyway = await app.request(`/api/sites/${site.id}/export?anyway=1`, { headers: { cookie } });
+    expect(anyway.status).toBe(200);
+    expect(anyway.headers.get("content-type")).toBe("application/zip");
+    expect(anyway.headers.get("content-disposition")).toContain(`-v3.zip`);
+    expect((await anyway.arrayBuffer()).byteLength).toBeGreaterThan(10_000);
 
     const reverted = await app.request(`/api/sites/${site.id}/revert`, { method: "POST", headers: json, body: JSON.stringify({ version: 2 }) });
     expect(await reverted.json()).toMatchObject({ ok: true, version: 4 });

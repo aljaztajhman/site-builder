@@ -35,6 +35,7 @@ describe("migration 1 → 2 (contact-form section type)", () => {
     const v1 = { ...golden, specVersion: 1 };
     const v2 = migrateSpec(v1, MIGRATIONS, 2);
     expect(v2).toEqual({ ...golden, specVersion: 2 });
+    expect(migrateSpec(v2).specVersion).toBe(SPEC_VERSION);
     expect(validateSite(migrateSpec(v2)).ok).toBe(true);
   });
 });
@@ -51,17 +52,17 @@ describe("migration 2 → 3 (image origin)", () => {
   });
 });
 
-describe("migration 3 → 4 (trade templates)", () => {
-  it("turns a stored v3 site into a valid v4 site unchanged apart from the version", async () => {
+describe("migration 4 → 5 (trade templates)", () => {
+  it("turns a stored v4 site into a valid v5 site unchanged apart from the version", async () => {
     const { readFileSync } = await import("node:fs");
     const { validateSite } = await import("../src/index.ts");
     const golden = JSON.parse(readFileSync(new URL("../../../tools/eval/golden/avtoservis-mrak.json", import.meta.url), "utf8")) as Record<string, unknown>;
-    const v4 = migrateSpec({ ...golden, specVersion: 3 });
-    expect(v4).toEqual({ ...golden, specVersion: 4 });
-    expect(validateSite(v4).ok).toBe(true);
+    const v5 = migrateSpec({ ...golden, specVersion: 4 });
+    expect(v5).toEqual({ ...golden, specVersion: 5 });
+    expect(validateSite(v5).ok).toBe(true);
   });
 
-  it("accepts what v4 adds: the band tone, band colours, hero-signature, price tags and the call-out", async () => {
+  it("accepts what v5 adds: the band tone, band colours, hero-signature, price tags and the call-out", async () => {
     const { readFileSync } = await import("node:fs");
     const { validateSite, direction } = await import("../src/index.ts");
     const golden = JSON.parse(readFileSync(new URL("../../../tools/eval/golden/avtoservis-mrak.json", import.meta.url), "utf8")) as import("../src/index.ts").SiteSpec;
@@ -75,8 +76,8 @@ describe("migration 3 → 4 (trade templates)", () => {
     ];
     const r = validateSite(spec);
     expect(r.issues).toEqual([]);
-    // As a v3 spec, the same content is rejected: v4 is what makes it valid.
-    expect(validateSite({ ...spec, specVersion: 3 }).ok).toBe(false);
+    // As a v4 spec, the same content is rejected: v5 is what makes it valid.
+    expect(validateSite({ ...spec, specVersion: 4 }).ok).toBe(false);
   });
 });
 

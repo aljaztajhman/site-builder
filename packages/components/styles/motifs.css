@@ -250,18 +250,29 @@ a.plate:hover .plate__num {
   padding-left: 3.75rem;
 }
 /* Steps on a hot pipe with valves. */
+/* The pipe is drawn, not a border: a coloured stripe on one side of a box is a give-away. */
 [data-motif="pipes"] .steps__item,
 [data-motif="pipes"] .steps__item:last-child {
-  margin-left: 1.125rem;
-  padding: 0 0 2.25rem 2.25rem;
-  border-left: 0.75rem solid var(--c-primary);
+  margin-left: 1rem;
+  padding: 0 0 2.25rem 3rem;
+  border: 0;
 }
 [data-motif="pipes"] .steps__item:last-child {
   padding-bottom: 0.5rem;
 }
-[data-motif="pipes"] .steps__item::before {
+[data-motif="pipes"] .steps__item::after {
+  content: "";
+  position: absolute;
   top: 0;
-  left: -1.625rem;
+  bottom: 0;
+  left: 0;
+  width: 0.75rem;
+  background: var(--c-primary);
+}
+[data-motif="pipes"] .steps__item::before {
+  z-index: 1;
+  top: 0;
+  left: -0.875rem;
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 50%;
@@ -311,13 +322,13 @@ a.plate:hover .plate__num {
   border: 0.5rem solid var(--c-text);
 }
 @media (min-width: 64rem) {
-  [data-motif="pipes"] .s-services-list .container {
+  /* Services: the list in two columns under the heading, each name on its T-joint. */
+  [data-motif="pipes"] .s-services-list .svc-list {
     display: grid;
-    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
-    column-gap: 4.5rem;
-    align-items: start;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 3.5rem;
   }
-  [data-motif="pipes"] .s-services-list--rows .svc-list__item {
+  [data-motif="pipes"] .s-services-list .svc-list__item {
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas:
       "name price"
@@ -326,12 +337,18 @@ a.plate:hover .plate__num {
   [data-motif="pipes"] .s-steps--horizontal .steps__item,
   [data-motif="pipes"] .s-steps--horizontal .steps__item:last-child {
     margin: 0;
-    padding: 4rem 2rem 0 0;
-    border-left: 0;
-    border-top: 0.75rem solid var(--c-primary);
+    padding: 4.75rem 2rem 0 0;
+    border: 0;
+  }
+  [data-motif="pipes"] .s-steps--horizontal .steps__item::after {
+    top: 0.875rem;
+    bottom: auto;
+    right: 0;
+    width: auto;
+    height: 0.75rem;
   }
   [data-motif="pipes"] .s-steps--horizontal .steps__item::before {
-    top: -1.625rem;
+    top: 0;
     left: 0;
   }
   [data-motif="pipes"] .s-service-area--list .area__list {
@@ -464,7 +481,7 @@ a.plate:hover .plate__num {
 
 /* ---------- layout fixes shared by the templates ---------- */
 /* The section after the pipes hero keeps its own top gap (the divider closes the hero). */
-[data-motif="pipes"] main > .s-hero-signature + .s {
+[data-motif="pipes"] main > .s.s-hero-signature + .s.s {
   padding-top: var(--space-section);
 }
 /* A heading beside a photo gets less room than a full-width one. */
@@ -480,4 +497,10 @@ a.plate:hover .plate__num {
 .hsig__strip .hours__row dt,
 .callout .hours__row dt {
   min-width: 5.5rem;
+}
+/* The radiator stays a supporting drawing on a phone: the services start soon after the call. */
+@media (max-width: 63.99rem) {
+  [data-motif="pipes"] .hsig__drawing {
+    width: min(62%, 15rem);
+  }
 }

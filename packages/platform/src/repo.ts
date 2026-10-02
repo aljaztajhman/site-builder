@@ -221,7 +221,11 @@ export class Repo {
     ]);
   }
 
-  /** Stores a new spec version and makes it current. Returns the version number. */
+  /**
+   * Stores a new spec version and makes it current. Returns the version number.
+   * A "generate" save is a (re)generation ("Ustvari znova", retry, homepage → full site): the version it
+   * replaces is marked `keep_reason = 'replaced'`, so retention never removes it (sb-keep-replaced).
+   */
   async saveSpec(
     siteId: string,
     spec: SiteSpec,
@@ -232,15 +236,20 @@ export class Repo {
     baseVersion?: number | null,
   ): Promise<number> {
     // One statement: claim the next version on the site row (row lock serialises concurrent saves)
-    // and insert it. current_version is always the highest version, so +1 is the next free number.
+    // and insert it. current_version is always the highest version, so +1 is the next free number and
+    // v - 1 is the version this save replaces (the current one is never pruned).
     const { rows } = await this.db.query<{ version: number }>(
       `with claimed as (
          update sites set current_version = coalesce(current_version, 0) + 1, updated_at = now()
           where id = $1 and ($6::integer is null or current_version = $6)
           returning current_version as v
+       ),
+       keep_replaced as (
+         update spec_versions set keep_reason = 'replaced'
+          where $3::text = 'generate' and site_id = $1 and version = (select v - 1 from claimed)
        )
        insert into spec_versions (site_id, version, spec, source, message, patch)
-       select $1, v, $2, $3, $4, $5 from claimed
+       select $1, v, $2, $3::text, $4, $5 from claimed
        returning version`,
       [siteId, JSON.stringify(spec), source, message ?? null, patch === undefined ? null : JSON.stringify(patch), baseVersion ?? null],
     );
@@ -319,7 +328,8 @@ export class Repo {
   /**
    * Retention (config `versions.retention`): removes the versions of one site that are older than today
    * and the `keepAllDays` whole days before it, except the last version of each day, every version that
-   * was ever published, and the current one. Days are local days in `timeZone`. Versions themselves never
+   * was ever published, every version a regeneration replaced (`keep_reason`), and the current one.
+   * Days are local days in `timeZone`. Versions themselves never
    * change; the direct-editor operations of removed manual versions move to pruned_patches, so the text
    * the owner typed stays part of the fact corpus.
    *
@@ -333,7 +343,7 @@ export class Repo {
          select id, current_version, published_version from sites where id = $1 for update
        ),
        v as (
-         select version, (created_at at time zone $2::text)::date as day from spec_versions where site_id = $1
+         select version, keep_reason, (created_at at time zone $2::text)::date as day from spec_versions where site_id = $1
        ),
        last_of_day as (
          select max(version) as version from v group by day
@@ -342,6 +352,7 @@ export class Repo {
          select v.version from v, site
           where v.day < ($3::timestamptz at time zone $2::text)::date - $4::integer
             and v.version not in (select version from last_of_day)
+            and v.keep_reason is null
             and v.version is distinct from site.current_version
             and v.version is distinct from site.published_version
             and not exists (select 1 from site_publishes p where p.site_id = $1 and p.version = v.version)

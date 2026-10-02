@@ -382,10 +382,13 @@ export function issueMessage(issue: IssueLike): string {
     if (rule.startsWith("filler: ")) return `vsebuje prazno frazo »${rule.slice(8)}«; napišite konkretno, kaj ponujate`;
     if (rule === "emoji") return "vsebuje emoji";
     if (rule === "numbered label") return "oznake ne smejo biti oštevilčene (01, 02 …)";
+    if (rule === "em dash") return "vsebuje dolgi pomišljaj (—); uporabite pomišljaj s presledki ( – ) ali vejico";
+    if (rule === "all-caps eyebrow") return "nadnaslov naj ne bo napisan z velikimi črkami; pišite ga kot navaden stavek";
     const greeting = /^"(.+)" headline$/.exec(rule);
     if (greeting) return `naslov ne sme biti pozdrav (»${greeting[1]}«); povejte, kaj ponujate`;
     return "vsebuje izraz, ki ga ne uporabljamo";
   }
+  if (issue.code === "design" && / is pure (black|white);/.test(m)) return "barva ne sme biti čisto črna ali čisto bela; izberite malo mehkejši odtenek";
   if (issue.code === "design") return "barve ali mere niso v dovoljenem razponu";
   if (issue.code === "structure") return "te spremembe ni mogoče shraniti (zgradba strani)";
   return "ni veljavno";

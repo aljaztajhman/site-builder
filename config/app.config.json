@@ -105,7 +105,14 @@
   },
   "plans": {
     "$comment": "Phase 1 has no billing; kept here so later phases read from config.",
-    "freePreview": { "pages": ["home"], "model": "claude-sonnet-5-5", "effort": "medium", "watermark": true, "publishable": false },
+    "freePreview": {
+      "$comment": "watermark (owner's decision sb-preview-watermark, 2026-10-02): \"app-badge\" = a small \"Predogled · Stranko\" badge in the app beside the preview frame (editor, guest preview, sites list) while the viewer has no paid plan and the site isn't published; never in the site's own HTML, so preview stays equal to published output. \"off\" = no badge.",
+      "pages": ["home"],
+      "model": "claude-sonnet-5-5",
+      "effort": "medium",
+      "watermark": "app-badge",
+      "publishable": false
+    },
     "paid": {
       "$comment": "Owner's decision sb-pricing (2026-10-01). Whole euros, VAT included, the same whether or not we're VAT-registered. billingEnabled stays false until the legal entity exists (sb-legal-entity: registered after billing is built, before the first charge); while it's false the landing page calls these planned prices.",
       "billingEnabled": false,

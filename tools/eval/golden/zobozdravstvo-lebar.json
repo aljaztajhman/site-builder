@@ -1,5 +1,5 @@
 {
-  "specVersion": 3,
+  "specVersion": 5,
   "slug": "zobozdravstvo-lebar",
   "locales": {
     "default": "sl",
@@ -64,7 +64,7 @@
       "accent": "#1479a0",
       "border": "#d3e0ea",
       "inverse": "#0c2331",
-      "onInverse": "#ffffff"
+      "onInverse": "#f5f5f5"
     },
     "radius": 12,
     "baseFontSize": 17,

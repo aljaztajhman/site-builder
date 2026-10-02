@@ -1,4 +1,4 @@
-import { formatAddress, isPlaceholder, type Link } from "@sb/spec";
+import { formatAddress, isPlaceholder, type Link, type SectionOf } from "@sb/spec";
 import { ActionLink, Actions, HoursList, Picture, Ph, Section, titleId } from "../../primitives/index.tsx";
 import { CallObject, Radiator, Seal, motifOf } from "../../motifs/index.tsx";
 import type { RenderCtx, SectionProps } from "../../types.ts";
@@ -11,6 +11,18 @@ export const HERO_SIGNATURE_ARCH_SIZES = "(min-width: 64rem) 32rem, 78vw";
 /** A link that is not a second call: the hero's object already is the call. */
 function notCall(link: Link | undefined): Link | undefined {
   return link && "action" in link.target && link.target.action === "call" ? undefined : link;
+}
+
+const DIRECTIONS_LINK: Link = { label: "", target: { action: "directions" } };
+
+/** The one text link beside the phone object: the model's non-call link, else directions (labelled at render). */
+export function signatureLink(section: SectionOf<"hero-signature">): Link {
+  return notCall(section.props.primary) ?? notCall(section.props.secondary) ?? DIRECTIONS_LINK;
+}
+
+/** A phone hero that shows directions too, so it puts call and directions on the first screen. */
+export function signatureOffersDirections(section: SectionOf<"hero-signature">): boolean {
+  return section.props.fact === "phone" && signatureLink(section) === DIRECTIONS_LINK;
 }
 
 /** The band under the photo hero: hours and address with a directions link (no phone: the plate shows it). */
@@ -70,13 +82,15 @@ export function HeroSignature({ section, ctx, index }: SectionProps<"hero-signat
       <p className="lead hsig__lead">{props.intro}</p>
     </>
   );
-  // With the phone as the object, a further link is a quiet text link and never a second call.
+  // With the phone as the object, a further link is a quiet text link and never a second call; without one,
+  // directions, so the first screen offers call and directions and the phone's call bar can wait below it.
   const links = phone ? (
     (() => {
-      const link = notCall(props.primary) ?? notCall(props.secondary);
-      return link ? (
+      const link = signatureLink(section);
+      const shown = link === DIRECTIONS_LINK ? { ...link, label: ctx.t("directions") } : link;
+      return ctx.href(shown.target) ? (
         <div className="actions hsig__links">
-          <ActionLink link={link} ctx={ctx} kind="text" />
+          <ActionLink link={shown} ctx={ctx} kind="text" />
         </div>
       ) : null;
     })()

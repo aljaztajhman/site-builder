@@ -3,6 +3,9 @@
 /** The product name the owner chose (`sb-brand-name`, 2026-09-30). Trademark search and domains still to do. */
 export const PRODUCT_NAME = "Stranko";
 
+/** The small badge beside a free, unpublished preview (`sb-preview-watermark`): app chrome, never in the site's HTML. */
+export const PREVIEW_BADGE = `Predogled · ${PRODUCT_NAME}`;
+
 const TZ = "Europe/Ljubljana";
 const eur = new Intl.NumberFormat("sl-SI", { style: "currency", currency: "EUR" });
 

@@ -86,11 +86,16 @@ Hard list. Add to it whenever a new default shows up in eval screenshots.
 - The default row of three icon feature cards
 - Everything centred
 - Heavy drop shadows on every card
-- Filler copy: "vrhunska kakovost", "celovite rešitve", "vaš zanesljiv partner", "z dolgoletnimi izkušnjami", "strast do …"
+- Filler copy: "vrhunska kakovost", "celovite rešitve", "vaš zanesljiv partner", "z dolgoletnimi izkušnjami", "strast do …", "brezhibno", "celovit pristop", "dvignite/povzdignite na višjo raven", "odklenite", "opolnomočimo", "inovativne rešitve", "vrhunski", "po meri vaših potreb", "z vami na vsakem koraku", "v današnjem hitrem tempu", "sanje se uresničijo", "izkusite"
+- The em dash (U+2014) anywhere in generated copy. Slovene uses „…" quotes and the spaced en dash ( – ) or a comma; code replaces em dashes mechanically
+- Accent-coloured single-side borders: a primary or accent stripe on one side of a card, quote, notice or list item
+- Uppercase or tracked-out eyebrow labels: eyebrows are sentence case with letter-spacing at most 0.04 em (uppercase stays a heading-only token where a direction allows it)
+- Pure black (#000) text or surfaces, and pure white (#fff) text: text and surface colours stay off-black, text stays off-white (lightness bounds in the design rules; a pure white page in the white directions is fine)
+- More than one primary action in a hero, such as two identical full-width buttons stacked under the headline; the second action is a text link or the phone number
 
 ## Pricing (in config, `plans`)
 
-- Free preview (owner's decisions `sb-preview-gate`, `sb-free-tiers` = 1-2-10): homepage only, Sonnet 5.5 at medium effort, not publishable. One homepage without an account (kept 7 days unless the visitor signs up), then with a free account (email magic link) 2 more homepages and 10 chat edits in total. Bot check (Turnstile) on the form without an account, per-device and per-IP limits, a daily € pool per tier. Numbers in config `tiers`; design in docs/plans/free-generation-limits.md. (A watermark was planned; it isn't built.)
+- Free preview (owner's decisions `sb-preview-gate`, `sb-free-tiers` = 1-2-10): homepage only, Sonnet 5.5 at medium effort, not publishable. One homepage without an account (kept 7 days unless the visitor signs up), then with a free account (email magic link) 2 more homepages and 10 chat edits in total. Bot check (Turnstile) on the form without an account, per-device and per-IP limits, a daily € pool per tier. Numbers in config `tiers`; design in docs/plans/free-generation-limits.md. Watermark (`sb-preview-watermark`, 2026-10-02): a small badge "Predogled · Stranko" outside the site, in the app (on the corner of the editor's preview frame and of the sites list thumbnail), while the viewer has no paid plan and the site isn't published; never in the site's own HTML, so the preview stays equal to the published output. Switch: config `plans.freePreview.watermark`.
 - Paid, one plan (owner's decision `sb-pricing`, 2026-10-01): €15/month or €150/year, VAT included. The domain is included on the yearly plan. Yearly is paid by invoice and bank transfer. AI work (regenerations, chat edits) within a monthly allowance of 10 % of the monthly price, plus €3 in the first month (`sb-ai-allowance`); direct editing is never limited; no credits. Full site, editor, CMS, publishing, domains, export. Before billing, allow-listed accounts get these rights (`sb-full-access`).
 - Founding offer: the first 100 customers pay €99 for their first year, then the normal price.
 - Optional "we set it up with you" service: €79 one-off.

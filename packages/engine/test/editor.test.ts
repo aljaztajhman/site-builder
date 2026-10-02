@@ -50,6 +50,37 @@ describe("applyDirectEdit", () => {
   });
 });
 
+describe("applyDirectEdit and the give-away rules", () => {
+  it("replaces an em dash the owner types instead of refusing the edit, and says so", () => {
+    const r = applyDirectEdit(golden(), [{ op: "replace", path: "/pages/0/sections/0/props/headline", value: "Kruh z drožmi — iz Kamnika" }]);
+    expect(r.ok).toBe(true);
+    expect(r.spec.pages[0]!.sections[0]!.props).toMatchObject({ headline: "Kruh z drožmi – iz Kamnika" });
+    expect(r.adjustments).toEqual(["Besedilo: dolgi pomišljaj (—) smo zamenjali s pomišljajem ( – )"]);
+  });
+
+  it("refuses new filler, but a filler phrase the site already had doesn't block an unrelated edit", () => {
+    const spec = golden();
+    expect(applyDirectEdit(spec, [{ op: "replace", path: "/pages/0/sections/0/props/headline", value: "Vrhunski kruh iz Kamnika" }]).ok).toBe(false);
+    // A site made before "vrhunski" was banned.
+    (spec.pages[0]!.sections[0]!.props as { headline: string }).headline = "Vrhunski kruh iz Kamnika";
+    const unrelated = applyDirectEdit(spec, [{ op: "replace", path: "/pages/0/sections/3/props/heading", value: "Z drožmi iz domače kleti" }]);
+    expect(unrelated.ok).toBe(true);
+    expect(unrelated.spec.pages[0]!.sections[3]!.props).toMatchObject({ heading: "Z drožmi iz domače kleti" });
+    expect(publishBlockers(unrelated.spec).join(" ")).toMatch(/filler: vrhunski/);
+    // Writing it somewhere new is still refused, and only the new place is reported.
+    const another = applyDirectEdit(spec, [{ op: "replace", path: "/pages/0/sections/3/props/heading", value: "Brezhibno pecivo" }]);
+    expect(another.ok).toBe(false);
+    expect(another.issues.map((i) => i.path)).toEqual(["/pages/0/sections/3/props/heading"]);
+  });
+
+  it("keeps text colours off pure black on a colour edit", () => {
+    const r = applyDirectEdit(golden(), [{ op: "replace", path: "/design/colors/text", value: "#000000" }]);
+    expect(r.ok).toBe(true);
+    expect(r.spec.design.colors.text).not.toBe("#000000");
+    expect(r.adjustments.join(" ")).toMatch(/Besedilo: barva popravljena na #[0-9a-f]{6}/);
+  });
+});
+
 describe("guarded edits", () => {
   it("applies an edit whose guard matches and refuses one whose section moved, in words the owner reads", () => {
     const spec = golden();

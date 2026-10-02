@@ -8,6 +8,7 @@ import {
   SECTION_ISLANDS,
   lcpImageFor,
   rendererFor,
+  signatureOffersDirections,
   uiStrings,
   type RenderCtx,
   type ResolvedImage,
@@ -23,6 +24,7 @@ import {
   type LinkTarget,
   type Locale,
   type Page,
+  type SectionOf,
   type SiteSpec,
 } from "@sb/spec";
 import { fontFaceCss, fontFiles, tokensCss } from "./tokens.ts";
@@ -45,6 +47,7 @@ function heroOffersCall(first: { type: string; variant: string; props: unknown }
 function heroOffersCallAndDirections(first: { type: string; variant: string; props: unknown } | undefined): boolean {
   if (!first) return false;
   if (first.type === "hero-type" && first.variant === "with-facts") return true;
+  if (first.type === "hero-signature") return signatureOffersDirections(first as SectionOf<"hero-signature">);
   const p = first.props as { primary?: { target?: { action?: string } }; secondary?: { target?: { action?: string } } };
   const actions = [p.primary?.target?.action, p.secondary?.target?.action];
   return actions.includes("call") && actions.includes("directions");

@@ -1,5 +1,5 @@
 {
-  "specVersion": 3,
+  "specVersion": 5,
   "slug": "trgovina-oljka-in-sol",
   "locales": {
     "default": "sl",
@@ -59,7 +59,7 @@
       "accent": "#d93f7d",
       "border": "#dcd5ee",
       "inverse": "#2a1236",
-      "onInverse": "#ffffff"
+      "onInverse": "#f5f5f5"
     },
     "radius": 12,
     "baseFontSize": 17,

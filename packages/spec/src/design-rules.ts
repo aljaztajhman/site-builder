@@ -1,5 +1,28 @@
-import { contrast, ensureContrast, isCreamOrOffWhite, isWarmCream, luminance } from "./color.ts";
+import { OFF_BLACK_MIN, OFF_WHITE_MAX, clampLuminance, contrast, ensureContrast, isCreamOrOffWhite, isWarmCream, luminance } from "./color.ts";
 import type { Colors, Design, Direction } from "./design.ts";
+
+/** Text colours: never pure black, never pure white. (Button text, onPrimary, may be white.) */
+export const TEXT_TOKENS = ["text", "muted", "onInverse"] as const satisfies readonly (keyof Colors)[];
+/** Surface colours: never pure black. A pure white page is allowed (the white directions require it). */
+export const SURFACE_TOKENS = ["background", "surface", "inverse"] as const satisfies readonly (keyof Colors)[];
+
+/** The off-black / off-white issues of a palette (see OFF_BLACK_MIN, OFF_WHITE_MAX). */
+export function offBlackWhiteIssues(c: Colors): DesignIssue[] {
+  const issues: DesignIssue[] = [];
+  for (const k of [...TEXT_TOKENS, ...SURFACE_TOKENS]) {
+    if (luminance(c[k]) < OFF_BLACK_MIN) issues.push({ path: `/design/colors/${k}`, message: `${k} ${c[k]} is pure black; use an off-black` });
+  }
+  for (const k of TEXT_TOKENS) {
+    if (luminance(c[k]) > OFF_WHITE_MAX) issues.push({ path: `/design/colors/${k}`, message: `${k} ${c[k]} is pure white; use an off-white` });
+  }
+  return issues;
+}
+
+/** In place: moves text and surface colours inside the off-black / off-white bounds. */
+export function clampOffBlackWhite(c: Colors): void {
+  for (const k of TEXT_TOKENS) c[k] = clampLuminance(c[k], OFF_BLACK_MIN, OFF_WHITE_MAX);
+  for (const k of SURFACE_TOKENS) c[k] = clampLuminance(c[k], OFF_BLACK_MIN);
+}
 
 /** Contrast pairs enforced in code: [foreground, background, minimum ratio]. */
 export const CONTRAST_RULES: [keyof Colors, keyof Colors, number][] = [
@@ -36,6 +59,7 @@ export function checkDesign(design: Design, dir: Direction | undefined): DesignI
   if (isCreamOrOffWhite(c.background)) issues.push({ path: "/design/colors/background", message: "cream or off-white page background is banned" });
   if (isWarmCream(c.surface))
     issues.push({ path: "/design/colors/surface", message: "cream section background is banned" });
+  issues.push(...offBlackWhiteIssues(c));
   if (!dir) {
     issues.push({ path: "/design/direction", message: `unknown direction ${design.direction}` });
     return issues;
@@ -98,6 +122,7 @@ export function enforceDesign(design: Design, dir: Direction): Design {
   if (isCreamOrOffWhite(c.background) || (dir.palette.background === "dark" && luminance(c.background) > 0.05)) c.background = fb.background;
   if (dir.palette.background === "tint" && luminance(c.background) < 0.6) c.background = fb.background;
   if (isWarmCream(c.surface)) c.surface = fb.surface;
+  clampOffBlackWhite(c);
   // Body text must pass on both the page and the section surface, so the surface stays on the page's
   // side of light/dark. A mid-grey surface on a white page left no text colour that passes on both
   // (live eval, "Barve naj bodo temnejše, bolj resne": the edit was rejected instead of repaired).
@@ -115,6 +140,10 @@ export function enforceDesign(design: Design, dir: Direction): Design {
     c.onInverse = ensureContrast(c.onInverse, c.inverse, 4.5);
     c.accent = ensureContrast(c.accent, c.background, 3);
     c.accent = ensureContrast(c.accent, c.inverse, 3);
+    // ensureContrast's last resort is pure black or white; pull text back inside the bounds.
+    clampOffBlackWhite(c);
+    // A mid-tone inverse can leave no off-white or off-black text that passes; darken the inverse instead.
+    if (contrast(c.onInverse, c.inverse) < 4.5) c.inverse = clampLuminance(ensureContrast(c.inverse, c.onInverse, 4.5), OFF_BLACK_MIN);
     if (c.band !== undefined) c.onBand = ensureContrast(c.onBand ?? bestText(c.band), c.band, 4.5);
   }
   if (c.band === undefined) delete c.onBand;
