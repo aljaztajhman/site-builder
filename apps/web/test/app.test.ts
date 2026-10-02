@@ -252,6 +252,11 @@ describe("health", () => {
     expect(await (await app.request("/health")).json()).not.toHaveProperty("you");
   });
 
+  it("takes the visitor from X-Real-IP, as Railway's edge sets it, not the edge address at the end of X-Forwarded-For", async () => {
+    const res = await app.request("/health?ip=1", { headers: { "x-forwarded-for": "95.143.153.82, 152.233.13.164", "x-real-ip": "95.143.153.82" } });
+    expect((await res.json()).you.ip).toBe("95.143.153.82");
+  });
+
   it("keeps internal error detail out of public responses", async () => {
     const detail = "connect ECONNREFUSED minio.internal:9000";
     const broken = { ...platform.storage, ping: () => Promise.reject(new Error(detail)), get: () => Promise.reject(new Error(detail)) };
