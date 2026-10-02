@@ -11,10 +11,30 @@ AI website builder for Slovenian small businesses. Product brief: docs/PRODUCT.m
   - changing anything outside this repository, except this product's own GitHub repo and Railway project
   - touching any other repo on my GitHub or any other Railway project
   - creating accounts, upgrading plans, entering payment details, buying anything
-  - spending more than €30 on model API calls in one run (track it; eval runs count)
+  - any paid model, image or eval call the development budget in Stranko HQ doesn't allow (see "Stranko HQ" below)
   - anything that pushes the estimated Railway bill above €50/month
 - Work on a feature branch in a git worktree and open a pull request. I review and merge manually.
-- Keep the task list in TASKS.md. Tick items when done, add anything new you find. Read it at the start of every session.
+- Keep the task list in TASKS.md (the detailed engineering checklist). Tick items when done, add anything new you find. Read it at the start of every session.
+
+## Stranko HQ (my control panel)
+
+https://claude.ai/artifact/WFgqTKUvSipeSjT1v5CqKT. I steer the project there: priorities, decisions, messages and the development budget. Read and write it with the ArtifactData tool. When HQ and TASKS.md disagree about priority, owner or status, HQ wins.
+
+- **Session start**, before other work: read `requests` with status `new`, `activity` with `by == "you"` and `seen == false`, `decisions` that are `decided` without an `outcome`, `approvals` that changed, and `meta/budget`. Act on them. Then mark each request `seen` (and `done` with a `reply` when finished), set those activity entries `seen: true`, and write each decision's `outcome`.
+- **My edits win.** If I changed an item's status, priority, owner or `next`, or left a note, follow it. Don't overwrite my changes; if you disagree, say so in a note on the item.
+- **Keep it current.** Starting an item: status `doing`. Finishing it: `done`, plus a note with what ran. Anything shipped or set up: one `activity` entry (`by: "claude"`, `seen: true`, a PR link). New work found: a new `items` doc (and in TASKS.md). End of every run: rewrite `meta/overview` (phase, headline, summary, health tiles) and the order of `next` on your items.
+- **Decisions** I must make go in `decisions` with options and a recommendation, never only in chat.
+- Items: `items/<id>` with `title`, `detail`, `area` (launch, generation, editor, platform, images, content, billing, growth), `phase`, `status` (todo, doing, blocked, done), `blockedBy`, `priority` (critical, high, normal, low), `owner` (claude, you), `cost` (free, api, money), `ref`, `next` (number, lower first), `notes` [{by, at, text}], `updatedAt`, `updatedBy`.
+
+### Development budget (money for building and testing)
+
+Before any paid call (evals, judge runs, generated pictures, smoke tests on the live app, re-recording fixtures), read `meta/budget` and follow it exactly:
+- `mode: "none"`: spend nothing. Mark the item blocked ("budget: spend nothing") and move on to free work.
+- `mode: "ask"`: create `approvals/<id>` with `title`, `eur` (your estimate), `why`, `kind` (evals, images, smoke, recording), `at`, `status: "pending"`, and wait until it is `approved`. Declined or unanswered means no.
+- `mode: "within"`: allowed only if the kind is allowed in `kinds`, the estimate is at most `askOver`, this session's total stays within `perSession`, and this month's `spend` total plus the estimate stays within `monthly`. Any limit that's empty means ask. Over a limit means an approval as above.
+- Right after each paid run, log it in `spend/<id>`: `at`, `eur` (actual, from the cost log), `kind`, `what`. Estimates are not logged as spend.
+- Subagents get the remaining allowance stated in their prompt and report what they spent; check it.
+- `liveDailyCap` is the live app's daily cap. When it differs from `liveApplied`, set `DAILY_SPEND_CAP_EUR` on Railway (web and worker) and write the new `liveApplied`.
 - Split work that divides cleanly (component groups, fixtures, check tooling) across subagents. Check each subagent's evidence (test output, screenshots, scores) before accepting its result. Put search and log-reading subagents on a smaller model; keep code writing on the main model.
 - Give every change a way to be checked: a test, a build, the eval script. Don't mark anything done that you haven't run.
 - If a target can't be met, don't loosen the check or the threshold. Report the real number.
