@@ -249,6 +249,17 @@ export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
        where exists (select 1 from spec_versions n where n.site_id = v.site_id and n.version = v.version + 1 and n.source = 'generate');
     `,
   },
+  {
+    id: 9,
+    name: "ai_jobs.started_at",
+    // started_at: when a worker began the job (null while it waits in the queue), so a stale job is measured
+    // from its start, not from when it was queued. units: what the job covers, for per-account caps that
+    // count more than jobs (photos in an 'alt' job; 1 otherwise).
+    sql: `
+      alter table ai_jobs add column started_at timestamptz;
+      alter table ai_jobs add column units integer not null default 1;
+    `,
+  },
 ];
 
 type Query = (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>;

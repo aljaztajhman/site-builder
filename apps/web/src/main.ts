@@ -1,7 +1,7 @@
 import { serve } from "@hono/node-server";
 import { loadConfig } from "@sb/config";
 import { mailerFromEnv, platformFromEnv } from "@sb/platform";
-import { intakeClassifier, startWorker } from "@sb/worker/worker";
+import { drainMs, intakeClassifier, startWorker } from "@sb/worker/worker";
 import { createApp } from "./app.ts";
 import { authSettingsFromEnv } from "./auth.ts";
 import { missingEnv, missingEnvLine } from "./env-check.ts";
@@ -12,10 +12,8 @@ const platform = await platformFromEnv();
 
 // PGlite is single-process: with it (Docker-less dev) the web service also runs the job handlers.
 const inline = process.env.RUN_WORKER_INLINE === "true" || platform.db.kind === "pglite";
-if (inline) {
-  await startWorker(platform, config);
-  console.log("[web] running job handlers in-process");
-}
+const worker = inline ? await startWorker(platform, config) : null;
+if (worker) console.log("[web] running job handlers in-process");
 
 // Links in sign-in emails point here. Railway provides its public domain; APP_URL overrides it (custom domain).
 const appUrl = process.env.APP_URL || (process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : undefined);
@@ -29,6 +27,13 @@ const app = createApp({ platform, config, auth, mailer, classifyIntake: intakeCl
 const port = Number(process.env.PORT || 3000);
 serve({ fetch: app.fetch, port, hostname: "0.0.0.0" }, (info) => console.log(`[web] http://localhost:${info.port}`));
 
+// In-process job handlers drain like the worker service's (apps/worker/src/main.ts) before the database closes.
+let stopping = false;
 for (const sig of ["SIGINT", "SIGTERM"] as const) {
-  process.on(sig, () => void platform.close().finally(() => process.exit(0)));
+  process.on(sig, () => {
+    if (stopping) return;
+    stopping = true;
+    void (worker ? worker.shutdown(drainMs(config)).catch((e: unknown) => console.error("[web] worker shutdown", e)) : Promise.resolve())
+      .finally(() => void platform.close().finally(() => process.exit(0)));
+  });
 }
