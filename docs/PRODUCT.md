@@ -61,7 +61,7 @@ Targets on Sonnet 5.5, medium effort:
 
 ## Slovene specifics
 
-- Default locale `sl`. The spec supports more locales from day one (en, de, hr later for tourism).
+- Default locale `sl`. The spec supports more locales from day one; sites can use `sl` and `en` (the locales with UI strings). `de`, `hr` (tourism) stay in the schema and become available once their UI strings are translated.
 - Dates `29. 9. 2026`, times `8.00`, prices `12,50 €`, phones `+386 …`.
 - Plurals via `Intl.PluralRules('sl')` (one, two, few, other). Never hard-code plural endings.
 - Fonts self-hosted and subset to Latin plus Latin Extended-A. Every font pair must render č š ž ć đ correctly; a test verifies it.

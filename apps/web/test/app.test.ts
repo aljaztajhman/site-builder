@@ -505,6 +505,17 @@ describe("direct editor API (no model calls)", () => {
     // Preview equals published output, byte for byte.
     const previewHtml = await (await app.request(`/preview/${site.id}/index.html`, { headers: { cookie } })).text();
     expect(previewHtml).toBe(publishedHtml);
+    // A miss at any depth gets the 404 page with paths for that depth (styled, links work), same in the preview.
+    for (const [missing, up] of [["nic.html", ""], ["storitve/nic", "../"], ["a/b/nic.html", "../../"]] as const) {
+      const live = await app.request(`/s/pekarna-kvas/${missing}`);
+      expect(live.status, missing).toBe(404);
+      const liveHtml = await live.text();
+      expect(liveHtml, missing).toContain(`<link rel="stylesheet" href="${up}../_shared/`);
+      expect(liveHtml, missing).toContain(`href="${up}index.html"`);
+      const preview = await app.request(`/preview/${site.id}/${missing}`, { headers: { cookie } });
+      expect(preview.status, missing).toBe(404);
+      expect(await preview.text(), missing).toBe(liveHtml);
+    }
 
     // Two publishes at once: one writes its release, the other is told to wait; the live site stays whole.
     const twice = await Promise.all([1, 2].map(() => app.request(`/api/sites/${site.id}/publish`, { method: "POST", headers: { cookie } })));
