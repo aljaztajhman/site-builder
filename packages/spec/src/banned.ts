@@ -5,6 +5,7 @@
  * and components have no such variants. Tests assert the shared stylesheet never contains them (see
  * packages/render/test/shared.test.ts and packages/components/test).
  */
+import { escapeToken } from "./pointer.ts";
 
 /** Matches `stem` only at the start of a word (JS \b is ASCII-only and misreads č, š, ž). */
 const word = (source: string) => new RegExp(`(?<![\\p{L}\\p{N}])${source}`, "iu");
@@ -81,7 +82,7 @@ export function findBannedCopy(value: unknown, path = ""): CopyViolation[] {
       return;
     }
     if (Array.isArray(v)) v.forEach((x, i) => visit(x, `${p}/${i}`, key));
-    else if (v && typeof v === "object") for (const [k, x] of Object.entries(v)) visit(x, `${p}/${escapePointer(k)}`, k);
+    else if (v && typeof v === "object") for (const [k, x] of Object.entries(v)) visit(x, `${p}/${escapeToken(k)}`, k);
   };
   visit(value, path, "");
   return out;
@@ -115,7 +116,7 @@ export function repairEmDashes(value: unknown, path = ""): string[] {
     if (Array.isArray(v)) v.forEach((x, i) => (v[i] = visit(x, `${p}/${i}`)));
     else if (v && typeof v === "object") {
       const o = v as Record<string, unknown>;
-      for (const [k, x] of Object.entries(o)) o[k] = visit(x, `${p}/${escapePointer(k)}`);
+      for (const [k, x] of Object.entries(o)) o[k] = visit(x, `${p}/${escapeToken(k)}`);
     }
     return v;
   };
@@ -128,8 +129,4 @@ export function repairSiteCopy(spec: unknown): string[] {
   if (!spec || typeof spec !== "object") return [];
   const s = spec as { pages?: unknown; translations?: unknown };
   return [...repairEmDashes(s.pages, "/pages"), ...repairEmDashes(s.translations, "/translations")];
-}
-
-export function escapePointer(k: string): string {
-  return k.replace(/~/g, "~0").replace(/\//g, "~1");
 }
