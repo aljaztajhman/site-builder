@@ -81,7 +81,12 @@ export interface GenerateResult {
   timings: Record<string, number>;
   /** From the start of the job to the first saved version, which the editor already shows as the preview. */
   firstVersionMs: number;
+  /** The job finished with the critique skipped: the daily spend cap was reached after the version was saved. */
+  critiqueSkipped?: "spend_cap";
 }
+
+/** The editor's log line when the spend cap skipped the critique (the site itself is ready). */
+export const CRITIQUE_SKIPPED_NOTE = "Današnja omejitev porabe je dosežena, zato zadnjega pregleda strani nismo naredili. Stran je pripravljena in jo lahko urejate.";
 
 /** Pipeline steps 1–5 from docs/PRODUCT.md. Every model call is logged per stage with tokens and €. */
 export async function generateSite(deps: PipelineDeps, siteId: string, jobId: string | null): Promise<GenerateResult> {
@@ -113,6 +118,14 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
   // Steps 1–2 (brief, design) and step 3 (images) don't depend on each other: they run side by side,
   // so photo processing and alt text (up to ~20 s with many photos) are off the path to the first preview.
   const slots = generatedImageCount(config, photos.length, !!deps.images, intake.scope);
+  // The job has failed (either branch, or the spend cap stopped a picture): no further paid call starts.
+  // Each branch checks it between its calls; pictures check it before and after reserving their price.
+  const stop = new AbortController();
+  const stopOnFailure = <T>(p: Promise<T>): Promise<T> =>
+    p.catch((e: unknown) => {
+      if (!stop.signal.aborted) stop.abort(e);
+      throw e;
+    });
   // 1. Classify first. The intake may have asked the classifier already (its junk check). Junk, a
   // description the classifier can't place (config tiers.junk), gets no Sonnet or image call: the brief
   // and the photos' alt texts both wait for this.
@@ -122,12 +135,13 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
   });
   // Awaited below by both branches; without a handler now, an early rejection would be unhandled.
   classified.catch(() => undefined);
-  const planning = (async () => {
+  const planning = stopOnFailure((async () => {
     // 1. Intake -> brief
     const cls = await classified;
     const { brief, dropped } = await stageTime("brief", () =>
       makeBrief(client, { description: intake.description, businessType: cls.businessType, photoCount: photos.length, generatedSlots: slots.wanted, hasLogo: !!logo, scope: intake.scope }),
     );
+    stop.signal.throwIfAborted();
     if (dropped.length) await log("brief", "Dropped facts not found in the client's text", dropped);
     await repo.setBrief(siteId, brief, brief.name);
 
@@ -137,30 +151,39 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     const ideas = brief.imageIdeas.slice(0, slots.wanted);
     const template = templateFor(brief.businessType, photos.length);
     const waitForDesign = ideas.length > 0 && template !== undefined && drawsInsteadOfPhotos(template);
-    const startImages = (): Promise<ImageAsset[]> => (ideas.length ? stageTime("imageGen", () => generateImages(deps, siteId, ideas, log)) : Promise.resolve([]));
+    const startImages = (): Promise<ImageAsset[]> => (ideas.length ? stageTime("imageGen", () => generateImages(deps, siteId, ideas, log, stop)) : Promise.resolve([]));
     let generating: Promise<ImageAsset[]> = waitForDesign ? Promise.resolve([]) : startImages();
     // Awaited only after the design call: without a handler now, an early rejection (spend cap) would crash the process.
     generating.catch(() => undefined);
 
-    // 2. Design direction (palette extracted in code)
-    const swatches: Swatch[] = [];
-    if (logo) swatches.push(...(await extractSwatches(originals.get(logo.id)!, "logo", 3)));
-    for (const p of photos.slice(0, 3)) swatches.push(...(await extractSwatches(originals.get(p.id)!, "photo", 2)));
-    const { design } = await stageTime("design", () => chooseDesign(client, { brief, swatches, photoCount: photos.length, generatedCount: ideas.length }));
-    // The editor's live preview recolours its skeleton with these while the content is written.
-    await log("design", "Direction chosen", { direction: design.direction, colors: design.colors });
-    if (waitForDesign) {
-      if (drawsInsteadOfPhotos(directionById(design.direction))) await log("imageGen", `${design.direction} draws the trade instead of showing pictures; no pictures generated`);
-      else generating = startImages();
+    try {
+      // 2. Design direction (palette extracted in code)
+      const swatches: Swatch[] = [];
+      if (logo) swatches.push(...(await extractSwatches(originals.get(logo.id)!, "logo", 3)));
+      for (const p of photos.slice(0, 3)) swatches.push(...(await extractSwatches(originals.get(p.id)!, "photo", 2)));
+      const { design } = await stageTime("design", () => chooseDesign(client, { brief, swatches, photoCount: photos.length, generatedCount: ideas.length }));
+      // The editor's live preview recolours its skeleton with these while the content is written.
+      await log("design", "Direction chosen", { direction: design.direction, colors: design.colors });
+      stop.signal.throwIfAborted();
+      if (waitForDesign) {
+        if (drawsInsteadOfPhotos(directionById(design.direction))) await log("imageGen", `${design.direction} draws the trade instead of showing pictures; no pictures generated`);
+        else generating = startImages();
+      }
+      return { brief, design, generated: await generating };
+    } catch (e) {
+      // Pictures not yet sent don't start; ones already sent finish (fal bills them anyway) before the
+      // failure is passed on, so nothing of this job runs on behind it.
+      if (!stop.signal.aborted) stop.abort(e);
+      await generating.catch(() => undefined);
+      throw e;
     }
-    return { brief, design, generated: await generating };
-  })();
+  })());
 
   // 3. Images: variants + Slovene alt text
   const images: ImageAsset[] = [];
   let logoAsset: SiteSpec["assets"]["logo"];
   const heroIds: string[] = [];
-  const imaging = stageTime("images", async () => {
+  const imaging = stopOnFailure(stageTime("images", async () => {
     const vision: { jpegBase64: string }[] = [];
     for (const [i, p] of photos.entries()) {
       const id = `img_${String(i + 1).padStart(2, "0")}`;
@@ -172,6 +195,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     // The variants exist now; the editor's live preview shows the photos before the alt texts are back.
     if (images.length) await log("images", "Photos ready", { ids: images.map((i) => i.id) });
     await classified;
+    stop.signal.throwIfAborted();
     const alts = await altTexts(client, vision);
     alts.forEach((a, i) => {
       images[i]!.alt = a.alt.slice(0, 180);
@@ -183,7 +207,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
       await storage.put(mediaKey(siteId, l.file), l.data, contentType(l.file));
       logoAsset = { src: logo.storage_key, width: l.width, height: l.height, file: l.file };
     }
-  });
+  }));
   // Both branches finish before either's failure is passed on, so a stopped job (junk, spend cap) leaves
   // no photo processing running behind it.
   const [planned, imaged] = await Promise.allSettled([planning, imaging]);
@@ -231,6 +255,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
   // 5. Check + critique (max N iterations)
   let check: SiteCheckReport | null = null;
   let rounds = 0;
+  let critiqueSkipped: GenerateResult["critiqueSkipped"];
   const runCheck = async () => {
     const media = await loadMedia(storage, siteId, spec, config.images.widths);
     return checkSite(spec, siteFiles(spec, media, { imageWidths: config.images.widths }), {
@@ -258,9 +283,13 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
         critique(client, { spec, mobilePng: check!.screenshots.mobileFull, desktopPng: check!.screenshots.desktop, failures: check!.failures, corpus }),
       );
     } catch (e) {
-      // The site already passed validation and checks; a failed critique only means no polish.
-      // The spend cap still stops the job.
-      if (e instanceof SpendCapError) throw e;
+      // The site already passed validation and checks; a failed critique only means no polish. The spend
+      // cap too: the saved version stays (the owner sees the site, not an error), the critique is skipped.
+      if (e instanceof SpendCapError) {
+        critiqueSkipped = "spend_cap";
+        await log("critique", CRITIQUE_SKIPPED_NOTE, { skipped: "spend_cap", reason: e.message });
+        break;
+      }
       await log("critique", e instanceof ModelOutputError ? "Critique answer unusable; kept the checked site" : "Critique failed; kept the checked site", (e as Error).message.slice(0, 300));
       break;
     }
@@ -292,7 +321,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     await log("check", check.failures.length ? "Checks found problems" : "All checks passed", { failures: check.failures, lighthouse: check.lighthouse });
   }
   await repo.setStatus(siteId, "ready");
-  return { version, check, critiqueRounds: rounds, timings, firstVersionMs };
+  return { version, check, critiqueRounds: rounds, timings, firstVersionMs, ...(critiqueSkipped ? { critiqueSkipped } : {}) };
 }
 
 /**
@@ -309,16 +338,26 @@ export function generatedImageCount(config: AppConfig, photoCount: number, hasGe
 /**
  * One generated image per idea, stored and processed like an upload, marked `origin: "generated"` so the
  * site labels it and validation keeps it to hero and image-text slots. A failed image is logged and
- * skipped; the site is built from what arrived. The spend cap still stops the job.
+ * skipped; the site is built from what arrived. The spend cap still stops the job, and `stop` (the job
+ * failed, or the cap stopped another picture) keeps the ones not yet sent from starting.
  */
-async function generateImages(deps: PipelineDeps, siteId: string, ideas: { subject: string; alt: string }[], log: Log): Promise<ImageAsset[]> {
+async function generateImages(deps: PipelineDeps, siteId: string, ideas: { subject: string; alt: string }[], log: Log, stop: AbortController): Promise<ImageAsset[]> {
   const { config, storage, repo } = deps;
   // Fresh ids on every generation: the version this one replaces keeps its own pictures (restore shows them).
   const ids = await claimImageIds(repo, siteId, "generated", ideas.length, (await repo.getSpec(siteId))?.spec.assets.images ?? []);
   const results = await Promise.allSettled(
     ideas.map(async (idea, i): Promise<ImageAsset> => {
       const id = ids[i]!;
-      const img = await deps.images!.generate(idea.subject);
+      let img: Awaited<ReturnType<ImageGenerator["generate"]>>;
+      try {
+        img = await deps.images!.generate(idea.subject, { signal: stop.signal });
+      } catch (e) {
+        if (e instanceof SpendCapError && !stop.signal.aborted) stop.abort(e);
+        throw e;
+      }
+      // The job failed while this picture was made: it is booked (we were billed) but not stored for a
+      // site that won't use it.
+      stop.signal.throwIfAborted();
       const key = `sites/${siteId}/generated/${id}.jpg`;
       await storage.put(key, img.data, "image/jpeg");
       const processed = await processPhoto(id, img.data, config.images.widths, { avif: config.images.avifQuality, webp: config.images.webpQuality });
@@ -328,6 +367,7 @@ async function generateImages(deps: PipelineDeps, siteId: string, ideas: { subje
       return { id, src: key, width: processed.width, height: processed.height, alt: idea.alt.slice(0, 180), origin: "generated" };
     }),
   );
+  if (stop.signal.aborted) throw stop.signal.reason;
   const out: ImageAsset[] = [];
   for (const [i, r] of results.entries()) {
     if (r.status === "fulfilled") out.push(r.value);
