@@ -120,7 +120,8 @@ if (step("admin makes a sign-in link", !!link, `HTTP ${made.status}`)) {
   step("a sign-in link works once", !again.ok);
 }
 
-const exp = await api(`/api/sites/${siteId}/export`);
+// Confirmed export (the checklist warning is tested in apps/web/test/app.test.ts): this step checks the zip itself.
+const exp = await api(`/api/sites/${siteId}/export?anyway=1`);
 const zip = new Uint8Array(await exp.arrayBuffer());
 if (step("export download", exp.ok && zip.length > 10_000, `${(zip.length / 1024).toFixed(0)} KB`)) {
   const browser = await launchCheckBrowser();

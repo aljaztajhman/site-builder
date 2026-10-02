@@ -2,7 +2,7 @@ import type { Context } from "hono";
 import type { AppConfig } from "@sb/config";
 import { poolOf, type Pool, type Repo, type SiteRow, type Tier, type UsageQueries } from "@sb/platform";
 import { clientIp, ipKey, signInUrl, tierOf, type AppEnv, type Refusal, type Viewer } from "./access.ts";
-import { formatDate } from "./ui/labels.ts";
+import { PREVIEW_BADGE, formatDate } from "./ui/labels.ts";
 
 /**
  * Free generation limits (docs/plans/free-generation-limits.md). The server decides before every
@@ -186,6 +186,18 @@ export interface AccessInfo {
   expiresAt: string | null;
   /** Anonymous: the sign-in page that comes back to this site. */
   signIn: string | null;
+  /** The free-preview badge the editor shows beside the preview frame (never inside it); null for none. */
+  badge: string | null;
+}
+
+/**
+ * `sb-preview-watermark` = small badge: a free preview (no account or a free account) of a site that isn't
+ * published gets PREVIEW_BADGE in the app chrome around the preview; config `plans.freePreview.watermark` switches it.
+ */
+export function previewBadge(config: AppConfig, tier: Tier, site: Pick<SiteRow, "published_version">): string | null {
+  if (config.plans.freePreview.watermark !== "app-badge") return null;
+  if (tier !== "anonymous" && tier !== "free") return null;
+  return site.published_version ? null : PREVIEW_BADGE;
 }
 
 const none = { homepagesLeft: null, homepagesTotal: null, chatEditsLeft: null, chatEditsTotal: null, eurLeft: null, eurTotal: null, renewsAt: null };
@@ -247,5 +259,6 @@ export async function accessInfo(deps: Pick<LimitDeps, "repo" | "config">, viewe
     allowance,
     expiresAt: unclaimed ? new Date(Date.parse(site.created_at) + t.anonymous.keepDays * 86400_000).toISOString() : null,
     signIn: tier === "anonymous" ? signInUrl(`/sites/${site.id}`) : null,
+    badge: previewBadge(deps.config, tier, site),
   };
 }
