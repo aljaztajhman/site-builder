@@ -8,7 +8,7 @@ import { loadConfig } from "@sb/config";
 import { Repo, createDb, createFsStorage, migrate, type Db, type Storage } from "@sb/platform";
 import { mediaFiles } from "@sb/render";
 import type { SiteSpec } from "@sb/spec";
-import { addPhotos, checkFacts, clientCorpus, livePointerKey, mediaKey, newReleaseId, pruneAllSites, pruneSite, writeRelease } from "../src/index.ts";
+import { addPhotos, checkFacts, claimImageIds, clientCorpus, livePointerKey, mediaKey, newReleaseId, pruneAllSites, pruneSite, writeRelease } from "../src/index.ts";
 
 /** Retention with files: what goes with the pruned versions, and what never does. */
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -108,21 +108,63 @@ describe("retention removes files only pruned versions used", () => {
     expect(await pruneSite(deps(), id, NOW)).toMatchObject({ removed: [], files: [] });
   });
 
-  it("keeps the variants of an image id the next upload may take (an upload writes them before it saves)", async () => {
+  it("removes the highest image's files with the versions that showed it: its id is never issued again", async () => {
     const site = await newSite("ret-reissue");
     const spec = await golden("ret-reissue");
-    const withSeven = { ...spec, assets: { ...spec.assets, images: [...spec.assets.images, { id: "img_07", src: `sites/${site.id}/uploads/asset_seven.jpg`, width: 800, height: 600, alt: "" }] } };
-    await storage.put(`sites/${site.id}/uploads/asset_seven.jpg`, new Uint8Array([1]), "image/jpeg");
-    await putMedia(site.id, withSeven);
-    await repo.saveSpec(site.id, withSeven, "manual"); // v1: img_07 (removed later; current's highest is img_03)
-    await repo.saveSpec(site.id, spec, "manual"); // v2
+    await repo.saveSpec(site.id, spec, "manual"); // v1: img_01..img_03
+    const added = await addPhotos(deps(), site.id, [{ data: await jpeg(), mime: "image/jpeg", name: "a.jpg" }]); // v2: + img_04
+    await repo.saveSpec(site.id, spec, "manual"); // v3: img_04 removed again
     await age(site.id, OLD_DAY);
-    await repo.saveSpec(site.id, spec, "manual"); // v3
+    await repo.saveSpec(site.id, spec, "manual"); // v4
+    await age(site.id, RECENT, 4);
+    const img04 = (await repo.getSpec(site.id, 2))!.spec.assets.images.find((i) => i.id === "img_04")!;
+    expect(added.added).toEqual(["img_04"]);
     const r = await pruneSite(deps(), site.id, NOW);
-    expect(r.removed).toEqual([1]);
-    // The original's name is unique per upload, so it goes; img_07-* could be the next upload's.
-    expect(r.files).toEqual([`sites/${site.id}/uploads/asset_seven.jpg`]);
-    expect(await exists(mediaKey(site.id, "img_07-360.webp"))).toBe(true);
+    expect(r.removed).toEqual([1, 2]);
+    expect(r.files).toEqual([...variants(site.id, img04), img04.src].sort());
+    // The next upload doesn't take img_04 back.
+    expect((await addPhotos(deps(), site.id, [{ data: await jpeg(), mime: "image/jpeg", name: "b.jpg" }])).added).toEqual(["img_05"]);
+  });
+
+  it("after regenerations keeps every picture a kept version shows and removes those only pruned versions showed", async () => {
+    const site = await newSite("ret-regen");
+    const id = site.id;
+    const base = await golden("ret-regen");
+    /** A generation's pictures under fresh ids, stored like generateImages stores them. */
+    const generate = async (n: number) => {
+      const out: SiteSpec["assets"]["images"] = [];
+      for (const gid of await claimImageIds(repo, id, "generated", n)) {
+        const img = { id: gid, src: `sites/${id}/generated/${gid}.jpg`, width: 1536, height: 1024, alt: "Ustvarjena slika", origin: "generated" as const };
+        await storage.put(img.src, await jpeg(), "image/jpeg");
+        out.push(img);
+      }
+      return out;
+    };
+    const withImages = (images: SiteSpec["assets"]["images"]) => ({ ...base, assets: { ...base.assets, images } });
+    const save = async (images: SiteSpec["assets"]["images"], source: "generate" | "manual") => {
+      const spec = withImages(images);
+      await putMedia(id, spec);
+      return repo.saveSpec(id, spec, source);
+    };
+
+    const [g1, g2] = await generate(2);
+    await save([g1!, g2!], "generate"); // v1: first generation
+    await save([g1!], "manual"); // v2: the owner removed g2
+    await save([g1!], "manual"); // v3: replaced by "Ustvari znova" below (kept for good)
+    const [g3, g4] = await generate(2);
+    await save([g3!, g4!], "generate"); // v4: regeneration, last of the old day
+    expect([g1, g2, g3, g4].map((g) => g!.id)).toEqual(["img_g1", "img_g2", "img_g3", "img_g4"]);
+    await age(id, OLD_DAY);
+    const [g5, g6] = await generate(2);
+    await save([g5!, g6!], "generate"); // v5: another regeneration, current
+    await age(id, RECENT, 5);
+
+    const r = await pruneSite(deps(), id, NOW);
+    expect(r.removed).toEqual([1, 2]);
+    expect(await versions(id)).toEqual([3, 4, 5]);
+    // g2 only appeared in v1 and v2: its original and variants go. g1 (v3), g3/g4 (v4) and g5/g6 (v5) stay.
+    expect(r.files).toEqual([...variants(id, g2!), g2!.src].sort());
+    for (const g of [g1!, g3!, g4!, g5!, g6!]) for (const k of [g.src, ...variants(id, g)]) expect(await exists(k), k).toBe(true);
   });
 
   it("waits while a job runs on the site", async () => {
