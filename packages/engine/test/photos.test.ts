@@ -7,7 +7,7 @@ import sharp from "sharp";
 import { loadConfig } from "@sb/config";
 import { Repo, createDb, createFsStorage, migrate, type Db, type Storage } from "@sb/platform";
 import { publishBlockers, validateSite, type SiteSpec } from "@sb/spec";
-import { ModelClient, PhotoError, addPhotos, describePhotos, imageUses, nextImageIds, type ModelTransport } from "../src/index.ts";
+import { ModelClient, PhotoError, addPhotos, claimImageIds, describePhotos, highestImageNumber, imageUses, type ModelTransport } from "../src/index.ts";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const config = loadConfig();
@@ -84,9 +84,38 @@ describe("photos added in the editor", () => {
     await expect(call([{ data: await jpeg(), mime: "image/jpeg", name: "d.jpg" }], { baseVersion: 0 })).rejects.toThrow(/changed since version/);
   });
 
-  it("numbers new images after the highest img_NN, skipping generated ids", () => {
-    const spec = { assets: { images: [{ id: "img_01" }, { id: "img_g1" }, { id: "img_07" }] } } as unknown as SiteSpec;
-    expect(nextImageIds(spec, 2)).toEqual(["img_08", "img_09"]);
+  it("numbers new images after the highest img_NN, skipping generated ids", async () => {
+    const s = await repo.createSite({ name: "ids", slug: "photos-ids", intake: { description: "x", photoAssetIds: [], scope: "home" } });
+    const images = [{ id: "img_01" }, { id: "img_g1" }, { id: "img_07" }];
+    expect(highestImageNumber(images, "photo")).toBe(7);
+    expect(highestImageNumber(images, "generated")).toBe(1);
+    expect(await claimImageIds(repo, s.id, "photo", 2, images)).toEqual(["img_08", "img_09"]);
+    expect(await claimImageIds(repo, s.id, "generated", 2, images)).toEqual(["img_g2", "img_g3"]);
+  });
+
+  it("never reuses an id: remove the highest image, add a new one, and it gets a new id; the old files stay as they were", async () => {
+    const id = await site("photos-reuse");
+    const first = await addPhotos({ repo, storage, config }, id, [{ data: await jpeg(1200, 800), mime: "image/jpeg", name: "a.jpg" }]);
+    expect(first.added).toEqual(["img_04"]);
+    const withFour = (await repo.getSpec(id))!;
+    const oldFile = await storage.get(`sites/${id}/media/img_04-360.webp`);
+    // The owner removes img_04, the highest image, again.
+    const removed = { ...withFour.spec, assets: { ...withFour.spec.assets, images: withFour.spec.assets.images.filter((i) => i.id !== "img_04") } };
+    await repo.saveSpec(id, removed, "manual", "odstranjena slika", undefined, withFour.version);
+    const second = await addPhotos({ repo, storage, config }, id, [{ data: await jpeg(800, 1200), mime: "image/jpeg", name: "b.jpg" }]);
+    expect(second.added).toEqual(["img_05"]);
+    // The version that showed img_04 still points at its own picture.
+    expect(Buffer.from((await storage.get(`sites/${id}/media/img_04-360.webp`))!).equals(Buffer.from(oldFile!))).toBe(true);
+    expect((await repo.getSpec(id, withFour.version))!.spec.assets.images.find((i) => i.id === "img_04")).toMatchObject({ width: 1200, height: 800 });
+    expect((await repo.getSpec(id))!.spec.assets.images.find((i) => i.id === "img_05")).toMatchObject({ width: 800, height: 1200 });
+  });
+
+  it("never takes an intake photo's id, even when the current version doesn't show it", async () => {
+    const id = await site("photos-intake");
+    // Five intake photos: every generation numbers them img_01..img_05; this version shows only three.
+    await db.query("update sites set intake = jsonb_set(intake, '{photoAssetIds}', $2::jsonb) where id = $1", [id, JSON.stringify(["a", "b", "c", "d", "e"])]);
+    const r = await addPhotos({ repo, storage, config }, id, [{ data: await jpeg(), mime: "image/jpeg", name: "a.jpg" }]);
+    expect(r.added).toEqual(["img_06"]);
   });
 
   it("writes the vision model's descriptions, never over one the owner typed meanwhile", async () => {

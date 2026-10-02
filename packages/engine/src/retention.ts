@@ -14,10 +14,11 @@ import { mediaKey } from "./pipeline.ts";
  * - never the published release (published/…): releases are complete copies, written and cleaned up by publishSite;
  * - only keys under the site's own `sites/{id}/` prefix;
  * - never a file a kept version references, and never an intake upload ("Ustvari znova" builds from those again);
- * - never media of an image id the next upload could take (img_NN above the current highest): addPhotos
- *   writes those files before it saves the version that uses them;
- * - not while a job runs on the site (a generation rewrites img_gN and the variants before saving): the
+ * - not while a job runs on the site (a generation rewrites the intake photos' variants before saving): the
  *   site waits for the next night, and is checked again just before the files go.
+ *
+ * Image ids are never issued twice on a site (image-ids.ts), so a file named by a removed version's image id
+ * belongs to that image alone: no kept version, upload in progress or later generation can be using it.
  */
 
 const BUSY = new Set(["generating", "editing", "publishing"]);
@@ -116,13 +117,5 @@ async function unusedFiles(deps: Deps, site: SiteRow, pruned: PrunedVersion[]): 
   }
   const intake = new Set([...(site.intake.photoAssetIds ?? []), ...(site.intake.logoAssetId ? [site.intake.logoAssetId] : [])]);
   for (const a of await repo.listAssets(site.id)) if (intake.has(a.id)) used.add(a.storage_key);
-
-  // The current version is the highest; the next upload takes img_NN above its highest NN.
-  const current = (kept.at(-1)?.assets ?? {}) as Partial<SiteSpec["assets"]>;
-  const top = Math.max(0, ...(current.images ?? []).map((i) => Number(/^img_(\d+)$/.exec(i.id)?.[1] ?? 0)));
-  const reissuable = (key: string) => {
-    const n = /\/media\/img_(\d+)-[^/]*$/.exec(key)?.[1];
-    return n !== undefined && Number(n) > top;
-  };
-  return [...candidates].filter((k) => !used.has(k) && !reissuable(k)).sort();
+  return [...candidates].filter((k) => !used.has(k)).sort();
 }

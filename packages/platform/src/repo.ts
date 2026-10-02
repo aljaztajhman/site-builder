@@ -20,6 +20,10 @@ export interface SiteRow {
   device_id: string | null;
   /** Set while a publish writes its release (claimPublish); null otherwise. */
   publishing_since: string | null;
+  /** The highest img_NN number ever issued on this site (claimImageNumbers). */
+  photo_seq: number;
+  /** The highest img_gN number ever issued on this site (claimImageNumbers). */
+  generated_seq: number;
   intake: Intake;
   brief: unknown;
   created_at: string;
@@ -211,6 +215,25 @@ export class Repo {
     );
     for (const r of rows) await this.addEvent({ siteId: r.id, stage: "error", level: "error", message: "Opravilo je bilo prekinjeno (ponovni zagon strežnika). Poskusite znova." });
     return rows.map((r) => r.id);
+  }
+
+  /**
+   * Issues `count` image numbers never issued on this site before (img_NN for "photo", img_gN for
+   * "generated"): each image's files are named by its id, so a reissued id would overwrite the pictures
+   * older versions show. `floor`: a number already in use that the counter may not know of (a spec saved
+   * without claiming, the intake photos numbered 1..N). Atomic: concurrent claims never share a number.
+   */
+  async claimImageNumbers(siteId: string, kind: "photo" | "generated", count: number, floor = 0): Promise<number[]> {
+    if (count <= 0) return [];
+    const col = kind === "photo" ? "photo_seq" : "generated_seq";
+    const { rows } = await this.db.query<{ last: number | string }>(`update sites set ${col} = greatest(${col}, $2::integer) + $3::integer where id = $1 returning ${col} as last`, [
+      siteId,
+      floor,
+      count,
+    ]);
+    if (!rows[0]) throw new Error(`Site ${siteId} not found`);
+    const last = Number(rows[0].last);
+    return Array.from({ length: count }, (_, i) => last - count + 1 + i);
   }
 
   async setBrief(id: string, brief: unknown, name?: string): Promise<void> {
