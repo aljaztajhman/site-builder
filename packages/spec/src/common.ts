@@ -2,7 +2,7 @@ import { z } from "zod";
 
 /**
  * Locales the spec schema can carry. `sl` is the default; others are overlays (see SiteSpec.translations).
- * Sites may only use SITE_LOCALES (validateSpec enforces it, withSiteLocales falls back on read); the others
+ * Sites may only use SITE_LOCALES (validateSite enforces it, withSiteLocales falls back on read); the others
  * stay in the schema so specs written before the restriction still parse without a version bump.
  */
 export const Locale = z.enum(["sl", "en", "de", "hr", "it"]);
