@@ -14,6 +14,7 @@ import { typedText } from "./editor.ts";
 import { checkFacts } from "./facts.ts";
 import { newReleaseId, writeRelease } from "./published.ts";
 import { keepOwnerFacts } from "./owner-facts.ts";
+import { claimImageIds } from "./image-ids.ts";
 
 export interface PipelineDeps {
   config: AppConfig;
@@ -311,10 +312,12 @@ export function generatedImageCount(config: AppConfig, photoCount: number, hasGe
  * skipped; the site is built from what arrived. The spend cap still stops the job.
  */
 async function generateImages(deps: PipelineDeps, siteId: string, ideas: { subject: string; alt: string }[], log: Log): Promise<ImageAsset[]> {
-  const { config, storage } = deps;
+  const { config, storage, repo } = deps;
+  // Fresh ids on every generation: the version this one replaces keeps its own pictures (restore shows them).
+  const ids = await claimImageIds(repo, siteId, "generated", ideas.length, (await repo.getSpec(siteId))?.spec.assets.images ?? []);
   const results = await Promise.allSettled(
     ideas.map(async (idea, i): Promise<ImageAsset> => {
-      const id = `img_g${i + 1}`;
+      const id = ids[i]!;
       const img = await deps.images!.generate(idea.subject);
       const key = `sites/${siteId}/generated/${id}.jpg`;
       await storage.put(key, img.data, "image/jpeg");
