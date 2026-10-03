@@ -107,6 +107,15 @@ export const AppConfigSchema = z.object({
     /** Lighthouse mobile performance in the report (off in tests: it needs a debugging port and takes ~20 s). */
     lighthouse: z.boolean(),
   }),
+  stats: z.object({
+    visitDedupeMinutes: z.number().int().min(0),
+    tapsPerVisitorPerDay: z.number().int().min(1),
+    timeZone: z.string().min(1),
+    reportFromHour: z.number().int().min(0).max(23),
+    reportWithinDays: z.number().int().min(1).max(28),
+    retryEveryMinutes: z.number().int().positive(),
+    maxAttempts: z.number().int().min(1).max(10),
+  }),
   formEmail: z.object({
     waitMs: z.number().int().positive(),
     retryEveryMinutes: z.number().int().positive(),
