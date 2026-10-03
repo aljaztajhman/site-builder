@@ -15,19 +15,25 @@ export function siteFiles(spec: SiteSpec, media: Map<string, Uint8Array>, opts: 
 }
 
 /**
- * The export zip: the same files as the published site plus a root index.html that opens the site.
+ * The export's files: the same files as the published site plus a root index.html that opens the site.
  * Works from file:// because every path in the pages is relative.
  */
-export function exportZip(spec: SiteSpec, media: Map<string, Uint8Array>, opts: { imageWidths?: number[] } = {}): Uint8Array {
+export function exportFiles(spec: SiteSpec, media: Map<string, Uint8Array>, opts: { imageWidths?: number[] } = {}): Map<string, Uint8Array> {
   const files = siteFiles(spec, media, opts);
-  const entries: Record<string, Uint8Array> = {};
-  for (const [p, data] of files) entries[p] = data;
-  entries["index.html"] = strToU8(
-    `<!doctype html><html lang="${spec.locales.default}"><head><meta charset="utf-8"><title>${escapeHtml(spec.business.name)}</title>` +
-      `<meta http-equiv="refresh" content="0; url=${spec.slug}/index.html"></head>` +
-      `<body><p><a href="${spec.slug}/index.html">${escapeHtml(spec.business.name)}</a></p></body></html>`,
+  files.set(
+    "index.html",
+    strToU8(
+      `<!doctype html><html lang="${spec.locales.default}"><head><meta charset="utf-8"><title>${escapeHtml(spec.business.name)}</title>` +
+        `<meta http-equiv="refresh" content="0; url=${spec.slug}/index.html"></head>` +
+        `<body><p><a href="${spec.slug}/index.html">${escapeHtml(spec.business.name)}</a></p></body></html>`,
+    ),
   );
-  return zipSync(entries, { level: 6, mtime: new Date("2026-01-01T00:00:00Z") });
+  return files;
+}
+
+/** The export zip an owner downloads: `exportFiles`, zipped. */
+export function exportZip(spec: SiteSpec, media: Map<string, Uint8Array>, opts: { imageWidths?: number[] } = {}): Uint8Array {
+  return zipSync(Object.fromEntries(exportFiles(spec, media, opts)), { level: 6, mtime: new Date("2026-01-01T00:00:00Z") });
 }
 
 function escapeHtml(s: string): string {
