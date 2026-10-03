@@ -143,6 +143,47 @@ export function hoursRows(h: Hours, locale: Locale = "sl", short = false): { day
   return h.entries.map((e) => ({ days: formatDayRange(e, locale, short), value: formatHoursValue(e, locale) }));
 }
 
+export interface WeekChart {
+  /** First and last whole hour on the scale (the earliest opening floored, the latest closing ceiled). */
+  start: number;
+  end: number;
+  days: { day: Day; closed: boolean; bars: { from: number; to: number; label: string }[] }[];
+}
+
+/** Week order (business.ts has it as DAYS, but this module stays free of zod for the editor bundle). */
+const WEEK: readonly Day[] = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+
+const minutes = (hhmm: string) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5));
+
+/**
+ * Opening hours as a week chart (opening-hours week): one row per day the hours mention, in week order, each
+ * with its opening spans in minutes and their labels; a day marked closed has no bars. Null when nothing opens.
+ */
+export function weekChart(h: Hours): WeekChart | null {
+  const rows = new Map<Day, { closed: boolean; bars: { from: number; to: number; label: string }[] }>();
+  for (const e of h.entries) {
+    const a = WEEK.indexOf(e.from);
+    const b = WEEK.indexOf(e.to);
+    for (let i = a; i <= (b >= a ? b : a); i++) {
+      const day = WEEK[i]!;
+      const row = rows.get(day) ?? { closed: false, bars: [] };
+      if (e.closed || !e.open || !e.close) row.closed = row.bars.length === 0;
+      else row.bars.push({ from: minutes(e.open), to: minutes(e.close), label: `${formatTime(e.open)}–${formatTime(e.close)}` });
+      if (row.bars.length) row.closed = false;
+      rows.set(day, row);
+    }
+  }
+  const bars = [...rows.values()].flatMap((r) => r.bars);
+  if (!bars.length) return null;
+  const start = Math.floor(Math.min(...bars.map((x) => x.from)) / 60);
+  const end = Math.ceil(Math.max(...bars.map((x) => x.to)) / 60);
+  return {
+    start,
+    end,
+    days: WEEK.filter((d) => rows.has(d)).map((day) => ({ day, ...rows.get(day)!, bars: rows.get(day)!.bars.sort((x, y) => x.from - y.from) })),
+  };
+}
+
 export function capitalize(s: string): string {
   return s.charAt(0).toLocaleUpperCase("sl") + s.slice(1);
 }

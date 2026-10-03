@@ -101,6 +101,18 @@ export function semanticIssues(spec: SiteSpec): Issue[] {
     }),
   );
 
+  // A service's description may be left out only where the list is names only (services-list aside).
+  spec.pages.forEach((p, pi) =>
+    p.sections.forEach((s, si) => {
+      if (s.type !== "services-list") return;
+      if (s.props.note && s.variant !== "aside") add(`/pages/${pi}/sections/${si}/props/note`, "structure", "note is only shown by the aside variant");
+      if (s.variant === "aside") return;
+      s.props.items.forEach((it, ii) => {
+        if (it.description === undefined) add(`/pages/${pi}/sections/${si}/props/items/${ii}/description`, "structure", "description is required outside the aside variant");
+      });
+    }),
+  );
+
   // References: images and pages.
   const imageIds = new Set<string>();
   spec.assets.images.forEach((img, i) => {

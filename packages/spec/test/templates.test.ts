@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { DIRECTIONS, MOTIFS, SECTION_DEFS, checkDesign, contrast, earliestOpening, enforceDesign, formatPhoneNational, migrateSpec, plateCode, templateFor, validateSite, type Design, type SiteSpec } from "../src/index.ts";
+import { DIRECTIONS, MOTIFS, SECTION_DEFS, checkDesign, contrast, earliestOpening, enforceDesign, formatPhoneNational, migrateSpec, plateCode, templateFor, validateSite, weekChart, type Design, type Hours, type SiteSpec } from "../src/index.ts";
 
 describe("trade template directions (docs/design/templates)", () => {
   const templates = DIRECTIONS.filter((d) => d.template);
 
-  it("implements M, S, J, R, T, K and L, one motif each", () => {
+  it("implements M, S, J, R, T, K, L and O, one motif each", () => {
     expect(templates.map((d) => [d.id, d.template!.id, d.template!.motif])).toEqual([
       ["tablica", "M", "plate"],
       ["cevi", "S", "pipes"],
@@ -14,6 +14,7 @@ describe("trade template directions (docs/design/templates)", () => {
       ["etiketa", "T", "label"],
       ["jedilnik", "K", "spoon"],
       ["ogledalo", "L", "mirror"],
+      ["nasmeh", "O", "smile"],
     ]);
     expect(new Set(templates.map((d) => d.template!.motif)).size).toBe(templates.length);
     for (const d of templates) expect(MOTIFS).toContain(d.template!.motif);
@@ -76,7 +77,10 @@ describe("trade template directions (docs/design/templates)", () => {
     expect(templateFor("restaurant", 1)?.id).toBe("jedilnik");
     expect(templateFor("hairdresser", 3)?.id).toBe("ogledalo");
     expect(templateFor("hairdresser", 2)).toBeUndefined();
-    expect(templateFor("dental", 3)).toBeUndefined();
+    // Dental has its template now (O Nasmeh): the first choice with at least one photo.
+    expect(templateFor("dental", 3)?.id).toBe("nasmeh");
+    expect(templateFor("dental", 0)).toBeUndefined();
+    expect(templateFor("physio", 3)).toBeUndefined();
   });
 
   it("repairs a band without its text colour and an unreadable one", () => {
@@ -207,5 +211,48 @@ describe("variants that need a prop to look different", () => {
         expect(shape[prop!]!.isOptional(), `${d.type}.${prop}`).toBe(true);
       }
     }
+  });
+});
+
+describe("the hours as a week chart (O)", () => {
+  it("draws one row per day the hours mention, in week order, on a scale from the earliest opening to the latest closing", () => {
+    const dentist: Hours = { entries: [{ from: "mon", to: "mon", open: "12:00", close: "19:00" }, { from: "tue", to: "tue", open: "07:00", close: "14:00" }, { from: "wed", to: "wed", open: "12:00", close: "19:00" }, { from: "thu", to: "fri", open: "07:00", close: "14:00" }] };
+    const chart = weekChart(dentist)!;
+    expect([chart.start, chart.end]).toEqual([7, 19]);
+    expect(chart.days.map((d) => d.day)).toEqual(["mon", "tue", "wed", "thu", "fri"]);
+    expect(chart.days[0]).toEqual({ day: "mon", closed: false, bars: [{ from: 720, to: 1140, label: "12.00–19.00" }] });
+    expect(chart.days[4]!.bars[0]!.label).toBe("7.00–14.00");
+  });
+
+  it("keeps a closed day as an empty row, floors and ceils the scale to whole hours, and shows a split day as two bars", () => {
+    const h: Hours = {
+      entries: [
+        { from: "sat", to: "sat", open: "08:30", close: "12:00" },
+        { from: "sat", to: "sat", open: "14:00", close: "17:45" },
+        { from: "sun", to: "sun", closed: true },
+        { from: "mon", to: "mon", open: "09:00", close: "16:00" },
+      ],
+    };
+    const chart = weekChart(h)!;
+    expect([chart.start, chart.end]).toEqual([8, 18]);
+    expect(chart.days.map((d) => [d.day, d.closed, d.bars.length])).toEqual([["mon", false, 1], ["sat", false, 2], ["sun", true, 0]]);
+    expect(chart.days[1]!.bars.map((b) => b.label)).toEqual(["8.30–12.00", "14.00–17.45"]);
+  });
+
+  it("has no chart when nothing opens", () => {
+    expect(weekChart({ entries: [{ from: "mon", to: "sun", closed: true }] })).toBeNull();
+  });
+});
+
+describe("services aside (O)", () => {
+  const golden = (): SiteSpec => migrateSpec(JSON.parse(readFileSync(new URL("../../../tools/eval/golden/zobozdravstvo-lebar.json", import.meta.url), "utf8")) as unknown);
+
+  it("lets a service stand as its name only in aside, with the note beside it; elsewhere both are refused", () => {
+    const spec = golden();
+    expect(validateSite(spec).issues).toEqual([]);
+    const care = spec.pages[0]!.sections.find((s) => s.type === "services-list")!;
+    expect(care.variant).toBe("aside");
+    care.variant = "rows";
+    expect(validateSite(spec).issues.map((i) => i.message)).toEqual(expect.arrayContaining(["note is only shown by the aside variant", "description is required outside the aside variant"]));
   });
 });

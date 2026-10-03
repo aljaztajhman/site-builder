@@ -131,6 +131,16 @@ export function motifVars(motif: Motif, c: Colors): Record<string, string> {
     case "mirror":
       // The frames, branch, arches and wordmark take the site's tokens directly in the shared stylesheet.
       return {};
+    case "smile": {
+      // A smile arc in the accent colour: the brand mark, the line under the round hero photo, the list bullets.
+      const arc = (w: number, h: number, d: string, sw: number) =>
+        svgUrl(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><path d="${d}" stroke="${c.accent}" stroke-width="${sw}" stroke-linecap="round" fill="none"/></svg>`);
+      return {
+        "--motif-brand": arc(40, 24, "M4 5c5 18 27 18 32 0", 6),
+        "--motif-arc": arc(600, 150, "M40 20c110 150 410 150 520 0", 22),
+        "--motif-bullet": arc(24, 14, "M3 3c4 10 14 10 18 0", 4.5),
+      };
+    }
     case "spoon":
       return {
         // A brass spoon (the inn's name): the brand mark and the divider between the offers, in the band colour.

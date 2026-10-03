@@ -277,6 +277,34 @@ describe("hero-signature mirrors (Ogledalo)", () => {
   });
 });
 
+describe("hero-signature disc (Nasmeh)", () => {
+  const MARIBOR: Business = { ...FULL_BUSINESS, name: "Zobozdravstvo Lebar", phone: "+38625553120", address: { street: "Gosposvetska cesta 36", postalCode: "2000", city: "Maribor" } };
+  const disc = (props: Partial<SectionOf<"hero-signature">["props"]> = {}) =>
+    hero("disc", {
+      headline: "Prvi obisk je le pogovor in pregled, brez posegov",
+      fact: "phone",
+      factLabel: "Naročite se",
+      factNote: "Otroke sprejemamo od 3. leta starosti.",
+      secondary: { label: "Pišite nam", target: { action: "email" } },
+      ...props,
+    });
+
+  it("sets the promise as the headline, the photo round with the arc, the note on the chip, the call as the button", () => {
+    const out = html(<HeroSignature section={disc()} ctx={ctxFor("nasmeh", MARIBOR)} index={0} />);
+    expect(out).toContain('<p class="eyebrow hsig__eyebrow">Gosposvetska cesta 36, Maribor</p>');
+    expect(out).toMatch(/<figure class="hsig__face"><picture class="media hsig__face-media disc media--contained">[\s\S]*<\/picture><span class="hsig__arc" aria-hidden="true"><\/span><figcaption class="hsig__chip">Otroke sprejemamo od 3\. leta starosti\.<\/figcaption><\/figure>/);
+    expect(out).toMatch(/<a href="tel:\+38625553120" data-action="call" class="btn btn--primary">Naročite se<\/a>/);
+    expect(out.match(/btn btn--primary/g)).toHaveLength(1);
+    expect(heroLcp["hero-signature"]?.(disc())).toEqual({ image: "img_salon", sizes: "(min-width: 64rem) 35rem, 82vw" });
+  });
+
+  it("keeps the note without a photo", () => {
+    const out = html(<HeroSignature section={disc({ image: undefined })} ctx={ctxFor("nasmeh", MARIBOR)} index={0} />);
+    expect(out).toContain('<p class="hsig__chip hsig__chip--alone">Otroke sprejemamo od 3. leta starosti.</p>');
+    expect(out).not.toContain("<img");
+  });
+});
+
 describe("price-list offers (Jedilnik)", () => {
   const offers: SectionOf<"price-list"> = {
     id: "s_today",

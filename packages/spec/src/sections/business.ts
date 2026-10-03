@@ -19,9 +19,9 @@ export const servicesList = defineSection(
   {
     type: "services-list",
     group: "business",
-    variants: ["rows", "two-column"],
+    variants: ["rows", "two-column", "aside"],
     description:
-      "Two to twelve services as a typographic list: name, one or two sentences, optional price and link. rows: one service per row with the price aligned right. two-column: services in two columns on desktop. Use when services matter more than photos.",
+      "Two to twelve services as a typographic list: name, one or two sentences, optional price and link. rows: one service per row with the price aligned right. two-column: services in two columns on desktop. aside: the heading and an optional note card (note: how the client charges, e.g. self-paying) on the left, the services as a ruled list of names on the right; descriptions optional, one short line where the client said more. Use when services matter more than photos.",
     images: "none",
     mobile: "One column; name and price on one line when they fit, otherwise the price wraps under the name. Rows separated by rules.",
     a11y: "Heading is an h2; each service is an h3 inside a list. Prices use tabular numbers.",
@@ -32,13 +32,17 @@ export const servicesList = defineSection(
       .array(
         z.strictObject({
           name: text(60),
-          description: text(240),
+          description: text(240).optional().describe("Required except in aside, where a name may stand alone."),
           price: Price.optional().describe(PRICE_RULE),
           link: Link.optional(),
         }),
       )
       .min(2)
       .max(12),
+    note: z
+      .strictObject({ title: text(40), text: text(200) })
+      .optional()
+      .describe("aside only: a short note card beside the list, from the client's words (e.g. how prices are set)."),
   }),
 );
 
@@ -149,9 +153,9 @@ export const openingHoursSection = defineSection(
   {
     type: "opening-hours",
     group: "business",
-    variants: ["table", "compact", "photo"],
+    variants: ["table", "compact", "photo", "week"],
     description:
-      "Opening hours from the business facts (never written in props), with a heading and an optional note. table: full day names in a table. compact: short day names in a narrow list. photo: the hours beside a photo of the shop front or room in a tall arch, with an optional second photo (inset) as a disc over its edge. Use on the homepage or contact page.",
+      "Opening hours from the business facts (never written in props), with a heading and an optional note. table: full day names in a table. compact: short day names in a narrow list. photo: the hours beside a photo of the shop front or room in a tall arch, with an optional second photo (inset) as a disc over its edge. week: the hours drawn as a week chart, one bar per day on a time scale, each bar labelled with its times; for practices whose hours change from day to day. Use on the homepage or contact page.",
     images: "optional",
     mobile: "Day left, hours right, one row per day range, fits 360 px. photo: the arch photo first at 78 % of the width, then the hours.",
     variantNeeds: { photo: "image" },

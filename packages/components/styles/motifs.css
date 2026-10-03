@@ -677,23 +677,23 @@ a.plate:hover .plate__num {
 }
 /* The closing call in two columns on desktop (Račun, Etiketa, Jedilnik, Ogledalo): heading and number on the left, the other facts on the right. */
 @media (min-width: 64rem) {
-  :is([data-motif="ledger"], [data-motif="label"], [data-motif="spoon"], [data-motif="mirror"]) .callout {
+  :is([data-motif="ledger"], [data-motif="label"], [data-motif="spoon"], [data-motif="mirror"], [data-motif="smile"]) .callout {
     grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
     column-gap: 4.5rem;
     align-items: end;
   }
-  :is([data-motif="ledger"], [data-motif="label"], [data-motif="spoon"], [data-motif="mirror"]) .callout > .section-head,
-  :is([data-motif="ledger"], [data-motif="label"], [data-motif="spoon"], [data-motif="mirror"]) .callout__call {
+  :is([data-motif="ledger"], [data-motif="label"], [data-motif="spoon"], [data-motif="mirror"], [data-motif="smile"]) .callout > .section-head,
+  :is([data-motif="ledger"], [data-motif="label"], [data-motif="spoon"], [data-motif="mirror"], [data-motif="smile"]) .callout__call {
     grid-column: 1;
   }
-  :is([data-motif="ledger"], [data-motif="label"], [data-motif="spoon"], [data-motif="mirror"]) .callout__facts {
+  :is([data-motif="ledger"], [data-motif="label"], [data-motif="spoon"], [data-motif="mirror"], [data-motif="smile"]) .callout__facts {
     grid-column: 2;
     grid-row: 1 / span 2;
     grid-template-columns: minmax(0, 1fr);
     gap: 1.25rem;
     border-top-width: 2px;
   }
-  :is([data-motif="ledger"], [data-motif="label"], [data-motif="spoon"], [data-motif="mirror"]) .callout .section-title {
+  :is([data-motif="ledger"], [data-motif="label"], [data-motif="spoon"], [data-motif="mirror"], [data-motif="smile"]) .callout .section-title {
     font-size: calc(var(--fs-h2) * 0.64);
     line-height: 1.08;
   }
@@ -1077,4 +1077,76 @@ a.plate:hover .plate__num {
   [data-motif="mirror"] .team-photo__media {
     border-radius: 16.25rem 16.25rem 0.5rem 0.5rem;
   }
+}
+
+/* ---------- smile: Nasmeh (O), health practices ---------- */
+[data-motif="smile"] .site-header__brand::before {
+  content: "";
+  flex: none;
+  width: 2.5rem;
+  height: 1.5rem;
+  margin-right: 0.75rem;
+  background: var(--motif-brand) no-repeat center / contain;
+}
+[data-motif="smile"] .hsig__eyebrow {
+  color: var(--c-primary);
+  font-weight: 700;
+}
+[data-motif="smile"] .hsig__lead {
+  color: var(--c-muted);
+}
+/* Services: a small smile arc as each bullet. */
+[data-motif="smile"] .svc-list__name {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+[data-motif="smile"] .svc-list__name::before {
+  content: "";
+  flex: none;
+  width: 1.375rem;
+  height: 0.875rem;
+  background: var(--motif-bullet) no-repeat center / contain;
+}
+[data-motif="smile"] .svc-list__body {
+  padding-left: 2.25rem;
+  color: var(--c-muted);
+}
+/* The team: the practitioner round, the people, the room in a tall arch, side by side on desktop. */
+[data-motif="smile"] .team-photo__figure {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 3fr);
+  gap: 1.25rem;
+  align-items: end;
+}
+[data-motif="smile"] .team-photo__media {
+  aspect-ratio: 1;
+}
+[data-motif="smile"] .team-photo__inset {
+  position: static;
+  width: auto;
+  aspect-ratio: 3 / 5;
+  border: 0;
+}
+@media (min-width: 64rem) {
+  [data-motif="smile"] .team-photo--has-image {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 5fr) minmax(0, 3fr);
+    gap: 3.5rem;
+  }
+  [data-motif="smile"] .team-photo__figure {
+    display: contents;
+  }
+  [data-motif="smile"] .team-photo__media {
+    order: -1;
+  }
+}
+/* The closing call on teal, the number large. */
+[data-motif="smile"] .bignum--poster {
+  font-size: clamp(3rem, 1rem + 7.6vw, 7rem);
+  letter-spacing: -0.05em;
+}
+[data-motif="smile"] .action-bar {
+  --c-bg: inherit;
+  --c-text: inherit;
+  --c-border: inherit;
 }

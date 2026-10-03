@@ -718,6 +718,82 @@ main > .s-hero-signature:first-child {
   }
 }
 
+/* disc: white ground, the promise as the headline; the photo round on a disc in the alternate colour, the motif's
+   arc under it, the note on a small tilted chip over its edge. */
+.s-hero-signature--disc.s {
+  overflow-x: clip;
+}
+.hsig--disc {
+  display: grid;
+  gap: 2.5rem;
+  padding-block: 0.5rem 1.5rem;
+}
+.hsig--disc .hsig__title,
+.hsig--disc .hsig__title--long {
+  max-width: none;
+  font-size: var(--fs-display, calc(var(--fs-h1) * 1.3));
+  line-height: 1;
+}
+.hsig__face {
+  position: relative;
+  width: 82%;
+  margin: 1.5rem 0 3.5rem;
+  justify-self: end;
+}
+.hsig__face::before {
+  content: "";
+  position: absolute;
+  inset: -7%;
+  border-radius: 50%;
+  background: var(--c-surface);
+}
+.hsig__face > .hsig__face-media {
+  position: relative;
+}
+.hsig__arc {
+  position: absolute;
+  left: -6%;
+  right: -6%;
+  bottom: -13%;
+  aspect-ratio: 4 / 1;
+  background: var(--motif-arc, none) no-repeat center / contain;
+}
+.hsig__chip {
+  position: absolute;
+  left: -8%;
+  top: 4%;
+  max-width: 13rem;
+  padding: 0.875rem 1.125rem;
+  border-radius: 0.875rem;
+  background: var(--c-inverse);
+  color: var(--c-on-inverse);
+  font-weight: 700;
+  line-height: 1.25;
+  rotate: -4deg;
+}
+.hsig__chip--alone {
+  position: static;
+  justify-self: start;
+  rotate: -2deg;
+}
+@media (min-width: 64rem) {
+  .hsig--disc {
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    gap: 4rem;
+    align-items: center;
+    padding-block: 1.5rem 3.5rem;
+  }
+  .hsig__face {
+    width: 100%;
+    max-width: 35rem;
+    margin: 2rem 0;
+  }
+  .hsig__chip {
+    left: -12%;
+    top: 12%;
+  }
+}
+
 /* The seal: the earliest opening time on a round, slightly turned stamp in the band colour. */
 .seal {
   display: flex;

@@ -16,7 +16,7 @@ One branch and PR per one or two templates, each based on the previous (stacked)
 | --- | --- | --- |
 | claude/templates-rt | R Račun, T Etiketa | v7 |
 | claude/templates-kl | K Jedilnik, L Ogledalo | v8 (built on claude/templates-rt) |
-| claude/templates-o | O Nasmeh | v9 |
+| claude/templates-o | O Nasmeh | v9 (built on claude/templates-kl) |
 | claude/templates-np | N Markacija, P Pregib | v10 |
 
 ## Decisions per template (from the analyses, checked against the HTML)
@@ -79,7 +79,7 @@ One branch and PR per one or two templates, each based on the previous (stacked)
 - [x] T: claude/templates-rt. templates:compare T passes at all four widths; eval --offline 0 failures, LH 97/100/100/100, axe 0; lowest text contrast 5.18:1; phone first screen 10 % photo (report-only target 25 %, same as the hand-made page)
 - [x] K: claude/templates-kl. templates:compare K passes at all four widths; eval --offline 0 failures, LH 95/100/100/100, axe 0; lowest text contrast 5.93:1 (brass on green)
 - [x] L: claude/templates-kl. templates:compare L passes at all four widths; eval --offline 0 failures, LH 98/100/100/100, axe 0; lowest text contrast 7.11:1; first screen 21 % photo (report-only targets 25/30 %)
-- [ ] O
+- [x] O: claude/templates-o. templates:compare O passes at all four widths; eval --offline 0 failures, LH 99/100/100/100, axe 0; lowest text contrast 4.54:1 (teal on mint); desktop headline 4 lines (report-only, same as the hand-made page)
 - [ ] N
 - [ ] P
 - [ ] Swim set (only if all seven are done)

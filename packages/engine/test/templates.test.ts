@@ -23,7 +23,8 @@ describe("trade templates in the pipeline", () => {
     expect(templateLine("car-repair", 3)).toContain("tablica");
     expect(templateLine("builder", 0)).toContain("draws the trade instead of showing pictures");
     expect(templateLine("bakery", 0)).toBe("");
-    expect(templateLine("dental", 2)).toBe("");
+    expect(templateLine("dental", 0)).toBe("");
+    expect(templateLine("dental", 2)).toContain("nasmeh");
     expect(templateLine("accountant", 0)).toContain("racun (Račun (receipt))");
     expect(templateLine("accountant", 0)).toContain("draws the trade instead of showing pictures");
     expect(directionsCatalogue()).toContain("Hand-made trade template M");
@@ -66,9 +67,9 @@ describe("trade templates in the pipeline", () => {
   });
 
   it("tells the design and critique steps every template by name and what its motif draws", () => {
-    expect(DESIGN_SYSTEM).toContain("Trade templates (tablica, cevi, skorja, racun, etiketa, jedilnik, ogledalo)");
-    expect(CRITIQUE_SYSTEM).toContain("design directions tablica, cevi, skorja, racun, etiketa, jedilnik, ogledalo");
-    expect(CRITIQUE_SYSTEM).toContain("bottle labels and an olive branch, a brass spoon and dishes as round plates, mirror arches and the name as a wall-sized wordmark)");
+    expect(DESIGN_SYSTEM).toContain("Trade templates (tablica, cevi, skorja, racun, etiketa, jedilnik, ogledalo, nasmeh)");
+    expect(CRITIQUE_SYSTEM).toContain("design directions tablica, cevi, skorja, racun, etiketa, jedilnik, ogledalo, nasmeh");
+    expect(CRITIQUE_SYSTEM).toContain("mirror arches and the name as a wall-sized wordmark, a smile arc and the hours as a week chart)");
   });
 
   it("fixes the header: dark over the dark hero (not under a logo), no call button above the phone object", () => {

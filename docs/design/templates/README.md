@@ -155,6 +155,14 @@ K and L are directions `jedilnik` and `ogledalo` (branch claude/templates-kl, on
 - L's price list is set like a masthead (motif CSS on `price-list:grouped`, no new variant); the team photo sits in a tall mirror arch with a small arch over its corner.
 - The contact call-out has no map, so it no longer loads the consent script or shows a cookie notice.
 
+## In the engine (O, spec v9)
+
+O is direction `nasmeh` (branch claude/templates-o, on top of K and L).
+
+- Spec v9 (additive migration): hero-signature `disc` (the photo round on a disc in the alternate colour, the motif's arc under it, `factNote` on a tilted chip); opening-hours `week` (the hours as a week chart, computed by `weekChart()` in @sb/spec from the business hours: one row per day, a bar per opening span, the scale from the earliest opening to the latest closing, positions as custom properties); services-list `aside` with an optional `note` card, a service's `description` optional there (validation requires it in the other variants).
+- The coral of the hand-made page (#ff7a66) is 2.55:1 on white; the accent is #e4573f (3.66:1 on white, 3.86:1 on the deep green), so the arcs are a little deeper.
+- The team photo layout puts the practitioner round, the people and the room in an arch side by side (motif CSS; the round and arch classes come from the markup in this motif).
+
 ## Checked
 
 All ten rendered in Chromium at 1440 × 900 and 390 × 844, as plain HTML and through the canvas's own runtime: no horizontal scroll, no failed requests or broken images, every button, call link, plate and bar link at least 44 px tall on the phone. Contrast computed for 69 text and background colour pairs: lowest 4.64:1 (S, white on the red block, after darkening the red from 4.01:1), all others 4.76:1 or more. White text over the photo overlays in M and N is not measured per pixel. Not checked: axe, Lighthouse, other browsers.

@@ -165,6 +165,23 @@ describe("migration 7 → 8 (trade templates K and L)", () => {
   });
 });
 
+describe("migration 8 → 9 (trade template O)", () => {
+  it("turns stored v8 sites into valid v9 sites unchanged apart from the version, and accepts what v9 adds", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { validateSite } = await import("../src/index.ts");
+    const read = (id: string) => JSON.parse(readFileSync(new URL(`../../../tools/eval/golden/${id}.json`, import.meta.url), "utf8")) as SiteSpec;
+    for (const id of ["gostilna-zlata-zlica", "frizerstvo-lana"]) {
+      const golden = read(id);
+      const v9 = migrateSpec({ ...golden, specVersion: 8 }, MIGRATIONS, 9);
+      expect(v9, id).toEqual({ ...golden, specVersion: 9 });
+      expect(validateSite(migrateSpec(v9)).issues, id).toEqual([]);
+    }
+    const dentist = migrateSpec(read("zobozdravstvo-lebar"));
+    expect(validateSite(dentist).issues).toEqual([]);
+    expect(dentist.pages[0]!.sections.map((s) => `${s.type}:${s.variant}`)).toEqual(["hero-signature:disc", "opening-hours:week", "services-list:aside", "team:photo", "contact:call-out"]);
+  });
+});
+
 describe("generated images", () => {
   it("may fill a hero but not a products section (pekarna-kvas uses img_01 in both)", async () => {
     const { readFileSync } = await import("node:fs");

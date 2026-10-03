@@ -2,6 +2,7 @@ import { isPlaceholder, plural, type Placeholder } from "@sb/spec";
 import { ActionLink, MaybeText, Ph, Picture, PriceText, Section, SectionHead, cx } from "../../primitives/index.tsx";
 import type { SectionProps } from "../../types.ts";
 import { largestWebp } from "./shared.tsx";
+import { motifOf } from "../../motifs/index.tsx";
 
 export const TEAM_GRID_SIZES = "(min-width: 64rem) 17rem, (min-width: 48rem) 33vw, 50vw";
 export const TEAM_LIST_SIZES = "(min-width: 48rem) 8rem, 6rem";
@@ -20,6 +21,8 @@ export const TEAM_INSET_SIZES = "(min-width: 64rem) 12rem, 34vw";
 /** photo: the heading and the people as ruled rows (name, role) beside one photo, a second photo over its corner. */
 function TeamPhoto({ section, ctx, index }: SectionProps<"team">) {
   const { props } = section;
+  // Nasmeh: the practitioner round, the room in a tall arch, side by side with the people between them.
+  const smile = motifOf(ctx) === "smile";
   return (
     <Section id={section.id} type={section.type} variant={section.variant} tone={section.tone}>
       <div className={cx("team-photo", props.image && "team-photo--has-image")}>
@@ -39,8 +42,8 @@ function TeamPhoto({ section, ctx, index }: SectionProps<"team">) {
         </div>
         {props.image && (
           <figure className="team-photo__figure">
-            <Picture id={props.image} ctx={ctx} className="team-photo__media media--contained" sizes={TEAM_PHOTO_SIZES} priority={index === 0} />
-            {props.inset && <Picture id={props.inset} ctx={ctx} className="team-photo__inset media--contained" sizes={TEAM_INSET_SIZES} />}
+            <Picture id={props.image} ctx={ctx} className={cx("team-photo__media media--contained", smile && "disc")} sizes={TEAM_PHOTO_SIZES} priority={index === 0} />
+            {props.inset && <Picture id={props.inset} ctx={ctx} className={cx("team-photo__inset media--contained", smile && "arch-top")} sizes={TEAM_INSET_SIZES} />}
           </figure>
         )}
       </div>
