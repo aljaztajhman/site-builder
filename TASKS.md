@@ -255,6 +255,13 @@ Before CMS collections (`sb-roadmap-order` = swap, 2026-10-01).
 - [x] The generic section form sends the whole props object on every edit, so every price in a services-list, products or rooms section re-enters the fact corpus as owner-typed when the owner edits any other field of it (a price the model invented passes from then on). Fixed on the server (2026-10-03, branch claude/typed-ops), for every form and any client: `typedOps` (packages/engine/src/editor.ts) reduces each direct edit to what differs from the spec before it, and `/patch` stores only that. Array elements are matched by content, id, name, then position (a reorder stores nothing); an added element is compared with its closest sibling (a duplicated section stores only its new id); a priced item whose name or price changed and a changed hours row stay whole, so the fact check can still pair them. Tests: `packages/engine/test/price-edit.test.ts` ("an edit elsewhere in a section…": an invented price stays flagged after a whole-section title save, which it didn't before; a duplicate; a reorder; one changed price is accepted; an hours row), the existing owner-typed price tests now go through `typedOps`, `apps/web/test/app.test.ts` checks what `/patch` stores. Patches saved before this keep their whole sections (not rewritten)
 - [ ] Translation overlays don't follow section moves or deletes in the direct editor: a moved section's English overlay points at another section's text, and deleting a section that has overlays is refused by validation ("pointer … is not a string"). Read in `validateSite` and the editor's move/delete ops, not reproduced in a browser; the price editor re-points overlays for its own moves
 
+## Polish and optimization (2026-10-03)
+- [x] Editor polish (branch claude/editor-polish):
+  - Bug: after a form autosave the top bar wasn't refreshed, so undo stayed disabled and "Še N do objave" stale until something else re-rendered. The top bar now follows every save.
+  - Focus survives re-renders: undo from the keyboard keeps focus on the button. Browser test; it fails without the fix.
+  - Messages stay up 4–12 s by length, can be closed ("Zapri obvestilo"), and "Objavljeno: /s/…/" is a link.
+  - `rel="noopener"` on new-tab links; colour pickers, "more fields" and the toast's close button are 44 px on touch screens.
+
 ## Later: phase 4 — CMS collections
 - [ ] Collections the client edits: blog, services, price list (cenik; its editing comes forward into phase 3), team, events; spec migration + components + editor forms
 - [ ] Per-collection list/detail pages, RSS for the blog, sitemap entries
