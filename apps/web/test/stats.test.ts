@@ -52,6 +52,7 @@ async function site(slug: string, o: { owner?: boolean; publish?: boolean } = {}
     [`${slug}/index.html`, enc.encode("<!doctype html><title>Domov</title>")],
     [`${slug}/kontakt/index.html`, enc.encode("<!doctype html><title>Kontakt</title>")],
     [`${slug}/media/a.webp`, enc.encode("img")],
+    [`${slug}/media/logo.png`, enc.encode("logo")],
   ]);
   await writeRelease(platform.storage, slug, newReleaseId(v), files);
   return s.id;
@@ -121,6 +122,17 @@ describe("counting without cookies", () => {
     const admin = await adminBrowser(app.request.bind(app), "pw-123456789012");
     const list = await (await app.request("/sites", { headers: { cookie: admin.cookie } })).text();
     expect(list).toContain("Zadnjih 30 dni: ogledi 0 · klici 0 · pot 0 · sporočila 1");
+  });
+});
+
+describe("published files' caching", () => {
+  it("caches photos for good, but the logo (same name when replaced) and pages only briefly", async () => {
+    const app = appWith();
+    await site("predpomnjenje");
+    const cache = async (p: string) => (await app.request(`/s/predpomnjenje/${p}`)).headers.get("cache-control");
+    expect(await cache("media/a.webp")).toBe("public, max-age=31536000, immutable");
+    expect(await cache("media/logo.png")).toBe("public, max-age=300");
+    expect(await cache("")).toBe("public, max-age=60");
   });
 });
 

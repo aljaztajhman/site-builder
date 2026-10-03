@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import type { ReactNode } from "react";
 import type { SiteRow, StatTotals } from "@sb/platform";
 import { uiUrl } from "./ui/assets.ts";
+import { clientScriptUrl } from "./client-bundle.ts";
 import { PRODUCT_NAME, formatDate, formatEur, siteStatus } from "./ui/labels.ts";
 
 /** Page shell for every dashboard page: the shared stylesheet (apps/web/src/ui/app.css), no inline CSS. */
@@ -158,7 +159,7 @@ export function sitesPage({ sites, spendToday, cap, csrf, admin, account, badgeF
 
 export function sitePage({ site }: { site: SiteRow }): string {
   return html(
-    <Doc title={site.name} script="/assets/editor.js">
+    <Doc title={site.name} script={clientScriptUrl("editor")}>
       <div id="app" data-site-id={site.id}>
         <p className="loading">Nalagam urejevalnik …</p>
       </div>

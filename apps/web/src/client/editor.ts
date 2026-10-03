@@ -118,8 +118,18 @@ function h<K extends keyof HTMLElementTagNameMap>(tag: K, attrs: Record<string, 
 
 
 // ---------- API ----------
+/** What the owner reads when a request failed without a message of its own (never the browser's English). */
+const OFFLINE = "Preverite internetno povezavo in poskusite znova.";
+const statusText = (status: number): string =>
+  status >= 500 ? "Strežnik trenutno ne odgovarja. Poskusite znova čez trenutek." : status === 404 ? "Tega ni več. Osvežite stran." : "Zahteva ni uspela. Osvežite stran in poskusite znova.";
+
 async function api<T = unknown>(path: string, init?: RequestInit): Promise<T> {
-  const r = await fetch(`/api/sites/${siteId}${path}`, { headers: { "content-type": "application/json" }, ...init });
+  let r: Response;
+  try {
+    r = await fetch(`/api/sites/${siteId}${path}`, { headers: { "content-type": "application/json" }, ...init });
+  } catch {
+    throw new Error(OFFLINE);
+  }
   const body = (await r.json().catch(() => ({}))) as T & { error?: string; message?: string; issues?: { path: string; code: string; message: string }[]; checklist?: BlockerLike[] };
   if (!r.ok) {
     const spec = currentSpec();
@@ -127,12 +137,16 @@ async function api<T = unknown>(path: string, init?: RequestInit): Promise<T> {
       body.issues?.slice(0, 3).map((i) => issueText(spec, i)).join("; ") ??
       body.checklist?.slice(0, 3).map((b) => `${describePath(spec, b.path)}: ${blockerMessage(b)}`).join(" ") ??
       body.message ??
-      body.error ??
-      r.statusText;
+      // A sentence for the owner starts with a capital; lowercase codes ("not found") are for us.
+      (body.error && /^[A-ZČŠŽ]/.test(body.error) ? body.error : undefined) ??
+      statusText(r.status);
     throw new Error(detail);
   }
   return body;
 }
+
+/** A publish is on its way (the button ignores more taps until it lands). */
+let publishing = false;
 
 /** Server clock minus this browser's, from the last state fetch; running-stage seconds use server time. */
 let clockSkew = 0;
@@ -146,6 +160,7 @@ async function fetchState(): Promise<State> {
 
 /** Running-stage seconds count up once a second without re-rendering anything else. */
 window.setInterval(() => {
+  if (document.hidden) return;
   for (const el of document.querySelectorAll<HTMLElement>("[data-since]")) el.textContent = elapsed(el.dataset.since!);
 }, 1000);
 
@@ -163,7 +178,12 @@ async function load(rerender = true): Promise<void> {
     toast ||= `Povezave ni. ${(e as Error).message}`;
   }
   if (rerender) render();
-  else showToast();
+  else {
+    // A form autosave keeps the panel (and the owner's typing) as it is; the top bar still follows the
+    // new version (undo, "Še N do objave"), or undo stayed disabled after the first edit.
+    if (shell) shell.top.replaceChildren(...topItems().filter((c): c is Node => c instanceof Node));
+    showToast();
+  }
   schedulePoll();
 }
 
@@ -180,13 +200,21 @@ const awaitingReply = (): boolean => {
 const pollSignature = (): string => pulseKey(state.pulse);
 const pulseKey = (p: Pulse): string => [p.status, p.version, p.chat, p.lastEvent].join("|");
 
+const pollActive = (): boolean => state.site.status === "generating" || state.site.status === "editing" || awaitingReply();
+
+/** Polls every 2 s while the site is busy, and not at all while the tab is hidden (it catches up when shown). */
 function schedulePoll(): void {
   window.clearTimeout(pollTimer);
-  const active = state.site.status === "generating" || state.site.status === "editing" || awaitingReply();
-  if (active) pollTimer = window.setTimeout(() => void poll(), 2000);
+  if (pollActive() && !document.hidden) pollTimer = window.setTimeout(() => void poll(), 2000);
 }
 
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) window.clearTimeout(pollTimer);
+  else if (typeof state !== "undefined" && pollActive()) void poll();
+});
+
 async function poll(): Promise<void> {
+  if (document.hidden) return;
   const before = pollSignature();
   try {
     // The pulse is one small query; the full state (spec, versions, events, chat, checklist) only when it moved.
@@ -1150,7 +1178,8 @@ function suggestions(): string[] {
 }
 
 async function sendToAssistant(): Promise<void> {
-  if (!dock) return;
+  // Enter while a message is still being sent (the button is disabled then) sends nothing more.
+  if (!dock || dock.send.disabled) return;
   const message = dock.input.value.trim();
   if (!message) return dock.input.focus();
   dock.send.disabled = true;
@@ -1433,7 +1462,10 @@ function statusBlock(): HTMLElement | null {
     );
   }
   if (s.status === "failed") {
-    const last = [...state.events].reverse().find((e) => e.level === "error");
+    // The worker writes some failures for the owner, in Slovene (a description it couldn't place, a restart);
+    // other errors are technical English for us: the admin sees them, an owner doesn't.
+    const error = [...state.events].reverse().find((e) => e.level === "error");
+    const last = error && (state.access?.viewer === "admin" || /[čšžČŠŽ]|Poskusite/.test(error.message)) ? error : undefined;
     return h("div", { class: "pane" },
       h("div", { class: "note bad", role: "alert" },
         h("p", {}, h("strong", {}, "Ustvarjanje ni uspelo."), state.spec ? " Zadnja dobra različica ostaja, urejate jo lahko naprej." : " Poskusite znova; če se ponovi, nam pišite."),
@@ -1789,6 +1821,9 @@ function topItems(): Child[] {
             return showToast();
           }
           if (state.checklist.length) return openChecklist();
+          // A second tap while publishing does nothing (it would publish the same version again).
+          if (publishing) return;
+          publishing = true;
           // Publishes the version on screen, after any text still waiting to be saved.
           await queued(async () => {
             try {
@@ -1796,6 +1831,8 @@ function topItems(): Child[] {
               toast = `Objavljeno: ${r.url}`;
             } catch (e) {
               toast = `Ni objavljeno. ${(e as Error).message}`;
+            } finally {
+              publishing = false;
             }
             await load();
           });
@@ -1815,8 +1852,8 @@ function moreMenu(): HTMLElement {
     h("div", { class: "list" },
       h("a", { href: `/sites/${siteId}/messages` }, state.messages ? `Sporočila (${state.messages})` : "Sporočila"),
       h("button", { type: "button", onClick: go("versions") }, "Zgodovina sprememb"),
-      h("a", { href: previewUrl(), target: "_blank" }, "Predogled v novem zavihku"),
-      s.published_version ? h("a", { href: `/s/${s.slug}/`, target: "_blank" }, "Odpri objavljeno stran") : null,
+      h("a", { href: previewUrl(), target: "_blank", rel: "noopener" }, "Predogled v novem zavihku"),
+      s.published_version ? h("a", { href: `/s/${s.slug}/`, target: "_blank", rel: "noopener" }, "Odpri objavljeno stran") : null,
       can("export") ? h("button", { type: "button", id: "export-start", onClick: () => { menuOpen = false; void startExport(); } }, "Prenesi stran (.zip)") : null,
       !can("regenerate") ? null : h("button", {
         type: "button",
@@ -1859,7 +1896,21 @@ function barItems(): Child[] {
   ];
 }
 
+/**
+ * What identifies a focused control across a re-render (the panel, bar and top are rebuilt): its region,
+ * tag and the first of id, field path, label or text. Null when focus isn't on such a control.
+ */
+function focusKey(el: Element | null): string | null {
+  if (!shell || !(el instanceof HTMLElement) || el === document.body) return null;
+  const region = shell.top.contains(el) ? "top" : shell.panel.contains(el) ? "panel" : shell.bar.contains(el) ? "bar" : null;
+  if (!region) return null;
+  const name = el.id || el.closest<HTMLElement>("[data-path]")?.dataset.path || el.getAttribute("aria-label") || el.getAttribute("name") || (el.textContent ?? "").trim().slice(0, 60);
+  return name ? `${region}|${el.tagName}|${name}` : null;
+}
+
 function render(): void {
+  // Focus on a control that is rebuilt below goes back to its new copy (a re-render used to drop it to <body>).
+  const focused = focusKey(document.activeElement);
   if (!shell) {
     // Labelled, so they stay distinct from the header and main of the site inside the preview frame.
     const top = h("header", { class: "top", "aria-label": "Urejevalnik" });
@@ -1908,6 +1959,18 @@ function render(): void {
   // Keep the selection and its toolbar in sync with the frame that survives re-renders.
   decorate();
   showToast();
+  if (focused && (document.activeElement === document.body || !document.activeElement?.isConnected)) restoreFocus(focused);
+}
+
+function restoreFocus(key: string): void {
+  if (!shell) return;
+  const region = { top: shell.top, panel: shell.panel, bar: shell.bar }[key.split("|")[0] as "top" | "panel" | "bar"];
+  for (const el of region.querySelectorAll<HTMLElement>("button, a[href], input, select, textarea, summary, [tabindex]")) {
+    if (focusKey(el) === key) {
+      el.focus({ preventScroll: true });
+      return;
+    }
+  }
 }
 
 function renderStage(): void {
@@ -2120,21 +2183,36 @@ function missingPhrase(n: number): string {
 }
 
 /** One live region for the whole session, shown and hidden, so screen readers keep announcing it. */
-const toastEl = document.body.appendChild(h("div", { class: "toast", role: "status", hidden: true }));
+const toastText = h("span", { class: "toast-text" });
+const toastClose = h("button", { class: "toast-close", type: "button", "aria-label": "Zapri obvestilo" }, "✕");
+const toastEl = document.body.appendChild(h("div", { class: "toast", role: "status", hidden: true }, toastText, toastClose));
+toastClose.addEventListener("click", () => {
+  window.clearTimeout(toastTimer);
+  toast = "";
+  toastEl.hidden = true;
+});
 let toastTimer: number | undefined;
+
+/** The toast's text, with a published site's address ("Objavljeno: /s/…/") as a link to it. */
+function toastContent(text: string): Child[] {
+  const m = /(\/s\/[a-z0-9]+(?:-[a-z0-9]+)*\/)/.exec(text);
+  if (!m) return [text];
+  return [text.slice(0, m.index), h("a", { href: m[1]!, target: "_blank", rel: "noopener" }, m[1]!), text.slice(m.index + m[1]!.length)];
+}
 
 function showToast(): void {
   if (!toast) return;
-  toastEl.textContent = toast;
+  toastText.replaceChildren(...toastContent(toast).filter((c): c is Node | string => c !== null && c !== false && c !== undefined).map((c) => (c instanceof Node ? c : document.createTextNode(String(c)))));
   toastEl.hidden = false;
   const t = toast;
   window.clearTimeout(toastTimer);
+  // Long enough to read: 4 s, plus a little per character for longer messages (at most 12 s).
   toastTimer = window.setTimeout(() => {
     if (toast === t) {
       toast = "";
       toastEl.hidden = true;
     }
-  }, 4000);
+  }, Math.min(12_000, Math.max(4000, 1500 + t.length * 60)));
 }
 
 load()

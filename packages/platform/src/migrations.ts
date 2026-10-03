@@ -382,6 +382,31 @@ export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
     `,
   },
   {
+    id: 16,
+    name: "site_domains",
+    // A site's own domain names (custom-domains plan): bought for the owner ('registered') or owned
+    // already and pointed at us ('connected'). Only an 'active' hostname serves the site; one of a site's
+    // active hostnames is its primary, the others (www, a second name) redirect to it. `step` and `detail`
+    // follow provisioning (registration, DNS, certificate) and keep the providers' ids and the last error.
+    // The platform subdomain (<slug>.<PLATFORM_DOMAIN>) needs no row.
+    sql: `
+      create table site_domains (
+        hostname text primary key,
+        site_id text not null references sites(id) on delete cascade,
+        kind text not null check (kind in ('registered', 'connected')),
+        status text not null default 'pending' check (status in ('pending', 'active', 'failed')),
+        step text not null default 'start',
+        is_primary boolean not null default false,
+        detail jsonb not null default '{}',
+        created_at timestamptz not null default now(),
+        updated_at timestamptz not null default now(),
+        active_at timestamptz
+      );
+      create index site_domains_site on site_domains(site_id);
+      create unique index site_domains_one_primary on site_domains(site_id) where is_primary;
+    `,
+  },
+  {
     id: 17,
     name: "allow_list.plan",
     // sb-tiers: which paid plan an allow-listed account has (Osnovni or Plus); everyone listed so far had the one plan.

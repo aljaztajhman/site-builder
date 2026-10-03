@@ -4,6 +4,7 @@ import type { Db } from "./db.ts";
 import { Accounts } from "./accounts.ts";
 import { UrlChecks } from "./checks.ts";
 import { SiteStats } from "./stats.ts";
+import { SiteDomains } from "./domains.ts";
 import { Usage, type Tier } from "./usage.ts";
 
 export type SiteStatus = "new" | "generating" | "ready" | "editing" | "publishing" | "failed";
@@ -159,12 +160,15 @@ export class Repo {
   readonly checks: UrlChecks;
   /** Cookieless counts per published site, and the monthly report emails. */
   readonly stats: SiteStats;
+  /** Sites' own domain names. */
+  readonly domains: SiteDomains;
 
   constructor(readonly db: Db) {
     this.accounts = new Accounts(db);
     this.usage = new Usage(db);
     this.checks = new UrlChecks(db);
     this.stats = new SiteStats(db);
+    this.domains = new SiteDomains(db);
   }
 
   async createSite(input: { id?: string; name: string; slug: string; intake: Intake; accountId?: string | null; deviceId?: string | null }): Promise<SiteRow> {
@@ -357,6 +361,12 @@ export class Repo {
   }
 
   /** Sites that have a version older than `before`, so retention may have something to remove there. */
+  /** Every site's id (the nightly sweep of pictures no version uses). */
+  async allSiteIds(): Promise<string[]> {
+    const { rows } = await this.db.query<{ id: string }>("select id from sites order by id");
+    return rows.map((r) => r.id);
+  }
+
   async sitesWithVersionsBefore(before: Date): Promise<string[]> {
     const { rows } = await this.db.query<{ id: string }>(
       "select s.id from sites s where exists (select 1 from spec_versions v where v.site_id = s.id and v.created_at < $1) order by s.id",
@@ -459,6 +469,12 @@ export class Repo {
       "select count(*) as n from form_messages where sender_key = $1 and created_at > now() - make_interval(mins => $2::integer)",
       [senderKey, minutes],
     );
+    return Number(rows[0]?.n ?? 0);
+  }
+
+  /** How many messages a site has (the editor's count; listFormMessages would read them all). */
+  async formMessageCount(siteId: string): Promise<number> {
+    const { rows } = await this.db.query<{ n: string | number }>("select count(*) as n from form_messages where site_id = $1", [siteId]);
     return Number(rows[0]?.n ?? 0);
   }
 
@@ -582,11 +598,15 @@ export class Repo {
     ]);
   }
 
+  /**
+   * A site's events in order: the next 500 after `afterId`, or without it the newest 500 (a site with a long
+   * history used to get its oldest 500, so the editor never saw its latest run).
+   */
   async listEvents(siteId: string, afterId = 0): Promise<EventRow[]> {
-    const { rows } = await this.db.query<EventRow>("select * from site_events where site_id = $1 and id > $2 order by id limit 500", [
-      siteId,
-      afterId,
-    ]);
+    const { rows } =
+      afterId > 0
+        ? await this.db.query<EventRow>("select * from site_events where site_id = $1 and id > $2 order by id limit 500", [siteId, afterId])
+        : await this.db.query<EventRow>("select * from (select * from site_events where site_id = $1 order by id desc limit 500) e order by id", [siteId]);
     return rows;
   }
 

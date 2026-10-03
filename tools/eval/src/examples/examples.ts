@@ -50,6 +50,30 @@ export function exampleSpec(ex: Example): SiteSpec {
   return spec;
 }
 
+/**
+ * The landing page's "Primer" section: the Pekarna Kvas golden site with one gap left on purpose, the
+ * cinnamon rolls' price, so the page shows how a missing fact is marked (and blocks publishing). The other
+ * gaps are filled the way an owner would, as in the trade showcase.
+ */
+export const PRIMER_SLUG = "primer";
+export function primerSpec(): SiteSpec {
+  const raw = JSON.parse(readFileSync(path.join(ROOT, "tools/eval/golden/pekarna-kvas.json"), "utf8")) as SiteSpec;
+  raw.slug = PRIMER_SLUG;
+  setAt(raw, "/pages/0/sections/2/props/items/4/price", { amount: 0.9 });
+  setAt(raw, "/business/provider/legalName", "Pekarna Kvas d.o.o.");
+  setAt(raw, "/business/provider/registrationNumber", "8123456000");
+  setAt(raw, "/business/provider/taxNumber", "81234567");
+  // The cinnamon rolls second, so their marked price is inside the framed first screen of the page.
+  const items = (raw.pages[0]!.sections[2]!.props as { items: unknown[] }).items;
+  items.splice(1, 0, ...items.splice(5, 1));
+  const spec = migrateSpec(raw);
+  const v = validateSite(spec);
+  if (!v.ok) throw new Error(`primer: ${v.issues.map((i) => `${i.path} ${i.message}`).join("; ")}`);
+  const left = collectPlaceholders(spec).filter((p) => p.path.startsWith("/pages/0/") || !p.path.startsWith("/pages/"));
+  if (left.map((p) => p.path).join() !== "/pages/0/sections/2/props/items/1/price") throw new Error(`primer: expected only the cinnamon rolls' price missing, got ${left.map((p) => p.path).join(", ")}`);
+  return spec;
+}
+
 /** The example's homepage HTML and the shared files (CSS, fonts, scripts) it references, by path under OUT_DIR. */
 export function exampleHtml(ex: Example): { slug: string; html: string; shared: Map<string, Uint8Array> } {
   return homepageFiles(exampleSpec(ex));

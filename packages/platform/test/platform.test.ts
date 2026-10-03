@@ -77,6 +77,12 @@ describe("repo", () => {
 
     await repo.addEvent({ siteId: site.id, stage: "brief", message: "ok" });
     expect((await repo.listEvents(site.id)).map((e) => e.stage)).toEqual(["brief"]);
+    // A long history: the newest 500 in order (it used to be the oldest 500, hiding the latest run).
+    for (let i = 1; i <= 510; i++) await repo.addEvent({ siteId: site.id, stage: "check", message: `e${i}` });
+    const latest = await repo.listEvents(site.id);
+    expect(latest).toHaveLength(500);
+    expect([latest[0]!.message, latest.at(-1)!.message]).toEqual(["e11", "e510"]);
+    expect((await repo.listEvents(site.id, Number(latest.at(-2)!.id))).map((e) => e.message)).toEqual(["e510"]);
 
     const msg = await repo.addChat(site.id, "user", "dodaj pogosta vprašanja");
     expect((await repo.getChat(Number(msg.id)))?.content).toBe("dodaj pogosta vprašanja");

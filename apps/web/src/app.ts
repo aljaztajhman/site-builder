@@ -35,11 +35,12 @@ import { registerAdminRoutes } from "./admin.tsx";
 import { registerPrivacyRoute } from "./privacy.tsx";
 import { registerCheckerRoutes } from "./checker.tsx";
 import { dayIn, registerStatsRoutes, statsCounter } from "./stats.ts";
+import { siteHostResolver, siteHosts } from "./site-hosts.ts";
 import { descriptionHash, readTicket, signTicket } from "./upload-ticket.ts";
 import { slugify } from "./slug.ts";
 import { DASHBOARD, sitesPage, sitePage } from "./pages.tsx";
 import { homePage } from "./home.tsx";
-import { clientBundle } from "./client-bundle.ts";
+import { clientBundle, warmClientBundles } from "./client-bundle.ts";
 import { uiAssets } from "./ui/assets.ts";
 import { registerFormRoutes } from "./forms.tsx";
 import { createHash } from "node:crypto";
@@ -67,6 +68,12 @@ export interface AppOptions {
   classifyIntake?: ClassifyIntake;
   /** DNS for the website checker's private-address refusal (tests). */
   checkerResolve?: Resolve;
+  /** PLATFORM_DOMAIN: published sites also answer at <slug>.<domain> (site-hosts.ts). */
+  platformDomain?: string | null;
+  /** How long a hostname's answer is reused (tests: 0). */
+  siteHostCacheMs?: number;
+  /** SITE_PROXY_SECRET: the edge Worker's proof that its forwarded site hostname is real. */
+  siteProxySecret?: string | null;
 }
 
 export type ClassifyIntake = (description: string, ctx: { siteId: string; tier: Tier; accountId: string | null; aiJobId: string }) => Promise<{ businessType: string; confidence: number }>;
@@ -93,6 +100,10 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   // The landing page and the intake's refusal page carry the Turnstile widget (its script and frame).
   const turnstileCsp = (path: string) => botCheck.mode === "on" && (path === "/" || path === "/api/sites" || path === "/pregled");
 
+  // A published site's own hostname (or <slug>.<PLATFORM_DOMAIN>) is served as its /s/<slug>/ path.
+  const appHosts = ["localhost", "127.0.0.1", ...(opts.appUrl ? [new URL(opts.appUrl).host] : [])];
+  app.use("*", siteHosts(app, siteHostResolver({ repo, platformDomain: opts.platformDomain ?? null, appHosts, ...(opts.siteHostCacheMs !== undefined ? { cacheMs: opts.siteHostCacheMs } : {}) }), { proxySecret: opts.siteProxySecret ?? null }));
+
   // Deployed environments are public URLs: nothing here may be indexed, published sites included in phase 1.
   app.use("*", async (c, next) => {
     // Encoded slashes or backslashes never belong in our paths; they are how params escape their prefix.
@@ -109,7 +120,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       c.req.path.startsWith("/s/") || c.req.path.startsWith("/preview/") || /^\/assets\/ui\/[0-9a-f]+\/examples\//.test(c.req.path)
         ? `default-src 'self'; script-src 'self' '${JS_FLAG_HASH}'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-src https://www.google.com https://maps.google.com; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'self'`
         : `default-src 'self'; ${turnstileCsp(c.req.path) ? `script-src 'self' ${TURNSTILE_ORIGIN}; frame-src 'self' ${TURNSTILE_ORIGIN}` : "frame-src 'self'"}; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors ${
-            // The landing page frames its example site (/assets/ui/<hash>/example-home.html).
+            // The landing page frames its example sites (/assets/ui/<hash>/examples/…).
             c.req.path.startsWith("/assets/ui/") ? "'self'" : "'none'"
           }`,
     );
@@ -212,10 +223,18 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     return c.json({ status: ok ? "ok" : "degraded", checks, ...you }, ok ? 200 : 503);
   });
 
+  // The editor's and landing page's scripts: linked with their content hash (pages use clientScriptUrl) and
+  // then cached for good; a plain or old URL is revalidated by ETag.
+  warmClientBundles();
   for (const name of ["editor", "home"] as const) {
     app.get(`/assets/${name}.js`, async (c) => {
+      const b = await clientBundle(name);
+      const etag = `"${b.hash}"`;
+      c.header("etag", etag);
+      c.header("cache-control", c.req.query("v") === b.hash ? "public, max-age=31536000, immutable" : "no-cache");
+      if (c.req.header("if-none-match") === etag) return c.body(null, 304);
       c.header("content-type", "text/javascript; charset=utf-8");
-      return c.body(await clientBundle(name));
+      return c.body(b.text);
     });
   }
   app.get("/assets/ui/:hash/*", (c) => {
@@ -433,29 +452,38 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     const admin = viewer.kind === "admin";
     // Read first: anything that changes while the rest is read makes the next pulse differ.
     const pulse = await repo.pulse(id);
-    const site = await repo.getSite(id);
+    const [site, current] = await Promise.all([repo.getSite(id), repo.getSpec(id)]);
     if (!site || !pulse) return c.json({ error: "not found" }, 404);
-    const current = await repo.getSpec(id);
     const after = Number(c.req.query("after") ?? 0);
-    const checklist = current ? await siteChecklist(repo, id, current.spec) : [];
+    // Independent reads, side by side (this runs after every save, not only on polls).
+    const [checklist, access, events, chat, cost, versions, messages, spendToday] = await Promise.all([
+      current ? siteChecklist(repo, id, current.spec) : Promise.resolve([]),
+      accessInfo(limits, viewer, c.get("deviceId"), site),
+      repo.listEvents(id, after),
+      repo.listChat(id),
+      repo.siteCost(id),
+      repo.listVersions(id),
+      repo.formMessageCount(id),
+      admin ? repo.spendToday() : Promise.resolve(null),
+    ]);
     return c.json({
       // What this viewer may do here and has left; refusals from the action endpoints carry { code, message } too.
-      access: await accessInfo(limits, viewer, c.get("deviceId"), site),
+      access,
       site,
       pulse,
       version: current?.version ?? null,
       spec: current?.spec ?? null,
-      events: await repo.listEvents(id, after),
-      chat: await repo.listChat(id),
-      cost: await repo.siteCost(id),
-      versions: await repo.listVersions(id),
+      events,
+      chat,
+      cost,
+      versions,
       placeholders: current ? collectPlaceholders(current.spec) : [],
       // The pre-publish checklist (structured, the editor words it in Slovene) and the same as English lines.
       checklist,
       blockers: checklist.map(blockerText),
-      messages: (await repo.listFormMessages(id)).length,
+      messages,
       // The platform's own spend: the admin's business, null for owners.
-      spendToday: admin ? await repo.spendToday() : null,
+      spendToday,
       cap: admin ? config.limits.dailyModelSpendCapEur : null,
       // Server time, so the editor's running-stage seconds don't depend on the visitor's clock.
       now: new Date().toISOString(),
@@ -660,12 +688,28 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     return c.json({ ok: true });
   });
 
+  // The live release pointer per slug, kept a few seconds: every page, picture and 404 of a published site
+  // asks for it. A publish here forgets it at once; another web process sees it within LIVE_BASE_TTL_MS.
+  const LIVE_BASE_TTL_MS = 5_000;
+  const bases = new Map<string, { until: number; base: Promise<string> }>();
+  const liveBase = (slug: string): Promise<string> => {
+    const now = Date.now();
+    const hit = bases.get(slug);
+    if (hit && hit.until > now) return hit.base;
+    const base = publishedBase(storage, slug);
+    if (bases.size > 10_000) bases.clear();
+    bases.set(slug, { until: now + LIVE_BASE_TTL_MS, base });
+    base.catch(() => bases.delete(slug));
+    return base;
+  };
+
   app.post("/api/sites/:id/publish", async (c) => {
     const denied = publishRefusal(c.get("viewer"));
     if (denied) return refusalJson(c, denied);
     try {
       const r = await publishSite({ repo, storage, config }, c.req.param("id"));
       const site = await repo.getSite(c.req.param("id"));
+      if (site) bases.delete(site.slug);
       return c.json({ ok: true, version: r.version, url: `/s/${site?.slug}/` });
     } catch (e) {
       if (e instanceof PublishBlockedError) return c.json({ error: "blocked", blockers: e.blockers, checklist: e.checklist }, 422);
@@ -708,31 +752,50 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     c.header("cache-control", "private, max-age=3600");
     return c.body(data as Uint8Array<ArrayBuffer>);
   });
+  // Rendered preview pages by site, version, page and layout variant. A saved version never changes, so a
+  // page rendered once is served again without loading the spec or rendering (the editor reloads the
+  // preview after every save, and each layout thumbnail is a page of its own). In memory, newest kept.
+  const PREVIEW_CACHE = 200;
+  const previews = new Map<string, string>();
+  const remember = (key: string, html: string) => {
+    previews.delete(key);
+    previews.set(key, html);
+    if (previews.size > PREVIEW_CACHE) previews.delete(previews.keys().next().value!);
+    return html;
+  };
+
   app.get("/preview/:id/:file", async (c) => {
+    const id = c.req.param("id");
     const v = c.req.query("v");
-    if (!SAFE_ID.test(c.req.param("id"))) return c.notFound();
+    if (!SAFE_ID.test(id)) return c.notFound();
     // ?v=N of a version retention removed shows the nearest older kept one (as undo does).
-    const asked = v && /^\d+$/.test(v) ? await repo.nearestVersion(c.req.param("id"), Number(v)) : undefined;
-    const current = asked === null ? null : await repo.getSpec(c.req.param("id"), asked);
+    const asked = v && /^\d+$/.test(v) ? await repo.nearestVersion(id, Number(v)) : undefined;
+    const sectionId = c.req.query("section");
+    const variant = c.req.query("variant");
+    c.header("cache-control", "no-store");
+    // The version this request shows: asked for, or the site's current one (siteAccess loaded the row).
+    const version = asked ?? c.get("site")?.current_version ?? null;
+    const key = version === null ? null : [id, version, c.req.param("file"), sectionId ?? "", variant ?? ""].join("|");
+    const hit = key === null ? undefined : previews.get(key);
+    if (hit !== undefined) return c.html(remember(key!, hit));
+    const current = asked === null ? null : await repo.getSpec(id, version ?? undefined);
     if (!current) {
-      const gone = asked === null && (await repo.getSite(c.req.param("id")))?.current_version != null;
+      const gone = asked === null && (await repo.getSite(id))?.current_version != null;
       return c.text(gone ? "Te različice ni več med shranjenimi." : "Predogled še ni pripravljen.", 404);
     }
     const page = current.spec.pages.find((p) => pageFile(p) === c.req.param("file"));
     if (!page) return previewNotFound(c, current.spec, 0);
-    c.header("cache-control", "no-store");
+    const cacheKey = [id, current.version, c.req.param("file"), sectionId ?? "", variant ?? ""].join("|");
     // ?section=…&variant=…: that section alone in another variant, for the editor's layout thumbnails.
     // Same renderer and the same page URL depth, so media and shared assets resolve as in the preview.
-    const sectionId = c.req.query("section");
-    const variant = c.req.query("variant");
     if (sectionId !== undefined || variant !== undefined) {
       const section = page.sections.find((s) => s.id === sectionId);
       if (!section || !variant || !(sectionDef(section.type).variants as readonly string[]).includes(variant)) return c.notFound();
       const alone = { ...page, sections: [{ ...section, variant } as typeof section] };
       const spec = { ...current.spec, pages: current.spec.pages.map((p) => (p.id === page.id ? alone : p)) };
-      return c.html(renderPage(spec, alone, { imageWidths: config.images.widths }));
+      return c.html(remember(cacheKey, renderPage(spec, alone, { imageWidths: config.images.widths })));
     }
-    return c.html(renderPage(current.spec, page, { imageWidths: config.images.widths }));
+    return c.html(remember(cacheKey, renderPage(current.spec, page, { imageWidths: config.images.widths })));
   });
   // Deeper paths are never pages (pages are files at the site root): the 404 page, rendered for that depth.
   app.get("/preview/:id/*", async (c) => {
@@ -761,18 +824,17 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     if (rest === "" || rest.endsWith("/")) rest += "index.html";
     if (!SAFE_REST.test(rest)) return c.notFound();
     // The live release (published.ts): a publish in progress never shows half a site.
-    const base = await publishedBase(storage, slug);
+    const base = await liveBase(slug);
     const data = await storage.get(`${base}${rest}`);
     if (data) {
       // A page view (not its images or scripts), counted after the answer and never in its way.
       if (rest.endsWith(".html")) {
-        void repo
-          .getSiteBySlug(slug)
-          .then((site) => (site?.published_version ? stats.visit(c, site.id, rest) : undefined))
-          .catch((e: unknown) => console.error("[stats] visit", (e as Error).message));
+        void stats.visit(c, slug, rest).catch((e: unknown) => console.error("[stats] visit", (e as Error).message));
       }
       c.header("content-type", contentType(rest));
-      c.header("cache-control", rest.startsWith("media/") ? "public, max-age=31536000, immutable" : "public, max-age=60");
+      // Photos never change under a name (ids aren't reused): cached for good. The logo keeps its name when
+      // the owner replaces it, so it is cached briefly like the pages.
+      c.header("cache-control", rest.startsWith("media/logo.") ? "public, max-age=300" : rest.startsWith("media/") ? "public, max-age=31536000, immutable" : "public, max-age=60");
       return c.body(data as Uint8Array<ArrayBuffer>);
     }
     // The 404 page of the locale directory asked for (en/…), else the site's; its relative paths are

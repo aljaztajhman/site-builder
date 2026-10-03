@@ -25,7 +25,7 @@ const missing = missingEnvLine(missingEnv());
 if (missing) console.warn(missing);
 
 // The intake's junk check asks the classifier before a generation is queued (fails open: the pipeline asks again).
-const app = createApp({ platform, config, auth, mailer, classifyIntake: intakeClassifier(platform, config), ...(appUrl ? { appUrl } : {}) });
+const app = createApp({ platform, config, auth, mailer, classifyIntake: intakeClassifier(platform, config), ...(appUrl ? { appUrl } : {}), platformDomain: process.env.PLATFORM_DOMAIN || null, siteProxySecret: process.env.SITE_PROXY_SECRET || null });
 const port = Number(process.env.PORT || 3000);
 serve({ fetch: app.fetch, port, hostname: "0.0.0.0" }, (info) => console.log(`[web] http://localhost:${info.port}`));
 

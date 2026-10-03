@@ -38,10 +38,11 @@ describe("give-aways on the rendered page", () => {
     const spec = await golden("pekarna-kvas");
     const f = files(spec);
     const key = (end: string) => [...f.keys()].find((k) => k.endsWith(end))!;
-    const css = key("site.css");
     const page = key(`${spec.slug}/index.html`);
-    expect(css && page).toBeTruthy();
     const text = (k: string) => new TextDecoder().decode(f.get(k));
+    // The stylesheet this page links (site.css, or its trade motif's site-<motif>.css).
+    const css = key(/_shared\/[0-9a-f]+\/(site(?:-[a-z-]+)?\.css)/.exec(text(page))![1]!);
+    expect(css && page).toBeTruthy();
     f.set(css, new TextEncoder().encode(`${text(css)}.section-head{border-left:4px solid var(--c-primary)}.eyebrow{text-transform:uppercase;letter-spacing:.12em}`));
     const html = text(page)
       .replace(/(<h1[^>]*>)/, "$1Kruh — ")

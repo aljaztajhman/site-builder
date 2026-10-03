@@ -232,7 +232,8 @@ export function renderPage(spec: SiteSpec, page: Page, opts: RenderOptions = {})
       {lcp && avif && (
         <link rel="preload" as="image" type="image/avif" imageSrcSet={avif.srcSet} imageSizes={lcp.sizes} fetchPriority="high" />
       )}
-      <link rel="stylesheet" href={ctx.shared("site.css")} />
+      {/* The stylesheet without other trades' motif rules (shared.ts stylesheetFor). */}
+      <link rel="stylesheet" href={ctx.shared(motif ? `site-${motif}.css` : "site.css")} />
       <style dangerouslySetInnerHTML={{ __html: fontFaceCss(design, fontsBase) + tokensCss(design) }} />
       {localizedPage.kind === "home" && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(localized) }} />

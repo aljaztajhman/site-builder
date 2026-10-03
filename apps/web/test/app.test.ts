@@ -201,6 +201,12 @@ describe("landing page", () => {
     expect(js.status).toBe(200);
     expect(js.headers.get("content-type")).toContain("javascript");
     expect(await js.text()).toContain("sb-intake-draft");
+    // Plain URL: revalidated by ETag; the hashed URL pages link to once built: cached for good.
+    const etag = js.headers.get("etag")!;
+    expect(js.headers.get("cache-control")).toBe("no-cache");
+    expect((await app.request("/assets/home.js", { headers: { "if-none-match": etag } })).status).toBe(304);
+    const hashed = await app.request(`/assets/home.js?v=${etag.replaceAll('"', "")}`);
+    expect(hashed.headers.get("cache-control")).toBe("public, max-age=31536000, immutable");
   });
 
   it("calls the prices planned only while billing is off", () => {
@@ -228,14 +234,19 @@ describe("landing page", () => {
 
   it("serves the example site so the landing page can frame it, and nothing else may be framed", async () => {
     const page = await (await app.request("/")).text();
-    const src = page.match(/<iframe src="(\/assets\/ui\/([0-9a-f]{10})\/example-home\.html)"/);
+    // The "Primer" section: Pekarna Kvas rendered by our engine, the cinnamon rolls' price marked as missing.
+    const src = page.match(/<iframe src="(\/assets\/ui\/([0-9a-f]{10})\/examples\/primer\/index\.html)"/);
     expect(src).not.toBeNull();
     const ex = await app.request(src![1]!);
     expect(ex.status).toBe(200);
     expect(ex.headers.get("content-type")).toContain("text/html");
     expect(ex.headers.get("content-security-policy")).toContain("frame-ancestors 'self'");
-    expect(await ex.text()).toContain('url("fonts/fraunces.woff2")');
-    for (const f of ["fonts/fraunces.woff2", "fonts/source-sans-3.woff2"]) expect((await app.request(`/assets/ui/${src![2]}/${f}`)).status, f).toBe(200);
+    const html = await ex.text();
+    expect(html).toContain('<mark class="ph" data-ph="price"');
+    // Its stylesheet resolves next to it.
+    const css = /href="\.\.\/(_shared\/[0-9a-f]+\/site(?:-[a-z-]+)?\.css)"/.exec(html);
+    expect(css, "the example links its stylesheet").not.toBeNull();
+    expect((await app.request(`/assets/ui/${src![2]}/examples/${css![1]}`)).status).toBe(200);
     for (const p of ["/", "/login"]) expect((await app.request(p)).headers.get("content-security-policy"), p).toContain("frame-ancestors 'none'");
   });
 
@@ -249,9 +260,9 @@ describe("landing page", () => {
     expect(dashboard).not.toContain("data-home-intake");
     expect(dashboard).toContain('action="/logout"');
     expect(dashboard).toContain('class="brand" href="/sites"');
-    // Signing in without a destination lands on the sites list; signing out on the landing page.
+    // Signing in without a destination lands on the landing page, as does signing out.
     const signIn = await app.request("/login", { method: "POST", body: new URLSearchParams({ password: PASSWORD }) });
-    expect(signIn.headers.get("location")).toBe("/sites");
+    expect(signIn.headers.get("location")).toBe("/");
     // Signing out is a form with the CSRF token; without it nothing happens.
     expect((await app.request("/logout", { method: "POST", headers: { cookie } })).status).toBe(403);
     const signOut = await app.request("/logout", { method: "POST", headers: { cookie }, body: new URLSearchParams({ _csrf: csrf }) });
@@ -583,6 +594,6 @@ describe("login redirect", () => {
   it("only follows same-origin paths", async () => {
     const { safeNext } = await import("../src/app.ts");
     expect(safeNext("/sites/x")).toBe("/sites/x");
-    for (const bad of ["//evil.com", "/\\evil.com", "https://evil.com", "/ x", 42, undefined]) expect(safeNext(bad)).toBe("/sites");
+    for (const bad of ["//evil.com", "/\\evil.com", "https://evil.com", "/ x", 42, undefined]) expect(safeNext(bad)).toBe("/");
   });
 });

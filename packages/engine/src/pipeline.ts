@@ -15,6 +15,7 @@ import { checkFacts } from "./facts.ts";
 import { newReleaseId, writeRelease } from "./published.ts";
 import { keepOwnerFacts } from "./owner-facts.ts";
 import { claimImageIds } from "./image-ids.ts";
+import { STORAGE_CONCURRENCY, mapLimit } from "./parallel.ts";
 
 export interface PipelineDeps {
   config: AppConfig;
@@ -41,11 +42,12 @@ export const mediaKey = (siteId: string, file: string) => `sites/${siteId}/media
 export const uploadKey = (siteId: string, assetId: string) => `sites/${siteId}/uploads/${assetId}`;
 
 export async function loadMedia(storage: Storage, siteId: string, spec: SiteSpec, widths: number[]): Promise<Map<string, Uint8Array>> {
+  const files = mediaFiles(spec, widths);
+  const data = await mapLimit(files, STORAGE_CONCURRENCY, (f) => storage.get(mediaKey(siteId, f)));
   const media = new Map<string, Uint8Array>();
-  for (const f of mediaFiles(spec, widths)) {
-    const data = await storage.get(mediaKey(siteId, f));
-    if (data) media.set(f, data);
-  }
+  files.forEach((f, i) => {
+    if (data[i]) media.set(f, data[i]);
+  });
   return media;
 }
 
@@ -188,7 +190,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     for (const [i, p] of photos.entries()) {
       const id = `img_${String(i + 1).padStart(2, "0")}`;
       const processed = await processPhoto(id, originals.get(p.id)!, config.images.widths, { avif: config.images.avifQuality, webp: config.images.webpQuality });
-      for (const v of processed.variants) await storage.put(mediaKey(siteId, v.file), v.data, contentType(v.file));
+      await mapLimit(processed.variants, STORAGE_CONCURRENCY, (v) => storage.put(mediaKey(siteId, v.file), v.data, contentType(v.file)));
       images.push({ id, src: p.storage_key, width: processed.width, height: processed.height, alt: "" });
       vision.push({ jpegBase64: await visionJpeg(originals.get(p.id)!) });
     }
@@ -361,7 +363,7 @@ async function generateImages(deps: PipelineDeps, siteId: string, ideas: { subje
       const key = `sites/${siteId}/generated/${id}.jpg`;
       await storage.put(key, img.data, "image/jpeg");
       const processed = await processPhoto(id, img.data, config.images.widths, { avif: config.images.avifQuality, webp: config.images.webpQuality });
-      for (const v of processed.variants) await storage.put(mediaKey(siteId, v.file), v.data, contentType(v.file));
+      await mapLimit(processed.variants, STORAGE_CONCURRENCY, (v) => storage.put(mediaKey(siteId, v.file), v.data, contentType(v.file)));
       // One event per picture as it lands, so the editor's live preview shows each one at once.
       await log("imageGen", "Image ready", { id, alt: idea.alt.slice(0, 180) });
       return { id, src: key, width: processed.width, height: processed.height, alt: idea.alt.slice(0, 180), origin: "generated" };

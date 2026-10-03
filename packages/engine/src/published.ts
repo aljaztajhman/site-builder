@@ -1,4 +1,5 @@
 import { contentType, type Storage } from "@sb/platform";
+import { STORAGE_CONCURRENCY, mapLimit } from "./parallel.ts";
 
 /**
  * Where published sites live in storage. Each publish writes a complete new release next to the live
@@ -44,6 +45,7 @@ export async function writeRelease(storage: Storage, slug: string, release: stri
   if (!RELEASE_ID.test(release)) throw new Error(`Bad release id ${release}`);
   const base = `${releasesPrefix(slug)}${release}/`;
   const sharedKeys = new Map<string, Set<string>>();
+  const puts: [key: string, data: Uint8Array, type: string][] = [];
   for (const [rel, data] of files) {
     if (rel.startsWith("_shared/")) {
       // Content-addressed: a file already in storage is identical, so it is written once. Checked per
@@ -51,12 +53,14 @@ export async function writeRelease(storage: Storage, slug: string, release: stri
       const dir = rel.split("/").slice(0, 2).join("/");
       let stored = sharedKeys.get(dir);
       if (!stored) sharedKeys.set(dir, (stored = new Set(await storage.list(`${publishedPrefix}/${dir}/`))));
-      if (!stored.has(`${publishedPrefix}/${rel}`)) await storage.put(`${publishedPrefix}/${rel}`, data, contentType(rel));
+      if (!stored.has(`${publishedPrefix}/${rel}`)) puts.push([`${publishedPrefix}/${rel}`, data, contentType(rel)]);
       continue;
     }
     if (!rel.startsWith(`${slug}/`)) throw new Error(`File ${rel} is outside site ${slug}`);
-    await storage.put(`${base}${rel.slice(slug.length + 1)}`, data, contentType(rel));
+    puts.push([`${base}${rel.slice(slug.length + 1)}`, data, contentType(rel)]);
   }
+  // Several at a time: a release is 50-100 files, seconds on S3 one by one.
+  await mapLimit(puts, STORAGE_CONCURRENCY, ([key, data, type]) => storage.put(key, data, type));
   const previous = await liveRelease(storage, slug);
   // The switch: one small object, written after every file of the release is in place.
   await storage.put(livePointerKey(slug), new TextEncoder().encode(release), "text/plain; charset=utf-8");

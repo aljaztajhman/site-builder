@@ -4,12 +4,11 @@ import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import type { AppConfig } from "@sb/config";
 import type { AccountRow, PaidPlanKey, Repo, SiteRow, Tier } from "@sb/platform";
 import { hasSession, type AuthSettings } from "./auth.ts";
-import { DASHBOARD } from "./pages.tsx";
 import type { UploadTicket } from "./upload-ticket.ts";
 
-/** Same-origin path only: "/x" but not "//host", "/\host" or anything with whitespace. Default: the sites list. */
+/** Same-origin path only: "/x" but not "//host", "/\host" or anything with whitespace. Default: the landing page. */
 export function safeNext(v: unknown): string {
-  return typeof v === "string" && /^\/(?![/\\])[^\s\\]*$/.test(v) ? v : DASHBOARD;
+  return typeof v === "string" && /^\/(?![/\\])[^\s\\]*$/.test(v) ? v : "/";
 }
 
 /**
