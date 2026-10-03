@@ -220,3 +220,41 @@ describe("the fact check after a prune", () => {
     expect(phone(await clientCorpus(repo, site.id))).toEqual([]);
   });
 });
+
+describe("generated pictures no version uses", () => {
+  it("are removed with their variants by the nightly run, while a version's pictures and a busy site's stay", async () => {
+    const site = await newSite("ret-orphans");
+    const id = site.id;
+    const spec = await golden("ret-orphans");
+    // The saved version uses img_g1; a generation that failed before saving left img_g2 and img_g3 behind.
+    const used = { id: "img_g1", src: `sites/${id}/generated/img_g1.jpg`, width: 800, height: 600, alt: "Kruh", origin: "generated" as const };
+    spec.assets.images = [...spec.assets.images, used];
+    await repo.saveSpec(id, spec, "generate");
+    await repo.setStatus(id, "ready");
+    const pictures = ["img_g1", "img_g2", "img_g3", "img_g10"];
+    for (const p of pictures) {
+      await storage.put(`sites/${id}/generated/${p}.jpg`, new Uint8Array([1]), "image/jpeg");
+      for (const k of variants(id, { ...used, id: p })) await storage.put(k, new Uint8Array([1]), "image/webp");
+    }
+    // img_g10 is unused too, and named so that a careless prefix match on img_g1 would catch it.
+
+    // A job running: nothing goes.
+    await repo.setStatus(id, "generating");
+    await pruneAllSites(deps(), NOW);
+    expect(await exists(`sites/${id}/generated/img_g2.jpg`)).toBe(true);
+
+    await repo.setStatus(id, "ready");
+    const r = await pruneAllSites(deps(), NOW);
+    const removed = r.find((x) => x.siteId === id)!.files;
+    for (const p of ["img_g2", "img_g3", "img_g10"]) {
+      expect(removed).toContain(`sites/${id}/generated/${p}.jpg`);
+      for (const k of variants(id, { ...used, id: p })) expect(await exists(k), k).toBe(false);
+    }
+    // The version's picture and every variant of it stay.
+    expect(await exists(`sites/${id}/generated/img_g1.jpg`)).toBe(true);
+    for (const k of variants(id, used)) expect(await exists(k), k).toBe(true);
+    expect((await repo.listEvents(id)).some((e) => e.message === "Removed 3 generated picture(s) no version uses")).toBe(true);
+    // Nothing left to do the next night.
+    expect((await pruneAllSites(deps(), NOW)).find((x) => x.siteId === id)).toBeUndefined();
+  });
+});

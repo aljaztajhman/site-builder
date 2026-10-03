@@ -357,6 +357,12 @@ export class Repo {
   }
 
   /** Sites that have a version older than `before`, so retention may have something to remove there. */
+  /** Every site's id (the nightly sweep of pictures no version uses). */
+  async allSiteIds(): Promise<string[]> {
+    const { rows } = await this.db.query<{ id: string }>("select id from sites order by id");
+    return rows.map((r) => r.id);
+  }
+
   async sitesWithVersionsBefore(before: Date): Promise<string[]> {
     const { rows } = await this.db.query<{ id: string }>(
       "select s.id from sites s where exists (select 1 from spec_versions v where v.site_id = s.id and v.created_at < $1) order by s.id",
