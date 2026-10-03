@@ -6,6 +6,7 @@ import { imageMeta, processPhoto, visionJpeg } from "./images.ts";
 import { altTexts } from "./stages.ts";
 import { mediaKey, uploadKey } from "./pipeline.ts";
 import { claimImageIds } from "./image-ids.ts";
+import { STORAGE_CONCURRENCY, mapLimit } from "./parallel.ts";
 
 /**
  * The owner's photos after generation: add new ones, or put one in place of an existing picture
@@ -103,7 +104,7 @@ export async function addPhotos(
     await storage.put(key, f.data, f.mime);
     await repo.addAsset({ id: assetId, site_id: siteId, kind: "photo", storage_key: key, mime: f.mime, width: meta.width, height: meta.height, bytes: f.data.length, original_name: f.name.slice(0, 200) });
     const processed = await processPhoto(id, f.data, config.images.widths, { avif: config.images.avifQuality, webp: config.images.webpQuality });
-    for (const v of processed.variants) await storage.put(mediaKey(siteId, v.file), v.data, contentType(v.file));
+    await mapLimit(processed.variants, STORAGE_CONCURRENCY, (v) => storage.put(mediaKey(siteId, v.file), v.data, contentType(v.file)));
     images.push({ id, src: key, width: processed.width, height: processed.height, alt: "" });
   }
 
