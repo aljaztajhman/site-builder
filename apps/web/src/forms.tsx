@@ -10,6 +10,7 @@ import { Doc, TopBar, html } from "./pages.tsx";
 import { csrfOk, type AppEnv } from "./access.ts";
 import { formatDateTime } from "./ui/labels.ts";
 import { EMAIL, notifyOwner } from "./form-email.ts";
+import { dayIn } from "./stats.ts";
 
 /**
  * Contact forms on published sites: the public submit endpoint (next to the published pages, so the
@@ -143,6 +144,7 @@ export function registerFormRoutes(app: Hono<AppEnv>, deps: { repo: Repo; config
       senderKey: key,
       notify,
     });
+    await repo.stats.bump(site.id, "forms", dayIn(config.stats.timeZone));
     // The visitor gets the same answer whether or not the email went out.
     if (notify) await waitAtMost(notifyOwner(deps, id, 0), config.formEmail.waitMs);
     return reply(200, "formSent");

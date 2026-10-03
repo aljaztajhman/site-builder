@@ -37,6 +37,16 @@
     "formMessagesPerSitePerDay": 100,
     "formMessagesPerSenderPerDay": 30
   },
+  "stats": {
+    "$comment": "Cookieless counts per published site (it-site-stats-report): page views (counted when a published page is served), taps on call and directions links (a beacon from stats.js, only from the live /s/ address, never the preview or an export) and contact-form messages. Only daily totals per site are stored. The visitor's IP is used in memory as a keyed hash to skip the same visitor reloading a page within visitDedupeMinutes and to cap tapsPerVisitorPerDay; it is never stored. The monthly report email goes to the site's owner account from the web process, from reportFromHour on day 1 (in timeZone) for the previous month, at most once per site and month (Resend idempotency key), retried every retryEveryMinutes up to maxAttempts within the first reportWithinDays days.",
+    "visitDedupeMinutes": 30,
+    "tapsPerVisitorPerDay": 20,
+    "timeZone": "Europe/Ljubljana",
+    "reportFromHour": 8,
+    "reportWithinDays": 5,
+    "retryEveryMinutes": 60,
+    "maxAttempts": 5
+  },
   "formEmail": {
     "$comment": "Contact-form email to the site's owner account (Resend; nothing when the site has no owner account). The message is stored first; the submit waits at most waitMs for the send, then answers the visitor the same either way. A failed or slow send stays pending and the web process retries it every retryEveryMinutes, at most maxAttempts sends in all, for messages received within retryWithinHours (under Resend's 24 h idempotency window); then it is marked failed and the owner's message list says the email didn't go out. Resend's idempotency key (form message id) keeps a retry from sending twice within 24 h. Visitor limits: limits.formMessages*.",
     "waitMs": 4000,

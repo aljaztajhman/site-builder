@@ -96,6 +96,15 @@ export const AppConfigSchema = z.object({
     formMessagesPerSenderPerDay: z.number().int().positive(),
   }),
   /** The owner's email about each contact-form message (see config $comment). */
+  stats: z.object({
+    visitDedupeMinutes: z.number().int().min(0),
+    tapsPerVisitorPerDay: z.number().int().min(1),
+    timeZone: z.string().min(1),
+    reportFromHour: z.number().int().min(0).max(23),
+    reportWithinDays: z.number().int().min(1).max(28),
+    retryEveryMinutes: z.number().int().positive(),
+    maxAttempts: z.number().int().min(1).max(10),
+  }),
   formEmail: z.object({
     waitMs: z.number().int().positive(),
     retryEveryMinutes: z.number().int().positive(),

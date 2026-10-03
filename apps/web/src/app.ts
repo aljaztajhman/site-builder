@@ -31,6 +31,7 @@ import { TOKEN_FIELD, TURNSTILE_ORIGIN, botCheckFromEnv, type BotCheck } from ".
 import { registerLoginRoutes } from "./login.tsx";
 import { registerAdminRoutes } from "./admin.tsx";
 import { registerPrivacyRoute } from "./privacy.tsx";
+import { dayIn, registerStatsRoutes, statsCounter } from "./stats.ts";
 import { descriptionHash, readTicket, signTicket } from "./upload-ticket.ts";
 import { slugify } from "./slug.ts";
 import { DASHBOARD, sitesPage, sitePage } from "./pages.tsx";
@@ -177,6 +178,9 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   });
   registerAdminRoutes(app, { repo, config, ...(opts.appUrl ? { appUrl: opts.appUrl } : {}) });
   registerPrivacyRoute(app, config);
+  // Cookieless counts for published sites: page views below, taps from stats.js here.
+  const stats = statsCounter(repo, config, auth.secret);
+  registerStatsRoutes(app, { repo, config, secret: auth.secret, counter: stats });
 
   // ---------- Health ----------
   app.get("/health", async (c) => {
@@ -242,9 +246,14 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     const viewer = c.get("viewer");
     const admin = viewer.kind === "admin";
     const sites = await repo.listSites(viewer.kind === "account" ? { accountId: viewer.account.id } : {});
+    // The last 30 days of each published site (cookieless counts, stats.ts).
+    const from = dayIn(config.stats.timeZone, new Date(Date.now() - 29 * 86400_000));
+    const tomorrow = dayIn(config.stats.timeZone, new Date(Date.now() + 86400_000));
+    const counts = await repo.stats.totalsFor(sites.filter((s) => s.published_version).map((s) => s.id), from, tomorrow);
     return c.html(
       sitesPage({
         sites,
+        statsFor: (site) => (site.published_version ? (counts.get(site.id) ?? { visits: 0, calls: 0, directions: 0, forms: 0 }) : null),
         spendToday: admin ? await repo.spendToday() : 0,
         cap: config.limits.dailyModelSpendCapEur,
         csrf: c.get("csrf"),
@@ -746,6 +755,13 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     const base = await publishedBase(storage, slug);
     const data = await storage.get(`${base}${rest}`);
     if (data) {
+      // A page view (not its images or scripts), counted after the answer and never in its way.
+      if (rest.endsWith(".html")) {
+        void repo
+          .getSiteBySlug(slug)
+          .then((site) => (site?.published_version ? stats.visit(c, site.id, rest) : undefined))
+          .catch((e: unknown) => console.error("[stats] visit", (e as Error).message));
+      }
       c.header("content-type", contentType(rest));
       c.header("cache-control", rest.startsWith("media/") ? "public, max-age=31536000, immutable" : "public, max-age=60");
       return c.body(data as Uint8Array<ArrayBuffer>);

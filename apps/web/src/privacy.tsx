@@ -55,7 +55,10 @@ export function privacyPage(config: AppConfig): string {
               {`: vaša prijava (velja ${config.accounts.sessionDays} dni ali do odjave).`}
             </li>
           </ul>
-          <p>Objavljene strani, ki jih naredimo, ne nastavljajo nobenih piškotkov.</p>
+          <p>
+            Objavljene strani, ki jih naredimo, ne nastavljajo nobenih piškotkov. Za vaš mesečni pregled brez piškotkov štejemo oglede strani, tape na klic in pot ter
+            sporočila; hranimo samo skupna števila na dan, nobenih podatkov o obiskovalcih.
+          </p>
         </section>
         <section className="message">
           <h2>Naslov IP</h2>

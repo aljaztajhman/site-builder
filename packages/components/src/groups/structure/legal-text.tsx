@@ -53,7 +53,10 @@ function privacySl(f: LegalFacts) {
       <h2>Katere podatke obdelujemo in zakaj</h2>
       <h3>Obisk spletne strani</h3>
       <p>
-        Spletna stran je statična. Ne uporablja orodij za analitiko, oglaševanje ali sledenje in ne nastavlja piškotkov.
+        Spletna stran ne uporablja orodij za analitiko, oglaševanje ali sledenje in ne nastavlja piškotkov. Brez piškotkov štejemo
+        le, kolikokrat so bile strani odprte in kolikokrat so obiskovalci tapnili povezavo za klic ali pot; shranimo samo skupna
+        števila na dan. Vaš naslov IP pri tem uporabimo le za to, da ponovnega ogleda v kratkem času ne štejemo dvakrat, in ga ne
+        shranimo.
       </p>
       <p>
         Strežnik ponudnika gostovanja ob vsakem obisku samodejno zabeleži tehnične podatke, ki jih pošlje vaš brskalnik: naslov IP,
@@ -147,7 +150,11 @@ function privacyEn(f: LegalFacts) {
 
       <h2>What data we process and why</h2>
       <h3>Visiting the website</h3>
-      <p>This is a static website. It uses no analytics, advertising or tracking tools and sets no cookies.</p>
+      <p>
+        This website uses no analytics, advertising or tracking tools and sets no cookies. Without cookies, we count only how often
+        pages were opened and how often visitors tapped the call or directions link; we store daily totals only. Your IP address is
+        used only so that a repeat view shortly after is not counted twice, and it is not stored.
+      </p>
       <p>
         On every visit, the hosting provider&apos;s server automatically logs technical data sent by your browser: IP address, date
         and time, the requested page, and browser and device type. We need this data to keep the site secure and reliable.

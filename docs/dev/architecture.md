@@ -69,3 +69,11 @@ Brief and design (classify → brief → design) and the image stage (photo vari
 - Lighthouse runs on the homepage only (per checkpoint); axe and the mobile checks run on every page at 360 and 1280 px.
 - Every response carries `X-Robots-Tag: noindex`, including published sites, so Lighthouse SEO on the deployed URL loses the "is crawlable" audit; the eval serves files without the header, like a production host would.
 - The export is checked offline (file://) in Chromium by `checkExportOffline` during eval: pages, images, fonts, stylesheet, no network. Other browsers are not verified; Firefox's file:// origin rules may block fonts from the parent `_shared/` folder, in which case system fonts are used.
+
+**Site statistics** (`apps/web/src/stats.ts`, config `stats`): counts per published site and day, with no cookies (`site_stats`, migration 15).
+- **Page views:** counted when the web serves a published `.html` page. Bots, prefetches, 404s and the same visitor reloading the same page within `visitDedupeMinutes` are skipped.
+- **Taps:** taps on `tel:` and Google Maps links reach `POST /s/<slug>/_hit` from the always-loaded island `stats.js`, only on the live `/s/` address, at most `tapsPerVisitorPerDay` per visitor.
+- **Form messages:** counted when stored.
+- **Privacy:** the IP is used in memory only, as a keyed hash; nothing about a visitor is stored.
+- **Monthly email:** `sendMonthlyReports` runs hourly in the web process (which holds the mail settings). It sends each published site's owner last month's totals once (`stats_reports` claim plus a Resend idempotency key), in the first `reportWithinDays` days of the month.
+
