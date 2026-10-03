@@ -285,6 +285,9 @@ Before CMS collections (`sb-roadmap-order` = swap, 2026-10-01).
   - Messages stay up 4–12 s by length, can be closed ("Zapri obvestilo"), and "Objavljeno: /s/…/" is a link.
   - `rel="noopener"` on new-tab links; colour pickers, "more fields" and the toast's close button are 44 px on touch screens.
 
+## Polish and optimization (2026-10-03)
+- [x] Editor preview renders cached (branch claude/preview-cache): a saved version never changes, so a rendered preview page (by site, version, page and layout variant) is kept in memory (last 200) and served again without loading the spec or rendering. The editor reloads the preview after every save and each layout thumbnail is its own page. A save shows at once (new version, new key). Still `no-store` for the browser, so a deploy's renderer changes show immediately. Test `apps/web/test/preview-cache.test.ts`
+
 ## Later: phase 4 — CMS collections
 - [ ] Collections the client edits: blog, services, price list (cenik; its editing comes forward into phase 3), team, events; spec migration + components + editor forms
 - [ ] Per-collection list/detail pages, RSS for the blog, sitemap entries
