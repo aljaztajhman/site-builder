@@ -217,14 +217,19 @@ describe("landing page", () => {
 
   it("serves the example site so the landing page can frame it, and nothing else may be framed", async () => {
     const page = await (await app.request("/")).text();
-    const src = page.match(/<iframe src="(\/assets\/ui\/([0-9a-f]{10})\/example-home\.html)"/);
+    // The "Primer" section: Pekarna Kvas rendered by our engine, the cinnamon rolls' price marked as missing.
+    const src = page.match(/<iframe src="(\/assets\/ui\/([0-9a-f]{10})\/examples\/primer\/index\.html)"/);
     expect(src).not.toBeNull();
     const ex = await app.request(src![1]!);
     expect(ex.status).toBe(200);
     expect(ex.headers.get("content-type")).toContain("text/html");
     expect(ex.headers.get("content-security-policy")).toContain("frame-ancestors 'self'");
-    expect(await ex.text()).toContain('url("fonts/fraunces.woff2")');
-    for (const f of ["fonts/fraunces.woff2", "fonts/source-sans-3.woff2"]) expect((await app.request(`/assets/ui/${src![2]}/${f}`)).status, f).toBe(200);
+    const html = await ex.text();
+    expect(html).toContain('<mark class="ph" data-ph="price"');
+    // Its stylesheet resolves next to it.
+    const css = /href="\.\.\/(_shared\/[0-9a-f]+\/site(?:-[a-z-]+)?\.css)"/.exec(html);
+    expect(css, "the example links its stylesheet").not.toBeNull();
+    expect((await app.request(`/assets/ui/${src![2]}/examples/${css![1]}`)).status).toBe(200);
     for (const p of ["/", "/login"]) expect((await app.request(p)).headers.get("content-security-policy"), p).toContain("frame-ancestors 'none'");
   });
 

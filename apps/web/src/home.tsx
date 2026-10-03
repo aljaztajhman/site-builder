@@ -9,7 +9,7 @@ import { DEFAULT_CAPTION, tradeCaption, tradeClientData, tradeFontFace, tradeSho
 /**
  * The product's landing page at / (docs/design/homepage.html), for everyone; signed in, the header
  * links to the sites list instead of the login.
- * Stylesheet ui/home.css, script client/home.ts; the example site is ui/example-home.html.
+ * Stylesheet ui/home.css, script client/home.ts; the example sites are rendered by our engine into ui/examples/ (pnpm examples:build).
  * The prompt box is the intake, the only way to start a site, signed in or not: it posts the
  * description, photos, logo (and, for those who may, the scope) to /api/sites, where the limits decide.
  * Without an account the form carries the Turnstile widget. Going to the login from here, home.ts
@@ -72,7 +72,7 @@ export interface HomeProps {
 
 export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteKey, anonymousClosed, previous, anonymousUpload, error, description, showcase }: HomeProps): string {
   const paid = config.plans.paid;
-  const example = uiUrl("example-home.html");
+  const example = uiUrl("examples/primer/index.html");
   // Example sites rendered by our engine (pnpm examples:build): a different business in each place.
   const shopExample = uiUrl("examples/trgovina-oljka-in-sol/index.html");
   const dentistExample = uiUrl("examples/zobozdravstvo-lebar/index.html");
@@ -447,7 +447,7 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
             <div className="wrap">
               <h2 id="h-primer">Primer</h2>
               <p className="lead">
-                Pekarna Kvas iz Kamnika (izmišljen primer). Vse na strani je iz opisa pekarne. Cena cimetovega polža manjka, zato je označena in stran brez nje ni objavljiva.
+                Pekarna Kvas iz Kamnika (izmišljen primer), narejena z našim pogonom. Cena cimetovih polžev manjka, zato je označena in stran brez nje ni objavljiva.
               </p>
               <div className="ex">
                 <div className="deskwrap" inert>

@@ -8,7 +8,7 @@ import path from "node:path";
 import { loadConfig } from "@sb/config";
 import { processPhoto } from "@sb/engine";
 import type { SiteSpec } from "@sb/spec";
-import { EXAMPLES, OUT_DIR, ROOT, WIDTHS, exampleSpec, homepageFiles } from "./examples.ts";
+import { EXAMPLES, OUT_DIR, ROOT, WIDTHS, exampleSpec, homepageFiles, primerSpec } from "./examples.ts";
 import { SHOWCASES, SHOWCASE_JSON, showcaseJson, showcaseSpec } from "./showcase.ts";
 
 const config = loadConfig();
@@ -43,6 +43,8 @@ async function writeSite(spec: SiteSpec, fixture: string): Promise<void> {
 }
 
 for (const ex of EXAMPLES) await writeSite(exampleSpec(ex), ex.id);
+// The "Primer" section: Pekarna Kvas with the cinnamon rolls' price left missing (marked on the page).
+await writeSite(primerSpec(), "pekarna-kvas");
 // The trade showcase: each golden in its showcase colourway, and the landing page's data for it.
 for (const s of SHOWCASES) await writeSite(showcaseSpec(s), s.golden);
 write(SHOWCASE_JSON, showcaseJson());
