@@ -118,8 +118,18 @@ function h<K extends keyof HTMLElementTagNameMap>(tag: K, attrs: Record<string, 
 
 
 // ---------- API ----------
+/** What the owner reads when a request failed without a message of its own (never the browser's English). */
+const OFFLINE = "Preverite internetno povezavo in poskusite znova.";
+const statusText = (status: number): string =>
+  status >= 500 ? "Strežnik trenutno ne odgovarja. Poskusite znova čez trenutek." : status === 404 ? "Tega ni več. Osvežite stran." : "Zahteva ni uspela. Osvežite stran in poskusite znova.";
+
 async function api<T = unknown>(path: string, init?: RequestInit): Promise<T> {
-  const r = await fetch(`/api/sites/${siteId}${path}`, { headers: { "content-type": "application/json" }, ...init });
+  let r: Response;
+  try {
+    r = await fetch(`/api/sites/${siteId}${path}`, { headers: { "content-type": "application/json" }, ...init });
+  } catch {
+    throw new Error(OFFLINE);
+  }
   const body = (await r.json().catch(() => ({}))) as T & { error?: string; message?: string; issues?: { path: string; code: string; message: string }[]; checklist?: BlockerLike[] };
   if (!r.ok) {
     const spec = currentSpec();
@@ -127,12 +137,16 @@ async function api<T = unknown>(path: string, init?: RequestInit): Promise<T> {
       body.issues?.slice(0, 3).map((i) => issueText(spec, i)).join("; ") ??
       body.checklist?.slice(0, 3).map((b) => `${describePath(spec, b.path)}: ${blockerMessage(b)}`).join(" ") ??
       body.message ??
-      body.error ??
-      r.statusText;
+      // A sentence for the owner starts with a capital; lowercase codes ("not found") are for us.
+      (body.error && /^[A-ZČŠŽ]/.test(body.error) ? body.error : undefined) ??
+      statusText(r.status);
     throw new Error(detail);
   }
   return body;
 }
+
+/** A publish is on its way (the button ignores more taps until it lands). */
+let publishing = false;
 
 /** Server clock minus this browser's, from the last state fetch; running-stage seconds use server time. */
 let clockSkew = 0;
@@ -146,6 +160,7 @@ async function fetchState(): Promise<State> {
 
 /** Running-stage seconds count up once a second without re-rendering anything else. */
 window.setInterval(() => {
+  if (document.hidden) return;
   for (const el of document.querySelectorAll<HTMLElement>("[data-since]")) el.textContent = elapsed(el.dataset.since!);
 }, 1000);
 
@@ -180,13 +195,21 @@ const awaitingReply = (): boolean => {
 const pollSignature = (): string => pulseKey(state.pulse);
 const pulseKey = (p: Pulse): string => [p.status, p.version, p.chat, p.lastEvent].join("|");
 
+const pollActive = (): boolean => state.site.status === "generating" || state.site.status === "editing" || awaitingReply();
+
+/** Polls every 2 s while the site is busy, and not at all while the tab is hidden (it catches up when shown). */
 function schedulePoll(): void {
   window.clearTimeout(pollTimer);
-  const active = state.site.status === "generating" || state.site.status === "editing" || awaitingReply();
-  if (active) pollTimer = window.setTimeout(() => void poll(), 2000);
+  if (pollActive() && !document.hidden) pollTimer = window.setTimeout(() => void poll(), 2000);
 }
 
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) window.clearTimeout(pollTimer);
+  else if (typeof state !== "undefined" && pollActive()) void poll();
+});
+
 async function poll(): Promise<void> {
+  if (document.hidden) return;
   const before = pollSignature();
   try {
     // The pulse is one small query; the full state (spec, versions, events, chat, checklist) only when it moved.
@@ -1150,7 +1173,8 @@ function suggestions(): string[] {
 }
 
 async function sendToAssistant(): Promise<void> {
-  if (!dock) return;
+  // Enter while a message is still being sent (the button is disabled then) sends nothing more.
+  if (!dock || dock.send.disabled) return;
   const message = dock.input.value.trim();
   if (!message) return dock.input.focus();
   dock.send.disabled = true;
@@ -1433,7 +1457,10 @@ function statusBlock(): HTMLElement | null {
     );
   }
   if (s.status === "failed") {
-    const last = [...state.events].reverse().find((e) => e.level === "error");
+    // The worker writes some failures for the owner, in Slovene (a description it couldn't place, a restart);
+    // other errors are technical English for us: the admin sees them, an owner doesn't.
+    const error = [...state.events].reverse().find((e) => e.level === "error");
+    const last = error && (state.access?.viewer === "admin" || /[čšžČŠŽ]|Poskusite/.test(error.message)) ? error : undefined;
     return h("div", { class: "pane" },
       h("div", { class: "note bad", role: "alert" },
         h("p", {}, h("strong", {}, "Ustvarjanje ni uspelo."), state.spec ? " Zadnja dobra različica ostaja, urejate jo lahko naprej." : " Poskusite znova; če se ponovi, nam pišite."),
@@ -1789,6 +1816,9 @@ function topItems(): Child[] {
             return showToast();
           }
           if (state.checklist.length) return openChecklist();
+          // A second tap while publishing does nothing (it would publish the same version again).
+          if (publishing) return;
+          publishing = true;
           // Publishes the version on screen, after any text still waiting to be saved.
           await queued(async () => {
             try {
@@ -1796,6 +1826,8 @@ function topItems(): Child[] {
               toast = `Objavljeno: ${r.url}`;
             } catch (e) {
               toast = `Ni objavljeno. ${(e as Error).message}`;
+            } finally {
+              publishing = false;
             }
             await load();
           });

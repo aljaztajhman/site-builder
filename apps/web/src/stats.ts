@@ -40,34 +40,53 @@ class Recent {
 
 export interface StatsCounter {
   /** A published page was served: counted unless it is a bot, a prefetch, or the same visitor again soon. */
-  visit(c: Context, siteId: string, page: string): Promise<void>;
+  visit(c: Context, slug: string, page: string): Promise<void>;
+  /** The published site behind a slug ({ id }), or null; cached briefly, since every view and tap asks. */
+  publishedSite(slug: string): Promise<{ id: string } | null>;
+  recent: Recent;
 }
 
-export function statsCounter(repo: Repo, config: AppConfig, secret: string): StatsCounter & { recent: Recent } {
+const SITE_TTL_MS = 30_000;
+
+export function statsCounter(repo: Repo, config: AppConfig, secret: string): StatsCounter {
   const recent = new Recent();
+  const sites = new Map<string, { until: number; site: Promise<{ id: string } | null> }>();
   const visitorKey = (c: Context, rest: string) => createHmac("sha256", secret).update(`stats:${clientIp(c)}:${rest}`).digest("hex").slice(0, 32);
+  const publishedSite = (slug: string) => {
+    const now = Date.now();
+    const hit = sites.get(slug);
+    if (hit && hit.until > now) return hit.site;
+    const site = repo.getSiteBySlug(slug).then((s) => (s?.published_version ? { id: s.id } : null));
+    if (sites.size > 10_000) sites.clear();
+    sites.set(slug, { until: now + SITE_TTL_MS, site });
+    site.catch(() => sites.delete(slug));
+    return site;
+  };
   return {
     recent,
-    async visit(c, siteId, page) {
+    publishedSite,
+    async visit(c, slug, page) {
+      // Everything that needs no database first: bots, prefetches and the same visitor again.
       if (c.req.method !== "GET" || NOT_A_VISITOR.test(c.req.header("user-agent") ?? "") || !c.req.header("user-agent")) return;
       // Speculative loads (Chrome's prerender/prefetch) aren't views.
       if (/prefetch|prerender/i.test(`${c.req.header("sec-purpose") ?? ""} ${c.req.header("purpose") ?? ""}`)) return;
       const minutes = config.stats.visitDedupeMinutes;
-      if (minutes > 0 && recent.hit(`v:${visitorKey(c, `${siteId}:${page}`)}`, minutes * 60_000) > 1) return;
-      await repo.stats.bump(siteId, "visits", dayIn(config.stats.timeZone));
+      if (minutes > 0 && recent.hit(`v:${visitorKey(c, `${slug}:${page}`)}`, minutes * 60_000) > 1) return;
+      const site = await publishedSite(slug);
+      if (site) await repo.stats.bump(site.id, "visits", dayIn(config.stats.timeZone));
     },
   };
 }
 
 /** The beacon from stats.js: POST /s/<slug>/_hit with "call" or "directions" as the body. */
-export function registerStatsRoutes(app: Hono<AppEnv>, d: { repo: Repo; config: AppConfig; secret: string; counter: ReturnType<typeof statsCounter> }): void {
+export function registerStatsRoutes(app: Hono<AppEnv>, d: { repo: Repo; config: AppConfig; secret: string; counter: StatsCounter }): void {
   app.post("/s/:slug/_hit", async (c) => {
     const slug = c.req.param("slug");
     const kind = (await c.req.text().catch(() => "")).trim();
     // Always 204: a beacon's answer is never read, and nobody learns which sites exist.
     if (!SAFE_SLUG.test(slug) || (kind !== "call" && kind !== "directions") || NOT_A_VISITOR.test(c.req.header("user-agent") ?? "")) return c.body(null, 204);
-    const site = await d.repo.getSiteBySlug(slug);
-    if (!site?.published_version) return c.body(null, 204);
+    const site = await d.counter.publishedSite(slug);
+    if (!site) return c.body(null, 204);
     const day = dayIn(d.config.stats.timeZone);
     const key = createHmac("sha256", d.secret).update(`tap:${clientIp(c)}:${site.id}:${day}`).digest("hex").slice(0, 32);
     if (d.counter.recent.hit(`t:${key}`, 24 * 3600_000) > d.config.stats.tapsPerVisitorPerDay) return c.body(null, 204);

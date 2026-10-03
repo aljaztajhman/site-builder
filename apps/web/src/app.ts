@@ -677,12 +677,28 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     return c.json({ ok: true });
   });
 
+  // The live release pointer per slug, kept a few seconds: every page, picture and 404 of a published site
+  // asks for it. A publish here forgets it at once; another web process sees it within LIVE_BASE_TTL_MS.
+  const LIVE_BASE_TTL_MS = 5_000;
+  const bases = new Map<string, { until: number; base: Promise<string> }>();
+  const liveBase = (slug: string): Promise<string> => {
+    const now = Date.now();
+    const hit = bases.get(slug);
+    if (hit && hit.until > now) return hit.base;
+    const base = publishedBase(storage, slug);
+    if (bases.size > 10_000) bases.clear();
+    bases.set(slug, { until: now + LIVE_BASE_TTL_MS, base });
+    base.catch(() => bases.delete(slug));
+    return base;
+  };
+
   app.post("/api/sites/:id/publish", async (c) => {
     const denied = publishRefusal(c.get("viewer"));
     if (denied) return refusalJson(c, denied);
     try {
       const r = await publishSite({ repo, storage, config }, c.req.param("id"));
       const site = await repo.getSite(c.req.param("id"));
+      if (site) bases.delete(site.slug);
       return c.json({ ok: true, version: r.version, url: `/s/${site?.slug}/` });
     } catch (e) {
       if (e instanceof PublishBlockedError) return c.json({ error: "blocked", blockers: e.blockers, checklist: e.checklist }, 422);
@@ -778,15 +794,12 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     if (rest === "" || rest.endsWith("/")) rest += "index.html";
     if (!SAFE_REST.test(rest)) return c.notFound();
     // The live release (published.ts): a publish in progress never shows half a site.
-    const base = await publishedBase(storage, slug);
+    const base = await liveBase(slug);
     const data = await storage.get(`${base}${rest}`);
     if (data) {
       // A page view (not its images or scripts), counted after the answer and never in its way.
       if (rest.endsWith(".html")) {
-        void repo
-          .getSiteBySlug(slug)
-          .then((site) => (site?.published_version ? stats.visit(c, site.id, rest) : undefined))
-          .catch((e: unknown) => console.error("[stats] visit", (e as Error).message));
+        void stats.visit(c, slug, rest).catch((e: unknown) => console.error("[stats] visit", (e as Error).message));
       }
       c.header("content-type", contentType(rest));
       c.header("cache-control", rest.startsWith("media/") ? "public, max-age=31536000, immutable" : "public, max-age=60");
