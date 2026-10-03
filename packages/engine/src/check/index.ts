@@ -18,6 +18,7 @@ export { loadLazyImages, measurePage } from "./page-checks.ts";
 export type { LighthouseScores } from "./lighthouse.ts";
 export type { Composition } from "./composition.ts";
 export { checkExportOffline, unzipTo, type ExportCheck } from "./export-offline.ts";
+export * from "./url-check.ts";
 
 export interface PageCheck {
   file: string;

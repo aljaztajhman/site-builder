@@ -76,8 +76,9 @@ function privacySl(f: LegalFacts) {
       {f.contactForm && (
         <p>
           Če izpolnite kontaktni obrazec na tej strani, prejmemo vaše ime, e-poštni naslov, telefonsko številko (če jo vpišete) in
-          sporočilo. Za zaščito pred zlorabami strežnik en dan hrani zgoščeno obliko vašega naslova IP, iz katere naslova ni mogoče
-          razbrati, nato jo izbriše.
+          sporočilo. Sporočilo shrani ponudnik, ki gosti to spletno stran, in nam ga posreduje tudi po e-pošti prek ponudnika storitve
+          pošiljanja e-pošte. Za zaščito pred zlorabami strežnik en dan hrani zgoščeno obliko vašega naslova IP, iz katere naslova ni
+          mogoče razbrati, nato jo izbriše.
         </p>
       )}
       <ul>
@@ -109,7 +110,8 @@ function privacySl(f: LegalFacts) {
       <h2>Komu posredujemo podatke</h2>
       <p>
         Podatkov ne prodajamo in jih ne posredujemo tretjim osebam za oglaševanje. Dostop do njih ima ponudnik gostovanja, ki jih
-        obdeluje v našem imenu, ter državni organi, kadar to zahteva zakon.
+        obdeluje v našem imenu,{f.contactForm && " ponudnik storitve pošiljanja e-pošte, ki nam posreduje sporočila iz kontaktnega obrazca,"}{" "}
+        ter državni organi, kadar to zahteva zakon.
       </p>
 
       <h2>Vaše pravice</h2>
@@ -172,8 +174,9 @@ function privacyEn(f: LegalFacts) {
       {f.contactForm && (
         <p>
           If you fill in the contact form on this site, we receive your name, email address, phone number (if you give one) and your
-          message. To prevent abuse, the server keeps a hashed form of your IP address, from which the address cannot be read, for
-          one day and then deletes it.
+          message. The message is stored by the provider that hosts this website, which also forwards it to us by email through an
+          email delivery service. To prevent abuse, the server keeps a hashed form of your IP address, from which the address cannot
+          be read, for one day and then deletes it.
         </p>
       )}
       <ul>
@@ -201,7 +204,8 @@ function privacyEn(f: LegalFacts) {
       <h2>Who receives the data</h2>
       <p>
         We do not sell data or pass it to third parties for advertising. The hosting provider, which processes it on our behalf,
-        has access to it, as do public authorities where the law requires it.
+        has access to it{f.contactForm && ", as does the email delivery service that forwards contact-form messages to us"}, and so
+        do public authorities where the law requires it.
       </p>
 
       <h2>Your rights</h2>

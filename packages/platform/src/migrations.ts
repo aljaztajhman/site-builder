@@ -333,6 +333,29 @@ export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
     `,
   },
   {
+    id: 14,
+    name: "url_checks",
+    // The public website checker (/pregled): one row per check, its id the report's unguessable link.
+    // url is what the visitor typed (normalised), host for counting; result is the worker's report.
+    // ip_key is a keyed hash for the per-visitor limit, cleared after a day; rows go after checker.keepDays.
+    sql: `
+      create table url_checks (
+        id text primary key,
+        url text not null,
+        host text not null,
+        status text not null default 'queued' check (status in ('queued', 'running', 'done', 'failed')),
+        result jsonb,
+        error text,
+        ip_key text not null default '',
+        device_id text,
+        created_at timestamptz not null default now(),
+        finished_at timestamptz
+      );
+      create index url_checks_ip on url_checks(ip_key, created_at);
+      create index url_checks_created on url_checks(created_at);
+    `,
+  },
+  {
     id: 15,
     name: "site_stats",
     // Cookieless counts per published site and day (Europe/Ljubljana): page views, taps on call and

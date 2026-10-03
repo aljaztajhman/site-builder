@@ -559,6 +559,9 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
                   <li>
                     <a href="#cena">Cena</a>
                   </li>
+                  <li>
+                    <a href="/pregled">Brezplačen pregled strani</a>
+                  </li>
                 </ul>
               </div>
               <div>

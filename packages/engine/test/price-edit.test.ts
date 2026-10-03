@@ -4,7 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Operation } from "fast-json-patch";
 import { getAt, listEdits, parsePriceInput, priceValue, publishChecklist, readList, validateSite, type ListAt, type ListItem, type PatchOp, type SiteSpec } from "@sb/spec";
-import { applyDirectEdit, checkFacts, typedText } from "../src/index.ts";
+import { applyDirectEdit, checkFacts, typedOps, typedText } from "../src/index.ts";
 
 /**
  * The price-list and menu editor's operations as the server receives them: built by @sb/spec/price-edit
@@ -165,6 +165,8 @@ describe("menu editing as spec patches (gostilna-zlata-zlica)", () => {
 describe("fact check: prices the owner typed count as the owner's facts", () => {
   /** The fact-check corpus as the pipeline builds it: intake text plus the editor's saved operations. */
   const corpus = (id: string, saves: (PatchOp[] | null)[]) => [description(id), ...saves.flatMap((ops) => typedText((ops ?? []) as Operation[]))].join("\n");
+  /** What the /patch endpoint stores for a save: the operations reduced to what the owner changed. */
+  const stored = (before: SiteSpec, ops: PatchOp[] | null) => typedOps(before, (ops ?? []) as Operation[]) as PatchOp[];
   const prices = (s: SiteSpec) => checkFacts(s, description("frizerstvo-lana")).filter((v) => v.kind === "price");
 
   it("accepts a missing price the owner fills in, typed the Slovene or the English way", () => {
@@ -173,7 +175,7 @@ describe("fact check: prices the owner typed count as the owner's facts", () => 
       const parsed = parsePriceInput(typed) as { kind: "ok"; amount: number; from: boolean };
       const ops = listEdits.setItem(s0, SALON, 1, 1, { ...groups(s0, SALON)[1]!.items[1]!, price: priceValue(parsed) });
       const s1 = apply(s0, ops);
-      expect(checkFacts(s1, corpus("frizerstvo-lana", [ops])), typed).toEqual([]);
+      expect(checkFacts(s1, corpus("frizerstvo-lana", [stored(s0, ops)])), typed).toEqual([]);
       // The same price without the owner's save is invented.
       expect(prices(s1).map((v) => v.path), typed).toContain("/pages/1/sections/1/props/groups/1/items/1/price");
     }
@@ -183,7 +185,7 @@ describe("fact check: prices the owner typed count as the owner's facts", () => 
     let s = read("frizerstvo-lana");
     const saves: (PatchOp[] | null)[] = [];
     const save = (ops: PatchOp[] | null) => {
-      saves.push(ops);
+      saves.push(stored(s, ops));
       s = apply(s, ops);
     };
     save(listEdits.setItem(s, SALON, 0, 1, { ...groups(s, SALON)[0]!.items[1]!, name: "Striženje za gospode" }));
@@ -199,6 +201,64 @@ describe("fact check: prices the owner typed count as the owner's facts", () => 
     const s1 = apply(s0, ownerSave);
     // The assistant (not the editor) then changes "Moško striženje" to 28 €, the women's price.
     const s2 = apply(s1, [{ op: "replace", path: "/pages/1/sections/1/props/groups/0/items/1/price", value: { amount: 28 } }]);
-    expect(checkFacts(s2, corpus("frizerstvo-lana", [ownerSave])).map((v) => v.path)).toEqual(["/pages/1/sections/1/props/groups/0/items/1/price"]);
+    expect(checkFacts(s2, corpus("frizerstvo-lana", [stored(s0, ownerSave)])).map((v) => v.path)).toEqual(["/pages/1/sections/1/props/groups/0/items/1/price"]);
+  });
+});
+
+describe("fact check: an edit elsewhere in a section doesn't make its prices the owner's", () => {
+  const PRICE = "/pages/1/sections/1/props/groups/0/items/1/price";
+  const corpus = (saves: Operation[][]) => [description("frizerstvo-lana"), ...saves.flatMap((ops) => typedText(ops))].join("\n");
+  const flagged = (s: SiteSpec, saves: Operation[][]) => checkFacts(s, corpus(saves)).map((v) => v.path);
+  /** "Moško striženje" at 28 € (the women's price) after an assistant edit: invented, the check must keep flagging it. */
+  const invented = () => apply(read("frizerstvo-lana"), [{ op: "replace", path: PRICE, value: { amount: 28 } }]);
+  const props = (s: SiteSpec) => structuredClone(s.pages[1]!.sections[1]!.props) as Record<string, unknown>;
+
+  it("the section form saving the whole section with a new title", () => {
+    const s0 = invented();
+    expect(flagged(s0, [])).toEqual([PRICE]);
+    const ops: Operation[] = [
+      { op: "test", path: "/pages/1/sections/1/id", value: "s_prices" },
+      { op: "replace", path: "/pages/1/sections/1/props", value: { ...props(s0), title: "Naš cenik" } },
+    ];
+    const s1 = apply(s0, ops as PatchOp[]);
+    // Before: the whole section was stored, so every price in it passed as typed.
+    expect(flagged(s1, [ops])).toEqual([]);
+    const saved = typedOps(s0, ops);
+    expect(saved).toEqual([{ op: "replace", path: "/pages/1/sections/1/props", value: { title: "Naš cenik" } }]);
+    expect(flagged(s1, [saved])).toEqual([PRICE]);
+  });
+
+  it("the section form saving the whole section with one price the owner changed", () => {
+    const s0 = invented();
+    const p = props(s0) as { groups: { items: { name: string; price: unknown }[] }[] };
+    p.groups[0]!.items[1]!.price = { amount: 16 };
+    const ops: Operation[] = [{ op: "replace", path: "/pages/1/sections/1/props", value: p }];
+    const s1 = apply(s0, ops as PatchOp[]);
+    const saved = typedOps(s0, ops);
+    expect(saved).toEqual([{ op: "replace", path: "/pages/1/sections/1/props", value: { groups: [{ items: [{ name: "Moško striženje", price: { amount: 16 } }] }] } }]);
+    expect(flagged(s1, [saved])).toEqual([]);
+  });
+
+  it("a section the owner duplicated, and one moved into a group", () => {
+    const s0 = invented();
+    const copy = { ...structuredClone(s0.pages[1]!.sections[1]!), id: "s_prices_2" };
+    const dup: Operation[] = [{ op: "add", path: "/pages/1/sections/2", value: copy }];
+    const s1 = apply(s0, dup as PatchOp[]);
+    expect(typedOps(s0, dup)).toEqual([{ op: "replace", path: "/pages/1/sections/2", value: { id: "s_prices_2" } }]);
+    expect(flagged(s1, [typedOps(s0, dup)])).toEqual([PRICE, PRICE.replace("/sections/1/", "/sections/2/")]);
+    // An item reordered inside the form's array is matched by name, not by its new position.
+    const p = props(s0) as { groups: { items: unknown[] }[] };
+    p.groups[0]!.items.reverse();
+    const reorder: Operation[] = [{ op: "replace", path: "/pages/1/sections/1/props", value: p }];
+    expect(typedOps(s0, reorder)).toEqual([]);
+  });
+
+  it("a whole business block saved with one changed hours row keeps that row whole", () => {
+    const s0 = read("frizerstvo-lana");
+    const business = structuredClone(s0.business) as { hours?: { entries: Record<string, unknown>[] } };
+    const row = business.hours!.entries[0]!;
+    row.close = "20:00";
+    const saved = typedOps(s0, [{ op: "replace", path: "/business", value: business }]);
+    expect(saved).toEqual([{ op: "replace", path: "/business", value: { hours: { entries: [row] } } }]);
   });
 });

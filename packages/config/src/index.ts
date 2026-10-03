@@ -96,6 +96,17 @@ export const AppConfigSchema = z.object({
     formMessagesPerSenderPerDay: z.number().int().positive(),
   }),
   /** The owner's email about each contact-form message (see config $comment). */
+  checker: z.object({
+    perIpPerDay: z.number().int().min(1),
+    perDay: z.number().int().min(1),
+    keepDays: z.number().int().min(1),
+    pageTimeoutMs: z.number().int().positive(),
+    /** Wait after load before reading cookies and measuring: scripts that set cookies late get the chance. */
+    settleMs: z.number().int().min(0),
+    maxRedirects: z.number().int().min(0).max(10),
+    /** Lighthouse mobile performance in the report (off in tests: it needs a debugging port and takes ~20 s). */
+    lighthouse: z.boolean(),
+  }),
   stats: z.object({
     visitDedupeMinutes: z.number().int().min(0),
     tapsPerVisitorPerDay: z.number().int().min(1),

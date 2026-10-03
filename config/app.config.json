@@ -37,6 +37,16 @@
     "formMessagesPerSitePerDay": 100,
     "formMessagesPerSenderPerDay": 30
   },
+  "checker": {
+    "$comment": "Public website checker (/pregled): a URL in, a report in plain Slovene out (mobile speed, tap targets, cookies before consent, the ZEPT company details). No model calls. Runs in the worker, one at a time (Chromium + Lighthouse, like a generation's checks). perIpPerDay per keyed IP hash (cleared after a day), perDay for everyone together; reports and URLs are deleted after keepDays. Only public http(s) addresses on ports 80/443; every redirect hop and every browser request to a private address is refused.",
+    "perIpPerDay": 5,
+    "perDay": 100,
+    "keepDays": 30,
+    "pageTimeoutMs": 30000,
+    "settleMs": 3000,
+    "maxRedirects": 5,
+    "lighthouse": true
+  },
   "stats": {
     "$comment": "Cookieless counts per published site (it-site-stats-report): page views (counted when a published page is served), taps on call and directions links (a beacon from stats.js, only from the live /s/ address, never the preview or an export) and contact-form messages. Only daily totals per site are stored. The visitor's IP is used in memory as a keyed hash to skip the same visitor reloading a page within visitDedupeMinutes and to cap tapsPerVisitorPerDay; it is never stored. The monthly report email goes to the site's owner account from the web process, from reportFromHour on day 1 (in timeZone) for the previous month, at most once per site and month (Resend idempotency key), retried every retryEveryMinutes up to maxAttempts within the first reportWithinDays days.",
     "visitDedupeMinutes": 30,

@@ -1224,6 +1224,27 @@ function guestPane(): HTMLElement {
     until ? h("p", { class: "help" }, `Brez prijave predogled hranimo do ${until}.`) : null,
     a?.signIn ? h("a", { class: "btn primary", href: a.signIn }, "Shrani in uredi") : null,
     a?.allowance.text ? h("p", { class: "help" }, a.allowance.text) : null,
+    guestChecklist(),
+  );
+}
+
+/** What the guest will still need before publishing (sb-preview-gate): the same checklist, read only until they sign in. */
+function guestChecklist(): HTMLElement | null {
+  const list = state.checklist;
+  if (!list.length || !state.spec) return null;
+  const spec = state.spec;
+  const missing = list.filter((b) => b.kind === "placeholder").length;
+  const parts: string[] = [];
+  if (missing) parts.push(`${missingPhrase(missing)} (rumeno v predogledu)`);
+  if (list.length - missing) parts.push(`preverite še ${items(list.length - missing)}`);
+  const shown = list.slice(0, 8);
+  return h("div", { class: "note warn checklist guest-checklist", id: "guest-checklist" },
+    h("p", {}, h("strong", {}, `Še ${list.length} do objave`)),
+    h("p", {}, `Pred objavo: ${parts.join(", ")}. Vpišete jih po prijavi.`),
+    h("ol", {},
+      ...shown.map((b) => h("li", {}, h("strong", {}, describePath(spec, b.path)), h("span", {}, blockerMessage(b)))),
+      list.length > shown.length ? h("li", {}, h("span", {}, `… in še ${items(list.length - shown.length)}`)) : null,
+    ),
   );
 }
 
