@@ -210,6 +210,31 @@ describe("migration 9 → 10 (trade templates N and P)", () => {
   });
 });
 
+describe("migration 10 → 11 (footer year and statement date in the spec)", () => {
+  it("turns stored v10 sites into valid v11 sites unchanged apart from the version, and accepts the dates", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { validateSite } = await import("../src/index.ts");
+    const read = (id: string) => JSON.parse(readFileSync(new URL(`../../../tools/eval/golden/${id}.json`, import.meta.url), "utf8")) as SiteSpec;
+    for (const id of ["kmetija-grabnar", "pekarna-kvas"]) {
+      const golden = read(id);
+      const v11 = migrateSpec({ ...golden, specVersion: 10 }, MIGRATIONS, 11);
+      expect(v11, id).toEqual({ ...golden, specVersion: 11 });
+      expect(validateSite(migrateSpec(v11)).issues, id).toEqual([]);
+    }
+    const dated = read("pekarna-kvas");
+    dated.chrome.footer.year = 2026;
+    const a11y = dated.pages.find((p) => p.kind === "accessibility")!.sections[0]!;
+    if (a11y.type === "legal") a11y.props.date = "2026-10-02";
+    expect(validateSite(dated).issues).toEqual([]);
+    // Only the accessibility statement is dated, and only as YYYY-MM-DD.
+    const privacy = dated.pages.find((p) => p.kind === "privacy")!.sections[0]!;
+    if (privacy.type === "legal") privacy.props.date = "2026-10-02";
+    expect(validateSite(dated).issues.map((i) => i.message)).toContain("only the accessibility statement carries a date");
+    if (a11y.type === "legal") a11y.props.date = "2. 10. 2026";
+    expect(validateSite(dated).ok).toBe(false);
+  });
+});
+
 describe("generated images", () => {
   it("may fill a hero but not a products section (pekarna-kvas uses img_01 in both)", async () => {
     const { readFileSync } = await import("node:fs");

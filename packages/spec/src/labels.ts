@@ -99,6 +99,8 @@ export const FIELD_LABEL: Record<string, string> = {
   inset: "Druga fotografija",
   images: "Fotografije",
   wordmark: "Ime v ozadju",
+  year: "Leto v nogi strani",
+  date: "Datum izjave (LLLL-MM-DD)",
   signs: "Kažipoti",
   receipt: "Račun v uvodu",
   lines: "Vrstice na računu",

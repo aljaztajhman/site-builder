@@ -85,6 +85,7 @@ export function semanticIssues(spec: SiteSpec): Issue[] {
   // hero-signature: the line that introduces a phone or an opening time, and the address only on the label card.
   spec.pages.forEach((p, pi) =>
     p.sections.forEach((s, si) => {
+      if (s.type === "legal" && s.props.date !== undefined && s.props.kind !== "accessibility") add(`/pages/${pi}/sections/${si}/props/date`, "structure", "only the accessibility statement carries a date");
       if (s.type !== "hero-signature") return;
       const at = `/pages/${pi}/sections/${si}/props`;
       if (s.props.fact !== "address" && s.props.factLabel === undefined) add(`${at}/factLabel`, "structure", `factLabel is required when the hero shows the ${s.props.fact}`);
