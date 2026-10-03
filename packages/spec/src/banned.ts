@@ -127,6 +127,6 @@ export function repairEmDashes(value: unknown, path = ""): string[] {
 /** The copy of a site (pages and translation overlays), repaired in place. Business facts are the client's own. */
 export function repairSiteCopy(spec: unknown): string[] {
   if (!spec || typeof spec !== "object") return [];
-  const s = spec as { pages?: unknown; translations?: unknown };
-  return [...repairEmDashes(s.pages, "/pages"), ...repairEmDashes(s.translations, "/translations")];
+  const s = spec as { pages?: unknown; translations?: unknown; collections?: unknown };
+  return [...repairEmDashes(s.pages, "/pages"), ...repairEmDashes(s.collections, "/collections"), ...repairEmDashes(s.translations, "/translations")];
 }

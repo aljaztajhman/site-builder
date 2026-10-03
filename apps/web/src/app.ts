@@ -12,6 +12,8 @@ import {
   exportSite,
   mediaKey,
   publishSite,
+  siteAddress,
+  startCollection,
   publishedPrefix,
   publishedBase,
   switchDirection,
@@ -24,8 +26,8 @@ import {
   type Resolve,
 } from "@sb/engine";
 import { VersionConflictError, contentType, mailerFromEnv, newId, type Mailer, type Platform, type SiteStatus, type Tier } from "@sb/platform";
-import { renderPage, sharedBundle, pageFile, notFoundPlacement, rebaseRelativeUrls } from "@sb/render";
-import { blockerText, collectPlaceholders, sectionDef, type SiteSpec } from "@sb/spec";
+import { renderPage, renderPath, sharedBundle, pageFile, notFoundPlacement, rebaseRelativeUrls } from "@sb/render";
+import { CollectionKind, blockerText, collectPlaceholders, sectionDef, type SiteSpec } from "@sb/spec";
 import type { AuthSettings } from "./auth.ts";
 import { clientIp, csrfOk, fullSiteRefusal, identity, publishRefusal, refusalJson, sameOriginOnly, signedIn, siteAccess, tierOf, type AppEnv, type Refusal } from "./access.ts";
 import { accessInfo, allowanceFor, previewBadge, reserveJob } from "./limits.ts";
@@ -35,7 +37,7 @@ import { registerAdminRoutes } from "./admin.tsx";
 import { registerPrivacyRoute } from "./privacy.tsx";
 import { registerCheckerRoutes } from "./checker.tsx";
 import { dayIn, registerStatsRoutes, statsCounter } from "./stats.ts";
-import { siteHostResolver, siteHosts } from "./site-hosts.ts";
+import { servedForSiteHost, siteHostResolver, siteHosts } from "./site-hosts.ts";
 import { descriptionHash, readTicket, signTicket } from "./upload-ticket.ts";
 import { slugify } from "./slug.ts";
 import { DASHBOARD, sitesPage, sitePage } from "./pages.tsx";
@@ -110,7 +112,9 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     // Only the path: the query legitimately carries them (login?next=%2F).
     if (/%2f|%5c/i.test(c.req.url.split("?")[0]!)) return c.text("Bad request", 400);
     await next();
-    c.header("X-Robots-Tag", "noindex, nofollow");
+    // A published site on its own hostname may be indexed once config seo.indexSiteHosts is on (it-seo-basics);
+    // the app's origin, /s/ paths included, never.
+    if (!(config.seo.indexSiteHosts && servedForSiteHost(c.req.raw) && c.req.path.startsWith("/s/"))) c.header("X-Robots-Tag", "noindex, nofollow");
     c.header("X-Content-Type-Options", "nosniff");
     c.header("Referrer-Policy", "strict-origin-when-cross-origin");
     // Published sites share the dashboard's origin: only our own scripts, and map embeds after consent.
@@ -505,7 +509,11 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   });
 
   // ---------- Direct editor: deterministic, no model calls ----------
-  const directEdit = async (c: Context, siteId: string, baseVersion: unknown, build: (spec: SiteSpec) => Operation[] | { error: string }, message: string) => {
+  /**
+   * `typed: false` for an edit that only rearranges what the site already says (a collection taking over the
+   * services sections): nothing of it counts as text the owner typed, so the fact check keeps checking it.
+   */
+  const directEdit = async (c: Context, siteId: string, baseVersion: unknown, build: (spec: SiteSpec) => Operation[] | { error: string }, message: string, typed = true) => {
     const current = await repo.getSpec(siteId);
     if (!current) return c.json({ error: "no spec yet" }, 404);
     if (typeof baseVersion === "number" && baseVersion !== current.version) {
@@ -518,7 +526,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     let version: number;
     try {
       // Only what the owner changed is stored: the fact check counts it as their own text.
-      version = await repo.saveSpec(siteId, r.spec, "manual", message.slice(0, 200), typedOps(current.spec, ops), current.version);
+      version = await repo.saveSpec(siteId, r.spec, "manual", message.slice(0, 200), typed ? typedOps(current.spec, ops) : [], current.version);
     } catch (e) {
       if (e instanceof VersionConflictError) return c.json({ error: "conflict", message: "Stran je bila medtem spremenjena. Osvežite urejevalnik." }, 409);
       throw e;
@@ -575,6 +583,14 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       },
       "dodana stran",
     );
+  });
+
+  // Switches a collection on (Strani › Zbirke): a news or events page, or services and team kept as lists of their own.
+  app.post("/api/sites/:id/collections", async (c) => {
+    const body = (await c.req.json().catch(() => ({}))) as { baseVersion?: number; kind?: string };
+    const kind = CollectionKind.safeParse(body.kind);
+    if (!kind.success) return c.json({ error: "kind required" }, 400);
+    return directEdit(c, c.req.param("id"), body.baseVersion, (spec) => startCollection(spec, kind.data), `zbirka ${kind.data}`, false);
   });
 
   app.post("/api/sites/:id/direction", async (c) => {
@@ -707,7 +723,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     const denied = publishRefusal(c.get("viewer"));
     if (denied) return refusalJson(c, denied);
     try {
-      const r = await publishSite({ repo, storage, config }, c.req.param("id"));
+      const r = await publishSite({ repo, storage, config, platformDomain: opts.platformDomain ?? null }, c.req.param("id"));
       const site = await repo.getSite(c.req.param("id"));
       if (site) bases.delete(site.slug);
       return c.json({ ok: true, version: r.version, url: `/s/${site?.slug}/` });
@@ -734,7 +750,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
         return c.json({ error: "checklist", message: EXPORT_CHECKLIST_MESSAGE, checklist, blockers: checklist.map(blockerText) }, 409);
       }
     }
-    const { filename, zip } = await exportSite({ repo, storage, config }, id, current.version);
+    const { filename, zip } = await exportSite({ repo, storage, config, platformDomain: opts.platformDomain ?? null }, id, current.version);
     c.header("content-type", "application/zip");
     c.header("content-disposition", `attachment; filename="${filename}"`);
     return c.body(zip as Uint8Array<ArrayBuffer>);
@@ -785,6 +801,9 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     }
     const page = current.spec.pages.find((p) => pageFile(p) === c.req.param("file"));
     if (!page) return previewNotFound(c, current.spec, 0);
+    // The address the published pages carry (canonical, og:url), so the preview's head is the published one.
+    const slug = c.get("site")?.slug ?? (await repo.getSite(id))?.slug;
+    const siteUrl = slug ? await siteAddress(repo, id, slug, opts.platformDomain) : null;
     const cacheKey = [id, current.version, c.req.param("file"), sectionId ?? "", variant ?? ""].join("|");
     // ?section=…&variant=…: that section alone in another variant, for the editor's layout thumbnails.
     // Same renderer and the same page URL depth, so media and shared assets resolve as in the preview.
@@ -793,17 +812,25 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       if (!section || !variant || !(sectionDef(section.type).variants as readonly string[]).includes(variant)) return c.notFound();
       const alone = { ...page, sections: [{ ...section, variant } as typeof section] };
       const spec = { ...current.spec, pages: current.spec.pages.map((p) => (p.id === page.id ? alone : p)) };
-      return c.html(remember(cacheKey, renderPage(spec, alone, { imageWidths: config.images.widths })));
+      return c.html(remember(cacheKey, renderPage(spec, alone, { imageWidths: config.images.widths, siteUrl })));
     }
-    return c.html(remember(cacheKey, renderPage(current.spec, page, { imageWidths: config.images.widths })));
+    return c.html(remember(cacheKey, renderPage(current.spec, page, { imageWidths: config.images.widths, siteUrl })));
   });
-  // Deeper paths are never pages (pages are files at the site root): the 404 page, rendered for that depth.
+  // Deeper paths are a collection entry's page (novice/odprtje.html) or else the 404 page, rendered for that depth.
   app.get("/preview/:id/*", async (c) => {
     const id = c.req.param("id");
     if (!SAFE_ID.test(id)) return c.notFound();
     const current = await repo.getSpec(id);
     if (!current) return c.notFound();
-    return previewNotFound(c, current.spec, notFoundPlacement(c.req.path.slice(`/preview/${id}/`.length)).depth);
+    const rest = c.req.path.slice(`/preview/${id}/`.length);
+    const slug = c.get("site")?.slug ?? (await repo.getSite(id))?.slug;
+    const siteUrl = slug ? await siteAddress(repo, id, slug, opts.platformDomain) : null;
+    const entry = renderPath(current.spec, rest, { imageWidths: config.images.widths, siteUrl });
+    if (entry !== null) {
+      c.header("cache-control", "no-store");
+      return c.html(entry);
+    }
+    return previewNotFound(c, current.spec, notFoundPlacement(rest).depth);
   });
 
   /** A missing page in the preview: the site's own 404 page with status 404, as the published site answers. */

@@ -31,6 +31,10 @@ export interface RenderCtx {
   /** Resolved href, or null when the target depends on a missing fact (placeholder). */
   href: (target: LinkTarget) => string | null;
   pageHref: (pageId: string) => string;
+  /** On a collection entry's page, `page` is the collection's list page: the menu marks it as the current section, not the current page. */
+  entry?: boolean;
+  /** Path of a collection entry's page ("novice/odprtje.html", collections.ts) relative to the current page. */
+  entryHref: (path: string) => string;
   /** Path to a shared asset (stylesheet, fonts, islands), relative to the current page. */
   shared: (file: string) => string;
   /** Path to a site media file, relative to the current page. */

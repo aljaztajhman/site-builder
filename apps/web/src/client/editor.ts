@@ -38,6 +38,9 @@ interface SectionInfo {
 interface Catalogue {
   sections: SectionInfo[];
   business: Schema;
+  /** One entry's schema per collection, and how many a collection may hold. */
+  collections: Record<string, Schema>;
+  collectionLimits: Record<string, number>;
   directions: { id: string; name: string; summary: string; fontPairs: string[]; ranges: Record<string, unknown> }[];
   fontPairs: { id: string; label: string }[];
 }
@@ -90,7 +93,7 @@ let catalogue: Catalogue | null = null;
 /** Whether the viewer may do this here; true when the server sends no access info. */
 const can = (k: "edit" | "chat" | "regenerate" | "publish" | "export"): boolean => state.access?.can[k] ?? true;
 /** What the panel shows: "content" is the page (or the selected section); the rest open from shortcuts, taps and the ⋯ menu. */
-type Tab = "content" | "facts" | "photos" | "design" | "pages" | "versions" | "chat" | "diag" | "add" | "image";
+type Tab = "content" | "facts" | "photos" | "design" | "pages" | "versions" | "chat" | "diag" | "add" | "image" | "collection";
 let tab: Tab = "content";
 let pageIndex = 0;
 let selected: string | null = null;
@@ -399,6 +402,10 @@ function isPlaceholderSchema(s: Schema): boolean {
 }
 
 /** Default value for a new field. `starter` fills text with the editor starter text (a publish blocker until replaced). */
+/** The patterns of a calendar day and a time in the spec's JSON Schema (collections.ts IsoDay, business hours). */
+const ISO_DAY_PATTERN = "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$";
+const TIME_PATTERN = "^([01]\\d|2[0-3]):[0-5]\\d$";
+
 function defaultFor(s: Schema, rootSchema: Schema, key: string, starter = true): Json {
   s = resolve(s, rootSchema);
   if (Array.isArray(s.anyOf)) {
@@ -419,6 +426,8 @@ function defaultFor(s: Schema, rootSchema: Schema, key: string, starter = true):
     case "array":
       return Array.from({ length: Number(s.minItems ?? 0) }, () => defaultFor((s.items ?? {}) as Schema, rootSchema, key, starter));
     case "string": {
+      // A new blog post or event is dated today (the owner changes it).
+      if (s.pattern === ISO_DAY_PATTERN) return new Date().toLocaleDateString("en-CA");
       if (typeof s.pattern === "string" && s.pattern.includes("img_")) return ((state.spec?.assets as Obj)?.images as Obj[])?.[0]?.id ?? "";
       if (typeof s.pattern === "string" && s.pattern.includes("p_")) return pages()[0]?.id ?? "";
       return starter ? (EDITOR_STARTER_TEXT[key] ?? EDITOR_STARTER_TEXT.text!).slice(0, Number(s.maxLength ?? 200)) : "";
@@ -614,6 +623,13 @@ function fieldBody(schema: Schema, rootSchema: Schema, value: Json | undefined, 
           h("label", {}, title),
           h("select", { onChange: (e: Event) => sink.edit((e.target as HTMLSelectElement).value) }, ...pages().map((p) => h("option", { value: p.id as string, selected: p.id === value }, ((p.nav as Obj).label as string) ?? p.id))),
         );
+        return box;
+      }
+      // Collection dates and times (YYYY-MM-DD, HH:MM): the browser's own pickers.
+      if (pattern === ISO_DAY_PATTERN || (pattern === TIME_PATTERN && (key === "start" || key === "end"))) {
+        const input = h("input", { type: pattern === TIME_PATTERN ? "time" : "date", value: typeof value === "string" ? value : "" });
+        input.addEventListener("input", () => (input.value === "" ? (optional ? sink.edit(undefined) : undefined) : sink.edit(input.value)));
+        box.append(h("label", {}, title), input);
         return box;
       }
       const max = Number(s.maxLength ?? 0);
@@ -1121,10 +1137,55 @@ function pagesPane(): HTMLElement {
     }
     pane.append(fs);
   });
+  pane.append(collectionsBlock());
   const slug = h("input", { type: "text", placeholder: "npr. cenik" });
   const name = h("input", { type: "text", placeholder: "npr. Cenik", maxlength: 24 });
   pane.append(h("h2", {}, "Nova stran"), labelled("Ime v meniju", name), labelled("Naslov datoteke (brez šumnikov)", slug),
     h("p", {}, h("button", { class: "btn", type: "button", onClick: () => void post("/pages", { slug: slug.value.trim(), label: name.value.trim() }, "Stran dodana.") }, "+ Dodaj stran")));
+  return pane;
+}
+
+// ---------- Collections (spec v12): blog, events, services and team the owner keeps ----------
+const COLLECTIONS: { kind: string; name: string; on: string; hint: string }[] = [
+  { kind: "blog", name: "Novice", on: "Vklopi novice", hint: "Nova stran Novice. Vsaka novica dobi svojo stran." },
+  { kind: "events", name: "Dogodki", on: "Vklopi dogodke", hint: "Nova stran Dogodki. Pretekli dogodki se na strani skrijejo sami." },
+  { kind: "services", name: "Storitve", on: "Storitve kot seznam", hint: "Storitve s strani preidejo v seznam. Storitev z opisom dobi svojo stran." },
+  { kind: "team", name: "Ekipa", on: "Ekipa kot seznam", hint: "Člani ekipe s strani preidejo v seznam. Član z opisom dobi svojo stran." },
+];
+let collectionKind = "blog";
+
+/** Strani › Zbirke: each collection switched on (with its entry count and Uredi) or a button to switch it on. */
+function collectionsBlock(): HTMLElement {
+  const cols = (state.spec?.collections ?? {}) as Obj;
+  const box = h("div", { class: "collections" }, h("h2", {}, "Novice, dogodki, storitve, ekipa"), h("p", { class: "hint" }, "Seznami, ki jih urejate sami, brez pomočnika."));
+  for (const c of COLLECTIONS) {
+    const on = cols[c.kind] as Obj | undefined;
+    const count = ((on?.items ?? []) as unknown[]).length;
+    box.append(
+      h("div", { class: "row collection-row" },
+        h("span", { class: "sp" }, h("strong", {}, c.name), on ? h("span", { class: "muted" }, ` · ${count}`) : h("span", { class: "muted" }, ` · ${c.hint}`)),
+        on
+          ? h("button", { class: "btn sm", type: "button", onClick: () => { collectionKind = c.kind; tab = "collection"; render(); } }, `Uredi: ${c.name}`)
+          : h("button", { class: "btn sm", type: "button", onClick: () => void post("/collections", { kind: c.kind }, `${c.name}: vklopljeno.`) }, c.on),
+      ),
+    );
+  }
+  return box;
+}
+
+/** One collection's entries: add, reorder, remove and edit them with the schema-driven form. */
+function collectionPane(): HTMLElement {
+  const c = COLLECTIONS.find((x) => x.kind === collectionKind) ?? COLLECTIONS[0]!;
+  const pane = h("div", { class: "pane" }, paneHead(c.name));
+  const on = ((state.spec?.collections ?? {}) as Obj)[c.kind] as Obj | undefined;
+  const item = catalogue?.collections[c.kind];
+  if (!on || !item) return pane;
+  const schema: Schema = { type: "array", items: item, maxItems: catalogue?.collectionLimits[c.kind] ?? 30 };
+  const where = at(`/collections/${c.kind}/items`);
+  pane.append(
+    h("p", { class: "hint" }, c.kind === "blog" ? "Novice so na strani urejene po datumu, najnovejša prva." : c.kind === "events" ? "Dogodki so urejeni po datumu; ko dogodek mine, ga obiskovalci ne vidijo več." : "Vrstni red tukaj je vrstni red na strani."),
+    withPath(`/collections/${c.kind}/items`, formAt(where, schema, on.items as Json, c.name, `zbirka ${c.kind}`)),
+  );
   return pane;
 }
 
@@ -1945,7 +2006,7 @@ function render(): void {
       checklistBlock(),
       !state.spec && state.site.status !== "generating" && state.site.status !== "failed" ? h("div", { class: "pane" }, h("p", { class: "muted" }, "Stran še nima vsebine.")) : null,
       state.spec && !can("edit") ? guestPane() : null,
-      state.spec && can("edit") ? { content: contentPane, facts: factsPane, photos: photosPane, design: designPane, pages: pagesPane, versions: versionsPane, chat: chatPane, diag: diagPane, add: addPane, image: imagePane }[tab]() : null,
+      state.spec && can("edit") ? { content: contentPane, facts: factsPane, photos: photosPane, design: designPane, pages: pagesPane, versions: versionsPane, chat: chatPane, diag: diagPane, add: addPane, image: imagePane, collection: collectionPane }[tab]() : null,
     ].filter((c): c is HTMLElement => c !== null),
   );
   shell.bar.replaceChildren(...barItems().filter((c): c is Node => c instanceof Node));
@@ -2133,7 +2194,8 @@ function goTo(path: string): void {
     if (pageChanged) reloadPreview();
     else if (selected) frame?.contentDocument?.getElementById(selected)?.scrollIntoView({ block: "start" });
   } else {
-    tab = head === "pages" ? "pages" : head === "business" || head === "chrome" ? "facts" : head === "assets" ? "photos" : head === "design" ? "design" : "content";
+    if (head === "collections") collectionKind = path.split("/")[2] ?? collectionKind;
+    tab = head === "pages" ? "pages" : head === "business" || head === "chrome" ? "facts" : head === "assets" ? "photos" : head === "design" ? "design" : head === "collections" ? "collection" : "content";
     render();
   }
   focusPath(path);

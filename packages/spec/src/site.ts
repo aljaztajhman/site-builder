@@ -3,8 +3,9 @@ import { ImageRef, Locale, PageRef, Tone, text } from "./common.ts";
 import { Business } from "./business.ts";
 import { Design } from "./design.ts";
 import { Section } from "./sections/index.ts";
+import { Collections } from "./collections.ts";
 
-export const SPEC_VERSION = 11 as const;
+export const SPEC_VERSION = 12 as const;
 
 export const PageKind = z.enum(["home", "standard", "privacy", "accessibility", "not-found"]);
 export type PageKind = z.infer<typeof PageKind>;
@@ -83,6 +84,8 @@ export const SiteSpec = z.strictObject({
   }),
   chrome: Chrome,
   pages: z.array(Page).min(1).max(12),
+  /** Spec v12: blog, events, services and team the owner keeps in the editor (collections.ts). Never generated. */
+  collections: Collections.optional(),
   /**
    * Non-default locales as overlays: JSON Pointer into this spec -> translated string.
    * Only string leaves can be translated.

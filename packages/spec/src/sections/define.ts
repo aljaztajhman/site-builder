@@ -20,6 +20,11 @@ export interface SectionMeta<T extends string, V extends readonly [string, ...st
   /** Only the code adds this section (legal pages, 404); the model must not add or edit it. */
   systemOnly?: boolean;
   /**
+   * Only the owner adds this section, in the editor (collections): it is left out of the model's catalogue and
+   * its output schema, so generation never makes one.
+   */
+  ownerOnly?: boolean;
+  /**
    * Variants that only look different with an optional prop filled (about figure: the figure). Without it the
    * editor doesn't offer them, since switching would look like another variant.
    */

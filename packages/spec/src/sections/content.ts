@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ImageRef, Link, orPlaceholder, text } from "../common.ts";
+import { CollectionKind } from "../collections.ts";
 import { defineSection } from "./define.ts";
 
 const EYEBROW_RULE = "Optional short plain label above the heading. Not numbered.";
@@ -185,6 +186,28 @@ export const announcementSection = defineSection(
   }),
 );
 
+/** Spec v12: a collection the owner keeps (collections.ts) shown on a page. */
+export const collectionSection = defineSection(
+  {
+    type: "collection",
+    group: "content",
+    variants: ["list", "cards"],
+    description:
+      "Entries of one of the owner's collections (blog posts, events, services, team) from SiteSpec.collections: list: ruled rows with the date or price beside the title and summary. cards: two or three cards per row with a photo when the entry has one. limit shows only the first entries (newest posts, next events) with a link to the collection's page.",
+    images: "optional",
+    mobile: "One entry per row; dates and prices stay on one line; each entry's link is at least 44 px tall.",
+    a11y: "Heading is an h2; each entry's title an h3 inside a list, linking to the entry's page when it has one. Dates are <time> elements.",
+    ownerOnly: true,
+  },
+  z.strictObject({
+    kind: CollectionKind,
+    eyebrow: text(40).optional().describe(EYEBROW_RULE),
+    title: text(80),
+    intro: text(240).optional(),
+    limit: z.number().int().min(1).max(12).optional().describe("Show only this many entries, with a link to the collection's page"),
+  }),
+);
+
 export const contentSchemas = [
   textSection.schema,
   imageText.schema,
@@ -194,5 +217,6 @@ export const contentSchemas = [
   bookingSection.schema,
   aboutSection.schema,
   announcementSection.schema,
+  collectionSection.schema,
 ] as const;
-export const contentDefs = [textSection, imageText, highlightsSection, stepsSection, ctaSection, bookingSection, aboutSection, announcementSection];
+export const contentDefs = [textSection, imageText, highlightsSection, stepsSection, ctaSection, bookingSection, aboutSection, announcementSection, collectionSection];

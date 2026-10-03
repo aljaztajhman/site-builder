@@ -8,7 +8,7 @@
     "photos": 5,
     "font": {
       "family": "Inter Tight",
-      "file": "_shared/3041865c40/fonts/inter-tight.woff2",
+      "file": "_shared/a7b545b018/fonts/inter-tight.woff2",
       "weights": [
         100,
         900
@@ -49,7 +49,7 @@
     "photos": 3,
     "font": {
       "family": "Figtree",
-      "file": "_shared/3041865c40/fonts/figtree.woff2",
+      "file": "_shared/a7b545b018/fonts/figtree.woff2",
       "weights": [
         300,
         900
@@ -90,7 +90,7 @@
     "photos": 3,
     "font": {
       "family": "Archivo",
-      "file": "_shared/3041865c40/fonts/archivo.woff2",
+      "file": "_shared/a7b545b018/fonts/archivo.woff2",
       "weights": [
         100,
         900
@@ -131,7 +131,7 @@
     "photos": 8,
     "font": {
       "family": "EB Garamond",
-      "file": "_shared/3041865c40/fonts/eb-garamond.woff2",
+      "file": "_shared/a7b545b018/fonts/eb-garamond.woff2",
       "weights": [
         400,
         800
@@ -172,7 +172,7 @@
     "photos": 3,
     "font": {
       "family": "Fraunces",
-      "file": "_shared/3041865c40/fonts/fraunces.woff2",
+      "file": "_shared/a7b545b018/fonts/fraunces.woff2",
       "weights": [
         100,
         900
@@ -213,7 +213,7 @@
     "photos": 5,
     "font": {
       "family": "Lora",
-      "file": "_shared/3041865c40/fonts/lora.woff2",
+      "file": "_shared/a7b545b018/fonts/lora.woff2",
       "weights": [
         400,
         700
@@ -254,7 +254,7 @@
     "photos": 1,
     "font": {
       "family": "Bricolage Grotesque",
-      "file": "_shared/3041865c40/fonts/bricolage-grotesque.woff2",
+      "file": "_shared/a7b545b018/fonts/bricolage-grotesque.woff2",
       "weights": [
         200,
         800
@@ -295,7 +295,7 @@
     "photos": 0,
     "font": {
       "family": "IBM Plex Sans",
-      "file": "_shared/3041865c40/fonts/ibm-plex-sans.woff2",
+      "file": "_shared/a7b545b018/fonts/ibm-plex-sans.woff2",
       "weights": [
         100,
         700
@@ -336,7 +336,7 @@
     "photos": 8,
     "font": {
       "family": "Fraunces",
-      "file": "_shared/3041865c40/fonts/fraunces.woff2",
+      "file": "_shared/a7b545b018/fonts/fraunces.woff2",
       "weights": [
         100,
         900
@@ -377,7 +377,7 @@
     "photos": 0,
     "font": {
       "family": "Space Grotesk",
-      "file": "_shared/3041865c40/fonts/space-grotesk.woff2",
+      "file": "_shared/a7b545b018/fonts/space-grotesk.woff2",
       "weights": [
         300,
         700

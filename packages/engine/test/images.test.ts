@@ -55,3 +55,24 @@ describe("decompression bombs", () => {
     await expect(visionJpeg(data)).rejects.toThrow();
   });
 });
+
+describe("shareJpeg", () => {
+  it("makes the 1200 × 630 JPEG a shared link shows, cropped around the focal point", async () => {
+    const { shareJpeg } = await import("../src/index.ts");
+    // Left half black, right half white: a focal point on the right keeps mostly white.
+    const src = await sharp({ create: { width: 3200, height: 1000, channels: 3, background: "#000" } })
+      .composite([{ input: await sharp({ create: { width: 1600, height: 1000, channels: 3, background: "#fff" } }).png().toBuffer(), left: 1600, top: 0 }])
+      .webp()
+      .toBuffer();
+    const out = await shareJpeg(new Uint8Array(src), { x: 0.9, y: 0.5 });
+    const m = await sharp(out).metadata();
+    expect([m.format, m.width, m.height]).toEqual(["jpeg", 1200, 630]);
+    const { channels } = await sharp(out).stats();
+    expect(channels[0]!.mean).toBeGreaterThan(200);
+    // Centred, the same picture is half black.
+    expect((await sharp(await shareJpeg(new Uint8Array(src))).stats()).channels[0]!.mean).toBeLessThan(140);
+    // A small photo is scaled up to the size, not left small.
+    const small = await shareJpeg(await png(600, 400));
+    expect((await sharp(small).metadata()).width).toBe(1200);
+  });
+});

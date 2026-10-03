@@ -86,7 +86,7 @@ export function Footer({ ctx }: { ctx: RenderCtx }) {
               <ul className="site-footer__links" role="list">
                 {links.map((x) => (
                   <li key={x.id}>
-                    <a className="site-footer__link" href={ctx.pageHref(x.id)} aria-current={x.id === ctx.page.id ? "page" : undefined}>
+                    <a className="site-footer__link" href={ctx.pageHref(x.id)} aria-current={x.id === ctx.page.id ? (ctx.entry ? "true" : "page") : undefined}>
                       {x.nav.label}
                     </a>
                   </li>
