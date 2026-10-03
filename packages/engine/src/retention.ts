@@ -65,7 +65,10 @@ export async function pruneSite(deps: Deps, siteId: string, now = new Date()): P
   return { siteId, removed, bytes, files };
 }
 
-/** Applies retention to every site that has versions old enough to remove. One failure doesn't stop the rest. */
+/**
+ * Applies retention to every site that has versions old enough to remove, then sweeps every site's generated
+ * pictures that no version uses (`sweepOrphanPictures`). One failure doesn't stop the rest.
+ */
 export async function pruneAllSites(deps: Deps, now = new Date()): Promise<(PruneResult & { error?: string })[]> {
   // A superset: anything retention removes is older than this (a day of margin for daylight saving).
   const before = new Date(now.getTime() - (deps.config.versions.retention.keepAllDays - 1) * 86_400_000);
@@ -79,7 +82,58 @@ export async function pruneAllSites(deps: Deps, now = new Date()): Promise<(Prun
       out.push({ siteId, removed: [], bytes: 0, files: [], error });
     }
   }
+  for (const siteId of await deps.repo.allSiteIds()) {
+    try {
+      const files = await sweepOrphanPictures(deps, siteId);
+      if (!files.length) continue;
+      const r = out.find((x) => x.siteId === siteId);
+      if (r) r.files = [...r.files, ...files];
+      else out.push({ siteId, removed: [], bytes: 0, files });
+    } catch (e) {
+      await deps.repo.addEvent({ siteId, stage: "retention", level: "error", message: `Picture sweep failed: ${(e as Error).message.slice(0, 300)}` }).catch(() => undefined);
+    }
+  }
   return out;
+}
+
+const GENERATED = /\/generated\/(img_g\d+)\.jpg$/;
+
+/**
+ * Generated pictures no version uses: a generation that failed before it saved a version (spend cap,
+ * content retries exhausted, a crash) leaves its 2-3 pictures and their variants behind, and since ids are
+ * never reissued nothing ever overwrites them. Removed (the original and every media variant of that id)
+ * when no stored version references the id, only while no job or publish runs on the site; a version whose
+ * assets can't be read keeps everything. Returns the removed keys.
+ */
+export async function sweepOrphanPictures(deps: Deps, siteId: string): Promise<string[]> {
+  const { repo, storage } = deps;
+  const busy = async () => {
+    const s = await repo.getSite(siteId);
+    return !s || BUSY.has(s.status) || !!s.publishing_since;
+  };
+  if (await busy()) return [];
+  const generated = new Map<string, string>();
+  for (const key of await storage.list(`sites/${siteId}/generated/`)) {
+    const id = GENERATED.exec(key)?.[1];
+    if (id) generated.set(id, key);
+  }
+  if (generated.size === 0) return [];
+  const used = new Set<string>();
+  for (const v of await repo.versionAssets(siteId)) {
+    const images = (v.assets as { images?: unknown } | null)?.images;
+    if (!Array.isArray(images)) return [];
+    for (const img of images) if (img && typeof (img as { id?: unknown }).id === "string") used.add((img as { id: string }).id);
+  }
+  const orphans = [...generated.keys()].filter((id) => !used.has(id));
+  if (orphans.length === 0) return [];
+  const media = await storage.list(`sites/${siteId}/media/`);
+  const files = orphans.flatMap((id) => [generated.get(id)!, ...media.filter((k) => k.slice(k.lastIndexOf("/") + 1).startsWith(`${id}-`))]).sort();
+  // A job may have started meanwhile: then the files wait for the next night.
+  if (await busy()) return [];
+  await storage.delete(files);
+  await repo.deleteAssetsByKey(siteId, files);
+  await repo.addEvent({ siteId, stage: "retention", message: `Removed ${orphans.length} generated picture(s) no version uses`, data: { pictures: orphans, files: files.length } });
+  return files;
 }
 
 /** Storage keys a version's assets point to (originals and media variants), or null when they can't be read. */
