@@ -2,7 +2,7 @@ import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypt
 import type { Context, MiddlewareHandler } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import type { AppConfig } from "@sb/config";
-import type { AccountRow, Repo, SiteRow, Tier } from "@sb/platform";
+import type { AccountRow, PaidPlanKey, Repo, SiteRow, Tier } from "@sb/platform";
 import { hasSession, type AuthSettings } from "./auth.ts";
 import { DASHBOARD } from "./pages.tsx";
 import type { UploadTicket } from "./upload-ticket.ts";
@@ -25,7 +25,7 @@ export function safeNext(v: unknown): string {
 export const DEVICE_COOKIE = "sb_device";
 export const ACCOUNT_COOKIE = "sb_account";
 
-export type Viewer = { kind: "admin" } | { kind: "account"; account: AccountRow; paidSince: string | null } | { kind: "anonymous" };
+export type Viewer = { kind: "admin" } | { kind: "account"; account: AccountRow; paidSince: string | null; plan: PaidPlanKey | null } | { kind: "anonymous" };
 export type { Tier };
 
 export const tierOf = (v: Viewer): Tier => (v.kind === "admin" ? "admin" : v.kind === "account" ? (v.paidSince ? "paid" : "free") : "anonymous");
@@ -104,7 +104,7 @@ async function resolveViewer(c: Context, repo: Repo, auth: AuthSettings): Promis
   const account = await repo.accounts.sessionAccount(hashToken(token));
   if (!account) return { kind: "anonymous" };
   const allowed = await repo.accounts.allowed(account.email_key);
-  return { kind: "account", account, paidSince: allowed?.added_at ?? null };
+  return { kind: "account", account, paidSince: allowed?.added_at ?? null, plan: allowed?.plan ?? null };
 }
 
 export function issueAccountSession(c: Context, token: string, auth: AuthSettings, config: AppConfig): void {

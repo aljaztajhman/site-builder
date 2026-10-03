@@ -170,19 +170,17 @@ describe("free limits in a browser", () => {
       await signIn(page, "ana.pekarna@siol.net");
       expect(page.url()).toBe(`${base}/sites`);
       expect(await page.locator(".site-card h2 a").getAttribute("href")).toBe(`/sites/${first}`);
-      expect(await page.locator("main.sites > p.muted").textContent()).toContain("Še 2 brezplačni ustvarjanji domače strani in 10 sprememb s pomočnikom.");
+      expect(await page.locator("main.sites > p.muted").textContent()).toContain("Še 1 brezplačno ustvarjanje domače strani in 5 sprememb s pomočnikom.");
       expect((await platform.repo.getSite(first))!.device_id).toBeNull();
 
-      // Two more homepages, then no more.
+      // One more homepage, then no more; the refusal names the plan that adds more (sb-tiers).
+      await page.goto(`${base}/`);
+      expect(await page.locator("[data-allowance]").textContent()).toContain("Še 1 brezplačno ustvarjanje domače strani in 5 sprememb s pomočnikom.");
       await create(page, `${DESCRIPTION} Druga.`);
       expect(page.url()).toMatch(/\/sites\/site_/);
-      await page.goto(`${base}/`);
-      expect(await page.locator("[data-allowance]").textContent()).toContain("Še 1 brezplačno ustvarjanje domače strani in 10 sprememb s pomočnikom.");
       await create(page, `${DESCRIPTION} Tretja.`);
-      expect(page.url()).toMatch(/\/sites\/site_/);
-      await create(page, `${DESCRIPTION} Četrta.`);
-      expect(await page.locator(".note.bad").textContent()).toContain("Porabili ste 2 brezplačni ustvarjanji domače strani.");
-      expect(await page.locator("#opis").inputValue()).toBe(`${DESCRIPTION} Četrta.`);
+      expect(await page.locator(".note.bad").textContent()).toContain("Porabili ste 1 brezplačno ustvarjanje domače strani. Stran lahko še naprej urejate neposredno. Z naročnino Osnovni");
+      expect(await page.locator("#opis").inputValue()).toBe(`${DESCRIPTION} Tretja.`);
       // Signed in, no bot check is loaded or needed.
       expect(await page.locator(".cf-turnstile").count()).toBe(0);
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);

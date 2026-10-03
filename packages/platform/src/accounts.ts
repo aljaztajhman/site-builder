@@ -9,11 +9,27 @@ export interface AccountRow {
   last_login_at: string | null;
 }
 
+export type PaidPlanKey = "standard" | "premium";
+
+/** An account as the admin sees it: plan, sites and AI cost. */
+export interface AccountListRow extends AccountRow {
+  allowed_since: string | null;
+  /** Null: a free account. */
+  plan: PaidPlanKey | null;
+  sites: number;
+  published: number;
+  /** € of AI work this calendar month (UTC), and ever. */
+  ai_month_eur: number;
+  ai_total_eur: number;
+}
+
 export interface AllowListRow {
   email_key: string;
   email: string;
   note: string | null;
   added_at: string;
+  /** Osnovni or Plus (sb-tiers). */
+  plan: PaidPlanKey;
 }
 
 export interface LoginTokenRow {
@@ -53,14 +69,21 @@ export class Accounts {
     return rows[0]!;
   }
 
-  /** Every account with its allow-list entry (if any) and number of sites, newest first (admin view). */
-  async list(): Promise<(AccountRow & { allowed_since: string | null; sites: number })[]> {
-    const { rows } = await this.db.query<AccountRow & { allowed_since: string | null; sites: string | number }>(
-      `select a.*, l.added_at as allowed_since, (select count(*) from sites s where s.account_id = a.id) as sites
+  /**
+   * Every account with its plan (allow-list entry, if any), its sites and what its AI work has cost:
+   * this calendar month (UTC) and in total, from the per-call log. Newest first (admin view).
+   */
+  async list(): Promise<AccountListRow[]> {
+    const { rows } = await this.db.query<AccountRow & { allowed_since: string | null; plan: PaidPlanKey | null; sites: string | number; published: string | number; ai_month_eur: string | number; ai_total_eur: string | number }>(
+      `select a.*, l.added_at as allowed_since, l.plan,
+              (select count(*) from sites s where s.account_id = a.id) as sites,
+              (select count(*) from sites s where s.account_id = a.id and s.published_version is not null) as published,
+              (select coalesce(sum(m.cost_eur), 0) from model_calls m where m.account_id = a.id and m.created_at >= date_trunc('month', now() at time zone 'utc') at time zone 'utc') as ai_month_eur,
+              (select coalesce(sum(m.cost_eur), 0) from model_calls m where m.account_id = a.id) as ai_total_eur
          from accounts a left join allow_list l on l.email_key = a.email_key
         order by a.created_at desc limit 500`,
     );
-    return rows.map((r) => ({ ...r, sites: Number(r.sites) }));
+    return rows.map((r) => ({ ...r, plan: r.plan ?? null, sites: Number(r.sites), published: Number(r.published), ai_month_eur: Number(r.ai_month_eur), ai_total_eur: Number(r.ai_total_eur) }));
   }
 
   // ---------- Allow-list (full sites before billing, sb-full-access) ----------
@@ -75,10 +98,12 @@ export class Accounts {
     return rows;
   }
 
-  async allow(email: string, emailKey: string, note: string | null): Promise<void> {
+  /** Lists an address (or changes its plan); listing again keeps the date its paid rights started. */
+  async allow(email: string, emailKey: string, note: string | null, plan: PaidPlanKey = "standard"): Promise<void> {
     await this.db.query(
-      "insert into allow_list (email_key, email, note) values ($1, $2, $3) on conflict (email_key) do update set note = coalesce(excluded.note, allow_list.note)",
-      [emailKey, email, note],
+      `insert into allow_list (email_key, email, note, plan) values ($1, $2, $3, $4)
+       on conflict (email_key) do update set note = coalesce(excluded.note, allow_list.note), plan = excluded.plan`,
+      [emailKey, email, note, plan],
     );
   }
 

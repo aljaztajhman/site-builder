@@ -436,7 +436,7 @@ describe("free account", () => {
     expect(list).not.toContain(`href="/sites/${fromB}"`);
   });
 
-  it("claims the anonymous preview on sign-up, then gets 2 homepages and 10 chat edits in total", async () => {
+  it("claims the anonymous preview on sign-up, then gets 1 homepage and 5 chat edits in total", async () => {
     const b = await newBrowser(req);
     const made = await intake(req, b);
     const preview = siteOf(made);
@@ -449,27 +449,30 @@ describe("free account", () => {
     expect(site.device_id).toBeNull();
     const list = await (await req("/sites", { headers: { cookie: owner.cookie } })).text();
     expect(list).toContain(`href="/sites/${preview}"`);
-    // The claimed preview doesn't use one of the two.
-    expect(list).toContain("Še 2 brezplačni ustvarjanji domače strani in 10 sprememb s pomočnikom.");
+    // The claimed preview doesn't use up the one more.
+    expect(list).toContain("Še 1 brezplačno ustvarjanje domače strani in 5 sprememb s pomočnikom.");
     const s = await state(owner, preview);
     expect(s.access).toMatchObject({ viewer: "free", expiresAt: null, signIn: null, badge: "Predogled · Stranko", can: { edit: true, chat: true, regenerate: true, publish: false, fullSite: false } });
-    expect(s.access.allowance).toMatchObject({ homepagesLeft: 2, homepagesTotal: 2, chatEditsLeft: 10, chatEditsTotal: 10 });
+    expect(s.access.allowance).toMatchObject({ homepagesLeft: 1, homepagesTotal: 1, chatEditsLeft: 5, chatEditsTotal: 5 });
 
-    // A whole site isn't a free right; the homepage twice is.
+    // A whole site isn't a free right; one more homepage is.
     expect((await intake(req, owner, { scope: "full" })).status).toBe(403);
     expect((await intake(req, owner)).status).toBe(303);
-    expect((await regenerate(owner, preview)).status).toBe(200);
     await runQueued();
     const third = await intake(req, owner);
     expect(third.status).toBe(429);
-    expect(await third.text()).toContain("Porabili ste 2 brezplačni ustvarjanji domače strani.");
+    // The refusal names the plan that adds what's missing (sb-tiers upsell).
+    expect(await third.text()).toContain("Porabili ste 1 brezplačno ustvarjanje domače strani. Stran lahko še naprej urejate neposredno. Z naročnino Osnovni (15 € na mesec) dobite celotno stran, objavo na svoji domeni in pomočnika vsak mesec.");
     const again = await regenerate(owner, preview);
     expect(await again.json()).toMatchObject({ code: "free_homepages_used" });
 
     for (let i = 0; i < config.tiers.free.chatEdits; i++) expect((await chat(owner, preview)).status, `edit ${i + 1}`).toBe(200);
-    const eleventh = await chat(owner, preview);
-    expect(eleventh.status).toBe(429);
-    expect(await eleventh.json()).toMatchObject({ code: "free_edits_used", message: "Porabili ste vseh 10 sprememb s pomočnikom. Stran lahko še naprej urejate neposredno." });
+    const oneMore = await chat(owner, preview);
+    expect(oneMore.status).toBe(429);
+    expect(await oneMore.json()).toMatchObject({
+      code: "free_edits_used",
+      message: "Porabili ste vseh 5 sprememb s pomočnikom. Stran lahko še naprej urejate neposredno. Z naročnino Osnovni (15 € na mesec) dobite celotno stran, objavo na svoji domeni in pomočnika vsak mesec.",
+    });
     // A failed edit doesn't count.
     const edits = sent.filter((j) => j.name === "edit");
     await platform.repo.usage.finishJob((edits[0]!.data as { aiJobId: string }).aiJobId, "failed");
@@ -482,17 +485,34 @@ describe("free account", () => {
     const patch = await req(`/api/sites/${preview}/patch`, { method: "POST", headers: json(owner.cookie), body: JSON.stringify({ ops: [{ op: "replace", path: "/pages/0/sections/0/props/headline", value: "Kruh z drožmi iz Kamnika" }] }) });
     expect(patch.status).toBe(200);
   });
+
+  it("never costs more than its lifetime €, the claimed anonymous preview included, whatever the counts say (sb-tiers)", async () => {
+    const b = await newBrowser(req);
+    const preview = siteOf(await intake(req, b));
+    // An expensive preview: it leaves less than one chat edit's estimate of the free lifetime €.
+    await runQueued(config.tiers.free.lifetimeEur - config.tiers.estimatesEur.chatEdit / 2);
+    const owner = await ownerSignIn(req, mail.sent, "draga.predogled@siol.net", b);
+    const s = await state(owner, preview);
+    expect(s.access.allowance.chatEditsLeft).toBe(config.tiers.free.chatEdits);
+    const refused = await chat(owner, preview);
+    expect(refused.status).toBe(429);
+    expect(await refused.json()).toMatchObject({ code: "free_budget_used", message: expect.stringContaining("Brezplačni del pomočnika je porabljen. Stran lahko še naprej urejate neposredno. Z naročnino Osnovni") });
+    // The homepage it still has by count is refused too.
+    expect(await (await regenerate(owner, preview)).json()).toMatchObject({ code: "free_budget_used" });
+  });
 });
 
 describe("paid (allow-listed) monthly allowance", () => {
-  it("is a share of the monthly price plus a first-month extra, counted from the logged €, and renews monthly", async () => {
+  it("is the plan's monthly allowance plus a first-month extra, counted from the logged €, and renews monthly", async () => {
     const t = config.tiers;
-    const monthly = (config.plans.paid.monthlyEur * t.paid.allowancePercentOfMonthlyPrice) / 100;
+    const ai = config.plans.standard.ai;
+    const monthly = ai.allowanceEurPerMonth;
     const since = new Date("2026-01-31T10:00:00Z");
     expect(allowancePeriod(since, new Date("2026-02-15T00:00:00Z"))).toMatchObject({ first: true, start: since, end: new Date("2026-02-28T10:00:00Z") });
     expect(allowancePeriod(since, new Date("2026-03-01T00:00:00Z"))).toMatchObject({ first: false, start: new Date("2026-02-28T10:00:00Z"), end: new Date("2026-03-31T10:00:00Z") });
-    expect(monthlyAllowance(config, since, new Date("2026-02-01T00:00:00Z")).eur).toBeCloseTo(monthly + t.paid.firstMonthExtraEur, 6);
-    expect(monthlyAllowance(config, since, new Date("2026-05-01T00:00:00Z")).eur).toBeCloseTo(monthly, 6);
+    expect(monthlyAllowance(config, "standard", since, new Date("2026-02-01T00:00:00Z")).eur).toBeCloseTo(monthly + ai.firstMonthExtraEur, 6);
+    expect(monthlyAllowance(config, "standard", since, new Date("2026-05-01T00:00:00Z")).eur).toBeCloseTo(monthly, 6);
+    expect(monthlyAllowance(config, "premium", since, new Date("2026-05-01T00:00:00Z")).eur).toBeCloseTo(config.plans.premium.ai.allowanceEurPerMonth, 6);
 
     await platform.repo.accounts.allow("partner@siol.net", "partner@siol.net", null);
     const owner = await ownerSignIn(req, mail.sent, "partner@siol.net");
@@ -501,16 +521,16 @@ describe("paid (allow-listed) monthly allowance", () => {
     const id = siteOf(made);
     expect(await platform.repo.usage.getJob((sent.at(-1)!.data as { aiJobId: string }).aiJobId)).toMatchObject({ tier: "paid", estimate_eur: t.estimatesEur.fullSite });
     // Spend almost all of this month's allowance (first month: share + extra).
-    await runQueued(monthly + t.paid.firstMonthExtraEur - 0.02);
+    await runQueued(monthly + ai.firstMonthExtraEur - 0.02);
     const s = await state(owner, id);
     expect(s.access.viewer).toBe("paid");
-    expect(s.access.allowance.eurTotal).toBeCloseTo(monthly + t.paid.firstMonthExtraEur, 6);
+    expect(s.access.allowance.eurTotal).toBeCloseTo(monthly + ai.firstMonthExtraEur, 6);
     expect(s.access.can.chat).toBe(false);
     const refused = await chat(owner, id);
     expect(refused.status).toBe(429);
     const body = (await refused.json()) as { code: string; message: string };
     expect(body.code).toBe("allowance_used");
-    expect(body.message).toMatch(/^Pomočnik je ta mesec porabil vse, kar vključuje naročnina\. Stran lahko še naprej urejate neposredno; pomočnik spet deluje \d+\. \d+\. \d{4}\.$/);
+    expect(body.message).toMatch(/^Pomočnik je ta mesec porabil vse, kar vključuje naročnina\. Stran lahko še naprej urejate neposredno; pomočnik spet deluje \d+\. \d+\. \d{4}\. Paket Plus \(29 € na mesec\) vključuje več pomoči vsak mesec\.$/);
 
     // A month later the allowance is new (without the first month's extra) and last month's spend is gone.
     const account = (await platform.repo.accounts.byKey("partner@siol.net"))!;
@@ -521,6 +541,18 @@ describe("paid (allow-listed) monthly allowance", () => {
     expect(next.access.allowance.text).toMatch(/^Pomočnik ta mesec še za približno 3 ustvarjanja celotne strani ali 50 sprememb s pomočnikom \(obnovi se /);
     expect((await chat(owner, id)).status).toBe(200);
     await runQueued(0.01);
+  });
+
+  it("follows the account's plan: Plus has the bigger allowance and nothing more to upsell", async () => {
+    await platform.repo.accounts.allow("plus@siol.net", "plus@siol.net", null, "premium");
+    const owner = await ownerSignIn(req, mail.sent, "plus@siol.net");
+    const id = siteOf(await intake(req, owner, { scope: "full" }));
+    const ai = config.plans.premium.ai;
+    expect((await state(owner, id)).access.allowance.eurTotal).toBeCloseTo(ai.allowanceEurPerMonth + ai.firstMonthExtraEur, 6);
+    await runQueued(ai.allowanceEurPerMonth + ai.firstMonthExtraEur - 0.02);
+    const body = (await (await chat(owner, id)).json()) as { code: string; message: string };
+    expect(body.code).toBe("allowance_used");
+    expect(body.message).not.toContain("Paket Plus");
   });
 });
 

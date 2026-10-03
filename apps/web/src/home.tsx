@@ -71,7 +71,9 @@ export interface HomeProps {
 }
 
 export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteKey, anonymousClosed, previous, anonymousUpload, error, description, showcase }: HomeProps): string {
-  const paid = config.plans.paid;
+  const plans = config.plans;
+  const std = plans.standard;
+  const plus = plans.premium;
   const example = uiUrl("example-home.html");
   // Example sites rendered by our engine (pnpm examples:build): a different business in each place.
   const shopExample = uiUrl("examples/trgovina-oljka-in-sol/index.html");
@@ -398,7 +400,7 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
                       <b>Brezplačen</b> predogled v manj kot minuti
                     </li>
                     <li>
-                      <b>{wholeEur.format(config.plans.paid.monthlyEur)}</b> na mesec{config.plans.paid.billingEnabled ? "" : " (načrtovana cena)"}
+                      <b>{`od ${wholeEur.format(std.monthlyEur)}`}</b> na mesec{plans.billingEnabled ? "" : " (načrtovana cena)"}
                     </li>
                     <li>Popravke naredite sami, takoj</li>
                   </ul>
@@ -471,7 +473,7 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
 
           <section id="cena" aria-labelledby="h-cena">
             <div className="wrap">
-              <h2 id="h-cena">Ena cena, brez kreditov</h2>
+              <h2 id="h-cena">Trije paketi, cene z DDV</h2>
               <div className="price">
                 <div className="plan">
                   <h3>Predogled</h3>
@@ -488,40 +490,61 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
                   </a>
                 </div>
                 <div className="plan">
-                  <h3>Naročnina</h3>
+                  <h3>{std.name}</h3>
                   <div className="amt">
-                    {`${wholeEur.format(paid.monthlyEur)} `}
+                    {`${wholeEur.format(std.monthlyEur)} `}
                     <small>na mesec</small>
                   </div>
-                  <p className="yearly">{`ali ${wholeEur.format(paid.yearlyEur)} na leto${paid.yearlyIncludesDomain ? ", domena vključena" : ""}`}</p>
+                  <p className="yearly">{`ali ${wholeEur.format(std.yearlyEur)} na leto${std.yearlyIncludesDomain ? ", domena vključena" : ""}`}</p>
                   <p className="muted">Celotna stran in vse, kar potrebujete, da jo vodite sami.</p>
                   <ul>
-                    <li>Vse strani: ponudba, cenik, o nas, kontakt</li>
-                    <li>Urejanje s klikom ali s pogovorom, brez kreditov</li>
+                    <li>{`Do ${std.site.maxPages} strani: ponudba, cenik, o nas, kontakt`}</li>
+                    <li>Urejanje s klikom brez omejitev, pomočnik vsak mesec</li>
                     <li>Objava in gostovanje</li>
                     <li>Prenos strani kot datoteke, kadarkoli</li>
                   </ul>
-                  <dl className="extra">
-                    <div>
-                      <dt>{`Prvo leto za prvih ${paid.foundingOffer.customers} strank`}</dt>
-                      <dd>{wholeEur.format(paid.foundingOffer.firstYearEur)}</dd>
-                    </div>
-                    <div>
-                      <dt>Postavitev skupaj z vami, po želji</dt>
-                      <dd>{`${wholeEur.format(paid.setupService.eur)} enkratno`}</dd>
-                    </div>
-                  </dl>
+                  {std.foundingOffer && (
+                    <dl className="extra">
+                      <div>
+                        <dt>{`Prvo leto za prvih ${std.foundingOffer.customers} strank`}</dt>
+                        <dd>{wholeEur.format(std.foundingOffer.firstYearEur)}</dd>
+                      </div>
+                      <div>
+                        <dt>Postavitev skupaj z vami, po želji</dt>
+                        <dd>{`${wholeEur.format(std.setupService.eur)} enkratno`}</dd>
+                      </div>
+                    </dl>
+                  )}
                   <a className="btn primary" href="#zacni">
                     Začnite s predogledom
                   </a>
-                  {/* No billing until the legal entity exists (config plans.paid.billingEnabled, TASKS: billing phase). */}
-                  <p className="muted fine">
-                    {paid.billingEnabled
-                      ? "Cene so z DDV. Letno naročnino plačate po računu z bančnim nakazilom."
-                      : "Načrtovane cene, z DDV. Plačevanja še ni, zato zaenkrat ničesar ne zaračunamo. Letno naročnino boste plačali po računu z bančnim nakazilom."}
-                  </p>
+                </div>
+                <div className="plan">
+                  <h3>{plus.name}</h3>
+                  <div className="amt">
+                    {`${wholeEur.format(plus.monthlyEur)} `}
+                    <small>na mesec</small>
+                  </div>
+                  <p className="yearly">{`ali ${wholeEur.format(plus.yearlyEur)} na leto${plus.yearlyIncludesDomain ? ", domena vključena" : ""}`}</p>
+                  <p className="muted">{`Vse iz paketa ${std.name}, za podjetja, ki jim stran prinaša stranke.`}</p>
+                  <ul>
+                    <li>{`Do ${plus.site.maxPages} strani`}</li>
+                    <li>{`Več pomoči pomočnika vsak mesec`}</li>
+                    {plus.setupService.includedYearly && <li>Pri letnem paketu postavitev skupaj z vami vključena</li>}
+                    <li>Odgovor na vprašanja isti dan</li>
+                    <li>{`Stran v ${plus.site.locales} jezikih ter novice, ekipa in dogodki (v pripravi)`}</li>
+                  </ul>
+                  <a className="btn" href="#zacni">
+                    Začnite s predogledom
+                  </a>
                 </div>
               </div>
+              {/* No billing until the legal entity exists (config plans.billingEnabled, TASKS: billing phase). */}
+              <p className="muted fine">
+                {plans.billingEnabled
+                  ? "Cene so z DDV. Letni paket plačate po računu z bančnim nakazilom."
+                  : "Načrtovane cene, z DDV. Plačevanja še ni, zato zaenkrat ničesar ne zaračunamo. Letni paket boste plačali po računu z bančnim nakazilom."}
+              </p>
             </div>
           </section>
 
@@ -634,6 +657,6 @@ const faq = (config: AppConfig): [string, string][] => [
   ],
   [
     "Ali dobim svojo domeno?",
-    `Stran dobi svoj naslov takoj. Povezava lastne domene in registracija nove domene sta v pripravi.${config.plans.paid.yearlyIncludesDomain ? " Pri letni naročnini bo domena vključena v ceno." : ""}`,
+    `Stran dobi svoj naslov takoj. Povezava lastne domene in registracija nove domene sta v pripravi.${config.plans.standard.yearlyIncludesDomain ? " Pri letnem paketu bo domena vključena v ceno." : ""}`,
   ],
 ];

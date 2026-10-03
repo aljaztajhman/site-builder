@@ -258,6 +258,16 @@ describe("allow-list (full sites before billing)", () => {
     const page = await added.text();
     expect(page).toContain("prva partnerka");
     expect(page).toContain("eva.partner+x@siol.net");
+    // Listed without a choice: Osnovni. The accounts list shows her plan, sites and AI cost, and a summary per plan.
+    expect(page).toContain("ima zdaj paket Osnovni.");
+    expect(page).toMatch(/<dt>Paket<\/dt><dd>Osnovni od \d+\. \d+\. \d{4}<\/dd>/);
+    expect(page).toMatch(/<p class="muted num" id="plan-summary">Brezplačno \d+ · Osnovni 1 · Plus 0\. Mesečno po načrtovanih cenah 15,00\u00a0€ z DDV, pomočnik ta mesec [\d,]+\u00a0€\.<\/p>/);
+    // The admin moves her to Plus from her account card; the date her paid rights started stays.
+    const since = (await platform.repo.accounts.allowed("eva.partner@siol.net"))!.added_at;
+    const plus = await req("/admin/allow-list", { method: "POST", body: new URLSearchParams({ email: "eva.partner+x@siol.net", plan: "premium", _csrf: admin.csrf }), headers: { cookie: admin.cookie } });
+    expect(await plus.text()).toContain("ima zdaj paket Plus.");
+    expect(await platform.repo.accounts.allowed("eva.partner@siol.net")).toMatchObject({ plan: "premium", added_at: since });
+    await req("/admin/allow-list", { method: "POST", body: new URLSearchParams({ email: "eva.partner+x@siol.net", plan: "standard", _csrf: admin.csrf }), headers: { cookie: admin.cookie } });
 
     const state = (await (await req(`/api/sites/${site}`, { headers: { cookie: eva.cookie } })).json()) as { access: { viewer: string; can: Record<string, boolean> } };
     expect(state.access).toMatchObject({ viewer: "paid", can: { edit: true, chat: true, regenerate: true, publish: true, export: true, fullSite: true } });

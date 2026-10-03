@@ -220,6 +220,7 @@ html.trade-switch::view-transition-old(root),html.trade-switch::view-transition-
 .plan{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-3);padding:24px}
 .plan .amt{font-family:var(--font-display);font-size:44px;font-weight:600;letter-spacing:-.03em;line-height:1;margin:10px 0 4px}
 .plan .amt small{font:400 16px var(--font-ui);color:var(--ink-3);letter-spacing:0}
+#cena .fine{margin-top:16px;font-size:14px}
 .plan ul{margin:16px 0 20px;display:grid;gap:8px;padding-left:0;list-style:none}
 .plan ul li{padding-left:18px;position:relative}
 .plan ul li::before{content:"";position:absolute;left:0;top:11px;width:8px;height:2px;background:var(--ink)}
@@ -297,6 +298,6 @@ footer .legal{margin-top:28px;padding-top:16px;border-top:1px solid var(--line);
   .versus{grid-template-columns:1fr 1fr;gap:20px}
   .how{grid-template-columns:repeat(5,1fr)}
   .ex{grid-template-columns:2fr 1fr;align-items:start}
-  .price{grid-template-columns:1fr 1fr}
+  .price{grid-template-columns:repeat(3,1fr)}
   footer .cols{grid-template-columns:2fr 1fr 1fr 1fr}
 }
