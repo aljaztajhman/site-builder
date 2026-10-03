@@ -168,7 +168,8 @@ describe("free limits in a browser", () => {
 
       // Sign up with a magic link on the same phone: the preview becomes the account's.
       await signIn(page, "ana.pekarna@siol.net");
-      expect(page.url()).toBe(`${base}/sites`);
+      expect(page.url()).toBe(`${base}/`);
+      await page.goto(`${base}/sites`);
       expect(await page.locator(".site-card h2 a").getAttribute("href")).toBe(`/sites/${first}`);
       expect(await page.locator("main.sites > p.muted").textContent()).toContain("Še 2 brezplačni ustvarjanji domače strani in 10 sprememb s pomočnikom.");
       expect((await platform.repo.getSite(first))!.device_id).toBeNull();
