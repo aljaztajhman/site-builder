@@ -406,6 +406,12 @@ export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
       create unique index site_domains_one_primary on site_domains(site_id) where is_primary;
     `,
   },
+  {
+    id: 17,
+    name: "allow_list.plan",
+    // sb-tiers: which paid plan an allow-listed account has (Osnovni or Plus); everyone listed so far had the one plan.
+    sql: `alter table allow_list add column plan text not null default 'standard' check (plan in ('standard', 'premium'))`,
+  },
 ];
 
 type Query = (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>;

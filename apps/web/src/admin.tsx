@@ -1,6 +1,6 @@
 import type { Context, Hono } from "hono";
-import type { AppConfig } from "@sb/config";
-import { POOLS, isDisposableEmailDomain, normaliseEmail, type AccountRow, type AllowListRow, type Pool, type Repo } from "@sb/platform";
+import { PLAN_KEYS, type AppConfig, type PlanKey } from "@sb/config";
+import { POOLS, isDisposableEmailDomain, normaliseEmail, type AccountListRow, type AllowListRow, type Pool, type Repo } from "@sb/platform";
 import { csrfOk, hashToken, newToken, type AppEnv } from "./access.ts";
 import { Doc, TopBar, html } from "./pages.tsx";
 import { formatDate, formatDateTime, formatEur } from "./ui/labels.ts";
@@ -33,6 +33,10 @@ export function registerAdminRoutes(app: Hono<AppEnv>, deps: AdminDeps): void {
         pools,
         holds: await repo.usage.holds(),
         warnAt: config.tiers.pools.warnAt,
+        plans: { standard: config.plans.standard.name, premium: config.plans.premium.name },
+        planPrices: { standard: config.plans.standard.monthlyEur, premium: config.plans.premium.monthlyEur },
+        allowances: { standard: config.plans.standard.ai.allowanceEurPerMonth, premium: config.plans.premium.ai.allowanceEurPerMonth },
+        freeLifetimeEur: config.tiers.free.lifetimeEur,
         ...(flash ? { flash } : {}),
       }),
       status,
@@ -69,8 +73,9 @@ export function registerAdminRoutes(app: Hono<AppEnv>, deps: AdminDeps): void {
     if (!email) return show(c, { text: "To ni veljaven e-poštni naslov.", bad: true }, 400);
     if (isDisposableEmailDomain(email.domain)) return show(c, { text: "Naslov za enkratno uporabo ne more biti na seznamu.", bad: true }, 400);
     const note = typeof body.note === "string" && body.note.trim() ? body.note.trim().slice(0, 200) : null;
-    await repo.accounts.allow(email.email, email.key, note);
-    return show(c, { text: `${email.email} ima zdaj dostop do celotne strani.` });
+    const plan = body.plan === "premium" ? "premium" : "standard";
+    await repo.accounts.allow(email.email, email.key, note, plan);
+    return show(c, { text: `${email.email} ima zdaj paket ${config.plans[plan].name}.` });
   });
 
   app.post("/admin/allow-list/remove", async (c) => {
@@ -107,16 +112,27 @@ const POOL_LABEL: Record<Pool, string> = { anonymous: "brez prijave", free: "bre
 interface AdminProps {
   csrf: string;
   allowList: AllowListRow[];
-  accounts: (AccountRow & { allowed_since: string | null; sites: number })[];
+  accounts: AccountListRow[];
   spendToday: number;
   cap: number;
   pools: { pool: Pool; size: number; spent: number; held: number }[];
   warnAt: number;
   holds: { pool: Pool; eur: number; until: string }[];
+  /** Plan names (config), for the allow-list's plan choice. */
+  plans: Record<PlanKey, string>;
+  /** Monthly prices (VAT included) and monthly AI allowances per plan, for the summary and each account. */
+  planPrices: Record<PlanKey, number>;
+  allowances: Record<PlanKey, number>;
+  freeLifetimeEur: number;
   flash?: { text: string; bad?: boolean };
 }
 
-export function adminPage({ csrf, allowList, accounts, spendToday, cap, pools, holds, warnAt, flash }: AdminProps): string {
+export function adminPage({ csrf, allowList, accounts, spendToday, cap, pools, holds, warnAt, plans, planPrices, allowances, freeLifetimeEur, flash }: AdminProps): string {
+  // Accounts per plan and what they bring and cost this month (planned prices while billing is off).
+  const byPlan = (p: PlanKey | null) => accounts.filter((a) => a.plan === p);
+  const monthlyRevenue = PLAN_KEYS.reduce((sum, k) => sum + byPlan(k).length * planPrices[k], 0);
+  const aiMonth = accounts.reduce((sum, a) => sum + a.ai_month_eur, 0);
+  const planLabel = (p: PlanKey | null) => (p ? plans[p] : "Brezplačno");
   return html(
     <Doc title="Skrbnik">
       <TopBar spend={{ today: spendToday, cap }} csrf={csrf} admin>
@@ -168,6 +184,14 @@ export function adminPage({ csrf, allowList, accounts, spendToday, cap, pools, h
           <input type="hidden" name="_csrf" value={csrf} />
           <label htmlFor="al-email">E-poštni naslov</label>
           <input id="al-email" type="email" name="email" required autoComplete="off" />
+          <label htmlFor="al-plan">Paket</label>
+          <select id="al-plan" name="plan">
+            {PLAN_KEYS.map((k) => (
+              <option key={k} value={k}>
+                {plans[k]}
+              </option>
+            ))}
+          </select>
           <label htmlFor="al-note">Opomba (neobvezno)</label>
           <input id="al-note" type="text" name="note" maxLength={200} />
           <button className="btn primary" type="submit">
@@ -180,6 +204,8 @@ export function adminPage({ csrf, allowList, accounts, spendToday, cap, pools, h
             <dl>
               <dt>E-pošta</dt>
               <dd>{a.email}</dd>
+              <dt>Paket</dt>
+              <dd>{plans[a.plan]}</dd>
               {a.note && (
                 <>
                   <dt>Opomba</dt>
@@ -199,20 +225,49 @@ export function adminPage({ csrf, allowList, accounts, spendToday, cap, pools, h
         <h2>
           Računi <span className="muted num">{accounts.length}</span>
         </h2>
+        <p className="muted num" id="plan-summary">
+          {`${[null, ...PLAN_KEYS].map((k) => `${planLabel(k as PlanKey | null)} ${byPlan(k as PlanKey | null).length}`).join(" · ")}. Mesečno po načrtovanih cenah ${formatEur(monthlyRevenue)} z DDV, pomočnik ta mesec ${formatEur(aiMonth)}.`}
+        </p>
         {accounts.length === 0 && <p className="muted">Še nihče se ni prijavil.</p>}
-        {accounts.map((a) => (
-          <article className="message" key={a.id}>
-            <p className="when num">{`Od ${formatDate(a.created_at)}${a.last_login_at ? `, zadnja prijava ${formatDateTime(a.last_login_at)}` : ""}`}</p>
-            <dl>
-              <dt>E-pošta</dt>
-              <dd>{a.email}</dd>
-              <dt>Dostop</dt>
-              <dd>{a.allowed_since ? "celotna stran (seznam)" : "brezplačno"}</dd>
-              <dt>Strani</dt>
-              <dd className="num">{a.sites}</dd>
-            </dl>
-          </article>
-        ))}
+        {accounts.map((a) => {
+          // Over its plan's monthly allowance (or a free account over its lifetime €): worth a look.
+          const limit = a.plan ? allowances[a.plan] : freeLifetimeEur;
+          const spent = a.plan ? a.ai_month_eur : a.ai_total_eur;
+          return (
+            <article className="message" key={a.id}>
+              <p className="when num">{`Od ${formatDate(a.created_at)}${a.last_login_at ? `, zadnja prijava ${formatDateTime(a.last_login_at)}` : ""}`}</p>
+              <dl>
+                <dt>E-pošta</dt>
+                <dd>{a.email}</dd>
+                <dt>Paket</dt>
+                <dd>{a.plan && a.allowed_since ? `${planLabel(a.plan)} od ${formatDate(a.allowed_since)}` : planLabel(null)}</dd>
+                <dt>Strani</dt>
+                <dd className="num">{`${a.sites}, objavljenih ${a.published}`}</dd>
+                <dt>Pomočnik</dt>
+                <dd className={`num${spent > limit ? " bad" : ""}`}>
+                  {a.plan
+                    ? `${formatEur(a.ai_month_eur)} ta mesec od ${formatEur(limit)}, skupaj ${formatEur(a.ai_total_eur)}`
+                    : `${formatEur(a.ai_total_eur)} skupaj od ${formatEur(limit)} brezplačnega`}
+                </dd>
+              </dl>
+              <form method="post" action="/admin/allow-list" className="row">
+                <input type="hidden" name="_csrf" value={csrf} />
+                <input type="hidden" name="email" value={a.email} />
+                <label htmlFor={`plan-${a.id}`}>Paket</label>
+                <select id={`plan-${a.id}`} name="plan">
+                  {PLAN_KEYS.map((k) => (
+                    <option key={k} value={k} selected={a.plan === k}>
+                      {plans[k]}
+                    </option>
+                  ))}
+                </select>
+                <button className="btn sm" type="submit">
+                  {a.plan ? "Zamenjaj paket" : "Dodeli paket"}
+                </button>
+              </form>
+            </article>
+          );
+        })}
       </main>
     </Doc>,
   );

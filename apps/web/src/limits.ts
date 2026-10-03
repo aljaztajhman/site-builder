@@ -1,5 +1,5 @@
 import type { Context } from "hono";
-import type { AppConfig } from "@sb/config";
+import type { AppConfig, PlanKey } from "@sb/config";
 import { poolOf, type Pool, type Repo, type SiteRow, type Tier, type UsageQueries } from "@sb/platform";
 import { clientIp, ipKey, signInUrl, tierOf, type AppEnv, type Refusal, type Viewer } from "./access.ts";
 import { PREVIEW_BADGE, formatDate } from "./ui/labels.ts";
@@ -67,12 +67,20 @@ export function allowancePeriod(since: Date, now: Date): { start: Date; end: Dat
   return { start: addMonths(since, k), end: addMonths(since, k + 1), first: k === 0 };
 }
 
-/** € the paid tier may spend on AI this allowance month: a share of the monthly price, plus the first month's extra. */
-export function monthlyAllowance(config: AppConfig, since: Date, now: Date): { eur: number; start: Date; end: Date } {
+/** € a paid plan may spend on AI this allowance month: its monthly allowance, plus the first month's extra (sb-tiers). */
+export function monthlyAllowance(config: AppConfig, plan: PlanKey, since: Date, now: Date): { eur: number; start: Date; end: Date } {
   const p = allowancePeriod(since, now);
-  const share = (config.plans.paid.monthlyEur * config.tiers.paid.allowancePercentOfMonthlyPrice) / 100;
-  return { eur: share + (p.first ? config.tiers.paid.firstMonthExtraEur : 0), start: p.start, end: p.end };
+  const ai = config.plans[plan].ai;
+  return { eur: ai.allowanceEurPerMonth + (p.first ? ai.firstMonthExtraEur : 0), start: p.start, end: p.end };
 }
+
+/** "Osnovni (od 15 € na mesec)": the plan an upsell points to. */
+const planOffer = (config: AppConfig, plan: PlanKey): string => `${config.plans[plan].name} (${config.plans[plan].monthlyEur} € na mesec)`;
+/** After a free limit: what the first paid plan adds. */
+const freeUpsell = (config: AppConfig): string => `Z naročnino ${planOffer(config, "standard")} dobite celotno stran, objavo na svoji domeni in pomočnika vsak mesec.`;
+/** After a paid allowance: Plus for Osnovni, nothing more to sell for Plus. */
+const allowanceUpsell = (config: AppConfig, plan: PlanKey): string =>
+  plan === "standard" ? ` Paket ${planOffer(config, "premium")} vključuje več pomoči vsak mesec.` : "";
 
 // ---------- Refusals (Slovene) ----------
 
@@ -113,9 +121,13 @@ async function altRefusalFor(u: UsageQueries, config: AppConfig, who: Who, ask: 
     if (used + photos > t.altText.photosPerDay[who.tier]) return altRefusal("alt_limit", "danes ste porabili vse samodejne opise fotografij.");
   }
   if (who.tier === "paid" && v.kind === "account" && v.paidSince) {
-    const a = monthlyAllowance(config, new Date(v.paidSince), who.now);
+    const a = monthlyAllowance(config, v.plan ?? "standard", new Date(v.paidSince), who.now);
     const s = await u.accountSpend(v.account.id, a.start);
     if (s.spent + s.held + estimate > a.eur + 1e-9) return altRefusal("allowance_used", "pomočnik je ta mesec porabil vse, kar vključuje naročnina.");
+  }
+  if (who.tier === "free" && v.kind === "account") {
+    const s = await u.freeLifetimeSpend(v.account.id);
+    if (s.spent + s.held + estimate > t.free.lifetimeEur + 1e-9) return altRefusal("free_budget_used", "brezplačni del pomočnika je porabljen.");
   }
   const pool = poolOf(who.tier);
   const p = await u.pool(pool);
@@ -150,17 +162,27 @@ async function refusalFor(u: UsageQueries, config: AppConfig, who: Who, ask: Job
   } else if (who.tier === "free" && v.kind === "account") {
     if (ask.kind === "generate") {
       if ((await u.countJobs({ kind: "generate", tiers: ["free"], accountId: v.account.id })) >= t.free.homepages) {
-        return msg(429, "free_homepages_used", `Porabili ste ${count(t.free.homepages, HOMEPAGES)}. Stran lahko še naprej urejate neposredno.`);
+        return msg(429, "free_homepages_used", `Porabili ste ${count(t.free.homepages, HOMEPAGES)}. Stran lahko še naprej urejate neposredno. ${freeUpsell(config)}`);
       }
       if (await ipLimit(["anonymous", "free"])) return msg(429, "ip_limit", "Iz tega omrežja je bilo danes narejenih že veliko predogledov. Poskusite jutri; stran lahko medtem urejate neposredno.");
     } else if ((await u.countJobs({ kind: "edit", tiers: ["free"], accountId: v.account.id })) >= t.free.chatEdits) {
-      return msg(429, "free_edits_used", `Porabili ste vseh ${count(t.free.chatEdits, EDITS)}. Stran lahko še naprej urejate neposredno.`);
+      return msg(429, "free_edits_used", `Porabili ste vseh ${count(t.free.chatEdits, EDITS)}. Stran lahko še naprej urejate neposredno. ${freeUpsell(config)}`);
+    }
+    // Whatever the counts say, a free account never costs more than its lifetime € (sb-tiers: micro losses only).
+    const s = await u.freeLifetimeSpend(v.account.id);
+    if (s.spent + s.held + estimate > t.free.lifetimeEur + 1e-9) {
+      return msg(429, "free_budget_used", `Brezplačni del pomočnika je porabljen. Stran lahko še naprej urejate neposredno. ${freeUpsell(config)}`);
     }
   } else if (who.tier === "paid" && v.kind === "account" && v.paidSince) {
-    const a = monthlyAllowance(config, new Date(v.paidSince), who.now);
+    const plan = v.plan ?? "standard";
+    const a = monthlyAllowance(config, plan, new Date(v.paidSince), who.now);
     const s = await u.accountSpend(v.account.id, a.start);
     if (s.spent + s.held + estimate > a.eur + 1e-9) {
-      return msg(429, "allowance_used", `Pomočnik je ta mesec porabil vse, kar vključuje naročnina. Stran lahko še naprej urejate neposredno; pomočnik spet deluje ${formatDate(a.end.toISOString())}.`);
+      return msg(
+        429,
+        "allowance_used",
+        `Pomočnik je ta mesec porabil vse, kar vključuje naročnina. Stran lahko še naprej urejate neposredno; pomočnik spet deluje ${formatDate(a.end.toISOString())}.${allowanceUpsell(config, plan)}`,
+      );
     }
   }
   const pool = poolOf(who.tier);
@@ -217,7 +239,7 @@ export interface Allowance {
   eurTotal: number | null;
   /** When the paid allowance renews (ISO). */
   renewsAt: string | null;
-  /** One Slovene sentence for the owner, e.g. "Še 2 brezplačni ustvarjanji domače strani in 10 sprememb s pomočnikom." */
+  /** One Slovene sentence for the owner, e.g. "Še 1 brezplačno ustvarjanje domače strani in 5 sprememb s pomočnikom." */
   text: string;
 }
 
@@ -270,7 +292,7 @@ export async function allowanceFor(deps: Pick<LimitDeps, "repo" | "config">, vie
     return { ...none, homepagesLeft, homepagesTotal: t.free.homepages, chatEditsLeft, chatEditsTotal: t.free.chatEdits, text };
   }
   if (viewer.kind === "account" && viewer.paidSince) {
-    const a = monthlyAllowance(deps.config, new Date(viewer.paidSince), now);
+    const a = monthlyAllowance(deps.config, viewer.plan ?? "standard", new Date(viewer.paidSince), now);
     const s = await u.accountSpend(viewer.account.id, a.start);
     const left = Math.max(0, a.eur - s.spent - s.held);
     const sites = Math.floor(left / t.estimatesEur.fullSite + 1e-9);

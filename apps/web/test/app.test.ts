@@ -155,16 +155,27 @@ describe("landing page", () => {
     const page = await res.text();
     expect(page).toContain("Opišite svoje podjetje.<br/>Spletna stran je narejena.");
     for (const id of ["zacni", "kaj", "kako", "primer", "cena", "vprasanja"]) expect(page, id).toContain(`id="${id}"`);
-    const paid = loadConfig().plans.paid;
+    const plans = loadConfig().plans;
+    const std = plans.standard;
+    const plus = plans.premium;
     const eur = (n: number) => `${n}\u00a0€`;
-    expect(page).toContain(`${eur(paid.monthlyEur)} <small>na mesec</small>`);
-    expect(page).toContain(`ali ${eur(paid.yearlyEur)} na leto, domena vključena`);
-    expect(page).toContain(`<dt>Prvo leto za prvih ${paid.foundingOffer.customers} strank</dt><dd>${eur(paid.foundingOffer.firstYearEur)}</dd>`);
-    expect(page).toContain(`<dd>${eur(paid.setupService.eur)} enkratno</dd>`);
+    expect(page).toContain(`<h3>${std.name}</h3>`);
+    expect(page).toContain(`<h3>${plus.name}</h3>`);
+    expect(page).toContain(`${eur(std.monthlyEur)} <small>na mesec</small>`);
+    expect(page).toContain(`${eur(plus.monthlyEur)} <small>na mesec</small>`);
+    expect(page).toContain(`ali ${eur(std.yearlyEur)} na leto, domena vključena`);
+    expect(page).toContain(`ali ${eur(plus.yearlyEur)} na leto, domena vključena`);
+    expect(page).toContain(`<dt>Prvo leto za prvih ${std.foundingOffer!.customers} strank</dt><dd>${eur(std.foundingOffer!.firstYearEur)}</dd>`);
+    expect(page).toContain(`<dd>${eur(std.setupService.eur)} enkratno</dd>`);
+    expect(page).toContain(`Do ${std.site.maxPages} strani`);
+    expect(page).toContain(`Do ${plus.site.maxPages} strani`);
+    // Features not built yet say so.
+    expect(page).toContain("novice, ekipa in dogodki (v pripravi)");
     // No billing yet: the prices are planned and nothing is charged.
-    expect(paid.billingEnabled).toBe(false);
+    expect(plans.billingEnabled).toBe(false);
     expect(page).toContain("Načrtovane cene, z DDV. Plačevanja še ni, zato zaenkrat ničesar ne zaračunamo.");
-    expect(page).not.toMatch(/od \d+\u00a0€/);
+    // The comparison with a designer names the cheapest plan as "from".
+    expect(page).toContain(`<b>od ${eur(std.monthlyEur)}</b> na mesec (načrtovana cena)`);
     // Signed out the prompt is the intake too (the first homepage needs no account): a POST, never the URL.
     const formTag = page.match(/<form class="prompt"[^>]*>/)?.[0] ?? "";
     expect(formTag).toContain('action="/api/sites"');
@@ -200,16 +211,16 @@ describe("landing page", () => {
 
   it("calls the prices planned only while billing is off", () => {
     const config = loadConfig();
-    const withBilling = { ...config, plans: { ...config.plans, paid: { ...config.plans.paid, billingEnabled: true } } };
+    const withBilling = { ...config, plans: { ...config.plans, billingEnabled: true } };
     const page = homePage({ config: withBilling, signedIn: false, csrf: "t", fullSite: false, allowance: "", botSiteKey: null });
     expect(page).not.toContain("Načrtovane cene");
     expect(page).not.toContain("Plačevanja še ni");
-    expect(page).toContain("Cene so z DDV. Letno naročnino plačate po računu z bančnim nakazilom.");
-    expect(page).toContain("Pri letni naročnini bo domena vključena v ceno.");
-    const noDomain = { ...config, plans: { ...config.plans, paid: { ...config.plans.paid, yearlyIncludesDomain: false } } };
+    expect(page).toContain("Cene so z DDV. Letni paket plačate po računu z bančnim nakazilom.");
+    expect(page).toContain("Pri letnem paketu bo domena vključena v ceno.");
+    const noDomain = { ...config, plans: { ...config.plans, standard: { ...config.plans.standard, yearlyIncludesDomain: false }, premium: { ...config.plans.premium, yearlyIncludesDomain: false } } };
     const page2 = homePage({ config: noDomain, signedIn: false, csrf: "t", fullSite: false, allowance: "", botSiteKey: null });
     expect(page2).not.toContain("domena vključena");
-    expect(page2).not.toContain("Pri letni naročnini bo domena");
+    expect(page2).not.toContain("Pri letnem paketu bo domena");
   });
 
   it("says in the FAQ which versions can be restored, from the retention settings, not 'every change' forever", () => {

@@ -105,6 +105,19 @@ export class UsageQueries {
     return Number(rows[0]?.n ?? 0);
   }
 
+  /**
+   * Everything an account's free use has cost: logged € and € still held by its anonymous and free jobs,
+   * its claimed anonymous preview included (claiming moves the preview's jobs to the account).
+   */
+  async freeLifetimeSpend(accountId: string): Promise<Spend> {
+    const spent = await this.q<{ n: string | number }>(
+      "select coalesce(sum(m.cost_eur), 0) as n from model_calls m join ai_jobs j on j.id = m.ai_job_id where j.account_id = $1 and j.tier in ('anonymous', 'free')",
+      [accountId],
+    );
+    const held = await this.q<{ n: string | number }>(`select coalesce(sum(${HELD}), 0) as n from ai_jobs j where ${LIVE} and j.account_id = $1 and j.tier in ('anonymous', 'free')`, [accountId]);
+    return { spent: Number(spent.rows[0]?.n ?? 0), held: Number(held.rows[0]?.n ?? 0) };
+  }
+
   async insertJob(j: { kind: AiJobKind; scope?: string | null; tier: Tier; accountId?: string | null; deviceId?: string | null; ipKey?: string; siteId?: string | null; estimateEur: number; expiresInMinutes?: number; units?: number }): Promise<string> {
     const { rows } = await this.q<{ id: string | number }>(
       `insert into ai_jobs (kind, scope, tier, pool, account_id, device_id, ip_key, site_id, estimate_eur, expires_at, units)

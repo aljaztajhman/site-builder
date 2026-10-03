@@ -32,15 +32,14 @@ const CompositionTarget = z.object({
 });
 
 /**
- * The one paid plan (owner's decision `sb-pricing`, docs/GO-TO-MARKET.md §5). Prices in euros, VAT
- * included. No billing code exists yet: `billingEnabled` stays false until the legal entity is
- * registered, and the landing page shows these as planned prices.
+ * A paid plan (owner's decisions `sb-pricing` and `sb-tiers`, docs/plans/pricing-tiers.md). Prices in
+ * euros, VAT included. No billing code exists yet: `plans.billingEnabled` stays false until the legal
+ * entity is registered, and the landing page shows these as planned prices.
  */
 const PaidPlan = z
-  .looseObject({
-    billingEnabled: z.boolean(),
-    /** Prices are shown and charged with VAT, whether or not we're VAT-registered. */
-    vatIncluded: z.literal(true),
+  .strictObject({
+    /** Shown to owners ("Osnovni", "Plus"). */
+    name: z.string().min(1),
     monthlyEur: z.number().positive(),
     yearlyEur: z.number().positive(),
     /** The yearly plan includes the customer's domain. */
@@ -48,12 +47,46 @@ const PaidPlan = z
     /** How the yearly plan is paid: an invoice settled by bank transfer. */
     yearlyPayment: z.enum(["invoice-bank-transfer"]),
     /** The first `customers` customers pay `firstYearEur` for their first year, then the yearly price. */
-    foundingOffer: z.strictObject({ customers: z.number().int().positive(), firstYearEur: z.number().positive() }),
-    /** Optional one-off "we set it up with you" service. */
-    setupService: z.strictObject({ eur: z.number().positive() }),
+    foundingOffer: z.strictObject({ customers: z.number().int().positive(), firstYearEur: z.number().positive() }).optional(),
+    /** The one-off "we set it up with you" service, and whether the yearly plan includes it. */
+    setupService: z.strictObject({ eur: z.number().positive(), includedYearly: z.boolean() }),
+    /** A hard monthly € limit on AI work, counted from real costs; direct editing is never limited. */
+    ai: z.strictObject({ allowanceEurPerMonth: z.number().min(0), firstMonthExtraEur: z.number().min(0) }),
+    /** What a site on this plan may have (enforced as each feature is built). */
+    site: z.strictObject({ maxPages: z.number().int().positive(), locales: z.number().int().min(1), generatedPicturesPerMonth: z.number().int().min(0) }),
   })
   .refine((p) => p.yearlyEur < 12 * p.monthlyEur, { message: "the yearly price must be below 12 monthly payments" })
-  .refine((p) => p.foundingOffer.firstYearEur < p.yearlyEur, { message: "the founding first year must be below the yearly price" });
+  .refine((p) => !p.foundingOffer || p.foundingOffer.firstYearEur < p.yearlyEur, { message: "the founding first year must be below the yearly price" });
+export type PaidPlanConfig = z.infer<typeof PaidPlan>;
+export type PlanKey = "standard" | "premium";
+export const PLAN_KEYS: readonly PlanKey[] = ["standard", "premium"];
+
+const PlanCosts = z.object({
+  domainEurPerYear: z.number().min(0),
+  hostingEurPerSitePerYear: z.number().min(0),
+  vatRate: z.number().min(0).max(1),
+  cardFeePercent: z.number().min(0),
+  cardFeeFixedEur: z.number().min(0),
+});
+type PlanCostsConfig = z.infer<typeof PlanCosts>;
+
+/**
+ * What a plan earns in the worst case: its price without VAT and card fees, minus the most it can cost
+ * us (the whole AI allowance, the first month's extra, the domain when included, hosting). Yearly is
+ * paid by bank transfer (no card fee); monthly by card.
+ */
+export function planMargins(p: PaidPlanConfig, c: PlanCostsConfig): { monthly: number; yearly: number; foundingYear: number | null } {
+  const net = (gross: number, card: boolean) => gross / (1 + c.vatRate) - (card ? (gross * c.cardFeePercent) / 100 + c.cardFeeFixedEur : 0);
+  const hostingMonth = c.hostingEurPerSitePerYear / 12;
+  const aiYear = 12 * p.ai.allowanceEurPerMonth + p.ai.firstMonthExtraEur;
+  const yearCost = aiYear + c.hostingEurPerSitePerYear + (p.yearlyIncludesDomain ? c.domainEurPerYear : 0);
+  return {
+    // The first month is the dearest: the allowance plus its one-off extra.
+    monthly: net(p.monthlyEur, true) - (p.ai.allowanceEurPerMonth + p.ai.firstMonthExtraEur + hostingMonth),
+    yearly: net(p.yearlyEur, false) - yearCost,
+    foundingYear: p.foundingOffer ? net(p.foundingOffer.firstYearEur, false) - yearCost : null,
+  };
+}
 
 export const AppConfigSchema = z.object({
   models: z.object({
@@ -196,8 +229,12 @@ export const AppConfigSchema = z.object({
         maxFileBytes: z.number().int().positive(),
       }),
     }),
-    free: z.object({ homepages: z.number().int().min(0), chatEdits: z.number().int().min(0) }),
-    paid: z.object({ allowancePercentOfMonthlyPrice: z.number().min(0).max(100), firstMonthExtraEur: z.number().min(0) }),
+    free: z.object({
+      homepages: z.number().int().min(0),
+      chatEdits: z.number().int().min(0),
+      /** The most a free account may ever cost (its claimed anonymous preview included): micro losses only. */
+      lifetimeEur: z.number().min(0).max(1),
+    }),
     perIpGenerationsPerDay: z.number().int().positive(),
     /** Photo descriptions (the vision model) per account in 24 h; the admin has no count, only the paid pool. */
     altText: z.object({ photosPerDay: z.object({ free: z.number().int().min(0), paid: z.number().int().min(0) }) }),
@@ -215,8 +252,24 @@ export const AppConfigSchema = z.object({
        */
       watermark: z.enum(["app-badge", "off"]),
     }),
-    paid: PaidPlan,
-  }),
+    billingEnabled: z.boolean(),
+    /** Prices are shown and charged with VAT, whether or not we're VAT-registered. */
+    vatIncluded: z.literal(true),
+    costs: PlanCosts,
+    standard: PaidPlan,
+    premium: PaidPlan,
+    /** "AI paket": more allowance for this month, sold when a plan's is used up. */
+    aiTopUp: z.object({ eur: z.number().positive(), allowanceEur: z.number().positive(), maxPerMonth: z.number().int().min(0) }),
+  })
+    .refine((p) => PLAN_KEYS.every((k) => { const m = planMargins(p[k], p.costs); return m.monthly > 0 && m.yearly > 0 && (m.foundingYear ?? 1) > 0; }), {
+      message: "a paid plan could lose money: its price without VAT and fees must cover the whole AI allowance, the domain and hosting (planMargins)",
+    })
+    .refine((p) => p.aiTopUp.eur / (1 + p.costs.vatRate) - (p.aiTopUp.eur * p.costs.cardFeePercent) / 100 - p.costs.cardFeeFixedEur > p.aiTopUp.allowanceEur, {
+      message: "the AI top-up must earn more than the allowance it adds",
+    })
+    .refine((p) => p.premium.monthlyEur > p.standard.monthlyEur && planMargins(p.premium, p.costs).yearly > planMargins(p.standard, p.costs).yearly, {
+      message: "Plus must cost more than Osnovni and earn more per year",
+    }),
 });
 export type AppConfig = z.infer<typeof AppConfigSchema>;
 export type ModelStageName = keyof AppConfig["models"];

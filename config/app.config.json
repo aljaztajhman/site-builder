@@ -135,8 +135,12 @@
       "$comment": "Uploads without an account: the bot check and the limits run first (a signed one-time ticket, valid ticketMinutes), then at most maxTotalBytes of request body (declared size checked before reading, the stream cut off past it), maxPhotos photos, maxFileBytes per file.",
       "uploads": { "ticketMinutes": 10, "maxTotalBytes": 25000000, "maxPhotos": 10, "maxFileBytes": 10000000 }
     },
-    "free": { "homepages": 2, "chatEdits": 10 },
-    "paid": { "allowancePercentOfMonthlyPrice": 10, "firstMonthExtraEur": 3 },
+    "free": {
+      "$comment": "sb-tiers (proposed 2026-10-03): a free account gets `homepages` more and `chatEdits` in total, and never costs more than lifetimeEur, its claimed anonymous preview included (counted from real costs).",
+      "homepages": 1,
+      "chatEdits": 5,
+      "lifetimeEur": 0.6
+    },
     "perIpGenerationsPerDay": 5,
     "altText": {
       "$comment": "Photo descriptions (alt job, the vision model) for photos an owner adds in the editor: photos per account in 24 h, on top of the tier's pool (and a paid account's allowance). Adding and replacing photos is never limited; over the cap the owner writes the description. Anonymous visitors can't add photos; the admin has no count.",
@@ -156,17 +160,43 @@
       "watermark": "app-badge",
       "publishable": false
     },
-    "paid": {
-      "$comment": "Owner's decision sb-pricing (2026-10-01). Whole euros, VAT included, the same whether or not we're VAT-registered. billingEnabled stays false until the legal entity exists (sb-legal-entity: registered after billing is built, before the first charge); while it's false the landing page calls these planned prices.",
-      "billingEnabled": false,
-      "vatIncluded": true,
+    "$comment2": "Paid plans (sb-pricing 2026-10-01 for Osnovni; sb-tiers proposed 2026-10-03 adds Plus). Whole euros, VAT included, the same whether or not we're VAT-registered. billingEnabled stays false until the legal entity exists (sb-legal-entity); while it's false the landing page calls these planned prices. Every plan must make money even when its owner uses the whole AI allowance: the schema checks each price against `costs` (VAT taken off, the domain, hosting, card fees) and refuses a config where any plan, the founding year or the AI top-up could lose money.",
+    "billingEnabled": false,
+    "vatIncluded": true,
+    "costs": {
+      "$comment": "Worst-case costs per customer, for the margin check. domain: .si ~€10–13/yr at the reseller (registry fee €10, research 2026-10-03). hosting: a share of Railway, the edge and email per site. vatRate: Slovenia's 22 %, taken off even while we're below the VAT threshold. Card fee: Stripe's EU card rate.",
+      "domainEurPerYear": 13,
+      "hostingEurPerSitePerYear": 6,
+      "vatRate": 0.22,
+      "cardFeePercent": 1.5,
+      "cardFeeFixedEur": 0.25
+    },
+    "standard": {
+      "name": "Osnovni",
       "monthlyEur": 15,
       "yearlyEur": 150,
       "yearlyIncludesDomain": true,
       "yearlyPayment": "invoice-bank-transfer",
       "foundingOffer": { "customers": 100, "firstYearEur": 99 },
-      "setupService": { "eur": 79 },
-      "aiEdits": "fair-use"
+      "setupService": { "eur": 79, "includedYearly": false },
+      "ai": { "allowanceEurPerMonth": 1.5, "firstMonthExtraEur": 3 },
+      "site": { "maxPages": 8, "locales": 1, "generatedPicturesPerMonth": 3 }
+    },
+    "premium": {
+      "name": "Plus",
+      "monthlyEur": 29,
+      "yearlyEur": 290,
+      "yearlyIncludesDomain": true,
+      "yearlyPayment": "invoice-bank-transfer",
+      "setupService": { "eur": 79, "includedYearly": true },
+      "ai": { "allowanceEurPerMonth": 3.5, "firstMonthExtraEur": 3 },
+      "site": { "maxPages": 20, "locales": 2, "generatedPicturesPerMonth": 10 }
+    },
+    "aiTopUp": {
+      "$comment": "'AI paket': more allowance this month when the plan's is used up; earns money, at most maxPerMonth. Not sold yet (needs billing).",
+      "eur": 5,
+      "allowanceEur": 2.5,
+      "maxPerMonth": 2
     }
   }
 }

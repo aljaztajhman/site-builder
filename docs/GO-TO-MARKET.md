@@ -122,7 +122,7 @@ Before buying: a trademark search for "Izvesek" at SIPO and EUIPO TMview, classe
 
 ## 5. Offer and pricing
 
-Decided (`sb-pricing`, 2026-10-01); the numbers live in config (`plans.paid`). Billing isn't built yet and stays switched off in config until the legal entity exists (`sb-legal-entity`), so until then these are planned prices and the landing page says so.
+Decided (`sb-pricing`, 2026-10-01); the numbers live in config (`plans.standard`; a second plan, Plus, is proposed in `sb-tiers`, docs/plans/pricing-tiers.md). Billing isn't built yet and stays switched off in config until the legal entity exists (`sb-legal-entity`), so until then these are planned prices and the landing page says so.
 
 - **One plan.** Full site, edits (chat, editor, phone), hosting, SSL, forms, export. No tier table; the decision is yes or no.
 - **€15/month or €150/year, VAT included, the domain included on yearly.** Many s.p. aren't VAT-registered (threshold €60,000) and can't deduct it, and ZEPT requires prices on websites to include tax anyway. Same price whether or not we're VAT-registered.
