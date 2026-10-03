@@ -413,6 +413,18 @@ describe("opening-hours", () => {
     expect(render(fixtures["opening-hours"], ctxWith({ hours: undefined }))).toContain('data-ph="hours"');
   });
 
+  it("photo: the table beside the shop front in an arch, a detail in a disc over its edge, the note under the hours", () => {
+    const out = render({ ...fixtures["opening-hours"], variant: "photo", props: { ...fixtures["opening-hours"].props, image: "img_salon", inset: "img_team" } });
+    expect(out).toContain('<div class="oh oh--photo"><figure class="oh__door"><picture class="media oh__door-media arch-top media--contained">');
+    expect(out).toContain('<span class="oh__dot disc"><picture class="media oh__dot-media media--contained">');
+    expect(out).toContain('<table class="oh__table" aria-labelledby="s_hours-title">');
+    expect(out).toContain("Ob praznikih po dogovoru.");
+    // Without a photo it is the plain table.
+    const plain = render({ ...fixtures["opening-hours"], variant: "photo" });
+    expect(plain).not.toContain("<img");
+    expect(plain).toContain('<table class="oh__table"');
+  });
+
   it("has no props that duplicate the hours", () => {
     const bad = { ...fixtures["opening-hours"], props: { title: "Ure", hours: "8-16" } };
     expect(openingHoursSection.schema.safeParse(bad).success).toBe(false);

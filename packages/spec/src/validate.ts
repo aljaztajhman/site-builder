@@ -82,6 +82,17 @@ export function semanticIssues(spec: SiteSpec): Issue[] {
     if (centred.length > 1) add(`/pages/${pi}/sections`, "banned", `${centred.length} centred sections on one page (max 1)`);
   });
 
+  // hero-signature: the line that introduces a phone or an opening time, and the address only on the label card.
+  spec.pages.forEach((p, pi) =>
+    p.sections.forEach((s, si) => {
+      if (s.type !== "hero-signature") return;
+      const at = `/pages/${pi}/sections/${si}/props`;
+      if (s.props.fact !== "address" && s.props.factLabel === undefined) add(`${at}/factLabel`, "structure", `factLabel is required when the hero shows the ${s.props.fact}`);
+      if (s.props.fact === "address" && s.variant !== "label") add(`${at}/fact`, "structure", "fact address is only shown by the label variant");
+      if (s.props.receipt && s.variant !== "receipt") add(`${at}/receipt`, "structure", "receipt is only shown by the receipt variant");
+    }),
+  );
+
   // References: images and pages.
   const imageIds = new Set<string>();
   spec.assets.images.forEach((img, i) => {

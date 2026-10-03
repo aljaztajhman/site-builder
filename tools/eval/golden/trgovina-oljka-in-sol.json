@@ -1,5 +1,5 @@
 {
-  "specVersion": 6,
+  "specVersion": 7,
   "slug": "trgovina-oljka-in-sol",
   "locales": {
     "default": "sl",
@@ -47,29 +47,31 @@
     }
   },
   "design": {
-    "direction": "playful-modern",
-    "fontPair": "bricolage-figtree",
+    "direction": "etiketa",
+    "fontPair": "lora-karla",
     "colors": {
       "background": "#ffffff",
-      "surface": "#f1edfc",
-      "text": "#1c1427",
-      "muted": "#554d66",
-      "primary": "#b01f5c",
+      "surface": "#e3ebd3",
+      "text": "#23281a",
+      "muted": "#4d5440",
+      "primary": "#b9492f",
       "onPrimary": "#ffffff",
-      "accent": "#d93f7d",
-      "border": "#dcd5ee",
-      "inverse": "#2a1236",
-      "onInverse": "#f5f5f5"
+      "accent": "#869850",
+      "border": "#cfd6bb",
+      "inverse": "#3b4819",
+      "onInverse": "#f5f5f5",
+      "band": "#b9492f",
+      "onBand": "#ffffff"
     },
-    "radius": 12,
-    "baseFontSize": 17,
-    "scale": 1.3,
-    "headingWeight": 750,
+    "radius": 6,
+    "baseFontSize": 18,
+    "scale": 1.25,
+    "headingWeight": 700,
     "headingCase": "normal",
     "headingTracking": -0.02,
     "density": "regular",
-    "shadow": "subtle",
-    "imagery": "arched"
+    "shadow": "none",
+    "imagery": "natural"
   },
   "assets": {
     "images": [
@@ -112,8 +114,9 @@
   },
   "chrome": {
     "header": {
-      "variant": "split-cta",
-      "cta": "call"
+      "variant": "bar",
+      "cta": "call",
+      "tone": "inverse"
     },
     "footer": {
       "variant": "compact"
@@ -136,140 +139,113 @@
       "sections": [
         {
           "id": "s_hero",
-          "type": "hero-split",
-          "variant": "image-right",
+          "type": "hero-signature",
+          "variant": "label",
           "props": {
-            "eyebrow": "Staro mestno jedro Kopra",
-            "headline": "Oljčno olje, piranska sol in dobrote iz Istre in s Krasa",
-            "intro": "Prodajamo samo izdelke manjših pridelovalcev iz slovenske Istre in Krasa. Darilne pakete sestavimo po vaši želji in lepo zavijemo.",
+            "headline": "Istrske dobrote manjših pridelovalcev",
+            "intro": "Majhna trgovina v starem mestnem jedru Kopra. Prodajamo samo izdelke manjših pridelovalcev iz slovenske Istre in Krasa.",
+            "fact": "address",
             "primary": {
-              "label": "Naročite darilni paket",
+              "label": "Darilni paketi",
               "target": {
                 "page": "p_darila"
               }
             },
             "secondary": {
-              "label": "Kako do trgovine",
+              "label": "Kaj prodajamo",
               "target": {
-                "action": "directions"
+                "page": "p_ponudba"
               }
             },
-            "image": "img_01"
+            "image": "img_01",
+            "inset": "img_02"
           }
         },
         {
-          "id": "s_strip",
-          "type": "contact-strip",
-          "variant": "bar",
-          "props": {}
-        },
-        {
-          "id": "s_products",
-          "type": "products",
-          "variant": "grid",
-          "tone": "alt",
+          "id": "s_shelf",
+          "type": "price-list",
+          "variant": "tags",
           "props": {
-            "title": "Na naših policah",
-            "intro": "Poleg tega še med, vino, suhe fige, marmelade iz fig in domače testenine.",
-            "items": [
+            "title": "Na policah",
+            "intro": "Vse je od manjših pridelovalcev iz slovenske Istre in Krasa. Spletne trgovine za zdaj nimamo, pridite pogledat.",
+            "groups": [
               {
-                "name": "Ekstra deviško oljčno olje",
-                "unit": "0,5 l",
-                "price": {
-                  "amount": 14
-                },
-                "image": "img_01"
-              },
-              {
-                "name": "Piranska sol",
-                "unit": "1 kg",
-                "price": {
-                  "amount": 4.5
-                },
-                "image": "img_02"
-              },
-              {
-                "name": "Darilni paket",
-                "description": "Sestavimo ga po vaši želji.",
-                "price": {
-                  "amount": 25,
-                  "from": true
-                },
-                "image": "img_03"
-              },
-              {
-                "name": "Pršut in siri",
-                "description": "Od manjših pridelovalcev s Krasa in iz Istre.",
-                "image": "img_05"
+                "items": [
+                  {
+                    "name": "Ekstra deviško oljčno olje",
+                    "note": "0,5 l",
+                    "price": {
+                      "amount": 14
+                    }
+                  },
+                  {
+                    "name": "Piranska sol",
+                    "note": "1 kg",
+                    "price": {
+                      "amount": 4.5
+                    }
+                  },
+                  {
+                    "name": "Darilni paket",
+                    "note": "sestavimo ga po vaši želji",
+                    "price": {
+                      "amount": 25,
+                      "from": true
+                    }
+                  }
+                ]
               }
             ]
           }
         },
         {
-          "id": "s_summer",
-          "type": "announcement",
-          "variant": "card",
+          "id": "s_rest",
+          "type": "text",
+          "variant": "narrow",
           "props": {
-            "title": "Poleti odprto tudi ob nedeljah",
-            "text": "Julija in avgusta smo odprti tudi ob nedeljah od 9.00 do 12.00."
+            "heading": "Imamo tudi",
+            "paragraphs": [
+              "Med, vino, pršut, sire, suhe fige, marmelade iz fig in domače testenine."
+            ]
           }
         },
         {
-          "id": "s_gift_steps",
-          "type": "steps",
-          "variant": "horizontal",
+          "id": "s_gifts",
+          "type": "image-text",
+          "variant": "round",
+          "tone": "band",
           "props": {
-            "heading": "Darilni paket s prevzemom v trgovini",
-            "intro": "Online shopa zaenkrat nimamo. Paket naročite, mi ga pripravimo, vi ga prevzamete (click & collect).",
-            "steps": [
-              {
-                "title": "Naročite",
-                "text": "Po telefonu ali po e-pošti povejte, kaj naj bo v paketu."
-              },
-              {
-                "title": "Sestavimo in zavijemo",
-                "text": "Paket sestavimo po vaši želji in ga lepo zavijemo."
-              },
-              {
-                "title": "Prevzamete v trgovini",
-                "text": "Paket prevzamete na Kidričevi ulici v času odprtja."
-              }
+            "heading": "Darilni paketi po vaši želji",
+            "paragraphs": [
+              "Sestavimo jih in lepo zavijemo. Za podjetja pripravimo poslovna darila v večjih količinah. Naročite po telefonu ali e-pošti, paket prevzamete v trgovini."
             ],
-            "action": {
-              "label": "Pokličite za naročilo",
+            "link": {
+              "label": "Naročite paket",
               "target": {
                 "action": "call"
               }
-            }
+            },
+            "image": "img_03"
           }
         },
         {
           "id": "s_shop",
-          "type": "image-text",
-          "variant": "image-left",
+          "type": "opening-hours",
+          "variant": "photo",
           "tone": "alt",
           "props": {
-            "heading": "Majhna trgovina v kamniti hiši",
-            "paragraphs": [
-              "Najdete nas v starem mestnem jedru Kopra, na Kidričevi ulici. Veliko naših kupcev so turisti, zato imamo tudi darilne pakete.",
-              "Za podjetja pripravimo tudi poslovna darila v večjih količinah."
-            ],
-            "link": {
-              "label": "Pot do trgovine",
-              "target": {
-                "action": "directions"
-              }
-            },
-            "image": "img_04"
+            "title": "Odprto",
+            "image": "img_04",
+            "inset": "img_05"
           }
         },
         {
-          "id": "s_contact",
+          "id": "s_call",
           "type": "contact",
-          "variant": "split-map",
-          "tone": "alt",
+          "variant": "call-out",
+          "tone": "inverse",
           "props": {
-            "title": "Trgovina na Kidričevi ulici"
+            "title": "Naročila darilnih paketov"
           }
         }
       ]

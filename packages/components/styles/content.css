@@ -31,10 +31,26 @@
 .image-text__link {
   margin-top: 1rem;
 }
+/* round: the photo in a disc with a ring in the text colour of its ground, the link as the section's button. */
+.s-image-text--round .image-text__media {
+  width: 70%;
+  aspect-ratio: 1;
+  border: 0.5rem solid currentColor;
+}
+.s-image-text--round .image-text__link {
+  margin-top: 1.5rem;
+}
 @media (min-width: 48rem) {
   .image-text {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 3rem;
+  }
+  .s-image-text--round .image-text {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  }
+  .s-image-text--round .image-text__media {
+    width: 100%;
+    border-width: 0.625rem;
   }
   .s-image-text--image-right .image-text__media {
     order: 2;
@@ -86,6 +102,36 @@
     border-top: 2px solid currentColor;
     padding-bottom: 1.5rem;
   }
+}
+
+/* figures: each title one short word or number at poster size, its label under it on a rule; the heading is a small label. */
+.s-highlights--figures .section-title {
+  font-size: var(--fs-lg);
+  line-height: 1.3;
+}
+.s-highlights--figures .highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2.25rem 4.5rem;
+}
+.s-highlights--figures .highlights__item {
+  flex: 1 1 auto;
+  gap: 0;
+  padding: 0;
+  border: 0;
+}
+.s-highlights--figures .highlights__title {
+  font-size: var(--fs-figure, clamp(5rem, 1.4rem + 7.6vw, 8.5rem));
+  line-height: 0.9;
+  letter-spacing: -0.06em;
+  overflow-wrap: normal;
+}
+.s-highlights--figures .highlights__text {
+  margin-top: 0.875rem;
+  padding-top: 0.875rem;
+  border-top: 2px solid currentColor;
+  font-weight: 600;
+  font-size: var(--fs-lg);
 }
 
 /* ---------- steps ---------- */
@@ -316,6 +362,47 @@
 @media (min-width: 64rem) {
   .about--has-image .about {
     gap: 5rem;
+  }
+}
+
+/* figure: one number the client gave (the founding year), wall-sized beside the heading and text. */
+.figure {
+  display: grid;
+  max-width: none;
+}
+.figure__label {
+  font-weight: 600;
+  font-size: var(--fs-lg);
+}
+.figure__value {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-heading);
+  font-size: var(--fs-figure-xl, clamp(6.5rem, 0.5rem + 19vw, 16.75rem));
+  line-height: 0.8;
+  letter-spacing: -0.07em;
+  margin-left: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+.about--figure .section-title {
+  font-size: calc(var(--fs-h2) * 0.64);
+  line-height: 1.08;
+}
+.about--figure .about__owner {
+  max-width: none;
+  margin: 1.75rem 0 1.25rem;
+  padding-block: 1rem;
+  border-top: 2px solid currentColor;
+  border-bottom: 1px solid var(--c-border);
+}
+.about--figure .about__owner-name {
+  font-size: var(--fs-h3);
+  letter-spacing: -0.02em;
+}
+@media (min-width: 64rem) {
+  .about--figure {
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    gap: 4.5rem;
+    align-items: end;
   }
 }
 

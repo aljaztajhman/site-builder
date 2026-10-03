@@ -1,12 +1,23 @@
 import { formatAddress, isPlaceholder, type Link, type SectionOf } from "@sb/spec";
 import { ActionLink, Actions, HoursList, Picture, Ph, Section, titleId } from "../../primitives/index.tsx";
-import { CallObject, Radiator, Seal, motifOf } from "../../motifs/index.tsx";
+import { Branch, CallObject, Radiator, Receipt, Seal, motifOf } from "../../motifs/index.tsx";
 import type { RenderCtx, SectionProps } from "../../types.ts";
 
 /** photo: the photo fills the hero at every width. */
 export const HERO_SIGNATURE_PHOTO_SIZES = "100vw";
 /** arch: 5/11 of the container on desktop, 78 % of the screen on phones. */
 export const HERO_SIGNATURE_ARCH_SIZES = "(min-width: 64rem) 32rem, 78vw";
+/** label: the arch beside the label card, 5/11 of the container on desktop, 74 % of the screen on phones. */
+export const HERO_SIGNATURE_LABEL_SIZES = "(min-width: 64rem) 32rem, 74vw";
+
+/** The photo's sizes per variant; null where the variant shows no photo (it draws instead). */
+export const HERO_SIGNATURE_SIZES: Record<SectionOf<"hero-signature">["variant"], string | null> = {
+  photo: HERO_SIGNATURE_PHOTO_SIZES,
+  arch: HERO_SIGNATURE_ARCH_SIZES,
+  label: HERO_SIGNATURE_LABEL_SIZES,
+  drawing: null,
+  receipt: null,
+};
 
 /** A link that is not a second call: the hero's object already is the call. */
 function notCall(link: Link | undefined): Link | undefined {
@@ -69,7 +80,7 @@ function FactStrip({ ctx }: { ctx: RenderCtx }) {
 export function HeroSignature({ section, ctx, index }: SectionProps<"hero-signature">) {
   const { props, variant } = section;
   const phone = props.fact === "phone";
-  const image = variant === "drawing" ? undefined : props.image;
+  const image = HERO_SIGNATURE_SIZES[variant] === null ? undefined : props.image;
   const title = (
     <h1 id={titleId(section.id)} className={props.headline.length > 34 ? "hsig__title hsig__title--long" : "hsig__title"}>
       {props.headline}
@@ -125,6 +136,67 @@ export function HeroSignature({ section, ctx, index }: SectionProps<"hero-signat
             {links}
           </div>
           <FactStrip ctx={ctx} />
+        </div>
+      </Section>
+    );
+  }
+
+  if (variant === "receipt") {
+    // The address line comes from the facts (the model never writes it); the call is the one button, labelled
+    // with factLabel, beside one quiet text link; the receipt lists what the business does.
+    const address = ctx.site.business.address;
+    const where = props.eyebrow ?? (isPlaceholder(address) ? undefined : `${address.street}, ${address.city}`);
+    const call: Link | undefined = phone ? { label: props.factLabel ?? ctx.t("call"), target: { action: "call" } } : undefined;
+    const other = phone ? notCall(props.primary) ?? notCall(props.secondary) : undefined;
+    return (
+      <Section id={section.id} type={section.type} variant={variant} tone={section.tone} bleed>
+        <div className="hsig hsig--receipt">
+          <div className="container hsig__grid">
+            <div className="hsig__text">
+              {where && <p className="eyebrow hsig__eyebrow">{where}</p>}
+              {title}
+              <p className="lead hsig__lead">{props.intro}</p>
+              {phone ? <Actions primary={call} secondary={other} ctx={ctx} /> : <Actions primary={props.primary} secondary={props.secondary} ctx={ctx} />}
+              {phone && isPlaceholder(ctx.site.business.phone) && <Ph p={ctx.site.business.phone} ctx={ctx} />}
+            </div>
+            {props.receipt && (
+              <div className="hsig__paper">
+                <Receipt ctx={ctx} id={section.id} title={props.receipt.title} lines={props.receipt.lines} total={props.receipt.total} note={props.factNote} />
+              </div>
+            )}
+          </div>
+        </div>
+      </Section>
+    );
+  }
+
+  if (variant === "label") {
+    // The headline on a white label card, the address from the facts on it like a bottle's origin line;
+    // the photo in a tall arch beside it, the inset as a disc over the arch's edge.
+    const address = ctx.site.business.address;
+    const where = props.fact === "address" ? (isPlaceholder(address) ? <Ph p={address} ctx={ctx} /> : `${address.street}, ${address.city}`) : props.factLabel;
+    return (
+      <Section id={section.id} type={section.type} variant={variant} tone={section.tone ?? "inverse"}>
+        <div className={image ? "hsig hsig--label hsig--has-image" : "hsig hsig--label"}>
+          <div className="label-card hsig__card">
+            <Branch />
+            {props.eyebrow && <p className="eyebrow hsig__eyebrow">{props.eyebrow}</p>}
+            {where && <p className="hsig__where">{where}</p>}
+            {title}
+            <p className="lead hsig__lead">{props.intro}</p>
+            {phone ? links : <Actions primary={props.primary} secondary={props.secondary} ctx={ctx} />}
+            {phone && <CallObject ctx={ctx} />}
+          </div>
+          {image && (
+            <figure className="hsig__door">
+              <Picture id={image} ctx={ctx} className="hsig__door-media arch-top media--contained" sizes={HERO_SIGNATURE_LABEL_SIZES} priority={index === 0} />
+              {props.inset && (
+                <span className="hsig__dot disc">
+                  <Picture id={props.inset} ctx={ctx} className="hsig__dot-media media--contained" sizes="(min-width: 64rem) 14rem, 9rem" />
+                </span>
+              )}
+            </figure>
+          )}
         </div>
       </Section>
     );

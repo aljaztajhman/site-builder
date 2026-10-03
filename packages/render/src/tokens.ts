@@ -116,6 +116,20 @@ export function motifVars(motif: Motif, c: Colors): Record<string, string> {
         "--motif-mark": svgUrl(`<svg xmlns="http://www.w3.org/2000/svg" width="74" height="40" viewBox="0 0 74 40"><path d="M6 6l14 28M30 6l14 28M54 6l14 28" stroke="${c.accent}" stroke-width="7" stroke-linecap="round" fill="none"/></svg>`),
         "--motif-mark-inverse": svgUrl(`<svg xmlns="http://www.w3.org/2000/svg" width="74" height="40" viewBox="0 0 74 40"><path d="M6 6l14 28M30 6l14 28M54 6l14 28" stroke="${band}" stroke-width="7" stroke-linecap="round" fill="none"/></svg>`),
       };
+    case "ledger":
+      return {
+        // A check mark per receipt line, in the primary (ledger) colour.
+        "--motif-check": svgUrl(`<svg xmlns="http://www.w3.org/2000/svg" width="20" height="16" viewBox="0 0 20 16"><path d="M2 8.5l5.5 5L18 2.5" stroke="${c.primary}" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`),
+        // The receipt's torn edge: teeth in the paper's colour (the page colour).
+        "--motif-tear": svgUrl(`<svg xmlns="http://www.w3.org/2000/svg" width="20" height="14"><path d="M0 0h20L10 14z" fill="${c.background}"/></svg>`),
+        "--motif-tear-h": "14px",
+        "--motif-tear-w": "20px",
+        // Red ink for the double rule under the name, as a book-keeper closes a total (fixed by the motif, like the plate's blue).
+        "--motif-ink": "#c2362b",
+      };
+    case "label":
+      // The label's frame, branch and photo shapes take the site's tokens directly in the shared stylesheet.
+      return {};
   }
 }
 

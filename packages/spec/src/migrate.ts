@@ -34,6 +34,11 @@ export const MIGRATIONS: Record<number, (spec: RawSpec) => RawSpec> = {
   // 5 → 6: owner-edited price lists and menus (sb-roadmap-order). Additive: optional `unavailable` on
   // price-list items and menu dishes. Every v5 spec is a valid v6 spec.
   5: (spec) => spec,
+  // 6 → 7: trade templates R (Račun) and T (Etiketa). Additive: hero-signature variants "receipt" and "label",
+  // fact "address", optional factLabel (still required for phone and opening, checked in validate.ts), optional
+  // receipt and inset; highlights "figures"; about "figure" with optional figure; image-text "round"; opening-hours
+  // "photo" with optional image and inset. Every v6 spec is a valid v7 spec.
+  6: (spec) => spec,
 };
 
 export function migrateSpec(input: unknown, migrations = MIGRATIONS, target: number = SPEC_VERSION): SiteSpec {

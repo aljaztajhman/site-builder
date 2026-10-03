@@ -1,5 +1,5 @@
 {
-  "specVersion": 6,
+  "specVersion": 7,
   "slug": "racunovodstvo-seliskar",
   "locales": {
     "default": "sl",
@@ -17,9 +17,6 @@
       "postalCode": "9000",
       "city": "Murska Sobota"
     },
-    "hours": {
-      "$placeholder": "hours"
-    },
     "provider": {
       "legalName": "Računovodstvo Seliškar d.o.o.",
       "registrationNumber": "6543210000",
@@ -28,40 +25,42 @@
     }
   },
   "design": {
-    "direction": "editorial",
-    "fontPair": "newsreader-libre-franklin",
+    "direction": "racun",
+    "fontPair": "ibm-plex-sans",
     "colors": {
       "background": "#ffffff",
-      "surface": "#f2f3f5",
-      "text": "#16161a",
-      "muted": "#55555f",
-      "primary": "#8f1d24",
+      "surface": "#e4f1ea",
+      "text": "#0c2a1e",
+      "muted": "#3f574b",
+      "primary": "#0b5a3c",
       "onPrimary": "#ffffff",
-      "accent": "#c23a3a",
-      "border": "#d9d9de",
-      "inverse": "#16161a",
-      "onInverse": "#f5f5f5"
+      "accent": "#2e8a5f",
+      "border": "#cfe0d6",
+      "inverse": "#0c2a1e",
+      "onInverse": "#f2f7f4",
+      "band": "#0b5a3c",
+      "onBand": "#ffffff"
     },
-    "radius": 0,
+    "radius": 4,
     "baseFontSize": 18,
-    "scale": 1.382,
-    "headingWeight": 400,
+    "scale": 1.25,
+    "headingWeight": 700,
     "headingCase": "normal",
-    "headingTracking": -0.015,
-    "density": "airy",
+    "headingTracking": -0.03,
+    "density": "regular",
     "shadow": "none",
-    "imagery": "framed"
+    "imagery": "natural"
   },
   "assets": {
     "images": []
   },
   "chrome": {
     "header": {
-      "variant": "stacked",
-      "cta": "call"
+      "variant": "bar",
+      "cta": "none"
     },
     "footer": {
-      "variant": "columns"
+      "variant": "compact"
     },
     "mobileActionBar": true
   },
@@ -81,118 +80,115 @@
       "sections": [
         {
           "id": "s_hero",
-          "type": "hero-type",
-          "variant": "large",
+          "type": "hero-signature",
+          "variant": "receipt",
           "props": {
-            "eyebrow": "Računovodstvo v Murski Soboti",
-            "headline": "Knjige, plače in DDV za samostojne podjetnike, manjša podjetja in društva",
-            "intro": "Vodimo poslovne knjige, obračunavamo plače in DDV ter pripravljamo letna poročila za AJPES. Delamo od leta 2004, stranke sprejemamo tudi v madžarskem jeziku.",
-            "primary": {
-              "label": "Pokličite za dogovor",
+            "headline": "Računovodstvo za s.p., d.o.o. in društva",
+            "intro": "Delamo od leta 2004. Večina naših strank je iz Pomurja, delamo pa za podjetja po vsej Sloveniji. Stranke sprejemamo tudi v madžarskem jeziku.",
+            "fact": "phone",
+            "factLabel": "Pokličite nas",
+            "factNote": "Odvisna je od števila prejetih in izdanih računov.",
+            "secondary": {
+              "label": "Pišite nam",
               "target": {
-                "action": "call"
+                "action": "email"
               }
             },
-            "secondary": {
-              "label": "Vse storitve",
-              "target": {
-                "page": "p_storitve"
+            "receipt": {
+              "title": "Kaj uredimo za vas",
+              "lines": [
+                "Poslovne knjige in davčne evidence",
+                "Plače in potni stroški",
+                "DDV in poročanje FURS",
+                "Letna poročila za AJPES",
+                "Davčni obračuni",
+                "Odprtje s.p. ali d.o.o."
+              ],
+              "total": {
+                "label": "Cena",
+                "value": "po dogovoru"
               }
             }
           }
         },
         {
-          "id": "s_strip",
-          "type": "contact-strip",
-          "variant": "bar",
-          "props": {}
-        },
-        {
-          "id": "s_services",
-          "type": "services-list",
-          "variant": "rows",
+          "id": "s_whom",
+          "type": "highlights",
+          "variant": "figures",
           "props": {
-            "title": "Kaj naredimo za vas",
+            "heading": "Za koga delamo",
             "items": [
               {
-                "name": "Poslovne knjige in davčna evidenca",
-                "description": "Vodenje poslovnih knjig in davčne evidence za s.p., d.o.o. in društva."
+                "title": "s.p.",
+                "text": "Samostojni podjetniki"
               },
               {
-                "name": "Plače in potni stroški",
-                "description": "Mesečni obračun plač in potnih stroškov."
+                "title": "d.o.o.",
+                "text": "Manjša podjetja"
               },
               {
-                "name": "DDV in poročanje FURS",
-                "description": "Obračun DDV in poročanje finančni upravi."
-              },
-              {
-                "name": "Letna poročila in davčni obračuni",
-                "description": "Letna poročila za AJPES in davčni obračuni ob koncu leta."
-              },
-              {
-                "name": "Odprtje s.p. ali d.o.o.",
-                "description": "Pomoč pri odprtju podjetja in davčno svetovanje za začetnike."
+                "title": "društva",
+                "text": "Društva"
               }
             ]
           }
         },
         {
-          "id": "s_for_whom",
-          "type": "text",
-          "variant": "two-column",
+          "id": "s_services",
+          "type": "services-list",
+          "variant": "rows",
+          "tone": "alt",
           "props": {
-            "heading": "Iz Pomurja, za podjetja po vsej Sloveniji",
-            "paragraphs": [
-              "Večina naših strank je iz Pomurja, delamo pa za podjetja po vsej Sloveniji. Dokumente lahko pošiljate po e-pošti ali jih prinesete osebno v pisarno na Slovenski ulici.",
-              "Stranke sprejemamo tudi v madžarskem jeziku."
+            "title": "Storitve",
+            "intro": "Dokumente lahko pošiljate po e-pošti ali jih prinesete osebno.",
+            "items": [
+              {
+                "name": "Vodenje poslovnih knjig in davčne evidence",
+                "description": "Za samostojne podjetnike, manjša podjetja in društva."
+              },
+              {
+                "name": "Obračun plač in potnih stroškov",
+                "description": "Plače in potni stroški vaših zaposlenih."
+              },
+              {
+                "name": "Obračun DDV in poročanje FURS",
+                "description": "DDV obračunamo in ga sporočimo finančni upravi."
+              },
+              {
+                "name": "Letna poročila za AJPES in davčni obračuni",
+                "description": "Letna poročila in davčni obračuni ob koncu leta."
+              },
+              {
+                "name": "Pomoč pri odprtju s.p. ali d.o.o.",
+                "description": "Skupaj z davčnim svetovanjem za začetnike."
+              }
             ]
           }
         },
         {
           "id": "s_about",
           "type": "about",
-          "variant": "text-only",
+          "variant": "figure",
           "props": {
-            "heading": "Direktorica in dve računovodkinji",
-            "paragraphs": [
-              "Računovodski servis vodimo od leta 2004. Direktorica je Branka Seliškar, poleg nje sta zaposleni še dve računovodkinji."
-            ],
+            "heading": "Računovodski servis iz Murske Sobote",
+            "figure": {
+              "label": "Delamo od leta",
+              "value": "2004"
+            },
             "ownerName": "Branka Seliškar",
-            "ownerRole": "direktorica"
+            "ownerRole": "direktorica",
+            "paragraphs": [
+              "Poleg direktorice sta zaposleni še dve računovodkinji."
+            ]
           }
         },
         {
-          "id": "s_enquiry",
-          "type": "contact-form",
-          "variant": "split",
-          "props": {
-            "title": "Pošljite povpraševanje",
-            "intro": "Opišite, kaj potrebujete, in pripravimo ponudbo. Odgovorimo v enem delovnem dnevu.",
-            "askPhone": true,
-            "messageHint": "Na primer: vrsta dejavnosti, število računov na mesec, ali ste zavezanec za DDV."
-          }
-        },
-        {
-          "id": "s_cta",
-          "type": "cta",
-          "variant": "split",
+          "id": "s_call",
+          "type": "contact",
+          "variant": "call-out",
           "tone": "inverse",
           "props": {
-            "heading": "Cena po dogovoru",
-            "text": "Cena je odvisna od števila prejetih in izdanih računov. Pokličite nas in se dogovorimo za vaše podjetje.",
-            "primary": {
-              "label": "Pokličite",
-              "target": {
-                "action": "call"
-              }
-            },
-            "secondary": {
-              "label": "Pišite nam",
-              "target": {
-                "action": "email"
-              }
-            }
+            "title": "Pred obiskom se najavite po telefonu"
           }
         }
       ]

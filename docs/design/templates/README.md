@@ -134,7 +134,17 @@ Owner's decision `sb-landing-directions` = start-three (2026-10-02). M, S and J 
 - Spec v4 (additive migration): the `band` tone with optional `band`/`onBand` colours (contrast checked like the others), heading weight up to 900, the `hero-signature` section (variants photo, drawing, arch; the fact shown is the phone or the earliest opening time, always from the business facts), price-list `tags` and contact `call-out`.
 - Rendering: `<body data-motif>` and `packages/components/styles/motifs.css`; the motif's repeating pieces (tyre tread, pipes, T-joints, scoring cuts) are SVG images that `packages/render/src/tokens.ts` builds from the site's colours. Plate, seal and radiator are components in `packages/components/src/motifs/`.
 - Pipeline: the design step is told the trade's template; a template keeps its own palette; the content step gets the outline; the header is set in code (dark over a dark hero unless there is a logo, no header call button above a phone object); a template that draws (S) gets no generated pictures.
-- Still outside the rules above and not built: clip-path shapes (N, P), centred label text (T), the other seven templates, the swim set's motion and photo-filled type, logo colours for template palettes.
+- Still outside the rules above and not built: clip-path shapes (N, P), the templates K, L, N, O and P, the swim set's motion and photo-filled type, logo colours for template palettes.
+
+## In the engine (R and T, spec v7)
+
+R and T are directions `racun` and `etiketa` (branch claude/templates-rt). Compare them with `pnpm templates:compare R,T`: it renders the hand-made page and the fixture's golden spec through the engine at 1440, 1280, 390 and 360 px, checks the engine's page and writes first screens side by side to `eval/runs/templates-<letter>/`.
+
+- Spec v7 (additive migration): hero-signature variants `receipt` and `label`, fact `address`, optional `receipt` and `inset`, and `factLabel` optional (validation still requires it for a phone or an opening time); highlights `figures`; about `figure` with an optional `figure` (the client's own number); image-text `round`; opening-hours `photo` with optional `image` and `inset`.
+- R draws a paper receipt (check marks and a torn edge as SVG tokens in the site's colours, the offset shadow as a layer, not a box-shadow; the red double rule under the name is the motif's fixed ink). T draws a bottle label (a double inner rule in the ground colour, an olive branch as an inline SVG in the site's colours) and sets each priced product on its own label; text is centred inside those labels only.
+- Photo shapes: `.arch-top` and `.disc` in motifs.css, the only round shapes allowed besides drawn objects; a test keeps them off buttons and links.
+- A template may list the colour pairs it sets as text (`textPairs`, e.g. Račun's green figures on white); they are held at 4.5:1 by checkDesign and enforceDesign.
+- Pipeline: hero variants that draw (drawing, receipt) get no generated pictures; the design and critique prompts name every template from the directions list.
 
 ## Checked
 

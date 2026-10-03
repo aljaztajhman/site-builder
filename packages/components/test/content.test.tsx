@@ -15,7 +15,7 @@ import { Announcement } from "../src/groups/content/Announcement.tsx";
 import { Booking } from "../src/groups/content/Booking.tsx";
 import { Cta } from "../src/groups/content/Cta.tsx";
 import { Highlights } from "../src/groups/content/Highlights.tsx";
-import { IMAGE_TEXT_SIZES, ImageText } from "../src/groups/content/ImageText.tsx";
+import { IMAGE_TEXT_ROUND_SIZES, IMAGE_TEXT_SIZES, ImageText } from "../src/groups/content/ImageText.tsx";
 import { Steps } from "../src/groups/content/Steps.tsx";
 import { Text } from "../src/groups/content/Text.tsx";
 import { contentLcp, contentRenderers } from "../src/groups/content/index.ts";
@@ -73,7 +73,7 @@ describe("image-text", () => {
     },
   });
 
-  for (const variant of imageText.variants) {
+  for (const variant of imageText.variants.filter((v) => v !== "round")) {
     it(`renders ${variant} with a lazy photo and a text link`, () => {
       const out = html(<ImageText section={{ ...section, variant }} ctx={testCtx()} index={2} />);
       expect(out).toContain(`s-image-text--${variant}`);
@@ -83,6 +83,16 @@ describe("image-text", () => {
       expect(out).toMatch(/<a href="storitve.html" class="text-link image-text__link">Vse storitve<\/a>/);
     });
   }
+
+  it("renders round with the photo in a disc and the link as the section's one button", () => {
+    const out = html(<ImageText section={{ ...section, variant: "round", tone: "band" }} ctx={testCtx()} index={2} />);
+    expect(out).toContain("s-image-text--round tone-band");
+    expectH2(out, "s_it");
+    expect(out).toContain('<picture class="media image-text__media disc media--contained">');
+    expect(out).toContain(`sizes="${IMAGE_TEXT_ROUND_SIZES}"`);
+    expect(out).toMatch(/<a href="storitve.html" class="btn btn--primary image-text__link">Vse storitve<\/a>/);
+    expect(count(out, /btn btn--primary/g)).toBe(1);
+  });
 
   it("requires an image and at most 3 paragraphs", () => {
     const { image: _image, ...noImage } = section.props;
@@ -286,6 +296,24 @@ describe("about", () => {
 
   it("limits paragraphs to 4", () => {
     expect(() => aboutSection.schema.parse({ ...section, props: { ...section.props, paragraphs: Array(5).fill("Besedilo.") } })).toThrow();
+  });
+
+  it("renders figure: the client's number wall-sized beside the heading, the owner and the text, no photo", () => {
+    const fig = aboutSection.schema.parse({ ...section, variant: "figure", props: { ...section.props, figure: { label: "Delamo od leta", value: "2004" } } });
+    const out = html(<About section={fig} ctx={testCtx()} index={1} />);
+    expectH2(out, "s_about");
+    expect(out).toContain('<p class="figure"><span class="figure__label">Delamo od leta</span><span class="figure__value">2004</span></p>');
+    expect(out).toContain("Ana Novak");
+    expect(out).not.toContain("<img");
+    // Without a figure it is the plain text-only story.
+    const none = html(<About section={{ ...fig, props: { ...section.props } }} ctx={testCtx()} index={1} />);
+    expect(none).not.toContain("figure__value");
+    expect(none).not.toContain("<img");
+  });
+
+  it("keeps the figure short: a number as the client wrote it", () => {
+    expect(() => aboutSection.schema.parse({ ...section, variant: "figure", props: { ...section.props, figure: { label: "Od leta", value: "123456789" } } })).toThrow();
+    expect(() => aboutSection.schema.parse({ ...section, variant: "figure", props: { ...section.props, figure: { value: "2004" } } })).toThrow();
   });
 });
 

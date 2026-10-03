@@ -26,6 +26,8 @@ interface SectionInfo {
   type: string;
   group: string;
   variants: string[];
+  /** Variant → the prop it needs to look different (offered only when the section has it). */
+  variantNeeds: Record<string, string>;
   description: string;
   images: string;
   props: Schema;
@@ -730,12 +732,12 @@ function sectionPane(si: number): HTMLElement {
     ...["default", "alt", "inverse", "band"].map((t) => h("option", { value: t, selected: (s.tone ?? "default") === t }, TONE[t]!))));
   // Price lists and menus: groups and items in their own editor, the list first (that is what owners come to change).
   if (isPriceListType(s.type)) {
-    pane.append(priceListPane(String(s.id), info.props), variantPicker(s, pi, si, info.variants), tone);
+    pane.append(priceListPane(String(s.id), info.props), variantPicker(s, pi, si, offeredVariants(s, info)), tone);
     return pane;
   }
   pane.append(
     h("p", { class: "help" }, "Besedilo popravite kar na strani: tapnite ga. Premik, podvajanje in brisanje so na vrhu razdelka v predogledu."),
-    variantPicker(s, pi, si, info.variants),
+    variantPicker(s, pi, si, offeredVariants(s, info)),
     tone,
     formAt(inSection(String(s.id), "/props"), info.props, s.props as Json, "props", `urejen razdelek ${s.type}`),
   );
@@ -854,6 +856,12 @@ const THUMB_WIDTH = 1024;
  * "Druga postavitev": the selected section in each of its layouts, with its own content, rendered by
  * the preview route (same components as the published site; no model call). A tap switches to it.
  */
+/** The layouts worth offering: a variant that needs a prop the section lacks would look like another one. */
+function offeredVariants(s: Obj, info: SectionInfo): string[] {
+  const props = (s.props ?? {}) as Obj;
+  return info.variants.filter((v) => v === s.variant || info.variantNeeds[v] === undefined || props[info.variantNeeds[v]] !== undefined);
+}
+
 function variantPicker(s: Obj, pi: number, si: number, variants: string[]): HTMLElement {
   const type = String(s.type);
   const page = pages()[pi]!;

@@ -491,6 +491,10 @@ a.plate:hover .plate__num {
 [data-motif] .image-text .section-title {
   font-size: calc(var(--fs-h2) * 0.72);
 }
+/* A round photo leaves the heading its full size (the offer is the band's one statement). */
+[data-motif] .s-image-text--round .section-title {
+  font-size: var(--fs-h2);
+}
 /* Hours in the hero strip and the call-out: the time follows the days, not pushed to the far edge. */
 .hsig__strip .hours__row,
 .callout .hours__row {
@@ -506,4 +510,418 @@ a.plate:hover .plate__num {
   [data-motif="pipes"] .hsig__drawing {
     width: min(62%, 15rem);
   }
+}
+
+/* ---------- the receipt (ledger): a paper slip in the page colour, check marks, a torn edge, an offset shadow ---------- */
+.receipt {
+  position: relative;
+  z-index: 0;
+  width: min(25rem, 100%);
+  margin-inline: auto;
+  padding: 2rem 1.5rem 1.5rem;
+  color: var(--c-text);
+  font-variant-numeric: tabular-nums;
+  transform: rotate(2deg);
+}
+/* The paper and its flat offset shadow are layers behind the text (no box-shadow). */
+.receipt::before,
+.receipt::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+.receipt::before {
+  z-index: -1;
+  background: var(--c-bg);
+}
+.receipt::after {
+  z-index: -2;
+  translate: 0.75rem 0.875rem;
+  background: var(--c-inverse);
+  opacity: 0.28;
+}
+.receipt__tear {
+  position: absolute;
+  z-index: -1;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: var(--motif-tear-h, 0.875rem);
+  background: var(--motif-tear) repeat-x left top / var(--motif-tear-w, 1.25rem) var(--motif-tear-h, 0.875rem);
+}
+.receipt__title {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-heading);
+  font-size: 1.375rem;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+.receipt__sub {
+  margin-top: 0.125rem;
+  color: var(--c-muted);
+}
+.receipt__lines {
+  margin: 1.125rem 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1.5px dashed color-mix(in srgb, var(--c-text) 45%, transparent);
+}
+.receipt__lines li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  max-width: none;
+  padding-block: 0.6875rem;
+  border-bottom: 1px dashed color-mix(in srgb, var(--c-text) 30%, transparent);
+  font-weight: 500;
+  line-height: 1.3;
+}
+.receipt__lines li::after {
+  content: "";
+  flex: none;
+  width: 1.25rem;
+  height: 1rem;
+  background: var(--motif-check) no-repeat center / contain;
+}
+.receipt__total {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  margin-top: 1rem;
+  padding-bottom: 0.375rem;
+  border-bottom: 3px double currentColor;
+  font-family: var(--font-heading);
+  font-weight: var(--fw-heading);
+  font-size: 1.3125rem;
+}
+.receipt__fine {
+  margin-top: 0.625rem;
+  color: var(--c-muted);
+}
+@media (min-width: 64rem) {
+  .receipt {
+    padding: 2.25rem 2rem 1.875rem;
+    transform: rotate(3deg);
+  }
+}
+
+/* ---------- ledger: Račun (R), offices without photos ---------- */
+/* One grotesk, tabular figures everywhere, tight display tracking. */
+[data-motif="ledger"] main {
+  font-variant-numeric: tabular-nums;
+}
+[data-motif="ledger"] :where(h1, h2) {
+  letter-spacing: -0.045em;
+}
+/* The name underlined twice in red ink, as a book-keeper closes a total. */
+[data-motif="ledger"] .site-header__name {
+  text-decoration: underline double var(--motif-ink);
+  text-decoration-thickness: 0.09em;
+  text-underline-offset: 0.3em;
+}
+[data-motif="ledger"] .hsig__eyebrow {
+  color: var(--c-primary);
+  font-size: 1rem;
+  font-weight: 600;
+}
+[data-motif="ledger"] .hsig__title {
+  line-height: 0.98;
+}
+[data-motif="ledger"] .hsig__lead {
+  color: var(--c-muted);
+}
+/* Client types and the founding year in the ledger green. */
+[data-motif="ledger"] .s-highlights--figures .highlights__title,
+[data-motif="ledger"] .figure__value,
+[data-motif="ledger"] .figure__label {
+  color: var(--c-primary);
+}
+/* Services as ledger rows: a heavy rule on top, the name large, the line beside it. */
+[data-motif="ledger"] .svc-list {
+  border-top: 3px solid currentColor;
+}
+[data-motif="ledger"] .svc-list__name {
+  font-size: clamp(1.375rem, 1.1rem + 1.2vw, 2rem);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+[data-motif="ledger"] .svc-list__body {
+  color: var(--c-muted);
+}
+@media (min-width: 64rem) {
+  [data-motif="ledger"] .s-services-list .section-head {
+    display: grid;
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    gap: 4rem;
+    align-items: end;
+    max-width: none;
+  }
+  [data-motif="ledger"] .s-services-list--rows .svc-list__item {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr) auto;
+  }
+}
+/* The closing call: the number at 124 px on the dark ground. */
+[data-motif="ledger"] .bignum--poster {
+  font-size: clamp(3rem, 1rem + 8.4vw, 7.75rem);
+  letter-spacing: -0.06em;
+}
+/* The phone bar stays on the page colour with the call in the ledger green (the template's own bar). */
+[data-motif="ledger"] .action-bar {
+  --c-bg: inherit;
+  --c-text: inherit;
+  --c-border: inherit;
+}
+/* The closing call in two columns on desktop (Račun, Etiketa): heading and number on the left, the other facts on the right. */
+@media (min-width: 64rem) {
+  :is([data-motif="ledger"], [data-motif="label"]) .callout {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    column-gap: 4.5rem;
+    align-items: end;
+  }
+  :is([data-motif="ledger"], [data-motif="label"]) .callout > .section-head,
+  :is([data-motif="ledger"], [data-motif="label"]) .callout__call {
+    grid-column: 1;
+  }
+  :is([data-motif="ledger"], [data-motif="label"]) .callout__facts {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+    border-top-width: 2px;
+  }
+  :is([data-motif="ledger"], [data-motif="label"]) .callout .section-title {
+    font-size: calc(var(--fs-h2) * 0.64);
+    line-height: 1.08;
+  }
+}
+
+/* ---------- photo shapes shared by the templates: a tall arch, a disc ---------- */
+/* .media.x: outranks the imagery treatments' own radius on photos ([data-imagery] .media). */
+.arch-top,
+.media.arch-top {
+  border-radius: 100vw 100vw 0 0;
+}
+.disc,
+.media.disc {
+  display: block;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 50%;
+}
+.disc .media,
+.disc img {
+  width: 100%;
+  height: 100%;
+}
+.arch-top::before,
+.disc::before {
+  content: none;
+}
+
+/* ---------- label: Etiketa (T), shops that sell things you can hold ---------- */
+/* A white label card with a double inner rule in the ground colour (four sides: a frame, not a stripe). */
+.label-card {
+  position: relative;
+  padding: 2.5rem 1.5rem 2.25rem;
+  background: var(--c-bg);
+  color: var(--c-text);
+}
+.label-card::before,
+.label-card::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+.label-card::before {
+  inset: 0.5625rem;
+  border: 1.5px solid var(--c-inverse);
+}
+.label-card::after {
+  inset: 0.8125rem;
+  border: 1px solid var(--c-inverse);
+}
+.label-card :where(.muted, .lead) {
+  color: var(--c-muted);
+}
+.label-card .eyebrow {
+  color: var(--c-text);
+}
+.label-card :focus-visible {
+  outline-color: var(--c-text);
+}
+.tone-inverse .label-card .btn--primary,
+.tone-band .label-card .btn--primary {
+  background: var(--c-primary);
+  color: var(--c-on-primary);
+}
+.label-card .text-link {
+  color: var(--c-text);
+}
+/* The olive branch, drawn in the label's frame colour with olives in the primary colour. */
+.branch {
+  display: block;
+  flex: none;
+  width: 8.25rem;
+  height: 3.625rem;
+}
+.branch__stem {
+  stroke: var(--c-inverse);
+}
+.branch__leaf {
+  fill: var(--c-inverse);
+}
+.branch__olive {
+  fill: var(--c-primary);
+}
+[data-motif="label"] .hsig__card {
+  display: grid;
+  justify-items: start;
+  gap: 0.875rem;
+}
+[data-motif="label"] .hsig__card .hsig__title {
+  margin-top: -0.25rem;
+}
+@media (min-width: 64rem) {
+  .label-card {
+    padding: 3.375rem 3.25rem 3.125rem;
+  }
+  .label-card::before {
+    inset: 0.75rem;
+  }
+  .label-card::after {
+    inset: 1.0625rem;
+  }
+}
+/* Prices: each product on its own label, text centred inside the label only, as on a bottle. */
+.price-labels {
+  display: grid;
+  gap: 1rem;
+  max-width: 27.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.price-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: none;
+  padding: 2.5rem 1.875rem 2.25rem;
+  border: 1.5px solid var(--c-inverse);
+  text-align: center;
+}
+.price-label::before {
+  inset: 0.4375rem;
+  border-width: 1px;
+}
+.price-label::after {
+  content: none;
+}
+.price-label .branch {
+  width: 5.75rem;
+  height: 2.5rem;
+}
+.price-label__name {
+  margin-top: 1rem;
+  font-size: clamp(1.5rem, 1.2rem + 0.9vw, 1.875rem);
+  line-height: 1.08;
+}
+.price-label__note {
+  margin-top: 0.5rem;
+  color: var(--c-muted);
+  font-weight: 500;
+}
+.price-label__price {
+  margin-top: auto;
+  padding-top: 1.25rem;
+  font-family: var(--font-heading);
+  font-weight: var(--fw-heading);
+  font-size: clamp(2.75rem, 2rem + 2.2vw, 4rem);
+  line-height: 1;
+  color: var(--c-primary);
+}
+@media (min-width: 56.25rem) {
+  .price-labels {
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 1.75rem;
+    max-width: none;
+  }
+  .price-label {
+    min-height: 20.625rem;
+  }
+}
+[data-motif="label"] .s-price-list--tags .section-head,
+[data-motif="label"] .s-services-list .section-head {
+  display: grid;
+  max-width: none;
+}
+@media (min-width: 64rem) {
+  [data-motif="label"] .s-price-list--tags .section-head {
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    column-gap: 4rem;
+    align-items: end;
+  }
+  [data-motif="label"] .s-price-list--tags .section-head .lead {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+}
+/* The rest of the range as one large sentence under a short label, on a rule, right after the labels. */
+[data-motif="label"] .s-price-list--tags + .s-text--narrow {
+  padding-top: 0;
+}
+[data-motif="label"] .s-text--narrow .text-block {
+  display: grid;
+  gap: 0.625rem 2.5rem;
+  max-width: none;
+  padding-top: 1.75rem;
+  border-top: 1.5px solid var(--c-inverse);
+}
+[data-motif="label"] .s-text--narrow .section-head {
+  margin: 0;
+}
+[data-motif="label"] .s-text--narrow .section-title {
+  font-family: var(--font-body);
+  font-size: var(--fs-base);
+  font-weight: 700;
+  letter-spacing: 0;
+  color: var(--c-inverse);
+}
+[data-motif="label"] .s-text--narrow .prose p {
+  max-width: none;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: clamp(1.625rem, 1rem + 2.2vw, 2.875rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+@media (min-width: 64rem) {
+  [data-motif="label"] .s-text--narrow .text-block {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 9fr);
+    align-items: baseline;
+  }
+}
+/* Hours set like the label: a rule on top, the times in the heading face. */
+[data-motif="label"] .oh__table td {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-heading);
+}
+[data-motif="label"] .oh__note {
+  font-weight: 700;
+}
+/* The phone bar and the closing call on the olive ground, the call in terracotta. */
+[data-motif="label"] .action-bar {
+  --c-primary: var(--c-band);
+  --c-on-primary: var(--c-on-band);
+}
+/* Single numbers at poster size read better with proportional figures (Lora's tabular ones widen the spaces). */
+[data-motif="label"] :is(.bignum, .price-label__price .price) {
+  font-variant-numeric: proportional-nums;
+}
+[data-motif="label"] .bignum--poster {
+  font-size: clamp(2.5rem, 0.6rem + 8.4vw, 6.75rem);
+  letter-spacing: -0.03em;
 }

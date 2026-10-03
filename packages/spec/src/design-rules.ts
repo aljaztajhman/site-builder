@@ -64,6 +64,13 @@ export function checkDesign(design: Design, dir: Direction | undefined): DesignI
     issues.push({ path: "/design/direction", message: `unknown direction ${design.direction}` });
     return issues;
   }
+  for (const [fg, bg] of dir.template?.textPairs ?? []) {
+    const a = c[fg];
+    const b = c[bg];
+    if (a === undefined || b === undefined) continue;
+    const ratio = contrast(a, b);
+    if (ratio < 4.5) issues.push({ path: `/design/colors/${fg}`, message: `${fg} on ${bg} contrast ${ratio.toFixed(2)} < 4.5 (text in ${dir.id})` });
+  }
   if (!dir.fontPairs.includes(design.fontPair)) issues.push({ path: "/design/fontPair", message: `font pair ${design.fontPair} not in direction ${dir.id}` });
   const r = dir.ranges;
   const inRange = (key: "radius" | "baseFontSize" | "scale" | "headingWeight" | "headingTracking") => {
@@ -140,6 +147,12 @@ export function enforceDesign(design: Design, dir: Direction): Design {
     c.onInverse = ensureContrast(c.onInverse, c.inverse, 4.5);
     c.accent = ensureContrast(c.accent, c.background, 3);
     c.accent = ensureContrast(c.accent, c.inverse, 3);
+    // Pairs a template sets as text (poster-size figures and prices in its primary colour) read like body text.
+    for (const [fg, bg] of dir.template?.textPairs ?? []) {
+      const a = c[fg];
+      const b = c[bg];
+      if (a !== undefined && b !== undefined) c[fg] = ensureContrast(a, b, 4.5);
+    }
     // ensureContrast's last resort is pure black or white; pull text back inside the bounds.
     clampOffBlackWhite(c);
     // A mid-tone inverse can leave no off-white or off-black text that passes; darken the inverse instead.

@@ -19,6 +19,11 @@ export interface SectionMeta<T extends string, V extends readonly [string, ...st
   centredVariants?: readonly V[number][];
   /** Only the code adds this section (legal pages, 404); the model must not add or edit it. */
   systemOnly?: boolean;
+  /**
+   * Variants that only look different with an optional prop filled (about figure: the figure). Without it the
+   * editor doesn't offer them, since switching would look like another variant.
+   */
+  variantNeeds?: Partial<Record<V[number], string>>;
 }
 
 export const SectionId = z.string().regex(/^s_[a-z0-9_-]+$/);

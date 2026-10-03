@@ -35,6 +35,19 @@ describe("template tokens", () => {
     const pipes = tokensCss(designFor("cevi"));
     expect(decodeURIComponent(pipes)).toContain('stroke="#d63c22"');
     expect(tokensCss(designFor("skorja"))).toContain("--motif-mark:");
+    // Račun: check marks in the ledger green, the torn edge in the paper's (page) colour, red ink for the double rule.
+    const ledger = decodeURIComponent(tokensCss(designFor("racun")));
+    expect(ledger).toMatch(/--motif-check:url\("data:image\/svg\+xml,<svg[^;]*stroke="#0b5a3c"/);
+    expect(ledger).toMatch(/--motif-tear:url\("data:image\/svg\+xml,<svg[^;]*fill="#ffffff"/);
+    expect(ledger).toContain("--motif-ink:#c2362b");
+    expect(ledger).toMatch(/--fs-display:clamp\(2\.5rem, [^)]*, 5rem\)/);
+  });
+
+  it("draws the motif in the site's own colours after an edit", () => {
+    const d = designFor("racun");
+    const edited = decodeURIComponent(tokensCss({ ...d, colors: { ...d.colors, primary: "#0a4f6b", background: "#ffffff" } }));
+    expect(edited).toContain('stroke="#0a4f6b"');
+    expect(edited).not.toContain('stroke="#0b5a3c"');
   });
 
   it("leaves the other directions' tokens as they were", () => {

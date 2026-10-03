@@ -5,6 +5,7 @@ import {
   HoursList,
   Icon,
   PhoneLink,
+  Picture,
   Ph,
   Section,
   SectionHead,
@@ -33,37 +34,61 @@ function HoursTable({ hours, ctx, labelledBy }: { hours: Hours; ctx: RenderCtx; 
   );
 }
 
-export function OpeningHours({ section, ctx }: SectionProps<"opening-hours">) {
+/** photo: the arch at 5/11 of the container on desktop, 78 % of the screen on phones; the inset disc beside it. */
+export const OPENING_HOURS_PHOTO_SIZES = "(min-width: 64rem) 30rem, 78vw";
+
+export function OpeningHours({ section, ctx, index }: SectionProps<"opening-hours">) {
   const { props } = section;
   const hours = ctx.site.business.hours ?? MISSING_HOURS;
+  const image = section.variant === "photo" ? props.image : undefined;
+  const text = (
+    <>
+      <SectionHead id={section.id} eyebrow={props.eyebrow} title={props.title} />
+      <div className="oh__body">
+        {isPlaceholder(hours) ? (
+          <p>
+            <Ph p={hours} ctx={ctx} />
+          </p>
+        ) : section.variant === "compact" ? (
+          <HoursList ctx={ctx} hours={hours} short />
+        ) : (
+          <HoursTable hours={hours} ctx={ctx} labelledBy={titleId(section.id)} />
+        )}
+        {props.note && <p className="oh__note">{props.note}</p>}
+      </div>
+    </>
+  );
   return (
     <Section id={section.id} type={section.type} variant={section.variant} tone={section.tone}>
-      <div className="oh">
-        <SectionHead id={section.id} eyebrow={props.eyebrow} title={props.title} />
-        <div className="oh__body">
-          {isPlaceholder(hours) ? (
-            <p>
-              <Ph p={hours} ctx={ctx} />
-            </p>
-          ) : section.variant === "table" ? (
-            <HoursTable hours={hours} ctx={ctx} labelledBy={titleId(section.id)} />
-          ) : (
-            <HoursList ctx={ctx} hours={hours} short />
-          )}
-          {props.note && <p className="oh__note">{props.note}</p>}
+      {image ? (
+        <div className="oh oh--photo">
+          <figure className="oh__door">
+            <Picture id={image} ctx={ctx} className="oh__door-media arch-top media--contained" sizes={OPENING_HOURS_PHOTO_SIZES} priority={index === 0} />
+            {props.inset && (
+              <span className="oh__dot disc">
+                <Picture id={props.inset} ctx={ctx} className="oh__dot-media media--contained" sizes="(min-width: 64rem) 12.5rem, 8rem" />
+              </span>
+            )}
+          </figure>
+          <div className="oh__text">{text}</div>
         </div>
-      </div>
+      ) : (
+        <div className="oh">{text}</div>
+      )}
     </Section>
   );
 }
 
 /**
  * Closing call for businesses that live on calls: the phone at poster size as the direction's call object,
- * then address, hours and e-mail (when there is one) in a row. No map.
+ * then address, hours (unless the page has its own opening-hours section) and e-mail (when there is one) in a
+ * row. No map.
  */
 function ContactCallOut({ section, ctx }: SectionProps<"contact">) {
   const { props } = section;
   const b = ctx.site.business;
+  // Say each thing once: a page that has its own opening-hours section doesn't repeat the hours here.
+  const hoursElsewhere = ctx.page.sections.some((s) => s.type === "opening-hours");
   const directions = ctx.href({ action: "directions" });
   return (
     <Section id={section.id} type={section.type} variant={section.variant} tone={section.tone}>
@@ -84,7 +109,7 @@ function ContactCallOut({ section, ctx }: SectionProps<"contact">) {
               )}
             </dd>
           </div>
-          {b.hours !== undefined && (
+          {b.hours !== undefined && !hoursElsewhere && (
             <div className="callout__fact">
               <dt>{ctx.t("openingHours")}</dt>
               <dd>

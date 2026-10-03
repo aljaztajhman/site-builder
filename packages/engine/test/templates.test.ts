@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { direction as directionById } from "@sb/spec";
-import { designFromChoice, directionsCatalogue, drawsInsteadOfPhotos, heroRule, templateChrome, templateLine, templateOutline, type ContentOutput } from "../src/index.ts";
+import { CRITIQUE_SYSTEM, DESIGN_SYSTEM, designFromChoice, directionsCatalogue, drawsInsteadOfPhotos, heroRule, templateChrome, templateLine, templateOutline, type ContentOutput } from "../src/index.ts";
 
 const choice = (id: string) => ({
   direction: id,
@@ -24,7 +24,10 @@ describe("trade templates in the pipeline", () => {
     expect(templateLine("builder", 0)).toContain("draws the trade instead of showing pictures");
     expect(templateLine("bakery", 0)).toBe("");
     expect(templateLine("dental", 2)).toBe("");
+    expect(templateLine("accountant", 0)).toContain("racun (Račun (receipt))");
+    expect(templateLine("accountant", 0)).toContain("draws the trade instead of showing pictures");
     expect(directionsCatalogue()).toContain("Hand-made trade template M");
+    expect(directionsCatalogue()).toContain("Hand-made trade template R");
   });
 
   it("keeps the template's own palette and type, whatever colours the model proposes", () => {
@@ -50,7 +53,20 @@ describe("trade templates in the pipeline", () => {
 
   it("makes no generated pictures for a template that draws instead", () => {
     expect(drawsInsteadOfPhotos(directionById("cevi"))).toBe(true);
+    expect(drawsInsteadOfPhotos(directionById("racun"))).toBe(true);
     expect(drawsInsteadOfPhotos(directionById("tablica"))).toBe(false);
+    expect(drawsInsteadOfPhotos(directionById("skorja"))).toBe(false);
+    // A typographic general direction is not a drawing template: it may still open on a generated picture.
+    expect(drawsInsteadOfPhotos(directionById("editorial"))).toBe(false);
+    expect(heroRule(["img_01"], directionById("racun").layout.heroes)).toBe("");
+    expect(drawsInsteadOfPhotos(directionById("etiketa"))).toBe(false);
+    expect(heroRule(["img_01"], directionById("etiketa").layout.heroes)).toContain("hero-signature:label with one of the hero-suitable pictures");
+  });
+
+  it("tells the design and critique steps every template by name and what its motif draws", () => {
+    expect(DESIGN_SYSTEM).toContain("Trade templates (tablica, cevi, skorja, racun, etiketa)");
+    expect(CRITIQUE_SYSTEM).toContain("design directions tablica, cevi, skorja, racun, etiketa");
+    expect(CRITIQUE_SYSTEM).toContain("(number plates, pipes, scoring cuts, a paper receipt and wall-sized figures, bottle labels and an olive branch)");
   });
 
   it("fixes the header: dark over the dark hero (not under a logo), no call button above the phone object", () => {
