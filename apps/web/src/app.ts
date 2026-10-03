@@ -15,6 +15,7 @@ import {
   publishedPrefix,
   publishedBase,
   switchDirection,
+  typedOps,
   uploadKey,
   imageMeta,
   addPhotos,
@@ -472,7 +473,8 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     if (!r.ok) return c.json({ error: "invalid", issues: r.issues.slice(0, 20) }, 422);
     let version: number;
     try {
-      version = await repo.saveSpec(siteId, r.spec, "manual", message.slice(0, 200), ops, current.version);
+      // Only what the owner changed is stored: the fact check counts it as their own text.
+      version = await repo.saveSpec(siteId, r.spec, "manual", message.slice(0, 200), typedOps(current.spec, ops), current.version);
     } catch (e) {
       if (e instanceof VersionConflictError) return c.json({ error: "conflict", message: "Stran je bila medtem spremenjena. Osvežite urejevalnik." }, 409);
       throw e;
