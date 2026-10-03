@@ -257,3 +257,101 @@ export function typedText(ops: Operation[]): string[] {
   }
   return out;
 }
+
+type Plain = Record<string, unknown>;
+const isPlain = (v: unknown): v is Plain => !!v && typeof v === "object" && !Array.isArray(v);
+
+function same(a: unknown, b: unknown): boolean {
+  if (a === b) return true;
+  if (Array.isArray(a)) return Array.isArray(b) && a.length === b.length && a.every((x, i) => same(x, b[i]));
+  if (isPlain(a) && isPlain(b)) {
+    const ka = Object.keys(a).filter((k) => a[k] !== undefined);
+    const kb = Object.keys(b).filter((k) => b[k] !== undefined);
+    return ka.length === kb.length && ka.every((k) => same(a[k], b[k]));
+  }
+  return false;
+}
+
+/** The leaves a reduced value still holds: how much of it the owner changed. */
+function leaves(v: unknown): number {
+  if (Array.isArray(v)) return v.reduce((n: number, x) => n + leaves(x), 0);
+  if (isPlain(v)) return Object.values(v).reduce((n: number, x) => n + leaves(x), 0);
+  return v === undefined ? 0 : 1;
+}
+
+const label = (o: Plain) => (typeof o.name === "string" ? o.name : typeof o.title === "string" ? o.title : undefined);
+const isPriced = (o: Plain) => label(o) !== undefined && "price" in o;
+const isHoursRow = (o: Plain) => DAY_SET.has(o.from as string) && DAY_SET.has(o.to as string);
+
+/** The element of `old` that `v` most likely is: the same content, id or name, else the same position. */
+function counterpart(old: unknown[], v: unknown, i: number): unknown {
+  if (old.some((o) => same(o, v))) return v;
+  if (isPlain(v)) {
+    const byId = typeof v.id === "string" ? old.find((o) => isPlain(o) && o.id === v.id) : undefined;
+    if (byId !== undefined) return byId;
+    const name = label(v);
+    const byName = name !== undefined ? old.find((o) => isPlain(o) && label(o) === name) : undefined;
+    if (byName !== undefined) return byName;
+  }
+  return old[i];
+}
+
+/**
+ * The part of `next` that differs from `prev`, or undefined when nothing does. A priced item or an
+ * hours row stays whole once its name, price or times change: the fact check pairs a price with its
+ * offering and times with their days, so the owner's new price needs its name beside it.
+ */
+function changed(prev: unknown, next: unknown): unknown {
+  if (same(prev, next)) return undefined;
+  if (Array.isArray(next)) {
+    const old = Array.isArray(prev) ? prev : [];
+    const out = next.map((v, i) => changed(counterpart(old, v, i), v)).filter((v) => v !== undefined);
+    return out.length ? out : undefined;
+  }
+  if (!isPlain(next)) return next;
+  const before = isPlain(prev) ? prev : {};
+  if (isHoursRow(next)) return next;
+  const out: Plain = {};
+  for (const [k, v] of Object.entries(next)) {
+    const d = changed(before[k], v);
+    if (d !== undefined) out[k] = d;
+  }
+  if (isPriced(next) && ("price" in out || label(out) !== undefined)) {
+    out.price = next.price;
+    out[typeof next.name === "string" ? "name" : "title"] = label(next);
+  }
+  return Object.keys(out).length ? out : undefined;
+}
+
+/**
+ * The owner's direct edit reduced to what they actually typed, for the fact-check corpus (`typedText`).
+ * Editor forms send whole sections and a duplicated section arrives as a full copy; without this, every
+ * price in it would count as the owner's own and skip the fact check. Each value is compared with what
+ * was at its place before (an added array element with its closest sibling); unchanged parts are
+ * dropped. The result describes the edit, it isn't meant to be applied.
+ */
+export function typedOps(before: SiteSpec, ops: Operation[]): Operation[] {
+  let doc: unknown = structuredClone(before);
+  const out: Operation[] = [];
+  for (const op of ops) {
+    if (op.op === "add" || op.op === "replace") {
+      const parent = op.path.slice(0, op.path.lastIndexOf("/"));
+      const key = op.path.slice(op.path.lastIndexOf("/") + 1).replace(/~1/g, "/").replace(/~0/g, "~");
+      const container = parent === "" ? doc : jsonpatch.getValueByPointer(doc, parent);
+      let reduced: unknown;
+      if (op.op === "add" && Array.isArray(container) && (key === "-" || /^\d+$/.test(key))) {
+        // A new element: as typed as its difference from the most similar element already there.
+        reduced = op.value;
+        for (const sibling of container) {
+          const d = changed(sibling, op.value);
+          if (leaves(d) < leaves(reduced)) reduced = d;
+        }
+      } else {
+        reduced = changed(isPlain(container) || Array.isArray(container) ? (container as Plain)[key] : undefined, op.value);
+      }
+      if (reduced !== undefined) out.push({ op: "replace", path: op.path, value: reduced });
+    }
+    doc = jsonpatch.applyOperation(doc, op, false, true, false).newDocument;
+  }
+  return out;
+}

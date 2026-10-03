@@ -454,10 +454,13 @@ describe("direct editor API (no model calls)", () => {
     const patched = await app.request(`/api/sites/${site.id}/patch`, {
       method: "POST",
       headers: json,
-      body: JSON.stringify({ baseVersion: 1, ops: [{ op: "replace", path: "/pages/0/sections/0/props/headline", value: "Kruh z drožmi iz Kamnika" }] }),
+      // The whole section, as the editor's section form sends it.
+      body: JSON.stringify({ baseVersion: 1, ops: [{ op: "replace", path: "/pages/0/sections/0/props", value: { ...golden.pages[0]!.sections[0]!.props, headline: "Kruh z drožmi iz Kamnika" } }] }),
     });
     expect(patched.status).toBe(200);
     expect(await patched.json()).toMatchObject({ ok: true, version: 2 });
+    // Only what changed is stored as the owner's text: the rest of the section stays fact-checked.
+    expect(await platform.repo.manualPatches(site.id)).toEqual([[{ op: "replace", path: "/pages/0/sections/0/props", value: { headline: "Kruh z drožmi iz Kamnika" } }]]);
 
     const stale = await app.request(`/api/sites/${site.id}/patch`, { method: "POST", headers: json, body: JSON.stringify({ baseVersion: 1, ops: [{ op: "remove", path: "/pages/0/sections/1" }] }) });
     expect(stale.status).toBe(409);
