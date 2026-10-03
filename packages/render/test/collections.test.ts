@@ -1,44 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
-import { migrateSpec, validateSite, type SiteSpec } from "@sb/spec";
+import { validateSite, type SiteSpec } from "@sb/spec";
 import { renderPage, renderPath, renderSite } from "../src/index.ts";
+import { withCollections } from "./collections-fixture.ts";
 
 const URL_ = "https://pekarnakvas.si/";
 const NBSP = " ";
-
-/** Pekarna Kvas with a news page, a blog, events and services kept as collections. */
-export function withCollections(): SiteSpec {
-  const spec = migrateSpec(JSON.parse(readFileSync(new URL("../../../tools/eval/golden/pekarna-kvas.json", import.meta.url), "utf8"))) as SiteSpec;
-  spec.pages.splice(1, 0, {
-    id: "p_novice",
-    kind: "standard",
-    slug: "novice",
-    nav: { label: "Novice", show: true },
-    seo: { title: "Novice | Pekarna Kvas", description: "Novice in dogodki pekarne." },
-    sections: [
-      { id: "s_novice", type: "collection", variant: "list", props: { kind: "blog", title: "Novice" } },
-      { id: "s_dogodki", type: "collection", variant: "cards", props: { kind: "events", title: "Dogodki" } },
-    ],
-  });
-  spec.pages[0]!.sections.push({ id: "s_home_news", type: "collection", variant: "list", props: { kind: "blog", title: "Iz pekarne", limit: 1 } });
-  spec.collections = {
-    blog: {
-      page: "p_novice",
-      items: [
-        { title: "Kvasni tečaj za začetnike", date: "2026-09-12", summary: "Prvi tečaj peke kruha.", body: ["Prvi odstavek.", "Drugi odstavek."], image: "img_02" },
-        { title: "Nov rženi kruh", date: "2026-10-01", summary: "V ponudbi je rženi kruh.", body: ["Rženi kruh pečemo ob petkih."] },
-      ],
-    },
-    events: {
-      page: "p_novice",
-      items: [
-        { title: "Dan odprtih vrat", date: "2026-11-07", start: "10:00", end: "14:00", place: "Pekarna", summary: "Pridite pogledat peč.", body: ["Pokazali bomo peč."], price: { amount: 0 } },
-        { title: "Pekovski sejem", date: "2026-10-20", endDate: "2026-10-22", summary: "Sejem v mestu." },
-      ],
-    },
-  };
-  return spec;
-}
 
 const html = (spec: SiteSpec, path: string, siteUrl?: string) => renderPath(spec, path, siteUrl ? { siteUrl } : {})!;
 const ld = (page: string) => [...page.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/g)].map((m) => JSON.parse(m[1]!) as Record<string, unknown>);
@@ -52,12 +18,15 @@ describe("collections on the site", () => {
 
   it("lists posts newest first with Slovene dates, each linking to its page", () => {
     const page = html(spec, "novice.html");
-    const titles = [...page.matchAll(/<h3 class="coll__title"><a href="([^"]+)">([^<]+)<\/a>/g)].map((m) => [m[1], m[2]]);
+    const titles = [...page.matchAll(/<h2 class="coll__title"><a href="([^"]+)">([^<]+)<\/a>/g)].map((m) => [m[1], m[2]]);
     expect(titles.slice(0, 2)).toEqual([
       ["novice/nov-rzeni-kruh.html", "Nov rženi kruh"],
       ["novice/kvasni-tecaj-za-zacetnike.html", "Kvasni tečaj za začetnike"],
     ]);
     expect(page).toContain(`<time dateTime="2026-10-01">1.${NBSP}oktobra 2026</time>`);
+    // The list opens the page: its title is the page's h1 (the home page's short list keeps an h2).
+    expect(page).toMatch(/<h1 id="s_novice-title" class="section-title">Novice<\/h1>/);
+    expect(html(spec, "index.html")).toMatch(/<h2 id="s_home_news-title" class="section-title">Iz pekarne<\/h2>/);
   });
 
   it("lists events soonest first; only an event with a body links to a page; the events island is loaded", () => {
@@ -67,6 +36,7 @@ describe("collections on the site", () => {
     expect(events).toContain(`20.–22.${NBSP}oktobra 2026`);
     expect(events).toContain('data-ends="2026-10-22"');
     expect(events).toContain('<h3 class="coll__title">Pekovski sejem</h3>');
+    expect(html(spec, "index.html")).toContain('<h3 class="coll__title"><a href="novice/nov-rzeni-kruh.html">Nov rženi kruh</a></h3>');
     expect(events).toContain('href="dogodki/dan-odprtih-vrat.html"');
     expect(events).toContain(`7.${NBSP}novembra 2026, 10.00–14.00`);
     expect(page).toMatch(/<script src="[^"]*js\/events\.js" defer="">/);

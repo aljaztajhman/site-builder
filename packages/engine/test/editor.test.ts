@@ -98,11 +98,19 @@ describe("guarded edits", () => {
 describe("defaultSection", () => {
   const spec = golden();
   it("builds a valid starter section for every non-system section type", () => {
+    // A collection section needs a collection to show (tested below).
+    const withBlog = { ...spec, collections: { blog: { page: spec.pages[0]!.id, items: [] } } };
     for (const def of SECTION_DEFS.filter((d) => !d.systemOnly)) {
-      const s = defaultSection(spec, def.type, `s_new_${def.type.replace(/-/g, "_")}`);
+      const s = defaultSection(withBlog, def.type, `s_new_${def.type.replace(/-/g, "_")}`);
       expect(s, def.type).not.toBeNull();
       expect(sectionDef(def.type).schema.safeParse(s).success, def.type).toBe(true);
     }
+  });
+
+  it("offers a collection section only once a collection is switched on, showing the first one", () => {
+    expect(defaultSection(spec, "collection", "s_c")).toBeNull();
+    const withEvents = { ...spec, collections: { events: { page: spec.pages[0]!.id, items: [] } } };
+    expect(defaultSection(withEvents, "collection", "s_c")).toMatchObject({ type: "collection", variant: "list", props: { kind: "events" } });
   });
 
   it("refuses photo sections on a site without photos, and system sections", () => {

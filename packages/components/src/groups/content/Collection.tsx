@@ -13,7 +13,7 @@ import {
   type ResolvedEntry,
   type Service,
 } from "@sb/spec";
-import type { ReactNode } from "react";
+import { createContext, useContext, type ReactNode } from "react";
 import { Picture, PriceText, Section, SectionHead, cx, titleId } from "../../primitives/index.tsx";
 import type { RenderCtx, SectionProps } from "../../types.ts";
 import type { UiKey } from "../../i18n.ts";
@@ -24,10 +24,13 @@ const MORE: Record<CollectionKind, UiKey> = { blog: "moreBlog", events: "moreEve
 export const COLLECTION_CARD_SIZES = "(min-width: 64rem) 24rem, (min-width: 48rem) 50vw, 100vw";
 const PORTRAIT_SIZES = "6rem";
 
-/** An entry's title, a link to its page when it has one. */
+/** An entry's title (h3 under the section's h2, h2 when the list opens the page), a link to its page when it has one. */
 function EntryTitle({ e, ctx, children }: { e: ResolvedEntry; ctx: RenderCtx; children: ReactNode }) {
-  return <h3 className="coll__title">{e.path ? <a href={ctx.entryHref(e.path)}>{children}</a> : children}</h3>;
+  const H = useContext(EntryHeading);
+  return <H className="coll__title">{e.path ? <a href={ctx.entryHref(e.path)}>{children}</a> : children}</H>;
 }
+
+const EntryHeading = createContext<"h2" | "h3">("h3");
 
 /** When and where an event is: the days, the time and the place, each only when given. */
 export function eventWhen(ev: Event, ctx: RenderCtx): string {
@@ -139,7 +142,7 @@ function PersonItem({ e, ctx }: { e: ResolvedEntry<"team">; ctx: RenderCtx }) {
  * events.js hides the past ones in the visitor's browser, so the published page needn't change each day.
  * An empty collection shows nothing, except events, which say there are none coming up.
  */
-export function Collection({ section, ctx }: SectionProps<"collection">) {
+export function Collection({ section, ctx, index }: SectionProps<"collection">) {
   const { props } = section;
   const kind = props.kind;
   const all = collectionEntries(ctx.site.collections, kind);
@@ -164,9 +167,10 @@ export function Collection({ section, ctx }: SectionProps<"collection">) {
   });
   return (
     <Section id={section.id} type={section.type} variant={section.variant} tone={section.tone}>
-      <SectionHead id={section.id} eyebrow={props.eyebrow} title={props.title} intro={props.intro} />
+      {/* Opening a page of its own (Novice), the list's title is the page's h1. */}
+      <SectionHead id={section.id} eyebrow={props.eyebrow} title={props.title} intro={props.intro} level={index === 0 ? 1 : 2} />
       <ul className={cx("coll", `coll--${kind}`, cards && "coll--cards")} aria-labelledby={titleId(section.id)} {...(kind === "events" ? { "data-upcoming": "", "data-limit": String(limit) } : {})}>
-        {items}
+        <EntryHeading.Provider value={index === 0 ? "h2" : "h3"}>{items}</EntryHeading.Provider>
       </ul>
       {kind === "events" && (
         <p className="coll__empty" hidden={all.length > 0 || undefined}>

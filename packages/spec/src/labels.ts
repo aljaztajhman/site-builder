@@ -102,7 +102,7 @@ export const FIELD_LABEL: Record<string, string> = {
   images: "Fotografije",
   wordmark: "Ime v ozadju",
   year: "Leto v nogi strani",
-  date: "Datum izjave (LLLL-MM-DD)",
+  date: "Datum",
   signs: "Kažipoti",
   receipt: "Račun v uvodu",
   lines: "Vrstice na računu",
@@ -184,10 +184,8 @@ export const FIELD_LABEL_IN: Record<string, string> = {
   "figure/label": "Kaj številka pomeni",
   "signs/label": "Kraj na kažipotu",
   "signs/note": "Čas ali razdalja",
-  // Collection entries (blog posts and events).
-  "items/date": "Datum",
-  "items/body": "Besedilo (odstavki)",
-  "items/url": "Povezava za prijavo ali vstopnice",
+  // The accessibility statement's date (legal section props); a post's or event's date is just "Datum".
+  "props/date": "Datum izjave (LLLL-MM-DD)",
 };
 
 export function fieldLabel(key: string, parent?: string): string {
