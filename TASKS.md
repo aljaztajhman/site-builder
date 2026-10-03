@@ -269,6 +269,12 @@ Before CMS collections (`sb-roadmap-order` = swap, 2026-10-01).
   - A second tap on Objavi while publishing, or Enter while a message is being sent, does nothing.
 - Checked and not needed: response compression. Railway's edge already sends gzip and zstd (measured on the live landing page: home.css 24.5 KB → 6.6 KB transferred).
 
+## Polish and optimization (2026-10-03)
+- [x] Published sites (branch claude/site-output):
+  - Each site loads the stylesheet for its own trade motif: `site-<motif>.css`, or `site.css` without one. Each is the whole sheet without the other nine trades' rules, in the original order. 97 KB → 80–83 KB per site (gzip 17.0 → 14.7–15.2 KB).
+  - Checked: all 12 landing examples are pixel-identical to the full sheet at 360 and 1280 px, plus render tests (`shared.test.ts`: per-motif sheets, mixed `:is()` groups, @media, quoted braces).
+  - The logo is cached for 5 minutes instead of `immutable` for a year: it keeps the name `logo.png` when replaced, so returning visitors kept the old one. Photos stay immutable (their ids are never reused).
+
 ## Later: phase 4 — CMS collections
 - [ ] Collections the client edits: blog, services, price list (cenik; its editing comes forward into phase 3), team, events; spec migration + components + editor forms
 - [ ] Per-collection list/detail pages, RSS for the blog, sitemap entries

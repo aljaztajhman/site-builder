@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { minifyCss, sharedBundle } from "../src/index.ts";
+import { minifyCss, motifsIn, sharedBundle, sharedStylesheet, stylesheetFor } from "../src/index.ts";
 
 describe("minifyCss", () => {
   it("keeps descendant pseudo-class selectors intact", () => {
@@ -9,7 +9,8 @@ describe("minifyCss", () => {
 });
 
 describe("shared stylesheet", () => {
-  const css = new TextDecoder().decode(sharedBundle().files.get("site.css"));
+  // Every stylesheet a site can get (site.css and one per trade motif), so the checks cover motif rules too.
+  const css = [...sharedBundle().files].filter(([f]) => f.endsWith(".css")).map(([, d]) => new TextDecoder().decode(d)).join("\n");
 
   it("contains no banned visual patterns", () => {
     expect(css).not.toMatch(/gradient\(/);
@@ -72,5 +73,38 @@ describe("shared stylesheet", () => {
     const files = [...sharedBundle().files.keys()];
     expect(files.filter((f) => f.startsWith("fonts/"))).toHaveLength(19);
     expect(files).toEqual(expect.arrayContaining(["js/nav.js", "js/consent.js", "js/gallery.js", "site.css"]));
+  });
+});
+
+describe("one stylesheet per trade motif", () => {
+  const full = minifyCss(sharedStylesheet());
+  const motifs = motifsIn(full);
+  const files = sharedBundle().files;
+  const text = (f: string) => new TextDecoder().decode(files.get(f));
+
+  it("ships site.css and a sheet per motif, each without the other trades' rules", () => {
+    expect(motifs).toEqual(["bend", "crust", "label", "ledger", "mirror", "pipes", "plate", "smile", "spoon", "trail"]);
+    expect(text("site.css")).not.toMatch(/\[data-motif="/);
+    for (const m of motifs) {
+      const sheet = text(`site-${m}.css`);
+      expect(sheet, m).toContain(`[data-motif="${m}"]`);
+      // Nothing in it only for other trades: every selector naming motifs names this one (some name a group).
+      expect(stylesheetFor(sheet, m)).toBe(sheet);
+      for (const sel of sheet.match(/[^{}]*\[data-motif="[a-z-]+"\][^{}]*\{/g) ?? []) {
+        for (const one of sel.split(/,(?![^(]*\))/)) if (one.includes("[data-motif=")) expect(one, `${m}: ${one}`).toContain(`[data-motif="${m}"]`);
+      }
+      // Smaller than the whole sheet, and everything for sites without a motif is in it, in order.
+      expect(sheet.length).toBeLessThan(full.length);
+      expect(stylesheetFor(sheet, null)).toBe(text("site.css"));
+    }
+  });
+
+  it("keeps order and splits mixed selector lists, @media blocks and quoted braces correctly", () => {
+    const css =
+      '.a{color:red}[data-motif="x"] .b,[data-motif="y"] .b,.c{color:blue}@media (min-width:1px){[data-motif="y"] .d{margin:0}}' +
+      '[data-motif] .e{padding:0}[data-motif="x"] .f::before{content:"{}"}.g{color:green}';
+    expect(stylesheetFor(css, "x")).toBe('.a{color:red}[data-motif="x"] .b,.c{color:blue}[data-motif] .e{padding:0}[data-motif="x"] .f::before{content:"{}"}.g{color:green}');
+    expect(stylesheetFor(css, "y")).toBe('.a{color:red}[data-motif="y"] .b,.c{color:blue}@media (min-width:1px){[data-motif="y"] .d{margin:0}}[data-motif] .e{padding:0}.g{color:green}');
+    expect(stylesheetFor(css, null)).toBe(".a{color:red}.c{color:blue}[data-motif] .e{padding:0}.g{color:green}");
   });
 });
