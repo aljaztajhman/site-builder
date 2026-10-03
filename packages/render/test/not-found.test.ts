@@ -49,7 +49,7 @@ describe("404 page at any depth", () => {
         const served = rebaseRelativeUrls(stored, "../".repeat(depth));
         expect(unresolved(served, `${spec.slug}/${dir}${missing}`, files), `${dir}${missing}`).toEqual([]);
         // Without the rebase the stylesheet is what breaks first (the bug this guards).
-        expect(unresolved(stored, `${spec.slug}/${dir}${missing}`, files).some((u) => u.endsWith("site.css"))).toBe(true);
+        expect(unresolved(stored, `${spec.slug}/${dir}${missing}`, files).some((u) => /\/site(-[a-z-]+)?\.css$/.test(u))).toBe(true);
       }
     }
   });

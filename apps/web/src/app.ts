@@ -772,7 +772,9 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
           .catch((e: unknown) => console.error("[stats] visit", (e as Error).message));
       }
       c.header("content-type", contentType(rest));
-      c.header("cache-control", rest.startsWith("media/") ? "public, max-age=31536000, immutable" : "public, max-age=60");
+      // Photos never change under a name (ids aren't reused): cached for good. The logo keeps its name when
+      // the owner replaces it, so it is cached briefly like the pages.
+      c.header("cache-control", rest.startsWith("media/logo.") ? "public, max-age=300" : rest.startsWith("media/") ? "public, max-age=31536000, immutable" : "public, max-age=60");
       return c.body(data as Uint8Array<ArrayBuffer>);
     }
     // The 404 page of the locale directory asked for (en/…), else the site's; its relative paths are
