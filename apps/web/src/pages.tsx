@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import type { ReactNode } from "react";
-import type { SiteRow } from "@sb/platform";
+import type { SiteRow, StatTotals } from "@sb/platform";
 import { uiUrl } from "./ui/assets.ts";
 import { clientScriptUrl } from "./client-bundle.ts";
 import { PRODUCT_NAME, formatDate, formatEur, siteStatus } from "./ui/labels.ts";
@@ -70,7 +70,7 @@ export function TopBar({ children, spend, csrf, admin }: { children?: ReactNode;
   );
 }
 
-function SiteCard({ site, badge }: { site: SiteRow; badge: string | null }) {
+function SiteCard({ site, badge, stats }: { site: SiteRow; badge: string | null; stats: StatTotals | null }) {
   const status = siteStatus(site);
   const scope = site.intake?.scope === "full" ? "celotna stran" : "domača stran";
   const meta = site.current_version
@@ -98,6 +98,11 @@ function SiteCard({ site, badge }: { site: SiteRow; badge: string | null }) {
             {`/s/${site.slug}/`}
           </a>
         ) : null}
+        {stats ? (
+          <span className="meta num stats" title="Šteto brez piškotkov; ponovnih ogledov v pol ure in robotov ne štejemo.">
+            {`Zadnjih 30 dni: ogledi ${stats.visits} · klici ${stats.calls} · pot ${stats.directions} · sporočila ${stats.forms}`}
+          </span>
+        ) : null}
       </div>
     </li>
   );
@@ -114,9 +119,11 @@ export interface SitesPageProps {
   account?: { email: string; note: string | null };
   /** The free-preview badge for a site's thumbnail (limits.ts previewBadge); none when absent. */
   badgeFor?: (site: SiteRow) => string | null;
+  /** A published site's last 30 days (cookieless counts); null for one not published. */
+  statsFor?: (site: SiteRow) => StatTotals | null;
 }
 
-export function sitesPage({ sites, spendToday, cap, csrf, admin, account, badgeFor }: SitesPageProps): string {
+export function sitesPage({ sites, spendToday, cap, csrf, admin, account, badgeFor, statsFor }: SitesPageProps): string {
   return html(
     <Doc title={admin ? "Strani" : "Moje strani"}>
       <TopBar spend={{ today: spendToday, cap }} csrf={csrf} admin={admin} />
@@ -137,7 +144,7 @@ export function sitesPage({ sites, spendToday, cap, csrf, admin, account, badgeF
         {sites.length ? (
           <ul className="cards">
             {sites.map((s) => (
-              <SiteCard key={s.id} site={s} badge={badgeFor?.(s) ?? null} />
+              <SiteCard key={s.id} site={s} badge={badgeFor?.(s) ?? null} stats={statsFor?.(s) ?? null} />
             ))}
           </ul>
         ) : (

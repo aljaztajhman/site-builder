@@ -355,6 +355,32 @@ export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
       create index url_checks_created on url_checks(created_at);
     `,
   },
+  {
+    id: 15,
+    name: "site_stats",
+    // Cookieless counts per published site and day (Europe/Ljubljana): page views, taps on call and
+    // directions links, contact-form messages. Totals only: nothing about a visitor is stored.
+    // stats_reports: the monthly report email per site and month ('YYYY-MM'), sent at most once.
+    sql: `
+      create table site_stats (
+        site_id text not null references sites(id) on delete cascade,
+        day date not null,
+        visits integer not null default 0,
+        calls integer not null default 0,
+        directions integer not null default 0,
+        forms integer not null default 0,
+        primary key (site_id, day)
+      );
+      create table stats_reports (
+        site_id text not null references sites(id) on delete cascade,
+        month text not null,
+        status text not null default 'pending' check (status in ('pending', 'sent', 'none', 'failed')),
+        attempts integer not null default 0,
+        last_attempt_at timestamptz not null default now(),
+        primary key (site_id, month)
+      );
+    `,
+  },
 ];
 
 type Query = (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>;

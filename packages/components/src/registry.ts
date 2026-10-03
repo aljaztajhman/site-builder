@@ -20,7 +20,7 @@ export function rendererFor(type: SectionType): SectionComponent<SectionType> {
 
 /**
  * Client-side islands a section needs (files in packages/components/islands, served from _shared/js/).
- * nav.js is always loaded by the page shell.
+ * nav.js and stats.js are always loaded by the page shell.
  */
 export const SECTION_ISLANDS: Partial<Record<SectionType, string[]>> = {
   ...heroIslands,

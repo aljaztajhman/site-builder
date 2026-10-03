@@ -158,7 +158,8 @@ export function renderPage(spec: SiteSpec, page: Page, opts: RenderOptions = {})
   const ctx = makeCtx(localized, localizedPage, opts);
   const design = localized.design;
 
-  const islands = new Set<string>(["nav.js"]);
+  // nav.js (the menu) and stats.js (cookieless tap counts, live address only) are on every page.
+  const islands = new Set<string>(["nav.js", "stats.js"]);
   for (const s of localizedPage.sections) for (const i of islandsFor(s)) islands.add(i);
   // The privacy policy says consent can be withdrawn with the footer's "cookie settings" button, which consent.js
   // reveals: on a site with consent-gated embeds the privacy page loads it too, with the notice closed until asked for.
