@@ -708,31 +708,50 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     c.header("cache-control", "private, max-age=3600");
     return c.body(data as Uint8Array<ArrayBuffer>);
   });
+  // Rendered preview pages by site, version, page and layout variant. A saved version never changes, so a
+  // page rendered once is served again without loading the spec or rendering (the editor reloads the
+  // preview after every save, and each layout thumbnail is a page of its own). In memory, newest kept.
+  const PREVIEW_CACHE = 200;
+  const previews = new Map<string, string>();
+  const remember = (key: string, html: string) => {
+    previews.delete(key);
+    previews.set(key, html);
+    if (previews.size > PREVIEW_CACHE) previews.delete(previews.keys().next().value!);
+    return html;
+  };
+
   app.get("/preview/:id/:file", async (c) => {
+    const id = c.req.param("id");
     const v = c.req.query("v");
-    if (!SAFE_ID.test(c.req.param("id"))) return c.notFound();
+    if (!SAFE_ID.test(id)) return c.notFound();
     // ?v=N of a version retention removed shows the nearest older kept one (as undo does).
-    const asked = v && /^\d+$/.test(v) ? await repo.nearestVersion(c.req.param("id"), Number(v)) : undefined;
-    const current = asked === null ? null : await repo.getSpec(c.req.param("id"), asked);
+    const asked = v && /^\d+$/.test(v) ? await repo.nearestVersion(id, Number(v)) : undefined;
+    const sectionId = c.req.query("section");
+    const variant = c.req.query("variant");
+    c.header("cache-control", "no-store");
+    // The version this request shows: asked for, or the site's current one (siteAccess loaded the row).
+    const version = asked ?? c.get("site")?.current_version ?? null;
+    const key = version === null ? null : [id, version, c.req.param("file"), sectionId ?? "", variant ?? ""].join("|");
+    const hit = key === null ? undefined : previews.get(key);
+    if (hit !== undefined) return c.html(remember(key!, hit));
+    const current = asked === null ? null : await repo.getSpec(id, version ?? undefined);
     if (!current) {
-      const gone = asked === null && (await repo.getSite(c.req.param("id")))?.current_version != null;
+      const gone = asked === null && (await repo.getSite(id))?.current_version != null;
       return c.text(gone ? "Te različice ni več med shranjenimi." : "Predogled še ni pripravljen.", 404);
     }
     const page = current.spec.pages.find((p) => pageFile(p) === c.req.param("file"));
     if (!page) return previewNotFound(c, current.spec, 0);
-    c.header("cache-control", "no-store");
+    const cacheKey = [id, current.version, c.req.param("file"), sectionId ?? "", variant ?? ""].join("|");
     // ?section=…&variant=…: that section alone in another variant, for the editor's layout thumbnails.
     // Same renderer and the same page URL depth, so media and shared assets resolve as in the preview.
-    const sectionId = c.req.query("section");
-    const variant = c.req.query("variant");
     if (sectionId !== undefined || variant !== undefined) {
       const section = page.sections.find((s) => s.id === sectionId);
       if (!section || !variant || !(sectionDef(section.type).variants as readonly string[]).includes(variant)) return c.notFound();
       const alone = { ...page, sections: [{ ...section, variant } as typeof section] };
       const spec = { ...current.spec, pages: current.spec.pages.map((p) => (p.id === page.id ? alone : p)) };
-      return c.html(renderPage(spec, alone, { imageWidths: config.images.widths }));
+      return c.html(remember(cacheKey, renderPage(spec, alone, { imageWidths: config.images.widths })));
     }
-    return c.html(renderPage(current.spec, page, { imageWidths: config.images.widths }));
+    return c.html(remember(cacheKey, renderPage(current.spec, page, { imageWidths: config.images.widths })));
   });
   // Deeper paths are never pages (pages are files at the site root): the 404 page, rendered for that depth.
   app.get("/preview/:id/*", async (c) => {
