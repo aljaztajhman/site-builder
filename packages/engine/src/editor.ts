@@ -16,6 +16,8 @@ import {
   TOKEN_LABEL,
   toModelJsonSchema,
   validateSite,
+  followTranslations,
+  pruneTranslations,
   EDITOR_STARTER_TEXT as DEFAULT_TEXT,
   DAYS,
   capitalize,
@@ -24,6 +26,7 @@ import {
   type Day,
   type Issue,
   type SiteSpec,
+  type StructuralOp,
 } from "@sb/spec";
 
 /**
@@ -66,7 +69,9 @@ export type ApplyFailure =
 
 /**
  * The first half of every edit (chat patches and the owner's direct edits): refuse protected paths, check the
- * ops against the spec, apply them to a copy and migrate it. Never mutates the input.
+ * ops against the spec, apply them to a copy and migrate it. Never mutates the input. Translation overlays
+ * follow the sections and items they translate: re-pointed op by op when an array element is inserted,
+ * removed, moved or copied, and dropped where an edit took away the text they pointed at.
  */
 export function applyOps(spec: SiteSpec, ops: Operation[]): { next: SiteSpec } | ApplyFailure {
   const guarded = protectedPathIssues(ops);
@@ -74,7 +79,15 @@ export function applyOps(spec: SiteSpec, ops: Operation[]): { next: SiteSpec } |
   const invalid = jsonpatch.validate(ops, spec);
   if (invalid) return { reason: "invalid", message: invalid.message, op: invalid.operation?.op, path: invalid.operation?.path };
   try {
-    return { next: migrateSpec(jsonpatch.applyPatch(structuredClone(spec), ops, true, false).newDocument) };
+    let doc: unknown = structuredClone(spec);
+    for (const op of ops) {
+      const overlays = followTranslations(doc, op as StructuralOp);
+      doc = jsonpatch.applyOperation(doc, op, true, true, true).newDocument;
+      if (overlays) (doc as { translations?: unknown }).translations = overlays;
+    }
+    const pruned = pruneTranslations(doc);
+    if (pruned) (doc as { translations?: unknown }).translations = pruned;
+    return { next: migrateSpec(doc) };
   } catch (e) {
     return { reason: "failed", message: (e as Error).message };
   }
