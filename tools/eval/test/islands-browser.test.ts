@@ -21,15 +21,20 @@ let cb: CheckBrowser;
 let server: StaticServer;
 let dir: string;
 let slug: string;
+let mapSlug: string;
 
 beforeAll(async () => {
-  const spec = migrateSpec(JSON.parse(await readFile(path.join(here, "../golden/kmetija-grabnar.json"), "utf8"))) as SiteSpec;
-  slug = spec.slug;
   dir = await mkdtemp(path.join(tmpdir(), "sb-islands-"));
-  for (const [rel, data] of siteFiles(spec, new Map(), { imageWidths: config.images.widths })) {
-    const file = path.join(dir, rel);
-    await mkdir(path.dirname(file), { recursive: true });
-    await writeFile(file, data);
+  // The farm has the menu and the gallery; the bakery's contact section has the consent-gated map.
+  for (const id of ["kmetija-grabnar", "pekarna-kvas"]) {
+    const spec = migrateSpec(JSON.parse(await readFile(path.join(here, `../golden/${id}.json`), "utf8"))) as SiteSpec;
+    if (id === "kmetija-grabnar") slug = spec.slug;
+    else mapSlug = spec.slug;
+    for (const [rel, data] of siteFiles(spec, new Map(), { imageWidths: config.images.widths })) {
+      const file = path.join(dir, rel);
+      await mkdir(path.dirname(file), { recursive: true });
+      await writeFile(file, data);
+    }
   }
   server = await serveStatic(dir);
   cb = await launchCheckBrowser();
@@ -41,12 +46,12 @@ afterAll(async () => {
   await rm(dir, { recursive: true, force: true });
 });
 
-async function open(width = 360): Promise<Page> {
+async function open(width = 360, site = slug): Promise<Page> {
   const context = await cb.browser.newContext({ viewport: { width, height: 800 }, reducedMotion: "reduce" });
   const page = await context.newPage();
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  await page.goto(`${server.url}/${slug}/index.html`);
+  await page.goto(`${server.url}/${site}/index.html`);
   page.on("close", () => expect(errors).toEqual([]));
   return page;
 }
@@ -101,7 +106,8 @@ describe("island scripts in Chromium", () => {
   }, 60_000);
 
   it("consent: no map before a click, the map after one; a refusal hides the notice and loads nothing", async () => {
-    const page = await open(1280);
+    const page = await open(1280, mapSlug);
+    expect(await page.locator("[data-embed-src]").count()).toBeGreaterThan(0);
     expect(await page.locator("[data-embed-src] iframe").count()).toBe(0);
     await expect.poll(() => page.locator("[data-consent-notice]").isVisible()).toBe(true);
     await page.locator('[data-consent="denied"]').click();
