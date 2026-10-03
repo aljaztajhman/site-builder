@@ -22,10 +22,10 @@ async function freePort(): Promise<number> {
 }
 
 /** One Chromium for axe, screenshots and Lighthouse (which attaches over the debugging port). */
-export async function launchCheckBrowser(): Promise<CheckBrowser> {
+export async function launchCheckBrowser(args: string[] = []): Promise<CheckBrowser> {
   // Imported on first use, like Lighthouse: only the worker and the eval launch a browser.
   const { chromium } = await import("playwright");
   const port = await freePort();
-  const browser = await chromium.launch({ args: [`--remote-debugging-port=${port}`] });
+  const browser = await chromium.launch({ args: [`--remote-debugging-port=${port}`, ...args] });
   return { browser, port, close: () => browser.close() };
 }

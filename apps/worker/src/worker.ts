@@ -1,6 +1,7 @@
 import { loadConfig, type AppConfig } from "@sb/config";
 import {
   AnthropicTransport,
+  CHECKER_BROWSER_ARGS,
   FalImageTransport,
   ImageGenerator,
   JunkIntakeError,
@@ -8,15 +9,19 @@ import {
   ReplayTransport,
   SpendCapError,
   StandInImageTransport,
+  UrlRefusedError,
   applyChatEdit,
+  checkUrl,
   classify,
   describePhotos,
   generateSite,
+  launchCheckBrowser,
   loadRecordings,
   pruneAllSites,
   pruneSite,
   type ModelTransport,
   type SpendLedger,
+  type UrlCheckResult,
 } from "@sb/engine";
 import { INTERRUPTED_MESSAGE, type Platform, type Tier } from "@sb/platform";
 import { cleanupExpired, spendMonitor } from "./housekeeping.ts";
@@ -124,6 +129,20 @@ export interface WorkerJobs {
   generateSite: typeof generateSite;
   applyChatEdit: typeof applyChatEdit;
   describePhotos: typeof describePhotos;
+  /** The public website checker: one live site, in its own Chromium. */
+  checkUrl: (url: string, config: AppConfig) => Promise<UrlCheckResult>;
+}
+
+/** What the visitor reads when a check failed for a reason of ours, not of the address. */
+export const CHECK_FAILED_MESSAGE = "Pregleda nismo mogli dokončati. Poskusite znova čez nekaj minut.";
+
+async function checkUrlInBrowser(url: string, config: AppConfig): Promise<UrlCheckResult> {
+  const browser = await launchCheckBrowser(CHECKER_BROWSER_ARGS);
+  try {
+    return await checkUrl(url, { browser, config });
+  } finally {
+    await browser.close();
+  }
 }
 
 /** What the owner reads when a chat edit was cut off by a restart. */
@@ -155,7 +174,7 @@ export async function recoverInterrupted(platform: Pick<Platform, "repo">, grace
 /** Registers the job handlers. Used by the worker service and, with PGlite, in-process by the web service. */
 export async function startWorker(platform: Platform, config = loadConfig(), jobs: Partial<WorkerJobs> = {}): Promise<WorkerHandle> {
   const { repo, storage, queue } = platform;
-  const run: WorkerJobs = { generateSite, applyChatEdit, describePhotos, ...jobs };
+  const run: WorkerJobs = { generateSite, applyChatEdit, describePhotos, checkUrl: checkUrlInBrowser, ...jobs };
   const timers: ReturnType<typeof setInterval>[] = [];
 
   // Left busy by a process that died (deploy, crash): at start, and every minute for jobs whose pg-boss
@@ -322,6 +341,22 @@ export async function startWorker(platform: Platform, config = loadConfig(), job
     console.log(`[prune] ${results.length} site(s): ${versions} version(s) removed (${mb.toFixed(1)} MB), ${results.reduce((n, r) => n + r.files.length, 0)} file(s)${failed ? `, ${failed} failed` : ""}`);
   });
   await queue.schedule?.("prune", config.versions.retention.cron, {}, { tz: config.versions.retention.timeZone });
+
+  // The public website checker (/pregled): no model calls, one at a time (each opens a Chromium and runs
+  // Lighthouse). A refused address is the visitor's answer; anything else is logged and worded for them.
+  await queue.work("check-url", async (job) => {
+    const row = await repo.checks.get(job.checkId);
+    if (!row || !(await repo.checks.start(job.checkId))) return;
+    try {
+      await repo.checks.finish(row.id, await run.checkUrl(row.url, config));
+    } catch (e) {
+      if (e instanceof UrlRefusedError) await repo.checks.fail(row.id, e.message);
+      else {
+        console.error(`[check-url] ${row.host}:`, (e as Error).message);
+        await repo.checks.fail(row.id, CHECK_FAILED_MESSAGE);
+      }
+    }
+  });
 
   let stopping: Promise<{ interrupted: RunningJob[] }> | null = null;
   return {

@@ -131,6 +131,16 @@ legend{padding:0 4px;font-weight:600;font-size:13px;color:var(--ink-2)}
 .login .brand{font-size:22px;margin-bottom:40px}
 .login h1{font-size:clamp(32px,8vw,44px);font-weight:560;letter-spacing:-.03em;margin-bottom:8px}
 .login .btn{margin-top:16px}
+/* Website checker (/pregled): a wider column for the report; each finding says what to fix first. */
+.checker{max-width:560px}
+.checker .cf-turnstile{margin-top:16px;min-height:65px}
+.findings{list-style:none;margin:20px 0;padding:0;border-top:1px solid var(--line)}
+.findings li{display:grid;gap:2px;padding:14px 0;border-bottom:1px solid var(--line)}
+.findings .mark{justify-self:start;font-size:13px;font-weight:600;padding:2px 8px;border-radius:var(--r-1);background:var(--accent-soft);color:var(--accent)}
+.findings .fix .mark{background:var(--warn-soft);color:var(--warn)}
+.findings strong{font-size:17px;margin-top:4px}
+.findings li>span:last-child{color:var(--ink-2)}
+.checker .note{margin:20px 0 12px}
 
 /* ---------- Sites ---------- */
 .sites{padding-top:32px;padding-bottom:64px}

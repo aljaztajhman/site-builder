@@ -69,3 +69,10 @@ Brief and design (classify → brief → design) and the image stage (photo vari
 - Lighthouse runs on the homepage only (per checkpoint); axe and the mobile checks run on every page at 360 and 1280 px.
 - Every response carries `X-Robots-Tag: noindex`, including published sites, so Lighthouse SEO on the deployed URL loses the "is crawlable" audit; the eval serves files without the header, like a production host would.
 - The export is checked offline (file://) in Chromium by `checkExportOffline` during eval: pages, images, fonts, stylesheet, no network. Other browsers are not verified; Firefox's file:// origin rules may block fonts from the parent `_shared/` folder, in which case system fonts are used.
+
+**Website checker** (`/pregled`, `apps/web/src/checker.tsx`; config `checker`): a public page where anyone types a site's address and gets a report in plain Slovene. Nothing is spent: no model calls. The web refuses an address that isn't public http(s) on 80/443 (it resolves the name), checks the bot check and the per-IP-hash and daily limits, writes a `url_checks` row (migration 14) and queues `check-url`. The worker runs one at a time in its own Chromium (`checkUrl`, `packages/engine/src/check/url-check.ts`):
+- Redirects are followed in Node, refusing any hop to a private address.
+- The browser aborts every request whose host resolves to a private address, and `*.internal` names never resolve.
+- It measures the page at 360×800 with the generator's own page checks, reads cookies set before any interaction and the ZEPT company details in the page text, and runs Lighthouse mobile.
+
+The report page polls with a `Refresh` header and lists what to fix first. Reports are deleted after `checker.keepDays` and IP hashes after a day (housekeeping). `pnpm study <list.csv>` runs the same checks over a list for the small-business study. Per-site rows stay in `eval/runs/study/`; `summary.md` holds aggregates only.

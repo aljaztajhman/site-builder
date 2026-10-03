@@ -154,6 +154,9 @@ const PUBLIC = (path: string) =>
   path.startsWith("/login/") ||
   path === "/logout" ||
   path === "/zasebnost" ||
+  // The public website checker and its reports (an unguessable id each).
+  path === "/pregled" ||
+  /^\/pregled\/[^/]+$/.test(path) ||
   // The intake: the first homepage needs no account (the limits decide who may generate).
   path === "/api/sites" ||
   path === "/api/intake/ticket" ||

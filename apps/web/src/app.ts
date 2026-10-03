@@ -20,6 +20,7 @@ import {
   addPhotos,
   PhotoError,
   type Operation,
+  type Resolve,
 } from "@sb/engine";
 import { VersionConflictError, contentType, mailerFromEnv, newId, type Mailer, type Platform, type SiteStatus, type Tier } from "@sb/platform";
 import { renderPage, sharedBundle, pageFile, notFoundPlacement, rebaseRelativeUrls } from "@sb/render";
@@ -31,6 +32,7 @@ import { TOKEN_FIELD, TURNSTILE_ORIGIN, botCheckFromEnv, type BotCheck } from ".
 import { registerLoginRoutes } from "./login.tsx";
 import { registerAdminRoutes } from "./admin.tsx";
 import { registerPrivacyRoute } from "./privacy.tsx";
+import { registerCheckerRoutes } from "./checker.tsx";
 import { descriptionHash, readTicket, signTicket } from "./upload-ticket.ts";
 import { slugify } from "./slug.ts";
 import { DASHBOARD, sitesPage, sitePage } from "./pages.tsx";
@@ -61,6 +63,8 @@ export interface AppOptions {
    * logged against the job. Absent (tests), the pipeline's own classification is the only check.
    */
   classifyIntake?: ClassifyIntake;
+  /** DNS for the website checker's private-address refusal (tests). */
+  checkerResolve?: Resolve;
 }
 
 export type ClassifyIntake = (description: string, ctx: { siteId: string; tier: Tier; accountId: string | null; aiJobId: string }) => Promise<{ businessType: string; confidence: number }>;
@@ -85,7 +89,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   const botCheck = opts.botCheck ?? botCheckFromEnv(process.env, auth.secureCookies);
   const limits = { repo, config, secret: auth.secret };
   // The landing page and the intake's refusal page carry the Turnstile widget (its script and frame).
-  const turnstileCsp = (path: string) => botCheck.mode === "on" && (path === "/" || path === "/api/sites");
+  const turnstileCsp = (path: string) => botCheck.mode === "on" && (path === "/" || path === "/api/sites" || path === "/pregled");
 
   // Deployed environments are public URLs: nothing here may be indexed, published sites included in phase 1.
   app.use("*", async (c, next) => {
@@ -116,6 +120,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   app.use("/logout", bodyLimit({ maxSize: 16 * 1024 }));
   app.use("/admin/*", bodyLimit({ maxSize: 16 * 1024 }));
   app.use("/api/intake/*", bodyLimit({ maxSize: 16 * 1024 }));
+  app.use("/pregled", bodyLimit({ maxSize: 16 * 1024 }));
   // The intake. Without an account nothing of the body is read before its upload ticket (the bot check
   // and the limits passed; upload-ticket.ts) is checked and taken, and the body is capped: a declared
   // size over tiers.anonymous.uploads.maxTotalBytes is refused unread, an undeclared one is cut off as
@@ -177,6 +182,8 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   });
   registerAdminRoutes(app, { repo, config, ...(opts.appUrl ? { appUrl: opts.appUrl } : {}) });
   registerPrivacyRoute(app, config);
+  // The public website checker (/pregled): no model calls, run by the worker.
+  registerCheckerRoutes(app, { repo, queue, config, secret: auth.secret, botCheck, ...(opts.checkerResolve ? { resolve: opts.checkerResolve } : {}) });
 
   // ---------- Health ----------
   app.get("/health", async (c) => {
