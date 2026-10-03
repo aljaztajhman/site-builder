@@ -218,7 +218,19 @@ describe("free-preview badge (sb-preview-watermark)", () => {
       await preview(page).locator("main").waitFor();
       await badge(page).waitFor();
       await page.goto(`${base}/sites`);
-      expect(await page.locator(".site-card .shot .preview-badge").textContent()).toBe("Predogled · Stranko");
+      expect(await page.locator(".site-card .preview-badge").textContent()).toBe("Predogled · Stranko");
+      // The badge covers nothing of the thumbnail, on a wide and on a narrow card.
+      for (const w of [1280, 360]) {
+        await page.setViewportSize({ width: w, height: 900 });
+        const b = (await page.locator(".site-card .preview-badge").boundingBox())!;
+        // The thumbnail as seen: the scaled frame, clipped by its .shot box.
+        const f = (await page.locator(".site-card .shot iframe").boundingBox())!;
+        const shot = (await page.locator(".site-card .shot").boundingBox())!;
+        const t = { x: Math.max(f.x, shot.x), y: Math.max(f.y, shot.y), width: Math.min(f.x + f.width, shot.x + shot.width) - Math.max(f.x, shot.x), height: Math.min(f.y + f.height, shot.y + shot.height) - Math.max(f.y, shot.y) };
+        const overlap = Math.max(0, Math.min(b.x + b.width, t.x + t.width) - Math.max(b.x, t.x)) * Math.max(0, Math.min(b.y + b.height, t.y + t.height) - Math.max(b.y, t.y));
+        expect(overlap, `badge over the thumbnail at ${w} px`).toBe(0);
+      }
+      await page.setViewportSize({ width: 1280, height: 900 });
       if (shots) await page.screenshot({ path: path.join(shots, "badge-sites-list-1280.png") });
       // Published (e.g. by the admin for a design partner): no badge anywhere.
       await platform.repo.markPublished(id, 1, "test");
