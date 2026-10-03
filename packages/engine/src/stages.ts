@@ -7,6 +7,7 @@ import {
   GENERATED_IMAGE_SECTIONS,
   SIGNATURE_PHOTO_VARIANTS,
   direction as directionById,
+  awayFromShowcases,
   enforceDesign,
   templateFor,
   type BusinessType,
@@ -161,7 +162,8 @@ export function designFromChoice(choice: z.infer<typeof DesignChoice>): Design {
     shadow: choice.shadow,
     imagery: dir.imagery,
   };
-  return Design.parse(enforceDesign(clampToSchema(draft), dir));
+  // Never the colours and fonts of a site on the landing page's trade showcase.
+  return Design.parse(awayFromShowcases(enforceDesign(clampToSchema(draft), dir), dir));
 }
 
 function clampToSchema(d: Design): Design {

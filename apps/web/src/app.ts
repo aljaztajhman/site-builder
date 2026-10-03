@@ -218,7 +218,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   app.get("/favicon.ico", (c) => c.redirect(`/assets/ui/${uiAssets().hash}/icon.svg`, 301));
 
   // ---------- Landing page ----------
-  const landing = async (c: Context<AppEnv>, extra: { error?: string; description?: string } = {}) => {
+  const landing = async (c: Context<AppEnv>, extra: { error?: string; description?: string; showcase?: string | undefined } = {}) => {
     const viewer = c.get("viewer");
     const anonymous = viewer.kind === "anonymous";
     const previous = anonymous ? (await repo.usage.deviceSites(c.get("deviceId")))[0] : undefined;
@@ -235,7 +235,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       ...extra,
     });
   };
-  app.get("/", async (c) => c.html(await landing(c)));
+  app.get("/", async (c) => c.html(await landing(c, { showcase: c.req.query("primer") })));
 
   // ---------- Dashboard ----------
   app.get(DASHBOARD, async (c) => {
