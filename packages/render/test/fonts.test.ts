@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -28,12 +28,16 @@ describe("self-hosted fonts (pnpm fonts)", () => {
         expect(existsSync(path.join(FONTS_DIR, "LICENSES", `${face.file}.txt`))).toBe(true);
       });
 
+      it("stays within the 60 KB per-family budget", () => {
+        expect(statSync(file).size).toBeLessThanOrEqual(60 * 1024);
+      });
+
       it("parses, keeps the wght axis and covers Slovene text", () => {
         const font = fontkit.create(readFileSync(file));
         const wght = font.variationAxes.wght;
         expect(wght, "wght axis").toBeDefined();
-        expect(wght!.min).toBeLessThanOrEqual(face.weights[0]);
-        expect(wght!.max).toBeGreaterThanOrEqual(face.weights[1]);
+        // The file holds exactly the weights the @font-face rule declares (a narrower file would fake the rest).
+        expect([wght!.min, wght!.max]).toEqual(face.weights);
         const missing = [...SLOVENE_AND_PUNCTUATION, ...ASCII_LETTERS].filter((ch) => {
           const cp = ch.codePointAt(0)!;
           if (!font.hasGlyphForCodePoint(cp)) return true;

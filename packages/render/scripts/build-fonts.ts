@@ -12,6 +12,9 @@
  *    (č kerns like c) by rewriting the PairPos subtables of GPOS;
  * 3. harfbuzz-subsets the merged font to the target set and writes woff2.
  *
+ * Axes other than wght are pinned to their defaults; wght is cut to the face's declared weights (fonts.ts) when
+ * those are narrower than the font's own range.
+ *
  * HVAR is dropped from the merged font (it does not cover the appended glyphs); advance-width variation
  * then comes from the gvar phantom points, which harfbuzz and browsers support.
  *
@@ -26,8 +29,10 @@ import { allFontFaces, type FontFace } from "@sb/spec";
 type SubsetFont = (
   buf: Buffer,
   text: string,
-  opts: { targetFormat: "sfnt" | "woff2"; glyphNames?: boolean; variationAxes?: Record<string, number>; keepFeatures?: string[] },
+  opts: { targetFormat: "sfnt" | "woff2"; glyphNames?: boolean; variationAxes?: Record<string, AxisSetting>; keepFeatures?: string[] },
 ) => Promise<Buffer>;
+/** A pinned axis location, or a narrowed range (harfbuzz instancing). */
+type AxisSetting = number | { min: number; max: number; default: number };
 interface FkGlyph {
   id: number;
   name: string | undefined;
@@ -824,8 +829,12 @@ async function buildFace(face: FontFace): Promise<{ file: string; bytes: number;
   const ext = readFileSync(sourceFile(face, "latin-ext"));
   const axes = fontkit.create(await subsetFont(latin, "a", { targetFormat: "sfnt" })).variationAxes;
   if (!axes.wght) throw new Error(`${face.family}: no wght axis`);
-  const pin: Record<string, number> = {};
+  const pin: Record<string, AxisSetting> = {};
   for (const [tag, a] of Object.entries(axes)) if (tag !== "wght") pin[tag] = a.default;
+  // A face that declares fewer weights than its font has (fonts.ts) is cut to them: the bytes go with the range.
+  const [lo, hi] = face.weights;
+  const w = axes.wght;
+  if (lo > w.min || hi < w.max) pin.wght = { min: Math.max(lo, w.min), max: Math.min(hi, w.max), default: Math.min(Math.max(w.default, lo), hi) };
   const pinOpt = Object.keys(pin).length ? { variationAxes: pin } : {};
   const a = await subsetFont(latin, text(TARGET_CODEPOINTS.filter((c) => !EXT_A(c))), { targetFormat: "sfnt", glyphNames: true, keepFeatures: FEATURES, ...pinOpt });
   const b = await subsetFont(ext, text(TARGET_CODEPOINTS.filter(EXT_A)), { targetFormat: "sfnt", glyphNames: true, keepFeatures: FEATURES, ...pinOpt });

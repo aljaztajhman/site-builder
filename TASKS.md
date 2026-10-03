@@ -304,7 +304,7 @@ Product work (not started):
 - [ ] Accessibility statement date uses render date (changes on republish); make it a spec field if that matters
 - [x] CSP for published pages: script-src drops 'unsafe-inline'; the one inline snippet (header `js` class) is allowed by its SHA-256 hash (tested)
 - [ ] Offline export verified in Chromium only; Firefox may block `file://` fonts from a parent folder — not verified
-- [ ] Newsreader font file is 62 KB (target 60)
+- [x] Newsreader font file is 58.7 KB (was 62, target 60; 2026-10-02, branch claude/newsreader-subset): `pnpm fonts` cuts the wght axis to the weights a face declares in fonts.ts, Newsreader declared 300–700 (headings only, editorial uses 400–500); the other 18 files rebuild byte-identical. Text at 400–700 measures the same width in Chromium as with the old file. Tests: every font ≤ 60 KB, each file's wght range equals its declared weights (fails on the old file)
 - [x] Team with only some portraits (2026-10-01): members without one get a same-size tile with their initials (none for a placeholder name; titles like "dr." skipped), with the direction's photo shape, so names and roles line up in grid and list. Checked: component tests; looked at the dentist golden at 1280 and 360 px (before: Maja's entry started beside Urška's portrait with bare text)
 - [ ] Railway bucket: confirm virtual-hosted vs path style in the bucket's Credentials tab; S3 keys are validated in code
 - [x] Railway PR environments: turned off by the owner (`sb-pr-envs` = off); on 2026-10-02 the project has only the `preview` environment
