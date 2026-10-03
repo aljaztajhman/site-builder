@@ -4,6 +4,7 @@ import type { Db } from "./db.ts";
 import { Accounts } from "./accounts.ts";
 import { UrlChecks } from "./checks.ts";
 import { SiteStats } from "./stats.ts";
+import { SiteDomains } from "./domains.ts";
 import { Usage, type Tier } from "./usage.ts";
 
 export type SiteStatus = "new" | "generating" | "ready" | "editing" | "publishing" | "failed";
@@ -159,12 +160,15 @@ export class Repo {
   readonly checks: UrlChecks;
   /** Cookieless counts per published site, and the monthly report emails. */
   readonly stats: SiteStats;
+  /** Sites' own domain names. */
+  readonly domains: SiteDomains;
 
   constructor(readonly db: Db) {
     this.accounts = new Accounts(db);
     this.usage = new Usage(db);
     this.checks = new UrlChecks(db);
     this.stats = new SiteStats(db);
+    this.domains = new SiteDomains(db);
   }
 
   async createSite(input: { id?: string; name: string; slug: string; intake: Intake; accountId?: string | null; deviceId?: string | null }): Promise<SiteRow> {
