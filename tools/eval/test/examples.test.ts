@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { EXAMPLES, OUT_DIR, exampleHtml } from "../src/examples/examples.ts";
+import { EXAMPLES, OUT_DIR, PRIMER_SLUG, exampleHtml, homepageFiles, primerSpec } from "../src/examples/examples.ts";
 
 /**
  * The landing page's example sites are our engine's output, not a mock-up: the committed homepages
@@ -29,6 +29,23 @@ describe("landing examples", () => {
       if (/data-action="call"[^>]*class="btn/.test(html) && html.includes('class="action-bar"')) expect(html).toContain("bar-covers-hero-call");
     });
   }
+});
+
+describe("landing Primer section", () => {
+  it("is Pekarna Kvas rendered by the engine, with the cinnamon rolls' price marked missing", () => {
+    const { slug, html } = homepageFiles(primerSpec());
+    expect(slug).toBe(PRIMER_SLUG);
+    const file = path.join(OUT_DIR, slug, "index.html");
+    expect(existsSync(file), "run pnpm examples:build").toBe(true);
+    const committed = readFileSync(file, "utf8");
+    expect(masked(committed), "stale example: run pnpm examples:build").toBe(masked(html));
+    expect(committed.match(/<mark class="ph"/g)).toHaveLength(1);
+    for (const m of committed.matchAll(/(?:src|href|srcset)="([^"]+)"/g)) {
+      for (const ref of m[1]!.split(",").map((x) => x.trim().split(" ")[0]!)) {
+        if (ref.startsWith("media/") || ref.startsWith("../_shared/")) expect(existsSync(path.join(OUT_DIR, slug, ref)), ref).toBe(true);
+      }
+    }
+  });
 });
 
 describe("landing trade showcase", () => {
