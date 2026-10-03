@@ -71,6 +71,14 @@ describe("editor by viewer", () => {
       await preview(page).locator("main").waitFor();
       await expect.poll(() => page.locator(".guest h2").textContent()).toBe("Vaš brezplačni predogled");
       expect(await page.getByRole("link", { name: "Shrani in uredi" }).first().getAttribute("href")).toContain("/login");
+      // What publishing will need, before any email (sb-preview-gate): the checklist, read only.
+      const checklist = (await (await fetch(`${base}/api/sites/${id}`, { headers: { cookie: (await context.cookies()).map((c) => `${c.name}=${c.value}`).join("; ") } })).json()) as { checklist: unknown[] };
+      expect(checklist.checklist.length).toBeGreaterThan(0);
+      const guestList = page.locator("#guest-checklist");
+      expect(await guestList.locator("strong").first().textContent()).toBe(`Še ${checklist.checklist.length} do objave`);
+      expect(await guestList.textContent()).toContain("Vpišete jih po prijavi.");
+      expect(await guestList.locator("li").count()).toBe(Math.min(checklist.checklist.length, 8) + (checklist.checklist.length > 8 ? 1 : 0));
+      expect(await guestList.locator("button").count()).toBe(0);
       expect(await page.getByRole("button", { name: "Objavi" }).count()).toBe(0);
       expect(await page.locator(".shortcut").count()).toBe(0);
       expect(await page.locator("#ask").isDisabled()).toBe(true);
@@ -197,6 +205,14 @@ describe("free-preview badge (sb-preview-watermark)", () => {
         expect(b.y).toBeGreaterThanOrEqual(s.y);
         expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
         if (shots) await page.screenshot({ path: path.join(shots, `badge-anonymous-${width}.png`) });
+        // The guest's checklist fits the panel at this width.
+        const list = page.locator("#guest-checklist");
+        await list.scrollIntoViewIfNeeded();
+        const l = (await list.boundingBox())!;
+        expect(l.x).toBeGreaterThanOrEqual(0);
+        expect(l.x + l.width).toBeLessThanOrEqual(width);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+        if (shots) await list.screenshot({ path: path.join(shots, `guest-checklist-${width}.png`) });
       } finally {
         await context.close();
       }
