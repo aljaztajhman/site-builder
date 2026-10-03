@@ -39,8 +39,18 @@ describe("legal", () => {
     const out = html(<Legal section={privacy} ctx={testCtx(withForm)} index={0} />);
     expect(out).toContain("Ko nas pokličete, nam pišete ali izpolnite obrazec");
     expect(out).toContain("zgoščeno obliko vašega naslova IP");
+    // Form messages are also emailed to the owner (through an email delivery service, a processor).
+    expect(out).toContain("posreduje tudi po e-pošti prek ponudnika storitve");
+    expect(out).toContain("ponudnik storitve pošiljanja e-pošte, ki nam posreduje sporočila iz kontaktnega obrazca");
     const en = html(<Legal section={privacy} ctx={{ ...testCtx(withForm), locale: "en", t: uiStrings("en") }} index={0} />);
     expect(en).toContain("use the contact form");
+    expect(en).toContain("forwards it to us by email through an");
+    expect(en).toContain("the email delivery service that forwards contact-form messages to us");
+    // Without a form, neither mentions email delivery.
+    const plain = html(<Legal section={privacy} ctx={testCtx()} index={0} />);
+    expect(plain).not.toContain("pošiljanja e-pošte");
+    expect(plain).toContain("obdeluje v našem imenu, ter državni organi");
+    expect(html(<Legal section={privacy} ctx={{ ...testCtx(), locale: "en", t: uiStrings("en") }} index={0} />)).not.toContain("email delivery");
   });
 
   it("renders the privacy policy from the business facts with a review notice", () => {
