@@ -10,7 +10,7 @@
     "dev": "concurrently -k -n web,worker -c blue,magenta \"pnpm --filter @sb/web dev\" \"pnpm --filter @sb/worker dev\"",
     "start:web": "pnpm --filter @sb/web start",
     "start:worker": "pnpm --filter @sb/worker start",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.islands.json",
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",

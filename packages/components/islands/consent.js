@@ -13,6 +13,7 @@
       return null;
     }
   };
+  /** @param {string} v */
   const store = (v) => {
     try {
       localStorage.setItem(KEY, v);
@@ -20,6 +21,10 @@
       /* storage blocked: the choice lasts for this page view */
     }
   };
+  /**
+   * @param {Element | null} box
+   * @param {boolean} [focus]
+   */
   const load = (box, focus) => {
     const src = box && box.getAttribute("data-embed-src");
     if (!src || !/^https:\/\//.test(src) || box.querySelector("iframe")) return;
@@ -36,7 +41,7 @@
     if (focus) f.focus();
   };
   const loadAll = () => d.querySelectorAll("[data-embed-src]").forEach((b) => load(b));
-  const notice = d.querySelector("[data-consent-notice]");
+  const notice = /** @type {HTMLElement | null} */ (d.querySelector("[data-consent-notice]"));
 
   d.addEventListener("click", (e) => {
     const t = e.target instanceof Element ? e.target : null;
@@ -60,7 +65,9 @@
     }
   });
 
-  d.querySelectorAll("[data-consent-open]").forEach((b) => (b.hidden = false));
+  d.querySelectorAll("[data-consent-open]").forEach((b) => {
+    if (b instanceof HTMLElement) b.hidden = false;
+  });
   const c = get();
   if (c === "granted") loadAll();
   else if (!c && notice && !notice.hasAttribute("data-consent-on-request")) notice.hidden = false;
