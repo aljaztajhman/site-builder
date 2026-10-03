@@ -10,3 +10,5 @@ export * from "./mail.ts";
 export * from "./usage.ts";
 export * from "./checks.ts";
 export * from "./stats.ts";
+export * from "./domains.ts";
+export * from "./domain-names.ts";

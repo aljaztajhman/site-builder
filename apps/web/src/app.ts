@@ -35,6 +35,7 @@ import { registerAdminRoutes } from "./admin.tsx";
 import { registerPrivacyRoute } from "./privacy.tsx";
 import { registerCheckerRoutes } from "./checker.tsx";
 import { dayIn, registerStatsRoutes, statsCounter } from "./stats.ts";
+import { siteHostResolver, siteHosts } from "./site-hosts.ts";
 import { descriptionHash, readTicket, signTicket } from "./upload-ticket.ts";
 import { slugify } from "./slug.ts";
 import { DASHBOARD, sitesPage, sitePage } from "./pages.tsx";
@@ -67,6 +68,12 @@ export interface AppOptions {
   classifyIntake?: ClassifyIntake;
   /** DNS for the website checker's private-address refusal (tests). */
   checkerResolve?: Resolve;
+  /** PLATFORM_DOMAIN: published sites also answer at <slug>.<domain> (site-hosts.ts). */
+  platformDomain?: string | null;
+  /** How long a hostname's answer is reused (tests: 0). */
+  siteHostCacheMs?: number;
+  /** SITE_PROXY_SECRET: the edge Worker's proof that its forwarded site hostname is real. */
+  siteProxySecret?: string | null;
 }
 
 export type ClassifyIntake = (description: string, ctx: { siteId: string; tier: Tier; accountId: string | null; aiJobId: string }) => Promise<{ businessType: string; confidence: number }>;
@@ -92,6 +99,10 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   const limits = { repo, config, secret: auth.secret };
   // The landing page and the intake's refusal page carry the Turnstile widget (its script and frame).
   const turnstileCsp = (path: string) => botCheck.mode === "on" && (path === "/" || path === "/api/sites" || path === "/pregled");
+
+  // A published site's own hostname (or <slug>.<PLATFORM_DOMAIN>) is served as its /s/<slug>/ path.
+  const appHosts = ["localhost", "127.0.0.1", ...(opts.appUrl ? [new URL(opts.appUrl).host] : [])];
+  app.use("*", siteHosts(app, siteHostResolver({ repo, platformDomain: opts.platformDomain ?? null, appHosts, ...(opts.siteHostCacheMs !== undefined ? { cacheMs: opts.siteHostCacheMs } : {}) }), { proxySecret: opts.siteProxySecret ?? null }));
 
   // Deployed environments are public URLs: nothing here may be indexed, published sites included in phase 1.
   app.use("*", async (c, next) => {
