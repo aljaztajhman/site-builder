@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import { SPEC_VERSION, migrateSpec, withSiteLocales, type SiteSpec } from "@sb/spec";
 import type { Db } from "./db.ts";
 import { Accounts } from "./accounts.ts";
+import { UrlChecks } from "./checks.ts";
 import { Usage, type Tier } from "./usage.ts";
 
 export type SiteStatus = "new" | "generating" | "ready" | "editing" | "publishing" | "failed";
@@ -153,10 +154,13 @@ export class Repo {
 
   /** Model spend per tier, queued jobs and their held estimates, anonymous previews. */
   readonly usage: Usage;
+  /** The public website checker's reports. */
+  readonly checks: UrlChecks;
 
   constructor(readonly db: Db) {
     this.accounts = new Accounts(db);
     this.usage = new Usage(db);
+    this.checks = new UrlChecks(db);
   }
 
   async createSite(input: { id?: string; name: string; slug: string; intake: Intake; accountId?: string | null; deviceId?: string | null }): Promise<SiteRow> {

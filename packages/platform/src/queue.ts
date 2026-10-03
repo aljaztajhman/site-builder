@@ -2,7 +2,7 @@ import { PgBoss, fromPglite } from "pg-boss";
 import type { PGlite } from "@electric-sql/pglite";
 import type { Db } from "./db.ts";
 
-export const QUEUES = ["generate", "edit", "alt", "prune"] as const;
+export const QUEUES = ["generate", "edit", "alt", "prune", "check-url"] as const;
 export type QueueName = (typeof QUEUES)[number];
 
 export interface GenerateJob {
@@ -28,11 +28,16 @@ export interface AltJob {
 export interface PruneJob {
   siteId?: string;
 }
+/** The public website checker: the url_checks row to run (no model calls). */
+export interface CheckUrlJob {
+  checkId: string;
+}
 export interface JobData {
   generate: GenerateJob;
   edit: EditJob;
   alt: AltJob;
   prune: PruneJob;
+  "check-url": CheckUrlJob;
 }
 
 export interface Queue {

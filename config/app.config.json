@@ -37,6 +37,16 @@
     "formMessagesPerSitePerDay": 100,
     "formMessagesPerSenderPerDay": 30
   },
+  "checker": {
+    "$comment": "Public website checker (/pregled): a URL in, a report in plain Slovene out (mobile speed, tap targets, cookies before consent, the ZEPT company details). No model calls. Runs in the worker, one at a time (Chromium + Lighthouse, like a generation's checks). perIpPerDay per keyed IP hash (cleared after a day), perDay for everyone together; reports and URLs are deleted after keepDays. Only public http(s) addresses on ports 80/443; every redirect hop and every browser request to a private address is refused.",
+    "perIpPerDay": 5,
+    "perDay": 100,
+    "keepDays": 30,
+    "pageTimeoutMs": 30000,
+    "settleMs": 3000,
+    "maxRedirects": 5,
+    "lighthouse": true
+  },
   "formEmail": {
     "$comment": "Contact-form email to the site's owner account (Resend; nothing when the site has no owner account). The message is stored first; the submit waits at most waitMs for the send, then answers the visitor the same either way. A failed or slow send stays pending and the web process retries it every retryEveryMinutes, at most maxAttempts sends in all, for messages received within retryWithinHours (under Resend's 24 h idempotency window); then it is marked failed and the owner's message list says the email didn't go out. Resend's idempotency key (form message id) keeps a retry from sending twice within 24 h. Visitor limits: limits.formMessages*.",
     "waitMs": 4000,

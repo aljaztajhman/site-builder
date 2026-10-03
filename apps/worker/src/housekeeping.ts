@@ -2,8 +2,8 @@ import type { AppConfig } from "@sb/config";
 import { POOLS, type Platform, type Pool, type Repo } from "@sb/platform";
 
 /**
- * Scheduled work in the worker: expired anonymous previews are deleted with their files, IP hashes and
- * old sign-in tokens are cleared, queued jobs nobody finished stop holding money; and the spend per
+ * Scheduled work in the worker: expired anonymous previews are deleted with their files, IP hashes,
+ * old sign-in tokens and old website-checker reports are cleared, queued jobs nobody finished stop holding money; and the spend per
  * pool is logged once a day, with a warning when a pool passes `tiers.pools.warnAt`.
  */
 
@@ -27,6 +27,7 @@ export async function cleanupExpired(platform: Pick<Platform, "repo" | "storage"
   const staleJobs = await repo.usage.endStaleJobs(30);
   await repo.usage.clearOldIpKeys();
   await repo.accounts.cleanup();
+  await repo.checks.cleanup(config.checker.keepDays);
   return { sites, staleJobs };
 }
 

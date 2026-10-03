@@ -40,6 +40,7 @@ export function privacyPage(config: AppConfig): string {
             <li>Vaša sporočila pomočniku in njegove odgovore, pri strani, na katero se nanašajo.</li>
             <li>Za vsako ustvarjanje in spremembo s pomočnikom čas in stroške, da lahko omejimo brezplačno uporabo.</li>
             <li>{`Predogled brez prijave in njegove datoteke izbrišemo po ${t.anonymous.keepDays} dneh, razen če se v tem času prijavite; potem je vaš.`}</li>
+            <li>{`Pri brezplačnem pregledu spletne strani naslov strani in rezultat pregleda, ${config.checker.keepDays} dni, da lahko povezavo do rezultata delite. Vsebine pregledane strani ne shranimo.`}</li>
           </ul>
         </section>
         <section className="message">
@@ -60,7 +61,7 @@ export function privacyPage(config: AppConfig): string {
         <section className="message">
           <h2>Naslov IP</h2>
           <p>
-            Vašega naslova IP ne shranjujemo. Za omejitve števila zahtev (prijavne povezave, brezplačni predogledi) hranimo samo njegov ključni zgoščeni zapis (hash), iz katerega
+            Vašega naslova IP ne shranjujemo. Za omejitve števila zahtev (prijavne povezave, brezplačni predogledi, pregledi spletnih strani) hranimo samo njegov ključni zgoščeni zapis (hash), iz katerega
             naslova ni mogoče razbrati, in ga po enem dnevu izbrišemo.
           </p>
         </section>
@@ -68,7 +69,7 @@ export function privacyPage(config: AppConfig): string {
           <h2>Zunanji ponudniki</h2>
           <ul>
             <li>
-              <strong>Cloudflare Turnstile</strong> preveri, da obrazca za predogled brez prijave ne izpolnjuje robot. Naloži se šele, ko začnete pisati opis; pri tem Cloudflare
+              <strong>Cloudflare Turnstile</strong> preveri, da obrazca za predogled brez prijave in pregled spletne strani ne izpolnjuje robot. Naloži se šele, ko začnete pisati opis; pri tem Cloudflare
               obdela vaš naslov IP in podatke o brskalniku.
             </li>
             <li>
