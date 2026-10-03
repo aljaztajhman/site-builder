@@ -58,20 +58,38 @@ export function protectedPathIssues(ops: Operation[]): Issue[] {
   return issues;
 }
 
-export function applyDirectEdit(spec: SiteSpec, ops: Operation[]): DirectEditResult {
+/** Why ops could not be applied, for each caller to word in its own way (the chat model, the owner). */
+export type ApplyFailure =
+  | { reason: "protected"; issues: Issue[] }
+  | { reason: "invalid"; message: string; op: string | undefined; path: string | undefined }
+  | { reason: "failed"; message: string };
+
+/**
+ * The first half of every edit (chat patches and the owner's direct edits): refuse protected paths, check the
+ * ops against the spec, apply them to a copy and migrate it. Never mutates the input.
+ */
+export function applyOps(spec: SiteSpec, ops: Operation[]): { next: SiteSpec } | ApplyFailure {
   const guarded = protectedPathIssues(ops);
-  if (guarded.length) return { ok: false, spec, issues: guarded, adjustments: [] };
+  if (guarded.length) return { reason: "protected", issues: guarded };
   const invalid = jsonpatch.validate(ops, spec);
-  if (invalid) {
-    return { ok: false, spec, issues: [{ path: invalid.operation?.path ?? "", code: "schema", message: invalid.message }], adjustments: [] };
-  }
-  let next: SiteSpec;
+  if (invalid) return { reason: "invalid", message: invalid.message, op: invalid.operation?.op, path: invalid.operation?.path };
   try {
-    next = jsonpatch.applyPatch(structuredClone(spec), ops, true, false).newDocument;
+    return { next: migrateSpec(jsonpatch.applyPatch(structuredClone(spec), ops, true, false).newDocument) };
   } catch (e) {
-    return { ok: false, spec, issues: [{ path: "", code: "schema", message: (e as Error).message }], adjustments: [] };
+    return { reason: "failed", message: (e as Error).message };
   }
-  next = migrateSpec(next);
+}
+
+export function applyDirectEdit(spec: SiteSpec, ops: Operation[]): DirectEditResult {
+  const applied = applyOps(spec, ops);
+  if ("reason" in applied) {
+    const issues: Issue[] =
+      applied.reason === "protected"
+        ? applied.issues
+        : [{ path: applied.reason === "invalid" ? (applied.path ?? "") : "", code: "schema", message: applied.message }];
+    return { ok: false, spec, issues, adjustments: [] };
+  }
+  const next = applied.next;
   const adjustments: string[] = [];
   if (repairSiteCopy(next).length) adjustments.push("Besedilo: dolgi pomišljaj (—) smo zamenjali s pomišljajem ( – )");
   if (ops.some((o) => o.path.startsWith("/design"))) {

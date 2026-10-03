@@ -1,5 +1,5 @@
 import { z } from "zod";
-import jsonpatch, { type Operation } from "fast-json-patch";
+import type { Operation } from "fast-json-patch";
 import type Anthropic from "@anthropic-ai/sdk";
 import {
   DIRECTIONS,
@@ -12,7 +12,6 @@ import {
   type BusinessType,
   type Direction,
   contrast,
-  migrateSpec,
   repairSiteCopy,
   toModelJsonSchema,
   validateSite,
@@ -43,7 +42,7 @@ import { repairContentOutput } from "./repair.ts";
 import type { Swatch } from "./palette.ts";
 import { fitImageForModel, sliceScreenshot } from "./images.ts";
 import { checkFacts, type FactViolation } from "./facts.ts";
-import { protectedPathIssues } from "./editor.ts";
+import { applyOps } from "./editor.ts";
 
 // ---------- 1. Intake -> brief ----------
 
@@ -384,17 +383,17 @@ export interface PatchResult {
 /** Applies RFC 6902 operations to a copy, then validates. Never mutates the input. */
 export function applyPatches(spec: SiteSpec, ops: Operation[], corpus: string): PatchResult {
   if (ops.length === 0) return { spec, applied: 0, issues: [] };
-  const guarded = protectedPathIssues(ops);
-  if (guarded.length) return { spec, applied: 0, issues: guarded.map((i) => `${i.path}: ${i.message}`) };
-  const errors = jsonpatch.validate(ops, spec);
-  if (errors) return { spec, applied: 0, issues: [`invalid patch: ${errors.message} (${errors.operation?.op} ${errors.operation?.path})`] };
-  let next: SiteSpec;
-  try {
-    next = jsonpatch.applyPatch(structuredClone(spec), ops, true, false).newDocument;
-  } catch (e) {
-    return { spec, applied: 0, issues: [`patch failed: ${(e as Error).message}`] };
+  const result = applyOps(spec, ops);
+  if ("reason" in result) {
+    const issue =
+      result.reason === "protected"
+        ? result.issues.map((i) => `${i.path}: ${i.message}`)
+        : result.reason === "invalid"
+          ? [`invalid patch: ${result.message} (${result.op} ${result.path})`]
+          : [`patch failed: ${result.message}`];
+    return { spec, applied: 0, issues: issue };
   }
-  next = migrateSpec(next);
+  let next = result.next;
   repairSiteCopy(next);
   // Design edits get the same repair as generation: banned backgrounds replaced, contrast fixed in code.
   if (ops.some((o) => o.path === "/design" || o.path.startsWith("/design/"))) next = { ...next, design: repairDesign(next.design) };
