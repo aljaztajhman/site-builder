@@ -38,7 +38,7 @@ import { descriptionHash, readTicket, signTicket } from "./upload-ticket.ts";
 import { slugify } from "./slug.ts";
 import { DASHBOARD, sitesPage, sitePage } from "./pages.tsx";
 import { homePage } from "./home.tsx";
-import { clientBundle } from "./client-bundle.ts";
+import { clientBundle, warmClientBundles } from "./client-bundle.ts";
 import { uiAssets } from "./ui/assets.ts";
 import { registerFormRoutes } from "./forms.tsx";
 import { createHash } from "node:crypto";
@@ -208,10 +208,18 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     return c.json({ status: ok ? "ok" : "degraded", checks, ...you }, ok ? 200 : 503);
   });
 
+  // The editor's and landing page's scripts: linked with their content hash (pages use clientScriptUrl) and
+  // then cached for good; a plain or old URL is revalidated by ETag.
+  warmClientBundles();
   for (const name of ["editor", "home"] as const) {
     app.get(`/assets/${name}.js`, async (c) => {
+      const b = await clientBundle(name);
+      const etag = `"${b.hash}"`;
+      c.header("etag", etag);
+      c.header("cache-control", c.req.query("v") === b.hash ? "public, max-age=31536000, immutable" : "no-cache");
+      if (c.req.header("if-none-match") === etag) return c.body(null, 304);
       c.header("content-type", "text/javascript; charset=utf-8");
-      return c.body(await clientBundle(name));
+      return c.body(b.text);
     });
   }
   app.get("/assets/ui/:hash/*", (c) => {
@@ -424,29 +432,38 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     const admin = viewer.kind === "admin";
     // Read first: anything that changes while the rest is read makes the next pulse differ.
     const pulse = await repo.pulse(id);
-    const site = await repo.getSite(id);
+    const [site, current] = await Promise.all([repo.getSite(id), repo.getSpec(id)]);
     if (!site || !pulse) return c.json({ error: "not found" }, 404);
-    const current = await repo.getSpec(id);
     const after = Number(c.req.query("after") ?? 0);
-    const checklist = current ? await siteChecklist(repo, id, current.spec) : [];
+    // Independent reads, side by side (this runs after every save, not only on polls).
+    const [checklist, access, events, chat, cost, versions, messages, spendToday] = await Promise.all([
+      current ? siteChecklist(repo, id, current.spec) : Promise.resolve([]),
+      accessInfo(limits, viewer, c.get("deviceId"), site),
+      repo.listEvents(id, after),
+      repo.listChat(id),
+      repo.siteCost(id),
+      repo.listVersions(id),
+      repo.formMessageCount(id),
+      admin ? repo.spendToday() : Promise.resolve(null),
+    ]);
     return c.json({
       // What this viewer may do here and has left; refusals from the action endpoints carry { code, message } too.
-      access: await accessInfo(limits, viewer, c.get("deviceId"), site),
+      access,
       site,
       pulse,
       version: current?.version ?? null,
       spec: current?.spec ?? null,
-      events: await repo.listEvents(id, after),
-      chat: await repo.listChat(id),
-      cost: await repo.siteCost(id),
-      versions: await repo.listVersions(id),
+      events,
+      chat,
+      cost,
+      versions,
       placeholders: current ? collectPlaceholders(current.spec) : [],
       // The pre-publish checklist (structured, the editor words it in Slovene) and the same as English lines.
       checklist,
       blockers: checklist.map(blockerText),
-      messages: (await repo.listFormMessages(id)).length,
+      messages,
       // The platform's own spend: the admin's business, null for owners.
-      spendToday: admin ? await repo.spendToday() : null,
+      spendToday,
       cap: admin ? config.limits.dailyModelSpendCapEur : null,
       // Server time, so the editor's running-stage seconds don't depend on the visitor's clock.
       now: new Date().toISOString(),

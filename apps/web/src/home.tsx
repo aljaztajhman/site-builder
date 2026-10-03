@@ -5,6 +5,7 @@ import { PRODUCT_NAME } from "./ui/labels.ts";
 import { TURNSTILE_SCRIPT } from "./turnstile.ts";
 import { chatEdits, daysAfterOd, moreHomepages } from "./limits.ts";
 import { DEFAULT_CAPTION, tradeCaption, tradeClientData, tradeFontFace, tradeShowcases, tradeStyle } from "./showcase.ts";
+import { clientScriptUrl } from "./client-bundle.ts";
 
 /**
  * The product's landing page at / (docs/design/homepage.html), for everyone; signed in, the header
@@ -605,7 +606,7 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
             </div>
           </div>
         </footer>
-        <script type="module" src="/assets/home.js" />
+        <script type="module" src={clientScriptUrl("home")} />
       </body>
     </html>,
   );
