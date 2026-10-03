@@ -56,6 +56,42 @@ describe("checkFacts", () => {
     });
     expect(checkFacts(s, corpus)).toEqual([]);
   });
+
+  it("reads the accessibility statement's date as a date, not a phone number in copy", () => {
+    const s = spec({ sections: [{ id: "s_legal_accessibility", type: "legal", variant: "default", props: { kind: "accessibility", date: "2026-10-03" } }] });
+    expect(checkFacts(s, corpus)).toEqual([]);
+  });
+
+  it("reads an image reference under any key as an id, not a number in copy", () => {
+    const s = spec({
+      sections: [
+        { id: "s_hero", type: "hero-signature", variant: "label", props: { headline: "Striženje v Celju", image: "img_01", inset: "img_02" } },
+        { id: "s_hours", type: "opening-hours", variant: "photo", props: { title: "Odprto", image: "img_04", inset: "img_05" } },
+      ],
+    });
+    expect(checkFacts(s, corpus)).toEqual([]);
+    // A number written in copy is still checked.
+    const copy = spec({ sections: [{ id: "s_hero", type: "hero-signature", variant: "label", props: { headline: "img_02 in 05 let", inset: "img_05" } }] });
+    expect(checkFacts(copy, corpus).map((v) => v.value)).toContain("05");
+  });
+});
+
+describe("checkFacts, numbers written as words", () => {
+  const words = (text: string) => `${corpus} ${text}`;
+  const figures = (title: string) => spec({ sections: [{ id: "s_f", type: "highlights", variant: "figures", props: { heading: "V številkah", items: [{ title, text: "imam svojo ambulanto" }, { title: "18 €", text: "moško striženje" }] } }] });
+
+  it("passes a figure the client wrote as a word, in any case form", () => {
+    expect(checkFacts(figures("4 leta"), words("Zadnja štiri leta imam svojo ambulanto."))).toEqual([]);
+    expect(checkFacts(figures("12 let"), words("Dvanajst let sem delala v bolnišnici."))).toEqual([]);
+    expect(checkFacts(figures("5 terapij"), words("Paket petih terapij."))).toEqual([]);
+  });
+
+  it("still flags a number the client never wrote, as digits or as a word", () => {
+    expect(checkFacts(figures("4 leta"), words("Tri leta imam svojo ambulanto.")).map((v) => v.value)).toEqual(["4"]);
+    // Words inside longer words are not numbers: "petek" is not 5, "trideset" is 30 not 3.
+    expect(checkFacts(figures("5 dni"), words("Odprto v petek.")).map((v) => v.value)).toEqual(["5"]);
+    expect(checkFacts(figures("3 leta"), words("Trideset let izkušenj.")).map((v) => v.value)).toEqual(["3"]);
+  });
 });
 
 describe("checkFacts, stricter matching", () => {

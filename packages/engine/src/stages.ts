@@ -1,17 +1,17 @@
 import { z } from "zod";
-import jsonpatch, { type Operation } from "fast-json-patch";
+import type { Operation } from "fast-json-patch";
 import type Anthropic from "@anthropic-ai/sdk";
 import {
   DIRECTIONS,
   Design,
   GENERATED_IMAGE_SECTIONS,
+  SIGNATURE_PHOTO_VARIANTS,
   direction as directionById,
   enforceDesign,
   templateFor,
   type BusinessType,
   type Direction,
   contrast,
-  migrateSpec,
   repairSiteCopy,
   toModelJsonSchema,
   validateSite,
@@ -42,7 +42,7 @@ import { repairContentOutput } from "./repair.ts";
 import type { Swatch } from "./palette.ts";
 import { fitImageForModel, sliceScreenshot } from "./images.ts";
 import { checkFacts, type FactViolation } from "./facts.ts";
-import { protectedPathIssues } from "./editor.ts";
+import { applyOps } from "./editor.ts";
 
 // ---------- 1. Intake -> brief ----------
 
@@ -109,9 +109,15 @@ export function templateLine(businessType: BusinessType, photoCount: number): st
   return `Trade template: ${t.id} (${t.name}) is hand-made for this trade. Choose it whenever the business fits its description.${draws}`;
 }
 
-/** A direction whose heroes all draw the trade (template S): generated mood pictures would go unused. */
+/** "hero-signature:<variant>" with a photo (photo, arch, label), as opposed to one that draws (drawing, receipt). */
+function signatureWithPhoto(hero: string): boolean {
+  const [type, variant] = hero.split(":");
+  return type === "hero-signature" && SIGNATURE_PHOTO_VARIANTS.includes(variant ?? "");
+}
+
+/** A direction whose heroes all draw the trade (templates S and R): generated mood pictures would go unused. */
 export function drawsInsteadOfPhotos(dir: Direction): boolean {
-  return dir.layout.heroes.every((h) => h.endsWith(":drawing"));
+  return dir.layout.heroes.every((h) => h.startsWith("hero-signature:") && !signatureWithPhoto(h));
 }
 
 export async function chooseDesign(
@@ -258,7 +264,7 @@ function imageList(assets: SiteSpec["assets"], heroIds: string[]): string {
  * direction's own picture heroes. A typographic direction (no picture hero) keeps its type hero.
  */
 export function heroRule(heroImageIds: string[], directionHeroes: string[]): string {
-  const pictureHeroes = directionHeroes.filter((h) => h.startsWith("hero-split:") || h.startsWith("hero-image:") || h === "hero-signature:photo" || h === "hero-signature:arch");
+  const pictureHeroes = directionHeroes.filter((h) => h.startsWith("hero-split:") || h.startsWith("hero-image:") || signatureWithPhoto(h));
   if (!heroImageIds.length || !pictureHeroes.length) return "";
   return `Homepage hero: ${pictureHeroes.join(" or ")} with one of the hero-suitable pictures (${heroImageIds.join(", ")}), not hero-type. Put the other pictures in image-text or page-header with-image sections.`;
 }
@@ -377,17 +383,17 @@ export interface PatchResult {
 /** Applies RFC 6902 operations to a copy, then validates. Never mutates the input. */
 export function applyPatches(spec: SiteSpec, ops: Operation[], corpus: string): PatchResult {
   if (ops.length === 0) return { spec, applied: 0, issues: [] };
-  const guarded = protectedPathIssues(ops);
-  if (guarded.length) return { spec, applied: 0, issues: guarded.map((i) => `${i.path}: ${i.message}`) };
-  const errors = jsonpatch.validate(ops, spec);
-  if (errors) return { spec, applied: 0, issues: [`invalid patch: ${errors.message} (${errors.operation?.op} ${errors.operation?.path})`] };
-  let next: SiteSpec;
-  try {
-    next = jsonpatch.applyPatch(structuredClone(spec), ops, true, false).newDocument;
-  } catch (e) {
-    return { spec, applied: 0, issues: [`patch failed: ${(e as Error).message}`] };
+  const result = applyOps(spec, ops);
+  if ("reason" in result) {
+    const issue =
+      result.reason === "protected"
+        ? result.issues.map((i) => `${i.path}: ${i.message}`)
+        : result.reason === "invalid"
+          ? [`invalid patch: ${result.message} (${result.op} ${result.path})`]
+          : [`patch failed: ${result.message}`];
+    return { spec, applied: 0, issues: issue };
   }
-  next = migrateSpec(next);
+  let next = result.next;
   repairSiteCopy(next);
   // Design edits get the same repair as generation: banned backgrounds replaced, contrast fixed in code.
   if (ops.some((o) => o.path === "/design" || o.path.startsWith("/design/"))) next = { ...next, design: repairDesign(next.design) };

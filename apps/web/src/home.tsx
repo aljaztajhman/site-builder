@@ -3,7 +3,7 @@ import { html } from "./pages.tsx";
 import { uiUrl } from "./ui/assets.ts";
 import { PRODUCT_NAME } from "./ui/labels.ts";
 import { TURNSTILE_SCRIPT } from "./turnstile.ts";
-import { chatEdits, moreHomepages } from "./limits.ts";
+import { chatEdits, daysAfterOd, moreHomepages } from "./limits.ts";
 
 /**
  * The product's landing page at / (docs/design/homepage.html), for everyone; signed in, the header
@@ -587,7 +587,9 @@ const faq = (config: AppConfig): [string, string][] => [
   ],
   [
     "Ali lahko stran urejam sam, s telefona?",
-    "Da. Urejevalnik deluje na telefonu. Besedilo popravite s klikom, večje spremembe opišete v pogovoru. Vsaka sprememba je shranjena kot različica, ki jo lahko obnovite.",
+    // What retention keeps (config versions.retention): every version of the last keepAllDays days, the last one of
+    // each older day, every published one. The old wording ("every change, restorable") read as forever.
+    `Da. Urejevalnik deluje na telefonu. Besedilo popravite s klikom, večje spremembe opišete v pogovoru. Vsaka sprememba se shrani kot različica: obnovite lahko vsako, ki ni starejša od ${daysAfterOd(config.versions.retention.keepAllDays)}, iz starejših dni zadnjo različico dneva, objavljene različice pa vedno.`,
   ],
   ["Kaj če želim oditi?", "Stran prenesete kot datoteke, ki delujejo na katerem koli gostovanju, tudi brez povezave. Nič ni zaklenjeno."],
   [

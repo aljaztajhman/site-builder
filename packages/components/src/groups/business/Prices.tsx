@@ -1,7 +1,8 @@
-import { PriceText, Section, SectionHead, cx, titleId } from "../../primitives/index.tsx";
+import { formatPrice, isPlaceholder, type Price } from "@sb/spec";
+import { Ph, Picture, PriceText, Section, SectionHead, cx, titleId } from "../../primitives/index.tsx";
 import type { RenderCtx, SectionProps } from "../../types.ts";
 import { TAG_KEYS, itemId } from "./shared.tsx";
-import { PlateStrip, motifOf } from "../../motifs/index.tsx";
+import { Branch, PlateStrip, Spoon, motifOf } from "../../motifs/index.tsx";
 
 /**
  * An item the owner marked as not available right now: it stays listed, says so in words (the price is
@@ -11,10 +12,15 @@ function Unavailable({ ctx, className }: { ctx: RenderCtx; className: string }) 
   return <span className={cx("unavailable", className)}>{ctx.t("unavailable")}</span>;
 }
 
-/** Every price as a large object drawn by the direction's motif (a number plate in Tablica), the name under it. */
+/**
+ * Every price as a large object drawn by the direction's motif: a number plate in Tablica with the name under
+ * it, a bottle label in Etiketa (branch, name, quantity, then the price, read top to bottom like a label).
+ */
 function PriceTags({ section, ctx }: SectionProps<"price-list">) {
   const { props } = section;
-  const plate = motifOf(ctx) === "plate";
+  const motif = motifOf(ctx);
+  if (motif === "label" || motif === "bend") return <PriceLabels section={section} ctx={ctx} fold={motif === "bend"} />;
+  const plate = motif === "plate";
   return (
     <Section id={section.id} type={section.type} variant={section.variant} tone={section.tone}>
       <SectionHead id={section.id} eyebrow={props.eyebrow} title={props.title} intro={props.intro} />
@@ -50,8 +56,139 @@ function PriceTags({ section, ctx }: SectionProps<"price-list">) {
   );
 }
 
+/**
+ * Prices on bottle labels (Etiketa): each item a framed label with the branch, its name, the note and the price.
+ * fold (Pregib): the same order on a card with one cut corner, the price at the foot.
+ */
+function PriceLabels({ section, ctx, fold = false }: Omit<SectionProps<"price-list">, "index"> & { fold?: boolean }) {
+  const { props } = section;
+  return (
+    <Section id={section.id} type={section.type} variant={section.variant} tone={section.tone}>
+      <SectionHead id={section.id} eyebrow={props.eyebrow} title={props.title} intro={props.intro} />
+      {props.groups.map((g, gi) => {
+        const Name = g.name ? "h4" : "h3";
+        return (
+          <div className="price-tags__group" key={gi}>
+            {g.name && <h3 className="prices__group-title">{g.name}</h3>}
+            <ul className="price-labels" role="list">
+              {g.items.map((it, ii) => (
+                <li className={cx("price-label", fold ? "price-label--fold" : "label-card", it.unavailable && "is-unavailable")} key={ii}>
+                  {!fold && <Branch />}
+                  <Name className="price-label__name">{it.name}</Name>
+                  {it.note && <p className="price-label__note">{it.note}</p>}
+                  {it.unavailable && (
+                    <p>
+                      <Unavailable ctx={ctx} className="price-tags__flag" />
+                    </p>
+                  )}
+                  <p className="price-label__price">
+                    <PriceText price={it.price} ctx={ctx} />
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
+      {props.footnote && <p className="prices__footnote muted">{props.footnote}</p>}
+    </Section>
+  );
+}
+
+/**
+ * Standing offers (a daily lunch, a Sunday menu) at headline size: each group one offer, its name saying when,
+ * the item and what it includes, the price large; a spoon between them in Jedilnik. The heading is for screen
+ * readers: the band itself is the statement.
+ */
+function PriceOffers({ section, ctx }: Omit<SectionProps<"price-list">, "index">) {
+  const { props } = section;
+  const spoon = motifOf(ctx) === "spoon";
+  const offers = props.groups.flatMap((g) => g.items.map((it) => ({ when: g.name, it })));
+  return (
+    <Section id={section.id} type={section.type} variant={section.variant} tone={section.tone}>
+      <h2 id={titleId(section.id)} className="section-title">
+        {props.title}
+      </h2>
+      <ul className={cx("offers", spoon && "offers--spoon")} role="list">
+        {offers.map(({ when, it }, i) => (
+          <li className={cx("offers__item", it.unavailable && "is-unavailable")} key={i}>
+            {spoon && i > 0 && <Spoon className="offers__spoon" />}
+            <div className="offers__body">
+              {when && <p className="offers__when">{when}</p>}
+              <h3 className="offers__name">{it.name}</h3>
+              {it.note && <p className="offers__note">{it.note}</p>}
+              {it.unavailable && (
+                <p>
+                  <Unavailable ctx={ctx} className="prices__flag" />
+                </p>
+              )}
+              <p className="offers__price">
+                <PriceText price={it.price} ctx={ctx} />
+              </p>
+            </div>
+          </li>
+        ))}
+      </ul>
+      {props.footnote && <p className="prices__footnote muted">{props.footnote}</p>}
+    </Section>
+  );
+}
+
+/** rates: the photo beside it, at most 26 rem on desktop and 70 % of the screen on phones. */
+export const PRICE_RATES_SIZES = "(min-width: 64rem) 26rem, 70vw";
+
+/** A rate's amount large, its unit ("na osebo") small under it. */
+function RateValue({ price, ctx }: { price: Price; ctx: RenderCtx }) {
+  if (isPlaceholder(price)) return <Ph p={price} ctx={ctx} />;
+  return (
+    <>
+      <span className="rates__amount">
+        {price.from ? `${ctx.t("from")} ` : ""}
+        {formatPrice(price.amount, ctx.locale)}
+      </span>
+      {price.unit && <span className="rates__unit">{price.unit}</span>}
+    </>
+  );
+}
+
+/**
+ * Two to four prices at headline size on heavy rules (rooms per night), beside a photo of what they buy; the
+ * footnote as a marked line under them (a trail blaze in Markacija).
+ */
+function PriceRates({ section, ctx }: Omit<SectionProps<"price-list">, "index">) {
+  const { props } = section;
+  const items = props.groups.flatMap((g) => g.items);
+  return (
+    <Section id={section.id} type={section.type} variant={section.variant} tone={section.tone}>
+      <div className={cx("rates", props.image && "rates--image")}>
+        {props.image && <Picture id={props.image} ctx={ctx} className="rates__media media--contained" sizes={PRICE_RATES_SIZES} />}
+        <div className="rates__body">
+          <SectionHead id={section.id} eyebrow={props.eyebrow} title={props.title} intro={props.intro} />
+          <dl className="rates__list">
+            {items.map((it, i) => (
+              <div className={cx("rates__item", it.unavailable && "is-unavailable")} key={i}>
+                <dt className="rates__name">
+                  {it.name}
+                  {it.note && <span className="rates__note muted">{it.note}</span>}
+                  {it.unavailable && <Unavailable ctx={ctx} className="prices__flag" />}
+                </dt>
+                <dd className="rates__price">
+                  <RateValue price={it.price} ctx={ctx} />
+                </dd>
+              </div>
+            ))}
+          </dl>
+          {props.footnote && <p className="rates__footnote">{props.footnote}</p>}
+        </div>
+      </div>
+    </Section>
+  );
+}
+
 export function PriceList({ section, ctx, index }: SectionProps<"price-list">) {
   if (section.variant === "tags") return <PriceTags section={section} ctx={ctx} index={index} />;
+  if (section.variant === "offers") return <PriceOffers section={section} ctx={ctx} />;
+  if (section.variant === "rates") return <PriceRates section={section} ctx={ctx} />;
   const { props } = section;
   const table = section.variant === "table";
   return (

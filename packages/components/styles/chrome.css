@@ -389,9 +389,10 @@ body.has-action-bar:not(:has(.action-bar)) {
     }
   }
 }
-/* The bar is on screen from the start: on a phone the hero's own call button would sit right above its "Klic". */
+/* The bar is on screen from the start: on a phone the hero's own call (or booking) would sit right above the bar's. */
 @media (max-width: 47.99rem) {
-  body.bar-covers-hero-call main > :first-child [data-action="call"] {
+  body.bar-covers-hero-call main > :first-child [data-action="call"],
+  body.bar-covers-hero-booking main > :first-child [data-action="booking"] {
     display: none;
   }
 }

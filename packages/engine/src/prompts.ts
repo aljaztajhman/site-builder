@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { BANNED_PHRASES, Business, DIRECTIONS, SECTION_DEFS, toModelJsonSchema } from "@sb/spec";
+import { BANNED_PHRASES, Business, DIRECTIONS, SECTION_DEFS, toModelJsonSchema, type Motif } from "@sb/spec";
 
 /**
  * Static prompt parts. They must be byte-stable across calls so prompt caching works:
@@ -16,6 +16,23 @@ export const RULES = `Hard rules for every generated website:
 - Every page starts with a hero section (home) or page-header (other pages). Use each section type at most once per page unless it clearly needs repeating.
 - Mobile first: most visitors are on a phone. Put the most useful information (what, where, when, how to contact) near the top of the homepage.
 - Say each thing once. On the homepage show the contact facts in exactly one place near the top: hero-type with-facts, or contact-strip (it already includes the hours), or opening-hours; never two of them. Add a contact section to the homepage only when the site has no contact page. The footer and, on phones, a fixed call/directions bar already repeat the phone and directions on every page. A highlights section is only for points no other section makes.`;
+
+/** What each trade motif draws, for the prompts that must leave it alone. */
+const MOTIF_WORDS: Record<Motif, string> = {
+  plate: "number plates",
+  pipes: "pipes",
+  crust: "scoring cuts",
+  ledger: "a paper receipt and wall-sized figures",
+  label: "bottle labels and an olive branch",
+  spoon: "a brass spoon and dishes as round plates",
+  mirror: "mirror arches and the name as a wall-sized wordmark",
+  smile: "a smile arc and the hours as a week chart",
+  trail: "trail blazes, signs on a post and a mountain ridge",
+  bend: "the logo's bent line and cut corners",
+};
+const TEMPLATES = DIRECTIONS.filter((d) => d.template);
+const TEMPLATE_IDS = TEMPLATES.map((d) => d.id).join(", ");
+const TEMPLATE_MOTIFS = TEMPLATES.map((d) => MOTIF_WORDS[d.template!.motif]).join(", ");
 
 /** Catalogue of section components for the model, generated from the spec (the single source of truth). */
 export function sectionCatalogue(): string {
@@ -70,7 +87,7 @@ Brief rules:
 
 export const DESIGN_SYSTEM = `You are the art director for small-business websites. Pick one curated design direction and fill its tokens inside the direction's ranges. Colours: choose primary (and optionally accent) from the brand colours extracted from the logo and photos when they are usable; otherwise from the direction. Code enforces contrast and ranges afterwards, so pick what looks right, not what merely passes.
 Avoid: cream or off-white page backgrounds, pill shapes, gradients, glassmorphism, heavy shadows, italic accent words, monospace labels.
-Trade templates (tablica, cevi, skorja) are hand-made for their trades and look far more specific than the general directions: when the message names one and the business fits its description, choose it.`;
+Trade templates (${TEMPLATE_IDS}) are hand-made for their trades and look far more specific than the general directions: when the message names one and the business fits its description, choose it.`;
 
 export const ALT_SYSTEM = `You write alt text in Slovene for photos on a small-business website. Describe what matters for a visitor who can't see the image, in one sentence of at most 150 characters, without "slika" or "fotografija" at the start. If a photo is a placeholder with a caption, describe the captioned subject. Also give the focal point (x, y from 0 to 1) and whether the photo works as a large hero image.`;
 
@@ -85,7 +102,7 @@ Only propose patches that change the spec (copy, section order, variants, tones,
 Filler: code matches the listed filler phrases by word stem; patch other wordings of the same empty claims too (Slovene calques of "seamless", "elevate", "unlock", "empower", "cutting-edge", "in today's fast-paced world").
 Facts: code has already checked every number, year, price, name and contact detail on the site against the client's own text, which you get below. Never remove or reword a fact because you think it might be invented; read the client's text instead.
 Fixed elements (the phone's call/directions bar, the desktop cookie box) are hidden in the full-page screenshots. Don't report them as covering content.
-Trade templates (design directions tablica, cevi, skorja) are hand-made designs: their hero-signature section, the order of sections, band and inverse tones, very large headlines and phone numbers, and the drawn motif (number plates, pipes, scoring cuts) are intended. Keep them; fix only real problems.`;
+Trade templates (design directions ${TEMPLATE_IDS}) are hand-made designs: their hero-signature section, the order of sections, band and inverse tones, very large headlines, figures and phone numbers, and the drawn motif (${TEMPLATE_MOTIFS}) are intended. Keep them; fix only real problems.`;
 
 export const EDIT_SYSTEM = `You apply a client's chat request to their website by returning RFC 6902 JSON Patch operations against the site spec, plus a one-sentence reply in the client's language.
 ${RULES}

@@ -1,5 +1,5 @@
 {
-  "specVersion": 6,
+  "specVersion": 11,
   "slug": "gostilna-zlata-zlica",
   "locales": {
     "default": "sl",
@@ -46,29 +46,31 @@
     }
   },
   "design": {
-    "direction": "dark-elegant",
-    "fontPair": "garamond-karla",
+    "direction": "jedilnik",
+    "fontPair": "garamond-figtree",
     "colors": {
-      "background": "#14110f",
-      "surface": "#1f1a17",
-      "text": "#f2ece5",
-      "muted": "#b9ada1",
-      "primary": "#c9a46a",
-      "onPrimary": "#14110f",
-      "accent": "#c9a46a",
-      "border": "#3a322b",
-      "inverse": "#3a1d25",
-      "onInverse": "#f2ece5"
+      "background": "#ffffff",
+      "surface": "#edf3ef",
+      "text": "#1b241f",
+      "muted": "#4d5a52",
+      "primary": "#16382b",
+      "onPrimary": "#ffffff",
+      "accent": "#a8862f",
+      "border": "#d6ddd7",
+      "inverse": "#16382b",
+      "onInverse": "#f2f5f3",
+      "band": "#d2ab55",
+      "onBand": "#0f2a20"
     },
-    "radius": 0,
+    "radius": 4,
     "baseFontSize": 18,
-    "scale": 1.333,
-    "headingWeight": 500,
+    "scale": 1.25,
+    "headingWeight": 600,
     "headingCase": "normal",
-    "headingTracking": 0,
-    "density": "airy",
+    "headingTracking": -0.02,
+    "density": "regular",
     "shadow": "none",
-    "imagery": "framed"
+    "imagery": "natural"
   },
   "assets": {
     "images": [
@@ -132,8 +134,8 @@
   },
   "chrome": {
     "header": {
-      "variant": "stacked",
-      "cta": "call"
+      "variant": "bar",
+      "cta": "none"
     },
     "footer": {
       "variant": "compact"
@@ -156,11 +158,12 @@
       "sections": [
         {
           "id": "s_hero",
-          "type": "hero-image",
-          "variant": "overlay-left",
+          "type": "hero-signature",
+          "variant": "card",
           "props": {
-            "headline": "Domače jedi v starem delu Škofje Loke",
-            "intro": "Družinska gostilna tretje generacije Bizjakov. Kuhamo iz sestavin lokalnih kmetov.",
+            "headline": "Domače jedi iz sestavin lokalnih kmetov",
+            "intro": "Družinska gostilna v starem delu Škofje Loke. Vodi jo že tretja generacija družine Bizjak.",
+            "fact": "address",
             "primary": {
               "label": "Rezervirajte mizo",
               "target": {
@@ -168,7 +171,7 @@
               }
             },
             "secondary": {
-              "label": "Jedilnik",
+              "label": "Jedilni list",
               "target": {
                 "page": "p_jedilnik"
               }
@@ -177,106 +180,131 @@
           }
         },
         {
-          "id": "s_booking",
-          "type": "booking",
-          "variant": "with-hours",
-          "tone": "alt",
+          "id": "s_today",
+          "type": "price-list",
+          "variant": "offers",
+          "tone": "inverse",
           "props": {
-            "heading": "Rezervacije in odprti čas",
-            "text": "Mizo rezervirate po telefonu ali e-pošti. Za rezervacije skrbi Nina Bizjak.",
-            "action": {
-              "label": "Pokliči za rezervacijo",
-              "target": {
-                "action": "call"
-              }
-            },
-            "secondary": {
-              "label": "Pišite nam",
-              "target": {
-                "action": "email"
-              }
-            }
-          }
-        },
-        {
-          "id": "s_food",
-          "type": "image-text",
-          "variant": "image-right",
-          "props": {
-            "heading": "Domače jedi iz lokalnih sestavin",
-            "paragraphs": [
-              "Na mizo prinesemo ajdove žgance z ocvirki, ričet, telečjo obaro, pečenke in orehove štruklje. Sestavine kupujemo pri lokalnih kmetih.",
-              "Vsak dan pripravimo dnevno malico z juho, glavno jedjo in solato, ob nedeljah pa nedeljsko kosilo s štirimi hodi."
-            ],
-            "link": {
-              "label": "Poglejte jedilnik",
-              "target": {
-                "page": "p_jedilnik"
-              }
-            },
-            "image": "img_03"
-          }
-        },
-        {
-          "id": "s_terrace",
-          "type": "image-text",
-          "variant": "image-left",
-          "tone": "alt",
-          "props": {
-            "heading": "Poleti na terasi pod lipo",
-            "paragraphs": [
-              "Ko je toplo, odpremo teraso pod lipo s 40 sedeži, sredi starega mestnega jedra."
-            ],
-            "image": "img_05"
-          }
-        },
-        {
-          "id": "s_about",
-          "type": "about",
-          "variant": "image-side",
-          "props": {
-            "heading": "Tretja generacija za štedilnikom",
-            "paragraphs": [
-              "Gostilno vodi že tretja generacija družine Bizjak. V kuhinji je glavni kuhar Marko Bizjak, za strežbo in rezervacije skrbi njegova sestra Nina."
-            ],
-            "image": "img_07",
-            "ownerName": "Marko Bizjak",
-            "ownerRole": "glavni kuhar"
-          }
-        },
-        {
-          "id": "s_gallery",
-          "type": "gallery",
-          "variant": "grid",
-          "tone": "alt",
-          "props": {
-            "title": "Iz jedilnice in kuhinje",
-            "images": [
+            "title": "Malica in nedeljsko kosilo",
+            "groups": [
               {
-                "image": "img_02",
-                "caption": "Jedilnica"
+                "name": "Vsak dan",
+                "items": [
+                  {
+                    "name": "Dnevna malica",
+                    "note": "Juha, glavna jed, solata",
+                    "price": {
+                      "amount": 11.5
+                    }
+                  }
+                ]
               },
               {
-                "image": "img_06",
-                "caption": "Telečja obara"
-              },
-              {
-                "image": "img_04",
-                "caption": "Orehovi štruklji"
-              },
-              {
-                "image": "img_08",
-                "caption": "Miza za praznovanje"
+                "name": "Ob nedeljah",
+                "items": [
+                  {
+                    "name": "Nedeljsko kosilo",
+                    "note": "Štirje hodi",
+                    "price": {
+                      "amount": 19
+                    }
+                  }
+                ]
               }
             ]
           }
         },
         {
-          "id": "s_contact",
-          "type": "contact",
-          "variant": "stacked",
+          "id": "s_dishes",
+          "type": "products",
+          "variant": "plates",
           "props": {
-            "title": "Kako do nas"
+            "title": "Z jedilnega lista",
+            "intro": "Ajdovi žganci, ričet, telečja obara, pečenke in orehovi štruklji. Kuhamo iz sestavin lokalnih kmetov.",
+            "items": [
+              {
+                "name": "Ajdovi žganci z ocvirki in kislim mlekom",
+                "price": {
+                  "amount": 9.8
+                },
+                "image": "img_03"
+              },
+              {
+                "name": "Telečja obara",
+                "price": {
+                  "amount": 8.5
+                },
+                "image": "img_06"
+              },
+              {
+                "name": "Orehovi štruklji",
+                "price": {
+                  "amount": 5.2
+                },
+                "image": "img_04"
+              },
+              {
+                "name": "Ričet",
+                "price": {
+                  "$placeholder": "price"
+                }
+              },
+              {
+                "name": "Pečenke",
+                "price": {
+                  "$placeholder": "price"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_terrace",
+          "type": "image-text",
+          "variant": "pair",
+          "tone": "inverse",
+          "props": {
+            "heading": "sedežev na terasi pod lipo",
+            "figure": "40",
+            "paragraphs": [
+              "Terasa je odprta poleti. Za skupine do 60 oseb sprejemamo rezervacije za praznovanja, obletnice in pogostitve po pogrebu."
+            ],
+            "link": {
+              "label": "Rezervirajte za skupino",
+              "target": {
+                "action": "call"
+              }
+            },
+            "image": "img_05",
+            "inset": "img_08"
+          }
+        },
+        {
+          "id": "s_family",
+          "type": "team",
+          "variant": "photo",
+          "props": {
+            "title": "Tretja generacija družine Bizjak",
+            "members": [
+              {
+                "name": "Marko Bizjak",
+                "role": "glavni kuhar"
+              },
+              {
+                "name": "Nina Bizjak",
+                "role": "strežba in rezervacije"
+              }
+            ],
+            "image": "img_07"
+          }
+        },
+        {
+          "id": "s_call",
+          "type": "contact",
+          "variant": "call-out",
+          "tone": "inverse",
+          "props": {
+            "title": "Rezervacije"
           }
         }
       ]

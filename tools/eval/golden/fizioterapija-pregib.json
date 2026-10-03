@@ -1,5 +1,5 @@
 {
-  "specVersion": 6,
+  "specVersion": 11,
   "slug": "fizioterapija-pregib",
   "locales": {
     "default": "sl",
@@ -36,27 +36,29 @@
     }
   },
   "design": {
-    "direction": "clean-swiss",
-    "fontPair": "inter-tight-inter",
+    "direction": "pregib",
+    "fontPair": "bricolage-public-sans",
     "colors": {
       "background": "#ffffff",
-      "surface": "#f1f4f8",
-      "text": "#111418",
-      "muted": "#4a5360",
+      "surface": "#e6f2f0",
+      "text": "#10302d",
+      "muted": "#44605c",
       "primary": "#0f6b63",
       "onPrimary": "#ffffff",
-      "accent": "#148a7f",
-      "border": "#d5dbe3",
-      "inverse": "#111418",
-      "onInverse": "#f5f5f5"
+      "accent": "#de7b2d",
+      "border": "#cfe0dd",
+      "inverse": "#10302d",
+      "onInverse": "#e6f2f0",
+      "band": "#0f6b63",
+      "onBand": "#ffffff"
     },
-    "radius": 2,
-    "baseFontSize": 17,
-    "scale": 1.25,
-    "headingWeight": 700,
+    "radius": 8,
+    "baseFontSize": 18,
+    "scale": 1.3,
+    "headingWeight": 800,
     "headingCase": "normal",
-    "headingTracking": -0.015,
-    "density": "regular",
+    "headingTracking": -0.04,
+    "density": "airy",
     "shadow": "none",
     "imagery": "natural"
   },
@@ -83,7 +85,7 @@
       "cta": "booking"
     },
     "footer": {
-      "variant": "columns"
+      "variant": "compact"
     },
     "mobileActionBar": true
   },
@@ -103,12 +105,12 @@
       "sections": [
         {
           "id": "s_hero",
-          "type": "hero-split",
-          "variant": "image-right",
+          "type": "hero-signature",
+          "variant": "bend",
           "props": {
-            "eyebrow": "Fizioterapija v Novem mestu",
-            "headline": "Ena ura, en pacient: fizioterapija za hrbet, vrat, koleno in ramo",
-            "intro": "Individualna obravnava na Glavnem trgu. Napotnica ni potrebna, storitve so samoplačniške. Termin rezervirate online ali po telefonu.",
+            "headline": "Ena ura je samo za enega pacienta",
+            "intro": "Tina Zupan, dipl. fiziot. Delam individualno, napotnica ni potrebna.",
+            "fact": "address",
             "primary": {
               "label": "Rezervirajte termin",
               "target": {
@@ -125,94 +127,127 @@
           }
         },
         {
-          "id": "s_strip",
-          "type": "contact-strip",
-          "variant": "bar",
-          "props": {}
-        },
-        {
-          "id": "s_conditions",
-          "type": "services-list",
-          "variant": "rows",
+          "id": "s_figures",
+          "type": "highlights",
+          "variant": "figures",
+          "tone": "inverse",
           "props": {
-            "title": "S čim pridete na terapijo",
-            "intro": "Najpogosteje pridejo ljudje s temi težavami.",
+            "heading": "V številkah",
             "items": [
               {
-                "name": "Bolečine v hrbtu in vratu",
-                "description": "Pregled, manualna terapija in vaje, ki jih nadaljujete doma."
+                "title": "12 let",
+                "text": "sem delala v bolnišnici"
               },
               {
-                "name": "Poškodbe kolena in rame",
-                "description": "Terapija po poškodbi, da se gibljivost in moč postopoma vrneta."
+                "title": "4 leta",
+                "text": "imam svojo ambulanto"
               },
               {
-                "name": "Po operacijah",
-                "description": "Rehabilitacija s terapevtskimi vajami, prilagojenimi vašemu okrevanju."
+                "title": "60 min",
+                "text": "traja prva obravnava s pregledom"
               },
               {
-                "name": "Športniki",
-                "description": "Obravnava športnih poškodb, po potrebi z dry needlingom in kinesio tapingom."
+                "title": "7–20",
+                "text": "od ponedeljka do petka, samo po naročilu"
               }
             ]
+          }
+        },
+        {
+          "id": "s_cases",
+          "type": "services-list",
+          "variant": "aside",
+          "props": {
+            "title": "S čim ljudje najpogosteje pridejo",
+            "items": [
+              {
+                "name": "Bolečine v hrbtu in vratu"
+              },
+              {
+                "name": "Poškodbe kolena in rame"
+              },
+              {
+                "name": "Po operacijah"
+              },
+              {
+                "name": "Športniki"
+              }
+            ],
+            "note": {
+              "title": "Brez napotnice",
+              "text": "Storitve so samoplačniške, napotnica ni potrebna."
+            }
           }
         },
         {
           "id": "s_how",
-          "type": "highlights",
-          "variant": "columns",
-          "tone": "alt",
+          "type": "text",
+          "variant": "narrow",
           "props": {
             "heading": "Kako delam",
-            "items": [
+            "paragraphs": [
+              "Manualna terapija, terapevtske vaje, dry needling in kinesio taping."
+            ]
+          }
+        },
+        {
+          "id": "s_home_prices",
+          "type": "price-list",
+          "variant": "tags",
+          "tone": "alt",
+          "props": {
+            "title": "Cenik",
+            "groups": [
               {
-                "title": "Samo vi in terapevtka",
-                "text": "Delam individualno, ena ura je samo za enega pacienta."
-              },
-              {
-                "title": "Brez napotnice",
-                "text": "Napotnica ni potrebna, storitve so samoplačniške."
-              },
-              {
-                "title": "Samo po naročilu",
-                "text": "Termin rezervirate online ali po telefonu, od ponedeljka do petka."
-              },
-              {
-                "title": "Vhod z dvorišča",
-                "text": "Ambulanta je na Glavnem trgu 9, v 2. nadstropju, vhod je z dvorišča."
+                "items": [
+                  {
+                    "name": "Prva obravnava s pregledom",
+                    "note": "60 min",
+                    "price": {
+                      "amount": 55
+                    }
+                  },
+                  {
+                    "name": "Terapija",
+                    "note": "45 min",
+                    "price": {
+                      "amount": 45
+                    }
+                  },
+                  {
+                    "name": "Dry needling",
+                    "note": "kot dodatek",
+                    "price": {
+                      "amount": 30
+                    }
+                  },
+                  {
+                    "name": "Paket 5 terapij",
+                    "price": {
+                      "amount": 200
+                    }
+                  }
+                ]
               }
             ]
           }
         },
         {
-          "id": "s_about",
-          "type": "about",
-          "variant": "text-only",
+          "id": "s_book",
+          "type": "cta",
+          "variant": "band",
+          "tone": "band",
           "props": {
-            "heading": "Tina Zupan, diplomirana fizioterapevtka",
-            "paragraphs": [
-              "Dvanajst let sem delala v bolnišnici, zadnja štiri leta imam svojo ambulanto v Novem mestu.",
-              "Pri delu uporabljam manualno terapijo, terapevtske vaje, dry needling in kinesio taping."
-            ],
-            "ownerName": "Tina Zupan",
-            "ownerRole": "dipl. fiziot."
-          }
-        },
-        {
-          "id": "s_booking",
-          "type": "booking",
-          "variant": "with-hours",
-          "props": {
-            "heading": "Rezervirajte termin tudi zvečer",
-            "text": "Prosti termini so objavljeni v spletnem naročanju. Če raje pokličete, sem dosegljiva na telefonu.",
-            "action": {
-              "label": "Rezervirajte online",
+            "heading": "Termin si rezervirate na spletu",
+            "text": "Delam samo po predhodnem naročilu, od ponedeljka do petka od 7.00 do 20.00.",
+            "primary": {
+              "label": "Rezervirajte termin",
               "target": {
                 "action": "booking"
               }
             },
             "secondary": {
-              "label": "Pokličite",
+              "label": "Ali pokličite",
               "target": {
                 "action": "call"
               }
@@ -220,13 +255,11 @@
           }
         },
         {
-          "id": "s_contact",
-          "type": "contact",
-          "variant": "split-map",
-          "tone": "alt",
+          "id": "s_visit",
+          "type": "contact-strip",
+          "variant": "cards",
           "props": {
-            "title": "Kje je ambulanta",
-            "intro": "Glavni trg 9, 2. nadstropje. Vhod je z dvorišča."
+            "title": "Kje sem"
           }
         }
       ]

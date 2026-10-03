@@ -38,9 +38,16 @@ beforeAll(async () => {
   await new Promise<void>((r) => server.once("listening", () => r()));
   base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
 
-  // The accountant's golden site (it has a contact form).
+  // The accountant's golden site, with an enquiry form on its homepage before the closing call.
   const golden = JSON.parse(await readFile(path.join(here, "../../../tools/eval/golden/racunovodstvo-seliskar.json"), "utf8")) as SiteSpec;
   const spec = structuredClone(golden);
+  const home = spec.pages.find((p) => p.kind === "home")!;
+  home.sections.splice(home.sections.length - 1, 0, {
+    id: "s_enquiry",
+    type: "contact-form",
+    variant: "split",
+    props: { title: "Pošljite povpraševanje", intro: "Opišite, kaj potrebujete, in pripravimo ponudbo.", askPhone: true, messageHint: "Na primer: vrsta dejavnosti, število računov na mesec." },
+  });
   // The fixture's brief is the client's input: the fact check compares the site against it.
   const brief = JSON.parse(await readFile(path.join(here, "../../../tools/eval/fixtures/racunovodstvo-seliskar/brief.json"), "utf8")) as { description: string };
   const site = await platform.repo.createSite({ name: "Seliškar", slug: spec.slug, intake: { description: brief.description, photoAssetIds: [], scope: "full" } });
@@ -48,13 +55,16 @@ beforeAll(async () => {
   await platform.repo.saveSpec(site.id, spec, "generate");
 
   cookie = await adminCookie((p, init) => fetch(`${base}${p}`, init), PASSWORD);
-  // The owner fills the missing facts in the editor (a manual edit counts as client input).
-  const patch = await fetch(`${base}/api/sites/${site.id}/patch`, {
-    method: "POST",
-    headers: { cookie, "content-type": "application/json" },
-    body: JSON.stringify({ baseVersion: 1, ops: fillPlaceholderOps(spec), message: "facts" }),
-  });
-  expect(patch.status, await patch.clone().text()).toBe(200);
+  // The owner fills the missing facts in the editor (a manual edit counts as client input), if any are missing.
+  const ops = fillPlaceholderOps(spec);
+  if (ops.length) {
+    const patch = await fetch(`${base}/api/sites/${site.id}/patch`, {
+      method: "POST",
+      headers: { cookie, "content-type": "application/json" },
+      body: JSON.stringify({ baseVersion: 1, ops, message: "facts" }),
+    });
+    expect(patch.status, await patch.clone().text()).toBe(200);
+  }
   const pub = await fetch(`${base}/api/sites/${site.id}/publish`, { method: "POST", headers: { cookie, "content-type": "application/json" }, body: "{}" });
   expect(pub.status, await pub.clone().text()).toBe(200);
   cb = await launchCheckBrowser();
@@ -72,10 +82,12 @@ afterAll(async () => {
 const STILL = { reducedMotion: "reduce" as const };
 type Page = Awaited<ReturnType<CheckBrowser["browser"]["newPage"]>>;
 const fill = async (page: Page, message: string) => {
-  await page.getByLabel("Ime in priimek").fill("Ana Novak");
-  await page.getByLabel("E-pošta").fill("ana@primer.si");
-  await page.getByLabel("Telefon").fill("041 555 906");
-  await page.getByLabel("Sporočilo").fill(message);
+  // Inside the form: a section labelled "… po telefonu" elsewhere on the page also matches "Telefon".
+  const form = page.locator("form[data-contact-form]");
+  await form.getByLabel("Ime in priimek").fill("Ana Novak");
+  await form.getByLabel("E-pošta").fill("ana@primer.si");
+  await form.getByLabel("Telefon").fill("041 555 906");
+  await form.getByLabel("Sporočilo").fill(message);
   await page.getByRole("button", { name: "Pošljite sporočilo" }).click();
 };
 

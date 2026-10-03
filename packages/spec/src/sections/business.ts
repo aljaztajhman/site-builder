@@ -19,9 +19,9 @@ export const servicesList = defineSection(
   {
     type: "services-list",
     group: "business",
-    variants: ["rows", "two-column"],
+    variants: ["rows", "two-column", "aside"],
     description:
-      "Two to twelve services as a typographic list: name, one or two sentences, optional price and link. rows: one service per row with the price aligned right. two-column: services in two columns on desktop. Use when services matter more than photos.",
+      "Two to twelve services as a typographic list: name, one or two sentences, optional price and link. rows: one service per row with the price aligned right. two-column: services in two columns on desktop. aside: the heading and an optional note card (note: how the client charges, e.g. self-paying) on the left, the services as a ruled list of names on the right; descriptions optional, one short line where the client said more. Use when services matter more than photos.",
     images: "none",
     mobile: "One column; name and price on one line when they fit, otherwise the price wraps under the name. Rows separated by rules.",
     a11y: "Heading is an h2; each service is an h3 inside a list. Prices use tabular numbers.",
@@ -32,13 +32,17 @@ export const servicesList = defineSection(
       .array(
         z.strictObject({
           name: text(60),
-          description: text(240),
+          description: text(240).optional().describe("Required except in aside, where a name may stand alone."),
           price: Price.optional().describe(PRICE_RULE),
           link: Link.optional(),
         }),
       )
       .min(2)
       .max(12),
+    note: z
+      .strictObject({ title: text(40), text: text(200) })
+      .optional()
+      .describe("aside only: a short note card beside the list, from the client's words (e.g. how prices are set)."),
   }),
 );
 
@@ -73,10 +77,10 @@ export const priceList = defineSection(
   {
     type: "price-list",
     group: "business",
-    variants: ["table", "grouped", "tags"],
+    variants: ["table", "grouped", "tags", "offers", "rates"],
     description:
-      "Cenik: up to eight groups of items with prices. table: one real table per group. grouped: groups as definition lists, two columns on desktop. tags: every price as a large object drawn by the direction's motif (a number plate, a label) with the item's name under it; for two to eight items. Every price comes from the client's input; missing prices are placeholders.",
-    images: "none",
+      "Cenik: up to eight groups of items with prices. table: one real table per group. grouped: groups as definition lists, two columns on desktop. tags: every price as a large object drawn by the direction's motif (a number plate, a label) with the item's name under it; for two to eight items. offers: two or three standing offers (a daily lunch, a Sunday menu) on a dark band, each group one offer: the group name says when (\"Vsak dan\"), the item is the offer with what it includes as its note, the price at headline size; the heading is read by screen readers only. rates: a photo beside the heading, intro and two to four prices at headline size on heavy rules (rooms per night, a lesson), the footnote as a marked line under them. Every price comes from the client's input; missing prices are placeholders.",
+    images: "optional",
     mobile: "Two columns (item, price) that fit 360 px without a scroll container; long item names wrap, prices stay on one line, aligned right. tags: two objects per row.",
     a11y: "table: <table> with the group name as caption (h3) and row headers. grouped: h3 per group and a <dl>. tags: a list, each item's name an h3 after its price. Prices use tabular numbers.",
   },
@@ -102,6 +106,7 @@ export const priceList = defineSection(
       .min(1)
       .max(8),
     footnote: text(200).optional().describe('e.g. "Cene vključujejo DDV." Only if the client said so.'),
+    image: ImageRef.optional().describe("rates only: a photo of what the prices are for (a room)."),
   }),
 );
 
@@ -149,17 +154,20 @@ export const openingHoursSection = defineSection(
   {
     type: "opening-hours",
     group: "business",
-    variants: ["table", "compact"],
+    variants: ["table", "compact", "photo", "week", "poster"],
     description:
-      "Opening hours from the business facts (never written in props), with a heading and an optional note. table: full day names in a table. compact: short day names in a narrow list. Use on the homepage or contact page.",
-    images: "none",
-    mobile: "Day left, hours right, one row per day range, fits 360 px.",
-    a11y: "Heading is an h2. table: <table> with row headers for the days.",
+      "Opening hours from the business facts (never written in props), with a heading and an optional note. table: full day names in a table. compact: short day names in a narrow list. photo: the hours beside a photo of the shop front or room in a tall arch, with an optional second photo (inset) as a disc over its edge. week: the hours drawn as a week chart, one bar per day on a time scale, each bar labelled with its times; for practices whose hours change from day to day. poster: the heading beside the hours at poster size, the note under them; for a business open on a few days only (weekend lunches), on a coloured band. Use on the homepage or contact page.",
+    images: "optional",
+    mobile: "Day left, hours right, one row per day range, fits 360 px. photo: the arch photo first at 78 % of the width, then the hours.",
+    variantNeeds: { photo: "image" },
+    a11y: "Heading is an h2. table and photo: <table> with row headers for the days. Photo alt text comes from the asset.",
   },
   z.strictObject({
     eyebrow: head.eyebrow,
     title: head.title,
-    note: text(200).optional().describe("e.g. how to book outside opening hours; not the hours themselves"),
+    note: text(200).optional().describe("e.g. how to book outside opening hours, or hours the client gave for a season; not the regular hours themselves"),
+    image: ImageRef.optional().describe("photo only: the shop front or the room, in a tall arch."),
+    inset: ImageRef.optional().describe("photo only: a second photo, shown round over the edge of the first (a detail)."),
   }),
 );
 
@@ -221,12 +229,13 @@ export const teamSection = defineSection(
   {
     type: "team",
     group: "business",
-    variants: ["grid", "list"],
+    variants: ["grid", "list", "photo"],
     description:
-      "People who work there: name, role, optional short bio and portrait. grid: portraits in a grid. list: one person per row with a small portrait. Names only from the client's input, otherwise a name placeholder.",
+      "People who work there: name, role, optional short bio and portrait. grid: portraits in a grid. list: one person per row with a small portrait. photo: the heading and the people as ruled rows (name left, role right) beside one photo of the team at work or the room (image), with an optional second photo (inset) overlapping its corner. Names only from the client's input, otherwise a name placeholder.",
     images: "optional",
     mobile: "grid: two portraits per row. list: small portrait beside name and role.",
     a11y: "Heading is an h2; each person's name an h3. Portrait alt text comes from the asset.",
+    variantNeeds: { photo: "image" },
   },
   z.strictObject({
     ...head,
@@ -241,6 +250,8 @@ export const teamSection = defineSection(
       )
       .min(1)
       .max(12),
+    image: ImageRef.optional().describe("photo only: the team at work or the room, beside the people."),
+    inset: ImageRef.optional().describe("photo only: a second, smaller photo overlapping the first one's corner."),
   }),
 );
 
@@ -248,9 +259,9 @@ export const gallerySection = defineSection(
   {
     type: "gallery",
     group: "business",
-    variants: ["grid", "mosaic"],
+    variants: ["grid", "mosaic", "wall"],
     description:
-      "Two to sixteen photos with optional captions; tapping a photo opens a larger view. grid: even tiles. mosaic: photos at their natural proportions in columns. Use for interiors, dishes, finished work or the farm.",
+      "Two to sixteen photos with optional captions; tapping a photo opens a larger view. grid: even tiles. mosaic: photos at their natural proportions in columns. wall: five photos edge to edge, a wide and a narrow one above three in a row, no visible heading (it is read by screen readers); for places sold on the view. Use for interiors, dishes, finished work or the farm.",
     images: "required",
     mobile: "Two columns at 360 px; mosaic keeps each photo's proportions so nothing is cropped awkwardly.",
     a11y: "Heading is an h2. Each photo is a link to the large image (works without JS); with JS it opens a modal <dialog> with labelled previous, next and close buttons; Escape closes and focus returns.",
@@ -268,9 +279,9 @@ export const productsSection = defineSection(
   {
     type: "products",
     group: "business",
-    variants: ["grid", "list"],
+    variants: ["grid", "list", "plates"],
     description:
-      "Shop or bakery products: name, optional description, price, quantity and photo. grid: product cards with photos. list: compact rows with a small photo. Only products and prices from the client's input.",
+      "Shop or bakery products: name, optional description, price, quantity and photo. grid: product cards with photos. list: compact rows with a small photo. plates: dishes with a top-down photo as round plates (three in a row, the middle one lower), the name and price on a rule under each; items without a photo follow as a ruled list with dotted leaders. Only products and prices from the client's input.",
     images: "optional",
     mobile: "grid: two products per row. list: one per row, price aligned right.",
     a11y: "Heading is an h2; each product name an h3 inside a list. Prices use tabular numbers.",

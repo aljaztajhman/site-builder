@@ -83,14 +83,14 @@ function SiteCard({ site, badge }: { site: SiteRow; badge: string | null }) {
         ) : (
           <p className="empty">{site.status === "failed" ? "Ustvarjanje ni uspelo." : site.status === "generating" ? "Stran se ustvarja …" : "Še brez vsebine."}</p>
         )}
-        {/* Outside the frame: the site's own HTML never carries it (preview = published output). */}
-        {site.current_version && badge ? <span className="preview-badge">{badge}</span> : null}
       </div>
       <div className="body">
         <h2>
           <a href={`/sites/${site.id}`}>{site.name}</a>
         </h2>
         <span className={`pill ${status.tone}`}>{status.label}</span>
+        {/* Beside the status, not on the thumbnail (it covered the site); never in the site's own HTML. */}
+        {site.current_version && badge ? <span className="preview-badge">{badge}</span> : null}
         <span className="meta num">{meta.filter(Boolean).join(" · ")}</span>
         {site.published_version ? (
           <a className="pub" href={`/s/${site.slug}/`}>

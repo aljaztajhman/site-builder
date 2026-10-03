@@ -36,7 +36,8 @@ export const FONTS = {
   publicSans: face("Public Sans", "public-sans", "sans-serif", [100, 900]),
   bitter: face("Bitter", "bitter", "serif", [100, 900]),
   nunitoSans: face("Nunito Sans", "nunito-sans", "sans-serif", [200, 1000]),
-  newsreader: face("Newsreader", "newsreader", "serif", [200, 800]),
+  // Headings only (editorial: 400–500); cut to 300–700 to keep the file under the 60 KB per-family budget.
+  newsreader: face("Newsreader", "newsreader", "serif", [300, 700]),
   libreFranklin: face("Libre Franklin", "libre-franklin", "sans-serif", [100, 900]),
   bricolage: face("Bricolage Grotesque", "bricolage-grotesque", "sans-serif", [200, 800]),
   figtree: face("Figtree", "figtree", "sans-serif", [300, 900]),
@@ -61,6 +62,17 @@ export const FONT_PAIRS: FontPair[] = [
   { id: "archivo-public-sans", label: "Archivo / Public Sans", heading: FONTS.archivo, body: FONTS.publicSans },
   { id: "space-grotesk-public-sans", label: "Space Grotesk / Public Sans", heading: FONTS.spaceGrotesk, body: FONTS.publicSans },
   { id: "bitter-karla", label: "Bitter / Karla", heading: FONTS.bitter, body: FONTS.karla },
+  // R Račun, T Etiketa.
+  { id: "ibm-plex-sans", label: "IBM Plex Sans", heading: FONTS.ibmPlexSans, body: FONTS.ibmPlexSans },
+  { id: "lora-karla", label: "Lora / Karla", heading: FONTS.lora, body: FONTS.karla },
+  // K Jedilnik, L Ogledalo.
+  { id: "garamond-figtree", label: "EB Garamond / Figtree", heading: FONTS.ebGaramond, body: FONTS.figtree },
+  { id: "inter-tight-dm-sans", label: "Inter Tight / DM Sans", heading: FONTS.interTight, body: FONTS.dmSans },
+  // O Nasmeh.
+  { id: "figtree-figtree", label: "Figtree", heading: FONTS.figtree, body: FONTS.figtree },
+  // N Markacija, P Pregib.
+  { id: "fraunces-nunito-sans", label: "Fraunces / Nunito Sans", heading: FONTS.fraunces, body: FONTS.nunitoSans },
+  { id: "bricolage-public-sans", label: "Bricolage Grotesque / Public Sans", heading: FONTS.bricolage, body: FONTS.publicSans },
 ];
 
 export function fontPair(id: string): FontPair {

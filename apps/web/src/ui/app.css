@@ -240,7 +240,7 @@ legend{padding:0 4px;font-weight:600;font-size:13px;color:var(--ink-2)}
 /* A tab on the frame's top-right corner, outside the site: nothing of the page is covered. */
 .ed .frame-box>.preview-badge{bottom:100%;right:14px;border-bottom:0;border-radius:var(--r-1) var(--r-1) 0 0}
 .ed .stage.badged{padding-top:42px}
-.site-card .shot .preview-badge{top:8px;right:8px}
+.site-card .body .preview-badge{position:static}
 .ed .frame.skeleton{display:grid;place-items:center;padding:24px;text-align:center;color:var(--ink-3);font-size:15px}
 /* Live preview while generating: a skeleton page that fills in with the run's real name, colours and pictures. */
 .ed .frame.live{--sk-bg:#fff;--sk-surface:#f3f2ef;--sk-text:#2a2825;--sk-muted:#6b665e;--sk-primary:#b9b4ab;--sk-line:#e4e1db;

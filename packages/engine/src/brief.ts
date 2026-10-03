@@ -111,8 +111,40 @@ export function numbersIn(text: string): Set<string> {
     if (Number.isFinite(n)) out.add(String(n));
     out.add(m[0].replace(/[.,]\d+$/, ""));
   }
+  // A number the client wrote as a word ("zadnja štiri leta") is the same fact as its digits ("4 leta").
+  const words = fold(text);
+  for (const [n, re] of NUMBER_WORDS) if (re.test(words)) out.add(String(n));
   return out;
 }
+
+/** Slovene number words two to twenty and the tens to fifty, in their common case forms (folded, no diacritics). */
+const NUMBER_WORDS: [number, RegExp][] = (
+  [
+    [2, "dva|dve|dveh|dvema"],
+    [3, "tri|trije|treh|trem|tremi"],
+    [4, "stiri|stirje|stirih|stirim|stirimi"],
+    // "pet" alone is also petek in day ranges ("pon–pet", "pet. 8–16"): not after a day and a dash, not before a dot or a dash.
+    [5, "(?<!(?:pon|tor|sre|cet)\\.?\\s*[-–—]\\s*)pet(?!\\s*[-–—.])|petih|petim|petimi"],
+    [6, "sest|sestih|sestim|sestimi"],
+    [7, "sedem|sedmih|sedmim|sedmimi"],
+    [8, "osem|osmih|osmim|osmimi"],
+    [9, "devet|devetih|devetim|devetimi"],
+    [10, "deset|desetih|desetim|desetimi"],
+    [11, "enajst|enajstih"],
+    [12, "dvanajst|dvanajstih"],
+    [13, "trinajst|trinajstih"],
+    [14, "stirinajst|stirinajstih"],
+    [15, "petnajst|petnajstih"],
+    [16, "sestnajst|sestnajstih"],
+    [17, "sedemnajst|sedemnajstih"],
+    [18, "osemnajst|osemnajstih"],
+    [19, "devetnajst|devetnajstih"],
+    [20, "dvajset|dvajsetih"],
+    [30, "trideset|tridesetih"],
+    [40, "stirideset|stiridesetih"],
+    [50, "petdeset|petdesetih"],
+  ] as [number, string][]
+).map(([n, forms]) => [n, new RegExp(`(?<![\\p{L}\\p{N}])(?:${forms})(?![\\p{L}\\p{N}])`, "u")]);
 
 /** Lower case without diacritics; lives with the fact pairing, exported here as before. */
 export { fold };

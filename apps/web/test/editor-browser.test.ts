@@ -111,6 +111,25 @@ describe("editor in a browser", () => {
     }
   }, 60_000);
 
+  it("opens the exact field when a yellow placeholder is tapped in the preview: the second missing price, a legal field", async () => {
+    const id = await bakery("urejanje-oznaka");
+    const { page, close } = await open(id);
+    try {
+      const frame = page.frameLocator('iframe[title="Predogled strani"]');
+      const focusedPath = () => page.evaluate(() => (document.activeElement?.closest("[data-path]") as HTMLElement | null)?.dataset.path ?? null);
+      // Products: two items have no price; the second mark is the sixth item's (items/5).
+      await frame.locator('#s_products mark.ph[data-ph="price"]').nth(1).click();
+      await expect.poll(focusedPath).toBe("/pages/0/sections/2/props/items/5/price");
+      await frame.locator('#s_products mark.ph[data-ph="price"]').nth(0).click();
+      await expect.poll(focusedPath).toBe("/pages/0/sections/2/props/items/4/price");
+      // The footer's missing tax number: a business fact, in the facts tab.
+      await frame.locator('footer mark.ph[data-ph="taxNumber"]').first().click();
+      await expect.poll(focusedPath).toBe("/business/provider/taxNumber");
+    } finally {
+      await close();
+    }
+  }, 60_000);
+
   it("picks up a change the worker saves while the site is busy, from the small poll", async () => {
     const id = await bakery("urejanje-pulz");
     await platform.repo.setStatus(id, "editing");

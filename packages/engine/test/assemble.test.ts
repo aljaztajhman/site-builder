@@ -99,6 +99,17 @@ describe("opening hours the client won't publish", () => {
   const wish = "Delovnega časa tudi ne bi pisali, ker se stranke vedno prej najavijo po telefonu.";
   const hoursBlockers = (spec: SiteSpec) => publishChecklist(spec).filter((b) => b.detail === "hours");
 
+  it("dates the accessibility statement and the footer's year on the Slovenian day the site is made", () => {
+    // 23:30 UTC on New Year's Eve is already 1 January in Ljubljana.
+    const spec = assembleSpec({ slug: id, brief, design, assets, content: content(), now: new Date("2026-12-31T23:30:00Z") });
+    expect(spec.chrome.footer.year).toBe(2027);
+    const statement = spec.pages.find((p) => p.kind === "accessibility")!.sections[0]!;
+    expect(statement.type === "legal" && statement.props).toEqual({ kind: "accessibility", date: "2027-01-01" });
+    const privacy = spec.pages.find((p) => p.kind === "privacy")!.sections[0]!;
+    expect(privacy.type === "legal" && privacy.props).toEqual({ kind: "privacy" });
+    expect(validateSite(spec).ok).toBe(true);
+  });
+
   it("the accountant's own words: no hours placeholder, nothing about hours blocks publishing", () => {
     expect(fixture.description).toContain(wish);
     expect(brief.facts.hours).toBeNull();

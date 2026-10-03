@@ -1,9 +1,9 @@
-import { formatDate, isPlaceholder } from "@sb/spec";
+import { dayDate, formatDate, isPlaceholder } from "@sb/spec";
 import { EmailLink, MaybeText, PhoneLink, Ph, Section, addressLine, titleId } from "../../primitives/index.tsx";
 import type { RenderCtx, SectionProps } from "../../types.ts";
 import { accessibilityBody, privacyBody, type LegalFacts } from "./legal-text.tsx";
 
-function legalFacts(ctx: RenderCtx): LegalFacts {
+function legalFacts(ctx: RenderCtx, date: string | undefined): LegalFacts {
   const b = ctx.site.business;
   return {
     name: b.name,
@@ -12,7 +12,8 @@ function legalFacts(ctx: RenderCtx): LegalFacts {
     reg: <MaybeText value={b.provider.registrationNumber} ctx={ctx} />,
     email: <EmailLink ctx={ctx} />,
     phone: <PhoneLink ctx={ctx} />,
-    date: formatDate(new Date()),
+    // The day the statement was prepared, from the spec; a site made before v11 shows the day it is rendered.
+    date: formatDate(date ? dayDate(date) : new Date()),
     contactForm: ctx.site.pages.some((p) => p.sections.some((s) => s.type === "contact-form")),
   };
 }
@@ -21,7 +22,7 @@ function legalFacts(ctx: RenderCtx): LegalFacts {
 export function Legal({ section, ctx }: SectionProps<"legal">) {
   const { kind } = section.props;
   const lang = ctx.locale === "sl" ? "sl" : "en";
-  const facts = legalFacts(ctx);
+  const facts = legalFacts(ctx, section.props.date);
   return (
     <Section id={section.id} type={section.type} variant={section.variant} tone={section.tone}>
       <article className="legal">

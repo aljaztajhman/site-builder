@@ -206,6 +206,15 @@ describe("landing page", () => {
     expect(page2).not.toContain("Pri letni naročnini bo domena");
   });
 
+  it("says in the FAQ which versions can be restored, from the retention settings, not 'every change' forever", () => {
+    const config = loadConfig();
+    const page = homePage({ config, signedIn: false, csrf: "t", fullSite: false, allowance: "", botSiteKey: null });
+    expect(page).not.toContain("Vsaka sprememba je shranjena kot različica, ki jo lahko obnovite.");
+    expect(page).toContain(`obnovite lahko vsako, ki ni starejša od ${config.versions.retention.keepAllDays} dni, iz starejših dni zadnjo različico dneva, objavljene različice pa vedno.`);
+    const oneDay = { ...config, versions: { ...config.versions, retention: { ...config.versions.retention, keepAllDays: 1 } } };
+    expect(homePage({ config: oneDay, signedIn: false, csrf: "t", fullSite: false, allowance: "", botSiteKey: null })).toContain("ni starejša od 1 dneva,");
+  });
+
   it("serves the example site so the landing page can frame it, and nothing else may be framed", async () => {
     const page = await (await app.request("/")).text();
     const src = page.match(/<iframe src="(\/assets\/ui\/([0-9a-f]{10})\/example-home\.html)"/);

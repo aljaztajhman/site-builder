@@ -115,6 +115,14 @@ describe("defaultSection", () => {
     expect(cat.sections.find((s) => s.type === "gallery")?.canAdd).toBe(false);
   });
 
+  it("tells the editor which layouts need a prop the section may lack (about figure, a receipt, hours with a photo)", () => {
+    const cat = editorCatalogue(spec);
+    expect(cat.sections.find((s) => s.type === "about")?.variantNeeds).toEqual({ "image-side": "image", figure: "figure" });
+    expect(cat.sections.find((s) => s.type === "hero-signature")?.variantNeeds).toEqual({ receipt: "receipt", mirrors: "images" });
+    expect(cat.sections.find((s) => s.type === "team")?.variantNeeds).toEqual({ photo: "image" });
+    expect(cat.sections.find((s) => s.type === "faq")?.variantNeeds).toEqual({});
+  });
+
   it("blocks publishing until the starter text is replaced", () => {
     const s = defaultSection(spec, "faq", "s_faq")!;
     const withFaq = applyDirectEdit(spec, [{ op: "add", path: "/pages/0/sections/7", value: s }]);

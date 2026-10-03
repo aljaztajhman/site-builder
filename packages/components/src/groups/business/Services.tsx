@@ -3,25 +3,49 @@ import type { SectionProps } from "../../types.ts";
 
 export function ServicesList({ section, ctx }: SectionProps<"services-list">) {
   const { props } = section;
+  const list = (
+    <ul className="svc-list">
+      {props.items.map((item, i) => (
+        <li className={cx("svc-list__item", !item.price && "svc-list__item--no-price")} key={i}>
+          <h3 className="svc-list__name">{item.name}</h3>
+          {item.price && (
+            <p className="svc-list__price">
+              <PriceText price={item.price} ctx={ctx} />
+            </p>
+          )}
+          {(item.description || item.link) && (
+            <div className="svc-list__body">
+              {item.description && <p>{item.description}</p>}
+              {item.link && <ActionLink link={item.link} ctx={ctx} kind="text" />}
+            </div>
+          )}
+        </li>
+      ))}
+    </ul>
+  );
+  // aside: the heading and the note card on the left, the names on the right.
+  if (section.variant === "aside") {
+    return (
+      <Section id={section.id} type={section.type} variant={section.variant} tone={section.tone}>
+        <div className="svc-aside">
+          <div className="svc-aside__head">
+            <SectionHead id={section.id} eyebrow={props.eyebrow} title={props.title} intro={props.intro} />
+            {props.note && (
+              <p className="svc-note">
+                <strong className="svc-note__title">{props.note.title}</strong>
+                {props.note.text}
+              </p>
+            )}
+          </div>
+          {list}
+        </div>
+      </Section>
+    );
+  }
   return (
     <Section id={section.id} type={section.type} variant={section.variant} tone={section.tone}>
       <SectionHead id={section.id} eyebrow={props.eyebrow} title={props.title} intro={props.intro} />
-      <ul className="svc-list">
-        {props.items.map((item, i) => (
-          <li className={cx("svc-list__item", !item.price && "svc-list__item--no-price")} key={i}>
-            <h3 className="svc-list__name">{item.name}</h3>
-            {item.price && (
-              <p className="svc-list__price">
-                <PriceText price={item.price} ctx={ctx} />
-              </p>
-            )}
-            <div className="svc-list__body">
-              <p>{item.description}</p>
-              {item.link && <ActionLink link={item.link} ctx={ctx} kind="text" />}
-            </div>
-          </li>
-        ))}
-      </ul>
+      {list}
     </Section>
   );
 }

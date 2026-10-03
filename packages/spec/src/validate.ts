@@ -82,6 +82,39 @@ export function semanticIssues(spec: SiteSpec): Issue[] {
     if (centred.length > 1) add(`/pages/${pi}/sections`, "banned", `${centred.length} centred sections on one page (max 1)`);
   });
 
+  // hero-signature: the line that introduces a phone or an opening time, and the address only on the label card.
+  spec.pages.forEach((p, pi) =>
+    p.sections.forEach((s, si) => {
+      if (s.type === "legal" && s.props.date !== undefined && s.props.kind !== "accessibility") add(`/pages/${pi}/sections/${si}/props/date`, "structure", "only the accessibility statement carries a date");
+      if (s.type !== "hero-signature") return;
+      const at = `/pages/${pi}/sections/${si}/props`;
+      if (s.props.fact !== "address" && s.props.factLabel === undefined) add(`${at}/factLabel`, "structure", `factLabel is required when the hero shows the ${s.props.fact}`);
+      if (s.props.fact === "address" && !["label", "card", "bend"].includes(s.variant)) add(`${at}/fact`, "structure", "fact address is only shown by the label, card and bend variants");
+      if (s.props.signs && s.variant !== "view") add(`${at}/signs`, "structure", "signs are only shown by the view variant");
+      if (s.props.receipt && s.variant !== "receipt") add(`${at}/receipt`, "structure", "receipt is only shown by the receipt variant");
+      if (s.props.images && s.variant !== "mirrors") add(`${at}/images`, "structure", "images are only shown by the mirrors variant");
+      const wordmark = s.props.wordmark;
+      if (wordmark !== undefined) {
+        if (s.variant !== "mirrors") add(`${at}/wordmark`, "structure", "wordmark is only shown by the mirrors variant");
+        // Decorative, but still the business's own name: one word of it, never a slogan.
+        const words = spec.business.name.toLocaleLowerCase("sl").split(/[^\p{L}\p{N}]+/u);
+        if (!words.includes(wordmark.toLocaleLowerCase("sl"))) add(`${at}/wordmark`, "structure", "wordmark must be one word of the business name");
+      }
+    }),
+  );
+
+  // A service's description may be left out only where the list is names only (services-list aside).
+  spec.pages.forEach((p, pi) =>
+    p.sections.forEach((s, si) => {
+      if (s.type !== "services-list") return;
+      if (s.props.note && s.variant !== "aside") add(`/pages/${pi}/sections/${si}/props/note`, "structure", "note is only shown by the aside variant");
+      if (s.variant === "aside") return;
+      s.props.items.forEach((it, ii) => {
+        if (it.description === undefined) add(`/pages/${pi}/sections/${si}/props/items/${ii}/description`, "structure", "description is required outside the aside variant");
+      });
+    }),
+  );
+
   // References: images and pages.
   const imageIds = new Set<string>();
   spec.assets.images.forEach((img, i) => {

@@ -4,7 +4,7 @@ import { HERO_SPLIT_SIZES, HeroSplit } from "./HeroSplit.tsx";
 import { HERO_IMAGE_SIZES, HeroImage } from "./HeroImage.tsx";
 import { HeroType } from "./HeroType.tsx";
 import { PAGE_HEADER_SIZES, PageHeader, pageHeaderImage } from "./PageHeader.tsx";
-import { HERO_SIGNATURE_ARCH_SIZES, HERO_SIGNATURE_PHOTO_SIZES, HeroSignature } from "./HeroSignature.tsx";
+import { HERO_SIGNATURE_SIZES, HeroSignature, signaturePhoto } from "./HeroSignature.tsx";
 
 export const heroRenderers = {
   "hero-split": HeroSplit,
@@ -22,8 +22,11 @@ export const heroLcp: LcpResolvers = {
     const image = pageHeaderImage(s);
     return image ? { image, sizes: PAGE_HEADER_SIZES } : null;
   },
-  "hero-signature": (s) =>
-    s.variant === "drawing" || !s.props.image ? null : { image: s.props.image, sizes: s.variant === "photo" ? HERO_SIGNATURE_PHOTO_SIZES : HERO_SIGNATURE_ARCH_SIZES },
+  "hero-signature": (s) => {
+    const sizes = HERO_SIGNATURE_SIZES[s.variant];
+    const image = signaturePhoto(s);
+    return sizes && image ? { image, sizes } : null;
+  },
 };
 
 /** No hero needs client-side JS. */

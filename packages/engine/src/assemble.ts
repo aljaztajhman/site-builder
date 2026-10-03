@@ -4,6 +4,7 @@ import {
   DIRECTIONS,
   SECTION_DEFS,
   SPEC_VERSION,
+  isoDay,
   PageRef,
   text,
   toModelJsonSchema,
@@ -33,7 +34,9 @@ export function contentOutputSchema() {
     seo: z.strictObject({ title: text(SEO_LIMITS.title), description: text(SEO_LIMITS.description) }),
     sections: z.array(modelSectionUnion()).min(1).max(14),
   });
-  return z.strictObject({ chrome: Chrome, pages: z.array(ModelPage).min(1).max(8) });
+  // The model never sets the footer's year (assembleSpec does, from the day the site is made).
+  const ModelChrome = Chrome.extend({ footer: z.strictObject({ variant: Chrome.shape.footer.shape.variant }) });
+  return z.strictObject({ chrome: ModelChrome, pages: z.array(ModelPage).min(1).max(8) });
 }
 
 export type ContentOutput = { chrome: SiteSpec["chrome"]; pages: Page[] };
@@ -77,8 +80,13 @@ function seoTitle(prefix: string, name: string): string {
   return t.length <= 60 ? t : prefix.slice(0, 60);
 }
 
+/** The footer's year from the day the site is made (the model never sets it). */
+function withYear(chrome: SiteSpec["chrome"], issued: string): SiteSpec["chrome"] {
+  return { ...chrome, footer: { ...chrome.footer, year: Number(issued.slice(0, 4)) } };
+}
+
 /** Privacy, accessibility and 404 pages. Generated in code, never by the model. */
-export function systemPages(name: string): Page[] {
+export function systemPages(name: string, issued?: string): Page[] {
   return [
     {
       id: "p_zasebnost",
@@ -94,7 +102,7 @@ export function systemPages(name: string): Page[] {
       slug: "dostopnost",
       nav: { label: "Dostopnost", show: false },
       seo: { title: seoTitle("Izjava o dostopnosti", name), description: `Izjava o dostopnosti spletne strani ${name}.`.slice(0, 160) },
-      sections: [{ id: "s_legal_accessibility", type: "legal", variant: "default", props: { kind: "accessibility" } } as Page["sections"][number]],
+      sections: [{ id: "s_legal_accessibility", type: "legal", variant: "default", props: { kind: "accessibility", ...(issued ? { date: issued } : {}) } } as Page["sections"][number]],
     },
     {
       id: "p_404",
@@ -175,7 +183,10 @@ export function assembleSpec(input: {
   content: ContentOutput;
   /** The client asked for no opening hours on the site (clientWithholdsHours over their text). */
   hoursWithheld?: boolean;
+  /** When the site is made (default now): dates the accessibility statement and the footer's year. */
+  now?: Date;
 }): SiteSpec {
+  const issued = isoDay(input.now ?? new Date());
   const business = businessFromBrief(input.brief, { hoursWithheld: input.hoursWithheld });
   let modelPages = input.content.pages.filter((p) => p.kind === "home" || p.kind === "standard");
   // Hours the client won't publish: an opening-hours section would show (and block publishing on) a
@@ -195,7 +206,7 @@ export function assembleSpec(input: {
     business,
     design: input.design,
     assets: input.assets,
-    chrome: templateChrome(input.design, input.content, input.assets.logo !== undefined),
-    pages: [...uniqueSectionIds(modelPages), ...systemPages(input.brief.name)],
+    chrome: withYear(templateChrome(input.design, input.content, input.assets.logo !== undefined), issued),
+    pages: [...uniqueSectionIds(modelPages), ...systemPages(input.brief.name, issued)],
   };
 }

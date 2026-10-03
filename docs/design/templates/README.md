@@ -134,7 +134,46 @@ Owner's decision `sb-landing-directions` = start-three (2026-10-02). M, S and J 
 - Spec v4 (additive migration): the `band` tone with optional `band`/`onBand` colours (contrast checked like the others), heading weight up to 900, the `hero-signature` section (variants photo, drawing, arch; the fact shown is the phone or the earliest opening time, always from the business facts), price-list `tags` and contact `call-out`.
 - Rendering: `<body data-motif>` and `packages/components/styles/motifs.css`; the motif's repeating pieces (tyre tread, pipes, T-joints, scoring cuts) are SVG images that `packages/render/src/tokens.ts` builds from the site's colours. Plate, seal and radiator are components in `packages/components/src/motifs/`.
 - Pipeline: the design step is told the trade's template; a template keeps its own palette; the content step gets the outline; the header is set in code (dark over a dark hero unless there is a logo, no header call button above a phone object); a template that draws (S) gets no generated pictures.
-- Still outside the rules above and not built: clip-path shapes (N, P), centred label text (T), the other seven templates, the swim set's motion and photo-filled type, logo colours for template palettes.
+- Still outside the rules above and not built: clip-path shapes (N, P), the templates K, L, N, O and P, the swim set's motion and photo-filled type, logo colours for template palettes.
+
+## In the engine (R and T, spec v7)
+
+R and T are directions `racun` and `etiketa` (branch claude/templates-rt). Compare them with `pnpm templates:compare R,T`: it renders the hand-made page and the fixture's golden spec through the engine at 1440, 1280, 390 and 360 px, checks the engine's page and writes first screens side by side to `eval/runs/templates-<letter>/`.
+
+- Spec v7 (additive migration): hero-signature variants `receipt` and `label`, fact `address`, optional `receipt` and `inset`, and `factLabel` optional (validation still requires it for a phone or an opening time); highlights `figures`; about `figure` with an optional `figure` (the client's own number); image-text `round`; opening-hours `photo` with optional `image` and `inset`.
+- R draws a paper receipt (check marks and a torn edge as SVG tokens in the site's colours, the offset shadow as a layer, not a box-shadow; the red double rule under the name is the motif's fixed ink). T draws a bottle label (a double inner rule in the ground colour, an olive branch as an inline SVG in the site's colours) and sets each priced product on its own label; text is centred inside those labels only.
+- Photo shapes: `.arch-top` and `.disc` in motifs.css, the only round shapes allowed besides drawn objects; a test keeps them off buttons and links.
+- A template may list the colour pairs it sets as text (`textPairs`, e.g. Račun's green figures on white); they are held at 4.5:1 by checkDesign and enforceDesign.
+- Pipeline: hero variants that draw (drawing, receipt) get no generated pictures; the design and critique prompts name every template from the directions list.
+
+## In the engine (K and L, spec v8)
+
+K and L are directions `jedilnik` and `ogledalo` (branch claude/templates-kl, on top of R and T).
+
+- Spec v8 (additive migration): hero-signature `card` (the house full-bleed, a white menu card with a thin brass rule hanging into the next section, the address from the facts) and `mirrors` (two or three photos in mirror arches, optional `images`, the business's own name wall-sized behind as `wordmark`, validated to be a word of the name); price-list `offers`; products `plates`; image-text `pair` (a second photo over the corner, an optional `figure` the client gave inside the heading); team `photo` (the people as ruled rows beside a photo, optional `image` and `inset`).
+- K's brass is the band colour (on the greens 5.93:1 and more; a template text pair), so the offers' prices, the seat count, the number to call and the buttons on green follow a colour edit. The spoon is an inline SVG in the band colour; the brand mark the same spoon as an SVG token.
+- L's price list is set like a masthead (motif CSS on `price-list:grouped`, no new variant); the team photo sits in a tall mirror arch with a small arch over its corner.
+- The contact call-out has no map, so it no longer loads the consent script or shows a cookie notice.
+
+## In the engine (O, spec v9)
+
+O is direction `nasmeh` (branch claude/templates-o, on top of K and L).
+
+- Spec v9 (additive migration): hero-signature `disc` (the photo round on a disc in the alternate colour, the motif's arc under it, `factNote` on a tilted chip); opening-hours `week` (the hours as a week chart, computed by `weekChart()` in @sb/spec from the business hours: one row per day, a bar per opening span, the scale from the earliest opening to the latest closing, positions as custom properties); services-list `aside` with an optional `note` card, a service's `description` optional there (validation requires it in the other variants).
+- The coral of the hand-made page (#ff7a66) is 2.55:1 on white; the accent is #e4573f (3.66:1 on white, 3.86:1 on the deep green), so the arcs are a little deeper.
+- The team photo layout puts the practitioner round, the people and the room in an arch side by side (motif CSS; the round and arch classes come from the markup in this motif).
+
+## In the engine (N and P, spec v10)
+
+N is direction `markacija`, P is `pregib` (branch claude/templates-np, on top of O).
+
+- Spec v10 (additive migration): hero-signature `view` (the landscape full-bleed under the flat overlay, the headline at the bottom left, up to three `signs` on a wooden post) and `bend` (the logo's bent line as a pale limb behind the headline, the photo with a cut corner hanging into the next section; fact `address` allowed); price-list `rates` (two to four prices at headline size on heavy rules beside an optional `image`); opening-hours `poster` (the times at poster size beside the heading); gallery `wall` (five photos edge to edge, the heading for screen readers). A direction's template can set its phone bar's actions (`phoneBar`, up to three, call and directions always among them): Pregib books first, then call and directions under short labels ("Rezerviraj", "Klic", "Pot") so three fit at 360 px. The hand-made page has only book and call; directions in one tap is a hard mobile rule here.
+- Shapes cut with clip-path only through shape tokens set in tokens.ts (`--shape-sign`, `--shape-fold`), used as `clip-path: var(--shape-*)`; a test refuses any other clip-path in the stylesheets (the visually-hidden `inset(50%)` aside).
+- The trail blaze (red ring, white centre) and the post's wood are fixed motif colours, like the plate's EU blue. The ridge is an SVG mask: the section under the hero and every dark section rise into the one above in their own ground colour.
+- N keeps the engine's flat overlay at 68 % over the view (the hand-made page uses 42 %, white text on a white pixel there is 2.58:1).
+- P's orange is the accent (3.01:1 on white, 4.71:1 against the dark green): buttons are orange with dark text, figures orange on the dark band; teal stays the primary for links, the address line and prices.
+- The fact check reads Slovene number words two to fifty in their common case forms, so "4 leta" passes when the client wrote "zadnja štiri leta" (and "pet" in a day range like "pon–pet" is not read as 5).
+- On a phone, a hero action that the bar shows from the start (a call, a booking) is hidden in the hero, so one screen never shows the same action twice. This now also covers the phone-fact heroes of R, L and O, whose call button sat right above the bar's "Klic".
 
 ## Checked
 

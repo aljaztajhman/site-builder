@@ -91,21 +91,147 @@ describe("migration 5 → 6 (owner-edited price lists and menus)", () => {
     const { validateSite } = await import("../src/index.ts");
     for (const id of ["frizerstvo-lana", "gostilna-zlata-zlica"]) {
       const golden = await read(id);
-      const v6 = migrateSpec({ ...golden, specVersion: 5 });
+      const v6 = migrateSpec({ ...golden, specVersion: 5 }, MIGRATIONS, 6);
       expect(v6, id).toEqual({ ...golden, specVersion: 6 });
-      expect(validateSite(v6).issues, id).toEqual([]);
+      expect(validateSite(migrateSpec(v6)).issues, id).toEqual([]);
     }
   });
 
   it("accepts what v6 adds: an item or dish marked unavailable (a boolean)", async () => {
     const { validateSite, priceList, menuSection } = await import("../src/index.ts");
-    const golden = await read("frizerstvo-lana");
+    const golden = migrateSpec(await read("frizerstvo-lana"));
     const spec = structuredClone(golden);
     const prices = spec.pages[1]!.sections.find((s) => s.type === "price-list")!;
     (prices.props as { groups: { items: { unavailable?: boolean }[] }[] }).groups[0]!.items[1]!.unavailable = true;
     expect(validateSite(spec).issues).toEqual([]);
     expect(priceList.schema.safeParse({ ...prices, props: { title: "Cenik", groups: [{ items: [{ name: "A", price: { amount: 1 }, unavailable: "yes" }] }] } }).success).toBe(false);
     expect(menuSection.schema.safeParse({ id: "s_m", type: "menu", variant: "classic", props: { title: "Jedi", categories: [{ name: "Juhe", dishes: [{ name: "Ričet", price: { amount: 6 }, unavailable: true }] }] } }).success).toBe(true);
+  });
+});
+
+describe("migration 6 → 7 (trade templates R and T)", () => {
+  const read = async (id: string) => {
+    const { readFileSync } = await import("node:fs");
+    return JSON.parse(readFileSync(new URL(`../../../tools/eval/golden/${id}.json`, import.meta.url), "utf8")) as SiteSpec;
+  };
+
+  it("turns stored v6 sites into valid v7 sites unchanged apart from the version", async () => {
+    const { validateSite } = await import("../src/index.ts");
+    for (const id of ["avtoservis-mrak", "pekarna-kvas", "frizerstvo-lana"]) {
+      const golden = await read(id);
+      const v7 = migrateSpec({ ...golden, specVersion: 6 }, MIGRATIONS, 7);
+      expect(v7, id).toEqual({ ...golden, specVersion: 7 });
+      expect(validateSite(migrateSpec(v7)).issues, id).toEqual([]);
+    }
+  });
+
+  it("accepts what v7 adds (the receipt and label heroes, figures, the founding year, a round photo, hours with photos) and only from v7 on", async () => {
+    const { validateSite } = await import("../src/index.ts");
+    const spec = migrateSpec(await read("racunovodstvo-seliskar"));
+    expect(validateSite(spec).issues).toEqual([]);
+    expect(spec.pages[0]!.sections.map((s) => s.variant)).toEqual(["receipt", "figures", "rows", "figure", "call-out"]);
+    const shop = migrateSpec(await read("trgovina-oljka-in-sol"));
+    expect(validateSite(shop).issues).toEqual([]);
+    expect(shop.pages[0]!.sections.map((s) => s.variant)).toEqual(["label", "tags", "narrow", "round", "photo", "call-out"]);
+    // A stored spec must be migrated before it validates: the schema takes only the current version.
+    expect(validateSite({ ...spec, specVersion: 6 }).ok).toBe(false);
+  });
+});
+
+describe("migration 7 → 8 (trade templates K and L)", () => {
+  const read = async (id: string) => {
+    const { readFileSync } = await import("node:fs");
+    return JSON.parse(readFileSync(new URL(`../../../tools/eval/golden/${id}.json`, import.meta.url), "utf8")) as SiteSpec;
+  };
+
+  it("turns stored v7 sites into valid v8 sites unchanged apart from the version", async () => {
+    const { validateSite } = await import("../src/index.ts");
+    for (const id of ["racunovodstvo-seliskar", "trgovina-oljka-in-sol", "pekarna-kvas"]) {
+      const golden = await read(id);
+      const v8 = migrateSpec({ ...golden, specVersion: 7 }, MIGRATIONS, 8);
+      expect(v8, id).toEqual({ ...golden, specVersion: 8 });
+      expect(validateSite(migrateSpec(v8)).issues, id).toEqual([]);
+    }
+  });
+
+  it("accepts what v8 adds: the card and mirrors heroes, offers, plates, a photo pair with a figure, a team photo", async () => {
+    const { validateSite } = await import("../src/index.ts");
+    const inn = migrateSpec(await read("gostilna-zlata-zlica"));
+    expect(validateSite(inn).issues).toEqual([]);
+    expect(inn.pages[0]!.sections.map((s) => `${s.type}:${s.variant}`)).toEqual(["hero-signature:card", "price-list:offers", "products:plates", "image-text:pair", "team:photo", "contact:call-out"]);
+    const salon = migrateSpec(await read("frizerstvo-lana"));
+    expect(validateSite(salon).issues).toEqual([]);
+    expect(salon.pages[0]!.sections.map((s) => `${s.type}:${s.variant}`)).toEqual(["hero-signature:mirrors", "cta:band", "price-list:grouped", "team:photo", "contact:call-out"]);
+  });
+});
+
+describe("migration 8 → 9 (trade template O)", () => {
+  it("turns stored v8 sites into valid v9 sites unchanged apart from the version, and accepts what v9 adds", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { validateSite } = await import("../src/index.ts");
+    const read = (id: string) => JSON.parse(readFileSync(new URL(`../../../tools/eval/golden/${id}.json`, import.meta.url), "utf8")) as SiteSpec;
+    for (const id of ["gostilna-zlata-zlica", "frizerstvo-lana"]) {
+      const golden = read(id);
+      const v9 = migrateSpec({ ...golden, specVersion: 8 }, MIGRATIONS, 9);
+      expect(v9, id).toEqual({ ...golden, specVersion: 9 });
+      expect(validateSite(migrateSpec(v9)).issues, id).toEqual([]);
+    }
+    const dentist = migrateSpec(read("zobozdravstvo-lebar"));
+    expect(validateSite(dentist).issues).toEqual([]);
+    expect(dentist.pages[0]!.sections.map((s) => `${s.type}:${s.variant}`)).toEqual(["hero-signature:disc", "opening-hours:week", "services-list:aside", "team:photo", "contact:call-out"]);
+  });
+});
+
+describe("migration 9 → 10 (trade templates N and P)", () => {
+  it("turns stored v9 sites into valid v10 sites unchanged apart from the version, and accepts what v10 adds", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { validateSite } = await import("../src/index.ts");
+    const read = (id: string) => JSON.parse(readFileSync(new URL(`../../../tools/eval/golden/${id}.json`, import.meta.url), "utf8")) as SiteSpec;
+    for (const id of ["zobozdravstvo-lebar", "gostilna-zlata-zlica", "avtoservis-mrak"]) {
+      const golden = read(id);
+      const v10 = migrateSpec({ ...golden, specVersion: 9 }, MIGRATIONS, 10);
+      expect(v10, id).toEqual({ ...golden, specVersion: 10 });
+      expect(validateSite(migrateSpec(v10)).issues, id).toEqual([]);
+    }
+    const farm = migrateSpec(read("kmetija-grabnar"));
+    expect(validateSite(farm).issues).toEqual([]);
+    expect(farm.pages[0]!.sections.map((s) => `${s.type}:${s.variant}`)).toEqual(["hero-signature:view", "price-list:rates", "gallery:wall", "image-text:image-right", "opening-hours:poster", "services-list:aside", "team:list", "contact:call-out"]);
+    const physio = migrateSpec(read("fizioterapija-pregib"));
+    expect(validateSite(physio).issues).toEqual([]);
+    expect(physio.pages[0]!.sections.map((s) => `${s.type}:${s.variant}`)).toEqual(["hero-signature:bend", "highlights:figures", "services-list:aside", "text:narrow", "price-list:tags", "cta:band", "contact-strip:cards"]);
+  });
+
+  it("validates a stored v9 spec only after migration (the schema takes only the current version)", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { validateSite } = await import("../src/index.ts");
+    const farm = JSON.parse(readFileSync(new URL("../../../tools/eval/golden/kmetija-grabnar.json", import.meta.url), "utf8")) as SiteSpec;
+    expect(validateSite({ ...farm, specVersion: 9 }).ok).toBe(false);
+    expect(validateSite(migrateSpec({ ...farm, specVersion: 9 })).ok).toBe(true);
+  });
+});
+
+describe("migration 10 → 11 (footer year and statement date in the spec)", () => {
+  it("turns stored v10 sites into valid v11 sites unchanged apart from the version, and accepts the dates", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { validateSite } = await import("../src/index.ts");
+    const read = (id: string) => JSON.parse(readFileSync(new URL(`../../../tools/eval/golden/${id}.json`, import.meta.url), "utf8")) as SiteSpec;
+    for (const id of ["kmetija-grabnar", "pekarna-kvas"]) {
+      const golden = read(id);
+      const v11 = migrateSpec({ ...golden, specVersion: 10 }, MIGRATIONS, 11);
+      expect(v11, id).toEqual({ ...golden, specVersion: 11 });
+      expect(validateSite(migrateSpec(v11)).issues, id).toEqual([]);
+    }
+    const dated = read("pekarna-kvas");
+    dated.chrome.footer.year = 2026;
+    const a11y = dated.pages.find((p) => p.kind === "accessibility")!.sections[0]!;
+    if (a11y.type === "legal") a11y.props.date = "2026-10-02";
+    expect(validateSite(dated).issues).toEqual([]);
+    // Only the accessibility statement is dated, and only as YYYY-MM-DD.
+    const privacy = dated.pages.find((p) => p.kind === "privacy")!.sections[0]!;
+    if (privacy.type === "legal") privacy.props.date = "2026-10-02";
+    expect(validateSite(dated).issues.map((i) => i.message)).toContain("only the accessibility statement carries a date");
+    if (a11y.type === "legal") a11y.props.date = "2. 10. 2026";
+    expect(validateSite(dated).ok).toBe(false);
   });
 });
 

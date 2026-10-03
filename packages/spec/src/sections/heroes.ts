@@ -90,25 +90,54 @@ export const heroSignature = defineSection(
   {
     type: "hero-signature",
     group: "heroes",
-    variants: ["photo", "drawing", "arch"],
+    variants: ["photo", "drawing", "arch", "receipt", "label", "card", "mirrors", "disc", "view", "bend"],
     description:
-      "Homepage hero built around the business's strongest fact, shown as a designed object drawn by the direction's motif: the phone number (as a registration plate, a red call block) or the earliest opening time (on a round seal). The fact itself comes from the business facts, never from props. Display-size headline. photo: one wide photo full-bleed under a flat dark overlay, text on it (a flat dark ground without a photo). drawing: no photo; type beside a drawing of the trade (a radiator and pipes). arch: dark ground, the photo in a tall oven arch on the right running into the bottom edge, with the seal over it. Use only when the design direction lists it.",
+      "Homepage hero built around the business's strongest fact, shown as a designed object drawn by the direction's motif: the phone number (as a registration plate, a red call block), the earliest opening time (on a round seal) or the address (on a bottle label). The fact itself comes from the business facts, never from props. Display-size headline. photo: one wide photo full-bleed under a flat dark overlay, text on it (a flat dark ground without a photo). drawing: no photo; type beside a drawing of the trade (a radiator and pipes). arch: dark ground, the photo in a tall oven arch on the right running into the bottom edge, with the seal over it. receipt: no photo; type on white beside a solid colour field holding a tilted paper receipt that lists what the business does (props.receipt); the call is the primary button. label: coloured ground, the headline inside a white label card with a double inner rule and the address on it, the photo in a tall arch beside it with a second round photo (inset) over its edge. card: the photo of the house full-bleed with no overlay, the headline on a white card with a thin inner rule that hangs into the next section, the address on it. mirrors: white ground, the business's short name (wordmark) wall-sized behind everything, the headline on the left, two or three photos (images) in mirror arches of different heights on the right; the call is the primary button. disc: white ground, the headline left (the client's reassuring promise), the photo round on a pale disc with the motif's arc under it and factNote on a small tilted chip over its edge; the call is the primary button. view: the landscape full-bleed under a flat dark overlay, the headline at the bottom left, a wooden post with up to three trail signs (signs: places the client named, with a time only if the client gave one), a mountain ridge as the bottom edge; the call is the primary button. bend: white ground, the headline over a wide bent line drawn from the logo (a limb with a joint), the photo with a cut corner hanging into the next section, the address from the facts; actions as given (a booking first). Use only when the design direction lists it.",
     images: "optional",
-    mobile: "One column: label, headline, intro, then the fact object at full width (a tap target at least 48 px tall); the arch photo follows the text, the drawing sits below it at a smaller size.",
-    a11y: "Headline is the page h1. The phone object is one tel: link with an accessible name (\"Pokličite 041 555 730\"). Drawings and the plate's decorations are aria-hidden. Text on the photo sits on a flat overlay of at least 70 %.",
+    mobile: "One column: label, headline, intro, then the fact object at full width (a tap target at least 48 px tall); the arch photo follows the text, the drawing sits below it at a smaller size; the receipt follows the actions on its colour field; the label card comes first, the arch photo after it; the card sits under a strip of the photo; the mirrors stay side by side in one row, smaller.",
+    variantNeeds: { receipt: "receipt", mirrors: "images" },
+    a11y: "Headline is the page h1. The phone object is one tel: link with an accessible name (\"Pokličite 041 555 730\"). Drawings and the plate's decorations are aria-hidden. Text on the photo sits on a flat overlay of at least 70 %. The receipt is a heading and a list; its check marks and torn edge are decorative.",
   },
   z.strictObject({
     eyebrow: text(40).optional().describe(EYEBROW_RULE),
     headline: text(60).describe(`${HEADLINE_RULE} Short: two to six words; it is set very large.`),
     intro: text(220),
-    fact: z.enum(["phone", "opening"]).describe('Which business fact becomes the hero object: "phone" (the number, the main action) or "opening" (the earliest opening time on a seal; only when the business has hours).'),
-    factLabel: text(48).describe('Short line that introduces the fact, from the client\'s wording, e.g. "Najhitreje nas dobite po telefonu", "Pokličite za ogled". No numbers, times or days: the object shows them.'),
+    fact: z
+      .enum(["phone", "opening", "address"])
+      .describe('Which business fact becomes the hero object: "phone" (the number, the main action), "opening" (the earliest opening time on a seal; only when the business has hours) or "address" (the street and town on the card; label, card and bend variants only).'),
+    factLabel: text(48)
+      .optional()
+      .describe('Short line that introduces the fact, from the client\'s wording, e.g. "Najhitreje nas dobite po telefonu", "Pokličite za ogled"; in receipt the call button\'s label ("Pokličite nas"). Required for phone and opening; leave out for address. No numbers, times or days: the object shows them.'),
     factNote: text(120).optional().describe('One short sentence under the object, only from the client\'s words, e.g. "Če ne dvignem, vas pokličem nazaj isti dan."'),
     primary: Link.optional().describe("Optional. With fact phone the object already is the call action: add at most one link and never another call."),
     secondary: Link.optional(),
-    image: ImageRef.optional().describe("photo and arch: the photo. drawing: leave out."),
+    image: ImageRef.optional().describe("photo, arch and label: the photo. drawing and receipt: leave out."),
+    inset: ImageRef.optional().describe("label only: a second photo, shown round over the edge of the first (a detail: a product, a counter)."),
+    images: z.array(ImageRef).min(2).max(3).optional().describe("mirrors only: two or three portrait-friendly photos, each in a mirror arch (the work, the people, the room)."),
+    signs: z
+      .array(z.strictObject({ label: text(24).describe("A place the client named, e.g. \"Raduha\""), note: text(20).optional().describe("Only a time or distance the client gave, e.g. \"10 min\"") }))
+      .max(3)
+      .optional()
+      .describe("view only: up to three trail signs on the post, places reached from the business."),
+    wordmark: text(16)
+      .optional()
+      .describe("mirrors only: one word of the business's own name, set wall-sized behind the hero (e.g. \"Lana\" for Frizerstvo Lana). Decorative; never a slogan."),
+    receipt: z
+      .strictObject({
+        title: text(40).describe('What the receipt lists, e.g. "Kaj uredimo za vas"'),
+        lines: z.array(text(44)).min(2).max(7).describe("What the business does, in the client's words, shortened to a few words each"),
+        total: z
+          .strictObject({ label: text(20), value: text(32) })
+          .optional()
+          .describe('The double-ruled last line, only from the client\'s words, e.g. { label: "Cena", value: "po dogovoru" }. Never an amount the client didn\'t give.'),
+      })
+      .optional()
+      .describe("receipt only: the paper receipt beside the headline. Its second line is the business name, from the facts."),
   }),
 );
+
+/** hero-signature variants that show a photo; the others draw the trade instead (a radiator, a receipt). */
+export const SIGNATURE_PHOTO_VARIANTS: readonly string[] = ["photo", "arch", "label", "card", "mirrors", "disc", "view", "bend"];
 
 /** Add new hero section definitions here and to the tuple below. */
 export const heroSchemas = [heroSplit.schema, heroImage.schema, heroType.schema, pageHeader.schema, heroSignature.schema] as const;

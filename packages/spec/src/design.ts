@@ -49,13 +49,20 @@ type Range = [number, number];
  * times on a page: plate (the phone number as a Slovenian registration plate, prices as plates, a tyre
  * tread between sections), pipes (a radiator fed by a hot and a cold pipe, the pipes as dividers, step
  * line and service-area line), crust (a loaf's three scoring cuts as section mark, the photo in an oven
- * arch, the opening time on a round seal).
+ * arch, the opening time on a round seal), ledger (a tilted paper receipt with check marks, a torn edge and a
+ * double-ruled total, ruled rows, wall-sized figures), label (a bottle label: a framed card with a double inner
+ * rule and an olive branch, prices on labels, photos in arches and discs), spoon (a brass spoon as brand mark and
+ * divider, a menu card over the house, dishes as round plates, prices at headline size), mirror (the name as a
+ * wall-sized wordmark, photos in mirror arches of different heights, a price list set like a masthead), smile (a
+ * smile arc as brand mark, under the round hero photo and as list bullets; the opening hours as a week chart),
+ * trail (a trail blaze as mark and bullet, trail signs on a post, a mountain ridge as a section edge), bend (the
+ * logo's bent line as a limb behind the hero, cut corners on the photo, tiles and price cards).
  */
-export const MOTIFS = ["plate", "pipes", "crust"] as const;
+export const MOTIFS = ["plate", "pipes", "crust", "ledger", "label", "spoon", "mirror", "smile", "trail", "bend"] as const;
 export type Motif = (typeof MOTIFS)[number];
 
 export interface DirectionTemplate {
-  /** Letter in docs/design/templates (M, S, J). */
+  /** Letter in docs/design/templates (M, S, J, R, T …). */
   id: string;
   motif: Motif;
   /** Hero headline size in px at a 360 px and a 1280 px viewport. */
@@ -68,6 +75,13 @@ export interface DirectionTemplate {
   minPhotos: number;
   /** Homepage outline the content step follows, top to bottom ("type:variant tone …, what goes in it"). */
   homepage: string[];
+  /**
+   * Colour pairs the template sets as text beyond the base contrast rules (e.g. primary on the page for
+   * poster-size figures and prices), as [text, ground]. Held at 4.5:1 like body text (checkDesign, enforceDesign).
+   */
+  textPairs?: [keyof Colors, keyof Colors][];
+  /** The phone bar's actions, up to three, first is the primary one (default call, then directions). Keep call and directions. */
+  phoneBar?: ("call" | "directions" | "booking")[];
 }
 
 /** A curated design direction. The model picks one and fills tokens inside these ranges; code clamps. */

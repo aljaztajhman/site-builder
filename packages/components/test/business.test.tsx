@@ -267,6 +267,14 @@ describe("services-list", () => {
     expect(render(fixtures["services-list"], sparseCtx())).not.toContain("tel:");
   });
 
+  it("aside: the heading and the note card beside the list; a name may stand alone", () => {
+    const base = fixtures["services-list"];
+    const out = render({ ...base, variant: "aside", props: { ...base.props, note: { title: "Samoplačniška ambulanta", text: "Cene so odvisne od načrta zdravljenja." }, items: [{ name: "Zalivke" }, ...base.props.items.slice(1)] } });
+    expect(out).toContain('<div class="svc-aside"><div class="svc-aside__head">');
+    expect(out).toContain('<p class="svc-note"><strong class="svc-note__title">Samoplačniška ambulanta</strong>Cene so odvisne od načrta zdravljenja.</p>');
+    expect(out).toMatch(/<li class="svc-list__item svc-list__item--no-price"><h3 class="svc-list__name">Zalivke<\/h3><\/li>/);
+  });
+
   it("rejects fewer than two services", () => {
     const one = { ...fixtures["services-list"], props: { ...fixtures["services-list"].props, items: fixtures["services-list"].props.items.slice(0, 1) } };
     expect(servicesList.schema.safeParse(one).success).toBe(false);
@@ -411,6 +419,31 @@ describe("opening-hours", () => {
   it("renders a placeholder when hours are missing or were never given", () => {
     expect(render(fixtures["opening-hours"], sparseCtx())).toContain('data-ph="hours"');
     expect(render(fixtures["opening-hours"], ctxWith({ hours: undefined }))).toContain('data-ph="hours"');
+  });
+
+  it("photo: the table beside the shop front in an arch, a detail in a disc over its edge, the note under the hours", () => {
+    const out = render({ ...fixtures["opening-hours"], variant: "photo", props: { ...fixtures["opening-hours"].props, image: "img_salon", inset: "img_team" } });
+    expect(out).toContain('<div class="oh oh--photo"><figure class="oh__door"><picture class="media oh__door-media arch-top media--contained">');
+    expect(out).toContain('<span class="oh__dot disc"><picture class="media oh__dot-media media--contained">');
+    expect(out).toContain('<table class="oh__table" aria-labelledby="s_hours-title">');
+    expect(out).toContain("Ob praznikih po dogovoru.");
+    // Without a photo it is the plain table.
+    const plain = render({ ...fixtures["opening-hours"], variant: "photo" });
+    expect(plain).not.toContain("<img");
+    expect(plain).toContain('<table class="oh__table"');
+  });
+
+  it("week: a bar per day on a scale from the facts, positions as fractions, times on every bar, a closed day empty", () => {
+    const out = render({ ...fixtures["opening-hours"], variant: "week" });
+    // FULL_BUSINESS: mon–fri 8–19, sat 8–13, sun closed; the scale runs 8 to 19 (11 hours).
+    expect(out).toContain('<div class="week" style="--week-hours:11">');
+    expect(out).toContain('<dl class="week__days" aria-labelledby="s_hours-title">');
+    expect(out).toMatch(/<dt>Ponedeljek<\/dt><dd class="week__track">[\s\S]*?<span class="week__bar" style="--at:0\.0000;--len:1\.0000">8\.00–19\.00<\/span><\/dd>/);
+    expect(out).toMatch(/<dt>Sobota<\/dt><dd class="week__track">[\s\S]*?<span class="week__bar" style="--at:0\.0000;--len:0\.4545">8\.00–13\.00<\/span>/);
+    expect(out).toMatch(/<dt>Nedelja<\/dt><dd class="week__track">[\s\S]*?<span class="week__closed">zaprto<\/span>/);
+    expect(out.match(/<div class="week__day">/g)).toHaveLength(7);
+    expect(out).toContain('<div class="week__scale" aria-hidden="true">');
+    expect(render({ ...fixtures["opening-hours"], variant: "week" }, sparseCtx())).toContain('data-ph="hours"');
   });
 
   it("has no props that duplicate the hours", () => {
