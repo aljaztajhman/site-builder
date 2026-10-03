@@ -794,6 +794,194 @@ main > .s-hero-signature:first-child {
   }
 }
 
+/* view: the landscape full-bleed under the flat overlay, the headline at the bottom left, up to three trail signs
+   on a wooden post beside it. The next section draws the mountain ridge over the bottom edge (motifs.css). */
+.s-hero-signature--view.s {
+  padding-block: 0;
+}
+.hsig--view {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 36rem;
+  background: var(--c-inverse);
+  color: var(--c-on-inverse);
+  overflow: hidden;
+}
+.hsig--view .hsig__grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 2.5rem;
+  padding-block: 7rem 6.5rem;
+}
+.hsig--view .hsig__title,
+.hsig--view .hsig__title--long {
+  max-width: none;
+  font-size: var(--fs-display, calc(var(--fs-h1) * 1.3));
+  line-height: 0.92;
+}
+.hsig--view .hsig__lead {
+  max-width: 27em;
+  font-weight: 700;
+}
+.hsig--view .hsig__eyebrow {
+  color: inherit;
+  font-weight: 800;
+}
+.hsig__post {
+  position: relative;
+  display: grid;
+  gap: 1.125rem;
+  justify-items: start;
+  margin: 0;
+  padding: 0.5rem 0 0.5rem 2.125rem;
+  list-style: none;
+}
+.hsig__post::before {
+  content: "";
+  position: absolute;
+  left: 0.625rem;
+  top: -1.125rem;
+  bottom: -7rem;
+  width: 0.875rem;
+  border-radius: 0.4375rem 0.4375rem 0 0;
+  background: var(--motif-wood, currentColor);
+}
+.hsig__sign {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: none;
+  padding: 0.75rem 2.5rem 0.75rem 0.875rem;
+  background: var(--c-primary);
+  color: var(--c-on-primary);
+  font-family: var(--font-heading);
+  font-weight: var(--fw-heading);
+  font-size: 1.3125rem;
+  line-height: 1.05;
+  clip-path: var(--shape-sign);
+}
+.hsig__sign:nth-child(1) {
+  rotate: -2deg;
+}
+.hsig__sign:nth-child(2) {
+  rotate: 1.5deg;
+  margin-left: 0.625rem;
+}
+.hsig__sign:nth-child(3) {
+  rotate: -1deg;
+}
+.hsig__sign-note {
+  display: block;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.9375rem;
+}
+@media (min-width: 64rem) {
+  .hsig--view {
+    min-height: 53.75rem;
+  }
+  .hsig--view .hsig__grid {
+    grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+    gap: 3rem;
+    align-items: end;
+    padding-block: 5rem 9.5rem;
+  }
+  .hsig__sign {
+    padding: 0.875rem 2.875rem 0.875rem 1rem;
+    font-size: 1.5625rem;
+  }
+}
+
+/* bend: white ground, the logo's bent line drawn wide behind the headline (a pale limb, a joint in the accent
+   colour), the photo with a cut corner hanging into the next section, which makes room for it. */
+.s-hero-signature--bend.s {
+  position: relative;
+  z-index: 1;
+  padding-block: 0;
+  overflow-x: clip;
+}
+.hsig--bend {
+  position: relative;
+}
+.hsig__limb {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.5;
+}
+.limb__line {
+  stroke: var(--motif-limb, var(--c-surface));
+}
+.limb__joint {
+  fill: var(--c-accent);
+}
+.hsig--bend .hsig__grid {
+  position: relative;
+  display: grid;
+}
+.hsig--bend .hsig__text {
+  padding-block: 1rem 3rem;
+}
+.hsig--bend .hsig__where {
+  color: var(--c-primary);
+  font-weight: 700;
+}
+.hsig--bend .hsig__title,
+.hsig--bend .hsig__title--long {
+  max-width: none;
+  margin-top: 0.75rem;
+  font-size: var(--fs-display, calc(var(--fs-h1) * 1.3));
+  line-height: 0.92;
+}
+.hsig--bend .hsig__lead {
+  max-width: 25em;
+  color: var(--c-muted);
+}
+.hsig__fold {
+  position: relative;
+  width: 72%;
+  margin: 0 0 -3.5rem auto;
+}
+.hsig__fold > .hsig__fold-media {
+  display: block;
+  aspect-ratio: 4 / 5;
+  --fold: 3rem;
+  clip-path: var(--shape-fold);
+}
+.s.s-hero-signature--bend + .s.s {
+  padding-top: calc(var(--space-section) + 3.5rem);
+}
+@media (min-width: 64rem) {
+  .hsig__limb {
+    width: 62%;
+    opacity: 1;
+  }
+  .hsig--bend .hsig__grid {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: 3.5rem;
+    align-items: end;
+  }
+  .hsig--bend .hsig__text {
+    padding-block: 2.5rem 6.5rem;
+  }
+  .hsig__fold {
+    width: 100%;
+    margin-bottom: -4.5rem;
+  }
+  .hsig__fold > .hsig__fold-media {
+    --fold: 4rem;
+  }
+  .s.s-hero-signature--bend + .s.s {
+    padding-top: calc(var(--space-section) + 4.5rem);
+  }
+}
+
 /* The seal: the earliest opening time on a round, slightly turned stamp in the band colour. */
 .seal {
   display: flex;

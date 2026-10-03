@@ -79,6 +79,19 @@ export function tokensCss(design: Design): string {
     .join(";")}}`;
 }
 
+/** The red of the Slovenian trail blaze (Knafelčeva markacija). */
+const TRAIL_RED = "#c8202a";
+/** The mountain ridge, 1440 × 90, drawn up from the bottom edge. */
+export const RIDGE_PATH = "M0 90V58l70-22 46 14 88-46 62 38 54-18 96 44 82-52 60 26 110-40 74 36 66-20 92 46 84-58 70 34 58-16 100 40 90-48 78 30 60-12v84z";
+
+/** `fg` at `share` over `bg`, as hex. */
+export function mix(fg: string, bg: string, share: number): string {
+  const ch = (hex: string, i: number) => parseInt(hex.slice(1 + 2 * i, 3 + 2 * i), 16);
+  return `#${[0, 1, 2]
+    .map((i) => Math.round(ch(fg, i) * share + ch(bg, i) * (1 - share)).toString(16).padStart(2, "0"))
+    .join("")}`;
+}
+
 const svgUrl = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
 
 /**
@@ -141,6 +154,30 @@ export function motifVars(motif: Motif, c: Colors): Record<string, string> {
         "--motif-bullet": arc(24, 14, "M3 3c4 10 14 10 18 0", 4.5),
       };
     }
+    case "trail": {
+      // The Slovenian trail blaze (a red ring, a white centre) is fixed by the marking, like the plate's colours;
+      // on a sign the ring turns white around a red centre.
+      const blaze = (ring: string, centre: string) =>
+        svgUrl(`<svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26"><circle cx="13" cy="13" r="9" fill="${centre}" stroke="${ring}" stroke-width="8"/></svg>`);
+      return {
+        "--motif-brand": blaze(TRAIL_RED, "#ffffff"),
+        "--motif-bullet": blaze(TRAIL_RED, "#ffffff"),
+        "--motif-blaze-sign": blaze("#ffffff", TRAIL_RED),
+        // The mountain ridge as a mask: the section that carries it paints it in its own ground colour.
+        "--motif-ridge": svgUrl(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 90" preserveAspectRatio="none"><path d="${RIDGE_PATH}"/></svg>`),
+        // The signpost's wood, fixed by the material.
+        "--motif-wood": "#5b3d24",
+        // A trail sign: an arrow pointing right, the point 1.625 rem deep.
+        "--shape-sign": "polygon(0 0, calc(100% - 1.625rem) 0, 100% 50%, calc(100% - 1.625rem) 100%, 0 100%)",
+      };
+    }
+    case "bend":
+      return {
+        // The limb behind the hero: the primary colour at 20 % on the page.
+        "--motif-limb": mix(c.primary, c.background, 0.2),
+        // One cut corner (bottom right) on photos, tiles and price cards; the cut's size is set per piece (--fold).
+        "--shape-fold": "polygon(0 0, 100% 0, 100% calc(100% - var(--fold, 4rem)), calc(100% - var(--fold, 4rem)) 100%, 0 100%)",
+      };
     case "spoon":
       return {
         // A brass spoon (the inn's name): the brand mark and the divider between the offers, in the band colour.

@@ -4,7 +4,7 @@ import { Business } from "./business.ts";
 import { Design } from "./design.ts";
 import { Section } from "./sections/index.ts";
 
-export const SPEC_VERSION = 9 as const;
+export const SPEC_VERSION = 10 as const;
 
 export const PageKind = z.enum(["home", "standard", "privacy", "accessibility", "not-found"]);
 export type PageKind = z.infer<typeof PageKind>;

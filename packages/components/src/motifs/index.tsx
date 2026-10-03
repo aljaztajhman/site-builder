@@ -165,3 +165,16 @@ export function Spoon({ className }: { className?: string }) {
     </svg>
   );
 }
+
+/**
+ * The limb (motif bend): the logo's bent line drawn wide behind the hero, a pale tint of the primary colour, with
+ * the joint in the accent colour. Decorative; sliced, never stretched, so the joint stays round.
+ */
+export function Limb({ className }: { className?: string }) {
+  return (
+    <svg className={cx("limb", className)} viewBox="0 0 900 900" preserveAspectRatio="xMinYMin slice" fill="none" aria-hidden="true" focusable="false">
+      <path className="limb__line" d="M200 -40 L200 430 L960 880" strokeWidth="150" strokeLinecap="round" strokeLinejoin="round" />
+      <circle className="limb__joint" cx="200" cy="430" r="46" />
+    </svg>
+  );
+}

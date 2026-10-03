@@ -60,9 +60,31 @@ function duplicates(list: Landmark[]): string[] {
   return [...seen].filter(([, n]) => n > 1).map(([k, n]) => `${k} ×${n}`);
 }
 
-/** fizioterapija-pregib's homepage with its booking section repeated right after it under a new id. */
-function withSecondBooking(copies = 1) {
+/** A booking section and an untitled contact strip, inserted into a golden homepage (the tests own their fixture). */
+const BOOKING = {
+  id: "s_booking",
+  type: "booking",
+  variant: "with-hours",
+  props: {
+    heading: "Rezervirajte termin tudi zvečer",
+    text: "Prosti termini so objavljeni v spletnem naročanju. Če raje pokličete, sem dosegljiva na telefonu.",
+    action: { label: "Rezervirajte online", target: { action: "booking" } },
+    secondary: { label: "Pokličite", target: { action: "call" } },
+  },
+} as const;
+const STRIP = { id: "s_strip", type: "contact-strip", variant: "bar", props: {} } as const;
+
+/** fizioterapija-pregib with the booking section on its homepage. */
+function withBookingHome() {
   const spec = golden("fizioterapija-pregib");
+  const home = spec.pages[0]!;
+  home.sections.splice(1, 0, structuredClone(BOOKING) as unknown as (typeof home.sections)[number]);
+  return spec;
+}
+
+/** That homepage with its booking section repeated right after it under a new id. */
+function withSecondBooking(copies = 1) {
+  const spec = withBookingHome();
   const home = spec.pages[0]!;
   const i = home.sections.findIndex((s) => s.type === "booking");
   const booking = home.sections[i]!;
@@ -73,7 +95,7 @@ function withSecondBooking(copies = 1) {
 
 describe("landmark names", () => {
   it("reads names back from the markup", () => {
-    const spec = golden("fizioterapija-pregib");
+    const spec = withBookingHome();
     const html = renderPage(spec, spec.pages[0]!);
     expect(elementText(html, "s_booking-title")).toBe("Rezervirajte termin tudi zvečer");
     expect(landmarks(html)).toContainEqual({ role: "region", name: "Rezervirajte termin tudi zvečer", tag: "section" });
@@ -91,7 +113,8 @@ describe("landmark names", () => {
     expect(names).toContain("Rezervirajte termin tudi zvečer");
     expect(names).toContain("Rezervirajte termin tudi zvečer (2)");
     // The first booking section's markup is unchanged.
-    const original = renderPage(golden("fizioterapija-pregib"), golden("fizioterapija-pregib").pages[0]!);
+    const once = withBookingHome();
+    const original = renderPage(once, once.pages[0]!);
     const sectionHtml = (h: string, id: string) => /<section id="[^"]+"[^>]*>/.exec(h.slice(h.indexOf(`<section id="${id}"`)))?.[0];
     expect(sectionHtml(html, booking.id)).toBe(sectionHtml(original, booking.id));
     expect(sectionHtml(html, `${booking.id}_2`)).toBe(
@@ -115,7 +138,8 @@ describe("landmark names", () => {
   it("repeats of a fixed fallback heading (contact strip without a title) get unique names too", () => {
     const spec = golden("fizioterapija-pregib");
     const home = spec.pages[0]!;
-    const strip = home.sections.find((s) => s.type === "contact-strip")! as { id: string; props: Record<string, unknown> };
+    home.sections.push(structuredClone(STRIP) as unknown as (typeof home.sections)[number]);
+    const strip = home.sections.find((s) => s.id === STRIP.id)! as { id: string; props: Record<string, unknown> };
     expect(strip.props.title).toBeUndefined();
     home.sections.push({ ...structuredClone(strip), id: "s_strip_2" } as (typeof home.sections)[number]);
     expect(duplicates(landmarks(renderPage(spec, home)))).toEqual([]);

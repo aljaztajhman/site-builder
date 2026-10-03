@@ -677,23 +677,23 @@ a.plate:hover .plate__num {
 }
 /* The closing call in two columns on desktop (Račun, Etiketa, Jedilnik, Ogledalo): heading and number on the left, the other facts on the right. */
 @media (min-width: 64rem) {
-  :is([data-motif="ledger"], [data-motif="label"], [data-motif="spoon"], [data-motif="mirror"], [data-motif="smile"]) .callout {
+  :is([data-motif="ledger"], [data-motif="label"], [data-motif="spoon"], [data-motif="mirror"], [data-motif="smile"], [data-motif="trail"]) .callout {
     grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
     column-gap: 4.5rem;
     align-items: end;
   }
-  :is([data-motif="ledger"], [data-motif="label"], [data-motif="spoon"], [data-motif="mirror"], [data-motif="smile"]) .callout > .section-head,
-  :is([data-motif="ledger"], [data-motif="label"], [data-motif="spoon"], [data-motif="mirror"], [data-motif="smile"]) .callout__call {
+  :is([data-motif="ledger"], [data-motif="label"], [data-motif="spoon"], [data-motif="mirror"], [data-motif="smile"], [data-motif="trail"]) .callout > .section-head,
+  :is([data-motif="ledger"], [data-motif="label"], [data-motif="spoon"], [data-motif="mirror"], [data-motif="smile"], [data-motif="trail"]) .callout__call {
     grid-column: 1;
   }
-  :is([data-motif="ledger"], [data-motif="label"], [data-motif="spoon"], [data-motif="mirror"], [data-motif="smile"]) .callout__facts {
+  :is([data-motif="ledger"], [data-motif="label"], [data-motif="spoon"], [data-motif="mirror"], [data-motif="smile"], [data-motif="trail"]) .callout__facts {
     grid-column: 2;
     grid-row: 1 / span 2;
     grid-template-columns: minmax(0, 1fr);
     gap: 1.25rem;
     border-top-width: 2px;
   }
-  :is([data-motif="ledger"], [data-motif="label"], [data-motif="spoon"], [data-motif="mirror"], [data-motif="smile"]) .callout .section-title {
+  :is([data-motif="ledger"], [data-motif="label"], [data-motif="spoon"], [data-motif="mirror"], [data-motif="smile"], [data-motif="trail"]) .callout .section-title {
     font-size: calc(var(--fs-h2) * 0.64);
     line-height: 1.08;
   }
@@ -1149,4 +1149,332 @@ a.plate:hover .plate__num {
   --c-bg: inherit;
   --c-text: inherit;
   --c-border: inherit;
+}
+
+/* ---------- trail: Markacija (N), places sold on the view ---------- */
+[data-motif="trail"] .site-header__brand::before,
+.blaze {
+  content: "";
+  display: inline-block;
+  flex: none;
+  width: 1.625rem;
+  height: 1.625rem;
+  background: var(--motif-bullet) no-repeat center / contain;
+}
+[data-motif="trail"] .site-header__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+.blaze--sign {
+  width: 1.25rem;
+  height: 1.25rem;
+  background-image: var(--motif-blaze-sign);
+}
+/* The mountain ridge: the section under the hero and every dark section (but the second of two) rise into the
+   one above in their own ground colour. */
+[data-motif="trail"] .s-hero-signature--view + .s,
+[data-motif="trail"] .s.tone-inverse {
+  position: relative;
+}
+[data-motif="trail"] .s-hero-signature--view + .s::before,
+[data-motif="trail"] .s.tone-inverse:not(.s-hero-signature, .tone-inverse + .s, main > :first-child)::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: clamp(3rem, 6.25vw, 5.625rem);
+  margin-bottom: -1px;
+  background: inherit;
+  -webkit-mask: var(--motif-ridge) no-repeat center / 100% 100%;
+  mask: var(--motif-ridge) no-repeat center / 100% 100%;
+  pointer-events: none;
+}
+/* Buttons in signal red on every ground, as on the signs. */
+[data-motif="trail"] :is(.tone-inverse, .tone-default, .tone-alt) .btn--primary {
+  background: var(--c-primary);
+  color: var(--c-on-primary);
+}
+[data-motif="trail"] .tone-band .btn--primary {
+  background: var(--c-on-band);
+  color: var(--c-band);
+}
+/* Rooms: the photo beside the prices; the footnote marked with a blaze. */
+[data-motif="trail"] .s-price-list--rates .section-title {
+  font-size: clamp(2.5rem, 1.4rem + 3.4vw, 5rem);
+  line-height: 0.94;
+}
+[data-motif="trail"] .rates__footnote::before {
+  content: "";
+  flex: none;
+  width: 1.625rem;
+  height: 1.625rem;
+  background: var(--motif-bullet) no-repeat center / contain;
+}
+[data-motif="trail"] .tone-default .rates__amount {
+  color: var(--c-inverse);
+}
+/* Headings beside a list or the weekend times at a sentence's size, not a headline's. */
+[data-motif="trail"] :is(.s-services-list, .s-opening-hours--poster) .section-title {
+  font-size: clamp(2rem, 1.3rem + 2.2vw, 3.75rem);
+  line-height: 1;
+}
+[data-motif="trail"] .hsig--view .hsig__eyebrow {
+  font-size: var(--fs-base);
+}
+/* From the farm: the heading at a sentence's size. */
+[data-motif="trail"] .s-image-text .section-title {
+  font-size: clamp(2.125rem, 1.4rem + 2.4vw, 4.25rem);
+  line-height: 1;
+}
+/* Trails: a blaze before every name, the name in the heading face, a description to the right. */
+[data-motif="trail"] .s-services-list--aside .svc-list {
+  border-top: 1px solid var(--b-rule);
+}
+[data-motif="trail"] .svc-list__item {
+  align-items: center;
+}
+[data-motif="trail"] .svc-list__name {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: clamp(1.4375rem, 1.2rem + 0.8vw, 1.75rem);
+}
+[data-motif="trail"] .svc-list__name::before {
+  content: "";
+  flex: none;
+  width: 1.625rem;
+  height: 1.625rem;
+  background: var(--motif-bullet) no-repeat center / contain;
+}
+[data-motif="trail"] .svc-list__body {
+  padding-left: 2.625rem;
+  color: var(--c-muted);
+  font-weight: 700;
+}
+/* How to get here: plain text under its own heading, not a card. */
+[data-motif="trail"] .svc-note {
+  max-width: 30rem;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--c-muted);
+  font-size: var(--fs-lg);
+}
+[data-motif="trail"] .svc-note__title {
+  margin-bottom: 0.5rem;
+  font-family: var(--font-heading);
+  font-weight: var(--fw-heading);
+  font-size: clamp(1.75rem, 1.3rem + 1.6vw, 3.25rem);
+  line-height: 1;
+  letter-spacing: -0.025em;
+  color: var(--c-text);
+}
+/* The hosts as ruled rows on the forest ground: the name in the heading face, the role beside it. */
+[data-motif="trail"] .s-team--list .team {
+  grid-template-columns: minmax(0, 1fr);
+  border-top: 1px solid currentColor;
+}
+[data-motif="trail"] .s-team--list .team__member {
+  border-top: 0;
+  border-bottom: 1px solid currentColor;
+}
+@media (min-width: 64rem) {
+  [data-motif="trail"] .s-team--list > .container {
+    display: grid;
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    column-gap: 5.5rem;
+    align-items: start;
+  }
+}
+[data-motif="trail"] .s-team--list .team__text {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.25rem 1.5rem;
+}
+[data-motif="trail"] .s-team--list .team__name {
+  font-size: clamp(1.5rem, 1.2rem + 0.9vw, 1.75rem);
+}
+[data-motif="trail"] .s-team--list .team__role {
+  color: inherit;
+}
+[data-motif="trail"] .bignum--poster {
+  font-size: clamp(2.875rem, 1.4rem + 4.6vw, 5rem);
+  letter-spacing: -0.03em;
+  font-variant-numeric: proportional-nums;
+}
+
+/* ---------- bend: Pregib (P), practices that sell appointments ---------- */
+/* The headline as tight as the template sets it (the token range stops at -0.04em). */
+[data-motif="bend"] .hsig__title {
+  letter-spacing: -0.045em;
+}
+/* Buttons in the accent (orange) with dark text on every ground, the phone bar's first one too. */
+[data-motif="bend"] .btn--primary,
+[data-motif="bend"] :is(.tone-inverse, .tone-band, .tone-default, .tone-alt) .btn--primary {
+  background: var(--c-accent);
+  color: var(--c-inverse);
+}
+[data-motif="bend"] .action-bar {
+  --c-bg: inherit;
+  --c-text: inherit;
+  --c-border: inherit;
+}
+/* The figures in orange on the dark band; no visible heading needed beyond the small label. */
+[data-motif="bend"] .tone-inverse .highlights__title {
+  color: var(--c-accent);
+}
+[data-motif="bend"] .s-highlights--figures .highlights__title {
+  font-size: clamp(2.875rem, 1rem + 5.6vw, 5rem);
+  letter-spacing: -0.05em;
+  white-space: nowrap;
+}
+[data-motif="bend"] .s-highlights--figures .highlights {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2.25rem 1.5rem;
+}
+@media (min-width: 64rem) {
+  [data-motif="bend"] .s-highlights--figures .highlights {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 2.5rem;
+  }
+}
+[data-motif="bend"] .s-highlights--figures .highlights__text {
+  padding-top: 0;
+  border-top: 0;
+  font-weight: 400;
+  font-size: var(--fs-base);
+}
+/* Complaints as tiles with one cut corner. */
+[data-motif="bend"] .s-services-list--aside .svc-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
+  border-top: 0;
+}
+[data-motif="bend"] .s-services-list--aside .svc-list__item {
+  display: block;
+  padding: 1.375rem 1.125rem 2.75rem;
+  border: 0;
+  background: var(--c-surface);
+  --fold: 2.5rem;
+  clip-path: var(--shape-fold);
+}
+[data-motif="bend"] .s-services-list--aside .svc-list__name {
+  font-size: clamp(1.3125rem, 1rem + 1vw, 1.75rem);
+  line-height: 1.08;
+}
+[data-motif="bend"] .svc-note {
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--c-muted);
+  font-size: var(--fs-lg);
+}
+[data-motif="bend"] .svc-note__title {
+  color: var(--c-text);
+  font-size: var(--fs-lg);
+}
+/* How they work: a short label beside one large sentence on a heavy rule. */
+[data-motif="bend"] .s-services-list + .s-text--narrow {
+  padding-top: 0;
+}
+[data-motif="bend"] .s-text--narrow .text-block {
+  display: grid;
+  gap: 0.625rem 2.5rem;
+  max-width: none;
+  padding-top: 1.75rem;
+  border-top: 3px solid currentColor;
+}
+[data-motif="bend"] .s-text--narrow .section-head {
+  margin: 0;
+}
+[data-motif="bend"] .s-text--narrow .section-title {
+  font-family: var(--font-body);
+  font-size: var(--fs-base);
+  font-weight: 700;
+  letter-spacing: 0;
+  color: var(--c-primary);
+}
+[data-motif="bend"] .s-text--narrow .prose p {
+  max-width: none;
+  font-family: var(--font-heading);
+  font-weight: var(--fw-heading);
+  font-size: clamp(1.625rem, 0.9rem + 2.6vw, 3.125rem);
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+}
+/* Prices on cards with one cut corner, the price at the foot in the primary colour. */
+.price-label--fold {
+  align-items: flex-start;
+  min-height: 14.375rem;
+  padding: 1.25rem 1.125rem 3.25rem;
+  border: 0;
+  background: var(--c-bg);
+  text-align: start;
+  --fold: 2.75rem;
+  clip-path: var(--shape-fold);
+}
+.price-label--fold::before {
+  content: none;
+}
+.price-label--fold .price-label__name {
+  margin-top: 0;
+  font-size: clamp(1.25rem, 1rem + 0.8vw, 1.5625rem);
+}
+.price-label--fold .price-label__price {
+  font-size: clamp(3.25rem, 2rem + 3.4vw, 4.75rem);
+  letter-spacing: -0.05em;
+  font-variant-numeric: proportional-nums;
+}
+[data-motif="bend"] .price-labels {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
+  max-width: none;
+}
+@media (min-width: 56.25rem) {
+  [data-motif="bend"] .price-labels {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .price-label--fold {
+    min-height: 18.75rem;
+    padding: 1.75rem 1.625rem 3.75rem;
+    --fold: 2.75rem;
+  }
+}
+/* Contact in three columns on heavy rules, the values in the heading face. */
+[data-motif="bend"] .s-contact-strip--cards .contact-strip__item {
+  padding: 1.25rem 0 0;
+  border: 0;
+  border-top: 3px solid currentColor;
+  border-radius: 0;
+  background: none;
+}
+[data-motif="bend"] .contact-strip__label {
+  color: var(--c-primary);
+}
+[data-motif="bend"] :is(.contact-strip__value, .contact-strip__phone) {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-heading);
+  font-size: clamp(1.5rem, 1.2rem + 0.9vw, 1.875rem);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+}
+@media (min-width: 64rem) {
+  [data-motif="bend"] .s-services-list--aside .svc-list__item {
+    padding: 2rem 1.875rem 3.5rem;
+    --fold: 2.5rem;
+  }
+  [data-motif="bend"] .s-text--narrow .text-block {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 9fr);
+    align-items: baseline;
+  }
 }

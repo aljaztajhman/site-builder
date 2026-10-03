@@ -54,9 +54,11 @@ type Range = [number, number];
  * rule and an olive branch, prices on labels, photos in arches and discs), spoon (a brass spoon as brand mark and
  * divider, a menu card over the house, dishes as round plates, prices at headline size), mirror (the name as a
  * wall-sized wordmark, photos in mirror arches of different heights, a price list set like a masthead), smile (a
- * smile arc as brand mark, under the round hero photo and as list bullets; the opening hours as a week chart).
+ * smile arc as brand mark, under the round hero photo and as list bullets; the opening hours as a week chart),
+ * trail (a trail blaze as mark and bullet, trail signs on a post, a mountain ridge as a section edge), bend (the
+ * logo's bent line as a limb behind the hero, cut corners on the photo, tiles and price cards).
  */
-export const MOTIFS = ["plate", "pipes", "crust", "ledger", "label", "spoon", "mirror", "smile"] as const;
+export const MOTIFS = ["plate", "pipes", "crust", "ledger", "label", "spoon", "mirror", "smile", "trail", "bend"] as const;
 export type Motif = (typeof MOTIFS)[number];
 
 export interface DirectionTemplate {
@@ -78,6 +80,8 @@ export interface DirectionTemplate {
    * poster-size figures and prices), as [text, ground]. Held at 4.5:1 like body text (checkDesign, enforceDesign).
    */
   textPairs?: [keyof Colors, keyof Colors][];
+  /** The phone bar's actions, up to three, first is the primary one (default call, then directions). Keep call and directions. */
+  phoneBar?: ("call" | "directions" | "booking")[];
 }
 
 /** A curated design direction. The model picks one and fills tokens inside these ranges; code clamps. */

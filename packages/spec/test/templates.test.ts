@@ -5,7 +5,7 @@ import { DIRECTIONS, MOTIFS, SECTION_DEFS, checkDesign, contrast, earliestOpenin
 describe("trade template directions (docs/design/templates)", () => {
   const templates = DIRECTIONS.filter((d) => d.template);
 
-  it("implements M, S, J, R, T, K, L and O, one motif each", () => {
+  it("implements M, S, J, R, T, K, L, O, N and P, one motif each", () => {
     expect(templates.map((d) => [d.id, d.template!.id, d.template!.motif])).toEqual([
       ["tablica", "M", "plate"],
       ["cevi", "S", "pipes"],
@@ -15,6 +15,8 @@ describe("trade template directions (docs/design/templates)", () => {
       ["jedilnik", "K", "spoon"],
       ["ogledalo", "L", "mirror"],
       ["nasmeh", "O", "smile"],
+      ["markacija", "N", "trail"],
+      ["pregib", "P", "bend"],
     ]);
     expect(new Set(templates.map((d) => d.template!.motif)).size).toBe(templates.length);
     for (const d of templates) expect(MOTIFS).toContain(d.template!.motif);
@@ -66,6 +68,15 @@ describe("trade template directions (docs/design/templates)", () => {
     }
   });
 
+  it("keeps call and directions on every template's phone bar, at most three actions", () => {
+    for (const d of templates) {
+      const bar = d.template!.phoneBar ?? ["call", "directions"];
+      expect(bar, d.id).toContain("call");
+      expect(bar, d.id).toContain("directions");
+      expect(bar.length, d.id).toBeLessThanOrEqual(3);
+    }
+  });
+
   it("is the first choice for its trade when the photos allow it", () => {
     expect(templateFor("car-repair", 0)?.id).toBe("tablica");
     expect(templateFor("builder", 0)?.id).toBe("cevi");
@@ -80,7 +91,10 @@ describe("trade template directions (docs/design/templates)", () => {
     // Dental has its template now (O Nasmeh): the first choice with at least one photo.
     expect(templateFor("dental", 3)?.id).toBe("nasmeh");
     expect(templateFor("dental", 0)).toBeUndefined();
-    expect(templateFor("physio", 3)).toBeUndefined();
+    // Tourist farms need photos for the view, the rooms and the wall (N Markacija); physio needs none (P Pregib).
+    expect(templateFor("tourist-farm", 8)?.id).toBe("markacija");
+    expect(templateFor("tourist-farm", 4)).toBeUndefined();
+    expect(templateFor("physio", 0)?.id).toBe("pregib");
   });
 
   it("repairs a band without its text colour and an unreadable one", () => {
@@ -157,8 +171,24 @@ describe("hero-signature receipt (R) and the hero rules", () => {
       return validateSite(spec).issues.map((i) => `${i.path} ${i.message}`);
     };
     expect(issues((h) => delete h.props.factLabel)).toEqual(["/pages/0/sections/0/props/factLabel factLabel is required when the hero shows the phone"]);
-    expect(issues((h) => (h.props.fact = "address"))).toEqual(["/pages/0/sections/0/props/fact fact address is only shown by the label and card variants"]);
+    expect(issues((h) => (h.props.fact = "address"))).toEqual(["/pages/0/sections/0/props/fact fact address is only shown by the label, card and bend variants"]);
     expect(issues((h) => (h.variant = "drawing"))).toEqual(["/pages/0/sections/0/props/receipt receipt is only shown by the receipt variant"]);
+  });
+
+  it("shows trail signs only on the view hero, and the address on bend too", () => {
+    const issues = (edit: (h: ReturnType<typeof hero>) => void) => {
+      const spec = golden();
+      edit(hero(spec));
+      return validateSite(spec).issues.map((i) => `${i.path} ${i.message}`);
+    };
+    expect(issues((h) => (h.props.signs = [{ label: "Raduha" }]))).toContain("/pages/0/sections/0/props/signs signs are only shown by the view variant");
+    expect(
+      issues((h) => {
+        h.variant = "bend";
+        h.props.fact = "address";
+        delete h.props.receipt;
+      }),
+    ).toEqual([]);
   });
 
   it("limits the receipt to two to seven short lines", () => {

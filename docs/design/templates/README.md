@@ -163,6 +163,18 @@ O is direction `nasmeh` (branch claude/templates-o, on top of K and L).
 - The coral of the hand-made page (#ff7a66) is 2.55:1 on white; the accent is #e4573f (3.66:1 on white, 3.86:1 on the deep green), so the arcs are a little deeper.
 - The team photo layout puts the practitioner round, the people and the room in an arch side by side (motif CSS; the round and arch classes come from the markup in this motif).
 
+## In the engine (N and P, spec v10)
+
+N is direction `markacija`, P is `pregib` (branch claude/templates-np, on top of O).
+
+- Spec v10 (additive migration): hero-signature `view` (the landscape full-bleed under the flat overlay, the headline at the bottom left, up to three `signs` on a wooden post) and `bend` (the logo's bent line as a pale limb behind the headline, the photo with a cut corner hanging into the next section; fact `address` allowed); price-list `rates` (two to four prices at headline size on heavy rules beside an optional `image`); opening-hours `poster` (the times at poster size beside the heading); gallery `wall` (five photos edge to edge, the heading for screen readers). A direction's template can set its phone bar's actions (`phoneBar`, up to three, call and directions always among them): Pregib books first, then call and directions under short labels ("Rezerviraj", "Klic", "Pot") so three fit at 360 px. The hand-made page has only book and call; directions in one tap is a hard mobile rule here.
+- Shapes cut with clip-path only through shape tokens set in tokens.ts (`--shape-sign`, `--shape-fold`), used as `clip-path: var(--shape-*)`; a test refuses any other clip-path in the stylesheets (the visually-hidden `inset(50%)` aside).
+- The trail blaze (red ring, white centre) and the post's wood are fixed motif colours, like the plate's EU blue. The ridge is an SVG mask: the section under the hero and every dark section rise into the one above in their own ground colour.
+- N keeps the engine's flat overlay at 68 % over the view (the hand-made page uses 42 %, white text on a white pixel there is 2.58:1).
+- P's orange is the accent (3.01:1 on white, 4.71:1 against the dark green): buttons are orange with dark text, figures orange on the dark band; teal stays the primary for links, the address line and prices.
+- The fact check reads Slovene number words two to fifty in their common case forms, so "4 leta" passes when the client wrote "zadnja štiri leta" (and "pet" in a day range like "pon–pet" is not read as 5).
+- On a phone, a hero action that the bar shows from the start (a call, a booking) is hidden in the hero, so one screen never shows the same action twice. This now also covers the phone-fact heroes of R, L and O, whose call button sat right above the bar's "Klic".
+
 ## Checked
 
 All ten rendered in Chromium at 1440 × 900 and 390 × 844, as plain HTML and through the canvas's own runtime: no horizontal scroll, no failed requests or broken images, every button, call link, plate and bar link at least 44 px tall on the phone. Contrast computed for 69 text and background colour pairs: lowest 4.64:1 (S, white on the red block, after darkening the red from 4.01:1), all others 4.76:1 or more. White text over the photo overlays in M and N is not measured per pixel. Not checked: axe, Lighthouse, other browsers.

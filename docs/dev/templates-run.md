@@ -17,7 +17,7 @@ One branch and PR per one or two templates, each based on the previous (stacked)
 | claude/templates-rt | R Račun, T Etiketa | v7 |
 | claude/templates-kl | K Jedilnik, L Ogledalo | v8 (built on claude/templates-rt) |
 | claude/templates-o | O Nasmeh | v9 (built on claude/templates-kl) |
-| claude/templates-np | N Markacija, P Pregib | v10 |
+| claude/templates-np | N Markacija, P Pregib | v10 (built on claude/templates-o) |
 
 ## Decisions per template (from the analyses, checked against the HTML)
 
@@ -80,6 +80,6 @@ One branch and PR per one or two templates, each based on the previous (stacked)
 - [x] K: claude/templates-kl. templates:compare K passes at all four widths; eval --offline 0 failures, LH 95/100/100/100, axe 0; lowest text contrast 5.93:1 (brass on green)
 - [x] L: claude/templates-kl. templates:compare L passes at all four widths; eval --offline 0 failures, LH 98/100/100/100, axe 0; lowest text contrast 7.11:1; first screen 21 % photo (report-only targets 25/30 %)
 - [x] O: claude/templates-o. templates:compare O passes at all four widths; eval --offline 0 failures, LH 99/100/100/100, axe 0; lowest text contrast 4.54:1 (teal on mint); desktop headline 4 lines (report-only, same as the hand-made page)
-- [ ] N
-- [ ] P
+- [x] N: claude/templates-np. templates:compare N passes at all four widths; eval --offline 0 failures, LH 91/100/100/100, axe 0, 3 placeholders (legal data the brief lacks); lowest text contrast 5.68:1 (white on the red signs and band); white over the photo overlay not measured per pixel
+- [x] P: claude/templates-np. templates:compare P passes at all four widths; eval --offline 0 failures (after two fixes: directions on the phone bar, number words in the fact check), LH 98/100/100/100, axe 0, 0 placeholders; lowest text contrast 4.71:1 (dark on the orange, orange on the dark band); desktop headline 3 lines after capping display at 88 px (96 px wrapped to 4), first screen 26 % photo (report-only target 30 %)
 - [ ] Swim set (only if all seven are done)

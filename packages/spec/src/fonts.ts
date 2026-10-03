@@ -69,6 +69,9 @@ export const FONT_PAIRS: FontPair[] = [
   { id: "inter-tight-dm-sans", label: "Inter Tight / DM Sans", heading: FONTS.interTight, body: FONTS.dmSans },
   // O Nasmeh.
   { id: "figtree-figtree", label: "Figtree", heading: FONTS.figtree, body: FONTS.figtree },
+  // N Markacija, P Pregib.
+  { id: "fraunces-nunito-sans", label: "Fraunces / Nunito Sans", heading: FONTS.fraunces, body: FONTS.nunitoSans },
+  { id: "bricolage-public-sans", label: "Bricolage Grotesque / Public Sans", heading: FONTS.bricolage, body: FONTS.publicSans },
 ];
 
 export function fontPair(id: string): FontPair {
