@@ -275,6 +275,9 @@ Before CMS collections (`sb-roadmap-order` = swap, 2026-10-01).
   - Checked: all 12 landing examples are pixel-identical to the full sheet at 360 and 1280 px, plus render tests (`shared.test.ts`: per-motif sheets, mixed `:is()` groups, @media, quoted braces).
   - The logo is cached for 5 minutes instead of `immutable` for a year: it keeps the name `logo.png` when replaced, so returning visitors kept the old one. Photos stay immutable (their ids are never reused).
 
+## Polish and optimization (2026-10-03)
+- [x] Storage I/O in parallel (branch claude/parallel-io): publish and export read media 8 at a time, a release's files are written 8 at a time (the live pointer still last), and photo variants likewise (intake photos, generated pictures, editor uploads). Measured with a 30 ms-per-put storage stub: 84 release files 3.05 s → 0.56 s. `mapLimit` in `packages/engine/src/parallel.ts` (test: order, concurrency cap, first failure rejects)
+
 ## Later: phase 4 — CMS collections
 - [ ] Collections the client edits: blog, services, price list (cenik; its editing comes forward into phase 3), team, events; spec migration + components + editor forms
 - [ ] Per-collection list/detail pages, RSS for the blog, sitemap entries
