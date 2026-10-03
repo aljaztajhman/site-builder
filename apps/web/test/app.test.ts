@@ -249,9 +249,9 @@ describe("landing page", () => {
     expect(dashboard).not.toContain("data-home-intake");
     expect(dashboard).toContain('action="/logout"');
     expect(dashboard).toContain('class="brand" href="/sites"');
-    // Signing in without a destination lands on the sites list; signing out on the landing page.
+    // Signing in without a destination lands on the landing page, as does signing out.
     const signIn = await app.request("/login", { method: "POST", body: new URLSearchParams({ password: PASSWORD }) });
-    expect(signIn.headers.get("location")).toBe("/sites");
+    expect(signIn.headers.get("location")).toBe("/");
     // Signing out is a form with the CSRF token; without it nothing happens.
     expect((await app.request("/logout", { method: "POST", headers: { cookie } })).status).toBe(403);
     const signOut = await app.request("/logout", { method: "POST", headers: { cookie }, body: new URLSearchParams({ _csrf: csrf }) });
@@ -583,6 +583,6 @@ describe("login redirect", () => {
   it("only follows same-origin paths", async () => {
     const { safeNext } = await import("../src/app.ts");
     expect(safeNext("/sites/x")).toBe("/sites/x");
-    for (const bad of ["//evil.com", "/\\evil.com", "https://evil.com", "/ x", 42, undefined]) expect(safeNext(bad)).toBe("/sites");
+    for (const bad of ["//evil.com", "/\\evil.com", "https://evil.com", "/ x", 42, undefined]) expect(safeNext(bad)).toBe("/");
   });
 });
