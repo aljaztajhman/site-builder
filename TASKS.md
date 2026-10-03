@@ -278,6 +278,13 @@ Before CMS collections (`sb-roadmap-order` = swap, 2026-10-01).
 ## Polish and optimization (2026-10-03)
 - [x] Storage I/O in parallel (branch claude/parallel-io): publish and export read media 8 at a time, a release's files are written 8 at a time (the live pointer still last), and photo variants likewise (intake photos, generated pictures, editor uploads). Measured with a 30 ms-per-put storage stub: 84 release files 3.05 s → 0.56 s. `mapLimit` in `packages/engine/src/parallel.ts` (test: order, concurrency cap, first failure rejects)
 
+## Polish and optimization (2026-10-03)
+- [x] Editor polish (branch claude/editor-polish):
+  - Bug: after a form autosave the top bar wasn't refreshed, so undo stayed disabled and "Še N do objave" stale until something else re-rendered. The top bar now follows every save.
+  - Focus survives re-renders: undo from the keyboard keeps focus on the button. Browser test; it fails without the fix.
+  - Messages stay up 4–12 s by length, can be closed ("Zapri obvestilo"), and "Objavljeno: /s/…/" is a link.
+  - `rel="noopener"` on new-tab links; colour pickers, "more fields" and the toast's close button are 44 px on touch screens.
+
 ## Later: phase 4 — CMS collections
 - [ ] Collections the client edits: blog, services, price list (cenik; its editing comes forward into phase 3), team, events; spec migration + components + editor forms
 - [ ] Per-collection list/detail pages, RSS for the blog, sitemap entries

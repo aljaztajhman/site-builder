@@ -93,6 +93,35 @@ describe("editor in a browser", () => {
     }
   }, 60_000);
 
+  it("keeps the keyboard's place through a re-render (undo) and lets the owner close a message", async () => {
+    const id = await bakery("urejanje-fokus");
+    const { page, close } = await open(id);
+    try {
+      await page.locator(".outline li", { hasText: "O nas" }).click();
+      const heading = page.locator('[data-path$="/props/heading"] input');
+      const saved = async () => (home(await spec(id)).sections.find((s) => s.id === "s_about")?.props as { heading?: string }).heading;
+      // Two saves, so there is still something to undo after one undo (a disabled button can't hold focus).
+      await heading.fill("Drožmi iz kleti");
+      await expect.poll(saved, { timeout: 10_000 }).toBe("Drožmi iz kleti");
+      await heading.fill("Drožmi iz domače kleti");
+      await expect.poll(saved, { timeout: 10_000 }).toBe("Drožmi iz domače kleti");
+      // Undo from the keyboard: the whole editor re-renders, the focus stays on the button.
+      const undo = page.getByRole("button", { name: "Razveljavi" });
+      await expect.poll(() => undo.isEnabled(), { timeout: 10_000 }).toBe(true);
+      await undo.focus();
+      await page.keyboard.press("Enter");
+      await expect.poll(saved, { timeout: 10_000 }).toBe("Drožmi iz kleti");
+      await expect.poll(() => page.evaluate(() => document.activeElement?.getAttribute("aria-label"))).toBe("Razveljavi");
+      // The message it shows can be closed.
+      const toast = page.locator(".toast");
+      await expect.poll(() => toast.isVisible()).toBe(true);
+      await page.getByRole("button", { name: "Zapri obvestilo" }).click();
+      await expect.poll(() => toast.isVisible()).toBe(false);
+    } finally {
+      await close();
+    }
+  }, 60_000);
+
   it("opens the field of a checklist entry when Objavi is tapped while something is missing (phone width)", async () => {
     const id = await bakery("urejanje-seznam");
     const { page, close } = await open(id, 375);
