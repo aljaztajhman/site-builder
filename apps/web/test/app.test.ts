@@ -190,6 +190,12 @@ describe("landing page", () => {
     expect(js.status).toBe(200);
     expect(js.headers.get("content-type")).toContain("javascript");
     expect(await js.text()).toContain("sb-intake-draft");
+    // Plain URL: revalidated by ETag; the hashed URL pages link to once built: cached for good.
+    const etag = js.headers.get("etag")!;
+    expect(js.headers.get("cache-control")).toBe("no-cache");
+    expect((await app.request("/assets/home.js", { headers: { "if-none-match": etag } })).status).toBe(304);
+    const hashed = await app.request(`/assets/home.js?v=${etag.replaceAll('"', "")}`);
+    expect(hashed.headers.get("cache-control")).toBe("public, max-age=31536000, immutable");
   });
 
   it("calls the prices planned only while billing is off", () => {

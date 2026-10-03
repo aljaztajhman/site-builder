@@ -39,7 +39,7 @@ import { descriptionHash, readTicket, signTicket } from "./upload-ticket.ts";
 import { slugify } from "./slug.ts";
 import { DASHBOARD, sitesPage, sitePage } from "./pages.tsx";
 import { homePage } from "./home.tsx";
-import { clientBundle } from "./client-bundle.ts";
+import { clientBundle, warmClientBundles } from "./client-bundle.ts";
 import { uiAssets } from "./ui/assets.ts";
 import { registerFormRoutes } from "./forms.tsx";
 import { createHash } from "node:crypto";
@@ -212,10 +212,18 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     return c.json({ status: ok ? "ok" : "degraded", checks, ...you }, ok ? 200 : 503);
   });
 
+  // The editor's and landing page's scripts: linked with their content hash (pages use clientScriptUrl) and
+  // then cached for good; a plain or old URL is revalidated by ETag.
+  warmClientBundles();
   for (const name of ["editor", "home"] as const) {
     app.get(`/assets/${name}.js`, async (c) => {
+      const b = await clientBundle(name);
+      const etag = `"${b.hash}"`;
+      c.header("etag", etag);
+      c.header("cache-control", c.req.query("v") === b.hash ? "public, max-age=31536000, immutable" : "no-cache");
+      if (c.req.header("if-none-match") === etag) return c.body(null, 304);
       c.header("content-type", "text/javascript; charset=utf-8");
-      return c.body(await clientBundle(name));
+      return c.body(b.text);
     });
   }
   app.get("/assets/ui/:hash/*", (c) => {
@@ -433,29 +441,38 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     const admin = viewer.kind === "admin";
     // Read first: anything that changes while the rest is read makes the next pulse differ.
     const pulse = await repo.pulse(id);
-    const site = await repo.getSite(id);
+    const [site, current] = await Promise.all([repo.getSite(id), repo.getSpec(id)]);
     if (!site || !pulse) return c.json({ error: "not found" }, 404);
-    const current = await repo.getSpec(id);
     const after = Number(c.req.query("after") ?? 0);
-    const checklist = current ? await siteChecklist(repo, id, current.spec) : [];
+    // Independent reads, side by side (this runs after every save, not only on polls).
+    const [checklist, access, events, chat, cost, versions, messages, spendToday] = await Promise.all([
+      current ? siteChecklist(repo, id, current.spec) : Promise.resolve([]),
+      accessInfo(limits, viewer, c.get("deviceId"), site),
+      repo.listEvents(id, after),
+      repo.listChat(id),
+      repo.siteCost(id),
+      repo.listVersions(id),
+      repo.formMessageCount(id),
+      admin ? repo.spendToday() : Promise.resolve(null),
+    ]);
     return c.json({
       // What this viewer may do here and has left; refusals from the action endpoints carry { code, message } too.
-      access: await accessInfo(limits, viewer, c.get("deviceId"), site),
+      access,
       site,
       pulse,
       version: current?.version ?? null,
       spec: current?.spec ?? null,
-      events: await repo.listEvents(id, after),
-      chat: await repo.listChat(id),
-      cost: await repo.siteCost(id),
-      versions: await repo.listVersions(id),
+      events,
+      chat,
+      cost,
+      versions,
       placeholders: current ? collectPlaceholders(current.spec) : [],
       // The pre-publish checklist (structured, the editor words it in Slovene) and the same as English lines.
       checklist,
       blockers: checklist.map(blockerText),
-      messages: (await repo.listFormMessages(id)).length,
+      messages,
       // The platform's own spend: the admin's business, null for owners.
-      spendToday: admin ? await repo.spendToday() : null,
+      spendToday,
       cap: admin ? config.limits.dailyModelSpendCapEur : null,
       // Server time, so the editor's running-stage seconds don't depend on the visitor's clock.
       now: new Date().toISOString(),
@@ -660,12 +677,28 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     return c.json({ ok: true });
   });
 
+  // The live release pointer per slug, kept a few seconds: every page, picture and 404 of a published site
+  // asks for it. A publish here forgets it at once; another web process sees it within LIVE_BASE_TTL_MS.
+  const LIVE_BASE_TTL_MS = 5_000;
+  const bases = new Map<string, { until: number; base: Promise<string> }>();
+  const liveBase = (slug: string): Promise<string> => {
+    const now = Date.now();
+    const hit = bases.get(slug);
+    if (hit && hit.until > now) return hit.base;
+    const base = publishedBase(storage, slug);
+    if (bases.size > 10_000) bases.clear();
+    bases.set(slug, { until: now + LIVE_BASE_TTL_MS, base });
+    base.catch(() => bases.delete(slug));
+    return base;
+  };
+
   app.post("/api/sites/:id/publish", async (c) => {
     const denied = publishRefusal(c.get("viewer"));
     if (denied) return refusalJson(c, denied);
     try {
       const r = await publishSite({ repo, storage, config }, c.req.param("id"));
       const site = await repo.getSite(c.req.param("id"));
+      if (site) bases.delete(site.slug);
       return c.json({ ok: true, version: r.version, url: `/s/${site?.slug}/` });
     } catch (e) {
       if (e instanceof PublishBlockedError) return c.json({ error: "blocked", blockers: e.blockers, checklist: e.checklist }, 422);
@@ -761,15 +794,12 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     if (rest === "" || rest.endsWith("/")) rest += "index.html";
     if (!SAFE_REST.test(rest)) return c.notFound();
     // The live release (published.ts): a publish in progress never shows half a site.
-    const base = await publishedBase(storage, slug);
+    const base = await liveBase(slug);
     const data = await storage.get(`${base}${rest}`);
     if (data) {
       // A page view (not its images or scripts), counted after the answer and never in its way.
       if (rest.endsWith(".html")) {
-        void repo
-          .getSiteBySlug(slug)
-          .then((site) => (site?.published_version ? stats.visit(c, site.id, rest) : undefined))
-          .catch((e: unknown) => console.error("[stats] visit", (e as Error).message));
+        void stats.visit(c, slug, rest).catch((e: unknown) => console.error("[stats] visit", (e as Error).message));
       }
       c.header("content-type", contentType(rest));
       c.header("cache-control", rest.startsWith("media/") ? "public, max-age=31536000, immutable" : "public, max-age=60");

@@ -462,6 +462,12 @@ export class Repo {
     return Number(rows[0]?.n ?? 0);
   }
 
+  /** How many messages a site has (the editor's count; listFormMessages would read them all). */
+  async formMessageCount(siteId: string): Promise<number> {
+    const { rows } = await this.db.query<{ n: string | number }>("select count(*) as n from form_messages where site_id = $1", [siteId]);
+    return Number(rows[0]?.n ?? 0);
+  }
+
   async listFormMessages(siteId: string): Promise<FormMessageRow[]> {
     const { rows } = await this.db.query<FormMessageRow>(
       "select id, section_id, name, email, phone, message, notify_status, created_at from form_messages where site_id = $1 order by id desc limit 500",
@@ -582,11 +588,15 @@ export class Repo {
     ]);
   }
 
+  /**
+   * A site's events in order: the next 500 after `afterId`, or without it the newest 500 (a site with a long
+   * history used to get its oldest 500, so the editor never saw its latest run).
+   */
   async listEvents(siteId: string, afterId = 0): Promise<EventRow[]> {
-    const { rows } = await this.db.query<EventRow>("select * from site_events where site_id = $1 and id > $2 order by id limit 500", [
-      siteId,
-      afterId,
-    ]);
+    const { rows } =
+      afterId > 0
+        ? await this.db.query<EventRow>("select * from site_events where site_id = $1 and id > $2 order by id limit 500", [siteId, afterId])
+        : await this.db.query<EventRow>("select * from (select * from site_events where site_id = $1 order by id desc limit 500) e order by id", [siteId]);
     return rows;
   }
 

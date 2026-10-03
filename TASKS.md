@@ -255,6 +255,20 @@ Before CMS collections (`sb-roadmap-order` = swap, 2026-10-01).
 - [x] The generic section form sends the whole props object on every edit, so every price in a services-list, products or rooms section re-enters the fact corpus as owner-typed when the owner edits any other field of it (a price the model invented passes from then on). Fixed on the server (2026-10-03, branch claude/typed-ops), for every form and any client: `typedOps` (packages/engine/src/editor.ts) reduces each direct edit to what differs from the spec before it, and `/patch` stores only that. Array elements are matched by content, id, name, then position (a reorder stores nothing); an added element is compared with its closest sibling (a duplicated section stores only its new id); a priced item whose name or price changed and a changed hours row stay whole, so the fact check can still pair them. Tests: `packages/engine/test/price-edit.test.ts` ("an edit elsewhere in a section…": an invented price stays flagged after a whole-section title save, which it didn't before; a duplicate; a reorder; one changed price is accepted; an hours row), the existing owner-typed price tests now go through `typedOps`, `apps/web/test/app.test.ts` checks what `/patch` stores. Patches saved before this keep their whole sections (not rewritten)
 - [x] Translation overlays don't follow section moves or deletes in the direct editor (fixed 2026-10-03, branch claude/translations-follow: `applyOps` re-points overlays op by op for array inserts, removals, moves and copies, for the editor and chat patches alike, and drops overlays whose text an edit removed; `packages/spec/src/translations-follow.ts`, tests `packages/engine/test/translations-follow.test.ts`: move up/down, delete (was refused), insert/duplicate before, copy carries English, replace without a field, price editor's own re-pointing unchanged; 5 of 7 fail without the fix)
 
+## Polish and optimization (2026-10-03)
+- [x] Server (branch claude/server-perf):
+  - The editor's state endpoint does its independent reads side by side and counts form messages instead of reading them all. It runs after every save.
+  - Events: without `after` it returns the newest 500. It used to return the oldest 500, so a site with a long history never showed its latest run (test in `packages/platform/test/platform.test.ts`).
+  - `editor.js`/`home.js` are built at start, linked with a content hash and cached `immutable`; the plain URL is revalidated by ETag (304). A failed build is no longer kept until restart.
+  - Published pages keep the live-release pointer for 5 s; a publish clears it at once (`apps/web/test/published-cache.test.ts`: 3 views read it once, a republish shows immediately).
+  - Page-view counting filters bots, prefetches and repeat views before any database lookup, and caches the slug lookup for 30 s.
+- [x] Editor client (same branch):
+  - Polling stops while the tab is hidden and catches up when it is shown (browser test in `progress-browser.test.ts`).
+  - Request failures read in Slovene ("Preverite internetno povezavo …", "Strežnik trenutno ne odgovarja …") instead of "Failed to fetch" / "Internal Server Error"; lowercase English error codes are never shown.
+  - A failed generation's technical English stays hidden from owners; the admin still sees it.
+  - A second tap on Objavi while publishing, or Enter while a message is being sent, does nothing.
+- Checked and not needed: response compression. Railway's edge already sends gzip and zstd (measured on the live landing page: home.css 24.5 KB → 6.6 KB transferred).
+
 ## Later: phase 4 — CMS collections
 - [ ] Collections the client edits: blog, services, price list (cenik; its editing comes forward into phase 3), team, events; spec migration + components + editor forms
 - [ ] Per-collection list/detail pages, RSS for the blog, sitemap entries

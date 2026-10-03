@@ -139,4 +139,36 @@ describe("generation progress in a browser", () => {
       }
     }
   }, 120_000);
+
+  it("stops polling while the tab is hidden and catches up when it is shown again", async () => {
+    const site = await platform.repo.createSite({ name: "Skrit zavihek", slug: "skrit-zavihek", intake: { description: "Inštalacije Rebernik, Ptuj.", photoAssetIds: [], scope: "home" } });
+    await platform.repo.setStatus(site.id, "generating");
+    const context = await cb.browser.newContext({ viewport: { width: 1280, height: 900 } });
+    const [name, value] = cookie.split("=") as [string, string];
+    await context.addCookies([{ name, value, url: base }]);
+    const page = await context.newPage();
+    const pulses: number[] = [];
+    page.on("request", (r) => {
+      if (r.url().endsWith("/pulse")) pulses.push(Date.now());
+    });
+    try {
+      await page.goto(`${base}/sites/${site.id}`);
+      await expect.poll(() => pulses.length, { timeout: 10_000 }).toBeGreaterThan(0);
+      // Hidden: the browser reports it and fires visibilitychange, as when the owner switches tabs.
+      const setHidden = (hidden: boolean) =>
+        page.evaluate((h) => {
+          Object.defineProperty(document, "hidden", { configurable: true, get: () => h });
+          document.dispatchEvent(new Event("visibilitychange"));
+        }, hidden);
+      await setHidden(true);
+      const hiddenAt = pulses.length;
+      await page.waitForTimeout(5000);
+      expect(pulses.length - hiddenAt).toBeLessThanOrEqual(1);
+      // Shown again: one poll right away, then every 2 s.
+      await setHidden(false);
+      await expect.poll(() => pulses.length, { timeout: 3000 }).toBeGreaterThan(hiddenAt + 1);
+    } finally {
+      await context.close();
+    }
+  }, 60_000);
 });
