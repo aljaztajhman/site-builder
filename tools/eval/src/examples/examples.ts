@@ -52,10 +52,14 @@ export function exampleSpec(ex: Example): SiteSpec {
 
 /** The example's homepage HTML and the shared files (CSS, fonts, scripts) it references, by path under OUT_DIR. */
 export function exampleHtml(ex: Example): { slug: string; html: string; shared: Map<string, Uint8Array> } {
-  const spec = exampleSpec(ex);
+  return homepageFiles(exampleSpec(ex));
+}
+
+/** A spec's homepage HTML and the shared files it references (examples and the trade showcase). */
+export function homepageFiles(spec: SiteSpec): { slug: string; html: string; shared: Map<string, Uint8Array> } {
   const bundle = sharedBundle();
   const html = renderSite(spec, { imageWidths: WIDTHS, sharedHash: bundle.hash }).pages.get("index.html");
-  if (!html) throw new Error(`${ex.id}: no homepage`);
+  if (!html) throw new Error(`${spec.slug}: no homepage`);
   const shared = new Map<string, Uint8Array>();
   const want = (p: string) => {
     const data = bundle.files.get(p);

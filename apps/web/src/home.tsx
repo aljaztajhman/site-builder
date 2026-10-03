@@ -4,6 +4,7 @@ import { uiUrl } from "./ui/assets.ts";
 import { PRODUCT_NAME } from "./ui/labels.ts";
 import { TURNSTILE_SCRIPT } from "./turnstile.ts";
 import { chatEdits, daysAfterOd, moreHomepages } from "./limits.ts";
+import { DEFAULT_CAPTION, tradeCaption, tradeClientData, tradeFontFace, tradeShowcases, tradeStyle } from "./showcase.ts";
 
 /**
  * The product's landing page at / (docs/design/homepage.html), for everyone; signed in, the header
@@ -65,16 +66,20 @@ export interface HomeProps {
   /** A refused intake: the reason, shown above the prompt, and the description, kept. */
   error?: string;
   description?: string;
+  /** `/?primer=<id>`: the page in that trade's look, its showcase site in the demo. */
+  showcase?: string;
 }
 
-export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteKey, anonymousClosed, previous, anonymousUpload, error, description }: HomeProps): string {
+export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteKey, anonymousClosed, previous, anonymousUpload, error, description, showcase }: HomeProps): string {
   const paid = config.plans.paid;
   const example = uiUrl("example-home.html");
   // Example sites rendered by our engine (pnpm examples:build): a different business in each place.
   const shopExample = uiUrl("examples/trgovina-oljka-in-sol/index.html");
   const dentistExample = uiUrl("examples/zobozdravstvo-lebar/index.html");
+  const trades = tradeShowcases();
+  const trade = trades.find((t) => t.id === showcase);
   return html(
-    <html lang="sl">
+    <html lang="sl" style={trade ? tradeStyle(trade) : undefined} data-trade={trade?.id}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -85,6 +90,7 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
         <link rel="preload" href={uiUrl("fonts/bricolage-grotesque.woff2")} as="font" type="font/woff2" crossOrigin="" />
         <link rel="stylesheet" href={uiUrl("home.css")} />
         <link rel="icon" href={uiUrl("icon.svg")} type="image/svg+xml" />
+        {trade && <style dangerouslySetInnerHTML={{ __html: tradeFontFace(trade) }} />}
       </head>
       <body>
         <header className="hd">
@@ -195,8 +201,31 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
                 </p>
               </div>
               <div>
+                {/* A chip per trade: the page takes that trade's look and the demo shows its site (home.ts switches in place; without it the links reload). */}
+                <nav className="trades" aria-labelledby="trades-q">
+                  <p className="trades-q" id="trades-q">
+                    Poglejte primer za svojo dejavnost:
+                  </p>
+                  <ul className="chips">
+                    {trades.map((t) => (
+                      <li key={t.id}>
+                        <a className="chip" href={`/?primer=${t.id}#zacni`} data-trade-id={t.id} aria-current={t.id === trade?.id ? "true" : undefined}>
+                          {t.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                  <button className="chip more" type="button" aria-expanded="false" hidden>
+                    Več dejavnosti
+                  </button>
+                  <a className="trades-reset" href="/#zacni" hidden={!trade}>
+                    {`Nazaj na videz ${PRODUCT_NAME}`}
+                  </a>
+                  <p className="sr-only" aria-live="polite" data-trade-status="" />
+                  <script type="application/json" id="trades-data" dangerouslySetInnerHTML={{ __html: JSON.stringify(tradeClientData(trades)).replace(/</g, "\\u003c") }} />
+                </nav>
                 {/* From description to site: typed, built, shown on a phone, then widened to a computer (home.ts plays it). */}
-                <figure className="demo" data-demo="">
+                <figure className="demo" data-demo="" data-showcase={trade ? "" : undefined}>
                   <div className="demo-stage">
                     <div className="demo-prompt" aria-hidden="true">
                       <p className="demo-text" data-text={DEMO_PROMPT}>
@@ -220,15 +249,19 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
                         <i />
                       </span>
                       <div className="demo-screen">
-                        <iframe src={shopExample} title="Primer strani: trgovina Oljka in sol" loading="lazy" />
+                        <iframe src={trade ? uiUrl(`examples/${trade.page}`) : shopExample} title={trade ? `Primer strani: ${trade.name}` : "Primer strani: trgovina Oljka in sol"}
+                          data-default-src={shopExample}
+                          data-default-title="Primer strani: trgovina Oljka in sol"
+                          loading="lazy"
+                        />
                       </div>
                     </div>
                   </div>
                   <button className="demo-pause" type="button" aria-pressed="false" hidden>
                     Ustavi
                   </button>
-                  <figcaption className="phone-cap">
-                    {`Primer: izmišljena trgovina Oljka in sol iz Kopra. Stran je ${PRODUCT_NAME} naredil iz njenega opisa in petih fotografij; manjkajočo ceno smo vpisali, kot bi jo lastnik. Fotografije so ustvarjene z UI.`}
+                  <figcaption className="phone-cap" data-default={DEFAULT_CAPTION}>
+                    {trade ? tradeCaption(trade) : DEFAULT_CAPTION}
                   </figcaption>
                 </figure>
               </div>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 80" width="300" height="80" role="img" aria-label="Fizioterapija Pregib">
+  <circle cx="22" cy="22" r="11" fill="#0f6b63"/>
+  <path d="M22 40 L22 56 L44 70" fill="none" stroke="#0f6b63" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M22 44 L46 36" fill="none" stroke="#e0833a" stroke-width="7" stroke-linecap="round"/>
+  <text x="68" y="44" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#10302d">pregib</text>
+  <text x="70" y="66" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f6b63" letter-spacing="2.5">FIZIOTERAPIJA</text>
+</svg>

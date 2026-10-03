@@ -92,3 +92,28 @@ describe("trade templates in the pipeline", () => {
     expect(templateChrome(designFromChoice(choice("clean-swiss")), content)).toBe(content.chrome);
   });
 });
+
+describe("the landing page's trade showcase", () => {
+  it("a client's design never lands on a showcase's colours and fonts", async () => {
+    const { SHOWCASES, showcaseLookalike } = await import("@sb/spec");
+    const { designFromChoice } = await import("../src/index.ts");
+    for (const s of SHOWCASES) {
+      const d = designFromChoice({
+        direction: s.direction,
+        fontPair: s.fontPair,
+        primary: s.colors.primary,
+        accent: s.colors.accent,
+        radius: 4,
+        baseFontSize: 17,
+        scale: 1.25,
+        headingWeight: 700,
+        headingCase: "normal",
+        headingTracking: -0.01,
+        density: "regular",
+        shadow: "none",
+        reason: "test",
+      });
+      expect(showcaseLookalike(d), s.id).toBeUndefined();
+    }
+  });
+});

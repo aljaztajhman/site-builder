@@ -40,8 +40,13 @@ for (const s of document.querySelectorAll("#kako, .win")) io.observe(s);
  * The hero demo: the description is typed, "Ustvari" pressed, the build steps tick, the example site
  * appears on a phone, then the frame widens to a computer and the same page re-flows. Loops while in
  * view, with a pause button. Without JavaScript the phone view stays (no data-step).
+ * A trade's showcase (data-showcase) is not made from a typed description, so it starts on the phone.
  */
 const demo = document.querySelector<HTMLElement>("[data-demo]");
+/** Restarts the demo from its first step (after a trade switch). */
+let restartDemo = () => {};
+/** Stops the demo on the finished site (a trade switch shows its site at once). */
+let showSite = () => {};
 if (demo) {
   const stage = demo.querySelector<HTMLElement>(".demo-stage")!;
   const frame = demo.querySelector<HTMLIFrameElement>(".demo-screen iframe")!;
@@ -80,6 +85,18 @@ if (demo) {
   };
   const play = () => {
     stop();
+    if (demo.dataset.showcase !== undefined) {
+      text.textContent = full;
+      demo.dataset.step = "phone";
+      scrollSite(0);
+      at(3300, () => scrollSite(320));
+      at(6500, () => {
+        scrollSite(0);
+        demo.dataset.step = "desk";
+      });
+      at(14700, play);
+      return;
+    }
     demo.dataset.step = "type";
     text.textContent = "";
     scrollSite(0);
@@ -123,6 +140,165 @@ if (demo) {
     update();
   }, { threshold: 0.3 }).observe(demo);
   document.addEventListener("visibilitychange", update);
+  showSite = () => {
+    stop();
+    text.textContent = full;
+    demo.dataset.step = "phone";
+  };
+  restartDemo = () => {
+    stop();
+    if (paused) {
+      text.textContent = full;
+      demo.dataset.step = "phone";
+    } else update();
+  };
+}
+
+/**
+ * Trade chips: the page takes the chosen trade's colours, heading face and corners, and the demo shows
+ * its showcase site. A view transition reveals the new look in a circle from the chip (about 0.6 s);
+ * with reduced motion, or without view transitions, the look changes at once. The address follows
+ * (/?primer=<id>), so it can be shared and the back button is not filled with switches.
+ */
+interface Trade {
+  id: string;
+  label: string;
+  page: string;
+  title: string;
+  caption: string;
+  font: { family: string; url: string; weights: string };
+  vars: Record<string, string>;
+}
+const tradesNav = document.querySelector<HTMLElement>(".trades");
+const tradesJson = document.getElementById("trades-data")?.textContent;
+if (tradesNav && tradesJson && demo) {
+  const trades = JSON.parse(tradesJson) as Trade[];
+  const root = document.documentElement;
+  const frame = demo.querySelector<HTMLIFrameElement>(".demo-screen iframe")!;
+  const caption = demo.querySelector<HTMLElement>(".phone-cap")!;
+  const status = tradesNav.querySelector<HTMLElement>("[data-trade-status]")!;
+  const reset = tradesNav.querySelector<HTMLAnchorElement>(".trades-reset")!;
+  const chips = [...tradesNav.querySelectorAll<HTMLAnchorElement>("a.chip[data-trade-id]")];
+  // The product's own look, whichever look the server rendered (/?primer= renders a trade's).
+  const original = { page: frame.dataset.defaultSrc ?? frame.getAttribute("src")!, title: frame.dataset.defaultTitle ?? frame.title, caption: caption.dataset.default ?? "" };
+  const varNames = [...new Set(trades.flatMap((t) => Object.keys(t.vars)))];
+  const calm = matchMedia("(prefers-reduced-motion: reduce)");
+  const narrow = matchMedia("(max-width: 47.99rem)");
+  const loadedFonts = new Map<string, Promise<unknown>>();
+  const within = <T,>(p: Promise<T>, ms: number) => Promise.race([p, new Promise((r) => window.setTimeout(r, ms))]);
+
+  const fontFor = (t: Trade): Promise<unknown> => {
+    let p = loadedFonts.get(t.id);
+    if (!p) {
+      const face = new FontFace(t.font.family, `url("${t.font.url}") format("woff2")`, { weight: t.font.weights, display: "swap" });
+      document.fonts.add(face);
+      p = face.load().catch(() => undefined);
+      loadedFonts.set(t.id, p);
+    }
+    return p;
+  };
+  const frameLoaded = (src: string): Promise<unknown> => {
+    if (frame.getAttribute("src") === src) return Promise.resolve();
+    const done = new Promise((r) => frame.addEventListener("load", r, { once: true }));
+    // A lazy frame waits for layout, which a view transition holds back: load it now.
+    frame.loading = "eager";
+    frame.src = src;
+    return done;
+  };
+
+  /** Puts the page in `t`'s look (null: the product's own). Waits for the font and the site, briefly. */
+  const apply = async (t: Trade | null) => {
+    if (t) await within(fontFor(t), 800);
+    for (const name of varNames) root.style.removeProperty(name);
+    if (t) for (const [k, v] of Object.entries(t.vars)) root.style.setProperty(k, v);
+    if (t) root.dataset.trade = t.id;
+    else delete root.dataset.trade;
+    for (const c of chips) {
+      if (c.dataset.tradeId === t?.id) c.setAttribute("aria-current", "true");
+      else c.removeAttribute("aria-current");
+    }
+    reset.hidden = !t;
+    caption.textContent = t ? t.caption : original.caption;
+    frame.title = t ? t.title : original.title;
+    if (t) demo.dataset.showcase = "";
+    else delete demo.dataset.showcase;
+    showSite();
+    status.textContent = t ? `Prikazan primer: ${t.label}` : "Prikazan izvirni videz";
+    await within(frameLoaded(t ? t.page : original.page), 1200);
+  };
+
+  let busy = false;
+  const switchTo = async (t: Trade | null, from: { x: number; y: number }) => {
+    if (busy || (root.dataset.trade ?? null) === (t?.id ?? null)) return;
+    busy = true;
+    const url = new URL(location.href);
+    if (t) url.searchParams.set("primer", t.id);
+    else url.searchParams.delete("primer");
+    history.replaceState(null, "", url);
+    const vt = (document as Document & { startViewTransition?: (cb: () => Promise<void>) => { ready: Promise<void>; finished: Promise<void> } }).startViewTransition;
+    try {
+      if (!vt || calm.matches) await apply(t);
+      else {
+        root.classList.add("trade-switch");
+        const transition = vt.call(document, () => apply(t));
+        await transition.ready;
+        const r = Math.hypot(Math.max(from.x, innerWidth - from.x), Math.max(from.y, innerHeight - from.y));
+        root.animate({ clipPath: [`circle(0px at ${from.x}px ${from.y}px)`, `circle(${r}px at ${from.x}px ${from.y}px)`] }, { duration: 600, easing: "cubic-bezier(.2,.7,.2,1)", pseudoElement: "::view-transition-new(root)" });
+        await transition.finished;
+      }
+    } catch {
+      // A skipped transition still applied the look.
+    } finally {
+      root.classList.remove("trade-switch");
+      busy = false;
+      restartDemo();
+      // On a phone the site is below the chips: bring it into view.
+      if (narrow.matches && t) demo.scrollIntoView({ behavior: calm.matches ? "auto" : "smooth", block: "center" });
+    }
+  };
+
+  const point = (e: MouseEvent, el: HTMLElement) => {
+    if (e.clientX || e.clientY) return { x: e.clientX, y: e.clientY };
+    const r = el.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  };
+  for (const chip of chips) {
+    const t = trades.find((x) => x.id === chip.dataset.tradeId);
+    if (!t) continue;
+    chip.addEventListener("click", (e) => {
+      // A new tab or window keeps its own behaviour.
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+      e.preventDefault();
+      void switchTo(t, point(e, chip));
+    });
+    // Font and page are small and cached for good: fetch them when the pointer or focus arrives.
+    const warm = () => {
+      void fontFor(t);
+      void fetch(t.page).catch(() => undefined);
+    };
+    chip.addEventListener("pointerenter", warm, { once: true });
+    chip.addEventListener("focus", warm, { once: true });
+  }
+  reset.addEventListener("click", (e) => {
+    e.preventDefault();
+    void switchTo(null, point(e, reset));
+  });
+
+  // Phones: five chips, the rest behind "Več dejavnosti".
+  const list = tradesNav.querySelector<HTMLElement>(".chips")!;
+  const more = tradesNav.querySelector<HTMLButtonElement>(".chip.more")!;
+  const fold = () => {
+    const folded = narrow.matches && more.getAttribute("aria-expanded") !== "true";
+    list.classList.toggle("collapsed", folded);
+    more.hidden = !narrow.matches || more.getAttribute("aria-expanded") === "true" || chips.length <= 5;
+  };
+  more.addEventListener("click", () => {
+    more.setAttribute("aria-expanded", "true");
+    fold();
+    chips[5]?.focus();
+  });
+  narrow.addEventListener("change", fold);
+  fold();
 }
 
 const form = document.querySelector<HTMLFormElement>("form[data-home-intake]");

@@ -17,3 +17,4 @@ export * from "./starter.ts";
 export * from "./labels.ts";
 export * from "./locales.ts";
 export * from "./price-edit.ts";
+export * from "./showcase.ts";

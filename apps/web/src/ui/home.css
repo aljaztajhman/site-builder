@@ -11,6 +11,8 @@
 :root{
   --canvas:#f5f3ef;--surface:#fff;--surface-2:#ece9e3;--ink:#151412;--ink-2:#4d4a44;--ink-3:#6b665e;--line:#dcd8d0;--line-2:#c9c4ba;
   --accent:#156b4a;--accent-ink:#fff;--accent-soft:#e3efe8;--ph:#fff1a8;--danger:#b3261e;--danger-soft:#f9e3e1;
+  /* Tokens a trade theme also sets (apps/web/src/ui/examples/showcase.json): button hover, accent as text, text on ink, the call vignette, a search link. */
+  --accent-hover:#115a3e;--accent-text:#156b4a;--on-ink:#fff;--on-ink-2:#c9c4ba;--calling:#9ad0b6;--link:#1a4fa8;--h1-weight:560;
   --r-1:4px;--r-2:8px;--r-3:12px;--shadow-float:0 8px 24px rgb(20 20 18/.10),0 1px 2px rgb(20 20 18/.08);
   --font-display:"Bricolage Grotesque","Inter Tight",system-ui,sans-serif;--font-ui:"Figtree","Inter",system-ui,sans-serif;
   --gutter:20px;--section:64px;
@@ -26,7 +28,7 @@ a{color:inherit}
 :focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 h1,h2,h3{font-family:var(--font-display);font-weight:600;letter-spacing:-.025em;line-height:1.05}
-h1{font-size:clamp(38px,9.5vw,76px);font-weight:560;letter-spacing:-.035em;line-height:1}
+h1{font-size:clamp(38px,9.5vw,76px);font-weight:var(--h1-weight);letter-spacing:-.035em;line-height:1}
 h2{font-size:clamp(30px,6vw,48px);letter-spacing:-.03em;margin-bottom:14px}
 h3{font-size:21px;letter-spacing:-.01em;margin-bottom:4px}
 .wrap{max-width:1180px;margin:0 auto;padding:0 var(--gutter)}
@@ -36,17 +38,17 @@ section{padding:var(--section) 0;border-top:1px solid var(--line);scroll-margin-
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 20px;border-radius:var(--r-2);border:1px solid var(--line-2);background:var(--surface);color:var(--ink);font:600 16px/1 var(--font-ui);text-decoration:none;cursor:pointer;transition:background-color .15s,border-color .15s}
 .btn:hover{background:var(--surface-2)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.btn.primary:hover{background:#115a3e;border-color:#115a3e}
+.btn.primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
 .btn.quiet{border-color:transparent;background:transparent}
 .btn.quiet:hover{background:var(--surface-2)}
 .btn.sm{min-height:40px;padding:0 14px;font-size:15px}
 @media (pointer:coarse){.btn.sm{min-height:44px}}
-mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:var(--ink)}
+mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:#151412}
 
 /* ---------- Header ---------- */
 .hd{background:var(--canvas)}
 .hd .wrap{display:flex;align-items:center;gap:20px;min-height:64px}
-.brand{font-family:var(--font-display);font-weight:700;font-size:22px;letter-spacing:-.02em;text-decoration:none;display:flex;align-items:center;gap:9px}
+.brand{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:700;font-size:22px;letter-spacing:-.02em;text-decoration:none;display:flex;align-items:center;gap:9px}
 .brand i{width:12px;height:12px;background:var(--accent);border-radius:2px;flex:none}
 .hd nav{display:none;gap:4px;font-weight:600;font-size:15px}
 .hd nav a{text-decoration:none;padding:8px 10px;border-radius:var(--r-1)}
@@ -67,7 +69,7 @@ mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:var(--ink)}
 .prompt .bar .sp{flex:1}
 /* The prompt is the intake: attach buttons with a file count, homepage/whole-site switch, a refusal above it. */
 .attach:has(input:focus-visible){outline:2px solid var(--ink);outline-offset:2px}
-.attach[data-count]::after{content:attr(data-count);margin-left:2px;padding:1px 6px;border-radius:var(--r-1);background:var(--accent-soft);color:var(--accent);font-size:13px}
+.attach[data-count]::after{content:attr(data-count);margin-left:2px;padding:1px 6px;border-radius:var(--r-1);background:var(--accent-soft);color:var(--accent-text);font-size:13px}
 .seg{position:relative;display:inline-flex;gap:2px;padding:3px;margin:0;border:0;border-radius:var(--r-2);background:var(--surface-2);min-width:0}
 .seg label{display:inline-flex;align-items:center;min-height:36px;margin:0;padding:0 12px;border-radius:6px;color:var(--ink-2);font:600 14px/1 var(--font-ui);white-space:nowrap;cursor:pointer}
 .seg input:checked+label{background:var(--surface);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line-2)}
@@ -101,8 +103,8 @@ mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:var(--ink)}
 .demo[data-step=type] .demo-text::after{content:"";display:inline-block;width:2px;height:1.1em;margin-left:1px;vertical-align:-.2em;background:var(--ink);animation:caret .8s step-end infinite}
 .demo-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px}
 .demo-chip{padding:6px 10px;border:1px solid var(--line-2);border-radius:var(--r-2);font-size:14px;font-weight:600}
-.demo-go{padding:9px 18px;border-radius:var(--r-2);background:var(--accent);color:#fff;font-weight:600;font-size:15px;transition:transform .15s,background .15s}
-.demo[data-step=build] .demo-go{transform:scale(.95);background:#0f5139}
+.demo-go{padding:9px 18px;border-radius:var(--r-2);background:var(--accent);color:var(--accent-ink);font-weight:600;font-size:15px;transition:transform .15s,background .15s}
+.demo[data-step=build] .demo-go{transform:scale(.95);background:var(--accent-hover)}
 .demo-steps{position:absolute;left:0;right:0;top:52%;display:grid;gap:8px;margin:0;padding:0;list-style:none;opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s}
 .demo[data-step=build] .demo-steps{opacity:1;visibility:visible}
 .demo-steps li{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--r-2);background:var(--surface);font-size:15px;color:var(--ink-3)}
@@ -124,6 +126,24 @@ mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:var(--ink)}
 .demo.calm[data-step=type] .demo-device,.demo.calm[data-step=build] .demo-device{transform:translate(-50%,-50%)}
 .phone-cap{font-size:14px;color:var(--ink-3);text-align:left;margin-top:10px;justify-self:center;max-width:300px}
 
+/* ---------- Trade showcase: a chip per trade restyles the page in that trade's colours and shows its site ---------- */
+.trades{margin:0 0 18px}
+.trades-q{margin:0 0 10px;font-size:15px;font-weight:600;color:var(--ink-2)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
+.chip{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border:1px solid var(--line-2);border-radius:var(--r-2);background:var(--surface);color:var(--ink);font:600 15px/1 var(--font-ui);text-decoration:none;cursor:pointer;transition:background-color .15s,border-color .15s,color .15s}
+.chip:hover{border-color:var(--ink-3)}
+.chip[aria-current=true]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chip.more{background:transparent;border-style:dashed}
+.chip.more[hidden],.trades-reset[hidden]{display:none}
+@media (min-width:48rem){.chips{gap:6px}.chip{min-height:34px;padding:0 12px;font-size:14px}}
+@media (pointer:coarse){.chip{min-height:44px}}
+.trades-reset{display:block;width:fit-content;margin-top:12px;font-size:14px;font-weight:600;color:var(--ink-2)}
+.trades-reset:hover{color:var(--ink)}
+/* Phones: the five most asked trades, the rest behind "Več" (only once home.js runs; without it every chip shows). */
+@media (max-width:47.99rem){.chips.collapsed li:nth-child(n+6):not(:has([aria-current=true])){display:none}}
+/* The switch: a view transition, the new look revealed in a circle from the chip (home.ts animates the clip). */
+html.trade-switch::view-transition-old(root),html.trade-switch::view-transition-new(root){animation:none;mix-blend-mode:normal}
+
 /* ---------- What you get: three outcomes shown with the real example, then promises and a comparison ---------- */
 .win{display:grid;gap:24px;align-items:center;margin-top:48px}
 .win h3{font-size:clamp(26px,4vw,36px);letter-spacing:-.03em;line-height:1.08;margin-bottom:12px;max-width:16ch}
@@ -136,8 +156,8 @@ mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:var(--ink)}
 /* The example's call bar is fixed to its viewport: a viewport as tall as the frame puts it at the bottom. */
 .phone.sm iframe{height:717px;transform:scale(.6556)}
 .call-vis .tap{position:absolute;left:52px;bottom:14px;width:30px;height:30px;border-radius:50%;background:rgb(21 20 18/.25);box-shadow:0 0 0 0 rgb(21 107 74/.5)}
-.call-vis .calling{position:absolute;left:50%;top:0;transform:translateX(-50%);display:grid;gap:2px;min-width:200px;padding:10px 16px;border-radius:14px;background:var(--ink);color:#fff;font-size:14px;box-shadow:var(--shadow-float);text-align:center}
-.call-vis .calling b{font-weight:600;color:#9ad0b6}
+.call-vis .calling{position:absolute;left:50%;top:0;transform:translateX(-50%);display:grid;gap:2px;min-width:200px;padding:10px 16px;border-radius:14px;background:var(--ink);color:var(--on-ink);font-size:14px;box-shadow:var(--shadow-float);text-align:center}
+.call-vis .calling b{font-weight:600;color:var(--calling)}
 /* 2. A search typed, the result with the facts the page gives search engines. */
 .search-vis{align-content:center;gap:14px;justify-items:stretch}
 .search-vis .q{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:999px;background:var(--surface);border:1px solid var(--line-2);font-size:17px}
@@ -145,10 +165,10 @@ mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:var(--ink)}
 .search-vis .typed{overflow:hidden;white-space:nowrap;border-right:2px solid var(--ink);width:15ch}
 .search-vis .result{display:grid;gap:4px;padding:18px 20px;border-radius:var(--r-2);background:var(--surface);box-shadow:var(--shadow-float)}
 .search-vis .url{font-size:13px;color:var(--ink-3)}
-.search-vis .title{font:600 20px/1.25 var(--font-ui);color:#1a4fa8}
+.search-vis .title{font:600 20px/1.25 var(--font-ui);color:var(--link)}
 .search-vis .desc{font-size:15px;color:var(--ink-2)}
 .search-vis .facts{margin-top:6px;padding-top:8px;border-top:1px solid var(--line);font-size:14px;color:var(--ink-2)}
-.search-vis .facts b{color:var(--accent)}
+.search-vis .facts b{color:var(--accent-text)}
 /* 3. One sentence changes Saturday's hours on the page. */
 .edit-vis{align-content:center;gap:14px;justify-items:center}
 .edit-vis .hours{display:grid;width:min(320px,100%);padding:16px 18px;border-radius:var(--r-2);background:var(--surface);box-shadow:var(--shadow-float);font-size:15px}
@@ -157,9 +177,9 @@ mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:var(--ink)}
 .edit-vis .sat{position:relative;margin:0 -8px;padding:8px;border-radius:6px;background:var(--accent-soft)}
 .edit-vis .val{position:relative;white-space:nowrap}
 .edit-vis .val s{display:none}
-.edit-vis .val b{font-weight:600;color:var(--accent)}
-.edit-vis .say{justify-self:end;max-width:260px;padding:10px 14px;border-radius:14px 14px 4px 14px;background:var(--ink);color:#fff;font-size:15px}
-.edit-vis .done{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-size:13px;font-weight:600}
+.edit-vis .val b{font-weight:600;color:var(--accent-text)}
+.edit-vis .say{justify-self:end;max-width:260px;padding:10px 14px;border-radius:14px 14px 4px 14px;background:var(--ink);color:var(--on-ink);font-size:15px}
+.edit-vis .done{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;background:var(--accent-soft);color:var(--accent-text);font-size:13px;font-weight:600}
 .edit-vis .done::before{content:"";width:6px;height:10px;margin:-3px 2px 0 0;border:solid currentColor;border-width:0 2px 2px 0;transform:rotate(45deg)}
 /* Promises: plain words, two columns on a wide screen. */
 .promises{display:grid;gap:14px 40px;margin:64px 0 0;padding:28px 0 0;border-top:1px solid var(--line);list-style:none}
@@ -190,9 +210,9 @@ mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:var(--ink)}
 .deskwrap iframe{width:1280px;height:1500px;border:0;transform-origin:0 0;display:block}
 .chat{display:grid;gap:8px;align-content:start}
 .msg{padding:12px 14px;border-radius:var(--r-2);background:var(--surface-2);font-size:16px;max-width:90%}
-.msg.user{background:var(--ink);color:#fff;justify-self:end}
+.msg.user{background:var(--ink);color:var(--on-ink);justify-self:end}
 .msg small{display:block;color:var(--ink-3);margin-top:4px}
-.msg.user small{color:#c9c4ba}
+.msg.user small{color:var(--on-ink-2)}
 .chat .muted{font-size:15px;margin-top:8px}
 
 /* ---------- Pricing ---------- */
