@@ -90,12 +90,12 @@ export const heroSignature = defineSection(
   {
     type: "hero-signature",
     group: "heroes",
-    variants: ["photo", "drawing", "arch", "receipt", "label"],
+    variants: ["photo", "drawing", "arch", "receipt", "label", "card", "mirrors"],
     description:
-      "Homepage hero built around the business's strongest fact, shown as a designed object drawn by the direction's motif: the phone number (as a registration plate, a red call block), the earliest opening time (on a round seal) or the address (on a bottle label). The fact itself comes from the business facts, never from props. Display-size headline. photo: one wide photo full-bleed under a flat dark overlay, text on it (a flat dark ground without a photo). drawing: no photo; type beside a drawing of the trade (a radiator and pipes). arch: dark ground, the photo in a tall oven arch on the right running into the bottom edge, with the seal over it. receipt: no photo; type on white beside a solid colour field holding a tilted paper receipt that lists what the business does (props.receipt); the call is the primary button. label: coloured ground, the headline inside a white label card with a double inner rule and the address on it, the photo in a tall arch beside it with a second round photo (inset) over its edge. Use only when the design direction lists it.",
+      "Homepage hero built around the business's strongest fact, shown as a designed object drawn by the direction's motif: the phone number (as a registration plate, a red call block), the earliest opening time (on a round seal) or the address (on a bottle label). The fact itself comes from the business facts, never from props. Display-size headline. photo: one wide photo full-bleed under a flat dark overlay, text on it (a flat dark ground without a photo). drawing: no photo; type beside a drawing of the trade (a radiator and pipes). arch: dark ground, the photo in a tall oven arch on the right running into the bottom edge, with the seal over it. receipt: no photo; type on white beside a solid colour field holding a tilted paper receipt that lists what the business does (props.receipt); the call is the primary button. label: coloured ground, the headline inside a white label card with a double inner rule and the address on it, the photo in a tall arch beside it with a second round photo (inset) over its edge. card: the photo of the house full-bleed with no overlay, the headline on a white card with a thin inner rule that hangs into the next section, the address on it. mirrors: white ground, the business's short name (wordmark) wall-sized behind everything, the headline on the left, two or three photos (images) in mirror arches of different heights on the right; the call is the primary button. Use only when the design direction lists it.",
     images: "optional",
-    mobile: "One column: label, headline, intro, then the fact object at full width (a tap target at least 48 px tall); the arch photo follows the text, the drawing sits below it at a smaller size; the receipt follows the actions on its colour field; the label card comes first, the arch photo after it.",
-    variantNeeds: { receipt: "receipt" },
+    mobile: "One column: label, headline, intro, then the fact object at full width (a tap target at least 48 px tall); the arch photo follows the text, the drawing sits below it at a smaller size; the receipt follows the actions on its colour field; the label card comes first, the arch photo after it; the card sits under a strip of the photo; the mirrors stay side by side in one row, smaller.",
+    variantNeeds: { receipt: "receipt", mirrors: "images" },
     a11y: "Headline is the page h1. The phone object is one tel: link with an accessible name (\"Pokličite 041 555 730\"). Drawings and the plate's decorations are aria-hidden. Text on the photo sits on a flat overlay of at least 70 %. The receipt is a heading and a list; its check marks and torn edge are decorative.",
   },
   z.strictObject({
@@ -104,7 +104,7 @@ export const heroSignature = defineSection(
     intro: text(220),
     fact: z
       .enum(["phone", "opening", "address"])
-      .describe('Which business fact becomes the hero object: "phone" (the number, the main action), "opening" (the earliest opening time on a seal; only when the business has hours) or "address" (the street and town on the label card; label variant only).'),
+      .describe('Which business fact becomes the hero object: "phone" (the number, the main action), "opening" (the earliest opening time on a seal; only when the business has hours) or "address" (the street and town on the card; label and card variants only).'),
     factLabel: text(48)
       .optional()
       .describe('Short line that introduces the fact, from the client\'s wording, e.g. "Najhitreje nas dobite po telefonu", "Pokličite za ogled"; in receipt the call button\'s label ("Pokličite nas"). Required for phone and opening; leave out for address. No numbers, times or days: the object shows them.'),
@@ -113,6 +113,10 @@ export const heroSignature = defineSection(
     secondary: Link.optional(),
     image: ImageRef.optional().describe("photo, arch and label: the photo. drawing and receipt: leave out."),
     inset: ImageRef.optional().describe("label only: a second photo, shown round over the edge of the first (a detail: a product, a counter)."),
+    images: z.array(ImageRef).min(2).max(3).optional().describe("mirrors only: two or three portrait-friendly photos, each in a mirror arch (the work, the people, the room)."),
+    wordmark: text(16)
+      .optional()
+      .describe("mirrors only: one word of the business's own name, set wall-sized behind the hero (e.g. \"Lana\" for Frizerstvo Lana). Decorative; never a slogan."),
     receipt: z
       .strictObject({
         title: text(40).describe('What the receipt lists, e.g. "Kaj uredimo za vas"'),
@@ -128,7 +132,7 @@ export const heroSignature = defineSection(
 );
 
 /** hero-signature variants that show a photo; the others draw the trade instead (a radiator, a receipt). */
-export const SIGNATURE_PHOTO_VARIANTS: readonly string[] = ["photo", "arch", "label"];
+export const SIGNATURE_PHOTO_VARIANTS: readonly string[] = ["photo", "arch", "label", "card", "mirrors"];
 
 /** Add new hero section definitions here and to the tuple below. */
 export const heroSchemas = [heroSplit.schema, heroImage.schema, heroType.schema, pageHeader.schema, heroSignature.schema] as const;

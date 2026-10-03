@@ -29,6 +29,15 @@ export const SECTION_ISLANDS: Partial<Record<SectionType, string[]>> = {
   ...(structureIslands as Partial<Record<SectionType, string[]>>),
 };
 
+/**
+ * The islands one section needs. Variants without the island's subject don't load it: the contact call-out has
+ * no map, so it needs no consent notice (it had one, and showed a cookie box for nothing).
+ */
+export function islandsFor(section: Section): string[] {
+  if (section.type === "contact" && section.variant === "call-out") return [];
+  return SECTION_ISLANDS[section.type] ?? [];
+}
+
 /** LCP resolvers for sections that can open a page with a photo. Heroes and page headers. */
 export const SECTION_LCP: LcpResolvers = { ...heroLcp, ...contentLcp, ...businessLcp };
 

@@ -10,14 +10,25 @@ export const HERO_SIGNATURE_ARCH_SIZES = "(min-width: 64rem) 32rem, 78vw";
 /** label: the arch beside the label card, 5/11 of the container on desktop, 74 % of the screen on phones. */
 export const HERO_SIGNATURE_LABEL_SIZES = "(min-width: 64rem) 32rem, 74vw";
 
+/** mirrors: three arches side by side in 7/12 of the container on desktop, about a third of the screen on phones. */
+export const HERO_SIGNATURE_MIRROR_SIZES = "(min-width: 64rem) 15rem, 32vw";
+
 /** The photo's sizes per variant; null where the variant shows no photo (it draws instead). */
 export const HERO_SIGNATURE_SIZES: Record<SectionOf<"hero-signature">["variant"], string | null> = {
   photo: HERO_SIGNATURE_PHOTO_SIZES,
   arch: HERO_SIGNATURE_ARCH_SIZES,
   label: HERO_SIGNATURE_LABEL_SIZES,
+  card: HERO_SIGNATURE_PHOTO_SIZES,
+  mirrors: HERO_SIGNATURE_MIRROR_SIZES,
   drawing: null,
   receipt: null,
 };
+
+/** The photo a variant opens on (its LCP image): the first mirror for mirrors, else image; none where it draws. */
+export function signaturePhoto(section: SectionOf<"hero-signature">): string | undefined {
+  if (HERO_SIGNATURE_SIZES[section.variant] === null) return undefined;
+  return section.variant === "mirrors" ? (section.props.images?.[0] ?? section.props.image) : section.props.image;
+}
 
 /** A link that is not a second call: the hero's object already is the call. */
 function notCall(link: Link | undefined): Link | undefined {
@@ -141,13 +152,72 @@ export function HeroSignature({ section, ctx, index }: SectionProps<"hero-signat
     );
   }
 
+  // receipt, card, mirrors: the address line comes from the facts (the model never writes it); with fact phone
+  // the call is the one button, labelled with factLabel, beside one quiet text link that is not a call.
+  const address = ctx.site.business.address;
+  const streetCity = isPlaceholder(address) ? undefined : `${address.street}, ${address.city}`;
+  const buttons = phone ? (
+    <>
+      <Actions primary={{ label: props.factLabel ?? ctx.t("call"), target: { action: "call" } }} secondary={notCall(props.primary) ?? notCall(props.secondary)} ctx={ctx} />
+      {isPlaceholder(ctx.site.business.phone) && <Ph p={ctx.site.business.phone} ctx={ctx} />}
+    </>
+  ) : (
+    <Actions primary={props.primary} secondary={props.secondary} ctx={ctx} />
+  );
+
+  if (variant === "card") {
+    // The house full-bleed with no overlay; the headline on a white card (a thin inner rule) hanging into the next section.
+    const where = props.fact === "address" ? (isPlaceholder(address) ? <Ph p={address} ctx={ctx} /> : streetCity) : props.eyebrow;
+    return (
+      <Section id={section.id} type={section.type} variant={variant} tone={section.tone} bleed>
+        <div className={image ? "hsig hsig--card hsig--has-image" : "hsig hsig--card"}>
+          {image && <Picture id={image} ctx={ctx} className="hsig__bg media--contained" sizes={HERO_SIGNATURE_PHOTO_SIZES} priority={index === 0} />}
+          <div className="container hsig__body">
+            <div className="label-card label-card--rule hsig__card">
+              {where && <p className="hsig__where">{where}</p>}
+              {title}
+              <p className="lead hsig__lead">{props.intro}</p>
+              {buttons}
+            </div>
+          </div>
+        </div>
+      </Section>
+    );
+  }
+
+  if (variant === "mirrors") {
+    // White ground, the name wall-sized behind everything (decorative: the header and footer say it), the
+    // headline left, the photos in mirror arches of different heights right.
+    const photos = props.images ?? (props.image ? [props.image] : []);
+    return (
+      <Section id={section.id} type={section.type} variant={variant} tone={section.tone}>
+        <div className={photos.length ? "hsig hsig--mirrors hsig--has-image" : "hsig hsig--mirrors"}>
+          {props.wordmark && (
+            <p className="hsig__wall" aria-hidden="true">
+              {props.wordmark}
+            </p>
+          )}
+          <div className="hsig__text">
+            {(props.eyebrow ?? streetCity) && <p className="eyebrow hsig__eyebrow">{props.eyebrow ?? streetCity}</p>}
+            {title}
+            <p className="lead hsig__lead">{props.intro}</p>
+            {buttons}
+          </div>
+          {photos.length > 0 && (
+            <div className="hsig__mirrors" data-count={photos.length}>
+              {photos.map((id, i) => (
+                <Picture key={id} id={id} ctx={ctx} className="hsig__mirror arch-top media--contained" sizes={HERO_SIGNATURE_MIRROR_SIZES} priority={index === 0 && i === 0} />
+              ))}
+            </div>
+          )}
+        </div>
+      </Section>
+    );
+  }
+
   if (variant === "receipt") {
-    // The address line comes from the facts (the model never writes it); the call is the one button, labelled
-    // with factLabel, beside one quiet text link; the receipt lists what the business does.
-    const address = ctx.site.business.address;
-    const where = props.eyebrow ?? (isPlaceholder(address) ? undefined : `${address.street}, ${address.city}`);
-    const call: Link | undefined = phone ? { label: props.factLabel ?? ctx.t("call"), target: { action: "call" } } : undefined;
-    const other = phone ? notCall(props.primary) ?? notCall(props.secondary) : undefined;
+    // The receipt lists what the business does.
+    const where = props.eyebrow ?? streetCity;
     return (
       <Section id={section.id} type={section.type} variant={variant} tone={section.tone} bleed>
         <div className="hsig hsig--receipt">
@@ -156,8 +226,7 @@ export function HeroSignature({ section, ctx, index }: SectionProps<"hero-signat
               {where && <p className="eyebrow hsig__eyebrow">{where}</p>}
               {title}
               <p className="lead hsig__lead">{props.intro}</p>
-              {phone ? <Actions primary={call} secondary={other} ctx={ctx} /> : <Actions primary={props.primary} secondary={props.secondary} ctx={ctx} />}
-              {phone && isPlaceholder(ctx.site.business.phone) && <Ph p={ctx.site.business.phone} ctx={ctx} />}
+              {buttons}
             </div>
             {props.receipt && (
               <div className="hsig__paper">

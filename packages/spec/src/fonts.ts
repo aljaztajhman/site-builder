@@ -64,6 +64,9 @@ export const FONT_PAIRS: FontPair[] = [
   // R Račun, T Etiketa.
   { id: "ibm-plex-sans", label: "IBM Plex Sans", heading: FONTS.ibmPlexSans, body: FONTS.ibmPlexSans },
   { id: "lora-karla", label: "Lora / Karla", heading: FONTS.lora, body: FONTS.karla },
+  // K Jedilnik, L Ogledalo.
+  { id: "garamond-figtree", label: "EB Garamond / Figtree", heading: FONTS.ebGaramond, body: FONTS.figtree },
+  { id: "inter-tight-dm-sans", label: "Inter Tight / DM Sans", heading: FONTS.interTight, body: FONTS.dmSans },
 ];
 
 export function fontPair(id: string): FontPair {

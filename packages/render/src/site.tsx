@@ -5,7 +5,7 @@ import {
   Header,
   LandmarkSuffixes,
   MobileActionBar,
-  SECTION_ISLANDS,
+  islandsFor,
   lcpImageFor,
   rendererFor,
   signatureOffersDirections,
@@ -155,13 +155,13 @@ export function renderPage(spec: SiteSpec, page: Page, opts: RenderOptions = {})
   const design = localized.design;
 
   const islands = new Set<string>(["nav.js"]);
-  for (const s of localizedPage.sections) for (const i of SECTION_ISLANDS[s.type] ?? []) islands.add(i);
+  for (const s of localizedPage.sections) for (const i of islandsFor(s)) islands.add(i);
   // The privacy policy says consent can be withdrawn with the footer's "cookie settings" button, which consent.js
   // reveals: on a site with consent-gated embeds the privacy page loads it too, with the notice closed until asked for.
   const consentOnRequest =
     localizedPage.kind === "privacy" &&
     !islands.has("consent.js") &&
-    localized.pages.some((p) => p.sections.some((s) => SECTION_ISLANDS[s.type]?.includes("consent.js")));
+    localized.pages.some((p) => p.sections.some((s) => islandsFor(s).includes("consent.js")));
   if (consentOnRequest) islands.add("consent.js");
   const needsConsent = islands.has("consent.js");
 

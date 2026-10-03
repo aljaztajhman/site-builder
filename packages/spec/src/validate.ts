@@ -88,8 +88,16 @@ export function semanticIssues(spec: SiteSpec): Issue[] {
       if (s.type !== "hero-signature") return;
       const at = `/pages/${pi}/sections/${si}/props`;
       if (s.props.fact !== "address" && s.props.factLabel === undefined) add(`${at}/factLabel`, "structure", `factLabel is required when the hero shows the ${s.props.fact}`);
-      if (s.props.fact === "address" && s.variant !== "label") add(`${at}/fact`, "structure", "fact address is only shown by the label variant");
+      if (s.props.fact === "address" && s.variant !== "label" && s.variant !== "card") add(`${at}/fact`, "structure", "fact address is only shown by the label and card variants");
       if (s.props.receipt && s.variant !== "receipt") add(`${at}/receipt`, "structure", "receipt is only shown by the receipt variant");
+      if (s.props.images && s.variant !== "mirrors") add(`${at}/images`, "structure", "images are only shown by the mirrors variant");
+      const wordmark = s.props.wordmark;
+      if (wordmark !== undefined) {
+        if (s.variant !== "mirrors") add(`${at}/wordmark`, "structure", "wordmark is only shown by the mirrors variant");
+        // Decorative, but still the business's own name: one word of it, never a slogan.
+        const words = spec.business.name.toLocaleLowerCase("sl").split(/[^\p{L}\p{N}]+/u);
+        if (!words.includes(wordmark.toLocaleLowerCase("sl"))) add(`${at}/wordmark`, "structure", "wordmark must be one word of the business name");
+      }
     }),
   );
 

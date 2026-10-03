@@ -119,9 +119,9 @@ describe("migration 6 → 7 (trade templates R and T)", () => {
     const { validateSite } = await import("../src/index.ts");
     for (const id of ["avtoservis-mrak", "pekarna-kvas", "frizerstvo-lana"]) {
       const golden = await read(id);
-      const v7 = migrateSpec({ ...golden, specVersion: 6 });
+      const v7 = migrateSpec({ ...golden, specVersion: 6 }, MIGRATIONS, 7);
       expect(v7, id).toEqual({ ...golden, specVersion: 7 });
-      expect(validateSite(v7).issues, id).toEqual([]);
+      expect(validateSite(migrateSpec(v7)).issues, id).toEqual([]);
     }
   });
 
@@ -135,6 +135,33 @@ describe("migration 6 → 7 (trade templates R and T)", () => {
     expect(shop.pages[0]!.sections.map((s) => s.variant)).toEqual(["label", "tags", "narrow", "round", "photo", "call-out"]);
     // A stored spec must be migrated before it validates: the schema takes only the current version.
     expect(validateSite({ ...spec, specVersion: 6 }).ok).toBe(false);
+  });
+});
+
+describe("migration 7 → 8 (trade templates K and L)", () => {
+  const read = async (id: string) => {
+    const { readFileSync } = await import("node:fs");
+    return JSON.parse(readFileSync(new URL(`../../../tools/eval/golden/${id}.json`, import.meta.url), "utf8")) as SiteSpec;
+  };
+
+  it("turns stored v7 sites into valid v8 sites unchanged apart from the version", async () => {
+    const { validateSite } = await import("../src/index.ts");
+    for (const id of ["racunovodstvo-seliskar", "trgovina-oljka-in-sol", "pekarna-kvas"]) {
+      const golden = await read(id);
+      const v8 = migrateSpec({ ...golden, specVersion: 7 }, MIGRATIONS, 8);
+      expect(v8, id).toEqual({ ...golden, specVersion: 8 });
+      expect(validateSite(migrateSpec(v8)).issues, id).toEqual([]);
+    }
+  });
+
+  it("accepts what v8 adds: the card and mirrors heroes, offers, plates, a photo pair with a figure, a team photo", async () => {
+    const { validateSite } = await import("../src/index.ts");
+    const inn = migrateSpec(await read("gostilna-zlata-zlica"));
+    expect(validateSite(inn).issues).toEqual([]);
+    expect(inn.pages[0]!.sections.map((s) => `${s.type}:${s.variant}`)).toEqual(["hero-signature:card", "price-list:offers", "products:plates", "image-text:pair", "team:photo", "contact:call-out"]);
+    const salon = migrateSpec(await read("frizerstvo-lana"));
+    expect(validateSite(salon).issues).toEqual([]);
+    expect(salon.pages[0]!.sections.map((s) => `${s.type}:${s.variant}`)).toEqual(["hero-signature:mirrors", "cta:band", "price-list:grouped", "team:photo", "contact:call-out"]);
   });
 });
 

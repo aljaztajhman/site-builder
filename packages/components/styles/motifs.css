@@ -27,7 +27,8 @@
   --c-border: var(--c-inverse);
 }
 [data-motif="plate"] .action-bar,
-[data-motif="crust"] .action-bar {
+[data-motif="crust"] .action-bar,
+[data-motif="spoon"] .action-bar {
   --c-primary: var(--c-band);
   --c-on-primary: var(--c-on-band);
 }
@@ -674,25 +675,25 @@ a.plate:hover .plate__num {
   --c-text: inherit;
   --c-border: inherit;
 }
-/* The closing call in two columns on desktop (Račun, Etiketa): heading and number on the left, the other facts on the right. */
+/* The closing call in two columns on desktop (Račun, Etiketa, Jedilnik, Ogledalo): heading and number on the left, the other facts on the right. */
 @media (min-width: 64rem) {
-  :is([data-motif="ledger"], [data-motif="label"]) .callout {
+  :is([data-motif="ledger"], [data-motif="label"], [data-motif="spoon"], [data-motif="mirror"]) .callout {
     grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
     column-gap: 4.5rem;
     align-items: end;
   }
-  :is([data-motif="ledger"], [data-motif="label"]) .callout > .section-head,
-  :is([data-motif="ledger"], [data-motif="label"]) .callout__call {
+  :is([data-motif="ledger"], [data-motif="label"], [data-motif="spoon"], [data-motif="mirror"]) .callout > .section-head,
+  :is([data-motif="ledger"], [data-motif="label"], [data-motif="spoon"], [data-motif="mirror"]) .callout__call {
     grid-column: 1;
   }
-  :is([data-motif="ledger"], [data-motif="label"]) .callout__facts {
+  :is([data-motif="ledger"], [data-motif="label"], [data-motif="spoon"], [data-motif="mirror"]) .callout__facts {
     grid-column: 2;
     grid-row: 1 / span 2;
     grid-template-columns: minmax(0, 1fr);
     gap: 1.25rem;
     border-top-width: 2px;
   }
-  :is([data-motif="ledger"], [data-motif="label"]) .callout .section-title {
+  :is([data-motif="ledger"], [data-motif="label"], [data-motif="spoon"], [data-motif="mirror"]) .callout .section-title {
     font-size: calc(var(--fs-h2) * 0.64);
     line-height: 1.08;
   }
@@ -924,4 +925,156 @@ a.plate:hover .plate__num {
 [data-motif="label"] .bignum--poster {
   font-size: clamp(2.5rem, 0.6rem + 8.4vw, 6.75rem);
   letter-spacing: -0.03em;
+}
+
+/* A label card with one thin inner rule in the band colour (Jedilnik's menu card) instead of the double rule. */
+.label-card--rule::before {
+  inset: 0.875rem;
+  border: 1px solid var(--c-band, var(--c-primary));
+}
+.label-card--rule::after {
+  content: none;
+}
+
+/* ---------- spoon: Jedilnik (K), inns and restaurants ---------- */
+[data-motif="spoon"] .site-header__brand::before {
+  content: "";
+  flex: none;
+  width: 0.75rem;
+  height: 3.25rem;
+  margin-right: 0.875rem;
+  background: var(--motif-brand) no-repeat center / contain;
+}
+.spoon {
+  display: block;
+  flex: none;
+  width: 1.375rem;
+  height: 6.5rem;
+  fill: var(--c-band, var(--c-primary));
+}
+@media (max-width: 56.24rem) {
+  .offers__spoon {
+    display: none;
+  }
+}
+/* Brass on the green grounds: buttons, the offers' prices, the seat count, the number to call. */
+[data-motif="spoon"] .tone-inverse .btn--primary {
+  background: var(--c-band);
+  color: var(--c-on-band);
+}
+[data-motif="spoon"] .tone-inverse :is(.offers__price, .image-text__figure, .bignum) {
+  color: var(--c-band);
+}
+[data-motif="spoon"] .plates__price {
+  color: var(--c-primary);
+}
+[data-motif="spoon"] .bignum--poster {
+  font-size: clamp(3rem, 1rem + 6.4vw, 5.75rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  font-variant-numeric: proportional-nums;
+}
+@media (min-width: 64rem) {
+  [data-motif="spoon"] :is(.s-products--plates, .s-team--photo) .section-head {
+    max-width: none;
+  }
+  [data-motif="spoon"] .s-products--plates .section-head {
+    display: grid;
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    column-gap: 4rem;
+    align-items: end;
+  }
+  [data-motif="spoon"] .s-products--plates .section-head .lead {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+}
+
+/* ---------- mirror: Ogledalo (L), salons ---------- */
+[data-motif="mirror"] .hsig__eyebrow {
+  color: var(--c-primary);
+  font-weight: 700;
+}
+[data-motif="mirror"] :where(h1, h2) {
+  letter-spacing: -0.05em;
+}
+/* The price list set like a masthead: a giant title beside a ruled list. */
+[data-motif="mirror"] .s-price-list--grouped .section-title {
+  font-size: clamp(4.5rem, 1.5rem + 11vw, 11rem);
+  line-height: 0.84;
+  letter-spacing: -0.06em;
+  color: var(--c-primary);
+}
+[data-motif="mirror"] .s-price-list--grouped .prices__dl {
+  border-top: 3px solid currentColor;
+}
+[data-motif="mirror"] .s-price-list--grouped .prices__row {
+  padding-block: 1.25rem;
+}
+[data-motif="mirror"] .s-price-list--grouped .prices__row dt {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: clamp(1.3125rem, 1rem + 1vw, 1.75rem);
+  line-height: 1.15;
+}
+[data-motif="mirror"] .s-price-list--grouped .prices__row dd {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-heading);
+  font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2.25rem);
+  line-height: 1.1;
+}
+[data-motif="mirror"] .s-price-list--grouped .prices__row .price {
+  font-weight: inherit;
+}
+@media (min-width: 64rem) {
+  [data-motif="mirror"] .s-price-list--grouped > .container {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    column-gap: 4.5rem;
+    align-items: start;
+  }
+  [data-motif="mirror"] .s-price-list--grouped .prices__footnote {
+    grid-column: 2;
+  }
+}
+[data-motif="mirror"] .s-price-list--grouped .prices__row .ph {
+  font-size: 0.55em;
+}
+/* The booking sentence on the wine band at a sentence's size, not a headline's. */
+[data-motif="mirror"] .s-cta--band .cta__title {
+  font-size: calc(var(--fs-h2) * 0.78);
+  line-height: 1.02;
+}
+/* The salon photo first, in a tall mirror arch, a small arch over its corner in the ground's colour. */
+[data-motif="mirror"] .team-photo__figure {
+  order: -1;
+}
+[data-motif="mirror"] .team-photo__media {
+  aspect-ratio: 4 / 3;
+  border-radius: 10rem 10rem 0.5rem 0.5rem;
+}
+[data-motif="mirror"] .team-photo__inset {
+  border-radius: 100vw 100vw 1rem 1rem;
+}
+[data-motif="mirror"] .team-rows__name {
+  font-size: clamp(1.75rem, 1.4rem + 1vw, 2.125rem);
+}
+/* The number to call in wine on white, large. */
+[data-motif="mirror"] .tone-default .bignum {
+  color: var(--c-primary);
+}
+[data-motif="mirror"] .bignum--poster {
+  font-size: clamp(3rem, 1.3rem + 5.6vw, 6rem);
+  letter-spacing: -0.05em;
+}
+/* The phone bar on white with the call in wine (the template's own bar). */
+[data-motif="mirror"] .action-bar {
+  --c-bg: inherit;
+  --c-text: inherit;
+  --c-border: inherit;
+}
+@media (min-width: 64rem) {
+  [data-motif="mirror"] .team-photo__media {
+    border-radius: 16.25rem 16.25rem 0.5rem 0.5rem;
+  }
 }

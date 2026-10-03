@@ -29,10 +29,22 @@ describe("cookie settings on the privacy page", () => {
   });
 
   it("leaves consent.js off the privacy page of a site without consent-gated embeds", () => {
-    // frizerstvo-lana has no contact section, so nothing on the site asks for consent.
+    // frizerstvo-lana's only contact section is the call-out, which has no map: nothing on the site asks for consent.
     const spec = golden("frizerstvo-lana");
+    expect(spec.pages.flatMap((p) => p.sections).filter((s) => s.type === "contact").map((s) => s.variant)).toEqual(["call-out"]);
     const out = renderPage(spec, privacyOf(spec));
     expect(out).not.toMatch(CONSENT_JS);
     expect(out).not.toContain("data-consent-notice");
+  });
+
+  it("shows no cookie notice on a page whose contact is the call-out (no map), and does with a map", () => {
+    const spec = golden("frizerstvo-lana");
+    const home = renderPage(spec, spec.pages[0]!);
+    expect(home).not.toMatch(CONSENT_JS);
+    expect(home).not.toContain("data-consent-notice");
+    const withMap = structuredClone(spec);
+    const call = withMap.pages[0]!.sections.find((s) => s.type === "contact")!;
+    call.variant = "stacked";
+    expect(renderPage(withMap, withMap.pages[0]!)).toMatch(CONSENT_JS);
   });
 });

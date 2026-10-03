@@ -73,7 +73,8 @@ describe("image-text", () => {
     },
   });
 
-  for (const variant of imageText.variants.filter((v) => v !== "round")) {
+  // round and pair set their link as the section's one button (their own tests below and in motifs.test.tsx).
+  for (const variant of imageText.variants.filter((v) => v !== "round" && v !== "pair")) {
     it(`renders ${variant} with a lazy photo and a text link`, () => {
       const out = html(<ImageText section={{ ...section, variant }} ctx={testCtx()} index={2} />);
       expect(out).toContain(`s-image-text--${variant}`);
