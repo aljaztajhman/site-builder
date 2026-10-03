@@ -376,6 +376,12 @@ details.more>summary{padding:12px 0;font-weight:600;cursor:pointer}
 .checklist li button strong{font-size:13px;font-weight:600}
 .checklist li button span{font-size:14px}
 .checklist li button:hover span{text-decoration:underline}
+/* The guest's copy (no account yet): the same list as text, nothing to open. */
+.guest-checklist{margin-top:14px}
+.guest-checklist p{margin:0 0 4px}
+.guest-checklist li{display:grid;gap:2px;padding:8px 0}
+.guest-checklist li strong{font-size:13px;font-weight:600}
+.guest-checklist li span{font-size:14px}
 .btn.blocked{opacity:.6}
 .flash{outline:3px solid var(--warn);outline-offset:4px;border-radius:var(--r-1);transition:outline-color .3s}
 /* Layout thumbnails of the selected section ("Postavitev"): real content, drawn at desktop width and scaled. */
