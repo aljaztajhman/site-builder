@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -218,6 +218,108 @@ describe("a domain we register for the owner", () => {
     await repo.db.query("update site_domains set lease_until = now() - interval '1 second' where hostname = $1", [row.hostname]);
     expect(await repo.domains.due()).toContain(row.hostname);
     expect((await provisionDomain(deps(p), row.hostname)).status).toBe("active");
+  });
+
+  it("a run cut off after the registrar registered the name, before the progress write: the retry adopts it", async () => {
+    const s = await site();
+    const p = providers();
+    const row = await startDomain(deps(p), s.id, { kind: "registered", hostname: "seliskar-odrezana.si", registrant: REGISTRANT });
+    // The process dies right after register() answered: the step's progress write never happens.
+    const progress = repo.domains.progress.bind(repo.domains);
+    const spy = vi.spyOn(repo.domains, "progress").mockImplementation(async (h, change) => {
+      if (h === row.hostname && change.step === "certificate") throw new Error("worker died");
+      return progress(h, change);
+    });
+    try {
+      await expect(provisionDomain(deps(p), row.hostname)).rejects.toThrow("worker died");
+    } finally {
+      spy.mockRestore();
+    }
+    expect(p.registrar.registered.get(row.hostname)).toBe("fake-seliskar-odrezana.si");
+    let r = (await repo.domains.get(row.hostname))!;
+    expect(r).toMatchObject({ status: "pending", step: "register" });
+    expect(r.detail.registrationId).toBeUndefined();
+    expect(typeof r.detail.registering).toBe("string");
+    // Even failed now, it would never offer another name: it may be bought.
+    expect(domainState({ ...r, status: "failed", failure: "unavailable" }, config).chooseAnother).toBe(false);
+    // The next run asks the registrar, finds the name in our account and goes on: one registration, live.
+    expect(await provisionDomain(deps(p), row.hostname, { force: true })).toMatchObject({ status: "active", step: "live" });
+    expect(p.registrar.calls.filter((c) => c.method === "register")).toHaveLength(1);
+    expect(p.registrar.calls.filter((c) => c.method === "lookup")).toHaveLength(1);
+    expect(p.registrar.registered.size).toBe(1);
+    r = (await repo.domains.get(row.hostname))!;
+    expect(r).toMatchObject({ status: "active", failure: null });
+    expect(r.detail.registrationId).toBe("fake-seliskar-odrezana.si");
+    // The id replaced the attempt marker.
+    expect(r.detail.registering).toBeNull();
+  });
+
+  it("a registrar timeout after the name was registered: retried, found in our account, never bought twice", async () => {
+    const s = await site();
+    const p = providers({ registrar: { script: { register: { lose: 1 } } } });
+    const row = await startDomain(deps(p), s.id, { kind: "registered", hostname: "seliskar-casovna.si", registrant: REGISTRANT });
+    expect(await provisionDomain(deps(p), row.hostname)).toEqual({ status: "pending", step: "register" });
+    expect(p.registrar.registered.has(row.hostname)).toBe(true);
+    const r = (await repo.domains.get(row.hostname))!;
+    expect(r).toMatchObject({ attempts: 1, step: "register" });
+    expect(String(r.detail.lastError)).toMatch(/no answer/);
+    expect(domainState(r, config).chooseAnother).toBe(false);
+    expect(await provisionDomain(deps(p), row.hostname, { force: true })).toMatchObject({ status: "active" });
+    expect(p.registrar.calls.filter((c) => c.method === "register")).toHaveLength(1);
+    // The name is unavailable at the registry now (it is ours), yet it was never treated as taken.
+    expect((await repo.domains.get(row.hostname))!.failure).toBeNull();
+  });
+
+  it("after an unanswered attempt a name the registrar doesn't list as ours is not called taken: retried, then 'try again'", async () => {
+    const s = await site();
+    // The attempt's answer was lost before the registrar did anything.
+    const p = providers({ registrar: { script: { register: { fail: 1 } } } });
+    const row = await startDomain(deps(p), s.id, { kind: "registered", hostname: "seliskar-nejasna.si", registrant: REGISTRANT });
+    expect((await provisionDomain(deps(p), row.hostname)).status).toBe("pending");
+    // Meanwhile the registry shows the name as taken and our account doesn't (yet) list it.
+    const taken = providers({ registrar: { taken: [row.hostname] } });
+    expect((await provisionDomain(deps(taken), row.hostname, { force: true })).status).toBe("pending");
+    expect(await provisionDomain(deps(taken), row.hostname, { force: true })).toMatchObject({ status: "failed", failure: "register_unconfirmed" });
+    expect(taken.registrar.calls.map((c) => c.method)).not.toContain("register");
+    const st = domainState((await repo.domains.get(row.hostname))!, config);
+    expect(st).toMatchObject({ failure: "register_unconfirmed", chooseAnother: false });
+    expect(st.message).toBe("Registracije domene seliskar-nejasna.si pri registrarju še nismo mogli potrditi. Poskusite znova čez nekaj minut.");
+    // And the owner can't replace it with another name.
+    await expect(startDomain(deps(taken), s.id, { kind: "registered", hostname: "seliskar-druga-izbira.si", registrant: REGISTRANT })).rejects.toThrow(/morda že uspela/);
+  });
+
+  it("a run whose lease ran out never clears the lease of the run that took over", async () => {
+    const s = await site();
+    const p = providers();
+    let takeover: (() => Promise<void>) | null = null;
+    const slow: DomainProviders = {
+      ...p,
+      edge: {
+        ...p.edge,
+        addZone: async (d: string) => {
+          await takeover?.();
+          return p.edge.addZone(d);
+        },
+      },
+    };
+    const row = await startDomain(deps(p), s.id, { kind: "registered", hostname: "seliskar-zakup.si", registrant: REGISTRANT });
+    let second: string | null = null;
+    // While the first run waits on the edge, its lease runs out and a second run claims the domain.
+    takeover = async () => {
+      takeover = null;
+      await repo.db.query("update site_domains set lease_until = now() - interval '1 second' where hostname = $1", [row.hostname]);
+      second = (await repo.domains.claim(row.hostname, 300, true))!.lease;
+    };
+    expect(await provisionDomain(deps(slow), row.hostname)).toEqual({ status: "pending", step: "register" });
+    expect(second).not.toBeNull();
+    // The first run's progress write and its finally left the second run's lease in place.
+    const r = (await repo.domains.get(row.hostname))!;
+    expect(r.lease_until).not.toBeNull();
+    expect((await repo.domains.claim(row.hostname, 300, true))).toBeNull();
+    expect((await provisionDomain(deps(p), row.hostname, { force: true })).status).toBe("skipped");
+    // The second run lets go of its own lease.
+    await repo.domains.release(row.hostname, second!);
+    expect((await repo.domains.get(row.hostname))!.lease_until).toBeNull();
   });
 
   it("goes live even when the republish has to wait for another publish; the address check republishes later", async () => {

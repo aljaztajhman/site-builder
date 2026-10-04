@@ -15,8 +15,9 @@ import { DomainProviderError, type DomainCheck, type DomainRegistrar, type Regis
  * - .si requirements: ask GET /v1/domains/additional-data?domain.extension=si and
  *   GET /v1/domains/additional-data/customers?domain.extension=si (not documented for .si on the pages read);
  * - whose handles go in admin/tech/billing for .si (today: the owner's, a guess to confirm);
- * - the error code for "domain already in your account", so a repeated register can look the domain up
- *   (until then it throws a transient error and the step retries, then fails);
+ * - a register whose answer was lost is found with `lookup` (GET /v1/domains?full_name=…, ListDomains in
+ *   the same Swagger file, read 2026-10-04) before buying again; confirm against the sandbox that a domain
+ *   just requested (REQ) is listed there at once;
  * - rate limits (openprovider.help): check 20 calls / 300 s, create domain 15 / 300 s, token 30 / 60 s;
  *   the token is cached (TTL 48 h per the older v1beta article; v1 says only "limited time").
  */
@@ -144,6 +145,16 @@ export function openproviderRegistrar(o: { username: string; password: string; b
     async registration(id) {
       const data = await call<{ status: string }>("GET", `/domains/${encodeURIComponent(id)}`);
       return statusOf(data.status);
+    },
+    async lookup(raw) {
+      const name = raw.trim().toLowerCase();
+      // ListDomains: `full_name` filters by the whole name; results are domainGetDomainResponseData (id, status, domain.name/extension, is_deleted).
+      const data = await call<{ results?: { id: number; status: string; is_deleted?: boolean; domain?: { name?: string; extension?: string } }[] }>(
+        "GET",
+        `/domains?full_name=${encodeURIComponent(name)}&is_deleted=false&limit=10`,
+      );
+      const hit = (data.results ?? []).find((r) => !r.is_deleted && `${r.domain?.name ?? ""}.${r.domain?.extension ?? ""}`.toLowerCase() === name);
+      return hit ? { id: String(hit.id), status: statusOf(hit.status) } : null;
     },
   };
 }
