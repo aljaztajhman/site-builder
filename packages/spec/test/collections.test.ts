@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import type {
   Collections} from "../src/index.ts";
 import {
+  SPEC_VERSION,
   SiteSpec,
   collectionEntries,
   dateBadge,
@@ -119,7 +120,7 @@ describe("collections in the spec (v12)", () => {
   it("migrates a v11 site unchanged", () => {
     const v11 = { ...JSON.parse(readFileSync(new URL("../../../tools/eval/golden/pekarna-kvas.json", import.meta.url), "utf8")), specVersion: 11 };
     const out = migrateSpec(v11);
-    expect(out.specVersion).toBe(12);
+    expect(out.specVersion).toBe(SPEC_VERSION);
     expect(out.collections).toBeUndefined();
     expect(SiteSpec.safeParse(out).success).toBe(true);
   });

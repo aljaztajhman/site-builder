@@ -28,6 +28,12 @@ export interface PipelineDeps {
   lighthouse?: boolean;
   /** Generates mood images when the client gave too few photos (config imageGen.pipeline); absent = never. */
   images?: ImageGenerator;
+  /**
+   * The job's own picture count (plan-limits.ts pictureBudget): fill up to `fillTo` photos instead of
+   * `fillUpTo[scope]`, and make at most `max`. `note` (Slovene, naming the plan that has more) is logged for the
+   * owner when `max` left the site with fewer than it would have had.
+   */
+  pictures?: { fillTo?: number; max?: number; note?: string | null };
 }
 
 /** The classifier couldn't place the description (below tiers.junk.minClassifierConfidence): stopped before the brief. */
@@ -119,7 +125,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
 
   // Steps 1–2 (brief, design) and step 3 (images) don't depend on each other: they run side by side,
   // so photo processing and alt text (up to ~20 s with many photos) are off the path to the first preview.
-  const slots = generatedImageCount(config, photos.length, !!deps.images, intake.scope);
+  const slots = generatedImageCount(config, photos.length, !!deps.images, intake.scope, deps.pictures);
   // The job has failed (either branch, or the spend cap stopped a picture): no further paid call starts.
   // Each branch checks it between its calls; pictures check it before and after reserving their price.
   const stop = new AbortController();
@@ -150,6 +156,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     // 3b. Too few photos: generated mood images, beside the design step (they don't need it). When the trade's
     // template draws instead of showing pictures (template S), they wait for the design: chosen, it needs none.
     if (slots.skipped) await log("imageGen", slots.skipped);
+    if (slots.limited && deps.pictures?.note) await log("imageGen", deps.pictures.note, { planLimit: true, wanted: slots.limited.wanted, made: slots.wanted });
     const ideas = brief.imageIdeas.slice(0, slots.wanted);
     const template = templateFor(brief.businessType, photos.length);
     const waitForDesign = ideas.length > 0 && template !== undefined && drawsInsteadOfPhotos(template);
@@ -330,10 +337,20 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
  * How many mood images to generate for a site with `photoCount` client photos. When some are wanted but
  * no image service is configured (no FAL_KEY), says so: a silent skip left sites without any picture.
  */
-export function generatedImageCount(config: AppConfig, photoCount: number, hasGenerator: boolean, scope: "home" | "full"): { wanted: number; skipped: string | null } {
-  const missing = config.imageGen.pipeline.enabled ? Math.max(0, config.imageGen.pipeline.fillUpTo[scope] - photoCount) : 0;
+export function generatedImageCount(
+  config: AppConfig,
+  photoCount: number,
+  hasGenerator: boolean,
+  scope: "home" | "full",
+  budget: { fillTo?: number; max?: number } = {},
+): { wanted: number; skipped: string | null; limited?: { wanted: number } } {
+  const fillTo = budget.fillTo ?? config.imageGen.pipeline.fillUpTo[scope];
+  const missing = config.imageGen.pipeline.enabled ? Math.max(0, fillTo - photoCount) : 0;
   if (!missing) return { wanted: 0, skipped: null };
   if (!hasGenerator) return { wanted: 0, skipped: `${missing} generated picture(s) wanted, but no image service is configured (FAL_KEY); built without them` };
+  const max = Math.max(0, budget.max ?? Infinity);
+  // The plan's pictures for this month ran short: fewer than the site would get, and the caller says why.
+  if (missing > max) return { wanted: max, skipped: null, limited: { wanted: missing } };
   return { wanted: missing, skipped: null };
 }
 
@@ -484,8 +501,16 @@ export async function siteBlockers(repo: Repo, siteId: string, spec: SiteSpec): 
 /** Earlier chat messages (user and assistant) sent with an edit request. */
 const CHAT_HISTORY_TURNS = 6;
 
-/** Applies one chat message (already stored) to the current spec and stores the reply. */
-export async function applyChatEdit(deps: Pick<PipelineDeps, "repo" | "client">, siteId: string, messageId: number): Promise<{ version: number | null; reply: string; issues: string[] }> {
+/**
+ * Applies one chat message (already stored) to the current spec and stores the reply. `guard` (the owner's plan
+ * limits, plan-limits.ts) may refuse the edited spec: nothing is saved and its Slovene reason is the reply.
+ */
+export async function applyChatEdit(
+  deps: Pick<PipelineDeps, "repo" | "client">,
+  siteId: string,
+  messageId: number,
+  guard?: (before: SiteSpec, after: SiteSpec) => string | null,
+): Promise<{ version: number | null; reply: string; issues: string[] }> {
   const { repo, client } = deps;
   const msg = await repo.getChat(messageId);
   const current = await repo.getSpec(siteId);
@@ -504,7 +529,11 @@ export async function applyChatEdit(deps: Pick<PipelineDeps, "repo" | "client">,
     let version: number | null = null;
     let reply = r.reply;
     const issues = [...r.issues];
-    if (r.changed && r.issues.length === 0) {
+    const refused = r.changed && r.issues.length === 0 && guard ? guard(current.spec, r.spec) : null;
+    if (refused) {
+      reply = refused;
+      issues.push("plan limit: the edit was not saved");
+    } else if (r.changed && r.issues.length === 0) {
       try {
         version = await repo.saveSpec(siteId, r.spec, "edit", msg.content.slice(0, 500), undefined, current.version);
       } catch (e) {

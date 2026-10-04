@@ -118,6 +118,18 @@ export class UsageQueries {
     return { spent: Number(spent.rows[0]?.n ?? 0), held: Number(held.rows[0]?.n ?? 0) };
   }
 
+  /**
+   * Generated pictures an account's paid jobs have made since `since` (its allowance month), the ones in flight
+   * included: each picture's reservation is a pending row, and a picture that failed without a bill doesn't count.
+   */
+  async generatedPictures(accountId: string, since: Date): Promise<number> {
+    const { rows } = await this.q<{ n: string | number }>(
+      "select count(*) as n from model_calls where account_id = $1 and tier = 'paid' and stage = 'imageGen' and (pending or ok) and created_at >= $2",
+      [accountId, since.toISOString()],
+    );
+    return Number(rows[0]?.n ?? 0);
+  }
+
   async insertJob(j: { kind: AiJobKind; scope?: string | null; tier: Tier; accountId?: string | null; deviceId?: string | null; ipKey?: string; siteId?: string | null; estimateEur: number; expiresInMinutes?: number; units?: number }): Promise<string> {
     const { rows } = await this.q<{ id: string | number }>(
       `insert into ai_jobs (kind, scope, tier, pool, account_id, device_id, ip_key, site_id, estimate_eur, expires_at, units)
@@ -177,10 +189,19 @@ export class Usage extends UsageQueries {
    * processes, today's € (logged and reserved) is read and, if the estimate fits, a pending model_calls row
    * at the estimate is written, so two calls can't both take the last room. Otherwise today's € comes back.
    */
-  async reserveCall(c: CallOwner & { stage: string; model: string; estimateEur: number; capEur: number }): Promise<{ id: string } | { spent: number }> {
+  async reserveCall(
+    c: CallOwner & { stage: string; model: string; estimateEur: number; capEur: number; pictureCap?: { since: Date; max: number } },
+  ): Promise<{ id: string } | { spent: number } | { pictures: number }> {
     return this.db.transaction(async (q) => {
       await q("select pg_advisory_xact_lock($1)", [SPEND_LOCK]);
-      const spent = await new UsageQueries(q).spentToday();
+      const usage = new UsageQueries(q);
+      // A paid plan's generated pictures per allowance month (it-plan-limits), under the same lock: two jobs of
+      // one account can't both take its last picture.
+      if (c.pictureCap && c.accountId) {
+        const pictures = await usage.generatedPictures(c.accountId, c.pictureCap.since);
+        if (pictures >= c.pictureCap.max) return { pictures };
+      }
+      const spent = await usage.spentToday();
       if (spent + c.estimateEur > c.capEur) return { spent };
       const { rows } = await q<{ id: string | number }>(
         `insert into model_calls (site_id, job_id, stage, model, input_tokens, output_tokens, cost_eur, duration_ms, ok, pending, tier, account_id, ai_job_id)
@@ -313,11 +334,25 @@ export class Usage extends UsageQueries {
   /** On sign-in: the device's unclaimed previews (and their jobs) become the account's. */
   async claimDevice(deviceId: string, accountId: string): Promise<string[]> {
     const { rows } = await this.db.query<{ id: string }>(
-      "update sites set account_id = $2, device_id = null, updated_at = now() where device_id = $1 and account_id is null returning id",
+      "update sites set account_id = $2, device_id = null, reminder_email = null, reminder = 'none', updated_at = now() where device_id = $1 and account_id is null returning id",
       [deviceId, accountId],
     );
     if (rows.length) await this.db.query("update ai_jobs set account_id = $2 where device_id = $1 and account_id is null and kind <> 'hold'", [deviceId, accountId]);
     return rows.map((r) => r.id);
+  }
+
+  /**
+   * The reminder email's link (it-upsells): one unclaimed preview becomes the account's, with its jobs, so the
+   * free limits count it as the claimed anonymous preview. Null when it is gone or already claimed.
+   */
+  async claimSite(siteId: string, accountId: string): Promise<string | null> {
+    const { rows } = await this.db.query<{ id: string }>(
+      "update sites set account_id = $2, device_id = null, reminder_email = null, reminder = 'none', updated_at = now() where id = $1 and account_id is null and device_id is not null returning id",
+      [siteId, accountId],
+    );
+    if (!rows.length) return null;
+    await this.db.query("update ai_jobs set account_id = $2 where site_id = $1 and account_id is null and kind <> 'hold'", [siteId, accountId]);
+    return rows[0]!.id;
   }
 
   /** The device's unclaimed previews, newest first. */

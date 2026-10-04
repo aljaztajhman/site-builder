@@ -249,3 +249,24 @@ describe("generated images", () => {
     expect(flagged).toEqual(["products"]);
   });
 });
+
+describe("migration 12 → 13 (more pages, it-plan-limits)", () => {
+  it("turns stored v12 sites into valid v13 sites unchanged apart from the version, and holds Plus's 20 pages", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { validateSite, SiteSpec: Schema } = await import("../src/index.ts");
+    const read = (id: string) => JSON.parse(readFileSync(new URL(`../../../tools/eval/golden/${id}.json`, import.meta.url), "utf8")) as SiteSpec;
+    for (const id of ["pekarna-kvas", "avtoservis-mrak", "gostilna-zlata-zlica"]) {
+      const golden = read(id);
+      const v13 = migrateSpec({ ...golden, specVersion: 12 }, MIGRATIONS, 13);
+      expect(v13, id).toEqual({ ...golden, specVersion: 13 });
+      expect(validateSite(v13).issues, id).toEqual([]);
+    }
+    // 20 home and standard pages beside privacy, accessibility and 404: 23 pages, which v12 refused (12 at most).
+    const site = read("pekarna-kvas");
+    const extra = Array.from({ length: 19 }, (_, i) => ({ ...site.pages[0]!, id: `p_extra_${i + 1}`, kind: "standard" as const, slug: `stran-${i + 1}`, nav: { label: `Stran ${i + 1}`, show: false } }));
+    const big = { ...site, pages: [site.pages[0]!, ...extra, ...site.pages.slice(1)] };
+    expect(big.pages.length).toBe(23);
+    expect(Schema.safeParse(big).success).toBe(true);
+    expect(Schema.safeParse({ ...big, pages: [...big.pages, { ...extra[0]!, id: "p_x2", slug: "x2" }, { ...extra[0]!, id: "p_x3", slug: "x3" }] }).success).toBe(false);
+  });
+});

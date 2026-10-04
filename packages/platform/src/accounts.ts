@@ -30,6 +30,8 @@ export interface AllowListRow {
   added_at: string;
   /** Osnovni or Plus (sb-tiers). */
   plan: PaidPlanKey;
+  /** Since when the account holds one of the founding offer's places (migration 19); null: it doesn't. */
+  founding_at?: string | null;
 }
 
 export interface LoginTokenRow {
@@ -98,13 +100,32 @@ export class Accounts {
     return rows;
   }
 
-  /** Lists an address (or changes its plan); listing again keeps the date its paid rights started. */
-  async allow(email: string, emailKey: string, note: string | null, plan: PaidPlanKey = "standard"): Promise<void> {
+  /**
+   * Lists an address (or changes its plan); listing again keeps the date its paid rights started. `founding`
+   * gives it one of the founding offer's places (kept from then on; removing the entry frees the place).
+   */
+  async allow(email: string, emailKey: string, note: string | null, plan: PaidPlanKey = "standard", founding = false): Promise<void> {
     await this.db.query(
-      `insert into allow_list (email_key, email, note, plan) values ($1, $2, $3, $4)
-       on conflict (email_key) do update set note = coalesce(excluded.note, allow_list.note), plan = excluded.plan`,
-      [emailKey, email, note, plan],
+      `insert into allow_list (email_key, email, note, plan, founding_at) values ($1, $2, $3, $4, case when $5::boolean then now() end)
+       on conflict (email_key) do update set note = coalesce(excluded.note, allow_list.note), plan = excluded.plan,
+         founding_at = coalesce(allow_list.founding_at, excluded.founding_at)`,
+      [emailKey, email, note, plan, founding],
     );
+  }
+
+  /** How many of the founding offer's places are taken (the landing page shows what is left). */
+  async foundingTaken(): Promise<number> {
+    const { rows } = await this.db.query<{ n: string | number }>("select count(*) as n from allow_list where founding_at is not null");
+    return Number(rows[0]?.n ?? 0);
+  }
+
+  /** An account's plan and since when it has paid rights (its allow-list entry), or null for a free account. */
+  async planOf(accountId: string): Promise<{ plan: PaidPlanKey; since: string } | null> {
+    const { rows } = await this.db.query<{ plan: PaidPlanKey; added_at: string }>(
+      "select l.plan, l.added_at from accounts a join allow_list l on l.email_key = a.email_key where a.id = $1",
+      [accountId],
+    );
+    return rows[0] ? { plan: rows[0].plan, since: rows[0].added_at } : null;
   }
 
   async disallow(emailKey: string): Promise<boolean> {
