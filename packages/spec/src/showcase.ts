@@ -18,7 +18,7 @@ export interface Showcase {
   /** The golden's direction and font pair (tested against the golden). */
   direction: string;
   fontPair: string;
-  /** "Takole bi lahko izgledala stran za …" */
+  /** The caption under the landing demo: "Primer za …" (apps/web/src/showcase.ts). */
   forWhom: string;
   /**
    * What the landing demo types before it builds this site: the opening of the business's own description

@@ -199,91 +199,91 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
                 </p>
               </div>
               {/* The demo: the first trade's description is typed and its site builds itself, then the site transforms
-                    into the next trade's every few seconds (client/home.ts). Without JavaScript the tabs are links. */}
+                    into the next trade's every few seconds (client/demo.ts). Without JavaScript the tabs are links. */}
               <div className="devwrap">
-                  <div className="demo-top">
-                    <p className="trades-q" id="trades-q">
-                      Poglejte primer za svojo dejavnost:
-                    </p>
-                    <div className="demo-tools" hidden>
-                      <div className="views" role="radiogroup" aria-label="Pogled">
-                        <button type="button" role="radio" aria-checked="false" data-mode="phone" aria-label="Telefon" title="Telefon">
-                          <svg viewBox="0 0 24 24" aria-hidden="true">
-                            <rect x="7" y="2.5" width="10" height="19" rx="2.2" />
-                            <path d="M11 18.5h2" />
-                          </svg>
-                        </button>
-                        <button type="button" role="radio" aria-checked="true" data-mode="desk" aria-label="Računalnik" title="Računalnik">
-                          <svg viewBox="0 0 24 24" aria-hidden="true">
-                            <rect x="2.5" y="4" width="19" height="12.5" rx="1.8" />
-                            <path d="M8.5 20.5h7M12 16.5v4" />
-                          </svg>
-                        </button>
-                      </div>
-                      <button className="pause" type="button" aria-pressed="false" aria-label="Ustavi" title="Ustavi">
+                <div className="demo-top">
+                  <p className="trades-q" id="trades-q">
+                    Poglejte primer za svojo dejavnost:
+                  </p>
+                  <div className="demo-tools" hidden>
+                    <div className="views" role="radiogroup" aria-label="Pogled">
+                      <button type="button" role="radio" aria-checked="false" data-mode="phone" aria-label="Telefon" title="Telefon">
                         <svg viewBox="0 0 24 24" aria-hidden="true">
-                          <path d="M9 6v12M15 6v12" />
+                          <rect x="7" y="2.5" width="10" height="19" rx="2.2" />
+                          <path d="M11 18.5h2" />
+                        </svg>
+                      </button>
+                      <button type="button" role="radio" aria-checked="true" data-mode="desk" aria-label="Računalnik" title="Računalnik">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <rect x="2.5" y="4" width="19" height="12.5" rx="1.8" />
+                          <path d="M8.5 20.5h7M12 16.5v4" />
                         </svg>
                       </button>
                     </div>
+                    <button className="pause" type="button" aria-pressed="false" aria-label="Ustavi" title="Ustavi">
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M9 6v12M15 6v12" />
+                      </svg>
+                    </button>
                   </div>
-                  <div className="tabbar">
-                    <div className="tabs" role="tablist" aria-labelledby="trades-q">
-                      {trades.map((t) => (
-                        <a
-                          key={t.id}
-                          className="tab"
-                          role="tab"
-                          href={`/?primer=${t.id}#zacni`}
-                          aria-selected={t === shown ? "true" : "false"}
-                          aria-controls="demo"
-                          tabIndex={t === shown ? 0 : -1}
-                          data-id={t.id}
-                        >
-                          {t.label}
-                        </a>
-                      ))}
-                    </div>
+                </div>
+                <div className="tabbar">
+                  <div className="tabs" role="tablist" aria-labelledby="trades-q">
+                    {trades.map((t) => (
+                      <a
+                        key={t.id}
+                        className="tab"
+                        role="tab"
+                        href={`/?primer=${t.id}#zacni`}
+                        aria-selected={t === shown ? "true" : "false"}
+                        aria-controls="demo"
+                        tabIndex={t === shown ? 0 : -1}
+                        data-id={t.id}
+                      >
+                        {t.label}
+                      </a>
+                    ))}
                   </div>
-                  <div className="devbox" data-intro={chosen ? undefined : ""}>
-                    {!chosen && (
-                      <div className="intro" aria-hidden="true">
-                        <div className="ask">
-                          <div className="ask-type">
-                            <p className="ask-text">
-                              <span className="typed" />
-                              <span className="caret" />
-                              <span className="rest">{shown.intro}</span>
-                            </p>
-                            <div className="ask-bar">
-                              <span className="ask-chip">＋ 5 fotografij</span>
-                              <span className="ask-go">Ustvari</span>
-                            </div>
+                </div>
+                <div className="devbox" data-intro={chosen ? undefined : ""}>
+                  {!chosen && (
+                    <div className="intro" aria-hidden="true">
+                      <div className="ask">
+                        <div className="ask-type">
+                          <p className="ask-text">
+                            <span className="typed" />
+                            <span className="caret" />
+                            <span className="rest">{shown.intro}</span>
+                          </p>
+                          <div className="ask-bar">
+                            <span className="ask-chip">＋ 5 fotografij</span>
+                            <span className="ask-go">Ustvari</span>
                           </div>
-                          <ol className="ask-steps">
-                            <li>Razumevanje opisa</li>
-                            <li>Oblikovna smer in barve</li>
-                            <li>Fotografije</li>
-                            <li>Besedila in postavitev</li>
-                          </ol>
                         </div>
-                      </div>
-                    )}
-                    <div className="dev" data-mode="desk" id="demo" role="tabpanel">
-                      <span className="chrome" aria-hidden="true">
-                        <i />
-                        <i />
-                        <i />
-                      </span>
-                      <div className="screen">
-                        <iframe className="stage" title="" tabIndex={-1} aria-hidden="true" />
-                        <iframe className="main" src={uiUrl(`examples/${shown.page}`)} title={tradeTitle(shown)} inert />
+                        <ol className="ask-steps">
+                          <li>Razumevanje opisa</li>
+                          <li>Oblikovna smer in barve</li>
+                          <li>Fotografije</li>
+                          <li>Besedila in postavitev</li>
+                        </ol>
                       </div>
                     </div>
+                  )}
+                  <div className="dev" data-mode="desk" id="demo" role="tabpanel">
+                    <span className="chrome" aria-hidden="true">
+                      <i />
+                      <i />
+                      <i />
+                    </span>
+                    <div className="screen">
+                      <iframe className="stage" title="" tabIndex={-1} aria-hidden="true" />
+                      <iframe className="main" src={uiUrl(`examples/${shown.page}`)} title={tradeTitle(shown)} inert />
+                    </div>
                   </div>
-                  <p className="cap">{tradeCaption(shown)}</p>
-                  <p className="sr-only" aria-live="polite" data-demo-status="" />
-                  <script type="application/json" id="trades-data" dangerouslySetInnerHTML={{ __html: JSON.stringify(tradeClientData(trades)).replace(/</g, "\\u003c") }} />
+                </div>
+                <p className="cap">{tradeCaption(shown)}</p>
+                <p className="sr-only" aria-live="polite" data-demo-status="" />
+                <script type="application/json" id="trades-data" dangerouslySetInnerHTML={{ __html: JSON.stringify(tradeClientData(trades)).replace(/</g, "\\u003c") }} />
               </div>
             </div>
           </section>
