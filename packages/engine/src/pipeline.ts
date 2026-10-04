@@ -1,13 +1,13 @@
 import type { AppConfig } from "@sb/config";
-import { VersionConflictError, type Repo, type Storage } from "@sb/platform";
+import { VersionConflictError, normaliseHostname, type Repo, type Storage } from "@sb/platform";
 import { contentType } from "@sb/platform";
-import { mediaFiles, siteFiles, exportZip } from "@sb/render";
+import { mediaFiles, siteFiles, exportZip, shareImageOf, variantFile, variantWidths } from "@sb/render";
 import { blockerText, direction as directionById, publishChecklist, templateFor, validateSite, type ImageAsset, type PublishBlocker, type SiteSpec } from "@sb/spec";
 import type { Operation } from "fast-json-patch";
 import { ModelOutputError, SpendCapError, type ModelClient } from "./llm/client.ts";
 import { classify, makeBrief, chooseDesign, altTexts, generateContent, critique, applyPatches, editSpec, drawsInsteadOfPhotos } from "./stages.ts";
 import { extractSwatches, type Swatch } from "./palette.ts";
-import { processLogo, processPhoto, visionJpeg } from "./images.ts";
+import { processLogo, processPhoto, shareJpeg, visionJpeg } from "./images.ts";
 import type { ImageGenerator } from "./image-gen.ts";
 import { checkSite, type CheckBrowser, type SiteCheckReport } from "./check/index.ts";
 import { typedText } from "./editor.ts";
@@ -399,7 +399,36 @@ export class PublishBusyError extends Error {
   }
 }
 
-export async function publishSite(deps: Pick<PipelineDeps, "repo" | "storage" | "config">, siteId: string, version?: number): Promise<{ version: number; files: number }> {
+/**
+ * A site's absolute address for canonical URLs and the sitemap: its primary domain once active, else
+ * <slug>.<PLATFORM_DOMAIN> when the platform domain exists, else null (the app's /s/ path is never canonical:
+ * it is not indexed and moves once the site has a domain).
+ */
+export async function siteAddress(repo: Repo, siteId: string, slug: string, platformDomain: string | null | undefined): Promise<string | null> {
+  const primary = (await repo.domains.forSite(siteId)).find((d) => d.is_primary && d.status === "active");
+  if (primary) return `https://${primary.hostname}/`;
+  const platform = platformDomain ? normaliseHostname(platformDomain) : null;
+  return platform ? `https://${slug}.${platform}/` : null;
+}
+
+/** Adds the share picture (og:image, seo.ts shareImageOf) to `media`, made from the image's largest variant. */
+export async function addShareImage(spec: SiteSpec, media: Map<string, Uint8Array>, widths: number[]): Promise<void> {
+  const share = shareImageOf(spec);
+  const asset = share ? spec.assets.images.find((i) => i.id === share.image) : undefined;
+  if (!share || !asset) return;
+  const source = variantWidths(asset, widths)
+    .reverse()
+    .map((w) => media.get(variantFile(asset.id, w, "webp")))
+    .find((d) => d !== undefined);
+  if (source) media.set(share.file, await shareJpeg(source, asset.focal));
+}
+
+/** Where a site is published and exported: its address (siteAddress) comes from PLATFORM_DOMAIN and its domains. */
+export interface AddressDeps {
+  platformDomain?: string | null;
+}
+
+export async function publishSite(deps: Pick<PipelineDeps, "repo" | "storage" | "config"> & AddressDeps, siteId: string, version?: number): Promise<{ version: number; files: number }> {
   const { repo, storage, config } = deps;
   const site = await repo.getSite(siteId);
   const stored = await repo.getSpec(siteId, version);
@@ -412,7 +441,9 @@ export async function publishSite(deps: Pick<PipelineDeps, "repo" | "storage" | 
   if (!(await repo.claimPublish(siteId))) throw new PublishBusyError();
   try {
     const media = await loadMedia(storage, siteId, current.spec, config.images.widths);
-    const files = siteFiles(current.spec, media, { imageWidths: config.images.widths });
+    const siteUrl = await siteAddress(repo, siteId, site.slug, deps.platformDomain);
+    if (siteUrl) await addShareImage(current.spec, media, config.images.widths);
+    const files = siteFiles(current.spec, media, { imageWidths: config.images.widths, siteUrl });
     const release = newReleaseId(current.version);
     await writeRelease(storage, site.slug, release, files);
     await repo.markPublished(siteId, current.version, release);
@@ -423,13 +454,16 @@ export async function publishSite(deps: Pick<PipelineDeps, "repo" | "storage" | 
   }
 }
 
-export async function exportSite(deps: Pick<PipelineDeps, "repo" | "storage" | "config">, siteId: string, version?: number): Promise<{ filename: string; zip: Uint8Array }> {
+export async function exportSite(deps: Pick<PipelineDeps, "repo" | "storage" | "config"> & AddressDeps, siteId: string, version?: number): Promise<{ filename: string; zip: Uint8Array }> {
   const site = await deps.repo.getSite(siteId);
   const stored = await deps.repo.getSpec(siteId, version);
   if (!site || !stored) throw new Error(`Site ${siteId} has no spec`);
   const spec = { ...stored.spec, slug: site.slug };
   const media = await loadMedia(deps.storage, siteId, spec, deps.config.images.widths);
-  return { filename: `${site.slug}-v${stored.version}.zip`, zip: exportZip(spec, media, { imageWidths: deps.config.images.widths }) };
+  // The export carries the same search files as the published site (robots.txt, sitemap.xml with its address).
+  const siteUrl = await siteAddress(deps.repo, siteId, site.slug, deps.platformDomain);
+  if (siteUrl) await addShareImage(spec, media, deps.config.images.widths);
+  return { filename: `${site.slug}-v${stored.version}.zip`, zip: exportZip(spec, media, { imageWidths: deps.config.images.widths, siteUrl }) };
 }
 
 /**

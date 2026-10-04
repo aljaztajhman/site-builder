@@ -500,3 +500,203 @@
     padding: 1.75rem 2rem;
   }
 }
+
+/* ---------- collection (spec v12): the owner's blog, events, services and team ---------- */
+.coll {
+  display: grid;
+  border-top: 1px solid var(--c-border);
+}
+.tone-inverse .coll,
+.tone-band .coll {
+  border-color: currentColor;
+}
+.coll > li {
+  max-width: none;
+}
+.coll__item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
+  padding-block: 1.25rem;
+  border-bottom: 1px solid var(--c-border);
+}
+.coll__item[hidden] {
+  display: none;
+}
+.coll__body {
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: 0.4rem;
+}
+.coll__title {
+  font-size: var(--fs-h3);
+}
+/* The whole title is the link; 44 px tall at least with its line box. */
+.coll__title a {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding-block: 0.4rem;
+  margin-block: -0.4rem;
+  text-underline-offset: 0.15em;
+}
+/* Dates, times and places are information, not decoration: body size, muted colour. */
+.coll__meta {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 1rem;
+  row-gap: 0.25rem;
+  font-size: 1rem;
+  color: var(--c-muted);
+}
+.tone-inverse .coll__meta,
+.tone-band .coll__meta {
+  color: inherit;
+}
+.coll__meta time,
+.coll__price {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.coll__media {
+  aspect-ratio: 3 / 2;
+  border-radius: var(--radius);
+}
+/* Events: a calendar badge beside the text. */
+.coll__item--event {
+  grid-template-columns: 4rem minmax(0, 1fr);
+  column-gap: 1rem;
+}
+.coll__item--event > .coll__media {
+  grid-column: 1 / -1;
+}
+.coll__badge {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  aspect-ratio: 1;
+  border: 2px solid currentColor;
+  border-radius: var(--radius);
+  line-height: 1;
+}
+.coll__badge-day {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-heading);
+  font-size: var(--fs-h3);
+  font-variant-numeric: tabular-nums;
+}
+.coll__badge-month {
+  font-size: var(--fs-sm);
+}
+/* Services: price beside the name, as in the services list. */
+.coll__item--service .coll__body {
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 1rem;
+  width: 100%;
+}
+.coll__item--service .coll__price {
+  font-weight: 600;
+  text-align: right;
+}
+.coll__item--service .coll__summary {
+  grid-column: 1 / -1;
+}
+/* Team: a small portrait beside the name and role. */
+.coll__item--person {
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  column-gap: 1rem;
+  align-items: start;
+}
+.coll__portrait {
+  width: 4.5rem;
+  aspect-ratio: 1;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.coll__portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.coll__initials {
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, currentColor 7%, transparent);
+  font-family: var(--font-heading);
+  font-size: var(--fs-lg);
+}
+.coll__empty,
+.coll__more {
+  margin-top: var(--space-block);
+}
+@media (min-width: 48rem) {
+  .coll--cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 2rem;
+    border-top: 0;
+  }
+  .coll--cards .coll__item {
+    border-top: 1px solid var(--c-border);
+    border-bottom: 0;
+  }
+  .coll--cards.coll--team {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .coll:not(.coll--cards) .coll__item--event {
+    grid-template-columns: 5rem minmax(0, 1fr);
+    column-gap: 2rem;
+  }
+}
+
+/* ---------- An entry's own page (novice/…, dogodki/…) ---------- */
+.s-entry .entry {
+  display: grid;
+  gap: var(--space-block);
+  max-width: 48rem;
+}
+.entry__back a {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding-block: 0.6rem;
+  font-size: var(--fs-sm);
+}
+.entry__head {
+  display: grid;
+  justify-items: start;
+  gap: 0.75rem;
+}
+.entry__facts {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+}
+.entry__facts > div {
+  display: grid;
+  grid-template-columns: 5rem minmax(0, 1fr);
+  gap: 1rem;
+}
+.entry__facts dt {
+  font-weight: 600;
+}
+.entry__facts dd {
+  margin: 0;
+}
+.entry__price {
+  font-size: var(--fs-lg);
+  font-weight: 600;
+}
+.entry__past {
+  font-weight: 600;
+}
+/* Landscape at any width, so a portrait photo doesn't fill two screens above the text. */
+.entry__media {
+  aspect-ratio: 3 / 2;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.entry__body {
+  display: grid;
+  gap: 1em;
+  font-size: var(--fs-base);
+  line-height: 1.65;
+}

@@ -8,6 +8,7 @@ export * from "./color.ts";
 export * from "./format.ts";
 export * from "./banned.ts";
 export * from "./pointer.ts";
+export * from "./collections.ts";
 export * from "./site.ts";
 export * from "./sections/index.ts";
 export * from "./validate.ts";

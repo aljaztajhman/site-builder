@@ -89,6 +89,20 @@ const sl = {
   formBack: "Nazaj na stran",
   openFrom: "odprto od",
   everyDay: "Vsak dan",
+  moreBlog: "Vse novice",
+  moreEvents: "Vsi dogodki",
+  moreServices: "Vse storitve",
+  moreTeam: "Vsa ekipa",
+  noUpcoming: "Trenutno ni napovedanih dogodkov.",
+  eventPast: "Ta dogodek je že minil.",
+  eventWhen: "Kdaj",
+  eventPlace: "Kje",
+  eventTickets: "Prijava in vstopnice",
+  /** Reading time of a blog post, after the number: 1 minuta, 2 minuti, 3 minute, 5 minut branja. */
+  readOne: "minuta branja",
+  readTwo: "minuti branja",
+  readFew: "minute branja",
+  readOther: "minut branja",
 } as const;
 
 export type UiKey = keyof typeof sl;
@@ -177,6 +191,19 @@ const en: Record<UiKey, string> = {
   formBack: "Back to the page",
   openFrom: "open from",
   everyDay: "Every day",
+  moreBlog: "All news",
+  moreEvents: "All events",
+  moreServices: "All services",
+  moreTeam: "The whole team",
+  noUpcoming: "No upcoming events at the moment.",
+  eventPast: "This event has already taken place.",
+  eventWhen: "When",
+  eventPlace: "Where",
+  eventTickets: "Tickets and sign-up",
+  readOne: "minute read",
+  readTwo: "minute read",
+  readFew: "minute read",
+  readOther: "minute read",
 };
 
 // One dictionary per locale a site may use (SITE_LOCALES); adding a locale there needs its strings here.

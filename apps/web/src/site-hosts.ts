@@ -85,6 +85,10 @@ const sameSecret = (a: string, b: string) => {
   return x.length === y.length && timingSafeEqual(x, y);
 };
 
+/** Requests the app answers for a site's own hostname (siteHosts), for the indexing header (config seo). */
+const siteHostRequests = new WeakSet<Request>();
+export const servedForSiteHost = (req: Request) => siteHostRequests.has(req);
+
 /**
  * First middleware of the app: a site host's request is answered by the app itself at the site's
  * /s/<slug>/ path (the inner request is marked so it isn't routed twice). The hostname is the Host
@@ -107,6 +111,7 @@ export function siteHosts(app: Hono<AppEnv>, resolve: (host: string) => Promise<
     }
     const req = new Request(new URL(`${sitePath(answer.slug, url.pathname)}${url.search}`, url), c.req.raw);
     inner.add(req);
+    siteHostRequests.add(req);
     return app.fetch(req, c.env);
   };
 }

@@ -19,7 +19,7 @@ const LEGAL_FORMS = new Set(["d.o.o.", "d.o.o", "s.p.", "s.p", "d.d.", "d.d", "k
 const STREET_KINDS = new Set(["cesta", "ulica", "trg", "pot", "nabrezje", "naselje"]);
 
 /** Keys whose strings are structural, not visible copy; "date" is the accessibility statement's day, set in code (its digits would read as a phone). */
-const NON_COPY_KEYS = new Set(["id", "type", "variant", "tone", "page", "section", "action", "kind", "slug", "image", "network", "src", "file", "$placeholder", "date"]);
+const NON_COPY_KEYS = new Set(["id", "type", "variant", "tone", "page", "section", "action", "kind", "slug", "image", "network", "src", "file", "$placeholder", "date", "endDate", "start", "end"]);
 
 const IMAGE_REF_RE = /^img_[a-z0-9_-]+$/;
 const EMAIL_RE = /[\w.+-]+@[\w-]+\.[\w.]+/g;
@@ -156,6 +156,12 @@ function check(spec: SiteSpec, c: Corpus, translated: boolean): FactViolation[] 
     for (const [k, x] of Object.entries(o)) visit(x, `${p}/${k}`, Array.isArray(x) && name ? name : owner);
   };
   visit(spec.pages, "/pages", "");
+  // Collections are the owner's, typed in the editor (their text is in the corpus); an entry moved in from a
+  // generated section still has to pass, so they are checked like pages.
+  visit(spec.collections ?? {}, "/collections", "");
+  (spec.collections?.team?.items ?? []).forEach((m, mi) => {
+    if (!m.name.toLowerCase().split(/\s+/).every((w) => text.includes(w))) out.push({ path: `/collections/team/items/${mi}/name`, kind: "name", value: m.name });
+  });
   spec.pages.forEach((page, pi) =>
     page.sections.forEach((s, si) => {
       if (s.type !== "team" && s.type !== "about") return;
@@ -177,6 +183,10 @@ function check(spec: SiteSpec, c: Corpus, translated: boolean): FactViolation[] 
     // An image reference under any key (image, inset, …) is an id, not copy.
     if (IMAGE_REF_RE.test(s)) return;
     for (const f of copyFacts(s, c, "number")) out.push({ path: `/pages${p}`, ...f });
+  });
+  walkStrings(spec.collections ?? {}, (s, p, key) => {
+    if (NON_COPY_KEYS.has(key) || key === "url" || /^https?:\/\//.test(s) || IMAGE_REF_RE.test(s)) return;
+    for (const f of copyFacts(s, c, "number")) out.push({ path: `/collections${p}`, ...f });
   });
   // Translations overlay any string of the spec when rendered; check each locale as it is shown.
   for (const [locale, map] of Object.entries(spec.translations ?? {})) {

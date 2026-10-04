@@ -35,10 +35,10 @@ afterAll(async () => {
   await rm(dir, { recursive: true, force: true });
 });
 
-const app = () =>
+const app = (o: { indexSiteHosts?: boolean } = {}) =>
   createApp({
     platform,
-    config,
+    config: o.indexSiteHosts === undefined ? config : { ...config, seo: { ...config.seo, indexSiteHosts: o.indexSiteHosts } },
     mailer: memoryMailer(),
     appUrl: "https://app.stranko.example",
     platformDomain: "stranko.example",
@@ -168,6 +168,26 @@ describe("platform subdomains", () => {
     const r = await get("app.stranko.example", "/health");
     expect(r.status).toBe(200);
     expect((await get("localhost", "/health")).status).toBe(200);
+  });
+});
+
+describe("indexing (config seo.indexSiteHosts)", () => {
+  it("is off by default: every answer says noindex", async () => {
+    await site("pekarna-index");
+    expect((await get("pekarna-index.stranko.example", "/")).headers.get("x-robots-tag")).toBe("noindex, nofollow");
+  });
+
+  it("when on, lets a site on its own hostname be indexed, never the app's /s/ path or dashboard", async () => {
+    await site("pekarna-index-on");
+    const on = app({ indexSiteHosts: true });
+    const ask = (host: string, p: string) => on.request(`http://${host}${p}`, { headers: { host } });
+    const home = await ask("pekarna-index-on.stranko.example", "/");
+    expect(home.status).toBe(200);
+    expect(home.headers.get("x-robots-tag")).toBeNull();
+    expect((await ask("app.stranko.example", "/s/pekarna-index-on/")).headers.get("x-robots-tag")).toBe("noindex, nofollow");
+    expect((await ask("app.stranko.example", "/")).headers.get("x-robots-tag")).toBe("noindex, nofollow");
+    // A hostname with nothing published stays out of the index too.
+    expect((await ask("nothing-here.stranko.example", "/")).headers.get("x-robots-tag")).toBe("noindex, nofollow");
   });
 });
 

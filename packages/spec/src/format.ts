@@ -207,3 +207,55 @@ export function plural(n: number, forms: { one: string; two: string; few: string
   const rule = new Intl.PluralRules(localeTag(locale)).select(n) as keyof typeof forms;
   return forms[rule] ?? forms.other;
 }
+
+const MONTHS: Record<"sl" | "en", string[]> = {
+  // Slovene dates take the month in the genitive: "3. oktobra 2026".
+  sl: ["januarja", "februarja", "marca", "aprila", "maja", "junija", "julija", "avgusta", "septembra", "oktobra", "novembra", "decembra"],
+  en: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+};
+const MONTHS_SHORT: Record<"sl" | "en", string[]> = {
+  sl: ["jan.", "feb.", "mar.", "apr.", "maj", "jun.", "jul.", "avg.", "sep.", "okt.", "nov.", "dec."],
+  en: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+};
+
+const ymd = (iso: string) => iso.split("-").map(Number) as [number, number, number];
+
+/** A YYYY-MM-DD day in words: "3. oktobra 2026" (sl), "3 October 2026" (en). */
+export function formatLongDate(iso: string, locale: Locale = "sl"): string {
+  const [y, m, d] = ymd(iso);
+  const month = MONTHS[dayLocale(locale)][m - 1]!;
+  return locale === "sl" ? `${d}.${NBSP}${month} ${y}` : `${d}${NBSP}${month} ${y}`;
+}
+
+/**
+ * A run of days, the shared parts once: "3.–5. oktobra 2026", "30. septembra – 2. oktobra 2026",
+ * "30. decembra 2026 – 2. januarja 2027". One day, or an end before the start, is that one day.
+ */
+export function formatDateRange(start: string, end: string | undefined, locale: Locale = "sl"): string {
+  if (!end || end <= start) return formatLongDate(start, locale);
+  const [y1, m1, d1] = ymd(start);
+  const [y2, m2, d2] = ymd(end);
+  const sl = locale === "sl";
+  const dot = sl ? "." : "";
+  if (y1 === y2 && m1 === m2) return `${d1}${dot}–${d2}${dot}${NBSP}${MONTHS[dayLocale(locale)][m2 - 1]} ${y2}`;
+  const month = (m: number) => MONTHS[dayLocale(locale)][m - 1]!;
+  if (y1 === y2) return `${d1}${dot}${NBSP}${month(m1)} – ${d2}${dot}${NBSP}${month(m2)} ${y2}`;
+  return `${formatLongDate(start, locale)} – ${formatLongDate(end, locale)}`;
+}
+
+/** Day number and short month of a date, for a calendar badge: { day: "3", month: "okt." }. */
+export function dateBadge(iso: string, locale: Locale = "sl"): { day: string; month: string } {
+  const [, m, d] = ymd(iso);
+  return { day: String(d), month: MONTHS_SHORT[dayLocale(locale)][m - 1]! };
+}
+
+/** "19.00–21.00", or "19.00" without an end. */
+export function formatTimeRange(start: string, end?: string): string {
+  return end ? `${formatTime(start)}–${formatTime(end)}` : formatTime(start);
+}
+
+/** Minutes to read paragraphs at ~200 words a minute, at least one. */
+export function readingMinutes(paragraphs: readonly string[]): number {
+  const words = paragraphs.join(" ").split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words / 200));
+}

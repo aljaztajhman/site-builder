@@ -36,7 +36,7 @@ const TEMPLATE_MOTIFS = TEMPLATES.map((d) => MOTIF_WORDS[d.template!.motif]).joi
 
 /** Catalogue of section components for the model, generated from the spec (the single source of truth). */
 export function sectionCatalogue(): string {
-  const lines = SECTION_DEFS.filter((d) => !d.systemOnly).map((d) => {
+  const lines = SECTION_DEFS.filter((d) => !d.systemOnly && !d.ownerOnly).map((d) => {
     const schema = toModelJsonSchema(d.props);
     return [
       `### ${d.type}`,

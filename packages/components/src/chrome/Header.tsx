@@ -47,7 +47,7 @@ export function Header({ ctx }: { ctx: RenderCtx }) {
               <ul className="site-nav__list" role="list">
                 {navPages.map((p) => (
                   <li key={p.id}>
-                    <a href={ctx.pageHref(p.id)} aria-current={p.id === page.id ? "page" : undefined}>
+                    <a href={ctx.pageHref(p.id)} aria-current={p.id === page.id ? (ctx.entry ? "true" : "page") : undefined}>
                       {p.nav.label}
                     </a>
                   </li>

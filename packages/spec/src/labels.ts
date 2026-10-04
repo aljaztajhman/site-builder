@@ -34,6 +34,7 @@ export const SECTION_LABEL: Record<string, string> = {
   rooms: "Sobe in ponudba",
   "service-area": "Območje dela",
   "contact-strip": "Hitri kontakt",
+  collection: "Zbirka (novice, dogodki, storitve, ekipa)",
   legal: "Pravno besedilo",
   "not-found": "Stran ne obstaja",
 };
@@ -66,6 +67,7 @@ export const VARIANT_LABEL: Record<string, Record<string, string>> = {
   rooms: { cards: "Kartice", rows: "Vrstice" },
   "service-area": { list: "Seznam", inline: "V vrstici" },
   "contact-strip": { bar: "Vrstica", cards: "Kartice" },
+  collection: { list: "Seznam", cards: "Kartice" },
   legal: { default: "Osnovno" },
   "not-found": { default: "Osnovno" },
 };
@@ -100,10 +102,21 @@ export const FIELD_LABEL: Record<string, string> = {
   images: "Fotografije",
   wordmark: "Ime v ozadju",
   year: "Leto v nogi strani",
-  date: "Datum izjave (LLLL-MM-DD)",
+  date: "Datum",
   signs: "Kažipoti",
   receipt: "Račun v uvodu",
   lines: "Vrstice na računu",
+  limit: "Prikaži največ (prazno: vse)",
+  blog: "Novice",
+  events: "Dogodki",
+  services: "Storitve",
+  team: "Ekipa",
+  summary: "Povzetek",
+  endDate: "Zadnji dan (več dni)",
+  start: "Začetek (HH:MM)",
+  end: "Konec (HH:MM)",
+  place: "Kraj",
+  slug: "Ime strani v naslovu (neobvezno)",
   total: "Zadnja vrstica (dvojna črta)",
   figure: "Velika številka",
   value: "Številka",
@@ -171,6 +184,8 @@ export const FIELD_LABEL_IN: Record<string, string> = {
   "figure/label": "Kaj številka pomeni",
   "signs/label": "Kraj na kažipotu",
   "signs/note": "Čas ali razdalja",
+  // The accessibility statement's date (legal section props); a post's or event's date is just "Datum".
+  "props/date": "Datum izjave (LLLL-MM-DD)",
 };
 
 export function fieldLabel(key: string, parent?: string): string {
@@ -217,6 +232,11 @@ export const ENUM_LABEL: Record<string, string> = {
   fri: "Petek",
   sat: "Sobota",
   sun: "Nedelja",
+  // Collections.
+  blog: "Novice",
+  events: "Dogodki",
+  services: "Storitve",
+  team: "Ekipa",
   // Social networks (brand names).
   facebook: "Facebook",
   instagram: "Instagram",

@@ -7,6 +7,7 @@ import { findBannedCopy } from "./banned.ts";
 import { getAt, walkObjects, walkStrings } from "./pointer.ts";
 import { SITE_LOCALES, isSiteLocale, isWebUrl, type PlaceholderKind } from "./common.ts";
 import { EDITOR_STARTER_TEXT } from "./starter.ts";
+import { COLLECTION_KINDS } from "./collections.ts";
 
 export interface Issue {
   path: string;
@@ -145,10 +146,41 @@ export function semanticIssues(spec: SiteSpec): Issue[] {
     add("/chrome/header/cta", "reference", "booking CTA without business.bookingUrl");
   }
 
-  // Link URLs: z.url() also accepts javascript:, data: and the like; the renderer drops anything not http(s).
   const webUrl = (path: string, url: string) => {
     if (!isWebUrl(url)) add(path, "reference", "link URL must start with http:// or https://");
   };
+
+  // Collections (v12): their list pages, pictures and entry pages; sections only show collections that exist.
+  const cols = spec.collections;
+  for (const kind of COLLECTION_KINDS) {
+    const c = cols?.[kind];
+    if (!c) continue;
+    const at = `/collections/${kind}`;
+    const listPage = spec.pages.find((p) => p.id === c.page);
+    if (!listPage) add(`${at}/page`, "reference", `unknown page ${c.page}`);
+    else if (SYSTEM_PAGE_KINDS.has(listPage.kind)) add(`${at}/page`, "reference", `a collection can't be listed on the ${listPage.kind} page`);
+    const named = new Set<string>();
+    c.items.forEach((item, i) => {
+      if (item.image !== undefined && !imageIds.has(item.image)) add(`${at}/items/${i}/image`, "reference", `unknown image ${item.image}`);
+      if (item.image !== undefined && generated.has(item.image)) add(`${at}/items/${i}/image`, "reference", `${item.image} is AI-generated and may only be used in ${GENERATED_IMAGE_SECTIONS.join(", ")}`);
+      if (item.slug !== undefined) {
+        if (named.has(item.slug)) add(`${at}/items/${i}/slug`, "structure", `duplicate entry slug "${item.slug}"`);
+        named.add(item.slug);
+      }
+      if ("endDate" in item && item.endDate !== undefined && item.endDate < item.date) add(`${at}/items/${i}/endDate`, "structure", "an event can't end before it starts");
+      if ("end" in item && item.end !== undefined && item.start === undefined) add(`${at}/items/${i}/end`, "structure", "an event's end time needs a start time");
+      if ("url" in item && item.url !== undefined) webUrl(`${at}/items/${i}/url`, item.url);
+    });
+  }
+  spec.pages.forEach((p, pi) =>
+    p.sections.forEach((s, si) => {
+      if (s.type === "collection" && !cols?.[s.props.kind]) add(`/pages/${pi}/sections/${si}/props/kind`, "reference", `the ${s.props.kind} collection is not set up`);
+    }),
+  );
+  // The banned phrases are give-aways of generated copy; collections are the owner's own words, so they aren't
+  // checked against them (em dashes are still repaired on save, banned.ts repairSiteCopy).
+
+  // Link URLs: z.url() also accepts javascript:, data: and the like; the renderer drops anything not http(s).
   walkObjects(spec.pages, (o, p) => {
     if (typeof o.url === "string") webUrl(`/pages${p}/url`, o.url);
   });
@@ -186,6 +218,10 @@ export function collectStarterText(spec: unknown): string[] {
   const out: string[] = [];
   walkStrings((spec as { pages?: unknown }).pages, (s, p) => {
     if (STARTER.has(s)) out.push(`/pages${p}`);
+  });
+  // A new blog post or event starts with the same text; it is published only once the owner wrote theirs.
+  walkStrings((spec as { collections?: unknown }).collections, (s, p) => {
+    if (STARTER.has(s)) out.push(`/collections${p}`);
   });
   return out;
 }

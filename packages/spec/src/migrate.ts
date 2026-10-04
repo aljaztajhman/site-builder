@@ -56,6 +56,9 @@ export const MIGRATIONS: Record<number, (spec: RawSpec) => RawSpec> = {
   // date), so preview, published page and export agree. Additive and optional: a v10 site without them renders
   // them from the day it is rendered, as before.
   10: (spec) => spec,
+  // 11 → 12: collections (phase 4, it-collections). Additive: the optional `collections` (blog, events, services,
+  // team) and the owner-only "collection" section. Every v11 spec is a valid v12 spec.
+  11: (spec) => spec,
 };
 
 export function migrateSpec(input: unknown, migrations = MIGRATIONS, target: number = SPEC_VERSION): SiteSpec {

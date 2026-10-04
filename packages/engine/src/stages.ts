@@ -385,6 +385,10 @@ export interface PatchResult {
 /** Applies RFC 6902 operations to a copy, then validates. Never mutates the input. */
 export function applyPatches(spec: SiteSpec, ops: Operation[], corpus: string): PatchResult {
   if (ops.length === 0) return { spec, applied: 0, issues: [] };
+  // Collections are the owner's own lists (blog posts, events …): the model may not write them, so nothing in
+  // them is invented. The owner edits them in the editor.
+  const owned = ops.filter((o) => o.path === "/collections" || o.path.startsWith("/collections/") || ("from" in o && typeof o.from === "string" && o.from.startsWith("/collections")));
+  if (owned.length) return { spec, applied: 0, issues: owned.map((o) => `${o.path}: collections are edited by the owner in the editor, not in chat`) };
   const result = applyOps(spec, ops);
   if ("reason" in result) {
     const issue =

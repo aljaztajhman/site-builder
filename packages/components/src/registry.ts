@@ -35,6 +35,8 @@ export const SECTION_ISLANDS: Partial<Record<SectionType, string[]>> = {
  */
 export function islandsFor(section: Section): string[] {
   if (section.type === "contact" && section.variant === "call-out") return [];
+  // Only a list of events changes with the date (events.js hides the past ones).
+  if (section.type === "collection" && section.props.kind !== "events") return [];
   return SECTION_ISLANDS[section.type] ?? [];
 }
 

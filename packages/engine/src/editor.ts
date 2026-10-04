@@ -1,7 +1,13 @@
 import jsonpatch, { type Operation } from "fast-json-patch";
 import {
   Business,
+  COLLECTION_KINDS,
+  COLLECTION_LIMITS,
   COLOR_LABEL,
+  Event as EventEntry,
+  Person,
+  Post,
+  Service,
   DESIGN_LABEL,
   DIRECTIONS,
   DIRECTION_LABEL,
@@ -166,6 +172,11 @@ type Json = Record<string, unknown>;
 export function defaultSection(spec: SiteSpec, type: string, id: string): Json | null {
   const def = sectionDef(type);
   if (def.systemOnly) return null;
+  // A collection section shows one of the site's collections; it can be added once one is switched on.
+  if (type === "collection") {
+    const kind = COLLECTION_KINDS.find((k) => spec.collections?.[k]);
+    return kind ? { id, type, variant: def.variants[0], props: { kind, title: DEFAULT_TEXT.title } } : null;
+  }
   const images = spec.assets.images.map((i) => i.id);
   const home = spec.pages.find((p) => p.kind === "home")?.id ?? spec.pages[0]!.id;
   let imgIndex = 0;
@@ -227,6 +238,14 @@ export function editorCatalogue(spec: SiteSpec) {
       canAdd: defaultSection(spec, d.type, "s_probe") !== null,
     })),
     business: toModelJsonSchema(Business),
+    /** One entry of each collection (the forms under Strani › Zbirke) and how many a collection may hold. */
+    collections: {
+      blog: toModelJsonSchema(Post),
+      events: toModelJsonSchema(EventEntry),
+      services: toModelJsonSchema(Service),
+      team: toModelJsonSchema(Person),
+    },
+    collectionLimits: COLLECTION_LIMITS,
     directions: DIRECTIONS.map((d) => ({ id: d.id, name: d.name, summary: d.summary, fontPairs: d.fontPairs, ranges: d.ranges })),
     fontPairs: FONT_PAIRS.map((f) => ({ id: f.id, label: f.label })),
   };

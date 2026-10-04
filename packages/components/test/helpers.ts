@@ -82,6 +82,7 @@ export function testCtx(spec: SiteSpec = testSpec(), page?: Page): RenderCtx {
   return {
     site: spec,
     page: page ?? spec.pages[0]!,
+    entryHref: (path) => path,
     locale: "sl",
     t: uiStrings("sl"),
     image: (id) => {

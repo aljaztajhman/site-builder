@@ -149,6 +149,13 @@ export const AppConfigSchema = z.object({
     retryEveryMinutes: z.number().int().positive(),
     maxAttempts: z.number().int().min(1).max(10),
   }),
+  seo: z.object({
+    /**
+     * Published sites on their own hostname (a domain or <slug>.<PLATFORM_DOMAIN>) are sent without the noindex
+     * header. Off until the platform domain exists (it-platform-domain); the app's own /s/ paths are never indexed.
+     */
+    indexSiteHosts: z.boolean(),
+  }),
   formEmail: z.object({
     waitMs: z.number().int().positive(),
     retryEveryMinutes: z.number().int().positive(),

@@ -1,5 +1,5 @@
 import sharp from "sharp";
-import { variantFile, variantWidths } from "@sb/render";
+import { SHARE_IMAGE, variantFile, variantWidths } from "@sb/render";
 
 export interface ProcessedImage {
   width: number;
@@ -39,6 +39,23 @@ export async function processLogo(data: Uint8Array, mime: string): Promise<{ fil
   const input = mime === "image/svg+xml" ? sharp(data, { density: 300, limitInputPixels: MAX_INPUT_PIXELS }) : sharp(data, { limitInputPixels: MAX_INPUT_PIXELS });
   const out = await input.resize({ height: 96, withoutEnlargement: mime !== "image/svg+xml" }).png().toBuffer({ resolveWithObject: true });
   return { file: "logo.png", data: out.data, width: Math.round(out.info.width / 2), height: Math.round(out.info.height / 2) };
+}
+
+/**
+ * The picture shown when a link to the site is shared (og:image): SHARE_IMAGE.width × height JPEG, cropped around
+ * the image's focal point (centre without one). From the largest variant, upscaled when that is smaller.
+ */
+export async function shareJpeg(data: Uint8Array, focal: { x: number; y: number } = { x: 0.5, y: 0.5 }): Promise<Uint8Array> {
+  const { width: W, height: H } = SHARE_IMAGE;
+  const m = await sharp(data, { limitInputPixels: MAX_INPUT_PIXELS }).metadata();
+  if (!m.width || !m.height) throw new Error("Unreadable image");
+  const scale = Math.max(W / m.width, H / m.height);
+  const w = Math.max(W, Math.ceil(m.width * scale));
+  const h = Math.max(H, Math.ceil(m.height * scale));
+  const left = Math.min(w - W, Math.max(0, Math.round(focal.x * w - W / 2)));
+  const top = Math.min(h - H, Math.max(0, Math.round(focal.y * h - H / 2)));
+  const out = await sharp(data, { limitInputPixels: MAX_INPUT_PIXELS }).resize(w, h, { fit: "fill" }).extract({ left, top, width: W, height: H }).jpeg({ quality: 82, mozjpeg: true }).toBuffer();
+  return new Uint8Array(out);
 }
 
 /** Small JPEG for the vision model: enough for alt text and critique, cheap in tokens. */

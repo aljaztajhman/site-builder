@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import {
   Business,
   COLOR_LABEL,
+  Collections,
   DESIGN_LABEL,
   DIRECTIONS,
   DIRECTION_LABEL,
@@ -56,6 +57,7 @@ describe("Slovene names for everything the editor shows", () => {
   const enums = new Set<string>();
   for (const d of SECTION_DEFS) walk(toModelJsonSchema(d.props), keys, enums);
   walk(toModelJsonSchema(Business), keys, enums);
+  walk(toModelJsonSchema(Collections), keys, enums);
 
   it("names every section type and variant", () => {
     for (const d of SECTION_DEFS) {
