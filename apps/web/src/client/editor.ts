@@ -9,7 +9,8 @@ import { COLOR_LABEL, DIRECTION_LABEL, ENUM_LABEL, SECTION_LABEL, TOKEN_LABEL, V
 import { formatDateTime, formatEur, siteStatus } from "../ui/labels.ts";
 import { groupVersions, undoTarget, type ListedVersion } from "./versions.ts";
 import { placeholderPath } from "./placeholders.ts";
-import { isPriceListType } from "@sb/spec/price-edit";
+import { isPriceListType, parsePriceInput, priceValue } from "@sb/spec/price-edit";
+import { missingFacts, type MissingFact } from "@sb/spec/missing-facts";
 import { itemKeyForPath, priceEditor, type PriceEditorState } from "./price-editor.ts";
 import { domainStatus, domainStep, newDomainStepUi, openDomainStep, type DomainChoice, type DomainStepDeps, type DomainsInfo } from "./domain-step.ts";
 import { lockedPagesBlock, planTag, reminderBlock, type Limits, type Upgrade } from "./upsell.ts";
@@ -248,6 +249,13 @@ async function load(rerender = true): Promise<void> {
     toast ||= `Povezave ni. ${(e as Error).message}`;
   }
   void freeDomainLookup();
+  // A generation that just finished with facts missing: "Še to potrebujemo" opens (it renders itself).
+  const asking = askOpen;
+  maybeAsk();
+  if (askOpen && !asking) {
+    schedulePoll();
+    return;
+  }
   if (rerender) render();
   else {
     // A form autosave keeps the panel (and the owner's typing) as it is; the top bar still follows the
@@ -330,7 +338,12 @@ async function poll(): Promise<void> {
     pollTimer = window.setTimeout(() => void poll(), 5000);
     return;
   }
-  if (pollSignature() !== before) render();
+  if (pollSignature() !== before) {
+    // A generation just finished with facts missing: "Še to potrebujemo" opens (it renders itself).
+    const asking = askOpen;
+    maybeAsk();
+    if (askOpen === asking) render();
+  }
   if (state.version !== frameVersion) reloadPreview();
   schedulePoll();
 }
@@ -2021,6 +2034,7 @@ function select(id: string, scroll = true): void {
   selected = id;
   tab = "content";
   checklistOpen = false;
+  askOpen = false;
   if (sheet === "closed") setSheet("peek");
   render();
   if (scroll) frame?.contentDocument?.getElementById(id)?.scrollIntoView({ block: "start" });
@@ -2107,49 +2121,52 @@ function topItems(): Child[] {
         class: state.checklist.length ? "btn sm primary blocked publish" : "btn sm primary publish",
         type: "button",
         "aria-describedby": state.checklist.length ? "checklist-summary" : undefined,
-        onClick: async () => {
-          // A free account can build and edit, not publish yet: say so instead of a refusal after the tap, with the
-          // plan and, when the domain check found one, the address the site would have (it-upsells).
-          if (!can("publish")) {
-            const offer = state.access?.offer;
-            toast = offer
-              ? `${freeDomain ? `Objava na ${freeDomain}` : "Objava"} je del naročnine ${offer.text} Predogled lahko še naprej urejate.`
-              : "Objava je na voljo z naročnino. Med preizkusom jo omogočamo izbranim podjetjem.";
-            return showToast();
-          }
-          if (state.checklist.length) return openChecklist();
-          // No domain yet: the domain step first (pick a name, or "Že imam domeno"); its button publishes.
-          if (state.domains?.enabled && !withoutDomain && !state.domains.domains.some((d) => d.status !== "failed")) {
-            setSheet("full");
-            void openDomainStep(domainDeps).then(() => document.getElementById("domain-confirm")?.scrollIntoView({ block: "nearest" }));
-            return;
-          }
-          // A second tap while publishing does nothing (it would publish the same version again).
-          if (publishing) return;
-          publishing = true;
-          // Publishes the version on screen, after any text still waiting to be saved.
-          await queued(async () => {
-            try {
-              const r = await api<{ url: string }>("/publish", { method: "POST", body: "{}" });
-              toast = `Objavljeno: ${r.url}`;
-            } catch (e) {
-              toast = `Ni objavljeno. ${(e as Error).message}`;
-            } finally {
-              publishing = false;
-            }
-            await load();
-          });
-        },
+        onClick: () => void startPublish(),
       }, "Objavi", !can("publish") && freeDomain ? h("span", { class: "label" }, `\u00a0na ${freeDomain}`) : null),
     ),
   ];
+}
+
+/** Objavi, from the top bar or the "Še to potrebujemo" screen. */
+async function startPublish(): Promise<void> {
+  // A free account can build and edit, not publish yet: say so instead of a refusal after the tap, with the
+  // plan and, when the domain check found one, the address the site would have (it-upsells).
+  if (!can("publish")) {
+    const offer = state.access?.offer;
+    toast = offer
+      ? `${freeDomain ? `Objava na ${freeDomain}` : "Objava"} je del naročnine ${offer.text} Predogled lahko še naprej urejate.`
+      : "Objava je na voljo z naročnino. Med preizkusom jo omogočamo izbranim podjetjem.";
+    return showToast();
+  }
+  if (state.checklist.length) return openChecklist();
+  // No domain yet: the domain step first (pick a name, or "Že imam domeno"); its button publishes.
+  if (state.domains?.enabled && !withoutDomain && !state.domains.domains.some((d) => d.status !== "failed")) {
+    setSheet("full");
+    void openDomainStep(domainDeps).then(() => document.getElementById("domain-confirm")?.scrollIntoView({ block: "nearest" }));
+    return;
+  }
+  // A second tap while publishing does nothing (it would publish the same version again).
+  if (publishing) return;
+  publishing = true;
+  // Publishes the version on screen, after any text still waiting to be saved.
+  await queued(async () => {
+    try {
+      const r = await api<{ url: string }>("/publish", { method: "POST", body: "{}" });
+      toast = `Objavljeno: ${r.url}`;
+    } catch (e) {
+      toast = `Ni objavljeno. ${(e as Error).message}`;
+    } finally {
+      publishing = false;
+    }
+    await load();
+  });
 }
 
 /** Everything that isn't everyday editing, in one menu. Stays open across re-renders. */
 let menuOpen = false;
 function moreMenu(): HTMLElement {
   const s = state.site;
-  const go = (t: Tab) => () => { menuOpen = false; tab = t; selected = null; setSheet("full"); render(); };
+  const go = (t: Tab) => () => { menuOpen = false; askOpen = false; tab = t; selected = null; setSheet("full"); render(); };
   const menu = h("details", { class: "menu", open: menuOpen },
     h("summary", { class: "btn quiet sm icon-btn", "aria-label": "Več možnosti", title: "Več možnosti" }, "⋯"),
     h("div", { class: "list" },
@@ -2248,12 +2265,13 @@ function render(): void {
     ...[
       state.spec ? sheetHandle() : null,
       statusBlock(),
+      askPane(),
       checklistBlock(),
       state.spec && can("publish") ? domainStep(domainDeps) : null,
       state.spec ? domainStatus(h, state.domains, { check: (host) => void checkDomain(host), choose: () => void openDomainStep(domainDeps) }) : null,
       !state.spec && state.site.status !== "generating" && state.site.status !== "failed" ? h("div", { class: "pane" }, h("p", { class: "muted" }, "Stran še nima vsebine.")) : null,
       state.spec && !can("edit") ? guestPane() : null,
-      state.spec && can("edit") ? { content: contentPane, facts: factsPane, photos: photosPane, design: designPane, pages: pagesPane, versions: versionsPane, chat: chatPane, diag: diagPane, add: addPane, image: imagePane, collection: collectionPane }[tab]() : null,
+      state.spec && can("edit") && !askOpen ? { content: contentPane, facts: factsPane, photos: photosPane, design: designPane, pages: pagesPane, versions: versionsPane, chat: chatPane, diag: diagPane, add: addPane, image: imagePane, collection: collectionPane }[tab]() : null,
     ].filter((c): c is HTMLElement => c !== null),
   );
   shell.bar.replaceChildren(...barItems().filter((c): c is Node => c instanceof Node));
@@ -2373,6 +2391,194 @@ function linkLabels(scope: HTMLElement): void {
   }
 }
 
+// ---------- "Še to potrebujemo": the facts we can't invent, on one screen (it-zero-to-live) ----------
+/** Open right after a generation that left facts missing, and from Objavi or "Še N" while any are. */
+let askOpen = false;
+/** This visit watched a generation run: when it finishes with facts missing, the screen opens by itself once. */
+let sawGenerating = false;
+let askDecided = false;
+/** What the owner typed into a fact that isn't complete yet (an address without a city): kept, not saved. */
+const askDraft = new Map<string, Json>();
+
+/** The JSON Schema of the value at a business fact or section prop path, with its form root and field names. */
+function schemaAt(path: string): { schema: Schema; root: Schema; key: string; parent: string | undefined } | null {
+  if (!catalogue) return null;
+  const segs = path.split("/").slice(1).map((x) => x.replace(/~1/g, "/").replace(/~0/g, "~"));
+  let root: Schema;
+  let rest: string[];
+  if (segs[0] === "business") {
+    root = catalogue.business;
+    rest = segs.slice(1);
+  } else if (segs[0] === "pages" && segs[2] === "sections" && segs[4] === "props") {
+    const sec = ((pages()[Number(segs[1])]?.sections ?? []) as Obj[])[Number(segs[3])];
+    const info = sec ? sectionInfo(String(sec.type)) : undefined;
+    if (!info) return null;
+    root = info.props;
+    rest = segs.slice(5);
+  } else return null;
+  let s = root;
+  let key = segs[0]!;
+  let parent: string | undefined;
+  for (const seg of rest) {
+    s = resolve(s, root);
+    // Through a fact that may be missing ({$placeholder}) to its real shape.
+    if (Array.isArray(s.anyOf)) s = (s.anyOf as Schema[]).map((o) => resolve(o, root)).find((o) => !isPlaceholderSchema(o) && (o.type === "object" || o.type === "array")) ?? s;
+    const next = s.type === "array" ? (s.items as Schema | undefined) : ((s.properties ?? {}) as Record<string, Schema>)[seg];
+    if (!next) return null;
+    if (s.type !== "array") [parent, key] = [key, seg];
+    s = next;
+  }
+  return { schema: s, root, key, parent };
+}
+
+/** A value with a text left empty (an address without its city) isn't saved yet. */
+const incomplete = (v: Json | undefined): boolean =>
+  v === "" || (Array.isArray(v) ? v.some(incomplete) : v !== null && typeof v === "object" ? Object.values(v).some(incomplete) : false);
+
+/** One missing fact as its form, already open: no "Vnesi" to tap. */
+function askField(f: MissingFact, first: boolean): HTMLElement | null {
+  const at = schemaAt(f.path);
+  if (!at || !state.spec) return null;
+  const s = resolve(at.schema, at.root);
+  const inner = Array.isArray(s.anyOf) ? ((s.anyOf as Schema[]).map((o) => resolve(o, at.root)).find((o) => !isPlaceholderSchema(o)) ?? s) : s;
+  // Emptied again: missing again (a service area is a list that is simply left out). "add" sets an object member
+  // whether or not it is there yet (business hours may be absent).
+  const save = (v: Json | undefined, rerender: boolean) =>
+    patch(
+      [v === undefined && f.kind === "serviceArea" ? { op: "remove", path: f.path } : { op: "add", path: f.path, value: v ?? ({ $placeholder: f.kind } as Json) }],
+      "manjkajoči podatki",
+      rerender,
+    );
+  // A price as the owner writes it ("12,50", "od 30"), read like the price-list editor reads it.
+  if (f.kind === "price") return askBox(f, first, askPrice(f, save));
+  const later = debounced((v) => {
+    if (!incomplete(v)) void save(v, false);
+  });
+  const sink: Sink = {
+    edit: (v) => {
+      if (v !== undefined) askDraft.set(f.path, v);
+      later.push(v);
+    },
+    structure: (v) => {
+      later.cancel();
+      if (v !== undefined) askDraft.set(f.path, v);
+      if (!incomplete(v)) void save(v, true);
+      else render();
+    },
+  };
+  const text = inner.type === "string" && !Array.isArray(inner.enum);
+  const value = askDraft.get(f.path) ?? (text ? "" : defaultFor(inner, at.root, at.key, false));
+  // Opening hours: the times to type are there at once (empty, never guessed), not under "Več možnosti".
+  if (f.kind === "hours" && !askDraft.has(f.path)) for (const e of ((value as Obj).entries ?? []) as Obj[]) Object.assign(e, { open: "", close: "" });
+  if (!askDraft.has(f.path) && !text) askDraft.set(f.path, value);
+  return askBox(f, first, field(inner, at.root, value, at.key, sink, text, f.path, at.parent));
+}
+
+/** The thing on the page a fact belongs to, by its own words: a price list item's name, a team member's role. */
+function ownerOf(path: string): string | null {
+  let o: unknown = state.spec;
+  for (const seg of path.split("/").slice(1, -1)) o = o && typeof o === "object" ? (o as Record<string, unknown>)[seg] : undefined;
+  const r = (o ?? {}) as Obj;
+  const words = [r.name, r.title, r.role].find((x): x is string => typeof x === "string" && !!x.trim() && !Object.values(EDITOR_STARTER_TEXT).includes(x));
+  return words ?? null;
+}
+
+/** A fact's form, named by where it shows when it belongs to something on the page (a price, a name). */
+function askBox(f: MissingFact, first: boolean, el: HTMLElement): HTMLElement {
+  const owner = f.path.startsWith("/business/") ? null : ownerOf(f.path);
+  const where = f.path.startsWith("/business/") || !state.spec ? null : owner ? `${describePath(state.spec, f.path.split("/").slice(0, 5).join("/"))} › ${owner}` : describePath(state.spec, f.path);
+  const box = h("div", { class: "ask-fact", "data-ask": f.path }, where ? h("p", { class: "help where" }, where) : null, el);
+  if (first) box.dataset.first = "true";
+  return box;
+}
+
+function askPrice(f: MissingFact, save: (v: Json | undefined, rerender: boolean) => Promise<boolean>): HTMLElement {
+  const typed = askDraft.get(f.path);
+  const input = h("input", { type: "text", inputmode: "decimal", autocomplete: "off", placeholder: "npr. 12,50 ali od 30", maxlength: 16, value: typeof typed === "string" ? typed : "" });
+  const err = h("div", { class: "err", role: "status" });
+  const later = debounced((v) => void save(v, false));
+  input.addEventListener("input", () => {
+    askDraft.set(f.path, input.value);
+    const p = parsePriceInput(input.value);
+    if (p.kind === "error") {
+      err.textContent = p.message;
+      input.setAttribute("aria-invalid", "true");
+      later.cancel();
+      return;
+    }
+    err.textContent = "";
+    input.removeAttribute("aria-invalid");
+    later.push(priceValue(p) as Json);
+  });
+  return h("div", { class: "field", "data-path": f.path }, h("label", {}, "Cena (€)"), input, err);
+}
+
+/** The facts the checklist says are missing, as one form with Objavi under it. */
+function askPane(): HTMLElement | null {
+  if (!askOpen || !state.spec || !catalogue || !can("edit")) return null;
+  const facts = missingFacts(state.checklist);
+  const other = state.checklist.length - facts.length;
+  const close = () => {
+    askOpen = false;
+    render();
+  };
+  return h("div", { class: "pane", id: "facts-ask" },
+    h("div", { class: "row" },
+      h("h2", { class: "sp" }, "Še to potrebujemo"),
+      h("button", { class: "btn quiet sm", type: "button", "aria-label": "Zapri", onClick: close }, "✕"),
+    ),
+    h("p", { class: "help" }, facts.length
+      ? "Teh podatkov si ne izmišljujemo. Vpišite jih in stran lahko objavite."
+      : "Vsi podatki so vpisani."),
+    ...facts.map((f, i) => askField(f, i === 0)),
+    other ? h("p", { class: "note warn" }, `Pred objavo preverite še ${items(other)}.`, " ", h("button", { class: "linkish", type: "button", onClick: () => { askOpen = false; openChecklist("publish", false); } }, "Pokaži")) : null,
+    h("div", { class: "row" },
+      h("button", { class: "btn primary", type: "button", id: "ask-publish", onClick: () => void askPublish() }, can("publish") ? "Objavi" : "Shrani"),
+      h("button", { class: "btn quiet", type: "button", onClick: close }, "Kasneje"),
+    ),
+  );
+}
+
+/** Objavi under the form: what was typed is saved first, then the usual publish (or what is still missing). */
+async function askPublish(): Promise<void> {
+  flushPending();
+  await queued(() => load(false));
+  if (!can("publish")) {
+    askOpen = false;
+    render();
+    return;
+  }
+  if (missingFacts(state.checklist).length) {
+    toast = "Še niso vpisani vsi podatki.";
+    render();
+    document.querySelector<HTMLElement>("#facts-ask .field input")?.focus();
+    return;
+  }
+  askOpen = false;
+  render();
+  await startPublish();
+}
+
+/**
+ * Opens the screen by itself once, when a generation this visit watched has finished with facts missing. A later
+ * visit doesn't push it: "Še N do objave" and Objavi open it while facts are missing.
+ */
+function maybeAsk(): void {
+  if (state.site.status === "generating") sawGenerating = true;
+  if (askDecided || !sawGenerating || !state.spec || state.site.status !== "ready" || !can("edit")) return;
+  askDecided = true;
+  if (missingFacts(state.checklist).length) openAsk();
+}
+
+function openAsk(): void {
+  askOpen = true;
+  checklistOpen = false;
+  setSheet("full");
+  render();
+  document.getElementById("facts-ask")?.scrollIntoView({ block: "start" });
+  document.querySelector<HTMLElement>("#facts-ask [data-first] input, #facts-ask [data-first] select")?.focus({ preventScroll: true });
+}
+
 // ---------- Pre-publish checklist: each entry says what is missing, where, and opens the field ----------
 let checklistOpen = false;
 /** "export": the same checklist, opened by "Prenesi stran" as a warning with "Izvozi vseeno" (sb-export-checklist). */
@@ -2414,7 +2620,10 @@ async function startExport(): Promise<void> {
   openChecklist("export");
 }
 
-function openChecklist(forWhat: "publish" | "export" = "publish"): void {
+function openChecklist(forWhat: "publish" | "export" = "publish", ask = true): void {
+  // Missing facts first, on their own screen; the rest of the list is one tap from there.
+  if (forWhat === "publish" && ask && can("edit") && missingFacts(state.checklist).length) return openAsk();
+  askOpen = false;
   checklistFor = forWhat;
   checklistOpen = true;
   setSheet("full");
@@ -2426,6 +2635,7 @@ function openChecklist(forWhat: "publish" | "export" = "publish"): void {
 
 /** Opens the tab, page and section a spec path belongs to, then the field itself. */
 function goTo(path: string): void {
+  askOpen = false;
   setSheet("full");
   const [, head, a, b, c] = path.split("/");
   if (head === "pages" && b === "sections") {

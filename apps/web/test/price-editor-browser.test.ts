@@ -212,16 +212,22 @@ describe("price list editor in a browser", () => {
     }
   }, 90_000);
 
-  it("a missing price on the publish checklist opens its item with the price field focused", async () => {
+  it("a missing price is on 'Še to potrebujemo' after Objavi, named by its item, and takes a price as owners write it", async () => {
     const id = await seed("frizerstvo-lana", "cenik-seznam");
     const { page, close } = await open(id, 1280);
     try {
       await page.getByRole("button", { name: "Objavi" }).click();
-      const entry = page.locator(".checklist li button", { hasText: "Pramene" });
+      const entry = page.locator("#facts-ask [data-ask]", { hasText: "Pramene" });
       await expect.poll(() => entry.count()).toBe(1);
-      await entry.click();
-      await expect.poll(() => page.evaluate(() => (document.activeElement as HTMLElement | null)?.dataset.field ?? null)).toBe("price");
-      expect(await page.locator(".pl-item.is-open .pl-name").allTextContents()).toEqual(["Pramene"]);
+      const path = (await entry.getAttribute("data-ask"))!;
+      await entry.locator("input").fill("od 12,50");
+      await expect
+        .poll(async () => {
+          let o: unknown = (await platform.repo.getSpec(id))!.spec;
+          for (const seg of path.split("/").slice(1)) o = (o as Record<string, unknown>)[seg];
+          return o;
+        })
+        .toEqual({ amount: 12.5, from: true });
     } finally {
       await close();
     }

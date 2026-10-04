@@ -34,6 +34,8 @@ export interface PipelineDeps {
    * owner when `max` left the site with fewer than it would have had.
    */
   pictures?: { fillTo?: number; max?: number; note?: string | null };
+  /** Called once the brief (with the business name) is saved, beside the rest of the generation; not awaited. */
+  onBrief?: () => void;
 }
 
 /** The classifier couldn't place the description (below tiers.junk.minClassifierConfidence): stopped before the brief. */
@@ -152,6 +154,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     stop.signal.throwIfAborted();
     if (dropped.length) await log("brief", "Dropped facts not found in the client's text", dropped);
     await repo.setBrief(siteId, brief, brief.name);
+    deps.onBrief?.();
 
     // 3b. Too few photos: generated mood images, beside the design step (they don't need it). When the trade's
     // template draws instead of showing pictures (template S), they wait for the design: chosen, it needs none.
