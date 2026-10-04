@@ -165,7 +165,8 @@ describe("landing page", () => {
     expect(page).toContain(`${eur(plus.monthlyEur)} <small>na mesec</small>`);
     expect(page).toContain(`ali ${eur(std.yearlyEur)} na leto, domena vključena`);
     expect(page).toContain(`ali ${eur(plus.yearlyEur)} na leto, domena vključena`);
-    expect(page).toContain(`<dt>Prvo leto za prvih ${std.foundingOffer!.customers} strank</dt><dd>${eur(std.foundingOffer!.firstYearEur)}</dd>`);
+    // The founding offer with its places left (none given yet in this database: all of them; it-upsells).
+    expect(page).toContain(`<dt>Prvo leto za prvih ${std.foundingOffer!.customers} strank<span class="left"> · še ${std.foundingOffer!.customers} prostih mest</span></dt><dd>${eur(std.foundingOffer!.firstYearEur)}</dd>`);
     expect(page).toContain(`<dd>${eur(std.setupService.eur)} enkratno</dd>`);
     expect(page).toContain(`Do ${std.site.maxPages} strani`);
     expect(page).toContain(`Do ${plus.site.maxPages} strani`);
