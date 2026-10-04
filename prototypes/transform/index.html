@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="sl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Prototip: preobrazba primera</title>
+<!--
+  Prototype only (not wired into the app): the landing hero with five trade chips. A switch transforms
+  the page piece by piece instead of revealing a finished page behind a circle:
+  - the demo site comes apart into its parts, each part travels to its place in the new site, flips on a
+    hinge to its new face, and the parts lock together (a same-document view transition inside the frame,
+    every part a named group with its own delay, hinge and easing);
+  - the landing page re-skins in a wave from the chip: each element changes colour and corners on its own
+    delay, heading words flip over to the new typeface, the background follows as a shock wave.
+  Run: node prototypes/transform/serve.mjs, then http://localhost:3091/
+-->
+<link rel="stylesheet" href="/apps/web/src/ui/home.css">
+<style>
+@font-face{font-family:"Bricolage Grotesque";src:url("/apps/web/src/ui/examples/_shared/85a3177729/fonts/bricolage-grotesque.woff2") format("woff2");font-weight:200 800;font-display:swap}
+@font-face{font-family:"Figtree";src:url("/apps/web/src/ui/examples/_shared/85a3177729/fonts/figtree.woff2") format("woff2");font-weight:300 900;font-display:swap}
+
+:root{--slow:1}
+@media (min-width:48rem){.hero .wrap{grid-template-columns:1fr 1.1fr;gap:48px;align-items:start}}
+.hero h1 .w{display:inline-block;transform-origin:50% 55%;backface-visibility:hidden}
+
+/* Prototype controls */
+.proto{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:16px 0 12px;font:600 13px/1 var(--font-ui);color:var(--ink-3)}
+.proto .seg label{min-height:30px;font-size:13px;padding:0 10px}
+.proto .tog{display:inline-flex;gap:6px;align-items:center;cursor:pointer;user-select:none}
+.proto .tog input{accent-color:var(--accent);margin:0}
+.badge{position:fixed;left:12px;bottom:12px;z-index:5;padding:6px 10px;border-radius:999px;background:#151412;color:#fff;font:600 12px/1 var(--font-ui);letter-spacing:.02em}
+
+/* The demo device: a phone (360 px site) or a computer (1280 px site), scaled to the column */
+.devwrap{min-width:0}
+.dev{position:relative;margin:0 auto;width:var(--w,300px);height:var(--h,585px);background:#fff;border:1px solid var(--line-2);border-radius:26px;box-shadow:var(--shadow-float);overflow:hidden;display:flex;flex-direction:column;transition:width .9s cubic-bezier(.65,0,.35,1),height .9s cubic-bezier(.65,0,.35,1),border-radius .9s}
+.dev[data-mode=desk]{border-radius:10px}
+.dev .chrome{flex:none;display:flex;align-items:center;gap:6px;height:var(--ch,0px);padding:0 12px;overflow:hidden;background:var(--surface-2);transition:height .9s cubic-bezier(.65,0,.35,1)}
+.dev .chrome i{width:8px;height:8px;border-radius:50%;background:var(--line-2)}
+/* Dark under the site: what shows through the seams while the parts move. */
+.dev .screen{position:relative;flex:1;min-height:0;overflow:hidden;background:#1b1917}
+.dev iframe{position:absolute;left:0;top:0;display:block;border:0;width:var(--iw,360px);height:calc((var(--h,585px) - var(--ch,0px)) / var(--s,.8333));transform:scale(var(--s,.8333));transform-origin:0 0}
+.dev iframe.main{z-index:1}
+.dev iframe.stage{z-index:0}
+.cap{font-size:14px;color:var(--ink-3);margin:12px auto 0;max-width:56ch}
+
+/* The landing page's wave: every marked element changes on its own delay (set per switch from its distance to the chip). */
+html.morphing .wave{transition:background-color var(--t,.45s) var(--d,0ms),color var(--t,.45s) var(--d,0ms),border-color var(--t,.45s) var(--d,0ms),border-radius var(--t,.45s) var(--d,0ms),box-shadow var(--t,.45s) var(--d,0ms),outline-color var(--t,.45s) var(--d,0ms) !important}
+.shock{position:fixed;inset:0;z-index:-1;pointer-events:none;visibility:hidden}
+
+.big .hero .wrap{grid-template-columns:1fr !important}.big .hero .wrap>div:first-child,.big .hd{display:none}.big .hero{padding-top:8px}
+@media (prefers-reduced-motion:reduce){.dev,.dev .chrome{transition:none}}
+</style>
+</head>
+<body>
+<div class="shock" aria-hidden="true"></div>
+<span class="badge">Prototip · preobrazba</span>
+
+<header class="hd wave">
+  <div class="wrap">
+    <a class="brand wave" href="#"><i class="wave" aria-hidden="true"></i>Stranko</a>
+    <nav aria-label="Glavni meni">
+      <a class="wave" href="#">Kaj dobite</a>
+      <a class="wave" href="#">Kako deluje</a>
+      <a class="wave" href="#">Primer</a>
+      <a class="wave" href="#">Cena</a>
+      <a class="wave" href="#">Vprašanja</a>
+    </nav>
+    <span class="sp"></span>
+    <a class="btn quiet sm login wave" href="#">Prijava</a>
+    <a class="btn primary sm wave" href="#">Naredite predogled</a>
+  </div>
+</header>
+
+<main>
+  <section class="hero" aria-labelledby="h1">
+    <div class="wrap">
+      <div>
+        <h1 id="h1" class="wave">Opišite svoje podjetje.<br>Spletna stran je narejena.</h1>
+        <p class="lead wave">Za frizerje, gostilne, servise, ambulante, obrtnike in trgovine. Napišete, kdo ste in kaj ponujate, dodate logotip in svoje fotografije. Predogled domače strani vidite v manj kot minuti.</p>
+        <form class="prompt wave" onsubmit="return false">
+          <label for="opis" class="sr-only">Opis podjetja</label>
+          <textarea id="opis" class="wave" placeholder="Frizerski salon Lana v Celju, Prešernova 4. Striženje, barvanje in svečane pričeske. Odprto tor–pet 8.00–18.00, sobota 8.00–13.00 …"></textarea>
+          <div class="bar">
+            <span class="btn sm attach wave">＋ Fotografije</span>
+            <span class="btn sm attach wave">＋ Logotip</span>
+            <span class="sp"></span>
+            <button class="btn primary wave" type="button">Ustvari</button>
+          </div>
+        </form>
+        <p class="under wave">Napišite, kdo ste, kaj ponujate, kje ste in kako vas dosežejo. Česar ne napišete, si ne izmislimo.</p>
+      </div>
+
+      <div class="devwrap">
+        <nav class="trades" aria-labelledby="trades-q">
+          <p class="trades-q wave" id="trades-q">Poglejte primer za svojo dejavnost:</p>
+          <ul class="chips"></ul>
+          <a class="trades-reset wave" href="#" hidden>Nazaj na videz Stranko</a>
+        </nav>
+        <div class="proto wave">
+          <fieldset class="seg wave">
+            <legend class="sr-only">Naprava</legend>
+            <input type="radio" id="m-desk" name="mode" value="desk" checked><label for="m-desk">Računalnik</label>
+            <input type="radio" id="m-phone" name="mode" value="phone"><label for="m-phone">Telefon</label>
+          </fieldset>
+          <label class="tog"><input type="checkbox" id="slow"> Počasi (×3)</label>
+          <label class="tog"><input type="checkbox" id="auto"> Samodejno</label>
+        </div>
+        <div class="dev wave" data-mode="desk">
+          <span class="chrome wave" aria-hidden="true"><i></i><i></i><i></i></span>
+          <div class="screen">
+            <iframe class="stage" title="" tabindex="-1" aria-hidden="true"></iframe>
+            <iframe class="main" title="Primer strani" inert></iframe>
+          </div>
+        </div>
+        <p class="cap wave" aria-live="polite"></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script type="module">
+const EX = "/apps/web/src/ui/examples/";
+const FONTS = EX + "_shared/85a3177729/fonts/";
+const IDS = ["frizer", "gostilna", "avtoservis", "zobozdravnik", "instalater"];
+const DEFAULT = { id: null, label: "Stranko", page: "trgovina-oljka-in-sol/index.html", name: "Oljka in sol", forWhom: "trgovino", vars: null, font: null };
+
+const all = await fetch(EX + "showcase.json").then((r) => r.json());
+const trades = IDS.map((id) => all.find((t) => t.id === id)).filter(Boolean);
+
+const root = document.documentElement;
+const chipsEl = document.querySelector(".chips");
+const reset = document.querySelector(".trades-reset");
+const dev = document.querySelector(".dev");
+const devwrap = document.querySelector(".devwrap");
+const main = dev.querySelector("iframe.main");
+const stage = dev.querySelector("iframe.stage");
+const cap = document.querySelector(".cap");
+const shock = document.querySelector(".shock");
+const slowBox = document.getElementById("slow");
+const autoBox = document.getElementById("auto");
+const reduced = matchMedia("(prefers-reduced-motion: reduce)");
+const slow = () => (slowBox.checked ? 3 : 1);
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const within = (p, ms) => Promise.race([p, sleep(ms)]);
+const FREEZE = new URLSearchParams(location.search).has("freeze") ? Number(new URLSearchParams(location.search).get("freeze")) : null;
+// Debugging: ?big gives the demo the whole width.
+if (new URLSearchParams(location.search).has("big")) document.documentElement.classList.add("big");
+const varNames = [...new Set(trades.flatMap((t) => Object.keys(t.vars)))];
+
+// ---------- chips ----------
+for (const t of trades) {
+  const li = document.createElement("li");
+  li.innerHTML = `<a class="chip wave" href="#" data-id="${t.id}">${t.label}</a>`;
+  chipsEl.append(li);
+}
+const chips = [...chipsEl.querySelectorAll(".chip")];
+
+// ---------- heading words: each one flips on its own ----------
+const h1 = document.getElementById("h1");
+for (const node of [...h1.childNodes]) {
+  if (node.nodeType !== 3) continue;
+  const frag = document.createDocumentFragment();
+  node.textContent.split(/(\s+)/).forEach((part) => {
+    if (!part) return;
+    if (/^\s+$/.test(part)) frag.append(part);
+    else {
+      const s = document.createElement("span");
+      s.className = "w";
+      s.textContent = part;
+      frag.append(s);
+    }
+  });
+  node.replaceWith(frag);
+}
+const words = [...h1.querySelectorAll(".w")];
+
+// ---------- device sizes ----------
+let mode = "desk";
+const size = () => {
+  const col = devwrap.clientWidth;
+  const v = mode === "phone"
+    ? { w: Math.min(300, col), iw: 360, ch: 0 }
+    : { w: col, iw: 1280, ch: 24 };
+  v.h = mode === "phone" ? Math.round(v.w * 1.95) : Math.round(v.w * 0.62) + 24;
+  dev.dataset.mode = mode;
+  dev.style.setProperty("--w", v.w + "px");
+  dev.style.setProperty("--h", v.h + "px");
+  dev.style.setProperty("--ch", v.ch + "px");
+  dev.style.setProperty("--iw", v.iw + "px");
+  dev.style.setProperty("--s", String(v.w / v.iw));
+};
+size();
+addEventListener("resize", size);
+for (const r of document.querySelectorAll("input[name=mode]")) r.addEventListener("change", () => { mode = r.value; size(); });
+
+// ---------- fonts for the landing page ----------
+const fonts = new Map();
+const fontFor = (t) => {
+  if (!t?.font) return Promise.resolve();
+  if (!fonts.has(t.id)) {
+    const file = FONTS + t.font.file.split("/").pop();
+    const face = new FontFace(t.font.family, `url("${file}") format("woff2")`, { weight: `${t.font.weights[0]} ${t.font.weights[1]}` });
+    document.fonts.add(face);
+    fonts.set(t.id, face.load().catch(() => undefined));
+  }
+  return fonts.get(t.id);
+};
+
+const caption = (t) => t.id
+  ? `Takole bi lahko izgledala stran za ${t.forWhom}. ${t.name} je izmišljeno podjetje; vaša stran nastane iz vašega opisa in fotografij, zato bo drugačna.`
+  : "Primer: izmišljena trgovina Oljka in sol iz Kopra. Stran je Stranko naredil iz njenega opisa in petih fotografij.";
+
+// =====================================================================
+// The demo site: parts, matched across the two sites by role
+// =====================================================================
+/** The parts of a rendered example: plates (header, hero, next section) and the pieces on them. */
+function parts(doc) {
+  const out = [];
+  const used = new Set();
+  const add = (key, el, kind = "part") => {
+    if (!el || used.has(el)) return;
+    used.add(el);
+    out.push({ key, el, kind });
+  };
+  const h = doc.querySelector(".site-header");
+  add("header", h, "plate");
+  if (h) {
+    add("brand", h.querySelector(".site-header__brand"));
+    add("toggle", h.querySelector(".nav-toggle"));
+    h.querySelectorAll(".site-nav__list > li").forEach((li, i) => add("nav" + i, li));
+    add("hcta", h.querySelector(".site-header__inner > .btn"));
+  }
+  const secs = doc.querySelectorAll("main > section");
+  const hero = secs[0];
+  if (hero) {
+    add("hero", hero, "plate");
+    add("card", hero.querySelector(".label-card"), "plate");
+    add("wall", hero.querySelector(".hsig__wall"));
+    add("eyebrow", hero.querySelector(".eyebrow, .hsig__where"));
+    add("h1", hero.querySelector("h1"));
+    add("lead", hero.querySelector(".lead"));
+    hero.querySelectorAll(".actions > *").forEach((a, i) => add("act" + i, a));
+    hero.querySelectorAll("picture.media").forEach((p, i) => add("media" + i, p));
+    hero.querySelectorAll(".hero-facts__item").forEach((f, i) => add("fact" + i, f));
+    add("chip", hero.querySelector(".hsig__chip"));
+  }
+  const s2 = secs[1];
+  if (s2) {
+    add("s2", s2, "plate");
+    add("s2title", s2.querySelector("h2"));
+    const list = s2.querySelector("ul, ol, .week");
+    if (list) [...list.children].slice(0, 6).forEach((li, i) => add("s2i" + i, li));
+    s2.querySelectorAll(".actions > *").forEach((a, i) => add("s2a" + i, a));
+  }
+  return out;
+}
+
+/** Laid out, one box, at least partly in the frame's viewport. */
+function visible(doc) {
+  const vh = doc.defaultView.innerHeight;
+  return (p) => {
+    const rects = p.el.getClientRects();
+    if (rects.length !== 1) return false;
+    const r = rects[0];
+    if (r.width < 2 || r.height < 2) return false;
+    p.rect = r;
+    return r.bottom > 0 && r.top < vh;
+  };
+}
+
+/**
+ * Pairs the old site's visible parts with the new site's: the same role first (headline to headline),
+ * then the leftovers in reading order (a mirror photo becomes a fact card), so as many parts as possible
+ * travel instead of fading. What is left over folds away or unfolds.
+ */
+function match(oldParts, newParts) {
+  // Leftovers only pair with their own sort (photo to photo, button to button, text to text) and a
+  // similar size: a small button blown up to a giant word reads as a stretched picture, not a part.
+  const sort = (p) => (p.kind === "plate" ? "plate" : p.el.matches("picture, img") || p.el.querySelector("picture, img") ? "media" : p.el.matches(".btn, button") ? "control" : "text");
+  const close = (a, b) => {
+    const r = (a.rect.width * a.rect.height) / (b.rect.width * b.rect.height);
+    return r < 5 && r > 1 / 5;
+  };
+  const fits = (o, n) => sort(o) === sort(n) && close(o, n);
+  const byKey = new Map(newParts.map((p) => [p.key, p]));
+  const pairs = [];
+  const oldLeft = [];
+  for (const o of oldParts) {
+    const n = byKey.get(o.key);
+    if (n && n.kind === o.kind) {
+      pairs.push({ o, n });
+      byKey.delete(o.key);
+    } else oldLeft.push(o);
+  }
+  const order = (a, b) => a.rect.top - b.rect.top || a.rect.left - b.rect.left;
+  const newLeft = [...byKey.values()].sort(order);
+  oldLeft.sort(order);
+  const exits = [];
+  for (const o of oldLeft) {
+    const i = newLeft.findIndex((n) => fits(o, n));
+    if (i >= 0) pairs.push({ o, n: newLeft.splice(i, 1)[0] });
+    else exits.push(o);
+  }
+  return { pairs, exits, enters: newLeft };
+}
+
+// =====================================================================
+// The transformation: a view transition inside the frame, choreographed per part
+// =====================================================================
+const RIG_CSS = (k) => `
+::view-transition{background:#1b1917}
+::view-transition-old(root){animation:rig-fade-out ${260 * k}ms ease-in both}
+::view-transition-new(root){animation:rig-fade-in ${320 * k}ms var(--rig-root-delay) ease-out both}
+::view-transition-old(*),::view-transition-new(*){mix-blend-mode:normal;backface-visibility:hidden}
+@keyframes rig-fade-out{to{opacity:0}}
+@keyframes rig-fade-in{from{opacity:0}}
+@keyframes rig-lift{
+  0%{transform:none;filter:none}
+  10%,88%{transform:scale(.94);filter:drop-shadow(0 10px 16px rgb(0 0 0/.45))}
+  95%{transform:scale(1.012)}
+  100%{transform:none;filter:none}}
+@keyframes rig-lift-text{
+  0%{transform:none}
+  10%,88%{transform:scale(.94) translateY(-2px)}
+  95%{transform:scale(1.012)}
+  100%{transform:none}}
+@keyframes rig-old-x{
+  0%{transform:perspective(900px) rotateX(0);opacity:1;animation-timing-function:cubic-bezier(.55,0,1,.45)}
+  50%{transform:perspective(900px) rotateX(90deg);opacity:1}
+  50.01%,100%{transform:perspective(900px) rotateX(90deg);opacity:0}}
+@keyframes rig-new-x{
+  0%,49.99%{transform:perspective(900px) rotateX(-90deg);opacity:0}
+  50%{transform:perspective(900px) rotateX(-90deg);opacity:1;animation-timing-function:cubic-bezier(0,.55,.45,1)}
+  100%{transform:perspective(900px) rotateX(0);opacity:1}}
+@keyframes rig-old-y{
+  0%{transform:perspective(900px) rotateY(0);opacity:1;animation-timing-function:cubic-bezier(.55,0,1,.45)}
+  50%{transform:perspective(900px) rotateY(-90deg);opacity:1}
+  50.01%,100%{transform:perspective(900px) rotateY(-90deg);opacity:0}}
+@keyframes rig-new-y{
+  0%,49.99%{transform:perspective(900px) rotateY(90deg);opacity:0}
+  50%{transform:perspective(900px) rotateY(90deg);opacity:1;animation-timing-function:cubic-bezier(0,.55,.45,1)}
+  100%{transform:perspective(900px) rotateY(0);opacity:1}}
+@keyframes rig-old-plate{
+  0%{transform:perspective(2400px) rotateX(0);opacity:1;animation-timing-function:cubic-bezier(.55,0,1,.45)}
+  50%{transform:perspective(2400px) rotateX(-90deg);opacity:1}
+  50.01%,100%{transform:perspective(2400px) rotateX(-90deg);opacity:0}}
+@keyframes rig-new-plate{
+  0%,49.99%{transform:perspective(2400px) rotateX(90deg);opacity:0}
+  50%{transform:perspective(2400px) rotateX(90deg);opacity:1;animation-timing-function:cubic-bezier(0,.55,.45,1)}
+  100%{transform:perspective(2400px) rotateX(0);opacity:1}}
+@keyframes rig-exit{
+  0%{transform:none;opacity:1}
+  100%{transform:perspective(700px) rotateX(85deg) scale(.3);opacity:0}}
+@keyframes rig-enter{
+  0%{transform:perspective(700px) rotateX(-85deg) scale(.3);opacity:0}
+  100%{transform:none;opacity:1}}
+`;
+
+/** Rewrites a headline's letters from noise to the new words, left to right (the real, live text). */
+function decode(el, start, dur) {
+  const walker = el.ownerDocument.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) nodes.push({ n: walker.currentNode, text: walker.currentNode.nodeValue });
+  const total = nodes.reduce((s, x) => s + x.text.length, 0);
+  const glyphs = "ABCČDEFGHIJKLMNOPRSŠTUVZŽabcčdefghijklmnoprsštuvzž0123456789";
+  let raf = 0;
+  let t0 = 0;
+  const frame = (now) => {
+    if (!t0) t0 = now;
+    const p = Math.min(1, (now - t0) / dur);
+    let i = 0;
+    for (const x of nodes) {
+      let s = "";
+      for (const ch of x.text) {
+        s += /\s/.test(ch) || i / total < p ? ch : glyphs[(Math.random() * glyphs.length) | 0];
+        i++;
+      }
+      x.n.nodeValue = s;
+    }
+    if (p < 1) raf = requestAnimationFrame(frame);
+  };
+  const timer = setTimeout(() => (raf = requestAnimationFrame(frame)), start);
+  return () => {
+    clearTimeout(timer);
+    cancelAnimationFrame(raf);
+    for (const x of nodes) x.n.nodeValue = x.text;
+  };
+}
+
+const loadInto = (frame, src) => new Promise((resolve) => {
+  frame.addEventListener("load", resolve, { once: true });
+  frame.src = src;
+});
+const settle = async (doc) => {
+  doc.body.offsetHeight;
+  await within(doc.fonts.ready, 1200);
+  const imgs = [...doc.images].filter((i) => { const r = i.getBoundingClientRect(); return r.bottom > 0 && r.top < doc.defaultView.innerHeight; });
+  await within(Promise.all(imgs.map((i) => i.decode().catch(() => undefined))), 1500);
+};
+
+let morphing = null;
+/** Transforms the demo site into `url`. */
+async function transformSite(url) {
+  const doc = main.contentDocument;
+  const win = main.contentWindow;
+  const k = slow();
+  // 1. The new site, laid out in the frame under this one: its parts' places, its fonts and photos warm.
+  const [html] = await Promise.all([fetch(url).then((r) => r.text()), loadInto(stage, url)]);
+  const sdoc = stage.contentDocument;
+  sdoc.defaultView.scrollTo(0, 0);
+  await settle(sdoc);
+  win.scrollTo(0, 0);
+
+  const oldParts = parts(doc).filter(visible(doc));
+  const newParts = parts(sdoc).filter(visible(sdoc));
+  const { pairs, exits, enters } = match(oldParts, newParts);
+
+  if (!doc.startViewTransition || reduced.matches) {
+    await loadInto(main, url);
+    return;
+  }
+
+  // 2. Timing: everything comes apart together, the parts travel one after another (plates first,
+  //    then top to bottom), everything locks together at the end.
+  const UNLOCK = 260 * k, TRAVEL = 720 * k, STAGGER = 55 * k;
+  // Stacking while apart: plates and backdrop lettering under the parts.
+  const layer = (p) => (p.kind === "plate" || p.key === "wall" ? 1 : 2);
+  // A shadow under boxes (plates, photos, buttons, cards) lifts them; under bare text it reads as blur.
+  const boxy = (p) => p.kind === "plate" || p.el.matches("picture, img, .btn, button, li, .hero-facts__item, .label-card") || !!p.el.querySelector("picture, img");
+  const ordered = [
+    ...pairs.filter((p) => p.o.kind === "plate"),
+    ...pairs.filter((p) => p.o.kind !== "plate").sort((a, b) => a.o.rect.top - b.o.rect.top || a.o.rect.left - b.o.rect.left),
+  ];
+  const lastStart = UNLOCK + Math.max(0, ordered.length - 1) * STAGGER;
+  const enterEnd = enters.length ? UNLOCK + TRAVEL * 0.45 + (enters.length - 1) * STAGGER + TRAVEL : 0;
+  const TOTAL = Math.max(lastStart + TRAVEL, enterEnd) + 260 * k;
+  let css = RIG_CSS(k) + `:root{--rig-root-delay:${TOTAL - 320 * k}ms}`;
+  const names = [];
+  ordered.forEach((p, i) => {
+    const name = "rig-" + i;
+    const delay = UNLOCK + i * STAGGER;
+    // Wide parts hinge over the top edge, tall ones turn on their side; plates swing slowly.
+    const hinge = p.o.kind === "plate" ? "plate" : p.o.rect.width > p.o.rect.height * 2.2 ? "x" : "y";
+    p.name = name;
+    p.delay = delay;
+    names.push([p.o.el, name]);
+    css += `
+::view-transition-group(${name}){z-index:${layer(p.n)};animation-delay:${delay}ms;animation-duration:${TRAVEL}ms;animation-timing-function:cubic-bezier(.68,-0.32,.24,1.32)}
+::view-transition-image-pair(${name}){animation:${boxy(p.o) ? "rig-lift" : "rig-lift-text"} ${TOTAL}ms linear both}
+::view-transition-old(${name}){animation:rig-old-${hinge} ${TRAVEL}ms ${delay}ms linear both}
+::view-transition-new(${name}){animation:rig-new-${hinge} ${TRAVEL}ms ${delay}ms linear both}`;
+  });
+  // Parts the new site doesn't need retract into the nearest part's new place; parts it adds spring
+  // out of the nearest part's old place (as if they were folded inside it).
+  const centre = (r) => ({ x: r.left + r.width / 2, y: r.top + r.height / 2 });
+  const nearest = (from, side) => {
+    let best = null, bd = Infinity;
+    for (const p of ordered) {
+      if (p.o.kind === "plate") continue;
+      const c = centre(p[side].rect);
+      const d = Math.hypot(c.x - from.x, c.y - from.y);
+      if (d < bd) { bd = d; best = p; }
+    }
+    return best;
+  };
+  exits.forEach((p, i) => {
+    const name = "rig-out-" + i;
+    names.push([p.el, name]);
+    const c = centre(p.rect);
+    const into = nearest(c, "n");
+    const t = into ? centre(into.n.rect) : c;
+    const delay = UNLOCK + i * STAGGER;
+    css += `
+@keyframes ${name}{0%{transform:none;opacity:1}75%{opacity:1}100%{transform:translate(${Math.round(t.x - c.x)}px,${Math.round(t.y - c.y)}px) perspective(700px) rotateX(80deg) scale(.15);opacity:0}}
+::view-transition-group(${name}){z-index:${layer(p)}}
+::view-transition-old(${name}){animation:${name} ${TRAVEL * 0.8}ms ${delay}ms cubic-bezier(.6,-0.3,.7,.6) both}`;
+  });
+  enters.forEach((p, i) => {
+    p.name = "rig-in-" + i;
+    const c = centre(p.rect);
+    const from = nearest(c, "o");
+    const s = from ? centre(from.o.rect) : c;
+    const delay = UNLOCK + TRAVEL * 0.45 + i * STAGGER;
+    css += `
+@keyframes ${p.name}{0%{transform:translate(${Math.round(s.x - c.x)}px,${Math.round(s.y - c.y)}px) perspective(700px) rotateX(-80deg) scale(.15);opacity:0}20%{opacity:1}100%{transform:none;opacity:1}}
+::view-transition-group(${p.name}){z-index:${layer(p)}}
+::view-transition-new(${p.name}){animation:${p.name} ${TRAVEL}ms ${delay}ms cubic-bezier(.2,.9,.3,1.2) both}`;
+  });
+
+  const style = doc.createElement("style");
+  style.dataset.rig = "";
+  style.textContent = css;
+  doc.head.append(style);
+  for (const [el, name] of names) el.style.viewTransitionName = name;
+
+  // 3. The swap, frozen behind the old parts' snapshots: the new site's head and body in this frame.
+  let undoDecode = () => {};
+  const vt = doc.startViewTransition(async () => {
+    win.history.replaceState(null, "", url);
+    const nd = new DOMParser().parseFromString(html, "text/html");
+    const de = doc.documentElement;
+    for (const a of [...de.attributes]) de.removeAttribute(a.name);
+    for (const a of nd.documentElement.attributes) de.setAttribute(a.name, a.value);
+    // Keep identical head nodes (the shared stylesheet stays loaded), add the new ones.
+    const want = new Set([...nd.head.children].map((n) => n.outerHTML));
+    const have = new Set();
+    for (const n of [...doc.head.children]) {
+      if (n === style) continue;
+      if (want.has(n.outerHTML)) have.add(n.outerHTML);
+      else n.remove();
+    }
+    const added = [];
+    for (const n of nd.head.children) if (!have.has(n.outerHTML)) added.push(doc.head.appendChild(doc.importNode(n, true)));
+    doc.head.append(style);
+    doc.body.replaceWith(doc.importNode(nd.body, true));
+    // Imported scripts don't run: run the site's own (the phone menu folds itself up with one).
+    for (const old of doc.querySelectorAll("script:not([type=application\\/ld\\+json])")) {
+      const s = doc.createElement("script");
+      for (const a of old.attributes) s.setAttribute(a.name, a.value);
+      s.textContent = old.textContent;
+      old.replaceWith(s);
+    }
+    await within(Promise.all(added.filter((n) => n.matches("link[rel=stylesheet]")).map((n) => new Promise((r) => { n.onload = r; n.onerror = r; }))), 1500);
+    // The same parts in the live frame, named like their partners.
+    const live = new Map(parts(doc).map((p) => [p.key, p]));
+    for (const p of ordered) live.get(p.n.key)?.el.style.setProperty("view-transition-name", p.name);
+    for (const p of enters) live.get(p.key)?.el.style.setProperty("view-transition-name", p.name);
+    await settle(doc);
+    const h = ordered.find((p) => p.n.key === "h1");
+    if (h) undoDecode = decode(live.get("h1").el, h.delay + TRAVEL * 0.5, TRAVEL * 0.9);
+  });
+  morphing = vt;
+  // Debugging: ?freeze=<ms> stops every animation at that moment of the switch, for a still frame.
+  vt.ready.catch(() => undefined);
+  if (FREEZE !== null) vt.ready.then(() => {
+    for (const a of [...doc.getAnimations(), ...document.getAnimations()]) { a.pause(); a.currentTime = FREEZE * k; }
+  });
+  try {
+    await vt.finished;
+  } catch (e) {
+    // Skipped: the new site is in place all the same.
+    console.warn("transform skipped", e);
+  } finally {
+    undoDecode();
+    style.remove();
+    for (const el of doc.querySelectorAll("[style*=view-transition-name]")) el.style.removeProperty("view-transition-name");
+    morphing = null;
+  }
+}
+
+// =====================================================================
+// The landing page: a wave from the chip
+// =====================================================================
+function reskin(t, from) {
+  const k = slow();
+  const waves = [...document.querySelectorAll(".wave")];
+  const maxD = Math.hypot(innerWidth, innerHeight);
+  const SPREAD = 750 * k;
+  const delayOf = (el) => {
+    const r = el.getBoundingClientRect();
+    return (Math.hypot(r.left + r.width / 2 - from.x, r.top + r.height / 2 - from.y) / maxD) * SPREAD;
+  };
+  const instant = reduced.matches;
+
+  // Hold every heading word and the background where they are; the wave lets them go one by one.
+  for (const w of words) {
+    const cs = getComputedStyle(w);
+    w.style.fontFamily = cs.fontFamily;
+    w.style.fontWeight = cs.fontWeight;
+  }
+  const oldCanvas = getComputedStyle(document.body).backgroundColor;
+  document.body.style.background = oldCanvas;
+
+  if (!instant) {
+    root.style.setProperty("--t", `${0.45 * k}s`);
+    for (const el of waves) el.style.setProperty("--d", `${Math.round(delayOf(el))}ms`);
+    root.classList.add("morphing");
+  }
+  for (const n of varNames) root.style.removeProperty(n);
+  if (t.vars) for (const [n, v] of Object.entries(t.vars)) root.style.setProperty(n, v);
+  for (const c of chips) {
+    if (c.dataset.id === t.id) c.setAttribute("aria-current", "true");
+    else c.removeAttribute("aria-current");
+  }
+  reset.hidden = !t.id;
+
+  if (instant) {
+    for (const w of words) { w.style.fontFamily = ""; w.style.fontWeight = ""; }
+    document.body.style.background = "";
+    return Promise.resolve();
+  }
+
+  // Heading words: each flips over on its own beat and lands in the new typeface.
+  const flips = words.map((w) => {
+    const d = delayOf(w);
+    return w.animate([{ transform: "perspective(500px) rotateX(0)" }, { transform: "perspective(500px) rotateX(90deg)" }], { duration: 170 * k, delay: d, easing: "cubic-bezier(.55,0,1,.45)", fill: "forwards" })
+      .finished.then((a) => {
+        w.style.fontFamily = "";
+        w.style.fontWeight = "";
+        a.cancel();
+        return w.animate([{ transform: "perspective(500px) rotateX(-90deg)" }, { transform: "perspective(500px) rotateX(0)" }], { duration: 260 * k, easing: "cubic-bezier(.2,.9,.3,1.35)" }).finished;
+      });
+  });
+
+  // The background follows as a shock wave from the chip.
+  const r = Math.hypot(Math.max(from.x, innerWidth - from.x), Math.max(from.y, innerHeight - from.y));
+  shock.style.background = getComputedStyle(root).getPropertyValue("--canvas");
+  shock.style.visibility = "visible";
+  const wave = shock.animate({ clipPath: [`circle(0px at ${from.x}px ${from.y}px)`, `circle(${r}px at ${from.x}px ${from.y}px)`] }, { duration: SPREAD + 300 * k, easing: "cubic-bezier(.3,.6,.25,1)", fill: "forwards" });
+
+  return Promise.all([...flips, wave.finished, sleep(SPREAD + 450 * k)]).then(() => {
+    document.body.style.background = "";
+    shock.style.visibility = "hidden";
+    wave.cancel();
+    root.classList.remove("morphing");
+  });
+}
+
+// =====================================================================
+// Switching
+// =====================================================================
+let current = DEFAULT;
+let busy = false;
+let queued = null;
+async function switchTo(t, from) {
+  if (busy) { queued = [t, from]; morphing?.skipTransition?.(); return; }
+  if (t === current) return;
+  busy = true;
+  current = t;
+  await within(fontFor(t), 800);
+  cap.textContent = caption(t);
+  try {
+    await Promise.all([reskin(t, from), transformSite(EX + t.page)]);
+  } finally {
+    busy = false;
+  }
+  if (queued) { const q = queued; queued = null; switchTo(...q); }
+}
+
+const point = (e, el) => {
+  if (e.clientX || e.clientY) return { x: e.clientX, y: e.clientY };
+  const r = el.getBoundingClientRect();
+  return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+};
+for (const c of chips) {
+  const t = trades.find((x) => x.id === c.dataset.id);
+  c.addEventListener("click", (e) => { e.preventDefault(); stopAuto(); switchTo(t, point(e, c)); });
+  c.addEventListener("pointerenter", () => { void fontFor(t); void fetch(EX + t.page); }, { once: true });
+}
+reset.addEventListener("click", (e) => { e.preventDefault(); stopAuto(); switchTo(DEFAULT, point(e, reset)); });
+
+// Plays every trade in turn, for watching hands-free.
+let autoTimer = 0;
+const stopAuto = () => { clearTimeout(autoTimer); autoBox.checked = false; };
+const next = async () => {
+  if (!autoBox.checked) return;
+  const i = (trades.indexOf(current) + 1) % trades.length;
+  const c = chips[i];
+  const r = c.getBoundingClientRect();
+  await switchTo(trades[i], { x: r.left + r.width / 2, y: r.top + r.height / 2 });
+  autoTimer = setTimeout(next, 2600);
+};
+autoBox.addEventListener("change", () => { clearTimeout(autoTimer); if (autoBox.checked) next(); });
+
+// Start on the product's own look and its shop example.
+cap.textContent = caption(DEFAULT);
+main.src = EX + DEFAULT.page;
+</script>
+</body>
+</html>
