@@ -21,3 +21,4 @@ export * from "./price-edit.ts";
 export * from "./translations-follow.ts";
 export * from "./showcase.ts";
 export * from "./owner-edits.ts";
+export * from "./missing-facts.ts";

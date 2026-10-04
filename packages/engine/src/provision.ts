@@ -346,6 +346,10 @@ export async function domainSuggestions(deps: Pick<ProvisionDeps, "repo" | "conf
   const tlds = deps.config.domains.tlds;
   const names = suggestDomains(name, { tlds: tlds.map((t) => t.tld), town, limit: deps.config.domains.suggestions.check });
   if (!names.length) return [];
+  // The worker asked while the site generated (warmDomainSuggestions): the same names within cacheMinutes reuse it.
+  const key = names.join(",");
+  const cached = await deps.repo.getDomainSuggestions(siteId);
+  if (cached?.key === key && Date.now() - cached.at.getTime() < deps.config.domains.suggestions.cacheMinutes * 60_000) return cached.suggestions as DomainSuggestion[];
   const checks = await deps.providers.registrar.check(names);
   const byName = new Map(checks.map((c) => [c.name, c]));
   const out: DomainSuggestion[] = [];
@@ -356,7 +360,22 @@ export async function domainSuggestions(deps: Pick<ProvisionDeps, "repo" | "conf
     out.push({ name: n, priceEurPerYear: offer.priceEurPerYear });
     if (out.length >= deps.config.domains.suggestions.show) break;
   }
+  await deps.repo.setDomainSuggestions(siteId, key, out);
   return out;
+}
+
+/**
+ * Asks the registrar about a site's names while it generates, once the brief has named the business, so the
+ * domain step (and a free preview's "Objavi na …") opens with the answer instead of waiting for it. Never throws:
+ * the step asks again itself.
+ */
+export async function warmDomainSuggestions(deps: Pick<ProvisionDeps, "repo" | "config" | "providers">, siteId: string): Promise<void> {
+  if (!deps.config.domains.enabled) return;
+  try {
+    await domainSuggestions(deps, siteId);
+  } catch (e) {
+    console.error(`[domains] ${siteId}: suggestions while generating:`, (e as Error).message);
+  }
 }
 
 /** The holder's details the owner can correct before registering, and which of them are still missing. */

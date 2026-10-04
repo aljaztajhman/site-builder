@@ -24,6 +24,7 @@ import {
   launchCheckBrowser,
   loadRecordings,
   provisionDomain,
+  warmDomainSuggestions,
   pruneAllSites,
   pruneSite,
   republishStaleAddresses,
@@ -328,7 +329,9 @@ export async function startWorker(platform: Platform, config = loadConfig(), job
     try {
       const { pictures, pictureCap } = await picturesForJob(platform, config, ctx, job.scope === "full" ? "full" : "home");
       const images = imageGeneratorFor(platform, config, ctx, pictureCap);
-      const r = await run.generateSite({ config, repo, storage, client, pictures, ...(images ? { images } : {}) }, job.siteId, jobId);
+      // The domain step's names are asked while the site generates (it-zero-to-live).
+      const onBrief = () => void warmDomainSuggestions(domainDeps, job.siteId);
+      const r = await run.generateSite({ config, repo, storage, client, pictures, onBrief, ...(images ? { images } : {}) }, job.siteId, jobId);
       if (r.critiqueSkipped) console.log(`[generate] ${job.siteId}: finished with the critique skipped (${r.critiqueSkipped})`);
       await finish(ctx.aiJobId, "done");
     } catch (e) {

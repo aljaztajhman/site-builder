@@ -1,0 +1,568 @@
+[
+ {
+  "id": "avtoservis-mrak",
+  "checklist": [
+   {
+    "path": "/pages/1/sections/3/props/items/2/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/business/email",
+    "kind": "placeholder",
+    "detail": "email"
+   },
+   {
+    "path": "/business/provider/legalName",
+    "kind": "placeholder",
+    "detail": "legalName"
+   },
+   {
+    "path": "/business/provider/taxNumber",
+    "kind": "placeholder",
+    "detail": "taxNumber"
+   },
+   {
+    "path": "/business/provider/registrationNumber",
+    "kind": "placeholder",
+    "detail": "registrationNumber"
+   }
+  ],
+  "asked": [
+   {
+    "path": "/pages/1/sections/3/props/items/2/price",
+    "kind": "price"
+   },
+   {
+    "path": "/business/email",
+    "kind": "email"
+   },
+   {
+    "path": "/business/provider/legalName",
+    "kind": "legalName"
+   },
+   {
+    "path": "/business/provider/taxNumber",
+    "kind": "taxNumber"
+   },
+   {
+    "path": "/business/provider/registrationNumber",
+    "kind": "registrationNumber"
+   }
+  ],
+  "other": []
+ },
+ {
+  "id": "fizioterapija-pregib",
+  "checklist": [
+   {
+    "path": "/business/address",
+    "kind": "placeholder",
+    "detail": "address"
+   }
+  ],
+  "asked": [
+   {
+    "path": "/business/address",
+    "kind": "address"
+   }
+  ],
+  "other": []
+ },
+ {
+  "id": "frizerstvo-lana",
+  "checklist": [
+   {
+    "path": "/pages/0/sections/2/props/items/3/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/groups/1/items/1/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/groups/2/items/0/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/business/provider/legalName",
+    "kind": "placeholder",
+    "detail": "legalName"
+   },
+   {
+    "path": "/business/provider/taxNumber",
+    "kind": "placeholder",
+    "detail": "taxNumber"
+   },
+   {
+    "path": "/business/provider/registrationNumber",
+    "kind": "placeholder",
+    "detail": "registrationNumber"
+   }
+  ],
+  "asked": [
+   {
+    "path": "/pages/0/sections/2/props/items/3/price",
+    "kind": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/groups/1/items/1/price",
+    "kind": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/groups/2/items/0/price",
+    "kind": "price"
+   },
+   {
+    "path": "/business/provider/legalName",
+    "kind": "legalName"
+   },
+   {
+    "path": "/business/provider/taxNumber",
+    "kind": "taxNumber"
+   },
+   {
+    "path": "/business/provider/registrationNumber",
+    "kind": "registrationNumber"
+   }
+  ],
+  "other": []
+ },
+ {
+  "id": "gostilna-zlata-zlica",
+  "checklist": [
+   {
+    "path": "/pages/1/sections/1/props/categories/1/dishes/3/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/categories/1/dishes/4/price",
+    "kind": "placeholder",
+    "detail": "price"
+   }
+  ],
+  "asked": [
+   {
+    "path": "/pages/1/sections/1/props/categories/1/dishes/3/price",
+    "kind": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/categories/1/dishes/4/price",
+    "kind": "price"
+   }
+  ],
+  "other": []
+ },
+ {
+  "id": "instalacije-rebernik",
+  "checklist": [
+   {
+    "path": "/business/email",
+    "kind": "placeholder",
+    "detail": "email"
+   }
+  ],
+  "asked": [
+   {
+    "path": "/business/email",
+    "kind": "email"
+   }
+  ],
+  "other": []
+ },
+ {
+  "id": "kmetija-grabnar",
+  "checklist": [
+   {
+    "path": "/pages/1/sections/1/props/items/0/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/1/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/pages/2/sections/1/props/categories/0/dishes/0/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/pages/2/sections/1/props/categories/0/dishes/1/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/pages/2/sections/1/props/categories/0/dishes/2/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/pages/2/sections/1/props/categories/0/dishes/3/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/business/provider/legalName",
+    "kind": "placeholder",
+    "detail": "legalName"
+   },
+   {
+    "path": "/business/provider/taxNumber",
+    "kind": "placeholder",
+    "detail": "taxNumber"
+   },
+   {
+    "path": "/business/provider/registrationNumber",
+    "kind": "placeholder",
+    "detail": "registrationNumber"
+   }
+  ],
+  "asked": [
+   {
+    "path": "/pages/1/sections/1/props/items/0/price",
+    "kind": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/1/price",
+    "kind": "price"
+   },
+   {
+    "path": "/pages/2/sections/1/props/categories/0/dishes/0/price",
+    "kind": "price"
+   },
+   {
+    "path": "/pages/2/sections/1/props/categories/0/dishes/1/price",
+    "kind": "price"
+   },
+   {
+    "path": "/pages/2/sections/1/props/categories/0/dishes/2/price",
+    "kind": "price"
+   },
+   {
+    "path": "/pages/2/sections/1/props/categories/0/dishes/3/price",
+    "kind": "price"
+   },
+   {
+    "path": "/business/provider/legalName",
+    "kind": "legalName"
+   },
+   {
+    "path": "/business/provider/taxNumber",
+    "kind": "taxNumber"
+   },
+   {
+    "path": "/business/provider/registrationNumber",
+    "kind": "registrationNumber"
+   }
+  ],
+  "other": []
+ },
+ {
+  "id": "pekarna-kvas",
+  "checklist": [
+   {
+    "path": "/pages/1/sections/1/props/categories/0/dishes/2/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/categories/1/dishes/1/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/categories/2/dishes/1/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/business/provider/legalName",
+    "kind": "placeholder",
+    "detail": "legalName"
+   },
+   {
+    "path": "/business/provider/taxNumber",
+    "kind": "placeholder",
+    "detail": "taxNumber"
+   },
+   {
+    "path": "/business/provider/registrationNumber",
+    "kind": "placeholder",
+    "detail": "registrationNumber"
+   }
+  ],
+  "asked": [
+   {
+    "path": "/pages/1/sections/1/props/categories/0/dishes/2/price",
+    "kind": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/categories/1/dishes/1/price",
+    "kind": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/categories/2/dishes/1/price",
+    "kind": "price"
+   },
+   {
+    "path": "/business/provider/legalName",
+    "kind": "legalName"
+   },
+   {
+    "path": "/business/provider/taxNumber",
+    "kind": "taxNumber"
+   },
+   {
+    "path": "/business/provider/registrationNumber",
+    "kind": "registrationNumber"
+   }
+  ],
+  "other": []
+ },
+ {
+  "id": "racunovodstvo-seliskar",
+  "checklist": [
+   {
+    "path": "/pages/1/sections/1/props/items/0/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/1/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/2/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/3/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/4/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/5/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/pages/2/sections/2/props/members/1/name",
+    "kind": "placeholder",
+    "detail": "name"
+   },
+   {
+    "path": "/pages/2/sections/2/props/members/2/name",
+    "kind": "placeholder",
+    "detail": "name"
+   },
+   {
+    "path": "/pages/2/sections/2/props/members/3/name",
+    "kind": "placeholder",
+    "detail": "name"
+   }
+  ],
+  "asked": [
+   {
+    "path": "/pages/1/sections/1/props/items/0/price",
+    "kind": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/1/price",
+    "kind": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/2/price",
+    "kind": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/3/price",
+    "kind": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/4/price",
+    "kind": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/5/price",
+    "kind": "price"
+   },
+   {
+    "path": "/pages/2/sections/2/props/members/1/name",
+    "kind": "name"
+   },
+   {
+    "path": "/pages/2/sections/2/props/members/2/name",
+    "kind": "name"
+   },
+   {
+    "path": "/pages/2/sections/2/props/members/3/name",
+    "kind": "name"
+   }
+  ],
+  "other": []
+ },
+ {
+  "id": "trgovina-oljka-in-sol",
+  "checklist": [
+   {
+    "path": "/pages/0/sections/2/props/items/2/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/2/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/3/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/4/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/5/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/6/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/7/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/8/price",
+    "kind": "placeholder",
+    "detail": "price"
+   }
+  ],
+  "asked": [
+   {
+    "path": "/pages/0/sections/2/props/items/2/price",
+    "kind": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/2/price",
+    "kind": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/3/price",
+    "kind": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/4/price",
+    "kind": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/5/price",
+    "kind": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/6/price",
+    "kind": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/7/price",
+    "kind": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/8/price",
+    "kind": "price"
+   }
+  ],
+  "other": []
+ },
+ {
+  "id": "zobozdravstvo-lebar",
+  "checklist": [
+   {
+    "path": "/pages/1/sections/1/props/items/0/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/1/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/2/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/3/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/pages/1/sections/2/props/items/0/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/pages/1/sections/2/props/items/1/price",
+    "kind": "placeholder",
+    "detail": "price"
+   },
+   {
+    "path": "/pages/1/sections/2/props/items/2/price",
+    "kind": "placeholder",
+    "detail": "price"
+   }
+  ],
+  "asked": [
+   {
+    "path": "/pages/1/sections/1/props/items/0/price",
+    "kind": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/1/price",
+    "kind": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/2/price",
+    "kind": "price"
+   },
+   {
+    "path": "/pages/1/sections/1/props/items/3/price",
+    "kind": "price"
+   },
+   {
+    "path": "/pages/1/sections/2/props/items/0/price",
+    "kind": "price"
+   },
+   {
+    "path": "/pages/1/sections/2/props/items/1/price",
+    "kind": "price"
+   },
+   {
+    "path": "/pages/1/sections/2/props/items/2/price",
+    "kind": "price"
+   }
+  ],
+  "other": []
+ }
+]
