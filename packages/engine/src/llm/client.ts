@@ -52,6 +52,17 @@ export class SpendCapError extends Error {
   }
 }
 
+/**
+ * A paid plan's generated pictures for this allowance month are used up (config plans.*.site.generatedPicturesPerMonth,
+ * checked at each picture's reservation). The pipeline builds the site without that picture; nothing else stops.
+ */
+export class PictureLimitError extends Error {
+  constructor(used: number, max: number) {
+    super(`The plan's generated pictures for this month are used up (${used} of ${max}); building without this one`);
+    this.name = "PictureLimitError";
+  }
+}
+
 /** A paid call's estimated cost, reserved under the daily cap until the call is over. */
 export interface SpendReservation {
   /** The provider billed the call: book `record` (its real cost, tokens, stage) in place of the estimate. */

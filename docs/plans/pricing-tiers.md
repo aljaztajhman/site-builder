@@ -41,22 +41,22 @@ Plus is made of things that cost us almost nothing per customer (pages, a langua
 - **Free lifetime cap**: everything a free account's jobs cost, its claimed anonymous preview included, never passes `tiers.free.lifetimeEur`, whatever the counts allow. Built.
 - **Daily pools and the global cap** stay as they are.
 - **AI paket** (later, needs billing): €5 for €2.50 more allowance this month, at most 2 a month; the schema refuses a top-up that doesn't earn more than it adds.
-- **Per-plan site limits** (pages, languages, generated pictures per month) are in config now and enforced as each feature is built (item `it-plan-limits`).
+- **Per-plan site limits** (it-plan-limits, built 2026-10-04 on claude/upsells): pages (Osnovni 8, Plus 20; home and standard pages, a collection's list page included), languages (1 / 2), collections (Plus only: `plans.*.site.collections`) and generated pictures per allowance month (3 / 10). The API refuses every direct edit past a limit (`limitBreach`, whatever the edit's path) and the worker every chat edit, in Slovene, naming the plan that has more; only growth is refused, so a site already over can be edited and trimmed. Pictures are counted from the per-call log and held again at each picture's reservation, so two jobs can't both take the last one; past the month's count a generation still runs, with fewer pictures, and says so. A free preview fills up to `imageGen.pipeline.fillUpToFree` (1) generated pictures instead of 2. Spec v13 holds 24 pages (was 12), so Plus's 20 fit.
 
 ## Upsells
 
 **Free → Osnovni**
-- The refusals name the plan: "Z naročnino Osnovni (15 € na mesec) dobite celotno stran, objavo na svoji domeni in pomočnika vsak mesec." Built.
-- Publish says where the site will live: the domain is checked while the preview generates, so the button reads "Objavi na pekarnakvas.si" (custom-domains plan).
-- The rest of the site is listed but locked: the brief already names the pages, so the preview shows them greyed out at no extra cost.
-- Day 5 of the 7-day anonymous preview: an email "your preview is deleted in 2 days; keep it and publish it".
-- The founding €99 offer, with its count left.
+- The refusals name the plan: "Z naročnino Osnovni (15 € na mesec) dobite celotno stran, objavo na svoji domeni in pomočnika vsak mesec." Built; publishing and export refusals name it too.
+- Publish says where the site will live: for a free preview the editor asks the publish step's own domain check once, and Objavi reads "Objavi na pekarnakvas.si" (on a phone the panel names the domain); a tap says it is part of Osnovni, with its price. Built; shows only while `domains.enabled`.
+- The rest of the site is listed but locked: the brief's other pages by menu name (no model call), each with "Osnovni", and Osnovni's monthly and yearly price, in the guest panel and where a free account's page list would be. Built.
+- Day 5 of the 7-day anonymous preview: the visitor may leave an address on the preview ("Opomnik pred izbrisom", optional); one email goes to it `tiers.anonymous.reminder.daysBefore` (2) days before deletion, from the web process, once, with an idempotency key. Its link keeps the preview once the visitor signs in with that address, on any device; the address is used for nothing else and goes with the preview. Built (migration 19); `/zasebnost` says so.
+- The founding €99 offer, with its count left: the landing page shows "še N prostih mest", N = `foundingOffer.customers` minus the allow-list entries the admin marked "Ustanovna cena" (`allow_list.founding_at`); the line goes when none are left. Built. Before billing, the admin's mark is the only source; with billing, a paid founding year will be.
 
 **Osnovni → Plus**
-- Reaching the AI allowance offers Plus (built in the refusal text) and, once billing exists, the AI paket.
-- Adding a 9th page, a second language or a blog shows "Plus" at that button.
-- The monthly stats email names what Plus adds where it fits (visitors from abroad → a second language).
-- At renewal, Plus with the unused months credited.
+- Reaching the AI allowance offers Plus (built in the refusal text) and, once billing exists, the AI paket (not built: needs billing).
+- Adding a 9th page, a second language or a blog shows "Plus" at that button, and the API refuses it naming Plus. Built for pages and collections; there is no language editor yet, so Strani shows a "Jeziki" line with Plus instead, and the API and chat edits refuse a second language on Osnovni.
+- The monthly stats email names what Plus adds where it fits: near Osnovni's page limit (7 or 8 pages), or a one-language tourist farm or restaurant (we count no visitor countries, so the trade stands in for "visitors from abroad"). Built.
+- At renewal, Plus with the unused months credited: the rule is in config (`plans.upgrade.credit` = unused-whole-months) and `upgradeQuote` (@sb/config, tested); nothing charges it until billing exists.
 
 ## Tracking accounts and plans (how you manage them)
 
@@ -74,5 +74,5 @@ With billing (phase 3):
 ## Open
 
 - Hosting share per site is an assumption; replace with the measured Railway bill per published site once there are 20+.
-- Whether free previews should use fewer generated pictures (1 instead of 2) to bring the typical free cost down further: needs a per-tier picture count in the pipeline.
+- Free previews now make 1 generated picture instead of 2 (`imageGen.pipeline.fillUpToFree`, it-plan-limits). Not measured yet (budget €0): the saving is ~€0.07 per photo-less preview; whether the homepage still looks photo-led with one picture needs `pnpm eval --only <fixture> --scope home --photos 0`.
 - VAT: prices include VAT whether or not we're registered; below €60,000 a year we keep the VAT share.

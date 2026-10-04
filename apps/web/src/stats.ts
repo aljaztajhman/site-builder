@@ -1,7 +1,9 @@
 import { createHmac } from "node:crypto";
 import type { Context, Hono } from "hono";
-import type { AppConfig } from "@sb/config";
+import type { AppConfig, PlanKey } from "@sb/config";
+import { localeCount, nextPlanFor, pageCount, planOffer } from "@sb/engine";
 import type { MailMessage, Mailer, Repo, StatTotals } from "@sb/platform";
+import type { SiteSpec } from "@sb/spec";
 import { clientIp, type AppEnv } from "./access.ts";
 
 /**
@@ -114,6 +116,32 @@ export interface ReportMailInput {
   before: StatTotals | null;
   siteUrl: string | null;
   dashboardUrl: string | null;
+  /** One line about what the next plan adds, where it fits this site (plusNote); absent otherwise. */
+  plusNote?: string | null;
+}
+
+/** Trades whose visitors often come from abroad: the report mentions a second language to them. */
+const ABROAD_TRADES = new Set(["tourist-farm", "restaurant"]);
+
+/**
+ * The monthly report's upsell (it-upsells), only where it fits the site and only when a plan above the owner's adds
+ * it: a site at its plan's page limit (or one below) hears about more pages; a tourist farm or restaurant in one
+ * language about a second one. We count no visitor countries (cookieless), so the trade stands in for "from abroad".
+ */
+export function plusNote(config: AppConfig, plan: PlanKey | null, spec: Pick<SiteSpec, "pages" | "locales" | "business"> | undefined): string | null {
+  if (!plan || !spec) return null;
+  const site = config.plans[plan].site;
+  const next = nextPlanFor(config, "paid", plan, () => true);
+  if (!next) return null;
+  const more = config.plans[next];
+  const pages = pageCount(spec);
+  if (pages >= site.maxPages - 1 && more.site.maxPages > site.maxPages) {
+    return `Stran ima ${pages} od ${site.maxPages} strani, kolikor jih vključuje paket ${config.plans[plan].name}. Paket ${planOffer(config, next)} jih ima do ${more.site.maxPages}.`;
+  }
+  if (localeCount(spec) <= site.locales && more.site.locales > site.locales && ABROAD_TRADES.has(spec.business.type)) {
+    return `Če vas obiskujejo tudi gostje iz tujine: paket ${planOffer(config, next)} ima stran v ${more.site.locales === 2 ? "dveh jezikih" : `${more.site.locales} jezikih`}, na primer v slovenščini in angleščini.`;
+  }
+  return null;
 }
 
 export function monthlyReportMail(m: ReportMailInput): MailMessage {
@@ -135,6 +163,7 @@ export function monthlyReportMail(m: ReportMailInput): MailMessage {
     ...rows.map(([l, k]) => line(l, k)),
     "",
     "Štejemo brez piškotkov in brez podatkov o obiskovalcih: samo, kolikokrat so bile strani odprte in kolikokrat so obiskovalci tapnili klic ali pot. Ponovnih ogledov iste osebe v pol ure ne štejemo, robotov in iskalnikov tudi ne.",
+    ...(m.plusNote ? ["", m.plusNote] : []),
     ...(m.siteUrl ? ["", `Vaša stran: ${m.siteUrl}`] : []),
     ...(m.dashboardUrl ? [`Urejanje: ${m.dashboardUrl}`] : []),
   ].join("\n");
@@ -147,6 +176,7 @@ export function monthlyReportMail(m: ReportMailInput): MailMessage {
     ...rows.map(([l, k]) => `<tr>${cell(l)}${cell(fmt(m.totals[k]), true)}${m.before ? cell(`<span style="color:#555">${MONTH_NAME[(monthIndex + 11) % 12]}: ${fmt(m.before[k])}</span>`, true) : ""}</tr>`),
     `</table>`,
     `<p style="color:#555;font-size:14px">Štejemo brez piškotkov in brez podatkov o obiskovalcih: samo, kolikokrat so bile strani odprte in kolikokrat so obiskovalci tapnili klic ali pot. Ponovnih ogledov iste osebe v pol ure ne štejemo, robotov in iskalnikov tudi ne.</p>`,
+    ...(m.plusNote ? [`<p>${escapeHtml(m.plusNote)}</p>`] : []),
     ...(m.siteUrl ? [`<p><a href="${escapeHtml(m.siteUrl)}">Vaša stran</a>${m.dashboardUrl ? ` · <a href="${escapeHtml(m.dashboardUrl)}">Urejanje</a>` : ""}</p>`] : []),
     `</div>`,
   ].join("");
@@ -218,6 +248,7 @@ export async function sendMonthlyReports(deps: ReportDeps, now = new Date(), lim
           before: hadEarlier ? earlier : null,
           siteUrl: origin ? `${origin}/s/${site.slug}/` : null,
           dashboardUrl: origin ? `${origin}/sites/${site.id}` : null,
+          plusNote: plusNote(config, site.account_id ? ((await repo.accounts.planOf(site.account_id))?.plan ?? null) : null, spec),
         }),
       );
       await repo.stats.setReport(site.id, p.month, "sent");

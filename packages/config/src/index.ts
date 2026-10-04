@@ -52,8 +52,17 @@ const PaidPlan = z
     setupService: z.strictObject({ eur: z.number().positive(), includedYearly: z.boolean() }),
     /** A hard monthly € limit on AI work, counted from real costs; direct editing is never limited. */
     ai: z.strictObject({ allowanceEurPerMonth: z.number().min(0), firstMonthExtraEur: z.number().min(0) }),
-    /** What a site on this plan may have (enforced as each feature is built). */
-    site: z.strictObject({ maxPages: z.number().int().positive(), locales: z.number().int().min(1), generatedPicturesPerMonth: z.number().int().min(0) }),
+    /**
+     * What a site on this plan may have (it-plan-limits), enforced by the API and the worker: pages (home and
+     * standard pages, collection list pages included), languages, generated pictures per allowance month, and
+     * which collections the owner may switch on.
+     */
+    site: z.strictObject({
+      maxPages: z.number().int().positive(),
+      locales: z.number().int().min(1),
+      generatedPicturesPerMonth: z.number().int().min(0),
+      collections: z.array(z.enum(["blog", "events", "services", "team"])),
+    }),
   })
   .refine((p) => p.yearlyEur < 12 * p.monthlyEur, { message: "the yearly price must be below 12 monthly payments" })
   .refine((p) => !p.foundingOffer || p.foundingOffer.firstYearEur < p.yearlyEur, { message: "the founding first year must be below the yearly price" });
@@ -86,6 +95,48 @@ export function planMargins(p: PaidPlanConfig, c: PlanCostsConfig): { monthly: n
     yearly: net(p.yearlyEur, false) - yearCost,
     foundingYear: p.foundingOffer ? net(p.foundingOffer.firstYearEur, false) - yearCost : null,
   };
+}
+
+const addMonthsUtc = (d: Date, n: number): Date => {
+  const m = d.getUTCMonth() + n;
+  const last = new Date(Date.UTC(d.getUTCFullYear(), m + 1, 0)).getUTCDate();
+  return new Date(Date.UTC(d.getUTCFullYear(), m, Math.min(d.getUTCDate(), last), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds(), d.getUTCMilliseconds()));
+};
+const cents = (n: number) => Math.round(n * 100) / 100;
+
+export interface UpgradeQuote {
+  /** Whole months of the current period still ahead. */
+  unusedMonths: number;
+  /** What comes off the new plan's price: the part of `paidEur` for those months. */
+  creditEur: number;
+  /** The new plan's price for a new period of the same length, starting now. */
+  priceEurNew: number;
+  /** What the owner pays now (never below 0). */
+  dueEur: number;
+}
+
+/**
+ * Moving up to a dearer plan (config `plans.upgrade`, docs/plans/pricing-tiers.md: "at renewal, Plus with the
+ * unused months credited"; up at once, the difference credited): the whole months left of the period the owner
+ * paid `paidEur` for are credited pro rata against the new plan's price for a new period of the same length
+ * starting `now`. A part month is not credited. Billing doesn't exist yet; nothing charges this.
+ */
+export function upgradeQuote(
+  plans: Pick<AppConfig["plans"], "standard" | "premium" | "upgrade">,
+  q: { from: PlanKey; to: PlanKey; period: "monthly" | "yearly"; paidEur: number; periodStart: Date; periodEnd: Date; now: Date },
+): UpgradeQuote {
+  const from = plans[q.from];
+  const to = plans[q.to];
+  if (to.monthlyEur <= from.monthlyEur) throw new Error(`upgradeQuote: ${to.name} is not dearer than ${from.name}`);
+  if (!(q.periodEnd > q.periodStart) || q.paidEur < 0) throw new Error("upgradeQuote: an empty period or a negative payment");
+  const months = q.period === "yearly" ? 12 : 1;
+  let unused = 0;
+  if (q.now < q.periodEnd) {
+    while (unused < months && addMonthsUtc(q.now, unused + 1) <= q.periodEnd) unused++;
+  }
+  const creditEur = cents((q.paidEur * unused) / months);
+  const priceEurNew = q.period === "yearly" ? to.yearlyEur : to.monthlyEur;
+  return { unusedMonths: unused, creditEur, priceEurNew, dueEur: Math.max(0, cents(priceEurNew - creditEur)) };
 }
 
 /**
@@ -237,6 +288,8 @@ export const AppConfigSchema = z.object({
       model: z.string(),
       /** Generate images until the site has this many photos (client photos count first), per generation scope. */
       fillUpTo: z.strictObject({ home: z.number().int().min(0).max(4), full: z.number().int().min(0).max(4) }),
+      /** The most generated pictures in a free preview (no account or a free account): a per-tier count (it-plan-limits). */
+      fillUpToFree: z.number().int().min(0).max(4),
       /** Appended to every generated image's prompt. */
       style: z.string().min(1),
     }),
@@ -273,6 +326,8 @@ export const AppConfigSchema = z.object({
         maxPhotos: z.number().int().min(0),
         maxFileBytes: z.number().int().positive(),
       }),
+      /** One email, if the visitor asked for it, `daysBefore` days before the unclaimed preview is deleted (it-upsells). */
+      reminder: z.object({ daysBefore: z.number().positive(), everyMinutes: z.number().int().min(1), maxAttempts: z.number().int().min(1).max(10) }),
     }),
     free: z.object({
       homepages: z.number().int().min(0),
@@ -296,6 +351,10 @@ export const AppConfigSchema = z.object({
        * free, unpublished preview; never inside the rendered site (preview = published output). "off": none.
        */
       watermark: z.enum(["app-badge", "off"]),
+      /** The pages a free preview has (the homepage); more need a paid plan. */
+      pages: z.array(z.string()).min(1),
+      /** Languages of a free preview. */
+      locales: z.number().int().min(1),
     }),
     billingEnabled: z.boolean(),
     /** Prices are shown and charged with VAT, whether or not we're VAT-registered. */
@@ -303,6 +362,8 @@ export const AppConfigSchema = z.object({
     costs: PlanCosts,
     standard: PaidPlan,
     premium: PaidPlan,
+    /** Moving up to a dearer plan: how the period already paid is credited (upgradeQuote). */
+    upgrade: z.object({ credit: z.enum(["unused-whole-months"]) }),
     /** "AI paket": more allowance for this month, sold when a plan's is used up. */
     aiTopUp: z.object({ eur: z.number().positive(), allowanceEur: z.number().positive(), maxPerMonth: z.number().int().min(0) }),
   })
@@ -314,7 +375,17 @@ export const AppConfigSchema = z.object({
     })
     .refine((p) => p.premium.monthlyEur > p.standard.monthlyEur && planMargins(p.premium, p.costs).yearly > planMargins(p.standard, p.costs).yearly, {
       message: "Plus must cost more than Osnovni and earn more per year",
-    }),
+    })
+    .refine(
+      (p) =>
+        p.premium.site.maxPages >= p.standard.site.maxPages &&
+        p.premium.site.locales >= p.standard.site.locales &&
+        p.premium.site.generatedPicturesPerMonth >= p.standard.site.generatedPicturesPerMonth &&
+        p.standard.site.collections.every((k) => p.premium.site.collections.includes(k)) &&
+        p.standard.site.maxPages >= p.freePreview.pages.length &&
+        p.standard.site.locales >= p.freePreview.locales,
+      { message: "each plan must allow at least what the one below it does (free preview < Osnovni < Plus), or the upsell would name a plan that adds nothing" },
+    ),
 }).refine((c) => c.domains.tlds.every((t) => t.maxCostEur <= c.plans.costs.domainEurPerYear), {
   // The yearly plans include the domain: the margin check counts plans.costs.domainEurPerYear for it.
   message: "a domain's maxCostEur may not exceed plans.costs.domainEurPerYear (the margin check counts that)",

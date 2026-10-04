@@ -3,7 +3,7 @@ import { html } from "./pages.tsx";
 import { uiUrl } from "./ui/assets.ts";
 import { PRODUCT_NAME } from "./ui/labels.ts";
 import { TURNSTILE_SCRIPT } from "./turnstile.ts";
-import { chatEdits, daysAfterOd, moreHomepages } from "./limits.ts";
+import { chatEdits, count, daysAfterOd, moreHomepages } from "./limits.ts";
 import { DEFAULT_CAPTION, tradeCaption, tradeClientData, tradeFontFace, tradeShowcases, tradeStyle } from "./showcase.ts";
 import { clientScriptUrl } from "./client-bundle.ts";
 
@@ -25,6 +25,10 @@ const DEMO_PROMPT =
   "Oljka in sol je majhna trgovina z istrskimi dobrotami v starem mestnem jedru Kopra, Kidričeva ulica 22. Prodajamo oljčno olje, piransko sol, med, vino, pršut in sire manjših pridelovalcev …";
 
 const wholeEur = new Intl.NumberFormat("sl-SI", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+/** "3 ustvarjene slike", "10 ustvarjenih slik". */
+const pictures = (n: number) => count(n, { one: "ustvarjena slika", two: "ustvarjeni sliki", few: "ustvarjene slike", other: "ustvarjenih slik" });
+/** "še 100 prostih mest", "še 1 prosto mesto". */
+const placesLeft = (n: number) => `še ${count(n, { one: "prosto mesto", two: "prosti mesti", few: "prosta mesta", other: "prostih mest" })}`;
 
 const Brand = () => (
   <a className="brand" href="/">
@@ -69,9 +73,11 @@ export interface HomeProps {
   description?: string;
   /** `/?primer=<id>`: the page in that trade's look, its showcase site in the demo. */
   showcase?: string;
+  /** The founding offer's places left (its size in config minus the places given); null without an offer. */
+  foundingLeft?: number | null;
 }
 
-export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteKey, anonymousClosed, previous, anonymousUpload, error, description, showcase }: HomeProps): string {
+export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteKey, anonymousClosed, previous, anonymousUpload, error, description, showcase, foundingLeft = null }: HomeProps): string {
   const plans = config.plans;
   const std = plans.standard;
   const plus = plans.premium;
@@ -503,13 +509,19 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
                     <li>Urejanje s klikom brez omejitev, pomočnik vsak mesec</li>
                     <li>Objava in gostovanje</li>
                     <li>Prenos strani kot datoteke, kadarkoli</li>
+                    <li>{`${pictures(std.site.generatedPicturesPerMonth)} na mesec, kjer fotografij ni dovolj`}</li>
                   </ul>
                   {std.foundingOffer && (
                     <dl className="extra">
-                      <div>
-                        <dt>{`Prvo leto za prvih ${std.foundingOffer.customers} strank`}</dt>
-                        <dd>{wholeEur.format(std.foundingOffer.firstYearEur)}</dd>
-                      </div>
+                      {foundingLeft !== 0 && (
+                        <div id="founding">
+                          <dt>
+                            {`Prvo leto za prvih ${std.foundingOffer.customers} strank`}
+                            {foundingLeft !== null && <span className="left">{` · ${placesLeft(foundingLeft)}`}</span>}
+                          </dt>
+                          <dd>{wholeEur.format(std.foundingOffer.firstYearEur)}</dd>
+                        </div>
+                      )}
                       <div>
                         <dt>Postavitev skupaj z vami, po želji</dt>
                         <dd>{`${wholeEur.format(std.setupService.eur)} enkratno`}</dd>
@@ -530,6 +542,7 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
                   <p className="muted">{`Vse iz paketa ${std.name}, za podjetja, ki jim stran prinaša stranke.`}</p>
                   <ul>
                     <li>{`Do ${plus.site.maxPages} strani`}</li>
+                    <li>{`${pictures(plus.site.generatedPicturesPerMonth)} na mesec`}</li>
                     <li>{`Več pomoči pomočnika vsak mesec`}</li>
                     {plus.setupService.includedYearly && <li>Pri letnem paketu postavitev skupaj z vami vključena</li>}
                     <li>Odgovor na vprašanja isti dan</li>

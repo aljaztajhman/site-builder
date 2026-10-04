@@ -112,7 +112,8 @@ describe("editor by viewer", () => {
       await expect.poll(() => preview(page).locator(".sb-tools").count()).toBe(1);
       // Publishing says why, no export, no spend.
       await page.getByRole("button", { name: "Objavi" }).click();
-      await expect.poll(() => page.locator(".toast").textContent()).toContain("z naročnino");
+      // With the plan and its price (it-upsells).
+      await expect.poll(() => page.locator(".toast").textContent()).toContain("Objava je del naročnine Osnovni: 15 € na mesec");
       await page.locator("details.menu > summary").click();
       expect(await page.locator("details.menu .list").getByText("Prenesi stran (.zip)").count()).toBe(0);
       expect(await page.getByRole("button", { name: "Poraba in dnevnik" }).count()).toBe(0);

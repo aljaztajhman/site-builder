@@ -23,6 +23,10 @@ export interface SiteRow {
   device_id: string | null;
   /** The address the live release carries (canonical URLs, sitemap); null = none (migration 18). */
   published_address?: string | null;
+  /** The address an anonymous preview's visitor left for one email before it is deleted (migration 19). */
+  reminder_email?: string | null;
+  reminder?: "none" | "pending" | "sent" | "failed";
+  reminder_attempts?: number;
   /** Set while a publish writes its release (claimPublish); null otherwise. */
   publishing_since: string | null;
   /** The highest img_NN number ever issued on this site (claimImageNumbers). */
@@ -486,6 +490,39 @@ export class Repo {
       [siteId],
     );
     return rows.map((r) => ({ ...r, id: String(r.id) }));
+  }
+
+  // ---------- The reminder before an anonymous preview is deleted (it-upsells) ----------
+
+  /** The visitor's address for the one reminder, only on an unclaimed anonymous preview whose reminder wasn't sent. */
+  async setReminder(siteId: string, email: string): Promise<boolean> {
+    const { rows } = await this.db.query(
+      "update sites set reminder_email = $2, reminder = 'pending', reminder_attempts = 0 where id = $1 and account_id is null and device_id is not null and reminder <> 'sent' returning id",
+      [siteId, email],
+    );
+    return rows.length > 0;
+  }
+
+  /** Unclaimed previews whose reminder is due: at least `remindAfterDays` old and not yet `keepDays` old (deleted then). */
+  async dueReminders(o: { keepDays: number; remindAfterDays: number; maxAttempts: number; limit?: number }): Promise<{ id: string; reminder_email: string; reminder_attempts: number; created_at: string }[]> {
+    const { rows } = await this.db.query<{ id: string; reminder_email: string; reminder_attempts: number; created_at: string }>(
+      `select id, reminder_email, reminder_attempts, created_at from sites
+        where reminder = 'pending' and reminder_email is not null and account_id is null and device_id is not null and reminder_attempts < $3
+          and created_at <= now() - make_interval(secs => $2::double precision) and created_at > now() - make_interval(secs => $1::double precision)
+        order by created_at limit $4`,
+      [o.keepDays * 86400, o.remindAfterDays * 86400, o.maxAttempts, o.limit ?? 100],
+    );
+    return rows.map((r) => ({ ...r, reminder_attempts: Number(r.reminder_attempts) }));
+  }
+
+  /** Takes a due reminder for one send attempt; of several processes only one gets it. */
+  async claimReminder(siteId: string, attempts: number): Promise<boolean> {
+    const { rows } = await this.db.query("update sites set reminder_attempts = reminder_attempts + 1 where id = $1 and reminder = 'pending' and reminder_attempts = $2 returning id", [siteId, attempts]);
+    return rows.length > 0;
+  }
+
+  async setReminderStatus(siteId: string, status: "pending" | "sent" | "failed"): Promise<void> {
+    await this.db.query("update sites set reminder = $2 where id = $1", [siteId, status]);
   }
 
   /** The address that gets a site's contact-form emails: its owner account's, or null (admin-made, unclaimed). */

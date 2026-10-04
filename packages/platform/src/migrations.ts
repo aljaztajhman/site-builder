@@ -432,6 +432,21 @@ export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
       alter table sites add column published_address text;
     `,
   },
+  {
+    id: 19,
+    name: "upsells",
+    // it-upsells. sites.reminder_*: the address a visitor left on their anonymous preview for one email before it
+    // is deleted (deleted with the preview's row); 'none' until asked, 'pending' once asked, then 'sent' or 'failed'.
+    // allow_list.founding_at: the account holds one of the founding offer's places (plans.standard.foundingOffer);
+    // the landing page shows how many are left.
+    sql: `
+      alter table sites add column reminder_email text;
+      alter table sites add column reminder text not null default 'none' check (reminder in ('none', 'pending', 'sent', 'failed'));
+      alter table sites add column reminder_attempts integer not null default 0;
+      create index sites_reminder_due on sites(created_at) where reminder = 'pending';
+      alter table allow_list add column founding_at timestamptz;
+    `,
+  },
 ];
 
 type Query = (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>;

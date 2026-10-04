@@ -6,6 +6,12 @@ import {
   ImageGenerator,
   JunkIntakeError,
   ModelClient,
+  PictureLimitError,
+  allowancePeriod,
+  limitBreach,
+  pictureBudget,
+  picturesNotice,
+  slDate,
   ReplayTransport,
   SpendCapError,
   StandInImageTransport,
@@ -26,6 +32,7 @@ import {
   type UrlCheckResult,
 } from "@sb/engine";
 import { INTERRUPTED_MESSAGE, domainProvidersFor, type DomainProviders, type Platform, type Tier } from "@sb/platform";
+import type { SiteSpec } from "@sb/spec";
 import { cleanupExpired, spendMonitor } from "./housekeeping.ts";
 
 /** Replies to the owner when a chat edit fails outright (the details go to the event log). */
@@ -50,11 +57,12 @@ const owner = (ctx: CallContext) => ({ tier: ctx.tier ?? null, accountId: ctx.ac
  * before it is sent (atomic across processes, Usage.reserveCall), then its row is settled to the real
  * tokens and € (per stage, with the job's tier, account and ai_jobs row) or released when nothing was billed.
  */
-export function spendLedgerFor(platform: Pick<Platform, "repo">, ctx: CallContext): SpendLedger {
+export function spendLedgerFor(platform: Pick<Platform, "repo">, ctx: CallContext, pictureCap?: { since: Date; max: number }): SpendLedger {
   const usage = platform.repo.usage;
   return {
     async reserve({ stage, model, estimateEur, capEur }) {
-      const r = await usage.reserveCall({ ...owner(ctx), siteId: ctx.siteId, jobId: ctx.jobId, stage, model, estimateEur, capEur });
+      const r = await usage.reserveCall({ ...owner(ctx), siteId: ctx.siteId, jobId: ctx.jobId, stage, model, estimateEur, capEur, ...(stage === "imageGen" && pictureCap ? { pictureCap } : {}) });
+      if ("pictures" in r) throw new PictureLimitError(r.pictures, pictureCap?.max ?? 0);
       if (!("id" in r)) throw new SpendCapError(r.spent, capEur);
       return {
         async settle(c) {
@@ -78,11 +86,43 @@ export function modelClientFor(platform: Platform, config: AppConfig, ctx: CallC
  * Generated mood images for sites with too few photos: fal.ai when FAL_KEY is set, flat stand-ins when
  * replaying recordings (demos), none otherwise. Every image is reserved at its price under the cap and logged with its €.
  */
-export function imageGeneratorFor(platform: Platform, config: AppConfig, ctx: CallContext): ImageGenerator | undefined {
+export function imageGeneratorFor(platform: Platform, config: AppConfig, ctx: CallContext, pictureCap?: { since: Date; max: number }): ImageGenerator | undefined {
   if (!config.imageGen.pipeline.enabled) return undefined;
   const transport = process.env.MODEL_REPLAY_DIR ? new StandInImageTransport() : process.env.FAL_KEY ? new FalImageTransport() : null;
   if (!transport) return undefined;
-  return new ImageGenerator({ config, transport, ledger: spendLedgerFor(platform, ctx) });
+  return new ImageGenerator({ config, transport, ledger: spendLedgerFor(platform, ctx, pictureCap) });
+}
+
+/**
+ * A generation's own picture count (it-plan-limits): a free preview fills up to `imageGen.pipeline.fillUpToFree`;
+ * a paid plan makes at most what is left of its month's generated pictures, held again at each picture's
+ * reservation (`pictureCap`), with a note for the owner naming the plan that has more; the admin fills as config says.
+ */
+export async function picturesForJob(
+  platform: Pick<Platform, "repo">,
+  config: AppConfig,
+  ctx: CallContext,
+  scope: "home" | "full",
+  now = new Date(),
+): Promise<{ pictures: { fillTo: number; max: number; note: string | null }; pictureCap?: { since: Date; max: number } }> {
+  const tier = ctx.tier ?? "admin";
+  const plan = tier === "paid" && ctx.accountId ? await platform.repo.accounts.planOf(ctx.accountId) : null;
+  if (!plan || !ctx.accountId) return { pictures: { ...pictureBudget(config, tier === "paid" ? "admin" : tier, scope), note: null } };
+  const period = allowancePeriod(new Date(plan.since), now);
+  const used = await platform.repo.usage.generatedPictures(ctx.accountId, period.start);
+  const budget = pictureBudget(config, "paid", scope, { plan: plan.plan, used });
+  return {
+    pictures: { ...budget, note: picturesNotice(config, plan.plan, budget.max, slDate(config, period.end)) },
+    pictureCap: { since: period.start, max: config.plans[plan.plan].site.generatedPicturesPerMonth },
+  };
+}
+
+/** The owner's plan limits on a chat edit's result (plan-limits.ts): a Slovene refusal, or null. */
+async function chatEditGuard(platform: Pick<Platform, "repo">, config: AppConfig, ctx: CallContext): Promise<((before: SiteSpec, after: SiteSpec) => string | null) | undefined> {
+  const tier = ctx.tier ?? "admin";
+  if (tier === "admin") return undefined;
+  const plan = tier === "paid" && ctx.accountId ? ((await platform.repo.accounts.planOf(ctx.accountId))?.plan ?? "standard") : null;
+  return (before, after) => limitBreach(config, tier, plan, before, after)?.message ?? null;
 }
 
 /**
@@ -276,8 +316,9 @@ export async function startWorker(platform: Platform, config = loadConfig(), job
     const client = modelClientFor(platform, config, ctx);
     const before = (await repo.getSite(job.siteId))?.current_version ?? null;
     try {
-      const images = imageGeneratorFor(platform, config, ctx);
-      const r = await run.generateSite({ config, repo, storage, client, ...(images ? { images } : {}) }, job.siteId, jobId);
+      const { pictures, pictureCap } = await picturesForJob(platform, config, ctx, job.scope === "full" ? "full" : "home");
+      const images = imageGeneratorFor(platform, config, ctx, pictureCap);
+      const r = await run.generateSite({ config, repo, storage, client, pictures, ...(images ? { images } : {}) }, job.siteId, jobId);
       if (r.critiqueSkipped) console.log(`[generate] ${job.siteId}: finished with the critique skipped (${r.critiqueSkipped})`);
       await finish(ctx.aiJobId, "done");
     } catch (e) {
@@ -310,7 +351,7 @@ export async function startWorker(platform: Platform, config = loadConfig(), job
     const ctx = await contextFor(job.siteId, jobId, job.aiJobId);
     const client = modelClientFor(platform, config, ctx, defaultTransport("edit"));
     try {
-      await run.applyChatEdit({ repo, client }, job.siteId, job.messageId);
+      await run.applyChatEdit({ repo, client }, job.siteId, job.messageId, await chatEditGuard(platform, config, ctx));
       await finish(ctx.aiJobId, "done");
     } catch (e) {
       // The owner reads this reply; the technical error goes to the log. applyChatEdit already put back

@@ -2,6 +2,7 @@ import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypt
 import type { Context, MiddlewareHandler } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import type { AppConfig } from "@sb/config";
+import { planOffer } from "@sb/engine";
 import type { AccountRow, PaidPlanKey, Repo, SiteRow, Tier } from "@sb/platform";
 import { hasSession, type AuthSettings } from "./auth.ts";
 import type { UploadTicket } from "./upload-ticket.ts";
@@ -159,6 +160,8 @@ const PUBLIC = (path: string) =>
   // The intake: the first homepage needs no account (the limits decide who may generate).
   path === "/api/sites" ||
   path === "/api/intake/ticket" ||
+  // The reminder email's link (reminder.tsx checks its token, then sign-in).
+  /^\/predogled\/[^/]+\/[^/]+$/.test(path) ||
   path.startsWith("/s/") ||
   path.startsWith("/assets/") ||
   path.startsWith("/preview/_shared/") ||
@@ -203,8 +206,8 @@ export function siteAccess(repo: Repo): MiddlewareHandler<AppEnv> {
       if (site && canView(viewer, site, c.get("deviceId"))) {
         c.set("site", site);
         // An anonymous preview can be looked at; changing it needs an account. Its generation (a retry
-        // after a failure) is the limits' call.
-        if (viewer.kind === "anonymous" && c.req.method !== "GET" && c.req.method !== "HEAD" && !/^\/api\/sites\/[^/]+\/generate$/.test(path)) {
+        // after a failure) is the limits' call; leaving an address for the reminder before it is deleted is allowed.
+        if (viewer.kind === "anonymous" && c.req.method !== "GET" && c.req.method !== "HEAD" && !/^\/api\/sites\/[^/]+\/(generate|reminder)$/.test(path)) {
           return refusalJson(c, { status: 401, code: "sign_in_required", message: "Za urejanje se prijavite z e-pošto. Predogled ostane vaš.", signIn: signInUrl(`/sites/${site.id}`) });
         }
         return next();
@@ -228,16 +231,16 @@ export interface Refusal {
 
 export const refusalJson = (c: Context, r: Refusal) => c.json({ error: r.code, code: r.code, message: r.message, ...(r.signIn ? { signIn: r.signIn } : {}) }, r.status);
 
-/** Publishing and export are paid-tier rights (allow-listed accounts before billing) and the admin's. */
-export function publishRefusal(v: Viewer): Refusal | null {
+/** Publishing and export are paid-tier rights (allow-listed accounts before billing) and the admin's; the refusal names the plan (it-upsells). */
+export function publishRefusal(v: Viewer, config: AppConfig): Refusal | null {
   const tier = tierOf(v);
   if (tier === "admin" || tier === "paid") return null;
-  return { status: 403, code: "paid_only", message: "Objava in prenos strani sta del naročnine. Predogled lahko še naprej urejate." };
+  return { status: 403, code: "paid_only", message: `Objava in prenos strani sta del naročnine ${planOffer(config, "standard")}. Predogled lahko še naprej urejate.` };
 }
 
 /** A whole site (all pages) is a paid-tier right; free and anonymous previews are the homepage. */
-export function fullSiteRefusal(v: Viewer): Refusal | null {
+export function fullSiteRefusal(v: Viewer, config: AppConfig): Refusal | null {
   const tier = tierOf(v);
   if (tier === "admin" || tier === "paid") return null;
-  return { status: 403, code: "full_site_paid", message: "Celotna stran z vsemi podstranmi je del naročnine. Brezplačno naredimo domačo stran." };
+  return { status: 403, code: "full_site_paid", message: `Celotna stran z vsemi podstranmi je del naročnine ${planOffer(config, "standard")}. Brezplačno naredimo domačo stran.` };
 }

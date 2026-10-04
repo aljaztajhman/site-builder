@@ -59,6 +59,9 @@ export const MIGRATIONS: Record<number, (spec: RawSpec) => RawSpec> = {
   // 11 → 12: collections (phase 4, it-collections). Additive: the optional `collections` (blog, events, services,
   // team) and the owner-only "collection" section. Every v11 spec is a valid v12 spec.
   11: (spec) => spec,
+  // 12 → 13: more pages (it-plan-limits). Additive: a site may hold up to 24 pages instead of 12, so Plus's 20
+  // home and standard pages fit beside privacy, accessibility and 404. Every v12 spec is a valid v13 spec.
+  12: (spec) => spec,
 };
 
 export function migrateSpec(input: unknown, migrations = MIGRATIONS, target: number = SPEC_VERSION): SiteSpec {

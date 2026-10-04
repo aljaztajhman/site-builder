@@ -40,6 +40,7 @@ export function privacyPage(config: AppConfig): string {
             <li>Vaša sporočila pomočniku in njegove odgovore, pri strani, na katero se nanašajo.</li>
             <li>Za vsako ustvarjanje in spremembo s pomočnikom čas in stroške, da lahko omejimo brezplačno uporabo.</li>
             <li>{`Predogled brez prijave in njegove datoteke izbrišemo po ${t.anonymous.keepDays} dneh, razen če se v tem času prijavite; potem je vaš.`}</li>
+            <li>{`Če pri predogledu brez prijave pustite e-poštni naslov za opomnik, vam nanj pošljemo eno sporočilo ${t.anonymous.reminder.daysBefore === 1 ? "dan" : `${t.anonymous.reminder.daysBefore} dni`} pred izbrisom. Za nič drugega ga ne uporabimo in ga izbrišemo skupaj s predogledom.`}</li>
             <li>{`Pri brezplačnem pregledu spletne strani naslov strani in rezultat pregleda, ${config.checker.keepDays} dni, da lahko povezavo do rezultata delite. Vsebine pregledane strani ne shranimo.`}</li>
           </ul>
         </section>

@@ -12,6 +12,7 @@ import { placeholderPath } from "./placeholders.ts";
 import { isPriceListType } from "@sb/spec/price-edit";
 import { itemKeyForPath, priceEditor, type PriceEditorState } from "./price-editor.ts";
 import { domainStatus, domainStep, newDomainStepUi, openDomainStep, type DomainChoice, type DomainStepDeps, type DomainsInfo } from "./domain-step.ts";
+import { lockedPagesBlock, planTag, reminderBlock, type Limits, type Upgrade } from "./upsell.ts";
 
 type Json = null | boolean | number | string | Json[] | { [k: string]: Json };
 type Obj = { [k: string]: Json };
@@ -84,6 +85,15 @@ interface State {
     signIn: string | null;
     /** The free-preview badge beside the frame, or null. */
     badge?: string | null;
+    /** The viewer's plan limits and the note each button reads at its limit (apps/web/src/limits.ts; null: the admin). */
+    limits?: Limits | null;
+    /** Free previews: the brief's other pages, shown locked with the first paid plan's price. */
+    lockedPages?: string[];
+    offer?: { plan: string; name: string; monthlyEur: number; text: string } | null;
+    /** A paid plan's generated pictures this month. */
+    pictures?: { used: number; total: number; left: number; short: boolean; notice: string | null; upgrade: Upgrade | null } | null;
+    /** An unclaimed preview: the reminder before it is deleted. */
+    reminder?: { email: string | null; status: "none" | "pending" | "sent" | "failed"; sendsAt: string } | null;
   };
   /** Server time of this response (ISO). */
   now: string;
@@ -237,6 +247,7 @@ async function load(rerender = true): Promise<void> {
     if (!loaded) throw e;
     toast ||= `Povezave ni. ${(e as Error).message}`;
   }
+  void freeDomainLookup();
   if (rerender) render();
   else {
     // A form autosave keeps the panel (and the owner's typing) as it is; the top bar still follows the
@@ -246,6 +257,37 @@ async function load(rerender = true): Promise<void> {
   }
   schedulePoll();
 }
+
+/** A free preview (no account, or a free account): the upsells to the first paid plan show. */
+const freeViewer = (): boolean => state.access?.viewer === "anonymous" || state.access?.viewer === "free";
+
+/**
+ * Free previews: the best free domain from the business name (the publish step's own check), so Objavi can say
+ * where the site would live. Asked once per visit; undefined until asked, null when none was found.
+ */
+let freeDomain: string | null | undefined;
+async function freeDomainLookup(): Promise<void> {
+  if (freeDomain !== undefined || !state.spec || !state.domains?.enabled || !freeViewer()) return;
+  freeDomain = null;
+  try {
+    freeDomain = (await api<{ suggestions: { name: string }[] }>("/domains/suggestions")).suggestions[0]?.name ?? null;
+  } catch {
+    freeDomain = null;
+  }
+  if (freeDomain) render();
+}
+
+/** "Celotna stran": the free preview's other pages, locked, with the price; `action` is the next step. */
+function lockedPages(action: HTMLElement | null): HTMLElement | null {
+  const a = state.access;
+  return lockedPagesBlock(h, { pages: a?.lockedPages ?? [], offer: a?.offer ?? null, domain: freeDomain ?? null, action });
+}
+
+/** The plan with more generated pictures, beside "Ustvari celotno stran znova" once this month's run short for this site. */
+const picturesTag = (upgrade: Upgrade | null): HTMLElement | null => (upgrade ? planTag(h, upgrade.name) : null);
+
+/** A note under a button that reached the plan's limit, naming the plan that has more. */
+const limitNote = (message: string, id: string): HTMLElement => h("p", { class: "help limit-note", id }, message);
 
 /**
  * A chat message is waiting for its reply: the worker may not have marked the site "editing" yet.
@@ -411,8 +453,9 @@ async function sendPatch(opsOrFn: Op[] | (() => Op[] | null), message: string, r
 function post(path: string, body: unknown, ok: string): Promise<void> {
   return queued(async () => {
     try {
-      await api(path, { method: "POST", body: JSON.stringify({ baseVersion: state.version, ...(body as object) }) });
-      toast = ok;
+      // A server notice (a plan's pictures used up) replaces the plain confirmation.
+      const r = await api<{ notice?: string }>(path, { method: "POST", body: JSON.stringify({ baseVersion: state.version, ...(body as object) }) });
+      toast = r.notice ?? ok;
     } catch (e) {
       toast = (e as Error).message;
     }
@@ -801,6 +844,8 @@ function homePane(): HTMLElement {
         ...pages().map((p, i) => h("option", { value: String(i), selected: i === pageIndex }, String((p.nav as Obj).label)))),
     );
   }
+  // A free account's preview: the rest of the site, locked, with the first plan's price (it-upsells).
+  if (freeViewer()) pane.append(...[lockedPages(h("a", { class: "btn sm", href: "/#cena" }, "Paketi in cene"))].filter((x): x is HTMLElement => !!x));
   const secs = sections();
   pane.append(
     h("h2", {}, "Na tej strani"),
@@ -1196,12 +1241,42 @@ function pagesPane(): HTMLElement {
     pane.append(fs);
   });
   pane.append(collectionsBlock());
+  const limits = state.access?.limits ?? null;
+  // A free account's preview is its homepage: the rest of the site is listed, locked, instead of a form that can't save.
+  if (freeViewer()) {
+    const locked = lockedPages(h("a", { class: "btn sm", href: "/#cena" }, "Paketi in cene"));
+    if (locked) pane.append(locked);
+    return pane;
+  }
   const slug = h("input", { type: "text", placeholder: "npr. cenik" });
   const name = h("input", { type: "text", placeholder: "npr. Cenik", maxlength: 24 });
+  // At the plan's page limit the button names the plan that has more (the server refuses anyway).
+  const full = !!limits && navPages() >= limits.maxPages;
   pane.append(h("h2", {}, "Nova stran"), labelled("Ime v meniju", name), labelled("Naslov datoteke (brez šumnikov)", slug),
-    h("p", {}, h("button", { class: "btn", type: "button", onClick: () => void post("/pages", { slug: slug.value.trim(), label: name.value.trim() }, "Stran dodana.") }, "+ Dodaj stran")));
+    h("p", {}, h("button", {
+      class: "btn",
+      type: "button",
+      id: "add-page",
+      "aria-describedby": full ? "pages-limit" : undefined,
+      onClick: () => {
+        if (full) {
+          toast = limits!.pagesNote.message;
+          return showToast();
+        }
+        void post("/pages", { slug: slug.value.trim(), label: name.value.trim() }, "Stran dodana.");
+      },
+    }, "+ Dodaj stran", full && limits!.pagesNote.upgrade ? planTag(h, limits!.pagesNote.upgrade.name) : null)));
+  if (full) pane.append(limitNote(limits!.pagesNote.message, "pages-limit"));
+  // Languages: no language editor yet; a plan with one language says which plan has two (it-upsells).
+  if (limits && limits.localesNote.upgrade && localesOf() >= limits.locales) {
+    pane.append(h("h2", {}, "Jeziki"), h("p", { class: "help", id: "locales-limit" }, limits.localesNote.message, " ", planTag(h, limits.localesNote.upgrade.name)));
+  }
   return pane;
 }
+
+/** Home and standard pages: what the plan's page limit counts (collection list pages included). */
+const navPages = (): number => pages().filter((p) => p.kind === "home" || p.kind === "standard").length;
+const localesOf = (): number => (((state.spec?.locales as Obj | undefined)?.enabled ?? []) as unknown[]).length || 1;
 
 // ---------- Collections (spec v12): blog, events, services and team the owner keeps ----------
 const COLLECTIONS: { kind: string; name: string; on: string; hint: string }[] = [
@@ -1219,12 +1294,16 @@ function collectionsBlock(): HTMLElement {
   for (const c of COLLECTIONS) {
     const on = cols[c.kind] as Obj | undefined;
     const count = ((on?.items ?? []) as unknown[]).length;
+    // Not in the viewer's plan: the button names the plan that has it, and a tap says so (the server refuses anyway).
+    const locked = on ? undefined : state.access?.limits?.collectionNotes[c.kind];
     box.append(
       h("div", { class: "row collection-row" },
         h("span", { class: "sp" }, h("strong", {}, c.name), on ? h("span", { class: "muted" }, ` · ${count}`) : h("span", { class: "muted" }, ` · ${c.hint}`)),
         on
           ? h("button", { class: "btn sm", type: "button", onClick: () => { collectionKind = c.kind; tab = "collection"; render(); } }, `Uredi: ${c.name}`)
-          : h("button", { class: "btn sm", type: "button", onClick: () => void post("/collections", { kind: c.kind }, `${c.name}: vklopljeno.`) }, c.on),
+          : locked
+            ? h("button", { class: "btn sm", type: "button", "data-locked": c.kind, onClick: () => { toast = locked.message; showToast(); } }, c.on, locked.upgrade ? planTag(h, locked.upgrade.name) : null)
+            : h("button", { class: "btn sm", type: "button", onClick: () => void post("/collections", { kind: c.kind }, `${c.name}: vklopljeno.`) }, c.on),
       ),
     );
   }
@@ -1372,8 +1451,21 @@ function guestPane(): HTMLElement {
     until ? h("p", { class: "help" }, `Brez prijave predogled hranimo do ${until}.`) : null,
     a?.signIn ? h("a", { class: "btn primary", href: a.signIn }, "Shrani in uredi") : null,
     a?.allowance.text ? h("p", { class: "help" }, a.allowance.text) : null,
+    a?.reminder ? reminderBlock(h, { reminder: a.reminder, save: saveReminder, rerender: () => void load() }) : null,
+    lockedPages(null),
     guestChecklist(),
   );
+}
+
+/** The guest's address for the one reminder before the preview is deleted; the refusal's reason, or null. */
+async function saveReminder(email: string): Promise<string | null> {
+  try {
+    await api("/reminder", { method: "POST", body: JSON.stringify({ email }) });
+    toast = email ? "Opomnik bomo poslali." : "Opomnika ne bomo poslali.";
+    return null;
+  } catch (e) {
+    return (e as Error).message;
+  }
 }
 
 /** What the guest will still need before publishing (sb-preview-gate): the same checklist, read only until they sign in. */
@@ -1930,13 +2022,17 @@ function topItems(): Child[] {
       // While something blocks publishing the button stays tappable and opens the checklist: a disabled
       // button with a tooltip explains nothing on a phone.
       h("button", {
-        class: state.checklist.length ? "btn sm primary blocked" : "btn sm primary",
+        class: state.checklist.length ? "btn sm primary blocked publish" : "btn sm primary publish",
         type: "button",
         "aria-describedby": state.checklist.length ? "checklist-summary" : undefined,
         onClick: async () => {
-          // A free account can build and edit, not publish yet: say so instead of a refusal after the tap.
+          // A free account can build and edit, not publish yet: say so instead of a refusal after the tap, with the
+          // plan and, when the domain check found one, the address the site would have (it-upsells).
           if (!can("publish")) {
-            toast = "Objava je na voljo z naročnino. Med preizkusom jo omogočamo izbranim podjetjem.";
+            const offer = state.access?.offer;
+            toast = offer
+              ? `${freeDomain ? `Objava na ${freeDomain}` : "Objava"} je del naročnine ${offer.text} Predogled lahko še naprej urejate.`
+              : "Objava je na voljo z naročnino. Med preizkusom jo omogočamo izbranim podjetjem.";
             return showToast();
           }
           if (state.checklist.length) return openChecklist();
@@ -1962,7 +2058,7 @@ function topItems(): Child[] {
             await load();
           });
         },
-      }, "Objavi"),
+      }, "Objavi", !can("publish") && freeDomain ? h("span", { class: "label" }, `\u00a0na ${freeDomain}`) : null),
     ),
   ];
 }
@@ -1982,11 +2078,14 @@ function moreMenu(): HTMLElement {
       can("export") ? h("button", { type: "button", id: "export-start", onClick: () => { menuOpen = false; void startExport(); } }, "Prenesi stran (.zip)") : null,
       !can("regenerate") ? null : h("button", {
         type: "button",
+        id: "regenerate",
         disabled: s.status === "generating",
         onClick: () => {
-          if (confirm("Ustvarim celotno stran znova? Podatki o podjetju ostanejo, besedila in postavitev so nova. Trenutna vsebina ostane v zgodovini, zato jo lahko obnovite.")) void post("/generate", { scope: "full" }, "Ustvarjanje se je začelo.");
+          // This month's generated pictures run short for this site: said before, not after (it-plan-limits).
+          const pictures = state.access?.pictures?.short && state.access.pictures.notice ? `\n\n${state.access.pictures.notice}` : "";
+          if (confirm(`Ustvarim celotno stran znova? Podatki o podjetju ostanejo, besedila in postavitev so nova. Trenutna vsebina ostane v zgodovini, zato jo lahko obnovite.${pictures}`)) void post("/generate", { scope: "full" }, "Ustvarjanje se je začelo.");
         },
-      }, "Ustvari celotno stran znova"),
+      }, "Ustvari celotno stran znova", picturesTag(state.access?.pictures?.short ? (state.access.pictures.upgrade ?? null) : null)),
       !state.access || state.access.viewer === "admin" ? h("button", { type: "button", onClick: go("diag") }, "Poraba in dnevnik") : null,
     ),
   );

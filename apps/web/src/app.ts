@@ -22,6 +22,8 @@ import {
   imageMeta,
   addPhotos,
   PhotoError,
+  limitBreach,
+  picturesNotice,
   type Operation,
   type Resolve,
 } from "@sb/engine";
@@ -30,7 +32,9 @@ import { renderPage, renderPath, sharedBundle, pageFile, notFoundPlacement, reba
 import { CollectionKind, blockerText, collectPlaceholders, sectionDef, type SiteSpec } from "@sb/spec";
 import type { AuthSettings } from "./auth.ts";
 import { clientIp, csrfOk, fullSiteRefusal, identity, publishRefusal, refusalJson, sameOriginOnly, signedIn, siteAccess, tierOf, type AppEnv, type Refusal } from "./access.ts";
-import { accessInfo, allowanceFor, previewBadge, reserveJob } from "./limits.ts";
+import { accessInfo, allowanceFor, picturesFor, picturesShort, previewBadge, reserveJob } from "./limits.ts";
+import { registerReminderRoutes } from "./reminder.tsx";
+import { formatDate } from "./ui/labels.ts";
 import { TOKEN_FIELD, TURNSTILE_ORIGIN, botCheckFromEnv, type BotCheck } from "./turnstile.ts";
 import { registerLoginRoutes } from "./login.tsx";
 import { registerAdminRoutes } from "./admin.tsx";
@@ -210,6 +214,8 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   // The domain step of publishing; provisioning runs in the worker (queue "domain").
   const domainDeps = { repo, queue, config, providers: opts.domainProviders ?? domainProvidersFor(config.domains.providers), platformDomain: opts.platformDomain ?? null, appHosts };
   registerDomainRoutes(app, domainDeps);
+  // The reminder before an anonymous preview is deleted: the visitor's address, and the email's link.
+  registerReminderRoutes(app, { repo, config, secret: auth.secret });
 
   // ---------- Health ----------
   app.get("/health", async (c) => {
@@ -267,12 +273,14 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       config,
       signedIn: signedIn(viewer),
       csrf: c.get("csrf"),
-      fullSite: !fullSiteRefusal(viewer),
+      fullSite: !fullSiteRefusal(viewer, config),
       allowance: (await allowanceFor(limits, viewer, c.get("deviceId"))).text,
       botSiteKey: anonymous && botCheck.mode === "on" ? botCheck.siteKey : null,
       anonymousClosed: anonymous && botCheck.mode === "unavailable",
       ...(anonymous ? { anonymousUpload: { ticketUrl: "/api/intake/ticket", maxPhotos: config.tiers.anonymous.uploads.maxPhotos, maxTotalBytes: config.tiers.anonymous.uploads.maxTotalBytes } } : {}),
       ...(previous ? { previous: `/sites/${previous.id}` } : {}),
+      // The founding offer's places left: its size (config) minus the places the admin gave (allow_list.founding_at).
+      foundingLeft: config.plans.standard.foundingOffer ? Math.max(0, config.plans.standard.foundingOffer.customers - (await repo.accounts.foundingTaken())) : null,
       ...extra,
     });
   };
@@ -372,7 +380,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     if (viewer.kind === "anonymous" && !ticket) return refuse("Obrazec je potekel. Pošljite ga še enkrat.", 403);
     if (!csrfOk(c, body as Record<string, unknown>)) return refuse("Obrazec je potekel. Pošljite ga še enkrat.", 403);
     const scope = body.scope === "full" ? "full" : "home";
-    const fullDenied = scope === "full" ? fullSiteRefusal(viewer) : null;
+    const fullDenied = scope === "full" ? fullSiteRefusal(viewer, config) : null;
     if (fullDenied) return refuse(fullDenied.message, fullDenied.status);
     const minChars = config.tiers.junk.minDescriptionChars;
     if (description.length < minChars) return refuse(tooShort(minChars));
@@ -468,7 +476,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     // Independent reads, side by side (this runs after every save, not only on polls).
     const [checklist, access, events, chat, cost, versions, messages, spendToday, domains] = await Promise.all([
       current ? siteChecklist(repo, id, current.spec) : Promise.resolve([]),
-      accessInfo(limits, viewer, c.get("deviceId"), site),
+      accessInfo(limits, viewer, c.get("deviceId"), site, new Date(), current?.spec ?? null),
       repo.listEvents(id, after),
       repo.listChat(id),
       repo.siteCost(id),
@@ -532,6 +540,10 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     if ("error" in ops) return c.json({ error: ops.error }, 400);
     const r = applyDirectEdit(current.spec, ops);
     if (!r.ok) return c.json({ error: "invalid", issues: r.issues.slice(0, 20) }, 422);
+    // The viewer's plan limits (pages, languages, collections), whatever the edit's path; the refusal names the plan that has more.
+    const viewer = (c as Context<AppEnv>).get("viewer");
+    const breach = limitBreach(config, tierOf(viewer), viewer.kind === "account" ? viewer.plan : null, current.spec, r.spec);
+    if (breach) return c.json({ error: breach.code, code: breach.code, message: breach.message, upgrade: breach.upgrade }, 403);
     let version: number;
     try {
       // Only what the owner changed is stored: the fact check counts it as their own text.
@@ -692,7 +704,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     if (!site) return c.json({ error: "not found" }, 404);
     const body = (await c.req.json().catch(() => ({}))) as { scope?: string };
     const scope = body.scope === "full" ? "full" : "home";
-    const denied = scope === "full" ? fullSiteRefusal(c.get("viewer")) : null;
+    const denied = scope === "full" ? fullSiteRefusal(c.get("viewer"), config) : null;
     if (denied) return refusalJson(c, denied);
     // Claimed in one statement: two clicks at once must not start two paid generations.
     const idle: SiteStatus[] = ["new", "ready", "editing", "publishing", "failed"];
@@ -710,7 +722,12 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       await repo.setStatusIf(id, "generating", site.status);
       throw e;
     }
-    return c.json({ ok: true });
+    // A paid plan whose generated pictures for this month run short: the generation goes ahead with fewer (the worker
+    // holds the count), and the owner reads why and which plan has more (it-plan-limits).
+    const viewer = c.get("viewer");
+    const pictures = await picturesFor(limits, viewer);
+    const notice = pictures && viewer.kind === "account" && picturesShort(config, site, scope, pictures.left) ? picturesNotice(config, viewer.plan ?? "standard", pictures.left, formatDate(pictures.renewsAt)) : null;
+    return c.json({ ok: true, ...(notice ? { notice } : {}) });
   });
 
   // The live release pointer per slug, kept a few seconds: every page, picture and 404 of a published site
@@ -729,7 +746,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   };
 
   app.post("/api/sites/:id/publish", async (c) => {
-    const denied = publishRefusal(c.get("viewer"));
+    const denied = publishRefusal(c.get("viewer"), config);
     if (denied) return refusalJson(c, denied);
     try {
       const r = await publishSite({ repo, storage, config, platformDomain: opts.platformDomain ?? null }, c.req.param("id"));
@@ -746,7 +763,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   // Export runs the publish checklist as a warning (`sb-export-checklist` = warn): with something on it the
   // zip comes only after the owner confirmed ("Izvozi vseeno", ?anyway=1). The checked version is the one exported.
   app.get("/api/sites/:id/export", async (c) => {
-    const denied = publishRefusal(c.get("viewer"));
+    const denied = publishRefusal(c.get("viewer"), config);
     if (denied) return refusalJson(c, denied);
     const id = c.req.param("id");
     const current = await repo.getSpec(id);
