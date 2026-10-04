@@ -246,6 +246,19 @@ Owner, 2026-10-04: "I don't want it to look like a template filler and that ever
 - [ ] Step 5, design in parts (`it-design-genome`): direction split into independent axes with compatibility rules, directions and templates as presets, content against section intents so a new look needs no content call. Spec bump + migration. ≈ €10
 - [ ] Step 6, copy that doesn't repeat (`it-catalogue-sameness`, `it-slovene-copy`): catalogue wording, a client fact in every headline, specific section titles, copy similarity across twins. ≈ €3
 
+## After 1.0: development rules and analytics (proposals 2026-10-04; HQ `sb-dev-workflow`, `sb-analytics`)
+Development rules: docs/dev/workflow.md. Analytics: docs/plans/analytics.md. Nothing below starts before the owner decides; the order is the one in each document.
+- [ ] Production environment on Railway (own Postgres and bucket), `release` branch, `promote` workflow (fast-forward, tag, release notes, migrate-check, deployed smoke test), version on `/health` and `/admin` (supersedes "Deployed: production environment tracking `main`" above; HQ `it-production-env`)
+- [ ] Repository settings at 1.0 (owner): branch protection on `main` and `release`, squash-merge only, auto-delete head branches, secret scanning with push protection, Dependabot; delete the 80 remote branches already merged into `main` (114 in total on 2026-10-04)
+- [ ] Backups: nightly `pg_dump` to the bucket (30 days), bucket versioning, quarterly restore drill; confirm whether the Railway plan has its own Postgres backups
+- [ ] CI additions: `pnpm eval --offline`, the web build, migrations on an empty Postgres; `nightly` workflow (audit, backup check, stale-branch report)
+- [ ] Monitoring: free external monitor on production `/health` (owner creates the account), `/admin` rows for failures by stage, slowest generation, spend-cap hits
+- [ ] Analytics step 1: `product_events` table (keyed device hash, no IP or email, 90 days then daily roll-up) written at intake, job end, sign-in, claim, publish, plan change, limit hit, upsell; `/admin/funnel` with conversion per step and median time between steps; one sentence in `/zasebnost`
+- [ ] Analytics step 2: Cloudflare Web Analytics beacon on `/`, `/prijava`, `/zasebnost` only (owner creates the Cloudflare site); UTM `source` stored on `intake_submitted`
+- [ ] Analytics step 3: one `generation` event per job (stage seconds and €, critique score, failed checks, pictures, cap hits, direction) and `/admin/engine`
+- [ ] Analytics step 4: customers' statistics extended (referrer bucket and device class per day, visits per page, owner's own device excluded), "Statistika" tab in the editor, monthly email with the new rows, privacy sentence on generated sites
+- [ ] Later, on evidence only: PostHog (EU, cookieless) in the editor; "connect your own GA / Meta pixel" on Plus behind consent; weekly funnel digest to the owner and HQ tiles
+
 ## Later: phase 3 — billing and domains
 Before CMS collections (`sb-roadmap-order` = swap, 2026-10-01).
 - [ ] Build billing; register the legal entity (the accountant chooses s.p. or d.o.o.) before the first charge (`sb-legal-entity` = later, 2026-10-01). Billing stays off in config (`plans.paid.billingEnabled: false`) until the entity exists; nothing is charged before then
