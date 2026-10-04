@@ -28,10 +28,46 @@
 
 @media (min-width:48rem){.hero .wrap{grid-template-columns:1fr 1.1fr;gap:48px;align-items:start}}
 
-.proto{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:16px 0 12px;font:600 13px/1 var(--font-ui);color:var(--ink-3)}
+.proto{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin:20px 0 0;padding-top:12px;border-top:1px dashed var(--line-2);font:600 13px/1 var(--font-ui);color:var(--ink-3)}
 .proto .seg label{min-height:30px;font-size:13px;padding:0 10px}
-.proto .tog{display:inline-flex;gap:6px;align-items:center;cursor:pointer;user-select:none}
-.proto .tog input{accent-color:var(--accent);margin:0}
+
+/* Trade tabs: an underline under the shown trade; while the demo moves on by itself it fills up as the time to the next one runs. */
+.tabbar{display:flex;align-items:flex-end;gap:12px;margin:0 0 14px;border-bottom:1px solid var(--line)}
+.tabs{display:flex;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{position:relative;flex:none;min-height:44px;margin:0;padding:0 14px;border:0;background:none;color:var(--ink-3);font:600 15px/1 var(--font-ui);white-space:nowrap;cursor:pointer;transition:color .2s}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected=true]{color:var(--ink)}
+.tab::after{content:"";position:absolute;left:10px;right:10px;bottom:-1px;height:2px;border-radius:2px;background:var(--accent);transform:scaleX(0);transform-origin:left}
+.tab[aria-selected=true]::after{transform:scaleX(1);transition:transform .3s}
+.tabs.auto .tab[aria-selected=true]::after{animation:tab-fill var(--dwell,4s) linear both}
+@keyframes tab-fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.tab:focus-visible{outline:2px solid var(--ink);outline-offset:-4px;border-radius:var(--r-1)}
+.pause{flex:none;min-height:32px;margin:0 0 6px;padding:0 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--surface);color:var(--ink-2);font:600 13px/1 var(--font-ui);cursor:pointer}
+.pause:hover{color:var(--ink)}
+@media (pointer:coarse){.pause{min-height:44px}}
+
+/* The intro: the description is typed, "Ustvari" pressed, the steps tick, then the device with the site appears. */
+.devbox{position:relative}
+.intro{position:absolute;inset:0;z-index:2;display:grid;align-content:center;gap:10px;padding:0 4%;transition:opacity .45s,visibility .45s}
+.devbox[data-step=site] .intro{opacity:0;visibility:hidden}
+.ask{padding:16px;background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r-3);box-shadow:var(--shadow-float);transition:transform .6s cubic-bezier(.65,0,.35,1)}
+
+.ask-text{min-height:4.65em;margin:0;font-size:15px;line-height:1.55;color:var(--ink)}
+.devbox[data-step=type] .ask-text::after{content:"";display:inline-block;width:2px;height:1.1em;margin-left:1px;vertical-align:-.2em;background:var(--ink);animation:ask-caret .8s step-end infinite}
+@keyframes ask-caret{50%{opacity:0}}
+.ask-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px}
+.ask-chip{padding:6px 10px;border:1px solid var(--line-2);border-radius:var(--r-2);font-size:14px;font-weight:600}
+.ask-go{padding:9px 18px;border-radius:var(--r-2);background:var(--accent);color:var(--accent-ink);font-weight:600;font-size:15px;transition:transform .15s,background .15s}
+.devbox[data-step=build] .ask-go{transform:scale(.95);background:var(--accent-hover)}
+.ask-steps{display:grid;gap:6px;margin:0;padding:0;list-style:none;opacity:0;transition:opacity .4s}
+.devbox[data-step=build] .ask-steps{opacity:1}
+.ask-steps li{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--r-2);background:var(--surface);font-size:14px;color:var(--ink-3);transition:color .3s}
+.ask-steps li::before{content:"";flex:none;width:10px;height:10px;border:2px solid var(--line-2);border-radius:50%;transition:background .3s,border-color .3s}
+.ask-steps li.done{color:var(--ink)}
+.ask-steps li.done::before{background:var(--accent);border-color:var(--accent)}
+.devbox:not([data-step=site]) .dev{opacity:0;transform:translateY(14px) scale(.97)}
+.devbox .dev{transition:opacity .6s,transform .7s cubic-bezier(.2,.8,.2,1),width .9s cubic-bezier(.65,0,.35,1),height .9s cubic-bezier(.65,0,.35,1),border-radius .9s}
 .badge{position:fixed;left:12px;bottom:12px;z-index:5;padding:6px 10px;border-radius:999px;background:#151412;color:#fff;font:600 12px/1 var(--font-ui);letter-spacing:.02em}
 .badge a{color:#c9c4ba;margin-left:8px}
 
@@ -90,28 +126,42 @@
       </div>
 
       <div class="devwrap">
-        <nav class="trades" aria-labelledby="trades-q">
-          <p class="trades-q" id="trades-q">Poglejte primer za svojo dejavnost:</p>
-          <ul class="chips"></ul>
-          <a class="trades-reset" href="#" hidden>Nazaj na primer trgovine</a>
-        </nav>
+        <!-- A tab per trade above the demo; the demo moves through them on its own (with a pause button). -->
+        <div class="tabbar">
+          <div class="tabs" role="tablist" aria-label="Primer za dejavnost"></div>
+          <button class="pause" type="button" aria-pressed="false">Ustavi</button>
+        </div>
+        <div class="devbox" data-step="type">
+          <!-- From description to site: typed, built, then the site appears and moves on through the trades. -->
+          <div class="intro" aria-hidden="true">
+            <div class="ask">
+              <p class="ask-text"></p>
+              <div class="ask-bar"><span class="ask-chip">＋ 5 fotografij</span><span class="ask-go">Ustvari</span></div>
+            </div>
+            <ol class="ask-steps">
+              <li>Razumevanje opisa</li>
+              <li>Oblikovna smer in barve</li>
+              <li>Fotografije</li>
+              <li>Besedila in postavitev</li>
+            </ol>
+          </div>
+          <div class="dev" data-mode="desk" id="demo" role="tabpanel">
+            <span class="chrome" aria-hidden="true"><i></i><i></i><i></i></span>
+            <div class="screen">
+              <iframe class="stage" title="" tabindex="-1" aria-hidden="true"></iframe>
+              <iframe class="main" title="Primer strani" inert></iframe>
+            </div>
+          </div>
+        </div>
+        <p class="cap" aria-live="polite"></p>
         <div class="proto">
+          <span>Prototip, naprava:</span>
           <fieldset class="seg">
             <legend class="sr-only">Naprava</legend>
             <input type="radio" id="m-desk" name="mode" value="desk" checked><label for="m-desk">Računalnik</label>
             <input type="radio" id="m-phone" name="mode" value="phone"><label for="m-phone">Telefon</label>
           </fieldset>
-          <label class="tog"><input type="checkbox" id="slow"> Počasi (×3)</label>
-          <label class="tog"><input type="checkbox" id="auto"> Samodejno</label>
         </div>
-        <div class="dev" data-mode="desk">
-          <span class="chrome" aria-hidden="true"><i></i><i></i><i></i></span>
-          <div class="screen">
-            <iframe class="stage" title="" tabindex="-1" aria-hidden="true"></iframe>
-            <iframe class="main" title="Primer strani" inert></iframe>
-          </div>
-        </div>
-        <p class="cap" aria-live="polite"></p>
       </div>
     </div>
   </section>
@@ -120,7 +170,10 @@
 <script type="module">
 const EX = "/apps/web/src/ui/examples/";
 const IDS = ["frizer", "gostilna", "avtoservis", "zobozdravnik", "instalater"];
-const DEFAULT = { id: null, page: "trgovina-oljka-in-sol/index.html" };
+/** What the intro types: the opening of the first trade's own description (tools/eval/fixtures/frizerstvo-lana/brief.json, shortened). */
+const PROMPT = "Sem Lana Vidmar in že devet let vodim Frizerstvo Lana na Stanetovi ulici 14 v Celju. Strižemo ženske, moške in otroke, delamo barvanje brez amoniaka, pramene in svečane pričeske …";
+/** Time on each trade's site before the demo moves on. */
+const DWELL = 4500;
 const params = new URLSearchParams(location.search);
 const FREEZE = params.has("freeze") ? Number(params.get("freeze")) : null;
 if (params.has("big")) document.documentElement.classList.add("big");
@@ -128,30 +181,36 @@ if (params.has("big")) document.documentElement.classList.add("big");
 const all = await fetch(EX + "showcase.json").then((r) => r.json());
 const trades = IDS.map((id) => all.find((t) => t.id === id)).filter(Boolean);
 
-const chipsEl = document.querySelector(".chips");
-const reset = document.querySelector(".trades-reset");
+const tabsEl = document.querySelector(".tabs");
+const pauseBtn = document.querySelector(".pause");
+const devbox = document.querySelector(".devbox");
 const dev = document.querySelector(".dev");
 const devwrap = document.querySelector(".devwrap");
 const main = dev.querySelector("iframe.main");
 const stage = dev.querySelector("iframe.stage");
 const cap = document.querySelector(".cap");
-const slowBox = document.getElementById("slow");
-const autoBox = document.getElementById("auto");
 const reduced = matchMedia("(prefers-reduced-motion: reduce)");
-const slow = () => (slowBox.checked ? 3 : 1);
+// Tempo of the transformation: 1.5× the first tuning (owner, 2026-10-04).
+const slow = () => 1.5;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const within = (p, ms) => Promise.race([p, sleep(ms)]);
 
 for (const t of trades) {
-  const li = document.createElement("li");
-  li.innerHTML = `<a class="chip" href="#" data-id="${t.id}">${t.label}</a>`;
-  chipsEl.append(li);
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "tab";
+  b.setAttribute("role", "tab");
+  b.setAttribute("aria-selected", "false");
+  b.setAttribute("aria-controls", "demo");
+  b.tabIndex = -1;
+  b.dataset.id = t.id;
+  b.textContent = t.label;
+  tabsEl.append(b);
 }
-const chips = [...chipsEl.querySelectorAll(".chip")];
+const tabs = [...tabsEl.querySelectorAll(".tab")];
+tabsEl.style.setProperty("--dwell", DWELL + "ms");
 
-const caption = (t) => t.id
-  ? `Takole bi lahko izgledala stran za ${t.forWhom}. ${t.name} je izmišljeno podjetje; vaša stran nastane iz vašega opisa in fotografij, zato bo drugačna.`
-  : "Primer: izmišljena trgovina Oljka in sol iz Kopra. Stran je Stranko naredil iz njenega opisa in petih fotografij.";
+const caption = (t) => `Takole bi lahko izgledala stran za ${t.forWhom}. ${t.name} je izmišljeno podjetje; vaša stran nastane iz vašega opisa in fotografij, zato bo drugačna.`;
 
 // ---------- device ----------
 let mode = "desk";
@@ -642,46 +701,123 @@ async function transformSite(url) {
   }
 }
 
-let current = DEFAULT;
+// =====================================================================
+// Tabs, the intro and the demo moving on by itself
+// =====================================================================
+// The first trade's site loads during the intro; no switch before it is in the frame.
+const mainReady = new Promise((r) => main.addEventListener("load", r, { once: true }));
+main.src = EX + trades[0].page;
+
+let current = null;
 let busy = false;
 let queued = null;
+const mark = (t) => {
+  for (const b of tabs) {
+    const on = b.dataset.id === t.id;
+    b.setAttribute("aria-selected", String(on));
+    b.tabIndex = on ? 0 : -1;
+  }
+  cap.textContent = caption(t);
+};
 async function switchTo(t) {
   if (busy) { queued = t; morphing?.skipTransition?.(); return; }
-  if (t === current) return;
+  if (t === current) return startClock();
   busy = true;
   current = t;
-  for (const c of chips) {
-    if (c.dataset.id === t.id) c.setAttribute("aria-current", "true");
-    else c.removeAttribute("aria-current");
-  }
-  reset.hidden = !t.id;
-  cap.textContent = caption(t);
+  mark(t);
+  stopClock();
   try {
+    await mainReady;
     await transformSite(EX + t.page);
   } finally {
     busy = false;
   }
-  if (queued) { const q = queued; queued = null; switchTo(q); }
+  if (queued) { const q = queued; queued = null; return switchTo(q); }
+  startClock();
 }
 
-for (const c of chips) {
-  const t = trades.find((x) => x.id === c.dataset.id);
-  c.addEventListener("click", (e) => { e.preventDefault(); stopAuto(); switchTo(t); });
-  c.addEventListener("pointerenter", () => void fetch(EX + t.page), { once: true });
-}
-reset.addEventListener("click", (e) => { e.preventDefault(); stopAuto(); switchTo(DEFAULT); });
-
-let autoTimer = 0;
-const stopAuto = () => { clearTimeout(autoTimer); autoBox.checked = false; };
-const next = async () => {
-  if (!autoBox.checked) return;
-  await switchTo(trades[(trades.indexOf(current) + 1) % trades.length]);
-  autoTimer = setTimeout(next, 2600);
+// The next trade after a while; the shown tab's underline fills up meanwhile. Only while on screen, in a
+// visible tab and not paused (a loop that runs by itself needs a way to stop it, WCAG 2.2.2).
+let paused = false;
+let onScreen = false;
+let timer = 0;
+const stopClock = () => { clearTimeout(timer); tabsEl.classList.remove("auto"); };
+const startClock = () => {
+  stopClock();
+  if (paused || !onScreen || document.hidden || busy || devbox.dataset.step !== "site") return;
+  void tabsEl.offsetWidth; // restarts the fill
+  tabsEl.classList.add("auto");
+  timer = setTimeout(() => switchTo(trades[(trades.indexOf(current) + 1) % trades.length]), DWELL);
 };
-autoBox.addEventListener("change", () => { clearTimeout(autoTimer); if (autoBox.checked) next(); });
+pauseBtn.addEventListener("click", () => {
+  paused = !paused;
+  pauseBtn.setAttribute("aria-pressed", String(paused));
+  pauseBtn.textContent = paused ? "Predvajaj" : "Ustavi";
+  if (paused) stopClock();
+  else startClock();
+});
 
-cap.textContent = caption(DEFAULT);
-main.src = EX + DEFAULT.page;
+// The intro: the first trade's description typed, "Ustvari", the build steps, then its site.
+const askText = devbox.querySelector(".ask-text");
+const askSteps = [...devbox.querySelectorAll(".ask-steps li")];
+let introStarted = false;
+let introDone = false;
+const introTimers = [];
+const finishIntro = () => {
+  if (introDone) return;
+  introDone = true;
+  introTimers.forEach(clearTimeout);
+  askText.textContent = PROMPT;
+  devbox.dataset.step = "site";
+  current = trades[0];
+  mark(trades[0]);
+};
+const playIntro = () => {
+  introStarted = true;
+  if (reduced.matches) { finishIntro(); startClock(); return; }
+  const at = (ms, run) => introTimers.push(setTimeout(run, ms));
+  devbox.dataset.step = "type";
+  askText.textContent = "";
+  const step = 45;
+  for (let i = 3; i <= PROMPT.length + 2; i += 3) at((i / 3) * step, () => (askText.textContent = PROMPT.slice(0, i)));
+  const typed = Math.round(PROMPT.length / 3) * step;
+  at(typed + 600, () => (devbox.dataset.step = "build"));
+  askSteps.forEach((li, j) => at(typed + 600 + (j + 1) * 650, () => li.classList.add("done")));
+  at(typed + 600 + askSteps.length * 650 + 450, async () => {
+    await within(mainReady, 3000);
+    finishIntro();
+    startClock();
+  });
+};
+
+new IntersectionObserver((entries) => {
+  for (const e of entries) onScreen = e.isIntersecting;
+  if (onScreen && !introStarted) playIntro();
+  if (onScreen) startClock();
+  else stopClock();
+}, { threshold: 0.3 }).observe(devbox);
+document.addEventListener("visibilitychange", () => (document.hidden ? stopClock() : startClock()));
+
+// Tabs: a click (or the arrow keys) shows that trade; the demo then moves on from there.
+const choose = (t) => {
+  finishIntro();
+  void switchTo(t);
+};
+for (const b of tabs) {
+  const t = trades.find((x) => x.id === b.dataset.id);
+  b.addEventListener("click", () => choose(t));
+  b.addEventListener("pointerenter", () => void fetch(EX + t.page), { once: true });
+}
+tabsEl.addEventListener("keydown", (e) => {
+  const i = tabs.indexOf(document.activeElement);
+  if (i < 0) return;
+  const j = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 }[e.key];
+  if (j === undefined) return;
+  e.preventDefault();
+  const k = (j + tabs.length) % tabs.length;
+  tabs[k].focus();
+  choose(trades[k]);
+});
 </script>
 </body>
 </html>
