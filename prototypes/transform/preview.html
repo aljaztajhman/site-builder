@@ -84,21 +84,25 @@
 .ask-steps li.done{color:var(--ink)}
 .ask-steps li.done::before{background:var(--accent);border-color:var(--accent);box-shadow:none;animation:none}
 .devbox[data-step=type] .dev{opacity:0;transform:translateY(14px) scale(.97)}
-.devbox .dev{transition:opacity .6s .15s,transform .8s cubic-bezier(.2,.8,.2,1) .15s,width .9s cubic-bezier(.65,0,.35,1),height .9s cubic-bezier(.65,0,.35,1),border-radius .9s}
+.devbox .dev{transition:opacity .6s .15s,transform .8s cubic-bezier(.2,.8,.2,1) .15s}
+.devbox .dev.resize{transition:opacity .6s .15s,transform .8s cubic-bezier(.2,.8,.2,1) .15s,width .9s cubic-bezier(.65,0,.35,1),height .9s cubic-bezier(.65,0,.35,1),border-radius .9s}
 .cap{transition:opacity .5s}
 .devbox:not([data-step=site]) + .cap{opacity:0}
 @media (prefers-reduced-motion:reduce){.ask,.ask-type,.ask-steps,.devbox .dev{transition:none}.ask-text .caret{animation:none}}
 .badge{position:fixed;left:12px;bottom:12px;z-index:5;padding:6px 10px;border-radius:999px;background:#151412;color:#fff;font:600 12px/1 var(--font-ui);letter-spacing:.02em}
 .badge a{color:#c9c4ba;margin-left:8px}
 
-.devwrap{min-width:0}
-.dev{position:relative;margin:0 auto;width:var(--w,280px);height:var(--h,546px);background:#fff;border:1px solid var(--line-2);border-radius:26px;box-shadow:var(--shadow-float);overflow:hidden;display:flex;flex-direction:column;transition:width .9s cubic-bezier(.65,0,.35,1),height .9s cubic-bezier(.65,0,.35,1),border-radius .9s}
+/* Sized for the computer view before the script runs (the column width in container units), so nothing moves when it does. */
+.devwrap{min-width:0;container-type:inline-size}
+.dev{position:relative;margin:0 auto;width:var(--w,100cqw);height:var(--h,calc(62cqw + 24px));background:#fff;border:1px solid var(--line-2);border-radius:26px;box-shadow:var(--shadow-float);overflow:hidden;display:flex;flex-direction:column}
 .dev[data-mode=desk]{border-radius:10px}
-.dev .chrome{flex:none;display:flex;align-items:center;gap:6px;height:var(--ch,0px);padding:0 12px;overflow:hidden;background:var(--surface-2);transition:height .9s cubic-bezier(.65,0,.35,1)}
+.dev .chrome{flex:none;display:flex;align-items:center;gap:6px;height:var(--ch,24px);padding:0 12px;overflow:hidden;background:var(--surface-2)}
+/* The size moves only when the view is switched (not while the page settles at load). */
+.dev.resize .chrome{transition:height .9s cubic-bezier(.65,0,.35,1)}
 .dev .chrome i{width:8px;height:8px;border-radius:50%;background:var(--line-2)}
 /* The machine under the site, seen through the seams while the parts move. */
 .dev .screen{position:relative;flex:1;min-height:0;overflow:hidden;background:#191714 radial-gradient(rgb(255 255 255/.07) 1px,transparent 1.3px) 0 0/14px 14px}
-.dev iframe{position:absolute;left:0;top:0;display:block;border:0;width:var(--iw,360px);height:calc((var(--h,546px) - var(--ch,0px)) / var(--s,.7778));transform:scale(var(--s,.7778));transform-origin:0 0}
+.dev iframe{position:absolute;left:0;top:0;display:block;border:0;width:var(--iw,1280px);height:calc((var(--h,calc(62cqw + 24px)) - var(--ch,24px)) / var(--s,.31));transform:scale(var(--s,.31));transform-origin:0 0}
 .dev iframe.main{z-index:1}
 .dev iframe.stage{z-index:0}
 .cap{font-size:14px;color:var(--ink-3);margin:12px auto 0;max-width:56ch}
@@ -151,8 +155,8 @@
           <p class="trades-q" id="trades-q">Poglejte primer za svojo dejavnost:</p>
           <div class="demo-tools">
             <div class="views" role="radiogroup" aria-label="Pogled">
-              <button type="button" role="radio" aria-checked="true" data-mode="phone" aria-label="Telefon" title="Telefon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.2"/><path d="M11 18.5h2"/></svg></button>
-              <button type="button" role="radio" aria-checked="false" data-mode="desk" aria-label="Računalnik" title="Računalnik"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4" width="19" height="12.5" rx="1.8"/><path d="M8.5 20.5h7M12 16.5v4"/></svg></button>
+              <button type="button" role="radio" aria-checked="false" data-mode="phone" aria-label="Telefon" title="Telefon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.2"/><path d="M11 18.5h2"/></svg></button>
+              <button type="button" role="radio" aria-checked="true" data-mode="desk" aria-label="Računalnik" title="Računalnik"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4" width="19" height="12.5" rx="1.8"/><path d="M8.5 20.5h7M12 16.5v4"/></svg></button>
             </div>
             <button class="pause" type="button" aria-pressed="false" aria-label="Ustavi" title="Ustavi"></button>
           </div>
@@ -176,7 +180,7 @@
               </ol>
             </div>
           </div>
-          <div class="dev" data-mode="phone" id="demo" role="tabpanel">
+          <div class="dev" data-mode="desk" id="demo" role="tabpanel">
             <span class="chrome" aria-hidden="true"><i></i><i></i><i></i></span>
             <div class="screen">
               <iframe class="stage" title="" tabindex="-1" aria-hidden="true"></iframe>
@@ -236,7 +240,7 @@ tabsEl.style.setProperty("--dwell", DWELL + "ms");
 const caption = (t) => `Takole bi lahko izgledala stran za ${t.forWhom}. ${t.name} je izmišljeno podjetje; vaša stran nastane iz vašega opisa in fotografij, zato bo drugačna.`;
 
 // ---------- device ----------
-let mode = "phone";
+let mode = "desk";
 const size = () => {
   const col = devwrap.clientWidth;
   const v = mode === "phone" ? { w: Math.min(280, col - 24), iw: 360, ch: 0 } : { w: col, iw: 1280, ch: 24 };
@@ -251,7 +255,9 @@ for (const b of viewButtons) b.addEventListener("click", () => {
   if (mode === b.dataset.mode) return;
   mode = b.dataset.mode;
   for (const x of viewButtons) x.setAttribute("aria-checked", String(x === b));
+  dev.classList.add("resize");
   size();
+  setTimeout(() => dev.classList.remove("resize"), 1000);
   setTimeout(() => placeCard(), 950);
 });
 
