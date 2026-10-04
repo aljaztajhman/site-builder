@@ -289,7 +289,7 @@ footer .legal{margin-top:28px;padding-top:16px;border-top:1px solid var(--line);
   :root{--gutter:32px;--section:96px}
   .hd nav,.hd .login{display:inline-flex}
   .hero{padding:72px 0 88px}
-  .hero .wrap{grid-template-columns:1.25fr .75fr;align-items:center;gap:56px}
+  .hero .wrap{grid-template-columns:1.25fr .75fr;align-items:start;gap:56px}
   .phone{justify-self:end}
   .win{grid-template-columns:1.1fr 1fr;gap:64px;margin-top:72px}
   .win.flip .win-vis{order:2}

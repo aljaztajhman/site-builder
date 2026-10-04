@@ -3,7 +3,6 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { CSSProperties } from "react";
 import { uiUrl } from "./ui/assets.ts";
-import { PRODUCT_NAME } from "./ui/labels.ts";
 
 /**
  * The landing page's trade showcase, as `pnpm examples:build` wrote it (ui/examples/showcase.json, from
@@ -44,7 +43,7 @@ export const tradeFontFace = (t: TradeShowcase): string =>
 
 /** Under the demo: what the visitor sees, and that their own site will differ. */
 export const tradeCaption = (t: TradeShowcase): string =>
-  `Takole bi lahko izgledala stran za ${t.forWhom}. ${t.name} je izmišljeno podjetje; vaša stran nastane iz vašega opisa in fotografij, zato bo drugačna.${t.photos ? " Fotografije so ustvarjene z UI." : ""}`;
+  `Primer za ${t.forWhom}: ${t.name} je izmišljeno podjetje.${t.photos ? " Fotografije so ustvarjene z UI." : ""}`;
 
 /** What home.ts needs to switch without a reload. */
 export const tradeClientData = (trades: TradeShowcase[]) =>
@@ -58,4 +57,4 @@ export const tradeClientData = (trades: TradeShowcase[]) =>
     vars: t.vars,
   }));
 
-export const DEFAULT_CAPTION = `Primer: izmišljena trgovina Oljka in sol iz Kopra. Stran je ${PRODUCT_NAME} naredil iz njenega opisa in petih fotografij; manjkajočo ceno smo vpisali, kot bi jo lastnik. Fotografije so ustvarjene z UI.`;
+export const DEFAULT_CAPTION = "Primer: izmišljena trgovina Oljka in sol iz Kopra. Fotografije so ustvarjene z UI.";

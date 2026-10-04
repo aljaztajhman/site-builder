@@ -97,6 +97,9 @@ const IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avi
 const LOGO_TYPES = new Set([...IMAGE_TYPES, "image/svg+xml"]);
 const EXT: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/avif": "avif", "image/svg+xml": "svg" };
 
+/** Under the landing page's prompt while the free homepage is still there to make. */
+export const LANDING_FREE_LINE = "Brezplačno, brez prijave in brez kartice.";
+
 /** An export with something on the publish checklist, not confirmed yet. */
 export const EXPORT_CHECKLIST_MESSAGE = "Stran še ni pripravljena za objavo: nekateri podatki manjkajo ali niso preverjeni. Preverite seznam ali stran izvozite vseeno.";
 
@@ -265,6 +268,14 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   app.get("/favicon.ico", (c) => c.redirect(`/assets/ui/${uiAssets().hash}/icon.svg`, 301));
 
   // ---------- Landing page ----------
+  /**
+   * The one line under the landing page's prompt. A visitor who still has the free homepage reads the short
+   * promise (what an account adds is in the prices and the questions); everyone else what they have left.
+   */
+  const landingAllowance = async (viewer: AppEnv["Variables"]["viewer"], deviceId?: string) => {
+    const a = await allowanceFor(limits, viewer, deviceId ?? "");
+    return viewer.kind === "anonymous" && (a.homepagesLeft ?? 0) > 0 ? LANDING_FREE_LINE : a.text;
+  };
   const landing = async (c: Context<AppEnv>, extra: { error?: string; description?: string; showcase?: string | undefined } = {}) => {
     const viewer = c.get("viewer");
     const anonymous = viewer.kind === "anonymous";
@@ -274,7 +285,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       signedIn: signedIn(viewer),
       csrf: c.get("csrf"),
       fullSite: !fullSiteRefusal(viewer, config),
-      allowance: (await allowanceFor(limits, viewer, c.get("deviceId"))).text,
+      allowance: await landingAllowance(viewer, c.get("deviceId")),
       botSiteKey: anonymous && botCheck.mode === "on" ? botCheck.siteKey : null,
       anonymousClosed: anonymous && botCheck.mode === "unavailable",
       ...(anonymous ? { anonymousUpload: { ticketUrl: "/api/intake/ticket", maxPhotos: config.tiers.anonymous.uploads.maxPhotos, maxTotalBytes: config.tiers.anonymous.uploads.maxTotalBytes } } : {}),

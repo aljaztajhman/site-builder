@@ -292,7 +292,8 @@ export async function allowanceFor(deps: Pick<LimitDeps, "repo" | "config">, vie
   const tier = tierOf(viewer);
   if (tier === "anonymous") {
     const left = Math.max(0, t.anonymous.homepages - (await u.countJobs({ kind: "generate", tiers: ["anonymous"], deviceId })));
-    const more = `Z brezplačno prijavo z e-pošto dobite še ${count(t.free.homepages, MORE_HOMEPAGES)} in ${count(t.free.chatEdits, EDITS)}.`;
+    // The landing page shows a shorter line while the free homepage is left (app.ts landingAllowance).
+    const more = `Z brezplačno prijavo dobite še ${count(t.free.homepages, MORE_HOMEPAGES)} in ${count(t.free.chatEdits, EDITS)}.`;
     return {
       ...none,
       homepagesLeft: left,
