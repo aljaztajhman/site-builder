@@ -53,6 +53,16 @@ describe("fakes", () => {
     expect(e).toBeInstanceOf(DomainProviderError);
     expect((e as DomainProviderError).permanent).toBe(true);
     expect((e as DomainProviderError).opts.code).toBe("unavailable");
+    // What we hold is found by name; what we don't is null.
+    expect(await r.lookup("Prosta.si")).toEqual({ id: a.id, status: "active" });
+    expect(await r.lookup("zaseden.si")).toBeNull();
+  });
+
+  it("'lose' registers the name and then loses the answer, as a timeout would", async () => {
+    const r = fakeRegistrar({ script: { register: { lose: 1 }, registration: { pending: 1 } } });
+    await expect(r.register({ name: "izgubljen.si", ownerHandle: "H", years: 1, nameservers: [] })).rejects.toThrow(/no answer/);
+    expect(await r.lookup("izgubljen.si")).toEqual({ id: "fake-izgubljen.si", status: "active" });
+    expect((await r.check(["izgubljen.si"]))[0]!.available).toBe(false);
   });
 
   it("scripts fail a method a number of times, then answer pending, then active", async () => {
@@ -133,6 +143,27 @@ describe("Openprovider adapter (skeleton, documented shapes)", () => {
       name_servers: [{ name: "ana.ns.x", seq_nr: 1 }, { name: "bor.ns.x", seq_nr: 2 }],
     });
     expect(await op.registration("4242")).toBe("active");
+  });
+
+  it("looks a domain up in our account by its full name (ListDomains), ignoring other and deleted names", async () => {
+    const f = fakeFetch({
+      "POST /v1/auth/login": ok({ token: "tok" }),
+      "GET /v1/domains": ok({
+        results: [
+          { id: 1, status: "ACT", is_deleted: true, domain: { name: "pekarnakvas", extension: "si" } },
+          { id: 4242, status: "REQ", is_deleted: false, domain: { name: "pekarnakvas", extension: "si" } },
+        ],
+        total: 2,
+      }),
+    });
+    const op = openproviderRegistrar({ username: "u", password: "p", baseUrl: base, fetch: f });
+    expect(await op.lookup("PekarnaKvas.si")).toEqual({ id: "4242", status: "pending" });
+    const get = f.seen.find((s) => s.method === "GET")!;
+    expect(new URL(get.url).pathname).toBe("/v1/domains");
+    expect(Object.fromEntries(new URL(get.url).searchParams)).toEqual({ full_name: "pekarnakvas.si", is_deleted: "false", limit: "10" });
+    expect(await op.lookup("drugo.si")).toBeNull();
+    const none = openproviderRegistrar({ username: "u", password: "p", baseUrl: base, fetch: fakeFetch({ "POST /v1/auth/login": ok({ token: "tok" }), "GET /v1/domains": ok({ total: 0 }) }) });
+    expect(await none.lookup("pekarnakvas.si")).toBeNull();
   });
 
   it("a non-zero code is an error; a refused login is permanent", async () => {
@@ -224,6 +255,30 @@ describe("site_domains provisioning bookkeeping (migration 18)", () => {
     expect(await repo.domains.claimNotification("x.si", 0)).toBe(true);
     expect(await repo.domains.claimNotification("x.si", 0)).toBe(false);
     expect((await repo.domains.get("x.si"))!.active_at).not.toBeNull();
+    await db.close();
+  });
+
+  it("a run lets go only of its own lease: one that ran out and was taken over stays with the new holder", async () => {
+    const db = await createDb("pglite://memory");
+    await migrate(db);
+    const repo = new Repo(db);
+    const s = await repo.createSite({ name: "y", slug: "y", intake: { description: "y", photoAssetIds: [], scope: "home" } });
+    await repo.domains.start(s.id, "y.si", "registered", {});
+    const first = (await repo.domains.claim("y.si", 60))!;
+    expect(first.lease).toEqual(expect.any(String));
+    await db.query("update site_domains set lease_until = now() - interval '1 second' where hostname = 'y.si'");
+    const second = (await repo.domains.claim("y.si", 60))!;
+    expect(second.lease).not.toBe(first.lease);
+    // The first run's finally and progress write leave the second run's lease alone.
+    await repo.domains.release("y.si", first.lease);
+    await repo.domains.progress("y.si", { step: "zone", lease: first.lease });
+    const held = (await repo.domains.get("y.si"))!;
+    expect(held.step).toBe("zone");
+    expect(held.lease_until).not.toBeNull();
+    expect(await repo.domains.claim("y.si", 60, true)).toBeNull();
+    // Its own lease, released, is gone.
+    await repo.domains.release("y.si", second.lease);
+    expect((await repo.domains.get("y.si"))!.lease_until).toBeNull();
     await db.close();
   });
 });

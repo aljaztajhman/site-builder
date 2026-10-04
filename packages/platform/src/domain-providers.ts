@@ -52,6 +52,11 @@ export interface DomainRegistrar {
   /** Registers `name` for `ownerHandle` with our edge's nameservers. A name already registered in our account answers with it. */
   register(o: { name: string; ownerHandle: string; years: number; nameservers: string[] }): Promise<{ id: string; status: RegistrationStatus }>;
   registration(id: string): Promise<RegistrationStatus>;
+  /**
+   * The registration of `name` in our account (any status), or null when we don't hold it. A register
+   * call whose answer was lost (a timeout, a dead process) is found here instead of bought again.
+   */
+  lookup(name: string): Promise<{ id: string; status: RegistrationStatus } | null>;
 }
 
 export interface EdgeHostnames {
@@ -149,11 +154,14 @@ export function detectDnsHost(nameservers: readonly string[]): string | null {
 /**
  * How a fake method behaves, for tests of retries and failures: throw a transient error the first
  * `fail` times, throw a permanent one, or answer "pending" the first `pending` times it is asked.
+ * `lose` (register only): do the work, then throw a transient error the first `lose` times, as a call
+ * whose answer never arrived (a timeout after the registrar registered the name).
  */
 export interface FakeBehaviour {
   fail?: number;
   permanent?: boolean;
   pending?: number;
+  lose?: number;
 }
 
 type Calls = { method: string; args: unknown[] }[];
@@ -187,6 +195,8 @@ export function fakeRegistrar(o: { taken?: Iterable<string>; costEur?: Record<st
   const script = o.script ?? {};
   const calls: Calls = [];
   const registered = new Map<string, string>();
+  // Asked for and still with the registry (register answered "pending").
+  const pendingNames = new Set<string>();
   return {
     kind: "fake",
     calls,
@@ -197,7 +207,7 @@ export function fakeRegistrar(o: { taken?: Iterable<string>; costEur?: Record<st
       return names.map((raw) => {
         const name = lower(raw);
         const tld = name.split(".").pop() ?? "";
-        return { name, available: !taken.has(name) && !name.includes("zaseden") && !registered.has(name), premium: premium.has(name), costEur: o.costEur?.[tld] ?? 10 };
+        return { name, available: !taken.has(name) && !name.includes("zaseden") && !registered.has(name) && !pendingNames.has(name), premium: premium.has(name), costEur: o.costEur?.[tld] ?? 10 };
       });
     },
     async createContact(r) {
@@ -213,13 +223,26 @@ export function fakeRegistrar(o: { taken?: Iterable<string>; costEur?: Record<st
       const state = behave(script, counts, "register");
       const id = `fake-${name}`;
       if (state === "ok") registered.set(name, id);
+      else pendingNames.add(name);
+      const lose = script.register?.lose ?? 0;
+      if (lose && (counts.get("register") ?? 0) <= lose) throw new DomainProviderError(`fake register: no answer (the name was registered)`);
       return { id, status: state === "ok" ? "active" : "pending" };
     },
     async registration(id) {
       calls.push({ method: "registration", args: [id] });
       const state = behave(script, counts, "registration");
-      if (state === "ok") registered.set(id.replace(/^fake-/, ""), id);
+      if (state === "ok") {
+        registered.set(id.replace(/^fake-/, ""), id);
+        pendingNames.delete(id.replace(/^fake-/, ""));
+      }
       return state === "ok" ? "active" : "pending";
+    },
+    async lookup(raw) {
+      calls.push({ method: "lookup", args: [raw] });
+      behave(script, counts, "lookup");
+      const name = lower(raw);
+      if (registered.has(name)) return { id: registered.get(name)!, status: "active" };
+      return pendingNames.has(name) ? { id: `fake-${name}`, status: "pending" } : null;
     },
   };
 }

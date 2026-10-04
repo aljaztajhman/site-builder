@@ -41,7 +41,12 @@ export interface DomainProgress {
   nextInSeconds?: number | null;
   failure?: string | null;
   notify?: SiteDomainRow["notify"];
+  /** The run's lease (from `claim`): the write lets go of the lease only while it is still this one. */
+  lease?: string;
 }
+
+/** A domain one provisioning run holds; `lease` names this run's hold (release and progress compare it). */
+export type ClaimedDomain = SiteDomainRow & { lease: string };
 
 /** A hostname as stored and looked up: lower case, no port, no trailing dot. Null when it isn't a hostname. */
 export function normaliseHostname(raw: string): string | null {
@@ -123,14 +128,15 @@ export class SiteDomains {
   /**
    * Takes a pending domain for one provisioning run: only when nobody holds it (or the holder's lease ran
    * out, a dead process) and, unless `force`, only when it is due. Null when someone else has it or it isn't pending.
+   * The lease's exact expiry (as text, microseconds kept) is the run's token for `release` and `progress`.
    */
-  async claim(hostname: string, leaseSeconds: number, force = false): Promise<SiteDomainRow | null> {
-    const { rows } = await this.db.query<SiteDomainRow>(
-      `update site_domains set lease_until = now() + make_interval(secs => $2::integer)
+  async claim(hostname: string, leaseSeconds: number, force = false): Promise<ClaimedDomain | null> {
+    const { rows } = await this.db.query<ClaimedDomain>(
+      `update site_domains set lease_until = clock_timestamp() + make_interval(secs => $2::integer)
         where hostname = $1 and status = 'pending'
           and (lease_until is null or lease_until < now())
           and ($3 or next_at is null or next_at <= now())
-        returning *`,
+        returning *, lease_until::text as lease`,
       [hostname, leaseSeconds, force],
     );
     return rows[0] ?? null;
@@ -148,7 +154,7 @@ export class SiteDomains {
          failure = case when $9::boolean then $10 else failure end,
          notify = coalesce($11, notify),
          active_at = case when coalesce($2, status) = 'active' and active_at is null then now() else active_at end,
-         lease_until = null,
+         lease_until = case when $12::text is null or lease_until = $12::timestamptz then null else lease_until end,
          updated_at = now()
        where hostname = $1`,
       [
@@ -163,13 +169,17 @@ export class SiteDomains {
         p.failure !== undefined,
         p.failure ?? null,
         p.notify ?? null,
+        p.lease ?? null,
       ],
     );
   }
 
-  /** Lets go of a lease without changing anything (a run that found nothing to do). */
-  async release(hostname: string): Promise<void> {
-    await this.db.query("update site_domains set lease_until = null where hostname = $1", [hostname]);
+  /**
+   * Lets go of this run's lease without changing anything. A lease another run holds by now (ours ran
+   * out and it claimed the domain) is left alone.
+   */
+  async release(hostname: string, lease: string): Promise<void> {
+    await this.db.query("update site_domains set lease_until = null where hostname = $1 and lease_until = $2::timestamptz", [hostname, lease]);
   }
 
   /** Pending domains whose next step is due and that nobody holds: the worker's sweep queues them. */

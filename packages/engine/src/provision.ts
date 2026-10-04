@@ -1,11 +1,13 @@
 import type { AppConfig } from "@sb/config";
 import {
   DomainProviderError,
+  type ClaimedDomain,
   detectDnsHost,
   normaliseHostname,
   suggestDomains,
   type DomainProviders,
   type Registrant,
+  type RegistrationStatus,
   type Repo,
   type SiteDomainRow,
   type Storage,
@@ -107,7 +109,7 @@ export async function provisionDomain(deps: ProvisionDeps, hostname: string, opt
           await fail(deps, row, step, code, message, attempts);
           return { status: "failed", step, failure: code };
         }
-        await domains.progress(hostname, { step, attempts, nextInSeconds: backoffSeconds(config, attempts - 1), detail: { lastError: message, stepSince: new Date(since).toISOString() } });
+        await domains.progress(hostname, { step, attempts, nextInSeconds: backoffSeconds(config, attempts - 1), detail: { lastError: message, stepSince: new Date(since).toISOString() }, lease: row.lease });
         await repo.addEvent({ siteId: row.site_id, stage: "domain", level: "warn", message: `${hostname}: ${step} failed (attempt ${attempts}), retrying: ${message}` });
         return { status: "pending", step };
       }
@@ -117,14 +119,14 @@ export async function provisionDomain(deps: ProvisionDeps, hostname: string, opt
           await fail(deps, row, step, `${step}_timeout`, `${step} still waiting: ${result.wait}`, row.attempts);
           return { status: "failed", step, failure: `${step}_timeout` };
         }
-        await domains.progress(hostname, { step, nextInSeconds: backoffSeconds(config, waits), detail: { ...result.detail, waits: waits + 1, waiting: result.wait, stepSince: new Date(since).toISOString() } });
+        await domains.progress(hostname, { step, nextInSeconds: backoffSeconds(config, waits), detail: { ...result.detail, waits: waits + 1, waiting: result.wait, stepSince: new Date(since).toISOString() }, lease: row.lease });
         return { status: "pending", step };
       }
       const steps = stepsOf(row);
       const next = steps[steps.indexOf(step) + 1]!;
       Object.assign(detail, result.detail ?? {}, { stepSince: new Date(now()).toISOString(), waits: 0 });
       for (const k of result.forget ?? []) delete detail[k];
-      await domains.progress(hostname, { step: next, attempts: 0, detail: { ...result.detail, stepSince: detail.stepSince, waits: 0 }, forget: [...(result.forget ?? []), "lastError", "waiting"] });
+      await domains.progress(hostname, { step: next, attempts: 0, detail: { ...result.detail, stepSince: detail.stepSince, waits: 0 }, forget: [...(result.forget ?? []), "lastError", "waiting"], lease: row.lease });
       // An event per step: the editor's poll notices it and shows the new stage.
       await repo.addEvent({ siteId: row.site_id, stage: "domain", message: `${hostname}: ${step} done, next ${next}` });
       // Keep holding it for the next step: the progress write let go of the lease.
@@ -134,7 +136,8 @@ export async function provisionDomain(deps: ProvisionDeps, hostname: string, opt
       step = next;
     }
   } finally {
-    await domains.release(hostname).catch(() => undefined);
+    // Only our own hold: a run that took the domain after our lease ran out keeps its lease.
+    await domains.release(hostname, row.lease).catch(() => undefined);
   }
 }
 
@@ -143,8 +146,8 @@ function waitLimitHours(config: AppConfig, step: Step): number {
   return step === "dns" ? w.dns : step === "certificate" ? w.certificate : w.registration;
 }
 
-async function fail(deps: ProvisionDeps, row: SiteDomainRow, step: Step, code: string, message: string, attempts: number): Promise<void> {
-  await deps.repo.domains.progress(row.hostname, { status: "failed", step, attempts, failure: code, nextInSeconds: null, detail: { lastError: message } });
+async function fail(deps: ProvisionDeps, row: ClaimedDomain, step: Step, code: string, message: string, attempts: number): Promise<void> {
+  await deps.repo.domains.progress(row.hostname, { status: "failed", step, attempts, failure: code, nextInSeconds: null, detail: { lastError: message }, lease: row.lease });
   await deps.repo.addEvent({ siteId: row.site_id, stage: "domain", level: "error", message: `${row.hostname}: ${step} failed (${code}): ${message}` });
 }
 
@@ -171,16 +174,48 @@ async function runStep(deps: ProvisionDeps, row: SiteDomainRow, step: Step, deta
         if (status === "failed") throw new StepFailed("registrar", "the registrar reports the registration failed");
         return status === "active" ? { next: true } : { wait: "registry" };
       }
+      // An earlier run asked the registrar to register and never stored the answer (a timeout, a dead
+      // process): the name may be ours already. Ask the registrar before anything else; a name we hold is
+      // adopted, never bought twice, and never reported as taken.
+      let attempted = typeof detail.registering === "string";
+      if (attempted) {
+        const held = await registrar.lookup(host);
+        if (held && held.status !== "failed") return adoptRegistration(held);
+        // Listed as failed: the registrar bought nothing, so this is a fresh attempt.
+        if (held) {
+          await deps.repo.domains.update(host, { detail: { registering: null } });
+          attempted = false;
+        }
+      }
       // Never pay more than config allows: the price is checked again right before buying.
       const tld = host.split(".").pop()!;
       const offer = deps.config.domains.tlds.find((t) => t.tld === tld);
       if (!offer) throw new StepFailed("price", `.${tld} is not offered`);
       const [check] = await registrar.check([host]);
-      if (!check || !check.available) throw new StepFailed("unavailable", `${host} is no longer available`);
+      if (!check || !check.available) {
+        // After an attempt the registrar doesn't list in our account (yet): not "taken", which would offer
+        // the owner another name and a second purchase. Retried with backoff, then "try again".
+        if (attempted) throw new DomainProviderError(`${host} is unavailable and not (yet) listed in our account after a registration attempt`, { code: "register_unconfirmed" });
+        throw new StepFailed("unavailable", `${host} is no longer available`);
+      }
+      // Available and not ours: the earlier attempt bought nothing.
+      if (attempted) await deps.repo.domains.update(host, { detail: { registering: null } });
       if (check.premium || check.costEur === null || check.costEur > offer.maxCostEur) throw new StepFailed("price", `${host} costs ${check.costEur ?? "?"} € (at most ${offer.maxCostEur} €)`);
-      const r = await registrar.register({ name: host, ownerHandle: String(detail.ownerHandle), years: deps.config.domains.registrationYears, nameservers: (detail.nameservers as string[] | undefined) ?? [] });
-      if (r.status === "failed") throw new StepFailed("registrar", "the registrar refused the registration");
-      return r.status === "active" ? { next: true, detail: { registrationId: r.id } } : { wait: "registry", detail: { registrationId: r.id } };
+      // Stored before the call: from here on a registration may exist even if its answer never reaches us.
+      await deps.repo.domains.update(host, { detail: { registering: new Date(deps.now?.() ?? Date.now()).toISOString() } });
+      let r: { id: string; status: RegistrationStatus };
+      try {
+        r = await registrar.register({ name: host, ownerHandle: String(detail.ownerHandle), years: deps.config.domains.registrationYears, nameservers: (detail.nameservers as string[] | undefined) ?? [] });
+      } catch (e) {
+        // A refusal bought nothing; anything else (a timeout, a lost answer) may have, so the marker stays.
+        if (e instanceof DomainProviderError && e.permanent) await deps.repo.domains.update(host, { detail: { registering: null } });
+        throw e;
+      }
+      if (r.status === "failed") {
+        await deps.repo.domains.update(host, { detail: { registering: null } });
+        throw new StepFailed("registrar", "the registrar refused the registration");
+      }
+      return adoptRegistration(r);
     }
     case "edge": {
       if (typeof detail.hostnameId === "string") return { next: true };
@@ -207,14 +242,31 @@ async function runStep(deps: ProvisionDeps, row: SiteDomainRow, step: Step, deta
   }
 }
 
+/** A registration in our account (just made, or found after a lost answer): its id replaces the attempt marker. */
+function adoptRegistration(r: { id: string; status: RegistrationStatus }): StepResult {
+  if (r.status === "failed") throw new StepFailed("registrar", "the registrar reports the registration failed");
+  const detail = { registrationId: r.id, registering: null };
+  return r.status === "active" ? { next: true, detail } : { wait: "registry", detail };
+}
+
+/**
+ * Whether a registered domain is (or may be) bought: it has a registration id the registrar didn't report
+ * as failed, or a registration was asked for and its answer is unknown. Such a domain is only ever tried
+ * again, never swapped for another name.
+ */
+export function mayBeBought(row: SiteDomainRow): boolean {
+  if (typeof row.detail.registering === "string") return true;
+  return typeof row.detail.registrationId === "string" && !(row.step === "register" && row.failure === "registrar");
+}
+
 /**
  * The last step: the hostname serves the site from now on (a registered domain's www too, redirecting
  * to it), the site is republished with this address, and the owner's email is due. A republish that
  * can't happen now (another publish running) is left to the address check, which retries it.
  */
-async function goLive(deps: ProvisionDeps, row: SiteDomainRow): Promise<void> {
+async function goLive(deps: ProvisionDeps, row: ClaimedDomain): Promise<void> {
   const { repo } = deps;
-  await repo.domains.progress(row.hostname, { status: "active", step: "live", attempts: 0, nextInSeconds: null, failure: null, notify: "pending", forget: ["lastError", "waiting", "waits"] });
+  await repo.domains.progress(row.hostname, { status: "active", step: "live", attempts: 0, nextInSeconds: null, failure: null, notify: "pending", forget: ["lastError", "waiting", "waits"], lease: row.lease });
   if (row.kind === "registered") {
     const www = `www.${row.hostname}`;
     const existing = await repo.domains.get(www);
@@ -441,7 +493,8 @@ export class DomainStartError extends Error {}
 
 /**
  * Starts provisioning: a registered name (checked again at the registrar, the holder's details complete)
- * or the owner's own domain (planOwnDomain). One domain per site; a failed one is replaced. The caller
+ * or the owner's own domain (planOwnDomain). One domain per site; a failed one is replaced unless it was
+ * (or may have been) bought. The caller
  * queues the job (it is also due for the worker's sweep).
  */
 export async function startDomain(
@@ -451,6 +504,16 @@ export async function startDomain(
 ): Promise<SiteDomainRow> {
   const existing = await deps.repo.domains.forSite(siteId);
   if (existing.some((d) => d.status !== "failed")) throw new DomainStartError("Stran že ima domeno.");
+  // A failed domain that was bought, or may have been (a registration asked for, its answer unknown), is
+  // the owner's: it is tried again, never replaced by another name (a second purchase).
+  const bought = existing.find(mayBeBought);
+  if (bought) {
+    throw new DomainStartError(
+      typeof bought.detail.registering === "string"
+        ? `Registracija domene ${bought.hostname} je morda že uspela, zato je ne moremo zamenjati z drugo. Tapnite »Poskusi znova«.`
+        : `Domena ${bought.hostname} je že registrirana za to stran, zato je ne moremo zamenjati z drugo. Tapnite »Poskusi znova«.`,
+    );
+  }
   let hostname: string;
   let detail: Record<string, unknown>;
   if (input.kind === "registered") {
@@ -507,6 +570,7 @@ const FAILURE: Record<string, (h: string, c: AppConfig) => string> = {
   refused: () => "Registrar podatkov imetnika domene ni sprejel. Preverite ime, naslov, telefon in e-pošto ter poskusite znova.",
   registrar: (h) => `Registracija domene ${h} ni uspela. Poskusite znova; če se ponovi, izberite drugo ime.`,
   register_timeout: (h) => `Registracija domene ${h} ni bila končana v pričakovanem času. Poskusite znova.`,
+  register_unconfirmed: (h) => `Registracije domene ${h} pri registrarju še nismo mogli potrditi. Poskusite znova čez nekaj minut.`,
   dns_timeout: (h, c) => `Zapisa DNS za ${h} v ${Math.round(c.domains.waitHours.dns / 24)} dneh nismo videli, zato smo povezovanje ustavili. Preverite zapis pri ponudniku DNS in tapnite »Poskusi znova«.`,
   certificate: (h) => `Varne povezave (HTTPS) za ${h} nismo mogli vzpostaviti. Poskusite znova čez nekaj minut.`,
   certificate_timeout: (h) => `Varne povezave (HTTPS) za ${h} nismo mogli vzpostaviti v pričakovanem času. Poskusite znova.`,
@@ -535,7 +599,10 @@ export function domainState(row: SiteDomainRow, config: AppConfig): DomainState 
     connect: !registered && row.status !== "active" && record ? { record, dnsHost: (d.dnsHost as string | null) ?? null, hasMail: d.hasMail === true, seen: (d.seen as string[] | undefined) ?? [] } : null,
     url: row.status === "active" ? `https://${row.hostname}/` : null,
     failure: row.status === "failed" ? row.failure : null,
-    // Never once the name is bought (a later step failed): trying again keeps it.
-    chooseAnother: row.status === "failed" && (row.kind === "connected" || (typeof d.registrationId !== "string" && ["unavailable", "price", "refused", "contact"].includes(row.failure ?? ""))),
+    // Never once the name is bought (a later step failed) or may be (a registration was asked for and its
+    // answer is unknown): trying again keeps it.
+    chooseAnother:
+      row.status === "failed" &&
+      (row.kind === "connected" || (typeof d.registrationId !== "string" && !mayBeBought(row) && ["unavailable", "price", "refused", "contact"].includes(row.failure ?? ""))),
   };
 }
