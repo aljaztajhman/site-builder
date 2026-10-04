@@ -1,6 +1,8 @@
 import type { Context } from "hono";
 import type { AppConfig, PlanKey } from "@sb/config";
+import { allowancePeriod, limitsInfo, picturesInfo, picturesNotice, planOffer, type LimitsInfo, type PicturesInfo } from "@sb/engine";
 import { poolOf, type Pool, type Repo, type SiteRow, type Tier, type UsageQueries } from "@sb/platform";
+import type { SiteSpec } from "@sb/spec";
 import { clientIp, ipKey, signInUrl, tierOf, type AppEnv, type Refusal, type Viewer } from "./access.ts";
 import { PREVIEW_BADGE, formatDate } from "./ui/labels.ts";
 
@@ -52,20 +54,8 @@ const FULL_SITES: Forms ={ one: "ustvarjanje celotne strani", two: "ustvarjanji 
 
 // ---------- Paid allowance ----------
 
-const addMonths = (d: Date, n: number): Date => {
-  const y = d.getUTCFullYear();
-  const m = d.getUTCMonth() + n;
-  const last = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
-  return new Date(Date.UTC(y, m, Math.min(d.getUTCDate(), last), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds(), d.getUTCMilliseconds()));
-};
-
-/** The allowance month `now` falls in, counted from the day paid rights started; the first one is month 0. */
-export function allowancePeriod(since: Date, now: Date): { start: Date; end: Date; first: boolean } {
-  let k = (now.getUTCFullYear() - since.getUTCFullYear()) * 12 + (now.getUTCMonth() - since.getUTCMonth());
-  if (addMonths(since, k) > now) k--;
-  k = Math.max(0, k);
-  return { start: addMonths(since, k), end: addMonths(since, k + 1), first: k === 0 };
-}
+/** The allowance month `now` falls in (engine plan-limits.ts: the worker counts generated pictures by it too). */
+export { allowancePeriod };
 
 /** € a paid plan may spend on AI this allowance month: its monthly allowance, plus the first month's extra (sb-tiers). */
 export function monthlyAllowance(config: AppConfig, plan: PlanKey, since: Date, now: Date): { eur: number; start: Date; end: Date } {
@@ -74,8 +64,6 @@ export function monthlyAllowance(config: AppConfig, plan: PlanKey, since: Date, 
   return { eur: ai.allowanceEurPerMonth + (p.first ? ai.firstMonthExtraEur : 0), start: p.start, end: p.end };
 }
 
-/** "Osnovni (od 15 € na mesec)": the plan an upsell points to. */
-const planOffer = (config: AppConfig, plan: PlanKey): string => `${config.plans[plan].name} (${config.plans[plan].monthlyEur} € na mesec)`;
 /** After a free limit: what the first paid plan adds. */
 const freeUpsell = (config: AppConfig): string => `Z naročnino ${planOffer(config, "standard")} dobite celotno stran, objavo na svoji domeni in pomočnika vsak mesec.`;
 /** After a paid allowance: Plus for Osnovni, nothing more to sell for Plus. */
@@ -253,6 +241,36 @@ export interface AccessInfo {
   signIn: string | null;
   /** The free-preview badge the editor shows beside the preview frame (never inside it); null for none. */
   badge: string | null;
+  /** What a site may have on the viewer's plan, and the note each button reads at its limit (null: the admin). */
+  limits: LimitsInfo | null;
+  /**
+   * Free previews (it-upsells): the pages the brief planned beyond the homepage, by their menu names, shown
+   * locked with the first paid plan's price (no model call: the brief already names them).
+   */
+  lockedPages: string[];
+  /** Free previews: the first paid plan, its prices in one Slovene line. Null for paid viewers and the admin. */
+  offer: { plan: PlanKey; name: string; monthlyEur: number; text: string } | null;
+  /** A paid plan's generated pictures this allowance month (null otherwise); `short`: regenerating this site would get fewer than it would without the limit. */
+  pictures: (PicturesInfo & { short: boolean }) | null;
+  /** An unclaimed anonymous preview: the address its one reminder goes to before it is deleted, if the visitor left one. */
+  reminder: { email: string | null; status: "none" | "pending" | "sent" | "failed"; sendsAt: string } | null;
+}
+
+/** "Osnovni: 15 € na mesec ali 150 € na leto, domena je vključena v letno ceno." */
+export function offerText(config: AppConfig, plan: PlanKey = "standard"): string {
+  const p = config.plans[plan];
+  return `${p.name}: ${p.monthlyEur} € na mesec ali ${p.yearlyEur} € na leto${p.yearlyIncludesDomain ? ", domena je vključena v letno ceno" : ""}.`;
+}
+
+/** The brief's planned pages that the site doesn't have yet, by menu name (at most what the first paid plan allows). */
+export function lockedPagesOf(config: AppConfig, site: Pick<SiteRow, "brief">, spec: Pick<SiteSpec, "pages"> | null): string[] {
+  const planned = (site.brief as { pages?: { kind?: string; slug?: string; navLabel?: string }[] } | null)?.pages;
+  if (!Array.isArray(planned)) return [];
+  const have = new Set((spec?.pages ?? []).map((p) => p.slug));
+  return planned
+    .filter((p) => p.kind === "standard" && typeof p.navLabel === "string" && p.navLabel.trim() && !have.has(p.slug ?? ""))
+    .map((p) => p.navLabel!.trim())
+    .slice(0, config.plans.standard.site.maxPages - 1);
 }
 
 /**
@@ -307,10 +325,27 @@ export async function allowanceFor(deps: Pick<LimitDeps, "repo" | "config">, vie
   return { ...none, text: "Skrbnik: brez omejitev, velja dnevna omejitev porabe." };
 }
 
+/** A generation of this site in `scope` would want more generated pictures than the plan has left this month. */
+export function picturesShort(config: AppConfig, site: Pick<SiteRow, "intake">, scope: "home" | "full", left: number): boolean {
+  const wanted = config.imageGen.pipeline.enabled ? Math.max(0, config.imageGen.pipeline.fillUpTo[scope] - (site.intake?.photoAssetIds?.length ?? 0)) : 0;
+  return wanted > left;
+}
+
+/** A paid viewer's generated pictures this allowance month (it-plan-limits), or null. */
+export async function picturesFor(deps: Pick<LimitDeps, "repo" | "config">, viewer: Viewer, now = new Date()): Promise<PicturesInfo | null> {
+  if (viewer.kind !== "account" || !viewer.paidSince) return null;
+  const plan = viewer.plan ?? "standard";
+  const period = allowancePeriod(new Date(viewer.paidSince), now);
+  const used = await deps.repo.usage.generatedPictures(viewer.account.id, period.start);
+  return picturesInfo(deps.config, plan, used, period.end, formatDate(period.end.toISOString()));
+}
+
 /** GET /api/sites/:id → `access`. */
-export async function accessInfo(deps: Pick<LimitDeps, "repo" | "config">, viewer: Viewer, deviceId: string, site: SiteRow, now = new Date()): Promise<AccessInfo> {
+export async function accessInfo(deps: Pick<LimitDeps, "repo" | "config">, viewer: Viewer, deviceId: string, site: SiteRow, now = new Date(), spec: Pick<SiteSpec, "pages"> | null = null): Promise<AccessInfo> {
   const t = deps.config.tiers;
   const tier = tierOf(viewer);
+  const free = tier === "anonymous" || tier === "free";
+  const plan = viewer.kind === "account" ? viewer.plan : null;
   const allowance = await allowanceFor(deps, viewer, deviceId, now);
   const paidish = tier === "paid" || tier === "admin";
   const regenerateCost = site.intake?.scope === "full" ? t.estimatesEur.fullSite : t.estimatesEur.homepage;
@@ -318,12 +353,26 @@ export async function accessInfo(deps: Pick<LimitDeps, "repo" | "config">, viewe
   const regenerate =
     tier === "admin" || ((tier === "anonymous" || tier === "free") && (allowance.homepagesLeft ?? 0) > 0) || (tier === "paid" && (allowance.eurLeft ?? 0) >= regenerateCost);
   const unclaimed = site.account_id === null && !!site.device_id;
+  const created = Date.parse(site.created_at);
   return {
     viewer: tier,
     can: { edit: tier !== "anonymous", chat, regenerate, publish: paidish, export: paidish, fullSite: paidish },
     allowance,
-    expiresAt: unclaimed ? new Date(Date.parse(site.created_at) + t.anonymous.keepDays * 86400_000).toISOString() : null,
+    expiresAt: unclaimed ? new Date(created + t.anonymous.keepDays * 86400_000).toISOString() : null,
     signIn: tier === "anonymous" ? signInUrl(`/sites/${site.id}`) : null,
     badge: previewBadge(deps.config, tier, site),
+    limits: limitsInfo(deps.config, tier, tier === "paid" ? (plan ?? "standard") : null),
+    lockedPages: free ? lockedPagesOf(deps.config, site, spec) : [],
+    offer: free ? { plan: "standard", name: deps.config.plans.standard.name, monthlyEur: deps.config.plans.standard.monthlyEur, text: offerText(deps.config) } : null,
+    // For this site: a full regeneration would get fewer generated pictures than it wants; the note says so, naming Plus.
+    pictures: await picturesFor(deps, viewer, now).then((p) => {
+      if (!p) return null;
+      const short = picturesShort(deps.config, site, "full", p.left);
+      return { ...p, short, notice: short ? picturesNotice(deps.config, plan ?? "standard", p.left, formatDate(p.renewsAt)) : null };
+    }),
+    reminder:
+      unclaimed && tier === "anonymous"
+        ? { email: site.reminder_email ?? null, status: site.reminder ?? "none", sendsAt: new Date(created + (t.anonymous.keepDays - t.anonymous.reminder.daysBefore) * 86400_000).toISOString() }
+        : null,
   };
 }

@@ -88,7 +88,7 @@ export function registerDomainRoutes(app: Hono<AppEnv>, d: DomainRouteDeps): voi
 
   // "Že imam domeno": the record to add at the owner's DNS host. DNS is only read.
   app.post("/api/sites/:id/domains/inspect", async (c) => {
-    const denied = publishRefusal(c.get("viewer"));
+    const denied = publishRefusal(c.get("viewer"), config);
     if (denied) return refusalJson(c, denied);
     if (!config.domains.enabled) return c.json({ error: "disabled", message: "Lastne domene še niso na voljo." }, 409);
     const body = (await c.req.json().catch(() => ({}))) as { hostname?: unknown };
@@ -101,7 +101,7 @@ export function registerDomainRoutes(app: Hono<AppEnv>, d: DomainRouteDeps): voi
   });
 
   app.post("/api/sites/:id/domains", async (c) => {
-    const denied = publishRefusal(c.get("viewer"));
+    const denied = publishRefusal(c.get("viewer"), config);
     if (denied) return refusalJson(c, denied);
     if (!config.domains.enabled) return c.json({ error: "disabled", message: "Lastne domene še niso na voljo." }, 409);
     const id = c.req.param("id");
@@ -122,7 +122,7 @@ export function registerDomainRoutes(app: Hono<AppEnv>, d: DomainRouteDeps): voi
 
   // "Preveri zdaj" (a connected domain waiting for its record) and "Poskusi znova" (a failed one).
   app.post("/api/sites/:id/domains/:hostname/check", async (c) => {
-    const denied = publishRefusal(c.get("viewer"));
+    const denied = publishRefusal(c.get("viewer"), config);
     if (denied) return refusalJson(c, denied);
     const row = await repo.domains.get(c.req.param("hostname"));
     if (!row || row.site_id !== c.req.param("id")) return c.json({ error: "not found" }, 404);

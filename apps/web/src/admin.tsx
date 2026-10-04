@@ -37,6 +37,7 @@ export function registerAdminRoutes(app: Hono<AppEnv>, deps: AdminDeps): void {
         planPrices: { standard: config.plans.standard.monthlyEur, premium: config.plans.premium.monthlyEur },
         allowances: { standard: config.plans.standard.ai.allowanceEurPerMonth, premium: config.plans.premium.ai.allowanceEurPerMonth },
         freeLifetimeEur: config.tiers.free.lifetimeEur,
+        founding: config.plans.standard.foundingOffer ? { ...config.plans.standard.foundingOffer, taken: await repo.accounts.foundingTaken() } : null,
         ...(flash ? { flash } : {}),
       }),
       status,
@@ -74,8 +75,10 @@ export function registerAdminRoutes(app: Hono<AppEnv>, deps: AdminDeps): void {
     if (isDisposableEmailDomain(email.domain)) return show(c, { text: "Naslov za enkratno uporabo ne more biti na seznamu.", bad: true }, 400);
     const note = typeof body.note === "string" && body.note.trim() ? body.note.trim().slice(0, 200) : null;
     const plan = body.plan === "premium" ? "premium" : "standard";
-    await repo.accounts.allow(email.email, email.key, note, plan);
-    return show(c, { text: `${email.email} ima zdaj paket ${config.plans[plan].name}.` });
+    // One of the founding offer's places (it-upsells): only for the plan that has the offer.
+    const founding = body.founding === "on" && !!config.plans[plan].foundingOffer;
+    await repo.accounts.allow(email.email, email.key, note, plan, founding);
+    return show(c, { text: `${email.email} ima zdaj paket ${config.plans[plan].name}${founding ? " z ustanovno ceno" : ""}.` });
   });
 
   app.post("/admin/allow-list/remove", async (c) => {
@@ -124,10 +127,12 @@ interface AdminProps {
   planPrices: Record<PlanKey, number>;
   allowances: Record<PlanKey, number>;
   freeLifetimeEur: number;
+  /** The founding offer (Osnovni's first year) and how many of its places are taken; null without an offer. */
+  founding?: { customers: number; firstYearEur: number; taken: number } | null;
   flash?: { text: string; bad?: boolean };
 }
 
-export function adminPage({ csrf, allowList, accounts, spendToday, cap, pools, holds, warnAt, plans, planPrices, allowances, freeLifetimeEur, flash }: AdminProps): string {
+export function adminPage({ csrf, allowList, accounts, spendToday, cap, pools, holds, warnAt, plans, planPrices, allowances, freeLifetimeEur, founding = null, flash }: AdminProps): string {
   // Accounts per plan and what they bring and cost this month (planned prices while billing is off).
   const byPlan = (p: PlanKey | null) => accounts.filter((a) => a.plan === p);
   const monthlyRevenue = PLAN_KEYS.reduce((sum, k) => sum + byPlan(k).length * planPrices[k], 0);
@@ -194,6 +199,12 @@ export function adminPage({ csrf, allowList, accounts, spendToday, cap, pools, h
           </select>
           <label htmlFor="al-note">Opomba (neobvezno)</label>
           <input id="al-note" type="text" name="note" maxLength={200} />
+          {founding && (
+            <label>
+              <input type="checkbox" name="founding" />
+              {` Ustanovna cena (${plans.standard}: prvo leto ${founding.firstYearEur} €; zasedenih ${founding.taken} od ${founding.customers} mest)`}
+            </label>
+          )}
           <button className="btn primary" type="submit">
             Dodaj
           </button>
@@ -205,7 +216,7 @@ export function adminPage({ csrf, allowList, accounts, spendToday, cap, pools, h
               <dt>E-pošta</dt>
               <dd>{a.email}</dd>
               <dt>Paket</dt>
-              <dd>{plans[a.plan]}</dd>
+              <dd>{`${plans[a.plan]}${a.founding_at ? ", ustanovna cena" : ""}`}</dd>
               {a.note && (
                 <>
                   <dt>Opomba</dt>

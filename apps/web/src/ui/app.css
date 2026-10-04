@@ -361,7 +361,7 @@ details.more>summary{padding:12px 0;font-weight:600;cursor:pointer}
   /* One app-bar row on a phone: back, name, undo, what's left, ⋯, publish. */
   .top{flex-wrap:nowrap;gap:4px;padding:6px 8px}
   .top .site-name{flex:1;font-size:16px}
-  .top>.pill,.top .back .label,.top .chip .label,.top>.sp{display:none}
+  .top>.pill,.top .back .label,.top .chip .label,.top .publish .label,.top>.sp{display:none}
   .top .actions{flex:none;gap:2px}
   .chip{padding:0 10px}
   /* A phone shows the phone layout; the size switch and the suggestions would only take preview space. */
@@ -474,3 +474,23 @@ details.more>summary{padding:12px 0;font-weight:600;cursor:pointer}
 .pl-tags label{font-size:14px}
 .pl-gtools,.pl-btools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}
 .pl-btools .help{margin:0}
+/* Upsells (it-upsells, it-plan-limits): the free preview's locked pages, the plan's name at a button that reached its
+   limit, and the reminder before an anonymous preview is deleted. A small outlined tag, sentence case, no fill. */
+.plan-tag{display:inline-flex;align-items:center;padding:1px 6px;border:1px solid var(--line-2);border-radius:var(--r-1);background:var(--surface);color:var(--ink-2);font:600 12px/1.4 var(--font-ui);white-space:nowrap}
+.btn .plan-tag{margin-left:2px}
+.locked-pages{margin:14px 0}
+.locked-pages>p{margin:0 0 6px}
+.locked{display:grid;gap:4px;margin:8px 0 10px;padding:0;list-style:none}
+.locked li{display:flex;align-items:center;gap:8px;min-height:32px;color:var(--ink-3);font-size:15px}
+.locked li .name{flex:1;min-width:0;overflow-wrap:anywhere}
+.locked .lock{flex:none;color:var(--ink-3)}
+.locked-pages .price-line{color:var(--ink);font-weight:600}
+.limit-note{margin:4px 0 12px}
+.reminder{display:grid;gap:6px;margin:14px 0}
+.reminder label{font-weight:600;font-size:14px}
+.reminder .row{display:flex;gap:8px;flex-wrap:wrap}
+.reminder input[type=email]{flex:1;min-width:0}
+.reminder .help{margin:0}
+.reminder>.btn{justify-self:start}
+/* "Objavi na pekarnakvas.si": one word gap, not the button's icon gap (the label starts with a no-break space). */
+.top .publish{gap:0}

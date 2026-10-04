@@ -6,6 +6,7 @@ import { createApp } from "./app.ts";
 import { retryFormNotifications } from "./form-email.ts";
 import { sendMonthlyReports } from "./stats.ts";
 import { sendDomainLiveEmails } from "./domain-email.ts";
+import { sendPreviewReminders } from "./reminder.tsx";
 import { authSettingsFromEnv } from "./auth.ts";
 import { missingEnv, missingEnvLine } from "./env-check.ts";
 
@@ -49,6 +50,13 @@ const domainMail = setInterval(
 );
 domainMail.unref();
 
+// The one reminder a visitor asked for before their anonymous preview is deleted (reminder.tsx).
+const reminders = setInterval(
+  () => void sendPreviewReminders({ repo: platform.repo, config, mailer, secret: auth.secret, ...(appUrl ? { appUrl } : {}) }).catch((e: unknown) => console.error("[web] preview reminders", e)),
+  config.tiers.anonymous.reminder.everyMinutes * 60_000,
+);
+reminders.unref();
+
 // In-process job handlers drain like the worker service's (apps/worker/src/main.ts) before the database closes.
 let stopping = false;
 for (const sig of ["SIGINT", "SIGTERM"] as const) {
@@ -58,6 +66,7 @@ for (const sig of ["SIGINT", "SIGTERM"] as const) {
     clearInterval(formRetry);
     clearInterval(reportTimer);
     clearInterval(domainMail);
+    clearInterval(reminders);
     void (worker ? worker.shutdown(drainMs(config)).catch((e: unknown) => console.error("[web] worker shutdown", e)) : Promise.resolve())
       .finally(() => void platform.close().finally(() => process.exit(0)));
   });
