@@ -26,7 +26,6 @@
 @font-face{font-family:"Bricolage Grotesque";src:url("/apps/web/src/ui/examples/_shared/85a3177729/fonts/bricolage-grotesque.woff2") format("woff2");font-weight:200 800;font-display:swap}
 @font-face{font-family:"Figtree";src:url("/apps/web/src/ui/examples/_shared/85a3177729/fonts/figtree.woff2") format("woff2");font-weight:300 900;font-display:swap}
 
-@media (min-width:48rem){.hero .wrap{grid-template-columns:1fr 1.1fr;gap:48px;align-items:start}}
 
 .proto{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin:20px 0 0;padding-top:12px;border-top:1px dashed var(--line-2);font:600 13px/1 var(--font-ui);color:var(--ink-3)}
 .proto .seg label{min-height:30px;font-size:13px;padding:0 10px}
@@ -47,38 +46,51 @@
 .pause:hover{color:var(--ink)}
 @media (pointer:coarse){.pause{min-height:44px}}
 
-/* The intro: the description is typed, "Ustvari" pressed, the steps tick, then the device with the site appears. */
+/*
+ * The intro, one card all the way: first the description being typed (its full text laid out from the
+ * start, so nothing moves while it types), then, after "Ustvari", it shrinks into the build steps under the
+ * device (where the caption goes) while the page builds itself in it; when the page is done the card gives way to the caption.
+ */
 .devbox{position:relative}
-.intro{position:absolute;inset:0;z-index:2;display:grid;align-content:center;gap:10px;padding:0 4%;transition:opacity .45s,visibility .45s}
-.devbox[data-step=site] .intro{opacity:0;visibility:hidden}
-.ask{padding:16px;background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r-3);box-shadow:var(--shadow-float);transition:transform .6s cubic-bezier(.65,0,.35,1)}
-
-.ask-text{min-height:4.65em;margin:0;font-size:15px;line-height:1.55;color:var(--ink)}
-.devbox[data-step=type] .ask-text::after{content:"";display:inline-block;width:2px;height:1.1em;margin-left:1px;vertical-align:-.2em;background:var(--ink);animation:ask-caret .8s step-end infinite}
+.intro{position:absolute;inset:0;z-index:3;pointer-events:none}
+.ask{position:absolute;left:var(--ax,0px);top:var(--ay,0px);width:var(--aw,100%);height:var(--ah,auto);overflow:hidden;background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r-3);box-shadow:var(--shadow-float);transition:left .7s cubic-bezier(.65,0,.35,1),top .7s cubic-bezier(.65,0,.35,1),width .7s cubic-bezier(.65,0,.35,1),height .7s cubic-bezier(.65,0,.35,1),opacity .5s,transform .5s cubic-bezier(.65,0,.35,1)}
+.ask:not(.placed){visibility:hidden}
+.devbox[data-step=site] .ask{opacity:0;transform:translateY(8px) scale(.96)}
+.ask-type{position:absolute;left:0;top:0;width:var(--tw,100%);padding:16px;transition:opacity .3s}
+.devbox:not([data-step=type]) .ask-type{opacity:0}
+.ask-text{margin:0;font-size:15px;line-height:1.55;color:var(--ink)}
+.ask-text .rest{color:transparent}
+.ask-text .caret{display:inline-block;width:2px;height:1.1em;margin:0 -2px 0 0;vertical-align:-.2em;background:var(--ink);animation:ask-caret .8s step-end infinite}
 @keyframes ask-caret{50%{opacity:0}}
 .ask-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px}
 .ask-chip{padding:6px 10px;border:1px solid var(--line-2);border-radius:var(--r-2);font-size:14px;font-weight:600}
 .ask-go{padding:9px 18px;border-radius:var(--r-2);background:var(--accent);color:var(--accent-ink);font-weight:600;font-size:15px;transition:transform .15s,background .15s}
-.devbox[data-step=build] .ask-go{transform:scale(.95);background:var(--accent-hover)}
-.ask-steps{display:grid;gap:6px;margin:0;padding:0;list-style:none;opacity:0;transition:opacity .4s}
-.devbox[data-step=build] .ask-steps{opacity:1}
-.ask-steps li{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--r-2);background:var(--surface);font-size:14px;color:var(--ink-3);transition:color .3s}
-.ask-steps li::before{content:"";flex:none;width:10px;height:10px;border:2px solid var(--line-2);border-radius:50%;transition:background .3s,border-color .3s}
+.ask-go.pressed{transform:scale(.94);background:var(--accent-hover)}
+.ask-steps{position:absolute;left:0;top:0;width:var(--sw,240px);display:grid;gap:0;margin:0;padding:8px 12px;list-style:none;opacity:0;transition:opacity .3s}
+.devbox[data-step=build] .ask-steps,.devbox[data-step=site] .ask-steps{opacity:1;transition-delay:.3s}
+.ask-steps li{display:flex;align-items:center;gap:10px;padding:4px 2px;font-size:13px;color:var(--ink-3);transition:color .3s}
+.ask-steps li::before{content:"";flex:none;width:10px;height:10px;border:2px solid var(--line-2);border-radius:50%;transition:background .3s,border-color .3s,box-shadow .3s}
+.ask-steps li.now{color:var(--ink)}
+.ask-steps li.now::before{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft);animation:ask-pulse 1s ease-in-out infinite alternate}
+@keyframes ask-pulse{to{box-shadow:0 0 0 1px var(--accent-soft)}}
 .ask-steps li.done{color:var(--ink)}
-.ask-steps li.done::before{background:var(--accent);border-color:var(--accent)}
-.devbox:not([data-step=site]) .dev{opacity:0;transform:translateY(14px) scale(.97)}
-.devbox .dev{transition:opacity .6s,transform .7s cubic-bezier(.2,.8,.2,1),width .9s cubic-bezier(.65,0,.35,1),height .9s cubic-bezier(.65,0,.35,1),border-radius .9s}
+.ask-steps li.done::before{background:var(--accent);border-color:var(--accent);box-shadow:none;animation:none}
+.devbox[data-step=type] .dev{opacity:0;transform:translateY(14px) scale(.97)}
+.devbox .dev{transition:opacity .6s .15s,transform .8s cubic-bezier(.2,.8,.2,1) .15s,width .9s cubic-bezier(.65,0,.35,1),height .9s cubic-bezier(.65,0,.35,1),border-radius .9s}
+.cap{transition:opacity .5s}
+.devbox:not([data-step=site]) + .cap{opacity:0}
+@media (prefers-reduced-motion:reduce){.ask,.ask-type,.ask-steps,.devbox .dev{transition:none}.ask-text .caret{animation:none}}
 .badge{position:fixed;left:12px;bottom:12px;z-index:5;padding:6px 10px;border-radius:999px;background:#151412;color:#fff;font:600 12px/1 var(--font-ui);letter-spacing:.02em}
 .badge a{color:#c9c4ba;margin-left:8px}
 
 .devwrap{min-width:0}
-.dev{position:relative;margin:0 auto;width:var(--w,300px);height:var(--h,585px);background:#fff;border:1px solid var(--line-2);border-radius:26px;box-shadow:var(--shadow-float);overflow:hidden;display:flex;flex-direction:column;transition:width .9s cubic-bezier(.65,0,.35,1),height .9s cubic-bezier(.65,0,.35,1),border-radius .9s}
+.dev{position:relative;margin:0 auto;width:var(--w,280px);height:var(--h,546px);background:#fff;border:1px solid var(--line-2);border-radius:26px;box-shadow:var(--shadow-float);overflow:hidden;display:flex;flex-direction:column;transition:width .9s cubic-bezier(.65,0,.35,1),height .9s cubic-bezier(.65,0,.35,1),border-radius .9s}
 .dev[data-mode=desk]{border-radius:10px}
 .dev .chrome{flex:none;display:flex;align-items:center;gap:6px;height:var(--ch,0px);padding:0 12px;overflow:hidden;background:var(--surface-2);transition:height .9s cubic-bezier(.65,0,.35,1)}
 .dev .chrome i{width:8px;height:8px;border-radius:50%;background:var(--line-2)}
 /* The machine under the site, seen through the seams while the parts move. */
 .dev .screen{position:relative;flex:1;min-height:0;overflow:hidden;background:#191714 radial-gradient(rgb(255 255 255/.07) 1px,transparent 1.3px) 0 0/14px 14px}
-.dev iframe{position:absolute;left:0;top:0;display:block;border:0;width:var(--iw,360px);height:calc((var(--h,585px) - var(--ch,0px)) / var(--s,.8333));transform:scale(var(--s,.8333));transform-origin:0 0}
+.dev iframe{position:absolute;left:0;top:0;display:block;border:0;width:var(--iw,360px);height:calc((var(--h,546px) - var(--ch,0px)) / var(--s,.7778));transform:scale(var(--s,.7778));transform-origin:0 0}
 .dev iframe.main{z-index:1}
 .dev iframe.stage{z-index:0}
 .cap{font-size:14px;color:var(--ink-3);margin:12px auto 0;max-width:56ch}
@@ -135,17 +147,19 @@
           <!-- From description to site: typed, built, then the site appears and moves on through the trades. -->
           <div class="intro" aria-hidden="true">
             <div class="ask">
-              <p class="ask-text"></p>
-              <div class="ask-bar"><span class="ask-chip">＋ 5 fotografij</span><span class="ask-go">Ustvari</span></div>
+              <div class="ask-type">
+                <p class="ask-text"><span class="typed"></span><span class="caret"></span><span class="rest"></span></p>
+                <div class="ask-bar"><span class="ask-chip">＋ 5 fotografij</span><span class="ask-go">Ustvari</span></div>
+              </div>
+              <ol class="ask-steps">
+                <li>Razumevanje opisa</li>
+                <li>Oblikovna smer in barve</li>
+                <li>Fotografije</li>
+                <li>Besedila in postavitev</li>
+              </ol>
             </div>
-            <ol class="ask-steps">
-              <li>Razumevanje opisa</li>
-              <li>Oblikovna smer in barve</li>
-              <li>Fotografije</li>
-              <li>Besedila in postavitev</li>
-            </ol>
           </div>
-          <div class="dev" data-mode="desk" id="demo" role="tabpanel">
+          <div class="dev" data-mode="phone" id="demo" role="tabpanel">
             <span class="chrome" aria-hidden="true"><i></i><i></i><i></i></span>
             <div class="screen">
               <iframe class="stage" title="" tabindex="-1" aria-hidden="true"></iframe>
@@ -158,8 +172,8 @@
           <span>Prototip, naprava:</span>
           <fieldset class="seg">
             <legend class="sr-only">Naprava</legend>
-            <input type="radio" id="m-desk" name="mode" value="desk" checked><label for="m-desk">Računalnik</label>
-            <input type="radio" id="m-phone" name="mode" value="phone"><label for="m-phone">Telefon</label>
+            <input type="radio" id="m-desk" name="mode" value="desk"><label for="m-desk">Računalnik</label>
+            <input type="radio" id="m-phone" name="mode" value="phone" checked><label for="m-phone">Telefon</label>
           </fieldset>
         </div>
       </div>
@@ -213,10 +227,10 @@ tabsEl.style.setProperty("--dwell", DWELL + "ms");
 const caption = (t) => `Takole bi lahko izgledala stran za ${t.forWhom}. ${t.name} je izmišljeno podjetje; vaša stran nastane iz vašega opisa in fotografij, zato bo drugačna.`;
 
 // ---------- device ----------
-let mode = "desk";
+let mode = "phone";
 const size = () => {
   const col = devwrap.clientWidth;
-  const v = mode === "phone" ? { w: Math.min(300, col), iw: 360, ch: 0 } : { w: col, iw: 1280, ch: 24 };
+  const v = mode === "phone" ? { w: Math.min(280, col - 24), iw: 360, ch: 0 } : { w: col, iw: 1280, ch: 24 };
   v.h = mode === "phone" ? Math.round(v.w * 1.95) : Math.round(v.w * 0.62) + 24;
   dev.dataset.mode = mode;
   for (const [k, val] of Object.entries({ "--w": v.w + "px", "--h": v.h + "px", "--ch": v.ch + "px", "--iw": v.iw + "px", "--s": String(v.w / v.iw) })) dev.style.setProperty(k, val);
@@ -757,34 +771,195 @@ pauseBtn.addEventListener("click", () => {
   else startClock();
 });
 
-// The intro: the first trade's description typed, "Ustvari", the build steps, then its site.
-const askText = devbox.querySelector(".ask-text");
-const askSteps = [...devbox.querySelectorAll(".ask-steps li")];
+// The intro: the first trade's description is typed; on "Ustvari" its page builds itself in the device
+// while the steps tick (structure, colours, photos, text). The page being built is the real page in the
+// frame, only held back by a stylesheet, so when the last step ends what is left is the page itself.
+const ask = devbox.querySelector(".ask");
+const askType = devbox.querySelector(".ask-type");
+const askList = devbox.querySelector(".ask-steps");
+const typedEl = devbox.querySelector(".ask-text .typed");
+const restEl = devbox.querySelector(".ask-text .rest");
+const goEl = devbox.querySelector(".ask-go");
+const askSteps = [...askList.children];
+
+/** The card: over the device while typing, then the steps under it. */
+const placeCard = () => {
+  const W = devbox.clientWidth, H = devbox.clientHeight;
+  const sw = Math.min(280, W);
+  ask.style.setProperty("--tw", W + "px");
+  ask.style.setProperty("--sw", sw + "px");
+  const r = devbox.dataset.step === "type"
+    ? { x: 0, y: Math.max(0, (H - askType.offsetHeight) / 2), w: W, h: askType.offsetHeight }
+    // Under the device, where the caption will be: the page being built stays in full view.
+    : { x: dev.offsetLeft + (dev.offsetWidth - sw) / 2, y: dev.offsetTop + dev.offsetHeight + 12, w: sw, h: askList.offsetHeight };
+  // The first placing (and a window resize) jumps straight there; only the change of step moves.
+  const jump = !ask.classList.contains("placed") || placeCard.resizing;
+  if (jump) ask.style.transition = "none";
+  for (const [k, v] of Object.entries({ "--ax": r.x, "--ay": r.y, "--aw": r.w, "--ah": r.h })) ask.style.setProperty(k, v + "px");
+  if (jump) {
+    void ask.offsetWidth;
+    ask.style.removeProperty("transition");
+    ask.classList.add("placed");
+  }
+};
+addEventListener("resize", () => { placeCard.resizing = true; placeCard(); placeCard.resizing = false; });
+// Placed (and its caption filled) before anything shows, so nothing moves when the intro starts.
+restEl.textContent = PROMPT;
+placeCard();
+cap.textContent = caption(trades[0]);
+for (const r of document.querySelectorAll("input[name=mode]")) r.addEventListener("change", () => setTimeout(placeCard, 950));
+
+/** Held back while building: words as bars, photos wiped out, sections without colour, blocks not yet placed. */
+const BUILD_CSS = `
+html.bld body *{transition:color .5s var(--d,0ms),opacity .45s var(--d,0ms),filter .8s var(--d,0ms),clip-path .8s cubic-bezier(.65,0,.35,1) var(--d,0ms),background-size .6s cubic-bezier(.65,0,.35,1) var(--d,0ms),transform .55s cubic-bezier(.2,.8,.2,1) var(--d,0ms) !important}
+html.bld.still body *{transition:none !important}
+html.bld [data-plate]{filter:grayscale(0) brightness(1)}
+html.bld.mono [data-plate]{filter:grayscale(1) brightness(1.03)}
+html.bld sb-w{background:linear-gradient(var(--sk),var(--sk)) 0 60%/100% .55em no-repeat;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+html.bld.hide-t sb-w{color:transparent !important}
+html.bld.text sb-w{background-size:0 .55em;background-position:100% 60%}
+html.bld.empty sb-w{opacity:0}
+html.bld.empty [data-bk]{opacity:0;transform:translateY(10px) scale(.97)}
+html.bld picture{background-color:rgb(128 128 128/.22)}
+html.bld img{clip-path:inset(0)}
+html.bld.nophoto img{clip-path:inset(0 0 100% 0)}`;
+
+const withAlpha = (rgb, a) => {
+  const m = rgb.match(/[\d.]+/g);
+  return m ? `rgb(${m[0]} ${m[1]} ${m[2]} / ${a})` : `rgb(128 128 128 / ${a})`;
+};
+
+/** Takes the page in the frame apart (instantly, unseen): every visible word wrapped, the stylesheet on. */
+function prepareBuild(doc) {
+  const win = doc.defaultView, de = doc.documentElement;
+  const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, {
+    acceptNode: (n) => (n.nodeValue.trim() && !n.parentElement.closest("script, style, noscript, template") ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT),
+  });
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  const words = nodes.map((n) => {
+    const w = doc.createElement("sb-w");
+    n.replaceWith(w);
+    w.append(n);
+    return w;
+  });
+  for (const w of words) w.style.setProperty("--sk", withAlpha(win.getComputedStyle(w).color, 0.22));
+  const plates = [...doc.querySelectorAll(".site-header, main > section, .site-footer, .action-bar")];
+  for (const p of plates) p.setAttribute("data-plate", "");
+  const boxes = [...doc.querySelectorAll("picture, .btn, button")];
+  for (const x of boxes) x.setAttribute("data-bk", "");
+  const imgs = [...doc.images];
+  const style = doc.createElement("style");
+  style.textContent = BUILD_CSS;
+  doc.head.append(style);
+  de.classList.add("bld", "still", "mono", "hide-t", "empty", "nophoto");
+  void doc.body.offsetHeight;
+  de.classList.remove("still");
+  const timers = [];
+  let done = false;
+  // The page as it was: the stylesheet off, the words unwrapped (the same text nodes back in place).
+  const finish = () => {
+    if (done) return;
+    done = true;
+    timers.forEach(clearTimeout);
+    style.remove();
+    de.classList.remove("bld", "still", "mono", "hide-t", "empty", "nophoto", "text");
+    for (const w of words) w.replaceWith(...w.childNodes);
+    for (const el of [...plates, ...boxes, ...imgs]) {
+      el.removeAttribute("data-plate");
+      el.removeAttribute("data-bk");
+      el.style.removeProperty("--d");
+      if (!el.getAttribute("style")) el.removeAttribute("style");
+    }
+  };
+  return { win, de, words, plates, boxes, imgs, timers, finish };
+}
+
+/** Builds the page in four steps, each one as a wave from the top. */
+async function runBuild(b, onStep) {
+  const { win, de, words, plates, boxes, imgs } = b;
+  const vh = win.innerHeight;
+  const top = (el) => el.getBoundingClientRect().top;
+  const seen = (el) => { const r = el.getBoundingClientRect(); return r.width > 0 && r.bottom > 0 && r.top < vh; };
+  const ordered = (els) => els.filter(seen).sort((a, c) => top(a) - top(c) || a.getBoundingClientRect().left - c.getBoundingClientRect().left);
+  const delay = (els, f) => els.forEach((el) => el.style.setProperty("--d", Math.round(f(el)) + "ms"));
+  const pause = (ms) => new Promise((r) => b.timers.push(setTimeout(r, ms)));
+  // 1. Structure: blocks and word bars appear, top to bottom.
+  onStep(0);
+  delay([...words, ...boxes], (el) => (seen(el) ? (Math.max(0, top(el)) / vh) * 1000 : 1000));
+  de.classList.remove("empty");
+  await pause(1550);
+  // 2. Colours: section by section.
+  onStep(1);
+  const vp = ordered(plates);
+  delay(plates, (el) => Math.max(0, vp.indexOf(el)) * 220);
+  de.classList.remove("mono");
+  await pause(vp.length * 220 + 800);
+  // 3. Photos: wiped in one after another.
+  onStep(2);
+  const vi = ordered(imgs);
+  delay(imgs, (el) => Math.max(0, vi.indexOf(el)) * 230);
+  de.classList.remove("nophoto");
+  await pause(vi.length * 230 + 850);
+  // 4. Text: each bar gives way to its words, top to bottom.
+  onStep(3);
+  const vw = ordered(words);
+  const per = Math.min(45, 1300 / Math.max(1, vw.length));
+  delay(words, (el) => Math.max(0, vw.indexOf(el)) * per);
+  de.classList.remove("hide-t");
+  de.classList.add("text");
+  await pause(vw.length * per + 700);
+  b.finish();
+}
+
 let introStarted = false;
 let introDone = false;
+let build = null;
 const introTimers = [];
+const showSteps = (i) => askSteps.forEach((li, j) => { li.classList.toggle("done", j < i); li.classList.toggle("now", j === i); });
 const finishIntro = () => {
   if (introDone) return;
   introDone = true;
   introTimers.forEach(clearTimeout);
-  askText.textContent = PROMPT;
+  build?.finish();
+  typedEl.textContent = PROMPT;
+  restEl.textContent = "";
+  showSteps(askSteps.length);
   devbox.dataset.step = "site";
   current = trades[0];
   mark(trades[0]);
 };
-const playIntro = () => {
+const playIntro = async () => {
   introStarted = true;
+  // The card's text is laid out in full from the start (the untyped rest is transparent), in its final font.
+  await within(document.fonts.ready, 1500);
+  typedEl.textContent = "";
+  restEl.textContent = PROMPT;
+  devbox.dataset.step = "type";
+  placeCard();
   if (reduced.matches) { finishIntro(); startClock(); return; }
   const at = (ms, run) => introTimers.push(setTimeout(run, ms));
-  devbox.dataset.step = "type";
-  askText.textContent = "";
   const step = 45;
-  for (let i = 3; i <= PROMPT.length + 2; i += 3) at((i / 3) * step, () => (askText.textContent = PROMPT.slice(0, i)));
+  for (let i = 3; i <= PROMPT.length + 2; i += 3) at((i / 3) * step, () => { typedEl.textContent = PROMPT.slice(0, i); restEl.textContent = PROMPT.slice(i); });
   const typed = Math.round(PROMPT.length / 3) * step;
-  at(typed + 600, () => (devbox.dataset.step = "build"));
-  askSteps.forEach((li, j) => at(typed + 600 + (j + 1) * 650, () => li.classList.add("done")));
-  at(typed + 600 + askSteps.length * 650 + 450, async () => {
+  // Meanwhile the page waits in the hidden device, taken apart.
+  mainReady.then(() => { if (!introDone && !build) build = prepareBuild(main.contentDocument); });
+  at(typed + 450, () => goEl.classList.add("pressed"));
+  at(typed + 700, async () => {
+    goEl.classList.remove("pressed");
     await within(mainReady, 3000);
+    if (introDone) return;
+    build ??= prepareBuild(main.contentDocument);
+    devbox.dataset.step = "build";
+    placeCard();
+    mark(trades[0]);
+    current = trades[0];
+    await sleep(450);
+    if (introDone) return;
+    await runBuild(build, showSteps);
+    if (introDone) return;
+    showSteps(askSteps.length);
+    await sleep(500);
     finishIntro();
     startClock();
   });
