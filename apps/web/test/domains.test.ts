@@ -150,6 +150,39 @@ describe("the domain step's API", () => {
     expect(((await missing.json()) as { message: string }).message).toMatch(/^Za registracijo manjka še: priimek, ulica in hišna številka/);
   });
 
+  it("never replaces a failed domain that was (or may have been) bought with another name", async () => {
+    const holder = { firstName: "Matej", lastName: "Rebernik", street: "Cesta 1", postalCode: "3000", city: "Celje", country: "SI", phone: "+38641123456", email: "info@rebernik.si" };
+    const cases = [
+      { host: "rebernik-kupljena.si", detail: { registrationId: "fake-rebernik-kupljena.si" }, message: "Domena rebernik-kupljena.si je že registrirana za to stran, zato je ne moremo zamenjati z drugo. Tapnite »Poskusi znova«." },
+      // A registration was asked for and its answer was lost: it may be ours.
+      { host: "rebernik-morda.si", detail: { registering: "2026-10-04T10:00:00.000Z" }, message: "Registracija domene rebernik-morda.si je morda že uspela, zato je ne moremo zamenjati z drugo. Tapnite »Poskusi znova«." },
+    ];
+    for (const c of cases) {
+      const s = await site();
+      await platform.repo.domains.start(s.id, c.host, "registered", { ownerHandle: "H", ...c.detail });
+      await platform.repo.domains.progress(c.host, { status: "failed", step: "certificate", failure: "certificate", nextInSeconds: null });
+      for (const body of [{ kind: "registered", hostname: "rebernik-druga.si", registrant: holder }, { kind: "connected", hostname: "rebernik.si" }]) {
+        const r = await api(admin, `/api/sites/${s.id}/domains`, { method: "POST", body });
+        expect(r.status).toBe(400);
+        expect(((await r.json()) as { message: string }).message).toBe(c.message);
+      }
+      expect((await platform.repo.domains.forSite(s.id)).map((d) => d.hostname)).toEqual([c.host]);
+    }
+    // A failed one that was never bought (taken meanwhile) is replaced.
+    const s = await site();
+    await platform.repo.domains.start(s.id, "rebernik-zasedena.si", "registered", { ownerHandle: "H", registering: null });
+    await platform.repo.domains.progress("rebernik-zasedena.si", { status: "failed", step: "register", failure: "unavailable", nextInSeconds: null });
+    const r = await api(admin, `/api/sites/${s.id}/domains`, { method: "POST", body: { kind: "registered", hostname: "rebernik-druga.si", registrant: holder } });
+    expect(r.status, await r.clone().text()).toBe(200);
+    expect((await platform.repo.domains.forSite(s.id)).map((d) => d.hostname)).toEqual(["rebernik-druga.si"]);
+    // Nor one the registrar reported as a failed registration (nothing was bought).
+    const f = await site();
+    await platform.repo.domains.start(f.id, "rebernik-zavrnjena.si", "registered", { ownerHandle: "H", registrationId: "fake-rebernik-zavrnjena.si", registering: null });
+    await platform.repo.domains.progress("rebernik-zavrnjena.si", { status: "failed", step: "register", failure: "registrar", nextInSeconds: null });
+    const again = await api(admin, `/api/sites/${f.id}/domains`, { method: "POST", body: { kind: "connected", hostname: "rebernik-nova.si" } });
+    expect(again.status, await again.clone().text()).toBe(200);
+  });
+
   it("'Že imam domeno' shows the one record, the DNS host and that email stays; never our own domains", async () => {
     const s = await site();
     const plan = await (await api(admin, `/api/sites/${s.id}/domains/inspect`, { method: "POST", body: { hostname: "Rebernik.si" } })).json();
