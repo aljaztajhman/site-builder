@@ -398,6 +398,42 @@ details.more>summary{padding:12px 0;font-weight:600;cursor:pointer}
 .guest-checklist li{display:grid;gap:2px;padding:8px 0}
 .guest-checklist li strong{font-size:13px;font-weight:600}
 .guest-checklist li span{font-size:14px}
+
+/* The domain step of publishing and each domain's progress (client/domain-step.ts). */
+.domain-step .pane-title{margin:4px 0 8px}
+.domain-choices{display:grid;gap:8px;margin:4px 0 12px}
+.domain-choice{position:relative}
+.domain-choice input{position:absolute;opacity:0;width:1px;height:1px}
+.domain-choice label{display:grid;gap:2px;min-height:56px;margin:0;padding:10px 14px 10px 44px;border:1px solid var(--line-2);border-radius:var(--r-2);background:var(--surface);font-weight:400;font-size:15px;cursor:pointer;position:relative}
+.domain-choice label::before{content:"";position:absolute;left:14px;top:50%;width:18px;height:18px;margin-top:-9px;border:1.5px solid var(--line-field);border-radius:50%;background:var(--surface)}
+.domain-choice input:checked+label{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.domain-choice input:checked+label::before{border:6px solid var(--accent)}
+.domain-choice input:focus-visible+label{outline:2px solid var(--ink);outline-offset:2px}
+.domain-choice strong{font-size:16px;overflow-wrap:anywhere}
+.domain-choice .muted{font-size:14px}
+.domain-holder{display:flex;gap:8px;align-items:flex-start;margin:0 0 12px;padding:10px 0;border-top:1px solid var(--line)}
+.domain-holder p{margin:0}
+.domain-holder-title{font-weight:600;font-size:14px}
+.domain-holder .muted{font-size:14px;overflow-wrap:anywhere}
+.domain-holder-form .seg{margin-top:8px}
+.domain-alt{margin-top:8px;justify-content:space-between}
+.row.nowrap{flex-wrap:nowrap}
+.row.nowrap input{flex:1;min-width:0}
+.domain-own .row.nowrap{margin-bottom:12px}
+.dns-record{width:100%;border-collapse:collapse;margin:4px 0 8px;font-size:14px;table-layout:fixed}
+.dns-record th,.dns-record td{padding:6px 8px 6px 0;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+.dns-record th{font-size:13px;font-weight:600;color:var(--ink-2)}
+.dns-record th:first-child,.dns-record td:first-child{width:5.5em;white-space:nowrap}
+.dns-record th:nth-child(2),.dns-record td:nth-child(2){width:5em}
+.dns-record code{font-size:14px;overflow-wrap:anywhere;user-select:all}
+.domain-progress p{margin:0 0 8px}
+.domain-stages{display:flex;flex-wrap:wrap;gap:4px 14px;margin:0 0 8px;padding:0;list-style:none;font-size:14px}
+.domain-stages li{display:flex;align-items:center;gap:6px;color:var(--ink-3)}
+.domain-stages li::before{content:"";width:10px;height:10px;border-radius:50%;border:1.5px solid currentColor}
+.domain-stages li[data-state=done]{color:var(--accent)}
+.domain-stages li[data-state=done]::before{background:currentColor}
+.domain-stages li[data-state=current]{color:var(--ink);font-weight:600}
+.domain-stages li[data-state=current]::before{border-color:var(--warn);background:var(--warn-soft)}
 .btn.blocked{opacity:.6}
 .flash{outline:3px solid var(--warn);outline-offset:4px;border-radius:var(--r-1);transition:outline-color .3s}
 /* Layout thumbnails of the selected section ("Postavitev"): real content, drawn at desktop width and scaled. */

@@ -11,7 +11,7 @@ export default tseslint.config(
     languageOptions: {
       sourceType: "script",
       globals: Object.fromEntries(
-        ["window", "document", "location", "localStorage", "fetch", "FormData", "URLSearchParams", "Element", "Node", "HTMLDialogElement", "HTMLElement", "HTMLAnchorElement", "matchMedia", "setTimeout", "clearTimeout", "requestAnimationFrame", "console", "navigator"].map((g) => [g, "readonly"]),
+        ["window", "document", "location", "localStorage", "fetch", "FormData", "URLSearchParams", "Element", "Node", "HTMLDialogElement", "HTMLElement", "HTMLAnchorElement", "HTMLScriptElement", "URL", "matchMedia", "setTimeout", "clearTimeout", "requestAnimationFrame", "console", "navigator"].map((g) => [g, "readonly"]),
       ),
     },
   },

@@ -25,7 +25,7 @@ import {
   type Operation,
   type Resolve,
 } from "@sb/engine";
-import { VersionConflictError, contentType, mailerFromEnv, newId, type Mailer, type Platform, type SiteStatus, type Tier } from "@sb/platform";
+import { VersionConflictError, contentType, domainProvidersFor, mailerFromEnv, newId, type DomainProviders, type Mailer, type Platform, type SiteStatus, type Tier } from "@sb/platform";
 import { renderPage, renderPath, sharedBundle, pageFile, notFoundPlacement, rebaseRelativeUrls } from "@sb/render";
 import { CollectionKind, blockerText, collectPlaceholders, sectionDef, type SiteSpec } from "@sb/spec";
 import type { AuthSettings } from "./auth.ts";
@@ -45,6 +45,7 @@ import { homePage } from "./home.tsx";
 import { clientBundle, warmClientBundles } from "./client-bundle.ts";
 import { uiAssets } from "./ui/assets.ts";
 import { registerFormRoutes } from "./forms.tsx";
+import { domainsInfo, registerDomainRoutes } from "./domains.ts";
 import { createHash } from "node:crypto";
 import { JS_FLAG } from "@sb/components";
 
@@ -76,6 +77,8 @@ export interface AppOptions {
   siteHostCacheMs?: number;
   /** SITE_PROXY_SECRET: the edge Worker's proof that its forwarded site hostname is real. */
   siteProxySecret?: string | null;
+  /** Registrar, edge and DNS for own domains; config `domains.providers` when not given (only fakes exist there). */
+  domainProviders?: DomainProviders;
 }
 
 export type ClassifyIntake = (description: string, ctx: { siteId: string; tier: Tier; accountId: string | null; aiJobId: string }) => Promise<{ businessType: string; confidence: number }>;
@@ -204,6 +207,9 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   // Cookieless counts for published sites: page views below, taps from stats.js here.
   const stats = statsCounter(repo, config, auth.secret);
   registerStatsRoutes(app, { repo, config, secret: auth.secret, counter: stats });
+  // The domain step of publishing; provisioning runs in the worker (queue "domain").
+  const domainDeps = { repo, queue, config, providers: opts.domainProviders ?? domainProvidersFor(config.domains.providers), platformDomain: opts.platformDomain ?? null, appHosts };
+  registerDomainRoutes(app, domainDeps);
 
   // ---------- Health ----------
   app.get("/health", async (c) => {
@@ -460,7 +466,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     if (!site || !pulse) return c.json({ error: "not found" }, 404);
     const after = Number(c.req.query("after") ?? 0);
     // Independent reads, side by side (this runs after every save, not only on polls).
-    const [checklist, access, events, chat, cost, versions, messages, spendToday] = await Promise.all([
+    const [checklist, access, events, chat, cost, versions, messages, spendToday, domains] = await Promise.all([
       current ? siteChecklist(repo, id, current.spec) : Promise.resolve([]),
       accessInfo(limits, viewer, c.get("deviceId"), site),
       repo.listEvents(id, after),
@@ -469,6 +475,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       repo.listVersions(id),
       repo.formMessageCount(id),
       admin ? repo.spendToday() : Promise.resolve(null),
+      domainsInfo(domainDeps, id, site.slug),
     ]);
     return c.json({
       // What this viewer may do here and has left; refusals from the action endpoints carry { code, message } too.
@@ -486,6 +493,8 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       checklist,
       blockers: checklist.map(blockerText),
       messages,
+      // The site's own domains and their progress, in Slovene (domains.ts).
+      domains,
       // The platform's own spend: the admin's business, null for owners.
       spendToday,
       cap: admin ? config.limits.dailyModelSpendCapEur : null,

@@ -412,6 +412,26 @@ export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
     // sb-tiers: which paid plan an allow-listed account has (Osnovni or Plus); everyone listed so far had the one plan.
     sql: `alter table allow_list add column plan text not null default 'standard' check (plan in ('standard', 'premium'))`,
   },
+  {
+    id: 18,
+    name: "site_domains.provisioning",
+    // The provisioning job's bookkeeping (it-domain-flow): failed attempts of the current step, when it
+    // runs next, the lease one run holds, and why it failed (a code; the owner's sentence comes from it).
+    // notify: the owner's "live" email ('pending' once active, then 'sent', 'failed' or 'none').
+    // sites.published_address: the address (canonical URLs, sitemap, feed) the live release was published
+    // with; a site whose address has changed since (a domain went live, PLATFORM_DOMAIN set) is republished.
+    // Null = no address, which is what every site published so far had.
+    sql: `
+      alter table site_domains add column attempts integer not null default 0;
+      alter table site_domains add column next_at timestamptz;
+      alter table site_domains add column lease_until timestamptz;
+      alter table site_domains add column failure text;
+      alter table site_domains add column notify text not null default 'none' check (notify in ('none', 'pending', 'sent', 'failed'));
+      alter table site_domains add column notify_attempts integer not null default 0;
+      create index site_domains_due on site_domains(next_at) where status = 'pending';
+      alter table sites add column published_address text;
+    `,
+  },
 ];
 
 type Query = (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>;

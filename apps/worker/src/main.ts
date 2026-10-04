@@ -5,7 +5,7 @@ import { drainMs, startWorker } from "./worker.ts";
 const config = loadConfig();
 const platform = await platformFromEnv();
 const worker = await startWorker(platform, config);
-console.log("[worker] listening for generate, edit, alt (photo descriptions) and prune (nightly version retention) jobs");
+console.log("[worker] listening for generate, edit, alt (photo descriptions), prune (nightly version retention), check-url and domain jobs");
 
 // SIGTERM (a Railway deploy): no new jobs; running ones get Railway's draining window (config worker),
 // then the ones still running are marked interrupted so their sites offer a retry.

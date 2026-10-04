@@ -2,7 +2,7 @@ import { PgBoss, fromPglite } from "pg-boss";
 import type { PGlite } from "@electric-sql/pglite";
 import type { Db } from "./db.ts";
 
-export const QUEUES = ["generate", "edit", "alt", "prune", "check-url"] as const;
+export const QUEUES = ["generate", "edit", "alt", "prune", "check-url", "domain"] as const;
 export type QueueName = (typeof QUEUES)[number];
 
 export interface GenerateJob {
@@ -32,12 +32,19 @@ export interface PruneJob {
 export interface CheckUrlJob {
   checkId: string;
 }
+/** Provisioning of a site's own domain (no model calls): one run of its steps (packages/engine provision.ts). */
+export interface DomainJob {
+  hostname: string;
+  /** Run now even if its next step isn't due yet (the owner tapped "Preveri zdaj"). */
+  force?: boolean;
+}
 export interface JobData {
   generate: GenerateJob;
   edit: EditJob;
   alt: AltJob;
   prune: PruneJob;
   "check-url": CheckUrlJob;
+  domain: DomainJob;
 }
 
 export interface Queue {

@@ -17,13 +17,15 @@ import {
   generateSite,
   launchCheckBrowser,
   loadRecordings,
+  provisionDomain,
   pruneAllSites,
   pruneSite,
+  republishStaleAddresses,
   type ModelTransport,
   type SpendLedger,
   type UrlCheckResult,
 } from "@sb/engine";
-import { INTERRUPTED_MESSAGE, type Platform, type Tier } from "@sb/platform";
+import { INTERRUPTED_MESSAGE, domainProvidersFor, type DomainProviders, type Platform, type Tier } from "@sb/platform";
 import { cleanupExpired, spendMonitor } from "./housekeeping.ts";
 
 /** Replies to the owner when a chat edit fails outright (the details go to the event log). */
@@ -171,9 +173,17 @@ export async function recoverInterrupted(platform: Pick<Platform, "repo">, grace
   return { sites, jobs };
 }
 
+/** Where sites live and who provides their domains (default: PLATFORM_DOMAIN and config `domains.providers`). */
+export interface WorkerOptions {
+  platformDomain?: string | null;
+  domainProviders?: DomainProviders;
+}
+
 /** Registers the job handlers. Used by the worker service and, with PGlite, in-process by the web service. */
-export async function startWorker(platform: Platform, config = loadConfig(), jobs: Partial<WorkerJobs> = {}): Promise<WorkerHandle> {
+export async function startWorker(platform: Platform, config = loadConfig(), jobs: Partial<WorkerJobs> = {}, opts: WorkerOptions = {}): Promise<WorkerHandle> {
   const { repo, storage, queue } = platform;
+  const platformDomain = opts.platformDomain !== undefined ? opts.platformDomain : process.env.PLATFORM_DOMAIN || null;
+  const domainDeps = { repo, storage, config, platformDomain, providers: opts.domainProviders ?? domainProvidersFor(config.domains.providers) };
   const run: WorkerJobs = { generateSite, applyChatEdit, describePhotos, checkUrl: checkUrlInBrowser, ...jobs };
   const timers: ReturnType<typeof setInterval>[] = [];
 
@@ -357,6 +367,27 @@ export async function startWorker(platform: Platform, config = loadConfig(), job
       }
     }
   });
+
+  // A site's own domain (no model calls): one run of its provisioning steps per job (engine provision.ts).
+  // A run that has to wait or retry sets the domain's next time; the sweep below queues it again then.
+  await queue.work("domain", async (job) => {
+    const r = await provisionDomain(domainDeps, job.hostname, { force: job.force ?? false });
+    if (r.status !== "skipped") console.log(`[domain] ${job.hostname}: ${r.status} at ${r.step}${r.failure ? ` (${r.failure})` : ""}`);
+  });
+  const sweepDomains = async () => {
+    for (const hostname of await repo.domains.due()) await queue.send("domain", { hostname });
+  };
+  timers.push(setInterval(() => void sweepDomains().catch((e: unknown) => console.error("[worker] domain sweep", e)), config.domains.sweepSeconds * 1000));
+  // Sites whose address changed since their release (PLATFORM_DOMAIN set, a domain went live or away) are
+  // republished, so canonical URLs, the sitemap and the feed name where they are served: at start and hourly.
+  const addresses = async () => {
+    const r = await republishStaleAddresses(domainDeps);
+    if (r.republished.length || r.busy.length || r.blocked.length) console.log(`[worker] address check: ${r.republished.length} republished, ${r.busy.length} busy, ${r.blocked.length} blocked by the checklist`);
+  };
+  // Not awaited: republishing many sites must not hold up the worker's start.
+  void addresses().catch((e: unknown) => console.error("[worker] address check", e));
+  timers.push(setInterval(() => void addresses().catch((e: unknown) => console.error("[worker] address check", e)), 60 * 60_000));
+  for (const t of timers) t.unref();
 
   let stopping: Promise<{ interrupted: RunningJob[] }> | null = null;
   return {

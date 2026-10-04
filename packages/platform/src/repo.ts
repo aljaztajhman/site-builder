@@ -21,6 +21,8 @@ export interface SiteRow {
   account_id: string | null;
   /** The device that made an unclaimed anonymous preview (deleted after tiers.anonymous.keepDays); null once claimed. */
   device_id: string | null;
+  /** The address the live release carries (canonical URLs, sitemap); null = none (migration 18). */
+  published_address?: string | null;
   /** Set while a publish writes its release (claimPublish); null otherwise. */
   publishing_since: string | null;
   /** The highest img_NN number ever issued on this site (claimImageNumbers). */
@@ -557,12 +559,21 @@ export class Repo {
     await this.db.query("update sites set publishing_since = null where id = $1", [siteId]);
   }
 
-  async markPublished(siteId: string, version: number, release?: string): Promise<void> {
+  /** `address`: the site address the release carries (siteAddress), null for none. */
+  async markPublished(siteId: string, version: number, release?: string, address: string | null = null): Promise<void> {
     await this.db.query(
       `with publish as (insert into site_publishes (site_id, version, release) values ($1, $2, $3))
-       update sites set published_version = $2, published_at = now(), updated_at = now() where id = $1`,
-      [siteId, version, release ?? null],
+       update sites set published_version = $2, published_at = now(), published_address = $4, updated_at = now() where id = $1`,
+      [siteId, version, release ?? null, address],
     );
+  }
+
+  /** Published sites, for the address check (republish when a site's address changed). */
+  async publishedSites(): Promise<{ id: string; slug: string; published_version: number; published_address: string | null }[]> {
+    const { rows } = await this.db.query<{ id: string; slug: string; published_version: number; published_address: string | null }>(
+      "select id, slug, published_version, published_address from sites where published_version is not null order by id",
+    );
+    return rows;
   }
 
   async addAsset(a: Omit<AssetRow, "id"> & { id?: string }): Promise<AssetRow> {

@@ -88,6 +88,42 @@ export function planMargins(p: PaidPlanConfig, c: PlanCostsConfig): { monthly: n
   };
 }
 
+/**
+ * Own domains (docs/plans/custom-domains.md). Prices are what the owner is shown per year, VAT included;
+ * `maxCostEur` is the most we pay the registrar for a name, so a premium or repriced name is never offered.
+ * Only the in-memory fakes are wired: the Openprovider and Cloudflare adapters exist but no config selects them.
+ */
+const Domains = z.object({
+  /** Shows the domain step when publishing. Off on a deployed app until real providers are wired. */
+  enabled: z.boolean(),
+  providers: z.object({
+    registrar: z.enum(["fake"]),
+    edge: z.enum(["fake"]),
+    /** "system" asks real DNS (free, no account); "fake" answers as if the owner's records were in place (dev). */
+    dns: z.enum(["fake", "system"]),
+  }),
+  /** In the order to offer them. */
+  tlds: z
+    .array(z.strictObject({ tld: z.string().regex(/^[a-z]{2,24}$/), priceEurPerYear: z.number().positive(), maxCostEur: z.number().positive() }))
+    .min(1),
+  suggestions: z.object({
+    /** Names asked about at the registrar per request. */
+    check: z.number().int().min(1).max(20),
+    /** Available names shown (the first is preselected). */
+    show: z.number().int().min(1).max(5),
+  }),
+  registrationYears: z.number().int().min(1).max(10),
+  /** A step that fails is retried after baseSeconds · 2^n (at most maxSeconds), maxAttempts times in all. */
+  retry: z.object({ baseSeconds: z.number().int().min(1), maxSeconds: z.number().int().min(1), maxAttempts: z.number().int().min(1).max(30) }),
+  /** How long a step may keep waiting (registry, the owner's DNS record, the certificate) before it is a failure. */
+  waitHours: z.object({ registration: z.number().positive(), dns: z.number().positive(), certificate: z.number().positive() }),
+  /** How often the worker looks for due provisioning steps, and how long one run holds a domain. */
+  sweepSeconds: z.number().int().min(5),
+  leaseSeconds: z.number().int().min(30),
+  /** The owner's "your domain is live" email, sent by the web process. */
+  notify: z.object({ everyMinutes: z.number().int().min(1), maxAttempts: z.number().int().min(1).max(10) }),
+});
+
 export const AppConfigSchema = z.object({
   models: z.object({
     classify: ModelStage,
@@ -156,6 +192,8 @@ export const AppConfigSchema = z.object({
      */
     indexSiteHosts: z.boolean(),
   }),
+  /** Own domains for published sites: the domain step, provisioning and its providers (see config $comment). */
+  domains: Domains,
   formEmail: z.object({
     waitMs: z.number().int().positive(),
     retryEveryMinutes: z.number().int().positive(),
@@ -277,6 +315,9 @@ export const AppConfigSchema = z.object({
     .refine((p) => p.premium.monthlyEur > p.standard.monthlyEur && planMargins(p.premium, p.costs).yearly > planMargins(p.standard, p.costs).yearly, {
       message: "Plus must cost more than Osnovni and earn more per year",
     }),
+}).refine((c) => c.domains.tlds.every((t) => t.maxCostEur <= c.plans.costs.domainEurPerYear), {
+  // The yearly plans include the domain: the margin check counts plans.costs.domainEurPerYear for it.
+  message: "a domain's maxCostEur may not exceed plans.costs.domainEurPerYear (the margin check counts that)",
 });
 export type AppConfig = z.infer<typeof AppConfigSchema>;
 export type ModelStageName = keyof AppConfig["models"];
