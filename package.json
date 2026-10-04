@@ -24,7 +24,9 @@
     "seed": "tsx --env-file-if-exists=.env tools/eval/src/seed.ts",
     "templates:compare": "tsx tools/eval/src/templates-compare.ts",
     "study": "tsx tools/eval/src/study.ts",
-    "zero-to-live": "tsx tools/eval/src/zero-to-live.ts"
+    "zero-to-live": "tsx tools/eval/src/zero-to-live.ts",
+    "eval:junk": "tsx --env-file-if-exists=.env tools/eval/src/junk-cli.ts",
+    "smoke:launch": "tsx --env-file-if-exists=.env tools/eval/src/smoke-launch.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
