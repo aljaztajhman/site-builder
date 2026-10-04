@@ -3,9 +3,10 @@ import { ImageRef, Locale, PageRef, Tone, text } from "./common.ts";
 import { Business } from "./business.ts";
 import { Design } from "./design.ts";
 import { Section } from "./sections/index.ts";
+import { SectionId } from "./sections/define.ts";
 import { Collections } from "./collections.ts";
 
-export const SPEC_VERSION = 13 as const;
+export const SPEC_VERSION = 14 as const;
 
 export const PageKind = z.enum(["home", "standard", "privacy", "accessibility", "not-found"]);
 export type PageKind = z.infer<typeof PageKind>;
@@ -72,6 +73,18 @@ export const Chrome = z.strictObject({
 });
 export type Chrome = z.infer<typeof Chrome>;
 
+/**
+ * Spec v14: a text (or price, or other plain value) the owner typed in the editor (it-keep-owner-edits): the
+ * section's id and the value's pointer inside it. "Ustvari znova" keeps these in the regenerated site where the same
+ * section and field exist (engine owner-text.ts); the server sets them on direct edits (owner-edits.ts).
+ */
+export const OwnerEdit = z.strictObject({
+  section: SectionId,
+  path: z.string().regex(/^\/props(\/[^/]+)+$/).max(200),
+});
+export type OwnerEdit = z.infer<typeof OwnerEdit>;
+export const MAX_OWNER_EDITS = 500;
+
 /** Most pages a site holds, every kind counted (see `pages` below). */
 export const MAX_PAGES = 24;
 
@@ -95,5 +108,7 @@ export const SiteSpec = z.strictObject({
    * Only string leaves can be translated.
    */
   translations: z.partialRecord(Locale, z.record(z.string(), z.string())).optional(),
+  /** Spec v14: what the owner typed in the editor, kept by "Ustvari znova" (OwnerEdit above). */
+  ownerEdits: z.array(OwnerEdit).max(MAX_OWNER_EDITS).optional().describe("Set by the editor; leave out."),
 });
 export type SiteSpec = z.infer<typeof SiteSpec>;

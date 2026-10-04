@@ -487,6 +487,10 @@ describe("direct editor API (no model calls)", () => {
     expect(await patched.json()).toMatchObject({ ok: true, version: 2 });
     // Only what changed is stored as the owner's text: the rest of the section stays fact-checked.
     expect(await platform.repo.manualPatches(site.id)).toEqual([[{ op: "replace", path: "/pages/0/sections/0/props", value: { headline: "Kruh z drožmi iz Kamnika" } }]]);
+    // And marked as the owner's, so "Ustvari znova" keeps it (it-keep-owner-edits); the edit can't set the marks itself.
+    expect((await platform.repo.getSpec(site.id))!.spec.ownerEdits).toEqual([{ section: golden.pages[0]!.sections[0]!.id, path: "/props/headline" }]);
+    const forged = await app.request(`/api/sites/${site.id}/patch`, { method: "POST", headers: json, body: JSON.stringify({ baseVersion: 2, ops: [{ op: "replace", path: "/ownerEdits", value: [] }] }) });
+    expect(forged.status).toBe(422);
 
     const stale = await app.request(`/api/sites/${site.id}/patch`, { method: "POST", headers: json, body: JSON.stringify({ baseVersion: 1, ops: [{ op: "remove", path: "/pages/0/sections/1" }] }) });
     expect(stale.status).toBe(409);

@@ -1757,6 +1757,45 @@ function liveSkeleton(): HTMLElement {
   return page;
 }
 
+/** The pipeline's event with the owner's texts a regeneration kept (engine OWNER_TEXT_NOTE). */
+const OWNER_TEXT_NOTE = "Kept the texts the owner typed";
+/** The run whose kept texts the owner has closed the note for. */
+let keptSeen: string | null = null;
+
+/** "1 besedilo", "2 besedili", "3 besedila", "5 besedil" (Slovene plural rules). */
+function texts(n: number): string {
+  const form = new Intl.PluralRules("sl-SI").select(n);
+  return `${n} ${({ one: "besedilo", two: "besedili", few: "besedila" } as Record<string, string>)[form] ?? "besedil"}`;
+}
+
+/** "ga", "ju", "jih": the pronoun after a count of texts. */
+const them = (n: number): string => ({ one: "ga", two: "ju" } as Record<string, string>)[new Intl.PluralRules("sl-SI").select(n)] ?? "jih";
+
+/**
+ * After "Ustvari znova" (it-keep-owner-edits): which texts the owner typed came along into the new site, and how many
+ * had no place in it (the previous version keeps them, in the history). Until the owner edits or closes it.
+ */
+function keptBlock(): HTMLElement | null {
+  if (!state.spec || state.site.status === "generating") return null;
+  const run = currentRun();
+  const note = run.find((e) => e.message === OWNER_TEXT_NOTE);
+  const latest = state.versions.reduce<State["versions"][number] | null>((a, v) => (!a || v.version > a.version ? v : a), null);
+  if (!note || keptSeen === note.id || (latest && latest.source !== "generate" && latest.source !== "critique")) return null;
+  const data = (note.data ?? {}) as { kept?: string[]; dropped?: string[] };
+  const kept = data.kept ?? [];
+  const dropped = data.dropped ?? [];
+  const spec = state.spec;
+  return h("div", { class: "pane tight", id: "kept-texts" },
+    h("div", { class: "note" },
+      h("div", { class: "row" },
+        h("p", { class: "sp" }, h("strong", {}, kept.length ? `Ohranili smo ${texts(kept.length)}, ki ste ${them(kept.length)} vpisali sami.` : "Vaših besedil nova stran nima kam postaviti.")),
+        h("button", { class: "btn quiet sm", type: "button", "aria-label": "Zapri obvestilo", onClick: () => { keptSeen = note.id; render(); } }, "✕"),
+      ),
+      kept.length ? h("ul", {}, ...kept.slice(0, 6).map((p) => h("li", {}, describePath(spec, p)))) : null,
+      dropped.length ? h("p", { class: "help" }, `${texts(dropped.length)} nova stran nima na istem mestu (${dropped.slice(0, 3).join("; ")}${dropped.length > 3 ? " …" : ""}). Prejšnja različica je v zgodovini sprememb.`) : null,
+    ));
+}
+
 function statusBlock(): HTMLElement | null {
   const s = state.site;
   if (s.status === "generating") {
@@ -2182,7 +2221,7 @@ function moreMenu(): HTMLElement {
         onClick: () => {
           // This month's generated pictures run short for this site: said before, not after (it-plan-limits).
           const pictures = state.access?.pictures?.short && state.access.pictures.notice ? `\n\n${state.access.pictures.notice}` : "";
-          if (confirm(`Ustvarim celotno stran znova? Podatki o podjetju ostanejo, besedila in postavitev so nova. Trenutna vsebina ostane v zgodovini, zato jo lahko obnovite.${pictures}`)) void post("/generate", { scope: "full" }, "Ustvarjanje se je začelo.");
+          if (confirm(`Ustvarim celotno stran znova? Podatki o podjetju in besedila, ki ste jih vpisali sami, ostanejo, kjer ima nova stran zanje mesto; ostala besedila in postavitev so nova. Trenutna vsebina ostane v zgodovini, zato jo lahko obnovite.${pictures}`)) void post("/generate", { scope: "full" }, "Ustvarjanje se je začelo.");
         },
       }, "Ustvari celotno stran znova", picturesTag(state.access?.pictures?.short ? (state.access.pictures.upgrade ?? null) : null)),
       !state.access || state.access.viewer === "admin" ? h("button", { type: "button", onClick: go("diag") }, "Poraba in dnevnik") : null,
@@ -2265,6 +2304,7 @@ function render(): void {
     ...[
       state.spec ? sheetHandle() : null,
       statusBlock(),
+      keptBlock(),
       askPane(),
       checklistBlock(),
       state.spec && can("publish") ? domainStep(domainDeps) : null,

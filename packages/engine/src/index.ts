@@ -15,6 +15,7 @@ export * from "./pipeline.ts";
 export * from "./published.ts";
 export * from "./retention.ts";
 export * from "./owner-facts.ts";
+export * from "./owner-text.ts";
 export * from "./check/index.ts";
 export * from "./editor.ts";
 export type { Operation } from "fast-json-patch";

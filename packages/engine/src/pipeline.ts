@@ -2,7 +2,7 @@ import type { AppConfig } from "@sb/config";
 import { VersionConflictError, normaliseHostname, type Repo, type Storage } from "@sb/platform";
 import { contentType } from "@sb/platform";
 import { mediaFiles, siteFiles, exportZip, shareImageOf, variantFile, variantWidths } from "@sb/render";
-import { blockerText, direction as directionById, publishChecklist, templateFor, validateSite, type ImageAsset, type PublishBlocker, type SiteSpec } from "@sb/spec";
+import { blockerText, direction as directionById, keepUnchangedOwnerEdits, publishChecklist, templateFor, validateSite, type ImageAsset, type PublishBlocker, type SiteSpec } from "@sb/spec";
 import type { Operation } from "fast-json-patch";
 import { ModelOutputError, SpendCapError, type ModelClient } from "./llm/client.ts";
 import { classify, makeBrief, chooseDesign, altTexts, generateContent, critique, applyPatches, editSpec, drawsInsteadOfPhotos } from "./stages.ts";
@@ -14,6 +14,7 @@ import { typedText } from "./editor.ts";
 import { checkFacts } from "./facts.ts";
 import { newReleaseId, writeRelease } from "./published.ts";
 import { keepOwnerFacts } from "./owner-facts.ts";
+import { keepOwnerText } from "./owner-text.ts";
 import { claimImageIds } from "./image-ids.ts";
 import { STORAGE_CONCURRENCY, mapLimit } from "./parallel.ts";
 
@@ -37,6 +38,9 @@ export interface PipelineDeps {
   /** Called once the brief (with the business name) is saved, beside the rest of the generation; not awaited. */
   onBrief?: () => void;
 }
+
+/** The event a regeneration logs with the owner's texts it kept and those it couldn't (the editor words it). */
+export const OWNER_TEXT_NOTE = "Kept the texts the owner typed";
 
 /** The classifier couldn't place the description (below tiers.junk.minClassifierConfidence): stopped before the brief. */
 export class JunkIntakeError extends Error {
@@ -128,6 +132,12 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
   // Steps 1–2 (brief, design) and step 3 (images) don't depend on each other: they run side by side,
   // so photo processing and alt text (up to ~20 s with many photos) are off the path to the first preview.
   const slots = generatedImageCount(config, photos.length, !!deps.images, intake.scope, deps.pictures);
+  // Past the plan's pictures for this month (it-reuse-pictures-regenerate), "Ustvari znova" reuses the generated
+  // pictures of the version it replaces for the places the limit left empty, instead of none. Their files are
+  // stored under their own ids, which are never issued twice, so the replaced version keeps showing them too.
+  const reuse = slots.limited
+    ? ((await repo.getSpec(siteId))?.spec.assets.images ?? []).filter((i) => i.origin === "generated").slice(0, Math.max(0, slots.limited.wanted - slots.wanted))
+    : [];
   // The job has failed (either branch, or the spend cap stopped a picture): no further paid call starts.
   // Each branch checks it between its calls; pictures check it before and after reserving their price.
   const stop = new AbortController();
@@ -173,7 +183,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
       const swatches: Swatch[] = [];
       if (logo) swatches.push(...(await extractSwatches(originals.get(logo.id)!, "logo", 3)));
       for (const p of photos.slice(0, 3)) swatches.push(...(await extractSwatches(originals.get(p.id)!, "photo", 2)));
-      const { design } = await stageTime("design", () => chooseDesign(client, { brief, swatches, photoCount: photos.length, generatedCount: ideas.length }));
+      const { design } = await stageTime("design", () => chooseDesign(client, { brief, swatches, photoCount: photos.length, generatedCount: ideas.length + reuse.length }));
       // The editor's live preview recolours its skeleton with these while the content is written.
       await log("design", "Direction chosen", { direction: design.direction, colors: design.colors });
       stop.signal.throwIfAborted();
@@ -226,6 +236,11 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
   if (planned.status === "rejected") throw planned.reason;
   if (imaged.status === "rejected") throw imaged.reason;
   const { brief, design, generated } = planned.value;
+  // Not for a template that draws the trade instead of showing pictures (template S).
+  if (reuse.length && !drawsInsteadOfPhotos(directionById(design.direction))) {
+    generated.push(...reuse.map((i) => structuredClone(i)));
+    await log("imageGen", `Reused ${reuse.length} generated picture(s) of the previous version (this month's pictures are used up)`, { ids: reuse.map((i) => i.id) });
+  }
   // Generated pictures come after the client's photos; landscape, so they can carry a hero.
   images.push(...generated);
   heroIds.push(...generated.map((g) => g.id));
@@ -259,6 +274,10 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
       spec = v.ok ? v.spec : merged.spec;
       await log("content", "Kept the business facts of the previous version", merged.kept);
     } else if (merged.kept.length) await log("content", "Previous business facts don't fit the new site; used the regenerated ones", v.issues.slice(0, 5));
+    // And the texts the owner typed in the editor, where the regenerated site has the same place for them.
+    const text = keepOwnerText(replaced.spec, spec);
+    spec = text.spec;
+    if (text.kept.length || text.dropped.length) await log("content", OWNER_TEXT_NOTE, { kept: text.kept, dropped: text.dropped });
   }
   let version = await repo.saveSpec(siteId, spec, "generate");
   const firstVersionMs = Date.now() - started;
@@ -312,6 +331,10 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
       await log("critique", "Critique patches rejected by validation", r.issues);
       break;
     }
+    // The owner's kept texts stay marked only where the critique left them as they were.
+    const owned = keepUnchangedOwnerEdits(spec, r.spec);
+    if (owned) r.spec.ownerEdits = owned;
+    else delete r.spec.ownerEdits;
     try {
       version = await repo.saveSpec(siteId, r.spec, "critique", c.issues.join("; ").slice(0, 500), undefined, version);
     } catch (e) {
@@ -538,7 +561,12 @@ export async function applyChatEdit(
       issues.push("plan limit: the edit was not saved");
     } else if (r.changed && r.issues.length === 0) {
       try {
-        version = await repo.saveSpec(siteId, r.spec, "edit", msg.content.slice(0, 500), undefined, current.version);
+        // The owner's own texts stay marked only where the assistant left them as they were (it-keep-owner-edits).
+        const owned = keepUnchangedOwnerEdits(current.spec, r.spec);
+        const edited: SiteSpec = { ...r.spec };
+        if (owned) edited.ownerEdits = owned;
+        else delete edited.ownerEdits;
+        version = await repo.saveSpec(siteId, edited, "edit", msg.content.slice(0, 500), undefined, current.version);
       } catch (e) {
         if (!(e instanceof VersionConflictError)) throw e;
         // Never overwrite edits made while the model was working.

@@ -138,11 +138,21 @@ export function intakeClassifier(platform: Platform, config: AppConfig) {
 /**
  * MODEL_REPLAY_DIR replays recorded responses instead of calling the API (demo and offline dev).
  * Every job gets a fresh transport, so a generate job replays the generation calls and an edit job the edit calls.
+ * `editIndex`: the site's n-th chat message gets the n-th recorded edit (from the first again after the last), so
+ * a demo answers each message with its own edit instead of the first one every time (it-worker-replay).
  */
-function defaultTransport(job: "generate" | "edit"): ModelTransport {
+export function defaultTransport(job: "generate" | "edit", editIndex = 0): ModelTransport {
   const dir = process.env.MODEL_REPLAY_DIR;
   if (!dir) return new AnthropicTransport();
-  return new ReplayTransport(loadRecordings(dir).filter((r) => (r.stage === "edit") === (job === "edit")));
+  const recordings = loadRecordings(dir).filter((r) => (r.stage === "edit") === (job === "edit"));
+  if (job !== "edit" || !recordings.length) return new ReplayTransport(recordings);
+  const n = editIndex % recordings.length;
+  return new ReplayTransport([...recordings.slice(n), ...recordings.slice(0, n)]);
+}
+
+/** How many chat messages the owner sent on a site before this one: which recorded edit a replayed edit job gets. */
+async function earlierMessages(repo: Platform["repo"], siteId: string, messageId: number | string): Promise<number> {
+  return (await repo.listChat(siteId)).filter((c) => c.role === "user" && Number(c.id) < Number(messageId)).length;
 }
 
 /** A job this process is running now. */
@@ -352,7 +362,7 @@ export async function startWorker(platform: Platform, config = loadConfig(), job
   // Edits and publishes stay sequential: two at once on the same site would conflict on the spec version.
   await queue.work("edit", (job, jobId) => tracked({ queue: "edit", jobId, siteId: job.siteId, aiJobId: job.aiJobId ?? null }, async () => {
     const ctx = await contextFor(job.siteId, jobId, job.aiJobId);
-    const client = modelClientFor(platform, config, ctx, defaultTransport("edit"));
+    const client = modelClientFor(platform, config, ctx, defaultTransport("edit", process.env.MODEL_REPLAY_DIR ? await earlierMessages(repo, job.siteId, job.messageId) : 0));
     try {
       await run.applyChatEdit({ repo, client }, job.siteId, job.messageId, await chatEditGuard(platform, config, ctx));
       await finish(ctx.aiJobId, "done");
