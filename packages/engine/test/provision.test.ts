@@ -153,6 +153,7 @@ describe("a domain we register for the owner", () => {
     const st = domainState(r, config);
     expect(st.label).toBe("Ni uspelo");
     expect(st.message).toMatch(/^Povezave domene seliskar-zone\.si nismo mogli dokončati/);
+    expect(st.chooseAnother).toBe(false);
     // Failed: the sweep never picks it up, a run skips it, "Poskusi znova" starts that step again.
     expect(await repo.domains.due()).not.toContain(row.hostname);
     expect((await provisionDomain(deps(p), row.hostname, { force: true })).status).toBe("skipped");
@@ -169,7 +170,9 @@ describe("a domain we register for the owner", () => {
     const r = await provisionDomain(deps(taken), row.hostname);
     expect(r).toMatchObject({ status: "failed", step: "register", failure: "unavailable" });
     expect(taken.registrar.calls.map((c) => c.method)).not.toContain("register");
-    expect(domainState((await repo.domains.get(row.hostname))!, config).message).toBe("Domena seliskar-prosta.si je medtem postala zasedena, zato je nismo registrirali. Izberite drugo ime.");
+    const st = domainState((await repo.domains.get(row.hostname))!, config);
+    expect(st.message).toBe("Domena seliskar-prosta.si je medtem postala zasedena, zato je nismo registrirali. Izberite drugo ime.");
+    expect(st).toMatchObject({ failure: "unavailable", chooseAnother: true });
   });
 
   it("never pays more than the TLD's maxCostEur (the price is checked again right before registering)", async () => {
@@ -197,7 +200,10 @@ describe("a domain we register for the owner", () => {
     expect(p.registrar.calls.filter((c) => c.method === "register")).toHaveLength(1);
     now += 48 * 3600_000;
     expect(await provisionDomain(d, row.hostname, { force: true })).toMatchObject({ status: "failed", failure: "register_timeout" });
-    expect(domainState((await repo.domains.get(row.hostname))!, config).message).toMatch(/ni bila končana v pričakovanem času/);
+    const st = domainState((await repo.domains.get(row.hostname))!, config);
+    expect(st.message).toMatch(/ni bila končana v pričakovanem času/);
+    // The name may be bought already: no "choose another", only "try again".
+    expect(st.chooseAnother).toBe(false);
   });
 
   it("resumes a run that was cut off: a lease left by a dead process expires, the step runs again", async () => {
@@ -231,7 +237,7 @@ describe("a domain we register for the owner", () => {
 describe("a domain the owner already has", () => {
   it("adds the custom hostname, waits for the owner's CNAME, then the certificate, then goes live", async () => {
     const s = await site();
-    let now = Date.now();
+    const now = Date.now();
     const dns = fakeDns({ ns: { "seliskar.si": ["ns1.neoserv.si", "ns2.neoserv.si"] }, mx: { "seliskar.si": ["mx.seliskar.si"] } });
     const p = providers({ dns, edge: { cnameTarget: "povezava.stranko.example", script: { hostname: { pending: 1 } } } });
     const plan = await planOwnDomain({ providers: p }, "https://Seliskar.si/");

@@ -23,7 +23,9 @@ export interface DomainState {
   message: string | null;
   connect: { record: { type: string; name: string; value: string }; dnsHost: string | null; hasMail: boolean; seen: string[] } | null;
   url: string | null;
-  failure?: string | null;
+  failure: string | null;
+  /** Offer "Izberi drugo domeno" (nothing was bought yet). */
+  chooseAnother: boolean;
 }
 
 export interface DomainsInfo {
@@ -299,7 +301,7 @@ export function domainStatus(h: H, info: DomainsInfo | undefined, act: { check: 
         dm.status === "failed"
           ? h("div", { class: "row" },
               h("button", { class: "btn sm", type: "button", onClick: () => act.check(dm.hostname) }, "Poskusi znova"),
-              h("button", { class: "btn quiet sm", type: "button", onClick: act.choose }, "Izberi drugo domeno"),
+              dm.chooseAnother ? h("button", { class: "btn quiet sm", type: "button", onClick: act.choose }, "Izberi drugo domeno") : null,
             )
           : null,
       )),

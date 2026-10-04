@@ -166,10 +166,14 @@ const domainDeps: DomainStepDeps = {
   confirm: (choice) => publishWithDomain(choice),
 };
 
+/** "Objavi brez domene" was chosen in this session: later publishes don't open the domain step again. */
+let withoutDomain = false;
+
 /** One tap: publishes the version on screen, then starts the chosen domain (the worker provisions it). */
 function publishWithDomain(choice: DomainChoice): Promise<void> {
   if (publishing) return Promise.resolve();
   publishing = true;
+  if (!choice) withoutDomain = true;
   return queued(async () => {
     try {
       const r = await api<{ url: string }>("/publish", { method: "POST", body: "{}" });
@@ -1937,7 +1941,7 @@ function topItems(): Child[] {
           }
           if (state.checklist.length) return openChecklist();
           // No domain yet: the domain step first (pick a name, or "Že imam domeno"); its button publishes.
-          if (state.domains?.enabled && !state.domains.domains.some((d) => d.status !== "failed")) {
+          if (state.domains?.enabled && !withoutDomain && !state.domains.domains.some((d) => d.status !== "failed")) {
             setSheet("full");
             void openDomainStep(domainDeps).then(() => document.getElementById("domain-confirm")?.scrollIntoView({ block: "nearest" }));
             return;

@@ -67,7 +67,7 @@ afterAll(async () => {
 
 describe("worker: domains", () => {
   it("republishes a site with its platform address when it starts with PLATFORM_DOMAIN", async () => {
-    expect((await platform.repo.getSite(siteId))!.published_address).toBe(`https://${slug}.stranko.example/`);
+    await expect.poll(async () => (await platform.repo.getSite(siteId))!.published_address, { timeout: 15_000 }).toBe(`https://${slug}.stranko.example/`);
   });
 
   it("runs the domain job: an owner's domain goes live and the site carries its address", async () => {

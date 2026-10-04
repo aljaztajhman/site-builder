@@ -384,7 +384,8 @@ export async function startWorker(platform: Platform, config = loadConfig(), job
     const r = await republishStaleAddresses(domainDeps);
     if (r.republished.length || r.busy.length || r.blocked.length) console.log(`[worker] address check: ${r.republished.length} republished, ${r.busy.length} busy, ${r.blocked.length} blocked by the checklist`);
   };
-  await addresses().catch((e: unknown) => console.error("[worker] address check", e));
+  // Not awaited: republishing many sites must not hold up the worker's start.
+  void addresses().catch((e: unknown) => console.error("[worker] address check", e));
   timers.push(setInterval(() => void addresses().catch((e: unknown) => console.error("[worker] address check", e)), 60 * 60_000));
   for (const t of timers) t.unref();
 

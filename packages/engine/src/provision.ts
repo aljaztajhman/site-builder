@@ -125,6 +125,8 @@ export async function provisionDomain(deps: ProvisionDeps, hostname: string, opt
       Object.assign(detail, result.detail ?? {}, { stepSince: new Date(now()).toISOString(), waits: 0 });
       for (const k of result.forget ?? []) delete detail[k];
       await domains.progress(hostname, { step: next, attempts: 0, detail: { ...result.detail, stepSince: detail.stepSince, waits: 0 }, forget: [...(result.forget ?? []), "lastError", "waiting"] });
+      // An event per step: the editor's poll notices it and shows the new stage.
+      await repo.addEvent({ siteId: row.site_id, stage: "domain", message: `${hostname}: ${step} done, next ${next}` });
       // Keep holding it for the next step: the progress write let go of the lease.
       const again = await domains.claim(hostname, config.domains.leaseSeconds, true);
       if (!again) return { status: "pending", step: next };
@@ -493,6 +495,10 @@ export interface DomainState {
   connect: { record: { type: string; name: string; value: string }; dnsHost: string | null; hasMail: boolean; seen: string[] } | null;
   /** https://… once active. */
   url: string | null;
+  /** Why it failed (a code), so the editor offers the right way on: another name, or trying again. */
+  failure: string | null;
+  /** A failed registration the owner should replace with another name (taken, dearer, refused before buying). */
+  chooseAnother: boolean;
 }
 
 const FAILURE: Record<string, (h: string, c: AppConfig) => string> = {
@@ -528,5 +534,8 @@ export function domainState(row: SiteDomainRow, config: AppConfig): DomainState 
     message: row.status === "failed" ? (FAILURE[row.failure ?? ""] ?? FAILURE_DEFAULT)(row.hostname, config) : null,
     connect: !registered && row.status !== "active" && record ? { record, dnsHost: (d.dnsHost as string | null) ?? null, hasMail: d.hasMail === true, seen: (d.seen as string[] | undefined) ?? [] } : null,
     url: row.status === "active" ? `https://${row.hostname}/` : null,
+    failure: row.status === "failed" ? row.failure : null,
+    // Never once the name is bought (a later step failed): trying again keeps it.
+    chooseAnother: row.status === "failed" && (row.kind === "connected" || (typeof d.registrationId !== "string" && ["unavailable", "price", "refused", "contact"].includes(row.failure ?? ""))),
   };
 }
