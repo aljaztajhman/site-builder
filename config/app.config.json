@@ -62,14 +62,14 @@
     "indexSiteHosts": false
   },
   "domains": {
-    "$comment": "Own domains (docs/plans/custom-domains.md, it-domain-flow). enabled shows the domain step after Objavi; off until real providers are wired (only the in-memory fakes can be selected: registrar and edge 'fake'; dns 'fake' answers as if the owner's CNAME were in place, 'system' asks real DNS). tlds are offered in this order; priceEurPerYear is what the owner is shown (VAT included; the yearly plans include the domain), maxCostEur the most we pay the registrar for a name (a premium or repriced name is not offered) and may not exceed plans.costs.domainEurPerYear. .si: registry fee EUR 10, expected EUR 10-13 at the reseller (research 2026-10-03); the .com cost is not confirmed yet. Provisioning runs in the worker (queue 'domain'): a failed step is retried after retry.baseSeconds * 2^n, at most retry.maxSeconds apart and retry.maxAttempts times; a step that waits (the registry, the owner's DNS record, the certificate) may wait waitHours before it counts as failed. The worker looks for due steps every sweepSeconds; one run holds its domain for leaseSeconds. The 'live' email to the owner goes from the web process (it has the mail settings) every notify.everyMinutes, at most notify.maxAttempts tries.",
+    "$comment": "Own domains (docs/plans/custom-domains.md, it-domain-flow). enabled shows the domain step after Objavi; off until real providers are wired (only the in-memory fakes can be selected: registrar and edge 'fake'; dns 'fake' answers as if the owner's CNAME were in place, 'system' asks real DNS). tlds are offered in this order; priceEurPerYear is what the owner is shown (VAT included; the yearly plans include the domain), maxCostEur the most we pay the registrar for a name (a premium or repriced name is not offered) and may not exceed plans.costs.domainEurPerYear. .si: registry fee EUR 10, expected EUR 10-13 at the reseller (research 2026-10-03); the .com cost is not confirmed yet. Provisioning runs in the worker (queue 'domain'): a failed step is retried after retry.baseSeconds * 2^n, at most retry.maxSeconds apart and retry.maxAttempts times; a step that waits (the registry, the owner's DNS record, the certificate) may wait waitHours before it counts as failed. suggestions: the registrar is asked about `check` names and `show` available ones are offered; the worker asks while the site generates and the answer is reused for cacheMinutes (it-zero-to-live). The worker looks for due steps every sweepSeconds; one run holds its domain for leaseSeconds. The 'live' email to the owner goes from the web process (it has the mail settings) every notify.everyMinutes, at most notify.maxAttempts tries.",
     "enabled": false,
     "providers": { "registrar": "fake", "edge": "fake", "dns": "fake" },
     "tlds": [
       { "tld": "si", "priceEurPerYear": 13, "maxCostEur": 13 },
       { "tld": "com", "priceEurPerYear": 13, "maxCostEur": 13 }
     ],
-    "suggestions": { "check": 8, "show": 3 },
+    "suggestions": { "check": 8, "show": 3, "cacheMinutes": 60 },
     "registrationYears": 1,
     "retry": { "baseSeconds": 30, "maxSeconds": 3600, "maxAttempts": 10 },
     "waitHours": { "registration": 48, "dns": 168, "certificate": 24 },

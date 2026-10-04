@@ -162,6 +162,8 @@ const Domains = z.object({
     check: z.number().int().min(1).max(20),
     /** Available names shown (the first is preselected). */
     show: z.number().int().min(1).max(5),
+    /** How long the registrar's answer for a site is reused (the worker asks while the site generates). */
+    cacheMinutes: z.number().int().min(0).max(1440),
   }),
   registrationYears: z.number().int().min(1).max(10),
   /** A step that fails is retried after baseSeconds · 2^n (at most maxSeconds), maxAttempts times in all. */

@@ -262,6 +262,21 @@ export class Repo {
     return Array.from({ length: count }, (_, i) => last - count + 1 + i);
   }
 
+  /** The registrar's last answer about a site's domain names (`key`: the names asked), with its time. */
+  async getDomainSuggestions(id: string): Promise<{ key: string; suggestions: unknown; at: Date } | null> {
+    const { rows } = await this.db.query<{ domain_suggestions: unknown; domain_suggestions_key: string | null; domain_suggestions_at: Date | string | null }>(
+      "select domain_suggestions, domain_suggestions_key, domain_suggestions_at from sites where id = $1",
+      [id],
+    );
+    const r = rows[0];
+    if (!r?.domain_suggestions_key || !r.domain_suggestions_at) return null;
+    return { key: r.domain_suggestions_key, suggestions: r.domain_suggestions, at: new Date(r.domain_suggestions_at) };
+  }
+
+  async setDomainSuggestions(id: string, key: string, suggestions: unknown): Promise<void> {
+    await this.db.query("update sites set domain_suggestions = $2, domain_suggestions_key = $3, domain_suggestions_at = now() where id = $1", [id, JSON.stringify(suggestions), key]);
+  }
+
   async setBrief(id: string, brief: unknown, name?: string): Promise<void> {
     await this.db.query("update sites set brief = $2, name = coalesce($3, name), updated_at = now() where id = $1", [
       id,
