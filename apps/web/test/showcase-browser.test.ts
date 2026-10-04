@@ -7,15 +7,18 @@ import { serve, type ServerType } from "@hono/node-server";
 import { loadConfig } from "@sb/config";
 import { launchCheckBrowser, type CheckBrowser } from "@sb/engine";
 import { Repo, createDb, createFsStorage, migrate, type Platform, type Queue } from "@sb/platform";
-import { SHOWCASES } from "@sb/spec";
+import { LANDING_TRADES } from "@sb/spec";
 import { createApp } from "../src/app.ts";
-import { tradeShowcases } from "../src/showcase.ts";
+import { tradeCaption, tradeClientData, tradeShowcases, tradeTitle } from "../src/showcase.ts";
+import { DEMO } from "../src/client/demo-timing.ts";
 
 /**
- * The landing page's trade showcase in Chromium, at 1280 and 360 px: a chip restyles the page in the
- * trade's colours and heading face (a view transition), the demo shows the trade's site, the address
- * follows, "Nazaj" restores the product's look; /?primer= renders a trade's look without JavaScript;
- * reduced motion switches at once; phones fold the chips after five; nothing scrolls sideways.
+ * The landing page's trade demo in Chromium, at 1280 and 360 px (docs/plans/landing-trade-demo.md,
+ * "Checks"): the intro types, builds and shows the first site without moving the card or the column; the
+ * build's last frame is the finished page; the demo moves on by itself, by tab, by arrow key; pause
+ * stops it; the view switch resizes the device; Gostilna's label card stays above its photo while
+ * transforming; reduced motion has no intro and cuts; without JavaScript the tabs are links.
+ * Playwright's clock drives the demo's timers; CSS transitions and the view transitions run in real time.
  */
 let platform: Platform;
 let dir: string;
@@ -44,172 +47,308 @@ afterAll(async () => {
 });
 
 type Page = Awaited<ReturnType<CheckBrowser["browser"]["newPage"]>>;
+type Frame = ReturnType<Page["mainFrame"]>;
 
-async function open(width: number, opts: { reducedMotion?: "reduce" | "no-preference"; javaScriptEnabled?: boolean; path?: string } = {}) {
-  const context = await cb.browser.newContext({ viewport: { width, height: 900 }, reducedMotion: opts.reducedMotion ?? "no-preference", javaScriptEnabled: opts.javaScriptEnabled ?? true });
-  const page = await context.newPage();
-  const errors: string[] = [];
-  page.on("pageerror", (e) => errors.push(e.message));
-  await page.goto(`${base}${opts.path ?? "/"}`);
-  return { page, errors, close: () => context.close() };
+const trades = tradeShowcases();
+const CLOCK_START = Date.parse("2026-10-04T10:00:00Z");
+const client = tradeClientData(trades);
+const byId = (id: string) => trades.find((t) => t.id === id)!;
+
+interface Opened {
+  page: Page;
+  /** Console errors, page errors and failed responses. */
+  problems: string[];
+  close: () => Promise<void>;
 }
 
-const cssVar = (page: Page, name: string) => page.evaluate((n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim(), name);
-const sideways = (page: Page) => page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
-const frameSrc = (page: Page) => page.locator(".demo-screen iframe").getAttribute("src");
-const trades = tradeShowcases();
-const dentist = trades.find((t) => t.id === "zobozdravnik")!;
+async function open(width: number, opts: { reducedMotion?: "reduce" | "no-preference"; javaScriptEnabled?: boolean; path?: string; clock?: boolean } = {}): Promise<Opened> {
+  const context = await cb.browser.newContext({ viewport: { width, height: 900 }, reducedMotion: opts.reducedMotion ?? "no-preference", javaScriptEnabled: opts.javaScriptEnabled ?? true });
+  const page = await context.newPage();
+  const problems: string[] = [];
+  page.on("pageerror", (e) => problems.push(`pageerror: ${e.message}`));
+  page.on("console", (m) => {
+    if (m.type() === "error") problems.push(`console: ${m.text()}`);
+  });
+  page.on("response", (r) => {
+    if (r.status() >= 400) problems.push(`${r.status()} ${r.url()}`);
+  });
+  // The landing's <html> never gets an inline style or a data-trade (the page keeps its own look).
+  await page.addInitScript(() => {
+    if (window !== window.top) return;
+    const w = window as unknown as { htmlTouched: string[] };
+    w.htmlTouched = [];
+    new MutationObserver((ms) => {
+      for (const m of ms) if (m.target === document.documentElement) w.htmlTouched.push(m.attributeName!);
+    }).observe(document, { attributes: true, subtree: true, attributeFilter: ["style", "data-trade"] });
+  });
+  // The demo's timers run only when the test advances them.
+  if (opts.clock) {
+    await page.clock.install({ time: CLOCK_START });
+    await page.clock.pauseAt(CLOCK_START + 1000);
+  }
+  await page.goto(`${base}${opts.path ?? "/"}`);
+  return { page, problems, close: () => context.close() };
+}
 
-describe("landing trade showcase", () => {
-  it("lists every showcase, in the spec's order", () => {
-    expect(trades.map((t) => t.id)).toEqual(SHOWCASES.map((s) => s.id));
+const step = (page: Page) => page.evaluate(() => document.querySelector<HTMLElement>(".devbox")!.dataset.step ?? null);
+const selected = (page: Page) => page.locator('.tab[aria-selected="true"]').getAttribute("data-id");
+const frameTitle = (page: Page) => page.locator("iframe.main").getAttribute("title");
+const sideways = (page: Page) => page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+const mainFrame = async (page: Page): Promise<Frame> => (await (await page.locator("iframe.main").elementHandle())!.contentFrame())!;
+/** A switch has finished when the clock runs again (its tab's underline filling). */
+const switched = (page: Page) => page.waitForFunction(() => document.querySelector(".tabs")!.classList.contains("auto"), undefined, { timeout: 15_000 });
+
+async function cleanHtml(page: Page) {
+  expect(await page.evaluate(() => (window as unknown as { htmlTouched: string[] }).htmlTouched)).toEqual([]);
+  expect(await page.evaluate(() => [document.documentElement.getAttribute("style"), document.documentElement.dataset.trade ?? null])).toEqual([null, null]);
+}
+
+/** Advances the demo's timers by `ms`, a little at a time (CSS keeps running in real time). */
+async function run(page: Page, ms: number, slice = 100) {
+  for (let t = 0; t < ms; t += slice) await page.clock.runFor(Math.min(slice, ms - t));
+}
+
+describe("landing trade demo", () => {
+  it("shows the five landing trades, in order", () => {
+    expect(trades.map((t) => t.id)).toEqual([...LANDING_TRADES]);
+    expect(trades.every((t) => t.intro.length > 40 && t.intro.endsWith("…"))).toBe(true);
+  });
+
+  it("serves every example page and the fonts it uses", async () => {
+    for (const t of client) {
+      const res = await fetch(new URL(t.page, base));
+      expect(res.status, t.page).toBe(200);
+      const html = await res.text();
+      const fonts = [...new Set([...html.matchAll(/url\("([^"]+\.woff2)"\)/g)].map((m) => m[1]!))];
+      expect(fonts.length, t.page).toBeGreaterThan(0);
+      for (const f of fonts) expect((await fetch(new URL(f, new URL(t.page, base)))).status, f).toBe(200);
+    }
   });
 
   for (const width of [1280, 360] as const) {
-    it(`at ${width} px: a chip restyles the page and shows the trade's site; Nazaj restores it`, async () => {
-      const { page, errors, close } = await open(width);
+    it(`at ${width} px: the intro types, builds and shows the first site; the build's last frame is the finished page`, async () => {
+      const { page, problems, close } = await open(width, { clock: true });
       try {
-        expect(await cssVar(page, "--accent")).toBe("#156b4a");
-        // Count the view transitions the switch starts.
-        await page.evaluate(() => {
-          const w = window as unknown as { vt: number };
-          w.vt = 0;
-          const d = document as Document & { startViewTransition: (cb: () => unknown) => unknown };
-          const orig = d.startViewTransition.bind(d);
-          d.startViewTransition = (cb) => {
-            w.vt++;
-            return orig(cb);
-          };
-        });
-        const chip = page.locator('a.chip[data-trade-id="zobozdravnik"]');
-        await chip.scrollIntoViewIfNeeded();
-        await chip.click();
-        await expect.poll(() => page.evaluate(() => document.documentElement.dataset.trade), { timeout: 5000 }).toBe("zobozdravnik");
-        await expect.poll(() => page.evaluate(() => document.documentElement.classList.contains("trade-switch")), { timeout: 5000 }).toBe(false);
-        expect(await page.evaluate(() => (window as unknown as { vt: number }).vt)).toBe(1);
-        expect(await cssVar(page, "--accent")).toBe(dentist.vars["--accent"]);
-        expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).not.toBe("rgb(245, 243, 239)");
-        expect(await page.locator("h1").evaluate((h) => getComputedStyle(h).fontFamily)).toContain("Figtree");
-        expect(await page.evaluate(() => document.fonts.check('700 40px "Figtree"'))).toBe(true);
-        expect(await frameSrc(page)).toContain("examples/primer-zobozdravnik/index.html");
-        expect(await chip.getAttribute("aria-current")).toBe("true");
-        expect(await page.locator(".phone-cap").textContent()).toContain("zobozdravstveno ordinacijo");
-        expect(await page.locator("[data-trade-status]").textContent()).toBe("Prikazan primer: Zobozdravnik");
-        expect(new URL(page.url()).searchParams.get("primer")).toBe("zobozdravnik");
-        // The site in the demo is there and is the showcase (its own colours, not the template's).
-        const site = page.frameLocator(".demo-screen iframe");
-        await expect.poll(() => site.locator("h1").count()).toBeGreaterThan(0);
-        expect(await site.locator("html").evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--c-primary").trim())).toBe(dentist.vars["--accent"]);
-        expect(await page.locator(".demo").getAttribute("data-step")).toBe("phone");
-        expect(await sideways(page)).toBeLessThanOrEqual(0);
+        const frizer = byId("frizer");
+        await page.locator(".devwrap").scrollIntoViewIfNeeded();
+        await page.waitForFunction(() => document.querySelector(".ask")!.classList.contains("placed"));
+        expect(await step(page)).toBe("type");
+        // While typing: one card rect, one text height, one column height.
+        const sample = () =>
+          page.evaluate(() => {
+            const r = document.querySelector(".ask")!.getBoundingClientRect();
+            return JSON.stringify([r.x, r.y, r.width, r.height, document.querySelector(".ask-text")!.getBoundingClientRect().height, document.querySelector<HTMLElement>(".devwrap")!.offsetHeight]);
+          });
+        await run(page, 50, 10); // fonts.ready, then the card is placed for typing
+        const samples = new Set<string>();
+        let typed = "";
+        while ((await step(page)) === "type") {
+          samples.add(await sample());
+          typed = (await page.locator(".ask-text .typed").textContent()) ?? "";
+          await page.clock.runFor(DEMO.typing.everyMs * 2);
+        }
+        expect(typed).toBe(frizer.intro);
+        expect([...samples]).toHaveLength(1);
+        expect(await step(page)).toBe("build");
+        expect(await selected(page)).toBe("frizer");
+        expect(await page.locator(".tabs").evaluate((el) => el.classList.contains("auto"))).toBe(false);
 
-        // Another trade, then back to the product's look.
-        await page.locator('a.chip[data-trade-id="gostilna"]').evaluate((a: HTMLElement) => a.scrollIntoView({ block: "center" }));
-        const more = page.locator(".chip.more");
-        if (await more.isVisible()) await more.click();
-        await page.locator('a.chip[data-trade-id="gostilna"]').click();
-        await expect.poll(() => page.evaluate(() => document.documentElement.dataset.trade), { timeout: 5000 }).toBe("gostilna");
-        expect(await chip.getAttribute("aria-current")).toBeNull();
-        expect(await frameSrc(page)).toContain("primer-gostilna");
-        const reset = page.locator(".trades-reset");
-        await reset.click();
-        await expect.poll(() => page.evaluate(() => document.documentElement.dataset.trade ?? null), { timeout: 5000 }).toBeNull();
-        expect(await cssVar(page, "--accent")).toBe("#156b4a");
-        expect(await page.evaluate(() => document.documentElement.getAttribute("style") ?? "")).toBe("");
-        expect(await frameSrc(page)).toContain("examples/trgovina-oljka-in-sol/index.html");
-        expect(await page.locator(".phone-cap").textContent()).toContain("Oljka in sol");
-        expect(await reset.isHidden()).toBe(true);
-        expect(new URL(page.url()).searchParams.has("primer")).toBe(false);
+        // The build: the four steps tick; the last one hands over to the page itself.
+        const frame = await mainFrame(page);
+        while (!(await frame.evaluate(() => document.documentElement.classList.contains("text")))) await page.clock.runFor(100);
+        expect(await page.locator(".ask-steps li.now").textContent()).toBe("Besedila in postavitev");
+        // Every transition of the last step done (real time); then, 50 ms at a time, the last frame with the
+        // build stylesheet still on, and the first one without it: the same picture.
+        await frame.waitForFunction(() => document.getAnimations().length === 0, undefined, { timeout: 10_000 });
+        const screen = page.locator(".dev .screen");
+        const building = () => frame.evaluate(() => document.documentElement.classList.contains("bld"));
+        let before = await screen.screenshot({ animations: "disabled" });
+        for (;;) {
+          await page.clock.runFor(50);
+          if (!(await building())) break;
+          await frame.waitForFunction(() => document.getAnimations().length === 0, undefined, { timeout: 10_000 });
+          before = await screen.screenshot({ animations: "disabled" });
+        }
+        expect(await frame.evaluate(() => document.querySelectorAll("sb-w, [data-plate], [data-bk]").length)).toBe(0);
+        const after = await screen.screenshot({ animations: "disabled" });
+        expect(after.equals(before)).toBe(true);
+
+        await run(page, DEMO.buildEnd + 100);
+        expect(await step(page)).toBe("site");
+        await switched(page);
+        expect(await page.locator(".cap").textContent()).toBe(tradeCaption(frizer));
+        await page.waitForFunction(() => getComputedStyle(document.querySelector(".cap")!).opacity === "1");
+        expect(await frameTitle(page)).toBe(tradeTitle(frizer));
         expect(await sideways(page)).toBeLessThanOrEqual(0);
-        expect(errors).toEqual([]);
+        await cleanHtml(page);
+        expect(problems).toEqual([]);
       } finally {
         await close();
       }
     }, 90_000);
-  }
 
-  it("at 360 px: five chips, the rest behind 'Več dejavnosti'; at 1280 px every chip shows", async () => {
-    const phone = await open(360);
-    try {
-      const visible = () => phone.page.locator("a.chip[data-trade-id]").evaluateAll((as) => as.filter((a) => (a as HTMLElement).offsetParent !== null).length);
-      expect(await visible()).toBe(5);
-      const more = phone.page.locator(".chip.more");
-      expect(await more.isVisible()).toBe(true);
-      await more.click();
-      expect(await visible()).toBe(trades.length);
-      expect(await more.isHidden()).toBe(true);
-      expect(await phone.page.evaluate(() => document.activeElement?.getAttribute("data-trade-id"))).toBe(trades[5]!.id);
-      // Chips are big enough for a thumb and stay inside the screen.
-      for (const box of await phone.page.locator("a.chip[data-trade-id]").evaluateAll((as) => as.map((a) => a.getBoundingClientRect().toJSON() as DOMRect))) {
-        expect(box.height).toBeGreaterThanOrEqual(40);
-        expect(box.right).toBeLessThanOrEqual(360);
+    it(`at ${width} px: moves on by itself, by tab and by arrow key; pause stops it; the view switch resizes the device`, async () => {
+      const { page, problems, close } = await open(width, { clock: true, path: "/?primer=frizer" });
+      try {
+        await page.locator(".devwrap").scrollIntoViewIfNeeded();
+        expect(await step(page)).toBe("site");
+        expect(await page.locator(".ask").count()).toBe(0);
+        await switched(page);
+        // After the dwell, the next trade.
+        await run(page, DEMO.dwell - 200);
+        expect(await selected(page)).toBe("frizer");
+        await run(page, 300);
+        expect(await selected(page)).toBe("gostilna");
+        await switched(page);
+        expect(await frameTitle(page)).toBe(tradeTitle(byId("gostilna")));
+        expect(await (await mainFrame(page)).evaluate(() => location.pathname)).toBe(new URL(client[1]!.page, base).pathname);
+        // Automatic switches aren't announced.
+        expect(await page.locator("[data-demo-status]").textContent()).toBe("");
+
+        // A tab click.
+        await page.locator('.tab[data-id="avtoservis"]').click();
+        expect(await selected(page)).toBe("avtoservis");
+        await switched(page);
+        expect(await frameTitle(page)).toBe(tradeTitle(byId("avtoservis")));
+        expect(await page.locator("[data-demo-status]").textContent()).toBe(tradeCaption(byId("avtoservis")));
+        expect(page.url()).toBe(`${base}/?primer=frizer`);
+
+        // Arrow keys, Home and End: focus and selection move together (a roving tabindex).
+        await page.locator('.tab[data-id="avtoservis"]').focus();
+        for (const [key, id] of [["ArrowRight", "zobozdravnik"], ["ArrowLeft", "avtoservis"], ["End", "instalater"], ["ArrowRight", "frizer"], ["Home", "frizer"], ["ArrowLeft", "instalater"]] as const) {
+          await page.keyboard.press(key);
+          expect(await selected(page), key).toBe(id);
+          expect(await page.evaluate(() => document.activeElement?.getAttribute("data-id"))).toBe(id);
+          expect(await page.locator('.tab[tabindex="0"]').getAttribute("data-id")).toBe(id);
+        }
+        await switched(page);
+        expect(await frameTitle(page)).toBe(tradeTitle(byId("instalater")));
+
+        // Pause: the clock stops; play starts it again.
+        const pause = page.locator(".pause");
+        await pause.click();
+        expect(await pause.getAttribute("aria-pressed")).toBe("true");
+        expect(await pause.getAttribute("aria-label")).toBe("Predvajaj");
+        expect(await page.locator(".tabs").evaluate((el) => el.classList.contains("auto"))).toBe(false);
+        await run(page, DEMO.dwell * 3);
+        expect(await selected(page)).toBe("instalater");
+        await pause.click();
+        expect(await pause.getAttribute("aria-label")).toBe("Ustavi");
+        expect(await page.locator(".tabs").evaluate((el) => el.classList.contains("auto"))).toBe(true);
+
+        // The view switch: the phone, then the computer again.
+        const dev = page.locator(".dev");
+        const col = await page.locator(".devwrap").evaluate((el) => el.clientWidth);
+        const deskBox = await dev.boundingBox();
+        expect(Math.round(deskBox!.width)).toBe(col);
+        expect(Math.round(deskBox!.height)).toBe(Math.round(col * DEMO.desk.ratio) + DEMO.desk.chrome);
+        await page.locator('.views [data-mode="phone"]').click();
+        expect(await page.locator('.views [data-mode="phone"]').getAttribute("aria-checked")).toBe("true");
+        await page.waitForTimeout(DEMO.resize + 300);
+        await run(page, DEMO.resize + 200);
+        const w = Math.min(DEMO.phone.width, col - 24);
+        const phoneBox = await dev.boundingBox();
+        expect(Math.round(phoneBox!.width)).toBe(w);
+        expect(Math.round(phoneBox!.height)).toBe(Math.round(w * DEMO.phone.ratio));
+        expect(await (await mainFrame(page)).evaluate(() => innerWidth)).toBe(DEMO.phone.site);
+        await page.locator('.views [data-mode="desk"]').click();
+        await page.waitForTimeout(DEMO.resize + 300);
+        expect(Math.round((await dev.boundingBox())!.width)).toBe(col);
+
+        expect(await sideways(page)).toBeLessThanOrEqual(0);
+        await cleanHtml(page);
+        expect(problems).toEqual([]);
+      } finally {
+        await close();
       }
-    } finally {
-      await phone.close();
-    }
-    const desk = await open(1280);
-    try {
-      expect(await desk.page.locator(".chip.more").isHidden()).toBe(true);
-      expect(await desk.page.locator("a.chip[data-trade-id]").evaluateAll((as) => as.filter((a) => (a as HTMLElement).offsetParent !== null).length)).toBe(trades.length);
-    } finally {
-      await desk.close();
-    }
-  }, 60_000);
+    }, 90_000);
 
-  it("reduced motion: the look changes at once, without a view transition", async () => {
-    const { page, errors, close } = await open(1280, { reducedMotion: "reduce" });
-    try {
-      await page.evaluate(() => {
-        const d = document as Document & { startViewTransition: () => never };
-        d.startViewTransition = () => {
-          throw new Error("no transition with reduced motion");
-        };
-      });
-      await page.locator('a.chip[data-trade-id="pekarna"]').click();
-      await expect.poll(() => page.evaluate(() => document.documentElement.dataset.trade)).toBe("pekarna");
-      expect(await cssVar(page, "--accent")).toBe(trades.find((t) => t.id === "pekarna")!.vars["--accent"]);
-      expect(errors).toEqual([]);
-    } finally {
-      await close();
-    }
-  }, 60_000);
+    it(`at ${width} px: Gostilna's label card stays above its photo while transforming, on the phone`, async () => {
+      const { page, problems, close } = await open(width, { path: "/?primer=frizer" });
+      try {
+        await page.locator(".devwrap").scrollIntoViewIfNeeded();
+        await page.locator(".pause").click();
+        await page.locator('.views [data-mode="phone"]').click();
+        await page.waitForTimeout(DEMO.resize + 300);
+        const frame = await mainFrame(page);
+        await page.locator('.tab[data-id="gostilna"]').click();
+        // While the view transition runs: the stacking of the new card and photo in the generated rules.
+        const z = await frame.waitForFunction(
+          () => {
+            const rig = document.querySelector("style[data-rig]");
+            const card = document.querySelector<HTMLElement>(".label-card");
+            const photo = document.querySelector<HTMLElement>("main > section picture.media");
+            const name = (el: HTMLElement | null) => el?.style.getPropertyValue("view-transition-name");
+            const zOf = (n: string | undefined) => (n ? Number(rig?.textContent?.match(new RegExp(`::view-transition-group\\(${n}\\)\\{z-index:(\\d+)`))?.[1]) : NaN);
+            const c = zOf(name(card));
+            const p = zOf(name(photo));
+            return Number.isFinite(c) && Number.isFinite(p) ? { card: c, photo: p } : null;
+          },
+          undefined,
+          { timeout: 10_000, polling: 20 },
+        );
+        const { card, photo } = (await z.jsonValue())!;
+        expect(card).toBeGreaterThan(photo);
+        expect(await selected(page)).toBe("gostilna");
+        await frame.waitForFunction(() => !document.querySelector("style[data-rig]"), undefined, { timeout: 15_000 });
+        expect(await frame.evaluate(() => document.querySelectorAll("[style*=view-transition-name]").length)).toBe(0);
+        expect(problems).toEqual([]);
+      } finally {
+        await close();
+      }
+    }, 60_000);
 
-  it("/?primer=<id> renders the trade's look on the server, and the chips work as links without JavaScript", async () => {
-    const { page, close } = await open(1280, { javaScriptEnabled: false, path: "/?primer=instalater" });
-    try {
-      const inst = trades.find((t) => t.id === "instalater")!;
-      expect(await page.evaluate(() => document.documentElement.dataset.trade)).toBe("instalater");
-      expect(await cssVar(page, "--canvas")).toBe(inst.vars["--canvas"]);
-      expect(await page.evaluate(() => getComputedStyle(document.documentElement).colorScheme)).toBe("dark");
-      expect(await frameSrc(page)).toContain("primer-instalater");
-      expect(await page.locator('a.chip[aria-current="true"]').getAttribute("data-trade-id")).toBe("instalater");
-      expect(await page.locator(".trades-reset").isVisible()).toBe(true);
-      expect(await page.locator("a.chip[data-trade-id]").count()).toBe(trades.length);
-      await page.locator('a.chip[data-trade-id="frizer"]').click();
-      await page.waitForURL(/primer=frizer/);
-      expect(await page.evaluate(() => document.documentElement.dataset.trade)).toBe("frizer");
-      expect(await sideways(page)).toBeLessThanOrEqual(0);
-    } finally {
-      await close();
-    }
-    // An unknown trade is the product's own look.
-    const plain = await open(1280, { path: "/?primer=nic" });
-    try {
-      expect(await plain.page.evaluate(() => document.documentElement.dataset.trade ?? null)).toBeNull();
-      expect(await cssVar(plain.page, "--accent")).toBe("#156b4a");
-    } finally {
-      await plain.close();
-    }
-  }, 60_000);
+    it(`at ${width} px: reduced motion has no intro, and a switch is a cut`, async () => {
+      const { page, problems, close } = await open(width, { reducedMotion: "reduce" });
+      try {
+        await page.locator(".devwrap").scrollIntoViewIfNeeded();
+        expect(await step(page)).toBe("site");
+        expect(await page.locator(".ask").evaluate((el) => getComputedStyle(el).visibility === "hidden" || getComputedStyle(el).opacity === "0")).toBe(true);
+        expect(await page.locator(".dev").evaluate((el) => getComputedStyle(el).opacity)).toBe("1");
+        const frame = await mainFrame(page);
+        await frame.waitForLoadState("load");
+        expect(await frame.evaluate(() => document.documentElement.classList.contains("bld"))).toBe(false);
+        // A cut loads the next site into the frame (a view transition would swap it in place).
+        await page.evaluate(() => {
+          const w = window as unknown as { loads: number };
+          w.loads = 0;
+          document.querySelector("iframe.main")!.addEventListener("load", () => w.loads++);
+        });
+        await page.locator('.tab[data-id="zobozdravnik"]').click();
+        await page.waitForFunction(() => (window as unknown as { loads: number }).loads === 1);
+        expect(await frame.evaluate(() => location.pathname)).toBe(new URL(client[3]!.page, base).pathname);
+        expect(await frameTitle(page)).toBe(tradeTitle(byId("zobozdravnik")));
+        await switched(page);
+        expect(await sideways(page)).toBeLessThanOrEqual(0);
+        await cleanHtml(page);
+        expect(problems).toEqual([]);
+      } finally {
+        await close();
+      }
+    }, 60_000);
 
-  it("every showcase page and its heading font load from the landing's assets", async () => {
-    const html = await (await fetch(`${base}/`)).text();
-    const data = JSON.parse(/<script type="application\/json" id="trades-data">([^<]*)<\/script>/.exec(html)![1]!) as { page: string; font: { url: string } }[];
-    expect(data.length).toBe(trades.length);
-    for (const t of data) {
-      expect((await fetch(`${base}${t.page}`)).status, t.page).toBe(200);
-      const font = await fetch(`${base}${t.font.url}`);
-      expect([font.status, font.headers.get("content-type")], t.font.url).toEqual([200, "font/woff2"]);
-    }
-  }, 60_000);
+    it(`at ${width} px: without JavaScript the tabs are links and ?primer= shows that trade`, async () => {
+      const { page, problems, close } = await open(width, { javaScriptEnabled: false });
+      try {
+        const tabs = page.locator(".tab");
+        expect(await tabs.evaluateAll((as) => as.map((a) => [a.tagName, a.getAttribute("href")]))).toEqual(trades.map((t) => ["A", `/?primer=${t.id}#zacni`]));
+        expect(await page.locator(".demo-tools").isVisible()).toBe(false);
+        expect(await page.locator(".dev").evaluate((el) => getComputedStyle(el).opacity)).toBe("1");
+        expect(await page.locator(".ask").isVisible()).toBe(false);
+        expect(await page.locator(".cap").textContent()).toBe(tradeCaption(trades[0]!));
+        await page.locator('.tab[data-id="gostilna"]').click();
+        await page.waitForURL(/primer=gostilna/);
+        expect(await selected(page)).toBe("gostilna");
+        expect(await page.locator(".ask").count()).toBe(0);
+        expect(await page.locator("iframe.main").getAttribute("src")).toBe(client[1]!.page);
+        expect(await frameTitle(page)).toBe(tradeTitle(byId("gostilna")));
+        expect(await page.locator(".cap").textContent()).toBe(tradeCaption(byId("gostilna")));
+        expect(await page.locator(".dev").evaluate((el) => getComputedStyle(el).opacity)).toBe("1");
+        expect(await sideways(page)).toBeLessThanOrEqual(0);
+        expect(problems).toEqual([]);
+      } finally {
+        await close();
+      }
+    }, 60_000);
+  }
 });

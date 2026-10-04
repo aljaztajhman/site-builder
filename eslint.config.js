@@ -16,6 +16,11 @@ export default tseslint.config(
     },
   },
   {
+    // Plain browser scripts the dashboard serves as they are (no bundle), e.g. the landing's js-flag.js.
+    files: ["apps/web/src/ui/*.js"],
+    languageOptions: { sourceType: "script", globals: { document: "readonly" } },
+  },
+  {
     rules: {
       "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
       "@typescript-eslint/consistent-type-imports": "error",

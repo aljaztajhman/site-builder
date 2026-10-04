@@ -13,7 +13,7 @@ import { FONTS_DIR } from "@sb/render";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const FONTS = ["bricolage-grotesque", "figtree", "fraunces", "source-sans-3"] as const;
-const FILES = { "app.css": "text/css; charset=utf-8", "home.css": "text/css; charset=utf-8", "example-home.html": "text/html; charset=utf-8" } as const;
+const FILES = { "app.css": "text/css; charset=utf-8", "home.css": "text/css; charset=utf-8", "example-home.html": "text/html; charset=utf-8", "js-flag.js": "text/javascript; charset=utf-8" } as const;
 // Pekarna Kvas example photos (GPT Image 2.5 via fal.ai, prompts in tools/eval/fixtures/photo-prompts.json), 480 and 960 px.
 const EXAMPLE_PHOTOS = ["01", "02", "03"].flatMap((n) => [480, 960].map((w) => `example/pekarna-${n}-${w}.webp`));
 // Example sites rendered by our engine (pnpm examples:build): homepage, photos, the shared files they use.

@@ -11,7 +11,7 @@
 :root{
   --canvas:#f5f3ef;--surface:#fff;--surface-2:#ece9e3;--ink:#151412;--ink-2:#4d4a44;--ink-3:#6b665e;--line:#dcd8d0;--line-2:#c9c4ba;
   --accent:#156b4a;--accent-ink:#fff;--accent-soft:#e3efe8;--ph:#fff1a8;--danger:#b3261e;--danger-soft:#f9e3e1;
-  /* Tokens a trade theme also sets (apps/web/src/ui/examples/showcase.json): button hover, accent as text, text on ink, the call vignette, a search link. */
+  /* Button hover, accent as text, text on ink, the call vignette, a search link. */
   --accent-hover:#115a3e;--accent-text:#156b4a;--on-ink:#fff;--on-ink-2:#c9c4ba;--calling:#9ad0b6;--link:#1a4fa8;--h1-weight:560;
   --r-1:4px;--r-2:8px;--r-3:12px;--shadow-float:0 8px 24px rgb(20 20 18/.10),0 1px 2px rgb(20 20 18/.08);
   --font-display:"Bricolage Grotesque","Inter Tight",system-ui,sans-serif;--font-ui:"Figtree","Inter",system-ui,sans-serif;
@@ -84,65 +84,96 @@ mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:#151412}
 .under{font-size:15px;color:var(--ink-3);margin-top:12px}
 .phone{width:300px;max-width:100%;aspect-ratio:300/620;border:1px solid var(--line-2);border-radius:22px;overflow:hidden;background:#fff;box-shadow:var(--shadow-float);position:relative;justify-self:center}
 .phone iframe{width:360px;height:744px;border:0;transform:scale(.8333);transform-origin:0 0;display:block}
-/* ---------- Hero demo: description → build → phone → computer, the same rendered example resized live ---------- */
-.demo{margin:0;min-width:0}
-.demo-stage{position:relative;height:var(--stage-h,600px)}
-.demo-device{position:absolute;left:50%;top:50%;width:var(--pw,280px);height:var(--ph,560px);transform:translate(-50%,-50%);display:flex;flex-direction:column;overflow:hidden;background:#fff;border:1px solid var(--line-2);border-radius:26px;box-shadow:var(--shadow-float);transition:width 1.5s cubic-bezier(.65,0,.35,1),height 1.5s cubic-bezier(.65,0,.35,1),border-radius 1.5s,opacity .5s,transform .5s}
-.demo-chrome{flex:none;display:flex;align-items:center;gap:6px;height:0;padding:0 12px;overflow:hidden;background:var(--surface-2);transition:height 1.5s cubic-bezier(.65,0,.35,1)}
-.demo-chrome i{width:8px;height:8px;border-radius:50%;background:var(--line-2)}
-.demo-screen{position:relative;flex:1;min-height:0;overflow:hidden}
-.demo-screen iframe{display:block;border:0;width:360px;height:calc(var(--ph,560px) / var(--ps,.7778));transform:scale(var(--ps,.7778));transform-origin:0 0;transition:width 1.5s cubic-bezier(.65,0,.35,1),height 1.5s cubic-bezier(.65,0,.35,1),transform 1.5s cubic-bezier(.65,0,.35,1)}
-.demo[data-step=desk] .demo-device{width:var(--dw,100%);height:var(--dh,340px);border-radius:10px}
-.demo[data-step=desk] .demo-chrome{height:24px}
-.demo[data-step=desk] .demo-screen iframe{width:1280px;height:calc((var(--dh,340px) - 24px) / var(--ds,.4));transform:scale(var(--ds,.4))}
-.demo[data-step=type] .demo-device,.demo[data-step=build] .demo-device{opacity:0;transform:translate(-50%,-46%) scale(.96)}
-.demo-prompt{position:absolute;left:0;right:0;top:50%;padding:16px;background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r-3);box-shadow:var(--shadow-float);opacity:0;visibility:hidden;transform:translateY(-50%);transition:top .7s cubic-bezier(.65,0,.35,1),opacity .4s,visibility .4s}
-.demo[data-step=type] .demo-prompt,.demo[data-step=build] .demo-prompt{opacity:1;visibility:visible}
-.demo[data-step=build] .demo-prompt{top:24%}
-.demo-text{min-height:6.2em;margin:0;font-size:16px;line-height:1.55;color:var(--ink)}
-.demo[data-step=type] .demo-text::after{content:"";display:inline-block;width:2px;height:1.1em;margin-left:1px;vertical-align:-.2em;background:var(--ink);animation:caret .8s step-end infinite}
-.demo-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px}
-.demo-chip{padding:6px 10px;border:1px solid var(--line-2);border-radius:var(--r-2);font-size:14px;font-weight:600}
-.demo-go{padding:9px 18px;border-radius:var(--r-2);background:var(--accent);color:var(--accent-ink);font-weight:600;font-size:15px;transition:transform .15s,background .15s}
-.demo[data-step=build] .demo-go{transform:scale(.95);background:var(--accent-hover)}
-.demo-steps{position:absolute;left:0;right:0;top:52%;display:grid;gap:8px;margin:0;padding:0;list-style:none;opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s}
-.demo[data-step=build] .demo-steps{opacity:1;visibility:visible}
-.demo-steps li{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--r-2);background:var(--surface);font-size:15px;color:var(--ink-3)}
-.demo-steps li::before{content:"";flex:none;width:10px;height:10px;border:2px solid var(--line-2);border-radius:50%}
-.demo[data-step=build] .demo-steps li{animation:step-done .3s forwards}
-.demo[data-step=build] .demo-steps li:nth-child(2){animation-delay:.7s}.demo[data-step=build] .demo-steps li:nth-child(3){animation-delay:1.4s}.demo[data-step=build] .demo-steps li:nth-child(4){animation-delay:2.1s}
-@keyframes step-done{to{color:var(--ink)}}
-.demo[data-step=build] .demo-steps li::before{animation:dot-done .3s forwards;animation-delay:inherit}
-@keyframes dot-done{to{background:var(--accent);border-color:var(--accent)}}
-@keyframes caret{50%{opacity:0}}
-.demo .phone-cap{max-width:none;margin-top:14px}
-.demo{position:relative}
-.demo-pause{display:block;margin:10px 0 0 auto;min-height:32px;padding:0 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--surface);color:var(--ink-2);font:600 13px/1 var(--font-ui);cursor:pointer}
-.demo-pause:hover{color:var(--ink)}
-.demo-pause[hidden]{display:none}
-@media (pointer:coarse){.demo-pause{min-height:44px}}
-/* Reduced motion: cuts and fades only. */
-.demo.calm .demo-device,.demo.calm .demo-screen iframe,.demo.calm .demo-chrome,.demo.calm .demo-prompt{transition:opacity .4s,visibility .4s}
-.demo.calm[data-step=type] .demo-device,.demo.calm[data-step=build] .demo-device{transform:translate(-50%,-50%)}
-.phone-cap{font-size:14px;color:var(--ink-3);text-align:left;margin-top:10px;justify-self:center;max-width:300px}
+/* ---------- Hero demo: a trade's description is typed, its site builds itself, then it transforms into the next trade's ---------- */
+/* Above the tabs: the question, the phone/computer switch and the pause button, as icons. */
+.demo-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 4px}
+.demo-top .trades-q{margin:0}
+.trades-q{font-size:15px;font-weight:600;color:var(--ink-2)}
+.demo-tools{display:flex;align-items:center;gap:8px;flex:none}
+.demo-tools[hidden]{display:none}
+.views{display:inline-flex;gap:2px;padding:3px;border-radius:var(--r-2);background:var(--surface-2)}
+.views button{display:grid;place-items:center;width:34px;height:30px;margin:0;padding:0;border:0;border-radius:6px;background:none;color:var(--ink-3);cursor:pointer}
+.views button:hover{color:var(--ink)}
+.views button[aria-checked=true]{background:var(--surface);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line-2)}
+.views svg,.pause svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.views button:focus-visible,.pause:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 
-/* ---------- Trade showcase: a chip per trade restyles the page in that trade's colours and shows its site ---------- */
-.trades{margin:0 0 18px}
-.trades-q{margin:0 0 10px;font-size:15px;font-weight:600;color:var(--ink-2)}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
-.chip{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border:1px solid var(--line-2);border-radius:var(--r-2);background:var(--surface);color:var(--ink);font:600 15px/1 var(--font-ui);text-decoration:none;cursor:pointer;transition:background-color .15s,border-color .15s,color .15s}
-.chip:hover{border-color:var(--ink-3)}
-.chip[aria-current=true]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.chip.more{background:transparent;border-style:dashed}
-.chip.more[hidden],.trades-reset[hidden]{display:none}
-@media (min-width:48rem){.chips{gap:6px}.chip{min-height:34px;padding:0 12px;font-size:14px}}
-@media (pointer:coarse){.chip{min-height:44px}}
-.trades-reset{display:block;width:fit-content;margin-top:12px;font-size:14px;font-weight:600;color:var(--ink-2)}
-.trades-reset:hover{color:var(--ink)}
-/* Phones: the five most asked trades, the rest behind "Več" (only once home.js runs; without it every chip shows). */
-@media (max-width:47.99rem){.chips.collapsed li:nth-child(n+6):not(:has([aria-current=true])){display:none}}
-/* The switch: a view transition, the new look revealed in a circle from the chip (home.ts animates the clip). */
-html.trade-switch::view-transition-old(root),html.trade-switch::view-transition-new(root){animation:none;mix-blend-mode:normal}
+/* Trade tabs: an underline under the shown trade; while the demo moves on by itself it fills up as the time to the next one runs. */
+.tabbar{margin:0 0 14px;border-bottom:1px solid var(--line)}
+.tabs{display:flex;min-width:0;margin:0 -8px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{position:relative;flex:none;display:inline-flex;align-items:center;min-height:44px;margin:0;padding:0 8px;border:0;background:none;color:var(--ink-3);font:600 14px/1 var(--font-ui);white-space:nowrap;text-decoration:none;cursor:pointer;transition:color .2s}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected=true]{color:var(--ink)}
+.tab::after{content:"";position:absolute;left:6px;right:6px;bottom:-1px;height:2px;border-radius:2px;background:var(--accent);transform:scaleX(0);transform-origin:left}
+.tab[aria-selected=true]::after{transform:scaleX(1);transition:transform .3s}
+.tabs.auto .tab[aria-selected=true]::after{animation:tab-fill var(--dwell,4s) linear both}
+@keyframes tab-fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.tab:focus-visible{outline:2px solid var(--ink);outline-offset:-4px;border-radius:var(--r-1)}
+.pause{display:grid;place-items:center;width:36px;height:36px;margin:0;padding:0;border:1px solid var(--line-2);border-radius:999px;background:var(--surface);color:var(--ink-2);cursor:pointer}
+.pause:hover{color:var(--ink)}
+@media (pointer:coarse){.views button{width:44px;height:44px}.pause{width:44px;height:44px}}
+
+/*
+ * The intro, one card all the way: first the description being typed (its full text laid out from the
+ * start, so nothing moves while it types), then, after "Ustvari", it shrinks into the build steps under the
+ * device (where the caption goes) while the page builds itself in it; when the page is done the card gives way to the caption.
+ */
+.devbox{position:relative}
+.intro{position:absolute;inset:0;z-index:3;pointer-events:none}
+.ask{position:absolute;left:var(--ax,0px);top:var(--ay,0px);width:var(--aw,100%);height:var(--ah,auto);overflow:hidden;background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r-3);box-shadow:var(--shadow-float);transition:left .7s cubic-bezier(.65,0,.35,1),top .7s cubic-bezier(.65,0,.35,1),width .7s cubic-bezier(.65,0,.35,1),height .7s cubic-bezier(.65,0,.35,1),opacity .5s,transform .5s cubic-bezier(.65,0,.35,1)}
+.ask:not(.placed){visibility:hidden}
+.devbox[data-step=site] .ask{opacity:0;transform:translateY(8px) scale(.96)}
+.ask-type{position:absolute;left:0;top:0;width:var(--tw,100%);padding:16px;transition:opacity .3s}
+.devbox:not([data-step=type]) .ask-type{opacity:0}
+.ask-text{margin:0;font-size:15px;line-height:1.55;color:var(--ink)}
+.ask-text .rest{color:transparent}
+.ask-text .caret{display:inline-block;width:2px;height:1.1em;margin:0 -2px 0 0;vertical-align:-.2em;background:var(--ink);animation:ask-caret .8s step-end infinite}
+@keyframes ask-caret{50%{opacity:0}}
+.ask-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px}
+.ask-chip{padding:6px 10px;border:1px solid var(--line-2);border-radius:var(--r-2);font-size:14px;font-weight:600}
+.ask-go{padding:9px 18px;border-radius:var(--r-2);background:var(--accent);color:var(--accent-ink);font-weight:600;font-size:15px;transition:transform .15s,background .15s}
+.ask-go.pressed{transform:scale(.94);background:var(--accent-hover)}
+.ask-steps{position:absolute;left:0;top:0;width:var(--sw,240px);display:grid;gap:0;margin:0;padding:8px 12px;list-style:none;opacity:0;transition:opacity .3s}
+.devbox[data-step=build] .ask-steps,.devbox[data-step=site] .ask-steps{opacity:1;transition-delay:.3s}
+.ask-steps li{display:flex;align-items:center;gap:10px;padding:4px 2px;font-size:13px;color:var(--ink-3);transition:color .3s}
+.ask-steps li::before{content:"";flex:none;width:10px;height:10px;border:2px solid var(--line-2);border-radius:50%;transition:background .3s,border-color .3s,box-shadow .3s}
+.ask-steps li.now{color:var(--ink)}
+.ask-steps li.now::before{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft);animation:ask-pulse 1s ease-in-out infinite alternate}
+@keyframes ask-pulse{to{box-shadow:0 0 0 1px var(--accent-soft)}}
+.ask-steps li.done{color:var(--ink)}
+.ask-steps li.done::before{background:var(--accent);border-color:var(--accent);box-shadow:none;animation:none}
+.devbox[data-step=type] .dev{opacity:0;transform:translateY(14px) scale(.97)}
+.devbox .dev{transition:opacity .6s .15s,transform .8s cubic-bezier(.2,.8,.2,1) .15s}
+.devbox .dev.resize{transition:opacity .6s .15s,transform .8s cubic-bezier(.2,.8,.2,1) .15s,width .9s cubic-bezier(.65,0,.35,1),height .9s cubic-bezier(.65,0,.35,1),border-radius .9s}
+.cap{transition:opacity .5s}
+.devbox[data-step]:not([data-step=site]) + .cap{opacity:0}
+/*
+ * Before the script runs (html.js is set in <head>), the intro's first frame: the device and the caption
+ * hidden, so the finished site never flashes before it is typed and built. Without JavaScript, or with
+ * reduced motion (no intro), the site shows at once.
+ */
+@media (prefers-reduced-motion:no-preference){
+  html.js .devbox[data-intro]:not([data-step]) .dev{opacity:0;transform:translateY(14px) scale(.97)}
+  html.js .devbox[data-intro]:not([data-step]) + .cap{opacity:0}
+}
+@media (prefers-reduced-motion:reduce){.ask,.ask-type,.ask-steps,.devbox .dev{transition:none}.ask-text .caret{animation:none}}
+
+/* Sized for the computer view before the script runs (the column width in container units), so nothing moves when it does. */
+.devwrap{min-width:0;container-type:inline-size}
+.dev{position:relative;margin:0 auto;width:var(--w,100cqw);height:var(--h,calc(62cqw + 24px));background:#fff;border:1px solid var(--line-2);border-radius:26px;box-shadow:var(--shadow-float);overflow:hidden;display:flex;flex-direction:column}
+.dev[data-mode=desk]{border-radius:10px}
+.dev .chrome{flex:none;display:flex;align-items:center;gap:6px;height:var(--ch,24px);padding:0 12px;overflow:hidden;background:var(--surface-2)}
+/* The size moves only when the view is switched (not while the page settles at load). */
+.dev.resize .chrome{transition:height .9s cubic-bezier(.65,0,.35,1)}
+.dev .chrome i{width:8px;height:8px;border-radius:50%;background:var(--line-2)}
+/* The machine under the site, seen through the seams while the parts move. */
+.dev .screen{position:relative;flex:1;min-height:0;overflow:hidden;background:#191714 radial-gradient(rgb(255 255 255/.07) 1px,transparent 1.3px) 0 0/14px 14px}
+.dev iframe{position:absolute;left:0;top:0;display:block;border:0;width:var(--iw,1280px);height:calc((var(--h,calc(62cqw + 24px)) - var(--ch,24px)) / var(--s,.31));transform:scale(var(--s,.31));transform-origin:0 0}
+.dev iframe.main{z-index:1}
+.dev iframe.stage{z-index:0}
+.cap{font-size:14px;color:var(--ink-3);margin:12px auto 0;max-width:56ch}
+@media (prefers-reduced-motion:reduce){.dev,.dev .chrome{transition:none}}
 
 /* ---------- What you get: three outcomes shown with the real example, then promises and a comparison ---------- */
 .win{display:grid;gap:24px;align-items:center;margin-top:48px}

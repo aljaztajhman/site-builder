@@ -6,39 +6,7 @@
     "name": "Frizerstvo Lana",
     "page": "primer-frizer/index.html",
     "photos": 5,
-    "font": {
-      "family": "Inter Tight",
-      "file": "_shared/96ee5ca92b/fonts/inter-tight.woff2",
-      "weights": [
-        100,
-        900
-      ]
-    },
-    "vars": {
-      "--canvas": "#f8f4fb",
-      "--surface": "#ffffff",
-      "--surface-2": "#f0e9f6",
-      "--ink": "#1c0f29",
-      "--ink-2": "#52455f",
-      "--ink-3": "#52455f",
-      "--line": "#dbd2e4",
-      "--line-2": "#b9afc2",
-      "--accent": "#4b2a6b",
-      "--accent-ink": "#ffffff",
-      "--accent-hover": "#3f235a",
-      "--accent-soft": "#e9e5ed",
-      "--accent-text": "#4b2a6b",
-      "--on-ink": "#ffffff",
-      "--on-ink-2": "#bbb7bf",
-      "--calling": "#b7aac4",
-      "--link": "#1a4fa8",
-      "--font-display": "\"Inter Tight\", system-ui, sans-serif",
-      "--h1-weight": "800",
-      "--r-1": "4px",
-      "--r-2": "6px",
-      "--r-3": "10px",
-      "color-scheme": "light"
-    }
+    "intro": "Sem Lana Vidmar in že devet let vodim Frizerstvo Lana na Stanetovi ulici 14 v Celju. Strižemo ženske, moške in otroke, delamo barvanje brez amoniaka, pramene in svečane pričeske …"
   },
   {
     "id": "zobozdravnik",
@@ -47,39 +15,7 @@
     "name": "Zobozdravstvo Lebar",
     "page": "primer-zobozdravnik/index.html",
     "photos": 3,
-    "font": {
-      "family": "Figtree",
-      "file": "_shared/96ee5ca92b/fonts/figtree.woff2",
-      "weights": [
-        300,
-        900
-      ]
-    },
-    "vars": {
-      "--canvas": "#f4f6fb",
-      "--surface": "#ffffff",
-      "--surface-2": "#e9ecf6",
-      "--ink": "#0f1429",
-      "--ink-2": "#454a5f",
-      "--ink-3": "#454a5f",
-      "--line": "#d2d6e4",
-      "--line-2": "#afb3c2",
-      "--accent": "#3c4fa0",
-      "--accent-ink": "#ffffff",
-      "--accent-hover": "#324286",
-      "--accent-soft": "#e8eaf4",
-      "--accent-text": "#3c4fa0",
-      "--on-ink": "#ffffff",
-      "--on-ink-2": "#b7b9bf",
-      "--calling": "#b1b9d9",
-      "--link": "#1a4fa8",
-      "--font-display": "\"Figtree\", system-ui, sans-serif",
-      "--h1-weight": "800",
-      "--r-1": "4px",
-      "--r-2": "12px",
-      "--r-3": "16px",
-      "color-scheme": "light"
-    }
+    "intro": "Zobozdravstvo Lebar je zasebna samoplačniška zobna ambulanta v središču Maribora, na Gosposvetski cesti 36. Vodi jo dr. Urška Lebar. Nudimo preventivne preglede, čiščenje zobnega kamna, zalivke, beljenje zob in prevleke …"
   },
   {
     "id": "avtoservis",
@@ -88,39 +24,7 @@
     "name": "Avtoservis Mrak",
     "page": "primer-avtoservis/index.html",
     "photos": 3,
-    "font": {
-      "family": "Archivo",
-      "file": "_shared/96ee5ca92b/fonts/archivo.woff2",
-      "weights": [
-        100,
-        900
-      ]
-    },
-    "vars": {
-      "--canvas": "#f9f7f7",
-      "--surface": "#ffffff",
-      "--surface-2": "#f2efee",
-      "--ink": "#29170f",
-      "--ink-2": "#5f4c45",
-      "--ink-3": "#5f4c45",
-      "--line": "#dedad9",
-      "--line-2": "#bdb7b5",
-      "--accent": "#c2410c",
-      "--accent-ink": "#ffffff",
-      "--accent-hover": "#a3370a",
-      "--accent-soft": "#f8e8e2",
-      "--accent-text": "#bd3f0c",
-      "--on-ink": "#ffffff",
-      "--on-ink-2": "#bfb9b7",
-      "--calling": "#e7b39e",
-      "--link": "#1a4fa8",
-      "--font-display": "\"Archivo\", system-ui, sans-serif",
-      "--h1-weight": "800",
-      "--r-1": "0px",
-      "--r-2": "0px",
-      "--r-3": "0px",
-      "color-scheme": "light"
-    }
+    "intro": "Avtoservis Mrak v Kranju je družinski servis, delamo od leta 2008, vodi ga Rok Mrak. Servisiramo osebna vozila vseh znamk in kombije do 3,5 t: redni servis, zavore, sklopke, diagnostika, polnjenje klime …"
   },
   {
     "id": "gostilna",
@@ -129,39 +33,7 @@
     "name": "Gostilna Pri Zlati Žlici",
     "page": "primer-gostilna/index.html",
     "photos": 8,
-    "font": {
-      "family": "EB Garamond",
-      "file": "_shared/96ee5ca92b/fonts/eb-garamond.woff2",
-      "weights": [
-        400,
-        800
-      ]
-    },
-    "vars": {
-      "--canvas": "#fbf4f6",
-      "--surface": "#ffffff",
-      "--surface-2": "#f6e9ec",
-      "--ink": "#290f15",
-      "--ink-2": "#5f454a",
-      "--ink-3": "#5f454a",
-      "--line": "#e4d2d6",
-      "--line-2": "#c2afb3",
-      "--accent": "#5a1f2b",
-      "--accent-ink": "#ffffff",
-      "--accent-hover": "#4c1a24",
-      "--accent-soft": "#ebe4e6",
-      "--accent-text": "#5a1f2b",
-      "--on-ink": "#ffffff",
-      "--on-ink-2": "#bfb7b9",
-      "--calling": "#bda5aa",
-      "--link": "#1a4fa8",
-      "--font-display": "\"EB Garamond\", Georgia, serif",
-      "--h1-weight": "600",
-      "--r-1": "4px",
-      "--r-2": "4px",
-      "--r-3": "8px",
-      "color-scheme": "light"
-    }
+    "intro": "Gostilna Pri Zlati Žlici je družinska gostilna v starem delu Škofje Loke, na Kapucinskem trgu 7. Kuhamo domače jedi iz sestavin lokalnih kmetov: ajdove žgance z ocvirki, ričet, telečjo obaro in orehove štruklje …"
   },
   {
     "id": "pekarna",
@@ -170,39 +42,7 @@
     "name": "Pekarna Kvas",
     "page": "primer-pekarna/index.html",
     "photos": 3,
-    "font": {
-      "family": "Fraunces",
-      "file": "_shared/96ee5ca92b/fonts/fraunces.woff2",
-      "weights": [
-        100,
-        900
-      ]
-    },
-    "vars": {
-      "--canvas": "#f9fbf4",
-      "--surface": "#ffffff",
-      "--surface-2": "#f2f6e9",
-      "--ink": "#20290f",
-      "--ink-2": "#565f45",
-      "--ink-3": "#565f45",
-      "--line": "#dee4d2",
-      "--line-2": "#bcc2af",
-      "--accent": "#4a5a2c",
-      "--accent-ink": "#ffffff",
-      "--accent-hover": "#3e4c25",
-      "--accent-soft": "#e9ebe6",
-      "--accent-text": "#4a5a2c",
-      "--on-ink": "#ffffff",
-      "--on-ink-2": "#bcbfb7",
-      "--calling": "#b7bdab",
-      "--link": "#1a4fa8",
-      "--font-display": "\"Fraunces\", Georgia, serif",
-      "--h1-weight": "600",
-      "--r-1": "4px",
-      "--r-2": "6px",
-      "--r-3": "10px",
-      "color-scheme": "light"
-    }
+    "intro": "Pekarna Kvas je naša mala družinska pekarna v Kamniku, Šutna 30. Kruh pečemo samo z drožmi, ki jih gojimo sami, in ga pustimo vzhajati čez noč. Moko kupujemo pri mlinu v bližini …"
   },
   {
     "id": "trgovina",
@@ -211,39 +51,7 @@
     "name": "Oljka in sol",
     "page": "primer-trgovina/index.html",
     "photos": 5,
-    "font": {
-      "family": "Lora",
-      "file": "_shared/96ee5ca92b/fonts/lora.woff2",
-      "weights": [
-        400,
-        700
-      ]
-    },
-    "vars": {
-      "--canvas": "#f4fafb",
-      "--surface": "#ffffff",
-      "--surface-2": "#e9f4f6",
-      "--ink": "#0f2429",
-      "--ink-2": "#455a5f",
-      "--ink-3": "#455a5f",
-      "--line": "#d2e1e4",
-      "--line-2": "#afbfc2",
-      "--accent": "#1f5f6e",
-      "--accent-ink": "#ffffff",
-      "--accent-hover": "#1a505c",
-      "--accent-soft": "#e4ecee",
-      "--accent-text": "#1f5f6e",
-      "--on-ink": "#ffffff",
-      "--on-ink-2": "#b7bdbf",
-      "--calling": "#a5bfc5",
-      "--link": "#1a4fa8",
-      "--font-display": "\"Lora\", Georgia, serif",
-      "--h1-weight": "700",
-      "--r-1": "4px",
-      "--r-2": "6px",
-      "--r-3": "10px",
-      "color-scheme": "light"
-    }
+    "intro": "Oljka in sol je majhna trgovina z istrskimi dobrotami v starem mestnem jedru Kopra, Kidričeva ulica 22. Prodajamo oljčno olje, piransko sol, med, vino, pršut in sire manjših pridelovalcev …"
   },
   {
     "id": "fizioterapija",
@@ -252,39 +60,7 @@
     "name": "Fizioterapija Pregib",
     "page": "primer-fizioterapija/index.html",
     "photos": 1,
-    "font": {
-      "family": "Bricolage Grotesque",
-      "file": "_shared/96ee5ca92b/fonts/bricolage-grotesque.woff2",
-      "weights": [
-        200,
-        800
-      ]
-    },
-    "vars": {
-      "--canvas": "#f4f7fb",
-      "--surface": "#ffffff",
-      "--surface-2": "#e9eff6",
-      "--ink": "#0f1b29",
-      "--ink-2": "#45505f",
-      "--ink-3": "#45505f",
-      "--line": "#d2dae4",
-      "--line-2": "#afb8c2",
-      "--accent": "#1f4f8a",
-      "--accent-ink": "#ffffff",
-      "--accent-hover": "#1a4274",
-      "--accent-soft": "#e4eaf1",
-      "--accent-text": "#1f4f8a",
-      "--on-ink": "#ffffff",
-      "--on-ink-2": "#b7bbbf",
-      "--calling": "#a5b9d0",
-      "--link": "#1a4fa8",
-      "--font-display": "\"Bricolage Grotesque\", system-ui, sans-serif",
-      "--h1-weight": "800",
-      "--r-1": "4px",
-      "--r-2": "8px",
-      "--r-3": "12px",
-      "color-scheme": "light"
-    }
+    "intro": "Sem Tina Zupan, dipl. fiziot., in imam Fizioterapijo Pregib na Glavnem trgu 9 v Novem mestu. Delam individualno, ena ura je samo za enega pacienta: bolečine v hrbtu in vratu, poškodbe kolena in rame …"
   },
   {
     "id": "racunovodstvo",
@@ -293,39 +69,7 @@
     "name": "Računovodstvo Seliškar d.o.o.",
     "page": "primer-racunovodstvo/index.html",
     "photos": 0,
-    "font": {
-      "family": "IBM Plex Sans",
-      "file": "_shared/96ee5ca92b/fonts/ibm-plex-sans.woff2",
-      "weights": [
-        100,
-        700
-      ]
-    },
-    "vars": {
-      "--canvas": "#f4f8fb",
-      "--surface": "#ffffff",
-      "--surface-2": "#e9f0f6",
-      "--ink": "#0f1c29",
-      "--ink-2": "#45525f",
-      "--ink-3": "#45525f",
-      "--line": "#d2dbe4",
-      "--line-2": "#afb9c2",
-      "--accent": "#2f3a45",
-      "--accent-ink": "#ffffff",
-      "--accent-hover": "#27313a",
-      "--accent-soft": "#e6e7e9",
-      "--accent-text": "#2f3a45",
-      "--on-ink": "#ffffff",
-      "--on-ink-2": "#b7bbbf",
-      "--calling": "#acb0b5",
-      "--link": "#1a4fa8",
-      "--font-display": "\"IBM Plex Sans\", system-ui, sans-serif",
-      "--h1-weight": "700",
-      "--r-1": "4px",
-      "--r-2": "4px",
-      "--r-3": "8px",
-      "color-scheme": "light"
-    }
+    "intro": "Računovodstvo Seliškar iz Murske Sobote, Slovenska ulica 41. Računovodski servis za samostojne podjetnike, manjša podjetja in društva, delamo od leta 2004: poslovne knjige, plače, DDV …"
   },
   {
     "id": "kmetija",
@@ -334,39 +78,7 @@
     "name": "Turistična kmetija Grabnar",
     "page": "primer-kmetija/index.html",
     "photos": 8,
-    "font": {
-      "family": "Fraunces",
-      "file": "_shared/96ee5ca92b/fonts/fraunces.woff2",
-      "weights": [
-        100,
-        900
-      ]
-    },
-    "vars": {
-      "--canvas": "#f4fbf6",
-      "--surface": "#ffffff",
-      "--surface-2": "#e9f6ec",
-      "--ink": "#0f2916",
-      "--ink-2": "#455f4b",
-      "--ink-3": "#455f4b",
-      "--line": "#d2e4d7",
-      "--line-2": "#afc2b4",
-      "--accent": "#2e5e3a",
-      "--accent-ink": "#ffffff",
-      "--accent-hover": "#274f31",
-      "--accent-soft": "#e6ece7",
-      "--accent-text": "#2e5e3a",
-      "--on-ink": "#ffffff",
-      "--on-ink-2": "#b7bfb9",
-      "--calling": "#abbfb0",
-      "--link": "#1a4fa8",
-      "--font-display": "\"Fraunces\", Georgia, serif",
-      "--h1-weight": "800",
-      "--r-1": "4px",
-      "--r-2": "8px",
-      "--r-3": "12px",
-      "color-scheme": "light"
-    }
+    "intro": "Smo Turistična kmetija Grabnar iz Zgornje Savinjske doline, Podveža 41, Luče. Kmetijo imava z možem Tonetom od leta 1996. Imamo 4 sobe in en apartma, vse z lastno kopalnico in pogledom na gore …"
   },
   {
     "id": "instalater",
@@ -375,38 +87,6 @@
     "name": "Inštalacije Rebernik",
     "page": "primer-instalater/index.html",
     "photos": 0,
-    "font": {
-      "family": "Space Grotesk",
-      "file": "_shared/96ee5ca92b/fonts/space-grotesk.woff2",
-      "weights": [
-        300,
-        700
-      ]
-    },
-    "vars": {
-      "--canvas": "#121619",
-      "--surface": "#1a2025",
-      "--surface-2": "#252d33",
-      "--ink": "#eef3f6",
-      "--ink-2": "#a3b0b9",
-      "--ink-3": "#a3b0b9",
-      "--line": "#2f3940",
-      "--line-2": "#515a61",
-      "--accent": "#35c4e8",
-      "--accent-ink": "#0e1114",
-      "--accent-hover": "#55cdec",
-      "--accent-soft": "#1f414c",
-      "--accent-text": "#35c4e8",
-      "--on-ink": "#121619",
-      "--on-ink-2": "#54585b",
-      "--calling": "#205c6c",
-      "--link": "#8ab4f8",
-      "--font-display": "\"Space Grotesk\", system-ui, sans-serif",
-      "--h1-weight": "700",
-      "--r-1": "0px",
-      "--r-2": "0px",
-      "--r-3": "0px",
-      "color-scheme": "dark"
-    }
+    "intro": "Sem Matej Rebernik, inštalater z mojstrskim izpitom, s sedežem na Ptuju. Delamo vodovod, ogrevanje, toplotne črpalke in prenove kopalnic, večinoma na terenu: Ptuj, Ormož, Slovenska Bistrica in okolica Maribora …"
   }
 ]

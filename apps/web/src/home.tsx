@@ -4,7 +4,7 @@ import { uiUrl } from "./ui/assets.ts";
 import { PRODUCT_NAME } from "./ui/labels.ts";
 import { TURNSTILE_SCRIPT } from "./turnstile.ts";
 import { chatEdits, count, daysAfterOd, moreHomepages } from "./limits.ts";
-import { DEFAULT_CAPTION, tradeCaption, tradeClientData, tradeFontFace, tradeShowcases, tradeStyle } from "./showcase.ts";
+import { tradeCaption, tradeClientData, tradeShowcases, tradeTitle } from "./showcase.ts";
 import { clientScriptUrl } from "./client-bundle.ts";
 
 /**
@@ -16,13 +16,6 @@ import { clientScriptUrl } from "./client-bundle.ts";
  * Without an account the form carries the Turnstile widget. Going to the login from here, home.ts
  * carries the typed text across it (sessionStorage, never the URL) back to this page.
  */
-
-/**
- * What the hero demo types: the opening of the shop's own description, from which the pipeline made the
- * example (tools/eval/fixtures/trgovina-oljka-in-sol/brief.json, shortened).
- */
-const DEMO_PROMPT =
-  "Oljka in sol je majhna trgovina z istrskimi dobrotami v starem mestnem jedru Kopra, Kidričeva ulica 22. Prodajamo oljčno olje, piransko sol, med, vino, pršut in sire manjših pridelovalcev …";
 
 const wholeEur = new Intl.NumberFormat("sl-SI", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
 /** "3 ustvarjene slike", "10 ustvarjenih slik". */
@@ -71,7 +64,7 @@ export interface HomeProps {
   /** A refused intake: the reason, shown above the prompt, and the description, kept. */
   error?: string;
   description?: string;
-  /** `/?primer=<id>`: the page in that trade's look, its showcase site in the demo. */
+  /** `/?primer=<id>`: the demo opens on that trade's site, without the intro. */
   showcase?: string;
   /** The founding offer's places left (its size in config minus the places given); null without an offer. */
   foundingLeft?: number | null;
@@ -83,12 +76,13 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
   const plus = plans.premium;
   const example = uiUrl("examples/primer/index.html");
   // Example sites rendered by our engine (pnpm examples:build): a different business in each place.
-  const shopExample = uiUrl("examples/trgovina-oljka-in-sol/index.html");
   const dentistExample = uiUrl("examples/zobozdravstvo-lebar/index.html");
   const trades = tradeShowcases();
-  const trade = trades.find((t) => t.id === showcase);
+  // The trade the demo opens on: /?primer=<id>, else the first, which the intro types and builds.
+  const chosen = trades.find((t) => t.id === showcase);
+  const shown = chosen ?? trades[0]!;
   return html(
-    <html lang="sl" style={trade ? tradeStyle(trade) : undefined} data-trade={trade?.id}>
+    <html lang="sl">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -99,7 +93,8 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
         <link rel="preload" href={uiUrl("fonts/bricolage-grotesque.woff2")} as="font" type="font/woff2" crossOrigin="" />
         <link rel="stylesheet" href={uiUrl("home.css")} />
         <link rel="icon" href={uiUrl("icon.svg")} type="image/svg+xml" />
-        {trade && <style dangerouslySetInnerHTML={{ __html: tradeFontFace(trade) }} />}
+        {/* html.js before the first paint: the demo's intro starts from its first frame, never from the finished site. */}
+        <script src={uiUrl("js-flag.js")} />
       </head>
       <body>
         <header className="hd">
@@ -209,70 +204,92 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
                   {signedIn ? allowance : `${allowance} Kartice ne potrebujete. Predogled brez prijave hranimo ${config.tiers.anonymous.keepDays} dni.`}
                 </p>
               </div>
-              <div>
-                {/* A chip per trade: the page takes that trade's look and the demo shows its site (home.ts switches in place; without it the links reload). */}
-                <nav className="trades" aria-labelledby="trades-q">
-                  <p className="trades-q" id="trades-q">
-                    Poglejte primer za svojo dejavnost:
-                  </p>
-                  <ul className="chips">
-                    {trades.map((t) => (
-                      <li key={t.id}>
-                        <a className="chip" href={`/?primer=${t.id}#zacni`} data-trade-id={t.id} aria-current={t.id === trade?.id ? "true" : undefined}>
+              {/* The demo: the first trade's description is typed and its site builds itself, then the site transforms
+                    into the next trade's every few seconds (client/home.ts). Without JavaScript the tabs are links. */}
+              <div className="devwrap">
+                  <div className="demo-top">
+                    <p className="trades-q" id="trades-q">
+                      Poglejte primer za svojo dejavnost:
+                    </p>
+                    <div className="demo-tools" hidden>
+                      <div className="views" role="radiogroup" aria-label="Pogled">
+                        <button type="button" role="radio" aria-checked="false" data-mode="phone" aria-label="Telefon" title="Telefon">
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <rect x="7" y="2.5" width="10" height="19" rx="2.2" />
+                            <path d="M11 18.5h2" />
+                          </svg>
+                        </button>
+                        <button type="button" role="radio" aria-checked="true" data-mode="desk" aria-label="Računalnik" title="Računalnik">
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <rect x="2.5" y="4" width="19" height="12.5" rx="1.8" />
+                            <path d="M8.5 20.5h7M12 16.5v4" />
+                          </svg>
+                        </button>
+                      </div>
+                      <button className="pause" type="button" aria-pressed="false" aria-label="Ustavi" title="Ustavi">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M9 6v12M15 6v12" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div className="tabbar">
+                    <div className="tabs" role="tablist" aria-labelledby="trades-q">
+                      {trades.map((t) => (
+                        <a
+                          key={t.id}
+                          className="tab"
+                          role="tab"
+                          href={`/?primer=${t.id}#zacni`}
+                          aria-selected={t === shown ? "true" : "false"}
+                          aria-controls="demo"
+                          tabIndex={t === shown ? 0 : -1}
+                          data-id={t.id}
+                        >
                           {t.label}
                         </a>
-                      </li>
-                    ))}
-                  </ul>
-                  <button className="chip more" type="button" aria-expanded="false" hidden>
-                    Več dejavnosti
-                  </button>
-                  <a className="trades-reset" href="/#zacni" hidden={!trade}>
-                    {`Nazaj na videz ${PRODUCT_NAME}`}
-                  </a>
-                  <p className="sr-only" aria-live="polite" data-trade-status="" />
-                  <script type="application/json" id="trades-data" dangerouslySetInnerHTML={{ __html: JSON.stringify(tradeClientData(trades)).replace(/</g, "\\u003c") }} />
-                </nav>
-                {/* From description to site: typed, built, shown on a phone, then widened to a computer (home.ts plays it). */}
-                <figure className="demo" data-demo="" data-showcase={trade ? "" : undefined}>
-                  <div className="demo-stage">
-                    <div className="demo-prompt" aria-hidden="true">
-                      <p className="demo-text" data-text={DEMO_PROMPT}>
-                        {DEMO_PROMPT}
-                      </p>
-                      <div className="demo-bar">
-                        <span className="demo-chip">＋ 5 fotografij</span>
-                        <span className="demo-go">Ustvari</span>
-                      </div>
+                      ))}
                     </div>
-                    <ol className="demo-steps" aria-hidden="true">
-                      <li>Razumevanje opisa</li>
-                      <li>Oblikovna smer in barve</li>
-                      <li>Fotografije</li>
-                      <li>Besedila in postavitev</li>
-                    </ol>
-                    <div className="demo-device" inert>
-                      <span className="demo-chrome" aria-hidden="true">
+                  </div>
+                  <div className="devbox" data-intro={chosen ? undefined : ""}>
+                    {!chosen && (
+                      <div className="intro" aria-hidden="true">
+                        <div className="ask">
+                          <div className="ask-type">
+                            <p className="ask-text">
+                              <span className="typed" />
+                              <span className="caret" />
+                              <span className="rest">{shown.intro}</span>
+                            </p>
+                            <div className="ask-bar">
+                              <span className="ask-chip">＋ 5 fotografij</span>
+                              <span className="ask-go">Ustvari</span>
+                            </div>
+                          </div>
+                          <ol className="ask-steps">
+                            <li>Razumevanje opisa</li>
+                            <li>Oblikovna smer in barve</li>
+                            <li>Fotografije</li>
+                            <li>Besedila in postavitev</li>
+                          </ol>
+                        </div>
+                      </div>
+                    )}
+                    <div className="dev" data-mode="desk" id="demo" role="tabpanel">
+                      <span className="chrome" aria-hidden="true">
                         <i />
                         <i />
                         <i />
                       </span>
-                      <div className="demo-screen">
-                        <iframe src={trade ? uiUrl(`examples/${trade.page}`) : shopExample} title={trade ? `Primer strani: ${trade.name}` : "Primer strani: trgovina Oljka in sol"}
-                          data-default-src={shopExample}
-                          data-default-title="Primer strani: trgovina Oljka in sol"
-                          loading="lazy"
-                        />
+                      <div className="screen">
+                        <iframe className="stage" title="" tabIndex={-1} aria-hidden="true" />
+                        <iframe className="main" src={uiUrl(`examples/${shown.page}`)} title={tradeTitle(shown)} inert />
                       </div>
                     </div>
                   </div>
-                  <button className="demo-pause" type="button" aria-pressed="false" hidden>
-                    Ustavi
-                  </button>
-                  <figcaption className="phone-cap" data-default={DEFAULT_CAPTION}>
-                    {trade ? tradeCaption(trade) : DEFAULT_CAPTION}
-                  </figcaption>
-                </figure>
+                  <p className="cap">{tradeCaption(shown)}</p>
+                  <p className="sr-only" aria-live="polite" data-demo-status="" />
+                  <script type="application/json" id="trades-data" dangerouslySetInnerHTML={{ __html: JSON.stringify(tradeClientData(trades)).replace(/</g, "\\u003c") }} />
               </div>
             </div>
           </section>
