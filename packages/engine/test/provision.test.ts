@@ -308,7 +308,9 @@ describe("a domain we register for the owner", () => {
     takeover = async () => {
       takeover = null;
       await repo.db.query("update site_domains set lease_until = now() - interval '1 second' where hostname = $1", [row.hostname]);
-      second = (await repo.domains.claim(row.hostname, 300, true))!.lease;
+      // A lease of another length than the first run's: PGlite's clock counts milliseconds, so a takeover in the
+      // same millisecond with the same length would get the same expiry, the first run's token (CI, 2026-10-04).
+      second = (await repo.domains.claim(row.hostname, 600, true))!.lease;
     };
     expect(await provisionDomain(deps(slow), row.hostname)).toEqual({ status: "pending", step: "register" });
     expect(second).not.toBeNull();

@@ -41,9 +41,9 @@ export function tradeShowcases(): TradeShowcase[] {
   });
 }
 
-/** Under the demo: what the visitor sees, and that their own site will differ. */
+/** Under the demo: the trade, and that the business is made up. */
 export const tradeCaption = (t: TradeShowcase): string =>
-  `Takole bi lahko izgledala stran za ${t.forWhom}. ${t.name} je izmišljeno podjetje; vaša stran nastane iz vašega opisa in fotografij, zato bo drugačna.${t.photos ? " Fotografije so ustvarjene z UI." : ""}`;
+  `Primer za ${t.forWhom}: ${t.name} je izmišljeno podjetje.${t.photos ? " Fotografije so ustvarjene z UI." : ""}`;
 
 /** The demo frame's title. */
 export const tradeTitle = (t: TradeShowcase): string => `Primer strani: ${t.name}`;

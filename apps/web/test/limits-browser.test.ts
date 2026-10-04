@@ -113,7 +113,7 @@ async function shot(page: Page, name: string) {
 }
 
 /**
- * Types a description on the landing page and presses "Ustvari". Resolves when the next page has loaded,
+ * Types a description on the landing page and presses "Ustvari stran". Resolves when the next page has loaded,
  * or (without an account, refused at the ticket) when the refusal shows above the form on the same page.
  */
 async function create(page: Page, description: string, scope?: "full") {
@@ -124,7 +124,7 @@ async function create(page: Page, description: string, scope?: "full") {
   const refused = page.locator(".note.bad").waitFor({ timeout: 30_000 }).then(() => "note");
   navigated.catch(() => undefined);
   refused.catch(() => undefined);
-  await page.getByRole("button", { name: "Ustvari" }).click();
+  await page.getByRole("button", { name: "Ustvari stran" }).click();
   await Promise.race([navigated, refused]);
   await page.waitForLoadState();
 }
@@ -148,7 +148,7 @@ describe("free limits in a browser", () => {
       // Cloudflare's script isn't loaded for a mere visit, only once the visitor starts on the form.
       await page.waitForTimeout(300);
       expect(turnstileRequests).toEqual([]);
-      expect(await page.locator("[data-allowance]").textContent()).toContain("Prva domača stran je brezplačna, brez prijave.");
+      expect(await page.locator("[data-allowance]").textContent()).toContain("Brezplačno, brez prijave in brez kartice.");
 
       await create(page, DESCRIPTION);
       expect(turnstileRequests.length).toBe(1);

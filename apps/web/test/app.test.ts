@@ -153,7 +153,9 @@ describe("landing page", () => {
     expect(res.status).toBe(200);
     expect(res.headers.get("x-robots-tag")).toContain("noindex");
     const page = await res.text();
-    expect(page).toContain("Opišite svoje podjetje.<br/>Spletna stran je narejena.");
+    // The slogan is the h1 and the title (sb-slogan); one short line under it.
+    expect(page).toContain('<h1 id="h1">Stran za vaše stranke.</h1>');
+    expect(page).toContain("<title>Stranko · Stran za vaše stranke.</title>");
     for (const id of ["zacni", "kaj", "kako", "primer", "cena", "vprasanja"]) expect(page, id).toContain(`id="${id}"`);
     const plans = loadConfig().plans;
     const std = plans.standard;
@@ -170,11 +172,12 @@ describe("landing page", () => {
     expect(page).toContain(`<dd>${eur(std.setupService.eur)} enkratno</dd>`);
     expect(page).toContain(`Do ${std.site.maxPages} strani`);
     expect(page).toContain(`Do ${plus.site.maxPages} strani`);
-    // Features not built yet say so.
-    expect(page).toContain("novice, ekipa in dogodki (v pripravi)");
+    // Collections and a second language are built (spec v12, Jeziki in the editor): no "v pripravi" on them.
+    expect(page).toContain("<li>Novice, dogodki, storitve in ekipa</li>");
+    expect(page).not.toContain("dogodki (v pripravi)");
     // No billing yet: the prices are planned and nothing is charged.
     expect(plans.billingEnabled).toBe(false);
-    expect(page).toContain("Načrtovane cene, z DDV. Plačevanja še ni, zato zaenkrat ničesar ne zaračunamo.");
+    expect(page).toContain("Načrtovane cene z DDV. Zaenkrat ničesar ne zaračunamo.");
     // The comparison with a designer names the cheapest plan as "from".
     expect(page).toContain(`<b>od ${eur(std.monthlyEur)}</b> na mesec (načrtovana cena)`);
     // Signed out the prompt is the intake too (the first homepage needs no account): a POST, never the URL.
@@ -185,7 +188,7 @@ describe("landing page", () => {
     expect(page).toMatch(/<input[^>]*type="file"[^>]*name="photos"/);
     // No whole-site switch without paid rights; the copy says what's true.
     expect(page).not.toContain('id="scope-full"');
-    expect(page).toContain("Prva domača stran je brezplačna, brez prijave.");
+    expect(page).toContain("Brezplačno, brez prijave in brez kartice.");
     expect(page).not.toContain("Potrebujete le e-poštni naslov");
     expect(page).not.toContain("vodnim žigom");
     expect(page).toContain('href="/zasebnost"');
@@ -228,7 +231,7 @@ describe("landing page", () => {
     const config = loadConfig();
     const page = homePage({ config, signedIn: false, csrf: "t", fullSite: false, allowance: "", botSiteKey: null });
     expect(page).not.toContain("Vsaka sprememba je shranjena kot različica, ki jo lahko obnovite.");
-    expect(page).toContain(`obnovite lahko vsako, ki ni starejša od ${config.versions.retention.keepAllDays} dni, iz starejših dni zadnjo različico dneva, objavljene različice pa vedno.`);
+    expect(page).toContain(`Obnovite lahko vsako različico, ki ni starejša od ${config.versions.retention.keepAllDays} dni, iz starejših dni zadnjo različico dneva, objavljene pa vedno.`);
     const oneDay = { ...config, versions: { ...config.versions, retention: { ...config.versions.retention, keepAllDays: 1 } } };
     expect(homePage({ config: oneDay, signedIn: false, csrf: "t", fullSite: false, allowance: "", botSiteKey: null })).toContain("ni starejša od 1 dneva,");
   });
