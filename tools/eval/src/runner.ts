@@ -13,6 +13,8 @@ import {
   applyChatEdit,
   checkExportOffline,
   checkSite,
+  sampleEntryPages,
+  sitePageFiles,
   exportSite,
   generateSite,
   loadMedia,
@@ -44,6 +46,8 @@ export interface Checkpoint {
   placeholders: number;
   facts: number;
   valid: boolean;
+  /** The page files checked: the spec's pages and the collection entries' own pages. */
+  pages: string[];
   edit?: { message: string; lang: string; reply: string; check: EditCheckResult; issues: string[]; ms: number };
 }
 
@@ -112,14 +116,28 @@ function summarise(label: string, spec: SiteSpec, version: number | null, r: Sit
     placeholders: r.placeholders,
     facts: r.facts.length,
     valid: validateSite(spec).ok,
+    pages: r.pages.map((p) => p.file),
   };
 }
 
-async function checkCurrent(config: AppConfig, repo: Repo, storage: Storage, siteId: string, opts: RunOptions) {
+/**
+ * Checks the site as it is now: every page, collection entries' own pages included (sitePageFiles); one entry page per
+ * collection also gets whole-page screenshots at 360 and 1280 px and Lighthouse beside the homepage's.
+ */
+export async function checkCurrent(config: AppConfig, repo: Repo, storage: Storage, siteId: string, opts: Pick<RunOptions, "lighthouse" | "browser">) {
   const current = (await repo.getSpec(siteId))!;
   const media = await loadMedia(storage, siteId, current.spec, config.images.widths);
   const files = siteFiles(current.spec, media, { imageWidths: config.images.widths });
-  const report = await checkSite(current.spec, files, { config, corpus: await clientCorpus(repo, siteId), lighthouse: opts.lighthouse, browser: opts.browser });
+  const sample = sampleEntryPages(current.spec);
+  const report = await checkSite(current.spec, files, {
+    config,
+    corpus: await clientCorpus(repo, siteId),
+    lighthouse: opts.lighthouse,
+    browser: opts.browser,
+    pages: sitePageFiles(current.spec),
+    shots: sample,
+    lighthousePages: sample,
+  });
   const html = [...files].filter(([k]) => k.endsWith(".html")).map(([, v]) => new TextDecoder().decode(v));
   return { current, report, text: pagesText(html) };
 }
@@ -237,6 +255,12 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
     // First screens as a visitor sees them (sticky bar included), for the review sheets.
     await writeFile(path.join(dir, "home-360-first.png"), first.report.screenshots.mobile);
     await writeFile(path.join(dir, "home-1280-first.png"), first.report.screenshots.desktopFirst);
+    // A collection entry's own page per collection, whole: "entry-novice-odprtje-360.png".
+    for (const s of first.report.pageShots) {
+      const name = `entry-${s.file.replace(/\.html$/, "").replace(/\//g, "-")}`;
+      await writeFile(path.join(dir, `${name}-360.png`), s.mobile);
+      await writeFile(path.join(dir, `${name}-1280.png`), s.desktop);
+    }
     if (opts.judge) {
       // Its own live client: judge calls are never recorded or replayed, and their cost stays out of the site's.
       const judgeClient = new ModelClient({

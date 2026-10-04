@@ -1,6 +1,7 @@
 import type { Operation } from "fast-json-patch";
 import {
   COLLECTION_DIRS,
+  MAX_PAGES,
   isPlaceholder,
   type CollectionKind,
   type Collections,
@@ -33,18 +34,30 @@ const unique = (base: string, taken: Set<string>, sep: string) => {
   return v;
 };
 
-function servicesFrom(s: SourceSection): Service[] {
+/** An entry made from a section's item, and where each of its texts was in that section (under `props`). */
+interface Moved<T> {
+  item: T;
+  from: Partial<Record<string, string>>;
+}
+
+function servicesFrom(s: SourceSection): Moved<Service>[] {
   if (s.type === "services-list")
-    return s.props.items.map((it) => ({ name: it.name, summary: it.description ?? it.name, ...(it.price ? { price: it.price } : {}) }));
-  if (s.type === "services-cards") return s.props.items.map((it) => ({ name: it.title, summary: it.text, ...(it.image ? { image: it.image } : {}) }));
+    return s.props.items.map((it, k) => ({
+      item: { name: it.name, summary: it.description ?? it.name, ...(it.price ? { price: it.price } : {}) },
+      from: { name: `/items/${k}/name`, summary: `/items/${k}/${it.description !== undefined ? "description" : "name"}` },
+    }));
+  if (s.type === "services-cards")
+    return s.props.items.map((it, k) => ({ item: { name: it.title, summary: it.text, ...(it.image ? { image: it.image } : {}) }, from: { name: `/items/${k}/title`, summary: `/items/${k}/text` } }));
   return [];
 }
 
 /** Team members with a name (a name placeholder stays behind: the owner adds that person in the collection). */
-function peopleFrom(s: SourceSection): Person[] {
+function peopleFrom(s: SourceSection): Moved<Person>[] {
   if (s.type !== "team") return [];
-  return s.props.members.flatMap((m) =>
-    isPlaceholder(m.name) ? [] : [{ name: m.name, role: m.role, ...(m.bio ? { bio: m.bio } : {}), ...(m.image ? { image: m.image } : {}) }],
+  return s.props.members.flatMap((m, k) =>
+    isPlaceholder(m.name)
+      ? []
+      : [{ item: { name: m.name, role: m.role, ...(m.bio ? { bio: m.bio } : {}), ...(m.image ? { image: m.image } : {}) }, from: { name: `/members/${k}/name`, role: `/members/${k}/role`, ...(m.bio ? { bio: `/members/${k}/bio` } : {}) } }],
   );
 }
 
@@ -74,14 +87,20 @@ export function startCollection(spec: SiteSpec, kind: CollectionKind): Operation
   // shows for the same name (a service card) comes along.
   const items: (Service | Person)[] = [];
   const byName = new Map<string, Service | Person>();
+  // Where each entry's texts were (`/pages/1/sections/2/props/items/0/name`), first source first: their
+  // translations come along into the collection (it-collection-translations).
+  const origins: Partial<Record<string, string[]>>[] = [];
   for (const src of [main, ...sources].filter((x): x is NonNullable<typeof x> => x !== undefined)) {
-    for (const it of itemsOf(src.s)) {
+    for (const { item: it, from } of itemsOf(src.s)) {
       const key = it.name.toLocaleLowerCase("sl");
       const known = byName.get(key);
       if (!known) {
         byName.set(key, it);
         items.push(it);
+        origins.push({});
       } else if (!known.image && it.image) known.image = it.image;
+      const at = origins[items.indexOf(known ?? it)]!;
+      for (const [field, rel] of Object.entries(from)) (at[field] ??= []).push(`/pages/${src.pi}/sections/${src.si}/props${rel!}`);
     }
   }
 
@@ -119,7 +138,7 @@ export function startCollection(spec: SiteSpec, kind: CollectionKind): Operation
       seo: { title: title.length <= 60 ? title : n.title, description: n.intro(spec.business.name).slice(0, 160) },
       sections: [{ id: unique(`s_${COLLECTION_DIRS[kind].replace(/-/g, "_")}`, sectionIds, "_"), type: "collection", variant: kind === "team" ? "cards" : "list", props: { kind, title: n.title } }],
     };
-    if (spec.pages.length >= 12) return { error: "Stran ima že največ strani (12). Najprej odstranite eno od strani." };
+    if (spec.pages.length >= MAX_PAGES) return { error: `Stran ima že največ strani (${MAX_PAGES}). Najprej odstranite eno od strani.` };
     const index = spec.pages.filter((p) => p.kind === "home" || p.kind === "standard").length;
     ops.push({ op: "add", path: `/pages/${index}`, value: page });
   }
@@ -127,5 +146,27 @@ export function startCollection(spec: SiteSpec, kind: CollectionKind): Operation
   const collection = { page: pageId, items } as NonNullable<Collections[typeof kind]>;
   if (!spec.collections) ops.push({ op: "add", path: "/collections", value: { [kind]: collection } });
   else ops.push({ op: "add", path: `/collections/${kind}`, value: collection });
+  // The moved items' translations (English) move with them; the sections' own headings keep theirs in place.
+  // Only with sources, so no page was inserted and the pointers above are still the spec's own.
+  if (main) {
+    for (const [locale, overlay] of Object.entries(spec.translations ?? {})) {
+      if (!overlay) continue;
+      const next = { ...overlay };
+      let moved = false;
+      origins.forEach((fields, j) => {
+        for (const [field, ptrs] of Object.entries(fields)) {
+          const text = ptrs!.map((p) => overlay[p]).find((t) => t !== undefined);
+          if (text !== undefined) {
+            next[`/collections/${kind}/items/${j}/${field}`] = text;
+            moved = true;
+          }
+        }
+      });
+      if (!moved) continue;
+      // The section items' own pointers no longer reach anything.
+      for (const fields of origins) for (const ptrs of Object.values(fields)) for (const p of ptrs!) delete next[p];
+      ops.push({ op: "replace", path: `/translations/${locale}`, value: next });
+    }
+  }
   return ops;
 }

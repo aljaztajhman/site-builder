@@ -675,6 +675,12 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       const gone = typeof body.version === "number" ? { message: `Različice ${body.version} ni več med shranjenimi. Seznam različic je osvežen.` } : {};
       return c.json({ error: "version not found", ...gone }, 404);
     }
+    // An old version is held to the viewer's plan like any edit: one with a blog or more pages, from before a
+    // move to a smaller plan, isn't brought back (only what grows past the limit is refused).
+    const current = await repo.getSpec(id);
+    const viewer = (c as Context<AppEnv>).get("viewer");
+    const breach = current ? limitBreach(config, tierOf(viewer), viewer.kind === "account" ? viewer.plan : null, current.spec, target.spec) : null;
+    if (breach) return c.json({ error: breach.code, code: breach.code, message: breach.message, upgrade: breach.upgrade }, 403);
     const version = await repo.saveSpec(id, target.spec, "revert", `povrnjeno na različico ${target.version}`);
     return c.json({ ok: true, version });
   });

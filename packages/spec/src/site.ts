@@ -72,6 +72,9 @@ export const Chrome = z.strictObject({
 });
 export type Chrome = z.infer<typeof Chrome>;
 
+/** Most pages a site holds, every kind counted (see `pages` below). */
+export const MAX_PAGES = 24;
+
 export const SiteSpec = z.strictObject({
   specVersion: z.literal(SPEC_VERSION),
   slug: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/).min(2).max(48),
@@ -84,7 +87,7 @@ export const SiteSpec = z.strictObject({
   }),
   chrome: Chrome,
   /** Spec v13: up to 24 (Plus has up to 20 home and standard pages, plus privacy, accessibility and 404; it-plan-limits). */
-  pages: z.array(Page).min(1).max(24),
+  pages: z.array(Page).min(1).max(MAX_PAGES),
   /** Spec v12: blog, events, services and team the owner keeps in the editor (collections.ts). Never generated. */
   collections: Collections.optional(),
   /**

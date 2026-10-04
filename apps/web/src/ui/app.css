@@ -486,6 +486,9 @@ details.more>summary{padding:12px 0;font-weight:600;cursor:pointer}
 .locked .lock{flex:none;color:var(--ink-3)}
 .locked-pages .price-line{color:var(--ink);font-weight:600}
 .limit-note{margin:4px 0 12px}
+/* A collection's entries in the other language: the translation, the original under it. */
+.translations fieldset.translation{margin:0 0 14px}
+.translation-field .original{margin:4px 0 0;font-size:14px;overflow-wrap:anywhere}
 .reminder{display:grid;gap:6px;margin:14px 0}
 .reminder label{font-weight:600;font-size:14px}
 .reminder .row{display:flex;gap:8px;flex-wrap:wrap}

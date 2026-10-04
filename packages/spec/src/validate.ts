@@ -193,7 +193,11 @@ export function semanticIssues(spec: SiteSpec): Issue[] {
 
   // Banned copy.
   for (const v of findBannedCopy(spec.pages, "/pages")) add(v.path, "banned", `${v.rule}: "${v.text}"`);
-  for (const v of findBannedCopy(spec.translations ?? {}, "/translations")) add(v.path, "banned", `${v.rule}: "${v.text}"`);
+  // A collection entry's translation is the owner's own words too (it-collection-translations).
+  const shownTranslations = Object.fromEntries(
+    Object.entries(spec.translations ?? {}).map(([locale, map]) => [locale, Object.fromEntries(Object.entries(map ?? {}).filter(([ptr]) => !ptr.startsWith("/collections/")))]),
+  );
+  for (const v of findBannedCopy(shownTranslations, "/translations")) add(v.path, "banned", `${v.rule}: "${v.text}"`);
 
   // Locales and translation overlays. Only locales with UI strings (a German site would get English buttons).
   if (!spec.locales.enabled.includes(spec.locales.default)) add("/locales", "structure", "default locale must be enabled");

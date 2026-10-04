@@ -87,3 +87,80 @@ describe("chat edits", () => {
     expect(r.spec).toBe(spec);
   });
 });
+
+describe("English overlays move into the collection (it-collection-translations)", () => {
+  it("services: each item's English name and description come along; the sections' headings keep theirs", () => {
+    const before = golden("avtoservis-mrak");
+    before.locales = { default: "sl", enabled: ["sl", "en"] };
+    before.translations = {
+      en: {
+        "/pages/1/sections/1/props/title": "Services and prices",
+        "/pages/1/sections/1/props/items/0/name": "Regular service",
+        "/pages/1/sections/1/props/items/0/description": "By the maker's schedule, so the warranty stays.",
+        "/pages/1/sections/1/props/items/1/name": "Oil and filter change",
+        // The home page's card for the same service: the list's English comes first.
+        "/pages/0/sections/1/props/items/0/title": "Servicing",
+        "/pages/0/sections/1/props/items/1/text": "Brakes, clutches, timing belts and diagnostics.",
+      },
+    };
+    const spec = start(before, "services");
+    const items = spec.collections!.services!.items;
+    const en = spec.translations!.en!;
+    expect(en["/collections/services/items/0/name"]).toBe("Regular service");
+    expect(en["/collections/services/items/0/summary"]).toBe("By the maker's schedule, so the warranty stays.");
+    expect(en["/collections/services/items/1/name"]).toBe("Oil and filter change");
+    // "Popravila in diagnostika" exists only as a card: its English text is now its summary.
+    const repairs = items.findIndex((i) => i.name === "Popravila in diagnostika");
+    expect(en[`/collections/services/items/${repairs}/summary`]).toBe("Brakes, clutches, timing belts and diagnostics.");
+    expect(en["/pages/1/sections/1/props/title"]).toBe("Services and prices");
+    expect(Object.keys(en).filter((p) => p.includes("/props/items/"))).toEqual([]);
+    expect(validateSite(spec).issues).toEqual([]);
+  });
+
+  it("team: role and bio come along; a person's name isn't translated, and a placeholder's English stays behind", () => {
+    const before = golden("zobozdravstvo-lebar");
+    const team = before.pages[0]!.sections[3]!;
+    if (team.type !== "team") throw new Error("team");
+    team.props.members[1]!.bio = "Skrbi za naročanje.";
+    before.locales = { default: "sl", enabled: ["sl", "en"] };
+    before.translations = {
+      en: {
+        "/pages/0/sections/3/props/members/0/role": "DDS, prosthodontics specialist",
+        "/pages/0/sections/3/props/members/1/role": "Dental assistant",
+        "/pages/0/sections/3/props/members/1/bio": "Looks after appointments.",
+      },
+    };
+    const spec = start(before, "team");
+    expect(spec.translations!.en).toEqual({
+      "/collections/team/items/0/role": "DDS, prosthodontics specialist",
+      "/collections/team/items/1/role": "Dental assistant",
+      "/collections/team/items/1/bio": "Looks after appointments.",
+    });
+    expect(validateSite(spec).issues).toEqual([]);
+  });
+
+  it("a site without English gets no translation operations", () => {
+    const ops = startCollection(golden("avtoservis-mrak"), "services");
+    expect("error" in ops ? [] : ops.filter((o) => o.path.startsWith("/translations"))).toEqual([]);
+  });
+
+  it("an entry's English is the owner's own words: not held to the banned phrases (the Slovene isn't either)", () => {
+    const spec = start(golden("pekarna-kvas"), "blog");
+    spec.locales = { default: "sl", enabled: ["sl", "en"] };
+    spec.collections!.blog!.items.push({ title: "Novi kruh 🍞", date: "2026-10-01", summary: "Kruh.", body: ["Kruh."] });
+    spec.translations = { en: { "/collections/blog/items/0/title": "New bread 🍞" } };
+    expect(validateSite(spec).issues).toEqual([]);
+    // A page's English still is.
+    spec.translations.en!["/pages/0/sections/0/props/headline"] = "Fresh bread 🍞";
+    expect(validateSite(spec).issues.map((i) => i.code)).toEqual(["banned"]);
+  });
+
+  it("a new list page is refused only at the spec's page maximum (24), not the old 12", () => {
+    const spec = golden("pekarna-kvas");
+    const filler = (n: number) => ({ id: `p_x${n}`, kind: "standard" as const, slug: `x${n}`, nav: { label: `X${n}`, show: false }, seo: { title: "X", description: "X" }, sections: structuredClone(spec.pages[0]!.sections.slice(0, 1)).map((s) => ({ ...s, id: `${s.id}_${n}` })) });
+    while (spec.pages.length < 12) spec.pages.splice(1, 0, filler(spec.pages.length));
+    expect("error" in startCollection(spec, "blog")).toBe(false);
+    while (spec.pages.length < 24) spec.pages.splice(1, 0, filler(spec.pages.length));
+    expect(startCollection(spec, "blog")).toEqual({ error: "Stran ima že največ strani (24). Najprej odstranite eno od strani." });
+  });
+});
