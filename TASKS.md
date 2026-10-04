@@ -419,6 +419,8 @@ Product work (not started):
 - [ ] Railway bucket: confirm virtual-hosted vs path style in the bucket's Credentials tab; S3 keys are validated in code
 - [x] Railway PR environments: turned off by the owner (`sb-pr-envs` = off); on 2026-10-02 the project has only the `preview` environment
 - [x] Worker replay mode (`MODEL_REPLAY_DIR`) replayed the same recorded edit for every chat message: now the site's n-th chat message gets the n-th recorded edit, from the first again after the last (2026-10-04, branch claude/regenerate-keeps, HQ `it-worker-replay`; `apps/worker/test/regenerate.test.ts`)
+- [ ] Homepage-scope replay recordings (HQ `it-home-replay`, overnight plan `on-home-replay`): the recordings are full-site, so a replayed anonymous homepage fails ("No recording left for stage content"); 3 of 8 limits steps failed in the 2026-10-04 smoke dry run for that reason, and a replay demo can't show the free preview
+- [ ] Editor accessibility (HQ `it-editor-a11y`, overnight plan `on-editor-a11y`): /dostopnost says the editor isn't checked yet; axe at 360 and 1280 px on its main states, keyboard paths for the six owner tasks, then update the statement
 
 ## Done (phase 1 build)
 - Workspace (TS strict, eslint, vitest with network blocked), config in `config/app.config.json`
