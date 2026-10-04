@@ -19,3 +19,4 @@ export * from "./check/index.ts";
 export * from "./editor.ts";
 export type { Operation } from "fast-json-patch";
 export * from "./collections.ts";
+export * from "./provision.ts";

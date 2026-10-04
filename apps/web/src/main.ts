@@ -5,6 +5,7 @@ import { drainMs, intakeClassifier, startWorker } from "@sb/worker/worker";
 import { createApp } from "./app.ts";
 import { retryFormNotifications } from "./form-email.ts";
 import { sendMonthlyReports } from "./stats.ts";
+import { sendDomainLiveEmails } from "./domain-email.ts";
 import { authSettingsFromEnv } from "./auth.ts";
 import { missingEnv, missingEnvLine } from "./env-check.ts";
 
@@ -41,6 +42,13 @@ const reportTimer = setInterval(reports, 60 * 60_000);
 reportTimer.unref();
 setTimeout(reports, 60_000).unref();
 
+// "Your site is live at your domain": the provisioning job leaves it pending, the web service sends it.
+const domainMail = setInterval(
+  () => void sendDomainLiveEmails({ repo: platform.repo, config, mailer, ...(appUrl ? { appUrl } : {}) }).catch((e: unknown) => console.error("[web] domain email", e)),
+  config.domains.notify.everyMinutes * 60_000,
+);
+domainMail.unref();
+
 // In-process job handlers drain like the worker service's (apps/worker/src/main.ts) before the database closes.
 let stopping = false;
 for (const sig of ["SIGINT", "SIGTERM"] as const) {
@@ -49,6 +57,7 @@ for (const sig of ["SIGINT", "SIGTERM"] as const) {
     stopping = true;
     clearInterval(formRetry);
     clearInterval(reportTimer);
+    clearInterval(domainMail);
     void (worker ? worker.shutdown(drainMs(config)).catch((e: unknown) => console.error("[web] worker shutdown", e)) : Promise.resolve())
       .finally(() => void platform.close().finally(() => process.exit(0)));
   });

@@ -446,8 +446,9 @@ export async function publishSite(deps: Pick<PipelineDeps, "repo" | "storage" | 
     const files = siteFiles(current.spec, media, { imageWidths: config.images.widths, siteUrl });
     const release = newReleaseId(current.version);
     await writeRelease(storage, site.slug, release, files);
-    await repo.markPublished(siteId, current.version, release);
-    await repo.addEvent({ siteId, stage: "publish", message: `Published version ${current.version}`, data: { files: files.size, release } });
+    // The address the release carries: a site whose address changes later (a domain goes live) is republished.
+    await repo.markPublished(siteId, current.version, release, siteUrl);
+    await repo.addEvent({ siteId, stage: "publish", message: `Published version ${current.version}`, data: { files: files.size, release, address: siteUrl } });
     return { version: current.version, files: files.size };
   } finally {
     await repo.releasePublish(siteId);

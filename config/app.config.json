@@ -61,6 +61,22 @@
     "$comment": "it-seo-basics. Published sites carry canonical URLs, hreflang, og tags, JSON-LD, robots.txt and sitemap.xml once they have an address (their primary domain, else <slug>.<PLATFORM_DOMAIN>). indexSiteHosts: when true, a site served on its own hostname is sent without the X-Robots-Tag noindex header. Everything on the app's origin (dashboard, /s/ and /preview/ paths) always keeps noindex. Off until the platform domain exists.",
     "indexSiteHosts": false
   },
+  "domains": {
+    "$comment": "Own domains (docs/plans/custom-domains.md, it-domain-flow). enabled shows the domain step after Objavi; off until real providers are wired (only the in-memory fakes can be selected: registrar and edge 'fake'; dns 'fake' answers as if the owner's CNAME were in place, 'system' asks real DNS). tlds are offered in this order; priceEurPerYear is what the owner is shown (VAT included; the yearly plans include the domain), maxCostEur the most we pay the registrar for a name (a premium or repriced name is not offered) and may not exceed plans.costs.domainEurPerYear. .si: registry fee EUR 10, expected EUR 10-13 at the reseller (research 2026-10-03); the .com cost is not confirmed yet. Provisioning runs in the worker (queue 'domain'): a failed step is retried after retry.baseSeconds * 2^n, at most retry.maxSeconds apart and retry.maxAttempts times; a step that waits (the registry, the owner's DNS record, the certificate) may wait waitHours before it counts as failed. The worker looks for due steps every sweepSeconds; one run holds its domain for leaseSeconds. The 'live' email to the owner goes from the web process (it has the mail settings) every notify.everyMinutes, at most notify.maxAttempts tries.",
+    "enabled": false,
+    "providers": { "registrar": "fake", "edge": "fake", "dns": "fake" },
+    "tlds": [
+      { "tld": "si", "priceEurPerYear": 13, "maxCostEur": 13 },
+      { "tld": "com", "priceEurPerYear": 13, "maxCostEur": 13 }
+    ],
+    "suggestions": { "check": 8, "show": 3 },
+    "registrationYears": 1,
+    "retry": { "baseSeconds": 30, "maxSeconds": 3600, "maxAttempts": 10 },
+    "waitHours": { "registration": 48, "dns": 168, "certificate": 24 },
+    "sweepSeconds": 30,
+    "leaseSeconds": 300,
+    "notify": { "everyMinutes": 2, "maxAttempts": 5 }
+  },
   "formEmail": {
     "$comment": "Contact-form email to the site's owner account (Resend; nothing when the site has no owner account). The message is stored first; the submit waits at most waitMs for the send, then answers the visitor the same either way. A failed or slow send stays pending and the web process retries it every retryEveryMinutes, at most maxAttempts sends in all, for messages received within retryWithinHours (under Resend's 24 h idempotency window); then it is marked failed and the owner's message list says the email didn't go out. Resend's idempotency key (form message id) keeps a retry from sending twice within 24 h. Visitor limits: limits.formMessages*.",
     "waitMs": 4000,

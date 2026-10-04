@@ -11,6 +11,7 @@ import { groupVersions, undoTarget, type ListedVersion } from "./versions.ts";
 import { placeholderPath } from "./placeholders.ts";
 import { isPriceListType } from "@sb/spec/price-edit";
 import { itemKeyForPath, priceEditor, type PriceEditorState } from "./price-editor.ts";
+import { domainStatus, domainStep, newDomainStepUi, openDomainStep, type DomainChoice, type DomainStepDeps, type DomainsInfo } from "./domain-step.ts";
 
 type Json = null | boolean | number | string | Json[] | { [k: string]: Json };
 type Obj = { [k: string]: Json };
@@ -69,6 +70,8 @@ interface State {
   checklist: BlockerLike[];
   blockers: string[];
   messages: number;
+  /** The site's own domains and their progress (apps/web/src/domains.ts); absent on old servers. */
+  domains?: DomainsInfo;
   /** Model spend today and the cap: the admin only (null for owners). */
   spendToday: number | null;
   cap: number | null;
@@ -151,6 +154,56 @@ async function api<T = unknown>(path: string, init?: RequestInit): Promise<T> {
 /** A publish is on its way (the button ignores more taps until it lands). */
 let publishing = false;
 
+// ---------- The domain step of publishing (domain-step.ts) ----------
+const domainUi = newDomainStepUi();
+const domainDeps: DomainStepDeps = {
+  h,
+  api,
+  ui: domainUi,
+  rerender: () => render(),
+  // Every paid plan includes the domain in the yearly price (config plans.*.yearlyIncludesDomain).
+  includedInPlan: true,
+  confirm: (choice) => publishWithDomain(choice),
+};
+
+/** One tap: publishes the version on screen, then starts the chosen domain (the worker provisions it). */
+function publishWithDomain(choice: DomainChoice): Promise<void> {
+  if (publishing) return Promise.resolve();
+  publishing = true;
+  return queued(async () => {
+    try {
+      const r = await api<{ url: string }>("/publish", { method: "POST", body: "{}" });
+      toast = `Objavljeno: ${r.url}`;
+      if (choice) {
+        try {
+          await api("/domains", { method: "POST", body: JSON.stringify(choice) });
+          domainUi.open = false;
+          toast = choice.kind === "registered" ? `Objavljeno: ${r.url} Domeno ${choice.hostname} registriramo.` : `Objavljeno: ${r.url} Domeno ${choice.hostname} povezujemo.`;
+        } catch (e) {
+          // The site is published; the domain step stays open with the reason.
+          toast = `Stran je objavljena, domene pa nismo mogli začeti: ${(e as Error).message}`;
+        }
+      } else domainUi.open = false;
+    } catch (e) {
+      toast = `Ni objavljeno. ${(e as Error).message}`;
+    } finally {
+      publishing = false;
+    }
+    await load();
+  });
+}
+
+/** "Preveri zdaj" / "Poskusi znova" on a domain. */
+async function checkDomain(hostname: string): Promise<void> {
+  try {
+    await api(`/domains/${encodeURIComponent(hostname)}/check`, { method: "POST", body: "{}" });
+    toast = "Preverjamo …";
+  } catch (e) {
+    toast = (e as Error).message;
+  }
+  await load();
+}
+
 /** Server clock minus this browser's, from the last state fetch; running-stage seconds use server time. */
 let clockSkew = 0;
 
@@ -203,7 +256,8 @@ const awaitingReply = (): boolean => {
 const pollSignature = (): string => pulseKey(state.pulse);
 const pulseKey = (p: Pulse): string => [p.status, p.version, p.chat, p.lastEvent].join("|");
 
-const pollActive = (): boolean => state.site.status === "generating" || state.site.status === "editing" || awaitingReply();
+const pollActive = (): boolean =>
+  state.site.status === "generating" || state.site.status === "editing" || awaitingReply() || !!state.domains?.domains.some((d) => d.status === "pending");
 
 /** Polls every 2 s while the site is busy, and not at all while the tab is hidden (it catches up when shown). */
 function schedulePoll(): void {
@@ -1882,6 +1936,12 @@ function topItems(): Child[] {
             return showToast();
           }
           if (state.checklist.length) return openChecklist();
+          // No domain yet: the domain step first (pick a name, or "Že imam domeno"); its button publishes.
+          if (state.domains?.enabled && !state.domains.domains.some((d) => d.status !== "failed")) {
+            setSheet("full");
+            void openDomainStep(domainDeps).then(() => document.getElementById("domain-confirm")?.scrollIntoView({ block: "nearest" }));
+            return;
+          }
           // A second tap while publishing does nothing (it would publish the same version again).
           if (publishing) return;
           publishing = true;
@@ -2004,6 +2064,8 @@ function render(): void {
       state.spec ? sheetHandle() : null,
       statusBlock(),
       checklistBlock(),
+      state.spec && can("publish") ? domainStep(domainDeps) : null,
+      state.spec ? domainStatus(h, state.domains, { check: (host) => void checkDomain(host), choose: () => void openDomainStep(domainDeps) }) : null,
       !state.spec && state.site.status !== "generating" && state.site.status !== "failed" ? h("div", { class: "pane" }, h("p", { class: "muted" }, "Stran še nima vsebine.")) : null,
       state.spec && !can("edit") ? guestPane() : null,
       state.spec && can("edit") ? { content: contentPane, facts: factsPane, photos: photosPane, design: designPane, pages: pagesPane, versions: versionsPane, chat: chatPane, diag: diagPane, add: addPane, image: imagePane, collection: collectionPane }[tab]() : null,
