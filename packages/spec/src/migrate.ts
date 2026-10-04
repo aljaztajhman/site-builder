@@ -62,6 +62,10 @@ export const MIGRATIONS: Record<number, (spec: RawSpec) => RawSpec> = {
   // 12 → 13: more pages (it-plan-limits). Additive: a site may hold up to 24 pages instead of 12, so Plus's 20
   // home and standard pages fit beside privacy, accessibility and 404. Every v12 spec is a valid v13 spec.
   12: (spec) => spec,
+  // 13 → 14: the owner's own texts (it-keep-owner-edits). Additive: the optional `ownerEdits`, set by the editor on
+  // direct edits from now on; a stored site has none, so its first regeneration keeps only its business facts, as
+  // before. Every v13 spec is a valid v14 spec.
+  13: (spec) => spec,
 };
 
 export function migrateSpec(input: unknown, migrations = MIGRATIONS, target: number = SPEC_VERSION): SiteSpec {

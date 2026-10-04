@@ -259,7 +259,8 @@ describe("migration 12 → 13 (more pages, it-plan-limits)", () => {
       const golden = read(id);
       const v13 = migrateSpec({ ...golden, specVersion: 12 }, MIGRATIONS, 13);
       expect(v13, id).toEqual({ ...golden, specVersion: 13 });
-      expect(validateSite(v13).issues, id).toEqual([]);
+      // Valid once brought to the current version (the schema accepts only the current one).
+      expect(validateSite(migrateSpec(v13)).issues, id).toEqual([]);
     }
     // 20 home and standard pages beside privacy, accessibility and 404: 23 pages, which v12 refused (12 at most).
     const site = read("pekarna-kvas");
@@ -268,5 +269,27 @@ describe("migration 12 → 13 (more pages, it-plan-limits)", () => {
     expect(big.pages.length).toBe(23);
     expect(Schema.safeParse(big).success).toBe(true);
     expect(Schema.safeParse({ ...big, pages: [...big.pages, { ...extra[0]!, id: "p_x2", slug: "x2" }, { ...extra[0]!, id: "p_x3", slug: "x3" }] }).success).toBe(false);
+  });
+});
+
+describe("migration 13 → 14 (the owner's own texts, it-keep-owner-edits)", () => {
+  it("turns stored v13 sites into valid v14 sites unchanged apart from the version; ownerEdits is optional and checked", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { validateSite, SiteSpec: Schema, MAX_OWNER_EDITS } = await import("../src/index.ts");
+    const read = (id: string) => JSON.parse(readFileSync(new URL(`../../../tools/eval/golden/${id}.json`, import.meta.url), "utf8")) as SiteSpec;
+    for (const id of ["pekarna-kvas", "racunovodstvo-seliskar", "zobozdravstvo-lebar"]) {
+      const golden = read(id);
+      const v14 = migrateSpec({ ...golden, specVersion: 13 });
+      expect(v14, id).toEqual({ ...golden, specVersion: 14 });
+      expect(v14.ownerEdits, id).toBeUndefined();
+      expect(validateSite(v14).issues, id).toEqual([]);
+    }
+    const site = read("pekarna-kvas");
+    const section = site.pages[0]!.sections[0]!.id;
+    expect(Schema.safeParse({ ...site, ownerEdits: [{ section, path: "/props/title" }] }).success).toBe(true);
+    // Only pointers inside a section's props, by a section id; never more than MAX_OWNER_EDITS.
+    expect(Schema.safeParse({ ...site, ownerEdits: [{ section, path: "/variant" }] }).success).toBe(false);
+    expect(Schema.safeParse({ ...site, ownerEdits: [{ section: "hero", path: "/props/title" }] }).success).toBe(false);
+    expect(Schema.safeParse({ ...site, ownerEdits: Array.from({ length: MAX_OWNER_EDITS + 1 }, () => ({ section, path: "/props/title" })) }).success).toBe(false);
   });
 });

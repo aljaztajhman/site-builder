@@ -55,7 +55,7 @@ function recordings(id: string, golden: SiteSpec, heroImage: string | null): Rec
   });
 }
 
-async function run(id: string, photos: number, heroImage: string | null, opts: { slug?: string; again?: { site: SiteRow; stand: StandInImageTransport } } = {}) {
+async function run(id: string, photos: number, heroImage: string | null, opts: { slug?: string; again?: { site: SiteRow; stand: StandInImageTransport }; pictures?: { max?: number; note?: string } } = {}) {
   const again = opts.again;
   const golden = migrateSpec(JSON.parse(await readFile(path.join(here, `../golden/${id}.json`), "utf8"))) as SiteSpec;
   const storage = createFsStorage(path.join(dir, id));
@@ -74,7 +74,7 @@ async function run(id: string, photos: number, heroImage: string | null, opts: {
   const client = new ModelClient({ config, transport: new ReplayTransport(recordings(id, golden, heroImage)), spentToday: async () => 0, onCall });
   const stand = again?.stand ?? new StandInImageTransport();
   const images = new ImageGenerator({ config, transport: stand, spentToday: async () => 0, onCall });
-  await generateSite({ config, repo, storage, client, browser, lighthouse: false, images }, site.id, null);
+  await generateSite({ config, repo, storage, client, browser, lighthouse: false, images, ...(opts.pictures ? { pictures: opts.pictures } : {}) }, site.id, null);
   const spec = (await repo.getSpec(site.id))!.spec;
   return { spec, calls, stand, storage, site };
 }
@@ -128,6 +128,25 @@ describe("generated images for sites with too few photos", () => {
     const html = renderPage(restored, restored.pages[0]!, { imageWidths: config.images.widths });
     expect(html).toContain("media/img_g1-");
     expect(html).not.toContain("img_g3");
+  }, 300_000);
+
+  it("reuses the replaced version's generated pictures when this month's are used up, instead of leaving none", async () => {
+    const first = await run("instalacije-rebernik", 0, "img_g1", { slug: "regen-reuse" });
+    expect(first.stand.calls).toBe(2);
+    // "Ustvari znova" with the plan's pictures for the month used up (plan-limits pictureBudget: max 0).
+    const again = await run("instalacije-rebernik", 0, "img_g1", { again: { site: first.site, stand: first.stand }, pictures: { max: 0, note: "Ta mesec ste porabili vse ustvarjene slike." } });
+    expect(first.stand.calls).toBe(2);
+    expect(again.calls.some((c) => c.stage === "imageGen")).toBe(false);
+    const generated = again.spec.assets.images.filter((i) => i.origin === "generated");
+    expect(generated.map((i) => i.id)).toEqual(["img_g1", "img_g2"]);
+    expect(generated).toEqual(first.spec.assets.images.filter((i) => i.origin === "generated"));
+    expect(validateSite(again.spec).ok).toBe(true);
+    // Still labelled, and the files are the ones the first run stored.
+    const html = renderPage(again.spec, again.spec.pages[0]!, { imageWidths: config.images.widths });
+    expect(html).toContain('data-ai-label="Ustvarjeno z UI"');
+    expect(html).toContain("media/img_g1-");
+    const events = await db.query<{ message: string }>("select message from site_events where site_id = $1", [first.site.id]);
+    expect(events.rows.map((e) => e.message)).toContain("Reused 2 generated picture(s) of the previous version (this month's pictures are used up)");
   }, 300_000);
 
   it("generates nothing when the owner gave enough photos, even with ideas in the brief", async () => {

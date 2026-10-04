@@ -29,7 +29,7 @@ import {
 } from "@sb/engine";
 import { VersionConflictError, contentType, domainProvidersFor, mailerFromEnv, newId, type DomainProviders, type Mailer, type Platform, type SiteStatus, type Tier } from "@sb/platform";
 import { renderPage, renderPath, sharedBundle, pageFile, notFoundPlacement, rebaseRelativeUrls } from "@sb/render";
-import { CollectionKind, blockerText, collectPlaceholders, sectionDef, type SiteSpec } from "@sb/spec";
+import { CollectionKind, blockerText, collectPlaceholders, markOwnerEdits, sectionDef, type SiteSpec } from "@sb/spec";
 import type { AuthSettings } from "./auth.ts";
 import { clientIp, csrfOk, fullSiteRefusal, identity, publishRefusal, refusalJson, sameOriginOnly, signedIn, siteAccess, tierOf, type AppEnv, type Refusal } from "./access.ts";
 import { accessInfo, allowanceFor, picturesFor, picturesShort, previewBadge, reserveJob } from "./limits.ts";
@@ -557,8 +557,14 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     if (breach) return c.json({ error: breach.code, code: breach.code, message: breach.message, upgrade: breach.upgrade }, 403);
     let version: number;
     try {
-      // Only what the owner changed is stored: the fact check counts it as their own text.
-      version = await repo.saveSpec(siteId, r.spec, "manual", message.slice(0, 200), typed ? typedOps(current.spec, ops) : [], current.version);
+      // Only what the owner changed is stored: the fact check counts it as their own text, and "Ustvari znova"
+      // keeps it (spec ownerEdits, it-keep-owner-edits).
+      const own = typed ? typedOps(current.spec, ops) : [];
+      const owned = markOwnerEdits(r.spec, own);
+      const spec: SiteSpec = { ...r.spec };
+      if (owned) spec.ownerEdits = owned;
+      else delete spec.ownerEdits;
+      version = await repo.saveSpec(siteId, spec, "manual", message.slice(0, 200), own, current.version);
     } catch (e) {
       if (e instanceof VersionConflictError) return c.json({ error: "conflict", message: "Stran je bila medtem spremenjena. Osvežite urejevalnik." }, 409);
       throw e;

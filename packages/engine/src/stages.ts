@@ -493,7 +493,8 @@ export async function editSpec(
     {
       role: "user",
       content: [
-        `Current site spec:\n${JSON.stringify(input.spec)}`,
+        // The owner's marks (ownerEdits) are bookkeeping the assistant can't change; left out.
+        `Current site spec:\n${JSON.stringify({ ...input.spec, ownerEdits: undefined })}`,
         history ? `Earlier messages in this conversation (their changes are already in the spec above):\n"""\n${history}\n"""` : "",
         `Client's request:\n"""\n${input.message}\n"""`,
         PATCH_FORMAT,

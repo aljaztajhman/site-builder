@@ -56,7 +56,7 @@ export interface DirectEditResult {
 export function protectedPathIssues(ops: Operation[]): Issue[] {
   const blocked = (p: string) =>
     p === "" ||
-    /^\/(specVersion|slug)(\/|$)/.test(p) ||
+    /^\/(specVersion|slug|ownerEdits)(\/|$)/.test(p) ||
     /^\/assets(\/logo(\/|$)|\/images\/?$|\/images\/[^/]+\/?$|\/images\/[^/]+\/(id|src|width|height|origin)(\/|$)|\/?$)/.test(p);
   const issues: Issue[] = [];
   for (const op of ops) {
