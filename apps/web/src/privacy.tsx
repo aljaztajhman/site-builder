@@ -3,11 +3,13 @@ import type { AppConfig } from "@sb/config";
 import type { AppEnv } from "./access.ts";
 import { Brand, Doc, html } from "./pages.tsx";
 import { PRODUCT_NAME } from "./ui/labels.ts";
+import { Provider } from "./legal.tsx";
 
 /**
  * The product's own privacy policy (/zasebnost): what we store about owners and visitors of the product
  * itself (not the privacy policies of the sites it makes). A draft until the legal entity exists and a
- * lawyer has read it; the provider's details are marked placeholders like the landing page's footer.
+ * lawyer has read it (config legal.lawyerReviewed.privacy); the provider's details come from config legal.provider,
+ * marked placeholders until filled in.
  */
 export function registerPrivacyRoute(app: Hono<AppEnv>, config: AppConfig): void {
   app.get("/zasebnost", (c) => c.html(privacyPage(config)));
@@ -23,12 +25,13 @@ export function privacyPage(config: AppConfig): string {
       </header>
       <main className="messages">
         <h1>Zasebnost</h1>
-        <p className="note">Osnutek. Pred javnim zagonom ga pregleda pravnik; podatki o ponudniku bodo dopolnjeni, ko bo podjetje registrirano.</p>
+        {!config.legal.lawyerReviewed.privacy && <p className="note">Osnutek. Pred javnim zagonom ga pregleda pravnik; podatki o ponudniku bodo dopolnjeni, ko bo podjetje registrirano.</p>}
         <section className="message">
           <h2>Kdo obdeluje podatke</h2>
           <p>
             {`${PRODUCT_NAME}, `}
-            <mark className="ph">[polno ime podjetja, naslov]</mark>. Za vprašanja in zahteve glede vaših podatkov pišite na <mark className="ph">[e-pošta]</mark>.
+            <Provider config={config} field="companyName" />, <Provider config={config} field="address" />. Za vprašanja in zahteve glede vaših podatkov pišite na{" "}
+            <Provider config={config} field="email" />.
           </p>
         </section>
         <section className="message">

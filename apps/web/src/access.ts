@@ -154,6 +154,8 @@ const PUBLIC = (path: string) =>
   path.startsWith("/login/") ||
   path === "/logout" ||
   path === "/zasebnost" ||
+  path === "/pogoji" ||
+  path === "/dostopnost" ||
   // The public website checker and its reports (an unguessable id each).
   path === "/pregled" ||
   /^\/pregled\/[^/]+$/.test(path) ||
