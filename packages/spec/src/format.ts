@@ -38,7 +38,7 @@ export function formatDate(d: Date): string {
 }
 
 /** Slovene mobile and non-geographic prefixes (two digits after +386). */
-const MOBILE_PREFIXES = new Set(["30", "31", "40", "41", "49", "50", "51", "64", "65", "68", "69", "70", "71", "80", "81", "82", "83", "89", "90"]);
+export const MOBILE_PREFIXES: ReadonlySet<string> = new Set(["30", "31", "40", "41", "49", "50", "51", "64", "65", "68", "69", "70", "71", "80", "81", "82", "83", "89", "90"]);
 
 /** +38641123456 -> +386 41 123 456 (mobile); +38615550123 -> +386 1 555 01 23 (landline, one-digit area code). */
 export function formatPhone(e164: string): string {

@@ -419,10 +419,11 @@ details.more>summary{padding:12px 0;font-weight:600;cursor:pointer}
 .domain-alt{margin-top:8px;justify-content:space-between}
 .row.nowrap{flex-wrap:nowrap}
 .row.nowrap input{flex:1;min-width:0}
+.domain-own .row.nowrap{margin-bottom:12px}
 .dns-record{width:100%;border-collapse:collapse;margin:4px 0 8px;font-size:14px;table-layout:fixed}
 .dns-record th,.dns-record td{padding:6px 8px 6px 0;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
 .dns-record th{font-size:13px;font-weight:600;color:var(--ink-2)}
-.dns-record th:first-child,.dns-record td:first-child{width:4.5em}
+.dns-record th:first-child,.dns-record td:first-child{width:5.5em;white-space:nowrap}
 .dns-record th:nth-child(2),.dns-record td:nth-child(2){width:5em}
 .dns-record code{font-size:14px;overflow-wrap:anywhere;user-select:all}
 .domain-progress p{margin:0 0 8px}

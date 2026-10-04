@@ -13,6 +13,7 @@ import {
   startDomain,
 } from "@sb/engine";
 import { normaliseHostname, type DomainProviders, type Queue, type Repo } from "@sb/platform";
+import { formatPhone } from "@sb/spec";
 import { publishRefusal, refusalJson, type AppEnv } from "./access.ts";
 
 /**
@@ -59,6 +60,14 @@ export function registerDomainRoutes(app: Hono<AppEnv>, d: DomainRouteDeps): voi
       ...(await domainsInfo(d, site.id, site.slug)),
       // The holder's details from the site's facts; the confirm sheet shows them with "Uredi".
       registrant,
+      // The same details as one line, written the way the site writes them (+386 41 123 456).
+      holder: [
+        registrant.kind === "company" && registrant.companyName ? registrant.companyName : null,
+        [registrant.firstName, registrant.lastName].filter(Boolean).join(" ") || null,
+        registrant.street ? `${registrant.street}, ${[registrant.postalCode, registrant.city].filter(Boolean).join(" ")}` : null,
+        registrant.phone ? formatPhone(registrant.phone) : null,
+        registrant.email ?? null,
+      ].filter(Boolean).join(" · "),
       missing: registrantMissing(registrant),
       labels: REGISTRANT_LABEL,
       years: config.domains.registrationYears,

@@ -126,7 +126,9 @@ export function csrfOk(c: Context<AppEnv>, body: Record<string, unknown>): boole
  * they can't be cross-site forgeries. The public form endpoint of published sites is exempt.
  */
 export const sameOriginOnly: MiddlewareHandler = async (c, next) => {
-  if (c.req.method === "GET" || c.req.method === "HEAD" || c.req.method === "OPTIONS" || /^\/s\/[^/]+\/_submit$/.test(c.req.path)) return next();
+  // A published site's form and stats beacon are public and carry no authority; behind the edge Worker the
+  // Host header is the app's while the Origin is the site's own domain, so they can't be judged by Host.
+  if (c.req.method === "GET" || c.req.method === "HEAD" || c.req.method === "OPTIONS" || /^\/s\/[^/]+\/(_submit|_hit)$/.test(c.req.path)) return next();
   const fetchSite = c.req.header("sec-fetch-site");
   const origin = c.req.header("origin");
   let cross = false;

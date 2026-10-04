@@ -55,6 +55,8 @@ export interface DomainStepUi {
   registrant: Registrant;
   missing: RegistrantField[];
   labels: Record<RegistrantField, string>;
+  /** The prefilled details as one line, worded by the server. */
+  holder: string;
   editing: boolean;
   ownInput: string;
   own: OwnPlan | null;
@@ -72,6 +74,7 @@ export const newDomainStepUi = (): DomainStepUi => ({
   registrant: {},
   missing: [],
   labels: {} as Record<RegistrantField, string>,
+  holder: "",
   editing: false,
   ownInput: "",
   own: null,
@@ -98,7 +101,7 @@ export async function openDomainStep(d: DomainStepDeps): Promise<void> {
   Object.assign(ui, { ...newDomainStepUi(), open: true, loading: true });
   d.rerender();
   const [info, sugg] = await Promise.all([
-    d.api<{ registrant: Registrant; missing: RegistrantField[]; labels: Record<RegistrantField, string> }>("/domains").catch(() => null),
+    d.api<{ registrant: Registrant; holder: string; missing: RegistrantField[]; labels: Record<RegistrantField, string> }>("/domains").catch(() => null),
     d.api<{ suggestions: { name: string; priceEurPerYear: number }[]; message?: string }>("/domains/suggestions").catch(() => ({ suggestions: [], message: "Prostih domen trenutno ne moremo preveriti." })),
   ]);
   ui.loading = false;
@@ -110,6 +113,7 @@ export async function openDomainStep(d: DomainStepDeps): Promise<void> {
     ui.registrant = info.registrant;
     ui.missing = info.missing;
     ui.labels = info.labels;
+    ui.holder = info.holder;
     ui.editing = info.missing.length > 0;
   }
   d.rerender();
@@ -123,11 +127,10 @@ function registrantBlock(d: DomainStepDeps): HTMLElement {
   const company = r.kind === "company";
   const fields = ORDER.filter((k) => k !== "companyName" || company);
   if (!ui.editing) {
-    const who = company ? `${r.companyName ?? ""} (${[r.firstName, r.lastName].filter(Boolean).join(" ")})` : [r.firstName, r.lastName].filter(Boolean).join(" ");
     return h("div", { class: "domain-holder" },
       h("div", { class: "sp" },
         h("p", { class: "domain-holder-title" }, "Imetnik domene (vi)"),
-        h("p", { class: "muted" }, [who, [r.street, [r.postalCode, r.city].filter(Boolean).join(" ")].filter(Boolean).join(", "), r.phone, r.email].filter(Boolean).join(" · ")),
+        h("p", { class: "muted" }, ui.holder),
       ),
       h("button", { class: "btn quiet sm", type: "button", onClick: () => { ui.editing = true; d.rerender(); } }, "Uredi"),
     );

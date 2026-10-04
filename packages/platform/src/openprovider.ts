@@ -1,3 +1,4 @@
+import { MOBILE_PREFIXES } from "@sb/spec";
 import { DomainProviderError, type DomainCheck, type DomainRegistrar, type Registrant, type RegistrationStatus } from "./domain-providers.ts";
 
 /**
@@ -35,8 +36,6 @@ interface Envelope<T> {
 const AUTH_FAILED = 196;
 /** Domains per check request (older API docs: 15). */
 const CHECK_BATCH = 15;
-/** Slovene mobile prefixes (two digits after +386); landlines have a one-digit area code. */
-const SI_MOBILE = ["30", "31", "40", "41", "49", "51", "64", "65", "68", "69", "70", "71"];
 
 /** "Trubarjeva cesta 12a" → street "Trubarjeva cesta", number "12", suffix "a" (Openprovider's address fields). */
 export function splitStreet(street: string): { street: string; number: string; suffix: string } {
@@ -49,7 +48,8 @@ export function splitPhone(e164: string): { country_code: string; area_code: str
   const m = /^\+386(\d{8})$/.exec(e164);
   if (!m) throw new DomainProviderError(`Only Slovene phone numbers are mapped so far: ${e164.slice(0, 5)}…`, { permanent: true, code: "refused" });
   const digits = m[1]!;
-  const area = SI_MOBILE.includes(digits.slice(0, 2)) ? digits.slice(0, 2) : digits.slice(0, 1);
+  // Mobile and non-geographic prefixes are two digits (the same list the sites format numbers with); landlines one.
+  const area = MOBILE_PREFIXES.has(digits.slice(0, 2)) ? digits.slice(0, 2) : digits.slice(0, 1);
   return { country_code: "+386", area_code: area, subscriber_number: digits.slice(area.length) };
 }
 
