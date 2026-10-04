@@ -1,10 +1,12 @@
 // Static server for the transform prototype: serves the repository root, so the prototype and the
 // example sites (apps/web/src/ui/examples) share one origin and the prototype can reach into the frame.
-// node prototypes/transform/serve.mjs  ->  http://localhost:3091/
+// node prototypes/transform/serve.mjs  ->  http://localhost:3091/ (prototype 2), http://localhost:3091/v1 (prototype 1)
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { URL, fileURLToPath } from "node:url";
+import process from "node:process";
+import console from "node:console";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const port = Number(process.env.PORT ?? 3091);
@@ -12,7 +14,9 @@ const TYPES = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=
 
 createServer(async (req, res) => {
   let p = decodeURIComponent(new URL(req.url ?? "/", "http://x").pathname);
-  if (p === "/") p = "/prototypes/transform/index.html";
+  // / is prototype 2 (only the preview transforms), /v1 the first one (the whole page re-skins too).
+  if (p === "/") p = "/prototypes/transform/preview.html";
+  if (p === "/v1") p = "/prototypes/transform/index.html";
   if (p.endsWith("/")) p += "index.html";
   const file = path.join(root, p);
   if (!file.startsWith(root)) return res.writeHead(403).end();

@@ -1,0 +1,687 @@
+<!doctype html>
+<html lang="sl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Prototip 2: preobrazba predogleda</title>
+<!--
+  Prototype 2 (not wired into the app). The landing page keeps its own look; only the demo site
+  transforms when a trade chip is clicked. Each visible part of the old site (header, logo, menu, headline,
+  text, buttons, photos, cards, section panels) becomes the matching part of the new site:
+  - unlock: the parts lift and spread apart a little, the page underneath goes dark;
+  - travel: each part runs on rails to its new place (one axis, then the other), retracting where the new
+    part is smaller;
+  - turn: at its new place the part flips over on a hinge to its new face, in step with its section's panel;
+  - extend: where the new part is bigger it telescopes out, revealing its face (clipped, never stretched,
+    so text stays sharp);
+  - lock: everything snaps down at once with a small overshoot.
+  Engine: a same-document view transition inside the frame; every part is a named group whose path,
+  size, hinge and timing are computed from both layouts (the new site is laid out first in a hidden frame).
+  Run: node prototypes/transform/serve.mjs, then http://localhost:3091/
+  Debug: ?freeze=<ms> stops the switch at that moment; ?big gives the demo the whole width.
+-->
+<link rel="stylesheet" href="/apps/web/src/ui/home.css">
+<style>
+@font-face{font-family:"Bricolage Grotesque";src:url("/apps/web/src/ui/examples/_shared/85a3177729/fonts/bricolage-grotesque.woff2") format("woff2");font-weight:200 800;font-display:swap}
+@font-face{font-family:"Figtree";src:url("/apps/web/src/ui/examples/_shared/85a3177729/fonts/figtree.woff2") format("woff2");font-weight:300 900;font-display:swap}
+
+@media (min-width:48rem){.hero .wrap{grid-template-columns:1fr 1.1fr;gap:48px;align-items:start}}
+
+.proto{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:16px 0 12px;font:600 13px/1 var(--font-ui);color:var(--ink-3)}
+.proto .seg label{min-height:30px;font-size:13px;padding:0 10px}
+.proto .tog{display:inline-flex;gap:6px;align-items:center;cursor:pointer;user-select:none}
+.proto .tog input{accent-color:var(--accent);margin:0}
+.badge{position:fixed;left:12px;bottom:12px;z-index:5;padding:6px 10px;border-radius:999px;background:#151412;color:#fff;font:600 12px/1 var(--font-ui);letter-spacing:.02em}
+.badge a{color:#c9c4ba;margin-left:8px}
+
+.devwrap{min-width:0}
+.dev{position:relative;margin:0 auto;width:var(--w,300px);height:var(--h,585px);background:#fff;border:1px solid var(--line-2);border-radius:26px;box-shadow:var(--shadow-float);overflow:hidden;display:flex;flex-direction:column;transition:width .9s cubic-bezier(.65,0,.35,1),height .9s cubic-bezier(.65,0,.35,1),border-radius .9s}
+.dev[data-mode=desk]{border-radius:10px}
+.dev .chrome{flex:none;display:flex;align-items:center;gap:6px;height:var(--ch,0px);padding:0 12px;overflow:hidden;background:var(--surface-2);transition:height .9s cubic-bezier(.65,0,.35,1)}
+.dev .chrome i{width:8px;height:8px;border-radius:50%;background:var(--line-2)}
+/* The machine under the site, seen through the seams while the parts move. */
+.dev .screen{position:relative;flex:1;min-height:0;overflow:hidden;background:#191714 radial-gradient(rgb(255 255 255/.07) 1px,transparent 1.3px) 0 0/14px 14px}
+.dev iframe{position:absolute;left:0;top:0;display:block;border:0;width:var(--iw,360px);height:calc((var(--h,585px) - var(--ch,0px)) / var(--s,.8333));transform:scale(var(--s,.8333));transform-origin:0 0}
+.dev iframe.main{z-index:1}
+.dev iframe.stage{z-index:0}
+.cap{font-size:14px;color:var(--ink-3);margin:12px auto 0;max-width:56ch}
+
+.big .hero .wrap{grid-template-columns:1fr !important}.big .hero .wrap>div:first-child,.big .hd{display:none}.big .hero{padding-top:8px}
+@media (prefers-reduced-motion:reduce){.dev,.dev .chrome{transition:none}}
+</style>
+</head>
+<body>
+<span class="badge">Prototip 2 · samo predogled <a href="/v1">prototip 1</a></span>
+
+<header class="hd">
+  <div class="wrap">
+    <a class="brand" href="#"><i aria-hidden="true"></i>Stranko</a>
+    <nav aria-label="Glavni meni">
+      <a href="#">Kaj dobite</a>
+      <a href="#">Kako deluje</a>
+      <a href="#">Primer</a>
+      <a href="#">Cena</a>
+      <a href="#">Vprašanja</a>
+    </nav>
+    <span class="sp"></span>
+    <a class="btn quiet sm login" href="#">Prijava</a>
+    <a class="btn primary sm" href="#">Naredite predogled</a>
+  </div>
+</header>
+
+<main>
+  <section class="hero" aria-labelledby="h1">
+    <div class="wrap">
+      <div>
+        <h1 id="h1">Opišite svoje podjetje.<br>Spletna stran je narejena.</h1>
+        <p class="lead">Za frizerje, gostilne, servise, ambulante, obrtnike in trgovine. Napišete, kdo ste in kaj ponujate, dodate logotip in svoje fotografije. Predogled domače strani vidite v manj kot minuti.</p>
+        <form class="prompt" onsubmit="return false">
+          <label for="opis" class="sr-only">Opis podjetja</label>
+          <textarea id="opis" placeholder="Frizerski salon Lana v Celju, Prešernova 4. Striženje, barvanje in svečane pričeske. Odprto tor–pet 8.00–18.00, sobota 8.00–13.00 …"></textarea>
+          <div class="bar">
+            <span class="btn sm attach">＋ Fotografije</span>
+            <span class="btn sm attach">＋ Logotip</span>
+            <span class="sp"></span>
+            <button class="btn primary" type="button">Ustvari</button>
+          </div>
+        </form>
+        <p class="under">Napišite, kdo ste, kaj ponujate, kje ste in kako vas dosežejo. Česar ne napišete, si ne izmislimo.</p>
+      </div>
+
+      <div class="devwrap">
+        <nav class="trades" aria-labelledby="trades-q">
+          <p class="trades-q" id="trades-q">Poglejte primer za svojo dejavnost:</p>
+          <ul class="chips"></ul>
+          <a class="trades-reset" href="#" hidden>Nazaj na primer trgovine</a>
+        </nav>
+        <div class="proto">
+          <fieldset class="seg">
+            <legend class="sr-only">Naprava</legend>
+            <input type="radio" id="m-desk" name="mode" value="desk" checked><label for="m-desk">Računalnik</label>
+            <input type="radio" id="m-phone" name="mode" value="phone"><label for="m-phone">Telefon</label>
+          </fieldset>
+          <label class="tog"><input type="checkbox" id="slow"> Počasi (×3)</label>
+          <label class="tog"><input type="checkbox" id="auto"> Samodejno</label>
+        </div>
+        <div class="dev" data-mode="desk">
+          <span class="chrome" aria-hidden="true"><i></i><i></i><i></i></span>
+          <div class="screen">
+            <iframe class="stage" title="" tabindex="-1" aria-hidden="true"></iframe>
+            <iframe class="main" title="Primer strani" inert></iframe>
+          </div>
+        </div>
+        <p class="cap" aria-live="polite"></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script type="module">
+const EX = "/apps/web/src/ui/examples/";
+const IDS = ["frizer", "gostilna", "avtoservis", "zobozdravnik", "instalater"];
+const DEFAULT = { id: null, page: "trgovina-oljka-in-sol/index.html" };
+const params = new URLSearchParams(location.search);
+const FREEZE = params.has("freeze") ? Number(params.get("freeze")) : null;
+if (params.has("big")) document.documentElement.classList.add("big");
+
+const all = await fetch(EX + "showcase.json").then((r) => r.json());
+const trades = IDS.map((id) => all.find((t) => t.id === id)).filter(Boolean);
+
+const chipsEl = document.querySelector(".chips");
+const reset = document.querySelector(".trades-reset");
+const dev = document.querySelector(".dev");
+const devwrap = document.querySelector(".devwrap");
+const main = dev.querySelector("iframe.main");
+const stage = dev.querySelector("iframe.stage");
+const cap = document.querySelector(".cap");
+const slowBox = document.getElementById("slow");
+const autoBox = document.getElementById("auto");
+const reduced = matchMedia("(prefers-reduced-motion: reduce)");
+const slow = () => (slowBox.checked ? 3 : 1);
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const within = (p, ms) => Promise.race([p, sleep(ms)]);
+
+for (const t of trades) {
+  const li = document.createElement("li");
+  li.innerHTML = `<a class="chip" href="#" data-id="${t.id}">${t.label}</a>`;
+  chipsEl.append(li);
+}
+const chips = [...chipsEl.querySelectorAll(".chip")];
+
+const caption = (t) => t.id
+  ? `Takole bi lahko izgledala stran za ${t.forWhom}. ${t.name} je izmišljeno podjetje; vaša stran nastane iz vašega opisa in fotografij, zato bo drugačna.`
+  : "Primer: izmišljena trgovina Oljka in sol iz Kopra. Stran je Stranko naredil iz njenega opisa in petih fotografij.";
+
+// ---------- device ----------
+let mode = "desk";
+const size = () => {
+  const col = devwrap.clientWidth;
+  const v = mode === "phone" ? { w: Math.min(300, col), iw: 360, ch: 0 } : { w: col, iw: 1280, ch: 24 };
+  v.h = mode === "phone" ? Math.round(v.w * 1.95) : Math.round(v.w * 0.62) + 24;
+  dev.dataset.mode = mode;
+  for (const [k, val] of Object.entries({ "--w": v.w + "px", "--h": v.h + "px", "--ch": v.ch + "px", "--iw": v.iw + "px", "--s": String(v.w / v.iw) })) dev.style.setProperty(k, val);
+};
+size();
+addEventListener("resize", size);
+for (const r of document.querySelectorAll("input[name=mode]")) r.addEventListener("change", () => { mode = r.value; size(); });
+
+// =====================================================================
+// Parts of a rendered example, matched across two sites by role
+// =====================================================================
+function parts(doc) {
+  const out = [];
+  const used = new Set();
+  const add = (key, el, kind = "part") => {
+    if (!el || used.has(el)) return;
+    used.add(el);
+    out.push({ key, el, kind });
+  };
+  const h = doc.querySelector(".site-header");
+  add("header", h, "plate");
+  if (h) {
+    add("brand", h.querySelector(".site-header__brand"));
+    add("toggle", h.querySelector(".nav-toggle"));
+    h.querySelectorAll(".site-nav__list > li").forEach((li, i) => add("nav" + i, li));
+    add("hcta", h.querySelector(".site-header__inner > .btn"));
+  }
+  const secs = [...doc.querySelectorAll("main > section")];
+  const hero = secs[0];
+  if (hero) {
+    add("hero", hero, "plate");
+    add("card", hero.querySelector(".label-card"), "plate");
+    add("wall", hero.querySelector(".hsig__wall"));
+    add("eyebrow", hero.querySelector(".eyebrow, .hsig__where"));
+    add("h1", hero.querySelector("h1"));
+    add("lead", hero.querySelector(".lead"));
+    hero.querySelectorAll(".actions > *").forEach((a, i) => add("act" + i, a));
+    hero.querySelectorAll("picture.media").forEach((p, i) => add("media" + i, p));
+    hero.querySelectorAll(".hero-facts__item").forEach((f, i) => add("fact" + i, f));
+    add("chip", hero.querySelector(".hsig__chip"));
+  }
+  const s2 = secs[1];
+  if (s2) {
+    add("s2", s2, "plate");
+    add("s2title", s2.querySelector("h2"));
+    const list = s2.querySelector("ul, ol, .week");
+    if (list) [...list.children].slice(0, 6).forEach((li, i) => add("s2i" + i, li));
+    s2.querySelectorAll(".actions > *").forEach((a, i) => add("s2a" + i, a));
+  }
+  // Further sections in view (a tall screen): panels without parts.
+  secs.slice(2, 5).forEach((s, i) => add("s" + (i + 3), s, "plate"));
+  return out;
+}
+
+function visible(doc) {
+  const vh = doc.defaultView.innerHeight;
+  return (p) => {
+    const rects = p.el.getClientRects();
+    if (rects.length !== 1) return false;
+    const r = rects[0];
+    if (r.width < 2 || r.height < 2) return false;
+    p.rect = { left: r.left, top: r.top, width: r.width, height: r.height };
+    return r.bottom > 0 && r.top < vh;
+  };
+}
+
+/**
+ * Section panels with no background of their own show the page's through them; once apart they would be
+ * see-through. While transforming, each one gets the colour that shows behind it. Returns the undo.
+ */
+function fillPanels(list) {
+  const done = [];
+  for (const p of list) {
+    if (p.kind !== "plate") continue;
+    const view = p.el.ownerDocument.defaultView;
+    if (view.getComputedStyle(p.el).backgroundColor !== "rgba(0, 0, 0, 0)") continue;
+    let colour = "#fff";
+    for (let e = p.el.parentElement; e; e = e.parentElement) {
+      const c = view.getComputedStyle(e).backgroundColor;
+      if (c !== "rgba(0, 0, 0, 0)" && c !== "transparent") { colour = c; break; }
+    }
+    p.el.style.backgroundColor = colour;
+    done.push(p.el);
+  }
+  return () => { for (const el of done) el.style.removeProperty("background-color"); };
+}
+
+const sortOf = (p) => (p.kind === "plate" ? "plate" : p.el.matches("picture, img") || p.el.querySelector("picture, img") ? "media" : p.el.matches(".btn, button") ? "control" : "text");
+const boxy = (p) => p.kind === "plate" || sortOf(p) !== "text" || p.el.matches("li, .hero-facts__item, .label-card");
+
+function match(oldParts, newParts) {
+  const close = (a, b) => {
+    const r = (a.rect.width * a.rect.height) / (b.rect.width * b.rect.height);
+    return r < 5 && r > 1 / 5;
+  };
+  const byKey = new Map(newParts.map((p) => [p.key, p]));
+  const pairs = [];
+  const oldLeft = [];
+  for (const o of oldParts) {
+    const n = byKey.get(o.key);
+    if (n && n.kind === o.kind) {
+      pairs.push({ o, n });
+      byKey.delete(o.key);
+    } else oldLeft.push(o);
+  }
+  const order = (a, b) => a.rect.top - b.rect.top || a.rect.left - b.rect.left;
+  const newLeft = [...byKey.values()].sort(order);
+  oldLeft.sort(order);
+  const exits = [];
+  for (const o of oldLeft) {
+    const i = newLeft.findIndex((n) => sortOf(o) === sortOf(n) && close(o, n));
+    if (i >= 0) pairs.push({ o, n: newLeft.splice(i, 1)[0] });
+    else exits.push(o);
+  }
+  return { pairs, exits, enters: newLeft };
+}
+
+// =====================================================================
+// Choreography: every part's path, size, hinge and timing, as CSS keyframes
+// =====================================================================
+const EASE = {
+  out: "cubic-bezier(.2,.8,.2,1)",
+  rail: "cubic-bezier(.8,0,.2,1)",
+  turnIn: "cubic-bezier(.55,0,1,.45)",
+  turnOut: "cubic-bezier(.15,.85,.35,1.2)",
+  extend: "cubic-bezier(.65,0,.2,1.12)",
+  snap: "cubic-bezier(.35,0,.6,1)",
+  settle: "cubic-bezier(.2,.9,.3,1)",
+};
+const regionIndex = { header: 0, hero: 1, card: 1, s2: 2, s3: 3, s4: 4, s5: 5 };
+const centre = (r) => ({ x: r.left + r.width / 2, y: r.top + r.height / 2 });
+
+/** Keyframes from timed states; times in ms on the switch's clock. */
+function keyframes(name, frames, total) {
+  let out = `@keyframes ${name}{`;
+  let last = -1;
+  for (const f of frames) {
+    // Rounded first, then kept strictly increasing: two equal percentages merge into one keyframe.
+    let pct = Math.round(Math.min(100, (f.t / total) * 100) * 1e4) / 1e4;
+    if (pct <= last) pct = Math.round((last + 0.001) * 1e4) / 1e4;
+    last = pct;
+    out += `${pct.toFixed(4)}%{${f.css}${f.ease ? `;animation-timing-function:${f.ease}` : ""}}`;
+  }
+  return out + "}";
+}
+
+function choreograph({ pairs, exits, enters, oldPlates, newPlates, vw, vh, k }) {
+  const T = { unlock: 200, stagger: 48, leg: 210, turn: 280, extend: 240, lock: 260 };
+  for (const key in T) T[key] *= k;
+  const LIFT = 0.955;
+  // Stacking while apart follows each page's own paint order (a full-width photo stays under the text card on it).
+  const order = (els) => new Map([...els].sort((a, b) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1)).map((el, i) => [el, 10 + i]));
+  const zNew = order([...pairs.map((p) => p.n.el), ...enters.map((p) => p.el)]);
+  const zOld = order(exits.map((p) => p.el));
+
+  const regionOf = (plates, rect) => {
+    const c = centre(rect);
+    let r = 2;
+    for (const pl of plates) {
+      const b = pl.rect;
+      if (c.x >= b.left && c.x <= b.left + b.width && c.y >= b.top && c.y <= b.top + b.height) r = regionIndex[pl.key] ?? r;
+    }
+    return r;
+  };
+  // Parts spread out from the middle of the screen while apart (an exploded view); panels don't.
+  const spread = (p, rect) => {
+    if (p.kind === "plate") return { x: 0, y: 0 };
+    const c = centre(rect);
+    const dx = c.x - vw / 2, dy = c.y - vh / 2;
+    const d = Math.hypot(dx, dy) || 1;
+    const m = Math.min(22, d * 0.045);
+    return { x: (dx / d) * m, y: (dy / d) * m };
+  };
+
+  // ---- schedule: one wave of parts from the top of the new page down; each part turns as it arrives ----
+  const items = pairs.map((p) => ({ ...p, r: p.o.kind === "plate" ? regionIndex[p.n.key] ?? 2 : regionOf(newPlates, p.n.rect) }));
+  const byTop = (a, b) => a.top - b.top || a.left - b.left;
+  items.sort((a, b) => byTop(a.n.rect, b.n.rect) || (a.o.kind === "plate" ? -1 : 1));
+  items.forEach((it, i) => {
+    it.tS = T.unlock + i * T.stagger;
+    it.tL1 = it.tS + T.leg;
+    it.tL2 = it.tL1 + T.leg;
+    it.tF = it.tL2;
+  });
+  // A section's panel turns over in the middle of its parts' turns, so its colour and theirs change together.
+  for (const pl of items.filter((it) => it.o.kind === "plate")) {
+    const turns = items.filter((it) => it.o.kind !== "plate" && it.r === pl.r).map((it) => it.tF).sort((a, b) => a - b);
+    if (turns.length) pl.tF = Math.max(pl.tL2, turns[Math.floor(turns.length / 2)]);
+  }
+  for (const it of items) {
+    it.tFm = it.tF + T.turn / 2;
+    it.tFe = it.tF + T.turn;
+    it.tX = it.tFe + T.extend;
+  }
+  // Leftover parts leave early to make room; new ones unfold as the wave reaches their place.
+  const outs = exits.sort((a, b) => byTop(a.rect, b.rect)).map((p, j) => {
+    const tS = T.unlock + j * T.stagger * 0.6;
+    return { p, tS, tE: tS + 2 * T.leg };
+  });
+  const ins = enters.map((p) => {
+    const reached = items.filter((it) => it.n.rect.top <= p.rect.top).length;
+    const tS = T.unlock + reached * T.stagger + T.leg;
+    return { p, tS, tE: tS + 2 * T.leg + T.extend };
+  });
+  const LOCK = Math.max(0, ...items.map((i) => i.tX), ...outs.map((o) => o.tE), ...ins.map((i) => i.tE)) + 40 * k;
+  const TOTAL = LOCK + T.lock;
+  const LOCK_PEAK = LOCK + T.lock * 0.45;
+
+  let css = `
+::view-transition{background:#191714 radial-gradient(rgb(255 255 255/.07) 1px,transparent 1.3px) 0 0/14px 14px}
+::view-transition-old(*),::view-transition-new(*){mix-blend-mode:normal;inline-size:auto;block-size:auto;animation:none}
+::view-transition-image-pair(*){overflow:clip;overflow-clip-margin:6px;isolation:auto}
+::view-transition-old(root){animation:rig-root-out ${T.unlock}ms ${EASE.out} both}
+::view-transition-new(root){animation:rig-root-in ${T.lock}ms ${LOCK}ms ${EASE.out} both}
+@keyframes rig-root-out{to{opacity:0}}
+@keyframes rig-root-in{from{opacity:0}}`;
+
+  const groupCss = (x, y, w, h) => `transform:translate(${x.toFixed(1)}px,${y.toFixed(1)}px);width:${w.toFixed(1)}px;height:${h.toFixed(1)}px`;
+  // 3D only while a part turns over: a 3D layer is rasterised soft, so outside the turn the part stays flat and sharp.
+  const pairCss = (p, s, { z = 0, turn = null, axis = "X", per = 900, lifted = false, light = 1 }) => {
+    const shadow = boxy(p) ? (lifted ? "drop-shadow(0 10px 14px rgb(0 0 0/.42))" : "drop-shadow(0 0 0 rgb(0 0 0/0))") + " " : "";
+    const tf = turn === null ? `rotate(${z}deg) scale(${s})` : `perspective(${per}px) rotate(${z}deg) rotate${axis}(${turn}deg) scale(${s})`;
+    return `transform:${tf};filter:${shadow}brightness(${light})`;
+  };
+  const opacity = (name, which, frames, total) => keyframes(name, frames.map(([t, o]) => ({ t, css: `opacity:${o}` })), total) + `\n::view-transition-${which}(${name.replace(/-(o|n)$/, "")}){animation:${name} ${total}ms linear both}`;
+
+  const names = []; // [oldElement, name]
+  const newNames = new Map(); // new key -> name
+  let h1Item = null;
+
+  items.forEach((it, i) => {
+    const name = "rig-" + i;
+    it.name = name;
+    names.push([it.o.el, name]);
+    newNames.set(it.n.key, name);
+    if (it.n.key === "h1") h1Item = it;
+    const a = it.o.rect, b = it.n.rect;
+    const e0 = spread(it.o, a), e1 = spread(it.n, b);
+    // Rails: the longer axis first. Where the new part is smaller it retracts on the way; bigger, it extends after the turn.
+    const hFirst = Math.abs(b.left - a.left) >= Math.abs(b.top - a.top);
+    const mid = hFirst ? { x: b.left + e0.x, y: a.top + e0.y } : { x: a.left + e0.x, y: b.top + e0.y };
+    const wT = Math.min(a.width, b.width), hT = Math.min(a.height, b.height);
+    css += "\n" + keyframes(name + "-g", [
+      { t: 0, css: groupCss(a.left, a.top, a.width, a.height), ease: EASE.out },
+      { t: T.unlock, css: groupCss(a.left + e0.x, a.top + e0.y, a.width, a.height) },
+      { t: it.tS, css: groupCss(a.left + e0.x, a.top + e0.y, a.width, a.height), ease: EASE.rail },
+      { t: it.tL1, css: groupCss(mid.x, mid.y, (a.width + wT) / 2, (a.height + hT) / 2), ease: EASE.rail },
+      { t: it.tL2, css: groupCss(b.left + e1.x, b.top + e1.y, wT, hT) },
+      { t: it.tFe, css: groupCss(b.left + e1.x, b.top + e1.y, wT, hT), ease: EASE.extend },
+      { t: it.tX, css: groupCss(b.left + e1.x, b.top + e1.y, b.width, b.height) },
+      { t: LOCK, css: groupCss(b.left + e1.x, b.top + e1.y, b.width, b.height), ease: EASE.snap },
+      { t: TOTAL, css: groupCss(b.left, b.top, b.width, b.height) },
+    ], TOTAL);
+    // Hinge: wide parts and panels over the top edge, the rest on their side; alternate directions.
+    const axis = it.o.kind === "plate" || b.width > b.height * 2.2 ? "X" : "Y";
+    const dir = i % 2 ? -1 : 1;
+    const per = Math.max(900, 2.2 * Math.max(wT, hT));
+    const tilt = Math.max(-3, Math.min(3, (b.left - a.left) / 60)) * (it.o.kind === "plate" ? 0 : 1);
+    const P = (s, o) => pairCss(it.o, s, { axis, per, ...o });
+    css += "\n" + keyframes(name + "-p", [
+      { t: 0, css: P(1, {}), ease: EASE.out },
+      { t: T.unlock, css: P(LIFT, { lifted: true }) },
+      { t: it.tS, css: P(LIFT, { lifted: true }), ease: EASE.rail },
+      { t: it.tL1, css: P(LIFT, { lifted: true, z: tilt }), ease: EASE.rail },
+      { t: it.tL2, css: P(LIFT, { lifted: true }) },
+      { t: it.tF - 0.5, css: P(LIFT, { lifted: true }) },
+      { t: it.tF, css: P(LIFT, { lifted: true, turn: 0 }), ease: EASE.turnIn },
+      { t: it.tFm, css: P(LIFT, { lifted: true, turn: 90 * dir }) },
+      { t: it.tFm + 0.5, css: P(LIFT, { lifted: true, turn: -90 * dir }), ease: EASE.turnOut },
+      { t: it.tFe, css: P(LIFT, { lifted: true, turn: 0 }) },
+      { t: it.tFe + 0.5, css: P(LIFT, { lifted: true }) },
+      { t: LOCK, css: P(LIFT, { lifted: true }), ease: EASE.snap },
+      { t: LOCK_PEAK, css: P(1.018, { light: 1.12 }), ease: EASE.settle },
+      { t: TOTAL, css: P(1, {}) },
+    ], TOTAL);
+    css += `
+::view-transition-group(${name}){z-index:${zNew.get(it.n.el)};animation:${name}-g ${TOTAL}ms linear both}
+::view-transition-image-pair(${name}){animation:${name}-p ${TOTAL}ms linear both}`;
+    css += "\n" + opacity(name + "-o", "old", [[0, 1], [it.tFm, 1], [it.tFm + 0.5, 0], [TOTAL, 0]], TOTAL);
+    css += "\n" + opacity(name + "-n", "new", [[0, 0], [it.tFm, 0], [it.tFm + 0.5, 1], [TOTAL, 1]], TOTAL);
+  });
+
+  const nearest = (from, side) => {
+    let best = null, bd = Infinity;
+    for (const it of items) {
+      if (it.o.kind === "plate") continue;
+      const c = centre(it[side].rect);
+      const d = Math.hypot(c.x - from.x, c.y - from.y);
+      if (d < bd) { bd = d; best = it; }
+    }
+    return best;
+  };
+
+  // Parts the new site doesn't need retract into the nearest part's new place; panels drop out of view.
+  outs.forEach(({ p, tS, tE }, i) => {
+    const name = "rig-out-" + i;
+    names.push([p.el, name]);
+    const a = p.rect, e0 = spread(p, a);
+    const into = p.kind === "plate" ? null : nearest(centre(a), "n");
+    const t = into ? centre(into.n.rect) : { x: a.left + a.width / 2, y: vh + a.height };
+    const endW = p.kind === "plate" ? a.width : 6, endH = p.kind === "plate" ? a.height : 6;
+    css += "\n" + keyframes(name + "-g", [
+      { t: 0, css: groupCss(a.left, a.top, a.width, a.height), ease: EASE.out },
+      { t: T.unlock, css: groupCss(a.left + e0.x, a.top + e0.y, a.width, a.height) },
+      { t: tS, css: groupCss(a.left + e0.x, a.top + e0.y, a.width, a.height), ease: EASE.rail },
+      { t: tE, css: groupCss(t.x - endW / 2, p.kind === "plate" ? t.y : t.y - endH / 2, endW, endH) },
+      { t: TOTAL, css: groupCss(t.x - endW / 2, p.kind === "plate" ? t.y : t.y - endH / 2, endW, endH) },
+    ], TOTAL);
+    css += "\n" + keyframes(name + "-p", [
+      { t: 0, css: pairCss(p, 1, {}), ease: EASE.out },
+      { t: T.unlock, css: pairCss(p, LIFT, { lifted: true }) },
+      { t: tS, css: pairCss(p, LIFT, { lifted: true }), ease: EASE.turnIn },
+      { t: tE, css: pairCss(p, LIFT, { lifted: true, z: i % 2 ? 25 : -25 }) },
+      { t: TOTAL, css: pairCss(p, LIFT, { lifted: true, z: i % 2 ? 25 : -25 }) },
+    ], TOTAL);
+    css += `
+::view-transition-group(${name}){z-index:${p.kind === "plate" ? 5 : 100 + zOld.get(p.el)};animation:${name}-g ${TOTAL}ms linear both}
+::view-transition-image-pair(${name}){animation:${name}-p ${TOTAL}ms linear both}`;
+    css += "\n" + opacity(name + "-o", "old", [[0, 1], [tE - 60 * k, 1], [tE, 0], [TOTAL, 0]], TOTAL);
+  });
+
+  // Parts the new site adds unfold out of the nearest part's old place; panels rise from below.
+  ins.forEach(({ p, tS, tE }, i) => {
+    const name = "rig-in-" + i;
+    newNames.set(p.key, name);
+    const b = p.rect, e1 = spread(p, b);
+    const from = p.kind === "plate" ? null : nearest(centre(b), "o");
+    const s = from ? centre(from.o.rect) : { x: b.left + b.width / 2, y: vh + b.height };
+    const w0 = p.kind === "plate" ? b.width : 6, h0 = p.kind === "plate" ? b.height : 6;
+    const s0 = groupCss(s.x - w0 / 2, p.kind === "plate" ? s.y : s.y - h0 / 2, w0, h0);
+    css += "\n" + keyframes(name + "-g", [
+      { t: 0, css: s0 },
+      { t: tS, css: s0, ease: EASE.extend },
+      { t: tE, css: groupCss(b.left + e1.x, b.top + e1.y, b.width, b.height) },
+      { t: LOCK, css: groupCss(b.left + e1.x, b.top + e1.y, b.width, b.height), ease: EASE.snap },
+      { t: TOTAL, css: groupCss(b.left, b.top, b.width, b.height) },
+    ], TOTAL);
+    css += "\n" + keyframes(name + "-p", [
+      { t: 0, css: pairCss(p, LIFT, { lifted: true, z: i % 2 ? -20 : 20 }) },
+      { t: tS, css: pairCss(p, LIFT, { lifted: true, z: i % 2 ? -20 : 20 }), ease: EASE.extend },
+      { t: tE, css: pairCss(p, LIFT, { lifted: true }) },
+      { t: LOCK, css: pairCss(p, LIFT, { lifted: true }), ease: EASE.snap },
+      { t: LOCK_PEAK, css: pairCss(p, 1.018, { light: 1.12 }), ease: EASE.settle },
+      { t: TOTAL, css: pairCss(p, 1, {}) },
+    ], TOTAL);
+    css += `
+::view-transition-group(${name}){z-index:${zNew.get(p.el)};animation:${name}-g ${TOTAL}ms linear both}
+::view-transition-image-pair(${name}){animation:${name}-p ${TOTAL}ms linear both}`;
+    css += "\n" + opacity(name + "-n", "new", [[0, 0], [tS, 0], [tS + 0.5, 1], [TOTAL, 1]], TOTAL);
+  });
+
+  return { css, names, newNames, TOTAL, h1Item, T };
+}
+
+/** The headline's letters shuffle into the new words, left to right (the real, live text). */
+function decode(el, start, dur) {
+  const walker = el.ownerDocument.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) nodes.push({ n: walker.currentNode, text: walker.currentNode.nodeValue });
+  const pool = nodes.map((x) => x.text).join("").replace(/\s/g, "") || "abc";
+  const total = nodes.reduce((s, x) => s + x.text.length, 0);
+  let raf = 0, t0 = 0;
+  const frame = (now) => {
+    if (!t0) t0 = now;
+    const p = Math.min(1, (now - t0) / dur);
+    let i = 0;
+    for (const x of nodes) {
+      let s = "";
+      for (const ch of x.text) {
+        s += /\s/.test(ch) || i / total < p ? ch : pool[(Math.random() * pool.length) | 0];
+        i++;
+      }
+      x.n.nodeValue = s;
+    }
+    if (p < 1) raf = requestAnimationFrame(frame);
+  };
+  const timer = setTimeout(() => (raf = requestAnimationFrame(frame)), start);
+  return () => {
+    clearTimeout(timer);
+    cancelAnimationFrame(raf);
+    for (const x of nodes) x.n.nodeValue = x.text;
+  };
+}
+
+// =====================================================================
+// The switch
+// =====================================================================
+const loadInto = (frame, src) => new Promise((resolve) => {
+  frame.addEventListener("load", resolve, { once: true });
+  frame.src = src;
+});
+const settle = async (doc) => {
+  doc.body.offsetHeight;
+  await within(doc.fonts.ready, 1200);
+  const imgs = [...doc.images].filter((i) => { const r = i.getBoundingClientRect(); return r.bottom > 0 && r.top < doc.defaultView.innerHeight; });
+  await within(Promise.all(imgs.map((i) => i.decode().catch(() => undefined))), 1500);
+};
+
+let morphing = null;
+async function transformSite(url) {
+  const doc = main.contentDocument;
+  const win = main.contentWindow;
+  const k = slow();
+  // The new site, laid out in the hidden frame first: its parts' places, fonts and photos warm.
+  const [html] = await Promise.all([fetch(url).then((r) => r.text()), loadInto(stage, url)]);
+  const sdoc = stage.contentDocument;
+  sdoc.defaultView.scrollTo(0, 0);
+  await settle(sdoc);
+  win.scrollTo(0, 0);
+
+  if (!doc.startViewTransition || reduced.matches) {
+    await loadInto(main, url);
+    return;
+  }
+
+  const oldParts = parts(doc).filter(visible(doc));
+  const newParts = parts(sdoc).filter(visible(sdoc));
+  const { pairs, exits, enters } = match(oldParts, newParts);
+  const plan = choreograph({
+    pairs, exits, enters,
+    oldPlates: oldParts.filter((p) => p.kind === "plate"),
+    newPlates: newParts.filter((p) => p.kind === "plate"),
+    vw: win.innerWidth, vh: win.innerHeight, k,
+  });
+
+  const style = doc.createElement("style");
+  style.dataset.rig = "";
+  style.textContent = plan.css;
+  doc.head.append(style);
+  for (const [el, name] of plan.names) el.style.viewTransitionName = name;
+  fillPanels(oldParts);
+
+  let undoDecode = () => {};
+  let unfill = () => {};
+  const vt = doc.startViewTransition(async () => {
+    win.history.replaceState(null, "", url);
+    const nd = new DOMParser().parseFromString(html, "text/html");
+    const de = doc.documentElement;
+    for (const a of [...de.attributes]) de.removeAttribute(a.name);
+    for (const a of nd.documentElement.attributes) de.setAttribute(a.name, a.value);
+    // Identical head nodes stay (the shared stylesheet stays loaded); the rest is replaced.
+    const want = new Set([...nd.head.children].map((n) => n.outerHTML));
+    const have = new Set();
+    for (const n of [...doc.head.children]) {
+      if (n === style) continue;
+      if (want.has(n.outerHTML)) have.add(n.outerHTML);
+      else n.remove();
+    }
+    const added = [];
+    for (const n of nd.head.children) if (!have.has(n.outerHTML)) added.push(doc.head.appendChild(doc.importNode(n, true)));
+    doc.head.append(style);
+    doc.body.replaceWith(doc.importNode(nd.body, true));
+    // Imported scripts don't run: run the site's own (the phone menu folds itself up with one).
+    for (const old of doc.querySelectorAll("script:not([type=application\\/ld\\+json])")) {
+      const s = doc.createElement("script");
+      for (const a of old.attributes) s.setAttribute(a.name, a.value);
+      s.textContent = old.textContent;
+      old.replaceWith(s);
+    }
+    await within(Promise.all(added.filter((n) => n.matches("link[rel=stylesheet]")).map((n) => new Promise((r) => { n.onload = r; n.onerror = r; }))), 1500);
+    const live = new Map(parts(doc).map((p) => [p.key, p]));
+    for (const [key, name] of plan.newNames) live.get(key)?.el.style.setProperty("view-transition-name", name);
+    unfill = fillPanels([...live.values()].filter((p) => [...plan.newNames.keys()].includes(p.key)));
+    await settle(doc);
+    if (plan.h1Item && live.get("h1")) undoDecode = decode(live.get("h1").el, plan.h1Item.tFm, plan.T.turn / 2 + plan.T.extend + 220 * k);
+  });
+  morphing = vt;
+  vt.ready.catch(() => undefined);
+  if (FREEZE !== null) vt.ready.then(() => {
+    for (const a of doc.getAnimations()) { a.pause(); a.currentTime = FREEZE * k; }
+  });
+  try {
+    await vt.finished;
+  } catch (e) {
+    console.warn("transform skipped", e);
+  } finally {
+    undoDecode();
+    unfill();
+    style.remove();
+    for (const el of doc.querySelectorAll("[style*=view-transition-name]")) el.style.removeProperty("view-transition-name");
+    morphing = null;
+  }
+}
+
+let current = DEFAULT;
+let busy = false;
+let queued = null;
+async function switchTo(t) {
+  if (busy) { queued = t; morphing?.skipTransition?.(); return; }
+  if (t === current) return;
+  busy = true;
+  current = t;
+  for (const c of chips) {
+    if (c.dataset.id === t.id) c.setAttribute("aria-current", "true");
+    else c.removeAttribute("aria-current");
+  }
+  reset.hidden = !t.id;
+  cap.textContent = caption(t);
+  try {
+    await transformSite(EX + t.page);
+  } finally {
+    busy = false;
+  }
+  if (queued) { const q = queued; queued = null; switchTo(q); }
+}
+
+for (const c of chips) {
+  const t = trades.find((x) => x.id === c.dataset.id);
+  c.addEventListener("click", (e) => { e.preventDefault(); stopAuto(); switchTo(t); });
+  c.addEventListener("pointerenter", () => void fetch(EX + t.page), { once: true });
+}
+reset.addEventListener("click", (e) => { e.preventDefault(); stopAuto(); switchTo(DEFAULT); });
+
+let autoTimer = 0;
+const stopAuto = () => { clearTimeout(autoTimer); autoBox.checked = false; };
+const next = async () => {
+  if (!autoBox.checked) return;
+  await switchTo(trades[(trades.indexOf(current) + 1) % trades.length]);
+  autoTimer = setTimeout(next, 2600);
+};
+autoBox.addEventListener("change", () => { clearTimeout(autoTimer); if (autoBox.checked) next(); });
+
+cap.textContent = caption(DEFAULT);
+main.src = EX + DEFAULT.page;
+</script>
+</body>
+</html>
