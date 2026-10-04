@@ -12,6 +12,7 @@ import {
   domainState,
   domainSuggestions,
   livePointerKey,
+  warmDomainSuggestions,
   planOwnDomain,
   provisionDomain,
   publishSite,
@@ -42,6 +43,9 @@ const config: AppConfig = {
   ...base,
   domains: { ...base.domains, enabled: true, retry: { baseSeconds: 30, maxSeconds: 600, maxAttempts: 3 }, waitHours: { registration: 48, dns: 72, certificate: 24 } },
 };
+
+/** The same config with the registrar's answers never reused. */
+const uncached: AppConfig = { ...config, domains: { ...config.domains, suggestions: { ...config.domains.suggestions, cacheMinutes: 0 } } };
 
 const REGISTRANT: RegistrantDraft = { kind: "company", companyName: "Računovodstvo Seliškar d.o.o.", firstName: "Maja", lastName: "Seliškar", street: "Testna ulica 1", postalCode: "1000", city: "Ljubljana", country: "SI", phone: "+38640123456", email: "info@primer.si" };
 
@@ -428,7 +432,37 @@ describe("starting a registration", () => {
     expect(out.map((x) => x.name)).not.toContain("racunovodstvoseliskar.si");
     expect(out.map((x) => x.name)).not.toContain("racunovodstvo-seliskar.si");
     const dear = providers({ registrar: { costEur: { si: 99, com: 99 } } });
-    expect(await domainSuggestions({ repo, config, providers: dear }, s.id)).toEqual([]);
+    expect(await domainSuggestions({ repo, config: uncached, providers: dear }, s.id)).toEqual([]);
+  });
+
+  it("reuses the answer the worker got while the site generated, and asks again for a new name or after cacheMinutes", async () => {
+    const s = await site({ publish: false });
+    const p = providers();
+    const checks = () => p.registrar.calls.filter((c) => c.method === "check").length;
+    await warmDomainSuggestions({ repo, config, providers: p }, s.id);
+    expect(checks()).toBe(1);
+    // The editor's domain step opens with the same answer: no second question to the registrar.
+    const first = await domainSuggestions({ repo, config, providers: p }, s.id);
+    expect(checks()).toBe(1);
+    expect(first.length).toBe(config.domains.suggestions.show);
+    // The owner renamed the business: other names, asked again.
+    const current = (await repo.getSpec(s.id))!;
+    const renamed = structuredClone(current.spec);
+    renamed.business.name = "Knjigovodstvo Maja";
+    await repo.saveSpec(s.id, renamed, "manual", "ime", [{ op: "replace", path: "/business/name", value: "Knjigovodstvo Maja" }], current.version);
+    expect((await domainSuggestions({ repo, config, providers: p }, s.id))[0]!.name).toMatch(/^knjigovodstvo/);
+    expect(checks()).toBe(2);
+    // Older than cacheMinutes: asked again.
+    expect(await domainSuggestions({ repo, config: uncached, providers: p }, s.id)).toHaveLength(config.domains.suggestions.show);
+    expect(checks()).toBe(3);
+    // Off in config: the worker asks nothing; a registrar error is logged, not thrown.
+    await warmDomainSuggestions({ repo, config: { ...config, domains: { ...config.domains, enabled: false } }, providers: p }, s.id);
+    expect(checks()).toBe(3);
+    const failing = providers({ registrar: { script: { check: { fail: 5 } } } });
+    const err = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    await expect(warmDomainSuggestions({ repo, config: uncached, providers: failing }, s.id)).resolves.toBeUndefined();
+    expect(err).toHaveBeenCalled();
+    err.mockRestore();
   });
 
   it("takes the holder's details from the site's facts, never inventing a name", () => {

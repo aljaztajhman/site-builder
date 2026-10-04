@@ -447,6 +447,17 @@ export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
       alter table allow_list add column founding_at timestamptz;
     `,
   },
+  {
+    id: 20,
+    name: "sites.domain_suggestions",
+    // it-zero-to-live. The domain names offered for a site, as the registrar last answered (asked by the worker while
+    // the site generates, so Objavi doesn't wait for it). `key` is the names asked; a new business name asks again.
+    sql: `
+      alter table sites add column domain_suggestions jsonb;
+      alter table sites add column domain_suggestions_key text;
+      alter table sites add column domain_suggestions_at timestamptz;
+    `,
+  },
 ];
 
 type Query = (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>;

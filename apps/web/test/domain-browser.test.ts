@@ -138,9 +138,10 @@ describe("publish on the owner's own domain", () => {
         expect(await status.locator("a").getAttribute("href")).toBe(`https://${hostname}/`);
         expect(await noSideScroll(ui.page)).toBe(true);
         await shot(ui.page, `domain-live-${width}`);
+        // The republish with the new address follows the domain going live; on a busy machine it lands a moment later.
+        await expect.poll(async () => (await platform.repo.getSite(id))?.published_address, { timeout: 10_000 }).toBe(`https://${hostname}/`);
         const site = (await platform.repo.getSite(id))!;
         expect(site.published_version).not.toBeNull();
-        expect(site.published_address).toBe(`https://${hostname}/`);
         expect(await platform.repo.domains.get(hostname)).toMatchObject({ status: "active", kind: "registered", notify: "pending" });
         results[`registered-${width}`] = ui.taps();
         expect(ui.taps()).toBeLessThanOrEqual(TARGET_TAPS);

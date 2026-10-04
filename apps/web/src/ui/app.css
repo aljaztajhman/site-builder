@@ -392,6 +392,12 @@ details.more>summary{padding:12px 0;font-weight:600;cursor:pointer}
 .checklist li button strong{font-size:13px;font-weight:600}
 .checklist li button span{font-size:14px}
 .checklist li button:hover span{text-decoration:underline}
+/* "Še to potrebujemo" (it-zero-to-live): one fact after another, each named by where it shows. */
+#facts-ask .ask-fact{padding:12px 0;border-top:1px solid var(--line, rgb(0 0 0 / .1))}
+#facts-ask .ask-fact .where{margin:0 0 6px;font-size:13px}
+#facts-ask .ask-fact > fieldset{border:0;padding:0;margin:0}
+#facts-ask .ask-fact > fieldset > legend{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+#facts-ask > .row:last-child{margin-top:12px}
 /* The guest's copy (no account yet): the same list as text, nothing to open. */
 .guest-checklist{margin-top:14px}
 .guest-checklist p{margin:0 0 4px}
