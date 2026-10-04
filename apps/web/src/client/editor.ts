@@ -11,6 +11,7 @@ import { groupVersions, undoTarget, type ListedVersion } from "./versions.ts";
 import { placeholderPath } from "./placeholders.ts";
 import { isPriceListType, parsePriceInput, priceValue } from "@sb/spec/price-edit";
 import { missingFacts, type MissingFact } from "@sb/spec/missing-facts";
+import { isoDay } from "@sb/spec/format";
 import { itemKeyForPath, priceEditor, type PriceEditorState } from "./price-editor.ts";
 import { domainStatus, domainStep, newDomainStepUi, openDomainStep, type DomainChoice, type DomainStepDeps, type DomainsInfo } from "./domain-step.ts";
 import { lockedPagesBlock, planTag, reminderBlock, type Limits, type Upgrade } from "./upsell.ts";
@@ -541,7 +542,9 @@ function defaultFor(s: Schema, rootSchema: Schema, key: string, starter = true):
       return Array.from({ length: Number(s.minItems ?? 0) }, () => defaultFor((s.items ?? {}) as Schema, rootSchema, key, starter));
     case "string": {
       // A new blog post or event is dated today (the owner changes it).
-      if (s.pattern === ISO_DAY_PATTERN) return new Date().toLocaleDateString("en-CA");
+      // Today on the sites' calendar (Ljubljana), not the browser's: a post written after midnight in Slovenia is
+      // dated the new day wherever the owner's computer clock is set.
+      if (s.pattern === ISO_DAY_PATTERN) return isoDay(new Date());
       if (typeof s.pattern === "string" && s.pattern.includes("img_")) return ((state.spec?.assets as Obj)?.images as Obj[])?.[0]?.id ?? "";
       if (typeof s.pattern === "string" && s.pattern.includes("p_")) return pages()[0]?.id ?? "";
       return starter ? (EDITOR_STARTER_TEXT[key] ?? EDITOR_STARTER_TEXT.text!).slice(0, Number(s.maxLength ?? 200)) : "";

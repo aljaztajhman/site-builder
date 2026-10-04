@@ -8,7 +8,8 @@
     "./starter": "./src/starter.ts",
     "./labels": "./src/labels.ts",
     "./price-edit": "./src/price-edit.ts",
-    "./missing-facts": "./src/missing-facts.ts"
+    "./missing-facts": "./src/missing-facts.ts",
+    "./format": "./src/format.ts"
   },
   "dependencies": {
     "zod": "^4.6.5"
