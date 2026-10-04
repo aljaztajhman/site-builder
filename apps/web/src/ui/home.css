@@ -276,7 +276,9 @@ footer{border-top:1px solid var(--line);padding:40px 0 32px;font-size:15px;color
 footer .cols{display:grid;gap:24px}
 footer .about{margin-top:10px;max-width:40ch}
 footer h2{font-family:var(--font-ui);font-size:14px;color:var(--ink);margin-bottom:8px;letter-spacing:0}
-footer ul{list-style:none;padding:0}footer ul li{margin:4px 0}
+footer ul{list-style:none;padding:0}footer ul li{margin:0}
+/* Footer links are at least 24 px tall (WCAG 2.5.8), so a thumb doesn't hit the neighbour. */
+footer ul a,footer .legal a{display:inline-block;padding:5px 0}
 footer .legal{margin-top:28px;padding-top:16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px 20px;color:var(--ink-3)}
 
 /* Timeline rule under "Kako deluje" columns draws in sequence */

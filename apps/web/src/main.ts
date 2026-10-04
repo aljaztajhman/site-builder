@@ -9,6 +9,7 @@ import { sendDomainLiveEmails } from "./domain-email.ts";
 import { sendPreviewReminders } from "./reminder.tsx";
 import { authSettingsFromEnv } from "./auth.ts";
 import { missingEnv, missingEnvLine } from "./env-check.ts";
+import { launchLine, launchProblems } from "./legal.tsx";
 
 const config = loadConfig();
 const auth = authSettingsFromEnv();
@@ -25,6 +26,9 @@ const mailer = mailerFromEnv();
 // Optional variables never stop the server: what's missing is named once, and only its feature is off.
 const missing = missingEnvLine(missingEnv());
 if (missing) console.warn(missing);
+// The legal side of a public launch: unfilled provider facts and drafts no lawyer has read (config legal).
+const notReady = launchLine(launchProblems(config));
+if (notReady) console.warn(notReady);
 
 // The intake's junk check asks the classifier before a generation is queued (fails open: the pipeline asks again).
 const app = createApp({ platform, config, auth, mailer, classifyIntake: intakeClassifier(platform, config), ...(appUrl ? { appUrl } : {}), platformDomain: process.env.PLATFORM_DOMAIN || null, siteProxySecret: process.env.SITE_PROXY_SECRET || null });

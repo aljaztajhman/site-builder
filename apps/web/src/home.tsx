@@ -2,6 +2,7 @@ import type { AppConfig } from "@sb/config";
 import { html } from "./pages.tsx";
 import { uiUrl } from "./ui/assets.ts";
 import { PRODUCT_NAME } from "./ui/labels.ts";
+import { Provider } from "./legal.tsx";
 import { TURNSTILE_SCRIPT } from "./turnstile.ts";
 import { chatEdits, count, daysAfterOd, moreHomepages } from "./limits.ts";
 import { tradeCaption, tradeClientData, tradeShowcases, tradeTitle } from "./showcase.ts";
@@ -602,7 +603,7 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
                     <a href="#vprasanja">Pogosta vprašanja</a>
                   </li>
                   <li>
-                    Pišite nam: <mark className="ph">[e-pošta]</mark>
+                    Pišite nam: <Provider config={config} field="email" />
                   </li>
                 </ul>
               </div>
@@ -610,29 +611,28 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
                 <h2>Ponudnik</h2>
                 <ul>
                   <li>
-                    <mark className="ph">[polno ime podjetja]</mark>
+                    <Provider config={config} field="companyName" />
                   </li>
                   <li>
-                    <mark className="ph">[naslov]</mark>
+                    <Provider config={config} field="address" />
                   </li>
                   <li>
-                    Matična št. <mark className="ph">[matična številka]</mark>
+                    Matična št. <Provider config={config} field="registrationNumber" />
                   </li>
                   <li>
-                    Davčna št. <mark className="ph">[davčna številka]</mark>
+                    Davčna št. <Provider config={config} field="taxNumber" />
                   </li>
                 </ul>
               </div>
             </div>
             <div className="legal">
               <span>
-                {`© ${new Date().getFullYear()} `}
-                <mark className="ph">[ime izdelka]</mark>
+                {`© ${new Date().getFullYear()} ${PRODUCT_NAME}, `}
+                <Provider config={config} field="companyName" />
               </span>
               <a href="/zasebnost">Zasebnost</a>
-              {/* Written once the legal entity exists (TASKS: billing phase). */}
-              <span>Pogoji uporabe</span>
-              <span>Izjava o dostopnosti</span>
+              <a href="/pogoji">Pogoji uporabe</a>
+              <a href="/dostopnost">Izjava o dostopnosti</a>
             </div>
           </div>
         </footer>

@@ -344,6 +344,38 @@ export const AppConfigSchema = z.object({
     estimatesEur: z.object({ homepage: z.number().positive(), fullSite: z.number().positive(), chatEdit: z.number().positive(), altTextPerPhoto: z.number().positive() }),
     junk: z.object({ minDescriptionChars: z.number().int().min(1), minClassifierConfidence: z.number().min(0).max(1) }),
   }),
+  /**
+   * The provider's own facts (it-landing-claims): who runs the product, shown in the landing footer, the privacy
+   * policy and the terms. null until the legal entity exists (sb-legal-entity); every null stays a marked placeholder
+   * on those pages and on the launch check (apps/web/src/legal.tsx). Never invented.
+   */
+  legal: z.object({
+    provider: z.strictObject({
+      /** Full registered name, e.g. "Ime Priimek s.p." or "Podjetje d.o.o.". */
+      companyName: z.string().min(2).max(120).nullable(),
+      /** Registered address as one line: street and number, postal code and town. */
+      address: z.string().min(5).max(160).nullable(),
+      /** Matična številka (7 or 10 digits). */
+      registrationNumber: z.string().regex(/^\d{7}(\d{3})?$/).nullable(),
+      /** Davčna številka (8 digits, "SI" in front when VAT-registered). */
+      taxNumber: z.string().regex(/^(SI)?\d{8}$/).nullable(),
+      /** Where owners and visitors write to us (privacy requests, accessibility problems, terms). */
+      email: z.email().nullable(),
+    }),
+    /**
+     * The terms' points nobody has decided yet (/pogoji), in Slovene as they should read, written with the lawyer:
+     * cancellation and refunds, the provider's liability, how changes to the terms are announced, governing law and
+     * court. null shows a marked placeholder and keeps the launch check failing.
+     */
+    terms: z.strictObject({
+      cancellation: z.string().min(10).max(1000).nullable(),
+      liability: z.string().min(10).max(1000).nullable(),
+      changes: z.string().min(10).max(1000).nullable(),
+      law: z.string().min(10).max(1000).nullable(),
+    }),
+    /** A lawyer has read the page: its "Osnutek" note goes, and the launch check stops listing it. */
+    lawyerReviewed: z.strictObject({ privacy: z.boolean(), terms: z.boolean() }),
+  }),
   plans: z.looseObject({
     freePreview: z.looseObject({
       /**
