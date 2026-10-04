@@ -354,10 +354,12 @@ if (form) {
     });
   }
   const button = form.querySelector<HTMLButtonElement>("button[type=submit]");
+  // The button's own label (home.tsx), put back after a refused or failed send.
+  const idle = button?.textContent ?? "";
   const busy = (label: string | null) => {
     if (!button) return;
     button.disabled = label !== null;
-    button.textContent = label ?? "Ustvari";
+    button.textContent = label ?? idle;
   };
   /** A refusal above the form; the text stays in it. */
   const say = (text: string) => {
