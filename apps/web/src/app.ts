@@ -39,6 +39,7 @@ import { TOKEN_FIELD, TURNSTILE_ORIGIN, botCheckFromEnv, type BotCheck } from ".
 import { registerLoginRoutes } from "./login.tsx";
 import { registerAdminRoutes } from "./admin.tsx";
 import { registerPrivacyRoute } from "./privacy.tsx";
+import { registerLegalRoutes } from "./legal.tsx";
 import { registerCheckerRoutes } from "./checker.tsx";
 import { dayIn, registerStatsRoutes, statsCounter } from "./stats.ts";
 import { servedForSiteHost, siteHostResolver, siteHosts } from "./site-hosts.ts";
@@ -209,6 +210,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   });
   registerAdminRoutes(app, { repo, config, ...(opts.appUrl ? { appUrl: opts.appUrl } : {}) });
   registerPrivacyRoute(app, config);
+  registerLegalRoutes(app, config);
   // The public website checker (/pregled): no model calls, run by the worker.
   registerCheckerRoutes(app, { repo, queue, config, secret: auth.secret, botCheck, ...(opts.checkerResolve ? { resolve: opts.checkerResolve } : {}) });
   // Cookieless counts for published sites: page views below, taps from stats.js here.

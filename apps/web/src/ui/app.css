@@ -503,3 +503,7 @@ details.more>summary{padding:12px 0;font-weight:600;cursor:pointer}
 .reminder>.btn{justify-self:start}
 /* "Objavi na pekarnakvas.si": one word gap, not the button's icon gap (the label starts with a no-break space). */
 .top .publish{gap:0}
+/* Legal pages (/pogoji, /dostopnost, /zasebnost): the links between them under the text. */
+.legal-page .legal-links{margin-top:24px;font-size:15px;color:var(--ink-3)}
+.legal-page .legal-links a{display:inline-block;padding:10px 0}
+.legal-page .when{color:var(--ink-3);font-size:14px}
