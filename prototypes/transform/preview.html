@@ -27,24 +27,32 @@
 @font-face{font-family:"Figtree";src:url("/apps/web/src/ui/examples/_shared/85a3177729/fonts/figtree.woff2") format("woff2");font-weight:300 900;font-display:swap}
 
 
-.proto{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin:20px 0 0;padding-top:12px;border-top:1px dashed var(--line-2);font:600 13px/1 var(--font-ui);color:var(--ink-3)}
-.proto .seg label{min-height:30px;font-size:13px;padding:0 10px}
+/* Above the tabs: the question, the phone/computer switch and the pause button, as icons. */
+.demo-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 4px}
+.demo-top .trades-q{margin:0}
+.demo-tools{display:flex;align-items:center;gap:8px;flex:none}
+.views{display:inline-flex;gap:2px;padding:3px;border-radius:var(--r-2);background:var(--surface-2)}
+.views button{display:grid;place-items:center;width:34px;height:30px;margin:0;padding:0;border:0;border-radius:6px;background:none;color:var(--ink-3);cursor:pointer}
+.views button:hover{color:var(--ink)}
+.views button[aria-checked=true]{background:var(--surface);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line-2)}
+.views svg,.pause svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.views button:focus-visible,.pause:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 
 /* Trade tabs: an underline under the shown trade; while the demo moves on by itself it fills up as the time to the next one runs. */
-.tabbar{display:flex;align-items:flex-end;gap:12px;margin:0 0 14px;border-bottom:1px solid var(--line)}
-.tabs{display:flex;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none}
+.tabbar{margin:0 0 14px;border-bottom:1px solid var(--line)}
+.tabs{display:flex;min-width:0;margin:0 -8px;overflow-x:auto;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
-.tab{position:relative;flex:none;min-height:44px;margin:0;padding:0 14px;border:0;background:none;color:var(--ink-3);font:600 15px/1 var(--font-ui);white-space:nowrap;cursor:pointer;transition:color .2s}
+.tab{position:relative;flex:none;min-height:44px;margin:0;padding:0 8px;border:0;background:none;color:var(--ink-3);font:600 14px/1 var(--font-ui);white-space:nowrap;cursor:pointer;transition:color .2s}
 .tab:hover{color:var(--ink)}
 .tab[aria-selected=true]{color:var(--ink)}
-.tab::after{content:"";position:absolute;left:10px;right:10px;bottom:-1px;height:2px;border-radius:2px;background:var(--accent);transform:scaleX(0);transform-origin:left}
+.tab::after{content:"";position:absolute;left:6px;right:6px;bottom:-1px;height:2px;border-radius:2px;background:var(--accent);transform:scaleX(0);transform-origin:left}
 .tab[aria-selected=true]::after{transform:scaleX(1);transition:transform .3s}
 .tabs.auto .tab[aria-selected=true]::after{animation:tab-fill var(--dwell,4s) linear both}
 @keyframes tab-fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 .tab:focus-visible{outline:2px solid var(--ink);outline-offset:-4px;border-radius:var(--r-1)}
-.pause{flex:none;min-height:32px;margin:0 0 6px;padding:0 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--surface);color:var(--ink-2);font:600 13px/1 var(--font-ui);cursor:pointer}
+.pause{display:grid;place-items:center;width:36px;height:36px;margin:0;padding:0;border:1px solid var(--line-2);border-radius:999px;background:var(--surface);color:var(--ink-2);cursor:pointer}
 .pause:hover{color:var(--ink)}
-@media (pointer:coarse){.pause{min-height:44px}}
+@media (pointer:coarse){.views button{width:44px;height:40px}.pause{width:44px;height:44px}}
 
 /*
  * The intro, one card all the way: first the description being typed (its full text laid out from the
@@ -138,10 +146,19 @@
       </div>
 
       <div class="devwrap">
-        <!-- A tab per trade above the demo; the demo moves through them on its own (with a pause button). -->
+        <!-- A tab per trade above the demo; the demo moves through them on its own. Above: phone or computer, and pause. -->
+        <div class="demo-top">
+          <p class="trades-q" id="trades-q">Poglejte primer za svojo dejavnost:</p>
+          <div class="demo-tools">
+            <div class="views" role="radiogroup" aria-label="Pogled">
+              <button type="button" role="radio" aria-checked="true" data-mode="phone" aria-label="Telefon" title="Telefon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.2"/><path d="M11 18.5h2"/></svg></button>
+              <button type="button" role="radio" aria-checked="false" data-mode="desk" aria-label="Računalnik" title="Računalnik"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4" width="19" height="12.5" rx="1.8"/><path d="M8.5 20.5h7M12 16.5v4"/></svg></button>
+            </div>
+            <button class="pause" type="button" aria-pressed="false" aria-label="Ustavi" title="Ustavi"></button>
+          </div>
+        </div>
         <div class="tabbar">
-          <div class="tabs" role="tablist" aria-label="Primer za dejavnost"></div>
-          <button class="pause" type="button" aria-pressed="false">Ustavi</button>
+          <div class="tabs" role="tablist" aria-labelledby="trades-q"></div>
         </div>
         <div class="devbox" data-step="type">
           <!-- From description to site: typed, built, then the site appears and moves on through the trades. -->
@@ -168,14 +185,6 @@
           </div>
         </div>
         <p class="cap" aria-live="polite"></p>
-        <div class="proto">
-          <span>Prototip, naprava:</span>
-          <fieldset class="seg">
-            <legend class="sr-only">Naprava</legend>
-            <input type="radio" id="m-desk" name="mode" value="desk"><label for="m-desk">Računalnik</label>
-            <input type="radio" id="m-phone" name="mode" value="phone" checked><label for="m-phone">Telefon</label>
-          </fieldset>
-        </div>
       </div>
     </div>
   </section>
@@ -237,7 +246,14 @@ const size = () => {
 };
 size();
 addEventListener("resize", size);
-for (const r of document.querySelectorAll("input[name=mode]")) r.addEventListener("change", () => { mode = r.value; size(); });
+const viewButtons = [...document.querySelectorAll(".views button")];
+for (const b of viewButtons) b.addEventListener("click", () => {
+  if (mode === b.dataset.mode) return;
+  mode = b.dataset.mode;
+  for (const x of viewButtons) x.setAttribute("aria-checked", String(x === b));
+  size();
+  setTimeout(() => placeCard(), 950);
+});
 
 // =====================================================================
 // Parts of a rendered example, matched across two sites by role
@@ -763,10 +779,19 @@ const startClock = () => {
   tabsEl.classList.add("auto");
   timer = setTimeout(() => switchTo(trades[(trades.indexOf(current) + 1) % trades.length]), DWELL);
 };
+const ICON_PAUSE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6v12M15 6v12"/></svg>';
+const ICON_PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg>';
+const setPauseIcon = () => {
+  const label = paused ? "Predvajaj" : "Ustavi";
+  pauseBtn.innerHTML = paused ? ICON_PLAY : ICON_PAUSE;
+  pauseBtn.setAttribute("aria-label", label);
+  pauseBtn.title = label;
+};
+setPauseIcon();
 pauseBtn.addEventListener("click", () => {
   paused = !paused;
   pauseBtn.setAttribute("aria-pressed", String(paused));
-  pauseBtn.textContent = paused ? "Predvajaj" : "Ustavi";
+  setPauseIcon();
   if (paused) stopClock();
   else startClock();
 });
@@ -786,6 +811,8 @@ const askSteps = [...askList.children];
 const placeCard = () => {
   const W = devbox.clientWidth, H = devbox.clientHeight;
   const sw = Math.min(280, W);
+  // The caption's place is the steps' place while building: kept at least that tall, so they cover nothing.
+  cap.style.minHeight = askList.offsetHeight + "px";
   ask.style.setProperty("--tw", W + "px");
   ask.style.setProperty("--sw", sw + "px");
   const r = devbox.dataset.step === "type"
@@ -807,7 +834,6 @@ addEventListener("resize", () => { placeCard.resizing = true; placeCard(); place
 restEl.textContent = PROMPT;
 placeCard();
 cap.textContent = caption(trades[0]);
-for (const r of document.querySelectorAll("input[name=mode]")) r.addEventListener("change", () => setTimeout(placeCard, 950));
 
 /** Held back while building: words as bars, photos wiped out, sections without colour, blocks not yet placed. */
 const BUILD_CSS = `
