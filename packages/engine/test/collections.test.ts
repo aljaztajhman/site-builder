@@ -155,6 +155,41 @@ describe("English overlays move into the collection (it-collection-translations)
     expect(validateSite(spec).issues.map((i) => i.code)).toEqual(["banned"]);
   });
 
+  it("services and team entries' texts moved from generated sections stay held to the banned phrases, English included", () => {
+    const before = golden("avtoservis-mrak");
+    before.locales = { default: "sl", enabled: ["sl", "en"] };
+    // Generated copy the site was left with (a rule added later, or generation's retries ran out).
+    (before.pages[1]!.sections[1]!.props as { items: { description?: string }[] }).items[0]!.description = "Vrhunska kakovost po navodilih proizvajalca.";
+    before.translations = { en: { "/pages/1/sections/1/props/items/0/description": "Top quality 🔧 by the maker's schedule." } };
+    expect(validateSite(before).issues.map((i) => i.path)).toEqual(["/pages/1/sections/1/props/items/0/description", "/translations/en/~1pages~11~1sections~11~1props~1items~10~1description"]);
+    // Switching the collection on isn't blocked by what the site already had (the text only moved) …
+    const spec = start(before, "services");
+    expect(spec.collections!.services!.items[0]!.summary).toBe("Vrhunska kakovost po navodilih proizvajalca.");
+    expect(spec.translations!.en!["/collections/services/items/0/summary"]).toBe("Top quality 🔧 by the maker's schedule.");
+    // … and it is still reported (the publish checklist lists it): the Slovene and the English.
+    const issues = validateSite(spec).issues;
+    expect(issues.map((i) => [i.code, i.path])).toEqual([
+      ["banned", "/collections/services/items/0/summary"],
+      ["banned", "/translations/en/~1collections~1services~1items~10~1summary"],
+    ]);
+    expect(issues.map((i) => i.message).join(" ")).toMatch(/filler: vrhunska kakovost.*emoji/);
+    // Typing it into another entry is refused like on a page.
+    const typed = applyDirectEdit(spec, [{ op: "replace", path: "/collections/services/items/1/summary", value: "Brezhibno menjamo olje." }]);
+    expect(typed.ok).toBe(false);
+    expect(typed.issues.map((i) => i.path)).toEqual(["/collections/services/items/1/summary"]);
+    // The same text again elsewhere is new too, not "moved".
+    const copied = applyDirectEdit(spec, [{ op: "replace", path: "/collections/services/items/1/summary", value: "Vrhunska kakovost po navodilih proizvajalca." }]);
+    expect(copied.ok).toBe(false);
+  });
+
+  it("team entries: a generated role and bio stay checked; an entry's body is the owner's own", () => {
+    const spec = start(golden("zobozdravstvo-lebar"), "team");
+    const member = spec.collections!.team!.items[0]!;
+    member.bio = "Z dolgoletnimi izkušnjami.";
+    member.body = ["Z dolgoletnimi izkušnjami in strastjo do zob 🦷."];
+    expect(validateSite(spec).issues.map((i) => i.path)).toEqual(["/collections/team/items/0/bio"]);
+  });
+
   it("a new list page is refused only at the spec's page maximum (24), not the old 12", () => {
     const spec = golden("pekarna-kvas");
     const filler = (n: number) => ({ id: `p_x${n}`, kind: "standard" as const, slug: `x${n}`, nav: { label: `X${n}`, show: false }, seo: { title: "X", description: "X" }, sections: structuredClone(spec.pages[0]!.sections.slice(0, 1)).map((s) => ({ ...s, id: `${s.id}_${n}` })) });
