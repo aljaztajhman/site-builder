@@ -122,16 +122,14 @@ describe("editor in a browser", () => {
     }
   }, 60_000);
 
-  it("opens the field of a checklist entry when Objavi is tapped while something is missing (phone width)", async () => {
+  it("opens the missing facts on one screen when Objavi is tapped while something is missing (phone width)", async () => {
     const id = await bakery("urejanje-seznam");
     const { page, close } = await open(id, 375);
     try {
       await page.getByRole("button", { name: "Objavi" }).click();
-      const first = page.locator(".checklist li button").first();
-      await expect.poll(() => first.isVisible()).toBe(true);
-      expect(await first.textContent()).toMatch(/Manjka/);
-      await first.click();
-      // Focus lands inside the block for that path (a price placeholder's "Vnesi" or a provider field).
+      // "Še to potrebujemo" (it-zero-to-live): every missing fact's field, the first one focused.
+      await page.locator("#facts-ask").waitFor();
+      expect(await page.locator("#facts-ask [data-ask]").count()).toBeGreaterThan(1);
       const focused = await page.evaluate(() => (document.activeElement?.closest("[data-path]") as HTMLElement | null)?.dataset.path ?? null);
       expect(focused).toMatch(/^\/(pages\/0\/sections\/2\/props\/items\/\d\/price|business\/provider\/\w+)$/);
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);

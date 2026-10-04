@@ -80,7 +80,11 @@ describe("pipeline with replayed model responses (no network)", () => {
     const calls: CallRecord[] = [];
     const client = new ModelClient({ config, transport: new ReplayTransport(recordings), spentToday: async () => 0, onCall: async (r) => void calls.push(r) });
 
-    const gen = await generateSite({ config, repo, storage, client, browser, lighthouse: false }, site.id, null);
+    // The worker asks for domain names once the brief has named the business (it-zero-to-live).
+    let briefNamed: string | null = null;
+    const onBrief = () => void repo.getSite(site.id).then((s) => (briefNamed = s?.name ?? null));
+    const gen = await generateSite({ config, repo, storage, client, browser, lighthouse: false, onBrief }, site.id, null);
+    expect(briefNamed).toBe(golden.business.name);
     expect(gen.check?.validation).toEqual([]);
     expect(gen.check?.facts).toEqual([]);
     expect(gen.check?.pages.flatMap((p) => p.axe)).toEqual([]);
