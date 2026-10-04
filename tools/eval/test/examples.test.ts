@@ -65,22 +65,4 @@ describe("landing trade showcase", () => {
     }
     expect(masked(readFileSync(path.join(OUT_DIR, SHOWCASE_JSON), "utf8")), "stale showcase.json: run pnpm examples:build").toBe(masked(showcaseJson()));
   });
-
-  it("every trade's landing tokens keep text at 4.5:1 and buttons visible", async () => {
-    const { SHOWCASES, contrast, landingVars, showcaseSpec } = await import("../src/examples/showcase.ts");
-    for (const s of SHOWCASES) {
-      const v = landingVars(showcaseSpec(s));
-      const pairs: [string, string, number][] = [
-        ["--ink", "--canvas", 4.5], ["--ink", "--surface", 4.5], ["--ink", "--surface-2", 4.5],
-        ["--ink-2", "--canvas", 4.5], ["--ink-2", "--surface", 4.5], ["--ink-2", "--surface-2", 4.5],
-        ["--ink-3", "--canvas", 4.5], ["--ink-3", "--surface", 4.5], ["--ink-3", "--surface-2", 4.5],
-        ["--accent-ink", "--accent", 4.5], ["--accent-ink", "--accent-hover", 4.5],
-        ["--accent-text", "--accent-soft", 4.5], ["--accent-text", "--canvas", 4.5], ["--accent-text", "--surface", 4.5],
-        ["--on-ink", "--ink", 4.5], ["--on-ink-2", "--ink", 4.5], ["--calling", "--ink", 4.5], ["--link", "--surface", 4.5],
-        // A chip or button against the page.
-        ["--accent", "--canvas", 3], ["--accent", "--surface", 3],
-      ];
-      for (const [fg, bg, min] of pairs) expect(contrast(v[fg]!, v[bg]!), `${s.id}: ${fg} on ${bg}`).toBeGreaterThanOrEqual(min);
-    }
-  });
 });

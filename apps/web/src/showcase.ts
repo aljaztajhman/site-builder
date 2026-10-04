@@ -1,14 +1,14 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import type { CSSProperties } from "react";
+import { LANDING_TRADES } from "@sb/spec";
 import { uiUrl } from "./ui/assets.ts";
 
 /**
- * The landing page's trade showcase, as `pnpm examples:build` wrote it (ui/examples/showcase.json, from
- * packages/spec/src/showcase.ts): per trade a fictional site in a colourway clients never get, and the
- * landing page's tokens recoloured from it. `/?primer=<id>` renders the page in that trade's look;
- * home.ts switches between them in place.
+ * The landing page's trade demo, as `pnpm examples:build` wrote it (ui/examples/showcase.json, from
+ * packages/spec/src/showcase.ts): per trade a fictional site in a colourway clients never get. The demo
+ * shows LANDING_TRADES of them as tabs and transforms one site into the next (client/home.ts); the
+ * landing page keeps its own look. `/?primer=<id>` opens the demo on that trade.
  */
 export interface TradeShowcase {
   id: string;
@@ -18,43 +18,45 @@ export interface TradeShowcase {
   /** Under the examples folder. */
   page: string;
   photos: number;
-  font: { family: string; file: string; weights: [number, number] };
-  vars: Record<string, string>;
+  /** What the demo types before it builds this site. */
+  intro: string;
 }
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 let cached: TradeShowcase[] | undefined;
 
-export function tradeShowcases(): TradeShowcase[] {
+/** Every showcase in showcase.json. */
+export function allShowcases(): TradeShowcase[] {
   cached ??= JSON.parse(readFileSync(path.join(here, "ui/examples/showcase.json"), "utf8")) as TradeShowcase[];
   return cached;
 }
 
-/** The trade's tokens on <html>: custom properties as they are, color-scheme as the property it is. */
-export function tradeStyle(t: TradeShowcase): CSSProperties {
-  const style: Record<string, string> = {};
-  for (const [k, v] of Object.entries(t.vars)) style[k === "color-scheme" ? "colorScheme" : k] = v;
-  return style as CSSProperties;
+/** The trades the landing demo shows, in tab order. */
+export function tradeShowcases(): TradeShowcase[] {
+  const all = allShowcases();
+  return LANDING_TRADES.map((id) => {
+    const t = all.find((x) => x.id === id);
+    if (!t) throw new Error(`showcase.json has no ${id}: run pnpm examples:build`);
+    return t;
+  });
 }
 
-/** The trade's heading face for the landing page (the file the showcase site itself loads). */
-export const tradeFontFace = (t: TradeShowcase): string =>
-  `@font-face{font-family:"${t.font.family}";src:url("${uiUrl(`examples/${t.font.file}`)}") format("woff2");font-weight:${t.font.weights[0]} ${t.font.weights[1]};font-display:swap}`;
-
-/** Under the demo: what the visitor sees, and that their own site will differ. */
+/** Under the demo: the trade, and that the business is made up. */
 export const tradeCaption = (t: TradeShowcase): string =>
   `Primer za ${t.forWhom}: ${t.name} je izmišljeno podjetje.${t.photos ? " Fotografije so ustvarjene z UI." : ""}`;
 
-/** What home.ts needs to switch without a reload. */
-export const tradeClientData = (trades: TradeShowcase[]) =>
-  trades.map((t) => ({
-    id: t.id,
-    label: t.label,
-    page: uiUrl(`examples/${t.page}`),
-    title: `Primer strani: ${t.name}`,
-    caption: tradeCaption(t),
-    font: { family: t.font.family, url: uiUrl(`examples/${t.font.file}`), weights: `${t.font.weights[0]} ${t.font.weights[1]}` },
-    vars: t.vars,
-  }));
+/** The demo frame's title. */
+export const tradeTitle = (t: TradeShowcase): string => `Primer strani: ${t.name}`;
 
-export const DEFAULT_CAPTION = "Primer: izmišljena trgovina Oljka in sol iz Kopra. Fotografije so ustvarjene z UI.";
+/** What home.ts needs to play the demo (in the page as JSON). */
+export interface TradeClient {
+  id: string;
+  label: string;
+  page: string;
+  title: string;
+  caption: string;
+  intro: string;
+}
+
+export const tradeClientData = (trades: TradeShowcase[]): TradeClient[] =>
+  trades.map((t) => ({ id: t.id, label: t.label, page: uiUrl(`examples/${t.page}`), title: tradeTitle(t), caption: tradeCaption(t), intro: t.intro }));
