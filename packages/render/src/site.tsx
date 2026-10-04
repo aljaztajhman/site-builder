@@ -418,13 +418,18 @@ export function renderSite(spec: SiteSpec, opts: Omit<RenderOptions, "locale"> =
 
 /**
  * The page a path inside the site renders, for the preview: a page of the spec ("storitve.html") or a
- * collection entry's page ("novice/odprtje.html"), in the default locale. Null when it is neither.
+ * collection entry's page ("novice/odprtje.html"), in the default locale, or either of them under another enabled
+ * locale's directory ("en/novice/odprtje.html"), as published. Null when it is neither.
  */
 export function renderPath(spec: SiteSpec, path: string, opts: Omit<RenderOptions, "locale" | "depth"> = {}): string | null {
-  const page = spec.pages.find((p) => pageFile(p) === path);
-  if (page) return renderPage(spec, page, opts);
-  const entry = entryPages(spec.collections).find((e) => e.path === path);
-  return entry ? renderEntryPage(spec, entry, opts) : null;
+  const first = path.split("/")[0]!;
+  const locale = path.includes("/") ? spec.locales.enabled.find((l) => l !== spec.locales.default && first === l) : undefined;
+  const rest = locale ? path.slice(first.length + 1) : path;
+  const o = locale ? { ...opts, locale } : opts;
+  const page = spec.pages.find((p) => pageFile(p) === rest);
+  if (page) return renderPage(spec, page, o);
+  const entry = entryPages(spec.collections).find((e) => e.path === rest);
+  return entry ? renderEntryPage(spec, entry, o) : null;
 }
 
 /** Media files a site references (image variants and the logo), for publish and export. */

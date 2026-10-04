@@ -12,6 +12,7 @@ export interface StructuralOp {
   op: string;
   path: string;
   from?: string;
+  value?: unknown;
 }
 
 type Overlays = Record<string, Record<string, string> | undefined>;
@@ -93,8 +94,19 @@ export function followTranslations(doc: unknown, op: StructuralOp): Overlays | n
       const target = slot ? `${slot.parent}/${slot.index}` : op.path;
       entries = [...entries, ...carried.map(([rest, text]): Entry => [`${target}${rest}`, text])];
     } else if (op.op === "replace") {
-      // The subtree is new: overlays inside it are kept only where the same shape is still there (checked by the caller).
-      continue;
+      // A form saves a whole list (a collection's entries, a section's items) or a whole section: the elements of
+      // every array in it are matched with the ones before, so an overlay follows its entry when one was moved or
+      // removed instead of staying at its index on another entry's text. What can't be matched is dropped; where the
+      // shape is the same the pointer stays, and pruneTranslations drops any that no longer reach a string.
+      const base = op.path;
+      if (base === "") continue;
+      const old = getAt(doc, base);
+      const cache = new Map<unknown, Map<number, number>>();
+      entries = entries.flatMap(([ptr, text]): Entry[] => {
+        if (!ptr.startsWith(`${base}/`)) return [[ptr, text]];
+        const moved = follow(old, op.value, ptr.slice(base.length + 1).split("/"), cache);
+        return moved ? [[`${base}/${moved.join("/")}`, text]] : [];
+      });
     } else continue;
     const next = Object.fromEntries(entries);
     if (JSON.stringify(Object.entries(next)) !== before) changed = true;
@@ -129,4 +141,77 @@ export function pruneTranslations(doc: unknown): Overlays | null {
     out[locale] = kept;
   }
   return changed ? out : null;
+}
+
+// ---------- A whole value replaced: which element became which ----------
+
+const isObj = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v);
+
+function same(a: unknown, b: unknown): boolean {
+  if (a === b) return true;
+  if (Array.isArray(a)) return Array.isArray(b) && a.length === b.length && a.every((x, i) => same(x, b[i]));
+  if (isObj(a) && isObj(b)) {
+    const ka = Object.keys(a).filter((k) => a[k] !== undefined);
+    const kb = Object.keys(b).filter((k) => b[k] !== undefined);
+    return ka.length === kb.length && ka.every((k) => same(a[k], b[k]));
+  }
+  return false;
+}
+
+/** What names an element whose text changed: its id, its page name (slug), its name or its title. */
+function identity(v: unknown): string | null {
+  if (!isObj(v)) return null;
+  for (const k of ["id", "slug", "name", "title"]) if (typeof v[k] === "string") return `${k}:${v[k] as string}`;
+  return null;
+}
+
+/**
+ * Old index -> new index for the elements of `old` still in `next`: the same content in the same place, the same
+ * content elsewhere (moved, or shifted by a removal), the same id, page name, name or title (edited and moved), and,
+ * when the length didn't change, the same place (an element whose text was edited).
+ */
+function matchIndices(old: unknown[], next: unknown[]): Map<number, number> {
+  const map = new Map<number, number>();
+  const taken = new Set<number>();
+  const take = (i: number, j: number) => {
+    map.set(i, j);
+    taken.add(j);
+  };
+  const free = (fn: (v: unknown) => boolean) => next.findIndex((v, j) => !taken.has(j) && fn(v));
+  for (let i = 0; i < Math.min(old.length, next.length); i++) if (same(old[i], next[i])) take(i, i);
+  old.forEach((o, i) => {
+    if (map.has(i)) return;
+    const j = free((v) => same(o, v));
+    if (j >= 0) take(i, j);
+  });
+  old.forEach((o, i) => {
+    const id = identity(o);
+    if (map.has(i) || id === null) return;
+    const j = free((v) => identity(v) === id);
+    if (j >= 0) take(i, j);
+  });
+  if (old.length === next.length) old.forEach((_, i) => !map.has(i) && !taken.has(i) && take(i, i));
+  return map;
+}
+
+/** The pointer tokens `segs` under the old value, as they are under the new one; null when that place is gone. */
+function follow(old: unknown, next: unknown, segs: string[], cache: Map<unknown, Map<number, number>>): string[] | null {
+  if (segs.length === 0) return [];
+  const [head, ...rest] = segs as [string, ...string[]];
+  if (Array.isArray(old)) {
+    if (!Array.isArray(next) || !/^\d+$/.test(head)) return null;
+    let m = cache.get(old);
+    if (!m) cache.set(old, (m = matchIndices(old, next)));
+    const j = m.get(Number(head));
+    if (j === undefined) return null;
+    const r = follow(old[Number(head)], next[j], rest, cache);
+    return r && [String(j), ...r];
+  }
+  if (isObj(old)) {
+    const key = head.replace(/~1/g, "/").replace(/~0/g, "~");
+    if (!isObj(next) || !(key in next)) return null;
+    const r = follow(old[key], next[key], rest, cache);
+    return r && [head, ...r];
+  }
+  return null;
 }

@@ -1296,6 +1296,8 @@ function collectionsBlock(): HTMLElement {
     const count = ((on?.items ?? []) as unknown[]).length;
     // Not in the viewer's plan: the button names the plan that has it, and a tap says so (the server refuses anyway).
     const locked = on ? undefined : state.access?.limits?.collectionNotes[c.kind];
+    // Switched on before the plan lost it (a move to Osnovni): it stays and can be edited; the note says which plan has it.
+    const kept = on ? state.access?.limits?.collectionNotes[c.kind] : undefined;
     box.append(
       h("div", { class: "row collection-row" },
         h("span", { class: "sp" }, h("strong", {}, c.name), on ? h("span", { class: "muted" }, ` · ${count}`) : h("span", { class: "muted" }, ` · ${c.hint}`)),
@@ -1306,7 +1308,75 @@ function collectionsBlock(): HTMLElement {
             : h("button", { class: "btn sm", type: "button", onClick: () => void post("/collections", { kind: c.kind }, `${c.name}: vklopljeno.`) }, c.on),
       ),
     );
+    if (kept) box.append(h("p", { class: "help limit-note", "data-kept": c.kind }, `${kept.message} Vnosi, ki jih že imate, ostanejo na strani in jih lahko urejate.`));
   }
+  return box;
+}
+
+// ---------- Collection entries in the site's second language (it-collection-translations) ----------
+const LANG_NAME: Record<string, string> = { sl: "Slovenščina", en: "Angleščina", de: "Nemščina", hr: "Hrvaščina" };
+const LANG_IN: Record<string, string> = { sl: "slovensko", en: "angleško", de: "nemško", hr: "hrvaško" };
+/** The texts of an entry a visitor reads in the other language; dates, prices, pictures and addresses stay as they are. */
+const TRANSLATED: Record<string, string[]> = { blog: ["title", "summary", "body"], events: ["title", "place", "summary", "body"], services: ["name", "summary", "body"], team: ["role", "bio", "body"] };
+/** The language the collection pane shows: null for the site's own (default) language. */
+let collectionLang: string | null = null;
+
+/** The site's languages besides its default one (Plus has two). */
+function otherLocales(): string[] {
+  const l = (state.spec?.locales ?? {}) as Obj;
+  return ((l.enabled ?? []) as string[]).filter((x) => x !== l.default);
+}
+
+/**
+ * Operations that set the translation of the text at `ptr` (or remove it when `v` is empty), checked against the
+ * text it translates, so a translation never lands on another entry if the list changed in between.
+ */
+function translationOps(lang: string, ptr: string, source: string, v: string): Op[] {
+  const all = (state.spec?.translations ?? null) as Obj | null;
+  const overlay = (all?.[lang] ?? null) as Obj | null;
+  const guard: Op = { op: "test", path: ptr, value: source };
+  if (!v) return overlay && ptr in overlay ? [guard, { op: "remove", path: `/translations/${lang}/${esc(ptr)}` }] : [guard];
+  if (!all) return [guard, { op: "add", path: "/translations", value: { [lang]: { [ptr]: v } } }];
+  if (!overlay) return [guard, { op: "add", path: `/translations/${lang}`, value: { [ptr]: v } }];
+  return [guard, { op: "add", path: `/translations/${lang}/${esc(ptr)}`, value: v }];
+}
+
+/** One text of an entry in the other language: the translation to type, the original under it. */
+function translationField(lang: string, ptr: string, source: string, label: string, max: number): HTMLElement {
+  const current = ((state.spec?.translations as Obj | undefined)?.[lang] as Obj | undefined)?.[ptr];
+  const long = max > 120;
+  const input = long ? h("textarea", { maxlength: max, rows: Math.min(8, Math.ceil(Math.max(source.length, 90) / 90) + 1) }) : h("input", { type: "text", maxlength: max });
+  input.value = typeof current === "string" ? current : "";
+  input.setAttribute("lang", lang);
+  const later = debounced((v) => void patch(() => translationOps(lang, ptr, source, typeof v === "string" ? v.trim() : ""), "prevod", false));
+  input.addEventListener("input", () => later.push(input.value));
+  return h("div", { class: "field translation-field", "data-path": `/translations/${lang}/${esc(ptr)}` },
+    h("label", {}, `${label} (${LANG_IN[lang] ?? lang})`),
+    input,
+    h("p", { class: "muted original", lang: "sl" }, `Slovensko: ${source}`),
+  );
+}
+
+/** The collection's entries in the other language: each translatable text with its original. */
+function collectionTranslations(kind: string, lang: string, collection: Obj, item: Schema): HTMLElement {
+  const box = h("div", { class: "translations", "data-lang": lang });
+  const props = (item.properties ?? {}) as Record<string, Schema>;
+  const maxOf = (k: string): number => Number(props[k]?.maxLength ?? ((props[k]?.items as Schema | undefined)?.maxLength) ?? 1000);
+  const listPage = pages().find((p) => p.id === collection.page);
+  box.append(h("p", { class: "hint" }, `Prevodi za ${LANG_IN[lang] ?? lang} različico strani. Kjer prevoda ni, obiskovalec vidi slovensko besedilo.`));
+  if (listPage) box.append(h("p", {}, h("a", { href: `/preview/${siteId}/${lang}/${pageFileOf(listPage)}`, target: "_blank", rel: "noopener" }, `Poglej ${LANG_IN[lang] ?? lang} stran`)));
+  const items = (collection.items ?? []) as Obj[];
+  if (!items.length) box.append(h("p", { class: "muted" }, "Zbirka je še prazna. Vnose dodajte v slovenščini, nato jih prevedite tukaj."));
+  items.forEach((entry, i) => {
+    const fs = h("fieldset", { class: "translation" }, h("legend", {}, String(entry.title ?? entry.name ?? `Vnos ${i + 1}`)));
+    for (const key of TRANSLATED[kind] ?? []) {
+      const v = entry[key];
+      const at = `/collections/${kind}/items/${i}/${key}`;
+      if (typeof v === "string") fs.append(translationField(lang, at, v, fieldLabel(key), maxOf(key)));
+      else if (Array.isArray(v)) v.forEach((para, k) => typeof para === "string" && fs.append(translationField(lang, `${at}/${k}`, para, `Odstavek ${k + 1}`, maxOf(key))));
+    }
+    box.append(fs);
+  });
   return box;
 }
 
@@ -1317,6 +1387,18 @@ function collectionPane(): HTMLElement {
   const on = ((state.spec?.collections ?? {}) as Obj)[c.kind] as Obj | undefined;
   const item = catalogue?.collections[c.kind];
   if (!on || !item) return pane;
+  // A site in two languages (Plus): the entries' texts in the other one, beside the default language's form.
+  const others = otherLocales();
+  if (others.length) {
+    const lang = collectionLang && others.includes(collectionLang) ? collectionLang : null;
+    const choice = (l: string | null, name: string) => h("button", { type: "button", "aria-pressed": String(l === lang), onClick: () => { collectionLang = l; render(); } }, name);
+    const def = String(((state.spec?.locales ?? {}) as Obj).default ?? "sl");
+    pane.append(h("p", {}, h("span", { class: "seg lang-switch", role: "group", "aria-label": "Jezik vnosov" }, choice(null, LANG_NAME[def] ?? def), ...others.map((l) => choice(l, LANG_NAME[l] ?? l)))));
+    if (lang) {
+      pane.append(collectionTranslations(c.kind, lang, on, item));
+      return pane;
+    }
+  }
   const schema: Schema = { type: "array", items: item, maxItems: catalogue?.collectionLimits[c.kind] ?? 30 };
   const where = at(`/collections/${c.kind}/items`);
   pane.append(

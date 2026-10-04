@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadConfig } from "@sb/config";
+import { applyDirectEdit, startCollection } from "@sb/engine";
 import { Repo, createDb, createFsStorage, memoryMailer, migrate, type JobData, type Platform, type Queue } from "@sb/platform";
 import type { SiteSpec } from "@sb/spec";
 import { createApp } from "../src/app.ts";
@@ -151,6 +152,94 @@ describe("collections (Plus)", () => {
     const ok = await req(`/api/sites/${plus.siteId}/collections`, { method: "POST", headers: json(plus.b), body: JSON.stringify({ baseVersion: await version(plus.siteId), kind: "blog" }) });
     expect(ok.status).toBe(200);
   });
+
+  /** The bakery with its news switched on and one post, saved as the site's next version (as Plus left it). */
+  const withNews = async (siteId: string) => {
+    const spec = structuredClone((await platform.repo.getSpec(siteId))!.spec);
+    const ops = startCollection(spec, "blog");
+    if ("error" in ops) throw new Error(ops.error);
+    const r = applyDirectEdit(spec, ops);
+    r.spec.collections!.blog!.items.push({ title: "Rženi kruh ob petkih", date: "2026-10-02", summary: "Nov kruh v ponudbi.", body: ["Pečemo ga ob petkih zjutraj."] });
+    await platform.repo.saveSpec(siteId, r.spec, "manual", "novice");
+    return r.spec;
+  };
+
+  it("a blog kept from Plus stays on Osnovni: its posts can be edited and added; the editor says which plan has it", async () => {
+    const { b, siteId } = await owner("standard");
+    await withNews(siteId);
+    const entry = { title: "Dan odprtih vrat", date: "2026-11-07", summary: "Ogled peči.", body: ["Pridite v soboto."] };
+    expect((await patch(b, siteId, [{ op: "add", path: "/collections/blog/items/1", value: entry }])).status).toBe(200);
+    expect((await patch(b, siteId, [{ op: "replace", path: "/collections/blog/items/0/title", value: "Rženi kruh" }])).status).toBe(200);
+    expect((await platform.repo.getSpec(siteId))!.spec.collections!.blog!.items.map((i) => i.title)).toEqual(["Rženi kruh", "Dan odprtih vrat"]);
+    // The note the editor shows beside its "Uredi" is the one the switch-on button would read.
+    expect((await state(b, siteId)).access.limits!.collectionNotes).toMatchObject({ blog: { message: "Novice so v paketu Plus (29 € na mesec)." } });
+  });
+
+  it("restoring an old version is held to the plan: Osnovni can't bring a blog back, Plus can", async () => {
+    for (const [plan, status] of [["standard", 403], ["premium", 200]] as const) {
+      const { b, siteId } = await owner(plan);
+      const before = await version(siteId);
+      await withNews(siteId);
+      // The blog's version, then one without it (the generated site again).
+      const withBlog = await version(siteId);
+      await platform.repo.saveSpec(siteId, { ...golden, slug: (await platform.repo.getSpec(siteId, before))!.spec.slug }, "generate");
+      const r = await req(`/api/sites/${siteId}/revert`, { method: "POST", headers: json(b), body: JSON.stringify({ version: withBlog }) });
+      expect(r.status, plan).toBe(status);
+      if (status === 403) {
+        const body = (await r.json()) as Refused;
+        expect(body).toMatchObject({ code: "plan_collections", message: "Novice so v paketu Plus (29 € na mesec).", upgrade: { plan: "premium" } });
+        expect((await platform.repo.getSpec(siteId))!.spec.collections).toBeUndefined();
+      } else expect((await platform.repo.getSpec(siteId))!.spec.collections?.blog).toBeDefined();
+    }
+  });
+});
+
+describe("collection entries in English (Plus, it-collection-translations)", () => {
+  const ptr = "/collections/blog/items/0/title";
+  const at = (p: string) => p.replace(/~/g, "~0").replace(/\//g, "~1");
+
+  it("the editor's operations write, change and remove an entry's English; the preview shows it under en/", async () => {
+    const { b, siteId } = await owner("premium");
+    expect((await patch(b, siteId, [{ op: "replace", path: "/locales/enabled", value: ["sl", "en"] }])).status).toBe(200);
+    await withNewsAt(siteId);
+    const guard = { op: "test", path: ptr, value: "Rženi kruh ob petkih" };
+    // The first translation creates the overlay; the next ones add to it.
+    expect((await patch(b, siteId, [guard, { op: "add", path: "/translations", value: { en: { [ptr]: "Rye bread on Fridays" } } }])).status).toBe(200);
+    expect((await patch(b, siteId, [{ op: "test", path: "/collections/blog/items/0/body/0", value: "Pečemo ga ob petkih zjutraj." }, { op: "add", path: `/translations/en/${at("/collections/blog/items/0/body/0")}`, value: "We bake it on Friday mornings — early." }])).status).toBe(200);
+    const spec = (await platform.repo.getSpec(siteId))!.spec;
+    // Em dashes are repaired as in Slovene text.
+    expect(spec.translations!.en).toEqual({ [ptr]: "Rye bread on Fridays", "/collections/blog/items/0/body/0": "We bake it on Friday mornings – early." });
+    const page = await req(`/preview/${siteId}/en/novice/rzeni-kruh-ob-petkih.html`, { headers: { cookie: b.cookie } });
+    expect(page.status).toBe(200);
+    const html = await page.text();
+    expect(html).toContain(">Rye bread on Fridays</h1>");
+    expect(html).toContain('<html lang="en">');
+    // The Slovene page keeps its own title and file name.
+    expect(await (await req(`/preview/${siteId}/novice/rzeni-kruh-ob-petkih.html`, { headers: { cookie: b.cookie } })).text()).toContain(">Rženi kruh ob petkih</h1>");
+    // A translation aimed at text that changed meanwhile is refused, not written onto another entry.
+    expect((await patch(b, siteId, [{ op: "test", path: ptr, value: "Drug naslov" }, { op: "add", path: `/translations/en/${at(ptr)}`, value: "Other" }])).status).toBe(422);
+    // Emptied: the overlay goes and the English page shows the Slovene title.
+    expect((await patch(b, siteId, [guard, { op: "remove", path: `/translations/en/${at(ptr)}` }])).status).toBe(200);
+    expect((await platform.repo.getSpec(siteId))!.spec.translations!.en![ptr]).toBeUndefined();
+  });
+
+  it("Osnovni has one language: no English to write (refused by the plan's languages, not by the entry)", async () => {
+    const { b, siteId } = await owner("standard");
+    await withNewsAt(siteId);
+    const r = await patch(b, siteId, [{ op: "replace", path: "/locales/enabled", value: ["sl", "en"] }, { op: "add", path: "/translations", value: { en: { [ptr]: "Rye bread" } } }]);
+    expect(r.status).toBe(403);
+    expect(((await r.json()) as Refused).code).toBe("plan_locales");
+  });
+
+  /** The news with one post on the site's current spec (keeps its languages). */
+  async function withNewsAt(siteId: string) {
+    const spec = structuredClone((await platform.repo.getSpec(siteId))!.spec);
+    const ops = startCollection(spec, "blog");
+    if ("error" in ops) throw new Error(ops.error);
+    const r = applyDirectEdit(spec, ops);
+    r.spec.collections!.blog!.items.push({ title: "Rženi kruh ob petkih", date: "2026-10-02", summary: "Nov kruh v ponudbi.", body: ["Pečemo ga ob petkih zjutraj."] });
+    await platform.repo.saveSpec(siteId, r.spec, "manual", "novice");
+  }
 });
 
 describe("generated pictures per month", () => {

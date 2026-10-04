@@ -109,6 +109,13 @@ describe("collections on the site", () => {
     expect(en).toContain('href="../../../_shared/');
     // The menu marks the news page as the section the entry belongs to, not as the current page.
     expect(en).toContain('<a href="../novice.html" aria-current="true">Novice</a>');
+    // The editor's preview of the English pages renders the same files from their paths.
+    expect(renderPath(two, "en/novice/nov-rzeni-kruh.html", { siteUrl: URL_ })).toBe(en);
+    expect(renderPath(two, "en/novice.html", { siteUrl: URL_ })).toBe(site.pages.get("en/novice.html"));
+    expect(renderPath(two, "en/index.html", { siteUrl: URL_ })).toBe(site.pages.get("en/index.html"));
+    // Only an enabled language: German isn't, so there is no de/ page.
+    expect(renderPath(two, "de/novice.html")).toBeNull();
+    expect(renderPath(spec, "en/novice.html")).toBeNull();
   });
 
   it("shows nothing for an empty blog, and says so for no events", () => {

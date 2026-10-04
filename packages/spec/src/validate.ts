@@ -177,8 +177,19 @@ export function semanticIssues(spec: SiteSpec): Issue[] {
       if (s.type === "collection" && !cols?.[s.props.kind]) add(`/pages/${pi}/sections/${si}/props/kind`, "reference", `the ${s.props.kind} collection is not set up`);
     }),
   );
-  // The banned phrases are give-aways of generated copy; collections are the owner's own words, so they aren't
-  // checked against them (em dashes are still repaired on save, banned.ts repairSiteCopy).
+  // The banned phrases are give-aways of generated copy. Blog posts, events and every entry's body are only ever
+  // the owner's own words (the model never writes collections, and these start empty), so they aren't checked
+  // against them (em dashes are still repaired on save, banned.ts repairSiteCopy). Services and team entries'
+  // short texts start as the generated sections' items (startCollection moves them, with their English), so
+  // they stay checked like the sections they came from, whoever edits them later.
+  for (const kind of ["services", "team"] as const) {
+    cols?.[kind]?.items.forEach((item, i) => {
+      for (const field of GENERATED_ENTRY_FIELDS[kind]) {
+        const text = (item as Record<string, unknown>)[field];
+        if (typeof text === "string") for (const v of findBannedCopy(text, `/collections/${kind}/items/${i}/${field}`)) add(v.path, "banned", `${v.rule}: "${v.text}"`);
+      }
+    });
+  }
 
   // Link URLs: z.url() also accepts javascript:, data: and the like; the renderer drops anything not http(s).
   walkObjects(spec.pages, (o, p) => {
@@ -193,7 +204,12 @@ export function semanticIssues(spec: SiteSpec): Issue[] {
 
   // Banned copy.
   for (const v of findBannedCopy(spec.pages, "/pages")) add(v.path, "banned", `${v.rule}: "${v.text}"`);
-  for (const v of findBannedCopy(spec.translations ?? {}, "/translations")) add(v.path, "banned", `${v.rule}: "${v.text}"`);
+  // An owner-only entry text's translation is the owner's own words too (it-collection-translations); the
+  // English of a services or team entry's short texts may be generated (moved with it), so it is checked.
+  const shownTranslations = Object.fromEntries(
+    Object.entries(spec.translations ?? {}).map(([locale, map]) => [locale, Object.fromEntries(Object.entries(map ?? {}).filter(([ptr]) => !ptr.startsWith("/collections/") || GENERATED_ENTRY_POINTER.test(ptr)))]),
+  );
+  for (const v of findBannedCopy(shownTranslations, "/translations")) add(v.path, "banned", `${v.rule}: "${v.text}"`);
 
   // Locales and translation overlays. Only locales with UI strings (a German site would get English buttons).
   if (!spec.locales.enabled.includes(spec.locales.default)) add("/locales", "structure", "default locale must be enabled");
@@ -211,6 +227,10 @@ export function semanticIssues(spec: SiteSpec): Issue[] {
 
   return issues;
 }
+
+/** The services and team entry fields startCollection fills from generated sections (engine collections.ts). */
+const GENERATED_ENTRY_FIELDS = { services: ["name", "summary"], team: ["name", "role", "bio"] } as const;
+const GENERATED_ENTRY_POINTER = /^\/collections\/(services\/items\/\d+\/(name|summary)|team\/items\/\d+\/(name|role|bio))$/;
 
 const STARTER = new Set(Object.values(EDITOR_STARTER_TEXT));
 

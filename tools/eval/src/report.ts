@@ -132,6 +132,8 @@ export function renderReport(results: FixtureResult[], config: AppConfig, meta: 
     if (r.home) {
       lines.push(`Homepage: ${r.home.sections.join(" › ")} (${r.home.contactBlocks} contact block${r.home.contactBlocks === 1 ? "" : "s"}).`, "");
     }
+    const entries = (r.checkpoints[0]?.pages ?? []).filter((f) => f.includes("/"));
+    if (entries.length) lines.push(`Collection entry pages checked: ${entries.length} (${entries.slice(0, 6).join(", ")}${entries.length > 6 ? ", …" : ""}).`, "");
     lines.push(`| Checkpoint | LH P/A/BP/SEO | axe | Valid | Edit check | Failures |`, `|---|---|---|---|---|---|`);
     for (const c of r.checkpoints) {
       const l = c.lighthouse;

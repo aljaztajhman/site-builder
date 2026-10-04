@@ -132,11 +132,23 @@ export function applyDirectEdit(spec: SiteSpec, ops: Operation[]): DirectEditRes
   const v = validateSite(next);
   if (v.ok) return { ok: true, spec: v.spec, issues: [], adjustments };
   // Copy rules added after a site was made (new filler phrases, all-caps eyebrows) must not lock it: a
-  // banned-copy issue the site already had, at the same place, doesn't block an unrelated edit. The
-  // publish checklist still lists it.
+  // banned-copy issue the site already had, at the same place, doesn't block an unrelated edit; nor does one
+  // that only moved (a services item into its collection: the same rule and text, no more often than before).
+  // The publish checklist still lists it.
   const key = (i: Issue) => `${i.path}|${i.message}`;
-  const before = new Set(validateSite(spec).issues.filter((i) => i.code === "banned").map(key));
-  const fresh = v.issues.filter((i) => !(i.code === "banned" && before.has(key(i))));
+  const had = validateSite(spec).issues.filter((i) => i.code === "banned");
+  const before = new Set(had.map(key));
+  const spare = new Map<string, number>();
+  for (const i of had) spare.set(i.message, (spare.get(i.message) ?? 0) + 1);
+  for (const i of v.issues) if (i.code === "banned" && before.has(key(i))) spare.set(i.message, (spare.get(i.message) ?? 0) - 1);
+  const fresh = v.issues.filter((i) => {
+    if (i.code !== "banned") return true;
+    if (before.has(key(i))) return false;
+    const left = spare.get(i.message) ?? 0;
+    if (left <= 0) return true;
+    spare.set(i.message, left - 1);
+    return false;
+  });
   if (fresh.length === 0 && v.spec) return { ok: true, spec: v.spec, issues: [], adjustments };
   return { ok: false, spec, issues: fresh, adjustments };
 }
