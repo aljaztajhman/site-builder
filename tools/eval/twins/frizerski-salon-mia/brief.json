@@ -1,0 +1,34 @@
+{
+  "id": "frizerski-salon-mia",
+  "businessType": "hairdresser",
+  "twinOf": "frizerstvo-lana",
+  "description": "Frizerski salon Mia v Ljubljani. Naslov: Celovška cesta 88, 1000 Ljubljana. Salon sem odprla leta 2017, sem Mia Golob, pomočnica je Ana Rus.\n\nStrižemo ženske, moške in otroke, barvamo, delamo pramene, balayage in keratinsko nego. Uporabljamo veganske barve brez amoniaka.\n\nCenik: žensko striženje s fenom 32 €, moško striženje 18 €, otroško striženje 12 €, barvanje od 45 €, balayage od 85 €.\n\nOdprto: torek do petek od 9.00 do 19.00, sobota od 8.00 do 13.00, ob nedeljah in ponedeljkih zaprto.\n\nNaročanje po telefonu 040 555 318 ali na mia@salonmia.example. Rada bi, da je stran svetla in prijazna, nič preveč resnega.",
+  "logo": null,
+  "photos": [
+    { "file": "photos/01.jpg", "from": "frizerstvo-lana", "subject": "notranjost frizerskega salona z dvema stoloma in ogledaloma" },
+    { "file": "photos/02.jpg", "from": "frizerstvo-lana", "subject": "frizerka striže stranko s srednje dolgimi lasmi" },
+    { "file": "photos/05.jpg", "from": "frizerstvo-lana", "subject": "polica s frizerskimi izdelki in škarjami" }
+  ],
+  "facts": {
+    "name": "Frizerski salon Mia",
+    "phone": "+38640555318",
+    "email": "mia@salonmia.example",
+    "address": { "street": "Celovška cesta 88", "postalCode": "1000", "city": "Ljubljana" },
+    "hours": [
+      { "from": "mon", "to": "mon", "closed": true },
+      { "from": "tue", "to": "fri", "open": "09:00", "close": "19:00" },
+      { "from": "sat", "to": "sat", "open": "08:00", "close": "13:00" },
+      { "from": "sun", "to": "sun", "closed": true }
+    ],
+    "prices": [
+      { "item": "žensko striženje s fenom", "amount": 32 },
+      { "item": "moško striženje", "amount": 18 },
+      { "item": "otroško striženje", "amount": 12 },
+      { "item": "barvanje", "amount": 45, "from": true },
+      { "item": "balayage", "amount": 85, "from": true }
+    ],
+    "people": [{ "name": "Mia Golob" }, { "name": "Ana Rus", "role": "pomočnica" }],
+    "other": ["leta 2017", "veganske barve brez amoniaka", "keratinsko nego"]
+  },
+  "missing": ["legal"]
+}

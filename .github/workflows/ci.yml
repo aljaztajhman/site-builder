@@ -22,8 +22,26 @@ jobs:
           node-version: 24
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
-      - name: Install Chromium for render checks
-        run: pnpm --filter @sb/engine exec playwright install --with-deps chromium
       - run: pnpm typecheck
       - run: pnpm lint
-      - run: pnpm test
+
+  # Every test runs, split over three runners by file (vitest --shard): the browser suites made one runner take
+  # 15–20 minutes (the job's limit).
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
+    name: test (${{ matrix.shard }}/3)
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - name: Install Chromium for render checks
+        run: pnpm --filter @sb/engine exec playwright install --with-deps chromium
+      - run: pnpm test --shard=${{ matrix.shard }}/3

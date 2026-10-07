@@ -1,0 +1,26 @@
+{
+  "id": "vulkanizer-zorman",
+  "businessType": "car-repair",
+  "trade": "gume",
+  "twinOf": "avtoservis-mrak",
+  "description": "Vulkanizerstvo Zorman, Ptuj. Družinska vulkanizerska delavnica, ki jo je oče Stanko odprl leta 1994, danes jo vodi sin Matej Zorman. Naslov: Ormoška cesta 41, 2250 Ptuj, takoj za bencinsko črpalko.\n\nMenjamo in centriramo gume za osebna vozila, kombije in manjše traktorje, krpamo predrte gume, polnimo z dušikom in hranimo gume čez sezono. Prodajamo tudi nove gume vseh večjih znamk, cene po ponudbi.\n\nCene: menjava in centriranje kompleta 28 €, krpanje gume 12 €, hramba kompleta za eno sezono 35 €.\n\nOdprto od ponedeljka do petka od 7.30 do 17.00, v soboto od 8.00 do 12.00. Spomladi in jeseni je gneča, zato se prej naročite po telefonu 041 555 864.\n\nFotografij delavnice nimamo, logotipa tudi ne. Na strani naj bo telefon na vrhu, ker skoraj vsi kličejo.",
+  "logo": null,
+  "photos": [],
+  "facts": {
+    "name": "Vulkanizerstvo Zorman",
+    "phone": "+38641555864",
+    "address": { "street": "Ormoška cesta 41", "postalCode": "2250", "city": "Ptuj" },
+    "hours": [
+      { "from": "mon", "to": "fri", "open": "07:30", "close": "17:00" },
+      { "from": "sat", "to": "sat", "open": "08:00", "close": "12:00" }
+    ],
+    "prices": [
+      { "item": "menjava in centriranje kompleta", "amount": 28 },
+      { "item": "krpanje gume", "amount": 12 },
+      { "item": "hramba kompleta za eno sezono", "amount": 35 }
+    ],
+    "people": [{ "name": "Matej Zorman" }, { "name": "Stanko" }],
+    "other": ["leta 1994", "za bencinsko črpalko", "manjše traktorje", "polnimo z dušikom", "cene po ponudbi"]
+  },
+  "missing": ["photos", "email", "legal"]
+}

@@ -1,5 +1,7 @@
 # Variety engine: every business its own site
 
+Status 2026-10-07: Step 0's free part is built: 12 twins in `tools/eval/twins/` (`--twins`), look distance (`tools/eval/src/look-distance.ts`), brand fit, motif fit, `--no-edits`; the variety report in `eval/variety-<mode>-<scope>.md`. Offline baseline over the 10 goldens: look distance across trades 0.61, replay of the 2026-10-01 recordings 0.47, no colliding pair. Within a trade there is no number yet: it needs `pnpm eval --twins --no-edits --scope home` (paid, ≈ €2–3 with the batched judge).
+
 Status: plan, 2026-10-04. Nothing here is built. Building waits for eval budget (HQ `meta/budget` is "spend nothing"), because every step changes what the model produces and has to be measured on real generations. HQ decisions: `sb-variety-approach` (which way), `sb-druga-podoba` (how owners see alternatives). Items: `it-variety-*` and the existing `it-sameness`, `it-hero-families`, `it-catalogue-sameness`.
 
 The owner's worry (2026-10-04): "I don't want it to look like a template filler and that every avtoserviser would get a same-y looking site."

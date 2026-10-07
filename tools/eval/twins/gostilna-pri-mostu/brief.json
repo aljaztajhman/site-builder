@@ -1,0 +1,30 @@
+{
+  "id": "gostilna-pri-mostu",
+  "businessType": "restaurant",
+  "twinOf": "gostilna-zlata-zlica",
+  "description": "Gostilna Pri mostu, Kamnik. Ob reki Bistrici, tik ob starem mostu, kuhamo od leta 1968, danes v tretji generaciji. Naslov: Šutna 2, 1241 Kamnik.\n\nKuhamo domačo hrano: dnevne malice med tednom, ob nedeljah kosila z juho, pečenko in štruklji. Specialiteta hiše so kamniški štruklji in telečja obara. Imamo prostor za 60 gostov in teraso ob reki.\n\nDnevna malica 9,50 €, nedeljsko kosilo 16 €, porcija štrukljev 6 €.\n\nOdprto od ponedeljka do sobote od 10.00 do 22.00, ob nedeljah od 11.00 do 17.00.\n\nRezervacije in pogostitve: 01 555 8820, gostilna@primostu.example. Vodita jo brata Peter in Jure Kosmač.",
+  "logo": null,
+  "photos": [
+    { "file": "photos/02.jpg", "from": "gostilna-zlata-zlica", "subject": "jedilnica z lesenimi mizami in pogrnjenimi prti" },
+    { "file": "photos/03.jpg", "from": "gostilna-zlata-zlica", "subject": "krožnik ajdovih žgancev z ocvirki" },
+    { "file": "photos/06.jpg", "from": "gostilna-zlata-zlica", "subject": "skleda telečje obare na mizi" }
+  ],
+  "facts": {
+    "name": "Gostilna Pri mostu",
+    "phone": "+38615558820",
+    "email": "gostilna@primostu.example",
+    "address": { "street": "Šutna 2", "postalCode": "1241", "city": "Kamnik" },
+    "hours": [
+      { "from": "mon", "to": "sat", "open": "10:00", "close": "22:00" },
+      { "from": "sun", "to": "sun", "open": "11:00", "close": "17:00" }
+    ],
+    "prices": [
+      { "item": "dnevna malica", "amount": 9.5 },
+      { "item": "nedeljsko kosilo", "amount": 16 },
+      { "item": "porcija štrukljev", "amount": 6 }
+    ],
+    "people": [{ "name": "Peter" }, { "name": "Jure Kosmač" }],
+    "other": ["od leta 1968", "v tretji generaciji", "za 60 gostov", "teraso ob reki", "kamniški štruklji in telečja obara"]
+  },
+  "missing": ["legal"]
+}
