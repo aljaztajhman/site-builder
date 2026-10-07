@@ -10,9 +10,10 @@ import { loadFixture } from "../src/fixtures/load.ts";
 import { homeRecordings } from "../src/home-recordings.ts";
 
 /**
- * The variety engine in the pipeline (config variety.families on; synthetic answers built from the restaurant's golden,
- * whose design step picks the jedilnik template): the second restaurant in the same town sees the first as a neighbour
- * (repo.neighbourLooks) and gets another look; the switch off leaves the template's own look.
+ * The variety engine in the pipeline (config variety.families on; synthetic answers built from the accountant's golden,
+ * whose design step picks the racun template; no photos, so the generations stay quick): the next accountant in the same
+ * town sees the earlier ones as neighbours (repo.neighbourLooks) and gets another look; the switch off leaves the
+ * template's own look.
  */
 const base = loadConfig();
 let db: Db;
@@ -33,9 +34,9 @@ afterAll(async () => {
   await rm(dir, { recursive: true, force: true });
 });
 
-async function restaurant(slug: string, families: boolean): Promise<{ id: string; spec: SiteSpec }> {
+async function accountant(slug: string, families: boolean): Promise<{ id: string; spec: SiteSpec }> {
   const config = { ...base, variety: { ...base.variety, families } };
-  const fixture = loadFixture("gostilna-zlata-zlica");
+  const fixture = loadFixture("racunovodstvo-seliskar");
   const storage = createFsStorage(path.join(dir, slug));
   const site = await repo.createSite({ name: slug, slug, intake: { description: fixture.brief.description, photoAssetIds: [], scope: "home" } });
   const ids: string[] = [];
@@ -55,19 +56,19 @@ const heroOf = (s: SiteSpec) => s.pages.find((p) => p.kind === "home")!.sections
 
 describe("the variety engine in the pipeline", () => {
   it("off: the template's own palette and fonts", async () => {
-    const { spec } = await restaurant("gostilna-off", false);
-    expect(spec.design.direction).toBe("jedilnik");
-    expect(spec.design.colors.primary).toBe(FAMILIES.jedilnik!.palettes[0]!.colors.primary);
-    expect(spec.design.fontPair).toBe(FAMILIES.jedilnik!.fontPairs[0]);
+    const { spec } = await accountant("racun-off", false);
+    expect(spec.design.direction).toBe("racun");
+    expect(spec.design.colors.primary).toBe(FAMILIES.racun!.palettes[0]!.colors.primary);
+    expect(spec.design.fontPair).toBe(FAMILIES.racun!.fontPairs[0]);
   }, 180_000);
 
-  it("on: the next restaurant in town sees the earlier ones and gets a look none of them has", async () => {
-    const first = await restaurant("gostilna-one", true);
-    const second = await restaurant("gostilna-two", true);
+  it("on: the next accountant in town sees the earlier ones and gets a look none of them has", async () => {
+    const first = await accountant("racun-one", true);
+    const second = await accountant("racun-two", true);
     const valid = validateSite(second.spec);
     expect(valid.ok ? [] : valid.issues).toEqual([]);
-    // Both earlier restaurants (this test's and the switch-off one) are the second's neighbours, from the database.
-    const neighbours = await repo.neighbourLooks(second.id, "restaurant", "Škofja Loka", 50);
+    // Both earlier accountants (this test's and the switch-off one) are the second's neighbours, from the database.
+    const neighbours = await repo.neighbourLooks(second.id, "accountant", "Murska Sobota", 50);
     expect(neighbours).toHaveLength(2);
     expect(neighbours.map((n) => n.hero)).toEqual([{ type: heroOf(first.spec).type, variant: heroOf(first.spec).variant }, expect.anything()]);
     const events = await db.query<{ data: { neighbours: number; hero: string | null } }>("select data from site_events where site_id = $1 and message = 'Variety engine'", [second.id]);

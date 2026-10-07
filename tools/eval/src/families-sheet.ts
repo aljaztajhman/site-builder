@@ -66,12 +66,22 @@ export async function familyVariants(dir: Direction): Promise<FamilyVariant[]> {
   return out;
 }
 
-/** The fixture's photos and logo, processed as the pipeline does, keyed by media file. */
+/** Processed photos per fixture: every variant of a template shares its fixture's photos (AVIF encoding is slow). */
+const processedMedia = new Map<string, Promise<{ media: Map<string, Uint8Array>; assets: SiteSpec["assets"] }>>();
+
+/** The fixture's photos and logo, processed as the pipeline does, keyed by media file; sets their sizes in `spec`. */
 export async function fixtureMedia(fixtureId: string, spec: SiteSpec): Promise<Map<string, Uint8Array>> {
+  if (!processedMedia.has(fixtureId)) processedMedia.set(fixtureId, processFixtureMedia(fixtureId, structuredClone(spec.assets)));
+  const done = await processedMedia.get(fixtureId)!;
+  spec.assets = structuredClone(done.assets);
+  return done.media;
+}
+
+async function processFixtureMedia(fixtureId: string, assets: SiteSpec["assets"]): Promise<{ media: Map<string, Uint8Array>; assets: SiteSpec["assets"] }> {
   const config = loadConfig();
   const fixture = loadFixtures().find((f) => f.id === fixtureId)!;
   const media = new Map<string, Uint8Array>();
-  for (const [i, img] of spec.assets.images.entries()) {
+  for (const [i, img] of assets.images.entries()) {
     const photo = fixture.photos[i];
     if (!photo) continue;
     const processed = await processPhoto(img.id, new Uint8Array(await readFile(photo.path)), config.images.widths, { avif: config.images.avifQuality, webp: config.images.webpQuality });
@@ -79,12 +89,12 @@ export async function fixtureMedia(fixtureId: string, spec: SiteSpec): Promise<M
     img.width = processed.width;
     img.height = processed.height;
   }
-  if (spec.assets.logo && fixture.logoPath) {
+  if (assets.logo && fixture.logoPath) {
     const logo = await processLogo(new Uint8Array(await readFile(fixture.logoPath)), "image/svg+xml");
     media.set(logo.file, logo.data);
-    spec.assets.logo = { ...spec.assets.logo, file: logo.file, width: logo.width, height: logo.height };
+    assets.logo = { ...assets.logo, file: logo.file, width: logo.width, height: logo.height };
   }
-  return media;
+  return { media, assets };
 }
 
 export interface VariantCheck {
