@@ -319,6 +319,19 @@ export const AppConfigSchema = z.object({
       cron: z.string().min(1),
     }),
   }),
+  /** Database backups (docs/dev/workflow.md §4): `pnpm db:backup`, run by the nightly workflow (see config $comment). */
+  backups: z.object({
+    /** Storage key prefix; each backup is <prefix><YYYY-MM-DD>.sql.gz (UTC day; a second run that day replaces it). */
+    prefix: z.string().regex(/^[a-z0-9-]+\/$/),
+    /** Backups older than this many days are deleted after a new one is written. */
+    keepDays: z.number().int().min(1),
+    /** The check fails when the newest backup is older than this. */
+    maxAgeHours: z.number().positive(),
+    /** The check fails when the newest backup is smaller than this (compressed bytes)... */
+    minBytes: z.number().int().min(0),
+    /** ...or smaller than this share of the backup before it (a truncated dump). */
+    minShareOfPrevious: z.number().min(0).max(1),
+  }),
   /** fal.ai images: eval fixture photos, and generated mood images for client sites with too few photos (see config $comment). */
   imageGen: z.object({
     pipeline: z.object({
