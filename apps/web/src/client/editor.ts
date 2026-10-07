@@ -579,6 +579,7 @@ interface Sink {
 function field(schema: Schema, rootSchema: Schema, value: Json | undefined, key: string, sink: Sink, optional = false, ptr = "", parent?: string): HTMLElement {
   const el = fieldBody(schema, rootSchema, value, key, sink, optional, ptr, parent);
   if (ptr && !el.dataset.path) el.dataset.path = ptr;
+  if (ptr === TAX_PATH) hookTaxNumber(el);
   return el;
 }
 
@@ -721,7 +722,8 @@ function fieldBody(schema: Schema, rootSchema: Schema, value: Json | undefined, 
         fs.append(tools, field(itemSchema, rootSchema, item, key === "paragraphs" ? "text" : key, itemSink, false, `${ptr}/${i}`, parent));
       });
       if (arr.length < Number(s.maxItems ?? 99)) {
-        fs.append(h("button", { class: "btn sm", type: "button", onClick: () => restructure(() => arr.push(defaultFor(itemSchema, rootSchema, key))) }, "+ Dodaj"));
+        // A team's people are added one by one, named by the owner (generation leaves out anyone the client didn't name).
+        fs.append(h("button", { class: "btn sm", type: "button", onClick: () => restructure(() => arr.push(defaultFor(itemSchema, rootSchema, key))) }, key === "members" ? "+ Dodaj člana" : "+ Dodaj"));
       }
       return fs;
     }
@@ -2535,20 +2537,24 @@ function schemaAt(path: string): { schema: Schema; root: Schema; key: string; pa
 const incomplete = (v: Json | undefined): boolean =>
   v === "" || (Array.isArray(v) ? v.some(incomplete) : v !== null && typeof v === "object" ? Object.values(v).some(incomplete) : false);
 
+/**
+ * Saves one fact of the screen. Emptied again: missing again (a service area is a list that is simply left out).
+ * "add" sets an object member whether or not it is there yet (business hours may be absent).
+ */
+const askSave = (f: MissingFact) => (v: Json | undefined, rerender: boolean) =>
+  patch(
+    [v === undefined && f.kind === "serviceArea" ? { op: "remove", path: f.path } : { op: "add", path: f.path, value: v ?? ({ $placeholder: f.kind } as Json) }],
+    "manjkajoči podatki",
+    rerender,
+  );
+
 /** One missing fact as its form, already open: no "Vnesi" to tap. */
 function askField(f: MissingFact, first: boolean): HTMLElement | null {
   const at = schemaAt(f.path);
   if (!at || !state.spec) return null;
   const s = resolve(at.schema, at.root);
   const inner = Array.isArray(s.anyOf) ? ((s.anyOf as Schema[]).map((o) => resolve(o, at.root)).find((o) => !isPlaceholderSchema(o)) ?? s) : s;
-  // Emptied again: missing again (a service area is a list that is simply left out). "add" sets an object member
-  // whether or not it is there yet (business hours may be absent).
-  const save = (v: Json | undefined, rerender: boolean) =>
-    patch(
-      [v === undefined && f.kind === "serviceArea" ? { op: "remove", path: f.path } : { op: "add", path: f.path, value: v ?? ({ $placeholder: f.kind } as Json) }],
-      "manjkajoči podatki",
-      rerender,
-    );
+  const save = askSave(f);
   // A price as the owner writes it ("12,50", "od 30"), read like the price-list editor reads it.
   if (f.kind === "price") return askBox(f, first, askPrice(f, save));
   const later = debounced((v) => {
@@ -2616,7 +2622,7 @@ function askPrice(f: MissingFact, save: (v: Json | undefined, rerender: boolean)
 /** The facts the checklist says are missing, as one form with Objavi under it. */
 function askPane(): HTMLElement | null {
   if (!askOpen || !state.spec || !catalogue || !can("edit")) return null;
-  const facts = missingFacts(state.checklist);
+  const facts = taxNumberFirst(missingFacts(state.checklist));
   const other = state.checklist.length - facts.length;
   const close = () => {
     askOpen = false;
@@ -2641,6 +2647,8 @@ function askPane(): HTMLElement | null {
 
 /** Objavi under the form: what was typed is saved first, then the usual publish (or what is still missing). */
 async function askPublish(): Promise<void> {
+  // A tax number just typed: its lookup fills the name first (or says why not).
+  await settleCompanyLookup();
   flushPending();
   await queued(() => load(false));
   if (!can("publish")) {
@@ -2677,6 +2685,148 @@ function openAsk(): void {
   render();
   document.getElementById("facts-ask")?.scrollIntoView({ block: "start" });
   document.querySelector<HTMLElement>("#facts-ask [data-first] input, #facts-ask [data-first] select")?.focus({ preventScroll: true });
+}
+
+// ---------- Legal name and address from the tax number (EU VIES via /company-lookup, it-zept-lookup) ----------
+const TAX_PATH = "/business/provider/taxNumber";
+const LEGAL_NAME_PATH = "/business/provider/legalName";
+const ADDRESS_PATH = "/business/address";
+type CompanyAddress = { street: string; postalCode: string; city: string };
+type CompanyLookup = { found: true; name: string; address: CompanyAddress | null } | { found: false; message: string };
+
+/**
+ * The lookup for the number in the field: its state (the field carries it as data-lookup), the note under the
+ * field, and what it filled in, so the next number replaces its own values but never what the owner typed.
+ */
+const company: { digits: string | null; status: "" | "busy" | "found" | "none"; note: string; filled: { name?: string; address?: CompanyAddress } } = { digits: null, status: "", note: "", filled: {} };
+let companyTimer: number | undefined;
+let companyRun: Promise<void> | null = null;
+
+/** The 8 digits of a Slovenian tax number as typed ("SI 1234 5678"), or null. */
+const taxDigitsOf = (v: string): string | null => {
+  const s = v.replace(/[\s.-]/g, "").toUpperCase().replace(/^SI/, "");
+  return /^\d{8}$/.test(s) ? s : null;
+};
+
+/** On the screen the tax number comes before the name and address it can fill. */
+function taxNumberFirst(facts: MissingFact[]): MissingFact[] {
+  const t = facts.findIndex((f) => f.kind === "taxNumber");
+  const first = facts.findIndex((f) => f.path === LEGAL_NAME_PATH || f.path === ADDRESS_PATH);
+  if (t < 0 || first < 0 || t < first) return facts;
+  const out = facts.slice();
+  out.splice(first, 0, ...out.splice(t, 1));
+  return out;
+}
+
+/** The tax number's field (in "Še to potrebujemo" or Podatki): typing a whole number looks it up. */
+function hookTaxNumber(el: HTMLElement): void {
+  if (el.dataset.lookupHooked) return;
+  el.dataset.lookupHooked = "true";
+  el.dataset.lookup = company.status;
+  if (company.note) el.append(h("p", { class: company.status === "found" ? "help company-note" : "note company-note", role: "status" }, company.note));
+  el.addEventListener("input", (e) => {
+    const target = e.target;
+    if (target instanceof HTMLInputElement) onTaxNumber(target.value);
+  });
+}
+
+function showCompanyStatus(status: typeof company.status, note: string): void {
+  company.status = status;
+  company.note = note;
+  for (const el of document.querySelectorAll<HTMLElement>(`[data-lookup-hooked][data-path="${TAX_PATH}"]`)) {
+    el.dataset.lookup = status;
+    el.querySelector(".company-note")?.remove();
+    if (note) el.append(h("p", { class: status === "found" ? "help company-note" : "note company-note", role: "status" }, note));
+  }
+}
+
+function onTaxNumber(value: string): void {
+  const digits = taxDigitsOf(value);
+  window.clearTimeout(companyTimer);
+  companyTimer = undefined;
+  // The same number again: no second question, unless the last one got no answer.
+  if (digits === company.digits && (company.status === "busy" || company.status === "found")) return;
+  company.digits = digits;
+  if (!digits) return showCompanyStatus("", "");
+  showCompanyStatus("busy", "Iščemo podatke v registru zavezancev za DDV …");
+  companyTimer = window.setTimeout(() => {
+    companyTimer = undefined;
+    companyRun = lookupCompany(digits).finally(() => (companyRun = null));
+  }, 400);
+}
+
+/** Objavi under the screen: a number still waiting for its lookup is looked up now. */
+async function settleCompanyLookup(): Promise<void> {
+  if (companyTimer !== undefined && company.digits) {
+    window.clearTimeout(companyTimer);
+    companyTimer = undefined;
+    companyRun = lookupCompany(company.digits).finally(() => (companyRun = null));
+  }
+  if (companyRun) await companyRun;
+}
+
+async function lookupCompany(digits: string): Promise<void> {
+  let r: CompanyLookup;
+  try {
+    r = await api<CompanyLookup>("/company-lookup", { method: "POST", body: JSON.stringify({ taxNumber: digits }) });
+  } catch (e) {
+    r = { found: false, message: (e as Error).message };
+  }
+  // The owner typed another number meanwhile: that one's answer counts.
+  if (company.digits !== digits) return;
+  if (!r.found) return showCompanyStatus("none", r.message);
+  const filled = await fillCompany(r);
+  const what = filled.name && filled.address ? "Ime in naslov smo prevzeli" : filled.name ? "Ime smo prevzeli" : filled.address ? "Naslov smo prevzeli" : null;
+  showCompanyStatus("found", what ? `${what} iz registra zavezancev za DDV (VIES). Preverite in po potrebi popravite.` : `V registru zavezancev za DDV: ${r.name}.`);
+}
+
+/** Text the owner hasn't typed: empty, or what the previous lookup put there. */
+const untouchedName = (v: Json | undefined): boolean => v === undefined || v === "" || isPh(v) || (typeof v === "string" && v === company.filled.name);
+const untouchedAddress = (v: Json | undefined): boolean =>
+  v === undefined || isPh(v) || (v !== null && typeof v === "object" && !Array.isArray(v) && (Object.values(v).every((x) => x === "" || x === undefined) || JSON.stringify(v) === JSON.stringify(company.filled.address)));
+const isPh = (v: Json | undefined): boolean => v !== null && typeof v === "object" && !Array.isArray(v) && "$placeholder" in v;
+
+/**
+ * Puts the register's name (and address, where the site has none yet) into the fields, saved like typed text; the
+ * owner can change them. On "Še to potrebujemo" the fields stay on the screen; elsewhere the facts form redraws.
+ */
+async function fillCompany(r: { name: string; address: CompanyAddress | null }): Promise<{ name: boolean; address: boolean }> {
+  const done = { name: false, address: false };
+  const screen = document.getElementById("facts-ask");
+  if (askOpen && screen) {
+    const fill = (path: string, value: Json, untouched: (v: Json | undefined) => boolean): boolean => {
+      const box = screen.querySelector<HTMLElement>(`[data-ask="${path}"]`);
+      if (!box || !untouched(askDraft.get(path))) return false;
+      const f: MissingFact = { path, kind: path === ADDRESS_PATH ? "address" : "legalName" };
+      askDraft.set(path, value);
+      const fresh = askField(f, box.dataset.first === "true");
+      if (!fresh) return false;
+      box.replaceWith(fresh);
+      linkLabels(fresh);
+      void askSave(f)(value, false);
+      return true;
+    };
+    done.name = fill(LEGAL_NAME_PATH, r.name, untouchedName);
+    if (r.address) done.address = fill(ADDRESS_PATH, { ...r.address }, untouchedAddress);
+  } else {
+    // The facts form's own pending save (the number itself) goes first; the fill is worked out against what it saved.
+    flushPending();
+    const business = () => (state.spec?.business ?? {}) as Obj;
+    done.name = untouchedName(((business().provider ?? {}) as Obj).legalName as Json | undefined);
+    done.address = !!r.address && isPh(business().address as Json | undefined);
+    if (done.name || done.address) {
+      await patch(() => {
+        const b = business();
+        const ops: Op[] = [];
+        if (untouchedName(((b.provider ?? {}) as Obj).legalName as Json | undefined)) ops.push({ op: "replace", path: LEGAL_NAME_PATH, value: r.name });
+        if (r.address && isPh(b.address as Json | undefined)) ops.push({ op: "replace", path: ADDRESS_PATH, value: { ...r.address } });
+        return ops.length ? ops : [{ op: "test", path: "/business/name", value: b.name as Json }];
+      }, "podatki iz registra DDV");
+    }
+  }
+  if (done.name) company.filled.name = r.name;
+  if (done.address && r.address) company.filled.address = { ...r.address };
+  return done;
 }
 
 // ---------- Pre-publish checklist: each entry says what is missing, where, and opens the field ----------

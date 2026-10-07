@@ -51,6 +51,7 @@ import { clientBundle, warmClientBundles } from "./client-bundle.ts";
 import { uiAssets } from "./ui/assets.ts";
 import { registerFormRoutes } from "./forms.tsx";
 import { domainsInfo, registerDomainRoutes } from "./domains.ts";
+import { registerCompanyLookupRoute } from "./company-lookup.ts";
 import { createHash } from "node:crypto";
 import { JS_FLAG } from "@sb/components";
 
@@ -84,6 +85,8 @@ export interface AppOptions {
   siteProxySecret?: string | null;
   /** Registrar, edge and DNS for own domains; config `domains.providers` when not given (only fakes exist there). */
   domainProviders?: DomainProviders;
+  /** The HTTP client the tax-number lookup asks EU VIES with (tests: a fake); global fetch when not given. */
+  viesFetch?: typeof fetch;
 }
 
 export type ClassifyIntake = (description: string, ctx: { siteId: string; tier: Tier; accountId: string | null; aiJobId: string }) => Promise<{ businessType: string; confidence: number }>;
@@ -221,6 +224,8 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   registerDomainRoutes(app, domainDeps);
   // The reminder before an anonymous preview is deleted: the visitor's address, and the email's link.
   registerReminderRoutes(app, { repo, config, secret: auth.secret });
+  // Legal name and address from the tax number the owner types (EU VIES); nothing of the answer is stored.
+  registerCompanyLookupRoute(app, { config, ...(opts.viesFetch ? { fetch: opts.viesFetch } : {}) });
 
   // ---------- Health ----------
   app.get("/health", async (c) => {

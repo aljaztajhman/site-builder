@@ -63,6 +63,15 @@
     "retryEveryMinutes": 60,
     "maxAttempts": 5
   },
+  "companyLookup": {
+    "$comment": "it-zept-lookup. The editor fills the legal name and address from a Slovenian tax number typed in 'Še to potrebujemo' or Podatki, asking the EU VIES REST service (free, no key; POST check-vat-number, fields valid, name, address). Only VAT-registered businesses are in VIES; the matična številka isn't, it stays a typed field. Nothing from VIES is stored or logged by the server: the values go into the fields and are saved like typed text. timeoutMs: after it the owner types the facts. Rate limit per viewer (account, admin) and for everyone together, in-memory, per windowMinutes.",
+    "enabled": true,
+    "url": "https://ec.europa.eu/taxation_customs/vies/rest-api/check-vat-number",
+    "timeoutMs": 4000,
+    "perViewer": 20,
+    "total": 300,
+    "windowMinutes": 10
+  },
   "seo": {
     "$comment": "it-seo-basics. Published sites carry canonical URLs, hreflang, og tags, JSON-LD, robots.txt and sitemap.xml once they have an address (their primary domain, else <slug>.<PLATFORM_DOMAIN>). indexSiteHosts: when true, a site served on its own hostname is sent without the X-Robots-Tag noindex header. Everything on the app's origin (dashboard, /s/ and /preview/ paths) always keeps noindex. Off until the platform domain exists.",
     "indexSiteHosts": false
