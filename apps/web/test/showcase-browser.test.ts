@@ -17,7 +17,8 @@ import { DEMO } from "../src/client/demo-timing.ts";
  * "Checks"): the intro types, builds and shows the first site without moving the card or the column; the
  * build's last frame is the finished page; the demo moves on by itself, by tab, by arrow key; pause
  * stops it; the view switch resizes the device; Gostilna's label card stays above its photo while
- * transforming; reduced motion has no intro and cuts; without JavaScript the tabs are links.
+ * transforming; reduced motion plays the intro and the switches in fades, nothing moving (?primer= still
+ * shows the trade at once); without JavaScript the tabs are links.
  * Playwright's clock drives the demo's timers; CSS transitions and the view transitions run in real time.
  */
 let platform: Platform;
@@ -101,6 +102,22 @@ const switched = (page: Page) => page.waitForFunction(() => document.querySelect
 async function cleanHtml(page: Page) {
   expect(await page.evaluate(() => (window as unknown as { htmlTouched: string[] }).htmlTouched)).toEqual([]);
   expect(await page.evaluate(() => [document.documentElement.getAttribute("style"), document.documentElement.dataset.trade ?? null])).toEqual([null, null]);
+}
+
+/**
+ * In the page: every running animation or transition that changes a place or a size (transform, position,
+ * size, clipping, a background's size or position), as "name: properties". Fades (opacity, colour,
+ * filter) are fine under reduced motion.
+ */
+function movingAnimations(): string[] {
+  const moving = /^(transform|translate|scale|rotate|left|top|right|bottom|inset|width|height|clipPath|backgroundSize|backgroundPosition|offsetPath)/;
+  return document.getAnimations().flatMap((a) => {
+    const keyframes = (a.effect as KeyframeEffect | null)?.getKeyframes() ?? [];
+    const props = [...new Set(keyframes.flatMap((k) => Object.keys(k)))].filter((p) => moving.test(p));
+    const name = (a as CSSAnimation).animationName ?? (a as CSSTransition).transitionProperty ?? "?";
+    const el = (a.effect as KeyframeEffect | null)?.target;
+    return props.length ? [`${name} on ${el?.nodeName ?? "?"}.${(el as Element | null)?.className ?? ""}: ${props.join(",")}`] : [];
+  });
 }
 
 /** Advances the demo's timers by `ms`, a little at a time (CSS keeps running in real time). */
@@ -298,29 +315,119 @@ describe("landing trade demo", () => {
       }
     }, 60_000);
 
-    it(`at ${width} px: reduced motion has no intro, and a switch is a cut`, async () => {
-      const { page, problems, close } = await open(width, { reducedMotion: "reduce" });
+    it(`at ${width} px: reduced motion plays the intro and the switches in fades, nothing moving; pause works`, async () => {
+      const { page, problems, close } = await open(width, { reducedMotion: "reduce", clock: true });
+      try {
+        const frizer = byId("frizer");
+        await page.locator(".devwrap").scrollIntoViewIfNeeded();
+        await page.waitForFunction(() => document.querySelector(".ask")!.classList.contains("placed"));
+        expect(await step(page)).toBe("type");
+        const frame = await mainFrame(page);
+        // Every animation and transition running on the landing and in the demo's frame, sampled as the
+        // demo's clock advances: fades (opacity, colour, filter) only, never a change of place or size.
+        const moved = new Set<string>();
+        const watch = async () => {
+          for (const m of await page.evaluate(movingAnimations)) moved.add(m);
+          // The frame may be loading the next site (its document then has nothing running yet).
+          for (const m of await frame.evaluate(movingAnimations).catch(() => [] as string[])) moved.add(m);
+        };
+        await run(page, 50, 10);
+        const lengths: number[] = [];
+        while ((await step(page)) === "type") {
+          lengths.push(((await page.locator(".ask-text .typed").textContent()) ?? "").length);
+          await watch();
+          await page.clock.runFor(DEMO.typing.everyMs * 2);
+        }
+        // The description is typed: the text grows to the whole description.
+        expect(lengths.length).toBeGreaterThan(5);
+        expect(lengths.every((n, i) => i === 0 || n >= lengths[i - 1]!)).toBe(true);
+        expect(lengths[0]).toBeLessThan(frizer.intro.length / 4);
+        expect(new Set(lengths).size).toBeGreaterThan(5);
+        expect(await page.locator(".ask-text .typed").textContent()).toBe(frizer.intro);
+        // The card fades out over the device and back in under it; the page builds itself in fades.
+        while ((await step(page)) !== "build") {
+          await watch();
+          await page.clock.runFor(50);
+        }
+        expect(await frame.evaluate(() => [...document.documentElement.classList].filter((c) => c === "bld" || c === "calm"))).toEqual(["bld", "calm"]);
+        await page.waitForFunction(() => getComputedStyle(document.querySelector(".dev")!).opacity === "1", undefined, { timeout: 10_000 });
+        while (!(await frame.evaluate(() => document.documentElement.classList.contains("text")))) {
+          await watch();
+          await page.clock.runFor(100);
+        }
+        expect(await page.locator(".ask-steps li.now").textContent()).toBe("Besedila in postavitev");
+        await watch();
+        // The handover: the build's last frame is the finished page (as without reduced motion).
+        await frame.waitForFunction(() => document.getAnimations().length === 0, undefined, { timeout: 10_000 });
+        const screen = page.locator(".dev .screen");
+        const building = () => frame.evaluate(() => document.documentElement.classList.contains("bld"));
+        let before = await screen.screenshot({ animations: "disabled" });
+        for (;;) {
+          await page.clock.runFor(50);
+          if (!(await building())) break;
+          await frame.waitForFunction(() => document.getAnimations().length === 0, undefined, { timeout: 10_000 });
+          before = await screen.screenshot({ animations: "disabled" });
+        }
+        expect(await frame.evaluate(() => document.querySelectorAll("sb-w, [data-plate], [data-bk]").length)).toBe(0);
+        expect((await screen.screenshot({ animations: "disabled" })).equals(before)).toBe(true);
+        await run(page, DEMO.buildEnd + 100);
+        expect(await step(page)).toBe("site");
+        await switched(page);
+        expect(await page.locator(".cap").textContent()).toBe(tradeCaption(frizer));
+
+        // Pause stops the moving on; play starts it again.
+        const pause = page.locator(".pause");
+        await pause.click();
+        expect(await pause.getAttribute("aria-pressed")).toBe("true");
+        await run(page, DEMO.dwell * 2);
+        expect(await selected(page)).toBe("frizer");
+        await pause.click();
+        expect(await page.locator(".tabs").evaluate((el) => el.classList.contains("auto"))).toBe(true);
+
+        // It moves on by itself: a cross-fade (the frame fades out over the next site), no transformation.
+        await run(page, DEMO.dwell + 100);
+        expect(await selected(page)).toBe("gostilna");
+        let faded = false;
+        while (!(await page.locator(".tabs").evaluate((el) => el.classList.contains("auto")))) {
+          faded ||= (await page.locator("iframe.main").evaluate((el) => (el as HTMLElement).style.opacity)) === "0";
+          expect(await page.evaluate(() => document.querySelector<HTMLIFrameElement>("iframe.main")!.contentDocument?.querySelector("style[data-rig]") ?? null)).toBeNull();
+          await watch();
+          await page.clock.runFor(50);
+        }
+        expect(faded).toBe(true);
+        expect(await page.locator("iframe.main").getAttribute("style")).toBeNull();
+        expect(await frameTitle(page)).toBe(tradeTitle(byId("gostilna")));
+        expect(await frame.evaluate(() => location.pathname)).toBe(new URL(client[1]!.page, base).pathname);
+        // And by tab.
+        await page.locator('.tab[data-id="zobozdravnik"]').click();
+        while (!(await page.locator(".tabs").evaluate((el) => el.classList.contains("auto")))) {
+          await watch();
+          await page.clock.runFor(50);
+        }
+        expect(await frameTitle(page)).toBe(tradeTitle(byId("zobozdravnik")));
+        expect(await frame.evaluate(() => location.pathname)).toBe(new URL(client[3]!.page, base).pathname);
+        expect(await page.locator("[data-demo-status]").textContent()).toBe(tradeCaption(byId("zobozdravnik")));
+
+        expect([...moved]).toEqual([]);
+        expect(await sideways(page)).toBeLessThanOrEqual(0);
+        await cleanHtml(page);
+        expect(problems).toEqual([]);
+      } finally {
+        await close();
+      }
+    }, 120_000);
+
+    it(`at ${width} px: reduced motion with ?primer= shows that trade at once`, async () => {
+      const { page, problems, close } = await open(width, { reducedMotion: "reduce", path: "/?primer=gostilna", clock: true });
       try {
         await page.locator(".devwrap").scrollIntoViewIfNeeded();
         expect(await step(page)).toBe("site");
-        expect(await page.locator(".ask").evaluate((el) => getComputedStyle(el).visibility === "hidden" || getComputedStyle(el).opacity === "0")).toBe(true);
+        expect(await page.locator(".ask").count()).toBe(0);
         expect(await page.locator(".dev").evaluate((el) => getComputedStyle(el).opacity)).toBe("1");
+        expect(await selected(page)).toBe("gostilna");
         const frame = await mainFrame(page);
         await frame.waitForLoadState("load");
         expect(await frame.evaluate(() => document.documentElement.classList.contains("bld"))).toBe(false);
-        // A cut loads the next site into the frame (a view transition would swap it in place).
-        await page.evaluate(() => {
-          const w = window as unknown as { loads: number };
-          w.loads = 0;
-          document.querySelector("iframe.main")!.addEventListener("load", () => w.loads++);
-        });
-        await page.locator('.tab[data-id="zobozdravnik"]').click();
-        await page.waitForFunction(() => (window as unknown as { loads: number }).loads === 1);
-        expect(await frame.evaluate(() => location.pathname)).toBe(new URL(client[3]!.page, base).pathname);
-        expect(await frameTitle(page)).toBe(tradeTitle(byId("zobozdravnik")));
-        await switched(page);
-        expect(await sideways(page)).toBeLessThanOrEqual(0);
-        await cleanHtml(page);
         expect(problems).toEqual([]);
       } finally {
         await close();

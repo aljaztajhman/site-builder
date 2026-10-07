@@ -20,7 +20,7 @@ const EXAMPLE_PHOTOS = ["01", "02", "03"].flatMap((n) => [480, 960].map((w) => `
 const EXAMPLES_DIR = "examples";
 const TYPES: Record<string, string> = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".woff2": "font/woff2", ".webp": "image/webp", ".avif": "image/avif", ".svg": "image/svg+xml", ".json": "application/json" };
 // The wordmark's accent square.
-const ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="2" fill="#156b4a"/></svg>`;
+const ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="2" fill="#0d7a84"/></svg>`;
 
 export interface UiFile {
   data: Uint8Array;
