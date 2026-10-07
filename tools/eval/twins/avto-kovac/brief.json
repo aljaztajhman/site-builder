@@ -1,0 +1,22 @@
+{
+  "id": "avto-kovac",
+  "businessType": "car-repair",
+  "trade": "servis",
+  "twinOf": "avtoservis-mrak",
+  "description": "Avto Kovač, specializirani servis za nemška vozila v Ljubljani. Ukvarjamo se samo z vozili Audi, BMW, Mercedes-Benz in Volkswagen, od leta 2012. Servis vodi Gregor Kovač, mojster z dvajsetimi leti izkušenj v pooblaščenih servisih.\n\nDelamo redne servise po predpisih proizvajalca z originalnimi deli, diagnostiko z originalno opremo, popravila menjalnikov DSG in avtomatskih menjalnikov, pripravo vozila na tehnični pregled in programiranje ključev. Med popravilom vam brezplačno posodimo nadomestno vozilo, če se naročite vsaj teden prej.\n\nNaslov: Leskoškova cesta 9, 1000 Ljubljana. Odprto od ponedeljka do petka od 8.00 do 18.00.\n\nPokličite na 01 555 4417 ali pišite na servis@avtokovac.example. Cene za servis in popravila povemo po ogledu, ker so odvisne od modela.\n\nNaš logotip je modre barve, želimo, da je stran elegantna in ne kriči, naše stranke so zahtevne.",
+  "logo": "logo.svg",
+  "photos": [
+    { "file": "photos/01.jpg", "from": "avtoservis-mrak", "subject": "osebni avto na dvigalu v avtomehanični delavnici" },
+    { "file": "photos/02.jpg", "from": "avtoservis-mrak", "subject": "mehanik pregleduje motor pod odprtim pokrovom" }
+  ],
+  "facts": {
+    "name": "Avto Kovač",
+    "phone": "+38615554417",
+    "email": "servis@avtokovac.example",
+    "address": { "street": "Leskoškova cesta 9", "postalCode": "1000", "city": "Ljubljana" },
+    "hours": [{ "from": "mon", "to": "fri", "open": "08:00", "close": "18:00" }],
+    "people": [{ "name": "Gregor Kovač", "role": "mojster" }],
+    "other": ["od leta 2012", "Audi, BMW, Mercedes-Benz in Volkswagen", "menjalnikov DSG", "nadomestno vozilo", "programiranje ključev"]
+  },
+  "missing": ["prices", "legal"]
+}

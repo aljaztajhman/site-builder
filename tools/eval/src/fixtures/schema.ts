@@ -100,6 +100,10 @@ function wordCount(s: string): number {
 export const FixtureBrief = z.strictObject({
   id: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
   businessType: BusinessType,
+  /** The trade within the business type when it isn't the type's usual one (Slovene: "elektro", "mizar", "gume"); for the motif-fit metric. */
+  trade: z.string().min(2).max(30).optional(),
+  /** Twins (tools/eval/twins): the base fixture of the same trade this one is measured against. */
+  twinOf: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/).optional(),
   description: z
     .string()
     .refine((d) => wordCount(d) >= 90 && wordCount(d) <= 260, { message: "description must be 90–260 words" }),
@@ -108,6 +112,8 @@ export const FixtureBrief = z.strictObject({
     .array(
       z.strictObject({
         file: z.string().regex(/^photos\/\d{2}\.jpg$/),
+        /** Twins reuse a base fixture's committed photo instead of a copy: that fixture's id. */
+        from: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/).optional(),
         subject: z.string().min(8).max(120).describe("Slovene: what the stand-in photo depicts"),
       }),
     )
@@ -163,5 +169,5 @@ export interface Fixture {
   /** Absolute path of the logo SVG, or null. */
   logoPath: string | null;
   /** Photos with absolute paths. The JPEGs exist only after `pnpm fixtures:photos`. */
-  photos: { file: string; subject: string; path: string }[];
+  photos: { file: string; subject: string; path: string; from?: string }[];
 }

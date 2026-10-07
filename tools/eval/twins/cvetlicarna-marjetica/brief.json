@@ -1,0 +1,28 @@
+{
+  "id": "cvetlicarna-marjetica",
+  "businessType": "shop",
+  "trade": "cvetličarna",
+  "twinOf": "trgovina-oljka-in-sol",
+  "description": "Cvetličarna Marjetica, Novo mesto. Naslov: Glavni trg 7, 8000 Novo mesto. Cvetličarno imam od leta 2010, sem floristka Petra Hočevar.\n\nVežem šopke za vsak dan, poročne šopke in aranžmaje za cerkev in dvorano, žalne vence in ikebane. Imamo lončnice, sezonsko cvetje z bližnjih vrtnarij in darilne košarice. Šopke dostavimo po Novem mestu.\n\nCene: šopek iz sezonskega cvetja od 20 €, poročni šopek od 90 €, žalni venec od 70 €, dostava po Novem mestu 5 €.\n\nOdprto od ponedeljka do petka od 8.00 do 19.00, v soboto od 8.00 do 13.00, za praznike tudi v nedeljo dopoldne.\n\nNaročila: 07 555 3368 ali petra@marjetica.example. Slik še nisem uredila.",
+  "logo": null,
+  "photos": [],
+  "facts": {
+    "name": "Cvetličarna Marjetica",
+    "phone": "+38675553368",
+    "email": "petra@marjetica.example",
+    "address": { "street": "Glavni trg 7", "postalCode": "8000", "city": "Novo mesto" },
+    "hours": [
+      { "from": "mon", "to": "fri", "open": "08:00", "close": "19:00" },
+      { "from": "sat", "to": "sat", "open": "08:00", "close": "13:00" }
+    ],
+    "prices": [
+      { "item": "šopek iz sezonskega cvetja", "amount": 20, "from": true },
+      { "item": "poročni šopek", "amount": 90, "from": true },
+      { "item": "žalni venec", "amount": 70, "from": true },
+      { "item": "dostava po Novem mestu", "amount": 5 }
+    ],
+    "people": [{ "name": "Petra Hočevar", "role": "floristka" }],
+    "other": ["od leta 2010", "z bližnjih vrtnarij", "za praznike tudi v nedeljo dopoldne"]
+  },
+  "missing": ["photos", "legal"]
+}

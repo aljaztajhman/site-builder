@@ -11,8 +11,13 @@
  *                   --record-missing; opt-in for --offline and --replay, since it is a real model call). All of a
  *                   run's judge calls go out as one Message Batch (50 % off) after the last fixture; the run waits.
  * --photos <n>:     give each fixture only its first n photos (0: a site without photos, which gets generated pictures).
+ * --no-edits:       generate and check only; no scripted chat edits (about 40 % of a homepage run's cost). Not with
+ *                   --record (it would drop the edit recordings the tests replay).
+ * --twins:          also run the twins (tools/eval/twins: more businesses of the same trades, no scripted edits), for
+ *                   the same-trade look distance. They have no recordings or goldens: live, --record or --record-missing.
  * fal pictures (FAL_KEY) are cached by request in tools/eval/image-cache/ in every mode that makes them.
- * Writes eval/report.md, eval/contact-sheet.png and the review sheets in eval/look/ (look.ts).
+ * Writes eval/report.md, eval/contact-sheet.png, the review sheets in eval/look/ (look.ts) and the variety numbers
+ * (variety-report.ts): eval/variety-<mode>-<scope>.md for a run over every fixture, else beside the report in eval/runs/.
  */
 import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
@@ -21,7 +26,8 @@ import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
 import { loadConfig } from "@sb/config";
 import { BatchTransport, launchCheckBrowser } from "@sb/engine";
-import { loadFixtures } from "./fixtures/load.ts";
+import { loadFixtures, loadTwins } from "./fixtures/load.ts";
+import { renderVariety } from "./variety-report.ts";
 import { runFixture, type FixtureResult, type Mode } from "./runner.ts";
 import { contactSheet, renderReport } from "./report.ts";
 import { desktopContactSheet, reviewSheet } from "./look.ts";
@@ -49,8 +55,18 @@ if ((paid || judge) && !process.env.ANTHROPIC_API_KEY) {
   process.exit(2);
 }
 
+const edits = !flag("no-edits");
+if (!edits && mode === "record") {
+  console.error("--no-edits with --record would drop the fixtures' edit recordings; use --record-missing (it keeps them) or record with edits.");
+  process.exit(2);
+}
+const twins = flag("twins");
+if (twins && !paid) {
+  console.error("--twins needs real generations (live, --record or --record-missing): the twins have no recordings or golden specs.");
+  process.exit(2);
+}
 const photoLimit = value("photos") === undefined ? undefined : Number(value("photos"));
-const fixtures = loadFixtures()
+const fixtures = [...loadFixtures(), ...(twins ? loadTwins() : [])]
   .filter((f) => !only || only.includes(f.id))
   .map((f) => (photoLimit === undefined ? f : { ...f, photos: f.photos.slice(0, photoLimit) }));
 if (fixtures.length === 0) {
@@ -89,6 +105,7 @@ try {
       maxEur,
       spentSoFar: () => spent,
       judge,
+      edits,
       ...(judgeBatch ? { judgeBatch } : {}),
     });
     // What was really paid: replayed answers and cached pictures are free (the report still prices them).
@@ -111,9 +128,10 @@ try {
 }
 
 const report = renderReport(results, config, { mode, scope, startedAt, totalEur: spent, wallMs: Date.now() - t0 });
-const out = reportPaths({ mode, scope, ...(only ? { only } : {}), ...(photoLimit !== undefined ? { photos: photoLimit } : {}) });
+const out = reportPaths({ mode, scope, ...(only ? { only } : {}), ...(photoLimit !== undefined ? { photos: photoLimit } : {}), twins, edits });
 await mkdir(path.dirname(path.join(outDir, out.report)), { recursive: true });
 await writeFile(path.join(outDir, out.report), report);
+await writeFile(path.join(outDir, out.variety), renderVariety(results, { mode, scope, startedAt }));
 await writeFile(path.join(outDir, out.contactSheet), await contactSheet(results));
 for (const r of results) await reviewSheet(r.id);
 await desktopContactSheet(results.map((r) => r.id));
