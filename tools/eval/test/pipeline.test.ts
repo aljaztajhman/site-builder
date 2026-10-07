@@ -5,7 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 import { loadConfig } from "@sb/config";
-import { CRITIQUE_SKIPPED_NOTE, ModelClient, ReplayTransport, SpendCapError, applyChatEdit, generateSite, launchCheckBrowser, loadRecordings, type CallRecord, type CheckBrowser, type SpendLedger } from "@sb/engine";
+import { CRITIQUE_SKIPPED_NOTE, SECOND_ROUND_SKIPPED_NOTE, ModelClient, ReplayTransport, SpendCapError, applyChatEdit, generateSite, launchCheckBrowser, loadRecordings, type CallRecord, type CheckBrowser, type SpendLedger } from "@sb/engine";
 import { Repo, createDb, createFsStorage, migrate, type Db } from "@sb/platform";
 import type { SiteSpec } from "@sb/spec";
 import { loadFixture } from "../src/fixtures/load.ts";
@@ -245,6 +245,52 @@ describe("pipeline with replayed model responses (no network)", () => {
     expect(r.issues.join(" ")).toMatch(/phone/);
     expect((await repo.getSpec(site.id))!.version).toBe(1);
   });
+});
+
+describe("second critique round only when the re-check fails (costCuts.secondCritiqueOnlyOnFailures)", () => {
+  const gated = { ...config, limits: { ...config.limits, critiqueIterations: 2 }, costCuts: { ...config.costCuts, secondCritiqueOnlyOnFailures: true } };
+  /** The fixture's synthetic answers with these critique rounds in place of its one empty critique. */
+  const withCritiques = (fixture: ReturnType<typeof loadFixture>, golden: SiteSpec, rounds: unknown[]) => {
+    const base = syntheticRecordings(fixture, golden);
+    const critique = base.find((r) => r.stage === "critique")!;
+    return [...base.filter((r) => r.stage !== "critique"), ...rounds.map((body) => ({ ...critique, response: { ...critique.response, text: JSON.stringify(body) } }))].map((r, seq) => ({ ...r, seq }));
+  };
+  const intro = { issues: ["intro too generic"], patches: [{ op: "replace", path: "/pages/0/sections/0/props/intro", value: "Družinska pekarna na Šutni. Kruh z drožmi, ročno delo in nič zamrznjenega testa." }] };
+  const nothing = { issues: [], patches: [] };
+  const run = async (slug: string, cfg: typeof config, rounds: unknown[]) => {
+    const { fixture, golden, storage, site } = await seedSite(slug);
+    const calls: CallRecord[] = [];
+    const client = new ModelClient({ config: cfg, transport: new ReplayTransport(withCritiques(fixture, golden, rounds)), spentToday: async () => 0, onCall: async (r) => void calls.push(r) });
+    const gen = await generateSite({ config: cfg, repo, storage, client, browser, lighthouse: false }, site.id, null);
+    const events = await db.query<{ stage: string; message: string }>("select stage, message from site_events where site_id = $1", [site.id]);
+    return { gen, critiques: calls.filter((c) => c.stage === "critique").length, messages: events.rows.map((e) => e.message) };
+  };
+
+  it("ends after round 1 when the checks pass after its patches", async () => {
+    // With the switch off the same answers take two critique calls (the loop as on main).
+    const on = await run("pekarna-kvas-gate-on", gated, [intro, nothing]);
+    expect(on.gen.check?.failures).toEqual([]);
+    expect(on.critiques).toBe(1);
+    expect(on.gen.critiqueRounds).toBe(1);
+    expect(on.messages).toContain(SECOND_ROUND_SKIPPED_NOTE);
+  }, 180_000);
+
+  it("runs round 2 when the re-check after round 1 still reports failures (a fix that didn't take)", async () => {
+    // Round 1 takes away every call button the first screen at 360 px had: the re-check reports it.
+    const noCall = {
+      issues: ["fewer buttons"],
+      patches: [
+        { op: "replace", path: "/chrome/mobileActionBar", value: false },
+        { op: "replace", path: "/chrome/header/cta", value: "none" },
+        { op: "replace", path: "/pages/0/sections/0/props/primary/target", value: { page: "p_home", section: "s_products" } },
+      ],
+    };
+    const r = await run("pekarna-kvas-gate-fail", gated, [noCall, nothing]);
+    expect(r.gen.check?.failures.join(" ")).toMatch(/click-to-call not reachable/);
+    expect(r.critiques).toBe(2);
+    expect(r.gen.critiqueRounds).toBe(2);
+    expect(r.messages).not.toContain(SECOND_ROUND_SKIPPED_NOTE);
+  }, 240_000);
 });
 
 describe("content stage", () => {

@@ -199,6 +199,12 @@ export const AppConfigSchema = z.object({
    * neighbours: how many sites of the same trade the neighbour check compares.
    */
   variety: z.object({ families: z.boolean(), neighbours: z.number().int().min(0).max(500) }),
+  /**
+   * Generation cost cuts (docs/plans/cost-cuts.md, see config $comment). secondCritiqueOnlyOnFailures: a second critique
+   * round only when the re-check after the first still reports failures. contentRetryAsPatch: a content answer that fails
+   * validation is fixed with an RFC 6902 patch from the model instead of the whole JSON again. Off: today's behaviour.
+   */
+  costCuts: z.object({ secondCritiqueOnlyOnFailures: z.boolean(), contentRetryAsPatch: z.boolean() }),
   structuredOutputForContent: z.boolean(),
   pricesUsdPerMTok: z.record(z.string(), Price),
   eurPerUsd: z.number().positive(),
