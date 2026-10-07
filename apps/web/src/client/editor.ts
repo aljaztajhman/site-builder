@@ -863,7 +863,7 @@ function homePane(): HTMLElement {
     );
   }
   // A free account's preview: the rest of the site, locked, with the first plan's price (it-upsells).
-  if (freeViewer()) pane.append(...[lockedPages(h("a", { class: "btn sm", href: "/#cena" }, "Paketi in cene"))].filter((x): x is HTMLElement => !!x));
+  if (freeViewer()) pane.append(...[lockedPages(h("a", { class: "btn sm", href: "/?ref=upsell#cena" }, "Paketi in cene"))].filter((x): x is HTMLElement => !!x));
   const secs = sections();
   // A list of buttons: the item carries the button role (an <li> itself may not), Enter and Space select.
   const open = (id: string) => {
@@ -1295,7 +1295,7 @@ function pagesPane(): HTMLElement {
   const limits = state.access?.limits ?? null;
   // A free account's preview is its homepage: the rest of the site is listed, locked, instead of a form that can't save.
   if (freeViewer()) {
-    const locked = lockedPages(h("a", { class: "btn sm", href: "/#cena" }, "Paketi in cene"));
+    const locked = lockedPages(h("a", { class: "btn sm", href: "/?ref=upsell#cena" }, "Paketi in cene"));
     if (locked) pane.append(locked);
     return pane;
   }
