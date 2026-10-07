@@ -119,7 +119,7 @@ Watch the prototype before writing code: the intro, two or three automatic switc
   4. It telescopes out where the new part is bigger.
   5. All parts lock together at the end with a small overshoot and a brightness glint.
   - Never stretch a snapshot: old/new images are `inline-size: auto` and the image pair clips. Text stays sharp.
-- **Backdrop:** the page under the parts goes dark (`#191714` with a faint dot grid) at unlock and comes back at lock.
+- **Backdrop:** the page under the parts goes dark (`--screen` in home.css, `#0f1a1c` since sb-ui-palette, with a faint dot grid) at unlock and comes back at lock.
 - **Stacking** while apart follows each page's own paint order: Gostilna's full-width photo stays under its text card.
 - **Solid panels:** while transforming, a panel with no background gets the colour behind it.
 - **Headline:** the new h1's letters shuffle into the new words, left to right, during its turn and extend.

@@ -145,7 +145,7 @@ export function choreograph({ pairs, exits, enters, newPlates, vw, vh, k }: Inpu
   const LOCK_PEAK = LOCK + T.lock * 0.45;
 
   let css = `
-::view-transition{background:#191714 radial-gradient(rgb(255 255 255/.07) 1px,transparent 1.3px) 0 0/14px 14px}
+::view-transition{background:var(--screen,#0f1a1c) radial-gradient(rgb(255 255 255/.07) 1px,transparent 1.3px) 0 0/14px 14px}
 ::view-transition-old(*),::view-transition-new(*){mix-blend-mode:normal;inline-size:auto;block-size:auto;animation:none}
 ::view-transition-image-pair(*){overflow:clip;overflow-clip-margin:6px;isolation:auto}
 ::view-transition-old(root){animation:rig-root-out ${T.unlock}ms ${EASE.out} both}
