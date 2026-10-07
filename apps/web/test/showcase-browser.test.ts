@@ -390,7 +390,7 @@ describe("landing trade demo", () => {
         let faded = false;
         while (!(await page.locator(".tabs").evaluate((el) => el.classList.contains("auto")))) {
           faded ||= (await page.locator("iframe.main").evaluate((el) => (el as HTMLElement).style.opacity)) === "0";
-          expect(await page.evaluate(() => document.querySelector("iframe.main")!.contentDocument?.querySelector("style[data-rig]") ?? null)).toBeNull();
+          expect(await page.evaluate(() => document.querySelector<HTMLIFrameElement>("iframe.main")!.contentDocument?.querySelector("style[data-rig]") ?? null)).toBeNull();
           await watch();
           await page.clock.runFor(50);
         }
