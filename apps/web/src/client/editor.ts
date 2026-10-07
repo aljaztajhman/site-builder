@@ -14,7 +14,7 @@ import { missingFacts, type MissingFact } from "@sb/spec/missing-facts";
 import { isoDay } from "@sb/spec/format";
 import { itemKeyForPath, priceEditor, type PriceEditorState } from "./price-editor.ts";
 import { domainStatus, domainStep, newDomainStepUi, openDomainStep, type DomainChoice, type DomainStepDeps, type DomainsInfo } from "./domain-step.ts";
-import { lockedPagesBlock, planTag, reminderBlock, type Limits, type Upgrade } from "./upsell.ts";
+import { lockedPagesBlock, planTag, reminderBlock, type Limits, type Note, type Upgrade } from "./upsell.ts";
 
 type Json = null | boolean | number | string | Json[] | { [k: string]: Json };
 type Obj = { [k: string]: Json };
@@ -1347,20 +1347,55 @@ function collectionsBlock(): HTMLElement {
     const count = ((on?.items ?? []) as unknown[]).length;
     // Not in the viewer's plan: the button names the plan that has it, and a tap says so (the server refuses anyway).
     const locked = on ? undefined : state.access?.limits?.collectionNotes[c.kind];
-    // Switched on before the plan lost it (a move to Osnovni): it stays and can be edited; the note says which plan has it.
-    const kept = on ? state.access?.limits?.collectionNotes[c.kind] : undefined;
+    // Switched on before the plan lost it (a move to Osnovni): it stays on the site, read-only; the note says which plan edits it.
+    const kept = on ? readOnlyNote(c.kind) : undefined;
     box.append(
       h("div", { class: "row collection-row" },
         h("span", { class: "sp" }, h("strong", {}, c.name), on ? h("span", { class: "muted" }, ` · ${count}`) : h("span", { class: "muted" }, ` · ${c.hint}`)),
         on
-          ? h("button", { class: "btn sm", type: "button", onClick: () => { collectionKind = c.kind; tab = "collection"; render(); } }, `Uredi: ${c.name}`)
+          ? h("button", { class: "btn sm", type: "button", onClick: () => { collectionKind = c.kind; tab = "collection"; render(); } }, `${kept ? "Poglej" : "Uredi"}: ${c.name}`)
           : locked
             ? h("button", { class: "btn sm", type: "button", "data-locked": c.kind, onClick: () => { toast = locked.message; showToast(); } }, c.on, locked.upgrade ? planTag(h, locked.upgrade.name) : null)
             : h("button", { class: "btn sm", type: "button", onClick: () => void post("/collections", { kind: c.kind }, `${c.name}: vklopljeno.`) }, c.on),
       ),
     );
-    if (kept) box.append(h("p", { class: "help limit-note", "data-kept": c.kind }, `${kept.message} Vnosi, ki jih že imate, ostanejo na strani in jih lahko urejate.`));
+    if (kept) box.append(h("p", { class: "help limit-note", "data-kept": c.kind }, kept.message, kept.upgrade ? [" ", planTag(h, kept.upgrade.name)] : null));
   }
+  return box;
+}
+
+/** The note on a collection the site has but the viewer's plan doesn't include (read-only), or undefined. */
+const readOnlyNote = (kind: string): Note | undefined => state.access?.limits?.readOnlyNotes?.[kind];
+
+/** "2026-10-02" as the owner reads it: "2. 10. 2026". */
+const dayText = (d: unknown): string => {
+  const m = typeof d === "string" ? /^(\d{4})-(\d{2})-(\d{2})$/.exec(d) : null;
+  return m ? `${Number(m[3])}. ${Number(m[2])}. ${m[1]}` : "";
+};
+
+/** A read-only collection's entries as the site lists them, without edit controls, under the note naming the plan. */
+function readOnlyEntries(kind: string, collection: Obj, note: Note): HTMLElement {
+  const items = (collection.items ?? []) as Obj[];
+  const box = h("div", { class: "readonly-entries", "data-readonly": kind });
+  box.append(h("p", { class: "help limit-note", role: "note" }, note.message, note.upgrade ? [" ", planTag(h, note.upgrade.name)] : null));
+  if (!items.length) {
+    box.append(h("p", { class: "muted" }, "Zbirka je prazna."));
+    return box;
+  }
+  box.append(
+    h("ol", { class: "entries" },
+      items.map((e) => {
+        const when = [dayText(e.date), e.endDate ? `– ${dayText(e.endDate)}` : "", e.start ? `ob ${String(e.start)}` : ""].filter(Boolean).join(" ");
+        const meta = [when, typeof e.place === "string" ? e.place : "", typeof e.role === "string" ? e.role : ""].filter(Boolean).join(" · ");
+        const summary = typeof e.summary === "string" ? e.summary : typeof e.bio === "string" ? e.bio : "";
+        return h("li", { class: "entry" },
+          h("strong", {}, String(e.title ?? e.name ?? "")),
+          meta ? h("span", { class: "muted" }, meta) : null,
+          summary ? h("p", {}, summary) : null,
+        );
+      }),
+    ),
+  );
   return box;
 }
 
@@ -1438,6 +1473,12 @@ function collectionPane(): HTMLElement {
   const on = ((state.spec?.collections ?? {}) as Obj)[c.kind] as Obj | undefined;
   const item = catalogue?.collections[c.kind];
   if (!on || !item) return pane;
+  // Not in the viewer's plan any more (moved down from Plus): shown as the site lists it, nothing to edit; the server refuses edits anyway.
+  const readOnly = readOnlyNote(c.kind);
+  if (readOnly) {
+    pane.append(readOnlyEntries(c.kind, on, readOnly));
+    return pane;
+  }
   // A site in two languages (Plus): the entries' texts in the other one, beside the default language's form.
   const others = otherLocales();
   if (others.length) {

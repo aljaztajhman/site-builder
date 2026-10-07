@@ -130,7 +130,7 @@ describe("collections (the blog and the rest are Plus)", () => {
     expect(b.code).toBe("plan_collections");
     expect(b.message).toBe("Novice so v paketu Plus (29 € na mesec).");
     expect(limitBreach(config, "paid", "premium", golden, withBlog(golden))).toBeNull();
-    // A blog that is already there (switched on before) stays editable.
+    // A blog that is already there (switched on before) and left as it is doesn't stop other edits.
     expect(limitBreach(config, "paid", "standard", withBlog(golden), withBlog(golden))).toBeNull();
   });
 
@@ -145,9 +145,71 @@ describe("collections (the blog and the rest are Plus)", () => {
     expect(info.pagesNote.upgrade?.name).toBe("Plus");
     expect(info.localesNote.upgrade?.name).toBe("Plus");
     expect(Object.keys(info.collectionNotes).sort()).toEqual(["blog", "events", "services", "team"]);
+    expect(Object.keys(info.readOnlyNotes).sort()).toEqual(["blog", "events", "services", "team"]);
+    expect(info.readOnlyNotes.team).toEqual({
+      message: "Vnosi zbirke Ekipa ostanejo na strani, kot so. Dodajate, urejate, brišete in razvrščate jih lahko na paketu Plus (29 € na mesec).",
+      upgrade: { plan: "premium", name: "Plus", monthlyEur: 29 },
+    });
     const top = limitsInfo(config, "paid", "premium")!;
     expect(top.collectionNotes).toEqual({});
+    expect(top.readOnlyNotes).toEqual({});
     expect(top.pagesNote.upgrade).toBeNull();
+  });
+});
+
+describe("a collection kept from Plus is read-only below Plus (sb-collection-downgrade)", () => {
+  const post = (title: string) => ({ title, date: "2026-10-02", summary: "Nov kruh v ponudbi.", body: ["Pečemo ga ob petkih."] });
+  /** The bakery with news of these posts, and optionally English for the first post's title. */
+  const news = (titles: string[], english?: string): SiteSpec => ({
+    ...withEnglish(golden),
+    collections: { blog: { page: golden.pages[0]!.id, items: titles.map(post) } } as unknown as SiteSpec["collections"],
+    ...(english ? { translations: { en: { "/collections/blog/items/0/title": english } } } : {}),
+  });
+  const READ_ONLY = "Vnosi zbirke Novice ostanejo na strani, kot so. Dodajate, urejate, brišete in razvrščate jih lahko na paketu Plus (29 € na mesec).";
+  const refused = (before: SiteSpec, after: SiteSpec) => limitBreach(config, "paid", "standard", before, after);
+
+  it("refuses adding, editing, deleting and reordering entries on Osnovni, naming Plus; Plus and the admin may", () => {
+    const base = news(["Rženi kruh", "Dan odprtih vrat"]);
+    const cases: Record<string, SiteSpec> = {
+      add: news(["Rženi kruh", "Dan odprtih vrat", "Božični kruh"]),
+      edit: news(["Rženi kruh ob petkih", "Dan odprtih vrat"]),
+      delete: news(["Rženi kruh"]),
+      reorder: news(["Dan odprtih vrat", "Rženi kruh"]),
+    };
+    for (const [what, after] of Object.entries(cases)) {
+      const b = refused(base, after);
+      expect(b, what).toMatchObject({ what: "collections", code: "plan_collections", message: READ_ONLY, upgrade: { plan: "premium", name: "Plus", monthlyEur: 29 } });
+      expect(limitBreach(config, "paid", "premium", base, after), what).toBeNull();
+      expect(limitBreach(config, "admin", null, base, after), what).toBeNull();
+    }
+  });
+
+  it("refuses changing an entry's English; keeps other edits, removing the collection or the language allowed", () => {
+    const base = news(["Rženi kruh"], "Rye bread");
+    expect(refused(base, news(["Rženi kruh"], "Rye bread on Fridays"))?.message).toBe(READ_ONLY);
+    expect(refused(base, news(["Rženi kruh"]))?.message).toBe(READ_ONLY);
+    // The same data in another key order (as the database returns it) is no change.
+    const reordered = structuredClone(base);
+    reordered.collections!.blog = { items: base.collections!.blog!.items.map((p) => ({ body: p.body, summary: p.summary, date: p.date, title: p.title })), page: base.collections!.blog!.page };
+    expect(refused(base, reordered)).toBeNull();
+    // Another edit leaves the collection as it was.
+    const renamed = structuredClone(base);
+    renamed.business.name = "Pekarna Kvas d.o.o.";
+    expect(refused(base, renamed)).toBeNull();
+    // Removing the collection whole is not growth; neither is dropping the second language with its translations.
+    const { collections: _gone, ...without } = base;
+    expect(refused(base, without as SiteSpec)).toBeNull();
+    const { translations: _t, ...sl } = base;
+    expect(refused(base, { ...sl, locales: { default: "sl", enabled: ["sl"] } } as SiteSpec)).toBeNull();
+  });
+
+  it("words each collection, and a plan that has none above it", () => {
+    for (const [kind, name] of [["events", "Dogodki"], ["services", "Storitve"]] as const)
+      expect(limitsInfo(config, "paid", "standard")!.readOnlyNotes[kind]?.message).toBe(`Vnosi zbirke ${name} ostanejo na strani, kot so. Dodajate, urejate, brišete in razvrščate jih lahko na paketu Plus (29 € na mesec).`);
+    // A config where no plan has the blog: nothing to sell.
+    const none = structuredClone(config);
+    none.plans.premium.site.collections = none.plans.premium.site.collections.filter((k) => k !== "blog");
+    expect(limitsInfo(none, "paid", "standard")!.readOnlyNotes.blog).toEqual({ message: "Vnosi zbirke Novice ostanejo na strani, kot so. V tem paketu jih ne morete urejati.", upgrade: null });
   });
 });
 
@@ -215,5 +277,41 @@ describe("a chat edit past the plan's limit", () => {
     const saved = await applyChatEdit({ repo, client }, site.id, Number(again.id), guard("premium"));
     expect(saved.version).not.toBeNull();
     expect((await repo.getSpec(site.id))!.spec.locales.enabled).toEqual(["sl", "en"]);
+  });
+
+  it("can't change a read-only collection's entries or their English on Osnovni; other chat edits are saved", async () => {
+    const site = await repo.createSite({ name: "Pekarna", slug: "pekarna-novice", intake: { description: "Pekarna Kvas", photoAssetIds: [], scope: "home" } });
+    // As Plus left it: two languages and news with one post and its English title.
+    const kept: SiteSpec = {
+      ...withEnglish(golden),
+      slug: site.slug,
+      collections: { blog: { page: golden.pages[0]!.id, items: [{ title: "Rženi kruh", date: "2026-10-02", summary: "Nov kruh v ponudbi.", body: ["Pečemo ga ob petkih."] }] } } as unknown as SiteSpec["collections"],
+      translations: { en: { "/collections/blog/items/0/title": "Rye bread" } },
+    };
+    await repo.saveSpec(site.id, kept, "generate");
+    const guard = (before: SiteSpec, after: SiteSpec) => limitBreach(config, "paid", "standard", before, after)?.message ?? null;
+    const chat = async (text: string, patches: unknown[]) => {
+      const client = new ModelClient({ config, transport: answering("Urejeno.", patches), spentToday: async () => 0, onCall: async () => undefined });
+      const msg = await repo.addChat(site.id, "user", text);
+      return applyChatEdit({ repo, client }, site.id, Number(msg.id), guard);
+    };
+    const enTitle = "/translations/en/~1collections~1blog~1items~10~1title";
+    // The post's English: refused by the plan, the reply names Plus.
+    const english = await chat("Prevedi naslov novice", [{ op: "replace", path: enTitle, value: "Rye bread on Fridays" }]);
+    expect(english.version).toBeNull();
+    expect(english.reply).toBe("Vnosi zbirke Novice ostanejo na strani, kot so. Dodajate, urejate, brišete in razvrščate jih lahko na paketu Plus (29 € na mesec).");
+    // The post itself: chat never edits collections (any plan); not saved either.
+    const entry = await chat("Spremeni naslov novice", [{ op: "replace", path: "/collections/blog/items/0/title", value: "Rženi kruh ob petkih" }]);
+    expect(entry.version).toBeNull();
+    let spec = (await repo.getSpec(site.id))!.spec;
+    expect(spec.collections!.blog!.items[0]!.title).toBe("Rženi kruh");
+    expect(spec.translations!.en!["/collections/blog/items/0/title"]).toBe("Rye bread");
+    // Something else on the same site is saved, the news untouched.
+    const other = await chat("Temnejši razdelek", [{ op: "replace", path: "/pages/0/sections/2/tone", value: "inverse" }]);
+    expect(other, JSON.stringify(other)).toMatchObject({ issues: [] });
+    expect(other.version).not.toBeNull();
+    spec = (await repo.getSpec(site.id))!.spec;
+    expect(spec.pages[0]!.sections[2]!.tone).toBe("inverse");
+    expect(spec.collections).toEqual(kept.collections);
   });
 });
