@@ -374,7 +374,7 @@ export async function generateContent(client: ModelClient, input: ContentInput):
   let structured = input.structuredOutput;
   let structuredFallback = false;
   /** One parsed answer (whole or patched) checked: repaired in place, assembled, validated, fact-checked. Throws on a shape assembly can't take. */
-  const evaluate = (data: unknown): { issues: string[]; built?: { spec: SiteSpec; repairs: string[] } } => {
+  const evaluate: PatchLoopDeps["evaluate"] = (data) => {
     const repairs = repairContentOutput(data);
     const parsed = schema.safeParse(data);
     if (!parsed.success) return { issues: parsed.error.issues.slice(0, 25).map((i) => `/${i.path.join("/")}: ${i.message}`) };
@@ -461,8 +461,7 @@ async function generateContentPatched(
   };
   const r = await patchRetryLoop({ call, evaluate, retries: input.retries });
   if (!r.spec) throw new Error(`Content generation failed after ${r.attempts} attempts: ${r.lastIssues.slice(0, 5).join("; ")}`);
-  const done = r.lastIssues.length === 0;
-  return { spec: r.spec, attempts: r.attempts, issues: done ? [] : r.specIssues, structuredFallback, repairs: r.specRepairs, patchRetries: r.notes };
+  return { spec: r.spec, attempts: r.attempts, issues: r.specIssues, structuredFallback, repairs: r.specRepairs, patchRetries: r.notes };
 }
 
 const issueLine = (i: Issue) => `${i.path}: ${i.message}`;
