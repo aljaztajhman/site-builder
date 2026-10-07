@@ -3,7 +3,8 @@ import { POOLS, type Platform, type Pool, type Repo } from "@sb/platform";
 
 /**
  * Scheduled work in the worker: expired anonymous previews are deleted with their files, IP hashes,
- * old sign-in tokens and old website-checker reports are cleared, queued jobs nobody finished stop holding money; and the spend per
+ * old sign-in tokens and old website-checker reports are cleared, product events past their keep days are rolled
+ * into daily counts, queued jobs nobody finished stop holding money; and the spend per
  * pool is logged once a day, with a warning when a pool passes `tiers.pools.warnAt`.
  */
 
@@ -13,7 +14,7 @@ export interface Log {
 }
 
 /** One housekeeping pass. Returns what it removed. */
-export async function cleanupExpired(platform: Pick<Platform, "repo" | "storage">, config: AppConfig): Promise<{ sites: string[]; staleJobs: number }> {
+export async function cleanupExpired(platform: Pick<Platform, "repo" | "storage">, config: AppConfig): Promise<{ sites: string[]; staleJobs: number; events: number }> {
   const { repo, storage } = platform;
   const sites: string[] = [];
   for (const id of await repo.usage.expiredAnonymousSites(config.tiers.anonymous.keepDays)) {
@@ -28,7 +29,9 @@ export async function cleanupExpired(platform: Pick<Platform, "repo" | "storage"
   await repo.usage.clearOldIpKeys();
   await repo.accounts.cleanup();
   await repo.checks.cleanup(config.checker.keepDays);
-  return { sites, staleJobs };
+  // Product events past analytics.keepDays become daily counts (idempotent: one cutoff, one transaction).
+  const events = await repo.events.rollUp(config.analytics.keepDays);
+  return { sites, staleJobs, events: events.rolled };
 }
 
 const day = (d: Date) => d.toISOString().slice(0, 10);

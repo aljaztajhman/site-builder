@@ -167,7 +167,8 @@ describe("publish on the owner's own domain", () => {
       await shot(ui.page, "domain-own-360");
       await ui.tap(ui.page.locator("#domain-confirm"));
       await expect.poll(async () => (await ui.page.locator("#domain-status").textContent()) ?? "", { timeout: 20_000 }).toContain("Objavljeno");
-      expect((await platform.repo.getSite(id))!.published_address).toBe("https://www.rebernik-instalacije.si/");
+      // As above: the republish with the new address follows the domain going live, a moment later on a busy machine.
+      await expect.poll(async () => (await platform.repo.getSite(id))?.published_address, { timeout: 10_000 }).toBe("https://www.rebernik-instalacije.si/");
       results["connected-360"] = ui.taps();
     } finally {
       await ui.close();

@@ -164,15 +164,97 @@ describe("collections (Plus)", () => {
     return r.spec;
   };
 
-  it("a blog kept from Plus stays on Osnovni: its posts can be edited and added; the editor says which plan has it", async () => {
-    const { b, siteId } = await owner("standard");
-    await withNews(siteId);
-    const entry = { title: "Dan odprtih vrat", date: "2026-11-07", summary: "Ogled peči.", body: ["Pridite v soboto."] };
-    expect((await patch(b, siteId, [{ op: "add", path: "/collections/blog/items/1", value: entry }])).status).toBe(200);
-    expect((await patch(b, siteId, [{ op: "replace", path: "/collections/blog/items/0/title", value: "Rženi kruh" }])).status).toBe(200);
-    expect((await platform.repo.getSpec(siteId))!.spec.collections!.blog!.items.map((i) => i.title)).toEqual(["Rženi kruh", "Dan odprtih vrat"]);
-    // The note the editor shows beside its "Uredi" is the one the switch-on button would read.
-    expect((await state(b, siteId)).access.limits!.collectionNotes).toMatchObject({ blog: { message: "Novice so v paketu Plus (29 € na mesec)." } });
+  describe("a blog kept from Plus is read-only on Osnovni (sb-collection-downgrade)", () => {
+    const READ_ONLY = "Vnosi zbirke Novice ostanejo na strani, kot so. Dodajate, urejate, brišete in razvrščate jih lahko na paketu Plus (29 € na mesec).";
+    const open = { title: "Dan odprtih vrat", date: "2026-11-07", summary: "Ogled peči.", body: ["Pridite v soboto."] };
+    /** Osnovni with the news as Plus left them: two posts. */
+    const kept = async (plan: "standard" | "premium" = "standard") => {
+      const o = await owner(plan);
+      const spec = structuredClone(await withNews(o.siteId));
+      spec.collections!.blog!.items.push(open);
+      await platform.repo.saveSpec(o.siteId, spec, "manual", "novice");
+      return o;
+    };
+    const titles = async (siteId: string) => (await platform.repo.getSpec(siteId))!.spec.collections!.blog!.items.map((i) => i.title);
+    const refusedAs = async (r: Response) => {
+      expect(r.status).toBe(403);
+      expect((await r.json()) as Refused).toEqual({ error: "plan_collections", code: "plan_collections", message: READ_ONLY, upgrade: { plan: "premium", name: "Plus", monthlyEur: 29 } });
+    };
+
+    it("refuses adding, editing, deleting and reordering posts, naming Plus; nothing changes", async () => {
+      const { b, siteId } = await kept();
+      const v = await version(siteId);
+      const edits: Record<string, unknown[]> = {
+        add: [{ op: "add", path: "/collections/blog/items/2", value: { ...open, title: "Božični kruh" } }],
+        edit: [{ op: "replace", path: "/collections/blog/items/0/title", value: "Rženi kruh" }],
+        delete: [{ op: "remove", path: "/collections/blog/items/1" }],
+        reorder: [{ op: "move", from: "/collections/blog/items/1", path: "/collections/blog/items/0" }],
+        // The editor's form saves the whole list at once.
+        "whole list": [{ op: "replace", path: "/collections/blog/items", value: [open] }],
+      };
+      for (const [what, ops] of Object.entries(edits)) {
+        const r = await patch(b, siteId, ops);
+        expect(r.status, what).toBe(403);
+        await refusedAs(r);
+      }
+      expect(await titles(siteId)).toEqual(["Rženi kruh ob petkih", "Dan odprtih vrat"]);
+      expect(await version(siteId)).toBe(v);
+      // Plus edits the same posts.
+      const plus = await kept("premium");
+      expect((await patch(plus.b, plus.siteId, edits.reorder!)).status).toBe(200);
+      expect(await titles(plus.siteId)).toEqual(["Dan odprtih vrat", "Rženi kruh ob petkih"]);
+    });
+
+    it("refuses a post's English while the site keeps two languages from Plus", async () => {
+      const { b, siteId } = await kept();
+      const spec = structuredClone((await platform.repo.getSpec(siteId))!.spec);
+      spec.locales = { default: "sl", enabled: ["sl", "en"] };
+      spec.translations = { en: { "/collections/blog/items/0/title": "Rye bread on Fridays" } };
+      await platform.repo.saveSpec(siteId, spec, "manual", "angleščina");
+      await refusedAs(await patch(b, siteId, [{ op: "add", path: "/translations/en/~1collections~1blog~1items~10~1title", value: "Rye bread" }]));
+      await refusedAs(await patch(b, siteId, [{ op: "remove", path: "/translations/en/~1collections~1blog~1items~10~1title" }]));
+      // English elsewhere on the site is not the collection's.
+      expect((await patch(b, siteId, [{ op: "add", path: "/translations/en/~1pages~10~1nav~1label", value: "Home" }])).status).toBe(200);
+    });
+
+    it("refuses an undo or a restored version that would change the posts; one that leaves them as they are is fine", async () => {
+      const { b, siteId } = await kept();
+      const both = await version(siteId);
+      // An older version with only the first post, and a later text edit that leaves the news alone.
+      const onePost = both - 1;
+      expect((await patch(b, siteId, [{ op: "replace", path: "/pages/0/nav/label", value: "Začetek" }])).status).toBe(200);
+      await refusedAs(await req(`/api/sites/${siteId}/revert`, { method: "POST", headers: json(b), body: JSON.stringify({ version: onePost }) }));
+      expect(await titles(siteId)).toEqual(["Rženi kruh ob petkih", "Dan odprtih vrat"]);
+      // Undo of the text edit: the news are the same in that version.
+      expect((await req(`/api/sites/${siteId}/revert`, { method: "POST", headers: json(b), body: JSON.stringify({ version: both }) })).status).toBe(200);
+      expect((await platform.repo.getSpec(siteId))!.spec.pages[0]!.nav.label).toBe("Domov");
+    });
+
+    it("other edits go through; removing the news whole (the collection and its page) is allowed", async () => {
+      const { b, siteId } = await kept();
+      expect((await patch(b, siteId, [{ op: "replace", path: "/pages/0/nav/label", value: "Začetek" }])).status).toBe(200);
+      const spec = (await platform.repo.getSpec(siteId))!.spec;
+      const pageIndex = spec.pages.findIndex((p) => p.id === spec.collections!.blog!.page);
+      const r = await patch(b, siteId, [{ op: "remove", path: `/pages/${pageIndex}` }, { op: "remove", path: "/collections/blog" }]);
+      expect(r.status, await r.clone().text()).toBe(200);
+      expect((await platform.repo.getSpec(siteId))!.spec.collections?.blog).toBeUndefined();
+    });
+
+    it("still renders on the preview (list and post pages); the editor gets the read-only note", async () => {
+      const { b, siteId } = await kept();
+      const list = await req(`/preview/${siteId}/novice.html`, { headers: { cookie: b.cookie } });
+      expect(list.status).toBe(200);
+      const html = await list.text();
+      expect(html).toContain("Rženi kruh ob petkih");
+      expect(html).toContain("Dan odprtih vrat");
+      const post = await req(`/preview/${siteId}/novice/rzeni-kruh-ob-petkih.html`, { headers: { cookie: b.cookie } });
+      expect(post.status).toBe(200);
+      expect(await post.text()).toContain(">Rženi kruh ob petkih</h1>");
+      const limits = (await state(b, siteId)).access.limits!;
+      expect(limits.readOnlyNotes).toMatchObject({ blog: { message: READ_ONLY, upgrade: { name: "Plus" } } });
+      // The switch-on button's note for a collection the site doesn't have is unchanged.
+      expect(limits.collectionNotes).toMatchObject({ events: { message: "Dogodki so v paketu Plus (29 € na mesec)." } });
+    });
   });
 
   it("restoring an old version is held to the plan: Osnovni can't bring a blog back, Plus can", async () => {

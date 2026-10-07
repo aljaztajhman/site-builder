@@ -458,6 +458,40 @@ export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
       alter table sites add column domain_suggestions_at timestamptz;
     `,
   },
+  {
+    id: 21,
+    name: "product_events",
+    // it-analytics (docs/plans/analytics.md Steps 1 and 3): Stranko's own funnel and engine events. device_key is a
+    // keyed hash of the device cookie (never an IP, never an email); site_id and account_id are our opaque ids, kept
+    // without a foreign key so the counts outlive a deleted preview. Raw rows are kept analytics.keepDays, then
+    // rolled into product_events_daily (kept): counts per day, kind, tier, plan and source ('' for none).
+    sql: `
+      create table product_events (
+        id bigserial primary key,
+        at timestamptz not null default now(),
+        kind text not null,
+        site_id text,
+        account_id text,
+        device_key text,
+        tier text,
+        plan text,
+        source text,
+        props jsonb not null default '{}'::jsonb
+      );
+      create index product_events_kind_at on product_events(kind, at);
+      create index product_events_at on product_events(at);
+      create index product_events_device on product_events(device_key, kind, at) where device_key is not null;
+      create table product_events_daily (
+        day date not null,
+        kind text not null,
+        tier text not null default '',
+        plan text not null default '',
+        source text not null default '',
+        n integer not null,
+        primary key (day, kind, tier, plan, source)
+      );
+    `,
+  },
 ];
 
 type Query = (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>;

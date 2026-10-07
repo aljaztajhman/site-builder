@@ -1,8 +1,10 @@
 import type { Context, Hono } from "hono";
 import { PLAN_KEYS, type AppConfig, type PlanKey } from "@sb/config";
-import { POOLS, isDisposableEmailDomain, normaliseEmail, runningVersion, type AccountListRow, type AllowListRow, type Pool, type Repo, type RunningVersion } from "@sb/platform";
+import { POOLS, isDisposableEmailDomain, normaliseEmail, recordEvent, runningVersion, type AccountListRow, type AllowListRow, type Pool, type Repo, type RunningVersion } from "@sb/platform";
 import { csrfOk, hashToken, newToken, type AppEnv } from "./access.ts";
 import { Doc, TopBar, html } from "./pages.tsx";
+import { AnalyticsLinks } from "./analytics-admin.tsx";
+import { costDays, costsPage } from "./admin-costs.tsx";
 import { formatDate, formatDateTime, formatEur } from "./ui/labels.ts";
 
 /**
@@ -47,7 +49,23 @@ export function registerAdminRoutes(app: Hono<AppEnv>, deps: AdminDeps): void {
     );
   };
 
+  /**
+   * A paid plan given, changed or taken away (the funnel's "paid" step until billing exists): the account by its id
+   * (none yet when the address hasn't signed in), never the address.
+   */
+  const planChanged = async (emailKey: string, from: string | null, to: string | null) => {
+    const account = await repo.accounts.byKey(emailKey);
+    await recordEvent(repo.events, config, { kind: "plan_changed", accountId: account?.id ?? null, tier: to ? "paid" : "free", plan: to, props: { from, to } });
+  };
+
   app.get("/admin", (c) => show(c));
+
+  // Cost history (it-cost-history): read-only, over the last ?days= UTC days.
+  app.get("/admin/costs", async (c) => {
+    const report = await repo.costs.report({ days: costDays(c.req.query("days")) });
+    const { anonymous, free, paid } = config.tiers.pools;
+    return c.html(costsPage({ csrf: c.get("csrf"), report, spendToday: await repo.spendToday(), cap: config.limits.dailyModelSpendCapEur, poolShares: { anonymous, free, paid } }));
+  });
 
   // Pause a pool for some hours (a hold the size of the pool), or end the holds. The deployed smoke test
   // uses this to empty the free pools and check that paid jobs still run.
@@ -80,7 +98,9 @@ export function registerAdminRoutes(app: Hono<AppEnv>, deps: AdminDeps): void {
     const plan = body.plan === "premium" ? "premium" : "standard";
     // One of the founding offer's places (it-upsells): only for the plan that has the offer.
     const founding = body.founding === "on" && !!config.plans[plan].foundingOffer;
+    const before = await repo.accounts.allowed(email.key);
     await repo.accounts.allow(email.email, email.key, note, plan, founding);
+    if (before?.plan !== plan) await planChanged(email.key, before?.plan ?? null, plan);
     return show(c, { text: `${email.email} ima zdaj paket ${config.plans[plan].name}${founding ? " z ustanovno ceno" : ""}.` });
   });
 
@@ -88,7 +108,9 @@ export function registerAdminRoutes(app: Hono<AppEnv>, deps: AdminDeps): void {
     const body = (await c.req.parseBody()) as Record<string, unknown>;
     if (!csrfOk(c, body)) return show(c, { text: "Obrazec je potekel. Poskusite znova.", bad: true }, 403);
     const key = typeof body.key === "string" ? body.key : "";
+    const before = await repo.accounts.allowed(key);
     const removed = await repo.accounts.disallow(key);
+    if (removed && before) await planChanged(key, before.plan, null);
     return show(c, removed ? { text: `${key} ni več na seznamu.` } : { text: "Tega naslova ni na seznamu.", bad: true });
   });
 
@@ -157,6 +179,7 @@ export function adminPage({ csrf, allowList, accounts, spendToday, cap, pools, h
             {`Različica ${version.tag ?? "brez oznake"} · ${version.sha ?? "neznana"}`}
           </p>
         )}
+        <AnalyticsLinks />
         {flash && (
           <p className={flash.bad ? "note bad" : "note"} role={flash.bad ? "alert" : "status"}>
             {flash.text}
@@ -164,6 +187,10 @@ export function adminPage({ csrf, allowList, accounts, spendToday, cap, pools, h
         )}
         <h2>Poraba danes</h2>
         <p className="muted">{`Vsak bazen je delež dnevne omejitve (${formatEur(cap)}). »Zadržano« je ocena za opravila, ki še tečejo. Ko porabljeno doseže ${Math.round(warnAt * 100)} % bazena, delavec to zapiše v dnevnik.`}</p>
+        <p>
+          <a href="/admin/costs">Poraba skozi čas</a>
+          <span className="muted"> · po dnevih, opravilih, fazah, računih in straneh</span>
+        </p>
         {pools.map((p) => {
           const hold = holds.find((h) => h.pool === p.pool);
           return (

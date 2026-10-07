@@ -44,6 +44,10 @@ export function privacyPage(config: AppConfig): string {
             <li>Za vsako ustvarjanje in spremembo s pomočnikom čas in stroške, da lahko omejimo brezplačno uporabo.</li>
             <li>{`Predogled brez prijave in njegove datoteke izbrišemo po ${t.anonymous.keepDays} dneh, razen če se v tem času prijavite; potem je vaš.`}</li>
             <li>{`Če pri predogledu brez prijave pustite e-poštni naslov za opomnik, vam nanj pošljemo eno sporočilo ${t.anonymous.reminder.daysBefore === 1 ? "dan" : `${t.anonymous.reminder.daysBefore} dni`} pred izbrisom. Za nič drugega ga ne uporabimo in ga izbrišemo skupaj s predogledom.`}</li>
+            {/* One sentence (docs/plans/analytics.md Step 1), while product events are written: what they hold, and for how long. */}
+            {config.analytics.events && (
+              <li id="product-events">{`Da vidimo, kje se izdelek zatika, štejemo korake v njem (ogled prve strani, oddan opis, prijava, objava) po napravi, ki jo označimo samo z zgoščenim zapisom naključne oznake brskalnika, brez naslova IP in e-pošte, in te zapise po ${config.analytics.keepDays} dneh združimo v dnevna števila.`}</li>
+            )}
             <li>{`Pri brezplačnem pregledu spletne strani naslov strani in rezultat pregleda, ${config.checker.keepDays} dni, da lahko povezavo do rezultata delite. Vsebine pregledane strani ne shranimo.`}</li>
           </ul>
         </section>
