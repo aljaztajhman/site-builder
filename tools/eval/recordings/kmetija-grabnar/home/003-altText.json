@@ -1,0 +1,18 @@
+{
+  "seq": 3,
+  "stage": "altText",
+  "model": "synthetic",
+  "hash": "synthetic",
+  "origin": "synthetic",
+  "response": {
+    "text": "{\"images\":[{\"index\":0,\"alt\":\"Kmečka hiša z lesenim balkonom, v ozadju gore\",\"focalX\":0.5,\"focalY\":0.5,\"heroSuitable\":true},{\"index\":1,\"alt\":\"Soba z dvema lesenima posteljama in kariranimi prevlekami\",\"focalX\":0.5,\"focalY\":0.5,\"heroSuitable\":false},{\"index\":2,\"alt\":\"Zajtrk na mizi: sir, skuta, marmelada in domač kruh\",\"focalX\":0.5,\"focalY\":0.5,\"heroSuitable\":false},{\"index\":3,\"alt\":\"Krave na pašniku pod gorami\",\"focalX\":0.5,\"focalY\":0.5,\"heroSuitable\":false},{\"index\":4,\"alt\":\"Jabolčni zavitek na krožniku\",\"focalX\":0.5,\"focalY\":0.5,\"heroSuitable\":false},{\"index\":5,\"alt\":\"Otroka krmita koze pri ogradi\",\"focalX\":0.5,\"focalY\":0.5,\"heroSuitable\":false},{\"index\":6,\"alt\":\"Pogled s terase na gorsko dolino\",\"focalX\":0.5,\"focalY\":0.5,\"heroSuitable\":false},{\"index\":7,\"alt\":\"Kozarci domače marmelade na polici\",\"focalX\":0.5,\"focalY\":0.5,\"heroSuitable\":false}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

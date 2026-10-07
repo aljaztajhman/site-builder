@@ -1,5 +1,7 @@
 # Cost cuts: engine and evals
 
+Status 2026-10-07 (branch claude/eval-tooling): steps 4, 5, 9 and 10 built, step 11 for the judge (the whole run through batches stays open); free, no model call made, so nothing below is measured on a real run yet. From the 2026-10-01 recordings, with pictures cached and the judge batched: a full `--record` ≈ €2.28 (was €2.96), `--record-missing` after an edit-prompt change ≈ €0.96, a critique change ≈ €1.31, a content change ≈ €1.89. Step 4 saves ≈ €0.0025 per job (58k cache-write tokens over the 10 recorded jobs), step 5 ≈ 4.1k characters (~1.5k tokens, ≈ €0.002–0.003) per critique round on the goldens, below the 2.4k-token estimate.
+
 Status: plan, 2026-10-04. Analysis only; nothing here is built. Numbers come from the recorded calls of the 2026-10-01 full-scope record run (`eval/report.md`), the 2026-09-30 home run (`eval/report-home.md`) and the config prices (Sonnet 5.5 $2 in / $10 out / $2.5 cache write / $0.2 cache read, €/$ 0.86). Nothing below has been measured after a change; every item that changes model output ends with the eval that confirms it. HQ items are named per step; the development budget (`meta/budget`) decides when the paid checks run.
 
 Earlier cost review with the same source data: docs/plans/audit-2026-10-01.md ("Cost levers, best first"). This plan supersedes its list: it adds the catalogue, the eval record-missing mode and the batch tier, and puts a number on the whole bundle.

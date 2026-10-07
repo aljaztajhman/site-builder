@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
 import { loadConfig, type AppConfig } from "@sb/config";
 import {
   AnthropicTransport,
@@ -140,14 +142,22 @@ export function intakeClassifier(platform: Platform, config: AppConfig) {
  * Every job gets a fresh transport, so a generate job replays the generation calls and an edit job the edit calls.
  * `editIndex`: the site's n-th chat message gets the n-th recorded edit (from the first again after the last), so
  * a demo answers each message with its own edit instead of the first one every time (it-worker-replay).
+ * `scope`: a homepage site (a free preview) replays `<dir>/home/` when the fixture has it (`pnpm recordings:home`,
+ * it-home-replay), since the recorded calls are a full site's; everything else replays `<dir>`.
  */
-export function defaultTransport(job: "generate" | "edit", editIndex = 0): ModelTransport {
-  const dir = process.env.MODEL_REPLAY_DIR;
-  if (!dir) return new AnthropicTransport();
+export function defaultTransport(job: "generate" | "edit", editIndex = 0, scope: "home" | "full" = "full"): ModelTransport {
+  const root = process.env.MODEL_REPLAY_DIR;
+  if (!root) return new AnthropicTransport();
+  const dir = scope === "home" && existsSync(path.join(root, "home")) ? path.join(root, "home") : root;
   const recordings = loadRecordings(dir).filter((r) => (r.stage === "edit") === (job === "edit"));
   if (job !== "edit" || !recordings.length) return new ReplayTransport(recordings);
   const n = editIndex % recordings.length;
   return new ReplayTransport([...recordings.slice(n), ...recordings.slice(0, n)]);
+}
+
+/** A site's scope as its intake says (what the pipeline builds): which recordings a replayed job gets. */
+async function replayScope(repo: Platform["repo"], siteId: string): Promise<"home" | "full"> {
+  return (await repo.getSite(siteId))?.intake.scope === "home" ? "home" : "full";
 }
 
 /** How many chat messages the owner sent on a site before this one: which recorded edit a replayed edit job gets. */
@@ -324,7 +334,7 @@ export async function startWorker(platform: Platform, config = loadConfig(), job
   // Generations run in parallel (one site each); each peaks at ~1.1 GB with its Chromium checks.
   await queue.work("generate", (job, jobId) => tracked({ queue: "generate", jobId, siteId: job.siteId, aiJobId: job.aiJobId ?? null }, async () => {
     const ctx = await contextFor(job.siteId, jobId, job.aiJobId);
-    const client = modelClientFor(platform, config, ctx);
+    const client = modelClientFor(platform, config, ctx, defaultTransport("generate", 0, process.env.MODEL_REPLAY_DIR ? await replayScope(repo, job.siteId) : "full"));
     const before = (await repo.getSite(job.siteId))?.current_version ?? null;
     try {
       const { pictures, pictureCap } = await picturesForJob(platform, config, ctx, job.scope === "full" ? "full" : "home");
@@ -362,7 +372,8 @@ export async function startWorker(platform: Platform, config = loadConfig(), job
   // Edits and publishes stay sequential: two at once on the same site would conflict on the spec version.
   await queue.work("edit", (job, jobId) => tracked({ queue: "edit", jobId, siteId: job.siteId, aiJobId: job.aiJobId ?? null }, async () => {
     const ctx = await contextFor(job.siteId, jobId, job.aiJobId);
-    const client = modelClientFor(platform, config, ctx, defaultTransport("edit", process.env.MODEL_REPLAY_DIR ? await earlierMessages(repo, job.siteId, job.messageId) : 0));
+    const replay = process.env.MODEL_REPLAY_DIR ? { index: await earlierMessages(repo, job.siteId, job.messageId), scope: await replayScope(repo, job.siteId) } : { index: 0, scope: "full" as const };
+    const client = modelClientFor(platform, config, ctx, defaultTransport("edit", replay.index, replay.scope));
     try {
       await run.applyChatEdit({ repo, client }, job.siteId, job.messageId, await chatEditGuard(platform, config, ctx));
       await finish(ctx.aiJobId, "done");

@@ -1,0 +1,18 @@
+{
+  "seq": 5,
+  "stage": "content",
+  "model": "synthetic",
+  "hash": "synthetic",
+  "origin": "synthetic",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"none\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Zobozdravstvo Lebar, Maribor – zasebna ambulanta\",\"description\":\"Samoplačniška zobna ambulanta v središču Maribora: preventivni pregledi, zalivke, beljenje, prevleke, mostički in proteze. Prvi obisk je le pogovor in pregled.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"disc\",\"props\":{\"headline\":\"Prvi obisk je le pogovor in pregled, brez posegov\",\"intro\":\"Zasebna zobna ambulanta v središču Maribora. Posebej smo pozorni na paciente, ki jih je strah zobozdravnika.\",\"fact\":\"phone\",\"factLabel\":\"Naročite se\",\"factNote\":\"Otroke sprejemamo od 3. leta starosti.\",\"secondary\":{\"label\":\"Pišite nam\",\"target\":{\"action\":\"email\"}},\"image\":\"img_01\"}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"week\",\"tone\":\"alt\",\"props\":{\"title\":\"Ordinacijski čas\",\"note\":\"Naročite se po telefonu ali e-pošti.\"}},{\"id\":\"s_care\",\"type\":\"services-list\",\"variant\":\"aside\",\"props\":{\"title\":\"Kaj delamo\",\"note\":{\"title\":\"Samoplačniška ambulanta\",\"text\":\"Nismo koncesionarji ZZZS. Cene so odvisne od načrta zdravljenja.\"},\"items\":[{\"name\":\"Preventivni pregledi in čiščenje zobnega kamna\"},{\"name\":\"Zalivke\"},{\"name\":\"Beljenje zob\"},{\"name\":\"Prevleke, mostički in proteze\"},{\"name\":\"Vsaditve (implantati)\",\"description\":\"Sodelujemo z zunanjim oralnim kirurgom, protetični del opravimo pri nas.\"},{\"name\":\"Otroci od 3. leta starosti\"}]}},{\"id\":\"s_team\",\"type\":\"team\",\"variant\":\"photo\",\"props\":{\"title\":\"Kdo vas sprejme\",\"members\":[{\"name\":\"Urška Lebar\",\"role\":\"dr. dent. med., specialistka stomatološke protetike\"},{\"name\":\"Maja Horvat\",\"role\":\"zobna asistentka\"}],\"image\":\"img_03\",\"inset\":\"img_02\"}},{\"id\":\"s_call\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"band\",\"props\":{\"title\":\"Naročanje\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

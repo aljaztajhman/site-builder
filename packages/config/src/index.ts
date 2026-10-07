@@ -194,6 +194,8 @@ export const AppConfigSchema = z.object({
   structuredOutputForContent: z.boolean(),
   pricesUsdPerMTok: z.record(z.string(), Price),
   eurPerUsd: z.number().positive(),
+  /** Message Batches API: every token at this share of `pricesUsdPerMTok` (0.5). Eval only (the judge's batch). */
+  batchPriceFactor: z.number().positive().max(1),
   limits: z.object({
     dailyModelSpendCapEur: z.number().nonnegative(),
     /**
@@ -458,8 +460,8 @@ export interface Usage {
   cache_read_input_tokens?: number | null;
 }
 
-/** € cost of one model call, from config prices. Throws for a model with no configured price. */
-export function costEur(config: AppConfig, model: string, usage: Usage): number {
+/** € cost of one model call, from config prices (`batch`: at `batchPriceFactor`). Throws for a model with no configured price. */
+export function costEur(config: AppConfig, model: string, usage: Usage, batch = false): number {
   const p = config.pricesUsdPerMTok[model];
   if (!p) throw new Error(`No price configured for model ${model}`);
   const usd =
@@ -468,5 +470,5 @@ export function costEur(config: AppConfig, model: string, usage: Usage): number 
       (usage.cache_creation_input_tokens ?? 0) * p.cacheWrite5m +
       (usage.cache_read_input_tokens ?? 0) * p.cacheRead) /
     1_000_000;
-  return usd * config.eurPerUsd;
+  return usd * config.eurPerUsd * (batch ? config.batchPriceFactor : 1);
 }

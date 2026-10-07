@@ -1,4 +1,4 @@
-import { rmSync } from "node:fs";
+import { existsSync, readdirSync, rmSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { loadConfig, type AppConfig } from "@sb/config";
@@ -8,8 +8,10 @@ import {
   ImageGenerator,
   ModelClient,
   StandInImageTransport,
+  RecordMissingTransport,
   RecordingTransport,
   ReplayTransport,
+  type BatchTransport,
   applyChatEdit,
   checkExportOffline,
   checkSite,
@@ -33,8 +35,9 @@ import type { Fixture } from "./fixtures/schema.ts";
 import { evaluateEditCheck, pagesText, type EditCheckResult } from "./edit-checks.ts";
 import { homepageShape, type HomepageShape } from "./homepage-metrics.ts";
 import { judgeHomepage, type JudgeOutput } from "./judge.ts";
+import { CachedImageTransport, meteredImages, meteredModel, type Meter } from "./eval-transports.ts";
 
-export type Mode = "live" | "record" | "replay" | "offline";
+export type Mode = "live" | "record" | "record-missing" | "replay" | "offline";
 
 export interface Checkpoint {
   label: string;
@@ -76,6 +79,12 @@ export interface FixtureResult {
   judge: JudgeOutput | null;
   judgeError?: string;
   judgeEur: number;
+  /** What this fixture really paid the providers, judge excluded: replayed answers and cached pictures cost nothing. */
+  paidEur: number;
+  /** --record-missing: calls answered from the recordings, and calls paid and recorded. */
+  calls?: { replayed: number; recorded: number };
+  /** Generated pictures from the cache, and pictures fal made (paid) in this run. */
+  pictures?: { cached: number; made: number };
   /** The export zip opened from file:// (checked once, after generation). */
   exportCheck: { ok: boolean; bytes: number; pages: number; problems: string[] } | null;
   error?: string;
@@ -91,18 +100,28 @@ export interface RunOptions {
   lighthouse: boolean;
   /** Abort once the run's total model spend passes this (CLAUDE.md: stop before €30). */
   maxEur: number;
-  /** Score the generated homepage with the vision judge (a real model call, not recorded). */
+  /**
+   * Score the generated homepage with the vision judge (a real model call, not recorded). With `judgeBatch` the
+   * request joins the run's batch (50 % off) and its promise goes to `judging`; the caller drains the batch at the end.
+   */
   judge: boolean;
+  judgeBatch?: { transport: BatchTransport; judging: Promise<void>[] };
+  /** Where fal pictures are cached by request (live, record and record-missing runs). */
+  imageCacheDir?: string;
   spentSoFar: () => number;
 }
 
-function transportFor(opts: RunOptions, fixture: Fixture): ModelTransport {
+function transportFor(opts: RunOptions, fixture: Fixture, live: () => ModelTransport): { transport: ModelTransport; finish?: () => void; calls?: () => FixtureResult["calls"] } {
   const dir = path.join(opts.recordingsDir, fixture.id);
-  if (opts.mode === "replay") return new ReplayTransport(dir);
-  const live = new AnthropicTransport();
+  if (opts.mode === "replay") return { transport: new ReplayTransport(dir) };
+  if (opts.mode === "record-missing") {
+    const t = new RecordMissingTransport(live(), dir);
+    return { transport: t, finish: () => t.finish(), calls: () => ({ ...t.stats }) };
+  }
   // A re-record replaces the fixture's recordings; leftovers from a longer earlier run would replay as stale answers.
-  if (opts.mode === "record") rmSync(dir, { recursive: true, force: true });
-  return opts.mode === "record" ? new RecordingTransport(live, dir) : live;
+  // Only the files: home/ holds the homepage-scope replays (pnpm recordings:home), which aren't recorded here.
+  if (opts.mode === "record" && existsSync(dir)) for (const f of readdirSync(dir)) if (f.endsWith(".json")) rmSync(path.join(dir, f));
+  return { transport: opts.mode === "record" ? new RecordingTransport(live(), dir) : live() };
 }
 
 function summarise(label: string, spec: SiteSpec, version: number | null, r: SiteCheckReport): Checkpoint {
@@ -169,8 +188,13 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
     photoCount: fixture.photos.length,
     judge: null,
     judgeEur: 0,
+    paidEur: 0,
     exportCheck: null,
   };
+  const meter: Meter = { eur: 0 };
+  let finishRecordings: (() => void) | undefined;
+  let callStats: (() => FixtureResult["calls"]) | undefined;
+  let pictureStats: (() => FixtureResult["pictures"]) | undefined;
   try {
     const site = await repo.createSite({ name: fixture.id, slug: fixture.id, intake: { description: fixture.brief.description, photoAssetIds: [], scope: opts.scope } });
     const photoIds: string[] = [];
@@ -194,7 +218,10 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
     ]);
 
     // One transport per fixture: generation and edits share it, so recordings are numbered in call order.
-    const transport = opts.mode === "offline" ? null : transportFor(opts, fixture);
+    const transports = opts.mode === "offline" ? null : transportFor(opts, fixture, () => meteredModel(new AnthropicTransport(), config, meter));
+    const transport = transports?.transport ?? null;
+    finishRecordings = transports?.finish;
+    callStats = transports?.calls;
     if (!transport) {
       await seedGolden(fixture, opts.goldenDir, repo, storage, site.id, config);
     } else {
@@ -219,8 +246,13 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
           });
         },
       });
-      // Generated images for fixtures with too few photos: fal when live (FAL_KEY), flat stand-ins when replaying.
-      const imageTransport = opts.mode === "replay" ? new StandInImageTransport() : process.env.FAL_KEY ? new FalImageTransport() : null;
+      // Generated images for fixtures with too few photos: fal when live (FAL_KEY), cached by request; flat stand-ins when replaying.
+      const cache =
+        opts.mode !== "replay" && process.env.FAL_KEY
+          ? new CachedImageTransport(meteredImages(new FalImageTransport(), config, meter), opts.imageCacheDir ?? path.join(opts.recordingsDir, "../image-cache"))
+          : null;
+      if (cache) pictureStats = () => ({ ...cache.stats });
+      const imageTransport = opts.mode === "replay" ? new StandInImageTransport() : cache;
       const images = imageTransport
         ? new ImageGenerator({
             config,
@@ -262,20 +294,23 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
       await writeFile(path.join(dir, `${name}-1280.png`), s.desktop);
     }
     if (opts.judge) {
-      // Its own live client: judge calls are never recorded or replayed, and their cost stays out of the site's.
+      // Its own client: judge calls are never recorded or replayed, and their cost stays out of the site's. Through
+      // the run's batch when there is one (the answer comes when the caller drains it), else live.
       const judgeClient = new ModelClient({
         config,
-        transport: new AnthropicTransport(),
+        transport: opts.judgeBatch?.transport ?? new AnthropicTransport(),
         spentToday: async () => (opts.spentSoFar() >= opts.maxEur ? Number.POSITIVE_INFINITY : 0),
         onCall: async (r) => {
           result.judgeEur += r.costEur;
         },
       });
-      try {
-        result.judge = await judgeHomepage(judgeClient, dir, { businessType: fixture.brief.businessType, direction: result.direction, photos: fixture.photos.length });
-      } catch (e) {
-        result.judgeError = (e as Error).message.slice(0, 300);
-      }
+      // Reads only the screenshots already written to `dir`, so it may finish after this function returns.
+      const judging = judgeHomepage(judgeClient, dir, { businessType: fixture.brief.businessType, direction: result.direction, photos: fixture.photos.length }).then(
+        (j) => void (result.judge = j),
+        (e: unknown) => void (result.judgeError = (e as Error).message.slice(0, 300)),
+      );
+      if (opts.judgeBatch) opts.judgeBatch.judging.push(judging);
+      else await judging;
     }
     await writeFile(path.join(dir, "spec-generated.json"), JSON.stringify(first.current.spec, null, 2));
 
@@ -306,9 +341,16 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
     result.costByStage = await repo.siteCost(site.id);
     const total = result.costByStage.reduce((a, c) => a + c.eur, 0);
     result.editsEur = total - result.generationEur;
+    // Only a complete run may drop the recordings it didn't reach; a failed one leaves them for the next.
+    finishRecordings?.();
   } catch (e) {
     result.error = (e as Error).stack ?? String(e);
   } finally {
+    result.paidEur = meter.eur;
+    const calls = callStats?.();
+    const pictures = pictureStats?.();
+    if (calls) result.calls = calls;
+    if (pictures) result.pictures = pictures;
     await db.close();
   }
   return result;

@@ -6,13 +6,15 @@ import type { Fixture } from "./fixtures/schema.ts";
 /**
  * Hand-built ("synthetic") model responses for one fixture, derived from its golden spec. Used by
  * unit tests and offline demos to drive the real pipeline with the replay transport. They are
- * marked origin "synthetic"; `pnpm eval --record` replaces them with real recordings.
+ * marked origin "synthetic"; `pnpm eval --record` replaces them with real recordings. `scope` "home": the
+ * content answer is the golden homepage alone, as a free preview gets it (the brief still plans every page).
  */
-export function syntheticRecordings(fixture: Fixture, golden: SiteSpec, edits: { reply: string; patches: unknown[] }[] = []): Recording[] {
+export function syntheticRecordings(fixture: Fixture, golden: SiteSpec, edits: { reply: string; patches: unknown[] }[] = [], scope: "home" | "full" = "full"): Recording[] {
   const config = loadConfig();
   const f = fixture.brief.facts;
   const d = golden.design;
-  const contentPages = golden.pages.filter((p) => p.kind === "home" || p.kind === "standard");
+  const plannedPages = golden.pages.filter((p) => p.kind === "home" || p.kind === "standard");
+  const contentPages = scope === "home" ? plannedPages.filter((p) => p.kind === "home") : plannedPages;
   const out: { stage: ModelStageName; body: unknown }[] = [
     { stage: "classify", body: { businessType: fixture.brief.businessType, confidence: 0.95 } },
     {
@@ -38,10 +40,11 @@ export function syntheticRecordings(fixture: Fixture, golden: SiteSpec, edits: {
           registrationNumber: f.legal?.registrationNumber ?? null,
           taxNumber: f.legal?.taxNumber ?? null,
           vatPayer: null,
-          serviceArea: [],
+          // The golden's service area (the fixture's facts don't list one), so a site that names it has no placeholder there.
+          serviceArea: Array.isArray(golden.business.serviceArea) ? golden.business.serviceArea : [],
           people: (f.people ?? []).map((p) => ({ name: p.name, role: p.role ?? null })),
         },
-        pages: contentPages.map((p) => ({ kind: p.kind, slug: p.slug, navLabel: p.nav.label, purpose: p.seo.description })),
+        pages: plannedPages.map((p) => ({ kind: p.kind, slug: p.slug, navLabel: p.nav.label, purpose: p.seo.description })),
         missing: fixture.brief.missing,
       },
     },

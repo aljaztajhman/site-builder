@@ -1,0 +1,18 @@
+{
+  "seq": 1,
+  "stage": "brief",
+  "model": "synthetic",
+  "hash": "synthetic",
+  "origin": "synthetic",
+  "response": {
+    "text": "{\"businessType\":\"shop\",\"name\":\"Oljka in sol\",\"town\":\"Koper\",\"summary\":\"Oljka in sol je majhna trgovina z istrskimi dobrotami v starem mestnem jedru Kopra, na naslovu Kidričeva ulica 22, 6000 Koper. Prodajamo samo izdelke manjših pridelovalcev iz slovenske Istre in Krasa: ekstra deviško oljčno olje, piransko sol, med, vino, pršut, sire, suhe fige, marmelade iz fig in domače testenine.\\n\\nVeliko kupcev so turisti, zato imamo tudi darilne pakete (gift \",\"audience\":\"lokalni obiskovalci\",\"tone\":\"friendly\",\"offerings\":[{\"group\":null,\"name\":\"oljčno olje 0,5 l\",\"description\":null,\"price\":{\"amount\":14,\"from\":false,\"unit\":null}},{\"group\":null,\"name\":\"piranska sol 1 kg\",\"description\":null,\"price\":{\"amount\":4.5,\"from\":false,\"unit\":null}},{\"group\":null,\"name\":\"darilni paket\",\"description\":null,\"price\":{\"amount\":25,\"from\":true,\"unit\":null}}],\"highlights\":[],\"facts\":{\"phone\":\"+38655551860\",\"email\":\"narocila@oljka-in-sol.example\",\"address\":{\"street\":\"Kidričeva ulica 22\",\"postalCode\":\"6000\",\"city\":\"Koper\"},\"hours\":[{\"from\":\"mon\",\"to\":\"fri\",\"open\":\"08:00\",\"close\":\"19:00\",\"closed\":false},{\"from\":\"sat\",\"to\":\"sat\",\"open\":\"08:00\",\"close\":\"13:00\",\"closed\":false},{\"from\":\"sun\",\"to\":\"sun\",\"open\":null,\"close\":null,\"closed\":true}],\"hoursNote\":null,\"bookingUrl\":null,\"social\":[],\"legalName\":\"Oljka in sol, trgovina, d.o.o.\",\"registrationNumber\":\"9123456000\",\"taxNumber\":\"SI91234567\",\"vatPayer\":null,\"serviceArea\":[],\"people\":[]},\"pages\":[{\"kind\":\"home\",\"slug\":\"\",\"navLabel\":\"Domov\",\"purpose\":\"Trgovina v starem mestnem jedru Kopra: oljčno olje, piranska sol, med, vino, pršut in siri manjših pridelovalcev iz Istre in Krasa. Darilni paketi po želji.\"},{\"kind\":\"standard\",\"slug\":\"darilni-paketi\",\"navLabel\":\"Darilni paketi\",\"purpose\":\"Darilni paketi z oljčnim oljem, piransko soljo, medom in drugimi istrskimi dobrotami, sestavljeni po vaši želji. Prevzem v trgovini v Kopru.\"},{\"kind\":\"standard\",\"slug\":\"ponudba\",\"navLabel\":\"Ponudba\",\"purpose\":\"Oljčno olje, piranska sol, med, vino, pršut, siri, suhe fige, marmelade iz fig in domače testenine manjših pridelovalcev iz Istre in Krasa.\"}],\"missing\":[\"people\"]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

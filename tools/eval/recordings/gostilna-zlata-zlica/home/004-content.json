@@ -1,0 +1,18 @@
+{
+  "seq": 4,
+  "stage": "content",
+  "model": "synthetic",
+  "hash": "synthetic",
+  "origin": "synthetic",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"none\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Gostilna Pri Zlati Žlici, Škofja Loka\",\"description\":\"Družinska gostilna na Kapucinskem trgu v Škofji Loki: domače jedi iz sestavin lokalnih kmetov, dnevna malica, nedeljsko kosilo in terasa pod lipo.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"card\",\"props\":{\"headline\":\"Domače jedi iz sestavin lokalnih kmetov\",\"intro\":\"Družinska gostilna v starem delu Škofje Loke. Vodi jo že tretja generacija družine Bizjak.\",\"fact\":\"address\",\"primary\":{\"label\":\"Rezervirajte mizo\",\"target\":{\"action\":\"call\"}},\"secondary\":{\"label\":\"Jedilni list\",\"target\":{\"page\":\"p_jedilnik\"}},\"image\":\"img_01\"}},{\"id\":\"s_today\",\"type\":\"price-list\",\"variant\":\"offers\",\"tone\":\"inverse\",\"props\":{\"title\":\"Malica in nedeljsko kosilo\",\"groups\":[{\"name\":\"Vsak dan\",\"items\":[{\"name\":\"Dnevna malica\",\"note\":\"Juha, glavna jed, solata\",\"price\":{\"amount\":11.5}}]},{\"name\":\"Ob nedeljah\",\"items\":[{\"name\":\"Nedeljsko kosilo\",\"note\":\"Štirje hodi\",\"price\":{\"amount\":19}}]}]}},{\"id\":\"s_dishes\",\"type\":\"products\",\"variant\":\"plates\",\"props\":{\"title\":\"Z jedilnega lista\",\"intro\":\"Ajdovi žganci, ričet, telečja obara, pečenke in orehovi štruklji. Kuhamo iz sestavin lokalnih kmetov.\",\"items\":[{\"name\":\"Ajdovi žganci z ocvirki in kislim mlekom\",\"price\":{\"amount\":9.8},\"image\":\"img_03\"},{\"name\":\"Telečja obara\",\"price\":{\"amount\":8.5},\"image\":\"img_06\"},{\"name\":\"Orehovi štruklji\",\"price\":{\"amount\":5.2},\"image\":\"img_04\"},{\"name\":\"Ričet\",\"price\":{\"$placeholder\":\"price\"}},{\"name\":\"Pečenke\",\"price\":{\"$placeholder\":\"price\"}}]}},{\"id\":\"s_terrace\",\"type\":\"image-text\",\"variant\":\"pair\",\"tone\":\"inverse\",\"props\":{\"heading\":\"sedežev na terasi pod lipo\",\"figure\":\"40\",\"paragraphs\":[\"Terasa je odprta poleti. Za skupine do 60 oseb sprejemamo rezervacije za praznovanja, obletnice in pogostitve po pogrebu.\"],\"link\":{\"label\":\"Rezervirajte za skupino\",\"target\":{\"action\":\"call\"}},\"image\":\"img_05\",\"inset\":\"img_08\"}},{\"id\":\"s_family\",\"type\":\"team\",\"variant\":\"photo\",\"props\":{\"title\":\"Tretja generacija družine Bizjak\",\"members\":[{\"name\":\"Marko Bizjak\",\"role\":\"glavni kuhar\"},{\"name\":\"Nina Bizjak\",\"role\":\"strežba in rezervacije\"}],\"image\":\"img_07\"}},{\"id\":\"s_call\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"inverse\",\"props\":{\"title\":\"Rezervacije\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

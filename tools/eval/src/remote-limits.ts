@@ -1,16 +1,21 @@
 /**
  * The free generation limits on a deployed environment (docs/plans/free-generation-limits.md, "Done
  * means"): a second anonymous generation from the same device is refused; a free account stops after
- * its allowance (the 10 chat edits; its 2 extra homepages only with --homepages, they cost ~€0.5);
+ * its allowance (config tiers.free: its chat edits; its extra homepages only with --homepages, ~€0.25 each);
  * and with both free pools held, a paid (admin) job still runs while a preview without an account is
- * refused. Part of remote-smoke.ts, run with --limits. Costs one anonymous homepage (~€0.26), ten free
- * chat edits (~€0.12) and one admin edit (~€0.01). Leaves one preview and one account
- * smoke-free-<time>@stranko-smoke.example behind.
+ * refused. Part of remote-smoke.ts, run with --limits. Costs one anonymous homepage (~€0.26), the free
+ * chat edits (~€0.012 each, 5 today) and one admin edit (~€0.01). Leaves one preview and one account
+ * smoke-free-<time>@stranko-smoke.example behind. The counts come from this checkout's config, which is the
+ * deployed one when the environment runs main.
  *
  * Turnstile: the script sends Cloudflare's dummy test token. It passes only with Cloudflare's test
  * keys (always-pass secret); with production keys the anonymous steps are reported as not run.
  */
+import { loadConfig } from "@sb/config";
 import { remoteBrowser, useSignInLink, type RemoteBrowser } from "./remote-session.ts";
+
+/** A free account's allowance (config tiers.free); it was 10 edits and 2 homepages before 2026-10-03. */
+const FREE = loadConfig().tiers.free;
 
 type Step = (name: string, ok: boolean, detail?: string) => boolean;
 
@@ -94,18 +99,18 @@ export async function runLimitChecks(opts: { base: string; admin: RemoteBrowser;
       const ready = await waitFor(owner, preview, (s) => s.site.status === "ready" || s.site.status === "failed", 6);
       step("the anonymous preview is generated", ready?.site.status === "ready", ready?.site.status ?? "timeout");
 
-      // 3. A free account: 10 chat edits in total (queued edits count), then refused.
+      // 3. A free account: its chat edits in total (queued edits count), then refused.
       const results: number[] = [];
-      for (let i = 0; i < 10; i++) results.push((await chat(owner, preview, i % 2 ? "Glava naj bo svetla." : "Glava naj bo temna.")).status);
-      const eleventh = await chat(owner, preview, "Še ena sprememba.");
-      const body = (await eleventh.json().catch(() => ({}))) as { code?: string };
-      step("a free account stops after its 10 chat edits", results.every((s) => s === 200) && eleventh.status === 429 && body.code === "free_edits_used", `${results.join(",")} → ${eleventh.status} ${body.code ?? ""}`);
+      for (let i = 0; i < FREE.chatEdits; i++) results.push((await chat(owner, preview, i % 2 ? "Glava naj bo svetla." : "Glava naj bo temna.")).status);
+      const over = await chat(owner, preview, "Še ena sprememba.");
+      const body = (await over.json().catch(() => ({}))) as { code?: string };
+      step(`a free account stops after its ${FREE.chatEdits} chat edits`, results.every((s) => s === 200) && over.status === 429 && body.code === "free_edits_used", `${results.join(",")} → ${over.status} ${body.code ?? ""}`);
       if (opts.homepages) {
-        // The same browser, now signed in: the claimed preview didn't use one of the two.
-        const a = await intake(owner, `${DESCRIPTION} Druga.`);
-        const b = await intake(owner, `${DESCRIPTION} Tretja.`);
-        const c = await intake(owner, `${DESCRIPTION} Četrta.`);
-        step("a free account gets 2 more homepages, then no more", a.status === 303 && b.status === 303 && c.status === 429, `${a.status}, ${b.status}, ${c.status}`);
+        // The same browser, now signed in: the claimed preview didn't use one of them.
+        const allowed: number[] = [];
+        for (let i = 0; i < FREE.homepages; i++) allowed.push((await intake(owner, `${DESCRIPTION} Še ena (${i + 1}).`)).status);
+        const refused = await intake(owner, `${DESCRIPTION} Ena preveč.`);
+        step(`a free account gets ${FREE.homepages} more homepage(s), then no more`, allowed.every((s) => s === 303) && refused.status === 429, `${allowed.join(", ")} → ${refused.status}`);
       }
     }
   }

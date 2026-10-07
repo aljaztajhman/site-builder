@@ -1,6 +1,6 @@
 # Eval report
 
-Mode: **offline**, scope: **full**, started 2026-10-03T00:22:45.378Z, wall time 652.3 s, total model spend €0.000.
+Mode: **offline**, scope: **full**, started 2026-10-07T11:29:45.279Z, wall time 345.0 s, paid this run €0.000 (replayed answers and cached pictures are free; the € columns below price every call like production).
 
 Offline mode renders hand-authored golden specs with no model calls: it measures the components, directions and checks, not generation quality, cost or time.
 
@@ -18,7 +18,7 @@ Measured on the rendered homepage before scrolling: photo share · first photo a
 
 | Site | Photos | Phone 360×800 | Misses | Desktop 1280×800 | Misses |
 |---|---|---|---|---|---|
-| avtoservis-mrak | 3 | 0 % · 1.30 · 1 · 3 · 58 | photo 0 % < 25 % | 3 % · 0.87 · 2 · 2 · 85 | photo 3 % < 30 % |
+| avtoservis-mrak | 3 | 0 % · 1.25 · 1 · 2 · 58 | photo 0 % < 25 % | 3 % · 0.87 · 2 · 2 · 85 | photo 3 % < 30 % |
 | fizioterapija-pregib | 1 | 25 % · 0.53 · 3 · 3 · 62 | ✓ | 26 % · 0.24 · 2 · 3 · 112 | photo 26 % < 30 % |
 | frizerstvo-lana | 5 | 21 % · 0.57 · 2 · 2 · 53 | photo 21 % < 25 % | 21 % · 0.18 · 2 · 3 · 88 | photo 21 % < 30 % |
 | gostilna-zlata-zlica | 8 | 83 % · 0.09 · 2 · 3 · 44 | ✓ | 91 % · 0.09 · 1 · 3 · 140 | ✓ |
@@ -35,16 +35,16 @@ Lighthouse thresholds: performance ≥ 90, accessibility 100, best practices ≥
 
 | Site | Type | Direction | LH P/A/BP/SEO | axe | 360 px width | Facts | Placeholders | Export offline | Gen cost | Gen time | First preview | Pass |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| avtoservis-mrak | car-repair | bold-local | 99/100/100/100 | 0 | 360 | 0 | 4 | ✓ 2.0 MB | — | — | — | ✓ |
-| fizioterapija-pregib | physio | pregib | 99/100/100/100 | 0 | 360 | 0 | 0 | ✓ 1.0 MB | — | — | — | ✓ |
-| frizerstvo-lana | hairdresser | ogledalo | 97/100/100/100 | 0 | 360 | 0 | 7 | ✓ 2.3 MB | — | — | — | ✓ |
-| gostilna-zlata-zlica | restaurant | jedilnik | 95/100/100/100 | 0 | 360 | 0 | 4 | ✓ 4.8 MB | — | — | — | ✓ |
-| instalacije-rebernik | builder | industrial | 99/100/100/100 | 0 | 360 | 0 | 1 | ✓ 0.7 MB | — | — | — | ✓ |
-| kmetija-grabnar | tourist-farm | markacija | 92/100/100/100 | 0 | 360 | 0 | 3 | ✓ 5.4 MB | — | — | — | ✓ |
-| pekarna-kvas | bakery | warm-craft | 95/100/100/100 | 0 | 360 | 0 | 5 | ✓ 2.3 MB | — | — | — | ✓ |
-| racunovodstvo-seliskar | accountant | racun | 100/100/100/100 | 0 | 360 | 0 | 0 | ✓ 0.7 MB | — | — | — | ✓ |
-| trgovina-oljka-in-sol | shop | etiketa | 96/100/100/100 | 0 | 360 | 0 | 0 | ✓ 3.3 MB | — | — | — | ✓ |
-| zobozdravstvo-lebar | dental | nasmeh | 99/100/100/100 | 0 | 360 | 0 | 0 | ✓ 1.6 MB | — | — | — | ✓ |
+| avtoservis-mrak | car-repair | bold-local | 99/100/100/100 | 0 | 360 | 0 | 4 | ✓ 2.1 MB | — | — | — | ✓ |
+| fizioterapija-pregib | physio | pregib | 98/100/100/100 | 0 | 360 | 0 | 0 | ✓ 1.2 MB | — | — | — | ✓ |
+| frizerstvo-lana | hairdresser | ogledalo | 97/100/100/100 | 0 | 360 | 0 | 7 | ✓ 2.5 MB | — | — | — | ✓ |
+| gostilna-zlata-zlica | restaurant | jedilnik | 95/100/100/100 | 0 | 360 | 0 | 4 | ✓ 4.9 MB | — | — | — | ✓ |
+| instalacije-rebernik | builder | industrial | 99/100/100/100 | 0 | 360 | 0 | 1 | ✓ 0.9 MB | — | — | — | ✓ |
+| kmetija-grabnar | tourist-farm | markacija | 94/100/100/100 | 0 | 360 | 0 | 3 | ✓ 5.6 MB | — | — | — | ✓ |
+| pekarna-kvas | bakery | warm-craft | 96/100/100/100 | 0 | 360 | 0 | 5 | ✓ 2.4 MB | — | — | — | ✓ |
+| racunovodstvo-seliskar | accountant | racun | 100/100/100/100 | 0 | 360 | 0 | 0 | ✓ 0.9 MB | — | — | — | ✓ |
+| trgovina-oljka-in-sol | shop | etiketa | 97/100/100/100 | 0 | 360 | 0 | 0 | ✓ 3.5 MB | — | — | — | ✓ |
+| zobozdravstvo-lebar | dental | nasmeh | 99/100/100/100 | 0 | 360 | 0 | 0 | ✓ 1.7 MB | — | — | — | ✓ |
 
 ### avtoservis-mrak
 
@@ -60,7 +60,7 @@ Homepage: hero-signature:bend › highlights:figures › services-list:aside ›
 
 | Checkpoint | LH P/A/BP/SEO | axe | Valid | Edit check | Failures |
 |---|---|---|---|---|---|
-| generated | 99/100/100/100 | 0 | ✓ |  | — |
+| generated | 98/100/100/100 | 0 | ✓ |  | — |
 
 ### frizerstvo-lana
 
@@ -92,7 +92,7 @@ Homepage: hero-signature:view › price-list:rates › gallery:wall › image-te
 
 | Checkpoint | LH P/A/BP/SEO | axe | Valid | Edit check | Failures |
 |---|---|---|---|---|---|
-| generated | 92/100/100/100 | 0 | ✓ |  | — |
+| generated | 94/100/100/100 | 0 | ✓ |  | — |
 
 ### pekarna-kvas
 
@@ -100,7 +100,7 @@ Homepage: hero-split:image-left › contact-strip:bar › products:grid › abou
 
 | Checkpoint | LH P/A/BP/SEO | axe | Valid | Edit check | Failures |
 |---|---|---|---|---|---|
-| generated | 95/100/100/100 | 0 | ✓ |  | — |
+| generated | 96/100/100/100 | 0 | ✓ |  | — |
 
 ### racunovodstvo-seliskar
 
@@ -116,7 +116,7 @@ Homepage: hero-signature:label › price-list:tags › text:narrow › image-tex
 
 | Checkpoint | LH P/A/BP/SEO | axe | Valid | Edit check | Failures |
 |---|---|---|---|---|---|
-| generated | 96/100/100/100 | 0 | ✓ |  | — |
+| generated | 97/100/100/100 | 0 | ✓ |  | — |
 
 ### zobozdravstvo-lebar
 

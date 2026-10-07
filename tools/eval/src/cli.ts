@@ -1,13 +1,17 @@
 /**
- * pnpm eval [--only <id>[,<id>]] [--record | --replay | --offline] [--scope full|home] [--photos <n>] [--no-lighthouse] [--max-eur 25] [--judge | --no-judge]
+ * pnpm eval [--only <id>[,<id>]] [--record | --record-missing | --replay | --offline] [--scope full|home] [--photos <n>] [--no-lighthouse] [--max-eur 25] [--judge | --no-judge]
  *
- * live (default): real model calls, the only place outside the app that spends money.
- * --record:       live, and writes every model exchange to tools/eval/recordings/<id>/ for unit tests.
- * --replay:       replays those recordings (no network, no cost).
- * --offline:      no model at all: checks hand-authored golden specs from tools/eval/golden/.
- * --judge:        score each generated homepage with the vision judge (default for live and --record;
- *                 opt-in for --offline and --replay, since it is a real model call).
- * --photos <n>:   give each fixture only its first n photos (0: a site without photos, which gets generated pictures).
+ * live (default):   real model calls, the only place outside the app that spends money.
+ * --record:         live, and writes every model exchange to tools/eval/recordings/<id>/ for unit tests.
+ * --record-missing: replays the calls whose request is unchanged since the recording and pays only for the rest,
+ *                   rewriting the fixture's recordings in place (a changed stage and the ones after it re-record).
+ * --replay:         replays those recordings (no network, no cost).
+ * --offline:        no model at all: checks hand-authored golden specs from tools/eval/golden/.
+ * --judge:          score each generated homepage with the vision judge (default for live, --record and
+ *                   --record-missing; opt-in for --offline and --replay, since it is a real model call). All of a
+ *                   run's judge calls go out as one Message Batch (50 % off) after the last fixture; the run waits.
+ * --photos <n>:     give each fixture only its first n photos (0: a site without photos, which gets generated pictures).
+ * fal pictures (FAL_KEY) are cached by request in tools/eval/image-cache/ in every mode that makes them.
  * Writes eval/report.md, eval/contact-sheet.png and the review sheets in eval/look/ (look.ts).
  */
 import { existsSync } from "node:fs";
@@ -16,7 +20,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
 import { loadConfig } from "@sb/config";
-import { launchCheckBrowser } from "@sb/engine";
+import { BatchTransport, launchCheckBrowser } from "@sb/engine";
 import { loadFixtures } from "./fixtures/load.ts";
 import { runFixture, type FixtureResult, type Mode } from "./runner.ts";
 import { contactSheet, renderReport } from "./report.ts";
@@ -32,14 +36,15 @@ const value = (name: string) => {
   return i >= 0 ? args[i + 1] : undefined;
 };
 
-const mode: Mode = flag("offline") ? "offline" : flag("replay") ? "replay" : flag("record") ? "record" : "live";
+const mode: Mode = flag("offline") ? "offline" : flag("replay") ? "replay" : flag("record-missing") ? "record-missing" : flag("record") ? "record" : "live";
+const paid = mode === "live" || mode === "record" || mode === "record-missing";
 const scope = value("scope") === "home" ? "home" : "full";
 const maxEur = Number(value("max-eur") ?? 25);
 const only = value("only")?.split(",").map((s) => s.trim());
-const judge = flag("judge") || ((mode === "live" || mode === "record") && !flag("no-judge"));
+const judge = flag("judge") || (paid && !flag("no-judge"));
 const outDir = path.join(repoRoot, "eval");
 
-if ((mode === "live" || mode === "record" || judge) && !process.env.ANTHROPIC_API_KEY) {
+if ((paid || judge) && !process.env.ANTHROPIC_API_KEY) {
   console.error("ANTHROPIC_API_KEY is not set. Use --offline (golden specs) or --replay (recordings) to run without the API.");
   process.exit(2);
 }
@@ -65,6 +70,7 @@ const results: FixtureResult[] = [];
 const startedAt = new Date();
 const t0 = Date.now();
 let spent = 0;
+const judgeBatch = judge ? { transport: new BatchTransport(), judging: [] as Promise<void>[] } : undefined;
 try {
   for (const f of fixtures) {
     if (spent >= maxEur) {
@@ -83,13 +89,22 @@ try {
       maxEur,
       spentSoFar: () => spent,
       judge,
+      ...(judgeBatch ? { judgeBatch } : {}),
     });
-    const cost = r.costByStage.reduce((a, c) => a + c.eur, 0) + r.judgeEur;
-    spent += cost;
+    // What was really paid: replayed answers and cached pictures are free (the report still prices them).
+    spent += r.paidEur;
     results.push(r);
     const failing = r.checkpoints.filter((c) => c.failures.length).length;
-    console.log(r.error ? `  error: ${r.error.split("\n")[0]}` : `  ${r.checkpoints.length} checkpoints, ${failing} with failures, €${cost.toFixed(3)} (run total €${spent.toFixed(2)})`);
+    const reuse = [r.calls ? `${r.calls.replayed} calls replayed, ${r.calls.recorded} recorded` : "", r.pictures ? `${r.pictures.cached} pictures cached, ${r.pictures.made} made` : ""].filter(Boolean).join(", ");
+    console.log(r.error ? `  error: ${r.error.split("\n")[0]}` : `  ${r.checkpoints.length} checkpoints, ${failing} with failures, paid €${r.paidEur.toFixed(3)}${reuse ? ` (${reuse})` : ""}, run total €${spent.toFixed(2)}`);
     for (const c of r.checkpoints) for (const fail of c.failures) console.log(`    ${c.label}: ${fail}`);
+  }
+  if (judgeBatch?.judging.length) {
+    console.log(`\nJudging ${judgeBatch.judging.length} homepage(s) in one Message Batch (50 % off); waiting for it to end …`);
+    await judgeBatch.transport.drain(judgeBatch.judging);
+    const judgeEur = results.reduce((a, r) => a + r.judgeEur, 0);
+    spent += judgeEur;
+    console.log(`  batch ${judgeBatch.transport.batches.join(", ")}: judge €${judgeEur.toFixed(3)} (run total €${spent.toFixed(2)})`);
   }
 } finally {
   await browser.close();

@@ -64,6 +64,8 @@ export async function makeBrief(
   const { data } = await client.callJson({
     stage: "brief",
     system: [BRIEF_SYSTEM],
+    // Brief, design and alt text run once per job: a cache breakpoint there is a 1.25× write nobody reads.
+    cache: false,
     messages: [
       {
         role: "user",
@@ -128,6 +130,7 @@ export async function chooseDesign(
   const { data } = await client.callJson({
     stage: "design",
     system: [DESIGN_SYSTEM, directionsCatalogue()],
+    cache: false,
     messages: [
       {
         role: "user",
@@ -204,6 +207,7 @@ export async function altTexts(client: ModelClient, photos: { jpegBase64: string
   const { data } = await client.callJson({
     stage: "altText",
     system: [ALT_SYSTEM],
+    cache: false,
     messages: [{ role: "user", content }],
     schema: toModelJsonSchema(AltOutput),
   }, (d) => AltOutput.parse(d));
@@ -417,6 +421,14 @@ export function applyPatches(spec: SiteSpec, ops: Operation[], corpus: string): 
 /** Screenshot slices for the critique: ≤ 1568 px long edge and ~1.15 MP each, the sizes the API keeps legible. */
 const CRITIQUE_SLICES = { mobile: { height: 1560, max: 6 }, desktop: { height: 900, max: 2 } } as const;
 
+/**
+ * The part of the spec the critique reads: it sees only homepage screenshots, so the homepage, the chrome and the
+ * business facts (≈ 2.4k fewer uncached tokens a round than the whole spec). The other pages stay in the list as
+ * id, kind and slug, so every page keeps its index and the critique's patches address the full spec unchanged.
+ */
+export function critiqueView(spec: SiteSpec): { business: SiteSpec["business"]; chrome: SiteSpec["chrome"]; pages: (SiteSpec["pages"][number] | Pick<SiteSpec["pages"][number], "id" | "kind" | "slug">)[] } {
+  return { business: spec.business, chrome: spec.chrome, pages: spec.pages.map((p) => (p.kind === "home" ? p : { id: p.id, kind: p.kind, slug: p.slug })) };
+}
 
 export async function critique(
   client: ModelClient,
@@ -447,7 +459,7 @@ export async function critique(
               input.spec.chrome.mobileActionBar ? "On phones a fixed bar with call and directions buttons stays at the bottom of the screen (hidden in the slices above)." : "",
               `Automated checks reported:\n${input.failures.length ? input.failures.map((f) => `- ${f}`).join("\n") : "- nothing"}`,
               `The client's own text (every fact on the site comes from here):\n"""\n${input.corpus}\n"""`,
-              `Current spec:\n${JSON.stringify(input.spec)}`,
+              `Current spec: the homepage, chrome and business facts (other pages by id, kind and slug only; design and assets left out). Patch paths address the full spec, so these page indexes hold:\n${JSON.stringify(critiqueView(input.spec))}`,
               `Return JSON: {"issues": [...], "patches": [...]}`,
             ]
               .filter(Boolean)
