@@ -19,7 +19,7 @@ export interface RunStats {
   kind: RunKind;
   runs: number;
   eur: number;
-  /** â‚¬ per run. */
+  /** € per run. */
   median: number;
   p90: number;
 }
@@ -30,7 +30,7 @@ export interface StageStats {
   /** Runs the stage was part of: an ai_jobs row, else one queue job of one site, else the call alone. */
   runs: number;
   eur: number;
-  /** â‚¬ per run of this stage. */
+  /** € per run of this stage. */
   median: number;
   p90: number;
 }
@@ -41,7 +41,7 @@ export interface CostDay {
   eur: number;
   calls: number;
   pools: Record<CostPool, number>;
-  /** Runs started that day per kind: how many and their â‚¬ (all their settled calls, whenever logged). */
+  /** Runs started that day per kind: how many and their € (all their settled calls, whenever logged). */
   runs: Record<RunKind, { runs: number; eur: number }>;
 }
 
@@ -87,7 +87,7 @@ const dayOf = (d: Date) => d.toISOString().slice(0, 10);
 const UTC_DAY = "to_char(created_at at time zone 'utc', 'YYYY-MM-DD')";
 const POOL_OF = "(case when tier = 'admin' then 'paid' when tier in ('anonymous', 'free', 'paid') then tier else 'untagged' end)";
 
-/** One row per run with its â‚¬ (settled calls only), for the runs started in [$1, $2). */
+/** One row per run with its € (settled calls only), for the runs started in [$1, $2). */
 const RUNS = `
   select j.id, (case when j.kind = 'generate' then 'generate:' || (case when j.scope = 'full' then 'full' else 'home' end) else j.kind end) as kind,
          to_char(j.created_at at time zone 'utc', 'YYYY-MM-DD') as day, sum(m.cost_eur)::float8 as eur
@@ -142,7 +142,7 @@ export class CostHistory {
       return r ? [{ kind, runs: n(r.runs), eur: n(r.eur), median: n(r.median), p90: n(r.p90) }] : [];
     });
 
-    // A stage's â‚¬ per run: its calls summed per ai_jobs row, else per queue job of one site, else alone.
+    // A stage's € per run: its calls summed per ai_jobs row, else per queue job of one site, else alone.
     const stageRows = await q<{ stage: string; calls: unknown; runs: unknown; eur: unknown; median: unknown; p90: unknown }>(
       `with per as (
          select stage, coalesce('a' || ai_job_id::text, 'q' || site_id || ':' || job_id, 'c' || id::text) as run, sum(cost_eur)::float8 as eur, count(*) as calls
