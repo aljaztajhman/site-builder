@@ -851,7 +851,7 @@ function homePane(): HTMLElement {
   pane.append(
     h("p", { class: "hint" }, "Tapnite karkoli na strani in to uredite. Ali pa v polje pod predogledom napišite, kaj naj spremenimo."),
     h("div", { class: "shortcuts" }, ...SHORTCUTS.map(([k, title, desc]) =>
-      h("button", { type: "button", class: "shortcut", onClick: () => { tab = k; selected = null; setSheet("full"); render(); } }, h("strong", {}, title), h("span", {}, desc)))),
+      h("button", { type: "button", class: "shortcut", onClick: () => { tab = k; selected = null; setSheet("full"); focusTitle = true; render(); } }, h("strong", {}, title), h("span", {}, desc)))),
   );
   if (pages().length > 1) {
     pane.append(
@@ -863,17 +863,24 @@ function homePane(): HTMLElement {
   // A free account's preview: the rest of the site, locked, with the first plan's price (it-upsells).
   if (freeViewer()) pane.append(...[lockedPages(h("a", { class: "btn sm", href: "/#cena" }, "Paketi in cene"))].filter((x): x is HTMLElement => !!x));
   const secs = sections();
+  // A list of buttons: the item carries the button role (an <li> itself may not), Enter and Space select.
+  const open = (id: string) => {
+    focusTitle = true;
+    select(id);
+  };
   pane.append(
     h("h2", {}, "Na tej strani"),
     h("ul", { class: "outline" }, ...secs.map((s) =>
-      h("li", {
-        role: "button",
-        tabindex: "0",
-        onClick: () => select(String(s.id)),
-        onKeydown: (e: KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(String(s.id)); } },
-      }, h("span", { class: "t" }, h("strong", {}, label(String(s.type))), h("span", { class: "muted" }, sectionTitle(s)))))),
+      h("li", {},
+        h("div", {
+          class: "outline-item",
+          role: "button",
+          tabindex: "0",
+          onClick: () => open(String(s.id)),
+          onKeydown: (e: KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(String(s.id)); } },
+        }, h("span", { class: "t" }, h("strong", {}, label(String(s.type))), h("span", { class: "muted" }, sectionTitle(s))))))),
   );
-  if (canAddSections()) pane.append(h("button", { class: "btn", type: "button", onClick: () => openAdd(secs.length) }, "+ Dodaj razdelek"));
+  if (canAddSections()) pane.append(h("button", { class: "btn", type: "button", onClick: () => { focusTitle = true; openAdd(secs.length); } }, "+ Dodaj razdelek"));
   return pane;
 }
 
@@ -885,7 +892,7 @@ function sectionPane(si: number): HTMLElement {
   const pane = h("div", { class: "pane" },
     h("div", { class: "pane-head", id: "selected-head" },
       h("button", { class: "btn quiet sm", type: "button", onClick: () => { selected = null; render(); } }, "← Vsi razdelki"),
-      h("h2", { class: "pane-title" }, label(String(s.type))),
+      h("h2", { class: "pane-title", tabindex: "-1", "data-pane-title": "" }, label(String(s.type))),
     ),
   );
   if (!info || !catalogue) {
@@ -1007,7 +1014,7 @@ function imagePane(): HTMLElement {
     paneHead("Slika"),
     h("img", { class: "image-big", src: `/preview/${siteId}/media/${id}-720.webp`, alt: "", width: 360, height: 240 }),
     generated ? h("p", { class: "note warn" }, "To sliko smo ustvarili z UI, ker je bilo vaših fotografij premalo. Ko jo zamenjate s svojo, oznaka izgine.") : null,
-    h("div", { class: "row" }, fileButton(generated ? "Zamenjaj s svojo fotografijo" : "Zamenjaj", false, (files) => void uploadPhotos(files, id), true)),
+    h("div", { class: "row" }, fileButton(generated ? "Zamenjaj s svojo fotografijo" : "Zamenjaj", `replace-${id}`, false, (files) => void uploadPhotos(files, id), true)),
     withPath(`/assets/images/${i}/alt`, labelled("Opis za obiskovalce, ki slik ne vidijo", alt)),
     h("button", { class: "linkish", type: "button", onClick: () => { tab = "photos"; render(); } }, "Vse fotografije"),
   );
@@ -1087,9 +1094,12 @@ function factsPane(): HTMLElement {
 // ---------- Photos: add the owner's own, replace generated ones, describe each ----------
 const PHOTO_ACCEPT = "image/jpeg,image/png,image/webp,image/avif";
 
-/** A button that opens the file picker; the files go straight to `onFiles`. */
-function fileButton(text: string, multiple: boolean, onFiles: (files: File[]) => void, primary = false): HTMLElement {
-  const input = h("input", { type: "file", class: "sr-only", accept: PHOTO_ACCEPT, ...(multiple ? { multiple: true } : {}) }) as HTMLInputElement;
+/**
+ * A button that opens the file picker; the files go straight to `onFiles`. `name` is unique on the screen, so keyboard
+ * focus on it survives a re-render (focusKey; the visible texts repeat, e.g. "Zamenjaj" on every photo).
+ */
+function fileButton(text: string, name: string, multiple: boolean, onFiles: (files: File[]) => void, primary = false): HTMLElement {
+  const input = h("input", { type: "file", class: "sr-only", name, accept: PHOTO_ACCEPT, ...(multiple ? { multiple: true } : {}) }) as HTMLInputElement;
   input.addEventListener("change", () => {
     const files = [...(input.files ?? [])];
     input.value = "";
@@ -1141,7 +1151,7 @@ function photosPane(): HTMLElement {
   const generated = images.filter((im) => im.origin === "generated").length;
   pane.append(
     h("p", { class: "help" }, generated ? "Slike z oznako »Ustvarjeno z UI« smo dodali, ker je bilo vaših fotografij premalo. Zamenjajte jih s svojimi, ko jih imate." : "Fotografije na vaši strani. Vsaka potrebuje kratek opis za obiskovalce, ki slik ne vidijo."),
-    h("div", { class: "row" }, fileButton("Dodaj fotografije", true, (files) => void uploadPhotos(files), true)),
+    h("div", { class: "row" }, fileButton("Dodaj fotografije", "add-photos", true, (files) => void uploadPhotos(files), true)),
   );
   const list = h("ul", { class: "photos" });
   images.forEach((im, i) => {
@@ -1161,7 +1171,7 @@ function photosPane(): HTMLElement {
           ),
           withPath(`/assets/images/${i}/alt`, labelled("Opis slike", altField)),
           !alt && uses.length ? h("p", { class: "note warn" }, "Brez opisa strani ni mogoče objaviti. Opis pripravljamo samodejno; lahko ga napišete sami.") : null,
-          h("div", { class: "row" }, fileButton(im.origin === "generated" ? "Zamenjaj s svojo fotografijo" : "Zamenjaj", false, (files) => void uploadPhotos(files, id))),
+          h("div", { class: "row" }, fileButton(im.origin === "generated" ? "Zamenjaj s svojo fotografijo" : "Zamenjaj", `replace-${id}`, false, (files) => void uploadPhotos(files, id))),
         ),
       ),
     );
@@ -1184,8 +1194,31 @@ function designPane(): HTMLElement {
 
   const main = h("input", { type: "color", value: colors.primary as string, "aria-label": "Glavna barva" });
   main.addEventListener("change", () => set("colors/primary", main.value));
+  // The same colour as a code (#c2410c): typed with the keyboard alone, or copied from the owner's logo or print work.
+  const code = h("input", { type: "text", id: "main-color-code", class: "color-code", value: colors.primary as string, maxlength: 7, autocomplete: "off", spellcheck: "false", "aria-label": "Koda glavne barve, npr. #c2410c" }) as HTMLInputElement;
+  const later = debounced((v) => void patch([{ op: "replace", path: "/design/colors/primary", value: v as string }], "oblikovanje colors/primary", false), 500);
+  const parsed = (): string | null => (/^#?[0-9a-f]{6}$/i.test(code.value.trim()) ? `#${code.value.trim().replace(/^#/, "").toLowerCase()}` : null);
+  const codeErr = h("div", { class: "err", role: "status" });
+  code.addEventListener("input", () => {
+    const v = parsed();
+    if (!v) return later.cancel();
+    code.removeAttribute("aria-invalid");
+    codeErr.textContent = "";
+    main.value = v;
+    // Against the spec as it is now: an autosave doesn't redraw this pane.
+    if (v !== ((state.spec?.design as Obj | undefined)?.colors as Obj | undefined)?.primary) later.push(v);
+    else later.cancel();
+  });
+  code.addEventListener("change", () => {
+    const ok = parsed() !== null;
+    if (ok) code.removeAttribute("aria-invalid");
+    else code.setAttribute("aria-invalid", "true");
+    codeErr.textContent = ok ? "" : "Koda barve ima obliko #c2410c: lojtra in šest znakov 0–9 ali a–f.";
+  });
   pane.append(
-    withPath("/design/colors/primary", h("div", { class: "row main-color" }, main, h("span", {}, h("strong", {}, "Glavna barva"), h("span", { class: "muted" }, " gumbi in poudarki")))),
+    withPath("/design/colors/primary", h("div", {},
+      h("div", { class: "row main-color" }, main, h("span", { class: "sp" }, h("strong", {}, "Glavna barva"), h("span", { class: "muted" }, " gumbi in poudarki")), code),
+      codeErr)),
     h("label", {}, "Pisave"),
     h("select", { onChange: (e: Event) => set("fontPair", (e.target as HTMLSelectElement).value) }, ...(dir?.fontPairs ?? []).map((id) => h("option", { value: id, selected: id === d.fontPair }, catalogue!.fontPairs.find((f) => f.id === id)?.label ?? id))),
   );
@@ -1431,7 +1464,7 @@ const n0 = (n: number) => n.toLocaleString("sl-SI");
 function paneHead(title: string): HTMLElement {
   return h("div", { class: "pane-head" },
     h("button", { class: "btn quiet sm", type: "button", onClick: () => { tab = "content"; render(); } }, "← Nazaj"),
-    h("h2", { class: "pane-title" }, title),
+    h("h2", { class: "pane-title", tabindex: "-1", "data-pane-title": "" }, title),
   );
 }
 
@@ -1983,7 +2016,10 @@ function decorate(): void {
   );
   el.prepend(tools);
   if (canAddSections()) {
-    const add = button("+ Dodaj razdelek", `Dodaj razdelek pod: ${name}`, () => openAdd(si + 1));
+    const add = button("+ Dodaj razdelek", `Dodaj razdelek pod: ${name}`, () => {
+      focusTitle = true;
+      openAdd(si + 1);
+    });
     add.className = "sb-add";
     el.append(add);
   }
@@ -2208,7 +2244,7 @@ async function startPublish(): Promise<void> {
 let menuOpen = false;
 function moreMenu(): HTMLElement {
   const s = state.site;
-  const go = (t: Tab) => () => { menuOpen = false; askOpen = false; tab = t; selected = null; setSheet("full"); render(); };
+  const go = (t: Tab) => () => { menuOpen = false; askOpen = false; tab = t; selected = null; setSheet("full"); focusTitle = true; render(); };
   const menu = h("details", { class: "menu", open: menuOpen },
     h("summary", { class: "btn quiet sm icon-btn", "aria-label": "Več možnosti", title: "Več možnosti" }, "⋯"),
     h("div", { class: "list" },
@@ -2269,7 +2305,9 @@ function focusKey(el: Element | null): string | null {
   if (!shell || !(el instanceof HTMLElement) || el === document.body) return null;
   const region = shell.top.contains(el) ? "top" : shell.panel.contains(el) ? "panel" : shell.bar.contains(el) ? "bar" : null;
   if (!region) return null;
-  const name = el.id || el.closest<HTMLElement>("[data-path]")?.dataset.path || el.getAttribute("aria-label") || el.getAttribute("name") || (el.textContent ?? "").trim().slice(0, 60);
+  // Ids that linkLabels makes up (f12) change with every render: they can't find the control again.
+  const id = /^f\d+$/.test(el.id) ? "" : el.id;
+  const name = id || el.closest<HTMLElement>("[data-path]")?.dataset.path || el.getAttribute("aria-label") || el.getAttribute("name") || (el.textContent ?? "").trim().slice(0, 60);
   return name ? `${region}|${el.tagName}|${name}` : null;
 }
 
@@ -2288,6 +2326,12 @@ function render(): void {
     const ed = h("main", { class: "ed", "aria-label": "Urejanje strani" }, panel, h("section", { class: "canvas", "aria-label": "Predogled" }, bar, stage, buildDock()));
     root.replaceChildren(h("div", { class: "shell" }, top, ed));
     shell = { top, ed, panel, bar, stage };
+    // The stage shrinks when the assistant box under it fills in after the frame was sized: size it again, so the
+    // frame never overflows the stage (a scrolling stage would need its own tab stop). Not on phones, where the
+    // keyboard changes the height while typing (see the resize listener below).
+    new ResizeObserver(() => {
+      if (!narrowScreen()) sizeFrame();
+    }).observe(stage);
     lastWidth = window.innerWidth;
     // Only width changes resize the frame: phone keyboards change the height while typing.
     window.addEventListener("resize", () => {
@@ -2329,7 +2373,19 @@ function render(): void {
   decorate();
   showToast();
   if (focused && (document.activeElement === document.body || !document.activeElement?.isConnected)) restoreFocus(focused);
+  // A pane opened from a button (a shortcut, the outline, "+ Dodaj razdelek", the ⋯ menu): focus goes to its title,
+  // so the keyboard goes on in the new pane and a screen reader says which pane it is.
+  if (focusTitle) {
+    focusTitle = false;
+    const title = shell.panel.querySelector<HTMLElement>("[data-pane-title]");
+    title?.focus({ preventScroll: true });
+    // The whole head in view, "← Nazaj" too (scrolling to the title alone left it under the phone sheet's handle).
+    title?.closest(".pane-head")?.scrollIntoView({ block: "nearest" });
+  }
 }
+
+/** Set by the buttons that open a pane; the next render focuses that pane's title. */
+let focusTitle = false;
 
 function restoreFocus(key: string): void {
   if (!shell) return;
@@ -2396,7 +2452,8 @@ function sizeFrame(): void {
   const cs = getComputedStyle(stage);
   const avail = stage.clientHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0) - 2;
   const height = Math.max(narrow ? 200 : 360, device === "mobile" ? Math.min(avail, 800) : avail);
-  wrap.style.width = `${Math.round(width * scale) + 2}px`;
+  // Rounded down: half a pixel more than the stage has would make it scroll (and a scrolling region needs a tab stop).
+  wrap.style.width = `${Math.floor(width * scale) + 2}px`;
   wrap.style.height = `${height + 2}px`;
   if (frame) {
     Object.assign(frame.style, { display: "block", border: "0", width: `${width}px`, height: `${Math.round(height / scale)}px`, transform: `scale(${scale})`, transformOrigin: "0 0" });
