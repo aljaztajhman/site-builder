@@ -21,6 +21,7 @@ import {
   generateSite,
   loadMedia,
   clientCorpus,
+  extractSwatches,
   processLogo,
   processPhoto,
   type CheckBrowser,
@@ -36,6 +37,7 @@ import { evaluateEditCheck, pagesText, type EditCheckResult } from "./edit-check
 import { homepageShape, type HomepageShape } from "./homepage-metrics.ts";
 import { judgeHomepage, type JudgeOutput } from "./judge.ts";
 import { CachedImageTransport, meteredImages, meteredModel, type Meter } from "./eval-transports.ts";
+import { brandFit, lookFeatures, motifFit, screenPrint, type BrandFit, type LookSite, type MotifFit } from "./look-distance.ts";
 
 export type Mode = "live" | "record" | "record-missing" | "replay" | "offline";
 
@@ -73,6 +75,8 @@ export interface FixtureResult {
   desktopShot: Uint8Array | null;
   /** First-screen composition of the generated homepage at phone and desktop size. */
   composition: { mobile: Composition; desktop: Composition } | null;
+  /** The generated homepage's look (look-distance.ts): for the same-trade distance, brand fit and motif fit. */
+  look: { site: LookSite; brand: BrandFit; motif: MotifFit } | null;
   /** Photos the client gave (the photo-share target only applies when there are some). */
   photoCount: number;
   /** Vision judge's scores for the generated homepage (--judge), and what it cost. */
@@ -108,6 +112,8 @@ export interface RunOptions {
   judgeBatch?: { transport: BatchTransport; judging: Promise<void>[] };
   /** Where fal pictures are cached by request (live, record and record-missing runs). */
   imageCacheDir?: string;
+  /** false (--no-edits): generate and check only, no scripted chat edits (40 % of a homepage run's cost). */
+  edits?: boolean;
   spentSoFar: () => number;
 }
 
@@ -185,6 +191,7 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
     mobileShot: null,
     desktopShot: null,
     composition: null,
+    look: null,
     photoCount: fixture.photos.length,
     judge: null,
     judgeEur: 0,
@@ -277,6 +284,18 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
     result.mobileShot = first.report.screenshots.mobile;
     result.desktopShot = first.report.screenshots.desktopFirst;
     result.composition = first.report.composition;
+    const features = lookFeatures(first.current.spec);
+    const logoColours = fixture.logoPath ? (await extractSwatches(new Uint8Array(await readFile(fixture.logoPath)), "logo", 3)).map((s) => s.hex) : null;
+    result.look = {
+      site: {
+        id: fixture.id,
+        trade: fixture.brief.businessType,
+        features,
+        shots: { mobile: await screenPrint(first.report.screenshots.mobile), desktop: await screenPrint(first.report.screenshots.desktopFirst) },
+      },
+      brand: brandFit(features, logoColours),
+      motif: motifFit(features.motif, fixture.brief.businessType, fixture.brief.trade),
+    };
     result.checkpoints.push(summarise("generated", first.current.spec, first.current.version, first.report));
     const { zip } = await exportSite({ repo, storage, config }, site.id);
     const ex = await checkExportOffline(zip, first.current.spec.slug, opts.browser.browser);
@@ -314,7 +333,8 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
     }
     await writeFile(path.join(dir, "spec-generated.json"), JSON.stringify(first.current.spec, null, 2));
 
-    if (transport) {
+    const edits = opts.edits !== false;
+    if (transport && edits) {
       const client = new ModelClient({
         config,
         transport,
@@ -341,8 +361,8 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
     result.costByStage = await repo.siteCost(site.id);
     const total = result.costByStage.reduce((a, c) => a + c.eur, 0);
     result.editsEur = total - result.generationEur;
-    // Only a complete run may drop the recordings it didn't reach; a failed one leaves them for the next.
-    finishRecordings?.();
+    // Only a complete run may drop the recordings it didn't reach; a failed one, or one without its edits, leaves them.
+    if (edits) finishRecordings?.();
   } catch (e) {
     result.error = (e as Error).stack ?? String(e);
   } finally {

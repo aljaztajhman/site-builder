@@ -1,0 +1,30 @@
+{
+  "id": "salon-tina",
+  "businessType": "hairdresser",
+  "twinOf": "frizerstvo-lana",
+  "description": "Salon Tina, frizerstvo za posebne priložnosti v Kranju. Naslov: Koroška cesta 14, 4000 Kranj, v pritličju za lekarno. Salon vodi Tina Bizjak, specializirana sem za barvanje las in svečane pričeske.\n\nDelam poročne in maturantske pričeske, poskusne pričeske, kite, barvanje, pramene in nego las. Za neveste pridem tudi na dom ali v hotel, po dogovoru.\n\nCene: poročna pričeska s poskusno 150 €, maturantska pričeska 55 €, barvanje od 50 €, pramene od 70 €.\n\nDelam samo po naročilu, ob sredah, četrtkih in petkih od 12.00 do 20.00 in ob sobotah od 7.00 do 15.00.\n\nKontakt: 051 555 641, tina@salontina.example. Na strani bi rada pokazala svoje delo, slike barvanih las in pričesk.",
+  "logo": null,
+  "photos": [
+    { "file": "photos/03.jpg", "from": "frizerstvo-lana", "subject": "dolgi pramenasto barvani lasje od zadaj" },
+    { "file": "photos/04.jpg", "from": "frizerstvo-lana", "subject": "svečana pričeska s kitami za poroko" }
+  ],
+  "facts": {
+    "name": "Salon Tina",
+    "phone": "+38651555641",
+    "email": "tina@salontina.example",
+    "address": { "street": "Koroška cesta 14", "postalCode": "4000", "city": "Kranj" },
+    "hours": [
+      { "from": "wed", "to": "fri", "open": "12:00", "close": "20:00" },
+      { "from": "sat", "to": "sat", "open": "07:00", "close": "15:00" }
+    ],
+    "prices": [
+      { "item": "poročna pričeska s poskusno", "amount": 150 },
+      { "item": "maturantska pričeska", "amount": 55 },
+      { "item": "barvanje", "amount": 50, "from": true },
+      { "item": "pramene", "amount": 70, "from": true }
+    ],
+    "people": [{ "name": "Tina Bizjak" }],
+    "other": ["za lekarno", "samo po naročilu", "na dom ali v hotel"]
+  },
+  "missing": ["legal"]
+}

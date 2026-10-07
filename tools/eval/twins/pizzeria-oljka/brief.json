@@ -1,0 +1,24 @@
+{
+  "id": "pizzeria-oljka",
+  "businessType": "restaurant",
+  "trade": "pizzerija",
+  "twinOf": "gostilna-zlata-zlica",
+  "description": "Pizzeria Oljka v Izoli, Ljubljanska ulica 21, 6310 Izola, dve minuti od marine. Pice pečemo v krušni peči na drva, testo zori 48 ur. Odprli smo leta 2015, vodi nas Marko Benčič.\n\nPoleg pic imamo testenine z morskimi sadeži, rižote, solate in domače tiramisu. Pice lahko odnesete s seboj, dostave nimamo.\n\nCene: margerita 9 €, pica Oljka s pršutom in rukolo 13 €, testenine z morskimi sadeži 14 €, tiramisu 5 €.\n\nOdprto vsak dan od 12.00 do 23.00, od novembra do marca ob ponedeljkih zaprto.\n\nMizo rezervirate na 05 555 3071. Fotografij lokala še nimamo, ga ravno prenavljamo.",
+  "logo": null,
+  "photos": [],
+  "facts": {
+    "name": "Pizzeria Oljka",
+    "phone": "+38655553071",
+    "address": { "street": "Ljubljanska ulica 21", "postalCode": "6310", "city": "Izola" },
+    "hours": [{ "from": "mon", "to": "sun", "open": "12:00", "close": "23:00" }],
+    "prices": [
+      { "item": "margerita", "amount": 9 },
+      { "item": "pica Oljka s pršutom in rukolo", "amount": 13 },
+      { "item": "testenine z morskimi sadeži", "amount": 14 },
+      { "item": "tiramisu", "amount": 5 }
+    ],
+    "people": [{ "name": "Marko Benčič" }],
+    "other": ["v krušni peči na drva", "testo zori 48 ur", "leta 2015", "dostave nimamo", "od novembra do marca ob ponedeljkih zaprto", "dve minuti od marine"]
+  },
+  "missing": ["photos", "email", "legal"]
+}

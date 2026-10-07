@@ -1,0 +1,26 @@
+{
+  "id": "gostisce-na-gricu",
+  "businessType": "restaurant",
+  "twinOf": "gostilna-zlata-zlica",
+  "description": "Gostišče Na griču nad Ormožem, sredi vinogradov Jeruzalema. Naslov: Svetinje 18, 2259 Ivanjkovci. Družina Šnajder kuha in toči domača vina že od leta 1990.\n\nPonujamo prleško kuhinjo: prleško tünko, bograč, gibanico in kislo juho. Ob vikendih pripravljamo degustacijske menije s petimi hodi in vini z naše kleti. Prirejamo poroke, obletnice in zaključke do 120 gostov, na terasi s pogledom na gorice.\n\nDegustacijski meni s petimi hodi 48 €, z vinsko spremljavo 68 €.\n\nOdprto od srede do nedelje od 11.00 do 22.00, v ponedeljek in torek samo za zaključene družbe.\n\nRezervacija je obvezna: 02 555 7194 ali info@nagricu.example. Gostilno vodi Nina Šnajder.",
+  "logo": null,
+  "photos": [
+    { "file": "photos/01.jpg", "from": "gostilna-zlata-zlica", "subject": "pročelje stare gostilne z lipo pred vhodom" },
+    { "file": "photos/05.jpg", "from": "gostilna-zlata-zlica", "subject": "terasa pod lipo s pogrnjenimi mizami" },
+    { "file": "photos/08.jpg", "from": "gostilna-zlata-zlica", "subject": "pogrnjena miza s kozarci vina za praznovanje" }
+  ],
+  "facts": {
+    "name": "Gostišče Na griču",
+    "phone": "+38625557194",
+    "email": "info@nagricu.example",
+    "address": { "street": "Svetinje 18", "postalCode": "2259", "city": "Ivanjkovci" },
+    "hours": [{ "from": "wed", "to": "sun", "open": "11:00", "close": "22:00" }],
+    "prices": [
+      { "item": "degustacijski meni s petimi hodi", "amount": 48 },
+      { "item": "z vinsko spremljavo", "amount": 68 }
+    ],
+    "people": [{ "name": "Nina Šnajder" }],
+    "other": ["od leta 1990", "do 120 gostov", "prleško tünko, bograč, gibanico in kislo juho", "samo za zaključene družbe", "Rezervacija je obvezna"]
+  },
+  "missing": ["legal"]
+}

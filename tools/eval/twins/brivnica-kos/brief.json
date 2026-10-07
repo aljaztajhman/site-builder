@@ -1,0 +1,28 @@
+{
+  "id": "brivnica-kos",
+  "businessType": "hairdresser",
+  "trade": "brivnica",
+  "twinOf": "frizerstvo-lana",
+  "description": "Brivnica Kos, Maribor. Klasična moška brivnica v starem mestnem jedru, Poštna ulica 6, 2000 Maribor. Brivnico vodi brivec Luka Kos, ki se je obrti učil v Zagrebu in na Dunaju.\n\nPonujamo moško striženje s škarjami ali strojčkom, fade, urejanje brade, britje z britvijo in vročo brisačo ter striženje za fante do 12 let.\n\nCene: striženje 20 €, fade 23 €, urejanje brade 14 €, britje z britvijo 25 €, striženje in brada skupaj 30 €.\n\nOdprto od torka do petka od 10.00 do 20.00 in v soboto od 9.00 do 14.00.\n\nNaročite se po telefonu ali SMS na 031 555 270. Brez naročila samo, če je prost stol. Slik še nimamo, salon ravno prenavljamo.",
+  "logo": null,
+  "photos": [],
+  "facts": {
+    "name": "Brivnica Kos",
+    "phone": "+38631555270",
+    "address": { "street": "Poštna ulica 6", "postalCode": "2000", "city": "Maribor" },
+    "hours": [
+      { "from": "tue", "to": "fri", "open": "10:00", "close": "20:00" },
+      { "from": "sat", "to": "sat", "open": "09:00", "close": "14:00" }
+    ],
+    "prices": [
+      { "item": "striženje", "amount": 20 },
+      { "item": "fade", "amount": 23 },
+      { "item": "urejanje brade", "amount": 14 },
+      { "item": "britje z britvijo", "amount": 25 },
+      { "item": "striženje in brada skupaj", "amount": 30 }
+    ],
+    "people": [{ "name": "Luka Kos", "role": "brivec" }],
+    "other": ["v Zagrebu in na Dunaju", "z britvijo in vročo brisačo", "za fante do 12 let", "če je prost stol"]
+  },
+  "missing": ["photos", "email", "legal"]
+}

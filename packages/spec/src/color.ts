@@ -23,6 +23,23 @@ export function luminance(hex: string): number {
   return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
 }
 
+/** CIE L*a*b* (D65) of a hex colour. */
+export function hexToLab(hex: string): [number, number, number] {
+  const [r, g, b] = hexToRgb(hex).map(channel) as Rgb;
+  const x = (0.4124 * r + 0.3576 * g + 0.1805 * b) / 0.95047;
+  const y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  const z = (0.0193 * r + 0.1192 * g + 0.9505 * b) / 1.08883;
+  const f = (t: number) => (t > 216 / 24389 ? Math.cbrt(t) : (24389 / 27 * t + 16) / 116);
+  return [116 * f(y) - 16, 500 * (f(x) - f(y)), 200 * (f(y) - f(z))];
+}
+
+/** Perceptual colour difference ΔE*76 (Euclidean in L*a*b*): about 2 is just noticeable, over 30 clearly different. */
+export function deltaE(a: string, b: string): number {
+  const p = hexToLab(a);
+  const q = hexToLab(b);
+  return Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]);
+}
+
 /** WCAG 2.x contrast ratio. */
 export function contrast(a: string, b: string): number {
   const la = luminance(a);

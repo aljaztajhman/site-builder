@@ -1,0 +1,22 @@
+{
+  "id": "karoserija-hribar",
+  "businessType": "car-repair",
+  "trade": "karoserija",
+  "twinOf": "avtoservis-mrak",
+  "description": "Karoserija in vleka Hribar iz Celja. Popravljamo karoserije po prometnih nesrečah, ravnamo pločevino, lakiramo cele avtomobile ali posamezne dele in odpravljamo praske ter udrtine po toči. Sodelujemo z vsemi zavarovalnicami, škodo uredimo namesto vas.\n\nImamo lastno vlečno vozilo in vlečemo okvarjena ali poškodovana vozila po vsej Savinjski regiji, 24 ur na dan, tudi ob praznikih.\n\nPoliranje avtomobila stane 90 €, odprava udrtine po toči od 45 € na udrtino.\n\nNaslov delavnice: Mariborska cesta 120, 3000 Celje. Odprto od ponedeljka do petka od 7.00 do 15.30. Za vleko in naročila kličite 041 555 702, telefon je vedno vklopljen.\n\nLastnik je Bojan Hribar, v delavnici smo štirje.",
+  "logo": null,
+  "photos": [{ "file": "photos/01.jpg", "from": "avtoservis-mrak", "subject": "osebni avto na dvigalu v avtomehanični delavnici" }],
+  "facts": {
+    "name": "Karoserija in vleka Hribar",
+    "phone": "+38641555702",
+    "address": { "street": "Mariborska cesta 120", "postalCode": "3000", "city": "Celje" },
+    "hours": [{ "from": "mon", "to": "fri", "open": "07:00", "close": "15:30" }],
+    "prices": [
+      { "item": "poliranje avtomobila", "amount": 90 },
+      { "item": "odprava udrtine po toči", "amount": 45, "from": true }
+    ],
+    "people": [{ "name": "Bojan Hribar", "role": "lastnik" }],
+    "other": ["z vsemi zavarovalnicami", "24 ur na dan", "Savinjski regiji", "v delavnici smo štirje"]
+  },
+  "missing": ["email", "legal"]
+}

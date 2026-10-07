@@ -1,0 +1,18 @@
+{
+  "id": "elektro-zupan",
+  "businessType": "builder",
+  "trade": "elektro",
+  "twinOf": "instalacije-rebernik",
+  "description": "Elektro Župan, elektroinštalacije iz Velenja. Sem Andrej Župan, mojster elektroinštalater z licenco, delam od leta 2006, z dvema sodelavcema.\n\nDelamo elektroinštalacije v novogradnjah in pri obnovah hiš in stanovanj, zamenjavo starih varovalk z novimi omaricami, polnilnice za električne avtomobile, pametne inštalacije, strelovode in meritve z zapisnikom za tehnični pregled. Za sončne elektrarne sodelujemo s preverjenim partnerjem.\n\nPrihajamo po celi Šaleški dolini in Koroški. Cene po ogledu, ogled je brezplačen.\n\nNaslov: Kidričeva cesta 55, 3320 Velenje. Pokličite na 041 555 917 ali pišite na andrej@elektrozupan.example, odgovorim isti dan.\n\nSlik naših del nimamo, ker večina konča za ometom.",
+  "logo": null,
+  "photos": [],
+  "facts": {
+    "name": "Elektro Župan",
+    "phone": "+38641555917",
+    "email": "andrej@elektrozupan.example",
+    "address": { "street": "Kidričeva cesta 55", "postalCode": "3320", "city": "Velenje" },
+    "people": [{ "name": "Andrej Župan", "role": "mojster elektroinštalater" }],
+    "other": ["od leta 2006", "z dvema sodelavcema", "polnilnice za električne avtomobile", "Šaleški dolini in Koroški", "ogled je brezplačen", "meritve z zapisnikom"]
+  },
+  "missing": ["prices", "hours", "photos", "legal"]
+}

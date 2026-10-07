@@ -1,0 +1,19 @@
+{
+  "id": "mizarstvo-lesnik",
+  "businessType": "builder",
+  "trade": "mizar",
+  "twinOf": "instalacije-rebernik",
+  "description": "Mizarstvo Lesnik iz Škofje Loke. Izdelujemo pohištvo po meri iz masivnega lesa: kuhinje, vgradne omare, mize, postelje, stopnice in notranja vrata. Les kupujemo pri žagah v Poljanski dolini, največ hrast, oreh in macesen.\n\nDelavnico je leta 1979 odprl dedek, danes jo vodi Jaka Lesnik. Vsak kos narišemo skupaj z vami, izdelamo v delavnici in sami montiramo.\n\nNaslov: Kidričeva cesta 80, 4220 Škofja Loka. Delavnica je odprta od ponedeljka do petka od 7.00 do 15.00, ob sobotah po dogovoru.\n\nPokličite 041 555 382 ali pišite na jaka@mizarstvolesnik.example. Cene po izmeri in ponudbi.\n\nTrenutno imamo tri do štiri mesece čakanja na kuhinje.",
+  "logo": null,
+  "photos": [],
+  "facts": {
+    "name": "Mizarstvo Lesnik",
+    "phone": "+38641555382",
+    "email": "jaka@mizarstvolesnik.example",
+    "address": { "street": "Kidričeva cesta 80", "postalCode": "4220", "city": "Škofja Loka" },
+    "hours": [{ "from": "mon", "to": "fri", "open": "07:00", "close": "15:00" }],
+    "people": [{ "name": "Jaka Lesnik" }],
+    "other": ["leta 1979", "hrast, oreh in macesen", "Poljanski dolini", "ob sobotah po dogovoru", "tri do štiri mesece čakanja", "masivnega lesa"]
+  },
+  "missing": ["prices", "photos", "legal"]
+}
