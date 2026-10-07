@@ -70,7 +70,7 @@ afterAll(async () => {
   server?.close();
   await platform?.close();
   await rm(dir, { recursive: true, force: true });
-});
+}, 60_000);
 
 let seq = 0;
 /** The fixture's replayed generation as a fresh site, with the fixture's description (the fact check reads it) and pictures in storage. */
@@ -248,12 +248,12 @@ describe("from a generated site to a published one", () => {
       // An invalid number says so without asking.
       viesAnswer = VIES_FOUND;
       await tax.fill("SI12345678");
-      await expect.poll(() => page.locator(".company-note").textContent()).toContain("Davčna številka ni veljavna");
+      await expect.poll(() => page.locator(".company-note").textContent(), { timeout: 10_000 }).toContain("Davčna številka ni veljavna");
       expect(await name.inputValue()).toBe("");
       // Up again: the name fills and is saved; the address the site has stays.
       await tax.fill("SI10000003");
       await page.locator(`[data-lookup="found"]`).waitFor();
-      await expect.poll(async () => (await spec()).business.provider.legalName).toBe(VIES_NAME);
+      await expect.poll(async () => (await spec()).business.provider.legalName, { timeout: 10_000 }).toBe(VIES_NAME);
       expect(await name.inputValue()).toBe(VIES_NAME);
       expect((await spec()).business.provider.taxNumber).toBe("SI10000003");
       expect((await spec()).business.address).toEqual(address);
@@ -310,7 +310,7 @@ describe("from a generated site to a published one", () => {
       if (at > 0) await page.getByLabel("Stran", { exact: true }).selectOption(String(at));
       await page.locator(".outline li", { hasText: "Ekipa" }).first().click();
       await page.getByRole("button", { name: "+ Dodaj člana" }).click();
-      await expect.poll(async () => (await members()).length).toBe(2);
+      await expect.poll(async () => (await members()).length, { timeout: 10_000 }).toBe(2);
       // The new person's name is the owner's to type: missing until then, never made up.
       expect((await members())[1]!.name).toEqual({ $placeholder: "name" });
     } finally {

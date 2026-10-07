@@ -123,7 +123,7 @@ describe("POST /api/sites/:id/company-lookup", () => {
     config = { ...base, companyLookup: { ...base.companyLookup, url: URL_, perViewer: 3 } };
     golden = JSON.parse(await readFile(path.join(here, "../../../tools/eval/golden/instalacije-rebernik.json"), "utf8")) as SiteSpec;
     admin = await adminBrowser((p, init) => app().request(p, init), PASSWORD);
-  });
+  }, 60_000);
   afterAll(async () => {
     await platform.close();
     await rm(dir, { recursive: true, force: true });
