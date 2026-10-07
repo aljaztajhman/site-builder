@@ -12,6 +12,7 @@ export * from "./photos.ts";
 export * from "./image-ids.ts";
 export * from "./prompts.ts";
 export * from "./stages.ts";
+export * from "./content-patch.ts";
 export * from "./variety.ts";
 export * from "./skeleton.ts";
 export * from "./pipeline.ts";

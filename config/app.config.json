@@ -18,6 +18,11 @@
     "skeleton": false,
     "neighbours": 50
   },
+  "costCuts": {
+    "$comment": "Generation cost cuts (docs/plans/cost-cuts.md items 1 and 7). secondCritiqueOnlyOnFailures: with limits.critiqueIterations 2, the second critique round runs only when the checks after the first round's patches still report failures (3 of 4 recorded second rounds returned no patches, ≈ €0.022 and 40–60 s of checks each); otherwise the job ends after round 1 and logs why. contentRetryAsPatch: a content answer that still fails validation after the code repairs gets an RFC 6902 patch fixing only the listed issues (≈ 300 output tokens instead of 3–5k), applied in code; a patch that doesn't apply or leaves issues falls back to the whole-JSON retry, all within limits.contentRetries. Both off until the 3-fixture critique eval and a full-scope eval on the fixtures that retried (gostilna, kmetija, instalacije) confirm them.",
+    "secondCritiqueOnlyOnFailures": false,
+    "contentRetryAsPatch": false
+  },
   "structuredOutputForContent": false,
   "pricesUsdPerMTok": {
     "claude-haiku-4-5-20251001": { "input": 1.0, "output": 5.0, "cacheWrite5m": 1.25, "cacheRead": 0.1 },
@@ -53,6 +58,13 @@
     "settleMs": 3000,
     "maxRedirects": 5,
     "lighthouse": true
+  },
+  "analytics": {
+    "$comment": "Stranko's own product analytics (docs/plans/analytics.md Steps 1 and 3, HQ sb-analytics = own-plus-cf). events: write product_events rows where a funnel step happens (landing view, intake, preview ready and opened, sign-in, claim, full site, publish, export, plan change, limit hit, upsell, domain) and one 'generation' row per generation job (stage seconds and EUR, checks, pictures, cap hits, direction). Rows carry a keyed hash of the device cookie, never an IP or an email; nothing reaches generation, specs or rendered sites. Off until the owner has read the /zasebnost sentence it adds (shown only while on); /admin/funnel and /admin/engine are always there and read empty without it. keepDays: raw rows are kept this long, then the worker's hourly housekeeping rolls them into daily counts (product_events_daily, kept). landingDedupeMinutes: one landing view per device in this window (like site visits). onceMinutes: an upsell shown or a preview opened counts once per device and site in this window.",
+    "events": false,
+    "keepDays": 90,
+    "landingDedupeMinutes": 30,
+    "onceMinutes": 1440
   },
   "stats": {
     "$comment": "Cookieless counts per published site (it-site-stats-report): page views (counted when a published page is served), taps on call and directions links (a beacon from stats.js, only from the live /s/ address, never the preview or an export) and contact-form messages. Only daily totals per site are stored. The visitor's IP is used in memory as a keyed hash to skip the same visitor reloading a page within visitDedupeMinutes and to cap tapsPerVisitorPerDay; it is never stored. The monthly report email goes to the site's owner account from the web process, from reportFromHour on day 1 (in timeZone) for the previous month, at most once per site and month (Resend idempotency key), retried every retryEveryMinutes up to maxAttempts within the first reportWithinDays days.",

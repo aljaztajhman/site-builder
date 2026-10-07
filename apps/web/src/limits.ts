@@ -5,6 +5,7 @@ import { poolOf, type Pool, type Repo, type SiteRow, type Tier, type UsageQuerie
 import type { SiteSpec } from "@sb/spec";
 import { clientIp, ipKey, signInUrl, tierOf, type AppEnv, type Refusal, type Viewer } from "./access.ts";
 import { PREVIEW_BADGE, formatDate } from "./ui/labels.ts";
+import { tracker } from "./analytics.ts";
 
 /**
  * Free generation limits (docs/plans/free-generation-limits.md). The server decides before every
@@ -194,7 +195,7 @@ export async function reserveJob(deps: LimitDeps, c: Context<AppEnv>, ask: JobAs
     signIn: signInUrl(ask.siteId ? `/sites/${ask.siteId}` : "/#zacni"),
     now,
   };
-  return deps.repo.usage.withQuotaLock(async (u) => {
+  const result = await deps.repo.usage.withQuotaLock(async (u) => {
     const refusal = await refusalFor(u, deps.config, who, ask);
     if (refusal) return { ok: false as const, refusal };
     const aiJobId = await u.insertJob({
@@ -211,6 +212,9 @@ export async function reserveJob(deps: LimitDeps, c: Context<AppEnv>, ask: JobAs
     });
     return { ok: true as const, aiJobId, tier };
   });
+  // A limit the viewer ran into (after the lock is released): which one, and for which kind of job.
+  if (!result.ok) await tracker(deps)(c, { kind: "limit_hit", siteId: ask.siteId ?? null, props: { which: result.refusal.code, job: ask.kind } });
+  return result;
 }
 
 // ---------- What the viewer has left (GET /api/sites/:id → access, the landing page) ----------
