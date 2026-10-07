@@ -48,10 +48,16 @@ jobs:
 
   # docs/dev/workflow.md §6, CI additions: the hand-authored golden specs through every automated check (render,
   # axe, Lighthouse, 360 px, facts, placeholders, export). No model calls, free. --strict fails the job when a
-  # fixture fails a check; the report and sheets are uploaded when it does.
+  # fixture fails a check; the report and sheets are uploaded when it does. Two runners, five fixtures each: on one
+  # runner the ten took 15 minutes of the 20-minute limit (2026-10-07).
   eval-offline:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
+    name: eval-offline (${{ matrix.shard }}/2)
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -61,11 +67,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Install Chromium for render checks
         run: pnpm --filter @sb/engine exec playwright install --with-deps chromium
-      - run: pnpm eval --offline --strict
+      - run: pnpm eval --offline --strict --shard ${{ matrix.shard }}/2
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: eval-offline
+          name: eval-offline-${{ matrix.shard }}
           path: eval/
 
   # The dashboard's scripts (editor, landing) and UI assets as production builds them at start, so a broken
@@ -128,7 +134,7 @@ jobs:
       - name: Create the databases
         run: |
           pg_dump --version
-          for db in empty base check; do psql -d sb -c "create database $db"; done
+          for db in empty base migcheck; do psql -d sb -c "create database $db"; done
       - name: Migrate an empty database
         env:
           DATABASE_URL: postgres://sb:sb@localhost:5432/empty
@@ -154,6 +160,6 @@ jobs:
         run: pnpm db:backup
       - name: Migrate-check this commit's migrations against that backup
         env:
-          MIGRATE_CHECK_DATABASE_URL: postgres://sb:sb@localhost:5432/check
+          MIGRATE_CHECK_DATABASE_URL: postgres://sb:sb@localhost:5432/migcheck
           STORAGE_DIR: ${{ runner.temp }}/backups
         run: pnpm db:migrate-check

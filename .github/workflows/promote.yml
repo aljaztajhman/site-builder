@@ -139,7 +139,7 @@ jobs:
         env:
           POSTGRES_USER: sb
           POSTGRES_PASSWORD: sb
-          POSTGRES_DB: check
+          POSTGRES_DB: migcheck
         ports: ["5432:5432"]
         options: >-
           --health-cmd "pg_isready -U sb"
@@ -163,7 +163,7 @@ jobs:
           echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
       - name: Restore production's newest backup and run this commit's migrations on it
         env:
-          MIGRATE_CHECK_DATABASE_URL: postgres://sb:sb@localhost:5432/check
+          MIGRATE_CHECK_DATABASE_URL: postgres://sb:sb@localhost:5432/migcheck
           STORAGE_DRIVER: s3
           S3_ENDPOINT: ${{ secrets.PRODUCTION_S3_ENDPOINT }}
           S3_BUCKET: ${{ secrets.PRODUCTION_S3_BUCKET }}
