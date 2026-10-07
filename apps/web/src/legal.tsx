@@ -223,12 +223,27 @@ export function accessibilityPage(config: AppConfig): string {
           <li>da se stran ne pomika vstran,</li>
           <li>da so povezave v nogi naslovne strani visoke vsaj 24 točk, da jih s prstom zadenete.</li>
         </ul>
+        <p>
+          Urejevalnik preverimo ob vsaki spremembi kode prav tako na širini telefona (360 točk) in računalnika (1280 točk): ko ni izbrano nič, ko je izbran razdelek, na zaslonu »Še to
+          potrebujemo«, na seznamu pred objavo, pri izbiri domene ter na zaslonih Podatki, Fotografije in Oblika:
+        </p>
+        <ul>
+          <li>z orodjem axe po pravilih WCAG 2.2 A in AA (brez najdenih napak),</li>
+          <li>
+            da šest pogostih opravil opravite samo s tipkovnico: spremembo telefonske številke, sobotni delovni čas, zamenjavo fotografije, dodajanje pogostih vprašanj, novo glavno barvo in
+            objavo,
+          </li>
+          <li>da je pri tem vsak element, na katerem je fokus, vidno označen in ga ne prekriva nič drugega.</li>
+        </ul>
         <p>Spletne strani, ki jih naredimo za stranke, preverimo z istim orodjem, na obeh širinah, ob vsakem ustvarjanju.</p>
       </section>
       <section className="message">
         <h2>Česar še ne preverjamo</h2>
         <ul>
-          <li>Urejevalnika in predogleda v njem še nismo pregledali z axe ali z bralnikom zaslona.</li>
+          <li>Ostalih zaslonov urejevalnika (na primer Strani, Dodaj razdelek, Zgodovina sprememb in pogovor s pomočnikom) ter seznama vaših strani z axe še ne preverjamo.</li>
+          <li>Urejanja besedila neposredno v predogledu in orodne vrstice razdelka v predogledu s tipkovnico še nismo preverili. Besedilo lahko uredite v obrazcu razdelka.</li>
+          <li>Izbirnika barv v brskalniku s tipkovnico nismo preverili. Glavno barvo lahko vpišete kot kodo, na primer #c2410c.</li>
+          <li>Nekatera opravila s tipkovnico zahtevajo veliko pritiskov tipk, večinoma tipke Tab: dodajanje razdelka približno 40, sobotni delovni čas približno 35.</li>
           <li>Ročnega pregleda z bralnikom zaslona še ni bilo.</li>
         </ul>
       </section>
@@ -238,7 +253,7 @@ export function accessibilityPage(config: AppConfig): string {
           Če česa ne morete uporabiti, nam pišite na <Provider config={config} field="email" />. Povejte, na kateri strani in s čim (brskalnik, bralnik zaslona, telefon).
         </p>
       </section>
-      <p className="when">Izjava je bila pripravljena 4. 10. 2026.</p>
+      <p className="when">Izjava je bila pripravljena 4. 10. 2026 in posodobljena 7. 10. 2026.</p>
     </Page>,
   );
 }
