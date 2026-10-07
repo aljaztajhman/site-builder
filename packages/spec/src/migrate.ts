@@ -66,6 +66,9 @@ export const MIGRATIONS: Record<number, (spec: RawSpec) => RawSpec> = {
   // direct edits from now on; a stored site has none, so its first regeneration keeps only its business facts, as
   // before. Every v13 spec is a valid v14 spec.
   13: (spec) => spec,
+  // 14 → 15: "Cena po dogovoru" (it-price-on-request). Additive: a price may be `{ onRequest: true }`, set only by the
+  // owner in the editor. Every v14 spec is a valid v15 spec.
+  14: (spec) => spec,
 };
 
 export function migrateSpec(input: unknown, migrations = MIGRATIONS, target: number = SPEC_VERSION): SiteSpec {

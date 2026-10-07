@@ -9,7 +9,7 @@ import { COLOR_LABEL, DIRECTION_LABEL, ENUM_LABEL, SECTION_LABEL, TOKEN_LABEL, V
 import { formatDateTime, formatEur, siteStatus } from "../ui/labels.ts";
 import { groupVersions, undoTarget, type ListedVersion } from "./versions.ts";
 import { placeholderPath } from "./placeholders.ts";
-import { isPriceListType, parsePriceInput, priceValue } from "@sb/spec/price-edit";
+import { PRICE_ON_REQUEST, isPriceListType, isPriceOnRequest, parsePriceInput, priceValue } from "@sb/spec/price-edit";
 import { missingFacts, type MissingFact } from "@sb/spec/missing-facts";
 import { isoDay } from "@sb/spec/format";
 import { itemKeyForPath, priceEditor, type PriceEditorState } from "./price-editor.ts";
@@ -75,6 +75,8 @@ interface State {
   messages: number;
   /** The site's own domains and their progress (apps/web/src/domains.ts); absent on old servers. */
   domains?: DomainsInfo;
+  /** The editor's switches (config `editor`); absent on old servers. */
+  editor?: { priceOnRequest: boolean };
   /** Model spend today and the cap: the admin only (null for owners). */
   spendToday: number | null;
   cap: number | null;
@@ -105,6 +107,8 @@ const root = document.getElementById("app")!;
 const siteId = root.dataset.siteId!;
 let state: State;
 let catalogue: Catalogue | null = null;
+/** "Cena po dogovoru" (config `editor.priceOnRequest`): offered per price and for a whole list. */
+const priceOnRequestOn = (): boolean => state.editor?.priceOnRequest === true;
 /** Whether the viewer may do this here; true when the server sends no access info. */
 const can = (k: "edit" | "chat" | "regenerate" | "publish" | "export"): boolean => state.access?.can[k] ?? true;
 /** What the panel shows: "content" is the page (or the selected section); the rest open from shortcuts, taps and the ⋯ menu. */
@@ -588,6 +592,15 @@ function fieldBody(schema: Schema, rootSchema: Schema, value: Json | undefined, 
   const title = fieldLabel(key, parent);
   const box = h("div", { class: "field" });
 
+  // The owner's "Cena po dogovoru" (the forms' schema doesn't offer it): said in words, and a price can be typed instead.
+  if (key === "price" && isPriceOnRequest(value)) {
+    box.append(
+      h("label", {}, title),
+      h("div", { class: "note row" }, h("span", { class: "sp" }, "Cena po dogovoru"), h("button", { class: "btn sm", type: "button", onClick: () => sink.structure({ $placeholder: "price" }) }, "Vpiši ceno")),
+    );
+    return box;
+  }
+
   if (Array.isArray(s.anyOf)) {
     const opts = (s.anyOf as Schema[]).map((o) => resolve(o, rootSchema));
     const phIndex = opts.findIndex(isPlaceholderSchema);
@@ -629,12 +642,14 @@ function fieldBody(schema: Schema, rootSchema: Schema, value: Json | undefined, 
               },
               "Vnesi",
             ),
+            key === "price" && priceOnRequestOn() ? h("button", { class: "btn sm", type: "button", onClick: () => sink.structure({ ...PRICE_ON_REQUEST }) }, "Cena po dogovoru") : null,
           ),
         );
         return holder;
       }
       const inner = field(nonPh[0]!, rootSchema, value, key, sink, false, ptr, parent);
       inner.append(h("button", { class: "linkish", type: "button", onClick: () => sink.structure({ $placeholder: PH_KIND[key] ?? "text" }) }, "Tega podatka nimam"));
+      if (key === "price" && priceOnRequestOn()) inner.append(" ", h("button", { class: "linkish", type: "button", onClick: () => sink.structure({ ...PRICE_ON_REQUEST }) }, "Cena po dogovoru"));
       return inner;
     }
     // Link targets and other unions: pick the branch whose keys match the value.
@@ -943,6 +958,7 @@ function priceListPane(id: string, props: Schema): HTMLElement {
     },
     props: props as { properties?: Record<string, { maxLength?: number }>; required?: string[] },
     ui: priceUi,
+    onRequest: priceOnRequestOn(),
   });
 }
 
@@ -2601,9 +2617,29 @@ function askBox(f: MissingFact, first: boolean, el: HTMLElement): HTMLElement {
 
 function askPrice(f: MissingFact, save: (v: Json | undefined, rerender: boolean) => Promise<boolean>): HTMLElement {
   const typed = askDraft.get(f.path);
-  const input = h("input", { type: "text", inputmode: "decimal", autocomplete: "off", placeholder: "npr. 12,50 ali od 30", maxlength: 16, value: typeof typed === "string" ? typed : "" });
+  /** What was typed before "Cena po dogovoru" was ticked: unticking brings it back. */
+  const typedText = askDraft.get(`${f.path}#typed`);
+  const asked = isPriceOnRequest(typed);
+  const input = h("input", { type: "text", inputmode: "decimal", autocomplete: "off", placeholder: "npr. 12,50 ali od 30", maxlength: 16, value: typeof typed === "string" ? typed : typeof typedText === "string" ? typedText : "", disabled: asked });
   const err = h("div", { class: "err", role: "status" });
   const later = debounced((v) => void save(v, false));
+  // "Cena po dogovoru": one tap, the owner's own answer, so the price no longer holds up publishing.
+  const onReq = priceOnRequestOn() || asked ? h("input", { type: "checkbox", checked: asked, "data-field": "on-request" }) : null;
+  onReq?.addEventListener("change", () => {
+    later.cancel();
+    input.disabled = onReq.checked;
+    err.textContent = "";
+    input.removeAttribute("aria-invalid");
+    if (onReq.checked) {
+      askDraft.set(`${f.path}#typed`, input.value);
+      askDraft.set(f.path, { ...PRICE_ON_REQUEST });
+      void save({ ...PRICE_ON_REQUEST }, false);
+      return;
+    }
+    askDraft.set(f.path, input.value);
+    const p = parsePriceInput(input.value);
+    void save(p.kind === "ok" ? (priceValue(p) as Json) : undefined, false);
+  });
   input.addEventListener("input", () => {
     askDraft.set(f.path, input.value);
     const p = parsePriceInput(input.value);
@@ -2617,7 +2653,7 @@ function askPrice(f: MissingFact, save: (v: Json | undefined, rerender: boolean)
     input.removeAttribute("aria-invalid");
     later.push(priceValue(p) as Json);
   });
-  return h("div", { class: "field", "data-path": f.path }, h("label", {}, "Cena (€)"), input, err);
+  return h("div", { class: "field", "data-path": f.path }, h("label", {}, "Cena (€)"), input, err, onReq ? h("label", {}, onReq, " Cena po dogovoru") : null);
 }
 
 /** The facts the checklist says are missing, as one form with Objavi under it. */
@@ -2637,13 +2673,37 @@ function askPane(): HTMLElement | null {
     h("p", { class: "help" }, facts.length
       ? "Teh podatkov si ne izmišljujemo. Vpišite jih in stran lahko objavite."
       : "Vsi podatki so vpisani."),
-    ...facts.map((f, i) => askField(f, i === 0)),
+    ...withAllOnRequest(facts, facts.map((f, i) => askField(f, i === 0))),
     other ? h("p", { class: "note warn" }, `Pred objavo preverite še ${items(other)}.`, " ", h("button", { class: "linkish", type: "button", onClick: () => { askOpen = false; openChecklist("publish", false); } }, "Pokaži")) : null,
     h("div", { class: "row" },
       h("button", { class: "btn primary", type: "button", id: "ask-publish", onClick: () => void askPublish() }, can("publish") ? "Objavi" : "Shrani"),
       h("button", { class: "btn quiet", type: "button", onClick: close }, "Kasneje"),
     ),
   );
+}
+
+/**
+ * "Cena po dogovoru" for every missing price on the screen in one tap, before the first of them; only with
+ * two or more (one has its own tick).
+ */
+function withAllOnRequest(facts: MissingFact[], boxes: (HTMLElement | null)[]): (HTMLElement | null)[] {
+  const prices = facts.filter((f) => f.kind === "price");
+  const first = facts.findIndex((f) => f.kind === "price");
+  if (!priceOnRequestOn() || prices.length < 2) return boxes;
+  const all = h("div", { class: "row" },
+    h("button", {
+      class: "btn sm ask-onreq-all",
+      type: "button",
+      onClick: () => {
+        // Prices typed a moment ago are saved first and stay; every price still missing then gets "po dogovoru".
+        flushPending();
+        void patch(() => missingFacts(state.checklist).filter((f) => f.kind === "price").map((f) => ({ op: "add", path: f.path, value: { ...PRICE_ON_REQUEST } })), "cene po dogovoru", true);
+      },
+    }, "Vse manjkajoče cene po dogovoru"),
+  );
+  const out = boxes.slice();
+  out.splice(first, 0, all);
+  return out;
 }
 
 /** Objavi under the form: what was typed is saved first, then the usual publish (or what is still missing). */

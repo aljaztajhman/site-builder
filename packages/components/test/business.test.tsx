@@ -651,6 +651,41 @@ describe("service-area", () => {
   });
 });
 
+describe("a price \"po dogovoru\" (the owner's choice)", () => {
+  const ON = { onRequest: true } as const;
+  /** Every item of a list on request. */
+  const onRequest = <T,>(v: T): T => JSON.parse(JSON.stringify(v), (k, x) => (k === "price" ? ON : x)) as T;
+
+  it("says \"po dogovoru\" in the price's place in every price-list variant and the menu, never a placeholder or an amount", () => {
+    for (const variant of priceList.variants) {
+      const out = render(priceList.schema.parse(onRequest({ ...fixtures["price-list"], variant })));
+      expect(out.match(/po dogovoru/g)?.length, variant).toBe(3);
+      expect(out, variant).not.toContain('class="ph"');
+      expect(out, variant).not.toContain("€");
+      expect(out, variant).toMatch(variant === "rates" ? /<span class="rates__amount rates__amount--on-request">po dogovoru<\/span>/ : /<span class="price price--on-request">po dogovoru<\/span>/);
+    }
+    const menu = render(menuSection.schema.parse(onRequest(fixtures.menu)));
+    expect(menu.match(/<span class="price price--on-request">po dogovoru<\/span>/g)).toHaveLength(3);
+    expect(menu).not.toContain('class="ph"');
+  });
+
+  it("in services, products and rooms too, and in English \"on request\"", () => {
+    for (const section of [servicesList.schema.parse(onRequest(fixtures["services-list"])), productsSection.schema.parse(onRequest(fixtures.products)), roomsSection.schema.parse(onRequest(fixtures.rooms))]) {
+      const out = render(section);
+      expect(out, section.type).toContain('<span class="price price--on-request">po dogovoru</span>');
+      expect(out, section.type).not.toContain('data-ph="price"');
+    }
+    const en = { ...testCtx(), locale: "en" as const, t: uiStrings("en") };
+    expect(render(priceList.schema.parse(onRequest(fixtures["price-list"])), en)).toContain('<span class="price price--on-request">on request</span>');
+  });
+
+  it("an item marked unavailable keeps its words, struck through like a price", () => {
+    const s = onRequest(fixtures["price-list"]);
+    s.props.groups[0]!.items[0]!.unavailable = true;
+    expect(render(priceList.schema.parse(s))).toMatch(/<tr class="is-unavailable">[\s\S]*?<span class="price price--on-request">po dogovoru<\/span>/);
+  });
+});
+
 describe("business.css", () => {
   const css = readFileSync(path.join(here, "../styles/business.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
 

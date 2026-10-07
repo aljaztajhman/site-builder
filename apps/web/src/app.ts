@@ -29,7 +29,7 @@ import {
 } from "@sb/engine";
 import { VersionConflictError, contentType, domainProvidersFor, mailerFromEnv, newId, type DomainProviders, type Mailer, type Platform, type SiteStatus, type Tier } from "@sb/platform";
 import { renderPage, renderPath, sharedBundle, pageFile, notFoundPlacement, rebaseRelativeUrls } from "@sb/render";
-import { CollectionKind, blockerText, collectPlaceholders, markOwnerEdits, sectionDef, type SiteSpec } from "@sb/spec";
+import { CollectionKind, addedOnRequest, blockerText, collectPlaceholders, markOwnerEdits, sectionDef, type SiteSpec } from "@sb/spec";
 import type { AuthSettings } from "./auth.ts";
 import { clientIp, csrfOk, fullSiteRefusal, identity, publishRefusal, refusalJson, sameOriginOnly, signedIn, siteAccess, tierOf, type AppEnv, type Refusal } from "./access.ts";
 import { accessInfo, allowanceFor, picturesFor, picturesShort, previewBadge, reserveJob } from "./limits.ts";
@@ -521,6 +521,8 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       messages,
       // The site's own domains and their progress, in Slovene (domains.ts).
       domains,
+      // The editor's switches (config `editor`).
+      editor: { priceOnRequest: config.editor.priceOnRequest },
       // The platform's own spend: the admin's business, null for owners.
       spendToday,
       cap: admin ? config.limits.dailyModelSpendCapEur : null,
@@ -558,6 +560,8 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     if ("error" in ops) return c.json({ error: ops.error }, 400);
     const r = applyDirectEdit(current.spec, ops);
     if (!r.ok) return c.json({ error: "invalid", issues: r.issues.slice(0, 20) }, 422);
+    // "Cena po dogovoru" only while its switch is on; one the site already has stays.
+    if (!config.editor.priceOnRequest && addedOnRequest(current.spec, r.spec).length) return c.json({ error: "Cena po dogovoru še ni na voljo." }, 400);
     // The viewer's plan limits (pages, languages, collections), whatever the edit's path; the refusal names the plan that has more.
     const viewer = (c as Context<AppEnv>).get("viewer");
     const breach = limitBreach(config, tierOf(viewer), viewer.kind === "account" ? viewer.plan : null, current.spec, r.spec);

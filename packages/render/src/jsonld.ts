@@ -1,4 +1,4 @@
-import { formatAddress, isPlaceholder, isWebUrl, type BusinessType, type Event, type Page, type Person, type Post, type Price, type ResolvedEntry, type Service, type SiteSpec } from "@sb/spec";
+import { formatAddress, isPlaceholder, isPriceOnRequest, isWebUrl, type BusinessType, type Event, type Page, type Person, type Post, type Price, type ResolvedEntry, type Service, type SiteSpec } from "@sb/spec";
 
 const SCHEMA_TYPE: Record<BusinessType, string> = {
   hairdresser: "HairSalon",
@@ -36,9 +36,9 @@ export interface JsonLdOptions {
 /** At most this many offers and menu items: enough for an answer, small enough for every page load. */
 const MAX_OFFERS = 60;
 
-/** An Offer's price part, or null for a placeholder. */
+/** An Offer's price part, or null for a placeholder or a price "po dogovoru" (no amount to give). */
 function offerPrice(price: Price | undefined): Record<string, unknown> | null {
-  if (!price || isPlaceholder(price)) return null;
+  if (!price || isPlaceholder(price) || isPriceOnRequest(price)) return null;
   return price.from
     ? { priceSpecification: { "@type": "PriceSpecification", minPrice: price.amount, priceCurrency: "EUR" } }
     : { price: price.amount, priceCurrency: "EUR" };

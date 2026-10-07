@@ -63,6 +63,10 @@
     "retryEveryMinutes": 60,
     "maxAttempts": 5
   },
+  "editor": {
+    "$comment": "Switches for the owner's editor. priceOnRequest (it-price-on-request, owner's decision sb-price-on-request): 'Cena po dogovoru' per price item and for a whole price list or menu, in the price editor and on 'Še to potrebujemo'. It is the owner's own choice (price { onRequest: true }), so it counts as the price and unblocks publishing; the site shows 'po dogovoru' in the price's place and JSON-LD gives no price for it. Only the owner's direct edits set it: the model's schema doesn't offer it, the generator's answer loses it and a chat edit or critique that adds one is refused. Off: the editor shows nothing new and the server refuses a new one; one already in a spec still renders.",
+    "priceOnRequest": false
+  },
   "companyLookup": {
     "$comment": "it-zept-lookup. The editor fills the legal name and address from a Slovenian tax number typed in 'Še to potrebujemo' or Podatki, asking the EU VIES REST service (free, no key; POST check-vat-number, fields valid, name, address). Only VAT-registered businesses are in VIES; the matična številka isn't, it stays a typed field. Nothing from VIES is stored or logged by the server: the values go into the fields and are saved like typed text. timeoutMs: after it the owner types the facts. Rate limit per viewer (account, admin) and for everyone together, in-memory, per windowMinutes.",
     "enabled": true,

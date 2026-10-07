@@ -488,6 +488,9 @@ details.more>summary{padding:12px 0;font-weight:600;cursor:pointer}
 .pl-tags label{font-size:14px}
 .pl-gtools,.pl-btools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}
 .pl-btools .help{margin:0}
+/* "Cena po dogovoru" (it-price-on-request): the whole list in one tap, a thumb's size on every screen. */
+.pl-tools{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 4px}
+.pl-tools .btn,#facts-ask .ask-onreq-all{min-height:44px}
 /* Upsells (it-upsells, it-plan-limits): the free preview's locked pages, the plan's name at a button that reached its
    limit, and the reminder before an anonymous preview is deleted. A small outlined tag, sentence case, no fill. */
 .plan-tag{display:inline-flex;align-items:center;padding:1px 6px;border:1px solid var(--line-2);border-radius:var(--r-1);background:var(--surface);color:var(--ink-2);font:600 12px/1.4 var(--font-ui);white-space:nowrap}

@@ -178,6 +178,7 @@ export const FIELD_LABEL_IN: Record<string, string> = {
   "entries/to": "Do dneva",
   "price/from": "Prikaži kot »od«",
   "price/amount": "Znesek (€)",
+  "price/onRequest": "Cena po dogovoru",
   "receipt/title": "Naslov računa",
   "total/label": "Besedilo",
   "total/value": "Vrednost",

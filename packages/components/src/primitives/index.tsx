@@ -5,6 +5,7 @@ import {
   formatPrice,
   hoursRows,
   isPlaceholder,
+  isPriceOnRequest,
   type Address,
   type Hours,
   type ImageRef,
@@ -209,6 +210,8 @@ export function HoursList({ ctx, hours, short }: { ctx: RenderCtx; hours?: Hours
 
 export function PriceText({ price, ctx }: { price: Price; ctx: RenderCtx }) {
   if (isPlaceholder(price)) return <Ph p={price} ctx={ctx} />;
+  // The owner's "Cena po dogovoru": words in the price's place, wrapping where a price would not.
+  if (isPriceOnRequest(price)) return <span className="price price--on-request">{ctx.t("priceOnRequest")}</span>;
   return (
     <span className="price">
       {price.from ? `${ctx.t("from")} ` : ""}
