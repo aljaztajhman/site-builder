@@ -246,7 +246,7 @@ Prompts (each needs `pnpm eval --only …` runs before merging; proposed text in
   - Ran: typecheck, lint, `pnpm test` 822 passed in 65 files (after merging main; an earlier run had one browser suite's afterAll time out under load, as 3 did on main before the change); all pages of the 10 golden sites through the new page checks: no give-aways found
 
 ## Variety engine (plan 2026-10-04: docs/plans/variety-engine.md; HQ `sb-variety-approach`, `sb-druga-podoba`)
-Owner, 2026-10-04: "I don't want it to look like a template filler and that every avtoserviser would get a same-y looking site." Today each trade gets one template with fixed palette, fonts, hero and outline. Since 2026-10-07 Step 0's free part (the measuring tools) is built; the other steps change model output and wait for eval budget. Each step is one PR, merged only when the twins' look distance rises and judge medians hold.
+Owner, 2026-10-04: "I don't want it to look like a template filler and that every avtoserviser would get a same-y looking site." Today each trade gets one template with fixed palette, fonts, hero and outline. Since 2026-10-07 the free parts of Steps 0–2 are built, Steps 1–2 behind config `variety.families` (off until the twin eval measures them). Each step is one PR, merged only when the twins' look distance rises and judge medians hold.
 - [x] Step 0, measure same-trade sameness (`it-variety-measure`): 12 twin fixtures (3 more car repair shops, hairdressers and restaurants; an electrician, a carpenter, a florist), pairwise look distance from spec and first screens, brand fit, motif fit, `--no-edits` eval flag. Built 2026-10-07 (branch claude/variety-measure), free:
   - twins in `tools/eval/twins/` (`pnpm eval --twins`; they reuse the fixtures' photos via `from`, 5 of 12 without photos, one blue logo);
   - `tools/eval/src/look-distance.ts`: spec parts plus first-screen gradients and colour histograms at 360 and 1280 px, 0–1;
@@ -254,8 +254,20 @@ Owner, 2026-10-04: "I don't want it to look like a template filler and that ever
   - `eval/variety-<mode>-<scope>.md` per run over every fixture.
   - Offline baseline (10 goldens): across trades 0.61, 0 collisions, brand fit 2 of 3 logos, motif 7 fit / 3 without.
 - [ ] Step 0, the paid part: baseline over the twins (`pnpm eval --twins --no-edits --scope home`, ≈ €2–3 with the batched judge) and the pairwise judge question ("same template?")
-- [ ] Step 1, templates become families (`it-template-families`): logo colours into template roles, 2–3 palettes, font pairs and hero alternates per template, outline slots (required, optional, one of), template offered beside two fitting directions instead of forced, a site seed for ties. ≈ €5
-- [ ] Step 2, regenerate explores and neighbours don't collide (`it-variety-seed`, `it-druga-podoba`): "Ustvari znova" asks for a different look and moves the seed, `awayFromNeighbours` over sites of the same trade and town, "Druga podoba" re-dresses the same content without a model call (decision `sb-druga-podoba`). ≈ €2
+- [x] Step 1, templates become families (`it-template-families`), built 2026-10-07 behind config `variety.families` (off):
+  - `packages/spec/src/families.ts`: 3 palettes, 3 font pairs and 3 heroes per template;
+  - outline slots (`outlineSlots`, `validateOutline`: required, optional, one of);
+  - the logo's colours in the template's roles, family palettes as fallback (`brandColours`);
+  - the template offered beside two fitting directions (`familyLine`);
+  - a site seed (`siteSeed`);
+  - tablica and skorja now declare their band-on-inverse text pair (the hero eyebrow), so a family band stays readable.
+  - Checks: `packages/spec/test/families.test.ts`, `packages/engine/test/variety.test.ts`, `tools/eval/test/families-render.test.ts` (every palette and hero at 360 and 1280 px, axe included), `pnpm variety:sheet` (90 looks).
+  - Turning it on needs the paid twin eval (≈ €5).
+- [x] Step 2, regenerate explores and neighbours don't collide (`it-variety-seed`), built 2026-10-07 behind the same switch:
+  - "Ustvari znova" tells the design step the look it replaces and moves the seed;
+  - `awayFromNeighbours` covers sites of the same trade, same town first (`repo.neighbourLooks`, config `variety.neighbours`);
+  - a test: 20 sites of one trade never collide.
+- [ ] Step 2, "Druga podoba" (`it-druga-podoba`): waits for decision `sb-druga-podoba`
 - [ ] Step 3, the concept (`it-concept-brief`, `it-motif-library`): brief gains goal, angle, signature fact, materials and local anchor; homepage blueprints by goal; signature device by fact, not trade; motifs and `subtype` per sub-trade (electricians, carpenters and roofers no longer get the radiator; florists no longer get bottle labels). Spec bump + migration. ≈ €5
 - [ ] Step 4, break the shared skeleton (`it-shared-skeleton`, `it-hero-families`): header families that differ on phones, optional eyebrow (not the street address by default), phone bar by goal, footer families and tone, section width, alignment, card, button and divider styles, rhythm and hue held in code. ≈ €6
 - [ ] Step 5, design in parts (`it-design-genome`): direction split into independent axes with compatibility rules, directions and templates as presets, content against section intents so a new look needs no content call. Spec bump + migration. ≈ €10

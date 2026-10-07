@@ -1,6 +1,9 @@
 # Variety engine: every business its own site
 
-Status 2026-10-07: Step 0's free part is built: 12 twins in `tools/eval/twins/` (`--twins`), look distance (`tools/eval/src/look-distance.ts`), brand fit, motif fit, `--no-edits`; the variety report in `eval/variety-<mode>-<scope>.md`. Offline baseline over the 10 goldens: look distance across trades 0.61, replay of the 2026-10-01 recordings 0.47, no colliding pair. Within a trade there is no number yet: it needs `pnpm eval --twins --no-edits --scope home` (paid, ≈ €2–3 with the batched judge).
+Status 2026-10-07: the free parts of Steps 0–2 are built; nothing is measured on real generations yet (that needs the paid twin run below), so `variety.families` stays off.
+- Step 0 (measure): 12 twins in `tools/eval/twins/` (`--twins`), look distance (`tools/eval/src/look-distance.ts`), brand fit, motif fit, `--no-edits`. The variety report goes in `eval/variety-<mode>-<scope>.md`. Offline baseline over the 10 goldens: look distance across trades 0.61 (replay of the 2026-10-01 recordings 0.47), no colliding pair. Within a trade there is no number yet: it needs `pnpm eval --twins --no-edits --scope home` (paid, ≈ €2–3 with the batched judge).
+- Step 1 (families): `packages/spec/src/families.ts` gives 3 palettes, 3 font pairs and 3 heroes per template and outline slots. Logo colours go into the template's roles. The template is offered beside two fitting directions. A seed from the site id breaks ties. The full sheet is `pnpm variety:sheet` (eval/look/families-*.jpg).
+- Step 2 (neighbours, regenerate): `awayFromNeighbours` covers the same trade, same town first. "Ustvari znova" asks for another look and moves the seed. "Druga podoba" is not built (decision `sb-druga-podoba` is open).
 
 Status: plan, 2026-10-04. Nothing here is built. Building waits for eval budget (HQ `meta/budget` is "spend nothing"), because every step changes what the model produces and has to be measured on real generations. HQ decisions: `sb-variety-approach` (which way), `sb-druga-podoba` (how owners see alternatives). Items: `it-variety-*` and the existing `it-sameness`, `it-hero-families`, `it-catalogue-sameness`.
 
