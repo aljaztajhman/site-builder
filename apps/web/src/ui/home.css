@@ -153,14 +153,29 @@ mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:var(--ink)}
 .devbox[data-step]:not([data-step=site]) + .cap{opacity:0}
 /*
  * Before the script runs (html.js is set in <head>), the intro's first frame: the device and the caption
- * hidden, so the finished site never flashes before it is typed and built. Without JavaScript, or with
- * reduced motion (no intro), the site shows at once.
+ * hidden, so the finished site never flashes before it is typed and built. Without JavaScript the site
+ * shows at once.
  */
+html.js .devbox[data-intro]:not([data-step]) + .cap{opacity:0}
 @media (prefers-reduced-motion:no-preference){
   html.js .devbox[data-intro]:not([data-step]) .dev{opacity:0;transform:translateY(14px) scale(.97)}
-  html.js .devbox[data-intro]:not([data-step]) + .cap{opacity:0}
 }
-@media (prefers-reduced-motion:reduce){.ask,.ask-type,.ask-steps,.devbox .dev{transition:none}.ask-text .caret{animation:none}}
+/*
+ * Reduced motion: the same intro and switches, in fades only. Nothing slides, scales or resizes: the card
+ * fades out over the device and back in under it (.swap), the device fades in where it stands, the tab's
+ * underline doesn't fill (it just shows the trade), the view switch is a cut.
+ */
+@media (prefers-reduced-motion:reduce){
+  html.js .devbox[data-intro]:not([data-step]) .dev,.devbox[data-step=type] .dev{opacity:0;transform:none}
+  .devbox .dev,.devbox .dev.resize{transition:opacity .6s .15s}
+  .ask{transition:opacity .3s}
+  .ask.swap{opacity:0}
+  .devbox[data-step=site] .ask{transform:none}
+  .ask-go,.ask-go.pressed{transform:none;transition:background .15s}
+  .ask-text .caret,.ask-steps li.now::before{animation:none}
+  .tab[aria-selected=true]::after{transition:none}
+  .tabs.auto .tab[aria-selected=true]::after{animation:none}
+}
 
 /* Sized for the computer view before the script runs (the column width in container units), so nothing moves when it does. */
 .devwrap{min-width:0;container-type:inline-size}
@@ -176,7 +191,7 @@ mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:var(--ink)}
 .dev iframe.main{z-index:1}
 .dev iframe.stage{z-index:0}
 .cap{font-size:14px;color:var(--ink-3);margin:12px auto 0;max-width:56ch}
-@media (prefers-reduced-motion:reduce){.dev,.dev .chrome{transition:none}}
+@media (prefers-reduced-motion:reduce){.dev .chrome,.dev.resize .chrome{transition:none}}
 
 /* ---------- What you get: three outcomes shown with the real example, then promises and a comparison ---------- */
 .win{display:grid;gap:24px;align-items:center;margin-top:48px}
