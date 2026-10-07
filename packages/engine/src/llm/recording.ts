@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import type { AppConfig, ModelStageName } from "@sb/config";
 import { requestHash, type ModelRequest, type ModelResponse, type ModelTransport } from "./client.ts";
@@ -30,6 +30,56 @@ export class RecordingTransport implements ModelTransport {
     writeFileSync(path.join(this.dir, `${String(this.seq).padStart(3, "0")}-${req.stage}.json`), JSON.stringify(rec, null, 2));
     this.seq += 1;
     return response;
+  }
+}
+
+/**
+ * Records only what changed (`pnpm eval --record-missing`): a call whose request hash matches a recording of the
+ * same stage in `dir` is answered from it; any other call goes to `inner` (the API) and is recorded. Stages
+ * downstream of a changed prompt get different inputs, so they miss and are recorded again too. The fixture's
+ * files are rewritten in place in this run's call order (NNN-stage.json), each as soon as it is answered, so a
+ * paid answer is never lost; `finish` removes the files this run didn't write (leftovers of a longer earlier run).
+ */
+export class RecordMissingTransport implements ModelTransport {
+  private seq = 0;
+  private readonly old: Recording[];
+  private readonly used = new Set<number>();
+  private readonly written = new Set<string>();
+  /** Calls answered from a recording, and calls sent to `inner` (paid) and recorded. */
+  readonly stats = { replayed: 0, recorded: 0 };
+
+  constructor(
+    private readonly inner: ModelTransport,
+    private readonly dir: string,
+  ) {
+    this.old = existsSync(dir) ? loadRecordings(dir) : [];
+    mkdirSync(dir, { recursive: true });
+  }
+
+  async send(req: ModelRequest, stage: AppConfig["models"][ModelStageName]): Promise<ModelResponse> {
+    const hash = requestHash(req, stage.model);
+    const i = this.old.findIndex((r, n) => !this.used.has(n) && r.stage === req.stage && r.hash === hash);
+    // The number is taken before the call: parallel stages keep the order in which they asked.
+    const seq = this.seq++;
+    let rec: Recording;
+    if (i >= 0) {
+      this.used.add(i);
+      this.stats.replayed++;
+      rec = { ...this.old[i]!, seq };
+    } else {
+      const response = await this.inner.send(req, stage);
+      this.stats.recorded++;
+      rec = { seq, stage: req.stage, model: stage.model, hash, origin: "recorded", response };
+    }
+    const file = `${String(seq).padStart(3, "0")}-${req.stage}.json`;
+    writeFileSync(path.join(this.dir, file), JSON.stringify(rec, null, 2));
+    this.written.add(file);
+    return rec.response;
+  }
+
+  /** Removes the recordings this run didn't write. Call once the fixture's last call is answered. */
+  finish(): void {
+    for (const f of readdirSync(this.dir)) if (f.endsWith(".json") && !this.written.has(f)) rmSync(path.join(this.dir, f));
   }
 }
 

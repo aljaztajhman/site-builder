@@ -9,8 +9,11 @@ import { DEMO } from "./demo-timing.ts";
  * Held back while building: words as bars, photos wiped out, sections without colour, blocks not yet placed.
  * By the last step nothing of it may show: no filter left on the panels (a filter composites them apart,
  * which antialiases differently in the scaled frame), no placeholder or clip at the photos' rounded edges,
- * and once every bar has shrunk to nothing, no bars at all (`bare`: a zero-width bar, and a cloned box
- * decoration, still shift the antialiasing at line starts).
+ * and once every bar has shrunk to nothing, no bars and no wrappers at all: the words go back into their own
+ * text then (`unwrap`), while this stylesheet is still on. A zero-width bar and a cloned box decoration still
+ * shift the antialiasing at line starts, and putting the text nodes back repaints every line; done at the
+ * handover itself, that repaint landed in the first frame without the stylesheet and, on a busy machine, came
+ * out antialiased differently from the build's last frame (1 px columns at the hero's line starts).
  */
 /** How long a word's bar takes to shrink away (ms). */
 const BAR_MS = 600;
@@ -22,7 +25,6 @@ html.bld.mono [data-plate]{filter:grayscale(1) brightness(1.03)}
 html.bld sb-w{background:linear-gradient(var(--sk),var(--sk)) 0 60%/100% .55em no-repeat;-webkit-box-decoration-break:clone;box-decoration-break:clone}
 html.bld.hide-t sb-w{color:transparent !important}
 html.bld.text sb-w{background-size:0 .55em;background-position:100% 60%}
-html.bld.bare sb-w{background:none;-webkit-box-decoration-break:slice;box-decoration-break:slice}
 html.bld.empty sb-w{opacity:0}
 html.bld.empty [data-bk]{opacity:0;transform:translateY(10px) scale(.97)}
 html.bld picture{background-color:rgb(128 128 128/.22)}
@@ -31,7 +33,7 @@ html.bld.nophoto img{clip-path:inset(0 0 100% 0)}
 html.bld.text picture{background-color:transparent}
 html.bld.text img{clip-path:none}`;
 
-const CLASSES = ["bld", "still", "mono", "hide-t", "empty", "nophoto", "text", "bare"];
+const CLASSES = ["bld", "still", "mono", "hide-t", "empty", "nophoto", "text"];
 
 /** A computed `rgb(…)` colour at alpha `a`. */
 const withAlpha = (rgb: string, a: number): string => {
@@ -47,6 +49,8 @@ export interface Build {
   boxes: HTMLElement[];
   imgs: HTMLImageElement[];
   timers: ReturnType<typeof setTimeout>[];
+  /** Puts the words back into their own text (no wrappers left). Safe to call more than once. */
+  unwrap: () => void;
   /** The page as it was: the stylesheet off, the words unwrapped. Safe to call more than once. */
   finish: () => void;
 }
@@ -82,13 +86,19 @@ export function prepareBuild(doc: Document): Build {
   de.classList.remove("still");
   const timers: ReturnType<typeof setTimeout>[] = [];
   let done = false;
+  let unwrapped = false;
+  const unwrap = () => {
+    if (unwrapped) return;
+    unwrapped = true;
+    for (const w of words) w.replaceWith(...w.childNodes);
+  };
   const finish = () => {
     if (done) return;
     done = true;
     timers.forEach(clearTimeout);
+    unwrap();
     style.remove();
     de.classList.remove(...CLASSES);
-    for (const w of words) w.replaceWith(...w.childNodes);
     for (const el of [...plates, ...boxes, ...imgs]) {
       el.removeAttribute("data-plate");
       el.removeAttribute("data-bk");
@@ -96,7 +106,7 @@ export function prepareBuild(doc: Document): Build {
       if (!el.getAttribute("style")) el.removeAttribute("style");
     }
   };
-  return { win, de, words, plates, boxes, imgs, timers, finish };
+  return { win, de, words, plates, boxes, imgs, timers, unwrap, finish };
 }
 
 /** Builds the page in four steps, each one a wave from the top; `onStep(i)` as each starts. */
@@ -140,7 +150,8 @@ export async function runBuild(b: Build, onStep: (i: number) => void): Promise<v
   de.classList.remove("hide-t");
   de.classList.add("text");
   const shrunk = vw.length * per + BAR_MS;
-  b.timers.push(setTimeout(() => de.classList.add("bare"), shrunk));
+  // Every bar has shrunk away: the words go back into their text now, so the handover repaints nothing.
+  b.timers.push(setTimeout(b.unwrap, shrunk));
   await pause(Math.max(shrunk, vw.length * per + T.text.after));
   b.finish();
 }

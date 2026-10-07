@@ -1,5 +1,6 @@
 export * from "./llm/client.ts";
 export * from "./llm/recording.ts";
+export * from "./llm/batch.ts";
 export * from "./brief.ts";
 export * from "./assemble.ts";
 export * from "./repair.ts";

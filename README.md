@@ -22,6 +22,8 @@ No Docker? Set `DATABASE_URL=pglite://./.data/pg` and `STORAGE_DRIVER=fs` in `.e
 | `pnpm eval [--only <id>]` | Generates the 10 fixtures with real model calls, applies the scripted edits, writes `eval/report.md` and `eval/contact-sheet.png` (`--scope home`: `report-home.md`; with `--only`: `eval/runs/`, so the baseline stays). Costs money. |
 | `pnpm eval --offline` | Same checks on hand-authored golden specs, no model calls (`eval/offline-report.md`). |
 | `pnpm eval --record` / `--replay` | Record model exchanges for tests / replay them. |
+| `pnpm eval --record-missing` | Replay the calls whose request is unchanged and pay only for the rest (a changed stage and the ones after it), rewriting the recordings in place. Judge calls go out as one Message Batch (half price); fal pictures are cached in `tools/eval/image-cache/`. |
+| `pnpm recordings:home` | Rebuild the homepage-scope replays (`tools/eval/recordings/<id>/home/`) from the golden specs, no model calls. |
 | `pnpm fonts` | Rebuilds the subset fonts in `packages/render/assets/fonts`. |
 | `pnpm fixtures:photos` | Generates the fixtures' stand-in photos. |
 

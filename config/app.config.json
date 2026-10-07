@@ -19,6 +19,7 @@
     "claude-opus-5-5": { "input": 4.0, "output": 20.0, "cacheWrite5m": 5.0, "cacheRead": 0.2 }
   },
   "eurPerUsd": 0.86,
+  "batchPriceFactor": 0.5,
   "limits": {
     "dailyModelSpendCapEur": 10,
     "spendReservation": {

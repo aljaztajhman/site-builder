@@ -1,0 +1,18 @@
+{
+  "seq": 1,
+  "stage": "brief",
+  "model": "synthetic",
+  "hash": "synthetic",
+  "origin": "synthetic",
+  "response": {
+    "text": "{\"businessType\":\"hairdresser\",\"name\":\"Frizerstvo Lana\",\"town\":\"Celje\",\"summary\":\"Pozdravljeni! Sem Lana Vidmar in že devet let vodim Frizerstvo Lana. Salon je na naslovu Stanetova ulica 14, 3000 Celje, v pritličju, parkirišče je za stavbo. Delava dve: jaz in moja sodelavka Petra Kos, ki je specialistka za barvanje in pramene. Strižemo ženske, moške in otroke, poleg tega delamo barvanje, pramene, fen frizure in svečane pričeske za poroke in maturantske plese\",\"audience\":\"lokalni obiskovalci\",\"tone\":\"friendly\",\"offerings\":[{\"group\":null,\"name\":\"žensko striženje s fenom\",\"description\":null,\"price\":{\"amount\":28,\"from\":false,\"unit\":null}},{\"group\":null,\"name\":\"moško striženje\",\"description\":null,\"price\":{\"amount\":15,\"from\":false,\"unit\":null}},{\"group\":null,\"name\":\"otroško striženje\",\"description\":null,\"price\":{\"amount\":10,\"from\":false,\"unit\":null}},{\"group\":null,\"name\":\"barvanje\",\"description\":null,\"price\":{\"amount\":45,\"from\":true,\"unit\":null}},{\"group\":null,\"name\":\"svečana pričeska\",\"description\":null,\"price\":{\"amount\":40,\"from\":true,\"unit\":null}}],\"highlights\":[],\"facts\":{\"phone\":\"+38641555213\",\"email\":\"lana@frizerstvo-lana.example\",\"address\":{\"street\":\"Stanetova ulica 14\",\"postalCode\":\"3000\",\"city\":\"Celje\"},\"hours\":[{\"from\":\"mon\",\"to\":\"mon\",\"open\":null,\"close\":null,\"closed\":true},{\"from\":\"tue\",\"to\":\"fri\",\"open\":\"08:00\",\"close\":\"19:00\",\"closed\":false},{\"from\":\"sat\",\"to\":\"sat\",\"open\":\"07:00\",\"close\":\"13:00\",\"closed\":false},{\"from\":\"sun\",\"to\":\"sun\",\"open\":null,\"close\":null,\"closed\":true}],\"hoursNote\":null,\"bookingUrl\":null,\"social\":[],\"legalName\":null,\"registrationNumber\":null,\"taxNumber\":null,\"vatPayer\":null,\"serviceArea\":[],\"people\":[{\"name\":\"Lana Vidmar\",\"role\":\"lastnica, frizerka\"},{\"name\":\"Petra Kos\",\"role\":\"frizerka, barvanje in pramene\"}]},\"pages\":[{\"kind\":\"home\",\"slug\":\"\",\"navLabel\":\"Domov\",\"purpose\":\"Frizerski salon na Stanetovi ulici v Celju: striženje za ženske, moške in otroke, barvanje brez amoniaka, pramene in svečane pričeske.\"},{\"kind\":\"standard\",\"slug\":\"cenik\",\"navLabel\":\"Cenik\",\"purpose\":\"Cene striženja, barvanja in svečanih pričesk v salonu Frizerstvo Lana v Celju.\"}],\"missing\":[\"legal\"]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

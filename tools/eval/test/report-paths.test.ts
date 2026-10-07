@@ -13,5 +13,7 @@ describe("eval report paths", () => {
     expect(reportPaths({ mode: "live", scope: "home", only: ["pekarna-kvas"] }).report).toBe("runs/report-live-home-pekarna-kvas.md");
     expect(reportPaths({ mode: "offline", scope: "full", photos: 0 }).report).toBe("runs/report-offline-full-0photos.md");
     expect(reportPaths({ mode: "replay", scope: "full" }).report).toBe("runs/report-replay-full.md");
+    // Its times mix replayed and live calls: never a baseline.
+    expect(reportPaths({ mode: "record-missing", scope: "full" }).report).toBe("runs/report-record-missing-full.md");
   });
 });

@@ -11,6 +11,11 @@ export interface ModelRequest {
    * (max 3), so stages that start with the same block (the section catalogue) share its cache entry.
    */
   system: string[];
+  /**
+   * false: no cache breakpoints. For stages whose blocks nobody reads back within the cache's 5 minutes (brief,
+   * design, alt text run once per job), where a breakpoint only adds the 1.25× write. Not part of `requestHash`.
+   */
+  cache?: boolean;
   messages: Anthropic.MessageParam[];
   /** JSON Schema for structured output. Omit for free text. */
   schema?: Record<string, unknown>;
@@ -28,6 +33,8 @@ export interface ModelResponse {
   stopReason: string | null;
   usage: ModelUsage;
   model: string;
+  /** Answered through the Message Batches API: priced at config `batchPriceFactor`. */
+  batch?: boolean;
 }
 
 export interface CallRecord {
@@ -200,7 +207,7 @@ export class ModelClient {
       stage: req.stage,
       model: res.model,
       usage: res.usage,
-      costEur: costEur(this.opts.config, priced, res.usage),
+      costEur: costEur(this.opts.config, priced, res.usage, res.batch),
       durationMs: Date.now() - started,
       ok: res.stopReason !== "refusal" && res.stopReason !== "max_tokens",
     };
@@ -331,10 +338,49 @@ export function requestHash(req: ModelRequest, model: string): string {
 }
 
 /**
- * Real Messages API transport. Parameter names checked against the current SDK
- * (@anthropic-ai/sdk 0.129: output_config.effort, output_config.format {type:"json_schema"},
- * cache_control on system blocks). Streaming avoids HTTP timeouts on long outputs.
+ * The Messages API body for a request. Parameter names checked against the current SDK (@anthropic-ai/sdk 0.129:
+ * output_config.effort, output_config.format {type:"json_schema"}, cache_control on system blocks). Shared by the
+ * live transport and the eval's batch transport (a batch request's params are the same body).
  */
+export function messageParams(req: ModelRequest, stage: AppConfig["models"][ModelStageName]): Anthropic.MessageCreateParamsNonStreaming {
+  const outputConfig: Anthropic.OutputConfig = {};
+  // Haiku 4.5 does not accept effort; the config simply omits it for that stage.
+  if (stage.effort) outputConfig.effort = stage.effort;
+  if (req.schema) outputConfig.format = { type: "json_schema", schema: toStructuredOutputSchema(req.schema) as Record<string, unknown> };
+  // A breakpoint after every static block: content, critique and edit all start with the section
+  // catalogue, so they read one cache entry for it instead of each writing their own (API max: 4).
+  if (req.system.length > 3) throw new Error(`At most 3 system blocks (cache breakpoints), got ${req.system.length}`);
+  const cache = req.cache === false ? {} : { cache_control: { type: "ephemeral" as const } };
+  const system: Anthropic.TextBlockParam[] = req.system.map((text) => ({ type: "text", text, ...cache }));
+  return {
+    model: stage.model,
+    max_tokens: stage.maxTokens,
+    system,
+    messages: req.messages,
+    ...(Object.keys(outputConfig).length ? { output_config: outputConfig } : {}),
+  };
+}
+
+/** A Messages API answer as the pipeline reads it. */
+export function toModelResponse(msg: Anthropic.Message, stage: AppConfig["models"][ModelStageName]): ModelResponse {
+  const text = msg.content
+    .filter((b): b is Anthropic.TextBlock => b.type === "text")
+    .map((b) => b.text)
+    .join("");
+  return {
+    text,
+    stopReason: msg.stop_reason,
+    model: msg.model || stage.model,
+    usage: {
+      input_tokens: msg.usage.input_tokens,
+      output_tokens: msg.usage.output_tokens,
+      cache_creation_input_tokens: msg.usage.cache_creation_input_tokens ?? 0,
+      cache_read_input_tokens: msg.usage.cache_read_input_tokens ?? 0,
+    },
+  };
+}
+
+/** Real Messages API transport. Streaming avoids HTTP timeouts on long outputs. */
 export class AnthropicTransport implements ModelTransport {
   private readonly client: Anthropic;
 
@@ -344,36 +390,7 @@ export class AnthropicTransport implements ModelTransport {
   }
 
   async send(req: ModelRequest, stage: AppConfig["models"][ModelStageName]): Promise<ModelResponse> {
-    const outputConfig: Anthropic.OutputConfig = {};
-    // Haiku 4.5 does not accept effort; the config simply omits it for that stage.
-    if (stage.effort) outputConfig.effort = stage.effort;
-    if (req.schema) outputConfig.format = { type: "json_schema", schema: toStructuredOutputSchema(req.schema) as Record<string, unknown> };
-    // A breakpoint after every static block: content, critique and edit all start with the section
-    // catalogue, so they read one cache entry for it instead of each writing their own (API max: 4).
-    if (req.system.length > 3) throw new Error(`At most 3 system blocks (cache breakpoints), got ${req.system.length}`);
-    const system: Anthropic.TextBlockParam[] = req.system.map((text) => ({ type: "text", text, cache_control: { type: "ephemeral" as const } }));
-    const stream = this.client.messages.stream({
-      model: stage.model,
-      max_tokens: stage.maxTokens,
-      system,
-      messages: req.messages,
-      ...(Object.keys(outputConfig).length ? { output_config: outputConfig } : {}),
-    });
-    const msg = await stream.finalMessage();
-    const text = msg.content
-      .filter((b): b is Anthropic.TextBlock => b.type === "text")
-      .map((b) => b.text)
-      .join("");
-    return {
-      text,
-      stopReason: msg.stop_reason,
-      model: msg.model || stage.model,
-      usage: {
-        input_tokens: msg.usage.input_tokens,
-        output_tokens: msg.usage.output_tokens,
-        cache_creation_input_tokens: msg.usage.cache_creation_input_tokens ?? 0,
-        cache_read_input_tokens: msg.usage.cache_read_input_tokens ?? 0,
-      },
-    };
+    const stream = this.client.messages.stream(messageParams(req, stage));
+    return toModelResponse(await stream.finalMessage(), stage);
   }
 }

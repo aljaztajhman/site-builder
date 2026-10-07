@@ -1,6 +1,31 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import sharp from "sharp";
 import { loadConfig } from "@sb/config";
-import { ModelClient, ModelOutputError, ReplayTransport, SpendCapError, estimateCallEur, extractJson, requestHash, type CallRecord, type ModelRequest, type ModelResponse, type ModelTransport, type SpendLedger } from "../src/index.ts";
+import { migrateSpec } from "@sb/spec";
+import {
+  ModelClient,
+  ModelOutputError,
+  ReplayTransport,
+  SpendCapError,
+  altTexts,
+  chooseDesign,
+  critique,
+  critiqueView,
+  editSpec,
+  estimateCallEur,
+  extractJson,
+  makeBrief,
+  messageParams,
+  requestHash,
+  type CallRecord,
+  type ModelRequest,
+  type ModelResponse,
+  type ModelTransport,
+  type SpendLedger,
+} from "../src/index.ts";
 
 const config = loadConfig();
 
@@ -168,5 +193,68 @@ describe("extractJson", () => {
 
   it("returns the raw text from the first bracket when nothing parses, so the error says why", () => {
     expect(extractJson('Sure: {"a": 1,')).toBe('{"a": 1,');
+  });
+});
+
+describe("request shape", () => {
+  const here = path.dirname(fileURLToPath(import.meta.url));
+  const spec = migrateSpec(JSON.parse(readFileSync(path.join(here, "../../../tools/eval/golden/gostilna-zlata-zlica.json"), "utf8")));
+  const STOP = new Error("captured");
+  /** Runs one stage against a transport that keeps its request and answers nothing. */
+  async function captured(run: (client: ModelClient) => Promise<unknown>): Promise<ModelRequest> {
+    const seen: ModelRequest[] = [];
+    const transport: ModelTransport = {
+      async send(r) {
+        seen.push(r);
+        throw STOP;
+      },
+    };
+    await expect(run(new ModelClient({ config, transport, spentToday: async () => 0, onCall: async () => undefined }))).rejects.toBe(STOP);
+    return seen[0]!;
+  }
+  const breakpoints = (r: ModelRequest) => (messageParams(r, config.models[r.stage]).system as { cache_control?: unknown }[]).filter((b) => b.cache_control).length;
+  const png = async () => new Uint8Array(await sharp({ create: { width: 360, height: 900, channels: 3, background: "#ffffff" } }).png().toBuffer());
+  const critiqueRequest = () => captured(async (c) => critique(c, { spec, mobilePng: await png(), desktopPng: await png(), failures: [], corpus: "" }));
+
+  it("brief, design and alt text send no cache breakpoints (no job reads them back); the hash ignores it", async () => {
+    const brief = await captured((c) => makeBrief(c, { description: "Gostilna", businessType: "restaurant", photoCount: 0, generatedSlots: 0, hasLogo: false, scope: "home" }));
+    const design = await captured((c) => chooseDesign(c, { brief: { name: "Gostilna", businessType: "restaurant", tone: "warm", summary: "" } as never, swatches: [], photoCount: 0, generatedCount: 0 }));
+    const alt = await captured((c) => altTexts(c, [{ jpegBase64: "AAAA" }]));
+    for (const r of [brief, design, alt]) {
+      expect(r.cache, r.stage).toBe(false);
+      expect(breakpoints(r), r.stage).toBe(0);
+      expect((messageParams(r, config.models[r.stage]).system as unknown[]).length, r.stage).toBe(r.system.length);
+    }
+    expect(design.system).toHaveLength(2);
+    expect(requestHash(brief, "m")).toBe(requestHash({ ...brief, cache: true }, "m"));
+  });
+
+  it("critique and edit keep a breakpoint after every system block (they share the cached section catalogue)", async () => {
+    const edit = await captured((c) => editSpec(c, { spec, message: "Temnejša glava.", corpus: "" }));
+    const crit = await critiqueRequest();
+    for (const r of [edit, crit]) {
+      expect(r.cache, r.stage).toBeUndefined();
+      expect(breakpoints(r), r.stage).toBe(2);
+    }
+    expect(crit.system[0]).toBe(edit.system[0]);
+  });
+
+  it("the critique reads only the homepage, the chrome and the business; every page keeps its index", async () => {
+    const crit = await critiqueRequest();
+    const text = (crit.messages[0]!.content as { type: string; text?: string }[])
+      .filter((b) => b.type === "text")
+      .map((b) => b.text)
+      .join("\n");
+    const view = critiqueView(spec);
+    expect(text).toContain(JSON.stringify(view));
+    expect(view.pages.map((p) => p.id)).toEqual(spec.pages.map((p) => p.id));
+    expect(spec.pages[0]!.kind).toBe("home");
+    expect(view.pages[0]).toEqual(spec.pages[0]);
+    // Other pages' sections, the design and the assets stay out.
+    expect(view.pages.slice(1).every((p) => !("sections" in p))).toBe(true);
+    expect(text).not.toContain(JSON.stringify(spec.pages[1]!.sections[0]));
+    expect(text).not.toContain(spec.assets.images[0]!.alt);
+    expect(text).not.toContain(`"direction":"${spec.design.direction}"`);
+    expect(JSON.stringify(view).length).toBeLessThan(JSON.stringify(spec).length * 0.6);
   });
 });

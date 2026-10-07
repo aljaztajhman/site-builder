@@ -32,7 +32,13 @@ export function renderReport(results: FixtureResult[], config: AppConfig, meta: 
   const lh = config.checks.lighthouse;
   const lines: string[] = [];
   lines.push(`# Eval report`, "");
-  lines.push(`Mode: **${meta.mode}**, scope: **${meta.scope}**, started ${meta.startedAt.toISOString()}, wall time ${sec(meta.wallMs)}, total model spend ${eur(meta.totalEur)}.`, "");
+  lines.push(`Mode: **${meta.mode}**, scope: **${meta.scope}**, started ${meta.startedAt.toISOString()}, wall time ${sec(meta.wallMs)}, paid this run ${eur(meta.totalEur)} (replayed answers and cached pictures are free; the € columns below price every call like production).`, "");
+  const sum = (f: (r: FixtureResult) => number) => results.reduce((a, r) => a + f(r), 0);
+  const reused = [
+    results.some((r) => r.calls) ? `${sum((r) => r.calls?.replayed ?? 0)} model calls replayed from the recordings, ${sum((r) => r.calls?.recorded ?? 0)} paid and recorded` : "",
+    results.some((r) => r.pictures) ? `${sum((r) => r.pictures?.cached ?? 0)} generated pictures from the cache, ${sum((r) => r.pictures?.made ?? 0)} made` : "",
+  ].filter(Boolean);
+  if (reused.length) lines.push(`${reused.join("; ")}.`, "");
   if (meta.mode === "offline") lines.push("Offline mode renders hand-authored golden specs with no model calls: it measures the components, directions and checks, not generation quality, cost or time.", "");
 
   const checkpoints = results.flatMap((r) => r.checkpoints);

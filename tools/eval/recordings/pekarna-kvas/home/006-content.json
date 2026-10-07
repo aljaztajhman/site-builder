@@ -1,0 +1,18 @@
+{
+  "seq": 6,
+  "stage": "content",
+  "model": "synthetic",
+  "hash": "synthetic",
+  "origin": "synthetic",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"split-cta\",\"cta\":\"call\"},\"footer\":{\"variant\":\"columns\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Pekarna Kvas, Kamnik – kruh z drožmi\",\"description\":\"Družinska pekarna na Šutni v Kamniku: pirin in rženi kruh z drožmi, rogljički, cimetovi polži, ob petkih in sobotah potica in krofi.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-split\",\"variant\":\"image-left\",\"props\":{\"eyebrow\":\"Šutna 30, Kamnik\",\"headline\":\"Kruh z drožmi, ki vzhaja čez noč\",\"intro\":\"Družinska pekarna na začetku stare ulice. Vse je ročno delo, brez aditivov in brez zamrznjenega testa.\",\"primary\":{\"label\":\"Pokliči za naročilo\",\"target\":{\"action\":\"call\"}},\"secondary\":{\"label\":\"Kaj pečemo\",\"target\":{\"page\":\"p_home\",\"section\":\"s_products\"}},\"image\":\"img_01\"}},{\"id\":\"s_strip\",\"type\":\"contact-strip\",\"variant\":\"bar\",\"props\":{}},{\"id\":\"s_products\",\"type\":\"products\",\"variant\":\"grid\",\"tone\":\"alt\",\"props\":{\"title\":\"Vsak dan v pekarni\",\"intro\":\"Ob petkih in sobotah pečemo še orehovo potico in kvašene krofe.\",\"items\":[{\"name\":\"Pirin kruh z drožmi\",\"price\":{\"amount\":4.2},\"image\":\"img_01\"},{\"name\":\"Rženi kruh\",\"price\":{\"amount\":3.9}},{\"name\":\"Rogljiček z maslom\",\"price\":{\"amount\":1.3},\"image\":\"img_03\"},{\"name\":\"Orehova potica\",\"unit\":\"1 kg\",\"price\":{\"amount\":18,\"from\":true}},{\"name\":\"Polnozrnate žemlje\",\"price\":{\"$placeholder\":\"price\"}},{\"name\":\"Cimetovi polži\",\"price\":{\"$placeholder\":\"price\"}}]}},{\"id\":\"s_about\",\"type\":\"about\",\"variant\":\"image-side\",\"props\":{\"heading\":\"Drožmi, ki jih gojimo sami\",\"paragraphs\":[\"Kruh pečemo samo z drožmi in ga pustimo vzhajati čez noč, zato je bolj okusen in dlje ostane svež.\",\"Moko kupujemo pri mlinu v bližini. Pečem jaz, v trgovini pa je večinoma moja žena Katja.\"],\"image\":\"img_02\",\"ownerName\":\"Jure Petek\",\"ownerRole\":\"pek\"}},{\"id\":\"s_order\",\"type\":\"steps\",\"variant\":\"horizontal\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Potica za praznike\",\"intro\":\"Potico lahko naročite za praznike in praznovanja.\",\"steps\":[{\"title\":\"Pokličite ali pišite\",\"text\":\"Naročilo sprejmemo po telefonu ali e-pošti.\"},{\"title\":\"Najmanj dva dni prej\",\"text\":\"Toliko časa potrebuje testo, da vzhaja in se speče.\"},{\"title\":\"Prevzem v pekarni\",\"text\":\"Potico prevzamete na Šutni v času odprtja.\"}],\"action\":{\"label\":\"Pokliči\",\"target\":{\"action\":\"call\"}}}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"compact\",\"props\":{\"title\":\"Kdaj smo odprti\"}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"split-map\",\"tone\":\"alt\",\"props\":{\"title\":\"Kje nas najdete\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}
