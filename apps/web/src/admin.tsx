@@ -1,6 +1,6 @@
 import type { Context, Hono } from "hono";
 import { PLAN_KEYS, type AppConfig, type PlanKey } from "@sb/config";
-import { POOLS, isDisposableEmailDomain, normaliseEmail, recordEvent, type AccountListRow, type AllowListRow, type Pool, type Repo } from "@sb/platform";
+import { POOLS, isDisposableEmailDomain, normaliseEmail, recordEvent, runningVersion, type AccountListRow, type AllowListRow, type Pool, type Repo, type RunningVersion } from "@sb/platform";
 import { csrfOk, hashToken, newToken, type AppEnv } from "./access.ts";
 import { Doc, TopBar, html } from "./pages.tsx";
 import { AnalyticsLinks } from "./analytics-admin.tsx";
@@ -16,6 +16,8 @@ export interface AdminDeps {
   repo: Repo;
   config: AppConfig;
   appUrl?: string;
+  /** The running version (tag and short SHA), shown at the top; from env when not given. */
+  version?: RunningVersion;
 }
 
 export function registerAdminRoutes(app: Hono<AppEnv>, deps: AdminDeps): void {
@@ -40,6 +42,7 @@ export function registerAdminRoutes(app: Hono<AppEnv>, deps: AdminDeps): void {
         allowances: { standard: config.plans.standard.ai.allowanceEurPerMonth, premium: config.plans.premium.ai.allowanceEurPerMonth },
         freeLifetimeEur: config.tiers.free.lifetimeEur,
         founding: config.plans.standard.foundingOffer ? { ...config.plans.standard.foundingOffer, taken: await repo.accounts.foundingTaken() } : null,
+        version: deps.version ?? runningVersion(),
         ...(flash ? { flash } : {}),
       }),
       status,
@@ -151,10 +154,12 @@ interface AdminProps {
   freeLifetimeEur: number;
   /** The founding offer (Osnovni's first year) and how many of its places are taken; null without an offer. */
   founding?: { customers: number; firstYearEur: number; taken: number } | null;
+  /** The running version; absent (tests of the page alone): not shown. */
+  version?: RunningVersion;
   flash?: { text: string; bad?: boolean };
 }
 
-export function adminPage({ csrf, allowList, accounts, spendToday, cap, pools, holds, warnAt, plans, planPrices, allowances, freeLifetimeEur, founding = null, flash }: AdminProps): string {
+export function adminPage({ csrf, allowList, accounts, spendToday, cap, pools, holds, warnAt, plans, planPrices, allowances, freeLifetimeEur, founding = null, version, flash }: AdminProps): string {
   // Accounts per plan and what they bring and cost this month (planned prices while billing is off).
   const byPlan = (p: PlanKey | null) => accounts.filter((a) => a.plan === p);
   const monthlyRevenue = PLAN_KEYS.reduce((sum, k) => sum + byPlan(k).length * planPrices[k], 0);
@@ -169,6 +174,11 @@ export function adminPage({ csrf, allowList, accounts, spendToday, cap, pools, h
       </TopBar>
       <main className="messages">
         <h1>Skrbnik</h1>
+        {version && (
+          <p className="muted num" id="version">
+            {`Različica ${version.tag ?? "brez oznake"} · ${version.sha ?? "neznana"}`}
+          </p>
+        )}
         <AnalyticsLinks />
         {flash && (
           <p className={flash.bad ? "note bad" : "note"} role={flash.bad ? "alert" : "status"}>

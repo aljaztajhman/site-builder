@@ -1,6 +1,6 @@
 import { serve } from "@hono/node-server";
 import { loadConfig } from "@sb/config";
-import { mailerFromEnv, platformFromEnv } from "@sb/platform";
+import { mailerFromEnv, platformFromEnv, runningVersion, versionLabel } from "@sb/platform";
 import { drainMs, intakeClassifier, startWorker } from "@sb/worker/worker";
 import { createApp } from "./app.ts";
 import { retryFormNotifications } from "./form-email.ts";
@@ -33,7 +33,7 @@ if (notReady) console.warn(notReady);
 // The intake's junk check asks the classifier before a generation is queued (fails open: the pipeline asks again).
 const app = createApp({ platform, config, auth, mailer, classifyIntake: intakeClassifier(platform, config), ...(appUrl ? { appUrl } : {}), platformDomain: process.env.PLATFORM_DOMAIN || null, siteProxySecret: process.env.SITE_PROXY_SECRET || null });
 const port = Number(process.env.PORT || 3000);
-serve({ fetch: app.fetch, port, hostname: "0.0.0.0" }, (info) => console.log(`[web] http://localhost:${info.port}`));
+serve({ fetch: app.fetch, port, hostname: "0.0.0.0" }, (info) => console.log(`[web] http://localhost:${info.port} (version ${versionLabel(runningVersion())})`));
 
 // Contact-form emails that failed or timed out are retried here (the web service holds the mail settings).
 const formRetry = setInterval(

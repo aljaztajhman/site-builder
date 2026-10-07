@@ -3,7 +3,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { loadConfig } from "@sb/config";
-import { Repo, createDb, createFsStorage, migrate, type Platform, type Queue } from "@sb/platform";
+import { Repo, createDb, createFsStorage, migrate, runningVersion, type Platform, type Queue } from "@sb/platform";
 import { EXPORT_CHECKLIST_MESSAGE, createApp } from "../src/app.ts";
 import { SESSION_COOKIE, loginThrottle } from "../src/auth.ts";
 import { homePage } from "../src/home.tsx";
@@ -278,7 +278,16 @@ describe("health", () => {
   it("reports database, storage and queue", async () => {
     const res = await app.request("/health");
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ status: "ok", checks: { database: "ok", storage: "ok", queue: "ok" } });
+    expect(await res.json()).toEqual({ status: "ok", checks: { database: "ok", storage: "ok", queue: "ok" }, version: runningVersion() });
+  });
+
+  it("shows the running version (tag and short SHA) on /health and on /admin", async () => {
+    const version = { sha: "abc1234", tag: "v1.2.3" };
+    const other = createApp({ platform, config: loadConfig(), auth: { password: PASSWORD, secret: "s".repeat(32), secureCookies: false }, version });
+    expect((await (await other.request("/health")).json()).version).toEqual(version);
+    const admin = await adminBrowser(other.request.bind(other), PASSWORD);
+    const page = await (await other.request("/admin", { headers: { cookie: admin.cookie } })).text();
+    expect(page).toContain("Različica v1.2.3 · abc1234");
   });
 
   it("echoes the caller's own IP as the limits see it (the proxy's rightmost entry) only when asked", async () => {

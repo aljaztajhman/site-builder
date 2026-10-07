@@ -64,7 +64,12 @@
     "events": false,
     "keepDays": 90,
     "landingDedupeMinutes": 30,
-    "onceMinutes": 1440
+    "onceMinutes": 1440,
+    "cloudflare": {
+      "$comment": "Cloudflare Web Analytics (docs/plans/analytics.md Step 2; sb-analytics = own-plus-cf; the owner created the site and sent the token). Cookieless beacon, only on /, /login and /zasebnost and only when the request's hostname is one of hosts, so local runs, tests and the railway.app address get none; never on the dashboard, editor, admin, previews or published sites. The token is public (it is in the page). token null turns it off everywhere.",
+      "token": "3fad897f56c14335aaccffae0a58ad9b",
+      "hosts": ["stranko.einvoicecheck.eu"]
+    }
   },
   "stats": {
     "$comment": "Cookieless counts per published site (it-site-stats-report): page views (counted when a published page is served), taps on call and directions links (a beacon from stats.js, only from the live /s/ address, never the preview or an export) and contact-form messages. Only daily totals per site are stored. The visitor's IP is used in memory as a keyed hash to skip the same visitor reloading a page within visitDedupeMinutes and to cap tapsPerVisitorPerDay; it is never stored. The monthly report email goes to the site's owner account from the web process, from reportFromHour on day 1 (in timeZone) for the previous month, at most once per site and month (Resend idempotency key), retried every retryEveryMinutes up to maxAttempts within the first reportWithinDays days.",
@@ -132,6 +137,14 @@
   "versions": {
     "$comment": "Spec version retention (owner's decision sb-autosave-versions = prune, 2026-10-01). Every editor autosave stores a full version. A nightly job (cron, read in timeZone) keeps every version from today and the keepAllDays whole days before it, then only the last version of each older day, plus every version that was ever published and the current one. Versions never change; files only pruned versions used are removed with them.",
     "retention": { "keepAllDays": 7, "timeZone": "Europe/Ljubljana", "cron": "30 3 * * *" }
+  },
+  "backups": {
+    "$comment": "Nightly pg_dump of the database to the bucket (docs/dev/workflow.md §4, owner's decision sb-dev-workflow): pnpm db:backup writes backups/<UTC date>.sql.gz, deletes those older than keepDays, then checks the newest one; pnpm db:backup --check only checks. The schema alone dumps to about 8.5 KB compressed (measured 2026-10-07), so minBytes catches an empty or failed dump; minShareOfPrevious catches one cut short.",
+    "prefix": "backups/",
+    "keepDays": 30,
+    "maxAgeHours": 26,
+    "minBytes": 4096,
+    "minShareOfPrevious": 0.5
   },
   "imageGen": {
     "$comment": "Images from fal.ai: eval fixture photos (pnpm fixtures:ai-photos) and, for client sites with fewer than pipeline.fillUpTo photos, up to that many generated mood images, labelled on the site (owner's decisions 2026-09-30 and 2026-10-01). A homepage preview uses 2 (hero + one image-text; keeps it under the €0.30 preview target), a full site 3. Needs FAL_KEY; without it the pipeline skips generation. Prices from fal's pricing API on 2026-09-30; gpt-image-2.5 is token-billed, so its per-megapixel price is fal's 1024x1024 high-quality estimate ($0.05268) scaled by area.",
