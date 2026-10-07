@@ -3,6 +3,7 @@
  * first trade's description is typed and its page builds itself in the device; then the demo moves on
  * through the trades by itself, each site turning into the next piece by piece. Tabs pick a trade, the
  * view switch shows the phone or the computer, the pause button stops the moving on (WCAG 2.2.2).
+ * With reduced motion it all still plays, in fades: nothing slides, scales or scrolls (owner, PR #51).
  * Without JavaScript the tabs are links (/?primer=<id>) and the device shows that trade's site.
  */
 import { prepareBuild, runBuild, type Build } from "./demo-build.ts";
@@ -110,7 +111,7 @@ export function startDemo(): void {
     stopClock();
     try {
       await mainReady;
-      await transformSite(main, stage, t.page, { cut: reduced.matches, onTransition: (vt) => (running = vt) });
+      await transformSite(main, stage, t.page, { calm: reduced.matches, onTransition: (vt) => (running = vt) });
     } finally {
       busy = false;
     }
@@ -213,6 +214,7 @@ export function startDemo(): void {
     introDone = true;
     introTimers.forEach(clearTimeout);
     build?.finish();
+    intro?.classList.remove("swap");
     if (typedEl) typedEl.textContent = prompt;
     if (restEl) restEl.textContent = "";
     showSteps(askSteps.length);
@@ -238,8 +240,9 @@ export function startDemo(): void {
       });
     const typed = Math.round(prompt.length / chars) * everyMs;
     // Meanwhile the page waits in the hidden device, taken apart.
+    const calm = reduced.matches;
     void mainReady.then(() => {
-      if (!introDone && !build && main.contentDocument) build = prepareBuild(main.contentDocument);
+      if (!introDone && !build && main.contentDocument) build = prepareBuild(main.contentDocument, { calm });
     });
     at(typed + pressAt, () => goEl.classList.add("pressed"));
     at(typed + buildAt, () => {
@@ -247,9 +250,16 @@ export function startDemo(): void {
       void (async () => {
         await within(mainReady, 3000);
         if (introDone || !main.contentDocument) return;
-        build ??= prepareBuild(main.contentDocument);
+        build ??= prepareBuild(main.contentDocument, { calm });
+        // Reduced motion: the card doesn't travel under the device; it fades out there and back in here.
+        if (calm) {
+          intro?.classList.add("swap");
+          await sleep(DEMO.calm.card);
+          if (introDone) return;
+        }
         devbox.dataset.step = "build";
         placeCard();
+        intro?.classList.remove("swap");
         mark(first);
         current = first;
         await sleep(DEMO.buildStart);
@@ -264,13 +274,14 @@ export function startDemo(): void {
     });
   };
 
-  if (intro && !reduced.matches && restEl) {
+  // The intro plays for everyone; with reduced motion it fades instead of moving (home.css, demo-build.ts).
+  if (intro && restEl) {
     // Placed (and its caption filled) before anything shows, so nothing moves when the intro starts.
     devbox.dataset.step = "type";
     restEl.textContent = prompt;
     placeCard();
   } else {
-    // Reduced motion, or a trade chosen in the address (/?primer=): the site at once, no intro.
+    // A trade chosen in the address (/?primer=): the site at once, no intro.
     introDone = true;
     devbox.dataset.step = "site";
     const chosen = byId(tabs.find((b) => b.getAttribute("aria-selected") === "true")?.dataset.id) ?? first;

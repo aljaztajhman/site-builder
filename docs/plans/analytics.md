@@ -1,6 +1,15 @@
 # Analytics plan (proposal)
 
-Status: proposal, 2026-10-04. Owner decision: HQ `sb-analytics`. Nothing here is built.
+Status: owner decided `sb-analytics` = own-plus-cf. **Steps 1 and 3 built** (2026-10-07, branch `claude/analytics-1`) behind config `analytics.events`, **off** until the owner turns it on (it adds a sentence to `/zasebnost`); `/admin/funnel` and `/admin/engine` are always there. Step 2 waits for the owner's Cloudflare site; Step 4 is later.
+
+What was built differs from the text below in these places:
+- Funnel order: `plan_changed` (paid) sits before full sites and publishing, because until billing exists the allow-list is what makes them possible. Steps are linked by device key (landing → intake, preview opened → sign-in), site (intake → preview ready → opened) or account (sign-in → claimed → paid → full site → published).
+- The admin's own clicks write no funnel events (their generations still write `generation`). `device_key` is an HMAC of the device cookie with its own prefix, not the cookie id.
+- `landing_view` is deduped per device in the database (`analytics.landingDedupeMinutes`); `preview_opened` (the editor frame loading the homepage) and `upsell_shown` once per device and site in `analytics.onceMinutes`. `upsell_shown` = a free preview's locked pages, or a plan limit naming the plan with more; `upsell_clicked` = the editor's "Paketi in cene" link (`/?ref=upsell`).
+- `exported`, `edit_direct` and `edit_chat` are written per action. `domain_connected` is written when the provisioning job takes a domain live.
+- The roll-up runs in the worker's hourly housekeeping (idempotent: one cutoff, one transaction), not nightly.
+- Step 3: the production pipeline has no critique score (the judge is eval-only), so the event carries the critique's rounds and issue counts per round. Failed checks are stored by name (`axe:<rule>`, `scroll-360`, `facts`, `lighthouse-performance` …), never the failure line (it can quote the site's facts). `retries` = content-stage calls beyond the first. Template = the chosen direction plus the homepage's first section (`hero`). The same-trade similarity score is not in yet.
+- No UTM `source` yet (Step 2).
 
 Two different things get called "analytics" here, and they need different answers:
 

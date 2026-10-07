@@ -119,7 +119,7 @@ Watch the prototype before writing code: the intro, two or three automatic switc
   4. It telescopes out where the new part is bigger.
   5. All parts lock together at the end with a small overshoot and a brightness glint.
   - Never stretch a snapshot: old/new images are `inline-size: auto` and the image pair clips. Text stays sharp.
-- **Backdrop:** the page under the parts goes dark (`#191714` with a faint dot grid) at unlock and comes back at lock.
+- **Backdrop:** the page under the parts goes dark (`--screen` in home.css, `#0f1a1c` since sb-ui-palette, with a faint dot grid) at unlock and comes back at lock.
 - **Stacking** while apart follows each page's own paint order: Gostilna's full-width photo stays under its text card.
 - **Solid panels:** while transforming, a panel with no background gets the colour behind it.
 - **Headline:** the new h1's letters shuffle into the new words, left to right, during its turn and extend.
@@ -132,8 +132,8 @@ Watch the prototype before writing code: the intro, two or three automatic switc
 - **Interruptions:** a second switch during one skips the running transition and queues the latest request. If the document is hidden, the browser aborts the transition; the swap still happens and the clock is stopped.
 
 ### Reduced motion, no JavaScript, failures
-- **`prefers-reduced-motion: reduce`:** no typing and no build animation (the first trade's site shows at once); a switch is a cut, with no view transition; autoplay continues, with pause.
-- **No view transitions** (old browsers): the switch is a cut.
+- **`prefers-reduced-motion: reduce`:** the demo plays for everyone (owner, PR #51; restored after #112 had dropped it), in fades only: the description is typed, the card fades out over the device and back in under it (no travel), the page builds itself in the same four steps with blocks, photos and word bars fading (no rise, wipe or shrink), and the trades follow each other by a cross-fade (`fadeSite`: the next site is laid out in the stage frame, the main frame fades out over it). No slides, scaling, scrolling or parallax; the tab underline doesn't fill; the view switch is a cut. Autoplay continues, with pause. `?primer=<id>` still shows that trade at once.
+- **No view transitions** (old browsers): the switch is the same cross-fade.
 - **No JavaScript:** the first trade's site (or the one in `?primer=`) shows in the device, the tabs are links, the caption is visible, there is no intro.
 - **No flash of the finished site before the intro starts.** The script runs after first paint, so the starting state must not depend on it alone. One way: a tiny same-origin script in `<head>` that sets `html.js` synchronously (CSP `script-src 'self'` allows it), with the intro's starting state under `html.js`.
 
@@ -153,7 +153,7 @@ Watch the prototype before writing code: the intro, two or three automatic switc
    - **Build:** a screenshot of the frame just before finish equals one just after finish.
    - **Switching:** the demo advances by itself after the dwell (Playwright's clock where it can drive timers; otherwise real time). A tab click and the arrow keys switch, and the frame title follows. Pause stops the clock. The view switch resizes the device.
    - **Gostilna** on the phone view: the label card stays above the photo while transforming.
-   - **Reduced motion:** no intro, the switch is a cut.
+   - **Reduced motion:** the intro types and builds, the trades cross-fade, pause works; sampled as the clock advances, no animation or transition on the landing or in the frame changes a place or a size; `?primer=` shows the trade at once.
    - **No JS:** tabs are links, `?primer=<id>` shows that trade.
    - **Across the board:** every example page and font is served, no sideways scroll, no console errors.
 3. **Contact sheets** (pause all animations in the frame right after the switch starts, then step `currentTime`, as the prototype was checked): the intro on the computer view, and Frizer → Avtoservis and Frizer → Gostilna on both views. Look at them and attach them to the PR.

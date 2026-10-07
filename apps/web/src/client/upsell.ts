@@ -32,6 +32,8 @@ export interface Limits {
   localesNote: Note;
   /** Per collection the plan doesn't include. */
   collectionNotes: Partial<Record<string, Note>>;
+  /** Per collection the plan doesn't include, on the entries of one the site already has: they are read-only. */
+  readOnlyNotes: Partial<Record<string, Note>>;
 }
 
 const SVG = "http://www.w3.org/2000/svg";
