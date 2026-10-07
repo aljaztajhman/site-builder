@@ -373,7 +373,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   app.post("/api/intake/ticket", async (c) => {
     const res = await intakeTicket(c);
     // A refusal is the intake's: its reason code (a limit's own code is also a limit_hit, limits.ts).
-    if (res.status !== 200) {
+    if (res.status !== 200 && config.analytics.events) {
       const code = ((await res.clone().json().catch(() => ({}))) as { code?: unknown }).code;
       await track(c, { kind: "intake_refused", props: { reason: typeof code === "string" ? code : "unknown" } });
     }
