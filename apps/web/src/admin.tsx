@@ -3,6 +3,7 @@ import { PLAN_KEYS, type AppConfig, type PlanKey } from "@sb/config";
 import { POOLS, isDisposableEmailDomain, normaliseEmail, type AccountListRow, type AllowListRow, type Pool, type Repo } from "@sb/platform";
 import { csrfOk, hashToken, newToken, type AppEnv } from "./access.ts";
 import { Doc, TopBar, html } from "./pages.tsx";
+import { costDays, costsPage } from "./admin-costs.tsx";
 import { formatDate, formatDateTime, formatEur } from "./ui/labels.ts";
 
 /**
@@ -45,6 +46,13 @@ export function registerAdminRoutes(app: Hono<AppEnv>, deps: AdminDeps): void {
   };
 
   app.get("/admin", (c) => show(c));
+
+  // Cost history (it-cost-history): read-only, over the last ?days= UTC days.
+  app.get("/admin/costs", async (c) => {
+    const report = await repo.costs.report({ days: costDays(c.req.query("days")) });
+    const { anonymous, free, paid } = config.tiers.pools;
+    return c.html(costsPage({ csrf: c.get("csrf"), report, spendToday: await repo.spendToday(), cap: config.limits.dailyModelSpendCapEur, poolShares: { anonymous, free, paid } }));
+  });
 
   // Pause a pool for some hours (a hold the size of the pool), or end the holds. The deployed smoke test
   // uses this to empty the free pools and check that paid jobs still run.
@@ -154,6 +162,10 @@ export function adminPage({ csrf, allowList, accounts, spendToday, cap, pools, h
         )}
         <h2>Poraba danes</h2>
         <p className="muted">{`Vsak bazen je delež dnevne omejitve (${formatEur(cap)}). »Zadržano« je ocena za opravila, ki še tečejo. Ko porabljeno doseže ${Math.round(warnAt * 100)} % bazena, delavec to zapiše v dnevnik.`}</p>
+        <p>
+          <a href="/admin/costs">Poraba skozi čas</a>
+          <span className="muted"> · po dnevih, opravilih, fazah, računih in straneh</span>
+        </p>
         {pools.map((p) => {
           const hold = holds.find((h) => h.pool === p.pool);
           return (
