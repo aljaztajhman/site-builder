@@ -189,6 +189,20 @@ legend{padding:0 4px;font-weight:600;font-size:13px;color:var(--ink-2)}
 .analytics .message ol{margin:0;padding-left:22px}
 .analytics .message ol li{padding:4px 0}
 
+/* ---------- Admin cost history (/admin/costs): wide tables scroll in their own box, never the page ---------- */
+.costs{max-width:1120px}
+.costs h2{margin:32px 0 6px}
+.costs h2+.muted{margin:0 0 12px;font-size:14px}
+.costs .windows{margin:0 0 20px}
+.table-scroll{overflow-x:auto;margin:0 0 12px;padding:4px 12px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-3)}
+.table-scroll:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.table-scroll caption{padding:8px 0 4px;text-align:left;font-weight:600;font-size:14px;color:var(--ink-2)}
+.table-scroll th,.table-scroll td{white-space:nowrap}
+.table-scroll thead th .muted{display:block;font-weight:400}
+.table-scroll tbody th{font-weight:600;color:var(--ink)}
+.table-scroll tbody th .muted{font-weight:400;font-size:13px}
+.table-scroll td.bad{color:var(--danger);font-weight:600}
+
 /* ---------- Editor ---------- */
 .shell{display:flex;flex-direction:column;height:100dvh}
 .top .site-name{min-width:0;max-width:36ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:18px;letter-spacing:-.015em}
@@ -506,6 +520,7 @@ details.more>summary{padding:12px 0;font-weight:600;cursor:pointer}
 .locked .lock{flex:none;color:var(--ink-3)}
 .locked-pages .price-line{color:var(--ink);font-weight:600}
 .limit-note{margin:4px 0 12px}
+.readonly-entries .entries{list-style:none;margin:0;padding:0}.readonly-entries .entry{display:flex;flex-direction:column;gap:2px;padding:10px 0;border-top:1px solid var(--line);overflow-wrap:anywhere}.readonly-entries .entry p{margin:2px 0 0}
 /* A collection's entries in the other language: the translation, the original under it. */
 .translations fieldset.translation{margin:0 0 14px}
 .translation-field .original{margin:4px 0 0;font-size:14px;overflow-wrap:anywhere}
