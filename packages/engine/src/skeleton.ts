@@ -15,6 +15,7 @@
 import {
   FAMILIES,
   NEW_HEADER_FAMILIES,
+  SECTION_DEFS,
   SIGNATURE_PHOTO_VARIANTS,
   canCentre,
   canOverlay,
@@ -196,6 +197,8 @@ export function pickCentred(pages: readonly Page[], o: { seed: number; dir: Dire
   const ids: string[] = [];
   for (const p of pages) {
     if (p.kind !== "home" && p.kind !== "standard") continue;
+    // A page with a centred variant already has its one centred section (the banned "everything centred" rule).
+    if (p.sections.some((s) => SECTION_DEFS.find((d) => d.type === s.type)?.centredVariants?.includes(s.variant))) continue;
     const candidates = p.sections.slice(1).filter((s) => canCentre(s, motif));
     const pick = seededOrder(candidates.map((s) => s.id), o.seed, `centre-${p.id}`)[0];
     if (pick) ids.push(pick);

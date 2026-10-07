@@ -163,10 +163,14 @@ describe("alignment per section: one centred section per page", () => {
     expect(canCentre(text, motif)).toBe(false);
     expect(home(withSkeleton(shop, { centred: [text.id] }))).not.toContain("data-align");
   });
-  it("the skeleton's centred ids are checked: section ids, a bounded list", () => {
+  it("the skeleton's centred ids are checked: section ids, a bounded list", async () => {
     const base = golden("avtoservis-mrak");
     const ok = withSkeleton(base, { centred: [base.pages[0]!.sections[1]!.id] });
     expect(SiteSpec.safeParse(ok).success).toBe(true);
+    // Two listed on one page: one renders centred, so the "everything centred" rule (at most one) holds.
+    const { validateSite } = await import("@sb/spec");
+    const two = withSkeleton(base, { centred: base.pages[0]!.sections.slice(1, 4).map((s) => s.id) });
+    expect(validateSite(two).issues).toEqual([]);
     expect(SiteSpec.safeParse(withSkeleton(base, { centred: ["not an id"] })).success).toBe(false);
     expect(SiteSpec.safeParse(withSkeleton(base, { centred: Array.from({ length: 17 }, (_, i) => `s_x${i}`) })).success).toBe(false);
   });
