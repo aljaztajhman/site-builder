@@ -1,0 +1,18 @@
+{
+  "seq": 11,
+  "stage": "classify",
+  "model": "claude-haiku-4-5-20251001",
+  "hash": "04b5b8ef21fb5d9d",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"businessType\": \"bakery\", \"confidence\": 0.92}",
+    "stopReason": "end_turn",
+    "model": "claude-haiku-4-5-20251001",
+    "usage": {
+      "input_tokens": 496,
+      "output_tokens": 19,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

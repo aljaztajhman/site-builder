@@ -1,0 +1,18 @@
+{
+  "seq": 6,
+  "stage": "classify",
+  "model": "claude-haiku-4-5-20251001",
+  "hash": "f57e99f72d51552c",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"businessType\": \"shop\", \"confidence\": 0.15}",
+    "stopReason": "end_turn",
+    "model": "claude-haiku-4-5-20251001",
+    "usage": {
+      "input_tokens": 482,
+      "output_tokens": 18,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}
