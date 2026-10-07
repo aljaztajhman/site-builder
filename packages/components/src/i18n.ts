@@ -103,6 +103,8 @@ const sl = {
   readTwo: "minuti branja",
   readFew: "minute branja",
   readOther: "minut branja",
+  /** Footer "visit" (skeleton): the heading over the address, directions and hours. */
+  visitUs: "Obiščite nas",
 } as const;
 
 export type UiKey = keyof typeof sl;
@@ -204,6 +206,7 @@ const en: Record<UiKey, string> = {
   readTwo: "minute read",
   readFew: "minute read",
   readOther: "minute read",
+  visitUs: "Visit us",
 };
 
 // One dictionary per locale a site may use (SITE_LOCALES); adding a locale there needs its strings here.

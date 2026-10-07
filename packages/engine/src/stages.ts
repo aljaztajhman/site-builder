@@ -46,6 +46,7 @@ import { fitImageForModel, sliceScreenshot } from "./images.ts";
 import { checkFacts, type FactViolation } from "./facts.ts";
 import { applyOps } from "./editor.ts";
 import { awayFromNeighbours, fittingDirections, pickFromFamily, type LookKey } from "./variety.ts";
+import { holdPrimary, skeletonLine } from "./skeleton.ts";
 
 // ---------- 1. Intake -> brief ----------
 
@@ -158,7 +159,7 @@ export function familyLine(businessType: BusinessType, photoCount: number, v: Va
 
 export async function chooseDesign(
   client: ModelClient,
-  input: { brief: Brief; swatches: Swatch[]; photoCount: number; generatedCount: number; variety?: VarietyInput },
+  input: { brief: Brief; swatches: Swatch[]; photoCount: number; generatedCount: number; variety?: VarietyInput; holdPrimary?: boolean },
 ): Promise<{ design: Design; reason: string; hero?: string }> {
   const offer = input.variety ? familyLine(input.brief.businessType, input.photoCount, input.variety) : templateLine(input.brief.businessType, input.photoCount);
   const { data } = await client.callJson({
@@ -176,7 +177,7 @@ export async function chooseDesign(
     schema: toModelJsonSchema(DesignChoice),
   }, (d) => DesignChoice.parse(d));
   const choice = data;
-  const r = designWithVariety(choice, input.variety ? { ...input.variety, swatches: input.swatches } : undefined);
+  const r = designWithVariety(choice, input.variety ? { ...input.variety, swatches: input.swatches } : undefined, input.holdPrimary === true);
   return { design: r.design, reason: choice.reason, ...(r.hero ? { hero: r.hero } : {}) };
 }
 
@@ -190,7 +191,7 @@ export function designFromChoice(choice: z.infer<typeof DesignChoice>): Design {
   return designWithVariety(choice).design;
 }
 
-export function designWithVariety(choice: z.infer<typeof DesignChoice>, variety?: VarietyInput & { swatches: Swatch[] }): { design: Design; hero?: string } {
+export function designWithVariety(choice: z.infer<typeof DesignChoice>, variety?: VarietyInput & { swatches: Swatch[] }, hold = false): { design: Design; hero?: string } {
   const dir = directionById(choice.direction);
   const avoid = variety ? [...variety.neighbours, ...(variety.previous ? [variety.previous] : [])] : [];
   const family = variety ? pickFromFamily(dir, { seed: variety.seed, logo: variety.swatches, pictures: variety.pictures, neighbours: avoid }) : undefined;
@@ -212,7 +213,8 @@ export function designWithVariety(choice: z.infer<typeof DesignChoice>, variety?
     shadow: choice.shadow,
     imagery: dir.imagery,
   };
-  let design = enforceDesign(clampToSchema(draft), dir);
+  // With the skeleton (config variety.skeleton) the direction's primary hue and saturation are held in code, not only asked for.
+  let design = enforceDesign(clampToSchema(hold ? holdPrimary(draft, dir) : draft), dir);
   if (variety && !family) design = enforceDesign(awayFromNeighbours(design, dir, dir.layout.heroes[0] ?? "none", avoid, variety.seed), dir);
   // Never the colours and fonts of a site on the landing page's trade showcase.
   return { design: Design.parse(awayFromShowcases(design, dir)), ...(family ? { hero: family.hero } : {}) };
@@ -278,6 +280,8 @@ export interface ContentInput {
   heroImageIds: string[];
   /** The variety engine's hero for a template family ("type:variant"); absent: the direction's own. */
   hero?: string;
+  /** Config variety.skeleton: the content step hears the eyebrow and one-call-button rules (skeletonLine). */
+  skeleton?: boolean;
   structuredOutput: boolean;
   retries: number;
   corpus: string;
@@ -357,6 +361,7 @@ export async function generateContent(client: ModelClient, input: ContentInput):
         templateOutline(dir, input.hero),
         `Photos (use each at most twice; alt text is already written):\n${imageList(input.assets, input.heroImageIds)}`,
         heroRule(input.heroImageIds, input.hero ? [input.hero] : dir.layout.heroes),
+        input.skeleton ? skeletonLine() : "",
         `Business facts available to components: phone ${input.brief.facts.phone ? "yes" : "missing"}, address ${input.brief.facts.address ? "yes" : "missing"}, hours ${input.brief.facts.hours ? "yes" : "missing"}, booking URL ${input.brief.facts.bookingUrl ? "yes" : "no — never use the booking action"}.`,
         input.structuredOutput ? "" : plainJsonInstruction(),
       ]

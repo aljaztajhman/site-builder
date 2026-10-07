@@ -169,6 +169,8 @@ export function switchDirection(spec: SiteSpec, directionId: string): Design {
     density: dir.ranges.density[0]!,
     shadow: dir.ranges.shadow[0]!,
     imagery: dir.imagery,
+    // The site's skeleton (spec v15) is its frame, not the style: it stays.
+    ...(spec.design.skeleton ? { skeleton: spec.design.skeleton } : {}),
   };
   return enforceDesign(d, dir);
 }

@@ -13,8 +13,9 @@
   },
   "useFullBuildModel": false,
   "variety": {
-    "$comment": "Variety engine Steps 1–2 (docs/plans/variety-engine.md). Off until a twin eval shows the look distance within a trade goes up and judge medians hold (pnpm eval --twins --no-edits).",
+    "$comment": "Variety engine Steps 1–2 (docs/plans/variety-engine.md). Off until a twin eval shows the look distance within a trade goes up and judge medians hold (pnpm eval --twins --no-edits). skeleton: Step 4, each site its own header, phone actions, footer and section styles, at most one centred section per page (design.skeleton, spec v15), one call button per screen, never the street address as the hero's eyebrow, section rhythm and primary hue held in code; off until the twin judge has seen it (contact sheet: pnpm variety:skeleton).",
     "families": false,
+    "skeleton": false,
     "neighbours": 50
   },
   "costCuts": {

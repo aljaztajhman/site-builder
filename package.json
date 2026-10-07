@@ -26,6 +26,7 @@
     "study": "tsx tools/eval/src/study.ts",
     "zero-to-live": "tsx tools/eval/src/zero-to-live.ts",
     "variety:sheet": "tsx tools/eval/src/families-sheet.ts",
+    "variety:skeleton": "tsx tools/eval/src/skeleton-sheet.ts",
     "recordings:home":"tsx tools/eval/src/home-recordings.ts",
     "eval:junk":"tsx --env-file-if-exists=.env tools/eval/src/junk-cli.ts",
     "smoke:launch": "tsx --env-file-if-exists=.env tools/eval/src/smoke-launch.ts",

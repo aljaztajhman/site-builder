@@ -1,0 +1,542 @@
+/*
+ * A site's own skeleton (spec v15, design.skeleton; docs/plans/variety-engine.md Step 4). Every rule here is keyed on
+ * markup or attributes only a site with a skeleton has (body[data-skeleton], the new header and footer families,
+ * .call-float), so a site without one renders exactly as before. Within the banned list: no pills, no gradients, no
+ * heavy shadows, no accent single-side borders.
+ */
+
+/* ---------- Menu button: the word without a box, or the icon alone ---------- */
+.nav-toggle--word,
+.nav-toggle--icon {
+  border-color: transparent;
+}
+.nav-toggle--word {
+  padding-inline: 0.375rem;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.3em;
+}
+.nav-toggle--word .nav-toggle__icon {
+  display: none;
+}
+.nav-toggle--word[aria-expanded="true"] {
+  text-decoration-style: double;
+}
+.nav-toggle--icon {
+  justify-content: center;
+  padding: 0.5rem;
+}
+.nav-toggle--icon .nav-toggle__icon {
+  width: 1.375rem;
+}
+
+/* ---------- Header families ---------- */
+
+/* Sticky (compact, or the header that carries the call): stays on screen; the open menu scrolls inside it. */
+.site-header--sticky {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+html:has(.site-header--sticky) {
+  scroll-padding-top: 6rem;
+}
+@media (max-width: 47.99rem) {
+  .site-header--sticky .site-nav.is-open {
+    max-height: calc(100vh - 8rem);
+    overflow-y: auto;
+  }
+}
+
+/* The header's own actions: a call button and the directions (actions "header"), or a booking (desktop only). */
+.site-header__actions {
+  order: 3;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1rem;
+}
+.site-header__actions .site-header__cta {
+  order: 0;
+}
+.site-header__directions {
+  gap: 0.4rem;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
+}
+.site-header__actions--wide-only {
+  display: none;
+}
+@media (max-width: 47.99rem) {
+  /* Phones: the call and the directions get their own row under the brand, the call as wide as it can be. */
+  .site-header__actions {
+    order: 5;
+    flex: 1 1 100%;
+    flex-wrap: nowrap;
+    padding-bottom: 0.25rem;
+  }
+  .site-header__actions .site-header__cta {
+    flex: 1 1 auto;
+  }
+  .site-header--carries-call .site-header__inner {
+    gap: 0.25rem 0.75rem;
+  }
+}
+@media (min-width: 48rem) {
+  .site-header__actions,
+  .site-header__actions--wide-only {
+    display: flex;
+    flex: none;
+  }
+}
+
+/* centred: the name or logo centred as a wordmark; on phones the menu is the icon alone at the right edge. */
+.site-header--centred .site-header__inner {
+  position: relative;
+  justify-content: center;
+}
+.site-header--centred .site-header__brand {
+  flex: 0 1 auto;
+  justify-content: center;
+  text-align: center;
+  padding-inline: 3rem;
+}
+.site-header--centred .site-header__name {
+  font-size: var(--fs-h3);
+}
+.site-header--centred .nav-toggle {
+  position: absolute;
+  top: 0.625rem;
+  right: 0.5rem;
+}
+@media (min-width: 48rem) {
+  .site-header--centred .site-header__inner {
+    flex-wrap: wrap;
+    justify-content: center;
+    padding-block: 1rem 0;
+  }
+  .site-header--centred .site-header__brand {
+    flex: 1 1 100%;
+    margin-right: 0;
+    padding-inline: 13rem;
+  }
+  .site-header--centred .site-header__logo {
+    max-height: 3.5rem;
+  }
+  .site-header--centred .site-header__name {
+    font-size: var(--fs-h2);
+  }
+  .site-header--centred .site-nav {
+    order: 4;
+    flex: 1 1 100%;
+    border-top: 1px solid var(--c-border);
+  }
+  .site-header--centred .site-nav__list {
+    justify-content: center;
+    gap: 0.25rem 2.5rem;
+  }
+  .site-header--centred .site-header__actions {
+    position: absolute;
+    top: 1rem;
+    right: 2rem;
+    min-height: 3.5rem;
+  }
+}
+
+/* phone: the logo and the phone number, no menu box; the menu is a word after the number. */
+.site-header__phone {
+  order: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.75rem;
+  font-family: var(--font-heading);
+  font-weight: var(--fw-heading);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.site-header__phone:hover {
+  text-decoration: underline;
+}
+.site-header--phone .nav-toggle {
+  order: 3;
+}
+@media (min-width: 48rem) {
+  .site-header__phone {
+    order: 3;
+    font-size: var(--fs-lg);
+  }
+}
+
+/* word: the menu as a word; on wide screens the navigation set in the heading face. */
+@media (min-width: 48rem) {
+  .site-header--word .site-nav__list,
+  .site-header--overlay .site-nav__list {
+    gap: 0.25rem 2rem;
+  }
+  .site-header--word .site-nav__list a,
+  .site-header--overlay .site-nav__list a {
+    font-family: var(--font-heading);
+    font-weight: var(--fw-heading);
+    font-size: var(--fs-lg);
+  }
+}
+
+/* compact: one slim row that stays on screen. */
+.site-header--compact .site-header__inner {
+  min-height: 3.25rem;
+  padding-block: 0.25rem;
+}
+.site-header--compact .site-header__logo {
+  max-height: 2rem;
+}
+.site-header--compact .site-header__name {
+  font-size: var(--fs-base);
+}
+@media (min-width: 48rem) {
+  .site-header--compact .site-header__inner {
+    min-height: 3.5rem;
+  }
+  .site-header--compact .site-nav__list a {
+    justify-content: center;
+    min-width: 2.75rem;
+    font-size: var(--fs-sm);
+  }
+}
+
+/* overlay: transparent over the hero photo (the hero's flat shade keeps its text readable); the open menu is solid. */
+.site-header--overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  background: transparent;
+  border-bottom-color: transparent;
+  --c-text: var(--c-on-inverse);
+  --c-muted: var(--c-on-inverse);
+  --c-primary: var(--c-on-inverse);
+  --c-on-primary: var(--c-inverse);
+  --c-border: color-mix(in srgb, var(--c-on-inverse) 35%, transparent);
+}
+.site-header--overlay .site-header__brand,
+.site-header--overlay .nav-toggle,
+.site-header--overlay .site-nav__list a {
+  color: var(--c-on-inverse);
+}
+@media (max-width: 47.99rem) {
+  .site-header--overlay .site-nav {
+    margin-inline: -1rem;
+    padding-inline: 1rem;
+    background: var(--c-inverse);
+  }
+}
+.site-header--overlay ~ main > .s-hero-signature:first-child .hsig__body {
+  padding-top: 6.5rem;
+}
+@media (min-width: 64rem) {
+  .site-header--overlay ~ main > .s-hero-signature:first-child .hsig__body {
+    padding-top: 9rem;
+  }
+}
+
+/* ---------- One call button per screen ---------- */
+/*
+ * The bar or the floating button carries the call on phones, the hero's own button on wide screens, the header at
+ * every width when it carries it: every other call button reads as a text link there (the same link, the same 44 px).
+ */
+@media (max-width: 47.99rem) {
+  body[data-actions="bar"] main .btn[data-action="call"],
+  body[data-actions="float"] main .btn[data-action="call"] {
+    justify-content: flex-start;
+    min-width: 0;
+    padding-inline: 0;
+    background: transparent;
+    color: inherit;
+    border-color: transparent;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
+  }
+}
+@media (min-width: 48rem) {
+  body[data-actions="bar"] main > :not(:first-child) .btn[data-action="call"],
+  body[data-actions="float"] main > :not(:first-child) .btn[data-action="call"] {
+    min-width: 0;
+    padding-inline: 0;
+    background: transparent;
+    color: inherit;
+    border-color: transparent;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
+  }
+}
+body[data-actions="header"] main .btn[data-action="call"] {
+  justify-content: flex-start;
+  min-width: 0;
+  padding-inline: 0;
+  background: transparent;
+  color: inherit;
+  border-color: transparent;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
+}
+
+/*
+ * The bar or the floating button that waits for the hero (reveal.js), or only its call (and the header's) while the
+ * hero's call object is on screen; without JS they are always there.
+ */
+html.js .action-bar[data-after-hero]:not(.is-shown),
+html.js .call-float[data-after-hero]:not(.is-shown) {
+  visibility: hidden;
+}
+html.js a[data-after-hero]:not(.is-shown) {
+  display: none;
+}
+
+/* ---------- The floating call button (actions "float"), phones only ---------- */
+.call-float {
+  position: fixed;
+  z-index: 50;
+  right: 1rem;
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  gap: 0.5rem;
+}
+.call-float__btn {
+  min-height: 3.25rem;
+  box-shadow: var(--shadow);
+}
+.call-float__directions {
+  min-width: 3.25rem;
+  padding-inline: 0;
+  background: var(--c-bg);
+  color: var(--c-text);
+}
+body.has-call-float {
+  padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+}
+@media (min-width: 48rem) {
+  .call-float {
+    display: none;
+  }
+  body.has-call-float {
+    padding-bottom: 0;
+  }
+}
+
+/* ---------- Footer families and tone ---------- */
+/* The tone comes from the skeleton: the motifs' forced dark footer is undone first. */
+body[data-skeleton] .site-footer {
+  --c-surface: inherit;
+  --c-text: inherit;
+  --c-muted: inherit;
+  --c-primary: inherit;
+  --c-border: inherit;
+}
+body[data-skeleton] .site-footer--tone-default {
+  background: var(--c-bg);
+}
+body[data-skeleton] .site-footer--tone-inverse {
+  --c-surface: var(--c-inverse);
+  --c-text: var(--c-on-inverse);
+  --c-muted: var(--c-on-inverse);
+  --c-primary: var(--c-on-inverse);
+  --c-border: color-mix(in srgb, var(--c-on-inverse) 30%, transparent);
+}
+body[data-skeleton] .site-footer--tone-band {
+  --c-surface: var(--c-band, var(--c-primary));
+  --c-text: var(--c-on-band, var(--c-on-primary));
+  --c-muted: var(--c-on-band, var(--c-on-primary));
+  --c-primary: var(--c-on-band, var(--c-on-primary));
+  --c-border: color-mix(in srgb, var(--c-on-band, var(--c-on-primary)) 35%, transparent);
+}
+body[data-skeleton] .site-footer--tone-inverse :focus-visible,
+body[data-skeleton] .site-footer--tone-band :focus-visible {
+  outline-color: currentColor;
+}
+
+/* wordmark: the name as the page's last, wall-sized word, sized from its longest word so it never overflows. */
+.site-footer__wordmark {
+  max-width: none;
+  margin-bottom: 2rem;
+  font-family: var(--font-heading);
+  font-weight: var(--fw-heading);
+  text-transform: var(--case-heading);
+  letter-spacing: -0.02em;
+  line-height: 0.92;
+  font-size: min(9rem, calc((100vw - 2rem) / (var(--wm-chars, 10) * 0.74)));
+  overflow-wrap: normal;
+  hyphens: manual;
+}
+@media (min-width: 48rem) {
+  .site-footer__wordmark {
+    font-size: min(9rem, calc((min(100vw, 76rem) - 4rem) / (var(--wm-chars, 10) * 0.74)));
+  }
+}
+
+/* visit: where to find the business and when, before the provider rows. */
+.site-footer__visit {
+  display: grid;
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--c-border);
+  font-size: var(--fs-base);
+}
+.site-footer__visit-title {
+  margin-bottom: 0.75rem;
+  font-size: var(--fs-h3);
+}
+.site-footer__visit-where address {
+  font-size: var(--fs-lg);
+  line-height: 1.4;
+}
+.site-footer__directions {
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+  text-decoration-thickness: 2px;
+}
+.site-footer__visit-hours .hours__list {
+  max-width: 24rem;
+}
+@media (min-width: 48rem) {
+  .site-footer__visit {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3rem;
+  }
+}
+
+/* ---------- Section width ---------- */
+body[data-width="wide"] .container {
+  max-width: 90rem;
+}
+body[data-width="full"] .container {
+  max-width: none;
+}
+@media (min-width: 80rem) {
+  body[data-width="full"] .container {
+    padding-inline: 4rem;
+  }
+}
+
+/* ---------- Cards: bordered, filled or none ---------- */
+body[data-cards="bordered"] main .card {
+  background: transparent;
+  border-color: var(--c-border);
+  box-shadow: none;
+}
+body[data-cards="filled"] main .card {
+  border-color: transparent;
+}
+body[data-cards="filled"] main .tone-alt .card {
+  background: var(--c-bg);
+}
+body[data-cards="none"] main .card {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  padding-inline: 0;
+}
+body[data-cards] main :is(.tone-inverse, .tone-band) .card {
+  background: transparent;
+}
+body[data-cards="bordered"] main :is(.tone-inverse, .tone-band) .card {
+  border-color: currentColor;
+}
+
+/* ---------- Buttons: square, soft or underline-only (never a pill) ---------- */
+body[data-buttons="square"] .btn {
+  border-radius: 0;
+}
+body[data-buttons="soft"] .btn {
+  border-radius: min(12px, max(6px, var(--radius)));
+}
+body[data-buttons="underline"] main .btn {
+  justify-content: flex-start;
+  min-width: 0;
+  padding-inline: 0;
+  border-radius: 0;
+  background: transparent;
+  border-color: transparent;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 0.3em;
+}
+body[data-buttons="underline"] main .btn--primary {
+  text-decoration-color: var(--c-primary);
+  font-size: var(--fs-lg);
+}
+body[data-buttons="underline"] main :is(.tone-inverse, .tone-band) .btn {
+  text-decoration-color: currentColor;
+}
+
+/* ---------- Dividers between sections: the motif's, a rule, or none ---------- */
+body[data-dividers="rule"] main > .s.tone-default + .s.tone-default,
+body[data-dividers="rule"] main > .s.tone-alt + .s.tone-alt {
+  border-top: 1px solid var(--c-border);
+  padding-top: calc(var(--space-section) * 0.6);
+}
+body[data-dividers="none"][data-motif="plate"] main > .s:not(.tone-inverse) + .s.tone-inverse::before,
+body[data-dividers="none"][data-motif="plate"] main > .s:not(.tone-band) + .s.tone-band::before,
+body[data-dividers="none"][data-motif="pipes"] main > .s:not(.tone-inverse) + .s.tone-inverse::before,
+body[data-dividers="none"][data-motif="pipes"] main > .s-hero-signature::after {
+  content: none;
+}
+body[data-dividers="none"][data-motif="plate"] main > .s:not(.tone-inverse) + .s.tone-inverse,
+body[data-dividers="none"][data-motif="plate"] main > .s:not(.tone-band) + .s.tone-band,
+body[data-dividers="none"][data-motif="pipes"] main > .s:not(.tone-inverse) + .s.tone-inverse {
+  padding-top: var(--space-section);
+}
+
+/* ---------- Photo ratio of content photos (image-text, the split hero on wide screens) ---------- */
+body[data-ratio="landscape"] .image-text > .image-text__media {
+  aspect-ratio: 3 / 2;
+}
+body[data-ratio="square"] .image-text > .image-text__media {
+  aspect-ratio: 1 / 1;
+}
+body[data-ratio="portrait"] .image-text > .image-text__media {
+  aspect-ratio: 4 / 5;
+}
+@media (min-width: 48rem) {
+  body[data-ratio="landscape"] .hero-split__media {
+    aspect-ratio: 3 / 2;
+  }
+  body[data-ratio="standard"] .hero-split__media {
+    aspect-ratio: 4 / 3;
+  }
+  body[data-ratio="portrait"] .hero-split__media {
+    aspect-ratio: 4 / 5;
+  }
+}
+
+/* ---------- One centred section per page (design.skeleton.centred, centredOn): every other section starts left ---------- */
+/* A short stack (cta band, a short narrow text, a short story without a photo) centred whole; a symmetric grid (cards,
+   products, horizontal steps, a gallery, a team grid) under a centred head. */
+.s[data-align="centre"] :is(.section-head, .text-block, .cta, .cta__text, .about__text, .about__owner) {
+  justify-items: center;
+  margin-inline: auto;
+  text-align: center;
+}
+.s[data-align="centre"] :is(.cta, .text-block) {
+  max-width: 48rem;
+}
+.s[data-align="centre"] :is(.prose, .cta__text) > p,
+.s[data-align="centre"] .cta__lead {
+  margin-inline: auto;
+}
+.s[data-align="centre"] .actions,
+.s[data-align="centre"] .actions .btn[data-action="call"] {
+  justify-content: center;
+}
+@media (min-width: 64rem) {
+  .s-cta--band[data-align="centre"] .cta {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+}

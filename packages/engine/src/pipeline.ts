@@ -7,6 +7,7 @@ import type { Operation } from "fast-json-patch";
 import { ModelOutputError, SpendCapError, type ModelClient } from "./llm/client.ts";
 import { classify, makeBrief, chooseDesign, altTexts, generateContent, critique, applyPatches, editSpec, drawsInsteadOfPhotos, type VarietyInput } from "./stages.ts";
 import { keyOf, lookKey, siteSeed } from "./variety.ts";
+import { applySkeleton, preferPhotoHero } from "./skeleton.ts";
 import { extractSwatches, type Swatch } from "./palette.ts";
 import { processLogo, processPhoto, shareJpeg, visionJpeg } from "./images.ts";
 import type { ImageGenerator } from "./image-gen.ts";
@@ -189,16 +190,31 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
       for (const p of photos.slice(0, 3)) swatches.push(...(await extractSwatches(originals.get(p.id)!, "photo", 2)));
       // The variety engine (config variety.families): the seed, the same trade's sites (same town first), the look a
       // regeneration replaces (it moves the seed too).
-      const variety = config.variety.families
-        ? await (async (): Promise<VarietyInput> => {
-            const previous = (await repo.getSpec(siteId))?.spec;
-            const previousKey = previous ? lookKey(previous) : undefined;
-            const neighbours = (await repo.neighbourLooks(siteId, brief.businessType, brief.town, config.variety.neighbours)).map((n) => keyOf(n.design, n.hero));
-            const seed = siteSeed(siteId, previousKey ? JSON.stringify(previousKey) : "");
-            return { seed, neighbours, pictures: photos.length + ideas.length + reuse.length > 0, ...(previousKey ? { previous: previousKey } : {}) };
-          })()
-        : undefined;
-      const { design, hero } = await stageTime("design", () => chooseDesign(client, { brief, swatches, photoCount: photos.length, generatedCount: ideas.length + reuse.length, ...(variety ? { variety } : {}) }));
+      // The skeleton (config variety.skeleton, Step 4) uses the same seed and the neighbours' skeletons.
+      const around =
+        config.variety.families || config.variety.skeleton
+          ? await (async () => {
+              const previous = (await repo.getSpec(siteId))?.spec;
+              const previousKey = previous ? lookKey(previous) : undefined;
+              const looks = await repo.neighbourLooks(siteId, brief.businessType, brief.town, config.variety.neighbours);
+              const seed = siteSeed(siteId, previousKey ? JSON.stringify(previousKey) : "");
+              return { seed, looks, previousKey };
+            })()
+          : undefined;
+      const variety: VarietyInput | undefined =
+        config.variety.families && around
+          ? {
+              seed: around.seed,
+              neighbours: around.looks.map((n) => keyOf(n.design, n.hero)),
+              pictures: photos.length + ideas.length + reuse.length > 0,
+              ...(around.previousKey ? { previous: around.previousKey } : {}),
+            }
+          : undefined;
+      const skeleton =
+        config.variety.skeleton && around ? { seed: around.seed, neighbours: around.looks.flatMap((n) => (n.design.skeleton ? [n.design.skeleton] : [])) } : undefined;
+      const { design, hero } = await stageTime("design", () =>
+        chooseDesign(client, { brief, swatches, photoCount: photos.length, generatedCount: ideas.length + reuse.length, ...(variety ? { variety } : {}), ...(skeleton ? { holdPrimary: true } : {}) }),
+      );
       if (variety) await log("design", "Variety engine", { seed: variety.seed, neighbours: variety.neighbours.length, regeneration: !!variety.previous, hero: hero ?? null, fontPair: design.fontPair, primary: design.colors.primary });
       // The editor's live preview recolours its skeleton with these while the content is written.
       await log("design", "Direction chosen", { direction: design.direction, colors: design.colors });
@@ -207,7 +223,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
         if (drawsInsteadOfPhotos(directionById(design.direction))) await log("imageGen", `${design.direction} draws the trade instead of showing pictures; no pictures generated`);
         else generating = startImages();
       }
-      return { brief, design, hero, generated: await generating };
+      return { brief, design, hero, skeleton, generated: await generating };
     } catch (e) {
       // Pictures not yet sent don't start; ones already sent finish (fal bills them anyway) before the
       // failure is passed on, so nothing of this job runs on behind it.
@@ -251,7 +267,8 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
   const [planned, imaged] = await Promise.allSettled([planning, imaging]);
   if (planned.status === "rejected") throw planned.reason;
   if (imaged.status === "rejected") throw imaged.reason;
-  const { brief, design, hero, generated } = planned.value;
+  const { brief, design, skeleton, generated } = planned.value;
+  let hero = planned.value.hero;
   // Not for a template that draws the trade instead of showing pictures (template S).
   if (reuse.length && !drawsInsteadOfPhotos(directionById(design.direction))) {
     generated.push(...reuse.map((i) => structuredClone(i)));
@@ -260,6 +277,12 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
   // Generated pictures come after the client's photos; landscape, so they can carry a hero.
   images.push(...generated);
   heroIds.push(...generated.map((g) => g.id));
+  // The skeleton: with a hero-suitable picture, the family's photo hero rather than a type-only or drawn one.
+  if (skeleton && hero) {
+    const preferred = preferPhotoHero(directionById(design.direction), hero, heroIds.length > 0, skeleton.seed);
+    if (preferred !== hero) await log("design", "A photo hero for the hero-suitable picture", { from: hero, to: preferred });
+    hero = preferred;
+  }
 
   // 4. Content and assembly (validate; retry with errors)
   const corpus = await clientCorpus(repo, siteId);
@@ -272,6 +295,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
       scope: intake.scope,
       heroImageIds: heroIds,
       ...(hero ? { hero } : {}),
+      ...(skeleton ? { skeleton: true } : {}),
       structuredOutput: config.structuredOutputForContent,
       retries: config.limits.contentRetries,
       corpus,
@@ -283,6 +307,13 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
   if (content.repairs.length) await log("content", "Repaired the content answer before validation", content.repairs);
   if (content.issues.length) await log("content", "Spec still has issues after retries", content.issues);
   let spec = content.spec;
+  // The site's own skeleton (config variety.skeleton): header, phone actions, footer and section styles, the rhythm held,
+  // no address as the hero's eyebrow.
+  if (skeleton) {
+    const applied = applySkeleton(spec, { seed: skeleton.seed, dir: directionById(spec.design.direction), neighbours: skeleton.neighbours });
+    spec = applied.spec;
+    await log("content", "Skeleton", { skeleton: applied.skeleton, neighbours: skeleton.neighbours.length, changes: applied.changes });
+  }
   // A regeneration keeps the business facts of the version it replaces (typed in the editor since the intake).
   const replaced = await repo.getSpec(siteId);
   if (replaced) {

@@ -196,9 +196,12 @@ export const AppConfigSchema = z.object({
    * fitting directions instead of forced, with its family of palettes, font pairs and heroes; logo colours go into its
    * colour roles; a seed from the site id picks among equal options; no two sites of one trade (same town first) share
    * direction, palette family, font pair and hero; "Ustvari znova" asks for a different look. Off: today's behaviour.
-   * neighbours: how many sites of the same trade the neighbour check compares.
+   * neighbours: how many sites of the same trade the neighbour check compares. skeleton (Step 4): the generator gives
+   * each site its own frame (design.skeleton: header family, where the call lives on phones, footer family and tone,
+   * section width, cards, buttons, dividers, photo ratio, at most one centred section per page), never the street address as the hero's eyebrow, and holds the
+   * direction's section rhythm and primary hue in code. Off: today's shared frame.
    */
-  variety: z.object({ families: z.boolean(), neighbours: z.number().int().min(0).max(500) }),
+  variety: z.object({ families: z.boolean(), skeleton: z.boolean(), neighbours: z.number().int().min(0).max(500) }),
   /**
    * Generation cost cuts (docs/plans/cost-cuts.md, see config $comment). secondCritiqueOnlyOnFailures: a second critique
    * round only when the re-check after the first still reports failures. contentRetryAsPatch: a content answer that fails
