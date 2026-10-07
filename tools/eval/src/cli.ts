@@ -45,6 +45,12 @@ const value = (name: string) => {
   return i >= 0 ? args[i + 1] : undefined;
 };
 
+/** The scripted edits: how many were applied without validation issues, and how many passed their check. */
+const editLine = (r: FixtureResult): string => {
+  const edits = r.checkpoints.flatMap((c) => (c.edit ? [c.edit] : []));
+  return edits.length ? `edits applied ${edits.filter((e) => e.issues.length === 0).length}/${edits.length}, checks passed ${edits.filter((e) => e.check.pass).length}/${edits.length}` : "";
+};
+
 const mode: Mode = flag("offline") ? "offline" : flag("replay") ? "replay" : flag("record-missing") ? "record-missing" : flag("record") ? "record" : "live";
 const paid = mode === "live" || mode === "record" || mode === "record-missing";
 const scope = value("scope") === "home" ? "home" : "full";
@@ -131,6 +137,8 @@ try {
       r.calls ? `${r.calls.replayed} calls replayed, ${r.calls.recorded} recorded` : "",
       r.pictures ? `${r.pictures.cached} pictures cached, ${r.pictures.made} made` : "",
       r.replayChanged !== undefined ? `${r.replayChanged} request(s) changed since recording` : "",
+      r.critique ? `critique patches applied in ${r.critique.applied}/${r.critique.withPatches} rounds${r.critique.rejected ? ` (${r.critique.rejected} rejected)` : ""}` : "",
+      editLine(r),
     ]
       .filter(Boolean)
       .join(", ");

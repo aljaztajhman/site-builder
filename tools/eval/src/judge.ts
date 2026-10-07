@@ -42,7 +42,7 @@ export const JudgeOutputNotesFirst = z.strictObject({
   fixes: JudgeOutput.shape.fixes,
 });
 
-export const mean =(s: JudgeScores): number => (s.impression + s.hierarchy + s.imagery + s.spacing + s.clutter + s.distinctiveness) / 6;
+export const mean = (s: JudgeScores): number => (s.impression + s.hierarchy + s.imagery + s.spacing + s.clutter + s.distinctiveness) / 6;
 
 export const JUDGE_SYSTEM = `You are a strict senior web designer reviewing homepages generated for Slovenian small businesses (hairdressers, gostilne, car repair, dentists, bakeries, tourist farms, accountants, installers, shops). You get screenshots of one homepage: the phone's first screen as a visitor sees it (360×800, a fixed call/directions bar may sit at the bottom), the whole phone page, the desktop first screen (1280×800) and the whole desktop page. Judge only what you see, for phone and desktop separately: a site must be excellent on both.
 

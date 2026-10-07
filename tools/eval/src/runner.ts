@@ -29,7 +29,7 @@ import {
   type Composition,
   type SiteCheckReport,
 } from "@sb/engine";
-import { Repo, createDb, createFsStorage, migrate, type Storage } from "@sb/platform";
+import { Repo, createDb, createFsStorage, migrate, type Db, type Storage } from "@sb/platform";
 import { siteFiles } from "@sb/render";
 import { validateSite, type SiteSpec } from "@sb/spec";
 import type { Fixture } from "./fixtures/schema.ts";
@@ -90,6 +90,8 @@ export interface FixtureResult {
   paidEur: number;
   /** --replay: requests that differ from the one recorded (a prompt changed since; the recorded answer is replayed anyway). */
   replayChanged?: number;
+  /** The critique's rounds that returned patches, and how many were applied (a critique version saved) or rejected by validation. */
+  critique?: { withPatches: number; applied: number; rejected: number };
   /** --record-missing: calls answered from the recordings, and calls paid and recorded. */
   calls?: { replayed: number; recorded: number };
   /** Generated pictures from the cache, and pictures fal made (paid) in this run. */
@@ -140,6 +142,17 @@ function transportFor(
   // Only the files: home/ holds the homepage-scope replays (pnpm recordings:home), which aren't recorded here.
   if (opts.mode === "record" && existsSync(dir)) for (const f of readdirSync(dir)) if (f.endsWith(".json")) rmSync(path.join(dir, f));
   return { transport: opts.mode === "record" ? new RecordingTransport(live(), dir) : live() };
+}
+
+/** How the generation's critique rounds went, from the job's log and saved versions (pipeline.ts). */
+async function critiqueOutcome(db: Db, siteId: string): Promise<NonNullable<FixtureResult["critique"]>> {
+  const events = await db.query<{ message: string }>("select message from site_events where site_id = $1 and stage = 'critique'", [siteId]);
+  const versions = await db.query<{ n: number }>("select count(*)::int as n from spec_versions where site_id = $1 and source = 'critique'", [siteId]);
+  return {
+    withPatches: events.rows.filter((e) => /^Round \d+: \d+ issues, [1-9]\d* patches/.test(e.message)).length,
+    applied: versions.rows[0]?.n ?? 0,
+    rejected: events.rows.filter((e) => /rejected by validation/.test(e.message)).length,
+  };
 }
 
 function summarise(label: string, spec: SiteSpec, version: number | null, r: SiteCheckReport): Checkpoint {
@@ -290,6 +303,7 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
       result.timings = gen.timings;
       result.firstVersionMs = gen.firstVersionMs;
       result.generationEur = (await repo.siteCost(site.id)).reduce((a, c) => a + c.eur, 0);
+      result.critique = await critiqueOutcome(db, site.id);
     }
 
     const first = await checkCurrent(config, repo, storage, site.id, opts);
