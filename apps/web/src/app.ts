@@ -53,7 +53,8 @@ import { registerFormRoutes } from "./forms.tsx";
 import { domainsInfo, registerDomainRoutes } from "./domains.ts";
 import { registerCompanyLookupRoute } from "./company-lookup.ts";
 import { createHash } from "node:crypto";
-import { isPageView, tracker } from "./analytics.ts";
+import { campaignSource, isPageView, tracker } from "./analytics.ts";
+import { CF_BEACON_ENDPOINT, CF_BEACON_SCRIPT, cloudflareBeacon } from "./beacon.tsx";
 import { registerAnalyticsAdminRoutes } from "./analytics-admin.tsx";
 import { JS_FLAG } from "@sb/components";
 
@@ -122,6 +123,13 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   const track = tracker(limits);
   // The landing page and the intake's refusal page carry the Turnstile widget (its script and frame).
   const turnstileCsp = (path: string) => botCheck.mode === "on" && (path === "/" || path === "/api/sites" || path === "/pregled");
+  // The app's own pages: script and frame sources beyond 'self' for Turnstile, and the Cloudflare Web Analytics
+  // beacon's script on the few pages that carry it (beacon.tsx; its measurements go to connect-src below).
+  const appScriptCsp = (c: Context<AppEnv>) => {
+    const turnstile = turnstileCsp(c.req.path);
+    const scripts = [...(turnstile ? [TURNSTILE_ORIGIN] : []), ...(cloudflareBeacon(c, config) ? [CF_BEACON_SCRIPT] : [])];
+    return `${scripts.length ? `script-src 'self' ${scripts.join(" ")}; ` : ""}frame-src 'self'${turnstile ? ` ${TURNSTILE_ORIGIN}` : ""}`;
+  };
 
   // A published site's own hostname (or <slug>.<PLATFORM_DOMAIN>) is served as its /s/<slug>/ path.
   const appHosts = ["localhost", "127.0.0.1", ...(opts.appUrl ? [new URL(opts.appUrl).host] : [])];
@@ -144,7 +152,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       // The landing page's example sites are rendered sites too (/assets/ui/<hash>/examples/…).
       c.req.path.startsWith("/s/") || c.req.path.startsWith("/preview/") || /^\/assets\/ui\/[0-9a-f]+\/examples\//.test(c.req.path)
         ? `default-src 'self'; script-src 'self' '${JS_FLAG_HASH}'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-src https://www.google.com https://maps.google.com; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'self'`
-        : `default-src 'self'; ${turnstileCsp(c.req.path) ? `script-src 'self' ${TURNSTILE_ORIGIN}; frame-src 'self' ${TURNSTILE_ORIGIN}` : "frame-src 'self'"}; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors ${
+        : `default-src 'self'; ${appScriptCsp(c)}; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'${cloudflareBeacon(c, config) ? ` ${CF_BEACON_ENDPOINT}` : ""}; base-uri 'none'; form-action 'self'; frame-ancestors ${
             // The landing page frames its example sites (/assets/ui/<hash>/examples/…).
             c.req.path.startsWith("/assets/ui/") ? "'self'" : "'none'"
           }`,
@@ -315,13 +323,15 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       ...(previous ? { previous: `/sites/${previous.id}` } : {}),
       // The founding offer's places left: its size (config) minus the places the admin gave (allow_list.founding_at).
       foundingLeft: config.plans.standard.foundingOffer ? Math.max(0, config.plans.standard.foundingOffer.customers - (await repo.accounts.foundingTaken())) : null,
+      beacon: cloudflareBeacon(c, config),
+      source: campaignSource(c.req.query("utm_source")),
       ...extra,
     });
   };
   app.get("/", async (c) => {
     // A landing view (once per device in analytics.landingDedupeMinutes), and the editor's "Paketi in cene" link (?ref=upsell).
     if (isPageView(c)) {
-      await track(c, { kind: "landing_view" }, { onceMinutes: config.analytics.landingDedupeMinutes });
+      await track(c, { kind: "landing_view", source: campaignSource(c.req.query("utm_source")) }, { onceMinutes: config.analytics.landingDedupeMinutes });
       if (c.req.query("ref") === "upsell") await track(c, { kind: "upsell_clicked", props: { where: "plans" } });
     }
     return c.html(await landing(c, { showcase: c.req.query("primer") }));
@@ -506,7 +516,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       await repo.setStatus(site.id, "failed");
       return refuse((e as Error).message, 400, "upload_failed");
     }
-    await track(c, { kind: "intake_submitted", siteId: site.id, props: { scope, photos: photos.length, logo: !!logo } });
+    await track(c, { kind: "intake_submitted", siteId: site.id, source: campaignSource(body.source), props: { scope, photos: photos.length, logo: !!logo } });
     return c.redirect(`/sites/${site.id}`, 303);
   });
 
