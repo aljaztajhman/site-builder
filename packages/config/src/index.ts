@@ -191,6 +191,14 @@ export const AppConfigSchema = z.object({
     judge: ModelStage,
   }),
   useFullBuildModel: z.boolean(),
+  /**
+   * The variety engine (docs/plans/variety-engine.md, Steps 1–2). families: a trade template is offered beside two
+   * fitting directions instead of forced, with its family of palettes, font pairs and heroes; logo colours go into its
+   * colour roles; a seed from the site id picks among equal options; no two sites of one trade (same town first) share
+   * direction, palette family, font pair and hero; "Ustvari znova" asks for a different look. Off: today's behaviour.
+   * neighbours: how many sites of the same trade the neighbour check compares.
+   */
+  variety: z.object({ families: z.boolean(), neighbours: z.number().int().min(0).max(500) }),
   structuredOutputForContent: z.boolean(),
   pricesUsdPerMTok: z.record(z.string(), Price),
   eurPerUsd: z.number().positive(),

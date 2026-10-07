@@ -321,6 +321,29 @@ export class Repo {
     return Number(rows[0].version);
   }
 
+  /**
+   * The current designs and homepage heroes of other sites of the same business type, the same town first, then the
+   * most recently changed (the variety engine's neighbour check). At most `limit`.
+   */
+  async neighbourLooks(siteId: string, businessType: string, town: string | null, limit: number): Promise<{ design: SiteSpec["design"]; hero: { type: string; variant: string } | null }[]> {
+    if (limit <= 0) return [];
+    const { rows } = await this.db.query<{ design: SiteSpec["design"] | string; hero: { type: string; variant: string } | string | null }>(
+      `select v.spec->'design' as design,
+              (select sec from jsonb_array_elements(v.spec->'pages') p, jsonb_array_elements(p->'sections') with ordinality as x(sec, n)
+                where p->>'kind' = 'home' order by n limit 1) as hero
+         from sites s join spec_versions v on v.site_id = s.id and v.version = s.current_version
+        where s.id <> $1 and s.brief->>'businessType' = $2
+        order by (coalesce(s.brief->>'town', '') = coalesce($3, '')) desc, s.updated_at desc
+        limit $4`,
+      [siteId, businessType, town, limit],
+    );
+    const parse = <T>(v: T | string): T => (typeof v === "string" ? (JSON.parse(v) as T) : v);
+    return rows.map((r) => {
+      const hero = r.hero === null ? null : parse(r.hero);
+      return { design: parse(r.design), hero: hero ? { type: hero.type, variant: hero.variant } : null };
+    });
+  }
+
   async getSpec(siteId: string, version?: number): Promise<{ version: number; spec: SiteSpec } | null> {
     const { rows } = await this.db.query<{ version: number; spec: SiteSpec | string }>(
       version === undefined

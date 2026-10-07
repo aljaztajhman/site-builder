@@ -12,6 +12,11 @@
     "judge": { "model": "claude-sonnet-5-5", "effort": "medium", "maxTokens": 4000 }
   },
   "useFullBuildModel": false,
+  "variety": {
+    "$comment": "Variety engine Steps 1–2 (docs/plans/variety-engine.md). Off until a twin eval shows the look distance within a trade goes up and judge medians hold (pnpm eval --twins --no-edits).",
+    "families": false,
+    "neighbours": 50
+  },
   "structuredOutputForContent": false,
   "pricesUsdPerMTok": {
     "claude-haiku-4-5-20251001": { "input": 1.0, "output": 5.0, "cacheWrite5m": 1.25, "cacheRead": 0.1 },

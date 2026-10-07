@@ -1,5 +1,6 @@
 import { OFF_BLACK_MIN, OFF_WHITE_MAX, clampLuminance, contrast, ensureContrast, isCreamOrOffWhite, isWarmCream, luminance } from "./color.ts";
 import type { Colors, Design, Direction } from "./design.ts";
+import { acceptedFontPairs } from "./families.ts";
 
 /** Text colours: never pure black, never pure white. (Button text, onPrimary, may be white.) */
 export const TEXT_TOKENS = ["text", "muted", "onInverse"] as const satisfies readonly (keyof Colors)[];
@@ -71,7 +72,7 @@ export function checkDesign(design: Design, dir: Direction | undefined): DesignI
     const ratio = contrast(a, b);
     if (ratio < 4.5) issues.push({ path: `/design/colors/${fg}`, message: `${fg} on ${bg} contrast ${ratio.toFixed(2)} < 4.5 (text in ${dir.id})` });
   }
-  if (!dir.fontPairs.includes(design.fontPair)) issues.push({ path: "/design/fontPair", message: `font pair ${design.fontPair} not in direction ${dir.id}` });
+  if (!acceptedFontPairs(dir).includes(design.fontPair)) issues.push({ path: "/design/fontPair", message: `font pair ${design.fontPair} not in direction ${dir.id}` });
   const r = dir.ranges;
   const inRange = (key: "radius" | "baseFontSize" | "scale" | "headingWeight" | "headingTracking") => {
     const [lo, hi] = r[key];
@@ -110,7 +111,7 @@ export function enforceDesign(design: Design, dir: Direction): Design {
   const out: Design = {
     ...design,
     direction: dir.id,
-    fontPair: dir.fontPairs.includes(design.fontPair) ? design.fontPair : dir.fontPairs[0]!,
+    fontPair: acceptedFontPairs(dir).includes(design.fontPair) ? design.fontPair : dir.fontPairs[0]!,
     radius: Math.round(clamp(design.radius, r.radius)),
     baseFontSize: Math.round(clamp(design.baseFontSize, r.baseFontSize)),
     scale: clamp(design.scale, r.scale),

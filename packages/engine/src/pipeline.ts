@@ -5,7 +5,8 @@ import { mediaFiles, siteFiles, exportZip, shareImageOf, variantFile, variantWid
 import { blockerText, direction as directionById, keepUnchangedOwnerEdits, publishChecklist, templateFor, validateSite, type ImageAsset, type PublishBlocker, type SiteSpec } from "@sb/spec";
 import type { Operation } from "fast-json-patch";
 import { ModelOutputError, SpendCapError, type ModelClient } from "./llm/client.ts";
-import { classify, makeBrief, chooseDesign, altTexts, generateContent, critique, applyPatches, editSpec, drawsInsteadOfPhotos } from "./stages.ts";
+import { classify, makeBrief, chooseDesign, altTexts, generateContent, critique, applyPatches, editSpec, drawsInsteadOfPhotos, type VarietyInput } from "./stages.ts";
+import { keyOf, lookKey, siteSeed } from "./variety.ts";
 import { extractSwatches, type Swatch } from "./palette.ts";
 import { processLogo, processPhoto, shareJpeg, visionJpeg } from "./images.ts";
 import type { ImageGenerator } from "./image-gen.ts";
@@ -183,7 +184,19 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
       const swatches: Swatch[] = [];
       if (logo) swatches.push(...(await extractSwatches(originals.get(logo.id)!, "logo", 3)));
       for (const p of photos.slice(0, 3)) swatches.push(...(await extractSwatches(originals.get(p.id)!, "photo", 2)));
-      const { design } = await stageTime("design", () => chooseDesign(client, { brief, swatches, photoCount: photos.length, generatedCount: ideas.length + reuse.length }));
+      // The variety engine (config variety.families): the seed, the same trade's sites (same town first), the look a
+      // regeneration replaces (it moves the seed too).
+      const variety = config.variety.families
+        ? await (async (): Promise<VarietyInput> => {
+            const previous = (await repo.getSpec(siteId))?.spec;
+            const previousKey = previous ? lookKey(previous) : undefined;
+            const neighbours = (await repo.neighbourLooks(siteId, brief.businessType, brief.town, config.variety.neighbours)).map((n) => keyOf(n.design, n.hero));
+            const seed = siteSeed(siteId, previousKey ? JSON.stringify(previousKey) : "");
+            return { seed, neighbours, pictures: photos.length + ideas.length + reuse.length > 0, ...(previousKey ? { previous: previousKey } : {}) };
+          })()
+        : undefined;
+      const { design, hero } = await stageTime("design", () => chooseDesign(client, { brief, swatches, photoCount: photos.length, generatedCount: ideas.length + reuse.length, ...(variety ? { variety } : {}) }));
+      if (variety) await log("design", "Variety engine", { seed: variety.seed, neighbours: variety.neighbours.length, regeneration: !!variety.previous, hero: hero ?? null, fontPair: design.fontPair, primary: design.colors.primary });
       // The editor's live preview recolours its skeleton with these while the content is written.
       await log("design", "Direction chosen", { direction: design.direction, colors: design.colors });
       stop.signal.throwIfAborted();
@@ -191,7 +204,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
         if (drawsInsteadOfPhotos(directionById(design.direction))) await log("imageGen", `${design.direction} draws the trade instead of showing pictures; no pictures generated`);
         else generating = startImages();
       }
-      return { brief, design, generated: await generating };
+      return { brief, design, hero, generated: await generating };
     } catch (e) {
       // Pictures not yet sent don't start; ones already sent finish (fal bills them anyway) before the
       // failure is passed on, so nothing of this job runs on behind it.
@@ -235,7 +248,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
   const [planned, imaged] = await Promise.allSettled([planning, imaging]);
   if (planned.status === "rejected") throw planned.reason;
   if (imaged.status === "rejected") throw imaged.reason;
-  const { brief, design, generated } = planned.value;
+  const { brief, design, hero, generated } = planned.value;
   // Not for a template that draws the trade instead of showing pictures (template S).
   if (reuse.length && !drawsInsteadOfPhotos(directionById(design.direction))) {
     generated.push(...reuse.map((i) => structuredClone(i)));
@@ -255,6 +268,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
       assets: { images, ...(logoAsset ? { logo: logoAsset } : {}) },
       scope: intake.scope,
       heroImageIds: heroIds,
+      ...(hero ? { hero } : {}),
       structuredOutput: config.structuredOutputForContent,
       retries: config.limits.contentRetries,
       corpus,

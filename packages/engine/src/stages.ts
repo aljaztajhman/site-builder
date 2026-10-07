@@ -44,6 +44,7 @@ import type { Swatch } from "./palette.ts";
 import { fitImageForModel, sliceScreenshot } from "./images.ts";
 import { checkFacts, type FactViolation } from "./facts.ts";
 import { applyOps } from "./editor.ts";
+import { awayFromNeighbours, fittingDirections, pickFromFamily, type LookKey } from "./variety.ts";
 
 // ---------- 1. Intake -> brief ----------
 
@@ -123,10 +124,42 @@ export function drawsInsteadOfPhotos(dir: Direction): boolean {
   return dir.layout.heroes.every((h) => h.startsWith("hero-signature:") && !signatureWithPhoto(h));
 }
 
+/**
+ * The variety engine's input to the design step (config `variety.families`): the site's seed, the looks of the sites
+ * of the same trade (the same town first), the look a regeneration replaces, and whether the site has any picture.
+ */
+export interface VarietyInput {
+  seed: number;
+  neighbours: LookKey[];
+  previous?: LookKey;
+  pictures: boolean;
+}
+
+/**
+ * With the variety engine: the trade template is offered beside two fitting directions instead of forced, and a
+ * regeneration asks for a different look. Empty when the trade has no template for these photos and nothing replaces.
+ */
+export function familyLine(businessType: BusinessType, photoCount: number, v: VarietyInput): string {
+  const t = templateFor(businessType, photoCount);
+  const alts = fittingDirections(businessType, v.seed, t ? [t.id] : []);
+  const lines: string[] = [];
+  if (t) {
+    const draws = drawsInsteadOfPhotos(t) ? " It draws the trade instead of showing pictures; with it no generated pictures are made." : "";
+    lines.push(
+      `Trade template: ${t.id} (${t.name}) is hand-made for this trade; code picks its palette (or the logo's colours), font pair and hero. Also fitting: ${alts.map((d) => `${d.id} (${d.name})`).join(", ")}. Choose the one that fits this business best: premium or everyday, how good and how many its photos are, its logo.${draws}`,
+    );
+  }
+  if (v.previous) {
+    lines.push(`The owner asked for a different look. The site it replaces uses direction ${v.previous.direction}, font pair ${v.previous.fontPair}, primary ${v.previous.primary} and hero ${v.previous.hero}: choose another direction, or at least other fonts and colours.`);
+  }
+  return lines.join("\n");
+}
+
 export async function chooseDesign(
   client: ModelClient,
-  input: { brief: Brief; swatches: Swatch[]; photoCount: number; generatedCount: number },
-): Promise<{ design: Design; reason: string }> {
+  input: { brief: Brief; swatches: Swatch[]; photoCount: number; generatedCount: number; variety?: VarietyInput },
+): Promise<{ design: Design; reason: string; hero?: string }> {
+  const offer = input.variety ? familyLine(input.brief.businessType, input.photoCount, input.variety) : templateLine(input.brief.businessType, input.photoCount);
   const { data } = await client.callJson({
     stage: "design",
     system: [DESIGN_SYSTEM, directionsCatalogue()],
@@ -134,7 +167,7 @@ export async function chooseDesign(
     messages: [
       {
         role: "user",
-        content: `Business: ${input.brief.name} (${input.brief.businessType}), tone ${input.brief.tone}.\nSummary: ${input.brief.summary}\n${photoLine(input.photoCount, input.generatedCount)}\n${templateLine(input.brief.businessType, input.photoCount)}\nBrand colours extracted in code (hex, share, source): ${
+        content: `Business: ${input.brief.name} (${input.brief.businessType}), tone ${input.brief.tone}.\nSummary: ${input.brief.summary}\n${photoLine(input.photoCount, input.generatedCount)}\n${offer}\nBrand colours extracted in code (hex, share, source): ${
           input.swatches.length ? input.swatches.map((s) => `${s.hex} ${(s.weight * 100).toFixed(0)}% ${s.source}`).join(", ") : "none"
         }`,
       },
@@ -142,18 +175,31 @@ export async function chooseDesign(
     schema: toModelJsonSchema(DesignChoice),
   }, (d) => DesignChoice.parse(d));
   const choice = data;
-  return { design: designFromChoice(choice), reason: choice.reason };
+  const r = designWithVariety(choice, input.variety ? { ...input.variety, swatches: input.swatches } : undefined);
+  return { design: r.design, reason: choice.reason, ...(r.hero ? { hero: r.hero } : {}) };
 }
 
-/** Builds full tokens from the direction's fallback palette and the chosen brand colours; code enforces ranges and contrast. */
+/**
+ * Builds full tokens from the direction's fallback palette and the chosen brand colours; code enforces ranges and
+ * contrast. With `variety`: a template takes its family's look (logo colours in its roles, or a palette, a font pair
+ * and a hero, by the seed and away from the neighbours, `hero` returned for the content step), and any other
+ * direction moves off a neighbour's look.
+ */
 export function designFromChoice(choice: z.infer<typeof DesignChoice>): Design {
+  return designWithVariety(choice).design;
+}
+
+export function designWithVariety(choice: z.infer<typeof DesignChoice>, variety?: VarietyInput & { swatches: Swatch[] }): { design: Design; hero?: string } {
   const dir = directionById(choice.direction);
-  // A trade template keeps its own palette (it comes from the trade: asphalt and signal yellow, hot and cold pipes, roast and wheat).
-  const colors = dir.template ? { ...dir.palette.fallback } : { ...dir.palette.fallback, primary: choice.primary, accent: choice.accent ?? choice.primary };
+  const avoid = variety ? [...variety.neighbours, ...(variety.previous ? [variety.previous] : [])] : [];
+  const family = variety ? pickFromFamily(dir, { seed: variety.seed, logo: variety.swatches, pictures: variety.pictures, neighbours: avoid }) : undefined;
+  // A trade template keeps its own palette (it comes from the trade: asphalt and signal yellow, hot and cold pipes, roast and wheat),
+  // or with the variety engine its family's: the logo's colours in its roles, else a palette the seed picks.
+  const colors = family ? { ...family.colors } : dir.template ? { ...dir.palette.fallback } : { ...dir.palette.fallback, primary: choice.primary, accent: choice.accent ?? choice.primary };
   if (!dir.template) colors.onPrimary = contrast("#ffffff", colors.primary) >= contrast("#111111", colors.primary) ? "#ffffff" : "#111111";
   const draft: Design = {
     direction: dir.id,
-    fontPair: choice.fontPair,
+    fontPair: family?.fontPair ?? choice.fontPair,
     colors,
     radius: Math.round(choice.radius),
     baseFontSize: Math.round(choice.baseFontSize),
@@ -165,8 +211,10 @@ export function designFromChoice(choice: z.infer<typeof DesignChoice>): Design {
     shadow: choice.shadow,
     imagery: dir.imagery,
   };
+  let design = enforceDesign(clampToSchema(draft), dir);
+  if (variety && !family) design = enforceDesign(awayFromNeighbours(design, dir, dir.layout.heroes[0] ?? "none", avoid, variety.seed), dir);
   // Never the colours and fonts of a site on the landing page's trade showcase.
-  return Design.parse(awayFromShowcases(enforceDesign(clampToSchema(draft), dir), dir));
+  return { design: Design.parse(awayFromShowcases(design, dir)), ...(family ? { hero: family.hero } : {}) };
 }
 
 function clampToSchema(d: Design): Design {
@@ -227,6 +275,8 @@ export interface ContentInput {
   assets: SiteSpec["assets"];
   scope: "home" | "full";
   heroImageIds: string[];
+  /** The variety engine's hero for a template family ("type:variant"); absent: the direction's own. */
+  hero?: string;
   structuredOutput: boolean;
   retries: number;
   corpus: string;
@@ -276,9 +326,15 @@ export function heroRule(heroImageIds: string[], directionHeroes: string[]): str
 }
 
 /** The template's homepage outline for the content step; empty for other directions. */
-export function templateOutline(dir: Direction): string {
+export function templateOutline(dir: Direction, hero?: string): string {
   if (!dir.template) return "";
-  return `Homepage outline of the ${dir.name} template, top to bottom. Follow it: these sections in this order, with these variants and tones, and no others on the homepage; leave a section out only when the facts it needs are missing. A closing contact section in the outline is allowed although the top already shows contact facts.\n${dir.template.homepage.map((s, i) => `${i + 1}. ${s}`).join("\n")}`;
+  // With the variety engine the hero is the family's pick; the template's own line describes only its signature hero.
+  const lines = dir.template.homepage.map((s, i) =>
+    i === 0 && hero && !s.startsWith(`${hero} `) && !s.startsWith(`${hero}:`)
+      ? `${hero}: this site's hero (instead of the template's signature hero): the headline and intro the signature hero would carry, the best photo where the variant shows one, the call as the primary action`
+      : s,
+  );
+  return `Homepage outline of the ${dir.name} template, top to bottom. Follow it: these sections in this order, with these variants and tones, and no others on the homepage; leave a section out only when the facts it needs are missing. A closing contact section in the outline is allowed although the top already shows contact facts.\n${lines.map((s, i) => `${i + 1}. ${s}`).join("\n")}`;
 }
 
 export async function generateContent(client: ModelClient, input: ContentInput): Promise<ContentResult> {
@@ -292,10 +348,10 @@ export async function generateContent(client: ModelClient, input: ContentInput):
         `Build the ${input.scope === "home" ? "homepage only (other pages come later; nav may list only the homepage)" : "full site"} for this brief.`,
         `Brief (facts are verified; anything null is missing and must be a placeholder or left out):\n${JSON.stringify(input.brief)}`,
         `Pages to produce (page ids p_<slug or "home">):\n${pages.map((p) => `- ${p.kind} "${p.slug}" nav "${p.navLabel}": ${p.purpose}`).join("\n")}`,
-        `Design direction: ${dir.id}. Header ${dir.layout.header}, footer ${dir.layout.footer}. Preferred heroes: ${dir.layout.heroes.join(", ")}. Section rhythm: ${dir.layout.rhythm} (use the tone field: default/alt/inverse/band; band is the direction's saturated colour). Preferred variants: ${dir.layout.prefer.join(", ")}.`,
-        templateOutline(dir),
+        `Design direction: ${dir.id}. Header ${dir.layout.header}, footer ${dir.layout.footer}. Preferred heroes: ${(input.hero ? [input.hero] : dir.layout.heroes).join(", ")}. Section rhythm: ${dir.layout.rhythm} (use the tone field: default/alt/inverse/band; band is the direction's saturated colour). Preferred variants: ${dir.layout.prefer.join(", ")}.`,
+        templateOutline(dir, input.hero),
         `Photos (use each at most twice; alt text is already written):\n${imageList(input.assets, input.heroImageIds)}`,
-        heroRule(input.heroImageIds, dir.layout.heroes),
+        heroRule(input.heroImageIds, input.hero ? [input.hero] : dir.layout.heroes),
         `Business facts available to components: phone ${input.brief.facts.phone ? "yes" : "missing"}, address ${input.brief.facts.address ? "yes" : "missing"}, hours ${input.brief.facts.hours ? "yes" : "missing"}, booking URL ${input.brief.facts.bookingUrl ? "yes" : "no — never use the booking action"}.`,
         input.structuredOutput ? "" : plainJsonInstruction(),
       ]

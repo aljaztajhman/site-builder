@@ -482,6 +482,8 @@ export const DIRECTIONS: Direction[] = [
       h2: [36, 84],
       firstFor: ["car-repair"],
       minPhotos: 0,
+      // The hero's eyebrow and fact label are set in the band colour on the photo's dark overlay (motifs.css).
+      textPairs: [["band", "inverse"]],
       homepage: [
         "hero-signature:photo tone inverse: fact phone, the best workshop photo (none: leave image out); factLabel how the client wants to be reached; the hero adds address and hours itself",
         "services-list:two-column: every service the client lists, a short name and one plain line each",
@@ -604,6 +606,8 @@ export const DIRECTIONS: Direction[] = [
       h2: [34, 64],
       firstFor: ["bakery"],
       minPhotos: 1,
+      // The hero's eyebrow is set in the band colour on the arch hero's inverse ground (motifs.css).
+      textPairs: [["band", "inverse"]],
       homepage: [
         "hero-signature:arch tone inverse: fact opening (phone when the client gave no hours), the best product photo; primary a link to the offer section, secondary a call or order link",
         "price-list:grouped: what is on the shelf every day, one group without a name, prices only as the client gave them (placeholders for the rest)",

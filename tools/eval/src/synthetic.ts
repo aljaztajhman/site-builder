@@ -73,7 +73,7 @@ export function syntheticRecordings(fixture: Fixture, golden: SiteSpec, edits: {
       body: { images: golden.assets.images.map((img, index) => ({ index, alt: img.alt, focalX: img.focal?.x ?? 0.5, focalY: img.focal?.y ?? 0.5, heroSuitable: index === 0 })) },
     });
   }
-  out.push({ stage: "content", body: { chrome: golden.chrome, pages: contentPages } });
+  out.push({ stage: "content", body: { chrome: golden.chrome, pages: scope === "home" ? withoutLinksOutside(contentPages) : contentPages } });
   out.push({ stage: "critique", body: { issues: [], patches: [] } });
   for (const e of edits) out.push({ stage: "edit", body: e });
 
@@ -90,4 +90,22 @@ export function syntheticRecordings(fixture: Fixture, golden: SiteSpec, edits: {
       usage: { input_tokens: 0, output_tokens: 0, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 },
     },
   }));
+}
+
+/**
+ * A homepage-only answer can't link to the pages it leaves out (the golden's menu page, its services page): links
+ * whose target is another page are dropped, as the content step would write them for a homepage preview.
+ */
+function withoutLinksOutside(pages: SiteSpec["pages"]): SiteSpec["pages"] {
+  const ids = new Set(pages.map((p) => p.id));
+  const outside = (v: unknown): boolean => {
+    const page = (v as { target?: { page?: unknown } } | null)?.target?.page;
+    return typeof page === "string" && !ids.has(page);
+  };
+  const clean = (v: unknown): unknown => {
+    if (Array.isArray(v)) return v.filter((x) => !outside(x)).map(clean);
+    if (v && typeof v === "object") return Object.fromEntries(Object.entries(v).filter(([, x]) => !outside(x)).map(([k, x]) => [k, clean(x)]));
+    return v;
+  };
+  return clean(structuredClone(pages)) as SiteSpec["pages"];
 }
