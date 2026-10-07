@@ -74,13 +74,14 @@ const deviceOf = (b: Browser) => /sb_device=([0-9a-f]{32})\./.exec(b.cookie)![1]
 const json = (cookie: string) => ({ cookie, "content-type": "application/json" });
 
 /** The landing page's form without an account: the ticket, then the form carrying it. */
-async function anonymousIntake(b: Browser, description = DESCRIPTION) {
+async function anonymousIntake(b: Browser, description = DESCRIPTION, source?: string) {
   const ip = freshIp();
   const ticket = await req("/api/intake/ticket", { method: "POST", body: new URLSearchParams({ _csrf: b.csrf, description }), headers: { cookie: b.cookie, "x-real-ip": ip } });
   if (ticket.status !== 200) return ticket;
   const form = new FormData();
   form.set("_csrf", b.csrf);
   form.set("description", description);
+  if (source !== undefined) form.set("source", source);
   const t = ((await ticket.json()) as { ticket: string }).ticket;
   return req(`/api/sites?ticket=${encodeURIComponent(t)}`, { method: "POST", body: form, headers: { cookie: b.cookie, "x-real-ip": ip } });
 }
@@ -113,6 +114,19 @@ describe("the funnel's steps write their events", () => {
     expect((await eventsOf("upsell_clicked")).map((e) => e.props)).toEqual([{ where: "plans" }]);
   });
 
+  it("landing_view keeps a campaign's utm_source, and the landing page's form carries it to the intake", async () => {
+    const card = await newBrowser(req);
+    const page = await req("/?utm_source=Letak-Ljubljana&utm_medium=print", { headers: { cookie: card.cookie, "user-agent": UA } });
+    expect(await page.text()).toContain('<input type="hidden" name="source" value="letak-ljubljana"/>');
+    const odd = await newBrowser(req);
+    const oddPage = await req(`/?utm_source=${encodeURIComponent("<script>")}`, { headers: { cookie: odd.cookie, "user-agent": UA } });
+    expect(await oddPage.text()).not.toContain('name="source"');
+    const views = await eventsOf("landing_view");
+    expect(views.find((v) => v.device_key === deviceKey(SECRET, deviceOf(card)))?.source).toBe("letak-ljubljana");
+    expect(views.find((v) => v.device_key === deviceKey(SECRET, deviceOf(odd)))?.source).toBeNull();
+    expect(views.find((v) => v.device_key === deviceKey(SECRET, deviceOf(anon)))?.source).toBeNull();
+  });
+
   it("intake_refused: with the reason's code, from the ticket and from the form", async () => {
     const short = await anonymousIntake(anon, "Pekarna.");
     expect(short.status).toBe(400);
@@ -124,12 +138,12 @@ describe("the funnel's steps write their events", () => {
     expect((await eventsOf("intake_refused")).map((e) => e.props.reason)).toEqual(["too_short", "no_javascript"]);
   });
 
-  it("intake_submitted: the new site, the device, the tier and the scope", async () => {
-    const res = await anonymousIntake(anon);
+  it("intake_submitted: the new site, the device, the tier, the scope and the campaign the form carried", async () => {
+    const res = await anonymousIntake(anon, DESCRIPTION, "Letak-Ljubljana");
     expect(res.status).toBe(303);
     anonSite = res.headers.get("location")!.split("/").at(-1)!;
     const [e] = await eventsOf("intake_submitted");
-    expect(e).toMatchObject({ site_id: anonSite, device_key: deviceKey(SECRET, deviceOf(anon)), tier: "anonymous", props: { scope: "home", photos: 0, logo: false } });
+    expect(e).toMatchObject({ site_id: anonSite, device_key: deviceKey(SECRET, deviceOf(anon)), tier: "anonymous", source: "letak-ljubljana", props: { scope: "home", photos: 0, logo: false } });
   });
 
   it("limit_hit: a second free homepage on the same device, with which limit and the job (and the intake's refusal)", async () => {

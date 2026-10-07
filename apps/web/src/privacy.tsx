@@ -4,6 +4,7 @@ import type { AppEnv } from "./access.ts";
 import { Brand, Doc, html } from "./pages.tsx";
 import { PRODUCT_NAME } from "./ui/labels.ts";
 import { Provider } from "./legal.tsx";
+import { cloudflareBeacon } from "./beacon.tsx";
 
 /**
  * The product's own privacy policy (/zasebnost): what we store about owners and visitors of the product
@@ -12,14 +13,15 @@ import { Provider } from "./legal.tsx";
  * marked placeholders until filled in.
  */
 export function registerPrivacyRoute(app: Hono<AppEnv>, config: AppConfig): void {
-  app.get("/zasebnost", (c) => c.html(privacyPage(config)));
+  app.get("/zasebnost", (c) => c.html(privacyPage(config, cloudflareBeacon(c, config))));
 }
 
-export function privacyPage(config: AppConfig): string {
+/** `beacon`: the Cloudflare Web Analytics token when this response carries it (beacon.tsx). */
+export function privacyPage(config: AppConfig, beacon: string | null = null): string {
   const t = config.tiers;
   const deviceDays = config.accounts.deviceCookieDays;
   return html(
-    <Doc title="Zasebnost">
+    <Doc title="Zasebnost" beacon={beacon}>
       <header className="top">
         <Brand href="/" />
       </header>
@@ -83,6 +85,13 @@ export function privacyPage(config: AppConfig): string {
               <strong>Cloudflare Turnstile</strong> preveri, da obrazca za predogled brez prijave in pregled spletne strani ne izpolnjuje robot. Naloži se šele, ko začnete pisati opis; pri tem Cloudflare
               obdela vaš naslov IP in podatke o brskalniku.
             </li>
+            {/* docs/plans/analytics.md Step 2: named while the beacon has a token (config analytics.cloudflare). */}
+            {config.analytics.cloudflare.token && (
+              <li id="cloudflare-analytics">
+                <strong>Cloudflare Web Analytics</strong> na prvi strani, strani za prijavo in tej strani prešteje oglede: od kod so obiskovalci prišli, katero stran so odprli in iz katere države. Ne
+                uporablja piškotkov; pri tem Cloudflare obdela vaš naslov IP in podatke o brskalniku, mi pa vidimo samo skupna števila.
+              </li>
+            )}
             <li>
               <strong>Resend</strong> pošlje e-pošto s povezavo za prijavo in sporočila iz kontaktnih obrazcev lastnikom strani.
             </li>

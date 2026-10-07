@@ -17,6 +17,7 @@ import {
 import { getCookie } from "hono/cookie";
 import { Brand, Doc, html } from "./pages.tsx";
 import type { Track } from "./analytics.ts";
+import { cloudflareBeacon } from "./beacon.tsx";
 import { PRODUCT_NAME } from "./ui/labels.ts";
 
 /**
@@ -44,7 +45,7 @@ const TOKEN = /^[A-Za-z0-9_-]{43}$/;
 export function registerLoginRoutes(app: Hono<AppEnv>, deps: LoginDeps): void {
   const { repo, config, auth, mailer } = deps;
   const throttle = loginThrottle();
-  const page = (c: Context<AppEnv>, p: Omit<LoginProps, "csrf">, status: 200 | 400 | 401 | 403 | 429 | 502 | 503 = 200) => c.html(loginPage({ ...p, csrf: c.get("csrf") }), status);
+  const page = (c: Context<AppEnv>, p: Omit<LoginProps, "csrf">, status: 200 | 400 | 401 | 403 | 429 | 502 | 503 = 200) => c.html(loginPage({ ...p, csrf: c.get("csrf"), beacon: cloudflareBeacon(c, config) }), status);
 
   app.get("/login", (c) => page(c, { next: safeNext(c.req.query("next")) }));
 
@@ -157,13 +158,15 @@ export interface LoginProps {
   email?: string;
   error?: string;
   adminError?: string;
+  /** Cloudflare Web Analytics token for this response (beacon.tsx), or none. */
+  beacon?: string | null;
 }
 
 const Hidden = ({ name, value }: { name: string; value: string }) => <input type="hidden" name={name} value={value} />;
 
-export function loginPage({ next, csrf, email, error, adminError }: LoginProps): string {
+export function loginPage({ next, csrf, email, error, adminError, beacon }: LoginProps): string {
   return html(
-    <Doc title="Prijava">
+    <Doc title="Prijava" beacon={beacon}>
       <main className="login">
         <Brand href="/" />
         <h1>Prijava</h1>
