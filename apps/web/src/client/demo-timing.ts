@@ -23,6 +23,11 @@ export const DEMO = {
     photos: { apart: 230, after: 850 },
     text: { perWord: 45, total: 1300, after: 700 },
   },
+  /**
+   * Reduced motion: the same demo in fades only. `switch` is the cross-fade from one trade's site to the
+   * next; `card` is the intro card fading out and back in under the device (the CSS uses the same .3s).
+   */
+  calm: { switch: 600, card: 300 },
   /** The transformation's phases (ms, before `tempo`). */
   transform: { unlock: 200, stagger: 48, leg: 210, turn: 280, extend: 240, lock: 260 },
   /** A part's scale while apart, and how far it spreads from the screen's centre (px). */
