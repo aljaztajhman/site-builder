@@ -13,9 +13,11 @@ import { startWorker } from "../src/worker.ts";
 /**
  * The worker's "domain" job (fake providers) and its address check at start: a site published before
  * PLATFORM_DOMAIN existed is republished with its platform address when the worker starts with it.
+ * With product events on (config analytics.events), a domain going live is the funnel's domain_connected.
  */
 const here = path.dirname(fileURLToPath(import.meta.url));
-const config = loadConfig();
+const loaded = loadConfig();
+const config = { ...loaded, analytics: { ...loaded.analytics, events: true } };
 let platform: Platform;
 let dir: string;
 let siteId: string;
@@ -75,8 +77,10 @@ describe("worker: domains", () => {
     await handlers.domain!({ hostname: "www.seliskar.si" }, "job-domain");
     expect((await platform.repo.domains.get("www.seliskar.si"))!).toMatchObject({ status: "active", notify: "pending" });
     expect((await platform.repo.getSite(siteId))!.published_address).toBe("https://www.seliskar.si/");
+    expect(await platform.repo.events.list({ kind: "domain_connected" })).toMatchObject([{ site_id: siteId, props: { kind: "connected" } }]);
     // A job for a domain that isn't due (or is done) does nothing.
     await handlers.domain!({ hostname: "www.seliskar.si" }, "job-domain-2");
     expect((await platform.repo.domains.get("www.seliskar.si"))!.status).toBe("active");
+    expect(await platform.repo.events.list({ kind: "domain_connected" })).toHaveLength(1);
   });
 });
