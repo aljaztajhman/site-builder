@@ -7,7 +7,9 @@ import type { SiteSpec } from "@sb/spec";
  * The numbers, names and prices are config (`plans.freePreview`, `plans.standard`, `plans.premium`); this only counts
  * and words them. The web API checks every direct edit with `limitBreach`, the worker every chat edit, so the browser
  * decides nothing. A limit refuses only what grows past it: a site already over (made before the limit, or moved to
- * a smaller plan) can still be edited and trimmed.
+ * a smaller plan) can still be edited and trimmed. The exception is a collection the plan doesn't include
+ * (sb-collection-downgrade: read-only): it stays published as it is, but its entries (and their translations)
+ * can't be added, changed, deleted or reordered until the plan includes it again; removing it whole is allowed.
  */
 
 export type CollectionKey = AppConfig["plans"]["standard"]["site"]["collections"][number];
@@ -71,6 +73,8 @@ const COLLECTION_SENTENCE: Record<CollectionKey, string> = {
   services: "Storitve kot seznam so",
   team: "Ekipa kot seznam je",
 };
+/** A collection's name as the editor shows it ("Vnosi zbirke Novice"). */
+const COLLECTION_NAME: Record<CollectionKey, string> = { blog: "Novice", events: "Dogodki", services: "Storitve", team: "Ekipa" };
 const FREE_PREFIX = "Brezplačni predogled je domača stran.";
 
 export type LimitKind = "pages" | "locales" | "collections";
@@ -110,8 +114,45 @@ export function limitMessage(config: AppConfig, tier: Tier, plan: PlanKey | null
 }
 
 /**
+ * What the owner reads about a collection the site has but the plan doesn't include (moved down from Plus): it
+ * stays on the site as it is, and which plan lets them add, edit, delete and reorder its entries again. The API's
+ * refusal and the editor's note on the read-only list.
+ */
+export function readOnlyMessage(config: AppConfig, tier: Tier, plan: PlanKey | null, kind: CollectionKey): { message: string; upgrade: PlanUpgrade | null } {
+  const next = nextPlanFor(config, tier, plan, (s) => s.collections.includes(kind));
+  const upgrade = next ? upgradeOf(config, next) : null;
+  const head = `Vnosi zbirke ${COLLECTION_NAME[kind]} ostanejo na strani, kot so.`;
+  return { message: next ? `${head} Dodajate, urejate, brišete in razvrščate jih lahko na paketu ${planOffer(config, next)}.` : `${head} V tem paketu jih ne morete urejati.`, upgrade };
+}
+
+/** JSON with sorted keys: the same data stored and read back (jsonb reorders keys) compares equal. */
+const canon = (v: unknown): string =>
+  JSON.stringify(v, (_k, x: unknown) => (x && typeof x === "object" && !Array.isArray(x) ? Object.fromEntries(Object.entries(x as Record<string, unknown>).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))) : x));
+
+/** A collection's translations, per language the spec keeps them for (`/collections/blog/…` keys only). */
+const collectionTranslations = (spec: SiteSpec, kind: CollectionKey, lang: string): Record<string, string> =>
+  Object.fromEntries(Object.entries((spec.translations as Record<string, Record<string, string> | undefined> | undefined)?.[lang] ?? {}).filter(([k]) => k.startsWith(`/collections/${kind}/`)));
+
+/**
+ * A collection the site had, the plan doesn't include and the edit keeps but changes (an entry added, changed,
+ * deleted or moved, or its translation in a language the site keeps), or undefined. Removing the collection, or
+ * the language, whole is not a change it refuses.
+ */
+function changedReadOnly(limits: SiteLimits, before: SiteSpec, after: SiteSpec): CollectionKey | undefined {
+  // The languages the site keeps (a translation emptied counts; a language dropped whole takes its translations along).
+  const langs = after.locales.enabled.filter((l) => l !== after.locales.default);
+  return collectionKinds(before).find(
+    (k) =>
+      !limits.collections.includes(k) &&
+      after.collections?.[k] != null &&
+      (canon(before.collections![k]) !== canon(after.collections[k]) || langs.some((l) => canon(collectionTranslations(before, k, l)) !== canon(collectionTranslations(after, k, l)))),
+  );
+}
+
+/**
  * The limit an edit from `before` to `after` would break for this viewer, or null. Only growth counts: a new
- * collection, more pages or languages than the plan has and than the site had.
+ * collection, more pages or languages than the plan has and than the site had; and any change to the entries of a
+ * collection the plan doesn't include (read-only until the plan has it).
  */
 export function limitBreach(config: AppConfig, tier: Tier, plan: PlanKey | null, before: SiteSpec, after: SiteSpec): LimitBreach | null {
   const limits = siteLimits(config, tier, plan);
@@ -124,6 +165,8 @@ export function limitBreach(config: AppConfig, tier: Tier, plan: PlanKey | null,
   if (pages > limits.maxPages && pages > pageCount(before)) return breach("pages", pages);
   const locales = localeCount(after);
   if (locales > limits.locales && locales > localeCount(before)) return breach("locales", locales);
+  const readOnly = changedReadOnly(limits, before, after);
+  if (readOnly) return { what: "collections", code: "plan_collections", ...readOnlyMessage(config, tier, plan, readOnly) };
   return null;
 }
 
@@ -137,6 +180,8 @@ export interface LimitsInfo extends SiteLimits {
   localesNote: { message: string; upgrade: PlanUpgrade | null };
   /** Per collection the plan doesn't include: the note at its button. */
   collectionNotes: Partial<Record<CollectionKey, { message: string; upgrade: PlanUpgrade | null }>>;
+  /** Per collection the plan doesn't include: the note on its entries when the site already has it (read-only). */
+  readOnlyNotes: Partial<Record<CollectionKey, { message: string; upgrade: PlanUpgrade | null }>>;
 }
 
 const ALL_COLLECTIONS: readonly CollectionKey[] = ["blog", "events", "services", "team"];
@@ -150,6 +195,7 @@ export function limitsInfo(config: AppConfig, tier: Tier, plan: PlanKey | null):
     pagesNote: limitMessage(config, tier, plan, "pages", limits.maxPages + 1),
     localesNote: limitMessage(config, tier, plan, "locales", limits.locales + 1),
     collectionNotes: Object.fromEntries(ALL_COLLECTIONS.filter((k) => !limits.collections.includes(k)).map((k) => [k, limitMessage(config, tier, plan, "collections", k)])),
+    readOnlyNotes: Object.fromEntries(ALL_COLLECTIONS.filter((k) => !limits.collections.includes(k)).map((k) => [k, readOnlyMessage(config, tier, plan, k)])),
   };
 }
 

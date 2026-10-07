@@ -145,7 +145,7 @@ export function choreograph({ pairs, exits, enters, newPlates, vw, vh, k }: Inpu
   const LOCK_PEAK = LOCK + T.lock * 0.45;
 
   let css = `
-::view-transition{background:#191714 radial-gradient(rgb(255 255 255/.07) 1px,transparent 1.3px) 0 0/14px 14px}
+::view-transition{background:var(--screen,#0f1a1c) radial-gradient(rgb(255 255 255/.07) 1px,transparent 1.3px) 0 0/14px 14px}
 ::view-transition-old(*),::view-transition-new(*){mix-blend-mode:normal;inline-size:auto;block-size:auto;animation:none}
 ::view-transition-image-pair(*){overflow:clip;overflow-clip-margin:6px;isolation:auto}
 ::view-transition-old(root){animation:rig-root-out ${T.unlock}ms ${EASE.out} both}
@@ -368,23 +368,53 @@ type VT = { ready: Promise<void>; finished: Promise<void>; skipTransition(): voi
 type WithVT = Document & { startViewTransition?: (cb: () => Promise<void>) => VT };
 
 export interface TransformOptions {
-  /** Reduced motion: a cut. */
-  cut: boolean;
+  /** Reduced motion: a cross-fade instead of the transformation. */
+  calm: boolean;
   /** The running transition, so a second switch can skip it. */
-  onTransition?: (vt: VT | null) => void;
+  onTransition?: (vt: Pick<VT, "skipTransition"> | null) => void;
+}
+
+/**
+ * Reduced motion (and browsers without view transitions): a cross-fade. The new site is loaded and laid out
+ * in `stage` (the frame of the same size under `main`); `main` fades out over it, then loads the same site
+ * unseen and comes back at once, showing the same picture. Only opacity changes; nothing moves.
+ */
+export async function fadeSite(main: HTMLIFrameElement, stage: HTMLIFrameElement, url: string, opts: Pick<TransformOptions, "onTransition">): Promise<void> {
+  await loadInto(stage, url);
+  const sdoc = stage.contentDocument;
+  if (sdoc) {
+    sdoc.defaultView?.scrollTo(0, 0);
+    await settle(sdoc);
+  }
+  let skip = () => {};
+  const skipped = new Promise<void>((r) => (skip = r));
+  opts.onTransition?.({ skipTransition: () => skip() });
+  try {
+    main.style.transition = `opacity ${DEMO.calm.switch}ms ease`;
+    void main.offsetWidth;
+    main.style.opacity = "0";
+    await Promise.race([sleep(DEMO.calm.switch), skipped]);
+    await loadInto(main, url);
+    const doc = main.contentDocument;
+    if (doc) await settle(doc);
+  } finally {
+    main.style.transition = "none";
+    main.style.removeProperty("opacity");
+    void main.offsetWidth;
+    main.style.removeProperty("transition");
+    if (!main.getAttribute("style")) main.removeAttribute("style");
+    opts.onTransition?.(null);
+  }
 }
 
 /**
  * Turns the site in `main` into the one at `url`, piece by piece. The new site is laid out in `stage` (a
- * frame of the same size under it) first. Without view transitions, or with `cut`, the frame just loads it.
+ * frame of the same size under it) first. With `calm`, or without view transitions, a cross-fade.
  */
 export async function transformSite(main: HTMLIFrameElement, stage: HTMLIFrameElement, url: string, opts: TransformOptions): Promise<void> {
   const doc = main.contentDocument as WithVT | null;
   const win = main.contentWindow;
-  if (!doc || !win || opts.cut || !doc.startViewTransition) {
-    await loadInto(main, url);
-    return;
-  }
+  if (!doc || !win || opts.calm || !doc.startViewTransition) return fadeSite(main, stage, url, opts);
   const k = DEMO.tempo;
   // The new site, laid out in the hidden frame first: its parts' places, fonts and photos warm.
   const [html] = await Promise.all([fetch(url).then((r) => r.text()), loadInto(stage, url)]);

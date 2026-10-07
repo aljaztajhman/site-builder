@@ -19,6 +19,11 @@
     "$conceptComment": "concept: Step 3. The brief adds the subtype, goal, angle, signature fact, materials and local anchor (materials and anchor only from the client's text, checked in code); the homepage follows a blueprint by goal instead of the template's fixed outline; a signature device by fact; the subtype picks the motif (wire, joint, tiles, strip, stem, tag). Off: every request is today's. Turning it on needs the paid twin eval (≈ €5).",
     "concept": false
   },
+  "costCuts": {
+    "$comment": "Generation cost cuts (docs/plans/cost-cuts.md items 1 and 7). secondCritiqueOnlyOnFailures: with limits.critiqueIterations 2, the second critique round runs only when the checks after the first round's patches still report failures (3 of 4 recorded second rounds returned no patches, ≈ €0.022 and 40–60 s of checks each); otherwise the job ends after round 1 and logs why. contentRetryAsPatch: a content answer that still fails validation after the code repairs gets an RFC 6902 patch fixing only the listed issues (≈ 300 output tokens instead of 3–5k), applied in code; a patch that doesn't apply or leaves issues falls back to the whole-JSON retry, all within limits.contentRetries. Both off until the 3-fixture critique eval and a full-scope eval on the fixtures that retried (gostilna, kmetija, instalacije) confirm them.",
+    "secondCritiqueOnlyOnFailures": false,
+    "contentRetryAsPatch": false
+  },
   "structuredOutputForContent": false,
   "pricesUsdPerMTok": {
     "claude-haiku-4-5-20251001": { "input": 1.0, "output": 5.0, "cacheWrite5m": 1.25, "cacheRead": 0.1 },
@@ -54,6 +59,18 @@
     "settleMs": 3000,
     "maxRedirects": 5,
     "lighthouse": true
+  },
+  "analytics": {
+    "$comment": "Stranko's own product analytics (docs/plans/analytics.md Steps 1 and 3, HQ sb-analytics = own-plus-cf). events: write product_events rows where a funnel step happens (landing view, intake, preview ready and opened, sign-in, claim, full site, publish, export, plan change, limit hit, upsell, domain) and one 'generation' row per generation job (stage seconds and EUR, checks, pictures, cap hits, direction). Rows carry a keyed hash of the device cookie, never an IP or an email; nothing reaches generation, specs or rendered sites. Off until the owner has read the /zasebnost sentence it adds (shown only while on); /admin/funnel and /admin/engine are always there and read empty without it. keepDays: raw rows are kept this long, then the worker's hourly housekeeping rolls them into daily counts (product_events_daily, kept). landingDedupeMinutes: one landing view per device in this window (like site visits). onceMinutes: an upsell shown or a preview opened counts once per device and site in this window.",
+    "events": false,
+    "keepDays": 90,
+    "landingDedupeMinutes": 30,
+    "onceMinutes": 1440,
+    "cloudflare": {
+      "$comment": "Cloudflare Web Analytics (docs/plans/analytics.md Step 2; sb-analytics = own-plus-cf; the owner created the site and sent the token). Cookieless beacon, only on /, /login and /zasebnost and only when the request's hostname is one of hosts, so local runs, tests and the railway.app address get none; never on the dashboard, editor, admin, previews or published sites. The token is public (it is in the page). token null turns it off everywhere.",
+      "token": "3fad897f56c14335aaccffae0a58ad9b",
+      "hosts": ["stranko.einvoicecheck.eu"]
+    }
   },
   "stats": {
     "$comment": "Cookieless counts per published site (it-site-stats-report): page views (counted when a published page is served), taps on call and directions links (a beacon from stats.js, only from the live /s/ address, never the preview or an export) and contact-form messages. Only daily totals per site are stored. The visitor's IP is used in memory as a keyed hash to skip the same visitor reloading a page within visitDedupeMinutes and to cap tapsPerVisitorPerDay; it is never stored. The monthly report email goes to the site's owner account from the web process, from reportFromHour on day 1 (in timeZone) for the previous month, at most once per site and month (Resend idempotency key), retried every retryEveryMinutes up to maxAttempts within the first reportWithinDays days.",
@@ -121,6 +138,14 @@
   "versions": {
     "$comment": "Spec version retention (owner's decision sb-autosave-versions = prune, 2026-10-01). Every editor autosave stores a full version. A nightly job (cron, read in timeZone) keeps every version from today and the keepAllDays whole days before it, then only the last version of each older day, plus every version that was ever published and the current one. Versions never change; files only pruned versions used are removed with them.",
     "retention": { "keepAllDays": 7, "timeZone": "Europe/Ljubljana", "cron": "30 3 * * *" }
+  },
+  "backups": {
+    "$comment": "Nightly pg_dump of the database to the bucket (docs/dev/workflow.md §4, owner's decision sb-dev-workflow): pnpm db:backup writes backups/<UTC date>.sql.gz, deletes those older than keepDays, then checks the newest one; pnpm db:backup --check only checks. The schema alone dumps to about 8.5 KB compressed (measured 2026-10-07), so minBytes catches an empty or failed dump; minShareOfPrevious catches one cut short.",
+    "prefix": "backups/",
+    "keepDays": 30,
+    "maxAgeHours": 26,
+    "minBytes": 4096,
+    "minShareOfPrevious": 0.5
   },
   "imageGen": {
     "$comment": "Images from fal.ai: eval fixture photos (pnpm fixtures:ai-photos) and, for client sites with fewer than pipeline.fillUpTo photos, up to that many generated mood images, labelled on the site (owner's decisions 2026-09-30 and 2026-10-01). A homepage preview uses 2 (hero + one image-text; keeps it under the €0.30 preview target), a full site 3. Needs FAL_KEY; without it the pipeline skips generation. Prices from fal's pricing API on 2026-09-30; gpt-image-2.5 is token-billed, so its per-megapixel price is fal's 1024x1024 high-quality estimate ($0.05268) scaled by area.",

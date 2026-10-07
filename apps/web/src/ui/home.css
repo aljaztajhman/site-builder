@@ -1,19 +1,22 @@
 /*
  * Product landing page, served at / to visitors without a session. The design is
- * docs/design/homepage.html; this is its stylesheet with two changes: --ink-3 is the darker value
- * from app.css (the design's #8a857c fails 4.5:1 on white), and the vignettes' starting states only
- * apply once home.js has run (html.js), so without JavaScript every drawing is shown finished.
+ * docs/design/homepage.html; this is its stylesheet with three changes: the colours are app.css's
+ * "Arctic & teal" tokens (owner decision sb-ui-palette) instead of the design's warm paper and green,
+ * --ink-3 is the darker value from app.css (the design's #8a857c fails 4.5:1 on white), and the
+ * vignettes' starting states only apply once home.js has run (html.js), so without JavaScript every
+ * drawing is shown finished.
  */
 @font-face{font-family:"Bricolage Grotesque";src:url("fonts/bricolage-grotesque.woff2") format("woff2");font-weight:200 800;font-display:swap}
 @font-face{font-family:"Figtree";src:url("fonts/figtree.woff2") format("woff2");font-weight:300 900;font-display:swap}
 
-/* Product tokens, same as app.css */
+/* Product tokens, same as app.css ("Arctic & teal", owner decision sb-ui-palette; test/ui-contrast.test.ts keeps them equal) */
 :root{
-  --canvas:#f5f3ef;--surface:#fff;--surface-2:#ece9e3;--ink:#151412;--ink-2:#4d4a44;--ink-3:#6b665e;--line:#dcd8d0;--line-2:#c9c4ba;
-  --accent:#156b4a;--accent-ink:#fff;--accent-soft:#e3efe8;--ph:#fff1a8;--danger:#b3261e;--danger-soft:#f9e3e1;
-  /* Button hover, accent as text, text on ink, the call vignette, a search link. */
-  --accent-hover:#115a3e;--accent-text:#156b4a;--on-ink:#fff;--on-ink-2:#c9c4ba;--calling:#9ad0b6;--link:#1a4fa8;--h1-weight:560;
-  --r-1:4px;--r-2:8px;--r-3:12px;--shadow-float:0 8px 24px rgb(20 20 18/.10),0 1px 2px rgb(20 20 18/.08);
+  --canvas:#eef3f4;--surface:#fff;--surface-2:#dfe8ea;--ink:#0f1f22;--ink-2:#3d5257;--ink-3:#53676c;--line:#cfdbde;--line-2:#b4c5c9;
+  --accent:#0d7a84;--accent-ink:#fff;--accent-soft:#dbeef0;--ph:#fff1a8;--danger:#b3261e;--danger-soft:#f9e3e1;
+  /* Button hover, accent as text, text on ink, the call vignette, a search link; the demo device's dark screen. */
+  --accent-hover:#0a636b;--accent-text:#0d6a73;--on-ink:#fff;--on-ink-2:#b4c5c9;--calling:#8fd3d9;--link:#1a4fa8;--h1-weight:560;
+  --screen:#0f1a1c;
+  --r-1:4px;--r-2:8px;--r-3:12px;--shadow-float:0 8px 24px rgb(15 31 34/.10),0 1px 2px rgb(15 31 34/.08);
   --font-display:"Bricolage Grotesque","Inter Tight",system-ui,sans-serif;--font-ui:"Figtree","Inter",system-ui,sans-serif;
   --gutter:20px;--section:64px;
   color-scheme:light;
@@ -43,7 +46,7 @@ section{padding:var(--section) 0;border-top:1px solid var(--line);scroll-margin-
 .btn.quiet:hover{background:var(--surface-2)}
 .btn.sm{min-height:40px;padding:0 14px;font-size:15px}
 @media (pointer:coarse){.btn.sm{min-height:44px}}
-mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:#151412}
+mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:var(--ink)}
 
 /* ---------- Header ---------- */
 .hd{background:var(--canvas)}
@@ -150,14 +153,29 @@ mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:#151412}
 .devbox[data-step]:not([data-step=site]) + .cap{opacity:0}
 /*
  * Before the script runs (html.js is set in <head>), the intro's first frame: the device and the caption
- * hidden, so the finished site never flashes before it is typed and built. Without JavaScript, or with
- * reduced motion (no intro), the site shows at once.
+ * hidden, so the finished site never flashes before it is typed and built. Without JavaScript the site
+ * shows at once.
  */
+html.js .devbox[data-intro]:not([data-step]) + .cap{opacity:0}
 @media (prefers-reduced-motion:no-preference){
   html.js .devbox[data-intro]:not([data-step]) .dev{opacity:0;transform:translateY(14px) scale(.97)}
-  html.js .devbox[data-intro]:not([data-step]) + .cap{opacity:0}
 }
-@media (prefers-reduced-motion:reduce){.ask,.ask-type,.ask-steps,.devbox .dev{transition:none}.ask-text .caret{animation:none}}
+/*
+ * Reduced motion: the same intro and switches, in fades only. Nothing slides, scales or resizes: the card
+ * fades out over the device and back in under it (.swap), the device fades in where it stands, the tab's
+ * underline doesn't fill (it just shows the trade), the view switch is a cut.
+ */
+@media (prefers-reduced-motion:reduce){
+  html.js .devbox[data-intro]:not([data-step]) .dev,.devbox[data-step=type] .dev{opacity:0;transform:none}
+  .devbox .dev,.devbox .dev.resize{transition:opacity .6s .15s}
+  .ask{transition:opacity .3s}
+  .ask.swap{opacity:0}
+  .devbox[data-step=site] .ask{transform:none}
+  .ask-go,.ask-go.pressed{transform:none;transition:background .15s}
+  .ask-text .caret,.ask-steps li.now::before{animation:none}
+  .tab[aria-selected=true]::after{transition:none}
+  .tabs.auto .tab[aria-selected=true]::after{animation:none}
+}
 
 /* Sized for the computer view before the script runs (the column width in container units), so nothing moves when it does. */
 .devwrap{min-width:0;container-type:inline-size}
@@ -168,12 +186,12 @@ mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:#151412}
 .dev.resize .chrome{transition:height .9s cubic-bezier(.65,0,.35,1)}
 .dev .chrome i{width:8px;height:8px;border-radius:50%;background:var(--line-2)}
 /* The machine under the site, seen through the seams while the parts move. */
-.dev .screen{position:relative;flex:1;min-height:0;overflow:hidden;background:#191714 radial-gradient(rgb(255 255 255/.07) 1px,transparent 1.3px) 0 0/14px 14px}
+.dev .screen{position:relative;flex:1;min-height:0;overflow:hidden;background:var(--screen) radial-gradient(rgb(255 255 255/.07) 1px,transparent 1.3px) 0 0/14px 14px}
 .dev iframe{position:absolute;left:0;top:0;display:block;border:0;width:var(--iw,1280px);height:calc((var(--h,calc(62cqw + 24px)) - var(--ch,24px)) / var(--s,.31));transform:scale(var(--s,.31));transform-origin:0 0}
 .dev iframe.main{z-index:1}
 .dev iframe.stage{z-index:0}
 .cap{font-size:14px;color:var(--ink-3);margin:12px auto 0;max-width:56ch}
-@media (prefers-reduced-motion:reduce){.dev,.dev .chrome{transition:none}}
+@media (prefers-reduced-motion:reduce){.dev .chrome,.dev.resize .chrome{transition:none}}
 
 /* ---------- What you get: three outcomes shown with the real example, then promises and a comparison ---------- */
 .win{display:grid;gap:24px;align-items:center;margin-top:48px}
@@ -186,7 +204,7 @@ mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:#151412}
 .phone.sm{width:236px;aspect-ratio:236/470;border-radius:20px;justify-self:center}
 /* The example's call bar is fixed to its viewport: a viewport as tall as the frame puts it at the bottom. */
 .phone.sm iframe{height:717px;transform:scale(.6556)}
-.call-vis .tap{position:absolute;left:52px;bottom:14px;width:30px;height:30px;border-radius:50%;background:rgb(21 20 18/.25);box-shadow:0 0 0 0 rgb(21 107 74/.5)}
+.call-vis .tap{position:absolute;left:52px;bottom:14px;width:30px;height:30px;border-radius:50%;background:rgb(15 31 34/.25);box-shadow:0 0 0 0 rgb(13 122 132/.5)}
 .call-vis .calling{position:absolute;left:50%;top:0;transform:translateX(-50%);display:grid;gap:2px;min-width:200px;padding:10px 16px;border-radius:14px;background:var(--ink);color:var(--on-ink);font-size:14px;box-shadow:var(--shadow-float);text-align:center}
 .call-vis .calling b{font-weight:600;color:var(--calling)}
 /* 2. A search typed, the result with the facts the page gives search engines. */
@@ -310,7 +328,7 @@ footer .legal{margin-top:28px;padding-top:16px;border-top:1px solid var(--line);
   @keyframes strike{to{transform:rotate(-3deg) scaleX(1)}}
   @keyframes draw{to{stroke-dashoffset:0}}
   @keyframes load{to{transform:scaleX(1)}}
-  @keyframes press{0%{transform:scale(1);box-shadow:0 0 0 0 rgb(21 107 74/.55)}30%{transform:scale(.8)}100%{transform:scale(1);box-shadow:0 0 0 22px rgb(21 107 74/0)}}
+  @keyframes press{0%{transform:scale(1);box-shadow:0 0 0 0 rgb(13 122 132/.55)}30%{transform:scale(.8)}100%{transform:scale(1);box-shadow:0 0 0 22px rgb(13 122 132/0)}}
   @keyframes drop{to{opacity:1;transform:translate(-50%,0)}}
   @keyframes type{to{width:15ch}}
   @keyframes caret{50%{border-right-color:transparent}}

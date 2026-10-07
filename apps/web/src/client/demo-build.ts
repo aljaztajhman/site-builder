@@ -33,7 +33,21 @@ html.bld.nophoto img{clip-path:inset(0 0 100% 0)}
 html.bld.text picture{background-color:transparent}
 html.bld.text img{clip-path:none}`;
 
-const CLASSES = ["bld", "still", "mono", "hide-t", "empty", "nophoto", "text"];
+/**
+ * Reduced motion: the same four steps in fades only. Blocks fade in where they stand (no rise, no scale),
+ * photos fade in instead of being wiped in, and each word's bar fades away instead of shrinking (its colour
+ * is registered so it can be transitioned). Nothing moves or changes size.
+ */
+const CALM_CSS = `
+@property --sk{syntax:"<color>";inherits:false;initial-value:transparent}
+html.bld.calm body *{transition:color .5s var(--d,0ms),opacity .45s var(--d,0ms),filter .8s var(--d,0ms),--sk ${BAR_MS}ms var(--d,0ms) !important}
+html.bld.calm.still body *{transition:none !important}
+html.bld.calm.empty [data-bk]{transform:none}
+html.bld.calm img,html.bld.calm.nophoto img{clip-path:none}
+html.bld.calm.nophoto img{opacity:0}
+html.bld.calm.text sb-w{background-size:100% .55em;background-position:0 60%;--sk:transparent !important}`;
+
+const CLASSES = ["bld", "still", "mono", "hide-t", "empty", "nophoto", "text", "calm"];
 
 /** A computed `rgb(…)` colour at alpha `a`. */
 const withAlpha = (rgb: string, a: number): string => {
@@ -55,8 +69,11 @@ export interface Build {
   finish: () => void;
 }
 
-/** Takes the page in the frame apart (instantly, unseen): every visible word wrapped, the stylesheet on. */
-export function prepareBuild(doc: Document): Build {
+/**
+ * Takes the page in the frame apart (instantly, unseen): every visible word wrapped, the stylesheet on.
+ * `calm` (reduced motion): the build in fades only.
+ */
+export function prepareBuild(doc: Document, { calm = false }: { calm?: boolean } = {}): Build {
   const win = doc.defaultView!;
   const de = doc.documentElement;
   const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, {
@@ -79,9 +96,9 @@ export function prepareBuild(doc: Document): Build {
   for (const x of boxes) x.setAttribute("data-bk", "");
   const imgs = [...doc.images];
   const style = doc.createElement("style");
-  style.textContent = BUILD_CSS;
+  style.textContent = calm ? BUILD_CSS + CALM_CSS : BUILD_CSS;
   doc.head.append(style);
-  de.classList.add("bld", "still", "mono", "hide-t", "empty", "nophoto");
+  de.classList.add("bld", "still", "mono", "hide-t", "empty", "nophoto", ...(calm ? ["calm"] : []));
   void doc.body.offsetHeight;
   de.classList.remove("still");
   const timers: ReturnType<typeof setTimeout>[] = [];

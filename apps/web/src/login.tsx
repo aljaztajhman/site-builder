@@ -16,6 +16,8 @@ import {
 } from "./access.ts";
 import { getCookie } from "hono/cookie";
 import { Brand, Doc, html } from "./pages.tsx";
+import type { Track } from "./analytics.ts";
+import { cloudflareBeacon } from "./beacon.tsx";
 import { PRODUCT_NAME } from "./ui/labels.ts";
 
 /**
@@ -34,6 +36,8 @@ export interface LoginDeps {
   appUrl?: string;
   /** After a sign-in: what else the new session takes over (anonymous previews, in the limits). */
   onSignIn?: (c: Context<AppEnv>, accountId: string, token: { deviceId: string | null }) => Promise<void>;
+  /** Product events (analytics.ts): a sign-in link asked for, a sign-in done. */
+  track?: Track;
 }
 
 const TOKEN = /^[A-Za-z0-9_-]{43}$/;
@@ -41,7 +45,7 @@ const TOKEN = /^[A-Za-z0-9_-]{43}$/;
 export function registerLoginRoutes(app: Hono<AppEnv>, deps: LoginDeps): void {
   const { repo, config, auth, mailer } = deps;
   const throttle = loginThrottle();
-  const page = (c: Context<AppEnv>, p: Omit<LoginProps, "csrf">, status: 200 | 400 | 401 | 403 | 429 | 502 | 503 = 200) => c.html(loginPage({ ...p, csrf: c.get("csrf") }), status);
+  const page = (c: Context<AppEnv>, p: Omit<LoginProps, "csrf">, status: 200 | 400 | 401 | 403 | 429 | 502 | 503 = 200) => c.html(loginPage({ ...p, csrf: c.get("csrf"), beacon: cloudflareBeacon(c, config) }), status);
 
   app.get("/login", (c) => page(c, { next: safeNext(c.req.query("next")) }));
 
@@ -85,6 +89,7 @@ export function registerLoginRoutes(app: Hono<AppEnv>, deps: LoginDeps): void {
       console.error("[login] sending the sign-in link failed:", (e as Error).message);
       return page(c, { next, email: typed, error: "Sporočila nismo mogli poslati. Poskusite znova čez nekaj minut." }, 502);
     }
+    await deps.track?.(c, { kind: "signin_requested" });
     return c.html(checkEmailPage({ email: email.email, minutes: limits.ttlMinutes }));
   });
 
@@ -112,6 +117,11 @@ export function registerLoginRoutes(app: Hono<AppEnv>, deps: LoginDeps): void {
     const session = newToken();
     await repo.accounts.createSession(hashToken(session), account.id, config.accounts.sessionDays);
     issueAccountSession(c, session, auth, config);
+    // The device that asked for the link (where the funnel's earlier steps were), else this one.
+    if (deps.track) {
+      const allowed = await repo.accounts.allowed(account.email_key);
+      await deps.track(c, { kind: "signin_done", accountId: account.id, tier: allowed ? "paid" : "free", plan: allowed?.plan ?? null }, used.device_id ? { deviceId: used.device_id } : {});
+    }
     await deps.onSignIn?.(c, account.id, { deviceId: used.device_id });
     return c.redirect(safeNext(used.next), 303);
   });
@@ -148,13 +158,15 @@ export interface LoginProps {
   email?: string;
   error?: string;
   adminError?: string;
+  /** Cloudflare Web Analytics token for this response (beacon.tsx), or none. */
+  beacon?: string | null;
 }
 
 const Hidden = ({ name, value }: { name: string; value: string }) => <input type="hidden" name={name} value={value} />;
 
-export function loginPage({ next, csrf, email, error, adminError }: LoginProps): string {
+export function loginPage({ next, csrf, email, error, adminError, beacon }: LoginProps): string {
   return html(
-    <Doc title="Prijava">
+    <Doc title="Prijava" beacon={beacon}>
       <main className="login">
         <Brand href="/" />
         <h1>Prijava</h1>

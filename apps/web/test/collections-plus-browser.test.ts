@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import type { AddressInfo } from "node:net";
 import { serve, type ServerType } from "@hono/node-server";
 import { loadConfig } from "@sb/config";
-import { applyDirectEdit, launchCheckBrowser, startCollection, type CheckBrowser } from "@sb/engine";
+import { applyDirectEdit, launchCheckBrowser, runAxe, startCollection, type CheckBrowser } from "@sb/engine";
 import { Repo, createDb, createFsStorage, memoryMailer, migrate, type Platform, type Queue } from "@sb/platform";
 import type { SiteSpec } from "@sb/spec";
 import { createApp } from "../src/app.ts";
@@ -14,7 +14,8 @@ import { linkFor } from "./session-helpers.ts";
 
 /**
  * Collections and the plans, in Chromium at 1280 and 360 px (it-collections-plus, it-collection-translations):
- * Osnovni keeps a blog it had on Plus (Uredi, and a note naming Plus) while the other collections carry "Plus";
+ * Osnovni keeps a blog it had on Plus read-only (sb-collection-downgrade: Poglej, its posts listed without edit
+ * controls and a note naming Plus; axe finds nothing) while the other collections carry "Plus";
  * a Plus site in two languages writes its posts' English in the collection pane (Slovenščina | Angleščina), the
  * English follows a post when another is deleted, and the English page shows it. No sideways scroll. No model calls.
  * Screenshots go to SB_SCREENSHOT_DIR when set.
@@ -50,6 +51,9 @@ afterAll(async () => {
   await platform?.close();
   await rm(dir, { recursive: true, force: true });
 });
+
+/** The note on a collection kept from Plus (read-only). */
+const READ_ONLY = "Vnosi zbirke Novice ostanejo na strani, kot so. Dodajate, urejate, brišete in razvrščate jih lahko na paketu Plus (29 € na mesec).";
 
 const POSTS = [
   { title: "Odprli smo", date: "2026-09-01", summary: "Prvi dan v pekarni.", body: ["Vrata smo odprli v ponedeljek."] },
@@ -91,29 +95,45 @@ async function signIn(page: Page, email: string, plan: "standard" | "premium"): 
 }
 
 describe.each([1280, 360])("collections and the plans at %i px", (width) => {
-  it("Osnovni keeps a blog from Plus: Uredi and a note naming Plus; the other collections carry Plus", async () => {
+  it("Osnovni keeps a blog from Plus read-only: Poglej, its posts without edit controls and a note naming Plus; the other collections carry Plus", async () => {
     const ctx = await context(width);
     const page = await ctx.newPage();
     try {
-      const id = await site(await signIn(page, `osnovni-novice${width}@siol.net`, "standard"), false);
+      const id = await site(await signIn(page, `osnovni-novice${width}@siol.net`, "standard"), true);
+      const before = await spec(id);
       await page.goto(`${base}/sites/${id}`);
       await page.getByRole("button", { name: /^Strani/ }).click();
       const kept = page.locator('[data-kept="blog"]');
       await kept.waitFor();
-      expect(await kept.textContent()).toBe("Novice so v paketu Plus (29 € na mesec). Vnosi, ki jih že imate, ostanejo na strani in jih lahko urejate.");
-      expect(await page.getByRole("button", { name: "Uredi: Novice" }).isVisible()).toBe(true);
+      expect(await kept.textContent()).toBe(`${READ_ONLY} Plus`);
+      expect(await page.getByRole("button", { name: "Uredi: Novice" }).count()).toBe(0);
       expect(await page.locator("[data-locked] .plan-tag").allTextContents()).toEqual(["Plus", "Plus", "Plus"]);
       expect(await noSidewaysScroll(page)).toBe(true);
       if (SHOTS) {
         await kept.scrollIntoViewIfNeeded();
         await page.screenshot({ path: path.join(SHOTS, `collections-kept-osnovni-${width}.png`) });
       }
-      // Its posts are still the owner's to edit; no language switch on a one-language site.
-      await page.getByRole("button", { name: "Uredi: Novice" }).click();
-      await page.locator('[data-path="/collections/blog/items"]').waitFor();
+      // The posts as the site lists them, the note naming Plus, and nothing to edit: no form, no language switch.
+      await page.getByRole("button", { name: "Poglej: Novice" }).click();
+      const pane = page.locator('[data-readonly="blog"]');
+      await pane.waitFor();
+      expect(await pane.locator(".limit-note").textContent()).toBe(`${READ_ONLY} Plus`);
+      expect(await pane.locator(".entry strong").allTextContents()).toEqual(["Odprli smo", "Rženi kruh ob petkih"]);
+      expect(await pane.locator(".entry .muted").first().textContent()).toBe("1. 9. 2026");
+      expect(await page.locator('[data-path="/collections/blog/items"]').count()).toBe(0);
       expect(await page.locator(".lang-switch").count()).toBe(0);
-      await page.locator('[data-path="/collections/blog/items"] input[type="text"]').first().fill("Odprli smo pekarno");
-      await expect.poll(async () => (await spec(id)).collections!.blog!.items[0]!.title, { timeout: 10_000 }).toBe("Odprli smo pekarno");
+      expect(await pane.locator("input, textarea, select, button").count()).toBe(0);
+      expect(await noSidewaysScroll(page)).toBe(true);
+      const violations = await runAxe(page);
+      expect(violations.map((v) => `${v.id}: ${v.targets.join(", ")}`)).toEqual([]);
+      if (SHOTS) {
+        await pane.scrollIntoViewIfNeeded();
+        await page.screenshot({ path: path.join(SHOTS, `collections-readonly-osnovni-${width}.png`) });
+      }
+      // The site renders the posts as before, and the spec is untouched.
+      const list = await page.request.get(`${base}/preview/${id}/novice.html`);
+      expect(await list.text()).toContain("Rženi kruh ob petkih");
+      expect((await spec(id)).collections).toEqual(before.collections);
     } finally {
       await ctx.close();
     }

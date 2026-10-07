@@ -4,6 +4,7 @@ import {
   type ClaimedDomain,
   detectDnsHost,
   normaliseHostname,
+  recordEvent,
   suggestDomains,
   type DomainProviders,
   type Registrant,
@@ -276,6 +277,8 @@ async function goLive(deps: ProvisionDeps, row: ClaimedDomain): Promise<void> {
     }
   }
   await repo.addEvent({ siteId: row.site_id, stage: "domain", message: `${row.hostname} is live` });
+  // A product event (config analytics.events): the funnel's "domain connected", by the site's owner account.
+  await recordEvent(repo.events, deps.config, { kind: "domain_connected", siteId: row.site_id, accountId: (await repo.getSite(row.site_id))?.account_id ?? null, props: { kind: row.kind } });
   await republishForAddress(deps, row.site_id).catch((e: unknown) =>
     repo.addEvent({ siteId: row.site_id, stage: "domain", level: "warn", message: `Republish for ${row.hostname} postponed: ${(e as Error).message.slice(0, 200)}` }),
   );

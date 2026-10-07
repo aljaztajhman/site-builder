@@ -2,9 +2,11 @@ import { randomBytes } from "node:crypto";
 import { SPEC_VERSION, migrateSpec, withSiteLocales, type SiteSpec } from "@sb/spec";
 import type { Db } from "./db.ts";
 import { Accounts } from "./accounts.ts";
+import { CostHistory } from "./costs.ts";
 import { UrlChecks } from "./checks.ts";
 import { SiteStats } from "./stats.ts";
 import { SiteDomains } from "./domains.ts";
+import { ProductEvents } from "./events.ts";
 import { Usage, type Tier } from "./usage.ts";
 
 export type SiteStatus = "new" | "generating" | "ready" | "editing" | "publishing" | "failed";
@@ -168,13 +170,19 @@ export class Repo {
   readonly stats: SiteStats;
   /** Sites' own domain names. */
   readonly domains: SiteDomains;
+  /** Stranko's own funnel and engine events (it-analytics). */
+  readonly events: ProductEvents;
+  /** Model and image spend over time, for the admin. */
+  readonly costs: CostHistory;
 
   constructor(readonly db: Db) {
+    this.costs = new CostHistory(db);
     this.accounts = new Accounts(db);
     this.usage = new Usage(db);
     this.checks = new UrlChecks(db);
     this.stats = new SiteStats(db);
     this.domains = new SiteDomains(db);
+    this.events = new ProductEvents(db);
   }
 
   async createSite(input: { id?: string; name: string; slug: string; intake: Intake; accountId?: string | null; deviceId?: string | null }): Promise<SiteRow> {

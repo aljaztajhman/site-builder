@@ -16,7 +16,7 @@ import { clientIp, type AppEnv } from "./access.ts";
 
 const SAFE_SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 /** Crawlers, link previews, monitors and checkers (ours included): not visitors. */
-const NOT_A_VISITOR = /bot|crawl|spider|slurp|preview|facebookexternalhit|whatsapp|telegram|lighthouse|headless|curl|wget|python|httpclient|axios|node-fetch|monitor|pingdom|uptime|StrankoPregled/i;
+export const NOT_A_VISITOR = /bot|crawl|spider|slurp|preview|facebookexternalhit|whatsapp|telegram|lighthouse|headless|curl|wget|python|httpclient|axios|node-fetch|monitor|pingdom|uptime|StrankoPregled/i;
 
 /** The calendar day (YYYY-MM-DD) of `d` in `timeZone`. */
 export function dayIn(timeZone: string, d = new Date()): string {

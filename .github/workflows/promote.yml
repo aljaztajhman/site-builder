@@ -1,0 +1,259 @@
+# Promote staging (main) to production (branch `release`), docs/dev/workflow.md §3–4. Run by hand only.
+#
+# 1. prepare: the chosen commit (default: head of main) must be on main, have a green CI run, and be a
+#    fast-forward of `release`; the next tag vX.Y.Z and release notes from the merged PR titles since the last tag.
+# 2. migrate-check: production's newest backup (bucket, backups/) restored into a throwaway Postgres and this
+#    commit's migrations run on it. A migration that loses rows fails unless allow_data_change is set (the owner
+#    approved it in HQ first).
+# 3. release: fast-forwards `release` (never a force push), pushes the tag, creates the GitHub release with the
+#    notes. The GitHub releases page is the changelog: a CHANGELOG.md commit would put a commit on `release` that
+#    main lacks, or need a push to main.
+# 4. verify: waits until production /health answers ok with this commit's SHA (Railway deploys `release`), then,
+#    with smoke=full, the deployed smoke test (tools/eval/src/remote-smoke.ts: a chat edit, ~€0.02; only when HQ
+#    meta/budget allows it). smoke=health spends nothing and says so in the summary.
+#
+# Owner's setup before the first run (HQ it-production-env, it-repo-settings): repository variables
+# PRODUCTION_READY=true, PRODUCTION_URL (https://…, no trailing slash), PRODUCTION_SMOKE_SITE_ID (for smoke=full),
+# PRODUCTION_S3_REGION and PRODUCTION_S3_FORCE_PATH_STYLE (optional); secrets PRODUCTION_S3_ENDPOINT,
+# PRODUCTION_S3_BUCKET, PRODUCTION_S3_ACCESS_KEY_ID, PRODUCTION_S3_SECRET_ACCESS_KEY (the production bucket),
+# PRODUCTION_ACCESS_PASSWORD (smoke=full) and, once `release` is protected, RELEASE_TOKEN (a token allowed to
+# push to `release` and tags; GITHUB_TOKEN is used without it). The nightly workflow writes the backups.
+name: Promote (main → production)
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Commit or tag on main to promote (empty: head of main)"
+        required: false
+        default: ""
+      bump:
+        description: "Version bump from the newest vX.Y.Z tag (patch: fixes, minor: a feature, major: see workflow.md §3)"
+        type: choice
+        options: [patch, minor, major]
+        default: patch
+      version:
+        description: "Explicit version instead of the bump, e.g. 1.0.0 for the first release (empty: use bump)"
+        required: false
+        default: ""
+      smoke:
+        description: "health: free, waits for production /health to show the commit. full: also the deployed smoke test (~€0.02 in model calls; only if HQ meta/budget allows)"
+        type: choice
+        options: [health, full]
+        default: health
+      allow_data_change:
+        description: "A migration in this release drops or rewrites data and the owner approved it in HQ"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: promote
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      sha: ${{ steps.target.outputs.sha }}
+      version: ${{ steps.notes.outputs.version }}
+      previous: ${{ steps.notes.outputs.previous }}
+      existing: ${{ steps.target.outputs.existing }}
+    steps:
+      - name: Production is set up
+        env:
+          READY: ${{ vars.PRODUCTION_READY }}
+          URL: ${{ vars.PRODUCTION_URL }}
+        run: |
+          if [ "$READY" != "true" ] || [ -z "$URL" ]; then
+            echo "::error::Production isn't set up yet: repository variables PRODUCTION_READY=true and PRODUCTION_URL are needed (see the top of promote.yml)."
+            exit 1
+          fi
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - name: Resolve the commit and check it can be promoted
+        id: target
+        env:
+          REF: ${{ inputs.ref }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          ref="${REF:-origin/main}"
+          sha=$(git rev-parse --verify "${ref}^{commit}") || { echo "::error::$ref is not a commit or tag here"; exit 1; }
+          git merge-base --is-ancestor "$sha" origin/main || { echo "::error::$sha is not on main"; exit 1; }
+          if git rev-parse --verify -q origin/release >/dev/null; then
+            [ "$(git rev-parse origin/release)" != "$sha" ] || { echo "::error::release is already at $sha"; exit 1; }
+            git merge-base --is-ancestor origin/release "$sha" || {
+              echo "::error::release has commits that $sha doesn't (a hotfix not merged into main?); fast-forward impossible:"
+              git log --oneline "$sha..origin/release"
+              exit 1
+            }
+          else
+            echo "release doesn't exist yet: this run creates it at $sha"
+          fi
+          green=$(gh run list --workflow ci.yml --commit "$sha" --json conclusion --jq '[.[] | select(.conclusion == "success")] | length')
+          [ "$green" -ge 1 ] || { echo "::error::no successful CI run for $sha"; exit 1; }
+          existing=$(git tag --points-at "$sha" --list 'v*' | head -1)
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "existing=$existing" >> "$GITHUB_OUTPUT"
+          echo "Promoting $(git log -1 --format='%h %s' "$sha")${existing:+ (already tagged $existing)}"
+      - name: Version and release notes
+        id: notes
+        env:
+          SHA: ${{ steps.target.outputs.sha }}
+          EXISTING: ${{ steps.target.outputs.existing }}
+          BUMP: ${{ inputs.bump }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          if [ -n "$EXISTING" ]; then
+            # The commit is already a release (a tag was promoted again): keep its tag and release.
+            echo "version=$EXISTING" >> "$GITHUB_OUTPUT"
+            echo "previous=" >> "$GITHUB_OUTPUT"
+            echo "Already released as $EXISTING; release notes are on its GitHub release." > notes.md
+          else
+            pnpm exec tsx tools/ops/src/release-cli.ts --target "$SHA" --bump "$BUMP" ${VERSION:+--version "$VERSION"} --notes notes.md
+          fi
+          cat notes.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-notes
+          path: notes.md
+
+  migrate-check:
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: sb
+          POSTGRES_PASSWORD: sb
+          POSTGRES_DB: migcheck
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U sb"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - name: Install the PostgreSQL 17 client
+        run: |
+          [ -x /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh ] || { sudo apt-get update -qq; sudo apt-get install -y -qq postgresql-common; }
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y -qq postgresql-client-17
+          echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
+      - name: Restore production's newest backup and run this commit's migrations on it
+        env:
+          MIGRATE_CHECK_DATABASE_URL: postgres://sb:sb@localhost:5432/migcheck
+          STORAGE_DRIVER: s3
+          S3_ENDPOINT: ${{ secrets.PRODUCTION_S3_ENDPOINT }}
+          S3_BUCKET: ${{ secrets.PRODUCTION_S3_BUCKET }}
+          S3_ACCESS_KEY_ID: ${{ secrets.PRODUCTION_S3_ACCESS_KEY_ID }}
+          S3_SECRET_ACCESS_KEY: ${{ secrets.PRODUCTION_S3_SECRET_ACCESS_KEY }}
+          S3_REGION: ${{ vars.PRODUCTION_S3_REGION || 'auto' }}
+          S3_FORCE_PATH_STYLE: ${{ vars.PRODUCTION_S3_FORCE_PATH_STYLE || 'false' }}
+          ALLOW: ${{ inputs.allow_data_change }}
+        run: |
+          if [ "$ALLOW" = "true" ]; then pnpm db:migrate-check --allow-shrink; else pnpm db:migrate-check; fi
+
+  release:
+    needs: [prepare, migrate-check]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.sha }}
+          fetch-depth: 0
+          token: ${{ secrets.RELEASE_TOKEN || github.token }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-notes
+      - name: Fast-forward release, tag, GitHub release
+        env:
+          SHA: ${{ needs.prepare.outputs.sha }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+          EXISTING: ${{ needs.prepare.outputs.existing }}
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN || github.token }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # A plain push: GitHub refuses it unless it is a fast-forward (or creates the branch on the first run).
+          git push origin "$SHA:refs/heads/release"
+          if [ -z "$EXISTING" ]; then
+            git tag -a "$VERSION" "$SHA" -m "$VERSION"
+            git push origin "refs/tags/$VERSION"
+            gh release create "$VERSION" --verify-tag --title "$VERSION" --notes-file notes.md
+          fi
+          echo "release → ${SHA:0:7} ($VERSION)" >> "$GITHUB_STEP_SUMMARY"
+
+  verify:
+    needs: [prepare, release]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Wait for production /health to show this commit
+        env:
+          URL: ${{ vars.PRODUCTION_URL }}
+          SHA: ${{ needs.prepare.outputs.sha }}
+        run: |
+          want="${SHA:0:7}"
+          for i in $(seq 1 60); do
+            body=$(curl -fsS --max-time 10 "$URL/health" || true)
+            got=$(printf '%s' "$body" | jq -r '.version.sha // empty' 2>/dev/null || true)
+            status=$(printf '%s' "$body" | jq -r '.status // empty' 2>/dev/null || true)
+            if [ "$got" = "$want" ] && [ "$status" = "ok" ]; then
+              echo "production /health: ok, version $(printf '%s' "$body" | jq -c .version)" | tee -a "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            echo "waiting ($i/60): status=${status:-none} sha=${got:-none}"
+            sleep 20
+          done
+          echo "::error::production /health didn't report ok at $want within 20 minutes"
+          exit 1
+      - uses: actions/checkout@v4
+        if: inputs.smoke == 'full'
+        with:
+          ref: ${{ needs.prepare.outputs.sha }}
+      - uses: actions/setup-node@v4
+        if: inputs.smoke == 'full'
+        with:
+          node-version: 24
+      - if: inputs.smoke == 'full'
+        run: corepack enable
+      - if: inputs.smoke == 'full'
+        run: pnpm install --frozen-lockfile
+      - if: inputs.smoke == 'full'
+        run: pnpm --filter @sb/engine exec playwright install --with-deps chromium
+      - name: Deployed smoke test (model calls, ~€0.02)
+        if: inputs.smoke == 'full'
+        env:
+          REMOTE_URL: ${{ vars.PRODUCTION_URL }}
+          REMOTE_PASSWORD: ${{ secrets.PRODUCTION_ACCESS_PASSWORD }}
+          SITE: ${{ vars.PRODUCTION_SMOKE_SITE_ID }}
+        run: pnpm exec tsx tools/eval/src/remote-smoke.ts "$SITE"
+      - name: Smoke test skipped
+        if: inputs.smoke != 'full'
+        run: echo "Deployed smoke test skipped (smoke=health, no model calls). Run with smoke=full when HQ meta/budget allows it." | tee -a "$GITHUB_STEP_SUMMARY"

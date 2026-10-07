@@ -14,7 +14,7 @@ import { missingFacts, type MissingFact } from "@sb/spec/missing-facts";
 import { isoDay } from "@sb/spec/format";
 import { itemKeyForPath, priceEditor, type PriceEditorState } from "./price-editor.ts";
 import { domainStatus, domainStep, newDomainStepUi, openDomainStep, type DomainChoice, type DomainStepDeps, type DomainsInfo } from "./domain-step.ts";
-import { lockedPagesBlock, planTag, reminderBlock, type Limits, type Upgrade } from "./upsell.ts";
+import { lockedPagesBlock, planTag, reminderBlock, type Limits, type Note, type Upgrade } from "./upsell.ts";
 
 type Json = null | boolean | number | string | Json[] | { [k: string]: Json };
 type Obj = { [k: string]: Json };
@@ -863,7 +863,7 @@ function homePane(): HTMLElement {
     );
   }
   // A free account's preview: the rest of the site, locked, with the first plan's price (it-upsells).
-  if (freeViewer()) pane.append(...[lockedPages(h("a", { class: "btn sm", href: "/#cena" }, "Paketi in cene"))].filter((x): x is HTMLElement => !!x));
+  if (freeViewer()) pane.append(...[lockedPages(h("a", { class: "btn sm", href: "/?ref=upsell#cena" }, "Paketi in cene"))].filter((x): x is HTMLElement => !!x));
   const secs = sections();
   // A list of buttons: the item carries the button role (an <li> itself may not), Enter and Space select.
   const open = (id: string) => {
@@ -1295,7 +1295,7 @@ function pagesPane(): HTMLElement {
   const limits = state.access?.limits ?? null;
   // A free account's preview is its homepage: the rest of the site is listed, locked, instead of a form that can't save.
   if (freeViewer()) {
-    const locked = lockedPages(h("a", { class: "btn sm", href: "/#cena" }, "Paketi in cene"));
+    const locked = lockedPages(h("a", { class: "btn sm", href: "/?ref=upsell#cena" }, "Paketi in cene"));
     if (locked) pane.append(locked);
     return pane;
   }
@@ -1347,20 +1347,55 @@ function collectionsBlock(): HTMLElement {
     const count = ((on?.items ?? []) as unknown[]).length;
     // Not in the viewer's plan: the button names the plan that has it, and a tap says so (the server refuses anyway).
     const locked = on ? undefined : state.access?.limits?.collectionNotes[c.kind];
-    // Switched on before the plan lost it (a move to Osnovni): it stays and can be edited; the note says which plan has it.
-    const kept = on ? state.access?.limits?.collectionNotes[c.kind] : undefined;
+    // Switched on before the plan lost it (a move to Osnovni): it stays on the site, read-only; the note says which plan edits it.
+    const kept = on ? readOnlyNote(c.kind) : undefined;
     box.append(
       h("div", { class: "row collection-row" },
         h("span", { class: "sp" }, h("strong", {}, c.name), on ? h("span", { class: "muted" }, ` · ${count}`) : h("span", { class: "muted" }, ` · ${c.hint}`)),
         on
-          ? h("button", { class: "btn sm", type: "button", onClick: () => { collectionKind = c.kind; tab = "collection"; render(); } }, `Uredi: ${c.name}`)
+          ? h("button", { class: "btn sm", type: "button", onClick: () => { collectionKind = c.kind; tab = "collection"; render(); } }, `${kept ? "Poglej" : "Uredi"}: ${c.name}`)
           : locked
             ? h("button", { class: "btn sm", type: "button", "data-locked": c.kind, onClick: () => { toast = locked.message; showToast(); } }, c.on, locked.upgrade ? planTag(h, locked.upgrade.name) : null)
             : h("button", { class: "btn sm", type: "button", onClick: () => void post("/collections", { kind: c.kind }, `${c.name}: vklopljeno.`) }, c.on),
       ),
     );
-    if (kept) box.append(h("p", { class: "help limit-note", "data-kept": c.kind }, `${kept.message} Vnosi, ki jih že imate, ostanejo na strani in jih lahko urejate.`));
+    if (kept) box.append(h("p", { class: "help limit-note", "data-kept": c.kind }, kept.message, kept.upgrade ? [" ", planTag(h, kept.upgrade.name)] : null));
   }
+  return box;
+}
+
+/** The note on a collection the site has but the viewer's plan doesn't include (read-only), or undefined. */
+const readOnlyNote = (kind: string): Note | undefined => state.access?.limits?.readOnlyNotes?.[kind];
+
+/** "2026-10-02" as the owner reads it: "2. 10. 2026". */
+const dayText = (d: unknown): string => {
+  const m = typeof d === "string" ? /^(\d{4})-(\d{2})-(\d{2})$/.exec(d) : null;
+  return m ? `${Number(m[3])}. ${Number(m[2])}. ${m[1]}` : "";
+};
+
+/** A read-only collection's entries as the site lists them, without edit controls, under the note naming the plan. */
+function readOnlyEntries(kind: string, collection: Obj, note: Note): HTMLElement {
+  const items = (collection.items ?? []) as Obj[];
+  const box = h("div", { class: "readonly-entries", "data-readonly": kind });
+  box.append(h("p", { class: "help limit-note", role: "note" }, note.message, note.upgrade ? [" ", planTag(h, note.upgrade.name)] : null));
+  if (!items.length) {
+    box.append(h("p", { class: "muted" }, "Zbirka je prazna."));
+    return box;
+  }
+  box.append(
+    h("ol", { class: "entries" },
+      items.map((e) => {
+        const when = [dayText(e.date), e.endDate ? `– ${dayText(e.endDate)}` : "", e.start ? `ob ${String(e.start)}` : ""].filter(Boolean).join(" ");
+        const meta = [when, typeof e.place === "string" ? e.place : "", typeof e.role === "string" ? e.role : ""].filter(Boolean).join(" · ");
+        const summary = typeof e.summary === "string" ? e.summary : typeof e.bio === "string" ? e.bio : "";
+        return h("li", { class: "entry" },
+          h("strong", {}, String(e.title ?? e.name ?? "")),
+          meta ? h("span", { class: "muted" }, meta) : null,
+          summary ? h("p", {}, summary) : null,
+        );
+      }),
+    ),
+  );
   return box;
 }
 
@@ -1438,6 +1473,12 @@ function collectionPane(): HTMLElement {
   const on = ((state.spec?.collections ?? {}) as Obj)[c.kind] as Obj | undefined;
   const item = catalogue?.collections[c.kind];
   if (!on || !item) return pane;
+  // Not in the viewer's plan any more (moved down from Plus): shown as the site lists it, nothing to edit; the server refuses edits anyway.
+  const readOnly = readOnlyNote(c.kind);
+  if (readOnly) {
+    pane.append(readOnlyEntries(c.kind, on, readOnly));
+    return pane;
+  }
   // A site in two languages (Plus): the entries' texts in the other one, beside the default language's form.
   const others = otherLocales();
   if (others.length) {
@@ -1879,15 +1920,15 @@ function reloadPreview(): void {
 }
 
 /** The editing layer in the preview: styles and the section toolbar are added at runtime; the rendered HTML is unchanged. */
-const EDIT_CSS = `main section{cursor:pointer} main section:hover{outline:2px dashed #156b4a;outline-offset:-2px}
-main section[data-sb-selected]{position:relative;outline:3px solid #156b4a;outline-offset:-3px}
+const EDIT_CSS = `main section{cursor:pointer} main section:hover{outline:2px dashed #0d7a84;outline-offset:-2px}
+main section[data-sb-selected]{position:relative;outline:3px solid #0d7a84;outline-offset:-3px}
 [contenteditable]{outline:2px solid #9a5b00!important;outline-offset:2px;cursor:text}
-.sb-tools{position:absolute;top:8px;left:8px;z-index:2147483000;display:flex;gap:2px;padding:4px;background:#fff;border:1px solid #c9c4ba;border-radius:8px;box-shadow:0 8px 24px rgb(20 20 18/.16)}
-.sb-tools button,.sb-add{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;min-width:40px;min-height:40px;padding:0 10px;border-radius:6px;font:600 14px/1 system-ui,-apple-system,"Segoe UI",sans-serif;color:#151412;cursor:pointer}
-.sb-tools button:hover{background:#ece9e3}
-.sb-tools button:disabled{color:#b5b0a7;cursor:default;background:none}
-.sb-add{position:absolute;left:50%;bottom:8px;z-index:2147483000;transform:translateX(-50%);padding:0 16px;border-radius:999px;background:#156b4a;color:#fff;box-shadow:0 8px 24px rgb(20 20 18/.2)}
-.sb-tools button:focus-visible,.sb-add:focus-visible{outline:2px solid #156b4a;outline-offset:2px}
+.sb-tools{position:absolute;top:8px;left:8px;z-index:2147483000;display:flex;gap:2px;padding:4px;background:#fff;border:1px solid #b4c5c9;border-radius:8px;box-shadow:0 8px 24px rgb(15 31 34/.16)}
+.sb-tools button,.sb-add{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;min-width:40px;min-height:40px;padding:0 10px;border-radius:6px;font:600 14px/1 system-ui,-apple-system,"Segoe UI",sans-serif;color:#0f1f22;cursor:pointer}
+.sb-tools button:hover{background:#dfe8ea}
+.sb-tools button:disabled{color:#93a6aa;cursor:default;background:none}
+.sb-add{position:absolute;left:50%;bottom:8px;z-index:2147483000;transform:translateX(-50%);padding:0 16px;border-radius:999px;background:#0d7a84;color:#fff;box-shadow:0 8px 24px rgb(15 31 34/.2)}
+.sb-tools button:focus-visible,.sb-add:focus-visible{outline:2px solid #0d7a84;outline-offset:2px}
 @media (pointer:coarse){.sb-tools button,.sb-add{min-height:44px;min-width:44px}}`;
 
 /** Which business fact a tap in the preview points at, if any: those live in Podatki, not in a section. */
@@ -2329,10 +2370,11 @@ function render(): void {
     root.replaceChildren(h("div", { class: "shell" }, top, ed));
     shell = { top, ed, panel, bar, stage };
     // The stage shrinks when the assistant box under it fills in after the frame was sized: size it again, so the
-    // frame never overflows the stage (a scrolling stage would need its own tab stop). Not on phones, where the
-    // keyboard changes the height while typing (see the resize listener below).
+    // frame never overflows the stage (a scrolling stage would need its own tab stop). On phones only while nothing
+    // that brings up the keyboard has focus (a field, or text edited in the preview): the keyboard changes the height
+    // while typing (see the resize listener below). A free account's longer note arrives after the first sizing.
     new ResizeObserver(() => {
-      if (!narrowScreen()) sizeFrame();
+      if (!narrowScreen() || !document.activeElement?.matches("input, textarea, select, [contenteditable], iframe")) sizeFrame();
     }).observe(stage);
     lastWidth = window.innerWidth;
     // Only width changes resize the frame: phone keyboards change the height while typing.
