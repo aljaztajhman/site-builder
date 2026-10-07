@@ -27,7 +27,7 @@ import {
   type Operation,
   type Resolve,
 } from "@sb/engine";
-import { VersionConflictError, contentType, domainProvidersFor, mailerFromEnv, newId, type DomainProviders, type Mailer, type Platform, type SiteStatus, type Tier } from "@sb/platform";
+import { VersionConflictError, contentType, domainProvidersFor, mailerFromEnv, newId, runningVersion, type DomainProviders, type Mailer, type Platform, type RunningVersion, type SiteStatus, type Tier } from "@sb/platform";
 import { renderPage, renderPath, sharedBundle, pageFile, notFoundPlacement, rebaseRelativeUrls } from "@sb/render";
 import { CollectionKind, blockerText, collectPlaceholders, markOwnerEdits, sectionDef, type SiteSpec } from "@sb/spec";
 import type { AuthSettings } from "./auth.ts";
@@ -87,6 +87,8 @@ export interface AppOptions {
   domainProviders?: DomainProviders;
   /** The HTTP client the tax-number lookup asks EU VIES with (tests: a fake); global fetch when not given. */
   viesFetch?: typeof fetch;
+  /** The running version shown on /health and /admin; from env (and git locally) when not given. */
+  version?: RunningVersion;
 }
 
 export type ClassifyIntake = (description: string, ctx: { siteId: string; tier: Tier; accountId: string | null; aiJobId: string }) => Promise<{ businessType: string; confidence: number }>;
@@ -110,6 +112,7 @@ export const EXPORT_CHECKLIST_MESSAGE = "Stran še ni pripravljena za objavo: ne
 export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono<AppEnv> {
   const { repo, storage, queue, db } = platform;
   const app = new Hono<AppEnv>();
+  const appVersion = opts.version ?? runningVersion();
   const mailer = opts.mailer ?? mailerFromEnv();
   const botCheck = opts.botCheck ?? botCheckFromEnv(process.env, auth.secureCookies);
   const limits = { repo, config, secret: auth.secret };
@@ -211,7 +214,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       if (claimed.length) console.log(`[web] ${claimed.length} anonymous preview(s) claimed by ${accountId}`);
     },
   });
-  registerAdminRoutes(app, { repo, config, ...(opts.appUrl ? { appUrl: opts.appUrl } : {}) });
+  registerAdminRoutes(app, { repo, config, version: appVersion, ...(opts.appUrl ? { appUrl: opts.appUrl } : {}) });
   registerPrivacyRoute(app, config);
   registerLegalRoutes(app, config);
   // The public website checker (/pregled): no model calls, run by the worker.
@@ -246,7 +249,8 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     const ok = Object.values(checks).every((v) => v === "ok");
     // `?ip=1` echoes the caller's own address as the IP limits see it, so the proxy setup can be checked from outside.
     const you = c.req.query("ip") === "1" ? { you: { ip: clientIp(c), forwarded: (c.req.header("x-forwarded-for") ?? "").split(",").map((s) => s.trim()).filter(Boolean), realIp: c.req.header("x-real-ip") ?? null } } : {};
-    return c.json({ status: ok ? "ok" : "degraded", checks, ...you }, ok ? 200 : 503);
+    // The running version (tag and short SHA): "which version is live" is this one request (docs/dev/workflow.md §3).
+    return c.json({ status: ok ? "ok" : "degraded", checks, version: appVersion, ...you }, ok ? 200 : 503);
   });
 
   // The editor's and landing page's scripts: linked with their content hash (pages use clientScriptUrl) and

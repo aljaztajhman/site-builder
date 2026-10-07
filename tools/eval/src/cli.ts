@@ -13,6 +13,8 @@
  * --photos <n>:     give each fixture only its first n photos (0: a site without photos, which gets generated pictures).
  * --no-edits:       generate and check only; no scripted chat edits (about 40 % of a homepage run's cost). Not with
  *                   --record (it would drop the edit recordings the tests replay).
+ * --strict:         exit 1 when a fixture errored, stopped early or has a checkpoint with a failure (CI runs
+ *                   `pnpm eval --offline --strict`). Without it the run reports and exits 0.
  * --twins:          also run the twins (tools/eval/twins: more businesses of the same trades, no scripted edits), for
  *                   the same-trade look distance. They have no recordings or goldens: live, --record or --record-missing.
  * fal pictures (FAL_KEY) are cached by request in tools/eval/image-cache/ in every mode that makes them.
@@ -136,3 +138,12 @@ await writeFile(path.join(outDir, out.contactSheet), await contactSheet(results)
 for (const r of results) await reviewSheet(r.id);
 await desktopContactSheet(results.map((r) => r.id));
 console.log(`\nWrote ${path.join(outDir, out.report)} and ${out.contactSheet}. Model spend €${spent.toFixed(2)}.`);
+
+if (flag("strict")) {
+  const failing = results.filter((r) => r.error || r.checkpoints.some((c) => c.failures.length > 0)).map((r) => r.id);
+  const missing = fixtures.length - results.length;
+  if (failing.length || missing) {
+    console.error(`--strict: ${failing.length ? `failing: ${failing.join(", ")}` : ""}${failing.length && missing ? "; " : ""}${missing ? `${missing} fixture(s) not run` : ""}`);
+    process.exitCode = 1;
+  } else console.log(`--strict: all ${results.length} fixture(s) pass every automated check.`);
+}

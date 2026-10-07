@@ -45,3 +45,115 @@ jobs:
       - name: Install Chromium for render checks
         run: pnpm --filter @sb/engine exec playwright install --with-deps chromium
       - run: pnpm test --shard=${{ matrix.shard }}/3
+
+  # docs/dev/workflow.md §6, CI additions: the hand-authored golden specs through every automated check (render,
+  # axe, Lighthouse, 360 px, facts, placeholders, export). No model calls, free. --strict fails the job when a
+  # fixture fails a check; the report and sheets are uploaded when it does.
+  eval-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - name: Install Chromium for render checks
+        run: pnpm --filter @sb/engine exec playwright install --with-deps chromium
+      - run: pnpm eval --offline --strict
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: eval-offline
+          path: eval/
+
+  # The dashboard's scripts (editor, landing) and UI assets as production builds them at start, so a broken
+  # bundle fails here instead of in the deploy.
+  web-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @sb/web build
+
+  # Migration smoke and migrate-check (docs/dev/workflow.md §4, §6) on Postgres 17 (as docker-compose.yml):
+  # 1. every migration on an empty database, then pg-boss's schema;
+  # 2. the base commit's code (the PR's target, or main before this push) migrates a database and seeds two
+  #    golden sites into it; `pnpm db:backup` dumps it; `pnpm db:migrate-check` restores that dump into an
+  #    empty database and runs this commit's migrations on the data, as the promote workflow does with
+  #    production's newest backup.
+  migrations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: sb
+          POSTGRES_PASSWORD: sb
+          POSTGRES_DB: sb
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U sb"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGUSER: sb
+      PGPASSWORD: sb
+      STORAGE_DRIVER: fs
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # This commit and its first parent: the base the migrations are checked from.
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - name: Install the PostgreSQL 17 client (pg_dump and psql at the server's version)
+        run: |
+          [ -x /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh ] || { sudo apt-get update -qq; sudo apt-get install -y -qq postgresql-common; }
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y -qq postgresql-client-17
+          echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
+      - name: Create the databases
+        run: |
+          pg_dump --version
+          for db in empty base check; do psql -d sb -c "create database $db"; done
+      - name: Migrate an empty database
+        env:
+          DATABASE_URL: postgres://sb:sb@localhost:5432/empty
+        run: |
+          pnpm db:migrate
+          pnpm db:migrate
+      - name: Base commit's database with data
+        env:
+          DATABASE_URL: postgres://sb:sb@localhost:5432/base
+          STORAGE_DIR: ${{ runner.temp }}/base-storage
+        run: |
+          git worktree add "$RUNNER_TEMP/base" HEAD^1
+          cd "$RUNNER_TEMP/base"
+          git log -1 --format='base: %h %s'
+          pnpm install --frozen-lockfile
+          pnpm fixtures:photos
+          pnpm seed avtoservis-mrak
+          pnpm seed pekarna-kvas
+      - name: Back up the base database (this commit's backup script)
+        env:
+          DATABASE_URL: postgres://sb:sb@localhost:5432/base
+          STORAGE_DIR: ${{ runner.temp }}/backups
+        run: pnpm db:backup
+      - name: Migrate-check this commit's migrations against that backup
+        env:
+          MIGRATE_CHECK_DATABASE_URL: postgres://sb:sb@localhost:5432/check
+          STORAGE_DIR: ${{ runner.temp }}/backups
+        run: pnpm db:migrate-check
