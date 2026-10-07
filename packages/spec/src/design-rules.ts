@@ -1,4 +1,4 @@
-import { OFF_BLACK_MIN, OFF_WHITE_MAX, clampLuminance, contrast, ensureContrast, isCreamOrOffWhite, isWarmCream, luminance } from "./color.ts";
+import { OFF_BLACK_MIN, OFF_WHITE_MAX, clampLuminance, contrast, ensureContrast, isCreamOrOffWhite, isWarmCream, isWarmTint, luminance, toWarmTint } from "./color.ts";
 import type { Colors, Design, Direction } from "./design.ts";
 import { acceptedFontPairs } from "./families.ts";
 
@@ -58,7 +58,9 @@ export function checkDesign(design: Design, dir: Direction | undefined): DesignI
   }
   if ((c.band === undefined) !== (c.onBand === undefined)) issues.push({ path: "/design/colors/onBand", message: "band and onBand go together" });
   if (isCreamOrOffWhite(c.background)) issues.push({ path: "/design/colors/background", message: "cream or off-white page background is banned" });
-  if (isWarmCream(c.surface))
+  // A warm direction's warm non-cream tint (warmSurfaceAllowed) is not cream. Accepted whatever the repair switch says,
+  // so a site made with config promptFixes.warmSurface on stays valid when it is turned off.
+  if (isWarmCream(c.surface) && !(warmSurfaceAllowed(dir) && isWarmTint(c.surface)))
     issues.push({ path: "/design/colors/surface", message: "cream section background is banned" });
   issues.push(...offBlackWhiteIssues(c));
   if (!dir) {
@@ -95,6 +97,21 @@ export function checkDesign(design: Design, dir: Direction | undefined): DesignI
   return issues;
 }
 
+/**
+ * Light directions whose look is warm (bread, food, a shop of local goods): with config promptFixes.warmSurface a warm
+ * non-cream tint (isWarmTint: peach, apricot, terracotta-tinted) may be their section surface. Cream and beige stay banned.
+ */
+export const WARM_SURFACE_DIRECTIONS: readonly string[] = ["warm-craft", "skorja", "etiketa", "jedilnik"];
+export const warmSurfaceAllowed = (dir: Direction | undefined): boolean => !!dir && WARM_SURFACE_DIRECTIONS.includes(dir.id);
+
+/** Repairs behind config promptFixes switches (the engine passes them for generated and model-edited designs). */
+export interface DesignRepairOptions {
+  /** A beige page background (isBeige) counts as cream and is replaced by the direction's. */
+  beige?: boolean;
+  /** A warm direction's cream surface becomes a warm tint (toWarmTint) instead of the direction's cool fallback. */
+  warmSurface?: boolean;
+}
+
 /** White or near-black, whichever reads better on `bg`. */
 function bestText(bg: string): string {
   return contrast("#ffffff", bg) >= contrast("#111111", bg) ? "#ffffff" : "#111111";
@@ -106,7 +123,7 @@ const clamp = (v: number, [lo, hi]: [number, number]) => Math.min(hi, Math.max(l
  * Brings a proposed design inside its direction: clamps numeric tokens, picks allowed enums,
  * replaces a banned background, and fixes contrast by moving lightness. Idempotent.
  */
-export function enforceDesign(design: Design, dir: Direction): Design {
+export function enforceDesign(design: Design, dir: Direction, opts: DesignRepairOptions = {}): Design {
   const r = dir.ranges;
   const out: Design = {
     ...design,
@@ -127,9 +144,11 @@ export function enforceDesign(design: Design, dir: Direction): Design {
   const c = out.colors;
   const fb = dir.palette.fallback;
   if (dir.palette.background === "white") c.background = "#ffffff";
-  if (isCreamOrOffWhite(c.background) || (dir.palette.background === "dark" && luminance(c.background) > 0.05)) c.background = fb.background;
+  if (isCreamOrOffWhite(c.background, { beige: opts.beige }) || (dir.palette.background === "dark" && luminance(c.background) > 0.05)) c.background = fb.background;
   if (dir.palette.background === "tint" && luminance(c.background) < 0.6) c.background = fb.background;
-  if (isWarmCream(c.surface)) c.surface = fb.surface;
+  // promptFixes.warmSurface: a warm direction's cream surface becomes a warm tint, so "warmer colours" can warm the page.
+  if (opts.warmSurface && warmSurfaceAllowed(dir) && isWarmCream(c.surface)) c.surface = toWarmTint(c.surface);
+  else if (isWarmCream(c.surface)) c.surface = fb.surface;
   clampOffBlackWhite(c);
   // Body text must pass on both the page and the section surface, so the surface stays on the page's
   // side of light/dark. A mid-grey surface on a white page left no text colour that passes on both

@@ -3,6 +3,7 @@
  * across trades, the pairs that would read as one template, brand fit and motif fit per site.
  */
 import { lookSummary, type BrandFit } from "./look-distance.ts";
+import { copySummary, type HomepageCopy } from "./copy-similarity.ts";
 import type { FixtureResult } from "./runner.ts";
 
 const n2 = (x: number | null) => (x === null ? "—" : x.toFixed(2));
@@ -47,5 +48,27 @@ export function renderVariety(results: FixtureResult[], meta: { mode: string; sc
   for (const p of [...s.pairs].sort((a, b) => a.total - b.total).slice(0, 12)) {
     lines.push(`| ${p.a} / ${p.b} | ${p.sameTrade ? "yes" : "no"} | ${p.spec.toFixed(2)} | ${n2(p.screens)} | ${p.total.toFixed(2)} |`);
   }
+  lines.push(...copyLines(results.flatMap((r) => (r.copy ? [r.copy] : []))));
   return `${lines.join("\n")}\n`;
+}
+
+/** The copy overlap section (copy-similarity.ts): how alike the homepages' headings read. */
+export function copyLines(sites: HomepageCopy[]): string[] {
+  if (sites.length < 2) return [];
+  const c = copySummary(sites);
+  const lines = [
+    "",
+    "## Copy: how alike the homepages read",
+    "",
+    "Word overlap (Jaccard of word stems) of each homepage's hero headline, eyebrows and section titles, the business's own name and town left out: 0 = no word in common, 1 = the same words. Free, from the spec.",
+    "",
+    `- Across trades: **${n2(c.acrossTrades)}**`,
+    `- Within a trade: **${n2(c.withinTrade)}**${c.withinTrade === null ? " (no two sites of one trade in this run: run with --twins)" : ""}`,
+    `- Headings used word for word on more than one homepage: ${c.repeated.length ? c.repeated.slice(0, 12).map((r) => `„${r.heading}" ×${r.sites}`).join(", ") : "none"}`,
+    "",
+    "| Pair | Same trade | Copy overlap |",
+    "|---|---|---|",
+  ];
+  for (const p of [...c.pairs].sort((a, b) => b.overlap - a.overlap).slice(0, 8)) lines.push(`| ${p.a} / ${p.b} | ${p.sameTrade ? "yes" : "no"} | ${p.overlap.toFixed(2)} |`);
+  return lines;
 }

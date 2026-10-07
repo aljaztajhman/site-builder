@@ -199,6 +199,37 @@ export const AppConfigSchema = z.object({
    * neighbours: how many sites of the same trade the neighbour check compares.
    */
   variety: z.object({ families: z.boolean(), neighbours: z.number().int().min(0).max(500) }),
+  /**
+   * The audit's prompt fixes (docs/plans/audit-2026-10-01.md, "Prompts"), one switch each so a paid eval can measure
+   * them one at a time. All off: every prompt, request and repair is byte-identical to before (see config $comment).
+   */
+  promptFixes: z.strictObject({
+    $comment: z.string().optional(),
+    /** Brief imageIdeas tied to the client's trade, hero composition, no landscapes or body parts; imageGen.pipeline.unstagedStyle. */
+    pictures: z.boolean(),
+    /** Critique priorities, Slovene only for clear errors, no deletions for component failures, JSON only, hero-suitable ids. */
+    critique: z.boolean(),
+    /** Alt text with the business's context and heroSuitable criteria. */
+    altText: z.boolean(),
+    /** Eval judge: required placeholders and the phone bar are intended; notes before scores. */
+    judge: z.boolean(),
+    /** Brief without the full site RULES (only its own), the address rule. */
+    brief: z.boolean(),
+    /** Classifier: what confidence means (non-business text, no fitting type). */
+    classifier: z.boolean(),
+    /** Chat edit: the editor's Slovene section names, replies in the client's language. */
+    edit: z.boolean(),
+    /** Directions: no black-and-white/duotone promises, imagery in words, editorial's photo hero, no "Avoid" list. */
+    directions: z.boolean(),
+    /** Warm directions may take a warm non-cream surface (peach, apricot); repair turns a cream surface into one. */
+    warmSurface: z.boolean(),
+    /** Exactly one main heading (hero, page header) per page, first on the page: validated in generation and edits. */
+    oneHero: z.boolean(),
+    /** The cream check also catches beige page backgrounds (#ece3d0) when repairing generated and edited designs. */
+    beige: z.boolean(),
+    /** Catalogue and RULES wording: eyebrow, contact strip, cta, responsive (not mobile first), call-button count. */
+    catalogue: z.boolean(),
+  }),
   structuredOutputForContent: z.boolean(),
   pricesUsdPerMTok: z.record(z.string(), Price),
   eurPerUsd: z.number().positive(),
@@ -313,6 +344,8 @@ export const AppConfigSchema = z.object({
       fillUpToFree: z.number().int().min(0).max(4),
       /** Appended to every generated image's prompt. */
       style: z.string().min(1),
+      /** Appended instead of `style` when promptFixes.pictures is on: an unstaged phone photo of the trade at work. */
+      unstagedStyle: z.string().min(1),
     }),
     landscape: z.object({ width: z.number().int().positive(), height: z.number().int().positive() }),
     models: z.record(z.string(), ImageGenModel),

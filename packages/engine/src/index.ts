@@ -11,6 +11,7 @@ export * from "./image-gen.ts";
 export * from "./photos.ts";
 export * from "./image-ids.ts";
 export * from "./prompts.ts";
+export * from "./prompt-fixes.ts";
 export * from "./stages.ts";
 export * from "./variety.ts";
 export * from "./pipeline.ts";

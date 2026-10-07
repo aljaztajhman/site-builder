@@ -229,9 +229,10 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     }
     // The variants exist now; the editor's live preview shows the photos before the alt texts are back.
     if (images.length) await log("images", "Photos ready", { ids: images.map((i) => i.id) });
-    await classified;
+    const cls = await classified;
     stop.signal.throwIfAborted();
-    const alts = await altTexts(client, vision);
+    // The business context reaches the request only with config promptFixes.altText.
+    const alts = await altTexts(client, vision, { businessType: cls.businessType, description: intake.description });
     alts.forEach((a, i) => {
       images[i]!.alt = a.alt.slice(0, 180);
       images[i]!.focal = a.focal;
@@ -325,7 +326,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     let c: Awaited<ReturnType<typeof critique>>;
     try {
       c = await stageTime("critique", () =>
-        critique(client, { spec, mobilePng: check!.screenshots.mobileFull, desktopPng: check!.screenshots.desktop, failures: check!.failures, corpus }),
+        critique(client, { spec, mobilePng: check!.screenshots.mobileFull, desktopPng: check!.screenshots.desktop, failures: check!.failures, corpus, heroImageIds: heroIds }),
       );
     } catch (e) {
       // The site already passed validation and checks; a failed critique only means no polish. The spend
@@ -340,7 +341,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     }
     await log("critique", `Round ${rounds}: ${c.issues.length} issues, ${c.patches.length} patches`, c.issues);
     if (c.patches.length === 0) break;
-    const r = applyPatches(spec, c.patches as Operation[], corpus);
+    const r = applyPatches(spec, c.patches as Operation[], corpus, config.promptFixes);
     if (r.issues.length) {
       await log("critique", "Critique patches rejected by validation", r.issues);
       break;

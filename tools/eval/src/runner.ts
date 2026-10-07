@@ -38,6 +38,7 @@ import { homepageShape, type HomepageShape } from "./homepage-metrics.ts";
 import { judgeHomepage, type JudgeOutput } from "./judge.ts";
 import { CachedImageTransport, meteredImages, meteredModel, type Meter } from "./eval-transports.ts";
 import { brandFit, lookFeatures, motifFit, screenPrint, type BrandFit, type LookSite, type MotifFit } from "./look-distance.ts";
+import { homepageCopy, type HomepageCopy } from "./copy-similarity.ts";
 
 export type Mode = "live" | "record" | "record-missing" | "replay" | "offline";
 
@@ -77,6 +78,8 @@ export interface FixtureResult {
   composition: { mobile: Composition; desktop: Composition } | null;
   /** The generated homepage's look (look-distance.ts): for the same-trade distance, brand fit and motif fit. */
   look: { site: LookSite; brand: BrandFit; motif: MotifFit } | null;
+  /** The generated homepage's headings, for the copy overlap (copy-similarity.ts). */
+  copy?: HomepageCopy | null;
   /** Photos the client gave (the photo-share target only applies when there are some). */
   photoCount: number;
   /** Vision judge's scores for the generated homepage (--judge), and what it cost. */
@@ -85,6 +88,8 @@ export interface FixtureResult {
   judgeEur: number;
   /** What this fixture really paid the providers, judge excluded: replayed answers and cached pictures cost nothing. */
   paidEur: number;
+  /** --replay: requests that differ from the one recorded (a prompt changed since; the recorded answer is replayed anyway). */
+  replayChanged?: number;
   /** --record-missing: calls answered from the recordings, and calls paid and recorded. */
   calls?: { replayed: number; recorded: number };
   /** Generated pictures from the cache, and pictures fal made (paid) in this run. */
@@ -117,9 +122,16 @@ export interface RunOptions {
   spentSoFar: () => number;
 }
 
-function transportFor(opts: RunOptions, fixture: Fixture, live: () => ModelTransport): { transport: ModelTransport; finish?: () => void; calls?: () => FixtureResult["calls"] } {
+function transportFor(
+  opts: RunOptions,
+  fixture: Fixture,
+  live: () => ModelTransport,
+): { transport: ModelTransport; finish?: () => void; calls?: () => FixtureResult["calls"]; changed?: () => number } {
   const dir = path.join(opts.recordingsDir, fixture.id);
-  if (opts.mode === "replay") return { transport: new ReplayTransport(dir) };
+  if (opts.mode === "replay") {
+    const t = new ReplayTransport(dir);
+    return { transport: t, changed: () => t.hashMismatches.length };
+  }
   if (opts.mode === "record-missing") {
     const t = new RecordMissingTransport(live(), dir);
     return { transport: t, finish: () => t.finish(), calls: () => ({ ...t.stats }) };
@@ -201,6 +213,7 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
   const meter: Meter = { eur: 0 };
   let finishRecordings: (() => void) | undefined;
   let callStats: (() => FixtureResult["calls"]) | undefined;
+  let replayChanged: (() => number) | undefined;
   let pictureStats: (() => FixtureResult["pictures"]) | undefined;
   try {
     const site = await repo.createSite({ name: fixture.id, slug: fixture.id, intake: { description: fixture.brief.description, photoAssetIds: [], scope: opts.scope } });
@@ -229,6 +242,7 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
     const transport = transports?.transport ?? null;
     finishRecordings = transports?.finish;
     callStats = transports?.calls;
+    replayChanged = transports?.changed;
     if (!transport) {
       await seedGolden(fixture, opts.goldenDir, repo, storage, site.id, config);
     } else {
@@ -296,6 +310,7 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
       brand: brandFit(features, logoColours),
       motif: motifFit(features.motif, fixture.brief.businessType, fixture.brief.trade),
     };
+    result.copy = homepageCopy(fixture.id, fixture.brief.businessType, first.current.spec);
     result.checkpoints.push(summarise("generated", first.current.spec, first.current.version, first.report));
     const { zip } = await exportSite({ repo, storage, config }, site.id);
     const ex = await checkExportOffline(zip, first.current.spec.slug, opts.browser.browser);
@@ -324,7 +339,8 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
         },
       });
       // Reads only the screenshots already written to `dir`, so it may finish after this function returns.
-      const judging = judgeHomepage(judgeClient, dir, { businessType: fixture.brief.businessType, direction: result.direction, photos: fixture.photos.length }).then(
+      const generated = first.current.spec.assets.images.filter((i) => i.origin === "generated").length;
+      const judging = judgeHomepage(judgeClient, dir, { businessType: fixture.brief.businessType, direction: result.direction, photos: fixture.photos.length, generated }).then(
         (j) => void (result.judge = j),
         (e: unknown) => void (result.judgeError = (e as Error).message.slice(0, 300)),
       );
@@ -371,6 +387,7 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
     const pictures = pictureStats?.();
     if (calls) result.calls = calls;
     if (pictures) result.pictures = pictures;
+    if (replayChanged) result.replayChanged = replayChanged();
     await db.close();
   }
   return result;

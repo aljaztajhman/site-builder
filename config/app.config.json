@@ -17,6 +17,21 @@
     "families": false,
     "neighbours": 50
   },
+  "promptFixes": {
+    "$comment": "The audit's prompt fixes (docs/plans/audit-2026-10-01.md, 'Prompts'; docs/dev/prompt-fixes.md), one switch each. All off: prompts, requests and repairs are byte-identical to before. Each changes model output: turn one on, run its pnpm eval --only fixtures (record-missing), compare, then keep it on. pictures: brief imageIdeas + imageGen.pipeline.unstagedStyle; critique; altText; judge (eval only); brief: no full RULES in the brief; classifier: confidence defined; edit: the editor's section names; directions: no b/w or duotone promises, editorial photo hero, no Avoid list; warmSurface: warm non-cream surfaces for warm directions; oneHero: one main heading per page (validation + safe repair); beige: beige page backgrounds count as cream in repair; catalogue: eyebrow/contact-strip/cta wording, responsive rule, call-button rule.",
+    "pictures": false,
+    "critique": false,
+    "altText": false,
+    "judge": false,
+    "brief": false,
+    "classifier": false,
+    "edit": false,
+    "directions": false,
+    "warmSurface": false,
+    "oneHero": false,
+    "beige": false,
+    "catalogue": false
+  },
   "structuredOutputForContent": false,
   "pricesUsdPerMTok": {
     "claude-haiku-4-5-20251001": { "input": 1.0, "output": 5.0, "cacheWrite5m": 1.25, "cacheRead": 0.1 },
@@ -128,7 +143,8 @@
       "fillUpTo": { "home": 2, "full": 3 },
       "$comment": "fillUpTo is for paid plans and the admin; a paid plan also stops at its plans.*.site.generatedPicturesPerMonth (counted per allowance month, held at each picture's reservation). fillUpToFree: the most generated pictures in a free preview (no account or a free account; homepage only), fewer than a paid homepage to keep the free cost down (it-plan-limits).",
       "fillUpToFree": 1,
-      "style": "Realistic photograph, natural available light, true-to-life colours, an ordinary everyday setting in Slovenia. No people's faces, no text, no lettering on signs or packaging, no logos, no shop fronts, no watermark, no borders."
+      "style": "Realistic photograph, natural available light, true-to-life colours, an ordinary everyday setting in Slovenia. No people's faces, no text, no lettering on signs or packaging, no logos, no shop fronts, no watermark, no borders.",
+      "unstagedStyle": "Unstaged photo taken with a good smartphone by the owner of a small Slovenian business at work: natural available light, true-to-life, slightly muted colours, ordinary surroundings with small imperfections and signs of use, nothing styled, arranged or symmetrical, no studio look. No people and no part of a person (no faces, hands or arms), no text or lettering anywhere (signs, packaging, labels, screens), no logos, no shop fronts, no watermark, no borders."
     },
     "landscape": { "width": 1536, "height": 1024 },
     "models": {
