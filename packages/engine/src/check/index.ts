@@ -6,15 +6,15 @@ import { collectPlaceholders, entryPages, validateSite, type Issue, type SiteSpe
 import { pageFile } from "@sb/render";
 import { checkFacts, type FactViolation } from "../facts.ts";
 import { launchCheckBrowser, type CheckBrowser } from "./browser.ts";
-import { hideFixedForFullPage, loadLazyImages, measurePage, runAxe, type AxeViolation, type MobileReport } from "./page-checks.ts";
+import { callButtonsPerScreen, hideFixedForFullPage, loadLazyImages, measurePage, runAxe, type AxeViolation, type CallButtons, type MobileReport } from "./page-checks.ts";
 import { runLighthouse, type LighthouseScores } from "./lighthouse.ts";
 import { measureComposition, type Composition } from "./composition.ts";
 import { serveStatic } from "./static-server.ts";
 
 export { launchCheckBrowser, type CheckBrowser } from "./browser.ts";
 export { serveStatic, type StaticServer } from "./static-server.ts";
-export type { AxeViolation, MobileReport } from "./page-checks.ts";
-export { loadLazyImages, measurePage, runAxe } from "./page-checks.ts";
+export type { AxeViolation, CallButtons, MobileReport } from "./page-checks.ts";
+export { callButtonsPerScreen, loadLazyImages, measurePage, runAxe } from "./page-checks.ts";
 export type { LighthouseScores } from "./lighthouse.ts";
 export type { Composition } from "./composition.ts";
 export { checkExportOffline, unzipTo, type ExportCheck } from "./export-offline.ts";
@@ -121,6 +121,8 @@ export async function checkSite(spec: SiteSpec, files: Map<string, Uint8Array>, 
       await mp.goto(url, { waitUntil: "networkidle" });
       const mobile = await measurePage(mp, { primaryMin: t.primaryMin, primaryGap: t.primaryGap, absoluteMin: t.absoluteMin });
       const axe = await runAxe(mp);
+      // A site with a skeleton (spec v15) promises one call button per screen; checked on every screen of the page.
+      if (spec.design.skeleton) mobile.banned.push(...callsBanned(await callButtonsPerScreen(mp)));
       let shotMobile: Buffer | undefined;
       let shotMobileFull: Buffer | undefined;
       if (file === "index.html") {
@@ -144,6 +146,7 @@ export async function checkSite(spec: SiteSpec, files: Map<string, Uint8Array>, 
       await dp.goto(url, { waitUntil: "networkidle" });
       const d = await measurePage(dp, { primaryMin: t.primaryMin, primaryGap: t.primaryGap, absoluteMin: t.absoluteMin });
       const desktopAxe = await runAxe(dp);
+      if (spec.design.skeleton) d.banned.push(...callsBanned(await callButtonsPerScreen(dp)));
       if (file === "index.html" && shotMobile && shotMobileFull) {
         const desktopComposition = await measureComposition(dp);
         if (mobileComposition) composition = { mobile: mobileComposition, desktop: desktopComposition };
@@ -185,6 +188,11 @@ export async function checkSite(spec: SiteSpec, files: Map<string, Uint8Array>, 
     if (own) await cb.close();
     await rm(dir, { recursive: true, force: true });
   }
+}
+
+/** The banned-pattern line for more than one call button on a screen; none when there is at most one. */
+export function callsBanned(c: CallButtons): string[] {
+  return c.max > 1 ? [`${c.max} call buttons on one screen (at ${c.at} px): ${c.buttons.join(", ")}`] : [];
 }
 
 function mergeAxe(a: AxeViolation[], b: AxeViolation[]): AxeViolation[] {

@@ -66,6 +66,12 @@ export const MIGRATIONS: Record<number, (spec: RawSpec) => RawSpec> = {
   // direct edits from now on; a stored site has none, so its first regeneration keeps only its business facts, as
   // before. Every v13 spec is a valid v14 spec.
   13: (spec) => spec,
+  // 14 → 15: the site's own skeleton (variety engine Step 4, config variety.skeleton). Additive: the optional
+  // design.skeleton (header family, where the call lives on phones, footer family and tone, section width, cards,
+  // buttons, dividers, photo ratio). A stored site has none and renders byte-identical HTML: its header and footer keep
+  // their chrome variants, which map one to one into the skeleton's families (skeletonOfChrome). Every v14 spec is a
+  // valid v15 spec.
+  14: (spec) => spec,
 };
 
 export function migrateSpec(input: unknown, migrations = MIGRATIONS, target: number = SPEC_VERSION): SiteSpec {

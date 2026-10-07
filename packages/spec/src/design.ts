@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { HexColor } from "./common.ts";
 import type { BusinessType } from "./business.ts";
+import { Skeleton } from "./skeleton.ts";
 
 /** How photos are presented. Implemented as CSS in packages/components/styles/imagery.css. */
 export const Imagery = z.enum(["natural", "rounded", "framed", "full-bleed", "monochrome", "arched", "offset-block", "duotone"]);
@@ -39,6 +40,8 @@ export const Design = z.strictObject({
   density: Density,
   shadow: Shadow,
   imagery: Imagery,
+  /** Spec v15: the site's own frame (skeleton.ts); absent renders the shared one of v14. Set by the generator (config variety.skeleton). */
+  skeleton: Skeleton.optional().describe("Set by the system; leave out."),
 });
 export type Design = z.infer<typeof Design>;
 

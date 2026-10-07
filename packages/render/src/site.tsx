@@ -1,5 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import {
+  CallFloat,
   CookieConsent,
   ENTRY_IMAGE_SIZES,
   EntryArticle,
@@ -11,6 +12,7 @@ import {
   lcpImageFor,
   rendererFor,
   barActions,
+  heroOwnsCall,
   signatureActions,
   signatureOffersDirections,
   uiStrings,
@@ -305,10 +307,30 @@ function renderDocument(spec: SiteSpec, localized: SiteSpec, opts: RenderOptions
   // one is hidden (chrome.css), so one screen never shows two of the same.
   const afterHero = heroOffersCallAndDirections(first);
   const shown = heroActions(first);
-  const covered = bar && !afterHero ? barActions(ctx).filter((a) => a !== "directions" && shown.includes(a)) : [];
-  const bodyClass = bar ? ["has-action-bar", ...covered.map((a) => `bar-covers-hero-${a}`)].join(" ") : undefined;
+  // Spec v15: the site's skeleton says where the call lives on phones: the bar, one floating call button, or the header
+  // (no fixed element). Either fixed one waits for a hero that offers call and directions itself (reveal.js), so a screen
+  // never shows two call buttons; skeleton.css turns every other call button into a text link.
+  const skeleton = design.skeleton;
+  const fixed = !bar || !skeleton ? (bar ? "bar" : null) : skeleton.actions === "header" ? null : skeleton.actions;
+  const covered = fixed === "bar" && !afterHero ? barActions(ctx).filter((a) => a !== "directions" && shown.includes(a)) : [];
+  const bodyClass =
+    fixed === "bar" ? ["has-action-bar", ...covered.map((a) => `bar-covers-hero-${a}`)].join(" ") : fixed === "float" ? "has-call-float" : undefined;
+  // A hero whose call object owns the call (a plate, a call block): only the fixed element's call waits for it.
+  const waitCall = skeleton !== undefined && !afterHero && heroOwnsCall(first);
+  if (skeleton && ((fixed && (afterHero || waitCall)) || (skeleton.actions === "header" && heroOwnsCall(first)))) islands.add("reveal.js");
+  const skeletonAttrs = skeleton
+    ? {
+        "data-skeleton": "",
+        "data-actions": skeleton.actions,
+        "data-width": skeleton.width,
+        "data-cards": skeleton.cards,
+        "data-buttons": skeleton.buttons,
+        "data-dividers": skeleton.dividers,
+        "data-ratio": skeleton.photoRatio,
+      }
+    : {};
   const renderBody = (suffixes: ReadonlyMap<string, string>) => renderToStaticMarkup(
-    <body data-imagery={design.imagery} data-motif={motif} className={bodyClass}>
+    <body data-imagery={design.imagery} data-motif={motif} className={bodyClass} {...skeletonAttrs}>
       <a className="skip-link" href="#main">
         {ctx.t("skipToContent")}
       </a>
@@ -317,7 +339,8 @@ function renderDocument(spec: SiteSpec, localized: SiteSpec, opts: RenderOptions
         <LandmarkSuffixes.Provider value={suffixes}>{doc.main(ctx)}</LandmarkSuffixes.Provider>
       </main>
       <Footer ctx={ctx} />
-      {bar && <MobileActionBar ctx={ctx} afterHero={afterHero} />}
+      {fixed === "bar" && <MobileActionBar ctx={ctx} afterHero={afterHero} reveal={skeleton !== undefined} waitCall={waitCall} />}
+      {fixed === "float" && <CallFloat ctx={ctx} reveal={afterHero} waitCall={waitCall} />}
       {needsConsent && <CookieConsent ctx={ctx} onRequest={consentOnRequest} />}
       {[...islands].sort().map((f) => (
         <script key={f} src={ctx.shared(`js/${f}`)} defer />

@@ -205,6 +205,65 @@ export async function measurePage(page: Page, opts: { primaryMin: number; primar
   }, opts);
 }
 
+export interface CallButtons {
+  /** Most call buttons seen together on one screen. */
+  max: number;
+  /** Where that screen starts (px from the top), and what was on it. */
+  at: number;
+  buttons: string[];
+}
+
+/**
+ * Call buttons per screen (banned: more than one; docs/PRODUCT.md). Walks the page a half screen at a time and counts
+ * the visible tel: links on each screen that read as a button: on a box of their own (a background or a border all
+ * round, like a button, the plate or the bar's call) or on a fixed or sticky layer that stays on screen (the bar, the
+ * floating button, a sticky header's call). A phone number in text, a fact list or the footer is a link, not a button.
+ * Ends back at the top. Runs in the page as a string, so tsx helpers don't leak in.
+ */
+export async function callButtonsPerScreen(page: Page): Promise<CallButtons> {
+  return page.evaluate(`(async () => {
+    const vh = window.innerHeight, vw = window.innerWidth;
+    const shown = (el) => {
+      const cs = getComputedStyle(el);
+      if (cs.display === "none" || cs.visibility === "hidden" || Number(cs.opacity) === 0) return false;
+      const r = el.getBoundingClientRect();
+      return r.width > 1 && r.height > 1;
+    };
+    const onLayer = (el) => {
+      for (let a = el; a; a = a.parentElement) {
+        const p = getComputedStyle(a).position;
+        if (p === "fixed" || p === "sticky") return true;
+      }
+      return false;
+    };
+    const opaque = (c) => c !== "transparent" && !/rgba\\([^)]*,\\s*0\\)$/.test(c);
+    const boxed = (el) => {
+      const cs = getComputedStyle(el);
+      if (opaque(cs.backgroundColor)) return true;
+      return ["top", "right", "bottom", "left"].every((s) => cs.getPropertyValue("border-" + s + "-style") !== "none" && parseFloat(cs.getPropertyValue("border-" + s + "-width")) >= 1 && opaque(cs.getPropertyValue("border-" + s + "-color")));
+    };
+    const describe = (el) => el.tagName.toLowerCase() + (el.className ? "." + String(el.className).trim().split(/\\s+/).slice(0, 2).join(".") : "") + ' "' + (el.textContent || "").trim().replace(/\\s+/g, " ").slice(0, 24) + '"';
+    const settle = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(r, 30))));
+    const height = document.documentElement.scrollHeight;
+    let best = { max: 0, at: 0, buttons: [] };
+    for (let y = 0; ; y += Math.round(vh / 2)) {
+      window.scrollTo({ top: y, behavior: "instant" });
+      await settle();
+      const on = [...document.querySelectorAll('a[href^="tel:"]')].filter((el) => {
+        if (!shown(el)) return false;
+        const r = el.getBoundingClientRect();
+        if (r.bottom <= 0 || r.top >= vh || r.right <= 0 || r.left >= vw) return false;
+        return boxed(el) || onLayer(el);
+      });
+      if (on.length > best.max) best = { max: on.length, at: window.scrollY, buttons: on.map(describe) };
+      if (y + vh >= height) break;
+    }
+    window.scrollTo({ top: 0, behavior: "instant" });
+    await settle();
+    return best;
+  })()`);
+}
+
 /** Scrolls through the page so lazy images load, then back to the top (for full-page screenshots). */
 export async function loadLazyImages(page: Page): Promise<void> {
   await page.evaluate("globalThis.__name = globalThis.__name || ((f) => f)");
