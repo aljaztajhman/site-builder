@@ -199,6 +199,12 @@ export const AppConfigSchema = z.object({
    * neighbours: how many sites of the same trade the neighbour check compares.
    */
   variety: z.object({ families: z.boolean(), neighbours: z.number().int().min(0).max(500) }),
+  /**
+   * Generation cost cuts (docs/plans/cost-cuts.md, see config $comment). secondCritiqueOnlyOnFailures: a second critique
+   * round only when the re-check after the first still reports failures. contentRetryAsPatch: a content answer that fails
+   * validation is fixed with an RFC 6902 patch from the model instead of the whole JSON again. Off: today's behaviour.
+   */
+  costCuts: z.object({ secondCritiqueOnlyOnFailures: z.boolean(), contentRetryAsPatch: z.boolean() }),
   structuredOutputForContent: z.boolean(),
   pricesUsdPerMTok: z.record(z.string(), Price),
   eurPerUsd: z.number().positive(),
@@ -238,6 +244,18 @@ export const AppConfigSchema = z.object({
     maxRedirects: z.number().int().min(0).max(10),
     /** Lighthouse mobile performance in the report (off in tests: it needs a debugging port and takes ~20 s). */
     lighthouse: z.boolean(),
+  }),
+  /** Stranko's own funnel and engine events (product_events; see config $comment). */
+  analytics: z.object({
+    events: z.boolean(),
+    keepDays: z.number().int().min(1).max(400),
+    landingDedupeMinutes: z.number().int().min(0),
+    onceMinutes: z.number().int().min(0),
+    /**
+     * Cloudflare Web Analytics on the landing, login and privacy pages (beacon.tsx): the site's public token (null:
+     * no beacon) and the hostnames it is shown on.
+     */
+    cloudflare: z.object({ token: z.string().regex(/^[0-9a-f]{32}$/).nullable(), hosts: z.array(z.string().min(1)) }),
   }),
   stats: z.object({
     visitDedupeMinutes: z.number().int().min(0),
@@ -310,6 +328,19 @@ export const AppConfigSchema = z.object({
       /** When the prune job runs (pg-boss cron, in timeZone). */
       cron: z.string().min(1),
     }),
+  }),
+  /** Database backups (docs/dev/workflow.md §4): `pnpm db:backup`, run by the nightly workflow (see config $comment). */
+  backups: z.object({
+    /** Storage key prefix; each backup is <prefix><YYYY-MM-DD>.sql.gz (UTC day; a second run that day replaces it). */
+    prefix: z.string().regex(/^[a-z0-9-]+\/$/),
+    /** Backups older than this many days are deleted after a new one is written. */
+    keepDays: z.number().int().min(1),
+    /** The check fails when the newest backup is older than this. */
+    maxAgeHours: z.number().positive(),
+    /** The check fails when the newest backup is smaller than this (compressed bytes)... */
+    minBytes: z.number().int().min(0),
+    /** ...or smaller than this share of the backup before it (a truncated dump). */
+    minShareOfPrevious: z.number().min(0).max(1),
   }),
   /** fal.ai images: eval fixture photos, and generated mood images for client sites with too few photos (see config $comment). */
   imageGen: z.object({

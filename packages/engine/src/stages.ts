@@ -42,6 +42,7 @@ import {
 } from "./prompts.ts";
 import { assembleSpec, contentJsonSchema, contentOutputSchema, type ContentOutput } from "./assemble.ts";
 import { repairContentOutput } from "./repair.ts";
+import { patchRetryLoop, wholeRetryInstruction, type PatchLoopDeps } from "./content-patch.ts";
 import type { Swatch } from "./palette.ts";
 import { fitImageForModel, sliceScreenshot } from "./images.ts";
 import { checkFacts, type FactViolation } from "./facts.ts";
@@ -282,6 +283,8 @@ export interface ContentInput {
   structuredOutput: boolean;
   retries: number;
   corpus: string;
+  /** Config costCuts.contentRetryAsPatch: a failed answer is fixed with an RFC 6902 patch first (content-patch.ts). */
+  retryAsPatch?: boolean;
 }
 
 export interface ContentResult {
@@ -293,6 +296,8 @@ export interface ContentResult {
   structuredFallback: boolean;
   /** Mechanical fixes made to the answer that produced `spec` before validation (see repairContentOutput). */
   repairs: string[];
+  /** With `retryAsPatch`: one line per patch retry (applied, issues left, or why it fell back to the whole JSON). */
+  patchRetries?: string[];
 }
 
 /**
@@ -370,6 +375,22 @@ export async function generateContent(client: ModelClient, input: ContentInput):
   let specRepairs: string[] = [];
   let structured = input.structuredOutput;
   let structuredFallback = false;
+  /** One parsed answer (whole or patched) checked: repaired in place, assembled, validated, fact-checked. Throws on a shape assembly can't take. */
+  const evaluate: PatchLoopDeps["evaluate"] = (data) => {
+    const repairs = repairContentOutput(data);
+    const parsed = schema.safeParse(data);
+    if (!parsed.success) return { issues: parsed.error.issues.slice(0, 25).map((i) => `/${i.path.join("/")}: ${i.message}`) };
+    const built = assembleSpec({ slug: input.slug, brief: input.brief, design: input.design, assets: input.assets, content: parsed.data as ContentOutput, hoursWithheld: clientWithholdsHours(input.corpus) });
+    // Copy rules fixed in code rather than by a paid retry: em dashes become en dashes.
+    repairs.push(...repairSiteCopy(built));
+    // "Cena po dogovoru" is the owner's choice, never the model's: a missing price again (it-price-on-request).
+    repairs.push(...stripModelOnRequest(built, null).map((p) => `${p}: price "on request" is set by the owner only; made a price placeholder`));
+    const v = validateSite(built);
+    const issues = v.ok ? [] : v.issues.map(issueLine);
+    issues.push(...checkFacts(built, input.corpus).map(factLine));
+    return { issues, built: { spec: built, repairs } };
+  };
+  if (input.retryAsPatch) return generateContentPatched(client, input, messages, evaluate, structured);
   for (;;) {
     attempts++;
     let res;
@@ -394,23 +415,12 @@ export async function generateContent(client: ModelClient, input: ContentInput):
     }
     let issues: string[];
     try {
-      const data: unknown = JSON.parse(extractJson(res.text));
-      const repairs = repairContentOutput(data);
-      const parsed = schema.safeParse(data);
-      if (!parsed.success) {
-        issues = parsed.error.issues.slice(0, 25).map((i) => `/${i.path.join("/")}: ${i.message}`);
-      } else {
-        spec = assembleSpec({ slug: input.slug, brief: input.brief, design: input.design, assets: input.assets, content: parsed.data as ContentOutput, hoursWithheld: clientWithholdsHours(input.corpus) });
-        // Copy rules fixed in code rather than by a paid retry: em dashes become en dashes.
-        repairs.push(...repairSiteCopy(spec));
-        // "Cena po dogovoru" is the owner's choice, never the model's: a missing price again (it-price-on-request).
-        repairs.push(...stripModelOnRequest(spec, null).map((p) => `${p}: price "on request" is set by the owner only; made a price placeholder`));
-        const v = validateSite(spec);
-        issues = v.ok ? [] : v.issues.map(issueLine);
-        const facts = checkFacts(spec, input.corpus);
-        issues.push(...facts.map(factLine));
+      const r = evaluate(JSON.parse(extractJson(res.text)));
+      issues = r.issues;
+      if (r.built) {
+        spec = r.built.spec;
         specIssues = issues;
-        specRepairs = repairs;
+        specRepairs = r.built.repairs;
       }
     } catch {
       issues = ["Output is not valid JSON."];
@@ -419,13 +429,43 @@ export async function generateContent(client: ModelClient, input: ContentInput):
     if (issues.length === 0 && spec) return { spec, attempts, issues: [], structuredFallback, repairs: specRepairs };
     if (attempts > input.retries) break;
     messages.push({ role: "assistant", content: res.text });
-    messages.push({
-      role: "user",
-      content: `The output failed validation. Fix every issue and return the complete corrected JSON (not a diff):\n${issues.map((i) => `- ${i}`).join("\n")}`,
-    });
+    messages.push({ role: "user", content: wholeRetryInstruction(issues) });
   }
   if (!spec) throw new Error(`Content generation failed after ${attempts} attempts: ${lastIssues.slice(0, 5).join("; ")}`);
   return { spec, attempts, issues: specIssues, structuredFallback, repairs: specRepairs };
+}
+
+/** generateContent with config costCuts.contentRetryAsPatch: retries go through patchRetryLoop (content-patch.ts). */
+async function generateContentPatched(
+  client: ModelClient,
+  input: ContentInput,
+  messages: Anthropic.MessageParam[],
+  evaluate: PatchLoopDeps["evaluate"],
+  structuredOutput: boolean,
+): Promise<ContentResult> {
+  let first = messages[0]!;
+  let structured = structuredOutput;
+  let structuredFallback = false;
+  const call: PatchLoopDeps["call"] = async (tail, kind) => {
+    for (;;) {
+      const withSchema = structured && kind === "whole";
+      try {
+        return await client.call({ stage: "content", system: [sectionCatalogue(), CONTENT_SYSTEM], messages: [first, ...tail], ...(withSchema ? { schema: contentJsonSchema() } : {}) });
+      } catch (e) {
+        // As in generateContent: the API refused the content schema, so plain JSON from here on.
+        if (withSchema && isSchemaRejection(e)) {
+          structured = false;
+          structuredFallback = true;
+          first = { role: "user", content: `${first.content as string}\n\n${plainJsonInstruction()}` };
+          continue;
+        }
+        throw e;
+      }
+    }
+  };
+  const r = await patchRetryLoop({ call, evaluate, retries: input.retries });
+  if (!r.spec) throw new Error(`Content generation failed after ${r.attempts} attempts: ${r.lastIssues.slice(0, 5).join("; ")}`);
+  return { spec: r.spec, attempts: r.attempts, issues: r.specIssues, structuredFallback, repairs: r.specRepairs, patchRetries: r.notes };
 }
 
 const issueLine = (i: Issue) => `${i.path}: ${i.message}`;

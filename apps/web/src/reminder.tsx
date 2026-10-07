@@ -5,6 +5,7 @@ import { planOffer } from "@sb/engine";
 import { isDisposableEmailDomain, normaliseEmail, type MailMessage, type Mailer, type Repo } from "@sb/platform";
 import type { SiteSpec } from "@sb/spec";
 import { refusalJson, signInUrl, type AppEnv } from "./access.ts";
+import type { Track } from "./analytics.ts";
 import { chatEdits, count, lockedPagesOf, moreHomepages } from "./limits.ts";
 import { Brand, Doc, html } from "./pages.tsx";
 import { PRODUCT_NAME, formatDate } from "./ui/labels.ts";
@@ -124,7 +125,7 @@ export async function sendPreviewReminders(deps: ReminderDeps, limit = 100): Pro
   return sent;
 }
 
-export function registerReminderRoutes(app: Hono<AppEnv>, deps: Pick<ReminderDeps, "repo" | "config" | "secret">): void {
+export function registerReminderRoutes(app: Hono<AppEnv>, deps: Pick<ReminderDeps, "repo" | "config" | "secret"> & { track?: Track }): void {
   const { repo, secret } = deps;
 
   // The visitor's address for the reminder (the editor's guest panel). Only on this device's unclaimed preview
@@ -167,7 +168,10 @@ export function registerReminderRoutes(app: Hono<AppEnv>, deps: Pick<ReminderDep
       );
     }
     const claimed = await repo.usage.claimSite(site.id, viewer.account.id);
-    if (claimed) console.log(`[web] preview ${site.id} kept from its reminder by ${viewer.account.id}`);
+    if (claimed) {
+      console.log(`[web] preview ${site.id} kept from its reminder by ${viewer.account.id}`);
+      await deps.track?.(c, { kind: "preview_claimed", siteId: site.id, accountId: viewer.account.id, props: { via: "reminder" } });
+    }
     return c.redirect(`/sites/${site.id}`, 303);
   });
 }

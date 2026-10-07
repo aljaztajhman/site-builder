@@ -27,7 +27,7 @@ import {
   type Operation,
   type Resolve,
 } from "@sb/engine";
-import { VersionConflictError, contentType, domainProvidersFor, mailerFromEnv, newId, type DomainProviders, type Mailer, type Platform, type SiteStatus, type Tier } from "@sb/platform";
+import { VersionConflictError, contentType, domainProvidersFor, mailerFromEnv, newId, runningVersion, type DomainProviders, type Mailer, type Platform, type RunningVersion, type SiteStatus, type Tier } from "@sb/platform";
 import { renderPage, renderPath, sharedBundle, pageFile, notFoundPlacement, rebaseRelativeUrls } from "@sb/render";
 import { CollectionKind, addedOnRequest, blockerText, collectPlaceholders, markOwnerEdits, sectionDef, type SiteSpec } from "@sb/spec";
 import type { AuthSettings } from "./auth.ts";
@@ -53,6 +53,9 @@ import { registerFormRoutes } from "./forms.tsx";
 import { domainsInfo, registerDomainRoutes } from "./domains.ts";
 import { registerCompanyLookupRoute } from "./company-lookup.ts";
 import { createHash } from "node:crypto";
+import { campaignSource, isPageView, tracker } from "./analytics.ts";
+import { CF_BEACON_ENDPOINT, CF_BEACON_SCRIPT, cloudflareBeacon } from "./beacon.tsx";
+import { registerAnalyticsAdminRoutes } from "./analytics-admin.tsx";
 import { JS_FLAG } from "@sb/components";
 
 export { safeNext } from "./access.ts";
@@ -87,6 +90,8 @@ export interface AppOptions {
   domainProviders?: DomainProviders;
   /** The HTTP client the tax-number lookup asks EU VIES with (tests: a fake); global fetch when not given. */
   viesFetch?: typeof fetch;
+  /** The running version shown on /health and /admin; from env (and git locally) when not given. */
+  version?: RunningVersion;
 }
 
 export type ClassifyIntake = (description: string, ctx: { siteId: string; tier: Tier; accountId: string | null; aiJobId: string }) => Promise<{ businessType: string; confidence: number }>;
@@ -110,11 +115,21 @@ export const EXPORT_CHECKLIST_MESSAGE = "Stran še ni pripravljena za objavo: ne
 export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono<AppEnv> {
   const { repo, storage, queue, db } = platform;
   const app = new Hono<AppEnv>();
+  const appVersion = opts.version ?? runningVersion();
   const mailer = opts.mailer ?? mailerFromEnv();
   const botCheck = opts.botCheck ?? botCheckFromEnv(process.env, auth.secureCookies);
   const limits = { repo, config, secret: auth.secret };
+  // Stranko's own funnel events (analytics.ts; config analytics.events, off by default).
+  const track = tracker(limits);
   // The landing page and the intake's refusal page carry the Turnstile widget (its script and frame).
   const turnstileCsp = (path: string) => botCheck.mode === "on" && (path === "/" || path === "/api/sites" || path === "/pregled");
+  // The app's own pages: script and frame sources beyond 'self' for Turnstile, and the Cloudflare Web Analytics
+  // beacon's script on the few pages that carry it (beacon.tsx; its measurements go to connect-src below).
+  const appScriptCsp = (c: Context<AppEnv>) => {
+    const turnstile = turnstileCsp(c.req.path);
+    const scripts = [...(turnstile ? [TURNSTILE_ORIGIN] : []), ...(cloudflareBeacon(c, config) ? [CF_BEACON_SCRIPT] : [])];
+    return `${scripts.length ? `script-src 'self' ${scripts.join(" ")}; ` : ""}frame-src 'self'${turnstile ? ` ${TURNSTILE_ORIGIN}` : ""}`;
+  };
 
   // A published site's own hostname (or <slug>.<PLATFORM_DOMAIN>) is served as its /s/<slug>/ path.
   const appHosts = ["localhost", "127.0.0.1", ...(opts.appUrl ? [new URL(opts.appUrl).host] : [])];
@@ -137,7 +152,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       // The landing page's example sites are rendered sites too (/assets/ui/<hash>/examples/…).
       c.req.path.startsWith("/s/") || c.req.path.startsWith("/preview/") || /^\/assets\/ui\/[0-9a-f]+\/examples\//.test(c.req.path)
         ? `default-src 'self'; script-src 'self' '${JS_FLAG_HASH}'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-src https://www.google.com https://maps.google.com; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'self'`
-        : `default-src 'self'; ${turnstileCsp(c.req.path) ? `script-src 'self' ${TURNSTILE_ORIGIN}; frame-src 'self' ${TURNSTILE_ORIGIN}` : "frame-src 'self'"}; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors ${
+        : `default-src 'self'; ${appScriptCsp(c)}; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'${cloudflareBeacon(c, config) ? ` ${CF_BEACON_ENDPOINT}` : ""}; base-uri 'none'; form-action 'self'; frame-ancestors ${
             // The landing page frames its example sites (/assets/ui/<hash>/examples/…).
             c.req.path.startsWith("/assets/ui/") ? "'self'" : "'none'"
           }`,
@@ -164,24 +179,28 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     onError: async (c) => {
       const t = (c as Context<AppEnv>).get("ticket");
       if (t) await repo.usage.finishJob(t.j, "failed");
+      await track(c as Context<AppEnv>, { kind: "intake_refused", props: { reason: "too_big" } });
       return c.html(await landing(c as Context<AppEnv>, { error: tooBig }), 413);
     },
   });
   app.use("/api/sites", async (c, next) => {
     if (c.req.method !== "POST") return next();
     if (c.get("viewer").kind !== "anonymous") return signedInLimit(c, next);
-    const refuse = async (error: string, status: 403 | 413) => c.html(await landing(c, { error }), status);
+    const refuse = async (error: string, status: 403 | 413, reason: string) => {
+      await track(c, { kind: "intake_refused", props: { reason } });
+      return c.html(await landing(c, { error }), status);
+    };
     const expired = "Obrazec je potekel. Pošljite ga še enkrat.";
     const given = c.req.query("ticket");
     const t = readTicket(auth.secret, given);
-    if (!t) return refuse(given ? expired : "Za predogled brez prijave mora biti v brskalniku vklopljen JavaScript (preverjanje, da niste robot). Lahko se tudi prijavite z e-pošto.", 403);
-    if (t.d !== c.get("deviceId")) return refuse(expired, 403);
+    if (!t) return refuse(given ? expired : "Za predogled brez prijave mora biti v brskalniku vklopljen JavaScript (preverjanje, da niste robot). Lahko se tudi prijavite z e-pošto.", 403, given ? "form_expired" : "no_javascript");
+    if (t.d !== c.get("deviceId")) return refuse(expired, 403, "form_expired");
     const declared = Number(c.req.header("content-length"));
     if (Number.isFinite(declared) && declared > uploads.maxTotalBytes) {
       await repo.usage.finishJob(t.j, "failed");
-      return refuse(tooBig, 413);
+      return refuse(tooBig, 413, "too_big");
     }
-    if (!(await repo.usage.claimTicketJob(t.j, t.d, t.s))) return refuse(expired, 403);
+    if (!(await repo.usage.claimTicketJob(t.j, t.d, t.s))) return refuse(expired, 403, "form_expired");
     c.set("ticket", t);
     return anonymousLimit(c, next);
   });
@@ -205,13 +224,17 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     // The anonymous previews carry over from the device that asked for the link (stored with the token,
     // `sb-magic-link-claim` = requesting-device), never from the device that opens it: otherwise anyone
     // could send their own link to a victim and take the victim's previews.
-    onSignIn: async (_c, accountId, link) => {
+    onSignIn: async (c, accountId, link) => {
       if (!link.deviceId) return;
       const claimed = await repo.usage.claimDevice(link.deviceId, accountId);
       if (claimed.length) console.log(`[web] ${claimed.length} anonymous preview(s) claimed by ${accountId}`);
+      for (const siteId of claimed) await track(c, { kind: "preview_claimed", siteId, accountId, tier: "free", props: { via: "signin" } }, { deviceId: link.deviceId });
     },
+    track,
   });
-  registerAdminRoutes(app, { repo, config, ...(opts.appUrl ? { appUrl: opts.appUrl } : {}) });
+  registerAdminRoutes(app, { repo, config, version: appVersion, ...(opts.appUrl ? { appUrl: opts.appUrl } : {}) });
+  // The admin's funnel and engine pages (it-analytics): read product_events, always there.
+  registerAnalyticsAdminRoutes(app, { repo, config });
   registerPrivacyRoute(app, config);
   registerLegalRoutes(app, config);
   // The public website checker (/pregled): no model calls, run by the worker.
@@ -223,7 +246,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   const domainDeps = { repo, queue, config, providers: opts.domainProviders ?? domainProvidersFor(config.domains.providers), platformDomain: opts.platformDomain ?? null, appHosts };
   registerDomainRoutes(app, domainDeps);
   // The reminder before an anonymous preview is deleted: the visitor's address, and the email's link.
-  registerReminderRoutes(app, { repo, config, secret: auth.secret });
+  registerReminderRoutes(app, { repo, config, secret: auth.secret, track });
   // Legal name and address from the tax number the owner types (EU VIES); nothing of the answer is stored.
   registerCompanyLookupRoute(app, { config, ...(opts.viesFetch ? { fetch: opts.viesFetch } : {}) });
 
@@ -246,7 +269,8 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     const ok = Object.values(checks).every((v) => v === "ok");
     // `?ip=1` echoes the caller's own address as the IP limits see it, so the proxy setup can be checked from outside.
     const you = c.req.query("ip") === "1" ? { you: { ip: clientIp(c), forwarded: (c.req.header("x-forwarded-for") ?? "").split(",").map((s) => s.trim()).filter(Boolean), realIp: c.req.header("x-real-ip") ?? null } } : {};
-    return c.json({ status: ok ? "ok" : "degraded", checks, ...you }, ok ? 200 : 503);
+    // The running version (tag and short SHA): "which version is live" is this one request (docs/dev/workflow.md §3).
+    return c.json({ status: ok ? "ok" : "degraded", checks, version: appVersion, ...you }, ok ? 200 : 503);
   });
 
   // The editor's and landing page's scripts: linked with their content hash (pages use clientScriptUrl) and
@@ -299,10 +323,19 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       ...(previous ? { previous: `/sites/${previous.id}` } : {}),
       // The founding offer's places left: its size (config) minus the places the admin gave (allow_list.founding_at).
       foundingLeft: config.plans.standard.foundingOffer ? Math.max(0, config.plans.standard.foundingOffer.customers - (await repo.accounts.foundingTaken())) : null,
+      beacon: cloudflareBeacon(c, config),
+      source: campaignSource(c.req.query("utm_source")),
       ...extra,
     });
   };
-  app.get("/", async (c) => c.html(await landing(c, { showcase: c.req.query("primer") })));
+  app.get("/", async (c) => {
+    // A landing view (once per device in analytics.landingDedupeMinutes), and the editor's "Paketi in cene" link (?ref=upsell).
+    if (isPageView(c)) {
+      await track(c, { kind: "landing_view", source: campaignSource(c.req.query("utm_source")) }, { onceMinutes: config.analytics.landingDedupeMinutes });
+      if (c.req.query("ref") === "upsell") await track(c, { kind: "upsell_clicked", props: { where: "plans" } });
+    }
+    return c.html(await landing(c, { showcase: c.req.query("primer") }));
+  });
 
   // ---------- Dashboard ----------
   app.get(DASHBOARD, async (c) => {
@@ -352,6 +385,15 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   // description's length, the bot check, the limits (which reserve the job) and the junk check, then a
   // signed one-time ticket for the upload. Refusals are JSON; the page keeps the text and shows the message.
   app.post("/api/intake/ticket", async (c) => {
+    const res = await intakeTicket(c);
+    // A refusal is the intake's: its reason code (a limit's own code is also a limit_hit, limits.ts).
+    if (res.status !== 200 && config.analytics.events) {
+      const code = ((await res.clone().json().catch(() => ({}))) as { code?: unknown }).code;
+      await track(c, { kind: "intake_refused", props: { reason: typeof code === "string" ? code : "unknown" } });
+    }
+    return res;
+  });
+  async function intakeTicket(c: Context<AppEnv>) {
     const viewer = c.get("viewer");
     const body = (await c.req.parseBody()) as Record<string, unknown>;
     const description = typeof body.description === "string" ? body.description.trim() : "";
@@ -378,7 +420,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       ...(classification ? { c: classification } : {}),
     });
     return c.json({ ok: true, ticket });
-  });
+  }
 
   // The intake. In order, before anything is spent: the form token, the scope, the description's length,
   // the files, then (signed in) the limits, which hold the job's estimated cost, and the classifier
@@ -391,29 +433,30 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     const body = await c.req.parseBody({ all: true });
     const description = typeof body.description === "string" ? body.description.trim() : "";
     // The landing page again, with the description kept and the reason above the prompt.
-    const refuse = async (error: string, status: Refusal["status"] = 400) => {
+    const refuse = async (error: string, status: Refusal["status"] = 400, reason = "invalid") => {
       if (ticket) await repo.usage.finishJob(ticket.j, "failed");
+      await track(c, { kind: "intake_refused", props: { reason } });
       return c.html(await landing(c, { error, description }), status);
     };
-    if (viewer.kind === "anonymous" && !ticket) return refuse("Obrazec je potekel. Pošljite ga še enkrat.", 403);
-    if (!csrfOk(c, body as Record<string, unknown>)) return refuse("Obrazec je potekel. Pošljite ga še enkrat.", 403);
+    if (viewer.kind === "anonymous" && !ticket) return refuse("Obrazec je potekel. Pošljite ga še enkrat.", 403, "form_expired");
+    if (!csrfOk(c, body as Record<string, unknown>)) return refuse("Obrazec je potekel. Pošljite ga še enkrat.", 403, "form_expired");
     const scope = body.scope === "full" ? "full" : "home";
     const fullDenied = scope === "full" ? fullSiteRefusal(viewer, config) : null;
-    if (fullDenied) return refuse(fullDenied.message, fullDenied.status);
+    if (fullDenied) return refuse(fullDenied.message, fullDenied.status, fullDenied.code);
     const minChars = config.tiers.junk.minDescriptionChars;
-    if (description.length < minChars) return refuse(tooShort(minChars));
+    if (description.length < minChars) return refuse(tooShort(minChars), 400, "too_short");
     // The text that passed the ticket's junk check is the text that is generated from.
-    if (ticket && descriptionHash(description) !== ticket.h) return refuse("Opis se je spremenil, ko smo ga že preverili. Pošljite ga še enkrat.", 403);
+    if (ticket && descriptionHash(description) !== ticket.h) return refuse("Opis se je spremenil, ko smo ga že preverili. Pošljite ga še enkrat.", 403, "description_changed");
     const photos = ([] as unknown[]).concat(body["photos"] ?? []).filter((f): f is File => f instanceof File && f.size > 0);
     const logo = body.logo instanceof File && body.logo.size > 0 ? body.logo : undefined;
     const maxPhotos = ticket ? uploads.maxPhotos : config.limits.maxPhotos;
     const maxFile = ticket ? uploads.maxFileBytes : config.limits.maxUploadBytes;
-    if (photos.length > maxPhotos) return refuse(`Največ ${maxPhotos} fotografij${ticket ? " brez prijave" : ""}. Izberite jih znova.`);
+    if (photos.length > maxPhotos) return refuse(`Največ ${maxPhotos} fotografij${ticket ? " brez prijave" : ""}. Izberite jih znova.`, 400, "too_many_photos");
     for (const f of [...photos, ...(logo ? [logo] : [])]) {
-      if (f.size > maxFile) return refuse(`Datoteka ${f.name} je prevelika (največ ${Math.floor(maxFile / 1e6)} MB). Izberite fotografije znova.`);
+      if (f.size > maxFile) return refuse(`Datoteka ${f.name} je prevelika (največ ${Math.floor(maxFile / 1e6)} MB). Izberite fotografije znova.`, 400, "file_too_big");
     }
-    for (const f of photos) if (!IMAGE_TYPES.has(f.type)) return refuse(`Nepodprta vrsta slike: ${f.name}. Izberite fotografije znova.`);
-    if (logo && !LOGO_TYPES.has(logo.type)) return refuse("Logotip mora biti SVG, PNG, JPEG, WebP ali AVIF.");
+    for (const f of photos) if (!IMAGE_TYPES.has(f.type)) return refuse(`Nepodprta vrsta slike: ${f.name}. Izberite fotografije znova.`, 400, "image_type");
+    if (logo && !LOGO_TYPES.has(logo.type)) return refuse("Logotip mora biti SVG, PNG, JPEG, WebP ali AVIF.", 400, "logo_type");
 
     const accountId = viewer.kind === "account" ? viewer.account.id : null;
     let siteId: string;
@@ -426,10 +469,10 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     } else {
       siteId = newId("site");
       const grant = await reserveJob(limits, c, { kind: "generate", scope, siteId });
-      if (!grant.ok) return refuse(grant.refusal.message, grant.refusal.status);
+      if (!grant.ok) return refuse(grant.refusal.message, grant.refusal.status, grant.refusal.code);
       aiJobId = grant.aiJobId;
       const checked = await classifyFor(description, { siteId, tier: grant.tier, accountId, aiJobId });
-      if (checked.junk) return refuse(JUNK);
+      if (checked.junk) return refuse(JUNK, 400, "junk_intake");
       classification = checked.classification;
     }
 
@@ -471,8 +514,9 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     } catch (e) {
       await repo.usage.finishJob(aiJobId, "failed");
       await repo.setStatus(site.id, "failed");
-      return refuse((e as Error).message);
+      return refuse((e as Error).message, 400, "upload_failed");
     }
+    await track(c, { kind: "intake_submitted", siteId: site.id, source: campaignSource(body.source), props: { scope, photos: photos.length, logo: !!logo } });
     return c.redirect(`/sites/${site.id}`, 303);
   });
 
@@ -503,6 +547,8 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       admin ? repo.spendToday() : Promise.resolve(null),
       domainsInfo(domainDeps, id, site.slug),
     ]);
+    // A free preview shows its locked pages with the first plan's price (editor upsell.ts): once per device and site a day.
+    if (access.offer && access.lockedPages.length) await track(c, { kind: "upsell_shown", siteId: id, props: { where: "locked_pages" } }, { onceMinutes: config.analytics.onceMinutes });
     return c.json({
       // What this viewer may do here and has left; refusals from the action endpoints carry { code, message } too.
       access,
@@ -565,7 +611,10 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     // The viewer's plan limits (pages, languages, collections), whatever the edit's path; the refusal names the plan that has more.
     const viewer = (c as Context<AppEnv>).get("viewer");
     const breach = limitBreach(config, tierOf(viewer), viewer.kind === "account" ? viewer.plan : null, current.spec, r.spec);
-    if (breach) return c.json({ error: breach.code, code: breach.code, message: breach.message, upgrade: breach.upgrade }, 403);
+    if (breach) {
+      await planLimitHit(c as Context<AppEnv>, siteId, breach);
+      return c.json({ error: breach.code, code: breach.code, message: breach.message, upgrade: breach.upgrade }, 403);
+    }
     let version: number;
     try {
       // Only what the owner changed is stored: the fact check counts it as their own text, and "Ustvari znova"
@@ -580,7 +629,13 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       if (e instanceof VersionConflictError) return c.json({ error: "conflict", message: "Stran je bila medtem spremenjena. Osvežite urejevalnik." }, 409);
       throw e;
     }
+    await track(c as Context<AppEnv>, { kind: "edit_direct", siteId });
     return c.json({ ok: true, version, adjustments: r.adjustments });
+  };
+  /** A plan limit an edit ran into: a limit hit, and an upsell when the refusal names the plan that has more. */
+  const planLimitHit = async (c: Context<AppEnv>, siteId: string, breach: { code: string; upgrade: { plan: string } | null }) => {
+    await track(c, { kind: "limit_hit", siteId, props: { which: breach.code } });
+    if (breach.upgrade) await track(c, { kind: "upsell_shown", siteId, props: { where: "limit", to: breach.upgrade.plan } }, { onceMinutes: config.analytics.onceMinutes });
   };
 
   app.post("/api/sites/:id/patch", async (c) => {
@@ -708,7 +763,10 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     const current = await repo.getSpec(id);
     const viewer = (c as Context<AppEnv>).get("viewer");
     const breach = current ? limitBreach(config, tierOf(viewer), viewer.kind === "account" ? viewer.plan : null, current.spec, target.spec) : null;
-    if (breach) return c.json({ error: breach.code, code: breach.code, message: breach.message, upgrade: breach.upgrade }, 403);
+    if (breach) {
+      await planLimitHit(c, id, breach);
+      return c.json({ error: breach.code, code: breach.code, message: breach.message, upgrade: breach.upgrade }, 403);
+    }
     const version = await repo.saveSpec(id, target.spec, "revert", `povrnjeno na različico ${target.version}`);
     return c.json({ ok: true, version });
   });
@@ -729,6 +787,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       await repo.usage.finishJob(grant.aiJobId, "failed");
       throw e;
     }
+    await track(c, { kind: "edit_chat", siteId: id });
     return c.json({ ok: true });
   });
 
@@ -783,9 +842,11 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     const denied = publishRefusal(c.get("viewer"), config);
     if (denied) return refusalJson(c, denied);
     try {
+      const first = c.get("site")?.published_version == null;
       const r = await publishSite({ repo, storage, config, platformDomain: opts.platformDomain ?? null }, c.req.param("id"));
       const site = await repo.getSite(c.req.param("id"));
       if (site) bases.delete(site.slug);
+      await track(c, { kind: "published", siteId: c.req.param("id"), accountId: site?.account_id ?? null, props: { version: r.version, first } });
       return c.json({ ok: true, version: r.version, url: `/s/${site?.slug}/` });
     } catch (e) {
       if (e instanceof PublishBlockedError) return c.json({ error: "blocked", blockers: e.blockers, checklist: e.checklist }, 422);
@@ -811,6 +872,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       }
     }
     const { filename, zip } = await exportSite({ repo, storage, config, platformDomain: opts.platformDomain ?? null }, id, current.version);
+    await track(c, { kind: "exported", siteId: id, props: { version: current.version } });
     c.header("content-type", "application/zip");
     c.header("content-disposition", `attachment; filename="${filename}"`);
     return c.body(zip as Uint8Array<ArrayBuffer>);
@@ -851,6 +913,10 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     c.header("cache-control", "no-store");
     // The version this request shows: asked for, or the site's current one (siteAccess loaded the row).
     const version = asked ?? c.get("site")?.current_version ?? null;
+    // The editor showing the homepage's preview (its frame loads it): a preview opened, once per device and site a day.
+    if (version !== null && c.req.param("file") === "index.html" && !v && sectionId === undefined && variant === undefined) {
+      await track(c, { kind: "preview_opened", siteId: id, accountId: c.get("site")?.account_id ?? null }, { onceMinutes: config.analytics.onceMinutes });
+    }
     const key = version === null ? null : [id, version, c.req.param("file"), sectionId ?? "", variant ?? ""].join("|");
     const hit = key === null ? undefined : previews.get(key);
     if (hit !== undefined) return c.html(remember(key!, hit));
