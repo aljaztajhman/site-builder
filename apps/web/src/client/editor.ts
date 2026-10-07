@@ -1920,15 +1920,15 @@ function reloadPreview(): void {
 }
 
 /** The editing layer in the preview: styles and the section toolbar are added at runtime; the rendered HTML is unchanged. */
-const EDIT_CSS = `main section{cursor:pointer} main section:hover{outline:2px dashed #156b4a;outline-offset:-2px}
-main section[data-sb-selected]{position:relative;outline:3px solid #156b4a;outline-offset:-3px}
+const EDIT_CSS = `main section{cursor:pointer} main section:hover{outline:2px dashed #0d7a84;outline-offset:-2px}
+main section[data-sb-selected]{position:relative;outline:3px solid #0d7a84;outline-offset:-3px}
 [contenteditable]{outline:2px solid #9a5b00!important;outline-offset:2px;cursor:text}
-.sb-tools{position:absolute;top:8px;left:8px;z-index:2147483000;display:flex;gap:2px;padding:4px;background:#fff;border:1px solid #c9c4ba;border-radius:8px;box-shadow:0 8px 24px rgb(20 20 18/.16)}
-.sb-tools button,.sb-add{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;min-width:40px;min-height:40px;padding:0 10px;border-radius:6px;font:600 14px/1 system-ui,-apple-system,"Segoe UI",sans-serif;color:#151412;cursor:pointer}
-.sb-tools button:hover{background:#ece9e3}
-.sb-tools button:disabled{color:#b5b0a7;cursor:default;background:none}
-.sb-add{position:absolute;left:50%;bottom:8px;z-index:2147483000;transform:translateX(-50%);padding:0 16px;border-radius:999px;background:#156b4a;color:#fff;box-shadow:0 8px 24px rgb(20 20 18/.2)}
-.sb-tools button:focus-visible,.sb-add:focus-visible{outline:2px solid #156b4a;outline-offset:2px}
+.sb-tools{position:absolute;top:8px;left:8px;z-index:2147483000;display:flex;gap:2px;padding:4px;background:#fff;border:1px solid #b4c5c9;border-radius:8px;box-shadow:0 8px 24px rgb(15 31 34/.16)}
+.sb-tools button,.sb-add{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;min-width:40px;min-height:40px;padding:0 10px;border-radius:6px;font:600 14px/1 system-ui,-apple-system,"Segoe UI",sans-serif;color:#0f1f22;cursor:pointer}
+.sb-tools button:hover{background:#dfe8ea}
+.sb-tools button:disabled{color:#93a6aa;cursor:default;background:none}
+.sb-add{position:absolute;left:50%;bottom:8px;z-index:2147483000;transform:translateX(-50%);padding:0 16px;border-radius:999px;background:#0d7a84;color:#fff;box-shadow:0 8px 24px rgb(15 31 34/.2)}
+.sb-tools button:focus-visible,.sb-add:focus-visible{outline:2px solid #0d7a84;outline-offset:2px}
 @media (pointer:coarse){.sb-tools button,.sb-add{min-height:44px;min-width:44px}}`;
 
 /** Which business fact a tap in the preview points at, if any: those live in Podatki, not in a section. */
@@ -2370,10 +2370,11 @@ function render(): void {
     root.replaceChildren(h("div", { class: "shell" }, top, ed));
     shell = { top, ed, panel, bar, stage };
     // The stage shrinks when the assistant box under it fills in after the frame was sized: size it again, so the
-    // frame never overflows the stage (a scrolling stage would need its own tab stop). Not on phones, where the
-    // keyboard changes the height while typing (see the resize listener below).
+    // frame never overflows the stage (a scrolling stage would need its own tab stop). On phones only while nothing
+    // that brings up the keyboard has focus (a field, or text edited in the preview): the keyboard changes the height
+    // while typing (see the resize listener below). A free account's longer note arrives after the first sizing.
     new ResizeObserver(() => {
-      if (!narrowScreen()) sizeFrame();
+      if (!narrowScreen() || !document.activeElement?.matches("input, textarea, select, [contenteditable], iframe")) sizeFrame();
     }).observe(stage);
     lastWidth = window.innerWidth;
     // Only width changes resize the frame: phone keyboards change the height while typing.
