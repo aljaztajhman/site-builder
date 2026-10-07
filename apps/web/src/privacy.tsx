@@ -4,6 +4,7 @@ import type { AppEnv } from "./access.ts";
 import { Brand, Doc, html } from "./pages.tsx";
 import { PRODUCT_NAME } from "./ui/labels.ts";
 import { Provider } from "./legal.tsx";
+import { cloudflareBeacon } from "./beacon.tsx";
 
 /**
  * The product's own privacy policy (/zasebnost): what we store about owners and visitors of the product
@@ -12,14 +13,15 @@ import { Provider } from "./legal.tsx";
  * marked placeholders until filled in.
  */
 export function registerPrivacyRoute(app: Hono<AppEnv>, config: AppConfig): void {
-  app.get("/zasebnost", (c) => c.html(privacyPage(config)));
+  app.get("/zasebnost", (c) => c.html(privacyPage(config, cloudflareBeacon(c, config))));
 }
 
-export function privacyPage(config: AppConfig): string {
+/** `beacon`: the Cloudflare Web Analytics token when this response carries it (beacon.tsx). */
+export function privacyPage(config: AppConfig, beacon: string | null = null): string {
   const t = config.tiers;
   const deviceDays = config.accounts.deviceCookieDays;
   return html(
-    <Doc title="Zasebnost">
+    <Doc title="Zasebnost" beacon={beacon}>
       <header className="top">
         <Brand href="/" />
       </header>
@@ -44,6 +46,10 @@ export function privacyPage(config: AppConfig): string {
             <li>Za vsako ustvarjanje in spremembo s pomočnikom čas in stroške, da lahko omejimo brezplačno uporabo.</li>
             <li>{`Predogled brez prijave in njegove datoteke izbrišemo po ${t.anonymous.keepDays} dneh, razen če se v tem času prijavite; potem je vaš.`}</li>
             <li>{`Če pri predogledu brez prijave pustite e-poštni naslov za opomnik, vam nanj pošljemo eno sporočilo ${t.anonymous.reminder.daysBefore === 1 ? "dan" : `${t.anonymous.reminder.daysBefore} dni`} pred izbrisom. Za nič drugega ga ne uporabimo in ga izbrišemo skupaj s predogledom.`}</li>
+            {/* One sentence (docs/plans/analytics.md Step 1), while product events are written: what they hold, and for how long. */}
+            {config.analytics.events && (
+              <li id="product-events">{`Da vidimo, kje se izdelek zatika, štejemo korake v njem (ogled prve strani, oddan opis, prijava, objava) po napravi, ki jo označimo samo z zgoščenim zapisom naključne oznake brskalnika, brez naslova IP in e-pošte, in te zapise po ${config.analytics.keepDays} dneh združimo v dnevna števila.`}</li>
+            )}
             <li>{`Pri brezplačnem pregledu spletne strani naslov strani in rezultat pregleda, ${config.checker.keepDays} dni, da lahko povezavo do rezultata delite. Vsebine pregledane strani ne shranimo.`}</li>
           </ul>
         </section>
@@ -79,6 +85,13 @@ export function privacyPage(config: AppConfig): string {
               <strong>Cloudflare Turnstile</strong> preveri, da obrazca za predogled brez prijave in pregled spletne strani ne izpolnjuje robot. Naloži se šele, ko začnete pisati opis; pri tem Cloudflare
               obdela vaš naslov IP in podatke o brskalniku.
             </li>
+            {/* docs/plans/analytics.md Step 2: named while the beacon has a token (config analytics.cloudflare). */}
+            {config.analytics.cloudflare.token && (
+              <li id="cloudflare-analytics">
+                <strong>Cloudflare Web Analytics</strong> na prvi strani, strani za prijavo in tej strani prešteje oglede: od kod so obiskovalci prišli, katero stran so odprli in iz katere države. Ne
+                uporablja piškotkov; pri tem Cloudflare obdela vaš naslov IP in podatke o brskalniku, mi pa vidimo samo skupna števila.
+              </li>
+            )}
             <li>
               <strong>Resend</strong> pošlje e-pošto s povezavo za prijavo in sporočila iz kontaktnih obrazcev lastnikom strani.
             </li>

@@ -103,6 +103,9 @@ export interface GenerateResult {
 /** The editor's log line when the spend cap skipped the critique (the site itself is ready). */
 export const CRITIQUE_SKIPPED_NOTE = "Današnja omejitev porabe je dosežena, zato zadnjega pregleda strani nismo naredili. Stran je pripravljena in jo lahko urejate.";
 
+/** Logged when config costCuts.secondCritiqueOnlyOnFailures ends the critique after a round whose re-check passed. */
+export const SECOND_ROUND_SKIPPED_NOTE = "Checks pass after the critique's patches; no further critique round";
+
 /** Pipeline steps 1–5 from docs/PRODUCT.md. Every model call is logged per stage with tokens and €. */
 export async function generateSite(deps: PipelineDeps, siteId: string, jobId: string | null): Promise<GenerateResult> {
   const { repo, storage, config, client } = deps;
@@ -273,8 +276,10 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
       structuredOutput: config.structuredOutputForContent,
       retries: config.limits.contentRetries,
       corpus,
+      ...(config.costCuts.contentRetryAsPatch ? { retryAsPatch: true } : {}),
     }),
   );
+  if (content.patchRetries?.length) await log("content", "Retried the content answer as patches", content.patchRetries);
   if (content.structuredFallback) await log("content", "Structured output rejected the content schema; used plain JSON");
   if (content.repairs.length) await log("content", "Repaired the content answer before validation", content.repairs);
   if (content.issues.length) await log("content", "Spec still has issues after retries", content.issues);
@@ -369,6 +374,12 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
       break;
     }
     await log("check", check.failures.length ? "Checks found problems" : "All checks passed", { failures: check.failures, lighthouse: check.lighthouse });
+    // Config costCuts.secondCritiqueOnlyOnFailures: another round only when the re-check still finds something (a
+    // fix that didn't take, a new failure). Most later rounds returned no patches, so a clean re-check ends the job.
+    if (config.costCuts.secondCritiqueOnlyOnFailures && rounds < config.limits.critiqueIterations && check.failures.length === 0) {
+      await log("critique", SECOND_ROUND_SKIPPED_NOTE, { rounds });
+      break;
+    }
   }
   await repo.setStatus(siteId, "ready");
   return { version, check, critiqueRounds: rounds, timings, firstVersionMs, ...(critiqueSkipped ? { critiqueSkipped } : {}) };

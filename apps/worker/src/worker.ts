@@ -37,6 +37,7 @@ import {
 import { INTERRUPTED_MESSAGE, domainProvidersFor, type DomainProviders, type Platform, type Tier } from "@sb/platform";
 import type { SiteSpec } from "@sb/spec";
 import { cleanupExpired, spendMonitor } from "./housekeeping.ts";
+import { recordGeneration, type GenerationOutcome } from "./telemetry.ts";
 
 /** Replies to the owner when a chat edit fails outright (the details go to the event log). */
 const EDIT_ERROR_REPLY = "Sprememba ni uspela, stran je ostala nespremenjena. Poskusite znova čez nekaj minut ali jo uredite neposredno.";
@@ -336,6 +337,11 @@ export async function startWorker(platform: Platform, config = loadConfig(), job
     const ctx = await contextFor(job.siteId, jobId, job.aiJobId);
     const client = modelClientFor(platform, config, ctx, defaultTransport("generate", 0, process.env.MODEL_REPLAY_DIR ? await replayScope(repo, job.siteId) : "full"));
     const before = (await repo.getSite(job.siteId))?.current_version ?? null;
+    // Engine telemetry (config analytics.events): one product event per job, however it ended (telemetry.ts).
+    const scope = job.scope === "full" ? "full" : "home";
+    const startedAt = Date.now();
+    const telemetry = (o: Pick<GenerationOutcome, "outcome" | "saved" | "result" | "error">) =>
+      recordGeneration(platform, config, { siteId: job.siteId, jobId, scope, tier: ctx.tier ?? null, accountId: ctx.accountId ?? null, startedAt, ...o });
     try {
       const { pictures, pictureCap } = await picturesForJob(platform, config, ctx, job.scope === "full" ? "full" : "home");
       const images = imageGeneratorFor(platform, config, ctx, pictureCap);
@@ -344,12 +350,14 @@ export async function startWorker(platform: Platform, config = loadConfig(), job
       const r = await run.generateSite({ config, repo, storage, client, pictures, onBrief, ...(images ? { images } : {}) }, job.siteId, jobId);
       if (r.critiqueSkipped) console.log(`[generate] ${job.siteId}: finished with the critique skipped (${r.critiqueSkipped})`);
       await finish(ctx.aiJobId, "done");
+      await telemetry({ outcome: "done", saved: true, result: r });
     } catch (e) {
       if (e instanceof JunkIntakeError) {
         // Refused, not failed: it doesn't use up the visitor's free generation.
         await repo.setStatus(job.siteId, "failed");
         await repo.addEvent({ siteId: job.siteId, jobId, stage: "error", level: "error", message: JUNK_REPLY, data: { confidence: e.confidence } });
         await finish(ctx.aiJobId, "refused");
+        await telemetry({ outcome: "refused", saved: false, error: e });
         return;
       }
       console.error("[generate]", e);
@@ -361,11 +369,13 @@ export async function startWorker(platform: Platform, config = loadConfig(), job
         await repo.setStatusIf(job.siteId, "generating", "ready");
         await repo.addEvent({ siteId: job.siteId, jobId, stage: "check", level: "warn", message: `Stopped after the version was saved; kept it without the remaining steps: ${(e as Error).message.slice(0, 300)}` });
         await finish(ctx.aiJobId, "done");
+        await telemetry({ outcome: "failed", saved: true, error: e });
         return;
       }
       await repo.setStatus(job.siteId, "failed");
       await repo.addEvent({ siteId: job.siteId, jobId, stage: "error", level: "error", message: (e as Error).message });
       await finish(ctx.aiJobId, "failed");
+      await telemetry({ outcome: "failed", saved: false, error: e });
     }
   }), { concurrency: config.limits.jobConcurrency });
 

@@ -230,6 +230,12 @@ export const AppConfigSchema = z.object({
     /** Catalogue and RULES wording: eyebrow, contact strip, cta, responsive (not mobile first), call-button count. */
     catalogue: z.boolean(),
   }),
+  /**
+   * Generation cost cuts (docs/plans/cost-cuts.md, see config $comment). secondCritiqueOnlyOnFailures: a second critique
+   * round only when the re-check after the first still reports failures. contentRetryAsPatch: a content answer that fails
+   * validation is fixed with an RFC 6902 patch from the model instead of the whole JSON again. Off: today's behaviour.
+   */
+  costCuts: z.object({ secondCritiqueOnlyOnFailures: z.boolean(), contentRetryAsPatch: z.boolean() }),
   structuredOutputForContent: z.boolean(),
   pricesUsdPerMTok: z.record(z.string(), Price),
   eurPerUsd: z.number().positive(),
@@ -269,6 +275,18 @@ export const AppConfigSchema = z.object({
     maxRedirects: z.number().int().min(0).max(10),
     /** Lighthouse mobile performance in the report (off in tests: it needs a debugging port and takes ~20 s). */
     lighthouse: z.boolean(),
+  }),
+  /** Stranko's own funnel and engine events (product_events; see config $comment). */
+  analytics: z.object({
+    events: z.boolean(),
+    keepDays: z.number().int().min(1).max(400),
+    landingDedupeMinutes: z.number().int().min(0),
+    onceMinutes: z.number().int().min(0),
+    /**
+     * Cloudflare Web Analytics on the landing, login and privacy pages (beacon.tsx): the site's public token (null:
+     * no beacon) and the hostnames it is shown on.
+     */
+    cloudflare: z.object({ token: z.string().regex(/^[0-9a-f]{32}$/).nullable(), hosts: z.array(z.string().min(1)) }),
   }),
   stats: z.object({
     visitDedupeMinutes: z.number().int().min(0),

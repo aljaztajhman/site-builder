@@ -4,9 +4,13 @@ import type { SiteRow, StatTotals } from "@sb/platform";
 import { uiUrl } from "./ui/assets.ts";
 import { clientScriptUrl } from "./client-bundle.ts";
 import { PRODUCT_NAME, formatDate, formatEur, siteStatus } from "./ui/labels.ts";
+import { Beacon } from "./beacon.tsx";
 
-/** Page shell for every dashboard page: the shared stylesheet (apps/web/src/ui/app.css), no inline CSS. */
-export function Doc({ title, children, script }: { title: string; children: ReactNode; script?: string }) {
+/**
+ * Page shell for every dashboard page: the shared stylesheet (apps/web/src/ui/app.css), no inline CSS. `beacon`: the
+ * Cloudflare Web Analytics token on the few public pages that carry it (beacon.tsx decides), else nothing.
+ */
+export function Doc({ title, children, script, beacon }: { title: string; children: ReactNode; script?: string; beacon?: string | null }) {
   return (
     <html lang="sl">
       <head>
@@ -22,6 +26,7 @@ export function Doc({ title, children, script }: { title: string; children: Reac
       <body>
         {children}
         {script && <script type="module" src={script} />}
+        <Beacon token={beacon} />
       </body>
     </html>
   );

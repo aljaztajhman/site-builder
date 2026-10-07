@@ -7,6 +7,7 @@ import { TURNSTILE_SCRIPT } from "./turnstile.ts";
 import { chatEdits, count, daysAfterOd, moreHomepages } from "./limits.ts";
 import { tradeCaption, tradeClientData, tradeShowcases, tradeTitle } from "./showcase.ts";
 import { clientScriptUrl } from "./client-bundle.ts";
+import { Beacon } from "./beacon.tsx";
 
 /**
  * The product's landing page at / (docs/design/homepage.html), for everyone; signed in, the header
@@ -72,9 +73,13 @@ export interface HomeProps {
   showcase?: string;
   /** The founding offer's places left (its size in config minus the places given); null without an offer. */
   foundingLeft?: number | null;
+  /** Cloudflare Web Analytics token for this response (beacon.tsx), or none. */
+  beacon?: string | null;
+  /** The visit's campaign (`?utm_source=`, analytics.ts campaignSource), carried by the intake form to intake_submitted. */
+  source?: string | null;
 }
 
-export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteKey, anonymousClosed, previous, anonymousUpload, error, description, showcase, foundingLeft = null }: HomeProps): string {
+export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteKey, anonymousClosed, previous, anonymousUpload, error, description, showcase, foundingLeft = null, beacon = null, source = null }: HomeProps): string {
   const plans = config.plans;
   const std = plans.standard;
   const plus = plans.premium;
@@ -161,6 +166,7 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
                   data-max-bytes={anonymousUpload?.maxTotalBytes}
                 >
                   <input type="hidden" name="_csrf" value={csrf} />
+                  {source && <input type="hidden" name="source" value={source} />}
                   {!fullSite && <input type="hidden" name="scope" value="home" />}
                   <label htmlFor="opis" className="sr-only">
                     Opis podjetja
@@ -637,6 +643,7 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
           </div>
         </footer>
         <script type="module" src={clientScriptUrl("home")} />
+        <Beacon token={beacon} />
       </body>
     </html>,
   );

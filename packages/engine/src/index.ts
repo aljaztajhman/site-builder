@@ -13,6 +13,7 @@ export * from "./image-ids.ts";
 export * from "./prompts.ts";
 export * from "./prompt-fixes.ts";
 export * from "./stages.ts";
+export * from "./content-patch.ts";
 export * from "./variety.ts";
 export * from "./pipeline.ts";
 export * from "./published.ts";
