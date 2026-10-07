@@ -279,17 +279,37 @@ describe("migration 13 → 14 (the owner's own texts, it-keep-owner-edits)", () 
     const read = (id: string) => JSON.parse(readFileSync(new URL(`../../../tools/eval/golden/${id}.json`, import.meta.url), "utf8")) as SiteSpec;
     for (const id of ["pekarna-kvas", "racunovodstvo-seliskar", "zobozdravstvo-lebar"]) {
       const golden = read(id);
-      const v14 = migrateSpec({ ...golden, specVersion: 13 });
+      const v14 = migrateSpec({ ...golden, specVersion: 13 }, MIGRATIONS, 14);
       expect(v14, id).toEqual({ ...golden, specVersion: 14 });
       expect(v14.ownerEdits, id).toBeUndefined();
-      expect(validateSite(v14).issues, id).toEqual([]);
+      expect(validateSite(migrateSpec(v14)).issues, id).toEqual([]);
     }
-    const site = read("pekarna-kvas");
+    const site = migrateSpec(read("pekarna-kvas"));
     const section = site.pages[0]!.sections[0]!.id;
     expect(Schema.safeParse({ ...site, ownerEdits: [{ section, path: "/props/title" }] }).success).toBe(true);
     // Only pointers inside a section's props, by a section id; never more than MAX_OWNER_EDITS.
     expect(Schema.safeParse({ ...site, ownerEdits: [{ section, path: "/variant" }] }).success).toBe(false);
     expect(Schema.safeParse({ ...site, ownerEdits: [{ section: "hero", path: "/props/title" }] }).success).toBe(false);
     expect(Schema.safeParse({ ...site, ownerEdits: Array.from({ length: MAX_OWNER_EDITS + 1 }, () => ({ section, path: "/props/title" })) }).success).toBe(false);
+  });
+});
+
+describe("migration 14 → 15 (the business subtype, variety engine Step 3)", () => {
+  it("turns stored v14 sites into valid v15 sites unchanged apart from the version; the subtype is optional and checked", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { validateSite, SiteSpec: Schema } = await import("../src/index.ts");
+    const read = (id: string) => JSON.parse(readFileSync(new URL(`../../../tools/eval/golden/${id}.json`, import.meta.url), "utf8")) as SiteSpec;
+    for (const id of ["instalacije-rebernik", "trgovina-oljka-in-sol", "avtoservis-mrak", "kmetija-grabnar"]) {
+      const golden = read(id);
+      const v15 = migrateSpec({ ...golden, specVersion: 14 }, MIGRATIONS, 15);
+      expect(v15, id).toEqual({ ...golden, specVersion: 15 });
+      expect(v15.business.subtype, id).toBeUndefined();
+      expect(validateSite(migrateSpec(v15)).issues, id).toEqual([]);
+    }
+    const shop = migrateSpec(read("trgovina-oljka-in-sol"));
+    expect(Schema.safeParse({ ...shop, business: { ...shop.business, subtype: "florist" } }).success).toBe(true);
+    // Only a known subtype; whether it fits the type is validateSite's (subtype.test.ts).
+    expect(Schema.safeParse({ ...shop, business: { ...shop.business, subtype: "gardening" } }).success).toBe(false);
+    expect(SPEC_VERSION).toBe(15);
   });
 });

@@ -1,9 +1,17 @@
 # Variety engine: every business its own site
 
-Status 2026-10-07: the free parts of Steps 0–2 are built; nothing is measured on real generations yet (that needs the paid twin run below), so `variety.families` stays off.
+Status 2026-10-07: the free parts of Steps 0–3 are built; nothing is measured on real generations yet (that needs the paid twin run below), so `variety.families` and `variety.concept` stay off.
 - Step 0 (measure): 12 twins in `tools/eval/twins/` (`--twins`), look distance (`tools/eval/src/look-distance.ts`), brand fit, motif fit, `--no-edits`. The variety report goes in `eval/variety-<mode>-<scope>.md`. Offline baseline over the 10 goldens: look distance across trades 0.61 (replay of the 2026-10-01 recordings 0.47), no colliding pair. Within a trade there is no number yet: it needs `pnpm eval --twins --no-edits --scope home` (paid, ≈ €2–3 with the batched judge).
 - Step 1 (families): `packages/spec/src/families.ts` gives 3 palettes, 3 font pairs and 3 heroes per template and outline slots. Logo colours go into the template's roles. The template is offered beside two fitting directions. A seed from the site id breaks ties. The full sheet is `pnpm variety:sheet` (eval/look/families-*.jpg).
 - Step 2 (neighbours, regenerate): `awayFromNeighbours` covers the same trade, same town first. "Ustvari znova" asks for another look and moves the seed. "Druga podoba" is not built (decision `sb-druga-podoba` is open).
+- Step 3 (concept), the free parts, behind config `variety.concept` (off; with it off every request is byte-identical to before, checked by replaying all ten fixtures on both branches):
+  - spec v15: `business.subtype` (car repair: repair, tyres, bodywork; builder: plumbing, electrical, carpentry, roofing, painting; shop: deli, florist, boutique), validated against the type; migration 14 → 15;
+  - six sub-trade motifs drawn on their template's layout (`packages/spec/src/motif.ts`, `packages/components/src/motifs/trades.tsx`): wire, joint, tiles and strip on Cevi; stem and tag on Etiketa. Sites without a subtype keep byte-identical stylesheets. `pnpm motifs:sheet` renders them at 360 and 1280 px with axe; `MOTIF_TRADES` knows them;
+  - the brief adds `concept` (subtype, goal, angle, signature fact, materials, local anchor; `packages/engine/src/concept.ts`). Code drops materials and an anchor that aren't in the client's text, a signature fact the client didn't give and a subtype of another type;
+  - five homepage blueprints by goal (call-first, book-first, browse-first, visit-first, story-first) as outline slots that replace the template's fixed outline, in the template's own variants where it has them;
+  - a signature device by fact and materials (call object, seal, week chart, poster, labels, offers, tags, figure, route line, rates, address card), placed right after the hero;
+  - the design step is told the subtype, goal and angle; the subtype goes into the spec and picks the motif.
+  - Not built: the paid twin eval (≈ €5). The critique prompt still lists only the template motifs' words.
 
 Status: plan, 2026-10-04. Nothing here is built. Building waits for eval budget (HQ `meta/budget` is "spend nothing"), because every step changes what the model produces and has to be measured on real generations. HQ decisions: `sb-variety-approach` (which way), `sb-druga-podoba` (how owners see alternatives). Items: `it-variety-*` and the existing `it-sameness`, `it-hero-families`, `it-catalogue-sameness`.
 

@@ -66,6 +66,11 @@ export const MIGRATIONS: Record<number, (spec: RawSpec) => RawSpec> = {
   // direct edits from now on; a stored site has none, so its first regeneration keeps only its business facts, as
   // before. Every v13 spec is a valid v14 spec.
   13: (spec) => spec,
+  // 14 → 15: the business subtype (variety engine Step 3, it-concept-brief). Additive: the optional
+  // `business.subtype` (a trade within the type, e.g. builder › electrical), set only by the variety engine's
+  // concept; it picks the drawn motif within a template. A stored site has none and renders as before. Every v14
+  // spec is a valid v15 spec.
+  14: (spec) => spec,
 };
 
 export function migrateSpec(input: unknown, migrations = MIGRATIONS, target: number = SPEC_VERSION): SiteSpec {

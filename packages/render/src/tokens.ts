@@ -1,4 +1,4 @@
-import { DIRECTIONS, fontPair, type Colors, type Design, type FontFace, type Motif } from "@sb/spec";
+import { DIRECTIONS, fontPair, type Colors, type Design, type FontFace, type Motif, type SubMotif } from "@sb/spec";
 
 const px = (n: number) => `${Math.round(n * 100) / 100}px`;
 const rem = (n: number) => `${Math.round((n / 16) * 1000) / 1000}rem`;
@@ -23,8 +23,11 @@ export function fontStack(f: FontFace): string {
   return `"${f.family}", ${generic}`;
 }
 
-/** Per-site CSS custom properties. Deterministic output for identical input. */
-export function tokensCss(design: Design): string {
+/**
+ * Per-site CSS custom properties. Deterministic output for identical input. `sub`: the sub-trade motif drawn on the
+ * template's layout (spec siteMotif); its pieces replace the template motif's.
+ */
+export function tokensCss(design: Design, sub?: SubMotif): string {
   const pair = fontPair(design.fontPair);
   const c = design.colors;
   const b = design.baseFontSize;
@@ -69,6 +72,7 @@ export function tokensCss(design: Design): string {
     vars["--fs-display"] = fluid(template.display[0], template.display[1]);
     vars["--fs-h2"] = fluid(template.h2[0], template.h2[1]);
     Object.assign(vars, motifVars(template.motif, c));
+    if (sub) Object.assign(vars, subMotifVars(sub, c));
   } else if (c.band !== undefined) {
     vars["--c-band"] = c.band;
     vars["--c-on-band"] = c.onBand ?? c.onPrimary;
@@ -183,6 +187,77 @@ export function motifVars(motif: Motif, c: Colors): Record<string, string> {
         // A brass spoon (the inn's name): the brand mark and the divider between the offers, in the band colour.
         "--motif-brand": svgUrl(`<svg xmlns="http://www.w3.org/2000/svg" width="22" height="104" viewBox="0 0 22 104"><ellipse cx="11" cy="19" rx="10.5" ry="18" fill="${band}"/><path d="M8.5 34h5l1.5 62a4 4 0 0 1-8 0z" fill="${band}"/></svg>`),
       };
+  }
+}
+
+/**
+ * A sub-trade motif's repeating pieces (variety engine Step 3), in the same tokens as its template motif's, so the
+ * template's layout rules draw them: the brand mark, the divider where the ground changes and the list bullets.
+ */
+export function subMotifVars(sub: SubMotif, c: Colors): Record<string, string> {
+  const band = c.band ?? c.primary;
+  const svg = (w: number, h: number, body: string) => svgUrl(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${body}</svg>`);
+  switch (sub) {
+    case "wire": {
+      // A wire run along a wall: a right-angle bend ending in a terminal ring.
+      const bullet = (ink: string) => svg(56, 40, `<path d="M4 9h22v22h18" stroke="${ink}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="48" cy="31" r="5" fill="none" stroke="${ink}" stroke-width="4"/>`);
+      return {
+        "--motif-brand": svg(34, 14, `<path d="M2 4h18M2 10h18" stroke="${c.primary}" stroke-width="3" stroke-linecap="round"/><rect x="20" y="1" width="12" height="12" rx="2" fill="${band}"/>`),
+        // A cable of three conductors with a clamp every 220 px.
+        "--motif-divider": svg(220, 44, `<path d="M0 11h220" stroke="${c.primary}" stroke-width="6"/><path d="M0 22h220" stroke="${band}" stroke-width="6"/><path d="M0 33h220" stroke="${c.text}" stroke-width="6"/><rect x="98" y="2" width="16" height="40" rx="3" fill="${c.text}"/><rect x="102" y="6" width="8" height="32" rx="1" fill="${c.background}"/>`),
+        "--motif-divider-h": "44px",
+        "--motif-divider-w": "220px",
+        "--motif-bullet": bullet(c.primary),
+        "--motif-bullet-2": bullet(band),
+      };
+    }
+    case "joint": {
+      // Dovetails: a tail on the end of its board.
+      const tail = (ink: string) => svg(56, 40, `<path d="M4 30h48v8H4z" fill="${ink}"/><path d="M20 31L10 4h36l-10 27z" fill="${ink}"/>`);
+      return {
+        "--motif-brand": svg(34, 14, `<path d="M3 13L1 1h12l-2 12z" fill="${c.primary}"/><path d="M19 13l-2-12h12l-2 12z" fill="${band}"/>`),
+        // Two boards meeting along the divider: the band board above, the primary board's tails reaching into it.
+        "--motif-divider": svg(48, 32, `<rect width="48" height="32" fill="${band}"/><path d="M0 18h14l-6-16h28l-6 16h18v14H0z" fill="${c.primary}"/>`),
+        "--motif-divider-h": "32px",
+        "--motif-divider-w": "48px",
+        "--motif-bullet": tail(c.primary),
+        "--motif-bullet-2": tail(band),
+      };
+    }
+    case "tiles": {
+      // Courses of round-ended roof tiles, the lower course offset by half a tile; gables as bullets.
+      const row = (y: number, x0: number, ink: string) =>
+        [0, 1, 2].map((i) => `<path d="M${x0 + i * 24} ${y}h24v10a12 9 0 0 1-24 0z" fill="${ink}" stroke="${c.background}" stroke-width="2"/>`).join("");
+      const gable = (ink: string) => svg(56, 40, `<path d="M6 32L28 9l22 23" stroke="${ink}" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`);
+      return {
+        "--motif-brand": svg(34, 14, `<path d="M3 12L17 2l14 10" stroke="${c.primary}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`),
+        "--motif-divider": svg(48, 38, `${row(0, 0, band)}${row(14, -12, c.primary)}`),
+        "--motif-divider-h": "38px",
+        "--motif-divider-w": "48px",
+        "--motif-bullet": gable(c.primary),
+        "--motif-bullet-2": gable(band),
+      };
+    }
+    case "strip": {
+      // A painter's colour strip: chips in the site's own colours; a roller as the bullet.
+      const chips = [...new Set([c.primary, band, c.accent, c.inverse, c.muted])];
+      const roller = (ink: string) => svg(56, 40, `<rect x="4" y="4" width="34" height="15" rx="3" fill="${ink}"/><path d="M38 11h8v13H23v12" stroke="${c.text}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`);
+      return {
+        "--motif-brand": svg(34, 14, chips.slice(0, 3).map((ink, i) => `<rect x="${i * 12}" y="2" width="10" height="10" rx="1.5" fill="${ink}"/>`).join("")),
+        "--motif-divider": svg(chips.length * 40, 28, chips.map((ink, i) => `<rect x="${i * 40}" width="36" height="28" fill="${ink}"/>`).join("")),
+        "--motif-divider-h": "28px",
+        "--motif-divider-w": `${chips.length * 40}px`,
+        "--motif-bullet": roller(c.primary),
+        "--motif-bullet-2": roller(band),
+      };
+    }
+    case "stem":
+      // A tulip on its stem as the brand mark's shape (a mask: the header paints it in its own text colour, whatever
+      // its tone). The label cards and price labels draw the stem inline.
+      return { "--motif-brand": svg(40, 16, `<path d="M2 12C12 12 20 10 28 8" stroke="${c.text}" stroke-width="2" stroke-linecap="round" fill="none"/><ellipse cx="14" cy="8" rx="6" ry="2.4" transform="rotate(-24 14 8)" fill="${c.text}"/><path d="M28 8c0-5 3-7 5-7s5 2 5 7c0 3-2 5-5 5s-5-2-5-5z" fill="${c.text}"/>`) };
+    case "tag":
+      // A hang tag on its string as the brand mark's shape (a mask, as the stem's).
+      return { "--motif-brand": svg(40, 16, `<path d="M2 8c6-6 10 6 16 0" stroke="${c.text}" stroke-width="1.6" fill="none"/><path fill-rule="evenodd" d="M18 3h18v10H18l-4-5zM19.5 6.4a1.6 1.6 0 1 0 0 3.2a1.6 1.6 0 1 0 0-3.2z" fill="${c.text}"/>`) };
   }
 }
 

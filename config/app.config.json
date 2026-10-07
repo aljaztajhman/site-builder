@@ -15,7 +15,9 @@
   "variety": {
     "$comment": "Variety engine Steps 1–2 (docs/plans/variety-engine.md). Off until a twin eval shows the look distance within a trade goes up and judge medians hold (pnpm eval --twins --no-edits).",
     "families": false,
-    "neighbours": 50
+    "neighbours": 50,
+    "$conceptComment": "concept: Step 3. The brief adds the subtype, goal, angle, signature fact, materials and local anchor (materials and anchor only from the client's text, checked in code); the homepage follows a blueprint by goal instead of the template's fixed outline; a signature device by fact; the subtype picks the motif (wire, joint, tiles, strip, stem, tag). Off: every request is today's. Turning it on needs the paid twin eval (≈ €5).",
+    "concept": false
   },
   "structuredOutputForContent": false,
   "pricesUsdPerMTok": {

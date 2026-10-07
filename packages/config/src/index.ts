@@ -197,8 +197,11 @@ export const AppConfigSchema = z.object({
    * colour roles; a seed from the site id picks among equal options; no two sites of one trade (same town first) share
    * direction, palette family, font pair and hero; "Ustvari znova" asks for a different look. Off: today's behaviour.
    * neighbours: how many sites of the same trade the neighbour check compares.
+   * concept (Step 3, engine concept.ts): the brief adds subtype, goal, angle, signature fact, materials and local
+   * anchor; the homepage follows a blueprint by goal; a signature device by fact; the subtype picks the motif. Off:
+   * every request is today's.
    */
-  variety: z.object({ families: z.boolean(), neighbours: z.number().int().min(0).max(500) }),
+  variety: z.object({ families: z.boolean(), neighbours: z.number().int().min(0).max(500), concept: z.boolean() }),
   structuredOutputForContent: z.boolean(),
   pricesUsdPerMTok: z.record(z.string(), Price),
   eurPerUsd: z.number().positive(),

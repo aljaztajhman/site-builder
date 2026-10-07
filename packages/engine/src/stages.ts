@@ -45,6 +45,7 @@ import { fitImageForModel, sliceScreenshot } from "./images.ts";
 import { checkFacts, type FactViolation } from "./facts.ts";
 import { applyOps } from "./editor.ts";
 import { awayFromNeighbours, fittingDirections, pickFromFamily, type LookKey } from "./variety.ts";
+import { BRIEF_CONCEPT_SYSTEM, conceptLine, conceptOutline, subtypeDesignLine, verifyConcept, type ConceptPlan } from "./concept.ts";
 
 // ---------- 1. Intake -> brief ----------
 
@@ -60,22 +61,29 @@ export async function classify(client: ModelClient, description: string): Promis
 
 export async function makeBrief(
   client: ModelClient,
-  input: { description: string; businessType: string; photoCount: number; generatedSlots: number; hasLogo: boolean; scope: "home" | "full" },
+  input: { description: string; businessType: string; photoCount: number; generatedSlots: number; hasLogo: boolean; scope: "home" | "full"; concept?: boolean },
 ): Promise<{ brief: Brief; dropped: Dropped[] }> {
+  // The variety engine's concept (config variety.concept): a second system block, the type's subtypes and the
+  // concept in the schema. Off: the request is exactly today's.
+  const concept = input.concept === true;
   const { data } = await client.callJson({
     stage: "brief",
-    system: [BRIEF_SYSTEM],
+    system: concept ? [BRIEF_SYSTEM, BRIEF_CONCEPT_SYSTEM] : [BRIEF_SYSTEM],
     // Brief, design and alt text run once per job: a cache breakpoint there is a 1.25× write nobody reads.
     cache: false,
     messages: [
       {
         role: "user",
-        content: `Business type (classified): ${input.businessType}\nPhotos provided: ${input.photoCount}\nGenerated pictures allowed: ${input.generatedSlots}\nLogo provided: ${input.hasLogo ? "yes" : "no"}\nScope: ${input.scope === "home" ? "homepage preview (plan all pages anyway)" : "full site"}\n\nClient's description:\n"""\n${input.description}\n"""`,
+        content: `Business type (classified): ${input.businessType}\n${concept ? `${conceptLine(input.businessType as BusinessType)}\n` : ""}Photos provided: ${input.photoCount}\nGenerated pictures allowed: ${input.generatedSlots}\nLogo provided: ${input.hasLogo ? "yes" : "no"}\nScope: ${input.scope === "home" ? "homepage preview (plan all pages anyway)" : "full site"}\n\nClient's description:\n"""\n${input.description}\n"""`,
       },
     ],
-    schema: briefJsonSchema(),
+    schema: briefJsonSchema(concept),
   }, (d) => Brief.parse(d));
-  return verifyBriefFacts(data, input.description);
+  const verified = verifyBriefFacts(data, input.description);
+  if (!concept || !verified.brief.concept) return verified;
+  // Materials and the anchor must be the client's own words; the signature fact one the client gave.
+  const c = verifyConcept(verified.brief.concept, verified.brief, input.description);
+  return { brief: { ...verified.brief, concept: c.concept }, dropped: [...verified.dropped, ...c.dropped] };
 }
 
 // ---------- 2. Design direction ----------
@@ -157,9 +165,12 @@ export function familyLine(businessType: BusinessType, photoCount: number, v: Va
 
 export async function chooseDesign(
   client: ModelClient,
-  input: { brief: Brief; swatches: Swatch[]; photoCount: number; generatedCount: number; variety?: VarietyInput },
+  input: { brief: Brief; swatches: Swatch[]; photoCount: number; generatedCount: number; variety?: VarietyInput; concept?: boolean },
 ): Promise<{ design: Design; reason: string; hero?: string }> {
-  const offer = input.variety ? familyLine(input.brief.businessType, input.photoCount, input.variety) : templateLine(input.brief.businessType, input.photoCount);
+  const offerLine = input.variety ? familyLine(input.brief.businessType, input.photoCount, input.variety) : templateLine(input.brief.businessType, input.photoCount);
+  // The variety engine's concept (config variety.concept): the design step is told the subtype, goal and angle.
+  const subtype = input.concept ? subtypeDesignLine(input.brief.concept) : "";
+  const offer = subtype ? `${offerLine}\n${subtype}` : offerLine;
   const { data } = await client.callJson({
     stage: "design",
     system: [DESIGN_SYSTEM, directionsCatalogue()],
@@ -277,6 +288,8 @@ export interface ContentInput {
   heroImageIds: string[];
   /** The variety engine's hero for a template family ("type:variant"); absent: the direction's own. */
   hero?: string;
+  /** The variety engine's concept (config variety.concept): the blueprint by goal and the signature device. */
+  concept?: ConceptPlan;
   structuredOutput: boolean;
   retries: number;
   corpus: string;
@@ -349,7 +362,7 @@ export async function generateContent(client: ModelClient, input: ContentInput):
         `Brief (facts are verified; anything null is missing and must be a placeholder or left out):\n${JSON.stringify(input.brief)}`,
         `Pages to produce (page ids p_<slug or "home">):\n${pages.map((p) => `- ${p.kind} "${p.slug}" nav "${p.navLabel}": ${p.purpose}`).join("\n")}`,
         `Design direction: ${dir.id}. Header ${dir.layout.header}, footer ${dir.layout.footer}. Preferred heroes: ${(input.hero ? [input.hero] : dir.layout.heroes).join(", ")}. Section rhythm: ${dir.layout.rhythm} (use the tone field: default/alt/inverse/band; band is the direction's saturated colour). Preferred variants: ${dir.layout.prefer.join(", ")}.`,
-        templateOutline(dir, input.hero),
+        input.concept ? conceptOutline(dir, input.concept, input.hero) || templateOutline(dir, input.hero) : templateOutline(dir, input.hero),
         `Photos (use each at most twice; alt text is already written):\n${imageList(input.assets, input.heroImageIds)}`,
         heroRule(input.heroImageIds, input.hero ? [input.hero] : dir.layout.heroes),
         `Business facts available to components: phone ${input.brief.facts.phone ? "yes" : "missing"}, address ${input.brief.facts.address ? "yes" : "missing"}, hours ${input.brief.facts.hours ? "yes" : "missing"}, booking URL ${input.brief.facts.bookingUrl ? "yes" : "no — never use the booking action"}.`,
