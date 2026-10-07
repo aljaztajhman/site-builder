@@ -269,27 +269,6 @@
        {
         "name": "Branka Seliškar",
         "role": "Direktorica"
-       },
-       {
-        "name": {
-         "note": "Ime računovodkinje",
-         "$placeholder": "name"
-        },
-        "role": "Računovodkinja"
-       },
-       {
-        "name": {
-         "note": "Ime računovodkinje",
-         "$placeholder": "name"
-        },
-        "role": "Računovodkinja"
-       },
-       {
-        "name": {
-         "note": "Ime računovodkinje",
-         "$placeholder": "name"
-        },
-        "role": "Računovodkinja"
        }
       ]
      },
@@ -410,7 +389,7 @@
      "id": "s_legal_accessibility",
      "type": "legal",
      "props": {
-      "date": "2026-10-04",
+      "date": "2026-10-07",
       "kind": "accessibility"
      },
      "variant": "default"
@@ -447,7 +426,7 @@
    {
     "id": "img_g1",
     "alt": "Pisalna miza s kalkulatorjem, pisalom in mapami z dokumenti",
-    "src": "sites/site_fc291d9e512975df/generated/img_g1.jpg",
+    "src": "sites/site_11a30aabba1103c5/generated/img_g1.jpg",
     "width": 1536,
     "height": 1024,
     "origin": "generated"
@@ -455,7 +434,7 @@
    {
     "id": "img_g2",
     "alt": "Registratorji in mape z dokumenti na polici",
-    "src": "sites/site_fc291d9e512975df/generated/img_g2.jpg",
+    "src": "sites/site_11a30aabba1103c5/generated/img_g2.jpg",
     "width": 1536,
     "height": 1024,
     "origin": "generated"
@@ -463,7 +442,7 @@
    {
     "id": "img_g3",
     "alt": "Ravnica v Pomurju z njivami in oddaljenim zvonikom v jutranji svetlobi",
-    "src": "sites/site_fc291d9e512975df/generated/img_g3.jpg",
+    "src": "sites/site_11a30aabba1103c5/generated/img_g3.jpg",
     "width": 1536,
     "height": 1024,
     "origin": "generated"
@@ -534,5 +513,5 @@
    "Slovenija"
   ]
  },
- "specVersion": 13
+ "specVersion": 14
 }

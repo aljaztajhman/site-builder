@@ -247,6 +247,15 @@ export const AppConfigSchema = z.object({
      */
     indexSiteHosts: z.boolean(),
   }),
+  /** Legal name and address from a tax number via EU VIES, in the editor (see config $comment). */
+  companyLookup: z.object({
+    enabled: z.boolean(),
+    url: z.string().regex(/^https:\/\/[^\s]+$/),
+    timeoutMs: z.number().int().min(500).max(15000),
+    perViewer: z.number().int().min(1),
+    total: z.number().int().min(1),
+    windowMinutes: z.number().int().min(1),
+  }),
   /** Own domains for published sites: the domain step, provisioning and its providers (see config $comment). */
   domains: Domains,
   formEmail: z.object({
