@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import { SPEC_VERSION, migrateSpec, withSiteLocales, type SiteSpec } from "@sb/spec";
 import type { Db } from "./db.ts";
 import { Accounts } from "./accounts.ts";
+import { CostHistory } from "./costs.ts";
 import { UrlChecks } from "./checks.ts";
 import { SiteStats } from "./stats.ts";
 import { SiteDomains } from "./domains.ts";
@@ -168,8 +169,11 @@ export class Repo {
   readonly stats: SiteStats;
   /** Sites' own domain names. */
   readonly domains: SiteDomains;
+  /** Model and image spend over time, for the admin. */
+  readonly costs: CostHistory;
 
   constructor(readonly db: Db) {
+    this.costs = new CostHistory(db);
     this.accounts = new Accounts(db);
     this.usage = new Usage(db);
     this.checks = new UrlChecks(db);
