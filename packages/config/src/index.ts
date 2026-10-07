@@ -245,6 +245,11 @@ export const AppConfigSchema = z.object({
     keepDays: z.number().int().min(1).max(400),
     landingDedupeMinutes: z.number().int().min(0),
     onceMinutes: z.number().int().min(0),
+    /**
+     * Cloudflare Web Analytics on the landing, login and privacy pages (beacon.tsx): the site's public token (null:
+     * no beacon) and the hostnames it is shown on.
+     */
+    cloudflare: z.object({ token: z.string().regex(/^[0-9a-f]{32}$/).nullable(), hosts: z.array(z.string().min(1)) }),
   }),
   stats: z.object({
     visitDedupeMinutes: z.number().int().min(0),
