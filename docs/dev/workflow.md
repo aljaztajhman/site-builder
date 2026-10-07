@@ -87,3 +87,12 @@ A change is done when: the tests that cover it ran green, the thing was looked a
 3. Backups and `migrate-check`.
 4. CI additions and `nightly`.
 5. External uptime monitor, `/admin` health rows.
+
+## Implementation (2026-10-07, HQ `it-dev-workflow`)
+
+In code: the version on `/health` (`version: {sha, tag}`) and `/admin`; CI jobs `eval-offline`, `web-build`, `migrations` (empty-database migration smoke plus a migrate-check from the base commit's seeded database); `.github/workflows/promote.yml` and `nightly.yml`; `pnpm db:migrate`, `pnpm db:backup [--check]`, `pnpm db:migrate-check` (config `backups`). Neither new workflow does anything until the owner sets the repository variables and secrets listed at the top of each file (`PRODUCTION_READY`, `NIGHTLY_ENABLED`, …).
+
+Differences from the text above, for the owner to confirm:
+- Release notes go to the GitHub release of each tag; that page is the changelog. A generated CHANGELOG.md would need a commit on `release` that main lacks (no more fast-forwards) or a push to `main`.
+- The tag shows on `/health` once `APP_VERSION` is set on production (the SHA always shows, from Railway's `RAILWAY_GIT_COMMIT_SHA`); the promote workflow checks production by SHA.
+- Hotfixes: a fix cherry-picked from `release` to `main` is a different commit, so `release` is no longer an ancestor of `main` and the next promote can't fast-forward (the workflow stops and says so). Either merge `release` into `main` after a hotfix (one merge commit, against squash-only), or let promote move `release` when `git cherry` shows every release-only change is already in `main`. Open decision.

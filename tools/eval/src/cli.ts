@@ -13,6 +13,10 @@
  * --photos <n>:     give each fixture only its first n photos (0: a site without photos, which gets generated pictures).
  * --no-edits:       generate and check only; no scripted chat edits (about 40 % of a homepage run's cost). Not with
  *                   --record (it would drop the edit recordings the tests replay).
+ * --shard <k>/<n>:  run only every n-th fixture starting at the k-th (1-based), e.g. CI's two offline runners;
+ *                   the report goes beside the others in eval/runs/, as for --only.
+ * --strict:         exit 1 when a fixture errored, stopped early or has a checkpoint with a failure (CI runs
+ *                   `pnpm eval --offline --strict`). Without it the run reports and exits 0.
  * --twins:          also run the twins (tools/eval/twins: more businesses of the same trades, no scripted edits), for
  *                   the same-trade look distance. They have no recordings or goldens: live, --record or --record-missing.
  * --prompt-fixes all|<name>[,<name>]: turns those config promptFixes switches on for this run (docs/dev/prompt-fixes.md),
@@ -55,7 +59,13 @@ const mode: Mode = flag("offline") ? "offline" : flag("replay") ? "replay" : fla
 const paid = mode === "live" || mode === "record" || mode === "record-missing";
 const scope = value("scope") === "home" ? "home" : "full";
 const maxEur = Number(value("max-eur") ?? 25);
-const only = value("only")?.split(",").map((s) => s.trim());
+const shardArg = value("shard");
+const shard = shardArg ? /^(\d+)\/(\d+)$/.exec(shardArg) : null;
+if (shardArg && (!shard || Number(shard[1]) < 1 || Number(shard[1]) > Number(shard[2]))) {
+  console.error(`--shard takes <k>/<n> with 1 <= k <= n, not ${shardArg}`);
+  process.exit(2);
+}
+const onlyArg = value("only")?.split(",").map((s) => s.trim());
 const judge = flag("judge") || (paid && !flag("no-judge"));
 const outDir = path.join(repoRoot, "eval");
 
@@ -76,10 +86,11 @@ if (twins && !paid) {
 }
 const photoLimit = value("photos") === undefined ? undefined : Number(value("photos"));
 const fixtures = [...loadFixtures(), ...(twins ? loadTwins() : [])]
-  .filter((f) => !only || only.includes(f.id))
+  .filter((f) => !onlyArg || onlyArg.includes(f.id))
+  .filter((_, i) => !shard || i % Number(shard[2]) === Number(shard[1]) - 1)
   .map((f) => (photoLimit === undefined ? f : { ...f, photos: f.photos.slice(0, photoLimit) }));
 if (fixtures.length === 0) {
-  console.error(`No fixtures match ${only?.join(",")}`);
+  console.error(`No fixtures match ${onlyArg?.join(",") ?? ""}${shardArg ? ` (shard ${shardArg})` : ""}`);
   process.exit(2);
 }
 const missingPhotos = fixtures.some((f) => f.photos.some((p) => !existsSync(p.path)));
@@ -88,6 +99,8 @@ if (missingPhotos) {
   execFileSync(process.execPath, [path.join(repoRoot, "node_modules/tsx/dist/cli.mjs"), path.join(here, "fixtures/generate-photos.ts")], { stdio: "inherit" });
 }
 
+// A shard reports like an --only run over its fixtures.
+const only = shard ? fixtures.map((f) => f.id) : onlyArg;
 const config = loadConfig();
 // --prompt-fixes all | name,name: turns those config promptFixes switches on for this run (the runner shares the config).
 const fixesArg = value("prompt-fixes");
@@ -165,3 +178,12 @@ await writeFile(path.join(outDir, out.contactSheet), await contactSheet(results)
 for (const r of results) await reviewSheet(r.id);
 await desktopContactSheet(results.map((r) => r.id));
 console.log(`\nWrote ${path.join(outDir, out.report)} and ${out.contactSheet}. Model spend €${spent.toFixed(2)}.`);
+
+if (flag("strict")) {
+  const failing = results.filter((r) => r.error || r.checkpoints.some((c) => c.failures.length > 0)).map((r) => r.id);
+  const missing = fixtures.length - results.length;
+  if (failing.length || missing) {
+    console.error(`--strict: ${failing.length ? `failing: ${failing.join(", ")}` : ""}${failing.length && missing ? "; " : ""}${missing ? `${missing} fixture(s) not run` : ""}`);
+    process.exitCode = 1;
+  } else console.log(`--strict: all ${results.length} fixture(s) pass every automated check.`);
+}
