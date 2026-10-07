@@ -357,21 +357,6 @@
     "path": "/pages/1/sections/1/props/items/5/price",
     "kind": "placeholder",
     "detail": "price"
-   },
-   {
-    "path": "/pages/2/sections/2/props/members/1/name",
-    "kind": "placeholder",
-    "detail": "name"
-   },
-   {
-    "path": "/pages/2/sections/2/props/members/2/name",
-    "kind": "placeholder",
-    "detail": "name"
-   },
-   {
-    "path": "/pages/2/sections/2/props/members/3/name",
-    "kind": "placeholder",
-    "detail": "name"
    }
   ],
   "asked": [
@@ -398,18 +383,6 @@
    {
     "path": "/pages/1/sections/1/props/items/5/price",
     "kind": "price"
-   },
-   {
-    "path": "/pages/2/sections/2/props/members/1/name",
-    "kind": "name"
-   },
-   {
-    "path": "/pages/2/sections/2/props/members/2/name",
-    "kind": "name"
-   },
-   {
-    "path": "/pages/2/sections/2/props/members/3/name",
-    "kind": "name"
    }
   ],
   "other": []

@@ -5,6 +5,7 @@ import {
   SECTION_DEFS,
   SPEC_VERSION,
   isoDay,
+  isPlaceholder,
   PageRef,
   text,
   toModelJsonSchema,
@@ -158,6 +159,37 @@ export function uniqueSectionIds(pages: Page[]): Page[] {
 }
 
 /**
+ * People the client didn't name ("smo trije", "še dve računovodkinji") would each be a name placeholder on a team
+ * section: a fact only the owner can give that blocks publishing. They are left out (never named), and a team
+ * section left with nobody goes, unless it is all its page has; links to a section that went point at its page.
+ * The editor's "Dodaj člana" adds people (it-zero-to-live).
+ */
+export function withoutUnnamedTeam(pages: Page[]): Page[] {
+  const gone = new Set<string>(); // `${pageId} ${sectionId}`
+  const out = pages.map((page) => {
+    const sections = page.sections.flatMap((s): Page["sections"] => {
+      if (s.type !== "team") return [s];
+      const members = s.props.members.filter((m) => !isPlaceholder(m.name));
+      if (members.length === s.props.members.length) return [s];
+      if (members.length) return [{ ...s, props: { ...s.props, members } }];
+      if (page.sections.length === 1) return [s];
+      gone.add(`${page.id} ${s.id}`);
+      return [];
+    });
+    return { ...page, sections } as Page;
+  });
+  if (!gone.size) return out;
+  const unlink = (v: unknown): unknown => {
+    if (Array.isArray(v)) return v.map(unlink);
+    if (!v || typeof v !== "object") return v;
+    const o = Object.fromEntries(Object.entries(v).map(([k, x]) => [k, unlink(x)])) as Record<string, unknown>;
+    if (typeof o.page === "string" && typeof o.section === "string" && gone.has(`${o.page} ${o.section}`)) delete o.section;
+    return o;
+  };
+  return out.map((page) => ({ ...page, sections: page.sections.map((s) => ({ ...s, props: unlink(s.props) }) as typeof s) }));
+}
+
+/**
  * Trade templates fix their header: its background (dark over a dark hero, unless there is a logo), and no header call button when
  * the hero already calls: its object is the phone number or it links a call (one primary action per screen).
  */
@@ -197,6 +229,7 @@ export function assembleSpec(input: {
       return sections.length && sections.length !== p.sections.length ? { ...p, sections } : p;
     });
   }
+  modelPages = withoutUnnamedTeam(modelPages);
   // Home first, keep the model's order for the rest. The homepage keeps its section ids.
   modelPages.sort((a, b) => (a.kind === "home" ? -1 : b.kind === "home" ? 1 : 0));
   return {

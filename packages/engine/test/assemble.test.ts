@@ -4,7 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadConfig } from "@sb/config";
 import { publishChecklist, validateSite, type ImageAsset, type Page, type SiteSpec } from "@sb/spec";
-import { Brief, assembleSpec, businessFromBrief, checkFacts, clientWithholdsHours, contentOutputSchema, designFromChoice, extractJson, generatedImageCount, repairContentOutput, uniqueSectionIds, verifyBriefFacts, type ContentOutput } from "../src/index.ts";
+import { Brief, assembleSpec, businessFromBrief, checkFacts, clientWithholdsHours, contentOutputSchema, designFromChoice, extractJson, generatedImageCount, repairContentOutput, uniqueSectionIds, verifyBriefFacts, withoutUnnamedTeam, type ContentOutput } from "../src/index.ts";
 
 const config = loadConfig();
 const evalDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../tools/eval");
@@ -137,10 +137,45 @@ describe("opening hours the client won't publish", () => {
     expect(hoursBlockers(spec)).toEqual([{ path: "/business/hours", kind: "placeholder", detail: "hours" }]);
   });
 
+  it("team members the client didn't name are left out; the one named stays (it-zero-to-live)", () => {
+    // "Direktorica je Branka Seliškar, poleg nje sta zaposleni še dve računovodkinji": the model made three unnamed.
+    const raw = content();
+    const team = (pages: Page[]) => pages.flatMap((p) => p.sections).filter((s) => s.type === "team");
+    expect(team(raw.pages).flatMap((s) => (s.type === "team" ? s.props.members : [])).filter((m) => typeof m.name !== "string")).toHaveLength(3);
+    const spec = assembleSpec({ slug: id, brief, design, assets, content: raw, hoursWithheld: true });
+    const members = team(spec.pages).flatMap((s) => (s.type === "team" ? s.props.members : []));
+    expect(members.map((m) => m.name)).toEqual(["Branka Seliškar"]);
+    for (const m of members) expect(fixture.description).toContain(m.name as string);
+    expect(publishChecklist(spec).filter((b) => b.detail === "name")).toEqual([]);
+    expect(validateSite(spec).ok).toBe(true);
+    expect(checkFacts(spec, fixture.description)).toEqual([]);
+  });
+
   it("stated hours win over the wish", () => {
     const withHours = { ...brief, facts: { ...brief.facts, hours: [{ from: "mon" as const, to: "fri" as const, open: "08:00", close: "16:00", closed: false }] } };
     expect(businessFromBrief(withHours, { hoursWithheld: true }).hours).toMatchObject({ entries: [{ from: "mon", to: "fri", open: "08:00", close: "16:00" }] });
     expect(businessFromBrief(brief, { hoursWithheld: true }).hours).toBeUndefined();
     expect(businessFromBrief(brief).hours).toEqual({ $placeholder: "hours" });
+  });
+});
+
+describe("a team section without names", () => {
+  const member = (name: string | null, role = "Računovodkinja") => ({ name: name ?? { $placeholder: "name", note: "Ime" }, role });
+  const team = (id: string, members: ReturnType<typeof member>[]) => ({ id, type: "team", variant: "list", props: { title: "Ekipa", members } }) as unknown as Page["sections"][number];
+
+  it("a head count without names: the section goes, and a link to it points at its page", () => {
+    const pages = withoutUnnamedTeam([
+      page("p_home", [section("s_head", { primary: { label: "Ekipa", target: { page: "p_home", section: "s_team" } } }), team("s_team", [member(null), member(null), member(null)]), section("s_cta")]),
+    ]);
+    expect(pages[0]!.sections.map((s) => s.id)).toEqual(["s_head", "s_cta"]);
+    expect((pages[0]!.sections[0]!.props as { primary: { target: unknown } }).primary.target).toEqual({ page: "p_home" });
+  });
+
+  it("named people stay as they are; a team section that is all its page has stays", () => {
+    const named = team("s_team", [member("Ana Novak"), member("Maja Kos", "Asistentka")]);
+    const only = team("s_team_ekipa", [member(null)]);
+    const pages = withoutUnnamedTeam([page("p_home", [section("s_head"), named]), page("p_ekipa", [only])]);
+    expect(pages[0]!.sections[1]).toBe(named);
+    expect(pages[1]!.sections).toEqual([only]);
   });
 });
