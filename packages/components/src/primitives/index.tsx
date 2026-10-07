@@ -39,7 +39,14 @@ export function landmarkSuffixId(sectionId: string): string {
 export const LandmarkSuffixes = createContext<ReadonlyMap<string, string>>(new Map());
 
 /**
- * Wrapper for every section: landmark, tone, variant classes and the width container.
+ * Spec v15: the section ids of the page that render centred (design.skeleton.centred through centredOn: at most one).
+ * Empty without a skeleton, so a site without one renders exactly as before.
+ */
+export const CentredSections = createContext<ReadonlySet<string>>(new Set());
+
+/**
+ * Wrapper for every section: landmark, tone, variant classes and the width container; `data-align="centre"` on the one
+ * centred section of a page with a skeleton (skeleton.css).
  * Classes: `s s-{type} s-{type}--{variant} tone-{tone}`.
  */
 export function Section(props: {
@@ -55,11 +62,13 @@ export function Section(props: {
 }) {
   const { id, type, variant, tone = "default", labelled = true, className, bleed, children } = props;
   const suffixes = useContext(LandmarkSuffixes);
+  const centred = useContext(CentredSections).has(id);
   const suffix = labelled ? suffixes.get(id) : undefined;
   return (
     <section
       id={id}
       className={cx("s", `s-${type}`, `s-${type}--${variant}`, `tone-${tone}`, className)}
+      data-align={centred ? "centre" : undefined}
       aria-labelledby={labelled ? (suffix ? `${titleId(id)} ${landmarkSuffixId(id)}` : titleId(id)) : undefined}
     >
       {suffix && (

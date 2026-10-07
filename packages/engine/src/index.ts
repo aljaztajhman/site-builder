@@ -14,6 +14,7 @@ export * from "./prompts.ts";
 export * from "./stages.ts";
 export * from "./content-patch.ts";
 export * from "./variety.ts";
+export * from "./skeleton.ts";
 export * from "./pipeline.ts";
 export * from "./published.ts";
 export * from "./retention.ts";

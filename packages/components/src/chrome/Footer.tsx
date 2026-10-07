@@ -1,6 +1,10 @@
-import { isPlaceholder, isWebUrl } from "@sb/spec";
+import type { CSSProperties } from "react";
+import { DIRECTIONS, isPlaceholder, isWebUrl } from "@sb/spec";
 import type { RenderCtx } from "../types.ts";
-import { AddressText, EmailLink, MaybeText, PhoneLink, cx } from "../primitives/index.tsx";
+import { AddressText, EmailLink, HoursList, Icon, MaybeText, PhoneLink, cx } from "../primitives/index.tsx";
+
+/** Characters of the longest word: the wordmark's size is set so it fits the width (skeleton.css). */
+const longestWord = (s: string): number => Math.max(4, ...s.split(/\s+/).map((w) => w.length));
 
 const NETWORK_LABEL = {
   facebook: "Facebook",
@@ -18,8 +22,14 @@ export function Footer({ ctx }: { ctx: RenderCtx }) {
   const { site } = ctx;
   const b = site.business;
   const p = b.provider;
-  const variant = site.chrome.footer.variant;
-  const compact = variant === "compact";
+  // Spec v15: a skeleton's footer family and tone (its wordmark and visit families hold the compact rows below).
+  const skeleton = site.design.skeleton;
+  const variant = skeleton?.footer ?? site.chrome.footer.variant;
+  const compact = variant !== "columns";
+  const directions = ctx.href({ action: "directions" });
+  // A band footer needs a band colour (a template always has one); without it the dark ground.
+  const hasBand = site.design.colors.band !== undefined || DIRECTIONS.some((d) => d.id === site.design.direction && d.template);
+  const tone = skeleton && skeleton.footerTone === "band" && !hasBand ? "inverse" : skeleton?.footerTone;
   const navPages = site.pages.filter((x) => x.nav.show);
   const legalPages = (["privacy", "accessibility"] as const)
     .map((kind) => site.pages.find((x) => x.kind === kind))
@@ -31,13 +41,45 @@ export function Footer({ ctx }: { ctx: RenderCtx }) {
   const social = (b.social ?? []).filter((s) => isWebUrl(s.url));
 
   return (
-    <footer className={cx("site-footer", `site-footer--${variant}`)}>
+    <footer
+      className={
+        skeleton
+          ? cx("site-footer", variant !== "columns" && variant !== "compact" && "site-footer--compact", `site-footer--${variant}`, `site-footer--tone-${tone}`)
+          : cx("site-footer", `site-footer--${variant}`)
+      }
+    >
       <div className="container">
+        {variant === "wordmark" && (
+          // The name set wall-sized as the page's last word; decorative (the name follows as text below).
+          <p className="site-footer__wordmark" aria-hidden="true" style={{ "--wm-chars": longestWord(b.name) } as CSSProperties}>
+            {b.name}
+          </p>
+        )}
+        {variant === "visit" && (
+          <div className="site-footer__visit">
+            <div className="site-footer__visit-where">
+              <h2 className="site-footer__visit-title">{ctx.t("visitUs")}</h2>
+              <AddressText ctx={ctx} />
+              {directions && (
+                <a className="text-link site-footer__directions" href={directions} rel="noopener" target="_blank">
+                  <Icon name="map-pin" />
+                  {ctx.t("directions")}
+                </a>
+              )}
+            </div>
+            {b.hours && (
+              <div className="site-footer__visit-hours">
+                <h2 className="site-footer__visit-title">{ctx.t("openingHours")}</h2>
+                <HoursList ctx={ctx} />
+              </div>
+            )}
+          </div>
+        )}
         <div className="site-footer__grid">
           <div className="site-footer__block site-footer__contact">
             <h2 className={headingClass}>{ctx.t("contact")}</h2>
             <p className="site-footer__name">{b.name}</p>
-            <AddressText ctx={ctx} />
+            {variant !== "visit" && <AddressText ctx={ctx} />}
             <ul className="site-footer__facts" role="list">
               <li>
                 <span className="visually-hidden">{ctx.t("phone")}: </span>

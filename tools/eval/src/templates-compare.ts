@@ -1,5 +1,8 @@
 /**
- * pnpm templates:compare <letter>[,<letter>] (e.g. R,T)
+ * pnpm templates:compare <letter>[,<letter>] (e.g. R,T) [--skeleton]
+ *
+ * --skeleton: the engine's side as the generator leaves it with config variety.skeleton on (applySkeleton, the golden's
+ * id as the seed), with the one-call-button-per-screen check; pictures in eval/runs/skeleton-templates-<letter>/.
  *
  * Renders a hand-made design template (docs/design/templates) and the engine's version of it (the fixture's
  * golden spec in tools/eval/golden, rendered by the shared component library with the fixture's own photos)
@@ -16,9 +19,9 @@ import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 import { chromium, type Browser, type Page } from "playwright";
 import { loadConfig } from "@sb/config";
-import { loadLazyImages, measurePage, processLogo, processPhoto, serveStatic } from "@sb/engine";
+import { applySkeleton, callButtonsPerScreen, callsBanned, loadLazyImages, measurePage, processLogo, processPhoto, serveStatic, siteSeed } from "@sb/engine";
 import { siteFiles } from "@sb/render";
-import { FONTS, migrateSpec, validateSite, type SiteSpec } from "@sb/spec";
+import { FONTS, direction as directionById, migrateSpec, validateSite, type SiteSpec } from "@sb/spec";
 import { loadFixture } from "./fixtures/load.ts";
 
 type Image = ReturnType<typeof sharp>;
@@ -73,11 +76,13 @@ function localFontsCss(base: string): string {
     .join("\n");
 }
 
-async function engineSite(fixtureId: string, outDir: string): Promise<SiteSpec> {
+async function engineSite(fixtureId: string, outDir: string, skeleton = false): Promise<SiteSpec> {
   const fixture = loadFixture(fixtureId);
   const config = loadConfig();
   const raw = JSON.parse(await readFile(path.join(repoRoot, "tools/eval/golden", `${fixtureId}.json`), "utf8")) as unknown;
-  const spec = migrateSpec(raw);
+  const golden = migrateSpec(raw);
+  // --skeleton: the golden as the generator leaves it with config variety.skeleton on (its own skeleton, rhythm, eyebrow).
+  const spec = skeleton ? applySkeleton(golden, { seed: siteSeed(fixtureId), dir: directionById(golden.design.direction), neighbours: [] }).spec : golden;
   const valid = validateSite(spec);
   if (!valid.ok) throw new Error(`${fixtureId}: golden spec is invalid\n${valid.issues.map((i) => `  ${i.path}: ${i.message}`).join("\n")}`);
   const media = new Map<string, Uint8Array>();
@@ -107,9 +112,11 @@ async function settle(page: Page): Promise<void> {
   await page.waitForTimeout(150);
 }
 
-async function checkEngine(page: Page): Promise<Omit<WidthCheck, "width">> {
+async function checkEngine(page: Page, skeleton = false): Promise<Omit<WidthCheck, "width">> {
   const t = loadConfig().checks.tapTarget;
   const m = await measurePage(page, { primaryMin: t.primaryMin, primaryGap: t.primaryGap, absoluteMin: t.absoluteMin });
+  // A skeleton promises one call button per screen (banned list); checked on every screen.
+  if (skeleton) m.banned.push(...callsBanned(await callButtonsPerScreen(page)));
   await loadLazyImages(page);
   const extra = await page.evaluate(() => {
     const brokenImages = [...document.images].filter((i) => !i.complete || i.naturalWidth === 0).map((i) => i.currentSrc || i.src);
@@ -189,9 +196,10 @@ async function stack(top: Image, bottom: Image): Promise<Buffer> {
     .toBuffer();
 }
 
-async function compare(t: TemplateEntry, browser: Browser): Promise<{ checks: WidthCheck[]; problems: string[] }> {
+async function compare(t: TemplateEntry, browser: Browser, skeleton = false): Promise<{ checks: WidthCheck[]; problems: string[] }> {
   if (!t.fixture) throw new Error(`${t.id} has no fixture`);
-  const outDir = path.join(repoRoot, "eval/runs", `templates-${t.id.toLowerCase()}`);
+  // With --skeleton the pictures go to eval/runs/skeleton-templates-<letter>/ (not committed), beside today's.
+  const outDir = path.join(repoRoot, "eval/runs", `${skeleton ? "skeleton-" : ""}templates-${t.id.toLowerCase()}`);
   // The rendered engine site stays next to the pictures (eval/runs is not committed) for a closer look.
   const siteDir = path.join(outDir, "site");
   await rm(siteDir, { recursive: true, force: true });
@@ -200,7 +208,7 @@ async function compare(t: TemplateEntry, browser: Browser): Promise<{ checks: Wi
   const siteServer = await serveStatic(siteDir);
   const fonts = localFontsCss(repoServer.url);
   try {
-    const spec = await engineSite(t.fixture, siteDir);
+    const spec = await engineSite(t.fixture, siteDir, skeleton);
     const handUrl = `${repoServer.url}/docs/design/templates/${t.file}`;
     const engineUrl = `${siteServer.url}/${spec.slug}/index.html`;
     const checks: WidthCheck[] = [];
@@ -208,7 +216,7 @@ async function compare(t: TemplateEntry, browser: Browser): Promise<{ checks: Wi
     for (const w of WIDTHS) {
       const hand = await firstScreen(browser, handUrl, w, fonts);
       const engine = await firstScreen(browser, engineUrl, w, null);
-      checks.push({ width: w.width, ...(await checkEngine(engine.page)) });
+      checks.push({ width: w.width, ...(await checkEngine(engine.page, skeleton)) });
       // Whole pages at one desktop and one phone width, for reviewing the sections below the first screen.
       if (w.width === 1280 || w.width === 390) {
         await loadLazyImages(hand.page);
@@ -237,6 +245,7 @@ async function compare(t: TemplateEntry, browser: Browser): Promise<{ checks: Wi
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const letters = (process.argv[2] ?? "").split(",").map((s) => s.trim().toUpperCase()).filter(Boolean);
+  const skeleton = process.argv.includes("--skeleton");
   const all = (JSON.parse(await readFile(path.join(repoRoot, "docs/design/templates/templates.json"), "utf8")) as { templates: TemplateEntry[] }).templates;
   const chosen = all.filter((t) => letters.includes(t.id));
   if (!chosen.length) {
@@ -247,8 +256,8 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   let failed = false;
   try {
     for (const t of chosen) {
-      const { checks, problems } = await compare(t, browser);
-      console.log(`\n${t.id} ${t.name} (${t.fixture}): eval/runs/templates-${t.id.toLowerCase()}/`);
+      const { checks, problems } = await compare(t, browser, skeleton);
+      console.log(`\n${t.id} ${t.name} (${t.fixture}): eval/runs/${skeleton ? "skeleton-" : ""}templates-${t.id.toLowerCase()}/`);
       for (const c of checks) console.log(`  ${c.width}px  scroll ${c.scrollWidth}  h1 ${c.h1}  hero actions ${c.heroPrimaryActions.length}  broken ${c.brokenImages.length}  small targets ${c.smallPrimaryTargets.length}  banned ${c.banned.length}`);
       for (const p of problems) console.log(`  FAIL ${p}`);
       if (problems.length) failed = true;
