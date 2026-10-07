@@ -2,6 +2,7 @@ import { afterAll, describe, expect, it } from "vitest";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { loadConfig } from "@sb/config";
 import { ModelClient, RecordingTransport, ReplayTransport, type CallRecord, type ModelRequest, type ModelResponse, type ModelTransport } from "@sb/engine";
 import { classifyCases, junkReport, loadCases, separate, type JunkCase, type JunkResult } from "../src/junk/calibrate.ts";
@@ -11,6 +12,7 @@ import { classifyCases, junkReport, loadCases, separate, type JunkCase, type Jun
  * stand-ins (a confidence per case id), not real classifier answers. The real run is `pnpm eval:junk --record`.
  */
 const config = loadConfig();
+const here = path.dirname(fileURLToPath(import.meta.url));
 const dirs: string[] = [];
 afterAll(async () => {
   for (const d of dirs) await rm(d, { recursive: true, force: true });
@@ -94,5 +96,16 @@ describe("pnpm eval:junk on scripted answers", () => {
     expect(replayed).toEqual(recorded);
     const changed = cases.map((c, i) => (i === 0 ? { ...c, description: `${c.description} (spremenjeno)` } : c));
     await expect(classifyCases(client(new ReplayTransport(dir, true)), changed, 20)).rejects.toThrow(/changed since recording/);
+  });
+});
+
+describe("the recorded calibration run (2026-10-07, Haiku 4.5)", () => {
+  it("with config's threshold refuses no real business and most junk", async () => {
+    const recorded = await classifyCases(client(new ReplayTransport(path.join(here, "../recordings/junk"), true)), loadCases(), config.tiers.junk.minDescriptionChars);
+    const min = config.tiers.junk.minClassifierConfidence;
+    const refused = (r: JunkResult) => r.confidence === null || r.confidence < min;
+    expect(recorded.filter((r) => r.expect === "real" && refused(r)).map((r) => r.id)).toEqual([]);
+    expect(recorded.filter((r) => r.expect === "junk" && !refused(r)).map((r) => r.id)).toEqual(["injection", "curious"]);
+    expect(recorded.filter((r) => r.expect === "junk" && refused(r))).toHaveLength(8);
   });
 });

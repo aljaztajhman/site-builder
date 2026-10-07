@@ -42,7 +42,8 @@ describe("assembleSpec on recorded full-site answers", () => {
     "instalacije-rebernik": ["/pages/0/sections/2/props/items/1/image: img_g2 is AI-generated and may only be used in hero-split, hero-image, hero-signature, image-text, page-header"],
   };
 
-  for (const id of readdirSync(recordingsDir)) {
+  // Site recordings only: junk/ holds the junk-check calibration's classify calls (pnpm eval:junk), not a site.
+  for (const id of readdirSync(recordingsDir).filter((d) => d !== "junk")) {
     const files = readdirSync(path.join(recordingsDir, id)).sort();
     const answers = (stage: string) =>
       files.filter((x) => x.endsWith(`-${stage}.json`)).map((f) => (JSON.parse(readFileSync(path.join(recordingsDir, id, f), "utf8")) as { response: { text: string } }).response.text);
