@@ -1,6 +1,6 @@
 /*
  * Product UI (login, sites, intake, editor, messages). Tokens and components from
- * docs/design/ideas.html §04–05: warm canvas, near-black ink, one accent, hairlines instead of
+ * docs/design/ideas.html §04–05: cool blue-white canvas, near-black ink, one teal accent, hairlines instead of
  * shadows (one shadow token, for things that float), radii 4/8/12, no pills, 44 px targets on touch.
  * Generated sites never load this file; they keep their own per-direction tokens.
  */
@@ -8,14 +8,17 @@
 @font-face{font-family:"Figtree";src:url("fonts/figtree.woff2") format("woff2");font-weight:300 900;font-display:swap}
 
 :root{
-  --canvas:#f5f3ef;--surface:#fff;--surface-2:#ece9e3;
-  --ink:#151412;--ink-2:#4d4a44;--ink-3:#6b665e;
-  --line:#dcd8d0;--line-2:#c9c4ba;--line-field:#8a857c;
-  --accent:#156b4a;--accent-ink:#fff;--accent-soft:#e3efe8;
+  /* "Arctic & teal" (owner decision sb-ui-palette, option 5). ink-3 and line-field are a step darker than the
+     prototype's so hints keep 4.5:1 on surface-2 and field borders 3:1 on every background (test/ui-contrast.test.ts). */
+  --canvas:#eef3f4;--surface:#fff;--surface-2:#dfe8ea;
+  --ink:#0f1f22;--ink-2:#3d5257;--ink-3:#53676c;
+  --line:#cfdbde;--line-2:#b4c5c9;--line-field:#6e8489;
+  /* accent fills (buttons, marks, selected borders); accent-text is the accent as text, 4.5:1 on accent-soft too. */
+  --accent:#0d7a84;--accent-hover:#0a636b;--accent-ink:#fff;--accent-text:#0d6a73;--accent-soft:#dbeef0;
   --warn:#9a5b00;--warn-soft:#fbefd9;--danger:#b3261e;--danger-soft:#f9e3e1;
   --ph:#fff1a8;
   --r-1:4px;--r-2:8px;--r-3:12px;
-  --shadow-float:0 8px 24px rgb(20 20 18/.10),0 1px 2px rgb(20 20 18/.08);
+  --shadow-float:0 8px 24px rgb(15 31 34/.10),0 1px 2px rgb(15 31 34/.08);
   --font-display:"Bricolage Grotesque","Inter Tight",system-ui,sans-serif;
   --font-ui:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
   --ease:cubic-bezier(.2,.7,.2,1);
@@ -46,7 +49,7 @@ mark.ph{background:var(--ph);color:var(--ink);padding:0 4px;border-radius:2px}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;margin:0;border:1px solid var(--line-2);border-radius:var(--r-2);background:var(--surface);color:var(--ink);font:600 15px/1.1 var(--font-ui);text-decoration:none;white-space:nowrap;cursor:pointer;transition:background-color .15s var(--ease),border-color .15s var(--ease)}
 .btn:hover{background:var(--surface-2)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.btn.primary:hover{background:#115a3e;border-color:#115a3e}
+.btn.primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
 .btn.quiet{background:transparent;border-color:transparent}
 .btn.quiet:hover{background:var(--surface-2)}
 .btn.danger{color:var(--danger)}
@@ -63,7 +66,7 @@ mark.ph{background:var(--ph);color:var(--ink);padding:0 4px;border-radius:2px}
 label{display:block;font-weight:600;font-size:14px;margin:14px 0 6px}
 input[type=text],input[type=password],input[type=number],input[type=url],input[type=email],input[type=tel],input:not([type]),textarea,select{display:block;width:100%;min-height:44px;margin:0;padding:9px 12px;border:1px solid var(--line-field);border-radius:var(--r-2);background:var(--surface);color:var(--ink);font:400 16px/1.4 var(--font-ui)}
 textarea{min-height:96px;line-height:1.5;resize:vertical}
-select{padding-right:32px;appearance:none;background:var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23151412' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right 12px center}
+select{padding-right:32px;appearance:none;background:var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%230f1f22' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right 12px center}
 input[type=color]{width:44px;height:36px;padding:2px;border:1px solid var(--line-field);border-radius:var(--r-1);background:var(--surface);cursor:pointer}
 input[type=checkbox]{width:18px;height:18px;margin:0;accent-color:var(--accent);flex:none}
 label:has(> input[type=checkbox]){display:flex;gap:10px;align-items:center;font-weight:500;font-size:15px;min-height:44px;margin:4px 0}
@@ -84,7 +87,7 @@ legend{padding:0 4px;font-weight:600;font-size:13px;color:var(--ink-2)}
 /* ---------- Status ---------- */
 .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:var(--r-1);background:var(--surface-2);color:var(--ink-2);font-size:13px;font-weight:600;line-height:1.3;white-space:nowrap}
 .pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
-.pill.live{background:var(--accent-soft);color:var(--accent)}
+.pill.live{background:var(--accent-soft);color:var(--accent-text)}
 .pill.busy{background:var(--warn-soft);color:var(--warn)}
 .pill.err{background:var(--danger-soft);color:var(--danger)}
 .pill.plain::before{display:none}
@@ -142,7 +145,7 @@ legend{padding:0 4px;font-weight:600;font-size:13px;color:var(--ink-2)}
 .checker .cf-turnstile{margin-top:16px;min-height:65px}
 .findings{list-style:none;margin:20px 0;padding:0;border-top:1px solid var(--line)}
 .findings li{display:grid;gap:2px;padding:14px 0;border-bottom:1px solid var(--line)}
-.findings .mark{justify-self:start;font-size:13px;font-weight:600;padding:2px 8px;border-radius:var(--r-1);background:var(--accent-soft);color:var(--accent)}
+.findings .mark{justify-self:start;font-size:13px;font-weight:600;padding:2px 8px;border-radius:var(--r-1);background:var(--accent-soft);color:var(--accent-text)}
 .findings .fix .mark{background:var(--warn-soft);color:var(--warn)}
 .findings strong{font-size:17px;margin-top:4px}
 .findings li>span:last-child{color:var(--ink-2)}
@@ -275,7 +278,7 @@ legend{padding:0 4px;font-weight:600;font-size:13px;color:var(--ink-2)}
 .site-card .body .preview-badge{position:static}
 .ed .frame.skeleton{display:grid;place-items:center;padding:24px;text-align:center;color:var(--ink-3);font-size:15px}
 /* Live preview while generating: a skeleton page that fills in with the run's real name, colours and pictures. */
-.ed .frame.live{--sk-bg:#fff;--sk-surface:#f3f2ef;--sk-text:#2a2825;--sk-muted:#6b665e;--sk-primary:#b9b4ab;--sk-line:#e4e1db;
+.ed .frame.live{--sk-bg:#fff;--sk-surface:#f0f4f5;--sk-text:#1f2d30;--sk-muted:#53676c;--sk-primary:#b4c5c9;--sk-line:#dfe8ea;
   position:relative;display:flex;flex-direction:column;gap:0;padding:0;text-align:left;place-items:initial;overflow:auto;container-type:inline-size;
   background:var(--sk-bg);color:var(--sk-text);transition:background .6s var(--ease),color .6s var(--ease)}
 .live .sk-bar{display:block;height:12px;margin:0 0 8px;border-radius:4px;
@@ -363,7 +366,7 @@ details.more>summary{padding:12px 0;font-weight:600;cursor:pointer}
   .ed[data-sheet=closed] .canvas{padding-bottom:var(--sheet-closed)}
   .ed .stage{padding:12px}
   .ed .stage.badged{padding-top:34px}
-  .ed .panel{position:fixed;left:0;right:0;bottom:0;z-index:15;height:var(--sheet-peek);overflow:auto;overscroll-behavior:contain;border-right:0;border-top:1px solid var(--line-2);border-radius:var(--r-3) var(--r-3) 0 0;box-shadow:0 -8px 24px rgb(20 20 18/.12);transition:height .2s ease-out}
+  .ed .panel{position:fixed;left:0;right:0;bottom:0;z-index:15;height:var(--sheet-peek);overflow:auto;overscroll-behavior:contain;border-right:0;border-top:1px solid var(--line-2);border-radius:var(--r-3) var(--r-3) 0 0;box-shadow:0 -8px 24px rgb(15 31 34/.12);transition:height .2s ease-out}
   /* Full stops under the app bar, so undo and publish stay in reach (--top-h is measured by the editor). */
   .ed .panel[data-sheet=full]{height:calc(100dvh - var(--top-h,0px))}
   /* Closed: the handle and the first line of the panel ("Tapnite karkoli …"), nothing to scroll. */
@@ -453,12 +456,12 @@ details.more>summary{padding:12px 0;font-weight:600;cursor:pointer}
 .domain-stages{display:flex;flex-wrap:wrap;gap:4px 14px;margin:0 0 8px;padding:0;list-style:none;font-size:14px}
 .domain-stages li{display:flex;align-items:center;gap:6px;color:var(--ink-3)}
 .domain-stages li::before{content:"";width:10px;height:10px;border-radius:50%;border:1.5px solid currentColor}
-.domain-stages li[data-state=done]{color:var(--accent)}
+.domain-stages li[data-state=done]{color:var(--accent-text)}
 .domain-stages li[data-state=done]::before{background:currentColor}
 .domain-stages li[data-state=current]{color:var(--ink);font-weight:600}
 .domain-stages li[data-state=current]::before{border-color:var(--warn);background:var(--warn-soft)}
 /* Objavi while something blocks publishing: outlined instead of faded, so its text keeps 4.5:1 (axe color-contrast). */
-.btn.primary.blocked{background:var(--surface);border-color:var(--accent);color:var(--accent)}
+.btn.primary.blocked{background:var(--surface);border-color:var(--accent);color:var(--accent-text)}
 .btn.primary.blocked:hover{background:var(--accent-soft);border-color:var(--accent)}
 .flash{outline:3px solid var(--warn);outline-offset:4px;border-radius:var(--r-1);transition:outline-color .3s}
 /* Layout thumbnails of the selected section ("Postavitev"): real content, drawn at desktop width and scaled. */
@@ -467,7 +470,7 @@ details.more>summary{padding:12px 0;font-weight:600;cursor:pointer}
 .variant{display:grid;gap:6px;padding:6px;border:1px solid var(--line);border-radius:var(--r-2);background:var(--surface);color:var(--ink);font:500 14px/1.3 var(--font-ui);text-align:left;cursor:pointer}
 .variant:hover{border-color:var(--line-field)}
 .variant[aria-pressed=true]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
-.variant[aria-pressed=true] .name::after{content:" · izbrana";color:var(--accent);font-weight:600}
+.variant[aria-pressed=true] .name::after{content:" · izbrana";color:var(--accent-text);font-weight:600}
 .variant .thumb{position:relative;display:block;height:120px;overflow:hidden;border-radius:var(--r-1);background:#fff;outline:1px solid var(--line)}
 .variant iframe{position:absolute;top:0;left:0;width:1024px;height:800px;border:0;transform-origin:0 0;pointer-events:none}
 
