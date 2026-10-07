@@ -10,11 +10,13 @@
  *   (they were prompt-only rules).
  * - heroEyebrow: never the street address or the town alone; per site the eyebrow may go altogether.
  * - preferPhotoHero: with a hero-suitable picture, a family's photo hero over a type-only or drawn one.
+ * - pickCentred: alignment per section: per page at most one section centred (a short stack or a symmetric grid), or none.
  */
 import {
   FAMILIES,
   NEW_HEADER_FAMILIES,
   SIGNATURE_PHOTO_VARIANTS,
+  canCentre,
   canOverlay,
   hexToHsl,
   hslToHex,
@@ -183,6 +185,24 @@ export function preferPhotoHero(dir: Direction, hero: string, heroSuitable: bool
   return seededOrder(family.heroes.filter(isPhotoHero), seed, "photo-hero")[0] ?? hero;
 }
 
+/**
+ * Alignment per section: on each home or standard page, below its first section, at most one section is centred: one
+ * that may be (canCentre: a short stack or a symmetric grid), in the seed's order; per seed a site centres none at all
+ * (every section starts at the left edge, as before). Returns the centred section ids (at most one per page).
+ */
+export function pickCentred(pages: readonly Page[], o: { seed: number; dir: Direction }): string[] {
+  if (seededOrder(["centre", "start"], o.seed, "align")[0] === "start") return [];
+  const motif = o.dir.template?.motif;
+  const ids: string[] = [];
+  for (const p of pages) {
+    if (p.kind !== "home" && p.kind !== "standard") continue;
+    const candidates = p.sections.slice(1).filter((s) => canCentre(s, motif));
+    const pick = seededOrder(candidates.map((s) => s.id), o.seed, `centre-${p.id}`)[0];
+    if (pick) ids.push(pick);
+  }
+  return ids;
+}
+
 export interface AppliedSkeleton {
   spec: SiteSpec;
   skeleton: Skeleton;
@@ -217,7 +237,9 @@ export function applySkeleton(spec: SiteSpec, o: { seed: number; dir: Direction;
     }
     return sections === p.sections ? p : { ...p, sections };
   });
-  return { spec: { ...spec, design: { ...spec.design, skeleton }, pages }, skeleton, changes };
+  const centred = pickCentred(pages, o);
+  const own: Skeleton = centred.length ? { ...skeleton, centred } : skeleton;
+  return { spec: { ...spec, design: { ...spec.design, skeleton: own }, pages }, skeleton: own, changes };
 }
 
 /** The content step's extra lines with the skeleton on (none with it off, so the prompt is unchanged). */

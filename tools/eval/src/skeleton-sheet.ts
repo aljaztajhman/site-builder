@@ -4,7 +4,7 @@
  * The skeleton families (spec v15, packages/spec/src/skeleton.ts; docs/plans/variety-engine.md Step 4) rendered on three
  * goldens: every header family once per golden, the other axes (phone actions, footer family and tone, width, cards,
  * buttons, dividers, photo ratio) rotating through their values so each one shows on every golden, plus the trade
- * template whose hero is the phone (the plate) under each phone action. Each look at 360 and 1280 px with the page checks
+ * template whose hero is the phone (the plate) under each phone action; every other look centres one section per page. Each look at 360 and 1280 px with the page checks
  * the eval uses (a valid spec, no horizontal scroll, banned patterns, axe WCAG 2.2 A/AA, one h1, 44 px targets, call and
  * directions in one tap on the phone) and the new one: never more than one call button on a screen. Writes
  * eval/look/skeleton-<golden>.jpg (one row per look: phone first screen, phone footer, desktop first screen, desktop
@@ -29,6 +29,7 @@ import {
   PHONE_ACTIONS,
   PHOTO_RATIOS,
   SECTION_WIDTHS,
+  canCentre,
   enforceDesign,
   migrateSpec,
   validateSite,
@@ -79,7 +80,21 @@ export function rotation(i: number, g: number): Skeleton {
   };
 }
 
-const short = (s: Skeleton) => `${s.header} · ${s.actions} · ${s.footer}/${s.footerTone} · ${s.width} · ${s.cards} · ${s.buttons} · ${s.dividers} · ${s.photoRatio}`;
+const short = (s: Skeleton) =>
+  `${s.header} · ${s.actions} · ${s.footer}/${s.footerTone} · ${s.width} · ${s.cards} · ${s.buttons} · ${s.dividers} · ${s.photoRatio}${s.centred?.length ? ` · centred ${s.centred.length}` : ""}`;
+
+/**
+ * Alignment per section on look `i`: every other look centres one section per page (below the first), a different one
+ * each time, among those that may be (canCentre); the others start every section at the left edge.
+ */
+export function centredFor(spec: SiteSpec, i: number): string[] {
+  if (i % 2 === 1) return [];
+  return spec.pages.flatMap((p) => {
+    const motif = DIRECTIONS.find((d) => d.id === spec.design.direction)?.template?.motif;
+    const candidates = p.kind === "home" || p.kind === "standard" ? p.sections.slice(1).filter((s) => canCentre(s, motif)) : [];
+    return candidates.length ? [candidates[(i / 2) % candidates.length]!.id] : [];
+  });
+}
 
 /** Every look of the sheet (or of the goldens named). */
 export async function skeletonVariants(only?: string[]): Promise<SkeletonVariant[]> {
@@ -88,8 +103,9 @@ export async function skeletonVariants(only?: string[]): Promise<SkeletonVariant
     if (only && !only.includes(id)) continue;
     const base = await golden(id);
     for (const i of HEADER_FAMILIES.keys()) {
-      const skeleton = rotation(i, g);
       const spec = structuredClone(base);
+      const centred = centredFor(spec, i);
+      const skeleton: Skeleton = { ...rotation(i, g), ...(centred.length ? { centred } : {}) };
       spec.design = { ...spec.design, skeleton };
       out.push({ site: id, label: short(skeleton), skeleton, spec, fixtureId: id });
     }

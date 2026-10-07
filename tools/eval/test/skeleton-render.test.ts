@@ -37,6 +37,8 @@ describe("skeleton families at 360 and 1280 px", () => {
       for (const [axis, values] of [["width", SECTION_WIDTHS], ["cards", CARD_STYLES], ["buttons", BUTTON_STYLES], ["dividers", DIVIDERS], ["photoRatio", PHOTO_RATIOS]] as const) {
         expect(new Set(on.map((s) => s[axis])), `${g} ${axis}`).toEqual(new Set(values));
       }
+      // Alignment per section: looks with one centred section per page and looks without.
+      expect(on.some((s) => s.centred?.length) && on.some((s) => !s.centred)).toBe(true);
     }
   });
 

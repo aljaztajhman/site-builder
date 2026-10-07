@@ -514,3 +514,29 @@ body[data-ratio="portrait"] .image-text > .image-text__media {
     aspect-ratio: 4 / 5;
   }
 }
+
+/* ---------- One centred section per page (design.skeleton.centred, centredOn): every other section starts left ---------- */
+/* A short stack (cta band, a short narrow text, a short story without a photo) centred whole; a symmetric grid (cards,
+   products, horizontal steps, a gallery, a team grid) under a centred head. */
+.s[data-align="centre"] :is(.section-head, .text-block, .cta, .cta__text, .about__text, .about__owner) {
+  justify-items: center;
+  margin-inline: auto;
+  text-align: center;
+}
+.s[data-align="centre"] :is(.cta, .text-block) {
+  max-width: 48rem;
+}
+.s[data-align="centre"] :is(.prose, .cta__text) > p,
+.s[data-align="centre"] .cta__lead {
+  margin-inline: auto;
+}
+.s[data-align="centre"] .actions,
+.s[data-align="centre"] .actions .btn[data-action="call"] {
+  justify-content: center;
+}
+@media (min-width: 64rem) {
+  .s-cta--band[data-align="centre"] .cta {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+}

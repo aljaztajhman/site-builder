@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { DIRECTIONS, Design, FOOTER_FAMILIES, HEADER_FAMILIES, PHONE_ACTIONS, direction as directionById, hexToHsl, migrateSpec, validateSite, type SiteSpec, type Skeleton } from "@sb/spec";
+import { DIRECTIONS, Design, canCentre, centredOn, FOOTER_FAMILIES, HEADER_FAMILIES, PHONE_ACTIONS, direction as directionById, hexToHsl, migrateSpec, validateSite, type SiteSpec, type Skeleton } from "@sb/spec";
 import { loadConfig } from "@sb/config";
 import {
   ModelClient,
@@ -12,6 +12,7 @@ import {
   holdPrimary,
   holdRhythm,
   isAddressEyebrow,
+  pickCentred,
   pickSkeleton,
   preferPhotoHero,
   siteSeed,
@@ -170,6 +171,42 @@ describe("applySkeleton", () => {
     const farm = golden("kmetija-grabnar");
     const r = applySkeleton(farm, { seed: 5, dir: directionById(farm.design.direction), neighbours: [] });
     expect(r.spec.pages.map((p) => p.sections.map((s) => s.tone))).toEqual(farm.pages.map((p) => p.sections.map((s) => s.tone)));
+  });
+});
+
+describe("pickCentred (alignment per section)", () => {
+  it("at most one centred section per page, never the first, only one that may be centred; per seed none; deterministic", () => {
+    let withCentre = 0;
+    let without = 0;
+    for (const id of ["avtoservis-mrak", "pekarna-kvas", "kmetija-grabnar", "instalacije-rebernik", "zobozdravstvo-lebar"]) {
+      const spec = golden(id);
+      const dir = directionById(spec.design.direction);
+      for (const [n, site] of ids.entries()) {
+        const seed = siteSeed(`${site}-${id}`);
+        const centred = pickCentred(spec.pages, { seed, dir });
+        expect(pickCentred(spec.pages, { seed, dir })).toEqual(centred);
+        if (centred.length) withCentre++;
+        else without++;
+        for (const p of spec.pages) {
+          const on = p.sections.filter((s) => centred.includes(s.id));
+          expect(on.length, `${id} ${n} ${p.id}`).toBeLessThanOrEqual(1);
+          if (on[0]) {
+            expect(canCentre(on[0], dir.template?.motif)).toBe(true);
+            expect(p.sections[0]!.id).not.toBe(on[0].id);
+            expect(["home", "standard"]).toContain(p.kind);
+          }
+        }
+        // applySkeleton writes them into the skeleton, the renderer centres exactly them, and the spec stays valid.
+        const r = applySkeleton(spec, { seed, dir, neighbours: [] });
+        expect(r.skeleton.centred ?? []).toEqual(centred);
+        expect(r.spec.pages.flatMap((p) => [...centredOn(r.skeleton, p.sections)])).toEqual(centred);
+        const v = validateSite(r.spec);
+        expect(v.ok ? [] : v.issues, id).toEqual([]);
+      }
+    }
+    // Both choices occur across sites: a centred section is allowed, not required.
+    expect(withCentre).toBeGreaterThan(10);
+    expect(without).toBeGreaterThan(10);
   });
 });
 

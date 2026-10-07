@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { DIRECTIONS, FAMILIES, HEADER_FAMILIES, MIGRATIONS, enforceDesign, migrateSpec, skeletonOfChrome, type SiteSpec, type Skeleton } from "@sb/spec";
+import { CENTRED_TEXT, DIRECTIONS, FAMILIES, HEADER_FAMILIES, MIGRATIONS, SiteSpec, canCentre, enforceDesign, migrateSpec, skeletonOfChrome, type Skeleton } from "@sb/spec";
 import { minifyCss, renderPage } from "../src/index.ts";
 
 /** The skeleton (spec v15, design.skeleton) in the page shell, header, footer and phone actions; no browser. */
@@ -128,16 +128,78 @@ describe("the skeleton in the page", () => {
   });
 });
 
+describe("alignment per section: one centred section per page", () => {
+  const sectionTag = (html: string, id: string) => html.match(new RegExp(`<section id="${id}"[^>]*>`))?.[0] ?? "";
+  it("centres the listed section that may be centred, the first on the page only, and nothing without a skeleton", () => {
+    const base = golden("avtoservis-mrak");
+    const page = base.pages[0]!;
+    const about = page.sections.find((s) => s.type === "about")!; // text-only, two short paragraphs
+    const cards = page.sections.find((s) => s.type === "services-cards")!; // a symmetric grid
+    const contact = page.sections.find((s) => s.type === "contact")!; // split-map: never centred
+    expect(canCentre(about) && canCentre(cards) && !canCentre(contact)).toBe(true);
+    const html = home(withSkeleton(base, { centred: [about.id, cards.id, contact.id] }));
+    // services-cards comes first on the page, so it is the one; the rest start at the left edge.
+    expect(sectionTag(html, cards.id)).toContain('data-align="centre"');
+    expect(html.match(/data-align=/g)).toHaveLength(1);
+    expect(home(withSkeleton(base, { centred: [contact.id] }))).not.toContain("data-align");
+    expect(home(base)).not.toContain("data-align");
+    expect(home(withSkeleton(base, {}))).not.toContain("data-align");
+  });
+  it("never centres long running text", () => {
+    const base = golden("avtoservis-mrak");
+    const about = base.pages[0]!.sections.find((s) => s.type === "about")!;
+    const long = { ...about, props: { ...about.props, paragraphs: ["x".repeat(CENTRED_TEXT.chars + 1)] } } as typeof about;
+    const three = { ...about, props: { ...about.props, paragraphs: ["a", "b", "c"] } } as typeof about;
+    expect(canCentre(long)).toBe(false);
+    expect(canCentre(three)).toBe(false);
+    expect(canCentre({ ...about, variant: "image-side" })).toBe(false);
+  });
+  it("leaves a narrow text that its trade motif lays out itself (label, bend) as the motif draws it", () => {
+    const shop = golden("trgovina-oljka-in-sol");
+    const motif = DIRECTIONS.find((d) => d.id === shop.design.direction)!.template!.motif;
+    expect(motif).toBe("label");
+    const text = shop.pages[0]!.sections.find((s) => s.type === "text")!;
+    expect(canCentre(text)).toBe(true);
+    expect(canCentre(text, motif)).toBe(false);
+    expect(home(withSkeleton(shop, { centred: [text.id] }))).not.toContain("data-align");
+  });
+  it("the skeleton's centred ids are checked: section ids, a bounded list", () => {
+    const base = golden("avtoservis-mrak");
+    const ok = withSkeleton(base, { centred: [base.pages[0]!.sections[1]!.id] });
+    expect(SiteSpec.safeParse(ok).success).toBe(true);
+    expect(SiteSpec.safeParse(withSkeleton(base, { centred: ["not an id"] })).success).toBe(false);
+    expect(SiteSpec.safeParse(withSkeleton(base, { centred: Array.from({ length: 17 }, (_, i) => `s_x${i}`) })).success).toBe(false);
+  });
+});
+
 describe("skeleton.css", () => {
   const css = readFileSync(new URL("../../components/styles/skeleton.css", import.meta.url), "utf8");
+  // Split selector lists on commas outside parentheses (:is(a, b) is one selector).
+  const split = (list: string) => {
+    const out: string[] = [];
+    let depth = 0;
+    let start = 0;
+    for (let i = 0; i < list.length; i++) {
+      if (list[i] === "(") depth++;
+      else if (list[i] === ")") depth--;
+      else if (list[i] === "," && depth === 0) {
+        out.push(list.slice(start, i));
+        start = i + 1;
+      }
+    }
+    return [...out, list.slice(start)];
+  };
   it("contains no banned patterns and uses tokens only", () => {
     expect(css).not.toMatch(/gradient\(|backdrop-filter|font-style:\s*italic|monospace|border-radius:\s*(9{3,}|50%)/);
     for (const m of css.matchAll(/box-shadow:\s*([^;]+);/g)) expect(["var(--shadow)", "none"]).toContain(m[1]);
     for (const m of css.matchAll(/#[0-9a-f]{3,6}\b|rgb\(/gi)) expect.fail(`raw colour ${m[0]}`);
     // Button radii stay under a pill: at most 12 px on a 48 px button.
     expect(css).toMatch(/border-radius:\s*min\(12px/);
-    // Only the centred header's wordmark is centred text.
-    expect([...css.matchAll(/text-align:\s*center/g)]).toHaveLength(1);
+    // Centred text only in the centred header's wordmark and the page's one centred section (data-align="centre").
+    const centred = [...minifyCss(css).matchAll(/([^{}]+)\{[^}]*text-align:\s*center/g)].map((m) => m[1]!.trim());
+    expect(centred).toHaveLength(2);
+    expect(centred[0]).toBe(".site-header--centred .site-header__brand");
+    for (const sel of split(centred[1]!)) expect(sel, sel).toContain('[data-align="centre"]');
   });
   it("keys every rule on markup only a site with a skeleton has, so a site without one renders as before", () => {
     const preludes: string[] = [];
@@ -149,22 +211,7 @@ describe("skeleton.css", () => {
       } else if (ch === "}") buf = "";
       else buf += ch;
     }
-    const own = /data-skeleton|data-actions|data-width|data-cards|data-buttons|data-dividers|data-ratio|data-after-hero|nav-toggle--(word|icon)|site-header--(centred|phone|overlay|word|compact|sticky|carries-call)|site-header__(actions|phone|directions)|call-float|has-call-float|site-footer--tone-|site-footer__(wordmark|visit|directions)/;
-    // Split selector lists on commas outside parentheses (:is(a, b) is one selector).
-    const split = (list: string) => {
-      const out: string[] = [];
-      let depth = 0;
-      let start = 0;
-      for (let i = 0; i < list.length; i++) {
-        if (list[i] === "(") depth++;
-        else if (list[i] === ")") depth--;
-        else if (list[i] === "," && depth === 0) {
-          out.push(list.slice(start, i));
-          start = i + 1;
-        }
-      }
-      return [...out, list.slice(start)];
-    };
+    const own = /data-skeleton|data-align|data-actions|data-width|data-cards|data-buttons|data-dividers|data-ratio|data-after-hero|nav-toggle--(word|icon)|site-header--(centred|phone|overlay|word|compact|sticky|carries-call)|site-header__(actions|phone|directions)|call-float|has-call-float|site-footer--tone-|site-footer__(wordmark|visit|directions)/;
     const selectors = preludes.filter((p) => !p.startsWith("@")).flatMap(split);
     expect(selectors.length).toBeGreaterThan(50);
     for (const sel of selectors) expect(sel, sel).toMatch(own);

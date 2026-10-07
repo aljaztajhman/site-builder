@@ -242,7 +242,7 @@ export async function callButtonsPerScreen(page: Page): Promise<CallButtons> {
       if (opaque(cs.backgroundColor)) return true;
       return ["top", "right", "bottom", "left"].every((s) => cs.getPropertyValue("border-" + s + "-style") !== "none" && parseFloat(cs.getPropertyValue("border-" + s + "-width")) >= 1 && opaque(cs.getPropertyValue("border-" + s + "-color")));
     };
-    const describe = (el) => el.tagName.toLowerCase() + (el.className ? "." + String(el.className).trim().split(/\\s+/).slice(0, 2).join(".") : "") + ' "' + (el.textContent || "").trim().replace(/\\s+/g, " ").slice(0, 24) + '"';
+    const describe = (el) => el.tagName.toLowerCase() + (el.className ? "." + String(el.className).trim().split(/\\s+/).slice(0, 3).join(".") : "") + ' "' + (el.textContent || "").trim().replace(/\\s+/g, " ").slice(0, 24) + '"';
     const settle = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(r, 30))));
     const height = document.documentElement.scrollHeight;
     let best = { max: 0, at: 0, buttons: [] };

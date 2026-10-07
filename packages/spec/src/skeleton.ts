@@ -14,8 +14,12 @@
  *   tone comes from the design, not forced dark under a trade motif.
  * - section level: container width, card style, button style (all within the banned list: no pills, no shadows),
  *   dividers between sections and the ratio of content photos.
+ * - alignment per section: every section starts at the left edge, except at most one per page that is centred
+ *   (`centred`, section ids): a short stack (a call to action band, a short narrow text, a short story without a photo)
+ *   centred whole, or a symmetric grid (cards, products, horizontal steps, a gallery, a team grid) under a centred head. Long running text is never centred (canCentre); the renderer keeps the first one per page that may be.
  */
 import { z } from "zod";
+import { SectionId } from "./sections/define.ts";
 
 export const HEADER_FAMILIES = ["bar", "split-cta", "stacked", "centred", "phone", "overlay", "word", "compact"] as const;
 export type HeaderFamily = (typeof HEADER_FAMILIES)[number];
@@ -46,8 +50,53 @@ export const Skeleton = z.strictObject({
   buttons: z.enum(BUTTON_STYLES),
   dividers: z.enum(DIVIDERS),
   photoRatio: z.enum(PHOTO_RATIOS),
+  /** The sections centred on their axis, at most one per page (see the module comment); absent: none. */
+  centred: z.array(SectionId).max(16).optional(),
 });
 export type Skeleton = z.infer<typeof Skeleton>;
+
+/** Short stacks centred whole (heading, text and buttons). */
+export const CENTRED_STACKS: readonly string[] = ["cta:band", "text:narrow", "about:text-only"];
+/** Symmetric grids whose head (eyebrow, title, intro) is centred over them. */
+export const CENTRED_HEADS: readonly string[] = [
+  "services-cards:grid",
+  "services-cards:compact",
+  "products:grid",
+  "steps:horizontal",
+  "gallery:grid",
+  "gallery:mosaic",
+  "team:grid",
+];
+/** Trade motifs that set the narrow text as their own two-part block (motifs.css): it is not centred there. */
+export const OWN_NARROW_TEXT: readonly string[] = ["label", "bend"];
+/** A centred stack holds at most this many paragraphs, each at most this long (characters): centred text stays short. */
+export const CENTRED_TEXT = { paragraphs: 2, chars: 280 } as const;
+
+/**
+ * Whether a section may be centred: a short stack or a symmetric grid (never long running text, never a narrow text a
+ * trade motif lays out itself). `motif`: the site's trade template motif, if any.
+ */
+export function canCentre(section: { type: string; variant: string; props: unknown }, motif?: string): boolean {
+  const key = `${section.type}:${section.variant}`;
+  if (CENTRED_HEADS.includes(key)) return true;
+  if (!CENTRED_STACKS.includes(key)) return false;
+  if (key === "text:narrow" && motif !== undefined && OWN_NARROW_TEXT.includes(motif)) return false;
+  const paragraphs = (section.props as { paragraphs?: unknown }).paragraphs;
+  if (paragraphs === undefined) return true;
+  return Array.isArray(paragraphs) && paragraphs.length <= CENTRED_TEXT.paragraphs && paragraphs.every((p) => typeof p === "string" && p.length <= CENTRED_TEXT.chars);
+}
+
+/** The ids of a page's sections that render centred: the first one on the page that is listed and may be centred, or none. */
+export function centredOn(
+  skeleton: Skeleton | undefined,
+  sections: readonly { id: string; type: string; variant: string; props: unknown }[],
+  motif?: string,
+): ReadonlySet<string> {
+  const ids = skeleton?.centred;
+  if (!ids?.length) return new Set();
+  const first = sections.find((s) => ids.includes(s.id) && canCentre(s, motif));
+  return new Set(first ? [first.id] : []);
+}
 
 /**
  * The skeleton that renders a site the way it rendered before v15, from its chrome (header and footer variant map one

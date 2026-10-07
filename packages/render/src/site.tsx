@@ -6,6 +6,7 @@ import {
   EntryArticle,
   Footer,
   Header,
+  CentredSections,
   LandmarkSuffixes,
   MobileActionBar,
   islandsFor,
@@ -24,6 +25,7 @@ import type { ReactNode } from "react";
 import {
   COLLECTION_KINDS,
   DIRECTIONS,
+  centredOn,
   collectionEntries,
   entrySlugs,
   entryPages,
@@ -329,6 +331,8 @@ function renderDocument(spec: SiteSpec, localized: SiteSpec, opts: RenderOptions
         "data-ratio": skeleton.photoRatio,
       }
     : {};
+  // The page's one centred section (design.skeleton.centred), if any; none without a skeleton.
+  const centred = centredOn(skeleton, doc.sections, motif);
   const renderBody = (suffixes: ReadonlyMap<string, string>) => renderToStaticMarkup(
     <body data-imagery={design.imagery} data-motif={motif} className={bodyClass} {...skeletonAttrs}>
       <a className="skip-link" href="#main">
@@ -336,7 +340,9 @@ function renderDocument(spec: SiteSpec, localized: SiteSpec, opts: RenderOptions
       </a>
       <Header ctx={ctx} />
       <main id="main" tabIndex={-1}>
-        <LandmarkSuffixes.Provider value={suffixes}>{doc.main(ctx)}</LandmarkSuffixes.Provider>
+        <LandmarkSuffixes.Provider value={suffixes}>
+          <CentredSections.Provider value={centred}>{doc.main(ctx)}</CentredSections.Provider>
+        </LandmarkSuffixes.Provider>
       </main>
       <Footer ctx={ctx} />
       {fixed === "bar" && <MobileActionBar ctx={ctx} afterHero={afterHero} reveal={skeleton !== undefined} waitCall={waitCall} />}
