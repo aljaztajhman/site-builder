@@ -17,31 +17,36 @@
 @font-face{font-family:"Karla";src:url("../../packages/render/assets/fonts/karla.woff2") format("woff2");font-weight:200 800;font-display:swap}
 @font-face{font-family:"Source Sans 3";src:url("../../packages/render/assets/fonts/source-sans-3.woff2") format("woff2");font-weight:200 900;font-display:swap}
 
-/* ---------- Proposed product tokens (this page uses them on itself) ---------- */
+/* ---------- Product tokens (this page uses them on itself; apps/web/src/ui/app.css is the source) ---------- */
+/* "Arctic & teal", owner decision sb-ui-palette (2026-10-07), replacing the warm paper canvas and deep green. */
 :root{
-  --canvas:#f5f3ef;          /* warm neutral page, not white, not cream-yellow */
+  --canvas:#eef3f4;          /* cool blue-white page, not white, not paper */
   --surface:#ffffff;
-  --surface-2:#ecE9e3;
-  --ink:#151412;
-  --ink-2:#4d4a44;
-  --ink-3:#8a857c;
-  --line:#dcd8d0;
-  --line-2:#c9c4ba;
-  --accent:#156b4a;          /* default: deep green. Switchable below. */
+  --surface-2:#dfe8ea;
+  --ink:#0f1f22;
+  --ink-2:#3d5257;
+  --ink-3:#53676c;
+  --line:#cfdbde;
+  --line-2:#b4c5c9;
+  --line-field:#6e8489;
+  --accent:#0d7a84;          /* default: deep teal. Switchable below. */
+  --accent-hover:#0a636b;
   --accent-ink:#ffffff;
-  --accent-soft:#e3efe8;
-  --ok:#156b4a;--warn:#9a5b00;--warn-soft:#fbefd9;--danger:#b3261e;--danger-soft:#f9e3e1;
+  --accent-text:#0d6a73;
+  --accent-soft:#dbeef0;
+  --ok:#0d7a84;--warn:#9a5b00;--warn-soft:#fbefd9;--danger:#b3261e;--danger-soft:#f9e3e1;
   --ph:#fff1a8;              /* placeholder mark */
   --r-1:4px;--r-2:8px;--r-3:12px;
-  --shadow-float:0 8px 24px rgb(20 20 18 / .10), 0 1px 2px rgb(20 20 18 / .08); /* the only shadow: floating things */
+  --shadow-float:0 8px 24px rgb(15 31 34 / .10), 0 1px 2px rgb(15 31 34 / .08); /* the only shadow: floating things */
   --font-display:"Bricolage Grotesque","Inter Tight",system-ui,sans-serif;
   --font-ui:"Figtree","Inter",system-ui,sans-serif;
   --ease:cubic-bezier(.2,.7,.2,1);
   color-scheme:light;
 }
+:root[data-accent="green"]{--accent:#156b4a;--accent-soft:#e3efe8}
 :root[data-accent="orange"]{--accent:#c8471b;--accent-soft:#f8e4dc}
 :root[data-accent="blue"]{--accent:#1f4fd8;--accent-soft:#e2e8fb}
-:root[data-accent="ink"]{--accent:#151412;--accent-soft:#e6e3dd}
+:root[data-accent="ink"]{--accent:#0f1f22;--accent-soft:#dfe8ea}
 
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -261,10 +266,11 @@ mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:var(--ink)}
     <span class="sp"></span>
     <div class="accents" role="group" aria-label="Try an accent colour">
       <span>Accent</span>
-      <button data-accent="green" aria-pressed="true" style="background:#156b4a" title="Deep green"></button>
+      <button data-accent="teal" aria-pressed="true" style="background:#0d7a84" title="Deep teal"></button>
+      <button data-accent="green" aria-pressed="false" style="background:#156b4a" title="Deep green (before sb-ui-palette)"></button>
       <button data-accent="orange" aria-pressed="false" style="background:#c8471b" title="Brick orange"></button>
       <button data-accent="blue" aria-pressed="false" style="background:#1f4fd8" title="Cobalt"></button>
-      <button data-accent="ink" aria-pressed="false" style="background:#151412" title="Ink only"></button>
+      <button data-accent="ink" aria-pressed="false" style="background:#0f1f22" title="Ink only"></button>
     </div>
   </div>
 </header>
@@ -388,7 +394,7 @@ mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:var(--ink)}
     <p class="eyebrow">03</p>
     <h2>Principles</h2>
     <div class="grid g3" style="margin-top:20px">
-      <div class="card"><h3>1. Quiet chrome, loud content</h3><p>The dashboard's job is to show the client's site. UI is ink on a warm canvas, hairline borders, no cards inside cards. The preview is the only thing with a shadow.</p></div>
+      <div class="card"><h3>1. Quiet chrome, loud content</h3><p>The dashboard's job is to show the client's site. UI is ink on a cool blue-white canvas, hairline borders, no cards inside cards. The preview is the only thing with a shadow.</p></div>
       <div class="card"><h3>2. One canvas, one ink, one accent</h3><p>Warm neutral canvas, near-black ink, a single accent used for the primary action and state, never for decoration. Try the four accents in the top bar.</p></div>
       <div class="card"><h3>3. Type does the talking</h3><p>A display face with character (Bricolage Grotesque) for headings, a clean humanist sans (Figtree) for UI. Big sizes, tight leading, generous margins. No icons where a word will do.</p></div>
       <div class="card"><h3>4. Borders, not shadows</h3><p>Structure comes from 1 px lines and background steps. Exactly one shadow token, reserved for things that float: the prompt box, the phone frame, the chat drawer, toasts.</p></div>
@@ -407,20 +413,20 @@ mark.ph{background:var(--ph);padding:0 4px;border-radius:2px;color:var(--ink)}
 
     <h3 style="margin-top:32px">Colour</h3>
     <div class="swatches">
-      <div class="sw"><i style="background:var(--canvas)"></i><b>canvas</b><span>#f5f3ef · page</span></div>
+      <div class="sw"><i style="background:var(--canvas)"></i><b>canvas</b><span>#eef3f4 · page</span></div>
       <div class="sw"><i style="background:var(--surface)"></i><b>surface</b><span>#ffffff · inputs, cards</span></div>
-      <div class="sw"><i style="background:var(--surface-2)"></i><b>surface-2</b><span>#ece9e3 · tabs, notes</span></div>
-      <div class="sw"><i style="background:var(--line)"></i><b>line</b><span>#dcd8d0 · hairlines</span></div>
-      <div class="sw"><i style="background:var(--ink)"></i><b>ink</b><span>#151412 · text, buttons</span></div>
-      <div class="sw"><i style="background:var(--ink-2)"></i><b>ink-2</b><span>#4d4a44 · secondary</span></div>
-      <div class="sw"><i style="background:var(--ink-3)"></i><b>ink-3</b><span>#8a857c · hints, meta</span></div>
-      <div class="sw"><i style="background:var(--accent)"></i><b>accent</b><span>primary action, live state</span></div>
-      <div class="sw"><i style="background:var(--accent-soft)"></i><b>accent-soft</b><span>selected, success bg</span></div>
+      <div class="sw"><i style="background:var(--surface-2)"></i><b>surface-2</b><span>#dfe8ea · tabs, notes</span></div>
+      <div class="sw"><i style="background:var(--line)"></i><b>line</b><span>#cfdbde · hairlines</span></div>
+      <div class="sw"><i style="background:var(--ink)"></i><b>ink</b><span>#0f1f22 · text, buttons</span></div>
+      <div class="sw"><i style="background:var(--ink-2)"></i><b>ink-2</b><span>#3d5257 · secondary</span></div>
+      <div class="sw"><i style="background:var(--ink-3)"></i><b>ink-3</b><span>#53676c · hints, meta</span></div>
+      <div class="sw"><i style="background:var(--accent)"></i><b>accent</b><span>#0d7a84 · primary action, live state</span></div>
+      <div class="sw"><i style="background:var(--accent-soft)"></i><b>accent-soft</b><span>#dbeef0 · selected, success bg</span></div>
       <div class="sw"><i style="background:var(--warn)"></i><b>warn</b><span>#9a5b00 · generating</span></div>
       <div class="sw"><i style="background:var(--danger)"></i><b>danger</b><span>#b3261e · errors, delete</span></div>
       <div class="sw"><i style="background:var(--ph)"></i><b>placeholder</b><span>#fff1a8 · unfilled fact</span></div>
     </div>
-    <p class="note" style="margin-top:14px">Accent options: deep green <code>#156b4a</code> (default here: local, calm, not a SaaS blue), brick orange <code>#c8471b</code> (warmer, closer to Base44's energy), cobalt <code>#1f4fd8</code> (what we have now), or ink-only (buttons black, accent reserved for state). All four pass 4.5:1 on canvas with white text. My pick: green.</p>
+    <p class="note" style="margin-top:14px">Chosen 2026-10-07 (sb-ui-palette, option 5 "Arctic &amp; teal"): deep teal <code>#0d7a84</code> on a blue-white canvas; teal as text is <code>#0d6a73</code> (accent-text), hover <code>#0a636b</code>, field borders <code>#6e8489</code>. The owner found the warm paper canvas too close to Claude's own look. Every text pair passes 4.5:1 and every border and focus pair 3:1 (apps/web/test/ui-contrast.test.ts). The earlier options, kept for reference: deep green <code>#156b4a</code> (the default until then), brick orange <code>#c8471b</code> (warmer, closer to Base44's energy), cobalt <code>#1f4fd8</code> (what we have now), or ink-only (buttons black, accent reserved for state). All four pass 4.5:1 on canvas with white text. My pick: green.</p>
 
     <h3 style="margin-top:32px">Type</h3>
     <div class="type-row"><small>display 72 / 560</small><div style="font:560 56px/1 var(--font-display);letter-spacing:-.035em">Pekarna Kvas</div></div>
