@@ -23,6 +23,7 @@ export const NO_PROMPT_FIXES: PromptFixes = {
   oneHero: false,
   beige: false,
   catalogue: false,
+  sloveneStyle: false,
 };
 export const ALL_PROMPT_FIXES: PromptFixes = {
   pictures: true,
@@ -37,6 +38,7 @@ export const ALL_PROMPT_FIXES: PromptFixes = {
   oneHero: true,
   beige: true,
   catalogue: true,
+  sloveneStyle: true,
 };
 
 /** `text` with `from` replaced by `to`; throws when `from` isn't in it (the fix would silently do nothing). */
@@ -73,6 +75,19 @@ export const CATALOGUE_DESCRIPTIONS: Record<string, [string, string]> = {
     "Use only for an action the visitor hasn't been offered yet (booking, ordering, the menu, rooms), never to repeat call or directions: the phone bar and the footer already do. Best on the inverse tone.",
   ],
 };
+
+// ---------- sloveneStyle: the Slovene style block (content, edit, critique) ----------
+
+/**
+ * Audit item 4 (docs/plans/audit-2026-10-01.md): register, typography, English words and word order, placed right
+ * after the rules in the content, edit and critique prompts. The eval's Slovene lint (tools/eval/src/slovene-lint.ts)
+ * checks the same points in code.
+ */
+export const SLOVENE_STYLE = `Slovene style, for every visible text (copy, headings, buttons, labels, alt text):
+- Address visitors formally in the plural everywhere, buttons and labels included: vi, vas, vam, vaš; "Pokličite nas", "Rezervirajte mizo"; never ti forms ("Pokliči", "tvoj", "boš"). We together with the visitor is plural, never dual: "skupaj poiščemo", not "skupaj poiščeva".
+- Slovene typography: quotes „…“, the spaced en dash " – " (never "—" or a spaced hyphen), a decimal comma and a space before units, € and % ("4,20 €", "5 km", "10 %"), number ranges with an unspaced en dash ("8–16"), the ellipsis "…".
+- No English where Slovene has a word, even when the client used one: "prevzem v trgovini", not "click & collect"; "na spletu", not "online"; "e-pošta", not "mail". The names of the business, its people, products and brands stay as the client wrote them.
+- Natural Slovene word order and idiom, as the owner would say it at the counter, not translated from English ("vsak dan", not "na dnevni bazi"). Headings in sentence case, never Title Case.`;
 
 // ---------- pictures: the brief's imageIdeas ----------
 

@@ -295,7 +295,7 @@
             "heading": "Naročite se na pregled",
             "text": "Pokličite nas v ordinacijskem času ali nam pišite.",
             "primary": {
-              "label": "Pokliči",
+              "label": "Pokličite",
               "target": {
                 "action": "call"
               }

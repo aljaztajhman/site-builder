@@ -16,6 +16,7 @@ import {
   PATCH_FORMAT,
   RULES,
   RULES_RESPONSIVE,
+  SLOVENE_STYLE,
   altSystem,
   altTexts,
   applyPatches,
@@ -116,6 +117,7 @@ describe("prompt fixes, all switches off", () => {
     expect(changed("oneHero")).toEqual([]);
     expect(changed("beige")).toEqual([]);
     expect(changed("catalogue")).toEqual(["brief", "content", "critique", "edit", "sections"]);
+    expect(changed("sloveneStyle")).toEqual(["content", "critique", "edit"]);
   });
 
   it("every fix at once still builds every prompt (no fix's passage was swapped away by another)", () => {
@@ -146,6 +148,39 @@ describe("fix: catalogue (eyebrow, contact strip, cta, responsive, call buttons)
     expect(c).toContain("never to repeat call or directions");
     // Still a catalogue of every section, with valid JSON schemas.
     for (const line of c.split("\n").filter((l) => l.startsWith("Props schema: "))) expect(() => JSON.parse(line.slice("Props schema: ".length))).not.toThrow();
+  });
+});
+
+describe("fix: sloveneStyle (the Slovene style block)", () => {
+  const on = only("sloveneStyle");
+  it("content, critique and edit get the block right after the rules; nothing else changes", () => {
+    for (const [name, b] of Object.entries({ content: contentSystem, critique: critiqueSystem, edit: editSystem })) {
+      const off = b(NO_PROMPT_FIXES);
+      const s = b(on);
+      expect(off, name).not.toContain(SLOVENE_STYLE);
+      expect(s, name).toContain(`${RULES}\n${SLOVENE_STYLE}`);
+      expect(s.replace(`\n${SLOVENE_STYLE}`, ""), name).toBe(off);
+    }
+    expect(briefSystem(on)).toBe(briefSystem(NO_PROMPT_FIXES));
+  });
+  it("covers register, typography, English words and word order", () => {
+    expect(SLOVENE_STYLE).toContain('"skupaj poiščemo", not "skupaj poiščeva"');
+    expect(SLOVENE_STYLE).toContain("never ti forms");
+    expect(SLOVENE_STYLE).toContain("quotes „…“");
+    expect(SLOVENE_STYLE).toContain('"4,20 €"');
+    expect(SLOVENE_STYLE).toContain('"prevzem v trgovini", not "click & collect"');
+    expect(SLOVENE_STYLE).toContain("never Title Case");
+    // The em dash appears only where the block bans it.
+    expect(SLOVENE_STYLE.replace('"—"', "")).not.toContain("—");
+  });
+  it("follows the catalogue fix's rules when both are on", () => {
+    const both = { ...NO_PROMPT_FIXES, catalogue: true, sloveneStyle: true };
+    for (const b of [contentSystem, critiqueSystem, editSystem]) expect(b(both)).toContain(`${rules(both)}\n${SLOVENE_STYLE}`);
+  });
+  it("the edit request carries it in its cached system block", async () => {
+    const c = client(on, '{"reply": "Ni sprememb.", "patches": []}');
+    await editSpec(c.client, { spec: golden("pekarna-kvas"), message: "Odstrani galerijo.", corpus: corpus("pekarna-kvas") });
+    expect(c.seen[0]!.system[1]).toContain(SLOVENE_STYLE);
   });
 });
 

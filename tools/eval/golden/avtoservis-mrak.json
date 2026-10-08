@@ -126,7 +126,7 @@
             "headline": "Servis vseh znamk v Kranju",
             "intro": "Družinski servis od leta 2008, za osebna vozila in kombije do 3,5 t. Pred popravilom dobite predračun.",
             "primary": {
-              "label": "Pokliči 041 555 730",
+              "label": "Pokličite 041 555 730",
               "target": {
                 "action": "call"
               }
@@ -206,7 +206,7 @@
               }
             ],
             "action": {
-              "label": "Pokliči servis",
+              "label": "Pokličite servis",
               "target": {
                 "action": "call"
               }
@@ -334,7 +334,7 @@
             "heading": "Najhitreje nas dobite po telefonu",
             "text": "Odprto od ponedeljka do petka od 7.00 do 16.00, v soboto po dogovoru.",
             "primary": {
-              "label": "Pokliči 041 555 730",
+              "label": "Pokličite 041 555 730",
               "target": {
                 "action": "call"
               }
