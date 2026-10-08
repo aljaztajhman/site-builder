@@ -1,1 +1,2 @@
 apps/web/src/ui/examples/** -text
+packages/morph/dist/** text eol=lf

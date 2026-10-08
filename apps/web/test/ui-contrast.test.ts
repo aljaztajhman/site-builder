@@ -135,6 +135,8 @@ describe("product UI colours", () => {
       "ui/assets.ts": read("assets.ts"),
       "client/editor.ts": read("../client/editor.ts"),
       "client/demo-transform.ts": read("../client/demo-transform.ts"),
+      // The demo's backdrop colour lives in the engine.
+      "packages/morph/src/choreograph.ts": read("../../../../packages/morph/src/choreograph.ts"),
     };
     const left = Object.entries(sources).flatMap(([f, src]) => old.filter((c) => withoutComments(src).toLowerCase().includes(c)).map((c) => `${f}: ${c}`));
     expect(left).toEqual([]);

@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>@sb/morph example</title>
+<style>
+  :root { color-scheme: light; --page: #eef3f4; --ink: #0f1f22; --line: #c9d6d9; font-family: system-ui, sans-serif; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--ink); }
+  .top { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 12px 16px; }
+  .top strong { margin-right: auto; }
+  .top button { font: inherit; padding: 8px 14px; border: 1px solid var(--line); border-radius: 8px; background: #fff; cursor: pointer; min-height: 40px; }
+  .top button[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+  /* The screen that morphs. Everything inside is re-rendered from data on each switch. */
+  .screen { margin: 0 16px 16px; border-radius: 14px; overflow: hidden; min-height: 560px; }
+  .bar { display: flex; align-items: center; gap: 20px; padding: 18px 28px; }
+  .brand { font-weight: 800; font-size: 20px; }
+  .bar nav { display: flex; gap: 18px; margin-left: auto; }
+  .bar nav a { color: inherit; text-decoration: none; }
+  .btn { display: inline-block; padding: 10px 18px; border-radius: 999px; text-decoration: none; font-weight: 600; }
+  .hero { display: grid; grid-template-columns: 1.1fr .9fr; gap: 32px; align-items: center; padding: 40px 28px; }
+  .eyebrow { margin: 0 0 8px; font-size: 14px; letter-spacing: .02em; }
+  h1 { margin: 0 0 14px; font-size: clamp(30px, 4.4vw, 54px); line-height: 1.05; }
+  .lead { margin: 0 0 22px; font-size: 18px; max-width: 34ch; }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .art { width: 100%; height: auto; border-radius: 12px; display: block; }
+  .list { padding: 28px; }
+  .list h2 { margin: 0 0 16px; }
+  .list ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+  .list li { padding: 16px; border-radius: 10px; }
+
+  /* Three looks. */
+  .coffee { background: #f6efe6; color: #2b1a10; font-family: Georgia, serif; }
+  .coffee .bar { background: #2b1a10; color: #f6efe6; }
+  .coffee .btn { background: #c2410c; color: #fff; }
+  .coffee .btn.ghost { background: transparent; color: inherit; outline: 2px solid currentColor; }
+  .coffee .list { background: #eadbc8; }
+  .coffee .list li { background: #fffaf3; }
+
+  .bikes { background: #0b1d2a; color: #e8f1f7; }
+  .bikes .bar { background: #0b1d2a; border-bottom: 1px solid #23435a; }
+  .bikes .hero { grid-template-columns: .9fr 1.1fr; }
+  .bikes .hero .art { order: -1; }
+  .bikes .btn { background: #facc15; color: #0b1d2a; border-radius: 6px; }
+  .bikes .btn.ghost { background: #173447; color: #e8f1f7; }
+  .bikes .list { background: #102838; }
+  .bikes .list li { background: #173447; }
+
+  .studio { background: #fff; color: #1d1d1f; }
+  .studio .bar { background: #f1edff; }
+  .studio .hero { grid-template-columns: 1fr; text-align: center; justify-items: center; }
+  .studio .lead { margin-inline: auto; }
+  .studio .art { max-width: 560px; }
+  .studio .btn { background: #6d28d9; color: #fff; }
+  .studio .btn.ghost { background: #ede9fe; color: #4c1d95; }
+  .studio .list { background: #f8f7fc; }
+  .studio .list li { background: #fff; border: 1px solid #e4e0f5; }
+
+  @media (max-width: 640px) {
+    .hero, .bikes .hero { grid-template-columns: 1fr; }
+    .bar nav { display: none; }
+    .screen { margin: 0 8px 8px; }
+  }
+</style>
+</head>
+<body>
+<div class="top">
+  <strong>@sb/morph example</strong>
+  <button type="button" data-show="coffee">Coffee</button>
+  <button type="button" data-show="bikes">Bikes</button>
+  <button type="button" data-show="studio">Studio</button>
+  <button type="button" class="pause" aria-pressed="true">Autoplay</button>
+  <button type="button" class="build">Build it</button>
+</div>
+<div class="screen" aria-live="polite"></div>
+
+<script type="module">
+  import { morph, prepareBuild, runBuild, prefersCalm } from "../dist/morph.js";
+
+  // 1. The data: one record per state. Any shape you like; render() turns it into markup.
+  const art = (a, b) => `<svg class="art" viewBox="0 0 400 260" role="img" aria-label="Illustration"><rect width="400" height="260" fill="${a}"/><circle cx="300" cy="90" r="60" fill="${b}"/><path d="M0 210 Q120 120 220 190 T400 170 V260 H0Z" fill="${b}" opacity=".6"/></svg>`;
+  const STATES = {
+    coffee: { brand: "Harbor Coffee", nav: ["Menu", "Beans", "Visit"], cta: "Order ahead", eyebrow: "Roasted on the pier since 2009", h1: "Coffee worth the walk", lead: "Small-batch beans, slow mornings and a window seat over the boats.", actions: ["See the menu", "Find us"], art: art("#d6b48c", "#7c3f1d"), title: "Today", items: ["Flat white", "Cardamom bun", "Cold brew", "Oat cortado"] },
+    bikes: { brand: "Northline Bikes", nav: ["Shop", "Repairs", "Rentals", "Rides"], cta: "Book a repair", eyebrow: "Workshop open six days a week", h1: "Ride further, fix less", lead: "Service while you wait, rentals by the day and Saturday group rides.", actions: ["Book a service"], art: art("#173447", "#facc15"), title: "Services", items: ["Tune-up", "Wheel true", "Brake bleed"] },
+    studio: { brand: "Studio Mira", nav: ["Work", "Contact"], cta: "Start a project", eyebrow: "Brand and web design", h1: "Quiet brands, loud results", lead: "Identity, websites and packaging for small companies with big ideas.", actions: ["See the work", "Say hello"], art: art("#ede9fe", "#6d28d9"), title: "What we do", items: ["Identity", "Websites", "Packaging", "Art direction", "Workshops"] },
+  };
+
+  // 2. The recipe: which elements play which role. Same key on both screens = the same part, transformed.
+  const RECIPE = [
+    { key: "bar", select: ".bar", kind: "panel" },
+    { key: "brand", select: ".brand", within: "bar" },
+    { key: "nav", select: "nav a", within: "bar", all: true },
+    { key: "cta", select: ".btn", within: "bar" },
+    { key: "hero", select: ".hero", kind: "panel" },
+    { key: "eyebrow", select: ".eyebrow", within: "hero" },
+    { key: "h1", select: "h1", within: "hero" },
+    { key: "lead", select: ".lead", within: "hero" },
+    { key: "act", select: ".actions > *", within: "hero", all: true },
+    { key: "art", select: ".art", within: "hero" },
+    { key: "list", select: ".list", kind: "panel" },
+    { key: "title", select: "h2", within: "list" },
+    { key: "item", select: "ul", within: "list", children: 6 },
+  ];
+
+  const screen = document.querySelector(".screen");
+  const render = (id) => {
+    const s = STATES[id];
+    screen.className = `screen ${id}`;
+    screen.innerHTML = `
+      <header class="bar"><span class="brand">${s.brand}</span><nav>${s.nav.map((n) => `<a href="#">${n}</a>`).join("")}</nav><a class="btn" href="#">${s.cta}</a></header>
+      <section class="hero"><div><p class="eyebrow">${s.eyebrow}</p><h1>${s.h1}</h1><p class="lead">${s.lead}</p>
+        <div class="actions">${s.actions.map((a, i) => `<a class="btn${i ? " ghost" : ""}" href="#">${a}</a>`).join("")}</div></div>${s.art}</section>
+      <section class="list"><h2>${s.title}</h2><ul>${s.items.map((t) => `<li>${t}</li>`).join("")}</ul></section>`;
+  };
+
+  // 3. Switching: morph() with an update that re-renders. A newer request skips the running one.
+  const ids = Object.keys(STATES);
+  let current = "coffee";
+  let running = null;
+  let busy = false;
+  const mark = () => document.querySelectorAll("[data-show]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.show === current)));
+  async function show(id) {
+    if (id === current) return;
+    current = id;
+    mark();
+    running?.skipTransition();
+    busy = true;
+    try {
+      await morph({ parts: RECIPE, update: () => render(id), decode: "h1", onTransition: (t) => (running = t) });
+    } finally {
+      busy = false;
+    }
+  }
+
+  // 4. Autoplay with a pause (a loop that moves by itself needs a stop: WCAG 2.2.2).
+  let auto = !prefersCalm();
+  const pauseBtn = document.querySelector(".pause");
+  const tick = () => setTimeout(async () => {
+    if (auto && !busy && !document.hidden) await show(ids[(ids.indexOf(current) + 1) % ids.length]);
+    timer = tick();
+  }, 4500);
+  let timer = tick();
+  pauseBtn.setAttribute("aria-pressed", String(auto));
+  pauseBtn.addEventListener("click", () => pauseBtn.setAttribute("aria-pressed", String((auto = !auto))));
+  document.querySelectorAll("[data-show]").forEach((b) => b.addEventListener("click", () => { auto = false; pauseBtn.setAttribute("aria-pressed", "false"); void show(b.dataset.show); }));
+
+  // 5. The build: the screen takes itself apart and builds up in four steps.
+  async function build() {
+    const b = prepareBuild(screen, { calm: prefersCalm(), panels: ".bar, .hero, .list", boxes: ".btn, .art, li" });
+    await runBuild(b);
+  }
+  document.querySelector(".build").addEventListener("click", () => { auto = false; pauseBtn.setAttribute("aria-pressed", "false"); void build(); });
+
+  render(current);
+  mark();
+  // For tests and the console.
+  window.morphDemo = { show, build, stop: () => { auto = false; clearTimeout(timer); } };
+</script>
+</body>
+</html>

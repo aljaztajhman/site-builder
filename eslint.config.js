@@ -21,6 +21,11 @@ export default tseslint.config(
     languageOptions: { sourceType: "script", globals: { document: "readonly" } },
   },
   {
+    // Plain Node scripts that run without a build (the morph example's static server).
+    files: ["packages/morph/examples/*.mjs"],
+    languageOptions: { globals: { process: "readonly", console: "readonly", URL: "readonly" } },
+  },
+  {
     rules: {
       "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
       "@typescript-eslint/consistent-type-imports": "error",

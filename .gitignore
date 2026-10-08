@@ -1,5 +1,7 @@
 node_modules/
 dist/
+# The morph engine's drop-in build is committed for other projects to copy (a test keeps it fresh).
+!packages/morph/dist/
 .tools/
 .worktrees/
 .env
