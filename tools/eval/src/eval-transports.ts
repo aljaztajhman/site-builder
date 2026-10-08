@@ -46,26 +46,67 @@ export function pictureKey(model: ImageGenModelConfig, body: Record<string, unkn
  * fal pictures cached by request in `dir` (tools/eval/image-cache, committed so cloud runs share it): a run whose
  * brief is replayed asks for the same prompts and pays for none of them again (≈ €0.54 of a full run). A changed
  * prompt, style, size or quality is a new key. Files are the provider's bytes as delivered.
+ *
+ * With `fixture`, the keys each fixture got are listed in `dir/by-fixture/<id>.json`; with `reuse` too (eval
+ * --reuse-pictures), a request the cache doesn't know takes the fixture's earlier picture at the same position instead
+ * of paying fal, so a run that changes the brief or design (the variety switches) keeps the pictures fixed and measures
+ * only what it changed.
  */
 export class CachedImageTransport implements ImageTransport {
-  readonly stats = { cached: 0, made: 0 };
+  readonly stats = { cached: 0, made: 0, reused: 0 };
+  private requests = 0;
 
   constructor(
     private readonly inner: ImageTransport,
     private readonly dir: string,
+    private readonly o: { fixture?: string; reuse?: boolean } = {},
   ) {}
 
+  private file(key: string): string | undefined {
+    return ["jpg", "png", "webp"].map((ext) => path.join(this.dir, `${key}.${ext}`)).find((f) => existsSync(f));
+  }
+
+  private indexFile(): string | undefined {
+    return this.o.fixture ? path.join(this.dir, "by-fixture", `${this.o.fixture}.json`) : undefined;
+  }
+
+  /** The keys this fixture got in earlier runs, in the order it first got them. */
+  fixtureKeys(): string[] {
+    const f = this.indexFile();
+    return f && existsSync(f) ? (JSON.parse(readFileSync(f, "utf8")) as string[]) : [];
+  }
+
+  private remember(key: string): void {
+    const f = this.indexFile();
+    if (!f) return;
+    const keys = this.fixtureKeys();
+    if (keys.includes(key)) return;
+    mkdirSync(path.dirname(f), { recursive: true });
+    writeFileSync(f, JSON.stringify([...keys, key], null, 2));
+  }
+
   async generate(model: ImageGenModelConfig, body: Record<string, unknown>): Promise<Uint8Array> {
+    const slot = this.requests++;
     const key = pictureKey(model, body);
-    const hit = ["jpg", "png", "webp"].map((ext) => path.join(this.dir, `${key}.${ext}`)).find((f) => existsSync(f));
+    const hit = this.file(key);
     if (hit) {
       this.stats.cached++;
+      this.remember(key);
       return new Uint8Array(readFileSync(hit));
+    }
+    if (this.o.reuse) {
+      const earlier = this.fixtureKeys().flatMap((k) => (this.file(k) ? [this.file(k)!] : []));
+      const pick = earlier[slot % Math.max(1, earlier.length)];
+      if (pick) {
+        this.stats.reused++;
+        return new Uint8Array(readFileSync(pick));
+      }
     }
     const data = await this.inner.generate(model, body);
     this.stats.made++;
     mkdirSync(this.dir, { recursive: true });
     writeFileSync(path.join(this.dir, `${key}.${extension(data)}`), data);
+    this.remember(key);
     return data;
   }
 }

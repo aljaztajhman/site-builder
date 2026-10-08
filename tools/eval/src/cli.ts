@@ -30,6 +30,17 @@
  * --homepage-first: turns config pipeline.homepageFirst on for this run (full scope: the homepage, then the other pages side
  *                   by side; HQ it-homepage-first). The recordings hold one content answer per site, so --replay runs out of
  *                   content recordings for the page calls until they are recorded with it on.
+ * --variety all|<name>[,<name>]: turns those config variety switches on for this run (families, skeleton, concept;
+ *                   docs/plans/variety-engine.md). With families on, every generated site also gets its "Druga podoba"
+ *                   (no model call) rendered, checked and measured against the generated look. The sites made earlier
+ *                   in a run are always the later fixtures' neighbours (same trade, same town first), as on the platform.
+ * --regenerate:     after the checks, "Ustvari znova" once per fixture (a real generation, paid) and the look distance
+ *                   from the first generation (variety Step 2: a regeneration explores).
+ * --recordings <dir>: where --record-missing and --replay keep the recordings (default tools/eval/recordings, the
+ *                   full-scope ones the tests replay; a homepage-scope or switched run should keep its own).
+ * --reuse-pictures: a picture request the cache doesn't know takes the picture the fixture got earlier at the same
+ *                   position (eval-transports.ts), so a run that changes the brief or design keeps its pictures fixed.
+ * --label <name>:   names the run in its report files (eval/runs/variety-…-<name>.md/.json), e.g. off and on.
  * fal pictures (FAL_KEY) are cached by request in tools/eval/image-cache/ in every mode that makes them.
  * Writes eval/report.md, eval/contact-sheet.png, the review sheets in eval/look/ (look.ts) and the variety numbers
  * (variety-report.ts): eval/variety-<mode>-<scope>.md for a run over every fixture, else beside the report in eval/runs/.
@@ -42,7 +53,7 @@ import { execFileSync } from "node:child_process";
 import { loadConfig } from "@sb/config";
 import { BatchTransport, NO_PROMPT_FIXES, launchCheckBrowser } from "@sb/engine";
 import { loadFixtures, loadTwins } from "./fixtures/load.ts";
-import { renderVariety } from "./variety-report.ts";
+import { VARIETY_SWITCHES, renderVariety, varietyData } from "./variety-report.ts";
 import { runFixture, type FixtureResult, type Mode } from "./runner.ts";
 import { contactSheet, renderReport } from "./report.ts";
 import { desktopContactSheet, reviewSheet } from "./look.ts";
@@ -135,6 +146,31 @@ if (flag("homepage-first")) {
   config.pipeline.homepageFirst = true;
   console.log("Homepage first on (pipeline.homepageFirst)");
 }
+// --variety all | families,skeleton,concept: turns those config variety switches on for this run.
+const varietyArg = value("variety");
+if (varietyArg) {
+  const names = varietyArg === "all" ? [...VARIETY_SWITCHES] : varietyArg.split(",").map((s) => s.trim());
+  const unknown = names.filter((n) => !(VARIETY_SWITCHES as readonly string[]).includes(n));
+  if (unknown.length) {
+    console.error(`Unknown variety switch(es): ${unknown.join(", ")}. Known: ${VARIETY_SWITCHES.join(", ")}.`);
+    process.exit(2);
+  }
+  for (const n of names) config.variety[n as (typeof VARIETY_SWITCHES)[number]] = true;
+  console.log(`Variety switches on: ${names.join(", ")}`);
+}
+const regenerate = flag("regenerate");
+if (regenerate && !paid) {
+  console.error("--regenerate needs real generations (live or --record-missing).");
+  process.exit(2);
+}
+// --recordings <dir>: where --record-missing/--replay keep the fixtures' recordings (default tools/eval/recordings, the
+// full-scope ones the unit tests replay). A homepage-scope or switched run should keep its own, so it never rewrites those.
+const recordingsDir = path.resolve(repoRoot, value("recordings") ?? "tools/eval/recordings");
+if (mode === "record" && value("recordings") === undefined && scope === "home") {
+  console.error("--record --scope home would replace the full-scope recordings the tests replay; pass --recordings <dir>.");
+  process.exit(2);
+}
+const label = value("label");
 await mkdir(outDir, { recursive: true });
 const browser = await launchCheckBrowser();
 const results: FixtureResult[] = [];
@@ -153,7 +189,7 @@ try {
       mode,
       outDir,
       browser,
-      recordingsDir: path.join(repoRoot, "tools/eval/recordings"),
+      recordingsDir,
       goldenDir: path.join(repoRoot, "tools/eval/golden"),
       scope,
       lighthouse: !flag("no-lighthouse"),
@@ -162,6 +198,10 @@ try {
       judge,
       judgeSlovene,
       edits,
+      // The sites made so far in this run are the platform's other sites (the variety engine's neighbours).
+      neighbours: results.flatMap((x) => (x.made ? [x.made] : [])),
+      regenerate,
+      reusePictures: flag("reuse-pictures"),
       ...(judgeBatch ? { judgeBatch } : {}),
     });
     // What was really paid: replayed answers and cached pictures are free (the report still prices them).
@@ -170,7 +210,9 @@ try {
     const failing = r.checkpoints.filter((c) => c.failures.length).length;
     const reuse = [
       r.calls ? `${r.calls.replayed} calls replayed, ${r.calls.recorded} recorded` : "",
-      r.pictures ? `${r.pictures.cached} pictures cached, ${r.pictures.made} made` : "",
+      r.pictures ? `${r.pictures.cached} pictures cached, ${r.pictures.made} made${r.pictures.reused ? `, ${r.pictures.reused} reused` : ""}` : "",
+      r.anotherLook ? (r.anotherLook.ok ? `Druga podoba ${r.anotherLook.distance.toFixed(2)} away` : `no Druga podoba (${r.anotherLook.reason})`) : "",
+      r.regenerated ? (r.regenerated.error === undefined ? `regenerated ${r.regenerated.distance.toFixed(2)} away (€${r.regenerated.eur.toFixed(3)})` : `regeneration failed: ${r.regenerated.error}`) : "",
       r.replayChanged !== undefined ? `${r.replayChanged} request(s) changed since recording` : "",
       r.critique ? `critique patches applied in ${r.critique.applied}/${r.critique.withPatches} rounds${r.critique.rejected ? ` (${r.critique.rejected} rejected)` : ""}` : "",
       editLine(r),
@@ -194,10 +236,14 @@ try {
 }
 
 const report = renderReport(results, config, { mode, scope, startedAt, totalEur: spent, wallMs: Date.now() - t0 });
-const out = reportPaths({ mode, scope, ...(only ? { only } : {}), ...(photoLimit !== undefined ? { photos: photoLimit } : {}), twins, edits });
+const out = reportPaths({ mode, scope, ...(only ? { only } : {}), ...(photoLimit !== undefined ? { photos: photoLimit } : {}), twins, edits, ...(label ? { label } : {}) });
 await mkdir(path.dirname(path.join(outDir, out.report)), { recursive: true });
 await writeFile(path.join(outDir, out.report), report);
-await writeFile(path.join(outDir, out.variety), renderVariety(results, { mode, scope, startedAt }));
+const switches = Object.entries(config.variety).filter(([k, v]) => (VARIETY_SWITCHES as readonly string[]).includes(k) && v === true).map(([k]) => k);
+const varietyMeta = { mode, scope, startedAt, switches, ...(label ? { label } : {}) };
+await writeFile(path.join(outDir, out.variety), renderVariety(results, varietyMeta));
+// The same numbers as data, for a before/after comparison of two runs (pnpm variety:compare).
+await writeFile(path.join(outDir, out.variety.replace(/\.md$/, ".json")), `${JSON.stringify(varietyData(results, { ...varietyMeta, totalEur: spent }), null, 2)}\n`);
 await writeFile(path.join(outDir, out.contactSheet), await contactSheet(results));
 for (const r of results) await reviewSheet(r.id);
 await desktopContactSheet(results.map((r) => r.id));

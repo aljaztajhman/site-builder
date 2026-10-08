@@ -40,7 +40,7 @@ describe("CachedImageTransport", () => {
     expect(inner.calls).toBe(1);
     await cache.generate(model, requestBody(config, model, "Rolls in a basket.", false));
     expect(inner.calls).toBe(2);
-    expect(cache.stats).toEqual({ cached: 1, made: 2 });
+    expect(cache.stats).toEqual({ cached: 1, made: 2, reused: 0 });
     expect(readdirSync(dir).sort()).toEqual([`${pictureKey(model, body)}.jpg`, `${pictureKey(model, requestBody(config, model, "Rolls in a basket.", false))}.jpg`].sort());
     const { width, height } = config.imageGen.landscape;
     expect(meter.eur).toBeCloseTo(2 * imageCostEur(config, model, width, height), 9);
@@ -68,10 +68,36 @@ describe("CachedImageTransport", () => {
     const paid = meter.eur;
     const picture = await gen.generate("Bread.");
     expect(picture.width).toBe(48);
-    expect(cache.stats).toEqual({ cached: 1, made: 1 });
+    expect(cache.stats).toEqual({ cached: 1, made: 1, reused: 0 });
     expect(meter.eur).toBe(paid);
     expect(logged).toHaveLength(1);
     expect(logged[0]).toBeGreaterThan(0);
+  });
+});
+
+describe("CachedImageTransport --reuse-pictures", () => {
+  it("lists each fixture's pictures, and with reuse a changed prompt takes the fixture's earlier picture instead of paying", async () => {
+    const inner = fal();
+    const bread = requestBody(config, model, "A loaf of bread on a wooden table.", false);
+    const flour = requestBody(config, model, "Flour dust over a dough on a table.", false);
+    const first = new CachedImageTransport(inner, dir, { fixture: "pekarna-kvas" });
+    const a = await first.generate(model, bread);
+    const b = await first.generate(model, flour);
+    expect(inner.calls).toBe(2);
+    expect(first.fixtureKeys()).toEqual([pictureKey(model, bread), pictureKey(model, flour)]);
+    // The next run's brief asks for other pictures: without reuse fal paints them, with reuse the earlier ones come back by position.
+    const reuse = new CachedImageTransport(inner, dir, { fixture: "pekarna-kvas", reuse: true });
+    expect(await reuse.generate(model, requestBody(config, model, "Rye bread, close up.", false))).toEqual(a);
+    expect(await reuse.generate(model, requestBody(config, model, "A baker's hands kneading.", false))).toEqual(b);
+    expect(await reuse.generate(model, bread)).toEqual(a);
+    expect(inner.calls).toBe(2);
+    expect(reuse.stats).toEqual({ cached: 1, made: 0, reused: 2 });
+    // Reused pictures aren't listed under their new prompts; another fixture has none to reuse and pays.
+    expect(reuse.fixtureKeys()).toHaveLength(2);
+    const other = new CachedImageTransport(inner, dir, { fixture: "instalacije-rebernik", reuse: true });
+    await other.generate(model, requestBody(config, model, "Copper pipes.", false));
+    expect(inner.calls).toBe(3);
+    expect(other.stats).toEqual({ cached: 0, made: 1, reused: 0 });
   });
 });
 

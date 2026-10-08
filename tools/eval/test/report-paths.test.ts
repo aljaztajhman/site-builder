@@ -26,4 +26,13 @@ describe("eval report paths", () => {
     expect(reportPaths({ mode: "record", scope: "home", twins: true, edits: false }).variety).toBe("variety-live-home-twins.md");
     expect(reportPaths({ mode: "live", scope: "home", only: ["pekarna-kvas"] }).variety).toBe("runs/variety-live-home-pekarna-kvas.md");
   });
+
+  it("a labelled run reports under its label in eval/runs/, the label standing for its fixture list", () => {
+    expect(reportPaths({ mode: "record-missing", scope: "home", twins: true, edits: false, label: "off" })).toEqual({
+      report: "runs/report-record-missing-home-off-twins-noedits.md",
+      contactSheet: "runs/contact-sheet-record-missing-home-off-twins-noedits.png",
+      variety: "runs/variety-record-missing-home-off-twins-noedits.md",
+    });
+    expect(reportPaths({ mode: "record-missing", scope: "home", only: ["avtoservis-mrak", "avto-kovac"], label: "on" }).variety).toBe("runs/variety-record-missing-home-on.md");
+  });
 });

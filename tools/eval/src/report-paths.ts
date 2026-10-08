@@ -13,10 +13,20 @@ export function reportPaths(o: {
   photos?: number;
   twins?: boolean;
   edits?: boolean;
+  /** --label: a named run (e.g. the variety switches off and on) always reports to eval/runs/, under its name. */
+  label?: string;
 }): { report: string; contactSheet: string; variety: string } {
   const home = o.scope === "home";
-  const partial = !!o.only || o.photos !== undefined;
-  const tag = [o.mode, o.scope, ...(o.only ?? []), ...(o.photos !== undefined ? [`${o.photos}photos`] : []), ...(o.twins ? ["twins"] : []), ...(o.edits === false ? ["noedits"] : [])].join("-");
+  const partial = !!o.only || o.photos !== undefined || !!o.label;
+  // A label stands for the fixture list (a long --only list would make file names too long for Windows).
+  const tag = [
+    o.mode,
+    o.scope,
+    ...(o.label ? [o.label] : (o.only ?? [])),
+    ...(o.photos !== undefined ? [`${o.photos}photos`] : []),
+    ...(o.twins ? ["twins"] : []),
+    ...(o.edits === false ? ["noedits"] : []),
+  ].join("-");
   const variety = partial ? `runs/variety-${tag}.md` : `variety-${o.mode === "record" ? "live" : o.mode}-${o.scope}${o.twins ? "-twins" : ""}.md`;
   if (o.mode === "replay" || o.mode === "record-missing" || partial || o.twins || o.edits === false) {
     return { report: `runs/report-${tag}.md`, contactSheet: `runs/contact-sheet-${tag}.png`, variety };
