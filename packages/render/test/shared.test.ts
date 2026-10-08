@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { minifyCss, motifsIn, sharedBundle, sharedStylesheet, stylesheetFor } from "../src/index.ts";
+import { minifyCss, motifsIn, sharedBundle, sharedStylesheet, stylesheetFor, subMotifsIn } from "../src/index.ts";
 
 describe("minifyCss", () => {
   it("keeps descendant pseudo-class selectors intact", () => {
@@ -97,6 +97,30 @@ describe("one stylesheet per trade motif", () => {
       expect(sheet.length).toBeLessThan(full.length);
       expect(stylesheetFor(sheet, null)).toBe(text("site.css"));
     }
+  });
+
+  it("ships a sheet per sub-trade motif on its template's layout; the template's own sheet has none of their rules", () => {
+    expect(subMotifsIn(full)).toEqual([
+      { motif: "pipes", sub: "joint" },
+      { motif: "label", sub: "stem" },
+      { motif: "pipes", sub: "strip" },
+      { motif: "label", sub: "tag" },
+      { motif: "pipes", sub: "tiles" },
+      { motif: "pipes", sub: "wire" },
+    ]);
+    for (const m of motifs) expect(text(`site-${m}.css`), m).not.toContain("data-submotif");
+    expect(text("site.css")).not.toContain("data-submotif");
+    for (const { motif, sub } of subMotifsIn(full)) {
+      const sheet = text(`site-${motif}-${sub}.css`);
+      // The template's whole sheet, plus this sub-trade's rules and no other's.
+      expect(stylesheetFor(sheet, motif)).toBe(text(`site-${motif}.css`));
+      expect(sheet).toContain(`[data-submotif="${sub}"]`);
+      for (const other of subMotifsIn(full).filter((o) => o.sub !== sub)) expect(sheet, sub).not.toContain(`[data-submotif="${other.sub}"]`);
+    }
+    // A sub-trade rule under another sub-trade, or without one, is dropped.
+    const css = '.a{color:red}[data-submotif="x"] .b{color:blue}[data-submotif="y"] .c{margin:0}';
+    expect(stylesheetFor(css, "m", "x")).toBe('.a{color:red}[data-submotif="x"] .b{color:blue}');
+    expect(stylesheetFor(css, "m")).toBe(".a{color:red}");
   });
 
   it("keeps order and splits mixed selector lists, @media blocks and quoted braces correctly", () => {

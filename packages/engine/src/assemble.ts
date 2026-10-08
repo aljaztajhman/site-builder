@@ -7,6 +7,7 @@ import {
   isoDay,
   isPlaceholder,
   PageRef,
+  subtypeFits,
   text,
   toModelJsonSchema,
   type Business,
@@ -60,6 +61,8 @@ export function businessFromBrief(brief: Brief, opts: { hoursWithheld?: boolean 
   return {
     name: brief.name,
     type: brief.businessType,
+    // Spec v15: the subtype from the variety engine's concept (config variety.concept); it picks the drawn motif.
+    ...(brief.concept?.subtype && subtypeFits(brief.businessType, brief.concept.subtype) ? { subtype: brief.concept.subtype } : {}),
     phone: f.phone && /^\+\d{8,15}$/.test(f.phone) ? f.phone : { $placeholder: "phone" },
     email: f.email ?? { $placeholder: "email" },
     address: f.address && /^\d{4}$/.test(f.address.postalCode) ? { ...f.address } : { $placeholder: "address" },

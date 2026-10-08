@@ -17,7 +17,7 @@ describe("migration 14 → 15 (skeleton)", () => {
       const v14 = { ...raw(id), specVersion: 14 };
       const v15 = migrateSpec(v14, MIGRATIONS, 15);
       expect(v15).toEqual({ ...v14, specVersion: 15 });
-      expect(validateSite(v15).ok).toBe(true);
+      expect(validateSite(migrateSpec(v15)).ok).toBe(true);
       const html = home(v15);
       for (const marker of ["data-skeleton", "nav-toggle--", "site-footer--tone-", "reveal.js", "call-float", "data-after-hero"]) expect(html, `${id} ${marker}`).not.toContain(marker);
     }

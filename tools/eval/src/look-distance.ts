@@ -5,7 +5,7 @@
  * trade). Free and offline: no model call.
  */
 import sharp from "sharp";
-import { deltaE, hexToHsl, DIRECTIONS, type Motif, type SiteSpec } from "@sb/spec";
+import { deltaE, hexToHsl, siteMotif, type Motif, type SiteSpec, type SubMotif } from "@sb/spec";
 
 /** What a homepage's look is made of, read from its spec. */
 export interface LookFeatures {
@@ -17,7 +17,8 @@ export interface LookFeatures {
   header: { variant: string; tone: string };
   /** Homepage sections as type:variant:tone, top to bottom. */
   sequence: string[];
-  motif: Motif | null;
+  /** The drawn motif: the sub-trade's on its template (spec v15 business.subtype), else the template's. */
+  motif: Motif | SubMotif | null;
 }
 
 export function lookFeatures(spec: SiteSpec): LookFeatures {
@@ -32,7 +33,7 @@ export function lookFeatures(spec: SiteSpec): LookFeatures {
     hero: { type: first?.type ?? "none", variant: first?.variant ?? "none" },
     header: { variant: header.variant, tone: header.tone ?? "default" },
     sequence: home.sections.map((s) => `${s.type}:${s.variant}:${(s as { tone?: string }).tone ?? "default"}`),
-    motif: DIRECTIONS.find((d) => d.id === spec.design.direction)?.template?.motif ?? null,
+    motif: ((m) => m.sub ?? m.motif ?? null)(siteMotif(spec)),
   };
 }
 
@@ -219,7 +220,7 @@ export function brandFit(features: LookFeatures, logoColours: string[] | null): 
  * trade the fixture names (tools/eval fixture `trade`). The pipes belong to plumbing and heating, not to an
  * electrician or a carpenter; the bottle label to a deli, not to a florist.
  */
-export const MOTIF_TRADES: Record<Motif, string[]> = {
+export const MOTIF_TRADES: Record<Motif | SubMotif, string[]> = {
   plate: ["car-repair", "car-repair/servis", "car-repair/gume", "car-repair/karoserija"],
   pipes: ["builder", "builder/vodovod", "builder/ogrevanje"],
   crust: ["bakery"],
@@ -230,11 +231,18 @@ export const MOTIF_TRADES: Record<Motif, string[]> = {
   smile: ["dental"],
   trail: ["tourist-farm"],
   bend: ["physio"],
+  // Sub-trade motifs (variety engine Step 3), drawn when the business subtype picks them.
+  wire: ["builder/elektro"],
+  joint: ["builder/mizar"],
+  tiles: ["builder/krovec"],
+  strip: ["builder/pleskar"],
+  stem: ["shop/cvetličarna"],
+  tag: ["shop/butik"],
 };
 
 export type MotifFit = "fit" | "misfit" | "no-motif";
 
-export function motifFit(motif: Motif | null, businessType: string, trade?: string): MotifFit {
+export function motifFit(motif: Motif | SubMotif | null, businessType: string, trade?: string): MotifFit {
   if (!motif) return "no-motif";
   return MOTIF_TRADES[motif].includes(trade ? `${businessType}/${trade}` : businessType) ? "fit" : "misfit";
 }

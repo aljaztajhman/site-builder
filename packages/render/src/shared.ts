@@ -3,7 +3,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { STYLE_FILES } from "@sb/components";
-import { allFontFaces } from "@sb/spec";
+import { SUBMOTIF_BASE, allFontFaces } from "@sb/spec";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const componentsDir = path.resolve(here, "../../components");
@@ -86,12 +86,29 @@ export function motifsIn(css: string): string[] {
   return [...new Set([...css.matchAll(MOTIF)].map((m) => m[1]!))].sort();
 }
 
+const SUBMOTIF = /\[data-submotif="([a-z-]+)"\]/g;
+const subMotifsOf = (sel: string): Set<string> => new Set([...sel.matchAll(SUBMOTIF)].map((m) => m[1]!));
+
 /**
- * The stylesheet for a site with trade motif `motif` (null: none): every rule, in the original order,
- * except selectors that only apply under other motifs' `[data-motif="x"]`. The cascade is exactly the
- * full sheet's for that site, without nine other trades' rules.
+ * The sub-trade motifs a stylesheet has rules for, each with its base motif (spec SUBMOTIF_BASE): a rule naming
+ * `[data-submotif="x"]` applies only on a site drawing x.
  */
-export function stylesheetFor(css: string, motif: string | null): string {
+export function subMotifsIn(css: string): { motif: string; sub: string }[] {
+  const subs = [...new Set([...css.matchAll(SUBMOTIF)].map((m) => m[1]!))].sort();
+  return subs.map((sub) => {
+    const motif = (SUBMOTIF_BASE as Record<string, string>)[sub];
+    if (!motif) throw new Error(`[data-submotif="${sub}"] is not a sub-trade motif (spec SUBMOTIFS)`);
+    return { motif, sub };
+  });
+}
+
+/**
+ * The stylesheet for a site with trade motif `motif` (null: none) and sub-trade motif `sub`: every rule, in the
+ * original order, except selectors that only apply under other motifs' `[data-motif="x"]` or other sub-trades'
+ * `[data-submotif="y"]`. The cascade is exactly the full sheet's for that site, without the other trades' rules; a
+ * site without a sub-trade motif gets exactly the sheet it got before sub-trade motifs existed.
+ */
+export function stylesheetFor(css: string, motif: string | null, sub: string | null = null): string {
   const filter = (css: string): string => {
     let out = "";
     for (const b of blocks(css)) {
@@ -103,7 +120,8 @@ export function stylesheetFor(css: string, motif: string | null): string {
         // A selector naming motifs can only match under one of them (:is([data-motif="a"],[data-motif="b"]) …).
         const kept = selectors(b.prelude).filter((sel) => {
           const named = motifsOf(sel);
-          return named.size === 0 || (motif !== null && named.has(motif));
+          const subs = subMotifsOf(sel);
+          return (named.size === 0 || (motif !== null && named.has(motif))) && (subs.size === 0 || (sub !== null && subs.has(sub)));
         });
         if (kept.length) out += `${kept.join(",")}{${b.body}}`;
       }
@@ -130,6 +148,8 @@ export function sharedBundle(): SharedBundle {
   const css = minifyCss(sharedStylesheet());
   files.set("site.css", Buffer.from(stylesheetFor(css, null), "utf8"));
   for (const motif of motifsIn(css)) files.set(`site-${motif}.css`, Buffer.from(stylesheetFor(css, motif), "utf8"));
+  // And one per sub-trade motif on its template's layout (site-<motif>-<sub>.css, spec v15 business.subtype).
+  for (const { motif, sub } of subMotifsIn(css)) files.set(`site-${motif}-${sub}.css`, Buffer.from(stylesheetFor(css, motif, sub), "utf8"));
   const islandsDir = path.join(componentsDir, "islands");
   for (const f of readdirSync(islandsDir).filter((n) => n.endsWith(".js")).sort()) {
     files.set(`js/${f}`, readFileSync(path.join(islandsDir, f)));
