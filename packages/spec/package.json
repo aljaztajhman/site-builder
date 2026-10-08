@@ -9,7 +9,8 @@
     "./labels": "./src/labels.ts",
     "./price-edit": "./src/price-edit.ts",
     "./missing-facts": "./src/missing-facts.ts",
-    "./format": "./src/format.ts"
+    "./format": "./src/format.ts",
+    "./translatable": "./src/translatable.ts"
   },
   "dependencies": {
     "zod": "^4.6.5"
