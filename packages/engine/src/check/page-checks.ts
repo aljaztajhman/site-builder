@@ -8,9 +8,11 @@ export interface AxeViolation {
   targets: string[];
 }
 
-export async function runAxe(page: Page): Promise<AxeViolation[]> {
+/** `include`: check only that part of the page (e.g. an open menu panel, without the page it lies over). */
+export async function runAxe(page: Page, include?: string): Promise<AxeViolation[]> {
   const { AxeBuilder } = await import("@axe-core/playwright");
-  const r = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa", "best-practice"]).analyze();
+  const builder = new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa", "best-practice"]);
+  const r = await (include ? builder.include(include) : builder).analyze();
   return r.violations.map((v) => ({
     id: v.id,
     impact: v.impact ?? null,
@@ -60,7 +62,8 @@ export async function measurePage(page: Page, opts: { primaryMin: number; primar
     const visible = (el: Element) => {
       const r = el.getBoundingClientRect();
       const cs = getComputedStyle(el);
-      return r.width > 0 && r.height > 0 && cs.visibility !== "hidden" && cs.display !== "none";
+      // checkVisibility: not inside a closed <details> (the wide header's "Več") or another skipped subtree.
+      return r.width > 0 && r.height > 0 && cs.visibility !== "hidden" && cs.display !== "none" && el.checkVisibility();
     };
     const vw = window.innerWidth;
     const vh = window.innerHeight;
