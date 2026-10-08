@@ -356,7 +356,7 @@
                 ],
                 "image": "img_02",
                 "link": {
-                  "label": "Pokliči za rezervacijo",
+                  "label": "Pokličite za rezervacijo",
                   "target": {
                     "action": "call"
                   }
@@ -372,7 +372,7 @@
                 ],
                 "image": "img_07",
                 "link": {
-                  "label": "Pokliči za rezervacijo",
+                  "label": "Pokličite za rezervacijo",
                   "target": {
                     "action": "call"
                   }
@@ -432,7 +432,7 @@
             "heading": "Rezervirajte sobo",
             "text": "Rezervacije sprejemamo po telefonu ali e-pošti.",
             "primary": {
-              "label": "Pokliči",
+              "label": "Pokličite",
               "target": {
                 "action": "call"
               }
