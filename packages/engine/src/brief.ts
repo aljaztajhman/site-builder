@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { BusinessType, Day, toModelJsonSchema } from "@sb/spec";
 import { clientHours, dayRange, fold, hoursPaired, priceMentions, pricePaired } from "./fact-pairing.ts";
+import { Concept } from "./concept.ts";
 
 const Time = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/);
 
@@ -20,7 +21,7 @@ const PriceFact = z.strictObject({
  * Structured brief. Facts hold only what the client stated; `verifyBriefFacts` drops anything the
  * model produced that does not literally appear in the client's text.
  */
-export const Brief = z.strictObject({
+const BriefCore = z.strictObject({
   businessType: BusinessType,
   name: z.string().min(1).max(80),
   town: z.string().max(40).nullable(),
@@ -82,10 +83,13 @@ export const Brief = z.strictObject({
     .max(3)
     .default([]),
 });
+/** With config `variety.concept` the brief also carries the concept (concept.ts); a brief made without it has none. */
+export const Brief = BriefCore.extend({ concept: Concept.optional() });
 export type Brief = z.infer<typeof Brief>;
 
 export const classificationJsonSchema = () => toModelJsonSchema(Classification);
-export const briefJsonSchema = () => toModelJsonSchema(Brief);
+/** The brief call's schema: today's, or with `concept` (config `variety.concept`) the concept added, required. */
+export const briefJsonSchema = (concept = false) => toModelJsonSchema(concept ? BriefCore.extend({ concept: Concept }) : BriefCore);
 
 const digits = (s: string) => s.replace(/\D/g, "");
 

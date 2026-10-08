@@ -169,6 +169,8 @@ export function switchDirection(spec: SiteSpec, directionId: string): Design {
     density: dir.ranges.density[0]!,
     shadow: dir.ranges.shadow[0]!,
     imagery: dir.imagery,
+    // The site's skeleton (spec v15) is its frame, not the style: it stays.
+    ...(spec.design.skeleton ? { skeleton: spec.design.skeleton } : {}),
   };
   return enforceDesign(d, dir);
 }
@@ -249,7 +251,8 @@ export function editorCatalogue(spec: SiteSpec) {
       props: toModelJsonSchema(d.props),
       canAdd: defaultSection(spec, d.type, "s_probe") !== null,
     })),
-    business: toModelJsonSchema(Business),
+    // The subtype is set by the variety engine, not typed by the owner (spec v15).
+    business: toModelJsonSchema(Business.omit({ subtype: true })),
     /** One entry of each collection (the forms under Strani › Zbirke) and how many a collection may hold. */
     collections: {
       blog: toModelJsonSchema(Post),

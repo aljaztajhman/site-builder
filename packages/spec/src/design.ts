@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { HexColor } from "./common.ts";
 import type { BusinessType } from "./business.ts";
+import { Skeleton } from "./skeleton.ts";
 
 /** How photos are presented. Implemented as CSS in packages/components/styles/imagery.css. */
 export const Imagery = z.enum(["natural", "rounded", "framed", "full-bleed", "monochrome", "arched", "offset-block", "duotone"]);
@@ -39,6 +40,8 @@ export const Design = z.strictObject({
   density: Density,
   shadow: Shadow,
   imagery: Imagery,
+  /** Spec v15: the site's own frame (skeleton.ts); absent renders the shared one of v14. Set by the generator (config variety.skeleton). */
+  skeleton: Skeleton.optional().describe("Set by the system; leave out."),
 });
 export type Design = z.infer<typeof Design>;
 
@@ -60,6 +63,19 @@ type Range = [number, number];
  */
 export const MOTIFS = ["plate", "pipes", "crust", "ledger", "label", "spoon", "mirror", "smile", "trail", "bend"] as const;
 export type Motif = (typeof MOTIFS)[number];
+
+/**
+ * Motifs by sub-trade (variety engine Step 3): drawn on a template's own layout in place of its trade's pieces, picked
+ * by the business subtype. wire (electrical: a cable in three conductors with clamps, wire bullets, a socket on a
+ * routed cable), joint (carpentry: dovetails as divider and bullets, a dovetailed corner), tiles (roofing: tile
+ * courses as divider, gables as bullets, a tiled roof with a chimney), strip (painting: colour chips as divider, a
+ * roller, a swatch card) on Cevi's layout; stem (florist: a flower stem) and tag (boutique: a hang tag on its string)
+ * in place of Etiketa's olive branch. Everything in the site's own colours.
+ */
+export const SUBMOTIFS = ["wire", "joint", "tiles", "strip", "stem", "tag"] as const;
+export type SubMotif = (typeof SUBMOTIFS)[number];
+/** The template motif whose layout each sub-trade motif draws on. */
+export const SUBMOTIF_BASE: Record<SubMotif, Motif> = { wire: "pipes", joint: "pipes", tiles: "pipes", strip: "pipes", stem: "label", tag: "label" };
 
 export interface DirectionTemplate {
   /** Letter in docs/design/templates (M, S, J, R, T …). */

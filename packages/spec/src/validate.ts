@@ -2,12 +2,14 @@ import type { z } from "zod";
 import { GENERATED_IMAGE_SECTIONS, SiteSpec } from "./site.ts";
 import { SECTION_DEFS } from "./sections/index.ts";
 import { DIRECTIONS } from "./directions.ts";
+import { subtypeFits } from "./business.ts";
 import { checkDesign } from "./design-rules.ts";
 import { findBannedCopy } from "./banned.ts";
 import { getAt, walkObjects, walkStrings } from "./pointer.ts";
 import { SITE_LOCALES, isSiteLocale, isWebUrl, type PlaceholderKind } from "./common.ts";
 import { EDITOR_STARTER_TEXT } from "./starter.ts";
 import { COLLECTION_KINDS } from "./collections.ts";
+import { centredOn } from "./skeleton.ts";
 
 export interface Issue {
   path: string;
@@ -77,9 +79,12 @@ export function semanticIssues(spec: SiteSpec): Issue[] {
     }),
   );
 
-  // Banned: everything centred. At most one centred section per page.
+  // Banned: everything centred. At most one centred section per page: a centred variant, or the one the site's
+  // skeleton centres (spec v15, design.skeleton.centred; centredOn keeps at most one per page).
+  const motif = DIRECTIONS.find((d) => d.id === spec.design.direction)?.template?.motif;
   spec.pages.forEach((p, pi) => {
-    const centred = p.sections.filter((s) => defOf(s.type)?.centredVariants?.includes(s.variant));
+    const byAlign = centredOn(spec.design.skeleton, p.sections, motif);
+    const centred = p.sections.filter((s) => defOf(s.type)?.centredVariants?.includes(s.variant) || byAlign.has(s.id));
     if (centred.length > 1) add(`/pages/${pi}/sections`, "banned", `${centred.length} centred sections on one page (max 1)`);
   });
 
@@ -197,6 +202,10 @@ export function semanticIssues(spec: SiteSpec): Issue[] {
   });
   if (spec.business.bookingUrl !== undefined) webUrl("/business/bookingUrl", spec.business.bookingUrl);
   spec.business.social?.forEach((s, i) => webUrl(`/business/social/${i}/url`, s.url));
+  // Spec v15: the subtype is a trade within the business's own type.
+  if (spec.business.subtype !== undefined && !subtypeFits(spec.business.type, spec.business.subtype)) {
+    add("/business/subtype", "structure", `subtype ${spec.business.subtype} is not a kind of ${spec.business.type}`);
+  }
 
   // Design rules: direction ranges, contrast, banned backgrounds.
   const dir = DIRECTIONS.find((d) => d.id === spec.design.direction);

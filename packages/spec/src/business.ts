@@ -15,6 +15,31 @@ export const BusinessType = z.enum([
 ]);
 export type BusinessType = z.infer<typeof BusinessType>;
 
+/**
+ * Spec v15: the trade within a business type (docs/plans/variety-engine.md, Step 3). The ten types stay for plans,
+ * templates and blueprints; the subtype picks the drawn motif (an electrician gets a wire line, not the plumber's
+ * pipes; a florist a stem, not the deli's olive branch). Set only by the variety engine's concept (config
+ * `variety.concept`); a site without one renders as before.
+ */
+export const SUBTYPES = {
+  "car-repair": ["repair", "tyres", "bodywork"],
+  builder: ["plumbing", "electrical", "carpentry", "roofing", "painting"],
+  shop: ["deli", "florist", "boutique"],
+} as const satisfies Partial<Record<BusinessType, readonly string[]>>;
+type SubtypeOf = (typeof SUBTYPES)[keyof typeof SUBTYPES][number];
+export const BusinessSubtype = z.enum(Object.values(SUBTYPES).flat() as [SubtypeOf, ...SubtypeOf[]]);
+export type BusinessSubtype = z.infer<typeof BusinessSubtype>;
+
+/** The subtypes a business type has (empty: none). */
+export function subtypesOf(type: BusinessType): readonly BusinessSubtype[] {
+  return (SUBTYPES as Partial<Record<BusinessType, readonly BusinessSubtype[]>>)[type] ?? [];
+}
+
+/** Whether `subtype` belongs to `type` (the spec's validation and the brief's concept check). */
+export function subtypeFits(type: BusinessType, subtype: string): subtype is BusinessSubtype {
+  return (subtypesOf(type) as readonly string[]).includes(subtype);
+}
+
 export const Address = z.strictObject({
   street: text(80).describe('Street and number, e.g. "Trubarjeva cesta 12"'),
   postalCode: z.string().regex(/^\d{4}$/),
@@ -56,6 +81,8 @@ export const Social = z.strictObject({
 export const Business = z.strictObject({
   name: text(80),
   type: BusinessType,
+  /** Spec v15: the trade within the type (SUBTYPES); must belong to `type` (validate.ts). */
+  subtype: BusinessSubtype.optional().describe("Set by the system; leave out."),
   phone: orPlaceholder(z.string().regex(/^\+\d{8,15}$/).describe("E.164, e.g. +38641123456")),
   email: orPlaceholder(z.email().max(120)),
   address: orPlaceholder(Address),

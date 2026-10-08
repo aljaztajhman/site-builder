@@ -6,7 +6,7 @@ import { Section } from "./sections/index.ts";
 import { SectionId } from "./sections/define.ts";
 import { Collections } from "./collections.ts";
 
-export const SPEC_VERSION = 15 as const;
+export const SPEC_VERSION = 17 as const;
 
 export const PageKind = z.enum(["home", "standard", "privacy", "accessibility", "not-found"]);
 export type PageKind = z.infer<typeof PageKind>;

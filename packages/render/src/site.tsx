@@ -1,16 +1,19 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import {
+  CallFloat,
   CookieConsent,
   ENTRY_IMAGE_SIZES,
   EntryArticle,
   Footer,
   Header,
+  CentredSections,
   LandmarkSuffixes,
   MobileActionBar,
   islandsFor,
   lcpImageFor,
   rendererFor,
   barActions,
+  heroOwnsCall,
   signatureActions,
   signatureOffersDirections,
   uiStrings,
@@ -21,7 +24,7 @@ import {
 import type { ReactNode } from "react";
 import {
   COLLECTION_KINDS,
-  DIRECTIONS,
+  centredOn,
   collectionEntries,
   entrySlugs,
   entryPages,
@@ -31,6 +34,8 @@ import {
   mapsUrl,
   setAt,
   fontPair,
+  siteMotif,
+  stylesheetName,
   type ImageRef,
   type LinkTarget,
   type Locale,
@@ -298,26 +303,52 @@ function renderDocument(spec: SiteSpec, localized: SiteSpec, opts: RenderOptions
   const fontsBase = ctx.shared("fonts/");
   const preloadFonts = fontFiles(design).filter((f) => f === `${pair.heading.file}.woff2` || f === `${pair.body.file}.woff2`);
 
-  // Trade templates draw their motif (dividers, bullets, plates) from CSS keyed on this attribute.
-  const motif = DIRECTIONS.find((d) => d.id === design.direction)?.template?.motif;
+  // Trade templates draw their motif (dividers, bullets, plates) from CSS keyed on this attribute; a sub-trade motif
+  // (spec v15 business.subtype) draws its own pieces on the template's layout.
+  const { motif, sub } = siteMotif(localized);
   const bar = localized.chrome.mobileActionBar === true;
   // Bar on screen from the start with an action the hero also offers (its call, a booking): on a phone the hero's
   // one is hidden (chrome.css), so one screen never shows two of the same.
   const afterHero = heroOffersCallAndDirections(first);
   const shown = heroActions(first);
-  const covered = bar && !afterHero ? barActions(ctx).filter((a) => a !== "directions" && shown.includes(a)) : [];
-  const bodyClass = bar ? ["has-action-bar", ...covered.map((a) => `bar-covers-hero-${a}`)].join(" ") : undefined;
+  // Spec v15: the site's skeleton says where the call lives on phones: the bar, one floating call button, or the header
+  // (no fixed element). Either fixed one waits for a hero that offers call and directions itself (reveal.js), so a screen
+  // never shows two call buttons; skeleton.css turns every other call button into a text link.
+  const skeleton = design.skeleton;
+  const fixed = !bar || !skeleton ? (bar ? "bar" : null) : skeleton.actions === "header" ? null : skeleton.actions;
+  const covered = fixed === "bar" && !afterHero ? barActions(ctx).filter((a) => a !== "directions" && shown.includes(a)) : [];
+  const bodyClass =
+    fixed === "bar" ? ["has-action-bar", ...covered.map((a) => `bar-covers-hero-${a}`)].join(" ") : fixed === "float" ? "has-call-float" : undefined;
+  // A hero whose call object owns the call (a plate, a call block): only the fixed element's call waits for it.
+  const waitCall = skeleton !== undefined && !afterHero && heroOwnsCall(first);
+  if (skeleton && ((fixed && (afterHero || waitCall)) || (skeleton.actions === "header" && heroOwnsCall(first)))) islands.add("reveal.js");
+  const skeletonAttrs = skeleton
+    ? {
+        "data-skeleton": "",
+        "data-actions": skeleton.actions,
+        "data-width": skeleton.width,
+        "data-cards": skeleton.cards,
+        "data-buttons": skeleton.buttons,
+        "data-dividers": skeleton.dividers,
+        "data-ratio": skeleton.photoRatio,
+      }
+    : {};
+  // The page's one centred section (design.skeleton.centred), if any; none without a skeleton.
+  const centred = centredOn(skeleton, doc.sections, motif);
   const renderBody = (suffixes: ReadonlyMap<string, string>) => renderToStaticMarkup(
-    <body data-imagery={design.imagery} data-motif={motif} className={bodyClass}>
+    <body data-imagery={design.imagery} data-motif={motif} data-submotif={sub} className={bodyClass} {...skeletonAttrs}>
       <a className="skip-link" href="#main">
         {ctx.t("skipToContent")}
       </a>
       <Header ctx={ctx} />
       <main id="main" tabIndex={-1}>
-        <LandmarkSuffixes.Provider value={suffixes}>{doc.main(ctx)}</LandmarkSuffixes.Provider>
+        <LandmarkSuffixes.Provider value={suffixes}>
+          <CentredSections.Provider value={centred}>{doc.main(ctx)}</CentredSections.Provider>
+        </LandmarkSuffixes.Provider>
       </main>
       <Footer ctx={ctx} />
-      {bar && <MobileActionBar ctx={ctx} afterHero={afterHero} />}
+      {fixed === "bar" && <MobileActionBar ctx={ctx} afterHero={afterHero} reveal={skeleton !== undefined} waitCall={waitCall} />}
+      {fixed === "float" && <CallFloat ctx={ctx} reveal={afterHero} waitCall={waitCall} />}
       {needsConsent && <CookieConsent ctx={ctx} onRequest={consentOnRequest} />}
       {[...islands].sort().map((f) => (
         <script key={f} src={ctx.shared(`js/${f}`)} defer />
@@ -374,8 +405,8 @@ function renderDocument(spec: SiteSpec, localized: SiteSpec, opts: RenderOptions
         <link rel="preload" as="image" type="image/avif" imageSrcSet={avif.srcSet} imageSizes={lcp.sizes} fetchPriority="high" />
       )}
       {/* The stylesheet without other trades' motif rules (shared.ts stylesheetFor). */}
-      <link rel="stylesheet" href={ctx.shared(motif ? `site-${motif}.css` : "site.css")} />
-      <style dangerouslySetInnerHTML={{ __html: fontFaceCss(design, fontsBase) + tokensCss(design) }} />
+      <link rel="stylesheet" href={ctx.shared(stylesheetName({ motif, sub }))} />
+      <style dangerouslySetInnerHTML={{ __html: fontFaceCss(design, fontsBase) + tokensCss(design, sub) }} />
       {doc.jsonLd.map((json, i) => (
         <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: json }} />
       ))}

@@ -282,10 +282,9 @@ describe("migration 13 → 14 (the owner's own texts, it-keep-owner-edits)", () 
       const v14 = migrateSpec({ ...golden, specVersion: 13 }, MIGRATIONS, 14);
       expect(v14, id).toEqual({ ...golden, specVersion: 14 });
       expect(v14.ownerEdits, id).toBeUndefined();
-      // Valid once brought to the current version (the schema accepts only the current one).
       expect(validateSite(migrateSpec(v14)).issues, id).toEqual([]);
     }
-    const site = read("pekarna-kvas");
+    const site = migrateSpec(read("pekarna-kvas"));
     const section = site.pages[0]!.sections[0]!.id;
     expect(Schema.safeParse({ ...site, ownerEdits: [{ section, path: "/props/title" }] }).success).toBe(true);
     // Only pointers inside a section's props, by a section id; never more than MAX_OWNER_EDITS.
@@ -295,16 +294,60 @@ describe("migration 13 → 14 (the owner's own texts, it-keep-owner-edits)", () 
   });
 });
 
-describe("migration 14 → 15 (\"Cena po dogovoru\", it-price-on-request)", () => {
-  it("turns stored v14 sites into valid v15 sites unchanged apart from the version; a price may be { onRequest: true }", async () => {
+describe("migration 14 → 15 (the site's skeleton, variety engine Step 4)", () => {
+  it("turns stored v14 sites into valid v15 sites unchanged apart from the version; the skeleton is optional and checked", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { validateSite, SiteSpec: Schema, skeletonOfChrome } = await import("../src/index.ts");
+    const read = (id: string) => JSON.parse(readFileSync(new URL(`../../../tools/eval/golden/${id}.json`, import.meta.url), "utf8")) as SiteSpec;
+    for (const id of ["avtoservis-mrak", "kmetija-grabnar", "pekarna-kvas", "racunovodstvo-seliskar"]) {
+      const golden = read(id);
+      const v15 = migrateSpec({ ...golden, specVersion: 14 }, MIGRATIONS, 15);
+      expect(v15, id).toEqual({ ...golden, specVersion: 15 });
+      expect(v15.design.skeleton, id).toBeUndefined();
+      expect(validateSite(migrateSpec(v15)).issues, id).toEqual([]);
+      // Today's header and footer variants are skeleton families one to one.
+      const skeleton = skeletonOfChrome(golden.chrome);
+      expect([skeleton.header, skeleton.footer], id).toEqual([golden.chrome.header.variant, golden.chrome.footer.variant]);
+      expect(validateSite(migrateSpec({ ...v15, design: { ...v15.design, skeleton } })).issues, id).toEqual([]);
+    }
+    const site = read("pekarna-kvas");
+    const skeleton = skeletonOfChrome(site.chrome);
+    expect(Schema.safeParse({ ...site, design: { ...site.design, skeleton: { ...skeleton, header: "hamburger" } } }).success).toBe(false);
+    expect(Schema.safeParse({ ...site, design: { ...site.design, skeleton: { ...skeleton, buttons: "pill" } } }).success).toBe(false);
+  });
+});
+
+describe("migration 15 → 16 (the business subtype, variety engine Step 3)", () => {
+  it("turns stored v15 sites into valid v16 sites unchanged apart from the version; the subtype is optional and checked", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { validateSite, SiteSpec: Schema } = await import("../src/index.ts");
+    const read = (id: string) => JSON.parse(readFileSync(new URL(`../../../tools/eval/golden/${id}.json`, import.meta.url), "utf8")) as SiteSpec;
+    for (const id of ["instalacije-rebernik", "trgovina-oljka-in-sol", "avtoservis-mrak", "kmetija-grabnar"]) {
+      const golden = read(id);
+      const v16 = migrateSpec({ ...golden, specVersion: 15 }, MIGRATIONS, 16);
+      expect(v16, id).toEqual({ ...golden, specVersion: 16 });
+      expect(v16.business.subtype, id).toBeUndefined();
+      // Valid once brought to the current version (the schema accepts only the current one).
+      expect(validateSite(migrateSpec(v16)).issues, id).toEqual([]);
+    }
+    const shop = migrateSpec(read("trgovina-oljka-in-sol"));
+    expect(Schema.safeParse({ ...shop, business: { ...shop.business, subtype: "florist" } }).success).toBe(true);
+    // Only a known subtype; whether it fits the type is validateSite's (subtype.test.ts).
+    expect(Schema.safeParse({ ...shop, business: { ...shop.business, subtype: "gardening" } }).success).toBe(false);
+    expect(SPEC_VERSION).toBeGreaterThanOrEqual(16);
+  });
+});
+
+describe("migration 16 → 17 (\"Cena po dogovoru\", it-price-on-request)", () => {
+  it("turns stored v16 sites into valid v17 sites unchanged apart from the version; a price may be { onRequest: true }", async () => {
     const { readFileSync } = await import("node:fs");
     const { validateSite, publishChecklist, SiteSpec: Schema } = await import("../src/index.ts");
     const read = (id: string) => JSON.parse(readFileSync(new URL(`../../../tools/eval/golden/${id}.json`, import.meta.url), "utf8")) as SiteSpec;
     for (const id of ["frizerstvo-lana", "gostilna-zlata-zlica", "pekarna-kvas", "racunovodstvo-seliskar"]) {
       const golden = read(id);
-      const v15 = migrateSpec({ ...golden, specVersion: 14 });
-      expect(v15, id).toEqual({ ...golden, specVersion: 15 });
-      expect(validateSite(v15).issues, id).toEqual([]);
+      const v17 = migrateSpec({ ...golden, specVersion: 16 }, MIGRATIONS, 17);
+      expect(v17, id).toEqual({ ...golden, specVersion: 17 });
+      expect(validateSite(migrateSpec(v17)).issues, id).toEqual([]);
     }
     // The salon's price list: "Pramene" has no price in the brief (a placeholder, so a publish blocker).
     const salon = read("frizerstvo-lana");

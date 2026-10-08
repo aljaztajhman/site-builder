@@ -92,6 +92,41 @@ describe("template tokens", () => {
     }
   });
 
+  it("draws a sub-trade motif's pieces in the site's colours in place of the template's, and nothing else changes", () => {
+    const cevi = designFor("cevi");
+    const base = tokensCss(cevi);
+    expect(tokensCss(cevi, undefined)).toBe(base);
+    const decode = (css: string) => css.replace(/data:image\/svg\+xml,([^"]+)/g, (_, svg: string) => `data:image/svg+xml,${decodeURIComponent(svg)}`);
+    for (const sub of ["wire", "joint", "tiles", "strip"] as const) {
+      const css = decode(tokensCss(cevi, sub));
+      // The same tokens Cevi's layout reads, drawn differently, in the site's own primary.
+      for (const token of ["--motif-brand", "--motif-divider", "--motif-bullet", "--motif-bullet-2"]) expect(css, `${sub} ${token}`).toContain(`${token}:url(`);
+      expect(css, sub).toContain(cevi.colors.primary);
+      expect(css).not.toBe(decode(base));
+      // Everything but the motif's pieces is the template's.
+      const rest = (s: string) => s.split(";").filter((d) => !d.startsWith("--motif")).join(";");
+      expect(rest(css)).toBe(rest(decode(base)));
+    }
+    expect(decode(tokensCss(designFor("etiketa"), "stem"))).toMatch(/--motif-brand:url\("data:image\/svg\+xml,<svg[^;]*fill="#/);
+    // An edit of the primary recolours the wire.
+    const edited = decode(tokensCss({ ...cevi, colors: { ...cevi.colors, primary: "#0a4f6b" } }, "wire"));
+    expect(edited).toContain('stroke="#0a4f6b"');
+  });
+
+  it("marks the page with the sub-trade motif and links its stylesheet; a site without a subtype is unchanged", () => {
+    const golden = migrateSpec(JSON.parse(readFileSync(new URL("../../../tools/eval/golden/instalacije-rebernik.json", import.meta.url), "utf8")) as unknown) as SiteSpec;
+    const spec: SiteSpec = { ...golden, design: designFor("cevi") };
+    const plain = renderPage(spec, spec.pages[0]!);
+    expect(plain).toContain('<body data-imagery="natural" data-motif="pipes"');
+    expect(plain).not.toContain("data-submotif");
+    expect(plain).toMatch(/_shared\/[0-9a-f]+\/site-pipes\.css"/);
+    const wire = renderPage({ ...spec, business: { ...spec.business, subtype: "electrical" } }, spec.pages[0]!);
+    expect(wire).toContain('data-motif="pipes" data-submotif="wire"');
+    expect(wire).toMatch(/_shared\/[0-9a-f]+\/site-pipes-wire\.css"/);
+    // Plumbing has no motif of its own: the page is exactly the one without a subtype.
+    expect(renderPage({ ...spec, business: { ...spec.business, subtype: "plumbing" } }, spec.pages[0]!)).toBe(plain);
+  });
+
   it("marks the page with the motif, so one stylesheet draws it in preview and published output alike", () => {
     const golden = migrateSpec(JSON.parse(readFileSync(new URL("../../../tools/eval/golden/avtoservis-mrak.json", import.meta.url), "utf8")) as unknown) as SiteSpec;
     const spec: SiteSpec = { ...golden, design: designFor("tablica") };

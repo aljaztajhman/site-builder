@@ -2,7 +2,7 @@ import { formatPrice, isPlaceholder, isPriceOnRequest, type Price } from "@sb/sp
 import { Ph, Picture, PriceText, Section, SectionHead, cx, titleId } from "../../primitives/index.tsx";
 import type { RenderCtx, SectionProps } from "../../types.ts";
 import { TAG_KEYS, itemId } from "./shared.tsx";
-import { Branch, PlateStrip, Spoon, motifOf } from "../../motifs/index.tsx";
+import { LabelMark, PlateStrip, Spoon, motifOf } from "../../motifs/index.tsx";
 
 /**
  * An item the owner marked as not available right now: it stays listed, says so in words (the price is
@@ -73,7 +73,7 @@ function PriceLabels({ section, ctx, fold = false }: Omit<SectionProps<"price-li
             <ul className="price-labels" role="list">
               {g.items.map((it, ii) => (
                 <li className={cx("price-label", fold ? "price-label--fold" : "label-card", it.unavailable && "is-unavailable")} key={ii}>
-                  {!fold && <Branch />}
+                  {!fold && <LabelMark ctx={ctx} />}
                   <Name className="price-label__name">{it.name}</Name>
                   {it.note && <p className="price-label__note">{it.note}</p>}
                   {it.unavailable && (

@@ -89,7 +89,7 @@ export type Link = z.infer<typeof Link>;
 export const OWNER_ONLY = "x-owner-only";
 
 /**
- * Spec v15: "Cena po dogovoru" (it-price-on-request, owner's decision sb-price-on-request). The owner chose to give
+ * Spec v17: "Cena po dogovoru" (it-price-on-request, owner's decision sb-price-on-request). The owner chose to give
  * the price on request instead of an amount: rendered as "po dogovoru", never a placeholder (it doesn't block
  * publishing) and never an offer price in JSON-LD. Only the owner sets it in the editor (config
  * `editor.priceOnRequest`); the generator, the critique and chat edits can't (engine owner-only prices).
@@ -97,7 +97,7 @@ export const OWNER_ONLY = "x-owner-only";
 export const PriceOnRequest = z.strictObject({ onRequest: z.literal(true) }).meta({ [OWNER_ONLY]: true });
 export type PriceOnRequest = z.infer<typeof PriceOnRequest>;
 
-/** A price in euros. `from: true` renders "od 25,00 €". Or a marked placeholder, or the owner's "po dogovoru" (v15). */
+/** A price in euros. `from: true` renders "od 25,00 €". Or a marked placeholder, or the owner's "po dogovoru" (v17). */
 export const Price = z.union([
   z.strictObject({
     amount: z.number().nonnegative().max(1_000_000),

@@ -28,11 +28,15 @@ export function barActions(ctx: RenderCtx): BarAction[] {
  * `afterHero`: the page's first section already offers call and directions, so the bar slides in only once it
  * has scrolled away (CSS scroll timeline; without support, or with reduced motion, it is always there).
  */
-export function MobileActionBar({ ctx, afterHero = false }: { ctx: RenderCtx; afterHero?: boolean }) {
+export function MobileActionBar({ ctx, afterHero = false, reveal = false, waitCall = false }: { ctx: RenderCtx; afterHero?: boolean; reveal?: boolean; waitCall?: boolean }) {
   const actions = barActions(ctx);
   if (actions.length === 0) return null;
+  // A site with a skeleton (reveal) shows the bar once the hero has gone (reveal.js), in every browser and with reduced
+  // motion too, so the hero's call and the bar's are never on one screen; without one, the CSS scroll timeline as before.
+  // waitCall: the hero's call object owns the call, so only the bar's call waits (the directions are there at once).
+  const props = reveal ? { className: "action-bar", ...(afterHero ? { "data-after-hero": "" } : {}) } : { className: afterHero ? "action-bar action-bar--after-hero" : "action-bar" };
   return (
-    <nav className={afterHero ? "action-bar action-bar--after-hero" : "action-bar"} aria-label={ctx.t("quickContact")}>
+    <nav {...props} aria-label={ctx.t("quickContact")}>
       {actions.map((a, i) => {
         const { label: long, short, icon, external } = BAR[a];
         const label = actions.length > 2 ? short : long;
@@ -43,12 +47,40 @@ export function MobileActionBar({ ctx, afterHero = false }: { ctx: RenderCtx; af
             href={ctx.href({ action: a })!}
             rel={external ? "noopener" : undefined}
             target={external ? "_blank" : undefined}
+            {...(waitCall && a === "call" ? { "data-after-hero": "" } : {})}
           >
             <Icon name={icon} />
             {ctx.t(label)}
           </a>
         );
       })}
+    </nav>
+  );
+}
+
+/**
+ * One floating call button in the corner below 48rem (skeleton actions "float"), with a small directions button beside
+ * it so both stay one tap away; lighter than the bar for businesses people visit or browse. `reveal`: waits for a hero
+ * that offers call and directions itself (reveal.js). The page shell adds `has-call-float` to <body>.
+ */
+export function CallFloat({ ctx, reveal = false, waitCall = false }: { ctx: RenderCtx; reveal?: boolean; waitCall?: boolean }) {
+  const call = ctx.href({ action: "call" });
+  const directions = ctx.href({ action: "directions" });
+  if (!call && !directions) return null;
+  return (
+    <nav className="call-float" aria-label={ctx.t("quickContact")} {...(reveal ? { "data-after-hero": "" } : {})}>
+      {directions && (
+        <a className="btn btn--secondary call-float__btn call-float__directions" href={directions} rel="noopener" target="_blank">
+          <Icon name="map-pin" />
+          <span className="visually-hidden">{ctx.t("directions")}</span>
+        </a>
+      )}
+      {call && (
+        <a className="btn btn--primary call-float__btn" href={call} {...(waitCall ? { "data-after-hero": "" } : {})}>
+          <Icon name="phone" />
+          {ctx.t("call")}
+        </a>
+      )}
     </nav>
   );
 }
