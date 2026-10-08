@@ -10,6 +10,7 @@ import { SITE_LOCALES, isSiteLocale, isWebUrl, type PlaceholderKind } from "./co
 import { EDITOR_STARTER_TEXT } from "./starter.ts";
 import { COLLECTION_KINDS } from "./collections.ts";
 import { centredOn } from "./skeleton.ts";
+import { secondLocales, untranslated } from "./translatable.ts";
 
 export interface Issue {
   path: string;
@@ -278,11 +279,11 @@ export function collectPlaceholders(spec: unknown): PlaceholderRef[] {
  */
 export interface PublishBlocker {
   path: string;
-  kind: "invalid" | "placeholder" | "starter" | "alt" | "fact";
+  kind: "invalid" | "placeholder" | "starter" | "alt" | "fact" | "translation";
   detail: string;
   /** Validation issue code (kind "invalid"). */
   code?: Issue["code"];
-  /** The value in question (kind "fact"). */
+  /** The value in question (kind "fact"); how many texts there still have no translation (kind "translation", whose detail is the language). */
   value?: string;
 }
 
@@ -298,6 +299,18 @@ export function publishChecklist(spec: unknown): PublishBlocker[] {
     const b = v.spec.business;
     if (types.has("opening-hours") && b.hours === undefined) out.push({ path: "/business/hours", kind: "placeholder", detail: "hours" });
     if (types.has("service-area") && !b.serviceArea?.length) out.push({ path: "/business/serviceArea", kind: "placeholder", detail: "serviceArea" });
+  }
+  // A second language: every text of the pages needs its translation (one entry per section, page settings or
+  // hours note, at its first text still missing; `value` is how many are), else the visitor reads the default language.
+  for (const locale of secondLocales(spec)) {
+    const groups = new Map<string, { path: string; n: number }>();
+    for (const t of untranslated(spec, locale)) {
+      const key = /^\/pages\/\d+\/sections\/\d+/.exec(t.path)?.[0] ?? /^\/pages\/\d+/.exec(t.path)?.[0] ?? t.path;
+      const g = groups.get(key);
+      if (g) g.n++;
+      else groups.set(key, { path: t.path, n: 1 });
+    }
+    for (const g of groups.values()) out.push({ path: g.path, kind: "translation", detail: locale, value: String(g.n) });
   }
   // A photo the pages show needs a description (alt text) for screen readers.
   if (v.spec) {
@@ -323,6 +336,8 @@ export function blockerText(b: PublishBlocker): string {
       return `${b.path}: photo ${b.detail} has no description`;
     case "fact":
       return `${b.path}: ${b.detail} "${b.value ?? ""}" is not in the client's input`;
+    case "translation":
+      return `${b.path}: ${b.value ?? "1"} text(s) here without a translation (${b.detail})`;
     default:
       return `${b.path}: ${b.detail}`;
   }
