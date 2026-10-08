@@ -28,6 +28,7 @@ export * from "./check/index.ts";
 export * from "./editor.ts";
 export type { Operation } from "fast-json-patch";
 export * from "./collections.ts";
+export * from "./languages.ts";
 export * from "./provision.ts";
 export * from "./plan-limits.ts";
 export * from "./concept.ts";
