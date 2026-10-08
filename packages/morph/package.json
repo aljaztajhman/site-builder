@@ -1,0 +1,19 @@
+{
+  "name": "@sb/morph",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Part-by-part screen morphs (\"Transformer\" transitions), a self-building page reveal and a text decode, on view transitions. No runtime dependencies.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsx scripts/build.ts",
+    "demo": "tsx scripts/build.ts && node examples/serve.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "playwright": "1.63.0",
+    "tsx": "^4.23.15"
+  }
+}

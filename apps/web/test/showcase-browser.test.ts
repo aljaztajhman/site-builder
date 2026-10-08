@@ -178,7 +178,7 @@ describe("landing trade demo", () => {
         // build stylesheet still on, and the first one without it: the same picture.
         await frame.waitForFunction(() => document.getAnimations().length === 0, undefined, { timeout: 10_000 });
         const screen = page.locator(".dev .screen");
-        const building = () => frame.evaluate(() => document.documentElement.classList.contains("bld"));
+        const building = () => frame.evaluate(() => document.documentElement.classList.contains("mb-bld"));
         let before = await screen.screenshot({ animations: "disabled" });
         for (;;) {
           await page.clock.runFor(50);
@@ -186,7 +186,7 @@ describe("landing trade demo", () => {
           await frame.waitForFunction(() => document.getAnimations().length === 0, undefined, { timeout: 10_000 });
           before = await screen.screenshot({ animations: "disabled" });
         }
-        expect(await frame.evaluate(() => document.querySelectorAll("sb-w, [data-plate], [data-bk]").length)).toBe(0);
+        expect(await frame.evaluate(() => document.querySelectorAll("mb-w, [data-mb-panel], [data-mb-box]").length)).toBe(0);
         const after = await screen.screenshot({ animations: "disabled" });
         expect(after.equals(before)).toBe(true);
 
@@ -292,11 +292,11 @@ describe("landing trade demo", () => {
         // While the view transition runs: the stacking of the new card and photo in the generated rules.
         const z = await frame.waitForFunction(
           () => {
-            const rig = document.querySelector("style[data-rig]");
+            const sheet = document.querySelector("style[data-morph]");
             const card = document.querySelector<HTMLElement>(".label-card");
             const photo = document.querySelector<HTMLElement>("main > section picture.media");
             const name = (el: HTMLElement | null) => el?.style.getPropertyValue("view-transition-name");
-            const zOf = (n: string | undefined) => (n ? Number(rig?.textContent?.match(new RegExp(`::view-transition-group\\(${n}\\)\\{z-index:(\\d+)`))?.[1]) : NaN);
+            const zOf = (n: string | undefined) => (n ? Number(sheet?.textContent?.match(new RegExp(`::view-transition-group\\(${n}\\)\\{z-index:(\\d+)`))?.[1]) : NaN);
             const c = zOf(name(card));
             const p = zOf(name(photo));
             return Number.isFinite(c) && Number.isFinite(p) ? { card: c, photo: p } : null;
@@ -307,7 +307,7 @@ describe("landing trade demo", () => {
         const { card, photo } = (await z.jsonValue())!;
         expect(card).toBeGreaterThan(photo);
         expect(await selected(page)).toBe("gostilna");
-        await frame.waitForFunction(() => !document.querySelector("style[data-rig]"), undefined, { timeout: 15_000 });
+        await frame.waitForFunction(() => !document.querySelector("style[data-morph]"), undefined, { timeout: 15_000 });
         expect(await frame.evaluate(() => document.querySelectorAll("[style*=view-transition-name]").length)).toBe(0);
         expect(problems).toEqual([]);
       } finally {
@@ -349,7 +349,7 @@ describe("landing trade demo", () => {
           await watch();
           await page.clock.runFor(50);
         }
-        expect(await frame.evaluate(() => [...document.documentElement.classList].filter((c) => c === "bld" || c === "calm"))).toEqual(["bld", "calm"]);
+        expect(await frame.evaluate(() => [...document.documentElement.classList].filter((c) => c === "mb-bld" || c === "mb-calm"))).toEqual(["mb-bld", "mb-calm"]);
         await page.waitForFunction(() => getComputedStyle(document.querySelector(".dev")!).opacity === "1", undefined, { timeout: 10_000 });
         while (!(await frame.evaluate(() => document.documentElement.classList.contains("text")))) {
           await watch();
@@ -360,7 +360,7 @@ describe("landing trade demo", () => {
         // The handover: the build's last frame is the finished page (as without reduced motion).
         await frame.waitForFunction(() => document.getAnimations().length === 0, undefined, { timeout: 10_000 });
         const screen = page.locator(".dev .screen");
-        const building = () => frame.evaluate(() => document.documentElement.classList.contains("bld"));
+        const building = () => frame.evaluate(() => document.documentElement.classList.contains("mb-bld"));
         let before = await screen.screenshot({ animations: "disabled" });
         for (;;) {
           await page.clock.runFor(50);
@@ -368,7 +368,7 @@ describe("landing trade demo", () => {
           await frame.waitForFunction(() => document.getAnimations().length === 0, undefined, { timeout: 10_000 });
           before = await screen.screenshot({ animations: "disabled" });
         }
-        expect(await frame.evaluate(() => document.querySelectorAll("sb-w, [data-plate], [data-bk]").length)).toBe(0);
+        expect(await frame.evaluate(() => document.querySelectorAll("mb-w, [data-mb-panel], [data-mb-box]").length)).toBe(0);
         expect((await screen.screenshot({ animations: "disabled" })).equals(before)).toBe(true);
         await run(page, DEMO.buildEnd + 100);
         expect(await step(page)).toBe("site");
@@ -390,7 +390,7 @@ describe("landing trade demo", () => {
         let faded = false;
         while (!(await page.locator(".tabs").evaluate((el) => el.classList.contains("auto")))) {
           faded ||= (await page.locator("iframe.main").evaluate((el) => (el as HTMLElement).style.opacity)) === "0";
-          expect(await page.evaluate(() => document.querySelector<HTMLIFrameElement>("iframe.main")!.contentDocument?.querySelector("style[data-rig]") ?? null)).toBeNull();
+          expect(await page.evaluate(() => document.querySelector<HTMLIFrameElement>("iframe.main")!.contentDocument?.querySelector("style[data-morph]") ?? null)).toBeNull();
           await watch();
           await page.clock.runFor(50);
         }
@@ -427,7 +427,7 @@ describe("landing trade demo", () => {
         expect(await selected(page)).toBe("gostilna");
         const frame = await mainFrame(page);
         await frame.waitForLoadState("load");
-        expect(await frame.evaluate(() => document.documentElement.classList.contains("bld"))).toBe(false);
+        expect(await frame.evaluate(() => document.documentElement.classList.contains("mb-bld"))).toBe(false);
         expect(problems).toEqual([]);
       } finally {
         await close();
