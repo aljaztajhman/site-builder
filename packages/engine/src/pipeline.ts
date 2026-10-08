@@ -188,7 +188,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     if (slots.skipped) await log("imageGen", slots.skipped);
     if (slots.limited && deps.pictures?.note) await log("imageGen", deps.pictures.note, { planLimit: true, wanted: slots.limited.wanted, made: slots.wanted });
     const ideas = brief.imageIdeas.slice(0, slots.wanted);
-    const template = templateFor(brief.businessType, photos.length);
+    const template = templateFor(brief.businessType, photos.length + ideas.length + reuse.length);
     const waitForDesign = ideas.length > 0 && template !== undefined && drawsInsteadOfPhotos(template);
     const startImages = (): Promise<ImageAsset[]> => (ideas.length ? stageTime("imageGen", () => generateImages(deps, siteId, ideas, log, stop)) : Promise.resolve([]));
     let generating: Promise<ImageAsset[]> = waitForDesign ? Promise.resolve([]) : startImages();

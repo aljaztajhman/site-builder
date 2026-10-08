@@ -91,6 +91,7 @@ export interface DirectionTemplate {
   /** Business types this template is the first choice for. */
   firstFor: BusinessType[];
   /** Photos the template needs: 0 works without any. */
+  /** The fewest pictures (client photos plus generated ones) the template needs. */
   minPhotos: number;
   /** Homepage outline the content step follows, top to bottom ("type:variant tone …, what goes in it"). */
   homepage: string[];

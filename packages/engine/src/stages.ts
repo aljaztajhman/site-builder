@@ -122,10 +122,11 @@ export function photoLine(photoCount: number, generatedCount: number): string {
 
 /**
  * The hand-made trade template for this business type (docs/design/templates), named to the design step as
- * the first choice when the business fits it. Empty when the trade has none or the photos don't allow it.
+ * the first choice when the business fits it. Empty when the trade has none or the pictures (client photos plus
+ * generated ones) don't allow it.
  */
-export function templateLine(businessType: BusinessType, photoCount: number): string {
-  const t = templateFor(businessType, photoCount);
+export function templateLine(businessType: BusinessType, pictureCount: number): string {
+  const t = templateFor(businessType, pictureCount);
   if (!t) return "";
   const draws = drawsInsteadOfPhotos(t) ? " It draws the trade instead of showing pictures; with it no generated pictures are made." : "";
   return `Trade template: ${t.id} (${t.name}) is hand-made for this trade. Choose it whenever the business fits its description.${draws}`;
@@ -157,8 +158,8 @@ export interface VarietyInput {
  * With the variety engine: the trade template is offered beside two fitting directions instead of forced, and a
  * regeneration asks for a different look. Empty when the trade has no template for these photos and nothing replaces.
  */
-export function familyLine(businessType: BusinessType, photoCount: number, v: VarietyInput): string {
-  const t = templateFor(businessType, photoCount);
+export function familyLine(businessType: BusinessType, pictureCount: number, v: VarietyInput): string {
+  const t = templateFor(businessType, pictureCount);
   const alts = fittingDirections(businessType, v.seed, t ? [t.id] : []);
   const lines: string[] = [];
   if (t) {
@@ -177,7 +178,9 @@ export async function chooseDesign(
   client: ModelClient,
   input: { brief: Brief; swatches: Swatch[]; photoCount: number; generatedCount: number; variety?: VarietyInput; concept?: boolean; holdPrimary?: boolean },
 ): Promise<{ design: Design; reason: string; hero?: string }> {
-  const offerLine = input.variety ? familyLine(input.brief.businessType, input.photoCount, input.variety) : templateLine(input.brief.businessType, input.photoCount);
+  // Generated pictures count toward a template's minimum (HQ it-template-min-photos).
+  const pictures = input.photoCount + input.generatedCount;
+  const offerLine = input.variety ? familyLine(input.brief.businessType, pictures, input.variety) : templateLine(input.brief.businessType, pictures);
   // The variety engine's concept (config variety.concept): the design step is told the subtype, goal and angle.
   const subtype = input.concept ? subtypeDesignLine(input.brief.concept) : "";
   const offer = subtype ? `${offerLine}\n${subtype}` : offerLine;

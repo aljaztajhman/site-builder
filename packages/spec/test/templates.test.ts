@@ -87,7 +87,9 @@ describe("trade template directions (docs/design/templates)", () => {
     expect(templateFor("shop", 0)).toBeUndefined();
     expect(templateFor("restaurant", 1)?.id).toBe("jedilnik");
     expect(templateFor("hairdresser", 3)?.id).toBe("ogledalo");
-    expect(templateFor("hairdresser", 2)).toBeUndefined();
+    // One picture is enough: a free preview's one generated picture (HQ it-template-min-photos).
+    expect(templateFor("hairdresser", 1)?.id).toBe("ogledalo");
+    expect(templateFor("hairdresser", 0)).toBeUndefined();
     // Dental has its template now (O Nasmeh): the first choice with at least one photo.
     expect(templateFor("dental", 3)?.id).toBe("nasmeh");
     expect(templateFor("dental", 0)).toBeUndefined();

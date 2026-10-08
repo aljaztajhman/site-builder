@@ -140,7 +140,7 @@ export function directionsCatalogue(f: PromptFixes = NO_PROMPT_FIXES): string {
       `Best for: ${d.bestFor.join(", ")}. Font pairs: ${d.fontPairs.join(", ")}. Page background: ${d.palette.background}. Imagery: ${imageryWords(d, f)}.`,
       `Ranges: radius ${d.ranges.radius.join("–")}, base font ${d.ranges.baseFontSize.join("–")}px, scale ${d.ranges.scale.join("–")}, heading weight ${d.ranges.headingWeight.join("–")}, tracking ${d.ranges.headingTracking.join("–")}em, heading case ${d.ranges.headingCase.join("/")}, density ${d.ranges.density.join("/")}, shadow ${d.ranges.shadow.join("/")}.`,
       `Layout: header ${d.layout.header}, footer ${d.layout.footer}, heroes ${directionHeroes(d, f).join(", ")}, rhythm ${d.layout.rhythm}, prefers ${d.layout.prefer.join(", ")}.`,
-      d.template ? `Hand-made trade template ${d.template.id}: first choice for ${d.template.firstFor.join(", ")}${d.template.minPhotos ? ` with at least ${d.template.minPhotos} photo` : ", with or without photos"}. Its own palette and type are fixed; primary and accent are ignored.` : "",
+      d.template ? `Hand-made trade template ${d.template.id}: first choice for ${d.template.firstFor.join(", ")}${d.template.minPhotos ? ` with at least ${d.template.minPhotos} picture (client photos and generated pictures both count)` : ", with or without photos"}. Its own palette and type are fixed; primary and accent are ignored.` : "",
     ]
       .filter(Boolean)
       .join("\n"),

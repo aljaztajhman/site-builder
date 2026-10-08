@@ -229,6 +229,14 @@ describe("request shape", () => {
     expect(requestHash(brief, "m")).toBe(requestHash({ ...brief, cache: true }, "m"));
   });
 
+  it("the design step offers the trade template when generated pictures make up the photos (HQ it-template-min-photos)", async () => {
+    const salon = { name: "Frizerski salon Marika", businessType: "hairdresser", tone: "warm", summary: "" } as never;
+    const withPicture = await captured((c) => chooseDesign(c, { brief: salon, swatches: [], photoCount: 0, generatedCount: 1 }));
+    const without = await captured((c) => chooseDesign(c, { brief: salon, swatches: [], photoCount: 0, generatedCount: 0 }));
+    expect(JSON.stringify(withPicture.messages)).toContain("Trade template: ogledalo");
+    expect(JSON.stringify(without.messages)).not.toContain("Trade template:");
+  });
+
   it("critique and edit keep a breakpoint after every system block (they share the cached section catalogue)", async () => {
     const edit = await captured((c) => editSpec(c, { spec, message: "Temnejša glava.", corpus: "" }));
     const crit = await critiqueRequest();
