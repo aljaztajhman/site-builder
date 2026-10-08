@@ -1,0 +1,18 @@
+{
+  "seq": 1,
+  "stage": "brief",
+  "model": "synthetic",
+  "hash": "synthetic",
+  "origin": "synthetic",
+  "response": {
+    "text": "{\"businessType\":\"tourist-farm\",\"name\":\"Turistična kmetija Grabnar\",\"town\":\"Luče\",\"summary\":\"Dober dan, smo Turistična kmetija Grabnar iz Zgornje Savinjske doline. Kmetijo imava z možem Tonetom že od leta 1996, jaz sem Mojca Grabnar in skrbim za goste in kuhinjo, Tone Grabnar pa za živino in gozd. Naslov je Podveža 41, 3334 Luče, do nas pripeljete po asfaltu, zadnjih 800 m je makadam.\\n\\nImamo 4 sobe in en apartma za 4 osebe, vse z lastno kopalnico in pogledom na gore. N\",\"audience\":\"lokalni obiskovalci\",\"tone\":\"friendly\",\"offerings\":[{\"group\":null,\"name\":\"Nočitev z zajtrkom\",\"description\":null,\"price\":{\"amount\":38,\"from\":false,\"unit\":null}},{\"group\":null,\"name\":\"polpenzion\",\"description\":null,\"price\":{\"amount\":52,\"from\":false,\"unit\":null}}],\"highlights\":[],\"facts\":{\"phone\":\"+38631555408\",\"email\":\"mojca@kmetija-grabnar.example\",\"address\":{\"street\":\"Podveža 41\",\"postalCode\":\"3334\",\"city\":\"Luče\"},\"hours\":[{\"from\":\"sat\",\"to\":\"sun\",\"open\":\"11:00\",\"close\":\"19:00\",\"closed\":false}],\"hoursNote\":null,\"bookingUrl\":null,\"social\":[],\"legalName\":null,\"registrationNumber\":null,\"taxNumber\":null,\"vatPayer\":null,\"serviceArea\":[],\"people\":[{\"name\":\"Mojca Grabnar\",\"role\":\"gostje in kuhinja\"},{\"name\":\"Tone Grabnar\",\"role\":\"živina in gozd\"}]},\"pages\":[{\"kind\":\"home\",\"slug\":\"\",\"navLabel\":\"Domov\",\"purpose\":\"Sobe in apartma z razgledom na gore v Lučah, domač zajtrk s kmetije, kosila ob koncih tedna in planinske poti na Raduho in v Logarsko dolino.\"},{\"kind\":\"standard\",\"slug\":\"sobe\",\"navLabel\":\"Sobe in cene\",\"purpose\":\"Štiri sobe in apartma za štiri osebe z lastno kopalnico in pogledom na gore. Nočitev z zajtrkom ali polpenzion na kmetiji v Lučah.\"}],\"missing\":[\"legal\"]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

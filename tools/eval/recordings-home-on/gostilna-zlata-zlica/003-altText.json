@@ -1,0 +1,18 @@
+{
+  "seq": 3,
+  "stage": "altText",
+  "model": "synthetic",
+  "hash": "synthetic",
+  "origin": "synthetic",
+  "response": {
+    "text": "{\"images\":[{\"index\":0,\"alt\":\"Pročelje stare gostilne na Kapucinskem trgu z lipo pred vhodom\",\"focalX\":0.5,\"focalY\":0.5,\"heroSuitable\":true},{\"index\":1,\"alt\":\"Jedilnica z lesenimi mizami, pogrnjenimi s prti\",\"focalX\":0.5,\"focalY\":0.5,\"heroSuitable\":false},{\"index\":2,\"alt\":\"Krožnik ajdovih žgancev z ocvirki\",\"focalX\":0.5,\"focalY\":0.5,\"heroSuitable\":false},{\"index\":3,\"alt\":\"Orehovi štruklji na belem krožniku\",\"focalX\":0.5,\"focalY\":0.5,\"heroSuitable\":false},{\"index\":4,\"alt\":\"Terasa pod lipo s pogrnjenimi mizami\",\"focalX\":0.5,\"focalY\":0.5,\"heroSuitable\":false},{\"index\":5,\"alt\":\"Skleda telečje obare na mizi\",\"focalX\":0.5,\"focalY\":0.5,\"heroSuitable\":false},{\"index\":6,\"alt\":\"Kuhar pri štedilniku v gostilniški kuhinji\",\"focalX\":0.5,\"focalY\":0.5,\"heroSuitable\":false},{\"index\":7,\"alt\":\"Pogrnjena miza s kozarci vina, pripravljena za praznovanje\",\"focalX\":0.5,\"focalY\":0.5,\"heroSuitable\":false}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

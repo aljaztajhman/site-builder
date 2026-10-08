@@ -1,0 +1,18 @@
+{
+  "seq": 1,
+  "stage": "brief",
+  "model": "synthetic",
+  "hash": "synthetic",
+  "origin": "synthetic",
+  "response": {
+    "text": "{\"businessType\":\"physio\",\"name\":\"Fizioterapija Pregib\",\"town\":\"Novo mesto\",\"summary\":\"Fizioterapija Pregib, Glavni trg 9, 8000 Novo mesto (vhod z dvorišča, 2. nadstropje).\\n\\nSem Tina Zupan, dipl. fiziot., 12 let sem delala v bolnišnici, zadnja štiri leta imam svojo ambulanto. Delam individualno, ena ura je samo za enega pacienta. Najpogosteje pridejo ljudje z bolečinami v hrbtu in vratu, po poškodbah kolena in rame, po operacijah ter športniki. Uporabljam manualn\",\"audience\":\"lokalni obiskovalci\",\"tone\":\"friendly\",\"offerings\":[{\"group\":null,\"name\":\"prva obravnava s pregledom (60 min)\",\"description\":null,\"price\":{\"amount\":55,\"from\":false,\"unit\":null}},{\"group\":null,\"name\":\"terapija (45 min)\",\"description\":null,\"price\":{\"amount\":45,\"from\":false,\"unit\":null}},{\"group\":null,\"name\":\"dry needling kot dodatek\",\"description\":null,\"price\":{\"amount\":30,\"from\":false,\"unit\":null}},{\"group\":null,\"name\":\"paket 5 terapij\",\"description\":null,\"price\":{\"amount\":200,\"from\":false,\"unit\":null}}],\"highlights\":[],\"facts\":{\"phone\":\"+38651555642\",\"email\":\"tina@pregib.example\",\"address\":{\"street\":\"Glavni trg 9\",\"postalCode\":\"8000\",\"city\":\"Novo mesto\"},\"hours\":[{\"from\":\"mon\",\"to\":\"fri\",\"open\":\"07:00\",\"close\":\"20:00\",\"closed\":false}],\"hoursNote\":null,\"bookingUrl\":\"https://pregib.example/narocanje\",\"social\":[],\"legalName\":\"Tina Zupan s.p.\",\"registrationNumber\":\"6011223000\",\"taxNumber\":\"60112233\",\"vatPayer\":null,\"serviceArea\":[],\"people\":[{\"name\":\"Tina Zupan\",\"role\":\"dipl. fiziot.\"}]},\"pages\":[{\"kind\":\"home\",\"slug\":\"\",\"navLabel\":\"Domov\",\"purpose\":\"Individualna fizioterapija na Glavnem trgu v Novem mestu: hrbet, vrat, koleno, rama, po operacijah in za športnike. Brez napotnice, naročanje online.\"},{\"kind\":\"standard\",\"slug\":\"cenik\",\"navLabel\":\"Storitve in cenik\",\"purpose\":\"Prva obravnava s pregledom, terapija, dry needling in paket terapij. Cene samoplačniških storitev fizioterapije v Novem mestu.\"},{\"kind\":\"standard\",\"slug\":\"kontakt\",\"navLabel\":\"Kontakt\",\"purpose\":\"Fizioterapija Pregib, Glavni trg 9, Novo mesto, vhod z dvorišča. Od ponedeljka do petka, samo po predhodnem naročilu.\"}],\"missing\":[]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

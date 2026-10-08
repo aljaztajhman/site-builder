@@ -1,0 +1,18 @@
+{
+  "seq": 10,
+  "stage": "altText",
+  "model": "claude-sonnet-5-5",
+  "hash": "e507fdef9b5c17a6",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"images\":[{\"index\":0,\"alt\":\"Siv karavan na dvigalu v svetli avtomehanični delavnici, ob strani rdeč delavniški voziček z orodjem in zloženi pnevmatiki.\",\"focalX\":0.5,\"focalY\":0.4,\"heroSuitable\":true}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 1134,
+      "output_tokens": 108,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

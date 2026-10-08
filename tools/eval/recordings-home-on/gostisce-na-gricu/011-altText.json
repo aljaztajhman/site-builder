@@ -1,0 +1,18 @@
+{
+  "seq": 11,
+  "stage": "altText",
+  "model": "claude-sonnet-5-5",
+  "hash": "89ba6c80b8437744",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"images\":[{\"index\":0,\"alt\":\"Belo podeželsko poslopje z zelenimi polkni in cvetjem na oknih, pred njim velika lipa ter lesene mize in klopi na kamnitem dvorišču.\",\"focalX\":0.55,\"focalY\":0.5,\"heroSuitable\":true},{\"index\":1,\"alt\":\"Senčen vrt pod staro lipo z lesenimi mizami, karirastimi prti in šopkom poljskega cvetja, v ozadju gozdnata pobočja in hribi.\",\"focalX\":0.35,\"focalY\":0.6,\"heroSuitable\":false},{\"index\":2,\"alt\":\"Družba sedi za dolgo obloženo mizo z rdečim vinom in šopkom cvetja, gostiteljica v ozadju drži steklenico vina.\",\"focalX\":0.55,\"focalY\":0.45,\"heroSuitable\":false}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2218,
+      "output_tokens": 310,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

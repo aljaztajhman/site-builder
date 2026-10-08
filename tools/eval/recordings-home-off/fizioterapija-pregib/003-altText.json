@@ -1,0 +1,18 @@
+{
+  "seq": 3,
+  "stage": "altText",
+  "model": "claude-sonnet-5-5",
+  "hash": "ecfe8f7e34aad7c2",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"images\":[{\"index\":0,\"alt\":\"Svetla fizioterapevtska ordinacija z masažno mizo, lesenimi letvenikom, policami z žogami in trakovi ter oknom z razgledom na hribe.\",\"focalX\":0.45,\"focalY\":0.6,\"heroSuitable\":true}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 1134,
+      "output_tokens": 110,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

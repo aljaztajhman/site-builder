@@ -1,0 +1,18 @@
+{
+  "seq": 2,
+  "stage": "design",
+  "model": "synthetic",
+  "hash": "synthetic",
+  "origin": "synthetic",
+  "response": {
+    "text": "{\"direction\":\"warm-craft\",\"fontPair\":\"fraunces-source-sans\",\"primary\":\"#b4441f\",\"accent\":\"#c65a2e\",\"radius\":6,\"baseFontSize\":17,\"scale\":1.28,\"headingWeight\":600,\"headingCase\":\"normal\",\"headingTracking\":-0.01,\"density\":\"regular\",\"shadow\":\"none\",\"reason\":\"synthetic\"}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

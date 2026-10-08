@@ -1,0 +1,493 @@
+{
+  "meta": {
+    "mode": "record-missing",
+    "scope": "home",
+    "startedAt": "2026-10-08T07:45:16.328Z",
+    "switches": [
+      "families",
+      "skeleton",
+      "concept"
+    ],
+    "label": "on",
+    "totalEur": 3.303770449216
+  },
+  "summary": {
+    "acrossTrades": 0.6153756638041128,
+    "withinTrade": {
+      "builder": {
+        "pairs": 3,
+        "mean": 0.5287548395714411,
+        "min": 0.3881147832451447
+      },
+      "car-repair": {
+        "pairs": 6,
+        "mean": 0.45740571067697716,
+        "min": 0.30314120837377767
+      },
+      "hairdresser": {
+        "pairs": 6,
+        "mean": 0.46999608490063766,
+        "min": 0.39743581330016053
+      },
+      "restaurant": {
+        "pairs": 6,
+        "mean": 0.5050660020858891,
+        "min": 0.32869300889702613
+      },
+      "shop": {
+        "pairs": 1,
+        "mean": 0.5203165720278692,
+        "min": 0.5203165720278692
+      }
+    },
+    "withinTradeAll": 0.4864267216692371,
+    "collisionsWithinTrade": [],
+    "collisionsAcross": [
+      "brivnica-kos / mizarstvo-lesnik"
+    ]
+  },
+  "judge": {
+    "sites": 17,
+    "median": 3.166666666666667,
+    "medianTemplate": 3.166666666666667,
+    "medianPhone": 3.1666666666666665,
+    "medianDesktop": 3.3333333333333335,
+    "minDistinctiveness": 3,
+    "belowDistinctiveness": []
+  },
+  "anotherLook": {
+    "measured": 17,
+    "ok": 13,
+    "meanDistance": 0.265388221625881,
+    "minDistance": 0.1651681033232597,
+    "failing": [
+      "avtoservis-mrak",
+      "karoserija-hribar"
+    ],
+    "none": [
+      "brivnica-kos (no_family)",
+      "mizarstvo-lesnik (no_family)",
+      "pizzeria-oljka (no_family)",
+      "salon-tina (no_family)"
+    ]
+  },
+  "regenerated": {
+    "measured": 12,
+    "meanDistance": 0.5856526419071717,
+    "minDistance": 0.4074515807032367,
+    "sameLook": [],
+    "eur": 2.16433,
+    "failing": [],
+    "errors": []
+  },
+  "generationEurMedian": 0.13192700000000002,
+  "sites": [
+    {
+      "id": "avtoservis-mrak",
+      "trade": "car-repair",
+      "direction": "tablica",
+      "fontPair": "archivo-public-sans",
+      "hero": "hero-signature:photo",
+      "primary": "#15181c",
+      "judge": 3.416666666666667,
+      "distinctiveness": 4,
+      "generationEur": 0.18218499999999999,
+      "failures": 1,
+      "anotherLook": {
+        "ok": true,
+        "look": "orange, space-grotesk-public-sans, hero-signature:photo, word/visit",
+        "distance": 0.2804249708781827,
+        "failures": [
+          "index.html: banned patterns: 2 call buttons on one screen (at 2800 px): a.btn.btn--primary.site-header__cta \"Pokličite\", a.plate.plate--poster \"SLOKR041 555 730\""
+        ],
+        "valid": true
+      }
+    },
+    {
+      "id": "frizerstvo-lana",
+      "trade": "hairdresser",
+      "direction": "ogledalo",
+      "fontPair": "lora-dm-sans",
+      "hero": "hero-signature:mirrors",
+      "primary": "#7a2e3a",
+      "judge": 3.1666666666666665,
+      "distinctiveness": 3,
+      "generationEur": 0.117525,
+      "failures": 0,
+      "anotherLook": {
+        "ok": true,
+        "look": "sage, inter-tight-dm-sans, hero-signature:mirrors, compact/wordmark",
+        "distance": 0.20994203601646982,
+        "failures": [],
+        "valid": true
+      }
+    },
+    {
+      "id": "gostilna-zlata-zlica",
+      "trade": "restaurant",
+      "direction": "jedilnik",
+      "fontPair": "fraunces-source-sans",
+      "hero": "hero-signature:card",
+      "primary": "#5a1a23",
+      "judge": 3.166666666666667,
+      "distinctiveness": 3,
+      "generationEur": 0.14901,
+      "failures": 0,
+      "anotherLook": {
+        "ok": true,
+        "look": "navy, garamond-figtree, hero-signature:card, compact/visit",
+        "distance": 0.17501145782928168,
+        "failures": [],
+        "valid": true
+      }
+    },
+    {
+      "id": "instalacije-rebernik",
+      "trade": "builder",
+      "direction": "cevi",
+      "fontPair": "manrope-public-sans",
+      "hero": "hero-signature:drawing",
+      "primary": "#a8481a",
+      "judge": 3.333333333333333,
+      "distinctiveness": 4,
+      "generationEur": 0.101997,
+      "failures": 0,
+      "anotherLook": {
+        "ok": true,
+        "look": "green, space-grotesk-plex, hero-signature:drawing, compact/wordmark",
+        "distance": 0.1651681033232597,
+        "failures": [],
+        "valid": true
+      }
+    },
+    {
+      "id": "trgovina-oljka-in-sol",
+      "trade": "shop",
+      "direction": "etiketa",
+      "fontPair": "garamond-karla",
+      "hero": "hero-image:overlay-left",
+      "primary": "#7b2d4a",
+      "judge": 3,
+      "distinctiveness": 3,
+      "generationEur": 0.11208300000000002,
+      "failures": 4,
+      "anotherLook": {
+        "ok": true,
+        "look": "terracotta, newsreader-libre-franklin, hero-image:overlay-left, word/visit",
+        "distance": 0.2609325052055159,
+        "failures": [],
+        "valid": true
+      }
+    },
+    {
+      "id": "avto-kovac",
+      "trade": "car-repair",
+      "direction": "tablica",
+      "fontPair": "archivo-archivo",
+      "hero": "hero-signature:photo",
+      "primary": "#1f4e9c",
+      "judge": 3.666666666666667,
+      "distinctiveness": 4,
+      "generationEur": 0.102458,
+      "failures": 4,
+      "anotherLook": {
+        "ok": true,
+        "look": "orange, space-grotesk-public-sans, hero-signature:photo, phone/wordmark",
+        "distance": 0.24542470664607446,
+        "failures": [],
+        "valid": true
+      },
+      "regenerated": {
+        "distance": 0.5884273081693778,
+        "eur": 0.10384199999999999,
+        "failures": 0
+      }
+    },
+    {
+      "id": "brivnica-kos",
+      "trade": "hairdresser",
+      "direction": "warm-craft",
+      "fontPair": "fraunces-source-sans",
+      "hero": "hero-split:image-left",
+      "primary": "#9a4a2b",
+      "judge": 3.5,
+      "distinctiveness": 3,
+      "generationEur": 0.23800200000000002,
+      "failures": 4,
+      "anotherLook": {
+        "ok": false,
+        "reason": "no_family"
+      },
+      "regenerated": {
+        "distance": 0.7551402420152888,
+        "eur": 0.23418400000000003,
+        "failures": 0
+      }
+    },
+    {
+      "id": "cvetlicarna-marjetica",
+      "trade": "shop",
+      "direction": "etiketa",
+      "fontPair": "newsreader-libre-franklin",
+      "hero": "hero-signature:label",
+      "primary": "#1f5f7a",
+      "judge": 3.083333333333333,
+      "distinctiveness": 3,
+      "generationEur": 0.24926299999999998,
+      "failures": 0,
+      "anotherLook": {
+        "ok": true,
+        "look": "wine, garamond-karla, hero-signature:label, compact/wordmark",
+        "distance": 0.25952351153227315,
+        "failures": [],
+        "valid": true
+      },
+      "regenerated": {
+        "distance": 0.6907889938870119,
+        "eur": 0.2180150000000001,
+        "failures": 0
+      }
+    },
+    {
+      "id": "elektro-zupan",
+      "trade": "builder",
+      "direction": "cevi",
+      "fontPair": "space-grotesk-plex",
+      "hero": "hero-type:large",
+      "primary": "#1f6e47",
+      "judge": 2.6666666666666665,
+      "distinctiveness": 3,
+      "generationEur": 0.100198,
+      "failures": 4,
+      "anotherLook": {
+        "ok": true,
+        "look": "copper, space-grotesk-public-sans, hero-type:large, compact/wordmark",
+        "distance": 0.23792774991869947,
+        "failures": [],
+        "valid": true
+      },
+      "regenerated": {
+        "distance": 0.5986563404154461,
+        "eur": 0.23987199999999997,
+        "failures": 0
+      }
+    },
+    {
+      "id": "frizerski-salon-mia",
+      "trade": "hairdresser",
+      "direction": "ogledalo",
+      "fontPair": "bricolage-figtree",
+      "hero": "hero-split:image-right",
+      "primary": "#2b2d42",
+      "judge": 3.083333333333333,
+      "distinctiveness": 3,
+      "generationEur": 0.10767299999999999,
+      "failures": 4,
+      "anotherLook": {
+        "ok": true,
+        "look": "wine, lora-dm-sans, hero-split:image-right, centred/wordmark",
+        "distance": 0.2346570902805005,
+        "failures": [],
+        "valid": true
+      },
+      "regenerated": {
+        "distance": 0.4779459531854522,
+        "eur": 0.131949,
+        "failures": 0
+      }
+    },
+    {
+      "id": "gostilna-pri-mostu",
+      "trade": "restaurant",
+      "direction": "jedilnik",
+      "fontPair": "garamond-figtree",
+      "hero": "hero-split:image-right",
+      "primary": "#16382b",
+      "judge": 3.25,
+      "distinctiveness": 3,
+      "generationEur": 0.105061,
+      "failures": 0,
+      "anotherLook": {
+        "ok": true,
+        "look": "burgundy, fraunces-source-sans, hero-image:overlay-bottom, compact/visit",
+        "distance": 0.4217436472790498,
+        "failures": [],
+        "valid": true
+      },
+      "regenerated": {
+        "distance": 0.5068117679547879,
+        "eur": 0.105728,
+        "failures": 0
+      }
+    },
+    {
+      "id": "gostisce-na-gricu",
+      "trade": "restaurant",
+      "direction": "jedilnik",
+      "fontPair": "garamond-figtree",
+      "hero": "hero-image:overlay-bottom",
+      "primary": "#16382b",
+      "judge": 3.083333333333333,
+      "distinctiveness": 3,
+      "generationEur": 0.100395,
+      "failures": 0,
+      "anotherLook": {
+        "ok": true,
+        "look": "navy, newsreader-libre-franklin, hero-split:image-right, word/wordmark",
+        "distance": 0.415224686031214,
+        "failures": [],
+        "valid": true
+      },
+      "regenerated": {
+        "distance": 0.4074515807032367,
+        "eur": 0.125583,
+        "failures": 0
+      }
+    },
+    {
+      "id": "karoserija-hribar",
+      "trade": "car-repair",
+      "direction": "tablica",
+      "fontPair": "space-grotesk-public-sans",
+      "hero": "hero-signature:photo",
+      "primary": "#15181c",
+      "judge": 3.5,
+      "distinctiveness": 4,
+      "generationEur": 0.174855,
+      "failures": 1,
+      "anotherLook": {
+        "ok": true,
+        "look": "blue, archivo-archivo, hero-signature:photo, centred/visit",
+        "distance": 0.2763575460515555,
+        "failures": [
+          "index.html: banned patterns: 2 call buttons on one screen (at 2800 px): a.plate.plate--poster \"SLOCE00 415 55 702\", a.btn.btn--primary.action-bar__btn \"Klic\""
+        ],
+        "valid": true
+      },
+      "regenerated": {
+        "distance": 0.7553796191172646,
+        "eur": 0.17121,
+        "failures": 0
+      }
+    },
+    {
+      "id": "mizarstvo-lesnik",
+      "trade": "builder",
+      "direction": "warm-craft",
+      "fontPair": "fraunces-source-sans",
+      "hero": "hero-split:image-left",
+      "primary": "#9a5b34",
+      "judge": 2.8333333333333335,
+      "distinctiveness": 3,
+      "generationEur": 0.24211500000000002,
+      "failures": 4,
+      "anotherLook": {
+        "ok": false,
+        "reason": "no_family"
+      },
+      "regenerated": {
+        "distance": 0.5829149169179387,
+        "eur": 0.239481,
+        "failures": 0
+      }
+    },
+    {
+      "id": "pizzeria-oljka",
+      "trade": "restaurant",
+      "direction": "warm-craft",
+      "fontPair": "fraunces-source-sans",
+      "hero": "hero-signature:arch",
+      "primary": "#b5482a",
+      "judge": 3.333333333333333,
+      "distinctiveness": 3,
+      "generationEur": 0.234634,
+      "failures": 4,
+      "anotherLook": {
+        "ok": false,
+        "reason": "no_family"
+      },
+      "regenerated": {
+        "distance": 0.6029484242110411,
+        "eur": 0.23244000000000004,
+        "failures": 0
+      }
+    },
+    {
+      "id": "salon-tina",
+      "trade": "hairdresser",
+      "direction": "soft-studio",
+      "fontPair": "lora-dm-sans",
+      "hero": "hero-split:image-left",
+      "primary": "#924e4e",
+      "judge": 3.25,
+      "distinctiveness": 3,
+      "generationEur": 0.13192700000000002,
+      "failures": 4,
+      "anotherLook": {
+        "ok": false,
+        "reason": "no_family"
+      },
+      "regenerated": {
+        "distance": 0.49358760240015587,
+        "eur": 0.11009399999999997,
+        "failures": 0
+      }
+    },
+    {
+      "id": "vulkanizer-zorman",
+      "trade": "car-repair",
+      "direction": "tablica",
+      "fontPair": "space-grotesk-public-sans",
+      "hero": "hero-type:large",
+      "primary": "#15181c",
+      "judge": 2.916666666666667,
+      "distinctiveness": 3,
+      "generationEur": 0.24251100000000003,
+      "failures": 4,
+      "anotherLook": {
+        "ok": true,
+        "look": "signal, archivo-archivo, hero-type:with-facts, compact/wordmark",
+        "distance": 0.2677088701443764,
+        "failures": [],
+        "valid": true
+      },
+      "regenerated": {
+        "distance": 0.5677789539090586,
+        "eur": 0.25193199999999993,
+        "failures": 0
+      }
+    }
+  ],
+  "targets": [
+    {
+      "name": "Look distance within a trade ≥ across trades",
+      "value": "0.49",
+      "target": "≥ 0.47 (today's lowest across-trade distance)",
+      "met": true
+    },
+    {
+      "name": "No two sites of one trade share palette, font pair and hero",
+      "value": "0",
+      "target": "0",
+      "met": true
+    },
+    {
+      "name": "Judge distinctiveness ≥ 3 on every site (lower of phone and desktop)",
+      "value": "min 3",
+      "target": "≥ 3",
+      "met": true
+    },
+    {
+      "name": "Judge median (mean of phone and desktop)",
+      "value": "3.17",
+      "target": "≥ 3.2",
+      "met": false
+    },
+    {
+      "name": "Judge median on the template trades",
+      "value": "3.17",
+      "target": "≥ 3.7",
+      "met": false
+    }
+  ]
+}

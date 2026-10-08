@@ -1,0 +1,18 @@
+{
+  "seq": 5,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "7cf017ace8fa2289",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Oljka in sol – istrske dobrote v Kopru\",\"description\":\"Mala trgovina v starem jedru Kopra z izdelki manjših pridelovalcev iz slovenske Istre in Krasa. Darilni paketi in poslovna darila.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"label\",\"tone\":\"inverse\",\"props\":{\"eyebrow\":\"Koper, staro mestno jedro\",\"headline\":\"Istra v steklenici, vrečki in škatli\",\"intro\":\"Pri nas najdete samo izdelke manjših pridelovalcev iz slovenske Istre in Krasa. Sestavimo vam tudi darilni paket.\",\"fact\":\"address\",\"image\":\"img_04\",\"inset\":\"img_02\",\"primary\":{\"label\":\"Darilni paketi\",\"target\":{\"page\":\"p_home\",\"section\":\"s_gift\"}},\"secondary\":{\"label\":\"Poglejte izdelke\",\"target\":{\"page\":\"p_home\",\"section\":\"s_prices\"}}}},{\"id\":\"s_prices\",\"type\":\"price-list\",\"variant\":\"tags\",\"tone\":\"default\",\"props\":{\"title\":\"Iz naše police\",\"intro\":\"Prodajamo samo izdelke manjših pridelovalcev iz slovenske Istre in Krasa.\",\"groups\":[{\"items\":[{\"name\":\"Ekstra deviško oljčno olje\",\"note\":\"0,5 l\",\"price\":{\"amount\":14}},{\"name\":\"Piranska sol\",\"note\":\"1 kg\",\"price\":{\"amount\":4.5}}]}]}},{\"id\":\"s_more\",\"type\":\"text\",\"variant\":\"narrow\",\"tone\":\"alt\",\"props\":{\"heading\":\"Imamo tudi\",\"paragraphs\":[\"Med, vino, pršut, sire, suhe fige, marmelade iz fig in domače testenine.\"]}},{\"id\":\"s_gift\",\"type\":\"image-text\",\"variant\":\"round\",\"tone\":\"band\",\"props\":{\"eyebrow\":\"Darila\",\"heading\":\"Darilni paket po vaši želji\",\"paragraphs\":[\"Paket sestavimo po vaših željah in ga lepo zavijemo. Naročite ga po telefonu ali e-pošti, prevzamete ga v trgovini. Cena od 25 €.\",\"Pripravljamo tudi poslovna darila v večjih količinah.\"],\"image\":\"img_03\",\"link\":{\"label\":\"Naročite po telefonu\",\"target\":{\"action\":\"call\"}}}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"photo\",\"tone\":\"alt\",\"props\":{\"title\":\"Kdaj smo odprti\",\"note\":\"Julija in avgusta smo odprti tudi ob nedeljah od 9.00 do 12.00.\",\"image\":\"img_01\",\"inset\":\"img_05\"}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"inverse\",\"props\":{\"title\":\"Pokličite za naročilo paketa ali obisk\",\"intro\":\"Naročila sprejemamo tudi po e-pošti. Paket prevzamete v trgovini.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2994,
+      "output_tokens": 1104,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

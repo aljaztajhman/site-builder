@@ -1,0 +1,386 @@
+{
+  "meta": {
+    "mode": "record-missing",
+    "scope": "home",
+    "startedAt": "2026-10-08T06:12:43.375Z",
+    "switches": [],
+    "label": "off",
+    "totalEur": 3.4570743312959995
+  },
+  "summary": {
+    "acrossTrades": 0.613130257053826,
+    "withinTrade": {
+      "builder": {
+        "pairs": 3,
+        "mean": 0.42093228495040064,
+        "min": 0.09755510816535853
+      },
+      "car-repair": {
+        "pairs": 6,
+        "mean": 0.157516689315181,
+        "min": 0.10011019842145687
+      },
+      "hairdresser": {
+        "pairs": 6,
+        "mean": 0.5439106448146749,
+        "min": 0.04919599629057868
+      },
+      "restaurant": {
+        "pairs": 6,
+        "mean": 0.38300993252179527,
+        "min": 0.039798788759008025
+      },
+      "shop": {
+        "pairs": 1,
+        "mean": 0.6210311696191644,
+        "min": 0.6210311696191644
+      }
+    },
+    "withinTradeAll": 0.38138416474455794,
+    "collisionsWithinTrade": [
+      "avtoservis-mrak / avto-kovac",
+      "avtoservis-mrak / karoserija-hribar",
+      "avtoservis-mrak / vulkanizer-zorman",
+      "frizerstvo-lana / frizerski-salon-mia",
+      "gostilna-zlata-zlica / gostilna-pri-mostu",
+      "gostilna-zlata-zlica / gostisce-na-gricu",
+      "instalacije-rebernik / elektro-zupan",
+      "avto-kovac / karoserija-hribar",
+      "avto-kovac / vulkanizer-zorman",
+      "gostilna-pri-mostu / gostisce-na-gricu",
+      "karoserija-hribar / vulkanizer-zorman"
+    ],
+    "collisionsAcross": [
+      "cvetlicarna-marjetica / mizarstvo-lesnik",
+      "cvetlicarna-marjetica / pizzeria-oljka"
+    ]
+  },
+  "judge": {
+    "sites": 22,
+    "median": 3.416666666666667,
+    "medianTemplate": 3.416666666666667,
+    "medianPhone": 3.3333333333333335,
+    "medianDesktop": 3.6666666666666665,
+    "minDistinctiveness": 2,
+    "belowDistinctiveness": [
+      "brivnica-kos",
+      "mizarstvo-lesnik"
+    ]
+  },
+  "anotherLook": {
+    "measured": 0,
+    "ok": 0,
+    "meanDistance": null,
+    "minDistance": null,
+    "failing": [],
+    "none": []
+  },
+  "regenerated": {
+    "measured": 0,
+    "meanDistance": null,
+    "minDistance": null,
+    "sameLook": [],
+    "eur": 0,
+    "failing": [],
+    "errors": []
+  },
+  "generationEurMedian": 0.123038,
+  "sites": [
+    {
+      "id": "avtoservis-mrak",
+      "trade": "car-repair",
+      "direction": "tablica",
+      "fontPair": "archivo-public-sans",
+      "hero": "hero-signature:photo",
+      "primary": "#15181c",
+      "judge": 3.6666666666666665,
+      "distinctiveness": 4,
+      "generationEur": 0.155419,
+      "failures": 0
+    },
+    {
+      "id": "fizioterapija-pregib",
+      "trade": "physio",
+      "direction": "pregib",
+      "fontPair": "bricolage-public-sans",
+      "hero": "hero-signature:bend",
+      "primary": "#0f6b63",
+      "judge": 3.833333333333333,
+      "distinctiveness": 4,
+      "generationEur": 0.17162300000000003,
+      "failures": 0
+    },
+    {
+      "id": "frizerstvo-lana",
+      "trade": "hairdresser",
+      "direction": "ogledalo",
+      "fontPair": "inter-tight-dm-sans",
+      "hero": "hero-signature:mirrors",
+      "primary": "#7a2e3a",
+      "judge": 3.166666666666667,
+      "distinctiveness": 3,
+      "generationEur": 0.10500899999999999,
+      "failures": 0
+    },
+    {
+      "id": "gostilna-zlata-zlica",
+      "trade": "restaurant",
+      "direction": "jedilnik",
+      "fontPair": "garamond-figtree",
+      "hero": "hero-signature:card",
+      "primary": "#16382b",
+      "judge": 3.5833333333333335,
+      "distinctiveness": 4,
+      "generationEur": 0.114663,
+      "failures": 0
+    },
+    {
+      "id": "instalacije-rebernik",
+      "trade": "builder",
+      "direction": "cevi",
+      "fontPair": "space-grotesk-public-sans",
+      "hero": "hero-signature:drawing",
+      "primary": "#d63c22",
+      "judge": 3.75,
+      "distinctiveness": 4,
+      "generationEur": 0.099185,
+      "failures": 0
+    },
+    {
+      "id": "kmetija-grabnar",
+      "trade": "tourist-farm",
+      "direction": "markacija",
+      "fontPair": "fraunces-nunito-sans",
+      "hero": "hero-signature:view",
+      "primary": "#c8202a",
+      "judge": 3.75,
+      "distinctiveness": 4,
+      "generationEur": 0.148954,
+      "failures": 0
+    },
+    {
+      "id": "pekarna-kvas",
+      "trade": "bakery",
+      "direction": "skorja",
+      "fontPair": "bitter-karla",
+      "hero": "hero-signature:arch",
+      "primary": "#8a4a1c",
+      "judge": 3.8333333333333335,
+      "distinctiveness": 4,
+      "generationEur": 0.106435,
+      "failures": 0
+    },
+    {
+      "id": "racunovodstvo-seliskar",
+      "trade": "accountant",
+      "direction": "racun",
+      "fontPair": "ibm-plex-sans",
+      "hero": "hero-signature:receipt",
+      "primary": "#0b5a3c",
+      "judge": 3.75,
+      "distinctiveness": 4,
+      "generationEur": 0.10217200000000001,
+      "failures": 0
+    },
+    {
+      "id": "trgovina-oljka-in-sol",
+      "trade": "shop",
+      "direction": "etiketa",
+      "fontPair": "lora-karla",
+      "hero": "hero-signature:label",
+      "primary": "#b9492f",
+      "judge": 3.416666666666667,
+      "distinctiveness": 4,
+      "generationEur": 0.10178900000000002,
+      "failures": 0
+    },
+    {
+      "id": "zobozdravstvo-lebar",
+      "trade": "dental",
+      "direction": "nasmeh",
+      "fontPair": "figtree-figtree",
+      "hero": "hero-signature:disc",
+      "primary": "#0c7a70",
+      "judge": 3.666666666666667,
+      "distinctiveness": 4,
+      "generationEur": 0.083043,
+      "failures": 0
+    },
+    {
+      "id": "avto-kovac",
+      "trade": "car-repair",
+      "direction": "tablica",
+      "fontPair": "archivo-public-sans",
+      "hero": "hero-signature:photo",
+      "primary": "#15181c",
+      "judge": 3.6666666666666665,
+      "distinctiveness": 4,
+      "generationEur": 0.075542,
+      "failures": 0
+    },
+    {
+      "id": "brivnica-kos",
+      "trade": "hairdresser",
+      "direction": "dark-elegant",
+      "fontPair": "garamond-karla",
+      "hero": "hero-image:overlay-left",
+      "primary": "#b08d57",
+      "judge": 3,
+      "distinctiveness": 2,
+      "generationEur": 0.230555,
+      "failures": 0
+    },
+    {
+      "id": "cvetlicarna-marjetica",
+      "trade": "shop",
+      "direction": "warm-craft",
+      "fontPair": "fraunces-source-sans",
+      "hero": "hero-split:image-left",
+      "primary": "#b4533c",
+      "judge": 3.3333333333333335,
+      "distinctiveness": 3,
+      "generationEur": 0.241812,
+      "failures": 0
+    },
+    {
+      "id": "elektro-zupan",
+      "trade": "builder",
+      "direction": "cevi",
+      "fontPair": "space-grotesk-public-sans",
+      "hero": "hero-signature:drawing",
+      "primary": "#d63c22",
+      "judge": 3.1666666666666665,
+      "distinctiveness": 3,
+      "generationEur": 0.099019,
+      "failures": 0
+    },
+    {
+      "id": "frizerski-salon-mia",
+      "trade": "hairdresser",
+      "direction": "ogledalo",
+      "fontPair": "inter-tight-dm-sans",
+      "hero": "hero-signature:mirrors",
+      "primary": "#7a2e3a",
+      "judge": 3.25,
+      "distinctiveness": 3,
+      "generationEur": 0.097622,
+      "failures": 0
+    },
+    {
+      "id": "gostilna-pri-mostu",
+      "trade": "restaurant",
+      "direction": "jedilnik",
+      "fontPair": "garamond-figtree",
+      "hero": "hero-signature:card",
+      "primary": "#16382b",
+      "judge": 3.083333333333333,
+      "distinctiveness": 3,
+      "generationEur": 0.129875,
+      "failures": 0
+    },
+    {
+      "id": "gostisce-na-gricu",
+      "trade": "restaurant",
+      "direction": "jedilnik",
+      "fontPair": "garamond-figtree",
+      "hero": "hero-signature:card",
+      "primary": "#16382b",
+      "judge": 3.333333333333333,
+      "distinctiveness": 3,
+      "generationEur": 0.12456999999999999,
+      "failures": 0
+    },
+    {
+      "id": "karoserija-hribar",
+      "trade": "car-repair",
+      "direction": "tablica",
+      "fontPair": "archivo-public-sans",
+      "hero": "hero-signature:photo",
+      "primary": "#15181c",
+      "judge": 3.583333333333333,
+      "distinctiveness": 4,
+      "generationEur": 0.174678,
+      "failures": 0
+    },
+    {
+      "id": "mizarstvo-lesnik",
+      "trade": "builder",
+      "direction": "warm-craft",
+      "fontPair": "fraunces-source-sans",
+      "hero": "hero-split:image-left",
+      "primary": "#9a4b2a",
+      "judge": 3.1666666666666665,
+      "distinctiveness": 2,
+      "generationEur": 0.236077,
+      "failures": 0
+    },
+    {
+      "id": "pizzeria-oljka",
+      "trade": "restaurant",
+      "direction": "warm-craft",
+      "fontPair": "fraunces-source-sans",
+      "hero": "hero-split:image-left",
+      "primary": "#b8502e",
+      "judge": 3.3333333333333335,
+      "distinctiveness": 3,
+      "generationEur": 0.229806,
+      "failures": 0
+    },
+    {
+      "id": "salon-tina",
+      "trade": "hairdresser",
+      "direction": "soft-studio",
+      "fontPair": "lora-dm-sans",
+      "hero": "hero-split:image-left",
+      "primary": "#92684e",
+      "judge": 3.416666666666667,
+      "distinctiveness": 3,
+      "generationEur": 0.121506,
+      "failures": 0
+    },
+    {
+      "id": "vulkanizer-zorman",
+      "trade": "car-repair",
+      "direction": "tablica",
+      "fontPair": "archivo-public-sans",
+      "hero": "hero-signature:photo",
+      "primary": "#15181c",
+      "judge": 3.333333333333333,
+      "distinctiveness": 4,
+      "generationEur": 0.235407,
+      "failures": 0
+    }
+  ],
+  "targets": [
+    {
+      "name": "Look distance within a trade ≥ across trades",
+      "value": "0.38",
+      "target": "≥ 0.47 (today's lowest across-trade distance)",
+      "met": false
+    },
+    {
+      "name": "No two sites of one trade share palette, font pair and hero",
+      "value": "11 (avtoservis-mrak / avto-kovac, avtoservis-mrak / karoserija-hribar, avtoservis-mrak / vulkanizer-zorman, frizerstvo-lana / frizerski-salon-mia, gostilna-zlata-zlica / gostilna-pri-mostu, gostilna-zlata-zlica / gostisce-na-gricu, instalacije-rebernik / elektro-zupan, avto-kovac / karoserija-hribar, avto-kovac / vulkanizer-zorman, gostilna-pri-mostu / gostisce-na-gricu, karoserija-hribar / vulkanizer-zorman)",
+      "target": "0",
+      "met": false
+    },
+    {
+      "name": "Judge distinctiveness ≥ 3 on every site (lower of phone and desktop)",
+      "value": "min 2; below 3: brivnica-kos, mizarstvo-lesnik",
+      "target": "≥ 3",
+      "met": false
+    },
+    {
+      "name": "Judge median (mean of phone and desktop)",
+      "value": "3.42",
+      "target": "≥ 3.2",
+      "met": true
+    },
+    {
+      "name": "Judge median on the template trades",
+      "value": "3.42",
+      "target": "≥ 3.7",
+      "met": false
+    }
+  ]
+}

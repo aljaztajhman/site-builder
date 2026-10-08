@@ -1,0 +1,18 @@
+{
+  "seq": 7,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "fbf784f9f00d5440",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Turistična kmetija Grabnar, Luče\",\"description\":\"Sobe in apartma s pogledom na gore, domač zajtrk in kosila ob koncih tedna na turistični kmetiji v Zgornji Savinjski dolini.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"view\",\"props\":{\"eyebrow\":\"Zgornja Savinjska dolina\",\"headline\":\"Pogled na gore iz vsake sobe\",\"intro\":\"Spite na kmetiji pod gorami, zjutraj jejte domač zajtrk, ob koncih tedna pa pridite na kosilo.\",\"fact\":\"phone\",\"factLabel\":\"Rezervirajte\",\"image\":\"img_07\",\"signs\":[{\"label\":\"Raduha\"},{\"label\":\"Logarska dolina\"},{\"label\":\"Smučišče\",\"note\":\"10 min\"}],\"secondary\":{\"label\":\"Oglejte si cene sob\",\"target\":{\"page\":\"p_home\",\"section\":\"s_rates\"}}}},{\"id\":\"s_rates\",\"type\":\"price-list\",\"variant\":\"rates\",\"tone\":\"default\",\"props\":{\"title\":\"Sobe in apartma na kmetiji\",\"intro\":\"Vsaka soba ima lastno kopalnico in pogled na gore. Imamo 4 sobe in apartma za 4 osebe.\",\"groups\":[{\"items\":[{\"name\":\"Nočitev z zajtrkom\",\"note\":\"Domač zajtrk s kmetije\",\"price\":{\"amount\":38,\"unit\":\"na osebo\"}},{\"name\":\"Polpenzion\",\"note\":\"Večerja na kmetiji\",\"price\":{\"amount\":52,\"unit\":\"na osebo\"}}]}],\"footnote\":\"Otroci do 6 let so pri polpenzionu brezplačni.\",\"image\":\"img_02\"}},{\"id\":\"s_gallery\",\"type\":\"gallery\",\"variant\":\"wall\",\"tone\":\"default\",\"props\":{\"title\":\"Kmetija, živali in domača hrana\",\"images\":[{\"image\":\"img_01\"},{\"image\":\"img_04\"},{\"image\":\"img_06\"},{\"image\":\"img_05\"},{\"image\":\"img_08\"}]}},{\"id\":\"s_breakfast\",\"type\":\"image-text\",\"variant\":\"image-right\",\"tone\":\"alt\",\"props\":{\"eyebrow\":\"Zajtrk\",\"heading\":\"Mleko, sir, skuta in kruh iz krušne peči\",\"paragraphs\":[\"Zajtrk je domač, vse pride z naše kmetije: mleko, sir, skuta, marmelade in kruh iz krušne peči.\"],\"image\":\"img_03\"}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"poster\",\"tone\":\"band\",\"props\":{\"eyebrow\":\"Izletniška kmetija\",\"title\":\"Ob sobotah in nedeljah kuhamo kosila\",\"note\":\"Juha, pečenka, štruklji in jabolčni zavitek. Skupine sprejmemo tudi med tednom po dogovoru.\"}},{\"id\":\"s_trails\",\"type\":\"services-list\",\"variant\":\"aside\",\"tone\":\"default\",\"props\":{\"title\":\"Poti in cilji v okolici\",\"items\":[{\"name\":\"Planinska pot na Raduho\"},{\"name\":\"Pot v Logarsko dolino\"},{\"name\":\"Manjše smučišče\",\"description\":\"10 minut stran.\"}],\"note\":{\"title\":\"Pot do nas\",\"text\":\"Zadnjih 800 m poti je makadam.\"}}},{\"id\":\"s_team\",\"type\":\"team\",\"variant\":\"list\",\"tone\":\"inverse\",\"props\":{\"title\":\"Kmetujeva od leta 1996\",\"members\":[{\"name\":\"Mojca Grabnar\",\"role\":\"Skrb za goste in kuhinjo\"},{\"name\":\"Tone Grabnar\",\"role\":\"Skrb za živino in gozd\"}]}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"inverse\",\"props\":{\"title\":\"Rezervirajte po telefonu ali e-pošti\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 4912,
+      "output_tokens": 1685,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "seq": 12,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "762d13933138bcc3",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Frizerski salon Mia, Ljubljana\",\"description\":\"Striženje za ženske, moške in otroke, barvanje z veganskimi barvami, balayage in keratinska nega na Celovški cesti v Ljubljani.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-split\",\"variant\":\"image-left\",\"tone\":\"default\",\"props\":{\"eyebrow\":\"Salon od leta 2017\",\"headline\":\"Striženje in barvanje za vso družino\",\"intro\":\"Strižemo ženske, moške in otroke. Barvamo z veganskimi barvami brez amoniaka. Pokličite nas in se dogovorimo za termin.\",\"primary\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}},\"secondary\":{\"label\":\"Poglejte cenik\",\"target\":{\"page\":\"p_cenik\"}},\"image\":\"img_01\"}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"week\",\"tone\":\"alt\",\"props\":{\"title\":\"Kdaj smo odprti\",\"note\":\"Termin si rezervirate po telefonu. Pokličite nas in izberemo čas, ki vam ustreza.\"}},{\"id\":\"s_services\",\"type\":\"services-list\",\"variant\":\"rows\",\"tone\":\"default\",\"props\":{\"title\":\"Kaj vse naredimo za vaše lase\",\"intro\":\"Od hitrega striženja do barvanja in nege.\",\"items\":[{\"name\":\"Striženje\",\"description\":\"Za ženske, moške in otroke.\",\"price\":{\"amount\":12,\"from\":true}},{\"name\":\"Barvanje\",\"description\":\"Veganske barve brez amoniaka.\",\"price\":{\"amount\":45,\"from\":true}},{\"name\":\"Balayage\",\"description\":\"Mehki prehodi barve po vaši želji.\",\"price\":{\"amount\":85,\"from\":true}},{\"name\":\"Pramene\",\"description\":\"Svetlejši ali bolj izraziti prameni.\",\"price\":{\"$placeholder\":\"price\",\"note\":\"Dodajte ceno pramenov\"}},{\"name\":\"Keratinska nega\",\"description\":\"Nega za bolj goste in gladke lase.\",\"price\":{\"$placeholder\":\"price\",\"note\":\"Dodajte ceno keratinske nege\"}}]}},{\"id\":\"s_about\",\"type\":\"image-text\",\"variant\":\"image-right\",\"tone\":\"alt\",\"props\":{\"eyebrow\":\"Pri nas\",\"heading\":\"Salon, kjer se počutite dobrodošli\",\"paragraphs\":[\"Salon Mia vodi Mia Golob, pomaga ji Ana Rus. Striževa vas, otroke in vso družino.\",\"Barve, ki jih uporabljamo, so veganske in brez amoniaka.\"],\"link\":{\"label\":\"Pokličite za termin\",\"target\":{\"action\":\"call\"}},\"image\":\"img_02\"}},{\"id\":\"s_care\",\"type\":\"image-text\",\"variant\":\"image-left\",\"tone\":\"default\",\"props\":{\"heading\":\"Nega las in izdelki\",\"paragraphs\":[\"Poleg striženja in barvanja vam ponudimo keratinsko nego. Povejte nam, kakšne lase imate, in skupaj izberemo pravo rešitev.\"],\"image\":\"img_03\"}},{\"id\":\"s_cta\",\"type\":\"cta\",\"variant\":\"band\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Želite nov videz?\",\"text\":\"Pokličite nas in izberite termin za striženje, barvanje ali nego.\",\"primary\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}}}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2376,
+      "output_tokens": 1257,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

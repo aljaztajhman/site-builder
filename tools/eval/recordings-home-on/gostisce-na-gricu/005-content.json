@@ -1,0 +1,18 @@
+{
+  "seq": 5,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "63670a70d85304ba",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Gostišče Na griču, Ivanjkovci | Prleška kuhinja\",\"description\":\"Družinsko gostišče v vinogradih Jeruzalema. Prleška kuhinja, domača vina in degustacijski meniji ob vikendih. Rezervacija je obvezna.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-image\",\"variant\":\"overlay-bottom\",\"props\":{\"eyebrow\":\"Gostišče v vinogradih Jeruzalema\",\"headline\":\"Prleška kuhinja in domača vina na griču\",\"intro\":\"Družina Šnajder kuha in toči na griču nad Ormožem. Pri nas jeste bograč, tünko in gibanico, ob vikendih pa degustacijski meni.\",\"primary\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}},\"image\":\"img_01\"}},{\"id\":\"s_about\",\"type\":\"about\",\"variant\":\"figure\",\"props\":{\"eyebrow\":\"Družinsko gostišče\",\"heading\":\"Domača kuhinja in vina iz lastne kleti\",\"paragraphs\":[\"Družina Šnajder kuha prleško kuhinjo in toči domača vina. Gostje pri nas sedijo na terasi s pogledom na gorice.\",\"Ob vikendih pripravljamo degustacijske menije z vini iz naše kleti. Pri nas pripravimo tudi poroke, obletnice in zaključke do 120 gostov.\"],\"figure\":{\"label\":\"Kuhamo in točimo od leta\",\"value\":\"1990\"}}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"table\",\"props\":{\"title\":\"Kdaj nas obiščete\",\"note\":\"V ponedeljek in torek smo odprti samo za zaključene družbe. Rezervacija je obvezna.\"}},{\"id\":\"s_offers\",\"type\":\"price-list\",\"variant\":\"offers\",\"tone\":\"inverse\",\"props\":{\"title\":\"Degustacijski meni ob vikendih\",\"groups\":[{\"name\":\"Ob vikendih\",\"items\":[{\"name\":\"Degustacijski meni s petimi hodi\",\"note\":\"Pet hodov, ob vikendih.\",\"price\":{\"amount\":48}}]},{\"name\":\"Ob vikendih, z vini\",\"items\":[{\"name\":\"Degustacijski meni z vinsko spremljavo\",\"note\":\"Pet hodov z vini iz naše kleti.\",\"price\":{\"$placeholder\":\"price\",\"note\":\"Vpišite ceno menija z vinsko spremljavo\"}}]}]}},{\"id\":\"s_team\",\"type\":\"team\",\"variant\":\"photo\",\"props\":{\"title\":\"Družina Šnajder\",\"intro\":\"Za mizami, v kuhinji in v kleti smo doma.\",\"members\":[{\"name\":\"Nina Šnajder\",\"role\":\"Vodi gostilno\"}],\"image\":\"img_03\"}},{\"id\":\"s_cta\",\"type\":\"cta\",\"variant\":\"band\",\"props\":{\"heading\":\"Rezervacija je obvezna\",\"text\":\"Pokličite nas in povejte, kdaj bi prišli ter koliko vas bo.\",\"primary\":{\"label\":\"Pošljite e-pošto\",\"target\":{\"action\":\"email\"}}}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"inverse\",\"props\":{\"title\":\"Pokličite za rezervacijo mize\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2891,
+      "output_tokens": 1213,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

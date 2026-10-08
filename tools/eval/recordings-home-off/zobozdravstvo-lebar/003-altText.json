@@ -1,0 +1,18 @@
+{
+  "seq": 3,
+  "stage": "altText",
+  "model": "claude-sonnet-5-5",
+  "hash": "277e94684d14c21f",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"images\":[{\"index\":0,\"alt\":\"Svetla zobozdravstvena ordinacija z modrim zobozdravniškim stolom, belimi omarami in oknom z razgledom na griče.\",\"focalX\":0.4,\"focalY\":0.55,\"heroSuitable\":true},{\"index\":1,\"alt\":\"Čakalnica z zelenimi stoli, leseno mizico z vrčem vode in kozarci, rastlinami ter sliko gora na steni.\",\"focalX\":0.55,\"focalY\":0.5,\"heroSuitable\":false},{\"index\":2,\"alt\":\"Zobozdravnica z masko in rokavicami pregleduje pacientko na zobozdravniškem stolu ob instrumentih.\",\"focalX\":0.5,\"focalY\":0.4,\"heroSuitable\":true}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2218,
+      "output_tokens": 276,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

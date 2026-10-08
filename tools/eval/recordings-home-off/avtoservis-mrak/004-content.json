@@ -1,0 +1,18 @@
+{
+  "seq": 4,
+  "stage": "content",
+  "model": "synthetic",
+  "hash": "synthetic",
+  "origin": "synthetic",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"split-cta\",\"cta\":\"call\"},\"footer\":{\"variant\":\"columns\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Avtoservis Mrak, Kranj – servis vseh znamk\",\"description\":\"Družinski avtoservis na Savski cesti v Kranju: redni servis, zavore, sklopke, jermeni, diagnostika, klima, menjava in hramba gum ter vlečna služba.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-type\",\"variant\":\"with-facts\",\"props\":{\"eyebrow\":\"Avtoservis v Kranju\",\"headline\":\"Servis vseh znamk v Kranju\",\"intro\":\"Družinski servis od leta 2008, za osebna vozila in kombije do 3,5 t. Pred popravilom dobite predračun.\",\"primary\":{\"label\":\"Pokličite 041 555 730\",\"target\":{\"action\":\"call\"}}}},{\"id\":\"s_services\",\"type\":\"services-cards\",\"variant\":\"compact\",\"tone\":\"alt\",\"props\":{\"title\":\"Kaj naredimo v delavnici\",\"items\":[{\"image\":\"img_02\",\"title\":\"Redni servis\",\"text\":\"Po navodilih proizvajalca, tako da garancija vozila ostane. Menjava olja in filtrov.\"},{\"image\":\"img_01\",\"title\":\"Popravila in diagnostika\",\"text\":\"Zavore, sklopke, zobati jermeni, izpušni sistemi in računalniška diagnostika.\"},{\"image\":\"img_03\",\"title\":\"Menjava in hramba gum\",\"text\":\"Gume zamenjamo in jih do naslednje sezone shranimo pri nas.\"}]}},{\"id\":\"s_steps\",\"type\":\"steps\",\"variant\":\"horizontal\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Najprej predračun, potem popravilo\",\"steps\":[{\"title\":\"Pokličite\",\"text\":\"Večina strank nas pokliče. Dogovorimo se za termin, ko pripeljete vozilo.\"},{\"title\":\"Pregled in predračun\",\"text\":\"Pred popravilom dobite predračun, da veste, koliko boste plačali.\"},{\"title\":\"Popravilo\",\"text\":\"Popravimo, kar ste potrdili. Brez presenečenj na računu.\"}],\"action\":{\"label\":\"Pokličite servis\",\"target\":{\"action\":\"call\"}}}},{\"id\":\"s_about\",\"type\":\"about\",\"variant\":\"text-only\",\"props\":{\"heading\":\"Družinski servis od leta 2008\",\"paragraphs\":[\"Avtoservis Mrak vodi Rok Mrak. Servisiramo osebna vozila vseh znamk in kombije do 3,5 t, imamo pa tudi vlečno službo za vso Gorenjsko.\",\"Delavnica je za trgovino s ploščicami, vhod je z dvorišča.\"],\"ownerName\":\"Rok Mrak\",\"ownerRole\":\"vodja servisa\"}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"split-map\",\"tone\":\"alt\",\"props\":{\"title\":\"Kje smo\",\"intro\":\"Savska cesta 52, za trgovino s ploščicami. Vhod je z dvorišča.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

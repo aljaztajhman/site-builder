@@ -1,0 +1,18 @@
+{
+  "seq": 6,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "d164bd1b0cc58fdb",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\",\"tone\":\"default\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Avtoservis Mrak Kranj – servis, gume, vleka\",\"description\":\"Družinski avtoservis v Kranju od leta 2008. Servis osebnih vozil in kombijev do 3,5 t, menjava in hramba gum, vlečna služba za Gorenjsko.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"photo\",\"tone\":\"inverse\",\"props\":{\"headline\":\"Servis, gume in vleka v Kranju\",\"intro\":\"Družinski avtoservis od leta 2008. Servisiramo osebna vozila vseh znamk in kombije do 3,5 t.\",\"fact\":\"phone\",\"factLabel\":\"Pokličite nas za termin ali vleko\",\"factNote\":\"Sobota po dogovoru.\",\"image\":\"img_01\"}},{\"id\":\"s_services\",\"type\":\"services-list\",\"variant\":\"two-column\",\"props\":{\"title\":\"Kaj vse popravimo in uredimo\",\"items\":[{\"name\":\"Redni servis\",\"description\":\"Po navodilih proizvajalca, tako da garancija ostane.\"},{\"name\":\"Menjava olja in filtrov\",\"description\":\"Olje in filtre zamenjamo med rednim servisom ali posebej.\"},{\"name\":\"Zavore\",\"description\":\"Pregled in popravilo zavornega sistema.\"},{\"name\":\"Sklopke\",\"description\":\"Popravilo in menjava sklopk.\"},{\"name\":\"Zobati jermeni\",\"description\":\"Menjava zobatih jermenov.\"},{\"name\":\"Izpusni sistemi\",\"description\":\"Popravilo izpusnih sistemov.\"},{\"name\":\"Računalniška diagnostika\",\"description\":\"Preverimo, kaj javlja računalnik vozila.\"},{\"name\":\"Polnjenje klime\",\"description\":\"Napolnimo klimatsko napravo.\"},{\"name\":\"Menjava gum\",\"description\":\"Cena velja za komplet.\"},{\"name\":\"Hramba gum\",\"description\":\"Gume vam hranimo čez sezono.\"},{\"name\":\"Vlečna služba\",\"description\":\"Vleka vozil po vsej Gorenjski.\"}]}},{\"id\":\"s_area\",\"type\":\"service-area\",\"variant\":\"list\",\"tone\":\"alt\",\"props\":{\"title\":\"Kje vam pomagamo\",\"intro\":\"Vlečna služba pokriva vso Gorenjsko.\"}},{\"id\":\"s_steps\",\"type\":\"steps\",\"variant\":\"vertical\",\"props\":{\"heading\":\"Kako poteka popravilo\",\"steps\":[{\"title\":\"Pokličete nas\",\"text\":\"Povejte, kaj se dogaja z vozilom, in dogovorimo se za termin.\"},{\"title\":\"Pripeljete vozilo\",\"text\":\"Vozilo pregledamo v naši delavnici v Kranju.\"},{\"title\":\"Dobite predračun\",\"text\":\"Pred popravilom vam povemo, kaj je treba narediti in koliko bo stalo. Brez presenečenj.\"}]}},{\"id\":\"s_prices\",\"type\":\"price-list\",\"variant\":\"tags\",\"tone\":\"inverse\",\"props\":{\"title\":\"Cene, ki jih že poznamo\",\"groups\":[{\"items\":[{\"name\":\"Računalniška diagnostika\",\"price\":{\"amount\":30}},{\"name\":\"Polnjenje klime\",\"price\":{\"amount\":59}},{\"name\":\"Menjava gum\",\"price\":{\"amount\":20,\"unit\":\"komplet\"}},{\"name\":\"Hramba gum\",\"price\":{\"amount\":40,\"unit\":\"sezona\"}}]}],\"footnote\":\"Za ostala dela vam pred popravilom pripravimo predračun.\"}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"inverse\",\"props\":{\"title\":\"Pokličite nas, pa se dogovorimo\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 4214,
+      "output_tokens": 1604,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

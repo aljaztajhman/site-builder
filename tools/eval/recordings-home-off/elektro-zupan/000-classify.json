@@ -1,0 +1,18 @@
+{
+  "seq": 0,
+  "stage": "classify",
+  "model": "claude-haiku-4-5-20251001",
+  "hash": "34361a91f423c34c",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"businessType\": \"builder\", \"confidence\": 0.95}",
+    "stopReason": "end_turn",
+    "model": "claude-haiku-4-5-20251001",
+    "usage": {
+      "input_tokens": 732,
+      "output_tokens": 18,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}
