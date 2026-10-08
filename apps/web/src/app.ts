@@ -14,6 +14,7 @@ import {
   publishSite,
   siteAddress,
   startCollection,
+  localeOps,
   publishedPrefix,
   publishedBase,
   switchDirection,
@@ -706,6 +707,16 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     const kind = CollectionKind.safeParse(body.kind);
     if (!kind.success) return c.json({ error: "kind required" }, 400);
     return directEdit(c, c.req.param("id"), body.baseVersion, (spec) => startCollection(spec, kind.data), `zbirka ${kind.data}`, false);
+  });
+
+  // The site's second language on or off (Strani › Jeziki, it-editor-languages): a direct edit, so it is validated, held
+  // to the plan's languages (Osnovni refused, naming Plus), saved as a version and undone like any other. No translation
+  // is written here: the owner types each one, and publishing waits until every text of the pages has one.
+  app.post("/api/sites/:id/locales", async (c) => {
+    const body = (await c.req.json().catch(() => ({}))) as { baseVersion?: number; locale?: unknown; on?: unknown };
+    if (typeof body.locale !== "string" || typeof body.on !== "boolean") return c.json({ error: "locale and on required" }, 400);
+    const { locale, on } = body;
+    return directEdit(c, c.req.param("id"), body.baseVersion, (spec) => localeOps(spec, locale, on), `${on ? "dodan" : "odstranjen"} jezik ${locale}`, false);
   });
 
   app.post("/api/sites/:id/direction", async (c) => {

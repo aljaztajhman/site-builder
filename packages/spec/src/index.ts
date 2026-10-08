@@ -24,6 +24,7 @@ export * from "./locales.ts";
 export * from "./price-edit.ts";
 export { onRequestPrices, stripModelOnRequest, addedOnRequest, type OnRequestPrice, type PriceOnRequestValue } from "./price-on-request.ts";
 export * from "./translations-follow.ts";
+export * from "./translatable.ts";
 export * from "./showcase.ts";
 export * from "./families.ts";
 export * from "./owner-edits.ts";
