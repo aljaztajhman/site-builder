@@ -93,7 +93,7 @@ jobs:
           if git rev-parse --verify -q origin/release >/dev/null; then
             [ "$(git rev-parse origin/release)" != "$sha" ] || { echo "::error::release is already at $sha"; exit 1; }
             git merge-base --is-ancestor origin/release "$sha" || {
-              echo "::error::release has commits that $sha doesn't (a hotfix not merged into main?); fast-forward impossible:"
+              echo "::error::release has commits that $sha doesn't (a hotfix not merged back: merge the release -> main PR with a merge commit, see hotfix-merge-back); fast-forward impossible:"
               git log --oneline "$sha..origin/release"
               exit 1
             }

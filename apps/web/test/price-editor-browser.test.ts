@@ -220,7 +220,8 @@ describe("price list editor in a browser", () => {
       const entry = page.locator("#facts-ask [data-ask]", { hasText: "Pramene" });
       await expect.poll(() => entry.count()).toBe(1);
       const path = (await entry.getAttribute("data-ask"))!;
-      await entry.locator("input").fill("od 12,50");
+      // With "Cena po dogovoru" on, the entry also has its checkbox: the price is the text field.
+      await entry.locator("input[type=text]").fill("od 12,50");
       await expect
         .poll(async () => {
           let o: unknown = (await platform.repo.getSpec(id))!.spec;

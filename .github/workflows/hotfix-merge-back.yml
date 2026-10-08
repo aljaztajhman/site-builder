@@ -1,0 +1,61 @@
+# Owner's decision sb-hotfix-promote = merge-back (2026-10-08): after a hotfix lands on `release` (a PR into release,
+# docs/dev/workflow.md section 3), `release` is merged back into `main` with a merge commit, so `release` stays an
+# ancestor of `main` and the next promote fast-forwards. No force push anywhere.
+#
+# On every push to `release`: when `release` has commits `main` lacks, open the merge-back PR (release -> main). A
+# promote's own push (a fast-forward to a main commit) is already in main, so it does nothing then.
+# The repository doesn't let GitHub Actions open pull requests (Settings > Actions > Workflow permissions), so the
+# step usually can't: the run then fails on purpose, and its summary gives the one command to open the PR by hand.
+# Merge that PR with "Create a merge commit"; a squash would leave release's commits outside main again.
+name: hotfix-merge-back
+
+on:
+  push:
+    branches: [release]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: hotfix-merge-back
+  cancel-in-progress: false
+
+jobs:
+  merge-back:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Open the merge-back PR when release has commits main lacks
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git fetch --quiet origin main release
+          if git merge-base --is-ancestor origin/release origin/main; then
+            echo "release is already in main: nothing to merge back"
+            exit 0
+          fi
+          echo "release has commits main lacks:"
+          git log --oneline origin/main..origin/release
+          open=$(gh pr list --base main --head release --state open --json number --jq 'length')
+          if [ "$open" -gt 0 ]; then
+            echo "A merge-back PR is already open."
+            exit 0
+          fi
+          title="Merge release back into main (hotfix)"
+          body="Hotfix merge-back (decision sb-hotfix-promote): release has commits main lacks, so the next promote can't fast-forward. Merge with **Create a merge commit**, not squash."
+          if gh pr create --base main --head release --title "$title" --body "$body"; then
+            exit 0
+          fi
+          {
+            echo "### Merge-back PR needed"
+            echo "GitHub Actions may not open pull requests in this repository. Open it by hand and merge it with a merge commit:"
+            echo '```'
+            echo "gh pr create --base main --head release --title \"$title\" --body \"Hotfix merge-back (sb-hotfix-promote). Merge with a merge commit.\""
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::error::release has commits main lacks and the merge-back PR couldn't be opened; see the run summary"
+          exit 1
