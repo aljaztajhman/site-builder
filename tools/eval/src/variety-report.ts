@@ -9,7 +9,7 @@ import { mean, type JudgeOutput } from "./judge.ts";
 import type { FixtureResult } from "./runner.ts";
 
 /** The config variety switches an eval run can turn on (--variety). */
-export const VARIETY_SWITCHES = ["families", "skeleton", "concept"] as const;
+export const VARIETY_SWITCHES = ["families", "skeleton", "concept", "genome"] as const;
 
 /**
  * The variety targets (docs/plans/variety-engine.md, Step 0 "Targets"): within-trade look distance at least today's

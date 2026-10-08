@@ -1,6 +1,7 @@
 import { OFF_BLACK_MIN, OFF_WHITE_MAX, clampLuminance, contrast, ensureContrast, isCreamOrOffWhite, isWarmCream, isWarmTint, luminance, toWarmTint } from "./color.ts";
 import type { Colors, Design, Direction } from "./design.ts";
 import { acceptedFontPairs } from "./families.ts";
+import { enforceGenomeTokens, genomeTokenIssues, groundFallback, intendedGround, shapeOfRadius } from "./genome-rules.ts";
 
 /** Text colours: never pure black, never pure white. (Button text, onPrimary, may be white.) */
 export const TEXT_TOKENS = ["text", "muted", "onInverse"] as const satisfies readonly (keyof Colors)[];
@@ -74,6 +75,12 @@ export function checkDesign(design: Design, dir: Direction | undefined): DesignI
     const ratio = contrast(a, b);
     if (ratio < 4.5) issues.push({ path: `/design/colors/${fg}`, message: `${fg} on ${bg} contrast ${ratio.toFixed(2)} < 4.5 (text in ${dir.id})` });
   }
+  // Spec v18: a picked genome (variety Step 5) is held by its type system, shape and ground instead of the direction's
+  // ranges; its compatibility rules are validateSite's (siteGenomeIssues).
+  if (design.genome?.source === "picked") {
+    issues.push(...genomeTokenIssues(design));
+    return issues;
+  }
   if (!acceptedFontPairs(dir).includes(design.fontPair)) issues.push({ path: "/design/fontPair", message: `font pair ${design.fontPair} not in direction ${dir.id}` });
   const r = dir.ranges;
   const inRange = (key: "radius" | "baseFontSize" | "scale" | "headingWeight" | "headingTracking") => {
@@ -124,6 +131,8 @@ const clamp = (v: number, [lo, hi]: [number, number]) => Math.min(hi, Math.max(l
  * replaces a banned background, and fixes contrast by moving lightness. Idempotent.
  */
 export function enforceDesign(design: Design, dir: Direction, opts: DesignRepairOptions = {}): Design {
+  // Spec v18: a picked genome's tokens follow its rules (genome-rules.ts), its ground the genome's; the colours as always.
+  if (design.genome?.source === "picked") return enforceColours(enforceGenomeTokens({ ...design, colors: { ...design.colors } }, dir), dir, opts);
   const r = dir.ranges;
   const out: Design = {
     ...design,
@@ -141,11 +150,21 @@ export function enforceDesign(design: Design, dir: Direction, opts: DesignRepair
     colors: { ...design.colors },
   };
   out.headingWeight = clamp(out.headingWeight, r.headingWeight);
+  // A preset genome (spec v18) follows its direction: the direction's rhythm, the shape its radius gives.
+  if (out.genome) out.genome = { ...out.genome, rhythm: dir.layout.rhythm, shape: shapeOfRadius(out.radius) };
+  return enforceColours(out, dir, opts);
+}
+
+/** The colour half of enforceDesign: the page ground, banned backgrounds, surfaces and contrast. In place on `out`; returns it. */
+function enforceColours(out: Design, dir: Direction, opts: DesignRepairOptions): Design {
   const c = out.colors;
-  const fb = dir.palette.fallback;
-  if (dir.palette.background === "white") c.background = "#ffffff";
-  if (isCreamOrOffWhite(c.background, { beige: opts.beige }) || (dir.palette.background === "dark" && luminance(c.background) > 0.05)) c.background = fb.background;
-  if (dir.palette.background === "tint" && luminance(c.background) < 0.6) c.background = fb.background;
+  const picked = out.genome?.source === "picked";
+  // A picked genome's ground is its own (intendedGround), repaired with a palette of that ground; else the direction's.
+  const ground = picked ? intendedGround(out, dir) : dir.palette.background;
+  const fb = picked ? groundFallback(dir, ground) : dir.palette.fallback;
+  if (ground === "white") c.background = "#ffffff";
+  if (isCreamOrOffWhite(c.background, { beige: opts.beige }) || (ground === "dark" && luminance(c.background) > 0.05)) c.background = fb.background;
+  if (ground === "tint" && luminance(c.background) < 0.6) c.background = fb.background;
   // promptFixes.warmSurface: a warm direction's cream surface becomes a warm tint, so "warmer colours" can warm the page.
   if (opts.warmSurface && warmSurfaceAllowed(dir) && isWarmCream(c.surface)) c.surface = toWarmTint(c.surface);
   else if (isWarmCream(c.surface)) c.surface = fb.surface;

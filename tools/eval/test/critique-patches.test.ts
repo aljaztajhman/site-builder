@@ -82,6 +82,8 @@ describe("recorded critique patches", () => {
         expect(v.spec.pages[0]!.kind).toBe("home");
         expect(critiqueView(v.spec as never).pages.findIndex((p) => p.kind === "home")).toBe(0);
       }
-    }, 180_000);
+    // A whole replayed generation with browser checks: 42–102 s locally, 70–180 s on a CI shard beside the browser suites
+    // (main went red at 180 s on 2026-10-08 once the 20-page nav, genome and language browser tests joined shard 1).
+    }, 300_000);
   }
 });

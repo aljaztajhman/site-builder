@@ -3,6 +3,7 @@ import { repairSiteCopy } from "./banned.ts";
 import { Design } from "./design.ts";
 import { enforceDesign } from "./design-rules.ts";
 import { DIRECTIONS } from "./directions.ts";
+import { presetGenome } from "./genome-rules.ts";
 
 type RawSpec = Record<string, unknown>;
 
@@ -80,6 +81,17 @@ export const MIGRATIONS: Record<number, (spec: RawSpec) => RawSpec> = {
   // 16 → 17: "Cena po dogovoru" (it-price-on-request). Additive: a price may be `{ onRequest: true }`, set only by the
   // owner in the editor. Every v16 spec is a valid v17 spec.
   16: (spec) => spec,
+  // 17 → 18: the design genome (variety engine Step 5, config variety.genome). Every stored site gets its direction's
+  // preset genome, one to one (presetGenome: source "preset", palette "preset", the direction's rhythm, square or soft by
+  // its radius). A preset genome keeps the direction's rules and renders nothing of its own, so a migrated site renders
+  // byte-identical HTML. A spec that already has a genome keeps it.
+  17: (spec) => {
+    const design = spec.design as Record<string, unknown> | undefined;
+    if (!design || typeof design !== "object" || design.genome !== undefined) return spec;
+    const dir = DIRECTIONS.find((d) => d.id === design.direction);
+    const radius = typeof design.radius === "number" ? design.radius : 0;
+    return { ...spec, design: { ...design, genome: presetGenome({ radius }, dir) } };
+  },
 };
 
 export function migrateSpec(input: unknown, migrations = MIGRATIONS, target: number = SPEC_VERSION): SiteSpec {

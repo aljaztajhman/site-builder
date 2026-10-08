@@ -336,10 +336,13 @@ function renderDocument(spec: SiteSpec, localized: SiteSpec, opts: RenderOptions
         "data-ratio": skeleton.photoRatio,
       }
     : {};
+  // Spec v18: a picked genome's shape language beyond the radius (cut corners, arched tops; genome.css). A preset genome
+  // (every migrated site) and the square and soft shapes add nothing, so their HTML is as before.
+  const shape = design.genome?.source === "picked" && (design.genome.shape === "cut" || design.genome.shape === "arch") ? design.genome.shape : undefined;
   // The page's one centred section (design.skeleton.centred), if any; none without a skeleton.
   const centred = centredOn(skeleton, doc.sections, motif);
   const renderBody = (suffixes: ReadonlyMap<string, string>) => renderToStaticMarkup(
-    <body data-imagery={design.imagery} data-motif={motif} data-submotif={sub} className={bodyClass} {...skeletonAttrs}>
+    <body data-imagery={design.imagery} data-motif={motif} data-submotif={sub} data-shape={shape} className={bodyClass} {...skeletonAttrs}>
       <a className="skip-link" href="#main">
         {ctx.t("skipToContent")}
       </a>

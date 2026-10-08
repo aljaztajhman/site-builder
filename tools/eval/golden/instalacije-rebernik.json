@@ -1,5 +1,5 @@
 {
-  "specVersion": 17,
+  "specVersion": 18,
   "slug": "instalacije-rebernik",
   "locales": {
     "default": "sl",
@@ -55,7 +55,13 @@
     "headingTracking": 0.01,
     "density": "compact",
     "shadow": "none",
-    "imagery": "monochrome"
+    "imagery": "monochrome",
+    "genome": {
+      "source": "preset",
+      "palette": "preset",
+      "rhythm": "inverse-accents",
+      "shape": "square"
+    }
   },
   "assets": {
     "images": []

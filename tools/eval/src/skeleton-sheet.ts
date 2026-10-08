@@ -285,7 +285,7 @@ async function headerRow(page: Page): Promise<string[]> {
 }
 
 /** One row per look: phone top, phone footer, desktop top, desktop footer. */
-async function sheet(rows: { label: string; shots: Buffer[] }[]): Promise<Buffer> {
+export async function sheet(rows: { label: string; shots: Buffer[] }[]): Promise<Buffer> {
   const phoneW = 180;
   const deskW = 448;
   const h = 400;
