@@ -4,6 +4,7 @@ import type { FixtureResult, Mode } from "./runner.ts";
 import { skeletonSimilarity, type HomepageShape } from "./homepage-metrics.ts";
 import type { Composition } from "@sb/engine";
 import { mean } from "./judge.ts";
+import { sloveneLines, sloveneSummary } from "./slovene-report.ts";
 
 type Target = AppConfig["checks"]["composition"]["mobile"];
 /** Which first-screen targets a homepage misses at one viewport. */
@@ -75,6 +76,7 @@ export function renderReport(results: FixtureResult[], config: AppConfig, meta: 
     const m = (xs: number[]) => median(xs).toFixed(1);
     lines.push(`- Vision judge (1–5, 3 = ordinary small-business site): phone median ${m(judged.map((r) => mean(r.judge!.phone)))}, desktop median ${m(judged.map((r) => mean(r.judge!.desktop)))} (${judged.length} sites, ${eur(judged.reduce((a, r) => a + r.judgeEur, 0))})`);
   }
+  lines.push(...sloveneSummary(results));
   const errors = results.filter((r) => r.error);
   if (errors.length) lines.push(`- **Errors:** ${errors.map((r) => r.id).join(", ")}`);
   lines.push("");
@@ -106,6 +108,7 @@ export function renderReport(results: FixtureResult[], config: AppConfig, meta: 
     lines.push("");
   }
 
+  lines.push(...sloveneLines(results));
   lines.push(`## Sites`, "");
   lines.push(`Lighthouse thresholds: performance ≥ ${lh.performance}, accessibility ${lh.accessibility}, best practices ≥ ${lh.bestPractices}, SEO ≥ ${lh.seo}.`, "");
   lines.push(`| Site | Type | Direction | LH P/A/BP/SEO | axe | 360 px width | Facts | Placeholders | Export offline | Gen cost | Gen time | First preview | Pass |`);

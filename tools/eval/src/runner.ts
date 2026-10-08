@@ -39,6 +39,8 @@ import { judgeHomepage, type JudgeOutput } from "./judge.ts";
 import { CachedImageTransport, meteredImages, meteredModel, type Meter } from "./eval-transports.ts";
 import { brandFit, lookFeatures, motifFit, screenPrint, type BrandFit, type LookSite, type MotifFit } from "./look-distance.ts";
 import { homepageCopy, type HomepageCopy } from "./copy-similarity.ts";
+import { lintSpec, type SloveneLint } from "./slovene-lint.ts";
+import { judgeSlovene, type SloveneJudgeResult } from "./slovene-judge.ts";
 
 export type Mode = "live" | "record" | "record-missing" | "replay" | "offline";
 
@@ -86,6 +88,12 @@ export interface FixtureResult {
   judge: JudgeOutput | null;
   judgeError?: string;
   judgeEur: number;
+  /** Slovene copy lint (slovene-lint.ts, no model, report only): the generated site and, after scripted edits, the final one. */
+  slovene?: { generated: SloveneLint; final?: SloveneLint };
+  /** Slovene judge (--judge-slovene, opt-in): errors listed by the model for the generated site, and what it cost. */
+  sloveneJudge?: SloveneJudgeResult;
+  sloveneJudgeError?: string;
+  sloveneJudgeEur?: number;
   /** What this fixture really paid the providers, judge excluded: replayed answers and cached pictures cost nothing. */
   paidEur: number;
   /** --replay: requests that differ from the one recorded (a prompt changed since; the recorded answer is replayed anyway). */
@@ -117,6 +125,8 @@ export interface RunOptions {
    */
   judge: boolean;
   judgeBatch?: { transport: BatchTransport; judging: Promise<void>[] };
+  /** --judge-slovene: list the generated site's Slovene errors with the Slovene judge (a real model call; never by default). */
+  judgeSlovene?: boolean;
   /** Where fal pictures are cached by request (live, record and record-missing runs). */
   imageCacheDir?: string;
   /** false (--no-edits): generate and check only, no scripted chat edits (40 % of a homepage run's cost). */
@@ -325,6 +335,7 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
       motif: motifFit(features.motif, fixture.brief.businessType, fixture.brief.trade),
     };
     result.copy = homepageCopy(fixture.id, fixture.brief.businessType, first.current.spec);
+    result.slovene = { generated: lintSpec(first.current.spec, fixture.brief.description) };
     result.checkpoints.push(summarise("generated", first.current.spec, first.current.version, first.report));
     const { zip } = await exportSite({ repo, storage, config }, site.id);
     const ex = await checkExportOffline(zip, first.current.spec.slug, opts.browser.browser);
@@ -361,6 +372,24 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
       if (opts.judgeBatch) opts.judgeBatch.judging.push(judging);
       else await judging;
     }
+    if (opts.judgeSlovene) {
+      // Like the vision judge: its own client, never recorded, its cost apart from the site's, in the run's batch.
+      result.sloveneJudgeEur = 0;
+      const sloveneClient = new ModelClient({
+        config,
+        transport: opts.judgeBatch?.transport ?? new AnthropicTransport(),
+        spentToday: async () => (opts.spentSoFar() >= opts.maxEur ? Number.POSITIVE_INFINITY : 0),
+        onCall: async (r) => {
+          result.sloveneJudgeEur = (result.sloveneJudgeEur ?? 0) + r.costEur;
+        },
+      });
+      const judging = judgeSlovene(sloveneClient, first.current.spec, fixture.brief.description).then(
+        (j) => void (result.sloveneJudge = j),
+        (e: unknown) => void (result.sloveneJudgeError = (e as Error).message.slice(0, 300)),
+      );
+      if (opts.judgeBatch) opts.judgeBatch.judging.push(judging);
+      else await judging;
+    }
     await writeFile(path.join(dir, "spec-generated.json"), JSON.stringify(first.current.spec, null, 2));
 
     const edits = opts.edits !== false;
@@ -387,7 +416,10 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
         before = after.current.spec;
       }
       await writeFile(path.join(dir, "spec-final.json"), JSON.stringify(before, null, 2));
+      // The scripted edits' messages are the client's words too.
+      if (result.slovene) result.slovene.final = lintSpec(before, [fixture.brief.description, ...fixture.edits.map((e) => e.message)].join("\n"));
     }
+    if (result.slovene) await writeFile(path.join(dir, "slovene-lint.json"), JSON.stringify(result.slovene, null, 2));
     result.costByStage = await repo.siteCost(site.id);
     const total = result.costByStage.reduce((a, c) => a + c.eur, 0);
     result.editsEur = total - result.generationEur;
