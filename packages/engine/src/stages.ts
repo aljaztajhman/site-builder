@@ -23,6 +23,7 @@ import {
   type DesignRepairOptions,
   type ImageAsset,
   type Issue,
+  type Page,
   type SiteSpec,
 } from "@sb/spec";
 import type { ModelClient } from "./llm/client.ts";
@@ -592,13 +593,26 @@ async function generateContentHomepageFirst(client: ModelClient, input: ContentI
     pageMessage,
     pages: others.map((p) => ({ page: p, id: pageId(p) })),
     plannedIds: all.map(pageId),
-    ...(input.onHomepage ? { onHomepage: input.onHomepage } : {}),
+    ...(input.onHomepage ? { onHomepage: (h) => input.onHomepage!(h.spec ? { ...h, spec: withPlannedPages(h.spec, others) } : h) } : {}),
   });
   return { spec: r.spec, attempts: r.attempts, issues: r.specIssues, structuredFallback: false, repairs: r.specRepairs, parts: r.notes };
 }
 
 /** A planned page's id, as the content step names it ("page ids p_<slug or "home">"). */
 const pageId = (p: Brief["pages"][number]) => `p_${p.slug || "home"}`;
+
+/**
+ * The homepage on its own with the pages still to be written as empty stand-ins after it (the brief's slug and nav
+ * label, no sections), so its nav and links render; only the homepage is shown. Not a valid spec, never saved.
+ */
+export function withPlannedPages(home: SiteSpec, planned: Brief["pages"]): SiteSpec {
+  const have = new Set(home.pages.map((p) => p.id));
+  const stand = planned
+    .filter((p) => p.kind !== "home" && !have.has(pageId(p)))
+    .map((p): Page => ({ id: pageId(p), kind: "standard", slug: p.slug, nav: { label: p.navLabel, show: true }, seo: { title: p.navLabel, description: p.purpose.slice(0, 160) }, sections: [] }));
+  const at = home.pages.findIndex((p) => p.kind === "home") + 1;
+  return { ...home, pages: [...home.pages.slice(0, at), ...stand, ...home.pages.slice(at)] };
+}
 
 /** The envelope for one inner page of the homepage-first content step. */
 function pageJsonInstruction(page: Brief["pages"][number]): string {
