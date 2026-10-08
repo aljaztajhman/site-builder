@@ -14,6 +14,8 @@ import {
   type Direction,
   contrast,
   repairSiteCopy,
+  addedOnRequest,
+  stripModelOnRequest,
   toModelJsonSchema,
   validateSite,
   type ImageAsset,
@@ -399,6 +401,8 @@ export async function generateContent(client: ModelClient, input: ContentInput):
     const built = assembleSpec({ slug: input.slug, brief: input.brief, design: input.design, assets: input.assets, content: parsed.data as ContentOutput, hoursWithheld: clientWithholdsHours(input.corpus) });
     // Copy rules fixed in code rather than by a paid retry: em dashes become en dashes.
     repairs.push(...repairSiteCopy(built));
+    // "Cena po dogovoru" is the owner's choice, never the model's: a missing price again (it-price-on-request).
+    repairs.push(...stripModelOnRequest(built, null).map((p) => `${p}: price "on request" is set by the owner only; made a price placeholder`));
     const v = validateSite(built);
     const issues = v.ok ? [] : v.issues.map(issueLine);
     issues.push(...checkFacts(built, input.corpus).map(factLine));
@@ -518,6 +522,10 @@ export function applyPatches(spec: SiteSpec, ops: Operation[], corpus: string): 
     return { spec, applied: 0, issues: issue };
   }
   let next = result.next;
+  // "Cena po dogovoru" is set by the owner in the editor only (it-price-on-request): an edit that adds one is
+  // refused, so the model tries again without it. The owner's own stay as they are.
+  const onRequest = addedOnRequest(spec, next);
+  if (onRequest.length) return { spec, applied: 0, issues: onRequest.map((p) => `${p}: a price "on request" is set by the client in the editor only; keep the price as it was or use a price placeholder`) };
   repairSiteCopy(next);
   // Design edits get the same repair as generation: banned backgrounds replaced, contrast fixed in code.
   if (ops.some((o) => o.path === "/design" || o.path.startsWith("/design/"))) next = { ...next, design: repairDesign(next.design) };

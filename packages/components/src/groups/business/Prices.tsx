@@ -1,4 +1,4 @@
-import { formatPrice, isPlaceholder, type Price } from "@sb/spec";
+import { formatPrice, isPlaceholder, isPriceOnRequest, type Price } from "@sb/spec";
 import { Ph, Picture, PriceText, Section, SectionHead, cx, titleId } from "../../primitives/index.tsx";
 import type { RenderCtx, SectionProps } from "../../types.ts";
 import { TAG_KEYS, itemId } from "./shared.tsx";
@@ -140,6 +140,7 @@ export const PRICE_RATES_SIZES = "(min-width: 64rem) 26rem, 70vw";
 /** A rate's amount large, its unit ("na osebo") small under it. */
 function RateValue({ price, ctx }: { price: Price; ctx: RenderCtx }) {
   if (isPlaceholder(price)) return <Ph p={price} ctx={ctx} />;
+  if (isPriceOnRequest(price)) return <span className="rates__amount rates__amount--on-request">{ctx.t("priceOnRequest")}</span>;
   return (
     <>
       <span className="rates__amount">

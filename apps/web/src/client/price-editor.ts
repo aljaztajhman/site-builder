@@ -8,6 +8,8 @@ import { ENUM_LABEL } from "@sb/spec/labels";
 import {
   LIST_SHAPE,
   MENU_TAGS,
+  PRICE_ON_REQUEST,
+  isPriceOnRequest,
   listEdits,
   parsePriceInput,
   priceInputValue,
@@ -45,6 +47,8 @@ export interface PriceEditorDeps {
   /** The section's props schema (JSON Schema) for the heading fields. */
   props: { properties?: Record<string, { maxLength?: number }>; required?: string[] };
   ui: PriceEditorState;
+  /** "Cena po dogovoru" per item and for the whole list (config `editor.priceOnRequest`). */
+  onRequest: boolean;
 }
 
 const itemKey = (sectionId: string, g: number, i: number) => `${sectionId}:${g}:${i}`;
@@ -99,6 +103,26 @@ export function priceEditor(d: PriceEditorDeps): HTMLElement {
       ? "Jedi in cene vpišite sami. Spremembo vidite v predogledu takoj, ko jo shranimo."
       : "Storitve in cene vpišite sami. Spremembo vidite v predogledu takoj, ko jo shranimo."),
   );
+  // "Cena po dogovoru" for the whole list in one tap; the owner's choice, so publishing isn't held up by it.
+  if (d.onRequest) {
+    const items = groups.flatMap((gr) => gr.items);
+    if (items.every((it) => isPriceOnRequest(it.price))) box.append(h("p", { class: "help pl-all-onreq" }, "Vse cene so po dogovoru. Ceno postavke vpišete, ko jo odprete."));
+    else
+      box.append(
+        h("div", { class: "pl-tools" },
+          h("button", {
+            class: "btn sm",
+            type: "button",
+            id: `pl-onreq-${d.sectionId}`,
+            onClick: () => {
+              const typed = items.some((it) => !isPriceOnRequest(it.price) && !("$placeholder" in (it.price as object)));
+              if (typed && !confirm("Vse cene na seznamu bodo »po dogovoru«, tudi tiste, ki ste jih že vpisali. Nadaljujem?")) return;
+              structural((s, at) => listEdits.allOnRequest(s, at), "vse cene po dogovoru");
+            },
+          }, "Vse cene po dogovoru"),
+        ),
+      );
+  }
 
   // ---------- Heading fields: each saves on its own path (never the whole props, which holds the list) ----------
   const head = h("div", { class: "pl-head" });
@@ -320,7 +344,9 @@ function itemRow(d: PriceEditorDeps, c: RowCtx): HTMLElement {
     later.push();
   });
 
-  const current = draft.price as { amount?: number; from?: boolean; unit?: string; $placeholder?: string };
+  const current = draft.price as { amount?: number; from?: boolean; unit?: string; $placeholder?: string; onRequest?: true };
+  // "Cena po dogovoru": one tap instead of an amount; shown when the switch is on, or to take one back.
+  const onReq = d.onRequest || current.onRequest === true ? h("input", { type: "checkbox", checked: current.onRequest === true, "data-field": "on-request" }) : null;
   const price = h("input", { type: "text", inputmode: "decimal", autocomplete: "off", "data-field": "price", placeholder: "npr. 12,50", maxlength: 16 });
   price.value = typeof current.amount === "number" ? priceInputValue(current.amount) : "";
   const unit = h("input", { type: "text", maxlength: shape.unitMax, autocomplete: "off", placeholder: "npr. / kos, na osebo" });
@@ -330,6 +356,17 @@ function itemRow(d: PriceEditorDeps, c: RowCtx): HTMLElement {
   const priceErr = h("div", { class: "err", role: "status" });
   /** Reads the three price fields into the draft; false while the amount can't be read. */
   const readPrice = (): boolean => {
+    const asked = onReq?.checked === true;
+    for (const el of [price, unit, from]) el.disabled = asked;
+    if (asked) {
+      draft.price = { ...PRICE_ON_REQUEST };
+      priceErr.textContent = "";
+      price.removeAttribute("aria-invalid");
+      shown.textContent = `Na strani: ${priceLabel(draft.price)}`;
+      shown.classList.remove("warn");
+      paint();
+      return true;
+    }
     const parsed = parsePriceInput(price.value);
     if (parsed.kind === "error") {
       priceErr.textContent = parsed.message;
@@ -357,6 +394,8 @@ function itemRow(d: PriceEditorDeps, c: RowCtx): HTMLElement {
   });
   unit.addEventListener("input", () => (readPrice() ? later.push() : later.cancel()));
   from.addEventListener("change", now);
+  // Back from "po dogovoru": the amount still in the field, or a missing price again.
+  onReq?.addEventListener("change", () => (readPrice() ? now() : later.cancel()));
 
   const detail = h("textarea", { rows: 2, maxlength: shape.detailMax });
   detail.value = (draft[shape.detail] as string | undefined) ?? "";
@@ -382,6 +421,7 @@ function itemRow(d: PriceEditorDeps, c: RowCtx): HTMLElement {
       h("div", {}, h("label", {}, "Enota (neobvezno)"), unit),
     ),
     priceErr,
+    ...(onReq ? [h("label", { class: "pl-onreq" }, onReq, " Cena po dogovoru (namesto zneska)")] : []),
     shown,
     h("label", {}, from, " Prikaži kot »od« (najnižja cena)"),
     h("label", {}, type === "menu" ? "Opis jedi (neobvezno)" : "Opis (neobvezno)"), detail,

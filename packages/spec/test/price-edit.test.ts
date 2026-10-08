@@ -73,6 +73,8 @@ describe("price input (Slovene formatting)", () => {
     expect(priceLabel({ amount: 45, from: true, unit: "/ kos" })).toBe(`od 45${NBSP}€ / kos`);
     expect(priceLabel({ amount: 1200 })).toBe(formatPrice(1200));
     expect(priceLabel({ $placeholder: "price" })).toBeNull();
+    // The owner's "Cena po dogovoru": words where the amount would be.
+    expect(priceLabel({ onRequest: true })).toBe("po dogovoru");
   });
 
   it("builds the spec value: placeholder when empty, »od« and unit kept", () => {
@@ -126,6 +128,11 @@ describe("list shapes match the spec", () => {
         : priceList.schema.safeParse({ id: "s_p", type, variant: "table", props: { title: "Cenik", groups: [{ items: [it] }] } });
     expect(section("price-list", item).success).toBe(true);
     expect(section("menu", dish).success).toBe(true);
+    // A price "po dogovoru" is saved as exactly { onRequest: true }, whatever else the fields held.
+    const asked = cleanItem("price-list", { name: "Pramene", price: { onRequest: true, amount: 5, unit: "x" } as never });
+    expect(asked).toEqual({ name: "Pramene", price: { onRequest: true } });
+    expect(section("price-list", asked).success).toBe(true);
+    expect(section("menu", cleanItem("menu", { name: "Ričet", price: { onRequest: true } })).success).toBe(true);
   });
 });
 

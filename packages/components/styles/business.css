@@ -323,6 +323,25 @@
   text-decoration-thickness: 0.08em;
 }
 
+/* ---------- The owner's "po dogovoru" where a price stands ---------- */
+/* Words, not figures. In a list's price column they stay on one line, as a price does (the name wraps instead). */
+.price--on-request,
+.prices__table .price--on-request,
+.prices__dl .price--on-request {
+  white-space: nowrap;
+  font-variant-numeric: normal;
+}
+/* At headline size (tags, labels, offers) the words would outgrow a phone's column: half the size, never below body
+   text, and they may wrap. */
+.price-tag .price--on-request,
+.price-label__price .price--on-request,
+.offers__price .price--on-request {
+  white-space: normal;
+  font-size: max(1rem, 0.5em);
+  line-height: 1.15;
+  letter-spacing: normal;
+}
+
 /* ---------- services aside: the heading and a note card beside a ruled list of names ---------- */
 .svc-aside {
   display: grid;
@@ -1643,6 +1662,13 @@
   letter-spacing: -0.03em;
   white-space: nowrap;
   font-variant-numeric: proportional-nums;
+}
+/* The owner's "po dogovoru" in a rate's place: words at a heading's size, wrapping like words. */
+.rates__amount.rates__amount--on-request {
+  font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2.25rem);
+  line-height: 1.15;
+  letter-spacing: normal;
+  white-space: normal;
 }
 .rates__unit {
   margin-top: 0.5rem;

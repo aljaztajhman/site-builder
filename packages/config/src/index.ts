@@ -279,6 +279,16 @@ export const AppConfigSchema = z.object({
      */
     indexSiteHosts: z.boolean(),
   }),
+  /** Switches for the owner's editor (see config $comment). */
+  editor: z.object({
+    /**
+     * it-price-on-request (owner's decision sb-price-on-request): "Cena po dogovoru" per price item and for a whole
+     * price list or menu, in the price editor and on "Še to potrebujemo". The owner's own choice (price
+     * `{ onRequest: true }`), so it fills the price and unblocks publishing; the site shows "po dogovoru" and gives no
+     * price in JSON-LD. Off: the editor offers nothing new and the server refuses a new one (an existing one still renders).
+     */
+    priceOnRequest: z.boolean(),
+  }),
   /** Legal name and address from a tax number via EU VIES, in the editor (see config $comment). */
   companyLookup: z.object({
     enabled: z.boolean(),
