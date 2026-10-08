@@ -441,6 +441,7 @@ Product work (not started):
 
 ## Follow-ups (not blocking a phase)
 - [ ] Eval recordings are stale on main (found 2026-10-07): only classify requests still match the recordings, so `pnpm eval --replay` can't be strict; racunovodstvo-seliskar and zobozdravstvo-lebar run out of edit recordings ("No recording left for stage edit (call 11)"). Re-record with `--record-missing` once the prompt switches are decided (needs budget, kind recording)
+- [x] The goldens said "Pokliči" on 12 call buttons of 6 sites that otherwise address the reader as vi (found by the Slovene lint, #140): now "Pokličite"; showcase examples and the synthetic home recordings rebuilt (PR #142, 2026-10-08)
 - [ ] Edit request hashes include the run's random site id (`assets.images[].src`), so edit requests never match between runs, main vs main too: normalise the id before hashing (free; makes `--record-missing` reuse edit recordings)
 - [x] A long homepage (kmetija-grabnar, home-scope eval) failed generation: its full-page screenshot exceeded the API's 8000 px limit (400). Screenshots over the limit are shrunk to fit; any critique failure except the spend cap now keeps the checked site
 - [x] Critique screenshots of long pages were illegible (API scales images to ≤ 1568 px long edge; a 360×5000 page arrived ~110 px wide). Now the whole mobile page in ≤ 1560 px slices (max 6) and the desktop top (2 × 900 px). Measured: ~9–10k input tokens per critique call vs ~6k, +€0.005–0.01 per call; kmetija-grabnar 6/6
