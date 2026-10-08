@@ -18,6 +18,7 @@ import {
   publishedBase,
   switchDirection,
   anotherLook,
+  anotherGenomeLook,
   hasLookFamily,
   keyOf,
   siteSeed,
@@ -34,7 +35,7 @@ import {
 } from "@sb/engine";
 import { VersionConflictError, contentType, domainProvidersFor, mailerFromEnv, newId, runningVersion, type DomainProviders, type Mailer, type Platform, type RunningVersion, type SiteStatus, type Tier } from "@sb/platform";
 import { renderPage, renderPath, sharedBundle, pageFile, notFoundPlacement, rebaseRelativeUrls } from "@sb/render";
-import { CollectionKind, addedOnRequest, blockerText, collectPlaceholders, markOwnerEdits, sectionDef, type SiteSpec } from "@sb/spec";
+import { CollectionKind, addedOnRequest, blockerText, collectPlaceholders, genomeOfLook, markOwnerEdits, sectionDef, type SiteSpec } from "@sb/spec";
 import type { AuthSettings } from "./auth.ts";
 import { clientIp, csrfOk, fullSiteRefusal, identity, publishRefusal, refusalJson, sameOriginOnly, signedIn, siteAccess, tierOf, type AppEnv, type Refusal } from "./access.ts";
 import { accessInfo, allowanceFor, picturesFor, picturesShort, previewBadge, reserveJob } from "./limits.ts";
@@ -566,8 +567,9 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       cost,
       versions,
       placeholders: current ? collectPlaceholders(current.spec) : [],
-      // "Druga podoba" is offered (config variety.families, and the site's style has a family of looks).
-      anotherLook: config.variety.families && !!current && hasLookFamily(current.spec),
+      // "Druga podoba" is offered (config variety.families, and the site's style has a family of looks; with config
+      // variety.genome, for every style).
+      anotherLook: !!current && (config.variety.genome || (config.variety.families && hasLookFamily(current.spec))),
       // The pre-publish checklist (structured, the editor words it in Slovene) and the same as English lines.
       checklist,
       blockers: checklist.map(blockerText),
@@ -724,17 +726,51 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   // "Druga podoba" (config variety.families; HQ sb-druga-podoba): the same text and photos in the next look of the site's
   // template family, picked in code away from the same trade's sites (engine another-look.ts). No model call and no
   // spend reservation, so every tier may; saved as a version like any direct edit (validated, held to the plan), so
-  // undo and the version list go back. With variety.skeleton on, the look brings another skeleton too.
+  // undo and the version list go back. With variety.skeleton on, the look brings another skeleton too. With
+  // variety.genome on (Step 5, engine genome.ts) the look is the next design genome, for every style: type, palette and
+  // ground, hero layout, header and footer, rhythm, imagery, shape and density move; texts, photos and facts stay.
   app.post("/api/sites/:id/look", async (c) => {
-    if (!config.variety.families) return c.json({ error: "not found" }, 404);
+    if (!config.variety.families && !config.variety.genome) return c.json({ error: "not found" }, 404);
     const id = c.req.param("id");
     const body = (await c.req.json().catch(() => ({}))) as { baseVersion?: number };
     const current = await repo.getSpec(id);
     if (!current) return c.json({ error: "no spec yet" }, 404);
-    if (!hasLookFamily(current.spec)) return c.json({ error: "no_family", code: "no_family", message: NO_FAMILY_MESSAGE }, 409);
+    if (!config.variety.genome && !hasLookFamily(current.spec)) return c.json({ error: "no_family", code: "no_family", message: NO_FAMILY_MESSAGE }, 409);
     const site = c.get("site") ?? (await repo.getSite(id));
     const brief = (site?.brief ?? null) as { businessType?: string; town?: string | null } | null;
     const looks = await repo.neighbourLooks(id, brief?.businessType ?? current.spec.business.type, brief?.town ?? null, config.variety.neighbours);
+    if (config.variety.genome) {
+      const genomeInput = {
+        seed: siteSeed(id),
+        neighbours: looks.map((n) => genomeOfLook(n.design, n.hero)),
+        ...(config.variety.skeleton ? { skeleton: { neighbours: looks.flatMap((n) => (n.design.skeleton ? [n.design.skeleton] : [])) } } : {}),
+      };
+      let told = "";
+      return directEdit(
+        c,
+        id,
+        body.baseVersion,
+        (spec) => {
+          const r = anotherGenomeLook(spec, genomeInput);
+          if (!r.ok) return { error: r.message };
+          const g = r.genome;
+          told = `druga podoba: ${g.type}, ${g.palette}, ${g.hero}, ${g.header}/${g.footer}, ${g.rhythm}, ${g.imagery}, ${g.shape}, ${g.density}`;
+          // The design and chrome whole; of the pages, only the sections the look moved (the hero's layout, tones).
+          const ops: Operation[] = [
+            { op: "replace", path: "/design", value: r.spec.design },
+            { op: "replace", path: "/chrome", value: r.spec.chrome },
+          ];
+          r.spec.pages.forEach((p, pi) =>
+            p.sections.forEach((s, si) => {
+              if (s !== spec.pages[pi]?.sections[si]) ops.push({ op: "replace", path: `/pages/${pi}/sections/${si}`, value: s });
+            }),
+          );
+          return ops;
+        },
+        () => told,
+        false,
+      );
+    }
     const input = {
       seed: siteSeed(id),
       neighbours: looks.map((n) => keyOf(n.design, n.hero)),

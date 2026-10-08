@@ -312,6 +312,7 @@ export const DESIGN_LABEL: Record<string, string> = {
   density: "Gostota",
   shadow: "Senca",
   imagery: "Obdelava fotografij",
+  genome: "Sestava podobe",
 };
 
 /** Values of the design tokens that are choices. */
@@ -319,6 +320,7 @@ export const TOKEN_LABEL: Record<string, Record<string, string>> = {
   density: { compact: "Strnjeno", regular: "Običajno", airy: "Zračno" },
   shadow: { none: "Brez", subtle: "Rahla" },
   headingCase: { normal: "Običajne črke", uppercase: "Vse velike črke" },
+  shape: { square: "Ravni robovi", soft: "Zaobljeni robovi", cut: "Prirezani vogali", arch: "Oboki" },
   imagery: { natural: "Naravno", rounded: "Zaobljeno", framed: "V okvirju", "full-bleed": "Čez celo širino", monochrome: "Enobarvno", arched: "Z obokom", "offset-block": "Na barvni podlagi", duotone: "Dvobarvno" },
 };
 

@@ -1,5 +1,5 @@
 {
-  "specVersion": 17,
+  "specVersion": 18,
   "slug": "trgovina-oljka-in-sol",
   "locales": {
     "default": "sl",
@@ -71,7 +71,13 @@
     "headingTracking": -0.02,
     "density": "regular",
     "shadow": "none",
-    "imagery": "natural"
+    "imagery": "natural",
+    "genome": {
+      "source": "preset",
+      "palette": "preset",
+      "rhythm": "alternate",
+      "shape": "soft"
+    }
   },
   "assets": {
     "images": [

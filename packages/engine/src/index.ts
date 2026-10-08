@@ -19,6 +19,7 @@ export * from "./homepage-first.ts";
 export * from "./variety.ts";
 export * from "./skeleton.ts";
 export * from "./another-look.ts";
+export * from "./genome.ts";
 export * from "./pipeline.ts";
 export * from "./published.ts";
 export * from "./retention.ts";

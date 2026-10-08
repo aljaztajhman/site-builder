@@ -1,5 +1,5 @@
 {
-  "specVersion": 17,
+  "specVersion": 18,
   "slug": "kmetija-grabnar",
   "locales": {
     "default": "sl",
@@ -65,7 +65,13 @@
     "headingTracking": -0.035,
     "density": "airy",
     "shadow": "none",
-    "imagery": "full-bleed"
+    "imagery": "full-bleed",
+    "genome": {
+      "source": "preset",
+      "palette": "preset",
+      "rhythm": "alternate",
+      "shape": "soft"
+    }
   },
   "assets": {
     "images": [
