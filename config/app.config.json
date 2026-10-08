@@ -21,7 +21,7 @@
     "concept": false
   },
   "promptFixes": {
-    "$comment": "The audit's prompt fixes (docs/plans/audit-2026-10-01.md, 'Prompts'; docs/dev/prompt-fixes.md), one switch each. All off: prompts, requests and repairs are byte-identical to before. Each changes model output: turn one on, run its pnpm eval --only fixtures (record-missing), compare, then keep it on. pictures: brief imageIdeas + imageGen.pipeline.unstagedStyle; critique; altText; judge (eval only); brief: no full RULES in the brief; classifier: confidence defined; edit: the editor's section names; directions: no b/w or duotone promises, editorial photo hero, no Avoid list; warmSurface: warm non-cream surfaces for warm directions; oneHero: one main heading per page (validation + safe repair); beige: beige page backgrounds count as cream in repair; catalogue: eyebrow/contact-strip/cta wording, responsive rule, call-button rule.",
+    "$comment": "The audit's prompt fixes (docs/plans/audit-2026-10-01.md, 'Prompts'; docs/dev/prompt-fixes.md), one switch each. All off: prompts, requests and repairs are byte-identical to before. Each changes model output: turn one on, run its pnpm eval --only fixtures (record-missing), compare, then keep it on. pictures: brief imageIdeas + imageGen.pipeline.unstagedStyle; critique; altText; judge (eval only); brief: no full RULES in the brief; classifier: confidence defined; edit: the editor's section names; directions: no b/w or duotone promises, editorial photo hero, no Avoid list; warmSurface: warm non-cream surfaces for warm directions; oneHero: one main heading per page (validation + safe repair); beige: beige page backgrounds count as cream in repair; catalogue: eyebrow/contact-strip/cta wording, responsive rule, call-button rule; sloveneStyle: Slovene style block (formal vi, typography, no English words, word order) in the content, edit and critique prompts.",
     "pictures": false,
     "critique": false,
     "altText": false,
@@ -33,7 +33,8 @@
     "warmSurface": false,
     "oneHero": false,
     "beige": false,
-    "catalogue": false
+    "catalogue": false,
+    "sloveneStyle": false
   },
   "costCuts": {
     "$comment": "Generation cost cuts (docs/plans/cost-cuts.md items 1 and 7). secondCritiqueOnlyOnFailures: with limits.critiqueIterations 2, the second critique round runs only when the checks after the first round's patches still report failures (3 of 4 recorded second rounds returned no patches, ≈ €0.022 and 40–60 s of checks each); otherwise the job ends after round 1 and logs why. contentRetryAsPatch: a content answer that still fails validation after the code repairs gets an RFC 6902 patch fixing only the listed issues (≈ 300 output tokens instead of 3–5k), applied in code; a patch that doesn't apply or leaves issues falls back to the whole-JSON retry, all within limits.contentRetries. Both off until the 3-fixture critique eval and a full-scope eval on the fixtures that retried (gostilna, kmetija, instalacije) confirm them.",

@@ -26,6 +26,7 @@ import {
   RULES_PLACEHOLDER_NEW,
   RULES_PLACEHOLDER_OLD,
   RULES_RESPONSIVE,
+  SLOVENE_STYLE,
   directionHeroes,
   directionSummary,
   imageryWords,
@@ -188,6 +189,8 @@ export function rules(f: PromptFixes): string {
   return f.catalogue ? swap(swap(RULES, RULES_MOBILE_FIRST, RULES_RESPONSIVE), RULES_PLACEHOLDER_OLD, RULES_PLACEHOLDER_NEW) : RULES;
 }
 const withRules = (system: string, f: PromptFixes): string => (f.catalogue ? swap(system, RULES, rules(f)) : system);
+/** The Slovene style block right after the rules (fix "sloveneStyle"): content, critique and edit. */
+const withStyle = (system: string, f: PromptFixes): string => (f.sloveneStyle ? swap(system, rules(f), `${rules(f)}\n${SLOVENE_STYLE}`) : system);
 
 export function classifySystem(f: PromptFixes): string {
   return f.classifier ? swap(CLASSIFY_SYSTEM, CLASSIFY_CONFIDENCE_OLD, CLASSIFY_CONFIDENCE_NEW) : CLASSIFY_SYSTEM;
@@ -209,17 +212,17 @@ export function altSystem(f: PromptFixes): string {
 }
 
 export function contentSystem(f: PromptFixes): string {
-  return withRules(CONTENT_SYSTEM, f);
+  return withStyle(withRules(CONTENT_SYSTEM, f), f);
 }
 
 export function critiqueSystem(f: PromptFixes): string {
-  const s = withRules(CRITIQUE_SYSTEM, f);
+  const s = withStyle(withRules(CRITIQUE_SYSTEM, f), f);
   return f.critique ? swap(swap(s, CRITIQUE_INTRO_OLD, CRITIQUE_INTRO_NEW), CRITIQUE_CHECKLIST_OLD, CRITIQUE_CHECKLIST_NEW) : s;
 }
 
 /** The edit system block (before the business schema): section names and reply language (fix "edit"), warm surfaces (fix "warmSurface"). */
 export function editSystem(f: PromptFixes): string {
-  let s = withRules(EDIT_SYSTEM, f);
+  let s = withStyle(withRules(EDIT_SYSTEM, f), f);
   if (f.warmSurface) s = swap(s, EDIT_COLOUR_OLD, EDIT_COLOUR_NEW);
   return f.edit ? `${swap(s, EDIT_REPLY_OLD, EDIT_REPLY_NEW)}\n\n${sectionNamesForEdits()}` : s;
 }
