@@ -18,6 +18,10 @@ import {
   sampleEntryPages,
   sitePageFiles,
   exportSite,
+  anotherLook,
+  hasLookFamily,
+  keyOf,
+  siteSeed,
   generateSite,
   loadMedia,
   clientCorpus,
@@ -37,7 +41,7 @@ import { evaluateEditCheck, pagesText, type EditCheckResult } from "./edit-check
 import { homepageShape, type HomepageShape } from "./homepage-metrics.ts";
 import { judgeHomepage, type JudgeOutput } from "./judge.ts";
 import { CachedImageTransport, meteredImages, meteredModel, type Meter } from "./eval-transports.ts";
-import { brandFit, lookFeatures, motifFit, screenPrint, type BrandFit, type LookSite, type MotifFit } from "./look-distance.ts";
+import { brandFit, lookFeatures, motifFit, pairDistance, screenPrint, type BrandFit, type LookFeatures, type LookSite, type MotifFit } from "./look-distance.ts";
 import { homepageCopy, type HomepageCopy } from "./copy-similarity.ts";
 import { lintSpec, type SloveneLint } from "./slovene-lint.ts";
 import { judgeSlovene, type SloveneJudgeResult } from "./slovene-judge.ts";
@@ -94,6 +98,16 @@ export interface FixtureResult {
   sloveneJudge?: SloveneJudgeResult;
   sloveneJudgeError?: string;
   sloveneJudgeEur?: number;
+  /** The generated site with its trade and town: a neighbour for the run's later fixtures (RunOptions.neighbours). */
+  made?: Neighbour;
+  /**
+   * "Druga podoba" (config variety.families on; no model call): the site's next look rendered and checked like the
+   * editor's button makes it, and its look distance to the generated one. Not ok: the site has no look family, or every
+   * other look is taken by its neighbours.
+   */
+  anotherLook?: { ok: true; look: string; distance: number; failures: string[]; valid: boolean } | { ok: false; reason: string };
+  /** --regenerate: "Ustvari znova" once after the checks (a real generation), and how far its look moved from the first. */
+  regenerated?: { distance: number; eur: number; failures: string[]; features: LookFeatures; error?: undefined } | { error: string };
   /** What this fixture really paid the providers, judge excluded: replayed answers and cached pictures cost nothing. */
   paidEur: number;
   /** --replay: requests that differ from the one recorded (a prompt changed since; the recorded answer is replayed anyway). */
@@ -103,10 +117,17 @@ export interface FixtureResult {
   /** --record-missing: calls answered from the recordings, and calls paid and recorded. */
   calls?: { replayed: number; recorded: number };
   /** Generated pictures from the cache, and pictures fal made (paid) in this run. */
-  pictures?: { cached: number; made: number };
+  pictures?: { cached: number; made: number; reused: number };
   /** The export zip opened from file:// (checked once, after generation). */
   exportCheck: { ok: boolean; bytes: number; pages: number; problems: string[] } | null;
   error?: string;
+}
+
+/** A site made earlier in the run, by trade and town (the generated brief's). */
+export interface Neighbour {
+  businessType: string;
+  town: string | null;
+  spec: SiteSpec;
 }
 
 export interface RunOptions {
@@ -131,6 +152,15 @@ export interface RunOptions {
   imageCacheDir?: string;
   /** false (--no-edits): generate and check only, no scripted chat edits (40 % of a homepage run's cost). */
   edits?: boolean;
+  /**
+   * Sites this run already made, seeded into this fixture's database as other sites of the platform, so the variety
+   * engine's neighbours (repo.neighbourLooks: same trade, same town first) see them as they would in production.
+   */
+  neighbours?: Neighbour[];
+  /** --regenerate: after the checks, run "Ustvari znova" once (a real generation) and measure how far the look moved. */
+  regenerate?: boolean;
+  /** --reuse-pictures: a picture request the cache doesn't know takes a picture this fixture got in an earlier run. */
+  reusePictures?: boolean;
   spentSoFar: () => number;
 }
 
@@ -211,6 +241,11 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
   await migrate(db);
   const repo = new Repo(db);
   const storage = createFsStorage(path.join(dir, "storage"));
+  for (const [i, n] of (opts.neighbours ?? []).entries()) {
+    const other = await repo.createSite({ name: `neighbour-${i}`, slug: `neighbour-${i}`, intake: { description: "", photoAssetIds: [], scope: opts.scope } });
+    await repo.setBrief(other.id, { businessType: n.businessType, town: n.town });
+    await repo.saveSpec(other.id, n.spec, "generate", "a site made earlier in this eval run");
+  }
   const result: FixtureResult = {
     id: fixture.id,
     type: fixture.brief.businessType,
@@ -266,6 +301,7 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
     finishRecordings = transports?.finish;
     callStats = transports?.calls;
     replayChanged = transports?.changed;
+    let genDeps: Parameters<typeof generateSite>[0] | undefined;
     if (!transport) {
       await seedGolden(fixture, opts.goldenDir, repo, storage, site.id, config);
     } else {
@@ -293,7 +329,10 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
       // Generated images for fixtures with too few photos: fal when live (FAL_KEY), cached by request; flat stand-ins when replaying.
       const cache =
         opts.mode !== "replay" && process.env.FAL_KEY
-          ? new CachedImageTransport(meteredImages(new FalImageTransport(), config, meter), opts.imageCacheDir ?? path.join(opts.recordingsDir, "../image-cache"))
+          ? new CachedImageTransport(meteredImages(new FalImageTransport(), config, meter), opts.imageCacheDir ?? path.join(opts.recordingsDir, "../image-cache"), {
+              fixture: fixture.id,
+              reuse: !!opts.reusePictures,
+            })
           : null;
       if (cache) pictureStats = () => ({ ...cache.stats });
       const imageTransport = opts.mode === "replay" ? new StandInImageTransport() : cache;
@@ -308,7 +347,8 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
           })
         : undefined;
       const t0 = Date.now();
-      const gen = await generateSite({ config, repo, storage, client, browser: opts.browser, lighthouse: opts.lighthouse, ...(images ? { images } : {}) }, site.id, null);
+      genDeps = { config, repo, storage, client, browser: opts.browser, lighthouse: opts.lighthouse, ...(images ? { images } : {}) };
+      const gen = await generateSite(genDeps, site.id, null);
       result.generationMs = Date.now() - t0;
       result.timings = gen.timings;
       result.firstVersionMs = gen.firstVersionMs;
@@ -391,6 +431,30 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
       else await judging;
     }
     await writeFile(path.join(dir, "spec-generated.json"), JSON.stringify(first.current.spec, null, 2));
+    const siteRow = await repo.getSite(site.id);
+    const made = (siteRow?.brief ?? {}) as { businessType?: string; town?: string | null };
+    result.made = { businessType: made.businessType ?? fixture.brief.businessType, town: made.town ?? null, spec: first.current.spec };
+    if (config.variety.families) result.anotherLook = await measureAnotherLook(config, repo, storage, site.id, result.made, result.look.site, dir, opts);
+    if (opts.regenerate && genDeps) {
+      const costBefore = (await repo.siteCost(site.id)).reduce((a, c) => a + c.eur, 0);
+      try {
+        await generateSite(genDeps, site.id, null);
+        const again = await checkCurrent(config, repo, storage, site.id, { ...opts, lighthouse: false });
+        const features = lookFeatures(again.current.spec);
+        const regenerated: LookSite = { ...result.look.site, features, shots: { mobile: await screenPrint(again.report.screenshots.mobile), desktop: await screenPrint(again.report.screenshots.desktopFirst) } };
+        await writeFile(path.join(dir, "regenerated-360-first.png"), again.report.screenshots.mobile);
+        await writeFile(path.join(dir, "regenerated-1280-first.png"), again.report.screenshots.desktopFirst);
+        await writeFile(path.join(dir, "spec-regenerated.json"), JSON.stringify(again.current.spec, null, 2));
+        result.regenerated = {
+          distance: pairDistance(result.look.site, regenerated).total,
+          eur: (await repo.siteCost(site.id)).reduce((a, c) => a + c.eur, 0) - costBefore,
+          failures: again.report.failures,
+          features,
+        };
+      } catch (e) {
+        result.regenerated = { error: (e as Error).message.slice(0, 300) };
+      }
+    }
 
     const edits = opts.edits !== false;
     if (transport && edits) {
@@ -422,7 +486,7 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
     if (result.slovene) await writeFile(path.join(dir, "slovene-lint.json"), JSON.stringify(result.slovene, null, 2));
     result.costByStage = await repo.siteCost(site.id);
     const total = result.costByStage.reduce((a, c) => a + c.eur, 0);
-    result.editsEur = total - result.generationEur;
+    result.editsEur = total - result.generationEur - (result.regenerated && result.regenerated.error === undefined ? result.regenerated.eur : 0);
     // Only a complete run may drop the recordings it didn't reach; a failed one, or one without its edits, leaves them.
     if (edits) finishRecordings?.();
   } catch (e) {
@@ -437,6 +501,44 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
     await db.close();
   }
   return result;
+}
+
+/**
+ * "Druga podoba" as the editor's button makes it (apps/web POST /api/sites/:id/look): the next look of the site's family,
+ * away from its neighbours, saved as a version, checked (no Lighthouse) and measured against the generated look; then
+ * the generated spec is saved back, so what follows (a regeneration) replaces the generated look, not this one.
+ */
+async function measureAnotherLook(
+  config: AppConfig,
+  repo: Repo,
+  storage: Storage,
+  siteId: string,
+  made: Neighbour,
+  generated: LookSite,
+  dir: string,
+  opts: RunOptions,
+): Promise<NonNullable<FixtureResult["anotherLook"]>> {
+  if (!hasLookFamily(made.spec)) return { ok: false, reason: "no_family" };
+  const looks = await repo.neighbourLooks(siteId, made.businessType, made.town, config.variety.neighbours);
+  const r = anotherLook(made.spec, {
+    seed: siteSeed(siteId),
+    neighbours: looks.map((n) => keyOf(n.design, n.hero)),
+    ...(config.variety.skeleton ? { skeleton: { neighbours: looks.flatMap((n) => (n.design.skeleton ? [n.design.skeleton] : [])) } } : {}),
+  });
+  if (!r.ok) return { ok: false, reason: r.reason };
+  await repo.saveSpec(siteId, r.spec, "manual", "Druga podoba (eval)");
+  const alt = await checkCurrent(config, repo, storage, siteId, { ...opts, lighthouse: false });
+  await writeFile(path.join(dir, "another-look-360-first.png"), alt.report.screenshots.mobile);
+  await writeFile(path.join(dir, "another-look-1280-first.png"), alt.report.screenshots.desktopFirst);
+  const site: LookSite = { ...generated, features: lookFeatures(alt.current.spec), shots: { mobile: await screenPrint(alt.report.screenshots.mobile), desktop: await screenPrint(alt.report.screenshots.desktopFirst) } };
+  await repo.saveSpec(siteId, made.spec, "revert", "back to the generated look (eval)");
+  return {
+    ok: true,
+    look: `${r.look.paletteId}, ${r.look.fontPair}, ${r.look.hero}${r.look.skeleton ? `, ${r.look.skeleton.header}/${r.look.skeleton.footer}` : ""}`,
+    distance: pairDistance(generated, site).total,
+    failures: alt.report.failures,
+    valid: validateSite(alt.current.spec).ok,
+  };
 }
 
 /** Offline mode: no model. Uses a hand-authored golden spec and the fixture's real photos. */
