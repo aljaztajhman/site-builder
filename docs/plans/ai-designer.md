@@ -1,6 +1,6 @@
 # AI designer: a layer that designs each site instead of picking one
 
-Status: plan, 2026-10-08. Nothing built. HQ decision `sb-ai-designer`, item `it-ai-designer`.
+Status: plan, 2026-10-08. Nothing built. Owner decided `sb-ai-designer` = designer (HQ), item `it-ai-designer`. Implementation spec: `docs/plans/ai-designer-spec.md`; prompt for the implementing agent: `docs/plans/ai-designer-handoff.md`.
 
 The owner (2026-10-08): "Its too templaty. We need another layer where an ai agent kind of designs the webpage based on input and assets/elements/architecture we have. I dont think ai does any proper design now."
 
