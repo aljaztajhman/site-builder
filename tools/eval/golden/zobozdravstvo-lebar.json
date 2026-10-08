@@ -1,5 +1,5 @@
 {
-  "specVersion": 17,
+  "specVersion": 18,
   "slug": "zobozdravstvo-lebar",
   "locales": {
     "default": "sl",
@@ -76,7 +76,13 @@
     "headingTracking": -0.03,
     "density": "regular",
     "shadow": "none",
-    "imagery": "natural"
+    "imagery": "natural",
+    "genome": {
+      "source": "preset",
+      "palette": "preset",
+      "rhythm": "alternate",
+      "shape": "soft"
+    }
   },
   "assets": {
     "images": [

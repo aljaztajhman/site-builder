@@ -1,5 +1,5 @@
 {
-  "specVersion": 17,
+  "specVersion": 18,
   "slug": "frizerstvo-lana",
   "locales": {
     "default": "sl",
@@ -80,7 +80,13 @@
     "headingTracking": -0.04,
     "density": "regular",
     "shadow": "none",
-    "imagery": "natural"
+    "imagery": "natural",
+    "genome": {
+      "source": "preset",
+      "palette": "preset",
+      "rhythm": "alternate",
+      "shape": "soft"
+    }
   },
   "assets": {
     "logo": {
