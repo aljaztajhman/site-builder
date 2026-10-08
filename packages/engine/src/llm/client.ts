@@ -339,12 +339,21 @@ function topLevelJson(text: string): string[] {
   return out;
 }
 
-/** Stable hash of a request, for recordings. Ignores nothing: any prompt change invalidates a recording. */
+/**
+ * A site's id (`site_` + 16 hex, platform `newId`) inside a storage key: `sites/<id>/uploads/…`, `…/generated/…`.
+ * The edit request carries the whole spec, so its picture and logo `src` hold the run's random site id.
+ */
+const SITE_ID_IN_KEY = /\bsites\/site_[0-9a-f]{16}\//g;
+
+/**
+ * Stable hash of a request, for recordings. Any prompt change invalidates a recording, except the site id inside
+ * storage keys: every run creates a new site, so without this an edit request never matched between two runs
+ * (`--record-missing` re-paid every edit). Only the hash input is normalised; the request sent is untouched. A
+ * request without such a key hashes exactly as before, so recordings of the other stages keep matching.
+ */
 export function requestHash(req: ModelRequest, model: string): string {
-  return createHash("sha256")
-    .update(JSON.stringify({ model, stage: req.stage, system: req.system, messages: req.messages, schema: req.schema ?? null }))
-    .digest("hex")
-    .slice(0, 16);
+  const json = JSON.stringify({ model, stage: req.stage, system: req.system, messages: req.messages, schema: req.schema ?? null });
+  return createHash("sha256").update(json.replace(SITE_ID_IN_KEY, "sites/site_*/")).digest("hex").slice(0, 16);
 }
 
 /**

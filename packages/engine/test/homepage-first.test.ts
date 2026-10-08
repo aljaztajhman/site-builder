@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type Anthropic from "@anthropic-ai/sdk";
 import type { SiteSpec } from "@sb/spec";
-import { homepageFirst, type Evaluated, type HomepageFirstDeps, type ModelResponse } from "../src/index.ts";
+import { homepageFirst, type Evaluated, type HomepageFirstDeps, type HomepageReady, type ModelResponse } from "../src/index.ts";
 
 type Page = { id: string; kind: string; title: string };
 const answer = (text: unknown): ModelResponse => ({ text: JSON.stringify(text), stopReason: "end_turn", model: "m", usage: { input_tokens: 1, output_tokens: 1, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 } });
@@ -122,6 +122,23 @@ describe("homepage first (pipeline.homepageFirst): the parts", () => {
     await expect(homepageFirst(deps)).rejects.toThrow("API overloaded");
     expect(log).toContain("end p_kontakt#1");
     expect(log.at(-1)).toBe("end p_kontakt#1");
+  });
+
+  it("hands the homepage on its own, as last checked, to onHomepage before any page is asked (the editor shows it)", async () => {
+    const heard: HomepageReady[] = [];
+    const { deps, log } = setup({
+      evaluate: (d, n) => (d.pages.length === 1 && n === 1 ? ["/pages/0/sections/0/props/title: Too big"] : []),
+    });
+    deps.onHomepage = (h) => {
+      heard.push(h);
+      log.push("homepage ready");
+    };
+    const r = await homepageFirst(deps);
+    expect(heard).toHaveLength(1);
+    // The retried homepage (its second answer), the same page JSON the merge then takes as page 0.
+    expect(heard[0]).toEqual({ attempts: 2, issues: [], spec: { pages: [{ id: "p_home", kind: "home", title: "home 2" }] } });
+    expect((r.spec as unknown as { pages: Page[] }).pages[0]).toEqual((heard[0]!.spec as unknown as { pages: Page[] }).pages[0]);
+    expect(log.indexOf("homepage ready")).toBeLessThan(log.indexOf("start p_storitve#1"));
   });
 
   it("a homepage that never answers in shape fails before any page is asked", async () => {

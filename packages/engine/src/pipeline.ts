@@ -1,7 +1,7 @@
 import type { AppConfig } from "@sb/config";
 import { VersionConflictError, normaliseHostname, type Repo, type Storage } from "@sb/platform";
 import { contentType } from "@sb/platform";
-import { mediaFiles, siteFiles, exportZip, shareImageOf, variantFile, variantWidths } from "@sb/render";
+import { mediaFiles, siteFiles, exportZip, renderPage, shareImageOf, variantFile, variantWidths } from "@sb/render";
 import { blockerText, direction as directionById, genomeOfLook, keepUnchangedOwnerEdits, publishChecklist, templateFor, validateSite, type ImageAsset, type PublishBlocker, type SiteSpec } from "@sb/spec";
 import type { Operation } from "fast-json-patch";
 import { ModelOutputError, SpendCapError, type ModelClient } from "./llm/client.ts";
@@ -45,6 +45,14 @@ export interface PipelineDeps {
 
 /** The event a regeneration logs with the owner's texts it kept and those it couldn't (the editor words it). */
 export const OWNER_TEXT_NOTE = "Kept the texts the owner typed";
+
+/**
+ * Config pipeline.homepageFirst: the event logged once the homepage is written, before the other pages. Its data's
+ * `homepage` is the homepage on its own (HomepageReady.spec, with the skeleton applied as the merged site gets it): the
+ * editor shows it read-only until the first version is saved (GET /preview/:id/index.html?draft=homepage). Never a
+ * version: alone it doesn't validate, and publishing reads only saved versions.
+ */
+export const HOMEPAGE_READY = "Homepage ready; writing the other pages";
 
 /** The classifier couldn't place the description (below tiers.junk.minClassifierConfidence): stopped before the brief. */
 export class JunkIntakeError extends Error {
@@ -294,6 +302,20 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
   // 4. Content and assembly (validate; retry with errors)
   const corpus = await clientCorpus(repo, siteId);
   let homepageMs: number | undefined;
+  /**
+   * The homepage for the editor (HOMEPAGE_READY's `homepage`): with the skeleton the merged site gets, only when it
+   * renders (a link the homepage still has to a page nobody planned would fail; the editor keeps the skeleton then).
+   */
+  const homepageDraft = (home: SiteSpec | undefined): { homepage?: SiteSpec } => {
+    if (!home) return {};
+    const draft = skeleton ? applySkeleton(home, { seed: skeleton.seed, dir: directionById(home.design.direction), neighbours: skeleton.neighbours }).spec : home;
+    try {
+      renderPage(draft, draft.pages.find((p) => p.kind === "home")!, { imageWidths: config.images.widths });
+      return { homepage: draft };
+    } catch {
+      return {};
+    }
+  };
   const content = await stageTime("content", () =>
     generateContent(client, {
       slug: site.slug,
@@ -317,7 +339,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
             homepageFirst: true,
             onHomepage: async (h) => {
               homepageMs = Date.now() - started;
-              await log("content", "Homepage ready; writing the other pages", { ms: homepageMs, attempts: h.attempts, issues: h.issues.slice(0, 5) });
+              await log("content", HOMEPAGE_READY, { ms: homepageMs, attempts: h.attempts, issues: h.issues.slice(0, 5), ...homepageDraft(h.spec) });
             },
           }
         : {}),

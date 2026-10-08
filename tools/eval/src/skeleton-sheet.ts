@@ -164,6 +164,9 @@ export async function renderSkeleton(browser: Browser, v: SkeletonVariant, media
       if (m.horizontalScroll) found.push(`horizontal scroll (${m.scrollWidth} px)`);
       for (const b of m.banned) found.push(`banned: ${b}`);
       for (const s of m.smallPrimaryTargets) found.push(`tap target below ${t.primaryMin} px: ${s}`);
+      // The generation's own page checks (check/index.ts) also refuse crowded and tiny targets on phones.
+      if (phone) for (const s of m.crowdedTargets) found.push(`targets < ${t.primaryGap} px apart: ${s}`);
+      if (phone) for (const s of m.tinyTargets) found.push(`target below ${t.absoluteMin} px: ${s}`);
       if (h1 !== 1) found.push(`${h1} h1 elements`);
       if (phone && !m.callInViewport) found.push("click-to-call not in the first screen");
       if (phone && !m.directionsInViewport) found.push("directions not in the first screen");

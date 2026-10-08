@@ -1813,6 +1813,38 @@ function liveData() {
 /** Pictures already faded in once; a re-render shows them without fading again. */
 const shownImages = new Set<string>();
 
+/** The pipeline's event once a full site's homepage is written, before its other pages (engine HOMEPAGE_READY). */
+const HOMEPAGE_READY = "Homepage ready; writing the other pages";
+
+/**
+ * Config pipeline.homepageFirst: the id of this run's "Homepage ready" event while its homepage is the newest thing to
+ * show (no version saved since). The server keeps the homepage in that event and renders it (?draft=homepage).
+ */
+function homepageDraftId(): string | null {
+  const run = currentRun();
+  const at = run.findLastIndex((e) => e.message === HOMEPAGE_READY && (e.data as { homepage?: unknown } | null)?.homepage === true);
+  if (at < 0 || run.slice(at + 1).some((e) => e.stage === "preview")) return null;
+  return run[at]!.id;
+}
+
+/**
+ * The homepage written before the other pages, in a frame like the saved version's, read only: no editing layer,
+ * links and forms do nothing (the other pages don't exist yet). Not a version; the first saved version replaces it.
+ */
+function homepageDraftFrame(eventId: string): HTMLElement {
+  const width = String(device === "mobile" ? 360 : 1280);
+  const src = `/preview/${siteId}/index.html?draft=homepage&e=${encodeURIComponent(eventId)}`;
+  const f = h("iframe", { title: "Predogled domače strani (še se ustvarja)", class: "draft", "data-width": width, src });
+  f.addEventListener("load", () => {
+    const doc = f.contentDocument;
+    doc?.addEventListener("click", (e) => {
+      if ((e.target as Element | null)?.closest?.("a, button")) e.preventDefault();
+    });
+    doc?.addEventListener("submit", (e) => e.preventDefault());
+  });
+  return h("div", { class: "frame-box draft" }, h("div", { class: "frame" }, f));
+}
+
 /**
  * The preview frame while the site is generated: a skeleton page that fills in with what the run has
  * actually produced (name, colours, pictures), so the owner sees it moving long before the text is ready.
@@ -1908,7 +1940,11 @@ function statusBlock(): HTMLElement | null {
     return h("div", { class: "pane" },
       h("h2", { class: "pane-title" }, state.spec ? "Stran preverjamo" : "Stran se ustvarja", runStart ? h("span", { class: "elapsed", "data-since": runStart }, elapsed(runStart)) : null),
       progress(),
-      h("p", { class: "help" }, state.spec ? "Predogled je pripravljen. Ko preverjanje najde kaj za popraviti, se pokaže nova različica. Urejate lahko že zdaj." : "Predogled se sestavlja sproti. Stran lahko zaprete, ustvarjanje teče naprej."),
+      h("p", { class: "help" }, state.spec
+        ? "Predogled je pripravljen. Ko preverjanje najde kaj za popraviti, se pokaže nova različica. Urejate lahko že zdaj."
+        : homepageDraftId()
+          ? "Domača stran je napisana, druge strani še pišemo. Urejate jo lahko, ko bo pripravljena vsa stran. Stran lahko zaprete, ustvarjanje teče naprej."
+          : "Predogled se sestavlja sproti. Stran lahko zaprete, ustvarjanje teče naprej."),
     );
   }
   if (s.status === "failed") {
@@ -2472,6 +2508,16 @@ function renderStage(): void {
   const stage = shell!.stage;
   if (!state.spec) {
     frame = null;
+    const draft = state.site.status === "generating" ? homepageDraftId() : null;
+    if (draft) {
+      // The homepage is written: shown as it will be rendered while the other pages are still being written.
+      const current = stage.querySelector<HTMLIFrameElement>(".frame-box.draft iframe");
+      const width = String(device === "mobile" ? 360 : 1280);
+      if (!current || current.dataset.width !== width || !current.src.endsWith(`e=${encodeURIComponent(draft)}`)) stage.replaceChildren(homepageDraftFrame(draft));
+      syncBadge(stage.querySelector<HTMLElement>(".frame-box"));
+      sizeFrame();
+      return;
+    }
     if (state.site.status === "generating") {
       const live = liveSkeleton();
       const current = stage.querySelector<HTMLElement>(".frame.live");
@@ -2525,8 +2571,10 @@ function sizeFrame(): void {
   // Rounded down: half a pixel more than the stage has would make it scroll (and a scrolling region needs a tab stop).
   wrap.style.width = `${Math.floor(width * scale) + 2}px`;
   wrap.style.height = `${height + 2}px`;
-  if (frame) {
-    Object.assign(frame.style, { display: "block", border: "0", width: `${width}px`, height: `${Math.round(height / scale)}px`, transform: `scale(${scale})`, transformOrigin: "0 0" });
+  // The saved version's frame, or the homepage written before the other pages (read only).
+  const target = frame ?? wrap.querySelector<HTMLIFrameElement>("iframe.draft");
+  if (target) {
+    Object.assign(target.style, { display: "block", border: "0", width: `${width}px`, height: `${Math.round(height / scale)}px`, transform: `scale(${scale})`, transformOrigin: "0 0" });
   }
 }
 
