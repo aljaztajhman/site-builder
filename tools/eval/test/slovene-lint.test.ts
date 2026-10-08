@@ -184,8 +184,17 @@ describe("Slovene lint over a site", () => {
     expect(lintSpec(golden("trgovina-oljka-in-sol"), "").counts.english).toBe(r.echoed.english);
   });
 
-  it("finds the informal call buttons on a golden that otherwise says vi", () => {
+  it("the goldens address the reader formally throughout: no finding that isn't the client's own text", () => {
     const r = lintSpec(golden("pekarna-kvas"), brief("pekarna-kvas"));
+    expect(r.findings.filter((f) => !f.echoed)).toEqual([]);
+    expect(r.total).toBe(0);
+    expect(r.address.vi).toBeGreaterThan(0);
+  });
+
+  it("finds informal call buttons on a site that otherwise says vi", () => {
+    // The goldens said "Pokliči" on 12 buttons until 2026-10-08; put two back.
+    const spec = JSON.parse(JSON.stringify(golden("pekarna-kvas")).replaceAll('"Pokličite za naročilo"', '"Pokliči za naročilo"').replace('"label":"Pokličite"', '"label":"Pokliči"')) as SiteSpec;
+    const r = lintSpec(spec, brief("pekarna-kvas"));
     expect(r.findings.filter((f) => !f.echoed).map((f) => `${f.rule}: ${f.quote}`)).toEqual(["ti-form: Pokliči", "ti-form: Pokliči"]);
     expect(r.total).toBe(2);
     expect(r.address.vi).toBeGreaterThan(0);

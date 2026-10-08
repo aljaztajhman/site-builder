@@ -412,7 +412,7 @@
             "heading": "Rezervirajte mizo",
             "text": "Od torka do sobote smo odprti od 10.00 do 22.00, v nedeljo od 11.00 do 17.00.",
             "primary": {
-              "label": "Pokliči",
+              "label": "Pokličite",
               "target": {
                 "action": "call"
               }
@@ -465,7 +465,7 @@
             "heading": "Rezervacija za skupino",
             "text": "Pokličite ali pišite in povejte datum, priložnost in število gostov. Rezervacije ureja Nina Bizjak.",
             "action": {
-              "label": "Pokliči za rezervacijo",
+              "label": "Pokličite za rezervacijo",
               "target": {
                 "action": "call"
               }

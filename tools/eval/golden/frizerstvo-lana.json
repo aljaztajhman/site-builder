@@ -381,7 +381,7 @@
             "heading": "Naročanje",
             "text": "Brez naročila težko pridete na vrsto. Pokličite nas in skupaj izberemo termin, ki vam ustreza.",
             "action": {
-              "label": "Pokliči za termin",
+              "label": "Pokličite za termin",
               "target": {
                 "action": "call"
               }
