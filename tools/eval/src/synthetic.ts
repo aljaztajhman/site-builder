@@ -1,6 +1,6 @@
 import type { Recording } from "@sb/engine";
 import { loadConfig, type ModelStageName } from "@sb/config";
-import type { SiteSpec } from "@sb/spec";
+import { SECTION_DEFS, type SiteSpec } from "@sb/spec";
 import type { Fixture } from "./fixtures/schema.ts";
 
 /**
@@ -14,7 +14,10 @@ export function syntheticRecordings(fixture: Fixture, golden: SiteSpec, edits: {
   const f = fixture.brief.facts;
   const d = golden.design;
   const plannedPages = golden.pages.filter((p) => p.kind === "home" || p.kind === "standard");
-  const contentPages = scope === "home" ? plannedPages.filter((p) => p.kind === "home") : plannedPages;
+  // The model never writes the owner's collections (a golden may show one, e.g. instalacije-rebernik's services): its
+  // answer leaves their sections out, as the content schema does.
+  const generated = plannedPages.map((p) => ({ ...p, sections: p.sections.filter((s) => !SECTION_DEFS.find((d) => d.type === s.type)?.ownerOnly) }));
+  const contentPages = scope === "home" ? generated.filter((p) => p.kind === "home") : generated;
   const out: { stage: ModelStageName; body: unknown }[] = [
     { stage: "classify", body: { businessType: fixture.brief.businessType, confidence: 0.95 } },
     {

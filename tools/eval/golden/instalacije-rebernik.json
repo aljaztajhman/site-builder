@@ -255,36 +255,11 @@
         },
         {
           "id": "s_storitve_list",
-          "type": "services-list",
-          "variant": "rows",
+          "type": "collection",
+          "variant": "list",
           "props": {
-            "title": "Dela, ki jih opravljamo",
-            "items": [
-              {
-                "name": "Vodovodne in odtočne inštalacije",
-                "description": "V novogradnjah in pri prenovah."
-              },
-              {
-                "name": "Talno ogrevanje",
-                "description": "Napeljava talnega ogrevanja v novogradnjah in pri prenovah."
-              },
-              {
-                "name": "Radiatorsko ogrevanje",
-                "description": "Napeljava in prenova radiatorskega ogrevanja."
-              },
-              {
-                "name": "Toplotne črpalke zrak-voda",
-                "description": "Montaža in servis."
-              },
-              {
-                "name": "Zamenjava kotla na olje",
-                "description": "Star kotel na olje zamenjamo s toplotno črpalko, pomagamo pri vlogi za subvencijo Eko sklada."
-              },
-              {
-                "name": "Prenove kopalnic na ključ",
-                "description": "Skupaj s keramikom."
-              }
-            ]
+            "kind": "services",
+            "title": "Dela, ki jih opravljamo"
           }
         },
         {
@@ -444,5 +419,39 @@
         }
       ]
     }
-  ]
+  ],
+  "collections": {
+    "services": {
+      "page": "p_storitve",
+      "items": [
+        {
+          "name": "Vodovodne in odtočne inštalacije",
+          "summary": "V novogradnjah in pri prenovah."
+        },
+        {
+          "name": "Talno in radiatorsko ogrevanje",
+          "summary": "Talno ogrevanje in ogrevanje z radiatorji."
+        },
+        {
+          "name": "Toplotne črpalke zrak-voda",
+          "summary": "Montaža in servis toplotnih črpalk zrak-voda."
+        },
+        {
+          "name": "Zamenjava kotla na olje",
+          "summary": "Star kotel na olje zamenjamo s toplotno črpalko.",
+          "body": [
+            "Pri zamenjavi kotla vam pomagamo tudi pri vlogi za subvencijo Eko sklada.",
+            "Za vsako delo najprej pridemo na ogled in pripravimo pisno ponudbo. Ogled je brezplačen."
+          ]
+        },
+        {
+          "name": "Prenove kopalnic na ključ",
+          "summary": "Kopalnico prenovimo na ključ, skupaj s keramikom.",
+          "body": [
+            "Za vsako delo najprej pridemo na ogled in pripravimo pisno ponudbo. Ogled je brezplačen."
+          ]
+        }
+      ]
+    }
+  }
 }
