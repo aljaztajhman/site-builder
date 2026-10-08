@@ -1,0 +1,18 @@
+{
+  "seq": 11,
+  "stage": "altText",
+  "model": "claude-sonnet-5-5",
+  "hash": "4fdce4b3074df1b7",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"images\":[{\"index\":0,\"alt\":\"Ženska v frizerskem salonu sedi s hrbtom proti kameri, dolgi valoviti lasje imajo svetle karamelne odtenke balayage.\",\"focalX\":0.5,\"focalY\":0.45,\"heroSuitable\":true},{\"index\":1,\"alt\":\"Nevesta s spletenim figo, pletenico in okrasnimi lasnimi sponkami s kristali, posneta od zadaj ob oknu in ogledalu.\",\"focalX\":0.38,\"focalY\":0.4,\"heroSuitable\":true}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 1676,
+      "output_tokens": 202,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "seq": 4,
+  "stage": "altText",
+  "model": "claude-sonnet-5-5",
+  "hash": "1974785db385fa0a",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"images\":[{\"index\":0,\"alt\":\"Lesene police s steklenicami oljčnega olja, kozarci in košaro česna, ob oknu s pogledom na vas s cerkvenim zvonikom.\",\"focalX\":0.3,\"focalY\":0.35,\"heroSuitable\":true},{\"index\":1,\"alt\":\"Pletena košara z lanenimi vrečkami in papirnatimi vrečkami morske soli na lesenem pultu.\",\"focalX\":0.4,\"focalY\":0.6,\"heroSuitable\":false},{\"index\":2,\"alt\":\"Darilna škatla s slamo, v kateri so steklenica oljčnega olja, vrečka morske soli in kozarec medu.\",\"focalX\":0.5,\"focalY\":0.55,\"heroSuitable\":true},{\"index\":3,\"alt\":\"Kamnita fasada trgovine z lesenimi vrati, lonci z rastlinami in klopjo na tlakovani ulici, v ozadju morje.\",\"focalX\":0.4,\"focalY\":0.45,\"heroSuitable\":true},{\"index\":4,\"alt\":\"Pršut, narezan na leseni deski, in kosi sira na pultu ob nožu.\",\"focalX\":0.3,\"focalY\":0.55,\"heroSuitable\":false}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 3302,
+      "output_tokens": 433,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

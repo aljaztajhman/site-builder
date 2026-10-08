@@ -1,0 +1,18 @@
+{
+  "seq": 1,
+  "stage": "brief",
+  "model": "synthetic",
+  "hash": "synthetic",
+  "origin": "synthetic",
+  "response": {
+    "text": "{\"businessType\":\"restaurant\",\"name\":\"Gostilna Pri Zlati Žlici\",\"town\":\"Škofja Loka\",\"summary\":\"Gostilna Pri Zlati Žlici je družinska gostilna v starem delu Škofje Loke, Kapucinski trg 7, 4220 Škofja Loka. Vodi jo že tretja generacija družine Bizjak. V kuhinji je glavni kuhar Marko Bizjak, za strežbo in rezervacije skrbi njegova sestra Nina Bizjak.\\n\\nKuhamo domače jedi iz sestavin lokalnih kmetov: ajdove žgance z ocvirki, ričet, telečjo obaro, pečenke in orehove štruklje. \",\"audience\":\"lokalni obiskovalci\",\"tone\":\"friendly\",\"offerings\":[{\"group\":null,\"name\":\"dnevno malico\",\"description\":null,\"price\":{\"amount\":11.5,\"from\":false,\"unit\":null}},{\"group\":null,\"name\":\"nedeljsko kosilo s štirimi hodi\",\"description\":null,\"price\":{\"amount\":19,\"from\":false,\"unit\":null}},{\"group\":null,\"name\":\"ajdovi žganci z ocvirki in kislim mlekom\",\"description\":null,\"price\":{\"amount\":9.8,\"from\":false,\"unit\":null}},{\"group\":null,\"name\":\"telečja obara\",\"description\":null,\"price\":{\"amount\":8.5,\"from\":false,\"unit\":null}},{\"group\":null,\"name\":\"orehovi štruklji\",\"description\":null,\"price\":{\"amount\":5.2,\"from\":false,\"unit\":null}}],\"highlights\":[],\"facts\":{\"phone\":\"+38645551234\",\"email\":\"rezervacije@zlata-zlica.example\",\"address\":{\"street\":\"Kapucinski trg 7\",\"postalCode\":\"4220\",\"city\":\"Škofja Loka\"},\"hours\":[{\"from\":\"mon\",\"to\":\"mon\",\"open\":null,\"close\":null,\"closed\":true},{\"from\":\"tue\",\"to\":\"sat\",\"open\":\"10:00\",\"close\":\"22:00\",\"closed\":false},{\"from\":\"sun\",\"to\":\"sun\",\"open\":\"11:00\",\"close\":\"17:00\",\"closed\":false}],\"hoursNote\":null,\"bookingUrl\":null,\"social\":[],\"legalName\":\"Gostinstvo Bizjak d.o.o.\",\"registrationNumber\":\"8765432000\",\"taxNumber\":\"SI87654321\",\"vatPayer\":null,\"serviceArea\":[],\"people\":[{\"name\":\"Marko Bizjak\",\"role\":\"glavni kuhar\"},{\"name\":\"Nina Bizjak\",\"role\":\"strežba in rezervacije\"}]},\"pages\":[{\"kind\":\"home\",\"slug\":\"\",\"navLabel\":\"Domov\",\"purpose\":\"Družinska gostilna na Kapucinskem trgu v Škofji Loki: domače jedi iz sestavin lokalnih kmetov, dnevna malica, nedeljsko kosilo in terasa pod lipo.\"},{\"kind\":\"standard\",\"slug\":\"jedilnik\",\"navLabel\":\"Jedilnik\",\"purpose\":\"Dnevna malica, nedeljsko kosilo s štirimi hodi in domače jedi z jedilnega lista Gostilne Pri Zlati Žlici v Škofji Loki.\"},{\"kind\":\"standard\",\"slug\":\"praznovanja\",\"navLabel\":\"Praznovanja\",\"purpose\":\"Praznovanja, obletnice in pogostitve po pogrebu za skupine do 60 oseb v Gostilni Pri Zlati Žlici v Škofji Loki.\"}],\"missing\":[]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

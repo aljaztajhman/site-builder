@@ -1,0 +1,144 @@
+{
+  "meta": {
+    "mode": "record-missing",
+    "scope": "home",
+    "startedAt": "2026-10-08T09:44:24.761Z",
+    "switches": [
+      "families"
+    ],
+    "label": "fam",
+    "totalEur": 0.291404292
+  },
+  "summary": {
+    "acrossTrades": 0.5331189029838266,
+    "withinTrade": {
+      "builder": {
+        "pairs": 1,
+        "mean": 0.5725622592952325,
+        "min": 0.5725622592952325
+      }
+    },
+    "withinTradeAll": 0.5725622592952325,
+    "collisionsWithinTrade": [],
+    "collisionsAcross": []
+  },
+  "judge": {
+    "sites": 3,
+    "median": 3.083333333333333,
+    "medianTemplate": 3.083333333333333,
+    "medianPhone": 3,
+    "medianDesktop": 3,
+    "minDistinctiveness": 2,
+    "belowDistinctiveness": [
+      "mizarstvo-lesnik"
+    ]
+  },
+  "anotherLook": {
+    "measured": 3,
+    "ok": 2,
+    "meanDistance": 0.23278464313866032,
+    "minDistance": 0.17068037944855827,
+    "failing": [],
+    "none": [
+      "mizarstvo-lesnik (no_family)"
+    ]
+  },
+  "regenerated": {
+    "measured": 0,
+    "meanDistance": null,
+    "minDistance": null,
+    "sameLook": [],
+    "eur": 0,
+    "failing": [],
+    "errors": []
+  },
+  "generationEurMedian": 0.23297700000000002,
+  "sites": [
+    {
+      "id": "elektro-zupan",
+      "trade": "builder",
+      "direction": "cevi",
+      "fontPair": "space-grotesk-public-sans",
+      "hero": "hero-type:large",
+      "primary": "#d63c22",
+      "judge": 3,
+      "distinctiveness": 3,
+      "generationEur": 0.13964,
+      "failures": 0,
+      "anotherLook": {
+        "ok": true,
+        "look": "green, space-grotesk-plex, hero-type:with-facts",
+        "distance": 0.2948889068287624,
+        "failures": [],
+        "valid": true
+      }
+    },
+    {
+      "id": "mizarstvo-lesnik",
+      "trade": "builder",
+      "direction": "warm-craft",
+      "fontPair": "fraunces-source-sans",
+      "hero": "hero-split:image-left",
+      "primary": "#9a5b32",
+      "judge": 3.083333333333333,
+      "distinctiveness": 2,
+      "generationEur": 0.23297700000000002,
+      "failures": 1,
+      "anotherLook": {
+        "ok": false,
+        "reason": "no_family"
+      }
+    },
+    {
+      "id": "vulkanizer-zorman",
+      "trade": "car-repair",
+      "direction": "tablica",
+      "fontPair": "archivo-archivo",
+      "hero": "hero-type:large",
+      "primary": "#15181c",
+      "judge": 3.083333333333333,
+      "distinctiveness": 4,
+      "generationEur": 0.23481400000000002,
+      "failures": 0,
+      "anotherLook": {
+        "ok": true,
+        "look": "signal, space-grotesk-public-sans, hero-type:large",
+        "distance": 0.17068037944855827,
+        "failures": [],
+        "valid": true
+      }
+    }
+  ],
+  "targets": [
+    {
+      "name": "Look distance within a trade ≥ across trades",
+      "value": "0.57",
+      "target": "≥ 0.47 (today's lowest across-trade distance)",
+      "met": true
+    },
+    {
+      "name": "No two sites of one trade share palette, font pair and hero",
+      "value": "0",
+      "target": "0",
+      "met": true
+    },
+    {
+      "name": "Judge distinctiveness ≥ 3 on every site (lower of phone and desktop)",
+      "value": "min 2; below 3: mizarstvo-lesnik",
+      "target": "≥ 3",
+      "met": false
+    },
+    {
+      "name": "Judge median (mean of phone and desktop)",
+      "value": "3.08",
+      "target": "≥ 3.2",
+      "met": false
+    },
+    {
+      "name": "Judge median on the template trades",
+      "value": "3.08",
+      "target": "≥ 3.7",
+      "met": false
+    }
+  ]
+}

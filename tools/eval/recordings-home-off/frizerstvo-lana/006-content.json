@@ -1,0 +1,18 @@
+{
+  "seq": 6,
+  "stage": "content",
+  "model": "synthetic",
+  "hash": "synthetic",
+  "origin": "synthetic",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"none\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Frizerstvo Lana, Celje – striženje in barvanje\",\"description\":\"Frizerski salon na Stanetovi ulici v Celju: striženje za ženske, moške in otroke, barvanje brez amoniaka, pramene in svečane pričeske.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"mirrors\",\"props\":{\"headline\":\"Barvamo brez amoniaka\",\"intro\":\"Že devet let strižemo ženske, moške in otroke. Barvamo, delamo pramene, fen frizure in svečane pričeske za poroke in maturantske plese.\",\"fact\":\"phone\",\"factLabel\":\"Naročite se\",\"wordmark\":\"Lana\",\"images\":[\"img_04\",\"img_03\",\"img_02\"]}},{\"id\":\"s_book\",\"type\":\"cta\",\"variant\":\"band\",\"tone\":\"band\",\"props\":{\"heading\":\"Brez naročila težko pridete na vrsto, zato raje pokličite.\",\"primary\":{\"label\":\"Pokličite\",\"target\":{\"action\":\"call\"}}}},{\"id\":\"s_home_prices\",\"type\":\"price-list\",\"variant\":\"grouped\",\"props\":{\"title\":\"Cenik\",\"intro\":\"Uporabljamo barve brez amoniaka, kar stranke z občutljivim lasiščem zelo cenijo.\",\"groups\":[{\"items\":[{\"name\":\"Žensko striženje s fenom\",\"price\":{\"amount\":28}},{\"name\":\"Moško striženje\",\"price\":{\"amount\":15}},{\"name\":\"Otroško striženje\",\"note\":\"do 10 let\",\"price\":{\"amount\":10}},{\"name\":\"Barvanje\",\"price\":{\"amount\":45,\"from\":true}},{\"name\":\"Svečana pričeska\",\"note\":\"za poroke in maturantske plese\",\"price\":{\"amount\":40,\"from\":true}},{\"name\":\"Prameni\",\"price\":{\"$placeholder\":\"price\"}},{\"name\":\"Fen frizura\",\"price\":{\"$placeholder\":\"price\"}}]}]}},{\"id\":\"s_team\",\"type\":\"team\",\"variant\":\"photo\",\"tone\":\"alt\",\"props\":{\"title\":\"V salonu delava dve\",\"members\":[{\"name\":\"Lana Vidmar\",\"role\":\"lastnica, frizerka\"},{\"name\":\"Petra Kos\",\"role\":\"frizerka, specialistka za barvanje in pramene\"}],\"image\":\"img_01\",\"inset\":\"img_05\"}},{\"id\":\"s_call\",\"type\":\"contact\",\"variant\":\"call-out\",\"props\":{\"title\":\"Naročanje\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

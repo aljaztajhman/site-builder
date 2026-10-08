@@ -1,0 +1,18 @@
+{
+  "seq": 5,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "ecbbabf713e38b18",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Frizerski salon Mia, Ljubljana\",\"description\":\"Striženje za ženske, moške in otroke, barvanje z veganskimi barvami, balayage in keratinska nega v Ljubljani. Naročite se po telefonu.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-split\",\"variant\":\"image-right\",\"props\":{\"headline\":\"Striženje in barvanje brez amoniaka\",\"intro\":\"Strižemo ženske, moške in otroke. Barvamo z veganskimi barvami brez amoniaka, delamo pramene, balayage in keratinsko nego.\",\"primary\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}},\"image\":\"img_01\"}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"week\",\"props\":{\"title\":\"Kdaj vas pričakujemo\",\"note\":\"V nedeljo in ponedeljek smo zaprti. Za termin nas pokličite.\"}},{\"id\":\"s_booking\",\"type\":\"booking\",\"variant\":\"simple\",\"props\":{\"heading\":\"Termin dobite po telefonu\",\"text\":\"Pokličite nas v delovnem času in skupaj poiščemo uro, ki vam ustreza.\",\"action\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}}}},{\"id\":\"s_prices\",\"type\":\"price-list\",\"variant\":\"grouped\",\"props\":{\"title\":\"Cenik\",\"intro\":\"Barvamo z veganskimi barvami brez amoniaka.\",\"groups\":[{\"items\":[{\"name\":\"Žensko striženje s fenom\",\"price\":{\"amount\":32}},{\"name\":\"Moško striženje\",\"price\":{\"amount\":18}},{\"name\":\"Otroško striženje\",\"price\":{\"amount\":12}},{\"name\":\"Barvanje\",\"price\":{\"amount\":45,\"from\":true}},{\"name\":\"Balayage\",\"price\":{\"amount\":85,\"from\":true}},{\"name\":\"Pramene\",\"price\":{\"$placeholder\":\"price\",\"note\":\"Vpišite ceno pramenov\"}},{\"name\":\"Keratinska nega\",\"price\":{\"$placeholder\":\"price\",\"note\":\"Vpišite ceno keratinske nege\"}}]}]}},{\"id\":\"s_team\",\"type\":\"team\",\"variant\":\"photo\",\"tone\":\"alt\",\"props\":{\"title\":\"Ekipa salona\",\"intro\":\"Salon je leta 2017 odprla Mia Golob.\",\"members\":[{\"name\":\"Mia Golob\",\"role\":\"Lastnica\"},{\"name\":\"Ana Rus\",\"role\":\"Pomočnica\"}],\"image\":\"img_02\",\"inset\":\"img_03\"}},{\"id\":\"s_cta\",\"type\":\"cta\",\"variant\":\"band\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Naročite se po telefonu\",\"text\":\"Pokličite nas in izberite termin za striženje, barvanje ali nego las.\",\"primary\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}}}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"props\":{\"title\":\"Naročite se s klicem\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2715,
+      "output_tokens": 1111,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "seq": 5,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "e1c318ae385a889c",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Gostilna Pri mostu Kamnik – malice, nedeljska kosila\",\"description\":\"Gostilna ob reki Bistrici v Kamniku. Dnevne malice, nedeljska kosila, kamniški štruklji in telečja obara. Terasa ob reki, prostor za 60 gostov.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"card\",\"props\":{\"eyebrow\":\"Kamnik, ob reki Bistrici\",\"headline\":\"Domača hrana tik ob starem mostu\",\"intro\":\"Kuhamo od leta 1968, danes v tretji generaciji. Pri nas dobite dnevne malice, nedeljska kosila in kamniške štruklje.\",\"fact\":\"address\",\"primary\":{\"label\":\"Rezervirajte mizo\",\"target\":{\"action\":\"call\"}},\"secondary\":{\"label\":\"Oglejte si jedilnik\",\"target\":{\"page\":\"p_jedilnik\"}},\"image\":\"img_03\"}},{\"id\":\"s_offers\",\"type\":\"price-list\",\"variant\":\"offers\",\"tone\":\"inverse\",\"props\":{\"title\":\"Malica in nedeljsko kosilo\",\"groups\":[{\"name\":\"Med tednom\",\"items\":[{\"name\":\"Dnevna malica\",\"note\":\"Domača malica med tednom.\",\"price\":{\"amount\":9.5}}]},{\"name\":\"Ob nedeljah\",\"items\":[{\"name\":\"Nedeljsko kosilo\",\"note\":\"Juha, pečenka in štruklji.\",\"price\":{\"amount\":16}}]}]}},{\"id\":\"s_dishes\",\"type\":\"products\",\"variant\":\"plates\",\"props\":{\"eyebrow\":\"Specialitete hiše\",\"title\":\"Kamniški štruklji in telečja obara\",\"intro\":\"Kuhamo domačo hrano, tako kot v naši gostilni kuhamo že od leta 1968.\",\"items\":[{\"name\":\"Kamniški štruklji\",\"description\":\"Specialiteta hiše.\",\"price\":{\"amount\":6,\"unit\":\"porcija\"},\"image\":\"img_02\"},{\"name\":\"Telečja obara\",\"description\":\"Specialiteta hiše.\",\"price\":{\"$placeholder\":\"price\",\"note\":\"Dodajte ceno telečje obare\"},\"image\":\"img_03\"}]}},{\"id\":\"s_terrace\",\"type\":\"image-text\",\"variant\":\"pair\",\"tone\":\"inverse\",\"props\":{\"eyebrow\":\"Terasa in jedilnica\",\"heading\":\"gostov za našimi mizami\",\"paragraphs\":[\"Imamo prostor za 60 gostov in teraso ob reki Bistrici, tik ob starem mostu. Pridite na kosilo ali nas pokličite za pogostitev.\"],\"link\":{\"label\":\"Rezervirajte mizo\",\"target\":{\"action\":\"call\"}},\"image\":\"img_01\",\"inset\":\"img_02\",\"figure\":\"60\"}},{\"id\":\"s_team\",\"type\":\"team\",\"variant\":\"photo\",\"props\":{\"title\":\"Družina za štedilnikom\",\"intro\":\"Gostilno danes vodita brata v tretji generaciji.\",\"members\":[{\"name\":\"Peter Kosmač\",\"role\":\"Vodi gostilno\"},{\"name\":\"Jure Kosmač\",\"role\":\"Vodi gostilno\"}],\"image\":\"img_03\"}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"inverse\",\"props\":{\"title\":\"Pokličite za rezervacijo mize\",\"intro\":\"Za kosilo, malico ali pogostitev nas pokličite, uredimo vse za vaš obisk.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2662,
+      "output_tokens": 1274,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

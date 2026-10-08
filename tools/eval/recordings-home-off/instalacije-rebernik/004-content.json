@@ -1,0 +1,18 @@
+{
+  "seq": 4,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "5e3d58f05a4699cb",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Inštalacije Rebernik, Ptuj | Vodovod, ogrevanje, črpalke\",\"description\":\"Vodovodne inštalacije, talno ogrevanje, toplotne črpalke in prenove kopalnic na ključ. Ptuj, Ormož, Slovenska Bistrica, Lenart, Maribor. Brezplačen ogled.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"drawing\",\"props\":{\"eyebrow\":\"Inštalater na Ptuju\",\"headline\":\"Vodovod, ogrevanje in kopalnice\",\"intro\":\"Delamo vodovodne in odtočne inštalacije, talno in radiatorsko ogrevanje, toplotne črpalke ter prenove kopalnic na ključ. Ogled in pisna ponudba sta brezplačna.\",\"fact\":\"phone\",\"factLabel\":\"Pokličite za brezplačen ogled\",\"factNote\":\"Če ne dvignem, pokličem nazaj isti dan.\"}},{\"id\":\"s_services\",\"type\":\"services-list\",\"variant\":\"rows\",\"props\":{\"title\":\"Kaj vse naredimo\",\"items\":[{\"name\":\"Vodovodne in odtočne inštalacije\",\"description\":\"V novogradnjah in pri prenovah.\"},{\"name\":\"Talno in radiatorsko ogrevanje\",\"description\":\"Namestimo ogrevanje, ki ustreza vaši hiši ali stanovanju.\"},{\"name\":\"Toplotne črpalke zrak-voda\",\"description\":\"Montaža in servis.\"},{\"name\":\"Zamenjava kotla na olje\",\"description\":\"Stari kotel zamenjamo s toplotno črpalko.\"},{\"name\":\"Prenova kopalnice na ključ\",\"description\":\"Delo opravimo skupaj s keramikom.\"}]}},{\"id\":\"s_subsidy\",\"type\":\"text\",\"variant\":\"narrow\",\"tone\":\"band\",\"props\":{\"heading\":\"Pomagamo pri vlogi za subvencijo Eko sklada\",\"paragraphs\":[\"Če stari kotel na olje menjate s toplotno črpalko, vam pomagamo tudi pri vlogi za subvencijo Eko sklada.\"]}},{\"id\":\"s_steps\",\"type\":\"steps\",\"variant\":\"horizontal\",\"tone\":\"alt\",\"props\":{\"heading\":\"Kako poteka delo\",\"steps\":[{\"title\":\"Pokličete nas\",\"text\":\"Povejte, kaj potrebujete. Če ne dvignem, pokličem nazaj isti dan.\"},{\"title\":\"Ogled na terenu\",\"text\":\"Pridemo pogledat, kako je pri vas. Ogled je brezplačen.\"},{\"title\":\"Pisna ponudba\",\"text\":\"Za vsako delo dobite pisno ponudbo.\"},{\"title\":\"Izvedba del\",\"text\":\"Delo opravimo dogovorjeno in pospravimo za seboj.\"}]}},{\"id\":\"s_area\",\"type\":\"service-area\",\"variant\":\"list\",\"props\":{\"title\":\"Kje delamo\",\"intro\":\"Na terenu smo v okolici Ptuja in Maribora.\"}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"inverse\",\"props\":{\"title\":\"Pokličite nas za brezplačen ogled\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2486,
+      "output_tokens": 1196,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

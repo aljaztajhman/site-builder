@@ -1,0 +1,18 @@
+{
+  "seq": 9,
+  "stage": "brief",
+  "model": "claude-sonnet-5-5",
+  "hash": "9facf658f48d565a",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"businessType\":\"restaurant\",\"name\":\"Gostišče Na griču\",\"town\":\"Ivanjkovci\",\"summary\":\"Družinsko gostišče Šnajder na griču nad Ormožem, sredi vinogradov Jeruzalema. Ponujamo prleško kuhinjo, domača vina, degustacijske menije ob vikendih ter praznovanja do 120 gostov na terasi s pogledom na gorice.\",\"audience\":\"Ljubitelji prleške kuhinje in vina, družine ter organizatorji porok, obletnic in zaključenih družb.\",\"tone\":\"warm\",\"offerings\":[{\"group\":\"Prleška kuhinja\",\"name\":\"Prleška tünka\",\"description\":null,\"price\":null},{\"group\":\"Prleška kuhinja\",\"name\":\"Bograč\",\"description\":null,\"price\":null},{\"group\":\"Prleška kuhinja\",\"name\":\"Gibanica\",\"description\":null,\"price\":null},{\"group\":\"Prleška kuhinja\",\"name\":\"Kisla juha\",\"description\":null,\"price\":null},{\"group\":\"Degustacijski meni\",\"name\":\"Degustacijski meni s petimi hodi\",\"description\":\"Ob vikendih, pet hodov z vini z naše kleti.\",\"price\":{\"amount\":48,\"from\":false,\"unit\":null}},{\"group\":\"Degustacijski meni\",\"name\":\"Degustacijski meni z vinsko spremljavo\",\"description\":\"Pet hodov z vinsko spremljavo.\",\"price\":{\"amount\":68,\"from\":false,\"unit\":null}},{\"group\":\"Praznovanja\",\"name\":\"Poroke, obletnice in zaključki\",\"description\":\"Do 120 gostov, na terasi s pogledom na gorice.\",\"price\":null}],\"highlights\":[\"Družina Šnajder kuha in toči domača vina od leta 1990\",\"Terasa s pogledom na gorice\",\"Praznovanja do 120 gostov\",\"Ob ponedeljkih in torkih samo za zaključene družbe\"],\"facts\":{\"phone\":\"+38625557194\",\"email\":\"info@nagricu.example\",\"address\":{\"street\":\"Svetinje 18\",\"postalCode\":\"2259\",\"city\":\"Ivanjkovci\"},\"hours\":[{\"from\":\"wed\",\"to\":\"sun\",\"open\":\"11:00\",\"close\":\"22:00\",\"closed\":false}],\"hoursNote\":\"V ponedeljek in torek samo za zaključene družbe. Rezervacija je obvezna.\",\"bookingUrl\":null,\"social\":[],\"legalName\":null,\"registrationNumber\":null,\"taxNumber\":null,\"vatPayer\":null,\"serviceArea\":[],\"people\":[{\"name\":\"Nina Šnajder\",\"role\":\"Vodi gostilno\"}]},\"pages\":[{\"kind\":\"home\",\"slug\":\"\",\"navLabel\":\"Domov\",\"purpose\":\"Kaj ponujamo, kje smo, kdaj imamo odprto in kako rezervirate mizo.\"},{\"kind\":\"standard\",\"slug\":\"jedilnik\",\"navLabel\":\"Jedilnik\",\"purpose\":\"Prleška kuhinja in degustacijski meni s cenama.\"},{\"kind\":\"standard\",\"slug\":\"praznovanja\",\"navLabel\":\"Praznovanja\",\"purpose\":\"Poroke, obletnice in zaključki do 120 gostov na terasi.\"},{\"kind\":\"standard\",\"slug\":\"o-nas\",\"navLabel\":\"O nas\",\"purpose\":\"Družina Šnajder, domača vina od leta 1990 in lega med vinogradi Jeruzalema.\"},{\"kind\":\"standard\",\"slug\":\"kontakt\",\"navLabel\":\"Kontakt\",\"purpose\":\"Naslov, delovni čas, telefon, e-pošta in navodila za rezervacijo.\"}],\"missing\":[\"cene jedi iz jedilnika\",\"seznam domačih vin\",\"opis poti do gostišča\",\"družbeni omrežji\",\"matična in davčna številka\"],\"imageIdeas\":[],\"concept\":{\"subtype\":null,\"goal\":\"book\",\"angle\":\"family-history\",\"signatureFact\":\"founding-year\",\"materials\":[\"tünka\",\"bograč\",\"gibanica\",\"kisla juha\",\"domača vina\"],\"localAnchor\":\"Jeruzalem\"}}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 4916,
+      "output_tokens": 1372,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

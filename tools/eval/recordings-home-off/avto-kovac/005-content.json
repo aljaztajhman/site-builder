@@ -1,0 +1,18 @@
+{
+  "seq": 5,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "09da2788aa8ef2f3",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Avto Kovač – servis nemških vozil v Ljubljani\",\"description\":\"Specializirani servis za Audi, BMW, Mercedes-Benz in Volkswagen v Ljubljani. Originalni deli, diagnostika, menjalniki in programiranje ključev.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"photo\",\"tone\":\"inverse\",\"props\":{\"eyebrow\":\"Servis nemških vozil, Ljubljana\",\"headline\":\"Servis samo za nemška vozila\",\"intro\":\"Servisiramo Audi, BMW, Mercedes-Benz in Volkswagen. Delamo natančno in z originalnimi deli.\",\"fact\":\"phone\",\"factLabel\":\"Pokličite nas za termin\",\"factNote\":\"Cene vam povemo po ogledu vozila.\",\"image\":\"img_01\"}},{\"id\":\"s_services\",\"type\":\"services-list\",\"variant\":\"two-column\",\"props\":{\"eyebrow\":\"Kaj delamo\",\"title\":\"Storitve za vaš Audi, BMW, Mercedes-Benz ali Volkswagen\",\"items\":[{\"name\":\"Redni servisi\",\"description\":\"Servisiramo po predpisih proizvajalca in z originalnimi deli.\"},{\"name\":\"Diagnostika\",\"description\":\"Napake iščemo z originalno opremo.\"},{\"name\":\"Menjalniki\",\"description\":\"Popravljamo menjalnike DSG in avtomatske menjalnike.\"},{\"name\":\"Tehnični pregled\",\"description\":\"Vozilo pripravimo na tehnični pregled.\"},{\"name\":\"Programiranje ključev\",\"description\":\"Programiramo ključe za vaše vozilo.\"}]}},{\"id\":\"s_offer\",\"type\":\"image-text\",\"variant\":\"image-left\",\"props\":{\"eyebrow\":\"Nadomestno vozilo\",\"heading\":\"Med popravilom vam posodimo vozilo\",\"paragraphs\":[\"Če se naročite vsaj teden prej, dobite brezplačno nadomestno vozilo za čas popravila.\",\"Servis vodi mojster Gregor Kovač z dvajsetimi leti izkušenj v pooblaščenih servisih. Posluje od leta 2012.\"],\"link\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}},\"image\":\"img_02\"}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"band\",\"props\":{\"title\":\"Pokličite nas in se dogovorimo za termin\",\"intro\":\"Vozilo si ogledamo in vam nato povemo ceno.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2298,
+      "output_tokens": 962,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

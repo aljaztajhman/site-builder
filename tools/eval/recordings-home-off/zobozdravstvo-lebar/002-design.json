@@ -1,0 +1,18 @@
+{
+  "seq": 2,
+  "stage": "design",
+  "model": "synthetic",
+  "hash": "synthetic",
+  "origin": "synthetic",
+  "response": {
+    "text": "{\"direction\":\"nasmeh\",\"fontPair\":\"figtree-figtree\",\"primary\":\"#0c7a70\",\"accent\":\"#e4573f\",\"radius\":12,\"baseFontSize\":18,\"scale\":1.25,\"headingWeight\":800,\"headingCase\":\"normal\",\"headingTracking\":-0.03,\"density\":\"regular\",\"shadow\":\"none\",\"reason\":\"synthetic\"}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

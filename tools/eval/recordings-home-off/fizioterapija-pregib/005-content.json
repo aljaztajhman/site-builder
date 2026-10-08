@@ -1,0 +1,18 @@
+{
+  "seq": 5,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "ac71e3147d0bec92",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"booking\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Fizioterapija Pregib, Novo mesto\",\"description\":\"Fizioterapevtska ambulanta v Novem mestu. Individualna obravnava: ena ura samo za enega pacienta. Napotnica ni potrebna. Termini tudi zvečer.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"bend\",\"props\":{\"eyebrow\":\"Fizioterapija v Novem mestu\",\"headline\":\"Ena ura samo za enega pacienta\",\"intro\":\"Sem Tina Zupan, dipl. fiziot. Pri meni napotnica ni potrebna, obravnave so samoplačniške.\",\"fact\":\"address\",\"primary\":{\"label\":\"Naročite se na termin\",\"target\":{\"action\":\"booking\"}},\"secondary\":{\"label\":\"Pokličite me\",\"target\":{\"action\":\"call\"}},\"image\":\"img_01\"}},{\"id\":\"s_figures\",\"type\":\"highlights\",\"variant\":\"figures\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Moje delo v številkah\",\"items\":[{\"title\":\"12 let\",\"text\":\"dela v bolnišnici\"},{\"title\":\"4 leta\",\"text\":\"lastne ambulante\"},{\"title\":\"60 min\",\"text\":\"prve obravnave s pregledom\"},{\"title\":\"7.00–20.00\",\"text\":\"termini od ponedeljka do petka\"}]}},{\"id\":\"s_services\",\"type\":\"services-list\",\"variant\":\"aside\",\"props\":{\"title\":\"Kdo pride k meni\",\"items\":[{\"name\":\"Bolečine v hrbtu\"},{\"name\":\"Bolečine v vratu\"},{\"name\":\"Poškodbe kolena\"},{\"name\":\"Poškodbe rame\"},{\"name\":\"Okrevanje po operacijah\"},{\"name\":\"Športniki\"}],\"note\":{\"title\":\"Samoplačniško, brez napotnice\",\"text\":\"Napotnice ne potrebujete. Storitve plačate sami.\"}}},{\"id\":\"s_methods\",\"type\":\"text\",\"variant\":\"narrow\",\"props\":{\"eyebrow\":\"Kako delam\",\"heading\":\"Metode, ki jih uporabljam\",\"paragraphs\":[\"Delam z manualno terapijo in terapevtskimi vajami. Po potrebi dodam dry needling ali kinesio taping. Vsako obravnavo prilagodim vam, saj je termin namenjen samo vam.\"]}},{\"id\":\"s_prices\",\"type\":\"price-list\",\"variant\":\"tags\",\"tone\":\"alt\",\"props\":{\"title\":\"Cenik obravnav\",\"groups\":[{\"items\":[{\"name\":\"Prva obravnava s pregledom\",\"note\":\"60 minut\",\"price\":{\"amount\":55}},{\"name\":\"Terapija\",\"note\":\"45 minut\",\"price\":{\"amount\":45}},{\"name\":\"Dry needling kot dodatek\",\"note\":\"dodatek k terapiji\",\"price\":{\"amount\":30}},{\"name\":\"Paket 5 terapij\",\"note\":\"pet terapij skupaj\",\"price\":{\"amount\":200}}]}]}},{\"id\":\"s_cta\",\"type\":\"cta\",\"variant\":\"band\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Rezervirajte svoj termin\",\"text\":\"Termini so samo po predhodnem naročilu. Naročite se spletno ali me pokličite.\",\"primary\":{\"label\":\"Naročite se\",\"target\":{\"action\":\"booking\"}},\"secondary\":{\"label\":\"Pokličite me\",\"target\":{\"action\":\"call\"}}}},{\"id\":\"s_contact\",\"type\":\"contact-strip\",\"variant\":\"cards\",\"props\":{\"title\":\"Obiščite me\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2757,
+      "output_tokens": 1280,
+      "cache_creation_input_tokens": 1160,
+      "cache_read_input_tokens": 20423
+    }
+  }
+}

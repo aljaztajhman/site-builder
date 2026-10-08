@@ -1,0 +1,18 @@
+{
+  "seq": 10,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "58252717f425c09c",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"split-cta\",\"cta\":\"call\"},\"footer\":{\"variant\":\"columns\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Cvetličarna Marjetica, Novo mesto\",\"description\":\"Šopki za vsak dan, poročno cvetje, žalni venci in aranžmaji na Glavnem trgu v Novem mestu. Šopke dostavimo po mestu.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-split\",\"variant\":\"image-left\",\"props\":{\"eyebrow\":\"Cvetličarna na Glavnem trgu\",\"headline\":\"Šopki iz sezonskega cvetja za vsak dan\",\"intro\":\"Vežemo šopke, poročno cvetje, aranžmaje in žalne vence. Cvetje kupujemo pri bližnjih vrtnarjih, šopke dostavimo po Novem mestu.\",\"primary\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}},\"secondary\":{\"label\":\"Pot do nas\",\"target\":{\"action\":\"directions\"}},\"image\":\"img_g3\"}},{\"id\":\"s_prices\",\"type\":\"price-list\",\"variant\":\"tags\",\"tone\":\"alt\",\"props\":{\"title\":\"Izbrane cene\",\"intro\":\"Cene za najpogostejša naročila.\",\"groups\":[{\"items\":[{\"name\":\"Šopek iz sezonskega cvetja\",\"price\":{\"amount\":20,\"from\":true,\"unit\":\"€\"}},{\"name\":\"Poročni šopek\",\"price\":{\"amount\":90,\"from\":true,\"unit\":\"€\"}},{\"name\":\"Žalni venec\",\"price\":{\"amount\":70,\"from\":true,\"unit\":\"€\"}},{\"name\":\"Dostava po Novem mestu\",\"price\":{\"amount\":5,\"unit\":\"€\"}}]}]}},{\"id\":\"s_offer\",\"type\":\"services-list\",\"variant\":\"two-column\",\"props\":{\"title\":\"Kaj vse vam pripravimo\",\"items\":[{\"name\":\"Šopki za vsak dan\",\"description\":\"Šopke vežemo iz sezonskega cvetja z bližnjih vrtnarij.\"},{\"name\":\"Poročno cvetje\",\"description\":\"Poročni šopki za vaš veliki dan.\"},{\"name\":\"Aranžmaji za cerkev in dvorano\",\"description\":\"Cvetlične aranžmaje pripravimo za obred in slavje.\"},{\"name\":\"Žalno cvetje\",\"description\":\"Žalne venec in drugo cvetje za slovo.\"},{\"name\":\"Ikebane\",\"description\":\"Ikebane po vaši želji.\"},{\"name\":\"Lončnice in darilne košarice\",\"description\":\"Lončnice za dom in darilne košarice za obdarovanje.\"}]}},{\"id\":\"s_craft\",\"type\":\"image-text\",\"variant\":\"image-right\",\"tone\":\"alt\",\"props\":{\"eyebrow\":\"Cvetličarno vodi Petra Hočevar\",\"heading\":\"Cvetličarno vodim od leta 2010\",\"paragraphs\":[\"Cvetje izbiramo sezonsko in pri bližnjih vrtnarijah. Vsak šopek vežemo sproti, ročno.\",\"Za praznike smo odprti tudi v nedeljo dopoldne.\"],\"image\":\"img_g4\"}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"compact\",\"props\":{\"title\":\"Kdaj smo odprti\",\"note\":\"Za praznike smo odprti tudi v nedeljo dopoldne.\"}},{\"id\":\"s_cta\",\"type\":\"cta\",\"variant\":\"band\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Naročite šopek ali pridite mimo\",\"text\":\"Najdete nas na Glavnem trgu v Novem mestu. Šopek vam dostavimo po mestu.\",\"primary\":{\"label\":\"Pot do cvetličarne\",\"target\":{\"action\":\"directions\"}},\"secondary\":{\"label\":\"Pišite nam\",\"target\":{\"action\":\"email\"}}}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2735,
+      "output_tokens": 1362,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "seq": 5,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "c7a8a2d9c9d7ed8e",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Frizerstvo Lana Celje | Striženje, barvanje, pričeske\",\"description\":\"Frizerstvo Lana v Celju: striženje žensk, moških in otrok, barvanje brez amoniaka, pramene ter svečane pričeske. Pokličite za naročilo.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"mirrors\",\"props\":{\"eyebrow\":\"Frizerski salon v Celju\",\"headline\":\"Lasje, ki jih boste radi nosili\",\"intro\":\"Strižemo ženske, moške in otroke, barvamo brez amoniaka in pripravimo svečane pričeske za poroke in maturantske plese.\",\"fact\":\"phone\",\"factLabel\":\"Naročite se po telefonu\",\"factNote\":\"Brez naročila težko pridete na vrsto, zato raje pokličite.\",\"secondary\":{\"label\":\"Poglejte cenik\",\"target\":{\"page\":\"p_home\",\"section\":\"s_prices\"}},\"wordmark\":\"Lana\",\"images\":[\"img_03\",\"img_02\",\"img_04\"]}},{\"id\":\"s_cta\",\"type\":\"cta\",\"variant\":\"band\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Brez naročila težko pridete na vrsto, zato raje pokličite.\",\"text\":\"Pokličite nas in uskladili bomo termin, ki vam ustreza.\",\"primary\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}}}},{\"id\":\"s_prices\",\"type\":\"price-list\",\"variant\":\"grouped\",\"props\":{\"title\":\"Cenik\",\"intro\":\"Barvamo z barvami brez amoniaka, primernimi tudi za občutljivo lasišče.\",\"groups\":[{\"items\":[{\"name\":\"Žensko striženje s fenom\",\"price\":{\"amount\":28}},{\"name\":\"Moško striženje\",\"price\":{\"amount\":15}},{\"name\":\"Otroško striženje (do 10 let)\",\"price\":{\"amount\":10}},{\"name\":\"Barvanje\",\"note\":\"Barve brez amoniaka\",\"price\":{\"amount\":45,\"from\":true}},{\"name\":\"Pramene\",\"note\":\"Dela Petra Kos, specialistka za barvanje in pramene\",\"price\":{\"$placeholder\":\"price\",\"note\":\"Vnesite ceno pramenov\"}},{\"name\":\"Fen frizure\",\"price\":{\"$placeholder\":\"price\",\"note\":\"Vnesite ceno fen frizur\"}},{\"name\":\"Svečana pričeska\",\"note\":\"Za poroke in maturantske plese\",\"price\":{\"amount\":40,\"from\":true}}]}]}},{\"id\":\"s_team\",\"type\":\"team\",\"variant\":\"photo\",\"tone\":\"alt\",\"props\":{\"title\":\"Kdo vas postriže\",\"intro\":\"Salon vodi Lana Vidmar že devet let. Salon je v pritličju, parkirišče je za stavbo.\",\"members\":[{\"name\":\"Lana Vidmar\",\"role\":\"Vodja salona\"},{\"name\":\"Petra Kos\",\"role\":\"Specialistka za barvanje in pramene\"}],\"image\":\"img_01\",\"inset\":\"img_05\"}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"props\":{\"title\":\"Pokličite za naročilo\",\"intro\":\"Obiščite nas v Stanetovi ulici v Celju ali nas pokličite in izberite termin.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2828,
+      "output_tokens": 1208,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

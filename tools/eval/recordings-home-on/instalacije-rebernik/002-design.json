@@ -1,0 +1,18 @@
+{
+  "seq": 2,
+  "stage": "design",
+  "model": "synthetic",
+  "hash": "synthetic",
+  "origin": "synthetic",
+  "response": {
+    "text": "{\"direction\":\"industrial\",\"fontPair\":\"space-grotesk-plex\",\"primary\":\"#f2c200\",\"accent\":\"#f2c200\",\"radius\":0,\"baseFontSize\":17,\"scale\":1.25,\"headingWeight\":700,\"headingCase\":\"uppercase\",\"headingTracking\":0.01,\"density\":\"compact\",\"shadow\":\"none\",\"reason\":\"synthetic\"}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

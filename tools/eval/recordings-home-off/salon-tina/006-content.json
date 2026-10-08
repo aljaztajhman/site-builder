@@ -1,0 +1,18 @@
+{
+  "seq": 6,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "58ebb9004f7d51fb",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Salon Tina Kranj | Svečane pričeske in barvanje las\",\"description\":\"Frizerstvo za posebne priložnosti v Kranju. Poročne in maturantske pričeske ter barvanje las, samo po naročilu. Za neveste tudi na domu ali v hotelu.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-split\",\"variant\":\"image-left\",\"tone\":\"default\",\"props\":{\"eyebrow\":\"Frizerstvo v Kranju\",\"headline\":\"Svečane pričeske in barvanje las\",\"intro\":\"Pričeske za neveste, maturantke in vse posebne priložnosti. Delam samo po naročilu, da se vam lahko povsem posvetim.\",\"primary\":{\"label\":\"Pokličite me\",\"target\":{\"action\":\"call\"}},\"secondary\":{\"label\":\"Pot do salona\",\"target\":{\"action\":\"directions\"}},\"image\":\"img_02\"}},{\"id\":\"s_strip\",\"type\":\"contact-strip\",\"variant\":\"bar\",\"tone\":\"alt\",\"props\":{}},{\"id\":\"s_services\",\"type\":\"services-list\",\"variant\":\"rows\",\"tone\":\"default\",\"props\":{\"eyebrow\":\"Storitve\",\"title\":\"Kaj vam uredim\",\"intro\":\"Specializirana sem za barvanje las in svečane pričeske.\",\"items\":[{\"name\":\"Poročna pričeska s poskusno\",\"description\":\"Poročna pričeska skupaj s poskusno pričesko. Za neveste pridem tudi na dom ali v hotel, po dogovoru.\",\"price\":{\"amount\":150}},{\"name\":\"Maturantska pričeska\",\"description\":\"Svečana pričeska za vaš maturantski večer.\",\"price\":{\"amount\":55}},{\"name\":\"Barvanje las\",\"description\":\"Barvanje las po vaši želji.\",\"price\":{\"amount\":50,\"from\":true}},{\"name\":\"Pramene\",\"description\":\"Pramene za bolj sveteče lase.\",\"price\":{\"amount\":70,\"from\":true}}]}},{\"id\":\"s_about\",\"type\":\"image-text\",\"variant\":\"image-right\",\"tone\":\"alt\",\"props\":{\"eyebrow\":\"Za neveste\",\"heading\":\"Pridem k vam, na dom ali v hotel\",\"paragraphs\":[\"Za neveste pridem tudi na dom ali v hotel, po dogovoru. Poročna pričeska vključuje poskusno pričesko, da je na dan poroke vse tako, kot ste si zamislili.\",\"Salon je v pritličju za lekarno. Delam samo po naročilu.\"],\"link\":{\"label\":\"Pokličite me\",\"target\":{\"action\":\"call\"}},\"image\":\"img_01\"}},{\"id\":\"s_book\",\"type\":\"booking\",\"variant\":\"simple\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Naročite se na termin\",\"text\":\"Delam samo po naročilu. Pokličite me in skupaj poiščeva termin, ki vam ustreza.\",\"action\":{\"label\":\"Pokličite me\",\"target\":{\"action\":\"call\"}}}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2249,
+      "output_tokens": 1087,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

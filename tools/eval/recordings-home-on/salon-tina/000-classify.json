@@ -1,0 +1,18 @@
+{
+  "seq": 0,
+  "stage": "classify",
+  "model": "claude-haiku-4-5-20251001",
+  "hash": "9364b7d6570446d1",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"businessType\": \"hairdresser\", \"confidence\": 0.99}",
+    "stopReason": "end_turn",
+    "model": "claude-haiku-4-5-20251001",
+    "usage": {
+      "input_tokens": 747,
+      "output_tokens": 21,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

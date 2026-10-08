@@ -1,0 +1,18 @@
+{
+  "seq": 5,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "af23ceecfb87503c",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Karoserija in vleka Hribar, Celje\",\"description\":\"Popravilo karoserij, lakiranje in vleka vozil 24 ur na dan v Savinjski regiji. Škodo uredimo z zavarovalnico namesto vas.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"photo\",\"tone\":\"inverse\",\"props\":{\"eyebrow\":\"Karoserija in vleka v Celju\",\"headline\":\"Karoserija in vleka 24 ur na dan\",\"intro\":\"Popravljamo karoserije po nesrečah in toči, lakiramo ter vlečemo vozila po vsej Savinjski regiji. Škodo uredimo z zavarovalnico namesto vas.\",\"fact\":\"phone\",\"factLabel\":\"Za vleko pokličite kadarkoli\",\"factNote\":\"Telefon za vleko je vedno vklopljen.\",\"image\":\"img_01\"}},{\"id\":\"s_services\",\"type\":\"services-list\",\"variant\":\"two-column\",\"props\":{\"title\":\"Kaj vse popravimo in uredimo\",\"items\":[{\"name\":\"Popravilo karoserije\",\"description\":\"Po prometni nesreči popravimo poškodovano karoserijo. Škodo uredimo z zavarovalnico namesto vas.\"},{\"name\":\"Ravnanje pločevine\",\"description\":\"Poškodovano pločevino poravnamo.\"},{\"name\":\"Lakiranje\",\"description\":\"Lakiramo cel avtomobil ali samo posamezne dele.\"},{\"name\":\"Odprava prask\",\"description\":\"Praske odpravimo in površino ponovno uredimo.\"},{\"name\":\"Poliranje avtomobila\",\"description\":\"Avtomobil zapoliramo do sijaja.\"},{\"name\":\"Odprava udrtin po toči\",\"description\":\"Udrtine, ki jih naredi toča, odpravimo.\"},{\"name\":\"Vleka vozil\",\"description\":\"Z lastnim vlečnim vozilom vlečemo okvarjena in poškodovana vozila, tudi ob praznikih.\"}]}},{\"id\":\"s_prices\",\"type\":\"price-list\",\"variant\":\"tags\",\"tone\":\"inverse\",\"props\":{\"title\":\"Cene, ki jih že lahko povemo\",\"groups\":[{\"items\":[{\"name\":\"Poliranje avtomobila\",\"price\":{\"amount\":90}},{\"name\":\"Odprava udrtine po toči, za posamezno udrtino\",\"price\":{\"amount\":45,\"from\":true,\"unit\":\"udrtina\"}}]}]}},{\"id\":\"s_tow\",\"type\":\"image-text\",\"variant\":\"image-left\",\"props\":{\"eyebrow\":\"Vleka\",\"heading\":\"Vlečemo z lastnim vozilom\",\"paragraphs\":[\"Vozila vlečemo po vsej Savinjski regiji, 24 ur na dan, tudi ob praznikih.\",\"Telefon za vleko je vedno vklopljen.\"],\"link\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}},\"image\":\"img_g1\"}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"band\",\"props\":{\"title\":\"Pokličite nas, pomagamo vam\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2775,
+      "output_tokens": 1157,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

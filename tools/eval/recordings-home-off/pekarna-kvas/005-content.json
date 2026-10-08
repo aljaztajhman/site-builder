@@ -1,0 +1,18 @@
+{
+  "seq": 5,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "8eeeea6fc99af78e",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Pekarna Kvas Kamnik – kruh z drožmi in potice\",\"description\":\"Družinska pekarna na Šutni v Kamniku. Kruh z lastnimi drožmi, ki vzhaja čez noč, ročno delo, brez aditivov. Potice po naročilu.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"arch\",\"tone\":\"inverse\",\"props\":{\"eyebrow\":\"Družinska pekarna, Kamnik\",\"headline\":\"Kruh z drožmi, ki vzhaja čez noč\",\"intro\":\"Pečemo na Šutni v Kamniku. Uporabljamo samo lastne droži in moko iz bližnjega mlina.\",\"fact\":\"opening\",\"factLabel\":\"Vsako jutro svež kruh\",\"primary\":{\"label\":\"Poglejte ponudbo\",\"target\":{\"page\":\"p_home\",\"section\":\"s_price\"}},\"secondary\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}},\"image\":\"img_01\"}},{\"id\":\"s_price\",\"type\":\"price-list\",\"variant\":\"grouped\",\"tone\":\"default\",\"props\":{\"title\":\"Na polici vsak dan\",\"groups\":[{\"items\":[{\"name\":\"Pirin kruh z drožmi\",\"note\":\"Pečen samo z drožmi, vzhaja čez noč.\",\"price\":{\"amount\":4.2}},{\"name\":\"Rženi kruh\",\"note\":\"Pečen z drožmi, vzhaja čez noč.\",\"price\":{\"amount\":3.9}},{\"name\":\"Polnozrnate žemlje\",\"price\":{\"$placeholder\":\"price\",\"note\":\"Vpišite ceno\"}},{\"name\":\"Rogljiček z maslom\",\"price\":{\"amount\":1.3}},{\"name\":\"Cimetov polž\",\"price\":{\"$placeholder\":\"price\",\"note\":\"Vpišite ceno\"}}]}]}},{\"id\":\"s_cta\",\"type\":\"cta\",\"variant\":\"band\",\"tone\":\"band\",\"props\":{\"heading\":\"Orehova potica ob petkih in sobotah\",\"text\":\"Za praznike in praznovanja jo naročite najmanj dva dni prej.\",\"primary\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}}}},{\"id\":\"s_how\",\"type\":\"image-text\",\"variant\":\"image-left\",\"tone\":\"inverse\",\"props\":{\"eyebrow\":\"Kako pečemo\",\"heading\":\"Počasi, z lastnimi drožmi\",\"paragraphs\":[\"Testo pustimo vzhajati čez noč. Moko kupujemo pri mlinu v bližini.\",\"Vse je ročno delo, brez aditivov in brez zamrznjenega testa.\"],\"image\":\"img_02\"}},{\"id\":\"s_about\",\"type\":\"about\",\"variant\":\"text-only\",\"tone\":\"default\",\"props\":{\"heading\":\"Smo družinska pekarna: peče Jure, v trgovini je večinoma Katja.\",\"paragraphs\":[\"Pri nas je vse ročno delo. Pridite na Šutno po svež kruh, rogljičke ali kvašene krofe.\"]}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"alt\",\"props\":{\"title\":\"Pokličite za naročilo potice ali pridite v pekarno\",\"intro\":\"Naročila za potice in praznična peciva sprejemamo najmanj dva dni prej.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2731,
+      "output_tokens": 1219,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

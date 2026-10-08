@@ -1,0 +1,18 @@
+{
+  "seq": 2,
+  "stage": "design",
+  "model": "synthetic",
+  "hash": "synthetic",
+  "origin": "synthetic",
+  "response": {
+    "text": "{\"direction\":\"etiketa\",\"fontPair\":\"lora-karla\",\"primary\":\"#b9492f\",\"accent\":\"#869850\",\"radius\":6,\"baseFontSize\":18,\"scale\":1.25,\"headingWeight\":700,\"headingCase\":\"normal\",\"headingTracking\":-0.02,\"density\":\"regular\",\"shadow\":\"none\",\"reason\":\"synthetic\"}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

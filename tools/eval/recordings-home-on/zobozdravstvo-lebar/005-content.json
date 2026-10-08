@@ -1,0 +1,18 @@
+{
+  "seq": 5,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "dd47ddd102bcaa2e",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Zobozdravstvo Lebar, zobna ambulanta v Mariboru\",\"description\":\"Zasebna zobna ambulanta v središču Maribora. Prvi obisk je le pogovor in pregled. Posebej smo pozorni na paciente, ki jih je strah zobozdravnika.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"disc\",\"props\":{\"eyebrow\":\"Zobna ambulanta v Mariboru\",\"headline\":\"Prvi obisk je le pogovor in pregled\",\"intro\":\"Posebej smo pozorni na paciente, ki jih je strah zobozdravnika. Brez posegov, brez naglice, v mirni ordinaciji v središču Maribora.\",\"fact\":\"phone\",\"factLabel\":\"Naročite se\",\"factNote\":\"Sprejemamo odrasle in otroke od 3. leta.\",\"image\":\"img_03\",\"secondary\":{\"label\":\"Pišite nam\",\"target\":{\"action\":\"email\"}}}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"week\",\"tone\":\"alt\",\"props\":{\"title\":\"Kdaj vas sprejmemo\",\"note\":\"Pokličite nas in uskladili bomo termin vašega prvega obiska.\"}},{\"id\":\"s_services\",\"type\":\"services-list\",\"variant\":\"aside\",\"props\":{\"title\":\"Kaj vse naredimo za vaše zobe\",\"items\":[{\"name\":\"Preventivni pregled\"},{\"name\":\"Čiščenje zobnega kamna\"},{\"name\":\"Zalivke\"},{\"name\":\"Beljenje zob\"},{\"name\":\"Prevleke\"},{\"name\":\"Mostički\"},{\"name\":\"Proteze\"},{\"name\":\"Vsaditve (implantati)\",\"description\":\"Kirurški del opravi zunanji oralni kirurg, s katerim sodelujemo. Protetični del opravimo pri nas.\"}],\"note\":{\"title\":\"Samoplačniška ambulanta\",\"text\":\"Smo zasebna samoplačniška ambulanta. Cene so znane po pregledu, ko skupaj določimo načrt zdravljenja.\"}}},{\"id\":\"s_team\",\"type\":\"team\",\"variant\":\"photo\",\"props\":{\"title\":\"Ekipa ambulante\",\"members\":[{\"name\":\"dr. Urška Lebar, dr. dent. med.\",\"role\":\"Vodja ambulante, specialistka stomatološke protetike\"},{\"name\":\"Maja Horvat\",\"role\":\"Zobna asistentka\"}],\"image\":\"img_01\",\"inset\":\"img_02\"}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"inverse\",\"props\":{\"title\":\"Naročite se po telefonu\",\"intro\":\"Pokličite nas in dogovorili se bomo za pogovor in pregled. Ambulanta je v prvem nadstropju z dvigalom.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2793,
+      "output_tokens": 1057,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

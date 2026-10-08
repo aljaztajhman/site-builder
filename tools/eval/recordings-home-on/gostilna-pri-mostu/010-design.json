@@ -1,0 +1,18 @@
+{
+  "seq": 10,
+  "stage": "design",
+  "model": "claude-sonnet-5-5",
+  "hash": "2191dfe90813cf6f",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"direction\":\"warm-craft\",\"fontPair\":\"fraunces-source-sans\",\"primary\":\"#8f4a24\",\"accent\":\"#6e4b32\",\"radius\":6,\"baseFontSize\":17,\"scale\":1.28,\"headingWeight\":650,\"headingCase\":\"normal\",\"headingTracking\":-0.01,\"density\":\"regular\",\"shadow\":\"none\",\"reason\":\"Owner wants a change from jedilnik, so warm-craft fits a family inn with 3 photos: Fraunces serif, a terracotta brown drawn from the photo colours, and photos on offset blocks give a homely, hand-made feel.\"}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 8847,
+      "output_tokens": 203,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

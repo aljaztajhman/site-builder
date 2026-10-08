@@ -1,0 +1,18 @@
+{
+  "seq": 5,
+  "stage": "altText",
+  "model": "claude-sonnet-5-5",
+  "hash": "ec2c13794727d66a",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"images\":[{\"index\":0,\"alt\":\"Lesena alpska hiša z balkonom, polnim rdečih rož, na zelenem travniku pod gozdnatimi gorami.\",\"focalX\":0.5,\"focalY\":0.4,\"heroSuitable\":true},{\"index\":1,\"alt\":\"Lesena soba z dvema posteljama z rdeče-belo karirasto posteljnino in oknom s pogledom na zelene griče.\",\"focalX\":0.5,\"focalY\":0.35,\"heroSuitable\":false},{\"index\":2,\"alt\":\"Miza z domačim sirom, skuto, maslom, kruhom, marmelado in vrčem mleka ter šopkom travniških rož.\",\"focalX\":0.45,\"focalY\":0.5,\"heroSuitable\":true},{\"index\":3,\"alt\":\"Tri rjavo-bele krave se pasejo na strmem travniku, v ozadju so visoke gore v večerni svetlobi.\",\"focalX\":0.3,\"focalY\":0.4,\"heroSuitable\":true},{\"index\":4,\"alt\":\"Kos jabolčnega zavitka s sladkorjem v prahu na krožniku na leseni mizi, zraven šopek marjetic.\",\"focalX\":0.5,\"focalY\":0.58,\"heroSuitable\":false},{\"index\":5,\"alt\":\"Fant in deklica skozi leseno ograjo hranita koze, v ozadju so zelen travnik in gore.\",\"focalX\":0.5,\"focalY\":0.45,\"heroSuitable\":true},{\"index\":6,\"alt\":\"Pogled z lesenega balkona na dolino z meglicami, zelenimi travniki, gozdovi in hribi v jutranji svetlobi.\",\"focalX\":0.55,\"focalY\":0.4,\"heroSuitable\":true},{\"index\":7,\"alt\":\"Lesene police z domačimi marmeladami in vloženo zelenjavo v kozarcih s karirastimi pokrovčki, spodaj krompir.\",\"focalX\":0.5,\"focalY\":0.45,\"heroSuitable\":false}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 4928,
+      "output_tokens": 700,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}
