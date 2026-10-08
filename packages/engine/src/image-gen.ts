@@ -16,6 +16,11 @@ export function outputSize(config: AppConfig, portrait: boolean): { width: numbe
   return portrait ? { width: height, height: width } : { width, height };
 }
 
+/** The style appended to every generated picture's prompt: the unstaged phone-photo style with config promptFixes.pictures. */
+export function pipelineStyle(config: AppConfig): string {
+  return config.promptFixes.pictures ? config.imageGen.pipeline.unstagedStyle : config.imageGen.pipeline.style;
+}
+
 /** Request body for fal's model endpoint. */
 export function requestBody(config: AppConfig, model: ImageGenModelConfig, prompt: string, portrait: boolean): Record<string, unknown> {
   const size = outputSize(config, portrait);
@@ -130,7 +135,7 @@ export class ImageGenerator {
   }
 
   /**
-   * One landscape image for `prompt` (the pipeline style is appended). Returns JPEG bytes and size.
+   * One landscape image for `prompt` (the pipeline style is appended: pipelineStyle). Returns JPEG bytes and size.
    * Its price is reserved under the daily cap first. `signal` (the job stopped) is checked before the
    * reservation and again once it is made; a request already sent is not cut off, since fal would bill it anyway.
    */
@@ -149,7 +154,7 @@ export class ImageGenerator {
     const book = (costEur: number, ok: boolean) => reservation.settle({ stage: "imageGen", model: name, usage: NO_TOKENS, costEur, durationMs: Date.now() - started, ok });
     let raw: Uint8Array;
     try {
-      raw = await this.opts.transport.generate(model, requestBody(config, model, `${prompt} ${config.imageGen.pipeline.style}`, false));
+      raw = await this.opts.transport.generate(model, requestBody(config, model, `${prompt} ${pipelineStyle(config)}`, false));
     } catch (e) {
       // A failed request is logged at no cost (fal bills only delivered images); an image fal made but we
       // couldn't fetch is booked at its price, because we were billed for it.

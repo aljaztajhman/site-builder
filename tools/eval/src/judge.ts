@@ -30,6 +30,18 @@ export const JudgeOutput = z.strictObject({
 export type JudgeOutput = z.infer<typeof JudgeOutput>;
 export type JudgeScores = z.infer<typeof Scores>;
 
+/**
+ * The judge fix (config promptFixes.judge): the same answer with the notes asked for before the scores, so the model
+ * names the problem before it scores (structured output follows the schema's order). Parses to the same type.
+ */
+export const JudgeOutputNotesFirst = z.strictObject({
+  phoneNote: JudgeOutput.shape.phoneNote,
+  desktopNote: JudgeOutput.shape.desktopNote,
+  phone: Scores,
+  desktop: Scores,
+  fixes: JudgeOutput.shape.fixes,
+});
+
 export const mean = (s: JudgeScores): number => (s.impression + s.hierarchy + s.imagery + s.spacing + s.clutter + s.distinctiveness) / 6;
 
 export const JUDGE_SYSTEM = `You are a strict senior web designer reviewing homepages generated for Slovenian small businesses (hairdressers, gostilne, car repair, dentists, bakeries, tourist farms, accountants, installers, shops). You get screenshots of one homepage: the phone's first screen as a visitor sees it (360×800, a fixed call/directions bar may sit at the bottom), the whole phone page, the desktop first screen (1280×800) and the whole desktop page. Judge only what you see, for phone and desktop separately: a site must be excellent on both.
@@ -44,6 +56,16 @@ Score each criterion from 1 to 5. Be strict: 3 is an ordinary small-business sit
 
 Notes: one sentence per viewport naming the biggest problem you see (or what works, if nothing is wrong). Fixes: up to three concrete design changes that would lift this page most, most important first. Don't comment on the copy's facts; they are checked elsewhere.`;
 
+/**
+ * What the judge fix adds: required placeholders and the phone bar are the product's, not the page's faults; generated
+ * pictures are labelled mood pictures; the direction's name sets no expectation.
+ */
+export const JUDGE_INTENDED = `
+
+Intended, never a fault: text in square brackets such as „[Vnesite delovni čas]" marks a fact the owner hasn't given yet and fills in before publishing; on phones a fixed call/directions bar is required on every site. Don't lower any score for them, and don't count the bar as a competing action or as clutter. Pictures the context calls generated are AI mood pictures with a small label: judge how they are used, not whether they are real. The design direction's name is only a reference: score what you see, not what the name leads you to expect.`;
+
+export const judgeSystem = (fixed: boolean): string => (fixed ? `${JUDGE_SYSTEM}${JUDGE_INTENDED}` : JUDGE_SYSTEM);
+
 async function png(file: string): Promise<Uint8Array> {
   return new Uint8Array(await readFile(file));
 }
@@ -52,12 +74,16 @@ type Block = Exclude<ModelRequest["messages"][number]["content"], string>[number
 const image = (b: Uint8Array): Block => ({ type: "image", source: { type: "base64", media_type: "image/png", data: Buffer.from(b).toString("base64") } });
 
 /** Scores the homepage whose screenshots `pnpm eval` wrote to `runDir`. */
-export async function judgeHomepage(client: ModelClient, runDir: string, context: { businessType: string; direction: string | null; photos: number }): Promise<JudgeOutput> {
+export async function judgeHomepage(client: ModelClient, runDir: string, context: { businessType: string; direction: string | null; photos: number; generated?: number }): Promise<JudgeOutput> {
+  const fixed = client.promptFixes.judge;
   const f = (n: string) => path.join(runDir, n);
   const phoneFull = await sliceScreenshot(await fitImageForModel(await png(f("home-360.png"))), 1560, 4);
   const deskFull = await sliceScreenshot(await fitImageForModel(await png(f("home-1280.png"))), 900, 4);
   const content: Block[] = [
-    { type: "text", text: `Business type: ${context.businessType}. Design direction: ${context.direction ?? "unknown"}. Photos the owner gave: ${context.photos}.` },
+    {
+      type: "text",
+      text: `Business type: ${context.businessType}. Design direction: ${context.direction ?? "unknown"}. Photos the owner gave: ${context.photos}.${fixed ? ` Generated pictures: ${context.generated ?? 0}.` : ""}`,
+    },
     { type: "text", text: "Phone first screen (360×800) as a visitor sees it:" },
     image(await png(f("home-360-first.png"))),
     { type: "text", text: `Whole phone page, top to bottom in ${phoneFull.tiles.length} slices${phoneFull.truncated ? " (the page continues below)" : ""}:` },
@@ -68,6 +94,9 @@ export async function judgeHomepage(client: ModelClient, runDir: string, context
     ...deskFull.tiles.map(image),
     { type: "text", text: "Score this homepage." },
   ];
-  const { data } = await client.callJson({ stage: "judge", system: [JUDGE_SYSTEM], messages: [{ role: "user", content }], schema: toModelJsonSchema(JudgeOutput) }, (d) => JudgeOutput.parse(d));
+  const { data } = await client.callJson(
+    { stage: "judge", system: [judgeSystem(fixed)], messages: [{ role: "user", content }], schema: toModelJsonSchema(fixed ? JudgeOutputNotesFirst : JudgeOutput) },
+    (d) => JudgeOutput.parse(d),
+  );
   return data;
 }

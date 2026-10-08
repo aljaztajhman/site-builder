@@ -19,6 +19,9 @@
  *                   `pnpm eval --offline --strict`). Without it the run reports and exits 0.
  * --twins:          also run the twins (tools/eval/twins: more businesses of the same trades, no scripted edits), for
  *                   the same-trade look distance. They have no recordings or goldens: live, --record or --record-missing.
+ * --prompt-fixes all|<name>[,<name>]: turns those config promptFixes switches on for this run (docs/dev/prompt-fixes.md),
+ *                   e.g. --record-missing --only avtoservis-mrak --prompt-fixes catalogue. --replay says per fixture how
+ *                   many requests changed since the recording (a changed prompt still replays the recorded answer).
  * fal pictures (FAL_KEY) are cached by request in tools/eval/image-cache/ in every mode that makes them.
  * Writes eval/report.md, eval/contact-sheet.png, the review sheets in eval/look/ (look.ts) and the variety numbers
  * (variety-report.ts): eval/variety-<mode>-<scope>.md for a run over every fixture, else beside the report in eval/runs/.
@@ -29,7 +32,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
 import { loadConfig } from "@sb/config";
-import { BatchTransport, launchCheckBrowser } from "@sb/engine";
+import { BatchTransport, NO_PROMPT_FIXES, launchCheckBrowser } from "@sb/engine";
 import { loadFixtures, loadTwins } from "./fixtures/load.ts";
 import { renderVariety } from "./variety-report.ts";
 import { runFixture, type FixtureResult, type Mode } from "./runner.ts";
@@ -44,6 +47,15 @@ const flag = (name: string) => args.includes(`--${name}`);
 const value = (name: string) => {
   const i = args.indexOf(`--${name}`);
   return i >= 0 ? args[i + 1] : undefined;
+};
+
+/** The scripted edits: how many were applied without validation issues, and how their checks went (manual: judged by eye). */
+const editLine = (r: FixtureResult): string => {
+  const edits = r.checkpoints.flatMap((c) => (c.edit ? [c.edit] : []));
+  const manual = edits.filter((e) => e.check.pass === null).length;
+  return edits.length
+    ? `edits applied ${edits.filter((e) => e.issues.length === 0).length}/${edits.length}, checks passed ${edits.filter((e) => e.check.pass === true).length}/${edits.length - manual}${manual ? ` (${manual} manual)` : ""}`
+    : "";
 };
 
 const mode: Mode = flag("offline") ? "offline" : flag("replay") ? "replay" : flag("record-missing") ? "record-missing" : flag("record") ? "record" : "live";
@@ -93,6 +105,18 @@ if (missingPhotos) {
 // A shard reports like an --only run over its fixtures.
 const only = shard ? fixtures.map((f) => f.id) : onlyArg;
 const config = loadConfig();
+// --prompt-fixes all | name,name: turns those config promptFixes switches on for this run (the runner shares the config).
+const fixesArg = value("prompt-fixes");
+if (fixesArg) {
+  const names = fixesArg === "all" ? Object.keys(NO_PROMPT_FIXES) : fixesArg.split(",").map((s) => s.trim());
+  const unknown = names.filter((n) => !(n in NO_PROMPT_FIXES));
+  if (unknown.length) {
+    console.error(`Unknown prompt fix(es): ${unknown.join(", ")}. Known: ${Object.keys(NO_PROMPT_FIXES).join(", ")}.`);
+    process.exit(2);
+  }
+  for (const n of names) (config.promptFixes as Record<string, unknown>)[n] = true;
+  console.log(`Prompt fixes on: ${names.join(", ")}`);
+}
 await mkdir(outDir, { recursive: true });
 const browser = await launchCheckBrowser();
 const results: FixtureResult[] = [];
@@ -125,7 +149,15 @@ try {
     spent += r.paidEur;
     results.push(r);
     const failing = r.checkpoints.filter((c) => c.failures.length).length;
-    const reuse = [r.calls ? `${r.calls.replayed} calls replayed, ${r.calls.recorded} recorded` : "", r.pictures ? `${r.pictures.cached} pictures cached, ${r.pictures.made} made` : ""].filter(Boolean).join(", ");
+    const reuse = [
+      r.calls ? `${r.calls.replayed} calls replayed, ${r.calls.recorded} recorded` : "",
+      r.pictures ? `${r.pictures.cached} pictures cached, ${r.pictures.made} made` : "",
+      r.replayChanged !== undefined ? `${r.replayChanged} request(s) changed since recording` : "",
+      r.critique ? `critique patches applied in ${r.critique.applied}/${r.critique.withPatches} rounds${r.critique.rejected ? ` (${r.critique.rejected} rejected)` : ""}` : "",
+      editLine(r),
+    ]
+      .filter(Boolean)
+      .join(", ");
     console.log(r.error ? `  error: ${r.error.split("\n")[0]}` : `  ${r.checkpoints.length} checkpoints, ${failing} with failures, paid €${r.paidEur.toFixed(3)}${reuse ? ` (${reuse})` : ""}, run total €${spent.toFixed(2)}`);
     for (const c of r.checkpoints) for (const fail of c.failures) console.log(`    ${c.label}: ${fail}`);
   }

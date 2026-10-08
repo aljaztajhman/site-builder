@@ -25,4 +25,5 @@ export * from "./showcase.ts";
 export * from "./families.ts";
 export * from "./owner-edits.ts";
 export * from "./missing-facts.ts";
+export * from "./headings.ts";
 export * from "./motif.ts";

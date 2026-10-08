@@ -179,6 +179,11 @@ export class ModelClient {
     return this.opts.config.limits;
   }
 
+  /** The audit's prompt fixes (config promptFixes), for the stages that build prompts. */
+  get promptFixes(): AppConfig["promptFixes"] {
+    return this.opts.config.promptFixes;
+  }
+
   stageConfig(stage: ModelStageName) {
     const { config } = this.opts;
     if (config.useFullBuildModel && (stage === "content" || stage === "brief")) {

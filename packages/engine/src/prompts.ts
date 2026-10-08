@@ -1,5 +1,38 @@
 import { z } from "zod";
 import { BANNED_PHRASES, Business, DIRECTIONS, SECTION_DEFS, toModelJsonSchema, type Motif } from "@sb/spec";
+import {
+  ALT_SYSTEM_FIXED,
+  BRIEF_FACTS_NEW,
+  BRIEF_FACTS_OLD,
+  BRIEF_RULES,
+  CATALOGUE_DESCRIPTIONS,
+  CLASSIFY_CONFIDENCE_NEW,
+  CLASSIFY_CONFIDENCE_OLD,
+  CRITIQUE_CHECKLIST_NEW,
+  CRITIQUE_CHECKLIST_OLD,
+  CRITIQUE_INTRO_NEW,
+  CRITIQUE_INTRO_OLD,
+  DESIGN_AVOID_LINE,
+  EDIT_COLOUR_NEW,
+  EDIT_COLOUR_OLD,
+  EDIT_REPLY_NEW,
+  EDIT_REPLY_OLD,
+  HERO_EYEBROW_NEW,
+  HERO_EYEBROW_OLD,
+  IMAGE_IDEAS_NEW,
+  IMAGE_IDEAS_OLD,
+  NO_PROMPT_FIXES,
+  RULES_MOBILE_FIRST,
+  RULES_PLACEHOLDER_NEW,
+  RULES_PLACEHOLDER_OLD,
+  RULES_RESPONSIVE,
+  directionHeroes,
+  directionSummary,
+  imageryWords,
+  sectionNamesForEdits,
+  swap,
+  type PromptFixes,
+} from "./prompt-fixes.ts";
 
 /**
  * Static prompt parts. They must be byte-stable across calls so prompt caching works:
@@ -34,16 +67,25 @@ const TEMPLATES = DIRECTIONS.filter((d) => d.template);
 const TEMPLATE_IDS = TEMPLATES.map((d) => d.id).join(", ");
 const TEMPLATE_MOTIFS = TEMPLATES.map((d) => MOTIF_WORDS[d.template!.motif]).join(", ");
 
-/** Catalogue of section components for the model, generated from the spec (the single source of truth). */
-export function sectionCatalogue(): string {
+/** JSON-encoded, as the text appears inside a props schema. */
+const inJson = (s: string) => JSON.stringify(s).slice(1, -1);
+
+/**
+ * Catalogue of section components for the model, generated from the spec (the single source of truth). With the
+ * catalogue fix (config promptFixes.catalogue): the hero eyebrow, contact-strip and cta wording that made every
+ * homepage the same.
+ */
+export function sectionCatalogue(f: PromptFixes = NO_PROMPT_FIXES): string {
   const lines = SECTION_DEFS.filter((d) => !d.systemOnly && !d.ownerOnly).map((d) => {
     const schema = toModelJsonSchema(d.props);
+    const fix = f.catalogue ? CATALOGUE_DESCRIPTIONS[d.type] : undefined;
+    const json = JSON.stringify(schema);
     return [
       `### ${d.type}`,
       `Variants: ${d.variants.join(", ")}. Photos: ${d.images}.`,
-      d.description,
+      fix ? swap(d.description, fix[0], fix[1]) : d.description,
       `Mobile: ${d.mobile}`,
-      `Props schema: ${JSON.stringify(schema)}`,
+      `Props schema: ${f.catalogue ? json.split(inJson(HERO_EYEBROW_OLD)).join(inJson(HERO_EYEBROW_NEW)) : json}`,
     ].join("\n");
   });
   return `# Section components\n\n${lines.join("\n\n")}`;
@@ -56,14 +98,15 @@ export function businessSchema(): string {
 Schema: ${JSON.stringify(toModelJsonSchema(Business.omit({ subtype: true })))}`;
 }
 
-export function directionsCatalogue(): string {
+/** With the directions fix (config promptFixes.directions): no toned-photo promises, imagery in words, editorial's photo hero. */
+export function directionsCatalogue(f: PromptFixes = NO_PROMPT_FIXES): string {
   return `# Design directions\n\n${DIRECTIONS.map((d) =>
     [
       `### ${d.id} — ${d.name}`,
-      d.summary,
-      `Best for: ${d.bestFor.join(", ")}. Font pairs: ${d.fontPairs.join(", ")}. Page background: ${d.palette.background}. Imagery: ${d.imagery}.`,
+      directionSummary(d, f),
+      `Best for: ${d.bestFor.join(", ")}. Font pairs: ${d.fontPairs.join(", ")}. Page background: ${d.palette.background}. Imagery: ${imageryWords(d, f)}.`,
       `Ranges: radius ${d.ranges.radius.join("–")}, base font ${d.ranges.baseFontSize.join("–")}px, scale ${d.ranges.scale.join("–")}, heading weight ${d.ranges.headingWeight.join("–")}, tracking ${d.ranges.headingTracking.join("–")}em, heading case ${d.ranges.headingCase.join("/")}, density ${d.ranges.density.join("/")}, shadow ${d.ranges.shadow.join("/")}.`,
-      `Layout: header ${d.layout.header}, footer ${d.layout.footer}, heroes ${d.layout.heroes.join(", ")}, rhythm ${d.layout.rhythm}, prefers ${d.layout.prefer.join(", ")}.`,
+      `Layout: header ${d.layout.header}, footer ${d.layout.footer}, heroes ${directionHeroes(d, f).join(", ")}, rhythm ${d.layout.rhythm}, prefers ${d.layout.prefer.join(", ")}.`,
       d.template ? `Hand-made trade template ${d.template.id}: first choice for ${d.template.firstFor.join(", ")}${d.template.minPhotos ? ` with at least ${d.template.minPhotos} photo` : ", with or without photos"}. Its own palette and type are fixed; primary and accent are ignored.` : "",
     ]
       .filter(Boolean)
@@ -136,3 +179,47 @@ export type CritiqueOutput = z.infer<typeof CritiqueOutput>;
 
 export const PATCH_FORMAT = `Answer with JSON only, no prose around it:
 {"reply": "<one sentence>", "patches": [{"op": "replace", "path": "/pages/0/sections/1/props/title", "value": "..."}]}`;
+
+// ---------- The audit's prompt fixes (config promptFixes; the wording is in prompt-fixes.ts) ----------
+// Every builder returns the constant above, byte for byte, when its switches are off.
+
+/** RULES, with the catalogue fix: responsive instead of mobile first, the call-button rule, placeholders only when needed. */
+export function rules(f: PromptFixes): string {
+  return f.catalogue ? swap(swap(RULES, RULES_MOBILE_FIRST, RULES_RESPONSIVE), RULES_PLACEHOLDER_OLD, RULES_PLACEHOLDER_NEW) : RULES;
+}
+const withRules = (system: string, f: PromptFixes): string => (f.catalogue ? swap(system, RULES, rules(f)) : system);
+
+export function classifySystem(f: PromptFixes): string {
+  return f.classifier ? swap(CLASSIFY_SYSTEM, CLASSIFY_CONFIDENCE_OLD, CLASSIFY_CONFIDENCE_NEW) : CLASSIFY_SYSTEM;
+}
+
+/** The brief: its own short rules instead of the site's RULES (fix "brief"), the picture ideas (fix "pictures"). */
+export function briefSystem(f: PromptFixes): string {
+  const s = f.brief ? swap(swap(BRIEF_SYSTEM, RULES, BRIEF_RULES), BRIEF_FACTS_OLD, BRIEF_FACTS_NEW) : withRules(BRIEF_SYSTEM, f);
+  return f.pictures ? swap(s, IMAGE_IDEAS_OLD, IMAGE_IDEAS_NEW) : s;
+}
+
+/** Without the "Avoid" list (fix "directions"): tokens and enforceDesign already rule those out. */
+export function designSystem(f: PromptFixes): string {
+  return f.directions ? swap(DESIGN_SYSTEM, DESIGN_AVOID_LINE, "") : DESIGN_SYSTEM;
+}
+
+export function altSystem(f: PromptFixes): string {
+  return f.altText ? ALT_SYSTEM_FIXED : ALT_SYSTEM;
+}
+
+export function contentSystem(f: PromptFixes): string {
+  return withRules(CONTENT_SYSTEM, f);
+}
+
+export function critiqueSystem(f: PromptFixes): string {
+  const s = withRules(CRITIQUE_SYSTEM, f);
+  return f.critique ? swap(swap(s, CRITIQUE_INTRO_OLD, CRITIQUE_INTRO_NEW), CRITIQUE_CHECKLIST_OLD, CRITIQUE_CHECKLIST_NEW) : s;
+}
+
+/** The edit system block (before the business schema): section names and reply language (fix "edit"), warm surfaces (fix "warmSurface"). */
+export function editSystem(f: PromptFixes): string {
+  let s = withRules(EDIT_SYSTEM, f);
+  if (f.warmSurface) s = swap(s, EDIT_COLOUR_OLD, EDIT_COLOUR_NEW);
+  return f.edit ? `${swap(s, EDIT_REPLY_OLD, EDIT_REPLY_NEW)}\n\n${sectionNamesForEdits()}` : s;
+}

@@ -13,11 +13,14 @@ import {
   type BusinessType,
   type Direction,
   contrast,
+  mainHeadingIssues,
+  repairMainHeadings,
   repairSiteCopy,
   addedOnRequest,
   stripModelOnRequest,
   toModelJsonSchema,
   validateSite,
+  type DesignRepairOptions,
   type ImageAsset,
   type Issue,
   type SiteSpec,
@@ -26,20 +29,21 @@ import type { ModelClient } from "./llm/client.ts";
 import { ModelOutputError, extractJson, isSchemaRejection } from "./llm/client.ts";
 import { Brief, Classification, briefJsonSchema, classificationJsonSchema, clientWithholdsHours, verifyBriefFacts, type Dropped } from "./brief.ts";
 import {
-  ALT_SYSTEM,
-  BRIEF_SYSTEM,
-  CLASSIFY_SYSTEM,
-  CONTENT_SYSTEM,
-  CRITIQUE_SYSTEM,
   CritiqueOutput,
-  DESIGN_SYSTEM,
-  EDIT_SYSTEM,
   EditOutput,
   PATCH_FORMAT,
+  altSystem,
+  briefSystem,
+  classifySystem,
+  contentSystem,
+  critiqueSystem,
+  designSystem,
   directionsCatalogue,
+  editSystem,
   sectionCatalogue,
   businessSchema,
 } from "./prompts.ts";
+import { CRITIQUE_FORMAT_NEW, CRITIQUE_FORMAT_OLD, NO_PROMPT_FIXES, altContext, designRepair, directionHeroes, heroSuitableLine, type PromptFixes } from "./prompt-fixes.ts";
 import { assembleSpec, contentJsonSchema, contentOutputSchema, type ContentOutput } from "./assemble.ts";
 import { repairContentOutput } from "./repair.ts";
 import { patchRetryLoop, wholeRetryInstruction, type PatchLoopDeps } from "./content-patch.ts";
@@ -56,7 +60,7 @@ import { holdPrimary, skeletonLine } from "./skeleton.ts";
 export async function classify(client: ModelClient, description: string): Promise<Classification> {
   const { data } = await client.callJson({
     stage: "classify",
-    system: [CLASSIFY_SYSTEM],
+    system: [classifySystem(client.promptFixes)],
     messages: [{ role: "user", content: description }],
     schema: classificationJsonSchema(),
   }, (d) => Classification.parse(d));
@@ -72,7 +76,7 @@ export async function makeBrief(
   const concept = input.concept === true;
   const { data } = await client.callJson({
     stage: "brief",
-    system: concept ? [BRIEF_SYSTEM, BRIEF_CONCEPT_SYSTEM] : [BRIEF_SYSTEM],
+    system: concept ? [briefSystem(client.promptFixes), BRIEF_CONCEPT_SYSTEM] : [briefSystem(client.promptFixes)],
     // Brief, design and alt text run once per job: a cache breakpoint there is a 1.25× write nobody reads.
     cache: false,
     messages: [
@@ -177,7 +181,7 @@ export async function chooseDesign(
   const offer = subtype ? `${offerLine}\n${subtype}` : offerLine;
   const { data } = await client.callJson({
     stage: "design",
-    system: [DESIGN_SYSTEM, directionsCatalogue()],
+    system: [designSystem(client.promptFixes), directionsCatalogue(client.promptFixes)],
     cache: false,
     messages: [
       {
@@ -190,7 +194,7 @@ export async function chooseDesign(
     schema: toModelJsonSchema(DesignChoice),
   }, (d) => DesignChoice.parse(d));
   const choice = data;
-  const r = designWithVariety(choice, input.variety ? { ...input.variety, swatches: input.swatches } : undefined, input.holdPrimary === true);
+  const r = designWithVariety(choice, input.variety ? { ...input.variety, swatches: input.swatches } : undefined, input.holdPrimary === true, designRepair(client.promptFixes));
   return { design: r.design, reason: choice.reason, ...(r.hero ? { hero: r.hero } : {}) };
 }
 
@@ -204,7 +208,12 @@ export function designFromChoice(choice: z.infer<typeof DesignChoice>): Design {
   return designWithVariety(choice).design;
 }
 
-export function designWithVariety(choice: z.infer<typeof DesignChoice>, variety?: VarietyInput & { swatches: Swatch[] }, hold = false): { design: Design; hero?: string } {
+export function designWithVariety(
+  choice: z.infer<typeof DesignChoice>,
+  variety?: VarietyInput & { swatches: Swatch[] },
+  hold = false,
+  repair: DesignRepairOptions = {},
+): { design: Design; hero?: string } {
   const dir = directionById(choice.direction);
   const avoid = variety ? [...variety.neighbours, ...(variety.previous ? [variety.previous] : [])] : [];
   const family = variety ? pickFromFamily(dir, { seed: variety.seed, logo: variety.swatches, pictures: variety.pictures, neighbours: avoid }) : undefined;
@@ -227,8 +236,8 @@ export function designWithVariety(choice: z.infer<typeof DesignChoice>, variety?
     imagery: dir.imagery,
   };
   // With the skeleton (config variety.skeleton) the direction's primary hue and saturation are held in code, not only asked for.
-  let design = enforceDesign(clampToSchema(hold ? holdPrimary(draft, dir) : draft), dir);
-  if (variety && !family) design = enforceDesign(awayFromNeighbours(design, dir, dir.layout.heroes[0] ?? "none", avoid, variety.seed), dir);
+  let design = enforceDesign(clampToSchema(hold ? holdPrimary(draft, dir) : draft), dir, repair);
+  if (variety && !family) design = enforceDesign(awayFromNeighbours(design, dir, dir.layout.heroes[0] ?? "none", avoid, variety.seed), dir, repair);
   // Never the colours and fonts of a site on the landing page's trade showcase.
   return { design: Design.parse(awayFromShowcases(design, dir)), ...(family ? { hero: family.hero } : {}) };
 }
@@ -260,9 +269,20 @@ const AltOutput = z.strictObject({
 });
 export type AltText = { alt: string; focal: { x: number; y: number }; heroSuitable: boolean };
 
-export async function altTexts(client: ModelClient, photos: { jpegBase64: string; name?: string }[]): Promise<AltText[]> {
+/**
+ * `context`: the business the photos belong to; sent only with config promptFixes.altText (the alt text then names
+ * the photo in the business's terms).
+ */
+export async function altTexts(
+  client: ModelClient,
+  photos: { jpegBase64: string; name?: string }[],
+  context?: { businessType?: string; name?: string; description?: string },
+): Promise<AltText[]> {
   if (photos.length === 0) return [];
+  const fixes = client.promptFixes;
   const content: Anthropic.ContentBlockParam[] = [];
+  const about = fixes.altText && context ? altContext(context) : "";
+  if (about) content.push({ type: "text", text: about });
   photos.forEach((p, i) => {
     content.push({ type: "text", text: `Photo ${i}:` });
     content.push({ type: "image", source: { type: "base64", media_type: "image/jpeg", data: p.jpegBase64 } });
@@ -270,7 +290,7 @@ export async function altTexts(client: ModelClient, photos: { jpegBase64: string
   content.push({ type: "text", text: `Write alt text for photos 0–${photos.length - 1}.` });
   const { data } = await client.callJson({
     stage: "altText",
-    system: [ALT_SYSTEM],
+    system: [altSystem(fixes)],
     cache: false,
     messages: [{ role: "user", content }],
     schema: toModelJsonSchema(AltOutput),
@@ -363,6 +383,8 @@ export function templateOutline(dir: Direction, hero?: string): string {
 
 export async function generateContent(client: ModelClient, input: ContentInput): Promise<ContentResult> {
   const dir = directionById(input.design.direction);
+  const fixes = client.promptFixes;
+  const heroes = input.hero ? [input.hero] : directionHeroes(dir, fixes);
   const schema = contentOutputSchema();
   const pages = input.scope === "home" ? input.brief.pages.filter((p) => p.kind === "home") : input.brief.pages;
   const messages: Anthropic.MessageParam[] = [
@@ -372,10 +394,10 @@ export async function generateContent(client: ModelClient, input: ContentInput):
         `Build the ${input.scope === "home" ? "homepage only (other pages come later; nav may list only the homepage)" : "full site"} for this brief.`,
         `Brief (facts are verified; anything null is missing and must be a placeholder or left out):\n${JSON.stringify(input.brief)}`,
         `Pages to produce (page ids p_<slug or "home">):\n${pages.map((p) => `- ${p.kind} "${p.slug}" nav "${p.navLabel}": ${p.purpose}`).join("\n")}`,
-        `Design direction: ${dir.id}. Header ${dir.layout.header}, footer ${dir.layout.footer}. Preferred heroes: ${(input.hero ? [input.hero] : dir.layout.heroes).join(", ")}. Section rhythm: ${dir.layout.rhythm} (use the tone field: default/alt/inverse/band; band is the direction's saturated colour). Preferred variants: ${dir.layout.prefer.join(", ")}.`,
+        `Design direction: ${dir.id}. Header ${dir.layout.header}, footer ${dir.layout.footer}. Preferred heroes: ${heroes.join(", ")}. Section rhythm: ${dir.layout.rhythm} (use the tone field: default/alt/inverse/band; band is the direction's saturated colour). Preferred variants: ${dir.layout.prefer.join(", ")}.`,
         input.concept ? conceptOutline(dir, input.concept, input.hero) || templateOutline(dir, input.hero) : templateOutline(dir, input.hero),
         `Photos (use each at most twice; alt text is already written):\n${imageList(input.assets, input.heroImageIds)}`,
-        heroRule(input.heroImageIds, input.hero ? [input.hero] : dir.layout.heroes),
+        heroRule(input.heroImageIds, heroes),
         input.skeleton ? skeletonLine() : "",
         `Business facts available to components: phone ${input.brief.facts.phone ? "yes" : "missing"}, address ${input.brief.facts.address ? "yes" : "missing"}, hours ${input.brief.facts.hours ? "yes" : "missing"}, booking URL ${input.brief.facts.bookingUrl ? "yes" : "no — never use the booking action"}.`,
         input.structuredOutput ? "" : plainJsonInstruction(),
@@ -403,8 +425,10 @@ export async function generateContent(client: ModelClient, input: ContentInput):
     repairs.push(...repairSiteCopy(built));
     // "Cena po dogovoru" is the owner's choice, never the model's: a missing price again (it-price-on-request).
     repairs.push(...stripModelOnRequest(built, null).map((p) => `${p}: price "on request" is set by the owner only; made a price placeholder`));
+    // promptFixes.oneHero: exactly one main heading per page, first; the safe cases are repaired in code.
+    if (fixes.oneHero) repairs.push(...repairMainHeadings(built));
     const v = validateSite(built);
-    const issues = v.ok ? [] : v.issues.map(issueLine);
+    const issues = v.ok ? (fixes.oneHero ? mainHeadingIssues(built).map(issueLine) : []) : v.issues.map(issueLine);
     issues.push(...checkFacts(built, input.corpus).map(factLine));
     return { issues, built: { spec: built, repairs } };
   };
@@ -415,7 +439,7 @@ export async function generateContent(client: ModelClient, input: ContentInput):
     try {
       res = await client.call({
         stage: "content",
-        system: [sectionCatalogue(), CONTENT_SYSTEM],
+        system: [sectionCatalogue(fixes), contentSystem(fixes)],
         messages,
         ...(structured ? { schema: contentJsonSchema() } : {}),
       });
@@ -468,7 +492,7 @@ async function generateContentPatched(
     for (;;) {
       const withSchema = structured && kind === "whole";
       try {
-        return await client.call({ stage: "content", system: [sectionCatalogue(), CONTENT_SYSTEM], messages: [first, ...tail], ...(withSchema ? { schema: contentJsonSchema() } : {}) });
+        return await client.call({ stage: "content", system: [sectionCatalogue(client.promptFixes), contentSystem(client.promptFixes)], messages: [first, ...tail], ...(withSchema ? { schema: contentJsonSchema() } : {}) });
       } catch (e) {
         // As in generateContent: the API refused the content schema, so plain JSON from here on.
         if (withSchema && isSchemaRejection(e)) {
@@ -492,10 +516,20 @@ const factLine = (f: FactViolation) => `${f.path}: ${f.kind} "${f.value}" ${f.de
 // ---------- Patches (critique and chat edits) ----------
 
 /** enforceDesign for a patched design; left as is when it no longer parses, so validation reports why. */
-function repairDesign(design: unknown): SiteSpec["design"] {
+function repairDesign(design: unknown, repair: DesignRepairOptions = {}): SiteSpec["design"] {
   const parsed = Design.safeParse(design);
   const dir = parsed.success ? DIRECTIONS.find((d) => d.id === parsed.data.direction) : undefined;
-  return parsed.success && dir ? enforceDesign(parsed.data, dir) : (design as SiteSpec["design"]);
+  return parsed.success && dir ? enforceDesign(parsed.data, dir, repair) : (design as SiteSpec["design"]);
+}
+
+/**
+ * promptFixes.oneHero for patches: the main-heading problems the patched spec has on pages (by id) that had none
+ * before, so a site made before the rule isn't locked by it; publishing doesn't check it.
+ */
+function newHeadingIssues(before: SiteSpec, after: SiteSpec): string[] {
+  const pageAt = (spec: SiteSpec, path: string) => spec.pages[Number(path.split("/")[2])]?.id;
+  const had = new Set(mainHeadingIssues(before).map((i) => pageAt(before, i.path)));
+  return mainHeadingIssues(after).filter((i) => !had.has(pageAt(after, i.path))).map(issueLine);
 }
 
 export interface PatchResult {
@@ -504,8 +538,11 @@ export interface PatchResult {
   issues: string[];
 }
 
-/** Applies RFC 6902 operations to a copy, then validates. Never mutates the input. */
-export function applyPatches(spec: SiteSpec, ops: Operation[], corpus: string): PatchResult {
+/**
+ * Applies RFC 6902 operations to a copy, then validates. Never mutates the input. `fixes` (config promptFixes): the
+ * beige and warm-surface design repairs, and the one-main-heading rule (oneHero).
+ */
+export function applyPatches(spec: SiteSpec, ops: Operation[], corpus: string, fixes: PromptFixes = NO_PROMPT_FIXES): PatchResult {
   if (ops.length === 0) return { spec, applied: 0, issues: [] };
   // Collections are the owner's own lists (blog posts, events …): the model may not write them, so nothing in
   // them is invented. The owner edits them in the editor.
@@ -528,7 +565,8 @@ export function applyPatches(spec: SiteSpec, ops: Operation[], corpus: string): 
   if (onRequest.length) return { spec, applied: 0, issues: onRequest.map((p) => `${p}: a price "on request" is set by the client in the editor only; keep the price as it was or use a price placeholder`) };
   repairSiteCopy(next);
   // Design edits get the same repair as generation: banned backgrounds replaced, contrast fixed in code.
-  if (ops.some((o) => o.path === "/design" || o.path.startsWith("/design/"))) next = { ...next, design: repairDesign(next.design) };
+  if (ops.some((o) => o.path === "/design" || o.path.startsWith("/design/"))) next = { ...next, design: repairDesign(next.design, designRepair(fixes)) };
+  if (fixes.oneHero) repairMainHeadings(next);
   const v = validateSite(next);
   // Fact checks walk the spec's structure, so they only run on a spec that validates. A violation the
   // site already had (left after generation's retries) doesn't block an unrelated edit; publishing
@@ -536,6 +574,7 @@ export function applyPatches(spec: SiteSpec, ops: Operation[], corpus: string): 
   const known = new Set<string>();
   if (v.ok && validateSite(spec).ok) for (const f of checkFacts(spec, corpus)) known.add(`${f.kind}|${f.value}`);
   const issues = v.ok ? checkFacts(v.spec, corpus).filter((f) => !known.has(`${f.kind}|${f.value}`)).map(factLine) : v.issues.map(issueLine);
+  if (v.ok && fixes.oneHero) issues.push(...newHeadingIssues(spec, v.spec));
   return { spec: v.ok && issues.length === 0 ? v.spec : next, applied: ops.length, issues };
 }
 
@@ -554,8 +593,9 @@ export function critiqueView(spec: SiteSpec): { business: SiteSpec["business"]; 
 
 export async function critique(
   client: ModelClient,
-  input: { spec: SiteSpec; mobilePng: Uint8Array; desktopPng: Uint8Array; failures: string[]; corpus: string },
+  input: { spec: SiteSpec; mobilePng: Uint8Array; desktopPng: Uint8Array; failures: string[]; corpus: string; heroImageIds?: string[] },
 ): Promise<{ issues: string[]; patches: Operation[] }> {
+  const fixes = client.promptFixes;
   const image = (b: Uint8Array) => ({ type: "image" as const, source: { type: "base64" as const, media_type: "image/png" as const, data: Buffer.from(b).toString("base64") } });
   // Legible slices: the whole mobile page (it's what most visitors see), the top of the desktop page.
   const [mobile, desktop] = await Promise.all([
@@ -566,7 +606,7 @@ export async function critique(
     `${what}${s.tiles.length > 1 ? `, top to bottom in ${s.tiles.length} consecutive slices` : ""}${s.truncated ? " (the page continues below the last slice)" : ""}:`;
   const res = await client.call({
     stage: "critique",
-    system: [sectionCatalogue(), CRITIQUE_SYSTEM],
+    system: [sectionCatalogue(fixes), critiqueSystem(fixes)],
     messages: [
       {
         role: "user",
@@ -580,9 +620,10 @@ export async function critique(
             text: [
               input.spec.chrome.mobileActionBar ? "On phones a fixed bar with call and directions buttons stays at the bottom of the screen (hidden in the slices above)." : "",
               `Automated checks reported:\n${input.failures.length ? input.failures.map((f) => `- ${f}`).join("\n") : "- nothing"}`,
+              fixes.critique ? heroSuitableLine(input.heroImageIds ?? []) : "",
               `The client's own text (every fact on the site comes from here):\n"""\n${input.corpus}\n"""`,
               `Current spec: the homepage, chrome and business facts (other pages by id, kind and slug only; design and assets left out). Patch paths address the full spec, so these page indexes hold:\n${JSON.stringify(critiqueView(input.spec))}`,
-              `Return JSON: {"issues": [...], "patches": [...]}`,
+              fixes.critique ? CRITIQUE_FORMAT_NEW : CRITIQUE_FORMAT_OLD,
             ]
               .filter(Boolean)
               .join("\n\n"),
@@ -641,11 +682,11 @@ export async function editSpec(
   let attempts = 0;
   for (;;) {
     attempts++;
-    const res = await client.call({ stage: "edit", system: [sectionCatalogue(), `${EDIT_SYSTEM}\n\n${businessSchema()}`], messages });
+    const res = await client.call({ stage: "edit", system: [sectionCatalogue(client.promptFixes), `${editSystem(client.promptFixes)}\n\n${businessSchema()}`], messages });
     let issues: string[];
     try {
       const out = EditOutput.parse(JSON.parse(extractJson(res.text)));
-      const r = applyPatches(input.spec, out.patches as Operation[], input.corpus);
+      const r = applyPatches(input.spec, out.patches as Operation[], input.corpus, client.promptFixes);
       issues = r.issues;
       if (issues.length === 0) return { reply: out.reply, spec: r.spec, changed: r.applied > 0, attempts, issues: [] };
     } catch (e) {

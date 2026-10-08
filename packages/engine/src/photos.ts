@@ -137,7 +137,8 @@ export async function describePhotos(deps: { repo: Repo; storage: Storage; clien
     if (!data) throw new Error(`Original of ${img.id} missing from storage`);
     vision.push({ jpegBase64: await visionJpeg(data) });
   }
-  const alts = await altTexts(client, vision);
+  const name = current.spec.business.name;
+  const alts = await altTexts(client, vision, { businessType: current.spec.business.type, ...(typeof name === "string" ? { name } : {}) });
   for (let attempt = 0; ; attempt++) {
     const latest = attempt === 0 ? current : await repo.getSpec(siteId);
     if (!latest) return null;

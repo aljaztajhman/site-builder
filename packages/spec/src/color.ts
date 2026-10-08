@@ -131,13 +131,38 @@ export function clampLuminance(hex: string, lo: number, hi = 1): string {
  * Banned: cream or off-white page backgrounds. Light backgrounds must be pure white
  * or a clearly tinted cool colour; warm near-whites and greyish near-whites are rejected.
  */
-export function isCreamOrOffWhite(hex: string): boolean {
+export function isCreamOrOffWhite(hex: string, opts: { beige?: boolean } = {}): boolean {
   const c = hex.toLowerCase();
   if (c === "#ffffff") return false;
   const { h, s, l } = hexToHsl(c);
+  // Config promptFixes.beige: a light warm beige or sand just under the near-white band (#ece3d0, #e8d5b7) is cream too.
+  if (opts.beige && isBeige(c)) return true;
   if (l < 0.88) return false;
   if (s < 0.2) return true; // grey/ivory near-white
   return h >= 20 && h <= 75; // warm cream, beige, ivory
+}
+
+/** Light warm beige, sand or greige below the near-white band (lightness 0.78–0.88, hue 20–75°, not grey). */
+export function isBeige(hex: string): boolean {
+  const { h, s, l } = hexToHsl(hex.toLowerCase());
+  return l >= 0.78 && l < 0.88 && s >= 0.1 && h >= 20 && h <= 75;
+}
+
+/**
+ * A warm tint that isn't cream (config promptFixes.warmSurface): peach, apricot or a terracotta-tinted light colour,
+ * clearly coloured (saturation ≥ 0.45) and redder than cream and beige (hue 8–30°), light enough for body text.
+ */
+export function isWarmTint(hex: string): boolean {
+  const { h, s, l } = hexToHsl(hex.toLowerCase());
+  return h >= 8 && h <= 30 && s >= 0.45 && l >= 0.82 && l <= 0.92;
+}
+
+/** The nearest warm tint (isWarmTint) to a warm colour: its hue pulled into 12–28°, saturation ≥ 0.55, lightness 0.85–0.9. */
+export function toWarmTint(hex: string): string {
+  if (isWarmTint(hex)) return hex.toLowerCase();
+  const { h, s, l } = hexToHsl(hex.toLowerCase());
+  const hue = h >= 12 && h <= 28 ? h : h > 28 && h < 200 ? 28 : 12;
+  return hslToHex({ h: hue, s: Math.max(s, 0.55), l: Math.min(0.9, Math.max(0.85, l)) });
 }
 
 /** Warm cream/beige near-white (used for section surfaces, where cool greys are fine). */
