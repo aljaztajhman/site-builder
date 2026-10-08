@@ -5,6 +5,8 @@ const sl = {
   skipToContent: "Preskočite na vsebino",
   menu: "Meni",
   mainNav: "Glavna navigacija",
+  /** The wide header's disclosure with the menu entries that don't fit in its row. */
+  moreNav: "Več",
   call: "Pokličite",
   /** Phone call bar: a noun, so the call and "Navodila za pot" fit on one line at 360 px (formal "Pokličite" wraps). */
   callShort: "Klic",
@@ -115,6 +117,7 @@ const en: Record<UiKey, string> = {
   skipToContent: "Skip to content",
   menu: "Menu",
   mainNav: "Main navigation",
+  moreNav: "More",
   call: "Call",
   callShort: "Call",
   directions: "Directions",
