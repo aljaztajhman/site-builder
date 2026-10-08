@@ -179,10 +179,56 @@ html:has(.site-header--sticky) {
 .site-header--phone .nav-toggle {
   order: 3;
 }
+@media (max-width: 47.99rem) {
+  /*
+   * Phones: the number gets its own row under the brand and the menu (with the directions when the header carries
+   * them), so the name or the logo keeps the brand row (HQ it-skeleton-phone-header-wrap). The empty item breaks the
+   * row; the rows stay 12 px apart (primary targets 8 px and more).
+   */
+  .site-header--phone .site-header__inner {
+    row-gap: 0.375rem;
+  }
+  .site-header--phone .site-header__inner::after {
+    content: "";
+    order: 4;
+    flex: 1 1 100%;
+  }
+  .site-header--phone .site-header__phone {
+    order: 5;
+  }
+  .site-header--phone .site-header__actions {
+    order: 6;
+    flex: 1 1 auto;
+    justify-content: flex-end;
+  }
+}
 @media (min-width: 48rem) {
   .site-header__phone {
     order: 3;
     font-size: var(--fs-lg);
+  }
+}
+
+/*
+ * The business name on phones (every header family of a skeleton): set at its family's size, or smaller down to the
+ * small size, so it fits its row on one line (--name-em: its width in em, estimated in code, nav-fit.ts nameEm). A name
+ * too long even then wraps, balanced. The name fills the brand beside its motif mark; its text is sized by that width.
+ */
+@media (max-width: 47.99rem) {
+  .site-header__name--fit {
+    flex: 1 1 0;
+    min-width: 0;
+    container-type: inline-size;
+    text-wrap: balance;
+    /* The lines are as tall as the text's own size, not the family's (no strut). */
+    line-height: 0;
+  }
+  .site-header__name-text {
+    font-size: max(var(--fs-sm), min(1em, 100cqi / var(--name-em, 10)));
+    line-height: 1.2;
+  }
+  .site-header--centred .site-header__brand {
+    flex: 1 1 0;
   }
 }
 

@@ -151,3 +151,13 @@ export function navFit(labels: string[], row: NavRow): (NavFit | undefined)[] {
     return s < 0 ? "never" : STEPS[s]!.fit;
   });
 }
+
+/**
+ * The business name's width in em of the site's heading face (its case and tracking, the face's measured margin
+ * included): the phone header of a site with a skeleton sets the name at the size that fits its row (skeleton.css
+ * --name-em), so a long name stays on one line (HQ it-skeleton-phone-header-wrap).
+ */
+export function nameEm(name: string, d: TypeTokens): number {
+  const pair = FONT_PAIRS.find((p) => p.id === d.fontPair);
+  return textEm(name, d.headingCase === "uppercase", d.headingTracking) * (HEADING_FACE[pair?.heading.family ?? ""] ?? 1.15) * MARGIN;
+}

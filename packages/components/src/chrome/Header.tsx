@@ -1,9 +1,10 @@
+import type { CSSProperties } from "react";
 import { formatPhone, headerFamilyFor, type HeaderFamily, type Page, type Skeleton } from "@sb/spec";
 import type { RenderCtx } from "../types.ts";
 import { Icon, cx } from "../primitives/index.tsx";
 import { heroOwnsCall } from "../groups/heroes/HeroSignature.tsx";
 import type { UiKey } from "../i18n.ts";
-import { navFit, type NavRow } from "./nav-fit.ts";
+import { nameEm, navFit, type NavRow } from "./nav-fit.ts";
 
 const CTA_LABEL: Record<"call" | "booking" | "directions", UiKey> = { call: "call", booking: "book", directions: "directions" };
 
@@ -124,7 +125,12 @@ function SkeletonHeader({ ctx, skeleton }: { ctx: RenderCtx; skeleton: Skeleton 
           {logo ? (
             <img className="site-header__logo" src={ctx.media(logo.file)} width={logo.width} height={logo.height} alt={site.business.name} />
           ) : (
-            <span className="site-header__name">{site.business.name}</span>
+            // On phones the name is set at the size that fits its row (skeleton.css), so a long name stays on one line.
+            <span className="site-header__name site-header__name--fit">
+              <span className="site-header__name-text" style={{ "--name-em": nameEm(site.business.name, site.design).toFixed(2) } as CSSProperties}>
+                {site.business.name}
+              </span>
+            </span>
           )}
         </a>
         {family === "phone" && callHref && (

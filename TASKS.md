@@ -259,13 +259,13 @@ Owner, 2026-10-04: "I don't want it to look like a template filler and that ever
   - Offline baseline (10 goldens): across trades 0.61, 0 collisions, brand fit 2 of 3 logos, motif 7 fit / 3 without.
 - [ ] Step 0, the paid part: baseline over the twins (`pnpm eval --twins --no-edits --scope home`, ≈ €2–3 with the batched judge) and the pairwise judge question ("same template?")
 - [x] Step 1, templates become families (`it-template-families`), built 2026-10-07 behind config `variety.families` (off):
-  - `packages/spec/src/families.ts`: 3 palettes, 3 font pairs and 3 heroes per template;
+  - `packages/spec/src/families.ts`: 3 palettes, 3 font pairs and 1–3 heroes per template (the signature hero and photo heroes; type-only heroes removed 2026-10-08);
   - outline slots (`outlineSlots`, `validateOutline`: required, optional, one of);
   - the logo's colours in the template's roles, family palettes as fallback (`brandColours`);
   - the template offered beside two fitting directions (`familyLine`);
   - a site seed (`siteSeed`);
   - tablica and skorja now declare their band-on-inverse text pair (the hero eyebrow), so a family band stays readable.
-  - Checks: `packages/spec/test/families.test.ts`, `packages/engine/test/variety.test.ts`, `tools/eval/test/families-render.test.ts` (every palette and hero at 360 and 1280 px, axe included), `pnpm variety:sheet` (90 looks).
+  - Checks: `packages/spec/test/families.test.ts`, `packages/engine/test/variety.test.ts`, `tools/eval/test/families-render.test.ts` (every palette and hero at 360 and 1280 px, axe included), `pnpm variety:sheet` (66 looks since 2026-10-08, was 90).
   - Turning it on needs the paid twin eval (≈ €5).
 - [x] Step 2, regenerate explores and neighbours don't collide (`it-variety-seed`), built 2026-10-07 behind the same switch:
   - "Ustvari znova" tells the design step the look it replaces and moves the seed;
@@ -279,6 +279,10 @@ Owner, 2026-10-04: "I don't want it to look like a template filler and that ever
 - [ ] "Druga podoba" across hero types (signature ↔ split/type): needs content per section intent (Step 5) or a content call; today a signature hero keeps its hero.
 - [ ] Step 3, the concept (`it-concept-brief`, `it-motif-library`): brief gains goal, angle, signature fact, materials and local anchor; homepage blueprints by goal; signature device by fact, not trade; motifs and `subtype` per sub-trade (electricians, carpenters and roofers no longer get the radiator; florists no longer get bottle labels). Spec bump + migration. ≈ €5 — built behind `variety.concept` (off; PR #133, spec v16, merged 2026-10-08), waits for the twin eval
 - [ ] Step 4, break the shared skeleton (`it-shared-skeleton`, `it-hero-families`): header families that differ on phones, optional eyebrow (not the street address by default), phone bar by goal, footer families and tone, section width, alignment, card, button and divider styles, rhythm and hue held in code. ≈ €6 — built behind `variety.skeleton` (off; PR #134, spec v15, with at most one centred section per page, merged 2026-10-08), waits for the twin judge
+- [x] Quality fixes from the 2026-10-08 paid variety run (judge median 3.33 → 3.17 with families + skeleton + concept on), branch claude/variety-quality, both behind switches that stay off:
+  - `it-family-type-heroes`: template families no longer offer type-only heroes (hero-type large / with-facts, judged lowest: elektro-zupan 3.17 → 2.67, vulkanizer-zorman 3.33 → 2.92). Alternates are photo heroes only; cevi and racun keep their signature hero alone (9 looks each instead of 27; tablica, ogledalo, nasmeh, pregib 18). Past the family a site moves off its neighbours as any direction does (`awayFromNeighbours`, now checked with contrast enforced), so "20 sites never collide" holds for tablica and cevi (20/20; cevi sites 10–20 get hue-turned colours). `pnpm variety:sheet` 132 renders (was 180), 0 problems.
+  - `it-skeleton-phone-header-wrap`: the phone header family puts the number on its own row under brand and menu on phones (directions beside it when the header carries them); on every skeleton header the name is set at the size that fits its row (`--name-em`, `nameEm` in nav-fit.ts; floor `--fs-sm`, then two balanced lines). `pnpm variety:skeleton` checks the brand row (name one line, logo not squeezed, menu on the row, number one line) and has 16 "long-name" looks (24+ characters, with and without a logo): 86 renders, 0 problems.
+  - Open: names that don't fit at `--fs-sm` (about 20+ characters in heavy upper case, e.g. Archivo 900) still wrap to two balanced lines; the centred family allows two lines. The phone family's number row makes its header about 50 px taller on phones.
 - [ ] Step 5, design in parts (`it-design-genome`): direction split into independent axes with compatibility rules, directions and templates as presets, content against section intents so a new look needs no content call. Spec bump + migration. ≈ €10
 - [ ] Step 6, copy that doesn't repeat (`it-catalogue-sameness`, `it-slovene-copy`): catalogue wording, a client fact in every headline, specific section titles, copy similarity across twins. ≈ €3
 

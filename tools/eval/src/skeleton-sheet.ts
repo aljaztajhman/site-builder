@@ -6,7 +6,9 @@
  * buttons, dividers, photo ratio) rotating through their values so each one shows on every golden, plus the trade
  * template whose hero is the phone (the plate) under each phone action; every other look centres one section per page. Each look at 360 and 1280 px with the page checks
  * the eval uses (a valid spec, no horizontal scroll, banned patterns, axe WCAG 2.2 A/AA, one h1, 44 px targets, call and
- * directions in one tap on the phone) and the new one: never more than one call button on a screen. Writes
+ * directions in one tap on the phone, the phone header's brand row: name on one line, logo not squeezed) and the new
+ * one: never more than one call button on a screen. Looks with long business names ("long-name") cover every header
+ * family. Writes
  * eval/look/skeleton-<golden>.jpg (one row per look: phone first screen, phone footer, desktop first screen, desktop
  * footer) and eval/look/skeleton-checks.json. No model call. Exits 1 when a check fails.
  */
@@ -14,7 +16,7 @@ import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
-import { chromium, type Browser } from "playwright";
+import { chromium, type Browser, type Page } from "playwright";
 import { loadConfig } from "@sb/config";
 import { callButtonsPerScreen, heroEyebrow, measurePage, runAxe, serveStatic } from "@sb/engine";
 import { siteFiles } from "@sb/render";
@@ -46,12 +48,14 @@ export const SKELETON_GOLDENS = ["kmetija-grabnar", "pekarna-kvas", "avtoservis-
 const TONES: Skeleton["footerTone"][] = ["default", "alt", "inverse", "band"];
 
 export interface SkeletonVariant {
-  /** Golden id, or "<golden>+tablica" for the plate hero. */
+  /** Golden id, "<golden>+tablica" for the plate hero, or "long-name". */
   site: string;
   label: string;
   skeleton: Skeleton;
   spec: SiteSpec;
   fixtureId: string;
+  /** Rendered without the fixture's logo (fixtureMedia puts the fixture's assets back). */
+  noLogo?: true;
 }
 
 /** The golden as the generator leaves it with the skeleton on: its hero's address eyebrow gone (heroEyebrow). */
@@ -126,8 +130,46 @@ export async function skeletonVariants(only?: string[]): Promise<SkeletonVariant
       out.push({ site: "avtoservis-mrak+tablica", label: short(skeleton), skeleton, spec, fixtureId: "avtoservis-mrak" });
     }
   }
+  // A long business name (HQ it-skeleton-phone-header-wrap): the phone family's number beside it wrapped the name at
+  // 360 px. Under each phone action, with the logo and with the name alone, on the bakery and in the plate template
+  // (heavy uppercase); the other families once each with the name alone.
+  if (!only || only.includes("long-name")) {
+    // The bakery has a logo: with it and with the name alone; the plate template (avtoservis has no logo) the name alone.
+    for (const [g, id] of [[1, "pekarna-kvas"], [2, "avtoservis-mrak"]] as const) {
+      const base = await golden(id);
+      base.business.name = LONG_NAMES[g - 1]!;
+      if (id === "avtoservis-mrak") {
+        const dir = DIRECTIONS.find((d) => d.id === "tablica")!;
+        base.design = enforceDesign({ ...base.design, direction: dir.id, fontPair: FAMILIES.tablica!.fontPairs[0]! }, dir);
+        // As a tablica site is made: the plate hero and the closing call-out.
+        const home = base.pages.find((p) => p.kind === "home")!;
+        home.sections[0] = heroAs(home.sections[0]!, "hero-signature:photo", base.assets.images[0]?.id ?? null);
+        for (const s of home.sections) if (s.type === "contact") s.variant = "call-out";
+      }
+      for (const [i, actions] of PHONE_ACTIONS.entries()) {
+        for (const logo of base.assets.logo ? [true, false] : [false]) {
+          const spec = structuredClone(base);
+          if (!logo) delete spec.assets.logo;
+          const skeleton: Skeleton = { ...rotation(i, g), header: "phone", actions };
+          spec.design = { ...spec.design, skeleton };
+          out.push({ site: "long-name", label: `${spec.business.name}${logo ? " + logo" : ""} · ${short(skeleton)}`, skeleton, spec, fixtureId: id, ...(logo ? {} : { noLogo: true as const }) });
+        }
+      }
+      if (id !== "pekarna-kvas") continue;
+      for (const [i, header] of HEADER_FAMILIES.filter((h) => h !== "phone").entries()) {
+        const spec = structuredClone(base);
+        delete spec.assets.logo;
+        const skeleton: Skeleton = { ...rotation(i, g), header };
+        spec.design = { ...spec.design, skeleton };
+        out.push({ site: "long-name", label: `${spec.business.name} · ${short(skeleton)}`, skeleton, spec, fixtureId: id, noLogo: true });
+      }
+    }
+  }
   return out;
 }
+
+/** Business names of 24 characters and more (Slovene, with č, š, ž). */
+export const LONG_NAMES = ["Pekarna in slaščičarna Kvas", "Avtoservis Mrak in sinovi"] as const;
 
 export interface SkeletonCheck {
   site: string;
@@ -141,6 +183,7 @@ export interface SkeletonCheck {
 /** Renders a look and checks its homepage at 360 and 1280 px; returns first screens, footers and the problems. */
 export async function renderSkeleton(browser: Browser, v: SkeletonVariant, media: Map<string, Uint8Array>, dir: string): Promise<{ shots: Buffer[]; checks: SkeletonCheck[] }> {
   const config = loadConfig();
+  if (v.noLogo) delete v.spec.assets.logo;
   const valid = validateSite(v.spec);
   const invalid = valid.ok ? [] : valid.issues.map((i) => `invalid: ${i.path} ${i.message}`);
   await rm(dir, { recursive: true, force: true });
@@ -171,6 +214,7 @@ export async function renderSkeleton(browser: Browser, v: SkeletonVariant, media
       if (phone) for (const s of m.crowdedTargets) found.push(`targets < ${t.primaryGap} px apart: ${s}`);
       if (phone) for (const s of m.tinyTargets) found.push(`target below ${t.absoluteMin} px: ${s}`);
       if (h1 !== 1) found.push(`${h1} h1 elements`);
+      if (phone) found.push(...(await headerRow(page)));
       if (phone && !m.callInViewport) found.push("click-to-call not in the first screen");
       if (phone && !m.directionsInViewport) found.push("directions not in the first screen");
       const calls = await callButtonsPerScreen(page);
@@ -186,6 +230,58 @@ export async function renderSkeleton(browser: Browser, v: SkeletonVariant, media
     await server.close();
   }
   return { shots, checks };
+}
+
+/**
+ * The phone header's first row (HQ it-skeleton-phone-header-wrap): the business name on one line (the centred family's
+ * wordmark: two balanced lines at most, its menu icon takes room on both sides), the logo at its full height (not
+ * squeezed by what shares its row), the menu button on the brand's row, the phone number on one line. A string, not a
+ * function: the bundler's helpers don't exist in the page.
+ */
+const HEADER_ROW = `(() => {
+  const out = [];
+  // Line boxes of an element's visible text (its text nodes only, not the inline elements' own boxes).
+  const lines = (el) => {
+    const tops = new Set();
+    const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    for (let t = walk.nextNode(); t; t = walk.nextNode()) {
+      if (t.parentElement.closest(".visually-hidden")) continue;
+      const range = document.createRange();
+      range.selectNodeContents(t);
+      for (const r of range.getClientRects()) if (r.width > 0) tops.add(Math.round(r.top / 4));
+    }
+    return tops.size;
+  };
+  const name = document.querySelector(".site-header__name");
+  if (name) {
+    const most = document.querySelector(".site-header--centred") ? 2 : 1;
+    const n = lines(name);
+    if (n > most) out.push("header name on " + n + " lines: " + name.textContent.trim());
+  }
+  const logo = document.querySelector(".site-header__logo");
+  if (logo) {
+    const maxH = parseFloat(getComputedStyle(logo).maxHeight);
+    const h = Number(logo.getAttribute("height"));
+    const w = Number(logo.getAttribute("width"));
+    const want = Math.min(maxH || h, h) * (w / h);
+    const got = logo.getBoundingClientRect().width;
+    if (got < want - 1) out.push("header logo squeezed to " + Math.round(got) + " px (of " + Math.round(want) + ")");
+  }
+  const brand = document.querySelector(".site-header__brand");
+  const toggle = document.querySelector(".site-header .nav-toggle");
+  if (brand && toggle && getComputedStyle(toggle).display !== "none") {
+    const b = brand.getBoundingClientRect();
+    const t = toggle.getBoundingClientRect();
+    if (t.top >= b.bottom || t.bottom <= b.top) out.push("menu button not on the brand's row");
+    if (lines(toggle) > 1) out.push("menu label wraps");
+  }
+  const phone = document.querySelector(".site-header__phone");
+  if (phone && phone.getClientRects().length && lines(phone) > 1) out.push("header phone number wraps");
+  return out;
+})()`;
+
+async function headerRow(page: Page): Promise<string[]> {
+  return (await page.evaluate(HEADER_ROW)) as string[];
 }
 
 /** One row per look: phone top, phone footer, desktop top, desktop footer. */
