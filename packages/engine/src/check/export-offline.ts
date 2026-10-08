@@ -65,8 +65,9 @@ export async function checkExportOffline(zip: Uint8Array, slug: string, browser:
         return {
           brokenImages: [...document.images].filter((i) => !(i.complete && i.naturalWidth > 0)).map((i) => i.currentSrc || i.src),
           fontsLoaded: [...document.fonts].filter((f) => f.status === "loaded").map((f) => f.family.replace(/"/g, "")),
-          // The shared stylesheet sets the body font from the design tokens; unstyled pages keep the UA serif.
-          styled: getComputedStyle(document.body).fontFamily.includes(",") && getComputedStyle(document.querySelector(".container") ?? document.body).maxWidth !== "none",
+          // The shared stylesheet sets the body font from the design tokens (unstyled pages keep the UA serif) and resets
+          // box-sizing everywhere. (Not the container's max-width: a skeleton's full-width sections have none.)
+          styled: getComputedStyle(document.body).fontFamily.includes(",") && getComputedStyle(document.body).boxSizing === "border-box",
         };
       });
       const external = failed.filter((u) => /^https?:/.test(u));
