@@ -64,17 +64,26 @@ describe("site seed", () => {
 });
 
 describe("neighbours", () => {
-  it("20 sites of one trade in one town, each designed after the last: no two share direction, palette family, font pair and hero", () => {
-    const made: LookKey[] = [];
-    for (const id of ids) {
-      const r = designWithVariety(choice("tablica"), { seed: siteSeed(id), neighbours: [...made], pictures: true, swatches: [] });
-      made.push(keyOf(r.design, { type: r.hero!.split(":")[0]!, variant: r.hero!.split(":")[1]! }));
-    }
-    for (let i = 0; i < made.length; i++) for (let j = i + 1; j < made.length; j++) expect(sameLook(made[i]!, made[j]!), `${ids[i]} / ${ids[j]}`).toBe(false);
-    // They spread over the family, not only past it.
-    expect(new Set(made.map((m) => m.fontPair)).size).toBe(FAMILIES.tablica!.fontPairs.length);
-    expect(new Set(made.map((m) => m.hero)).size).toBe(FAMILIES.tablica!.heroes.length);
-  });
+  // Tablica's family has 3 palettes × 3 font pairs × 2 heroes = 18 looks, cevi's (signature hero only) 9: the sites
+  // past them move off as any direction does (awayFromNeighbours).
+  for (const id of ["tablica", "cevi"] as const) {
+    it(`20 ${id} sites in one town, each designed after the last: no two share direction, palette family, font pair and hero`, () => {
+      const family = FAMILIES[id]!;
+      const looks = family.palettes.length * family.fontPairs.length * family.heroes.length;
+      const made: LookKey[] = [];
+      for (const site of ids) {
+        const r = designWithVariety(choice(id), { seed: siteSeed(site), neighbours: [...made], pictures: true, swatches: [] });
+        made.push(keyOf(r.design, { type: r.hero!.split(":")[0]!, variant: r.hero!.split(":")[1]! }));
+      }
+      for (let i = 0; i < made.length; i++) for (let j = i + 1; j < made.length; j++) expect(sameLook(made[i]!, made[j]!), `${ids[i]} / ${ids[j]}`).toBe(false);
+      // They spread over the family, not only past it: the first `looks` sites take every look of the family.
+      const inFamily = made.slice(0, looks);
+      const familyLook = (m: LookKey) => family.palettes.some((p) => deltaE(m.primary, p.colors.primary) < 10 && deltaE(m.band, p.colors.band ?? p.colors.primary) < 10);
+      expect(inFamily.every(familyLook), id).toBe(true);
+      expect(new Set(inFamily.map((m) => `${m.fontPair}|${m.hero}`)).size).toBe(family.fontPairs.length * family.heroes.length);
+      expect(new Set(made.map((m) => m.hero))).toEqual(new Set(family.heroes));
+    });
+  }
 
   it("a direction without a family moves off a neighbour's look: other fonts first, then other colours", () => {
     const dir = directionById("clean-swiss");

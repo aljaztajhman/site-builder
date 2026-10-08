@@ -240,6 +240,12 @@ export function designWithVariety(
   // With the skeleton (config variety.skeleton) the direction's primary hue and saturation are held in code, not only asked for.
   let design = enforceDesign(clampToSchema(hold ? holdPrimary(draft, dir) : draft), dir, repair);
   if (variety && !family) design = enforceDesign(awayFromNeighbours(design, dir, dir.layout.heroes[0] ?? "none", avoid, variety.seed), dir, repair);
+  else if (variety && family) {
+    // Every look of the family is taken by a neighbour (a family with one hero has 9, with two 18): past the family,
+    // as any other direction moves (other font pairs, then the colours turned around the hue wheel), each candidate
+    // checked with contrast enforced.
+    design = awayFromNeighbours(design, dir, family.hero, avoid, variety.seed, (d) => enforceDesign(d, dir, repair));
+  }
   // Never the colours and fonts of a site on the landing page's trade showcase.
   return { design: Design.parse(awayFromShowcases(design, dir)), ...(family ? { hero: family.hero } : {}) };
 }

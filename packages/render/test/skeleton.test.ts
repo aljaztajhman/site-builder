@@ -53,6 +53,19 @@ describe("the skeleton in the page", () => {
     expect(html).not.toMatch(/site-header__cta[^>]*data-action="call"/);
   });
 
+  it("sets the name to fit its phone row: its estimated width in em, longer for a longer or upper-case name; none without a skeleton", () => {
+    const spec = golden("avtoservis-mrak");
+    const em = (s: SiteSpec) => Number(/<span class="site-header__name site-header__name--fit"><span class="site-header__name-text" style="--name-em:([0-9.]+)">/.exec(home(s))?.[1]);
+    const short = em(withSkeleton(spec, { header: "phone" }));
+    expect(short).toBeGreaterThan(5);
+    const long = em(withSkeleton({ ...spec, business: { ...spec.business, name: "Avtoservis in vulkanizerstvo Mrak" } }, { header: "phone" }));
+    expect(long).toBeGreaterThan(short * 1.8);
+    const upper = em(withSkeleton({ ...spec, design: { ...spec.design, headingCase: "uppercase" } }, { header: "phone" }));
+    const lower = em(withSkeleton({ ...spec, design: { ...spec.design, headingCase: "normal" } }, { header: "phone" }));
+    expect(upper).toBeGreaterThan(lower);
+    expect(home(spec)).not.toContain("site-header__name--fit");
+  });
+
   it("overlay only over a full-bleed photo hero without a logo; elsewhere the menu as a word", () => {
     const farm = golden("kmetija-grabnar");
     expect(home(withSkeleton(farm, { header: "overlay" }))).toContain('class="site-header site-header--overlay"');
@@ -215,7 +228,7 @@ describe("skeleton.css", () => {
       } else if (ch === "}") buf = "";
       else buf += ch;
     }
-    const own = /data-skeleton|data-align|data-actions|data-width|data-cards|data-buttons|data-dividers|data-ratio|data-after-hero|nav-toggle--(word|icon)|site-header--(centred|phone|overlay|word|compact|sticky|carries-call)|site-header__(actions|phone|directions)|call-float|has-call-float|site-footer--tone-|site-footer__(wordmark|visit|directions)/;
+    const own = /data-skeleton|data-align|data-actions|data-width|data-cards|data-buttons|data-dividers|data-ratio|data-after-hero|nav-toggle--(word|icon)|site-header--(centred|phone|overlay|word|compact|sticky|carries-call)|site-header__(actions|phone|directions|name--fit|name-text)|call-float|has-call-float|site-footer--tone-|site-footer__(wordmark|visit|directions)/;
     const selectors = preludes.filter((p) => !p.startsWith("@")).flatMap(split);
     expect(selectors.length).toBeGreaterThan(50);
     for (const sel of selectors) expect(sel, sel).toMatch(own);

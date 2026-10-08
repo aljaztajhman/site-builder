@@ -134,7 +134,8 @@ describe("homepage blueprints by goal", () => {
     const cevi = directionById("cevi");
     const call = blueprintSlots(cevi, "call-first");
     expect(call.map((s) => [s.kind, s.options.join("|")])).toEqual([
-      ["one-of", "hero-signature:drawing|hero-type:with-facts|hero-type:large"],
+      // Cevi's family has no photo hero: its signature hero is the only one (HQ it-family-type-heroes).
+      ["one-of", "hero-signature:drawing"],
       ["optional", "services-list:rows"],
       ["optional", "service-area:list"],
       ["optional", "steps:horizontal"],
