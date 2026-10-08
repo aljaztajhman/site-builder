@@ -13,6 +13,7 @@ import {
   HERO_EYEBROW_OLD,
   ModelClient,
   NO_PROMPT_FIXES,
+  SLOVENE_STYLE,
   businessSchema,
   canonical,
   catalogueAliases,
@@ -20,6 +21,7 @@ import {
   critique,
   directionsCatalogue,
   editSpec,
+  editSystem,
   sectionCatalogue,
   type ModelRequest,
   type PromptFixes,
@@ -333,9 +335,9 @@ describe("compact catalogue notation (prompts.compactCatalogue)", () => {
 
 describe("the stages send the compact catalogue only with the switch", () => {
   const seen: ModelRequest[] = [];
-  const client = (compact: boolean, answer: string) =>
+  const client = (compact: boolean, answer: string, promptFixes: PromptFixes = NO_PROMPT_FIXES) =>
     new ModelClient({
-      config: { ...config, prompts: { compactCatalogue: compact } } as AppConfig,
+      config: { ...config, promptFixes, prompts: { compactCatalogue: compact } } as AppConfig,
       spentToday: async () => 0,
       onCall: async () => undefined,
       transport: {
@@ -356,6 +358,16 @@ describe("the stages send the compact catalogue only with the switch", () => {
     expect(seen[1]!.system[0]).toBe(sectionCatalogue(NO_PROMPT_FIXES, { compact: true }));
     expect(seen[1]!.system[1]).toContain(businessSchema({ compact: true }));
     expect(seen[1]!.system[1]).not.toContain('"type":"object"');
+  });
+
+  it("composes with the catalogue and Slovene style fixes: the compact catalogue carries the catalogue wording, the style block stays in the second block", async () => {
+    seen.length = 0;
+    const fixes = { ...NO_PROMPT_FIXES, catalogue: true, sloveneStyle: true };
+    await editSpec(client(true, '{"reply": "Ni sprememb.", "patches": []}', fixes), { spec: golden("pekarna-kvas"), message: "Nič.", corpus: "" });
+    expect(seen[0]!.system[0]).toBe(compactSectionCatalogue(fixes));
+    expect(seen[0]!.system[0]).toContain(HERO_EYEBROW_NEW);
+    expect(seen[0]!.system[1]).toBe(`${editSystem(fixes)}\n\n${businessSchema({ compact: true })}`);
+    expect(seen[0]!.system[1]).toContain(SLOVENE_STYLE);
   });
 
   it("critique: the catalogue", async () => {
