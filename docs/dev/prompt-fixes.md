@@ -1,6 +1,6 @@
 # Prompt fixes behind switches
 
-The audit's prompt fixes (docs/plans/audit-2026-10-01.md, "Prompts: what to change") and two engine-review items, each behind its own switch in `config/app.config.json` → `promptFixes`. All switches ship **off**. With every switch off the prompts, request bodies, repairs and specs are byte-identical to before (test: `packages/engine/test/prompt-fixes.test.ts` holds the sha256 of every prompt as it was on main; a `pnpm eval --replay` gives the same request hashes as main).
+The audit's prompt fixes (docs/plans/audit-2026-10-01.md, "Prompts: what to change") and two engine-review items, each behind its own switch in `config/app.config.json` → `promptFixes`. All switches ship **off**. With every switch off the prompts, request bodies, repairs and specs are byte-identical to before (test: `packages/engine/test/prompt-fixes.test.ts` holds the sha256 of every prompt as it was on main). With every switch on, `pnpm eval --replay --prompt-fixes all` still applies every recorded critique patch and scripted edit, with the same counts as with the switches off (2026-10-08: critique patches 4 of 4 rounds, edits 40 of 40 on the 8 fixtures whose recordings replay; racunovodstvo-seliskar and zobozdravstvo-lebar run out of edit recordings on main too).
 
 They change model output, so each one is measured by a paid eval before it is turned on for good: turn one on for a run with `--prompt-fixes <name>` and run the fixtures named below (`--record-missing` pays only for the calls the fix changes).
 
