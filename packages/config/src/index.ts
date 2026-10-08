@@ -244,6 +244,20 @@ export const AppConfigSchema = z.object({
    * validation is fixed with an RFC 6902 patch from the model instead of the whole JSON again. Off: today's behaviour.
    */
   costCuts: z.object({ secondCritiqueOnlyOnFailures: z.boolean(), contentRetryAsPatch: z.boolean() }),
+  /**
+   * How the static prompt blocks are written (see config $comment). compactCatalogue (HQ it-compact-catalogue): the
+   * section catalogue (the first cached system block of content, critique and edit) and the edit's business schema in a
+   * TypeScript-like notation with the limits inline and the shared shapes named once, instead of JSON Schema; generated
+   * from the same schemas, about half the tokens. Off: every prompt is byte-identical to before.
+   */
+  prompts: z.object({ compactCatalogue: z.boolean() }),
+  /**
+   * Generation pipeline (see config $comment). homepageFirst (HQ it-homepage-first): a full-site content step writes the
+   * homepage in one call, then every other page in its own call, side by side, each with the cached catalogue and the
+   * homepage for its facts and voice; the parts are merged into one spec with the same repairs, validation, fact check and
+   * retries (per part). Off: one content call for the whole site.
+   */
+  pipeline: z.object({ homepageFirst: z.boolean() }),
   structuredOutputForContent: z.boolean(),
   pricesUsdPerMTok: z.record(z.string(), Price),
   eurPerUsd: z.number().positive(),

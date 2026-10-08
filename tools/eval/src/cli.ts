@@ -25,6 +25,11 @@
  * --prompt-fixes all|<name>[,<name>]: turns those config promptFixes switches on for this run (docs/dev/prompt-fixes.md),
  *                   e.g. --record-missing --only avtoservis-mrak --prompt-fixes catalogue. --replay says per fixture how
  *                   many requests changed since the recording (a changed prompt still replays the recorded answer).
+ * --compact-catalogue: turns config prompts.compactCatalogue on for this run (the section catalogue and business schema in the
+ *                   compact notation; HQ it-compact-catalogue). --replay counts the changed requests as with --prompt-fixes.
+ * --homepage-first: turns config pipeline.homepageFirst on for this run (full scope: the homepage, then the other pages side
+ *                   by side; HQ it-homepage-first). The recordings hold one content answer per site, so --replay runs out of
+ *                   content recordings for the page calls until they are recorded with it on.
  * fal pictures (FAL_KEY) are cached by request in tools/eval/image-cache/ in every mode that makes them.
  * Writes eval/report.md, eval/contact-sheet.png, the review sheets in eval/look/ (look.ts) and the variety numbers
  * (variety-report.ts): eval/variety-<mode>-<scope>.md for a run over every fixture, else beside the report in eval/runs/.
@@ -121,6 +126,14 @@ if (fixesArg) {
   }
   for (const n of names) (config.promptFixes as Record<string, unknown>)[n] = true;
   console.log(`Prompt fixes on: ${names.join(", ")}`);
+}
+if (flag("compact-catalogue")) {
+  config.prompts.compactCatalogue = true;
+  console.log("Compact catalogue on (prompts.compactCatalogue)");
+}
+if (flag("homepage-first")) {
+  config.pipeline.homepageFirst = true;
+  console.log("Homepage first on (pipeline.homepageFirst)");
 }
 await mkdir(outDir, { recursive: true });
 const browser = await launchCheckBrowser();

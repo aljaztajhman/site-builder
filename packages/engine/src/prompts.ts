@@ -34,6 +34,7 @@ import {
   swap,
   type PromptFixes,
 } from "./prompt-fixes.ts";
+import { COMPACT_NOTATION, CompactWriter, catalogueAliases, compactBusinessSchema } from "./compact-catalogue.ts";
 
 /**
  * Static prompt parts. They must be byte-stable across calls so prompt caching works:
@@ -76,7 +77,8 @@ const inJson = (s: string) => JSON.stringify(s).slice(1, -1);
  * catalogue fix (config promptFixes.catalogue): the hero eyebrow, contact-strip and cta wording that made every
  * homepage the same.
  */
-export function sectionCatalogue(f: PromptFixes = NO_PROMPT_FIXES): string {
+export function sectionCatalogue(f: PromptFixes = NO_PROMPT_FIXES, opts: CatalogueOptions = {}): string {
+  if (opts.compact) return compactSectionCatalogue(f);
   const lines = SECTION_DEFS.filter((d) => !d.systemOnly && !d.ownerOnly).map((d) => {
     const schema = toModelJsonSchema(d.props);
     const fix = f.catalogue ? CATALOGUE_DESCRIPTIONS[d.type] : undefined;
@@ -92,8 +94,38 @@ export function sectionCatalogue(f: PromptFixes = NO_PROMPT_FIXES): string {
   return `# Section components\n\n${lines.join("\n\n")}`;
 }
 
+/** Config prompts.compactCatalogue: the compact notation instead of JSON Schema (compact-catalogue.ts). Off: today's prompts. */
+export interface CatalogueOptions {
+  compact?: boolean;
+}
+
+/**
+ * The section catalogue in the compact notation (config prompts.compactCatalogue): the same sections, variants,
+ * descriptions, props and limits as the JSON form, generated from the same schemas, with the shared shapes named once.
+ * With promptFixes.catalogue it carries the same wording changes as the JSON form.
+ */
+export function compactSectionCatalogue(f: PromptFixes = NO_PROMPT_FIXES): string {
+  const w = new CompactWriter(catalogueAliases());
+  const blocks = SECTION_DEFS.filter((d) => !d.systemOnly && !d.ownerOnly).map((d) => {
+    const fix = f.catalogue ? CATALOGUE_DESCRIPTIONS[d.type] : undefined;
+    const props = w.type(toModelJsonSchema(d.props));
+    return [
+      `### ${d.type}`,
+      `Variants: ${d.variants.join(", ")}. Photos: ${d.images}.`,
+      fix ? swap(d.description, fix[0], fix[1]) : d.description,
+      `Mobile: ${d.mobile}`,
+      `Props: ${f.catalogue ? props.split(HERO_EYEBROW_OLD).join(HERO_EYEBROW_NEW) : props}`,
+    ].join("\n");
+  });
+  const out = `# Section components\n\n${COMPACT_NOTATION}\nShared types:\n${w.definitions()}\n\n${blocks.join("\n\n")}`;
+  // As `swap`: the eyebrow fix must find its passage, or it would silently do nothing.
+  if (f.catalogue && !out.includes(HERO_EYEBROW_NEW)) throw new Error(`prompt fix: passage not found: ${HERO_EYEBROW_OLD.slice(0, 80)}`);
+  return out;
+}
+
 /** Schema of /business for edits: facts the client gives in chat (hours, address, phone) must match it exactly. */
-export function businessSchema(): string {
+export function businessSchema(opts: CatalogueOptions = {}): string {
+  if (opts.compact) return compactBusinessSchema();
   return `# Business facts (/business)
 
 Schema: ${JSON.stringify(toModelJsonSchema(Business.omit({ subtype: true })))}`;

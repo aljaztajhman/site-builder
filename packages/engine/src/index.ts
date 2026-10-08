@@ -14,6 +14,8 @@ export * from "./prompts.ts";
 export * from "./prompt-fixes.ts";
 export * from "./stages.ts";
 export * from "./content-patch.ts";
+export * from "./compact-catalogue.ts";
+export * from "./homepage-first.ts";
 export * from "./variety.ts";
 export * from "./skeleton.ts";
 export * from "./another-look.ts";
