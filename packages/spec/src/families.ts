@@ -1,7 +1,11 @@
 /**
  * Template families (docs/plans/variety-engine.md, Step 1): each hand-made trade template becomes a family of
  * equally good looks instead of one page. Per template: 2–3 palettes, 2–3 font pairs that fit its character and
- * 2–3 heroes, the template's own first. Code still enforces contrast on whichever palette is used (enforceDesign),
+ * 1–3 heroes, the template's own signature hero first. The other heroes are photo heroes only (hero-split,
+ * hero-image): the type-only heroes (hero-type large / with-facts) were the plainest and the vision judge scored them
+ * lowest when they replaced a signature hero (HQ it-family-type-heroes, 8 Oct: elektro-zupan 3.17 → 2.67,
+ * vulkanizer-zorman 3.33 → 2.92), so a template without photo heroes (cevi, racun) keeps its signature hero and
+ * varies palette and fonts only. Code still enforces contrast on whichever palette is used (enforceDesign),
  * and the banned list is untouched (no gradients, no off-white pages, no pure black). Used only when config
  * `variety.families` is on; validation accepts a family's font pairs either way, so a site keeps validating when the
  * switch changes.
@@ -19,7 +23,7 @@ export interface TemplateFamily {
   palettes: FamilyPalette[];
   /** Font pair ids (FONT_PAIRS); the first is the template's own. */
   fontPairs: string[];
-  /** Hero "type:variant" choices; the first is the template's own signature hero. */
+  /** Hero "type:variant" choices; the first is the template's own signature hero, the others photo heroes (never hero-type). */
   heroes: string[];
 }
 
@@ -37,7 +41,7 @@ export const FAMILIES: Record<string, TemplateFamily> = {
       { id: "blue", colors: vary("tablica", { band: "#3d8bfd", onBand: "#15181c", accent: "#3d8bfd", surface: "#e9eef6" }) },
     ],
     fontPairs: ["archivo-public-sans", "archivo-archivo", "space-grotesk-public-sans"],
-    heroes: ["hero-signature:photo", "hero-split:image-right", "hero-type:with-facts"],
+    heroes: ["hero-signature:photo", "hero-split:image-right"],
   },
   // S Cevi: hot and cold pipes, or copper and night blue, or green and amber.
   cevi: {
@@ -47,7 +51,7 @@ export const FAMILIES: Record<string, TemplateFamily> = {
       { id: "green", colors: vary("cevi", { primary: "#1f6e47", accent: "#1f6e47", band: "#f2b705", onBand: "#101820", surface: "#e8f0eb" }) },
     ],
     fontPairs: ["space-grotesk-public-sans", "space-grotesk-plex", "manrope-public-sans"],
-    heroes: ["hero-signature:drawing", "hero-type:with-facts", "hero-type:large"],
+    heroes: ["hero-signature:drawing"],
   },
   // J Skorja: roast and wheat, or rye and oat, or poppy red and honey.
   skorja: {
@@ -67,7 +71,7 @@ export const FAMILIES: Record<string, TemplateFamily> = {
       { id: "plum", colors: vary("racun", { text: "#2a1230", muted: "#5a4660", primary: "#5a2a5e", accent: "#8d4f92", band: "#5a2a5e", onBand: "#ffffff", surface: "#f1e6f2", border: "#e3d3e5", inverse: "#2a1230", onInverse: "#f6eff7" }) },
     ],
     fontPairs: ["ibm-plex-sans", "space-grotesk-plex", "manrope-public-sans"],
-    heroes: ["hero-signature:receipt", "hero-type:with-facts", "hero-type:large"],
+    heroes: ["hero-signature:receipt"],
   },
   // T Etiketa: terracotta and olive, or sea blue and ochre, or wine and sage.
   etiketa: {
@@ -97,7 +101,7 @@ export const FAMILIES: Record<string, TemplateFamily> = {
       { id: "ink", colors: vary("ogledalo", { text: "#16172a", muted: "#4a4b60", primary: "#2b2d42", band: "#2b2d42", accent: "#c4646c", surface: "#ececf2", border: "#d8d8e2", inverse: "#16172a", onInverse: "#f1f1f6" }) },
     ],
     fontPairs: ["inter-tight-dm-sans", "bricolage-figtree", "lora-dm-sans"],
-    heroes: ["hero-signature:mirrors", "hero-split:image-right", "hero-type:large"],
+    heroes: ["hero-signature:mirrors", "hero-split:image-right"],
   },
   // O Nasmeh: teal and coral, or clinic blue and apricot, or navy and coral.
   nasmeh: {
@@ -107,7 +111,7 @@ export const FAMILIES: Record<string, TemplateFamily> = {
       { id: "navy", colors: vary("nasmeh", { text: "#13213a", muted: "#47546a", primary: "#1d3557", band: "#1d3557", accent: "#d4573c", surface: "#e8edf3", border: "#d3dbe5", inverse: "#13213a", onInverse: "#eef1f6" }) },
     ],
     fontPairs: ["figtree-figtree", "manrope-public-sans", "inter-tight-inter"],
-    heroes: ["hero-signature:disc", "hero-split:image-right", "hero-type:with-facts"],
+    heroes: ["hero-signature:disc", "hero-split:image-right"],
   },
   // N Markacija: trail red, or alpine blue, or pine green.
   markacija: {
@@ -127,7 +131,7 @@ export const FAMILIES: Record<string, TemplateFamily> = {
       { id: "rust", colors: vary("pregib", { text: "#2b140b", muted: "#5e463c", primary: "#a6431f", band: "#a6431f", accent: "#30928c", surface: "#e9eef0", border: "#d9dee1", inverse: "#2b140b", onInverse: "#f6e9e2" }) },
     ],
     fontPairs: ["bricolage-public-sans", "bricolage-figtree", "manrope-public-sans"],
-    heroes: ["hero-signature:bend", "hero-split:image-left", "hero-type:large"],
+    heroes: ["hero-signature:bend", "hero-split:image-left"],
   },
 };
 

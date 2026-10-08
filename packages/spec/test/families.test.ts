@@ -5,15 +5,19 @@ import { DIRECTIONS, FAMILIES, FONT_PAIRS, SECTION_DEFS, acceptedFontPairs, chec
 const templates = DIRECTIONS.filter((d) => d.template);
 
 describe("template families", () => {
-  it("every trade template has a family of 2–3 palettes, font pairs and heroes, its own first", () => {
+  it("every trade template has a family of 2–3 palettes and font pairs and 1–3 heroes, its own first", () => {
     expect(templates).toHaveLength(10);
     for (const dir of templates) {
       const f = familyOf(dir)!;
       expect(f, dir.id).toBeDefined();
-      for (const list of [f.palettes, f.fontPairs, f.heroes]) {
+      for (const list of [f.palettes, f.fontPairs]) {
         expect(list.length, dir.id).toBeGreaterThanOrEqual(2);
         expect(list.length, dir.id).toBeLessThanOrEqual(3);
       }
+      expect(f.heroes.length, dir.id).toBeGreaterThanOrEqual(1);
+      expect(f.heroes.length, dir.id).toBeLessThanOrEqual(3);
+      // The alternates are photo heroes: never a type-only hero in place of the signature (HQ it-family-type-heroes).
+      for (const h of f.heroes.slice(1)) expect(h, dir.id).toMatch(/^hero-(split|image):/);
       expect(f.palettes[0]!.colors, dir.id).toEqual(dir.palette.fallback);
       expect(f.fontPairs[0], dir.id).toBe(dir.fontPairs[0]);
       expect(f.heroes[0], dir.id).toBe(dir.layout.heroes[0]);

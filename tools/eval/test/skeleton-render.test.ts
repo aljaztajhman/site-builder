@@ -43,7 +43,8 @@ describe("skeleton families at 360 and 1280 px", () => {
     }
   });
 
-  for (const site of [...SKELETON_GOLDENS, "avtoservis-mrak+tablica"]) {
+  // "long-name": names of 24+ characters, with a logo and without, under every phone action (HQ it-skeleton-phone-header-wrap).
+  for (const site of [...SKELETON_GOLDENS, "avtoservis-mrak+tablica", "long-name"]) {
     it(`${site}: every look passes the page checks, one call button per screen`, async () => {
       const variants = (await skeletonVariants()).filter((v) => v.site === site);
       for (const [n, v] of variants.entries()) {

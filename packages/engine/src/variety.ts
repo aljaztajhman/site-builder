@@ -139,19 +139,21 @@ const turn = (hex: string, deg: number): string => {
 /**
  * A design no neighbour shares (Step 2, replaces awayFromShowcases as the general rule; showcases stay avoided):
  * another of the direction's accepted font pairs first, then the brand colours turned around the hue wheel. The
- * caller enforces contrast afterwards. Returns the design unchanged when it collides with nobody.
+ * caller enforces contrast afterwards, or passes `finish` (contrast enforcement) to have each candidate checked as it
+ * will render, so enforcement cannot move it back onto a neighbour. Returns the design unchanged when it collides with
+ * nobody.
  */
-export function awayFromNeighbours(design: Design, dir: Direction, hero: string, neighbours: LookKey[], seed: number): Design {
+export function awayFromNeighbours(design: Design, dir: Direction, hero: string, neighbours: LookKey[], seed: number, finish: (d: Design) => Design = (d) => d): Design {
   const key = (d: Design): LookKey => ({ direction: d.direction, primary: d.colors.primary, band: d.colors.band ?? d.colors.primary, fontPair: d.fontPair, hero });
   if (!neighbours.some((n) => sameLook(n, key(design)))) return design;
   for (const fontPair of seededOrder(acceptedFontPairs(dir), seed, "away-font")) {
-    const d = { ...design, fontPair };
+    const d = finish({ ...design, fontPair });
     if (!neighbours.some((n) => sameLook(n, key(d)))) return d;
   }
   for (let step = 1; step <= 8; step++) {
     const c = { ...design.colors, primary: turn(design.colors.primary, 40 * step), accent: turn(design.colors.accent, 40 * step) };
     if (design.colors.band !== undefined) c.band = turn(design.colors.band, 40 * step);
-    const d = { ...design, colors: c };
+    const d = finish({ ...design, colors: c });
     if (!neighbours.some((n) => sameLook(n, key(d)))) return d;
   }
   return design;

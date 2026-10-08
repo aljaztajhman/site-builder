@@ -86,6 +86,9 @@ function tradePresets(type: string): { general: Direction[]; templates: Directio
   };
 }
 
+/** The type-only hero layouts: a general direction's type hero may take either. */
+const TYPE_HEROES = ["hero-type:large", "hero-type:with-facts"];
+
 /** What each axis may take for this site (see the module comment). */
 export function genomePools(spec: SiteSpec): GenomePools {
   const dir = directionById(spec.design.direction);
@@ -122,7 +125,8 @@ export function genomePools(spec: SiteSpec): GenomePools {
   return {
     type: unique([...fit.flatMap(acceptedFontPairs), ...templates.flatMap(acceptedFontPairs)]),
     palette: palettes([...fit.map((d) => ({ id: d.id, colors: d.palette.fallback })), ...templates.flatMap(familyPalettes)]),
-    hero: heroes([...fit.flatMap((d) => d.layout.heroes), ...templates.flatMap((t) => FAMILIES[t.id]?.heroes ?? [])]),
+    // A type-only hero may become the other type-only one (template families no longer list them: HQ it-family-type-heroes).
+    hero: heroes([...fit.flatMap((d) => d.layout.heroes), ...templates.flatMap((t) => FAMILIES[t.id]?.heroes ?? []), ...(hero?.type === "hero-type" ? TYPE_HEROES : [])]),
     header,
     footer,
     rhythm: [...RHYTHMS],
