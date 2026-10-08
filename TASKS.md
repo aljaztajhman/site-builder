@@ -249,6 +249,14 @@ Prompts (each needs `pnpm eval --only …` runs before merging; proposed text in
   - Prompt text changed without an eval (listed in the PR): RULES banned line (em dash, capital eyebrows), one critique line on filler calques. Needs `pnpm eval --only` runs before trusting generation quality
   - Ran: typecheck, lint, `pnpm test` 822 passed in 65 files (after merging main; an earlier run had one browser suite's afterAll time out under load, as 3 did on main before the change); all pages of the 10 golden sites through the new page checks: no give-aways found
 
+## AI designer (plan 2026-10-08: docs/plans/ai-designer.md; HQ `sb-ai-designer`, `it-ai-designer`)
+Owner, 2026-10-08: "Its too templaty… I dont think ai does any proper design now." Confirmed from the code: the design call returns a direction id and ten numbers (≈ 200 output tokens, €0.003), never sees photos or the page; layouts come from ~30 fixed sections. Plan: an art director (Opus, sees photos, writes the idea, genome and page), a composition language for new layouts, and a look-and-revise loop. All behind `designer.agent` (off). Waits for `sb-ai-designer`.
+- [ ] Step 1, composition language (free): spec v19 composed sections + migration + structural guards; renderer in packages/components; M, S, J re-expressed and compared at 360/1280 px
+- [ ] Step 2, art director stage + content writes compositions; reference library of the 19 templates (≈ €1.5)
+- [ ] Step 3, look-and-revise loop with render/check/patch tools, critique folded in, € and round caps (≈ €2)
+- [ ] Step 4, measure against today's engine on 10 goldens + 12 twins, side-by-side sheet for the owner (≈ €6–8)
+- [ ] Step 5, editor for composed sections (free)
+
 ## Variety engine (plan 2026-10-04: docs/plans/variety-engine.md; HQ `sb-variety-approach`, `sb-druga-podoba`)
 Owner, 2026-10-04: "I don't want it to look like a template filler and that every avtoserviser would get a same-y looking site." Today each trade gets one template with fixed palette, fonts, hero and outline. Since 2026-10-07 the free parts of Steps 0–2 are built, Steps 1–2 behind config `variety.families` (off until the twin eval measures them). Each step is one PR, merged only when the twins' look distance rises and judge medians hold.
 - [x] Step 0, measure same-trade sameness (`it-variety-measure`): 12 twin fixtures (3 more car repair shops, hairdressers and restaurants; an electrician, a carpenter, a florist), pairwise look distance from spec and first screens, brand fit, motif fit, `--no-edits` eval flag. Built 2026-10-07 (branch claude/variety-measure), free:
