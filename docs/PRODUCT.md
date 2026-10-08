@@ -92,6 +92,7 @@ Hard list. Add to it whenever a new default shows up in eval screenshots.
 - Uppercase or tracked-out eyebrow labels: eyebrows are sentence case with letter-spacing at most 0.04 em (uppercase stays a heading-only token where a direction allows it)
 - Pure black (#000) text or surfaces, and pure white (#fff) text: text and surface colours stay off-black, text stays off-white (lightness bounds in the design rules; a pure white page in the white directions is fine)
 - More than one primary action in a hero, such as two identical full-width buttons stacked under the headline; the second action is a text link or the phone number
+- More than one call button on one screen (360 or 1280 px), counting the header, the hero, the phone bar or floating button and the sections; other calls are the phone number or a text link. Enforced for sites with a skeleton (spec v15, `callButtonsPerScreen`)
 
 ## Pricing (in config, `plans`)
 

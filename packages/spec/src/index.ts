@@ -1,6 +1,7 @@
 export * from "./common.ts";
 export * from "./business.ts";
 export * from "./design.ts";
+export * from "./skeleton.ts";
 export * from "./design-rules.ts";
 export * from "./directions.ts";
 export * from "./fonts.ts";

@@ -34,8 +34,8 @@ afterAll(async () => {
   await rm(dir, { recursive: true, force: true });
 });
 
-async function accountant(slug: string, families: boolean): Promise<{ id: string; spec: SiteSpec }> {
-  const config = { ...base, variety: { ...base.variety, families } };
+async function accountant(slug: string, families: boolean, skeleton = false): Promise<{ id: string; spec: SiteSpec }> {
+  const config = { ...base, variety: { ...base.variety, families, skeleton } };
   const fixture = loadFixture("racunovodstvo-seliskar");
   const storage = createFsStorage(path.join(dir, slug));
   const site = await repo.createSite({ name: slug, slug, intake: { description: fixture.brief.description, photoAssetIds: [], scope: "home" } });
@@ -77,5 +77,20 @@ describe("the variety engine in the pipeline", () => {
     const picked = events.rows[0]!.data.hero!;
     const pickedKey = keyOf(second.spec.design, { type: picked.split(":")[0]!, variant: picked.split(":")[1]! });
     for (const n of neighbours) expect(sameLook(pickedKey, keyOf(n.design, n.hero))).toBe(false);
+  }, 360_000);
+
+  it("skeleton on (variety.skeleton, Step 4): the site gets its own skeleton, valid, and its checks find one call button per screen", async () => {
+    const { id, spec } = await accountant("racun-skeleton", false, true);
+    const valid = validateSite(spec);
+    expect(valid.ok ? [] : valid.issues).toEqual([]);
+    expect(spec.design.skeleton).toBeDefined();
+    const logged = await db.query<{ data: { skeleton: unknown } }>("select data from site_events where site_id = $1 and message = 'Skeleton'", [id]);
+    expect(logged.rows[0]!.data.skeleton).toEqual(spec.design.skeleton);
+    const checks = await db.query<{ data: { failures?: string[] } }>("select data from site_events where site_id = $1 and stage = 'check'", [id]);
+    const failures = checks.rows.flatMap((r) => r.data?.failures ?? []);
+    expect(failures.filter((f) => f.includes("call buttons on one screen"))).toEqual([]);
+    // The switch off left the first accountant without one.
+    const off = await db.query<{ n: number }>("select count(*)::int as n from site_events where message = 'Skeleton'");
+    expect(off.rows[0]!.n).toBe(1);
   }, 360_000);
 });

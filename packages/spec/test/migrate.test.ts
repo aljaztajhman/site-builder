@@ -279,10 +279,10 @@ describe("migration 13 → 14 (the owner's own texts, it-keep-owner-edits)", () 
     const read = (id: string) => JSON.parse(readFileSync(new URL(`../../../tools/eval/golden/${id}.json`, import.meta.url), "utf8")) as SiteSpec;
     for (const id of ["pekarna-kvas", "racunovodstvo-seliskar", "zobozdravstvo-lebar"]) {
       const golden = read(id);
-      const v14 = migrateSpec({ ...golden, specVersion: 13 });
+      const v14 = migrateSpec({ ...golden, specVersion: 13 }, MIGRATIONS, 14);
       expect(v14, id).toEqual({ ...golden, specVersion: 14 });
       expect(v14.ownerEdits, id).toBeUndefined();
-      expect(validateSite(v14).issues, id).toEqual([]);
+      expect(validateSite(migrateSpec(v14)).issues, id).toEqual([]);
     }
     const site = read("pekarna-kvas");
     const section = site.pages[0]!.sections[0]!.id;
@@ -291,5 +291,28 @@ describe("migration 13 → 14 (the owner's own texts, it-keep-owner-edits)", () 
     expect(Schema.safeParse({ ...site, ownerEdits: [{ section, path: "/variant" }] }).success).toBe(false);
     expect(Schema.safeParse({ ...site, ownerEdits: [{ section: "hero", path: "/props/title" }] }).success).toBe(false);
     expect(Schema.safeParse({ ...site, ownerEdits: Array.from({ length: MAX_OWNER_EDITS + 1 }, () => ({ section, path: "/props/title" })) }).success).toBe(false);
+  });
+});
+
+describe("migration 14 → 15 (the site's skeleton, variety engine Step 4)", () => {
+  it("turns stored v14 sites into valid v15 sites unchanged apart from the version; the skeleton is optional and checked", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { validateSite, SiteSpec: Schema, skeletonOfChrome } = await import("../src/index.ts");
+    const read = (id: string) => JSON.parse(readFileSync(new URL(`../../../tools/eval/golden/${id}.json`, import.meta.url), "utf8")) as SiteSpec;
+    for (const id of ["avtoservis-mrak", "kmetija-grabnar", "pekarna-kvas", "racunovodstvo-seliskar"]) {
+      const golden = read(id);
+      const v15 = migrateSpec({ ...golden, specVersion: 14 });
+      expect(v15, id).toEqual({ ...golden, specVersion: 15 });
+      expect(v15.design.skeleton, id).toBeUndefined();
+      expect(validateSite(v15).issues, id).toEqual([]);
+      // Today's header and footer variants are skeleton families one to one.
+      const skeleton = skeletonOfChrome(golden.chrome);
+      expect([skeleton.header, skeleton.footer], id).toEqual([golden.chrome.header.variant, golden.chrome.footer.variant]);
+      expect(validateSite({ ...v15, design: { ...v15.design, skeleton } }).issues, id).toEqual([]);
+    }
+    const site = read("pekarna-kvas");
+    const skeleton = skeletonOfChrome(site.chrome);
+    expect(Schema.safeParse({ ...site, design: { ...site.design, skeleton: { ...skeleton, header: "hamburger" } } }).success).toBe(false);
+    expect(Schema.safeParse({ ...site, design: { ...site.design, skeleton: { ...skeleton, buttons: "pill" } } }).success).toBe(false);
   });
 });

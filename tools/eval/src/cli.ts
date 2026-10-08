@@ -49,10 +49,13 @@ const value = (name: string) => {
   return i >= 0 ? args[i + 1] : undefined;
 };
 
-/** The scripted edits: how many were applied without validation issues, and how many passed their check. */
+/** The scripted edits: how many were applied without validation issues, and how their checks went (manual: judged by eye). */
 const editLine = (r: FixtureResult): string => {
   const edits = r.checkpoints.flatMap((c) => (c.edit ? [c.edit] : []));
-  return edits.length ? `edits applied ${edits.filter((e) => e.issues.length === 0).length}/${edits.length}, checks passed ${edits.filter((e) => e.check.pass).length}/${edits.length}` : "";
+  const manual = edits.filter((e) => e.check.pass === null).length;
+  return edits.length
+    ? `edits applied ${edits.filter((e) => e.issues.length === 0).length}/${edits.length}, checks passed ${edits.filter((e) => e.check.pass === true).length}/${edits.length - manual}${manual ? ` (${manual} manual)` : ""}`
+    : "";
 };
 
 const mode: Mode = flag("offline") ? "offline" : flag("replay") ? "replay" : flag("record-missing") ? "record-missing" : flag("record") ? "record" : "live";

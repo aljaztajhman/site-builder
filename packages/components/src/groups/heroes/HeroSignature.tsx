@@ -59,6 +59,20 @@ export function signatureOffersDirections(section: SectionOf<"hero-signature">):
 /** Variants whose phone fact is a plain button (labelled factLabel) rather than the motif's call object. */
 const CALL_BUTTON_VARIANTS: readonly string[] = ["receipt", "card", "mirrors", "disc", "view", "bend"];
 
+/**
+ * The hero's phone fact is the motif's call object (a plate, a red call block, the number at poster size) rather than a
+ * call button: CSS can't turn it into a text link, so on a site with a skeleton the bar's, the floating button's or the
+ * header's call waits until the hero has scrolled away (reveal.js).
+ */
+export function signatureOwnsCall(section: SectionOf<"hero-signature">): boolean {
+  return section.props.fact === "phone" && !CALL_BUTTON_VARIANTS.includes(section.variant);
+}
+
+/** The page's first section is a hero whose call object owns the call (signatureOwnsCall). */
+export function heroOwnsCall(first: { type: string; variant: string; props: unknown } | undefined): boolean {
+  return first?.type === "hero-signature" && signatureOwnsCall(first as SectionOf<"hero-signature">);
+}
+
 /** The actions the hero shows as buttons or links (data-action), for the phone bar to avoid repeating them. */
 export function signatureActions(section: SectionOf<"hero-signature">): string[] {
   const { props } = section;
@@ -177,6 +191,8 @@ export function HeroSignature({ section, ctx, index }: SectionProps<"hero-signat
   // the call is the one button, labelled with factLabel, beside one quiet text link that is not a call.
   const address = ctx.site.business.address;
   const streetCity = isPlaceholder(address) ? undefined : `${address.street}, ${address.city}`;
+  // The eyebrow falls back to the street address, except on a site with a skeleton (spec v15): its own or none.
+  const eyebrow = props.eyebrow ?? (ctx.site.design.skeleton ? undefined : streetCity);
   const buttons = phone ? (
     <>
       <Actions primary={{ label: props.factLabel ?? ctx.t("call"), target: { action: "call" } }} secondary={notCall(props.primary) ?? notCall(props.secondary)} ctx={ctx} />
@@ -219,7 +235,7 @@ export function HeroSignature({ section, ctx, index }: SectionProps<"hero-signat
             </p>
           )}
           <div className="hsig__text">
-            {(props.eyebrow ?? streetCity) && <p className="eyebrow hsig__eyebrow">{props.eyebrow ?? streetCity}</p>}
+            {eyebrow && <p className="eyebrow hsig__eyebrow">{eyebrow}</p>}
             {title}
             <p className="lead hsig__lead">{props.intro}</p>
             {buttons}
@@ -243,7 +259,7 @@ export function HeroSignature({ section, ctx, index }: SectionProps<"hero-signat
       <Section id={section.id} type={section.type} variant={variant} tone={section.tone}>
         <div className={image ? "hsig hsig--disc hsig--has-image" : "hsig hsig--disc"}>
           <div className="hsig__text">
-            {(props.eyebrow ?? streetCity) && <p className="eyebrow hsig__eyebrow">{props.eyebrow ?? streetCity}</p>}
+            {eyebrow && <p className="eyebrow hsig__eyebrow">{eyebrow}</p>}
             {title}
             <p className="lead hsig__lead">{props.intro}</p>
             {buttons}
@@ -265,7 +281,7 @@ export function HeroSignature({ section, ctx, index }: SectionProps<"hero-signat
   if (variant === "view") {
     // The landscape full-bleed under the flat overlay, the headline at the bottom left, the trail signs on a
     // wooden post beside it; the next section draws the mountain ridge over the hero's bottom edge.
-    const where = props.eyebrow ?? streetCity;
+    const where = eyebrow;
     const signs = props.signs ?? [];
     return (
       <Section id={section.id} type={section.type} variant={variant} tone={section.tone ?? "inverse"} bleed>
@@ -326,7 +342,7 @@ export function HeroSignature({ section, ctx, index }: SectionProps<"hero-signat
 
   if (variant === "receipt") {
     // The receipt lists what the business does.
-    const where = props.eyebrow ?? streetCity;
+    const where = eyebrow;
     return (
       <Section id={section.id} type={section.type} variant={variant} tone={section.tone} bleed>
         <div className="hsig hsig--receipt">
