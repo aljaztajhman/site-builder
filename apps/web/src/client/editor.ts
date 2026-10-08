@@ -69,6 +69,8 @@ interface State {
   cost: { stage: string; calls: number; input: number; output: number; cacheRead: number; cacheWrite: number; eur: number; ms: number }[];
   versions: { version: number; source: string; message: string | null; created_at: string }[];
   placeholders: { path: string; kind: string }[];
+  /** "Druga podoba" is offered here (config variety.families and a style with a family of looks); absent on old servers. */
+  anotherLook?: boolean;
   /** What stands between the site and publishing; worded in Slovene here (labels.ts). */
   checklist: BlockerLike[];
   blockers: string[];
@@ -1222,11 +1224,19 @@ function designPane(): HTMLElement {
       h("div", { class: "row main-color" }, main, h("span", { class: "sp" }, h("strong", {}, "Glavna barva"), h("span", { class: "muted" }, " gumbi in poudarki")), code),
       codeErr)),
     h("label", {}, "Pisave"),
-    h("select", { onChange: (e: Event) => set("fontPair", (e.target as HTMLSelectElement).value) }, ...(dir?.fontPairs ?? []).map((id) => h("option", { value: id, selected: id === d.fontPair }, catalogue!.fontPairs.find((f) => f.id === id)?.label ?? id))),
+    // The site's own pair is listed even where it isn't the style's (a template family's pair: variety.families, Druga podoba).
+    h("select", { onChange: (e: Event) => set("fontPair", (e.target as HTMLSelectElement).value) }, ...[...new Set([...(dir?.fontPairs ?? []), String(d.fontPair)])].map((id) => h("option", { value: id, selected: id === d.fontPair }, catalogue!.fontPairs.find((f) => f.id === id)?.label ?? id))),
   );
 
   pane.append(
     h("h2", {}, "Slog"),
+    // "Druga podoba" (config variety.families): the same text and photos in another look of this style, no model call;
+    // each look is a version, so undo goes back.
+    state.anotherLook && can("edit")
+      ? h("div", { class: "another-look" },
+          h("button", { class: "btn", type: "button", id: "another-look", "aria-describedby": "another-look-help", onClick: () => void post("/look", {}, "Druga podoba je tu. Prejšnjo vrnete z gumbom Razveljavi (↶).") }, "Druga podoba"),
+          h("p", { class: "help", id: "another-look-help" }, "Isto besedilo in fotografije v drugi podobi tega sloga: barve, pisave, oblika. Vsaka podoba je nova različica."))
+      : "",
     h("div", { class: "styles", role: "group", "aria-label": "Slog" }, ...catalogue.directions.map((x) => {
       const chosen = x.id === d.direction;
       return h("button", {

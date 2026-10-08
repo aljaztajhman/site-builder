@@ -17,6 +17,11 @@ import {
   publishedPrefix,
   publishedBase,
   switchDirection,
+  anotherLook,
+  hasLookFamily,
+  keyOf,
+  siteSeed,
+  NO_FAMILY_MESSAGE,
   typedOps,
   uploadKey,
   imageMeta,
@@ -561,6 +566,8 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       cost,
       versions,
       placeholders: current ? collectPlaceholders(current.spec) : [],
+      // "Druga podoba" is offered (config variety.families, and the site's style has a family of looks).
+      anotherLook: config.variety.families && !!current && hasLookFamily(current.spec),
       // The pre-publish checklist (structured, the editor words it in Slovene) and the same as English lines.
       checklist,
       blockers: checklist.map(blockerText),
@@ -594,7 +601,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
    * `typed: false` for an edit that only rearranges what the site already says (a collection taking over the
    * services sections): nothing of it counts as text the owner typed, so the fact check keeps checking it.
    */
-  const directEdit = async (c: Context, siteId: string, baseVersion: unknown, build: (spec: SiteSpec) => Operation[] | { error: string }, message: string, typed = true) => {
+  const directEdit = async (c: Context, siteId: string, baseVersion: unknown, build: (spec: SiteSpec) => Operation[] | { error: string }, message: string | (() => string), typed = true) => {
     const current = await repo.getSpec(siteId);
     if (!current) return c.json({ error: "no spec yet" }, 404);
     if (typeof baseVersion === "number" && baseVersion !== current.version) {
@@ -620,7 +627,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       const spec: SiteSpec = { ...r.spec };
       if (owned) spec.ownerEdits = owned;
       else delete spec.ownerEdits;
-      version = await repo.saveSpec(siteId, spec, "manual", message.slice(0, 200), own, current.version);
+      version = await repo.saveSpec(siteId, spec, "manual", (typeof message === "function" ? message() : message).slice(0, 200), own, current.version);
     } catch (e) {
       if (e instanceof VersionConflictError) return c.json({ error: "conflict", message: "Stran je bila medtem spremenjena. Osvežite urejevalnik." }, 409);
       throw e;
@@ -707,6 +714,44 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
         }
       },
       `smer ${body.direction}`,
+    );
+  });
+
+  // "Druga podoba" (config variety.families; HQ sb-druga-podoba): the same text and photos in the next look of the site's
+  // template family, picked in code away from the same trade's sites (engine another-look.ts). No model call and no
+  // spend reservation, so every tier may; saved as a version like any direct edit (validated, held to the plan), so
+  // undo and the version list go back. With variety.skeleton on, the look brings another skeleton too.
+  app.post("/api/sites/:id/look", async (c) => {
+    if (!config.variety.families) return c.json({ error: "not found" }, 404);
+    const id = c.req.param("id");
+    const body = (await c.req.json().catch(() => ({}))) as { baseVersion?: number };
+    const current = await repo.getSpec(id);
+    if (!current) return c.json({ error: "no spec yet" }, 404);
+    if (!hasLookFamily(current.spec)) return c.json({ error: "no_family", code: "no_family", message: NO_FAMILY_MESSAGE }, 409);
+    const site = c.get("site") ?? (await repo.getSite(id));
+    const brief = (site?.brief ?? null) as { businessType?: string; town?: string | null } | null;
+    const looks = await repo.neighbourLooks(id, brief?.businessType ?? current.spec.business.type, brief?.town ?? null, config.variety.neighbours);
+    const input = {
+      seed: siteSeed(id),
+      neighbours: looks.map((n) => keyOf(n.design, n.hero)),
+      ...(config.variety.skeleton ? { skeleton: { neighbours: looks.flatMap((n) => (n.design.skeleton ? [n.design.skeleton] : [])) } } : {}),
+    };
+    let described = "";
+    return directEdit(
+      c,
+      id,
+      body.baseVersion,
+      (spec) => {
+        const r = anotherLook(spec, input);
+        if (!r.ok) return { error: r.message };
+        described = `druga podoba: ${r.look.paletteId}, ${r.look.fontPair}, ${r.look.hero}${r.look.skeleton ? `, ${r.look.skeleton.header}/${r.look.skeleton.footer}` : ""}`;
+        const hi = Math.max(0, spec.pages.findIndex((p) => p.kind === "home"));
+        const ops: Operation[] = [{ op: "replace", path: "/design", value: r.spec.design }];
+        if (r.spec.pages[hi] !== spec.pages[hi]) ops.push({ op: "replace", path: `/pages/${hi}/sections/0`, value: r.spec.pages[hi]!.sections[0] });
+        return ops;
+      },
+      () => described,
+      false,
     );
   });
 
