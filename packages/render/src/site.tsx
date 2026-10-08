@@ -14,6 +14,7 @@ import {
   rendererFor,
   barActions,
   heroOwnsCall,
+  navHasMore,
   signatureActions,
   signatureOffersDirections,
   uiStrings,
@@ -284,6 +285,8 @@ function renderDocument(spec: SiteSpec, localized: SiteSpec, opts: RenderOptions
   // nav.js (the menu) and stats.js (cookieless tap counts, live address only) are on every page.
   const islands = new Set<string>(["nav.js", "stats.js", ...doc.islands]);
   for (const s of doc.sections) for (const i of islandsFor(s)) islands.add(i);
+  // A wide header with more menu entries than its row holds lists the rest under "Več" (Plus has up to 20 pages).
+  if (navHasMore(ctx)) islands.add("nav-more.js");
   // The privacy policy says consent can be withdrawn with the footer's "cookie settings" button, which consent.js
   // reveals: on a site with consent-gated embeds the privacy page loads it too, with the notice closed until asked for.
   const consentOnRequest =
@@ -333,10 +336,13 @@ function renderDocument(spec: SiteSpec, localized: SiteSpec, opts: RenderOptions
         "data-ratio": skeleton.photoRatio,
       }
     : {};
+  // Spec v18: a picked genome's shape language beyond the radius (cut corners, arched tops; genome.css). A preset genome
+  // (every migrated site) and the square and soft shapes add nothing, so their HTML is as before.
+  const shape = design.genome?.source === "picked" && (design.genome.shape === "cut" || design.genome.shape === "arch") ? design.genome.shape : undefined;
   // The page's one centred section (design.skeleton.centred), if any; none without a skeleton.
   const centred = centredOn(skeleton, doc.sections, motif);
   const renderBody = (suffixes: ReadonlyMap<string, string>) => renderToStaticMarkup(
-    <body data-imagery={design.imagery} data-motif={motif} data-submotif={sub} className={bodyClass} {...skeletonAttrs}>
+    <body data-imagery={design.imagery} data-motif={motif} data-submotif={sub} data-shape={shape} className={bodyClass} {...skeletonAttrs}>
       <a className="skip-link" href="#main">
         {ctx.t("skipToContent")}
       </a>

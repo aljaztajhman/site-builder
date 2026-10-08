@@ -19,6 +19,7 @@ import {
   sitePageFiles,
   exportSite,
   anotherLook,
+  anotherGenomeLook,
   hasLookFamily,
   keyOf,
   siteSeed,
@@ -35,7 +36,7 @@ import {
 } from "@sb/engine";
 import { Repo, createDb, createFsStorage, migrate, type Db, type Storage } from "@sb/platform";
 import { siteFiles } from "@sb/render";
-import { validateSite, type SiteSpec } from "@sb/spec";
+import { genomeOfLook, validateSite, type SiteSpec } from "@sb/spec";
 import type { Fixture } from "./fixtures/schema.ts";
 import { evaluateEditCheck, pagesText, type EditCheckResult } from "./edit-checks.ts";
 import { homepageShape, type HomepageShape } from "./homepage-metrics.ts";
@@ -434,7 +435,7 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
     const siteRow = await repo.getSite(site.id);
     const made = (siteRow?.brief ?? {}) as { businessType?: string; town?: string | null };
     result.made = { businessType: made.businessType ?? fixture.brief.businessType, town: made.town ?? null, spec: first.current.spec };
-    if (config.variety.families) result.anotherLook = await measureAnotherLook(config, repo, storage, site.id, result.made, result.look.site, dir, opts);
+    if (config.variety.families || config.variety.genome) result.anotherLook = await measureAnotherLook(config, repo, storage, site.id, result.made, result.look.site, dir, opts);
     if (opts.regenerate && genDeps) {
       const costBefore = (await repo.siteCost(site.id)).reduce((a, c) => a + c.eur, 0);
       try {
@@ -518,13 +519,13 @@ async function measureAnotherLook(
   dir: string,
   opts: RunOptions,
 ): Promise<NonNullable<FixtureResult["anotherLook"]>> {
-  if (!hasLookFamily(made.spec)) return { ok: false, reason: "no_family" };
+  if (!config.variety.genome && !hasLookFamily(made.spec)) return { ok: false, reason: "no_family" };
   const looks = await repo.neighbourLooks(siteId, made.businessType, made.town, config.variety.neighbours);
-  const r = anotherLook(made.spec, {
-    seed: siteSeed(siteId),
-    neighbours: looks.map((n) => keyOf(n.design, n.hero)),
-    ...(config.variety.skeleton ? { skeleton: { neighbours: looks.flatMap((n) => (n.design.skeleton ? [n.design.skeleton] : [])) } } : {}),
-  });
+  const skeleton = config.variety.skeleton ? { skeleton: { neighbours: looks.flatMap((n) => (n.design.skeleton ? [n.design.skeleton] : [])) } } : {};
+  // With config variety.genome the editor's button moves along the genome's axes, for every style (engine genome.ts).
+  const r = config.variety.genome
+    ? anotherGenomeLook(made.spec, { seed: siteSeed(siteId), neighbours: looks.map((n) => genomeOfLook(n.design, n.hero)), ...skeleton })
+    : anotherLook(made.spec, { seed: siteSeed(siteId), neighbours: looks.map((n) => keyOf(n.design, n.hero)), ...skeleton });
   if (!r.ok) return { ok: false, reason: r.reason };
   await repo.saveSpec(siteId, r.spec, "manual", "Druga podoba (eval)");
   const alt = await checkCurrent(config, repo, storage, siteId, { ...opts, lighthouse: false });
@@ -534,7 +535,10 @@ async function measureAnotherLook(
   await repo.saveSpec(siteId, made.spec, "revert", "back to the generated look (eval)");
   return {
     ok: true,
-    look: `${r.look.paletteId}, ${r.look.fontPair}, ${r.look.hero}${r.look.skeleton ? `, ${r.look.skeleton.header}/${r.look.skeleton.footer}` : ""}`,
+    look:
+      "genome" in r
+        ? `${r.genome.type}, ${r.genome.palette}, ${r.genome.hero}, ${r.genome.header}/${r.genome.footer}, ${r.genome.imagery}, ${r.genome.shape}, ${r.genome.density}`
+        : `${r.look.paletteId}, ${r.look.fontPair}, ${r.look.hero}${r.look.skeleton ? `, ${r.look.skeleton.header}/${r.look.skeleton.footer}` : ""}`,
     distance: pairDistance(generated, site).total,
     failures: alt.report.failures,
     valid: validateSite(alt.current.spec).ok,

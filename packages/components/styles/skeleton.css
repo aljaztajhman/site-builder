@@ -42,9 +42,24 @@ html:has(.site-header--sticky) {
   scroll-padding-top: 6rem;
 }
 @media (max-width: 47.99rem) {
-  .site-header--sticky .site-nav.is-open {
-    max-height: calc(100vh - 8rem);
+  /* The whole header scrolls, so the last entry and the call row under the menu are never cut off (up to 20 entries). */
+  .site-header--sticky:has(.site-nav.is-open) {
+    max-height: 100vh;
+    max-height: 100dvh;
     overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  /* Its last entries scroll clear of the floating call button or the bar. */
+  body.has-call-float .site-header--sticky:has(.site-nav.is-open),
+  body.has-action-bar .site-header--sticky:has(.site-nav.is-open) {
+    padding-bottom: 5rem;
+    scroll-padding-bottom: 5rem;
+  }
+  @supports not selector(:has(a)) {
+    .site-header--sticky .site-nav.is-open {
+      max-height: calc(100vh - 8rem);
+      overflow-y: auto;
+    }
   }
 }
 
@@ -118,9 +133,9 @@ html:has(.site-header--sticky) {
     padding-block: 1rem 0;
   }
   .site-header--centred .site-header__brand {
-    flex: 1 1 100%;
-    margin-inline: 0;
-    padding-inline: 13rem;
+    flex: 0 1 auto;
+    /* A margin, not padding: the link is no wider than the name or logo, clear of the actions on the right. */
+    margin-inline: 13rem;
   }
   .site-header--centred .site-header__logo {
     max-height: 3.5rem;
@@ -175,10 +190,12 @@ html:has(.site-header--sticky) {
 @media (min-width: 48rem) {
   .site-header--word .site-nav__list,
   .site-header--overlay .site-nav__list {
-    gap: 0.25rem 2rem;
+    gap: 0.5rem 2rem;
   }
   .site-header--word .site-nav__list a,
-  .site-header--overlay .site-nav__list a {
+  .site-header--overlay .site-nav__list a,
+  .site-header--word .site-nav__more > details > summary,
+  .site-header--overlay .site-nav__more > details > summary {
     font-family: var(--font-heading);
     font-weight: var(--fw-heading);
     font-size: var(--fs-lg);
@@ -200,9 +217,8 @@ html:has(.site-header--sticky) {
   .site-header--compact .site-header__inner {
     min-height: 3.5rem;
   }
-  .site-header--compact .site-nav__list a {
-    justify-content: center;
-    min-width: 2.75rem;
+  .site-header--compact .site-nav__list a,
+  .site-header--compact .site-nav__more > details > summary {
     font-size: var(--fs-sm);
   }
 }
@@ -224,7 +240,8 @@ html:has(.site-header--sticky) {
 }
 .site-header--overlay .site-header__brand,
 .site-header--overlay .nav-toggle,
-.site-header--overlay .site-nav__list a {
+.site-header--overlay .site-nav__list a,
+.site-header--overlay .site-nav__more > details > summary {
   color: var(--c-on-inverse);
 }
 @media (max-width: 47.99rem) {
@@ -233,6 +250,10 @@ html:has(.site-header--sticky) {
     padding-inline: 1rem;
     background: var(--c-inverse);
   }
+}
+/* "Več" opens over the photo on a solid panel. */
+.site-header--overlay .site-nav .site-nav__sub {
+  background: var(--c-inverse);
 }
 .site-header--overlay ~ main > .s-hero-signature:first-child .hsig__body {
   padding-top: 6.5rem;

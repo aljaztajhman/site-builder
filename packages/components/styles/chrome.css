@@ -142,12 +142,16 @@ html:not(.js) .nav-toggle {
   display: grid;
   border-top: 1px solid var(--c-border);
 }
-.site-nav__list a {
+/* Rows of 44 px links 9 px apart (a hairline between them): primary targets, 8 px apart and more. */
+.site-nav__list li {
+  padding-block: 0.25rem;
+  border-bottom: 1px solid var(--c-border);
+}
+.site-nav__list a,
+.site-nav__more > details > summary {
   display: flex;
   align-items: center;
-  min-height: 3rem;
-  padding-block: 0.5rem;
-  border-bottom: 1px solid var(--c-border);
+  min-height: 2.75rem;
   font-weight: 600;
   text-decoration: none;
 }
@@ -155,6 +159,10 @@ html:not(.js) .nav-toggle {
 .site-nav__list a[aria-current="page"] {
   text-decoration: underline;
   text-decoration-thickness: 2px;
+}
+/* "Več" is for wide screens: the phone menu lists every entry above. */
+.site-nav__list .site-nav__more {
+  display: none;
 }
 @media (max-width: 47.99rem) {
   html.js .site-nav:not(.is-open) {
@@ -185,13 +193,76 @@ html:not(.js) .nav-toggle {
   .site-nav__list {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.25rem 1.5rem;
+    gap: 0.5rem 1.5rem;
     border: 0;
   }
-  .site-nav__list a {
-    min-height: 2.75rem;
+  .site-nav__list li {
     padding-block: 0;
     border: 0;
+  }
+  .site-nav__list a,
+  .site-nav__more > details > summary {
+    justify-content: center;
+    min-width: 2.75rem;
+  }
+
+  /*
+   * "Več": the entries that don't fit in the row (Header navFit) are hidden there below their breakpoint
+   * (data-nav-fit 64, 80 or never) and listed in this disclosure instead, a panel under the header's right edge.
+   */
+  .site-header__inner {
+    position: relative;
+  }
+  .site-nav__list .site-nav__more {
+    display: block;
+  }
+  .site-nav__more > details > summary {
+    gap: 0.5em;
+    list-style: none;
+    cursor: pointer;
+  }
+  .site-nav__more > details > summary::-webkit-details-marker {
+    display: none;
+  }
+  .site-nav__more > details > summary::after {
+    content: "";
+    width: 0.45em;
+    height: 0.45em;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: translateY(-0.15em) rotate(45deg);
+  }
+  .site-nav__more > details[open] > summary::after {
+    transform: translateY(0.15em) rotate(-135deg);
+  }
+  .site-nav__more > details > summary:hover,
+  .site-nav__more > details[open] > summary {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+  }
+  .site-nav .site-nav__sub {
+    position: absolute;
+    top: 100%;
+    right: 2rem;
+    z-index: 50;
+    display: grid;
+    grid-template-columns: max-content;
+    gap: 0.5rem 2rem;
+    max-width: calc(100% - 4rem);
+    max-height: calc(100vh - 8rem);
+    overflow-y: auto;
+    padding: 0.5rem 1.25rem;
+    background: var(--c-bg);
+    color: var(--c-text);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  .site-nav .site-nav__sub:has(> li:nth-child(7)) {
+    grid-template-columns: repeat(2, max-content);
+  }
+  .site-nav__sub a {
+    justify-content: flex-start;
   }
   .site-header__cta,
   .site-header__cta--wide-only {
@@ -225,6 +296,40 @@ html:not(.js) .nav-toggle {
   }
   .site-header--stacked .site-header__name {
     font-size: var(--fs-h3);
+  }
+}
+/* Which entries stand in the row and which sit under "Več", per wide range; the summary marks a current page in it. */
+@media (min-width: 48rem) and (max-width: 63.99rem) {
+  .site-nav__list > li[data-nav-fit] {
+    display: none;
+  }
+  .site-nav__more summary[data-current] {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+  }
+}
+@media (min-width: 64rem) and (max-width: 79.99rem) {
+  .site-nav__list > li[data-nav-fit="80"],
+  .site-nav__list > li[data-nav-fit="never"],
+  .site-nav__sub > li[data-nav-fit="64"],
+  .site-nav__list .site-nav__more[data-until="64"] {
+    display: none;
+  }
+  .site-nav__more summary[data-current="80"],
+  .site-nav__more summary[data-current="never"] {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+  }
+}
+@media (min-width: 80rem) {
+  .site-nav__list > li[data-nav-fit="never"],
+  .site-nav__sub > li:not([data-nav-fit="never"]),
+  .site-nav__list .site-nav__more:not([data-until="never"]) {
+    display: none;
+  }
+  .site-nav__more summary[data-current="never"] {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
   }
 }
 

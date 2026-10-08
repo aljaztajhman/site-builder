@@ -1,4 +1,4 @@
-// Mobile menu: toggle, focus trap while open, Escape/link/outside click/resize close. Progressive enhancement.
+// Mobile menu: toggle, focus trap, Escape/link/outside click/resize close. Progressive enhancement.
 (() => {
   const d = document;
   d.documentElement.classList.add("js");
@@ -12,7 +12,7 @@
   const onKey = (e) => {
     if (e.key === "Escape") return set(false, true);
     if (e.key !== "Tab") return;
-    const f = [btn, .../** @type {NodeListOf<HTMLElement>} */ (nav.querySelectorAll("a[href],button"))];
+    const f = [btn, .../** @type {NodeListOf<HTMLElement>} */ (nav.querySelectorAll(".site-nav__list>li>a"))];
     const first = btn;
     const last = f[f.length - 1] ?? btn;
     if (e.shiftKey && d.activeElement === first) {

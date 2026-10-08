@@ -10,6 +10,7 @@ import { SITE_LOCALES, isSiteLocale, isWebUrl, type PlaceholderKind } from "./co
 import { EDITOR_STARTER_TEXT } from "./starter.ts";
 import { COLLECTION_KINDS } from "./collections.ts";
 import { centredOn } from "./skeleton.ts";
+import { siteGenomeIssues } from "./genome-rules.ts";
 import { secondLocales, untranslated } from "./translatable.ts";
 
 export interface Issue {
@@ -211,6 +212,8 @@ export function semanticIssues(spec: SiteSpec): Issue[] {
   // Design rules: direction ranges, contrast, banned backgrounds.
   const dir = DIRECTIONS.find((d) => d.id === spec.design.direction);
   for (const d of checkDesign(spec.design, dir)) add(d.path, "design", d.message);
+  // Spec v18: a picked genome's axes go together (genome-rules.ts GENOME_RULES).
+  for (const g of siteGenomeIssues(spec)) add("/design/genome", "design", g.message);
 
   // Banned copy.
   for (const v of findBannedCopy(spec.pages, "/pages")) add(v.path, "banned", `${v.rule}: "${v.text}"`);

@@ -203,8 +203,13 @@ export const AppConfigSchema = z.object({
    * concept (Step 3, engine concept.ts): the brief adds subtype, goal, angle, signature fact, materials and local
    * anchor; the homepage follows a blueprint by goal; a signature device by fact; the subtype picks the motif. Off:
    * every request is today's.
+   * genome (Step 5, engine genome.ts): after the content step, code picks the site's design genome (type, palette and
+   * ground, hero, header, footer, rhythm, imagery, shape, density; the motif follows the preset) from the site seed, away
+   * from the neighbours' genomes and inside the compatibility rules (spec genome-rules.ts), and dresses the written
+   * content in it with no content call; "Druga podoba" moves along the axes for every style, not only template families.
+   * Off: no genome is picked and every request is today's.
    */
-  variety: z.object({ families: z.boolean(), skeleton: z.boolean(), neighbours: z.number().int().min(0).max(500), concept: z.boolean() }),
+  variety: z.object({ families: z.boolean(), skeleton: z.boolean(), neighbours: z.number().int().min(0).max(500), concept: z.boolean(), genome: z.boolean() }),
   /**
    * The audit's prompt fixes (docs/plans/audit-2026-10-01.md, "Prompts"), one switch each so a paid eval can measure
    * them one at a time. All off: every prompt, request and repair is byte-identical to before (see config $comment).
