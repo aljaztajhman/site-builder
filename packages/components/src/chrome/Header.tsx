@@ -140,6 +140,14 @@ function SkeletonHeader({ ctx, skeleton }: { ctx: RenderCtx; skeleton: Skeleton 
             {formatPhone(site.business.phone as string)}
           </a>
         )}
+        {family === "phone" && callHref && !inHeader && directionsHref && (
+          // Phones only: the number's own row carries the directions too, so they are in the first screen however tall
+          // the hero is (the bar or the floating button carries them once the hero's call has gone).
+          <a className="text-link site-header__directions site-header__directions--phone-row" href={directionsHref} rel="noopener" target="_blank">
+            <Icon name="map-pin" />
+            {ctx.t("directions")}
+          </a>
+        )}
         {navPages.length > 0 && (
           <>
             <button type="button" className={`nav-toggle nav-toggle--${toggle}`} aria-expanded="false" aria-controls={NAV_ID} data-nav-toggle="">

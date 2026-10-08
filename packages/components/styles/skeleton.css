@@ -202,6 +202,19 @@ html:has(.site-header--sticky) {
     flex: 1 1 auto;
     justify-content: flex-end;
   }
+  /* With the bar or the floating button: the directions beside the number (the hero may push its own off the screen). */
+  .site-header--phone .site-header__directions--phone-row {
+    order: 6;
+    margin-left: auto;
+  }
+}
+.site-header__directions--phone-row {
+  display: none;
+}
+@media (max-width: 47.99rem) {
+  .site-header--phone .site-header__directions--phone-row {
+    display: inline-flex;
+  }
 }
 @media (min-width: 48rem) {
   .site-header__phone {
