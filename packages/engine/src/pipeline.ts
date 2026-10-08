@@ -7,6 +7,7 @@ import type { Operation } from "fast-json-patch";
 import { ModelOutputError, SpendCapError, type ModelClient } from "./llm/client.ts";
 import { classify, makeBrief, chooseDesign, altTexts, generateContent, critique, applyPatches, editSpec, drawsInsteadOfPhotos, type VarietyInput } from "./stages.ts";
 import { keyOf, lookKey, siteSeed } from "./variety.ts";
+import { conceptPlan } from "./concept.ts";
 import { applySkeleton, preferPhotoHero } from "./skeleton.ts";
 import { extractSwatches, type Swatch } from "./palette.ts";
 import { processLogo, processPhoto, shareJpeg, visionJpeg } from "./images.ts";
@@ -164,7 +165,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     // 1. Intake -> brief
     const cls = await classified;
     const { brief, dropped } = await stageTime("brief", () =>
-      makeBrief(client, { description: intake.description, businessType: cls.businessType, photoCount: photos.length, generatedSlots: slots.wanted, hasLogo: !!logo, scope: intake.scope }),
+      makeBrief(client, { description: intake.description, businessType: cls.businessType, photoCount: photos.length, generatedSlots: slots.wanted, hasLogo: !!logo, scope: intake.scope, ...(config.variety.concept ? { concept: true } : {}) }),
     );
     stop.signal.throwIfAborted();
     if (dropped.length) await log("brief", "Dropped facts not found in the client's text", dropped);
@@ -213,7 +214,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
       const skeleton =
         config.variety.skeleton && around ? { seed: around.seed, neighbours: around.looks.flatMap((n) => (n.design.skeleton ? [n.design.skeleton] : [])) } : undefined;
       const { design, hero } = await stageTime("design", () =>
-        chooseDesign(client, { brief, swatches, photoCount: photos.length, generatedCount: ideas.length + reuse.length, ...(variety ? { variety } : {}), ...(skeleton ? { holdPrimary: true } : {}) }),
+        chooseDesign(client, { brief, swatches, photoCount: photos.length, generatedCount: ideas.length + reuse.length, ...(variety ? { variety } : {}), ...(skeleton ? { holdPrimary: true } : {}), ...(config.variety.concept ? { concept: true } : {}) }),
       );
       if (variety) await log("design", "Variety engine", { seed: variety.seed, neighbours: variety.neighbours.length, regeneration: !!variety.previous, hero: hero ?? null, fontPair: design.fontPair, primary: design.colors.primary });
       // The editor's live preview recolours its skeleton with these while the content is written.
@@ -296,6 +297,8 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
       scope: intake.scope,
       heroImageIds: heroIds,
       ...(hero ? { hero } : {}),
+      // The variety engine's concept (config variety.concept): the homepage blueprint by goal, the signature device.
+      ...(config.variety.concept && brief.concept ? { concept: conceptPlan(brief.concept) } : {}),
       ...(skeleton ? { skeleton: true } : {}),
       structuredOutput: config.structuredOutputForContent,
       retries: config.limits.contentRetries,

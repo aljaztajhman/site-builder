@@ -1478,3 +1478,190 @@ a.plate:hover .plate__num {
     align-items: baseline;
   }
 }
+
+/* ---------- sub-trade motifs (spec v15 business.subtype): a trade's own pieces on its template's layout ---------- */
+/* Every rule names its [data-submotif]: the stylesheets of sites without one stay as they were (render shared.ts). */
+
+/* wire: electricians on Cevi's layout. A socket on its routed cable; the steps and places on a thin cable with square
+   junction boxes instead of the pipe's valves. */
+[data-submotif="wire"] .wire__live {
+  stroke: var(--c-primary);
+}
+[data-submotif="wire"] .wire__out {
+  stroke: var(--c-band, var(--c-accent));
+}
+[data-submotif="wire"] .wire__clip,
+[data-submotif="wire"] .wire__pin {
+  fill: var(--c-text);
+}
+[data-submotif="wire"] .wire__plate {
+  fill: var(--c-surface);
+  stroke: var(--c-text);
+}
+[data-submotif="wire"] .wire__face {
+  fill: var(--c-bg);
+  stroke: var(--c-text);
+}
+[data-submotif="wire"] .steps__item::after {
+  left: 0.1875rem;
+  width: 0.375rem;
+}
+[data-submotif="wire"] .steps__item::before,
+[data-submotif="wire"] .area__list li::before {
+  border-radius: var(--radius);
+}
+[data-submotif="wire"] .area__list::before {
+  left: 0.875rem;
+  width: 0.375rem;
+  border-radius: 0;
+}
+@media (min-width: 64rem) {
+  [data-submotif="wire"] .s-steps--horizontal .steps__item::after {
+    top: 1.0625rem;
+    left: 0;
+    width: auto;
+    height: 0.375rem;
+  }
+  [data-submotif="wire"] .area__list::before {
+    top: 0.875rem;
+    left: 0;
+    width: auto;
+    height: 0.375rem;
+  }
+}
+
+/* joint: carpenters on Cevi's layout. Two boards in a dovetailed corner, the grain drawn in the text colour. */
+[data-submotif="joint"] .joint__upright {
+  fill: var(--c-band, var(--c-accent));
+  stroke: var(--c-text);
+}
+[data-submotif="joint"] .joint__board {
+  fill: var(--c-primary);
+  stroke: var(--c-text);
+}
+[data-submotif="joint"] .joint__grain {
+  stroke: var(--c-text);
+  opacity: 0.35;
+}
+/* The steps and places run along a plank: the line in the band colour, wide as a board's edge. */
+[data-submotif="joint"] .steps__item::after {
+  background: var(--c-band, var(--c-accent));
+}
+[data-submotif="joint"] .area__list::before {
+  border-radius: 0;
+}
+
+/* tiles: roofers on Cevi's layout. A gable roof laid in tile courses of one colour, with a chimney. */
+[data-submotif="tiles"] .tiles__a,
+[data-submotif="tiles"] .tiles__b {
+  fill: var(--c-primary);
+  stroke: var(--c-bg);
+}
+[data-submotif="tiles"] .tiles__under,
+[data-submotif="tiles"] .tiles__chimney,
+[data-submotif="tiles"] .tiles__cap {
+  fill: var(--c-text);
+}
+[data-submotif="tiles"] .tiles__wall {
+  fill: var(--c-surface);
+  stroke: var(--c-text);
+}
+[data-submotif="tiles"] .tiles__window {
+  fill: var(--c-bg);
+  stroke: var(--c-text);
+}
+[data-submotif="tiles"] .tiles__verge {
+  stroke: var(--c-text);
+}
+/* The steps climb a ridge line: the stops square like a roof's battens meeting. */
+[data-submotif="tiles"] .steps__item::before,
+[data-submotif="tiles"] .area__list li::before {
+  border-radius: 0;
+  transform: rotate(45deg) scale(0.85);
+}
+
+/* strip: painters on Cevi's layout. A colour strip in the site's own colours beside a roller and its fresh stroke. */
+[data-submotif="strip"] .strip__paint,
+[data-submotif="strip"] .strip__c1 {
+  fill: var(--c-primary);
+}
+[data-submotif="strip"] .strip__roller {
+  fill: var(--c-primary);
+  stroke: var(--c-text);
+}
+[data-submotif="strip"] .strip__handle {
+  stroke: var(--c-text);
+}
+[data-submotif="strip"] .strip__grip {
+  fill: var(--c-text);
+}
+[data-submotif="strip"] .strip__card {
+  fill: var(--c-bg);
+  stroke: var(--c-text);
+}
+[data-submotif="strip"] .strip__c2 {
+  fill: var(--c-band, var(--c-accent));
+}
+[data-submotif="strip"] .strip__c3 {
+  fill: var(--c-inverse);
+}
+[data-submotif="strip"] .strip__c4 {
+  fill: var(--c-muted);
+}
+[data-submotif="strip"] .strip__c5 {
+  fill: var(--c-border);
+}
+/* The steps as swatches on a strip: square chips instead of valves. */
+[data-submotif="strip"] .steps__item::before,
+[data-submotif="strip"] .area__list li::before {
+  border-radius: var(--radius);
+  background: var(--c-band, var(--c-accent));
+}
+
+/* stem and tag: florists and boutiques on Etiketa's layout. The mark on every label card and price label, and beside
+   the name in the header. */
+[data-submotif="stem"] .site-header__brand::before,
+[data-submotif="tag"] .site-header__brand::before {
+  content: "";
+  flex: none;
+  width: 2.5rem;
+  height: 1rem;
+  margin-right: 0.625rem;
+  /* The mark's shape in the header's own text colour, light on Etiketa's dark header or dark on a light one. */
+  background: currentColor;
+  -webkit-mask: var(--motif-brand) no-repeat left center / contain;
+  mask: var(--motif-brand) no-repeat left center / contain;
+}
+[data-submotif="stem"] .stem,
+[data-submotif="tag"] .tag {
+  display: block;
+  flex: none;
+  width: 8.25rem;
+  height: 3.625rem;
+}
+[data-submotif="stem"] .price-label .stem,
+[data-submotif="tag"] .price-label .tag {
+  width: 5.75rem;
+  height: 2.5rem;
+}
+[data-submotif="stem"] .stem__stalk {
+  stroke: var(--c-inverse);
+}
+[data-submotif="stem"] .stem__leaf {
+  fill: var(--c-inverse);
+}
+[data-submotif="stem"] .stem__bloom {
+  fill: var(--c-primary);
+}
+[data-submotif="tag"] .tag__string {
+  stroke: var(--c-inverse);
+}
+[data-submotif="tag"] .tag__body {
+  fill: var(--c-primary);
+}
+[data-submotif="tag"] .tag__hole {
+  fill: var(--c-bg);
+}
+[data-submotif="tag"] .tag__stitch {
+  stroke: var(--c-on-primary);
+}

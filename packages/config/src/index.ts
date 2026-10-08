@@ -200,8 +200,11 @@ export const AppConfigSchema = z.object({
    * each site its own frame (design.skeleton: header family, where the call lives on phones, footer family and tone,
    * section width, cards, buttons, dividers, photo ratio, at most one centred section per page), never the street address as the hero's eyebrow, and holds the
    * direction's section rhythm and primary hue in code. Off: today's shared frame.
+   * concept (Step 3, engine concept.ts): the brief adds subtype, goal, angle, signature fact, materials and local
+   * anchor; the homepage follows a blueprint by goal; a signature device by fact; the subtype picks the motif. Off:
+   * every request is today's.
    */
-  variety: z.object({ families: z.boolean(), skeleton: z.boolean(), neighbours: z.number().int().min(0).max(500) }),
+  variety: z.object({ families: z.boolean(), skeleton: z.boolean(), neighbours: z.number().int().min(0).max(500), concept: z.boolean() }),
   /**
    * The audit's prompt fixes (docs/plans/audit-2026-10-01.md, "Prompts"), one switch each so a paid eval can measure
    * them one at a time. All off: every prompt, request and repair is byte-identical to before (see config $comment).

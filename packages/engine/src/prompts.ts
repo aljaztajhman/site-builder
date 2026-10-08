@@ -95,7 +95,7 @@ export function sectionCatalogue(f: PromptFixes = NO_PROMPT_FIXES): string {
 export function businessSchema(): string {
   return `# Business facts (/business)
 
-Schema: ${JSON.stringify(toModelJsonSchema(Business))}`;
+Schema: ${JSON.stringify(toModelJsonSchema(Business.omit({ subtype: true })))}`;
 }
 
 /** With the directions fix (config promptFixes.directions): no toned-photo promises, imagery in words, editorial's photo hero. */

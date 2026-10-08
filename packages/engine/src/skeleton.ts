@@ -35,16 +35,16 @@ import {
 import { seededOrder } from "./variety.ts";
 
 /** What the business mainly wants a visitor to do (Step 3 will read it from the brief; until then from the trade). */
-export type Goal = "call" | "visit" | "book";
+export type PhoneGoal = "call" | "visit" | "book";
 
-export function goalOf(type: BusinessType, hasBooking: boolean): Goal {
+export function goalOf(type: BusinessType, hasBooking: boolean): PhoneGoal {
   if (hasBooking && (type === "hairdresser" || type === "dental" || type === "physio")) return "book";
   if (type === "restaurant" || type === "bakery" || type === "shop" || type === "tourist-farm") return "visit";
   return "call";
 }
 
 /** Where the call lives on phones, by goal: the bar for call-first trades, the corner button where people come by. */
-const ACTIONS_BY_GOAL: Record<Goal, PhoneActions[]> = {
+const ACTIONS_BY_GOAL: Record<PhoneGoal, PhoneActions[]> = {
   call: ["bar", "header"],
   visit: ["float", "bar"],
   book: ["header", "bar"],

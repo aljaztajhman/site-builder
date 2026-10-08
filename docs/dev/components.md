@@ -11,6 +11,9 @@ How section components are defined and rendered. Read before adding or changing 
 | Styles | `packages/components/styles/<group>.css` (concatenated into one shared `site.css`) |
 | Client-side JS (islands) | `packages/components/islands/<name>.js`, plain ES2020, no dependencies, no build step |
 | Site chrome (header, footer, mobile action bar, cookie consent) | `packages/components/src/chrome/` |
+| Trade motifs (drawn objects of the template directions) | `packages/components/src/motifs/` (`index.tsx` the templates', `trades.tsx` the sub-trades'), `styles/motifs.css`, the repeating pieces as SVG tokens in `packages/render/src/tokens.ts` (`motifVars`, `subMotifVars`) |
+
+Trade motifs: a template direction's motif sets `data-motif` on `<body>` and every rule for it is scoped `[data-motif="x"]`, so each site loads `site-<motif>.css` without the other trades' rules (`packages/render/src/shared.ts`). Sub-trade motifs (spec v15 `business.subtype`, picked by `siteMotif` in `packages/spec/src/motif.ts`) draw on their template's layout: wire, joint, tiles and strip on Cevi (in place of the radiator, the pipe divider, the T-joint bullets and the brand dots), stem and tag on Etiketa (in place of the olive branch, plus a brand mark). They add `data-submotif`, and every one of their rules must name `[data-submotif="x"]` (a test checks it): the site then loads `site-<motif>-<sub>.css`, and the stylesheets of sites without a subtype stay byte-identical. Colours only from tokens; check new motifs with `pnpm motifs:sheet` (360 and 1280 px, axe) and `tools/eval/test/motifs-render.test.ts`.
 
 Groups: `heroes`, `content`, `business`, `structure`. Each group's spec file exports `<group>Schemas` (tuple, `as const`) and `<group>Defs`; each group's components `index.ts` exports `<group>Renderers` keyed by section type. `packages/components/src/registry.ts` uses `satisfies SectionRenderers`, so typecheck fails if a section type has no renderer.
 

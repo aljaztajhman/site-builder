@@ -24,7 +24,6 @@ import {
 import type { ReactNode } from "react";
 import {
   COLLECTION_KINDS,
-  DIRECTIONS,
   centredOn,
   collectionEntries,
   entrySlugs,
@@ -35,6 +34,8 @@ import {
   mapsUrl,
   setAt,
   fontPair,
+  siteMotif,
+  stylesheetName,
   type ImageRef,
   type LinkTarget,
   type Locale,
@@ -302,8 +303,9 @@ function renderDocument(spec: SiteSpec, localized: SiteSpec, opts: RenderOptions
   const fontsBase = ctx.shared("fonts/");
   const preloadFonts = fontFiles(design).filter((f) => f === `${pair.heading.file}.woff2` || f === `${pair.body.file}.woff2`);
 
-  // Trade templates draw their motif (dividers, bullets, plates) from CSS keyed on this attribute.
-  const motif = DIRECTIONS.find((d) => d.id === design.direction)?.template?.motif;
+  // Trade templates draw their motif (dividers, bullets, plates) from CSS keyed on this attribute; a sub-trade motif
+  // (spec v15 business.subtype) draws its own pieces on the template's layout.
+  const { motif, sub } = siteMotif(localized);
   const bar = localized.chrome.mobileActionBar === true;
   // Bar on screen from the start with an action the hero also offers (its call, a booking): on a phone the hero's
   // one is hidden (chrome.css), so one screen never shows two of the same.
@@ -334,7 +336,7 @@ function renderDocument(spec: SiteSpec, localized: SiteSpec, opts: RenderOptions
   // The page's one centred section (design.skeleton.centred), if any; none without a skeleton.
   const centred = centredOn(skeleton, doc.sections, motif);
   const renderBody = (suffixes: ReadonlyMap<string, string>) => renderToStaticMarkup(
-    <body data-imagery={design.imagery} data-motif={motif} className={bodyClass} {...skeletonAttrs}>
+    <body data-imagery={design.imagery} data-motif={motif} data-submotif={sub} className={bodyClass} {...skeletonAttrs}>
       <a className="skip-link" href="#main">
         {ctx.t("skipToContent")}
       </a>
@@ -403,8 +405,8 @@ function renderDocument(spec: SiteSpec, localized: SiteSpec, opts: RenderOptions
         <link rel="preload" as="image" type="image/avif" imageSrcSet={avif.srcSet} imageSizes={lcp.sizes} fetchPriority="high" />
       )}
       {/* The stylesheet without other trades' motif rules (shared.ts stylesheetFor). */}
-      <link rel="stylesheet" href={ctx.shared(motif ? `site-${motif}.css` : "site.css")} />
-      <style dangerouslySetInnerHTML={{ __html: fontFaceCss(design, fontsBase) + tokensCss(design) }} />
+      <link rel="stylesheet" href={ctx.shared(stylesheetName({ motif, sub }))} />
+      <style dangerouslySetInnerHTML={{ __html: fontFaceCss(design, fontsBase) + tokensCss(design, sub) }} />
       {doc.jsonLd.map((json, i) => (
         <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: json }} />
       ))}

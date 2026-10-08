@@ -284,7 +284,7 @@ describe("migration 13 → 14 (the owner's own texts, it-keep-owner-edits)", () 
       expect(v14.ownerEdits, id).toBeUndefined();
       expect(validateSite(migrateSpec(v14)).issues, id).toEqual([]);
     }
-    const site = read("pekarna-kvas");
+    const site = migrateSpec(read("pekarna-kvas"));
     const section = site.pages[0]!.sections[0]!.id;
     expect(Schema.safeParse({ ...site, ownerEdits: [{ section, path: "/props/title" }] }).success).toBe(true);
     // Only pointers inside a section's props, by a section id; never more than MAX_OWNER_EDITS.
@@ -301,18 +301,38 @@ describe("migration 14 → 15 (the site's skeleton, variety engine Step 4)", () 
     const read = (id: string) => JSON.parse(readFileSync(new URL(`../../../tools/eval/golden/${id}.json`, import.meta.url), "utf8")) as SiteSpec;
     for (const id of ["avtoservis-mrak", "kmetija-grabnar", "pekarna-kvas", "racunovodstvo-seliskar"]) {
       const golden = read(id);
-      const v15 = migrateSpec({ ...golden, specVersion: 14 });
+      const v15 = migrateSpec({ ...golden, specVersion: 14 }, MIGRATIONS, 15);
       expect(v15, id).toEqual({ ...golden, specVersion: 15 });
       expect(v15.design.skeleton, id).toBeUndefined();
-      expect(validateSite(v15).issues, id).toEqual([]);
+      expect(validateSite(migrateSpec(v15)).issues, id).toEqual([]);
       // Today's header and footer variants are skeleton families one to one.
       const skeleton = skeletonOfChrome(golden.chrome);
       expect([skeleton.header, skeleton.footer], id).toEqual([golden.chrome.header.variant, golden.chrome.footer.variant]);
-      expect(validateSite({ ...v15, design: { ...v15.design, skeleton } }).issues, id).toEqual([]);
+      expect(validateSite(migrateSpec({ ...v15, design: { ...v15.design, skeleton } })).issues, id).toEqual([]);
     }
     const site = read("pekarna-kvas");
     const skeleton = skeletonOfChrome(site.chrome);
     expect(Schema.safeParse({ ...site, design: { ...site.design, skeleton: { ...skeleton, header: "hamburger" } } }).success).toBe(false);
     expect(Schema.safeParse({ ...site, design: { ...site.design, skeleton: { ...skeleton, buttons: "pill" } } }).success).toBe(false);
+  });
+});
+
+describe("migration 15 → 16 (the business subtype, variety engine Step 3)", () => {
+  it("turns stored v15 sites into valid v16 sites unchanged apart from the version; the subtype is optional and checked", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { validateSite, SiteSpec: Schema } = await import("../src/index.ts");
+    const read = (id: string) => JSON.parse(readFileSync(new URL(`../../../tools/eval/golden/${id}.json`, import.meta.url), "utf8")) as SiteSpec;
+    for (const id of ["instalacije-rebernik", "trgovina-oljka-in-sol", "avtoservis-mrak", "kmetija-grabnar"]) {
+      const golden = read(id);
+      const v16 = migrateSpec({ ...golden, specVersion: 15 }, MIGRATIONS, 16);
+      expect(v16, id).toEqual({ ...golden, specVersion: 16 });
+      expect(v16.business.subtype, id).toBeUndefined();
+      expect(validateSite(v16).issues, id).toEqual([]);
+    }
+    const shop = migrateSpec(read("trgovina-oljka-in-sol"));
+    expect(Schema.safeParse({ ...shop, business: { ...shop.business, subtype: "florist" } }).success).toBe(true);
+    // Only a known subtype; whether it fits the type is validateSite's (subtype.test.ts).
+    expect(Schema.safeParse({ ...shop, business: { ...shop.business, subtype: "gardening" } }).success).toBe(false);
+    expect(SPEC_VERSION).toBe(16);
   });
 });

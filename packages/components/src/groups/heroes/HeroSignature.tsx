@@ -1,6 +1,6 @@
 import { formatAddress, isPlaceholder, type Link, type SectionOf } from "@sb/spec";
 import { ActionLink, Actions, HoursList, Picture, Ph, Section, titleId } from "../../primitives/index.tsx";
-import { Branch, CallObject, Limb, Radiator, Receipt, Seal, motifOf } from "../../motifs/index.tsx";
+import { CallObject, LabelMark, Limb, Receipt, Seal, TradeDrawing } from "../../motifs/index.tsx";
 import type { RenderCtx, SectionProps } from "../../types.ts";
 
 /** photo: the photo fills the hero at every width. */
@@ -373,7 +373,7 @@ export function HeroSignature({ section, ctx, index }: SectionProps<"hero-signat
       <Section id={section.id} type={section.type} variant={variant} tone={section.tone ?? "inverse"}>
         <div className={image ? "hsig hsig--label hsig--has-image" : "hsig hsig--label"}>
           <div className="label-card hsig__card">
-            <Branch />
+            <LabelMark ctx={ctx} />
             {props.eyebrow && <p className="eyebrow hsig__eyebrow">{props.eyebrow}</p>}
             {where && <p className="hsig__where">{where}</p>}
             {title}
@@ -405,7 +405,7 @@ export function HeroSignature({ section, ctx, index }: SectionProps<"hero-signat
             {fact ?? sealBlock}
             {links}
           </div>
-          {motifOf(ctx) === "pipes" && <Radiator className="hsig__drawing" />}
+          <TradeDrawing ctx={ctx} id={section.id} className="hsig__drawing" />
         </div>
       </Section>
     );
