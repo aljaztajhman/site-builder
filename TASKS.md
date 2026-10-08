@@ -267,7 +267,12 @@ Owner, 2026-10-04: "I don't want it to look like a template filler and that ever
   - "Ustvari znova" tells the design step the look it replaces and moves the seed;
   - `awayFromNeighbours` covers sites of the same trade, same town first (`repo.neighbourLooks`, config `variety.neighbours`);
   - a test: 20 sites of one trade never collide.
-- [ ] Step 2, "Druga podoba" (`it-druga-podoba`): waits for decision `sb-druga-podoba`
+- [x] Step 2, "Druga podoba" (`it-druga-podoba`, decision `sb-druga-podoba` = one-plus-switch), built 2026-10-08 behind `variety.families`:
+  - `POST /api/sites/:id/look` (engine `another-look.ts`): the next look of the site's template family in a cycle fixed by the seed (each step a new palette), away from the neighbours, saved as a version through the direct editor's path (enforceDesign, validation, plan limits); no model call, no reservation; with `variety.skeleton` on, another skeleton too;
+  - the hero changes only where the other hero takes the same props (split ↔ image, type large ↔ with-facts); a signature hero (every template's own) keeps its hero and changes palette and fonts;
+  - the editor's "Druga podoba" button under Oblika › Slog, shown only with the switch on and a family; undo goes back;
+  - Checks: `packages/engine/test/another-look.test.ts`, `apps/web/test/another-look.test.ts`, `apps/web/test/another-look-browser.test.ts` (360 and 1280 px, with and without the skeleton).
+- [ ] "Druga podoba" across hero types (signature ↔ split/type): needs content per section intent (Step 5) or a content call; today a signature hero keeps its hero.
 - [ ] Step 3, the concept (`it-concept-brief`, `it-motif-library`): brief gains goal, angle, signature fact, materials and local anchor; homepage blueprints by goal; signature device by fact, not trade; motifs and `subtype` per sub-trade (electricians, carpenters and roofers no longer get the radiator; florists no longer get bottle labels). Spec bump + migration. ≈ €5
 - [ ] Step 4, break the shared skeleton (`it-shared-skeleton`, `it-hero-families`): header families that differ on phones, optional eyebrow (not the street address by default), phone bar by goal, footer families and tone, section width, alignment, card, button and divider styles, rhythm and hue held in code. ≈ €6
 - [ ] Step 5, design in parts (`it-design-genome`): direction split into independent axes with compatibility rules, directions and templates as presets, content against section intents so a new look needs no content call. Spec bump + migration. ≈ €10
