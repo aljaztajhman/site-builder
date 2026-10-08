@@ -53,7 +53,7 @@ export function sectionCatalogue(): string {
 export function businessSchema(): string {
   return `# Business facts (/business)
 
-Schema: ${JSON.stringify(toModelJsonSchema(Business))}`;
+Schema: ${JSON.stringify(toModelJsonSchema(Business.omit({ subtype: true })))}`;
 }
 
 export function directionsCatalogue(): string {

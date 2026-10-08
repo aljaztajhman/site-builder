@@ -200,8 +200,11 @@ export const AppConfigSchema = z.object({
    * each site its own frame (design.skeleton: header family, where the call lives on phones, footer family and tone,
    * section width, cards, buttons, dividers, photo ratio, at most one centred section per page), never the street address as the hero's eyebrow, and holds the
    * direction's section rhythm and primary hue in code. Off: today's shared frame.
+   * concept (Step 3, engine concept.ts): the brief adds subtype, goal, angle, signature fact, materials and local
+   * anchor; the homepage follows a blueprint by goal; a signature device by fact; the subtype picks the motif. Off:
+   * every request is today's.
    */
-  variety: z.object({ families: z.boolean(), skeleton: z.boolean(), neighbours: z.number().int().min(0).max(500) }),
+  variety: z.object({ families: z.boolean(), skeleton: z.boolean(), neighbours: z.number().int().min(0).max(500), concept: z.boolean() }),
   /**
    * Generation cost cuts (docs/plans/cost-cuts.md, see config $comment). secondCritiqueOnlyOnFailures: a second critique
    * round only when the re-check after the first still reports failures. contentRetryAsPatch: a content answer that fails

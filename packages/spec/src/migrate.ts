@@ -72,6 +72,11 @@ export const MIGRATIONS: Record<number, (spec: RawSpec) => RawSpec> = {
   // their chrome variants, which map one to one into the skeleton's families (skeletonOfChrome). Every v14 spec is a
   // valid v15 spec.
   14: (spec) => spec,
+  // 15 → 16: the business subtype (variety engine Step 3, it-concept-brief). Additive: the optional
+  // `business.subtype` (a trade within the type, e.g. builder › electrical), set only by the variety engine's
+  // concept; it picks the drawn motif within a template. A stored site has none and renders as before. Every v15
+  // spec is a valid v16 spec.
+  15: (spec) => spec,
 };
 
 export function migrateSpec(input: unknown, migrations = MIGRATIONS, target: number = SPEC_VERSION): SiteSpec {

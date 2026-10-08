@@ -3,13 +3,49 @@
  * stock ornaments. Every fact they show comes from the business facts; every colour from the site's
  * tokens (CSS classes in styles/motifs.css), so a motif follows a colour edit.
  */
-import { DIRECTIONS, earliestOpening, formatPhoneNational, isPlaceholder, plateCode, type Motif } from "@sb/spec";
+import { DIRECTIONS, earliestOpening, formatPhoneNational, isPlaceholder, plateCode, siteMotif, type Motif, type SubMotif } from "@sb/spec";
 import { Ph, cx } from "../primitives/index.tsx";
 import type { RenderCtx } from "../types.ts";
+import { JointDrawing, Stem, StripDrawing, Tag, TilesDrawing, WireDrawing } from "./trades.tsx";
+
+export * from "./trades.tsx";
 
 /** The motif of the site's design direction, if it is a template direction. */
 export function motifOf(ctx: RenderCtx): Motif | undefined {
   return DIRECTIONS.find((d) => d.id === ctx.site.design.direction)?.template?.motif;
+}
+
+/** The sub-trade motif drawn on the template's layout (spec v15 business.subtype), if any. */
+export function subMotifOf(ctx: RenderCtx): SubMotif | undefined {
+  return siteMotif(ctx.site).sub;
+}
+
+/**
+ * The drawing beside the drawing hero's call (Cevi's layout): the radiator for plumbing and heating, or the sub-trade's
+ * own (a socket on its cable, a dovetailed corner, a tiled roof, a colour strip and a roller). Decorative.
+ */
+export function TradeDrawing({ ctx, id, className }: { ctx: RenderCtx; id: string; className?: string }) {
+  if (motifOf(ctx) !== "pipes") return null;
+  switch (subMotifOf(ctx)) {
+    case "wire":
+      return <WireDrawing className={className} />;
+    case "joint":
+      return <JointDrawing className={className} />;
+    case "tiles":
+      return <TilesDrawing id={id} className={className} />;
+    case "strip":
+      return <StripDrawing className={className} />;
+    default:
+      return <Radiator className={className} />;
+  }
+}
+
+/** The mark on a label card and a price label (Etiketa's layout): the olive branch, or a florist's stem, a boutique's tag. */
+export function LabelMark({ ctx }: { ctx: RenderCtx }) {
+  const sub = subMotifOf(ctx);
+  if (sub === "stem") return <Stem />;
+  if (sub === "tag") return <Tag />;
+  return <Branch />;
 }
 
 /** The blue EU strip of a Slovenian plate. Decorative: the link or price around it carries the meaning. */

@@ -16,7 +16,9 @@
     "$comment": "Variety engine Steps 1–2 (docs/plans/variety-engine.md). Off until a twin eval shows the look distance within a trade goes up and judge medians hold (pnpm eval --twins --no-edits). skeleton: Step 4, each site its own header, phone actions, footer and section styles, at most one centred section per page (design.skeleton, spec v15), one call button per screen, never the street address as the hero's eyebrow, section rhythm and primary hue held in code; off until the twin judge has seen it (contact sheet: pnpm variety:skeleton).",
     "families": false,
     "skeleton": false,
-    "neighbours": 50
+    "neighbours": 50,
+    "$conceptComment": "concept: Step 3. The brief adds the subtype, goal, angle, signature fact, materials and local anchor (materials and anchor only from the client's text, checked in code); the homepage follows a blueprint by goal instead of the template's fixed outline; a signature device by fact; the subtype picks the motif (wire, joint, tiles, strip, stem, tag). Off: every request is today's. Turning it on needs the paid twin eval (≈ €5).",
+    "concept": false
   },
   "costCuts": {
     "$comment": "Generation cost cuts (docs/plans/cost-cuts.md items 1 and 7). secondCritiqueOnlyOnFailures: with limits.critiqueIterations 2, the second critique round runs only when the checks after the first round's patches still report failures (3 of 4 recorded second rounds returned no patches, ≈ €0.022 and 40–60 s of checks each); otherwise the job ends after round 1 and logs why. contentRetryAsPatch: a content answer that still fails validation after the code repairs gets an RFC 6902 patch fixing only the listed issues (≈ 300 output tokens instead of 3–5k), applied in code; a patch that doesn't apply or leaves issues falls back to the whole-JSON retry, all within limits.contentRetries. Both off until the 3-fixture critique eval and a full-scope eval on the fixtures that retried (gostilna, kmetija, instalacije) confirm them.",
