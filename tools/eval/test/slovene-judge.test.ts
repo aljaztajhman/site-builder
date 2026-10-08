@@ -13,7 +13,10 @@ import type { FixtureResult } from "../src/runner.ts";
 /** The opt-in Slovene judge, with fake transports only: no model call is made here. */
 const here = path.dirname(fileURLToPath(import.meta.url));
 const config = loadConfig();
-const spec = JSON.parse(readFileSync(path.join(here, "../golden/pekarna-kvas.json"), "utf8")) as SiteSpec;
+// The bakery golden with the two informal call buttons it had until 2026-10-08, so the lint and the judge have something to find.
+const spec = JSON.parse(
+  readFileSync(path.join(here, "../golden/pekarna-kvas.json"), "utf8").replace('"Pokličite za naročilo"', '"Pokliči za naročilo"').replace(/("action": \{\s*"label": )"Pokličite"/, '$1"Pokliči"'),
+) as SiteSpec;
 const corpus = (JSON.parse(readFileSync(path.join(here, "../fixtures/pekarna-kvas/brief.json"), "utf8")) as { description: string }).description;
 /** The batch request body, from the transport's own API type (the SDK is the engine's dependency, not the eval's). */
 type BatchBody = Parameters<BatchApi["create"]>[0];

@@ -71,7 +71,7 @@
             "eyebrow": "Šutna 30, Kamnik",
             "headline": "Kruh z drožmi, ki vzhaja čez noč",
             "intro": "Družinska pekarna na začetku stare ulice. Vse je ročno delo, brez aditivov in brez zamrznjenega testa.",
-            "primary": { "label": "Pokliči za naročilo", "target": { "action": "call" } },
+            "primary": { "label": "Pokličite za naročilo", "target": { "action": "call" } },
             "secondary": { "label": "Kaj pečemo", "target": { "page": "p_home", "section": "s_products" } },
             "image": "img_01"
           }
@@ -123,7 +123,7 @@
               { "title": "Najmanj dva dni prej", "text": "Toliko časa potrebuje testo, da vzhaja in se speče." },
               { "title": "Prevzem v pekarni", "text": "Potico prevzamete na Šutni v času odprtja." }
             ],
-            "action": { "label": "Pokliči", "target": { "action": "call" } }
+            "action": { "label": "Pokličite", "target": { "action": "call" } }
           }
         },
         { "id": "s_hours", "type": "opening-hours", "variant": "compact", "props": { "title": "Kdaj smo odprti" } },
