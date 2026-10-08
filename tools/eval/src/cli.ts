@@ -34,8 +34,8 @@
  *                   docs/plans/variety-engine.md). With families on, every generated site also gets its "Druga podoba"
  *                   (no model call) rendered, checked and measured against the generated look. The sites made earlier
  *                   in a run are always the later fixtures' neighbours (same trade, same town first), as on the platform.
- * --regenerate:     after the checks, "Ustvari znova" once per fixture (a real generation, paid) and the look distance
- *                   from the first generation (variety Step 2: a regeneration explores).
+ * --regenerate [twins]: after the checks, "Ustvari znova" once per fixture (a real generation, paid) and the look
+ *                   distance from the first generation (variety Step 2: a regeneration explores); "twins": twins only.
  * --recordings <dir>: where --record-missing and --replay keep the recordings (default tools/eval/recordings, the
  *                   full-scope ones the tests replay; a homepage-scope or switched run should keep its own).
  * --reuse-pictures: a picture request the cache doesn't know takes the picture the fixture got earlier at the same
@@ -159,6 +159,7 @@ if (varietyArg) {
   console.log(`Variety switches on: ${names.join(", ")}`);
 }
 const regenerate = flag("regenerate");
+const twinIds = new Set(value("regenerate") === "twins" ? loadTwins().map((t) => t.id) : []);
 if (regenerate && !paid) {
   console.error("--regenerate needs real generations (live or --record-missing).");
   process.exit(2);
@@ -200,7 +201,7 @@ try {
       edits,
       // The sites made so far in this run are the platform's other sites (the variety engine's neighbours).
       neighbours: results.flatMap((x) => (x.made ? [x.made] : [])),
-      regenerate,
+      regenerate: regenerate && (twinIds.size === 0 || twinIds.has(f.id)),
       reusePictures: flag("reuse-pictures"),
       ...(judgeBatch ? { judgeBatch } : {}),
     });
