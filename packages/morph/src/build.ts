@@ -85,8 +85,10 @@ export interface Build {
  */
 export function prepareBuild(target: Document | HTMLElement, opts: BuildOptions = {}): Build {
   const { calm = false, panels: panelSel = "header, section, footer, [data-panel]", boxes: boxSel = "picture, button, .btn, [data-box]", barAlpha = 0.22 } = opts;
-  const doc = target instanceof Document ? target : target.ownerDocument;
-  const whole = target instanceof Document || target === doc.documentElement;
+  // nodeType, not instanceof: an iframe's document comes from another realm, where `Document` is another class.
+  const isDoc = target.nodeType === Node.DOCUMENT_NODE;
+  const doc = isDoc ? (target as Document) : (target as HTMLElement).ownerDocument;
+  const whole = isDoc || target === doc.documentElement;
   const root = whole ? doc.documentElement : (target as HTMLElement);
   const scope = whole ? doc.body : root;
   const win = doc.defaultView!;

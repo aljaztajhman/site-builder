@@ -5,12 +5,14 @@ import path from "node:path";
 import type { AddressInfo } from "node:net";
 import { chromium, type Browser, type Page } from "playwright";
 import { root } from "../scripts/bundle.ts";
+import type * as Morph from "../src/index.ts";
 
 /**
  * The engine in Chromium, through the example page (examples/index.html, which loads dist/morph.js the way
  * another project would): a switch morphs part by part on a view transition and leaves exactly the new
  * screen, with nothing of the engine left behind; a newer switch skips a running one; the build takes the
- * screen apart and gives back the same text; reduced motion cross-fades without keyframes.
+ * screen apart and gives back the same text, also for an iframe's document (another realm, as on the
+ * landing); reduced motion cross-fades without keyframes.
  */
 let server: Server;
 let base: string;
@@ -107,6 +109,33 @@ describe.each([1280, 360])("@sb/morph example at %i px", (width) => {
       await built;
       expect(await screenHtml(page)).toBe(before);
       expect(await page.evaluate(() => document.querySelectorAll("mb-w, [data-mb-panel], [data-mb-box]").length)).toBe(0);
+      expect(problems).toEqual([]);
+    } finally {
+      await close();
+    }
+  }, 60_000);
+
+  it("builds a document in an iframe (another realm) and gives back the same markup", async () => {
+    const { page, problems, close } = await open({ width });
+    try {
+      // The engine as another project loads it (a page evaluate can't import: the test runner rewrites import()).
+      await page.addScriptTag({ type: "module", content: "import * as m from '/dist/morph.js'; window.morphLib = m;" });
+      await page.waitForFunction(() => "morphLib" in window);
+      const r = await page.evaluate(async () => {
+        const m = (window as unknown as { morphLib: typeof Morph }).morphLib;
+        const f = document.createElement("iframe");
+        f.srcdoc = "<!doctype html><body><header><h1>Hello there</h1></header><section><p>Some words <b>here</b></p><button>Go</button></section></body>";
+        const loaded = new Promise((ok) => f.addEventListener("load", ok, { once: true }));
+        document.body.append(f);
+        await loaded;
+        const doc = f.contentDocument!;
+        const before = doc.body.outerHTML;
+        const b = m.prepareBuild(doc, { panels: "header, section" });
+        const during = { root: doc.documentElement.classList.contains("mb-bld"), words: doc.querySelectorAll("mb-w").length };
+        await m.runBuild(b, () => {}, { structure: { spread: 10, total: 20 }, colours: { apart: 5, after: 10 }, photos: { apart: 5, after: 10 }, text: { perWord: 5, total: 20, after: 650 } });
+        return { during, same: doc.body.outerHTML === before, left: doc.documentElement.className };
+      });
+      expect(r).toEqual({ during: { root: true, words: 4 }, same: true, left: "" });
       expect(problems).toEqual([]);
     } finally {
       await close();
