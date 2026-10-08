@@ -26,6 +26,13 @@
   font: 600 0.75rem/1.3 var(--font-body);
   pointer-events: none;
 }
+/* An arched top (mirrors, the arch hero) cuts the top-right corner off: the label goes to the bottom right, which no
+   seal or panel covers there. */
+.arch-top.media--ai::after,
+.hsig__arch-media.media--ai::after {
+  top: auto;
+  bottom: 0.5rem;
+}
 
 [data-imagery="natural"] .media {
   border-radius: 0;
