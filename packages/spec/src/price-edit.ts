@@ -9,6 +9,12 @@
  */
 import { EDITOR_STARTER_TEXT } from "./starter.ts";
 import { formatPrice } from "./format.ts";
+import { PRICE_ON_REQUEST, isPriceOnRequest, type PriceOnRequestValue } from "./price-on-request.ts";
+
+export { PRICE_ON_REQUEST, isPriceOnRequest } from "./price-on-request.ts";
+
+/** "Cena po dogovoru" as the site shows it in the price's place, in Slovene (components i18n priceOnRequest). */
+export const ON_REQUEST_LABEL = "po dogovoru";
 
 export type PriceListType = "price-list" | "menu";
 
@@ -95,12 +101,13 @@ interface PriceValue {
   from?: boolean;
   unit?: string;
 }
-type PriceLike = PriceValue | { $placeholder: string; note?: string };
+type PriceLike = PriceValue | { $placeholder: string; note?: string } | PriceOnRequestValue;
 
 const isPricePlaceholder = (p: unknown): p is { $placeholder: string } => !!p && typeof p === "object" && "$placeholder" in p;
 
-/** A price as the published site shows it in Slovene ("od 12,50 € / kos"), or null for a missing one. */
+/** A price as the published site shows it in Slovene ("od 12,50 € / kos", "po dogovoru"), or null for a missing one. */
 export function priceLabel(price: unknown): string | null {
+  if (isPriceOnRequest(price)) return ON_REQUEST_LABEL;
   if (!price || typeof price !== "object" || isPricePlaceholder(price)) return null;
   const p = price as PriceValue;
   if (typeof p.amount !== "number") return null;
@@ -228,7 +235,8 @@ export function cleanItem(type: PriceListType, item: ListItem): ListItem {
   }
   if (type !== "menu" || !out.tags?.length) delete out.tags;
   if (out.unavailable !== true) delete out.unavailable;
-  if (!isPricePlaceholder(out.price)) {
+  if (isPriceOnRequest(out.price)) out.price = { ...PRICE_ON_REQUEST };
+  else if (!isPricePlaceholder(out.price)) {
     const price: PriceValue = { ...(out.price as PriceValue) };
     const unit = price.unit?.trim();
     if (unit) price.unit = unit;
@@ -322,6 +330,22 @@ export const listEdits = {
         return [k, j];
       }),
     ];
+  },
+
+  /**
+   * "Vse cene po dogovoru": every item of the list gets the price "po dogovoru", amounts typed before
+   * included (the editor asks first). Only the price changes; [] when every price already is.
+   */
+  allOnRequest(spec: unknown, at: ListAt): PatchOp[] | null {
+    const l = locate(spec, at);
+    if (!l) return null;
+    const ops: PatchOp[] = [];
+    l.groups.forEach((_, g) =>
+      (itemsOf(l, g) ?? []).forEach((item, i) => {
+        if (!isPriceOnRequest(item.price)) ops.push({ op: "replace", path: `${l.list}/${g}/${l.shape.items}/${i}/price`, value: { ...PRICE_ON_REQUEST } });
+      }),
+    );
+    return ops.length ? [l.guard, ...ops] : [];
   },
 
   removeItem(spec: unknown, at: ListAt, g: number, i: number): PatchOp[] | null {

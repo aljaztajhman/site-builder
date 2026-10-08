@@ -327,12 +327,47 @@ describe("migration 15 → 16 (the business subtype, variety engine Step 3)", ()
       const v16 = migrateSpec({ ...golden, specVersion: 15 }, MIGRATIONS, 16);
       expect(v16, id).toEqual({ ...golden, specVersion: 16 });
       expect(v16.business.subtype, id).toBeUndefined();
-      expect(validateSite(v16).issues, id).toEqual([]);
+      // Valid once brought to the current version (the schema accepts only the current one).
+      expect(validateSite(migrateSpec(v16)).issues, id).toEqual([]);
     }
     const shop = migrateSpec(read("trgovina-oljka-in-sol"));
     expect(Schema.safeParse({ ...shop, business: { ...shop.business, subtype: "florist" } }).success).toBe(true);
     // Only a known subtype; whether it fits the type is validateSite's (subtype.test.ts).
     expect(Schema.safeParse({ ...shop, business: { ...shop.business, subtype: "gardening" } }).success).toBe(false);
-    expect(SPEC_VERSION).toBe(16);
+  });
+});
+
+describe("migration 16 → 17 (\"Cena po dogovoru\", it-price-on-request)", () => {
+  it("turns stored v16 sites into valid v17 sites unchanged apart from the version; a price may be { onRequest: true }", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { validateSite, publishChecklist, SiteSpec: Schema } = await import("../src/index.ts");
+    const read = (id: string) => JSON.parse(readFileSync(new URL(`../../../tools/eval/golden/${id}.json`, import.meta.url), "utf8")) as SiteSpec;
+    for (const id of ["frizerstvo-lana", "gostilna-zlata-zlica", "pekarna-kvas", "racunovodstvo-seliskar"]) {
+      const golden = read(id);
+      const v17 = migrateSpec({ ...golden, specVersion: 16 }, MIGRATIONS, 17);
+      expect(v17, id).toEqual({ ...golden, specVersion: 17 });
+      expect(validateSite(migrateSpec(v17)).issues, id).toEqual([]);
+    }
+    // The salon's price list: "Pramene" has no price in the brief (a placeholder, so a publish blocker).
+    const salon = read("frizerstvo-lana");
+    const items = (salon.pages[1]!.sections[1]!.props as { groups: { items: { name: string; price: unknown }[] }[] }).groups[1]!.items;
+    const pramene = items.findIndex((i) => i.name === "Pramene");
+    const path = `/pages/1/sections/1/props/groups/1/items/${pramene}/price`;
+    expect(publishChecklist(salon)).toContainEqual({ path, kind: "placeholder", detail: "price" });
+    items[pramene]!.price = { onRequest: true };
+    expect(validateSite(salon).issues).toEqual([]);
+    // The owner's own answer: no longer on the checklist.
+    expect(publishChecklist(salon).filter((b) => b.path === path)).toEqual([]);
+    // Exactly { onRequest: true }: never beside an amount, never false.
+    for (const bad of [{ onRequest: false }, { onRequest: true, amount: 12 }, { onRequest: true, unit: "na uro" }, { onRequest: "da" }]) {
+      items[pramene]!.price = bad;
+      expect(Schema.safeParse(salon).success, JSON.stringify(bad)).toBe(false);
+    }
+    // Menus, services, products and rooms share the one price: a menu's dish too.
+    const inn = read("gostilna-zlata-zlica");
+    const dishes = (inn.pages[1]!.sections[1]!.props as { categories: { dishes: { price: unknown }[] }[] }).categories[0]!.dishes;
+    dishes[0]!.price = { onRequest: true };
+    expect(validateSite(inn).issues).toEqual([]);
+    expect(SPEC_VERSION).toBe(17);
   });
 });

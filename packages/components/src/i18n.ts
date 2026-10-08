@@ -46,6 +46,8 @@ const sl = {
   footerNav: "Povezave v nogi",
   social: "Družbena omrežja",
   priceLabel: "Cena",
+  /** The owner's "Cena po dogovoru" in the price's place: short, it stands where an amount would. */
+  priceOnRequest: "po dogovoru",
   /** An item the owner marked as not available right now (price lists, menus). */
   unavailable: "Trenutno ni na voljo",
   day: "Dan",
@@ -151,6 +153,7 @@ const en: Record<UiKey, string> = {
   footerNav: "Footer links",
   social: "Social media",
   priceLabel: "Price",
+  priceOnRequest: "on request",
   unavailable: "Currently unavailable",
   day: "Day",
   map: "Map",

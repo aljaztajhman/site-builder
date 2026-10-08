@@ -77,6 +77,9 @@ export const MIGRATIONS: Record<number, (spec: RawSpec) => RawSpec> = {
   // concept; it picks the drawn motif within a template. A stored site has none and renders as before. Every v15
   // spec is a valid v16 spec.
   15: (spec) => spec,
+  // 16 → 17: "Cena po dogovoru" (it-price-on-request). Additive: a price may be `{ onRequest: true }`, set only by the
+  // owner in the editor. Every v16 spec is a valid v17 spec.
+  16: (spec) => spec,
 };
 
 export function migrateSpec(input: unknown, migrations = MIGRATIONS, target: number = SPEC_VERSION): SiteSpec {

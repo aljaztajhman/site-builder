@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { missingFacts, type PublishBlocker } from "../src/index.ts";
+import { readFileSync } from "node:fs";
+import { migrateSpec, missingFacts, publishChecklist, type PublishBlocker, type SiteSpec } from "../src/index.ts";
 
 describe("missingFacts (the 'Še to potrebujemo' screen)", () => {
   it("asks for the facts only the owner can give, once each, in checklist order", () => {
@@ -24,5 +25,16 @@ describe("missingFacts (the 'Še to potrebujemo' screen)", () => {
       { path: "/business/provider/taxNumber", kind: "taxNumber" },
     ]);
     expect(missingFacts([])).toEqual([]);
+  });
+});
+
+describe("a price the owner gave \"po dogovoru\"", () => {
+  it("is not missing: it leaves the screen and the checklist, the other missing prices stay", () => {
+    const spec = migrateSpec(JSON.parse(readFileSync(new URL("../../../tools/eval/golden/frizerstvo-lana.json", import.meta.url), "utf8"))) as SiteSpec;
+    const prices = () => missingFacts(publishChecklist(spec)).filter((f) => f.kind === "price").map((f) => f.path);
+    const before = prices();
+    expect(before).toContain("/pages/1/sections/1/props/groups/1/items/1/price");
+    (spec.pages[1]!.sections[1]!.props as { groups: { items: { price: unknown }[] }[] }).groups[1]!.items[1]!.price = { onRequest: true };
+    expect(prices()).toEqual(before.filter((p) => p !== "/pages/1/sections/1/props/groups/1/items/1/price"));
   });
 });

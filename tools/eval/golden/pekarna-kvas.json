@@ -1,5 +1,5 @@
 {
-  "specVersion": 16,
+  "specVersion": 17,
   "slug": "pekarna-kvas",
   "locales": { "default": "sl", "enabled": ["sl"] },
   "business": {

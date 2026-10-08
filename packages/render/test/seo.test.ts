@@ -150,6 +150,29 @@ describe("structured data", () => {
     expect(offers.some((o) => o.itemOffered.name === b.name)).toBe(false);
   });
 
+  it("gives no price for a price \"po dogovoru\": the item is offered, its price isn't, in a catalog and a menu", () => {
+    const spec = golden("frizerstvo-lana");
+    const lists = spec.pages.flatMap((p) => p.sections).flatMap((s) => (s.type === "price-list" ? [s] : []));
+    for (const l of lists) for (const it of l.props.groups.flatMap((g) => g.items)) if (it.name === "Barvanje") it.price = { onRequest: true };
+    const data = JSON.parse(jsonLd(spec)) as { hasOfferCatalog: { itemListElement: Record<string, unknown>[] } };
+    const offer = data.hasOfferCatalog.itemListElement.find((o) => (o.itemOffered as { name: string }).name === "Barvanje")!;
+    expect(offer).toMatchObject({ "@type": "Offer", itemOffered: { "@type": "Service", name: "Barvanje" } });
+    for (const k of ["price", "priceCurrency", "priceSpecification", "offers"]) expect(offer).not.toHaveProperty(k);
+    // The others keep theirs.
+    expect(data.hasOfferCatalog.itemListElement.find((o) => (o.itemOffered as { name: string }).name === "Moško striženje")).toMatchObject({ price: 15, priceCurrency: "EUR" });
+
+    const inn = golden("gostilna-zlata-zlica");
+    const menu = inn.pages.flatMap((p) => p.sections).find((s) => s.type === "menu")!;
+    if (menu.type !== "menu") throw new Error("no menu");
+    const dish = menu.props.categories[0]!.dishes[0]!;
+    dish.price = { onRequest: true };
+    const served = JSON.parse(jsonLd(inn)) as { hasMenu: { hasMenuSection: { hasMenuItem: Record<string, unknown>[] }[] } };
+    const item = served.hasMenu.hasMenuSection.flatMap((m) => m.hasMenuItem).find((i) => i.name === dish.name)!;
+    expect(item).toBeDefined();
+    expect(item).not.toHaveProperty("offers");
+    expect(JSON.stringify(served)).not.toContain("onRequest");
+  });
+
   it("lists a bakery's products with their prices", () => {
     const spec = golden("pekarna-kvas");
     const data = JSON.parse(jsonLd(spec)) as { hasOfferCatalog: { itemListElement: { itemOffered: { "@type": string; name: string }; price?: number }[] } };
