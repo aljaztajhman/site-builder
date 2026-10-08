@@ -14,10 +14,12 @@ import {
   publishSite,
   siteAddress,
   startCollection,
+  localeOps,
   publishedPrefix,
   publishedBase,
   switchDirection,
   anotherLook,
+  anotherGenomeLook,
   hasLookFamily,
   keyOf,
   siteSeed,
@@ -34,7 +36,8 @@ import {
 } from "@sb/engine";
 import { VersionConflictError, contentType, domainProvidersFor, mailerFromEnv, newId, runningVersion, type DomainProviders, type Mailer, type Platform, type RunningVersion, type SiteStatus, type Tier } from "@sb/platform";
 import { renderPage, renderPath, sharedBundle, pageFile, notFoundPlacement, rebaseRelativeUrls } from "@sb/render";
-import { CollectionKind, addedOnRequest, blockerText, collectPlaceholders, markOwnerEdits, sectionDef, type SiteSpec } from "@sb/spec";
+import { homepageDraft, withoutHomepageDrafts } from "./homepage-draft.ts";
+import { CollectionKind, addedOnRequest, blockerText, collectPlaceholders, genomeOfLook, markOwnerEdits, sectionDef, type SiteSpec } from "@sb/spec";
 import type { AuthSettings } from "./auth.ts";
 import { clientIp, csrfOk, fullSiteRefusal, identity, publishRefusal, refusalJson, sameOriginOnly, signedIn, siteAccess, tierOf, type AppEnv, type Refusal } from "./access.ts";
 import { accessInfo, allowanceFor, picturesFor, picturesShort, previewBadge, reserveJob } from "./limits.ts";
@@ -561,13 +564,15 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       pulse,
       version: current?.version ?? null,
       spec: current?.spec ?? null,
-      events,
+      // A homepage written before the other pages is served by its preview (?draft=homepage), not sent on every poll.
+      events: withoutHomepageDrafts(events),
       chat,
       cost,
       versions,
       placeholders: current ? collectPlaceholders(current.spec) : [],
-      // "Druga podoba" is offered (config variety.families, and the site's style has a family of looks).
-      anotherLook: config.variety.families && !!current && hasLookFamily(current.spec),
+      // "Druga podoba" is offered (config variety.families, and the site's style has a family of looks; with config
+      // variety.genome, for every style).
+      anotherLook: !!current && (config.variety.genome || (config.variety.families && hasLookFamily(current.spec))),
       // The pre-publish checklist (structured, the editor words it in Slovene) and the same as English lines.
       checklist,
       blockers: checklist.map(blockerText),
@@ -704,6 +709,16 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     return directEdit(c, c.req.param("id"), body.baseVersion, (spec) => startCollection(spec, kind.data), `zbirka ${kind.data}`, false);
   });
 
+  // The site's second language on or off (Strani › Jeziki, it-editor-languages): a direct edit, so it is validated, held
+  // to the plan's languages (Osnovni refused, naming Plus), saved as a version and undone like any other. No translation
+  // is written here: the owner types each one, and publishing waits until every text of the pages has one.
+  app.post("/api/sites/:id/locales", async (c) => {
+    const body = (await c.req.json().catch(() => ({}))) as { baseVersion?: number; locale?: unknown; on?: unknown };
+    if (typeof body.locale !== "string" || typeof body.on !== "boolean") return c.json({ error: "locale and on required" }, 400);
+    const { locale, on } = body;
+    return directEdit(c, c.req.param("id"), body.baseVersion, (spec) => localeOps(spec, locale, on), `${on ? "dodan" : "odstranjen"} jezik ${locale}`, false);
+  });
+
   app.post("/api/sites/:id/direction", async (c) => {
     const body = (await c.req.json().catch(() => ({}))) as { baseVersion?: number; direction?: string };
     return directEdit(
@@ -724,17 +739,51 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   // "Druga podoba" (config variety.families; HQ sb-druga-podoba): the same text and photos in the next look of the site's
   // template family, picked in code away from the same trade's sites (engine another-look.ts). No model call and no
   // spend reservation, so every tier may; saved as a version like any direct edit (validated, held to the plan), so
-  // undo and the version list go back. With variety.skeleton on, the look brings another skeleton too.
+  // undo and the version list go back. With variety.skeleton on, the look brings another skeleton too. With
+  // variety.genome on (Step 5, engine genome.ts) the look is the next design genome, for every style: type, palette and
+  // ground, hero layout, header and footer, rhythm, imagery, shape and density move; texts, photos and facts stay.
   app.post("/api/sites/:id/look", async (c) => {
-    if (!config.variety.families) return c.json({ error: "not found" }, 404);
+    if (!config.variety.families && !config.variety.genome) return c.json({ error: "not found" }, 404);
     const id = c.req.param("id");
     const body = (await c.req.json().catch(() => ({}))) as { baseVersion?: number };
     const current = await repo.getSpec(id);
     if (!current) return c.json({ error: "no spec yet" }, 404);
-    if (!hasLookFamily(current.spec)) return c.json({ error: "no_family", code: "no_family", message: NO_FAMILY_MESSAGE }, 409);
+    if (!config.variety.genome && !hasLookFamily(current.spec)) return c.json({ error: "no_family", code: "no_family", message: NO_FAMILY_MESSAGE }, 409);
     const site = c.get("site") ?? (await repo.getSite(id));
     const brief = (site?.brief ?? null) as { businessType?: string; town?: string | null } | null;
     const looks = await repo.neighbourLooks(id, brief?.businessType ?? current.spec.business.type, brief?.town ?? null, config.variety.neighbours);
+    if (config.variety.genome) {
+      const genomeInput = {
+        seed: siteSeed(id),
+        neighbours: looks.map((n) => genomeOfLook(n.design, n.hero)),
+        ...(config.variety.skeleton ? { skeleton: { neighbours: looks.flatMap((n) => (n.design.skeleton ? [n.design.skeleton] : [])) } } : {}),
+      };
+      let told = "";
+      return directEdit(
+        c,
+        id,
+        body.baseVersion,
+        (spec) => {
+          const r = anotherGenomeLook(spec, genomeInput);
+          if (!r.ok) return { error: r.message };
+          const g = r.genome;
+          told = `druga podoba: ${g.type}, ${g.palette}, ${g.hero}, ${g.header}/${g.footer}, ${g.rhythm}, ${g.imagery}, ${g.shape}, ${g.density}`;
+          // The design and chrome whole; of the pages, only the sections the look moved (the hero's layout, tones).
+          const ops: Operation[] = [
+            { op: "replace", path: "/design", value: r.spec.design },
+            { op: "replace", path: "/chrome", value: r.spec.chrome },
+          ];
+          r.spec.pages.forEach((p, pi) =>
+            p.sections.forEach((s, si) => {
+              if (s !== spec.pages[pi]?.sections[si]) ops.push({ op: "replace", path: `/pages/${pi}/sections/${si}`, value: s });
+            }),
+          );
+          return ops;
+        },
+        () => told,
+        false,
+      );
+    }
     const input = {
       seed: siteSeed(id),
       neighbours: looks.map((n) => keyOf(n.design, n.hero)),
@@ -951,6 +1000,23 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     const id = c.req.param("id");
     const v = c.req.query("v");
     if (!SAFE_ID.test(id)) return c.notFound();
+    // ?draft=homepage (config pipeline.homepageFirst): the homepage a full-site generation wrote before its other pages,
+    // from the run's "Homepage ready" event, while the site is generating and until its first version is saved.
+    // Same renderer and page depth as the saved pages; never a version, never cached.
+    if (c.req.query("draft") === "homepage") {
+      c.header("cache-control", "no-store");
+      const site = c.get("site") ?? (await repo.getSite(id));
+      const draft = site?.status === "generating" && c.req.param("file") === "index.html" ? homepageDraft(await repo.listEvents(id)) : null;
+      const home = draft?.spec.pages.find((p) => p.kind === "home");
+      if (!draft || !home || !site) return c.text("Predogled še ni pripravljen.", 404);
+      const siteUrl = await siteAddress(repo, id, site.slug, opts.platformDomain);
+      try {
+        return c.html(renderPage(draft.spec, home, { imageWidths: config.images.widths, siteUrl }));
+      } catch {
+        // The pipeline logs only a homepage that renders; an older or hand-written event may not.
+        return c.text("Predogled še ni pripravljen.", 404);
+      }
+    }
     // ?v=N of a version retention removed shows the nearest older kept one (as undo does).
     const asked = v && /^\d+$/.test(v) ? await repo.nearestVersion(id, Number(v)) : undefined;
     const sectionId = c.req.query("section");

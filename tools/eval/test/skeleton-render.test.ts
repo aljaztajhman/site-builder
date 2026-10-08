@@ -3,8 +3,9 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { chromium, type Browser } from "playwright";
-import { callButtonsPerScreen, serveStatic } from "@sb/engine";
-import { siteFiles } from "@sb/render";
+import { loadConfig } from "@sb/config";
+import { callButtonsPerScreen, checkExportOffline, serveStatic } from "@sb/engine";
+import { exportZip, siteFiles } from "@sb/render";
 import { BUTTON_STYLES, CARD_STYLES, DIVIDERS, FOOTER_FAMILIES, HEADER_FAMILIES, PHONE_ACTIONS, PHOTO_RATIOS, SECTION_WIDTHS } from "@sb/spec";
 import { fixtureMedia } from "../src/families-sheet.ts";
 import { SKELETON_GOLDENS, renderSkeleton, skeletonVariants } from "../src/skeleton-sheet.ts";
@@ -55,6 +56,15 @@ describe("skeleton families at 360 and 1280 px", () => {
       }
     }, 480_000);
   }
+
+  it("an export with full-width sections opens styled from file:// (the check read their max-width: none as unstyled)", async () => {
+    const [v] = (await skeletonVariants(["avtoservis-mrak"])).filter((x) => x.site === "avtoservis-mrak" && x.skeleton.width === "full");
+    expect(v).toBeDefined();
+    const media = await fixtureMedia(v!.fixtureId, v!.spec);
+    const zip = exportZip(v!.spec, media, { imageWidths: loadConfig().images.widths });
+    const r = await checkExportOffline(zip, v!.spec.slug, browser);
+    expect(r.problems).toEqual([]);
+  }, 120_000);
 
   it("the check sees two call buttons on one screen (a golden without a skeleton, at 1280 px: the header's and the hero's)", async () => {
     const [v] = (await skeletonVariants(["avtoservis-mrak"])).filter((x) => x.site === "avtoservis-mrak");

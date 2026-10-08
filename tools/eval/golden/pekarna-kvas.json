@@ -1,5 +1,5 @@
 {
-  "specVersion": 17,
+  "specVersion": 18,
   "slug": "pekarna-kvas",
   "locales": { "default": "sl", "enabled": ["sl"] },
   "business": {
@@ -44,7 +44,8 @@
     "headingTracking": -0.01,
     "density": "regular",
     "shadow": "none",
-    "imagery": "offset-block"
+    "imagery": "offset-block",
+    "genome": { "source": "preset", "palette": "preset", "rhythm": "alternate", "shape": "soft" }
   },
   "assets": {
     "logo": { "src": "uploads/logo.svg", "width": 160, "height": 48, "file": "logo.svg" },

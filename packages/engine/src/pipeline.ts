@@ -1,14 +1,15 @@
 import type { AppConfig } from "@sb/config";
 import { VersionConflictError, normaliseHostname, type Repo, type Storage } from "@sb/platform";
 import { contentType } from "@sb/platform";
-import { mediaFiles, siteFiles, exportZip, shareImageOf, variantFile, variantWidths } from "@sb/render";
-import { blockerText, direction as directionById, keepUnchangedOwnerEdits, publishChecklist, templateFor, validateSite, type ImageAsset, type PublishBlocker, type SiteSpec } from "@sb/spec";
+import { mediaFiles, siteFiles, exportZip, renderPage, shareImageOf, variantFile, variantWidths } from "@sb/render";
+import { blockerText, direction as directionById, genomeOfLook, keepUnchangedOwnerEdits, publishChecklist, templateFor, validateSite, type ImageAsset, type PublishBlocker, type SiteSpec } from "@sb/spec";
 import type { Operation } from "fast-json-patch";
 import { ModelOutputError, SpendCapError, type ModelClient } from "./llm/client.ts";
 import { classify, makeBrief, chooseDesign, altTexts, generateContent, critique, applyPatches, editSpec, drawsInsteadOfPhotos, type VarietyInput } from "./stages.ts";
 import { keyOf, lookKey, siteSeed } from "./variety.ts";
 import { conceptPlan } from "./concept.ts";
 import { applySkeleton, preferPhotoHero } from "./skeleton.ts";
+import { applyGenome } from "./genome.ts";
 import { extractSwatches, type Swatch } from "./palette.ts";
 import { processLogo, processPhoto, shareJpeg, visionJpeg } from "./images.ts";
 import type { ImageGenerator } from "./image-gen.ts";
@@ -44,6 +45,14 @@ export interface PipelineDeps {
 
 /** The event a regeneration logs with the owner's texts it kept and those it couldn't (the editor words it). */
 export const OWNER_TEXT_NOTE = "Kept the texts the owner typed";
+
+/**
+ * Config pipeline.homepageFirst: the event logged once the homepage is written, before the other pages. Its data's
+ * `homepage` is the homepage on its own (HomepageReady.spec, with the skeleton applied as the merged site gets it): the
+ * editor shows it read-only until the first version is saved (GET /preview/:id/index.html?draft=homepage). Never a
+ * version: alone it doesn't validate, and publishing reads only saved versions.
+ */
+export const HOMEPAGE_READY = "Homepage ready; writing the other pages";
 
 /** The classifier couldn't place the description (below tiers.junk.minClassifierConfidence): stopped before the brief. */
 export class JunkIntakeError extends Error {
@@ -195,7 +204,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
       // regeneration replaces (it moves the seed too).
       // The skeleton (config variety.skeleton, Step 4) uses the same seed and the neighbours' skeletons.
       const around =
-        config.variety.families || config.variety.skeleton
+        config.variety.families || config.variety.skeleton || config.variety.genome
           ? await (async () => {
               const previous = (await repo.getSpec(siteId))?.spec;
               const previousKey = previous ? lookKey(previous) : undefined;
@@ -215,6 +224,8 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
           : undefined;
       const skeleton =
         config.variety.skeleton && around ? { seed: around.seed, neighbours: around.looks.flatMap((n) => (n.design.skeleton ? [n.design.skeleton] : [])) } : undefined;
+      // The genome (config variety.genome, Step 5) uses the same seed and the neighbours' genomes.
+      const genome = config.variety.genome && around ? { seed: around.seed, neighbours: around.looks.map((n) => genomeOfLook(n.design, n.hero)) } : undefined;
       const { design, hero } = await stageTime("design", () =>
         chooseDesign(client, { brief, swatches, photoCount: photos.length, generatedCount: ideas.length + reuse.length, ...(variety ? { variety } : {}), ...(skeleton ? { holdPrimary: true } : {}), ...(config.variety.concept ? { concept: true } : {}) }),
       );
@@ -226,7 +237,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
         if (drawsInsteadOfPhotos(directionById(design.direction))) await log("imageGen", `${design.direction} draws the trade instead of showing pictures; no pictures generated`);
         else generating = startImages();
       }
-      return { brief, design, hero, skeleton, generated: await generating };
+      return { brief, design, hero, skeleton, genome, generated: await generating };
     } catch (e) {
       // Pictures not yet sent don't start; ones already sent finish (fal bills them anyway) before the
       // failure is passed on, so nothing of this job runs on behind it.
@@ -271,7 +282,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
   const [planned, imaged] = await Promise.allSettled([planning, imaging]);
   if (planned.status === "rejected") throw planned.reason;
   if (imaged.status === "rejected") throw imaged.reason;
-  const { brief, design, skeleton, generated } = planned.value;
+  const { brief, design, skeleton, genome, generated } = planned.value;
   let hero = planned.value.hero;
   // Not for a template that draws the trade instead of showing pictures (template S).
   if (reuse.length && !drawsInsteadOfPhotos(directionById(design.direction))) {
@@ -291,6 +302,20 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
   // 4. Content and assembly (validate; retry with errors)
   const corpus = await clientCorpus(repo, siteId);
   let homepageMs: number | undefined;
+  /**
+   * The homepage for the editor (HOMEPAGE_READY's `homepage`): with the skeleton the merged site gets, only when it
+   * renders (a link the homepage still has to a page nobody planned would fail; the editor keeps the skeleton then).
+   */
+  const homepageDraft = (home: SiteSpec | undefined): { homepage?: SiteSpec } => {
+    if (!home) return {};
+    const draft = skeleton ? applySkeleton(home, { seed: skeleton.seed, dir: directionById(home.design.direction), neighbours: skeleton.neighbours }).spec : home;
+    try {
+      renderPage(draft, draft.pages.find((p) => p.kind === "home")!, { imageWidths: config.images.widths });
+      return { homepage: draft };
+    } catch {
+      return {};
+    }
+  };
   const content = await stageTime("content", () =>
     generateContent(client, {
       slug: site.slug,
@@ -314,7 +339,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
             homepageFirst: true,
             onHomepage: async (h) => {
               homepageMs = Date.now() - started;
-              await log("content", "Homepage ready; writing the other pages", { ms: homepageMs, attempts: h.attempts, issues: h.issues.slice(0, 5) });
+              await log("content", HOMEPAGE_READY, { ms: homepageMs, attempts: h.attempts, issues: h.issues.slice(0, 5), ...homepageDraft(h.spec) });
             },
           }
         : {}),
@@ -332,6 +357,16 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     const applied = applySkeleton(spec, { seed: skeleton.seed, dir: directionById(spec.design.direction), neighbours: skeleton.neighbours });
     spec = applied.spec;
     await log("content", "Skeleton", { skeleton: applied.skeleton, neighbours: skeleton.neighbours.length, changes: applied.changes });
+  }
+  // The site's design genome (config variety.genome): each axis picked in code away from the neighbours, the written
+  // content dressed in it without a content call. Kept only when the dressed site still validates.
+  if (genome) {
+    const applied = applyGenome(spec, genome);
+    const v = validateSite(applied.spec);
+    if (v.ok) {
+      spec = v.spec;
+      await log("content", "Design genome", { genome: applied.genome, neighbours: genome.neighbours.length, distance: applied.distance });
+    } else await log("content", "Design genome left out: the dressed site doesn't validate", { genome: applied.genome, issues: v.issues.slice(0, 5) });
   }
   // A regeneration keeps the business facts of the version it replaces (typed in the editor since the intake).
   const replaced = await repo.getSpec(siteId);

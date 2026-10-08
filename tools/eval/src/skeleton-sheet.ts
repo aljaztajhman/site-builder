@@ -120,6 +120,9 @@ export async function skeletonVariants(only?: string[]): Promise<SkeletonVariant
       spec.design = { ...enforceDesign({ ...spec.design, direction: dir.id, fontPair: FAMILIES.tablica!.fontPairs[0]! }, dir), skeleton };
       const home = spec.pages.find((p) => p.kind === "home")!;
       home.sections[0] = heroAs(home.sections[0]!, "hero-signature:photo", spec.assets.images[0]?.id ?? null);
+      // And the plate again at the end (contact call-out, the template's closing call): the bar's, the floating
+      // button's or the header's call steps aside while it is on screen too.
+      for (const s of home.sections) if (s.type === "contact") s.variant = "call-out";
       out.push({ site: "avtoservis-mrak+tablica", label: short(skeleton), skeleton, spec, fixtureId: "avtoservis-mrak" });
     }
   }
@@ -186,7 +189,7 @@ export async function renderSkeleton(browser: Browser, v: SkeletonVariant, media
 }
 
 /** One row per look: phone top, phone footer, desktop top, desktop footer. */
-async function sheet(rows: { label: string; shots: Buffer[] }[]): Promise<Buffer> {
+export async function sheet(rows: { label: string; shots: Buffer[] }[]): Promise<Buffer> {
   const phoneW = 180;
   const deskW = 448;
   const h = 400;

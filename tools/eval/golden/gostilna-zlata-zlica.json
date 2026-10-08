@@ -1,5 +1,5 @@
 {
-  "specVersion": 17,
+  "specVersion": 18,
   "slug": "gostilna-zlata-zlica",
   "locales": {
     "default": "sl",
@@ -70,7 +70,13 @@
     "headingTracking": -0.02,
     "density": "regular",
     "shadow": "none",
-    "imagery": "natural"
+    "imagery": "natural",
+    "genome": {
+      "source": "preset",
+      "palette": "preset",
+      "rhythm": "inverse-accents",
+      "shape": "soft"
+    }
   },
   "assets": {
     "images": [

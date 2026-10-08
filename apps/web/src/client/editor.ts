@@ -5,7 +5,8 @@
  */
 
 import { EDITOR_STARTER_TEXT } from "@sb/spec/starter";
-import { COLOR_LABEL, DIRECTION_LABEL, ENUM_LABEL, SECTION_LABEL, TOKEN_LABEL, VARIANT_LABEL, blockerMessage, describePath, fieldLabel, issueText, type BlockerLike } from "@sb/spec/labels";
+import { COLOR_LABEL, DIRECTION_LABEL, ENUM_LABEL, SECTION_LABEL, TOKEN_LABEL, VARIANT_LABEL, blockerMessage, describePath, fieldLabel, issueText, textsCount, type BlockerLike } from "@sb/spec/labels";
+import { pageTexts, sectionTexts, translatableTexts, untranslated, type TranslatableText } from "@sb/spec/translatable";
 import { formatDateTime, formatEur, siteStatus } from "../ui/labels.ts";
 import { groupVersions, undoTarget, type ListedVersion } from "./versions.ts";
 import { placeholderPath } from "./placeholders.ts";
@@ -862,12 +863,16 @@ const SHORTCUTS: [Tab, string, string][] = [
 function contentPane(): HTMLElement {
   if (!state.spec) return h("div", { class: "pane" });
   const si = sections().findIndex((s) => s.id === selected);
+  // The site's second language: the same page and sections, their texts' translations.
+  const lang = editingIn();
+  if (lang) return si >= 0 ? translateSectionPane(si, lang) : translateHomePane(lang);
   return si >= 0 ? sectionPane(si) : homePane();
 }
 
 function homePane(): HTMLElement {
   const pane = h("div", { class: "pane" });
   pane.append(
+    ...[langSwitch()].filter((x): x is HTMLElement => !!x),
     h("p", { class: "hint" }, "Tapnite karkoli na strani in to uredite. Ali pa v polje pod predogledom napišite, kaj naj spremenimo."),
     h("div", { class: "shortcuts" }, ...SHORTCUTS.map(([k, title, desc]) =>
       h("button", { type: "button", class: "shortcut", onClick: () => { tab = k; selected = null; setSheet("full"); focusTitle = true; render(); } }, h("strong", {}, title), h("span", {}, desc)))),
@@ -913,6 +918,7 @@ function sectionPane(si: number): HTMLElement {
       h("button", { class: "btn quiet sm", type: "button", onClick: () => { selected = null; render(); } }, "← Vsi razdelki"),
       h("h2", { class: "pane-title", tabindex: "-1", "data-pane-title": "" }, label(String(s.type))),
     ),
+    langSwitch(),
   );
   if (!info || !catalogue) {
     pane.append(h("p", { class: "muted" }, "Ta razdelek ustvari sistem (pravna besedila, 404). Podatke uredite pod »Podatki«."));
@@ -1344,10 +1350,9 @@ function pagesPane(): HTMLElement {
       },
     }, "+ Dodaj stran", full && limits!.pagesNote.upgrade ? planTag(h, limits!.pagesNote.upgrade.name) : null)));
   if (full) pane.append(limitNote(limits!.pagesNote.message, "pages-limit"));
-  // Languages: no language editor yet; a plan with one language says which plan has two (it-upsells).
-  if (limits && limits.localesNote.upgrade && localesOf() >= limits.locales) {
-    pane.append(h("h2", {}, "Jeziki"), h("p", { class: "help", id: "locales-limit" }, limits.localesNote.message, " ", planTag(h, limits.localesNote.upgrade.name)));
-  }
+  // Languages: the second one on or off and its translations (a plan with one language says which plan has two).
+  const languages = languagesBlock();
+  if (languages) pane.append(languages);
   return pane;
 }
 
@@ -1453,20 +1458,206 @@ function translationOps(lang: string, ptr: string, source: string, v: string): O
   return [guard, { op: "add", path: `/translations/${lang}/${esc(ptr)}`, value: v }];
 }
 
-/** One text of an entry in the other language: the translation to type, the original under it. */
-function translationField(lang: string, ptr: string, source: string, label: string, max: number): HTMLElement {
+/**
+ * One text in the other language: the translation to type, the original under it. `required`: a text of the pages,
+ * which the site can't be published without (marked "Manjka prevod" while empty, and found by the checklist at the
+ * original's path); a collection entry's falls back to the Slovene.
+ */
+function translationField(lang: string, ptr: string, source: string, label: string, max: number, required = false): HTMLElement {
   const current = ((state.spec?.translations as Obj | undefined)?.[lang] as Obj | undefined)?.[ptr];
   const long = max > 120;
   const input = long ? h("textarea", { maxlength: max, rows: Math.min(8, Math.ceil(Math.max(source.length, 90) / 90) + 1) }) : h("input", { type: "text", maxlength: max });
   input.value = typeof current === "string" ? current : "";
   input.setAttribute("lang", lang);
-  const later = debounced((v) => void patch(() => translationOps(lang, ptr, source, typeof v === "string" ? v.trim() : ""), "prevod", false));
-  input.addEventListener("input", () => later.push(input.value));
-  return h("div", { class: "field translation-field", "data-path": `/translations/${lang}/${esc(ptr)}` },
+  const missing = required ? h("span", { class: "tr-missing" }, "Manjka prevod") : null;
+  const box = h("div", { class: "field translation-field", "data-path": required ? ptr : `/translations/${lang}/${esc(ptr)}` },
     h("label", {}, `${label} (${LANG_IN[lang] ?? lang})`),
+    missing,
     input,
     h("p", { class: "muted original", lang: "sl" }, `Slovensko: ${source}`),
   );
+  const mark = () => {
+    if (!missing) return;
+    const empty = !input.value.trim();
+    missing.hidden = !empty;
+    box.classList.toggle("is-missing", empty);
+  };
+  mark();
+  const later = debounced((v) => void patch(() => translationOps(lang, ptr, source, typeof v === "string" ? v.trim() : ""), "prevod", false));
+  input.addEventListener("input", () => {
+    mark();
+    later.push(input.value);
+  });
+  return box;
+}
+
+// ---------- The site's pages in its second language (Strani › Jeziki, it-editor-languages) ----------
+/** The language the content pane edits: null for the site's own (default) one, else the texts' translations. */
+let editLang: string | null = null;
+const editingIn = (): string | null => (editLang && otherLocales().includes(editLang) ? editLang : null);
+/** "angleščino": the language as the object of a button ("Odstrani angleščino"). */
+const LANG_ACC: Record<string, string> = { en: "angleščino", sl: "slovenščino" };
+/** Languages a site may add besides its default one (spec SITE_LOCALES). */
+const ADDABLE = ["en"];
+
+/** Switches the content pane and the preview between the site's languages. */
+function setEditLang(l: string | null): void {
+  if (l === editingIn()) return;
+  editLang = l;
+  render();
+  reloadPreview();
+}
+
+/** "Slovenščina | Angleščina" above the content pane on a site in two languages. */
+function langSwitch(): HTMLElement | null {
+  const others = otherLocales();
+  if (!others.length) return null;
+  const lang = editingIn();
+  const def = String(((state.spec?.locales ?? {}) as Obj).default ?? "sl");
+  const choice = (l: string | null, name: string) => h("button", { type: "button", "aria-pressed": String(l === lang), onClick: () => setEditLang(l) }, name);
+  return h("p", { class: "lang-row" }, h("span", { class: "seg lang-switch", role: "group", "aria-label": "Jezik urejanja" }, choice(null, LANG_NAME[def] ?? def), ...others.map((l) => choice(l, LANG_NAME[l] ?? l))));
+}
+
+/** A text's label: the field's own name, numbered inside lists ("Vprašanje 2"); page settings and the hours' note by name. */
+function textLabel(path: string): { label: string; max: number } {
+  const page = /^\/pages\/\d+\/(nav\/label|seo\/title|seo\/description)$/.exec(path)?.[1];
+  if (page) return { label: { "nav/label": "Ime v meniju", "seo/title": "Naslov za iskalnike", "seo/description": "Opis za iskalnike" }[page]!, max: { "nav/label": 24, "seo/title": 60, "seo/description": 160 }[page]! };
+  if (path === "/business/hours/note") return { label: "Opomba k delovnemu času", max: 140 };
+  const found = schemaAt(path);
+  let schema = found?.schema;
+  if (schema && Array.isArray(schema.anyOf)) schema = (schema.anyOf as Schema[]).find((o) => o.type === "string") ?? schema;
+  const nums = (path.split("/props/")[1] ?? "").split("/").filter((s) => /^\d+$/.test(s)).map((s) => Number(s) + 1);
+  let name = found ? fieldLabel(found.key, found.parent) : "Besedilo";
+  // A button's text by the button's name ("Glavni gumb: besedilo"), so two buttons of a section read apart.
+  if (found && found.key === "label" && found.parent && FIELD_LABEL_OF(found.parent)) name = `${FIELD_LABEL_OF(found.parent)}: besedilo`;
+  return { label: nums.length ? `${name} ${nums.join(".")}` : name, max: Number(schema?.maxLength ?? 1000) };
+}
+const FIELD_LABEL_OF = (key: string): string | null => (fieldLabel(key) !== key ? fieldLabel(key) : null);
+
+/** A section's texts in the order its form shows them (the props' schema order; a list's entries in their own order). */
+function inFormOrder(texts: TranslatableText[]): TranslatableText[] {
+  const rank = (path: string): number => {
+    const m = /^\/pages\/(\d+)\/sections\/(\d+)\/props\/([^/]+)/.exec(path);
+    if (!m) return -1;
+    const sec = ((pages()[Number(m[1])]?.sections ?? []) as Obj[])[Number(m[2])];
+    const info = sec ? sectionInfo(String(sec.type)) : undefined;
+    const keys = Object.keys(((info ? resolve(info.props, info.props).properties : null) as Record<string, unknown> | null) ?? {});
+    const i = keys.indexOf(m[3]!);
+    return i < 0 ? keys.length : i;
+  };
+  return texts.map((t, i) => ({ t, i, r: rank(t.path) })).sort((a, b) => a.r - b.r || a.i - b.i).map((x) => x.t);
+}
+
+/** The texts at these paths as fields in `lang`, each with its original. */
+const translationFields = (lang: string, texts: TranslatableText[]): HTMLElement[] =>
+  inFormOrder(texts).map((t) => {
+    const { label, max } = textLabel(t.path);
+    return translationField(lang, t.path, t.text, label, max, true);
+  });
+
+/** "Prevedeno: 12 od 40 besedil" for a set of texts. */
+function translatedLine(lang: string, texts: TranslatableText[]): string {
+  const left = untranslated(state.spec, lang, texts).length;
+  return left ? `Prevedeno ${texts.length - left} od ${textsCount(texts.length)}.` : `Vsa besedila so prevedena (${texts.length}).`;
+}
+
+/** No section selected, in the other language: this page's own texts and its sections, each with what is left. */
+function translateHomePane(lang: string): HTMLElement {
+  const all = translatableTexts(state.spec);
+  const pane = h("div", { class: "pane translate", "data-lang": lang },
+    langSwitch(),
+    h("p", { class: "hint" }, `${LANG_NAME[lang] ?? lang}: tapnite razdelek v predogledu ali ga izberite spodaj in vpišite prevode. Stran lahko objavite, ko so prevedena vsa besedila.`),
+    h("p", { class: "tr-progress", role: "status" }, translatedLine(lang, all)),
+  );
+  if (pages().length > 1) {
+    pane.append(
+      h("label", {}, "Stran"),
+      h("select", { onChange: (e: Event) => { pageIndex = Number((e.target as HTMLSelectElement).value); selected = null; render(); reloadPreview(); } },
+        ...pages().map((p, i) => h("option", { value: String(i), selected: i === pageIndex }, String((p.nav as Obj).label)))),
+    );
+  }
+  const own = pageTexts(state.spec, pageIndex).filter((t) => !t.path.includes("/sections/"));
+  pane.append(h("fieldset", { class: "translation" }, h("legend", {}, "Nastavitve strani"), ...translationFields(lang, own)));
+  const open = (id: string) => {
+    focusTitle = true;
+    select(id);
+  };
+  pane.append(
+    h("h2", {}, "Razdelki na tej strani"),
+    h("ul", { class: "outline" }, ...sections().map((s, si) => {
+      const texts = sectionTexts(state.spec, pageIndex, si);
+      const left = untranslated(state.spec, lang, texts).length;
+      return h("li", {},
+        h("div", {
+          class: "outline-item",
+          role: "button",
+          tabindex: "0",
+          onClick: () => open(String(s.id)),
+          onKeydown: (e: KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(String(s.id)); } },
+        }, h("span", { class: "t" }, h("strong", {}, label(String(s.type))), h("span", { class: left ? "tr-left" : "muted" }, !texts.length ? "brez besedil" : left ? `manjka ${left}` : "prevedeno"))));
+    })),
+  );
+  const note = all.find((t) => t.path === "/business/hours/note");
+  if (note) pane.append(h("fieldset", { class: "translation" }, h("legend", {}, "Delovni čas"), ...translationFields(lang, [note])));
+  return pane;
+}
+
+/** A selected section in the other language: each of its texts with the original under it. */
+function translateSectionPane(si: number, lang: string): HTMLElement {
+  const s = sections()[si]!;
+  const texts = sectionTexts(state.spec, pageIndex, si);
+  const pane = h("div", { class: "pane translate", "data-lang": lang },
+    h("div", { class: "pane-head", id: "selected-head" },
+      h("button", { class: "btn quiet sm", type: "button", onClick: () => { selected = null; render(); } }, "← Vsi razdelki"),
+      h("h2", { class: "pane-title", tabindex: "-1", "data-pane-title": "" }, label(String(s.type))),
+    ),
+    langSwitch(),
+  );
+  if (!texts.length) {
+    pane.append(h("p", { class: "muted" }, s.type === "legal" ? "Pravno besedilo je v angleščini že pripravljeno." : "Ta razdelek nima besedil za prevod."));
+    return pane;
+  }
+  pane.append(h("p", { class: "tr-progress", role: "status" }, translatedLine(lang, texts)), ...translationFields(lang, texts));
+  return pane;
+}
+
+/** Strani › Jeziki: the second language on or off and how far its translation is; Osnovni reads which plan has two. */
+function languagesBlock(): HTMLElement | null {
+  const limits = state.access?.limits ?? null;
+  const others = otherLocales();
+  const box = h("div", { class: "languages", id: "languages" }, h("h2", {}, "Jeziki"));
+  if (others.length) {
+    const all = translatableTexts(state.spec);
+    for (const l of others) {
+      box.append(
+        h("p", {}, h("strong", {}, LANG_NAME[l] ?? l), " · ", h("span", { class: "tr-progress" }, translatedLine(l, all))),
+        h("div", { class: "row" },
+          h("button", { class: "btn", type: "button", onClick: () => { tab = "content"; selected = null; editLang = l; render(); reloadPreview(); } }, "Prevedi besedila"),
+          h("button", {
+            class: "btn danger",
+            type: "button",
+            onClick: () => {
+              if (!confirm(`Odstranim ${LANG_ACC[l] ?? l}? Prevodi se izbrišejo s strani; vrnete jih z »Razveljavi«.`)) return;
+              if (editLang === l) editLang = null;
+              void post("/locales", { locale: l, on: false }, `${LANG_NAME[l] ?? l} odstranjena.`);
+            },
+          }, `Odstrani ${LANG_ACC[l] ?? l}`),
+        ),
+      );
+    }
+    return box;
+  }
+  // One language and a plan that has one: the note names the plan with two (it-upsells).
+  if (limits && localesOf() >= limits.locales) {
+    if (!limits.localesNote.upgrade) return null;
+    box.append(h("p", { class: "help", id: "locales-limit" }, limits.localesNote.message, " ", planTag(h, limits.localesNote.upgrade.name)));
+    return box;
+  }
+  box.append(h("p", { class: "hint" }, "Stran je v slovenščini. Dodajte še angleško različico: besedila prevedete sami, polje za poljem. Ko so prevedena vsa, stran objavite v obeh jezikih."));
+  for (const l of ADDABLE) {
+    box.append(h("p", {}, h("button", { class: "btn", type: "button", id: `add-locale-${l}`, onClick: () => void post("/locales", { locale: l, on: true }, `${LANG_NAME[l] ?? l} dodana. Besedila prevedete pod »Prevedi besedila«.`) }, `+ Dodaj jezik: ${LANG_NAME[l]?.toLowerCase() ?? l}`)));
+  }
+  return box;
 }
 
 /** The collection's entries in the other language: each translatable text with its original. */
@@ -1813,6 +2004,38 @@ function liveData() {
 /** Pictures already faded in once; a re-render shows them without fading again. */
 const shownImages = new Set<string>();
 
+/** The pipeline's event once a full site's homepage is written, before its other pages (engine HOMEPAGE_READY). */
+const HOMEPAGE_READY = "Homepage ready; writing the other pages";
+
+/**
+ * Config pipeline.homepageFirst: the id of this run's "Homepage ready" event while its homepage is the newest thing to
+ * show (no version saved since). The server keeps the homepage in that event and renders it (?draft=homepage).
+ */
+function homepageDraftId(): string | null {
+  const run = currentRun();
+  const at = run.findLastIndex((e) => e.message === HOMEPAGE_READY && (e.data as { homepage?: unknown } | null)?.homepage === true);
+  if (at < 0 || run.slice(at + 1).some((e) => e.stage === "preview")) return null;
+  return run[at]!.id;
+}
+
+/**
+ * The homepage written before the other pages, in a frame like the saved version's, read only: no editing layer,
+ * links and forms do nothing (the other pages don't exist yet). Not a version; the first saved version replaces it.
+ */
+function homepageDraftFrame(eventId: string): HTMLElement {
+  const width = String(device === "mobile" ? 360 : 1280);
+  const src = `/preview/${siteId}/index.html?draft=homepage&e=${encodeURIComponent(eventId)}`;
+  const f = h("iframe", { title: "Predogled domače strani (še se ustvarja)", class: "draft", "data-width": width, src });
+  f.addEventListener("load", () => {
+    const doc = f.contentDocument;
+    doc?.addEventListener("click", (e) => {
+      if ((e.target as Element | null)?.closest?.("a, button")) e.preventDefault();
+    });
+    doc?.addEventListener("submit", (e) => e.preventDefault());
+  });
+  return h("div", { class: "frame-box draft" }, h("div", { class: "frame" }, f));
+}
+
 /**
  * The preview frame while the site is generated: a skeleton page that fills in with what the run has
  * actually produced (name, colours, pictures), so the owner sees it moving long before the text is ready.
@@ -1908,7 +2131,11 @@ function statusBlock(): HTMLElement | null {
     return h("div", { class: "pane" },
       h("h2", { class: "pane-title" }, state.spec ? "Stran preverjamo" : "Stran se ustvarja", runStart ? h("span", { class: "elapsed", "data-since": runStart }, elapsed(runStart)) : null),
       progress(),
-      h("p", { class: "help" }, state.spec ? "Predogled je pripravljen. Ko preverjanje najde kaj za popraviti, se pokaže nova različica. Urejate lahko že zdaj." : "Predogled se sestavlja sproti. Stran lahko zaprete, ustvarjanje teče naprej."),
+      h("p", { class: "help" }, state.spec
+        ? "Predogled je pripravljen. Ko preverjanje najde kaj za popraviti, se pokaže nova različica. Urejate lahko že zdaj."
+        : homepageDraftId()
+          ? "Domača stran je napisana, druge strani še pišemo. Urejate jo lahko, ko bo pripravljena vsa stran. Stran lahko zaprete, ustvarjanje teče naprej."
+          : "Predogled se sestavlja sproti. Stran lahko zaprete, ustvarjanje teče naprej."),
     );
   }
   if (s.status === "failed") {
@@ -1934,7 +2161,9 @@ let frameVersion: number | null = null;
 
 function previewUrl(): string {
   const p = currentPage();
-  return `/preview/${siteId}/${p ? pageFileOf(p) : "index.html"}?v=${state.version ?? ""}`;
+  // The second language's page while its texts are edited (the renderer lays the translations over the spec).
+  const lang = editingIn();
+  return `/preview/${siteId}/${lang ? `${lang}/` : ""}${p ? pageFileOf(p) : "index.html"}?v=${state.version ?? ""}`;
 }
 
 function reloadPreview(): void {
@@ -2000,7 +2229,8 @@ function attachEditing(): void {
     if (fact) {
       e.preventDefault();
       if (sec) selected = sec.id;
-      goTo(fact);
+      // Facts are the same in every language: the preview stays in the one it shows.
+      goTo(fact, editingIn());
       return;
     }
     // A picture opens its own panel: replace it or describe it.
@@ -2016,8 +2246,11 @@ function attachEditing(): void {
       return;
     }
     // A tap on an item of a price list or menu opens that item's fields in the panel.
+    // In the second language a tap only selects the section: its texts' translations open in the panel (prices,
+    // like the text typed in place, belong to the default language).
+    const translating = editingIn() !== null;
     const priced = sec ? sections().find((s) => s.id === sec.id) : undefined;
-    if (sec && priced && isPriceListType(priced.type)) {
+    if (sec && priced && !translating && isPriceListType(priced.type)) {
       const row = t.closest(PRICE_ROWS);
       if (row) {
         e.preventDefault();
@@ -2027,7 +2260,7 @@ function attachEditing(): void {
     }
     // First tap selects the section, a tap on its text then edits that text in place (works by touch;
     // a double-click does both).
-    if (sec && sec.id === selected && t.closest(INLINE_TEXT)) {
+    if (sec && sec.id === selected && !translating && t.closest(INLINE_TEXT)) {
       e.preventDefault();
       inlineEdit(t);
     } else if (sec) select(sec.id, false);
@@ -2472,6 +2705,16 @@ function renderStage(): void {
   const stage = shell!.stage;
   if (!state.spec) {
     frame = null;
+    const draft = state.site.status === "generating" ? homepageDraftId() : null;
+    if (draft) {
+      // The homepage is written: shown as it will be rendered while the other pages are still being written.
+      const current = stage.querySelector<HTMLIFrameElement>(".frame-box.draft iframe");
+      const width = String(device === "mobile" ? 360 : 1280);
+      if (!current || current.dataset.width !== width || !current.src.endsWith(`e=${encodeURIComponent(draft)}`)) stage.replaceChildren(homepageDraftFrame(draft));
+      syncBadge(stage.querySelector<HTMLElement>(".frame-box"));
+      sizeFrame();
+      return;
+    }
     if (state.site.status === "generating") {
       const live = liveSkeleton();
       const current = stage.querySelector<HTMLElement>(".frame.live");
@@ -2525,8 +2768,10 @@ function sizeFrame(): void {
   // Rounded down: half a pixel more than the stage has would make it scroll (and a scrolling region needs a tab stop).
   wrap.style.width = `${Math.floor(width * scale) + 2}px`;
   wrap.style.height = `${height + 2}px`;
-  if (frame) {
-    Object.assign(frame.style, { display: "block", border: "0", width: `${width}px`, height: `${Math.round(height / scale)}px`, transform: `scale(${scale})`, transformOrigin: "0 0" });
+  // The saved version's frame, or the homepage written before the other pages (read only).
+  const target = frame ?? wrap.querySelector<HTMLIFrameElement>("iframe.draft");
+  if (target) {
+    Object.assign(target.style, { display: "block", border: "0", width: `${width}px`, height: `${Math.round(height / scale)}px`, transform: `scale(${scale})`, transformOrigin: "0 0" });
   }
 }
 
@@ -2951,12 +3196,11 @@ function checklistBlock(): HTMLElement | null {
   const list = state.checklist;
   if (!checklistOpen || !list.length || !state.spec) return null;
   const spec = state.spec;
-  const missing = list.filter((b) => b.kind === "placeholder").length;
   const exporting = checklistFor === "export";
   return h("div", { class: "pane tight", id: "checklist" },
     h("div", { class: "note warn checklist" },
       h("div", { class: "row" },
-        h("p", { class: "sp" }, h("strong", {}, exporting ? exportSummary(missing, list.length - missing) : blockerSummary(missing, list.length - missing))),
+        h("p", { class: "sp" }, h("strong", {}, exporting ? exportSummary(list) : blockerSummary(list))),
         h("button", { class: "btn quiet sm", type: "button", "aria-label": "Zapri seznam", onClick: () => { checklistOpen = false; render(); } }, "✕"),
       ),
       // Above the list, so a long checklist doesn't hide the way on.
@@ -2966,7 +3210,7 @@ function checklistBlock(): HTMLElement | null {
           )
         : null,
       h("ol", {}, ...list.slice(0, 40).map((b) =>
-        h("li", {}, h("button", { type: "button", onClick: () => goTo(b.path) }, h("strong", {}, describePath(spec, b.path)), h("span", {}, blockerMessage(b)))))),
+        h("li", {}, h("button", { type: "button", onClick: () => goTo(b.path, b.kind === "translation" ? b.detail : null) }, h("strong", {}, describePath(spec, b.path)), h("span", {}, blockerMessage(b)))))),
     ));
 }
 
@@ -2995,12 +3239,25 @@ function openChecklist(forWhat: "publish" | "export" = "publish", ask = true): v
   box?.querySelector<HTMLElement>("li button")?.focus({ preventScroll: true });
 }
 
-/** Opens the tab, page and section a spec path belongs to, then the field itself. */
-function goTo(path: string): void {
+/**
+ * Opens the tab, page and section a spec path belongs to, then the field itself. `lang`: the text's translation in
+ * the site's second language (a checklist entry for a missing one); otherwise the default language's field.
+ */
+function goTo(path: string, lang: string | null = null): void {
   askOpen = false;
   setSheet("full");
+  const langChanged = lang !== editingIn();
+  editLang = lang;
   const [, head, a, b, c] = path.split("/");
-  if (head === "pages" && b === "sections") {
+  if (lang && ((head === "pages" && b !== "sections") || path === "/business/hours/note")) {
+    // A page's own texts and the hours' note: the page's pane in that language, nothing selected.
+    const pageChanged = head === "pages" && Number(a) !== pageIndex;
+    if (head === "pages") pageIndex = Number(a);
+    selected = null;
+    tab = "content";
+    render();
+    if (pageChanged || langChanged) reloadPreview();
+  } else if (head === "pages" && b === "sections") {
     const pi = Number(a);
     const sec = ((pages()[pi]?.sections ?? []) as Obj[])[Number(c)];
     const pageChanged = pi !== pageIndex;
@@ -3008,11 +3265,12 @@ function goTo(path: string): void {
     selected = sec ? String(sec.id) : null;
     tab = "content";
     // A price-list or menu entry (a missing price): open that item's fields.
-    if (sec && isPriceListType(sec.type)) priceUi.open = itemKeyForPath(String(sec.id), sec.type, path) ?? priceUi.open;
+    if (sec && !lang && isPriceListType(sec.type)) priceUi.open = itemKeyForPath(String(sec.id), sec.type, path) ?? priceUi.open;
     render();
-    if (pageChanged) reloadPreview();
+    if (pageChanged || langChanged) reloadPreview();
     else if (selected) frame?.contentDocument?.getElementById(selected)?.scrollIntoView({ block: "start" });
   } else {
+    if (langChanged) reloadPreview();
     if (head === "collections") collectionKind = path.split("/")[2] ?? collectionKind;
     tab = head === "pages" ? "pages" : head === "business" || head === "chrome" ? "facts" : head === "assets" ? "photos" : head === "design" ? "design" : head === "collections" ? "collection" : "content";
     render();
@@ -3040,20 +3298,26 @@ function items(n: number): string {
   return `${n} ${({ one: "postavko", two: "postavki", few: "postavke" } as Record<string, string>)[form] ?? "postavk"}`;
 }
 
-/** The checklist's heading: missing facts (yellow in the preview) and other things to fix. */
-function blockerSummary(missing: number, other: number): string {
+/** What the checklist holds: missing facts (yellow in the preview), texts without a translation, other things to fix. */
+function summaryParts(list: BlockerLike[]): string {
+  const missing = list.filter((b) => b.kind === "placeholder").length;
+  const untranslatedTexts = list.filter((b) => b.kind === "translation").reduce((n, b) => n + Number(b.value ?? 1), 0);
+  const other = list.filter((b) => b.kind !== "placeholder" && b.kind !== "translation").length;
   const parts: string[] = [];
   if (missing) parts.push(`${missingPhrase(missing)} (rumeno v predogledu)`);
+  if (untranslatedTexts) parts.push(`brez prevoda je še ${textsCount(untranslatedTexts)}`);
   if (other) parts.push(`preverite še ${items(other)}`);
-  return `Pred objavo: ${parts.join(", ")}. Tapnite postavko, odpre se pravo polje.`;
+  return parts.join(", ");
+}
+
+/** The checklist's heading. */
+function blockerSummary(list: BlockerLike[]): string {
+  return `Pred objavo: ${summaryParts(list)}. Tapnite postavko, odpre se pravo polje.`;
 }
 
 /** The same checklist before an export: a warning, the download stays possible. */
-function exportSummary(missing: number, other: number): string {
-  const parts: string[] = [];
-  if (missing) parts.push(`${missingPhrase(missing)} (rumeno v predogledu)`);
-  if (other) parts.push(`preverite še ${items(other)}`);
-  return `Stran še ni pripravljena za objavo: ${parts.join(", ")}. Če jo izvozite zdaj, ostanejo te napake tudi v datotekah. Tapnite postavko, odpre se pravo polje.`;
+function exportSummary(list: BlockerLike[]): string {
+  return `Stran še ni pripravljena za objavo: ${summaryParts(list)}. Če jo izvozite zdaj, ostanejo te napake tudi v datotekah. Tapnite postavko, odpre se pravo polje.`;
 }
 
 /** "manjka 1 podatek", "manjkata 2 podatka", "manjkajo 3 podatki", "manjka 5 podatkov" (Slovene plural rules). */

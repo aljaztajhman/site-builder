@@ -368,6 +368,23 @@ describe("migration 16 → 17 (\"Cena po dogovoru\", it-price-on-request)", () =
     const dishes = (inn.pages[1]!.sections[1]!.props as { categories: { dishes: { price: unknown }[] }[] }).categories[0]!.dishes;
     dishes[0]!.price = { onRequest: true };
     expect(validateSite(inn).issues).toEqual([]);
-    expect(SPEC_VERSION).toBe(17);
+  });
+});
+
+describe("migration 17 → 18 (the design genome, variety engine Step 5)", () => {
+  it("gives every stored v17 site its direction's preset genome and nothing else; valid; a genome already there stays", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { validateSite, DIRECTIONS, presetGenome } = await import("../src/index.ts");
+    const read = (id: string) => JSON.parse(readFileSync(new URL(`../../../tools/eval/golden/${id}.json`, import.meta.url), "utf8")) as SiteSpec;
+    for (const id of ["avtoservis-mrak", "instalacije-rebernik", "pekarna-kvas", "kmetija-grabnar", "zobozdravstvo-lebar"]) {
+      const golden = read(id);
+      const { genome, ...design } = golden.design;
+      const v18 = migrateSpec({ ...golden, design, specVersion: 17 }, MIGRATIONS, 18);
+      expect(v18, id).toEqual(golden);
+      expect(genome, id).toEqual(presetGenome(design, DIRECTIONS.find((d) => d.id === design.direction)));
+      expect(validateSite(v18).issues, id).toEqual([]);
+      expect(migrateSpec({ ...golden, specVersion: 17 }, MIGRATIONS, 18), id).toEqual(golden);
+    }
+    expect(SPEC_VERSION).toBe(18);
   });
 });

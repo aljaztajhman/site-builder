@@ -5,7 +5,7 @@ import path from "node:path";
 import { loadConfig } from "@sb/config";
 import { ModelClient, ReplayTransport, generateSite, keyOf, launchCheckBrowser, sameLook, type CheckBrowser } from "@sb/engine";
 import { Repo, createDb, createFsStorage, migrate, type Db } from "@sb/platform";
-import { FAMILIES, validateSite, type SiteSpec } from "@sb/spec";
+import { FAMILIES, genomeDistance, genomeOf, genomeOfLook, validateSite, type SiteSpec } from "@sb/spec";
 import { loadFixture } from "../src/fixtures/load.ts";
 import { homeRecordings } from "../src/home-recordings.ts";
 
@@ -34,8 +34,8 @@ afterAll(async () => {
   await rm(dir, { recursive: true, force: true });
 });
 
-async function accountant(slug: string, families: boolean, skeleton = false): Promise<{ id: string; spec: SiteSpec }> {
-  const config = { ...base, variety: { ...base.variety, families, skeleton } };
+async function accountant(slug: string, families: boolean, skeleton = false, genome = false): Promise<{ id: string; spec: SiteSpec }> {
+  const config = { ...base, variety: { ...base.variety, families, skeleton, genome } };
   const fixture = loadFixture("racunovodstvo-seliskar");
   const storage = createFsStorage(path.join(dir, slug));
   const site = await repo.createSite({ name: slug, slug, intake: { description: fixture.brief.description, photoAssetIds: [], scope: "home" } });
@@ -60,6 +60,8 @@ describe("the variety engine in the pipeline", () => {
     expect(spec.design.direction).toBe("racun");
     expect(spec.design.colors.primary).toBe(FAMILIES.racun!.palettes[0]!.colors.primary);
     expect(spec.design.fontPair).toBe(FAMILIES.racun!.fontPairs[0]);
+    // No genome from the generator with variety.genome off (spec v18: absent is the direction's preset).
+    expect(spec.design.genome).toBeUndefined();
   }, 180_000);
 
   it("on: the next accountant in town sees the earlier ones and gets a look none of them has", async () => {
@@ -92,5 +94,20 @@ describe("the variety engine in the pipeline", () => {
     // The switch off left the first accountant without one.
     const off = await db.query<{ n: number }>("select count(*)::int as n from site_events where message = 'Skeleton'");
     expect(off.rows[0]!.n).toBe(1);
+  }, 360_000);
+
+  it("genome on (variety.genome, Step 5): a picked genome away from the earlier accountants, valid, the template's motif and hero kept", async () => {
+    const { id, spec } = await accountant("racun-genome", false, false, true);
+    const valid = validateSite(spec);
+    expect(valid.ok ? [] : valid.issues).toEqual([]);
+    expect(spec.design.genome?.source).toBe("picked");
+    const g = genomeOf(spec);
+    expect([g.preset, g.motif, g.hero]).toEqual(["racun", "ledger", "hero-signature:receipt"]);
+    const logged = await db.query<{ data: { genome: unknown; neighbours: number; distance: number } }>("select data from site_events where site_id = $1 and message = 'Design genome'", [id]);
+    expect(logged.rows[0]!.data.genome).toEqual(g);
+    // The accountants made before it in this file are its neighbours; it is at least one axis from each.
+    expect(logged.rows[0]!.data.neighbours).toBeGreaterThanOrEqual(2);
+    const neighbours = await repo.neighbourLooks(id, "accountant", "Murska Sobota", 50);
+    for (const n of neighbours) expect(genomeDistance(genomeOfLook(n.design, n.hero), g)).toBeGreaterThanOrEqual(1);
   }, 360_000);
 });

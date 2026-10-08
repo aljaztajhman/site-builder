@@ -312,6 +312,7 @@ export const DESIGN_LABEL: Record<string, string> = {
   density: "Gostota",
   shadow: "Senca",
   imagery: "Obdelava fotografij",
+  genome: "Sestava podobe",
 };
 
 /** Values of the design tokens that are choices. */
@@ -319,6 +320,7 @@ export const TOKEN_LABEL: Record<string, Record<string, string>> = {
   density: { compact: "Strnjeno", regular: "Običajno", airy: "Zračno" },
   shadow: { none: "Brez", subtle: "Rahla" },
   headingCase: { normal: "Običajne črke", uppercase: "Vse velike črke" },
+  shape: { square: "Ravni robovi", soft: "Zaobljeni robovi", cut: "Prirezani vogali", arch: "Oboki" },
   imagery: { natural: "Naravno", rounded: "Zaobljeno", framed: "V okvirju", "full-bleed": "Čez celo širino", monochrome: "Enobarvno", arched: "Z obokom", "offset-block": "Na barvni podlagi", duotone: "Dvobarvno" },
 };
 
@@ -479,15 +481,26 @@ export function issueText(spec: unknown, issue: IssueLike): string {
 /** One entry of the pre-publish checklist (see publishChecklist in validate.ts). */
 export interface BlockerLike {
   path: string;
-  kind: "invalid" | "placeholder" | "starter" | "alt" | "fact";
+  kind: "invalid" | "placeholder" | "starter" | "alt" | "fact" | "translation";
   detail: string;
   code?: string;
   value?: string;
 }
 
+/** "angleškega": the language in "brez … prevoda". */
+const LANGUAGE_GENITIVE: Record<string, string> = { en: "angleškega", sl: "slovenskega" };
+
+/** "1 besedilo", "2 besedili", "3 besedila", "5 besedil". */
+export function textsCount(n: number): string {
+  const form = new Intl.PluralRules("sl").select(n);
+  return `${n} ${({ one: "besedilo", two: "besedili", few: "besedila" } as Record<string, string>)[form] ?? "besedil"}`;
+}
+
 /** What to do about one checklist entry, in Slovene. */
 export function blockerMessage(b: BlockerLike): string {
   switch (b.kind) {
+    case "translation":
+      return `Še ${textsCount(Number(b.value ?? 1))} brez ${LANGUAGE_GENITIVE[b.detail] ?? "drugega"} prevoda.`;
     case "placeholder":
       return `Manjka ${PLACEHOLDER_LABEL[b.detail] ?? "podatek"}.`;
     case "starter":

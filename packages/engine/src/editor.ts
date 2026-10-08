@@ -17,6 +17,7 @@ import {
   direction as directionById,
   enforceDesign,
   migrateSpec,
+  presetGenome,
   repairSiteCopy,
   sectionDef,
   TOKEN_LABEL,
@@ -171,6 +172,8 @@ export function switchDirection(spec: SiteSpec, directionId: string): Design {
     imagery: dir.imagery,
     // The site's skeleton (spec v15) is its frame, not the style: it stays.
     ...(spec.design.skeleton ? { skeleton: spec.design.skeleton } : {}),
+    // A style is a preset (spec v18): the site takes the direction's own genome, and the direction's rules hold it again.
+    ...(spec.design.genome ? { genome: presetGenome({ radius: dir.ranges.radius[0] }, dir) } : {}),
   };
   return enforceDesign(d, dir);
 }

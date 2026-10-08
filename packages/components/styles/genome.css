@@ -1,0 +1,29 @@
+/*
+ * The design genome's shape language (spec v18, design.genome.shape; docs/plans/variety-engine.md Step 5), set on
+ * <body data-shape> only for a picked genome. square and soft are the radius token (--radius) and need nothing here; a
+ * trade template never gets cut or arch (its motif draws its own shapes; genome rules). No pills, no shadows, no
+ * gradients: corners only. Focusable elements are never clipped (a clip-path would cut their focus ring): only cards
+ * and photos, which are not links.
+ */
+
+/* ---------- cut: one cut corner, bottom right, on photos and cards ---------- */
+body[data-shape="cut"] {
+  --shape-cut: polygon(0 0, 100% 0, 100% calc(100% - 1.75rem), calc(100% - 1.75rem) 100%, 0 100%);
+  --shape-notch: polygon(0 0, 100% 0, 100% calc(100% - 0.875rem), calc(100% - 0.875rem) 100%, 0 100%);
+}
+/* Photos in sections and the split hero; not a full-bleed hero photo (its text panel sits over it) nor a page header. */
+body[data-shape="cut"] main .s:not(.s-hero-image):not(.s-page-header) .media {
+  clip-path: var(--shape-cut);
+}
+body[data-shape="cut"] main .card {
+  clip-path: var(--shape-notch);
+}
+
+/* ---------- arch: photos with an arched top, cards with a rounded top ---------- */
+/* Not in heroes and page headers (text panels over photos), and not on a generated picture: its label sits top right. */
+body[data-shape="arch"] main .s:not([class*="s-hero"]):not(.s-page-header) .media:not(.media--ai) {
+  border-radius: 50% 50% var(--radius) var(--radius) / min(9rem, 40%) min(9rem, 40%) var(--radius) var(--radius);
+}
+body[data-shape="arch"] main .card {
+  border-radius: 1.5rem 1.5rem var(--radius) var(--radius);
+}

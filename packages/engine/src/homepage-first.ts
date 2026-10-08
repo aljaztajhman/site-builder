@@ -12,10 +12,16 @@ import type { SiteSpec } from "@sb/spec";
 import { extractJson, type ModelResponse } from "./llm/client.ts";
 import { wholeRetryInstruction, type Evaluated } from "./content-patch.ts";
 
-/** What the caller hears once the homepage is written: its calls and the issues it still had on its own. */
+/** What the caller hears once the homepage is written: its calls, the issues it still had on its own, and the homepage. */
 export interface HomepageReady {
   attempts: number;
   issues: string[];
+  /**
+   * The homepage on its own, assembled and repaired from the same JSON the merge takes (the editor shows it while the
+   * other pages are written). Not valid by itself: its links to the pages still to be written don't resolve. Absent
+   * when its answer didn't assemble.
+   */
+  spec?: SiteSpec;
 }
 
 export interface HomepageFirstDeps<P> {
@@ -139,13 +145,16 @@ export async function homepageFirst<P>(deps: HomepageFirstDeps<P>): Promise<Home
   // 1. The homepage, checked on its own (its links to the pages still to be written aside), retried until it passes.
   await askShaped(home);
   if (!home.page) throw failed([home]);
+  let homeSpec: SiteSpec | undefined;
   for (;;) {
     // On a copy: the code repairs are made (and logged) once, on the merged answer.
-    home.issues = homeIssues(check(structuredClone({ chrome: home.chrome, pages: [home.page] })).issues, deps.plannedIds);
+    const r = check(structuredClone({ chrome: home.chrome, pages: [home.page] }));
+    homeSpec = r.built?.spec;
+    home.issues = homeIssues(r.issues, deps.plannedIds);
     if (!home.issues.length || home.attempts > deps.retries) break;
     await askShaped(home, home.issues);
   }
-  await deps.onHomepage?.({ attempts: home.attempts, issues: home.issues });
+  await deps.onHomepage?.({ attempts: home.attempts, issues: home.issues, ...(homeSpec ? { spec: homeSpec } : {}) });
 
   // 2. Every other page side by side, each with the homepage as written.
   const homeJson = { chrome: home.chrome, page: home.page };
