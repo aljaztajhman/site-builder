@@ -211,7 +211,7 @@ function titleCaseSegments(s: string, ctx: LintContext): Hit[] {
     const capitalised = rest.filter((w) => /^\p{Lu}\p{Ll}/u.test(w));
     const acronyms = rest.filter((w) => w === w.toUpperCase());
     const common = capitalised.filter((w) => !ctx.properNames.has(w));
-    if (words.length >= 3 && capitalised.length + acronyms.length === rest.length && common.length >= 2) out.push({ index: offset, text: seg.trim() });
+    if (words.length >= 3 && capitalised.length + acronyms.length === rest.length && common.length >= 2) out.push({ index: offset + seg.length - seg.trimStart().length, text: seg.trim() });
     offset += seg.length;
   }
   return out;
