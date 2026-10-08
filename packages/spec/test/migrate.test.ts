@@ -334,7 +334,6 @@ describe("migration 15 → 16 (the business subtype, variety engine Step 3)", ()
     expect(Schema.safeParse({ ...shop, business: { ...shop.business, subtype: "florist" } }).success).toBe(true);
     // Only a known subtype; whether it fits the type is validateSite's (subtype.test.ts).
     expect(Schema.safeParse({ ...shop, business: { ...shop.business, subtype: "gardening" } }).success).toBe(false);
-    expect(SPEC_VERSION).toBeGreaterThanOrEqual(16);
   });
 });
 
@@ -369,5 +368,6 @@ describe("migration 16 → 17 (\"Cena po dogovoru\", it-price-on-request)", () =
     const dishes = (inn.pages[1]!.sections[1]!.props as { categories: { dishes: { price: unknown }[] }[] }).categories[0]!.dishes;
     dishes[0]!.price = { onRequest: true };
     expect(validateSite(inn).issues).toEqual([]);
+    expect(SPEC_VERSION).toBe(17);
   });
 });
