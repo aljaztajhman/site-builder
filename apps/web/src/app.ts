@@ -34,6 +34,7 @@ import {
 } from "@sb/engine";
 import { VersionConflictError, contentType, domainProvidersFor, mailerFromEnv, newId, runningVersion, type DomainProviders, type Mailer, type Platform, type RunningVersion, type SiteStatus, type Tier } from "@sb/platform";
 import { renderPage, renderPath, sharedBundle, pageFile, notFoundPlacement, rebaseRelativeUrls } from "@sb/render";
+import { homepageDraft, withoutHomepageDrafts } from "./homepage-draft.ts";
 import { CollectionKind, addedOnRequest, blockerText, collectPlaceholders, markOwnerEdits, sectionDef, type SiteSpec } from "@sb/spec";
 import type { AuthSettings } from "./auth.ts";
 import { clientIp, csrfOk, fullSiteRefusal, identity, publishRefusal, refusalJson, sameOriginOnly, signedIn, siteAccess, tierOf, type AppEnv, type Refusal } from "./access.ts";
@@ -561,7 +562,8 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       pulse,
       version: current?.version ?? null,
       spec: current?.spec ?? null,
-      events,
+      // A homepage written before the other pages is served by its preview (?draft=homepage), not sent on every poll.
+      events: withoutHomepageDrafts(events),
       chat,
       cost,
       versions,
@@ -951,6 +953,23 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     const id = c.req.param("id");
     const v = c.req.query("v");
     if (!SAFE_ID.test(id)) return c.notFound();
+    // ?draft=homepage (config pipeline.homepageFirst): the homepage a full-site generation wrote before its other pages,
+    // from the run's "Homepage ready" event, while the site is generating and until its first version is saved.
+    // Same renderer and page depth as the saved pages; never a version, never cached.
+    if (c.req.query("draft") === "homepage") {
+      c.header("cache-control", "no-store");
+      const site = c.get("site") ?? (await repo.getSite(id));
+      const draft = site?.status === "generating" && c.req.param("file") === "index.html" ? homepageDraft(await repo.listEvents(id)) : null;
+      const home = draft?.spec.pages.find((p) => p.kind === "home");
+      if (!draft || !home || !site) return c.text("Predogled še ni pripravljen.", 404);
+      const siteUrl = await siteAddress(repo, id, site.slug, opts.platformDomain);
+      try {
+        return c.html(renderPage(draft.spec, home, { imageWidths: config.images.widths, siteUrl }));
+      } catch {
+        // The pipeline logs only a homepage that renders; an older or hand-written event may not.
+        return c.text("Predogled še ni pripravljen.", 404);
+      }
+    }
     // ?v=N of a version retention removed shows the nearest older kept one (as undo does).
     const asked = v && /^\d+$/.test(v) ? await repo.nearestVersion(id, Number(v)) : undefined;
     const sectionId = c.req.query("section");

@@ -12,6 +12,7 @@ import {
   generateContent,
   generateSite,
   launchCheckBrowser,
+  HOMEPAGE_READY,
   type CallRecord,
   type CheckBrowser,
   type ContentInput,
@@ -19,6 +20,7 @@ import {
   type ModelTransport,
 } from "@sb/engine";
 import { Repo, createDb, createFsStorage, migrate, type Db } from "@sb/platform";
+import { renderPage } from "@sb/render";
 import { validateSite, type SiteSpec } from "@sb/spec";
 import { loadFixture } from "../src/fixtures/load.ts";
 import { syntheticRecordings } from "../src/synthetic.ts";
@@ -74,14 +76,33 @@ describe("content stage, homepage first (pipeline.homepageFirst)", () => {
       const { input, golden } = await contentInput(id);
       const one = goldenContent(golden);
       const records: CallRecord[] = [];
-      const single = await generateContent(new ModelClient({ config, transport: one.transport, spentToday: async () => 0, onCall: async () => undefined }), input);
+      // Switch off: one call, and nothing is handed on before the whole answer.
+      let heardOff = 0;
+      const single = await generateContent(new ModelClient({ config, transport: one.transport, spentToday: async () => 0, onCall: async () => undefined }), { ...input, onHomepage: () => void heardOff++ });
+      expect(heardOff).toBe(0);
       const split = goldenContent(golden);
       let homepage = 0;
+      let draft: SiteSpec | undefined;
       const r = await generateContent(new ModelClient({ config, transport: split.transport, spentToday: async () => 0, onCall: async (c) => void records.push(c) }), {
         ...input,
         homepageFirst: true,
-        onHomepage: () => void (homepage = Date.now()),
+        onHomepage: (h) => {
+          homepage = Date.now();
+          draft = h.spec;
+        },
       });
+      // The homepage the editor shows is the merged site's homepage; the pages still to come are empty stand-ins
+      // (the brief's slug and nav label) so its nav and links render; it isn't valid on its own.
+      expect(draft!.pages[0]).toEqual(r.spec.pages[0]);
+      expect(draft!.chrome).toEqual(r.spec.chrome);
+      const planned = input.brief.pages.filter((p) => p.kind !== "home");
+      expect(draft!.pages.slice(1, 1 + planned.length)).toEqual(planned.map((p) => expect.objectContaining({ id: `p_${p.slug}`, kind: "standard", slug: p.slug, nav: { label: p.navLabel, show: true }, sections: [] })));
+      expect(validateSite(draft!).ok).toBe(false);
+      // It renders with the same renderer exactly as the saved homepage (the pages kept the brief's nav labels here),
+      // but for the head's structured data: its offer catalogue also lists the other pages' services, not written yet.
+      const visible = (html: string) => html.replace(/<script type="application\/ld\+json">.*?<\/script>/g, "");
+      expect(r.spec.pages.filter((p) => p.kind === "standard").map((p) => p.nav)).toEqual(planned.map((b) => ({ label: b.navLabel, show: true })));
+      expect(visible(renderPage(draft!, draft!.pages[0]!))).toBe(visible(renderPage(r.spec, r.spec.pages[0]!)));
       const others = golden.pages.filter((p) => p.kind === "standard").length;
       expect(one.seen).toHaveLength(1);
       expect(split.seen).toHaveLength(1 + others);
@@ -186,7 +207,16 @@ describe("pipeline, homepage first", () => {
     const transport: ModelTransport = { send: (req, stage) => (req.stage === "content" ? content.transport.send(req, stage) : replay.send(req, stage)) };
     const calls: CallRecord[] = [];
     const client = new ModelClient({ config: homepageFirst, transport, spentToday: async () => 0, onCall: async (c) => void calls.push(c) });
-    const gen = await generateSite({ config: homepageFirst, repo, storage, client, browser, lighthouse: false }, site.id, null);
+    // The versions saved when the homepage is announced: none (the homepage alone is never a version).
+    let versionsAtReady: number | undefined;
+    const spy = Object.assign(Object.create(repo) as Repo, {
+      addEvent: async (e: Parameters<Repo["addEvent"]>[0]) => {
+        if (e.message === HOMEPAGE_READY) versionsAtReady = (await repo.listVersions(site.id)).length;
+        return repo.addEvent(e);
+      },
+    });
+    const gen = await generateSite({ config: homepageFirst, repo: spy, storage, client, browser, lighthouse: false }, site.id, null);
+    expect(versionsAtReady).toBe(0);
 
     expect(gen.check?.validation).toEqual([]);
     expect(calls.filter((c) => c.stage === "content")).toHaveLength(3);
@@ -194,8 +224,14 @@ describe("pipeline, homepage first", () => {
     expect(gen.homepageMs!).toBeLessThan(gen.firstVersionMs);
     const events = (await db.query<{ stage: string; message: string; data: unknown }>("select stage, message, data from site_events where site_id = $1 order by id", [site.id])).rows;
     const messages = events.map((e) => e.message);
-    const ready = messages.indexOf("Homepage ready; writing the other pages");
+    const ready = messages.indexOf(HOMEPAGE_READY);
     expect(ready).toBeGreaterThan(-1);
+    // The event carries the homepage the editor shows: the saved site's homepage, its other pages still empty.
+    const draft = (events[ready]!.data as { homepage: SiteSpec }).homepage;
+    // Version 1: the generation's merged site, before any critique patch.
+    const saved = (await repo.getSpec(site.id, 1))!.spec;
+    expect(draft.pages[0]).toEqual(saved.pages[0]);
+    expect(draft.pages.filter((p) => p.kind === "standard").map((p) => [p.id, p.sections.length])).toEqual([["p_cenik", 0], ["p_kontakt", 0]]);
     expect(ready).toBeLessThan(messages.indexOf("First version saved; the editor shows it while checks and critique run"));
     expect(events.find((e) => e.message === "Content written homepage first")!.data).toEqual(["homepage: 1 call(s)", "p_cenik: 1 call(s)", "p_kontakt: 1 call(s)"]);
     // One version from the generation (the merged site), then the critique's if it patched.
