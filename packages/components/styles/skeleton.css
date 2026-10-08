@@ -183,10 +183,11 @@ html:has(.site-header--sticky) {
   /*
    * Phones: the number gets its own row under the brand and the menu (with the directions when the header carries
    * them), so the name or the logo keeps the brand row (HQ it-skeleton-phone-header-wrap). The empty item breaks the
-   * row; the rows stay 12 px apart (primary targets 8 px and more).
+   * row (so the brand row and the number's are two gaps apart). A number too long to share its row pushes the
+   * directions under it, one gap: 9 px (primary targets 8 px apart and more).
    */
   .site-header--phone .site-header__inner {
-    row-gap: 0.375rem;
+    row-gap: 0.5625rem;
   }
   .site-header--phone .site-header__inner::after {
     content: "";

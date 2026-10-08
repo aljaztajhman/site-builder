@@ -233,13 +233,15 @@ export async function renderSkeleton(browser: Browser, v: SkeletonVariant, media
 }
 
 /**
- * The phone header's first row (HQ it-skeleton-phone-header-wrap): the business name on one line (the centred family's
+ * The phone header's first row on a site with a skeleton (HQ it-skeleton-phone-header-wrap): the business name on one line (the centred family's
  * wordmark: two balanced lines at most, its menu icon takes room on both sides), the logo at its full height (not
  * squeezed by what shares its row), the menu button on the brand's row, the phone number on one line. A string, not a
  * function: the bundler's helpers don't exist in the page.
  */
 const HEADER_ROW = `(() => {
   const out = [];
+  // Only the skeleton's header families fit the name to their row; today's header wraps a long name by design.
+  if (!document.body.hasAttribute("data-skeleton")) return out;
   // Line boxes of an element's visible text (its text nodes only, not the inline elements' own boxes).
   const lines = (el) => {
     const tops = new Set();
