@@ -1,0 +1,18 @@
+{
+  "seq": 4,
+  "stage": "altText",
+  "model": "claude-sonnet-5-5",
+  "hash": "b2b26d2838271ddb",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"images\":[{\"index\":0,\"alt\":\"Svetel frizerski salon z dvema črnima stoloma, lesenima ogledaloma, polico z izdelki za lase in zeleno rastlino ob velikem oknu.\",\"focalX\":0.5,\"focalY\":0.55,\"heroSuitable\":true},{\"index\":1,\"alt\":\"Frizerka s škarjami striže ramenske lase stranki, ki sedi pod črnim ogrinjalom v salonu z rastlinami.\",\"focalX\":0.4,\"focalY\":0.3,\"heroSuitable\":false},{\"index\":2,\"alt\":\"Na leseni polici so steklenice in lončki z izdelki za nego las, glavnik, frizerske škarje in zloženi temni brisači.\",\"focalX\":0.4,\"focalY\":0.45,\"heroSuitable\":false}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2218,
+      "output_tokens": 286,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

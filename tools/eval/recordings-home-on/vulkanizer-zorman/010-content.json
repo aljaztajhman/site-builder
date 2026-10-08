@@ -1,0 +1,18 @@
+{
+  "seq": 10,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "7c362a9b93ea2130",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"split-cta\",\"cta\":\"call\"},\"footer\":{\"variant\":\"columns\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Vulkanizerstvo Zorman Ptuj | Gume, centriranje, krpanje\",\"description\":\"Družinska vulkanizerska delavnica v Ptuju. Menjava in centriranje gum, krpanje, dušik, hramba čez sezono in prodaja novih gum. Naročite se po telefonu.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-split\",\"variant\":\"image-right\",\"tone\":\"default\",\"props\":{\"eyebrow\":\"Družinska delavnica od leta 1994\",\"headline\":\"Gume za vaš avto, kombi ali traktor\",\"intro\":\"Menjamo in centriramo gume, krpamo predrte in prodajamo nove. Spomladi in jeseni je gneča, zato se naročite po telefonu.\",\"primary\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}},\"image\":\"img_g3\"}},{\"id\":\"s_contact\",\"type\":\"contact-strip\",\"variant\":\"bar\",\"tone\":\"alt\",\"props\":{\"title\":\"Obiščite nas\"}},{\"id\":\"s_services\",\"type\":\"services-list\",\"variant\":\"rows\",\"tone\":\"default\",\"props\":{\"eyebrow\":\"Kaj počnemo\",\"title\":\"Storitve za vaše gume\",\"items\":[{\"name\":\"Menjava in centriranje kompleta\",\"description\":\"Za osebna vozila, kombije in manjše traktorje.\",\"price\":{\"amount\":28,\"unit\":\"komplet\"}},{\"name\":\"Krpanje gume\",\"description\":\"Popravilo predrte gume.\",\"price\":{\"amount\":12}},{\"name\":\"Hramba gum čez sezono\",\"description\":\"Hramba kompleta za eno sezono.\",\"price\":{\"amount\":35,\"unit\":\"komplet\"}},{\"name\":\"Polnjenje z dušikom\",\"description\":\"Gume napolnimo z dušikom.\",\"price\":{\"$placeholder\":\"price\",\"note\":\"Dopišite ceno polnjenja z dušikom\"}},{\"name\":\"Nove gume vseh večjih znamk\",\"description\":\"Cena po ponudbi.\",\"price\":{\"$placeholder\":\"price\",\"note\":\"Cena po ponudbi\"}}]}},{\"id\":\"s_about\",\"type\":\"image-text\",\"variant\":\"image-left\",\"tone\":\"alt\",\"props\":{\"eyebrow\":\"Naša zgodba\",\"heading\":\"Od Stanka do Mateja\",\"paragraphs\":[\"Delavnico je leta 1994 odprl Stanko Zorman. Danes jo vodi sin Matej.\",\"Najdete nas takoj za bencinsko črpalko na Ormoški cesti.\"],\"image\":\"img_g4\"}},{\"id\":\"s_steps\",\"type\":\"steps\",\"variant\":\"horizontal\",\"tone\":\"default\",\"props\":{\"heading\":\"Kako do termina\",\"steps\":[{\"title\":\"Pokličite nas\",\"text\":\"Povejte, kaj potrebujete: menjavo, krpanje ali hrambo.\"},{\"title\":\"Dogovorimo termin\",\"text\":\"Spomladi in jeseni je gneča, zato se naročite vnaprej.\"},{\"title\":\"Pridite k nam\",\"text\":\"Gume uredimo v naši delavnici na Ormoški cesti.\"}]}},{\"id\":\"s_cta\",\"type\":\"cta\",\"variant\":\"band\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Potrebujete nove gume?\",\"text\":\"Pokličite nas za ponudbo ali pridite mimo delavnice.\",\"primary\":{\"label\":\"Navodila za pot\",\"target\":{\"action\":\"directions\"}}}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2578,
+      "output_tokens": 1265,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

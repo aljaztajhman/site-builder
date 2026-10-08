@@ -1,0 +1,124 @@
+{
+  "meta": {
+    "mode": "record-missing",
+    "scope": "home",
+    "startedAt": "2026-10-08T10:35:03.243Z",
+    "switches": [
+      "concept"
+    ],
+    "label": "conc",
+    "totalEur": 0.335677264
+  },
+  "summary": {
+    "acrossTrades": 0.7178417827822035,
+    "withinTrade": {
+      "builder": {
+        "pairs": 1,
+        "mean": 0.14284371681235952,
+        "min": 0.14284371681235952
+      }
+    },
+    "withinTradeAll": 0.14284371681235952,
+    "collisionsWithinTrade": [
+      "elektro-zupan / mizarstvo-lesnik"
+    ],
+    "collisionsAcross": []
+  },
+  "judge": {
+    "sites": 3,
+    "median": 3.6666666666666665,
+    "medianTemplate": 3.6666666666666665,
+    "medianPhone": 3.6666666666666665,
+    "medianDesktop": 3.6666666666666665,
+    "minDistinctiveness": 3,
+    "belowDistinctiveness": []
+  },
+  "anotherLook": {
+    "measured": 0,
+    "ok": 0,
+    "meanDistance": null,
+    "minDistance": null,
+    "failing": [],
+    "none": []
+  },
+  "regenerated": {
+    "measured": 0,
+    "meanDistance": null,
+    "minDistance": null,
+    "sameLook": [],
+    "eur": 0,
+    "failing": [],
+    "errors": []
+  },
+  "generationEurMedian": 0.149415,
+  "sites": [
+    {
+      "id": "elektro-zupan",
+      "trade": "builder",
+      "direction": "cevi",
+      "fontPair": "space-grotesk-public-sans",
+      "hero": "hero-signature:drawing",
+      "primary": "#d63c22",
+      "judge": 3.6666666666666665,
+      "distinctiveness": 4,
+      "generationEur": 0.149415,
+      "failures": 0
+    },
+    {
+      "id": "mizarstvo-lesnik",
+      "trade": "builder",
+      "direction": "cevi",
+      "fontPair": "space-grotesk-public-sans",
+      "hero": "hero-signature:drawing",
+      "primary": "#d63c22",
+      "judge": 3.25,
+      "distinctiveness": 3,
+      "generationEur": 0.101576,
+      "failures": 0
+    },
+    {
+      "id": "vulkanizer-zorman",
+      "trade": "car-repair",
+      "direction": "tablica",
+      "fontPair": "archivo-public-sans",
+      "hero": "hero-signature:photo",
+      "primary": "#15181c",
+      "judge": 3.6666666666666665,
+      "distinctiveness": 4,
+      "generationEur": 0.24120400000000003,
+      "failures": 0
+    }
+  ],
+  "targets": [
+    {
+      "name": "Look distance within a trade ≥ across trades",
+      "value": "0.14",
+      "target": "≥ 0.47 (today's lowest across-trade distance)",
+      "met": false
+    },
+    {
+      "name": "No two sites of one trade share palette, font pair and hero",
+      "value": "1 (elektro-zupan / mizarstvo-lesnik)",
+      "target": "0",
+      "met": false
+    },
+    {
+      "name": "Judge distinctiveness ≥ 3 on every site (lower of phone and desktop)",
+      "value": "min 3",
+      "target": "≥ 3",
+      "met": true
+    },
+    {
+      "name": "Judge median (mean of phone and desktop)",
+      "value": "3.67",
+      "target": "≥ 3.2",
+      "met": true
+    },
+    {
+      "name": "Judge median on the template trades",
+      "value": "3.67",
+      "target": "≥ 3.7",
+      "met": false
+    }
+  ]
+}

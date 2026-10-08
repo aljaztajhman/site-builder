@@ -1,0 +1,18 @@
+{
+  "seq": 10,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "c377aa2fb975c0ff",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"stacked\",\"cta\":\"call\",\"tone\":\"inverse\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Brivnica Kos Maribor – moško striženje in britje\",\"description\":\"Klasična moška brivnica v starem mestnem jedru Maribora. Striženje, fade, urejanje brade in britje z britvijo. Cene so na strani, pokličite nas.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-image\",\"variant\":\"overlay-left\",\"tone\":\"inverse\",\"props\":{\"eyebrow\":\"Klasična moška brivnica\",\"headline\":\"Natančno striženje in britje z britvijo\",\"intro\":\"Striženje s škarjami ali strojčkom, fade, urejena brada in britje z vročo brisačo. Pri nas vas postrežemo v starem mestnem jedru Maribora.\",\"primary\":{\"label\":\"Poglejte cene\",\"target\":{\"page\":\"p_home\",\"section\":\"s_prices\"}},\"image\":\"img_g3\"}},{\"id\":\"s_prices\",\"type\":\"price-list\",\"variant\":\"tags\",\"tone\":\"alt\",\"props\":{\"title\":\"Cene storitev\",\"intro\":\"Striženje za fante do 12 let: ceno vam povemo v salonu.\",\"groups\":[{\"items\":[{\"name\":\"Moško striženje\",\"price\":{\"amount\":20}},{\"name\":\"Fade\",\"price\":{\"amount\":23}},{\"name\":\"Urejanje brade\",\"price\":{\"amount\":14}},{\"name\":\"Britje z britvijo\",\"price\":{\"amount\":25}},{\"name\":\"Striženje in brada skupaj\",\"price\":{\"amount\":30}}]}]}},{\"id\":\"s_craft\",\"type\":\"image-text\",\"variant\":\"image-right\",\"tone\":\"default\",\"props\":{\"eyebrow\":\"Obrt\",\"heading\":\"Britje z britvijo in vročo brisačo\",\"paragraphs\":[\"Brivec Luka se je obrti učil v Zagrebu in na Dunaju. Striže s škarjami ali strojčkom, dela fade in ureja brado.\",\"Pri britju z britvijo uporabljamo vročo brisačo. Fante do 12 let postrižemo tudi pri nas.\"],\"image\":\"img_g4\"}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"table\",\"tone\":\"alt\",\"props\":{\"title\":\"Kdaj smo odprti\",\"note\":\"Brez naročila samo, če je prost stol. Za gotovost nas pokličite.\"}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"stacked\",\"tone\":\"inverse\",\"props\":{\"title\":\"Kako do nas\",\"intro\":\"Najdete nas v starem mestnem jedru Maribora. Za naročilo nas pokličite.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2353,
+      "output_tokens": 969,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

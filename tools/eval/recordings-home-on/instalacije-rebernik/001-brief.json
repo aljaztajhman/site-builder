@@ -1,0 +1,18 @@
+{
+  "seq": 1,
+  "stage": "brief",
+  "model": "synthetic",
+  "hash": "synthetic",
+  "origin": "synthetic",
+  "response": {
+    "text": "{\"businessType\":\"builder\",\"name\":\"Inštalacije Rebernik\",\"town\":\"Ptuj\",\"summary\":\"Inštalacije Rebernik. Vodovod, ogrevanje, toplotne črpalke, prenove kopalnic.\\n\\nSem Matej Rebernik, inštalater z mojstrskim izpitom. Delam s štirimi sodelavci, od leta 2011 kot samostojni podjetnik. Naš sedež je Ormoška cesta 18, 2250 Ptuj, ampak delamo večinoma na terenu: Ptuj, Ormož, Slovenska Bistrica, Lenart in okolica Maribora.\\n\\nKaj delamo:\\n- vodovodne in odtočne inštalacij\",\"audience\":\"lokalni obiskovalci\",\"tone\":\"friendly\",\"offerings\":[],\"highlights\":[],\"facts\":{\"phone\":\"+38641555118\",\"email\":null,\"address\":{\"street\":\"Ormoška cesta 18\",\"postalCode\":\"2250\",\"city\":\"Ptuj\"},\"hours\":null,\"hoursNote\":null,\"bookingUrl\":null,\"social\":[],\"legalName\":\"Matej Rebernik s.p.\",\"registrationNumber\":\"3987654000\",\"taxNumber\":\"39876543\",\"vatPayer\":null,\"serviceArea\":[\"Ptuj\",\"Ormož\",\"Slovenska Bistrica\",\"Lenart\",\"okolica Maribora\"],\"people\":[{\"name\":\"Matej Rebernik\",\"role\":\"inštalater z mojstrskim izpitom\"}]},\"pages\":[{\"kind\":\"home\",\"slug\":\"\",\"navLabel\":\"Domov\",\"purpose\":\"Vodovod, talno in radiatorsko ogrevanje, toplotne črpalke zrak-voda in prenove kopalnic na ključ. Ptuj, Ormož, Slovenska Bistrica, Lenart in okolica Maribora.\"},{\"kind\":\"standard\",\"slug\":\"storitve\",\"navLabel\":\"Storitve\",\"purpose\":\"Vodovodne in odtočne inštalacije, talno in radiatorsko ogrevanje, toplotne črpalke zrak-voda, zamenjava kotlov in prenove kopalnic na ključ.\"},{\"kind\":\"standard\",\"slug\":\"kontakt\",\"navLabel\":\"Kontakt\",\"purpose\":\"Inštalacije Rebernik, Ormoška cesta 18, Ptuj. Najlažje nas dobite po telefonu, ogled je brezplačen.\"}],\"missing\":[\"prices\",\"hours\",\"photos\",\"email\"]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

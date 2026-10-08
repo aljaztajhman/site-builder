@@ -7,15 +7,36 @@
  * Free: reads the two files, no model call.
  */
 import { readFileSync, writeFileSync } from "node:fs";
-import { targetLines, varietyTargets, type VarietyData } from "./variety-report.ts";
+import { targetLines, templateTrade, varietyTargets, type VarietyData } from "./variety-report.ts";
 
 const n2 = (x: number | null | undefined) => (x === null || x === undefined ? "—" : x.toFixed(2));
 const eur = (x: number | null | undefined) => (x === null || x === undefined ? "—" : `€${x.toFixed(3)}`);
 const switches = (d: VarietyData) => (d.meta.switches.length ? d.meta.switches.join(", ") : "none");
 
+const median = (xs: number[]): number | null => {
+  if (!xs.length) return null;
+  const s = [...xs].sort((a, b) => a - b);
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m]! : (s[m - 1]! + s[m]!) / 2;
+};
+
+/** Judge median, template-trade median and lowest distinctiveness over only these sites (both runs judged). */
+function sameSites(d: VarietyData, ids: Set<string>) {
+  const sites = d.sites.filter((s) => ids.has(s.id) && s.judge !== null);
+  return {
+    n: sites.length,
+    median: median(sites.map((s) => s.judge!)),
+    template: median(sites.filter((s) => templateTrade(s.trade)).map((s) => s.judge!)),
+    minDistinct: sites.length ? Math.min(...sites.map((s) => s.distinctiveness!)) : null,
+  };
+}
+
 export function renderCompare(before: VarietyData, after: VarietyData): string {
   const afterTargets = varietyTargets(after, before.summary.acrossTrades);
   const ids = after.sites.map((s) => s.id);
+  const shared = new Set(ids.filter((id) => before.sites.some((s) => s.id === id && s.judge !== null) && after.sites.some((s) => s.id === id && s.judge !== null)));
+  const b = sameSites(before, shared);
+  const a = sameSites(after, shared);
   const lines = [
     "# Variety: before and after",
     "",
@@ -43,6 +64,7 @@ export function renderCompare(before: VarietyData, after: VarietyData): string {
     `| Judge median (phone / desktop) | ${n2(before.judge.median)} (${n2(before.judge.medianPhone)} / ${n2(before.judge.medianDesktop)}) | ${n2(after.judge.median)} (${n2(after.judge.medianPhone)} / ${n2(after.judge.medianDesktop)}) |`,
     `| Judge median, template trades | ${n2(before.judge.medianTemplate)} | ${n2(after.judge.medianTemplate)} |`,
     `| Lowest distinctiveness | ${before.judge.minDistinctiveness ?? "—"} | ${after.judge.minDistinctiveness ?? "—"} |`,
+    `| Same ${shared.size} sites: judge median, template trades, lowest distinctiveness | ${n2(b.median)}, ${n2(b.template)}, ${b.minDistinct ?? "—"} | ${n2(a.median)}, ${n2(a.template)}, ${a.minDistinct ?? "—"} |`,
     `| Median generation cost per homepage | ${eur(before.generationEurMedian)} | ${eur(after.generationEurMedian)} |`,
     `| Druga podoba: sites with another look, mean distance | ${before.anotherLook.measured ? `${before.anotherLook.ok}/${before.anotherLook.measured}, ${n2(before.anotherLook.meanDistance)}` : "—"} | ${after.anotherLook.measured ? `${after.anotherLook.ok}/${after.anotherLook.measured}, ${n2(after.anotherLook.meanDistance)}` : "—"} |`,
     `| Ustvari znova: regenerated, mean distance, same look again | ${before.regenerated.measured ? `${before.regenerated.measured}, ${n2(before.regenerated.meanDistance)}, ${before.regenerated.sameLook.length}` : "—"} | ${after.regenerated.measured ? `${after.regenerated.measured}, ${n2(after.regenerated.meanDistance)}, ${after.regenerated.sameLook.length}` : "—"} |`,

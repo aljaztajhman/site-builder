@@ -1,0 +1,18 @@
+{
+  "seq": 1,
+  "stage": "brief",
+  "model": "synthetic",
+  "hash": "synthetic",
+  "origin": "synthetic",
+  "response": {
+    "text": "{\"businessType\":\"bakery\",\"name\":\"Pekarna Kvas\",\"town\":\"Kamnik\",\"summary\":\"Živjo! Pekarna Kvas je naša mala družinska pekarna v Kamniku, Šutna 30, 1241 Kamnik, čisto na začetku stare ulice. Pečem jaz, Jure Petek, v trgovini pa je večinoma moja žena Katja. Kruh pečemo samo z drožmi (kvasom, ki ga gojimo sami) in ga pustimo vzhajati čez noč, zato je bolj okusen in dlje ostane svež. Moko kupujemo pri mlinu v bližini.\\n\\nVsak dan imamo pirin kruh z drožmi, \",\"audience\":\"lokalni obiskovalci\",\"tone\":\"friendly\",\"offerings\":[{\"group\":null,\"name\":\"pirin kruh z drožmi\",\"description\":null,\"price\":{\"amount\":4.2,\"from\":false,\"unit\":null}},{\"group\":null,\"name\":\"rženi kruh\",\"description\":null,\"price\":{\"amount\":3.9,\"from\":false,\"unit\":null}},{\"group\":null,\"name\":\"rogljiček z maslom\",\"description\":null,\"price\":{\"amount\":1.3,\"from\":false,\"unit\":null}},{\"group\":null,\"name\":\"orehova potica (1 kg)\",\"description\":null,\"price\":{\"amount\":18,\"from\":true,\"unit\":null}}],\"highlights\":[],\"facts\":{\"phone\":\"+38641555906\",\"email\":\"pekarna@pekarna-kvas.example\",\"address\":{\"street\":\"Šutna 30\",\"postalCode\":\"1241\",\"city\":\"Kamnik\"},\"hours\":[{\"from\":\"mon\",\"to\":\"fri\",\"open\":\"06:30\",\"close\":\"18:00\",\"closed\":false},{\"from\":\"sat\",\"to\":\"sat\",\"open\":\"06:30\",\"close\":\"12:00\",\"closed\":false},{\"from\":\"sun\",\"to\":\"sun\",\"open\":\"07:00\",\"close\":\"10:00\",\"closed\":false}],\"hoursNote\":null,\"bookingUrl\":null,\"social\":[],\"legalName\":null,\"registrationNumber\":null,\"taxNumber\":null,\"vatPayer\":null,\"serviceArea\":[],\"people\":[{\"name\":\"Jure Petek\",\"role\":\"pek\"},{\"name\":\"Katja\",\"role\":\"trgovina\"}]},\"pages\":[{\"kind\":\"home\",\"slug\":\"\",\"navLabel\":\"Domov\",\"purpose\":\"Družinska pekarna na Šutni v Kamniku: pirin in rženi kruh z drožmi, rogljički, cimetovi polži, ob petkih in sobotah potica in krofi.\"}],\"missing\":[\"legal\"]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

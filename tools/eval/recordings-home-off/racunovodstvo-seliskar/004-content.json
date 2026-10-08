@@ -1,0 +1,18 @@
+{
+  "seq": 4,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "a5f9ea4435e578ec",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Računovodstvo Seliškar, Murska Sobota\",\"description\":\"Računovodski servis v Murski Soboti od leta 2004. Poslovne knjige, plače, DDV in letna poročila za s.p., d.o.o. in društva.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"receipt\",\"props\":{\"headline\":\"Računovodstvo za Pomurje in vso Slovenijo\",\"intro\":\"Vodimo poslovne knjige, obračunavamo plače in DDV ter pripravljamo letna poročila. Stranke sprejemamo tudi v madžarskem jeziku.\",\"fact\":\"phone\",\"factLabel\":\"Pokličite nas\",\"factNote\":\"Cena je odvisna od števila prejetih in izdanih računov.\",\"secondary\":{\"label\":\"Pišite nam\",\"target\":{\"action\":\"email\"}},\"receipt\":{\"title\":\"Kaj uredimo za vas\",\"lines\":[\"Poslovne knjige in davčna evidenca\",\"Obračun plač in potnih stroškov\",\"Obračun DDV in poročanje FURS\",\"Letna poročila za AJPES\",\"Pomoč pri odprtju s.p. ali d.o.o.\",\"Davčno svetovanje za začetnike\"],\"total\":{\"label\":\"Cena\",\"value\":\"po dogovoru\"}}}},{\"id\":\"s_za_koga\",\"type\":\"highlights\",\"variant\":\"figures\",\"props\":{\"heading\":\"Za koga delamo\",\"items\":[{\"title\":\"s.p.\",\"text\":\"Samostojni podjetniki\"},{\"title\":\"d.o.o.\",\"text\":\"Manjša podjetja\"},{\"title\":\"Društva\",\"text\":\"Društva iz Pomurja in cele Slovenije\"}]}},{\"id\":\"s_storitve\",\"type\":\"services-list\",\"variant\":\"rows\",\"tone\":\"alt\",\"props\":{\"title\":\"Naše storitve\",\"intro\":\"Dokumente nam lahko pošljete po e-pošti ali jih prinesete osebno. Stranke se prej najavijo po telefonu.\",\"items\":[{\"name\":\"Poslovne knjige in davčna evidenca\",\"description\":\"Vodimo vaše poslovne knjige in davčno evidenco.\"},{\"name\":\"Plače in potni stroški\",\"description\":\"Obračunamo plače in potne stroške.\"},{\"name\":\"DDV in poročanje FURS\",\"description\":\"Obračunamo DDV in poročamo na FURS.\"},{\"name\":\"Letna poročila in davčni obračuni\",\"description\":\"Pripravimo letna poročila za AJPES in davčne obračune.\"},{\"name\":\"Odprtje s.p. ali d.o.o.\",\"description\":\"Pomagamo vam pri odprtju podjetja.\"},{\"name\":\"Davčno svetovanje za začetnike\",\"description\":\"Svetujemo vam na začetku poslovne poti.\"}]}},{\"id\":\"s_about\",\"type\":\"about\",\"variant\":\"figure\",\"props\":{\"heading\":\"Delamo v Murski Soboti\",\"paragraphs\":[\"Večina naših strank je iz Pomurja, delamo pa za podjetja po vsej Sloveniji.\",\"Z direktorico delata še dve računovodkinji.\"],\"ownerName\":\"Branka Seliškar\",\"ownerRole\":\"direktorica\",\"figure\":{\"label\":\"Delamo od leta\",\"value\":\"2004\"}}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"inverse\",\"props\":{\"title\":\"Obisk najavite po telefonu\",\"intro\":\"Stranke se vedno prej najavijo po telefonu.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2640,
+      "output_tokens": 1284,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

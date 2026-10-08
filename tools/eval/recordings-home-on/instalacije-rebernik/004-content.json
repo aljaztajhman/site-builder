@@ -1,0 +1,18 @@
+{
+  "seq": 4,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "9c2d18fd7b02906f",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\",\"tone\":\"default\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Inštalacije Rebernik, Ptuj: vodovod, ogrevanje, črpalke\",\"description\":\"Vodovod, ogrevanje, toplotne črpalke in prenove kopalnic na ključ v okolici Ptuja in Maribora. Ogled in pisna ponudba sta brezplačna.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"drawing\",\"props\":{\"headline\":\"Vodovod, ogrevanje in kopalnice\",\"intro\":\"Sem Matej Rebernik, inštalater z mojstrskim izpitom. Z ekipo štirih sodelavcev delamo na terenu v okolici Ptuja in Maribora.\",\"fact\":\"phone\",\"factLabel\":\"Pokličite za brezplačen ogled\",\"factNote\":\"Če ne dvignem, pokličem nazaj isti dan.\"}},{\"id\":\"s_services\",\"type\":\"services-list\",\"variant\":\"rows\",\"props\":{\"title\":\"Kaj delamo\",\"items\":[{\"name\":\"Vodovodne in odtočne inštalacije\",\"description\":\"V novogradnjah in pri prenovah.\"},{\"name\":\"Talno in radiatorsko ogrevanje\",\"description\":\"Ogrevanje, ki ga načrtujemo in vgradimo za vašo hišo ali stanovanje.\"},{\"name\":\"Toplotne črpalke zrak-voda\",\"description\":\"Montaža in servis toplotnih črpalk.\"},{\"name\":\"Zamenjava starih kotlov na olje\",\"description\":\"Kotel zamenjamo s toplotno črpalko in vam pomagamo pri vlogi za subvencijo Eko sklada.\"},{\"name\":\"Prenove kopalnic na ključ\",\"description\":\"Kopalnico prenovimo skupaj s keramikom.\"}]}},{\"id\":\"s_area\",\"type\":\"service-area\",\"variant\":\"list\",\"props\":{\"title\":\"Kje delamo\",\"intro\":\"Na teren pridemo v okolico Ptuja, Ormoža, Slovenske Bistrice, Lenarta in Maribora.\"}},{\"id\":\"s_steps\",\"type\":\"steps\",\"variant\":\"horizontal\",\"tone\":\"alt\",\"props\":{\"heading\":\"Kako poteka delo\",\"steps\":[{\"title\":\"Pokličete nas\",\"text\":\"Povejte, kaj potrebujete. Če ne dvignem, vas pokličem nazaj isti dan.\"},{\"title\":\"Pridemo na ogled\",\"text\":\"Ogled na vašem domu je brezplačen.\"},{\"title\":\"Prejmete pisno ponudbo\",\"text\":\"Za vsako delo dobite pisno ponudbo, brezplačno.\"}]}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"inverse\",\"props\":{\"title\":\"Pokličite me, pogovoriva se o vašem delu\",\"intro\":\"Ogled in pisna ponudba sta brezplačna.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2686,
+      "output_tokens": 1083,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "seq": 13,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "8a5d127dcf1fb01b",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"split-cta\",\"cta\":\"call\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Salon Tina Kranj | Svečane pričeske in barvanje las\",\"description\":\"Frizerstvo za posebne priložnosti v Kranju. Poročne in maturantske pričeske ter barvanje las, samo po naročilu. Za neveste tudi na domu ali v hotelu.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-split\",\"variant\":\"image-right\",\"tone\":\"default\",\"props\":{\"eyebrow\":\"Frizerstvo za posebne priložnosti\",\"headline\":\"Svečane pričeske in barvanje las v Kranju\",\"intro\":\"Specializirani smo za barvanje las in svečane pričeske. Delamo samo po naročilu, neveste pa po dogovoru obiščemo tudi na domu ali v hotelu.\",\"primary\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}},\"secondary\":{\"label\":\"Poglejte cenik\",\"target\":{\"page\":\"p_home\",\"section\":\"s_cenik\"}},\"image\":\"img_02\"}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"week\",\"tone\":\"alt\",\"props\":{\"title\":\"Kdaj vas sprejmemo\",\"note\":\"Delamo samo po naročilu. Pokličite nas in dogovorili se bomo za termin.\"}},{\"id\":\"s_nevesta\",\"type\":\"image-text\",\"variant\":\"image-left\",\"tone\":\"default\",\"props\":{\"eyebrow\":\"Za neveste\",\"heading\":\"Poročna pričeska tudi na vašem domu\",\"paragraphs\":[\"Za neveste pridemo po dogovoru tudi na dom ali v hotel, da se na poročni dan pripravite v miru.\",\"Poročna pričeska vključuje tudi poskusno pričesko, da vemo, kaj si želite, še preden pride veliki dan.\"],\"link\":{\"label\":\"Pokličite za dogovor\",\"target\":{\"action\":\"call\"}},\"image\":\"img_01\"}},{\"id\":\"s_cenik\",\"type\":\"price-list\",\"variant\":\"grouped\",\"tone\":\"alt\",\"props\":{\"title\":\"Izbor storitev in cen\",\"intro\":\"Cene, ki jih je navedla Tina. Za ostale storitve nas pokličite.\",\"groups\":[{\"name\":\"Svečane pričeske\",\"items\":[{\"name\":\"Poročna pričeska s poskusno\",\"note\":\"Poročna pričeska skupaj s poskusno pričesko.\",\"price\":{\"amount\":150}},{\"name\":\"Maturantska pričeska\",\"price\":{\"amount\":55}},{\"name\":\"Poskusne pričeske\",\"price\":{\"$placeholder\":\"price\",\"note\":\"Vpišite ceno\"}},{\"name\":\"Kite\",\"price\":{\"$placeholder\":\"price\",\"note\":\"Vpišite ceno\"}}]},{\"name\":\"Barvanje in nega\",\"items\":[{\"name\":\"Barvanje las\",\"price\":{\"amount\":50,\"from\":true}},{\"name\":\"Pramene\",\"price\":{\"amount\":70,\"from\":true}},{\"name\":\"Nega las\",\"price\":{\"$placeholder\":\"price\",\"note\":\"Vpišite ceno\"}}]}]}},{\"id\":\"s_cta\",\"type\":\"cta\",\"variant\":\"band\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Rezervirajte svoj termin\",\"text\":\"Delamo samo po naročilu, zato nas pokličite in izbrala bova čas, ki vam ustreza.\",\"primary\":{\"label\":\"Poglejte delovni čas\",\"target\":{\"page\":\"p_home\",\"section\":\"s_hours\"}}}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2291,
+      "output_tokens": 1263,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

@@ -30,12 +30,14 @@
  * --homepage-first: turns config pipeline.homepageFirst on for this run (full scope: the homepage, then the other pages side
  *                   by side; HQ it-homepage-first). The recordings hold one content answer per site, so --replay runs out of
  *                   content recordings for the page calls until they are recorded with it on.
+ * --cost-cuts all|<name>[,<name>]: turns those config costCuts switches on for this run (secondCritiqueOnlyOnFailures,
+ *                   contentRetryAsPatch; docs/plans/cost-cuts.md).
  * --variety all|<name>[,<name>]: turns those config variety switches on for this run (families, skeleton, concept;
  *                   docs/plans/variety-engine.md). With families on, every generated site also gets its "Druga podoba"
  *                   (no model call) rendered, checked and measured against the generated look. The sites made earlier
  *                   in a run are always the later fixtures' neighbours (same trade, same town first), as on the platform.
- * --regenerate:     after the checks, "Ustvari znova" once per fixture (a real generation, paid) and the look distance
- *                   from the first generation (variety Step 2: a regeneration explores).
+ * --regenerate [twins]: after the checks, "Ustvari znova" once per fixture (a real generation, paid) and the look
+ *                   distance from the first generation (variety Step 2: a regeneration explores); "twins": twins only.
  * --recordings <dir>: where --record-missing and --replay keep the recordings (default tools/eval/recordings, the
  *                   full-scope ones the tests replay; a homepage-scope or switched run should keep its own).
  * --reuse-pictures: a picture request the cache doesn't know takes the picture the fixture got earlier at the same
@@ -146,6 +148,19 @@ if (flag("homepage-first")) {
   config.pipeline.homepageFirst = true;
   console.log("Homepage first on (pipeline.homepageFirst)");
 }
+// --cost-cuts all | secondCritiqueOnlyOnFailures,contentRetryAsPatch: turns those config costCuts switches on for this run.
+const cutsArg = value("cost-cuts");
+if (cutsArg) {
+  const known = Object.keys(config.costCuts);
+  const names = cutsArg === "all" ? known : cutsArg.split(",").map((s) => s.trim());
+  const unknown = names.filter((n) => !known.includes(n));
+  if (unknown.length) {
+    console.error(`Unknown cost cut(s): ${unknown.join(", ")}. Known: ${known.join(", ")}.`);
+    process.exit(2);
+  }
+  for (const n of names) (config.costCuts as Record<string, boolean>)[n] = true;
+  console.log(`Cost cuts on: ${names.join(", ")}`);
+}
 // --variety all | families,skeleton,concept: turns those config variety switches on for this run.
 const varietyArg = value("variety");
 if (varietyArg) {
@@ -159,6 +174,7 @@ if (varietyArg) {
   console.log(`Variety switches on: ${names.join(", ")}`);
 }
 const regenerate = flag("regenerate");
+const twinIds = new Set(value("regenerate") === "twins" ? loadTwins().map((t) => t.id) : []);
 if (regenerate && !paid) {
   console.error("--regenerate needs real generations (live or --record-missing).");
   process.exit(2);
@@ -200,7 +216,7 @@ try {
       edits,
       // The sites made so far in this run are the platform's other sites (the variety engine's neighbours).
       neighbours: results.flatMap((x) => (x.made ? [x.made] : [])),
-      regenerate,
+      regenerate: regenerate && (twinIds.size === 0 || twinIds.has(f.id)),
       reusePictures: flag("reuse-pictures"),
       ...(judgeBatch ? { judgeBatch } : {}),
     });

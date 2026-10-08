@@ -1,0 +1,18 @@
+{
+  "seq": 3,
+  "stage": "altText",
+  "model": "claude-sonnet-5-5",
+  "hash": "69b6ef84e5abc059",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"images\":[{\"index\":0,\"alt\":\"Siv karavan na dvigalu v svetli avtomehanični delavnici, ob njem rdeč voziček z orodjem in zložene pnevmatike.\",\"focalX\":0.45,\"focalY\":0.4,\"heroSuitable\":true},{\"index\":1,\"alt\":\"Mehanik v delovni obleki s svetilko pregleduje motor avtomobila z odprtim pokrovom motorja v delavnici.\",\"focalX\":0.4,\"focalY\":0.45,\"heroSuitable\":false}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 1676,
+      "output_tokens": 189,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

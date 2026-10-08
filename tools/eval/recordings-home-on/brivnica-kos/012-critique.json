@@ -1,0 +1,18 @@
+{
+  "seq": 12,
+  "stage": "critique",
+  "model": "claude-sonnet-5-5",
+  "hash": "0e7ea01155368902",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"issues\":[],\"patches\":[]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6762,
+      "output_tokens": 493,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 22242
+    }
+  }
+}

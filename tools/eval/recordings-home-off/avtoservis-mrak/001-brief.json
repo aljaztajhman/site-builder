@@ -1,0 +1,18 @@
+{
+  "seq": 1,
+  "stage": "brief",
+  "model": "synthetic",
+  "hash": "synthetic",
+  "origin": "synthetic",
+  "response": {
+    "text": "{\"businessType\":\"car-repair\",\"name\":\"Avtoservis Mrak\",\"town\":\"Kranj\",\"summary\":\"Avtoservis Mrak, Kranj. Smo druzinski servis, delamo od leta 2008, vodi ga Rok Mrak. Naslov: Savska cesta 52, 4000 Kranj (za trgovino s ploscicami, vhod z dvorisca).\\n\\nServisramo osebna vozila vseh znamk in kombije do 3,5 t. Redni servis po navodilih proizvajalca, tako da garancija ostane, menjava olja in filtrov, zavore, sklopke, zobati jermeni, izpusni sistemi, racunalniska di\",\"audience\":\"lokalni obiskovalci\",\"tone\":\"friendly\",\"offerings\":[{\"group\":null,\"name\":\"diagnostika\",\"description\":null,\"price\":{\"amount\":30,\"from\":false,\"unit\":null}},{\"group\":null,\"name\":\"polnjenje klime\",\"description\":null,\"price\":{\"amount\":59,\"from\":false,\"unit\":null}},{\"group\":null,\"name\":\"menjava gum\",\"description\":null,\"price\":{\"amount\":20,\"from\":false,\"unit\":null}},{\"group\":null,\"name\":\"hramba gum\",\"description\":null,\"price\":{\"amount\":40,\"from\":false,\"unit\":null}}],\"highlights\":[],\"facts\":{\"phone\":\"+38641555730\",\"email\":null,\"address\":{\"street\":\"Savska cesta 52\",\"postalCode\":\"4000\",\"city\":\"Kranj\"},\"hours\":[{\"from\":\"mon\",\"to\":\"fri\",\"open\":\"07:00\",\"close\":\"16:00\",\"closed\":false}],\"hoursNote\":null,\"bookingUrl\":null,\"social\":[],\"legalName\":null,\"registrationNumber\":null,\"taxNumber\":null,\"vatPayer\":null,\"serviceArea\":[],\"people\":[{\"name\":\"Rok Mrak\",\"role\":\"vodja servisa\"}]},\"pages\":[{\"kind\":\"home\",\"slug\":\"\",\"navLabel\":\"Domov\",\"purpose\":\"Družinski avtoservis na Savski cesti v Kranju: redni servis, zavore, sklopke, jermeni, diagnostika, klima, menjava in hramba gum ter vlečna služba.\"},{\"kind\":\"standard\",\"slug\":\"storitve\",\"navLabel\":\"Storitve in cene\",\"purpose\":\"Redni servis, popravila, diagnostika za 30 €, polnjenje klime za 59 €, menjava gum za 20 € in hramba gum. Ostalo po predračunu.\"}],\"missing\":[\"email\",\"legal\"]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "seq": 4,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "89b6e83bf7da8328",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"stacked\",\"cta\":\"call\",\"tone\":\"inverse\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Brivnica Kos Maribor – moško striženje in britje\",\"description\":\"Klasična moška brivnica v starem mestnem jedru Maribora. Moško striženje, fade, urejanje brade in britje z britvijo. Naročite se po telefonu ali SMS.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-image\",\"variant\":\"overlay-left\",\"tone\":\"inverse\",\"props\":{\"eyebrow\":\"Brivnica v starem jedru Maribora\",\"headline\":\"Klasično striženje in britje v Mariboru\",\"intro\":\"Moško striženje, fade, urejanje brade in britje z britvijo in vročo brisačo. Strižemo tudi fante do 12 let.\",\"primary\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}},\"secondary\":{\"label\":\"Poglejte cenik\",\"target\":{\"page\":\"p_home\",\"section\":\"s_cenik\"}},\"image\":\"img_g2\"}},{\"id\":\"s_contact\",\"type\":\"contact-strip\",\"variant\":\"cards\",\"tone\":\"alt\",\"props\":{\"title\":\"Obiščite nas\"}},{\"id\":\"s_cenik\",\"type\":\"price-list\",\"variant\":\"grouped\",\"tone\":\"default\",\"props\":{\"eyebrow\":\"Cenik\",\"title\":\"Storitve in cene\",\"intro\":\"Za fante do 12 let nas pokličite za ceno.\",\"groups\":[{\"name\":\"Striženje\",\"items\":[{\"name\":\"Moško striženje\",\"note\":\"S škarjami ali strojčkom.\",\"price\":{\"amount\":20}},{\"name\":\"Fade\",\"price\":{\"amount\":23}},{\"name\":\"Striženje za fante do 12 let\",\"price\":{\"$placeholder\":\"price\",\"note\":\"Vpišite ceno striženja za fante\"}}]},{\"name\":\"Brada\",\"items\":[{\"name\":\"Urejanje brade\",\"price\":{\"amount\":14}},{\"name\":\"Britje z britvijo in vročo brisačo\",\"price\":{\"amount\":25}}]},{\"name\":\"Paketi\",\"items\":[{\"name\":\"Striženje in brada skupaj\",\"price\":{\"amount\":30}}]}]}},{\"id\":\"s_about\",\"type\":\"image-text\",\"variant\":\"image-right\",\"tone\":\"alt\",\"props\":{\"eyebrow\":\"Brivnica Kos\",\"heading\":\"Britje, kot se spodobi\",\"paragraphs\":[\"Naš brivec Luka Kos se je obrti učil v Zagrebu in na Dunaju. Pri nas dobite britje z britvijo in vročo brisačo, kot je bilo nekoč.\",\"Najdete nas v starem mestnem jedru Maribora, na Poštni ulici.\"],\"image\":\"img_g1\"}},{\"id\":\"s_booking\",\"type\":\"booking\",\"variant\":\"with-hours\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Kako se naročite\",\"text\":\"Naročite se po telefonu ali SMS. Brez naročila vas postrižemo samo, če je prost stol.\",\"action\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}}}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2193,
+      "output_tokens": 1112,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

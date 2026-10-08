@@ -1,0 +1,18 @@
+{
+  "seq": 13,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "8970dd8f0f659da8",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"columns\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Gostišče Na griču, prleška kuhinja v Ivanjkovcih\",\"description\":\"Družinsko gostišče Šnajder med vinogradi Jeruzalema: prleška kuhinja, domača vina, degustacijski meniji ob vikendih in praznovanja do 120 gostov.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-image\",\"variant\":\"overlay-bottom\",\"props\":{\"eyebrow\":\"Družinsko gostišče Šnajder\",\"headline\":\"Prleška kuhinja in domača vina med goricami\",\"intro\":\"Pri nas kuhamo tünko, bograč in gibanico ter točimo vina z lastne kleti. Rezervacija mize je obvezna.\",\"primary\":{\"label\":\"Kako rezerviram mizo\",\"target\":{\"action\":\"call\"}},\"image\":\"img_01\"}},{\"id\":\"s_about\",\"type\":\"about\",\"variant\":\"figure\",\"tone\":\"alt\",\"props\":{\"eyebrow\":\"Naša zgodba\",\"heading\":\"Družina Šnajder kuha in toči domača vina\",\"paragraphs\":[\"Gostišče stoji na griču nad Ormožem, sredi vinogradov Jeruzalema. Kuhamo prleške jedi in točimo vina z naše kleti.\",\"Pri nas se zbirajo ljubitelji prleške kuhinje, družine in družbe, ki praznujejo.\"],\"figure\":{\"label\":\"Kuhamo in točimo od leta\",\"value\":\"1990\"}}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"compact\",\"props\":{\"title\":\"Kdaj imamo odprto\",\"note\":\"V ponedeljek in torek smo odprti samo za zaključene družbe. Rezervacija je obvezna.\"}},{\"id\":\"s_kitchen\",\"type\":\"image-text\",\"variant\":\"image-left\",\"tone\":\"alt\",\"props\":{\"eyebrow\":\"Prleška kuhinja\",\"heading\":\"Tünka, bograč, gibanica in kisla juha\",\"paragraphs\":[\"Na mizo prinesemo jedi, ki jih Prlekija pozna od nekdaj. Zraven natočimo domače vino z naše kleti.\",\"Ob vikendih pripravimo degustacijski meni s petimi hodi in vini z naše kleti.\"],\"link\":{\"label\":\"Pokličite nas za rezervacijo\",\"target\":{\"action\":\"call\"}},\"image\":\"img_03\"}},{\"id\":\"s_celebrate\",\"type\":\"image-text\",\"variant\":\"image-right\",\"props\":{\"eyebrow\":\"Praznovanja\",\"heading\":\"Poroke, obletnice in zaključki do 120 gostov\",\"paragraphs\":[\"Praznujete lahko na terasi s pogledom na gorice, pod staro lipo. Povejte nam, kaj načrtujete, in dogovorimo se o vsem.\"],\"image\":\"img_02\"}},{\"id\":\"s_points\",\"type\":\"highlights\",\"variant\":\"columns\",\"tone\":\"alt\",\"props\":{\"heading\":\"Kaj še velja vedeti\",\"items\":[{\"title\":\"Terasa s pogledom\",\"text\":\"Z mize vidite gorice, ki obdajajo gostišče.\"},{\"title\":\"Praznovanja do 120 gostov\",\"text\":\"Poroke, obletnice in zaključene družbe.\"},{\"title\":\"Ponedeljek in torek\",\"text\":\"Odprto samo za zaključene družbe, po dogovoru.\"}]}},{\"id\":\"s_cta\",\"type\":\"cta\",\"variant\":\"band\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Rezervirajte mizo ali praznovanje\",\"text\":\"Rezervacija je obvezna. Pokličite nas in povejte, kdaj pridete in koliko vas bo.\",\"primary\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}},\"secondary\":{\"label\":\"Navodila za pot\",\"target\":{\"action\":\"directions\"}}}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 3972,
+      "output_tokens": 1399,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

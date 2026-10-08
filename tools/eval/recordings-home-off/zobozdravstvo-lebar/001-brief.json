@@ -1,0 +1,18 @@
+{
+  "seq": 1,
+  "stage": "brief",
+  "model": "synthetic",
+  "hash": "synthetic",
+  "origin": "synthetic",
+  "response": {
+    "text": "{\"businessType\":\"dental\",\"name\":\"Zobozdravstvo Lebar\",\"town\":\"Maribor\",\"summary\":\"Zobozdravstvo Lebar je zasebna samoplačniška zobna ambulanta v središču Maribora, na naslovu Gosposvetska cesta 36, 2000 Maribor, v prvem nadstropju z dvigalom. Ambulanto vodi dr. Urška Lebar, dr. dent. med., ki ima specializacijo iz stomatološke protetike. Pri delu ji pomaga zobna asistentka Maja Horvat.\\n\\nNudimo preventivne preglede in čiščenje zobnega kamna, zalivke, beljenje\",\"audience\":\"lokalni obiskovalci\",\"tone\":\"friendly\",\"offerings\":[],\"highlights\":[],\"facts\":{\"phone\":\"+38625553120\",\"email\":\"info@zobozdravstvo-lebar.example\",\"address\":{\"street\":\"Gosposvetska cesta 36\",\"postalCode\":\"2000\",\"city\":\"Maribor\"},\"hours\":[{\"from\":\"mon\",\"to\":\"mon\",\"open\":\"12:00\",\"close\":\"19:00\",\"closed\":false},{\"from\":\"tue\",\"to\":\"tue\",\"open\":\"07:00\",\"close\":\"14:00\",\"closed\":false},{\"from\":\"wed\",\"to\":\"wed\",\"open\":\"12:00\",\"close\":\"19:00\",\"closed\":false},{\"from\":\"thu\",\"to\":\"fri\",\"open\":\"07:00\",\"close\":\"14:00\",\"closed\":false}],\"hoursNote\":null,\"bookingUrl\":null,\"social\":[],\"legalName\":\"Lebar zobozdravstvo d.o.o.\",\"registrationNumber\":\"7788990000\",\"taxNumber\":\"SI77889900\",\"vatPayer\":null,\"serviceArea\":[],\"people\":[{\"name\":\"Urška Lebar\",\"role\":\"dr. dent. med., specialistka stomatološke protetike\"},{\"name\":\"Maja Horvat\",\"role\":\"zobna asistentka\"}]},\"pages\":[{\"kind\":\"home\",\"slug\":\"\",\"navLabel\":\"Domov\",\"purpose\":\"Samoplačniška zobna ambulanta v središču Maribora: preventivni pregledi, zalivke, beljenje, prevleke, mostički in proteze. Prvi obisk je le pogovor in pregled.\"},{\"kind\":\"standard\",\"slug\":\"za-paciente\",\"navLabel\":\"Za paciente\",\"purpose\":\"Samoplačniške storitve, otroci od 3. leta, dostop z dvigalom in vsaditve z zunanjim oralnim kirurgom. Odgovori na pogosta vprašanja.\"}],\"missing\":[\"prices\"]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

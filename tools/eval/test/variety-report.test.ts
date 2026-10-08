@@ -112,5 +112,7 @@ describe("variety targets", () => {
     expect(md).toContain(`≥ ${before.summary.acrossTrades!.toFixed(2)} (the baseline's across-trade distance)`);
     expect(md).toMatch(/\| twin \| car-repair \| .* \| 3\.00 → 4\.00 \|/);
     expect(md).not.toMatch(/\| kvas \| bakery \|/);
+    // The before run's medians over only the sites both runs judged (kvas left out).
+    expect(md).toContain("| Same 2 sites: judge median, template trades, lowest distinctiveness | 3.00, 3.00, 3 | 4.00, 4.00, 4 |");
   });
 });

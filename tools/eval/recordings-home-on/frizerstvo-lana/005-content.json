@@ -1,0 +1,18 @@
+{
+  "seq": 5,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "ac9ea1a9050234b9",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Frizerstvo Lana Celje – striženje, barvanje, pričeske\",\"description\":\"Frizerstvo Lana v Celju: striženje za ženske, moške in otroke, barve brez amoniaka, pramene in svečane pričeske. Pokličite za naročilo.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"mirrors\",\"props\":{\"headline\":\"Lepi lasje v Celju\",\"intro\":\"Strižemo ženske, moške in otroke, barvamo z barvami brez amoniaka in pripravimo pričesko za poroko ali maturo.\",\"fact\":\"phone\",\"factLabel\":\"Naročite se po telefonu\",\"factNote\":\"Brez naročila težko pridete na vrsto, zato raje pokličite.\",\"secondary\":{\"label\":\"Poglejte cenik\",\"target\":{\"page\":\"p_home\",\"section\":\"s_prices\"}},\"images\":[\"img_02\",\"img_03\",\"img_04\"],\"wordmark\":\"Lana\"}},{\"id\":\"s_services\",\"type\":\"services-list\",\"variant\":\"rows\",\"tone\":\"alt\",\"props\":{\"title\":\"Kaj vse naredimo\",\"items\":[{\"name\":\"Žensko striženje s fenom\",\"description\":\"Striženje in fen frizura za ženske.\"},{\"name\":\"Moško striženje\",\"description\":\"Strižemo tudi moške.\"},{\"name\":\"Otroško striženje\",\"description\":\"Striženje otrok do 10 let.\"},{\"name\":\"Barvanje\",\"description\":\"Barve brez amoniaka.\"},{\"name\":\"Pramene\",\"description\":\"Pramene dela Petra Kos, specialistka za barvanje in pramene.\"},{\"name\":\"Fen frizure\",\"description\":\"Fen frizura za vsak dan ali posebno priložnost.\"},{\"name\":\"Svečana pričeska\",\"description\":\"Za poroke in maturantske plese.\"}]}},{\"id\":\"s_steps\",\"type\":\"steps\",\"variant\":\"vertical\",\"props\":{\"heading\":\"Kako poteka obisk\",\"steps\":[{\"title\":\"Pokličete nas\",\"text\":\"Dogovorimo se za termin, ki vam ustreza.\"},{\"title\":\"Obiščete salon\",\"text\":\"Pridite na Stanetovo ulico. Salon je v pritličju, parkirišče je za stavbo.\"},{\"title\":\"Uredimo vam lase\",\"text\":\"Povejte, kaj si želite, in skupaj izberemo pravo rešitev.\"}]}},{\"id\":\"s_prices\",\"type\":\"price-list\",\"variant\":\"grouped\",\"tone\":\"alt\",\"props\":{\"title\":\"Cenik\",\"intro\":\"Barve brez amoniaka so primerne tudi za občutljivo lasišče.\",\"groups\":[{\"items\":[{\"name\":\"Žensko striženje s fenom\",\"price\":{\"amount\":28}},{\"name\":\"Moško striženje\",\"price\":{\"amount\":15}},{\"name\":\"Otroško striženje (do 10 let)\",\"price\":{\"amount\":10}},{\"name\":\"Barvanje\",\"price\":{\"amount\":45,\"from\":true}},{\"name\":\"Pramene\",\"price\":{\"$placeholder\":\"price\",\"note\":\"Vnesite ceno pramenov\"}},{\"name\":\"Fen frizure\",\"price\":{\"$placeholder\":\"price\",\"note\":\"Vnesite ceno fen frizure\"}},{\"name\":\"Svečana pričeska\",\"note\":\"Za poroke in maturantske plese\",\"price\":{\"amount\":40,\"from\":true}}]}]}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"inverse\",\"props\":{\"title\":\"Naročite se s klicem\",\"intro\":\"Pokličite nas in izberemo termin. Brez naročila težko pridete na vrsto.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 3029,
+      "output_tokens": 1321,
+      "cache_creation_input_tokens": 1160,
+      "cache_read_input_tokens": 20423
+    }
+  }
+}

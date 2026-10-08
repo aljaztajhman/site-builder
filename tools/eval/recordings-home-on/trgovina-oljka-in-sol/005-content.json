@@ -1,0 +1,18 @@
+{
+  "seq": 5,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "80f4a45d505d1538",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Oljka in sol – istrske dobrote v Kopru\",\"description\":\"Mala trgovina v starem jedru Kopra: izdelki manjših pridelovalcev iz slovenske Istre in Krasa, darilni paketi in poslovna darila.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-image\",\"variant\":\"overlay-left\",\"props\":{\"eyebrow\":\"Istrske dobrote\",\"headline\":\"Istra in Kras v eni trgovini\",\"intro\":\"Prodajamo samo izdelke manjših pridelovalcev iz slovenske Istre in Krasa. Sestavljamo tudi darilne pakete.\",\"primary\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}},\"secondary\":{\"label\":\"Pot do nas\",\"target\":{\"action\":\"directions\"}},\"image\":\"img_04\"}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"photo\",\"tone\":\"alt\",\"props\":{\"title\":\"Kdaj smo odprti\",\"note\":\"Julija in avgusta smo odprti tudi ob nedeljah od 9.00 do 12.00.\",\"image\":\"img_01\",\"inset\":\"img_02\"}},{\"id\":\"s_gifts\",\"type\":\"image-text\",\"variant\":\"round\",\"tone\":\"alt\",\"props\":{\"eyebrow\":\"Darilni paketi\",\"heading\":\"Darilo, sestavljeno po vaši želji\",\"paragraphs\":[\"Darilni paket sestavimo po vaši želji in ga lepo zavijemo. Cena paketov se začne pri 25 evrih.\",\"Naročite po telefonu ali e-pošti, paket pa prevzamete v trgovini. Pripravljamo tudi poslovna darila v večjih količinah.\"],\"link\":{\"label\":\"Naročite po telefonu\",\"target\":{\"action\":\"call\"}},\"image\":\"img_03\"}},{\"id\":\"s_prices\",\"type\":\"price-list\",\"variant\":\"tags\",\"props\":{\"title\":\"Iz istrskih pridelovalcev\",\"intro\":\"Prodajamo samo izdelke manjših pridelovalcev iz slovenske Istre in Krasa.\",\"groups\":[{\"items\":[{\"name\":\"Ekstra deviško oljčno olje\",\"note\":\"0,5 l\",\"price\":{\"amount\":14}},{\"name\":\"Piranska sol\",\"note\":\"1 kg\",\"price\":{\"amount\":4.5}}]}]}},{\"id\":\"s_gallery\",\"type\":\"gallery\",\"variant\":\"grid\",\"props\":{\"title\":\"Utrinki iz trgovine\",\"images\":[{\"image\":\"img_02\"},{\"image\":\"img_05\"},{\"image\":\"img_01\"},{\"image\":\"img_03\"}]}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"inverse\",\"props\":{\"title\":\"Pokličite za naročilo ali obisk\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 3070,
+      "output_tokens": 1040,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}
