@@ -11,6 +11,7 @@ import {
   familyLine,
   fittingDirections,
   keyOf,
+  pickFromFamily,
   sameLook,
   seededOrder,
   siteSeed,
@@ -160,6 +161,26 @@ describe("the design step", () => {
       const previous = keyOf(first.design, { type: first.hero!.split(":")[0]!, variant: first.hero!.split(":")[1]! });
       const again = designWithVariety(choice("tablica"), { seed: siteSeed(id, JSON.stringify(previous)), neighbours: [], previous, pictures: true, swatches: [] });
       expect(sameLook(keyOf(again.design, { type: again.hero!.split(":")[0]!, variant: again.hero!.split(":")[1]! }), previous), id).toBe(false);
+    }
+  });
+});
+
+describe("template families keep their signature hero first", () => {
+  it("every seed gets the signature hero while palettes and fonts are free; a photo hero only once neighbours took them", () => {
+    for (const id of Object.keys(FAMILIES)) {
+      const dir = directionById(id);
+      const family = FAMILIES[id as keyof typeof FAMILIES]!;
+      const signature = family.heroes[0]!;
+      for (let seed = 1; seed <= 20; seed++) {
+        expect(pickFromFamily(dir, { seed, logo: [], pictures: true, neighbours: [] })?.hero, `${id} seed ${seed}`).toBe(signature);
+      }
+      if (family.heroes.length < 2) continue;
+      // Every palette and font pair with the signature hero taken: the next site gets a photo hero.
+      const taken: LookKey[] = family.palettes.flatMap((p) =>
+        family.fontPairs.map((fontPair) => ({ direction: id, primary: p.colors.primary, band: p.colors.band ?? p.colors.primary, fontPair, hero: signature })),
+      );
+      const next = pickFromFamily(dir, { seed: 7, logo: [], pictures: true, neighbours: taken });
+      expect(next?.hero, id).not.toBe(signature);
     }
   });
 });

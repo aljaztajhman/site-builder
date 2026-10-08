@@ -101,8 +101,11 @@ export interface FamilyPick {
 
 /**
  * The template family's look for one site: brand colours when the logo gives them, else a palette; a font pair and a
- * hero; in the seed's order, the first combination no neighbour has. `pictures`: whether the site has any picture
- * (heroes that need one are left out otherwise). Undefined when the direction is not a template.
+ * hero; the first combination no neighbour has. The template's own signature hero comes first: palettes and font pairs
+ * (in the seed's order) vary before a photo hero replaces it, because the signature hero is what makes the template
+ * (an owner's photo-less hairdresser got Ogledalo with a plain split hero, 8 Oct; the judge scored the replacements
+ * lowest). `pictures`: whether the site has any picture (heroes that need one are left out otherwise). Undefined when
+ * the direction is not a template.
  */
 export function pickFromFamily(
   dir: Direction,
@@ -114,11 +117,12 @@ export function pickFromFamily(
   const palettes = brand ? [{ id: "brand", colors: brand }, ...seededOrder(family.palettes, o.seed, "palette")] : seededOrder(family.palettes, o.seed, "palette");
   const fonts = seededOrder(family.fontPairs, o.seed, "font");
   const needsPicture = (h: string) => h.startsWith("hero-split:") || h.startsWith("hero-image:");
-  const heroes = seededOrder(family.heroes.filter((h) => o.pictures || !needsPicture(h)), o.seed, "hero");
+  const [signature, ...others] = family.heroes.filter((h) => o.pictures || !needsPicture(h));
+  const heroes = signature === undefined ? [] : [signature, ...seededOrder(others, o.seed, "hero")];
   let first: FamilyPick | undefined;
-  for (const p of palettes) {
-    for (const fontPair of fonts) {
-      for (const hero of heroes) {
+  for (const hero of heroes) {
+    for (const p of palettes) {
+      for (const fontPair of fonts) {
         const pick: FamilyPick = { paletteId: p.id, colors: p.colors, fontPair, hero, colourSource: p.id === "brand" ? "brand" : "seed" };
         first ??= pick;
         const key: LookKey = { direction: dir.id, primary: p.colors.primary, band: p.colors.band ?? p.colors.primary, fontPair, hero };

@@ -464,3 +464,13 @@ describe("motifs.css", () => {
     for (const m of src.matchAll(/className=\{?"([^"]*\b(?:disc|arch-top)\b[^"]*)"/g)) expect(m[1]).not.toMatch(/btn|text-link/);
   });
 });
+
+describe("AI label on arched pictures", () => {
+  it("an arched top (mirrors, the arch hero) moves the label to the bottom, where the arch doesn't cut it off", () => {
+    const css = readFileSync(path.join(here, "../styles/imagery.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    const rule = /\.arch-top\.media--ai::after,\s*\.hsig__arch-media\.media--ai::after\s*\{([^}]*)\}/.exec(css);
+    expect(rule).not.toBeNull();
+    expect(rule![1]).toMatch(/top:\s*auto/);
+    expect(rule![1]).toMatch(/bottom:\s*0\.5rem/);
+  });
+});

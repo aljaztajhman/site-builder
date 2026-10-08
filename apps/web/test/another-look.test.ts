@@ -17,7 +17,10 @@ import { adminBrowser, ownerSignIn, type Browser, type Req } from "./session-hel
  */
 const here = path.dirname(fileURLToPath(import.meta.url));
 const PASSWORD = "test-password-1234";
-const base = loadConfig();
+// Every variety switch pinned off here (the repo config has families, skeleton and concept on since sb-variety-switches):
+// "off" is all off, "on" families alone, "skeleton" families + skeleton, "genome" genome alone.
+const repoConfig = loadConfig();
+const base: AppConfig = { ...repoConfig, variety: { ...repoConfig.variety, families: false, skeleton: false, concept: false, genome: false } };
 const on: AppConfig = { ...base, variety: { ...base.variety, families: true } };
 const mail = memoryMailer();
 let platform: Platform;

@@ -507,11 +507,16 @@ describe("direct editor API (no model calls)", () => {
     const invalid = await app.request(`/api/sites/${site.id}/patch`, { method: "POST", headers: json, body: JSON.stringify({ baseVersion: 2, ops: [{ op: "replace", path: "/pages/0/sections/0/props/headline", value: "Dobrodošli" }] }) });
     expect(invalid.status).toBe(422);
 
-    // "Cena po dogovoru" is off in config: the server takes none, and the editor is told the switch is off.
-    const onRequest = await app.request(`/api/sites/${site.id}/patch`, { method: "POST", headers: json, body: JSON.stringify({ baseVersion: 2, ops: [{ op: "replace", path: "/pages/0/sections/2/props/items/4/price", value: { onRequest: true } }] }) });
+    // With "Cena po dogovoru" off in config (it is on since sb-price-on-request-switch): the server takes none, and
+    // the editor is told the switch is off.
+    const config = loadConfig();
+    const off = createApp({ platform, config: { ...config, editor: { ...config.editor, priceOnRequest: false } }, auth: { password: PASSWORD, secret: "s".repeat(32), secureCookies: false } });
+    const onRequest = await off.request(`/api/sites/${site.id}/patch`, { method: "POST", headers: json, body: JSON.stringify({ baseVersion: 2, ops: [{ op: "replace", path: "/pages/0/sections/2/props/items/4/price", value: { onRequest: true } }] }) });
     expect(onRequest.status).toBe(400);
     expect(await onRequest.json()).toEqual({ error: "Cena po dogovoru še ni na voljo." });
-    expect(((await (await app.request(`/api/sites/${site.id}`, { headers: { cookie } })).json()) as { editor: unknown }).editor).toEqual({ priceOnRequest: false });
+    expect(((await (await off.request(`/api/sites/${site.id}`, { headers: { cookie } })).json()) as { editor: unknown }).editor).toEqual({ priceOnRequest: false });
+    // The config in the repo has it on: the editor is told so.
+    expect(((await (await app.request(`/api/sites/${site.id}`, { headers: { cookie } })).json()) as { editor: unknown }).editor).toEqual({ priceOnRequest: true });
 
     const added = await app.request(`/api/sites/${site.id}/sections`, { method: "POST", headers: json, body: JSON.stringify({ baseVersion: 2, pageIndex: 0, index: 2, type: "faq" }) });
     expect(added.status).toBe(200);

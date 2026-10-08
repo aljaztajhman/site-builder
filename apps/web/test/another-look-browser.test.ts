@@ -21,7 +21,9 @@ import { adminCookie } from "./session-helpers.ts";
  */
 const here = path.dirname(fileURLToPath(import.meta.url));
 const PASSWORD = "test-password-1234";
-const config = loadConfig();
+// Variety switches pinned off here (the repo config has families, skeleton and concept on since sb-variety-switches).
+const repoConfig = loadConfig();
+const config: AppConfig = { ...repoConfig, variety: { ...repoConfig.variety, families: false, skeleton: false, concept: false, genome: false } };
 const families: AppConfig = { ...config, variety: { ...config.variety, families: true } };
 const withSkeleton: AppConfig = { ...families, variety: { ...families.variety, skeleton: true } };
 let platform: Platform;

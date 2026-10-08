@@ -864,9 +864,9 @@ export const DIRECTIONS: Direction[] = [
       display: [44, 96],
       h2: [34, 72],
       firstFor: ["hairdresser"],
-      minPhotos: 3,
+      minPhotos: 1,
       homepage: [
-        "hero-signature:mirrors: fact phone; factLabel the call button's label (e.g. \"Naročite se\"); wordmark one word of the business name; images three photos of the work and the people (portrait-friendly); secondary a link to the price list",
+        "hero-signature:mirrors: fact phone; factLabel the call button's label (e.g. \"Naročite se\"); wordmark one word of the business name; images two or three photos of the work and the people (portrait-friendly) when the site has them, with only one photo image instead; secondary a link to the price list",
         "cta:band tone band: the client's own sentence about booking as the heading; primary a call",
         "price-list:grouped: the prices the client gave, one group without a name; services named without a price get a price placeholder; title short (e.g. Cenik); intro one thing the client stressed about the work",
         "team:photo tone alt: the people the client named with their roles; image a photo of the salon, inset a detail (products, tools)",
@@ -1078,9 +1078,13 @@ export const DIRECTIONS: Direction[] = [
   },
 ];
 
-/** The template direction that is the first choice for a business type, if the photos allow it. */
-export function templateFor(businessType: BusinessType, photoCount: number): Direction | undefined {
-  return DIRECTIONS.find((d) => d.template && d.template.firstFor.includes(businessType) && photoCount >= d.template.minPhotos);
+/**
+ * The template direction that is the first choice for a business type, if the pictures allow it. `pictureCount`: the
+ * client's photos plus the generated pictures the site gets (HQ it-template-min-photos: most clients come without
+ * photos, and counting only theirs kept every photo-led template off those sites).
+ */
+export function templateFor(businessType: BusinessType, pictureCount: number): Direction | undefined {
+  return DIRECTIONS.find((d) => d.template && d.template.firstFor.includes(businessType) && pictureCount >= d.template.minPhotos);
 }
 
 export function direction(id: string): Direction {

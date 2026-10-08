@@ -108,7 +108,8 @@ describe("prompt fixes, all switches off", () => {
       edit: "bf6ab53fddf8b24f",
       sections: "c1ca4f753e529bc2",
       sectionsDefault: "c1ca4f753e529bc2",
-      directions: "dd2470f48752a583",
+      // Changed on purpose 2026-10-08 (HQ it-template-min-photos): template minimums count generated pictures; Ogledalo needs 1.
+      directions: "87d5797d834dc13f",
       business: "4e0f96995bd0d4be",
       patchFormat: "fb8eba337fd71564",
     });
