@@ -235,6 +235,8 @@ export const AppConfigSchema = z.object({
     beige: z.boolean(),
     /** Catalogue and RULES wording: eyebrow, contact strip, cta, responsive (not mobile first), call-button count. */
     catalogue: z.boolean(),
+    /** Slovene style block in the content, edit and critique prompts: formal vi, Slovene typography, no English words, natural word order. */
+    sloveneStyle: z.boolean(),
   }),
   /**
    * Generation cost cuts (docs/plans/cost-cuts.md, see config $comment). secondCritiqueOnlyOnFailures: a second critique

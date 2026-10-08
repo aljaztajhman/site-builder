@@ -10,6 +10,9 @@
  * --judge:          score each generated homepage with the vision judge (default for live, --record and
  *                   --record-missing; opt-in for --offline and --replay, since it is a real model call). All of a
  *                   run's judge calls go out as one Message Batch (50 % off) after the last fixture; the run waits.
+ * --judge-slovene:  also list each generated site's grammar, register and English-word errors with the Slovene judge
+ *                   (slovene-judge.ts; a real model call per site on the judge's model, in the same batch). Never on by
+ *                   default, in any mode. The free Slovene copy lint (slovene-lint.ts) runs in every mode, report only.
  * --photos <n>:     give each fixture only its first n photos (0: a site without photos, which gets generated pictures).
  * --no-edits:       generate and check only; no scripted chat edits (about 40 % of a homepage run's cost). Not with
  *                   --record (it would drop the edit recordings the tests replay).
@@ -44,6 +47,7 @@ import { runFixture, type FixtureResult, type Mode } from "./runner.ts";
 import { contactSheet, renderReport } from "./report.ts";
 import { desktopContactSheet, reviewSheet } from "./look.ts";
 import { reportPaths } from "./report-paths.ts";
+import { sloveneJudgeRequested } from "./slovene-judge.ts";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "../../..");
@@ -75,9 +79,10 @@ if (shardArg && (!shard || Number(shard[1]) < 1 || Number(shard[1]) > Number(sha
 }
 const onlyArg = value("only")?.split(",").map((s) => s.trim());
 const judge = flag("judge") || (paid && !flag("no-judge"));
+const judgeSlovene = sloveneJudgeRequested(args);
 const outDir = path.join(repoRoot, "eval");
 
-if ((paid || judge) && !process.env.ANTHROPIC_API_KEY) {
+if ((paid || judge || judgeSlovene) && !process.env.ANTHROPIC_API_KEY) {
   console.error("ANTHROPIC_API_KEY is not set. Use --offline (golden specs) or --replay (recordings) to run without the API.");
   process.exit(2);
 }
@@ -136,7 +141,7 @@ const results: FixtureResult[] = [];
 const startedAt = new Date();
 const t0 = Date.now();
 let spent = 0;
-const judgeBatch = judge ? { transport: new BatchTransport(), judging: [] as Promise<void>[] } : undefined;
+const judgeBatch = judge || judgeSlovene ? { transport: new BatchTransport(), judging: [] as Promise<void>[] } : undefined;
 try {
   for (const f of fixtures) {
     if (spent >= maxEur) {
@@ -155,6 +160,7 @@ try {
       maxEur,
       spentSoFar: () => spent,
       judge,
+      judgeSlovene,
       edits,
       ...(judgeBatch ? { judgeBatch } : {}),
     });
@@ -168,6 +174,7 @@ try {
       r.replayChanged !== undefined ? `${r.replayChanged} request(s) changed since recording` : "",
       r.critique ? `critique patches applied in ${r.critique.applied}/${r.critique.withPatches} rounds${r.critique.rejected ? ` (${r.critique.rejected} rejected)` : ""}` : "",
       editLine(r),
+      r.slovene ? `Slovene lint ${r.slovene.generated.total}` : "",
     ]
       .filter(Boolean)
       .join(", ");
@@ -175,11 +182,12 @@ try {
     for (const c of r.checkpoints) for (const fail of c.failures) console.log(`    ${c.label}: ${fail}`);
   }
   if (judgeBatch?.judging.length) {
-    console.log(`\nJudging ${judgeBatch.judging.length} homepage(s) in one Message Batch (50 % off); waiting for it to end …`);
+    console.log(`\nJudging: ${judgeBatch.judging.length} request(s)${judge && judgeSlovene ? " (vision and Slovene judge)" : judgeSlovene ? " (Slovene judge)" : ""} in one Message Batch (50 % off); waiting for it to end …`);
     await judgeBatch.transport.drain(judgeBatch.judging);
     const judgeEur = results.reduce((a, r) => a + r.judgeEur, 0);
-    spent += judgeEur;
-    console.log(`  batch ${judgeBatch.transport.batches.join(", ")}: judge €${judgeEur.toFixed(3)} (run total €${spent.toFixed(2)})`);
+    const sloveneEur = results.reduce((a, r) => a + (r.sloveneJudgeEur ?? 0), 0);
+    spent += judgeEur + sloveneEur;
+    console.log(`  batch ${judgeBatch.transport.batches.join(", ")}: judge €${judgeEur.toFixed(3)}${judgeSlovene ? `, Slovene judge €${sloveneEur.toFixed(3)}` : ""} (run total €${spent.toFixed(2)})`);
   }
 } finally {
   await browser.close();
