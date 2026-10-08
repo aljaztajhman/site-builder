@@ -172,7 +172,7 @@ describe("landing trade demo", () => {
 
         // The build: the four steps tick; the last one hands over to the page itself.
         const frame = await mainFrame(page);
-        while (!(await frame.evaluate(() => document.documentElement.classList.contains("text")))) await page.clock.runFor(100);
+        while (!(await frame.evaluate(() => document.documentElement.classList.contains("mb-text")))) await page.clock.runFor(100);
         expect(await page.locator(".ask-steps li.now").textContent()).toBe("Besedila in postavitev");
         // Every transition of the last step done (real time); then, 50 ms at a time, the last frame with the
         // build stylesheet still on, and the first one without it: the same picture.
@@ -351,7 +351,7 @@ describe("landing trade demo", () => {
         }
         expect(await frame.evaluate(() => [...document.documentElement.classList].filter((c) => c === "mb-bld" || c === "mb-calm"))).toEqual(["mb-bld", "mb-calm"]);
         await page.waitForFunction(() => getComputedStyle(document.querySelector(".dev")!).opacity === "1", undefined, { timeout: 10_000 });
-        while (!(await frame.evaluate(() => document.documentElement.classList.contains("text")))) {
+        while (!(await frame.evaluate(() => document.documentElement.classList.contains("mb-text")))) {
           await watch();
           await page.clock.runFor(100);
         }
