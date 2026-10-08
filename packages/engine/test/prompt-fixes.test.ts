@@ -68,6 +68,18 @@ describe("prompt fixes, all switches off", () => {
     expect(Object.entries(config.promptFixes).filter(([k, v]) => k !== "$comment" && v !== false)).toEqual([]);
   });
 
+  it("the config ships with the compact catalogue and homepage-first switches off too", () => {
+    expect(config.prompts.compactCatalogue).toBe(false);
+    expect(config.pipeline.homepageFirst).toBe(false);
+  });
+
+  it("with prompts.compactCatalogue off the catalogue and business schema are the same bytes as before", () => {
+    expect(sha(sectionCatalogue(NO_PROMPT_FIXES, {}))).toBe("c1ca4f753e529bc2");
+    expect(sha(sectionCatalogue(NO_PROMPT_FIXES, { compact: false }))).toBe("c1ca4f753e529bc2");
+    expect(sha(businessSchema({}))).toBe("4e0f96995bd0d4be");
+    expect(sha(businessSchema({ compact: false }))).toBe("4e0f96995bd0d4be");
+  });
+
   it("every prompt is byte-identical to origin/main (sha256 taken from 1a7e070's prompts.ts)", () => {
     const off = NO_PROMPT_FIXES;
     expect({

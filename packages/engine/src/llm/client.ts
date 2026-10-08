@@ -184,6 +184,11 @@ export class ModelClient {
     return this.opts.config.promptFixes;
   }
 
+  /** Config prompts.compactCatalogue: the section catalogue and business schema in the compact notation. */
+  get catalogueOptions(): { compact?: boolean } {
+    return this.opts.config.prompts.compactCatalogue ? { compact: true } : {};
+  }
+
   stageConfig(stage: ModelStageName) {
     const { config } = this.opts;
     if (config.useFullBuildModel && (stage === "content" || stage === "brief")) {

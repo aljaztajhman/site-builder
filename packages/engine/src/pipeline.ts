@@ -98,6 +98,8 @@ export interface GenerateResult {
   timings: Record<string, number>;
   /** From the start of the job to the first saved version, which the editor already shows as the preview. */
   firstVersionMs: number;
+  /** Config pipeline.homepageFirst: from the start of the job to the homepage's content (before the other pages). */
+  homepageMs?: number;
   /** The job finished with the critique skipped: the daily spend cap was reached after the version was saved. */
   critiqueSkipped?: "spend_cap";
 }
@@ -288,6 +290,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
 
   // 4. Content and assembly (validate; retry with errors)
   const corpus = await clientCorpus(repo, siteId);
+  let homepageMs: number | undefined;
   const content = await stageTime("content", () =>
     generateContent(client, {
       slug: site.slug,
@@ -304,8 +307,20 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
       retries: config.limits.contentRetries,
       corpus,
       ...(config.costCuts.contentRetryAsPatch ? { retryAsPatch: true } : {}),
+      // Config pipeline.homepageFirst: the homepage first, then the other pages side by side. The first version is
+      // still saved once, after the merge: the homepage alone links to pages that don't exist yet, so it doesn't validate.
+      ...(config.pipeline.homepageFirst
+        ? {
+            homepageFirst: true,
+            onHomepage: async (h) => {
+              homepageMs = Date.now() - started;
+              await log("content", "Homepage ready; writing the other pages", { ms: homepageMs, attempts: h.attempts, issues: h.issues.slice(0, 5) });
+            },
+          }
+        : {}),
     }),
   );
+  if (content.parts) await log("content", "Content written homepage first", content.parts);
   if (content.patchRetries?.length) await log("content", "Retried the content answer as patches", content.patchRetries);
   if (content.structuredFallback) await log("content", "Structured output rejected the content schema; used plain JSON");
   if (content.repairs.length) await log("content", "Repaired the content answer before validation", content.repairs);
@@ -357,7 +372,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     // runs its own checklist), it just gets no critique.
     await log("check", "Checks failed to run; kept the saved version without critique", (e as Error).message.slice(0, 300));
     await repo.setStatus(siteId, "ready");
-    return { version, check: null, critiqueRounds: 0, timings, firstVersionMs };
+    return { version, check: null, critiqueRounds: 0, timings, firstVersionMs, ...(homepageMs !== undefined ? { homepageMs } : {}) };
   }
   await log("check", check.failures.length ? "Checks found problems" : "All checks passed", { failures: check.failures, lighthouse: check.lighthouse });
   while (rounds < config.limits.critiqueIterations) {
@@ -416,7 +431,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     }
   }
   await repo.setStatus(siteId, "ready");
-  return { version, check, critiqueRounds: rounds, timings, firstVersionMs, ...(critiqueSkipped ? { critiqueSkipped } : {}) };
+  return { version, check, critiqueRounds: rounds, timings, firstVersionMs, ...(homepageMs !== undefined ? { homepageMs } : {}), ...(critiqueSkipped ? { critiqueSkipped } : {}) };
 }
 
 /**

@@ -54,6 +54,7 @@ import { applyOps } from "./editor.ts";
 import { awayFromNeighbours, fittingDirections, pickFromFamily, type LookKey } from "./variety.ts";
 import { BRIEF_CONCEPT_SYSTEM, conceptLine, conceptOutline, subtypeDesignLine, verifyConcept, type ConceptPlan } from "./concept.ts";
 import { holdPrimary, skeletonLine } from "./skeleton.ts";
+import { homepageFirst, type HomepageReady } from "./homepage-first.ts";
 
 // ---------- 1. Intake -> brief ----------
 
@@ -322,6 +323,13 @@ export interface ContentInput {
   corpus: string;
   /** Config costCuts.contentRetryAsPatch: a failed answer is fixed with an RFC 6902 patch first (content-patch.ts). */
   retryAsPatch?: boolean;
+  /**
+   * Config pipeline.homepageFirst, full scope only: the homepage in one call, then each other page in its own call side
+   * by side, merged and validated as one spec (homepage-first.ts). Not with structured output; parts retry whole.
+   */
+  homepageFirst?: boolean;
+  /** With `homepageFirst`: called once the homepage is written (and checked on its own), before the other pages. */
+  onHomepage?: (h: HomepageReady) => void | Promise<void>;
 }
 
 export interface ContentResult {
@@ -335,6 +343,8 @@ export interface ContentResult {
   repairs: string[];
   /** With `retryAsPatch`: one line per patch retry (applied, issues left, or why it fell back to the whole JSON). */
   patchRetries?: string[];
+  /** With `homepageFirst`: one line per part (its page, calls and issues left). */
+  parts?: string[];
 }
 
 /**
@@ -381,25 +391,52 @@ export function templateOutline(dir: Direction, hero?: string): string {
   return `Homepage outline of the ${dir.name} template, top to bottom. Follow it: these sections in this order, with these variants and tones, and no others on the homepage; leave a section out only when the facts it needs are missing. A closing contact section in the outline is allowed although the top already shows contact facts.\n${lines.map((s, i) => `${i + 1}. ${s}`).join("\n")}`;
 }
 
-export async function generateContent(client: ModelClient, input: ContentInput): Promise<ContentResult> {
+/** The parts of the content step's message, shared by the one-call request and the homepage-first parts (homepage-first.ts). */
+export interface ContentMessageParts {
+  brief: string;
+  /** The "- kind "slug" nav "label": purpose" lines of `pages`. */
+  pageLines: (pages: Brief["pages"]) => string;
+  direction: string;
+  outline: string;
+  photos: string;
+  hero: string;
+  skeleton: string;
+  facts: string;
+}
+
+export function contentMessageParts(input: ContentInput, fixes: PromptFixes): ContentMessageParts {
   const dir = directionById(input.design.direction);
-  const fixes = client.promptFixes;
   const heroes = input.hero ? [input.hero] : directionHeroes(dir, fixes);
+  return {
+    brief: `Brief (facts are verified; anything null is missing and must be a placeholder or left out):\n${JSON.stringify(input.brief)}`,
+    pageLines: (pages) => pages.map((p) => `- ${p.kind} "${p.slug}" nav "${p.navLabel}": ${p.purpose}`).join("\n"),
+    direction: `Design direction: ${dir.id}. Header ${dir.layout.header}, footer ${dir.layout.footer}. Preferred heroes: ${heroes.join(", ")}. Section rhythm: ${dir.layout.rhythm} (use the tone field: default/alt/inverse/band; band is the direction's saturated colour). Preferred variants: ${dir.layout.prefer.join(", ")}.`,
+    outline: input.concept ? conceptOutline(dir, input.concept, input.hero) || templateOutline(dir, input.hero) : templateOutline(dir, input.hero),
+    photos: `Photos (use each at most twice; alt text is already written):\n${imageList(input.assets, input.heroImageIds)}`,
+    hero: heroRule(input.heroImageIds, heroes),
+    skeleton: input.skeleton ? skeletonLine() : "",
+    facts: `Business facts available to components: phone ${input.brief.facts.phone ? "yes" : "missing"}, address ${input.brief.facts.address ? "yes" : "missing"}, hours ${input.brief.facts.hours ? "yes" : "missing"}, booking URL ${input.brief.facts.bookingUrl ? "yes" : "no — never use the booking action"}.`,
+  };
+}
+
+export async function generateContent(client: ModelClient, input: ContentInput): Promise<ContentResult> {
+  const fixes = client.promptFixes;
   const schema = contentOutputSchema();
   const pages = input.scope === "home" ? input.brief.pages.filter((p) => p.kind === "home") : input.brief.pages;
+  const parts = contentMessageParts(input, fixes);
   const messages: Anthropic.MessageParam[] = [
     {
       role: "user",
       content: [
         `Build the ${input.scope === "home" ? "homepage only (other pages come later; nav may list only the homepage)" : "full site"} for this brief.`,
-        `Brief (facts are verified; anything null is missing and must be a placeholder or left out):\n${JSON.stringify(input.brief)}`,
-        `Pages to produce (page ids p_<slug or "home">):\n${pages.map((p) => `- ${p.kind} "${p.slug}" nav "${p.navLabel}": ${p.purpose}`).join("\n")}`,
-        `Design direction: ${dir.id}. Header ${dir.layout.header}, footer ${dir.layout.footer}. Preferred heroes: ${heroes.join(", ")}. Section rhythm: ${dir.layout.rhythm} (use the tone field: default/alt/inverse/band; band is the direction's saturated colour). Preferred variants: ${dir.layout.prefer.join(", ")}.`,
-        input.concept ? conceptOutline(dir, input.concept, input.hero) || templateOutline(dir, input.hero) : templateOutline(dir, input.hero),
-        `Photos (use each at most twice; alt text is already written):\n${imageList(input.assets, input.heroImageIds)}`,
-        heroRule(input.heroImageIds, heroes),
-        input.skeleton ? skeletonLine() : "",
-        `Business facts available to components: phone ${input.brief.facts.phone ? "yes" : "missing"}, address ${input.brief.facts.address ? "yes" : "missing"}, hours ${input.brief.facts.hours ? "yes" : "missing"}, booking URL ${input.brief.facts.bookingUrl ? "yes" : "no — never use the booking action"}.`,
+        parts.brief,
+        `Pages to produce (page ids p_<slug or "home">):\n${parts.pageLines(pages)}`,
+        parts.direction,
+        parts.outline,
+        parts.photos,
+        parts.hero,
+        parts.skeleton,
+        parts.facts,
         input.structuredOutput ? "" : plainJsonInstruction(),
       ]
         .filter(Boolean)
@@ -432,6 +469,8 @@ export async function generateContent(client: ModelClient, input: ContentInput):
     issues.push(...checkFacts(built, input.corpus).map(factLine));
     return { issues, built: { spec: built, repairs } };
   };
+  // Config pipeline.homepageFirst: the homepage in one call, then the other pages side by side (homepage-first.ts).
+  if (input.homepageFirst && input.scope === "full" && !structured && pages.some((p) => p.kind !== "home")) return generateContentHomepageFirst(client, input, parts, evaluate);
   if (input.retryAsPatch) return generateContentPatched(client, input, messages, evaluate, structured);
   for (;;) {
     attempts++;
@@ -439,7 +478,7 @@ export async function generateContent(client: ModelClient, input: ContentInput):
     try {
       res = await client.call({
         stage: "content",
-        system: [sectionCatalogue(fixes), contentSystem(fixes)],
+        system: [sectionCatalogue(fixes, client.catalogueOptions), contentSystem(fixes)],
         messages,
         ...(structured ? { schema: contentJsonSchema() } : {}),
       });
@@ -492,7 +531,7 @@ async function generateContentPatched(
     for (;;) {
       const withSchema = structured && kind === "whole";
       try {
-        return await client.call({ stage: "content", system: [sectionCatalogue(client.promptFixes), contentSystem(client.promptFixes)], messages: [first, ...tail], ...(withSchema ? { schema: contentJsonSchema() } : {}) });
+        return await client.call({ stage: "content", system: [sectionCatalogue(client.promptFixes, client.catalogueOptions), contentSystem(client.promptFixes)], messages: [first, ...tail], ...(withSchema ? { schema: contentJsonSchema() } : {}) });
       } catch (e) {
         // As in generateContent: the API refused the content schema, so plain JSON from here on.
         if (withSchema && isSchemaRejection(e)) {
@@ -508,6 +547,65 @@ async function generateContentPatched(
   const r = await patchRetryLoop({ call, evaluate, retries: input.retries });
   if (!r.spec) throw new Error(`Content generation failed after ${r.attempts} attempts: ${r.lastIssues.slice(0, 5).join("; ")}`);
   return { spec: r.spec, attempts: r.attempts, issues: r.specIssues, structuredFallback, repairs: r.specRepairs, patchRetries: r.notes };
+}
+
+/**
+ * generateContent with config pipeline.homepageFirst: the homepage first, then the other pages side by side, each part
+ * one content call with the same cached system blocks (homepage-first.ts runs the parts, merges and retries them).
+ */
+async function generateContentHomepageFirst(client: ModelClient, input: ContentInput, parts: ContentMessageParts, evaluate: PatchLoopDeps["evaluate"]): Promise<ContentResult> {
+  const others = input.brief.pages.filter((p) => p.kind !== "home");
+  const all = input.brief.pages;
+  const homeMessage = [
+    "Build the homepage of the full site for this brief. The other pages are written next, each in its own call, from your homepage: write only the homepage now, with the header and nav for the whole site, and link to the other pages by their page ids.",
+    parts.brief,
+    `Pages of the site (page ids p_<slug or "home">); write only the home page now:\n${parts.pageLines(all)}`,
+    parts.direction,
+    parts.outline,
+    parts.photos,
+    parts.hero,
+    parts.skeleton,
+    parts.facts,
+    plainJsonInstruction(),
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+  const pageMessage = (page: Brief["pages"][number], home: unknown) =>
+    [
+      `Build one page of the full site for this brief: the page "${page.slug}" (page id ${pageId(page)}, nav "${page.navLabel}"): ${page.purpose}. The homepage is already written (below). Keep its voice: the same person (singular or plural) and form of address, the same facts and names, consistent wording; don't repeat its sections word for word.`,
+      parts.brief,
+      `Pages of the site (page ids p_<slug or "home">):\n${parts.pageLines(all)}`,
+      parts.direction,
+      parts.photos,
+      parts.skeleton,
+      parts.facts,
+      `The homepage as written (header, footer and the home page):\n${JSON.stringify(home)}`,
+      pageJsonInstruction(page),
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+  const r = await homepageFirst({
+    call: (messages) => client.call({ stage: "content", system: [sectionCatalogue(client.promptFixes, client.catalogueOptions), contentSystem(client.promptFixes)], messages }),
+    evaluate,
+    retries: input.retries,
+    homeMessage,
+    pageMessage,
+    pages: others.map((p) => ({ page: p, id: pageId(p) })),
+    plannedIds: all.map(pageId),
+    ...(input.onHomepage ? { onHomepage: input.onHomepage } : {}),
+  });
+  return { spec: r.spec, attempts: r.attempts, issues: r.specIssues, structuredFallback: false, repairs: r.specRepairs, parts: r.notes };
+}
+
+/** A planned page's id, as the content step names it ("page ids p_<slug or "home">"). */
+const pageId = (p: Brief["pages"][number]) => `p_${p.slug || "home"}`;
+
+/** The envelope for one inner page of the homepage-first content step. */
+function pageJsonInstruction(page: Brief["pages"][number]): string {
+  return `Return only one JSON object, no prose:
+{"pages": [{"id": "${pageId(page)}", "kind": "standard", "slug": "${page.slug}", "nav": {"label": string ≤24, "show": boolean}, "seo": {"title": string ≤60, "description": string ≤160},
+   "sections": [{"id": "s_<word>", "type": <section type from the catalogue>, "variant": <one of its variants>, "tone"?: "default"|"alt"|"inverse", "props": <exactly its props schema>}]}]}
+Only this page. Use only section types, variants and props from the catalogue; respect every length limit.`;
 }
 
 const issueLine = (i: Issue) => `${i.path}: ${i.message}`;
@@ -606,7 +704,7 @@ export async function critique(
     `${what}${s.tiles.length > 1 ? `, top to bottom in ${s.tiles.length} consecutive slices` : ""}${s.truncated ? " (the page continues below the last slice)" : ""}:`;
   const res = await client.call({
     stage: "critique",
-    system: [sectionCatalogue(fixes), critiqueSystem(fixes)],
+    system: [sectionCatalogue(fixes, client.catalogueOptions), critiqueSystem(fixes)],
     messages: [
       {
         role: "user",
@@ -682,7 +780,7 @@ export async function editSpec(
   let attempts = 0;
   for (;;) {
     attempts++;
-    const res = await client.call({ stage: "edit", system: [sectionCatalogue(client.promptFixes), `${editSystem(client.promptFixes)}\n\n${businessSchema()}`], messages });
+    const res = await client.call({ stage: "edit", system: [sectionCatalogue(client.promptFixes, client.catalogueOptions), `${editSystem(client.promptFixes)}\n\n${businessSchema(client.catalogueOptions)}`], messages });
     let issues: string[];
     try {
       const out = EditOutput.parse(JSON.parse(extractJson(res.text)));
