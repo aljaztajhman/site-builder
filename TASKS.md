@@ -7,7 +7,8 @@ Work top-down: finish the current phase's "Done means" before starting the next 
 Owner, 2026-10-09: significantly more quality and variety; an AI design layer that composes something high-standard and unique from our assets; a much larger inventory; "push the ambitious as much as we can". Per-site cost is not a constraint for now (measured, decided later). Supersedes the scope of docs/plans/ai-designer.md (2026-10-08); its spec PRs A and B are F1 and F2. All behind `designer.agent` (off); the gate to switch it on is the owner's blind A/B (plan §2, §9).
 Phase 0, foundations (free):
 - [ ] F1 composition language v1 (= ai-designer-spec.md PR A; HQ `it-studio-f1-composition`)
-- [ ] F2 tool use and `runAgent` in the model client (= spec PR B; `it-studio-f2-agent-client`)
+- [ ] F2 tool use and `runAgent` in the model client (= spec PR B) plus the advisor tool (Haiku executor, Opus advisor) (`it-studio-f2-agent-client`)
+- [ ] M1 Haiku 5.5 in client and config: both price cards, effort per stage, thinking headroom, blocks by type, refusal retry on Sonnet, `--stage-model` eval flag (`it-model-roles-55`)
 - [ ] F3 `packages/inventory`: registry, contact sheets, gallery artifact with approve/reject, CI checks per asset; today's assets registered (`it-studio-inventory-registry`)
 - [ ] F4 Okus: owner rating artifact + critic calibration harness, round-1 set (`it-studio-okus`)
 - [ ] F5 `design.seed`, stance/constraint deck schemas and dealing, `look_fingerprints` uniqueness registry (`it-studio-seed-registry`)
@@ -24,11 +25,12 @@ Phase 1, inventory (free, overnight, parallel; only owner-approved assets reach 
 - [ ] I9 wordmark generator, icons 3 styles × 40 for practical facts (`it-studio-wordmark-icons`)
 - [ ] I10 40 new hand-made reference homepages (`it-studio-references`)
 - [ ] F1b composition language v2: section layers, transitions, 14 new element kinds (`it-studio-f1b-language-v2`)
-Phase 2, the studio (paid ≈ €25, per meta/budget):
-- [ ] S1 photo analyst + creative director (3–4 concepts from dealt stances, shortlists, registry gate) ≈ €3
-- [ ] S2 designers ×N in parallel, copy in the concept's voice ≈ €4
+Phase 2, the studio (paid ≈ €27, per meta/budget; model roles: Opus decides, Haiku produces, code orchestrates, plan §6.4, HQ `sb-model-roles`):
+- [ ] S0 model bake-off: each stage on Haiku / Haiku + Opus advisor / Sonnet / Opus on 3 fixtures; per-stage models in config ≈ €3
+- [ ] S1 photo analyst (Haiku) + creative director (Opus, 6 concepts from dealt stances, shortlists, registry gate) ≈ €3
+- [ ] S2 designers ×6 (Haiku) in parallel, draft copy in the concept's voice; copy polish on the winner ≈ €3
 - [ ] S3 art worker: wordmark, SVG drawings, photo treatments; generated imagery per `sb-studio-imagery` ≈ €4
-- [ ] S4 render all + tournament critic with owner anchors; alternatives stored ≈ €4
+- [ ] S4 render all + Haiku pre-screen + Opus tournament critic with owner anchors; alternatives stored ≈ €4
 - [ ] S5 finisher loop (render, checks, patch, search inventory), critique replaced when on ≈ €5
 - [ ] S6 site kit + other pages composed with it ≈ €3
 - [ ] S7 owner UX: "Oblikovalec dela" progress, "Druge zamisli", "Predlagaj drugačno", editor slots (free)

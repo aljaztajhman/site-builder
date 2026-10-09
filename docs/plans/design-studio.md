@@ -65,8 +65,8 @@ Measured, and the gate for switching it on (§9):
             └──────────── retrieval: a shortlist per stance ───┘
                                      ▼
  THE STUDIO (runtime agents)
- understand → creative director (3–4 concepts) → designers ×N in parallel → art worker
-   → render all → tournament critic → finisher loop (look, check, patch) → site kit → gate
+ understand → creative director, Opus (6 concepts) → designers ×6 in parallel, Haiku → art worker, Haiku
+   → render all → Haiku pre-screen → Opus tournament critic → copy polish → finisher loop → site kit → gate
                                      ▼
  GUARDS IN CODE: spec is the source of truth · banned list · contrast · facts · phone layout
                                      ▲
@@ -105,7 +105,7 @@ The agents compose from the inventory and never build a site from scratch. The s
 | Fact objects | plate, seal, receipt | **20** | registration plate, stamp, ticket, tag, seal, receipt, docket, label, timetable, trail sign, price tag, calendar leaf … Every value comes from the client's facts |
 | Icons | 5 | **3 styles × 40** | for practical facts only (parking, card payment, wheelchair access, Wi-Fi …); feature-card icons stay banned |
 | Motion presets | 0 | **20** | on `@sb/morph` and CSS scroll-driven animation: headline reveal, photo unmask, stagger, marquee, counter, sticky stack, parallax-lite … All behind `prefers-reduced-motion`, a JS budget, no layout shift |
-| Wordmarks | 0 | generator | for businesses without a logo (§6.4) |
+| Wordmarks | 0 | generator | for businesses without a logo (§6.5) |
 | Stances | 0 | **80** | §5.2 |
 | Constraint cards | 0 | **50** | §5.3 |
 | Reference homepages | 19 | **60** | 40 new hand-made ones across stances and trades, rated by the owner |
@@ -143,7 +143,7 @@ Free, in overnight Claude Code sessions, not in API calls. Each session builds o
 
 `design.seed` (spec): a short string stored on the site, derived from the site id and the generation number (today's `siteSeed` in `packages/engine/src/variety.ts`). "Ustvari znova" advances it. The seed decides, deterministically:
 
-- which **stances** the director is dealt (3–4);
+- which **stances** the director is dealt (6, one per concept);
 - one **constraint card** per concept;
 - which **references** the director is shown;
 - tie-breaks everywhere code picks (shortlist order, palette candidates).
@@ -178,7 +178,7 @@ There are 80 of them, across families of language:
 
 Stances rooted in Slovene visual culture are what no foreign builder will have. Stances are visual only: they never imply a fact (no "since 1920", no heritage the client didn't give).
 
-**Dealing**: filter by trade fit, weight by fit to the brief's concept (goal, angle, materials, local anchor), down-weight stances used by same-trade sites (registry) and by this site's previous generations, then draw 3–4 by seed, never two from the same family.
+**Dealing**: filter by trade fit, weight by fit to the brief's concept (goal, angle, materials, local anchor), down-weight stances used by same-trade sites (registry) and by this site's previous generations, then draw 6 by seed, at most two from the same family.
 
 ### 5.3 Constraint cards
 
@@ -211,54 +211,82 @@ Distance is today's look distance extended with the composition signature and th
 ### 6.1 Pipeline with `designer.agent` on
 
 ```
-classify ─▶ brief + concept ─▶ photo analyst ─▶ creative director ─▶ designer A ─┐
-                                   (vision)        (3–4 concepts)    designer B ─┤ parallel
-                                                                      designer C ─┘
-     ─▶ art worker (wordmark, drawings, photo treatments, generated pictures per concept)
-     ─▶ render all at 360 + 1280 ─▶ tournament critic ─▶ save v1 (preview shows the winner)
+classify ─▶ brief + concept ─▶ photo analyst ─▶ creative director ─▶ designers A–F (parallel)
+ Haiku      Sonnet or Haiku    Haiku, vision    Opus, 6 concepts       Haiku
+     ─▶ art worker, Haiku (wordmark, drawings, photo treatments, generated pictures per concept)
+     ─▶ render all at 360 + 1280 ─▶ pre-screen, Haiku (drops broken or off-brief concepts)
+     ─▶ tournament critic, Opus (the best 3–4) ─▶ copy polish on the winner ─▶ save v1 (preview shows it)
      ─▶ finisher loop on the winner (render · check · patch · search inventory) ─▶ save v2
      ─▶ site kit ─▶ other pages composed with the kit ─▶ gate (guards, checks, registry, Lighthouse)
 ```
 
+Models are per-stage config values and start as listed; the bake-off in §6.4 confirms or moves each one.
+
 | Stage | Model (config) | What it does |
 |---|---|---|
-| **Photo analyst** | Sonnet, vision | Per photo: subject, quality, light, focal point, dominant colours, whether it can be the hero, cut out or cropped tight, and photos not to use. Ranks the photos. Replaces the alt-text call's vision work and writes alt text too |
-| **Creative director** | Opus, high, vision | Sees the brief, the photos with their analysis, the logo, the dealt stances with their moodboards, the references, and the neighbours' ideas. Writes 3–4 **concepts**, one per stance, each with: idea (one sentence), stance, constraint card, picks from the moodboard, genome with a reason per axis, type pairing, palette roles (from logo, photos or library), signature device, wordmark plan, the homepage as 4–9 moments, and the voice for the copy. Code validates and repairs the genome and contrast, and checks the registry |
-| **Designers ×N** | Sonnet, high (Opus compared in measurement) | One per concept, in parallel. Composes the homepage in the composition language (§7), adapting presets from the shortlist or composing new ones, and writes the Slovene copy in the concept's voice, with 3 headline candidates for the hero. Same validation, repair, fact check and placeholder rules as today's content step |
-| **Art worker** | Sonnet + code + fal | Wordmark (§6.4); per-site spot drawings and ornaments in the stance's drawing style (constrained SVG, sanitised, palette roles only); photo crops and treatments (code: sharp); cut-outs and generated pictures in the concept's art direction, within decision `sb-studio-imagery` |
-| **Tournament critic** | Opus, vision | Sees every concept rendered at both widths (first screen and full page), the rubric, and owner-rated anchors (§8). Compares pairwise, picks a winner with reasons, and scores each against the bar. Losing concepts are kept as stored alternatives |
-| **Finisher loop** | Opus, medium, tools | On the winner: `render_page`, `run_checks`, `patch_spec`, `search_inventory` (a shortlist for a new need), `done`. Works until the rubric and the checks pass, or a cap (renders, turns, € per site, time). Replaces today's critique when on |
-| **Site kit** | code + Sonnet | The winner's system (type, palette, components used, signature device, section rhythm, motion level) saved as `design.kit`. The other pages are composed with the kit so the whole site is one design. Full sites only |
+| **Photo analyst** | Haiku, vision | Per photo: subject, quality, light, focal point, dominant colours, whether it can be the hero, cut out or cropped tight, and photos not to use. Ranks the photos. Replaces the alt-text call's vision work and writes alt text too |
+| **Creative director** | Opus, high, vision | Sees the brief, the photos with their analysis, the logo, the dealt stances with their moodboards, the references, and the neighbours' ideas. Writes 6 **concepts**, one per stance, each with: idea (one sentence), stance, constraint card, picks from the moodboard, genome with a reason per axis, type pairing, palette roles (from logo, photos or library), signature device, wordmark plan, the homepage as 4–9 moments, and the voice for the copy. Code validates and repairs the genome and contrast, and checks the registry |
+| **Designers ×6** | Haiku, high (Haiku with an Opus advisor, and Sonnet, compared in the bake-off) | One per concept, in parallel. Composes the homepage in the composition language (§7), adapting presets from the shortlist or composing new ones, and drafts the Slovene copy in the concept's voice, with 3 headline candidates for the hero. Same validation, repair, fact check and placeholder rules as today's content step |
+| **Art worker** | Haiku + code + fal | Wordmark (§6.5); per-site spot drawings and ornaments in the stance's drawing style (constrained SVG, sanitised, palette roles only); photo crops and treatments (code: sharp); cut-outs and generated pictures in the concept's art direction, within decision `sb-studio-imagery` |
+| **Pre-screen** | Haiku, vision | Looks at every concept's first screens and check results and drops the broken or off-brief ones, so Opus judges only the best 3–4. Never picks the winner |
+| **Tournament critic** | Opus, vision | Sees the surviving concepts rendered at both widths (first screen and full page), the rubric, and owner-rated anchors (§8). Compares pairwise, picks a winner with reasons, and scores each against the bar. Losing concepts are kept as stored alternatives |
+| **Copy polish** | Sonnet or Haiku (bake-off) | The winner's Slovene copy only, one call: voice, rhythm, the banned filler list, headlines. Concepts compete on design with draft copy; the copy budget goes to the one that wins |
+| **Finisher loop** | Opus, medium, tools; or Haiku with an Opus advisor (bake-off) | On the winner: `render_page`, `run_checks`, `patch_spec`, `search_inventory` (a shortlist for a new need), `done`. Works until the rubric and the checks pass, or a cap (renders, turns, € per site, time). Replaces today's critique when on |
+| **Site kit** | code + Haiku | The winner's system (type, palette, components used, signature device, section rhythm, motion level) saved as `design.kit`. The other pages are composed with the kit so the whole site is one design. Full sites only |
 
 Runs that fail stay safe. A concept that fails validation is dropped (the others go on). If all fail, today's pipeline runs. A finisher that hits a cap keeps the last valid spec. The page never fails because of the studio.
 
 ### 6.2 What the owner sees
 
 - **"Oblikovalec dela"**: the wait becomes the show. The progress screen shows the real moodboard (fonts, colours, the photos chosen), then the concepts arriving as sketches, then the winner building itself (`@sb/morph`, as on the landing page). Each step shows real data from the run, never a fake animation.
-- **"Druge zamisli"**: the 2–3 concepts that lost are already designed and paid for. Switching to one is free and instant, and each is a version. This replaces the planned paid "Druga podoba" under the designer (spec §6).
+- **"Druge zamisli"**: the 2–3 runners-up from the tournament are already designed and paid for. Switching to one is free and instant, and each is a version. This replaces the planned paid "Druga podoba" under the designer (spec §6).
 - **"Predlagaj drugačno"** on a section: the designer recomposes that one section within the kit (a small paid call, counted in the AI allowance).
 - **"Ustvari znova"**: a new seed, so new stances and new concepts. The previous ideas are passed so they aren't repeated.
 
 ### 6.3 Cost and time (estimate, to be measured)
 
-From config prices (Sonnet $2/$10, Opus $4/$20 per MTok, €0.86 per $), with cached system blocks:
+From the Anthropic price list (Haiku 5.5 $0.10/$0.50 for prompts ≤ 100K tokens, Sonnet 5.5 $2/$10, Opus 5.5 $4/$20 per MTok, cache reads 0.1×; €0.86 per $), with cached system blocks:
 
 | Stage | € per homepage | Time |
 |---|---|---|
-| Classify, brief, concept | 0.04 | 10 s |
-| Photo analyst | 0.04 | 8 s (parallel with brief) |
-| Creative director, 3 concepts | 0.15 | 30–45 s |
-| Designers ×3 | 0.25 | 40–60 s (parallel) |
-| Art worker (without generated pictures) | 0.03 | 10 s |
-| Render + tournament | 0.09 | 25 s |
-| Finisher loop, ≤ 4 renders | 0.30 | 40–80 s |
+| Classify (Haiku), brief and concept (Sonnet or Haiku) | 0.01–0.04 | 10 s |
+| Photo analyst (Haiku) | < 0.01 | 8 s (parallel with brief) |
+| Creative director, 6 concepts (Opus) | 0.20 | 35–50 s |
+| Designers ×6 (Haiku, parallel) | 0.03 | 30–50 s |
+| Art worker (Haiku, without generated pictures) | < 0.01 | 10 s |
+| Render, pre-screen (Haiku), tournament over 3–4 (Opus) | 0.10 | 30 s |
+| Copy polish on the winner (Sonnet; Haiku < 0.01) | 0.02 | 10 s |
+| Finisher loop, ≤ 4 renders (Opus; Haiku + Opus advisor ≈ 0.10) | 0.10–0.30 | 40–80 s |
 | Generated pictures (when photos are missing) | 0.05–0.20 | parallel |
-| **Homepage** | **≈ €0.9–1.1** (today €0.15) | **≈ 2½–4 min** to the final; the winner shows at ≈ 2 min |
-| Other pages of a full site (site kit) | + €0.2–0.4 | + 1 min |
+| **Homepage** | **≈ €0.5–0.8** (today €0.15; with Sonnet designers ×3 it was ≈ €0.9–1.1) | **≈ 2½–4 min** to the final; the winner shows at ≈ 2 min |
+| Other pages of a full site (site kit, Haiku) | + €0.05–0.1 | + 1 min |
+
+With Haiku doing the production work, Opus's two calls (the idea and the pick) are most of the model cost, and generated pictures become the largest single line on photo-less sites.
 
 As the owner asked, this is reported, not optimised, until the studio is good. The levers for later are listed in §12. Which tiers get the studio is a later decision with real numbers.
 
-### 6.4 Wordmarks for businesses without a logo
+### 6.4 Model roles: Opus decides, Haiku produces, code orchestrates
+
+The owner's direction (2026-10-09, HQ `sb-model-roles`): use the 5.5 family as a team. Opus 5.5 makes the decisions that set quality (the idea, the pick, what to fix); Haiku 5.5 does the volume work. Haiku 5.5 is 20× cheaper than Sonnet 5.5 and 40× cheaper than Opus 5.5, has a 1M context, sees images, has effort levels, and Anthropic describes it as substantially better at instruction following and at running as a sub-agent. Its price buys **breadth**: twice the concepts for less money.
+
+**Three ways to combine them, and where each is used:**
+
+1. **Code orchestrates (the backbone).** The pipeline calls Opus for decisions, fans out Haiku calls in parallel for production, then calls Opus to judge. Deterministic, recorded per call for replay tests, capped by the spend ledger. Used for every stage above.
+2. **Haiku executes, Opus advises** (the advisor tool, beta `advisor-tool-2026-03-01`; a Haiku 5.5 executor with an Opus 5.5 advisor is a valid pair). Haiku does the long generation and consults Opus partway, with `max_uses` and `max_tokens` caps. Tested for the designers and the finisher in the bake-off. Catch: Opus 5.5's advice comes back encrypted, so it can be replayed but not logged or read.
+3. **Opus runs a loop and spawns Haiku helpers as tools.** The most autonomous, and the hardest to cap and replay. Only considered for the finisher if 1 and 2 fall short. Anthropic's hosted Managed Agents don't fit: rendering, checks and the spec must run on our side.
+
+**What our code must handle for Haiku 5.5** (Anthropic's migration notes; our client already sends no temperature, top_p, prefill or thinking budget):
+
+- Thinking is on by default and counts toward `max_tokens`: every Haiku stage gets headroom (classify's 1024 is too tight), content blocks are read by type, and `effort` is set explicitly (default `medium`; `low` for classify and the pre-screen).
+- No server-side refusal fallback: on `stop_reason: "refusal"` the client retries the call once on Sonnet 5.5 and logs it.
+- The newer tokenizer counts the same text as about 30 % more tokens than Haiku 4.5, and prompts over 100K tokens use a second price card ($0.50/$2.50). Both go into config prices; cost baselines are redone.
+- Prompt caches are per model: each stage stays on one model, with no per-request cascades between models.
+
+**The bake-off (Phase 2, ≈ €3):** each stage on Haiku, Haiku with an Opus advisor where it applies, Sonnet, and Opus, on 3 fixtures, judged and looked at by the owner. Each stage keeps the cheapest model that holds the quality. Slovene copy and the finisher are the stages most likely to need more than Haiku. Nothing moves without a number.
+
+**Development work too:** in Claude Code sessions, search and log-reading subagents run on Haiku; code writing stays on the main model (CLAUDE.md). Bulk inventory drafting that needs API calls (for example many SVG drawing variants to curate) uses Haiku through the eval tooling, with Opus or the owner curating.
+
+### 6.5 Wordmarks for businesses without a logo
 
 Many small businesses have none. The art worker proposes a typographic wordmark: the business name set in a fitting font from the inventory, with a treatment (lockup, stamp, plate, circular text, a monogram of the initials). It is never a drawn symbol pretending to be a brand mark. The wordmark is stored in the spec, the owner can replace it with their own logo, and it is used in the header, the footer and the share image.
 
@@ -331,7 +359,8 @@ Every PR sits behind config `designer.agent` (off): with it off, requests and ou
 | PR | Contents | Checks |
 |---|---|---|
 | **F1** | Composition language v1 = spec PR A (`ai-designer-spec.md` §2, §8 A) | as specified there |
-| **F2** | Tool use and `runAgent` in the model client = spec PR B | as specified there |
+| **F2** | Tool use and `runAgent` in the model client = spec PR B, plus the advisor tool (Haiku executor, Opus advisor; encrypted advice replayed unchanged) | as specified there; advisor replay test |
+| **M1** | Haiku 5.5 in the client and config (§6.4): both price cards, effort set per stage, thinking headroom, blocks read by type, refusal retry on Sonnet; `pnpm eval --stage-model <stage>=<model>` to run any stage on any model | unit tests on recorded and scripted responses (refusal, thinking-only reply, long-prompt price card); switch-off replay identical |
 | **F3** | `packages/inventory`: registry, asset schema, contact-sheet generator, the gallery artifact with approve/reject, CI checks per asset. Today's assets registered (fonts, palettes, motifs, treatments, sections as presets) | every registered asset renders at 360/1280, axe, banned, contrast, licence |
 | **F4** | Okus: rating artifact and database, calibration harness (agreement metric on stored ratings), round-1 item set rendered from what exists | harness tests on synthetic ratings; artifact published, owner asked to rate |
 | **F5** | Seed and registry: `design.seed`, stance and constraint deck schemas (decks filled in Phase 1), dealing, `look_fingerprints` table and migration, perceptual hash, distance and gate, wired behind the switch | dealing determinism tests; registry tests on the twins' renders; DB migration test |
@@ -349,20 +378,21 @@ Every PR sits behind config `designer.agent` (off): with it off, requests and ou
 | **I6** | Type treatments (15) and fact objects (20) |
 | **I7** | Motion: 20 presets on `@sb/morph` and CSS, reduced-motion, JS and layout-shift budget, Lighthouse unchanged |
 | **I8** | Stance deck (80, each with signatures and references) and constraint deck (50) |
-| **I9** | Wordmark generator (§6.4) and icons (3 styles × 40, practical facts only) |
+| **I9** | Wordmark generator (§6.5) and icons (3 styles × 40, practical facts only) |
 | **I10** | References: 40 new hand-made homepages across stances and trades at 360 and 1280 px, into Okus round 1 |
 | **F1b** | Composition language v2 (§7.1, §7.2), spec bump and migration |
 
 Each of these PRs ends with its contact sheet in the gallery. Only approved assets reach the runtime catalogue.
 
-### Phase 2: the studio (paid, ≈ €25 in evals)
+### Phase 2: the studio (paid, ≈ €27 in evals)
 
 | PR | Contents | Eval € |
 |---|---|---|
-| **S1** | Photo analyst, creative director (concepts, dealing, shortlists, registry gate), `design.art` with concepts | ≈ 3 |
-| **S2** | Designers ×N in parallel, copy in the concept's voice, headline candidates | ≈ 4 |
+| **S0** | Model bake-off (§6.4): each stage on Haiku, Haiku + Opus advisor, Sonnet, Opus, on 3 fixtures; per-stage model chosen in config | ≈ 3 |
+| **S1** | Photo analyst (Haiku), creative director (Opus, 6 concepts, dealing, shortlists, registry gate), `design.art` with concepts | ≈ 3 |
+| **S2** | Designers ×6 (Haiku) in parallel, draft copy in the concept's voice, headline candidates; copy polish on the winner | ≈ 3 |
 | **S3** | Art worker: wordmark, constrained SVG drawings, photo treatments; cut-outs and generated pictures per `sb-studio-imagery` | ≈ 4 |
-| **S4** | Render all, tournament critic with owner anchors, alternatives stored | ≈ 4 |
+| **S4** | Render all, Haiku pre-screen, Opus tournament critic with owner anchors, alternatives stored | ≈ 4 |
 | **S5** | Finisher loop with tools, caps, critique replaced when on | ≈ 5 |
 | **S6** | Site kit and other pages composed with it | ≈ 3 |
 | **S7** | Owner UX (free): "Oblikovalec dela" progress, "Druge zamisli", "Predlagaj drugačno"; editor slots for composed sections (spec PR F) | 0 |
@@ -379,23 +409,25 @@ Scoped CSS (§7.3, own decision). The sketch lab weekly. Inventory waves 2 and 3
 
 ### Totals
 
-- **Development spend**: ≈ €60–70 in evals plus ≈ €3 in pictures over the program. At today's €10 a week that is 6–7 weeks of paid steps. Decision `sb-studio-budget` proposes more for the length of the program.
+- **Development spend**: ≈ €60–70 in evals (Haiku workers make each run cheaper than first estimated; the saving goes into more iterations) plus ≈ €3 in pictures over the program. At today's €10 a week that is 6–7 weeks of paid steps. Decision `sb-studio-budget` proposes more for the length of the program.
 - **Free work**: Phases 0 and 1 are about 16 PRs that can run in overnight sessions now, several at a time.
 
 ## 12. Risks and answers
 
 - **Ugly freedom.** More materials and a freer language can make worse pages. Answers: the guards in code, the tournament, the finisher loop, owner-approved assets only, and nothing switches on without the owner's A/B.
 - **Quantity over quality in the inventory.** 150 mediocre motifs are worse than 16 good ones. Answers: every asset is reviewable in the gallery, and the owner's rejections and the tournament's losing reasons prune it. Targets are ceilings to aim at, not quotas to fill.
-- **Cost and time.** About 6–7× today's per homepage (estimate). Deliberately unconstrained for now. The levers, once it is good: Sonnet for the director or finisher; 2 concepts instead of 3; one finisher round on free previews; the studio after sign-in only; caching the director's system blocks across sites (already planned); and Message Batches for the non-interactive "Druge zamisli".
+- **Cost and time.** About 3–5× today's per homepage (estimate). Deliberately unconstrained for now. Haiku workers already take it from ≈ €0.9–1.1 to ≈ €0.5–0.8 (§6.3). The levers, once it is good: Sonnet for the director, critic or finisher; 4 concepts instead of 6; one finisher round on free previews; the studio after sign-in only; caching the director's system blocks across sites (already planned); and Message Batches for the non-interactive "Druge zamisli".
 - **Page weight.** More fonts, textures and motion. Answers: the per-site byte budgets in the registry, Lighthouse in the gate, at most 2 font families per site, and motion as CSS first.
 - **Editor complexity.** Composed sections edit by slots (text, photo, fact). Layout changes go through "Predlagaj drugačno" and "Druge zamisli".
 - **Legal.** Fonts and icons are open-licence only, with the licences listed. AI pictures are labelled, as today. Nothing in the inventory is traced from someone else's design. Ornaments are drawn new. The lab doesn't feed on scraped sites.
+- **Haiku quality.** Haiku 5.5 is unmeasured on our work, especially Slovene copy and reading owner photos. Answers: the bake-off before anything relies on it, the copy polish on the winner, Opus for every decision that sets quality, and a Sonnet retry on refusals.
 - **Run-to-run variance.** Seeds, recordings and per-stage logs make every run reproducible and comparable.
 
 ## 13. Decisions for the owner (in HQ)
 
 - `sb-studio-budget`: development budget for the program.
 - `sb-studio-imagery`: what the art worker may generate beyond today's rule (≤ 3 mood pictures, labelled): drawings in the stance's style, cut-outs of the owner's product photos, textures.
+- `sb-model-roles`: Opus decides, Haiku produces, code orchestrates (chosen 2026-10-09: "incorporate in plan"); the bake-off sets each stage's model.
 - Later, with numbers, not now: which tiers get the studio, and per-site cost and time.
 - Phase 4: scoped CSS.
 
