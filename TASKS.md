@@ -3,6 +3,40 @@
 Product brief and roadmap: docs/PRODUCT.md. Phase plans: docs/phases/. Tick only what has been run and checked.
 Work top-down: finish the current phase's "Done means" before starting the next phase.
 
+## #1 priority: design studio (plan 2026-10-09: docs/plans/design-studio.md; HQ `it-ai-designer`, `sb-ai-designer`)
+Owner, 2026-10-09: significantly more quality and variety; an AI design layer that composes something high-standard and unique from our assets; a much larger inventory; "push the ambitious as much as we can". Per-site cost is not a constraint for now (measured, decided later). Supersedes the scope of docs/plans/ai-designer.md (2026-10-08); its spec PRs A and B are F1 and F2. All behind `designer.agent` (off); the gate to switch it on is the owner's blind A/B (plan §2, §9).
+Phase 0, foundations (free):
+- [ ] F1 composition language v1 (= ai-designer-spec.md PR A; HQ `it-studio-f1-composition`)
+- [ ] F2 tool use and `runAgent` in the model client (= spec PR B; `it-studio-f2-agent-client`)
+- [ ] F3 `packages/inventory`: registry, contact sheets, gallery artifact with approve/reject, CI checks per asset; today's assets registered (`it-studio-inventory-registry`)
+- [ ] F4 Okus: owner rating artifact + critic calibration harness, round-1 set (`it-studio-okus`)
+- [ ] F5 `design.seed`, stance/constraint deck schemas and dealing, `look_fingerprints` uniqueness registry (`it-studio-seed-registry`)
+- [ ] F6 18 hard fixtures (no logo, no photos, dark photos, new trades …); their photos ≈ €1.5 (`it-studio-fixtures`)
+Phase 1, inventory (free, overnight, parallel; only owner-approved assets reach the runtime):
+- [ ] I1 type: 60 families, 120 pairings, Slovene glyph check (`it-studio-inv-type`)
+- [ ] I2 colour: 200 palettes, extraction from photos (`it-studio-inv-colour`)
+- [ ] I3 compositions wave 1: 120 presets over 12 intents, incl. today's variants and the references' signature parts; absorbs `it-templates-rest` (`it-studio-inv-compositions`)
+- [ ] I4 imagery: 30 masks/frames, 16 treatments, 12 textures (no dot/grid patterns) (`it-studio-inv-imagery`)
+- [ ] I5 drawings: 150 motifs and spot drawings in 3 styles, 24 Slovene ornaments, 20 dividers (`it-studio-inv-drawings`)
+- [ ] I6 type treatments (15) and fact objects (20) (`it-studio-inv-type-facts`)
+- [ ] I7 motion: 20 presets on @sb/morph + CSS, reduced motion, budgets (`it-studio-inv-motion`)
+- [ ] I8 stance deck (80) and constraint deck (50) (`it-studio-stances`)
+- [ ] I9 wordmark generator, icons 3 styles × 40 for practical facts (`it-studio-wordmark-icons`)
+- [ ] I10 40 new hand-made reference homepages (`it-studio-references`)
+- [ ] F1b composition language v2: section layers, transitions, 14 new element kinds (`it-studio-f1b-language-v2`)
+Phase 2, the studio (paid ≈ €25, per meta/budget):
+- [ ] S1 photo analyst + creative director (3–4 concepts from dealt stances, shortlists, registry gate) ≈ €3
+- [ ] S2 designers ×N in parallel, copy in the concept's voice ≈ €4
+- [ ] S3 art worker: wordmark, SVG drawings, photo treatments; generated imagery per `sb-studio-imagery` ≈ €4
+- [ ] S4 render all + tournament critic with owner anchors; alternatives stored ≈ €4
+- [ ] S5 finisher loop (render, checks, patch, search inventory), critique replaced when on ≈ €5
+- [ ] S6 site kit + other pages composed with it ≈ €3
+- [ ] S7 owner UX: "Oblikovalec dela" progress, "Druge zamisli", "Predlagaj drugačno", editor slots (free)
+(S1–S7 are one HQ item, `it-ai-designer`, until Phase 1 lands; split then.)
+Phase 3, measure and ship (≈ €15–20 + €15 reserve): 40 fixtures + twins, pairwise "same template?", owner blind A/B in Okus, report in eval/, HQ decision on switching on.
+Phase 4: scoped CSS (own decision), sketch lab weekly, inventory waves 2–3, whole-site redesign in the editor, photo shot list from the analyst.
+Found while planning: ai-designer-spec.md allowed a `dots` surface texture, which the 2026-10-01 decision (`sb-images-more`) keeps out; removed from the spec.
+
 ## Mandatory before public launch
 
 Nothing is opened to the public until every item here is done (owner, 2026-10-01).
@@ -248,14 +282,6 @@ Prompts (each needs `pnpm eval --only …` runs before merging; proposed text in
   - Direct edits: a banned-copy issue a stored site already had (e.g. new filler) no longer blocks an unrelated edit; publishing still lists it
   - Prompt text changed without an eval (listed in the PR): RULES banned line (em dash, capital eyebrows), one critique line on filler calques. Needs `pnpm eval --only` runs before trusting generation quality
   - Ran: typecheck, lint, `pnpm test` 822 passed in 65 files (after merging main; an earlier run had one browser suite's afterAll time out under load, as 3 did on main before the change); all pages of the 10 golden sites through the new page checks: no give-aways found
-
-## AI designer (plan 2026-10-08: docs/plans/ai-designer.md; HQ `sb-ai-designer`, `it-ai-designer`)
-Owner, 2026-10-08: "Its too templaty… I dont think ai does any proper design now." Confirmed from the code: the design call returns a direction id and ten numbers (≈ 200 output tokens, €0.003), never sees photos or the page; layouts come from ~30 fixed sections. Plan: an art director (Opus, sees photos, writes the idea, genome and page), a composition language for new layouts, and a look-and-revise loop. All behind `designer.agent` (off). Owner chose it (`sb-ai-designer` = designer) and asked for another agent to build it: spec docs/plans/ai-designer-spec.md, prompt docs/plans/ai-designer-handoff.md. PRs A–F in spec §8; A (composition language) and B (tool use in the client) are free.
-- [ ] Step 1, composition language (free): spec v19 composed sections + migration + structural guards; renderer in packages/components; M, S, J re-expressed and compared at 360/1280 px
-- [ ] Step 2, art director stage + content writes compositions; reference library of the 19 templates (≈ €1.5)
-- [ ] Step 3, look-and-revise loop with render/check/patch tools, critique folded in, € and round caps (≈ €2)
-- [ ] Step 4, measure against today's engine on 10 goldens + 12 twins, side-by-side sheet for the owner (≈ €6–8)
-- [ ] Step 5, editor for composed sections (free)
 
 ## Variety engine (plan 2026-10-04: docs/plans/variety-engine.md; HQ `sb-variety-approach`, `sb-druga-podoba`)
 Owner, 2026-10-04: "I don't want it to look like a template filler and that every avtoserviser would get a same-y looking site." Today each trade gets one template with fixed palette, fonts, hero and outline. Since 2026-10-07 the free parts of Steps 0–2 are built, Steps 1–2 behind config `variety.families` (off until the twin eval measures them). Each step is one PR, merged only when the twins' look distance rises and judge medians hold.

@@ -1,5 +1,7 @@
 # AI designer: implementation spec
 
+**Scope since 2026-10-09:** `docs/plans/design-studio.md` is the plan (priority #1). PRs A and B here are its F1 and F2, unchanged. §3–5 below (one art director, compose, loop) are the single-concept shape of its S1, S2 and S5; where they differ, design-studio.md wins (several concepts, stances and seed, tournament critic, inventory retrieval, composition language v2 as a follow-up PR F1b).
+
 The engineering spec for `docs/plans/ai-designer.md` (why and what). Owner decision: HQ `sb-ai-designer` = designer (2026-10-08). HQ item: `it-ai-designer`. The handoff prompt for the implementing agent is `docs/plans/ai-designer-handoff.md`.
 
 Read first: `CLAUDE.md`, `docs/PRODUCT.md` (banned patterns, mobile checklist, never invent facts), `docs/plans/ai-designer.md`, `docs/plans/variety-engine.md` ("Step 5 as built": the genome and section intents), `docs/design/templates/README.md`.
@@ -52,7 +54,7 @@ composed: {
     minHeight: "none" | "s" | "m" | "l" | "screen",   // screen = 100svh minus header, desktop only; phones cap at "l"
     rows: 1..8,                     // desktop grid rows; phone rows are implicit (order)
     gap: 0..6,                      // steps of the spacing scale
-    surface: { texture: "none" | "grain" | "lines" | "dots", divider: "none" | "rule" | "motif" },
+    surface: { texture: "none" | "grain" | "lines", divider: "none" | "rule" | "motif" },   // no dots: dot/grid patterns are on the give-away list (HQ sb-images-more)
     elements: Element[]             // 1..12
   }
 }

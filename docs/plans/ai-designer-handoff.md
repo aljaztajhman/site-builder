@@ -1,6 +1,6 @@
 # AI designer: handoff prompt
 
-Paste the block below into a new Claude Code session (local or cloud) on this repository. One session per PR in the table of `docs/plans/ai-designer-spec.md` §8; change the first line to the PR you want (A and B are free and independent; start with A).
+Paste the block below into a new Claude Code session (local or cloud) on this repository. It covers F1 and F2 of `docs/plans/design-studio.md` (spec PRs A and B); the other PRs of that plan are described there and in HQ overnight plans. One session per PR in the table of `docs/plans/ai-designer-spec.md` §8; change the first line to the PR you want (A and B are free and independent; start with A).
 
 ---
 
@@ -17,7 +17,8 @@ Read before anything else, in this order:
 1. CLAUDE.md (working rules, Stranko HQ protocol, development budget, reporting format) and TASKS.md.
 2. Stranko HQ session-start reads (CLAUDE.md "Stranko HQ"), then items it-ai-designer and decision sb-ai-designer.
    Set it-ai-designer to doing with a note naming this PR; write notes as things happen.
-3. docs/plans/ai-designer.md (why), docs/plans/ai-designer-spec.md (what to build; this PR is §2 and §8 row A).
+3. docs/plans/design-studio.md (the plan, priority #1; this PR is its F1), docs/plans/ai-designer.md (diagnosis),
+   docs/plans/ai-designer-spec.md (what to build; this PR is §2 and §8 row A).
 4. docs/PRODUCT.md: banned patterns, mobile checklist, never invent facts.
 5. docs/plans/variety-engine.md "Step 5 as built" (genome, section intents) and docs/design/templates/README.md.
 6. Code to mirror: packages/spec/src/sections/define.ts and content.ts (how sections are defined),
