@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { lcpImageFor } from "@sb/components";
 import { ComposedProps, migrateSpec, type Page, type Section, type SiteSpec } from "@sb/spec";
 import { uncoveredClasses } from "./composed-coverage.ts";
-import { COMPOSED_RIBBON_ISLAND, composedIslandFiles, composedIslands, composedSheets, composedV2Sheets, renderPage, sharedBundle } from "../src/index.ts";
+import { COMPOSED_RIBBON_ISLAND, composedIslandFiles, composedIslandPath, composedIslands, composedSheets, composedV2Sheets, renderPage, sharedBundle } from "../src/index.ts";
 
 /**
  * Spec v20 element kinds (docs/plans/studio-phase1-design.md §1.5, §3.1, §3.4; F1b-R2): photos, wordmark, ribbon,
@@ -143,10 +143,12 @@ describe("ribbon", () => {
     const island = readFileSync(new URL("../../components/islands/composed/ribbon.js", import.meta.url), "utf8");
     expect(island).toContain('setAttribute("aria-pressed"');
     expect(island).not.toMatch(/textContent|innerText/);
-    expect(composedIslands([s])).toEqual([COMPOSED_RIBBON_ISLAND]);
+    const served = composedIslandPath(COMPOSED_RIBBON_ISLAND);
+    expect(served).toMatch(/^composed\/ribbon-[0-9a-f]{10}\.js$/);
+    expect(composedIslands([s])).toEqual([served]);
     expect(composedIslandFiles()).toContain("ribbon.js");
-    expect(sharedBundle().files.has(`js/${COMPOSED_RIBBON_ISLAND}`)).toBe(true);
-    expect(html).toMatch(new RegExp(`<script src="[^"]*/js/${COMPOSED_RIBBON_ISLAND}" defer="">`));
+    expect(sharedBundle().files.has(`js/${served}`)).toBe(true);
+    expect(html).toMatch(new RegExp(`<script src="[^"]*/js/${served}" defer="">`));
     const css = composedV2Sheets().kinds.css;
     expect(css).toContain(".cx-rb--loop:is(:hover,:focus-within,.is-off,.is-paused) .cx-rb__track{animation-play-state:paused}");
     // The button is a 44 px target.

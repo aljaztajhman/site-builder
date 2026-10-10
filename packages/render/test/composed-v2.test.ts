@@ -5,10 +5,12 @@ import { ComposedProps, MOTION_META, MOTIONS, Skeleton, migrateSpec, type Page, 
 import {
   COMPOSED_MOTION_ISLAND,
   composedIslandFiles,
+  composedIslandPath,
   composedIslands,
   composedSheets,
   COMPOSED_V2_REGIONS,
   compactValues,
+  islandPathFor,
   composedStylesheet,
   composedV2Regions,
   composedV2Sheets,
@@ -283,7 +285,25 @@ describe("motion", () => {
     expect(MOTIONS.every((m) => MOTION_META[m].js === false)).toBe(true);
     // The composed islands: the marquee's pause (R2, ribbon move "loop") and the count-up (R3, fact.count); neither is a motion preset.
     expect(composedIslandFiles()).toEqual(["count.js", "ribbon.js"]);
-    expect(COMPOSED_MOTION_ISLAND).toBe("composed/motion.js");
+    expect(COMPOSED_MOTION_ISLAND).toBe("motion.js");
+  });
+});
+
+describe("composed islands are content-addressed", () => {
+  it("served at js/composed/<name>-<sha10>.js after the bundle hash: new bytes, a new URL; the bundle hash and the goldens hold", () => {
+    const bundle = sharedBundle();
+    for (const f of composedIslandFiles()) {
+      const bytes = readFileSync(new URL(`../../components/islands/composed/${f}`, import.meta.url));
+      const served = composedIslandPath(f);
+      expect(served).toBe(islandPathFor(f, bytes));
+      expect(served).toMatch(new RegExp(`^composed/${f.replace(/\.js$/, "")}-[0-9a-f]{10}\\.js$`));
+      expect(Buffer.from(bundle.files.get(`js/${served}`)!).equals(bytes), f).toBe(true);
+      // One changed byte, another URL: _shared/<hash>/ is immutable and written once, so an edit must never reuse a name.
+      expect(islandPathFor(f, Buffer.concat([bytes, Buffer.from("\n")]))).not.toBe(served);
+    }
+    expect([...bundle.files.keys()].filter((k) => k.startsWith("js/composed/")).sort()).toEqual(composedIslandFiles().map((f) => `js/${composedIslandPath(f)}`).sort());
+    // The islands come after the hash: the recorded bundle hash (composed-goldens.json) does not move with them.
+    expect(bundle.hash).toBe((JSON.parse(readFileSync(new URL("./composed-goldens.json", import.meta.url), "utf8")) as { sharedHash: string }).sharedHash);
   });
 });
 

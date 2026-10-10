@@ -389,32 +389,50 @@ export function composedSheets(sections: readonly Section[], families: Record<Vo
 }
 
 /**
- * Composed islands (packages/components/islands/composed/*.js): the JS a motion preset with `js: true` needs, in the
- * bundle after the hash like the composed sheets, so adding one changes no other site's bytes. Served from
- * _shared/<hash>/js/composed/. Today's presets (reveal, unmask) are pure CSS, so there are none yet.
+ * Composed islands (packages/components/islands/composed/*.js): the JS a composed feature needs (the marquee's pause, the
+ * count-up; a motion preset with `js: true`), in the bundle after the hash like the composed sheets, so adding or changing
+ * one changes no other site's bytes. Each is served content-addressed, _shared/<hash>/js/composed/<name>-<sha10>.js:
+ * _shared/<hash>/ is cached immutable and written once per release, so a changed island must get a new URL.
  */
 const COMPOSED_ISLANDS_DIR = path.join(componentsDir, "islands", "composed");
+/** The source files (count.js, ribbon.js …), sorted. */
 export function composedIslandFiles(): string[] {
   return existsSync(COMPOSED_ISLANDS_DIR) ? readdirSync(COMPOSED_ISLANDS_DIR).filter((n) => n.endsWith(".js")).sort() : [];
 }
 
-/** The one island of every motion preset that needs JS (MOTION_META js; §3.2: ≤ 3 KiB gzip), as a path under js/. */
-export const COMPOSED_MOTION_ISLAND = "composed/motion.js";
+/** The served path under js/ of an island with these bytes: composed/<stem>-<sha10>.js. */
+export const islandPathFor = (file: string, bytes: Uint8Array | string): string =>
+  `composed/${file.replace(/\.js$/, "")}-${createHash("sha256").update(bytes).digest("hex").slice(0, 10)}.js`;
 
-/** The marquee's pause button (ribbon move "loop", owner decision D2), as a path under js/. */
-export const COMPOSED_RIBBON_ISLAND = "composed/ribbon.js";
+let islandPaths: Map<string, string> | undefined;
+/** A composed island's served path under js/ (islandPathFor its source file's bytes; read once). */
+export function composedIslandPath(file: string): string {
+  islandPaths ??= new Map();
+  let p = islandPaths.get(file);
+  if (!p) {
+    p = islandPathFor(file, readFileSync(path.join(COMPOSED_ISLANDS_DIR, file)));
+    islandPaths.set(file, p);
+  }
+  return p;
+}
 
-/** The island of a fact with `count` (D2: counts up to the client's number once, on first view), as a path under js/. */
-export const COMPOSED_COUNT_ISLAND = "composed/count.js";
+/** The one island of every motion preset that needs JS (MOTION_META js; §3.2: ≤ 3 KiB gzip), its source file. */
+export const COMPOSED_MOTION_ISLAND = "motion.js";
 
-/** The composed islands a page's sections load, as paths under js/ (the page shell's island list). */
+/** The marquee's pause button (ribbon move "loop", owner decision D2), its source file. */
+export const COMPOSED_RIBBON_ISLAND = "ribbon.js";
+
+/** The island of a fact with `count` (D2: counts up to the client's number once, on first view), its source file. */
+export const COMPOSED_COUNT_ISLAND = "count.js";
+
+/** The composed islands a page's sections load, as served paths under js/ (composedIslandPath; the page shell's island list). */
 export function composedIslands(sections: readonly Section[]): string[] {
   const own = sections.filter(isComposed);
   const out: string[] = [];
   if (own.some((s) => s.props.motion !== undefined && MOTION_META[s.props.motion as keyof typeof MOTION_META]?.js === true)) out.push(COMPOSED_MOTION_ISLAND);
   if (own.some((s) => s.props.elements.some((el) => el.kind === "ribbon" && el.move === "loop"))) out.push(COMPOSED_RIBBON_ISLAND);
   if (own.some((s) => s.props.elements.some((el) => el.kind === "fact" && el.count === true && /^\d{1,9}$/.test(el.value)))) out.push(COMPOSED_COUNT_ISLAND);
-  return out;
+  return out.map(composedIslandPath);
 }
 
 export function sharedStylesheet(): string {
@@ -452,7 +470,7 @@ export function sharedBundle(): SharedBundle {
   const hash = h.digest("hex").slice(0, 10);
   // After the hash: the composed sheets and islands (see composedStylesheet, composedIslandFiles).
   for (const sheet of Object.values(COMPOSED_SHEETS).map((get) => get())) if (sheet.css !== "") files.set(sheet.name, Buffer.from(sheet.css, "utf8"));
-  for (const f of composedIslandFiles()) files.set(`js/composed/${f}`, readFileSync(path.join(COMPOSED_ISLANDS_DIR, f)));
+  for (const f of composedIslandFiles()) files.set(`js/${composedIslandPath(f)}`, readFileSync(path.join(COMPOSED_ISLANDS_DIR, f)));
   cached = { hash, files };
   return cached;
 }
@@ -462,5 +480,6 @@ export function resetSharedBundleCache(): void {
   cached = undefined;
   composed = undefined;
   composedV2 = undefined;
+  islandPaths = undefined;
   vocabSheets = undefined;
 }

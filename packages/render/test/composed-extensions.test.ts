@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { ComposedProps, ColorRole, migrateSpec, type Page, type Section, type SiteSpec } from "@sb/spec";
 import { uncoveredClasses } from "./composed-coverage.ts";
-import { COMPOSED_COUNT_ISLAND, composedIslandFiles, composedIslands, composedSheets, composedStylesheet, composedV2Sheets, renderPage, sharedBundle } from "../src/index.ts";
+import { COMPOSED_COUNT_ISLAND, composedIslandFiles, composedIslandPath, composedIslands, composedSheets, composedStylesheet, composedV2Sheets, renderPage, sharedBundle } from "../src/index.ts";
 
 /**
  * Spec v20 extensions of the existing composed kinds (docs/plans/studio-phase1-design.md §1.2, §1.4, §3.1; F1b-R3): Paint,
@@ -389,16 +389,19 @@ describe("fact: link, label order, plate code, count", () => {
 describe("the count island", () => {
   const source = readFileSync(new URL("../../components/islands/composed/count.js", import.meta.url), "utf8");
 
-  it("is at most 1 KiB, served at js/composed/count.js after the bundle hash, and linked only by a page with a counting fact", () => {
+  it("is at most 1 KiB, served content-addressed at js/composed/count-<sha10>.js after the bundle hash, and linked only by a page with a counting fact", () => {
     expect(Buffer.byteLength(source)).toBeLessThanOrEqual(1024);
     expect(composedIslandFiles()).toContain("count.js");
-    expect(COMPOSED_COUNT_ISLAND).toBe("composed/count.js");
+    expect(COMPOSED_COUNT_ISLAND).toBe("count.js");
+    const served = composedIslandPath(COMPOSED_COUNT_ISLAND);
+    expect(served).toMatch(/^composed\/count-[0-9a-f]{10}\.js$/);
     const bundle = sharedBundle();
-    expect(new TextDecoder().decode(bundle.files.get("js/composed/count.js"))).toBe(source);
+    expect(new TextDecoder().decode(bundle.files.get(`js/${served}`))).toBe(source);
+    expect(bundle.files.has("js/composed/count.js")).toBe(false);
     expect(bundle.hash).toBe(baseline.sharedHash);
     const counting = render([sec([fact({ treatment: "numeral", count: true })])]);
-    expect(composedIslands(counting.page.sections)).toEqual([COMPOSED_COUNT_ISLAND]);
-    expect(counting.html).toContain(`/js/composed/count.js`);
+    expect(composedIslands(counting.page.sections)).toEqual([served]);
+    expect(counting.html).toContain(`/js/${served}"`);
     const still = render([sec([fact({ treatment: "numeral" })])]);
     expect(composedIslands(still.page.sections)).toEqual([]);
     expect(still.html).not.toContain("count.js");
