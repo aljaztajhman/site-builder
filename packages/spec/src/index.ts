@@ -36,3 +36,4 @@ export * from "./owner-edits.ts";
 export * from "./missing-facts.ts";
 export * from "./headings.ts";
 export * from "./motif.ts";
+export * from "./studio/index.ts";

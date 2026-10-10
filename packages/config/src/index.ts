@@ -237,6 +237,27 @@ export const AppConfigSchema = z.object({
    */
   variety: z.object({ families: z.boolean(), skeleton: z.boolean(), neighbours: z.number().int().min(0).max(500), concept: z.boolean(), genome: z.boolean() }),
   /**
+   * The design studio (docs/plans/design-studio.md). uniqueness (§5.4, engine studio/look.ts): the look distance's part
+   * weights (genome axes, composition signature, palette in Lab, perceptual hash of the first screens, stance) and the
+   * gate: a look closer than sameTradeMin to a site of the same trade, or than sameTownMin to a site in the same town,
+   * is not unique enough. Calibrated offline on the goldens and twins (switches off: known look-alikes).
+   */
+  /**
+   * The AI designer (docs/plans/design-studio.md): agent switches the studio pipeline on for new sites. Off until the
+   * owner's blind A/B passes (§9); while off, every request and rendered byte is as before.
+   */
+  designer: z.strictObject({ $comment: z.string().optional(), agent: z.boolean() }),
+  studio: z.strictObject({
+    $comment: z.string().optional(),
+    uniqueness: z.strictObject({
+      sameTradeMin: z.number().min(0).max(1),
+      sameTownMin: z.number().min(0).max(1),
+      weights: z
+        .strictObject({ genome: z.number().min(0), composition: z.number().min(0), palette: z.number().min(0), phash: z.number().min(0), stance: z.number().min(0) })
+        .refine((w) => w.genome + w.composition + w.palette > 0, { message: "the spec parts (genome, composition, palette) need some weight: they are always there" }),
+    }),
+  }),
+  /**
    * The audit's prompt fixes (docs/plans/audit-2026-10-01.md, "Prompts"), one switch each so a paid eval can measure
    * them one at a time. All off: every prompt, request and repair is byte-identical to before (see config $comment).
    */
