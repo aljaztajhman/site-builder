@@ -75,7 +75,13 @@ function ListBlock({ el, over }: { el: ElOf<"list">; over: boolean }) {
 function FactBlock({ el, over }: { el: ElOf<"fact">; over: boolean }) {
   const t = el.treatment;
   const p = placement(el, over, { "--fz": stepVar(el.size), "--n": Math.min(Math.max(el.value.length, 3), 24) });
-  const label = <p className="cx-fact__label">{el.label}</p>;
+  // A seal sizes its label by the longest word, which never breaks (composed.css).
+  const longest = t === "seal" ? Math.max(...el.label.split(/\s+/).map((w) => w.length)) : undefined;
+  const label = (
+    <p className="cx-fact__label" style={longest ? ({ "--lw": longest } as CSSProperties) : undefined}>
+      {el.label}
+    </p>
+  );
   const outside = t === "plate" || t === "numeral";
   return (
     <div {...p} className={cx(p.className, "cx-fact", `cx-fact--${t}`)}>
