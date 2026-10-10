@@ -37,6 +37,7 @@ import {
 } from "./spec.ts";
 import { composedRuleBytes, fontBytes, motifBytes, sharedRuleBytes, subMotifBytes, word } from "./bytes.ts";
 import type { Asset, AssetTags, Ground } from "./schema.ts";
+import { CURATED_PALETTES } from "./palettes/curated.ts";
 
 const uniq = <T>(xs: Iterable<T>): T[] => [...new Set(xs)];
 const sorted = <T extends string>(xs: Iterable<T>): T[] => uniq(xs).sort();
@@ -112,9 +113,14 @@ export function pairingAssets(): Asset[] {
   });
 }
 
-/** A registered palette's colours and the direction it belongs to (for its extra text pairs). */
-export function paletteOf(id: string): { colors: Colors; direction: Direction } | undefined {
+/**
+ * A registered palette's colours and the direction it belongs to (for its extra text pairs and its render-time
+ * repair). A curated palette (palettes/curated.ts) belongs to no direction.
+ */
+export function paletteOf(id: string): { colors: Colors; direction?: Direction } | undefined {
   const name = id.replace(/^palette\//, "");
+  const curated = CURATED_PALETTES.find((p) => p.id === name);
+  if (curated) return { colors: curated.colors };
   const plain = DIRECTIONS.find((d) => d.id === name && !(d.template && FAMILIES[d.id]));
   if (plain) return { colors: plain.palette.fallback, direction: plain };
   for (const [family, f] of Object.entries(FAMILIES)) {
@@ -161,6 +167,20 @@ export function paletteAssets(): Asset[] {
     }
   }
   return out;
+}
+
+/** The curated palettes (palettes/curated.ts): new, so drafts until the owner approves them in the gallery. */
+export function curatedPaletteAssets(): Asset[] {
+  return CURATED_PALETTES.map((p) => ({
+    id: `palette/${p.id}`,
+    kind: "palette",
+    tags: tags({ trades: sorted(p.trades), stances: [...p.stances], mood: sorted(p.mood), ground: [p.ground] }),
+    phone: "ok",
+    bytes: 0,
+    license: "own",
+    status: "draft",
+    note: p.source,
+  }));
 }
 
 /** The trades a template motif belongs to: the template's own trades and those of their sub-trades that have no motif of their own. */
@@ -333,4 +353,9 @@ export function todaysAssets(): Asset[] {
     ...chromeAssets(),
     ...sectionAssets(),
   ];
+}
+
+/** New assets of the inventory phase, registered as drafts (design-studio.md §4.3): the director curates, the owner approves. */
+export function draftAssets(): Asset[] {
+  return [...curatedPaletteAssets()];
 }

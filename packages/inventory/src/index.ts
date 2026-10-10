@@ -4,19 +4,20 @@
  * sheets come from `pnpm inventory:sheet`.
  */
 import { Registry } from "./registry.ts";
-import { todaysAssets } from "./sources.ts";
+import { draftAssets, todaysAssets } from "./sources.ts";
 
 export * from "./schema.ts";
 export * from "./registry.ts";
 export * from "./shortlist.ts";
 export * from "./export.ts";
 export * from "./checks.ts";
-export { todaysAssets, groundOf, temperatureOf, paletteOf } from "./sources.ts";
+export { todaysAssets, draftAssets, curatedPaletteAssets, groundOf, temperatureOf, paletteOf } from "./sources.ts";
+export { CURATED_PALETTES, type CuratedPalette } from "./palettes/curated.ts";
 export { fontFile, fontLicenseFile } from "./bytes.ts";
 
 let cached: Registry | undefined;
 
-/** The registry with every asset that ships today (built once). */
+/** The registry with every asset that ships today and the new drafts (built once). */
 export function inventory(): Registry {
-  return (cached ??= new Registry().registerAll(todaysAssets()));
+  return (cached ??= new Registry().registerAll([...todaysAssets(), ...draftAssets()]));
 }

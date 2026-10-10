@@ -1,5 +1,5 @@
 /**
- * pnpm inventory:sheet [--kind <kind>]
+ * pnpm inventory:sheet [--kind <kind>] [--status draft|approved|rejected]
  *
  * Contact sheets of the design inventory (design-studio.md §4.2): every asset of a kind photographed at 360 and 1280 px
  * into eval/runs/inventory/ (gitignored). Components (sections, motifs, treatments, shapes, fact objects, header and
@@ -16,8 +16,8 @@ import path from "node:path";
 import { chromium, type Page } from "playwright";
 import { FONTS_DIR, sharedBundle, siteFiles } from "@sb/render";
 import { validateSite } from "@sb/spec";
-import { ASSET_KINDS, assetSlug, inventory, writeInventoryJson, type Asset, type AssetKind } from "../src/index.ts";
-import { fixturesDir, pagesFor, repoRoot, type SheetPage } from "./pages.ts";
+import { ASSET_KINDS, AssetStatus, assetSlug, inventory, writeInventoryJson, type Asset, type AssetKind } from "../src/index.ts";
+import { fixturesDir, pagesFor, paletteOverviewHtml, repoRoot, type SheetPage } from "./pages.ts";
 
 const SHEET_KINDS: AssetKind[] = ["font", "pairing", "palette", "motif", "submotif", "treatment", "shape", "factObject", "header", "footer", "section"];
 const WIDTHS = [360, 1280] as const;
@@ -148,6 +148,8 @@ async function main(): Promise<void> {
   const only = arg("kind");
   if (only && !(ASSET_KINDS as readonly string[]).includes(only)) throw new Error(`Unknown kind ${only}; one of ${ASSET_KINDS.join(", ")}`);
   const kinds = only ? [only as AssetKind] : SHEET_KINDS;
+  const status = arg("status");
+  if (status && !(AssetStatus.options as readonly string[]).includes(status)) throw new Error(`Unknown status ${status}; one of ${AssetStatus.options.join(", ")}`);
   const registry = inventory();
   mkdirSync(outDir, { recursive: true });
   rmSync(siteDir, { recursive: true, force: true });
@@ -161,7 +163,7 @@ async function main(): Promise<void> {
   const allShots: Shot[] = [];
   try {
     for (const kind of kinds) {
-      const assets = registry.byKind(kind);
+      const assets = registry.byKind(kind).filter((a) => !status || a.status === status);
       if (!assets.length) continue;
       const kindDir = path.join(outDir, kind);
       rmSync(kindDir, { recursive: true, force: true });
@@ -198,6 +200,17 @@ async function main(): Promise<void> {
         await sheetPage.screenshot({ path: path.join(outDir, `${kind}-${n + 1}.png`), fullPage: true });
         await sheetPage.close();
         rmSync(html);
+      }
+      if (kind === "palette") {
+        // Every palette side by side, 48 a picture (eight rows of six).
+        for (let n = 0; n * 48 < assets.length; n++) {
+          const html = path.join(outDir, `palette-overview-${n + 1}.html`);
+          writeFileSync(html, paletteOverviewHtml(assets.slice(n * 48, (n + 1) * 48), `palettes${status ? ` (${status})` : ""} ${n * 48 + 1}–${Math.min(assets.length, (n + 1) * 48)} of ${assets.length}`));
+          const sheetPage = await browser.newPage({ viewport: { width: 1700, height: 900 } });
+          await sheetPage.goto(`${url}/palette-overview-${n + 1}.html`, { waitUntil: "load" });
+          await sheetPage.screenshot({ path: path.join(outDir, `palette-overview-${n + 1}.png`), fullPage: true });
+          await sheetPage.close();
+        }
       }
       const bad = shots.filter((s) => s.problems.length);
       console.log(`${kind}: ${assets.length} assets, ${shots.length} pictures, ${parts} sheet PNG(s)${bad.length ? `, ${new Set(bad.map((s) => s.asset)).size} with problems` : ""}`);
