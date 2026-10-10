@@ -1,10 +1,11 @@
 import { COMPOSED_LAYOUT_KEYS, isPlaceholder, setAt, walkStrings, type SiteSpec } from "@sb/spec";
+import { checkComposedKinds } from "./facts-composed.ts";
 import { numberTokens, numbersIn } from "./brief.ts";
 import { clientHours, clockTimes, dayRange, fold, hoursPaired, parseHours, priceMentions, pricePaired, pricesFor, unnamedAmounts, type ClientHours, type PriceMention } from "./fact-pairing.ts";
 
 export interface FactViolation {
   path: string;
-  kind: "phone" | "email" | "address" | "hours" | "price" | "name" | "number" | "url";
+  kind: "phone" | "email" | "address" | "hours" | "price" | "name" | "number" | "url" | "quote" | "verbatim" | "claim" | "amenity" | "photo" | "plate" | "label";
   value: string;
   /** Why it failed when the value is in the input but for something else (another offering, other days). */
   detail?: string;
@@ -80,10 +81,10 @@ function corpusOf(corpus: string): Corpus {
  * not count.
  */
 export function checkFacts(spec: SiteSpec, corpus: string): FactViolation[] {
-  return check(spec, corpusOf(corpus), false);
+  return check(spec, corpusOf(corpus), false, corpus);
 }
 
-function check(spec: SiteSpec, c: Corpus, translated: boolean): FactViolation[] {
+function check(spec: SiteSpec, c: Corpus, translated: boolean, raw: string): FactViolation[] {
   const out: FactViolation[] = [];
   const { text, folded, tokens, nums } = c;
   const b = spec.business;
@@ -177,6 +178,9 @@ function check(spec: SiteSpec, c: Corpus, translated: boolean): FactViolation[] 
     }),
   );
 
+  // The v20 kinds: quotes, map text, sticker and ribbon claims, amenities, photos, list leads, plate codes. First, so their
+  // own finding stands where the general number check below would report the same string.
+  out.push(...checkComposedKinds(spec, raw, translated));
   // Free copy: phone numbers, emails, prices, times and any other number must come from the client.
   const composed = spec.pages.flatMap((page, pi) => page.sections.flatMap((s, si) => (s.type === "composed" ? [`/${pi}/sections/${si}/props/`] : [])));
   walkStrings(spec.pages, (s, p, key) => {
@@ -203,7 +207,7 @@ function check(spec: SiteSpec, c: Corpus, translated: boolean): FactViolation[] 
       }
     }
     const base = new Set(out.map((f) => `${f.path}|${f.value}`));
-    for (const f of check(shown, c, true)) if (!base.has(`${f.path}|${f.value}`)) out.push({ ...f, path: `/translations/${locale}${f.path}` });
+    for (const f of check(shown, c, true, raw)) if (!base.has(`${f.path}|${f.value}`)) out.push({ ...f, path: `/translations/${locale}${f.path}` });
   }
   return dedupe(out);
 }

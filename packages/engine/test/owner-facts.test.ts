@@ -36,4 +36,18 @@ describe("keepOwnerFacts", () => {
     expect(r.spec.business.email).toBe("info@pekarnakvas.si");
     expect(r.kept).toEqual([]);
   });
+
+  it("keeps the amenities the owner set, over a regeneration's (none) and over different ones", () => {
+    const current = golden();
+    current.business.amenities = ["wifi", "parking"];
+    const regenerated = golden();
+    const r = keepOwnerFacts(current, regenerated);
+    expect(r.spec.business.amenities).toEqual(["wifi", "parking"]);
+    expect(r.kept).toEqual(["/business/amenities"]);
+    regenerated.business.amenities = ["card"];
+    expect(keepOwnerFacts(current, regenerated).spec.business.amenities).toEqual(["wifi", "parking"]);
+    // Nothing set by the owner: the regenerated value stands.
+    expect(keepOwnerFacts(golden(), regenerated).spec.business.amenities).toEqual(["card"]);
+    expect(validateSite(r.spec).ok).toBe(true);
+  });
 });

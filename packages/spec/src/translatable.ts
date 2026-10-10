@@ -54,6 +54,18 @@ const LETTER = /\p{L}/u;
 type Obj = Record<string, unknown>;
 const obj = (v: unknown): Obj | null => (v && typeof v === "object" && !Array.isArray(v) ? (v as Obj) : null);
 
+/**
+ * Fields of a composed section that are the client's own words, shown as written in every language (spec v20,
+ * studio-phase1-design.md §1.8, §2.1): a quote's text and attribution, a map's cross street and note.
+ */
+const VERBATIM: Readonly<Record<string, readonly string[]>> = { quote: ["text", "by"], map: ["cross", "note"] };
+
+/** Whether the string at this pointer inside a composed section's props is a verbatim field of its element. */
+function isVerbatim(props: unknown, pointer: string, key: string): boolean {
+  const kind = obj(getAt(props, pointer.slice(0, pointer.lastIndexOf("/"))))?.kind;
+  return typeof kind === "string" && (VERBATIM[kind]?.includes(key) ?? false);
+}
+
 /** Whether a string at this pointer (inside a section's props), under this key, is copy a visitor reads. */
 function isCopy(s: string, pointer: string, key: string): boolean {
   if (NOT_COPY.has(key) || !s.trim() || !LETTER.test(s) || IMAGE_REF.test(s) || /^https?:\/\//i.test(s)) return false;
@@ -89,7 +101,7 @@ export function sectionTexts(spec: unknown, pi: number, si: number): Translatabl
   const out: TranslatableText[] = [];
   walkStrings(props, (s, p, key) => {
     if (placeholders.some((at) => p.startsWith(at))) return;
-    if (composed && COMPOSED_LAYOUT_KEYS.has(key)) return;
+    if (composed && (COMPOSED_LAYOUT_KEYS.has(key) || isVerbatim(props, p, key))) return;
     if (isCopy(s, p, key)) out.push({ path: `${base}${p}`, text: s });
   });
   return out;

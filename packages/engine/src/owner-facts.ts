@@ -6,7 +6,7 @@ import { isPlaceholder, type Business, type SiteSpec } from "@sb/spec";
  * current version's facts wherever they are filled in: a corrected phone number, the provider data
  * typed for publishing, opening hours. Only empty (placeholder) facts take the regenerated value.
  */
-const FACTS = ["name", "phone", "email", "address", "hours", "bookingUrl", "social", "serviceArea"] as const;
+const FACTS = ["name", "phone", "email", "address", "hours", "bookingUrl", "social", "serviceArea", "amenities"] as const;
 const PROVIDER = ["legalName", "registrationNumber", "taxNumber", "vatPayer", "registry"] as const;
 
 const filled = (v: unknown) => v !== undefined && !isPlaceholder(v);
