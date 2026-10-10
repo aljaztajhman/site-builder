@@ -15,9 +15,31 @@ import type { SiteSpec } from "../site.ts";
 import { BANNED_HEADLINE, NUMBERED_LABEL, findBannedCopy, repairEmDashes } from "../banned.ts";
 import { MAIN_HEADING_TYPES, hasComposedH1 } from "../headings.ts";
 import { walkStrings } from "../pointer.ts";
+import { isPlaceholder } from "../common.ts";
+import type { Colors } from "../design.ts";
+import type { MotionLevel } from "./vocab.ts";
 import { DecorPath, GRID_COLUMNS, MAX_ELEMENTS, type Element } from "./schema.ts";
 
 export type ComposedSection = Extract<Section, { type: "composed" }>;
+
+/**
+ * The business facts the v20 rules read (G14 link targets, iconFacts, plate codes). A field is present only when the
+ * client gave it: placeholders are absent.
+ */
+export interface CompositionBusiness {
+  /** E.164 phone: a call link (action or `fact.link`) needs it. */
+  phone?: string;
+  /** An email link needs it. */
+  email?: string;
+  /** The address on one line ("Savska cesta 52, 4000 Kranj"): a directions link and the map need it. */
+  address?: string;
+  /** address.city, for plate codes. */
+  town?: string;
+  /** business.amenities (PRACTICAL_FACTS names). */
+  amenities?: readonly string[];
+  /** business.bookingUrl: a booking link needs it. */
+  bookingUrl?: string;
+}
 
 /** What a rule needs besides the section itself. Everything is optional: a rule without its context is skipped. */
 export interface CompositionContext {
@@ -29,17 +51,81 @@ export interface CompositionContext {
   hasBookingUrl?: boolean;
   /** The page the section is on, for the rules across sections (one h1, display sizes, photo use). */
   page?: { sections: readonly Section[]; index: number };
+  /** Spec v20: design.colors, for the contrast rules (G3, G4, G9, G20). Without it the contrast rules are skipped. */
+  colors?: Colors;
+  /** Spec v20: the client's business facts (G14 link targets). Without it link targets aren't checked. */
+  business?: CompositionBusiness;
+  /** Spec v20: every spec.assets.images entry by id, with its origin (absent origin = the client's photo). */
+  images?: ReadonlyMap<string, { origin: "client" | "generated" }>;
+  /** Spec v20: design.motion; validateSite passes "calm" when the design has none (G7). */
+  motionLevel?: MotionLevel;
+  /** Spec v20: asset ids allowed at runtime, from the inventory (the engine passes it; publish-time validation omits it). Absent: vocabulary membership only (G8). */
+  approved?: ReadonlySet<string>;
+  /** Spec v20: the previous section on the page, for the top edge and its rise (G5). */
+  prev?: Section;
 }
 
 /** The context validateSite uses for the section at `pageIndex` / `sectionIndex`. */
 export function compositionContext(spec: SiteSpec, pageIndex: number, sectionIndex: number): CompositionContext {
+  const sections = spec.pages[pageIndex]!.sections;
+  const b = spec.business;
+  const address = isPlaceholder(b.address) ? undefined : b.address;
+  const business: CompositionBusiness = {
+    ...(typeof b.phone === "string" ? { phone: b.phone } : {}),
+    ...(typeof b.email === "string" ? { email: b.email } : {}),
+    ...(address ? { address: `${address.street}, ${address.postalCode} ${address.city}`, town: address.city } : {}),
+    ...(b.amenities ? { amenities: b.amenities } : {}),
+    ...(b.bookingUrl ? { bookingUrl: b.bookingUrl } : {}),
+  };
   return {
     at: `/pages/${pageIndex}/sections/${sectionIndex}`,
     imageIds: new Set(spec.assets.images.map((i) => i.id)),
     hasBookingUrl: !!spec.business.bookingUrl,
-    page: { sections: spec.pages[pageIndex]!.sections, index: sectionIndex },
+    page: { sections, index: sectionIndex },
+    colors: spec.design.colors,
+    business,
+    images: new Map(spec.assets.images.map((i) => [i.id, { origin: i.origin ?? "client" }])),
+    motionLevel: spec.design.motion ?? "calm",
+    ...(sectionIndex > 0 ? { prev: sections[sectionIndex - 1]! } : {}),
   };
 }
+
+// ---------- v20 limits (studio-phase1-design.md §2), read by the rules G1–G25 and their tests ----------
+
+/** Contrast minimums (WCAG): large text 3:1, everything else 4.5:1. */
+export const CONTRAST_MIN = { text: 4.5, large: 3 } as const;
+/** "Large": a heading of this size or more, a fact value of this size or more, and every sticker. */
+export const LARGE_TEXT = { headingSize: 3, factSize: 4 } as const;
+/** Scrim opacity by strength 1–4 (index strength − 1). The scrim colour is mixed per sRGB channel over a black and a white pixel. */
+export const SCRIM_ALPHA = [0.35, 0.5, 0.65, 0.8] as const;
+/** A background drawing is quiet: its ink against the ground at most this ratio (G9). */
+export const QUIET_INK_MAX = 1.6;
+/** Background layers (G1). */
+export const BACKGROUND_LIMITS = { layers: 2, photos: 1, drawings: 1 } as const;
+/** A pinned column (G6). */
+export const PIN_LIMITS = { maxElements: 4, minRows: 3 } as const;
+/** Sections with motion per page, by the site's motion level (G7); still allows none. */
+export const MOTION_BUDGET = { still: 0, calm: 3, lively: 5 } as const;
+/** Moving ribbons per page (G7). */
+export const MAX_MOVING_RIBBONS = 1;
+/** Kinds that may tilt (G10); a fact only when its treatment isn't "numeral". */
+export const TILT_KINDS: ReadonlySet<Element["kind"]> = new Set(["fact", "sticker", "image", "photos", "decor"]);
+/** Kinds that may bleed to the page edge (G11, `desk.bleedX`) and edge to edge on phones (G12, `phone.span: "bleed"`). */
+export const BLEED_X_KINDS: ReadonlySet<Element["kind"]> = new Set(["image", "photos", "decor"]);
+/** Kinds that may bleed past the section's top or bottom (G11, `desk.bleedY`). */
+export const BLEED_Y_KINDS: ReadonlySet<Element["kind"]> = new Set(["decor", "ribbon", "sticker"]);
+/** Kinds never half width on phones (G12). */
+export const NO_PHONE_HALF_KINDS: ReadonlySet<Element["kind"]> = new Set(["text", "list", "quote", "prices"]);
+/** The narrow-text relaxation of TEXT_SPAN (G13): span 3 at size 0, one paragraph this long at most, next to a text-bearing element of span 3–4. */
+export const TEXT_SPAN_NARROW = { span: 3, maxChars: 140, partner: { min: 3, max: 4 } } as const;
+/** Photos per arrangement (G21), inclusive. */
+export const PHOTOS_COUNT = { fan: [2, 4], stack: [2, 4], "offset-pair": [2, 4], strip: [3, 12], "before-after": [2, 2] } as const;
+/** A stacked heading sets one word per line, at most this many (G20). */
+export const STACKED_MAX_LINES = 4;
+/** Two price plates per phone row only when every name is at most this long (G17). */
+export const PHONE_COLUMNS_NAME_MAX = 24;
+/** Restraint (G22). */
+export const RESTRAINT = { stickersPerSection: 1, stickersPerPage: 2, wordmarksPerPage: 1, quotesPerSection: 1 } as const;
 
 /** Elements that carry words, numbers or links: they never overlap each other and are never hidden on phones. */
 const TEXT_KINDS: ReadonlySet<Element["kind"]> = new Set(["heading", "text", "list", "fact", "action", "hours", "contact", "prices"]);
