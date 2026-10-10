@@ -2,7 +2,20 @@ import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { describe, expect, it } from "vitest";
 import { DIRECTIONS, FAMILIES, FONTS, FONT_PAIRS, Imagery, MOTIFS, SECTION_DEFS, SUBMOTIFS, type Colors } from "@sb/spec";
-import { SLOVENE_GLYPHS, assetName, byteBudget, fontFile, fontLicenseFile, inventory, paletteContrast, paletteOf, shippedColors } from "../src/index.ts";
+import {
+  SLOVENE_GLYPHS,
+  assetName,
+  byteBudget,
+  fontFile,
+  fontLicenseFile,
+  inventory,
+  inventoryFontAssets,
+  inventoryPairingAssets,
+  paletteContrast,
+  paletteOf,
+  shippedColors,
+  todaysAssets,
+} from "../src/index.ts";
 
 /**
  * Per-asset checks (design-studio.md §4.2): every registered asset has a licence, stays within its kind's byte budget;
@@ -40,8 +53,11 @@ describe("today's assets are registered", () => {
     expect(registry.byKind("palette")).toHaveLength(DIRECTIONS.filter((d) => !(d.template && FAMILIES[d.id])).length + familyPalettes);
   });
 
-  it("existing assets start approved; system- and owner-only sections are not pickable", () => {
-    expect(assets.every((a) => a.status === "approved")).toBe(true);
+  it("existing assets start approved, new ones draft; system- and owner-only sections are not pickable", () => {
+    expect(todaysAssets().every((a) => a.status === "approved")).toBe(true);
+    const drafts = assets.filter((a) => a.status !== "approved");
+    expect(drafts.map((a) => a.id)).toEqual([...inventoryFontAssets(), ...inventoryPairingAssets()].map((a) => a.id));
+    expect(drafts.every((a) => a.status === "draft")).toBe(true);
     const unpickable = assets.filter((a) => a.pickable === false).map((a) => a.id);
     expect(unpickable.sort()).toEqual(["section/collection:cards", "section/collection:list", "section/legal:default", "section/not-found:default"]);
   });

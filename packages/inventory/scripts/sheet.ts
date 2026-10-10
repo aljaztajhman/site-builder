@@ -1,5 +1,5 @@
 /**
- * pnpm inventory:sheet [--kind <kind>]
+ * pnpm inventory:sheet [--kind <kind>] [--status draft|approved|rejected]
  *
  * Contact sheets of the design inventory (design-studio.md §4.2): every asset of a kind photographed at 360 and 1280 px
  * into eval/runs/inventory/ (gitignored). Components (sections, motifs, treatments, shapes, fact objects, header and
@@ -148,6 +148,7 @@ async function main(): Promise<void> {
   const only = arg("kind");
   if (only && !(ASSET_KINDS as readonly string[]).includes(only)) throw new Error(`Unknown kind ${only}; one of ${ASSET_KINDS.join(", ")}`);
   const kinds = only ? [only as AssetKind] : SHEET_KINDS;
+  const status = arg("status");
   const registry = inventory();
   mkdirSync(outDir, { recursive: true });
   rmSync(siteDir, { recursive: true, force: true });
@@ -161,7 +162,7 @@ async function main(): Promise<void> {
   const allShots: Shot[] = [];
   try {
     for (const kind of kinds) {
-      const assets = registry.byKind(kind);
+      const assets = registry.byKind(kind).filter((a) => !status || a.status === status);
       if (!assets.length) continue;
       const kindDir = path.join(outDir, kind);
       rmSync(kindDir, { recursive: true, force: true });
