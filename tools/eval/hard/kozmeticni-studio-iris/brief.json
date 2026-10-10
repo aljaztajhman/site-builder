@@ -1,0 +1,50 @@
+{
+  "id": "kozmeticni-studio-iris",
+  "businessType": "hairdresser",
+  "trade": "kozmetika",
+  "hard": ["many-prices"],
+  "description": "Kozmetični studio Iris, Velenje. Sem Iris Pečnik, kozmetičarka, studio imam od leta 2015. Delam sama, zato je naročanje obvezno.\n\nCenik:\nObraz: osnovna nega obraza 35 €, globinsko čiščenje obraza 45 €, anti-age nega 55 €, kemični piling 50 €.\nRoke in noge: klasična manikura 18 €, manikura s trajnim lakom 25 €, gel nohti nova postavitev 40 €, gel nohti korekcija 32 €, odstranitev gela 10 €, klasična pedikura 28 €, medicinska pedikura 35 €, trajni lak na nogah 22 €.\nDepilacija z voskom: depilacija nog do kolen 15 €, depilacija celih nog 25 €, depilacija pazduh 8 €, depilacija bikini 12 €, depilacija obraza 6 €.\nObrvi in trepalnice: oblikovanje obrvi 8 €, barvanje trepalnic 10 €, laminacija trepalnic 40 €.\n\nDelovni čas: pon, sre in pet 8.00–14.00, tor in čet 13.00–20.00, sobota po dogovoru.\n\nNaslov: Kidričeva cesta 31, 3320 Velenje, 1. nadstropje nad lekarno. Naročite se na 03 555 48 90 ali iris@studio-iris.example.\n\nCenik je dolg, želim da je na strani cel in pregleden. Pošiljam dve sliki studia.",
+  "logo": null,
+  "photos": [
+    { "file": "photos/01.jpg", "subject": "kozmetični ležalnik in lučka s povečevalnim steklom v svetlem prostoru" },
+    { "file": "photos/02.jpg", "subject": "roke stranke med manikuro na mizici s stekleničkami lakov" }
+  ],
+  "facts": {
+    "name": "Kozmetični studio Iris",
+    "phone": "+38635554890",
+    "email": "iris@studio-iris.example",
+    "address": { "street": "Kidričeva cesta 31", "postalCode": "3320", "city": "Velenje" },
+    "hours": [
+      { "from": "mon", "to": "mon", "open": "08:00", "close": "14:00" },
+      { "from": "tue", "to": "tue", "open": "13:00", "close": "20:00" },
+      { "from": "wed", "to": "wed", "open": "08:00", "close": "14:00" },
+      { "from": "thu", "to": "thu", "open": "13:00", "close": "20:00" },
+      { "from": "fri", "to": "fri", "open": "08:00", "close": "14:00" }
+    ],
+    "prices": [
+      { "item": "osnovna nega obraza", "amount": 35 },
+      { "item": "globinsko čiščenje obraza", "amount": 45 },
+      { "item": "anti-age nega", "amount": 55 },
+      { "item": "kemični piling", "amount": 50 },
+      { "item": "klasična manikura", "amount": 18 },
+      { "item": "manikura s trajnim lakom", "amount": 25 },
+      { "item": "gel nohti nova postavitev", "amount": 40 },
+      { "item": "gel nohti korekcija", "amount": 32 },
+      { "item": "odstranitev gela", "amount": 10 },
+      { "item": "klasična pedikura", "amount": 28 },
+      { "item": "medicinska pedikura", "amount": 35 },
+      { "item": "trajni lak na nogah", "amount": 22 },
+      { "item": "depilacija nog do kolen", "amount": 15 },
+      { "item": "depilacija celih nog", "amount": 25 },
+      { "item": "depilacija pazduh", "amount": 8 },
+      { "item": "depilacija bikini", "amount": 12 },
+      { "item": "depilacija obraza", "amount": 6 },
+      { "item": "oblikovanje obrvi", "amount": 8 },
+      { "item": "barvanje trepalnic", "amount": 10 },
+      { "item": "laminacija trepalnic", "amount": 40 }
+    ],
+    "people": [{ "name": "Iris Pečnik", "role": "kozmetičarka" }],
+    "other": ["od leta 2015", "naročanje obvezno", "sobota po dogovoru", "nad lekarno"]
+  },
+  "missing": ["legal"]
+}

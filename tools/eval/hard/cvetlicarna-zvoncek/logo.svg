@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 96" width="300" height="96" role="img" aria-label="Cvetličarna Zvonček">
+  <path d="M48 10 C 46 22, 44 30, 46 36" fill="none" stroke="#4f7a3a" stroke-width="3" stroke-linecap="round"/>
+  <path d="M30 70 C 28 50, 34 36, 48 34 C 62 36, 68 50, 66 70 C 61 64, 56 66, 52 72 C 49 66, 47 66, 44 72 C 40 66, 35 64, 30 70 Z" fill="#6b4fa0"/>
+  <path d="M48 72 L 48 82" stroke="#6b4fa0" stroke-width="3" stroke-linecap="round"/>
+  <path d="M46 26 C 36 18, 26 20, 22 26 C 30 30, 40 30, 46 26 Z" fill="#4f7a3a"/>
+  <text x="96" y="52" font-family="Georgia, 'Times New Roman', serif" font-size="34" font-style="italic" fill="#3a2d55">Zvonček</text>
+  <text x="98" y="76" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#4f7a3a" letter-spacing="3.5">CVETLIČARNA · PTUJ</text>
+</svg>

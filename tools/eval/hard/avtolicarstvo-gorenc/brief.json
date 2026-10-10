@@ -1,0 +1,25 @@
+{
+  "id": "avtolicarstvo-gorenc",
+  "businessType": "car-repair",
+  "trade": "karoserija",
+  "hard": ["long-name"],
+  "description": "Avtoličarstvo in avtomehanika Gorenc Matjaž s.p. – družinska delavnica v Krškem od leta 1994. Ime je dolgo, ker je tako registrirano, ljudje nam rečejo kar Gorenc.\n\nPopravljamo vse znamke osebnih vozil in kombijev do 3,5 t.\n\nLičarska dela: popravila po nesreči, ravnanje pločevine, lakiranje v komori, odprava toče brez lakiranja, poliranje.\n\nMehanika: redni servisi, zavore, sklopke, jermeni, diagnostika, klima servis, menjava in hramba gum.\n\nUrejamo škode z vsemi zavarovalnicami, ogled škode lahko naredimo kar pri nas, in vam damo nadomestno vozilo, če je prosto. Cene so po ogledu ali po oceni zavarovalnice.\n\nOdprto pon–pet 7.00–17.00, sobota 8.00–12.00.\n\nNaslov: Savska cesta 120, 8270 Krško. Telefon 07 555 21 40, e-pošta servis@gorenc-avto.example.\n\nLogo imamo, pošiljam ga, in dve sliki iz delavnice: avto v lakirni komori in naša delavnica od zunaj.",
+  "logo": "logo.svg",
+  "photos": [
+    { "file": "photos/01.jpg", "subject": "osebni avto z zalepljenimi deli pripravljen v lakirni komori" },
+    { "file": "photos/02.jpg", "subject": "manjša avtomehanična delavnica od zunaj z odprtimi garažnimi vrati" }
+  ],
+  "facts": {
+    "name": "Avtoličarstvo in avtomehanika Gorenc Matjaž s.p.",
+    "phone": "+38675552140",
+    "email": "servis@gorenc-avto.example",
+    "address": { "street": "Savska cesta 120", "postalCode": "8270", "city": "Krško" },
+    "hours": [
+      { "from": "mon", "to": "fri", "open": "07:00", "close": "17:00" },
+      { "from": "sat", "to": "sat", "open": "08:00", "close": "12:00" }
+    ],
+    "legal": { "legalName": "Avtoličarstvo in avtomehanika Gorenc Matjaž s.p." },
+    "other": ["od leta 1994", "ljudje nam rečejo kar Gorenc", "do 3,5 t", "nadomestno vozilo", "odprava toče brez lakiranja"]
+  },
+  "missing": ["prices", "people"]
+}

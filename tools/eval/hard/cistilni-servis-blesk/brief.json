@@ -1,0 +1,28 @@
+{
+  "id": "cistilni-servis-blesk",
+  "businessType": "builder",
+  "trade": "čiščenje",
+  "hard": ["dark-photos", "new-trade"],
+  "description": "Čistilni servis Blesk čisti stanovanja, hiše, pisarne in stopnišča v Domžalah, Kamniku, Mengšu in v Ljubljani. Smo ekipa šestih čistilk, vodi nas Mojca Šuštar. Vsa čistila in opremo prinesemo s sabo.\n\nDelamo redno tedensko ali mesečno čiščenje, generalno čiščenje, čiščenje po selitvi in po gradbenih delih, pranje oken in sedežnih garnitur.\n\nCene: redno čiščenje stanovanja 16 € na uro, generalno čiščenje od 180 €, pranje oken od 4 € na okno. Za čiščenje po gradbenih delih pridemo prej pogledat.\n\nPisarna je odprta pon–pet 8.00–14.00, čistimo pa tudi zvečer in v soboto, da ne motimo pri delu.\n\nNaslov: Ljubljanska cesta 72, 1230 Domžale. Pokličite 051 555 640 ali pišite na info@blesk-ciscenje.example.\n\nBlesk d.o.o., matična številka 9555123000, ID za DDV SI 55598431.\n\nPošiljam dve sliki ki sem jih naredila po čiščenju, ampak sta bolj temni ker je bilo že zvečer. Logotipa še nimamo.",
+  "logo": null,
+  "photos": [
+    { "file": "photos/01.jpg", "subject": "temna fotografija s telefonom: počiščena kuhinja v stanovanju zvečer pod stropno lučjo" },
+    { "file": "photos/02.jpg", "subject": "temna fotografija s telefonom: oprano stopnišče v bloku s slabo razsvetljavo" }
+  ],
+  "facts": {
+    "name": "Čistilni servis Blesk",
+    "phone": "+38651555640",
+    "email": "info@blesk-ciscenje.example",
+    "address": { "street": "Ljubljanska cesta 72", "postalCode": "1230", "city": "Domžale" },
+    "hours": [{ "from": "mon", "to": "fri", "open": "08:00", "close": "14:00" }],
+    "prices": [
+      { "item": "redno čiščenje stanovanja", "amount": 16 },
+      { "item": "generalno čiščenje", "amount": 180, "from": true },
+      { "item": "pranje oken", "amount": 4, "from": true }
+    ],
+    "people": [{ "name": "Mojca Šuštar", "role": "vodja" }],
+    "legal": { "legalName": "Blesk d.o.o.", "registrationNumber": "9555123000", "taxNumber": "SI55598431" },
+    "other": ["ekipa šestih čistilk", "Domžalah, Kamniku, Mengšu in v Ljubljani", "čistimo pa tudi zvečer in v soboto"]
+  },
+  "missing": []
+}

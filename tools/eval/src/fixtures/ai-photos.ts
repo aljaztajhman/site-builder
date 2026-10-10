@@ -9,6 +9,9 @@
  *     plus tools/eval/fixtures/photo-manifest.json. Photos with a manifest entry are kept unless --force,
  *     or unless someone looked at one and set its entry's "reject" to the reason: then it is regenerated
  *     and the old attempt moves into "rejected" (reason, prompt, €).
+ *   pnpm fixtures:ai-photos generate --model <name> --hard [--only <id>] [--max-eur 5]
+ *     The same for the hard fixtures (tools/eval/hard): their shot list in tools/eval/hard/photo-prompts.json (the
+ *     dark phone photos get its `poorStyle`), photos into tools/eval/hard/<id>/photos/, tools/eval/hard/photo-manifest.json.
  *
  * Needs FAL_KEY. States the € estimate first and stops before starting if it exceeds --max-eur.
  * Every call logs model, seconds and € (from config prices); the manifest records model, prompt and cost.
@@ -19,7 +22,7 @@ import { pathToFileURL } from "node:url";
 import sharp from "sharp";
 import { chromium } from "playwright";
 import { loadConfig, repoRoot, type AppConfig } from "@sb/config";
-import { FIXTURES_DIR, loadFixtures } from "./load.ts";
+import { FIXTURES_DIR, HARD_DIR, loadFixtures, loadHard } from "./load.ts";
 import {
   estimateEur,
   fullPrompt,
@@ -29,8 +32,11 @@ import {
   nextManifestEntry,
   photoKey,
   requestBody,
+  HARD_PROMPTS_FILE,
+  PROMPTS_FILE,
   type ImageGenModelConfig,
   type ManifestEntry,
+  type PhotoPrompts,
 } from "./photo-prompts.ts";
 
 interface Job {
@@ -82,8 +88,7 @@ async function callFal(key: string, endpoint: string, body: Record<string, unkno
   }
 }
 
-async function run(config: AppConfig, falKey: string, jobs: Job[]): Promise<Result[]> {
-  const prompts = loadPhotoPrompts();
+async function run(config: AppConfig, falKey: string, jobs: Job[], prompts: PhotoPrompts): Promise<Result[]> {
   const results: Result[] = [];
   let next = 0;
   let spent = 0;
@@ -173,7 +178,7 @@ async function contactSheet(dir: string, results: Result[], models: string[]): P
 async function main() {
   const [mode, ...args] = process.argv.slice(2);
   if (mode !== "compare" && mode !== "generate") {
-    console.error("usage: fixtures:ai-photos compare [--models a,b] [--max-eur N] | generate --model <name> [--only <id>] [--force] [--max-eur N]");
+    console.error("usage: fixtures:ai-photos compare [--models a,b] [--max-eur N] | generate --model <name> [--hard] [--only <id>] [--force] [--max-eur N]");
     process.exit(2);
   }
   const falKey = process.env.FAL_KEY;
@@ -181,10 +186,13 @@ async function main() {
     console.error("FAL_KEY is not set. Create a key at fal.ai and set it as an environment variable (docs/research/image-generation.html).");
     process.exit(2);
   }
+  // --hard: the hard fixtures' shot list (tools/eval/hard/photo-prompts.json) into tools/eval/hard/<id>/photos/.
+  const hard = args.includes("--hard");
+  manifestFile = path.join(hard ? HARD_DIR : FIXTURES_DIR, "photo-manifest.json");
   const config = loadConfig();
-  const prompts = loadPhotoPrompts();
+  const prompts = loadPhotoPrompts(hard ? HARD_PROMPTS_FILE : PROMPTS_FILE);
   const maxEur = Number(arg(args, "--max-eur") ?? 5);
-  const subjects = new Map(loadFixtures().flatMap((f) => f.photos.map((p) => [photoKey(f.id, p.file), { subject: p.subject, path: p.path }] as const)));
+  const subjects = new Map((hard ? loadHard() : loadFixtures()).flatMap((f) => f.photos.map((p) => [photoKey(f.id, p.file), { subject: p.subject, path: p.path }] as const)));
 
   const pickModel = (name: string): ImageGenModelConfig => {
     const m = config.imageGen.models[name];
@@ -211,7 +219,7 @@ async function main() {
     const model = pickModel(name);
     const only = arg(args, "--only");
     const force = args.includes("--force");
-    outDir = FIXTURES_DIR;
+    outDir = hard ? HARD_DIR : FIXTURES_DIR;
     const manifest = readManifest();
     jobs = [...subjects.entries()]
       .filter(([key]) => !only || key.startsWith(`${only}/`))
@@ -228,7 +236,7 @@ async function main() {
   }
   if (jobs.length === 0) return;
 
-  const results = await run(config, falKey, jobs);
+  const results = await run(config, falKey, jobs, prompts);
   const spent = results.reduce((s, r) => s + r.eur, 0);
   const failed = results.filter((r) => r.error).length;
 
@@ -242,17 +250,18 @@ async function main() {
     for (const r of results.filter((x) => !x.error)) {
       manifest[r.key] = nextManifestEntry(manifest[r.key], { model: r.model, endpoint: r.endpoint, prompt: r.prompt, width: r.width, height: r.height, eur: Number(r.eur.toFixed(4)), createdAt: new Date().toISOString() });
     }
-    writeFileSync(MANIFEST, JSON.stringify(sortKeys(manifest), null, 2) + "\n");
-    console.log(`\nWrote ${results.length - failed} photos and ${MANIFEST}`);
+    writeFileSync(manifestFile, JSON.stringify(sortKeys(manifest), null, 2) + "\n");
+    console.log(`\nWrote ${results.length - failed} photos and ${manifestFile}`);
   }
   console.log(`Spend €${spent.toFixed(2)} (config prices), ${failed} failed.`);
   if (failed) process.exit(1);
 }
 
-const MANIFEST = path.join(FIXTURES_DIR, "photo-manifest.json");
+/** Fixtures: tools/eval/fixtures/photo-manifest.json; --hard: tools/eval/hard/photo-manifest.json. */
+let manifestFile = path.join(FIXTURES_DIR, "photo-manifest.json");
 
 function readManifest(): Record<string, ManifestEntry> {
-  return existsSync(MANIFEST) ? (JSON.parse(readFileSync(MANIFEST, "utf8")) as Record<string, ManifestEntry>) : {};
+  return existsSync(manifestFile) ? (JSON.parse(readFileSync(manifestFile, "utf8")) as Record<string, ManifestEntry>) : {};
 }
 
 function sortKeys<T>(o: Record<string, T>): Record<string, T> {

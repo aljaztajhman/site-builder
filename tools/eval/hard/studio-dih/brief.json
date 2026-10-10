@@ -1,0 +1,34 @@
+{
+  "id": "studio-dih",
+  "businessType": "physio",
+  "trade": "joga",
+  "hard": ["new-trade"],
+  "description": "Studio Dih je majhen joga studio v Šiški, vodim ga Ana Bertoncelj, učiteljica joge s certifikatom (500 ur). Vadbe so v manjših skupinah, največ 12 ljudi, primerne tudi za začetnike in nosečnice. Učim hatha jogo, jin jogo in jogo za hrbtenico, enkrat na mesec je sobotna delavnica dihanja in meditacije.\n\nUrnik: ponedeljek in sreda ob 18.00 in 19.30, torek in četrtek ob 7.00 in 17.30, sobota ob 9.00.\n\nCene: posamezna vadba 14 €, karta za 10 obiskov 110 €, mesečna karta 65 € (neomejeno). Prva vadba je brezplačna, prosim samo da se prej prijavite. Blazine in pripomočki so v studiu, prinesite udobna oblačila.\n\nNaslov: Drenikova ulica 22, 1000 Ljubljana, vhod z dvorišča, 1. nadstropje.\n\nPrijave na 040 555 461 ali hello@studiodih.example.\n\nImam logo (krog, kot vdih) in dve sliki studia.",
+  "logo": "logo.svg",
+  "photos": [
+    { "file": "photos/01.jpg", "subject": "svetla joga dvorana z lesenimi tlemi in zloženimi blazinami ob steni" },
+    { "file": "photos/02.jpg", "subject": "ženska v jogijskem položaju na blazini ob oknu, od strani" }
+  ],
+  "facts": {
+    "name": "Studio Dih",
+    "phone": "+38640555461",
+    "email": "hello@studiodih.example",
+    "address": { "street": "Drenikova ulica 22", "postalCode": "1000", "city": "Ljubljana" },
+    "prices": [
+      { "item": "posamezna vadba", "amount": 14 },
+      { "item": "karta za 10 obiskov", "amount": 110 },
+      { "item": "mesečna karta", "amount": 65 }
+    ],
+    "people": [{ "name": "Ana Bertoncelj", "role": "učiteljica joge" }],
+    "other": [
+      "ponedeljek in sreda ob 18.00 in 19.30",
+      "torek in četrtek ob 7.00 in 17.30",
+      "sobota ob 9.00",
+      "s certifikatom (500 ur)",
+      "največ 12 ljudi",
+      "Prva vadba je brezplačna",
+      "hatha jogo, jin jogo in jogo za hrbtenico"
+    ]
+  },
+  "missing": ["hours", "legal"]
+}

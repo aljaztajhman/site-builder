@@ -1,0 +1,24 @@
+{
+  "id": "kljucavnicarstvo-hrovat",
+  "businessType": "builder",
+  "trade": "ključavničar",
+  "hard": ["no-photos", "new-trade"],
+  "description": "Ključavničarstvo Hrovat, Celje z okolico.\n\nSte se zaklenili ven, izgubili ključe ali se je zalomil ključ v ključavnici? Pokličite 041 555 772, nujne intervencije 24 ur na dan, vse dni v letu, tudi za praznike. V Celju sem ponavadi v 30 minutah. Vrata odpiram brez poškodb kadar se le da.\n\nDelam: odpiranje vrat, avtomobilov in sefov, menjava cilindrov in ključavnic, vgradnja varnostnih cilindrov in dodatnih ključavnic, kopiranje ključev, tudi ključi za avto s čipom.\n\nCene: odpiranje vrat od 60 €, zamenjava cilindra od 45 € z materialom, nočni in praznični dodatek 30 €.\n\nKopiranje ključev v delavnici na naslovu Mariborska cesta 88, 3000 Celje, pon–pet 8.00–16.00.\n\nPred odpiranjem vedno preverim, da ste res lastnik ali najemnik (osebna izkaznica).\n\nMatjaž Hrovat s.p. Slik ni, logota ni, maila tudi ne uporabljam, najhitreje je po telefonu.",
+  "logo": null,
+  "photos": [],
+  "facts": {
+    "name": "Ključavničarstvo Hrovat",
+    "phone": "+38641555772",
+    "address": { "street": "Mariborska cesta 88", "postalCode": "3000", "city": "Celje" },
+    "hours": [{ "from": "mon", "to": "fri", "open": "08:00", "close": "16:00" }],
+    "prices": [
+      { "item": "odpiranje vrat", "amount": 60, "from": true },
+      { "item": "zamenjava cilindra", "amount": 45, "from": true },
+      { "item": "nočni in praznični dodatek", "amount": 30 }
+    ],
+    "people": [{ "name": "Matjaž Hrovat" }],
+    "legal": { "legalName": "Matjaž Hrovat s.p." },
+    "other": ["Celje z okolico", "24 ur na dan", "v 30 minutah", "ključi za avto s čipom"]
+  },
+  "missing": ["email", "photos"]
+}
