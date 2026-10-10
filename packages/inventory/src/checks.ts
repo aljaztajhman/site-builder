@@ -30,11 +30,13 @@ export const BYTE_BUDGET: Partial<Record<AssetKind, number>> = {
 /**
  * The composed stylesheets, minified (docs/plans/studio-phase1-design.md §3.4.1, §3.4.7): the core sheet (spec v19,
  * composed.css) ≤ 16 KiB; each spec v20 region sheet (composed-v2.css split at its markers: section, kinds, extensions,
- * vocab) ≤ 12 KiB; the sheets one page links (core plus the regions it uses; at most all of them) ≤ 32 KiB together.
+ * vocab) ≤ 12 KiB; the sheets one page links (core plus the regions it uses; at most all of them) ≤ 32 KiB together; each
+ * vocab family sheet (masks, treatments, textures, edges, fact-objects, type-treatments, motion; the partials under
+ * styles/vocab/<family>/, §3.4.8) ≤ 6 KiB, and all seven together ≤ 42 KiB.
  * The asset section/composed:free measures the core sheet; the inventory's and @sb/render's composed tests check the
  * regions and the linked total against the same numbers.
  */
-export const COMPOSED_SHEET_BUDGET = { core: 16 * 1024, region: 12 * 1024, linked: 32 * 1024 } as const;
+export const COMPOSED_SHEET_BUDGET = { core: 16 * 1024, region: 12 * 1024, linked: 32 * 1024, family: 6 * 1024, families: 42 * 1024 } as const;
 
 export function byteBudget(a: { id: string; kind: AssetKind }): number | undefined {
   return a.id === "section/composed:free" ? COMPOSED_SHEET_BUDGET.core : BYTE_BUDGET[a.kind];

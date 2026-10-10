@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { describe, expect, it } from "vitest";
 import { DIRECTIONS, FAMILIES, FONTS, FONT_PAIRS, Imagery, MOTIFS, SECTION_DEFS, SUBMOTIFS, type Colors } from "@sb/spec";
-import { COMPOSED_V2_REGIONS, composedStylesheet, composedV2Sheets } from "@sb/render";
+import { COMPOSED_V2_REGIONS, VOCAB_FAMILIES, composedStylesheet, composedV2Sheets, vocabFamilySheets } from "@sb/render";
 import { COMPOSED_SHEET_BUDGET, SLOVENE_GLYPHS, assetName, byteBudget, fontFile, fontLicenseFile, inventory, needsPatternCheck, paletteContrast, paletteOf, patternCheck, shippedColors, todaysAssets } from "../src/index.ts";
 
 /**
@@ -66,6 +66,12 @@ describe("the composed sheets stay within COMPOSED_SHEET_BUDGET", () => {
     for (const [i, n] of regions.entries()) expect(n, COMPOSED_V2_REGIONS[i]).toBeLessThanOrEqual(COMPOSED_SHEET_BUDGET.region);
     expect(core + regions.reduce((a, b) => a + b, 0)).toBeLessThanOrEqual(COMPOSED_SHEET_BUDGET.linked);
     expect(byteBudget({ id: "section/composed:free", kind: "section" })).toBe(COMPOSED_SHEET_BUDGET.core);
+  });
+
+  it("each vocab family sheet ≤ 6 KiB, the seven together ≤ 42 KiB", () => {
+    const sizes = VOCAB_FAMILIES.map((f) => Buffer.byteLength(vocabFamilySheets()[f].css));
+    for (const [i, n] of sizes.entries()) expect(n, VOCAB_FAMILIES[i]).toBeLessThanOrEqual(COMPOSED_SHEET_BUDGET.family);
+    expect(sizes.reduce((a, b) => a + b, 0)).toBeLessThanOrEqual(COMPOSED_SHEET_BUDGET.families);
   });
 });
 

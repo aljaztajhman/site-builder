@@ -3,7 +3,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { STYLE_FILES } from "@sb/components";
-import { MOTION_META, SUBMOTIF_BASE, allFontFaces, type Section } from "@sb/spec";
+import { EDGES, FACT_OBJECTS, IMAGE_TREATMENTS, MASKS, MOTIONS, MOTION_META, SUBMOTIF_BASE, TEXTURES, TYPE_TREATMENTS, allFontFaces, type Section } from "@sb/spec";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const componentsDir = path.resolve(here, "../../components");
@@ -198,6 +198,80 @@ function contentAddressed(file: string, stem: string): Sheet {
 }
 const named = (css: string, stem: string): Sheet => ({ name: `${stem}-${createHash("sha256").update(css).digest("hex").slice(0, 10)}.css`, css });
 
+/**
+ * Vocab family sheets (docs/plans/studio-phase1-design.md §3.4.7-3.4.8): the CSS of the names the inventory batches add
+ * to the spec vocabularies, one sheet per asset family, linked only by a page that uses one of that family's names.
+ *
+ * Source: one small partial per name, `packages/components/styles/vocab/<family>/<name>.css` (the file name is the vocab
+ * name). An asset maker adds a name by adding one file, with no shared file to conflict on. A family's sheet is its
+ * partials in file-name order, minified, content-addressed (composed-v2-vocab-<family>-<sha10>.css), and in the bundle
+ * after the hash. A partial's rules are scoped to its own name (a class or attribute naming it), so the order between
+ * partials never matters. A family with no partial has no sheet and is never linked.
+ *
+ * The names in the spec lists when the sheets were introduced (STARTER_NAMES) are drawn by the core sheet and the v2
+ * region sheets and stay there (their shared mechanics are grouped with other names' rules); partials are for new names.
+ */
+export const VOCAB_FAMILIES = ["masks", "treatments", "textures", "edges", "fact-objects", "type-treatments", "motion"] as const;
+export type VocabFamily = (typeof VOCAB_FAMILIES)[number];
+
+/** The spec list each family's names come from. */
+export const FAMILY_LISTS: Record<VocabFamily, readonly string[]> = {
+  masks: MASKS,
+  treatments: IMAGE_TREATMENTS,
+  textures: TEXTURES,
+  edges: EDGES,
+  "fact-objects": FACT_OBJECTS,
+  "type-treatments": TYPE_TREATMENTS,
+  motion: MOTIONS,
+};
+
+/** The names each list had when the family sheets were introduced: their CSS is in composed.css / composed-v2.css. */
+export const STARTER_NAMES: Record<VocabFamily, readonly string[]> = {
+  masks: ["none", "arch", "circle", "cut", "stamp", "ticket"],
+  treatments: ["none", "duotone", "tint", "grain"],
+  textures: ["none", "grain", "lines"],
+  edges: ["straight", "rule", "cut", "torn", "drawing"],
+  "fact-objects": ["numeral", "plate", "stamp", "ticket", "seal", "tag"],
+  "type-treatments": ["none", "stacked", "knockout"],
+  motion: ["reveal", "unmask"],
+};
+
+export const VOCAB_DIR = path.join(componentsDir, "styles", "vocab");
+
+/** The names that have a partial in `<dir>/<family>/` (sorted). */
+export function vocabPartials(family: VocabFamily, dir: string = VOCAB_DIR): string[] {
+  const d = path.join(dir, family);
+  return existsSync(d) ? readdirSync(d).filter((n) => n.endsWith(".css")).map((n) => n.slice(0, -4)).sort() : [];
+}
+
+/**
+ * What a family's partials must be: one for every name of the family's spec list beyond the starter names, and no other.
+ * `missing`: such names without a partial; `orphans`: partials whose name is not one of them.
+ */
+export function vocabCoverage(family: VocabFamily, dir: string = VOCAB_DIR, list: readonly string[] = FAMILY_LISTS[family]): { missing: string[]; orphans: string[] } {
+  const partials = vocabPartials(family, dir);
+  const starters = new Set(STARTER_NAMES[family]);
+  const wanted = list.filter((n) => !starters.has(n));
+  return { missing: wanted.filter((n) => !partials.includes(n)), orphans: partials.filter((n) => !wanted.includes(n)) };
+}
+
+export interface VocabSheet extends Sheet {
+  family: VocabFamily;
+  /** The names whose partials the sheet holds: a page using one of them links it. */
+  names: string[];
+}
+/** The sheet of a family (css "" when it has no partials), from the partials in `dir`. */
+export function vocabSheet(family: VocabFamily, dir: string = VOCAB_DIR): VocabSheet {
+  const names = vocabPartials(family, dir);
+  const source = names.map((n) => readFileSync(path.join(dir, family, `${n}.css`), "utf8")).join("\n");
+  return { family, names, ...named(compactValues(minifyCss(source)), `composed-v2-vocab-${family}`) };
+}
+let vocabSheets: Record<VocabFamily, VocabSheet> | undefined;
+export function vocabFamilySheets(): Record<VocabFamily, VocabSheet> {
+  vocabSheets ??= Object.fromEntries(VOCAB_FAMILIES.map((f) => [f, vocabSheet(f)])) as Record<VocabFamily, VocabSheet>;
+  return vocabSheets;
+}
+
 /** The composed stylesheets by their key in composedSheets, in link order. */
 export const COMPOSED_SHEETS = {
   core: composedStylesheet,
@@ -205,10 +279,38 @@ export const COMPOSED_SHEETS = {
   kinds: () => composedV2Sheets().kinds,
   extensions: () => composedV2Sheets().extensions,
   vocab: () => composedV2Sheets().vocab,
-} as const satisfies Record<"core" | ComposedRegion, () => Sheet>;
+  "vocab-masks": () => vocabFamilySheets().masks,
+  "vocab-treatments": () => vocabFamilySheets().treatments,
+  "vocab-textures": () => vocabFamilySheets().textures,
+  "vocab-edges": () => vocabFamilySheets().edges,
+  "vocab-fact-objects": () => vocabFamilySheets()["fact-objects"],
+  "vocab-type-treatments": () => vocabFamilySheets()["type-treatments"],
+  "vocab-motion": () => vocabFamilySheets().motion,
+} as const satisfies Record<"core" | ComposedRegion | `vocab-${VocabFamily}`, () => Sheet>;
 export type ComposedSheet = keyof typeof COMPOSED_SHEETS;
 
 type ComposedSection = Extract<Section, { type: "composed" }>;
+
+/** The vocab names a section uses, by family. */
+export function vocabNamesOf(s: ComposedSection): Record<VocabFamily, Set<string>> {
+  const p = s.props;
+  const out: Record<VocabFamily, Set<string>> = { masks: new Set(), treatments: new Set(), textures: new Set(), edges: new Set(), "fact-objects": new Set(), "type-treatments": new Set(), motion: new Set() };
+  const add = (f: VocabFamily, n: string | undefined) => {
+    if (n !== undefined) out[f].add(n);
+  };
+  add("textures", p.surface?.texture);
+  add("edges", p.top?.edge);
+  add("motion", p.motion);
+  for (const b of p.background ?? []) if (b.kind === "photo") add("treatments", b.treatment);
+  for (const el of p.elements) {
+    if (el.kind === "image" || el.kind === "photos") {
+      add("masks", el.mask);
+      add("treatments", el.treatment);
+    } else if (el.kind === "fact") add("fact-objects", el.treatment);
+    else if (el.kind === "heading") add("type-treatments", el.treatment);
+  }
+  return out;
+}
 const isComposed = (s: Section): s is ComposedSection => s.type === "composed";
 
 /** The element kinds spec v20 adds (§1.5): their rules are in composed-v2.css region kinds. */
@@ -269,14 +371,21 @@ function regionsOf(s: ComposedSection): Set<ComposedRegion> {
 /**
  * The composed stylesheets a page links, in link order: none without a composed section; the core sheet with one; after
  * it, each v20 region sheet one of them uses (section-level fields: section; the new kinds: kinds; the extensions of the
- * existing kinds: extensions; vocab assets: vocab, none yet). One place decides every link (extensible: design.wordmark).
+ * existing kinds: extensions); then each vocab family sheet (VOCAB_FAMILIES) holding a name the page uses. One place decides every link (extensible: design.wordmark).
  */
-export function composedSheets(sections: readonly Section[]): ComposedSheet[] {
+export function composedSheets(sections: readonly Section[], families: Record<VocabFamily, VocabSheet> = vocabFamilySheets()): ComposedSheet[] {
   const own = sections.filter(isComposed);
   if (own.length === 0) return [];
   const used = new Set<ComposedRegion>();
-  for (const s of own) for (const r of regionsOf(s)) used.add(r);
-  return ["core", ...COMPOSED_V2_REGIONS.filter((r) => used.has(r) && composedV2Sheets()[r].css !== "")];
+  const names = VOCAB_FAMILIES.map((): Set<string> => new Set());
+  for (const s of own) {
+    for (const r of regionsOf(s)) used.add(r);
+    const byFamily = vocabNamesOf(s);
+    VOCAB_FAMILIES.forEach((f, i) => byFamily[f].forEach((n) => names[i]!.add(n)));
+  }
+  // A family sheet follows the region sheets, when the page uses one of the names it holds (starter names: none).
+  const familySheets = VOCAB_FAMILIES.filter((f, i) => families[f].css !== "" && families[f].names.some((n) => names[i]!.has(n))).map((f) => `vocab-${f}` as const);
+  return ["core", ...COMPOSED_V2_REGIONS.filter((r) => used.has(r) && composedV2Sheets()[r].css !== ""), ...familySheets];
 }
 
 /**
@@ -353,4 +462,5 @@ export function resetSharedBundleCache(): void {
   cached = undefined;
   composed = undefined;
   composedV2 = undefined;
+  vocabSheets = undefined;
 }
