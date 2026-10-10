@@ -248,6 +248,7 @@ The engine's `COMPOSED_LAYOUT_KEYS` (skipped by facts and translation) adds `arr
 - **Loop and counter (D2) in the schema:** the marquee is `ribbon.move: "loop"` (beside still and drift) and the counter is `fact.count: boolean` (both layout keys). G7: `loop` needs level lively and renders a pause control (R2); `count` only on a fact whose value is a plain whole number found in the client facts (checked by guards when `ctx.business` is given, and by F1b-3/I7). Their guard tests are written in I7.
 - **G4 header contrast** is not a guard (the context has no header tone); R1’s `composed-v2.css` makes the header over the opener follow section 0’s tone, and F1b-A checks it in the browser at 360/1280.
 - **G24 heading size:** today’s code counts headings from size 6 and facts from 7; that stays (the design’s “≥ 4” was a misreading).
+- **G26 (new, found by R1, already in v19):** a text-bearing element may share desktop grid cells with an `image` or `photos` element only when it is an intended over-photo element (`overPhoto`), and then its `layer` must be higher than the image's; repair: raise its layer; otherwise reject. The core sheet also gets a bug fix so `.cx-over` paints above images on the same layer. Both go into F1b-A, with a browser assertion (no text box intersects an image box unless marked over-photo and on top).
 - **Quotes are never translated:** `isCopy` (`packages/spec/src/translatable.ts:58-62`) gains the quote case (F1b-3).
 
 ## 3. Renderer
