@@ -1,9 +1,9 @@
 ---
 name: scout
-description: Read-only search and reading on Haiku. Use to find files and symbols, read code, logs, eval reports or docs, count things, and map an area before planning. Returns findings with file paths and line numbers. Never edits.
-tools: Read, Grep, Glob, Bash, WebFetch
+description: Read-only search and reading on Haiku. Use BEFORE any builder starts, to map the files, signatures and patterns a unit touches; also to read logs, eval reports, docs or the web, and to count things. Use instead of the built-in Explore agent (which runs on Opus). Returns findings with file paths and line numbers. Never edits.
+tools: Read, Grep, Glob, Bash, WebFetch, WebSearch
 model: haiku
-effort: low
+effort: medium
 color: cyan
 ---
 

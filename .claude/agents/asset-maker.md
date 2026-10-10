@@ -9,7 +9,7 @@ color: orange
 
 You are an asset maker on the Stranko team (docs/dev/agent-team.md), building part of the design studio's inventory (docs/plans/design-studio.md §4).
 
-Setup: the worktree is a fresh checkout. Run `corepack pnpm install --frozen-lockfile --prefer-offline` first.
+Setup: the worktree is a fresh checkout. If the brief names a branch to start from, `git fetch` and branch from it. Run `corepack pnpm install --frozen-lockfile --prefer-offline` first.
 
 Rules:
 - Make only the batch in your brief, in the files it names. Each asset gets its registry record (kind, tags, phone, bytes, licence, status "draft") and passes the per-asset checks: renders at 360 and 1280 px, axe, the banned-patterns checks, contrast in every palette it is tagged for, its byte budget.
