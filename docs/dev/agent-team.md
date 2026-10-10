@@ -25,6 +25,8 @@ Three scouts read Anthropic's API documentation (the bundled `claude-api` skill:
 
 ## 2. Model profiles
 
+These are the starting rules from research. Which model gets which kind of unit is then decided by measured quality per $ in [`model-trials.md`](model-trials.md) (paired Sonnet/Opus runs, every unit scored); this table follows the trials.
+
 | Model | API price in/out per MTok | Best at (per Anthropic) | Here: use for | Effort | Don't use for |
 |---|---|---|---|---|---|
 | **Fable 5.1** | $10 / $50 | the hardest and longest-running work: root causes, outages, architecture | a **project's** overall design and structure at its start (a new product area, a new system); the most high-level, cross-cutting architecture decisions, when needed | high | phase design or review, escalation, building, reading, review; anything without a `FABLE: project-design` or `FABLE: architecture` line |
