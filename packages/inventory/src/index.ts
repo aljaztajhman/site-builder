@@ -15,6 +15,8 @@ export * from "./registry.ts";
 export * from "./shortlist.ts";
 export * from "./export.ts";
 export * from "./checks.ts";
+export * from "./signatures.ts";
+export * from "./must-draw.ts";
 export { todaysAssets, groundOf, temperatureOf, paletteOf } from "./sources.ts";
 export { fontFile, fontLicenseFile } from "./bytes.ts";
 
