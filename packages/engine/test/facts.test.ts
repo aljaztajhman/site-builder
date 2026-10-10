@@ -154,4 +154,43 @@ describe("checkFacts, stricter matching", () => {
     expect(found).toEqual(expect.arrayContaining(["phone:/translations/en/business/phone", "number:/translations/en/pages/0/sections/0/props/title"]));
     expect(found.filter((f) => !f.includes("/translations/"))).toEqual([]);
   });
+
+  it("reads a composed section's layout as layout and its copy as copy", () => {
+    const desk = { col: 1, span: 6, row: 1 };
+    const phone = { order: 0, span: "full" };
+    const composed = (elements: unknown[]) => ({ id: "s_comp", type: "composed", props: { intent: "hero", width: "wide", rows: 2, elements } });
+    const layout = [
+      { id: "e_h", kind: "heading", desk, phone, text: "Striženje v Celju", level: 1, size: 7, rotate: "-90" },
+      { id: "e_img", kind: "image", desk, phone, image: "img_01", ratio: "4:5", mask: "arch" },
+      { id: "e_seal", kind: "fact", desk, phone, value: "8.00", label: "Odprto od", treatment: "seal", size: 4 },
+      { id: "e_call", kind: "action", desk, phone, action: "call", label: "Pokličite 041 555 301", style: "primary" },
+      { id: "e_dec", kind: "decor", desk, phone, svg: { width: 400, height: 20, paths: [{ d: "M10 10 a 7 7 0 1 0 14 0 a 7 7 0 1 0 -14 0 L 396 10", fill: "none", stroke: "accent", width: 2 }] } },
+      { id: "e_p", kind: "prices", desk, phone, style: "rows", items: [{ name: "Moško", price: { amount: 18 } }] },
+    ];
+    expect(checkFacts(spec({ sections: [composed(layout)] }), corpus)).toEqual([]);
+
+    const invented = [
+      { id: "e_h", kind: "heading", desk, phone, text: "25 let v Celju", level: 1, size: 7 },
+      { id: "e_seal", kind: "fact", desk, phone, value: "1987", label: "od leta", treatment: "seal", size: 4 },
+      { id: "e_t", kind: "text", desk, phone, paragraphs: ["Pokličite 041 555 777."] },
+      { id: "e_l", kind: "list", desk, phone, items: ["Več kot 500 strank"] },
+      { id: "e_p", kind: "prices", desk, phone, style: "rows", items: [{ name: "Barvanje", price: { amount: 45 } }] },
+    ];
+    const found = checkFacts(spec({ sections: [composed(invented)] }), corpus).map((v) => `${v.kind}:${v.value}:${v.path}`);
+    expect(found).toEqual(
+      expect.arrayContaining([
+        "number:25:/pages/0/sections/0/props/elements/0/text",
+        "number:1987:/pages/0/sections/0/props/elements/1/value",
+        "phone:041 555 777:/pages/0/sections/0/props/elements/2/paragraphs/0",
+        "number:500:/pages/0/sections/0/props/elements/3/items/0",
+        "price:45:/pages/0/sections/0/props/elements/4/items/0/price",
+      ]),
+    );
+  });
+
+  it("checks layout-named keys as copy outside composed sections", () => {
+    // Only composed sections have a fixed meaning for keys like "style" or "width"; elsewhere a string is copy until proven otherwise.
+    const s = spec({ sections: [{ id: "s_text", type: "text", props: { title: "Striženje", style: "25 let izkušenj" } }] });
+    expect(checkFacts(s, corpus).map((v) => `${v.kind}:${v.value}`)).toEqual(["number:25"]);
+  });
 });

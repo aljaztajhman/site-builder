@@ -4,6 +4,7 @@ dist/
 !packages/morph/dist/
 .tools/
 .worktrees/
+.claude/worktrees/
 .env
 .env.*
 !.env.example

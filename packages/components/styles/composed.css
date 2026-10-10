@@ -85,17 +85,19 @@
 
 /* ---------- the grid ---------- */
 .cx {
-  /* The type scale: steps 6 to 8 are display sizes, at most 15vw on a phone and 12vw on desktop. */
+  /* The type scale: steps 6 to 8 are display sizes, at most 15vw on a phone and 12vw on desktop. Every step is at least
+     the one below it: a trade template may set --fs-h2 above --fs-h1 (Tablica's big h2 at 1280 px), so step 3 takes the
+     smaller of the two and step 5 the larger, and a display step never drops below step 5. */
   --cx-fs-m1: var(--fs-sm);
   --cx-fs-0: var(--fs-base);
   --cx-fs-1: var(--fs-lg);
   --cx-fs-2: var(--fs-h3);
-  --cx-fs-3: var(--fs-h2);
-  --cx-fs-4: calc((var(--fs-h2) + var(--fs-h1)) / 2);
-  --cx-fs-5: var(--fs-h1);
-  --cx-fs-6: min(12vw, 4rem);
-  --cx-fs-7: min(13.5vw, 5rem);
-  --cx-fs-8: min(15vw, 6rem);
+  --cx-fs-3: max(var(--cx-fs-2), min(var(--fs-h2), var(--fs-h1)));
+  --cx-fs-4: max(var(--cx-fs-3), calc((var(--fs-h2) + var(--fs-h1)) / 2));
+  --cx-fs-5: max(var(--cx-fs-4), var(--fs-h2), var(--fs-h1));
+  --cx-fs-6: max(var(--cx-fs-5), min(12vw, 4rem));
+  --cx-fs-7: max(var(--cx-fs-6), min(13.5vw, 5rem));
+  --cx-fs-8: max(var(--cx-fs-7), min(15vw, 6rem));
   --cx-gap: max(0.75rem, calc(var(--g, 3) * 0.4rem));
   --cx-step: 1.25rem;
   display: grid;
@@ -214,9 +216,9 @@
     width: 100%;
   }
   .cx {
-    --cx-fs-6: min(calc(var(--fs-h1) * 1.4), 12vw);
-    --cx-fs-7: min(calc(var(--fs-h1) * 1.9), 12vw);
-    --cx-fs-8: min(calc(var(--fs-h1) * 2.6), 12vw);
+    --cx-fs-6: max(var(--cx-fs-5), min(calc(var(--fs-h1) * 1.4), 12vw));
+    --cx-fs-7: max(var(--cx-fs-6), min(calc(var(--fs-h1) * 1.9), 12vw));
+    --cx-fs-8: max(var(--cx-fs-7), min(calc(var(--fs-h1) * 2.6), 12vw));
   }
 }
 @media (min-width: 64rem) {
@@ -393,9 +395,14 @@ body:not([data-motif="plate"]) .cx-prices--plates .plate__eu {
   color: var(--c-on-band, var(--c-on-primary));
   text-align: center;
 }
+/* The label breaks between words only (a hyphenated "od-prto" in a seal reads as a typo). It is as wide as the seal
+   inside its padding, and its size comes from the seal's: at most the body size, smaller when the longest word
+   (--lw characters, about 0.6 em each) would not fit 70 % of the seal's width (the circle narrows away from its middle). */
 .cx-fact--seal .cx-fact__label {
-  max-width: 11ch;
-  overflow-wrap: anywhere;
+  max-width: 100%;
+  font-size: min(var(--fs-base), calc(min(var(--n, 6) * 0.6em + 2.4em, 100cqw) * 0.7 / (var(--lw, 8) * 0.6)));
+  hyphens: manual;
+  overflow-wrap: normal;
 }
 /* tag: a hang tag, pointed at the string end, with its hole. */
 .cx-fact--tag .cx-fact__obj {

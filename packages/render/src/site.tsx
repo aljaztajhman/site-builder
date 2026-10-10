@@ -13,6 +13,7 @@ import {
   lcpImageFor,
   rendererFor,
   barActions,
+  composedActions,
   heroOwnsCall,
   navHasMore,
   signatureActions,
@@ -58,6 +59,7 @@ import { landmarkSuffixes } from "./landmarks.ts";
 function heroActions(first: { type: string; variant: string; props: unknown } | undefined): string[] {
   if (!first) return [];
   if (first.type === "hero-signature") return signatureActions(first as SectionOf<"hero-signature">);
+  if (first.type === "composed") return composedActions(first as SectionOf<"composed">);
   const p = first.props as { primary?: { target?: { action?: string } }; secondary?: { target?: { action?: string } } };
   return [p.primary?.target?.action, p.secondary?.target?.action].filter((a): a is string => a !== undefined);
 }
@@ -71,6 +73,10 @@ function heroOffersCallAndDirections(first: { type: string; variant: string; pro
   if (!first) return false;
   if (first.type === "hero-type" && first.variant === "with-facts") return true;
   if (first.type === "hero-signature") return signatureOffersDirections(first as SectionOf<"hero-signature">);
+  if (first.type === "composed") {
+    const actions = composedActions(first as SectionOf<"composed">);
+    return actions.includes("call") && actions.includes("directions");
+  }
   const p = first.props as { primary?: { target?: { action?: string } }; secondary?: { target?: { action?: string } } };
   const actions = [p.primary?.target?.action, p.secondary?.target?.action];
   return actions.includes("call") && actions.includes("directions");
