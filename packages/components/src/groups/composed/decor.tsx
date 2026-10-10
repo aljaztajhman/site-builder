@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactElement, ReactNode } from "react";
 import type { Motif } from "@sb/spec";
-import { Branch, Limb, Radiator, Spoon } from "../../motifs/index.tsx";
+import { Branch, Radiator, Spoon } from "../../motifs/index.tsx";
 import { ROLE_VAR, type ElOf } from "./layout.ts";
 
 const fill = (role: keyof typeof ROLE_VAR): CSSProperties => ({ fill: ROLE_VAR[role], stroke: "none" });
@@ -95,7 +95,7 @@ const MOTIF_DRAWING: Record<Motif, () => ReactElement> = {
   mirror: Arch,
   smile: Smile,
   trail: Blaze,
-  bend: () => <Limb />,
+  bend: Bend,
 };
 
 /** A drawing the designer wrote: sanitised paths (schema DecorPath), colours as roles only. */

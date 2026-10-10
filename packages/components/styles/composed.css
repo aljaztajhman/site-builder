@@ -567,8 +567,12 @@ body:not([data-motif="plate"]) .cx-prices--plates .plate__eu {
 }
 /* Plates and tags lay out by the room they have, not by the section variant's fixed 2 or 4 columns. */
 .cx-prices.price-tags {
-  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
   gap: 1.5rem 1rem;
+}
+/* A plate smaller than the price list's 52 px: "od 35 €" has to fit a 12 rem column. */
+.cx-prices--plates .price-tag.plate {
+  font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2.125rem);
 }
 .cx-prices .price--on-request {
   white-space: normal;

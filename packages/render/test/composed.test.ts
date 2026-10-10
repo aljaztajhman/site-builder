@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { lcpImageFor } from "@sb/components";
-import { ComposedProps, ELEMENT_KINDS, migrateSpec, type Page, type Section, type SiteSpec } from "@sb/spec";
+import { ComposedProps, migrateSpec, type ELEMENT_KINDS, type Page, type Section, type SiteSpec } from "@sb/spec";
 import { composedStylesheet, renderPage, sharedBundle } from "../src/index.ts";
 
 /** Composed sections (spec v19) in the rendered page; no browser (the browser checks: tools/eval/test/composed-render.test.ts). */
