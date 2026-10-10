@@ -678,8 +678,44 @@ function g22(env: Env): Finding[] {
   return out;
 }
 
+// ---------- G26 text over a photo is painted above it ----------
+
+/**
+ * G26 (docs/plans/studio-phase1-design.md §2.1): a text-bearing element that shares desktop grid cells with an `image` or
+ * `photos` element lies over it, and then its `layer` must be higher than that image's, or the photo paints over the
+ * words. The rule is the geometry and the stacking; it does not narrow which kinds may sit on a photo. Every text-bearing
+ * kind may: text, lists, hours and contact get the renderer's backing panel (`overPhoto` in @sb/components layout.ts,
+ * `.cx-over`), and the objects with a ground of their own (plate, seal, ticket and tag facts, a primary action, a sticker,
+ * a ribbon) need none, so `overPhoto`'s exemptions decide only whether a panel is drawn, never whether the element may be
+ * there. The panel's rule stays in the renderer (spec cannot import components); this one is the part both share: who
+ * overlaps whom, and who is on top. A repair raises the layer (at most 3); when the photo is already on layer 3 the
+ * section is rejected. A captioned `photos` element is text-bearing itself, so its overlap with other text is G23's.
+ */
+function g26(env: Env): Finding[] {
+  const out: Finding[] = [];
+  const els = entries(env);
+  for (const { e, i } of els) {
+    if (!isTextBearing(e)) continue;
+    let need = 0;
+    const under: string[] = [];
+    for (const o of els) {
+      if (o.e === e || (o.e.kind !== "image" && o.e.kind !== "photos") || isTextBearing(o.e) || !meets(boxOf(e), boxOf(o.e))) continue;
+      const layer = o.e.desk.layer ?? 0;
+      if ((e.desk.layer ?? 0) > layer) continue;
+      need = Math.max(need, layer + 1);
+      under.push(`${o.e.id} (layer ${layer})`);
+    }
+    if (need === 0) continue;
+    const path = `${EL}/${i}/desk/layer`;
+    const message = `composed: ${e.id} (${e.kind}) shares desktop cells with ${under.join(", ")} and must be on a higher layer than the photo (it is on ${e.desk.layer ?? 0})`;
+    if (need > 3) out.push(issue("structure", path, `${message}; the photo is already on the top layer`));
+    else out.push(both(path, "structure", message, { path, what: `layer raised to ${need} (above the photo)`, run: () => void (e.desk.layer = Math.max(e.desk.layer ?? 0, need)) }));
+  }
+  return out;
+}
+
 /** The rules in repair order: layers and names first (they change what the later rules see), restraint last. */
-const RULES: ((env: Env) => Finding[])[] = [g1, g8, g4, g5, g6, g7, g2, g9, g3, g10to12, g14, g15to17, g18to21, photoRefs, g22];
+const RULES: ((env: Env) => Finding[])[] = [g1, g8, g4, g5, g6, g7, g2, g9, g3, g10to12, g14, g15to17, g18to21, photoRefs, g26, g22];
 
 /** Every issue G1–G22 find in the section (paths include `ctx.at`). */
 export function validateV2(section: ComposedSection, ctx: CompositionContext): Issue[] {
