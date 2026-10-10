@@ -87,9 +87,11 @@ export const NUMBERED = "a numbered label (01, 02 /) is banned";
 
 /**
  * Violations of §1.8 in a spec's composed sections. `input` is the client's text in verbatimForm. A translation is
- * checked as it is shown (facts.ts), so a translated quote or map note fails here like an invented one.
+ * checked as it is shown (facts.ts), so a translated quote or map note fails here like an invented one. The one thing a
+ * translation is not held to is a before-after pair's captions (`translated`): Prej and Potem are labels of the page, in the
+ * page's language, and the client's own words are checked in the original.
  */
-export function composedFacts(spec: SiteSpec, input: string): FactViolation[] {
+export function composedFacts(spec: SiteSpec, input: string, translated = false): FactViolation[] {
   const out: FactViolation[] = [];
   const b = spec.business;
   const amenities = new Set<string>(b.amenities ?? []);
@@ -140,7 +142,7 @@ export function composedFacts(spec: SiteSpec, input: string): FactViolation[] {
             images.forEach((id, i) => {
               if (origin.get(id) === "generated") out.push({ path: `${at}/images/${i}`, kind: "photo", value: id, detail: GENERATED_PHOTO });
             });
-            if (e.arrangement === "before-after") {
+            if (e.arrangement === "before-after" && !translated) {
               const caps = ((e.captions ?? []) as unknown[]).map((c) => (typeof c === "string" ? c : ""));
               const [first = "", second = ""] = caps;
               const said = BEFORE.test(first) && AFTER.test(second) && isVerbatim(first, input) && isVerbatim(second, input);

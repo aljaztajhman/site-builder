@@ -305,6 +305,24 @@ describe("checkFacts on the v20 composed kinds (studio-phase1-design.md §1.8)",
     expect(found(pair(["Prej", "Potem: nova pričeska"]))).toEqual([`photo:Prej | Potem: nova pričeska:${at}/0/captions`]);
   });
 
+  it("does not hold translated before-after captions to the client's words (Prej and Potem are page labels)", () => {
+    const base = withImages(spec({ sections: [composed({ kind: "photos", images: ["img_01", "img_02"], arrangement: "before-after", captions: ["Prej: lasje pred barvanjem.", "Potem: po barvanju."] })] }), ["client", "client"]);
+    const caps = `${at}/0/captions`;
+    const translated = { ...base, translations: { en: { [`${caps}/0`]: "Before: hair before colouring.", [`${caps}/1`]: "After: after colouring." } } } as SiteSpec;
+    expect(checkFacts(translated, input)).toEqual([]);
+    // The original is still checked: a caption the client never wrote fails, and its translation adds nothing.
+    const invented = withImages(spec({ sections: [composed({ kind: "photos", images: ["img_01", "img_02"], arrangement: "before-after", captions: ["Prej: staro.", "Potem: novo."] })] }), ["client", "client"]);
+    const both = { ...invented, translations: { en: { [`${caps}/0`]: "Before: old.", [`${caps}/1`]: "After: new." } } } as SiteSpec;
+    expect(found(both)).toEqual([`photo:Prej: staro. | Potem: novo.:${caps}`]);
+  });
+
+  it("a count-up fact is only a plain whole number from the client (G7 count: the number is checked here, the animation is the island's)", () => {
+    const counted = (value: string) => spec({ sections: [composed({ kind: "fact", value, label: "let", treatment: "numeral", size: 4, count: true })] });
+    expect(checkFacts(counted("12"), input)).toEqual([]);
+    expect(found(counted("12,5"))).toEqual(expect.arrayContaining([expect.stringContaining(`number:12,5:${at}/0/value`)]));
+    expect(found(counted("12+"))).toEqual(expect.arrayContaining([expect.stringContaining(`number:12+:${at}/0/value`)]));
+  });
+
   it("lets a plate show only the town's own registration code from the table", () => {
     // Celje → CE (@sb/spec plateCode).
     const ok = spec({
