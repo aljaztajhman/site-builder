@@ -25,10 +25,15 @@ export const BYTE_BUDGET: Partial<Record<AssetKind, number>> = {
   footer: 2 * 1024,
   section: 4 * 1024,
 };
-export const COMPOSED_SHEET_BUDGET = 20 * 1024;
+/**
+ * The composed stylesheets, minified, per sheet (docs/plans/studio-phase1-design.md §3.4.1): the core sheet (spec v19,
+ * composed.css) and the v20 sheet (composed-v2.css) each ≤ 16 KiB, the pair ≤ 28 KiB. The asset section/composed:free
+ * measures the core sheet; @sb/render's composed test checks the v2 sheet and the pair against the same numbers.
+ */
+export const COMPOSED_SHEET_BUDGET = { core: 16 * 1024, v2: 16 * 1024, pair: 28 * 1024 } as const;
 
 export function byteBudget(a: { id: string; kind: AssetKind }): number | undefined {
-  return a.id === "section/composed:free" ? COMPOSED_SHEET_BUDGET : BYTE_BUDGET[a.kind];
+  return a.id === "section/composed:free" ? COMPOSED_SHEET_BUDGET.core : BYTE_BUDGET[a.kind];
 }
 
 /** The Slovene letters (and Croatian/Serbian ć đ that Slovene names use) every font must draw. */
