@@ -140,28 +140,8 @@
             "intent": "hero",
             "width": "full",
             "minHeight": "l",
-            "rows": 5,
-            "surface": {
-              "divider": "motif"
-            },
+            "rows": 4,
             "elements": [
-              {
-                "id": "e_photo",
-                "kind": "image",
-                "image": "img_01",
-                "ratio": "fill",
-                "treatment": "tint",
-                "desk": {
-                  "col": 1,
-                  "span": 12,
-                  "row": 1,
-                  "rowSpan": 5
-                },
-                "phone": {
-                  "order": 6,
-                  "span": "full"
-                }
-              },
               {
                 "id": "e_where",
                 "kind": "text",
@@ -234,27 +214,25 @@
                 "phone": {
                   "order": 3,
                   "span": "full"
-                }
-              },
-              {
-                "id": "e_call",
-                "kind": "action",
-                "action": "call",
-                "label": "Pokličite",
-                "style": "primary",
-                "desk": {
-                  "col": 2,
-                  "span": 3,
-                  "row": 5,
-                  "alignY": "start",
-                  "layer": 1
                 },
-                "phone": {
-                  "order": 4,
-                  "span": "full"
+                "plateCode": true,
+                "link": {
+                  "action": "call"
                 }
               }
-            ]
+            ],
+            "background": [
+              {
+                "kind": "photo",
+                "image": "img_01",
+                "scrim": {
+                  "role": "inverse",
+                  "strength": 3
+                },
+                "phone": "band"
+              }
+            ],
+            "headerOver": true
           }
         },
         {
@@ -283,7 +261,8 @@
                 "phone": {
                   "order": 0,
                   "span": "full"
-                }
+                },
+                "labelAt": "before"
               },
               {
                 "id": "e_where",
@@ -300,7 +279,8 @@
                 "phone": {
                   "order": 1,
                   "span": "full"
-                }
+                },
+                "labelAt": "before"
               },
               {
                 "id": "e_road",
@@ -317,9 +297,14 @@
                 "phone": {
                   "order": 2,
                   "span": "full"
-                }
+                },
+                "labelAt": "before"
               }
-            ]
+            ],
+            "top": {
+              "edge": "cut",
+              "rise": 1
+            }
           }
         },
         {
@@ -330,9 +315,6 @@
             "intent": "services",
             "width": "contained",
             "rows": 2,
-            "surface": {
-              "divider": "motif"
-            },
             "elements": [
               {
                 "id": "e_h",
@@ -361,7 +343,7 @@
                   "Zavore in sklopke",
                   "Zobati jermeni"
                 ],
-                "marker": "rule",
+                "marker": "dash",
                 "desk": {
                   "col": 1,
                   "span": 4,
@@ -370,7 +352,9 @@
                 "phone": {
                   "order": 1,
                   "span": "full"
-                }
+                },
+                "weight": "medium",
+                "size": 1
               },
               {
                 "id": "e_l2",
@@ -381,7 +365,7 @@
                   "Polnjenje klime",
                   "Menjava in hramba gum"
                 ],
-                "marker": "rule",
+                "marker": "dash",
                 "desk": {
                   "col": 5,
                   "span": 4,
@@ -390,7 +374,9 @@
                 "phone": {
                   "order": 2,
                   "span": "full"
-                }
+                },
+                "weight": "medium",
+                "size": 1
               },
               {
                 "id": "e_photo",
@@ -497,9 +483,15 @@
                 "phone": {
                   "order": 2,
                   "span": "full"
-                }
+                },
+                "size": 2,
+                "phoneColumns": 2,
+                "plateCode": true
               }
-            ]
+            ],
+            "top": {
+              "edge": "cut"
+            }
           }
         },
         {
@@ -628,23 +620,10 @@
                 "phone": {
                   "order": 1,
                   "span": "full"
-                }
-              },
-              {
-                "id": "e_call",
-                "kind": "action",
-                "action": "call",
-                "label": "Pokličite",
-                "style": "primary",
-                "desk": {
-                  "col": 9,
-                  "span": 3,
-                  "row": 2,
-                  "alignY": "center"
                 },
-                "phone": {
-                  "order": 2,
-                  "span": "full"
+                "plateCode": true,
+                "link": {
+                  "action": "call"
                 }
               },
               {
@@ -694,7 +673,10 @@
                   "span": "full"
                 }
               }
-            ]
+            ],
+            "top": {
+              "edge": "cut"
+            }
           }
         }
       ]

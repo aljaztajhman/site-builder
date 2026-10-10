@@ -210,7 +210,8 @@ describe("G1 background layers", () => {
 
 describe("G2 field layers", () => {
   it("passes text wholly inside or outside a field, and a photo across its edge", () => {
-    const s = composed([heading("e_head", { col: 1, span: 6, row: 1 }, 0), text("e_text", { col: 1, span: 6, row: 2 }, 1), photo("e_photo", { col: 5, span: 8, row: 1, rowSpan: 3 }, 2)], { background: [field("surface", [1, 6])] });
+    // The text lies over the photo's first two columns, so it is on a higher layer (G26).
+    const s = composed([heading("e_head", { col: 1, span: 6, row: 1, layer: 1 }, 0), text("e_text", { col: 1, span: 6, row: 2, layer: 1 }, 1), photo("e_photo", { col: 5, span: 8, row: 1, rowSpan: 3 }, 2)], { background: [field("surface", [1, 6])] });
     expect(validateComposition(s, C)).toEqual([]);
     const outside = composed([heading("e_head", { col: 1, span: 6, row: 1 }, 0), text("e_text", { col: 8, span: 5, row: 2 }, 1)], { background: [field("surface", [1, 6])] });
     expect(validateComposition(outside, C)).toEqual([]);
@@ -989,5 +990,45 @@ describe("the fixtures stay valid under the v20 rules (no over-tightening)", () 
     const s = composed(base(), { background: [field("surface", [1, 6]), drawingLayer(undefined, "border")], top: { edge: "cut", rise: 1 }, motion: "reveal", pin: { col: 1, span: 6 }, headerOver: true }, "inverse");
     expect(Section.safeParse(s).success).toBe(true);
     expect(Section.safeParse(composed(base(), { background: [photoLayer(3)] })).success).toBe(true);
+  });
+});
+
+describe("G26 text over a photo is on a higher layer than the photo", () => {
+  const over = (textLayer: number | undefined, photoLayer: number | undefined, kind: "heading" | "sticker" | "fact" = "heading") => {
+    const d = { col: 2, span: 5, row: 2, ...(textLayer === undefined ? {} : { layer: textLayer }) };
+    const t = kind === "heading" ? heading("e_t", d, 1) : kind === "sticker" ? sticker("e_t", d, 1) : fact("e_t", d, 1, { treatment: "plate" });
+    return composed([photo("e_photo", { col: 1, span: 12, row: 1, rowSpan: 3, ...(photoLayer === undefined ? {} : { layer: photoLayer }) }, 0), t]);
+  };
+
+  it("accepts text on a higher layer, and text that does not share cells with the photo", () => {
+    expect(has(over(2, 1), /higher layer/, C)).toBe(false);
+    expect(has(over(1, undefined), /higher layer/, C)).toBe(false);
+    expect(has(composed(base()), /higher layer/, C)).toBe(false);
+  });
+
+  it("rejects text on the same or a lower layer, with the cells it shares and its repair path", () => {
+    for (const [t, p] of [[undefined, undefined], [1, 1], [0, 2]] as const) {
+      expect(issue(over(t, p), /e_t \(heading\) shares desktop cells with e_photo \(layer \d\) and must be on a higher layer/, C), `${t}/${p}`).toMatchObject({ code: "structure", path: "/props/elements/1/desk/layer" });
+    }
+    for (const k of ["sticker", "fact"] as const) expect(has(over(undefined, undefined, k), /higher layer/, C), k).toBe(true);
+  });
+
+  it("repairs by raising the layer to just above the photo, and the repaired section validates", () => {
+    const r = repairComposition(over(0, 2), C);
+    expect(r.repairs.map(repairPath)).toEqual(["/props/elements/1/desk/layer"]);
+    expect(r.section.props.elements[1]!.desk.layer).toBe(3);
+    expect(has(r.section, /higher layer/, C)).toBe(false);
+    expect(repairComposition(over(undefined, undefined), C).section.props.elements[1]!.desk.layer).toBe(1);
+  });
+
+  it("rejects without a repair when the photo is already on the top layer", () => {
+    const s = over(3, 3);
+    expect(issue(s, /the photo is already on the top layer/, C)).toMatchObject({ path: "/props/elements/1/desk/layer" });
+    expect(repairComposition(s, C).repairs).toEqual([]);
+  });
+
+  it("takes the highest layer of the photos it lies over", () => {
+    const s = composed([photo("e_a", { col: 1, span: 6, row: 1, rowSpan: 3, layer: 1 }, 0), photo("e_b", { col: 7, span: 6, row: 1, rowSpan: 3, layer: 2 }, 1, "img_02"), heading("e_t", { col: 5, span: 4, row: 2 }, 2)]);
+    expect(repairComposition(s, C).section.props.elements[2]!.desk.layer).toBe(3);
   });
 });

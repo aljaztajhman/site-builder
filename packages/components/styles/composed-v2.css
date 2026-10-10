@@ -504,6 +504,11 @@ body[data-hdr="over"] .site-header--sticky::before {
 .cx-ph--offset-pair .cx-ph__box {
   aspect-ratio: 1;
 }
+/* A fan's frames are 62 % wide at 4:5 (0.775 of the box's width high) and sit on its floor: a 4:5 box left a band of
+   about half its width empty above them (the gap under a heading, F1b-A2). 5:4 is just taller than the frames. */
+.cx-ph--fan .cx-ph__box {
+  aspect-ratio: 5 / 4;
+}
 .cx-ph__box > .cx-ph__f {
   position: absolute;
   z-index: calc(4 - var(--i));

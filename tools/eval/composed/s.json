@@ -105,9 +105,6 @@
             "intent": "hero",
             "width": "wide",
             "rows": 5,
-            "surface": {
-              "divider": "motif"
-            },
             "elements": [
               {
                 "id": "e_where",
@@ -124,7 +121,8 @@
                 "phone": {
                   "order": 0,
                   "span": "full"
-                }
+                },
+                "color": "muted"
               },
               {
                 "id": "e_title",
@@ -171,7 +169,8 @@
                 "desk": {
                   "col": 1,
                   "span": 5,
-                  "row": 4
+                  "row": 4,
+                  "tilt": 2
                 },
                 "phone": {
                   "order": 3,
@@ -221,12 +220,12 @@
                   "span": 5,
                   "row": 1,
                   "rowSpan": 5,
-                  "alignY": "center"
+                  "alignY": "center",
+                  "bleedX": "end"
                 },
                 "phone": {
                   "order": 6,
-                  "span": "inset",
-                  "alignX": "center"
+                  "span": "bleed"
                 }
               }
             ]
@@ -327,7 +326,10 @@
                   "span": "full"
                 }
               }
-            ]
+            ],
+            "top": {
+              "edge": "cut"
+            }
           }
         },
         {
@@ -338,7 +340,7 @@
           "props": {
             "intent": "steps",
             "width": "contained",
-            "rows": 4,
+            "rows": 2,
             "elements": [
               {
                 "id": "e_h",
@@ -357,142 +359,31 @@
                 }
               },
               {
-                "id": "e_line",
-                "kind": "decor",
-                "svg": {
-                  "width": 400,
-                  "height": 20,
-                  "paths": [
-                    {
-                      "d": "M4 10H396",
-                      "fill": "none",
-                      "stroke": "primary",
-                      "width": 5
-                    },
-                    {
-                      "d": "M14 10a7 7 0 1 0 -14 0a7 7 0 1 0 14 0",
-                      "fill": "background",
-                      "stroke": "text",
-                      "width": 3.5
-                    },
-                    {
-                      "d": "M152 10a7 7 0 1 0 -14 0a7 7 0 1 0 14 0",
-                      "fill": "background",
-                      "stroke": "text",
-                      "width": 3.5
-                    },
-                    {
-                      "d": "M290 10a7 7 0 1 0 -14 0a7 7 0 1 0 14 0",
-                      "fill": "background",
-                      "stroke": "text",
-                      "width": 3.5
-                    }
-                  ]
-                },
+                "id": "e_l",
+                "kind": "list",
+                "items": [
+                  {
+                    "lead": "Klic",
+                    "text": "Najlažje me dobite na telefon. Če ne dvignem, vas pokličem nazaj isti dan."
+                  },
+                  {
+                    "lead": "Ogled",
+                    "text": "Pridemo na ogled. Ogled je brezplačen."
+                  },
+                  {
+                    "lead": "Ponudba",
+                    "text": "Dobite pisno ponudbo. Cen ne objavljamo, ker je vsak objekt drugačen."
+                  }
+                ],
+                "marker": "line",
+                "weight": "medium",
                 "desk": {
                   "col": 1,
-                  "span": 12,
+                  "span": 8,
                   "row": 2
                 },
                 "phone": {
                   "order": 1,
-                  "span": "full",
-                  "hidden": true
-                }
-              },
-              {
-                "id": "e_h1",
-                "kind": "heading",
-                "text": "Pokličete",
-                "level": 3,
-                "size": 2,
-                "desk": {
-                  "col": 1,
-                  "span": 4,
-                  "row": 3
-                },
-                "phone": {
-                  "order": 2,
-                  "span": "full"
-                }
-              },
-              {
-                "id": "e_t1",
-                "kind": "text",
-                "paragraphs": [
-                  "Najlažje me dobite na telefon. Če ne dvignem, vas pokličem nazaj isti dan."
-                ],
-                "desk": {
-                  "col": 1,
-                  "span": 4,
-                  "row": 4
-                },
-                "phone": {
-                  "order": 3,
-                  "span": "full"
-                }
-              },
-              {
-                "id": "e_h2",
-                "kind": "heading",
-                "text": "Pridemo na ogled",
-                "level": 3,
-                "size": 2,
-                "desk": {
-                  "col": 5,
-                  "span": 4,
-                  "row": 3
-                },
-                "phone": {
-                  "order": 4,
-                  "span": "full"
-                }
-              },
-              {
-                "id": "e_t2",
-                "kind": "text",
-                "paragraphs": [
-                  "Ogled je brezplačen."
-                ],
-                "desk": {
-                  "col": 5,
-                  "span": 4,
-                  "row": 4
-                },
-                "phone": {
-                  "order": 5,
-                  "span": "full"
-                }
-              },
-              {
-                "id": "e_h3",
-                "kind": "heading",
-                "text": "Dobite pisno ponudbo",
-                "level": 3,
-                "size": 2,
-                "desk": {
-                  "col": 9,
-                  "span": 4,
-                  "row": 3
-                },
-                "phone": {
-                  "order": 6,
-                  "span": "full"
-                }
-              },
-              {
-                "id": "e_t3",
-                "kind": "text",
-                "paragraphs": [
-                  "Cen ne objavljamo, ker je vsak objekt drugačen."
-                ],
-                "desk": {
-                  "col": 9,
-                  "span": 4,
-                  "row": 4
-                },
-                "phone": {
-                  "order": 7,
                   "span": "full"
                 }
               }
@@ -608,7 +499,10 @@
                   "span": "full"
                 }
               }
-            ]
+            ],
+            "top": {
+              "edge": "torn"
+            }
           }
         }
       ]

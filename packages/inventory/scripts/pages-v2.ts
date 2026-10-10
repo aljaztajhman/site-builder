@@ -11,6 +11,7 @@ import {
   ComposedProps,
   EDGES,
   MOTION_META,
+  WORDMARK_STYLES,
   direction,
   fillPreset,
   parsePresetId,
@@ -183,12 +184,15 @@ export function wordmarkPages(asset: Asset): SheetPage[] {
   const { base, page } = pageMaker(asset);
   const style = assetName(asset.id);
   const dirs = palettes();
+  // A style the renderer doesn't know draws as plain: say so on the sheet and in the log instead of showing a look the site wouldn't get.
+  const known = (WORDMARK_STYLES as readonly string[]).includes(style);
+  if (!known) console.warn(`wordmark sheet: style "${style}" (${asset.id}) is not in WORDMARK_STYLES (packages/spec/src/composition/vocab.ts); it renders as plain until it is added`);
   return WORDMARK_NAMES.map((name, n) => {
     const dir = dirs[n % dirs.length]!;
     const spec = inDirection(base, dir);
     spec.business.name = name;
     spec.design.wordmark = { style };
-    return page(`n${String(n + 1).padStart(2, "0")}`, `${name} · ${dir.id}`, withHome(spec, [grounds(() => [el("w", { kind: "wordmark", size: 5 }, 5, 8, 1, 1)])[n % TONES.length]!], "x"));
+    return page(`n${String(n + 1).padStart(2, "0")}`, `${known ? "" : `NOT IN WORDMARK_STYLES, drawn as plain · `}${name} · ${dir.id}`, withHome(spec, [grounds(() => [el("w", { kind: "wordmark", size: 5 }, 5, 8, 1, 1)])[n % TONES.length]!], "x"));
   });
 }
 

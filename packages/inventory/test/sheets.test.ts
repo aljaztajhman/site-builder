@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { ComposedProps, validateSite } from "@sb/spec";
 import { Registry, compositionAssets, type Asset, type AssetKind } from "../src/index.ts";
 import { PRESET_FIXTURES, PRESET_SOURCE, WORDMARK_NAMES, pagesFor, presetsFromFixtures } from "../scripts/pages-v2.ts";
@@ -70,6 +70,22 @@ describe("contact sheets of the composition-language kinds", () => {
     const all = WORDMARK_NAMES.join("");
     for (const ch of "čšž") expect(all).toContain(ch);
     expect(Math.max(...WORDMARK_NAMES.map((n) => n.length))).toBeGreaterThanOrEqual(35);
+  });
+
+  it("wordmark: a style that isn't in WORDMARK_STYLES warns and says so on every page; a known one is silent", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    try {
+      const known = pagesFor(asset("wordmark/plain", "wordmark"));
+      expect(warn).not.toHaveBeenCalled();
+      expect(known.some((p) => p.label.includes("NOT IN WORDMARK_STYLES"))).toBe(false);
+      const unknown = pagesFor(asset("wordmark/chalk", "wordmark"));
+      expect(warn).toHaveBeenCalledTimes(1);
+      expect(String(warn.mock.calls[0]![0])).toContain('style "chalk"');
+      expect(unknown).toHaveLength(20);
+      expect(unknown.every((p) => p.label.startsWith("NOT IN WORDMARK_STYLES"))).toBe(true);
+    } finally {
+      warn.mockRestore();
+    }
   });
 
   it("composition: takes a list of ComposedProps, one set of pages per preset; none yet gives a row with a note", () => {
