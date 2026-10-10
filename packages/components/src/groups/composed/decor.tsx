@@ -122,8 +122,9 @@ function CustomDrawing({ svg }: { svg: NonNullable<ElOf<"decor">["svg"]> }) {
 export function DecorDrawing({ el }: { el: ElOf<"decor"> }) {
   if (el.svg) return <CustomDrawing svg={el.svg} />;
   if (el.motif) {
-    const Motif = MOTIF_DRAWING[el.motif];
-    return <Motif />;
+    // A value outside the library (a stray translation overlay) draws nothing rather than failing the page.
+    const Motif = MOTIF_DRAWING[el.motif] as (() => ReactElement) | undefined;
+    return Motif ? <Motif /> : null;
   }
   return null;
 }

@@ -219,6 +219,58 @@ describe("composed sections render", () => {
       const band = sectionHtml(render([one("decor", { svg: { width: 8, height: 8, paths: [{ d: "M0 0h8v8z", fill: "band", stroke: "onBand" }] } })]).html);
       expect(band).toContain("fill:var(--c-band, var(--c-primary))");
     });
+
+    it("a translation overlay on a layout value is ignored; a motif outside the library draws nothing, never fails the page", () => {
+      const en = (s: SiteSpec, overlay: Record<string, string>) => {
+        s.locales = { default: "sl", enabled: ["sl", "en"] };
+        s.translations = { en: overlay };
+      };
+      const { spec, page } = render([sectionOf(SAMPLE)]);
+      const pi = spec.pages.indexOf(page);
+      const at = (id: string) => `/pages/${pi}/sections/0/props/elements/${SAMPLE.elements.findIndex((e) => e.id === id)}`;
+      en(spec, { [`${at("e_mark")}/motif`]: "Plate", [`${at("e_photo")}/mask`]: "Cut", [`${at("e_title")}/text`]: "All makes serviced in Kranj" });
+      const s = sectionHtml(renderPage(spec, page, { locale: "en" }));
+      expect(s).toContain("All makes serviced in Kranj");
+      expect(s).toContain("cx-mask-cut");
+      expect(s).toContain('d="M0 0h10l10 14 10-14h10v6L26 28H14L0 6z"');
+      // A spec that skipped validation, with a motif no drawing knows.
+      const bogus = sectionOf(SAMPLE);
+      (bogus.props as { elements: { motif?: string }[] }).elements[4]!.motif = "Plate";
+      const raw = sectionHtml(render([bogus]).html);
+      expect(raw).toContain("cx-el--decor");
+      expect(raw).not.toContain("<svg");
+    });
+
+    it("a heading below size 2 is in normal case even where the direction sets uppercase headings", () => {
+      const caps = (s: SiteSpec) => {
+        s.design.headingCase = "uppercase";
+      };
+      for (const size of [-1, 0, 1]) {
+        const { html } = render([one("heading", { size, case: undefined, rotate: undefined })], caps);
+        expect(html).toContain("--case-heading:uppercase");
+        expect(sectionHtml(html), String(size)).toMatch(/<h2 [^>]*class="[^"]*\bcx-h cx-h--normal"/);
+      }
+      // From size 2 the direction's case holds; an explicit case still wins.
+      expect(sectionHtml(render([one("heading", { size: 2, case: undefined, rotate: undefined })], caps).html)).not.toContain("cx-h--normal");
+      expect(sectionHtml(render([one("heading", { size: 4, rotate: undefined })], caps).html)).toContain("cx-h cx-h--uppercase");
+      expect(composedStylesheet().css).toMatch(/\.cx-h--normal\{text-transform:none\}/);
+    });
+
+    it("a generated picture carries its label under every mask and treatment", () => {
+      const generated = (s: SiteSpec) => {
+        s.assets.images.find((i) => i.id === IMG2)!.origin = "generated";
+      };
+      for (const mask of ["none", "arch", "circle", "cut", "stamp", "ticket"]) {
+        for (const treatment of ["none", "duotone", "tint", "grain"]) {
+          const s = sectionHtml(render([one("image", { mask, treatment })], generated).html);
+          expect(s, `${mask} ${treatment}`).toMatch(/<picture class="media media--ai[^"]*" data-ai-label="Ustvarjeno z UI"/);
+        }
+      }
+      // The composed sheet moves the label where a mask would cut it, and never hides it.
+      const { css } = composedStylesheet();
+      expect(css).toMatch(/\.cx-mask-stamp \.media--ai::after\{[^}]*top:/);
+      expect(css).not.toMatch(/media(--ai)?::after\{[^}]*content:\s*none/);
+    });
   });
 
   describe("phones", () => {

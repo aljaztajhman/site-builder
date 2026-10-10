@@ -91,4 +91,32 @@ describe("composed type scale and seal labels", () => {
       expect(problems).toEqual([]);
     }, 120_000);
   }
+
+  it("a heading below size 2 renders in normal case in a direction with uppercase headings; size 2 keeps the direction's", async () => {
+    const t = COMPOSED[0]!;
+    const spec = await loadComposed(t);
+    spec.design.headingCase = "uppercase";
+    const sizes = [-1, 0, 1, 2];
+    spec.pages.find((p) => p.kind === "home")!.sections = [
+      {
+        id: "s_case",
+        type: "composed",
+        variant: "free",
+        props: ComposedProps.parse({
+          intent: "story",
+          width: "contained",
+          rows: sizes.length,
+          elements: sizes.map((n, i) => ({ id: `e_h${i}`, kind: "heading", text: `Velikost ${n}`, level: 2, size: n, desk: { col: 1, span: 12, row: i + 1 }, phone: { order: i, span: "full" } })),
+        }),
+      } as Section,
+    ];
+    const file = await writeComposedSite(t, spec, dir);
+    const { page, ctx } = await openPage(browser, WIDTHS[0]!, `${server.url}/${file}`);
+    try {
+      const cases = await page.evaluate((steps) => steps.map((n) => getComputedStyle(document.querySelector(`#s_case .cx-h[data-sz="${n}"]`)!).textTransform), sizes);
+      expect(cases).toEqual(["none", "none", "none", "uppercase"]);
+    } finally {
+      await ctx.close();
+    }
+  }, 120_000);
 });

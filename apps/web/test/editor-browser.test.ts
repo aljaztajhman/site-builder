@@ -93,6 +93,36 @@ describe("editor in a browser", () => {
     }
   }, 60_000);
 
+  it("edits a composed section's copy in its form, and shows none of its placement", async () => {
+    const sheet = JSON.parse(await readFile(path.join(here, "../../../tools/eval/composed/m.json"), "utf8")) as SiteSpec;
+    sheet.slug = "urejanje-oblikovan";
+    const site = await platform.repo.createSite({ name: sheet.slug, slug: sheet.slug, intake: { description: "Avtoservis Mrak, Savska cesta 52, Kranj.", photoAssetIds: [], scope: "home" } });
+    await platform.repo.saveSpec(site.id, sheet, "generate");
+    const { page, close } = await open(site.id);
+    try {
+      await page.locator(".outline li", { hasText: "Servis vseh znamk v Kranju" }).click();
+      const pane = page.locator(".pane");
+      await expect.poll(() => pane.textContent()).not.toContain("Ta razdelek ustvari sistem");
+      // Copy: the heading, the fact's value and label, the button's text (heading is elements/2).
+      const title = page.locator('[data-path="/pages/0/sections/0/props/elements/2/text"] input');
+      await title.waitFor();
+      expect(await page.locator('[data-path="/pages/0/sections/0/props/elements/4/value"] input').count()).toBe(1);
+      expect(await page.locator('[data-path="/pages/0/sections/0/props/elements/5/label"] input').count()).toBe(1);
+      // No placement, size, style or picture field, and no element to add, move or remove.
+      for (const key of ["desk", "phone", "size", "weight", "case", "measure", "ratio", "treatment", "style", "image", "action", "level", "kind", "id"]) {
+        expect(await pane.locator(`[data-path$="/${key}"]`).count(), key).toBe(0);
+      }
+      expect(await pane.locator('[data-path$="/props"]').count()).toBe(0);
+      await title.fill("Servis vseh znamk v Kranju in okolici");
+      const el = async () => (home(await spec(site.id)).sections[0]!.props as { elements: { text?: string; desk: object; case?: string }[] }).elements[2]!;
+      await expect.poll(async () => (await el()).text, { timeout: 10_000 }).toBe("Servis vseh znamk v Kranju in okolici");
+      // The rest of the element is as the designer placed it.
+      expect(await el()).toMatchObject({ desk: { col: 2, span: 8, row: 2, layer: 1 }, case: "uppercase" });
+    } finally {
+      await close();
+    }
+  }, 60_000);
+
   it("keeps the keyboard's place through a re-render (undo) and lets the owner close a message", async () => {
     const id = await bakery("urejanje-fokus");
     const { page, close } = await open(id);
