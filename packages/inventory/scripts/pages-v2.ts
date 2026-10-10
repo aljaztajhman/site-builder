@@ -5,15 +5,19 @@
  * small site spec the real component library renders, so a sheet equals what a site renders. `pagesFor` here is the
  * sheet's entry point: these kinds first, then the older kinds in pages.ts.
  */
+import { readFileSync } from "node:fs";
 import {
   ComposedProps,
   EDGES,
   MOTION_META,
-    direction,
+  direction,
+  fillPreset,
+  parsePresetId,
+  type PresetSources,
   type Section,
   type SiteSpec,
 } from "@sb/spec";
-import { assetName, type Asset } from "../src/index.ts";
+import { assetName, compositionPreset, type Asset } from "../src/index.ts";
 // @sb/components doesn't export its drawing data (not this unit's package); the data file imports only types.
 import { drawingData } from "../../components/src/groups/composed/drawings/index.ts";
 import { BASE_GOLDEN, SHEET_PALETTES, TONES, golden, imageIds, inDirection, pagesFor as pagesForV1, repairSpec, slugOf, withHome, type SheetPage } from "./pages.ts";
@@ -45,12 +49,42 @@ export const WORDMARK_NAMES = [
   "Zobna ordinacija Ažman Šuštar Žigon",
 ] as const;
 
+/** The fixtures a composition preset is filled from on its sheet (the three the preset tests fill from). */
+export const PRESET_FIXTURES = ["pekarna-kvas", "avtoservis-mrak", "instalacije-rebernik"] as const;
+
+type PresetFixture = Omit<PresetSources, "copy"> & { copy: Record<string, PresetSources["copy"]> };
+let presetFixtures: Record<string, PresetFixture> | undefined;
+
 /**
- * Where the composition sheet gets its pages. A composition asset is a preset (I3-0 builds `fillPreset`); until that
- * exists the list is empty and a composition asset shows a note. TODO(I3-0): return `fillPreset(asset, fixture)` for
- * each of the three fixtures (pekarna-kvas, avtoservis-mrak, instalacije-rebernik). Tests and makers can set it.
+ * A fixture's preset sources for an intent: its golden's business, images and colours, its recorded brief and the copy
+ * of its golden section of that intent (test/fixtures/preset-sources.json, shared with the preset tests).
  */
-export const PRESET_SOURCE: { current: (asset: Asset) => { fixture: string; props: ComposedProps }[] } = { current: () => [] };
+export function presetFixtureSources(fixture: string, intent: string): PresetSources | undefined {
+  presetFixtures ??= JSON.parse(readFileSync(new URL("../test/fixtures/preset-sources.json", import.meta.url), "utf8")) as Record<string, PresetFixture>;
+  const f = presetFixtures[fixture];
+  if (!f) return undefined;
+  const { copy, ...rest } = f;
+  return { ...rest, ...(copy[intent] ? { copy: copy[intent] } : {}) };
+}
+
+/**
+ * A composition asset's filled presets: `fillPreset` from each of the three fixtures (a fill that fails, say a hero that
+ * needs a photo for a client without one, is left out). An asset that isn't a registered preset has none, and its row
+ * shows a note. Tests and makers can replace `current`.
+ */
+export function presetsFromFixtures(asset: Asset): { fixture: string; props: ComposedProps }[] {
+  const preset = compositionPreset(asset.id);
+  const intent = preset && parsePresetId(preset.id)?.intent;
+  if (!preset || !intent) return [];
+  return PRESET_FIXTURES.flatMap((fixture) => {
+    const src = presetFixtureSources(fixture, intent);
+    const r = src && fillPreset(preset, src);
+    return r && r.ok ? [{ fixture, props: r.props }] : [];
+  });
+}
+
+/** Where the composition sheet gets its pages (default: the presets filled from the fixtures). */
+export const PRESET_SOURCE: { current: (asset: Asset) => { fixture: string; props: ComposedProps }[] } = { current: presetsFromFixtures };
 
 const TONE_LABEL: Record<Tone, string> = { default: "paper", alt: "alt", inverse: "inverse" };
 const LETTER = (i: number): string => String.fromCharCode(97 + i);

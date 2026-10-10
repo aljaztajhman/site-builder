@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ComposedProps, validateSite } from "@sb/spec";
-import { Registry, type Asset, type AssetKind } from "../src/index.ts";
-import { PRESET_SOURCE, WORDMARK_NAMES, pagesFor } from "../scripts/pages-v2.ts";
+import { Registry, compositionAssets, type Asset, type AssetKind } from "../src/index.ts";
+import { PRESET_FIXTURES, PRESET_SOURCE, WORDMARK_NAMES, pagesFor, presetsFromFixtures } from "../scripts/pages-v2.ts";
 import { emptySheetHtml, sheetGroups, sheetHtml, type Shot } from "../scripts/sheet-html.ts";
 
 const asset = (id: string, kind: AssetKind, more: Partial<Asset> = {}): Asset => ({
@@ -90,6 +90,17 @@ describe("contact sheets of the composition-language kinds", () => {
       for (const p of pages) if (p.kind === "site") expect(validateSite(p.spec).ok).toBe(true);
     } finally {
       PRESET_SOURCE.current = before;
+    }
+  });
+
+  it("composition: a registered preset's sheet is fillPreset from the three fixtures, each page a valid site", () => {
+    expect(PRESET_SOURCE.current).toBe(presetsFromFixtures);
+    for (const a of compositionAssets()) {
+      const filled = presetsFromFixtures(a);
+      expect(filled.map((f) => f.fixture), a.id).toEqual([...PRESET_FIXTURES]);
+      const pages = pagesFor(a);
+      expect(pages.length, a.id).toBe(filled.length * 6);
+      for (const p of pages) if (p.kind === "site") expect(validateSite(p.spec).ok, `${a.id} ${p.variant}`).toBe(true);
     }
   });
 
