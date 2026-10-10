@@ -1,13 +1,55 @@
-import { Section } from "../../primitives/index.tsx";
+import type { CSSProperties } from "react";
+import { Section, cx, titleId } from "../../primitives/index.tsx";
 import type { LcpResolvers, SectionProps } from "../../types.ts";
+import { ElementView } from "./elements.tsx";
+import { firstHeading, firstImage, imageSizes, overPhoto, readingOrder } from "./layout.ts";
 
 /**
- * Spec v19 composed sections (packages/spec/src/composition). Placeholder until the renderer lands (F1, builder
- * "renderer"): it renders the section shell only. Nothing generates composed sections while config designer.agent is off.
+ * Spec v19 composed sections (packages/spec/src/composition; docs/plans/ai-designer-spec.md §2.3). The elements sit on a
+ * 12-column grid from 64 rem, each by its own place (custom properties in its style attribute, composed.css); on phones
+ * they stack on a 4-column grid in phone.order, no rotation, no shift, no overlap. The DOM is in phone order, so the
+ * reading order is the phone's whatever the desktop shows. One static stylesheet (composed.css), loaded only by pages
+ * that have a composed section (@sb/render shared.ts, site.tsx): sites without one get exactly the HTML and CSS they had.
  */
-export function Composed({ section }: SectionProps<"composed">) {
-  return <Section id={section.id} type={section.type} variant={section.variant} tone={section.tone}>{null}</Section>;
+export function Composed({ section, ctx, index }: SectionProps<"composed">) {
+  const { props } = section;
+  const ordered = readingOrder(props.elements);
+  const heading = firstHeading(ordered);
+  // The page's opening section loads its first photo eagerly, the one composedLcp preloads.
+  const lead = index === 0 ? firstImage(props.elements) : undefined;
+  const surface = props.surface;
+  return (
+    <Section
+      id={section.id}
+      type={section.type}
+      variant={section.variant}
+      tone={section.tone}
+      labelled={heading !== undefined}
+      className={cx(`cx-w-${props.width}`, surface?.texture && surface.texture !== "none" && `cx-tex-${surface.texture}`, surface?.divider && surface.divider !== "none" && `cx-div-${surface.divider}`)}
+    >
+      <div className={cx("cx", `cx--mh-${props.minHeight ?? "none"}`)} style={{ "--rows": props.rows, "--g": props.gap ?? 3 } as CSSProperties} data-intent={props.intent}>
+        {ordered.map((el) => (
+          <ElementView
+            key={el.id}
+            el={el}
+            ctx={ctx}
+            width={props.width}
+            over={overPhoto(el, props.elements)}
+            titleId={el === heading ? titleId(section.id) : undefined}
+            priority={lead?.id === el.id}
+          />
+        ))}
+      </div>
+    </Section>
+  );
 }
 
 export const composedRenderers = { composed: Composed };
-export const composedLcp: LcpResolvers = {};
+
+/** The first photo in reading order that phones show, with the `sizes` Composed renders it with. */
+export const composedLcp: LcpResolvers = {
+  composed: (section) => {
+    const lead = firstImage(section.props.elements);
+    return lead ? { image: lead.image, sizes: imageSizes(section.props.width, lead) } : null;
+  },
+};
