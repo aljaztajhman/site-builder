@@ -39,7 +39,7 @@ Not documented, so decided here: how worktree branches get back (§6). The built
 | **Reviewer** | `.claude/agents/reviewer.md` | Opus 5.5, high; read-only | Reviews a diff against its plan and brief: correctness, requirements, the CLAUDE.md rules (spec, facts, banned list, both widths); not style | Edits; approves its own work |
 | **Asset maker** | `.claude/agents/asset-maker.md` | Opus 5.5, medium; own worktree | Makes inventory assets in batches (drawings, palettes, compositions, fixtures) with their registry entries, render tests and contact sheet | Approves assets (the owner's gallery and the director's curation do) |
 
-A role's model is a starting point. The director may pass a different one per task: Haiku for a mechanical builder task (a rename across 40 files with a codemod), Opus at high effort for a builder task that needs taste (a hand-made reference homepage, a tricky migration). Sonnet only as a deliberate comparison arm (§8).
+A role's model is a starting point. The director may pass a different one per task: Haiku for a mechanical builder task (a rename across 40 files with a codemod), Opus at high effort for a builder task that needs taste (a hand-made reference homepage, a tricky migration). Sonnet only as a deliberate comparison arm (§8), and then at **medium** effort: Anthropic recalibrated Sonnet 5.5's effort levels and advises starting coding agents at medium; the first Sonnet builders here ran at high, which overspends. Not yet known: how the owner's Claude plan weighs Opus against Sonnet usage, so "most out of the plan limits" is settled by the owner's setup measurements, not assumed.
 
 ## 4. Triage: every task gets a mode first
 
