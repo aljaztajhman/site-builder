@@ -1,19 +1,25 @@
 import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { describe, expect, it } from "vitest";
-import { DIRECTIONS, FAMILIES, FONTS, FONT_PAIRS, Imagery, MOTIFS, SECTION_DEFS, SUBMOTIFS, type Colors } from "@sb/spec";
+import { BusinessType, DIRECTIONS, FAMILIES, FONTS, FONT_PAIRS, Imagery, MOTIFS, SECTION_DEFS, SUBMOTIFS, SUBTYPES, type Colors } from "@sb/spec";
 import {
+  CURATED_PALETTES,
   SLOVENE_GLYPHS,
   assetName,
   byteBudget,
+  draftAssets,
   fontFile,
   fontLicenseFile,
+  groundOf,
   inventory,
   inventoryFontAssets,
   inventoryPairingAssets,
   paletteContrast,
+  paletteIssues,
   paletteOf,
+  paletteTells,
   shippedColors,
+  temperatureOf,
   todaysAssets,
 } from "../src/index.ts";
 
@@ -50,13 +56,14 @@ describe("today's assets are registered", () => {
       else expect(registry.byId(`palette/${d.id}`), d.id).toBeDefined();
     }
     const familyPalettes = Object.values(FAMILIES).reduce((n, f) => n + f.palettes.length, 0);
-    expect(registry.byKind("palette")).toHaveLength(DIRECTIONS.filter((d) => !(d.template && FAMILIES[d.id])).length + familyPalettes);
+    expect(registry.byKind("palette")).toHaveLength(DIRECTIONS.filter((d) => !(d.template && FAMILIES[d.id])).length + familyPalettes + CURATED_PALETTES.length);
   });
 
-  it("existing assets start approved, new ones draft; system- and owner-only sections are not pickable", () => {
+  it("existing assets start approved, new ones as drafts; system- and owner-only sections are not pickable", () => {
     expect(todaysAssets().every((a) => a.status === "approved")).toBe(true);
+    expect(draftAssets().length).toBeGreaterThan(0);
     const drafts = assets.filter((a) => a.status !== "approved");
-    expect(drafts.map((a) => a.id)).toEqual([...inventoryFontAssets(), ...inventoryPairingAssets()].map((a) => a.id));
+    expect(drafts.map((a) => a.id)).toEqual([...draftAssets(), ...inventoryFontAssets(), ...inventoryPairingAssets()].map((a) => a.id));
     expect(drafts.every((a) => a.status === "draft")).toBe(true);
     const unpickable = assets.filter((a) => a.pickable === false).map((a) => a.id);
     expect(unpickable.sort()).toEqual(["section/collection:cards", "section/collection:list", "section/legal:default", "section/not-found:default"]);
@@ -106,24 +113,59 @@ describe.each(assets.map((a) => [a.id, a] as const))("%s", (_id, asset) => {
     const p = paletteOf(asset.id);
     const misses = (colors: Colors) => paletteContrast(colors, p!.direction).filter((c) => !c.ok).map((c) => `${c.fg} on ${c.bg} ${c.ratio} < ${c.min}`);
 
-    it("holds contrast for its text roles as a site renders it", () => {
-      expect(p, "palette colours").toBeDefined();
-      expect(misses(shippedColors(p!.colors, p!.direction))).toEqual([]);
-    });
+    if (p?.direction) {
+      const dir = p.direction;
+      it("holds contrast for its text roles as a site renders it", () => {
+        expect(misses(shippedColors(p.colors, dir))).toEqual([]);
+      });
+    } else {
+      // A curated palette belongs to no direction: it is held to everything as stored.
+      it("passes every palette check as stored: contrast, bans, its ground, no give-away combination", () => {
+        expect(p, "palette colours").toBeDefined();
+        expect(paletteIssues(p!.colors, asset.tags.ground[0]!)).toEqual([]);
+      });
 
-    it("holds contrast for its text roles as stored (or is a known miss)", () => {
-      expect(misses(p!.colors)).toEqual(STORED_CONTRAST_MISSES[asset.id] ?? []);
+      it("renders exactly as stored in every plain direction of its ground (no render-time repair)", () => {
+        const dirs = DIRECTIONS.filter((d) => !d.template && d.palette.background === asset.tags.ground[0]);
+        expect(dirs.length).toBeGreaterThan(0);
+        for (const d of dirs) expect(shippedColors(p!.colors, d), d.id).toEqual(p!.colors);
+      });
+    }
+
+    it("holds contrast for its text roles as stored", () => {
+      expect(p, "palette colours").toBeDefined();
+      expect(misses(p!.colors)).toEqual([]);
     });
   }
 });
 
-/**
- * Stored family palettes whose accent misses 3:1 on the inverse ground; enforceDesign repairs the accent when a site
- * uses them (the test above), but the director sees the stored values. Measured 10 Oct 2026; fix them in
- * packages/spec/src/families.ts and empty this list (the test fails when a listed miss is fixed or a new one appears).
- */
-const STORED_CONTRAST_MISSES: Record<string, string[]> = {
-  "palette/cevi-green": ["accent on inverse 2.88 < 3"],
-  "palette/skorja-poppy": ["accent on inverse 2.73 < 3"],
-  "palette/racun-plum": ["accent on inverse 2.99 < 3"],
-};
+describe("curated palettes (palettes/curated.ts)", () => {
+  const trades = new Set<string>([...BusinessType.options, ...Object.entries(SUBTYPES).flatMap(([t, subs]) => subs.map((s) => `${t}/${s}`))]);
+
+  it("unique ids, a source line, stances, trades the spec knows, temperature and ground as read from the colours", () => {
+    expect(new Set(CURATED_PALETTES.map((p) => p.id)).size).toBe(CURATED_PALETTES.length);
+    for (const p of CURATED_PALETTES) {
+      expect(p.source.length, p.id).toBeGreaterThan(10);
+      expect(p.stances.length, p.id).toBeGreaterThan(0);
+      expect(p.trades.length, p.id).toBeGreaterThan(0);
+      expect(p.trades.filter((t) => !trades.has(t)), p.id).toEqual([]);
+      expect(p.temperature, p.id).toBe(temperatureOf(p.colors));
+      expect(p.ground, p.id).toBe(groundOf(p.colors));
+      expect(p.mood, p.id).toContain(p.temperature);
+      expect(p.colors.band === undefined ? true : p.mood.includes("band"), p.id).toBe(true);
+    }
+  });
+
+  it("covers every ground and temperature", () => {
+    for (const g of ["white", "tint", "dark"]) expect(CURATED_PALETTES.some((p) => p.ground === g), g).toBe(true);
+    for (const t of ["warm", "cool"]) expect(CURATED_PALETTES.some((p) => p.temperature === t), t).toBe(true);
+  });
+
+  it("the give-away checks catch what they are for", () => {
+    const base = CURATED_PALETTES[0]!.colors;
+    expect(paletteTells({ ...base, background: "#ffffff", surface: "#f3e9d8", primary: "#b9562f" })).toEqual(["warm cream with terracotta"]);
+    expect(paletteTells({ ...base, background: "#0e0f10", primary: "#b6f22c" })).toEqual(["near-black with acid green"]);
+    expect(paletteTells({ ...base, primary: "#6d3fd1", accent: "#2f6fe0", band: undefined, onBand: undefined })).toEqual(["purple with blue"]);
+    expect(paletteIssues({ ...base, background: "#f6f0e2" }, "tint")).toContain("background #f6f0e2 is cream, beige or off-white");
+  });
+});

@@ -34,7 +34,7 @@ import {
   type SiteSpec,
   type SubMotif,
 } from "@sb/spec";
-import { SLOVENE_GLYPHS, assetName, paletteContrast, paletteOf, shippedColors, type Asset } from "../src/index.ts";
+import { SLOVENE_GLYPHS, assetName, paletteContrast, paletteIssues, paletteOf, shippedColors, type Asset } from "../src/index.ts";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 export const repoRoot = path.resolve(here, "../../..");
@@ -256,6 +256,27 @@ export function sitePages(asset: Asset): SheetPage[] {
   }
 }
 
+/** The direction a curated palette is rendered in on its sheet: a plain direction of the palette's ground. */
+const CURATED_SHEET_DIRECTION: Record<string, string> = { white: "clean-swiss", tint: "clinical-calm", dark: "dark-elegant" };
+
+/**
+ * A curated palette on a real page (the base golden's photos and facts, the renderer that publishes): a hero, then
+ * sections on the alternate, inverse and band grounds, header and footer shown. Its colours go through enforceDesign
+ * as a site's would; a curated palette comes out unchanged (packages/inventory/test holds that).
+ */
+export function curatedPalettePage(asset: Asset): SheetPage {
+  const base = golden(BASE_GOLDEN).spec;
+  const dir = direction(CURATED_SHEET_DIRECTION[asset.tags.ground[0]!]!);
+  const spec = inDirection(base, dir, paletteOf(asset.id)!.colors);
+  const sections = [
+    sampleSection(base, "hero-split:image-right", "s_hero"),
+    sampleSection(base, "services-list:rows", "s_alt", "alt"),
+    sampleSection(base, "image-text:image-left", "s_inv", "inverse"),
+    sampleSection(base, "cta:band", "s_band", spec.design.colors.band ? "band" : "default"),
+  ].filter((s): s is Section => s !== null);
+  return { asset: asset.id, variant: "b", label: `on ${dir.id}`, kind: "site", spec: repairSpec(withHome(spec, sections, slugOf(asset.id, "b"))), fixture: BASE_GOLDEN, showChrome: true };
+}
+
 /** Three composed sections, one per ground, each holding the given elements beside a heading. */
 function composedGrounds(base: SiteSpec, elements: (image: string) => Props[]): Section[] {
   const imgs = imageIds(base);
@@ -364,7 +385,9 @@ const ROLES: (keyof Colors)[] = ["background", "surface", "text", "muted", "prim
 export function palettePage(asset: Asset): SheetPage {
   const p = paletteOf(asset.id)!;
   const c = p.colors;
-  const shipped = shippedColors(c, p.direction);
+  // A curated palette belongs to no direction: it renders as stored (paletteIssues holds it to that).
+  const shipped = p.direction ? shippedColors(c, p.direction) : c;
+  const issues = p.direction ? [] : paletteIssues(c, asset.tags.ground[0]!);
   const stored = paletteContrast(c, p.direction);
   const after = paletteContrast(shipped, p.direction);
   const sw = ROLES.filter((r) => c[r])
@@ -381,13 +404,33 @@ export function palettePage(asset: Asset): SheetPage {
 <div class="demo" style="background:${c.inverse};color:${c.onInverse}">Inverse <a style="color:${c.accent}">accent link</a></div>
 ${c.band ? `<div class="demo" style="background:${c.band};color:${c.onBand}">Band: 041 555 730</div>` : ""}`;
   const css = `.meta{font:13px/1.4 system-ui;color:#555;margin:0 0 16px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:18px}.sw{font-size:13px;display:flex;flex-direction:column;gap:2px}.chip{height:56px;border:1px solid #0002;border-radius:4px}code{font-size:12px}.chg{color:#b00}.wrap{display:grid;gap:16px}@media(min-width:900px){.wrap{grid-template-columns:1fr 1fr}}table{border-collapse:collapse;font-size:13px;width:100%}td{padding:3px 6px;border-bottom:1px solid #eee}.miss td{background:#fde8e8;font-weight:600}.pair{display:inline-block;padding:0 6px;font-weight:700;border:1px solid #0001}.demo{padding:14px 16px;border-radius:4px;margin-bottom:8px}.btn{display:inline-block;padding:8px 14px;border-radius:3px;font-weight:600}`;
-  const body = `<p class="meta">${asset.id} · ${asset.note ?? ""} · ground ${asset.tags.ground.join(", ")} · ${asset.tags.mood.join(", ")}</p><div class="grid">${sw}</div><div class="wrap"><div>${demo}</div><table><tr><td></td><td>pair</td><td>stored</td><td>as rendered</td><td>min</td><td></td></tr>${rows}</table></div>`;
+  const tagLine = [asset.tags.stances.join(", "), asset.tags.trades.join(", ")].filter(Boolean).join(" · ");
+  const body = `<p class="meta">${asset.id} · ${asset.note ?? ""} · ground ${asset.tags.ground.join(", ")} · ${asset.tags.mood.join(", ")}${tagLine ? `<br>${tagLine}` : ""}</p>${issues.length ? `<p class="meta" style="color:#b00;font-weight:600">${issues.join("; ")}</p>` : ""}<div class="grid">${sw}</div><div class="wrap"><div>${demo}</div><table><tr><td></td><td>pair</td><td>stored</td><td>as rendered</td><td>min</td><td></td></tr>${rows}</table></div>`;
   return { asset: asset.id, variant: "a", label: asset.id, kind: "html", html: doc(asset.id, css, body) };
 }
+
+/**
+ * Every palette at a glance (the sheet's palette-overview pictures): one small page per palette in its own colours,
+ * a header, a heading with muted text, the button and an accent link on the page, then the surface, band and inverse
+ * grounds, so palettes can be compared side by side.
+ */
+export function paletteOverviewHtml(assets: Asset[], title: string): string {
+  const cards = assets
+    .map((a) => {
+      const c = paletteOf(a.id)!.colors;
+      const band = c.band ? `<div class="g" style="background:${c.band};color:${c.onBand}"><b>041 555 730</b> · Pokličite danes</div>` : `<div class="g none">no band</div>`;
+      return `<div class="card"><div class="pg" style="background:${c.background};color:${c.text};border:1px solid ${c.border}"><div class="hd" style="border-bottom:1px solid ${c.border}"><b>Kvas</b><span style="color:${c.muted}">Ponudba · Kontakt</span></div><div class="hero"><div class="h">Kruh, ki vzhaja čez noč</div><p style="color:${c.muted}">Pečemo vsak dan od šestih zjutraj.</p><span class="btn" style="background:${c.primary};color:${c.onPrimary}">Pokličite</span> <a style="color:${c.accent}">Pot do nas →</a></div></div><div class="g" style="background:${c.surface};color:${c.text}">Ponudba <span style="color:${c.muted}">· drobno pecivo</span></div>${band}<div class="g" style="background:${c.inverse};color:${c.onInverse}">Odprto do 19h · <a style="color:${c.accent}">zemljevid</a></div><div class="id">${esc(a.id.replace(/^palette\//, ""))} <span>${esc(a.tags.ground.join(""))} · ${esc(a.tags.mood.join(", "))}</span></div><div class="src">${esc(a.note ?? "")}</div></div>`;
+    })
+    .join("");
+  const css = `body{background:#e9e9ea;padding:16px}h1{font:600 20px system-ui;margin:0 0 12px}.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}.card{background:#fff;border-radius:6px;padding:8px;font-size:12px}.pg{border-radius:3px 3px 0 0}.hd{display:flex;justify-content:space-between;padding:6px 10px;font-size:11px}.hero{padding:12px 10px 14px}.h{font:700 19px/1.15 system-ui;margin-bottom:4px}.hero p{margin:0 0 10px}.btn{display:inline-block;padding:6px 10px;border-radius:3px;font-weight:600}.g{padding:9px 10px}.none{color:#888;background:repeating-linear-gradient(45deg,#f4f4f4 0 6px,#fff 6px 12px)}.id{font-weight:700;margin-top:6px}.id span{font-weight:400;color:#666}.src{color:#444;font-style:italic;margin-top:2px}`;
+  return doc(title, css, `<h1>${esc(title)}</h1><div class="grid">${cards}</div>`);
+}
+
+const esc = (s: string): string => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 export function pagesFor(asset: Asset): SheetPage[] {
   if (asset.kind === "font") return [fontPage(asset)];
   if (asset.kind === "pairing") return [pairingPage(asset)];
-  if (asset.kind === "palette") return [palettePage(asset)];
+  if (asset.kind === "palette") return paletteOf(asset.id)!.direction ? [palettePage(asset)] : [palettePage(asset), curatedPalettePage(asset)];
   return sitePages(asset);
 }
