@@ -131,12 +131,16 @@ describe("ribbon", () => {
     expect(composedV2Stylesheet().css).toMatch(/@supports \(animation-timeline:scroll\(\)\)\{@media \(prefers-reduced-motion:no-preference\)\{@keyframes cx-rb-loop[\s\S]*\.cx-rb--drift \.cx-rb__track\{animation:cx-rb-drift linear both;animation-timeline:view\(\)\}/);
   });
 
-  it("loop: a pause button (hidden until the island runs, aria-pressed, Slovene label) and the ribbon island; pauses on hover, focus, off screen", () => {
+  it("loop: a pause button (hidden until the island runs, aria-pressed, a fixed Slovene label) and the ribbon island; pauses on hover, focus, off screen", () => {
     const s = sectionOf(at({ kind: "ribbon", items: ["Kruh", "Pecivo"], move: "loop" }));
     const html = render([s]);
     const h = el(html);
     expect(h).toContain("data-cx-loop");
-    expect(h).toContain('<button type="button" class="cx-rb__btn" aria-pressed="false" data-play="Predvajaj" data-pause="Ustavi" hidden="">Ustavi</button>');
+    expect(h).toContain('<button type="button" class="cx-rb__btn" aria-pressed="false" hidden="">Ustavi premikanje</button>');
+    // The island toggles aria-pressed only, never the label.
+    const island = readFileSync(new URL("../../components/islands/composed/ribbon.js", import.meta.url), "utf8");
+    expect(island).toContain('setAttribute("aria-pressed"');
+    expect(island).not.toMatch(/textContent|innerText/);
     expect(composedIslands([s])).toEqual([COMPOSED_RIBBON_ISLAND]);
     expect(composedIslandFiles()).toContain("ribbon.js");
     expect(sharedBundle().files.has(`js/${COMPOSED_RIBBON_ISLAND}`)).toBe(true);

@@ -6,8 +6,7 @@ import type { RenderCtx } from "../../../types.ts";
  * rather than in i18n.ts's UiKey table so the v19 dictionaries stay as they are; they can move there in one step.
  */
 const sl = {
-  pause: "Ustavi",
-  play: "Predvajaj",
+  pause: "Ustavi premikanje",
   before: "Prej",
   after: "Potem",
   photos: "Fotografije",
@@ -15,8 +14,7 @@ const sl = {
 };
 type KindKey = keyof typeof sl;
 const en: Record<KindKey, string> = {
-  pause: "Pause",
-  play: "Play",
+  pause: "Pause motion",
   before: "Before",
   after: "After",
   photos: "Photos",

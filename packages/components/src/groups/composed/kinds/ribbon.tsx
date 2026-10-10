@@ -67,7 +67,8 @@ export function RibbonBlock({ el, ctx, over }: { el: Ribbon; ctx: RenderCtx; ove
         </div>
       )}
       {move === "loop" && (
-        <button type="button" className="cx-rb__btn" aria-pressed="false" data-play={kindText(ctx, "play")} data-pause={kindText(ctx, "pause")} hidden>
+        // A toggle button with a fixed label (WAI-ARIA button pattern): aria-pressed says whether the motion is stopped.
+        <button type="button" className="cx-rb__btn" aria-pressed="false" hidden>
           {kindText(ctx, "pause")}
         </button>
       )}

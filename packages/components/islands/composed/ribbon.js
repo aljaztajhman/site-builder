@@ -15,12 +15,10 @@
   ribbons.forEach((ribbon) => {
     const button = ribbon.querySelector("button.cx-rb__btn");
     if (!(button instanceof window.HTMLButtonElement)) return;
-    const play = button.dataset.play ?? "";
-    const pause = button.dataset.pause ?? "";
+    // A toggle button with a fixed label ("Ustavi premikanje"): only aria-pressed changes (WAI-ARIA button pattern).
     button.addEventListener("click", () => {
       const stopped = ribbon.classList.toggle("is-paused");
       button.setAttribute("aria-pressed", String(stopped));
-      button.textContent = stopped ? play : pause;
     });
     button.hidden = false;
     ribbon.classList.add("is-live");

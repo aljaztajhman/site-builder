@@ -525,6 +525,7 @@ body[data-hdr="over"] .site-header--sticky::before {
 .cx-ph__caps {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 0.25rem 1.25rem;
   margin: 1.5rem 0 0;
   padding: 0;
@@ -637,6 +638,10 @@ body[data-hdr="over"] .site-header--sticky::before {
   cursor: pointer;
   outline-offset: -0.25rem;
 }
+/* Stopped: the pressed state shows as a bar along the button's foot. */
+.cx-rb__btn[aria-pressed="true"] {
+  box-shadow: inset 0 -0.25rem currentColor;
+}
 .cx-rb--drift {
   --rb-dx: -6rem;
 }
@@ -672,7 +677,7 @@ body[data-hdr="over"] .site-header--sticky::before {
       flex: none;
     }
     .cx-rb--loop.is-live {
-      padding-inline-end: 7rem;
+      padding-inline-end: 11rem;
     }
     .cx-rb--loop.is-live .cx-rb__track {
       animation: cx-rb-loop var(--rb-t) linear infinite;
