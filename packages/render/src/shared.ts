@@ -145,33 +145,76 @@ export function composedStylesheet(): { name: string; css: string } {
 }
 
 /**
- * The spec v20 composed stylesheet (packages/components/styles/composed-v2.css, docs/plans/studio-phase1-design.md §3.4):
- * every v20 addition, linked after the core sheet only by pages that use one (composedSheets). Named and kept out of the
- * bundle hash like the core sheet, so pages without a v20 feature keep their bytes.
+ * The spec v20 composed stylesheets (packages/components/styles/composed-v2.css, docs/plans/studio-phase1-design.md
+ * §3.4.7). The one source file has four regions (marker comments `region: <name>`, one owner each); each region is its
+ * own sheet, minified and content-addressed (composed-v2-<region>-<sha10>.css), in the bundle after the hash like the
+ * core sheet, and linked after it only by pages that use that region (composedSheets). Pages without a v20 feature keep
+ * their bytes; a page with one downloads only the regions it uses. An empty region (vocab, until the batches add rules)
+ * has no file and is never linked.
  */
 const COMPOSED_V2_CSS = "composed-v2.css";
-let composedV2: { name: string; css: string } | undefined;
-export function composedV2Stylesheet(): { name: string; css: string } {
-  if (!composedV2) composedV2 = contentAddressed(COMPOSED_V2_CSS, "composed-v2");
+export const COMPOSED_V2_REGIONS = ["section", "kinds", "extensions", "vocab"] as const;
+export type ComposedRegion = (typeof COMPOSED_V2_REGIONS)[number];
+
+/** The source of each region of composed-v2.css, split at its markers (the comment before the first marker is dropped). */
+export function composedV2Regions(source: string = readFileSync(path.join(componentsDir, "styles", COMPOSED_V2_CSS), "utf8")): Record<ComposedRegion, string> {
+  const at = COMPOSED_V2_REGIONS.map((r) => {
+    const marker = `/* region: ${r} */`;
+    const i = source.indexOf(marker);
+    if (i < 0 || source.indexOf(marker, i + 1) >= 0) throw new Error(`${COMPOSED_V2_CSS}: region marker "${marker}" must appear exactly once`);
+    return { r, start: i, from: i + marker.length };
+  });
+  if (at.some((x, n) => n > 0 && x.start < at[n - 1]!.start)) throw new Error(`${COMPOSED_V2_CSS}: region markers out of order (${COMPOSED_V2_REGIONS.join(", ")})`);
+  return Object.fromEntries(at.map((x, n) => [x.r, source.slice(x.from, at[n + 1]?.start ?? source.length)])) as Record<ComposedRegion, string>;
+}
+
+/**
+ * A second pass for the v2 sheets, inside declaration blocks only (outside strings and url()): no spaces around `*` and
+ * `/` (calc, aspect-ratio, grid lines, the font shorthand) and no leading zero (0.75rem → .75rem). All three are optional
+ * in CSS values; in selectors `*` and spaces mean something, so selectors are never touched. minifyCss itself stays as it
+ * is: it makes the shared sheets, whose bytes are recorded (composed-goldens).
+ */
+export function compactValues(css: string): string {
+  return css.replace(/\{([^{}]*)\}/g, (_, body: string) => {
+    const parts = body.split(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|url\([^)]*\))/);
+    const out = parts.map((p, i) => (i % 2 === 1 ? p : p.replace(/ ([*/]) /g, "$1").replace(/(?<![\w.])(-?)0\.(\d)/g, "$1.$2")));
+    return `{${out.join("")}}`;
+  });
+}
+
+type Sheet = { name: string; css: string };
+let composedV2: Record<ComposedRegion, Sheet> | undefined;
+/** Every region's sheet (an empty region has css "" and is not in the bundle). */
+export function composedV2Sheets(): Record<ComposedRegion, Sheet> {
+  if (!composedV2) {
+    const regions = composedV2Regions();
+    composedV2 = Object.fromEntries(COMPOSED_V2_REGIONS.map((r) => [r, named(compactValues(minifyCss(regions[r])), `composed-v2-${r}`)])) as Record<ComposedRegion, Sheet>;
+  }
   return composedV2;
 }
 
-function contentAddressed(file: string, stem: string): { name: string; css: string } {
-  const css = minifyCss(readFileSync(path.join(componentsDir, "styles", file), "utf8"));
-  return { name: `${stem}-${createHash("sha256").update(css).digest("hex").slice(0, 10)}.css`, css };
+function contentAddressed(file: string, stem: string): Sheet {
+  return named(minifyCss(readFileSync(path.join(componentsDir, "styles", file), "utf8")), stem);
 }
+const named = (css: string, stem: string): Sheet => ({ name: `${stem}-${createHash("sha256").update(css).digest("hex").slice(0, 10)}.css`, css });
 
 /** The composed stylesheets by their key in composedSheets, in link order. */
-export const COMPOSED_SHEETS = { core: composedStylesheet, v2: composedV2Stylesheet } as const;
+export const COMPOSED_SHEETS = {
+  core: composedStylesheet,
+  section: () => composedV2Sheets().section,
+  kinds: () => composedV2Sheets().kinds,
+  extensions: () => composedV2Sheets().extensions,
+  vocab: () => composedV2Sheets().vocab,
+} as const satisfies Record<"core" | ComposedRegion, () => Sheet>;
 export type ComposedSheet = keyof typeof COMPOSED_SHEETS;
 
 type ComposedSection = Extract<Section, { type: "composed" }>;
 const isComposed = (s: Section): s is ComposedSection => s.type === "composed";
 
-/** The element kinds spec v20 adds (§1.5): their rules are in composed-v2.css (region kinds). */
+/** The element kinds spec v20 adds (§1.5): their rules are in composed-v2.css region kinds. */
 const V2_KINDS: ReadonlySet<string> = new Set(["photos", "wordmark", "ribbon", "sticker", "map", "iconFacts", "quote"]);
 
-/** The mask, image treatment and fact object names the core sheet (spec v19) draws; any other name's rules are in the v2 sheet (region vocab). */
+/** The mask, image treatment and fact object names the core sheet (spec v19) draws. */
 const V19_MASKS: ReadonlySet<string> = new Set(["none", "arch", "circle", "cut", "stamp", "ticket"]);
 const V19_IMAGE_TREATMENTS: ReadonlySet<string> = new Set(["none", "duotone", "tint", "grain"]);
 const V19_FACT_OBJECTS: ReadonlySet<string> = new Set(["numeral", "plate", "stamp", "ticket", "seal", "tag"]);
@@ -179,12 +222,13 @@ const V19_FACT_OBJECTS: ReadonlySet<string> = new Set(["numeral", "plate", "stam
 type ComposedElement = ComposedSection["props"]["elements"][number];
 
 /**
- * Whether an element uses a spec v20 extension of an existing kind (F1b-R3; the new kinds are R2's): a tilt, a bleed, a
+ * Whether an element uses a spec v20 extension of an existing kind (F1b-R3; region extensions): a tilt, a bleed, a
  * colour role (`color`, `fill`), an image scrim or a mask or treatment name beyond v19's, a heading treatment, a drop cap,
  * a list lead, marker, weight or size, a fact link, label order, plate code, count or an object beyond v19's, a price
  * style beyond rows, plates and tags (or its columns, size, plate code), and a decor drawing, colour, fixed size or repeat.
+ * The generic ones (tilt, bleed, colour roles) count for the new kinds too.
  */
-function elementUsesV2(el: ComposedElement): boolean {
+function elementUsesExtension(el: ComposedElement): boolean {
   const d = el.desk;
   if ((d.tilt !== undefined && d.tilt !== 0) || d.bleedX !== undefined || d.bleedY !== undefined || el.phone.span === "bleed") return true;
   if (("color" in el && el.color !== undefined) || ("fill" in el && el.fill !== undefined)) return true;
@@ -204,24 +248,35 @@ function elementUsesV2(el: ComposedElement): boolean {
     case "decor":
       return el.drawing !== undefined || el.fit !== undefined || el.size !== undefined || el.repeat !== undefined;
     default:
-      return V2_KINDS.has(el.kind);
+      return false;
   }
 }
 
-/** Whether a composed section uses a spec v20 feature: at section level (§1.3: R1) or in its elements (the extensions: R3; the new kinds: R2). */
-function usesV2(s: ComposedSection): boolean {
+/** The v2 regions a section's rules come from. */
+function regionsOf(s: ComposedSection): Set<ComposedRegion> {
   const p = s.props;
-  return p.background !== undefined || p.top !== undefined || p.motion !== undefined || p.pin !== undefined || p.headerOver === true || p.elements.some(elementUsesV2);
+  const out = new Set<ComposedRegion>();
+  if (p.background !== undefined || p.top !== undefined || p.motion !== undefined || p.pin !== undefined || p.headerOver === true) out.add("section");
+  for (const el of p.elements) {
+    if (V2_KINDS.has(el.kind)) out.add("kinds");
+    if (elementUsesExtension(el)) out.add("extensions");
+    // An image's scrim is the photo layer's (.cx-scrim-<n>, .cx-ro-<role>: region section) over one picture.
+    if (el.kind === "image" && el.scrim !== undefined) out.add("section");
+  }
+  return out;
 }
 
 /**
- * The composed stylesheets a page links, in link order: none without a composed section; the core sheet with one; the
- * core and the v2 sheet when one of them uses a v20 feature. One place decides both links (extensible: design.wordmark).
+ * The composed stylesheets a page links, in link order: none without a composed section; the core sheet with one; after
+ * it, each v20 region sheet one of them uses (section-level fields: section; the new kinds: kinds; the extensions of the
+ * existing kinds: extensions; vocab assets: vocab, none yet). One place decides every link (extensible: design.wordmark).
  */
 export function composedSheets(sections: readonly Section[]): ComposedSheet[] {
   const own = sections.filter(isComposed);
   if (own.length === 0) return [];
-  return own.some(usesV2) ? ["core", "v2"] : ["core"];
+  const used = new Set<ComposedRegion>();
+  for (const s of own) for (const r of regionsOf(s)) used.add(r);
+  return ["core", ...COMPOSED_V2_REGIONS.filter((r) => used.has(r) && composedV2Sheets()[r].css !== "")];
 }
 
 /**
@@ -287,7 +342,7 @@ export function sharedBundle(): SharedBundle {
   }
   const hash = h.digest("hex").slice(0, 10);
   // After the hash: the composed sheets and islands (see composedStylesheet, composedIslandFiles).
-  for (const sheet of Object.values(COMPOSED_SHEETS).map((get) => get())) files.set(sheet.name, Buffer.from(sheet.css, "utf8"));
+  for (const sheet of Object.values(COMPOSED_SHEETS).map((get) => get())) if (sheet.css !== "") files.set(sheet.name, Buffer.from(sheet.css, "utf8"));
   for (const f of composedIslandFiles()) files.set(`js/composed/${f}`, readFileSync(path.join(COMPOSED_ISLANDS_DIR, f)));
   cached = { hash, files };
   return cached;

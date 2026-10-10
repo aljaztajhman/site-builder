@@ -119,12 +119,18 @@
   min-height: min(32rem, 80svh);
 }
 
+/* Layers count in twos (G26 bug fix): an element is at 2 x layer + 1, one over a photo (cx-over, a backing panel) at
+   2 x layer + 2, so over-photo text is on top of an image of its own layer that comes later in the DOM, and below the
+   next layer. */
 .cx-el {
   position: relative;
-  z-index: calc(var(--z, 0) + 1);
+  z-index: calc(var(--z, 0) * 2 + 1);
   min-width: 0;
   width: var(--cx-w, auto);
   grid-column: 1 / -1;
+}
+.cx-el.cx-over {
+  z-index: calc(var(--z, 0) * 2 + 2);
 }
 /* Things that size themselves from their cell (a photo, a drawing, a fact's container) never shrink to nothing. */
 .cx-img,

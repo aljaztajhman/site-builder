@@ -7,12 +7,16 @@ import {
   composedIslandFiles,
   composedIslands,
   composedSheets,
+  COMPOSED_V2_REGIONS,
+  compactValues,
   composedStylesheet,
-  composedV2Stylesheet,
+  composedV2Regions,
+  composedV2Sheets,
   minifyCss,
   renderPage,
   sharedBundle,
 } from "../src/index.ts";
+import { uncoveredClasses } from "./composed-coverage.ts";
 
 /**
  * Spec v20 composed section level (docs/plans/studio-phase1-design.md §1.3, §3.4): background layers, the top edge and
@@ -50,12 +54,14 @@ function render(sections: Section[], edit: (s: SiteSpec) => void = () => {}): { 
 const sectionHtml = (html: string, id = "s_v2") => new RegExp(`<section id="${id}"[\\s\\S]*?</section>`).exec(html)![0];
 const openTag = (html: string, id = "s_v2") => new RegExp(`<section id="${id}"[^>]*>`).exec(html)![0];
 const bodyTag = (html: string) => /<body[^>]*>/.exec(html)![0];
-const v2 = () => composedV2Stylesheet().css;
-/** The minified v2 sheet has a rule whose selector list contains `selector` (exactly, as one of its selectors). */
+/** The section region's sheet (R1's rules); allV2 is every region's sheet. */
+const v2 = () => composedV2Sheets().section.css;
+const allV2 = () => COMPOSED_V2_REGIONS.map((r) => composedV2Sheets()[r].css).join("");
+/** The minified section sheet has a rule whose selector list contains `selector` (exactly, as one of its selectors). */
 const hasRule = (selector: string) => new RegExp(`(^|[{},])${selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}[,{]`).test(v2());
 
 describe("composedSheets: which composed sheets a page links", () => {
-  it("none without a composed section, the core sheet for v19 sections, core and v2 once a section uses a v20 feature", () => {
+  it("none without a composed section, the core sheet for v19 sections, core and the section sheet once a section uses a v20 section-level feature", () => {
     expect(composedSheets(base.pages.find((p) => p.kind === "home")!.sections)).toEqual([]);
     expect(composedSheets([plain("s_a"), plain("s_b")])).toEqual(["core"]);
     const features: object[] = [
@@ -67,15 +73,27 @@ describe("composedSheets: which composed sheets a page links", () => {
       { pin: { col: 1, span: 6 } },
       { headerOver: true },
     ];
-    for (const f of features) expect(composedSheets([plain("s_a"), sectionOf(props(f))]), JSON.stringify(f)).toEqual(["core", "v2"]);
+    for (const f of features) {
+      expect(composedSheets([plain("s_a"), sectionOf(props(f))]), JSON.stringify(f)).toEqual(["core", "section"]);
+      expect(uncoveredClasses(render([plain("s_a"), sectionOf(props(f))]).html), JSON.stringify(f)).toEqual([]);
+    }
     // headerOver: false is no feature.
     expect(composedSheets([sectionOf(props({ headerOver: false }))])).toEqual(["core"]);
+  });
+
+  it("each region once, in region order, across the page's sections; the empty vocab region never", () => {
+    const kind = sectionOf({ intent: "story", width: "contained", rows: 1, elements: [{ id: "e_q", kind: "quote", text: "Dober kruh.", desk: desk(1, 6, 1), phone: { order: 0, span: "full" } }] }, "s_k");
+    const ext = sectionOf({ intent: "story", width: "contained", rows: 1, elements: [{ id: "e_x", kind: "text", paragraphs: ["Besedilo."], dropCap: true, desk: desk(1, 6, 1), phone: { order: 0, span: "full" } }] }, "s_x");
+    expect(composedSheets([ext, kind, sectionOf(props({ motion: "reveal" })), kind])).toEqual(["core", "section", "kinds", "extensions"]);
+    expect(composedSheets([kind])).toEqual(["core", "kinds"]);
+    expect(composedSheets([ext])).toEqual(["core", "extensions"]);
+    expect(composedV2Sheets().vocab.css).toBe("");
   });
 
   it("are linked in that order after the site's sheet, from the shared bundle", () => {
     const bundle = sharedBundle();
     const core = composedStylesheet().name;
-    const two = composedV2Stylesheet().name;
+    const two = composedV2Sheets().section.name;
     const v19 = render([plain("s_a")]).html;
     expect(v19).toContain(`href="../_shared/${bundle.hash}/${core}"`);
     expect(v19).not.toContain("composed-v2");
@@ -83,25 +101,44 @@ describe("composedSheets: which composed sheets a page links", () => {
     expect(html.indexOf("/site")).toBeLessThan(html.indexOf(core));
     expect(html.indexOf(core)).toBeLessThan(html.indexOf(two));
     expect(html).toContain(`<link rel="stylesheet" href="../_shared/${bundle.hash}/${two}"/>`);
+    expect(html.match(/composed-v2-/g)).toHaveLength(1);
   });
 
-  it("the v2 sheet is content-addressed, in the bundle after the hash: the bundle hash is the recorded one", () => {
+  it("the region sheets are content-addressed, in the bundle after the hash: the bundle hash is the recorded one", () => {
     const bundle = sharedBundle();
-    const sheet = composedV2Stylesheet();
-    expect(sheet.name).toMatch(/^composed-v2-[0-9a-f]{10}\.css$/);
-    expect(sheet.css).toBe(minifyCss(v2Source));
-    expect(new TextDecoder().decode(bundle.files.get(sheet.name))).toBe(sheet.css);
+    const regions = composedV2Regions(v2Source);
+    for (const r of COMPOSED_V2_REGIONS) {
+      const sheet = composedV2Sheets()[r];
+      expect(sheet.name).toMatch(new RegExp(`^composed-v2-${r}-[0-9a-f]{10}\\.css$`));
+      expect(sheet.css).toBe(compactValues(minifyCss(regions[r])));
+      if (sheet.css === "") expect(bundle.files.has(sheet.name), r).toBe(false);
+      else expect(new TextDecoder().decode(bundle.files.get(sheet.name)), r).toBe(sheet.css);
+    }
+    // Every rule of the source is in exactly one region's sheet (the comment before the first marker is all that goes).
+    expect(COMPOSED_V2_REGIONS.map((r) => minifyCss(regions[r])).join("")).toBe(minifyCss(v2Source));
     expect(bundle.hash).toBe(baseline.sharedHash);
-    // The shared sheets know nothing of it.
+    // The shared sheets know nothing of them.
     for (const [f, data] of bundle.files) if (/^site(-.*)?\.css$/.test(f)) expect(new TextDecoder().decode(data), f).not.toContain(".cx-");
   });
 
-  it("keeps each composed sheet within its budget (inventory COMPOSED_SHEET_BUDGET: core and v2 16 KiB, the pair 28 KiB)", () => {
+  it("compactValues drops spaces around * and / and leading zeros in declarations only, never in selectors, strings or url()", () => {
+    expect(compactValues('.a *>.b{margin:calc(-1 * (var(--x) / 2));aspect-ratio:4 / 5;top:-0.5rem;--o:0.75;content:"0.5 * 2";background:url(a/0.5 * b.svg)}')).toBe(
+      '.a *>.b{margin:calc(-1*(var(--x)/2));aspect-ratio:4/5;top:-.5rem;--o:.75;content:"0.5 * 2";background:url(a/0.5 * b.svg)}',
+    );
+    expect(compactValues(".a{width:10.5rem;--fc0:1}")).toBe(".a{width:10.5rem;--fc0:1}");
+  });
+
+  it("keeps each composed sheet within its budget (inventory COMPOSED_SHEET_BUDGET: core 16 KiB, each region 12 KiB, the sheets a page links 32 KiB)", () => {
     const core = Buffer.byteLength(composedStylesheet().css);
-    const two = Buffer.byteLength(composedV2Stylesheet().css);
     expect(core).toBeLessThanOrEqual(16 * 1024);
-    expect(two).toBeLessThanOrEqual(16 * 1024);
-    expect(core + two).toBeLessThanOrEqual(28 * 1024);
+    let all = core;
+    for (const r of COMPOSED_V2_REGIONS) {
+      const n = Buffer.byteLength(composedV2Sheets()[r].css);
+      expect(n, r).toBeLessThanOrEqual(12 * 1024);
+      all += n;
+    }
+    // The most a page can link: the core sheet and every region.
+    expect(all).toBeLessThanOrEqual(32 * 1024);
   });
 });
 
@@ -110,13 +147,14 @@ describe("composed-v2.css", () => {
     const at = ["section", "kinds", "extensions", "vocab"].map((r) => v2Source.indexOf(`/* region: ${r} */`));
     expect(at.every((i) => i > 0)).toBe(true);
     expect([...at].sort((a, b) => a - b)).toEqual(at);
+    expect(() => composedV2Regions(v2Source.replace("/* region: kinds */", ""))).toThrow(/region marker/);
   });
 
   it("obeys the bans every sheet obeys", () => {
-    expect(v2()).not.toMatch(/gradient\(|backdrop-filter|blur\(|monospace|font-style:italic|border-radius:999/);
+    expect(allV2()).not.toMatch(/gradient\(|backdrop-filter|blur\(|monospace|font-style:italic|border-radius:999/);
     // No endless animation, except the ribbon's marquee (move "loop", owner decision D2), which has a pause button.
-    expect(v2().replace(/\.cx-rb--loop\.is-live \.cx-rb__track\{animation:cx-rb-loop var\(--rb-t\) linear infinite\}/, "")).not.toMatch(/infinite/);
-    expect(v2()).not.toMatch(/border-(left|right|inline-start|inline-end):[^;}]*var\(--c-(primary|accent)/);
+    expect(allV2().replace(/\.cx-rb--loop\.is-live \.cx-rb__track\{animation:cx-rb-loop var\(--rb-t\) linear infinite\}/, "")).not.toMatch(/infinite/);
+    expect(allV2()).not.toMatch(/border-(left|right|inline-start|inline-end):[^;}]*var\(--c-(primary|accent)/);
   });
 
   /** Top-level blocks of minified CSS with their at-rule ancestry. */
@@ -141,7 +179,7 @@ describe("composed-v2.css", () => {
   }
 
   it("reduced motion is still: every animation and keyframes sits inside @supports (animation-timeline) and prefers-reduced-motion: no-preference, and animates only transform, opacity and clip-path", () => {
-    const blocks = walk(v2());
+    const blocks = walk(allV2());
     const animated = blocks.filter((b) => b.prelude.startsWith("@keyframes") || (!b.prelude.startsWith("@") && /(^|;)animation(-[a-z]+)?:/.test(b.body)));
     expect(animated.length).toBeGreaterThanOrEqual(4);
     for (const b of animated) {
@@ -156,7 +194,7 @@ describe("composed-v2.css", () => {
       }
     }
     // No transitions sneak motion in outside the guards either.
-    expect(v2()).not.toMatch(/transition/);
+    expect(allV2()).not.toMatch(/transition/);
   });
 
   it("has a rule for every motion preset in MOTIONS, on its targets", () => {
@@ -225,9 +263,11 @@ describe("top edge and rise", () => {
   });
 
   it("halves the edge depth and the rise on phones", () => {
-    expect(v2()).toMatch(/\.cx-edge-cut,\.cx-edge-torn,\.cx-edge-drawing\{--cx-ed:0\.75rem\}/);
+    expect(v2()).toMatch(/\.cx-edge-cut,\.cx-edge-torn,\.cx-edge-drawing\{--cx-ed:\.75rem\}/);
     expect(v2()).toMatch(/@media \(min-width:64rem\)\{\.cx-edge-cut,\.cx-edge-torn,\.cx-edge-drawing\{--cx-ed:1\.5rem\}\}/);
-    expect(v2()).toMatch(/\.s\.s-composed\.cx-v2\.cx-v2\{--cx-pt:var\(--space-section\);--cx-ru:0\.75rem;/);
+    expect(v2()).toMatch(/\.s\.s-composed\.cx-v2\.cx-v2\{--cx-pt:var\(--space-section\);--cx-ru:\.75rem;/);
+    // --cx-top, the section's whole top padding, is set on the section (the fields and a band photo read it).
+    expect(v2()).toContain(".s.s-composed.cx-v2.cx-v2{--cx-pt:var(--space-section);--cx-ru:.75rem;--cx-top:calc(var(--cx-pt) + var(--cx-ed,0px) + var(--cx-hx,0px));padding-top:var(--cx-top);");
     expect(v2()).toMatch(/@media \(min-width:64rem\)\{\.s\.s-composed\.cx-v2\.cx-v2\{--cx-ru:1\.5rem\}\}/);
   });
 });
@@ -323,7 +363,7 @@ describe("the header over the opener", () => {
     expect(v2()).toMatch(/@supports \(animation-timeline:scroll\(\)\)\{@media \(prefers-reduced-motion:no-preference\)\{@keyframes cx-hdr-solid/);
     // The opener runs up behind the header and pads its content down by as much: the header's room, at every width.
     expect(v2()).toContain(".cx-hdr0{--cx-hx:16rem}");
-    expect(v2()).toContain("margin-top:calc(-1 * (var(--cx-ed,0px) + var(--cx-rs,0) * var(--cx-ru) + var(--cx-hx,0px)))");
+    expect(v2()).toContain("margin-top:calc(-1*(var(--cx-ed,0px) + var(--cx-rs,0)*var(--cx-ru) + var(--cx-hx,0px)))");
     // Phones: the ground of the phone layout, and a solid open menu.
     expect(v2()).toMatch(/@media \(max-width:63\.999rem\)\{[^@]*\[data-hdr="over"\]:has\(\.cx-hgp-band\)\{--cx-rc:var\(--c-band,var\(--c-primary\)\)/);
     expect(v2()).toContain('body[data-hdr="over"] .site-header .site-nav{margin-inline:-1rem;padding-inline:1rem;background:var(--c-bg)}');

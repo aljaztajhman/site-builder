@@ -1,7 +1,8 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { ComposedProps, ColorRole, MOTIONS, migrateSpec, type Page, type Section, type SiteSpec } from "@sb/spec";
-import { COMPOSED_COUNT_ISLAND, composedIslandFiles, composedIslands, composedSheets, composedV2Stylesheet, renderPage, sharedBundle } from "../src/index.ts";
+import { uncoveredClasses } from "./composed-coverage.ts";
+import { COMPOSED_COUNT_ISLAND, composedIslandFiles, composedIslands, composedSheets, composedStylesheet, composedV2Sheets, renderPage, sharedBundle } from "../src/index.ts";
 
 /**
  * Spec v20 extensions of the existing composed kinds (docs/plans/studio-phase1-design.md §1.2, §1.4, §3.1; F1b-R3): Paint,
@@ -14,7 +15,7 @@ const IMG = base.assets.images[0]!.id;
 const IMG2 = base.assets.images[1]!.id;
 const baseline = JSON.parse(readFileSync(new URL("./composed-goldens.json", import.meta.url), "utf8")) as { sharedHash: string };
 const v2Source = readFileSync(new URL("../../components/styles/composed-v2.css", import.meta.url), "utf8");
-const v2 = () => composedV2Stylesheet().css;
+const v2 = () => composedV2Sheets().extensions.css;
 /** The v2 sheet has (or lacks) a fragment: a failure names the fragment, not the whole sheet. */
 function cssHas(x: string | RegExp, msg = "") {
   expect(typeof x === "string" ? v2().includes(x) : x.test(v2()), `${msg} ${String(x)}`.trim()).toBe(true);
@@ -119,8 +120,11 @@ describe("usesV2: every extension links the v2 sheet; none of them in a v19 sect
     ["decor repeat", edit("e_d", { motif: undefined, drawing: "ornament/rope-line", repeat: "x" })],
   ];
   for (const [name, elements] of cases) {
-    it(`${name}: core and v2`, () => {
-      expect(composedSheets([sec(elements)])).toEqual(["core", "v2"]);
+    // An image's scrim is the photo layer's (region section) over one picture.
+    const sheets = name === "image scrim" ? ["core", "section", "extensions"] : ["core", "extensions"];
+    it(`${name}: ${sheets.join(", ")}, and those sheets have the rules of every class it renders`, () => {
+      expect(composedSheets([sec(elements)])).toEqual(sheets);
+      expect(uncoveredClasses(html(elements))).toEqual([]);
     });
   }
 
@@ -241,16 +245,19 @@ describe("image scrim", () => {
   it("is the photo layer's flat scrim over the picture: a role at a strength, hidden from assistive technology", () => {
     const page = html([{ id: "e_i", kind: "image", image: IMG, ratio: "4:3", scrim: { role: "inverse", strength: 3 }, desk: desk(1, 8, 1), phone: full(0) }]);
     expect(page).toMatch(/<span class="cx-scrim cx-scrim-3 cx-ro-inverse" aria-hidden="true"><\/span><\/div>/);
-    cssHas(/\.cx-scrim-3\{opacity:0?\.65\}/);
-    cssHas(/\.cx-scrim\{position:absolute;inset:0;z-index:1;background:var\(--cx-rc\)/);
+    // The scrim rules are the photo layer's (region section), linked with the extensions.
+    expect(composedV2Sheets().section.css).toMatch(/\.cx-scrim-3\{opacity:0?\.65\}/);
+    expect(composedV2Sheets().section.css).toMatch(/\.cx-scrim\{position:absolute;inset:0;z-index:1;background:var\(--cx-rc\)/);
     expect(html([{ id: "e_i", kind: "image", image: IMG, ratio: "4:3", desk: desk(1, 8, 1), phone: full(0) }])).not.toContain("cx-scrim");
   });
 });
 
 describe("G26: text over an image is painted on top of it", () => {
   it("over-photo text is one half-layer above an element of its own layer, and below the next layer", () => {
-    cssHas(".cx-el{z-index:calc(var(--z,0)*2 + 1)}");
-    cssHas(".cx-over{z-index:calc(var(--z,0)*2 + 2)}");
+    // The core sheet's (the G26 bug fix): every composed page has it, v19 ones too.
+    expect(composedStylesheet().css).toContain(".cx-el{position:relative;z-index:calc(var(--z,0) * 2 + 1);");
+    expect(composedStylesheet().css).toContain(".cx-el.cx-over{z-index:calc(var(--z,0) * 2 + 2)}");
+    expect(v2()).not.toMatch(/z-index:calc\(var\(--z/);
     const z = (layer: number, over: boolean) => layer * 2 + (over ? 2 : 1);
     for (const layer of [0, 1, 2, 3]) {
       expect(z(layer, true), `over text above an image of layer ${layer}`).toBeGreaterThan(z(layer, false));
@@ -532,16 +539,16 @@ describe("decor: drawings, a fixed size, strips", () => {
   });
 });
 
-describe("the v2 sheet after the extensions", () => {
-  it("keeps its region markers in order, obeys the bans, animates nothing new, and stays within its budget", () => {
+describe("the extensions sheet (composed-v2.css region extensions)", () => {
+  it("keeps its region markers in order, obeys the bans, animates nothing, and stays within its budget", () => {
     const at = ["section", "kinds", "extensions", "vocab"].map((r) => v2Source.indexOf(`/* region: ${r} */`));
     expect([...at].sort((a, b) => a - b)).toEqual(at);
     cssLacks(/gradient\(|backdrop-filter|blur\(|monospace|font-style:italic|border-radius:999|infinite|transition/);
     cssLacks(/border-(left|right|inline-start|inline-end):[^;}]*var\(--c-(primary|accent)/);
-    // Every clip-path reads a shape token (the extensions add none); keyframes stay the motion presets'.
+    // Every clip-path reads a shape token (the extensions add none); the keyframes are the motion presets' (region section).
     for (const m of v2().matchAll(/clip-path:([^;}]+)/g)) expect(m[1]).toMatch(/^var\(--shape-[a-z]+\)$/);
-    expect(v2().match(/@keyframes/g)!.length).toBe(MOTIONS.length + 1);
-    expect(Buffer.byteLength(v2())).toBeLessThanOrEqual(16 * 1024);
+    expect(v2()).not.toMatch(/@keyframes|animation/);
+    expect(Buffer.byteLength(v2())).toBeLessThanOrEqual(12 * 1024);
   });
 
   it("the extensions leave a v19 composed page byte for byte as it was (no extension class, no second sheet)", () => {

@@ -2,7 +2,8 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { lcpImageFor } from "@sb/components";
 import { ComposedProps, migrateSpec, type Page, type Section, type SiteSpec } from "@sb/spec";
-import { COMPOSED_RIBBON_ISLAND, composedIslandFiles, composedIslands, composedSheets, composedV2Stylesheet, renderPage, sharedBundle } from "../src/index.ts";
+import { uncoveredClasses } from "./composed-coverage.ts";
+import { COMPOSED_RIBBON_ISLAND, composedIslandFiles, composedIslands, composedSheets, composedV2Sheets, renderPage, sharedBundle } from "../src/index.ts";
 
 /**
  * Spec v20 element kinds (docs/plans/studio-phase1-design.md §1.5, §3.1, §3.4; F1b-R2): photos, wordmark, ribbon,
@@ -42,8 +43,9 @@ describe("v2 kinds link the v2 sheet", () => {
   ];
   it.each(kinds)("%o", (k) => {
     const s = sectionOf(at(k));
-    expect(composedSheets([s])).toEqual(["core", "v2"]);
-    expect(render([s])).toContain(composedV2Stylesheet().name);
+    expect(composedSheets([s])).toEqual(["core", "kinds"]);
+    expect(render([s])).toContain(composedV2Sheets().kinds.name);
+    expect(uncoveredClasses(render([s]))).toEqual([]);
   });
 });
 
@@ -66,7 +68,7 @@ describe("photos", () => {
     expect(h).toMatch(/<div class="cx-ph__row" role="region" aria-label="Fotografije" tabindex="0">/);
     expect(h.match(/<figure class="cx-ph__fig">/g)).toHaveLength(3);
     expect(h).toContain('<figcaption class="cx-ph__cap">Ena</figcaption>');
-    expect(composedV2Stylesheet().css).toMatch(/\.cx-ph__row\{[^}]*overflow-x:auto[^}]*scroll-snap-type:x mandatory/);
+    expect(composedV2Sheets().kinds.css).toMatch(/\.cx-ph__row\{[^}]*overflow-x:auto[^}]*scroll-snap-type:x mandatory/);
   });
 
   it("before-after: two figures labelled Prej and Potem (UI words) before the client's captions", () => {
@@ -128,7 +130,7 @@ describe("ribbon", () => {
     expect(h).toMatch(/<div class="cx-rb__track" aria-hidden="true"><span class="cx-rb__run">/);
     expect(h).toMatch(/--rb-n:\d+/);
     expect(h).not.toContain("<button");
-    expect(composedV2Stylesheet().css).toMatch(/@supports \(animation-timeline:scroll\(\)\)\{@media \(prefers-reduced-motion:no-preference\)\{@keyframes cx-rb-loop[\s\S]*\.cx-rb--drift \.cx-rb__track\{animation:cx-rb-drift linear both;animation-timeline:view\(\)\}/);
+    expect(composedV2Sheets().kinds.css).toMatch(/@supports \(animation-timeline:scroll\(\)\)\{@media \(prefers-reduced-motion:no-preference\)\{@keyframes cx-rb-loop[\s\S]*\.cx-rb--drift \.cx-rb__track\{animation:cx-rb-drift linear both;animation-timeline:view\(\)\}/);
   });
 
   it("loop: a pause button (hidden until the island runs, aria-pressed, a fixed Slovene label) and the ribbon island; pauses on hover, focus, off screen", () => {
@@ -145,7 +147,7 @@ describe("ribbon", () => {
     expect(composedIslandFiles()).toContain("ribbon.js");
     expect(sharedBundle().files.has(`js/${COMPOSED_RIBBON_ISLAND}`)).toBe(true);
     expect(html).toMatch(new RegExp(`<script src="[^"]*/js/${COMPOSED_RIBBON_ISLAND}" defer="">`));
-    const css = composedV2Stylesheet().css;
+    const css = composedV2Sheets().kinds.css;
     expect(css).toContain(".cx-rb--loop:is(:hover,:focus-within,.is-off,.is-paused) .cx-rb__track{animation-play-state:paused}");
     // The button is a 44 px target.
     expect(css).toMatch(/\.cx-rb\{[^}]*min-height:2\.75rem/);
@@ -156,8 +158,8 @@ describe("ribbon", () => {
 describe("sticker", () => {
   it("a label in its shape, its length as --n, its tilt; turned on desktop only", () => {
     const h = el(render([sectionOf(at({ kind: "sticker", text: "Sveže vsak dan", shape: "tag", desk: desk(1, 3, 2, { tilt: 5 }) }))]));
-    expect(h).toMatch(/<p class="cx-el cx-el--sticker cx-ps-full cx-sk cx-sk--tag" style="[^"]*--n:14;--tilt:5"[^>]*><span class="cx-sk__t">Sveže vsak dan<\/span><\/p>/);
-    expect(composedV2Stylesheet().css).toMatch(/@media \(min-width:64rem\)\{\.cx-sk\{rotate:calc\(var\(--tilt,-4\) \* 1deg\)\}\}/);
+    expect(h).toMatch(/<p class="cx-el cx-el--sticker cx-ps-full cx-tilt cx-sk cx-sk--tag" style="[^"]*--n:14;--tilt:5"[^>]*><span class="cx-sk__t">Sveže vsak dan<\/span><\/p>/);
+    expect(composedV2Sheets().kinds.css).toMatch(/@media \(min-width:64rem\)\{\.cx-sk\{rotate:calc\(var\(--tilt,-4\)\*1deg\)\}\}/);
   });
 });
 
@@ -206,7 +208,7 @@ describe("quote", () => {
     expect(h).toContain('<figcaption class="cx-q__by"><span aria-hidden="true">– </span>Marko</figcaption>');
     expect(h).not.toContain("—");
     // No bar beside the quote (banned accent single-side border).
-    expect(composedV2Stylesheet().css).not.toMatch(/\.cx-q[^{]*\{[^}]*border/);
+    expect(composedV2Sheets().kinds.css).not.toMatch(/\.cx-q[^{]*\{[^}]*border/);
   });
 });
 

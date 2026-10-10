@@ -1,10 +1,13 @@
 /*
- * Composed sections, spec v20 additions (docs/plans/studio-phase1-design.md §3.4). The second composed stylesheet: the
- * core sheet (composed.css, v19) is frozen; everything spec v20 adds is here, minified and content-addressed
- * (composed-v2-<hash>.css) and linked after the core sheet only by pages that use a v20 feature (@sb/render shared.ts
- * composedSheets). Not part of STYLE_FILES.
+ * Composed sections, spec v20 additions (docs/plans/studio-phase1-design.md §3.4). The core sheet (composed.css, v19) is
+ * frozen except for bug fixes; everything spec v20 adds is here. Not part of STYLE_FILES.
  *
  * Four regions, one owner each: section (F1b-R1), kinds (F1b-R2), extensions (F1b-R3), vocab (the inventory batches).
+ * Each region ships as its own sheet (§3.4.7): split at the region markers, minified, content-addressed
+ * (composed-v2-<region>-<hash>.css), and linked after the core sheet only by pages that use it (@sb/render shared.ts
+ * composedSheets). So a region's rules must not need another region's: what two regions share goes in the core sheet,
+ * or composedSheets links both (an image scrim links section with extensions). Budgets: a region ≤ 12 KiB minified, the
+ * core sheet and every region together ≤ 32 KiB.
  *
  * Same bans as every sheet: no gradients, no blur or backdrop-filter, no heavy shadows, no pills, no accent-coloured
  * single-side borders. Motion: @keyframes and animations only inside @supports (animation-timeline: …) and
@@ -83,7 +86,8 @@
 .s.s-composed.cx-v2.cx-v2 {
   --cx-pt: var(--space-section);
   --cx-ru: 0.75rem;
-  padding-top: calc(var(--cx-pt) + var(--cx-ed, 0px) + var(--cx-hx, 0px));
+  --cx-top: calc(var(--cx-pt) + var(--cx-ed, 0px) + var(--cx-hx, 0px));
+  padding-top: var(--cx-top);
   padding-bottom: var(--space-section);
   margin-top: calc(-1 * (var(--cx-ed, 0px) + var(--cx-rs, 0) * var(--cx-ru) + var(--cx-hx, 0px)));
   z-index: 1;
@@ -109,9 +113,8 @@ main > .s.s-composed.cx-v2.cx-v2:first-child {
 }
 /* The field reaches past its grid area: half a gap on a side inside the grid (a gap above and below on phones), to the
    section's top or bottom edge on the first or last row, and past the page edge on a side that touches column 1 or 12
-   (the section clips it there). --cx-top is the section's whole top padding. */
+   (the section clips it there). --cx-top (set on the section) is its whole top padding. */
 .cx-field {
-  --cx-top: calc(var(--cx-pt) + var(--cx-ed, 0px) + var(--cx-hx, 0px));
   position: absolute;
   z-index: 0;
   inset: var(--fpt, calc(var(--cx-gap) * -1)) -100vmax var(--fpb, calc(var(--cx-gap) * -1));
@@ -212,7 +215,7 @@ main > .s.s-composed.cx-v2.cx-v2:first-child {
   .cx-bgp--band .cx-bg-photo {
     position: relative;
     height: calc(75vw + var(--cx-hx, 0px));
-    margin-top: calc(-1 * (var(--cx-pt) + var(--cx-ed, 0px) + var(--cx-hx, 0px)));
+    margin-top: calc(-1 * var(--cx-top));
     margin-bottom: var(--cx-pt);
   }
   /* Under a band photo a field on the first phone row starts where the band ends. */
@@ -856,17 +859,9 @@ body[data-hdr="over"] .site-header--sticky::before {
 /* region: extensions */
 
 /* Extensions of the existing kinds (spec v20, F1b-R3). Elements get their classes from placement() (elements.tsx).
-   The sheet is tight (core + v2 together stay under 28 KiB): rules are terse on purpose. */
+   Rules are terse on purpose (the core sheet and every region together stay under 32 KiB). */
 
-/* Stacking: the core sheet gives an element z-index layer + 1, so text marked cx-over (a backing panel over a photo) sat
-   under an image of the same layer that comes later in the DOM. Layers count in twos here: an element is at 2 x layer + 1,
-   one over a photo at 2 x layer + 2, so over-photo text is on top of an image of its own layer and below the next one. */
-.cx-el {
-  z-index: calc(var(--z, 0)*2 + 1);
-}
-.cx-over {
-  z-index: calc(var(--z, 0)*2 + 2);
-}
+/* Stacking (layers count in twos, the G26 bug fix) is the core sheet's: every composed page needs it. */
 
 /* Paint: an element's own colours as roles. cx-bg-<role> its own ground (cx-pb) with the text role on it, cx-fg-<role> its
    text colour (cx-pf). Not the shared cx-ro-* table (that is the layers' and the header's). */

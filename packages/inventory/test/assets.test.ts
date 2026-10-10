@@ -2,7 +2,8 @@ import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { describe, expect, it } from "vitest";
 import { DIRECTIONS, FAMILIES, FONTS, FONT_PAIRS, Imagery, MOTIFS, SECTION_DEFS, SUBMOTIFS, type Colors } from "@sb/spec";
-import { SLOVENE_GLYPHS, assetName, byteBudget, fontFile, fontLicenseFile, inventory, needsPatternCheck, paletteContrast, paletteOf, patternCheck, shippedColors, todaysAssets } from "../src/index.ts";
+import { COMPOSED_V2_REGIONS, composedStylesheet, composedV2Sheets } from "@sb/render";
+import { COMPOSED_SHEET_BUDGET, SLOVENE_GLYPHS, assetName, byteBudget, fontFile, fontLicenseFile, inventory, needsPatternCheck, paletteContrast, paletteOf, patternCheck, shippedColors, todaysAssets } from "../src/index.ts";
 
 /**
  * Per-asset checks (design-studio.md §4.2): every registered asset has a licence, stays within its kind's byte budget;
@@ -54,6 +55,17 @@ describe("today's assets are registered", () => {
     expect(registry.byId("motif/plate")!.tags.trades).toContain("car-repair/tyres");
     expect(registry.byId("palette/dark-elegant")!.tags.ground).toEqual(["dark"]);
     expect(registry.byId("section/menu:classic")!.tags.intents).toEqual(["menu"]);
+  });
+});
+
+describe("the composed sheets stay within COMPOSED_SHEET_BUDGET", () => {
+  it("core ≤ 16 KiB, each v20 region ≤ 12 KiB, everything one page can link ≤ 32 KiB", () => {
+    const core = Buffer.byteLength(composedStylesheet().css);
+    const regions = COMPOSED_V2_REGIONS.map((r) => Buffer.byteLength(composedV2Sheets()[r].css));
+    expect(core).toBeLessThanOrEqual(COMPOSED_SHEET_BUDGET.core);
+    for (const [i, n] of regions.entries()) expect(n, COMPOSED_V2_REGIONS[i]).toBeLessThanOrEqual(COMPOSED_SHEET_BUDGET.region);
+    expect(core + regions.reduce((a, b) => a + b, 0)).toBeLessThanOrEqual(COMPOSED_SHEET_BUDGET.linked);
+    expect(byteBudget({ id: "section/composed:free", kind: "section" })).toBe(COMPOSED_SHEET_BUDGET.core);
   });
 });
 
