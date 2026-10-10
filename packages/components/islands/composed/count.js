@@ -1,4 +1,4 @@
-// fact.count: counts up to the client's whole number once, on first view; the final value is the markup (no JS: still).
+// fact.count: counts up once on first view (not with data-still, reduced motion or no JS: markup value).
 (() => {
   if (!("IntersectionObserver" in window) || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const run = (el) => {
@@ -21,5 +21,5 @@
       run(e.target);
     }
   }, { threshold: 0.4 });
-  document.querySelectorAll("[data-count]").forEach((el) => seen.observe(el));
+  document.querySelectorAll("[data-count]:not([data-still])").forEach((el) => seen.observe(el));
 })();

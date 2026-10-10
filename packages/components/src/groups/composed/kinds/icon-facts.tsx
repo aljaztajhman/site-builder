@@ -63,12 +63,17 @@ const TWO_UP = 16;
  * card ground, no circle round the icon (the banned three-feature-cards row; G25).
  */
 export function IconFactsBlock({ el, ctx, over }: { el: ElOf<"iconFacts">; ctx: RenderCtx; over: boolean }) {
+  // Only a fact the business has: the guards and the facts check say so at generation, and a client who later takes an amenity out
+  // of business.amenities must not keep it on the site.
+  const has = new Set<string>(ctx.site.business.amenities ?? []);
   const items = el.items.flatMap((it) => {
+    if (!has.has(it.fact)) return [];
     const label = factLabel(ctx, it.fact);
     return label ? [{ ...it, label }] : [];
   });
   if (items.length === 0) return null;
-  const p = placement(el, over);
+  // --n: how many; the grid's column minimum falls with it (composed-v2.css), so six sit in a row and four stay two and two.
+  const p = placement(el, over, { "--n": items.length });
   const twoUp = items.every((it) => it.label.length <= TWO_UP && !it.note);
   return (
     <ul {...p} className={cx(p.className, "cx-if", `cx-if--${el.icons ?? "line"}`, twoUp && "cx-if--2")} role="list">

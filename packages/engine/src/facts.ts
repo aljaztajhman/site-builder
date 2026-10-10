@@ -202,7 +202,7 @@ function check(spec: SiteSpec, c: Corpus, translated: boolean): FactViolation[] 
     for (const f of copyFacts(s, c, "number")) out.push({ path: `/collections${p}`, ...f });
   });
   // Composed v20 elements: verbatim quotes and map notes, no claimed ratings, amenities, photo origin, plate codes.
-  out.push(...composedFacts(spec, c.verbatim));
+  out.push(...composedFacts(spec, c.verbatim, translated));
   // Translations overlay any string of the spec when rendered; check each locale as it is shown.
   for (const [locale, map] of Object.entries(spec.translations ?? {})) {
     const shown = structuredClone({ ...spec, translations: undefined });

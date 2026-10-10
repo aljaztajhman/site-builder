@@ -383,6 +383,9 @@ describe("fact: link, label order, plate code, count", () => {
       expect(composedIslands(render([sec([fact({ treatment: "numeral", count: true, value })])]).page.sections), value).toEqual([]);
     }
     expect(html([fact({ treatment: "numeral", value: "1996" })])).not.toContain("data-count");
+    // design.motion still: the count carries data-still, which the island respects.
+    const still = html([fact({ treatment: "numeral", count: true, value: "1996" })], {}, (sp) => void ((sp.design as { motion?: string }).motion = "still"));
+    expect(still).toContain('<span class="cx-count" data-count="1996" data-still="" role="img" aria-label="1996">1996</span>');
   });
 });
 
@@ -417,7 +420,7 @@ describe("the count island", () => {
   });
 
   it("runs: from 0 to the final value, then the width is released; reduced motion and no observer change nothing", () => {
-    const run = (reduced: boolean, observer: boolean) => {
+    const run = (reduced: boolean, observer: boolean, still = false) => {
       const el = { text: "1996", style: { minWidth: "" }, offsetWidth: 90, getAttribute: () => "1996", set textContent(v: string) { this.text = v; }, get textContent() { return this.text; } };
       const frames: ((t: number) => void)[] = [];
       let cb: ((e: { isIntersecting: boolean; target: unknown }[]) => void) | undefined;
@@ -430,9 +433,10 @@ describe("the count island", () => {
       }
       const perf = { now: () => 0 };
       const win = observer ? { IntersectionObserver: Observer, performance: perf } : { performance: perf };
-      const globals = { matchMedia: () => ({ matches: reduced }), requestAnimationFrame: (f: (t: number) => void) => frames.push(f), document: { querySelectorAll: () => [el] } };
+      const globals = { matchMedia: () => ({ matches: reduced }), requestAnimationFrame: (f: (t: number) => void) => frames.push(f), document: { querySelectorAll: (sel: string) => (still && sel.includes(":not([data-still])") ? [] : [el]) } };
       new Function("window", "IntersectionObserver", ...Object.keys(globals), source)(win, win.IntersectionObserver, ...Object.values(globals));
-      cb?.([{ isIntersecting: true, target: el }]);
+      // A still value is never observed: the query leaves it out.
+      if (!still) cb?.([{ isIntersecting: true, target: el }]);
       const seen: string[] = [];
       for (let t = 0; frames.length && t < 3000; t += 100) {
         frames.shift()!(t);
@@ -447,6 +451,9 @@ describe("the count island", () => {
     expect(run(true, true).frames).toBe(0);
     expect(run(false, false).frames).toBe(0);
     expect(run(true, true).last).toBe("1996");
+    // design.motion "still" marks the value (data-still): it stays the final value.
+    expect(run(false, true, true).frames).toBe(0);
+    expect(run(false, true, true).last).toBe("1996");
   });
 });
 
