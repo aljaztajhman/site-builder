@@ -5,6 +5,7 @@ dist/
 .tools/
 .worktrees/
 .claude/worktrees/
+.claude/agent-log.jsonl
 .env
 .env.*
 !.env.example
