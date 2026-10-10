@@ -45,7 +45,7 @@ export function overlaps(a: El, b: El): boolean {
 }
 
 /** Elements that carry no text of their own to put on a photo. */
-const TEXTLESS: ReadonlySet<El["kind"]> = new Set(["image", "decor"]);
+const TEXTLESS: ReadonlySet<El["kind"]> = new Set(["image", "photos", "decor"]);
 
 /**
  * A text-bearing element whose desktop rectangle overlaps a photo: it gets a solid backing panel (composed.css, .cx-over)
@@ -57,7 +57,9 @@ export function overPhoto(el: El, all: readonly El[]): boolean {
   if (TEXTLESS.has(el.kind)) return false;
   if (el.kind === "fact" && ["plate", "seal", "ticket", "tag"].includes(el.treatment)) return false;
   if (el.kind === "action" && el.style === "primary") return false;
-  return all.some((o) => o.kind === "image" && o.id !== el.id && overlaps(el, o));
+  // A sticker and a ribbon are objects on a ground of their own (composed-v2.css, region kinds).
+  if (el.kind === "sticker" || el.kind === "ribbon") return false;
+  return all.some((o) => (o.kind === "image" || o.kind === "photos") && o.id !== el.id && overlaps(el, o));
 }
 
 /** The heading that names the section (the first in reading order), if it has one. */
@@ -65,20 +67,43 @@ export function firstHeading(ordered: readonly El[]): ElOf<"heading"> | undefine
   return ordered.find((e): e is ElOf<"heading"> => e.kind === "heading");
 }
 
-/** The image the page's LCP preload and the eager photo refer to: the first in reading order that phones show. */
-export function firstImage(elements: readonly El[]): ElOf<"image"> | undefined {
-  return readingOrder(elements).find((e): e is ElOf<"image"> => e.kind === "image" && !e.phone.hidden);
+/**
+ * The photo element the page's LCP preload and the eager photo refer to: the first image or photos element in reading
+ * order that phones show (a photos element leads with its first image).
+ */
+export function firstImage(elements: readonly El[]): ElOf<"image"> | ElOf<"photos"> | undefined {
+  return readingOrder(elements).find((e): e is ElOf<"image"> | ElOf<"photos"> => (e.kind === "image" || e.kind === "photos") && !e.phone.hidden);
 }
 
-/** Part of the container's width an image of `span` columns takes on desktop, and on phones, as a `sizes` attribute. */
-export function imageSizes(width: ComposedProps["width"], el: ElOf<"image">): string {
-  const span = el.desk.span;
-  const phone = el.phone.span === "half" ? "calc((100vw - 3rem) / 2)" : el.phone.span === "inset" ? "calc((100vw - 2rem) * 0.82)" : "calc(100vw - 2rem)";
+/** The share of an element's width one frame of a photos arrangement takes, on desktop and on phones (composed-v2.css). */
+export const PHOTO_FRAME: Record<ElOf<"photos">["arrangement"], { desk: number; phone: number }> = {
+  fan: { desk: 0.62, phone: 0.62 },
+  stack: { desk: 0.72, phone: 0.72 },
+  "offset-pair": { desk: 0.62, phone: 0.62 },
+  strip: { desk: 0.4, phone: 0.8 },
+  "before-after": { desk: 0.5, phone: 1 },
+};
+
+/**
+ * Part of the container's width an image of `span` columns takes on desktop, and on phones, as a `sizes` attribute;
+ * `part` scales both for a photo that takes a share of its element (a frame of a photos arrangement).
+ */
+export function imageSizes(width: ComposedProps["width"], el: El, part: { desk: number; phone: number } = { desk: 1, phone: 1 }): string {
+  const span = el.desk.span * part.desk;
+  const base = el.phone.span === "half" ? "(100vw - 3rem) / 2" : el.phone.span === "inset" ? "(100vw - 2rem) * 0.82" : "100vw - 2rem";
+  const phone = part.phone === 1 ? `calc(${base})` : `calc((${base}) * ${part.phone})`;
   const rem = (n: number) => `${Math.round(n * 100) / 100}rem`;
+  const cols = Math.round(span * 100) / 100;
   // Contained: the container is 76 rem with 2 rem of padding each side; wide: 90 rem; full: the screen less its side padding.
-  if (width === "full") return `(min-width: 64rem) calc(94vw * ${span} / 12), ${phone}`;
+  if (width === "full") return `(min-width: 64rem) calc(94vw * ${cols} / 12), ${phone}`;
   const max = width === "wide" ? 90 : 76;
-  return `(min-width: ${max}rem) ${rem(((max - 4) * span) / 12)}, (min-width: 64rem) calc((100vw - 4rem) * ${span} / 12), ${phone}`;
+  return `(min-width: ${max}rem) ${rem(((max - 4) * span) / 12)}, (min-width: 64rem) calc((100vw - 4rem) * ${cols} / 12), ${phone}`;
+}
+
+/** The lead photo of an image or photos element and the `sizes` it renders with (the LCP preload must match it). */
+export function leadPhoto(width: ComposedProps["width"], el: ElOf<"image"> | ElOf<"photos">): { image: ElOf<"image">["image"]; sizes: string } {
+  if (el.kind === "image") return { image: el.image, sizes: imageSizes(width, el) };
+  return { image: el.images[0]!, sizes: imageSizes(width, el, PHOTO_FRAME[el.arrangement]) };
 }
 
 /** CSS variable of a type-scale step (composed.css defines --cx-fs-<step>; −1 is written m1). */

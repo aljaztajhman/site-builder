@@ -168,10 +168,14 @@ export type ComposedSheet = keyof typeof COMPOSED_SHEETS;
 type ComposedSection = Extract<Section, { type: "composed" }>;
 const isComposed = (s: Section): s is ComposedSection => s.type === "composed";
 
-/** Whether a composed section uses a spec v20 section-level feature (§1.3). R2 adds the new kinds, R3 the extensions. */
+/** The element kinds spec v20 adds (§1.5): their rules are in composed-v2.css (region kinds). */
+const V2_KINDS: ReadonlySet<string> = new Set(["photos", "wordmark", "ribbon", "sticker", "map", "iconFacts", "quote"]);
+
+/** Whether a composed section uses a spec v20 section-level feature (§1.3) or a v20 element kind (§1.5). R3 adds the extensions. */
 function usesV2(s: ComposedSection): boolean {
   const p = s.props;
-  return p.background !== undefined || p.top !== undefined || p.motion !== undefined || p.pin !== undefined || p.headerOver === true;
+  if (p.background !== undefined || p.top !== undefined || p.motion !== undefined || p.pin !== undefined || p.headerOver === true) return true;
+  return p.elements.some((el) => V2_KINDS.has(el.kind));
 }
 
 /**
@@ -197,10 +201,15 @@ export function composedIslandFiles(): string[] {
 /** The one island of every motion preset that needs JS (MOTION_META js; §3.2: ≤ 3 KiB gzip), as a path under js/. */
 export const COMPOSED_MOTION_ISLAND = "composed/motion.js";
 
+/** The marquee's pause button (ribbon move "loop", owner decision D2), as a path under js/. */
+export const COMPOSED_RIBBON_ISLAND = "composed/ribbon.js";
+
 /** The composed islands a page's sections load, as paths under js/ (the page shell's island list). */
 export function composedIslands(sections: readonly Section[]): string[] {
-  const js = sections.filter(isComposed).some((s) => s.props.motion !== undefined && MOTION_META[s.props.motion as keyof typeof MOTION_META]?.js === true);
-  return js ? [COMPOSED_MOTION_ISLAND] : [];
+  const own = sections.filter(isComposed);
+  const js = own.some((s) => s.props.motion !== undefined && MOTION_META[s.props.motion as keyof typeof MOTION_META]?.js === true);
+  const loop = own.some((s) => s.props.elements.some((el) => el.kind === "ribbon" && el.move === "loop"));
+  return [...(js ? [COMPOSED_MOTION_ISLAND] : []), ...(loop ? [COMPOSED_RIBBON_ISLAND] : [])];
 }
 
 export function sharedStylesheet(): string {

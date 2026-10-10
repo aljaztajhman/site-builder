@@ -5,6 +5,13 @@ import { ActionLink, Picture, cx } from "../../primitives/index.tsx";
 import type { RenderCtx } from "../../types.ts";
 import { DecorDrawing } from "./decor.tsx";
 import { ContactFact, HoursFact, PricesFact } from "./facts.tsx";
+import { IconFactsBlock } from "./kinds/icon-facts.tsx";
+import { MapBlock } from "./kinds/map.tsx";
+import { PhotosBlock } from "./kinds/photos.tsx";
+import { QuoteBlock } from "./kinds/quote.tsx";
+import { RibbonBlock } from "./kinds/ribbon.tsx";
+import { StickerBlock } from "./kinds/sticker.tsx";
+import { WordmarkBlock } from "./kinds/wordmark.tsx";
 import { imageSizes, stepVar, type El, type ElOf } from "./layout.ts";
 
 /**
@@ -197,5 +204,20 @@ export function ElementView({ el, ctx, width, over, titleId, priority }: Element
           <DecorDrawing el={el} />
         </Block>
       );
+    // Spec v20 kinds (kinds/*.tsx; their rules are in composed-v2.css, region kinds).
+    case "photos":
+      return <PhotosBlock el={el} ctx={ctx} width={width} priority={priority} />;
+    case "wordmark":
+      return <WordmarkBlock el={el} ctx={ctx} over={over} />;
+    case "ribbon":
+      return <RibbonBlock el={el} ctx={ctx} over={over} />;
+    case "sticker":
+      return <StickerBlock el={el} over={over} />;
+    case "map":
+      return <MapBlock el={el} ctx={ctx} over={over} />;
+    case "iconFacts":
+      return <IconFactsBlock el={el} ctx={ctx} over={over} />;
+    case "quote":
+      return <QuoteBlock el={el} ctx={ctx} over={over} />;
   }
 }
