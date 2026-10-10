@@ -38,3 +38,9 @@ Costs from session c60f7eb8 (design studio), 2026-10-11. Earlier units ran at ef
 | Phase 1 design | opus · xhigh | design | 43 | 4.55 | 19 min | n/a | 2 amendments after scouts (§2.1, §3.4) | — |
 | Phase 1 design (stopped) | fable · high | design | 9 | 3.39 | 4 min | nothing written | — | — |
 | Scouts (6 in this stretch) | haiku · low/medium | reading | 4–45 | 0.01–0.39 | 1–4 min | maps accurate; found 6 design/code mismatches | — | — |
+| F1b-3 fact rules, arm A | sonnet · medium | code, spec'd (paired) | — | ≈ 138k tokens | 5 min | yes after a self-caught type error; reran only one file after the fix | not kept | missed the photo layer's `phone` layout key and the translated-quote check |
+| F1b-3 fact rules, arm B (kept) | opus · medium | code, spec'd (paired) | — | ≈ 169k tokens | 8 min | yes; checked the 59 red tests were pre-existing against base | 0 | — |
+| F1b-2b guards G1–G25 | sonnet · medium (implementer) | code, failing tests given | — | ≈ 218k tokens | 10 min | yes: 59 red → green, spec 608, engine 516, render+components 455 | 0 | — |
+| F1b-R1 renderer section level | opus · medium | code, design-heavy | — | ≈ 270k tokens | 19 + 20 min | yes; browser check found a v19 overlap (not R1) | design G26 | — |
+
+First reading (2026-10-11): on the paired unit Sonnet used ≈ 20 % fewer tokens and was faster but missed two requirements Opus caught; as implementer against fixed failing tests (F1b-2b) Sonnet delivered clean. $ per row to be filled from `pnpm agents:costs` at the next run.
