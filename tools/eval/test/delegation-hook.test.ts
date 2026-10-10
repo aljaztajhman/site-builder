@@ -27,6 +27,8 @@ describe("agent-team hook", () => {
     expect(launch({ subagent_type: "general-purpose", model: "opus", effort: "xhigh", prompt: "MODE: S" }).problems).toEqual([]);
     expect(launch({ subagent_type: "general-purpose", model: "sonnet", effort: "high", prompt: "MODE: D" }).problems.join()).toMatch(/Sonnet/);
     expect(launch({ subagent_type: "implementer", prompt: "MODE: D" }).problems).toEqual([]);
+    expect(launch({ subagent_type: "builder", model: "sonnet", effort: "high", prompt: "MODE: D\nTRIAL: sonnet-high F1b-R3" }).problems).toEqual([]);
+    expect(launch({ subagent_type: "builder", model: "sonnet", effort: "xhigh", prompt: "MODE: D\nTRIAL: sonnet-high F1b-R3" }).problems.join()).toMatch(/Sonnet/);
     expect(launch({ subagent_type: "general-purpose", model: "opus", effort: "max", prompt: "MODE: S" }).problems.join()).toMatch(/max/);
   });
 });
