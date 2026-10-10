@@ -1,10 +1,16 @@
 import { COMPOSED_LAYOUT_KEYS, isPlaceholder, setAt, walkStrings, type SiteSpec } from "@sb/spec";
 import { numberTokens, numbersIn } from "./brief.ts";
+import { composedFacts, verbatimForm } from "./composed-facts.ts";
 import { clientHours, clockTimes, dayRange, fold, hoursPaired, parseHours, priceMentions, pricePaired, pricesFor, unnamedAmounts, type ClientHours, type PriceMention } from "./fact-pairing.ts";
 
 export interface FactViolation {
   path: string;
-  kind: "phone" | "email" | "address" | "hours" | "price" | "name" | "number" | "url";
+  /**
+   * quote: not the client's words verbatim; claim: a rating, award or superlative on a sticker or ribbon; amenity: an
+   * iconFacts key not in business.amenities; photo: a generated picture or an unlabelled before-after pair; plate: a
+   * registration code the table doesn't give; label: a numbered list lead (composed-facts.ts, spec v20).
+   */
+  kind: "phone" | "email" | "address" | "hours" | "price" | "name" | "number" | "url" | "quote" | "claim" | "amenity" | "photo" | "plate" | "label";
   value: string;
   /** Why it failed when the value is in the input but for something else (another offering, other days). */
   detail?: string;
@@ -47,6 +53,8 @@ interface Corpus {
   /** Prices given without saying what for; they count for any offering. */
   unnamed: Set<number>;
   hours: ClientHours;
+  /** The text as compared for verbatim copy (quotes, map notes): whitespace and quote marks normalised. */
+  verbatim: string;
 }
 
 function corpusOf(corpus: string): Corpus {
@@ -66,6 +74,7 @@ function corpusOf(corpus: string): Corpus {
     priceAmounts: new Set(prices.map((p) => p.amount)),
     unnamed: unnamedAmounts(prices),
     hours: clientHours(corpus),
+    verbatim: verbatimForm(corpus),
   };
 }
 
@@ -192,6 +201,8 @@ function check(spec: SiteSpec, c: Corpus, translated: boolean): FactViolation[] 
     if (NON_COPY_KEYS.has(key) || key === "url" || /^https?:\/\//.test(s) || IMAGE_REF_RE.test(s)) return;
     for (const f of copyFacts(s, c, "number")) out.push({ path: `/collections${p}`, ...f });
   });
+  // Composed v20 elements: verbatim quotes and map notes, no claimed ratings, amenities, photo origin, plate codes.
+  out.push(...composedFacts(spec, c.verbatim));
   // Translations overlay any string of the spec when rendered; check each locale as it is shown.
   for (const [locale, map] of Object.entries(spec.translations ?? {})) {
     const shown = structuredClone({ ...spec, translations: undefined });

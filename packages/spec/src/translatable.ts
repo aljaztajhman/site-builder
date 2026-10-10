@@ -10,7 +10,8 @@ import { getAt, walkObjects, walkStrings } from "./pointer.ts";
  * Counted: every page's menu label and search title and description, every section's copy, and the opening hours'
  * note. Not counted: ids, variants, links, picture references, dates and other values that aren't words, strings
  * without a letter ("2004", "40"), a composed section's layout values (composition/layout-keys.ts), people's and the
- * business's names (ownerName, team members' names, the hero's wordmark) and placeholders (filled in the default language first). Collection entries keep their documented
+ * business's names (ownerName, team members' names, the hero's wordmark), a composed quote and map notes (verbatim,
+ * VERBATIM_FIELDS) and placeholders (filled in the default language first). Collection entries keep their documented
  * fallback (the owner's own posts; the collection pane says the Slovene shows where there is no translation).
  *
  * No zod here: the editor imports it (`@sb/spec/translatable`).
@@ -54,9 +55,38 @@ const LETTER = /\p{L}/u;
 type Obj = Record<string, unknown>;
 const obj = (v: unknown): Obj | null => (v && typeof v === "object" && !Array.isArray(v) ? (v as Obj) : null);
 
-/** Whether a string at this pointer (inside a section's props), under this key, is copy a visitor reads. */
-function isCopy(s: string, pointer: string, key: string): boolean {
+/**
+ * Fields of composed elements (spec v20) that are the client's words verbatim and stay as written in every language
+ * (studio-phase1-design.md §1.8): a quote and its attribution (rendered with the source's `lang`), a map's cross street
+ * and note. A translation would no longer be what the client said.
+ */
+export const VERBATIM_FIELDS: Readonly<Record<string, readonly string[]>> = { quote: ["text", "by"], map: ["cross", "note"] };
+
+/** An element's own field inside a section's props: "/elements/3/text" → element 3, field "text". */
+const ELEMENT_FIELD = /^\/elements\/(\d+)\/([^/]+)$/;
+
+/** Whether `field` of the element at `index` of these composed props is verbatim (VERBATIM_FIELDS). */
+function verbatimField(props: unknown, pointer: string): boolean {
+  const m = ELEMENT_FIELD.exec(pointer);
+  if (!m) return false;
+  const kind = getAt(props, `/elements/${m[1]}/kind`);
+  return typeof kind === "string" && (VERBATIM_FIELDS[kind] ?? []).includes(m[2]!);
+}
+
+/** Whether a JSON Pointer into the spec is a verbatim field of a composed element (VERBATIM_FIELDS): never translated. */
+export function isVerbatimPointer(spec: unknown, pointer: string): boolean {
+  const m = /^(\/pages\/\d+\/sections\/\d+)\/props(\/.*)$/.exec(pointer);
+  if (!m || getAt(spec, `${m[1]}/type`) !== "composed") return false;
+  return verbatimField(getAt(spec, `${m[1]}/props`), m[2]!);
+}
+
+/**
+ * Whether a string at this pointer (inside a section's props), under this key, is copy a visitor reads. `composed` is
+ * the section's props when it is a composed section: its elements' verbatim fields are not translated.
+ */
+function isCopy(s: string, pointer: string, key: string, composed?: unknown): boolean {
   if (NOT_COPY.has(key) || !s.trim() || !LETTER.test(s) || IMAGE_REF.test(s) || /^https?:\/\//i.test(s)) return false;
+  if (composed !== undefined && verbatimField(composed, pointer)) return false;
   // A team member's name.
   return !(key === "name" && /\/members\/\d+\/name$/.test(pointer));
 }
@@ -90,7 +120,7 @@ export function sectionTexts(spec: unknown, pi: number, si: number): Translatabl
   walkStrings(props, (s, p, key) => {
     if (placeholders.some((at) => p.startsWith(at))) return;
     if (composed && COMPOSED_LAYOUT_KEYS.has(key)) return;
-    if (isCopy(s, p, key)) out.push({ path: `${base}${p}`, text: s });
+    if (isCopy(s, p, key, composed ? props : undefined)) out.push({ path: `${base}${p}`, text: s });
   });
   return out;
 }

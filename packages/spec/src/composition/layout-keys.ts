@@ -65,6 +65,8 @@ export const COMPOSED_LAYOUT_KEYS: ReadonlySet<string> = new Set([
   "tilt",
   "drawing",
   "separator",
+  // A photo layer's phone treatment ("band", "cover"); an element's `phone` is an object, walked by its own keys.
+  "phone",
   // A practical-fact key (PRACTICAL_FACTS); `fact` is a key only in iconFacts items.
   "fact",
 ]);
