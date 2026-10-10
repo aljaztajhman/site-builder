@@ -168,10 +168,47 @@ export type ComposedSheet = keyof typeof COMPOSED_SHEETS;
 type ComposedSection = Extract<Section, { type: "composed" }>;
 const isComposed = (s: Section): s is ComposedSection => s.type === "composed";
 
-/** Whether a composed section uses a spec v20 section-level feature (§1.3). R2 adds the new kinds, R3 the extensions. */
+/** The mask, image treatment and fact object names the core sheet (spec v19) draws; any other name's rules are in the v2 sheet (region vocab). */
+const V19_MASKS: ReadonlySet<string> = new Set(["none", "arch", "circle", "cut", "stamp", "ticket"]);
+const V19_IMAGE_TREATMENTS: ReadonlySet<string> = new Set(["none", "duotone", "tint", "grain"]);
+const V19_FACT_OBJECTS: ReadonlySet<string> = new Set(["numeral", "plate", "stamp", "ticket", "seal", "tag"]);
+
+type ComposedElement = ComposedSection["props"]["elements"][number];
+
+/**
+ * Whether an element uses a spec v20 extension of an existing kind (F1b-R3; the new kinds are R2's): a tilt, a bleed, a
+ * colour role (`color`, `fill`), an image scrim or a mask or treatment name beyond v19's, a heading treatment, a drop cap,
+ * a list lead, marker, weight or size, a fact link, label order, plate code, count or an object beyond v19's, a price
+ * style beyond rows, plates and tags (or its columns, size, plate code), and a decor drawing, colour, fixed size or repeat.
+ */
+function elementUsesV2(el: ComposedElement): boolean {
+  const d = el.desk;
+  if ((d.tilt !== undefined && d.tilt !== 0) || d.bleedX !== undefined || d.bleedY !== undefined || el.phone.span === "bleed") return true;
+  if (("color" in el && el.color !== undefined) || ("fill" in el && el.fill !== undefined)) return true;
+  switch (el.kind) {
+    case "heading":
+      return (el.treatment !== undefined && el.treatment !== "none") || el.fillImage !== undefined;
+    case "text":
+      return el.dropCap === true;
+    case "list":
+      return el.items.some((i) => typeof i !== "string") || (el.marker !== undefined && !["none", "rule", "dot"].includes(el.marker)) || el.drawing !== undefined || (el.weight !== undefined && el.weight !== "regular") || (el.size !== undefined && el.size > 0);
+    case "fact":
+      return el.link !== undefined || el.labelAt === "before" || el.plateCode === true || el.count === true || !V19_FACT_OBJECTS.has(el.treatment);
+    case "image":
+      return el.scrim !== undefined || (el.mask !== undefined && !V19_MASKS.has(el.mask)) || (el.treatment !== undefined && !V19_IMAGE_TREATMENTS.has(el.treatment));
+    case "prices":
+      return !["rows", "plates", "tags"].includes(el.style) || el.phoneColumns !== undefined || (el.size !== undefined && el.size > 0) || el.plateCode === true;
+    case "decor":
+      return el.drawing !== undefined || el.fit !== undefined || el.size !== undefined || el.repeat !== undefined;
+    default:
+      return false;
+  }
+}
+
+/** Whether a composed section uses a spec v20 feature: at section level (§1.3: R1) or in its elements (the extensions: R3; the new kinds: R2). */
 function usesV2(s: ComposedSection): boolean {
   const p = s.props;
-  return p.background !== undefined || p.top !== undefined || p.motion !== undefined || p.pin !== undefined || p.headerOver === true;
+  return p.background !== undefined || p.top !== undefined || p.motion !== undefined || p.pin !== undefined || p.headerOver === true || p.elements.some(elementUsesV2);
 }
 
 /**
@@ -197,10 +234,16 @@ export function composedIslandFiles(): string[] {
 /** The one island of every motion preset that needs JS (MOTION_META js; §3.2: ≤ 3 KiB gzip), as a path under js/. */
 export const COMPOSED_MOTION_ISLAND = "composed/motion.js";
 
+/** The island of a fact with `count` (D2: counts up to the client's number once, on first view), as a path under js/. */
+export const COMPOSED_COUNT_ISLAND = "composed/count.js";
+
 /** The composed islands a page's sections load, as paths under js/ (the page shell's island list). */
 export function composedIslands(sections: readonly Section[]): string[] {
-  const js = sections.filter(isComposed).some((s) => s.props.motion !== undefined && MOTION_META[s.props.motion as keyof typeof MOTION_META]?.js === true);
-  return js ? [COMPOSED_MOTION_ISLAND] : [];
+  const own = sections.filter(isComposed);
+  const out: string[] = [];
+  if (own.some((s) => s.props.motion !== undefined && MOTION_META[s.props.motion as keyof typeof MOTION_META]?.js === true)) out.push(COMPOSED_MOTION_ISLAND);
+  if (own.some((s) => s.props.elements.some((el) => el.kind === "fact" && el.count === true && /^\d{1,9}$/.test(el.value)))) out.push(COMPOSED_COUNT_ISLAND);
+  return out;
 }
 
 export function sharedStylesheet(): string {

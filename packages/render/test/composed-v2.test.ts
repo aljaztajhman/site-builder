@@ -238,7 +238,7 @@ describe("motion", () => {
       expect(openTag(render([sectionOf(props({ motion: m }))]).html), m).not.toContain("cx-mo-");
     }
     expect(MOTIONS.every((m) => MOTION_META[m].js === false)).toBe(true);
-    expect(composedIslandFiles()).toEqual([]);
+    expect(composedIslandFiles()).toEqual(["count.js"]); // the count-up island (fact.count), not a motion preset
     expect(COMPOSED_MOTION_ISLAND).toBe("composed/motion.js");
   });
 });
