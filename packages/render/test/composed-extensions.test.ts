@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { ComposedProps, ColorRole, MOTIONS, migrateSpec, type Page, type Section, type SiteSpec } from "@sb/spec";
+import { ComposedProps, ColorRole, migrateSpec, type Page, type Section, type SiteSpec } from "@sb/spec";
 import { uncoveredClasses } from "./composed-coverage.ts";
 import { COMPOSED_COUNT_ISLAND, composedIslandFiles, composedIslands, composedSheets, composedStylesheet, composedV2Sheets, renderPage, sharedBundle } from "../src/index.ts";
 
