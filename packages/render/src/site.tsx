@@ -50,7 +50,7 @@ import {
 } from "@sb/spec";
 import { fontFaceCss, fontFiles, tokensCss } from "./tokens.ts";
 import { DEFAULT_IMAGE_WIDTHS, variantFile, variantHeight, variantWidths } from "./images.ts";
-import { COMPOSED_SHEETS, composedIslands, composedSheets, sharedBundle } from "./shared.ts";
+import { COMPOSED_SHEETS, composedIslands, composedSheets, hasComposedCallFact, sharedBundle } from "./shared.ts";
 import { entryJsonLd, faqJsonLd, jsonLd } from "./jsonld.ts";
 import { feedOf, rssXml } from "./feed.ts";
 import { OG_LOCALE, SHARE_IMAGE, indexable, normaliseSiteUrl, pagePath, robotsTxt, shareImageOf, sitemapEntries, sitemapXml } from "./seo.ts";
@@ -346,7 +346,9 @@ function renderDocument(spec: SiteSpec, localized: SiteSpec, opts: RenderOptions
   // offers call and directions), and the plate can't be turned into a text link.
   const waitCall = heroOwnsCall(first) && (skeleton !== undefined ? !afterHero : first?.type === "composed");
   const reveal = skeleton ? (fixed !== null && (afterHero || waitCall)) || (skeleton.actions === "header" && heroOwnsCall(first)) : fixed !== null && waitCall;
-  if (reveal) islands.add("reveal.js");
+  // A page with a composed fact that calls loads the composed bar.js instead (composedIslands): reveal.js with those facts
+  // among its call objects, on the same marks, so one script runs them and the shared reveal.js keeps its bytes.
+  if (reveal && !hasComposedCallFact(doc.sections)) islands.add("reveal.js");
   const skeletonAttrs = skeleton
     ? {
         "data-skeleton": "",

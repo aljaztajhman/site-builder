@@ -425,10 +425,21 @@ export const COMPOSED_RIBBON_ISLAND = "ribbon.js";
 /** The island of a fact with `count` (D2: counts up to the client's number once, on first view), its source file. */
 export const COMPOSED_COUNT_ISLAND = "count.js";
 
+/**
+ * reveal.js with composed facts that call among its call objects (the bar steps aside for a later plate), its source
+ * file. A page with such a fact loads it in place of reveal.js (site.tsx), so the shared reveal.js keeps its bytes.
+ */
+export const COMPOSED_BAR_ISLAND = "bar.js";
+
+/** A composed section of the page has a fact whose whole object links to the phone. */
+export const hasComposedCallFact = (sections: readonly Section[]): boolean =>
+  sections.filter(isComposed).some((s) => s.props.elements.some((el) => el.kind === "fact" && el.link !== undefined && "action" in el.link && el.link.action === "call"));
+
 /** The composed islands a page's sections load, as served paths under js/ (composedIslandPath; the page shell's island list). */
 export function composedIslands(sections: readonly Section[]): string[] {
   const own = sections.filter(isComposed);
   const out: string[] = [];
+  if (hasComposedCallFact(sections)) out.push(COMPOSED_BAR_ISLAND);
   if (own.some((s) => s.props.motion !== undefined && MOTION_META[s.props.motion as keyof typeof MOTION_META]?.js === true)) out.push(COMPOSED_MOTION_ISLAND);
   if (own.some((s) => s.props.elements.some((el) => el.kind === "ribbon" && el.move === "loop"))) out.push(COMPOSED_RIBBON_ISLAND);
   if (own.some((s) => s.props.elements.some((el) => el.kind === "fact" && el.count === true && /^\d{1,9}$/.test(el.value)))) out.push(COMPOSED_COUNT_ISLAND);

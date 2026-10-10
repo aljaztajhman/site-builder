@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { composedActions, heroOwnsCall, lcpImageFor } from "@sb/components";
 import { ComposedProps, migrateSpec, type ELEMENT_KINDS, type Page, type Section, type SiteSpec } from "@sb/spec";
-import { composedStylesheet, renderPage, sharedBundle } from "../src/index.ts";
+import { COMPOSED_BAR_ISLAND, composedIslandPath, composedStylesheet, renderPage, sharedBundle } from "../src/index.ts";
 
 /** Composed sections (spec v19) in the rendered page; no browser (the browser checks: tools/eval/test/composed-render.test.ts). */
 const golden = (id: string) => migrateSpec(JSON.parse(readFileSync(new URL(`../../../tools/eval/golden/${id}.json`, import.meta.url), "utf8"))) as SiteSpec;
@@ -383,8 +383,27 @@ describe("composed sections render", () => {
         });
         expect(barCall(html), `skeleton ${skeleton}`).toContain('href="tel:');
         expect(barCall(html), `skeleton ${skeleton}`).toContain("data-after-hero");
-        expect(html, `skeleton ${skeleton}`).toContain("reveal.js");
+        // The composed bar.js runs the marks in place of reveal.js (which keeps its bytes in the shared bundle).
+        expect(html, `skeleton ${skeleton}`).toContain(`/js/${composedIslandPath(COMPOSED_BAR_ISLAND)}"`);
+        expect(html, `skeleton ${skeleton}`).not.toContain("reveal.js");
       }
+    });
+
+    it("bar.js is reveal.js with the composed facts that call among its call objects, nothing else", () => {
+      const body = (src: string) => src.slice(src.indexOf("(() => {"));
+      const reveal = readFileSync(new URL("../../components/islands/reveal.js", import.meta.url), "utf8");
+      const bar = readFileSync(new URL("../../components/islands/composed/bar.js", import.meta.url), "utf8");
+      const from = 'document.querySelectorAll("main a.plate, main a.callblock, main a.bignum")';
+      expect(body(reveal)).toContain(from);
+      expect(body(bar)).toBe(body(reveal).replace(from, `document.querySelectorAll('main a.plate, main a.callblock, main a.bignum, main a.cx-fact__a[href^="tel:"]')`));
+    });
+
+    it("a page with a skeleton and no calling fact keeps reveal.js and loads no bar.js", () => {
+      const { html } = render([sectionOf(SAMPLE)], (s) => {
+        s.design.skeleton = { header: "bar", actions: "bar", footer: "compact", footerTone: "inverse", width: "contained", cards: "none", buttons: "soft", dividers: "none", photoRatio: "standard" };
+        s.chrome.mobileActionBar = true;
+      });
+      expect(html).not.toContain("composed/bar-");
     });
 
     it("a fact that calls counts as the opener's call; a plain fact, or one in a later section, does not", () => {
