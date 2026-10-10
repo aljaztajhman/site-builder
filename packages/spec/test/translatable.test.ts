@@ -2,7 +2,20 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { blockerMessage, blockerText, describePath, publishChecklist, sectionTexts, textsCount, translatableTexts, untranslated, type SiteSpec } from "../src/index.ts";
+import {
+  COMPOSED_LAYOUT_KEYS,
+  blockerMessage,
+  blockerText,
+  describePath,
+  isComposedLayoutPointer,
+  publishChecklist,
+  sectionTexts,
+  textsCount,
+  translatableTexts,
+  untranslated,
+  validateSite,
+  type SiteSpec,
+} from "../src/index.ts";
 
 /**
  * The texts a second language needs (it-editor-languages) and the checklist entries for the ones still without a
@@ -102,5 +115,37 @@ describe("the checklist of a site in two languages", () => {
   it("words the count in Slovene", () => {
     expect([1, 2, 3, 4, 5, 101, 102].map(textsCount)).toEqual(["1 besedilo", "2 besedili", "3 besedila", "4 besedila", "5 besedil", "101 besedilo", "102 besedili"]);
     expect(blockerMessage({ path: "/pages/0/nav/label", kind: "translation", detail: "en", value: "1" })).toBe("Še 1 besedilo brez angleškega prevoda.");
+  });
+});
+
+describe("composed sections (spec v19) in a second language", () => {
+  const sheet = (): SiteSpec => JSON.parse(readFileSync(path.join(here, "../../../tools/eval/composed/m.json"), "utf8")) as SiteSpec;
+  /** A composed element's copy: heading text, paragraphs, list items, fact value and label, action and link labels, price names, notes and units. */
+  const COPY = new Set(["text", "paragraphs", "items", "value", "label", "name", "note", "unit"]);
+  const keyOf = (p: string) => p.split("/").filter((t) => t && !/^\d+$/.test(t)).pop()!;
+  const inComposed = (spec: SiteSpec, p: string) => {
+    const m = /^\/pages\/(\d+)\/sections\/(\d+)\/props\//.exec(p);
+    return !!m && spec.pages[Number(m[1])]!.sections[Number(m[2])]!.type === "composed";
+  };
+
+  it("lists only copy: no width, style, case, phone span, alignment, ratio or path data", () => {
+    const spec = english(sheet());
+    const composed = translatableTexts(spec).filter((t) => inComposed(spec, t.path));
+    expect(composed.length).toBeGreaterThan(20);
+    expect(composed.filter((t) => !COPY.has(keyOf(t.path))).map((t) => t.path)).toEqual([]);
+    expect(composed.filter((t) => COMPOSED_LAYOUT_KEYS.has(keyOf(t.path)))).toEqual([]);
+  });
+
+  it("rejects an overlay on a layout value, keeps one on copy", () => {
+    const spec = sheet();
+    const els = (spec.pages[0]!.sections[0]!.props as { elements: { kind: string }[] }).elements;
+    const at = `/pages/0/sections/0/props/elements/${els.findIndex((e) => e.kind === "heading")}`;
+    const bogus = english(spec, { [`${at}/text`]: "EN heading", [`${at}/phone/span`]: "Full" });
+    const issues = validateSite(bogus).issues.filter((i) => i.code === "translation");
+    expect(issues.map((i) => i.message)).toEqual([`pointer ${at}/phone/span is a composed section's layout value, not copy`]);
+    expect(isComposedLayoutPointer(bogus, `${at}/phone/span`)).toBe(true);
+    expect(isComposedLayoutPointer(bogus, `${at}/text`)).toBe(false);
+    // The same key outside a composed section means what that section says.
+    expect(isComposedLayoutPointer(golden(), "/pages/0/sections/0/props/style")).toBe(false);
   });
 });

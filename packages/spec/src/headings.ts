@@ -13,9 +13,16 @@ type Section = SiteSpec["pages"][number]["sections"][number];
 /** Page.sections' maximum (site.ts). */
 const MAX_SECTIONS = 14;
 
+/** Spec v19: a composed section renders the page's h1 when one of its headings is level 1. */
+export function hasComposedH1(s: { type: string; props?: unknown }): boolean {
+  if (s.type !== "composed") return false;
+  const elements = (s.props as { elements?: { kind?: string; level?: number }[] } | undefined)?.elements;
+  return !!elements?.some((e) => e.kind === "heading" && e.level === 1);
+}
+
 /** Does this section render the page's h1 at position `index`? */
-export function isMainHeading(s: Pick<Section, "type">, index: number): boolean {
-  return MAIN_HEADING_TYPES.has(s.type) || (s.type === "collection" && index === 0);
+export function isMainHeading(s: { type: string; props?: unknown }, index: number): boolean {
+  return MAIN_HEADING_TYPES.has(s.type) || (s.type === "collection" && index === 0) || hasComposedH1(s);
 }
 
 export function mainHeadingIssues(spec: SiteSpec): Issue[] {
@@ -40,7 +47,25 @@ export function repairMainHeadings(spec: SiteSpec): string[] {
   const repairs: string[] = [];
   const ids = new Set(spec.pages.flatMap((p) => p.sections.map((s) => s.id)));
   spec.pages.forEach((p, pi) => {
-    const at = p.sections.flatMap((s, si) => (MAIN_HEADING_TYPES.has(s.type) ? [si] : []));
+    // Spec v19: a composed section's later h1 is demoted to h2 (the heading stays, only its level changes): every
+    // composed h1 after the page's first main heading, and all of them on a page a collection opens.
+    let seen = p.sections[0]?.type === "collection";
+    p.sections.forEach((s, si) => {
+      if (MAIN_HEADING_TYPES.has(s.type)) seen = true;
+      else if (hasComposedH1(s)) {
+        if (!seen) {
+          seen = true;
+          return;
+        }
+        for (const [ei, e] of (s.props as { elements: { kind: string; level?: number }[] }).elements.entries()) {
+          if (e.kind === "heading" && e.level === 1) {
+            e.level = 2;
+            repairs.push(`/pages/${pi}/sections/${si}/props/elements/${ei}/level: demoted h1 to h2 (the page has one main heading)`);
+          }
+        }
+      }
+    });
+    const at = p.sections.flatMap((s, si) => (MAIN_HEADING_TYPES.has(s.type) || hasComposedH1(s) ? [si] : []));
     if (at.length === 1 && at[0] !== 0 && !(p.sections[0]!.type === "collection")) {
       const [h] = p.sections.splice(at[0]!, 1);
       p.sections.unshift(h!);

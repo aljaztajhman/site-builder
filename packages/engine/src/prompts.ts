@@ -79,7 +79,7 @@ const inJson = (s: string) => JSON.stringify(s).slice(1, -1);
  */
 export function sectionCatalogue(f: PromptFixes = NO_PROMPT_FIXES, opts: CatalogueOptions = {}): string {
   if (opts.compact) return compactSectionCatalogue(f);
-  const lines = SECTION_DEFS.filter((d) => !d.systemOnly && !d.ownerOnly).map((d) => {
+  const lines = SECTION_DEFS.filter((d) => !d.systemOnly && !d.ownerOnly && !d.designerOnly).map((d) => {
     const schema = toModelJsonSchema(d.props);
     const fix = f.catalogue ? CATALOGUE_DESCRIPTIONS[d.type] : undefined;
     const json = JSON.stringify(schema);
@@ -106,7 +106,7 @@ export interface CatalogueOptions {
  */
 export function compactSectionCatalogue(f: PromptFixes = NO_PROMPT_FIXES): string {
   const w = new CompactWriter(catalogueAliases());
-  const blocks = SECTION_DEFS.filter((d) => !d.systemOnly && !d.ownerOnly).map((d) => {
+  const blocks = SECTION_DEFS.filter((d) => !d.systemOnly && !d.ownerOnly && !d.designerOnly).map((d) => {
     const fix = f.catalogue ? CATALOGUE_DESCRIPTIONS[d.type] : undefined;
     const props = w.type(toModelJsonSchema(d.props));
     return [

@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { HexColor } from "./common.ts";
+import { HexColor, text } from "./common.ts";
+import { INTENTS } from "./intents-list.ts";
 import type { BusinessType } from "./business.ts";
 import { Skeleton } from "./skeleton.ts";
 import { Genome } from "./genome.ts";
@@ -28,6 +29,16 @@ export const Colors = z.strictObject({
 });
 export type Colors = z.infer<typeof Colors>;
 
+/** Spec v19: the AI designer's art direction for the site (design-studio.md §6). Metadata only; rendering never reads it. */
+export const Art = z.strictObject({
+  idea: text(160).describe("The one idea the design is built on"),
+  rationale: text(600).optional(),
+  stance: z.string().regex(/^[a-z0-9-]+$/).max(40).optional().describe("The stance the idea came from (design-studio.md §5.2)"),
+  references: z.array(z.string().regex(/^[a-z0-9-]+$/).max(40)).max(4).optional(),
+  moments: z.array(z.strictObject({ intent: z.enum(INTENTS), purpose: text(200) })).max(10).optional(),
+});
+export type Art = z.infer<typeof Art>;
+
 export const Design = z.strictObject({
   direction: z.string().regex(/^[a-z-]+$/),
   fontPair: z.string().regex(/^[a-z0-9-]+$/),
@@ -45,6 +56,8 @@ export const Design = z.strictObject({
   skeleton: Skeleton.optional().describe("Set by the system; leave out."),
   /** Spec v18: the site's design genome (genome.ts): the axes that have no other home, and whether they were picked independently. */
   genome: Genome.optional().describe("Set by the system; leave out."),
+  /** Spec v19: the AI designer's art direction (design-studio.md §6). Metadata for regenerations, neighbours and the editor; never changes rendering. */
+  art: Art.optional().describe("Set by the system; leave out."),
 });
 export type Design = z.infer<typeof Design>;
 

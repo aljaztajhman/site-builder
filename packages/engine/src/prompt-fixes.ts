@@ -172,7 +172,7 @@ export const heroSuitableLine = (ids: string[]): string => `Hero-suitable photos
 
 /** The editor's Slovene section names (what owners call sections in requests), for the cached edit system block. */
 export function sectionNamesForEdits(): string {
-  const types = SECTION_DEFS.filter((d) => !d.systemOnly && !d.ownerOnly).map((d) => d.type);
+  const types = SECTION_DEFS.filter((d) => !d.systemOnly && !d.ownerOnly && !d.designerOnly).map((d) => d.type);
   return `Section names the owner sees in the editor (requests may use them): ${types.filter((t) => SECTION_LABEL[t]).map((t) => `"${SECTION_LABEL[t]}" = ${t}`).join("; ")}.`;
 }
 export const EDIT_REPLY_OLD = `- Write the reply in first person plural`;

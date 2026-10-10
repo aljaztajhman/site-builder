@@ -100,7 +100,7 @@ describe("defaultSection", () => {
   it("builds a valid starter section for every non-system section type", () => {
     // A collection section needs a collection to show (tested below).
     const withBlog = { ...spec, collections: { blog: { page: spec.pages[0]!.id, items: [] } } };
-    for (const def of SECTION_DEFS.filter((d) => !d.systemOnly)) {
+    for (const def of SECTION_DEFS.filter((d) => !d.systemOnly && !d.designerOnly)) {
       const s = defaultSection(withBlog, def.type, `s_new_${def.type.replace(/-/g, "_")}`);
       expect(s, def.type).not.toBeNull();
       expect(sectionDef(def.type).schema.safeParse(s).success, def.type).toBe(true);
@@ -121,6 +121,27 @@ describe("defaultSection", () => {
     expect(defaultSection(spec, "legal", "s_l")).toBeNull();
     const cat = editorCatalogue(noPhotos);
     expect(cat.sections.find((s) => s.type === "gallery")?.canAdd).toBe(false);
+  });
+
+  it("lists a composed section with a form of its copy only, and never offers to add one", () => {
+    expect(defaultSection(spec, "composed", "s_c")).toBeNull();
+    const composed = editorCatalogue(spec).sections.find((s) => s.type === "composed");
+    expect(composed?.canAdd).toBe(false);
+    // Every property name anywhere in the form's schema: copy (and the price's own parts), no placement or layout.
+    const keys = new Set<string>();
+    const walk = (v: unknown): void => {
+      if (Array.isArray(v)) v.forEach(walk);
+      else if (v && typeof v === "object") {
+        const props = (v as { properties?: Record<string, unknown> }).properties;
+        if (props) Object.keys(props).forEach((k) => keys.add(k));
+        Object.values(v).forEach(walk);
+      }
+    };
+    walk(composed!.props);
+    expect([...keys].sort()).toEqual(["$placeholder", "amount", "elements", "from", "items", "kind", "label", "name", "note", "paragraphs", "price", "text", "unit", "value"]);
+    // Each element kind is a member, so the form finds an element's fields by its kind.
+    const members = ((composed!.props as { properties: { elements: { items: { anyOf: { properties: { kind: { enum: string[] } } }[] } } } }).properties.elements.items.anyOf).map((m) => m.properties.kind.enum);
+    expect(members).toEqual([["heading"], ["text"], ["list"], ["fact"], ["image"], ["action"], ["hours"], ["contact"], ["prices"], ["decor"]]);
   });
 
   it("tells the editor which layouts need a prop the section may lack (about figure, a receipt, hours with a photo)", () => {

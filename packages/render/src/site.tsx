@@ -13,6 +13,7 @@ import {
   lcpImageFor,
   rendererFor,
   barActions,
+  composedActions,
   heroOwnsCall,
   navHasMore,
   signatureActions,
@@ -31,6 +32,7 @@ import {
   entryPages,
   entryTitle,
   isPlaceholder,
+  isComposedLayoutPointer,
   isWebUrl,
   mapsUrl,
   setAt,
@@ -48,7 +50,7 @@ import {
 } from "@sb/spec";
 import { fontFaceCss, fontFiles, tokensCss } from "./tokens.ts";
 import { DEFAULT_IMAGE_WIDTHS, variantFile, variantHeight, variantWidths } from "./images.ts";
-import { sharedBundle } from "./shared.ts";
+import { composedStylesheet, sharedBundle } from "./shared.ts";
 import { entryJsonLd, faqJsonLd, jsonLd } from "./jsonld.ts";
 import { feedOf, rssXml } from "./feed.ts";
 import { OG_LOCALE, SHARE_IMAGE, indexable, normaliseSiteUrl, pagePath, robotsTxt, shareImageOf, sitemapEntries, sitemapXml } from "./seo.ts";
@@ -58,6 +60,7 @@ import { landmarkSuffixes } from "./landmarks.ts";
 function heroActions(first: { type: string; variant: string; props: unknown } | undefined): string[] {
   if (!first) return [];
   if (first.type === "hero-signature") return signatureActions(first as SectionOf<"hero-signature">);
+  if (first.type === "composed") return composedActions(first as SectionOf<"composed">);
   const p = first.props as { primary?: { target?: { action?: string } }; secondary?: { target?: { action?: string } } };
   return [p.primary?.target?.action, p.secondary?.target?.action].filter((a): a is string => a !== undefined);
 }
@@ -71,6 +74,10 @@ function heroOffersCallAndDirections(first: { type: string; variant: string; pro
   if (!first) return false;
   if (first.type === "hero-type" && first.variant === "with-facts") return true;
   if (first.type === "hero-signature") return signatureOffersDirections(first as SectionOf<"hero-signature">);
+  if (first.type === "composed") {
+    const actions = composedActions(first as SectionOf<"composed">);
+    return actions.includes("call") && actions.includes("directions");
+  }
   const p = first.props as { primary?: { target?: { action?: string } }; secondary?: { target?: { action?: string } } };
   const actions = [p.primary?.target?.action, p.secondary?.target?.action];
   return actions.includes("call") && actions.includes("directions");
@@ -106,7 +113,8 @@ export function pageFile(page: Pick<Page, "slug">): string {
 export function localizeSpec(spec: SiteSpec, locale: Locale): SiteSpec {
   if (locale === spec.locales.default) return spec;
   const clone = structuredClone(spec);
-  for (const [ptr, value] of Object.entries(spec.translations?.[locale] ?? {})) setAt(clone, ptr, value);
+  // A composed section's layout value is never translated (validateSite rejects such an overlay; an old one is ignored).
+  for (const [ptr, value] of Object.entries(spec.translations?.[locale] ?? {})) if (!isComposedLayoutPointer(spec, ptr)) setAt(clone, ptr, value);
   for (const kind of COLLECTION_KINDS) {
     const items = spec.collections?.[kind]?.items;
     const slugs = items ? entrySlugs(items) : [];
@@ -412,6 +420,8 @@ function renderDocument(spec: SiteSpec, localized: SiteSpec, opts: RenderOptions
       )}
       {/* The stylesheet without other trades' motif rules (shared.ts stylesheetFor). */}
       <link rel="stylesheet" href={ctx.shared(stylesheetName({ motif, sub }))} />
+      {/* Composed sections (spec v19) have a stylesheet of their own, linked only by pages that have one. */}
+      {doc.sections.some((s) => s.type === "composed") && <link rel="stylesheet" href={ctx.shared(composedStylesheet().name)} />}
       <style dangerouslySetInnerHTML={{ __html: fontFaceCss(design, fontsBase) + tokensCss(design, sub) }} />
       {doc.jsonLd.map((json, i) => (
         <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: json }} />
