@@ -72,7 +72,8 @@ export function IconFactsBlock({ el, ctx, over }: { el: ElOf<"iconFacts">; ctx: 
     return label ? [{ ...it, label }] : [];
   });
   if (items.length === 0) return null;
-  const p = placement(el, over);
+  // --n: how many; the grid's column minimum falls with it (composed-v2.css), so six sit in a row and four stay two and two.
+  const p = placement(el, over, { "--n": items.length });
   const twoUp = items.every((it) => it.label.length <= TWO_UP && !it.note);
   return (
     <ul {...p} className={cx(p.className, "cx-if", `cx-if--${el.icons ?? "line"}`, twoUp && "cx-if--2")} role="list">

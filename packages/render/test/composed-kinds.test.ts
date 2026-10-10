@@ -192,6 +192,7 @@ describe("iconFacts", () => {
   it("a list of icon + label (+ the client's note); two a row on phones only when every label is short and there are no notes", () => {
     const h = el(render([sectionOf(at({ kind: "iconFacts", items: [{ fact: "parking" }, { fact: "wifi" }, { fact: "lift" }] }))], amenities("parking", "wifi", "lift")));
     expect(h).toMatch(/<ul class="cx-el cx-el--iconFacts cx-ps-full cx-if cx-if--line cx-if--2"[^>]*role="list">/);
+    expect(h).toContain("--n:3"); // the grid's column minimum falls with the count (composed-v2.css)
     expect(h).toMatch(/<li class="cx-if__i" data-fact="parking"><svg class="cx-if__ic" viewBox="0 0 24 24"[^>]*aria-hidden="true" focusable="false">[\s\S]*?<\/svg><span class="cx-if__l">Parkirišče<\/span><\/li>/);
     const long = el(render([sectionOf(at({ kind: "iconFacts", items: [{ fact: "wheelchair" }, { fact: "terrace", note: "Odprta od maja." }] }))], amenities("wheelchair", "terrace")));
     expect(long).not.toContain("cx-if--2");

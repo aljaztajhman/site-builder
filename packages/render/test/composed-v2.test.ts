@@ -365,12 +365,12 @@ describe("the header over the opener", () => {
     expect(v2()).toContain(".cx-hdr0{--cx-hx:16rem}");
     expect(v2()).toContain("margin-top:calc(-1*(var(--cx-ed,0px) + var(--cx-rs,0)*var(--cx-ru) + var(--cx-hx,0px)))");
     // Phones: the ground of the phone layout, and a solid open menu.
-    expect(v2()).toMatch(/@media \(max-width:63\.999rem\)\{[^@]*\[data-hdr="over"\]:has\(\.cx-hgp-band\)\{--cx-rc:var\(--c-band,var\(--c-primary\)\)/);
+    expect(v2()).toMatch(/@media \(max-width:63\.999rem\)\{[^@]*\[data-hdr=over\]:has\(\.cx-hgp-band\)\{--cx-rc:var\(--c-band,var\(--c-primary\)\)/);
     expect(v2()).toContain('body[data-hdr="over"] .site-header .site-nav{margin-inline:-1rem;padding-inline:1rem;background:var(--c-bg)}');
     // Every role has a ground rule on both widths.
     for (const r of ComposedProps.shape.background.unwrap().element.options[0].shape.role.options) {
-      expect(hasRule(`[data-hdr="over"]:has(.cx-hg-${r})`), r).toBe(true);
-      expect(hasRule(`[data-hdr="over"]:has(.cx-hgp-${r})`), r).toBe(true);
+      expect(hasRule(`[data-hdr=over]:has(.cx-hg-${r})`), r).toBe(true);
+      expect(hasRule(`[data-hdr=over]:has(.cx-hgp-${r})`), r).toBe(true);
       expect(hasRule(`.cx-ro-${r}`), r).toBe(true);
     }
   });

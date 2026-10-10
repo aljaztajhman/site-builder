@@ -20,62 +20,62 @@
 /* Colour roles of layers and grounds: --cx-rc the role, --cx-ro the text role on it. The header over the opener takes
    the opener's ground the same way: its cx-hg-<role> class (cx-hgp-<role> on phones where it differs). */
 .cx-ro-background,
-[data-hdr="over"]:has(.cx-hg-background) {
+[data-hdr=over]:has(.cx-hg-background) {
   --cx-rc: var(--c-bg);
   --cx-ro: var(--c-text);
 }
 .cx-ro-surface,
-[data-hdr="over"]:has(.cx-hg-surface) {
+[data-hdr=over]:has(.cx-hg-surface) {
   --cx-rc: var(--c-surface);
   --cx-ro: var(--c-text);
 }
 .cx-ro-text,
-[data-hdr="over"]:has(.cx-hg-text) {
+[data-hdr=over]:has(.cx-hg-text) {
   --cx-rc: var(--c-text);
   --cx-ro: var(--c-bg);
 }
 .cx-ro-muted,
-[data-hdr="over"]:has(.cx-hg-muted) {
+[data-hdr=over]:has(.cx-hg-muted) {
   --cx-rc: var(--c-muted);
   --cx-ro: var(--c-bg);
 }
 .cx-ro-primary,
-[data-hdr="over"]:has(.cx-hg-primary) {
+[data-hdr=over]:has(.cx-hg-primary) {
   --cx-rc: var(--c-primary);
   --cx-ro: var(--c-on-primary);
 }
 .cx-ro-onPrimary,
-[data-hdr="over"]:has(.cx-hg-onPrimary) {
+[data-hdr=over]:has(.cx-hg-onPrimary) {
   --cx-rc: var(--c-on-primary);
   --cx-ro: var(--c-primary);
 }
 .cx-ro-accent,
-[data-hdr="over"]:has(.cx-hg-accent) {
+[data-hdr=over]:has(.cx-hg-accent) {
   --cx-rc: var(--c-accent);
   --cx-ro: var(--c-text);
 }
 .cx-ro-border,
-[data-hdr="over"]:has(.cx-hg-border) {
+[data-hdr=over]:has(.cx-hg-border) {
   --cx-rc: var(--c-border);
   --cx-ro: var(--c-text);
 }
 .cx-ro-inverse,
-[data-hdr="over"]:has(.cx-hg-inverse) {
+[data-hdr=over]:has(.cx-hg-inverse) {
   --cx-rc: var(--c-inverse);
   --cx-ro: var(--c-on-inverse);
 }
 .cx-ro-onInverse,
-[data-hdr="over"]:has(.cx-hg-onInverse) {
+[data-hdr=over]:has(.cx-hg-onInverse) {
   --cx-rc: var(--c-on-inverse);
   --cx-ro: var(--c-inverse);
 }
 .cx-ro-band,
-[data-hdr="over"]:has(.cx-hg-band) {
+[data-hdr=over]:has(.cx-hg-band) {
   --cx-rc: var(--c-band, var(--c-primary));
   --cx-ro: var(--c-on-band, var(--c-on-primary));
 }
 .cx-ro-onBand,
-[data-hdr="over"]:has(.cx-hg-onBand) {
+[data-hdr=over]:has(.cx-hg-onBand) {
   --cx-rc: var(--c-on-band, var(--c-on-primary));
   --cx-ro: var(--c-band, var(--c-primary));
 }
@@ -264,7 +264,8 @@ main > .s.s-composed.cx-v2.cx-v2:first-child {
   clip-path: var(--shape-edgecut);
 }
 .cx-edge-torn {
-  --shape-edgetorn: polygon(0 calc(var(--cx-ed) * 0.6), 4% calc(var(--cx-ed) * 0.2), 9% calc(var(--cx-ed) * 0.9), 13% calc(var(--cx-ed) * 0.3), 18% calc(var(--cx-ed) * 0.7), 22% 0, 27% calc(var(--cx-ed) * 0.8), 31% calc(var(--cx-ed) * 0.35), 36% calc(var(--cx-ed) * 0.95), 41% calc(var(--cx-ed) * 0.15), 45% calc(var(--cx-ed) * 0.6), 50% calc(var(--cx-ed) * 0.25), 55% calc(var(--cx-ed) * 0.85), 59% calc(var(--cx-ed) * 0.1), 64% calc(var(--cx-ed) * 0.7), 68% calc(var(--cx-ed) * 0.4), 73% var(--cx-ed), 77% calc(var(--cx-ed) * 0.2), 82% calc(var(--cx-ed) * 0.75), 86% calc(var(--cx-ed) * 0.3), 91% calc(var(--cx-ed) * 0.9), 95% calc(var(--cx-ed) * 0.45), 100% calc(var(--cx-ed) * 0.55), 100% 100%, 0 100%);
+  --e: var(--cx-ed);
+  --shape-edgetorn: polygon(0 calc(var(--e) * 0.6), 4% calc(var(--e) * 0.2), 9% calc(var(--e) * 0.9), 13% calc(var(--e) * 0.3), 18% calc(var(--e) * 0.7), 22% 0, 27% calc(var(--e) * 0.8), 31% calc(var(--e) * 0.35), 36% calc(var(--e) * 0.95), 41% calc(var(--e) * 0.15), 45% calc(var(--e) * 0.6), 50% calc(var(--e) * 0.25), 55% calc(var(--e) * 0.85), 59% calc(var(--e) * 0.1), 64% calc(var(--e) * 0.7), 68% calc(var(--e) * 0.4), 73% var(--e), 77% calc(var(--e) * 0.2), 82% calc(var(--e) * 0.75), 86% calc(var(--e) * 0.3), 91% calc(var(--e) * 0.9), 95% calc(var(--e) * 0.45), 100% calc(var(--e) * 0.55), 100% 100%, 0 100%);
   clip-path: var(--shape-edgetorn);
 }
 /* A drawn edge: the drawing (R2's Drawing, by its id) runs along the boundary in the section's text colour. */
@@ -312,10 +313,10 @@ main > .s.s-composed.cx-v2.cx-v2:first-child {
     grid-column: auto;
     grid-row: auto;
   }
-  .cx-pin .cx-el[data-ax="center"] {
+  .cx-pin .cx-el[data-ax=center] {
     align-self: center;
   }
-  .cx-pin .cx-el[data-ax="end"] {
+  .cx-pin .cx-el[data-ax=end] {
     align-self: flex-end;
   }
 }
@@ -338,51 +339,51 @@ body[data-hdr="over"] {
   --hx-op: var(--c-on-primary);
 }
 @media (max-width: 63.999rem) {
-  [data-hdr="over"]:has(.cx-hgp-background) {
+  [data-hdr=over]:has(.cx-hgp-background) {
     --cx-rc: var(--c-bg);
     --cx-ro: var(--c-text);
   }
-  [data-hdr="over"]:has(.cx-hgp-surface) {
+  [data-hdr=over]:has(.cx-hgp-surface) {
     --cx-rc: var(--c-surface);
     --cx-ro: var(--c-text);
   }
-  [data-hdr="over"]:has(.cx-hgp-text) {
+  [data-hdr=over]:has(.cx-hgp-text) {
     --cx-rc: var(--c-text);
     --cx-ro: var(--c-bg);
   }
-  [data-hdr="over"]:has(.cx-hgp-muted) {
+  [data-hdr=over]:has(.cx-hgp-muted) {
     --cx-rc: var(--c-muted);
     --cx-ro: var(--c-bg);
   }
-  [data-hdr="over"]:has(.cx-hgp-primary) {
+  [data-hdr=over]:has(.cx-hgp-primary) {
     --cx-rc: var(--c-primary);
     --cx-ro: var(--c-on-primary);
   }
-  [data-hdr="over"]:has(.cx-hgp-onPrimary) {
+  [data-hdr=over]:has(.cx-hgp-onPrimary) {
     --cx-rc: var(--c-on-primary);
     --cx-ro: var(--c-primary);
   }
-  [data-hdr="over"]:has(.cx-hgp-accent) {
+  [data-hdr=over]:has(.cx-hgp-accent) {
     --cx-rc: var(--c-accent);
     --cx-ro: var(--c-text);
   }
-  [data-hdr="over"]:has(.cx-hgp-border) {
+  [data-hdr=over]:has(.cx-hgp-border) {
     --cx-rc: var(--c-border);
     --cx-ro: var(--c-text);
   }
-  [data-hdr="over"]:has(.cx-hgp-inverse) {
+  [data-hdr=over]:has(.cx-hgp-inverse) {
     --cx-rc: var(--c-inverse);
     --cx-ro: var(--c-on-inverse);
   }
-  [data-hdr="over"]:has(.cx-hgp-onInverse) {
+  [data-hdr=over]:has(.cx-hgp-onInverse) {
     --cx-rc: var(--c-on-inverse);
     --cx-ro: var(--c-inverse);
   }
-  [data-hdr="over"]:has(.cx-hgp-band) {
+  [data-hdr=over]:has(.cx-hgp-band) {
     --cx-rc: var(--c-band, var(--c-primary));
     --cx-ro: var(--c-on-band, var(--c-on-primary));
   }
-  [data-hdr="over"]:has(.cx-hgp-onBand) {
+  [data-hdr=over]:has(.cx-hgp-onBand) {
     --cx-rc: var(--c-on-band, var(--c-on-primary));
     --cx-ro: var(--c-band, var(--c-primary));
   }
@@ -647,7 +648,7 @@ body[data-hdr="over"] .site-header--sticky::before {
   outline-offset: -0.25rem;
 }
 /* Stopped: the pressed state shows as a bar along the button's foot. */
-.cx-rb__btn[aria-pressed="true"] {
+.cx-rb__btn[aria-pressed=true] {
   box-shadow: inset 0 -0.25rem currentColor;
 }
 .cx-rb--drift {
@@ -832,9 +833,11 @@ body[data-hdr="over"] .site-header--sticky::before {
   grid-column: 2;
   font-size: var(--fs-sm);
 }
+/* The column minimum falls with the number of facts (--n): 4 facts keep the old 11.8rem (2 + 2 in a half-width cell), 6 get 10.7rem so a row of six
+   fits the 1152 px of a full-width cell at 1280 (it was 5 + 1). */
 @media (min-width: 64rem) {
   .cx-if {
-    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(calc(14rem - var(--n, 5) * .55rem), 1fr));
   }
 }
 
@@ -853,7 +856,7 @@ body[data-hdr="over"] .site-header--sticky::before {
 .cx-q__o {
   margin-inline-start: -0.42em;
 }
-.cx-q[data-ax="center"] .cx-q__o {
+.cx-q[data-ax=center] .cx-q__o {
   margin: 0;
 }
 .cx-q__by {
@@ -975,10 +978,21 @@ body[data-hdr="over"] .site-header--sticky::before {
 }
 /* Only objects without a ground of their own take the colour into the object (numeral, stamp); a ticket, seal or tag keeps its
    own ink on its own ground, a plate its plate ink (inheriting would set the colour on the object's own ground). */
-.cx-fact--numeral.cx-pf .cx-fact__obj,
-.cx-fact--stamp.cx-pf .cx-fact__obj,
+.cx-pf:is(.cx-fact--numeral, .cx-fact--stamp) .cx-fact__obj,
 .cx-pf a:not(.btn) {
   color: inherit;
+}
+
+/* Type treatments of a heading (class cx-tt-<name>; the guards: G20). stacked: one word to a line, the box as wide as the longest
+   word, set tight. knockout: reversed display type over a photo or a field: tight tracking and
+   leading, in the ink the ground's own text role gives (the guards check that ink, G3 and G9), so no blend modes. */
+.cx-h.cx-tt-stacked {
+  inline-size: min-content;
+  line-height: .92;
+}
+.cx-h.cx-tt-knockout {
+  letter-spacing: -.03em;
+  line-height: .92;
 }
 
 /* Place: --tilt in degrees and a bleed past the section's edge are desktop only; phones keep the stack (G10, G11, G12).

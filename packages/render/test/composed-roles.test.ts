@@ -56,8 +56,7 @@ describe("composed-v2.css repeats the spec's text-role table", () => {
   });
 
   it("puts an own text colour into a fact's object only where the object has no ground of its own (numeral, stamp)", () => {
-    expect(v2).toContain(".cx-fact--numeral.cx-pf .cx-fact__obj");
-    expect(v2).toContain(".cx-fact--stamp.cx-pf .cx-fact__obj");
+    expect(v2).toContain(".cx-pf:is(.cx-fact--numeral, .cx-fact--stamp) .cx-fact__obj");
     expect(v2).not.toMatch(/\.cx-fact\.cx-pf \.cx-fact__obj/);
     for (const t of ["ticket", "seal", "tag", "plate"]) expect(v2, t).not.toContain(`.cx-fact--${t}.cx-pf`);
   });
@@ -81,5 +80,15 @@ describe("a fact object's own ground (what G9 checks a colour against)", () => {
     expect(factObjectGround("ticket", "band")).toBe("onBand");
     expect(factObjectGround("tag", "inverse")).toBe("onInverse");
     expect(factObjectGround("numeral", "default")).toBeUndefined();
+  });
+});
+
+describe("the starter type treatments have rules (cx-tt-<name>, extensions region)", () => {
+  it("stacked and knockout style a heading; neither blends, blurs or paints a gradient", () => {
+    for (const t of ["stacked", "knockout"]) expect(v2, t).toContain(`.cx-h.cx-tt-${t} {`);
+    const rules = [...v2.matchAll(/\.cx-h\.cx-tt-(stacked|knockout) \{([^}]*)\}/g)].map((m) => m[2]!);
+    expect(rules).toHaveLength(2);
+    for (const r of rules) expect(r).not.toMatch(/blend|blur|gradient|shadow/);
+    expect(rules[0]).toContain("inline-size: min-content"); // one word to a line
   });
 });
