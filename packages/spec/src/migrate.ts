@@ -92,6 +92,9 @@ export const MIGRATIONS: Record<number, (spec: RawSpec) => RawSpec> = {
     const radius = typeof design.radius === "number" ? design.radius : 0;
     return { ...spec, design: { ...design, genome: presetGenome({ radius }, dir) } };
   },
+  // 18 → 19: composed sections and design.art (the AI designer, docs/plans/design-studio.md). Additive: both are new and
+  // optional, so every v18 spec is a valid v19 spec and renders byte-identical.
+  18: (spec) => spec,
 };
 
 export function migrateSpec(input: unknown, migrations = MIGRATIONS, target: number = SPEC_VERSION): SiteSpec {

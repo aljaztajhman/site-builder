@@ -20,7 +20,7 @@ import type { Brief } from "./brief.ts";
 
 /** Sections the model may use: everything except the system-only ones (legal text, 404) and the owner's (collections). */
 function modelSectionUnion() {
-  const schemas = SECTION_DEFS.filter((d) => !d.systemOnly && !d.ownerOnly).map((d) => d.schema);
+  const schemas = SECTION_DEFS.filter((d) => !d.systemOnly && !d.ownerOnly && !d.designerOnly).map((d) => d.schema);
   return z.discriminatedUnion("type", schemas as unknown as [z.ZodObject, ...z.ZodObject[]]);
 }
 

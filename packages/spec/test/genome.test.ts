@@ -67,7 +67,7 @@ describe("genome schema and migration 17 → 18", () => {
       delete v17.design.genome;
       const v18 = migrateSpec(v17);
       const dir = DIRECTIONS.find((d) => d.id === golden.design.direction)!;
-      expect(v18.specVersion, id).toBe(18);
+      expect(v18.specVersion, id).toBeGreaterThanOrEqual(18);
       expect(v18.design.genome, id).toEqual({ source: "preset", palette: "preset", rhythm: dir.layout.rhythm, shape: shapeOfRadius(golden.design.radius) });
       // Nothing else changes, and the stored golden is that migration's result.
       expect({ ...v18, design: { ...v18.design, genome: undefined } }, id).toEqual({ ...golden, design: { ...golden.design, genome: undefined } });

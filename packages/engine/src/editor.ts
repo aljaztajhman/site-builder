@@ -244,7 +244,7 @@ export function defaultSection(spec: SiteSpec, type: string, id: string): Json |
 /** What the dashboard editor needs to build its forms: JSON Schemas generated from the spec. */
 export function editorCatalogue(spec: SiteSpec) {
   return {
-    sections: SECTION_DEFS.filter((d) => !d.systemOnly).map((d) => ({
+    sections: SECTION_DEFS.filter((d) => !d.systemOnly && !d.designerOnly).map((d) => ({
       type: d.type,
       group: d.group,
       variants: d.variants,

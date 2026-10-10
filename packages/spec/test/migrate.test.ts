@@ -380,11 +380,30 @@ describe("migration 17 → 18 (the design genome, variety engine Step 5)", () =>
       const golden = read(id);
       const { genome, ...design } = golden.design;
       const v18 = migrateSpec({ ...golden, design, specVersion: 17 }, MIGRATIONS, 18);
-      expect(v18, id).toEqual(golden);
+      expect(v18, id).toEqual({ ...golden, specVersion: 18 });
       expect(genome, id).toEqual(presetGenome(design, DIRECTIONS.find((d) => d.id === design.direction)));
-      expect(validateSite(v18).issues, id).toEqual([]);
-      expect(migrateSpec({ ...golden, specVersion: 17 }, MIGRATIONS, 18), id).toEqual(golden);
+      expect(validateSite(migrateSpec(v18)).issues, id).toEqual([]);
+      expect(migrateSpec({ ...golden, specVersion: 17 }, MIGRATIONS, 18), id).toEqual({ ...golden, specVersion: 18 });
     }
-    expect(SPEC_VERSION).toBe(18);
+    expect(SPEC_VERSION).toBeGreaterThanOrEqual(18);
+  });
+});
+
+describe("migration 18 → 19 (composed sections and design.art, the AI designer)", () => {
+  it("is the identity: every golden stored at v18 migrates to itself at v19, valid, with no composed section or art added", async () => {
+    const { readdirSync, readFileSync } = await import("node:fs");
+    const { validateSite } = await import("../src/index.ts");
+    const dir = new URL("../../../tools/eval/golden/", import.meta.url);
+    const ids = readdirSync(dir).filter((f) => f.endsWith(".json"));
+    expect(ids.length).toBe(10);
+    for (const f of ids) {
+      const golden = JSON.parse(readFileSync(new URL(f, dir), "utf8")) as SiteSpec;
+      const v19 = migrateSpec({ ...golden, specVersion: 18 });
+      expect(v19, f).toEqual(golden);
+      expect(v19.design.art, f).toBeUndefined();
+      expect(v19.pages.flatMap((p) => p.sections).some((s) => s.type === "composed"), f).toBe(false);
+      expect(validateSite(v19).issues, f).toEqual([]);
+    }
+    expect(SPEC_VERSION).toBe(19);
   });
 });

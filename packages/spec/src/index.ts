@@ -5,6 +5,7 @@ export * from "./skeleton.ts";
 export * from "./genome.ts";
 export * from "./genome-rules.ts";
 export * from "./intents.ts";
+export * from "./composition/schema.ts";
 export * from "./design-rules.ts";
 export * from "./directions.ts";
 export * from "./fonts.ts";

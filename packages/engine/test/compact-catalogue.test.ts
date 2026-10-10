@@ -29,7 +29,7 @@ import {
 
 type Js = Record<string, unknown>;
 const config = loadConfig();
-const SECTIONS = SECTION_DEFS.filter((d) => !d.systemOnly && !d.ownerOnly);
+const SECTIONS = SECTION_DEFS.filter((d) => !d.systemOnly && !d.ownerOnly && !d.designerOnly);
 const evalDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../tools/eval");
 const golden = (id: string) => JSON.parse(readFileSync(path.join(evalDir, "golden", `${id}.json`), "utf8")) as SiteSpec;
 

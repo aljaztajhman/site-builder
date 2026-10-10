@@ -37,6 +37,7 @@ export const SECTION_LABEL: Record<string, string> = {
   collection: "Zbirka (novice, dogodki, storitve, ekipa)",
   legal: "Pravno besedilo",
   "not-found": "Stran ne obstaja",
+  composed: "Oblikovan razdelek",
 };
 
 export const VARIANT_LABEL: Record<string, Record<string, string>> = {
@@ -70,6 +71,7 @@ export const VARIANT_LABEL: Record<string, Record<string, string>> = {
   collection: { list: "Seznam", cards: "Kartice" },
   legal: { default: "Osnovno" },
   "not-found": { default: "Osnovno" },
+  composed: { free: "Prosta postavitev" },
 };
 
 /** Form field names by key. Keys whose meaning depends on the parent are in FIELD_LABEL_IN. */
