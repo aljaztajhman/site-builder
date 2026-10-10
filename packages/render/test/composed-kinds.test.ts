@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { lcpImageFor } from "@sb/components";
-import { ComposedProps, migrateSpec, type Page, type Section, type SiteSpec } from "@sb/spec";
+import { ComposedProps, PRACTICAL_FACTS, migrateSpec, type Page, type Section, type SiteSpec } from "@sb/spec";
 import { uncoveredClasses } from "./composed-coverage.ts";
 import { COMPOSED_RIBBON_ISLAND, composedIslandFiles, composedIslands, composedSheets, composedV2Sheets, renderPage, sharedBundle } from "../src/index.ts";
 
@@ -194,9 +194,15 @@ describe("iconFacts", () => {
     expect(long).toContain('<span class="cx-if__n">Odprta od maja.</span>');
   });
 
-  it("each placeholder icon stays under 1 KiB", () => {
-    const h = el(render([sectionOf(at({ kind: "iconFacts", items: ["parking", "card", "wifi", "wheelchair", "terrace", "takeaway", "lift"].map((fact) => ({ fact })) }))]));
-    for (const svg of h.match(/<svg class="cx-if__ic"[\s\S]*?<\/svg>/g)!) expect(Buffer.byteLength(svg)).toBeLessThanOrEqual(1024);
+  it("every practical fact renders its own icon (no shared fallback), each under 1 KiB", () => {
+    const svgs: string[] = [];
+    for (let i = 0; i < PRACTICAL_FACTS.length; i += 8) {
+      const h = el(render([sectionOf(at({ kind: "iconFacts", items: PRACTICAL_FACTS.slice(i, i + 8).map((fact) => ({ fact })) }))]));
+      svgs.push(...h.match(/<svg class="cx-if__ic"[\s\S]*?<\/svg>/g)!);
+    }
+    expect(svgs).toHaveLength(PRACTICAL_FACTS.length);
+    expect(new Set(svgs).size).toBe(PRACTICAL_FACTS.length);
+    for (const svg of svgs) expect(Buffer.byteLength(svg)).toBeLessThanOrEqual(1024);
   });
 });
 

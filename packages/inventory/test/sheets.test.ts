@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ComposedProps, validateSite } from "@sb/spec";
+import { ComposedProps, PRACTICAL_FACTS, validateSite } from "@sb/spec";
 import { Registry, compositionAssets, type Asset, type AssetKind } from "../src/index.ts";
 import { PRESET_FIXTURES, PRESET_SOURCE, WORDMARK_NAMES, pagesFor, presetsFromFixtures } from "../scripts/pages-v2.ts";
 import { emptySheetHtml, sheetGroups, sheetHtml, type Shot } from "../scripts/sheet-html.ts";
@@ -20,7 +20,7 @@ const CASES: [AssetKind, string[]][] = [
   ["motif", ["motif/bakery/wheat-ear-line"]],
   ["ornament", ["ornament/rope-line"]],
   ["motion", ["motion/reveal", "motion/unmask"]],
-  ["icon", ["icon/line/parking", "icon/line/wifi"]],
+  ["icon", PRACTICAL_FACTS.map((f) => `icon/line/${f}`)],
   ["wordmark", ["wordmark/plain"]],
   ["divider", ["divider/rule", "divider/rope-line"]],
 ];
