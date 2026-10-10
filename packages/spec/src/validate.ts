@@ -12,6 +12,7 @@ import { COLLECTION_KINDS } from "./collections.ts";
 import { centredOn } from "./skeleton.ts";
 import { siteGenomeIssues } from "./genome-rules.ts";
 import { secondLocales, untranslated } from "./translatable.ts";
+import { compositionContext, isCentredComposed, validateComposition } from "./composition/guards.ts";
 
 export interface Issue {
   path: string;
@@ -86,9 +87,17 @@ export function semanticIssues(spec: SiteSpec): Issue[] {
   const motif = DIRECTIONS.find((d) => d.id === spec.design.direction)?.template?.motif;
   spec.pages.forEach((p, pi) => {
     const byAlign = centredOn(spec.design.skeleton, p.sections, motif);
-    const centred = p.sections.filter((s) => defOf(s.type)?.centredVariants?.includes(s.variant) || byAlign.has(s.id));
+    // Spec v19: a composed section whose text is all centred counts too.
+    const centred = p.sections.filter((s) => defOf(s.type)?.centredVariants?.includes(s.variant) || byAlign.has(s.id) || (s.type === "composed" && isCentredComposed(s.props)));
     if (centred.length > 1) add(`/pages/${pi}/sections`, "banned", `${centred.length} centred sections on one page (max 1)`);
   });
+
+  // Spec v19: composed sections follow the rules a schema can't say (composition/guards.ts).
+  spec.pages.forEach((p, pi) =>
+    p.sections.forEach((s, si) => {
+      if (s.type === "composed") issues.push(...validateComposition(s, compositionContext(spec, pi, si)));
+    }),
+  );
 
   // hero-signature: the line that introduces a phone or an opening time, and the address only on the label card.
   spec.pages.forEach((p, pi) =>
@@ -238,7 +247,14 @@ export function semanticIssues(spec: SiteSpec): Issue[] {
     }
   }
 
-  return issues;
+  // The composed guards and the generic walks (unknown images, banned copy) can see the same problem: report it once.
+  const seen = new Set<string>();
+  return issues.filter((i) => {
+    const key = `${i.path}|${i.code}|${i.message}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 /** The services and team entry fields startCollection fills from generated sections (engine collections.ts). */
