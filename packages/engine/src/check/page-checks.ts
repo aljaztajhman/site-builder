@@ -219,7 +219,8 @@ export interface CallButtons {
 /**
  * Call buttons per screen (banned: more than one; docs/PRODUCT.md). Walks the page a half screen at a time and counts
  * the visible tel: links on each screen that read as a button: on a box of their own (a background or a border all
- * round, like a button, the plate or the bar's call) or on a fixed or sticky layer that stays on screen (the bar, the
+ * round, like a button, the plate or the bar's call; or a link whose call object inside has one, like a composed fact's
+ * plate) or on a fixed or sticky layer that stays on screen (the bar, the
  * floating button, a sticky header's call). A phone number in text, a fact list or the footer is a link, not a button.
  * Ends back at the top. Runs in the page as a string, so tsx helpers don't leak in.
  */
@@ -240,11 +241,13 @@ export async function callButtonsPerScreen(page: Page): Promise<CallButtons> {
       return false;
     };
     const opaque = (c) => c !== "transparent" && !/rgba\\([^)]*,\\s*0\\)$/.test(c);
-    const boxed = (el) => {
+    const ownBox = (el) => {
       const cs = getComputedStyle(el);
       if (opaque(cs.backgroundColor)) return true;
       return ["top", "right", "bottom", "left"].every((s) => cs.getPropertyValue("border-" + s + "-style") !== "none" && parseFloat(cs.getPropertyValue("border-" + s + "-width")) >= 1 && opaque(cs.getPropertyValue("border-" + s + "-color")));
     };
+    // A link around a call object (a composed fact's plate or seal, a motif's plate) reads as a button by that object's box.
+    const boxed = (el) => ownBox(el) || [...el.querySelectorAll(".cx-fact__obj, .plate")].some((o) => shown(o) && ownBox(o));
     const describe = (el) => el.tagName.toLowerCase() + (el.className ? "." + String(el.className).trim().split(/\\s+/).slice(0, 3).join(".") : "") + ' "' + (el.textContent || "").trim().replace(/\\s+/g, " ").slice(0, 24) + '"';
     const settle = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(r, 30))));
     const height = document.documentElement.scrollHeight;

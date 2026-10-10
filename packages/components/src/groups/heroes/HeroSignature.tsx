@@ -2,6 +2,7 @@ import { formatAddress, isPlaceholder, type Link, type SectionOf } from "@sb/spe
 import { ActionLink, Actions, HoursList, Picture, Ph, Section, titleId } from "../../primitives/index.tsx";
 import { CallObject, LabelMark, Limb, Receipt, Seal, TradeDrawing } from "../../motifs/index.tsx";
 import type { RenderCtx, SectionProps } from "../../types.ts";
+import { composedOwnsCall } from "../composed/index.tsx";
 
 /** photo: the photo fills the hero at every width. */
 export const HERO_SIGNATURE_PHOTO_SIZES = "100vw";
@@ -68,8 +69,9 @@ export function signatureOwnsCall(section: SectionOf<"hero-signature">): boolean
   return section.props.fact === "phone" && !CALL_BUTTON_VARIANTS.includes(section.variant);
 }
 
-/** The page's first section is a hero whose call object owns the call (signatureOwnsCall). */
+/** The page's first section is a hero whose call object owns the call (signatureOwnsCall), or a composed opener whose fact object calls (composedOwnsCall). */
 export function heroOwnsCall(first: { type: string; variant: string; props: unknown } | undefined): boolean {
+  if (first?.type === "composed") return composedOwnsCall(first as SectionOf<"composed">);
   return first?.type === "hero-signature" && signatureOwnsCall(first as SectionOf<"hero-signature">);
 }
 

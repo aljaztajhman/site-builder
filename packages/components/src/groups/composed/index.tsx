@@ -210,15 +210,26 @@ const BG_PHOTO_SIZES = "100vw";
 export const composedRenderers = { composed: Composed };
 
 /**
- * The actions a composed section shows as buttons or links (data-action: call, booking, directions, email), in reading
- * order: its action elements, a "link" one by its target's action. For the phone bar, as signatureActions for a hero.
+ * The actions a composed section shows as buttons or links (call, booking, directions, email), in reading order: its
+ * action elements, a "link" one by its target's action, and a fact whose whole object links to an action (a plate that
+ * calls). For the phone bar, as signatureActions for a hero.
  */
 export function composedActions(section: SectionOf<"composed">): string[] {
   return readingOrder(section.props.elements).flatMap((el) => {
+    if (el.kind === "fact") return el.link && "action" in el.link ? [el.link.action] : [];
     if (el.kind !== "action") return [];
     if (el.action === "link") return el.link && "action" in el.link.target ? [el.link.target.action] : [];
     return [el.action === "book" ? "booking" : el.action];
   });
+}
+
+/**
+ * A fact object of the section is its call (a plate or a big number linked to the phone): CSS can't turn it into a text
+ * link (it has no data-action, elements.tsx), so the bar's, the floating button's or the header's call waits until the
+ * section has scrolled away (reveal.js), as for a hero's call object (signatureOwnsCall).
+ */
+export function composedOwnsCall(section: SectionOf<"composed">): boolean {
+  return section.props.elements.some((el) => el.kind === "fact" && el.link !== undefined && "action" in el.link && el.link.action === "call");
 }
 
 /** The photo the opener shows first: its photo layer, else its first image in reading order that phones show, with the `sizes` Composed renders it with. */

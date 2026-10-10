@@ -341,8 +341,12 @@ function renderDocument(spec: SiteSpec, localized: SiteSpec, opts: RenderOptions
   const bodyClass =
     fixed === "bar" ? ["has-action-bar", ...covered.map((a) => `bar-covers-hero-${a}`)].join(" ") : fixed === "float" ? "has-call-float" : undefined;
   // A hero whose call object owns the call (a plate, a call block): only the fixed element's call waits for it.
-  const waitCall = skeleton !== undefined && !afterHero && heroOwnsCall(first);
-  if (skeleton && ((fixed && (afterHero || waitCall)) || (skeleton.actions === "header" && heroOwnsCall(first)))) islands.add("reveal.js");
+  // Without a skeleton a composed opener's fact object that calls (a plate) still makes the bar's call wait: the bar may
+  // be on screen from the start (with reduced motion, or a browser without scroll timelines, even after a hero that
+  // offers call and directions), and the plate can't be turned into a text link.
+  const waitCall = heroOwnsCall(first) && (skeleton !== undefined ? !afterHero : first?.type === "composed");
+  const reveal = skeleton ? (fixed !== null && (afterHero || waitCall)) || (skeleton.actions === "header" && heroOwnsCall(first)) : fixed !== null && waitCall;
+  if (reveal) islands.add("reveal.js");
   const skeletonAttrs = skeleton
     ? {
         "data-skeleton": "",

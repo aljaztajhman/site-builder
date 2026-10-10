@@ -103,18 +103,24 @@ describe("editor in a browser", () => {
       await page.locator(".outline li", { hasText: "Servis vseh znamk v Kranju" }).click();
       const pane = page.locator(".pane");
       await expect.poll(() => pane.textContent()).not.toContain("Ta razdelek ustvari sistem");
-      // Copy: the heading, the fact's value and label, the button's text (heading is elements/2).
-      const title = page.locator('[data-path="/pages/0/sections/0/props/elements/2/text"] input');
+      // Copy: the heading, the plate's value and label (elements addressed by their id, not by their place in the list).
+      const elements = (home(sheet).sections[0]!.props as { elements: { id: string; kind: string }[] }).elements;
+      const at = (id: string, kind: string) => {
+        const i = elements.findIndex((e) => e.id === id);
+        expect(elements[i]?.kind, id).toBe(kind);
+        return `/pages/0/sections/0/props/elements/${i}`;
+      };
+      const title = page.locator(`[data-path="${at("e_title", "heading")}/text"] input`);
       await title.waitFor();
-      expect(await page.locator('[data-path="/pages/0/sections/0/props/elements/4/value"] input').count()).toBe(1);
-      expect(await page.locator('[data-path="/pages/0/sections/0/props/elements/5/label"] input').count()).toBe(1);
+      expect(await page.locator(`[data-path="${at("e_plate", "fact")}/value"] input`).count()).toBe(1);
+      expect(await page.locator(`[data-path="${at("e_plate", "fact")}/label"] input`).count()).toBe(1);
       // No placement, size, style or picture field, and no element to add, move or remove.
       for (const key of ["desk", "phone", "size", "weight", "case", "measure", "ratio", "treatment", "style", "image", "action", "level", "kind", "id"]) {
         expect(await pane.locator(`[data-path$="/${key}"]`).count(), key).toBe(0);
       }
       expect(await pane.locator('[data-path$="/props"]').count()).toBe(0);
       await title.fill("Servis vseh znamk v Kranju in okolici");
-      const el = async () => (home(await spec(site.id)).sections[0]!.props as { elements: { text?: string; desk: object; case?: string }[] }).elements[2]!;
+      const el = async () => (home(await spec(site.id)).sections[0]!.props as { elements: { id: string; text?: string; desk: object; case?: string }[] }).elements.find((e) => e.id === "e_title")!;
       await expect.poll(async () => (await el()).text, { timeout: 10_000 }).toBe("Servis vseh znamk v Kranju in okolici");
       // The rest of the element is as the designer placed it.
       expect(await el()).toMatchObject({ desk: { col: 2, span: 8, row: 2, layer: 1 }, case: "uppercase" });

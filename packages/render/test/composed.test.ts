@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { lcpImageFor } from "@sb/components";
+import { composedActions, heroOwnsCall, lcpImageFor } from "@sb/components";
 import { ComposedProps, migrateSpec, type ELEMENT_KINDS, type Page, type Section, type SiteSpec } from "@sb/spec";
 import { composedStylesheet, renderPage, sharedBundle } from "../src/index.ts";
 
@@ -368,6 +368,33 @@ describe("composed sections render", () => {
     it("leaves the bar alone when the composed section is not the opener", () => {
       const { html } = render([one("text", { id: "e_t" }), sectionOf(SAMPLE, "s_second")], noSkeleton);
       expect(bodyClass(html)).not.toContain("bar-covers-hero");
+    });
+
+    // A plate that calls can't become a text link: the bar's call waits (reveal.js) while the opener is on screen.
+    const plateCalls = { ...SAMPLE, elements: SAMPLE.elements.filter((e) => e.id !== "e_call").map((e) => (e.id === "e_plate" ? { ...e, link: { action: "call" } } : e)) };
+    const barCall = (html: string) => /<a [^>]*class="btn btn--primary action-bar__btn"[^>]*>/.exec(html)?.[0] ?? "";
+
+    it("an opener whose fact object calls: the bar's call waits for it, with or without a skeleton", () => {
+      for (const skeleton of [false, true]) {
+        const { html } = render([sectionOf(plateCalls)], (s) => {
+          if (!skeleton) delete s.design.skeleton;
+          else s.design.skeleton = { header: "bar", actions: "bar", footer: "compact", footerTone: "inverse", width: "contained", cards: "none", buttons: "soft", dividers: "none", photoRatio: "standard" };
+          s.chrome.mobileActionBar = true;
+        });
+        expect(barCall(html), `skeleton ${skeleton}`).toContain('href="tel:');
+        expect(barCall(html), `skeleton ${skeleton}`).toContain("data-after-hero");
+        expect(html, `skeleton ${skeleton}`).toContain("reveal.js");
+      }
+    });
+
+    it("a fact that calls counts as the opener's call; a plain fact, or one in a later section, does not", () => {
+      const sec = sectionOf(plateCalls) as Parameters<typeof composedActions>[0];
+      expect(composedActions(sec)).toEqual(["call"]);
+      expect(heroOwnsCall(sec)).toBe(true);
+      expect(heroOwnsCall(sectionOf(SAMPLE))).toBe(false);
+      const later = render([one("text", { id: "e_t" }), sectionOf(plateCalls, "s_second")], noSkeleton).html;
+      expect(barCall(later)).not.toContain("data-after-hero");
+      expect(later).not.toContain("reveal.js");
     });
   });
 });
