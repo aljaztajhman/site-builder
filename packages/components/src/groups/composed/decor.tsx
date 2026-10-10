@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactElement, ReactNode } from "react";
 import type { Motif } from "@sb/spec";
 import { Branch, Radiator, Spoon } from "../../motifs/index.tsx";
+import { DrawingStrip, InlineDrawing } from "./inline-drawing.tsx";
 import { ROLE_VAR, type ElOf } from "./layout.ts";
 
 const fill = (role: keyof typeof ROLE_VAR): CSSProperties => ({ fill: ROLE_VAR[role], stroke: "none" });
@@ -119,8 +120,10 @@ function CustomDrawing({ svg }: { svg: NonNullable<ElOf<"decor">["svg"]> }) {
   );
 }
 
+/** What a decor element draws: the designer's own svg, a library motif, or (spec v20) an inventory drawing by its id, in the element's own colour role when it has one, tiled along x as a strip when it repeats. */
 export function DecorDrawing({ el }: { el: ElOf<"decor"> }) {
   if (el.svg) return <CustomDrawing svg={el.svg} />;
+  if (el.drawing) return el.repeat ? <DrawingStrip id={el.drawing} ink={el.color} className="cx-strip" /> : <InlineDrawing id={el.drawing} ink={el.color} />;
   if (el.motif) {
     // A value outside the library (a stray translation overlay) draws nothing rather than failing the page.
     const Motif = MOTIF_DRAWING[el.motif] as (() => ReactElement) | undefined;

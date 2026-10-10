@@ -855,4 +855,421 @@ body[data-hdr="over"] .site-header--sticky::before {
 
 /* region: extensions */
 
+/* Extensions of the existing kinds (spec v20, F1b-R3). Elements get their classes from placement() (elements.tsx).
+   The sheet is tight (core + v2 together stay under 28 KiB): rules are terse on purpose. */
+
+/* Stacking: the core sheet gives an element z-index layer + 1, so text marked cx-over (a backing panel over a photo) sat
+   under an image of the same layer that comes later in the DOM. Layers count in twos here: an element is at 2 x layer + 1,
+   one over a photo at 2 x layer + 2, so over-photo text is on top of an image of its own layer and below the next one. */
+.cx-el {
+  z-index: calc(var(--z, 0)*2 + 1);
+}
+.cx-over {
+  z-index: calc(var(--z, 0)*2 + 2);
+}
+
+/* Paint: an element's own colours as roles. cx-bg-<role> its own ground (cx-pb) with the text role on it, cx-fg-<role> its
+   text colour (cx-pf). Not the shared cx-ro-* table (that is the layers' and the header's). */
+.cx-bg-background {
+  --cx-f: var(--c-bg);
+  --cx-o: var(--c-text);
+}
+.cx-bg-surface {
+  --cx-f: var(--c-surface);
+  --cx-o: var(--c-text);
+}
+.cx-bg-text {
+  --cx-f: var(--c-text);
+  --cx-o: var(--c-bg);
+}
+.cx-bg-muted {
+  --cx-f: var(--c-muted);
+  --cx-o: var(--c-bg);
+}
+.cx-bg-primary {
+  --cx-f: var(--c-primary);
+  --cx-o: var(--c-on-primary);
+}
+.cx-bg-onPrimary {
+  --cx-f: var(--c-on-primary);
+  --cx-o: var(--c-primary);
+}
+.cx-bg-accent {
+  --cx-f: var(--c-accent);
+  --cx-o: var(--c-text);
+}
+.cx-bg-border {
+  --cx-f: var(--c-border);
+  --cx-o: var(--c-text);
+}
+.cx-bg-inverse {
+  --cx-f: var(--c-inverse);
+  --cx-o: var(--c-on-inverse);
+}
+.cx-bg-onInverse {
+  --cx-f: var(--c-on-inverse);
+  --cx-o: var(--c-inverse);
+}
+.cx-bg-band {
+  --cx-f: var(--c-band, var(--c-primary));
+  --cx-o: var(--c-on-band, var(--c-on-primary));
+}
+.cx-bg-onBand {
+  --cx-f: var(--c-on-band, var(--c-on-primary));
+  --cx-o: var(--c-band, var(--c-primary));
+}
+/* A fill is the element's ground: a fact paints its object only (its plate, its seal ...), the rest paint their box. */
+.cx-pb:where(:not(.cx-fact)) {
+  padding: .75rem 1rem;
+  border-radius: var(--radius);
+  background: var(--cx-f);
+  color: var(--cx-o);
+}
+.cx-pb.cx-fact .cx-fact__obj {
+  background: var(--cx-f);
+  color: var(--cx-o);
+}
+.cx-fact--numeral.cx-pb .cx-fact__obj {
+  padding: .05em .25em;
+}
+.cx-fact--plate.cx-fact.cx-pb {
+  --plate-ground: var(--cx-f);
+  --plate-ink: var(--cx-o);
+}
+/* An own text colour comes after (so it wins over the text role of a fill) and reaches the objects and the links inside. */
+.cx-fg-background {
+  color: var(--c-bg);
+}
+.cx-fg-surface {
+  color: var(--c-surface);
+}
+.cx-fg-text {
+  color: var(--c-text);
+}
+.cx-fg-muted {
+  color: var(--c-muted);
+}
+.cx-fg-primary {
+  color: var(--c-primary);
+}
+.cx-fg-onPrimary {
+  color: var(--c-on-primary);
+}
+.cx-fg-accent {
+  color: var(--c-accent);
+}
+.cx-fg-border {
+  color: var(--c-border);
+}
+.cx-fg-inverse {
+  color: var(--c-inverse);
+}
+.cx-fg-onInverse {
+  color: var(--c-on-inverse);
+}
+.cx-fg-band {
+  color: var(--c-band, var(--c-primary));
+}
+.cx-fg-onBand {
+  color: var(--c-on-band, var(--c-on-primary));
+}
+.cx-fact.cx-pf .cx-fact__obj,
+.cx-pf a:not(.btn) {
+  color: inherit;
+}
+
+/* Place: --tilt in degrees and a bleed past the section's edge are desktop only; phones keep the stack (G10, G11, G12).
+   A bleed runs from a grid edge the element touches to the page edge: --cx-be is the room between the grid and the page
+   edge (the container's width and its padding), the element's width is its cell's plus that room. cx-ps-bleed is the phone
+   place: edge to edge, no side padding. Sections clip what leaves them sideways, so no bleed makes the page scroll. */
+.s-composed {
+  --cx-mw: 76rem;
+  --cx-pad: 1rem;
+  --cx-be: calc(max(0px, (100vw - var(--cx-mw))/2) + var(--cx-pad));
+}
+.cx-w-wide {
+  --cx-mw: 90rem;
+}
+.cx-w-full {
+  --cx-mw: 100vw;
+}
+@media (min-width: 48rem) {
+  .s-composed {
+    --cx-pad: 2rem;
+  }
+}
+@media (max-width: 63.999rem) {
+  .cx-el.cx-ps-bleed {
+    --cx-w: auto;
+    justify-self: stretch;
+    margin-inline: calc(-1*var(--cx-pad));
+  }
+  .cx-ps-bleed.cx-mask-none {
+    border-radius: 0;
+  }
+}
+@media (min-width: 64rem) {
+  .cx-w-full {
+    --cx-pad: clamp(1rem, 3vw, 3rem);
+  }
+  .cx-tilt {
+    rotate: calc(var(--tilt)*1deg);
+  }
+  .cx-el:is(.cx-bx-start, .cx-bx-end, .cx-bx-both) {
+    --cx-w: auto;
+    justify-self: stretch;
+  }
+  .cx-bx-start,
+  .cx-bx-both {
+    margin-left: calc(-1*var(--cx-be));
+  }
+  .cx-bx-end,
+  .cx-bx-both {
+    margin-right: calc(-1*var(--cx-be));
+  }
+  /* Past the section's edge by one and a half paddings (translate, so the row keeps its height); the section clips it. */
+  .cx-by-top {
+    align-self: start;
+    --cx-by: calc(var(--cx-pt, var(--space-section))*-1.5);
+  }
+  .cx-by-bottom {
+    align-self: end;
+    --cx-by: calc(var(--space-section)*1.5);
+  }
+  .cx-by-top,
+  .cx-by-bottom {
+    translate: calc(var(--sx, 0)*var(--cx-step)) calc(var(--sy, 0)*var(--cx-step) + var(--cx-by));
+  }
+  .s-composed:has(.cx-by-top, .cx-by-bottom) {
+    overflow: clip;
+  }
+}
+
+/* Image scrim: the photo layer's flat scrim (.cx-scrim-<strength>, .cx-ro-<role>, region section) over one picture.
+   Heading: the type treatment is the inventory's (region vocab). Text: a drop cap. */
+.cx-t--drop > p:first-child::first-letter {
+  float: left;
+  margin: .05em .1em 0 0;
+  font: var(--fw-heading) 3.4em/.8 var(--font-heading);
+}
+
+/* List: a lead column, markers (dash, a timeline rail, a drawing), weight and size. */
+.cx-l--dash li,
+.cx-l--line li {
+  padding-left: 1.25rem;
+}
+.cx-l--drawing li {
+  padding-left: 1.75rem;
+}
+.cx-l--dash li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: .8em;
+  width: .7em;
+  height: 2px;
+  background: currentColor;
+}
+.cx-l__mk {
+  position: absolute;
+  left: 0;
+  top: .1em;
+  width: 1.25em;
+  height: 1.25em;
+}
+.cx-l--line {
+  gap: 0;
+}
+.cx-l--line li {
+  padding-bottom: 1.25rem;
+}
+.cx-l--line li:last-child {
+  padding-bottom: 0;
+}
+.cx-l--line li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: .3em;
+  width: .8em;
+  height: .8em;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  background: var(--cx-ground, var(--c-bg));
+}
+.cx-l--line li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: calc(.4em - 1px);
+  top: 1.1em;
+  bottom: -.3em;
+  width: 2px;
+  background: color-mix(in srgb, currentColor 35%, transparent);
+}
+.cx-l--leads li {
+  --cx-lw: 6.5rem;
+  display: grid;
+  grid-template-columns: var(--cx-lw) minmax(0, 1fr);
+  gap: 0 1rem;
+}
+.cx-l--leads .cx-l__txt {
+  grid-column: 1/-1;
+}
+.cx-l--leads .cx-l__lead + .cx-l__txt {
+  grid-column: 2;
+}
+.cx-l__lead {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+@media (min-width: 64rem) {
+  .cx-l--leads li {
+    --cx-lw: 9rem;
+  }
+}
+.cx-lw-medium {
+  font-weight: 500;
+}
+.cx-lw-bold {
+  font-weight: 700;
+}
+.cx-ls-1 {
+  font-size: var(--cx-fs-1);
+}
+.cx-ls-2 {
+  font-size: var(--cx-fs-2);
+}
+
+/* Fact: the whole object a link (at least 44 px), the label before the value, the plate's town code, the count-up value. */
+.cx-fact__a {
+  display: grid;
+  gap: inherit;
+  justify-items: inherit;
+  align-content: start;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  color: inherit;
+  text-decoration: none;
+}
+.cx-fact__a:hover .cx-fact__label {
+  text-decoration: underline;
+}
+.plate__code {
+  display: contents;
+}
+.cx-count {
+  display: inline-block;
+}
+
+/* Prices: sizes, two to a row on phones, and the styles leaders, board, docket and sheet (the rows' markup). */
+.cx-psz-1 {
+  font-size: var(--cx-fs-1);
+}
+.cx-psz-2 {
+  font-size: var(--cx-fs-2);
+}
+.cx-psz-1.price-tags {
+  grid-template-columns: repeat(auto-fill, minmax(14.5rem, 1fr));
+}
+.cx-psz-2.price-tags {
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+}
+/* A plate sizes its type to its column when it has a size, two to a row or a town code (--n: its longest price in characters). */
+.cx-prices--plates .price-tags__item {
+  container-type: inline-size;
+}
+.cx-prices--plates .price-tag.plate {
+  font-size: min(var(--pf, clamp(1.5rem, 1.1rem + 1.2vw, 2.125rem)), calc(100cqw/(var(--n, 8)*.62 + 2.4)));
+}
+.cx-psz-1 {
+  --pf: clamp(1.9rem, 1.2rem + 2.2vw, 2.8rem);
+}
+.cx-psz-2 {
+  --pf: clamp(2.3rem, 1.4rem + 3.2vw, 3.6rem);
+}
+@media (max-width: 63.999rem) {
+  .cx-pc2.price-tags {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem .75rem;
+  }
+  .cx-pc2 {
+    --pf: clamp(1.1rem, 5.2vw, 1.6rem);
+  }
+}
+.cx-prices--leaders .prices__row {
+  gap: .5rem;
+  border: 0;
+}
+.cx-prices--leaders .prices__row::after {
+  content: "";
+  order: 1;
+  flex: 1;
+  min-width: 1.5rem;
+  translate: 0 -.25em;
+  border-bottom: 2px dotted;
+}
+.cx-prices--leaders dd {
+  order: 2;
+}
+.cx-prices--board {
+  padding: 1.5rem 1.25rem;
+  background: var(--c-inverse);
+  color: var(--c-on-inverse);
+  border: 3px solid currentColor;
+  text-align: center;
+}
+.cx-prices--board .prices__row {
+  display: grid;
+  justify-items: center;
+  gap: .2rem;
+  border-color: currentColor;
+}
+.cx-prices--board .prices__row dd {
+  max-width: none;
+  text-align: center;
+  font: var(--fw-heading) var(--fs-h3) var(--font-heading);
+}
+.cx-prices--board .prices__note {
+  color: inherit;
+}
+.cx-prices-el .cx-prices--docket {
+  max-width: 26rem;
+  padding: 1rem 1.25rem;
+  border-block: 2px dashed;
+  font-variant-numeric: tabular-nums;
+}
+.cx-prices--docket .prices__row {
+  border-bottom: 1px dashed;
+}
+.cx-prices--docket .prices__row:last-child {
+  border: 0;
+}
+.cx-prices--sheet {
+  border-top: 3px solid;
+}
+.cx-prices--sheet .prices__row {
+  padding-block: .9rem;
+}
+.cx-prices--sheet .prices__row dd {
+  font: var(--fw-heading) var(--fs-h3) var(--font-heading);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Decor: a fixed size (--sz x 2 rem, at most 40vw on phones, its cell on desktop) and a strip of a repeating drawing. */
+.cx-decor--fx {
+  --cx-w: min(calc(var(--sz)*2rem), 40vw);
+}
+@media (min-width: 64rem) {
+  .cx-decor--fx {
+    --cx-w: min(calc(var(--sz)*2rem), 100%);
+  }
+}
+.cx-decor--strip {
+  --cx-w: 100%;
+}
+.cx-decor .cx-strip {
+  width: 100%;
+  height: calc(var(--sz, 2)*2rem);
+}
+
 /* region: vocab */

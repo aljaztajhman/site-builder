@@ -241,8 +241,8 @@ describe("motion", () => {
       expect(openTag(render([sectionOf(props({ motion: m }))]).html), m).not.toContain("cx-mo-");
     }
     expect(MOTIONS.every((m) => MOTION_META[m].js === false)).toBe(true);
-    // The only composed island is the marquee's (R2, ribbon move "loop"), loaded only by pages with one.
-    expect(composedIslandFiles()).toEqual(["ribbon.js"]);
+    // The composed islands: the marquee's pause (R2, ribbon move "loop") and the count-up (R3, fact.count); neither is a motion preset.
+    expect(composedIslandFiles()).toEqual(["count.js", "ribbon.js"]);
     expect(COMPOSED_MOTION_ISLAND).toBe("composed/motion.js");
   });
 });
