@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { loadConfig } from "@sb/config";
 import { unzipTo } from "@sb/engine";
 import { Repo, createDb, createFsStorage, migrate, type Platform, type Queue } from "@sb/platform";
-import { COMPOSED_SHEETS, composedSheets } from "@sb/render";
+import { COMPOSED_SHEETS, composedIslands, composedSheets, sharedBundle } from "@sb/render";
 import { migrateSpec, publishBlockers, type SiteSpec } from "@sb/spec";
 import { createApp } from "../src/app.ts";
 import { uncoveredClasses } from "../../../packages/render/test/composed-coverage.ts";
@@ -18,7 +18,8 @@ import { adminCookie } from "./session-helpers.ts";
  * /preview/<id>/ and /s/<slug>/, and exported. Per page: the HTML is byte-equal in both (and in the export, apart from
  * the asset path prefix, which the export roots in its own folder); every composed stylesheet the page links has the
  * same bytes in the preview, the published site and the export, and those bytes are what @sb/render says (COMPOSED_SHEETS);
- * the page links exactly the sheets composedSheets() names; no unlinked sheet has a rule that applies to its markup.
+ * the page links exactly the sheets composedSheets() names; no unlinked sheet has a rule that applies to its markup; the
+ * composed islands it loads are the ones composedIslands() names, with the bundle's bytes in all three.
  */
 const here = path.dirname(fileURLToPath(import.meta.url));
 const COMPOSED = path.join(here, "../../../tools/eval/composed");
@@ -59,6 +60,7 @@ function fillPlaceholders(spec: SiteSpec): SiteSpec {
 }
 
 const hrefs = (html: string) => [...html.matchAll(/<link rel="stylesheet" href="([^"]+)"/g)].map((m) => m[1]!).filter((h) => /\/composed(-v2-[a-z]+)?-[0-9a-f]{10}\.css$/.test(h));
+const islandSrcs = (html: string) => [...html.matchAll(/<script src="([^"]*\/js\/composed\/[^"]+)"/g)].map((m) => m[1]!);
 
 /** The brief each site is built from (tools/eval/fixtures/<id>/brief.json): the client text its facts are checked against. */
 const FIXTURE: Record<string, string> = { "kitchen-sink": "pekarna-kvas", m: "avtoservis-mrak", s: "instalacije-rebernik", j: "pekarna-kvas" };
@@ -91,6 +93,7 @@ describe("composed v20 sections: preview equals published", () => {
 
     let withComposed = 0;
     let sheetsSeen = 0;
+    let islandsSeen = 0;
     for (const page of spec.pages) {
       const file = page.slug === "" ? "index.html" : `${page.slug}.html`;
       const wanted = composedSheets(page.sections).map((k) => COMPOSED_SHEETS[k]());
@@ -124,11 +127,29 @@ describe("composed v20 sections: preview equals published", () => {
         expect(files.length, `${id}/${sheet.name} in the export`).toBe(1);
         expect(await readFile(files[0]!, "utf8"), `${id}/${sheet.name} in the export`).toBe(sheet.css);
       }
+      // The composed islands (content-addressed under js/composed/): the ones composedIslands() names, the same bytes in
+      // the preview, the published site and the export, and those bytes are the bundle's.
+      const scripts = islandSrcs(live);
+      const islands = scripts.map((s) => s.slice(s.indexOf("js/composed/") + 3));
+      expect([...islands].sort(), `${id}/${file}: composed islands`).toEqual([...composedIslands(page.sections)].sort());
+      for (const [n, island] of islands.entries()) {
+        const want = Buffer.from(sharedBundle().files.get(`js/${island}`)!);
+        const fromPublished = await app.request(new URL(scripts[n]!, `http://x/s/${spec.slug}/${file}`).pathname);
+        const fromPreview = await app.request(new URL(scripts[n]!, `http://x/preview/${site.id}/${file}`).pathname, { headers: { cookie } });
+        expect([fromPublished.status, fromPreview.status], island).toEqual([200, 200]);
+        expect(Buffer.from(await fromPublished.arrayBuffer()).equals(want), `${id}/${island}: published bytes`).toBe(true);
+        expect(Buffer.from(await fromPreview.arrayBuffer()).equals(want), `${id}/${island}: preview bytes`).toBe(true);
+        const files = await findFiles(out, island.split("/").pop()!);
+        expect(files.length, `${id}/${island} in the export`).toBe(1);
+        expect((await readFile(files[0]!)).equals(want), `${id}/${island} in the export`).toBe(true);
+        islandsSeen++;
+      }
       // No composed sheet the page leaves out has a rule that could apply to its markup (the page links every sheet it needs).
       expect(uncoveredClasses(live), `${id}/${file}: rules of unlinked composed sheets that could apply`).toEqual([]);
     }
     expect(withComposed, `${id}: pages with composed sections`).toBeGreaterThanOrEqual(1);
     expect(sheetsSeen).toBeGreaterThanOrEqual(2);
+    if (id === "kitchen-sink") expect(islandsSeen, "the kitchen sink loads the composed islands").toBeGreaterThanOrEqual(2);
   }, 120_000);
 });
 
