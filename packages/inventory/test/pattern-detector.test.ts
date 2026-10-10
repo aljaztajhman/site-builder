@@ -113,9 +113,11 @@ describe("dot/grid detector", () => {
 });
 
 describe("the per-asset check", () => {
-  it("runs for textures (REPEATABLE drawings join with I5) and fails a texture without a tile", () => {
+  it("runs for textures and REPEATABLE drawings, and fails a texture without a tile", () => {
     expect(needsPatternCheck({ kind: "texture" })).toBe(true);
     expect(needsPatternCheck({ kind: "motif" })).toBe(false);
+    expect(needsPatternCheck({ kind: "ornament", id: "ornament/idrija-lace-line" })).toBe(true);
+    expect(needsPatternCheck({ kind: "ornament", id: "ornament/beehive-panel-line" })).toBe(false);
     expect(patternCheck({ id: "texture/paper" }, {})).toMatchObject({ ok: false, reason: "no-tile" });
     expect(patternCheck({ id: "texture/dots" }, { "texture/dots": { tile: svg(20, 20, `<circle cx="10" cy="10" r="2"/>`) } })).toMatchObject({ ok: false, reason: "dot-grid" });
     expect(patternCheck({ id: "texture/grain" }, { "texture/grain": { tile: grain } })).toEqual({ ok: true });

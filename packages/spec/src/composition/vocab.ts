@@ -29,12 +29,34 @@ export const MOTIONS = ["reveal", "unmask"] as const;
 export const WORDMARK_STYLES = ["plain"] as const;
 /**
  * Drawings (`decor.drawing`, the drawing layer, the list marker, the ribbon separator, the edge drawing): full asset ids
- * (DrawingId), `motif/<trade>/<subject>-<style>` or `ornament/<name>-<style>`. I5 draws them; these two are the samples
- * the Drawing format starts with.
+ * (DrawingId), `motif/<trade>/<subject>-<style>` or `ornament/<name>-<style>`. I5 draws them: the first two are the
+ * samples the Drawing format starts with, then the I5-p pilot (12 trade motifs, 6 Slovene ornaments). <trade> is the
+ * business type, or the sub-trade where one exists (plumbing, electrical, florist, deli).
  */
-export const DRAWINGS = ["motif/bakery/wheat-ear-line", "ornament/rope-line"] as const;
+export const DRAWINGS = [
+  "motif/bakery/wheat-ear-line",
+  "ornament/rope-line",
+  "motif/bakery/peel-loaf-line",
+  "motif/car-repair/torque-wrench-line",
+  "motif/plumbing/ball-valve-line",
+  "motif/hairdresser/shears-comb-line",
+  "motif/dental/mirror-probe-line",
+  "motif/physio/spine-model-line",
+  "motif/tourist-farm/milk-can-line",
+  "motif/restaurant/ladle-pot-line",
+  "motif/accountant/ledger-pen-line",
+  "motif/florist/secateurs-stem-line",
+  "motif/deli/olive-salt-line",
+  "motif/electrical/cable-coil-line",
+  "ornament/beehive-panel-line",
+  "ornament/idrija-lace-line",
+  "ornament/gorenjska-rosette-line",
+  "ornament/trail-blaze-line",
+  "ornament/pisanica-band-line",
+  "ornament/prekmurje-pottery-band-line",
+] as const;
 /** Drawings that tile along x into a strip (`decor.repeat: "x"`, G19). Each one is in DRAWINGS. */
-export const REPEATABLE = ["ornament/rope-line"] as const;
+export const REPEATABLE = ["ornament/rope-line", "ornament/idrija-lace-line", "ornament/pisanica-band-line", "ornament/prekmurje-pottery-band-line"] as const;
 /**
  * Practical facts (`iconFacts`, `business.amenities`): a fixed list of 40; code picks the icon (`icon/<style>/<fact>`).
  * Unlike the others it is closed, not grown by batches.

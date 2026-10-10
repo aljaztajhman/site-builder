@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { Decisions, Registry, applyDecisions, formatDecisions, inventory, mergeDecisions, shippedDecisions, todaysAssets, unknownDecisionIds, type Asset } from "../src/index.ts";
+import { Decisions, Registry, applyDecisions, formatDecisions, inventory, mergeDecisions, registeredAssets, shippedDecisions, todaysAssets, unknownDecisionIds, type Asset } from "../src/index.ts";
 
 const asset = (id: string, kind: Asset["kind"], status: Asset["status"] = "draft"): Asset => ({
   id,
@@ -20,7 +20,7 @@ const AT = "2026-10-10T08:00:00.000Z";
 describe("decisions.json", () => {
   it("the checked-in file parses and names only registered assets", () => {
     const d = shippedDecisions();
-    expect(unknownDecisionIds(todaysAssets(), d)).toEqual([]);
+    expect(unknownDecisionIds(registeredAssets(), d)).toEqual([]);
     // The registry carries each decided status.
     for (const [id, dec] of Object.entries(d)) expect(inventory().byId(id)!.status, id).toBe(dec.status);
   });
