@@ -384,7 +384,7 @@ Every PR sits behind config `designer.agent` (off): with it off, requests and ou
 
 Each of these PRs ends with its contact sheet in the gallery. Only approved assets reach the runtime catalogue.
 
-### Phase 2: the studio (paid, ≈ €27 in evals)
+### Phase 2: the studio (paid, ≈ €27 in evals, October)
 
 | PR | Contents | Eval € |
 |---|---|---|
@@ -399,7 +399,7 @@ Each of these PRs ends with its contact sheet in the gallery. Only approved asse
 
 Runs use 3 fixtures (`avtoservis-mrak`, `instalacije-rebernik`, `pekarna-kvas`) with their own `--recordings` directory, then the next three.
 
-### Phase 3: measure and ship (paid, ≈ €15–20 + ≈ €15 reserve for iterations)
+### Phase 3: measure and ship (paid, ≈ €15–20 + ≈ €15 reserve for iterations, November)
 
 The full run on 40 fixtures with twins and the pairwise "same template?" question; the owner's blind A/B in Okus; the report; iterations where the numbers point; then the HQ decision on switching on and for which tiers.
 
@@ -409,8 +409,21 @@ Scoped CSS (§7.3, own decision). The sketch lab weekly. Inventory waves 2 and 3
 
 ### Totals
 
-- **Development spend**: ≈ €60–70 in evals (Haiku workers make each run cheaper than first estimated; the saving goes into more iterations) plus ≈ €3 in pictures over the program. At today's €10 a week that is 6–7 weeks of paid steps. Decision `sb-studio-budget` proposes more for the length of the program.
-- **Free work**: Phases 0 and 1 are about 16 PRs that can run in overnight sessions now, several at a time.
+- **Development spend**: ≈ €60–70 in evals plus ≈ €3–5 in pictures over the program.
+- **Budget** (owner, 2026-10-10): **$90 a month for the Anthropic API (≈ €77) and $10 a month for fal.ai (≈ €8.60)**, in HQ `meta/budget`. October has ≈ €67 of API budget left after €10 logged by 10 Oct. Planned split: Phase 2 including the bake-off (≈ €27) in October, Phase 3 and its reserve (≈ €30–35) in November. A weekly pace of ≈ €25 stops one week from using the month.
+- **Free work**: Phases 0 and 1 are about 17 PRs that can run in overnight sessions now, several at a time.
+
+### Test discipline (more budget is not more testing)
+
+The owner raised the budget to spend more on page generation, not on testing. Every paid run follows these rules:
+
+1. **One question per run**, written down before it runs (HQ item note), with an estimate and a hard stop (`--max-eur`). No run "to see what happens", and no re-run of a configuration that already ran.
+2. **The smallest sample that answers it**: 1 fixture to debug, 3 to compare options, the full 40 only for the Phase 3 gate (once, and at most one re-run after fixes).
+3. **Free checks first**: render tests, guards, offline replay, contact sheets and Haiku's pre-screen before any paid judge. A run that fails a free check is not judged.
+4. **Never pay twice for an unchanged stage**: `--record-missing` with a recordings directory per run, the fal cache and `--reuse-pictures` on every run. New pictures only for new fixtures or a picture change being tested.
+5. **The cheapest judge that answers it**: Message Batches for the judge (half price), Haiku for pass/fail checks, Opus only where the pick matters.
+6. **Two strikes**: after two paid iterations on the same question without the number moving, stop, write down why, and think before spending again.
+7. **Logged by provider**: each `spend/<id>` entry carries `provider` (`anthropic` or `fal`), so both monthly limits can be checked. fal is the tighter one: ≈ €8.60 is about 125 pictures a month.
 
 ## 12. Risks and answers
 
@@ -425,7 +438,7 @@ Scoped CSS (§7.3, own decision). The sketch lab weekly. Inventory waves 2 and 3
 
 ## 13. Decisions for the owner (in HQ)
 
-- `sb-studio-budget`: development budget for the program.
+- `sb-studio-budget`: decided 2026-10-10, $90/month API and $10/month fal (above).
 - `sb-studio-imagery`: what the art worker may generate beyond today's rule (≤ 3 mood pictures, labelled): drawings in the stance's style, cut-outs of the owner's product photos, textures.
 - `sb-model-roles`: Opus decides, Haiku produces, code orchestrates (chosen 2026-10-09: "incorporate in plan"); the bake-off sets each stage's model.
 - Later, with numbers, not now: which tiers get the studio, and per-site cost and time.

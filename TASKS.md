@@ -25,7 +25,8 @@ Phase 1, inventory (free, overnight, parallel; only owner-approved assets reach 
 - [ ] I9 wordmark generator, icons 3 styles × 40 for practical facts (`it-studio-wordmark-icons`)
 - [ ] I10 40 new hand-made reference homepages (`it-studio-references`)
 - [ ] F1b composition language v2: section layers, transitions, 14 new element kinds (`it-studio-f1b-language-v2`)
-Phase 2, the studio (paid ≈ €27, per meta/budget; model roles: Opus decides, Haiku produces, code orchestrates, plan §6.4, HQ `sb-model-roles`):
+Budget (owner, 2026-10-10): $90/month Anthropic API (≈ €77), $10/month fal (≈ €8.60), in HQ meta/budget; more budget is for page generation, not more testing: the test discipline in plan §11 applies to every paid run.
+Phase 2, the studio (paid ≈ €27 in October, per meta/budget; model roles: Opus decides, Haiku produces, code orchestrates, plan §6.4, HQ `sb-model-roles`):
 - [ ] S0 model bake-off: each stage on Haiku / Haiku + Opus advisor / Sonnet / Opus on 3 fixtures; per-stage models in config ≈ €3
 - [ ] S1 photo analyst (Haiku) + creative director (Opus, 6 concepts from dealt stances, shortlists, registry gate) ≈ €3
 - [ ] S2 designers ×6 (Haiku) in parallel, draft copy in the concept's voice; copy polish on the winner ≈ €3
