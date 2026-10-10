@@ -18,6 +18,15 @@
   isolation: isolate;
   /* A shifted or rotated element never makes the page scroll sideways. */
   overflow-x: clip;
+  /* The cut shapes of facts, masks and the hang tag: tokens like every shape (clip-path only ever reads a
+     var(--shape-*)), set here so the shared sheets and their goldens don't change. em values resolve on the element
+     that uses them. */
+  --shape-ticketfact: polygon(0 0, 100% 0, 100% calc(50% - 0.35em), calc(100% - 0.35em) 50%, 100% calc(50% + 0.35em), 100% 100%, 0 100%, 0 calc(50% + 0.35em), 0.35em 50%, 0 calc(50% - 0.35em));
+  --shape-tagfact: polygon(0.9em 0, 100% 0, 100% 100%, 0.9em 100%, 0 50%);
+  --shape-maskcut: polygon(0 0, 100% 0, 100% calc(100% - 2.5rem), calc(100% - 2.5rem) 100%, 0 100%);
+  --shape-maskticket: polygon(0 0, 100% 0, 100% calc(50% - 1.25rem), calc(100% - 1.25rem) 50%, 100% calc(50% + 1.25rem), 100% 100%, 0 100%, 0 calc(50% + 1.25rem), 1.25rem 50%, 0 calc(50% - 1.25rem));
+  --shape-stamp: polygon(0.00% 0, 6.25% 0.4rem, 12.50% 0, 18.75% 0.4rem, 25.00% 0, 31.25% 0.4rem, 37.50% 0, 43.75% 0.4rem, 50.00% 0, 56.25% 0.4rem, 62.50% 0, 68.75% 0.4rem, 75.00% 0, 81.25% 0.4rem, 87.50% 0, 93.75% 0.4rem, 100.00% 0, calc(100% - 0.4rem) 5.00%, 100% 10.00%, calc(100% - 0.4rem) 15.00%, 100% 20.00%, calc(100% - 0.4rem) 25.00%, 100% 30.00%, calc(100% - 0.4rem) 35.00%, 100% 40.00%, calc(100% - 0.4rem) 45.00%, 100% 50.00%, calc(100% - 0.4rem) 55.00%, 100% 60.00%, calc(100% - 0.4rem) 65.00%, 100% 70.00%, calc(100% - 0.4rem) 75.00%, 100% 80.00%, calc(100% - 0.4rem) 85.00%, 100% 90.00%, calc(100% - 0.4rem) 95.00%, 100% 100.00%, 93.75% calc(100% - 0.4rem), 87.50% 100%, 81.25% calc(100% - 0.4rem), 75.00% 100%, 68.75% calc(100% - 0.4rem), 62.50% 100%, 56.25% calc(100% - 0.4rem), 50.00% 100%, 43.75% calc(100% - 0.4rem), 37.50% 100%, 31.25% calc(100% - 0.4rem), 25.00% 100%, 18.75% calc(100% - 0.4rem), 12.50% 100%, 6.25% calc(100% - 0.4rem), 0.00% 100%, 0.4rem 95.00%, 0 90.00%, 0.4rem 85.00%, 0 80.00%, 0.4rem 75.00%, 0 70.00%, 0.4rem 65.00%, 0 60.00%, 0.4rem 55.00%, 0 50.00%, 0.4rem 45.00%, 0 40.00%, 0.4rem 35.00%, 0 30.00%, 0.4rem 25.00%, 0 20.00%, 0.4rem 15.00%, 0 10.00%, 0.4rem 5.00%);
+  --shape-tag: polygon(1.25rem 0, 100% 0, 100% 100%, 1.25rem 100%, 0 50%);
 }
 /* The section's own ground: what a backing panel and a hang tag's hole are painted in. */
 .s-composed.tone-default {
@@ -85,17 +94,19 @@
 
 /* ---------- the grid ---------- */
 .cx {
-  /* The type scale: steps 6 to 8 are display sizes, at most 15vw on a phone and 12vw on desktop. */
+  /* The type scale: steps 6 to 8 are display sizes, at most 15vw on a phone and 12vw on desktop. Every step is at least
+     the one below it: a trade template may set --fs-h2 above --fs-h1 (Tablica's big h2 at 1280 px), so step 3 takes the
+     smaller of the two and step 5 the larger, and a display step never drops below step 5. */
   --cx-fs-m1: var(--fs-sm);
   --cx-fs-0: var(--fs-base);
   --cx-fs-1: var(--fs-lg);
   --cx-fs-2: var(--fs-h3);
-  --cx-fs-3: var(--fs-h2);
-  --cx-fs-4: calc((var(--fs-h2) + var(--fs-h1)) / 2);
-  --cx-fs-5: var(--fs-h1);
-  --cx-fs-6: min(12vw, 4rem);
-  --cx-fs-7: min(13.5vw, 5rem);
-  --cx-fs-8: min(15vw, 6rem);
+  --cx-fs-3: max(var(--cx-fs-2), min(var(--fs-h2), var(--fs-h1)));
+  --cx-fs-4: max(var(--cx-fs-3), calc((var(--fs-h2) + var(--fs-h1)) / 2));
+  --cx-fs-5: max(var(--cx-fs-4), var(--fs-h2), var(--fs-h1));
+  --cx-fs-6: max(var(--cx-fs-5), min(12vw, 4rem));
+  --cx-fs-7: max(var(--cx-fs-6), min(13.5vw, 5rem));
+  --cx-fs-8: max(var(--cx-fs-7), min(15vw, 6rem));
   --cx-gap: max(0.75rem, calc(var(--g, 3) * 0.4rem));
   --cx-step: 1.25rem;
   display: grid;
@@ -214,9 +225,9 @@
     width: 100%;
   }
   .cx {
-    --cx-fs-6: min(calc(var(--fs-h1) * 1.4), 12vw);
-    --cx-fs-7: min(calc(var(--fs-h1) * 1.9), 12vw);
-    --cx-fs-8: min(calc(var(--fs-h1) * 2.6), 12vw);
+    --cx-fs-6: max(var(--cx-fs-5), min(calc(var(--fs-h1) * 1.4), 12vw));
+    --cx-fs-7: max(var(--cx-fs-6), min(calc(var(--fs-h1) * 1.9), 12vw));
+    --cx-fs-8: max(var(--cx-fs-7), min(calc(var(--fs-h1) * 2.6), 12vw));
   }
 }
 @media (min-width: 64rem) {
@@ -373,7 +384,7 @@ body:not([data-motif="plate"]) .cx-prices--plates .plate__eu {
   padding: 0.35em 1em;
   background: var(--c-primary);
   color: var(--c-on-primary);
-  clip-path: polygon(0 0, 100% 0, 100% calc(50% - 0.35em), calc(100% - 0.35em) 50%, 100% calc(50% + 0.35em), 100% 100%, 0 100%, 0 calc(50% + 0.35em), 0.35em 50%, 0 calc(50% - 0.35em));
+  clip-path: var(--shape-ticketfact);
 }
 .cx-fact--ticket .cx-fact__label {
   margin-top: 0.3rem;
@@ -393,9 +404,14 @@ body:not([data-motif="plate"]) .cx-prices--plates .plate__eu {
   color: var(--c-on-band, var(--c-on-primary));
   text-align: center;
 }
+/* The label breaks between words only (a hyphenated "od-prto" in a seal reads as a typo). It is as wide as the seal
+   inside its padding, and its size comes from the seal's: at most the body size, smaller when the longest word
+   (--lw characters, about 0.6 em each) would not fit 70 % of the seal's width (the circle narrows away from its middle). */
 .cx-fact--seal .cx-fact__label {
-  max-width: 11ch;
-  overflow-wrap: anywhere;
+  max-width: 100%;
+  font-size: min(var(--fs-base), calc(min(var(--n, 6) * 0.6em + 2.4em, 100cqw) * 0.7 / (var(--lw, 8) * 0.6)));
+  hyphens: manual;
+  overflow-wrap: normal;
 }
 /* tag: a hang tag, pointed at the string end, with its hole. */
 .cx-fact--tag .cx-fact__obj {
@@ -404,7 +420,7 @@ body:not([data-motif="plate"]) .cx-prices--plates .plate__eu {
   padding: 0.3em 0.8em 0.35em 1.8em;
   background: var(--c-inverse);
   color: var(--c-on-inverse);
-  clip-path: polygon(0.9em 0, 100% 0, 100% 100%, 0.9em 100%, 0 50%);
+  clip-path: var(--shape-tagfact);
 }
 .cx-fact--tag .cx-fact__obj::before,
 .cx-tag::before {
@@ -492,15 +508,15 @@ body:not([data-motif="plate"]) .cx-prices--plates .plate__eu {
   border-radius: 50%;
 }
 .cx-mask-cut {
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 2.5rem), calc(100% - 2.5rem) 100%, 0 100%);
+  clip-path: var(--shape-maskcut);
 }
 .cx-mask-ticket {
-  clip-path: polygon(0 0, 100% 0, 100% calc(50% - 1.25rem), calc(100% - 1.25rem) 50%, 100% calc(50% + 1.25rem), 100% 100%, 0 100%, 0 calc(50% + 1.25rem), 1.25rem 50%, 0 calc(50% - 1.25rem));
+  clip-path: var(--shape-maskticket);
 }
 /* stamp: a perforated edge round a paper margin. */
 .cx-mask-stamp {
   background: var(--c-border);
-  clip-path: polygon(0.00% 0, 6.25% 0.4rem, 12.50% 0, 18.75% 0.4rem, 25.00% 0, 31.25% 0.4rem, 37.50% 0, 43.75% 0.4rem, 50.00% 0, 56.25% 0.4rem, 62.50% 0, 68.75% 0.4rem, 75.00% 0, 81.25% 0.4rem, 87.50% 0, 93.75% 0.4rem, 100.00% 0, calc(100% - 0.4rem) 5.00%, 100% 10.00%, calc(100% - 0.4rem) 15.00%, 100% 20.00%, calc(100% - 0.4rem) 25.00%, 100% 30.00%, calc(100% - 0.4rem) 35.00%, 100% 40.00%, calc(100% - 0.4rem) 45.00%, 100% 50.00%, calc(100% - 0.4rem) 55.00%, 100% 60.00%, calc(100% - 0.4rem) 65.00%, 100% 70.00%, calc(100% - 0.4rem) 75.00%, 100% 80.00%, calc(100% - 0.4rem) 85.00%, 100% 90.00%, calc(100% - 0.4rem) 95.00%, 100% 100.00%, 93.75% calc(100% - 0.4rem), 87.50% 100%, 81.25% calc(100% - 0.4rem), 75.00% 100%, 68.75% calc(100% - 0.4rem), 62.50% 100%, 56.25% calc(100% - 0.4rem), 50.00% 100%, 43.75% calc(100% - 0.4rem), 37.50% 100%, 31.25% calc(100% - 0.4rem), 25.00% 100%, 18.75% calc(100% - 0.4rem), 12.50% 100%, 6.25% calc(100% - 0.4rem), 0.00% 100%, 0.4rem 95.00%, 0 90.00%, 0.4rem 85.00%, 0 80.00%, 0.4rem 75.00%, 0 70.00%, 0.4rem 65.00%, 0 60.00%, 0.4rem 55.00%, 0 50.00%, 0.4rem 45.00%, 0 40.00%, 0.4rem 35.00%, 0 30.00%, 0.4rem 25.00%, 0 20.00%, 0.4rem 15.00%, 0 10.00%, 0.4rem 5.00%);
+  clip-path: var(--shape-stamp);
 }
 .tone-inverse .cx-mask-stamp {
   background: var(--c-on-inverse);
@@ -584,7 +600,7 @@ body:not([data-motif="plate"]) .cx-prices--plates .plate__eu {
   padding: 0.75rem 1rem 0.75rem 2.25rem;
   background: var(--c-inverse);
   color: var(--c-on-inverse);
-  clip-path: polygon(1.25rem 0, 100% 0, 100% 100%, 1.25rem 100%, 0 50%);
+  clip-path: var(--shape-tag);
 }
 .cx-tag::before {
   left: 0.9rem;

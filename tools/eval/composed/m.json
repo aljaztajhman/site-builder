@@ -1,0 +1,877 @@
+{
+  "specVersion": 19,
+  "slug": "avtoservis-mrak",
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Avtoservis Mrak",
+    "type": "car-repair",
+    "phone": "+38641555730",
+    "email": {
+      "$placeholder": "email",
+      "note": "Če imate e-pošto, jo vpišite, sicer polje odstranite"
+    },
+    "address": {
+      "street": "Savska cesta 52",
+      "postalCode": "4000",
+      "city": "Kranj"
+    },
+    "hours": {
+      "entries": [
+        {
+          "from": "mon",
+          "to": "fri",
+          "open": "07:00",
+          "close": "16:00"
+        }
+      ],
+      "note": "Sobota po dogovoru."
+    },
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      }
+    }
+  },
+  "design": {
+    "direction": "tablica",
+    "fontPair": "archivo-public-sans",
+    "colors": {
+      "background": "#ffffff",
+      "surface": "#eef0f3",
+      "text": "#15181c",
+      "muted": "#4a525c",
+      "primary": "#15181c",
+      "onPrimary": "#ffffff",
+      "accent": "#b38f00",
+      "border": "#d9dee4",
+      "inverse": "#15181c",
+      "onInverse": "#f5f5f5",
+      "band": "#ffcc00",
+      "onBand": "#15181c"
+    },
+    "radius": 4,
+    "baseFontSize": 18,
+    "scale": 1.333,
+    "headingWeight": 900,
+    "headingCase": "uppercase",
+    "headingTracking": -0.03,
+    "density": "regular",
+    "shadow": "none",
+    "imagery": "natural",
+    "skeleton": {
+      "header": "overlay",
+      "actions": "bar",
+      "footer": "compact",
+      "footerTone": "inverse",
+      "width": "contained",
+      "cards": "none",
+      "buttons": "square",
+      "dividers": "none",
+      "photoRatio": "standard"
+    }
+  },
+  "assets": {
+    "images": [
+      {
+        "id": "img_01",
+        "src": "uploads/01.jpg",
+        "width": 1600,
+        "height": 1200,
+        "alt": "Osebni avto na dvigalu v delavnici Avtoservisa Mrak"
+      },
+      {
+        "id": "img_02",
+        "src": "uploads/02.jpg",
+        "width": 1200,
+        "height": 1600,
+        "alt": "Mehanik pregleduje motor pod odprtim pokrovom"
+      },
+      {
+        "id": "img_03",
+        "src": "uploads/03.jpg",
+        "width": 1600,
+        "height": 1200,
+        "alt": "Regal z zloženimi pnevmatikami za hrambo"
+      }
+    ]
+  },
+  "chrome": {
+    "header": {
+      "variant": "bar",
+      "cta": "none",
+      "tone": "inverse"
+    },
+    "footer": {
+      "variant": "compact"
+    },
+    "mobileActionBar": true
+  },
+  "pages": [
+    {
+      "id": "p_home",
+      "kind": "home",
+      "slug": "",
+      "nav": {
+        "label": "Domov",
+        "show": true
+      },
+      "seo": {
+        "title": "Avtoservis Mrak, Kranj – servis vseh znamk",
+        "description": "Družinski avtoservis na Savski cesti v Kranju: redni servis, zavore, sklopke, jermeni, diagnostika, klima, menjava in hramba gum ter vlečna služba."
+      },
+      "sections": [
+        {
+          "id": "s_hero",
+          "type": "composed",
+          "variant": "free",
+          "tone": "inverse",
+          "props": {
+            "intent": "hero",
+            "width": "full",
+            "minHeight": "l",
+            "rows": 5,
+            "surface": {
+              "divider": "motif"
+            },
+            "elements": [
+              {
+                "id": "e_photo",
+                "kind": "image",
+                "image": "img_01",
+                "ratio": "fill",
+                "treatment": "tint",
+                "desk": {
+                  "col": 1,
+                  "span": 12,
+                  "row": 1,
+                  "rowSpan": 5
+                },
+                "phone": {
+                  "order": 6,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_where",
+                "kind": "text",
+                "paragraphs": [
+                  "Savska cesta 52, Kranj"
+                ],
+                "desk": {
+                  "col": 2,
+                  "span": 4,
+                  "row": 1,
+                  "alignY": "end",
+                  "layer": 1
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_title",
+                "kind": "heading",
+                "text": "Servis vseh znamk v Kranju",
+                "level": 1,
+                "size": 6,
+                "weight": 900,
+                "case": "uppercase",
+                "measure": "m",
+                "desk": {
+                  "col": 2,
+                  "span": 8,
+                  "row": 2,
+                  "layer": 1
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_lead",
+                "kind": "text",
+                "paragraphs": [
+                  "Družinski servis od leta 2008. Osebna vozila vseh znamk in kombiji do 3,5 t. Pred popravilom dobite predračun, brez presenečenj."
+                ],
+                "size": 1,
+                "desk": {
+                  "col": 2,
+                  "span": 6,
+                  "row": 3,
+                  "layer": 1
+                },
+                "phone": {
+                  "order": 2,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_plate",
+                "kind": "fact",
+                "value": "041 555 730",
+                "label": "Najhitreje nas dobite po telefonu",
+                "treatment": "plate",
+                "size": 6,
+                "desk": {
+                  "col": 2,
+                  "span": 6,
+                  "row": 4,
+                  "layer": 1
+                },
+                "phone": {
+                  "order": 3,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_call",
+                "kind": "action",
+                "action": "call",
+                "label": "Pokličite",
+                "style": "primary",
+                "desk": {
+                  "col": 2,
+                  "span": 3,
+                  "row": 5,
+                  "alignY": "start",
+                  "layer": 1
+                },
+                "phone": {
+                  "order": 4,
+                  "span": "full"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_strip",
+          "type": "composed",
+          "variant": "free",
+          "tone": "band",
+          "props": {
+            "intent": "highlights",
+            "width": "contained",
+            "rows": 1,
+            "gap": 4,
+            "elements": [
+              {
+                "id": "e_open",
+                "kind": "fact",
+                "value": "Pon–pet 7.00–16.00",
+                "label": "Odprto, sobota po dogovoru",
+                "treatment": "numeral",
+                "size": 3,
+                "desk": {
+                  "col": 1,
+                  "span": 4,
+                  "row": 1
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_where",
+                "kind": "fact",
+                "value": "Savska cesta 52",
+                "label": "Kranj, vhod z dvorišča",
+                "treatment": "numeral",
+                "size": 3,
+                "desk": {
+                  "col": 5,
+                  "span": 4,
+                  "row": 1
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_road",
+                "kind": "fact",
+                "value": "Vlečna služba",
+                "label": "Na cesti, za Gorenjsko",
+                "treatment": "numeral",
+                "size": 3,
+                "desk": {
+                  "col": 9,
+                  "span": 4,
+                  "row": 1
+                },
+                "phone": {
+                  "order": 2,
+                  "span": "full"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_services",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "services",
+            "width": "contained",
+            "rows": 2,
+            "surface": {
+              "divider": "motif"
+            },
+            "elements": [
+              {
+                "id": "e_h",
+                "kind": "heading",
+                "text": "Kaj delamo",
+                "level": 2,
+                "size": 6,
+                "weight": 900,
+                "case": "uppercase",
+                "desk": {
+                  "col": 1,
+                  "span": 8,
+                  "row": 1
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_l1",
+                "kind": "list",
+                "items": [
+                  "Redni servis po navodilih proizvajalca, garancija ostane",
+                  "Menjava olja in filtrov",
+                  "Zavore in sklopke",
+                  "Zobati jermeni"
+                ],
+                "marker": "rule",
+                "desk": {
+                  "col": 1,
+                  "span": 4,
+                  "row": 2
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_l2",
+                "kind": "list",
+                "items": [
+                  "Izpušni sistemi",
+                  "Računalniška diagnostika",
+                  "Polnjenje klime",
+                  "Menjava in hramba gum"
+                ],
+                "marker": "rule",
+                "desk": {
+                  "col": 5,
+                  "span": 4,
+                  "row": 2
+                },
+                "phone": {
+                  "order": 2,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_photo",
+                "kind": "image",
+                "image": "img_02",
+                "ratio": "3:4",
+                "desk": {
+                  "col": 9,
+                  "span": 4,
+                  "row": 1,
+                  "rowSpan": 2,
+                  "alignY": "start"
+                },
+                "phone": {
+                  "order": 3,
+                  "span": "inset"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_prices",
+          "type": "composed",
+          "variant": "free",
+          "tone": "inverse",
+          "props": {
+            "intent": "prices",
+            "width": "contained",
+            "rows": 3,
+            "elements": [
+              {
+                "id": "e_h",
+                "kind": "heading",
+                "text": "Nekaj cen",
+                "level": 2,
+                "size": 5,
+                "weight": 900,
+                "case": "uppercase",
+                "desk": {
+                  "col": 1,
+                  "span": 8,
+                  "row": 1
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_t",
+                "kind": "text",
+                "paragraphs": [
+                  "Ostalo po predračunu, ki ga dobite pred popravilom."
+                ],
+                "size": 1,
+                "desk": {
+                  "col": 1,
+                  "span": 6,
+                  "row": 2
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_p",
+                "kind": "prices",
+                "style": "plates",
+                "items": [
+                  {
+                    "name": "Diagnostika",
+                    "price": {
+                      "amount": 30
+                    }
+                  },
+                  {
+                    "name": "Polnjenje klime",
+                    "price": {
+                      "amount": 59
+                    }
+                  },
+                  {
+                    "name": "Menjava gum",
+                    "note": "za komplet",
+                    "price": {
+                      "amount": 20
+                    }
+                  },
+                  {
+                    "name": "Hramba gum",
+                    "note": "na sezono",
+                    "price": {
+                      "amount": 40
+                    }
+                  }
+                ],
+                "desk": {
+                  "col": 1,
+                  "span": 12,
+                  "row": 3
+                },
+                "phone": {
+                  "order": 2,
+                  "span": "full"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_tyres",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "story",
+            "width": "contained",
+            "rows": 3,
+            "elements": [
+              {
+                "id": "e_photo",
+                "kind": "image",
+                "image": "img_03",
+                "ratio": "4:3",
+                "desk": {
+                  "col": 1,
+                  "span": 6,
+                  "row": 1,
+                  "rowSpan": 3,
+                  "alignY": "center"
+                },
+                "phone": {
+                  "order": 3,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_h",
+                "kind": "heading",
+                "text": "Gume zamenjamo in shranimo",
+                "level": 2,
+                "size": 5,
+                "weight": 900,
+                "case": "uppercase",
+                "desk": {
+                  "col": 7,
+                  "span": 6,
+                  "row": 1,
+                  "alignY": "end"
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_t",
+                "kind": "text",
+                "paragraphs": [
+                  "Menjava gum stane 20 € za komplet, hramba 40 € na sezono."
+                ],
+                "size": 1,
+                "desk": {
+                  "col": 7,
+                  "span": 6,
+                  "row": 2
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_since",
+                "kind": "list",
+                "items": [
+                  "Družinski servis od leta 2008. Vodi ga Rok Mrak."
+                ],
+                "marker": "rule",
+                "desk": {
+                  "col": 7,
+                  "span": 6,
+                  "row": 3,
+                  "alignY": "start"
+                },
+                "phone": {
+                  "order": 2,
+                  "span": "full"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_contact",
+          "type": "composed",
+          "variant": "free",
+          "tone": "band",
+          "props": {
+            "intent": "contact",
+            "width": "contained",
+            "rows": 3,
+            "elements": [
+              {
+                "id": "e_h",
+                "kind": "heading",
+                "text": "Pokličite",
+                "level": 2,
+                "size": 5,
+                "weight": 900,
+                "case": "uppercase",
+                "desk": {
+                  "col": 1,
+                  "span": 8,
+                  "row": 1
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_plate",
+                "kind": "fact",
+                "value": "041 555 730",
+                "label": "Najhitreje nas dobite po telefonu",
+                "treatment": "plate",
+                "size": 6,
+                "desk": {
+                  "col": 1,
+                  "span": 7,
+                  "row": 2
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_call",
+                "kind": "action",
+                "action": "call",
+                "label": "Pokličite",
+                "style": "primary",
+                "desk": {
+                  "col": 9,
+                  "span": 3,
+                  "row": 2,
+                  "alignY": "center"
+                },
+                "phone": {
+                  "order": 2,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_addr",
+                "kind": "contact",
+                "show": [
+                  "address"
+                ],
+                "desk": {
+                  "col": 1,
+                  "span": 4,
+                  "row": 3
+                },
+                "phone": {
+                  "order": 3,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_hours",
+                "kind": "hours",
+                "style": "compact",
+                "desk": {
+                  "col": 5,
+                  "span": 4,
+                  "row": 3
+                },
+                "phone": {
+                  "order": 4,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_dir",
+                "kind": "action",
+                "action": "directions",
+                "label": "Navodila za pot",
+                "style": "secondary",
+                "desk": {
+                  "col": 9,
+                  "span": 4,
+                  "row": 3,
+                  "alignY": "start"
+                },
+                "phone": {
+                  "order": 5,
+                  "span": "full"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_storitve",
+      "kind": "standard",
+      "slug": "storitve",
+      "nav": {
+        "label": "Storitve in cene",
+        "show": true
+      },
+      "seo": {
+        "title": "Storitve in cene | Avtoservis Mrak, Kranj",
+        "description": "Redni servis, popravila, diagnostika za 30 €, polnjenje klime za 59 €, menjava gum za 20 € in hramba gum. Ostalo po predračunu."
+      },
+      "sections": [
+        {
+          "id": "s_storitve_header",
+          "type": "page-header",
+          "variant": "plain",
+          "props": {
+            "title": "Storitve in cene",
+            "intro": "Za popravila, ki niso v ceniku, dobite predračun pred začetkom dela."
+          }
+        },
+        {
+          "id": "s_list",
+          "type": "services-list",
+          "variant": "rows",
+          "props": {
+            "title": "Kaj servisiramo",
+            "items": [
+              {
+                "name": "Redni servis",
+                "description": "Po navodilih proizvajalca, tako da garancija ostane."
+              },
+              {
+                "name": "Menjava olja in filtrov",
+                "description": "Za osebna vozila vseh znamk in kombije do 3,5 t."
+              },
+              {
+                "name": "Zavore in sklopke",
+                "description": "Pregled in popravilo po predračunu."
+              },
+              {
+                "name": "Zobati jermeni",
+                "description": "Menjava po predračunu."
+              },
+              {
+                "name": "Izpušni sistemi",
+                "description": "Popravilo in menjava po predračunu."
+              },
+              {
+                "name": "Računalniška diagnostika",
+                "description": "Preberemo napake in povemo, kaj je treba popraviti.",
+                "price": {
+                  "amount": 30
+                }
+              },
+              {
+                "name": "Polnjenje klime",
+                "description": "Za osebna vozila in kombije.",
+                "price": {
+                  "amount": 59
+                }
+              },
+              {
+                "name": "Menjava gum",
+                "description": "Cena velja za komplet.",
+                "price": {
+                  "amount": 20,
+                  "unit": "komplet"
+                }
+              },
+              {
+                "name": "Hramba gum",
+                "description": "Gume shranimo do naslednje sezone.",
+                "price": {
+                  "amount": 40,
+                  "unit": "na sezono"
+                }
+              },
+              {
+                "name": "Vlečna služba",
+                "description": "Za vso Gorenjsko. Pokličite in pridemo po vozilo."
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_storitve_cta",
+          "type": "cta",
+          "variant": "band",
+          "tone": "inverse",
+          "props": {
+            "heading": "Najhitreje nas dobite po telefonu",
+            "text": "Odprto od ponedeljka do petka od 7.00 do 16.00, v soboto po dogovoru.",
+            "primary": {
+              "label": "Pokličite 041 555 730",
+              "target": {
+                "action": "call"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "nav": {
+        "label": "Zasebnost",
+        "show": false
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Avtoservis Mrak",
+        "description": "Kako Avtoservis Mrak obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "variant": "default",
+          "props": {
+            "kind": "privacy"
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "nav": {
+        "label": "Dostopnost",
+        "show": false
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Avtoservis Mrak",
+        "description": "Izjava o dostopnosti spletne strani Avtoservis Mrak."
+      },
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "variant": "default",
+          "props": {
+            "kind": "accessibility"
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "kind": "not-found",
+      "slug": "404",
+      "nav": {
+        "label": "Ni najdeno",
+        "show": false
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Avtoservis Mrak",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "variant": "default",
+          "props": {
+            "title": "Te strani ni mogoče najti",
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo."
+          }
+        }
+      ]
+    }
+  ]
+}

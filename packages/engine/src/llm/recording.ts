@@ -86,7 +86,7 @@ export class RecordMissingTransport implements ModelTransport {
 /**
  * Replays recordings per stage, in order within each stage: some stages run side by side (images
  * next to brief and design), so the order across stages isn't fixed. When `strict`, the request
- * hash must match too (a prompt change then needs a re-record).
+ * hash must match too (a prompt change then needs a re-record). Requests with `tools` (agent loops) always match by hash.
  */
 export class ReplayTransport implements ModelTransport {
   private readonly recordings: Recording[];
@@ -101,10 +101,13 @@ export class ReplayTransport implements ModelTransport {
   }
 
   async send(req: ModelRequest, stage: AppConfig["models"][ModelStageName]): Promise<ModelResponse> {
-    const i = this.recordings.findIndex((r, n) => !this.used.has(n) && r.stage === req.stage);
-    const rec = this.recordings[i];
-    if (!rec) throw new Error(`No recording left for stage ${req.stage} (call ${this.used.size})`);
     const hash = requestHash(req, stage.model);
+    // A tool loop's turns share a stage, and each turn's request (tools, tool results) has its own hash: those
+    // are matched by hash, so a loop replays deterministically whatever the order. Others replay in stage order.
+    const byHash = !!req.tools?.length;
+    const i = this.recordings.findIndex((r, n) => !this.used.has(n) && r.stage === req.stage && (!byHash || r.hash === hash));
+    const rec = this.recordings[i];
+    if (!rec) throw new Error(byHash ? `No recording matches this ${req.stage} tool request (hash ${hash}); re-record with pnpm eval --record` : `No recording left for stage ${req.stage} (call ${this.used.size})`);
     if (hash !== rec.hash) {
       if (this.strict) throw new Error(`Request for ${req.stage} changed since recording ${rec.seq}; re-record with pnpm eval --record`);
       this.hashMismatches.push({ seq: rec.seq, stage: rec.stage });

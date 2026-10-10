@@ -74,3 +74,11 @@ describe("BatchTransport", () => {
     expect(created[1]!.requests).toHaveLength(1);
   });
 });
+
+describe("BatchTransport and tools", () => {
+  it("refuses a request with tools instead of returning an answer without its tool calls", async () => {
+    const t = new BatchTransport({} as BatchApi, 1);
+    const tool: Anthropic.Tool = { name: "lookup", description: "x", input_schema: { type: "object", properties: {} } };
+    await expect(t.send({ ...req("go"), tools: [tool] }, config.models.judge)).rejects.toThrow(/tool requests/);
+  });
+});

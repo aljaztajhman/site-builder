@@ -219,6 +219,58 @@ describe("composed sections render", () => {
       const band = sectionHtml(render([one("decor", { svg: { width: 8, height: 8, paths: [{ d: "M0 0h8v8z", fill: "band", stroke: "onBand" }] } })]).html);
       expect(band).toContain("fill:var(--c-band, var(--c-primary))");
     });
+
+    it("a translation overlay on a layout value is ignored; a motif outside the library draws nothing, never fails the page", () => {
+      const en = (s: SiteSpec, overlay: Record<string, string>) => {
+        s.locales = { default: "sl", enabled: ["sl", "en"] };
+        s.translations = { en: overlay };
+      };
+      const { spec, page } = render([sectionOf(SAMPLE)]);
+      const pi = spec.pages.indexOf(page);
+      const at = (id: string) => `/pages/${pi}/sections/0/props/elements/${SAMPLE.elements.findIndex((e) => e.id === id)}`;
+      en(spec, { [`${at("e_mark")}/motif`]: "Plate", [`${at("e_photo")}/mask`]: "Cut", [`${at("e_title")}/text`]: "All makes serviced in Kranj" });
+      const s = sectionHtml(renderPage(spec, page, { locale: "en" }));
+      expect(s).toContain("All makes serviced in Kranj");
+      expect(s).toContain("cx-mask-cut");
+      expect(s).toContain('d="M0 0h10l10 14 10-14h10v6L26 28H14L0 6z"');
+      // A spec that skipped validation, with a motif no drawing knows.
+      const bogus = sectionOf(SAMPLE);
+      (bogus.props as { elements: { motif?: string }[] }).elements[4]!.motif = "Plate";
+      const raw = sectionHtml(render([bogus]).html);
+      expect(raw).toContain("cx-el--decor");
+      expect(raw).not.toContain("<svg");
+    });
+
+    it("a heading below size 2 is in normal case even where the direction sets uppercase headings", () => {
+      const caps = (s: SiteSpec) => {
+        s.design.headingCase = "uppercase";
+      };
+      for (const size of [-1, 0, 1]) {
+        const { html } = render([one("heading", { size, case: undefined, rotate: undefined })], caps);
+        expect(html).toContain("--case-heading:uppercase");
+        expect(sectionHtml(html), String(size)).toMatch(/<h2 [^>]*class="[^"]*\bcx-h cx-h--normal"/);
+      }
+      // From size 2 the direction's case holds; an explicit case still wins.
+      expect(sectionHtml(render([one("heading", { size: 2, case: undefined, rotate: undefined })], caps).html)).not.toContain("cx-h--normal");
+      expect(sectionHtml(render([one("heading", { size: 4, rotate: undefined })], caps).html)).toContain("cx-h cx-h--uppercase");
+      expect(composedStylesheet().css).toMatch(/\.cx-h--normal\{text-transform:none\}/);
+    });
+
+    it("a generated picture carries its label under every mask and treatment", () => {
+      const generated = (s: SiteSpec) => {
+        s.assets.images.find((i) => i.id === IMG2)!.origin = "generated";
+      };
+      for (const mask of ["none", "arch", "circle", "cut", "stamp", "ticket"]) {
+        for (const treatment of ["none", "duotone", "tint", "grain"]) {
+          const s = sectionHtml(render([one("image", { mask, treatment })], generated).html);
+          expect(s, `${mask} ${treatment}`).toMatch(/<picture class="media media--ai[^"]*" data-ai-label="Ustvarjeno z UI"/);
+        }
+      }
+      // The composed sheet moves the label where a mask would cut it, and never hides it.
+      const { css } = composedStylesheet();
+      expect(css).toMatch(/\.cx-mask-stamp \.media--ai::after\{[^}]*top:/);
+      expect(css).not.toMatch(/media(--ai)?::after\{[^}]*content:\s*none/);
+    });
   });
 
   describe("phones", () => {
@@ -285,6 +337,36 @@ describe("composed sections render", () => {
       expect(lcpImageFor(one("text"))).toBeNull();
       const second = render([one("text", { id: "e_t" }), sectionOf({ intent: "gallery", width: "contained", rows: 1, elements: els }, "s_second")]).html;
       expect(sectionHtml(second, "s_second")).not.toContain('fetchPriority="high"');
+    });
+  });
+
+  describe("a composed opener and the phone bar (no skeleton)", () => {
+    const noSkeleton = (s: SiteSpec) => {
+      delete s.design.skeleton;
+      s.chrome.mobileActionBar = true;
+    };
+    const bodyClass = (html: string) => /<body[^>]*class="([^"]*)"/.exec(html)?.[1] ?? "";
+
+    it("hides the opener's call under the bar on phones, as a hero's", () => {
+      const { html } = render([sectionOf(SAMPLE)], noSkeleton);
+      expect(bodyClass(html).split(" ")).toEqual(expect.arrayContaining(["has-action-bar", "bar-covers-hero-call"]));
+      expect(html).not.toContain("action-bar--after-hero");
+    });
+
+    it("reads a link action's target; with call and directions, the bar waits until the opener scrolls away", () => {
+      const els = [
+        ...SAMPLE.elements.filter((e) => e.id !== "e_call"),
+        { id: "e_call", kind: "action", action: "link", label: "Pokliči", link: { label: "Pokliči", target: { action: "call" } }, style: "primary", desk: desk(1, 3, 3), phone: { order: 2, span: "full" } },
+        { id: "e_way", kind: "action", action: "directions", label: "Pot do nas", style: "text", desk: desk(4, 3, 3), phone: { order: 3, span: "full" } },
+      ];
+      const { html } = render([sectionOf({ ...SAMPLE, elements: els })], noSkeleton);
+      expect(bodyClass(html)).not.toContain("bar-covers-hero");
+      expect(html).toContain("action-bar action-bar--after-hero");
+    });
+
+    it("leaves the bar alone when the composed section is not the opener", () => {
+      const { html } = render([one("text", { id: "e_t" }), sectionOf(SAMPLE, "s_second")], noSkeleton);
+      expect(bodyClass(html)).not.toContain("bar-covers-hero");
     });
   });
 });
