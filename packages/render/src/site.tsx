@@ -100,6 +100,13 @@ export interface RenderOptions {
    * the same address, so the pages are the same.
    */
   siteUrl?: string | null;
+  /**
+   * The day the page is rendered on, for the dates a spec may not carry: a site generated before spec v11 has no
+   * accessibility statement date (legal `date`) and no footer year (chrome.footer.year), and shows this day's. A site
+   * generated since carries both (the engine's assemble sets them to the day it was generated), so preview, publish
+   * and export show the same day whenever they run. Default: now. Tests pass a fixed day so their output never moves.
+   */
+  now?: Date;
 }
 
 export function pageFile(page: Pick<Page, "slug">): string {
@@ -192,6 +199,7 @@ export function makeCtx(spec: SiteSpec, page: Page, opts: RenderOptions & { entr
     entryHref: (path) => down + path,
     shared: (file) => `${up}../_shared/${hash}/${file}`,
     media,
+    today: opts.now ?? new Date(),
   };
 }
 

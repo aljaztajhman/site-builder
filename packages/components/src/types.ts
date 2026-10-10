@@ -39,6 +39,8 @@ export interface RenderCtx {
   shared: (file: string) => string;
   /** Path to a site media file, relative to the current page. */
   media: (file: string) => string;
+  /** The day of rendering (@sb/render RenderOptions.now): only for a date the spec doesn't carry (a site from before spec v11). */
+  today: Date;
 }
 
 export interface SectionProps<T extends SectionType> {

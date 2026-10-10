@@ -83,6 +83,7 @@ export function testCtx(spec: SiteSpec = testSpec(), page?: Page): RenderCtx {
     site: spec,
     page: page ?? spec.pages[0]!,
     entryHref: (path) => path,
+    today: new Date("2026-10-10T12:00:00Z"),
     locale: "sl",
     t: uiStrings("sl"),
     image: (id) => {

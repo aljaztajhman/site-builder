@@ -38,4 +38,18 @@ describe("dates on the page", () => {
     expect(html).toContain(`Izjava je bila pripravljena 15.${NBSP}3.${NBSP}2027.`);
     expect(html).toContain("© 2027 ");
   });
+
+  it("the day of rendering can be given (RenderOptions.now), so a pre-v11 page renders the same on any day; the spec's own dates still win", () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2027-03-15T10:00:00Z"));
+    const old = golden();
+    const page = old.pages.find((p) => p.kind === "accessibility")!;
+    const html = renderPage(old, page, { now: new Date("2026-10-10T12:00:00Z") });
+    expect(html).toContain(`Izjava je bila pripravljena 10.${NBSP}10.${NBSP}2026.`);
+    expect(html).toContain("© 2026 ");
+    vi.setSystemTime(new Date("2028-01-02T10:00:00Z"));
+    expect(renderPage(old, page, { now: new Date("2026-10-10T12:00:00Z") })).toBe(html);
+    const spec = dated();
+    expect(renderPage(spec, spec.pages.find((p) => p.kind === "accessibility")!, { now: new Date("2030-05-05T12:00:00Z") })).toContain(`Izjava je bila pripravljena 2.${NBSP}10.${NBSP}2026.`);
+  });
 });

@@ -11,7 +11,11 @@ import { renderSite, sharedBundle } from "../src/index.ts";
  *
  * Deliberate changes to the shared stylesheets or the page shell change these hashes on purpose: refresh the file with
  * `UPDATE_COMPOSED_BASELINE=1 pnpm exec vitest run packages/render/test/composed-goldens.test.ts` and say why in the PR.
+ *
+ * The goldens are pre-v11 specs: they carry no accessibility statement date and no footer year, so those come from the
+ * day of rendering. The pages render on RECORDED_ON, the day the baseline was recorded, so the hashes hold on any day.
  */
+const RECORDED_ON = new Date("2026-10-10T12:00:00Z");
 const goldenDir = new URL("../../../tools/eval/golden/", import.meta.url);
 const baselineFile = new URL("./composed-goldens.json", import.meta.url);
 const sha = (data: string | Uint8Array) => createHash("sha256").update(data).digest("hex");
@@ -34,7 +38,7 @@ function snapshot(): Snapshot {
   const pages: Record<string, string> = {};
   for (const f of goldens) {
     const spec = migrateSpec(JSON.parse(readFileSync(new URL(f, goldenDir), "utf8"))) as SiteSpec;
-    for (const [path, html] of renderSite(spec).pages) pages[`${f.replace(/\.json$/, "")}/${path}`] = sha(html);
+    for (const [path, html] of renderSite(spec, { now: RECORDED_ON }).pages) pages[`${f.replace(/\.json$/, "")}/${path}`] = sha(html);
   }
   return { sharedHash: bundle.hash, css, pages };
 }
