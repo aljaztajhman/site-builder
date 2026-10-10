@@ -1,5 +1,20 @@
 {
   "worktree": {
     "baseRef": "head"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/delegation.mjs\"",
+            "timeout": 10,
+            "statusMessage": "Checking the agent-team rules"
+          }
+        ]
+      }
+    ]
   }
 }

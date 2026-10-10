@@ -12,6 +12,8 @@ import {
   FAMILIES,
   FONTS,
   FONT_PAIRS,
+  INVENTORY_FONTS,
+  INVENTORY_FONT_PAIRS,
   SUBMOTIF_BASE,
   SUBTYPE_MOTIF,
   direction,
@@ -25,11 +27,14 @@ import {
   type Colors,
   type Direction,
   type FontFace,
+  type FontPair,
+  type InventoryFontFace,
+  type InventoryFontPair,
   type Section,
   type SiteSpec,
   type SubMotif,
 } from "@sb/spec";
-import { SLOVENE_GLYPHS, assetName, paletteContrast, paletteOf, shippedColors, type Asset } from "../src/index.ts";
+import { SLOVENE_GLYPHS, assetName, paletteContrast, paletteIssues, paletteOf, shippedColors, type Asset } from "../src/index.ts";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 export const repoRoot = path.resolve(here, "../../..");
@@ -251,6 +256,27 @@ export function sitePages(asset: Asset): SheetPage[] {
   }
 }
 
+/** The direction a curated palette is rendered in on its sheet: a plain direction of the palette's ground. */
+const CURATED_SHEET_DIRECTION: Record<string, string> = { white: "clean-swiss", tint: "clinical-calm", dark: "dark-elegant" };
+
+/**
+ * A curated palette on a real page (the base golden's photos and facts, the renderer that publishes): a hero, then
+ * sections on the alternate, inverse and band grounds, header and footer shown. Its colours go through enforceDesign
+ * as a site's would; a curated palette comes out unchanged (packages/inventory/test holds that).
+ */
+export function curatedPalettePage(asset: Asset): SheetPage {
+  const base = golden(BASE_GOLDEN).spec;
+  const dir = direction(CURATED_SHEET_DIRECTION[asset.tags.ground[0]!]!);
+  const spec = inDirection(base, dir, paletteOf(asset.id)!.colors);
+  const sections = [
+    sampleSection(base, "hero-split:image-right", "s_hero"),
+    sampleSection(base, "services-list:rows", "s_alt", "alt"),
+    sampleSection(base, "image-text:image-left", "s_inv", "inverse"),
+    sampleSection(base, "cta:band", "s_band", spec.design.colors.band ? "band" : "default"),
+  ].filter((s): s is Section => s !== null);
+  return { asset: asset.id, variant: "b", label: `on ${dir.id}`, kind: "site", spec: repairSpec(withHome(spec, sections, slugOf(asset.id, "b"))), fixture: BASE_GOLDEN, showChrome: true };
+}
+
 /** Three composed sections, one per ground, each holding the given elements beside a heading. */
 function composedGrounds(base: SiteSpec, elements: (image: string) => Props[]): Section[] {
   const imgs = imageIds(base);
@@ -305,36 +331,52 @@ const SAMPLE = "Čevljar Đuro in šivilja Žana: ćaća, kuščar, žličnik, �
 const PARAGRAPH =
   "Družinska delavnica v Škofji Loki. Popravila čevljev, torb in pasov; šivanje usnja po meri. Ob sobotah dopoldne odprto, ostale dni po dogovoru. Pokličite, preden se oglasite, da vas počaka kava.";
 
-const fontFace = (f: FontFace): string =>
+/** The owner's specimen line (I1 brief): every Slovene letter plus ć and đ in a real phrase. */
+const SPECIMEN = "Šivilja Čebašek, Žalec — ćevapčiči, đuveč";
+
+type Face = FontFace | InventoryFontFace;
+const allFaces = (): Face[] => [...Object.values(FONTS), ...Object.values(INVENTORY_FONTS)];
+const allPairs = (): (FontPair | InventoryFontPair)[] => [...FONT_PAIRS, ...INVENTORY_FONT_PAIRS];
+/** The face's weight nearest to `w` (a one-weight face is never set in a faked bold). */
+const near = (f: Face, w: number): number => Math.min(Math.max(w, f.weights[0]), f.weights[1]);
+const stack = (f: Face): string => `"${f.family}",${f.fallback}`;
+
+const fontFace = (f: Face): string =>
   `@font-face{font-family:"${f.family}";src:url("/_fonts/${f.file}.woff2") format("woff2");font-weight:${f.weights[0]} ${f.weights[1]};font-display:block}`;
 
 const doc = (title: string, css: string, body: string): string =>
   `<!doctype html><html lang="sl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title><style>*{box-sizing:border-box}body{margin:0;padding:24px 16px;background:#fff;color:#16181c;font:16px/1.5 system-ui,sans-serif}${css}</style></head><body>${body}</body></html>`;
 
 export function fontPage(asset: Asset): SheetPage {
-  const face = Object.values(FONTS).find((f) => f.file === assetName(asset.id))!;
+  const face = allFaces().find((f) => f.file === assetName(asset.id))!;
   const [lo, hi] = face.weights;
   const mid = Math.round((lo + hi) / 200) * 100;
-  const css = `${fontFace(face)}.f{font-family:"${face.family}",${face.fallback}}.meta{font:13px/1.4 system-ui;color:#555;margin:0 0 16px}.big{font-size:clamp(40px,9vw,96px);line-height:1;margin:0 0 12px;letter-spacing:-.01em}.row{font-size:clamp(20px,4vw,34px);margin:0 0 10px;overflow-wrap:anywhere}.glyphs{font-size:clamp(28px,6vw,56px);letter-spacing:.06em;margin:16px 0;overflow-wrap:anywhere}.p{max-width:38em;font-size:18px}`;
-  const body = `<p class="meta">${asset.id} · ${face.family} · wght ${lo}–${hi} · ${(asset.bytes / 1024).toFixed(1)} KB · ${asset.license}</p>
-<p class="f big" style="font-weight:${hi >= 800 ? 800 : hi}">Šola žlic</p>
+  const css = `${fontFace(face)}.f{font-family:${stack(face)};font-synthesis:none}.meta{font:13px/1.4 system-ui;color:#555;margin:0 0 16px}.big{font-size:clamp(40px,9vw,96px);line-height:1;margin:0 0 12px;letter-spacing:-.01em}.row{font-size:clamp(20px,4vw,34px);margin:0 0 10px;overflow-wrap:anywhere}.glyphs{font-size:clamp(28px,6vw,56px);letter-spacing:.06em;margin:16px 0;overflow-wrap:anywhere}.p{max-width:38em;font-size:18px}.p16{max-width:38em;font-size:16px}`;
+  const body = `<p class="meta">${asset.id} · ${face.family} · wght ${lo}–${hi} · ${(asset.bytes / 1024).toFixed(1)} KB · ${asset.license}${"role" in face ? ` · ${face.role}` : ""}</p>
+<p class="f big" style="font-weight:${hi >= 800 ? 800 : hi}">${SPECIMEN}</p>
 <p class="f row" style="font-weight:${lo}">${lo} ${SAMPLE}</p>
 <p class="f row" style="font-weight:${mid}">${mid} ${SAMPLE}</p>
 <p class="f row" style="font-weight:${hi}">${hi} ${SAMPLE}</p>
 <p class="f glyphs" style="font-weight:${mid}">${[...SLOVENE_GLYPHS].join(" ")} € „“ – … 0123456789</p>
-<p class="f p" style="font-weight:400">${PARAGRAPH}</p>`;
+<p class="f p" style="font-weight:${near(face, 400)}">${PARAGRAPH}</p>
+<p class="f p16" style="font-weight:${near(face, 400)}">16 px: ${PARAGRAPH}</p>`;
   return { asset: asset.id, variant: "a", label: face.family, kind: "html", html: doc(face.family, css, body) };
 }
 
 export function pairingPage(asset: Asset): SheetPage {
-  const p = FONT_PAIRS.find((x) => x.id === assetName(asset.id))!;
-  const faces = [p.heading, p.body].filter((f, i, a) => a.findIndex((x) => x.file === f.file) === i);
-  const css = `${faces.map(fontFace).join("")}.h{font-family:"${p.heading.family}",${p.heading.fallback};font-weight:700;font-size:clamp(34px,7vw,72px);line-height:1.05;margin:0 0 16px;letter-spacing:-.015em}.h2{font-family:"${p.heading.family}",${p.heading.fallback};font-weight:600;font-size:clamp(24px,4vw,40px);margin:28px 0 8px}.b{font-family:"${p.body.family}",${p.body.fallback};font-size:18px;max-width:36em;margin:0 0 12px}.meta{font:13px/1.4 system-ui;color:#555;margin:0 0 16px}`;
-  const body = `<p class="meta">${asset.id} · ${p.label} · ${(asset.bytes / 1024).toFixed(1)} KB</p>
-<h1 class="h">Popravila čevljev in torb v Škofji Loki</h1>
+  const p = allPairs().find((x) => x.id === assetName(asset.id))!;
+  const u = "utility" in p ? p.utility : undefined;
+  const faces = [p.heading, p.body, ...(u ? [u] : [])].filter((f, i, a) => a.findIndex((x) => x.file === f.file) === i);
+  const h = p.heading;
+  const css = `${faces.map(fontFace).join("")}*{font-synthesis:none}.h{font-family:${stack(h)};font-weight:${near(h, 700)};font-size:clamp(34px,7vw,72px);line-height:1.05;margin:0 0 16px;letter-spacing:-.015em}.h2{font-family:${stack(h)};font-weight:${near(h, 600)};font-size:clamp(24px,4vw,40px);margin:28px 0 8px}.b{font-family:${stack(p.body)};font-weight:${near(p.body, 400)};font-size:18px;max-width:36em;margin:0 0 12px}.b16{font-size:16px}.meta{font:13px/1.4 system-ui;color:#555;margin:0 0 16px}${u ? `.u{font-family:${stack(u)};font-weight:${near(u, 400)};font-variant-numeric:tabular-nums;font-size:17px;border-collapse:collapse;margin:8px 0 0}.u td{padding:4px 18px 4px 0;border-bottom:1px solid #ddd}.u td+td{text-align:right}` : ""}`;
+  const table = u
+    ? `<table class="u"><tr><td>Šivanje zadrge</td><td>12,50 €</td></tr><tr><td>Nov podplat</td><td>38,00 €</td></tr><tr><td>Pon–pet</td><td>8.00–16.30</td></tr><tr><td>Sobota</td><td>9.00–12.00</td></tr></table>`
+    : "";
+  const body = `<p class="meta">${asset.id} · ${p.label} · ${(asset.bytes / 1024).toFixed(1)} KB · ${asset.tags.mood.join(", ")}${asset.tags.stances.length ? ` · ${asset.tags.stances.join(", ")}` : ""}</p>
+<h1 class="h">${SPECIMEN}</h1>
 <p class="b">${PARAGRAPH}</p>
 <h2 class="h2">Cenik: šivanje, lepljenje, ćup</h2>
-<p class="b">Žepi, zadrge in ročaji. ${[...SLOVENE_GLYPHS].join(" ")} — 12,50 €.</p>`;
+<p class="b b16">Žepi, zadrge in ročaji. ${[...SLOVENE_GLYPHS].join(" ")} – 12,50 €.</p>${table}`;
   return { asset: asset.id, variant: "a", label: p.label, kind: "html", html: doc(p.label, css, body) };
 }
 
@@ -343,7 +385,9 @@ const ROLES: (keyof Colors)[] = ["background", "surface", "text", "muted", "prim
 export function palettePage(asset: Asset): SheetPage {
   const p = paletteOf(asset.id)!;
   const c = p.colors;
-  const shipped = shippedColors(c, p.direction);
+  // A curated palette belongs to no direction: it renders as stored (paletteIssues holds it to that).
+  const shipped = p.direction ? shippedColors(c, p.direction) : c;
+  const issues = p.direction ? [] : paletteIssues(c, asset.tags.ground[0]!);
   const stored = paletteContrast(c, p.direction);
   const after = paletteContrast(shipped, p.direction);
   const sw = ROLES.filter((r) => c[r])
@@ -360,13 +404,33 @@ export function palettePage(asset: Asset): SheetPage {
 <div class="demo" style="background:${c.inverse};color:${c.onInverse}">Inverse <a style="color:${c.accent}">accent link</a></div>
 ${c.band ? `<div class="demo" style="background:${c.band};color:${c.onBand}">Band: 041 555 730</div>` : ""}`;
   const css = `.meta{font:13px/1.4 system-ui;color:#555;margin:0 0 16px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:18px}.sw{font-size:13px;display:flex;flex-direction:column;gap:2px}.chip{height:56px;border:1px solid #0002;border-radius:4px}code{font-size:12px}.chg{color:#b00}.wrap{display:grid;gap:16px}@media(min-width:900px){.wrap{grid-template-columns:1fr 1fr}}table{border-collapse:collapse;font-size:13px;width:100%}td{padding:3px 6px;border-bottom:1px solid #eee}.miss td{background:#fde8e8;font-weight:600}.pair{display:inline-block;padding:0 6px;font-weight:700;border:1px solid #0001}.demo{padding:14px 16px;border-radius:4px;margin-bottom:8px}.btn{display:inline-block;padding:8px 14px;border-radius:3px;font-weight:600}`;
-  const body = `<p class="meta">${asset.id} · ${asset.note ?? ""} · ground ${asset.tags.ground.join(", ")} · ${asset.tags.mood.join(", ")}</p><div class="grid">${sw}</div><div class="wrap"><div>${demo}</div><table><tr><td></td><td>pair</td><td>stored</td><td>as rendered</td><td>min</td><td></td></tr>${rows}</table></div>`;
+  const tagLine = [asset.tags.stances.join(", "), asset.tags.trades.join(", ")].filter(Boolean).join(" · ");
+  const body = `<p class="meta">${asset.id} · ${asset.note ?? ""} · ground ${asset.tags.ground.join(", ")} · ${asset.tags.mood.join(", ")}${tagLine ? `<br>${tagLine}` : ""}</p>${issues.length ? `<p class="meta" style="color:#b00;font-weight:600">${issues.join("; ")}</p>` : ""}<div class="grid">${sw}</div><div class="wrap"><div>${demo}</div><table><tr><td></td><td>pair</td><td>stored</td><td>as rendered</td><td>min</td><td></td></tr>${rows}</table></div>`;
   return { asset: asset.id, variant: "a", label: asset.id, kind: "html", html: doc(asset.id, css, body) };
 }
+
+/**
+ * Every palette at a glance (the sheet's palette-overview pictures): one small page per palette in its own colours,
+ * a header, a heading with muted text, the button and an accent link on the page, then the surface, band and inverse
+ * grounds, so palettes can be compared side by side.
+ */
+export function paletteOverviewHtml(assets: Asset[], title: string): string {
+  const cards = assets
+    .map((a) => {
+      const c = paletteOf(a.id)!.colors;
+      const band = c.band ? `<div class="g" style="background:${c.band};color:${c.onBand}"><b>041 555 730</b> · Pokličite danes</div>` : `<div class="g none">no band</div>`;
+      return `<div class="card"><div class="pg" style="background:${c.background};color:${c.text};border:1px solid ${c.border}"><div class="hd" style="border-bottom:1px solid ${c.border}"><b>Kvas</b><span style="color:${c.muted}">Ponudba · Kontakt</span></div><div class="hero"><div class="h">Kruh, ki vzhaja čez noč</div><p style="color:${c.muted}">Pečemo vsak dan od šestih zjutraj.</p><span class="btn" style="background:${c.primary};color:${c.onPrimary}">Pokličite</span> <a style="color:${c.accent}">Pot do nas →</a></div></div><div class="g" style="background:${c.surface};color:${c.text}">Ponudba <span style="color:${c.muted}">· drobno pecivo</span></div>${band}<div class="g" style="background:${c.inverse};color:${c.onInverse}">Odprto do 19h · <a style="color:${c.accent}">zemljevid</a></div><div class="id">${esc(a.id.replace(/^palette\//, ""))} <span>${esc(a.tags.ground.join(""))} · ${esc(a.tags.mood.join(", "))}</span></div><div class="src">${esc(a.note ?? "")}</div></div>`;
+    })
+    .join("");
+  const css = `body{background:#e9e9ea;padding:16px}h1{font:600 20px system-ui;margin:0 0 12px}.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}.card{background:#fff;border-radius:6px;padding:8px;font-size:12px}.pg{border-radius:3px 3px 0 0}.hd{display:flex;justify-content:space-between;padding:6px 10px;font-size:11px}.hero{padding:12px 10px 14px}.h{font:700 19px/1.15 system-ui;margin-bottom:4px}.hero p{margin:0 0 10px}.btn{display:inline-block;padding:6px 10px;border-radius:3px;font-weight:600}.g{padding:9px 10px}.none{color:#888;background:repeating-linear-gradient(45deg,#f4f4f4 0 6px,#fff 6px 12px)}.id{font-weight:700;margin-top:6px}.id span{font-weight:400;color:#666}.src{color:#444;font-style:italic;margin-top:2px}`;
+  return doc(title, css, `<h1>${esc(title)}</h1><div class="grid">${cards}</div>`);
+}
+
+const esc = (s: string): string => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 export function pagesFor(asset: Asset): SheetPage[] {
   if (asset.kind === "font") return [fontPage(asset)];
   if (asset.kind === "pairing") return [pairingPage(asset)];
-  if (asset.kind === "palette") return [palettePage(asset)];
+  if (asset.kind === "palette") return paletteOf(asset.id)!.direction ? [palettePage(asset)] : [palettePage(asset), curatedPalettePage(asset)];
   return sitePages(asset);
 }

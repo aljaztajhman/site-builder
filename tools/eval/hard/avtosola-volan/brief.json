@@ -1,0 +1,32 @@
+{
+  "id": "avtosola-volan",
+  "businessType": "car-repair",
+  "trade": "avtošola",
+  "hard": ["new-trade"],
+  "description": "Avtošola Volan, Jesenice. Učimo za B kategorijo (osebni avto), A in AM (motor, moped) ter BE (prikolica). Imamo štiri inštruktorje, vozimo Škoda Fabia in VW Polo, za motor Honda. Šef je Boris Kralj, ki uči že 25 let.\n\nTeoretični tečaj CPP se začne vsak prvi ponedeljek v mesecu ob 17.00 in traja dva tedna.\n\nCene: paket B kategorija (20 ur vožnje) 890 €, dodatna ura vožnje 38 €, tečaj CPP 70 €, tečaj prve pomoči 60 €. Možno je plačilo na obroke brez obresti.\n\nPisarna: Titova cesta 64, 4270 Jesenice, odprta pon–čet 9.00–17.00, petek 9.00–13.00.\n\nTelefon 04 555 63 08, info@avtosola-volan.example.\n\nAvtošola Volan d.o.o., matična številka 6555890000, davčna številka 55571234.\n\nLogo je volan, pošiljam ga. Slike imam dve: naš avto na parkirišču in poligon za motorje.",
+  "logo": "logo.svg",
+  "photos": [
+    { "file": "photos/01.jpg", "subject": "bel učni avto avtošole na parkirišču pred blokom" },
+    { "file": "photos/02.jpg", "subject": "poligon za motorje z rdeče-belimi stožci in motorjem" }
+  ],
+  "facts": {
+    "name": "Avtošola Volan",
+    "phone": "+38645556308",
+    "email": "info@avtosola-volan.example",
+    "address": { "street": "Titova cesta 64", "postalCode": "4270", "city": "Jesenice" },
+    "hours": [
+      { "from": "mon", "to": "thu", "open": "09:00", "close": "17:00" },
+      { "from": "fri", "to": "fri", "open": "09:00", "close": "13:00" }
+    ],
+    "prices": [
+      { "item": "paket B kategorija", "amount": 890 },
+      { "item": "dodatna ura vožnje", "amount": 38 },
+      { "item": "tečaj CPP", "amount": 70 },
+      { "item": "tečaj prve pomoči", "amount": 60 }
+    ],
+    "people": [{ "name": "Boris Kralj", "role": "vodja" }],
+    "legal": { "legalName": "Avtošola Volan d.o.o.", "registrationNumber": "6555890000", "taxNumber": "55571234" },
+    "other": ["štiri inštruktorje", "vsak prvi ponedeljek v mesecu ob 17.00", "plačilo na obroke brez obresti", "že 25 let", "Škoda Fabia in VW Polo"]
+  },
+  "missing": []
+}

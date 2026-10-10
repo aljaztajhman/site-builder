@@ -1,5 +1,5 @@
 /**
- * pnpm inventory:sheet [--kind <kind>] [--ids <id,id,...>]
+ * pnpm inventory:sheet [--kind <kind>] [--status draft|approved|rejected] [--ids <id,id,...>]
  *
  * Kinds without assets get an empty sheet (<kind>.html) with a note. `--ids` also photographs ids that are not
  * registered yet, as draft assets (an asset maker's preview before registering). Drawings, compositions (one sheet per
@@ -21,8 +21,8 @@ import path from "node:path";
 import { chromium, type Page } from "playwright";
 import { FONTS_DIR, sharedBundle, siteFiles } from "@sb/render";
 import { validateSite } from "@sb/spec";
-import { ASSET_KINDS, KIND_PREFIX, Asset as AssetSchema, assetSlug, inventory, writeInventoryJson, type Asset, type AssetKind } from "../src/index.ts";
-import { fixturesDir, repoRoot, type SheetPage } from "./pages.ts";
+import { ASSET_KINDS, AssetStatus, KIND_PREFIX, Asset as AssetSchema, assetSlug, inventory, writeInventoryJson, type Asset, type AssetKind } from "../src/index.ts";
+import { fixturesDir, paletteOverviewHtml, repoRoot, type SheetPage } from "./pages.ts";
 import { pagesFor } from "./pages-v2.ts";
 import { emptySheetHtml, sheetGroups, sheetHtml, type Shot } from "./sheet-html.ts";
 
@@ -165,6 +165,8 @@ async function main(): Promise<void> {
     return k;
   };
   const kinds = only ? [only as AssetKind] : ids.length ? [...new Set(ids.map(kindOfId))] : SHEET_KINDS;
+  const status = arg("status");
+  if (status && !(AssetStatus.options as readonly string[]).includes(status)) throw new Error(`Unknown status ${status}; one of ${AssetStatus.options.join(", ")}`);
   const registry = inventory();
   mkdirSync(outDir, { recursive: true });
   rmSync(siteDir, { recursive: true, force: true });
@@ -181,7 +183,12 @@ async function main(): Promise<void> {
   const allShots: Shot[] = [];
   try {
     for (const kind of kinds) {
-      const assets = [...registry.byKind(kind), ...ids.filter((id) => kindOfId(id) === kind && !registry.byId(id)).map((id) => previewAsset(id, kind))];
+      const assets = [
+        ...registry.byKind(kind).filter((a) => !status || a.status === status),
+        ...ids.filter((id) => kindOfId(id) === kind && !registry.byId(id)).map((id) => previewAsset(id, kind)),
+      ];
+      // A status filter that leaves a kind empty skips it (its sheet stays as it was); otherwise an empty kind gets a note.
+      if (!assets.length && status) continue;
       const kindDir = path.join(outDir, kind);
       rmSync(kindDir, { recursive: true, force: true });
       mkdirSync(kindDir, { recursive: true });
@@ -232,6 +239,17 @@ async function main(): Promise<void> {
           await sheetPage.close();
           rmSync(html);
           sheets++;
+        }
+      }
+      if (kind === "palette") {
+        // Every palette side by side, 48 a picture (eight rows of six).
+        for (let n = 0; n * 48 < assets.length; n++) {
+          const html = path.join(outDir, `palette-overview-${n + 1}.html`);
+          writeFileSync(html, paletteOverviewHtml(assets.slice(n * 48, (n + 1) * 48), `palettes${status ? ` (${status})` : ""} ${n * 48 + 1}–${Math.min(assets.length, (n + 1) * 48)} of ${assets.length}`));
+          const sheetPage = await browser.newPage({ viewport: { width: 1700, height: 900 } });
+          await sheetPage.goto(`${url}/palette-overview-${n + 1}.html`, { waitUntil: "load" });
+          await sheetPage.screenshot({ path: path.join(outDir, `palette-overview-${n + 1}.png`), fullPage: true });
+          await sheetPage.close();
         }
       }
       const bad = shots.filter((s) => s.problems.length);

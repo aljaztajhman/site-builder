@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 80" width="260" height="80" role="img" aria-label="Foto Rozman">
+  <rect x="4" y="18" width="64" height="46" rx="8" fill="#111111"/>
+  <rect x="18" y="10" width="20" height="10" rx="3" fill="#111111"/>
+  <circle cx="36" cy="41" r="15" fill="#ffffff"/>
+  <circle cx="36" cy="41" r="9" fill="#111111"/>
+  <circle cx="58" cy="27" r="3" fill="#e0a526"/>
+  <text x="82" y="48" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="300" fill="#111111" letter-spacing="5">ROZMAN</text>
+  <text x="84" y="66" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#777777" letter-spacing="6">FOTOGRAFIJA</text>
+</svg>

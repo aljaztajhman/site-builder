@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 96" width="340" height="96" role="img" aria-label="Veterinarska ambulanta Šapa">
+  <circle cx="48" cy="48" r="42" fill="#1f7a6d"/>
+  <ellipse cx="48" cy="60" rx="17" ry="13" fill="#ffffff"/>
+  <ellipse cx="27" cy="40" rx="7" ry="9" fill="#ffffff"/>
+  <ellipse cx="40" cy="28" rx="7" ry="9" fill="#ffffff"/>
+  <ellipse cx="56" cy="28" rx="7" ry="9" fill="#ffffff"/>
+  <ellipse cx="69" cy="40" rx="7" ry="9" fill="#ffffff"/>
+  <text x="104" y="54" font-family="Arial, Helvetica, sans-serif" font-size="36" font-weight="700" fill="#1f3d38">Šapa</text>
+  <text x="106" y="76" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1f7a6d" letter-spacing="2.5">VETERINARSKA AMBULANTA</text>
+</svg>

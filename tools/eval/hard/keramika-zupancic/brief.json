@@ -1,0 +1,21 @@
+{
+  "id": "keramika-zupancic",
+  "businessType": "builder",
+  "trade": "keramičar",
+  "hard": ["no-logo"],
+  "description": "Sem Rok Zupančič, keramičar z 18 leti izkušenj. Firma se imenuje Keramika Zupančič, delam sam, pri večjih delih mi pomaga brat.\n\nPolagam ploščice v kopalnicah, kuhinjah, na terasah in balkonih, delam tudi velike formate in mozaik. Prej naredim hidroizolacijo in izravnam tla, po želji se zmenim z inštalaterjem za talno gretje. Najraje imam celotne prenove kopalnic, ker takrat lahko vse naredim kot je treba od začetka.\n\nDelam po Dolenjskem in Beli krajini, za večja dela pridem tudi v Ljubljano. Cene ne morem napisat vnaprej ker je vsaka kopalnica drugačna, pridem na ogled in dam ponudbo v nekaj dneh, ogled je brezplačen.\n\nLogotipa nimam, imam samo napis na kombiju. Na slikah je kopalnica ki sem jo končal lani in terasa s ploščicami ki izgledajo kot les.\n\nKontakt: 041 555 318 ali rok.zupancic@keramika-zupancic.example. Naslov delavnice je Šmihelska cesta 14, 8000 Novo mesto, ampak tam me ponavadi ni, ker sem na terenu, zato prej pokličite.",
+  "logo": null,
+  "photos": [
+    { "file": "photos/01.jpg", "subject": "prenovljena kopalnica z velikimi sivimi ploščicami in tušem brez kadi" },
+    { "file": "photos/02.jpg", "subject": "terasa ob hiši s ploščicami v videzu lesa" }
+  ],
+  "facts": {
+    "name": "Keramika Zupančič",
+    "phone": "+38641555318",
+    "email": "rok.zupancic@keramika-zupancic.example",
+    "address": { "street": "Šmihelska cesta 14", "postalCode": "8000", "city": "Novo mesto" },
+    "people": [{ "name": "Rok Zupančič", "role": "keramičar" }],
+    "other": ["18 leti izkušenj", "po Dolenjskem in Beli krajini", "ogled je brezplačen", "velike formate in mozaik"]
+  },
+  "missing": ["prices", "hours", "legal"]
+}

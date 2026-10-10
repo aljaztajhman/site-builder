@@ -93,6 +93,14 @@ export const FixtureFacts = z.strictObject({
 });
 export type FixtureFacts = z.infer<typeof FixtureFacts>;
 
+/**
+ * The weak cases a hard fixture stands for (docs/plans/design-studio.md §8): no logo, no photos at all, only dark or
+ * poor phone photos, a single photo, a name of 40+ characters, 20 priced services, a tourism business whose owner
+ * also writes in English, and a trade the ten fixtures don't cover.
+ */
+export const HardCase = z.enum(["no-logo", "no-photos", "dark-photos", "one-photo", "long-name", "many-prices", "english", "new-trade"]);
+export type HardCase = z.infer<typeof HardCase>;
+
 function wordCount(s: string): number {
   return s.split(/\s+/).filter((w) => /[\p{L}\p{N}]/u.test(w)).length;
 }
@@ -104,6 +112,8 @@ export const FixtureBrief = z.strictObject({
   trade: z.string().min(2).max(30).optional(),
   /** Twins (tools/eval/twins): the base fixture of the same trade this one is measured against. */
   twinOf: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/).optional(),
+  /** Hard fixtures (tools/eval/hard): the weak cases this one stands for (a test checks each against the brief). */
+  hard: z.array(HardCase).min(1).optional(),
   description: z
     .string()
     .refine((d) => wordCount(d) >= 90 && wordCount(d) <= 260, { message: "description must be 90–260 words" }),

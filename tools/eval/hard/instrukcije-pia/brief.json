@@ -1,0 +1,22 @@
+{
+  "id": "instrukcije-pia",
+  "businessType": "accountant",
+  "trade": "inštrukcije",
+  "hard": ["no-photos", "new-trade"],
+  "description": "Inštrukcije Pia – matematika in fizika za osnovno in srednjo šolo.\n\nSem Pia Lešnik, profesorica matematike, inštrukcije dajem že 9 let. Pomagam pri sprotnem delu, pred testi in pri pripravi na NPZ in maturo, osnovno in višjo raven. Delam z vsakim posebej, v njegovem tempu, brez pritiska. Prvo srečanje je za spoznavanje, pogledamo kje so težave in naredim načrt.\n\nInštrukcije so pri meni doma v Mariboru ali online prek Zooma, za dijake iz Maribora pridem tudi na dom.\n\nCene: ura inštrukcij (60 minut) 18 €, paket 10 ur 160 €, priprava na maturo v skupini do 4 dijakov 12 € na uro na dijaka.\n\nTermine dogovorimo sproti, večinoma popoldne in ob sobotah, med počitnicami tudi dopoldne.\n\nPokličite ali pošljite sms na 031 555 906, lahko pa tudi mail pia.lesnik@mail.example. Slik nimam in jih ne bi dajala gor, tudi naslova ne bi objavila, ker delam doma.",
+  "logo": null,
+  "photos": [],
+  "facts": {
+    "name": "Inštrukcije Pia",
+    "phone": "+38631555906",
+    "email": "pia.lesnik@mail.example",
+    "prices": [
+      { "item": "ura inštrukcij", "amount": 18 },
+      { "item": "paket 10 ur", "amount": 160 },
+      { "item": "priprava na maturo v skupini do 4 dijakov", "amount": 12 }
+    ],
+    "people": [{ "name": "Pia Lešnik", "role": "profesorica matematike" }],
+    "other": ["matematika in fizika", "že 9 let", "NPZ in maturo", "online prek Zooma", "pridem tudi na dom"]
+  },
+  "missing": ["hours", "photos", "address", "legal"]
+}

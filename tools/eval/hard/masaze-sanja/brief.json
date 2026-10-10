@@ -1,0 +1,32 @@
+{
+  "id": "masaze-sanja",
+  "businessType": "physio",
+  "trade": "masaže",
+  "hard": ["one-photo"],
+  "description": "Masaže Sanja, Nova Gorica. Sem Sanja Bizjak, diplomirana fizioterapevtka, masiram že 12 let. V mojem malem studiu se lahko res sprostite, ni gneče, sem samo jaz.\n\nPonujam: klasična masaža 60 minut 40 €, masaža hrbta in vratu 30 minut 25 €, športna masaža 60 minut 45 €, limfna drenaža 60 minut 45 €, masaža z vročimi kamni 75 minut 55 €. Za darilo so na voljo darilni boni za vse masaže.\n\nNaročanje je obvezno, po telefonu 040 555 812 ali preko spleta https://masaze-sanja.example/narocanje. Prosim da me obvestite vsaj 24 ur prej če ne morete priti.\n\nDelovni čas: pon–pet 14.00–20.00, sobota 8.00–13.00.\n\nNaslov: Kidričeva ulica 11, 5000 Nova Gorica, pritličje, parkiranje pred hišo. E-pošta sanja@masaze-sanja.example.\n\nSliko imam samo eno, od masažne mize v studiu, logo pa še delam.",
+  "logo": null,
+  "photos": [
+    { "file": "photos/01.jpg", "subject": "masažna miza z brisačo in oljem v majhnem toplo osvetljenem studiu" }
+  ],
+  "facts": {
+    "name": "Masaže Sanja",
+    "phone": "+38640555812",
+    "email": "sanja@masaze-sanja.example",
+    "address": { "street": "Kidričeva ulica 11", "postalCode": "5000", "city": "Nova Gorica" },
+    "hours": [
+      { "from": "mon", "to": "fri", "open": "14:00", "close": "20:00" },
+      { "from": "sat", "to": "sat", "open": "08:00", "close": "13:00" }
+    ],
+    "bookingUrl": "https://masaze-sanja.example/narocanje",
+    "prices": [
+      { "item": "klasična masaža", "amount": 40 },
+      { "item": "masaža hrbta in vratu", "amount": 25 },
+      { "item": "športna masaža", "amount": 45 },
+      { "item": "limfna drenaža", "amount": 45 },
+      { "item": "masaža z vročimi kamni", "amount": 55 }
+    ],
+    "people": [{ "name": "Sanja Bizjak", "role": "diplomirana fizioterapevtka" }],
+    "other": ["masiram že 12 let", "darilni boni", "vsaj 24 ur prej", "parkiranje pred hišo"]
+  },
+  "missing": ["legal"]
+}

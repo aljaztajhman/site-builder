@@ -1,0 +1,27 @@
+{
+  "id": "cebelarstvo-medved",
+  "businessType": "shop",
+  "trade": "čebelarstvo",
+  "hard": ["one-photo"],
+  "description": "Čebelarstvo Medved – domač med iz Radovljice.\n\nČebelarim že 32 let, imam 60 panjev, AŽ panje in nekaj kranjičev. Čebele so na dveh stojiščih, eno pod Jelovico in eno doma za hišo.\n\nProdajam samo svoj med: cvetlični med 450 g 7 €, gozdni med 450 g 8 €, akacijev med 450 g 9 €, kostanjev med 900 g 15 €. Imamo tudi propolis kapljice 8 €, cvetni prah in svečke iz voska. Za darila naredim lesene škatle s tremi kozarčki, cena po dogovoru. Naš med je v shemi Slovenski med z zaščiteno geografsko označbo.\n\nProdaja na domu, Begunjska cesta 15, 4240 Radovljica, pon–sob 9.00–19.00, ob nedeljah samo če prej pokličete. Telefon 041 555 087 (Franc Medved). Pošiljam tudi po pošti, ampak samo po Sloveniji.\n\nImam samo eno sliko, čebelnjak s panji na travniku, druge so ostale na starem telefonu.",
+  "logo": null,
+  "photos": [
+    { "file": "photos/01.jpg", "subject": "lesen čebelnjak s pisanimi panjskimi končnicami na travniku" }
+  ],
+  "facts": {
+    "name": "Čebelarstvo Medved",
+    "phone": "+38641555087",
+    "address": { "street": "Begunjska cesta 15", "postalCode": "4240", "city": "Radovljica" },
+    "hours": [{ "from": "mon", "to": "sat", "open": "09:00", "close": "19:00" }],
+    "prices": [
+      { "item": "cvetlični med", "amount": 7 },
+      { "item": "gozdni med", "amount": 8 },
+      { "item": "akacijev med", "amount": 9 },
+      { "item": "kostanjev med", "amount": 15 },
+      { "item": "propolis kapljice", "amount": 8 }
+    ],
+    "people": [{ "name": "Franc Medved", "role": "čebelar" }],
+    "other": ["32 let", "60 panjev", "Slovenski med z zaščiteno geografsko označbo", "samo po Sloveniji", "ob nedeljah samo če prej pokličete"]
+  },
+  "missing": ["email", "legal"]
+}

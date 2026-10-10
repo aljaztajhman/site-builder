@@ -1,0 +1,29 @@
+{
+  "id": "apartmaji-pod-voglom",
+  "businessType": "tourist-farm",
+  "trade": "apartmaji",
+  "hard": ["english"],
+  "description": "Apartmaji Pod Voglom – Bohinj, 300 m od jezera. Smo družina Zupan, Marko in Petra, in oddajamo tri apartmaje v naši hiši v Ukancu, na koncu Bohinjskega jezera. Vsak apartma ima kuhinjo, kopalnico in balkon, WiFi in parkirišče sta brezplačna.\n\nApartma za 2 osebi od 85 € na noč, apartma za 4 osebe od 120 € na noč, najmanj 3 noči. Turistična taksa 3,13 € na osebo na noč ni vključena. Psi so dobrodošli po dogovoru. Check-in 15.00–20.00, check-out do 10.00.\n\nRezervacije: https://podvoglom.example/booking ali +386 41 555 903, e-mail stay@podvoglom.example. Naslov: Ukanc 18, 4265 Bohinjsko jezero.\n\nEnglish: We are a family-run house with three apartments, 300 m from Lake Bohinj, close to the Vogel cable car and the Savica waterfall. Every apartment has a kitchen, bathroom and balcony, free WiFi and parking. Minimum stay 3 nights, dogs welcome on request. We speak English and German, a little Italian.\n\nVečina gostov je iz tujine, zato želimo stran v slovenščini in angleščini. Slike: hiša, apartma, jezero zjutraj in naša terasa.",
+  "logo": null,
+  "photos": [
+    { "file": "photos/01.jpg", "subject": "alpska hiša z lesenimi balkoni in cvetjem, za njo gore" },
+    { "file": "photos/02.jpg", "subject": "dnevni prostor apartmaja z leseno mizo in kuhinjskim kotičkom" },
+    { "file": "photos/03.jpg", "subject": "Bohinjsko jezero zjutraj z meglico in gorami" },
+    { "file": "photos/04.jpg", "subject": "terasa z mizo in stoli s pogledom na travnik in gozd" }
+  ],
+  "facts": {
+    "name": "Apartmaji Pod Voglom",
+    "phone": "+38641555903",
+    "email": "stay@podvoglom.example",
+    "address": { "street": "Ukanc 18", "postalCode": "4265", "city": "Bohinjsko jezero" },
+    "bookingUrl": "https://podvoglom.example/booking",
+    "prices": [
+      { "item": "apartma za 2 osebi", "amount": 85, "from": true },
+      { "item": "apartma za 4 osebe", "amount": 120, "from": true },
+      { "item": "turistična taksa", "amount": 3.13 }
+    ],
+    "people": [{ "name": "Marko" }, { "name": "Petra" }],
+    "other": ["300 m od jezera", "tri apartmaje", "najmanj 3 noči", "Psi so dobrodošli po dogovoru", "check-in 15.00–20.00", "check-out do 10.00", "We speak English and German"]
+  },
+  "missing": ["hours", "legal"]
+}

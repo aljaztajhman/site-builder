@@ -1,0 +1,532 @@
+<title>Okus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one item at a time, the two first screens side by side at equal height (stacked on a phone), the questions underneath; a quiet bar on top. */
+:root {
+  --bg: #eceeec;
+  --surface: #ffffff;
+  --fg: #151917;
+  --muted: #5a625e;
+  --line: #cfd5d1;
+  --accent: #2b44c9;
+  --accent-fg: #ffffff;
+  --yes: #17714a;
+  --no: #a8352a;
+  --shot: #dde1de;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-ui: "Hanken Grotesk", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121514; --surface: #1b1f1d; --fg: #e8ebe9; --muted: #9aa39e; --line: #323936;
+    --accent: #8e9dff; --accent-fg: #0e1230; --yes: #5ccf95; --no: #ff8f80; --shot: #262b29;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121514; --surface: #1b1f1d; --fg: #e8ebe9; --muted: #9aa39e; --line: #323936;
+  --accent: #8e9dff; --accent-fg: #0e1230; --yes: #5ccf95; --no: #ff8f80; --shot: #262b29;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font: 16px/1.5 var(--font-ui); margin: 0; }
+button, input, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+.bar-in { max-width: 1240px; margin: 0 auto; padding: 10px 16px; display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; }
+.brand { font: 800 22px/1 var(--font-display); letter-spacing: -0.01em; }
+.brand small { font: 500 14px var(--font-ui); color: var(--muted); margin-left: 6px; letter-spacing: 0; }
+.tabs { display: flex; gap: 4px; margin-left: auto; }
+.tabs button { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 14px; cursor: pointer; font-size: 14px; font-variant-numeric: tabular-nums; }
+.tabs button[aria-current="page"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+
+main { max-width: 1240px; margin: 0 auto; padding: 20px 16px 48px; }
+.head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; margin-bottom: 14px; }
+.head h1 { font: 800 clamp(24px, 3.2vw, 34px)/1.1 var(--font-display); margin: 0; letter-spacing: -0.015em; text-wrap: balance; }
+.head .count { color: var(--muted); font-variant-numeric: tabular-nums; }
+.progress { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; margin-bottom: 18px; }
+.progress span { display: block; height: 100%; background: var(--accent); transition: width .2s; }
+
+/* Two first screens at equal height: widths in the ratio of the pictures (1280×800 and 360×800). */
+.shots { display: grid; grid-template-columns: 1.6fr 0.45fr; gap: 16px; align-items: start; }
+.shot { margin: 0; display: grid; gap: 6px; min-width: 0; }
+.shot button { padding: 0; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--shot); cursor: zoom-in; display: block; width: 100%; }
+.shot img { display: block; width: 100%; height: auto; }
+.shot.desk img { aspect-ratio: 1280 / 800; }
+.shot.phone img { aspect-ratio: 360 / 800; }
+.shot figcaption { font-size: 13px; color: var(--muted); }
+
+.questions { margin-top: 22px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px 32px; align-items: start; }
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+legend { font-weight: 700; margin-bottom: 8px; padding: 0; }
+.scale { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; max-width: 420px; }
+.choice { position: relative; }
+.choice input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.choice span { display: grid; place-items: center; min-height: 52px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); font: 800 22px var(--font-display); font-variant-numeric: tabular-nums; }
+.choice input:checked + span { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.choice input:focus-visible + span { outline: 3px solid var(--accent); outline-offset: 2px; }
+.ends { display: flex; justify-content: space-between; max-width: 420px; font-size: 13px; color: var(--muted); margin-top: 4px; }
+.yesno { display: flex; gap: 6px; }
+.yesno .choice span { font: 600 16px var(--font-ui); min-width: 88px; padding: 0 18px; }
+.yesno .yes input:checked + span { background: var(--yes); border-color: var(--yes); color: var(--surface); }
+.yesno .no input:checked + span { background: var(--no); border-color: var(--no); color: var(--surface); }
+label.note { display: grid; gap: 6px; font-weight: 700; }
+label.note small { font-weight: 400; color: var(--muted); }
+textarea { width: 100%; min-height: 84px; resize: vertical; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 10px 12px; }
+
+.actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 20px; }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: var(--radius); padding: 12px 20px; cursor: pointer; font-weight: 600; min-height: 48px; }
+.btn.primary { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.hint { color: var(--muted); font-size: 13px; }
+.status { font-size: 13px; color: var(--muted); }
+.status.err { color: var(--no); font-weight: 600; }
+
+/* Pairs: A and B side by side, each with its two first screens. */
+.pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
+.side { display: grid; gap: 10px; min-width: 0; }
+.side h2 { font: 800 28px/1 var(--font-display); margin: 0; }
+.side .shots { grid-template-columns: 1.6fr 0.45fr; gap: 10px; }
+.verdict { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.verdict .choice span { font: 600 16px var(--font-ui); padding: 0 22px; min-width: 120px; }
+
+.list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; padding: 0; margin: 0; list-style: none; }
+.list button { width: 100%; text-align: left; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 0; cursor: pointer; overflow: hidden; }
+.list img { display: block; width: 100%; height: auto; aspect-ratio: 1280 / 800; object-fit: cover; background: var(--shot); }
+.list .meta { display: flex; justify-content: space-between; padding: 6px 10px; font-size: 14px; font-variant-numeric: tabular-nums; }
+.list .meta b { font-family: var(--font-display); }
+.intro { max-width: 62ch; display: grid; gap: 12px; }
+.intro p { margin: 0; }
+.h { font: 800 30px/1.1 var(--font-display); margin: 0; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+dialog { border: 0; padding: 0; width: min(1320px, 100vw); max-width: 100vw; max-height: 100dvh; height: 100dvh; background: var(--bg); color: var(--fg); }
+dialog::backdrop { background: rgb(0 0 0 / .6); }
+.dlg { display: grid; grid-template-rows: auto 1fr; height: 100%; }
+.dlg header { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--line); }
+.dlg header strong { margin-right: auto; }
+.dlg .scroll { overflow: auto; padding: 16px; }
+.dlg img { display: block; margin: 0 auto; max-width: 100%; height: auto; border: 1px solid var(--line); }
+.dlg img.phone { width: 390px; }
+
+@media (max-width: 760px) {
+  .shots, .side .shots { grid-template-columns: minmax(0, 1fr); }
+  .shot.phone { width: min(260px, 72%); justify-self: center; }
+  .questions { grid-template-columns: minmax(0, 1fr); }
+  /* Pairs on a phone: A and B stay side by side, each with its desktop shot above its phone shot. */
+  .pair { gap: 12px; }
+  .side .shot.phone { width: 100%; }
+  .side h2 { font-size: 22px; }
+  .tabs { margin-left: 0; width: 100%; }
+  .tabs button { flex: 1; padding: 6px 4px; font-size: 13px; white-space: nowrap; }
+  .hint.keys { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .progress span { transition: none; } }
+</style>
+
+<header class="bar">
+  <div class="bar-in">
+    <div class="brand">Okus<small id="round-label"></small></div>
+    <nav class="tabs" aria-label="Deli">
+      <button type="button" id="tab-items" data-view="items">Ocene <span id="tab-items-n"></span></button>
+      <button type="button" id="tab-pairs" data-view="pairs">Primerjave <span id="tab-pairs-n"></span></button>
+      <button type="button" id="tab-review" data-view="review">Pregled</button>
+    </nav>
+  </div>
+</header>
+
+<main id="app" aria-live="polite">
+  <div class="intro">
+    <h1 class="h">Okus</h1>
+    <p>Nalagam strani za ocenjevanje …</p>
+  </div>
+</main>
+
+<dialog id="full" aria-labelledby="full-title">
+  <div class="dlg">
+    <header><strong id="full-title">Celotna stran</strong><button type="button" class="btn" id="full-close">Zapri</button></header>
+    <div class="scroll"><img id="full-img" alt=""></div>
+  </div>
+</dialog>
+
+<script>
+/*
+ * Storage adapter. In a claude.ai artifact with the `db` capability the answers go to the artifact's shared database
+ * (collections `ratings` and `pairs`); anywhere else (a local file, a test, a view without db) to localStorage. Every
+ * write is also mirrored to localStorage as a backup on this device.
+ * Documents: ratings/r<round>-<itemId> = { itemId, round, score, showCustomer, note, at }
+ *            pairs/r<round>-<pairId>   = { pairId, round, winner, at }   (winner: an item id, or "tie")
+ */
+window.OkusStore = (() => {
+  const KEY = (col) => `okus:${col}`;
+  const memory = {};
+  function localRead(col) {
+    try {
+      const raw = window.localStorage.getItem(KEY(col));
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return memory[col] ?? {};
+    }
+  }
+  function localWrite(col, all) {
+    memory[col] = all;
+    try {
+      window.localStorage.setItem(KEY(col), JSON.stringify(all));
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  const local = {
+    kind: "local",
+    async list(col) {
+      return Object.entries(localRead(col)).map(([id, data]) => ({ id, ...data }));
+    },
+    async get(col, id) {
+      return localRead(col)[id] ?? null;
+    },
+    async set(col, id, data) {
+      const all = localRead(col);
+      all[id] = data;
+      localWrite(col, all);
+    },
+  };
+  function shared(db) {
+    return {
+      kind: "db",
+      async list(col) {
+        const snap = await db.collection(col).get();
+        return snap.docs.filter((d) => d.exists).map((d) => ({ id: d.id, ...d.data() }));
+      },
+      async get(col, id) {
+        const snap = await db.collection(col).doc(id).get();
+        return snap.exists ? snap.data() : null;
+      },
+      async set(col, id, data) {
+        await local.set(col, id, data);
+        try {
+          await db.collection(col).doc(id).set(data);
+        } catch (e) {
+          if (e && e.code === "unavailable") {
+            await new Promise((r) => setTimeout(r, 400 + Math.random() * 600));
+            await db.collection(col).doc(id).set(data);
+          } else throw e;
+        }
+      },
+    };
+  }
+  /** Resolves the shared store when the viewer grants `db`, else the local one. */
+  async function open() {
+    let db = null;
+    try {
+      if (window.claude && typeof window.claude.use === "function") db = await window.claude.use("db");
+    } catch {
+      db = null;
+    }
+    return db ? shared(db) : local;
+  }
+  return { open, local, shared };
+})();
+</script>
+
+<script>
+(() => {
+  const app = document.getElementById("app");
+  const dlg = document.getElementById("full");
+  const S = { round: 1, items: [], pairs: [], ratings: new Map(), answers: new Map(), view: "items", i: 0, p: 0, store: null, draft: null };
+  const base = () => `rounds/${S.round}/`;
+  const src = (p) => (/^(https?:)?\/\//.test(p) || p.startsWith("/") ? p : base() + p);
+  const ratingId = (itemId) => `r${S.round}-${itemId}`;
+  const pairDocId = (pairId) => `r${S.round}-${pairId}`;
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+
+  async function load() {
+    try {
+      const idx = await fetch("rounds/index.json").then((r) => (r.ok ? r.json() : { rounds: [1] }));
+      S.round = Math.max(...idx.rounds);
+      const [items, pairs] = await Promise.all([fetch(base() + "items.json").then((r) => r.json()), fetch(base() + "pairs.json").then((r) => r.json())]);
+      S.items = items.items;
+      S.pairs = pairs.pairs;
+    } catch (e) {
+      app.innerHTML = `<div class="intro"><h1 class="h">Okus</h1><p class="status err">Strani za ocenjevanje se niso naložile. Osvežite stran; če ne pomaga, sporočite to.</p></div>`;
+      return;
+    }
+    document.getElementById("round-label").textContent = `runda ${S.round}`;
+    S.store = await window.OkusStore.open();
+    for (const d of await S.store.list("ratings").catch(() => [])) if (d.round === S.round) S.ratings.set(d.itemId, d);
+    for (const d of await S.store.list("pairs").catch(() => [])) if (d.round === S.round) S.answers.set(d.pairId, d);
+    S.i = Math.max(0, S.items.findIndex((it) => !S.ratings.has(it.id)));
+    if (S.ratings.size === S.items.length) S.i = 0;
+    S.p = Math.max(0, S.pairs.findIndex((p) => !S.answers.has(p.id)));
+    const hash = location.hash.replace("#", "");
+    S.view = ["items", "pairs", "review"].includes(hash) ? hash : S.ratings.size === S.items.length ? (S.answers.size === S.pairs.length ? "review" : "pairs") : "items";
+    render();
+  }
+
+  function storeNote() {
+    return S.store && S.store.kind === "db" ? "Odgovori se shranjujejo v skupno bazo." : "Odgovori se shranjujejo samo v tem brskalniku.";
+  }
+
+  function tabs() {
+    document.getElementById("tab-items-n").textContent = `${S.ratings.size}/${S.items.length}`;
+    document.getElementById("tab-pairs-n").textContent = `${S.answers.size}/${S.pairs.length}`;
+    for (const b of document.querySelectorAll(".tabs button")) {
+      if (b.dataset.view === S.view) b.setAttribute("aria-current", "page");
+      else b.removeAttribute("aria-current");
+    }
+  }
+
+  function shotsHtml(item, prefix) {
+    const im = item.images;
+    return `<div class="shots">
+      <figure class="shot desk"><button type="button" data-full="${esc(im.deskFull)}" data-kind="desk" aria-label="${prefix}Računalnik, 1280 px: odpri celo stran"><img src="${esc(src(im.desk))}" alt="${prefix}Prvi zaslon na računalniku" width="1280" height="800"></button><figcaption>Računalnik · tapnite za celo stran</figcaption></figure>
+      <figure class="shot phone"><button type="button" data-full="${esc(im.phoneFull)}" data-kind="phone" aria-label="${prefix}Telefon, 360 px: odpri celo stran"><img src="${esc(src(im.phone))}" alt="${prefix}Prvi zaslon na telefonu" width="360" height="800"></button><figcaption>Telefon</figcaption></figure>
+    </div>`;
+  }
+
+  function preload(item) {
+    if (!item) return;
+    for (const k of ["desk", "phone"]) new Image().src = src(item.images[k]);
+  }
+
+  // ---- Items ---------------------------------------------------------------------------------------------------
+  function renderItem() {
+    const item = S.items[S.i];
+    const saved = S.ratings.get(item.id);
+    const d = S.draft && S.draft.itemId === item.id ? S.draft : { itemId: item.id, score: saved?.score ?? null, showCustomer: saved?.showCustomer ?? null, note: saved?.note ?? "" };
+    S.draft = d;
+    const pct = (S.ratings.size / S.items.length) * 100;
+    app.innerHTML = `
+      <div class="head"><h1>Kako dobra je ta stran?</h1><span class="count">Stran ${S.i + 1} od ${S.items.length}</span></div>
+      <div class="progress" aria-hidden="true"><span style="width:${pct}%"></span></div>
+      ${shotsHtml(item, "")}
+      <form class="questions" id="rate" novalidate>
+        <fieldset>
+          <legend>Ocena</legend>
+          <div class="scale">${[1, 2, 3, 4, 5].map((n) => `<label class="choice"><input type="radio" name="score" id="score-${n}" value="${n}" ${d.score === n ? "checked" : ""}><span>${n}</span></label>`).join("")}</div>
+          <div class="ends"><span>1 slabo</span><span>5 odlično</span></div>
+        </fieldset>
+        <fieldset>
+          <legend>Bi to pokazal stranki?</legend>
+          <div class="yesno">
+            <label class="choice yes"><input type="radio" name="show" id="show-da" value="da" ${d.showCustomer === true ? "checked" : ""}><span>Da</span></label>
+            <label class="choice no"><input type="radio" name="show" id="show-ne" value="ne" ${d.showCustomer === false ? "checked" : ""}><span>Ne</span></label>
+          </div>
+        </fieldset>
+        <label class="note" for="note">Opomba <small>neobvezno: kaj je dobro, kaj moti</small><textarea id="note" name="note" rows="3">${esc(d.note)}</textarea></label>
+        <div>
+          <div class="actions">
+            <button type="button" class="btn" id="prev" ${S.i === 0 ? "disabled" : ""}>Nazaj</button>
+            <button type="submit" class="btn primary" id="next" ${d.score && d.showCustomer !== null ? "" : "disabled"}>${S.i === S.items.length - 1 ? "Shrani in na primerjave" : "Shrani in naprej"}</button>
+          </div>
+          <p class="hint keys">Tipke: 1–5 ocena, D ali N, Enter shrani, ← nazaj.</p>
+          <p class="status" id="status">${saved ? "Ta stran je že ocenjena; spremembo shranite z gumbom." : ""} ${storeNote()}</p>
+        </div>
+      </form>`;
+    preload(S.items[S.i + 1]);
+    const form = document.getElementById("rate");
+    form.addEventListener("change", () => {
+      const fd = new FormData(form);
+      d.score = fd.get("score") ? Number(fd.get("score")) : null;
+      d.showCustomer = fd.get("show") === "da" ? true : fd.get("show") === "ne" ? false : null;
+      document.getElementById("next").disabled = !(d.score && d.showCustomer !== null);
+    });
+    document.getElementById("note").addEventListener("input", (e) => (d.note = e.target.value));
+    document.getElementById("prev").addEventListener("click", () => go(S.i - 1));
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      saveRating();
+    });
+  }
+
+  async function saveRating() {
+    const d = S.draft;
+    if (!d || !d.score || d.showCustomer === null) return;
+    const doc = { itemId: d.itemId, round: S.round, score: d.score, showCustomer: d.showCustomer, note: d.note.trim(), at: new Date().toISOString() };
+    const btn = document.getElementById("next");
+    if (btn) btn.disabled = true;
+    try {
+      await S.store.set("ratings", ratingId(d.itemId), doc);
+    } catch (e) {
+      const st = document.getElementById("status");
+      if (st) {
+        st.className = "status err";
+        st.textContent = `Ni shranjeno v skupno bazo (${e && e.code ? e.code : "napaka"}). Ocena je shranjena v tem brskalniku; poskusite znova.`;
+      }
+      if (btn) btn.disabled = false;
+      return;
+    }
+    S.ratings.set(d.itemId, doc);
+    S.draft = null;
+    if (S.i < S.items.length - 1) go(S.i + 1);
+    else {
+      const next = S.items.findIndex((it) => !S.ratings.has(it.id));
+      if (next >= 0) go(next);
+      else setView("pairs");
+    }
+  }
+
+  function go(i) {
+    S.i = Math.min(Math.max(0, i), S.items.length - 1);
+    S.draft = null;
+    S.view = "items";
+    render();
+    window.scrollTo({ top: 0 });
+  }
+
+  // ---- Pairs ---------------------------------------------------------------------------------------------------
+  function renderPair() {
+    if (!S.pairs.length) {
+      app.innerHTML = `<div class="intro"><h1 class="h">Ni primerjav</h1><p>Ta runda nima primerjav.</p></div>`;
+      return;
+    }
+    const pair = S.pairs[S.p];
+    const a = S.items.find((it) => it.id === pair.a);
+    const b = S.items.find((it) => it.id === pair.b);
+    const saved = S.answers.get(pair.id);
+    const pct = (S.answers.size / S.pairs.length) * 100;
+    const checked = (v) => (saved && saved.winner === v ? "checked" : "");
+    app.innerHTML = `
+      <div class="head"><h1>Katera je boljša?</h1><span class="count">Primerjava ${S.p + 1} od ${S.pairs.length}</span></div>
+      <div class="progress" aria-hidden="true"><span style="width:${pct}%"></span></div>
+      <div class="pair">
+        <section class="side" aria-label="Stran A"><h2>A</h2>${shotsHtml(a, "A: ")}</section>
+        <section class="side" aria-label="Stran B"><h2>B</h2>${shotsHtml(b, "B: ")}</section>
+      </div>
+      <form id="choose" novalidate>
+        <fieldset>
+          <legend class="sr">Boljša stran</legend>
+          <div class="verdict">
+            <label class="choice"><input type="radio" name="w" id="w-a" value="${esc(a.id)}" ${checked(a.id)}><span>A je boljša</span></label>
+            <label class="choice"><input type="radio" name="w" id="w-b" value="${esc(b.id)}" ${checked(b.id)}><span>B je boljša</span></label>
+            <label class="choice"><input type="radio" name="w" id="w-tie" value="tie" ${checked("tie")}><span>Enako dobri</span></label>
+          </div>
+        </fieldset>
+        <div class="actions">
+          <button type="button" class="btn" id="pprev" ${S.p === 0 ? "disabled" : ""}>Nazaj</button>
+          <button type="button" class="btn" id="pnext" ${saved && S.p < S.pairs.length - 1 ? "" : "disabled"}>Naprej</button>
+          <span class="hint keys">Tipke: A, B, E (enako), ← nazaj. Izbira se shrani takoj.</span>
+        </div>
+        <p class="status" id="status">${storeNote()}</p>
+      </form>`;
+    const nextPair = S.pairs[S.p + 1];
+    if (nextPair) for (const id of [nextPair.a, nextPair.b]) preload(S.items.find((it) => it.id === id));
+    document.getElementById("choose").addEventListener("change", (e) => choose(e.target.value));
+    document.getElementById("pprev").addEventListener("click", () => goPair(S.p - 1));
+    document.getElementById("pnext").addEventListener("click", () => goPair(S.p + 1));
+  }
+
+  async function choose(winner) {
+    const pair = S.pairs[S.p];
+    const doc = { pairId: pair.id, round: S.round, winner, at: new Date().toISOString() };
+    try {
+      await S.store.set("pairs", pairDocId(pair.id), doc);
+    } catch (e) {
+      const st = document.getElementById("status");
+      if (st) {
+        st.className = "status err";
+        st.textContent = `Ni shranjeno v skupno bazo (${e && e.code ? e.code : "napaka"}). Poskusite znova.`;
+      }
+      return;
+    }
+    S.answers.set(pair.id, doc);
+    const next = S.pairs.findIndex((p, k) => k > S.p && !S.answers.has(p.id));
+    const any = S.pairs.findIndex((p) => !S.answers.has(p.id));
+    if (next >= 0) goPair(next);
+    else if (any >= 0) goPair(any);
+    else setView("review");
+  }
+
+  function goPair(p) {
+    S.p = Math.min(Math.max(0, p), S.pairs.length - 1);
+    S.view = "pairs";
+    render();
+    window.scrollTo({ top: 0 });
+  }
+
+  // ---- Review --------------------------------------------------------------------------------------------------
+  function renderReview() {
+    const done = S.ratings.size === S.items.length && S.answers.size === S.pairs.length;
+    app.innerHTML = `
+      <div class="head"><h1>${done ? "Hvala, runda je končana" : "Pregled"}</h1><span class="count">Ocenjenih ${S.ratings.size} od ${S.items.length} · primerjav ${S.answers.size} od ${S.pairs.length}</span></div>
+      <p class="status">${storeNote()} Oceno lahko spremenite: izberite stran.</p>
+      <ul class="list">${S.items
+        .map((it, k) => {
+          const r = S.ratings.get(it.id);
+          return `<li><button type="button" data-go="${k}"><img src="${esc(src(it.images.desk))}" alt="" loading="lazy" width="1280" height="800"><span class="meta"><span>Stran ${k + 1}</span><b>${r ? r.score : "–"}</b><span>${r ? (r.showCustomer ? "da" : "ne") : ""}</span></span></button></li>`;
+        })
+        .join("")}</ul>`;
+  }
+
+  // ---- Shell ---------------------------------------------------------------------------------------------------
+  function render() {
+    tabs();
+    if (S.view === "pairs") renderPair();
+    else if (S.view === "review") renderReview();
+    else renderItem();
+  }
+
+  function setView(v) {
+    S.view = v;
+    S.draft = null;
+    render();
+    window.scrollTo({ top: 0 });
+  }
+
+  document.querySelector(".tabs").addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-view]");
+    if (b && S.items.length) setView(b.dataset.view);
+  });
+
+  app.addEventListener("click", (e) => {
+    const full = e.target.closest("button[data-full]");
+    if (full) {
+      const img = document.getElementById("full-img");
+      img.src = src(full.dataset.full);
+      img.className = full.dataset.kind === "phone" ? "phone" : "";
+      img.alt = full.dataset.kind === "phone" ? "Cela stran na telefonu" : "Cela stran na računalniku";
+      document.getElementById("full-title").textContent = full.dataset.kind === "phone" ? "Cela stran · telefon" : "Cela stran · računalnik";
+      dlg.showModal();
+      dlg.querySelector(".scroll").scrollTop = 0;
+      return;
+    }
+    const g = e.target.closest("button[data-go]");
+    if (g) go(Number(g.dataset.go));
+  });
+  document.getElementById("full-close").addEventListener("click", () => dlg.close());
+
+  document.addEventListener("keydown", (e) => {
+    if (dlg.open || e.altKey || e.ctrlKey || e.metaKey) return;
+    const typing = e.target instanceof HTMLTextAreaElement || (e.target instanceof HTMLInputElement && e.target.type === "text");
+    if (typing) return;
+    const click = (id) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.click();
+        e.preventDefault();
+      }
+    };
+    if (S.view === "items") {
+      if (/^[1-5]$/.test(e.key)) click(`score-${e.key}`);
+      else if (e.key === "d" || e.key === "D") click("show-da");
+      else if (e.key === "n" || e.key === "N") click("show-ne");
+      else if (e.key === "ArrowLeft") click("prev");
+      else if (e.key === "Enter" && !(e.target instanceof HTMLButtonElement)) {
+        e.preventDefault();
+        saveRating();
+      }
+    } else if (S.view === "pairs") {
+      if (e.key === "a" || e.key === "A") click("w-a");
+      else if (e.key === "b" || e.key === "B") click("w-b");
+      else if (e.key === "e" || e.key === "E") click("w-tie");
+      else if (e.key === "ArrowLeft") click("pprev");
+    }
+  });
+
+  load();
+})();
+</script>

@@ -1,0 +1,185 @@
+{
+  "round": 1,
+  "pairs": [
+    {
+      "id": "p01",
+      "kind": "within-trade",
+      "a": "ref-h",
+      "b": "ref-e"
+    },
+    {
+      "id": "p02",
+      "kind": "reference-golden",
+      "a": "golden-avtoservis-mrak",
+      "b": "ref-m"
+    },
+    {
+      "id": "p03",
+      "kind": "within-trade",
+      "a": "ref-f",
+      "b": "ref-b"
+    },
+    {
+      "id": "p04",
+      "kind": "golden-composed",
+      "a": "golden-pekarna-kvas",
+      "b": "composed-j"
+    },
+    {
+      "id": "p05",
+      "kind": "cross-trade",
+      "a": "golden-gostilna-zlata-zlica",
+      "b": "ref-b"
+    },
+    {
+      "id": "p06",
+      "kind": "within-trade",
+      "a": "ref-i",
+      "b": "ref-a"
+    },
+    {
+      "id": "p07",
+      "kind": "cross-trade",
+      "a": "golden-kmetija-grabnar",
+      "b": "golden-fizioterapija-pregib"
+    },
+    {
+      "id": "p08",
+      "kind": "cross-trade",
+      "a": "golden-pekarna-kvas",
+      "b": "golden-trgovina-oljka-in-sol"
+    },
+    {
+      "id": "p09",
+      "kind": "cross-trade",
+      "a": "golden-frizerstvo-lana",
+      "b": "golden-zobozdravstvo-lebar"
+    },
+    {
+      "id": "p10",
+      "kind": "reference-golden",
+      "a": "golden-instalacije-rebernik",
+      "b": "ref-s"
+    },
+    {
+      "id": "p11",
+      "kind": "within-trade",
+      "a": "ref-h",
+      "b": "ref-g"
+    },
+    {
+      "id": "p12",
+      "kind": "cross-trade",
+      "a": "ref-i",
+      "b": "golden-fizioterapija-pregib"
+    },
+    {
+      "id": "p13",
+      "kind": "reference-golden",
+      "a": "golden-fizioterapija-pregib",
+      "b": "ref-p"
+    },
+    {
+      "id": "p14",
+      "kind": "within-trade",
+      "a": "ref-e",
+      "b": "ref-d"
+    },
+    {
+      "id": "p15",
+      "kind": "reference-golden",
+      "a": "ref-r",
+      "b": "golden-racunovodstvo-seliskar"
+    },
+    {
+      "id": "p16",
+      "kind": "reference-composed",
+      "a": "ref-j",
+      "b": "composed-j"
+    },
+    {
+      "id": "p17",
+      "kind": "reference-golden",
+      "a": "ref-l",
+      "b": "golden-frizerstvo-lana"
+    },
+    {
+      "id": "p18",
+      "kind": "reference-golden",
+      "a": "ref-k",
+      "b": "golden-gostilna-zlata-zlica"
+    },
+    {
+      "id": "p19",
+      "kind": "cross-trade",
+      "a": "ref-t",
+      "b": "golden-instalacije-rebernik"
+    },
+    {
+      "id": "p20",
+      "kind": "reference-golden",
+      "a": "golden-trgovina-oljka-in-sol",
+      "b": "ref-t"
+    },
+    {
+      "id": "p21",
+      "kind": "golden-composed",
+      "a": "composed-s",
+      "b": "golden-instalacije-rebernik"
+    },
+    {
+      "id": "p22",
+      "kind": "cross-trade",
+      "a": "golden-racunovodstvo-seliskar",
+      "b": "ref-j"
+    },
+    {
+      "id": "p23",
+      "kind": "reference-golden",
+      "a": "ref-o",
+      "b": "golden-zobozdravstvo-lebar"
+    },
+    {
+      "id": "p24",
+      "kind": "reference-composed",
+      "a": "composed-m",
+      "b": "ref-m"
+    },
+    {
+      "id": "p25",
+      "kind": "reference-composed",
+      "a": "ref-s",
+      "b": "composed-s"
+    },
+    {
+      "id": "p26",
+      "kind": "golden-composed",
+      "a": "composed-m",
+      "b": "golden-avtoservis-mrak"
+    },
+    {
+      "id": "p27",
+      "kind": "cross-trade",
+      "a": "golden-avtoservis-mrak",
+      "b": "golden-racunovodstvo-seliskar"
+    },
+    {
+      "id": "p28",
+      "kind": "reference-golden",
+      "a": "ref-n",
+      "b": "golden-kmetija-grabnar"
+    },
+    {
+      "id": "p29",
+      "kind": "reference-golden",
+      "a": "golden-pekarna-kvas",
+      "b": "ref-j"
+    },
+    {
+      "id": "p30",
+      "kind": "cross-trade",
+      "a": "ref-k",
+      "b": "golden-pekarna-kvas"
+    }
+  ]
+}

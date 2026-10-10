@@ -1,0 +1,32 @@
+{
+  "id": "veterina-sapa",
+  "businessType": "dental",
+  "trade": "veterina",
+  "hard": ["new-trade"],
+  "description": "Veterinarska ambulanta Šapa v Ajdovščini skrbi za pse, mačke, zajce in druge male živali. Ambulanto vodi Mateja Furlan, dr. vet. med., z njo delata še veterinarski tehnik in asistentka.\n\nDelamo preventivne preglede, cepljenja, čipiranje in potne liste za hišne ljubljenčke, zobozdravstvo, ultrazvok, rentgen in laboratorij, operacije in kastracije.\n\nNekaj cen: cepljenje psa proti steklini 35 €, čipiranje 30 €, kastracija mačka od 60 €.\n\nOrdinacijski čas: pon–pet 8.00–12.00 in 16.00–19.00, sobota 8.00–11.00. Na pregled se naročite po telefonu, nujni primeri imajo prednost. Za nujne primere izven ordinacijskega časa smo dosegljivi na isti številki.\n\nNaslov: Goriška cesta 47, 5270 Ajdovščina, parkirišče je pred ambulanto. Telefon 05 555 90 12, e-pošta ambulanta@vet-sapa.example.\n\nŠapa d.o.o.\n\nV priponki logo (šapa) in dve sliki: ordinacija in čakalnica.",
+  "logo": "logo.svg",
+  "photos": [
+    { "file": "photos/01.jpg", "subject": "veterinarska ordinacija s kovinsko mizo za preglede in omarico z instrumenti" },
+    { "file": "photos/02.jpg", "subject": "čakalnica ambulante s klopjo in posodo z vodo za pse" }
+  ],
+  "facts": {
+    "name": "Veterinarska ambulanta Šapa",
+    "phone": "+38655559012",
+    "email": "ambulanta@vet-sapa.example",
+    "address": { "street": "Goriška cesta 47", "postalCode": "5270", "city": "Ajdovščina" },
+    "hours": [
+      { "from": "mon", "to": "fri", "open": "08:00", "close": "12:00" },
+      { "from": "mon", "to": "fri", "open": "16:00", "close": "19:00" },
+      { "from": "sat", "to": "sat", "open": "08:00", "close": "11:00" }
+    ],
+    "prices": [
+      { "item": "cepljenje psa proti steklini", "amount": 35 },
+      { "item": "čipiranje", "amount": 30 },
+      { "item": "kastracija mačka", "amount": 60, "from": true }
+    ],
+    "people": [{ "name": "Mateja Furlan", "role": "dr. vet. med." }],
+    "legal": { "legalName": "Šapa d.o.o." },
+    "other": ["pse, mačke, zajce in druge male živali", "nujni primeri imajo prednost", "izven ordinacijskega časa smo dosegljivi na isti številki"]
+  },
+  "missing": []
+}

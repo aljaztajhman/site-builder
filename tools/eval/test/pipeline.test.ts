@@ -277,11 +277,14 @@ describe("second critique round only when the re-check fails (costCuts.secondCri
 
   it("runs round 2 when the re-check after round 1 still reports failures (a fix that didn't take)", async () => {
     // Round 1 takes away every call button the first screen at 360 px had: the re-check reports it.
+    // The skeleton comes from the site's seed (a random site id; config variety.skeleton): the "phone" header family
+    // shows the number in the header whatever header.cta says, so the patch pins a header family without it.
     const noCall = {
       issues: ["fewer buttons"],
       patches: [
         { op: "replace", path: "/chrome/mobileActionBar", value: false },
         { op: "replace", path: "/chrome/header/cta", value: "none" },
+        { op: "replace", path: "/design/skeleton/header", value: "compact" },
         { op: "replace", path: "/pages/0/sections/0/props/primary/target", value: { page: "p_home", section: "s_products" } },
       ],
     };

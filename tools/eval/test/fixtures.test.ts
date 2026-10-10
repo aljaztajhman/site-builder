@@ -1,8 +1,9 @@
 import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { BusinessType, SECTION_DEFS } from "@sb/spec";
-import { loadFixtures, loadTwins } from "../src/fixtures/load.ts";
-import { MissingFact, SECTION_TYPES, type Fixture, type FixtureBrief } from "../src/fixtures/schema.ts";
+import { loadFixtures, loadHard, loadTwins } from "../src/fixtures/load.ts";
+import { HARD_PROMPTS_FILE, fullPrompt, loadPhotoPrompts, photoKey } from "../src/fixtures/photo-prompts.ts";
+import { HardCase, MissingFact, SECTION_TYPES, type Fixture, type FixtureBrief } from "../src/fixtures/schema.ts";
 
 const fixtures = loadFixtures();
 
@@ -170,6 +171,107 @@ describe("twin fixtures", () => {
 
   describe.each(twins.map((f) => [f.id, f] as const))("%s", (_id, f) => {
     factTests(f);
+  });
+});
+
+/**
+ * The hard fixtures (docs/plans/design-studio.md §8, F6): 18 businesses for the weak cases, a group of their own like the
+ * twins, so `pnpm eval --offline` and CI never load them. Their photos are a shot list until a paid run makes them.
+ */
+describe("hard fixtures", () => {
+  const hard = loadHard();
+  const twins = loadTwins();
+  const prompts = loadPhotoPrompts(HARD_PROMPTS_FILE);
+  const keys = hard.flatMap((f) => f.photos.map((p) => photoKey(f.id, p.file)));
+  const withCase = (c: HardCase) => hard.filter((f) => f.brief.hard?.includes(c));
+  const englishWords = (d: string) => (d.match(/\b(the|and|we|with|from|every|our|of|is|are)\b/gi) ?? []).length;
+
+  it("18 of them, every one tagged, none sharing an id with a fixture or a twin", () => {
+    expect(hard).toHaveLength(18);
+    for (const f of hard) expect(f.brief.hard?.length, f.id).toBeGreaterThan(0);
+    const ids = [...fixtures, ...twins, ...hard].map((f) => f.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(fixtures.length + twins.length + hard.length).toBe(40);
+  });
+
+  it("covers each weak case the plan names, as often as it asks", () => {
+    const count = (c: HardCase) => withCase(c).length;
+    expect(Object.fromEntries(HardCase.options.filter((c) => c !== "new-trade").map((c) => [c, count(c)]))).toEqual({
+      "no-logo": 3,
+      "no-photos": 3,
+      "dark-photos": 2,
+      "one-photo": 2,
+      "long-name": 1,
+      "many-prices": 1,
+      english: 1,
+    });
+    const trades = withCase("new-trade").map((f) => f.brief.trade);
+    for (const t of ["cvetličarna", "joga", "fotograf", "veterina", "avtošola", "čiščenje", "ključavničar", "inštrukcije"]) expect(trades).toContain(t);
+  });
+
+  it("each fixture is the case it is tagged with", () => {
+    for (const f of withCase("no-logo")) expect(f.logoPath, f.id).toBeNull();
+    for (const f of withCase("no-photos")) expect(f.photos, f.id).toHaveLength(0);
+    for (const f of withCase("one-photo")) expect(f.photos, f.id).toHaveLength(1);
+    for (const f of withCase("dark-photos")) {
+      expect(f.photos.length, f.id).toBeGreaterThan(0);
+      for (const p of f.photos) {
+        expect(prompts.poor, `${f.id} ${p.file}`).toContain(photoKey(f.id, p.file));
+        expect(p.subject).toMatch(/^temna fotografija s telefonom: /);
+      }
+    }
+    for (const f of withCase("long-name")) expect(f.brief.facts.name.length, f.id).toBeGreaterThanOrEqual(40);
+    for (const f of withCase("many-prices")) expect(f.brief.facts.prices?.length, f.id).toBeGreaterThanOrEqual(20);
+    for (const f of withCase("english")) {
+      expect(f.brief.businessType, f.id).toBe("tourist-farm");
+      expect(englishWords(f.brief.description), f.id).toBeGreaterThanOrEqual(10);
+    }
+    // The others are Slovene: an English word now and then, no English paragraph.
+    for (const f of hard.filter((x) => !x.brief.hard?.includes("english"))) expect(englishWords(f.brief.description), f.id).toBeLessThan(5);
+    const trades = withCase("new-trade").map((f) => f.brief.trade);
+    expect(new Set(trades).size).toBe(trades.length);
+    for (const t of trades) expect(t).toBeDefined();
+  });
+
+  it("ships simple SVG logos where the owner has one", () => {
+    const logos = hard.filter((f) => f.logoPath);
+    expect(logos.length).toBeGreaterThanOrEqual(5);
+    for (const f of logos) {
+      const svg = readFileSync(f.logoPath!, "utf8");
+      expect(svg, f.id).toMatch(/^<svg[\s>]/);
+      expect(svg, f.id).not.toMatch(/href|<image|<script|url\(/);
+    }
+  });
+
+  it("has a shot list prompt for every planned photo and nothing else; the dark ones get the poor style", () => {
+    expect(Object.keys(prompts.photos).sort()).toEqual([...keys].sort());
+    expect(prompts.compare).toEqual([]);
+    for (const k of prompts.poor ?? []) expect(keys).toContain(k);
+    const dark = prompts.poor![0]!;
+    expect(fullPrompt(prompts, dark).endsWith(prompts.poorStyle!)).toBe(true);
+    expect(prompts.poorStyle).toMatch(/dark/i);
+    expect(prompts.poorStyle).toMatch(/no text/i);
+    const fine = keys.find((k) => !prompts.poor!.includes(k))!;
+    expect(fullPrompt(prompts, fine).endsWith(prompts.style)).toBe(true);
+    // The paid step's size: what the shot list will cost at about €0.068 a picture.
+    expect(keys).toHaveLength(32);
+  });
+
+  it("uses only fictional phone blocks and reserved email domains", () => {
+    for (const f of hard) {
+      for (const p of phonesIn(f.brief.description)) expect(p, `${f.id}: ${p}`).toMatch(/^\+386(\d555\d{4}|\d{2}555\d{3})$/);
+      for (const e of emailsIn(f.brief.description)) expect(e, `${f.id}: ${e}`).toMatch(/\.example$/);
+    }
+  });
+
+  describe.each(hard.map((f) => [f.id, f] as const))("%s", (_id, f) => {
+    factTests(f);
+
+    it("has no scripted edits and numbers its photos from 01", () => {
+      expect(f.edits).toEqual([]);
+      f.brief.photos.forEach((p, i) => expect(p.file).toBe(`photos/${String(i + 1).padStart(2, "0")}.jpg`));
+      for (const p of f.photos) expect(p.from, `${f.id} ${p.file}`).toBeUndefined();
+    });
   });
 });
 

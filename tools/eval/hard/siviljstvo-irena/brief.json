@@ -1,0 +1,32 @@
+{
+  "id": "siviljstvo-irena",
+  "businessType": "shop",
+  "trade": "šivilja",
+  "hard": ["no-logo"],
+  "description": "Moje ime je Irena Kotnik, šivam že 25 let, zadnjih deset let imam svojo delavnico Šiviljstvo Irena.\n\nDelam popravila in predelave oblačil: krajšanje, ožanje, menjava zadrg, krpanje, popravila jaken in plaščev. Šivam tudi po meri, predvsem obleke za maturantske plese, poroke in birme, pa zavese in prte. Za obleko po meri pridete najprej na pomerjanje, potem rabim tri do štiri tedne.\n\nNekaj cen: krajšanje hlač 8 €, krajšanje kavbojk z originalnim robom 12 €, menjava zadrge od 12 €, ožanje obleke od 20 €. Za šivanje po meri se zmenimo, ker je odvisno od blaga in kroja.\n\nDelovni čas: pon do pet 8.00 do 12.00 in 15.00 do 18.00, ob sredah popoldne zaprto, sobota 8.00 do 11.00.\n\nNaslov: Meškova ulica 6, 2380 Slovenj Gradec, vhod je z dvorišča. Telefon 02 555 41 87, lahko tudi pošljete sms. Maila nimam, logota tudi ne. Prilagam dve sliki, eno od moje mize s šivalnim strojem in eno od poročne obleke ki sem jo delala lani.",
+  "logo": null,
+  "photos": [
+    { "file": "photos/01.jpg", "subject": "šivalni stroj na delovni mizi s kosi blaga, škarjami in sukanci" },
+    { "file": "photos/02.jpg", "subject": "bela poročna obleka po meri na krojaški lutki" }
+  ],
+  "facts": {
+    "name": "Šiviljstvo Irena",
+    "phone": "+38625554187",
+    "address": { "street": "Meškova ulica 6", "postalCode": "2380", "city": "Slovenj Gradec" },
+    "hours": [
+      { "from": "mon", "to": "fri", "open": "08:00", "close": "12:00" },
+      { "from": "mon", "to": "tue", "open": "15:00", "close": "18:00" },
+      { "from": "thu", "to": "fri", "open": "15:00", "close": "18:00" },
+      { "from": "sat", "to": "sat", "open": "08:00", "close": "11:00" }
+    ],
+    "prices": [
+      { "item": "krajšanje hlač", "amount": 8 },
+      { "item": "krajšanje kavbojk z originalnim robom", "amount": 12 },
+      { "item": "menjava zadrge", "amount": 12, "from": true },
+      { "item": "ožanje obleke", "amount": 20, "from": true }
+    ],
+    "people": [{ "name": "Irena Kotnik", "role": "šivilja" }],
+    "other": ["šivam že 25 let", "tri do štiri tedne", "ob sredah popoldne zaprto", "vhod je z dvorišča"]
+  },
+  "missing": ["email", "legal"]
+}

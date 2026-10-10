@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 88" width="260" height="88" role="img" aria-label="Avtošola Volan">
+  <circle cx="44" cy="44" r="36" fill="none" stroke="#f2b705" stroke-width="8"/>
+  <circle cx="44" cy="44" r="9" fill="#1b2a41"/>
+  <path d="M10 40 L 35 42 M78 40 L 53 42 M44 53 L 44 78" stroke="#1b2a41" stroke-width="7" stroke-linecap="round"/>
+  <text x="94" y="50" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700" fill="#1b2a41" letter-spacing="1">VOLAN</text>
+  <text x="95" y="70" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#b38600" letter-spacing="4">AVTOŠOLA</text>
+</svg>

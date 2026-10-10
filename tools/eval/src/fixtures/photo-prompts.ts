@@ -6,17 +6,22 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { z } from "zod";
 import type { AppConfig } from "@sb/config";
-import { FIXTURES_DIR } from "./load.ts";
+import { FIXTURES_DIR, HARD_DIR } from "./load.ts";
 
 export const PhotoPrompts = z.object({
   style: z.string().min(1),
   /** Photos used for the model comparison, as "<fixture id>/<NN>". */
   compare: z.array(z.string()),
   photos: z.record(z.string(), z.string().min(1)),
+  /** Photos meant to look poor (dark, noisy phone shots; the hard fixtures): they get `poorStyle` instead of `style`. */
+  poor: z.array(z.string()).optional(),
+  poorStyle: z.string().min(1).optional(),
 });
 export type PhotoPrompts = z.infer<typeof PhotoPrompts>;
 
 export const PROMPTS_FILE = path.join(FIXTURES_DIR, "photo-prompts.json");
+/** The hard fixtures' shot list (tools/eval/hard), same format. */
+export const HARD_PROMPTS_FILE = path.join(HARD_DIR, "photo-prompts.json");
 
 export function loadPhotoPrompts(file = PROMPTS_FILE): PhotoPrompts {
   return PhotoPrompts.parse(JSON.parse(readFileSync(file, "utf8")));
@@ -35,6 +40,10 @@ export function isPortrait(key: string): boolean {
 export function fullPrompt(prompts: PhotoPrompts, key: string): string {
   const p = prompts.photos[key];
   if (!p) throw new Error(`photo-prompts.json has no prompt for ${key}`);
+  if (prompts.poor?.includes(key)) {
+    if (!prompts.poorStyle) throw new Error(`photo-prompts.json lists ${key} as poor but has no poorStyle`);
+    return `${p} ${prompts.poorStyle}`;
+  }
   return `${p} ${prompts.style}`;
 }
 
