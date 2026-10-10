@@ -48,17 +48,17 @@ export function loadGoldens(): Golden[] {
     .sort()
     .map((f) => ({ id: f.replace(/\.json$/, ""), spec: migrateSpec(JSON.parse(readFileSync(path.join(goldenDir, f), "utf8"))) as SiteSpec })));
 }
-const golden = (id: string): Golden => loadGoldens().find((g) => g.id === id)!;
+export const golden = (id: string): Golden => loadGoldens().find((g) => g.id === id)!;
 
 /** The golden whose photos the section, treatment and chrome pages use (the most photos: eight). */
 export const BASE_GOLDEN = "kmetija-grabnar";
 /** The two palettes every component page is shown in: a cool white one and a warm one with a tinted surface. */
 export const SHEET_PALETTES = ["clean-swiss", "warm-craft"] as const;
-const TONES = ["default", "alt", "inverse"] as const;
+export const TONES = ["default", "alt", "inverse"] as const;
 
 /** One page to photograph: either a rendered site (spec) or a standalone HTML document. */
 export type SheetPage =
-  | { asset: string; variant: string; label: string; kind: "site"; spec: SiteSpec; fixture: string; showChrome: boolean }
+  | { asset: string; variant: string; label: string; kind: "site"; spec: SiteSpec; fixture: string; showChrome: boolean; /** A motion preset: photographed as three frames (start, mid, end) of its section. */ motion?: string }
   | { asset: string; variant: string; label: string; kind: "html"; html: string };
 
 type Props = Record<string, unknown>;
@@ -66,7 +66,7 @@ type Props = Record<string, unknown>;
 const cut = (s: string, max: number): string => (s.length <= max ? s : `${s.slice(0, s.lastIndexOf(" ", max - 1))}`);
 
 /** Image ids of a spec's assets, in order. */
-const imageIds = (spec: SiteSpec): string[] => spec.assets.images.map((i) => i.id);
+export const imageIds = (spec: SiteSpec): string[] => spec.assets.images.map((i) => i.id);
 
 /** Replaces any image reference in props that `into` doesn't have with one it has (round robin). */
 function remapImages(value: unknown, have: string[], counter = { i: 0 }): unknown {
@@ -145,7 +145,7 @@ export function sampleSection(base: SiteSpec, key: string, id: string, tone?: st
 }
 
 /** The base spec in a palette direction: its colours, its first font pair, its imagery (or `imagery`). */
-function inDirection(spec: SiteSpec, dir: Direction, colors: Colors = dir.palette.fallback, imagery?: string): SiteSpec {
+export function inDirection(spec: SiteSpec, dir: Direction, colors: Colors = dir.palette.fallback, imagery?: string): SiteSpec {
   const out = structuredClone(spec);
   const fontPair = FAMILIES[dir.id]?.fontPairs[0] ?? dir.fontPairs[0]!;
   out.design = enforceDesign({ ...out.design, direction: dir.id, fontPair, colors: { ...colors }, imagery: (imagery ?? dir.imagery) as SiteSpec["design"]["imagery"], skeleton: undefined, genome: undefined }, dir);
@@ -184,7 +184,7 @@ export function repairSpec(spec: SiteSpec): SiteSpec {
   return spec;
 }
 
-function withHome(spec: SiteSpec, sections: Section[], slug: string): SiteSpec {
+export function withHome(spec: SiteSpec, sections: Section[], slug: string): SiteSpec {
   spec.slug = slug;
   const home = spec.pages.find((p) => p.kind === "home")!;
   home.sections = sections;
@@ -196,7 +196,7 @@ function threeGrounds(base: SiteSpec, key: string): Section[] {
   return TONES.map((t) => sampleSection(base, key, `s_g_${t}`, t)).filter((s): s is Section => s !== null);
 }
 
-const slugOf = (id: string, variant: string): string => `${id.replace(/[/:]/g, "-")}-${variant}`.replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-");
+export const slugOf = (id: string, variant: string): string => `${id.replace(/[/:]/g, "-")}-${variant}`.replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-");
 
 /** Pages for every component-rendered asset kind, per palette. */
 export function sitePages(asset: Asset): SheetPage[] {
