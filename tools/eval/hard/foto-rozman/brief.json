@@ -1,0 +1,30 @@
+{
+  "id": "foto-rozman",
+  "businessType": "shop",
+  "trade": "fotograf",
+  "hard": ["new-trade"],
+  "description": "Foto Rozman – Tilen Rozman, fotograf iz Murske Sobote.\n\nFotografiram poroke, družine, nosečnice in novorojenčke, pa tudi poslovne portrete in izdelke za spletne trgovine. Fotografiral sem že več kot 150 porok po Prekmurju, Štajerski in Hrvaški. Rad imam naravno svetlobo in sproščene fotografije, brez dolgega postavljanja.\n\nCene: poroka cel dan od 1200 €, družinsko fotografiranje 150 €, fotografiranje novorojenčkov 180 €, poslovni portret 60 €. Pri vseh paketih dobite obdelane fotografije v spletni galeriji v 3 tednih, za poroke v 6 tednih.\n\nStudio: Lendavska ulica 30, 9000 Murska Sobota, fotografiranje v studiu je samo po dogovoru.\n\nPokličite 031 555 247 ali pišite na tilen@foto-rozman.example, za poroke se je treba dogovoriti vsaj pol leta prej.\n\nTilen Rozman s.p. Logo imam, pošiljam ga, in štiri fotke iz portfolia ki jih lahko daste na stran.",
+  "logo": "logo.svg",
+  "photos": [
+    { "file": "photos/01.jpg", "subject": "mladoporočenca v polju ob sončnem zahodu, fotografirana od daleč" },
+    { "file": "photos/02.jpg", "subject": "novorojenček spi v pleteni košari na mehki odeji" },
+    { "file": "photos/03.jpg", "subject": "družina z dvema otrokoma na jesenskem sprehodu v parku" },
+    { "file": "photos/04.jpg", "subject": "poslovni portret moškega v srajci pred sivim ozadjem" }
+  ],
+  "facts": {
+    "name": "Foto Rozman",
+    "phone": "+38631555247",
+    "email": "tilen@foto-rozman.example",
+    "address": { "street": "Lendavska ulica 30", "postalCode": "9000", "city": "Murska Sobota" },
+    "prices": [
+      { "item": "poroka cel dan", "amount": 1200, "from": true },
+      { "item": "družinsko fotografiranje", "amount": 150 },
+      { "item": "fotografiranje novorojenčkov", "amount": 180 },
+      { "item": "poslovni portret", "amount": 60 }
+    ],
+    "people": [{ "name": "Tilen Rozman", "role": "fotograf" }],
+    "legal": { "legalName": "Tilen Rozman s.p." },
+    "other": ["več kot 150 porok", "v 3 tednih", "v 6 tednih", "vsaj pol leta prej", "samo po dogovoru"]
+  },
+  "missing": ["hours"]
+}

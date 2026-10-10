@@ -22,6 +22,10 @@
  *                   `pnpm eval --offline --strict`). Without it the run reports and exits 0.
  * --twins:          also run the twins (tools/eval/twins: more businesses of the same trades, no scripted edits), for
  *                   the same-trade look distance. They have no recordings or goldens: live, --record or --record-missing.
+ * --hard:           also run the 18 hard fixtures (tools/eval/hard: no logo, no photos, dark photos, one photo, a long
+ *                   name, 20 prices, tourism with English, new trades; no scripted edits). Like --twins: no recordings or
+ *                   goldens, so live, --record or --record-missing only, and their photos must be generated first
+ *                   (`pnpm fixtures:ai-photos generate --model <name> --hard`). --offline and CI never load them.
  * --prompt-fixes all|<name>[,<name>]: turns those config promptFixes switches on for this run (docs/dev/prompt-fixes.md),
  *                   e.g. --record-missing --only avtoservis-mrak --prompt-fixes catalogue. --replay says per fixture how
  *                   many requests changed since the recording (a changed prompt still replays the recorded answer).
@@ -59,7 +63,7 @@ import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
 import { loadConfig } from "@sb/config";
 import { BatchTransport, NO_PROMPT_FIXES, launchCheckBrowser } from "@sb/engine";
-import { loadFixtures, loadTwins } from "./fixtures/load.ts";
+import { loadFixtures, loadHard, loadTwins } from "./fixtures/load.ts";
 import { VARIETY_SWITCHES, renderVariety, varietyData } from "./variety-report.ts";
 import { runFixture, type FixtureResult, type Mode } from "./runner.ts";
 import { contactSheet, renderReport } from "./report.ts";
@@ -116,13 +120,26 @@ if (twins && !paid) {
   console.error("--twins needs real generations (live, --record or --record-missing): the twins have no recordings or golden specs.");
   process.exit(2);
 }
+const hard = flag("hard");
+if (hard && !paid) {
+  console.error("--hard needs real generations (live, --record or --record-missing): the hard fixtures have no recordings or golden specs.");
+  process.exit(2);
+}
+const hardFixtures = hard ? loadHard() : [];
 const photoLimit = value("photos") === undefined ? undefined : Number(value("photos"));
-const fixtures = [...loadFixtures(), ...(twins ? loadTwins() : [])]
+const fixtures = [...loadFixtures(), ...(twins ? loadTwins() : []), ...hardFixtures]
   .filter((f) => !onlyArg || onlyArg.includes(f.id))
   .filter((_, i) => !shard || i % Number(shard[2]) === Number(shard[1]) - 1)
   .map((f) => (photoLimit === undefined ? f : { ...f, photos: f.photos.slice(0, photoLimit) }));
 if (fixtures.length === 0) {
   console.error(`No fixtures match ${onlyArg?.join(",") ?? ""}${shardArg ? ` (shard ${shardArg})` : ""}`);
+  process.exit(2);
+}
+// The hard fixtures' photos come from a paid run (no SVG stand-ins): stop while a selected one has none yet.
+const hardIds = new Set(hardFixtures.map((f) => f.id));
+const hardWithoutPhotos = fixtures.filter((f) => hardIds.has(f.id) && f.photos.some((p) => !existsSync(p.path))).map((f) => f.id);
+if (hardWithoutPhotos.length) {
+  console.error(`--hard: photos not generated yet for ${hardWithoutPhotos.join(", ")}. Run \`pnpm fixtures:ai-photos generate --model <name> --hard\` first (paid), or --only the ones without photos.`);
   process.exit(2);
 }
 const missingPhotos = fixtures.some((f) => f.photos.some((p) => !existsSync(p.path)));

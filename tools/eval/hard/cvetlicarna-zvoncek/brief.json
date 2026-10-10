@@ -1,0 +1,32 @@
+{
+  "id": "cvetlicarna-zvoncek",
+  "businessType": "shop",
+  "trade": "cvetličarna",
+  "hard": ["new-trade"],
+  "description": "Cvetličarna Zvonček na Ptuju je odprta od leta 1998, zdaj jo vodim jaz, Maja Vaupotič, prej jo je vodila moja mama.\n\nPri nas dobite rezano cvetje, lončnice, sezonsko zasaditev za balkone in grobove, darila in voščilnice. Najbolj smo znani po poročnih šopkih in dekoraciji porok, pridemo pogledat prostor in se zmenimo za barve. Delamo tudi žalne vence in ikebane, tudi isti dan če naročite do 10. ure.\n\nCene: šopek od 20 €, poročni šopek od 90 €, žalni venec od 70 €, dostava po Ptuju 5 €.\n\nOdprto: pon–pet 7.30–19.00, sobota 7.30–13.00, nedelja 8.00–11.00.\n\nNaslov: Ormoška cesta 5, 2250 Ptuj, parkirate lahko pred trgovino. Naročila po telefonu 02 555 71 26 ali na narocila@cvetlicarna-zvoncek.example.\n\nLogo je zvonček, pošiljam ga, in dve sliki: naša izložba in en poročni šopek.",
+  "logo": "logo.svg",
+  "photos": [
+    { "file": "photos/01.jpg", "subject": "izložba cvetličarne z vedri rezanega cvetja in lončnicami" },
+    { "file": "photos/02.jpg", "subject": "poročni šopek belih vrtnic in evkaliptusa v rokah neveste" }
+  ],
+  "facts": {
+    "name": "Cvetličarna Zvonček",
+    "phone": "+38625557126",
+    "email": "narocila@cvetlicarna-zvoncek.example",
+    "address": { "street": "Ormoška cesta 5", "postalCode": "2250", "city": "Ptuj" },
+    "hours": [
+      { "from": "mon", "to": "fri", "open": "07:30", "close": "19:00" },
+      { "from": "sat", "to": "sat", "open": "07:30", "close": "13:00" },
+      { "from": "sun", "to": "sun", "open": "08:00", "close": "11:00" }
+    ],
+    "prices": [
+      { "item": "šopek", "amount": 20, "from": true },
+      { "item": "poročni šopek", "amount": 90, "from": true },
+      { "item": "žalni venec", "amount": 70, "from": true },
+      { "item": "dostava po Ptuju", "amount": 5 }
+    ],
+    "people": [{ "name": "Maja Vaupotič" }],
+    "other": ["od leta 1998", "tudi isti dan če naročite do 10. ure", "dekoraciji porok", "parkirate lahko pred trgovino"]
+  },
+  "missing": ["legal"]
+}

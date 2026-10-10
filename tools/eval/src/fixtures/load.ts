@@ -10,6 +10,12 @@ export const FIXTURES_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.
  * of one trade come out (docs/plans/variety-engine.md, Step 0). No scripted edits; photos reuse the fixtures' own.
  */
 export const TWINS_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../twins");
+/**
+ * Absolute path of tools/eval/hard: 18 hard businesses (no logo, no photos, dark phone photos, one photo, a long name,
+ * 20 prices, tourism with English, new trades) for the design studio (docs/plans/design-studio.md §8). No scripted
+ * edits, recordings or golden specs: opt-in with `pnpm eval --hard` in a paid mode, so `--offline` and CI never run them.
+ */
+export const HARD_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../hard");
 
 function readJson(file: string): unknown {
   return JSON.parse(readFileSync(file, "utf8")) as unknown;
@@ -19,16 +25,16 @@ function issues(e: { issues: { path: PropertyKey[]; message: string }[] }): stri
   return e.issues.map((i) => `  ${i.path.map(String).join(".") || "(root)"}: ${i.message}`).join("\n");
 }
 
-/** Load and validate one fixture by id (a twin when `root` is TWINS_DIR). Throws with every schema issue listed. */
+/** Load and validate one fixture by id (a twin or a hard one when `root` is TWINS_DIR or HARD_DIR). Throws with every schema issue listed. */
 export function loadFixture(id: string, root = FIXTURES_DIR): Fixture {
   const dir = path.join(root, id);
   if (!existsSync(dir)) throw new Error(`Fixture not found: ${id} (looked in ${dir})`);
 
   const brief = FixtureBrief.safeParse(readJson(path.join(dir, "brief.json")));
   if (!brief.success) throw new Error(`Fixture ${id}: brief.json is invalid\n${issues(brief.error)}`);
-  // Twins have no scripted edits (they run with --no-edits); the fixtures have five each.
+  // Twins and hard fixtures have no scripted edits; the fixtures have five each.
   const editsFile = path.join(dir, "edits.json");
-  const edits = root === TWINS_DIR && !existsSync(editsFile) ? { success: true as const, data: [] } : FixtureEdits.safeParse(readJson(editsFile));
+  const edits = root !== FIXTURES_DIR && !existsSync(editsFile) ? { success: true as const, data: [] } : FixtureEdits.safeParse(readJson(editsFile));
   if (!edits.success) throw new Error(`Fixture ${id}: edits.json is invalid\n${issues(edits.error)}`);
 
   const b = brief.data;
@@ -63,4 +69,9 @@ export function loadFixtures(): Fixture[] {
 /** The twins, sorted by id. */
 export function loadTwins(): Fixture[] {
   return loadAll(TWINS_DIR);
+}
+
+/** The hard fixtures, sorted by id. Their photos exist only after `pnpm fixtures:ai-photos generate --hard`. */
+export function loadHard(): Fixture[] {
+  return loadAll(HARD_DIR);
 }

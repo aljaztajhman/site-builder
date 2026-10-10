@@ -12,6 +12,8 @@ import {
   FAMILIES,
   FONTS,
   FONT_PAIRS,
+  INVENTORY_FONTS,
+  INVENTORY_FONT_PAIRS,
   SUBMOTIF_BASE,
   SUBTYPE_MOTIF,
   direction,
@@ -25,6 +27,9 @@ import {
   type Colors,
   type Direction,
   type FontFace,
+  type FontPair,
+  type InventoryFontFace,
+  type InventoryFontPair,
   type Section,
   type SiteSpec,
   type SubMotif,
@@ -326,36 +331,52 @@ const SAMPLE = "Čevljar Đuro in šivilja Žana: ćaća, kuščar, žličnik, �
 const PARAGRAPH =
   "Družinska delavnica v Škofji Loki. Popravila čevljev, torb in pasov; šivanje usnja po meri. Ob sobotah dopoldne odprto, ostale dni po dogovoru. Pokličite, preden se oglasite, da vas počaka kava.";
 
-const fontFace = (f: FontFace): string =>
+/** The owner's specimen line (I1 brief): every Slovene letter plus ć and đ in a real phrase. */
+const SPECIMEN = "Šivilja Čebašek, Žalec — ćevapčiči, đuveč";
+
+type Face = FontFace | InventoryFontFace;
+const allFaces = (): Face[] => [...Object.values(FONTS), ...Object.values(INVENTORY_FONTS)];
+const allPairs = (): (FontPair | InventoryFontPair)[] => [...FONT_PAIRS, ...INVENTORY_FONT_PAIRS];
+/** The face's weight nearest to `w` (a one-weight face is never set in a faked bold). */
+const near = (f: Face, w: number): number => Math.min(Math.max(w, f.weights[0]), f.weights[1]);
+const stack = (f: Face): string => `"${f.family}",${f.fallback}`;
+
+const fontFace = (f: Face): string =>
   `@font-face{font-family:"${f.family}";src:url("/_fonts/${f.file}.woff2") format("woff2");font-weight:${f.weights[0]} ${f.weights[1]};font-display:block}`;
 
 const doc = (title: string, css: string, body: string): string =>
   `<!doctype html><html lang="sl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title><style>*{box-sizing:border-box}body{margin:0;padding:24px 16px;background:#fff;color:#16181c;font:16px/1.5 system-ui,sans-serif}${css}</style></head><body>${body}</body></html>`;
 
 export function fontPage(asset: Asset): SheetPage {
-  const face = Object.values(FONTS).find((f) => f.file === assetName(asset.id))!;
+  const face = allFaces().find((f) => f.file === assetName(asset.id))!;
   const [lo, hi] = face.weights;
   const mid = Math.round((lo + hi) / 200) * 100;
-  const css = `${fontFace(face)}.f{font-family:"${face.family}",${face.fallback}}.meta{font:13px/1.4 system-ui;color:#555;margin:0 0 16px}.big{font-size:clamp(40px,9vw,96px);line-height:1;margin:0 0 12px;letter-spacing:-.01em}.row{font-size:clamp(20px,4vw,34px);margin:0 0 10px;overflow-wrap:anywhere}.glyphs{font-size:clamp(28px,6vw,56px);letter-spacing:.06em;margin:16px 0;overflow-wrap:anywhere}.p{max-width:38em;font-size:18px}`;
-  const body = `<p class="meta">${asset.id} · ${face.family} · wght ${lo}–${hi} · ${(asset.bytes / 1024).toFixed(1)} KB · ${asset.license}</p>
-<p class="f big" style="font-weight:${hi >= 800 ? 800 : hi}">Šola žlic</p>
+  const css = `${fontFace(face)}.f{font-family:${stack(face)};font-synthesis:none}.meta{font:13px/1.4 system-ui;color:#555;margin:0 0 16px}.big{font-size:clamp(40px,9vw,96px);line-height:1;margin:0 0 12px;letter-spacing:-.01em}.row{font-size:clamp(20px,4vw,34px);margin:0 0 10px;overflow-wrap:anywhere}.glyphs{font-size:clamp(28px,6vw,56px);letter-spacing:.06em;margin:16px 0;overflow-wrap:anywhere}.p{max-width:38em;font-size:18px}.p16{max-width:38em;font-size:16px}`;
+  const body = `<p class="meta">${asset.id} · ${face.family} · wght ${lo}–${hi} · ${(asset.bytes / 1024).toFixed(1)} KB · ${asset.license}${"role" in face ? ` · ${face.role}` : ""}</p>
+<p class="f big" style="font-weight:${hi >= 800 ? 800 : hi}">${SPECIMEN}</p>
 <p class="f row" style="font-weight:${lo}">${lo} ${SAMPLE}</p>
 <p class="f row" style="font-weight:${mid}">${mid} ${SAMPLE}</p>
 <p class="f row" style="font-weight:${hi}">${hi} ${SAMPLE}</p>
 <p class="f glyphs" style="font-weight:${mid}">${[...SLOVENE_GLYPHS].join(" ")} € „“ – … 0123456789</p>
-<p class="f p" style="font-weight:400">${PARAGRAPH}</p>`;
+<p class="f p" style="font-weight:${near(face, 400)}">${PARAGRAPH}</p>
+<p class="f p16" style="font-weight:${near(face, 400)}">16 px: ${PARAGRAPH}</p>`;
   return { asset: asset.id, variant: "a", label: face.family, kind: "html", html: doc(face.family, css, body) };
 }
 
 export function pairingPage(asset: Asset): SheetPage {
-  const p = FONT_PAIRS.find((x) => x.id === assetName(asset.id))!;
-  const faces = [p.heading, p.body].filter((f, i, a) => a.findIndex((x) => x.file === f.file) === i);
-  const css = `${faces.map(fontFace).join("")}.h{font-family:"${p.heading.family}",${p.heading.fallback};font-weight:700;font-size:clamp(34px,7vw,72px);line-height:1.05;margin:0 0 16px;letter-spacing:-.015em}.h2{font-family:"${p.heading.family}",${p.heading.fallback};font-weight:600;font-size:clamp(24px,4vw,40px);margin:28px 0 8px}.b{font-family:"${p.body.family}",${p.body.fallback};font-size:18px;max-width:36em;margin:0 0 12px}.meta{font:13px/1.4 system-ui;color:#555;margin:0 0 16px}`;
-  const body = `<p class="meta">${asset.id} · ${p.label} · ${(asset.bytes / 1024).toFixed(1)} KB</p>
-<h1 class="h">Popravila čevljev in torb v Škofji Loki</h1>
+  const p = allPairs().find((x) => x.id === assetName(asset.id))!;
+  const u = "utility" in p ? p.utility : undefined;
+  const faces = [p.heading, p.body, ...(u ? [u] : [])].filter((f, i, a) => a.findIndex((x) => x.file === f.file) === i);
+  const h = p.heading;
+  const css = `${faces.map(fontFace).join("")}*{font-synthesis:none}.h{font-family:${stack(h)};font-weight:${near(h, 700)};font-size:clamp(34px,7vw,72px);line-height:1.05;margin:0 0 16px;letter-spacing:-.015em}.h2{font-family:${stack(h)};font-weight:${near(h, 600)};font-size:clamp(24px,4vw,40px);margin:28px 0 8px}.b{font-family:${stack(p.body)};font-weight:${near(p.body, 400)};font-size:18px;max-width:36em;margin:0 0 12px}.b16{font-size:16px}.meta{font:13px/1.4 system-ui;color:#555;margin:0 0 16px}${u ? `.u{font-family:${stack(u)};font-weight:${near(u, 400)};font-variant-numeric:tabular-nums;font-size:17px;border-collapse:collapse;margin:8px 0 0}.u td{padding:4px 18px 4px 0;border-bottom:1px solid #ddd}.u td+td{text-align:right}` : ""}`;
+  const table = u
+    ? `<table class="u"><tr><td>Šivanje zadrge</td><td>12,50 €</td></tr><tr><td>Nov podplat</td><td>38,00 €</td></tr><tr><td>Pon–pet</td><td>8.00–16.30</td></tr><tr><td>Sobota</td><td>9.00–12.00</td></tr></table>`
+    : "";
+  const body = `<p class="meta">${asset.id} · ${p.label} · ${(asset.bytes / 1024).toFixed(1)} KB · ${asset.tags.mood.join(", ")}${asset.tags.stances.length ? ` · ${asset.tags.stances.join(", ")}` : ""}</p>
+<h1 class="h">${SPECIMEN}</h1>
 <p class="b">${PARAGRAPH}</p>
 <h2 class="h2">Cenik: šivanje, lepljenje, ćup</h2>
-<p class="b">Žepi, zadrge in ročaji. ${[...SLOVENE_GLYPHS].join(" ")} — 12,50 €.</p>`;
+<p class="b b16">Žepi, zadrge in ročaji. ${[...SLOVENE_GLYPHS].join(" ")} – 12,50 €.</p>${table}`;
   return { asset: asset.id, variant: "a", label: p.label, kind: "html", html: doc(p.label, css, body) };
 }
 

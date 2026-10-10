@@ -12,6 +12,8 @@ import {
   fontLicenseFile,
   groundOf,
   inventory,
+  inventoryFontAssets,
+  inventoryPairingAssets,
   paletteContrast,
   paletteIssues,
   paletteOf,
@@ -60,7 +62,9 @@ describe("today's assets are registered", () => {
   it("existing assets start approved, new ones as drafts; system- and owner-only sections are not pickable", () => {
     expect(todaysAssets().every((a) => a.status === "approved")).toBe(true);
     expect(draftAssets().length).toBeGreaterThan(0);
-    expect(draftAssets().every((a) => a.status === "draft" && registry.byId(a.id)?.status === "draft")).toBe(true);
+    const drafts = assets.filter((a) => a.status !== "approved");
+    expect(drafts.map((a) => a.id)).toEqual([...draftAssets(), ...inventoryFontAssets(), ...inventoryPairingAssets()].map((a) => a.id));
+    expect(drafts.every((a) => a.status === "draft")).toBe(true);
     const unpickable = assets.filter((a) => a.pickable === false).map((a) => a.id);
     expect(unpickable.sort()).toEqual(["section/collection:cards", "section/collection:list", "section/legal:default", "section/not-found:default"]);
   });

@@ -1,0 +1,453 @@
+{
+  "round": 1,
+  "items": [
+    {
+      "id": "composed-j",
+      "kind": "composed",
+      "label": "J Skorja (composed, spec v19)",
+      "trade": "bakery",
+      "fixture": "pekarna-kvas",
+      "source": "tools/eval/composed/j.json",
+      "images": {
+        "desk": "img/composed-j-desk.jpg",
+        "deskFull": "img/composed-j-desk-full.jpg",
+        "phone": "img/composed-j-phone.jpg",
+        "phoneFull": "img/composed-j-phone-full.jpg"
+      }
+    },
+    {
+      "id": "ref-d",
+      "kind": "reference",
+      "label": "D Mirno (hand-made)",
+      "trade": "swimming school",
+      "fixture": null,
+      "source": "docs/design/swim-landing/d-mirno.html",
+      "images": {
+        "desk": "img/ref-d-desk.jpg",
+        "deskFull": "img/ref-d-desk-full.jpg",
+        "phone": "img/ref-d-phone.jpg",
+        "phoneFull": "img/ref-d-phone-full.jpg"
+      }
+    },
+    {
+      "id": "golden-frizerstvo-lana",
+      "kind": "golden",
+      "label": "undefined (golden)",
+      "trade": "hairdresser",
+      "fixture": "frizerstvo-lana",
+      "source": "tools/eval/golden/frizerstvo-lana.json",
+      "images": {
+        "desk": "img/golden-frizerstvo-lana-desk.jpg",
+        "deskFull": "img/golden-frizerstvo-lana-desk-full.jpg",
+        "phone": "img/golden-frizerstvo-lana-phone.jpg",
+        "phoneFull": "img/golden-frizerstvo-lana-phone-full.jpg"
+      }
+    },
+    {
+      "id": "ref-g",
+      "kind": "reference",
+      "label": "G Črke (hand-made)",
+      "trade": "swimming school",
+      "fixture": null,
+      "source": "docs/design/swim-landing/g-crke.html",
+      "images": {
+        "desk": "img/ref-g-desk.jpg",
+        "deskFull": "img/ref-g-desk-full.jpg",
+        "phone": "img/ref-g-phone.jpg",
+        "phoneFull": "img/ref-g-phone-full.jpg"
+      }
+    },
+    {
+      "id": "composed-m",
+      "kind": "composed",
+      "label": "M Tablica (composed, spec v19)",
+      "trade": "car-repair",
+      "fixture": "avtoservis-mrak",
+      "source": "tools/eval/composed/m.json",
+      "images": {
+        "desk": "img/composed-m-desk.jpg",
+        "deskFull": "img/composed-m-desk-full.jpg",
+        "phone": "img/composed-m-phone.jpg",
+        "phoneFull": "img/composed-m-phone-full.jpg"
+      }
+    },
+    {
+      "id": "ref-f",
+      "kind": "reference",
+      "label": "F Lido (hand-made)",
+      "trade": "swimming school",
+      "fixture": null,
+      "source": "docs/design/swim-landing/f-lido.html",
+      "images": {
+        "desk": "img/ref-f-desk.jpg",
+        "deskFull": "img/ref-f-desk-full.jpg",
+        "phone": "img/ref-f-phone.jpg",
+        "phoneFull": "img/ref-f-phone-full.jpg"
+      }
+    },
+    {
+      "id": "golden-zobozdravstvo-lebar",
+      "kind": "golden",
+      "label": "undefined (golden)",
+      "trade": "dental",
+      "fixture": "zobozdravstvo-lebar",
+      "source": "tools/eval/golden/zobozdravstvo-lebar.json",
+      "images": {
+        "desk": "img/golden-zobozdravstvo-lebar-desk.jpg",
+        "deskFull": "img/golden-zobozdravstvo-lebar-desk-full.jpg",
+        "phone": "img/golden-zobozdravstvo-lebar-phone.jpg",
+        "phoneFull": "img/golden-zobozdravstvo-lebar-phone-full.jpg"
+      }
+    },
+    {
+      "id": "golden-fizioterapija-pregib",
+      "kind": "golden",
+      "label": "undefined (golden)",
+      "trade": "physio",
+      "fixture": "fizioterapija-pregib",
+      "source": "tools/eval/golden/fizioterapija-pregib.json",
+      "images": {
+        "desk": "img/golden-fizioterapija-pregib-desk.jpg",
+        "deskFull": "img/golden-fizioterapija-pregib-desk-full.jpg",
+        "phone": "img/golden-fizioterapija-pregib-phone.jpg",
+        "phoneFull": "img/golden-fizioterapija-pregib-phone-full.jpg"
+      }
+    },
+    {
+      "id": "ref-t",
+      "kind": "reference",
+      "label": "T Etiketa (hand-made)",
+      "trade": "shop",
+      "fixture": "trgovina-oljka-in-sol",
+      "source": "docs/design/templates/t-etiketa.html",
+      "images": {
+        "desk": "img/ref-t-desk.jpg",
+        "deskFull": "img/ref-t-desk-full.jpg",
+        "phone": "img/ref-t-phone.jpg",
+        "phoneFull": "img/ref-t-phone-full.jpg"
+      }
+    },
+    {
+      "id": "ref-o",
+      "kind": "reference",
+      "label": "O Nasmeh (hand-made)",
+      "trade": "dental",
+      "fixture": "zobozdravstvo-lebar",
+      "source": "docs/design/templates/o-nasmeh.html",
+      "images": {
+        "desk": "img/ref-o-desk.jpg",
+        "deskFull": "img/ref-o-desk-full.jpg",
+        "phone": "img/ref-o-phone.jpg",
+        "phoneFull": "img/ref-o-phone-full.jpg"
+      }
+    },
+    {
+      "id": "golden-pekarna-kvas",
+      "kind": "golden",
+      "label": "undefined (golden)",
+      "trade": "bakery",
+      "fixture": "pekarna-kvas",
+      "source": "tools/eval/golden/pekarna-kvas.json",
+      "images": {
+        "desk": "img/golden-pekarna-kvas-desk.jpg",
+        "deskFull": "img/golden-pekarna-kvas-desk-full.jpg",
+        "phone": "img/golden-pekarna-kvas-phone.jpg",
+        "phoneFull": "img/golden-pekarna-kvas-phone-full.jpg"
+      }
+    },
+    {
+      "id": "ref-i",
+      "kind": "reference",
+      "label": "I Popoldan (hand-made)",
+      "trade": "swimming school",
+      "fixture": null,
+      "source": "docs/design/swim-landing/i-popoldan.html",
+      "images": {
+        "desk": "img/ref-i-desk.jpg",
+        "deskFull": "img/ref-i-desk-full.jpg",
+        "phone": "img/ref-i-phone.jpg",
+        "phoneFull": "img/ref-i-phone-full.jpg"
+      }
+    },
+    {
+      "id": "ref-n",
+      "kind": "reference",
+      "label": "N Markacija (hand-made)",
+      "trade": "tourist-farm",
+      "fixture": "kmetija-grabnar",
+      "source": "docs/design/templates/n-markacija.html",
+      "images": {
+        "desk": "img/ref-n-desk.jpg",
+        "deskFull": "img/ref-n-desk-full.jpg",
+        "phone": "img/ref-n-phone.jpg",
+        "phoneFull": "img/ref-n-phone-full.jpg"
+      }
+    },
+    {
+      "id": "composed-s",
+      "kind": "composed",
+      "label": "S Cevi (composed, spec v19)",
+      "trade": "builder",
+      "fixture": "instalacije-rebernik",
+      "source": "tools/eval/composed/s.json",
+      "images": {
+        "desk": "img/composed-s-desk.jpg",
+        "deskFull": "img/composed-s-desk-full.jpg",
+        "phone": "img/composed-s-phone.jpg",
+        "phoneFull": "img/composed-s-phone-full.jpg"
+      }
+    },
+    {
+      "id": "golden-avtoservis-mrak",
+      "kind": "golden",
+      "label": "undefined (golden)",
+      "trade": "car-repair",
+      "fixture": "avtoservis-mrak",
+      "source": "tools/eval/golden/avtoservis-mrak.json",
+      "images": {
+        "desk": "img/golden-avtoservis-mrak-desk.jpg",
+        "deskFull": "img/golden-avtoservis-mrak-desk-full.jpg",
+        "phone": "img/golden-avtoservis-mrak-phone.jpg",
+        "phoneFull": "img/golden-avtoservis-mrak-phone-full.jpg"
+      }
+    },
+    {
+      "id": "ref-j",
+      "kind": "reference",
+      "label": "J Skorja (hand-made)",
+      "trade": "bakery",
+      "fixture": "pekarna-kvas",
+      "source": "docs/design/templates/j-skorja.html",
+      "images": {
+        "desk": "img/ref-j-desk.jpg",
+        "deskFull": "img/ref-j-desk-full.jpg",
+        "phone": "img/ref-j-phone.jpg",
+        "phoneFull": "img/ref-j-phone-full.jpg"
+      }
+    },
+    {
+      "id": "golden-trgovina-oljka-in-sol",
+      "kind": "golden",
+      "label": "undefined (golden)",
+      "trade": "shop",
+      "fixture": "trgovina-oljka-in-sol",
+      "source": "tools/eval/golden/trgovina-oljka-in-sol.json",
+      "images": {
+        "desk": "img/golden-trgovina-oljka-in-sol-desk.jpg",
+        "deskFull": "img/golden-trgovina-oljka-in-sol-desk-full.jpg",
+        "phone": "img/golden-trgovina-oljka-in-sol-phone.jpg",
+        "phoneFull": "img/golden-trgovina-oljka-in-sol-phone-full.jpg"
+      }
+    },
+    {
+      "id": "golden-racunovodstvo-seliskar",
+      "kind": "golden",
+      "label": "undefined (golden)",
+      "trade": "accountant",
+      "fixture": "racunovodstvo-seliskar",
+      "source": "tools/eval/golden/racunovodstvo-seliskar.json",
+      "images": {
+        "desk": "img/golden-racunovodstvo-seliskar-desk.jpg",
+        "deskFull": "img/golden-racunovodstvo-seliskar-desk-full.jpg",
+        "phone": "img/golden-racunovodstvo-seliskar-phone.jpg",
+        "phoneFull": "img/golden-racunovodstvo-seliskar-phone-full.jpg"
+      }
+    },
+    {
+      "id": "ref-s",
+      "kind": "reference",
+      "label": "S Cevi (hand-made)",
+      "trade": "builder",
+      "fixture": "instalacije-rebernik",
+      "source": "docs/design/templates/s-cevi.html",
+      "images": {
+        "desk": "img/ref-s-desk.jpg",
+        "deskFull": "img/ref-s-desk-full.jpg",
+        "phone": "img/ref-s-phone.jpg",
+        "phoneFull": "img/ref-s-phone-full.jpg"
+      }
+    },
+    {
+      "id": "ref-l",
+      "kind": "reference",
+      "label": "L Ogledalo (hand-made)",
+      "trade": "hairdresser",
+      "fixture": "frizerstvo-lana",
+      "source": "docs/design/templates/l-ogledalo.html",
+      "images": {
+        "desk": "img/ref-l-desk.jpg",
+        "deskFull": "img/ref-l-desk-full.jpg",
+        "phone": "img/ref-l-phone.jpg",
+        "phoneFull": "img/ref-l-phone-full.jpg"
+      }
+    },
+    {
+      "id": "ref-p",
+      "kind": "reference",
+      "label": "P Pregib (hand-made)",
+      "trade": "physio",
+      "fixture": "fizioterapija-pregib",
+      "source": "docs/design/templates/p-pregib.html",
+      "images": {
+        "desk": "img/ref-p-desk.jpg",
+        "deskFull": "img/ref-p-desk-full.jpg",
+        "phone": "img/ref-p-phone.jpg",
+        "phoneFull": "img/ref-p-phone-full.jpg"
+      }
+    },
+    {
+      "id": "ref-b",
+      "kind": "reference",
+      "label": "B Proge (hand-made)",
+      "trade": "swimming school",
+      "fixture": null,
+      "source": "docs/design/swim-landing/b-proge.html",
+      "images": {
+        "desk": "img/ref-b-desk.jpg",
+        "deskFull": "img/ref-b-desk-full.jpg",
+        "phone": "img/ref-b-phone.jpg",
+        "phoneFull": "img/ref-b-phone-full.jpg"
+      }
+    },
+    {
+      "id": "ref-e",
+      "kind": "reference",
+      "label": "E Gladina (hand-made)",
+      "trade": "swimming school",
+      "fixture": null,
+      "source": "docs/design/swim-landing/e-gladina.html",
+      "images": {
+        "desk": "img/ref-e-desk.jpg",
+        "deskFull": "img/ref-e-desk-full.jpg",
+        "phone": "img/ref-e-phone.jpg",
+        "phoneFull": "img/ref-e-phone-full.jpg"
+      }
+    },
+    {
+      "id": "ref-m",
+      "kind": "reference",
+      "label": "M Tablica (hand-made)",
+      "trade": "car-repair",
+      "fixture": "avtoservis-mrak",
+      "source": "docs/design/templates/m-tablica.html",
+      "images": {
+        "desk": "img/ref-m-desk.jpg",
+        "deskFull": "img/ref-m-desk-full.jpg",
+        "phone": "img/ref-m-phone.jpg",
+        "phoneFull": "img/ref-m-phone-full.jpg"
+      }
+    },
+    {
+      "id": "golden-kmetija-grabnar",
+      "kind": "golden",
+      "label": "undefined (golden)",
+      "trade": "tourist-farm",
+      "fixture": "kmetija-grabnar",
+      "source": "tools/eval/golden/kmetija-grabnar.json",
+      "images": {
+        "desk": "img/golden-kmetija-grabnar-desk.jpg",
+        "deskFull": "img/golden-kmetija-grabnar-desk-full.jpg",
+        "phone": "img/golden-kmetija-grabnar-phone.jpg",
+        "phoneFull": "img/golden-kmetija-grabnar-phone-full.jpg"
+      }
+    },
+    {
+      "id": "ref-h",
+      "kind": "reference",
+      "label": "H Deska (hand-made)",
+      "trade": "swimming school",
+      "fixture": null,
+      "source": "docs/design/swim-landing/h-deska.html",
+      "images": {
+        "desk": "img/ref-h-desk.jpg",
+        "deskFull": "img/ref-h-desk-full.jpg",
+        "phone": "img/ref-h-phone.jpg",
+        "phoneFull": "img/ref-h-phone-full.jpg"
+      }
+    },
+    {
+      "id": "golden-gostilna-zlata-zlica",
+      "kind": "golden",
+      "label": "undefined (golden)",
+      "trade": "restaurant",
+      "fixture": "gostilna-zlata-zlica",
+      "source": "tools/eval/golden/gostilna-zlata-zlica.json",
+      "images": {
+        "desk": "img/golden-gostilna-zlata-zlica-desk.jpg",
+        "deskFull": "img/golden-gostilna-zlata-zlica-desk-full.jpg",
+        "phone": "img/golden-gostilna-zlata-zlica-phone.jpg",
+        "phoneFull": "img/golden-gostilna-zlata-zlica-phone-full.jpg"
+      }
+    },
+    {
+      "id": "ref-a",
+      "kind": "reference",
+      "label": "A Globina (hand-made)",
+      "trade": "swimming school",
+      "fixture": null,
+      "source": "docs/design/swim-landing/a-globina.html",
+      "images": {
+        "desk": "img/ref-a-desk.jpg",
+        "deskFull": "img/ref-a-desk-full.jpg",
+        "phone": "img/ref-a-phone.jpg",
+        "phoneFull": "img/ref-a-phone-full.jpg"
+      }
+    },
+    {
+      "id": "golden-instalacije-rebernik",
+      "kind": "golden",
+      "label": "undefined (golden)",
+      "trade": "builder",
+      "fixture": "instalacije-rebernik",
+      "source": "tools/eval/golden/instalacije-rebernik.json",
+      "images": {
+        "desk": "img/golden-instalacije-rebernik-desk.jpg",
+        "deskFull": "img/golden-instalacije-rebernik-desk-full.jpg",
+        "phone": "img/golden-instalacije-rebernik-phone.jpg",
+        "phoneFull": "img/golden-instalacije-rebernik-phone-full.jpg"
+      }
+    },
+    {
+      "id": "ref-r",
+      "kind": "reference",
+      "label": "R Račun (hand-made)",
+      "trade": "accountant",
+      "fixture": "racunovodstvo-seliskar",
+      "source": "docs/design/templates/r-racun.html",
+      "images": {
+        "desk": "img/ref-r-desk.jpg",
+        "deskFull": "img/ref-r-desk-full.jpg",
+        "phone": "img/ref-r-phone.jpg",
+        "phoneFull": "img/ref-r-phone-full.jpg"
+      }
+    },
+    {
+      "id": "ref-k",
+      "kind": "reference",
+      "label": "K Jedilnik (hand-made)",
+      "trade": "restaurant",
+      "fixture": "gostilna-zlata-zlica",
+      "source": "docs/design/templates/k-jedilnik.html",
+      "images": {
+        "desk": "img/ref-k-desk.jpg",
+        "deskFull": "img/ref-k-desk-full.jpg",
+        "phone": "img/ref-k-phone.jpg",
+        "phoneFull": "img/ref-k-phone-full.jpg"
+      }
+    },
+    {
+      "id": "ref-c",
+      "kind": "reference",
+      "label": "C Val (hand-made)",
+      "trade": "swimming school",
+      "fixture": null,
+      "source": "docs/design/swim-landing/c-val.html",
+      "images": {
+        "desk": "img/ref-c-desk.jpg",
+        "deskFull": "img/ref-c-desk-full.jpg",
+        "phone": "img/ref-c-phone.jpg",
+        "phoneFull": "img/ref-c-phone-full.jpg"
+      }
+    }
+  ]
+}

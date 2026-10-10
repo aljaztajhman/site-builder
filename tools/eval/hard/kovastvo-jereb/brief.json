@@ -1,0 +1,22 @@
+{
+  "id": "kovastvo-jereb",
+  "businessType": "builder",
+  "trade": "kovač",
+  "hard": ["dark-photos"],
+  "description": "Umetno kovaštvo Jereb je družinska delavnica v Idriji, kujemo že tri generacije. Delava oče Anton Jereb in jaz, Luka.\n\nVse je ročno kovano na ognju in nakovalu, ne kupujemo gotovih elementov iz kataloga. Izdelujemo ograje za stopnice in balkone, vrata in dvoriščna vrata, svetila, okovje za stara vrata in skrinje, kamine pribor, nagrobne križe ter darila kot so svečniki in obeski za ključe. Restavriramo tudi staro kovano železo za cerkve in stare hiše.\n\nVsak izdelek narišemo po vaši želji, cena je po skici, zato je ne pišem.\n\nDelavnica: Vojkova ulica 40, 5280 Idrija, odprto pon–pet 7.00–15.00, popoldne po dogovoru.\n\nTel. 05 555 33 19, e-mail kovastvo.jereb@siol.example.\n\nSlike so slabe, sem jih slikal s telefonom v delavnici ko je bila že tema, upam da se kaj vidi: ogenj v kovačiji, ograja za stopnice ki smo jo naredili lani in vrata pred eno hišo.",
+  "logo": null,
+  "photos": [
+    { "file": "photos/01.jpg", "subject": "temna fotografija s telefonom: kovaško ognjišče z žarečim ognjem v delavnici" },
+    { "file": "photos/02.jpg", "subject": "temna fotografija s telefonom: kovana ograja ob notranjih stopnicah" }
+  ],
+  "facts": {
+    "name": "Umetno kovaštvo Jereb",
+    "phone": "+38655553319",
+    "email": "kovastvo.jereb@siol.example",
+    "address": { "street": "Vojkova ulica 40", "postalCode": "5280", "city": "Idrija" },
+    "hours": [{ "from": "mon", "to": "fri", "open": "07:00", "close": "15:00" }],
+    "people": [{ "name": "Anton Jereb", "role": "oče" }, { "name": "Luka", "role": "sin" }],
+    "other": ["tri generacije", "ročno kovano na ognju in nakovalu", "popoldne po dogovoru", "Restavriramo tudi staro kovano železo"]
+  },
+  "missing": ["prices", "legal"]
+}
