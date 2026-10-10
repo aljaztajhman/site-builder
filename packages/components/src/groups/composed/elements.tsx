@@ -140,9 +140,9 @@ function FactBlock({ el, ctx, over }: { el: ElOf<"fact">; ctx: RenderCtx; over: 
   const outside = t === "plate" || t === "numeral";
   const before = el.labelAt === "before";
   // Spec v20: a count-up value is a whole number from the client; its final value is the text and the label from the
-  // start, the island (islands/composed/count.js) only animates the text (reduced motion and no script: final value).
+  // start, the island (islands/composed/count.js) only animates the text (reduced motion, design.motion "still" (data-still) and no script: final value).
   const value = el.count && /^\d{1,9}$/.test(el.value) ? (
-    <span className="cx-count" data-count={el.value} role="img" aria-label={el.value}>
+    <span className="cx-count" data-count={el.value} data-still={ctx.site.design.motion === "still" ? "" : undefined} role="img" aria-label={el.value}>
       {el.value}
     </span>
   ) : (

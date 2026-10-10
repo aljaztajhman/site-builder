@@ -185,17 +185,30 @@ describe("map", () => {
 });
 
 describe("iconFacts", () => {
+  const amenities =
+    (...a: string[]) =>
+    (spec: SiteSpec) =>
+      void ((spec.business as { amenities?: string[] }).amenities = a);
   it("a list of icon + label (+ the client's note); two a row on phones only when every label is short and there are no notes", () => {
-    const h = el(render([sectionOf(at({ kind: "iconFacts", items: [{ fact: "parking" }, { fact: "wifi" }, { fact: "lift" }] }))]));
+    const h = el(render([sectionOf(at({ kind: "iconFacts", items: [{ fact: "parking" }, { fact: "wifi" }, { fact: "lift" }] }))], amenities("parking", "wifi", "lift")));
     expect(h).toMatch(/<ul class="cx-el cx-el--iconFacts cx-ps-full cx-if cx-if--line cx-if--2"[^>]*role="list">/);
     expect(h).toMatch(/<li class="cx-if__i" data-fact="parking"><svg class="cx-if__ic" viewBox="0 0 24 24"[^>]*aria-hidden="true" focusable="false">[\s\S]*?<\/svg><span class="cx-if__l">Parkirišče<\/span><\/li>/);
-    const long = el(render([sectionOf(at({ kind: "iconFacts", items: [{ fact: "wheelchair" }, { fact: "terrace", note: "Odprta od maja." }] }))]));
+    const long = el(render([sectionOf(at({ kind: "iconFacts", items: [{ fact: "wheelchair" }, { fact: "terrace", note: "Odprta od maja." }] }))], amenities("wheelchair", "terrace")));
     expect(long).not.toContain("cx-if--2");
     expect(long).toContain('<span class="cx-if__n">Odprta od maja.</span>');
   });
 
+  it("shows only the facts the business has in business.amenities (a client who takes one out loses it from the site)", () => {
+    const items = [{ fact: "parking" }, { fact: "wifi" }];
+    const h = el(render([sectionOf(at({ kind: "iconFacts", items }))], amenities("parking")));
+    expect(h).toContain('data-fact="parking"');
+    expect(h).not.toContain('data-fact="wifi"');
+    expect(el(render([sectionOf(at({ kind: "iconFacts", items }))], amenities()))).not.toContain("cx-el--iconFacts");
+  });
+
   it("each placeholder icon stays under 1 KiB", () => {
-    const h = el(render([sectionOf(at({ kind: "iconFacts", items: ["parking", "card", "wifi", "wheelchair", "terrace", "takeaway", "lift"].map((fact) => ({ fact })) }))]));
+    const all = ["parking", "card", "wifi", "wheelchair", "terrace", "takeaway", "lift"];
+    const h = el(render([sectionOf(at({ kind: "iconFacts", items: all.map((fact) => ({ fact })) }))], amenities(...all)));
     for (const svg of h.match(/<svg class="cx-if__ic"[\s\S]*?<\/svg>/g)!) expect(Buffer.byteLength(svg)).toBeLessThanOrEqual(1024);
   });
 });

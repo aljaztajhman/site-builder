@@ -63,7 +63,11 @@ const TWO_UP = 16;
  * card ground, no circle round the icon (the banned three-feature-cards row; G25).
  */
 export function IconFactsBlock({ el, ctx, over }: { el: ElOf<"iconFacts">; ctx: RenderCtx; over: boolean }) {
+  // Only a fact the business has: the guards and the facts check say so at generation, and a client who later takes an amenity out
+  // of business.amenities must not keep it on the site.
+  const has = new Set<string>(ctx.site.business.amenities ?? []);
   const items = el.items.flatMap((it) => {
+    if (!has.has(it.fact)) return [];
     const label = factLabel(ctx, it.fact);
     return label ? [{ ...it, label }] : [];
   });
