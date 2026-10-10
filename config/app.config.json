@@ -23,10 +23,10 @@
     "genome": false
   },
   "studio": {
-    "$comment": "Design studio (docs/plans/design-studio.md). uniqueness (§5.4, engine studio/look.ts, platform look_fingerprints): look distance 0..1 = weighted mean of genome axes differing (of 11), composition signature (homepage intent:layout sequence, edit distance), palette (ΔE76 in Lab of background, primary, band, accent, capped at 50), perceptual hash of the first screens at 360 and 1280 px (dHash Hamming of 64 bits) and stance (same or not); parts missing on either side are left out. The gate: closer than sameTradeMin to a site of the same trade, or sameTownMin to one in the same town, is not unique enough. Calibration: CALIBRATION.",
+    "$comment": "Design studio (docs/plans/design-studio.md). uniqueness (§5.4, engine studio/look.ts, platform look_fingerprints): look distance 0..1 = weighted mean of genome axes differing (of 11), composition signature (homepage intent:layout sequence, edit distance), palette (ΔE76 in Lab of background, primary, band, accent, capped at 50), perceptual hash of the first screens at 360 and 1280 px (dHash Hamming of 64 bits) and stance (same or not); parts missing on either side are left out. The gate: closer than sameTradeMin to a site of the same trade, or sameTownMin to one in the same town, is not unique enough. Calibrated 2026-10-10 on the goldens and twins replayed free (engine test/fixtures/studio-look-prints.json, studio-look.test.ts): switches off, the 7 same-trade pairs on one template and palette are 0.02–0.19 apart and every other same-trade pair ≥ 0.52; switches on, same-trade pairs 0.18–0.82 (3 below 0.35: two jedilnik, two etiketa, two ogledalo with near-equal palettes); across trades ≥ 0.155 off and ≥ 0.27 on, below 0.25 only three warm-craft pairs (one template and palette in other trades). sameTradeMin 0.35 sits between 0.19 and 0.52; sameTownMin 0.25 lets other trades in one town pass unless they are one template and palette.",
     "uniqueness": {
-      "sameTradeMin": 0.3,
-      "sameTownMin": 0.3,
+      "sameTradeMin": 0.35,
+      "sameTownMin": 0.25,
       "weights": { "genome": 1, "composition": 1, "palette": 1, "phash": 1, "stance": 0.5 }
     }
   },

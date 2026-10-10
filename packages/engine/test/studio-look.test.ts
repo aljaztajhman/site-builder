@@ -93,6 +93,60 @@ describe("uniqueEnough", () => {
   });
 });
 
+/**
+ * The calibration (config studio.uniqueness): the goldens and twins replayed free from the homepage recordings with the
+ * variety switches off and on. Off, twins on one template and palette are the known look-alikes
+ * (eval/variety-2026-10-08.md): the gate must stop them and let the other same-trade pairs through.
+ */
+describe("calibration on the twins", () => {
+  type Print = LookPrint & { id: string; direction: string };
+  const prints = JSON.parse(readFileSync(new URL("./fixtures/studio-look-prints.json", import.meta.url), "utf8")) as { off: Print[]; on: Print[] };
+  const c = loadConfig().studio.uniqueness;
+  const pairs = (ps: Print[]) => {
+    const out: { a: Print; b: Print; d: number }[] = [];
+    for (let i = 0; i < ps.length; i++) for (let j = i + 1; j < ps.length; j++) out.push({ a: ps[i]!, b: ps[j]!, d: lookDistance(ps[i]!, ps[j]!, c.weights).total });
+    return out;
+  };
+  const name = (p: { a: Print; b: Print }) => `${p.a.id} / ${p.b.id}`;
+  /** One template, one palette, the same trade: a visitor sees one site twice. */
+  const lookAlike = (p: { a: Print; b: Print }) => p.a.trade === p.b.trade && p.a.direction === p.b.direction && paletteDistance(p.a.paletteLab, p.b.paletteLab) < 0.1;
+
+  it("switches off: every look-alike twin fails the same-trade gate, every other same-trade pair passes", () => {
+    const same = pairs(prints.off).filter((p) => p.a.trade === p.b.trade);
+    const alike = same.filter(lookAlike);
+    expect(alike.map(name).sort()).toEqual(
+      [
+        "avto-kovac / karoserija-hribar",
+        "avto-kovac / vulkanizer-zorman",
+        "frizerstvo-lana / frizerski-salon-mia",
+        "gostilna-pri-mostu / gostisce-na-gricu",
+        "gostilna-zlata-zlica / gostilna-pri-mostu",
+        "gostilna-zlata-zlica / gostisce-na-gricu",
+        "karoserija-hribar / vulkanizer-zorman",
+      ].sort(),
+    );
+    for (const p of alike) expect(p.d, name(p)).toBeLessThan(c.sameTradeMin);
+    for (const p of same.filter((x) => !lookAlike(x))) expect(p.d, name(p)).toBeGreaterThanOrEqual(c.sameTradeMin);
+  });
+
+  it("switches on: what still fails is one template with a near-equal palette", () => {
+    const failing = pairs(prints.on).filter((p) => p.a.trade === p.b.trade && p.d < c.sameTradeMin);
+    for (const p of failing) {
+      expect(p.a.direction, name(p)).toBe(p.b.direction);
+      expect(paletteDistance(p.a.paletteLab, p.b.paletteLab), name(p)).toBeLessThan(0.1);
+    }
+  });
+
+  it("other trades in one town pass, unless they are one template and palette", () => {
+    for (const run of [prints.off, prints.on]) {
+      for (const p of pairs(run).filter((x) => x.a.trade !== x.b.trade && x.d < c.sameTownMin)) {
+        expect(p.a.direction, name(p)).toBe(p.b.direction);
+        expect(paletteDistance(p.a.paletteLab, p.b.paletteLab), name(p)).toBeLessThan(0.2);
+      }
+    }
+  });
+});
+
 /** A 1280 × 800 "first screen": a block of `fill` at `x` on a `ground`. */
 async function screen(o: { ground: string; fill: string; x: number; w?: number }): Promise<Uint8Array> {
   const block = await sharp({ create: { width: o.w ?? 500, height: 500, channels: 3, background: o.fill } }).png().toBuffer();
