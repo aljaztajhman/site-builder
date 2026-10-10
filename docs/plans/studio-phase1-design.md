@@ -295,6 +295,21 @@ The m/s/j composed fixtures change on purpose (the sheet becomes a site file).
 3. Every `cx-` class in the HTML must be covered by that sheet.
 4. Once, in Playwright at 360 and 1280, compare preview and published screenshots pixel for pixel. Also assert no horizontal scroll at 360 and that every link and button box is ≥ 44 × 44 except text links in running text.
 
+### 3.4 Director's amendments after the renderer scout (2026-10-11)
+
+The code differs from §3.1–3.3 in six places. These rules replace the matching parts of §3.1–3.3 and §1.3, and the renderer units build to them.
+
+1. **Two shared sheets instead of a per-site sheet.** `composed.css` today ships in the shared bundle (`packages/render/src/shared.ts:185`, after the hash). The preview serves only HTML and `/preview/_shared/:hash/*` (`apps/web/src/app.ts:976, 999`), so a sheet in `RenderedSite.files` would 404 in the preview. Instead:
+   - `composed.css` stays as it is: the **core** sheet (v19 features), byte-identical, linked exactly as today.
+   - A new `composed-v2.css` holds every v20 addition (section background/top/motion/pin/headerOver, the 7 kinds, the extensions, vocab assets). It is minified and content-addressed like the core sheet (`composed-v2-<sha10>.css`), added to the bundle **after** the hash, and linked only on pages that use a v20 feature. One helper decides both links: `composedSheets(doc, page) → ("core" | "v2")[]`, extensible for `design.wordmark` (I9a).
+   - Budgets: core ≤ 16 KiB minified (today 12.5 KiB), v2 ≤ 16 KiB, the pair ≤ 28 KiB. The inventory's `COMPOSED_SHEET_BUDGET` checks each sheet.
+   - §3.3's preview = published test compares the HTML and both sheets' bytes as fetched from preview and published routes. No new preview route.
+2. **New islands go after the hash.** Islands are read into the bundle **before** the hash (`shared.ts:169-172`), so a new island would change every golden. Composed JS (motion presets that need JS, the marquee pause and the counter) lives in `islands/composed/*.js`, added after the hash like the sheets, and is linked only on pages that use it.
+3. **Animation guards.** Scroll-driven presets use `@supports (animation-timeline: view())` (entrance on view) or `scroll()` (scroll-linked drift), and `@media (prefers-reduced-motion: no-preference)`. Only `transform`, `opacity` and `clip-path` (through `--shape-*` tokens) animate; never `visibility`, layout properties or colour. The default (unsupported, reduced motion) is the final, still state.
+4. **headerOver positioning.** The default header is static (`chrome.css:9-13`); skeleton families can be sticky (`skeleton.css:36-40`); `.site-header--overlay` is already used by the hero-photo family (`skeleton.ts:111-126`) and must not be reused. `headerOver` sets `data-hdr="over"` on `<body>` and the rules live in `composed-v2.css`: a static header becomes absolute over section 0 with a transparent background and the composed opener gets top padding equal to the header height; a sticky header stays sticky, section 0 is pulled up under it (negative margin of the header height) and the header turns solid once scrolled (scroll-driven, `@supports`), solid without support. Text colour over the opener follows section 0's tone so contrast holds (G-rule on contrast applies to the header too). Both header kinds get a test at 360 and 1280.
+5. **Regions in the sheets.** `composed.css` has no region markers. The core sheet is frozen (no edits except bug fixes). `composed-v2.css` starts with marker comments `/* region: section */`, `/* region: kinds */`, `/* region: extensions */`, `/* region: vocab */`; R1 owns `section`, R2 `kinds`, R3 `extensions`, the batches `vocab`.
+6. **LCP.** `firstImage` (`layout.ts:69-71`) only looks at `image`; R1 extends LCP to a background photo layer and R2 to `photos`.
+
 ## 4. Asset ids
 
 One table in `packages/spec/src/assets.ts` (new): `ASSET_KINDS`, `KIND_PREFIX`, `AssetId`, `assetId(kind, name)`, `parseAssetId(id) → { kind, name }`. The inventory re-exports it and I8 imports it.
