@@ -174,7 +174,7 @@ const PRINT: readonly Stance[] = [
       rhythm: ["flat"],
       motion: "still",
     },
-    signatures: ["motif/spoon", "divider/ruled-line", "ornament/drawn-object", "composition/services/index-card"],
+    signatures: ["motif/spoon", "divider/ruled-line", "ornament/drawn-object", "composition/menu/index-card"],
     references: ["skorja", "jedilnik"],
     avoid: "Scrapbook kitsch: handwriting fonts, coffee rings, tape on every photo, a beige page.",
     cues: { goals: ["order", "visit"], angles: ["craft", "family-history"], materials: ["moka", "jajca", "maslo", "sir", "juha", "štruklji"] },
