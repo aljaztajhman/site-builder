@@ -21,6 +21,15 @@ const STREET_KINDS = new Set(["cesta", "ulica", "trg", "pot", "nabrezje", "nasel
 /** Keys whose strings are structural, not visible copy; "date" is the accessibility statement's day, set in code (its digits would read as a phone). */
 const NON_COPY_KEYS = new Set(["id", "type", "variant", "tone", "page", "section", "action", "kind", "slug", "image", "network", "src", "file", "$placeholder", "date", "endDate", "start", "end"]);
 
+/**
+ * Keys of a composed section (spec v19, packages/spec/src/composition/schema.ts) that are layout, not copy: aspect ratios
+ * ("4:5"), rotations ("-90"), mask and treatment names, size and placement enums, and decor drawings (svg path data, whose
+ * numbers and arcs would read as numbers and phone numbers). Only applied inside composed sections, where the strict
+ * schema fixes what each key means; copy (heading text, paragraphs, list items, fact value and label, action and link
+ * labels, price names, notes and units) is still checked.
+ */
+const COMPOSED_LAYOUT_KEYS = new Set(["intent", "width", "minHeight", "texture", "divider", "span", "alignX", "alignY", "ratio", "mask", "treatment", "style", "marker", "case", "rotate", "measure", "motif", "show", "d", "fill", "stroke"]);
+
 const IMAGE_REF_RE = /^img_[a-z0-9_-]+$/;
 const EMAIL_RE = /[\w.+-]+@[\w-]+\.[\w.]+/g;
 const URL_RE = /https?:\/\/\S+|www\.\S+/g;
@@ -177,8 +186,10 @@ function check(spec: SiteSpec, c: Corpus, translated: boolean): FactViolation[] 
   );
 
   // Free copy: phone numbers, emails, prices, times and any other number must come from the client.
+  const composed = spec.pages.flatMap((page, pi) => page.sections.flatMap((s, si) => (s.type === "composed" ? [`/${pi}/sections/${si}/props/`] : [])));
   walkStrings(spec.pages, (s, p, key) => {
     if (NON_COPY_KEYS.has(key)) return;
+    if (COMPOSED_LAYOUT_KEYS.has(key) && composed.some((c) => p.startsWith(c))) return;
     if (/^https?:\/\//.test(s)) return;
     // An image reference under any key (image, inset, …) is an id, not copy.
     if (IMAGE_REF_RE.test(s)) return;
