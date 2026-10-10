@@ -99,9 +99,10 @@ function overlapProbe() {
   return { problems, met };
 }
 
-async function open(w: number, reduced: boolean, file: string): Promise<{ page: Page; close: () => Promise<void> }> {
+async function open(w: number, reduced: boolean, file: string, initScript?: () => void): Promise<{ page: Page; close: () => Promise<void> }> {
   const phone = w < 768;
   const ctx = await browser.newContext({ viewport: { width: w, height: 800 }, deviceScaleFactor: 1, reducedMotion: reduced ? "reduce" : "no-preference", ...(phone ? { isMobile: true, hasTouch: true } : {}) });
+  if (initScript) await ctx.addInitScript(initScript);
   const page = await ctx.newPage();
   await page.goto(`${base}/${file}`, { waitUntil: "networkidle" });
   await page.evaluate(() => document.fonts.ready);
@@ -161,6 +162,22 @@ describe("the kitchen-sink page at 360 and 1280 px", () => {
       expect(await page.locator("button.cx-rb__btn:visible").count(), `${p.file} at ${w} px`).toBe(0);
       await done();
     }
+  }, 60_000);
+
+  it.each([360, 1280])("%i px: a browser without scroll-driven animations (CSS.supports stubbed) keeps the ribbon still and shows no marquee button", async (w) => {
+    // The loop and the button's room are inside @supports (animation-timeline: scroll()) (composed-v2.css): where that
+    // fails (Firefox today) a shown button would cover the still row. Chromium supports it, so the island is told it doesn't.
+    const { page, close: done } = await open(w, false, "index.html", () => {
+      const real = CSS.supports.bind(CSS) as (...a: string[]) => boolean;
+      CSS.supports = ((...a: string[]) => (a.join(" ").includes("animation-timeline") ? false : real(...a))) as typeof CSS.supports;
+    });
+    expect(await page.locator("[data-cx-loop]").count()).toBeGreaterThan(0);
+    expect(await page.locator("button.cx-rb__btn").count()).toBeGreaterThan(0);
+    expect(await page.locator("button.cx-rb__btn:visible").count()).toBe(0);
+    expect(await page.locator("[data-cx-loop].is-live").count()).toBe(0);
+    const looping = await page.evaluate(() => document.getAnimations().filter((a) => (a as CSSAnimation).animationName === "cx-rb-loop" && a.playState === "running").length);
+    expect(looping).toBe(0);
+    await done();
   }, 60_000);
 
   it("the shots exist", async () => {

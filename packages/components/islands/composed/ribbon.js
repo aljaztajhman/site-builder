@@ -1,11 +1,13 @@
 // Composed ribbons that loop (spec v20 ribbon move "loop", owner decision D2; WCAG 2.2.2): the marquee runs only once
 // this has run and only where motion is welcome. It shows the pause button, pauses the marquee while it is off screen,
 // and the button stops and restarts it (aria-pressed: true while stopped). Hover and keyboard focus pause it in CSS
-// (composed-v2.css, region kinds). Without JS, or with reduced motion, the ribbon stays still and has no button.
+// (composed-v2.css, region kinds). Without JS, with reduced motion, or in a browser without scroll-driven animations
+// (the loop and the room for the button are inside `@supports (animation-timeline: scroll())`, e.g. Firefox today), the
+// ribbon stays still and has no button: a button there would cover the still row and stop nothing.
 (() => {
   const ribbons = document.querySelectorAll("[data-cx-loop]");
   const still = window.matchMedia("(prefers-reduced-motion: reduce)");
-  if (!ribbons.length || still.matches) return;
+  if (!ribbons.length || still.matches || !window.CSS?.supports?.("animation-timeline: scroll()")) return;
   const Observer = window.IntersectionObserver;
   const watch = Observer
     ? new Observer((entries) => {
