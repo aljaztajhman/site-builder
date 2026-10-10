@@ -8,6 +8,7 @@ import {
   blockerText,
   describePath,
   isComposedLayoutPointer,
+  isVerbatimPointer,
   publishChecklist,
   sectionTexts,
   textsCount,
@@ -147,5 +148,56 @@ describe("composed sections (spec v19) in a second language", () => {
     expect(isComposedLayoutPointer(bogus, `${at}/text`)).toBe(false);
     // The same key outside a composed section means what that section says.
     expect(isComposedLayoutPointer(golden(), "/pages/0/sections/0/props/style")).toBe(false);
+  });
+});
+
+describe("composed sections (spec v20): verbatim fields and the new layout fields", () => {
+  const sheet = (): SiteSpec => JSON.parse(readFileSync(path.join(here, "../../../tools/eval/composed/m.json"), "utf8")) as SiteSpec;
+  const desk = { col: 1, span: 6, row: 1 };
+  const phone = { order: 5, span: "full" };
+  /** The sheet's first composed section with the v20 elements and layers added; returns its pointer. */
+  const withV20 = (spec: SiteSpec): string => {
+    const si = spec.pages[0]!.sections.findIndex((s) => s.type === "composed");
+    const props = spec.pages[0]!.sections[si]!.props as { elements: unknown[]; background?: unknown; top?: unknown; motion?: unknown };
+    props.elements.push(
+      { id: "e_q", kind: "quote", desk, phone, text: "Kruh, kot ga je pekla babica.", by: "Marta", size: 2 },
+      { id: "e_m", kind: "map", desk, phone, style: "corner", cross: "Trubarjeva", note: "Vhod z dvorišča" },
+      { id: "e_s", kind: "sticker", desk, phone, text: "Vsak dan svež", shape: "round", color: "primary", fill: "accent" },
+      { id: "e_r", kind: "ribbon", desk, phone, items: ["Kruh", "Pecivo"], move: "loop", separator: "star-8" },
+      { id: "e_i", kind: "iconFacts", desk, phone, items: [{ fact: "parking", note: "Za hišo" }], icons: "line" },
+      { id: "e_ph", kind: "photos", desk, phone, images: ["img_01", "img_02"], arrangement: "fan", captions: ["Peč", "Pult"] },
+    );
+    props.background = [{ kind: "photo", image: "img_01", scrim: { role: "inverse", strength: 3 }, phone: "band" }, { kind: "field", role: "band" }];
+    props.top = { edge: "torn", rise: 1 };
+    props.motion = "rise";
+    return `/pages/0/sections/${si}/props`;
+  };
+
+  it("never lists a quote, its attribution or a map's cross street and note; lists sticker, ribbon, iconFacts and caption copy", () => {
+    const spec = sheet();
+    const base = withV20(spec);
+    const n = (spec.pages[0]!.sections.find((s) => s.type === "composed")!.props as { elements: unknown[] }).elements.length;
+    const el = (back: number) => `${base}/elements/${n - back}`;
+    const paths = translatableTexts(english(spec)).map((t) => t.path);
+    for (const p of [`${el(6)}/text`, `${el(6)}/by`, `${el(5)}/cross`, `${el(5)}/note`]) expect(paths, p).not.toContain(p);
+    for (const p of [`${el(4)}/text`, `${el(3)}/items/0`, `${el(3)}/items/1`, `${el(2)}/items/0/note`, `${el(1)}/captions/0`]) expect(paths, p).toContain(p);
+    // Layout values of v20: colour roles, layers, the photo layer's phone treatment, edges, motion, vocabulary names.
+    const layout = paths.filter((p) => p.startsWith(base) && /\/(background|top|motion|color|fill|move|separator|fact|icons|shape|style|arrangement)(\/|$)/.test(p.slice(base.length)));
+    expect(layout).toEqual([]);
+    expect(isComposedLayoutPointer(spec, `${base}/background/0/phone`)).toBe(true);
+    expect(isVerbatimPointer(spec, `${el(6)}/text`)).toBe(true);
+    expect(isVerbatimPointer(spec, `${el(5)}/note`)).toBe(true);
+    expect(isVerbatimPointer(spec, `${el(4)}/text`)).toBe(false);
+  });
+
+  it("translates a note or text of another kind as usual (the verbatim rule is per kind)", () => {
+    const spec = sheet();
+    const base = withV20(spec);
+    const els = (spec.pages[0]!.sections.find((s) => s.type === "composed")!.props as { elements: { kind: string }[] }).elements;
+    const heading = els.findIndex((e) => e.kind === "heading");
+    expect(translatableTexts(english(spec)).map((t) => t.path)).toContain(`${base}/elements/${heading}/text`);
+    expect(isVerbatimPointer(spec, `${base}/elements/${heading}/text`)).toBe(false);
+    // Outside a composed section the same keys mean what that section says.
+    expect(isVerbatimPointer(golden(), "/pages/0/sections/0/props/elements/0/text")).toBe(false);
   });
 });
