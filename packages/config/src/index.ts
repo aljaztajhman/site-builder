@@ -242,6 +242,11 @@ export const AppConfigSchema = z.object({
    * gate: a look closer than sameTradeMin to a site of the same trade, or than sameTownMin to a site in the same town,
    * is not unique enough. Calibrated offline on the goldens and twins (switches off: known look-alikes).
    */
+  /**
+   * The AI designer (docs/plans/design-studio.md): agent switches the studio pipeline on for new sites. Off until the
+   * owner's blind A/B passes (§9); while off, every request and rendered byte is as before.
+   */
+  designer: z.strictObject({ $comment: z.string().optional(), agent: z.boolean() }),
   studio: z.strictObject({
     $comment: z.string().optional(),
     uniqueness: z.strictObject({
