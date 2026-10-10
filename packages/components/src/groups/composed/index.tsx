@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import { Section, cx, titleId } from "../../primitives/index.tsx";
+import type { SectionOf } from "@sb/spec";
 import type { LcpResolvers, SectionProps } from "../../types.ts";
 import { ElementView } from "./elements.tsx";
 import { firstHeading, firstImage, imageSizes, overPhoto, readingOrder } from "./layout.ts";
@@ -45,6 +46,18 @@ export function Composed({ section, ctx, index }: SectionProps<"composed">) {
 }
 
 export const composedRenderers = { composed: Composed };
+
+/**
+ * The actions a composed section shows as buttons or links (data-action: call, booking, directions, email), in reading
+ * order: its action elements, a "link" one by its target's action. For the phone bar, as signatureActions for a hero.
+ */
+export function composedActions(section: SectionOf<"composed">): string[] {
+  return readingOrder(section.props.elements).flatMap((el) => {
+    if (el.kind !== "action") return [];
+    if (el.action === "link") return el.link && "action" in el.link.target ? [el.link.target.action] : [];
+    return [el.action === "book" ? "booking" : el.action];
+  });
+}
 
 /** The first photo in reading order that phones show, with the `sizes` Composed renders it with. */
 export const composedLcp: LcpResolvers = {
