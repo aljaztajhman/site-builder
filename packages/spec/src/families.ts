@@ -48,7 +48,7 @@ export const FAMILIES: Record<string, TemplateFamily> = {
     palettes: [
       { id: "hot-cold", colors: own("cevi") },
       { id: "copper", colors: vary("cevi", { primary: "#a8481a", accent: "#a8481a", band: "#12395e", onBand: "#ffffff", surface: "#eef1f4" }) },
-      { id: "green", colors: vary("cevi", { primary: "#1f6e47", accent: "#1f6e47", band: "#f2b705", onBand: "#101820", surface: "#e8f0eb" }) },
+      { id: "green", colors: vary("cevi", { primary: "#1f6e47", accent: "#20724a", band: "#f2b705", onBand: "#101820", surface: "#e8f0eb" }) },
     ],
     fontPairs: ["space-grotesk-public-sans", "space-grotesk-plex", "manrope-public-sans"],
     heroes: ["hero-signature:drawing"],
@@ -58,7 +58,7 @@ export const FAMILIES: Record<string, TemplateFamily> = {
     palettes: [
       { id: "wheat", colors: own("skorja") },
       { id: "rye", colors: vary("skorja", { primary: "#5b3a29", accent: "#b5652a", band: "#d8c29a", onBand: "#24130a", surface: "#f1ece4" }) },
-      { id: "poppy", colors: vary("skorja", { primary: "#8c2a2a", accent: "#a33a2e", band: "#ecc56a", onBand: "#24130a", surface: "#f4ece8" }) },
+      { id: "poppy", colors: vary("skorja", { primary: "#8c2a2a", accent: "#af3e31", band: "#ecc56a", onBand: "#24130a", surface: "#f4ece8" }) },
     ],
     fontPairs: ["bitter-karla", "fraunces-source-sans", "bitter-nunito-sans"],
     heroes: ["hero-signature:arch", "hero-split:image-right", "hero-image:overlay-bottom"],
@@ -68,7 +68,7 @@ export const FAMILIES: Record<string, TemplateFamily> = {
     palettes: [
       { id: "ledger", colors: own("racun") },
       { id: "ink", colors: vary("racun", { text: "#0d1e36", muted: "#3f4f66", primary: "#1d3f73", accent: "#3d6fb0", band: "#1d3f73", onBand: "#ffffff", surface: "#e6edf6", border: "#d0dbe8", inverse: "#0d1e36", onInverse: "#eef2f8" }) },
-      { id: "plum", colors: vary("racun", { text: "#2a1230", muted: "#5a4660", primary: "#5a2a5e", accent: "#8d4f92", band: "#5a2a5e", onBand: "#ffffff", surface: "#f1e6f2", border: "#e3d3e5", inverse: "#2a1230", onInverse: "#f6eff7" }) },
+      { id: "plum", colors: vary("racun", { text: "#2a1230", muted: "#5a4660", primary: "#5a2a5e", accent: "#905195", band: "#5a2a5e", onBand: "#ffffff", surface: "#f1e6f2", border: "#e3d3e5", inverse: "#2a1230", onInverse: "#f6eff7" }) },
     ],
     fontPairs: ["ibm-plex-sans", "space-grotesk-plex", "manrope-public-sans"],
     heroes: ["hero-signature:receipt"],
