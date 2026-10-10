@@ -3,6 +3,43 @@
 Product brief and roadmap: docs/PRODUCT.md. Phase plans: docs/phases/. Tick only what has been run and checked.
 Work top-down: finish the current phase's "Done means" before starting the next phase.
 
+## #1 priority: design studio (plan 2026-10-09: docs/plans/design-studio.md; HQ `it-ai-designer`, `sb-ai-designer`)
+Owner, 2026-10-09: significantly more quality and variety; an AI design layer that composes something high-standard and unique from our assets; a much larger inventory; "push the ambitious as much as we can". Per-site cost is not a constraint for now (measured, decided later). Supersedes the scope of docs/plans/ai-designer.md (2026-10-08); its spec PRs A and B are F1 and F2. All behind `designer.agent` (off); the gate to switch it on is the owner's blind A/B (plan §2, §9).
+Phase 0, foundations (free):
+- [ ] F1 composition language v1 (= ai-designer-spec.md PR A; HQ `it-studio-f1-composition`)
+- [ ] F2 tool use and `runAgent` in the model client (= spec PR B) plus the advisor tool (Haiku executor, Opus advisor) (`it-studio-f2-agent-client`)
+- [ ] M1 Haiku 5.5 in client and config: both price cards, effort per stage, thinking headroom, blocks by type, refusal retry on Sonnet, `--stage-model` eval flag (`it-model-roles-55`)
+- [ ] F3 `packages/inventory`: registry, contact sheets, gallery artifact with approve/reject, CI checks per asset; today's assets registered (`it-studio-inventory-registry`)
+- [ ] F4 Okus: owner rating artifact + critic calibration harness, round-1 set (`it-studio-okus`)
+- [ ] F5 `design.seed`, stance/constraint deck schemas and dealing, `look_fingerprints` uniqueness registry (`it-studio-seed-registry`)
+- [ ] F6 18 hard fixtures (no logo, no photos, dark photos, new trades …); their photos ≈ €1.5 (`it-studio-fixtures`)
+Phase 1, inventory (free, overnight, parallel; only owner-approved assets reach the runtime):
+- [ ] I1 type: 60 families, 120 pairings, Slovene glyph check (`it-studio-inv-type`)
+- [ ] I2 colour: 200 palettes, extraction from photos (`it-studio-inv-colour`)
+- [ ] I3 compositions wave 1: 120 presets over 12 intents, incl. today's variants and the references' signature parts; absorbs `it-templates-rest` (`it-studio-inv-compositions`)
+- [ ] I4 imagery: 30 masks/frames, 16 treatments, 12 textures (no dot/grid patterns) (`it-studio-inv-imagery`)
+- [ ] I5 drawings: 150 motifs and spot drawings in 3 styles, 24 Slovene ornaments, 20 dividers (`it-studio-inv-drawings`)
+- [ ] I6 type treatments (15) and fact objects (20) (`it-studio-inv-type-facts`)
+- [ ] I7 motion: 20 presets on @sb/morph + CSS, reduced motion, budgets (`it-studio-inv-motion`)
+- [ ] I8 stance deck (80) and constraint deck (50) (`it-studio-stances`)
+- [ ] I9 wordmark generator, icons 3 styles × 40 for practical facts (`it-studio-wordmark-icons`)
+- [ ] I10 40 new hand-made reference homepages (`it-studio-references`)
+- [ ] F1b composition language v2: section layers, transitions, 14 new element kinds (`it-studio-f1b-language-v2`)
+Budget (owner, 2026-10-10): $90/month Anthropic API (≈ €77), $10/month fal (≈ €8.60), in HQ meta/budget; more budget is for page generation, not more testing: the test discipline in plan §11 applies to every paid run.
+Phase 2, the studio (paid ≈ €27 in October, per meta/budget; model roles: Opus decides, Haiku produces, code orchestrates, plan §6.4, HQ `sb-model-roles`):
+- [ ] S0 model bake-off: each stage on Haiku / Haiku + Opus advisor / Sonnet / Opus on 3 fixtures; per-stage models in config ≈ €3
+- [ ] S1 photo analyst (Haiku) + creative director (Opus, 6 concepts from dealt stances, shortlists, registry gate) ≈ €3
+- [ ] S2 designers ×6 (Haiku) in parallel, draft copy in the concept's voice; copy polish on the winner ≈ €3
+- [ ] S3 art worker: wordmark, SVG drawings, photo treatments; generated imagery per `sb-studio-imagery` ≈ €4
+- [ ] S4 render all + Haiku pre-screen + Opus tournament critic with owner anchors; alternatives stored ≈ €4
+- [ ] S5 finisher loop (render, checks, patch, search inventory), critique replaced when on ≈ €5
+- [ ] S6 site kit + other pages composed with it ≈ €3
+- [ ] S7 owner UX: "Oblikovalec dela" progress, "Druge zamisli", "Predlagaj drugačno", editor slots (free)
+(S1–S7 are one HQ item, `it-ai-designer`, until Phase 1 lands; split then.)
+Phase 3, measure and ship (≈ €15–20 + €15 reserve): 40 fixtures + twins, pairwise "same template?", owner blind A/B in Okus, report in eval/, HQ decision on switching on.
+Phase 4: scoped CSS (own decision), sketch lab weekly, inventory waves 2–3, whole-site redesign in the editor, photo shot list from the analyst.
+Found while planning: ai-designer-spec.md allowed a `dots` surface texture, which the 2026-10-01 decision (`sb-images-more`) keeps out; removed from the spec.
+
 ## Mandatory before public launch
 
 Nothing is opened to the public until every item here is done (owner, 2026-10-01).
