@@ -1,0 +1,30 @@
+{
+  "id": "okrepcevalnica-pri-jozi",
+  "businessType": "restaurant",
+  "trade": "okrepčevalnica",
+  "hard": ["no-logo"],
+  "description": "Okrepčevalnica Pri Joži je majhen lokal s 30 sedeži, odprta od leta 2009. Kuhava jaz, Jožica Hribar, in moja hči.\n\nVsak dan med tednom kuhava dve malici, eno mesno in eno brezmesno, zraven je juha in solata. Malica stane 8,50 €, dnevna juha posebej 3 €. Ob petkih so ribe ali ocvirkovca. Delavcem iz okoliških podjetij malice tudi zapakiramo za s sabo, pokličite do 10. ure. Za praznovanja, sedmine in obletnice pripravimo kosila po dogovoru, do 30 oseb. Imamo pivo, vino, domače žganje in kavo seveda.\n\nOdprto: pon–pet 6.00–16.00, sobota 7.00–13.00, nedelja zaprto. Parkiranje je za lokalom.\n\nNaslov Rudarska cesta 21, 1420 Trbovlje. Telefon 03 555 62 10, mail joza.malice@posta.example. Logotipa nimamo, imamo samo tablo nad vrati. Slike sta dve, krožnik z malico in notranjost lokala, delal jih je vnuk.",
+  "logo": null,
+  "photos": [
+    { "file": "photos/01.jpg", "subject": "krožnik dnevne malice z golažem, polento in solato na leseni mizi" },
+    { "file": "photos/02.jpg", "subject": "notranjost majhnega lokala z lesenimi mizami in točilnim pultom" }
+  ],
+  "facts": {
+    "name": "Okrepčevalnica Pri Joži",
+    "phone": "+38635556210",
+    "email": "joza.malice@posta.example",
+    "address": { "street": "Rudarska cesta 21", "postalCode": "1420", "city": "Trbovlje" },
+    "hours": [
+      { "from": "mon", "to": "fri", "open": "06:00", "close": "16:00" },
+      { "from": "sat", "to": "sat", "open": "07:00", "close": "13:00" },
+      { "from": "sun", "to": "sun", "closed": true }
+    ],
+    "prices": [
+      { "item": "malica", "amount": 8.5 },
+      { "item": "dnevna juha", "amount": 3 }
+    ],
+    "people": [{ "name": "Jožica Hribar", "role": "kuharica" }],
+    "other": ["30 sedeži", "od leta 2009", "do 30 oseb", "Parkiranje je za lokalom", "Ob petkih so ribe ali ocvirkovca"]
+  },
+  "missing": ["legal"]
+}

@@ -43,6 +43,10 @@ matične and davčne številke. Phone numbers use the `555` block; emails use th
   eval recordings' request hashes: re-record after it. `pnpm fixtures:photos` still makes the old SVG stand-ins,
   only for photos that are missing (its `--force` would overwrite the committed ones).
 
+Two more groups use the same schema and are opt-in, never part of `--offline` or CI: the twelve twins
+(`tools/eval/twins`, `pnpm eval --twins`) and the eighteen hard fixtures (`tools/eval/hard`, `pnpm eval --hard`; see
+their README for the cases and the shot list of photos still to generate).
+
 `src/fixtures/schema.ts` is the schema, `src/fixtures/load.ts` loads and validates (`loadFixtures()`,
 `loadFixture(id)`), `test/fixtures.test.ts` checks facts against descriptions.
 

@@ -1,0 +1,24 @@
+{
+  "id": "prevajanje-kolar",
+  "businessType": "accountant",
+  "trade": "prevajanje",
+  "hard": ["no-photos"],
+  "description": "Prevajanje Kolar – sem Nina Kolar, sodna tolmačka za nemški in angleški jezik.\n\nPrevajam in overjam listine za tujino in iz tujine: rojstne liste, diplome, spričevala, pogodbe, sodbe, zdravniške izvide in dokumente za uvoz avta. Delam tudi strokovne prevode za podjetja (tehnična navodila, spletne strani, katalogi) in tolmačim na sodišču, pri notarju in na upravni enoti.\n\nCenik: prevod ene strani od 25 €, sodna overitev 10 € na dokument, nujni prevod v 24 urah stane polovico več. Za večje prevode pošljite dokument na mail, v enem dnevu dobite ponudbo.\n\nUradne ure v pisarni: pon–čet 9.00–15.00, petek po dogovoru. Pisarna: Vošnjakova ulica 3, 1000 Ljubljana, 2. nadstropje, parkirišče je za stavbo.\n\nTel. 040 555 274, e-pošta nina@prevodi-kolar.example. Nina Kolar s.p., ID za DDV: SI 55512847.\n\nFotografij nimam in jih ne rabim, pisarna je čisto navadna, logotip pa imam (črki NK v krogu).",
+  "logo": "logo.svg",
+  "photos": [],
+  "facts": {
+    "name": "Prevajanje Kolar",
+    "phone": "+38640555274",
+    "email": "nina@prevodi-kolar.example",
+    "address": { "street": "Vošnjakova ulica 3", "postalCode": "1000", "city": "Ljubljana" },
+    "hours": [{ "from": "mon", "to": "thu", "open": "09:00", "close": "15:00" }],
+    "prices": [
+      { "item": "prevod ene strani", "amount": 25, "from": true },
+      { "item": "sodna overitev", "amount": 10 }
+    ],
+    "people": [{ "name": "Nina Kolar", "role": "sodna tolmačka" }],
+    "legal": { "legalName": "Nina Kolar s.p.", "taxNumber": "SI55512847" },
+    "other": ["nemški in angleški jezik", "petek po dogovoru", "v 24 urah", "v enem dnevu dobite ponudbo"]
+  },
+  "missing": ["photos"]
+}
