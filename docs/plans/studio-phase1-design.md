@@ -9,7 +9,7 @@ Architect's design for F1b (spec v20) and batches I3–I7, I9, I10 of `docs/plan
 3. **One asset id scheme** owned by `@sb/spec` (`packages/spec/src/assets.ts`). The inventory kind `shape` becomes `mask`. A spec field holds the id's name part. Drawings hold the full id, because one field spans two kinds.
 4. **Contrast over photos is checked against the worst case.** A scrim must pass over both a black and a white pixel. A guard enforces it and the repair raises the scrim. No photo analysis is needed.
 5. **Per-site composed sheet.** `composed.css` stays the only source. Each site ships its own filtered `composed-<sha10>.css` in `RenderedSite.files`, containing only the families it uses. Sites without composed sections or studio features keep exactly today's bytes.
-6. **Motion never loops on its own and never shows a number the client didn't give.** The marquee is scroll-linked. No counter preset. Every animation runs under reduced-motion and `@supports` guards. The final state is the default.
+6. **Motion (owner decision D2: allow).** A ribbon may loop as a marquee, with a visible pause control; a `counter` preset counts a fact up to a number the client gave. Every animation runs under reduced-motion and `@supports` guards, and the final state is the default: the counter's final value is in the HTML from the start, and reduced motion or no JS shows the still ribbon and the final number.
 7. **F1b ships the mechanisms plus 1–3 starter names per vocabulary.** The batches fill them. Drawings are path data (one `Drawing` format), so asset makers can start now.
 
 ## 1. Composition language v2 (spec v20)
@@ -124,7 +124,7 @@ How each §7.2 row is expressed:
 | wordmark | `wordmark` (new) | No text field: the name comes from `business` and the style from `design.wordmark`. |
 | factObject | `fact.treatment` grows to 20 | Already the fact-object slot. A new kind would duplicate value, label and size. |
 | typeTreatment | `heading.treatment`, `text.dropCap` | They are still headings, so h1 and order rules apply unchanged. |
-| marquee, ribbon | `ribbon` (+ motion preset `drift`) | Structure is a kind and movement is a motion preset. One kind, no autonomous loop. |
+| marquee, ribbon | `ribbon` (+ motion preset `drift`, scroll-linked, or `loop`, a marquee with a pause control) | Structure is a kind and movement is a motion preset. One kind. |
 | sticker | `sticker` (new) | Short copy on its own ground, not a fact (no value). Needs the rating/award ban. |
 | map | `map` (new) | A drawn object built from the address. Contact lines can't carry its geometry or phone layout. |
 | timeline | `list` items with `lead` + `marker: "line"` | Dated steps are a list. checkFacts already checks numbers in leads. |
@@ -191,7 +191,7 @@ The engine's `COMPOSED_LAYOUT_KEYS` (skipped by facts and translation) adds `arr
 | G4 | `headerOver` only on the page's first section with a field or photo layer; header text passes G3 or G9 at 360 and 1280 (on phones against the band photo, or the field) | legible header | repair: drop `headerOver` |
 | G5 | `top`: not on the first section; `rise` only when this ground differs from the previous section's and that section has no `surface.divider`; `drawing` iff edge "drawing"; one divider per boundary | honest overlaps, no double dividers | repair: rise → 0; drop this `top` when the previous has a divider |
 | G6 | `pin`: pinned elements lie wholly inside its columns, are contiguous in reading order, ≤ 4 elements, no image taller than 4:5, rows ≥ 3, and something outside the pin spans more rows | sticky column that fits a screen; DOM = phone order | repair: drop `pin` |
-| G7 | motion: preset in MOTIONS and allowed at the level (still: none; calm: ≤ 3 sections per page, entrance only; lively: ≤ 5, scroll allowed); section 0 only `safeAtLoad` presets; ≤ 1 moving ribbon per page | motion budget, LCP | repair: drop `motion` / `move` |
+| G7 | motion: preset in MOTIONS and allowed at the level (still: none; calm: ≤ 3 sections per page, entrance only; lively: ≤ 5, scroll allowed); section 0 only `safeAtLoad` presets; ≤ 1 moving ribbon per page; `loop` only on a ribbon, which then renders a pause control; `counter` only on a fact whose value is a client number (checkFacts) | motion budget, LCP | repair: drop `motion` / `move` |
 | G8 | every vocab name is in its list; with `ctx.approved`, its asset is approved | only real, approved assets | repair: mask, treatment, texture → "none"; type treatment → none; unknown edge → drop `top`; unknown motion → drop; fact object → "numeral"; drawing → drop the decor element or layer |
 | G9 | `color`/`fill`: fg against its effective ground (own fill > field > tone) ≥ threshold; a background drawing is quiet (ink vs ground ≤ 1.6:1) and every text role in the section vs its ink ≥ threshold | per-element colours stay legible | repair: drop `color`/`fill`; drawing ink → `border` if that passes, else drop the layer |
 | G10 | `tilt` only on fact (not numeral), sticker, image, photos, decor | no tilted running text | repair: drop `tilt` |
@@ -229,7 +229,7 @@ The engine's `COMPOSED_LAYOUT_KEYS` (skipped by facts and translation) adds `arr
 | pin, tilt, bleedY, heading rotate/vertical | Off: a static stack, no rotation, nothing past the section. |
 | motion | lively runs as calm, distances halved; reduced motion: none. |
 | photos | fan/stack/offset-pair in a fixed 4:5 box at preset offsets; strip: an inner scroll-snap row (80 % items, `tabindex=0`, `role=region`, labelled), never page scroll; before-after stacked, labelled. |
-| ribbon | Wraps when still; drift clipped to its own box. |
+| ribbon | Wraps when still; drift clipped to its own box. `loop`: a pause/play button (≥ 44 px, `aria-pressed`, Slovene label) in the ribbon's box; the loop also pauses off-screen and on hover/focus, never runs under reduced motion, and the moving copy is `aria-hidden` next to a static copy for screen readers (WCAG 2.2.2). |
 | map | Full width, height ≤ 60 vh, directions link ≥ 44 × 44. |
 | fact.link | The whole object is a ≥ 44 × 44 target. |
 | iconFacts | One column; two per row when every label ≤ 16 characters. |
@@ -348,7 +348,7 @@ Signatures stay hints: the shortlist boosts them and nothing at runtime requires
 | **I4** imagery | I4a masks +25 (to 30), I4b composed treatments +13 (to 16), I4c textures 12 | the vocab list (F1b-1), not the renderer | Masks: clip-path via tokens, 3 ratios. Treatments: roles only, no gradient or blur. Textures: data-URI tile, dot/grid detector, contrast at the texture's max alpha. | photo set × 3 grounds |
 | **I5** drawings | I5-p pilot, I5a ≈ 50 line, I5b solid and cut where they read (≤ 100), I5c ornaments 24, I5d edges +15 (to 20) | I5-p, I5a–c: no (Drawing format, INV-1 sheet); I5d: F1b-R1 | `Drawing` schema, ≤ 24 paths, budgets, stroke ≥ 1.5 px at the smallest size, REPEATABLE pass the detector, 8 must-draw motifs from I8 | per trade; edges between two sections |
 | **I6** type and facts | I6a type treatments +13 (to 15), I6b fact objects +14 (to 20) | yes (F1b merged) | I6a: G20 limits as tests, real heading text in circle/vertical, banned (italic accent, tracked caps). I6b: values only from fixture facts, linked object ≥ 44 px, seal/badge never reads as an award (owner sheet). | each at sizes 2/5/8 |
-| **I7** motion | I7a harness, MOTION_META tests, presets to 6 (F1b ships reveal, unmask); I7b 14 presets (≤ 2 JS on `@sb/morph`, e.g. decode headline with `aria-label`) | F1b-R1 | CSS-guard test (§3.2). Playwright at 360/1280 with 4× CPU throttle: CLS = 0, LCP Δ ≤ 100 ms against motion off. Reduced-motion screenshots equal static. JS ≤ 3 KiB gzip. No counter. | 3-frame strips (start/mid/end) |
+| **I7** motion | I7a harness, MOTION_META tests, presets to 6 (F1b ships reveal, unmask); I7b 14 presets (≤ 2 JS on `@sb/morph`, e.g. decode headline with `aria-label`) | F1b-R1 | CSS-guard test (§3.2). Playwright at 360/1280 with 4× CPU throttle: CLS = 0, LCP Δ ≤ 100 ms against motion off. Reduced-motion screenshots equal static. JS ≤ 3 KiB gzip. `counter` (JS on `@sb/morph`): counts from 0 to the client's value once, on first view, ≤ 1.2 s; the element's text and `aria-label` hold the final value from the start (intermediate numbers are `aria-hidden`); only plain integers (a value with other characters stays still). `loop`: pause control test (keyboard, 44 px, reduced motion = still). | 3-frame strips (start/mid/end) |
 | **I9** wordmarks and icons | I9a generator, I9-p 40 line icons, I9c solid + cut (80) | I9a: F1b-R2; icons: no | I9a: deterministic per name and seed; č š ž ć đ glyph check; 40-character names fit the 360 header; contrast; header/footer use only the site sheet; goldens unchanged. Icons ≤ 1 KiB, legible at 24 px, practical facts only. | 20 real Slovene business names × styles |
 | **I10** references, 40 | I10a format and harness, I10b–e 4 × 10 | yes, and better after I4/I6 | Written as v20 site specs plus a fixture brief (decision D3). 0 guard issues, 0 invented facts, 360/1280, a gap note per reference (what the language couldn't say). Okus round-1 export. | Okus |
 
@@ -397,10 +397,10 @@ Overnight sessions before F1b merges branch from `claude/studio-f1b` (or main fo
 
 ## Decisions for the owner
 
-- **D1. Inventory names grow without a spec version bump.** New masks, fact objects, motions and so on are added to an append-only list checked by a guard, instead of v21, v22… per batch. Stored sites stay valid and a test forbids removals. *Recommendation: yes.* Otherwise every batch bumps the version and batches can't run in parallel.
-- **D2. Motion: no endless marquee and no counter.** The ribbon drifts with the page scroll instead of looping by itself (WCAG pause rule, battery). A counter shows numbers the client never gave while it runs. *Recommendation: yes.* 18 CSS presets and up to 2 JS ones still reach 20.
-- **D3. The 40 new references are made in the composition language** (v20 site specs rendered by our renderer), not as free HTML like the 19 old ones. Each comes with a note on what the language couldn't say. *Recommendation: yes.* The director should be shown pages the studio can actually make, and the notes feed Phase 4 (scoped CSS).
-- **D4. Pilot gates.** You rate a pilot of 10–12 (≈ 5 minutes each) before motifs, ornaments and icons are drawn in bulk. *Recommendation: yes.* If not, the director curates and you sample the gallery later.
+- **D1. Inventory names grow without a spec version bump. Decided: yes (owner, 2026-10-10).** New masks, fact objects, motions and so on are added to an append-only list checked by a guard, instead of v21, v22… per batch. Stored sites stay valid and a test forbids removals. *Recommendation: yes.* Otherwise every batch bumps the version and batches can't run in parallel.
+- **D2. Motion: endless marquee and counter. Decided by the owner (2026-10-10): allow**, a looping marquee with a pause control and a number counter. Built with the rules in §0.6, G7, §3 (ribbon) and I7: pause control, reduced motion = still, final value in the HTML, counter only to a client number. Still ≤ 2 JS presets (counter is one of them).
+- **D3. The 40 new references are made in the composition language. Decided: yes (owner, 2026-10-10).** (v20 site specs rendered by our renderer), not as free HTML like the 19 old ones. Each comes with a note on what the language couldn't say. *Recommendation: yes.* The director should be shown pages the studio can actually make, and the notes feed Phase 4 (scoped CSS).
+- **D4. Pilot gates. Decided: yes (owner, 2026-10-10).** You rate a pilot of 10–12 (≈ 5 minutes each) before motifs, ornaments and icons are drawn in bulk. *Recommendation: yes.* If not, the director curates and you sample the gallery later.
 
 ## Units table
 
