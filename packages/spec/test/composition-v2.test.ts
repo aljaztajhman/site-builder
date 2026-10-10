@@ -75,13 +75,13 @@ describe("composition language v2: new kinds", () => {
     expect(okEl({ ...w, fill: "primary" })).toBe(false);
   });
 
-  it("ribbon: 1–6 items of ≤ 40 characters, a drawing id as separator, still or drift", () => {
+  it("ribbon: 1–6 items of ≤ 40 characters, a drawing id as separator, still, drift or loop", () => {
     const r = NEW_KINDS.ribbon;
     expect(okEl({ ...r, items: [] })).toBe(false);
     expect(okEl({ ...r, items: Array.from({ length: 7 }, () => "x") })).toBe(false);
     expect(okEl({ ...r, items: ["x".repeat(41)] })).toBe(false);
     expect(okEl({ ...r, separator: "dot" })).toBe(false);
-    expect(okEl({ ...r, move: "loop" })).toBe(false);
+    expect(okEl({ ...r, move: "spin" })).toBe(false);
   });
 
   it("sticker: ≤ 32 characters, four shapes", () => {

@@ -120,6 +120,7 @@ export const FactElement = z.strictObject({
   link: LinkTarget.optional().describe("The whole object is the link"),
   labelAt: z.enum(["after", "before"]).optional(),
   plateCode: z.boolean().optional().describe("Plate only: the town's registration code, written by code"),
+  count: z.boolean().optional().describe("Counts up once to the value on first view; only a plain whole number from the client"),
   ...Paint,
 });
 
@@ -226,7 +227,7 @@ export const RibbonElement = z.strictObject({
   kind: z.enum(["ribbon"]),
   items: z.array(text(40)).min(1).max(6),
   separator: DrawingId.optional(),
-  move: z.enum(["still", "drift"]).optional().describe("drift: moves with scroll, never on its own"),
+  move: z.enum(["still", "drift", "loop"]).optional().describe("drift: moves with scroll; loop: a marquee with a pause control, still under reduced motion"),
   ...Paint,
 });
 

@@ -53,6 +53,7 @@ export const COMPOSED_LAYOUT_KEYS: ReadonlySet<string> = new Set([
   "repeat",
   "labelAt",
   "plateCode",
+  "count",
   "phoneColumns",
   "weight",
   "shape",
