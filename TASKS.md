@@ -295,6 +295,12 @@ Owner, 2026-10-04: "I don't want it to look like a template filler and that ever
   - left: the twin judge before turning it on (≈ €10); the model choosing axes with a reason (today code picks); the content step told the section intents; more layouts per intent with a shared schema; a free motif axis (motif CSS that doesn't assume its template's layout).
 - [ ] Step 6, copy that doesn't repeat (`it-catalogue-sameness`, `it-slovene-copy`): catalogue wording, a client fact in every headline, specific section titles, copy similarity across twins. ≈ €3
 
+## Agent team (docs/dev/agent-team.md; HQ `it-agent-team`)
+Owner, 2026-10-10: get the most out of agents, develop more efficiently, keep or raise quality. Opus director, workers in .claude/agents/ (scout Haiku, builder and asset-maker Sonnet in worktrees, reviewer Opus), triage S/D/W per task.
+- [ ] First project: the design studio's free phases in Mode D/W (agent-team.md §9); each PR records mode, agents, hours, first-push CI, reviewer catches
+- [ ] After about 10 team PRs: compare with the last 10 solo PRs (agent-team.md §8), write the result in HQ, adjust the score
+- [ ] Owner: confirm Claude Code isn't billed through the product's API key (HQ `it-claude-code-billing`)
+
 ## After 1.0: development rules and analytics (proposals 2026-10-04; HQ `sb-dev-workflow`, `sb-analytics`)
 Development rules: docs/dev/workflow.md. Analytics: docs/plans/analytics.md. Nothing below starts before the owner decides; the order is the one in each document.
 - [ ] Production environment on Railway (own Postgres and bucket), `release` branch, `promote` workflow (fast-forward, tag, release notes, migrate-check, deployed smoke test), version on `/health` and `/admin` (supersedes "Deployed: production environment tracking `main`" above; HQ `it-production-env`) — the code is in (PR #137: version on `/health` and `/admin`, `promote.yml`); the environment and the `release` branch are the owner's
