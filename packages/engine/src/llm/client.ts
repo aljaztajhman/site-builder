@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import Anthropic from "@anthropic-ai/sdk";
-import { costEur, type AppConfig, type ModelStageConfig, type ModelStageName } from "@sb/config";
+import { costEur, priceCard, type AppConfig, type ModelStageConfig, type ModelStageName } from "@sb/config";
 import { toStructuredOutputSchema } from "./structured-schema.ts";
 
 /** The request shape the pipeline sends; a subset of the Messages API. */
@@ -168,11 +168,11 @@ export const ledgerOf = (s: SpendSource): SpendLedger => ("ledger" in s ? s.ledg
 /**
  * What a model call may cost, reserved before it is sent: the request's text at
  * `limits.spendReservation.charsPerToken` plus a fixed count per image, all at the uncached input price,
- * and the stage's whole maxTokens of output (thinking included), the most it can bill.
+ * and the stage's whole maxTokens of output (thinking included), the most it can bill. A model with a long-prompt
+ * card is priced at it when that estimated input is over its threshold.
  */
 export function estimateCallEur(config: AppConfig, stage: ModelStageConfig, req: ModelRequest): number {
-  const price = config.pricesUsdPerMTok[stage.model];
-  if (!price) throw new Error(`No price configured for model ${stage.model}`);
+  if (!config.pricesUsdPerMTok[stage.model]) throw new Error(`No price configured for model ${stage.model}`);
   const { charsPerToken, tokensPerImage } = config.limits.spendReservation;
   let chars = req.system.reduce((n, s) => n + s.length, 0) + (req.schema ? JSON.stringify(req.schema).length : 0) + (req.tools?.length ? JSON.stringify(req.tools).length : 0);
   let images = 0;
@@ -190,15 +190,28 @@ export function estimateCallEur(config: AppConfig, stage: ModelStageConfig, req:
     else for (const b of m.content) count(b as unknown as { type: string } & Record<string, unknown>);
   }
   const input = Math.ceil(chars / charsPerToken) + images * tokensPerImage;
+  const price = priceCard(config, stage.model, input);
   let usd = (input * price.input + stage.maxTokens * price.output) / 1_000_000;
   // Each advisor use reads the transcript and writes up to its max_tokens, at the advisor model's price.
   for (const tool of req.tools ?? []) {
     if (!isAdvisorTool(tool)) continue;
-    const advisor = config.pricesUsdPerMTok[tool.model];
-    if (!advisor) throw new Error(`No price configured for advisor model ${tool.model}`);
+    if (!config.pricesUsdPerMTok[tool.model]) throw new Error(`No price configured for advisor model ${tool.model}`);
+    const advisor = priceCard(config, tool.model, input);
     usd += (tool.max_uses * (input * advisor.input + tool.max_tokens * advisor.output)) / 1_000_000;
   }
   return usd * config.eurPerUsd;
+}
+
+/**
+ * A stage's settings as they are sent, after its model's config `modelTraits`: max_tokens at least the model's
+ * `minMaxTokens` (thinking counts toward it), and the model's `defaultEffort` when the stage sets none. A model without
+ * traits gets its stage's settings unchanged.
+ */
+export function effectiveStage(config: Pick<AppConfig, "modelTraits">, stage: ModelStageConfig): ModelStageConfig {
+  const traits = config.modelTraits?.[stage.model];
+  if (!traits) return stage;
+  const effort = stage.effort ?? traits.defaultEffort;
+  return { ...stage, maxTokens: Math.max(stage.maxTokens, traits.minMaxTokens ?? 0), ...(effort ? { effort } : {}) };
 }
 
 export class ModelOutputError extends Error {
@@ -315,22 +328,45 @@ export class ModelClient {
     return this.opts.config.prompts.compactCatalogue ? { compact: true } : {};
   }
 
-  stageConfig(stage: ModelStageName) {
+  /** The settings a stage's calls are sent with (config models, then the model's traits: see `effectiveStage`). */
+  stageConfig(stage: ModelStageName): ModelStageConfig {
     const { config } = this.opts;
     if (config.useFullBuildModel && (stage === "content" || stage === "brief")) {
-      return { ...config.models[stage], model: config.models.fullBuild.model, effort: config.models.fullBuild.effort };
+      return effectiveStage(config, { ...config.models[stage], model: config.models.fullBuild.model, effort: config.models.fullBuild.effort });
     }
-    return config.models[stage];
+    return effectiveStage(config, config.models[stage]);
   }
 
   async call(req: ModelRequest): Promise<ModelResponse> {
     return (await this.callRecorded(req)).response;
   }
 
-  /** `call`, also returning the record that was booked (its € cost). */
-  private async callRecorded(req: ModelRequest): Promise<{ response: ModelResponse; record: CallRecord }> {
-    const { config } = this.opts;
+  /**
+   * `call`, also returning the last record that was booked and `costEur`, what the call cost in all. A refusal on a
+   * model with a config `modelTraits` refusalRetryModel (no server-side fallback) is sent once more on that model: the
+   * refused call is billed and logged too, and counts in `costEur`.
+   */
+  private async callRecorded(req: ModelRequest): Promise<{ response: ModelResponse; record: CallRecord; costEur: number }> {
+    // An answer can't be prefilled: the 5.5 models reject an assistant message last (400). A tool loop's paused
+    // server-tool turn (pause_turn) is the one exception: it is sent back as is, to be continued.
+    if (!req.tools?.length && req.messages.at(-1)?.role === "assistant") throw new Error(`The ${req.stage} request ends with an assistant message (prefill), which the API rejects`);
     const stage = this.stageConfig(req.stage);
+    let { response: res, record } = await this.sendBilled(req, stage);
+    let total = record.costEur;
+    const retryModel = res.stopReason === "refusal" ? this.opts.config.modelTraits?.[stage.model]?.refusalRetryModel : undefined;
+    if (retryModel && retryModel !== stage.model) {
+      console.warn(`[model] ${req.stage}: ${res.model} declined (stop_reason refusal, €${record.costEur.toFixed(4)}); sending it once more on ${retryModel}`);
+      ({ response: res, record } = await this.sendBilled(req, effectiveStage(this.opts.config, { ...stage, model: retryModel })));
+      total += record.costEur;
+    }
+    if (res.stopReason === "refusal") throw new ModelOutputError(`Model declined the ${req.stage} request`, res, total);
+    if (res.stopReason === "max_tokens") throw new ModelOutputError(`Model output for ${req.stage} hit max_tokens`, res, total);
+    return { response: res, record, costEur: total };
+  }
+
+  /** One request on `stage`: reserved under the daily cap, sent, and its tokens and € booked (also when unusable). */
+  private async sendBilled(req: ModelRequest, stage: ModelStageConfig): Promise<{ response: ModelResponse; record: CallRecord }> {
+    const { config } = this.opts;
     const reservation = await this.ledger.reserve({ stage: req.stage, model: stage.model, estimateEur: estimateCallEur(config, stage, req), capEur: config.limits.dailyModelSpendCapEur });
     const started = Date.now();
     let res: ModelResponse;
@@ -343,7 +379,7 @@ export class ModelClient {
     }
     // Price by the model the API reports; if it reports an ID we have no price for (e.g. a dated
     // alias), use the requested model's price so the call is still logged and counted against the cap.
-    const priced = this.opts.config.pricesUsdPerMTok[res.model] ? res.model : stage.model;
+    const priced = config.pricesUsdPerMTok[res.model] ? res.model : stage.model;
     // Advisor sub-inferences are billed at the advisor's price and are not in `usage`. A model with no configured
     // price (a dated alias) is priced as the advisor model the request named.
     const requested = req.tools?.find(isAdvisorTool)?.model;
@@ -352,14 +388,12 @@ export class ModelClient {
       stage: req.stage,
       model: res.model,
       usage: res.usage,
-      costEur: costEur(this.opts.config, priced, res.usage, res.batch) + advisorEur,
+      costEur: costEur(config, priced, res.usage, res.batch) + advisorEur,
       durationMs: Date.now() - started,
       ok: res.stopReason !== "refusal" && res.stopReason !== "max_tokens",
       ...(res.advisorUsage?.length ? { advisor: res.advisorUsage } : {}),
     };
     await reservation.settle(record);
-    if (res.stopReason === "refusal") throw new ModelOutputError(`Model declined the ${req.stage} request`, res, record.costEur);
-    if (res.stopReason === "max_tokens") throw new ModelOutputError(`Model output for ${req.stage} hit max_tokens`, res, record.costEur);
     return { response: res, record };
   }
 
@@ -400,7 +434,7 @@ export class ModelClient {
       try {
         const done = await this.callRecorded(req);
         response = done.response;
-        costTotal += done.record.costEur;
+        costTotal += done.costEur;
       } catch (e) {
         if (e instanceof SpendCapError) return result("spendCap", e);
         if (e instanceof ModelOutputError) {
@@ -589,7 +623,9 @@ function hashableMessage<T>(value: T): T {
 /** The body fields both Messages endpoints share. */
 function baseParams(req: ModelRequest, stage: AppConfig["models"][ModelStageName]) {
   const outputConfig: Anthropic.OutputConfig = {};
-  // Haiku 4.5 does not accept effort; the config simply omits it for that stage.
+  // Haiku 4.5 does not accept effort; the config simply omits it for that stage. A model with config modelTraits
+  // (Haiku 5.5) always has one by now (ModelClient.stageConfig). No temperature, top_p, top_k, thinking budget or
+  // `fallbacks` is ever sent: the 5.5 models reject the first four (400), and Haiku 5.5 has no server-side fallback.
   if (stage.effort) outputConfig.effort = stage.effort;
   if (req.schema) outputConfig.format = { type: "json_schema", schema: toStructuredOutputSchema(req.schema) as Record<string, unknown> };
   // A breakpoint after every static block: content, critique and edit all start with the section

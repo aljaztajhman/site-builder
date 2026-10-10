@@ -4,12 +4,38 @@ import path from "node:path";
 import { z } from "zod";
 
 const Effort = z.enum(["low", "medium", "high", "xhigh", "max"]);
+/** The effort levels a stage may set (output_config.effort). */
+export const EFFORT_LEVELS = Effort.options;
 const ModelStage = z.object({
   model: z.string(),
   effort: Effort.optional(),
   maxTokens: z.number().int().positive(),
 });
-const Price = z.object({ input: z.number(), output: z.number(), cacheWrite5m: z.number(), cacheRead: z.number() });
+const Rates = { input: z.number(), output: z.number(), cacheWrite5m: z.number(), cacheRead: z.number() };
+/**
+ * USD per million tokens. `longPrompt`: the dearer card a model bills a whole call at when its prompt (input, cache
+ * writes and cache reads together) is over `above` tokens (Haiku 5.5: above 100K). Without it, one card for any length.
+ */
+const Price = z.object({ ...Rates, longPrompt: z.strictObject({ above: z.number().int().positive(), ...Rates }).optional() });
+export type PriceCard = Pick<z.infer<typeof Price>, "input" | "output" | "cacheWrite5m" | "cacheRead">;
+/**
+ * What a model needs from the client beyond its stage's settings (config modelTraits, keyed by model id; a model
+ * without an entry is sent its stage's settings as they are). Model ids live here, never in code.
+ */
+const ModelTraits = z.strictObject({
+  /** Adaptive thinking is on by default and counts toward max_tokens: a stage on this model gets at least `minMaxTokens`. */
+  thinkingDefaultOn: z.boolean(),
+  /** The smallest max_tokens a call on this model is sent (room for thinking before the answer). */
+  minMaxTokens: z.number().int().positive().optional(),
+  /** Effort sent when the stage sets none, so the effort is always explicit. */
+  defaultEffort: Effort.optional(),
+  /**
+   * The model has no server-side refusal fallback: on stop_reason "refusal" the client sends the same request once
+   * more on this model (it needs a price). Both calls are billed and logged.
+   */
+  refusalRetryModel: z.string().optional(),
+}).refine((t) => !t.thinkingDefaultOn || t.minMaxTokens !== undefined, { message: "a model that thinks by default needs minMaxTokens (thinking counts toward max_tokens)" });
+export type ModelTraitsConfig = z.infer<typeof ModelTraits>;
 /** An image model on fal.ai. Priced per image or per output megapixel, as fal bills it. */
 const ImageGenModel = z
   .object({
@@ -265,6 +291,8 @@ export const AppConfigSchema = z.object({
   pipeline: z.object({ homepageFirst: z.boolean() }),
   structuredOutputForContent: z.boolean(),
   pricesUsdPerMTok: z.record(z.string(), Price),
+  /** Per-model needs of the client (ModelTraits). Optional: no entry, no change to what a stage is sent. */
+  modelTraits: z.record(z.string(), ModelTraits).optional(),
   eurPerUsd: z.number().positive(),
   /** Message Batches API: every token at this share of `pricesUsdPerMTok` (0.5). Eval only (the judge's batch). */
   batchPriceFactor: z.number().positive().max(1),
@@ -561,6 +589,9 @@ export function loadConfig(file = process.env.APP_CONFIG_PATH || path.join(repoR
   for (const [stage, m] of Object.entries(config.models)) {
     if (!config.pricesUsdPerMTok[m.model]) throw new Error(`config: no price for ${m.model} (stage ${stage})`);
   }
+  for (const [model, t] of Object.entries(config.modelTraits ?? {})) {
+    if (t.refusalRetryModel && !config.pricesUsdPerMTok[t.refusalRetryModel]) throw new Error(`config: no price for ${t.refusalRetryModel} (refusal retry of ${model})`);
+  }
   const cap = process.env.DAILY_SPEND_CAP_EUR;
   if (cap !== undefined && cap !== "") {
     const n = Number(cap);
@@ -578,10 +609,19 @@ export interface Usage {
   cache_read_input_tokens?: number | null;
 }
 
-/** € cost of one model call, from config prices (`batch`: at `batchPriceFactor`). Throws for a model with no configured price. */
-export function costEur(config: AppConfig, model: string, usage: Usage, batch = false): number {
+/**
+ * The rate card a call is billed at: the model's long-prompt card when its prompt (`promptTokens`: input, cache writes
+ * and cache reads) is over that card's threshold, else its base card. Throws for a model with no configured price.
+ */
+export function priceCard(config: Pick<AppConfig, "pricesUsdPerMTok">, model: string, promptTokens: number): PriceCard {
   const p = config.pricesUsdPerMTok[model];
   if (!p) throw new Error(`No price configured for model ${model}`);
+  return p.longPrompt && promptTokens > p.longPrompt.above ? p.longPrompt : p;
+}
+
+/** € cost of one model call, from config prices (`batch`: at `batchPriceFactor`). Throws for a model with no configured price. */
+export function costEur(config: AppConfig, model: string, usage: Usage, batch = false): number {
+  const p = priceCard(config, model, usage.input_tokens + (usage.cache_creation_input_tokens ?? 0) + (usage.cache_read_input_tokens ?? 0));
   const usd =
     (usage.input_tokens * p.input +
       usage.output_tokens * p.output +
