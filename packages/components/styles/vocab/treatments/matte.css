@@ -1,0 +1,14 @@
+/* matte: the shadows lifted to the palette's inverse colour (blend mode lighten), a matte print; colour and highlights
+   stay as they are. */
+.cx-tr-matte > .media img {
+  filter: contrast(0.95);
+}
+.cx-tr-matte::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--c-inverse);
+  mix-blend-mode: lighten;
+  pointer-events: none;
+}

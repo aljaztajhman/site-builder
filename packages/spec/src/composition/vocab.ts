@@ -12,9 +12,60 @@ import { z } from "zod";
 import type { ElementKind } from "./schema.ts";
 
 /** Image masks (`image.mask`, `photos.mask`). I4 fills it to 30. */
-export const MASKS = ["none", "arch", "circle", "cut", "stamp", "ticket"] as const;
+export const MASKS = [
+  "none",
+  "arch",
+  "circle",
+  "cut",
+  "stamp",
+  "ticket",
+  // I4a (drafts; CSS in packages/components/styles/vocab/masks/)
+  "window",
+  "arch-low",
+  "arch-pointed",
+  "stepped",
+  "gable",
+  "oval",
+  "barrel",
+  "bowl",
+  "leaf",
+  "pebble",
+  "chamfer",
+  "label",
+  "tab",
+  "notch",
+  "slant",
+  "slope",
+  "arrow",
+  "bookmark",
+  "torn",
+  "scallop",
+  "cut-paper",
+  "triptych",
+  "postcard",
+  "ruled",
+  "crop",
+] as const;
 /** Image treatments (`image.treatment`, `photos.treatment`, the photo layer). I4 fills it to 16. */
-export const IMAGE_TREATMENTS = ["none", "duotone", "tint", "grain"] as const;
+export const IMAGE_TREATMENTS = [
+  "none",
+  "duotone",
+  "tint",
+  "grain",
+  // I4b (drafts; CSS in packages/components/styles/vocab/treatments/)
+  "mono-contrast",
+  "bleach",
+  "high-key",
+  "low-key",
+  "faded",
+  "matte",
+  "toned",
+  "newsprint",
+  "grade",
+  "overprint",
+  "field",
+  "dim",
+] as const;
 /** Section textures (`surface.texture`). I4 adds 12. */
 export const TEXTURES = ["none", "grain", "lines"] as const;
 /** A section's top edge (`top.edge`); "drawing" takes `top.drawing`. I5 fills it to 20. */

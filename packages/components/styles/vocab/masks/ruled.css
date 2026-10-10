@@ -1,0 +1,10 @@
+/* ruled: a double hairline round the photo, as on a bottle or jar label, in the section's text colour (currentColor
+   follows the tone, so it holds on light and dark grounds). */
+.cx-mask-ruled {
+  border: 1px solid currentColor;
+  border-radius: 0;
+}
+.cx-mask-ruled > .media {
+  inset: 0.3rem;
+  outline: 1px solid currentColor;
+}
