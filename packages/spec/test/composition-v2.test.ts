@@ -256,6 +256,10 @@ describe("composition language v2: section level", () => {
     expect(okSection({ background: [{ ...field, cols: { from: 1, to: 13 } }] })).toBe(false);
     expect(okSection({ background: [{ ...field, rows: { from: 1, to: 9 } }] })).toBe(false);
     expect(okSection({ background: [{ ...field, role: "#123456" }] })).toBe(false);
+    // A field runs from its lower line to its higher (the guards and the renderer read the same box).
+    expect(okSection({ background: [{ ...field, cols: { from: 7, to: 1 } }] })).toBe(false);
+    expect(okSection({ background: [{ ...field, rows: { from: 2, to: 1 } }] })).toBe(false);
+    expect(okSection({ background: [{ ...field, cols: { from: 4, to: 4 } }] })).toBe(true);
     const { scrim: _s, ...noScrim } = photo;
     expect(okSection({ background: [noScrim] })).toBe(false);
     expect(okSection({ background: [{ ...photo, phone: "hidden" }] })).toBe(false);

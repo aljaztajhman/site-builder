@@ -16,6 +16,7 @@ import type { Colors } from "../design.ts";
 import { NUMBERED_LABEL } from "../banned.ts";
 import { contrast, mix } from "../color.ts";
 import { KIND_PREFIX } from "../assets.ts";
+import { ON_ROLE, factObjectGround } from "./roles.ts";
 import { MOTION_META, REPEATABLE, inVocab, type VocabKey } from "./vocab.ts";
 import type { ColorRole, Element, Scrim } from "./schema.ts";
 import {
@@ -123,31 +124,23 @@ function toneGround(env: Env): ColorRole {
   }
 }
 
-/** The default text role on a ground. */
-function onRole(c: Colors, ground: ColorRole): ColorRole {
-  switch (ground) {
-    case "background":
-    case "surface":
-      return "text";
-    case "inverse":
-      return "onInverse";
-    case "band":
-      return c.onBand ? "onBand" : "onPrimary";
-    case "primary":
-      return "onPrimary";
-    default: {
-      const g = hexOf(c, ground);
-      return contrast(c.text, g) >= contrast(c.onInverse, g) ? "text" : "onInverse";
-    }
-  }
-}
+/** The default text role on a ground: one table for the guards and the stylesheet (roles.ts). */
+const onRole = (ground: ColorRole): ColorRole => ON_ROLE[ground];
 
 interface Painted {
   color?: ColorRole;
   fill?: ColorRole;
+  /** Large text (3:1) when the element's words are all large; a fact's label is body size, so it never counts as large (see `facts` below). */
   large: boolean;
+  /** The element has smaller words next to its large ones (a fact's label): over a photo the whole needs the text threshold. */
+  label?: boolean;
 }
-/** The kinds that set words in a colour of their own; their ink and ground are checked. */
+/**
+ * The kinds that set words; their ink and ground are checked. A sticker's line is --fs-lg bold, about 17 px on a phone,
+ * under the 18.66 px that makes bold text large, so it is checked as text (CSS stays as it is: a bigger sticker is a bigger
+ * sticker on every page). A non-primary action is text on the ground; a primary one has its button ground. Captions of a
+ * photos element and a map's words are text on the ground too.
+ */
 function painted(e: Element): Painted | undefined {
   const o = loose(e);
   const paint = { ...(o.color ? { color: o.color as ColorRole } : {}), ...(o.fill ? { fill: o.fill as ColorRole } : {}) };
@@ -155,9 +148,9 @@ function painted(e: Element): Painted | undefined {
     case "heading":
       return { ...paint, large: e.size >= LARGE_TEXT.headingSize };
     case "fact":
-      return { ...paint, large: e.size >= LARGE_TEXT.factSize };
+      return { ...paint, large: e.size >= LARGE_TEXT.factSize, label: true };
     case "sticker":
-      return { ...paint, large: true };
+      return { ...paint, large: false };
     case "wordmark":
       return { ...paint, large: e.size >= LARGE_TEXT.headingSize };
     case "text":
@@ -169,17 +162,22 @@ function painted(e: Element): Painted | undefined {
     case "iconFacts":
     case "quote":
       return { ...paint, large: false };
+    case "action":
+      return e.style === "primary" ? undefined : { large: false };
+    case "photos":
+      return (e.captions?.length ?? 0) > 0 ? { large: false } : undefined;
+    case "map":
+      return { large: false };
     default:
       return undefined;
   }
 }
-const minOf = (p: Painted) => (p.large ? CONTRAST_MIN.large : CONTRAST_MIN.text);
+/** Over a photo the same colour carries a fact's value and its label, so the label's threshold is the one. */
+const minOf = (p: Painted) => (p.large && !p.label ? CONTRAST_MIN.large : CONTRAST_MIN.text);
 const ratio = (x: number) => x.toFixed(2);
 
-/** The ground a text sits on: its own fill, else a field layer it lies in, else the tone. */
-function groundOf(env: Env, e: Element, p: Painted): ColorRole {
-  return p.fill ?? fieldOf(env, e)?.l.role ?? toneGround(env);
-}
+/** Elements that sit on a ground of their own, not on the tone or the field behind them: a sticker, and the fact objects that paint one. */
+const hasOwnGround = (env: Env, e: Element): boolean => e.kind === "sticker" || (e.kind === "fact" && factObjectGround(e.treatment, env.s.tone ?? "default") !== undefined);
 
 /** The scrim holders: a photo layer (over the section's texts) or an image element with a scrim (over the texts overlapping it). */
 interface Holder {
@@ -196,7 +194,7 @@ function holders(env: Env): Holder[] {
   const out: Holder[] = [];
   const texts = entries(env).flatMap(({ e }) => {
     const p = painted(e);
-    return p && !p.fill ? [{ e, p }] : [];
+    return p && !p.fill && !hasOwnGround(env, e) ? [{ e, p }] : [];
   });
   for (const { l, k } of layerEntries(env)) {
     if (l.kind !== "photo") continue;
@@ -217,7 +215,7 @@ function scrimContrast(colors: Colors, scrim: Scrim, strength: number, fg: strin
 }
 
 function fgOver(env: Env, colors: Colors, p: Painted): string {
-  return hexOf(colors, p.color ?? onRole(colors, toneGround(env)));
+  return hexOf(colors, p.color ?? onRole(toneGround(env)));
 }
 
 // ---------- G1 background layers, G2 fields ----------
@@ -294,25 +292,83 @@ function g3(env: Env): Finding[] {
   return out;
 }
 
+/** One ink on one ground. `via` is what a repair would change: the own colour, the own fill, or the field behind. */
+interface Pair {
+  fg: ColorRole;
+  ground: ColorRole;
+  min: number;
+  via: "color" | "fill" | "field";
+  label: boolean;
+}
+
+/**
+ * The inks an element's words are set in and the grounds they sit on, with the threshold of each. A pair whose ink and
+ * ground are both the page's own defaults is not listed (the tone's own pair is the design's business, not a guard's).
+ * A fact has a value (large from size 4) and a label (body size, 4.5:1) in the same colour; numeral and stamp take the
+ * element's colour into the object (composed-v2.css), ticket, seal and tag keep their own ink on their own ground (the
+ * colour is checked against that ground all the same, so an unreadable choice never reaches a site), a plate's label sits
+ * outside it.
+ */
+function pairsOf(env: Env, e: Element, p: Painted, useColor: boolean): Pair[] {
+  const color = useColor ? p.color : undefined;
+  const fld = fieldOf(env, e);
+  const outer: { ground: ColorRole; src: "fill" | "field" | "tone" | "own" } = fld ? { ground: fld.l.role, src: "field" } : { ground: toneGround(env), src: "tone" };
+  const out: Pair[] = [];
+  const add = (ground: ColorRole, src: "fill" | "field" | "tone" | "own", colorApplies: boolean, min: number, label: boolean) => {
+    const via = colorApplies && color ? "color" : src === "fill" || src === "field" ? src : undefined;
+    if (via) out.push({ fg: colorApplies && color ? color : onRole(ground), ground, min, via, label });
+  };
+  if (e.kind === "fact") {
+    const t = e.treatment as string;
+    const own = factObjectGround(t, env.s.tone ?? "default");
+    const valueMin = p.large ? CONTRAST_MIN.large : CONTRAST_MIN.text;
+    if (t === "plate") {
+      if (p.fill) add(p.fill, "fill", false, valueMin, false);
+      add(outer.ground, outer.src, true, CONTRAST_MIN.text, true);
+    } else {
+      const g = p.fill ?? own ?? outer.ground;
+      const src = p.fill ? "fill" : own ? "own" : outer.src;
+      add(g, src, true, valueMin, false);
+      if (t === "numeral") add(outer.ground, outer.src, true, CONTRAST_MIN.text, true);
+      else add(g, src, true, CONTRAST_MIN.text, true);
+    }
+  } else if (e.kind === "sticker") {
+    add(p.fill ?? "primary", p.fill ? "fill" : "own", true, minOf(p), false);
+  } else {
+    add(p.fill ?? outer.ground, p.fill ? "fill" : outer.src, true, minOf(p), false);
+  }
+  return out.filter((x) => contrast(hexOf(env.ctx.colors!, x.fg), hexOf(env.ctx.colors!, x.ground)) < x.min);
+}
+
 function g9(env: Env): Finding[] {
   const colors = env.ctx.colors;
   if (!colors) return [];
   const out: Finding[] = [];
   const over = new Set(holders(env).flatMap((h) => h.texts.map((t) => t.e)));
+  const drop = (o: Loose, key: "color" | "fill", i: number): Fix => ({ path: `${EL}/${i}/${key}`, what: `${key} dropped`, run: () => void delete o[key] });
   for (const { e, i } of entries(env)) {
     const p = painted(e);
-    if (!p || (!p.color && !p.fill) || over.has(e)) continue;
+    if (!p || over.has(e)) continue;
     const o = loose(e);
-    const ground = groundOf(env, e, p);
-    const fg = p.color ?? onRole(colors, ground);
-    const got = contrast(hexOf(colors, fg), hexOf(colors, ground));
-    if (got >= minOf(p)) continue;
-    const message = `composed: ${e.id}: ${fg} on ${ground} fails contrast (${ratio(got)} < ${minOf(p)})`;
-    if (p.color) {
-      out.push(both(`${EL}/${i}/color`, "design", message, { path: `${EL}/${i}/color`, what: "color dropped", run: () => void delete o.color }));
-      const def = onRole(colors, ground);
-      if (p.fill && contrast(hexOf(colors, def), hexOf(colors, ground)) < minOf(p)) out.push({ fix: { path: `${EL}/${i}/fill`, what: "fill dropped", run: () => void delete o.fill } });
-    } else out.push(both(`${EL}/${i}/fill`, "design", message, { path: `${EL}/${i}/fill`, what: "fill dropped", run: () => void delete o.fill }));
+    const fails = pairsOf(env, e, p, true);
+    if (fails.length === 0) continue;
+    const msg = (x: Pair) => `composed: ${e.id}: ${x.fg} on ${x.ground}${x.label ? " (label)" : ""} fails contrast (${ratio(contrast(hexOf(colors, x.fg), hexOf(colors, x.ground)))} < ${x.min})`;
+    const colorFail = fails.find((x) => x.via === "color");
+    if (colorFail) out.push(both(`${EL}/${i}/color`, "design", msg(colorFail), drop(o, "color", i)));
+    // What still fails without the own colour is the fill's or the field's.
+    const rest = p.color ? pairsOf(env, e, p, false)[0] : fails[0];
+    if (!rest) continue;
+    let fix: Fix;
+    let path: string;
+    if (rest.via === "fill") {
+      path = `${EL}/${i}/fill`;
+      fix = drop(o, "fill", i);
+    } else {
+      const f = fieldOf(env, e)!;
+      path = `${BG}/${f.k}`;
+      fix = { path, what: "field layer dropped", run: () => (env.gone.has(f.l) ? false : void env.gone.add(f.l)) };
+    }
+    out.push(colorFail ? { fix } : both(path, "design", msg(rest), fix));
   }
   // A background drawing is quiet: its ink close to the ground.
   const ground = toneGround(env);

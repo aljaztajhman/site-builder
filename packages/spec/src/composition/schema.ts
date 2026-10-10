@@ -333,7 +333,10 @@ export const ComposedProps = z.strictObject({
           role: ColorRole,
           cols: z.strictObject({ from: Col, to: Col }).optional().describe("Default 1–12; touching 1 or 12 bleeds to the page edge"),
           rows: z.strictObject({ from: Row, to: Row }).optional(),
-        }),
+        })
+          // The renderer places a field from its first line to its last; a reversed pair would paint nothing (or the wrong box).
+          .refine((l) => (l.cols ? l.cols.from <= l.cols.to : true), { error: "composed: a field layer's cols run from the lower column to the higher", path: ["cols"] })
+          .refine((l) => (l.rows ? l.rows.from <= l.rows.to : true), { error: "composed: a field layer's rows run from the lower row to the higher", path: ["rows"] }),
         z.strictObject({
           kind: z.enum(["photo"]),
           image: ImageRef,

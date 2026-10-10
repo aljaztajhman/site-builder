@@ -77,7 +77,9 @@
 import { describe, expect, it } from "vitest";
 import {
   BACKGROUND_LIMITS,
+  ColorRole,
   CONTRAST_MIN,
+  ON_ROLE,
   LARGE_TEXT,
   MOTION_BUDGET,
   PHOTOS_COUNT,
@@ -256,6 +258,22 @@ describe("G3 contrast over a photo", () => {
     expect(props(repairComposition(large, C).section).background).toEqual([photoLayer(2)]);
   });
 
+  it("also checks non-primary actions, captioned photos and a map over the photo layer, and a fact at body size", () => {
+    const over = (...els: Element[]) => composed([heading("e_head", { col: 1, span: 6, row: 1 }, 0, { size: 3 }), ...els], { background: [photoLayer(1)] }, "inverse");
+    expect(has(over(action("e_a", { col: 1, span: 4, row: 2 }, 1, { style: "secondary" })), /e_a over the photo fails contrast \([\d.]+ < 4\.5\)/, C)).toBe(true);
+    expect(has(over(action("e_a", { col: 1, span: 4, row: 2 }, 1, { style: "text" })), /e_a over the photo/, C)).toBe(true);
+    expect(has(over(action("e_a", { col: 1, span: 4, row: 2 }, 1, { style: "primary" })), /e_a over the photo/, C)).toBe(false);
+    expect(has(over(photos("e_p", { col: 7, span: 5, row: 1 }, 1, { captions: ["Prva", "Druga"] })), /e_p over the photo/, C)).toBe(true);
+    expect(has(over(photos("e_p", { col: 7, span: 5, row: 1 }, 1)), /e_p over the photo/, C)).toBe(false);
+    expect(has(over(map("e_m", { col: 1, span: 5, row: 2 }, 1)), /e_m over the photo/, C)).toBe(true);
+    // Strength 2 gives 3.10: a large heading passes, a fact (its label is body size) does not.
+    const two = (e: Element) => composed([e], { background: [photoLayer(2)] }, "inverse");
+    expect(has(two(heading("e_x", { col: 1, span: 6, row: 1 }, 0, { size: 4 })), /over the photo/, C)).toBe(false);
+    expect(has(two(fact("e_x", { col: 1, span: 6, row: 1 }, 0, { size: 5 })), /e_x over the photo fails contrast \(3\.10 < 4\.5\)/, C)).toBe(true);
+    // A ticket sits on its own ground, not on the photo.
+    expect(has(two(fact("e_x", { col: 1, span: 6, row: 1 }, 0, { size: 5, treatment: "ticket" })), /over the photo/, C)).toBe(false);
+  });
+
   it("checks text overlapping an image with a scrim", () => {
     const over = (strength: number, rest: Record<string, unknown> = {}, tone?: "inverse") =>
       composed([photo("e_photo", { col: 1, span: 12, row: 1, rowSpan: 3 }, 0, "img_01", {}, { scrim: { role: "inverse", strength } }), heading("e_head", { col: 2, span: 6, row: 2, layer: 1 }, 1, { size: 2, ...rest })], {}, tone);
@@ -424,8 +442,19 @@ describe("G7 motion", () => {
   });
 
   it.todo("calm allows entrance presets only; scroll presets need lively (no scroll preset in MOTIONS yet)");
-  it.todo("`loop` only on a ribbon, which renders a pause control (no `loop` in MOTIONS / ribbon.move yet)");
-  it.todo("`counter` only on a fact whose value is a client number (no `counter` in MOTIONS yet)");
+  it("a looping ribbon needs motion level lively (the pause control is the renderer's), and repairs to no move", () => {
+    const loop = composed([heading("e_head", { col: 1, span: 6, row: 1 }, 0), ribbon("e_r", { col: 1, span: 12, row: 2 }, 1, { move: "loop" })]);
+    const calm = onPage([quiet(), loop], 1, ctxWith({ motionLevel: "calm" }));
+    expect(issue(loop, /e_r: loop needs motion level lively \(is calm\)/, calm)).toMatchObject({ code: "structure", path: "/props/elements/1/move" });
+    expect(paths(repairComposition(loop, calm))).toEqual(["/props/elements/1/move"]);
+    expect(has(loop, /loop needs motion level/, onPage([quiet(), loop], 1, ctxWith({ motionLevel: "lively" })))).toBe(false);
+    expect(has(loop, /moves but the motion level is still/, onPage([quiet(), loop], 1, ctxWith({ motionLevel: "still" })))).toBe(true);
+    // drift is fine at calm.
+    const drift = composed([heading("e_head", { col: 1, span: 6, row: 1 }, 0), ribbon("e_r", { col: 1, span: 12, row: 2 }, 1, { move: "drift" })]);
+    expect(validateComposition(drift, calm)).toEqual([]);
+  });
+  // `count` (a fact counts up only when its value is a plain whole number from the client) is checked where the client's
+  // facts are: packages/engine/test/facts.test.ts. The renderer only animates a value that is digits (count.js).
 });
 
 describe("G8 vocabulary names", () => {
@@ -530,10 +559,65 @@ describe("G9 element colours", () => {
     const inField = composed([heading("e_head", { col: 1, span: 6, row: 1 }, 0, { color: "text" })], { background: [field("inverse", [1, 6])] });
     expect(has(inField, /e_head: text on inverse fails contrast/, C)).toBe(true);
     const onFill = composed([sticker("e_s", { col: 8, span: 3, row: 1 }, 0, { fill: "band", color: "background" })]);
-    expect(issue(onFill, /e_s: background on band fails contrast \([\d.]+ < 3\)/, C)).toMatchObject({ path: "/props/elements/0/color" });
+    expect(issue(onFill, /e_s: background on band fails contrast \([\d.]+ < 4\.5\)/, C)).toMatchObject({ path: "/props/elements/0/color" });
     const r = repairComposition(onFill, C);
     expect(paths(r)).toEqual(["/props/elements/0/color"]);
     expect(elAt(r.section, 0)).toMatchObject({ fill: "band" });
+  });
+
+  it("checks a fact's colour against its object's own ground (a ticket is primary, a seal band, a tag inverse)", () => {
+    const one = (treatment: string, color: string, tone?: "inverse" | "band") => composed([heading("e_head", { col: 1, span: 6, row: 1 }, 0), fact("e_f", { col: 8, span: 4, row: 1 }, 1, { size: 5, treatment, color })], {}, tone);
+    for (const [t, color] of [["ticket", "primary"], ["seal", "band"], ["tag", "inverse"]] as const) {
+      const s = one(t, color);
+      expect(issue(s, new RegExp(`e_f: ${color} on ${color} fails contrast \\(1\\.00 < 3\\)`), C), t).toMatchObject({ code: "design", path: "/props/elements/1/color" });
+      const r = repairComposition(s, C);
+      expect(paths(r), t).toEqual(["/props/elements/1/color"]);
+      expect(elAt(r.section, 1).color).toBeUndefined();
+      expect(validateComposition(r.section, C), t).toEqual([]);
+    }
+    // On a band section the ticket flips to onBand: white (onPrimary) on it is fine, onBand is not.
+    expect(has(one("ticket", "onPrimary", "band"), /e_f: onPrimary on onBand fails/, C)).toBe(false);
+    expect(has(one("ticket", "onBand", "band"), /e_f: onBand on onBand fails/, C)).toBe(true);
+    // A colour that holds on the object's ground passes.
+    expect(validateComposition(one("ticket", "onPrimary"), C)).toEqual([]);
+  });
+
+  it("holds a fact's label to 4.5:1 in the value's colour (the value alone is large from size 4)", () => {
+    const s = composed([heading("e_head", { col: 1, span: 6, row: 1 }, 0), fact("e_f", { col: 8, span: 4, row: 1 }, 1, { size: 5, color: "accent" })]);
+    expect(issue(s, /e_f: accent on background \(label\) fails contrast \(3\.07 < 4\.5\)/, C)).toMatchObject({ code: "design", path: "/props/elements/1/color" });
+    expect(paths(repairComposition(s, C))).toEqual(["/props/elements/1/color"]);
+    // A plate's label sits outside the plate, on the section's ground.
+    const plate = composed([heading("e_head", { col: 1, span: 6, row: 1 }, 0), fact("e_f", { col: 8, span: 4, row: 1 }, 1, { size: 5, treatment: "plate", color: "accent" })]);
+    expect(has(plate, /e_f: accent on background \(label\)/, C)).toBe(true);
+  });
+
+  it("checks every text on a field against the field's ground, and repairs by dropping the field", () => {
+    const dark = { ...C, colors: { ...PALETTE, accent: "#2a2a2a" } };
+    const s = composed([heading("e_head", { col: 1, span: 6, row: 1 }, 0), text("e_text", { col: 1, span: 6, row: 2 }, 1)], { background: [field("accent", [1, 6])] });
+    expect(issue(s, /e_text: text on accent fails contrast \([\d.]+ < 4\.5\)/, dark)).toMatchObject({ code: "design", path: "/props/background/0" });
+    expect(has(s, /e_head: text on accent fails contrast \([\d.]+ < 3\)/, dark)).toBe(true);
+    expect(validateComposition(s, C)).toEqual([]); // accent #b38f00 holds the default text
+    const r = repairComposition(s, dark);
+    expect(paths(r)).toEqual(["/props/background/0"]);
+    expect(props(r.section).background).toBeUndefined();
+    expect(validateComposition(r.section, dark)).toEqual([]);
+    // An element with its own fill, and one that lies outside the field, are not on it.
+    const own = composed([heading("e_head", { col: 1, span: 6, row: 1 }, 0, { fill: "surface" }), text("e_text", { col: 8, span: 5, row: 2 }, 1)], { background: [field("accent", [1, 6])] });
+    expect(has(own, /on accent/, dark)).toBe(false);
+  });
+
+  it("reads one text-role table, the one the stylesheet repeats (ON_ROLE)", () => {
+    expect(ON_ROLE.accent).toBe("text");
+    expect(ON_ROLE.band).toBe("onBand");
+    expect(Object.keys(ON_ROLE).sort()).toEqual([...ColorRole.options].sort());
+    for (const g of ColorRole.options) expect(ColorRole.options).toContain(ON_ROLE[g]);
+  });
+
+  it("checks a sticker's line as text (17 px bold on a phone is not large), against its own ground", () => {
+    const s = composed([sticker("e_s", { col: 8, span: 3, row: 1 }, 0, { fill: "accent", color: "background" })]);
+    expect(issue(s, /e_s: background on accent fails contrast \(3\.07 < 4\.5\)/, C)).toMatchObject({ path: "/props/elements/0/color" });
+    const own = composed([sticker("e_s", { col: 8, span: 3, row: 1 }, 0, { color: "primary" })]);
+    expect(has(own, /e_s: primary on primary/, C)).toBe(true);
   });
 
   it("keeps a background drawing quiet and repairs its ink to border", () => {
