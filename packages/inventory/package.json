@@ -6,6 +6,9 @@
   "exports": {
     ".": "./src/index.ts"
   },
+  "scripts": {
+    "inventory:decide": "tsx scripts/decide.ts"
+  },
   "dependencies": {
     "@sb/render": "workspace:*",
     "@sb/spec": "workspace:*",

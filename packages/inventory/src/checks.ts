@@ -3,7 +3,9 @@
  * byte budgets per kind, the Slovene letters every font must draw, and the contrast of a palette's text roles.
  */
 import { CONTRAST_RULES, contrast, enforceDesign, type Colors, type Design, type Direction } from "@sb/spec";
-import type { AssetKind } from "./schema.ts";
+import { detectPattern, type PatternVerdict } from "./pattern-detector.ts";
+import type { Asset, AssetKind } from "./schema.ts";
+import { PATTERN_TILES, type PatternTile } from "./tiles.ts";
 
 /**
  * Bytes an asset may add to a page, per kind. Fonts: per file (a pairing is two files). Motifs and the rest: the CSS
@@ -78,4 +80,19 @@ export function shippedColors(colors: Colors, dir: Direction): Colors {
     imagery: dir.imagery,
   };
   return enforceDesign(design, dir).colors;
+}
+
+/**
+ * The kinds the dot/grid detector checks (G19). Textures only for now: REPEATABLE drawings join when the drawing list
+ * and its REPEATABLE set exist (I5), through a tag or this list.
+ */
+export const PATTERN_CHECKED_KINDS: readonly AssetKind[] = ["texture"];
+
+export const needsPatternCheck = (a: Pick<Asset, "kind">): boolean => PATTERN_CHECKED_KINDS.includes(a.kind);
+
+/** The dot/grid verdict for an asset's tile (tiles.ts); an asset that needs the check and has no tile fails. */
+export function patternCheck(a: Pick<Asset, "id">, tiles: Readonly<Record<string, PatternTile>> = PATTERN_TILES): PatternVerdict | { ok: false; reason: "no-tile"; detail: string } {
+  const t = tiles[a.id];
+  if (!t) return { ok: false, reason: "no-tile", detail: `${a.id} has no tile in packages/inventory/src/tiles.ts` };
+  return detectPattern(t.tile, t.repeat ? { repeat: t.repeat } : {});
 }
