@@ -51,7 +51,8 @@ export const TEXT_SPAN = { min: 4, max: 8 } as const;
 const SHIFT_CELLS = 0.75;
 /** Headings from this size rotate (a vertical heading needs the size to be legible). */
 const ROTATE_MIN_SIZE = 4;
-const UPPERCASE_MIN = { weight: 700, size: 2 } as const;
+/** All caps only this heavy and this large (smaller is the banned tracked eyebrow; the renderer sets normal case below). */
+export const UPPERCASE_MIN = { weight: 700, size: 2 } as const;
 const DISPLAY = { headingSize: 6, factSize: 7, perSection: 1, perPage: 2 } as const;
 const MAX_PHOTO_USES = 2;
 const MAX_SVG_PATHS = 24;
