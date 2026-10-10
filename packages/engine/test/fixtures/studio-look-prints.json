@@ -1,0 +1,2075 @@
+{
+ "$comment": "Look prints of the 10 goldens and 12 twins, replayed free from tools/eval/recordings-home-off (variety switches off) and recordings-home-on (families, skeleton, concept on) on 2026-10-10 for the studio F5 calibration: genome, composition signature, palette in Lab, dHash of the first screens at 360 and 1280 px.",
+ "off": [
+  {
+   "id": "avtoservis-mrak",
+   "direction": "bold-local",
+   "fontPair": "archivo-archivo",
+   "trade": "car-repair",
+   "town": "Kranj",
+   "stance": null,
+   "genome": {
+    "preset": "bold-local",
+    "type": "archivo-archivo",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-type:with-facts",
+    "header": "split-cta",
+    "footer": "columns",
+    "rhythm": "inverse-accents",
+    "imagery": "natural",
+    "shape": "square",
+    "density": "compact",
+    "motif": "none"
+   },
+   "composition": "hero:hero-type/with-facts services:services-cards/compact steps:steps/horizontal story:about/text-only contact:contact/split-map",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     57.26,
+     13.12,
+     57.91
+    ],
+    "band": [
+     57.26,
+     13.12,
+     57.91
+    ],
+    "accent": [
+     61.3,
+     11.98,
+     61.46
+    ]
+   },
+   "phash360": "a688ce8a82808686",
+   "phash1280": "8b84a48581a5829a"
+  },
+  {
+   "id": "fizioterapija-pregib",
+   "direction": "pregib",
+   "fontPair": "bricolage-public-sans",
+   "trade": "physio",
+   "town": "Novo mesto",
+   "stance": null,
+   "genome": {
+    "preset": "pregib",
+    "type": "bricolage-public-sans",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-signature:bend",
+    "header": "bar",
+    "footer": "compact",
+    "rhythm": "alternate",
+    "imagery": "natural",
+    "shape": "soft",
+    "density": "airy",
+    "motif": "bend"
+   },
+   "composition": "hero:hero-signature/bend highlights:highlights/figures services:services-list/aside story:text/narrow prices:price-list/tags call:cta/band contact:contact-strip/cards",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     40.44,
+     -26.86,
+     -2.72
+    ],
+    "band": [
+     40.44,
+     -26.86,
+     -2.72
+    ],
+    "accent": [
+     61.55,
+     33.02,
+     56.5
+    ]
+   },
+   "phash360": "86e2c0607a7a4e87",
+   "phash1280": "16909e969e9e8e53"
+  },
+  {
+   "id": "frizerstvo-lana",
+   "direction": "ogledalo",
+   "fontPair": "inter-tight-dm-sans",
+   "trade": "hairdresser",
+   "town": "Celje",
+   "stance": null,
+   "genome": {
+    "preset": "ogledalo",
+    "type": "inter-tight-dm-sans",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-signature:mirrors",
+    "header": "bar",
+    "footer": "compact",
+    "rhythm": "alternate",
+    "imagery": "natural",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "mirror"
+   },
+   "composition": "hero:hero-signature/mirrors call:cta/band prices:price-list/grouped team:team/photo contact:contact/call-out",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     30.39,
+     34.22,
+     9.72
+    ],
+    "band": [
+     30.39,
+     34.22,
+     9.72
+    ],
+    "accent": [
+     50.69,
+     35.45,
+     -0.08
+    ]
+   },
+   "phash360": "8ca0a08cb2b2b667",
+   "phash1280": "338c9c94de3e225c"
+  },
+  {
+   "id": "gostilna-zlata-zlica",
+   "direction": "jedilnik",
+   "fontPair": "garamond-figtree",
+   "trade": "restaurant",
+   "town": "Škofja Loka",
+   "stance": null,
+   "genome": {
+    "preset": "jedilnik",
+    "type": "garamond-figtree",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-signature:card",
+    "header": "bar",
+    "footer": "compact",
+    "rhythm": "inverse-accents",
+    "imagery": "natural",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "spoon"
+   },
+   "composition": "hero:hero-signature/card prices:price-list/offers products:products/plates story:image-text/pair team:team/photo contact:contact/call-out",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     20.73,
+     -16.21,
+     4.41
+    ],
+    "band": [
+     71.88,
+     4.38,
+     48.84
+    ],
+    "accent": [
+     57.64,
+     3.76,
+     49.61
+    ]
+   },
+   "phash360": "f6fad84941454d73",
+   "phash1280": "d0f0fa785a5a581a"
+  },
+  {
+   "id": "instalacije-rebernik",
+   "direction": "industrial",
+   "fontPair": "space-grotesk-plex",
+   "trade": "builder",
+   "town": "Ptuj",
+   "stance": null,
+   "genome": {
+    "preset": "industrial",
+    "type": "space-grotesk-plex",
+    "palette": "preset",
+    "ground": "dark",
+    "hero": "hero-type:with-facts",
+    "header": "bar",
+    "footer": "compact",
+    "rhythm": "inverse-accents",
+    "imagery": "monochrome",
+    "shape": "square",
+    "density": "compact",
+    "motif": "none"
+   },
+   "composition": "hero:hero-type/with-facts services:services-list/two-column steps:steps/horizontal story:text/two-column area:service-area/list story:about/text-only call:cta/split",
+   "paletteLab": {
+    "background": [
+     7.65,
+     -0.11,
+     -2.44
+    ],
+    "primary": [
+     80.44,
+     3.26,
+     82
+    ],
+    "band": [
+     80.44,
+     3.26,
+     82
+    ],
+    "accent": [
+     80.44,
+     3.26,
+     82
+    ]
+   },
+   "phash360": "69270779617e7178",
+   "phash1280": "4433735b7c636367"
+  },
+  {
+   "id": "kmetija-grabnar",
+   "direction": "markacija",
+   "fontPair": "fraunces-nunito-sans",
+   "trade": "tourist-farm",
+   "town": "Luče",
+   "stance": null,
+   "genome": {
+    "preset": "markacija",
+    "type": "fraunces-nunito-sans",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-signature:view",
+    "header": "bar",
+    "footer": "compact",
+    "rhythm": "alternate",
+    "imagery": "full-bleed",
+    "shape": "soft",
+    "density": "airy",
+    "motif": "trail"
+   },
+   "composition": "hero:hero-signature/view prices:price-list/rates gallery:gallery/wall story:image-text/image-right hours:opening-hours/poster services:services-list/aside team:team/list contact:contact/call-out",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     43.48,
+     62.94,
+     39.03
+    ],
+    "band": [
+     43.48,
+     62.94,
+     39.03
+    ],
+    "accent": [
+     56.44,
+     -28.85,
+     17.44
+    ]
+   },
+   "phash360": "c25c3d2f811d761a",
+   "phash1280": "8291173e7c5b53e3"
+  },
+  {
+   "id": "pekarna-kvas",
+   "direction": "warm-craft",
+   "fontPair": "fraunces-source-sans",
+   "trade": "bakery",
+   "town": "Kamnik",
+   "stance": null,
+   "genome": {
+    "preset": "warm-craft",
+    "type": "fraunces-source-sans",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-split:image-left",
+    "header": "split-cta",
+    "footer": "columns",
+    "rhythm": "alternate",
+    "imagery": "offset-block",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "none"
+   },
+   "composition": "hero:hero-split/image-left contact:contact-strip/bar products:products/grid story:about/image-side steps:steps/horizontal hours:opening-hours/compact contact:contact/split-map",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     44.14,
+     43.7,
+     44.16
+    ],
+    "band": [
+     44.14,
+     43.7,
+     44.16
+    ],
+    "accent": [
+     51.28,
+     40.43,
+     44.84
+    ]
+   },
+   "phash360": "9c9c888aa0888088",
+   "phash1280": "9ba4a4a4a0a0a425"
+  },
+  {
+   "id": "racunovodstvo-seliskar",
+   "direction": "racun",
+   "fontPair": "ibm-plex-sans",
+   "trade": "accountant",
+   "town": "Murska Sobota",
+   "stance": null,
+   "genome": {
+    "preset": "racun",
+    "type": "ibm-plex-sans",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-signature:receipt",
+    "header": "bar",
+    "footer": "compact",
+    "rhythm": "alternate",
+    "imagery": "natural",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "ledger"
+   },
+   "composition": "hero:hero-signature/receipt highlights:highlights/figures services:services-list/rows story:about/figure contact:contact/call-out",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     33.37,
+     -30.46,
+     11.1
+    ],
+    "band": [
+     33.37,
+     -30.46,
+     11.1
+    ],
+    "accent": [
+     51.36,
+     -37.59,
+     15.3
+    ]
+   },
+   "phash360": "b690a0b89e6941c9",
+   "phash1280": "8fada58d8da9ad2d"
+  },
+  {
+   "id": "trgovina-oljka-in-sol",
+   "direction": "etiketa",
+   "fontPair": "lora-karla",
+   "trade": "shop",
+   "town": "Koper",
+   "stance": null,
+   "genome": {
+    "preset": "etiketa",
+    "type": "lora-karla",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-signature:label",
+    "header": "bar",
+    "footer": "compact",
+    "rhythm": "alternate",
+    "imagery": "natural",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "label"
+   },
+   "composition": "hero:hero-signature/label prices:price-list/tags story:text/narrow story:image-text/round hours:opening-hours/photo contact:contact/call-out",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     46.02,
+     43.81,
+     38.13
+    ],
+    "band": [
+     46.02,
+     43.81,
+     38.13
+    ],
+    "accent": [
+     59.98,
+     -18.17,
+     35.58
+    ]
+   },
+   "phash360": "614541414d51843e",
+   "phash1280": "4c1d5d5b5e5e5f95"
+  },
+  {
+   "id": "zobozdravstvo-lebar",
+   "direction": "nasmeh",
+   "fontPair": "figtree-figtree",
+   "trade": "dental",
+   "town": "Maribor",
+   "stance": null,
+   "genome": {
+    "preset": "nasmeh",
+    "type": "figtree-figtree",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-signature:disc",
+    "header": "bar",
+    "footer": "compact",
+    "rhythm": "alternate",
+    "imagery": "natural",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "smile"
+   },
+   "composition": "hero:hero-signature/disc hours:opening-hours/week services:services-list/aside team:team/photo contact:contact/call-out",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     45.86,
+     -30.32,
+     -2.55
+    ],
+    "band": [
+     45.86,
+     -30.32,
+     -2.55
+    ],
+    "accent": [
+     55.76,
+     53.48,
+     42.25
+    ]
+   },
+   "phash360": "c6e0e08810d8c0d0",
+   "phash1280": "838c988ccc0cac44"
+  },
+  {
+   "id": "avto-kovac",
+   "direction": "tablica",
+   "fontPair": "archivo-public-sans",
+   "trade": "car-repair",
+   "town": "Ljubljana",
+   "stance": null,
+   "genome": {
+    "preset": "tablica",
+    "type": "archivo-public-sans",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-signature:photo",
+    "header": "bar",
+    "footer": "compact",
+    "rhythm": "inverse-accents",
+    "imagery": "natural",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "plate"
+   },
+   "composition": "hero:hero-signature/photo services:services-list/two-column story:image-text/image-left contact:contact/call-out",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     8.1,
+     -0.27,
+     -3.29
+    ],
+    "band": [
+     84.2,
+     3.68,
+     85.22
+    ],
+    "accent": [
+     60.98,
+     2.5,
+     65.45
+    ]
+   },
+   "phash360": "043f7f592b28a3b2",
+   "phash1280": "065e6e76d4666640"
+  },
+  {
+   "id": "brivnica-kos",
+   "direction": "dark-elegant",
+   "fontPair": "garamond-karla",
+   "trade": "hairdresser",
+   "town": "Maribor",
+   "stance": null,
+   "genome": {
+    "preset": "dark-elegant",
+    "type": "garamond-karla",
+    "palette": "preset",
+    "ground": "dark",
+    "hero": "hero-image:overlay-left",
+    "header": "stacked",
+    "footer": "compact",
+    "rhythm": "alternate",
+    "imagery": "framed",
+    "shape": "square",
+    "density": "airy",
+    "motif": "none"
+   },
+   "composition": "hero:hero-image/overlay-left contact:contact-strip/cards prices:price-list/grouped story:image-text/image-right booking:booking/simple",
+   "paletteLab": {
+    "background": [
+     5.28,
+     0.82,
+     1.45
+    ],
+    "primary": [
+     60.75,
+     6.35,
+     33.67
+    ],
+    "band": [
+     60.75,
+     6.35,
+     33.67
+    ],
+    "accent": [
+     60.75,
+     6.35,
+     33.67
+    ]
+   },
+   "phash360": "717d7d773a1b5377",
+   "phash1280": "c45b656565656565"
+  },
+  {
+   "id": "cvetlicarna-marjetica",
+   "direction": "warm-craft",
+   "fontPair": "fraunces-source-sans",
+   "trade": "shop",
+   "town": "Novo mesto",
+   "stance": null,
+   "genome": {
+    "preset": "warm-craft",
+    "type": "fraunces-source-sans",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-split:image-left",
+    "header": "split-cta",
+    "footer": "columns",
+    "rhythm": "alternate",
+    "imagery": "offset-block",
+    "shape": "soft",
+    "density": "airy",
+    "motif": "none"
+   },
+   "composition": "hero:hero-split/image-left contact:contact-strip/bar prices:price-list/grouped story:image-text/image-left call:cta/band",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     47.26,
+     37.7,
+     32.09
+    ],
+    "band": [
+     47.26,
+     37.7,
+     32.09
+    ],
+    "accent": [
+     56.33,
+     -17.28,
+     11.82
+    ]
+   },
+   "phash360": "a6bebab680a28e86",
+   "phash1280": "9ba4a2a0a4a0a004"
+  },
+  {
+   "id": "elektro-zupan",
+   "direction": "cevi",
+   "fontPair": "space-grotesk-public-sans",
+   "trade": "builder",
+   "town": "Velenje",
+   "stance": null,
+   "genome": {
+    "preset": "cevi",
+    "type": "space-grotesk-public-sans",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-signature:drawing",
+    "header": "bar",
+    "footer": "compact",
+    "rhythm": "inverse-accents",
+    "imagery": "natural",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "pipes"
+   },
+   "composition": "hero:hero-signature/drawing services:services-list/rows steps:steps/horizontal area:service-area/list contact:contact/call-out",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     49.06,
+     58.62,
+     49.46
+    ],
+    "band": [
+     48.31,
+     18.71,
+     -63.98
+    ],
+    "accent": [
+     48.31,
+     18.71,
+     -63.98
+    ]
+   },
+   "phash360": "c6a8a28c9cc07030",
+   "phash1280": "87a48c8c8e8e8e00"
+  },
+  {
+   "id": "frizerski-salon-mia",
+   "direction": "ogledalo",
+   "fontPair": "inter-tight-dm-sans",
+   "trade": "hairdresser",
+   "town": "Ljubljana",
+   "stance": null,
+   "genome": {
+    "preset": "ogledalo",
+    "type": "inter-tight-dm-sans",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-signature:mirrors",
+    "header": "bar",
+    "footer": "compact",
+    "rhythm": "alternate",
+    "imagery": "natural",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "mirror"
+   },
+   "composition": "hero:hero-signature/mirrors prices:price-list/grouped team:team/photo contact:contact/call-out",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     30.39,
+     34.22,
+     9.72
+    ],
+    "band": [
+     30.39,
+     34.22,
+     9.72
+    ],
+    "accent": [
+     50.69,
+     35.45,
+     -0.08
+    ]
+   },
+   "phash360": "868ca8c6b2b2b684",
+   "phash1280": "b79c9c9cbc9e8bcb"
+  },
+  {
+   "id": "gostilna-pri-mostu",
+   "direction": "jedilnik",
+   "fontPair": "garamond-figtree",
+   "trade": "restaurant",
+   "town": "Kamnik",
+   "stance": null,
+   "genome": {
+    "preset": "jedilnik",
+    "type": "garamond-figtree",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-signature:card",
+    "header": "bar",
+    "footer": "compact",
+    "rhythm": "inverse-accents",
+    "imagery": "natural",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "spoon"
+   },
+   "composition": "hero:hero-signature/card prices:price-list/offers products:products/plates story:image-text/pair team:team/list contact:contact/call-out",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     20.73,
+     -16.21,
+     4.41
+    ],
+    "band": [
+     71.88,
+     4.38,
+     48.84
+    ],
+    "accent": [
+     57.64,
+     3.76,
+     49.61
+    ]
+   },
+   "phash360": "a6ffe04541594575",
+   "phash1280": "3e5ff37b1b5b5f18"
+  },
+  {
+   "id": "gostisce-na-gricu",
+   "direction": "jedilnik",
+   "fontPair": "garamond-figtree",
+   "trade": "restaurant",
+   "town": "Ivanjkovci",
+   "stance": null,
+   "genome": {
+    "preset": "jedilnik",
+    "type": "garamond-figtree",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-signature:card",
+    "header": "bar",
+    "footer": "compact",
+    "rhythm": "inverse-accents",
+    "imagery": "natural",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "spoon"
+   },
+   "composition": "hero:hero-signature/card prices:price-list/offers products:products/plates story:image-text/pair team:team/photo contact:contact/call-out",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     20.73,
+     -16.21,
+     4.41
+    ],
+    "band": [
+     71.88,
+     4.38,
+     48.84
+    ],
+    "accent": [
+     57.64,
+     3.76,
+     49.61
+    ]
+   },
+   "phash360": "e6f2305151554d73",
+   "phash1280": "f0f0faf85a5a581a"
+  },
+  {
+   "id": "karoserija-hribar",
+   "direction": "tablica",
+   "fontPair": "archivo-public-sans",
+   "trade": "car-repair",
+   "town": "Celje",
+   "stance": null,
+   "genome": {
+    "preset": "tablica",
+    "type": "archivo-public-sans",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-signature:photo",
+    "header": "bar",
+    "footer": "compact",
+    "rhythm": "inverse-accents",
+    "imagery": "natural",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "plate"
+   },
+   "composition": "hero:hero-signature/photo services:services-list/two-column prices:price-list/tags story:image-text/image-left contact:contact/call-out",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     8.1,
+     -0.27,
+     -3.29
+    ],
+    "band": [
+     84.2,
+     3.68,
+     85.22
+    ],
+    "accent": [
+     60.98,
+     2.5,
+     65.45
+    ]
+   },
+   "phash360": "695f67690f2920b2",
+   "phash1280": "625e7c5adae26666"
+  },
+  {
+   "id": "mizarstvo-lesnik",
+   "direction": "warm-craft",
+   "fontPair": "fraunces-source-sans",
+   "trade": "builder",
+   "town": "Škofja Loka",
+   "stance": null,
+   "genome": {
+    "preset": "warm-craft",
+    "type": "fraunces-source-sans",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-split:image-left",
+    "header": "split-cta",
+    "footer": "columns",
+    "rhythm": "alternate",
+    "imagery": "offset-block",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "none"
+   },
+   "composition": "hero:hero-split/image-left contact:contact-strip/cards services:services-list/two-column story:image-text/image-left steps:steps/horizontal story:about/text-only call:cta/band",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     41.33,
+     30.47,
+     34.27
+    ],
+    "band": [
+     41.33,
+     30.47,
+     34.27
+    ],
+    "accent": [
+     48.58,
+     -14.73,
+     9.44
+    ]
+   },
+   "phash360": "aebeba8680908288",
+   "phash1280": "83a4a4a4a0a0a498"
+  },
+  {
+   "id": "pizzeria-oljka",
+   "direction": "warm-craft",
+   "fontPair": "fraunces-source-sans",
+   "trade": "restaurant",
+   "town": "Izola",
+   "stance": null,
+   "genome": {
+    "preset": "warm-craft",
+    "type": "fraunces-source-sans",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-split:image-left",
+    "header": "split-cta",
+    "footer": "columns",
+    "rhythm": "alternate",
+    "imagery": "offset-block",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "none"
+   },
+   "composition": "hero:hero-split/image-left contact:contact-strip/bar menu:menu/classic story:image-text/image-left call:cta/band",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     47.14,
+     40.01,
+     39.82
+    ],
+    "band": [
+     47.14,
+     40.01,
+     39.82
+    ],
+    "accent": [
+     48.21,
+     -17.83,
+     18.82
+    ]
+   },
+   "phash360": "cebebea2a0b69681",
+   "phash1280": "a3a4a4a4a0a0a43c"
+  },
+  {
+   "id": "salon-tina",
+   "direction": "soft-studio",
+   "fontPair": "lora-dm-sans",
+   "trade": "hairdresser",
+   "town": "Kranj",
+   "stance": null,
+   "genome": {
+    "preset": "soft-studio",
+    "type": "lora-dm-sans",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-split:image-left",
+    "header": "bar",
+    "footer": "compact",
+    "rhythm": "alternate",
+    "imagery": "duotone",
+    "shape": "soft",
+    "density": "airy",
+    "motif": "none"
+   },
+   "composition": "hero:hero-split/image-left contact:contact-strip/bar services:services-list/rows story:image-text/image-right booking:booking/simple",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     47.7,
+     13.5,
+     21.29
+    ],
+    "band": [
+     47.7,
+     13.5,
+     21.29
+    ],
+    "accent": [
+     49.88,
+     14.06,
+     22
+    ]
+   },
+   "phash360": "96f2b2a6a8b08e8e",
+   "phash1280": "0bc4c4c480e0e488"
+  },
+  {
+   "id": "vulkanizer-zorman",
+   "direction": "tablica",
+   "fontPair": "archivo-public-sans",
+   "trade": "car-repair",
+   "town": "Ptuj",
+   "stance": null,
+   "genome": {
+    "preset": "tablica",
+    "type": "archivo-public-sans",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-signature:photo",
+    "header": "bar",
+    "footer": "compact",
+    "rhythm": "inverse-accents",
+    "imagery": "natural",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "plate"
+   },
+   "composition": "hero:hero-signature/photo services:services-list/two-column prices:price-list/tags story:about/text-only contact:contact/call-out",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     8.1,
+     -0.27,
+     -3.29
+    ],
+    "band": [
+     84.2,
+     3.68,
+     85.22
+    ],
+    "accent": [
+     60.98,
+     2.5,
+     65.45
+    ]
+   },
+   "phash360": "797457436e3f70b2",
+   "phash1280": "685776795ad27d7d"
+  }
+ ],
+ "on": [
+  {
+   "id": "avtoservis-mrak",
+   "direction": "bold-local",
+   "fontPair": "archivo-archivo",
+   "trade": "car-repair",
+   "town": "Kranj",
+   "stance": null,
+   "genome": {
+    "preset": "bold-local",
+    "type": "archivo-archivo",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-type:with-facts",
+    "header": "compact",
+    "footer": "visit",
+    "rhythm": "inverse-accents",
+    "imagery": "natural",
+    "shape": "square",
+    "density": "compact",
+    "motif": "none"
+   },
+   "composition": "hero:hero-type/with-facts services:services-cards/compact steps:steps/horizontal story:about/text-only contact:contact/split-map",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     57.26,
+     13.12,
+     57.91
+    ],
+    "band": [
+     57.26,
+     13.12,
+     57.91
+    ],
+    "accent": [
+     61.3,
+     11.98,
+     61.46
+    ]
+   },
+   "phash360": "a6889a8480808286",
+   "phash1280": "8684a49519e59a9a"
+  },
+  {
+   "id": "fizioterapija-pregib",
+   "direction": "pregib",
+   "fontPair": "bricolage-figtree",
+   "trade": "physio",
+   "town": "Novo mesto",
+   "stance": null,
+   "genome": {
+    "preset": "pregib",
+    "type": "bricolage-figtree",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-signature:bend",
+    "header": "compact",
+    "footer": "visit",
+    "rhythm": "alternate",
+    "imagery": "natural",
+    "shape": "soft",
+    "density": "airy",
+    "motif": "bend"
+   },
+   "composition": "hero:hero-signature/bend highlights:highlights/figures services:services-list/aside story:text/narrow prices:price-list/tags call:cta/band contact:contact-strip/cards",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     40.84,
+     -26.85,
+     -2.73
+    ],
+    "band": [
+     40.84,
+     -26.85,
+     -2.73
+    ],
+    "accent": [
+     61.15,
+     -37.11,
+     -3.7
+    ]
+   },
+   "phash360": "83a2c0607a6a5e89",
+   "phash1280": "12949e969e8e8e13"
+  },
+  {
+   "id": "frizerstvo-lana",
+   "direction": "ogledalo",
+   "fontPair": "inter-tight-dm-sans",
+   "trade": "hairdresser",
+   "town": "Celje",
+   "stance": null,
+   "genome": {
+    "preset": "ogledalo",
+    "type": "inter-tight-dm-sans",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-signature:mirrors",
+    "header": "compact",
+    "footer": "wordmark",
+    "rhythm": "alternate",
+    "imagery": "natural",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "mirror"
+   },
+   "composition": "hero:hero-signature/mirrors call:cta/band prices:price-list/grouped team:team/photo contact:contact/call-out",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     30.39,
+     34.22,
+     9.72
+    ],
+    "band": [
+     30.39,
+     34.22,
+     9.72
+    ],
+    "accent": [
+     43.54,
+     45.48,
+     13.36
+    ]
+   },
+   "phash360": "a0a08850b2b2664d",
+   "phash1280": "638c1c949e3e0b86"
+  },
+  {
+   "id": "gostilna-zlata-zlica",
+   "direction": "jedilnik",
+   "fontPair": "newsreader-libre-franklin",
+   "trade": "restaurant",
+   "town": "Škofja Loka",
+   "stance": null,
+   "genome": {
+    "preset": "jedilnik",
+    "type": "newsreader-libre-franklin",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-signature:card",
+    "header": "compact",
+    "footer": "visit",
+    "rhythm": "inverse-accents",
+    "imagery": "natural",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "spoon"
+   },
+   "composition": "hero:hero-signature/card prices:price-list/offers products:products/plates story:image-text/pair team:team/photo contact:contact/call-out",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     17.02,
+     2.79,
+     -18.29
+    ],
+    "band": [
+     76.35,
+     4.29,
+     51.94
+    ],
+    "accent": [
+     57.64,
+     3.76,
+     49.61
+    ]
+   },
+   "phash360": "f3e9985961454977",
+   "phash1280": "f0f0fa585a9a589a"
+  },
+  {
+   "id": "instalacije-rebernik",
+   "direction": "industrial",
+   "fontPair": "space-grotesk-plex",
+   "trade": "builder",
+   "town": "Ptuj",
+   "stance": null,
+   "genome": {
+    "preset": "industrial",
+    "type": "space-grotesk-plex",
+    "palette": "preset",
+    "ground": "dark",
+    "hero": "hero-type:with-facts",
+    "header": "word",
+    "footer": "visit",
+    "rhythm": "inverse-accents",
+    "imagery": "monochrome",
+    "shape": "square",
+    "density": "compact",
+    "motif": "none"
+   },
+   "composition": "hero:hero-type/with-facts services:services-list/two-column steps:steps/horizontal story:text/two-column area:service-area/list story:about/text-only call:cta/split",
+   "paletteLab": {
+    "background": [
+     7.65,
+     -0.11,
+     -2.44
+    ],
+    "primary": [
+     80.44,
+     3.26,
+     82
+    ],
+    "band": [
+     80.44,
+     3.26,
+     82
+    ],
+    "accent": [
+     80.44,
+     3.26,
+     82
+    ]
+   },
+   "phash360": "595f27597a607870",
+   "phash1280": "7b337b5b70686367"
+  },
+  {
+   "id": "kmetija-grabnar",
+   "direction": "markacija",
+   "fontPair": "newsreader-libre-franklin",
+   "trade": "tourist-farm",
+   "town": "Luče",
+   "stance": null,
+   "genome": {
+    "preset": "markacija",
+    "type": "newsreader-libre-franklin",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-signature:view",
+    "header": "overlay",
+    "footer": "wordmark",
+    "rhythm": "alternate",
+    "imagery": "full-bleed",
+    "shape": "soft",
+    "density": "airy",
+    "motif": "trail"
+   },
+   "composition": "hero:hero-signature/view prices:price-list/rates gallery:gallery/wall story:image-text/image-right hours:opening-hours/poster services:services-list/aside team:team/list contact:contact/call-out",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     40.29,
+     -31.12,
+     21.67
+    ],
+    "band": [
+     40.29,
+     -31.12,
+     21.67
+    ],
+    "accent": [
+     52.59,
+     51.85,
+     31.83
+    ]
+   },
+   "phash360": "0c37176930761a4a",
+   "phash1280": "10173e7c7353e36a"
+  },
+  {
+   "id": "pekarna-kvas",
+   "direction": "warm-craft",
+   "fontPair": "fraunces-source-sans",
+   "trade": "bakery",
+   "town": "Kamnik",
+   "stance": null,
+   "genome": {
+    "preset": "warm-craft",
+    "type": "fraunces-source-sans",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-split:image-left",
+    "header": "phone",
+    "footer": "visit",
+    "rhythm": "alternate",
+    "imagery": "offset-block",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "none"
+   },
+   "composition": "hero:hero-split/image-left contact:contact-strip/bar products:products/grid story:about/image-side steps:steps/horizontal hours:opening-hours/compact contact:contact/split-map",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     44.14,
+     43.7,
+     44.16
+    ],
+    "band": [
+     44.14,
+     43.7,
+     44.16
+    ],
+    "accent": [
+     51.28,
+     40.43,
+     44.84
+    ]
+   },
+   "phash360": "8a9c9c8a88c49288",
+   "phash1280": "4ea4a5a4a480a0a4"
+  },
+  {
+   "id": "racunovodstvo-seliskar",
+   "direction": "racun",
+   "fontPair": "space-grotesk-plex",
+   "trade": "accountant",
+   "town": "Murska Sobota",
+   "stance": null,
+   "genome": {
+    "preset": "racun",
+    "type": "space-grotesk-plex",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-signature:receipt",
+    "header": "phone",
+    "footer": "visit",
+    "rhythm": "alternate",
+    "imagery": "natural",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "ledger"
+   },
+   "composition": "hero:hero-signature/receipt highlights:highlights/figures services:services-list/rows story:about/figure contact:contact/call-out",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     25.68,
+     30.59,
+     -21.61
+    ],
+    "band": [
+     25.68,
+     30.59,
+     -21.61
+    ],
+    "accent": [
+     44.21,
+     37.22,
+     -26.46
+    ]
+   },
+   "phash360": "c29cb0a09c805b69",
+   "phash1280": "8eada58d8d898dad"
+  },
+  {
+   "id": "trgovina-oljka-in-sol",
+   "direction": "etiketa",
+   "fontPair": "newsreader-libre-franklin",
+   "trade": "shop",
+   "town": "Koper",
+   "stance": null,
+   "genome": {
+    "preset": "etiketa",
+    "type": "newsreader-libre-franklin",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-signature:label",
+    "header": "compact",
+    "footer": "wordmark",
+    "rhythm": "alternate",
+    "imagery": "natural",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "label"
+   },
+   "composition": "hero:hero-signature/label prices:price-list/tags story:text/narrow story:image-text/round hours:opening-hours/photo contact:contact/call-out",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     30.84,
+     36.83,
+     -0.14
+    ],
+    "band": [
+     30.84,
+     36.83,
+     -0.14
+    ],
+    "accent": [
+     56.85,
+     -16.12,
+     30.5
+    ]
+   },
+   "phash360": "654141415d41173d",
+   "phash1280": "5c1d595b5f5f53a5"
+  },
+  {
+   "id": "zobozdravstvo-lebar",
+   "direction": "nasmeh",
+   "fontPair": "manrope-public-sans",
+   "trade": "dental",
+   "town": "Maribor",
+   "stance": null,
+   "genome": {
+    "preset": "nasmeh",
+    "type": "manrope-public-sans",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-signature:disc",
+    "header": "compact",
+    "footer": "visit",
+    "rhythm": "alternate",
+    "imagery": "natural",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "smile"
+   },
+   "composition": "hero:hero-signature/disc hours:opening-hours/week services:services-list/aside team:team/photo contact:contact/call-out",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     21.93,
+     2.86,
+     -23.33
+    ],
+    "band": [
+     21.93,
+     2.86,
+     -23.33
+    ],
+    "accent": [
+     53.1,
+     47.7,
+     40.18
+    ]
+   },
+   "phash360": "a2a2f0a88098d8c0",
+   "phash1280": "84c8988ccc8c8c65"
+  },
+  {
+   "id": "avto-kovac",
+   "direction": "tablica",
+   "fontPair": "space-grotesk-public-sans",
+   "trade": "car-repair",
+   "town": "Ljubljana",
+   "stance": null,
+   "genome": {
+    "preset": "tablica",
+    "type": "space-grotesk-public-sans",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-signature:photo",
+    "header": "compact",
+    "footer": "wordmark",
+    "rhythm": "inverse-accents",
+    "imagery": "natural",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "plate"
+   },
+   "composition": "hero:hero-signature/photo story:about/figure services:services-list/two-column steps:steps/vertical contact:contact/stacked",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     34.27,
+     13.62,
+     -47.03
+    ],
+    "band": [
+     84.2,
+     3.68,
+     85.22
+    ],
+    "accent": [
+     42.58,
+     16.81,
+     -56.08
+    ]
+   },
+   "phash360": "0b79654b0b2882b2",
+   "phash1280": "025656d6d26e4ec2"
+  },
+  {
+   "id": "brivnica-kos",
+   "direction": "warm-craft",
+   "fontPair": "fraunces-source-sans",
+   "trade": "hairdresser",
+   "town": "Maribor",
+   "stance": null,
+   "genome": {
+    "preset": "warm-craft",
+    "type": "fraunces-source-sans",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-split:image-left",
+    "header": "phone",
+    "footer": "visit",
+    "rhythm": "alternate",
+    "imagery": "offset-block",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "none"
+   },
+   "composition": "hero:hero-split/image-left hours:opening-hours/week services:services-list/rows story:about/text-only call:cta/band",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     41.12,
+     31.06,
+     33.5
+    ],
+    "band": [
+     41.12,
+     31.06,
+     33.5
+    ],
+    "accent": [
+     46.14,
+     -19.26,
+     5.22
+    ]
+   },
+   "phash360": "8aaebebea0b08e81",
+   "phash1280": "2ca4a5a0a4a6a4a4"
+  },
+  {
+   "id": "cvetlicarna-marjetica",
+   "direction": "etiketa",
+   "fontPair": "garamond-karla",
+   "trade": "shop",
+   "town": "Novo mesto",
+   "stance": null,
+   "genome": {
+    "preset": "etiketa",
+    "type": "garamond-karla",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-signature:label",
+    "header": "compact",
+    "footer": "visit",
+    "rhythm": "alternate",
+    "imagery": "natural",
+    "shape": "soft",
+    "density": "airy",
+    "motif": "stem"
+   },
+   "composition": "hero:hero-signature/label prices:price-list/tags story:about/text-only story:image-text/round services:services-list/rows contact:contact/call-out",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     30.84,
+     36.83,
+     -0.14
+    ],
+    "band": [
+     30.84,
+     36.83,
+     -0.14
+    ],
+    "accent": [
+     56.85,
+     -16.12,
+     30.5
+    ]
+   },
+   "phash360": "6d4545615d458715",
+   "phash1280": "5c5b1b5b591d51a3"
+  },
+  {
+   "id": "elektro-zupan",
+   "direction": "cevi",
+   "fontPair": "space-grotesk-plex",
+   "trade": "builder",
+   "town": "Velenje",
+   "stance": null,
+   "genome": {
+    "preset": "cevi",
+    "type": "space-grotesk-plex",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-type:large",
+    "header": "phone",
+    "footer": "visit",
+    "rhythm": "inverse-accents",
+    "imagery": "natural",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "wire"
+   },
+   "composition": "hero:hero-type/large story:about/figure services:services-list/rows area:service-area/list steps:steps/horizontal contact:contact/call-out",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     41.05,
+     -33.6,
+     15.04
+    ],
+    "band": [
+     77.73,
+     9.03,
+     79.61
+    ],
+    "accent": [
+     42.52,
+     -34.49,
+     15.27
+    ]
+   },
+   "phash360": "e6a8a89480a9a088",
+   "phash1280": "8cc09236b28ca4a4"
+  },
+  {
+   "id": "frizerski-salon-mia",
+   "direction": "ogledalo",
+   "fontPair": "bricolage-figtree",
+   "trade": "hairdresser",
+   "town": "Ljubljana",
+   "stance": null,
+   "genome": {
+    "preset": "ogledalo",
+    "type": "bricolage-figtree",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-split:image-right",
+    "header": "compact",
+    "footer": "visit",
+    "rhythm": "alternate",
+    "imagery": "natural",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "mirror"
+   },
+   "composition": "hero:hero-split/image-right hours:opening-hours/week prices:price-list/grouped team:team/photo contact:contact/call-out",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     30.39,
+     34.22,
+     9.72
+    ],
+    "band": [
+     30.39,
+     34.22,
+     9.72
+    ],
+    "accent": [
+     50.69,
+     35.45,
+     -0.08
+    ]
+   },
+   "phash360": "82868c80a0ccb488",
+   "phash1280": "1ad8989a1858e0b0"
+  },
+  {
+   "id": "gostilna-pri-mostu",
+   "direction": "jedilnik",
+   "fontPair": "fraunces-source-sans",
+   "trade": "restaurant",
+   "town": "Kamnik",
+   "stance": null,
+   "genome": {
+    "preset": "jedilnik",
+    "type": "fraunces-source-sans",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-split:image-right",
+    "header": "compact",
+    "footer": "wordmark",
+    "rhythm": "inverse-accents",
+    "imagery": "natural",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "spoon"
+   },
+   "composition": "hero:hero-split/image-right story:about/figure hours:opening-hours/table prices:price-list/offers team:team/photo contact:contact/call-out",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     20.18,
+     30.01,
+     10.34
+    ],
+    "band": [
+     74.87,
+     4.93,
+     41.18
+    ],
+    "accent": [
+     57.64,
+     3.76,
+     49.61
+    ]
+   },
+   "phash360": "96f2b2b8a0968877",
+   "phash1280": "929e9c9e1e011a1c"
+  },
+  {
+   "id": "gostisce-na-gricu",
+   "direction": "jedilnik",
+   "fontPair": "fraunces-source-sans",
+   "trade": "restaurant",
+   "town": "Ivanjkovci",
+   "stance": null,
+   "genome": {
+    "preset": "jedilnik",
+    "type": "fraunces-source-sans",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-image:overlay-bottom",
+    "header": "word",
+    "footer": "visit",
+    "rhythm": "inverse-accents",
+    "imagery": "natural",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "spoon"
+   },
+   "composition": "hero:hero-image/overlay-bottom story:about/figure hours:opening-hours/table prices:price-list/offers team:team/photo contact:contact/call-out",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     20.18,
+     30.01,
+     10.34
+    ],
+    "band": [
+     74.87,
+     4.93,
+     41.18
+    ],
+    "accent": [
+     57.64,
+     3.76,
+     49.61
+    ]
+   },
+   "phash360": "e6f2f2baaeb28273",
+   "phash1280": "93f0f2b0b290b4b2"
+  },
+  {
+   "id": "karoserija-hribar",
+   "direction": "tablica",
+   "fontPair": "archivo-archivo",
+   "trade": "car-repair",
+   "town": "Celje",
+   "stance": null,
+   "genome": {
+    "preset": "tablica",
+    "type": "archivo-archivo",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-signature:photo",
+    "header": "compact",
+    "footer": "wordmark",
+    "rhythm": "inverse-accents",
+    "imagery": "natural",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "plate"
+   },
+   "composition": "hero:hero-signature/photo services:services-list/two-column area:service-area/list steps:steps/vertical prices:price-list/tags contact:contact/call-out",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     8.1,
+     -0.27,
+     -3.29
+    ],
+    "band": [
+     58.55,
+     14.81,
+     -63.59
+    ],
+    "accent": [
+     58.55,
+     14.81,
+     -63.59
+    ]
+   },
+   "phash360": "763b3f6d0938b0a0",
+   "phash1280": "642e7c74d07646c0"
+  },
+  {
+   "id": "mizarstvo-lesnik",
+   "direction": "warm-craft",
+   "fontPair": "fraunces-source-sans",
+   "trade": "builder",
+   "town": "Škofja Loka",
+   "stance": null,
+   "genome": {
+    "preset": "warm-craft",
+    "type": "fraunces-source-sans",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-split:image-left",
+    "header": "compact",
+    "footer": "wordmark",
+    "rhythm": "alternate",
+    "imagery": "offset-block",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "none"
+   },
+   "composition": "hero:hero-split/image-left story:about/figure services:services-list/two-column story:image-text/image-right contact:contact-strip/cards call:cta/band",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     45.08,
+     22.18,
+     33.06
+    ],
+    "band": [
+     45.08,
+     22.18,
+     33.06
+    ],
+    "accent": [
+     48.37,
+     -16.44,
+     14.41
+    ]
+   },
+   "phash360": "aebeba82809eb688",
+   "phash1280": "a3a4a4a4a0a0a418"
+  },
+  {
+   "id": "pizzeria-oljka",
+   "direction": "warm-craft",
+   "fontPair": "fraunces-source-sans",
+   "trade": "restaurant",
+   "town": "Izola",
+   "stance": null,
+   "genome": {
+    "preset": "warm-craft",
+    "type": "fraunces-source-sans",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-signature:arch",
+    "header": "compact",
+    "footer": "columns",
+    "rhythm": "alternate",
+    "imagery": "offset-block",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "none"
+   },
+   "composition": "hero:hero-signature/arch story:image-text/image-left menu:menu/classic hours:opening-hours/compact call:cta/band",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     45.12,
+     42.59,
+     39.65
+    ],
+    "band": [
+     45.12,
+     42.59,
+     39.65
+    ],
+    "accent": [
+     48.07,
+     -19.09,
+     23.18
+    ]
+   },
+   "phash360": "465f59719d1d3d8c",
+   "phash1280": "33d3733365c333a4"
+  },
+  {
+   "id": "salon-tina",
+   "direction": "soft-studio",
+   "fontPair": "lora-dm-sans",
+   "trade": "hairdresser",
+   "town": "Kranj",
+   "stance": null,
+   "genome": {
+    "preset": "soft-studio",
+    "type": "lora-dm-sans",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-split:image-left",
+    "header": "word",
+    "footer": "visit",
+    "rhythm": "alternate",
+    "imagery": "duotone",
+    "shape": "soft",
+    "density": "airy",
+    "motif": "none"
+   },
+   "composition": "hero:hero-split/image-left prices:price-list/tags services:services-list/rows story:image-text/image-right contact:contact/split-map",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     41.39,
+     28.44,
+     12.79
+    ],
+    "band": [
+     41.39,
+     28.44,
+     12.79
+    ],
+    "accent": [
+     49.88,
+     14.06,
+     22
+    ]
+   },
+   "phash360": "86f2f2b6e6a48489",
+   "phash1280": "24c4c684e48418a0"
+  },
+  {
+   "id": "vulkanizer-zorman",
+   "direction": "tablica",
+   "fontPair": "archivo-public-sans",
+   "trade": "car-repair",
+   "town": "Ptuj",
+   "stance": null,
+   "genome": {
+    "preset": "tablica",
+    "type": "archivo-public-sans",
+    "palette": "preset",
+    "ground": "white",
+    "hero": "hero-type:large",
+    "header": "centred",
+    "footer": "wordmark",
+    "rhythm": "inverse-accents",
+    "imagery": "natural",
+    "shape": "soft",
+    "density": "regular",
+    "motif": "plate"
+   },
+   "composition": "hero:hero-type/large services:services-list/two-column steps:steps/vertical prices:price-list/tags contact:contact/stacked",
+   "paletteLab": {
+    "background": [
+     100,
+     0.01,
+     -0.01
+    ],
+    "primary": [
+     8.1,
+     -0.27,
+     -3.29
+    ],
+    "band": [
+     84.2,
+     3.68,
+     85.22
+    ],
+    "accent": [
+     60.98,
+     2.5,
+     65.45
+    ]
+   },
+   "phash360": "1ad8a8a48084a1b0",
+   "phash1280": "270f4ca0a1983630"
+  }
+ ]
+}

@@ -39,6 +39,9 @@ export const Art = z.strictObject({
 });
 export type Art = z.infer<typeof Art>;
 
+/** Spec v19: a design seed, 6 to 12 lowercase base-36 characters (design-studio.md §5.1). */
+export const DesignSeed = z.string().regex(/^[a-z0-9]{6,12}$/);
+
 export const Design = z.strictObject({
   direction: z.string().regex(/^[a-z-]+$/),
   fontPair: z.string().regex(/^[a-z0-9-]+$/),
@@ -58,6 +61,11 @@ export const Design = z.strictObject({
   genome: Genome.optional().describe("Set by the system; leave out."),
   /** Spec v19: the AI designer's art direction (design-studio.md §6). Metadata for regenerations, neighbours and the editor; never changes rendering. */
   art: Art.optional().describe("Set by the system; leave out."),
+  /**
+   * Spec v19: the design seed (design-studio.md §5.1), from the site id and the generation (engine studio designSeed).
+   * It deals the stances, constraint cards and references and breaks code's ties, so a run replays. Never rendered.
+   */
+  seed: DesignSeed.optional().describe("Set by the system; leave out."),
 });
 export type Design = z.infer<typeof Design>;
 
