@@ -19,9 +19,12 @@ describe("agent-team hook", () => {
     expect(launch({ subagent_type: "Explore", model: "haiku", prompt: "MODE: S" }).problems.join()).toMatch(/Explore/);
     expect(launch({ subagent_type: "builder", prompt: "do it" }).problems.join()).toMatch(/MODE/);
   });
-  it("needs a FABLE purpose line for Fable, medium effort for Sonnet, and never max", () => {
-    expect(launch({ subagent_type: "architect", prompt: "MODE: S" }).problems.join()).toMatch(/FABLE/);
-    expect(launch({ subagent_type: "architect", prompt: "MODE: S\nFABLE: phase-review of F1b" }).problems).toEqual([]);
+  it("keeps Fable to project-level design, Sonnet at medium, and effort to medium/high/xhigh", () => {
+    expect(launch({ subagent_type: "architect", prompt: "MODE: S" }).problems).toEqual([]);
+    expect(launch({ subagent_type: "architect", model: "fable", prompt: "MODE: S\nFABLE: phase-design of F1b" }).problems.join()).toMatch(/FABLE/);
+    expect(launch({ subagent_type: "architect", model: "fable", prompt: "MODE: S\nFABLE: project-design of the studio" }).problems).toEqual([]);
+    expect(launch({ subagent_type: "scout", effort: "low", prompt: "MODE: S" }).problems.join()).toMatch(/low/);
+    expect(launch({ subagent_type: "general-purpose", model: "opus", effort: "xhigh", prompt: "MODE: S" }).problems).toEqual([]);
     expect(launch({ subagent_type: "general-purpose", model: "sonnet", effort: "high", prompt: "MODE: D" }).problems.join()).toMatch(/Sonnet/);
     expect(launch({ subagent_type: "implementer", prompt: "MODE: D" }).problems).toEqual([]);
     expect(launch({ subagent_type: "general-purpose", model: "opus", effort: "max", prompt: "MODE: S" }).problems.join()).toMatch(/max/);

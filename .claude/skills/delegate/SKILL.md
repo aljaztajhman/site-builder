@@ -1,6 +1,6 @@
 ---
 name: delegate
-description: Stranko's agent-team procedure (docs/dev/agent-team.md). Use before starting any non-trivial task and before every Agent launch — triage the task (mode S/D/W), pick roles and models (Opus + Haiku, Fable only on escalation), map with a Haiku scout before any builder, write the brief, verify every touched package, record the setup. Not optional: the PreToolUse hook rejects agent launches without an explicit model or a MODE line.
+description: Stranko's agent-team procedure (docs/dev/agent-team.md). Use before starting any non-trivial task and before every Agent launch — triage the task (mode S/D/W), pick roles and models (Opus + Haiku, Sonnet only as implementer, Fable only for a project's overall design; effort medium, high or xhigh), map with a Haiku scout before any builder, write the brief, verify every touched package, record the setup. Not optional: the PreToolUse hook rejects agent launches without an explicit model or a MODE line.
 ---
 
 # Delegate (Stranko agent team)
@@ -19,15 +19,16 @@ Write the status line first: `Mode D · score 4/5 · team: scout(haiku) → 2 bu
 
 | Need | Role | Model · effort |
 |---|---|---|
-| read code / logs / reports / web, map an area | `scout` | haiku · medium (low for one lookup) |
+| read code / logs / reports / web, map an area | `scout` | haiku · medium |
 | mechanical edits from an exact list, downloads, registrations, running sheets | `mechanic` | haiku · medium |
 | build a unit of code | `builder` | opus · medium (high for bugs in existing code or tricky migrations) |
 | design assets (taste) | `asset-maker` | opus · medium; high when the asset sets the bar |
 | review a diff | `reviewer` | opus · high |
 | make failing tests pass against a fixed interface | `implementer` | sonnet · medium |
-| phase design (bookend), phase review (bookend), the product's ceiling decisions, escalation after two failed attempts | `architect` | fable · high, `FABLE: phase-design|phase-review|ceiling|escalation` line |
+| phase design (bookend), phase review (bookend), the product's ceiling decisions, escalation after two failed attempts | `architect` | opus · xhigh |
+| a project's overall design and structure at its start; the highest-level architecture decisions (rare, about once per project) | `architect` with `model: fable` | fable · high, `FABLE: project-design|architecture` line |
 
-Never: the built-in **Explore** (runs on Opus), `general-purpose` without an explicit `model`, **max** effort, Sonnet at high/max, Fable for routine building or reading.
+Never: the built-in **Explore** (runs on Opus), `general-purpose` without an explicit `model`, **low** or **max** effort (only medium, high, xhigh), Sonnet above medium, Fable for phase-level work, building or reading.
 
 The usual shape of a phase: **architect designs → scouts map → builders/implementers build → director verifies → architect reviews the phase**.
 

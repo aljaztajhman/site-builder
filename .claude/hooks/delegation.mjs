@@ -39,11 +39,11 @@ export function check(input) {
   if (type === "Explore") problems.push("The built-in Explore agent runs on Opus on subscription plans. Use subagent_type \"scout\" (Haiku) for reading.");
   if (!model) problems.push(`No model: pass model explicitly (agent type "${type}" would inherit the session's model). Pick it by docs/dev/agent-team.md §2.`);
   if (!mode) problems.push("No MODE line: the brief must start with `MODE: S|D|W (score n/5) · role: … · model: … · effort: …` (see the delegate skill).");
-  if (effort === "max") problems.push("Effort max is not used here (diminishing returns, overthinking; agent-team.md §1.2).");
-  if (model === "fable" || /fable/.test(String(model)) || type === "architect") {
-    if (!/\bFABLE:\s*(phase-design|phase-review|ceiling|escalation)\b/.test(prompt)) problems.push("A Fable launch needs a `FABLE: phase-design|phase-review|ceiling|escalation` line saying what it is for.");
+  if (effort && !["medium", "high", "xhigh"].includes(String(effort))) problems.push(`Effort ${effort} is not used here: only medium, high or xhigh (owner rule; agent-team.md §1.2).`);
+  if (model === "fable" || /fable/.test(String(model))) {
+    if (!/\bFABLE:\s*(project-design|architecture)\b/.test(prompt)) problems.push("Fable is only for a project's overall design or the highest-level architecture: the brief needs a `FABLE: project-design|architecture` line. Phase design, review and escalation go to the architect on Opus xhigh.");
   }
-  if ((model === "sonnet" || /sonnet/.test(String(model))) && effort && effort !== "medium" && effort !== "low") problems.push("Sonnet runs at medium effort here (high and max are token-hungry; agent-team.md §1.4).");
+  if ((model === "sonnet" || /sonnet/.test(String(model))) && effort && effort !== "medium") problems.push("Sonnet runs at medium effort here (high, xhigh and max are token-hungry; agent-team.md §1.4).");
 
   return { problems, record: { at: new Date().toISOString(), type, model: model ?? null, effort: effort ?? null, isolation: t.isolation ?? def?.isolation ?? null, background: !!t.run_in_background, mode: mode ?? null, description: t.description ?? null, blocked: problems.length > 0 } };
 }
