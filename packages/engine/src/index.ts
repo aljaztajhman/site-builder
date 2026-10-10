@@ -33,3 +33,4 @@ export * from "./languages.ts";
 export * from "./provision.ts";
 export * from "./plan-limits.ts";
 export * from "./concept.ts";
+export * from "./studio/index.ts";

@@ -492,6 +492,33 @@ export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
       );
     `,
   },
+  {
+    id: 22,
+    name: "look_fingerprints",
+    // The design studio's uniqueness registry (docs/plans/design-studio.md §5.4): one row per generated look, previews
+    // included, deleted with the site. genome: the 11 axes (spec genomeOf); composition: the homepage's
+    // "intent:type/variant" sequence; palette_lab: background, primary, band and accent in L*a*b*; phash_360 and
+    // phash_1280: dHash of the first screens (null when not rendered). trade and town are looked up by the gate.
+    sql: `
+      create table look_fingerprints (
+        site_id text not null references sites(id) on delete cascade,
+        generation integer not null,
+        trade text not null,
+        town text,
+        stance text,
+        seed text not null,
+        genome jsonb not null,
+        composition text not null,
+        palette_lab jsonb not null,
+        phash_360 text,
+        phash_1280 text,
+        created_at timestamptz not null default now(),
+        primary key (site_id, generation)
+      );
+      create index look_fingerprints_trade on look_fingerprints(trade, created_at);
+      create index look_fingerprints_town on look_fingerprints(lower(town), created_at) where town is not null;
+    `,
+  },
 ];
 
 type Query = (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>;

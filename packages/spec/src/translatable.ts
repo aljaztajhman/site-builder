@@ -1,3 +1,4 @@
+import { COMPOSED_LAYOUT_KEYS } from "./composition/layout-keys.ts";
 import { getAt, walkObjects, walkStrings } from "./pointer.ts";
 
 /**
@@ -8,8 +9,8 @@ import { getAt, walkObjects, walkStrings } from "./pointer.ts";
  *
  * Counted: every page's menu label and search title and description, every section's copy, and the opening hours'
  * note. Not counted: ids, variants, links, picture references, dates and other values that aren't words, strings
- * without a letter ("2004", "40"), people's and the business's names (ownerName, team members' names, the hero's
- * wordmark) and placeholders (filled in the default language first). Collection entries keep their documented
+ * without a letter ("2004", "40"), a composed section's layout values (composition/layout-keys.ts), people's and the
+ * business's names (ownerName, team members' names, the hero's wordmark) and placeholders (filled in the default language first). Collection entries keep their documented
  * fallback (the owner's own posts; the collection pane says the Slovene shows where there is no translation).
  *
  * No zod here: the editor imports it (`@sb/spec/translatable`).
@@ -83,9 +84,12 @@ export function sectionTexts(spec: unknown, pi: number, si: number): Translatabl
   walkObjects(props, (o, p) => {
     if ("$placeholder" in o) placeholders.push(`${p}/`);
   });
+  // A composed section's layout values (width, style, svg path data …) are not copy (composition/layout-keys.ts).
+  const composed = getAt(spec, `/pages/${pi}/sections/${si}/type`) === "composed";
   const out: TranslatableText[] = [];
   walkStrings(props, (s, p, key) => {
     if (placeholders.some((at) => p.startsWith(at))) return;
+    if (composed && COMPOSED_LAYOUT_KEYS.has(key)) return;
     if (isCopy(s, p, key)) out.push({ path: `${base}${p}`, text: s });
   });
   return out;

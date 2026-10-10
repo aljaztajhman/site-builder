@@ -7,6 +7,7 @@ import { UrlChecks } from "./checks.ts";
 import { SiteStats } from "./stats.ts";
 import { SiteDomains } from "./domains.ts";
 import { ProductEvents } from "./events.ts";
+import { LookFingerprints } from "./looks.ts";
 import { Usage, type Tier } from "./usage.ts";
 
 export type SiteStatus = "new" | "generating" | "ready" | "editing" | "publishing" | "failed";
@@ -174,6 +175,8 @@ export class Repo {
   readonly events: ProductEvents;
   /** Model and image spend over time, for the admin. */
   readonly costs: CostHistory;
+  /** The design studio's uniqueness registry: every generated look's fingerprint (look_fingerprints). */
+  readonly looks: LookFingerprints;
 
   constructor(readonly db: Db) {
     this.costs = new CostHistory(db);
@@ -183,6 +186,7 @@ export class Repo {
     this.stats = new SiteStats(db);
     this.domains = new SiteDomains(db);
     this.events = new ProductEvents(db);
+    this.looks = new LookFingerprints(db);
   }
 
   async createSite(input: { id?: string; name: string; slug: string; intake: Intake; accountId?: string | null; deviceId?: string | null }): Promise<SiteRow> {

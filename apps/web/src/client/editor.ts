@@ -496,7 +496,9 @@ const label = (t: string) => SECTION_LABEL[t] ?? t;
 
 function sectionTitle(s: Obj): string {
   const p = (s.props ?? {}) as Obj;
-  const t = (p.headline ?? p.title ?? p.eyebrow ?? "") as string;
+  // A composed section (spec v19) by its first heading.
+  const composed = Array.isArray(p.elements) ? (p.elements as Obj[]).find((e) => e.kind === "heading")?.text : undefined;
+  const t = (p.headline ?? p.title ?? p.eyebrow ?? composed ?? "") as string;
   return typeof t === "string" && t ? t : "";
 }
 
@@ -924,6 +926,10 @@ function sectionPane(si: number): HTMLElement {
     pane.append(h("p", { class: "muted" }, "Ta razdelek ustvari sistem (pravna besedila, 404). Podatke uredite pod »Podatki«."));
     return pane;
   }
+  if (s.type === "composed") {
+    pane.append(h("p", { class: "help" }, "Besedilo popravite tukaj ali kar na strani. Postavitev, velikosti in barve tega razdelka so del oblikovanja."), ...composedForms(s, info));
+    return pane;
+  }
   const tone = labelled("Ozadje", h("select", { onChange: (e: Event) => { const v = (e.target as HTMLSelectElement).value; void patch([isSection(pi, si, String(s.id)), s.tone === undefined ? { op: "add", path: `${base}/tone`, value: v } : { op: "replace", path: `${base}/tone`, value: v }], "ozadje"); } },
     ...["default", "alt", "inverse", "band"].map((t) => h("option", { value: t, selected: (s.tone ?? "default") === t }, TONE[t]!))));
   // Price lists and menus: groups and items in their own editor, the list first (that is what owners come to change).
@@ -938,6 +944,35 @@ function sectionPane(si: number): HTMLElement {
     formAt(inSection(String(s.id), "/props"), info.props, s.props as Json, "props", `urejen razdelek ${s.type}`),
   );
   return pane;
+}
+
+/** The member of a discriminated union (a composed section's elements) for a value's kind, if the union has one. */
+function memberOf(opts: Schema[], value: unknown): Schema | undefined {
+  const kind = value && typeof value === "object" && !Array.isArray(value) ? (value as Obj).kind : undefined;
+  if (typeof kind !== "string") return undefined;
+  return opts.find((o) => ((((o.properties ?? {}) as Record<string, Schema>).kind?.enum ?? []) as unknown[])[0] === kind);
+}
+
+/**
+ * A composed section (spec v19): one form per element with copy, in reading order (phone.order, as the page shows them).
+ * The catalogue's schema for it holds the copy only (@sb/spec ComposedCopy); each form saves its whole element, so the
+ * placement it doesn't show stays as it was. No element is added, removed or moved here: that is the designer's.
+ */
+function composedForms(s: Obj, info: SectionInfo): HTMLElement[] {
+  const root = info.props;
+  const list = resolve(((resolve(root, root).properties ?? {}) as Record<string, Schema>).elements ?? {}, root);
+  const opts = (((resolve((list.items ?? {}) as Schema, root).anyOf ?? []) as Schema[])).map((o) => resolve(o, root));
+  const elements = (((s.props as Obj | undefined)?.elements ?? []) as Obj[]).map((el, i) => ({ el, i }));
+  const order = (el: Obj) => Number((el.phone as Obj | undefined)?.order ?? 0);
+  return elements
+    .sort((a, b) => order(a.el) - order(b.el) || a.i - b.i)
+    .flatMap(({ el, i }) => {
+      const member = memberOf(opts, el);
+      const { kind: _kind, ...copy } = (member?.properties ?? {}) as Record<string, Schema>;
+      if (!member || !Object.keys(copy).length) return [];
+      const schema: Schema = { ...member, properties: copy, required: ((member.required ?? []) as string[]).filter((k) => k !== "kind"), $defs: root.$defs };
+      return [formAt(inSection(String(s.id), `/props/elements/${i}`), schema, el as Json, ENUM_LABEL[String(el.kind)] ?? fieldLabel(String(el.kind)), "urejen oblikovan razdelek")];
+    });
 }
 
 // ---------- Price lists and menus (price-editor.ts): what is open survives the redraw after each structural save ----------
@@ -2821,15 +2856,19 @@ function schemaAt(path: string): { schema: Schema; root: Schema; key: string; pa
   const segs = path.split("/").slice(1).map((x) => x.replace(/~1/g, "/").replace(/~0/g, "~"));
   let root: Schema;
   let rest: string[];
+  // The value along the path: a composed section's element is told apart by its kind.
+  let v: unknown;
   if (segs[0] === "business") {
     root = catalogue.business;
     rest = segs.slice(1);
+    v = state.spec?.business;
   } else if (segs[0] === "pages" && segs[2] === "sections" && segs[4] === "props") {
     const sec = ((pages()[Number(segs[1])]?.sections ?? []) as Obj[])[Number(segs[3])];
     const info = sec ? sectionInfo(String(sec.type)) : undefined;
     if (!info) return null;
     root = info.props;
     rest = segs.slice(5);
+    v = sec?.props;
   } else return null;
   let s = root;
   let key = segs[0]!;
@@ -2837,7 +2876,11 @@ function schemaAt(path: string): { schema: Schema; root: Schema; key: string; pa
   for (const seg of rest) {
     s = resolve(s, root);
     // Through a fact that may be missing ({$placeholder}) to its real shape.
-    if (Array.isArray(s.anyOf)) s = (s.anyOf as Schema[]).map((o) => resolve(o, root)).find((o) => !isPlaceholderSchema(o) && (o.type === "object" || o.type === "array")) ?? s;
+    if (Array.isArray(s.anyOf)) {
+      const opts = (s.anyOf as Schema[]).map((o) => resolve(o, root));
+      s = memberOf(opts, v) ?? opts.find((o) => !isPlaceholderSchema(o) && (o.type === "object" || o.type === "array")) ?? s;
+    }
+    v = v && typeof v === "object" ? (v as Obj)[seg] : undefined;
     const next = s.type === "array" ? (s.items as Schema | undefined) : ((s.properties ?? {}) as Record<string, Schema>)[seg];
     if (!next) return null;
     if (s.type !== "array") [parent, key] = [key, seg];
