@@ -113,7 +113,9 @@ describe("composed-v2.css", () => {
   });
 
   it("obeys the bans every sheet obeys", () => {
-    expect(v2()).not.toMatch(/gradient\(|backdrop-filter|blur\(|monospace|font-style:italic|border-radius:999|infinite/);
+    expect(v2()).not.toMatch(/gradient\(|backdrop-filter|blur\(|monospace|font-style:italic|border-radius:999/);
+    // No endless animation, except the ribbon's marquee (move "loop", owner decision D2), which has a pause button.
+    expect(v2().replace(/\.cx-rb--loop\.is-live \.cx-rb__track\{animation:cx-rb-loop var\(--rb-t\) linear infinite\}/, "")).not.toMatch(/infinite/);
     expect(v2()).not.toMatch(/border-(left|right|inline-start|inline-end):[^;}]*var\(--c-(primary|accent)/);
   });
 
@@ -202,7 +204,8 @@ describe("background layers", () => {
   it("drawing: a decorative hook by its id, anchored and scaled, in its ink (border by default)", () => {
     const { html } = render([plain("s_a"), sectionOf(props({ background: [{ kind: "drawing", drawing: "motif/bakery/wheat-ear-line", scale: 4, anchor: "start" }, { kind: "field", role: "surface" }] }))]);
     const s = sectionHtml(html);
-    expect(s).toContain('<div class="cx-bg-art cx-bga-start cx-bgs-4 cx-ro-border" data-drawing="motif/bakery/wheat-ear-line" aria-hidden="true"></div>');
+    // R2 draws the drawing inside the hook (composed-kinds.test.ts).
+    expect(s).toContain('<div class="cx-bg-art cx-bga-start cx-bgs-4 cx-ro-border" data-drawing="motif/bakery/wheat-ear-line" aria-hidden="true"><svg class="cx-dw cx-dw--line"');
     for (const sel of [".cx-bg-art", ".cx-bgs-4", ".cx-bga-start", ".cx-bga-center", ".cx-bga-end"]) expect(hasRule(sel), sel).toBe(true);
   });
 });
@@ -212,7 +215,7 @@ describe("top edge and rise", () => {
     const { html } = render([plain("s_a"), sectionOf(props({ top: { edge: "torn", rise: 2 } }))]);
     expect(openTag(html)).toContain("cx-v2 cx-edge-torn cx-rise-2");
     const drawn = render([plain("s_a"), sectionOf(props({ top: { edge: "drawing", drawing: "ornament/rope-line" } }))]).html;
-    expect(sectionHtml(drawn)).toMatch(/<section[^>]*><div class="cx-edge-art" data-drawing="ornament\/rope-line" aria-hidden="true"><\/div><div class="container">/);
+    expect(sectionHtml(drawn)).toMatch(/<section[^>]*><div class="cx-edge-art" data-drawing="ornament\/rope-line" aria-hidden="true"><svg [^>]*>[\s\S]*?<\/svg><\/div><div class="container">/);
     const first = render([sectionOf(props({ top: { edge: "cut", rise: 1 } }))]).html;
     expect(openTag(first)).not.toMatch(/cx-edge|cx-rise|cx-v2/);
     for (const sel of [".cx-edge-rule", ".cx-edge-cut", ".cx-edge-torn", ".cx-rise-1", ".cx-rise-2", ".cx-edge-art"]) expect(hasRule(sel), sel).toBe(true);
@@ -238,7 +241,8 @@ describe("motion", () => {
       expect(openTag(render([sectionOf(props({ motion: m }))]).html), m).not.toContain("cx-mo-");
     }
     expect(MOTIONS.every((m) => MOTION_META[m].js === false)).toBe(true);
-    expect(composedIslandFiles()).toEqual([]);
+    // The only composed island is the marquee's (R2, ribbon move "loop"), loaded only by pages with one.
+    expect(composedIslandFiles()).toEqual(["ribbon.js"]);
     expect(COMPOSED_MOTION_ISLAND).toBe("composed/motion.js");
   });
 });

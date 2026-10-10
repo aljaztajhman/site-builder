@@ -2,6 +2,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { MOTION_META, type ComposedProps, type SectionOf } from "@sb/spec";
 import { Picture, Section, cx, titleId } from "../../primitives/index.tsx";
 import type { LcpResolvers, RenderCtx, SectionProps } from "../../types.ts";
+import { DrawingSvg } from "./drawing.tsx";
 import { ElementView } from "./elements.tsx";
 import {
   TONE_GROUND,
@@ -9,8 +10,8 @@ import {
   firstHeading,
   firstImage,
   headerGround,
-  imageSizes,
   insideField,
+  leadPhoto,
   overPhoto,
   phoneRowCount,
   phoneRows,
@@ -115,7 +116,11 @@ export function Composed({ section, ctx, index }: SectionProps<"composed">) {
     >
       {own ? (
         <>
-          {top?.edge === "drawing" && top.drawing && <div className="cx-edge-art" data-drawing={top.drawing} aria-hidden="true" />}
+          {top?.edge === "drawing" && top.drawing && (
+            <div className="cx-edge-art" data-drawing={top.drawing} aria-hidden="true">
+              <DrawingSvg id={top.drawing} ink strip />
+            </div>
+          )}
           {layers.map((l, i) => (l.kind === "field" ? null : <SectionLayer key={`l${i}`} layer={l} ctx={ctx} priority={index === 0} />))}
           <div className="container">{grid}</div>
         </>
@@ -192,7 +197,11 @@ function SectionLayer({ layer, ctx, priority }: { layer: Exclude<Layer, LayerOf<
       </div>
     );
   }
-  return <div className={cx("cx-bg-art", `cx-bga-${layer.anchor}`, `cx-bgs-${layer.scale}`, roleClass(layer.color ?? "border"))} data-drawing={layer.drawing} aria-hidden="true" />;
+  return (
+    <div className={cx("cx-bg-art", `cx-bga-${layer.anchor}`, `cx-bgs-${layer.scale}`, roleClass(layer.color ?? "border"))} data-drawing={layer.drawing} aria-hidden="true">
+      <DrawingSvg id={layer.drawing} ink />
+    </div>
+  );
 }
 
 /** A photo layer covers the section, full bleed, on desktop and phones alike. */
@@ -218,6 +227,6 @@ export const composedLcp: LcpResolvers = {
     const photo = photoLayer(section.props);
     if (photo) return { image: photo.image, sizes: BG_PHOTO_SIZES };
     const lead = firstImage(section.props.elements);
-    return lead ? { image: lead.image, sizes: imageSizes(section.props.width, lead) } : null;
+    return lead ? leadPhoto(section.props.width, lead) : null;
   },
 };
