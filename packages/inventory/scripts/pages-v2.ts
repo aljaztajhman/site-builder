@@ -6,6 +6,7 @@
  * sheet's entry point: these kinds first, then the older kinds in pages.ts.
  */
 import { readFileSync } from "node:fs";
+import { drawingData } from "@sb/components";
 import {
   ComposedProps,
   EDGES,
@@ -18,8 +19,6 @@ import {
   type SiteSpec,
 } from "@sb/spec";
 import { assetName, compositionPreset, type Asset } from "../src/index.ts";
-// @sb/components doesn't export its drawing data (not this unit's package); the data file imports only types.
-import { drawingData } from "../../components/src/groups/composed/drawings/index.ts";
 import { BASE_GOLDEN, SHEET_PALETTES, TONES, golden, imageIds, inDirection, pagesFor as pagesForV1, repairSpec, slugOf, withHome, type SheetPage } from "./pages.ts";
 
 type Props = Record<string, unknown>;

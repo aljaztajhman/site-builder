@@ -5,7 +5,8 @@ import { ActionLink, Picture, cx } from "../../primitives/index.tsx";
 import type { RenderCtx } from "../../types.ts";
 import { DecorDrawing } from "./decor.tsx";
 import { ContactFact, HoursFact, PricesFact, townCode } from "./facts.tsx";
-import { InlineDrawing, resolveDrawing } from "./inline-drawing.tsx";
+import { DrawingSvg } from "./drawing.tsx";
+import { drawingData } from "./drawings/index.ts";
 import { IconFactsBlock } from "./kinds/icon-facts.tsx";
 import { MapBlock } from "./kinds/map.tsx";
 import { PhotosBlock } from "./kinds/photos.tsx";
@@ -89,7 +90,7 @@ function ListBlock({ el, over }: { el: ElOf<"list">; over: boolean }) {
   // Spec v20: an item may carry a lead (a date or a step, a column of its own), the marker may be a dash, a timeline rail
   // (line) or a drawing, the list a weight and a size. A drawing marker with no drawing to draw falls back to the dash.
   const leads = el.items.some((t) => typeof t !== "string");
-  const drawn = el.marker === "drawing" && el.drawing && resolveDrawing(el.drawing) ? el.drawing : undefined;
+  const drawn = el.marker === "drawing" && el.drawing && drawingData(el.drawing) ? el.drawing : undefined;
   const marker = el.marker === "drawing" && !drawn ? "dash" : (el.marker ?? "none");
   // base.css strips the list style from classed lists, which drops the list role in some screen readers: say it again.
   return (
@@ -100,7 +101,7 @@ function ListBlock({ el, over }: { el: ElOf<"list">; over: boolean }) {
     >
       {el.items.map((t, i) => (
         <li key={i}>
-          {drawn && <InlineDrawing id={drawn} className="cx-l__mk" />}
+          {drawn && <DrawingSvg id={drawn} className="cx-l__mk" />}
           {typeof t !== "string" ? (
             <>
               <span className="cx-l__lead">{t.lead}</span> <span className="cx-l__txt">{t.text}</span>

@@ -1,7 +1,8 @@
 import type { CSSProperties, ReactElement, ReactNode } from "react";
 import type { Motif } from "@sb/spec";
 import { Branch, Radiator, Spoon } from "../../motifs/index.tsx";
-import { DrawingStrip, InlineDrawing } from "./inline-drawing.tsx";
+import { DrawingSvg } from "./drawing.tsx";
+import { drawingData } from "./drawings/index.ts";
 import { ROLE_VAR, type ElOf } from "./layout.ts";
 
 const fill = (role: keyof typeof ROLE_VAR): CSSProperties => ({ fill: ROLE_VAR[role], stroke: "none" });
@@ -120,10 +121,18 @@ function CustomDrawing({ svg }: { svg: NonNullable<ElOf<"decor">["svg"]> }) {
   );
 }
 
-/** What a decor element draws: the designer's own svg, a library motif, or (spec v20) an inventory drawing by its id, in the element's own colour role when it has one, tiled along x as a strip when it repeats. */
+/**
+ * What a decor element draws: the designer's own svg, a library motif, or (spec v20) an inventory drawing by its id
+ * (DrawingSvg), tiled along x as a strip when it repeats. With its own colour role (`color`: the element's cx-fg-<role>
+ * text colour) the drawing is inked in it; without one it keeps its own roles.
+ */
 export function DecorDrawing({ el }: { el: ElOf<"decor"> }) {
   if (el.svg) return <CustomDrawing svg={el.svg} />;
-  if (el.drawing) return el.repeat ? <DrawingStrip id={el.drawing} ink={el.color} className="cx-strip" /> : <InlineDrawing id={el.drawing} ink={el.color} />;
+  if (el.drawing) {
+    // Only a drawing made to tile repeats (REPEATABLE, G19); a stray repeat on another draws nothing rather than seams.
+    if (el.repeat && !drawingData(el.drawing)?.repeat) return null;
+    return <DrawingSvg id={el.drawing} ink={el.color !== undefined} strip={el.repeat !== undefined} className={el.repeat ? "cx-strip" : undefined} />;
+  }
   if (el.motif) {
     // A value outside the library (a stray translation overlay) draws nothing rather than failing the page.
     const Motif = MOTIF_DRAWING[el.motif] as (() => ReactElement) | undefined;

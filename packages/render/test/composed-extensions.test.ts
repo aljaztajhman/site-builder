@@ -319,7 +319,7 @@ describe("list: leads, markers, weight, size", () => {
   it("a drawing marker is the drawing, hidden from assistive technology, once per item; without a drawing to draw it is the dash", () => {
     const page = list({ marker: "drawing", drawing: "motif/bakery/wheat-ear-line" });
     expect(classOf(page, "list")).toContain("cx-l--drawing");
-    expect(page.match(/<svg class="cx-l__mk" viewBox="0 0 40 100" aria-hidden="true" focusable="false">/g)).toHaveLength(2);
+    expect(page.match(/<svg class="cx-dw cx-dw--line cx-l__mk" viewBox="0 0 60 120" aria-hidden="true" focusable="false">/g)).toHaveLength(2);
     expect(classOf(list({ marker: "drawing", drawing: "ornament/unknown-line" }), "list")).toContain("cx-l--dash");
     expect(list({ marker: "drawing", drawing: "ornament/unknown-line" })).not.toContain("cx-l__mk");
   });
@@ -492,14 +492,16 @@ describe("prices", () => {
 describe("decor: drawings, a fixed size, strips", () => {
   const decor = (more: object) => html([{ id: "e_d", kind: "decor", desk: desk(1, 3, 1), phone: full(0), ...more }]);
 
-  it("a drawing is drawn inline, hidden from assistive technology, in its own role colours or the element's colour as one ink", () => {
+  it("a drawing is drawn inline (DrawingSvg), hidden from assistive technology, in its own role colours or the element's colour as one ink", () => {
     const page = decor({ drawing: "motif/bakery/wheat-ear-line" });
-    expect(page).toMatch(/<svg viewBox="0 0 40 100" aria-hidden="true" focusable="false"><path d="M20 98V28"[^>]*vector-effect="non-scaling-stroke"/);
+    expect(page).toMatch(/<svg class="cx-dw cx-dw--line" viewBox="0 0 60 120" aria-hidden="true" focusable="false"><path d="[^"]+" style="[^"]*vector-effect:non-scaling-stroke/);
     expect(page).toContain("stroke:var(--c-text)");
+    // With its own colour the drawing is inked in currentColor, which the element's cx-fg-<role> sets.
     const inked = decor({ drawing: "motif/bakery/wheat-ear-line", color: "accent" });
-    expect(inked).toContain("stroke:var(--c-accent)");
+    expect(inked).toContain("stroke:currentColor");
     expect(inked).not.toContain("stroke:var(--c-text)");
     expect(classOf(inked, "decor")).toContain("cx-fg-accent");
+    expect(v2()).toContain(".cx-fg-accent{color:var(--c-accent)}");
     // Strokes keep at least 1.5 px.
     for (const m of page.matchAll(/stroke-width:([\d.]+)/g)) expect(Number(m[1])).toBeGreaterThanOrEqual(1.5);
   });
@@ -523,8 +525,8 @@ describe("decor: drawings, a fixed size, strips", () => {
   it("repeat x: an SVG pattern of the drawing inside one inline svg, as wide as its cell; only a repeating drawing tiles", () => {
     const page = decor({ drawing: "ornament/rope-line", repeat: "x" });
     expect(classOf(page, "decor")).toContain("cx-decor--strip");
-    expect(page).toMatch(/<svg class="cx-strip" viewBox="0 0 8000 16" preserveAspectRatio="xMinYMid slice" aria-hidden="true" focusable="false"><defs><pattern id="(cxp\w+)" width="40" height="16" patternUnits="userSpaceOnUse">/);
-    expect(page).toMatch(/<rect width="8000" height="16" fill="url\(#cxp\w+\)"><\/rect>/);
+    expect(page).toMatch(/<svg class="cx-dw cx-dw--line cx-strip" viewBox="0 0 2880 12" preserveAspectRatio="xMinYMid slice" aria-hidden="true" focusable="false"><defs><pattern id="(cxd[\w-]+)" width="8" height="12" patternUnits="userSpaceOnUse">/);
+    expect(page).toMatch(/<rect width="2880" height="12" fill="url\(#cxd[\w-]+\)"><\/rect>/);
     const id = /<pattern id="(\w+)"/.exec(page)![1];
     expect(page.split(`#${id}`)).toHaveLength(2);
     // A drawing that does not repeat draws nothing as a strip.

@@ -10,6 +10,7 @@
     "inventory:decide": "tsx scripts/decide.ts"
   },
   "dependencies": {
+    "@sb/components": "workspace:*",
     "@sb/render": "workspace:*",
     "@sb/spec": "workspace:*",
     "zod": "^4.6.5"
