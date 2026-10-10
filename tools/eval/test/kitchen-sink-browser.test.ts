@@ -122,6 +122,9 @@ describe("the kitchen-sink page at 360 and 1280 px", () => {
       for (const s of probe.problems) problems.push(`${where}: ${s}`);
       // The probe has something to look at: the opener's sticker lies on the photo fan at desktop widths, and page 3's heading over its photo.
       if (w >= 768 && (p.id === "p_home" || p.id === "p_slike") && probe.met === 0) problems.push(`${where}: no text box meets an image box (the probe checks nothing)`);
+      // A piled arrangement's frames fill their box: no empty band above them (the fan once left half its width of air under the heading).
+      const air = await page.evaluate(() => [...document.querySelectorAll(".cx-ph--fan, .cx-ph--stack")].map((ph) => { const box = ph.querySelector(".cx-ph__box")!.getBoundingClientRect(); const top = Math.min(...[...ph.querySelectorAll(".cx-ph__f")].map((f) => f.getBoundingClientRect().top)); return { cls: ph.className, air: top - box.top, h: box.height }; }));
+      for (const a of air) if (a.air > Math.max(24, a.h * 0.12)) problems.push(`${where}: ${a.cls}: ${Math.round(a.air)} px of empty box above the frames`);
       // The sheets: exactly the composed stylesheets composedSheets() names, in that order.
       const linked = await page.evaluate(() => [...document.querySelectorAll('link[rel="stylesheet"]')].map((l) => l.getAttribute("href") ?? "").filter((h) => /\/composed(-v2-[a-z]+)?-[0-9a-f]{10}\.css$/.test(h)).map((h) => h.split("/").pop()!));
       const want = composedSheets(spec.pages.find((x) => x.id === p.id)!.sections).map((k) => COMPOSED_SHEETS[k]().name);
