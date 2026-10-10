@@ -1,8 +1,8 @@
 /**
  * Today's assets, read from @sb/spec and the files @sb/render ships (nothing copied): fonts, font pairs, palettes
- * (direction fallbacks and template family palettes), trade and sub-trade motifs, imagery treatments, shapes (image
- * masks), fact objects, header and footer families, and every section type:variant as a preset. They ship today, so
- * they start approved.
+ * (direction fallbacks and template family palettes), trade and sub-trade motifs, imagery treatments, image masks,
+ * fact objects, header and footer families, and every section type:variant as a preset. They ship today, so they start
+ * approved.
  *
  * Tags come from existing data only: trades from the directions that use an asset (bestFor, template firstFor) and
  * from the sub-trade table (SUBTYPE_MOTIF); ground and density from those directions' palettes and ranges; mood words
@@ -230,10 +230,10 @@ export function treatmentAssets(): Asset[] {
   });
 }
 
-export function shapeAssets(): Asset[] {
+export function maskAssets(): Asset[] {
   return IMAGE_MASKS.map((m) => ({
-    id: `shape/${m}`,
-    kind: "shape",
+    id: `mask/${m}`,
+    kind: "mask",
     tags: tags({ ground: ALL_GROUNDS }),
     phone: "ok",
     bytes: composedRuleBytes(word(`.cx-mask-${m}`)),
@@ -328,7 +328,7 @@ export function todaysAssets(): Asset[] {
     ...motifAssets(),
     ...subMotifAssets(),
     ...treatmentAssets(),
-    ...shapeAssets(),
+    ...maskAssets(),
     ...factObjectAssets(),
     ...chromeAssets(),
     ...sectionAssets(),

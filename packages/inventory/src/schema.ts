@@ -3,71 +3,15 @@
  * asset the AI director may use goes through it; only approved assets reach the runtime catalogue (shortlist.ts).
  */
 import { z } from "zod";
-import { INTENTS } from "@sb/spec";
+import { AssetId, AssetKind, INTENTS, KIND_PREFIX } from "@sb/spec";
 
-/**
- * Asset kinds. The plan's list (§4.2) plus what today's code already has as its own unit: sub-trade motifs, header and
- * footer families, section presets (`section`, today's type:variant; `composition` is the composition-language preset
- * that later phases add) and shapes (masks and frames).
- */
-export const ASSET_KINDS = [
-  "font",
-  "pairing",
-  "palette",
-  "section",
-  "composition",
-  "shape",
-  "treatment",
-  "texture",
-  "motif",
-  "submotif",
-  "ornament",
-  "divider",
-  "typeTreatment",
-  "factObject",
-  "icon",
-  "motion",
-  "header",
-  "footer",
-  "stance",
-  "constraint",
-  "reference",
-] as const;
-export const AssetKind = z.enum(ASSET_KINDS);
-export type AssetKind = z.infer<typeof AssetKind>;
-
-/** The id prefix per kind: an asset id is `<prefix>/<name>` ("font/archivo", "section/hero-split:image-left"). */
-export const KIND_PREFIX: Record<AssetKind, string> = {
-  font: "font",
-  pairing: "pairing",
-  palette: "palette",
-  section: "section",
-  composition: "composition",
-  shape: "shape",
-  treatment: "treatment",
-  texture: "texture",
-  motif: "motif",
-  submotif: "submotif",
-  ornament: "ornament",
-  divider: "divider",
-  typeTreatment: "type-treatment",
-  factObject: "fact",
-  icon: "icon",
-  motion: "motion",
-  header: "header",
-  footer: "footer",
-  stance: "stance",
-  constraint: "constraint",
-  reference: "reference",
-};
+/** The asset id scheme (kinds, prefixes, ids) is @sb/spec's (packages/spec/src/assets.ts); re-exported here. */
+export { ASSET_KINDS, AssetKind, KIND_PREFIX, AssetId, assetId, parseAssetId, type AssetPrefix } from "@sb/spec";
 
 export const GROUNDS = ["white", "tint", "dark"] as const;
 export const Ground = z.enum(GROUNDS);
 export type Ground = z.infer<typeof Ground>;
 export const DENSITIES = ["compact", "regular", "airy"] as const;
-
-/** `<prefix>/<name>`, name segments in lower case with digits, hyphens and the section's type:variant colon. */
-export const AssetId = z.string().regex(/^[a-z]+(?:-[a-z]+)*\/[a-z0-9-]+(?::[a-z0-9-]+)?(?:\/[a-z0-9-]+(?::[a-z0-9-]+)?)*$/);
 
 const tag = z.string().regex(/^[a-z0-9-]+(?:\/[a-z0-9-]+)?$/);
 

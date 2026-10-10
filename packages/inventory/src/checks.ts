@@ -17,7 +17,7 @@ export const BYTE_BUDGET: Partial<Record<AssetKind, number>> = {
   motif: 6 * 1024,
   submotif: 1.5 * 1024,
   treatment: 2 * 1024,
-  shape: 2 * 1024,
+  mask: 2 * 1024,
   factObject: 2 * 1024,
   header: 2 * 1024,
   footer: 2 * 1024,
