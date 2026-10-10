@@ -16,7 +16,8 @@ Which model gets which kind of unit is decided here from measured results, not r
 
 ## Trial rules (2026-10-11)
 
-1. **Paired runs.** Some units get the same brief twice, Sonnet medium and Opus medium, in separate worktrees; the director keeps the better result and both are scored. First pair: F1b-3 (engine fact rules).
+1. **Every unit is built once.** No duplicate builds by default (owner, 2026-10-11: testing must not duplicate work). Models rotate across units of the same kind (spec'd code, design-heavy code, mechanical, taste) and are compared per kind, averaged over several units. A paired run (same brief, two models) only when a rule change is at stake and the per-kind data can't answer it: at most one per phase, on a small unit. The one paired run so far is F1b-3 (Sonnet medium vs Opus medium); the better arm is kept and the other arm's extra tests are merged where they add coverage.
+   - Sonnet at high effort is tried on a real unit built once (not as an extra arm), to test the medium-only cap.
 2. **Sonnet's planned share widens** from "failing tests exist" to "exact spec plus listed checks": F1b-2b, INV-1b, I3-0. Open design and taste stay on Opus.
 3. Effort stays medium for both unless a unit's row says otherwise (the owner's rule: medium, high or xhigh only).
 4. After about 8 scored Sonnet units and as many Opus units, the rules in `agent-team.md` §2 and the `delegate` skill are updated from this table, and the result is reported.
