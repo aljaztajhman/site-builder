@@ -32,6 +32,7 @@ import {
   entryPages,
   entryTitle,
   isPlaceholder,
+  isComposedLayoutPointer,
   isWebUrl,
   mapsUrl,
   setAt,
@@ -112,7 +113,8 @@ export function pageFile(page: Pick<Page, "slug">): string {
 export function localizeSpec(spec: SiteSpec, locale: Locale): SiteSpec {
   if (locale === spec.locales.default) return spec;
   const clone = structuredClone(spec);
-  for (const [ptr, value] of Object.entries(spec.translations?.[locale] ?? {})) setAt(clone, ptr, value);
+  // A composed section's layout value is never translated (validateSite rejects such an overlay; an old one is ignored).
+  for (const [ptr, value] of Object.entries(spec.translations?.[locale] ?? {})) if (!isComposedLayoutPointer(spec, ptr)) setAt(clone, ptr, value);
   for (const kind of COLLECTION_KINDS) {
     const items = spec.collections?.[kind]?.items;
     const slugs = items ? entrySlugs(items) : [];

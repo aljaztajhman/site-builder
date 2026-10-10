@@ -1,5 +1,6 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { ComposedProps, Section, SECTION_DEFS, intentOfSection, toModelJsonSchema } from "../src/index.ts";
+import { ComposedProps, GENERATED_IMAGE_INTENTS, Section, SECTION_DEFS, intentOfSection, toModelJsonSchema, validateSite, type SiteSpec } from "../src/index.ts";
 
 /** A composed opener in the spirit of template M (Tablica): the phone as a registration plate beside a workshop photo. */
 export const SAMPLE_COMPOSED = {
@@ -46,5 +47,22 @@ describe("composed sections (spec v19)", () => {
     const text = JSON.stringify(toModelJsonSchema(ComposedProps));
     expect(text).not.toContain('"const"');
     expect(text).not.toContain('"prefixItems"');
+  });
+
+  it("take a generated picture where their intent is the opener, a page header or a story; nowhere else", () => {
+    // The M sheet: composed sections hero (img_01), services (img_02), story (img_03), every picture generated.
+    const sheet = JSON.parse(readFileSync(new URL("../../../tools/eval/composed/m.json", import.meta.url), "utf8")) as SiteSpec;
+    for (const img of sheet.assets.images) img.origin = "generated";
+    const flagged = (spec: SiteSpec) =>
+      validateSite(spec)
+        .issues.filter((i) => i.message.includes("AI-generated"))
+        .map((i) => [i.path.replace(/\/props\/.*/, ""), i.message]);
+    expect(GENERATED_IMAGE_INTENTS).toEqual(["hero", "page-head", "story"]);
+    expect(flagged(sheet)).toEqual([["/pages/0/sections/2", expect.stringMatching(/^img_02 is AI-generated and may only be used in .*\(a composed section: intent hero, page-head, story\)$/)]]);
+    const intentOf = (spec: SiteSpec, si: number) => spec.pages[0]!.sections[si]!.props as { intent: string };
+    const moved = structuredClone(sheet);
+    intentOf(moved, 4).intent = "page-head";
+    intentOf(moved, 0).intent = "gallery";
+    expect(flagged(moved).map(([p]) => p)).toEqual(["/pages/0/sections/0", "/pages/0/sections/2"]);
   });
 });
