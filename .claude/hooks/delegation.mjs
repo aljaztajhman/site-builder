@@ -44,7 +44,7 @@ export function check(input) {
     if (!/\bFABLE:\s*(project-design|architecture)\b/.test(prompt)) problems.push("Fable is only for a project's overall design or the highest-level architecture: the brief needs a `FABLE: project-design|architecture` line. Phase design, review and escalation go to the architect on Opus xhigh.");
   }
   // A logged trial (docs/dev/model-trials.md) may run Sonnet at high on one real unit: the brief carries `TRIAL: sonnet-high <unit>`.
-  const trial = /TRIAL:s*sonnet-highs+S+/.test(prompt);
+  const trial = /\bTRIAL:\s*sonnet-high\s+\S+/.test(prompt);
   if ((model === "sonnet" || /sonnet/.test(String(model))) && effort && effort !== "medium" && !(trial && effort === "high")) problems.push("Sonnet runs at medium effort here (high, xhigh and max are token-hungry; agent-team.md §1.4). A logged trial may run it at high with a `TRIAL: sonnet-high <unit>` line.");
 
   return { problems, record: { at: new Date().toISOString(), type, model: model ?? null, effort: effort ?? null, isolation: t.isolation ?? def?.isolation ?? null, background: !!t.run_in_background, mode: mode ?? null, description: t.description ?? null, blocked: problems.length > 0 } };
