@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { contrast, ensureContrast, hexToHsl, hexToRgb, hslToHex, isCreamOrOffWhite, isWarmCream, luminance, rgbToHex } from "../src/index.ts";
+import { contrast, ensureContrast, hexToHsl, hexToRgb, hslToHex, isCreamOrOffWhite, isWarmCream, luminance, mix, rgbToHex } from "../src/index.ts";
 
 describe("contrast", () => {
   it("matches known WCAG values", () => {
@@ -71,5 +71,20 @@ describe("banned backgrounds", () => {
     expect(isWarmCream("#fdf8f0")).toBe(true);
     expect(isWarmCream("#f1f4f8")).toBe(false);
     expect(isWarmCream("#f2f3f5")).toBe(false);
+  });
+});
+
+describe("mix", () => {
+  it("blends a over b per sRGB channel: alpha·a + (1 − alpha)·b", () => {
+    expect(mix("#000000", "#ffffff", 0.5)).toBe("#808080");
+    expect(mix("#ff0000", "#0000ff", 0.25)).toBe("#4000bf");
+    expect(mix("#123456", "#abcdef", 1)).toBe("#123456");
+    expect(mix("#123456", "#abcdef", 0)).toBe("#abcdef");
+  });
+
+  it("reproduces the scrim contrasts the composition guards use", () => {
+    const worst = (alpha: number) => Math.min(contrast("#f5f5f5", mix("#15181c", "#000000", alpha)), contrast("#f5f5f5", mix("#15181c", "#ffffff", alpha)));
+    expect(worst(0.35)).toBeCloseTo(2.04, 1);
+    expect(worst(0.8)).toBeCloseTo(8.68, 1);
   });
 });

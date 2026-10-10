@@ -47,6 +47,13 @@ export function contrast(a: string, b: string): number {
   return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
 }
 
+/** Blends `a` over `b` at opacity `alpha` (0–1), per sRGB channel: alpha·a + (1 − alpha)·b. A scrim over a pixel. */
+export function mix(a: string, b: string, alpha: number): string {
+  const x = hexToRgb(a);
+  const y = hexToRgb(b);
+  return rgbToHex(x.map((v, i) => alpha * v + (1 - alpha) * y[i]!) as Rgb);
+}
+
 export interface Hsl {
   h: number; // 0..360
   s: number; // 0..1

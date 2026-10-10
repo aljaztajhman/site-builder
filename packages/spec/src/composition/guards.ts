@@ -18,6 +18,7 @@ import { walkStrings } from "../pointer.ts";
 import { isPlaceholder } from "../common.ts";
 import type { Colors } from "../design.ts";
 import type { MotionLevel } from "./vocab.ts";
+import { repairV2, validateV2 } from "./guards-v2.ts";
 import { DecorPath, GRID_COLUMNS, MAX_ELEMENTS, type Element } from "./schema.ts";
 
 export type ComposedSection = Extract<Section, { type: "composed" }>;
@@ -128,8 +129,11 @@ export const PHONE_COLUMNS_NAME_MAX = 24;
 export const RESTRAINT = { stickersPerSection: 1, stickersPerPage: 2, wordmarksPerPage: 1, quotesPerSection: 1 } as const;
 
 /** Elements that carry words, numbers or links: they never overlap each other and are never hidden on phones. */
-const TEXT_KINDS: ReadonlySet<Element["kind"]> = new Set(["heading", "text", "list", "fact", "action", "hours", "contact", "prices"]);
-export const isTextBearing = (e: Element): boolean => TEXT_KINDS.has(e.kind);
+const TEXT_KINDS: ReadonlySet<Element["kind"]> = new Set(["heading", "text", "list", "fact", "action", "hours", "contact", "prices", "ribbon", "sticker", "map", "iconFacts", "quote", "wordmark"]);
+/** Words, numbers or links; a photos element only with captions (G23). */
+export const isTextBearing = (e: Element): boolean => TEXT_KINDS.has(e.kind) || (e.kind === "photos" && (e.captions?.length ?? 0) > 0);
+/** An image or a photos element without captions: the elements the second-photo hiding rule is about. */
+const isPhoto = (e: Element): boolean => e.kind === "image" || (e.kind === "photos" && !isTextBearing(e));
 
 /** Running text spans at least this many columns (never a sliver) and at most this many (45–75 characters at 1280 px). */
 export const TEXT_SPAN = { min: 4, max: 8 } as const;
@@ -139,11 +143,11 @@ const SHIFT_CELLS = 0.75;
 const ROTATE_MIN_SIZE = 4;
 /** All caps only this heavy and this large (smaller is the banned tracked eyebrow; the renderer sets normal case below). */
 export const UPPERCASE_MIN = { weight: 700, size: 2 } as const;
-const DISPLAY = { headingSize: 6, factSize: 7, perSection: 1, perPage: 2 } as const;
-const MAX_PHOTO_USES = 2;
+const DISPLAY = { headingSize: 6, factSize: 7, quoteSize: 4, perSection: 1, perPage: 2 } as const;
+export const MAX_PHOTO_USES = 2;
 const MAX_SVG_PATHS = 24;
 
-const isDisplay = (e: Element): boolean => (e.kind === "heading" && e.size >= DISPLAY.headingSize) || (e.kind === "fact" && e.size >= DISPLAY.factSize);
+const isDisplay = (e: Element): boolean => (e.kind === "heading" && e.size >= DISPLAY.headingSize) || (e.kind === "fact" && e.size >= DISPLAY.factSize) || (e.kind === "quote" && (e.size ?? 0) >= DISPLAY.quoteSize);
 
 /** Reading order is phone.order, ties by position in the list (the order the renderer stacks them in). */
 export function readingOrder(elements: readonly Element[]): { e: Element; i: number }[] {
@@ -179,7 +183,7 @@ export function isCentredComposed(props: ComposedSection["props"]): boolean {
 }
 
 /** Number of times each photo id appears in the sections' props. */
-function photoUses(sections: readonly Section[]): Map<string, number> {
+export function photoUses(sections: readonly Section[]): Map<string, number> {
   const uses = new Map<string, number>();
   for (const s of sections) {
     walkStrings(s.props, (v) => {
@@ -189,14 +193,17 @@ function photoUses(sections: readonly Section[]): Map<string, number> {
   return uses;
 }
 
+/** What stands for an icon in a card: a drawing, a fact (any object), practical-fact icons or a sticker (G25). */
+const isIconBlock = (e: Element): boolean => e.kind === "decor" || e.kind === "fact" || e.kind === "iconFacts" || e.kind === "sticker";
+
 /** Blocks of a decor or fact, a heading and a text that sit side by side with equal spans (the "row of three icon cards"). */
 function cardRows(elements: readonly Element[]): { start: number; span: number }[] {
   const headings = elements.filter((e) => e.kind === "heading");
   const cols = (e: Element) => ({ a: e.desk.col, b: e.desk.col + e.desk.span - 1 });
   const meets = (e: Element, h: Element) => cols(e).a <= cols(h).b && cols(h).a <= cols(e).b;
   const blocks = headings.flatMap((h) => {
-    const members = elements.filter((e) => e !== h && (e.kind === "decor" || e.kind === "fact" || e.kind === "text") && meets(e, h) && !headings.some((o) => o !== h && meets(e, o)));
-    if (!members.some((e) => e.kind === "decor" || e.kind === "fact") || !members.some((e) => e.kind === "text")) return [];
+    const members = elements.filter((e) => e !== h && (isIconBlock(e) || e.kind === "text") && meets(e, h) && !headings.some((o) => o !== h && meets(e, o)));
+    if (!members.some(isIconBlock) || !members.some((e) => e.kind === "text")) return [];
     const all = [h, ...members];
     return [{ h, y0: Math.min(...all.map((e) => e.desk.row)), y1: Math.max(...all.map((e) => e.desk.row + (e.desk.rowSpan ?? 1))) }];
   });
@@ -254,7 +261,7 @@ export function validateComposition(section: ComposedSection, ctx: CompositionCo
   els.forEach((e, i) => {
     if (!e.phone.hidden) return;
     if (isTextBearing(e)) add(`${base}/${i}/phone/hidden`, "structure", `composed: ${e.id} (${e.kind}) carries words and can't be hidden on phones`);
-    else if (e.kind === "image" && !els.some((o) => o !== e && o.kind === "image" && !o.phone.hidden)) add(`${base}/${i}/phone/hidden`, "structure", `composed: ${e.id} is the only photo shown on phones; only a second photo may be hidden`);
+    else if (isPhoto(e) && !els.some((o) => o !== e && isPhoto(o) && !o.phone.hidden)) add(`${base}/${i}/phone/hidden`, "structure", `composed: ${e.id} is the only photo shown on phones; only a second photo may be hidden`);
   });
 
   // Desktop: text never overlaps text (it may overlap a photo or a drawing).
@@ -287,8 +294,6 @@ export function validateComposition(section: ComposedSection, ctx: CompositionCo
   const actions = els.flatMap((e, i) => (e.kind === "action" ? [{ e, i }] : []));
   const primaries = actions.filter((a) => a.e.kind === "action" && a.e.style === "primary");
   if (primaries.length > 1) add(`${base}/${primaries[1]!.i}/style`, "banned", "composed: one primary action per section (the others are secondary)");
-  const calls = actions.filter((a) => a.e.kind === "action" && a.e.action === "call");
-  if (calls.length > 1) add(`${base}/${calls[1]!.i}/action`, "banned", "composed: at most one call action per section");
   for (const { e, i } of actions) {
     if (e.kind !== "action") continue;
     if (e.action === "link" && e.link === undefined) add(`${base}/${i}/link`, "structure", `composed: ${e.id} is a link action and needs a link`);
@@ -322,21 +327,10 @@ export function validateComposition(section: ComposedSection, ctx: CompositionCo
     if (before + display.length > DISPLAY.perPage) add(`${base}/${display[0]}`, "structure", `composed: at most ${DISPLAY.perPage} display sizes per page (${before} earlier on the page)`);
   }
 
-  // Photos exist and are not used more than twice on a page.
-  const earlier = ctx.page ? photoUses(ctx.page.sections.slice(0, ctx.page.index)) : new Map<string, number>();
-  const used = new Map<string, number>();
-  els.forEach((e, i) => {
-    if (e.kind !== "image") return;
-    if (ctx.imageIds && !ctx.imageIds.has(e.image)) add(`${base}/${i}/image`, "reference", `unknown image ${e.image}`);
-    const n = (used.get(e.image) ?? 0) + 1;
-    used.set(e.image, n);
-    if ((earlier.get(e.image) ?? 0) + n > MAX_PHOTO_USES) add(`${base}/${i}/image`, "structure", `composed: ${e.image} is used more than ${MAX_PHOTO_USES} times on the page`);
-  });
-
   // Drawings: a motif or an svg, never both or neither; at most 24 paths, each only the allowed characters.
   els.forEach((e, i) => {
     if (e.kind !== "decor") return;
-    if ((e.motif === undefined) === (e.svg === undefined)) add(`${base}/${i}`, "structure", `composed: ${e.id} needs exactly one of motif and svg`);
+    if ([e.motif, e.drawing, e.svg].filter((x) => x !== undefined).length !== 1) add(`${base}/${i}`, "structure", `composed: ${e.id} needs exactly one of motif and svg (or drawing)`);
     if (e.svg) {
       if (e.svg.paths.length > MAX_SVG_PATHS) add(`${base}/${i}/svg/paths`, "structure", `composed: a drawing has at most ${MAX_SVG_PATHS} paths (${e.svg.paths.length})`);
       e.svg.paths.forEach((p, k) => {
@@ -348,10 +342,20 @@ export function validateComposition(section: ComposedSection, ctx: CompositionCo
   // Measure: running text is never a sliver and never a long line.
   els.forEach((e, i) => {
     if (e.kind !== "text") return;
-    if (e.desk.span < TEXT_SPAN.min || e.desk.span > TEXT_SPAN.max) add(`${base}/${i}/desk/span`, "structure", `composed: running text spans ${TEXT_SPAN.min}–${TEXT_SPAN.max} columns on desktop (${e.id} spans ${e.desk.span})`);
+    if ((e.desk.span < TEXT_SPAN.min || e.desk.span > TEXT_SPAN.max) && !narrowText(e, els, section.props.width)) add(`${base}/${i}/desk/span`, "structure", `composed: running text spans ${TEXT_SPAN.min}–${TEXT_SPAN.max} columns on desktop (${e.id} spans ${e.desk.span})`);
   });
 
+  issues.push(...validateV2(section, ctx));
   return issues;
+}
+
+/** G13: a text of 3 columns at body size, one short paragraph, in a wide or full section, beside another text-bearing element of 3–4 columns on a shared row (never part of a card row). */
+function narrowText(e: Element, els: readonly Element[], width: ComposedSection["props"]["width"]): boolean {
+  if (e.kind !== "text" || e.desk.span !== TEXT_SPAN_NARROW.span || (e.size ?? 0) !== 0 || e.paragraphs.length !== 1 || e.paragraphs[0]!.length > TEXT_SPAN_NARROW.maxChars || width === "contained") return false;
+  const rows = (o: Element) => [o.desk.row, o.desk.row + (o.desk.rowSpan ?? 1) - 1] as const;
+  const [a0, a1] = rows(e);
+  const partner = els.some((o) => o !== e && isTextBearing(o) && o.desk.span >= TEXT_SPAN_NARROW.partner.min && o.desk.span <= TEXT_SPAN_NARROW.partner.max && rows(o)[0] <= a1 && a0 <= rows(o)[1]);
+  return partner && cardRows(els).length === 0;
 }
 
 /**
@@ -369,7 +373,7 @@ export function repairComposition(section: ComposedSection, ctx: CompositionCont
   repairs.push(...repairEmDashes(els, base));
 
   els.forEach((e, i) => {
-    if (e.phone.hidden && (isTextBearing(e) || (e.kind === "image" && !els.some((o) => o !== e && o.kind === "image" && !o.phone.hidden)))) {
+    if (e.phone.hidden && (isTextBearing(e) || (isPhoto(e) && !els.some((o) => o !== e && isPhoto(o) && !o.phone.hidden)))) {
       delete e.phone.hidden;
       log(`${base}/${i}/phone/hidden`, `${e.kind} is shown on phones`);
     }
@@ -403,7 +407,7 @@ export function repairComposition(section: ComposedSection, ctx: CompositionCont
   }
 
   els.forEach((e, i) => {
-    if (e.kind === "text" && (e.desk.span < TEXT_SPAN.min || e.desk.span > TEXT_SPAN.max)) {
+    if (e.kind === "text" && (e.desk.span < TEXT_SPAN.min || e.desk.span > TEXT_SPAN.max) && !narrowText(e, els, next.props.width)) {
       const span = Math.min(TEXT_SPAN.max, Math.max(TEXT_SPAN.min, e.desk.span));
       const col = Math.min(e.desk.col, GRID_COLUMNS - span + 1);
       log(`${base}/${i}/desk`, `text spans ${span} columns (was ${e.desk.span})${col !== e.desk.col ? ` from column ${col}` : ""}`);
@@ -415,6 +419,8 @@ export function repairComposition(section: ComposedSection, ctx: CompositionCont
       log(`${base}/${i}/case`, "uppercase dropped (needs weight 700+ and size 2+)");
     }
   });
+
+  repairV2(next, ctx, log);
 
   return repairs.length ? { section: next, repairs } : { section, repairs };
 }
