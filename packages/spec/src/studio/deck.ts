@@ -11,7 +11,7 @@
  *   the other kinds are the inventory's, named ahead of it.
  */
 import { z } from "zod";
-import { BusinessType } from "../business.ts";
+import { BusinessSubtype, BusinessType, SUBTYPES, subtypesOf } from "../business.ts";
 import { FactElement, ImageElement } from "../composition/schema.ts";
 import { Density, Imagery, MOTIFS, SUBMOTIFS } from "../design.ts";
 import { FONT_PAIRS } from "../fonts.ts";
@@ -97,7 +97,19 @@ export const Stance = z.strictObject({
   /** One sentence a designer could pitch; visual only, never a fact. */
   pitch: z.string().min(20).max(260),
   family: z.enum(STANCE_FAMILIES),
-  trades: z.strictObject({ fit: z.array(TradeFit).min(1), never: z.array(BusinessType) }),
+  /**
+   * Trades it fits. subOnly / subNever narrow a fitting type by its business subtype (business.ts SUBTYPES): a roof-tile
+   * stance fits builders only as roofers, a seed packet fits shops but not boutiques. A site without a subtype is judged
+   * by its type alone.
+   */
+  trades: z.strictObject({
+    fit: z.array(TradeFit).min(1),
+    never: z.array(BusinessType),
+    subOnly: z.array(BusinessSubtype).min(1).optional(),
+    subNever: z.array(BusinessSubtype).min(1).optional(),
+  }),
+  /** Rooted in Slovene visual culture (beehive panels, Plečnik, the trail blaze, Yugoslav-era signage …): drawn as a language, never copied. */
+  slovene: z.boolean().optional(),
   /** The ranges it takes on the genome's axes (genome-rules.ts GenomeView), plus palette character and motion. */
   axes: z.strictObject({
     ground: z.array(z.enum(GROUNDS)).min(1),
@@ -120,12 +132,27 @@ export const Stance = z.strictObject({
 });
 export type Stance = z.infer<typeof Stance>;
 
+/** What a card needs from the client's input to work (photos: owner or generated pictures; several-photos: three or more). */
+export const CARD_REQUIREMENTS = ["photos", "several-photos", "prices", "hours", "phone", "address"] as const;
+export type CardRequirement = (typeof CARD_REQUIREMENTS)[number];
+
 export const ConstraintCard = z.strictObject({
   id: Slug,
   /** The constraint as the director reads it. */
   text: z.string().min(10).max(160),
-  /** Only for these trades or stance families; absent: any. */
-  appliesTo: z.strictObject({ trades: z.array(BusinessType).min(1).optional(), families: z.array(z.enum(STANCE_FAMILIES)).min(1).optional() }).optional(),
+  /** Only for these trades or stance families, and only when the client's input has everything in `requires`; absent: any. */
+  appliesTo: z
+    .strictObject({
+      trades: z.array(BusinessType).min(1).optional(),
+      families: z.array(z.enum(STANCE_FAMILIES)).min(1).optional(),
+      requires: z.array(z.enum(CARD_REQUIREMENTS)).min(1).optional(),
+    })
+    .optional(),
+  /**
+   * "f1b": today's composition language (spec v19) can't say it; it needs composition language v2 (design-studio.md §7:
+   * transitions, background layers, sticky columns, marquee, sticker, map). Not to be dealt before that lands.
+   */
+  needs: z.enum(["f1b"]).optional(),
 });
 export type ConstraintCard = z.infer<typeof ConstraintCard>;
 
@@ -139,6 +166,23 @@ export const Reference = z.strictObject({
   trades: z.array(BusinessType),
 });
 export type Reference = z.infer<typeof Reference>;
+
+const SUBTYPE_PARENT = new Map<BusinessSubtype, BusinessType>(
+  (Object.entries(SUBTYPES) as [BusinessType, readonly BusinessSubtype[]][]).flatMap(([type, subs]) => subs.map((s) => [s, type] as const)),
+);
+
+/**
+ * Whether a stance fits a trade and, when the site has one, its subtype: on its fit list (or "*"), off its never-list,
+ * not on subNever, and on subOnly when subOnly names subtypes of this type. (The engine's stanceFits judges the type alone.)
+ */
+export function stanceFitsSubtype(stance: Stance, type: BusinessType, subtype?: BusinessSubtype): boolean {
+  const t = stance.trades;
+  if (t.never.includes(type) || !(t.fit.includes(type) || t.fit.includes("*"))) return false;
+  if (!subtype) return true;
+  if (t.subNever?.includes(subtype)) return false;
+  const only = t.subOnly?.filter((s) => subtypesOf(type).includes(s)) ?? [];
+  return only.length === 0 || only.includes(subtype);
+}
 
 /** The issues of a deck (empty: fine): schema, unique ids, known font pairs, assets and references. */
 export function deckIssues(stances: readonly unknown[], cards: readonly unknown[], references: readonly Reference[]): string[] {
@@ -160,6 +204,10 @@ export function deckIssues(stances: readonly unknown[], cards: readonly unknown[
     for (const ref of s.references) if (!refs.has(ref)) out.push(`stance ${s.id}: unknown reference ${ref}`);
     const fit = s.trades.fit.filter((t) => t !== "*");
     for (const t of fit) if (s.trades.never.includes(t)) out.push(`stance ${s.id}: ${t} both fits and never`);
+    for (const sub of [...(s.trades.subOnly ?? []), ...(s.trades.subNever ?? [])]) {
+      const type = SUBTYPE_PARENT.get(sub);
+      if (!type || !stanceFitsSubtype(s, type)) out.push(`stance ${s.id}: subtype ${sub} of a type it doesn't fit`);
+    }
   }
   const cardIds = new Set<string>();
   for (const raw of cards) {
