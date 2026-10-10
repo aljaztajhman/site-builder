@@ -49,6 +49,7 @@ Measured, and the gate for switching it on (§9):
 - **The owner's eye first.** In a blind side-by-side on 20 businesses, the owner prefers the studio's site on ≥ 16 of them and would show ≥ 16 of the studio's sites to a customer as they are.
 - **A judge that agrees with the owner.** A judge calibrated on the owner's ratings, median ≥ 4.0 and none below 3.5, at 360 and 1280 px.
 - **Unique.** 0 same-trade pairs judged "same template". Look distance within a trade ≥ today's across-trade distance (0.61).
+- **Not dependent on the client's photos.** On the fixtures with no photos, one photo or poor phone photos, the judge's median is within 0.3 of the fixtures with good photos, and the owner's blind preference holds on them too (§6.6).
 - **Safe.** Every automated check passes (banned list, contrast, facts, mobile checklist, axe, Lighthouse) at both widths.
 
 ## 3. Architecture
@@ -289,6 +290,16 @@ The owner's direction (2026-10-09, HQ `sb-model-roles`): use the 5.5 family as a
 ### 6.5 Wordmarks for businesses without a logo
 
 Many small businesses have none. The art worker proposes a typographic wordmark: the business name set in a fitting font from the inventory, with a treatment (lockup, stamp, plate, circular text, a monogram of the initials). It is never a drawn symbol pretending to be a brand mark. The wordmark is stored in the spec, the owner can replace it with their own logo, and it is used in the header, the footer and the share image.
+
+### 6.6 Photos help; they never lead
+
+Owner (2026-10-11): customer photos can help the design, but the studio must not rely on them. Most small businesses have a few dark phone photos or none. So:
+
+- **Direction comes from the business, not the pictures.** The stance deal, the brief (trade, sub-trade, place, voice, the client's own words) and the references set the direction. The creative director reads the photo analysis as *evidence of what exists*, never as the idea. At least 4 of the 6 concepts must stand without any client photo: their first screen is carried by type, a drawn object, a fact object, colour fields or the wordmark, and photos only fill slots further down.
+- **Photos are graded before they are used.** The photo analyst marks each photo hero, supporting, detail-only or don't-use. Only "hero" photos may carry a first screen or a full-bleed band; below that grade a concept places the photo small, cropped tight, treated (duotone, tint, cut-out) or not at all. Placeholders are never padded with photos the analyst rejected.
+- **Palette from the library first.** The palette comes from the curated library by stance and trade; the logo may steer it; photo-extracted colours are one candidate among them, never the default, and only from photos graded supporting or better.
+- **Generated pictures stay within today's rule** (decision sb-studio-imagery): drawings, cut-outs of the client's own product photos and up to 3 labelled illustrations; never a fake photo of the business, its people or its premises.
+- **Measured.** The eval reports every target split by photo condition (good, poor, one, none), and the no-photo fixtures carry the same gate (§2). The tournament judge never scores a concept higher for having photos.
 
 ## 7. Composition language v2
 
