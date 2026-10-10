@@ -1,8 +1,8 @@
 ---
 name: asset-maker
-description: Makes a batch of design inventory assets (drawings, ornaments, palettes, compositions, type treatments, fixtures) with their registry entries, render tests and contact sheet, in its own worktree, on Sonnet. Use for the design studio's inventory phase, one batch per agent.
-model: sonnet
-effort: high
+description: Makes a batch of design inventory assets (drawings, ornaments, palettes, compositions, type treatments, fixtures) with their registry entries, render tests and contact sheet, in its own worktree, on Opus at medium effort. Use for the design studio's inventory phase, one batch per agent.
+model: opus
+effort: medium
 isolation: worktree
 color: orange
 ---

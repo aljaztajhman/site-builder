@@ -16,7 +16,7 @@ Sources: Anthropic, ["How we built our multi-agent research system"](https://www
 4. **Effort scales with the task.** Anthropic's rule of thumb: a simple task gets 1 agent; a comparison gets 2–4; only broad work gets 10 or more. Claude Code's docs suggest teams of 3–5 with 5–6 tasks each, and give a warning above 25 workflow agents.
 5. **Verification decides whether it worked.** Each worker returns evidence (test output, screenshots, numbers), not claims. A fresh reviewer with no stake in the code checks the diff against the plan. Outcome over process: judge the result, not the path.
 6. **Start simple.** Add a layer only when a simpler setup has shown a weakness.
-7. **Pick the model by the judgment the task needs.** Judgment-heavy work (architecture, design taste, review) → Opus. Well-specified implementation → Sonnet. Reading, searching, counting and mechanical edits → Haiku. Haiku 5.5 is 20× cheaper than Sonnet and 40× cheaper than Opus in API prices.
+7. **Pick the model by the judgment the task needs, and judge cost per finished task.** Judgment-heavy work and implementation → Opus, with effort as the dial (medium for well-specified building, high for design, review and hard problems). Reading, searching, counting and mechanical edits → Haiku 5.5 (40× cheaper than Opus in API prices). Sonnet 5.5 costs half of Opus per token, but defaults to high effort and can spend more than twice the tokens, or need more turns and rework, so per finished task it can cost as much as Opus or more. Anthropic's own advice: before mixing models, measure the strongest model at lower effort; one model also means one prompt cache. So the default pair is **Opus + Haiku**; Sonnet is an arm to measure, not a default (owner, 2026-10-10: "best to use Opus + Haiku").
 
 ## 2. What Claude Code gives us
 
@@ -35,11 +35,11 @@ Not documented, so decided here: how worktree branches get back (§6). The built
 |---|---|---|---|---|
 | **Director** | the main session | Opus 5.5, high | Reads HQ and TASKS; triages (§4); plans; writes the delegation briefs; makes the decisions that need judgment; integrates; verifies; writes HQ; opens the PR; runs every paid call | Hands off a decision it should make |
 | **Scout** | `.claude/agents/scout.md` | Haiku 5.5, low | Finds files, reads code and logs, counts, maps an area, summarises a report | Edits anything |
-| **Builder** | `.claude/agents/builder.md` | Sonnet 5.5, high; own worktree | Implements one well-specified unit with its tests, runs the checks, commits on its branch, reports with evidence | Touches files outside its brief; HQ; merges; paid calls |
+| **Builder** | `.claude/agents/builder.md` | Opus 5.5, medium; own worktree | Implements one well-specified unit with its tests, runs the checks, commits on its branch, reports with evidence | Touches files outside its brief; HQ; merges; paid calls |
 | **Reviewer** | `.claude/agents/reviewer.md` | Opus 5.5, high; read-only | Reviews a diff against its plan and brief: correctness, requirements, the CLAUDE.md rules (spec, facts, banned list, both widths); not style | Edits; approves its own work |
-| **Asset maker** | `.claude/agents/asset-maker.md` | Sonnet 5.5, high; own worktree | Makes inventory assets in batches (drawings, palettes, compositions, fixtures) with their registry entries, render tests and contact sheet | Approves assets (the owner's gallery and the director's curation do) |
+| **Asset maker** | `.claude/agents/asset-maker.md` | Opus 5.5, medium; own worktree | Makes inventory assets in batches (drawings, palettes, compositions, fixtures) with their registry entries, render tests and contact sheet | Approves assets (the owner's gallery and the director's curation do) |
 
-A role's model is a starting point. The director may pass a different one per task: Haiku for a mechanical builder task (a rename across 40 files with a codemod), Opus for a builder task that needs taste (a hand-made reference homepage, a tricky migration).
+A role's model is a starting point. The director may pass a different one per task: Haiku for a mechanical builder task (a rename across 40 files with a codemod), Opus at high effort for a builder task that needs taste (a hand-made reference homepage, a tricky migration). Sonnet only as a deliberate comparison arm (§8), and then at **medium** effort: Anthropic recalibrated Sonnet 5.5's effort levels and advises starting coding agents at medium; the first Sonnet builders here ran at high, which overspends. Not yet known: how the owner's Claude plan weighs Opus against Sonnet usage, so "most out of the plan limits" is settled by the owner's setup measurements, not assumed.
 
 ## 4. Triage: every task gets a mode first
 
@@ -48,7 +48,7 @@ Before work starts, the director picks a mode and says it in the status note ("M
 | Mode | Shape | Use when |
 |---|---|---|
 | **S, solo** | One session does it; scouts optional for reading | Sequential or tightly coupled work; one package or the same files; under about 2 hours; bug fixes; plans and docs; anything where most of the work is judgment |
-| **D, director + workers** | Opus director, 2–6 subagents (builders, asset makers, scouts), one reviewer at the end | The work splits into **2–6 units that don't share files**, each about 30 minutes or more and each with its own check; or a large area has to be read without filling the director's context; or an independent review is worth it (a spec change, a migration, money, security) |
+| **D, director + workers** | Opus director, 2–6 subagents (Opus builders and asset makers, Haiku scouts), one Opus reviewer at the end | The work splits into **2–6 units that don't share files**, each about 30 minutes or more and each with its own check; or a large area has to be read without filling the director's context; or an independent review is worth it (a spec change, a migration, money, security) |
 | **W, workflow** | A Workflow script fans out and verifies | **8 or more similar units** (assets, fixtures, files to migrate, pages to audit), or findings that need adversarial verification. Overnight only when the HQ plan says `mode: "W"` and the owner approved it |
 
 **Quick score** (the director's call, written in one line): count one point for each that holds.
@@ -89,13 +89,13 @@ The director checks each report: reads the diff, reruns the checks itself (on th
 ## 7. Cost and limits
 
 - **Development agents run on the Claude Code account, not on the product's API budget**, as long as Claude Code isn't billed through the product's API key (owner to confirm: HQ `it-claude-code-billing`). They still use the plan's usage limits, so the caps below apply anyway.
-- Mode D: at most 6 workers at once and 1 reviewer per PR. **On this machine at most 3 builders run at the same time** (each installs and runs tests; the machine slows down beyond that). Cloud sessions can run 6. Mode W: at most 25 agents per run unless the HQ plan says otherwise. Scouts on Haiku, builders on Sonnet, Opus for direction and review only.
+- Mode D: at most 6 workers at once and 1 reviewer per PR. **On this machine at most 3 builders run at the same time** (each installs and runs tests; the machine slows down beyond that). Cloud sessions can run 6. Mode W: at most 25 agents per run unless the HQ plan says otherwise. Scouts on Haiku; builders, asset makers, the reviewer and the director on Opus with effort set per task.
 - Paid model and image calls (evals, fal) stay with the director and follow `meta/budget` and the test discipline in `docs/plans/design-studio.md` §11. A worker gets an allowance only when its brief states one.
 - Subagent prompt caches last 5 minutes. Briefs that share a long fixed preamble (the asset maker's style rules) put it first so batches reuse it.
 
 ## 8. Is it working? Efficiency and quality, measured
 
-Each overnight result and each PR description records: the mode; the agents used (role × count × model); wall-clock hours; whether CI was green on the first push; what the reviewer caught; what a worker got wrong and the director had to redo; and, for inventory, the share of assets the owner rejected.
+The owner keeps a measurement system for agent setups (quality and API-price cost per setup). Each overnight result and each PR description records what it needs: the mode; the agents used (role × count × model); wall-clock hours; whether CI was green on the first push; what the reviewer caught; what a worker got wrong and the director had to redo; and, for inventory, the share of assets the owner rejected.
 
 After the design studio's free phases (about 10 PRs), the director compares them with the last 10 solo PRs of similar size and writes the result in HQ `it-agent-team`:
 
@@ -119,7 +119,7 @@ If quality drops on any line, the score in §4 tightens (fewer Mode D tasks, Opu
 | M1 Haiku 5.5 in client and config | S | Small; scout reads the Anthropic notes already summarised in the plan |
 | F3–F6 foundations | D | 4 builders, one per unit (inventory registry, Okus, seed and uniqueness registry, fixtures), each in its own package; reviewer |
 | I1–I9 inventory | W | Asset makers per batch (one font family group, one palette set, one trade's drawings), Haiku scouts for licences and glyph coverage, an Opus reviewer per batch's contact sheet; the director curates; the owner approves in the gallery |
-| I10 reference homepages | D | 4–5 builders **on Opus** (design taste is the job), one stance and trade each; the director picks which go into Okus |
+| I10 reference homepages | D | 4–5 builders on Opus at high effort (design taste is the job), one stance and trade each; the director picks which go into Okus |
 | F1b composition language v2 | S, then D | Same shape as F1 |
 | S0–S6 the studio (paid) | D | Builders write the stages in parallel where packages separate; **only the director runs paid evals** |
 | S7 owner screens | D | Builders for the progress screen, Druge zamisli and Predlagaj drugačno; browser checks at 360 and 1280 px |
