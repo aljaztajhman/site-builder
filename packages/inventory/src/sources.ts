@@ -2,7 +2,8 @@
  * Today's assets, read from @sb/spec and the files @sb/render ships (nothing copied): fonts, font pairs, palettes
  * (direction fallbacks and template family palettes), trade and sub-trade motifs, imagery treatments, image masks,
  * fact objects, header and footer families, and every section type:variant as a preset. They ship today, so they start
- * approved.
+ * approved. That is each asset's default status; the owner's gallery decisions (decisions.json) override it in
+ * inventory() (index.ts).
  *
  * Tags come from existing data only: trades from the directions that use an asset (bestFor, template firstFor) and
  * from the sub-trade table (SUBTYPE_MOTIF); ground and density from those directions' palettes and ranges; mood words
