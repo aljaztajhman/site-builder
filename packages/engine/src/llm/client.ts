@@ -31,11 +31,12 @@ export interface ModelRequest {
 export const ADVISOR_BETA = "advisor-tool-2026-03-01";
 
 /**
- * The advisor tool (a fast executor consults a stronger model). `max_uses` is required here: it bounds the advisor's
- * share of the cost, which the spend reservation prices as max_uses × (input + max_tokens of output) at the advisor
- * model's configured price.
+ * The advisor tool (a fast executor consults a stronger model). `max_uses` and `max_tokens` are required here: they
+ * bound the advisor's share of the cost, which the spend reservation prices as max_uses × (input + max_tokens of
+ * output) at the advisor model's configured price. Without max_tokens the advisor would use its own model's default
+ * output cap, which the reservation can't know.
  */
-export type AdvisorToolSpec = Anthropic.Beta.BetaAdvisorTool20260301 & { max_uses: number };
+export type AdvisorToolSpec = Anthropic.Beta.BetaAdvisorTool20260301 & { max_uses: number; max_tokens: number };
 
 export type ModelTool = Anthropic.Tool | AdvisorToolSpec;
 
@@ -195,7 +196,7 @@ export function estimateCallEur(config: AppConfig, stage: ModelStageConfig, req:
     if (!isAdvisorTool(tool)) continue;
     const advisor = config.pricesUsdPerMTok[tool.model];
     if (!advisor) throw new Error(`No price configured for advisor model ${tool.model}`);
-    usd += (tool.max_uses * (input * advisor.input + (tool.max_tokens ?? stage.maxTokens) * advisor.output)) / 1_000_000;
+    usd += (tool.max_uses * (input * advisor.input + tool.max_tokens * advisor.output)) / 1_000_000;
   }
   return usd * config.eurPerUsd;
 }
@@ -241,7 +242,7 @@ export interface AgentOptions {
   log?: (event: AgentLogEvent) => void;
 }
 
-export type AgentStopReason = "end_turn" | "handler" | "maxTurns" | "maxEur" | "spendCap" | "refusal" | "max_tokens";
+export type AgentStopReason = "end_turn" | "handler" | "maxTurns" | "maxEur" | "spendCap" | "refusal" | "max_tokens" | "context_window";
 
 export type AgentLogEvent =
   | { type: "turn"; stage: ModelStageName; turn: number; stopReason: string | null; tools: string[]; costEur: number }
@@ -372,6 +373,9 @@ export class ModelClient {
    */
   async runAgent(opts: AgentOptions): Promise<AgentResult> {
     const { handlers, maxTurns, maxEur, log = defaultAgentLog } = opts;
+    // A missing config value (NaN, undefined) would switch both caps off; the daily cap would be the only brake.
+    if (!Number.isInteger(maxTurns) || maxTurns < 1) throw new Error(`runAgent: maxTurns must be a positive integer, got ${maxTurns}`);
+    if (!Number.isFinite(maxEur) || maxEur <= 0) throw new Error(`runAgent: maxEur must be a positive number, got ${maxEur}`);
     const messages: Anthropic.MessageParam[] = [...opts.messages];
     const responses: ModelResponse[] = [];
     let costTotal = 0;
@@ -411,6 +415,8 @@ export class ModelClient {
       log({ type: "turn", stage: opts.stage, turn: responses.length, stopReason: response.stopReason, tools: (response.toolUses ?? []).map((t) => t.name), costEur: costTotal });
       // All returned blocks go back unchanged (thinking, advisor results included).
       messages.push({ role: "assistant", content: (response.content ?? fallbackContent(response)) as Anthropic.ContentBlockParam[] });
+      // The context window ran out mid-answer: any tool input may be cut off and the next turn would be longer still.
+      if (response.stopReason === "model_context_window_exceeded") return result("context_window");
       const uses = response.toolUses ?? [];
       if (response.stopReason === "pause_turn" && !uses.length) continue; // a paused server-tool turn: ask again as is
       if (!uses.length) return result("end_turn");

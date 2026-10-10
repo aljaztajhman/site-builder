@@ -407,3 +407,23 @@ describe("advisor tool", () => {
     expect(toModelResponse(msg, stage)).toEqual({ text: "Hello world", stopReason: "tool_use", model: stage.model, usage: { input_tokens: 10, output_tokens: 5, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 } });
   });
 });
+
+describe("runAgent: review fixes (PR #161)", () => {
+  it("stops at model_context_window_exceeded without running the cut-off tool calls", async () => {
+    const t = scripted([{ ...calls(toolUse("lookup", { q: "a" })), stopReason: "model_context_window_exceeded" }]);
+    const { client } = clientOf(t);
+    let ran = 0;
+    const events: AgentLogEvent[] = [];
+    const r = await client.runAgent({ ...base, tools: [lookup], handlers: { lookup: () => (ran++, "x") }, log: quiet(events) });
+    expect(r.stopped).toBe("context_window");
+    expect(ran).toBe(0);
+    expect(t.seen).toHaveLength(1);
+  });
+
+  it("refuses caps that would switch themselves off (a missing config value)", async () => {
+    const { client } = clientOf(scripted([says("x")]));
+    await expect(client.runAgent({ ...base, maxTurns: Number.NaN, tools: [lookup], handlers: {} })).rejects.toThrow(/maxTurns/);
+    await expect(client.runAgent({ ...base, maxEur: Number.NaN, tools: [lookup], handlers: {} })).rejects.toThrow(/maxEur/);
+    await expect(client.runAgent({ ...base, maxTurns: 0, tools: [lookup], handlers: {} })).rejects.toThrow(/maxTurns/);
+  });
+});
