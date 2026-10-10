@@ -3,7 +3,7 @@
  * inputs deal the same stances, cards and references, so a run replays from its recordings. No model call. Nothing in
  * the pipeline calls this yet (the studio stages come later, behind the designer switch).
  */
-import { CARDS, REFERENCES, STANCES, type BusinessType, type ConstraintCard, type Reference, type Stance, type StanceFamily } from "@sb/spec";
+import { CARDS, REFERENCES, STANCES, stanceFitsSubtype, type BusinessSubtype, type BusinessType, type CardRequirement, type ConstraintCard, type Reference, type Stance, type StanceFamily } from "@sb/spec";
 import { inClientText, type Concept } from "../concept.ts";
 import { hash32, siteSeed } from "../variety.ts";
 
@@ -40,8 +40,9 @@ export const MAX_PER_FAMILY = 2;
 export type ConceptCues = Partial<Pick<Concept, "goal" | "angle" | "materials" | "localAnchor">>;
 
 /** Whether a stance may be dealt for a trade: on its fit list (or "*"), not on its never-list. */
-export function stanceFits(stance: Stance, trade: BusinessType): boolean {
-  return !stance.trades.never.includes(trade) && (stance.trades.fit.includes(trade) || stance.trades.fit.includes("*"));
+/** The stance fits the trade (and its sub-trade, when known): fit list, never list, subOnly/subNever (spec studio/deck.ts). */
+export function stanceFits(stance: Stance, trade: BusinessType, subtype?: BusinessSubtype): boolean {
+  return stanceFitsSubtype(stance, trade, subtype);
 }
 
 /** The stance's weight for this concept (before neighbours): 1 plus each cue it matches. */
@@ -63,6 +64,8 @@ export function conceptWeight(stance: Stance, concept: ConceptCues | undefined):
 export interface DealStancesInput {
   seed: string;
   trade: BusinessType;
+  /** The business's sub-trade (brief concept), when known: stances limited to other sub-trades are left out. */
+  subtype?: BusinessSubtype | undefined;
   concept?: ConceptCues | undefined;
   /** Looks of other sites of this trade (and town): their stances are dealt less often. */
   neighbours: readonly { stance: string | null | undefined }[];
@@ -85,7 +88,7 @@ export function dealStances(input: DealStancesInput): Stance[] {
   const used = new Map<string, number>();
   for (const n of input.neighbours) if (n.stance) used.set(n.stance, (used.get(n.stance) ?? 0) + 1);
   const ranked = deck
-    .filter((s) => stanceFits(s, input.trade))
+    .filter((s) => stanceFits(s, input.trade, input.subtype))
     .map((s) => {
       const w = conceptWeight(s, input.concept) * DEAL_WEIGHTS.neighbour ** (used.get(s.id) ?? 0);
       return { s, key: Math.log(unit(input.seed, "stance", s.id)) / w };
@@ -109,16 +112,27 @@ export function dealStances(input: DealStancesInput): Stance[] {
 }
 
 /** Whether a card may go with this trade and stance family (absent appliesTo: any). */
-export function cardApplies(card: ConstraintCard, o: { trade?: BusinessType | undefined; family?: StanceFamily | undefined }): boolean {
+export function cardApplies(
+  card: ConstraintCard,
+  o: { trade?: BusinessType | undefined; family?: StanceFamily | undefined; has?: readonly CardRequirement[] | undefined; f1b?: boolean | undefined },
+): boolean {
+  // Cards that need composition language v2 wait until it lands (o.f1b).
+  if (card.needs === "f1b" && !o.f1b) return false;
   const a = card.appliesTo;
   if (!a) return true;
+  // What the client's input has (photos, prices …); a card needing something missing doesn't apply. Unknown: no limit.
+  if (a.requires && o.has && !a.requires.every((req) => o.has!.includes(req))) return false;
   if (a.trades && o.trade && !a.trades.includes(o.trade)) return false;
   if (a.families && o.family && !a.families.includes(o.family)) return false;
   return true;
 }
 
 /** `n` distinct constraint cards in the seed's order (one per concept), those that apply to the trade and family. */
-export function dealCards(seed: string, n: number, o: { trade?: BusinessType; family?: StanceFamily; deck?: readonly ConstraintCard[] } = {}): ConstraintCard[] {
+export function dealCards(
+  seed: string,
+  n: number,
+  o: { trade?: BusinessType; family?: StanceFamily; has?: readonly CardRequirement[]; f1b?: boolean; deck?: readonly ConstraintCard[] } = {},
+): ConstraintCard[] {
   return (o.deck ?? CARDS)
     .filter((c) => cardApplies(c, o))
     .map((c) => ({ c, k: unit(seed, "card", c.id) }))

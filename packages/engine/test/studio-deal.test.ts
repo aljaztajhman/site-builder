@@ -135,7 +135,8 @@ describe("dealCards", () => {
     expect(dealCards("zz00aa1", 6).map((c) => c.id)).not.toEqual(a.map((c) => c.id));
     for (let i = 0; i < 20; i++) expect(dealCards(designSeed(`s${i}`, 0), CARDS.length, { trade: "accountant" }).map((c) => c.id)).not.toContain("price-at-headline-size");
     expect(dealCards("k3x9q2a", 0)).toEqual([]);
-    expect(dealCards("k3x9q2a", 100).length).toBe(CARDS.length);
+    // Cards that need composition language v2 are held back until it lands (f1b).
+    expect(dealCards("k3x9q2a", 100).length).toBe(CARDS.filter((c) => c.needs !== "f1b").length);
   });
 });
 
@@ -152,5 +153,26 @@ describe("dealReferences", () => {
       }
     }
     expect(dealReferences("k3x9q2a", "bakery")[0]!.id).toBe("skorja");
+  });
+});
+
+describe("dealing with the full deck (I8)", () => {
+  it("never deals a card that needs composition language v2, unless asked to", () => {
+    const all = dealCards("s1", 50);
+    expect(all.some((c) => c.needs === "f1b")).toBe(false);
+    expect(dealCards("s1", 50, { f1b: true }).some((c) => c.needs === "f1b")).toBe(true);
+  });
+  it("leaves out cards whose requirements the client's input lacks", () => {
+    const noPhotos = dealCards("s2", 50, { has: ["phone", "address", "hours"] });
+    expect(noPhotos.length).toBeGreaterThan(5);
+    expect(noPhotos.every((c) => !c.appliesTo?.requires?.includes("photos"))).toBe(true);
+  });
+  it("deals six stances for every trade, and respects sub-trade limits", () => {
+    for (const trade of ["car-repair", "accountant", "dental", "restaurant", "shop", "builder"] as const) {
+      const dealt = dealStances({ seed: "s3", trade, neighbours: [], previous: [] });
+      expect(dealt, trade).toHaveLength(6);
+    }
+    const electrical = dealStances({ seed: "s4", trade: "builder", subtype: "electrical", neighbours: [], previous: [] });
+    expect(electrical.every((s) => !s.trades.subNever?.includes("electrical"))).toBe(true);
   });
 });
