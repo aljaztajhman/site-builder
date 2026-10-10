@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
-import type { Link } from "@sb/spec";
+import { UPPERCASE_MIN, type Link } from "@sb/spec";
 import { PlateStrip } from "../../motifs/index.tsx";
 import { ActionLink, Picture, cx } from "../../primitives/index.tsx";
 import type { RenderCtx } from "../../types.ts";
@@ -35,8 +35,11 @@ function Heading({ el, over, id }: { el: ElOf<"heading">; over: boolean; id: str
   const H = HEADINGS[el.level - 1]!;
   const rotate = el.rotate === "90" || el.rotate === "-90" ? el.rotate : undefined;
   const p = placement(el, over, { "--fz": stepVar(el.size), ...(el.weight ? { "--w": el.weight } : {}) });
+  // Below size 2 a heading is never all caps, whatever the direction's --case-heading: a small uppercase line is the
+  // banned tracked eyebrow (an explicit uppercase there is the guard's to drop).
+  const textCase = el.size < UPPERCASE_MIN.size ? "normal" : el.case;
   return (
-    <H id={id} {...p} className={cx(p.className, "cx-h", el.case && `cx-h--${el.case}`)} data-sz={el.size} data-measure={el.measure} data-rotate={rotate}>
+    <H id={id} {...p} className={cx(p.className, "cx-h", textCase && `cx-h--${textCase}`)} data-sz={el.size} data-measure={el.measure} data-rotate={rotate}>
       {el.text}
     </H>
   );

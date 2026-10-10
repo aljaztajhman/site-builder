@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { GENERATED_IMAGE_SECTIONS, SiteSpec } from "./site.ts";
+import { GENERATED_IMAGE_INTENTS, GENERATED_IMAGE_SECTIONS, SiteSpec } from "./site.ts";
 import { SECTION_DEFS } from "./sections/index.ts";
 import { DIRECTIONS } from "./directions.ts";
 import { subtypeFits } from "./business.ts";
@@ -13,6 +13,7 @@ import { centredOn } from "./skeleton.ts";
 import { siteGenomeIssues } from "./genome-rules.ts";
 import { secondLocales, untranslated } from "./translatable.ts";
 import { compositionContext, isCentredComposed, validateComposition } from "./composition/guards.ts";
+import { isComposedLayoutPointer } from "./composition/layout-keys.ts";
 
 export interface Issue {
   path: string;
@@ -148,8 +149,12 @@ export function semanticIssues(spec: SiteSpec): Issue[] {
     spec.pages.forEach((page, pi) =>
       page.sections.forEach((s, si) => {
         if (allowed.has(s.type)) return;
+        // A composed section is the same slot as the section its intent stands for.
+        const composed = s.type === "composed";
+        if (composed && (GENERATED_IMAGE_INTENTS as readonly string[]).includes(s.props.intent)) return;
+        const where = `${GENERATED_IMAGE_SECTIONS.join(", ")}${composed ? ` (a composed section: intent ${GENERATED_IMAGE_INTENTS.join(", ")})` : ""}`;
         walkStrings(s.props, (v, p) => {
-          if (generated.has(v)) add(`/pages/${pi}/sections/${si}/props${p}`, "reference", `${v} is AI-generated and may only be used in ${GENERATED_IMAGE_SECTIONS.join(", ")}`);
+          if (generated.has(v)) add(`/pages/${pi}/sections/${si}/props${p}`, "reference", `${v} is AI-generated and may only be used in ${where}`);
         });
       }),
     );
@@ -244,6 +249,7 @@ export function semanticIssues(spec: SiteSpec): Issue[] {
     }
     for (const ptr of Object.keys(map ?? {})) {
       if (typeof getAt(spec, ptr) !== "string") add(`/translations/${locale}`, "translation", `pointer ${ptr} is not a string in the spec`);
+      else if (isComposedLayoutPointer(spec, ptr)) add(`/translations/${locale}`, "translation", `pointer ${ptr} is a composed section's layout value, not copy`);
     }
   }
 
