@@ -19,7 +19,43 @@ export interface ModelRequest {
   messages: Anthropic.MessageParam[];
   /** JSON Schema for structured output. Omit for free text. */
   schema?: Record<string, unknown>;
+  /** Tools the model may call: client tools (`name`, `description`, `input_schema`) and the server-side advisor. */
+  tools?: ModelTool[];
+  /** How the model picks tools. Use `auto`: Opus and Sonnet 5.5 reject forced `any` / `tool` (400). */
+  toolChoice?: Anthropic.ToolChoice;
+  /** Extra Messages API beta headers. The advisor beta is added by itself when `tools` has an advisor. */
+  betas?: string[];
 }
+
+/** Beta header of the server-side advisor tool. */
+export const ADVISOR_BETA = "advisor-tool-2026-03-01";
+
+/**
+ * The advisor tool (a fast executor consults a stronger model). `max_uses` and `max_tokens` are required here: they
+ * bound the advisor's share of the cost, which the spend reservation prices as max_uses × (input + max_tokens of
+ * output) at the advisor model's configured price. Without max_tokens the advisor would use its own model's default
+ * output cap, which the reservation can't know.
+ */
+export type AdvisorToolSpec = Anthropic.Beta.BetaAdvisorTool20260301 & { max_uses: number; max_tokens: number };
+
+export type ModelTool = Anthropic.Tool | AdvisorToolSpec;
+
+export const isAdvisorTool = (t: ModelTool): t is AdvisorToolSpec => (t as { type?: string }).type === "advisor_20260301";
+
+/** A client `tool_use` block of an answer. */
+export type ModelToolUse = Pick<Anthropic.ToolUseBlock, "id" | "name" | "input">;
+
+/** Answer blocks as the API returns them (the beta ones carry advisor results). Pass them back unchanged. */
+export type ModelContentBlock = Anthropic.ContentBlock | Anthropic.Beta.BetaContentBlock;
+
+/** Tokens an advisor sub-inference used, billed at the advisor model's price. */
+export interface AdvisorUsage {
+  model: string;
+  usage: ModelUsage;
+}
+
+const needsBeta = (req: ModelRequest): boolean => !!req.betas?.length || !!req.tools?.some(isAdvisorTool);
+export const betasOf = (req: ModelRequest): string[] => [...new Set([...(req.betas ?? []), ...(req.tools?.some(isAdvisorTool) ? [ADVISOR_BETA] : [])])];
 
 export interface ModelUsage {
   input_tokens: number;
@@ -35,6 +71,12 @@ export interface ModelResponse {
   model: string;
   /** Answered through the Message Batches API: priced at config `batchPriceFactor`. */
   batch?: boolean;
+  /** Every content block (thinking, tool_use, advisor results, ...), in order. Only kept for requests with `tools`. */
+  content?: ModelContentBlock[];
+  /** The client `tool_use` blocks of `content`. Only set when there are some. */
+  toolUses?: ModelToolUse[];
+  /** Advisor sub-inferences of this call (their tokens are not in `usage`). */
+  advisorUsage?: AdvisorUsage[];
 }
 
 export interface CallRecord {
@@ -45,6 +87,8 @@ export interface CallRecord {
   costEur: number;
   durationMs: number;
   ok: boolean;
+  /** Advisor sub-inferences, already included in `costEur` (priced per advisor model). Only set when there were some. */
+  advisor?: AdvisorUsage[];
 }
 
 /** Anything that can answer a ModelRequest: the real API, or a replay of recorded responses. */
@@ -130,29 +174,111 @@ export function estimateCallEur(config: AppConfig, stage: ModelStageConfig, req:
   const price = config.pricesUsdPerMTok[stage.model];
   if (!price) throw new Error(`No price configured for model ${stage.model}`);
   const { charsPerToken, tokensPerImage } = config.limits.spendReservation;
-  let chars = req.system.reduce((n, s) => n + s.length, 0) + (req.schema ? JSON.stringify(req.schema).length : 0);
+  let chars = req.system.reduce((n, s) => n + s.length, 0) + (req.schema ? JSON.stringify(req.schema).length : 0) + (req.tools?.length ? JSON.stringify(req.tools).length : 0);
   let images = 0;
+  const count = (b: { type: string } & Record<string, unknown>): void => {
+    if (b.type === "text") chars += String(b.text).length;
+    // Base64 data says nothing about an image's tokens.
+    else if (b.type === "image" || b.type === "document") images++;
+    else if (b.type === "tool_result" && typeof b.content === "string") chars += b.content.length;
+    // A tool result's pictures are priced like any other picture, not by their base64 text.
+    else if (b.type === "tool_result" && Array.isArray(b.content)) for (const c of b.content as ({ type: string } & Record<string, unknown>)[]) count(c);
+    else chars += JSON.stringify(b).length;
+  };
   for (const m of req.messages) {
     if (typeof m.content === "string") chars += m.content.length;
-    else
-      for (const b of m.content) {
-        if (b.type === "text") chars += b.text.length;
-        // Base64 data says nothing about an image's tokens.
-        else if (b.type === "image" || b.type === "document") images++;
-        else chars += JSON.stringify(b).length;
-      }
+    else for (const b of m.content) count(b as unknown as { type: string } & Record<string, unknown>);
   }
   const input = Math.ceil(chars / charsPerToken) + images * tokensPerImage;
-  return ((input * price.input + stage.maxTokens * price.output) / 1_000_000) * config.eurPerUsd;
+  let usd = (input * price.input + stage.maxTokens * price.output) / 1_000_000;
+  // Each advisor use reads the transcript and writes up to its max_tokens, at the advisor model's price.
+  for (const tool of req.tools ?? []) {
+    if (!isAdvisorTool(tool)) continue;
+    const advisor = config.pricesUsdPerMTok[tool.model];
+    if (!advisor) throw new Error(`No price configured for advisor model ${tool.model}`);
+    usd += (tool.max_uses * (input * advisor.input + tool.max_tokens * advisor.output)) / 1_000_000;
+  }
+  return usd * config.eurPerUsd;
 }
 
 export class ModelOutputError extends Error {
   constructor(
     message: string,
     readonly response: ModelResponse,
+    /** What the unusable call cost (it was billed and logged). */
+    readonly costEur = 0,
   ) {
     super(message);
     this.name = "ModelOutputError";
+  }
+}
+
+/** What a tool handler returns: text, or content blocks (images allowed), or the `{ content, isError, done }` form. */
+export type AgentToolContent = string | Array<Anthropic.TextBlockParam | Anthropic.ImageBlockParam>;
+export interface AgentToolResult {
+  content: AgentToolContent;
+  /** Sent as `is_error: true`, so the model sees the tool failed. */
+  isError?: boolean;
+  /** Stop the loop after this turn's results are appended (e.g. a "finish" tool). */
+  done?: boolean;
+}
+export type AgentHandler = (input: unknown, ctx: { id: string; turn: number }) => Promise<AgentToolContent | AgentToolResult> | AgentToolContent | AgentToolResult;
+
+export interface AgentOptions {
+  stage: ModelStageName;
+  system: string[];
+  messages: Anthropic.MessageParam[];
+  tools: ModelTool[];
+  /** By tool name. A tool_use for a name with no handler is answered with an error result. */
+  handlers: Record<string, AgentHandler>;
+  /** Model calls at most. */
+  maxTurns: number;
+  /** € this loop may spend, checked after each turn. */
+  maxEur: number;
+  toolChoice?: Anthropic.ToolChoice;
+  betas?: string[];
+  cache?: boolean;
+  /** Hears each turn and why the loop stopped (default: cap stops go to console.warn). */
+  log?: (event: AgentLogEvent) => void;
+}
+
+export type AgentStopReason = "end_turn" | "handler" | "maxTurns" | "maxEur" | "spendCap" | "refusal" | "max_tokens" | "context_window";
+
+export type AgentLogEvent =
+  | { type: "turn"; stage: ModelStageName; turn: number; stopReason: string | null; tools: string[]; costEur: number }
+  | { type: "stop"; stage: ModelStageName; stopped: AgentStopReason; turns: number; costEur: number; message?: string };
+
+export interface AgentResult {
+  stopped: AgentStopReason;
+  turns: number;
+  /** € booked by this loop's turns (advisor included). */
+  costEur: number;
+  /** The transcript: the input messages, then each turn's assistant message and tool results. */
+  messages: Anthropic.MessageParam[];
+  responses: ModelResponse[];
+  /** The last answer's text. */
+  text: string;
+  /** The cap error or unusable answer that stopped the loop. */
+  error?: Error;
+}
+
+const CAP_STOPS = new Set<AgentStopReason>(["maxTurns", "maxEur", "spendCap"]);
+function defaultAgentLog(e: AgentLogEvent): void {
+  if (e.type === "stop" && CAP_STOPS.has(e.stopped)) console.warn(`[agent] ${e.stage} stopped by ${e.stopped} after ${e.turns} turns, €${e.costEur.toFixed(4)}${e.message ? `: ${e.message}` : ""}`);
+}
+
+/** Content for an answer a transport returned without `content` (a scripted one): its text and tool_use blocks. */
+function fallbackContent(r: ModelResponse): Anthropic.ContentBlockParam[] {
+  return [...(r.text ? [{ type: "text" as const, text: r.text }] : []), ...(r.toolUses ?? []).map((t) => ({ type: "tool_use" as const, id: t.id, name: t.name, input: t.input }))];
+}
+
+async function runHandler(handler: AgentHandler | undefined, use: ModelToolUse, turn: number): Promise<AgentToolResult> {
+  if (!handler) return { content: `Unknown tool: ${use.name}`, isError: true };
+  try {
+    const out = await handler(use.input, { id: use.id, turn });
+    return typeof out === "string" || Array.isArray(out) ? { content: out } : out;
+  } catch (e) {
+    return { content: `Tool ${use.name} failed: ${(e as Error).message.slice(0, 500)}`, isError: true };
   }
 }
 
@@ -198,6 +324,11 @@ export class ModelClient {
   }
 
   async call(req: ModelRequest): Promise<ModelResponse> {
+    return (await this.callRecorded(req)).response;
+  }
+
+  /** `call`, also returning the record that was booked (its € cost). */
+  private async callRecorded(req: ModelRequest): Promise<{ response: ModelResponse; record: CallRecord }> {
     const { config } = this.opts;
     const stage = this.stageConfig(req.stage);
     const reservation = await this.ledger.reserve({ stage: req.stage, model: stage.model, estimateEur: estimateCallEur(config, stage, req), capEur: config.limits.dailyModelSpendCapEur });
@@ -213,18 +344,92 @@ export class ModelClient {
     // Price by the model the API reports; if it reports an ID we have no price for (e.g. a dated
     // alias), use the requested model's price so the call is still logged and counted against the cap.
     const priced = this.opts.config.pricesUsdPerMTok[res.model] ? res.model : stage.model;
+    // Advisor sub-inferences are billed at the advisor's price and are not in `usage`. A model with no configured
+    // price (a dated alias) is priced as the advisor model the request named.
+    const requested = req.tools?.find(isAdvisorTool)?.model;
+    const advisorEur = (res.advisorUsage ?? []).reduce((n, a) => n + costEur(config, config.pricesUsdPerMTok[a.model] ? a.model : (requested ?? stage.model), a.usage), 0);
     const record: CallRecord = {
       stage: req.stage,
       model: res.model,
       usage: res.usage,
-      costEur: costEur(this.opts.config, priced, res.usage, res.batch),
+      costEur: costEur(this.opts.config, priced, res.usage, res.batch) + advisorEur,
       durationMs: Date.now() - started,
       ok: res.stopReason !== "refusal" && res.stopReason !== "max_tokens",
+      ...(res.advisorUsage?.length ? { advisor: res.advisorUsage } : {}),
     };
     await reservation.settle(record);
-    if (res.stopReason === "refusal") throw new ModelOutputError(`Model declined the ${req.stage} request`, res);
-    if (res.stopReason === "max_tokens") throw new ModelOutputError(`Model output for ${req.stage} hit max_tokens`, res);
-    return res;
+    if (res.stopReason === "refusal") throw new ModelOutputError(`Model declined the ${req.stage} request`, res, record.costEur);
+    if (res.stopReason === "max_tokens") throw new ModelOutputError(`Model output for ${req.stage} hit max_tokens`, res, record.costEur);
+    return { response: res, record };
+  }
+
+  /**
+   * A tool-use loop: every turn goes through `call`'s path (reservation under the daily cap, per-stage log of tokens
+   * and €), runs the `handlers` for the answer's `tool_use` blocks and sends all their results back in one user
+   * message, until the model stops calling tools, a handler says `done`, or a cap is hit. A cap never throws: the loop
+   * returns what it has with `stopped` saying why, and `log` hears which cap. Only transport errors propagate.
+   * Caps: `maxTurns` model calls; `maxEur` of spend in this loop, checked after each turn (the last turn may overshoot
+   * it by one call); the daily cap (SpendCapError from the ledger), checked before each turn.
+   */
+  async runAgent(opts: AgentOptions): Promise<AgentResult> {
+    const { handlers, maxTurns, maxEur, log = defaultAgentLog } = opts;
+    // A missing config value (NaN, undefined) would switch both caps off; the daily cap would be the only brake.
+    if (!Number.isInteger(maxTurns) || maxTurns < 1) throw new Error(`runAgent: maxTurns must be a positive integer, got ${maxTurns}`);
+    if (!Number.isFinite(maxEur) || maxEur <= 0) throw new Error(`runAgent: maxEur must be a positive number, got ${maxEur}`);
+    const messages: Anthropic.MessageParam[] = [...opts.messages];
+    const responses: ModelResponse[] = [];
+    let costTotal = 0;
+    const result = (stopped: AgentStopReason, error?: Error): AgentResult => {
+      log({ type: "stop", stage: opts.stage, stopped, turns: responses.length, costEur: costTotal, ...(error ? { message: error.message } : {}) });
+      return { stopped, turns: responses.length, costEur: costTotal, messages, responses, text: responses.at(-1)?.text ?? "", ...(error ? { error } : {}) };
+    };
+    for (;;) {
+      if (responses.length >= maxTurns) return result("maxTurns");
+      if (costTotal >= maxEur) return result("maxEur");
+      const req: ModelRequest = {
+        stage: opts.stage,
+        system: opts.system,
+        // A copy: the loop keeps growing `messages`, a transport may keep the request.
+        messages: [...messages],
+        tools: opts.tools,
+        ...(opts.toolChoice ? { toolChoice: opts.toolChoice } : {}),
+        ...(opts.betas ? { betas: opts.betas } : {}),
+        ...(opts.cache === false ? { cache: false } : {}),
+      };
+      let response: ModelResponse;
+      try {
+        const done = await this.callRecorded(req);
+        response = done.response;
+        costTotal += done.record.costEur;
+      } catch (e) {
+        if (e instanceof SpendCapError) return result("spendCap", e);
+        if (e instanceof ModelOutputError) {
+          // Billed but unusable: refusal or max_tokens. Its cost counts; the answer is not added to the transcript.
+          responses.push(e.response);
+          costTotal += e.costEur;
+          return result(e.response.stopReason === "refusal" ? "refusal" : "max_tokens", e);
+        }
+        throw e;
+      }
+      responses.push(response);
+      log({ type: "turn", stage: opts.stage, turn: responses.length, stopReason: response.stopReason, tools: (response.toolUses ?? []).map((t) => t.name), costEur: costTotal });
+      // All returned blocks go back unchanged (thinking, advisor results included).
+      messages.push({ role: "assistant", content: (response.content ?? fallbackContent(response)) as Anthropic.ContentBlockParam[] });
+      // The context window ran out mid-answer: any tool input may be cut off and the next turn would be longer still.
+      if (response.stopReason === "model_context_window_exceeded") return result("context_window");
+      const uses = response.toolUses ?? [];
+      if (response.stopReason === "pause_turn" && !uses.length) continue; // a paused server-tool turn: ask again as is
+      if (!uses.length) return result("end_turn");
+      const results: Anthropic.ToolResultBlockParam[] = [];
+      let finished = false;
+      for (const use of uses) {
+        const out = await runHandler(handlers[use.name], use, responses.length);
+        results.push({ type: "tool_result", tool_use_id: use.id, content: out.content, ...(out.isError ? { is_error: true } : {}) });
+        if (out.done) finished = true;
+      }
+      messages.push({ role: "user", content: results });
+      if (finished) return result("handler");
+    }
   }
 
   /** Stages whose schema the API refused for structured output (too many unions etc.); they use plain JSON. */
@@ -350,18 +555,39 @@ const SITE_ID_IN_KEY = /\bsites\/site_[0-9a-f]{16}\//g;
  * storage keys: every run creates a new site, so without this an edit request never matched between two runs
  * (`--record-missing` re-paid every edit). Only the hash input is normalised; the request sent is untouched. A
  * request without such a key hashes exactly as before, so recordings of the other stages keep matching.
+ *
+ * A request with `tools` / `toolChoice` / `betas` also hashes those, and its messages (tool_use and tool_result
+ * blocks included) with every base64 picture replaced by the hash of its bytes, so a loop's turns each get their own
+ * hash. A request without them hashes exactly as before (the keys are not added, pictures stay inline).
  */
 export function requestHash(req: ModelRequest, model: string): string {
-  const json = JSON.stringify({ model, stage: req.stage, system: req.system, messages: req.messages, schema: req.schema ?? null });
+  const withTools = !!req.tools?.length || !!req.toolChoice || !!req.betas?.length;
+  const json = JSON.stringify({
+    model,
+    stage: req.stage,
+    system: req.system,
+    messages: withTools ? req.messages.map(hashableMessage) : req.messages,
+    schema: req.schema ?? null,
+    ...(withTools ? { tools: req.tools ?? null, toolChoice: req.toolChoice ?? null, betas: req.betas ?? null } : {}),
+  });
   return createHash("sha256").update(json.replace(SITE_ID_IN_KEY, "sites/site_*/")).digest("hex").slice(0, 16);
 }
 
-/**
- * The Messages API body for a request. Parameter names checked against the current SDK (@anthropic-ai/sdk 0.129:
- * output_config.effort, output_config.format {type:"json_schema"}, cache_control on system blocks). Shared by the
- * live transport and the eval's batch transport (a batch request's params are the same body).
- */
-export function messageParams(req: ModelRequest, stage: AppConfig["models"][ModelStageName]): Anthropic.MessageCreateParamsNonStreaming {
+/** The message with base64 picture data (also inside tool results) replaced by `sha256:<hash of the data>`. */
+function hashableMessage<T>(value: T): T {
+  if (Array.isArray(value)) return value.map(hashableMessage) as T;
+  if (!value || typeof value !== "object") return value;
+  const o = value as Record<string, unknown>;
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(o)) {
+    if (k === "data" && typeof v === "string" && o.type === "base64") out[k] = `sha256:${createHash("sha256").update(v).digest("hex")}`;
+    else out[k] = hashableMessage(v);
+  }
+  return out as T;
+}
+
+/** The body fields both Messages endpoints share. */
+function baseParams(req: ModelRequest, stage: AppConfig["models"][ModelStageName]) {
   const outputConfig: Anthropic.OutputConfig = {};
   // Haiku 4.5 does not accept effort; the config simply omits it for that stage.
   if (stage.effort) outputConfig.effort = stage.effort;
@@ -377,16 +603,46 @@ export function messageParams(req: ModelRequest, stage: AppConfig["models"][Mode
     system,
     messages: req.messages,
     ...(Object.keys(outputConfig).length ? { output_config: outputConfig } : {}),
+    ...(req.toolChoice ? { tool_choice: req.toolChoice } : {}),
   };
 }
 
-/** A Messages API answer as the pipeline reads it. */
-export function toModelResponse(msg: Anthropic.Message, stage: AppConfig["models"][ModelStageName]): ModelResponse {
-  const text = msg.content
+/**
+ * The Messages API body for a request. Parameter names checked against the current SDK (@anthropic-ai/sdk 0.129:
+ * output_config.effort, output_config.format {type:"json_schema"}, cache_control on system blocks, tools,
+ * tool_choice). Shared by the live transport and the eval's batch transport (a batch request's params are the same
+ * body). A request that needs a beta (the advisor tool) has no such body: see `betaMessageParams`.
+ */
+export function messageParams(req: ModelRequest, stage: AppConfig["models"][ModelStageName]): Anthropic.MessageCreateParamsNonStreaming {
+  if (needsBeta(req)) throw new Error("This request needs a beta header (advisor tool); build it with betaMessageParams and send it through AnthropicTransport");
+  return { ...baseParams(req, stage), ...(req.tools?.length ? { tools: req.tools as Anthropic.Tool[] } : {}) };
+}
+
+/**
+ * The beta Messages API body (`client.beta.messages`): the same fields plus `betas` (the `anthropic-beta` header)
+ * and tools that include the advisor, `{ type: "advisor_20260301", name: "advisor", model, max_uses?, max_tokens?,
+ * caching? }`.
+ */
+export function betaMessageParams(req: ModelRequest, stage: AppConfig["models"][ModelStageName]): Anthropic.Beta.Messages.MessageCreateParamsNonStreaming {
+  const betas = betasOf(req);
+  return {
+    ...(baseParams(req, stage) as Omit<Anthropic.Beta.Messages.MessageCreateParamsNonStreaming, "betas" | "tools">),
+    ...(req.tools?.length ? { tools: req.tools as Anthropic.Beta.BetaToolUnion[] } : {}),
+    ...(betas.length ? { betas } : {}),
+  };
+}
+
+/**
+ * A Messages API answer as the pipeline reads it. `opts.content` keeps every content block (thinking, tool_use,
+ * advisor results) plus the client `tool_use` blocks and the advisor sub-inferences' usage: for tool requests.
+ */
+export function toModelResponse(msg: Anthropic.Message | Anthropic.Beta.BetaMessage, stage: AppConfig["models"][ModelStageName], opts: { content?: boolean } = {}): ModelResponse {
+  const blocks: ModelContentBlock[] = msg.content;
+  const text = blocks
     .filter((b): b is Anthropic.TextBlock => b.type === "text")
     .map((b) => b.text)
     .join("");
-  return {
+  const res: ModelResponse = {
     text,
     stopReason: msg.stop_reason,
     model: msg.model || stage.model,
@@ -397,6 +653,20 @@ export function toModelResponse(msg: Anthropic.Message, stage: AppConfig["models
       cache_read_input_tokens: msg.usage.cache_read_input_tokens ?? 0,
     },
   };
+  if (!opts.content) return res;
+  res.content = blocks;
+  const toolUses = blocks.filter((b): b is Anthropic.ToolUseBlock => b.type === "tool_use").map((b) => ({ id: b.id, name: b.name, input: b.input }));
+  if (toolUses.length) res.toolUses = toolUses;
+  // The advisor's tokens are billed at its own model's price and are listed apart from the top-level usage.
+  const iterations = "iterations" in msg.usage ? (msg.usage.iterations ?? []) : [];
+  const advisorUsage = iterations
+    .filter((i): i is Anthropic.Beta.BetaAdvisorMessageIterationUsage => i.type === "advisor_message")
+    .map((i) => ({
+      model: i.model as string,
+      usage: { input_tokens: i.input_tokens, output_tokens: i.output_tokens, cache_creation_input_tokens: i.cache_creation_input_tokens, cache_read_input_tokens: i.cache_read_input_tokens },
+    }));
+  if (advisorUsage.length) res.advisorUsage = advisorUsage;
+  return res;
 }
 
 /** Real Messages API transport. Streaming avoids HTTP timeouts on long outputs. */
@@ -409,7 +679,8 @@ export class AnthropicTransport implements ModelTransport {
   }
 
   async send(req: ModelRequest, stage: AppConfig["models"][ModelStageName]): Promise<ModelResponse> {
-    const stream = this.client.messages.stream(messageParams(req, stage));
-    return toModelResponse(await stream.finalMessage(), stage);
+    const content = !!req.tools?.length;
+    if (needsBeta(req)) return toModelResponse(await this.client.beta.messages.stream(betaMessageParams(req, stage)).finalMessage(), stage, { content });
+    return toModelResponse(await this.client.messages.stream(messageParams(req, stage)).finalMessage(), stage, { content });
   }
 }
