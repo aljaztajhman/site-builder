@@ -43,6 +43,11 @@
  * --reuse-pictures: a picture request the cache doesn't know takes the picture the fixture got earlier at the same
  *                   position (eval-transports.ts), so a run that changes the brief or design keeps its pictures fixed.
  * --label <name>:   names the run in its report files (eval/runs/variety-…-<name>.md/.json), e.g. off and on.
+ * --stage-model <stage>=<model>[:<effort>]: runs that stage on another model (and effort) for this run only; repeatable,
+ *                   e.g. --stage-model content=claude-haiku-5-5:low (stage-model.ts; the model needs a config price).
+ *                   The request hash includes the model, and --record, --record-missing and --replay keep such a run's
+ *                   recordings in tools/eval/recordings-stage-models/<setup>/ unless --recordings is given, so setups
+ *                   never share recordings (the picture cache stays shared).
  * fal pictures (FAL_KEY) are cached by request in tools/eval/image-cache/ in every mode that makes them.
  * Writes eval/report.md, eval/contact-sheet.png, the review sheets in eval/look/ (look.ts) and the variety numbers
  * (variety-report.ts): eval/variety-<mode>-<scope>.md for a run over every fixture, else beside the report in eval/runs/.
@@ -61,6 +66,7 @@ import { contactSheet, renderReport } from "./report.ts";
 import { desktopContactSheet, reviewSheet } from "./look.ts";
 import { reportPaths } from "./report-paths.ts";
 import { sloveneJudgeRequested } from "./slovene-judge.ts";
+import { applyStageModels, parseStageModels, stageModelsSlug, type StageModelOverride } from "./stage-model.ts";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "../../..");
@@ -173,6 +179,18 @@ if (varietyArg) {
   for (const n of names) config.variety[n as (typeof VARIETY_SWITCHES)[number]] = true;
   console.log(`Variety switches on: ${names.join(", ")}`);
 }
+// --stage-model <stage>=<model>[:<effort>] (repeatable): that stage on another model for this run (the runner shares the config).
+let stageModels: StageModelOverride[];
+try {
+  stageModels = parseStageModels(args, config);
+} catch (e) {
+  console.error((e as Error).message);
+  process.exit(2);
+}
+if (stageModels.length) {
+  applyStageModels(config, stageModels);
+  console.log(`Stage models: ${stageModels.map((o) => `${o.stage} on ${o.model}${o.effort ? ` (${o.effort})` : ""}`).join(", ")}`);
+}
 const regenerate = flag("regenerate");
 const twinIds = new Set(value("regenerate") === "twins" ? loadTwins().map((t) => t.id) : []);
 if (regenerate && !paid) {
@@ -181,7 +199,9 @@ if (regenerate && !paid) {
 }
 // --recordings <dir>: where --record-missing/--replay keep the fixtures' recordings (default tools/eval/recordings, the
 // full-scope ones the unit tests replay). A homepage-scope or switched run should keep its own, so it never rewrites those.
-const recordingsDir = path.resolve(repoRoot, value("recordings") ?? "tools/eval/recordings");
+// A --stage-model run keeps its own recordings per setup, so it never rewrites or replays the default ones.
+const ownRecordings = stageModels.length > 0 && value("recordings") === undefined;
+const recordingsDir = path.resolve(repoRoot, value("recordings") ?? (ownRecordings ? `tools/eval/recordings-stage-models/${stageModelsSlug(stageModels)}` : "tools/eval/recordings"));
 if (mode === "record" && value("recordings") === undefined && scope === "home") {
   console.error("--record --scope home would replace the full-scope recordings the tests replay; pass --recordings <dir>.");
   process.exit(2);
@@ -218,6 +238,8 @@ try {
       neighbours: results.flatMap((x) => (x.made ? [x.made] : [])),
       regenerate: regenerate && (twinIds.size === 0 || twinIds.has(f.id)),
       reusePictures: flag("reuse-pictures"),
+      // The picture cache stays the shared one (it is by default beside the recordings directory).
+      ...(ownRecordings ? { imageCacheDir: path.join(repoRoot, "tools/eval/image-cache") } : {}),
       ...(judgeBatch ? { judgeBatch } : {}),
     });
     // What was really paid: replayed answers and cached pictures are free (the report still prices them).

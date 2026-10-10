@@ -35,6 +35,9 @@ export class BatchTransport implements ModelTransport {
   ) {}
 
   send(req: ModelRequest, stage: AppConfig["models"][ModelStageName]): Promise<ModelResponse> {
+    // Tool loops need every answer block back (toolUses, content); batch results carry text only. Refuse rather than
+    // end a loop after one turn without saying why.
+    if (req.tools?.length) return Promise.reject(new Error(`BatchTransport can't run tool requests (stage ${req.stage}); use the direct transport`));
     return new Promise((resolve, reject) => this.queue.push({ id: `${req.stage}-${this.n++}`, params: messageParams(req, stage), stage, resolve, reject }));
   }
 
