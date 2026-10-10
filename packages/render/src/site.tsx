@@ -48,7 +48,7 @@ import {
 } from "@sb/spec";
 import { fontFaceCss, fontFiles, tokensCss } from "./tokens.ts";
 import { DEFAULT_IMAGE_WIDTHS, variantFile, variantHeight, variantWidths } from "./images.ts";
-import { sharedBundle } from "./shared.ts";
+import { composedStylesheet, sharedBundle } from "./shared.ts";
 import { entryJsonLd, faqJsonLd, jsonLd } from "./jsonld.ts";
 import { feedOf, rssXml } from "./feed.ts";
 import { OG_LOCALE, SHARE_IMAGE, indexable, normaliseSiteUrl, pagePath, robotsTxt, shareImageOf, sitemapEntries, sitemapXml } from "./seo.ts";
@@ -412,6 +412,8 @@ function renderDocument(spec: SiteSpec, localized: SiteSpec, opts: RenderOptions
       )}
       {/* The stylesheet without other trades' motif rules (shared.ts stylesheetFor). */}
       <link rel="stylesheet" href={ctx.shared(stylesheetName({ motif, sub }))} />
+      {/* Composed sections (spec v19) have a stylesheet of their own, linked only by pages that have one. */}
+      {doc.sections.some((s) => s.type === "composed") && <link rel="stylesheet" href={ctx.shared(composedStylesheet().name)} />}
       <style dangerouslySetInnerHTML={{ __html: fontFaceCss(design, fontsBase) + tokensCss(design, sub) }} />
       {doc.jsonLd.map((json, i) => (
         <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: json }} />

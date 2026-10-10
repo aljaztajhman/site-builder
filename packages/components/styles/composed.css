@@ -1,0 +1,611 @@
+/*
+ * Composed sections (spec v19, packages/spec/src/composition; renderer: src/groups/composed). Its own stylesheet,
+ * linked only by pages that have a composed section (@sb/render shared.ts, site.tsx), so sites without one keep the
+ * stylesheet they had. Not part of STYLE_FILES.
+ *
+ * Phones (below 64 rem): the elements stack in phone.order on a 4-column grid; no rotation, no shift, no overlap.
+ * From 64 rem: a 12-column grid, every element on its own place. Placement arrives as custom properties on the element
+ * (--c column, --s span, --r row, --rs row span, --z layer, --sx/--sy shifts in steps); no colour and no size is ever
+ * inline: colours are the palette's roles (var(--c-*)), sizes the type scale (--cx-fs-*).
+ *
+ * Same bans as every sheet (a test greps all of them): no gradients, no blur, no heavy shadows, no pills, no accent-coloured
+ * single-side borders.
+ */
+
+/* ---------- the section ---------- */
+.s-composed {
+  position: relative;
+  isolation: isolate;
+  /* A shifted or rotated element never makes the page scroll sideways. */
+  overflow-x: clip;
+}
+/* The section's own ground: what a backing panel and a hang tag's hole are painted in. */
+.s-composed.tone-default {
+  --cx-ground: var(--c-bg);
+}
+.s-composed.tone-alt {
+  --cx-ground: var(--c-surface);
+}
+.s-composed.tone-inverse {
+  --cx-ground: var(--c-inverse);
+}
+.s-composed.tone-band {
+  --cx-ground: var(--c-band, var(--c-primary));
+}
+.cx-w-wide > .container {
+  max-width: 90rem;
+}
+.cx-w-full > .container {
+  max-width: none;
+}
+
+/* Surface texture and divider (props.surface). Textures are masks painted in a text colour: no dot or grid patterns. */
+.cx-tex-grain::before,
+.cx-tex-lines::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--c-text);
+  opacity: 0.07;
+}
+.cx-tex-grain.tone-inverse::before,
+.cx-tex-lines.tone-inverse::before {
+  background: var(--c-on-inverse);
+}
+.cx-tex-grain.tone-band::before,
+.cx-tex-lines.tone-band::before {
+  background: var(--c-on-band, var(--c-on-primary));
+}
+.cx-tex-grain::before {
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.cx-tex-lines::before {
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Crect y='7' width='8' height='1'/%3E%3C/svg%3E") repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Crect y='7' width='8' height='1'/%3E%3C/svg%3E") repeat;
+}
+.cx-div-rule {
+  border-bottom: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+}
+/* The site's motif divider where it has one (--motif-divider); a heavy rule in the text colour where it has none. */
+.cx-div-motif {
+  padding-bottom: calc(var(--space-section) + var(--motif-divider-h, 0.5rem));
+}
+.cx-div-motif::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--motif-divider-h, 0.5rem);
+  background: var(--motif-divider, currentColor) repeat-x left bottom / var(--motif-divider-w, auto) var(--motif-divider-h, 0.5rem);
+}
+
+/* ---------- the grid ---------- */
+.cx {
+  /* The type scale: steps 6 to 8 are display sizes, at most 15vw on a phone and 12vw on desktop. */
+  --cx-fs-m1: var(--fs-sm);
+  --cx-fs-0: var(--fs-base);
+  --cx-fs-1: var(--fs-lg);
+  --cx-fs-2: var(--fs-h3);
+  --cx-fs-3: var(--fs-h2);
+  --cx-fs-4: calc((var(--fs-h2) + var(--fs-h1)) / 2);
+  --cx-fs-5: var(--fs-h1);
+  --cx-fs-6: min(12vw, 4rem);
+  --cx-fs-7: min(13.5vw, 5rem);
+  --cx-fs-8: min(15vw, 6rem);
+  --cx-gap: max(0.75rem, calc(var(--g, 3) * 0.4rem));
+  --cx-step: 1.25rem;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--cx-gap);
+  align-content: start;
+}
+.cx--mh-l,
+.cx--mh-screen {
+  min-height: min(32rem, 80svh);
+}
+
+.cx-el {
+  position: relative;
+  z-index: calc(var(--z, 0) + 1);
+  min-width: 0;
+  width: var(--cx-w, auto);
+  grid-column: 1 / -1;
+}
+/* Things that size themselves from their cell (a photo, a drawing, a fact's container) never shrink to nothing. */
+.cx-img,
+.cx-decor,
+.cx-fact {
+  --cx-w: 100%;
+}
+
+/* Phone places: full (the row), inset (a part of it), half (two to a row). */
+.cx-ps-half {
+  grid-column: span 2;
+}
+@media (max-width: 63.999rem) {
+  .cx-ps-inset {
+    --cx-w: 82%;
+  }
+  .cx-nophone {
+    display: none;
+  }
+  .cx-el[data-pa="center"] {
+    justify-self: center;
+    text-align: center;
+    --cx-ji: center;
+  }
+  .cx-el[data-pa="end"] {
+    justify-self: end;
+    text-align: end;
+    --cx-ji: end;
+  }
+  /* A button spans its cell on a phone: a big target. */
+  .cx-act .btn {
+    width: 100%;
+  }
+}
+
+/* ---------- desktop: 12 columns, each element on its own place ---------- */
+@media (min-width: 64rem) {
+  .cx {
+    --cx-gap: calc(var(--g, 3) * 0.5rem);
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: repeat(var(--rows, 1), auto);
+    align-content: stretch;
+  }
+  .cx--mh-s {
+    min-height: 22rem;
+  }
+  .cx--mh-m {
+    min-height: 30rem;
+  }
+  .cx--mh-l {
+    min-height: 40rem;
+  }
+  /* The screen less the header (about 5 rem). */
+  .cx--mh-screen {
+    min-height: calc(100svh - 5rem);
+  }
+  .cx-el {
+    grid-column: var(--c) / span var(--s);
+    grid-row: var(--r) / span var(--rs, 1);
+    translate: calc(var(--sx, 0) * var(--cx-step)) calc(var(--sy, 0) * var(--cx-step));
+  }
+  /* A panel hugs its text; an explicit alignment below overrides it. */
+  .cx-over {
+    align-self: start;
+    padding: 0.75rem 1rem;
+    /* Text over a photo: the section's own ground at high opacity (not a gradient, not a blur), so contrast holds. */
+    background: color-mix(in srgb, var(--cx-ground) 94%, transparent);
+  }
+  .cx-el[data-ax="start"] {
+    justify-self: start;
+  }
+  .cx-el[data-ax="center"] {
+    justify-self: center;
+    text-align: center;
+    --cx-ji: center;
+  }
+  .cx-el[data-ax="end"] {
+    justify-self: end;
+    text-align: end;
+    --cx-ji: end;
+  }
+  .cx-el[data-ax="stretch"] {
+    justify-self: stretch;
+  }
+  .cx-el[data-ay="start"] {
+    align-self: start;
+  }
+  .cx-el[data-ay="center"] {
+    align-self: center;
+  }
+  .cx-el[data-ay="end"] {
+    align-self: end;
+  }
+  .cx-el[data-ay="stretch"] {
+    align-self: stretch;
+  }
+  .cx-act[data-ax="stretch"] .btn {
+    width: 100%;
+  }
+  .cx {
+    --cx-fs-6: min(calc(var(--fs-h1) * 1.4), 12vw);
+    --cx-fs-7: min(calc(var(--fs-h1) * 1.9), 12vw);
+    --cx-fs-8: min(calc(var(--fs-h1) * 2.6), 12vw);
+  }
+}
+@media (min-width: 64rem) {
+  /* A full-width section keeps a gutter that grows with the screen. */
+  .cx-w-full > .container {
+    padding-inline: clamp(1rem, 3vw, 3rem);
+  }
+}
+
+/* ---------- heading ---------- */
+.cx-h {
+  font-size: var(--fz, var(--fs-h2));
+  font-weight: var(--w, var(--fw-heading));
+  line-height: 1.12;
+}
+.cx-h[data-sz="4"],
+.cx-h[data-sz="5"] {
+  line-height: 1.08;
+}
+.cx-h[data-sz="6"],
+.cx-h[data-sz="7"],
+.cx-h[data-sz="8"] {
+  line-height: 1.02;
+}
+.cx-h--normal {
+  text-transform: none;
+}
+.cx-h--uppercase {
+  text-transform: uppercase;
+}
+@media (min-width: 64rem) {
+  /* Line length at display sizes, in characters of the heading font. */
+  .cx-h[data-measure="s"] {
+    max-width: 12ch;
+  }
+  .cx-h[data-measure="m"] {
+    max-width: 20ch;
+  }
+  .cx-h[data-measure="l"] {
+    max-width: 30ch;
+  }
+  /* Rotated headings are desktop only: a vertical writing mode, so the box is as tall as the words are long. */
+  .cx-h[data-rotate="90"] {
+    writing-mode: vertical-rl;
+  }
+  .cx-h[data-rotate="-90"] {
+    writing-mode: vertical-rl;
+    rotate: 180deg;
+  }
+}
+
+/* ---------- text and list ---------- */
+.cx-t,
+.cx-t p {
+  max-width: 65ch;
+}
+.cx-t > * + * {
+  margin-top: 1em;
+}
+.cx-t--lead p {
+  font-size: var(--fs-lg);
+  line-height: 1.5;
+}
+.cx-l {
+  display: grid;
+  gap: 0.5rem;
+}
+.cx-l li {
+  position: relative;
+  max-width: 65ch;
+}
+.cx-l--dot li {
+  padding-left: 1.25rem;
+}
+.cx-l--dot li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.7em;
+  width: 0.45em;
+  height: 0.45em;
+  border-radius: 50%;
+  background: currentColor;
+}
+.cx-l--rule {
+  gap: 0;
+  border-top: 1px solid var(--b-rule, var(--c-border));
+}
+.cx-l--rule li {
+  padding-block: 0.6rem;
+  border-bottom: 1px solid var(--b-rule, var(--c-border));
+}
+
+/* ---------- fact: a value as an object ---------- */
+.cx-fact {
+  container-type: inline-size;
+  display: grid;
+  align-content: start;
+  justify-items: var(--cx-ji, start);
+  gap: 0.625rem;
+}
+.cx-fact__obj {
+  /* The size step, but never wider than the cell: about 0.62 em per character, and room for the object's own padding. */
+  font-size: min(var(--fz), calc(100cqw / (var(--n, 6) * 0.62 + 1.7)));
+  max-width: 100%;
+}
+.cx-fact__value {
+  max-width: none;
+  font-family: var(--font-heading);
+  font-weight: var(--fw-heading);
+  font-size: 1em;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.cx-fact__label {
+  max-width: 30ch;
+  font-size: var(--fs-base);
+  line-height: 1.35;
+}
+/* plate: motifs.css's .plate; on sites without the plate motif the plate takes the palette's roles. */
+body:not([data-motif="plate"]) .cx-fact--plate,
+body:not([data-motif="plate"]) .cx-prices--plates {
+  --plate-ground: var(--c-surface);
+  --plate-ink: var(--c-text);
+  --plate-eu: var(--c-primary);
+}
+body:not([data-motif="plate"]) .cx-fact--plate .plate__eu,
+body:not([data-motif="plate"]) .cx-prices--plates .plate__eu {
+  color: var(--c-on-primary);
+}
+.tone-alt .cx-fact--plate,
+.tone-alt .cx-prices--plates {
+  --plate-ground: var(--c-bg);
+}
+.cx-fact--plate .plate__num {
+  max-width: none;
+}
+/* stamp: a double frame. */
+.cx-fact--stamp .cx-fact__obj {
+  display: grid;
+  gap: 0.15em;
+  padding: 0.3em 0.6em 0.4em;
+  border: 0.07em solid currentColor;
+  border-radius: var(--radius);
+  outline: 0.04em solid currentColor;
+  outline-offset: 0.14em;
+  margin: 0.2em;
+}
+/* ticket: notches in both sides, the label under a dashed rule. */
+.cx-fact--ticket .cx-fact__obj {
+  display: grid;
+  padding: 0.35em 1em;
+  background: var(--c-primary);
+  color: var(--c-on-primary);
+  clip-path: polygon(0 0, 100% 0, 100% calc(50% - 0.35em), calc(100% - 0.35em) 50%, 100% calc(50% + 0.35em), 100% 100%, 0 100%, 0 calc(50% + 0.35em), 0.35em 50%, 0 calc(50% - 0.35em));
+}
+.cx-fact--ticket .cx-fact__label {
+  margin-top: 0.3rem;
+  padding-top: 0.4rem;
+  border-top: 2px dashed currentColor;
+}
+/* seal: a round seal in the band colour that grows with its value. Not the hero's .seal (fixed size, tilted on every width). */
+.cx-fact--seal .cx-fact__obj {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  width: calc(var(--n, 6) * 0.6em + 2.4em);
+  aspect-ratio: 1;
+  padding: 0.4em;
+  border-radius: 50%;
+  background: var(--c-band, var(--c-primary));
+  color: var(--c-on-band, var(--c-on-primary));
+  text-align: center;
+}
+.cx-fact--seal .cx-fact__label {
+  max-width: 11ch;
+  overflow-wrap: anywhere;
+}
+/* tag: a hang tag, pointed at the string end, with its hole. */
+.cx-fact--tag .cx-fact__obj {
+  position: relative;
+  display: grid;
+  padding: 0.3em 0.8em 0.35em 1.8em;
+  background: var(--c-inverse);
+  color: var(--c-on-inverse);
+  clip-path: polygon(0.9em 0, 100% 0, 100% 100%, 0.9em 100%, 0 50%);
+}
+.cx-fact--tag .cx-fact__obj::before,
+.cx-tag::before {
+  content: "";
+  position: absolute;
+  left: 0.9em;
+  top: 50%;
+  width: 0.35em;
+  height: 0.35em;
+  margin-top: -0.175em;
+  border-radius: 50%;
+  background: var(--cx-ground, var(--c-bg));
+}
+.tone-inverse .cx-fact--tag .cx-fact__obj,
+.tone-inverse .cx-tag {
+  background: var(--c-on-inverse);
+  color: var(--c-inverse);
+}
+.tone-band .cx-fact--seal .cx-fact__obj,
+.tone-band .cx-fact--ticket .cx-fact__obj,
+.tone-band .cx-tag {
+  background: var(--c-on-band, var(--c-on-primary));
+  color: var(--c-band, var(--c-primary));
+}
+@media (min-width: 64rem) {
+  .cx-fact--stamp .cx-fact__obj {
+    rotate: -4deg;
+  }
+}
+
+/* ---------- image: ratio, mask, treatment ---------- */
+.cx-img {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: var(--radius);
+}
+/* The photo fills the frame whatever the site's imagery treatment draws around a .media (offset blocks, margins). */
+.cx-img > .media {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  overflow: hidden;
+}
+.cx-img > .media::before {
+  content: none;
+}
+.cx-r-1-1 {
+  aspect-ratio: 1 / 1;
+}
+.cx-r-4-5 {
+  aspect-ratio: 4 / 5;
+}
+.cx-r-3-4 {
+  aspect-ratio: 3 / 4;
+}
+.cx-r-4-3 {
+  aspect-ratio: 4 / 3;
+}
+.cx-r-3-2 {
+  aspect-ratio: 3 / 2;
+}
+.cx-r-16-9 {
+  aspect-ratio: 16 / 9;
+}
+.cx-r-21-9 {
+  aspect-ratio: 21 / 9;
+}
+.cx-r-fill {
+  aspect-ratio: 4 / 3;
+}
+@media (min-width: 64rem) {
+  /* fill: the photo takes its cell, whatever rows the other elements make. */
+  .cx-r-fill {
+    aspect-ratio: auto;
+    align-self: stretch;
+    min-height: 16rem;
+  }
+}
+.cx-mask-arch {
+  border-radius: 100vw 100vw 0 0;
+}
+.cx-mask-circle {
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+}
+.cx-mask-cut {
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 2.5rem), calc(100% - 2.5rem) 100%, 0 100%);
+}
+.cx-mask-ticket {
+  clip-path: polygon(0 0, 100% 0, 100% calc(50% - 1.25rem), calc(100% - 1.25rem) 50%, 100% calc(50% + 1.25rem), 100% 100%, 0 100%, 0 calc(50% + 1.25rem), 1.25rem 50%, 0 calc(50% - 1.25rem));
+}
+/* stamp: a perforated edge round a paper margin. */
+.cx-mask-stamp {
+  background: var(--c-border);
+  clip-path: polygon(0.00% 0, 6.25% 0.4rem, 12.50% 0, 18.75% 0.4rem, 25.00% 0, 31.25% 0.4rem, 37.50% 0, 43.75% 0.4rem, 50.00% 0, 56.25% 0.4rem, 62.50% 0, 68.75% 0.4rem, 75.00% 0, 81.25% 0.4rem, 87.50% 0, 93.75% 0.4rem, 100.00% 0, calc(100% - 0.4rem) 5.00%, 100% 10.00%, calc(100% - 0.4rem) 15.00%, 100% 20.00%, calc(100% - 0.4rem) 25.00%, 100% 30.00%, calc(100% - 0.4rem) 35.00%, 100% 40.00%, calc(100% - 0.4rem) 45.00%, 100% 50.00%, calc(100% - 0.4rem) 55.00%, 100% 60.00%, calc(100% - 0.4rem) 65.00%, 100% 70.00%, calc(100% - 0.4rem) 75.00%, 100% 80.00%, calc(100% - 0.4rem) 85.00%, 100% 90.00%, calc(100% - 0.4rem) 95.00%, 100% 100.00%, 93.75% calc(100% - 0.4rem), 87.50% 100%, 81.25% calc(100% - 0.4rem), 75.00% 100%, 68.75% calc(100% - 0.4rem), 62.50% 100%, 56.25% calc(100% - 0.4rem), 50.00% 100%, 43.75% calc(100% - 0.4rem), 37.50% 100%, 31.25% calc(100% - 0.4rem), 25.00% 100%, 18.75% calc(100% - 0.4rem), 12.50% 100%, 6.25% calc(100% - 0.4rem), 0.00% 100%, 0.4rem 95.00%, 0 90.00%, 0.4rem 85.00%, 0 80.00%, 0.4rem 75.00%, 0 70.00%, 0.4rem 65.00%, 0 60.00%, 0.4rem 55.00%, 0 50.00%, 0.4rem 45.00%, 0 40.00%, 0.4rem 35.00%, 0 30.00%, 0.4rem 25.00%, 0 20.00%, 0.4rem 15.00%, 0 10.00%, 0.4rem 5.00%);
+}
+.tone-inverse .cx-mask-stamp {
+  background: var(--c-on-inverse);
+}
+.tone-band .cx-mask-stamp {
+  background: var(--c-on-band, var(--c-on-primary));
+}
+.cx-mask-stamp > .media {
+  inset: 0.9rem;
+}
+/* The label of a generated picture sits where the mask doesn't cut it. */
+.cx-mask-arch .media--ai::after,
+.cx-mask-circle .media--ai::after {
+  top: auto;
+  right: auto;
+  bottom: 0.75rem;
+  left: 50%;
+  translate: -50% 0;
+}
+.cx-mask-stamp .media--ai::after {
+  top: 0.5rem;
+  right: 0.5rem;
+}
+/* Treatments: shaped by the palette's roles, never a gradient. */
+.cx-tr-duotone {
+  background: var(--c-primary);
+}
+.cx-tr-duotone > .media img {
+  filter: grayscale(1) contrast(1.05) brightness(1.1);
+  mix-blend-mode: multiply;
+}
+.cx-tr-tint::after,
+.cx-tr-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+.cx-tr-tint::after {
+  background: var(--c-primary);
+  opacity: 0.3;
+}
+.cx-tr-grain::after {
+  background: var(--c-text);
+  opacity: 0.22;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------- action, hours, contact, prices, decor ---------- */
+.cx-act .text-link {
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
+}
+.cx-hours .hours {
+  max-width: 34rem;
+}
+.cx-contact .contact__fact > dd {
+  max-width: none;
+}
+.cx-prices-el .prices {
+  max-width: 44rem;
+}
+/* Plates and tags lay out by the room they have, not by the section variant's fixed 2 or 4 columns. */
+.cx-prices.price-tags {
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: 1.5rem 1rem;
+}
+/* A plate smaller than the price list's 52 px: "od 35 €" has to fit a 12 rem column. */
+.cx-prices--plates .price-tag.plate {
+  font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2.125rem);
+}
+.cx-prices .price--on-request {
+  white-space: normal;
+}
+.cx-tag {
+  position: relative;
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem 0.75rem 2.25rem;
+  background: var(--c-inverse);
+  color: var(--c-on-inverse);
+  clip-path: polygon(1.25rem 0, 100% 0, 100% 100%, 1.25rem 100%, 0 50%);
+}
+.cx-tag::before {
+  left: 0.9rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-top: -0.25rem;
+}
+.cx-tag__name {
+  font-weight: 600;
+}
+.cx-tag__price {
+  font-family: var(--font-heading);
+  font-size: var(--fs-h3);
+  line-height: 1.2;
+}
+.cx-decor svg {
+  width: 100%;
+  height: auto;
+}
+.cx-decor .branch,
+.cx-decor .spoon {
+  width: 100%;
+  height: auto;
+}
