@@ -51,7 +51,9 @@ const TEXTLESS: ReadonlySet<El["kind"]> = new Set(["image", "photos", "decor"]);
  * A text-bearing element whose desktop rectangle overlaps a photo: it gets a solid backing panel (composed.css, .cx-over)
  * so its contrast holds whatever the photo. Measuring the photo's luminance under the text to size a scrim is a later
  * step (docs/plans/ai-designer-spec.md §2.3); until then the panel is always the section's own ground at high opacity.
- * Objects with a ground of their own (a plate, a seal, a ticket, a hang tag, a primary button) need none.
+ * Objects with a ground of their own (a plate, a seal, a ticket, a hang tag, a primary button) need none, and an image
+ * with a `scrim` (spec v20) is no photo to back against: its flat scrim is the ground the text is read on (the guards
+ * check its contrast, G3), so text over it gets no panel (§3.1).
  */
 export function overPhoto(el: El, all: readonly El[]): boolean {
   if (TEXTLESS.has(el.kind)) return false;
@@ -59,7 +61,7 @@ export function overPhoto(el: El, all: readonly El[]): boolean {
   if (el.kind === "action" && el.style === "primary") return false;
   // A sticker and a ribbon are objects on a ground of their own (composed-v2.css, region kinds).
   if (el.kind === "sticker" || el.kind === "ribbon") return false;
-  return all.some((o) => (o.kind === "image" || o.kind === "photos") && o.id !== el.id && overlaps(el, o));
+  return all.some((o) => ((o.kind === "image" && o.scrim === undefined) || o.kind === "photos") && o.id !== el.id && overlaps(el, o));
 }
 
 /** The heading that names the section (the first in reading order), if it has one. */

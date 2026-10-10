@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ComposedProps } from "@sb/spec";
-import { fieldRect, headerGround, insideField, phoneRowCount, phoneRows, readingOrder, type LayerOf } from "../src/groups/composed/layout.ts";
+import { fieldRect, headerGround, insideField, overPhoto, phoneRowCount, phoneRows, readingOrder, type LayerOf } from "../src/groups/composed/layout.ts";
 
 /** Spec v20 section-level helpers of the composed renderer (docs/plans/studio-phase1-design.md §1.3, §3.4). */
 const desk = (col: number, span: number, row: number, more: object = {}) => ({ col, span, row, ...more });
@@ -49,5 +49,20 @@ describe("headerGround", () => {
     expect(headerGround(parse({ background: [{ kind: "field", role: "band", cols: { from: 1, to: 6 } }] }), "inverse")).toEqual({ desk: "inverse", phone: "band" });
     expect(headerGround(parse({}), "band")).toEqual({ desk: "band", phone: "band" });
     expect(headerGround(parse({}))).toEqual({ desk: "background", phone: "background" });
+  });
+});
+
+describe("overPhoto", () => {
+  const image = (more: object = {}) => ({ id: "e_img", kind: "image", image: "img_1", ratio: "fill", desk: desk(1, 12, 1, { rowSpan: 2 }), phone: { order: 1, span: "full" }, ...more });
+  const els = (...imgs: object[]) => ComposedProps.parse({ intent: "story", width: "contained", rows: 2, elements: [text("e_t", 0, desk(2, 6, 1, { layer: 1 })), ...imgs] }).elements;
+
+  it("backs text over a photo with a panel, but not over an image with its own scrim (the scrim is its ground, §3.1)", () => {
+    const plain = els(image());
+    expect(overPhoto(plain[0]!, plain)).toBe(true);
+    const scrimmed = els(image({ scrim: { role: "inverse", strength: 3 } }));
+    expect(overPhoto(scrimmed[0]!, scrimmed)).toBe(false);
+    // A scrimmed image and a plain one under the same text: the plain one still needs the panel.
+    const both = els(image({ scrim: { role: "inverse", strength: 3 } }), image({ id: "e_img2", desk: desk(4, 6, 1), phone: { order: 2, span: "full" } }));
+    expect(overPhoto(both[0]!, both)).toBe(true);
   });
 });
