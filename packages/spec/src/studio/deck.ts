@@ -12,7 +12,7 @@
  */
 import { z } from "zod";
 import { BusinessType } from "../business.ts";
-import { FactElement, ImageElement } from "../composition/schema.ts";
+import { FACT_OBJECTS, IMAGE_TREATMENTS, MASKS, MotionLevel } from "../composition/vocab.ts";
 import { Density, Imagery, MOTIFS, SUBMOTIFS } from "../design.ts";
 import { FONT_PAIRS } from "../fonts.ts";
 import { GROUNDS, RHYTHMS, SHAPES } from "../genome.ts";
@@ -25,7 +25,6 @@ export type StanceFamily = (typeof STANCE_FAMILIES)[number];
 export const PALETTE_TAGS = ["warm", "cool", "neutral", "earth", "signal", "muted", "deep", "bright", "two-colour", "monochrome"] as const;
 export type PaletteTag = (typeof PALETTE_TAGS)[number];
 
-export const MOTIONS = ["still", "calm", "lively"] as const;
 
 /** Asset kinds (§4.2 AssetKind) a signature may name. */
 export const ASSET_KINDS = [
@@ -51,14 +50,13 @@ export type AssetKind = (typeof ASSET_KINDS)[number];
 export const AssetId = z.string().regex(new RegExp(`^(${ASSET_KINDS.join("|")})/[a-z0-9-]+(/[a-z0-9-]+)*$`));
 export type AssetId = z.infer<typeof AssetId>;
 
-const FACT_TREATMENTS: readonly string[] = FactElement.shape.treatment.options;
-const MASKS: readonly string[] = ImageElement.shape.mask.unwrap().options.filter((m) => m !== "none");
-const PHOTO_TREATMENTS: readonly string[] = ImageElement.shape.treatment.unwrap().options.filter((t) => t !== "none");
+const MASK_NAMES: readonly string[] = MASKS.filter((m) => m !== "none");
+const PHOTO_TREATMENTS: readonly string[] = IMAGE_TREATMENTS.filter((t) => t !== "none");
 
 /** What each kind with a list today may name; the other kinds are the inventory's (§4.2), not built yet. */
 const KNOWN_TODAY: Partial<Record<AssetKind, readonly string[]>> = {
-  fact: FACT_TREATMENTS,
-  mask: MASKS,
+  fact: FACT_OBJECTS,
+  mask: MASK_NAMES,
   treatment: PHOTO_TREATMENTS,
   imagery: Imagery.options,
   shape: SHAPES,
@@ -108,7 +106,7 @@ export const Stance = z.strictObject({
     shape: z.array(z.enum(SHAPES)).min(1),
     density: z.array(Density).min(1),
     rhythm: z.array(z.enum(RHYTHMS)).min(1).optional(),
-    motion: z.enum(MOTIONS),
+    motion: MotionLevel,
   }),
   /** Asset ids typical of it: fact objects, type treatments, ornaments, masks. */
   signatures: z.array(AssetId).min(1).max(8),

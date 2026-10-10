@@ -98,7 +98,8 @@ export function composedFallback(section: ComposedSection): Section | null {
     }
     case "services": {
       // A list of names only is what the aside variant is for (the others need a description each).
-      const items = of("list").flatMap((l) => l.items);
+      // A v20 item with a lead (a date or step) gives its text as the name.
+      const items = of("list").flatMap((l) => l.items.map((it) => (typeof it === "string" ? it : it.text)));
       if (!title || items.length < 2) return null;
       return first(["services-list:aside", { title, intro, items: items.map((name) => ({ name })) }]);
     }

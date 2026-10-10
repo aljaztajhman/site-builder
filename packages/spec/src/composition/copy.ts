@@ -3,7 +3,7 @@ import { ActionElement, ContactElement, DecorElement, FactElement, HeadingElemen
 
 /**
  * What the owner edits in a composed section (spec v19): each element's copy, in the field definitions of ./schema.ts
- * (same lengths), and nothing of where or how it sits. Heading text, paragraphs, list items, a fact's value and label,
+ * (same lengths), and nothing of where or how it sits. Heading text, paragraphs, list items (v20: with their leads), a fact's value and label,
  * an action's label, price items' name, note and price. Placement, sizes, masks, styles, drawings and the intent are
  * the designer's (validateComposition checks them together); the editor's form keeps whatever it doesn't show.
  * Every element kind is a member, those without copy (image, hours, contact, decor) with their kind only, so the
