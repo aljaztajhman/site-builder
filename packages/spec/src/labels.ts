@@ -37,6 +37,7 @@ export const SECTION_LABEL: Record<string, string> = {
   collection: "Zbirka (novice, dogodki, storitve, ekipa)",
   legal: "Pravno besedilo",
   "not-found": "Stran ne obstaja",
+  composed: "Oblikovan razdelek",
 };
 
 export const VARIANT_LABEL: Record<string, Record<string, string>> = {
@@ -70,6 +71,7 @@ export const VARIANT_LABEL: Record<string, Record<string, string>> = {
   collection: { list: "Seznam", cards: "Kartice" },
   legal: { default: "Osnovno" },
   "not-found": { default: "Osnovno" },
+  composed: { free: "Prosta postavitev" },
 };
 
 /** Form field names by key. Keys whose meaning depends on the parent are in FIELD_LABEL_IN. */
@@ -171,6 +173,48 @@ export const FIELD_LABEL: Record<string, string> = {
   unit: "Enota",
   url: "Spletni naslov",
   vatPayer: "Zavezanec za DDV",
+  // Spec v19: composed sections (composition/schema.ts).
+  intent: "Namen razdelka",
+  width: "Širina",
+  minHeight: "Najmanjša višina",
+  rows: "Vrstice",
+  gap: "Razmik",
+  surface: "Podlaga",
+  texture: "Tekstura",
+  divider: "Ločnica",
+  elements: "Elementi",
+  id: "Oznaka elementa",
+  desk: "Mesto na računalniku",
+  col: "Prvi stolpec",
+  span: "Širina v stolpcih",
+  row: "Vrstica",
+  rowSpan: "Višina v vrsticah",
+  layer: "Plast (kaj je spredaj)",
+  alignX: "Vodoravna poravnava",
+  alignY: "Navpična poravnava",
+  shiftX: "Zamik vodoravno",
+  shiftY: "Zamik navpično",
+  order: "Zaporedje na telefonu",
+  hidden: "Skrito na telefonu",
+  level: "Raven naslova",
+  size: "Velikost",
+  weight: "Debelina črk",
+  case: "Velike črke",
+  rotate: "Zasuk",
+  measure: "Dolžina vrstice",
+  marker: "Označba pred vrstico",
+  treatment: "Obdelava",
+  ratio: "Razmerje stranic",
+  mask: "Oblika okvirja",
+  style: "Slog",
+  show: "Kaj prikazati",
+  motif: "Motiv",
+  svg: "Risba",
+  height: "Višina",
+  paths: "Poti risbe",
+  d: "Podatki poti",
+  fill: "Polnilo",
+  stroke: "Obroba",
 };
 
 /** Field names that depend on the parent field ("parent/key"). */
@@ -188,6 +232,10 @@ export const FIELD_LABEL_IN: Record<string, string> = {
   "signs/note": "Čas ali razdalja",
   // The accessibility statement's date (legal section props); a post's or event's date is just "Datum".
   "props/date": "Datum izjave (LLLL-MM-DD)",
+  // Composed sections: a place on phones, and the two widths of a drawing.
+  "elements/phone": "Mesto na telefonu",
+  "svg/width": "Širina risbe",
+  "paths/width": "Debelina črte",
 };
 
 export function fieldLabel(key: string, parent?: string): string {
@@ -257,6 +305,100 @@ export const ENUM_LABEL: Record<string, string> = {
   tiktok: "TikTok",
   youtube: "YouTube",
   linkedin: "LinkedIn",
+  // Composed sections: what the section is for.
+  hero: "Uvod strani",
+  "page-head": "Glava strani",
+  story: "Zgodba",
+  highlights: "Poudarki",
+  steps: "Koraki",
+  menu: "Jedilnik",
+  prices: "Cenik",
+  hours: "Delovni čas",
+  contact: "Stik",
+  form: "Obrazec",
+  faq: "Vprašanja in odgovori",
+  gallery: "Galerija",
+  products: "Izdelki",
+  rooms: "Sobe",
+  area: "Območje dela",
+  notice: "Obvestilo",
+  collection: "Zbirka",
+  // Width and height of a composed section, surface.
+  contained: "Znotraj roba",
+  wide: "Široko",
+  full: "Čez celo širino",
+  none: "Brez",
+  s: "Majhno",
+  m: "Srednje",
+  l: "Veliko",
+  screen: "Cel zaslon",
+  grain: "Zrnato",
+  lines: "Črte",
+  rule: "Črta",
+  motif: "Motiv",
+  // Places and alignment.
+  start: "Na začetku",
+  center: "Na sredini",
+  end: "Na koncu",
+  stretch: "Čez vse",
+  inset: "Z robom",
+  half: "Polovica",
+  // Headings and text.
+  normal: "Običajne črke",
+  uppercase: "Vse velike črke",
+  "0": "Brez zasuka",
+  "90": "Navpično, navzgor",
+  "-90": "Navpično, navzdol",
+  dot: "Pika",
+  // Facts, photos, buttons, hours, contact, prices.
+  numeral: "Številka",
+  plate: "Tablica",
+  stamp: "Žig",
+  ticket: "Vstopnica",
+  seal: "Pečat",
+  tag: "Obeska",
+  "1:1": "Kvadrat (1:1)",
+  "4:5": "Pokončno (4:5)",
+  "3:4": "Pokončno (3:4)",
+  "4:3": "Ležeče (4:3)",
+  "3:2": "Ležeče (3:2)",
+  "16:9": "Široko (16:9)",
+  "21:9": "Panorama (21:9)",
+  fill: "Zapolni prostor",
+  arch: "Obok",
+  circle: "Krog",
+  cut: "Prirezani vogali",
+  duotone: "Dvobarvno",
+  tint: "Barvni preliv",
+  book: "Rezervacija",
+  link: "Povezava",
+  primary: "Glavni gumb",
+  secondary: "Drugi gumb",
+  text: "Besedilo",
+  table: "Tabela",
+  compact: "Strnjeno",
+  week: "Teden",
+  map: "Zemljevid",
+  rows: "Vrstice",
+  plates: "Tablice",
+  tags: "Oznake",
+  // Motifs (the trade drawings).
+  pipes: "Cevi",
+  crust: "Skorja",
+  ledger: "Knjiga",
+  label: "Etiketa",
+  spoon: "Žlica",
+  mirror: "Ogledalo",
+  smile: "Nasmeh",
+  trail: "Pot",
+  bend: "Pregib",
+  // The kinds of element.
+  heading: "Naslov",
+  list: "Seznam",
+  fact: "Podatek",
+  image: "Fotografija",
+  action: "Gumb",
+  decor: "Okras",
 };
 
 /** What a placeholder stands for, lower case, for "Manjka …". */
@@ -338,6 +480,10 @@ export const COLOR_LABEL: Record<string, string> = {
   band: "Barvni pasovi",
   onBand: "Besedilo na barvnem pasu",
 };
+
+// The colour roles are also choices in a composed section's drawings (fill, stroke); a word that is also another choice
+// ("primary": the main button) keeps the name it has there.
+for (const [role, name] of Object.entries(COLOR_LABEL)) ENUM_LABEL[role] ??= name;
 
 export const PAGE_FIELD_LABEL: Record<string, string> = {
   "nav/label": "Ime v meniju",
@@ -454,6 +600,8 @@ export function issueMessage(issue: IssueLike): string {
   if (/booking (link|CTA) without business.bookingUrl/.test(m)) return "gumb za rezervacijo potrebuje povezavo za rezervacije (Podatki o podjetju)";
   if (/^link URL must start with http/.test(m)) return "spletni naslov se mora začeti s https:// (ali http://)";
   if (/centred sections on one page/.test(m)) return "na strani je lahko le en sredinsko poravnan razdelek";
+  // composition/guards.ts: rules about a composed section's layout.
+  if (/^composed: /.test(m)) return "postavitev razdelka ni dovoljena (besedilo se ne sme prekrivati, mere in vrstni red morajo ustrezati pravilom)";
   if (issue.code === "banned") {
     // findBannedCopy: `${rule}: "${text}"`.
     const cut = m.lastIndexOf(': "');
@@ -462,6 +610,8 @@ export function issueMessage(issue: IssueLike): string {
     if (rule === "emoji") return "vsebuje emoji";
     if (rule === "numbered label") return "oznake ne smejo biti oštevilčene (01, 02 …)";
     if (rule === "em dash") return "vsebuje dolgi pomišljaj (—); uporabite pomišljaj s presledki ( – ) ali vejico";
+    if (rule.startsWith("uppercase tracked heading")) return "naslov z velikimi črkami mora biti krepek in dovolj velik";
+    if (rule.startsWith("row of three icon cards")) return "tri enake kartice z okrasom, naslovom in besedilom v vrsti so prepovedane; postavitev naj bo drugačna";
     if (rule === "all-caps eyebrow") return "nadnaslov naj ne bo napisan z velikimi črkami; pišite ga kot navaden stavek";
     const greeting = /^"(.+)" headline$/.exec(rule);
     if (greeting) return `naslov ne sme biti pozdrav (»${greeting[1]}«); povejte, kaj ponujate`;

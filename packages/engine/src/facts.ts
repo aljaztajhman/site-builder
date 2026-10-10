@@ -1,4 +1,4 @@
-import { isPlaceholder, setAt, walkStrings, type SiteSpec } from "@sb/spec";
+import { COMPOSED_LAYOUT_KEYS, isPlaceholder, setAt, walkStrings, type SiteSpec } from "@sb/spec";
 import { numberTokens, numbersIn } from "./brief.ts";
 import { clientHours, clockTimes, dayRange, fold, hoursPaired, parseHours, priceMentions, pricePaired, pricesFor, unnamedAmounts, type ClientHours, type PriceMention } from "./fact-pairing.ts";
 
@@ -20,6 +20,7 @@ const STREET_KINDS = new Set(["cesta", "ulica", "trg", "pot", "nabrezje", "nasel
 
 /** Keys whose strings are structural, not visible copy; "date" is the accessibility statement's day, set in code (its digits would read as a phone). */
 const NON_COPY_KEYS = new Set(["id", "type", "variant", "tone", "page", "section", "action", "kind", "slug", "image", "network", "src", "file", "$placeholder", "date", "endDate", "start", "end"]);
+
 
 const IMAGE_REF_RE = /^img_[a-z0-9_-]+$/;
 const EMAIL_RE = /[\w.+-]+@[\w-]+\.[\w.]+/g;
@@ -177,8 +178,11 @@ function check(spec: SiteSpec, c: Corpus, translated: boolean): FactViolation[] 
   );
 
   // Free copy: phone numbers, emails, prices, times and any other number must come from the client.
+  const composed = spec.pages.flatMap((page, pi) => page.sections.flatMap((s, si) => (s.type === "composed" ? [`/${pi}/sections/${si}/props/`] : [])));
   walkStrings(spec.pages, (s, p, key) => {
     if (NON_COPY_KEYS.has(key)) return;
+    // A composed section's layout values (svg path data would read as numbers and phones): @sb/spec layout-keys.ts.
+    if (COMPOSED_LAYOUT_KEYS.has(key) && composed.some((c) => p.startsWith(c))) return;
     if (/^https?:\/\//.test(s)) return;
     // An image reference under any key (image, inset, …) is an id, not copy.
     if (IMAGE_REF_RE.test(s)) return;

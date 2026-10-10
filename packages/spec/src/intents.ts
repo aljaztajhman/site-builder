@@ -14,31 +14,8 @@
  */
 import { sectionDef, type Section } from "./sections/index.ts";
 
-export const INTENTS = [
-  "hero",
-  "page-head",
-  "story",
-  "highlights",
-  "steps",
-  "call",
-  "booking",
-  "services",
-  "prices",
-  "menu",
-  "hours",
-  "contact",
-  "form",
-  "faq",
-  "team",
-  "gallery",
-  "products",
-  "rooms",
-  "area",
-  "notice",
-  "collection",
-  "system",
-] as const;
-export type Intent = (typeof INTENTS)[number];
+export { INTENTS, type Intent } from "./intents-list.ts";
+import type { Intent } from "./intents-list.ts";
 
 /** Every section type's intent. A test checks that every section type has one. */
 export const SECTION_INTENT: Record<string, Intent> = {
@@ -70,12 +47,21 @@ export const SECTION_INTENT: Record<string, Intent> = {
   "service-area": "area",
   announcement: "notice",
   collection: "collection",
+  // Spec v19: a composed section carries its own intent (props.intent); intentOfSection reads it. "story" is only the
+  // type-level default for code that has a type and no section.
+  composed: "story",
   legal: "system",
   "not-found": "system",
 };
 
 export function intentOf(type: string): Intent | undefined {
   return SECTION_INTENT[type];
+}
+
+/** A section's intent: a composed section's own, otherwise its type's. */
+export function intentOfSection(section: Section): Intent | undefined {
+  if (section.type === "composed") return section.props.intent;
+  return SECTION_INTENT[section.type];
 }
 
 /** Layouts that read their props by variant (validate.ts): never swapped in code. */

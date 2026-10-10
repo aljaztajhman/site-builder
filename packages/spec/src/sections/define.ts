@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { Tone } from "../common.ts";
 
-export type SectionGroup = "heroes" | "content" | "business" | "structure";
+export type SectionGroup = "heroes" | "content" | "business" | "structure" | "composed";
 
 export interface SectionMeta<T extends string, V extends readonly [string, ...string[]]> {
   type: T;
@@ -24,6 +24,12 @@ export interface SectionMeta<T extends string, V extends readonly [string, ...st
    * its output schema, so generation never makes one.
    */
   ownerOnly?: boolean;
+  /**
+   * Only the AI designer writes this section (spec v19 composed sections, config designer.agent): it is left out of the
+   * content step's catalogue and output schema, the edit catalogue and the editor's "add section" list while the
+   * designer is off, so every request stays byte-identical to before.
+   */
+  designerOnly?: boolean;
   /**
    * Variants that only look different with an optional prop filled (about figure: the figure). Without it the
    * editor doesn't offer them, since switching would look like another variant.

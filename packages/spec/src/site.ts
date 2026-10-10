@@ -5,8 +5,9 @@ import { Design } from "./design.ts";
 import { Section } from "./sections/index.ts";
 import { SectionId } from "./sections/define.ts";
 import { Collections } from "./collections.ts";
+import type { Intent } from "./intents-list.ts";
 
-export const SPEC_VERSION = 18 as const;
+export const SPEC_VERSION = 19 as const;
 
 export const PageKind = z.enum(["home", "standard", "privacy", "accessibility", "not-found"]);
 export type PageKind = z.infer<typeof PageKind>;
@@ -47,6 +48,9 @@ export type ImageAsset = z.infer<typeof ImageAsset>;
  * galleries, team, services, products, rooms or about, where a picture reads as the business itself.
  */
 export const GENERATED_IMAGE_SECTIONS = ["hero-split", "hero-image", "hero-signature", "image-text", "page-header"] as const;
+
+/** The same slots in a composed section (spec v19): its intent says which it is (the opener, a page header, a story). */
+export const GENERATED_IMAGE_INTENTS = ["hero", "page-head", "story"] as const satisfies readonly Intent[];
 
 export const LogoAsset = z.strictObject({
   src: z.string().max(300),

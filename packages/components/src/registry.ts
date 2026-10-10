@@ -3,6 +3,7 @@ import { heroIslands, heroLcp, heroRenderers } from "./groups/heroes/index.ts";
 import { contentIslands, contentLcp, contentRenderers } from "./groups/content/index.ts";
 import { businessIslands, businessLcp, businessRenderers } from "./groups/business/index.ts";
 import { structureIslands, structureRenderers } from "./groups/structure/index.ts";
+import { composedLcp, composedRenderers } from "./groups/composed/index.tsx";
 import type { LcpImage, LcpResolvers, SectionComponent, SectionRenderers } from "./types.ts";
 import type { Section } from "@sb/spec";
 
@@ -12,6 +13,7 @@ export const renderers = {
   ...contentRenderers,
   ...businessRenderers,
   ...structureRenderers,
+  ...composedRenderers,
 } satisfies SectionRenderers;
 
 export function rendererFor(type: SectionType): SectionComponent<SectionType> {
@@ -41,7 +43,7 @@ export function islandsFor(section: Section): string[] {
 }
 
 /** LCP resolvers for sections that can open a page with a photo. Heroes and page headers. */
-export const SECTION_LCP: LcpResolvers = { ...heroLcp, ...contentLcp, ...businessLcp };
+export const SECTION_LCP: LcpResolvers = { ...heroLcp, ...contentLcp, ...businessLcp, ...composedLcp };
 
 export function lcpImageFor(section: Section): LcpImage | null {
   const fn = SECTION_LCP[section.type] as ((s: Section) => LcpImage | null) | undefined;

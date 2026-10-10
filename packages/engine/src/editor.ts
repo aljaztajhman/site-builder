@@ -4,6 +4,7 @@ import {
   COLLECTION_KINDS,
   COLLECTION_LIMITS,
   COLOR_LABEL,
+  ComposedCopy,
   Event as EventEntry,
   Person,
   Post,
@@ -188,7 +189,8 @@ type Json = Record<string, unknown>;
  */
 export function defaultSection(spec: SiteSpec, type: string, id: string): Json | null {
   const def = sectionDef(type);
-  if (def.systemOnly) return null;
+  // System sections are made by the platform, composed ones by the designer.
+  if (def.systemOnly || def.designerOnly) return null;
   // A collection section shows one of the site's collections; it can be added once one is switched on.
   if (type === "collection") {
     const kind = COLLECTION_KINDS.find((k) => spec.collections?.[k]);
@@ -244,6 +246,7 @@ export function defaultSection(spec: SiteSpec, type: string, id: string): Json |
 /** What the dashboard editor needs to build its forms: JSON Schemas generated from the spec. */
 export function editorCatalogue(spec: SiteSpec) {
   return {
+    // A composed section (spec v19) is the designer's: never in the add list, and its form is its copy only.
     sections: SECTION_DEFS.filter((d) => !d.systemOnly).map((d) => ({
       type: d.type,
       group: d.group,
@@ -251,7 +254,7 @@ export function editorCatalogue(spec: SiteSpec) {
       variantNeeds: d.variantNeeds ?? {},
       description: d.description,
       images: d.images,
-      props: toModelJsonSchema(d.props),
+      props: toModelJsonSchema(d.type === "composed" ? ComposedCopy : d.props),
       canAdd: defaultSection(spec, d.type, "s_probe") !== null,
     })),
     // The subtype is set by the variety engine, not typed by the owner (spec v15).

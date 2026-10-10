@@ -131,6 +131,22 @@ export function stylesheetFor(css: string, motif: string | null, sub: string | n
   return filter(css);
 }
 
+/**
+ * The stylesheet of composed sections (spec v19, packages/components/styles/composed.css). It is not part of the shared
+ * sheet: a page links it only when it has a composed section, so every site without one keeps the HTML and the stylesheet
+ * it had. It is named by its own content hash (composed-<hash>.css), and stays out of the bundle hash for the same
+ * reason (the hash is in every page's stylesheet link): a changed composed.css changes its own file name, nothing else.
+ */
+const COMPOSED_CSS = "composed.css";
+let composed: { name: string; css: string } | undefined;
+export function composedStylesheet(): { name: string; css: string } {
+  if (!composed) {
+    const css = minifyCss(readFileSync(path.join(componentsDir, "styles", COMPOSED_CSS), "utf8"));
+    composed = { name: `composed-${createHash("sha256").update(css).digest("hex").slice(0, 10)}.css`, css };
+  }
+  return composed;
+}
+
 export function sharedStylesheet(): string {
   return STYLE_FILES.map((f) => readFileSync(path.join(componentsDir, "styles", f), "utf8")).join("\n");
 }
@@ -158,16 +174,21 @@ export function sharedBundle(): SharedBundle {
     const p = path.join(FONTS_DIR, `${face.file}.woff2`);
     if (existsSync(p)) files.set(`fonts/${face.file}.woff2`, readFileSync(p));
   }
+  const sheet = composedStylesheet();
   const h = createHash("sha256");
   for (const [k, v] of [...files.entries()].sort(([a], [b]) => a.localeCompare(b))) {
     h.update(k);
     h.update(v);
   }
-  cached = { hash: h.digest("hex").slice(0, 10), files };
+  const hash = h.digest("hex").slice(0, 10);
+  // After the hash: see composedStylesheet.
+  files.set(sheet.name, Buffer.from(sheet.css, "utf8"));
+  cached = { hash, files };
   return cached;
 }
 
 /** For tests and dev servers that edit styles live. */
 export function resetSharedBundleCache(): void {
   cached = undefined;
+  composed = undefined;
 }

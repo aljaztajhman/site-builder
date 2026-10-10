@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { GENERATED_IMAGE_SECTIONS, SiteSpec } from "./site.ts";
+import { GENERATED_IMAGE_INTENTS, GENERATED_IMAGE_SECTIONS, SiteSpec } from "./site.ts";
 import { SECTION_DEFS } from "./sections/index.ts";
 import { DIRECTIONS } from "./directions.ts";
 import { subtypeFits } from "./business.ts";
@@ -12,6 +12,8 @@ import { COLLECTION_KINDS } from "./collections.ts";
 import { centredOn } from "./skeleton.ts";
 import { siteGenomeIssues } from "./genome-rules.ts";
 import { secondLocales, untranslated } from "./translatable.ts";
+import { compositionContext, isCentredComposed, validateComposition } from "./composition/guards.ts";
+import { isComposedLayoutPointer } from "./composition/layout-keys.ts";
 
 export interface Issue {
   path: string;
@@ -86,9 +88,17 @@ export function semanticIssues(spec: SiteSpec): Issue[] {
   const motif = DIRECTIONS.find((d) => d.id === spec.design.direction)?.template?.motif;
   spec.pages.forEach((p, pi) => {
     const byAlign = centredOn(spec.design.skeleton, p.sections, motif);
-    const centred = p.sections.filter((s) => defOf(s.type)?.centredVariants?.includes(s.variant) || byAlign.has(s.id));
+    // Spec v19: a composed section whose text is all centred counts too.
+    const centred = p.sections.filter((s) => defOf(s.type)?.centredVariants?.includes(s.variant) || byAlign.has(s.id) || (s.type === "composed" && isCentredComposed(s.props)));
     if (centred.length > 1) add(`/pages/${pi}/sections`, "banned", `${centred.length} centred sections on one page (max 1)`);
   });
+
+  // Spec v19: composed sections follow the rules a schema can't say (composition/guards.ts).
+  spec.pages.forEach((p, pi) =>
+    p.sections.forEach((s, si) => {
+      if (s.type === "composed") issues.push(...validateComposition(s, compositionContext(spec, pi, si)));
+    }),
+  );
 
   // hero-signature: the line that introduces a phone or an opening time, and the address only on the label card.
   spec.pages.forEach((p, pi) =>
@@ -139,8 +149,12 @@ export function semanticIssues(spec: SiteSpec): Issue[] {
     spec.pages.forEach((page, pi) =>
       page.sections.forEach((s, si) => {
         if (allowed.has(s.type)) return;
+        // A composed section is the same slot as the section its intent stands for.
+        const composed = s.type === "composed";
+        if (composed && (GENERATED_IMAGE_INTENTS as readonly string[]).includes(s.props.intent)) return;
+        const where = `${GENERATED_IMAGE_SECTIONS.join(", ")}${composed ? ` (a composed section: intent ${GENERATED_IMAGE_INTENTS.join(", ")})` : ""}`;
         walkStrings(s.props, (v, p) => {
-          if (generated.has(v)) add(`/pages/${pi}/sections/${si}/props${p}`, "reference", `${v} is AI-generated and may only be used in ${GENERATED_IMAGE_SECTIONS.join(", ")}`);
+          if (generated.has(v)) add(`/pages/${pi}/sections/${si}/props${p}`, "reference", `${v} is AI-generated and may only be used in ${where}`);
         });
       }),
     );
@@ -235,10 +249,18 @@ export function semanticIssues(spec: SiteSpec): Issue[] {
     }
     for (const ptr of Object.keys(map ?? {})) {
       if (typeof getAt(spec, ptr) !== "string") add(`/translations/${locale}`, "translation", `pointer ${ptr} is not a string in the spec`);
+      else if (isComposedLayoutPointer(spec, ptr)) add(`/translations/${locale}`, "translation", `pointer ${ptr} is a composed section's layout value, not copy`);
     }
   }
 
-  return issues;
+  // The composed guards and the generic walks (unknown images, banned copy) can see the same problem: report it once.
+  const seen = new Set<string>();
+  return issues.filter((i) => {
+    const key = `${i.path}|${i.code}|${i.message}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 /** The services and team entry fields startCollection fills from generated sections (engine collections.ts). */

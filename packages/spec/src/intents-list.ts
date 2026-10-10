@@ -1,0 +1,26 @@
+/** The section intents (intents.ts). Their own module so the composition schema can use them without an import cycle. */
+export const INTENTS = [
+  "hero",
+  "page-head",
+  "story",
+  "highlights",
+  "steps",
+  "call",
+  "booking",
+  "services",
+  "prices",
+  "menu",
+  "hours",
+  "contact",
+  "form",
+  "faq",
+  "team",
+  "gallery",
+  "products",
+  "rooms",
+  "area",
+  "notice",
+  "collection",
+  "system",
+] as const;
+export type Intent = (typeof INTENTS)[number];
