@@ -12,6 +12,8 @@ export * from "./composition/guards.ts";
 export * from "./composition/fallback.ts";
 export * from "./composition/layout-keys.ts";
 export * from "./composition/copy.ts";
+export * from "./composition/slots.ts";
+export * from "./composition/preset.ts";
 export * from "./design-rules.ts";
 export * from "./directions.ts";
 export * from "./fonts.ts";

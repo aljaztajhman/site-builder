@@ -24,6 +24,8 @@ export const BYTE_BUDGET: Partial<Record<AssetKind, number>> = {
   header: 2 * 1024,
   footer: 2 * 1024,
   section: 4 * 1024,
+  /** A composition preset adds no CSS of its own: it renders with the composed sheet (section/composed:free). */
+  composition: 0,
 };
 /**
  * The composed stylesheets, minified, per sheet (docs/plans/studio-phase1-design.md §3.4.1): the core sheet (spec v19,

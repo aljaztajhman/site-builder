@@ -1,0 +1,413 @@
+{
+  "pekarna-kvas": {
+    "business": {
+      "name": "Pekarna Kvas",
+      "phone": "+38641555906",
+      "email": "pekarna@pekarna-kvas.example",
+      "address": {
+        "street": "Šutna 30",
+        "postalCode": "1241",
+        "city": "Kamnik"
+      },
+      "hours": {
+        "entries": [
+          {
+            "from": "mon",
+            "to": "fri",
+            "open": "06:30",
+            "close": "18:00"
+          },
+          {
+            "from": "sat",
+            "to": "sat",
+            "open": "06:30",
+            "close": "12:00"
+          },
+          {
+            "from": "sun",
+            "to": "sun",
+            "open": "07:00",
+            "close": "10:00"
+          }
+        ]
+      }
+    },
+    "images": [
+      {
+        "id": "img_01",
+        "origin": "client"
+      },
+      {
+        "id": "img_02",
+        "origin": "client"
+      },
+      {
+        "id": "img_03",
+        "origin": "client"
+      }
+    ],
+    "colors": {
+      "background": "#ffffff",
+      "surface": "#edf2ef",
+      "text": "#221b17",
+      "muted": "#5b504a",
+      "primary": "#b4441f",
+      "onPrimary": "#ffffff",
+      "accent": "#c65a2e",
+      "border": "#d9e0dc",
+      "inverse": "#2b211c",
+      "onInverse": "#f5f5f5"
+    },
+    "brief": {
+      "summary": "Mala družinska pekarna v Kamniku, na začetku Šutne. Kruh peče samo z lastnimi drožmi in ga pusti vzhajati čez noč. Moko kupujejo pri mlinu v bližini. Ob petkih in sobotah pečejo še orehovo potico in kvašene krofe, potico pa je mogoče naročiti tudi za praznike in praznovanja.",
+      "highlights": [
+        "Kruh pečemo samo z drožmi, ki jih gojimo sami.",
+        "Testo vzhaja čez noč, zato je kruh bolj okusen in dlje ostane svež.",
+        "Moko kupujemo pri mlinu v bližini.",
+        "Vse je ročno delo, brez aditivov in brez zamrznjenega testa.",
+        "Družinska pekarna: peče Jure Petek, v trgovini je večinoma Katja."
+      ],
+      "offerings": [
+        {
+          "group": "Kruh",
+          "name": "Pirin kruh z drožmi",
+          "description": "Pečen samo z drožmi, vzhajan čez noč.",
+          "price": {
+            "amount": 4.2,
+            "from": false,
+            "unit": null
+          }
+        },
+        {
+          "group": "Kruh",
+          "name": "Rženi kruh",
+          "description": "Pečen z drožmi, vzhajan čez noč.",
+          "price": {
+            "amount": 3.9,
+            "from": false,
+            "unit": null
+          }
+        },
+        {
+          "group": "Kruh",
+          "name": "Polnozrnate žemlje",
+          "description": null,
+          "price": null
+        },
+        {
+          "group": "Slaščice in pecivo",
+          "name": "Rogljiček z maslom",
+          "description": null,
+          "price": {
+            "amount": 1.3,
+            "from": false,
+            "unit": null
+          }
+        },
+        {
+          "group": "Slaščice in pecivo",
+          "name": "Cimetov polž",
+          "description": null,
+          "price": null
+        },
+        {
+          "group": "Petek in sobota",
+          "name": "Orehova potica",
+          "description": "Na voljo ob petkih in sobotah. Naročite jo lahko tudi za praznike in praznovanja.",
+          "price": {
+            "amount": 18,
+            "from": true,
+            "unit": "1 kg"
+          }
+        },
+        {
+          "group": "Petek in sobota",
+          "name": "Kvašeni krofi",
+          "description": "Na voljo ob petkih in sobotah.",
+          "price": null
+        }
+      ],
+      "facts": {
+        "people": [
+          {
+            "name": "Jure Petek",
+            "role": "Pek"
+          },
+          {
+            "name": "Katja",
+            "role": "Prodaja v trgovini"
+          }
+        ]
+      }
+    },
+    "copy": {
+      "hero": {
+        "headline": "Kruh z drožmi, ki vzhaja čez noč",
+        "lead": "Družinska pekarna na začetku stare ulice. Vse je ročno delo, brez aditivov in brez zamrznjenega testa."
+      },
+      "services": {
+        "headline": "Vsak dan v pekarni",
+        "lead": "Ob petkih in sobotah pečemo še orehovo potico in kvašene krofe."
+      },
+      "contact": {
+        "headline": "Kje nas najdete"
+      }
+    }
+  },
+  "avtoservis-mrak": {
+    "business": {
+      "name": "Avtoservis Mrak",
+      "phone": "+38641555730",
+      "email": {
+        "$placeholder": "email",
+        "note": "Če imate e-pošto, jo vpišite, sicer polje odstranite"
+      },
+      "address": {
+        "street": "Savska cesta 52",
+        "postalCode": "4000",
+        "city": "Kranj"
+      },
+      "hours": {
+        "entries": [
+          {
+            "from": "mon",
+            "to": "fri",
+            "open": "07:00",
+            "close": "16:00"
+          }
+        ],
+        "note": "Sobota po dogovoru."
+      }
+    },
+    "images": [
+      {
+        "id": "img_01",
+        "origin": "client"
+      },
+      {
+        "id": "img_02",
+        "origin": "client"
+      },
+      {
+        "id": "img_03",
+        "origin": "client"
+      }
+    ],
+    "colors": {
+      "background": "#ffffff",
+      "surface": "#eef0f3",
+      "text": "#0e0f12",
+      "muted": "#474c55",
+      "primary": "#c8261b",
+      "onPrimary": "#ffffff",
+      "accent": "#e0301e",
+      "border": "#d3d7dd",
+      "inverse": "#111317",
+      "onInverse": "#f5f5f5"
+    },
+    "brief": {
+      "summary": "Družinski avtoservis v Kranju, ki deluje od leta 2008 in ga vodi Rok Mrak. Servisira osebna vozila vseh znamk in kombije do 3,5 t. Ponuja tudi menjavo in hrambo gum ter vleko za Gorenjsko.",
+      "highlights": [
+        "Družinski servis, ki deluje od leta 2008",
+        "Redni servis po navodilih proizvajalca, garancija ostane",
+        "Predračun pred popravilom, brez presenečenj",
+        "Osebna vozila vseh znamk in kombiji do 3,5 t"
+      ],
+      "offerings": [
+        {
+          "group": "Servis",
+          "name": "Redni servis",
+          "description": "Po navodilih proizvajalca, tako da garancija ostane.",
+          "price": null
+        },
+        {
+          "group": "Servis",
+          "name": "Menjava olja in filtrov",
+          "description": null,
+          "price": null
+        },
+        {
+          "group": "Servis",
+          "name": "Zavore",
+          "description": null,
+          "price": null
+        },
+        {
+          "group": "Servis",
+          "name": "Sklopke",
+          "description": null,
+          "price": null
+        },
+        {
+          "group": "Servis",
+          "name": "Zobati jermeni",
+          "description": null,
+          "price": null
+        },
+        {
+          "group": "Servis",
+          "name": "Izpušni sistemi",
+          "description": null,
+          "price": null
+        },
+        {
+          "group": "Diagnostika in klima",
+          "name": "Računalniška diagnostika",
+          "description": null,
+          "price": {
+            "amount": 30,
+            "from": false,
+            "unit": null
+          }
+        },
+        {
+          "group": "Diagnostika in klima",
+          "name": "Polnjenje klime",
+          "description": null,
+          "price": {
+            "amount": 59,
+            "from": false,
+            "unit": null
+          }
+        },
+        {
+          "group": "Gume",
+          "name": "Menjava gum",
+          "description": "Cena velja za komplet.",
+          "price": {
+            "amount": 20,
+            "from": false,
+            "unit": "komplet"
+          }
+        },
+        {
+          "group": "Gume",
+          "name": "Hramba gum",
+          "description": null,
+          "price": {
+            "amount": 40,
+            "from": false,
+            "unit": "sezona"
+          }
+        },
+        {
+          "group": "Pomoč na cesti",
+          "name": "Vlečna služba za Gorenjsko",
+          "description": null,
+          "price": null
+        }
+      ],
+      "facts": {
+        "people": [
+          {
+            "name": "Rok Mrak",
+            "role": "Vodja servisa"
+          }
+        ]
+      }
+    },
+    "copy": {
+      "hero": {
+        "headline": "Servis vseh znamk v Kranju",
+        "lead": "Družinski servis od leta 2008, za osebna vozila in kombije do 3,5 t. Pred popravilom dobite predračun."
+      },
+      "services": {
+        "headline": "Kaj naredimo v delavnici"
+      },
+      "contact": {
+        "headline": "Kje smo",
+        "lead": "Savska cesta 52, za trgovino s ploščicami. Vhod je z dvorišča."
+      }
+    }
+  },
+  "instalacije-rebernik": {
+    "business": {
+      "name": "Inštalacije Rebernik",
+      "phone": "+38641555118",
+      "email": {
+        "$placeholder": "email"
+      },
+      "address": {
+        "street": "Ormoška cesta 18",
+        "postalCode": "2250",
+        "city": "Ptuj"
+      }
+    },
+    "images": [],
+    "colors": {
+      "background": "#15171a",
+      "surface": "#1e2125",
+      "text": "#eef0f2",
+      "muted": "#a7adb4",
+      "primary": "#f2c200",
+      "onPrimary": "#15171a",
+      "accent": "#f2c200",
+      "border": "#363a40",
+      "inverse": "#2b2f35",
+      "onInverse": "#f5f5f5"
+    },
+    "brief": {
+      "summary": "Inštalacije Rebernik je podjetje inštalaterja Mateja Reberника z mojstrskim izpitom. Izvaja vodovodne in odtočne inštalacije, talno in radiatorsko ogrevanje, montažo in servis toplotnih črpalk ter prenove kopalnic na ključ. Dela na terenu v okolici Ptuja in Maribora.",
+      "highlights": [
+        "Inštalater z mojstrskim izpitom, od leta 2011 samostojni podjetnik",
+        "Ekipa petih ljudi: Matej in štirje sodelavci",
+        "Brezplačen ogled in pisna ponudba za vsako delo",
+        "Pomoč pri vlogi za subvencijo Eko sklada pri zamenjavi kotla",
+        "Če ne dvigne telefona, pokliče nazaj isti dan"
+      ],
+      "offerings": [
+        {
+          "group": "Vodovod",
+          "name": "Vodovodne in odtočne inštalacije",
+          "description": "V novogradnjah in pri prenovah.",
+          "price": null
+        },
+        {
+          "group": "Ogrevanje",
+          "name": "Talno in radiatorsko ogrevanje",
+          "description": null,
+          "price": null
+        },
+        {
+          "group": "Toplotne črpalke",
+          "name": "Montaža in servis toplotnih črpalk zrak-voda",
+          "description": null,
+          "price": null
+        },
+        {
+          "group": "Toplotne črpalke",
+          "name": "Zamenjava starega kotla na olje s toplotno črpalko",
+          "description": "Pomoč pri vlogi za subvencijo Eko sklada.",
+          "price": null
+        },
+        {
+          "group": "Kopalnice",
+          "name": "Prenova kopalnice na ključ",
+          "description": "Skupaj s keramikom.",
+          "price": null
+        }
+      ],
+      "facts": {
+        "people": [
+          {
+            "name": "Matej Rebernik",
+            "role": "inštalater z mojstrskim izpitom, lastnik"
+          }
+        ]
+      }
+    },
+    "copy": {
+      "hero": {
+        "headline": "Vodovod, ogrevanje, toplotne črpalke in prenove kopalnic",
+        "lead": "Za vsako delo najprej pridemo na ogled in pripravimo pisno ponudbo. Ogled je brezplačen. Če ne dvignem, vas pokličem nazaj isti dan."
+      },
+      "services": {
+        "headline": "Kaj delamo"
+      },
+      "contact": {
+        "headline": "Sedež na Ptuju",
+        "lead": "Večinoma smo na terenu, zato se za obisk sedeža prej dogovorite po telefonu."
+      }
+    }
+  }
+}
