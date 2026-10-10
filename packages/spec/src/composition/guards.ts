@@ -19,6 +19,7 @@ import { isPlaceholder } from "../common.ts";
 import type { Colors } from "../design.ts";
 import type { MotionLevel } from "./vocab.ts";
 import { repairV2, validateV2 } from "./guards-v2.ts";
+import { SLOT_MARKER } from "./slots.ts";
 import { DecorPath, GRID_COLUMNS, MAX_ELEMENTS, type Element } from "./schema.ts";
 
 export type ComposedSection = Extract<Section, { type: "composed" }>;
@@ -307,6 +308,13 @@ export function validateComposition(section: ComposedSection, ctx: CompositionCo
     if (e.kind !== "heading") return;
     if (NUMBERED_LABEL.test(e.text)) add(`${base}/${i}/text`, "banned", `numbered label: "${e.text}"`);
     for (const b of BANNED_HEADLINE) if (b.pattern.test(e.text)) add(`${base}/${i}/text`, "banned", `${b.label}: "${e.text}"`);
+  });
+
+  // Preset slot markers (./slots.ts): a composition preset is filled (fillPreset) before it reaches a site; a marker
+  // left in any string of the section means it wasn't, and the section never publishes.
+  walkStrings(section.props, (v, p) => {
+    const m = SLOT_MARKER.exec(v);
+    if (m) add(`${at}/props${p}`, "structure", `composed: unfilled slot marker ${m[0]} (a composition preset must be filled by fillPreset)`);
   });
 
   // Uppercase headings: heavy and sized, never a small tracked eyebrow.

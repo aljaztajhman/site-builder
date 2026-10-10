@@ -6,6 +6,7 @@
 import { Registry } from "./registry.ts";
 import { applyDecisions, shippedDecisions } from "./decisions.ts";
 import { todaysAssets } from "./sources.ts";
+import { compositionAssets } from "./compositions/index.ts";
 
 export * from "./schema.ts";
 export * from "./decisions.ts";
@@ -19,10 +20,14 @@ export * from "./signatures.ts";
 export * from "./must-draw.ts";
 export { todaysAssets, groundOf, temperatureOf, paletteOf } from "./sources.ts";
 export { fontFile, fontLicenseFile } from "./bytes.ts";
+export { COMPOSITION_PRESETS, compositionAssets, compositionPreset } from "./compositions/index.ts";
 
 let cached: Registry | undefined;
 
-/** The registry with every asset that ships today, each with the owner's gallery decision applied (built once). */
+/**
+ * The registry with every asset that ships today plus the new batches' drafts (composition presets), each with the
+ * owner's gallery decision applied (built once).
+ */
 export function inventory(): Registry {
-  return (cached ??= new Registry().registerAll(applyDecisions(todaysAssets(), shippedDecisions())));
+  return (cached ??= new Registry().registerAll(applyDecisions([...todaysAssets(), ...compositionAssets()], shippedDecisions())));
 }
