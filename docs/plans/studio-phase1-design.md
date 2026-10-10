@@ -237,6 +237,16 @@ The engine's `COMPOSED_LAYOUT_KEYS` (skipped by facts and translation) adds `arr
 | decor fixed | width `min(size × 2rem, 40vw)`. |
 | circle text | Circle at `min(60vw, 14rem)`, real heading text visually hidden, SVG `aria-hidden`. |
 
+### 2.1 Director's notes after the guards and facts scout (2026-10-11)
+
+- **G23 photos captions:** a `photos` element whose arrangement shows captions counts as text-bearing: it can't be hidden on phones and its box never overlaps other text. Without captions it is an image (the second-photo hiding rule applies).
+- **G24:** there is no "giant numeral" heading field. Display sizes count `heading` at size ≥ 4 (as today), `fact` (as today) and `quote` at size 4; no other kind.
+- **CompositionContext** (`guards.ts:23-32`, built by `compositionContext` at :35-42, called from `validate.ts:99`) gains the optional fields §2 names: `colors`, `business` (for amenities and plate codes), `images` (origin, for before-after), `motionLevel`, `approved` (asset ids allowed at runtime; absent = vocab membership only), `prev` (the previous section, for top/rise). F1b-2a defines the type and the builder; 2b fills the checks.
+- **Not wired yet:** the engine never calls `repairComposition` or `composedFallback` (only tests do). With the designer off this is fine; Phase 2 (S-units) wires repair → validate → fallback. F1b does not.
+- **Owner amenities survive regeneration:** `packages/engine/src/owner-facts.ts:10` `FACTS` gains `amenities` (F1b-3).
+- **Plate codes** already exist (`packages/spec/src/format.ts:67-82`, `PLATE_CODES`, `plateCode()`); F1b-3 reuses them.
+- **Quotes are never translated:** `isCopy` (`packages/spec/src/translatable.ts:58-62`) gains the quote case (F1b-3).
+
 ## 3. Renderer
 
 ### 3.1 Hooks
