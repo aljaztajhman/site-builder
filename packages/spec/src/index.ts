@@ -6,6 +6,8 @@ export * from "./genome.ts";
 export * from "./genome-rules.ts";
 export * from "./intents.ts";
 export * from "./composition/schema.ts";
+export * from "./composition/vocab.ts";
+export * from "./composition/drawing.ts";
 export * from "./composition/guards.ts";
 export * from "./composition/fallback.ts";
 export * from "./composition/layout-keys.ts";
