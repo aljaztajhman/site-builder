@@ -325,6 +325,8 @@ The code differs from §3.1–3.3 in six places. These rules replace the matchin
 7. **v2 splits per region (decided after R2, 2026-10-11).** With R1+R2 the v2 sheet is 13.8 KB and core+v2 26.6 KB of the 28 KiB pair budget, leaving ≈ 2 KB for R3 and every batch's vocab. Instead of raising the budget, `composed-v2.css` is split at its region markers into `composed-v2-section`, `-kinds`, `-extensions` and `-vocab` sheets, each minified, content-addressed and in the shared bundle after the hash; `composedSheets()` links only the regions a page uses (vocab by the names it uses, later per asset family if it grows). Budgets: each region ≤ 12 KiB, the sheets a page links ≤ 32 KiB together. Done right after R3 merges (F1b-A or a small unit). Firefox without scroll timelines shows the still ribbon (accepted).
 6. **LCP.** `firstImage` (`layout.ts:69-71`) only looks at `image`; R1 extends LCP to a background photo layer and R2 to `photos`.
 
+8. **Vocab CSS is linked per asset family (decided after F1b-A1, 2026-10-11).** With core + section + kinds + extensions at 32,667 of 32,768 B, the vocab region never ships as one sheet: each vocab family (masks, treatments, textures, edges, fact objects, type treatments, motion) gets its own content-addressed sheet, linked only when a page uses one of its names. Each family ≤ 6 KiB; a page using every v20 feature plus its vocab families may reach 40 KiB, measured and reported per page in F1b-A2.
+
 ### 3.5 F1b-A checklist (collected from the units)
 
 - Split composed-v2.css per region (§3.4.7).
