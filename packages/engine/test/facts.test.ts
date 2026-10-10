@@ -194,3 +194,195 @@ describe("checkFacts, stricter matching", () => {
     expect(checkFacts(s, corpus).map((v) => `${v.kind}:${v.value}`)).toEqual(["number:25"]);
   });
 });
+
+describe("checkFacts on the v20 composed kinds (studio-phase1-design.md §1.8)", () => {
+  const input =
+    corpus +
+    " Stranka Mojca je napisala: „Najboljše striženje v Celju,   brez čakanja.“ Vhod je z dvorišča, pri križišču z Gregorčičevo. " +
+    "Imamo parkirišče in sprejemamo kartice. Fotografije: Prej: lasje pred barvanjem. Potem: po barvanju. Salon je odprt že 12 let.";
+  const desk = { col: 1, span: 6, row: 1 };
+  const phone = { order: 0, span: "full" };
+  const composed = (...elements: Record<string, unknown>[]) => ({
+    id: "s_comp",
+    type: "composed",
+    props: { intent: "story", width: "wide", rows: 2, elements: elements.map((e, i) => ({ id: `e_${i}`, desk, phone, ...e })) },
+  });
+  type Over = Parameters<typeof spec>[0];
+  const withImages = (s: SiteSpec, origins: ("client" | "generated" | undefined)[]): SiteSpec =>
+    ({ ...s, assets: { images: origins.map((origin, i) => ({ id: `img_0${i + 1}`, src: `x${i}.jpg`, width: 800, height: 600, alt: "", ...(origin ? { origin } : {}) })) } }) as SiteSpec;
+  const found = (s: SiteSpec) => checkFacts(s, input).map((v) => `${v.kind}:${v.value}:${v.path}`);
+  const at = "/pages/0/sections/0/props/elements";
+
+  it("passes a quote and its attribution as the client wrote them, whitespace and quote marks aside", () => {
+    const s = spec({ sections: [composed({ kind: "quote", text: '"Najboljše striženje v Celju, brez čakanja."', by: "Mojca" })] });
+    expect(checkFacts(s, input)).toEqual([]);
+  });
+
+  it("rejects a reworded quote, an invented attribution and a quote with changed case", () => {
+    const s = spec({
+      sections: [
+        composed(
+          { kind: "quote", text: "Najboljše striženje v Celju, brez čakanja in z nasmehom.", by: "Mojca K., stalna stranka" },
+          { kind: "quote", text: "najboljše striženje v celju" },
+        ),
+      ],
+    });
+    expect(found(s)).toEqual([
+      `quote:Najboljše striženje v Celju, brez čakanja in z nasmehom.:${at}/0/text`,
+      `name:Mojca K., stalna stranka:${at}/0/by`,
+      `quote:najboljše striženje v celju:${at}/1/text`,
+    ]);
+  });
+
+  it("keeps ratings, awards, certificates and superlatives off stickers and ribbons, in any inflection", () => {
+    const claims = ["★★★★★", "4,9/5", "Ocena odlično", "Ocenjen salon", "Nagrajeni frizerji", "Prejemniki nagrade", "Priznanje OZS", "Certificiran salon", "Certifikat kakovosti", "NAJBOLJŠA frizerka", "Najbolj priljubljen", "Št. 1 v Celju", "#1 salon", "Best in town", "Award-winning"];
+    for (const text of claims) {
+      expect(found(spec({ sections: [composed({ kind: "sticker", text, shape: "round" })] })), text).toEqual(expect.arrayContaining([`claim:${text}:${at}/0/text`]));
+    }
+    const ribbon = spec({ sections: [composed({ kind: "ribbon", items: ["Striženje", "Najboljši v mestu"] })] });
+    expect(found(ribbon)).toEqual([`claim:Najboljši v mestu:${at}/0/items/1`]);
+  });
+
+  it("allows plain sticker and ribbon copy, and a claim the client wrote verbatim", () => {
+    const s = spec({
+      sections: [
+        composed(
+          { kind: "sticker", text: "Brez naročanja", shape: "tag" },
+          { kind: "sticker", text: "Najboljše striženje v Celju", shape: "round" },
+          // "Ocenite nas" asks for a rating and "Najprej" is no superlative: neither is a claim.
+          { kind: "ribbon", items: ["Moško striženje", "Žensko striženje", "Že 12 let", "Ocenite nas", "Najprej pokličite"] },
+        ),
+      ],
+    });
+    expect(checkFacts(s, input)).toEqual([]);
+  });
+
+  it("checks numbers on stickers, ribbons and quotes with the copy rule", () => {
+    const s = spec({ sections: [composed({ kind: "sticker", text: "Že 30 let", shape: "round" }, { kind: "ribbon", items: ["500 strank"] })] });
+    expect(found(s)).toEqual([`number:30:${at}/0/text`, `number:500:${at}/1/items/0`]);
+  });
+
+  it("takes a map's cross street and note verbatim from the input", () => {
+    const ok = spec({ sections: [composed({ kind: "map", style: "corner", cross: "Gregorčičevo", note: "Vhod je z dvorišča" })] });
+    expect(checkFacts(ok, input)).toEqual([]);
+    const invented = spec({ sections: [composed({ kind: "map", style: "corner", cross: "Prešernova", note: "Parkirišče za hišo" })] });
+    expect(found(invented)).toEqual([`address:Prešernova:${at}/0/cross`, `quote:Parkirišče za hišo:${at}/0/note`]);
+  });
+
+  it("shows iconFacts only for the business's amenities, notes through the copy check", () => {
+    const s = (amenities?: string[]) =>
+      spec({
+        business: amenities ? { amenities } : {},
+        sections: [composed({ kind: "iconFacts", items: [{ fact: "parking", note: "Pred salonom" }, { fact: "card" }] })],
+      } as Over);
+    expect(checkFacts(s(["parking", "card", "wifi"]), input)).toEqual([]);
+    expect(found(s(["parking"]))).toEqual([`amenity:card:${at}/0/items/1/fact`]);
+    expect(found(s())).toEqual([`amenity:parking:${at}/0/items/0/fact`, `amenity:card:${at}/0/items/1/fact`]);
+    const note = spec({ business: { amenities: ["parking"] }, sections: [composed({ kind: "iconFacts", items: [{ fact: "parking", note: "20 mest" }] })] } as Over);
+    expect(found(note)).toEqual([`number:20:${at}/0/items/0/note`]);
+  });
+
+  it("checks list leads like copy and bans numbered labels there", () => {
+    const ok = spec({ sections: [composed({ kind: "list", marker: "line", items: [{ lead: "Pred 12 leti", text: "Odprli smo salon." }, { lead: "Danes", text: "Strižemo v Celju." }] })] });
+    expect(checkFacts(ok, input)).toEqual([]);
+    const bad = spec({ sections: [composed({ kind: "list", marker: "line", items: [{ lead: "1998", text: "Odprli smo salon." }, { lead: "02 /", text: "Selitev." }] })] });
+    expect(found(bad)).toEqual(expect.arrayContaining([`number:1998:${at}/0/items/0/lead`, `label:02 /:${at}/0/items/1/lead`]));
+  });
+
+  it("shows only the client's photos in a photos element", () => {
+    const el = { kind: "photos", images: ["img_01", "img_02", "img_03"], arrangement: "strip" };
+    expect(checkFacts(withImages(spec({ sections: [composed(el)] }), ["client", undefined, "client"]), input)).toEqual([]);
+    expect(found(withImages(spec({ sections: [composed(el)] }), ["client", "generated", undefined]))).toEqual([`photo:img_02:${at}/0/images/1`]);
+  });
+
+  it("needs before-after captions from the client that say which photo is before and which after", () => {
+    const pair = (captions?: string[]) =>
+      withImages(spec({ sections: [composed({ kind: "photos", images: ["img_01", "img_02"], arrangement: "before-after", ...(captions ? { captions } : {}) })] }), ["client", "client"]);
+    expect(checkFacts(pair(["Prej: lasje pred barvanjem.", "Potem: po barvanju."]), input)).toEqual([]);
+    expect(found(pair())).toEqual([`photo::${at}/0/captions`]);
+    // Swapped, or a caption the client never wrote.
+    expect(found(pair(["Potem: po barvanju.", "Prej: lasje pred barvanjem."]))).toEqual([`photo:Potem: po barvanju. | Prej: lasje pred barvanjem.:${at}/0/captions`]);
+    expect(found(pair(["Prej", "Potem: nova pričeska"]))).toEqual([`photo:Prej | Potem: nova pričeska:${at}/0/captions`]);
+  });
+
+  it("lets a plate show only the town's own registration code from the table", () => {
+    // Celje → CE (@sb/spec plateCode).
+    const ok = spec({
+      sections: [
+        composed(
+          { kind: "fact", value: "CE 12", label: "let v Celju", treatment: "plate", size: 4, plateCode: true },
+          { kind: "prices", style: "plates", plateCode: true, items: [{ name: "Moško", price: { amount: 18 } }] },
+        ),
+      ],
+    });
+    expect(checkFacts(ok, input)).toEqual([]);
+    const bad = spec({
+      sections: [
+        composed(
+          { kind: "fact", value: "LJ 12", label: "let", treatment: "plate", size: 4 },
+          { kind: "prices", style: "plates", plateCode: true, items: [{ name: "Moško MB", price: { amount: 18 } }] },
+        ),
+      ],
+    });
+    expect(found(bad)).toEqual([`plate:LJ:${at}/0/value`, `plate:MB:${at}/1/items/0/name`]);
+    // A town that is no registration seat has no code: any code written on its plate is invented.
+    const vransko = spec({
+      business: { address: { street: "Vransko 8", postalCode: "3305", city: "Vransko" } },
+      sections: [composed({ kind: "fact", value: "CE 12", label: "let", treatment: "plate", size: 4, plateCode: true })],
+    });
+    expect(found(vransko)).toEqual(expect.arrayContaining([`plate:CE:${at}/0/value`]));
+  });
+
+  it("counts up only to a plain whole number from the client", () => {
+    const fact = (value: string) => spec({ sections: [composed({ kind: "fact", value, label: "let", treatment: "numeral", size: 6, count: true })] });
+    expect(checkFacts(fact("12"), input)).toEqual([]);
+    expect(found(fact("12+"))).toEqual([`number:12+:${at}/0/value`]);
+    expect(found(fact("40"))).toEqual([`number:40:${at}/0/value`]);
+  });
+
+  it("skips every v20 layout field: colour roles, tilt, bleed, edges, layers, motion and vocabulary names are not copy", () => {
+    const s = withImages(
+      spec({
+        business: { amenities: ["parking"] },
+        sections: [
+          {
+            id: "s_comp",
+            type: "composed",
+            props: {
+              intent: "story",
+              width: "wide",
+              rows: 2,
+              background: [
+                { kind: "photo", image: "img_01", scrim: { role: "inverse", strength: 3 }, phone: "band" },
+                { kind: "field", role: "band", cols: { from: 1, to: 6 } },
+              ],
+              top: { edge: "torn-2", rise: 1 },
+              motion: "rise-1",
+              pin: { col: 1, span: 4 },
+              headerOver: true,
+              elements: [
+                { id: "e_h", kind: "heading", desk: { ...desk, tilt: -4, bleedX: "start" }, phone: { order: 0, span: "bleed" }, text: "Striženje", level: 2, size: 4, treatment: "outline-2", color: "primary", fill: "surface" },
+                { id: "e_r", kind: "ribbon", desk, phone, items: ["Striženje"], separator: "star-8", move: "loop" },
+                { id: "e_d", kind: "decor", desk, phone, drawing: "wave-12", fit: "fixed", size: 3, repeat: "x" },
+                { id: "e_l", kind: "list", desk, phone, items: ["Striženje"], marker: "drawing", drawing: "leaf-3", weight: "bold" },
+                { id: "e_f", kind: "fact", desk, phone, value: "12", label: "let", treatment: "stamp-2", size: 4, labelAt: "before", count: true },
+                { id: "e_i", kind: "iconFacts", desk, phone, items: [{ fact: "parking" }], icons: "line" },
+              ],
+            },
+          },
+        ],
+      } as Over),
+      ["client"],
+    );
+    expect(checkFacts(s, input)).toEqual([]);
+  });
+
+  it("checks a translated quote as shown: it is no longer the client's words", () => {
+    const s = {
+      ...spec({ sections: [composed({ kind: "quote", text: "Najboljše striženje v Celju, brez čakanja.", by: "Mojca" })] }),
+      locales: { default: "sl", enabled: ["sl", "en"] },
+      translations: { en: { [`${at}/0/text`]: "The best haircut in Celje, no waiting." } },
+    } as unknown as SiteSpec;
+    expect(found(s)).toEqual([`quote:The best haircut in Celje, no waiting.:/translations/en${at}/0/text`]);
+  });
+});

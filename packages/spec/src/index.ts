@@ -6,6 +6,8 @@ export * from "./genome.ts";
 export * from "./genome-rules.ts";
 export * from "./intents.ts";
 export * from "./composition/schema.ts";
+export * from "./composition/vocab.ts";
+export * from "./composition/drawing.ts";
 export * from "./composition/guards.ts";
 export * from "./composition/fallback.ts";
 export * from "./composition/layout-keys.ts";
@@ -37,3 +39,6 @@ export * from "./missing-facts.ts";
 export * from "./headings.ts";
 export * from "./motif.ts";
 export * from "./studio/index.ts";
+// Named, not `export *`: studio/deck.ts still has its own ASSET_KINDS/AssetKind/AssetId for stance signatures (I8
+// drops them, studio-phase1-design.md §4); a named export wins over the star export, so @sb/spec exposes these.
+export { ASSET_KINDS, AssetKind, KIND_PREFIX, AssetId, assetId, parseAssetId, type AssetPrefix } from "./assets.ts";

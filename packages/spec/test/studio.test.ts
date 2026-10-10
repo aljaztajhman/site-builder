@@ -8,9 +8,9 @@ import {
   REFERENCES,
   STANCES,
   STANCE_FAMILIES,
-  assetKnownToday,
   deckIssues,
   migrateSpec,
+  parseAssetId,
   stanceFitsSubtype,
   subtypesOf,
   validateSite,
@@ -25,20 +25,19 @@ describe("studio decks", () => {
     expect(CARDS.length).toBeGreaterThanOrEqual(8);
   });
 
-  it("every stance's signatures name an asset that exists today or an inventory kind", () => {
-    for (const s of STANCES) for (const a of s.signatures) expect(assetKnownToday(a), `${s.id} ${a}`).not.toBe(false);
-    // Each stance names at least one asset that renders today, so a shortlist has something before the inventory lands.
-    for (const s of STANCES) expect(s.signatures.some((a) => assetKnownToday(a) === true), s.id).toBe(true);
+  // Whether each signature is in the registry (resolved, pending, unknown) is the inventory's test (signatures.test.ts).
+  it("every stance signature is a valid id of the one scheme, and none is a shape", () => {
+    for (const s of STANCES) {
+      for (const a of s.signatures) expect(() => parseAssetId(a), `${s.id} ${a}`).not.toThrow();
+      expect(s.signatures.some((a) => a.startsWith("shape/")), s.id).toBe(false);
+    }
   });
 
-  it("knows today's assets and refuses unknown ones of a listed kind", () => {
-    expect(assetKnownToday("fact/plate")).toBe(true);
-    expect(assetKnownToday("mask/arch")).toBe(true);
-    expect(assetKnownToday("motif/wire")).toBe(true);
-    expect(assetKnownToday("imagery/duotone")).toBe(true);
-    expect(assetKnownToday("fact/hologram")).toBe(false);
-    expect(assetKnownToday("mask/none")).toBe(false);
-    expect(assetKnownToday("ornament/beehive-panel")).toBeUndefined();
+  it("the old ids are refused: imagery/, typeTreatment/ and shape/ are not prefixes", () => {
+    const good = STANCES[0]!;
+    for (const bad of ["imagery/duotone", "typeTreatment/masthead", "shape/cut"]) {
+      expect(deckIssues([{ ...good, signatures: [bad] }], [], REFERENCES)[0], bad).toMatch(/signatures/);
+    }
   });
 
   it("finds broken stances and cards", () => {
@@ -46,7 +45,7 @@ describe("studio decks", () => {
     const issues = deckIssues(
       [
         { ...good, id: "a", axes: { ...good.axes, type: ["comic-sans"] } },
-        { ...good, id: "b", signatures: ["fact/hologram"] },
+        { ...good, id: "b", signatures: ["imagery/duotone"] },
         { ...good, id: "c", references: ["nowhere"] },
         { ...good, id: "d", trades: { fit: ["dental"], never: ["dental"] } },
         { ...good, id: "e", axes: { ...good.axes, ground: ["cream"] } },
@@ -63,7 +62,7 @@ describe("studio decks", () => {
     );
     expect(issues).toEqual([
       "stance a: unknown font pair comic-sans",
-      "stance b: unknown asset fact/hologram",
+      expect.stringMatching(/^stance b: signatures.0 /),
       "stance c: unknown reference nowhere",
       "stance d: dental both fits and never",
       expect.stringMatching(/^stance e: axes\.ground\.0 /),

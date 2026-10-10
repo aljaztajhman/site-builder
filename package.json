@@ -30,6 +30,7 @@
     "variety:compare": "tsx tools/eval/src/variety-compare.ts",
     "motifs:sheet": "tsx tools/eval/src/motifs-sheet.ts",
     "inventory:sheet": "tsx packages/inventory/scripts/sheet.ts",
+    "inventory:decide": "tsx packages/inventory/scripts/decide.ts",
     "variety:skeleton": "tsx tools/eval/src/skeleton-sheet.ts",
     "variety:genome": "tsx tools/eval/src/genome-sheet.ts",
     "recordings:home":"tsx tools/eval/src/home-recordings.ts",

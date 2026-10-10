@@ -95,6 +95,11 @@ export const MIGRATIONS: Record<number, (spec: RawSpec) => RawSpec> = {
   // 18 → 19: composed sections, design.art and design.seed (the AI designer, docs/plans/design-studio.md). Additive: all
   // are new and optional, so every v18 spec is a valid v19 spec and renders byte-identical.
   18: (spec) => spec,
+  // 19 → 20: composition language v2 (docs/plans/studio-phase1-design.md §1). Additive or widening: seven new element
+  // kinds, new optional fields, mask/treatment/texture/fact-object enums became vocabulary strings that keep every v19
+  // value, and the optional design.motion, design.wordmark and business.amenities. Every v19 spec is a valid v20 spec
+  // and renders byte-identical. Vocabulary growth after v20 is not a schema change and needs no bump.
+  19: (spec) => spec,
 };
 
 export function migrateSpec(input: unknown, migrations = MIGRATIONS, target: number = SPEC_VERSION): SiteSpec {

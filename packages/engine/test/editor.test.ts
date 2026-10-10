@@ -138,7 +138,7 @@ describe("defaultSection", () => {
       }
     };
     walk(composed!.props);
-    expect([...keys].sort()).toEqual(["$placeholder", "amount", "elements", "from", "items", "kind", "label", "name", "note", "paragraphs", "price", "text", "unit", "value"]);
+    expect([...keys].sort()).toEqual(["$placeholder", "amount", "elements", "from", "items", "kind", "label", "lead", "name", "note", "paragraphs", "price", "text", "unit", "value"]);
     // Each element kind is a member, so the form finds an element's fields by its kind.
     const members = ((composed!.props as { properties: { elements: { items: { anyOf: { properties: { kind: { enum: string[] } } }[] } } } }).properties.elements.items.anyOf).map((m) => m.properties.kind.enum);
     expect(members).toEqual([["heading"], ["text"], ["list"], ["fact"], ["image"], ["action"], ["hours"], ["contact"], ["prices"], ["decor"]]);

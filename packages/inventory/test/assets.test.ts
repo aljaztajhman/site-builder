@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { describe, expect, it } from "vitest";
 import { DIRECTIONS, FAMILIES, FONTS, FONT_PAIRS, Imagery, MOTIFS, SECTION_DEFS, SUBMOTIFS, type Colors } from "@sb/spec";
-import { SLOVENE_GLYPHS, assetName, byteBudget, fontFile, fontLicenseFile, inventory, paletteContrast, paletteOf, shippedColors } from "../src/index.ts";
+import { SLOVENE_GLYPHS, assetName, byteBudget, fontFile, fontLicenseFile, inventory, needsPatternCheck, paletteContrast, paletteOf, patternCheck, shippedColors, todaysAssets } from "../src/index.ts";
 
 /**
  * Per-asset checks (design-studio.md §4.2): every registered asset has a licence, stays within its kind's byte budget;
@@ -41,7 +41,8 @@ describe("today's assets are registered", () => {
   });
 
   it("existing assets start approved; system- and owner-only sections are not pickable", () => {
-    expect(assets.every((a) => a.status === "approved")).toBe(true);
+    // The registered default; the owner's decisions (decisions.json, decisions.test.ts) may change it.
+    expect(todaysAssets().every((a) => a.status === "approved")).toBe(true);
     const unpickable = assets.filter((a) => a.pickable === false).map((a) => a.id);
     expect(unpickable.sort()).toEqual(["section/collection:cards", "section/collection:list", "section/legal:default", "section/not-found:default"]);
   });
@@ -83,6 +84,12 @@ describe.each(assets.map((a) => [a.id, a] as const))("%s", (_id, asset) => {
         return g.id === 0 || g.path.commands.length === 0;
       });
       expect(missing.join("")).toBe("");
+    });
+  }
+
+  if (needsPatternCheck(asset)) {
+    it("is not a dot grid, a lattice of crosses or grid paper (G19 detector)", () => {
+      expect(patternCheck(asset)).toEqual({ ok: true });
     });
   }
 

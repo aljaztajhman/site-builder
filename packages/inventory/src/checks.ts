@@ -3,7 +3,9 @@
  * byte budgets per kind, the Slovene letters every font must draw, and the contrast of a palette's text roles.
  */
 import { CONTRAST_RULES, contrast, enforceDesign, type Colors, type Design, type Direction } from "@sb/spec";
-import type { AssetKind } from "./schema.ts";
+import { detectPattern, type PatternVerdict } from "./pattern-detector.ts";
+import type { Asset, AssetKind } from "./schema.ts";
+import { PATTERN_TILES, type PatternTile } from "./tiles.ts";
 
 /**
  * Bytes an asset may add to a page, per kind. Fonts: per file (a pairing is two files). Motifs and the rest: the CSS
@@ -17,16 +19,21 @@ export const BYTE_BUDGET: Partial<Record<AssetKind, number>> = {
   motif: 6 * 1024,
   submotif: 1.5 * 1024,
   treatment: 2 * 1024,
-  shape: 2 * 1024,
+  mask: 2 * 1024,
   factObject: 2 * 1024,
   header: 2 * 1024,
   footer: 2 * 1024,
   section: 4 * 1024,
 };
-export const COMPOSED_SHEET_BUDGET = 20 * 1024;
+/**
+ * The composed stylesheets, minified, per sheet (docs/plans/studio-phase1-design.md §3.4.1): the core sheet (spec v19,
+ * composed.css) and the v20 sheet (composed-v2.css) each ≤ 16 KiB, the pair ≤ 28 KiB. The asset section/composed:free
+ * measures the core sheet; @sb/render's composed test checks the v2 sheet and the pair against the same numbers.
+ */
+export const COMPOSED_SHEET_BUDGET = { core: 16 * 1024, v2: 16 * 1024, pair: 28 * 1024 } as const;
 
 export function byteBudget(a: { id: string; kind: AssetKind }): number | undefined {
-  return a.id === "section/composed:free" ? COMPOSED_SHEET_BUDGET : BYTE_BUDGET[a.kind];
+  return a.id === "section/composed:free" ? COMPOSED_SHEET_BUDGET.core : BYTE_BUDGET[a.kind];
 }
 
 /** The Slovene letters (and Croatian/Serbian ć đ that Slovene names use) every font must draw. */
@@ -78,4 +85,19 @@ export function shippedColors(colors: Colors, dir: Direction): Colors {
     imagery: dir.imagery,
   };
   return enforceDesign(design, dir).colors;
+}
+
+/**
+ * The kinds the dot/grid detector checks (G19). Textures only for now: REPEATABLE drawings join when the drawing list
+ * and its REPEATABLE set exist (I5), through a tag or this list.
+ */
+export const PATTERN_CHECKED_KINDS: readonly AssetKind[] = ["texture"];
+
+export const needsPatternCheck = (a: Pick<Asset, "kind">): boolean => PATTERN_CHECKED_KINDS.includes(a.kind);
+
+/** The dot/grid verdict for an asset's tile (tiles.ts); an asset that needs the check and has no tile fails. */
+export function patternCheck(a: Pick<Asset, "id">, tiles: Readonly<Record<string, PatternTile>> = PATTERN_TILES): PatternVerdict | { ok: false; reason: "no-tile"; detail: string } {
+  const t = tiles[a.id];
+  if (!t) return { ok: false, reason: "no-tile", detail: `${a.id} has no tile in packages/inventory/src/tiles.ts` };
+  return detectPattern(t.tile, t.repeat ? { repeat: t.repeat } : {});
 }

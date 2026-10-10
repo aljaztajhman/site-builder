@@ -3,7 +3,7 @@
  * inputs deal the same stances, cards and references, so a run replays from its recordings. No model call. Nothing in
  * the pipeline calls this yet (the studio stages come later, behind the designer switch).
  */
-import { CARDS, REFERENCES, STANCES, stanceFitsSubtype, type BusinessSubtype, type BusinessType, type CardRequirement, type ConstraintCard, type Reference, type Stance, type StanceFamily } from "@sb/spec";
+import { CARDS, LANGUAGE_VERSION, REFERENCES, STANCES, stanceFitsSubtype, type BusinessSubtype, type BusinessType, type CardRequirement, type ConstraintCard, type Reference, type Stance, type StanceFamily } from "@sb/spec";
 import { inClientText, type Concept } from "../concept.ts";
 import { hash32, siteSeed } from "../variety.ts";
 
@@ -116,8 +116,8 @@ export function cardApplies(
   card: ConstraintCard,
   o: { trade?: BusinessType | undefined; family?: StanceFamily | undefined; has?: readonly CardRequirement[] | undefined; f1b?: boolean | undefined },
 ): boolean {
-  // Cards that need composition language v2 wait until it lands (o.f1b).
-  if (card.needs === "f1b" && !o.f1b) return false;
+  // Cards that need composition language v2 are dealt once it ships (LANGUAGE_VERSION >= 2); o.f1b overrides.
+  if (card.needs === "f1b" && !(o.f1b ?? LANGUAGE_VERSION >= 2)) return false;
   const a = card.appliesTo;
   if (!a) return true;
   // What the client's input has (photos, prices …); a card needing something missing doesn't apply. Unknown: no limit.

@@ -1,9 +1,10 @@
 import { z } from "zod";
-import { HexColor, text } from "./common.ts";
+import { HexColor, SYSTEM_ONLY, text } from "./common.ts";
 import { INTENTS } from "./intents-list.ts";
 import type { BusinessType } from "./business.ts";
 import { Skeleton } from "./skeleton.ts";
 import { Genome } from "./genome.ts";
+import { MotionLevel, Vocab } from "./composition/vocab.ts";
 
 /** How photos are presented. Implemented as CSS in packages/components/styles/imagery.css. */
 export const Imagery = z.enum(["natural", "rounded", "framed", "full-bleed", "monochrome", "arched", "offset-block", "duotone"]);
@@ -42,6 +43,10 @@ export type Art = z.infer<typeof Art>;
 /** Spec v19: a design seed, 6 to 12 lowercase base-36 characters (design-studio.md §5.1). */
 export const DesignSeed = z.string().regex(/^[a-z0-9]{6,12}$/);
 
+/** Spec v20: the site's wordmark, a style from WORDMARK_STYLES set in the display or the text face. */
+export const Wordmark = z.strictObject({ style: Vocab("WORDMARK_STYLES"), role: z.enum(["display", "text"]).optional() });
+export type Wordmark = z.infer<typeof Wordmark>;
+
 export const Design = z.strictObject({
   direction: z.string().regex(/^[a-z-]+$/),
   fontPair: z.string().regex(/^[a-z0-9-]+$/),
@@ -66,6 +71,10 @@ export const Design = z.strictObject({
    * It deals the stances, constraint cards and references and breaks code's ties, so a run replays. Never rendered.
    */
   seed: DesignSeed.optional().describe("Set by the system; leave out."),
+  /** Spec v20: how much composed sections move (studio-phase1-design.md §1.6); absent counts as calm. Never offered to the model. */
+  motion: MotionLevel.meta({ [SYSTEM_ONLY]: true }).optional(),
+  /** Spec v20: the business name set as a typographic wordmark, never a drawn symbol. Never offered to the model. */
+  wordmark: Wordmark.meta({ [SYSTEM_ONLY]: true }).optional(),
 });
 export type Design = z.infer<typeof Design>;
 

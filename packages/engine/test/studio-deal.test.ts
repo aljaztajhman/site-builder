@@ -135,8 +135,9 @@ describe("dealCards", () => {
     expect(dealCards("zz00aa1", 6).map((c) => c.id)).not.toEqual(a.map((c) => c.id));
     for (let i = 0; i < 20; i++) expect(dealCards(designSeed(`s${i}`, 0), CARDS.length, { trade: "accountant" }).map((c) => c.id)).not.toContain("price-at-headline-size");
     expect(dealCards("k3x9q2a", 0)).toEqual([]);
-    // Cards that need composition language v2 are held back until it lands (f1b).
-    expect(dealCards("k3x9q2a", 100).length).toBe(CARDS.filter((c) => c.needs !== "f1b").length);
+    // Cards that need composition language v2 are dealt now that it has landed (LANGUAGE_VERSION 2): all of them.
+    expect(dealCards("k3x9q2a", 100).length).toBe(CARDS.length);
+    expect(dealCards("k3x9q2a", 100, { f1b: false }).length).toBe(CARDS.filter((c) => c.needs !== "f1b").length);
   });
 });
 
@@ -157,10 +158,10 @@ describe("dealReferences", () => {
 });
 
 describe("dealing with the full deck (I8)", () => {
-  it("never deals a card that needs composition language v2, unless asked to", () => {
+  it("deals the cards that need composition language v2 now it has landed, and holds them back when told f1b is off", () => {
     const all = dealCards("s1", 50);
-    expect(all.some((c) => c.needs === "f1b")).toBe(false);
-    expect(dealCards("s1", 50, { f1b: true }).some((c) => c.needs === "f1b")).toBe(true);
+    expect(all.some((c) => c.needs === "f1b")).toBe(true);
+    expect(dealCards("s1", 50, { f1b: false }).some((c) => c.needs === "f1b")).toBe(false);
   });
   it("leaves out cards whose requirements the client's input lacks", () => {
     const noPhotos = dealCards("s2", 50, { has: ["phone", "address", "hours"] });

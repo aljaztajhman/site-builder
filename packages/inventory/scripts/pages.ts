@@ -1,6 +1,6 @@
 /**
  * The pages a contact sheet photographs, one per asset (and palette): fonts as specimens, palettes as swatches with
- * their contrast numbers, and everything that renders through the components (sections, motifs, treatments, shapes,
+ * their contrast numbers, and everything that renders through the components (sections, motifs, treatments, masks,
  * fact objects, header and footer families) as a small site spec rendered by @sb/render, the same code that publishes.
  */
 import { readFileSync, readdirSync } from "node:fs";
@@ -225,7 +225,7 @@ export function sitePages(asset: Asset): SheetPage[] {
         return page(String.fromCharCode(97 + i), dir.id, withHome(spec, sections.filter((s): s is Section => s !== null), "x"));
       });
     }
-    case "shape":
+    case "mask":
       return palettes.map((dir, i) => page(String.fromCharCode(97 + i), dir.id, withHome(inDirection(base, dir), composedGrounds(base, (img) => [{ kind: "image", image: img, ratio: "1:1", mask: name }]), "x")));
     case "factObject":
       return palettes.map((dir, i) =>

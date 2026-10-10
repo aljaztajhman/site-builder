@@ -43,7 +43,7 @@ function render(sections: Section[], edit: (s: SiteSpec) => void = () => {}): { 
 const sectionHtml = (html: string, id = "s_composed") => new RegExp(`<section id="${id}"[\\s\\S]*?</section>`).exec(html)![0];
 
 /** One element of each kind, at an own place. */
-const KINDS: Record<(typeof ELEMENT_KINDS)[number], object> = {
+const KINDS = {
   heading: { kind: "heading", text: "Naslov", level: 2, size: 4, case: "uppercase", rotate: "90" },
   text: { kind: "text", paragraphs: ["Prvi odstavek.", "Drugi odstavek."], size: 1 },
   list: { kind: "list", items: ["Menjava olja", "Zavore"], marker: "dot" },
@@ -54,9 +54,10 @@ const KINDS: Record<(typeof ELEMENT_KINDS)[number], object> = {
   contact: { kind: "contact", show: ["phone", "email", "address", "map"] },
   prices: { kind: "prices", style: "rows", items: [{ name: "Menjava olja", price: { amount: 59 } }, { name: "Pregled", price: { amount: 20, from: true } }] },
   decor: { kind: "decor", svg: { width: 40, height: 20, paths: [{ d: "M0 0L40 20", fill: "none", stroke: "accent", width: 2 }] } },
-};
+  // The spec v20 kinds (photos, wordmark, ribbon, sticker, map, iconFacts, quote) join with their renderer (F1b-R2).
+} satisfies Partial<Record<(typeof ELEMENT_KINDS)[number], object>>;
 
-function one(kind: (typeof ELEMENT_KINDS)[number], more: object = {}) {
+function one(kind: keyof typeof KINDS, more: object = {}) {
   return sectionOf({ intent: "story", width: "contained", rows: 1, elements: [{ id: `e_${kind}`, ...KINDS[kind], desk: desk(1, 6, 1), phone: { order: 0, span: "full" }, ...more }] });
 }
 

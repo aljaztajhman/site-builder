@@ -62,7 +62,8 @@ function ListBlock({ el, over }: { el: ElOf<"list">; over: boolean }) {
   return (
     <ul {...p} className={cx(p.className, "cx-l", `cx-l--${el.marker ?? "none"}`)} role="list">
       {el.items.map((t, i) => (
-        <li key={i}>{t}</li>
+        // Spec v20 items may carry a lead (a date or a step); F1b-R3 renders leads and the new markers.
+        <li key={i}>{typeof t === "string" ? t : `${t.lead} ${t.text}`}</li>
       ))}
     </ul>
   );

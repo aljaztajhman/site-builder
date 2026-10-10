@@ -2,7 +2,7 @@
  * pnpm inventory:sheet [--kind <kind>]
  *
  * Contact sheets of the design inventory (design-studio.md §4.2): every asset of a kind photographed at 360 and 1280 px
- * into eval/runs/inventory/ (gitignored). Components (sections, motifs, treatments, shapes, fact objects, header and
+ * into eval/runs/inventory/ (gitignored). Components (sections, motifs, treatments, masks, fact objects, header and
  * footer families) are rendered by @sb/render from a small spec in two palettes, on the default, alternate and inverse
  * grounds; fonts as specimens with the Slovene letters; palettes as swatches with their contrast numbers.
  *
@@ -19,7 +19,7 @@ import { validateSite } from "@sb/spec";
 import { ASSET_KINDS, assetSlug, inventory, writeInventoryJson, type Asset, type AssetKind } from "../src/index.ts";
 import { fixturesDir, pagesFor, repoRoot, type SheetPage } from "./pages.ts";
 
-const SHEET_KINDS: AssetKind[] = ["font", "pairing", "palette", "motif", "submotif", "treatment", "shape", "factObject", "header", "footer", "section"];
+const SHEET_KINDS: AssetKind[] = ["font", "pairing", "palette", "motif", "submotif", "treatment", "mask", "factObject", "header", "footer", "section"];
 const WIDTHS = [360, 1280] as const;
 /** The tallest part of a page a thumbnail keeps, per width. */
 const MAX_HEIGHT: Record<(typeof WIDTHS)[number], number> = { 360: 3600, 1280: 2400 };

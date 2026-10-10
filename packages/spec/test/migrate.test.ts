@@ -398,12 +398,79 @@ describe("migration 18 → 19 (composed sections and design.art, the AI designer
     expect(ids.length).toBe(10);
     for (const f of ids) {
       const golden = JSON.parse(readFileSync(new URL(f, dir), "utf8")) as SiteSpec;
-      const v19 = migrateSpec({ ...golden, specVersion: 18 });
-      expect(v19, f).toEqual(golden);
+      const v19 = migrateSpec({ ...golden, specVersion: 18 }, MIGRATIONS, 19);
+      expect(v19, f).toEqual({ ...golden, specVersion: 19 });
       expect(v19.design.art, f).toBeUndefined();
       expect(v19.pages.flatMap((p) => p.sections).some((s) => s.type === "composed"), f).toBe(false);
-      expect(validateSite(v19).issues, f).toEqual([]);
+      expect(validateSite(migrateSpec(v19)).issues, f).toEqual([]);
     }
-    expect(SPEC_VERSION).toBe(19);
+    expect(SPEC_VERSION).toBeGreaterThanOrEqual(19);
+  });
+});
+
+describe("migration 19 → 20 (composition language v2, studio-phase1-design.md §1.9)", () => {
+  const load = async (rel: string) => {
+    const { readFileSync } = await import("node:fs");
+    return JSON.parse(readFileSync(new URL(`../../../tools/eval/${rel}`, import.meta.url), "utf8")) as SiteSpec;
+  };
+
+  it("is the identity on every golden and on the composed sheets m, s and j: deep-equal at v20 and still schema-valid", async () => {
+    const { readdirSync } = await import("node:fs");
+    const { validateSite } = await import("../src/index.ts");
+    const goldens = readdirSync(new URL("../../../tools/eval/golden/", import.meta.url))
+      .filter((f) => f.endsWith(".json"))
+      .map((f) => `golden/${f}`);
+    expect(goldens.length).toBe(10);
+    for (const rel of [...goldens, "composed/m.json", "composed/s.json", "composed/j.json"]) {
+      const stored = await load(rel);
+      expect(stored.specVersion, rel).toBe(20);
+      const v20 = migrateSpec({ ...stored, specVersion: 19 });
+      expect(v20, rel).toEqual(stored);
+      // The goldens validate clean; the sheets carry their own guard notes (composition.test.ts), never a schema issue.
+      const issues = validateSite(v20).issues;
+      if (rel.startsWith("golden/")) expect(issues, rel).toEqual([]);
+      else expect(issues.filter((i) => i.code === "schema"), rel).toEqual([]);
+    }
+    expect(SPEC_VERSION).toBe(20);
+  });
+
+  it("keeps every v19 enum value valid: a v19 spec using each of them migrates to itself and parses", async () => {
+    const { validateSite } = await import("../src/index.ts");
+    const golden = await load("golden/avtoservis-mrak.json");
+    const place = (order: number) => ({ desk: { col: 1, span: 6, row: 1 }, phone: { order, span: "full" } });
+    // The v19 closed enums that became vocabulary strings, and the ones v20 widened.
+    const V19 = {
+      mask: ["none", "arch", "circle", "cut", "stamp", "ticket"],
+      treatment: ["none", "duotone", "tint", "grain"],
+      fact: ["numeral", "plate", "stamp", "ticket", "seal", "tag"],
+      texture: ["none", "grain", "lines"],
+      marker: ["none", "rule", "dot"],
+      prices: ["rows", "plates", "tags"],
+      span: ["full", "inset", "half"],
+    };
+    const sections = V19.mask.map((mask, i) => ({
+      id: `s_v19_${i}`,
+      type: "composed",
+      variant: "free",
+      props: {
+        intent: "story",
+        width: "contained",
+        rows: 1,
+        surface: { texture: V19.texture[i % V19.texture.length], divider: "rule" },
+        elements: [
+          { id: "e_img", kind: "image", image: golden.assets.images[0]!.id, ratio: "4:5", mask, treatment: V19.treatment[i % V19.treatment.length], ...place(0) },
+          { id: "e_fact", kind: "fact", value: "1998", label: "Leto", treatment: V19.fact[i], size: 4, ...place(1) },
+          { id: "e_list", kind: "list", items: ["Ena", "Dve"], marker: V19.marker[i % V19.marker.length], ...place(2) },
+          { id: "e_prices", kind: "prices", style: V19.prices[i % V19.prices.length], items: [{ name: "Pregled", price: { amount: 20 } }], ...place(3) },
+          { id: "e_decor", kind: "decor", motif: "plate", desk: { col: 7, span: 2, row: 1 }, phone: { order: 4, span: V19.span[i % V19.span.length] } },
+        ],
+      },
+    }));
+    const v19 = structuredClone(golden) as unknown as { specVersion: number; pages: { sections: unknown[] }[] };
+    v19.specVersion = 19;
+    v19.pages[0]!.sections.push(...sections);
+    const v20 = migrateSpec(v19);
+    expect(v20).toEqual({ ...v19, specVersion: 20 });
+    expect(validateSite(v20).issues.filter((i) => i.code === "schema")).toEqual([]);
   });
 });

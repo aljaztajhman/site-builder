@@ -33,6 +33,42 @@ export const COMPOSED_LAYOUT_KEYS: ReadonlySet<string> = new Set([
   "d",
   "fill",
   "stroke",
+  // Spec v20 (composition language v2, studio-phase1-design.md §1.5): section layers, edges, motion, pin, the new
+  // kinds' styles, colour roles, bleed and tilt, vocabulary names and drawing ids. Numbers and booleans among them
+  // (rise, scale, strength, tilt …) are listed too, so the list reads as the layout fields whatever their type.
+  "kind",
+  "arrangement",
+  "edge",
+  "rise",
+  "motion",
+  "pin",
+  "headerOver",
+  "role",
+  "cols",
+  "rows",
+  "scale",
+  "anchor",
+  "strength",
+  "fit",
+  "repeat",
+  "labelAt",
+  "plateCode",
+  "count",
+  "phoneColumns",
+  "weight",
+  "shape",
+  "move",
+  "icons",
+  "color",
+  "bleedX",
+  "bleedY",
+  "tilt",
+  "drawing",
+  "separator",
+  // A photo layer's phone treatment ("band", "cover"); an element's `phone` is an object, walked by its own keys.
+  "phone",
+  // A practical-fact key (PRACTICAL_FACTS); `fact` is a key only in iconFacts items.
+  "fact",
 ]);
 
 const IN_SECTION_PROPS = /^\/pages\/(\d+)\/sections\/(\d+)\/props(\/.*)$/;

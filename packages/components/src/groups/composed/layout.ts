@@ -83,3 +83,76 @@ export function imageSizes(width: ComposedProps["width"], el: ElOf<"image">): st
 
 /** CSS variable of a type-scale step (composed.css defines --cx-fs-<step>; −1 is written m1). */
 export const stepVar = (step: number): string => `var(--cx-fs-${step < 0 ? "m1" : step})`;
+
+/* ---------- spec v20 section level (docs/plans/studio-phase1-design.md §1.3, §3.4) ---------- */
+
+/** One background layer of a composed section, and one kind of them. */
+export type Layer = NonNullable<ComposedProps["background"]>[number];
+export type LayerOf<K extends Layer["kind"]> = Extract<Layer, { kind: K }>;
+
+/** The section's own ground per tone (base.css .tone-*): what text, a backing panel and the header sit on. */
+export const TONE_GROUND: Record<"default" | "alt" | "inverse" | "band", ColorRole> = { default: "background", alt: "surface", inverse: "inverse", band: "band" };
+
+/** The section's photo layer, if it has one. */
+export const photoLayer = (props: ComposedProps): LayerOf<"photo"> | undefined => props.background?.find((l): l is LayerOf<"photo"> => l.kind === "photo");
+
+/** A field layer's desktop rectangle: columns and rows, both inclusive (default: the whole grid). */
+export function fieldRect(f: LayerOf<"field">, rows: number) {
+  return { c0: f.cols?.from ?? 1, c1: f.cols?.to ?? 12, r0: f.rows?.from ?? 1, r1: Math.min(f.rows?.to ?? rows, rows) };
+}
+
+/** Whether an element's desktop rectangle lies wholly inside a field layer (G2: text is wholly inside or wholly outside). */
+export function insideField(el: El, f: LayerOf<"field">, rows: number): boolean {
+  const e = rect(el);
+  const r = fieldRect(f, rows);
+  return e.c0 >= r.c0 && e.c1 <= r.c1 && e.r0 >= r.r0 && e.r1 <= r.r1;
+}
+
+/**
+ * The phone rows (1-based, inclusive) each element shown on phones takes on the 4-column phone grid, as composed.css
+ * places them: in reading order, a half element takes two columns and the rest a full row (the grid's auto-placement).
+ */
+export function phoneRows(ordered: readonly El[]): Map<string, number> {
+  const out = new Map<string, number>();
+  let row = 1;
+  let col = 0;
+  for (const el of ordered) {
+    if (el.phone.hidden) continue;
+    const w = el.phone.span === "half" ? 2 : 4;
+    if (col + w > 4) {
+      row++;
+      col = 0;
+    }
+    out.set(el.id, row);
+    col += w;
+    if (col === 4) {
+      row++;
+      col = 0;
+    }
+  }
+  return out;
+}
+
+/** The number of phone rows the elements shown on phones fill. */
+export const phoneRowCount = (rows: ReadonlyMap<string, number>): number => Math.max(0, ...rows.values());
+
+/**
+ * What the header sits on when the section opens the page with `headerOver`, on desktop and on phones: the photo's scrim
+ * role (the photo covers the section on desktop; on phones the band or the cover photo is at the top), else a field that
+ * covers the top row from edge to edge (on phones: a field holding the first phone row), else the tone's ground.
+ */
+export function headerGround(props: ComposedProps, tone: keyof typeof TONE_GROUND = "default"): { desk: ColorRole; phone: ColorRole } {
+  const ground = TONE_GROUND[tone];
+  const photo = photoLayer(props);
+  if (photo) return { desk: photo.scrim.role, phone: photo.scrim.role };
+  const fields = (props.background ?? []).filter((l): l is LayerOf<"field"> => l.kind === "field");
+  const desk = fields.find((f) => {
+    const r = fieldRect(f, props.rows);
+    return r.r0 === 1 && r.c0 === 1 && r.c1 === 12;
+  });
+  const ordered = readingOrder(props.elements);
+  const rows = phoneRows(ordered);
+  const first = ordered.find((el) => rows.get(el.id) === 1);
+  const phone = first && fields.find((f) => insideField(first, f, props.rows));
+  return { desk: desk?.role ?? ground, phone: phone?.role ?? ground };
+}
