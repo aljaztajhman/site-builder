@@ -287,6 +287,36 @@ describe("composed sections render", () => {
       expect(sectionHtml(second, "s_second")).not.toContain('fetchPriority="high"');
     });
   });
+
+  describe("a composed opener and the phone bar (no skeleton)", () => {
+    const noSkeleton = (s: SiteSpec) => {
+      delete s.design.skeleton;
+      s.chrome.mobileActionBar = true;
+    };
+    const bodyClass = (html: string) => /<body[^>]*class="([^"]*)"/.exec(html)?.[1] ?? "";
+
+    it("hides the opener's call under the bar on phones, as a hero's", () => {
+      const { html } = render([sectionOf(SAMPLE)], noSkeleton);
+      expect(bodyClass(html).split(" ")).toEqual(expect.arrayContaining(["has-action-bar", "bar-covers-hero-call"]));
+      expect(html).not.toContain("action-bar--after-hero");
+    });
+
+    it("reads a link action's target; with call and directions, the bar waits until the opener scrolls away", () => {
+      const els = [
+        ...SAMPLE.elements.filter((e) => e.id !== "e_call"),
+        { id: "e_call", kind: "action", action: "link", label: "Pokliči", link: { label: "Pokliči", target: { action: "call" } }, style: "primary", desk: desk(1, 3, 3), phone: { order: 2, span: "full" } },
+        { id: "e_way", kind: "action", action: "directions", label: "Pot do nas", style: "text", desk: desk(4, 3, 3), phone: { order: 3, span: "full" } },
+      ];
+      const { html } = render([sectionOf({ ...SAMPLE, elements: els })], noSkeleton);
+      expect(bodyClass(html)).not.toContain("bar-covers-hero");
+      expect(html).toContain("action-bar action-bar--after-hero");
+    });
+
+    it("leaves the bar alone when the composed section is not the opener", () => {
+      const { html } = render([one("text", { id: "e_t" }), sectionOf(SAMPLE, "s_second")], noSkeleton);
+      expect(bodyClass(html)).not.toContain("bar-covers-hero");
+    });
+  });
 });
 
 describe("the composed stylesheet", () => {
