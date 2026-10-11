@@ -268,8 +268,11 @@ export const AppConfigSchema = z.object({
   studio: z.strictObject({
     $comment: z.string().optional(),
     $perRunMaxEurComment: z.string().optional(),
+    $generalBelowConfidenceComment: z.string().optional(),
     /** Studio 0.5: € one studio run may spend (the director call's estimate must fit under it; it is sent once, no retry). */
     perRunMaxEur: z.number().positive(),
+    /** Studio 0.5: below this classifier confidence the business is treated as outside the ten trades (general stances and presets only). */
+    generalBelowConfidence: z.number().min(0).max(1),
     uniqueness: z.strictObject({
       sameTradeMin: z.number().min(0).max(1),
       sameTownMin: z.number().min(0).max(1),

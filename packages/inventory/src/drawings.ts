@@ -142,6 +142,20 @@ export const DRAWING_META: Readonly<Record<(typeof DRAWINGS)[number], DrawingMet
     ground: ["white"],
     note: "Hero style pilot 4 (bold shapes): a terracotta sun, a dark loaf dome with three score cuts and a pale quarter round, cropped by the section's edges beside oversized type; for a site without photos.",
   },
+  "motif/plumbing/heat-pump-radiator-solid": {
+    trades: ["builder", "builder/plumbing"],
+    stances: ["technical-drawing", "safety-signage", "wayfinding"],
+    mood: ["hero-art", "illustration", "poster"],
+    ground: ["white"],
+    note: "Hero bar G (printed poster, for an installer without photos): a heat pump in the snow on the cold side of the house wall, its hot (primary) and cold (accent) pipes through the wall to a white column radiator before a big hot disc. Flat planes, a dark key line, stipple grain; drawn new. Full strength beside the headline, bled to the right and bottom.",
+  },
+  "motif/bakery/oven-night-linocut-solid": {
+    trades: ["bakery"],
+    stances: ["woodcut", "letterpress-proof", "pratika-almanac"],
+    mood: ["hero-art", "linocut", "night"],
+    ground: ["dark"],
+    note: "Hero bar C (two-colour linocut, the bread that rises overnight): a brick oven's mouth at night, the fire in the accent with white-hot tongues, a scored loaf going in on a peel, a crescent moon and stars. One ink with the paper cut out; its block is the inverse ink, so on a dark ground it runs into the page. Drawn new.",
+  },
 };
 
 /** The style a drawing's name ends in (`…-line` → line). */

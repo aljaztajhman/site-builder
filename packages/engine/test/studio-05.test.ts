@@ -3,8 +3,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { loadConfig, type AppConfig } from "@sb/config";
-import { COMPOSER_FIXTURES, composerFixture, inventory, studioShortlist, type StudioShortlist } from "@sb/inventory";
-import { STANCES, migrateSpec, publishChecklist, stanceFitsSubtype, validateSite, type SiteSpec } from "@sb/spec";
+import { COMPOSER_FIXTURES, COMPOSITION_PRESETS, HERO_PICKS, PROP_STANCE, composerFixture, inventory, isProp, studioShortlist, type StudioShortlist } from "@sb/inventory";
+import { STANCES, migrateSpec, publishChecklist, stanceFitsSubtype, validateSite, type PresetBrief, type SiteSpec } from "@sb/spec";
 import {
   DirectorAnswer,
   ModelClient,
@@ -164,7 +164,12 @@ describe("runStudio on the recorded director answers", () => {
     const recorded = DirectorAnswer.parse(JSON.parse((JSON.parse(readFileSync(path.join(RECORDINGS, id, "000-director.json"), "utf8")) as { response: { text: string } }).response.text));
     const picked = recorded.sections.map((x) => x.preset).filter((p) => r.used.presets.includes(p));
     expect(picked.length).toBeGreaterThanOrEqual(Math.ceil(recorded.sections.length / 2));
-    expect(r.stance).toBe(recorded.stance);
+    // The director's stance, unless it is a prop-led one (recorded before props were taken off the stance list).
+    if (PROP_STANCE.test(recorded.stance)) expect(PROP_STANCE.test(r.stance)).toBe(false);
+    else expect(r.stance).toBe(recorded.stance);
+    // No decorative drawing in 0.5, and one prop at most.
+    expect(r.used.drawing).toBeNull();
+    expect(r.used.presets.filter(isProp).length).toBeLessThanOrEqual(1);
     // The rest of the site is today's: the other pages, the business, the slug.
     expect(r.spec.slug).toBe(fx.base.slug);
     expect(r.spec.pages.filter((p) => p.kind !== "home")).toEqual(fx.base.pages.filter((p) => p.kind !== "home"));
@@ -225,6 +230,85 @@ describe("runStudio over any site spec", () => {
     expect(r.ok).toBe(false);
     expect(seen).toHaveLength(0);
     if (!r.ok) expect(r.reason).toMatch(/perRunMaxEur/);
+  });
+});
+
+/**
+ * A business outside the ten trades: the tattoo studio edge fixture (tools/eval/fixtures-edge, invented fixture data),
+ * on the hairdresser golden's frame with its business swapped in, its photos and every section that showed one taken out
+ * (the studio has no photos), and its brief written by hand.
+ */
+function tattooStudio(): { spec: SiteSpec; brief: PresetBrief; corpus: string } {
+  const fixture = JSON.parse(readFileSync(path.join(ROOT, "tools/eval/fixtures-edge/tattoo-crnilo/brief.json"), "utf8")) as { description: string; facts: { name: string; phone: string; email: string; address: { street: string; postalCode: string; city: string } } };
+  const spec = migrateSpec(JSON.parse(readFileSync(path.join(ROOT, "tools/eval/golden/frizerstvo-lana.json"), "utf8"))) as SiteSpec;
+  const { name, phone, email, address } = fixture.facts;
+  spec.business = { ...spec.business, name, phone, email, address: { ...address, country: "SI" } as never };
+  delete spec.business.hours;
+  spec.assets.images = [];
+  delete spec.assets.logo;
+  for (const page of spec.pages) page.sections = page.sections.filter((s) => !/"img_/.test(JSON.stringify(s)) && s.type !== "opening-hours" && s.type !== "team" && s.type !== "price-list");
+  const home = spec.pages.find((p) => p.kind === "home")!;
+  home.sections.unshift(
+    { id: "s_hero_t", type: "hero-type", variant: "large", props: { headline: "Tetovaže, narisane na novo za vas", intro: "Tattoo studio v Celju. Vsak motiv narišemo na novo za stranko." } } as never,
+    {
+      id: "s_services_t",
+      type: "services-list",
+      variant: "two-column",
+      props: { title: "Kaj delamo", items: [{ name: "Črno-sive tetovaže in fine line", description: "Luka Vidmar." }, { name: "Barvne tetovaže in ilustracije", description: "Rastline in živali, Tjaša Golob." }] },
+    } as never,
+    { id: "s_story_t", type: "text", variant: "two-column", props: { heading: "Vsak motiv na novo", paragraphs: ["Ne delamo motivov iz kataloga in ne kopiramo tujih tetovaž. Posvet je brezplačen."] } } as never,
+  );
+  const brief: PresetBrief = {
+    summary: "Tattoo studio v Celju, kjer vsak motiv narišejo na novo za stranko.",
+    highlights: ["vsak motiv narišemo na novo za stranko", "posvet, ki je brezplačen", "igle za enkratno uporabo"],
+    offerings: [{ name: "Črno-sive tetovaže in fine line" }, { name: "Barvne tetovaže in ilustracije" }, { name: "Mala tetovaža", price: { amount: 80, from: true } }],
+    facts: { people: [{ name: "Luka Vidmar" }, { name: "Tjaša Golob" }] },
+  };
+  return { spec, brief, corpus: fixture.description };
+}
+
+describe("a business outside the ten trades", () => {
+  it("the general shortlist has stances for any trade and untagged presets only; it composes and the guards pass", async () => {
+    const { spec, brief, corpus } = tattooStudio();
+    const base = validateSite(spec);
+    expect(base.issues.map((i) => `${i.path} ${i.message}`)).toEqual([]);
+    const sources = sourcesOf(base.spec!, brief, corpus);
+    const s = studioShortlist(base.spec!, sources, undefined, { general: true });
+    expect(s.stances.length).toBeGreaterThan(0);
+    for (const st of s.stances) expect(STANCES.find((x) => x.id === st.id)!.trades.fit, st.id).toContain("*");
+    expect(s.presets.hero?.length).toBeGreaterThan(0);
+    for (const e of Object.values(s.presets).flat()) expect(COMPOSITION_PRESETS.find((p) => p.id === e.id)?.tags?.trades ?? [], e.id).toEqual([]);
+    const r = await runStudio(scripted([(req) => JSON.stringify(firstPicks(shortlistOf(req), { hero: { headline: "Tetovaže, narisane samo za vas", lead: "Vsak motiv narišemo na novo, posvet je brezplačen." }, sections: [] }))]), config, { spec: base.spec!, brief, corpus, seed: 5, general: true });
+    if (!r.ok) throw new Error(r.reason);
+    expect(studioGuards(r.spec, base.spec!, corpus)).toBeNull();
+    expect(JSON.stringify(r.spec.pages.find((p) => p.kind === "home")!.sections[0])).toContain("Tetovaže, narisane samo za vas");
+  }, 60_000);
+});
+
+describe("props", () => {
+  it("are never a stance, and at most one per page: a second prop section loses its preset", () => {
+    const fx = composerFixture("avtoservis-mrak");
+    const sources = sourcesOf(fx.base, fx.sources.brief, fx.description);
+    const s = studioShortlist(fx.base, sources, fx.tradeWord);
+    expect(s.stances.map((x) => x.id)).not.toContain("registration-plate");
+    expect(s.stances.map((x) => x.id)).not.toContain("workshop-docket");
+    const props = Object.entries(s.presets).flatMap(([intent, l]) => l.filter((e) => e.prop).map((e) => ({ intent, preset: e.id })));
+    expect(props.length).toBeGreaterThanOrEqual(2);
+    const a: DirectorAnswer = { ...firstPicks(s), sections: [{ intent: "hero", preset: s.presets.hero![0]!.id }, ...props.slice(0, 2), { intent: "contact", preset: s.presets.contact![0]!.id }] };
+    const c = checkDirection(a, s, knownNumbers(fx.base, sources, fx.description));
+    const kept = c.choice.sections!.filter((x) => x.preset && props.some((p) => p.preset === x.preset));
+    expect(kept).toHaveLength(1);
+    expect(c.dropped.join("; ")).toMatch(/more than 1 prop/);
+  });
+
+  it("the owner's hero picks come first, painting-on-dark is not offered live", () => {
+    const fx = composerFixture("pekarna-kvas");
+    const s = studioShortlist(fx.base, sourcesOf(fx.base, fx.sources.brief, fx.description), fx.tradeWord);
+    const heroes = s.presets.hero!.map((e) => e.id);
+    expect(heroes).not.toContain("composition/hero/painting-on-dark");
+    const picks = heroes.filter((h) => HERO_PICKS.includes(h));
+    expect(picks.length).toBeGreaterThan(0);
+    expect(heroes.slice(0, picks.length)).toEqual(picks);
   });
 });
 

@@ -9,7 +9,7 @@ import { ComposerError, clientWordsOnly, composeFromBase, studioShortlist, type 
 import { collectPlaceholders, intentOfSection, presetSources, validateSite, type PresetBrief, type SiteSpec } from "@sb/spec";
 import { ModelOutputError, estimateCallEur, type ModelClient } from "../llm/client.ts";
 import { checkFacts } from "../facts.ts";
-import { DirectorAnswer, checkDirection, directorRequest, knownNumbers } from "./director.ts";
+import { DirectorAnswer, MAX_PROPS, checkDirection, directorRequest, knownNumbers } from "./director.ts";
 
 /** config designer.agent: "on" for everyone, "trial" only for the accounts in DESIGNER_TRIAL_EMAILS, "off" for no one. */
 export function studioEnabled(mode: AppConfig["designer"]["agent"], email: string | null | undefined, trialEmails: string | undefined): boolean {
@@ -26,7 +26,8 @@ export function studioEnabled(mode: AppConfig["designer"]["agent"], email: strin
 function copyOf(props: Record<string, unknown>): { headline?: string; lead?: string } | undefined {
   const pick = (...keys: string[]): string | undefined => keys.map((k) => props[k]).find((v): v is string => typeof v === "string" && v.trim() !== "");
   const headline = pick("headline", "title", "heading");
-  const lead = pick("lead", "intro", "subheadline", "text");
+  const paragraphs = Array.isArray(props.paragraphs) && typeof props.paragraphs[0] === "string" && props.paragraphs[0].trim() ? (props.paragraphs[0] as string) : undefined;
+  const lead = pick("lead", "intro", "subheadline", "text") ?? paragraphs;
   return headline || lead ? { ...(headline ? { headline } : {}), ...(lead ? { lead } : {}) } : undefined;
 }
 
@@ -65,6 +66,11 @@ export interface StudioInput {
   seed: number;
   /** The trade word drawings are named by, for a site without a subtype (fixtures only). */
   tradeWord?: string;
+  /**
+   * A business outside the ten trades (the classifier wasn't sure): only stances for any trade and presets not tagged
+   * for a trade are offered.
+   */
+  general?: boolean;
 }
 
 const factKeys = (spec: SiteSpec, corpus: string): Set<string> => new Set(checkFacts(spec, corpus).map((v) => `${v.kind}:${v.value}`));
@@ -92,7 +98,7 @@ export async function runStudio(client: ModelClient, config: AppConfig, input: S
   let idea: string | undefined;
   try {
     const sources = sourcesOf(input.spec, input.brief, input.corpus);
-    const shortlist = studioShortlist(input.spec, sources, input.tradeWord);
+    const shortlist = studioShortlist(input.spec, sources, input.tradeWord, input.general ? { general: true } : {});
     if (!shortlist.stances.length) return { ok: false, reason: "no stance fits the trade", costEur };
     if (!shortlist.presets.hero?.length) return { ok: false, reason: "no approved hero preset fills for this site", costEur };
     const req = directorRequest({ spec: input.spec, sources, shortlist });
@@ -104,16 +110,31 @@ export async function runStudio(client: ModelClient, config: AppConfig, input: S
     idea = data.idea;
     const checked = checkDirection(data, shortlist, knownNumbers(input.spec, sources, input.corpus));
     const stance = checked.stance ?? shortlist.stances[0]!.id;
-    const composed = composeFromBase({
-      base: input.spec,
-      sources,
-      stance,
-      seed: input.seed,
-      catalogue: "approved",
-      choice: checked.choice,
-      keepBaseSections: true,
-      ...(input.tradeWord ? { tradeWord: input.tradeWord } : {}),
-    });
+    const compose = (hero: string | undefined) =>
+      composeFromBase({
+        base: input.spec,
+        sources,
+        stance,
+        seed: input.seed,
+        catalogue: "approved",
+        choice: checked.choice,
+        keepBaseSections: true,
+        maxProps: MAX_PROPS,
+        live: true,
+        // 0.5: no decorative drawing behind or beside any section; drawn art only as a hero's own picture.
+        pin: { drawing: null, ...(hero ? { hero } : {}) },
+        ...(input.tradeWord ? { tradeWord: input.tradeWord } : {}),
+      });
+    // The director's hero is pinned; when it can't be filled here, the composer picks the hero from the shortlist order.
+    const hero = checked.choice.sections?.find((x) => x.intent === "hero")?.preset;
+    let composed: ReturnType<typeof composeFromBase>;
+    try {
+      composed = compose(hero);
+    } catch (e) {
+      if (!hero || !(e instanceof ComposerError)) throw e;
+      checked.dropped.push(`hero ${hero}: ${e.message}`);
+      composed = compose(undefined);
+    }
     const why = studioGuards(composed.spec, input.spec, input.corpus);
     if (why) return { ok: false, reason: `guards: ${why}`, idea, costEur };
     return { ok: true, spec: composed.spec, idea, stance, used: composed.used, dropped: [...checked.dropped, ...(composed.used.fallbacks ?? []).map((f) => `fell back: ${f}`)], costEur };

@@ -176,6 +176,8 @@ describe("tilt and bleed: desktop only", () => {
     cssHas(/\.s-composed\{--cx-mw:76rem;--cx-pad:1rem;--cx-be:calc\(max\(0px,\(100vw - var\(--cx-mw\)\)\/2\) \+ var\(--cx-pad\)\)\}/);
     cssHas(".cx-w-wide{--cx-mw:90rem}");
     cssHas(".cx-w-full{--cx-mw:100vw}");
+    // On desktop a wide section's container pads to the header's content edge (composed.css), so the bleed room adds that padding, not 2 rem.
+    cssHas(".cx-w-wide{--cx-pad:max(2rem,min(50vw,45rem) - 36rem)}");
   });
 
   it("tilt is no class and no property on an element without one", () => {

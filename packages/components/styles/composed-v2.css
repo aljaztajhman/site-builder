@@ -1055,6 +1055,10 @@ ol.cx-st {
   .cx-w-full {
     --cx-pad: clamp(1rem, 3vw, 3rem);
   }
+  /* A wide section's container pads to where the header's content starts (composed.css), so its bleed room does too. */
+  .cx-w-wide {
+    --cx-pad: max(2rem, min(50vw, 45rem) - 36rem);
+  }
   .cx-tilt {
     rotate: calc(var(--tilt)*1deg);
   }

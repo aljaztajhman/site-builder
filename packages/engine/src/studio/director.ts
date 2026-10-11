@@ -13,6 +13,8 @@ import type { ChoiceSection, ComposeChoice, ComposeSources, StudioShortlist } fr
 import type { SiteSpec } from "@sb/spec";
 import type { ModelRequest } from "../llm/client.ts";
 
+/** Trade props (number plates, price tags, signposts, dockets, stamps) per page: one accent at most (owner, 2026-10-11). */
+export const MAX_PROPS = 1;
 export const HEADLINE_MAX = 80;
 export const LEAD_MAX = 260;
 
@@ -71,7 +73,8 @@ const SYSTEM = `You are the art director of a small studio that makes homepages 
 You get one business (its brief, its photos, the facts it gave, today's copy) and a shortlist of approved design assets: stances (named visual languages), section presets per intent, palettes, font pairings and wordmark styles. Pick one coherent page:
 
 - idea: one sentence, the page's concept: why this stance for this business, what the first screen says.
-- stance: the visual language that suits this business best. Prefer one with character over a safe neutral one, as long as it fits the trade.
+- stance: the visual language that suits this business best. Prefer one with character over a safe neutral one. The page's idea comes from this business (its work, its photos, its words), never from a trade prop.
+- Presets marked PROP (number plates, price tags, signposts, dockets, receipts, stamps) are at most one accent on the whole page, and only when this business's own facts call for it (a number plate only around the phone number). Strong general layouts (type-led, photo-led, colour fields, editorial, poster) come first.
 - sections: 5 to 8 sections top to bottom. The hero first, the contact last. Each section is an intent with one preset of that intent from the shortlist; an intent at most twice, with two different presets. Use only intents listed. Choose presets that read as one language with the stance; vary rhythm (dense, airy, photo, type) down the page.
 - palette, pairing, wordmark: from the shortlist, in keeping with the stance ("none" when the business has its own logo or none suits).
 - copy, in Slovene, formal "vi", natural and specific to this business: the hero's headline (at most 70 characters) and lead (at most 220 characters), and a short headline for other sections where you want one.
@@ -168,11 +171,18 @@ export function checkDirection(a: DirectorAnswer, s: StudioShortlist, known: Rea
   const hh = keptCopy(a.copy.hero.headline, HEADLINE_MAX, known, dropped, "hero headline");
   const hl = keptCopy(a.copy.hero.lead, LEAD_MAX, known, dropped, "hero lead");
   const seen = new Map<string, number>();
+  let props = 0;
   const sections: ChoiceSection[] = a.sections.map((x) => {
     const k = seen.get(x.intent) ?? 0;
     seen.set(x.intent, k + 1);
-    const ok = (s.presets[x.intent] ?? []).some((e) => e.id === x.preset);
+    const entry = (s.presets[x.intent] ?? []).find((e) => e.id === x.preset);
+    let ok = !!entry;
     if (!ok) dropped.push(`section ${x.intent} ${x.preset} not in the shortlist`);
+    // A prop is one accent per page at most: a second one loses its preset (the composer picks a plain one, props capped).
+    if (entry?.prop && props++ >= MAX_PROPS) {
+      ok = false;
+      dropped.push(`section ${x.intent} ${x.preset}: more than ${MAX_PROPS} prop on the page`);
+    }
     const headline = x.intent === "hero" ? (k === 0 ? hh : undefined) : headlines.get(x.intent)?.[k];
     const lead = x.intent === "hero" && k === 0 ? hl : undefined;
     const copy = headline || lead ? { ...(headline ? { headline } : {}), ...(lead ? { lead } : {}) } : undefined;

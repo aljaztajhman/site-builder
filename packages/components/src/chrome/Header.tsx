@@ -1,8 +1,9 @@
 import type { CSSProperties } from "react";
-import { formatPhone, headerFamilyFor, type HeaderFamily, type Page, type Skeleton } from "@sb/spec";
+import { formatPhone, headerFamilyFor, type HeaderFamily, type Page, type SectionOf, type Skeleton } from "@sb/spec";
 import type { RenderCtx } from "../types.ts";
 import { Icon, cx } from "../primitives/index.tsx";
 import { heroOwnsCall } from "../groups/heroes/HeroSignature.tsx";
+import { composedActions } from "../groups/composed/index.tsx";
 import type { UiKey } from "../i18n.ts";
 import { nameEm, navFit, type NavRow } from "./nav-fit.ts";
 import { ChromeWordmark } from "../groups/composed/kinds/wordmark.tsx";
@@ -31,6 +32,10 @@ export function Header({ ctx }: { ctx: RenderCtx }) {
   const heroProps = page.sections[0]?.props as { primary?: { target?: { action?: string } }; secondary?: { target?: { action?: string } } } | undefined;
   const heroHasCta = cta !== "none" && [heroProps?.primary?.target?.action, heroProps?.secondary?.target?.action].includes(cta);
   const ctaWideOnly = (site.chrome.mobileActionBar && (cta === "call" || cta === "directions")) || heroHasCta;
+  // A composed opener that shows the same action (a call button, or a plate or number that calls) carries it on the first
+  // screen; this header is not sticky, so its button would only repeat it beside the opener's: two calls on one screen.
+  const first = page.sections[0];
+  const openerCarries = cta !== "none" && first?.type === "composed" && composedActions(first as SectionOf<"composed">).includes(cta);
   const logo = site.assets.logo;
 
   return (
@@ -53,7 +58,7 @@ export function Header({ ctx }: { ctx: RenderCtx }) {
             <SiteNav ctx={ctx} navPages={navPages} />
           </>
         )}
-        {cta !== "none" && ctaHref && (
+        {cta !== "none" && ctaHref && !openerCarries && (
           <a
             className={cx("btn btn--primary site-header__cta", ctaWideOnly && "site-header__cta--wide-only")}
             href={ctaHref}

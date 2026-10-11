@@ -400,7 +400,9 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
   let studio: GenerateResult["studio"];
   if (deps.studio) {
     const today = spec;
-    const r = await stageTime("studio", () => runStudio(client, config, { spec: today, brief, corpus, seed: studioSeed(siteId) }));
+    // A business the classifier wasn't sure of (outside the ten trades) gets the shortlist for any trade.
+    const general = (await classified).confidence < config.studio.generalBelowConfidence;
+    const r = await stageTime("studio", () => runStudio(client, config, { spec: today, brief, corpus, seed: studioSeed(siteId), ...(general ? { general } : {}) }));
     if (r.ok) {
       spec = r.spec;
       studio = { composed: true, idea: r.idea, stance: r.stance };

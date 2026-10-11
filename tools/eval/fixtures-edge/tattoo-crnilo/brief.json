@@ -1,0 +1,37 @@
+{
+  "id": "tattoo-crnilo",
+  "businessType": "hairdresser",
+  "trade": "tetovaže",
+  "hard": ["new-trade", "no-photos", "no-logo"],
+  "description": "Črnilo je tattoo studio v Celju, Gosposka ulica 9, 3000 Celje, v prvem nadstropju nad knjigarno. Studio imava dva: jaz, Luka Vidmar, delam predvsem črno-sive tetovaže in fine line, Tjaša Golob pa barvne tetovaže in ilustracije rastlin in živali. Tetoviramo samo po naročilu, vsak motiv narišemo na novo za stranko, ne delamo motivov iz kataloga in ne kopiramo tujih tetovaž.\n\nKako poteka: najprej se oglasite po telefonu ali mailu in na kratko opišete idejo, velikost in mesto na telesu. Dobite termin za posvet, ki je brezplačen. Za termin tetoviranja vzamemo aro 50 €, ki se odšteje od cene. Mala tetovaža stane od 80 €, ura dela 100 €.\n\nTetoviramo samo polnoletne, z osebnim dokumentom. Uporabljamo igle za enkratno uporabo, studio ima vsa dovoljenja.\n\nDelovni čas je po dogovoru, običajno od torka do sobote od 10.00 do 19.00.\n\nPokličite na 041 555 377 ali pišite na studio@crnilo.example. Fotografij del na strani zaenkrat ne bi objavljala, ker jih še zbirava.",
+  "logo": null,
+  "photos": [],
+  "facts": {
+    "name": "Črnilo tattoo studio",
+    "phone": "+38641555377",
+    "email": "studio@crnilo.example",
+    "address": { "street": "Gosposka ulica 9", "postalCode": "3000", "city": "Celje" },
+    "hours": [
+      { "from": "mon", "to": "mon", "closed": true },
+      { "from": "tue", "to": "sat", "open": "10:00", "close": "19:00" },
+      { "from": "sun", "to": "sun", "closed": true }
+    ],
+    "prices": [
+      { "item": "ara za termin", "amount": 50 },
+      { "item": "mala tetovaža", "amount": 80, "from": true },
+      { "item": "ura dela", "amount": 100 }
+    ],
+    "people": [
+      { "name": "Luka Vidmar", "role": "črno-sive tetovaže in fine line" },
+      { "name": "Tjaša Golob", "role": "barvne tetovaže in ilustracije" }
+    ],
+    "other": [
+      "vsak motiv narišemo na novo za stranko",
+      "posvet, ki je brezplačen",
+      "Tetoviramo samo polnoletne, z osebnim dokumentom",
+      "igle za enkratno uporabo",
+      "Delovni čas je po dogovoru"
+    ]
+  },
+  "missing": ["photos", "legal"]
+}
