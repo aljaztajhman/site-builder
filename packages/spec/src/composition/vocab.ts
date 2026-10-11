@@ -141,6 +141,10 @@ export const DRAWINGS = [
   "ornament/trail-blaze-line",
   "ornament/pisanica-band-line",
   "ornament/prekmurje-pottery-band-line",
+  // Hero style pilots (HQ it-studio-drawing-pilot): full-strength hero art in palette tones, drafts for the owner to pick from.
+  "motif/bakery/loaf-potica-scene-solid",
+  "motif/bakery/boule-linocut-solid",
+  "motif/bakery/sun-loaf-shapes-cut",
 ] as const;
 /** Drawings that tile along x into a strip (`decor.repeat: "x"`, G19). Each one is in DRAWINGS. */
 export const REPEATABLE = ["ornament/rope-line", "ornament/idrija-lace-line", "ornament/pisanica-band-line", "ornament/prekmurje-pottery-band-line"] as const;

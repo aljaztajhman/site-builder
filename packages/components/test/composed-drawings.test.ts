@@ -36,7 +36,28 @@ describe("drawing data", () => {
   const EDGE_PHONE_PX = 12;
   const BUDGET = { motif: 6 * 1024, ornament: 8 * 1024 }; // inventory checks.ts BYTE_BUDGET
 
-  it.each([...DRAWINGS])("%s: one stroke weight ≥ 1.5 px, the text role only, within its byte budget", (id) => {
+  const LINE = DRAWINGS.filter((id) => drawingData(id)!.style === "line");
+  /** Hero style pilots: filled art in several palette roles, shown at full strength (inventory checks.ts HERO_ART_BUDGET). */
+  const HERO_ART = DRAWINGS.filter((id) => drawingData(id)!.style !== "line");
+  const HERO_ART_BUDGET = 25 * 1024;
+  const PAPER_AND_INK = new Set(["background", "surface", "border", "text", "muted", "primary", "accent", "inverse"]);
+
+  it("every drawing is a line drawing except the hero style pilots", () => {
+    expect(HERO_ART).toEqual(["motif/bakery/loaf-potica-scene-solid", "motif/bakery/boule-linocut-solid", "motif/bakery/sun-loaf-shapes-cut"]);
+  });
+
+  it.each(HERO_ART)("%s: filled shapes in the light palette's roles, strokes only as ≥ 1 unit dots or hairs, within 25 KiB", (id) => {
+    const d = drawingData(id)!;
+    for (const p of d.paths) {
+      for (const role of [p.fill, p.stroke]) if (role && role !== "none") expect(PAPER_AND_INK.has(role), `${id}: ${role}`).toBe(true);
+      if (p.stroke && p.stroke !== "none") expect(p.width ?? 0, id).toBeGreaterThanOrEqual(1);
+    }
+    expect(d.paths.some((p) => p.fill !== "none"), id).toBe(true);
+    const bytes = Buffer.byteLength(renderToStaticMarkup(createElement(DrawingSvg, { id })), "utf8");
+    expect(bytes, id).toBeLessThanOrEqual(HERO_ART_BUDGET);
+  });
+
+  it.each(LINE)("%s: one stroke weight ≥ 1.5 px, the text role only, within its byte budget", (id) => {
     const d = drawingData(id)!;
     const strokes = d.paths.filter((p) => p.stroke && p.stroke !== "none");
     expect(strokes.length, id).toBeGreaterThan(0);
