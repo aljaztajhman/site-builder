@@ -100,6 +100,10 @@ export const MIGRATIONS: Record<number, (spec: RawSpec) => RawSpec> = {
   // value, and the optional design.motion, design.wordmark and business.amenities. Every v19 spec is a valid v20 spec
   // and renders byte-identical. Vocabulary growth after v20 is not a schema change and needs no bump.
   19: (spec) => spec,
+  // 20 → 21: the `steps` and `qa` element kinds (docs/plans/studio-phase1-design.md, I3b): a process in order and
+  // questions with answers, as elements a composed section can hold. Additive: no existing value changes, so every
+  // v20 spec is a valid v21 spec and renders byte-identical.
+  20: (spec) => spec,
 };
 
 export function migrateSpec(input: unknown, migrations = MIGRATIONS, target: number = SPEC_VERSION): SiteSpec {

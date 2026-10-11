@@ -163,6 +163,8 @@ function painted(e: Element): Painted | undefined {
     case "ribbon":
     case "iconFacts":
     case "quote":
+    case "steps":
+    case "qa":
       return { ...paint, large: false };
     case "action":
       return e.style === "primary" ? undefined : { large: false };
@@ -756,6 +758,7 @@ function g22(env: Env): Finding[] {
   let pageStickers = count("sticker");
   let marks = count("wordmark");
   let quotes = 0;
+  let qas = 0;
   for (const { e, i } of entries(env)) {
     if (e.kind === "sticker") {
       stickers++;
@@ -765,8 +768,27 @@ function g22(env: Env): Finding[] {
     }
     if (e.kind === "wordmark" && ++marks > RESTRAINT.wordmarksPerPage) out.push(both(`${EL}/${i}`, "structure", "composed: at most one wordmark per page", drop(e, i, "wordmark dropped")));
     if (e.kind === "quote" && ++quotes > RESTRAINT.quotesPerSection) out.push(issue("structure", `${EL}/${i}`, "composed: at most one quote per section"));
+    if (e.kind === "qa" && ++qas > RESTRAINT.qaPerSection) out.push(issue("structure", `${EL}/${i}`, "composed: at most one qa per section"));
   }
   return out;
+}
+
+// ---------- G29 the intent's own content ----------
+
+/** A list that is a dated or stepped run: every item carries a lead (a date, a step). */
+const isLeadList = (e: Element): boolean => e.kind === "list" && e.items.length > 0 && e.items.every((x) => typeof x !== "string");
+
+/**
+ * G29 (spec v21): a faq section holds a `qa` element (the questions and answers), a steps section holds a `steps`
+ * element or a list whose every item has a lead (the dated list of spec v20, kept working). The other intents say nothing
+ * about their elements. No repair: a section that says it is a FAQ and shows none is replaced by the intent's preset layout.
+ */
+function g29(env: Env): Finding[] {
+  const intent = env.s.props.intent;
+  const els = entries(env).map((x) => x.e);
+  if (intent === "faq" && !els.some((e) => e.kind === "qa")) return [issue("structure", "/props/intent", "composed: intent faq needs a qa element")];
+  if (intent === "steps" && !els.some((e) => e.kind === "steps" || isLeadList(e))) return [issue("structure", "/props/intent", "composed: intent steps needs a steps element or a list with a lead on every item")];
+  return [];
 }
 
 // ---------- G26 text over a photo is painted above it ----------
@@ -858,7 +880,7 @@ function g28(env: Env): Finding[] {
  * The rules in repair order: layers and names first (they change what the later rules see), restraint last. G4 runs after
  * G9 and G3: G9 may drop the field layer a headerOver opener rested on, and G4 then drops headerOver with it.
  */
-const RULES: ((env: Env) => Finding[])[] = [g1, g8, g5, g6, g7, g2, g9, g3, g4, g27, g28, g10to12, g14, g15to17, g18to21, photoRefs, g26, g22];
+const RULES: ((env: Env) => Finding[])[] = [g1, g8, g5, g6, g7, g2, g9, g3, g4, g27, g28, g10to12, g14, g15to17, g18to21, photoRefs, g26, g22, g29];
 
 /** Every issue G1–G22 find in the section (paths include `ctx.at`). */
 export function validateV2(section: ComposedSection, ctx: CompositionContext): Issue[] {

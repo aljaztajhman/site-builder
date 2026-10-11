@@ -268,6 +268,24 @@ export const QuoteElement = z.strictObject({
   ...Paint,
 });
 
+/** The business's own process, step by step (spec v21): a title and a sentence each. The order is the <ol>'s; no step carries a "01" label. */
+export const StepsElement = z.strictObject({
+  ...base,
+  kind: z.enum(["steps"]),
+  items: z.array(z.strictObject({ title: text(60), text: text(240) })).min(2).max(6),
+  style: z.enum(["numbered", "line"]).optional(),
+  ...Paint,
+});
+
+/** Questions and answers in the client's words (spec v21). open: every answer shown; toggle: details/summary, no script. */
+export const QaElement = z.strictObject({
+  ...base,
+  kind: z.enum(["qa"]),
+  items: z.array(z.strictObject({ question: text(140), answer: text(600) })).min(1).max(12),
+  style: z.enum(["open", "toggle"]).optional(),
+  ...Paint,
+});
+
 export const Element = z.discriminatedUnion("kind", [
   HeadingElement,
   TextElement,
@@ -286,6 +304,8 @@ export const Element = z.discriminatedUnion("kind", [
   MapElement,
   IconFactsElement,
   QuoteElement,
+  StepsElement,
+  QaElement,
 ]);
 export type Element = z.infer<typeof Element>;
 export type ElementKind = Element["kind"];
@@ -307,6 +327,8 @@ export const ELEMENT_KINDS = [
   "map",
   "iconFacts",
   "quote",
+  "steps",
+  "qa",
 ] as const satisfies readonly ElementKind[];
 
 /** Intents a composed section may serve: every intent except "system". */

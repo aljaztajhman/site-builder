@@ -17,6 +17,7 @@ import contactDetailsRowMap from "./contact/details-row-map.ts";
 import contactFactsCards from "./contact/facts-cards.ts";
 import contactFactsStrip from "./contact/facts-strip.ts";
 import contactPhoneCallOut from "./contact/phone-call-out.ts";
+import faqToggleList from "./faq/toggle-list.ts";
 import galleryMosaic from "./gallery/mosaic.ts";
 import galleryPhotoGrid from "./gallery/photo-grid.ts";
 import galleryWallBleed from "./gallery/wall-bleed.ts";
@@ -65,6 +66,7 @@ import servicesNamedRows from "./services/named-rows.ts";
 import servicesPhotoCardsLead from "./services/photo-cards-lead.ts";
 import servicesSmallCards from "./services/small-cards.ts";
 import servicesTwoColumnNamed from "./services/two-column-named.ts";
+import stepsNumberedColumn from "./steps/numbered-column.ts";
 import storyHeadingBesideText from "./story/heading-beside-text.ts";
 import storyNameFigure from "./story/name-figure.ts";
 import storyNarrowColumn from "./story/narrow-column.ts";
@@ -92,6 +94,7 @@ export const COMPOSITION_PRESETS: readonly CompositionPreset[] = [
   contactFactsCards,
   contactFactsStrip,
   contactPhoneCallOut,
+  faqToggleList,
   galleryMosaic,
   galleryPhotoGrid,
   galleryWallBleed,
@@ -140,6 +143,7 @@ export const COMPOSITION_PRESETS: readonly CompositionPreset[] = [
   servicesPhotoCardsLead,
   servicesSmallCards,
   servicesTwoColumnNamed,
+  stepsNumberedColumn,
   storyHeadingBesideText,
   storyNameFigure,
   storyNarrowColumn,

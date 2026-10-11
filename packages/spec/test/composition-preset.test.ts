@@ -90,7 +90,7 @@ describe("slot vocabulary", () => {
     expect(slotProblem("brief.offerings[12].price")).toMatch(/index 12/);
     expect(slotProblem("business.rating")).toMatch(/unknown slot/);
     expect(slotProblem("brief.offerings.name")).toMatch(/unknown slot/);
-    expect(Object.keys(SLOTS)).toHaveLength(24);
+    expect(Object.keys(SLOTS)).toHaveLength(28);
   });
 
   it("the marker pattern is the design's", () => {
