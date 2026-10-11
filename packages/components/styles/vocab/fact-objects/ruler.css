@@ -1,0 +1,10 @@
+/* ruler: the value over a rule with tick marks, as a folding rule lies under a measure: ticks in the text colour (a mask over
+   currentColor), no numbers on it and no scale claimed. No ground of its own. */
+.cx-fact--ruler .cx-fact__value::after {
+  content: "";
+  display: block;
+  height: 0.3em;
+  margin-top: 0.1em;
+  background: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0,0,20,10'%20preserveAspectRatio='none'%3E%3Cpath%20d='M0,0h20v1.6H0zm0,0h1.6v10H0zm5,0h1.2v4H5zm5,0h1.4v6.5H10zm5,0h1.2v4H15z'/%3E%3C/svg%3E") 0 0 / 1em 100% repeat-x;
+}

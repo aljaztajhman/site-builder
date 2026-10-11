@@ -1,0 +1,19 @@
+/* timetable: a station board: the value and its label on the inverse ground with a rule between them (under whichever
+   comes first), square corners. Made for opening hours (a day as the label). Own ground: @sb/spec factObjectGround (G9),
+   flipped on an inverse section; a fill replaces it. */
+.cx-fact--timetable .cx-fact__obj {
+  display: grid;
+  padding: max(0.5rem, 0.24em) max(0.75rem, 0.5em) max(0.6rem, 0.34em);
+  background: var(--c-inverse);
+  color: var(--c-on-inverse);
+}
+.cx-fact--timetable .cx-fact__obj > :first-child {
+  max-width: none;
+  margin-bottom: 0.3rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid;
+}
+:where(.tone-inverse) .cx-fact--timetable .cx-fact__obj {
+  background: var(--c-on-inverse);
+  color: var(--c-inverse);
+}

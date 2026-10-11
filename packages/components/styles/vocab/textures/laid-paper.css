@@ -1,0 +1,12 @@
+/* Laid paper: wavering chain lines in one direction over a faint fibre cloud.
+   Painted in the section's text colour (currentColor) through one SVG tile; the opacity is its max alpha (contrast). */
+.cx-tex-laid-paper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: currentColor;
+  opacity: 0.1;
+  mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='336' height='456'><filter id='a'><feTurbulence type='fractalNoise' baseFrequency='.04' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 0 0 0 -.9'/></filter><rect x='28' y='38' width='280' height='380' filter='url(%23a)'/><path d='M40 0c1 90-1 135 0 228s1 165 0 228M150 0c-1 90 1 135 0 228s-1 165 0 228M261 0c1 80-1 150 0 228s-1 170 0 228' fill='none' stroke='red' stroke-width='1.2'/></svg>");
+}

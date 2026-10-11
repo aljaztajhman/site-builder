@@ -12,7 +12,8 @@ describe("resolveSignature", () => {
     expect(resolveSignature("pairing/bricolage-figtree", reg)).toBe("resolved");
     expect(resolveSignature("submotif/wire", reg)).toBe("resolved");
     expect(resolveSignature("divider/torn-edge", reg)).toBe("pending");
-    expect(resolveSignature("type-treatment/masthead", reg)).toBe("pending");
+    expect(resolveSignature("type-treatment/masthead", reg)).toBe("resolved"); // batch I6a drew it (draft)
+    expect(resolveSignature("type-treatment/tabular-figures", reg)).toBe("pending");
     expect(resolveSignature("composition/hero/front-page", reg)).toBe("pending");
     expect(resolveSignature("fact/hologram", reg)).toBe("unknown");
     expect(resolveSignature("mask/none", reg)).toBe("unknown");

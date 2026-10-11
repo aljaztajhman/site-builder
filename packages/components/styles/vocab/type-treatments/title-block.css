@@ -1,0 +1,8 @@
+/* title-block: the heading in one ruled frame as wide as its words, as a drawing's title block holds its title. The frame
+   in the text colour. */
+.cx-tt-title-block {
+  --cx-w: fit-content;
+  max-width: 100%;
+  padding: 0.18em 0.4em 0.24em;
+  border: max(2px, 0.05em) solid;
+}

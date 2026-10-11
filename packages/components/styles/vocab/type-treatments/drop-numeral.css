@@ -1,0 +1,22 @@
+/* drop-numeral: the number the heading starts with (the client's own: a year, a price, a count; the renderer never adds
+   one) set large at the start. Desktop: dropped beside the words, as a drop cap is, the words beside it from its top and
+   on under it (a word never breaks to fit beside it: it goes under). Phones: the number on its own line above the words.
+   Only for a heading that starts with a number of at most 7 characters, size 6 at most (G20). */
+.cx-tt-drop-numeral .cx-tt__n {
+  display: block;
+  font-size: 1.8em;
+  line-height: 0.85;
+  font-variant-numeric: lining-nums;
+}
+@media (min-width: 64rem) {
+  .cx-tt-drop-numeral {
+    display: flow-root;
+    overflow-wrap: normal;
+    text-wrap: wrap;
+  }
+  .cx-tt-drop-numeral .cx-tt__n {
+    float: left;
+    margin: 0.04em 0.14em 0 0;
+    line-height: 0.8;
+  }
+}

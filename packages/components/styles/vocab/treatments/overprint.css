@@ -1,0 +1,12 @@
+/* overprint: a block of the accent ink printed over the left third of the photo (blend mode multiply), the way a
+   second ink crosses the first on a letterpress proof. The photo shows through it everywhere. */
+.cx-tr-overprint::after {
+  content: "";
+  position: absolute;
+  inset: 0 64% 0 0;
+  z-index: 1;
+  background: var(--c-accent);
+  mix-blend-mode: multiply;
+  opacity: 0.7;
+  pointer-events: none;
+}

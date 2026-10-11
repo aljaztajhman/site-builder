@@ -1,0 +1,56 @@
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { gzipSync } from "node:zlib";
+import { MOTIONS, MOTION_META } from "@sb/spec";
+import { composedIslands, renderPage, sharedBundle } from "@sb/render";
+import { LCP_BUDGET_MS, REDUCED_DIFF_MAX, WIDTHS, motionSpec, startHarness, writeReport, type Harness, type MotionRun } from "../src/motion-harness.ts";
+
+/**
+ * Every motion preset in a browser at 360 and 1280 px, CPU throttled 4x (src/motion-harness.ts): CLS 0, LCP within 100 ms
+ * of the same page with motion off, reduced motion static (no running animation, screenshot equal to the page without
+ * the preset), and no island JS beyond 3 KiB gzip. The numbers are written to eval/runs/motion/report.json. No model call.
+ */
+let harness: Harness;
+const runs: MotionRun[] = [];
+
+beforeAll(async () => {
+  harness = await startHarness();
+}, 300_000);
+afterAll(async () => {
+  await harness?.close();
+  if (runs.length) await writeReport(runs);
+});
+
+describe("motion presets in a browser", () => {
+  for (const preset of MOTIONS) {
+    for (const width of WIDTHS) {
+      it(`${preset} at ${width}px: CLS 0, LCP within ${LCP_BUDGET_MS} ms of motion off, still under reduced motion`, async () => {
+        const r = await harness.measure(preset, width);
+        runs.push(r);
+        console.log(`motion ${preset} ${width}px: CLS ${r.cls}, LCP ${Math.round(r.lcpMs)} ms vs ${Math.round(r.lcpOffMs)} ms off (delta ${Math.round(r.lcpDelta)} ms), animations ${r.animations}, reduced: ${r.reducedRunning} running, ${(r.reducedDiff * 100).toFixed(4)} % pixels differ`);
+        expect(r.cls, "CLS").toBe(0);
+        expect(r.lcpDelta, "LCP delta").toBeLessThanOrEqual(LCP_BUDGET_MS);
+        expect(r.animations, "the preset animates when motion is allowed").toBeGreaterThan(0);
+        expect(r.reducedRunning, "running animations under reduced motion").toBe(0);
+        expect(r.reducedDiff, "reduced-motion screenshot vs static").toBeLessThanOrEqual(REDUCED_DIFF_MAX);
+      }, 180_000);
+    }
+  }
+});
+
+describe("motion presets: JS", () => {
+  it("a CSS preset ships no island; JS presets together stay within 3 KiB gzip", () => {
+    let js = 0;
+    for (const preset of MOTIONS) {
+      const spec = motionSpec(preset);
+      const home = spec.pages.find((p) => p.kind === "home")!;
+      const html = renderPage(spec, home);
+      const islands = composedIslands(home.sections);
+      if (!MOTION_META[preset].js) {
+        expect(islands, preset).toEqual([]);
+        expect(html, preset).not.toContain("composed/motion.js");
+      }
+      for (const island of islands) js += gzipSync(sharedBundle().files.get(`js/${island}`) ?? "").length;
+    }
+    expect(js).toBeLessThanOrEqual(3 * 1024);
+  });
+});

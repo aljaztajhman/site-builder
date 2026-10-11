@@ -1,0 +1,20 @@
+/* drift-bg (scroll, lively): the section's background photo moves slower than the content, a few per cent of its own
+   height over the first screens of scroll. It starts fully visible (so it may open a page), is overscanned by the scale
+   so its edges never show, and animates transform only. */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes cx-mo-drift-bg {
+      from {
+        transform: translateY(-3%) scale(1.1);
+      }
+      to {
+        transform: translateY(3%) scale(1.1);
+      }
+    }
+    .cx-mo-drift-bg .cx-bg-photo img {
+      animation: cx-mo-drift-bg linear both;
+      animation-timeline: scroll();
+      animation-range: 0 250vh;
+    }
+  }
+}

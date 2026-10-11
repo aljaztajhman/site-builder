@@ -1,0 +1,8 @@
+/* pebble: a river pebble, rounder on one side than the other. */
+.cx-mask-pebble {
+  border-radius: 48% 52% 45% 55% / 56% 46% 54% 44%;
+}
+.cx-mask-pebble .media--ai::after {
+  inset: auto auto 1.5rem 50%;
+  translate: -50%;
+}

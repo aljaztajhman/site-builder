@@ -111,6 +111,19 @@ describe("vocab family sheets: files", () => {
   });
 });
 
+describe("the real family sheets obey the bans", () => {
+  it.each(VOCAB_FAMILIES)("%s: no gradient, blur, glass, shadow, italic, monospace, pill or endless animation; clip-path only through a --shape- token", (f) => {
+    const css = vocabFamilySheets()[f].css;
+    expect(css).not.toMatch(/gradient\(|backdrop-filter|blur\(|box-shadow|drop-shadow|monospace|font-style:italic|border-radius:999|infinite/);
+    for (const m of css.matchAll(/clip-path:([^;}]+)/g)) expect(m[1]).toMatch(/^var\(--shape-[a-z]+\)$/);
+  });
+
+  it.each(["masks", "treatments"] as const)("%s: colours only from the palette's roles, no pictures", (f) => {
+    const css = vocabFamilySheets()[f].css;
+    expect(css).not.toMatch(/#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(|url\(/i);
+  });
+});
+
 describe("vocab names and their partials (the registration check)", () => {
   it("every vocab name beyond the starter set has a partial in its family, and every partial has such a name", () => {
     for (const f of VOCAB_FAMILIES) expect(vocabCoverage(f), f).toEqual({ missing: [], orphans: [] });
@@ -122,8 +135,9 @@ describe("vocab names and their partials (the registration check)", () => {
 
   it("fails on a new name without a partial and on a partial without a name", () => {
     const dir = partials({ "masks/wave.css": ".a{top:0}", "masks/ghost.css": ".b{top:0}" });
-    expect(vocabCoverage("masks", dir, [...FAMILY_LISTS.masks, "wave", "blob"])).toEqual({ missing: ["blob"], orphans: ["ghost"] });
+    // The list is the starters plus the test's own names (the real list grows with every batch).
+    expect(vocabCoverage("masks", dir, [...STARTER_NAMES.masks, "wave", "blob"])).toEqual({ missing: ["blob"], orphans: ["ghost"] });
     // A partial named after a starter name is also an orphan: those names' rules stay where they are.
-    expect(vocabCoverage("masks", partials({ "masks/arch.css": ".a{top:0}" }))).toEqual({ missing: [], orphans: ["arch"] });
+    expect(vocabCoverage("masks", partials({ "masks/arch.css": ".a{top:0}" }), STARTER_NAMES.masks)).toEqual({ missing: [], orphans: ["arch"] });
   });
 });

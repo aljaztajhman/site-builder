@@ -14,6 +14,7 @@ import {
   composedStylesheet,
   composedV2Regions,
   composedV2Sheets,
+  vocabFamilySheets,
   minifyCss,
   renderPage,
   sharedBundle,
@@ -59,6 +60,8 @@ const bodyTag = (html: string) => /<body[^>]*>/.exec(html)![0];
 /** The section region's sheet (R1's rules); allV2 is every region's sheet. */
 const v2 = () => composedV2Sheets().section.css;
 const allV2 = () => COMPOSED_V2_REGIONS.map((r) => composedV2Sheets()[r].css).join("");
+/** The CSS guards cover the regions and the motion family sheet (every preset beyond the starters). */
+const guarded = () => allV2() + vocabFamilySheets().motion.css;
 /** The minified section sheet has a rule whose selector list contains `selector` (exactly, as one of its selectors). */
 const hasRule = (selector: string) => new RegExp(`(^|[{},])${selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}[,{]`).test(v2());
 
@@ -153,10 +156,10 @@ describe("composed-v2.css", () => {
   });
 
   it("obeys the bans every sheet obeys", () => {
-    expect(allV2()).not.toMatch(/gradient\(|backdrop-filter|blur\(|monospace|font-style:italic|border-radius:999/);
+    expect(guarded()).not.toMatch(/gradient\(|backdrop-filter|blur\(|monospace|font-style:italic|border-radius:999/);
     // No endless animation, except the ribbon's marquee (move "loop", owner decision D2), which has a pause button.
-    expect(allV2().replace(/\.cx-rb--loop\.is-live \.cx-rb__track\{animation:cx-rb-loop var\(--rb-t\) linear infinite\}/, "")).not.toMatch(/infinite/);
-    expect(allV2()).not.toMatch(/border-(left|right|inline-start|inline-end):[^;}]*var\(--c-(primary|accent)/);
+    expect(guarded().replace(/\.cx-rb--loop\.is-live \.cx-rb__track\{animation:cx-rb-loop var\(--rb-t\) linear infinite\}/, "")).not.toMatch(/infinite/);
+    expect(guarded()).not.toMatch(/border-(left|right|inline-start|inline-end):[^;}]*var\(--c-(primary|accent)/);
   });
 
   /** Top-level blocks of minified CSS with their at-rule ancestry. */
@@ -181,9 +184,9 @@ describe("composed-v2.css", () => {
   }
 
   it("reduced motion is still: every animation and keyframes sits inside @supports (animation-timeline) and prefers-reduced-motion: no-preference, and animates only transform, opacity and clip-path", () => {
-    const blocks = walk(allV2());
+    const blocks = walk(guarded());
     const animated = blocks.filter((b) => b.prelude.startsWith("@keyframes") || (!b.prelude.startsWith("@") && /(^|;)animation(-[a-z]+)?:/.test(b.body)));
-    expect(animated.length).toBeGreaterThanOrEqual(4);
+    expect(animated.length).toBeGreaterThanOrEqual(12);
     for (const b of animated) {
       expect(b.ancestors.some((a) => /^@supports\s*\(animation-timeline:(view|scroll)\(\)\)/.test(a)), b.prelude).toBe(true);
       expect(b.ancestors.some((a) => a === "@media (prefers-reduced-motion:no-preference)"), b.prelude).toBe(true);
@@ -196,12 +199,12 @@ describe("composed-v2.css", () => {
       }
     }
     // No transitions sneak motion in outside the guards either.
-    expect(allV2()).not.toMatch(/transition/);
+    expect(guarded()).not.toMatch(/transition/);
   });
 
   it("has a rule for every motion preset in MOTIONS, on its targets", () => {
     for (const m of MOTIONS) {
-      const block = walk(v2()).find((b) => b.prelude.startsWith(`.cx-mo-${m} `));
+      const block = walk(guarded()).find((b) => b.prelude.startsWith(`.cx-mo-${m} `));
       expect(block, m).toBeDefined();
       for (const t of MOTION_META[m].targets) expect(block!.prelude, `${m} ${t}`).toContain(`.cx-el--${t}`);
     }
@@ -275,12 +278,14 @@ describe("top edge and rise", () => {
 });
 
 describe("motion", () => {
-  it("the preset as a class on the section, never on the opener (G7: neither starter is safe at load); no island for CSS presets", () => {
+  it("the preset as a class on the section, on the opener only when it is safe at load (G7: MOTION_META.safeAtLoad); no island for CSS presets", () => {
     for (const m of MOTIONS) {
       const later = render([plain("s_a"), sectionOf(props({ motion: m }))]);
       expect(openTag(later.html), m).toContain(`cx-mo-${m}`);
       expect(composedIslands(later.page.sections)).toEqual([]);
-      expect(openTag(render([sectionOf(props({ motion: m }))]).html), m).not.toContain("cx-mo-");
+      const opener = openTag(render([sectionOf(props({ motion: m }))]).html);
+      if (MOTION_META[m].safeAtLoad) expect(opener, m).toContain(`cx-mo-${m}`);
+      else expect(opener, m).not.toContain("cx-mo-");
     }
     expect(MOTIONS.every((m) => MOTION_META[m].js === false)).toBe(true);
     // The composed islands: the bar stepping aside for a calling fact, the marquee's pause (R2, ribbon move "loop") and the count-up (R3, fact.count); none is a motion preset.

@@ -1,0 +1,25 @@
+/* calendar: a leaf of a tear-off calendar: the value and its label (a day, a date the client gave) centred on paper
+   (surface; the page's own ground on an alt section), framed, a heavy binding bar across its top inside the paper (so it
+   shows on a dark section too), all in the text colour. Own ground: @sb/spec factObjectGround (G9); a fill replaces it. */
+.cx-fact--calendar .cx-fact__obj {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 0.06em;
+  padding: calc(max(0.5rem, 0.24em) + max(6px, 0.22em)) max(0.75rem, 0.5em) max(0.6rem, 0.34em);
+  border: max(1px, 0.03em) solid;
+  border-radius: 0.06em;
+  background: var(--c-surface);
+  color: var(--c-text);
+  text-align: center;
+}
+.cx-fact--calendar .cx-fact__obj::before {
+  content: "";
+  position: absolute;
+  inset: max(3px, 0.08em) max(3px, 0.08em) auto;
+  height: max(5px, 0.18em);
+  background: currentColor;
+}
+:where(.tone-alt) .cx-fact--calendar .cx-fact__obj {
+  background: var(--c-bg);
+}

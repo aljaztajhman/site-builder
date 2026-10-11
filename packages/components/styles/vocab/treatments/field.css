@@ -1,0 +1,9 @@
+/* field: the photo set on a flat field of the primary role, a still life on coloured card. The fixture photos have no
+   alpha, so the field frames the photo instead of showing through it. An image or photos frame only (a background
+   photo stays full bleed); it sets the photo's inset, so it is not combined with the frame masks. */
+.cx-img.cx-tr-field {
+  background: var(--c-primary);
+}
+.cx-img.cx-tr-field > .media {
+  inset: 1.25rem;
+}

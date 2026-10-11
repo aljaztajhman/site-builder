@@ -1,0 +1,12 @@
+/* Woodcut gouge: broken rows of tapered cuts, as a cutter clears the ground of a block.
+   Painted in the section's text colour (currentColor) through one SVG tile; the opacity is its max alpha (contrast). */
+.cx-tex-gouge::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: currentColor;
+  opacity: 0.11;
+  mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='200'><path d='M31 6q37-6 83 0q-50 1-83 0M31 206q37-6 83 0q-50 1-83 0M145 6q21-6 46 0q-27 1-46 0M145 206q21-6 46 0q-27 1-46 0M41 30q24-6 52-1q-31 2-52 1M41 230q24-6 52-1q-31 2-52 1M118 31q36-7 81-2q-48 2-81 2M118 231q36-7 81-2q-48 2-81 2M51 50q42-5 94 2q-56 0-94-2M51 250q42-5 94 2q-56 0-94-2M165 50q20-7 44 1q-26 1-44-1M45 70q35-7 79-1q-47 2-79 1M5 86q34-4 75 2q-45 0-75-2M109 86q41-5 91 2q-55 0-91-2M213 86q17-7 37 1q-22 1-37-1M-27 86q17-7 37 1q-22 1-37-1M21 110q41-7 91-2q-55 3-91 2M135 109q35-7 79-2q-47 3-79 2M38 126q22-5 49 0q-29 1-49 0M134 126q45-5 100 1q-60 1-100-1M26 150q34-7 76-1q-46 2-76 1M124 150q31-5 69-1q-41 1-69 1M31 173q36-8 79-2q-48 2-79 2M31-27q36-8 79-2q-48 2-79 2M158 173q37-7 82-2q-49 2-82 2M158-27q37-7 82-2q-49 2-82 2M-82 173q37-7 82-2q-49 2-82 2M-82-27q37-7 82-2q-49 2-82 2M39 189q49-4 110 1q-66 0-110-1M39-11q49-4 110 1q-66 0-110-1'/></svg>");
+}

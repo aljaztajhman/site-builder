@@ -1,0 +1,8 @@
+/* barrel: the sides bow out like staves; top and bottom stay straight. */
+.cx-mask-barrel {
+  border-radius: 12% / 50%;
+}
+.cx-mask-barrel .media--ai::after {
+  inset: auto auto 0.5rem 50%;
+  translate: -50%;
+}

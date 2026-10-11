@@ -12,29 +12,138 @@ import { z } from "zod";
 import type { ElementKind } from "./schema.ts";
 
 /** Image masks (`image.mask`, `photos.mask`). I4 fills it to 30. */
-export const MASKS = ["none", "arch", "circle", "cut", "stamp", "ticket"] as const;
+export const MASKS = [
+  "none",
+  "arch",
+  "circle",
+  "cut",
+  "stamp",
+  "ticket",
+  // I4a (drafts; CSS in packages/components/styles/vocab/masks/)
+  "window",
+  "arch-low",
+  "arch-pointed",
+  "stepped",
+  "gable",
+  "oval",
+  "barrel",
+  "bowl",
+  "leaf",
+  "pebble",
+  "chamfer",
+  "label",
+  "tab",
+  "notch",
+  "slant",
+  "slope",
+  "arrow",
+  "bookmark",
+  "torn",
+  "scallop",
+  "cut-paper",
+  "triptych",
+  "postcard",
+  "ruled",
+  "crop",
+] as const;
 /** Image treatments (`image.treatment`, `photos.treatment`, the photo layer). I4 fills it to 16. */
-export const IMAGE_TREATMENTS = ["none", "duotone", "tint", "grain"] as const;
-/** Section textures (`surface.texture`). I4 adds 12. */
-export const TEXTURES = ["none", "grain", "lines"] as const;
+export const IMAGE_TREATMENTS = [
+  "none",
+  "duotone",
+  "tint",
+  "grain",
+  // I4b (drafts; CSS in packages/components/styles/vocab/treatments/)
+  "mono-contrast",
+  "bleach",
+  "high-key",
+  "low-key",
+  "faded",
+  "matte",
+  "toned",
+  "newsprint",
+  "grade",
+  "overprint",
+  "field",
+  "dim",
+] as const;
+/** Section textures (`surface.texture`). I4c added 10 (12 with the two starters); their CSS: styles/vocab/textures/<name>.css. */
+export const TEXTURES = ["none", "grain", "lines", "press-grain", "linen-weave", "stone", "bark", "raw-board", "board-concrete", "laid-paper", "kraft-fibre", "gouge", "terrazzo"] as const;
 /** A section's top edge (`top.edge`); "drawing" takes `top.drawing`. I5 fills it to 20. */
 export const EDGES = ["straight", "rule", "cut", "torn", "drawing"] as const;
 /** Fact objects (`fact.treatment`). I6 fills it to 20. */
-export const FACT_OBJECTS = ["numeral", "plate", "stamp", "ticket", "seal", "tag"] as const;
+export const FACT_OBJECTS = [
+  "numeral",
+  "plate",
+  "stamp",
+  "ticket",
+  "seal",
+  "tag",
+  // I6b (drafts until the owner approves them in the gallery; CSS: components styles/vocab/fact-objects/<name>.css)
+  "house-number",
+  "signpost",
+  "timetable",
+  "receipt",
+  "total",
+  "dimension",
+  "index-tab",
+  "calendar",
+  "split",
+  "door-plate",
+  "ruler",
+] as const;
 /** Heading type treatments (`heading.treatment`). I6 fills it to 15. */
-export const TYPE_TREATMENTS = ["none", "stacked", "knockout"] as const;
+export const TYPE_TREATMENTS = [
+  "none",
+  "stacked",
+  "knockout",
+  // I6a (drafts until the owner approves them in the gallery; CSS: components styles/vocab/type-treatments/<name>.css)
+  "circle",
+  "vertical",
+  "oversized-first-word",
+  "ruled-total",
+  "title-block",
+  "masthead",
+  "typed-line",
+  "rule-flanked",
+  "fascia-lettering",
+  "marker-highlight",
+  "drop-numeral",
+  "corner-marks",
+] as const;
 /** Section motion presets (`motion`), described in MOTION_META. I7 fills it to 20. */
-export const MOTIONS = ["reveal", "unmask"] as const;
+export const MOTIONS = ["reveal", "unmask", "rise", "wipe", "stagger", "drift-bg"] as const;
 /** Typographic wordmark styles (`design.wordmark.style`). I9 adds the rest. */
 export const WORDMARK_STYLES = ["plain"] as const;
 /**
  * Drawings (`decor.drawing`, the drawing layer, the list marker, the ribbon separator, the edge drawing): full asset ids
- * (DrawingId), `motif/<trade>/<subject>-<style>` or `ornament/<name>-<style>`. I5 draws them; these two are the samples
- * the Drawing format starts with.
+ * (DrawingId), `motif/<trade>/<subject>-<style>` or `ornament/<name>-<style>`. I5 draws them: the first two are the
+ * samples the Drawing format starts with, then the I5-p pilot (12 trade motifs, 6 Slovene ornaments). <trade> is the
+ * business type, or the sub-trade where one exists (plumbing, electrical, florist, deli).
  */
-export const DRAWINGS = ["motif/bakery/wheat-ear-line", "ornament/rope-line"] as const;
+export const DRAWINGS = [
+  "motif/bakery/wheat-ear-line",
+  "ornament/rope-line",
+  "motif/bakery/peel-loaf-line",
+  "motif/car-repair/torque-wrench-line",
+  "motif/plumbing/ball-valve-line",
+  "motif/hairdresser/shears-comb-line",
+  "motif/dental/mirror-probe-line",
+  "motif/physio/spine-model-line",
+  "motif/tourist-farm/milk-can-line",
+  "motif/restaurant/ladle-pot-line",
+  "motif/accountant/ledger-pen-line",
+  "motif/florist/secateurs-stem-line",
+  "motif/deli/olive-salt-line",
+  "motif/electrical/cable-coil-line",
+  "ornament/beehive-panel-line",
+  "ornament/idrija-lace-line",
+  "ornament/gorenjska-rosette-line",
+  "ornament/trail-blaze-line",
+  "ornament/pisanica-band-line",
+  "ornament/prekmurje-pottery-band-line",
+] as const;
 /** Drawings that tile along x into a strip (`decor.repeat: "x"`, G19). Each one is in DRAWINGS. */
-export const REPEATABLE = ["ornament/rope-line"] as const;
+export const REPEATABLE = ["ornament/rope-line", "ornament/idrija-lace-line", "ornament/pisanica-band-line", "ornament/prekmurje-pottery-band-line"] as const;
 /**
  * Practical facts (`iconFacts`, `business.amenities`): a fixed list of 40; code picks the icon (`icon/<style>/<fact>`).
  * Unlike the others it is closed, not grown by batches.
@@ -121,6 +230,11 @@ export interface MotionMeta {
 export const MOTION_META: Readonly<Record<(typeof MOTIONS)[number], MotionMeta>> = {
   reveal: { kind: "entrance", targets: ["heading", "text", "list", "fact", "prices", "quote"], safeAtLoad: false, js: false, minLevel: "calm" },
   unmask: { kind: "entrance", targets: ["image", "photos"], safeAtLoad: false, js: false, minLevel: "calm" },
+  rise: { kind: "entrance", targets: ["heading", "text", "list", "fact", "prices", "quote"], safeAtLoad: false, js: false, minLevel: "calm" },
+  wipe: { kind: "entrance", targets: ["image", "photos"], safeAtLoad: false, js: false, minLevel: "calm" },
+  stagger: { kind: "entrance", targets: ["heading", "text", "list", "fact", "prices", "quote"], safeAtLoad: false, js: false, minLevel: "calm" },
+  /** Moves the section's background photo layer (no element kind); starts fully visible, so it may open a page. */
+  "drift-bg": { kind: "scroll", targets: [], safeAtLoad: true, js: false, minLevel: "lively" },
 };
 
 const NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
