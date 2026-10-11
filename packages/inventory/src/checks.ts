@@ -59,13 +59,21 @@ export const BYTE_BUDGET: Partial<Record<AssetKind, number>> = {
 /**
  * The composed stylesheets, minified (docs/plans/studio-phase1-design.md §3.4.1, §3.4.7): the core sheet (spec v19,
  * composed.css) ≤ 16 KiB; each spec v20 region sheet (composed-v2.css split at its markers: section, kinds, extensions,
- * vocab) ≤ 12 KiB; the sheets one page links (core plus the regions it uses; at most all of them) ≤ 32 KiB together; each
- * vocab family sheet (masks, treatments, textures, edges, fact-objects, type-treatments, motion; the partials under
- * styles/vocab/<family>/, §3.4.8) ≤ 6 KiB, and all seven together ≤ 42 KiB.
+ * vocab) ≤ 12 KiB; each vocab family sheet (masks, treatments, textures, edges, fact-objects, type-treatments, motion;
+ * the partials under styles/vocab/<family>/, §3.4.8) ≤ 6 KiB, and all seven together ≤ 42 KiB. These are growth
+ * discipline, in raw minified bytes.
+ * What a visitor downloads is `pageGzip` (docs/plans/studio-phase1-review.md §6.1): per real page, each sheet the page
+ * links gzipped as served, the composed sheets together ≤ 20 KiB and all its stylesheets (the site sheet too) ≤ 36 KiB.
  * The asset section/composed:free measures the core sheet; the inventory's and @sb/render's composed tests check the
- * regions and the linked total against the same numbers.
+ * regions against the same numbers, tools/eval/test/composed-css-weight.test.ts the pages.
  */
-export const COMPOSED_SHEET_BUDGET = { core: 16 * 1024, region: 12 * 1024, linked: 32 * 1024, family: 6 * 1024, families: 42 * 1024 } as const;
+export const COMPOSED_SHEET_BUDGET = {
+  core: 16 * 1024,
+  region: 12 * 1024,
+  family: 6 * 1024,
+  families: 42 * 1024,
+  pageGzip: { composed: 20 * 1024, all: 36 * 1024 },
+} as const;
 
 /**
  * Hero art (the hero style pilots, mood "hero-art"): a drawn motif in several palette tones shown at full strength as a

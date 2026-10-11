@@ -246,7 +246,22 @@ export const AppConfigSchema = z.object({
    * The AI designer (docs/plans/design-studio.md): agent switches the studio pipeline on for new sites. Off until the
    * owner's blind A/B passes (§9); while off, every request and rendered byte is as before.
    */
-  designer: z.strictObject({ $comment: z.string().optional(), agent: z.boolean() }),
+  designer: z.strictObject({
+    $comment: z.string().optional(),
+    agent: z.boolean(),
+    /**
+     * Prompt size budgets of the designer, in tokens estimated as characters / charsPerToken (Haiku 5.5 counts about 30 %
+     * more tokens than the old chars / 4 rule). catalogue: the static designer catalogue (a cached system block, so the cap
+     * protects attention, not money); moodboard and examples: the per-call parts; request: all text of one designer request.
+     */
+    budgets: z.strictObject({
+      charsPerToken: z.number().positive(),
+      catalogue: z.number().int().positive(),
+      moodboard: z.number().int().positive(),
+      examples: z.number().int().positive(),
+      request: z.number().int().positive(),
+    }),
+  }),
   studio: z.strictObject({
     $comment: z.string().optional(),
     uniqueness: z.strictObject({

@@ -133,17 +133,10 @@ describe("composedSheets: which composed sheets a page links", () => {
     expect(compactValues(".a{width:10.5rem;--fc0:1}")).toBe(".a{width:10.5rem;--fc0:1}");
   });
 
-  it("keeps each composed sheet within its budget (inventory COMPOSED_SHEET_BUDGET: core 16 KiB, each region 12 KiB, the sheets a page links 32 KiB)", () => {
+  it("keeps each composed sheet within its budget (inventory COMPOSED_SHEET_BUDGET: core 16 KiB, each region 12 KiB; the per-page gzip budget is tools/eval/test/composed-css-weight.test.ts)", () => {
     const core = Buffer.byteLength(composedStylesheet().css);
     expect(core).toBeLessThanOrEqual(16 * 1024);
-    let all = core;
-    for (const r of COMPOSED_V2_REGIONS) {
-      const n = Buffer.byteLength(composedV2Sheets()[r].css);
-      expect(n, r).toBeLessThanOrEqual(12 * 1024);
-      all += n;
-    }
-    // The most a page can link: the core sheet and every region.
-    expect(all).toBeLessThanOrEqual(32 * 1024);
+    for (const r of COMPOSED_V2_REGIONS) expect(Buffer.byteLength(composedV2Sheets()[r].css), r).toBeLessThanOrEqual(12 * 1024);
   });
 });
 

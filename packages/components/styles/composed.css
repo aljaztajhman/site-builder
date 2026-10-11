@@ -110,6 +110,7 @@
   --cx-fs-6: max(var(--cx-fs-5), min(12vw, 4rem));
   --cx-fs-7: max(var(--cx-fs-6), min(13.5vw, 5rem));
   --cx-fs-8: max(var(--cx-fs-7), min(15vw, 6rem));
+  --cx-dh: 40vh;
   --cx-gap: max(0.75rem, calc(var(--g, 3) * 0.4rem));
   --cx-step: 1.25rem;
   display: grid;
@@ -172,6 +173,7 @@
 /* ---------- desktop: 12 columns, each element on its own place ---------- */
 @media (min-width: 64rem) {
   .cx {
+    --cx-dh: 60vh;
     --cx-gap: calc(var(--g, 3) * 0.5rem);
     grid-template-columns: repeat(12, minmax(0, 1fr));
     grid-template-rows: repeat(var(--rows, 1), auto);
@@ -630,6 +632,7 @@ body:not([data-motif="plate"]) .cx-prices--plates .plate__eu {
 .cx-decor svg {
   width: 100%;
   height: auto;
+  max-height: var(--cx-dh);
 }
 .cx-decor .branch,
 .cx-decor .spoon {

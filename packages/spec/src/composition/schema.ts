@@ -272,8 +272,8 @@ export const QuoteElement = z.strictObject({
 export const StepsElement = z.strictObject({
   ...base,
   kind: z.enum(["steps"]),
-  items: z.array(z.strictObject({ title: text(60), text: text(240).optional() })).min(2).max(6),
-  style: z.enum(["numbered", "line"]).optional(),
+  items: z.array(z.strictObject({ title: text(60), text: text(240).optional() })).min(2).max(6).describe("The client's own steps in their words, in order; never made up"),
+  style: z.enum(["numbered", "line"]).optional().describe("numbered: a numbered list; line: a timeline, a rail with a mark per step"),
   ...Paint,
 });
 
@@ -281,8 +281,8 @@ export const StepsElement = z.strictObject({
 export const QaElement = z.strictObject({
   ...base,
   kind: z.enum(["qa"]),
-  items: z.array(z.strictObject({ question: text(140), answer: text(600) })).min(1).max(12),
-  style: z.enum(["open", "toggle"]).optional(),
+  items: z.array(z.strictObject({ question: text(140), answer: text(600) })).min(1).max(12).describe("The client's own questions and answers, copied word for word; never made up"),
+  style: z.enum(["open", "toggle"]).optional().describe("open: every answer shown; toggle: tap a question to open its answer"),
   ...Paint,
 });
 
