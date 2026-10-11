@@ -56,6 +56,15 @@ export class ImageBilledError extends Error {
   }
 }
 
+/**
+ * Whether a failed image request may still be billed: the image was made but not fetched (ImageBilledError), or we
+ * stopped waiting (a timeout or an abort) while fal may have gone on making it. Those are booked at the image's price.
+ */
+export function mayBeBilled(e: unknown): boolean {
+  const name = (e as { name?: unknown })?.name;
+  return e instanceof ImageBilledError || name === "TimeoutError" || name === "AbortError";
+}
+
 export class FalImageTransport implements ImageTransport {
   constructor(private readonly key = process.env.FAL_KEY) {
     if (!key) throw new Error("FAL_KEY is not set");
@@ -135,6 +144,47 @@ export class ImageGenerator {
   }
 
   /**
+   * One image from `imageGen.models[modelName]` with a request body the caller wrote (`prompt`, `image_size`, references
+   * …; the model's params go first), booked under `stage` ("mockup": the studio's homepage mockup, which is not a site
+   * picture and so not counted against a plan's monthly pictures). Reserved under the daily cap at the model's price
+   * for the requested size, as `generate`. Returns the delivered JPEG bytes as they came (re-encoded, no metadata).
+   */
+  async paint(modelName: string, body: Record<string, unknown>, opts: { stage: "mockup"; signal?: AbortSignal }): Promise<{ data: Uint8Array; width: number; height: number; costEur: number }> {
+    const { config } = this.opts;
+    const model = config.imageGen.models[modelName];
+    if (!model) throw new Error(`config: imageGen.models has no ${modelName}`);
+    const size = (body.image_size as { width: number; height: number } | undefined) ?? outputSize(config, false);
+    const price = imageCostEur(config, model, size.width, size.height);
+    opts.signal?.throwIfAborted();
+    const reservation = await this.ledger.reserve({ stage: opts.stage, model: modelName, estimateEur: price, capEur: config.limits.dailyModelSpendCapEur });
+    if (opts.signal?.aborted) {
+      await reservation.release();
+      throw opts.signal.reason;
+    }
+    const started = Date.now();
+    const book = (costEur: number, ok: boolean) => reservation.settle({ stage: opts.stage, model: modelName, usage: NO_TOKENS, costEur, durationMs: Date.now() - started, ok });
+    let raw: Uint8Array;
+    try {
+      raw = await this.opts.transport.generate(model, { ...model.params, ...body, num_images: 1 });
+    } catch (e) {
+      await book(mayBeBilled(e) ? price : 0, false);
+      throw e;
+    }
+    try {
+      const data = new Uint8Array(await sharp(raw).rotate().jpeg({ quality: 90, mozjpeg: true }).toBuffer());
+      const meta = await sharp(data).metadata();
+      const width = meta.width ?? size.width;
+      const height = meta.height ?? size.height;
+      const costEur = model.usdPerImage !== undefined ? price : imageCostEur(config, model, width, height);
+      await book(costEur, true);
+      return { data, width, height, costEur };
+    } catch (e) {
+      await book(price, false);
+      throw e;
+    }
+  }
+
+  /**
    * One landscape image for `prompt` (the pipeline style is appended: pipelineStyle). Returns JPEG bytes and size.
    * Its price is reserved under the daily cap first. `signal` (the job stopped) is checked before the
    * reservation and again once it is made; a request already sent is not cut off, since fal would bill it anyway.
@@ -156,9 +206,9 @@ export class ImageGenerator {
     try {
       raw = await this.opts.transport.generate(model, requestBody(config, model, `${prompt} ${pipelineStyle(config)}`, false));
     } catch (e) {
-      // A failed request is logged at no cost (fal bills only delivered images); an image fal made but we
-      // couldn't fetch is booked at its price, because we were billed for it.
-      await book(e instanceof ImageBilledError ? price : 0, false);
+      // A refused request is logged at no cost (fal bills only delivered images); an image fal made but we
+      // couldn't fetch, or a request we gave up on while fal may still be making it, is booked at its price.
+      await book(mayBeBilled(e) ? price : 0, false);
       throw e;
     }
     // From here the image was delivered, so billed, whatever happens to it next.

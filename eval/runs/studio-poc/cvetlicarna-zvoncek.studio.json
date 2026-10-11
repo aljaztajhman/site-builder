@@ -1,0 +1,98 @@
+{
+  "ok": true,
+  "path": "mockup",
+  "idea": "The page is laid out like the long cultivated strips of Sorško polje seen from above: each season's flowers grow in their own full-width row on a dark, earthy ground. That way the year of a small Loka florist, from snowdrop to dahlia, reads as a field you walk through from top to bottom.",
+  "stance": "mockup",
+  "presets": [
+    "mockup:hero",
+    "mockup:story",
+    "mockup:services",
+    "mockup:contact"
+  ],
+  "palette": "mockup",
+  "pairing": "pairing/fraunces-nunito-sans",
+  "wordmark": "wordmark/plain",
+  "dropped": [
+    "section 1 (hero): h1 size 7 → 5 for a 42-character headline",
+    "section 4 (notice): /pages/0/sections/3/props/elements/0/move composed: e_rib: loop needs motion level lively (is calm)"
+  ],
+  "mockup": {
+    "ok": true,
+    "idea": "The page is laid out like the long cultivated strips of Sorško polje seen from above: each season's flowers grow in their own full-width row on a dark, earthy ground. That way the year of a small Loka florist, from snowdrop to dahlia, reads as a field you walk through from top to bottom.",
+    "direction": "Rows of Sorško Polje",
+    "sections": [
+      "hero",
+      "story",
+      "services",
+      "contact"
+    ],
+    "crops": [
+      {
+        "id": "crop1",
+        "ok": true
+      },
+      {
+        "id": "crop2",
+        "ok": true
+      }
+    ],
+    "eur": {
+      "artDirector": 0.07914407999999999,
+      "mockup": 0.067903684608,
+      "rebuild": 0.133472
+    }
+  },
+  "art": {
+    "name": "Rows of Sorško Polje",
+    "idea": "The page is laid out like the long cultivated strips of Sorško polje seen from above: each season's flowers grow in their own full-width row on a dark, earthy ground. That way the year of a small Loka florist, from snowdrop to dahlia, reads as a field you walk through from top to bottom.",
+    "palette": [
+      {
+        "role": "background",
+        "hex": "#13201a"
+      },
+      {
+        "role": "surface",
+        "hex": "#1c2c24"
+      },
+      {
+        "role": "text",
+        "hex": "#eef2ea"
+      },
+      {
+        "role": "muted",
+        "hex": "#a9b8ab"
+      },
+      {
+        "role": "primary",
+        "hex": "#e8c547"
+      },
+      {
+        "role": "onPrimary",
+        "hex": "#13201a"
+      },
+      {
+        "role": "band",
+        "hex": "#b23a4f"
+      },
+      {
+        "role": "onBand",
+        "hex": "#fbf3ee"
+      },
+      {
+        "role": "border",
+        "hex": "#34483c"
+      }
+    ],
+    "pairing": "fraunces-nunito-sans",
+    "typeCharacter": "Fraunces is soft, bulbous and slightly old-fashioned, like a hand-painted shop window. It is set very large in its heavy optical weight, sentence case and upright, with no italics. The season names and offerings run at display size, while Nunito Sans carries the lead, lists, hours and contact at a calm 17–19px in regular weight, with semibold for small labels in sentence case.",
+    "composition": "Hero, dark ground #13201a, about 640px tall. Columns 1–7 hold a three-line Fraunces headline at about 7vw in #eef2ea, then the lead in Nunito Sans at 19px in #a9b8ab across 5 columns, then one rectangular button with a 4px radius in #e8c547 with #13201a text. Columns 8–12 hold one tall painted snowdrop (zvonček) on the same dark ground, its bent head drooping toward the headline and its stem bleeding off the bottom edge. A thin top bar carries the shop name in Fraunces at the left and a short Nunito Sans nav at the right. \n\nSeasons section ('Cvetje iz Sorškega polja'): the h2 and the story text sit in columns 1–5. Below them are three stacked full-width rows divided by 1px #34483c rules, each about 150px tall, alternating between the ground #13201a and the surface #1c2c24 like strips of a field. Each row has a season word in Fraunces at about 5vw in columns 1–4 (Pomlad, Poletje, Jesen), the flower names in Nunito Sans in columns 5–7, and a horizontal painted strip of those flowers in columns 8–12: tulips and narcissus, then peonies and sunflowers, then dahlias. \n\nOfferings ('Kaj delam'): a full-width band in #b23a4f. The four offerings are set as a large Fraunces typographic list in #fbf3ee, two columns of two (columns 1–6 and 7–12), each item with a hairline rule above. The wedding note sits beneath in Nunito Sans across columns 1–6. \n\nRibbon: a narrow #e8c547 strip with #13201a Nunito Sans semibold words about delivery around Škofja Loka, repeated across the width. \n\nContact, dark ground: the phone as a large Fraunces numeral in #e8c547 in columns 1–6, with the email and address beneath it. Opening hours appear as a seven-day week strip across columns 7–12 in #eef2ea and #a9b8ab. Below them, a simple line map of Mestni trg in #34483c and #a9b8ab lines marks the shop with a small #e8c547 dot beside the fountain. A slim footer follows.",
+    "imagery": "There are no photographs anywhere. All imagery is gouache-style botanical painting with flat, slightly chalky colour and visible brush edges, each piece painted on the plain #13201a ground with no text, hands, vases, wrapping or buildings. There are four pieces: one tall drooping snowdrop for the hero (right columns), a horizontal row of tulips and narcissus, a row of peonies and sunflowers, and a row of dahlias for the season strips (right columns). They read as seasonal field flowers, never as the client's own bouquets. The only other drawing is the schematic line map in the contact section.",
+    "signature": "The seasons laid out as alternating full-width field strips, each with a giant Fraunces season word on the left and its painted flowers growing in a row on the right. Scrolling feels like walking the furrows of Sorško polje through the year.",
+    "copy": {
+      "headline": "Šopki iz cvetja, ki raste na Sorškem polju",
+      "lead": "Mala cvetličarna na Mestnem trgu v Škofji Loki, tik ob vodnjaku. Cvetje kupujem pri vrtnarjih iz Sorškega polja in ga povežem v šopek, kakršnega prinese letni čas."
+    },
+    "imagePrompt": "One flat full-page screenshot of a desktop homepage, 1536×1024 px, with no browser window, no device frame and no perspective. This is a website for a small florist in Škofja Loka, Slovenia, built on a 12-column grid. There are no photographs at all; all imagery is gouache botanical painting with flat, slightly chalky colour and visible soft brush edges, painted directly on the dark page ground, with no text, hands, vases, wrapping paper or buildings in the paintings. \n\nPage ground: deep green-black #13201a. Main text: #eef2ea. Muted text: #a9b8ab. Accent: sunflower yellow #e8c547. Feature band: deep peony red #b23a4f with light text #fbf3ee. Hairline rules: #34483c. Type pairing: Fraunces for headings (soft, bulbous, heavy, upright, sentence case, never italic) and Nunito Sans for body text (clean, rounded, regular weight). \n\nTop bar: the shop name in Fraunces at the left, a short Nunito Sans navigation at the right, and a thin #34483c rule beneath. \n\nHero (about two thirds of the first screen): the left seven columns carry a huge three-line Fraunces headline in #eef2ea, below it a lead paragraph in Nunito Sans in #a9b8ab spanning five columns, then a single rectangular button with slightly rounded 4px corners in #e8c547 with dark #13201a text. The right five columns hold one tall painted snowdrop with white bell petals and green tips on a slender stem, its head bowed toward the headline and its stem running off the bottom edge, painted on the same #13201a ground. \n\nNext section, seasons: a Fraunces heading and a short paragraph in the left five columns. Below them are three stacked full-width horizontal strips like cultivated field rows, alternating #13201a and #1c2c24 and separated by 1px #34483c rules. Each strip has a large Fraunces season word on the left in #eef2ea, flower names in small Nunito Sans in the middle, and a horizontal row of painted flowers in the right five columns. The first strip has red and pink tulips with yellow narcissus, the second pink peonies with sunflowers, and the third deep red, orange and wine dahlias. \n\nBelow that, a full-width band in #b23a4f shows a section heading and four offerings as a large Fraunces typographic list in #fbf3ee, two columns of two, each item with a thin light rule above it, and a short Nunito Sans note beneath. \n\nThen a narrow full-width #e8c547 ribbon of short repeated dark words. \n\nContact section on #13201a: the left half has the phone number as a very large Fraunces numeral in #e8c547 with the email and address in Nunito Sans below. The right half has opening hours as a seven-day week strip with day names and times in thin columns, and below it a simple schematic line map of a town square in #34483c and #a9b8ab lines with one small yellow dot beside a small circle marking the fountain. A slim footer closes the page. \n\nThe layout is asymmetric and left-aligned, with no gradients, no shadows, no icon cards, no pill buttons, no italic words and no faces."
+  },
+  "eur": 0.280519764608
+}

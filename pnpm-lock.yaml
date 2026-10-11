@@ -297,6 +297,9 @@ importers:
       '@sb/config':
         specifier: workspace:*
         version: link:../config
+      '@sb/inventory':
+        specifier: workspace:*
+        version: link:../inventory
       '@sb/platform':
         specifier: workspace:*
         version: link:../platform

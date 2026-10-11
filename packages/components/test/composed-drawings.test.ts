@@ -43,7 +43,7 @@ describe("drawing data", () => {
   const PAPER_AND_INK = new Set(["background", "surface", "border", "text", "muted", "primary", "accent", "inverse"]);
 
   it("every drawing is a line drawing except the hero style pilots", () => {
-    expect(HERO_ART).toEqual(["motif/bakery/loaf-potica-scene-solid", "motif/bakery/boule-linocut-solid", "motif/bakery/sun-loaf-shapes-cut"]);
+    expect(HERO_ART).toEqual(["motif/bakery/loaf-potica-scene-solid", "motif/bakery/boule-linocut-solid", "motif/bakery/sun-loaf-shapes-cut", "motif/plumbing/heat-pump-radiator-solid", "motif/bakery/oven-night-linocut-solid"]);
   });
 
   it.each(HERO_ART)("%s: filled shapes in the light palette's roles, strokes only as ≥ 1 unit dots or hairs, within 25 KiB", (id) => {

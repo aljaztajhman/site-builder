@@ -57,6 +57,14 @@ import heroPlateRibbon from "./hero/plate-ribbon.ts";
 import heroSignpostPole from "./hero/signpost-pole.ts";
 import heroSplitPhoto from "./hero/split-photo.ts";
 import heroThreeArches from "./hero/three-arches.ts";
+import heroShopWindowTags from "./hero/shop-window-tags.ts";
+import heroHandsAndHours from "./hero/hands-and-hours.ts";
+import heroWorkshopDoor from "./hero/workshop-door.ts";
+import heroPriceBoardBand from "./hero/price-board-band.ts";
+import heroTypeWallStrip from "./hero/type-wall-strip.ts";
+import heroPosterCallBlock from "./hero/poster-call-block.ts";
+import heroPaintingOnDark from "./hero/painting-on-dark.ts";
+import heroNightPrintCentred from "./hero/night-print-centred.ts";
 import highlightsBroadsheet from "./highlights/broadsheet.ts";
 import highlightsCheckerFields from "./highlights/checker-fields.ts";
 import highlightsDarkPanel from "./highlights/dark-panel.ts";
@@ -183,6 +191,14 @@ export const COMPOSITION_PRESETS: readonly CompositionPreset[] = [
   heroSignpostPole,
   heroSplitPhoto,
   heroThreeArches,
+  heroShopWindowTags,
+  heroHandsAndHours,
+  heroWorkshopDoor,
+  heroPriceBoardBand,
+  heroTypeWallStrip,
+  heroPosterCallBlock,
+  heroPaintingOnDark,
+  heroNightPrintCentred,
   highlightsBroadsheet,
   highlightsCheckerFields,
   highlightsDarkPanel,

@@ -1,0 +1,35 @@
+{
+  "id": "cvetlicarna-zvoncek",
+  "businessType": "shop",
+  "trade": "cvetličarna",
+  "hard": ["no-photos", "no-logo"],
+  "description": "Pozdravljeni! Sem Maja Kranjc in imam malo cvetličarno Zvonček v Škofji Loki, naslov Mestni trg 14, 4220 Škofja Loka, tik ob vodnjaku. Cvetličarno vodim sama, ob sobotah mi pomaga sestra Nina. Delam šopke iz sezonskega cvetja, ki ga kupujem pri vrtnarjih iz Sorškega polja, spomladi tulipane in narcise, poleti potonike in sončnice, jeseni dalije. Rada imam šopke, ki izgledajo kot da so nabrani na travniku, ne trdi in okrogli.\n\nPoleg šopkov delam poročno cvetje (šopek za nevesto, gumbnice, okrasitev cerkve in mize), žalne aranžmaje in vence ter lončnice za stanovanje. Šopek sestavim tudi po naročilu, dovolj je, da mi poveste priložnost in barvo.\n\nCene: sezonski šopek od 25 €, poročni šopek od 90 €, žalni venec od 70 €.\n\nOdprto imamo od ponedeljka do petka od 8.00 do 18.00, v soboto od 8.00 do 12.00, v nedeljo je zaprto.\n\nNaročila sprejemam po telefonu 041 555 214 ali na zvoncek@cvetlicarna-zvoncek.example. Poročno cvetje naročite vsaj mesec dni prej. Dostavljam po Škofji Loki in okolici. Slik še nimam, ker sem šele začela s spletno stranjo.",
+  "logo": null,
+  "photos": [],
+  "facts": {
+    "name": "Cvetličarna Zvonček",
+    "phone": "+38641555214",
+    "email": "zvoncek@cvetlicarna-zvoncek.example",
+    "address": { "street": "Mestni trg 14", "postalCode": "4220", "city": "Škofja Loka" },
+    "hours": [
+      { "from": "mon", "to": "fri", "open": "08:00", "close": "18:00" },
+      { "from": "sat", "to": "sat", "open": "08:00", "close": "12:00" },
+      { "from": "sun", "to": "sun", "closed": true }
+    ],
+    "prices": [
+      { "item": "sezonski šopek", "amount": 25, "from": true },
+      { "item": "poročni šopek", "amount": 90, "from": true },
+      { "item": "žalni venec", "amount": 70, "from": true }
+    ],
+    "people": [
+      { "name": "Maja Kranjc", "role": "cvetličarka" },
+      { "name": "Nina", "role": "pomoč ob sobotah" }
+    ],
+    "other": [
+      "pri vrtnarjih iz Sorškega polja",
+      "Poročno cvetje naročite vsaj mesec dni prej",
+      "Dostavljam po Škofji Loki in okolici"
+    ]
+  },
+  "missing": ["photos", "legal"]
+}

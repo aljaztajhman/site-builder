@@ -1,0 +1,26 @@
+{
+  "$comment": "INVENTED FIXTURE DATA for the mockup spike 2 (docs/plans/mockup-spike.md). Not a real business: the name, address number, phone, email, person and hours are made up for testing. Never publish.",
+  "id": "florist-sipek",
+  "businessType": "florist",
+  "description": "Cvetličarna Šipek je majhna cvetličarna na Glavnem trgu 9 v Novem mestu. Vodi jo Maja Kos. Šopke vežemo sproti, iz sezonskega cvetja, veliko ga dobimo pri vrtnarijah v Beli krajini. Delamo šopke po naročilu, poročno floristiko, žalne aranžmaje in imamo sobne rastline. Šopek lahko naročite po telefonu dan prej in ga prevzamete v cvetličarni.",
+  "photos": [],
+  "facts": {
+    "name": "Cvetličarna Šipek",
+    "phone": "+38631555427",
+    "email": "maja@cvetlicarna-sipek.example",
+    "address": { "street": "Glavni trg 9", "postalCode": "8000", "city": "Novo mesto" },
+    "hours": [
+      { "from": "mon", "to": "fri", "open": "08:00", "close": "19:00" },
+      { "from": "sat", "to": "sat", "open": "08:00", "close": "13:00" }
+    ],
+    "services": [
+      { "name": "Šopki po naročilu", "detail": "iz sezonskega cvetja, vezani sproti" },
+      { "name": "Poročna floristika", "detail": "šopek, cvetje za obleko in prostor" },
+      { "name": "Žalni aranžmaji", "detail": "venci in ikebane" },
+      { "name": "Sobne rastline", "detail": "rastline in lonci v cvetličarni" }
+    ],
+    "people": [{ "name": "Maja Kos", "role": "floristka" }],
+    "other": ["sezonsko cvetje", "vrtnarije v Beli krajini", "naročilo dan prej"]
+  },
+  "missing": ["photos", "logo", "prices", "legal"]
+}

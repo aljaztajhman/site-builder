@@ -76,5 +76,28 @@ describe("composeHomepage", () => {
     expect(validateSite(steered.spec).ok).toBe(true);
     expect(steered.used.palette).not.toBe(plain.used.palette);
   });
+
+  it("pin fixes the hero, palette, pairing, wordmark and imagery, keeps the drawing off, and refuses a pin it can't honour", () => {
+    const pin = { hero: "composition/hero/workshop-door", palette: "palette/tablica-blue", pairing: "pairing/archivo-public-sans", drawing: null, imagery: "natural" } as const;
+    const r = composeHomepageDetailed({ fixtureId: "avtoservis-mrak", stance: "registration-plate", seed: 3, catalogue: "drafts", pin });
+    expect(validateSite(r.spec).issues).toEqual([]);
+    expect(r.used.presets[0]).toBe(pin.hero);
+    expect([r.used.palette, r.used.pairing, r.used.drawing, r.spec.design.imagery]).toEqual([pin.palette, pin.pairing, null, "natural"]);
+    const wm = composeHomepageDetailed({ fixtureId: "avtoservis-mrak", stance: "registration-plate", seed: 3, catalogue: "drafts", pin: { ...pin, wordmark: "wordmark/plain" } });
+    expect(wm.used.wordmark).toBe("wordmark/plain");
+    expect(() => composeHomepageDetailed({ fixtureId: "avtoservis-mrak", stance: "registration-plate", seed: 3, catalogue: "drafts", pin: { hero: "composition/hero/no-such" } })).toThrow(ComposerError);
+    expect(() => composeHomepageDetailed({ fixtureId: "avtoservis-mrak", stance: "registration-plate", seed: 3, catalogue: "drafts", pin: { palette: "palette/no-such" } })).toThrow(ComposerError);
+  });
+
+  it("an AI picture reaches the hero only, as a generated image", () => {
+    const picture = { id: "img_ai_test", src: "uploads/ai-test.jpg", width: 1536, height: 900, alt: "Naslikana hiša v snegu" };
+    const r = composeHomepageDetailed({ fixtureId: "instalacije-rebernik", stance: "technical-drawing", seed: 1, catalogue: "drafts", pin: { hero: "composition/hero/painting-on-dark" }, pictures: [picture] });
+    expect(validateSite(r.spec).issues).toEqual([]);
+    expect(r.spec.assets.images.find((i) => i.id === picture.id)?.origin).toBe("generated");
+    const home = r.spec.pages.find((p) => p.kind === "home")!;
+    const uses = home.sections.map((s) => JSON.stringify(s).includes(picture.id));
+    expect(uses[0]).toBe(true);
+    expect(uses.slice(1).some(Boolean)).toBe(false);
+  });
 });
 

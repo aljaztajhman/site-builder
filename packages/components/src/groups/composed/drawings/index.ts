@@ -22,6 +22,8 @@ import { prekmurjePotteryBandLine } from "./ornament-prekmurje-pottery-band-line
 import { loafPoticaSceneSolid } from "./motif-bakery-loaf-potica-scene-solid.ts";
 import { bouleLinocutSolid } from "./motif-bakery-boule-linocut-solid.ts";
 import { sunLoafShapesCut } from "./motif-bakery-sun-loaf-shapes-cut.ts";
+import { heatPumpRadiatorSolid } from "./motif-plumbing-heat-pump-radiator-solid.ts";
+import { ovenNightLinocutSolid } from "./motif-bakery-oven-night-linocut-solid.ts";
 
 /**
  * The inventory's drawings as path data (spec Drawing format, docs/plans/studio-phase1-design.md §3.1), by their full
@@ -54,6 +56,8 @@ export const DRAWING_DATA: Readonly<Record<string, Drawing>> = {
   [loafPoticaSceneSolid.id]: loafPoticaSceneSolid,
   [bouleLinocutSolid.id]: bouleLinocutSolid,
   [sunLoafShapesCut.id]: sunLoafShapesCut,
+  [heatPumpRadiatorSolid.id]: heatPumpRadiatorSolid,
+  [ovenNightLinocutSolid.id]: ovenNightLinocutSolid,
 };
 
 export function drawingData(id: string): Drawing | undefined {

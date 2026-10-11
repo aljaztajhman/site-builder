@@ -1,0 +1,102 @@
+{
+  "ok": true,
+  "path": "mockup",
+  "idea": "Kvas bakes bread that rises overnight, so the homepage moves from night to morning: a deep, warm night ground where the dough rests under an oven-mouth arch, then opens into white daylight where the finished loaves stand on the shelf.",
+  "stance": "mockup",
+  "presets": [
+    "mockup:hero",
+    "mockup:products",
+    "mockup:story",
+    "mockup:highlights",
+    "mockup:hours",
+    "mockup:kept:contact"
+  ],
+  "palette": "mockup",
+  "pairing": "pairing/fraunces-source-sans",
+  "wordmark": null,
+  "dropped": [
+    "section 1 (hero): h1 size 8 → 6 for a 32-character headline",
+    "section 6 (contact): /pages/0/sections/5/props/elements/1 composed: at most 2 display sizes per page (2 earlier on the page)"
+  ],
+  "mockup": {
+    "ok": true,
+    "idea": "Kvas bakes bread that rises overnight, so the homepage moves from night to morning: a deep, warm night ground where the dough rests under an oven-mouth arch, then opens into white daylight where the finished loaves stand on the shelf.",
+    "direction": "Iz noči v jutro",
+    "sections": [
+      "hero",
+      "products",
+      "story",
+      "highlights",
+      "hours",
+      "kept:contact"
+    ],
+    "crops": [
+      {
+        "id": "crop1",
+        "ok": true
+      },
+      {
+        "id": "crop2",
+        "ok": true
+      }
+    ],
+    "eur": {
+      "artDirector": 0.08862128,
+      "mockup": 0.08600000000000001,
+      "rebuild": 0.15140472
+    }
+  },
+  "art": {
+    "name": "Iz noči v jutro",
+    "idea": "Kvas bakes bread that rises overnight, so the homepage moves from night to morning: a deep, warm night ground where the dough rests under an oven-mouth arch, then opens into white daylight where the finished loaves stand on the shelf.",
+    "palette": [
+      {
+        "role": "inverse",
+        "hex": "#1d1712"
+      },
+      {
+        "role": "onInverse",
+        "hex": "#f4ece2"
+      },
+      {
+        "role": "background",
+        "hex": "#ffffff"
+      },
+      {
+        "role": "text",
+        "hex": "#2a1d14"
+      },
+      {
+        "role": "muted",
+        "hex": "#6b5a4d"
+      },
+      {
+        "role": "primary",
+        "hex": "#9a4f1e"
+      },
+      {
+        "role": "onPrimary",
+        "hex": "#fff4e8"
+      },
+      {
+        "role": "accent",
+        "hex": "#e3b46e"
+      },
+      {
+        "role": "border",
+        "hex": "#e6ddd3"
+      }
+    ],
+    "pairing": "fraunces-source-sans",
+    "typeCharacter": "Fraunces, soft and plump like a well-risen crust and close to the bold serif of the Kvas logo, sets the one huge h1 at about 9vw in heavy weight and sentence case, tight leading, with section headings at 56–72px semibold. Source Sans 3 carries everything else at 18–20px regular, with product names at 22px semibold and no uppercase labels anywhere.",
+    "composition": "Hero (inverse field #1d1712, full width, 6 rows): the logo sits small top-left in columns 1–3, recoloured to #e3b46e and #f4ece2, with a single text link to the phone at the top right. Columns 1–6 hold the h1 in #f4ece2 across three lines, the lead in #f4ece2 at 20px spanning 5 columns, then one rust button #9a4f1e with square 4px corners. Columns 7–12 hold img_02 (hands shaping dough, cropped from the shoulder down so no face shows), masked with a tall round-topped arch like an oven mouth and bled to the right edge and the bottom of the section; the h1's last line overlaps the arch's left edge by a few px. Ribbon (primary field #9a4f1e, one row): short words in Source Sans 22px #fff4e8 separated by small dots: lastne droži, vzhajano čez noč, moka iz bližnjega mlina, ročno delo. Products (white #ffffff, 5 rows): img_01 (loaves on the wooden shelf) is bled to the left edge across columns 1–7 in a plain rectangle; columns 8–12 hold the heading 'Vsak dan v pekarni' in #2a1d14 and a ruled list of the seven offerings, with name in semibold and description in muted #6b5a4d. Potica and krofi each carry a small rust square-cornered tag reading 'pet in sob'. Below the list, img_03 (croissants and cinnamon rolls) sits in columns 8–12 with one cut corner. Story (inverse #1d1712, 4 rows; night again for the starter): a small ink drawing of a clay starter crock in #e3b46e on the dark field at columns 2–4, the heading at 72px #f4ece2 in columns 6–11, running text in columns 6–10, and a line naming Jure Petek at the oven and Katja in the shop. Potica (primary field #9a4f1e across columns 1–7, white across 8–12, 3 rows): the heading and text in #fff4e8 on the rust, with a drawn walnut sprig on white in columns 9–11. Hours (white, 2 rows): the heading at the left in columns 1–4 and a seven-day week strip in columns 5–12 with thin #e6ddd3 dividers; Friday and Saturday are outlined in rust as the potica and krofi days. Contact (inverse #1d1712, 3 rows): the phone as a large Fraunces numeral in #e3b46e across columns 1–7, with the address Šutna 30, 1241 Kamnik and the email below it in #f4ece2; columns 8–12 hold a simple schematic line map in #f4ece2 lines showing Šutna as one street with a rust dot at its start.",
+    "imagery": "All three client photos are used and none are invented. img_02 is the hero, in a tall arch mask, warm and close, with hands and flour visible and the head cropped out. img_01 is a wide left-bled rectangle in the products section. img_03 is a smaller cut-corner crop beneath the product list. There are two drawn pieces, each on its own plain ground and apart from text: a clay starter crock in fine golden ink line #e3b46e on the near-black field, and a walnut sprig with leaves and two nuts in rust line #9a4f1e on white. Neither has letters or hands.",
+    "signature": "The oven-mouth arch: the hero photo of dough being shaped sits in a tall round-topped arch on a warm night field, and the page alternates night and day bands as the bread goes from dough to shelf.",
+    "copy": {
+      "headline": "Kruh z drožmi, ki vzhaja čez noč",
+      "lead": "Družinska pekarna na začetku Šutne v Kamniku. Moko kupujemo pri mlinu v bližini, vse je ročno delo, brez aditivov in brez zamrznjenega testa."
+    },
+    "imagePrompt": "One flat full-page screenshot of a desktop bakery homepage, 1536×1024 px, with no browser window, no device frame and no perspective. Flat colours only, with no gradients, no shadows and no glass effects. Type: the headings are Fraunces, a soft heavy serif in sentence case; the body is Source Sans 3. Nothing is centred; the layout is asymmetric on a 12-column grid. SECTION 1, hero, full-width deep warm near-black field #1d1712. At the top left is the small bakery logo (a brown oval loaf with three slashes and the wordmark), recoloured to golden #e3b46e and light #f4ece2; at the top right is one small text link. The left half (columns 1–6) has a very large heavy Fraunces headline in #f4ece2 over three lines, a 20px Source Sans lead in #f4ece2 beneath it, then one rectangular rust button #9a4f1e with 4px corners and #fff4e8 text. The right half (columns 7–12) has the attached photo of hands shaping dough on a floured wooden table, cropped from the shoulders down with no face, masked in a tall round-topped arch like an oven mouth and bleeding off the right and bottom edges; the headline's last line overlaps the arch edge slightly. SECTION 2, a thin full-width rust band #9a4f1e carrying a single line of short words in #fff4e8, separated by small dots. SECTION 3 on pure white #ffffff: on the left, the attached photo of round sourdough loaves on wooden shelves, a wide rectangle bleeding off the left edge across about 7 columns. On the right, a serif heading in #2a1d14 above a ruled list of seven product names in semibold dark brown, with lighter descriptions in #6b5a4d and thin #e6ddd3 rules between items; two items carry small square rust tags. Beneath the list is the attached photo of croissants and cinnamon rolls on a tray, with one corner cut diagonally. SECTION 4 on the near-black field #1d1712: on the left, a small fine golden-ink line drawing of a clay sourdough starter crock, standing alone on the dark ground. On the right, a large Fraunces heading in #f4ece2 above a short paragraph. SECTION 5: the left 7 columns are a rust field #9a4f1e with a serif heading and short text in #fff4e8; the right 5 columns are white with a delicate rust line drawing of a walnut sprig with leaves and two walnuts, isolated on white. SECTION 6 on white: a heading on the left and a horizontal seven-day week strip on the right, divided by thin #e6ddd3 lines, with two days outlined in rust. SECTION 7 on the near-black field #1d1712: a very large golden #e3b46e Fraunces phone numeral on the left with address lines in #f4ece2 below it, and on the right a minimal schematic street map in thin #f4ece2 lines with one rust dot. No people's faces, no icons, no emoji, no pill buttons and no uppercase labels."
+  },
+  "eur": 0.326026
+}

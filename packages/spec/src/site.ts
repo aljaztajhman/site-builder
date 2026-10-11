@@ -52,6 +52,13 @@ export const GENERATED_IMAGE_SECTIONS = ["hero-split", "hero-image", "hero-signa
 /** The same slots in a composed section (spec v19): its intent says which it is (the opener, a page header, a story). */
 export const GENERATED_IMAGE_INTENTS = ["hero", "page-head", "story"] as const satisfies readonly Intent[];
 
+/**
+ * Studio 0.5b (docs/plans/studio-0.5.md, mockup pipeline): any other composed section may show a generated picture as
+ * decoration (art cut from the homepage mockup: no people, premises, signs, text or the client's work), only as an image
+ * element and labelled like every generated picture. Not in these intents, where a picture reads as the business itself.
+ */
+export const GENERATED_DECOR_EXCLUDED_INTENTS = ["gallery", "team", "products", "menu", "rooms"] as const satisfies readonly Intent[];
+
 export const LogoAsset = z.strictObject({
   src: z.string().max(300),
   width: z.number().int().positive(),
