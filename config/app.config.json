@@ -10,7 +10,9 @@
     "edit": { "model": "claude-sonnet-5-5", "effort": "medium", "maxTokens": 8000 },
     "fullBuild": { "model": "claude-opus-5-5", "effort": "medium", "maxTokens": 32000 },
     "judge": { "model": "claude-sonnet-5-5", "effort": "medium", "maxTokens": 4000 },
-    "director": { "model": "claude-opus-5-5", "effort": "medium", "maxTokens": 8000 }
+    "director": { "model": "claude-opus-5-5", "effort": "medium", "maxTokens": 8000 },
+    "artDirector": { "model": "claude-opus-5-5", "effort": "medium", "maxTokens": 8000 },
+    "rebuild": { "model": "claude-opus-5-5", "effort": "medium", "maxTokens": 16000 }
   },
   "useFullBuildModel": false,
   "variety": {
@@ -30,8 +32,12 @@
   },
   "studio": {
     "$comment": "Design studio (docs/plans/design-studio.md). uniqueness (§5.4, engine studio/look.ts, platform look_fingerprints): look distance 0..1 = weighted mean of genome axes differing (of 11), composition signature (homepage intent:layout sequence, edit distance), palette (ΔE76 in Lab of background, primary, band, accent, capped at 50), perceptual hash of the first screens at 360 and 1280 px (dHash Hamming of 64 bits) and stance (same or not); parts missing on either side are left out. The gate: closer than sameTradeMin to a site of the same trade, or sameTownMin to one in the same town, is not unique enough. Calibrated 2026-10-10 on the goldens and twins replayed free (engine test/fixtures/studio-look-prints.json, studio-look.test.ts): switches off, the 7 same-trade pairs on one template and palette are 0.02–0.19 apart and every other same-trade pair ≥ 0.52; switches on, same-trade pairs 0.18–0.82 (3 below 0.35: two jedilnik, two etiketa, two ogledalo with near-equal palettes); across trades ≥ 0.155 off and ≥ 0.27 on, below 0.25 only three warm-craft pairs (one template and palette in other trades). sameTradeMin 0.35 sits between 0.19 and 0.52; sameTownMin 0.25 lets other trades in one town pass unless they are one template and palette.",
-    "$perRunMaxEurComment": "Studio 0.5: one director call per run, sent only when its estimate (input at limits.spendReservation.charsPerToken, output at models.director.maxTokens) is at most this; no retry.",
-    "perRunMaxEur": 0.4,
+    "$perRunMaxEurComment": "Studio 0.5: the most one studio run may spend, all calls together (mockup path: art director, mockup image, rebuild; then the picker's director call if it falls back). A call is sent only when the run's spend so far plus its estimate (input at limits.spendReservation.charsPerToken, output at the stage's maxTokens; the image at its configured price) is at most this; no retries.",
+    "perRunMaxEur": 0.9,
+    "$modeComment": "Studio 0.5b (docs/plans/studio-0.5.md, 'Mockup pipeline'): mockup = Opus art director (vision) -> one GPT Image mockup of the homepage -> Opus vision rebuild into composed sections, falling back to the picker, then to today's site; picker = the 0.5 preset picker only.",
+    "mode": "mockup",
+    "$mockupComment": "The mockup image: imageGen.models[model] when the client gave photos or a logo (they go as references, refMaxSide px on the long side), imageGen.models[textModel] when not; width x height and quality as sent to fal. maxCrops: decorative art cut from the mockup (labelled AI images). timeoutSeconds: the whole mockup path; past it the run falls back to the picker (calls already sent still finish and are booked).",
+    "mockup": { "model": "gpt-image-2.5-edit", "textModel": "gpt-image-2.5", "width": 1536, "height": 1024, "quality": "high", "refMaxSide": 1024, "maxCrops": 3, "timeoutSeconds": 300 },
     "$generalBelowConfidenceComment": "Studio 0.5: a classification below this confidence means a business outside the ten trades; the shortlist then offers only stances for any trade and presets with no trade tag.",
     "generalBelowConfidence": 0.6,
     "uniqueness": {
@@ -234,6 +240,13 @@
         "sizeParam": "image_size",
         "params": { "quality": "high", "output_format": "jpeg" },
         "usdPerMegapixel": 0.0502
+      },
+      "gpt-image-2.5-edit": {
+        "$comment": "The studio's homepage mockup with the client's photos and logo as references (docs/plans/mockup-spike.md). Token-billed; booked at the spike's rate per image with references.",
+        "endpoint": "openai/gpt-image-2.5/flare/edit",
+        "sizeParam": "image_size",
+        "params": { "quality": "high", "output_format": "jpeg" },
+        "usdPerImage": 0.1
       }
     }
   },

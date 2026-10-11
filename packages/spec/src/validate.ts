@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { GENERATED_IMAGE_INTENTS, GENERATED_IMAGE_SECTIONS, SiteSpec } from "./site.ts";
+import { GENERATED_DECOR_EXCLUDED_INTENTS, GENERATED_IMAGE_INTENTS, GENERATED_IMAGE_SECTIONS, SiteSpec } from "./site.ts";
 import { SECTION_DEFS } from "./sections/index.ts";
 import { DIRECTIONS } from "./directions.ts";
 import { subtypeFits } from "./business.ts";
@@ -152,9 +152,14 @@ export function semanticIssues(spec: SiteSpec): Issue[] {
         // A composed section is the same slot as the section its intent stands for.
         const composed = s.type === "composed";
         if (composed && (GENERATED_IMAGE_INTENTS as readonly string[]).includes(s.props.intent)) return;
-        const where = `${GENERATED_IMAGE_SECTIONS.join(", ")}${composed ? ` (a composed section: intent ${GENERATED_IMAGE_INTENTS.join(", ")})` : ""}`;
+        // Studio 0.5b: elsewhere a composed section may hold AI art as decoration, labelled like every generated
+        // picture: only as an image element (never photos, a photo ground or a photo-filled heading), and never
+        // where a picture reads as the business itself (GENERATED_DECOR_EXCLUDED_INTENTS).
+        const decor = composed && !(GENERATED_DECOR_EXCLUDED_INTENTS as readonly string[]).includes(s.props.intent);
+        const decorPaths = new Set(decor ? s.props.elements.flatMap((e, ei) => (e.kind === "image" ? [`/elements/${ei}/image`] : [])) : []);
+        const where = `${GENERATED_IMAGE_SECTIONS.join(", ")}${composed ? ` (a composed section: intent ${GENERATED_IMAGE_INTENTS.join(", ")}; elsewhere only as an image element, not in ${GENERATED_DECOR_EXCLUDED_INTENTS.join(", ")})` : ""}`;
         walkStrings(s.props, (v, p) => {
-          if (generated.has(v)) add(`/pages/${pi}/sections/${si}/props${p}`, "reference", `${v} is AI-generated and may only be used in ${where}`);
+          if (generated.has(v) && !decorPaths.has(p)) add(`/pages/${pi}/sections/${si}/props${p}`, "reference", `${v} is AI-generated and may only be used in ${where}`);
         });
       }),
     );

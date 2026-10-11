@@ -217,6 +217,10 @@ export const AppConfigSchema = z.object({
     judge: ModelStage,
     /** Design studio 0.5 (docs/plans/studio-0.5.md): the director picks the homepage's stance, presets, palette and hero copy. */
     director: ModelStage,
+    /** Studio 0.5b mockup pipeline: the art director (vision) writes one direction and the mockup's image prompt. */
+    artDirector: ModelStage,
+    /** Studio 0.5b mockup pipeline: rebuilds the mockup (vision) into composed sections, facts through slots. */
+    rebuild: ModelStage,
   }),
   useFullBuildModel: z.boolean(),
   /**
@@ -269,8 +273,23 @@ export const AppConfigSchema = z.object({
     $comment: z.string().optional(),
     $perRunMaxEurComment: z.string().optional(),
     $generalBelowConfidenceComment: z.string().optional(),
-    /** Studio 0.5: € one studio run may spend (the director call's estimate must fit under it; it is sent once, no retry). */
+    /** Studio 0.5: € one studio run may spend, all its calls together (each is sent only when its estimate still fits; no retries). */
     perRunMaxEur: z.number().positive(),
+    $modeComment: z.string().optional(),
+    /** Studio 0.5b: "mockup" (art director → mockup image → rebuild, falling back to the picker) or "picker" (the 0.5 preset picker only). */
+    mode: z.enum(["mockup", "picker"]).default("mockup"),
+    $mockupComment: z.string().optional(),
+    /** Studio 0.5b: the mockup image (keys of imageGen.models), its size and quality, the decorative crops and the mockup path's time limit. */
+    mockup: z.strictObject({
+      model: z.string(),
+      textModel: z.string(),
+      width: z.number().int().min(512).max(2048),
+      height: z.number().int().min(512).max(2048),
+      quality: z.enum(["low", "medium", "high"]),
+      refMaxSide: z.number().int().min(256).max(2048),
+      maxCrops: z.number().int().min(0).max(6),
+      timeoutSeconds: z.number().positive(),
+    }),
     /** Studio 0.5: below this classifier confidence the business is treated as outside the ten trades (general stances and presets only). */
     generalBelowConfidence: z.number().min(0).max(1),
     uniqueness: z.strictObject({

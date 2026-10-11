@@ -15,9 +15,20 @@ describe("designer switch", () => {
     expect(parse("maybe").success).toBe(false);
   });
 
-  it("the director is a priced stage with its own per-run cap", () => {
+  it("the director, the art director and the rebuild are priced stages under one per-run cap", () => {
     const c = loadConfig();
-    expect(c.pricesUsdPerMTok[c.models.director.model]).toBeDefined();
-    expect(c.studio.perRunMaxEur).toBe(0.4);
+    for (const s of [c.models.director, c.models.artDirector, c.models.rebuild]) expect(c.pricesUsdPerMTok[s.model]).toBeDefined();
+    // Studio 0.5b: art director + mockup + rebuild, then the picker's director if it falls back.
+    expect(c.studio.perRunMaxEur).toBe(0.9);
+  });
+
+  it("the mockup pipeline: on by default, its image models priced in imageGen.models", () => {
+    const c = loadConfig();
+    expect(c.studio.mode).toBe("mockup");
+    const m = c.imageGen.models[c.studio.mockup.model]!;
+    expect(m.endpoint).toBe("openai/gpt-image-2.5/flare/edit");
+    expect(m.usdPerImage ?? m.usdPerMegapixel).toBeGreaterThan(0);
+    expect(c.imageGen.models[c.studio.mockup.textModel]).toBeDefined();
+    expect([c.studio.mockup.width, c.studio.mockup.height, c.studio.mockup.quality]).toEqual([1536, 1024, "high"]);
   });
 });

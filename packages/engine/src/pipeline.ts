@@ -22,6 +22,7 @@ import { keepOwnerText } from "./owner-text.ts";
 import { claimImageIds } from "./image-ids.ts";
 import { STORAGE_CONCURRENCY, mapLimit } from "./parallel.ts";
 import { runStudio, studioSeed } from "./studio/run.ts";
+import type { MockupDeps } from "./studio/mockup.ts";
 
 export interface PipelineDeps {
   config: AppConfig;
@@ -402,14 +403,17 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     const today = spec;
     // A business the classifier wasn't sure of (outside the ten trades) gets the shortlist for any trade.
     const general = (await classified).confidence < config.studio.generalBelowConfidence;
-    const r = await stageTime("studio", () => runStudio(client, config, { spec: today, brief, corpus, seed: studioSeed(siteId), ...(general ? { general } : {}) }));
+    const mockup = deps.images ? studioMockupDeps(deps, siteId, today) : undefined;
+    const r = await stageTime("studio", () => runStudio(client, config, { spec: today, brief, corpus, seed: studioSeed(siteId), ...(general ? { general } : {}), ...(mockup ? { mockup } : {}) }));
+    // The mockup path's own line (studio 0.5b): its idea, or why it fell back to the picker, and € by stage.
+    const mockupLog = r.mockup ? { mockup: { ok: r.mockup.ok, reason: r.mockup.reason ?? null, idea: r.mockup.idea ?? null, direction: r.mockup.direction ?? null, sections: r.mockup.sections ?? null, crops: r.mockup.crops, eur: r.mockup.eur } } : {};
     if (r.ok) {
       spec = r.spec;
       studio = { composed: true, idea: r.idea, stance: r.stance };
-      await log("studio", STUDIO_COMPOSED, { idea: r.idea, stance: r.stance, presets: r.used.presets, palette: r.used.palette, pairing: r.used.pairing, wordmark: r.used.wordmark, dropped: r.dropped, eur: r.costEur });
+      await log("studio", STUDIO_COMPOSED, { path: r.path, idea: r.idea, stance: r.stance, presets: r.used.presets, palette: r.used.palette, pairing: r.used.pairing, wordmark: r.used.wordmark, dropped: r.dropped, eur: r.costEur, ...mockupLog });
     } else {
-      studio = { composed: false, reason: r.reason, ...(r.idea ? { idea: r.idea } : {}) };
-      await log("studio", STUDIO_FELL_BACK, { reason: r.reason, idea: r.idea ?? null, eur: r.costEur });
+      studio = { composed: false, reason: r.mockup && !r.mockup.ok ? `mockup: ${r.mockup.reason ?? "failed"}; picker: ${r.reason}` : r.reason, ...(r.idea ? { idea: r.idea } : {}) };
+      await log("studio", STUDIO_FELL_BACK, { reason: r.reason, idea: r.idea ?? r.mockup?.idea ?? null, eur: r.costEur, ...mockupLog });
     }
   }
   let version = await repo.saveSpec(siteId, spec, "generate");
@@ -519,6 +523,31 @@ export function generatedImageCount(
   // The plan's pictures for this month ran short: fewer than the site would get, and the caller says why.
   if (missing > max) return { wanted: max, skipped: null, limited: { wanted: missing } };
   return { wanted: missing, skipped: null };
+}
+
+/**
+ * The studio's mockup path on this site's storage (studio 0.5b): the client's photos as their largest WebP variant, the
+ * logo as rendered, fresh "generated" image ids for the crops, each crop stored and processed like a generated picture.
+ */
+function studioMockupDeps(deps: PipelineDeps, siteId: string, today: SiteSpec): MockupDeps {
+  const { config, storage, repo } = deps;
+  return {
+    painter: deps.images!,
+    photo: async (id) => {
+      const img = today.assets.images.find((i) => i.id === id);
+      const w = img ? Math.max(...variantWidths(img, config.images.widths)) : undefined;
+      return img && w ? ((await storage.get(mediaKey(siteId, variantFile(id, w, "webp")))) ?? undefined) : undefined;
+    },
+    logo: async () => (today.assets.logo ? ((await storage.get(mediaKey(siteId, today.assets.logo.file))) ?? undefined) : undefined),
+    imageIds: (n) => claimImageIds(repo, siteId, "generated", n, today.assets.images),
+    store: async (id, jpeg) => {
+      const key = `sites/${siteId}/generated/${id}.jpg`;
+      await storage.put(key, jpeg, "image/jpeg");
+      const processed = await processPhoto(id, jpeg, config.images.widths, { avif: config.images.avifQuality, webp: config.images.webpQuality });
+      await mapLimit(processed.variants, STORAGE_CONCURRENCY, (v) => storage.put(mediaKey(siteId, v.file), v.data, contentType(v.file)));
+      return key;
+    },
+  };
 }
 
 /**

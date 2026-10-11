@@ -1,0 +1,13 @@
+A flat full-page screenshot of a desktop homepage, 1536×1024 px, with no browser window, no device frame and no perspective. Page ground is deep near-black ink #121014. Typography: Bricolage Grotesque ExtraBold for headings, with ink traps and quirky stroke ends, sentence case, tight leading. Public Sans Regular for body text. Header: a small wordmark in Bricolage Bold at far left in #ECE8F0, three plain text nav links at right in #A9A3B2, no button. Hero: on the left eight of twelve columns, a huge left-aligned headline in #ECE8F0 across three lines, about 9vw. Below it a lead paragraph in #A9A3B2 at 22px spanning six columns, then one rectangular button with barely rounded corners filled violet #5B3BD6 with #F4F1FA label. On the right four columns, a fine line drawing of a glass ink pot with a single drip, drawn in a slightly wobbly single-weight violet #A996FF line like a tattoo transfer stencil, on the plain #121014 ground, isolated from all text. Faint 1px #3A3442 horizontal rules run across the hero background like drawing-pad lines. Below: a services section with a small heading in the left three columns. To its right, three very large Bricolage rows in #ECE8F0, each separated by a thin 1px #A996FF horizontal rule. Next: a full-width saturated violet #5B3BD6 band. A heading in #F4F1FA sits on the left half and a paragraph in #F4F1FA on the right half. A single ribbon line of three short phrases separated by small light-violet dots runs across the band's bottom. Final contact section on #1C1920: a huge phone numeral in #A996FF on the left with an email line below it and two name lines in #ECE8F0. On the right, an opening hours table with thin #3A3442 rules, and below it a simple schematic street map drawn in thin violet lines on #121014. A thin footer rule closes the page. No photos, no people, no faces, no gradients, no shadows, no icons, no pill buttons, everything left-aligned on a 12-column grid, generous dark space.
+
+The business has no photographs: no photos anywhere on the page.
+
+Required texts, verbatim and spelled exactly (use only these; every word legible; no other words, numbers, reviews or prices):
+- the business name "Črnilo tattoo studio" set as a typographic wordmark
+- navigation: "Domov"
+- headline: "Tetovaže, narisane na novo za vas"
+- intro: "Tattoo studio na Gosposki ulici v Celju. Vsak motiv narišemo na novo za vas, posvet je brezplačen, igle pa so za enkratno uporabo."
+- a section listing: Črno-sive tetovaže in fine line, Barvne tetovaže in ilustracije, Mala tetovaža
+- opening hours: "Ponedeljek zaprto", "Torek–sobota 10.00–19.00", "Nedelja zaprto"
+- address: "Gosposka ulica 9, 3000 Celje"
+- phone: "041 555 377" with one button "Pokličite"

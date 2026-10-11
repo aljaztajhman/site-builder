@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { ComposedProps, GENERATED_IMAGE_INTENTS, Section, SECTION_DEFS, intentOfSection, toModelJsonSchema, validateSite, type SiteSpec } from "../src/index.ts";
+import { ComposedProps, GENERATED_DECOR_EXCLUDED_INTENTS, GENERATED_IMAGE_INTENTS, Section, SECTION_DEFS, intentOfSection, toModelJsonSchema, validateSite, type SiteSpec } from "../src/index.ts";
 
 /** A composed opener in the spirit of template M (Tablica): the phone as a registration plate beside a workshop photo. */
 export const SAMPLE_COMPOSED = {
@@ -49,8 +49,9 @@ describe("composed sections (spec v19)", () => {
     expect(text).not.toContain('"prefixItems"');
   });
 
-  it("take a generated picture where their intent is the opener, a page header or a story; nowhere else", () => {
-    // The M sheet: composed sections hero (img_01), services (img_02), story (img_03), every picture generated.
+  it("take a generated picture anywhere in the opener, a page header or a story; elsewhere only as a labelled image element (studio 0.5b)", () => {
+    // The M sheet: composed sections hero (img_01 as the photo ground), services (img_02 as an image element), story
+    // (img_03), every picture generated.
     const sheet = JSON.parse(readFileSync(new URL("../../../tools/eval/composed/m.json", import.meta.url), "utf8")) as SiteSpec;
     for (const img of sheet.assets.images) img.origin = "generated";
     const flagged = (spec: SiteSpec) =>
@@ -58,11 +59,29 @@ describe("composed sections (spec v19)", () => {
         .issues.filter((i) => i.message.includes("AI-generated"))
         .map((i) => [i.path.replace(/\/props\/.*/, ""), i.message]);
     expect(GENERATED_IMAGE_INTENTS).toEqual(["hero", "page-head", "story"]);
-    expect(flagged(sheet)).toEqual([["/pages/0/sections/2", expect.stringMatching(/^img_02 is AI-generated and may only be used in .*\(a composed section: intent hero, page-head, story\)$/)]]);
+    // The services section's image element is decoration: allowed.
+    expect(flagged(sheet)).toEqual([]);
     const intentOf = (spec: SiteSpec, si: number) => spec.pages[0]!.sections[si]!.props as { intent: string };
+    // Outside the opener a photo ground is not decoration: the hero moved to gallery is flagged, and so is an image
+    // element where a picture reads as the business itself (products, gallery, team, menu, rooms).
     const moved = structuredClone(sheet);
     intentOf(moved, 4).intent = "page-head";
-    intentOf(moved, 0).intent = "gallery";
-    expect(flagged(moved).map(([p]) => p)).toEqual(["/pages/0/sections/0", "/pages/0/sections/2"]);
+    intentOf(moved, 0).intent = "highlights";
+    expect(flagged(moved)).toEqual([["/pages/0/sections/0", expect.stringMatching(/^img_01 is AI-generated and may only be used in .*elsewhere only as an image element, not in gallery, team, products, menu, rooms\)$/)]]);
+    for (const intent of GENERATED_DECOR_EXCLUDED_INTENTS) {
+      const s = structuredClone(sheet);
+      intentOf(s, 2).intent = intent;
+      expect(flagged(s).map(([p]) => p), intent).toEqual(["/pages/0/sections/2"]);
+    }
+    expect([...GENERATED_DECOR_EXCLUDED_INTENTS].sort()).toEqual(["gallery", "menu", "products", "rooms", "team"]);
+  });
+
+  it("keep the AI label on decoration: a generated image element renders through the labelled picture (origin stays generated)", () => {
+    const sheet = JSON.parse(readFileSync(new URL("../../../tools/eval/composed/m.json", import.meta.url), "utf8")) as SiteSpec;
+    for (const img of sheet.assets.images) img.origin = "generated";
+    const v = validateSite(sheet);
+    expect(v.ok).toBe(true);
+    // validateSite keeps the origin: the renderer labels every generated picture (render test composed.test.ts).
+    if (v.ok) expect(v.spec.assets.images.find((i) => i.id === "img_02")?.origin).toBe("generated");
   });
 });

@@ -135,6 +135,43 @@ export class ImageGenerator {
   }
 
   /**
+   * One image from `imageGen.models[modelName]` with a request body the caller wrote (`prompt`, `image_size`, references
+   * …; the model's params go first), booked under `stage` ("mockup": the studio's homepage mockup, which is not a site
+   * picture and so not counted against a plan's monthly pictures). Reserved under the daily cap at the model's price
+   * for the requested size, as `generate`. Returns the delivered JPEG bytes as they came (re-encoded, no metadata).
+   */
+  async paint(modelName: string, body: Record<string, unknown>, opts: { stage: "mockup"; signal?: AbortSignal }): Promise<{ data: Uint8Array; width: number; height: number; costEur: number }> {
+    const { config } = this.opts;
+    const model = config.imageGen.models[modelName];
+    if (!model) throw new Error(`config: imageGen.models has no ${modelName}`);
+    const size = (body.image_size as { width: number; height: number } | undefined) ?? outputSize(config, false);
+    const price = imageCostEur(config, model, size.width, size.height);
+    opts.signal?.throwIfAborted();
+    const reservation = await this.ledger.reserve({ stage: opts.stage, model: modelName, estimateEur: price, capEur: config.limits.dailyModelSpendCapEur });
+    const started = Date.now();
+    const book = (costEur: number, ok: boolean) => reservation.settle({ stage: opts.stage, model: modelName, usage: NO_TOKENS, costEur, durationMs: Date.now() - started, ok });
+    let raw: Uint8Array;
+    try {
+      raw = await this.opts.transport.generate(model, { ...model.params, ...body, num_images: 1 });
+    } catch (e) {
+      await book(e instanceof ImageBilledError ? price : 0, false);
+      throw e;
+    }
+    try {
+      const data = new Uint8Array(await sharp(raw).rotate().jpeg({ quality: 90, mozjpeg: true }).toBuffer());
+      const meta = await sharp(data).metadata();
+      const width = meta.width ?? size.width;
+      const height = meta.height ?? size.height;
+      const costEur = model.usdPerImage !== undefined ? price : imageCostEur(config, model, width, height);
+      await book(costEur, true);
+      return { data, width, height, costEur };
+    } catch (e) {
+      await book(price, false);
+      throw e;
+    }
+  }
+
+  /**
    * One landscape image for `prompt` (the pipeline style is appended: pipelineStyle). Returns JPEG bytes and size.
    * Its price is reserved under the daily cap first. `signal` (the job stopped) is checked before the
    * reservation and again once it is made; a request already sent is not cut off, since fal would bill it anyway.

@@ -1,0 +1,97 @@
+{
+  "ok": true,
+  "path": "mockup",
+  "idea": "Črnilo means ink, and every motif here is drawn new before it touches skin, so the page is a near-black ink field marked with the violet line of a tattoo transfer stencil, the moment a drawing becomes a tattoo.",
+  "stance": "mockup",
+  "presets": [
+    "mockup:hero",
+    "mockup:services",
+    "mockup:story",
+    "mockup:contact"
+  ],
+  "palette": "mockup",
+  "pairing": "pairing/bricolage-public-sans",
+  "wordmark": "wordmark/plain",
+  "dropped": [
+    "section 1 (hero): h1 size 7 → 6 for a 33-character headline"
+  ],
+  "mockup": {
+    "ok": true,
+    "idea": "Črnilo means ink, and every motif here is drawn new before it touches skin, so the page is a near-black ink field marked with the violet line of a tattoo transfer stencil, the moment a drawing becomes a tattoo.",
+    "direction": "Stencil Violet",
+    "sections": [
+      "hero",
+      "services",
+      "story",
+      "contact"
+    ],
+    "crops": [
+      {
+        "id": "crop1",
+        "ok": true
+      }
+    ],
+    "eur": {
+      "artDirector": 0.06825304,
+      "mockup": 0.067903684608,
+      "rebuild": 0.11001464000000001
+    }
+  },
+  "art": {
+    "name": "Stencil Violet",
+    "idea": "Črnilo means ink, and every motif here is drawn new before it touches skin, so the page is a near-black ink field marked with the violet line of a tattoo transfer stencil, the moment a drawing becomes a tattoo.",
+    "palette": [
+      {
+        "role": "background",
+        "hex": "#121014"
+      },
+      {
+        "role": "surface",
+        "hex": "#1C1920"
+      },
+      {
+        "role": "text",
+        "hex": "#ECE8F0"
+      },
+      {
+        "role": "muted",
+        "hex": "#A9A3B2"
+      },
+      {
+        "role": "primary",
+        "hex": "#5B3BD6"
+      },
+      {
+        "role": "onPrimary",
+        "hex": "#F4F1FA"
+      },
+      {
+        "role": "accent",
+        "hex": "#A996FF"
+      },
+      {
+        "role": "border",
+        "hex": "#3A3442"
+      },
+      {
+        "role": "band",
+        "hex": "#5B3BD6"
+      },
+      {
+        "role": "onBand",
+        "hex": "#F4F1FA"
+      }
+    ],
+    "pairing": "bricolage-public-sans",
+    "typeCharacter": "Bricolage Grotesque's ink traps and slightly wonky stroke endings feel cut by a needle. It is set ExtraBold, sentence case and tight-leaded at display sizes (h1 around 9vw, service names around 5vw), while Public Sans Regular carries the body at 18px, with the lead at 22px in a muted lilac-grey.",
+    "composition": "Header row on #121014: the name 'Črnilo' in Bricolage Bold at left (cols 1–3), three plain text links at right (cols 8–12), no button. Hero, rows 1–5: the h1 spans cols 1–8 in #ECE8F0 across three lines, left-aligned. The lead sits below it in cols 1–6 in #A9A3B2, followed by one rectangular violet #5B3BD6 button with slightly squared corners. Cols 9–12 hold a violet stencil-line drawing of an ink pot with a single drip. Faint 1px #3A3442 horizontal construction rules run behind the hero like a drawing pad, with no text crossing them. Section 2 'Kaj delamo': a small heading in cols 1–3, then the three offerings stacked as huge Bricolage rows in cols 4–12, each separated by a 1px #A996FF rule, the row text in #ECE8F0. Section 3: a full-width violet #5B3BD6 band. The story heading sits in cols 1–6 in #F4F1FA and the running text in cols 7–12. Below them a ribbon of the three highlights runs as short words split by small violet-light dots. Section 4 'Naročanje' on #1C1920: the phone as a huge numeral in cols 1–7 in #A996FF, with the email beneath it. The two named artists appear as plain text lines in cols 1–4. The opening hours table sits in cols 8–12 with #3A3442 rules. The address and a schematic street map, drawn in thin violet lines on #121014, span cols 8–12. The footer is a thin rule with the name.",
+    "imagery": "No photos at all. There is one drawn piece: a fine violet #A996FF stencil-transfer line drawing of a glass ink pot with a single drip, single-weight slightly wobbly carbon line, painted alone on a plain #121014 ground in the hero's right columns, with no letters, hands or tattoo motifs. The schematic map uses the same violet thin-line language. Faint horizontal rules in the hero act as drawing-pad lines.",
+    "signature": "The stencil-violet line: the purple of a tattoo transfer used as the page's only colour, from the ink-pot drawing to the full-width violet band, so the whole site reads like a fresh stencil on dark ink.",
+    "copy": {
+      "headline": "Tetovaže, narisane na novo za vas",
+      "lead": "Tattoo studio na Gosposki ulici v Celju. Vsak motiv narišemo na novo za vas, posvet je brezplačen, igle pa so za enkratno uporabo."
+    },
+    "imagePrompt": "A flat full-page screenshot of a desktop homepage, 1536×1024 px, with no browser window, no device frame and no perspective. Page ground is deep near-black ink #121014. Typography: Bricolage Grotesque ExtraBold for headings, with ink traps and quirky stroke ends, sentence case, tight leading. Public Sans Regular for body text. Header: a small wordmark in Bricolage Bold at far left in #ECE8F0, three plain text nav links at right in #A9A3B2, no button. Hero: on the left eight of twelve columns, a huge left-aligned headline in #ECE8F0 across three lines, about 9vw. Below it a lead paragraph in #A9A3B2 at 22px spanning six columns, then one rectangular button with barely rounded corners filled violet #5B3BD6 with #F4F1FA label. On the right four columns, a fine line drawing of a glass ink pot with a single drip, drawn in a slightly wobbly single-weight violet #A996FF line like a tattoo transfer stencil, on the plain #121014 ground, isolated from all text. Faint 1px #3A3442 horizontal rules run across the hero background like drawing-pad lines. Below: a services section with a small heading in the left three columns. To its right, three very large Bricolage rows in #ECE8F0, each separated by a thin 1px #A996FF horizontal rule. Next: a full-width saturated violet #5B3BD6 band. A heading in #F4F1FA sits on the left half and a paragraph in #F4F1FA on the right half. A single ribbon line of three short phrases separated by small light-violet dots runs across the band's bottom. Final contact section on #1C1920: a huge phone numeral in #A996FF on the left with an email line below it and two name lines in #ECE8F0. On the right, an opening hours table with thin #3A3442 rules, and below it a simple schematic street map drawn in thin violet lines on #121014. A thin footer rule closes the page. No photos, no people, no faces, no gradients, no shadows, no icons, no pill buttons, everything left-aligned on a 12-column grid, generous dark space."
+  },
+  "eur": 0.246171364608
+}

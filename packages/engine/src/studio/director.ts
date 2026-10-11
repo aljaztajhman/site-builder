@@ -121,22 +121,22 @@ export function directorRequest(input: { spec: SiteSpec; sources: ComposeSources
 }
 
 /** Every run of digits in a text, and every phone-like group of runs ("041 555 906") as its digits ("041555906"). */
-const numbersIn = (s: string): string[] => [...(s.match(/\d+/g) ?? []), ...(s.match(/\d[\d\s/.-]{4,}\d/g) ?? []).map((g) => g.replace(/\D/g, "")).filter((g) => g.length >= 6)];
+export const digitRuns = (s: string): string[] => [...(s.match(/\d+/g) ?? []), ...(s.match(/\d[\d\s/.-]{4,}\d/g) ?? []).map((g) => g.replace(/\D/g, "")).filter((g) => g.length >= 6)];
 
 /** The digit runs the client gave: their own text, the business facts, the brief. */
 export function knownNumbers(spec: SiteSpec, sources: ComposeSources, corpus: string): Set<string> {
-  return new Set([...numbersIn(corpus), ...numbersIn(JSON.stringify(spec.business)), ...numbersIn(JSON.stringify(sources.brief ?? {}))]);
+  return new Set([...digitRuns(corpus), ...digitRuns(JSON.stringify(spec.business)), ...digitRuns(JSON.stringify(sources.brief ?? {}))]);
 }
 
 /** Copy the guards keep: within its length, and no number the client didn't give. Undefined when it can't be kept. */
-function keptCopy(s: string | undefined, max: number, known: ReadonlySet<string>, dropped: string[], where: string): string | undefined {
+export function keptCopy(s: string | undefined, max: number, known: ReadonlySet<string>, dropped: string[], where: string): string | undefined {
   const t = s?.replace(/\s+/g, " ").trim();
   if (!t) return undefined;
   if (t.length > max) {
     dropped.push(`${where}: longer than ${max}`);
     return undefined;
   }
-  const unknown = numbersIn(t).filter((n) => !known.has(n));
+  const unknown = digitRuns(t).filter((n) => !known.has(n));
   if (unknown.length) {
     dropped.push(`${where}: number ${unknown.join(", ")} not in the client's facts`);
     return undefined;

@@ -34,3 +34,17 @@ The six Haiku designers, the tournament critic and pre-screen, the finisher loop
 - Unit tests with recorded director answers for the 3 composer fixtures (pekarna-kvas, avtoservis-mrak, instalacije-rebernik), no real calls: shortlist contents (approved only), choice validation and fallback, compose from an arbitrary base spec (not only eval fixtures), guards pass, fallback to today's spec on a bad answer, the switch (off / trial with and without the email / on).
 - One paid recording run on the 3 fixtures (≈ €0.30, within meta/budget), with screenshots at 1280 and 360 px.
 - Live: after merge and the Railway variables, the owner generates on their account; their first test is the POC.
+
+## Mockup pipeline (0.5b, 2026-10-12)
+
+The live path is now spike 2's pipeline (docs/plans/mockup-spike.md); the picker above is its fallback. config `studio.mode`: `"mockup"` (default) or `"picker"`; same trial switch.
+
+1. **Art director** (stage `artDirector`, Opus, vision: the client's photos and logo; engine studio/art-director.ts). One direction: idea, palette with roles, one of the 20 font pairs, composition, imagery, signature, hero headline and lead (Slovene, copy checks), and the image prompt. Its prompt carries the banned list, the ground and contrast rules, what the composition language can build, the props rule and the owner's taste. Code appends the texts the mockup must show, verbatim from the spec.
+2. **Mockup** (stage `mockup`, fal `studio.mockup.model`: GPT Image 2.5 edit at high, 1536×1024, photos and logo as references; the text-to-image model without them). Booked under the daily cap like a picture, not counted against a plan's monthly pictures. Never published.
+3. **Rebuild** (stage `rebuild`, Opus, vision: the mockup and the photos; studio/rebuild.ts). Sections as composed props with slot markers, page tokens, photo regions, up to 3 decorative crop boxes. Code keeps only short number-free labels as literal text, removes call buttons, fills each section with `fillPreset` (repair, guards), adds a section only when the page gains no issue, caps the h1's size by its length, keeps today's contact or hours if the rebuild lost them, and runs `enforceDesign` on the tokens.
+4. **Crops**: refused when they overlap a client photo region, say they hold people, hands, premises, signs, text, logos or the client's work, or are tiny or huge. Accepted ones are stored as generated images and labelled "Ustvarjeno z UI". validateSite now allows a generated image as an image element in any composed section except gallery, team, products, menu and rooms (spec `GENERATED_DECOR_EXCLUDED_INTENTS`).
+5. **Fallback**: any failure (no FAL_KEY, cost cap, fal error, unusable answer, guards, `studio.mockup.timeoutSeconds`) runs the picker with what is left of `studio.perRunMaxEur` (€0.90), then today's site. The job log line carries the mockup's idea, sections, crops, reason and € by stage.
+
+Measured on 5 recorded runs (pnpm studio:poc, eval/runs/studio-poc/cost-log.jsonl): €0.25–0.33 per homepage (art director €0.07–0.09, mockup €0.068–0.086 booked, rebuild €0.11–0.15), about 2 minutes. All five built from the mockup; none fell back.
+
+Not yet (1.0): two directions for the owner to pick, a revise round against the mockup, transparent cut-outs (crops keep the painted ground), a page-wide drawing layer, condensed display faces, other pages in the same language.
