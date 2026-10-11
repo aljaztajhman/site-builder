@@ -45,7 +45,7 @@ const SHIPPED: Record<VocabKey, readonly string[]> = {
   EDGES: ["straight", "rule", "cut", "torn", "drawing"],
   FACT_OBJECTS: ["numeral", "plate", "stamp", "ticket", "seal", "tag"],
   TYPE_TREATMENTS: ["none", "stacked", "knockout"],
-  MOTIONS: ["reveal", "unmask"],
+  MOTIONS: ["reveal", "unmask", "rise", "wipe", "stagger", "drift-bg"],
   WORDMARK_STYLES: ["plain"],
   DRAWINGS: [
     "motif/bakery/wheat-ear-line",

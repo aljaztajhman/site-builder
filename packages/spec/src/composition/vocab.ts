@@ -75,7 +75,7 @@ export const FACT_OBJECTS = ["numeral", "plate", "stamp", "ticket", "seal", "tag
 /** Heading type treatments (`heading.treatment`). I6 fills it to 15. */
 export const TYPE_TREATMENTS = ["none", "stacked", "knockout"] as const;
 /** Section motion presets (`motion`), described in MOTION_META. I7 fills it to 20. */
-export const MOTIONS = ["reveal", "unmask"] as const;
+export const MOTIONS = ["reveal", "unmask", "rise", "wipe", "stagger", "drift-bg"] as const;
 /** Typographic wordmark styles (`design.wordmark.style`). I9 adds the rest. */
 export const WORDMARK_STYLES = ["plain"] as const;
 /**
@@ -194,6 +194,11 @@ export interface MotionMeta {
 export const MOTION_META: Readonly<Record<(typeof MOTIONS)[number], MotionMeta>> = {
   reveal: { kind: "entrance", targets: ["heading", "text", "list", "fact", "prices", "quote"], safeAtLoad: false, js: false, minLevel: "calm" },
   unmask: { kind: "entrance", targets: ["image", "photos"], safeAtLoad: false, js: false, minLevel: "calm" },
+  rise: { kind: "entrance", targets: ["heading", "text", "list", "fact", "prices", "quote"], safeAtLoad: false, js: false, minLevel: "calm" },
+  wipe: { kind: "entrance", targets: ["image", "photos"], safeAtLoad: false, js: false, minLevel: "calm" },
+  stagger: { kind: "entrance", targets: ["heading", "text", "list", "fact", "prices", "quote"], safeAtLoad: false, js: false, minLevel: "calm" },
+  /** Moves the section's background photo layer (no element kind); starts fully visible, so it may open a page. */
+  "drift-bg": { kind: "scroll", targets: [], safeAtLoad: true, js: false, minLevel: "lively" },
 };
 
 const NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;

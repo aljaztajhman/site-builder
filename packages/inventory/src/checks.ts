@@ -49,6 +49,8 @@ export const BYTE_BUDGET: Partial<Record<AssetKind, number>> = {
   composition: 0,
   /** A practical-fact icon: its inline SVG in the page (icons.ts), no CSS of its own. */
   icon: 1024,
+  /** A motion preset: its own partial (styles/vocab/motion/<name>.css), minified; the family sheet joins them. */
+  motion: 1024,
 };
 /**
  * The composed stylesheets, minified (docs/plans/studio-phase1-design.md §3.4.1, §3.4.7): the core sheet (spec v19,

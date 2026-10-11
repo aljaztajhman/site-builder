@@ -19,7 +19,7 @@ const asset = (id: string, kind: AssetKind, more: Partial<Asset> = {}): Asset =>
 const CASES: [AssetKind, string[]][] = [
   ["motif", DRAWINGS.filter((id) => id.startsWith("motif/"))],
   ["ornament", DRAWINGS.filter((id) => id.startsWith("ornament/"))],
-  ["motion", ["motion/reveal", "motion/unmask"]],
+  ["motion", ["motion/reveal", "motion/unmask", "motion/rise", "motion/wipe", "motion/stagger", "motion/drift-bg"]],
   ["icon", PRACTICAL_FACTS.map((f) => `icon/line/${f}`)],
   ["wordmark", ["wordmark/plain"]],
   ["divider", ["divider/rule", "divider/rope-line"]],
