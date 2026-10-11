@@ -1,0 +1,2934 @@
+{
+  "pages": [
+    {
+      "id": "p01",
+      "title": "Pekarna Kvas — oversized type",
+      "fixtureId": "pekarna-kvas",
+      "stance": "oversized-type",
+      "seed": 1,
+      "kind": "named",
+      "desktop": "img/p01-desk.jpg",
+      "phone": "img/p01-phone.jpg",
+      "parts": [
+        {
+          "id": "s1",
+          "label": "Section 1 — opening",
+          "assets": [
+            "composition/hero/headline-large-ruled",
+            "motif/bakery/sun-loaf-shapes-cut"
+          ],
+          "image": "img/p01-s1.jpg"
+        },
+        {
+          "id": "s2",
+          "label": "Section 2 — notice bar",
+          "assets": [
+            "composition/notice/one-line-bar"
+          ],
+          "image": "img/p01-s2.jpg"
+        },
+        {
+          "id": "s3",
+          "label": "Section 3 — highlights",
+          "assets": [
+            "composition/highlights/large-lines"
+          ],
+          "image": "img/p01-s3.jpg"
+        },
+        {
+          "id": "s4",
+          "label": "Section 4 — products",
+          "assets": [
+            "composition/products/round-plates",
+            "mask/circle"
+          ],
+          "image": "img/p01-s4.jpg"
+        },
+        {
+          "id": "s5",
+          "label": "Section 5 — prices",
+          "assets": [
+            "composition/prices/rows-table"
+          ],
+          "image": "img/p01-s5.jpg"
+        },
+        {
+          "id": "s6",
+          "label": "Section 6 — opening hours",
+          "assets": [
+            "composition/hours/heading-table"
+          ],
+          "image": "img/p01-s6.jpg"
+        },
+        {
+          "id": "s7",
+          "label": "Section 7 — contact",
+          "assets": [
+            "composition/contact/phone-call-out",
+            "fact/numeral"
+          ],
+          "image": "img/p01-s7.jpg"
+        },
+        {
+          "id": "colours",
+          "label": "Colours",
+          "assets": [
+            "palette/skorja-poppy"
+          ],
+          "image": null,
+          "swatches": [
+            "#ffffff",
+            "#edf2ef",
+            "#24130a",
+            "#8c2a2a",
+            "#af3e31",
+            "#ecc56a"
+          ]
+        },
+        {
+          "id": "fonts",
+          "label": "Fonts",
+          "assets": [
+            "pairing/bricolage-figtree"
+          ],
+          "image": "img/p01-s1.jpg"
+        },
+        {
+          "id": "lettering",
+          "label": "Name lettering",
+          "assets": [
+            "wordmark/lockup"
+          ],
+          "image": "img/p01-lettering.jpg"
+        }
+      ]
+    },
+    {
+      "id": "p02",
+      "title": "Pekarna Kvas — station timetable",
+      "fixtureId": "pekarna-kvas",
+      "stance": "station-timetable",
+      "seed": 1,
+      "kind": "named",
+      "desktop": "img/p02-desk.jpg",
+      "phone": "img/p02-phone.jpg",
+      "parts": [
+        {
+          "id": "s1",
+          "label": "Section 1 — opening",
+          "assets": [
+            "composition/hero/phone-giant-rope",
+            "fact/numeral",
+            "ornament/prekmurje-pottery-band-line",
+            "ornament/rope-line"
+          ],
+          "image": "img/p02-s1.jpg"
+        },
+        {
+          "id": "s2",
+          "label": "Section 2 — story",
+          "assets": [
+            "composition/story/photo-owner"
+          ],
+          "image": "img/p02-s2.jpg"
+        },
+        {
+          "id": "s3",
+          "label": "Section 3 — products",
+          "assets": [
+            "composition/products/photo-grid"
+          ],
+          "image": "img/p02-s3.jpg"
+        },
+        {
+          "id": "s4",
+          "label": "Section 4 — prices",
+          "assets": [
+            "composition/prices/rows-table"
+          ],
+          "image": "img/p02-s4.jpg"
+        },
+        {
+          "id": "s5",
+          "label": "Section 5 — opening hours",
+          "assets": [
+            "composition/hours/station-board",
+            "fact/split"
+          ],
+          "image": "img/p02-s5.jpg"
+        },
+        {
+          "id": "s6",
+          "label": "Section 6 — contact",
+          "assets": [
+            "composition/contact/details-and-map"
+          ],
+          "image": "img/p02-s6.jpg"
+        },
+        {
+          "id": "colours",
+          "label": "Colours",
+          "assets": [
+            "palette/linocut"
+          ],
+          "image": null,
+          "swatches": [
+            "#ffffff",
+            "#f1f1f2",
+            "#19181a",
+            "#19181a",
+            "#e2572a",
+            "#e2572a"
+          ]
+        },
+        {
+          "id": "fonts",
+          "label": "Fonts",
+          "assets": [
+            "pairing/archivo-public-sans"
+          ],
+          "image": "img/p02-s1.jpg"
+        },
+        {
+          "id": "lettering",
+          "label": "Name lettering",
+          "assets": [
+            "wordmark/stamp"
+          ],
+          "image": "img/p02-lettering.jpg"
+        }
+      ]
+    },
+    {
+      "id": "p03",
+      "title": "Pekarna Kvas — shopfront fascia",
+      "fixtureId": "pekarna-kvas",
+      "stance": "shopfront-fascia",
+      "seed": 1,
+      "kind": "named",
+      "desktop": "img/p03-desk.jpg",
+      "phone": "img/p03-phone.jpg",
+      "parts": [
+        {
+          "id": "s1",
+          "label": "Section 1 — opening",
+          "assets": [
+            "composition/hero/photo-dark-panel",
+            "motif/bakery/wheat-ear-line"
+          ],
+          "image": "img/p03-s1.jpg"
+        },
+        {
+          "id": "s2",
+          "label": "Section 2 — products",
+          "assets": [
+            "composition/products/photo-grid"
+          ],
+          "image": "img/p03-s2.jpg"
+        },
+        {
+          "id": "s3",
+          "label": "Section 3 — opening hours",
+          "assets": [
+            "composition/hours/poster-band-hours"
+          ],
+          "image": "img/p03-s3.jpg"
+        },
+        {
+          "id": "s4",
+          "label": "Section 4 — booking",
+          "assets": [
+            "composition/booking/book-beside-hours"
+          ],
+          "image": "img/p03-s4.jpg"
+        },
+        {
+          "id": "s5",
+          "label": "Section 5 — contact",
+          "assets": [
+            "composition/contact/details-and-map"
+          ],
+          "image": "img/p03-s5.jpg"
+        },
+        {
+          "id": "colours",
+          "label": "Colours",
+          "assets": [
+            "palette/bakery-blue"
+          ],
+          "image": null,
+          "swatches": [
+            "#ffffff",
+            "#eaf0f8",
+            "#141d2e",
+            "#24427a",
+            "#c4682a",
+            "#f0c75e"
+          ]
+        },
+        {
+          "id": "fonts",
+          "label": "Fonts",
+          "assets": [
+            "pairing/bitter-nunito-sans"
+          ],
+          "image": "img/p03-s1.jpg"
+        },
+        {
+          "id": "lettering",
+          "label": "Name lettering",
+          "assets": [
+            "wordmark/lockup"
+          ],
+          "image": "img/p03-lettering.jpg"
+        }
+      ]
+    },
+    {
+      "id": "p04",
+      "title": "Avtoservis Mrak — swiss grid",
+      "fixtureId": "avtoservis-mrak",
+      "stance": "swiss-grid",
+      "seed": 1,
+      "kind": "named",
+      "desktop": "img/p04-desk.jpg",
+      "phone": "img/p04-phone.jpg",
+      "parts": [
+        {
+          "id": "s1",
+          "label": "Section 1 — opening",
+          "assets": [
+            "composition/hero/headline-facts",
+            "motif/car-repair/torque-wrench-line"
+          ],
+          "image": "img/p04-s1.jpg"
+        },
+        {
+          "id": "s2",
+          "label": "Section 2 — services",
+          "assets": [
+            "composition/services/list-beside"
+          ],
+          "image": "img/p04-s2.jpg"
+        },
+        {
+          "id": "s3",
+          "label": "Section 3 — opening hours",
+          "assets": [
+            "composition/hours/heading-table"
+          ],
+          "image": "img/p04-s3.jpg"
+        },
+        {
+          "id": "s4",
+          "label": "Section 4 — booking",
+          "assets": [
+            "composition/booking/book-beside-hours"
+          ],
+          "image": "img/p04-s4.jpg"
+        },
+        {
+          "id": "s5",
+          "label": "Section 5 — contact",
+          "assets": [
+            "composition/contact/details-row-map"
+          ],
+          "image": "img/p04-s5.jpg"
+        },
+        {
+          "id": "colours",
+          "label": "Colours",
+          "assets": [
+            "palette/swiss-red"
+          ],
+          "image": null,
+          "swatches": [
+            "#ffffff",
+            "#f2f2f2",
+            "#141414",
+            "#d81e17",
+            "#e2352b",
+            "#d81e17"
+          ]
+        },
+        {
+          "id": "fonts",
+          "label": "Fonts",
+          "assets": [
+            "pairing/inter-tight-dm-sans"
+          ],
+          "image": "img/p04-s1.jpg"
+        },
+        {
+          "id": "lettering",
+          "label": "Name lettering",
+          "assets": [
+            "wordmark/stamp"
+          ],
+          "image": "img/p04-lettering.jpg"
+        }
+      ]
+    },
+    {
+      "id": "p05",
+      "title": "Avtoservis Mrak — colour block",
+      "fixtureId": "avtoservis-mrak",
+      "stance": "colour-block",
+      "seed": 1,
+      "kind": "named",
+      "desktop": "img/p05-desk.jpg",
+      "phone": "img/p05-phone.jpg",
+      "parts": [
+        {
+          "id": "s1",
+          "label": "Section 1 — opening",
+          "assets": [
+            "composition/hero/photo-bottom-band",
+            "motif/car-repair/torque-wrench-line"
+          ],
+          "image": "img/p05-s1.jpg"
+        },
+        {
+          "id": "s2",
+          "label": "Section 2 — story",
+          "assets": [
+            "composition/story/photo-left-text"
+          ],
+          "image": "img/p05-s2.jpg"
+        },
+        {
+          "id": "s3",
+          "label": "Section 3 — services",
+          "assets": [
+            "composition/services/small-cards"
+          ],
+          "image": "img/p05-s3.jpg"
+        },
+        {
+          "id": "s4",
+          "label": "Section 4 — opening hours",
+          "assets": [
+            "composition/hours/poster-band-hours"
+          ],
+          "image": "img/p05-s4.jpg"
+        },
+        {
+          "id": "s5",
+          "label": "Section 5 — call to action",
+          "assets": [
+            "composition/call/heading-split-ruled"
+          ],
+          "image": "img/p05-s5.jpg"
+        },
+        {
+          "id": "s6",
+          "label": "Section 6 — booking",
+          "assets": [
+            "composition/booking/band-split"
+          ],
+          "image": "img/p05-s6.jpg"
+        },
+        {
+          "id": "s7",
+          "label": "Section 7 — contact",
+          "assets": [
+            "composition/contact/details-row-map"
+          ],
+          "image": "img/p05-s7.jpg"
+        },
+        {
+          "id": "colours",
+          "label": "Colours",
+          "assets": [
+            "palette/hazard-yellow"
+          ],
+          "image": null,
+          "swatches": [
+            "#f7d64a",
+            "#fae48a",
+            "#1c1a14",
+            "#1c1a14",
+            "#d8352a"
+          ]
+        },
+        {
+          "id": "fonts",
+          "label": "Fonts",
+          "assets": [
+            "pairing/space-grotesk-public-sans"
+          ],
+          "image": "img/p05-s1.jpg"
+        },
+        {
+          "id": "lettering",
+          "label": "Name lettering",
+          "assets": [
+            "wordmark/monogram"
+          ],
+          "image": "img/p05-lettering.jpg"
+        }
+      ]
+    },
+    {
+      "id": "p06",
+      "title": "Avtoservis Mrak — workshop docket",
+      "fixtureId": "avtoservis-mrak",
+      "stance": "workshop-docket",
+      "seed": 1,
+      "kind": "named",
+      "desktop": "img/p06-desk.jpg",
+      "phone": "img/p06-phone.jpg",
+      "parts": [
+        {
+          "id": "s1",
+          "label": "Section 1 — opening",
+          "assets": [
+            "composition/hero/docket-on-band",
+            "motif/car-repair/torque-wrench-line"
+          ],
+          "image": "img/p06-s1.jpg"
+        },
+        {
+          "id": "s2",
+          "label": "Section 2 — story",
+          "assets": [
+            "composition/story/narrow-column"
+          ],
+          "image": "img/p06-s2.jpg"
+        },
+        {
+          "id": "s3",
+          "label": "Section 3 — services",
+          "assets": [
+            "composition/services/two-column-named"
+          ],
+          "image": "img/p06-s3.jpg"
+        },
+        {
+          "id": "s4",
+          "label": "Section 4 — team",
+          "assets": [
+            "composition/team/photo-beside-names"
+          ],
+          "image": "img/p06-s4.jpg"
+        },
+        {
+          "id": "s5",
+          "label": "Section 5 — opening hours",
+          "assets": [
+            "composition/hours/arch-photo-hours",
+            "mask/arch",
+            "mask/circle"
+          ],
+          "image": "img/p06-s5.jpg"
+        },
+        {
+          "id": "s6",
+          "label": "Section 6 — call to action",
+          "assets": [
+            "composition/call/phone-plate",
+            "fact/plate"
+          ],
+          "image": "img/p06-s6.jpg"
+        },
+        {
+          "id": "s7",
+          "label": "Section 7 — contact",
+          "assets": [
+            "composition/contact/details-row-map"
+          ],
+          "image": "img/p06-s7.jpg"
+        },
+        {
+          "id": "colours",
+          "label": "Colours",
+          "assets": [
+            "palette/docket-pink-copy"
+          ],
+          "image": null,
+          "swatches": [
+            "#f8e4ea",
+            "#fbeff3",
+            "#271a22",
+            "#24438f",
+            "#c43d5a",
+            "#24438f"
+          ]
+        },
+        {
+          "id": "fonts",
+          "label": "Fonts",
+          "assets": [
+            "pairing/space-grotesk-plex"
+          ],
+          "image": "img/p06-s1.jpg"
+        },
+        {
+          "id": "lettering",
+          "label": "Name lettering",
+          "assets": [
+            "wordmark/monogram"
+          ],
+          "image": "img/p06-lettering.jpg"
+        }
+      ]
+    },
+    {
+      "id": "p07",
+      "title": "Inštalacije Rebernik — editorial magazine",
+      "fixtureId": "instalacije-rebernik",
+      "stance": "editorial-magazine",
+      "seed": 1,
+      "kind": "named",
+      "desktop": "img/p07-desk.jpg",
+      "phone": "img/p07-phone.jpg",
+      "parts": [
+        {
+          "id": "s1",
+          "label": "Section 1 — opening",
+          "assets": [
+            "composition/hero/broadsheet-masthead",
+            "fact/split",
+            "ornament/gorenjska-rosette-line",
+            "type-treatment/masthead"
+          ],
+          "image": "img/p07-s1.jpg"
+        },
+        {
+          "id": "s2",
+          "label": "Section 2 — notice bar",
+          "assets": [
+            "composition/notice/one-line-bar"
+          ],
+          "image": "img/p07-s2.jpg"
+        },
+        {
+          "id": "s3",
+          "label": "Section 3 — services",
+          "assets": [
+            "composition/services/small-cards"
+          ],
+          "image": "img/p07-s3.jpg"
+        },
+        {
+          "id": "s4",
+          "label": "Section 4 — team",
+          "assets": [
+            "composition/team/lead-name"
+          ],
+          "image": "img/p07-s4.jpg"
+        },
+        {
+          "id": "s5",
+          "label": "Section 5 — opening hours",
+          "assets": [
+            "composition/hours/compact-list"
+          ],
+          "image": "img/p07-s5.jpg"
+        },
+        {
+          "id": "s6",
+          "label": "Section 6 — booking",
+          "assets": [
+            "composition/booking/town-stamp",
+            "fact/stamp"
+          ],
+          "image": "img/p07-s6.jpg"
+        },
+        {
+          "id": "s7",
+          "label": "Section 7 — contact",
+          "assets": [
+            "composition/contact/facts-strip"
+          ],
+          "image": "img/p07-s7.jpg"
+        },
+        {
+          "id": "colours",
+          "label": "Colours",
+          "assets": [
+            "palette/photo-book"
+          ],
+          "image": null,
+          "swatches": [
+            "#141414",
+            "#1c1c1c",
+            "#ececec",
+            "#ececec",
+            "#e5534b"
+          ]
+        },
+        {
+          "id": "fonts",
+          "label": "Fonts",
+          "assets": [
+            "pairing/newsreader-libre-franklin"
+          ],
+          "image": "img/p07-s1.jpg"
+        },
+        {
+          "id": "lettering",
+          "label": "Name lettering",
+          "assets": [
+            "wordmark/stamp"
+          ],
+          "image": "img/p07-lettering.jpg"
+        }
+      ]
+    },
+    {
+      "id": "p08",
+      "title": "Inštalacije Rebernik — functional catalogue",
+      "fixtureId": "instalacije-rebernik",
+      "stance": "functional-catalogue",
+      "seed": 1,
+      "kind": "named",
+      "desktop": "img/p08-desk.jpg",
+      "phone": "img/p08-phone.jpg",
+      "parts": [
+        {
+          "id": "s1",
+          "label": "Section 1 — opening",
+          "assets": [
+            "composition/hero/headline-facts",
+            "motif/plumbing/ball-valve-line"
+          ],
+          "image": "img/p08-s1.jpg"
+        },
+        {
+          "id": "s2",
+          "label": "Section 2 — services",
+          "assets": [
+            "composition/services/named-rows"
+          ],
+          "image": "img/p08-s2.jpg"
+        },
+        {
+          "id": "s3",
+          "label": "Section 3 — opening hours",
+          "assets": [
+            "composition/hours/heading-table"
+          ],
+          "image": "img/p08-s3.jpg"
+        },
+        {
+          "id": "s4",
+          "label": "Section 4 — booking",
+          "assets": [
+            "composition/booking/book-beside-hours"
+          ],
+          "image": "img/p08-s4.jpg"
+        },
+        {
+          "id": "s5",
+          "label": "Section 5 — contact",
+          "assets": [
+            "composition/contact/facts-cards"
+          ],
+          "image": "img/p08-s5.jpg"
+        },
+        {
+          "id": "colours",
+          "label": "Colours",
+          "assets": [
+            "palette/swiss-red"
+          ],
+          "image": null,
+          "swatches": [
+            "#ffffff",
+            "#f2f2f2",
+            "#141414",
+            "#d81e17",
+            "#e2352b",
+            "#d81e17"
+          ]
+        },
+        {
+          "id": "fonts",
+          "label": "Fonts",
+          "assets": [
+            "pairing/inter-tight-inter"
+          ],
+          "image": "img/p08-s1.jpg"
+        },
+        {
+          "id": "lettering",
+          "label": "Name lettering",
+          "assets": [
+            "wordmark/lockup"
+          ],
+          "image": "img/p08-lettering.jpg"
+        }
+      ]
+    },
+    {
+      "id": "p09",
+      "title": "Inštalacije Rebernik — enamel house plate",
+      "fixtureId": "instalacije-rebernik",
+      "stance": "enamel-house-plate",
+      "seed": 1,
+      "kind": "named",
+      "desktop": "img/p09-desk.jpg",
+      "phone": "img/p09-phone.jpg",
+      "parts": [
+        {
+          "id": "s1",
+          "label": "Section 1 — opening",
+          "assets": [
+            "composition/hero/enamel-house-number",
+            "fact/house-number",
+            "fact/numeral",
+            "ornament/gorenjska-rosette-line"
+          ],
+          "image": "img/p09-s1.jpg"
+        },
+        {
+          "id": "s2",
+          "label": "Section 2 — story",
+          "assets": [
+            "composition/story/narrow-column"
+          ],
+          "image": "img/p09-s2.jpg"
+        },
+        {
+          "id": "s3",
+          "label": "Section 3 — services",
+          "assets": [
+            "composition/services/list-beside"
+          ],
+          "image": "img/p09-s3.jpg"
+        },
+        {
+          "id": "s4",
+          "label": "Section 4 — opening hours",
+          "assets": [
+            "composition/hours/compact-list"
+          ],
+          "image": "img/p09-s4.jpg"
+        },
+        {
+          "id": "s5",
+          "label": "Section 5 — booking",
+          "assets": [
+            "composition/booking/town-stamp",
+            "fact/stamp"
+          ],
+          "image": "img/p09-s5.jpg"
+        },
+        {
+          "id": "s6",
+          "label": "Section 6 — contact",
+          "assets": [
+            "composition/contact/house-plate-map",
+            "fact/house-number"
+          ],
+          "image": "img/p09-s6.jpg"
+        },
+        {
+          "id": "colours",
+          "label": "Colours",
+          "assets": [
+            "palette/enamel-cobalt"
+          ],
+          "image": null,
+          "swatches": [
+            "#ffffff",
+            "#e9eef8",
+            "#121c2e",
+            "#1d4fa0",
+            "#d65a2a",
+            "#1d4fa0"
+          ]
+        },
+        {
+          "id": "fonts",
+          "label": "Fonts",
+          "assets": [
+            "pairing/archivo-archivo"
+          ],
+          "image": "img/p09-s1.jpg"
+        },
+        {
+          "id": "lettering",
+          "label": "Name lettering",
+          "assets": [
+            "wordmark/stamp"
+          ],
+          "image": "img/p09-lettering.jpg"
+        }
+      ]
+    },
+    {
+      "id": "p10",
+      "title": "Pekarna Kvas — pisanice",
+      "fixtureId": "pekarna-kvas",
+      "stance": "pisanice",
+      "seed": 11,
+      "kind": "extra",
+      "desktop": "img/p10-desk.jpg",
+      "phone": "img/p10-phone.jpg",
+      "parts": [
+        {
+          "id": "s1",
+          "label": "Section 1 — opening",
+          "assets": [
+            "composition/hero/photo-left",
+            "ornament/pisanica-band-line"
+          ],
+          "image": "img/p10-s1.jpg"
+        },
+        {
+          "id": "s2",
+          "label": "Section 2 — notice bar",
+          "assets": [
+            "composition/notice/framed-card"
+          ],
+          "image": "img/p10-s2.jpg"
+        },
+        {
+          "id": "s3",
+          "label": "Section 3 — story",
+          "assets": [
+            "composition/story/heading-beside-text"
+          ],
+          "image": "img/p10-s3.jpg"
+        },
+        {
+          "id": "s4",
+          "label": "Section 4 — products",
+          "assets": [
+            "composition/products/price-columns"
+          ],
+          "image": "img/p10-s4.jpg"
+        },
+        {
+          "id": "s5",
+          "label": "Section 5 — opening hours",
+          "assets": [
+            "composition/hours/week-chart"
+          ],
+          "image": "img/p10-s5.jpg"
+        },
+        {
+          "id": "s6",
+          "label": "Section 6 — service area",
+          "assets": [
+            "composition/area/heading-beside-line"
+          ],
+          "image": "img/p10-s6.jpg"
+        },
+        {
+          "id": "s7",
+          "label": "Section 7 — call to action",
+          "assets": [
+            "composition/call/heading-actions-band"
+          ],
+          "image": "img/p10-s7.jpg"
+        },
+        {
+          "id": "s8",
+          "label": "Section 8 — contact",
+          "assets": [
+            "composition/contact/details-hours"
+          ],
+          "image": "img/p10-s8.jpg"
+        },
+        {
+          "id": "colours",
+          "label": "Colours",
+          "assets": [
+            "palette/licitar"
+          ],
+          "image": null,
+          "swatches": [
+            "#ffffff",
+            "#eef4ec",
+            "#241417",
+            "#b3151b",
+            "#bd8b23",
+            "#2f7c44"
+          ]
+        },
+        {
+          "id": "fonts",
+          "label": "Fonts",
+          "assets": [
+            "pairing/bitter-karla"
+          ],
+          "image": "img/p10-s1.jpg"
+        },
+        {
+          "id": "lettering",
+          "label": "Name lettering",
+          "assets": [
+            "wordmark/stacked-caps"
+          ],
+          "image": "img/p10-lettering.jpg"
+        }
+      ]
+    },
+    {
+      "id": "p11",
+      "title": "Pekarna Kvas — documentary monochrome",
+      "fixtureId": "pekarna-kvas",
+      "stance": "documentary-monochrome",
+      "seed": 12,
+      "kind": "extra",
+      "desktop": "img/p11-desk.jpg",
+      "phone": "img/p11-phone.jpg",
+      "parts": [
+        {
+          "id": "s1",
+          "label": "Section 1 — opening",
+          "assets": [
+            "composition/hero/photo-cover-band",
+            "fact/numeral"
+          ],
+          "image": "img/p11-s1.jpg"
+        },
+        {
+          "id": "s2",
+          "label": "Section 2 — story",
+          "assets": [
+            "composition/story/photo-pair-offset"
+          ],
+          "image": "img/p11-s2.jpg"
+        },
+        {
+          "id": "s3",
+          "label": "Section 3 — products",
+          "assets": [
+            "composition/products/price-columns"
+          ],
+          "image": "img/p11-s3.jpg"
+        },
+        {
+          "id": "s4",
+          "label": "Section 4 — prices",
+          "assets": [
+            "composition/prices/photo-rates"
+          ],
+          "image": "img/p11-s4.jpg"
+        },
+        {
+          "id": "s5",
+          "label": "Section 5 — gallery",
+          "assets": [
+            "composition/gallery/triptych-aside",
+            "mask/triptych"
+          ],
+          "image": "img/p11-s5.jpg"
+        },
+        {
+          "id": "s6",
+          "label": "Section 6 — opening hours",
+          "assets": [
+            "composition/hours/heading-table"
+          ],
+          "image": "img/p11-s6.jpg"
+        },
+        {
+          "id": "s7",
+          "label": "Section 7 — booking",
+          "assets": [
+            "composition/booking/heading-book-call"
+          ],
+          "image": "img/p11-s7.jpg"
+        },
+        {
+          "id": "s8",
+          "label": "Section 8 — contact",
+          "assets": [
+            "composition/contact/details-and-map",
+            "motif/bakery/peel-loaf-line"
+          ],
+          "image": "img/p11-s8.jpg"
+        },
+        {
+          "id": "colours",
+          "label": "Colours",
+          "assets": [
+            "palette/beehive-panel"
+          ],
+          "image": null,
+          "swatches": [
+            "#ffffff",
+            "#edf3ec",
+            "#241a12",
+            "#2d5e3e",
+            "#d55241",
+            "#e1a83a"
+          ]
+        },
+        {
+          "id": "fonts",
+          "label": "Fonts",
+          "assets": [
+            "pairing/inter-tight-inter"
+          ],
+          "image": "img/p11-s1.jpg"
+        },
+        {
+          "id": "lettering",
+          "label": "Name lettering",
+          "assets": [
+            "wordmark/plain"
+          ],
+          "image": "img/p11-lettering.jpg"
+        }
+      ]
+    },
+    {
+      "id": "p12",
+      "title": "Avtoservis Mrak — technical drawing",
+      "fixtureId": "avtoservis-mrak",
+      "stance": "technical-drawing",
+      "seed": 13,
+      "kind": "extra",
+      "desktop": "img/p12-desk.jpg",
+      "phone": "img/p12-phone.jpg",
+      "parts": [
+        {
+          "id": "s1",
+          "label": "Section 1 — opening",
+          "assets": [
+            "composition/hero/split-photo",
+            "motif/car-repair/torque-wrench-line"
+          ],
+          "image": "img/p12-s1.jpg"
+        },
+        {
+          "id": "s2",
+          "label": "Section 2 — highlights",
+          "assets": [
+            "composition/highlights/checker-fields"
+          ],
+          "image": "img/p12-s2.jpg"
+        },
+        {
+          "id": "s3",
+          "label": "Section 3 — services",
+          "assets": [
+            "composition/services/aside-note"
+          ],
+          "image": "img/p12-s3.jpg"
+        },
+        {
+          "id": "s4",
+          "label": "Section 4 — prices",
+          "assets": [
+            "composition/prices/receipt-docket"
+          ],
+          "image": "img/p12-s4.jpg"
+        },
+        {
+          "id": "s5",
+          "label": "Section 5 — team",
+          "assets": [
+            "composition/team/names-in-columns"
+          ],
+          "image": "img/p12-s5.jpg"
+        },
+        {
+          "id": "s6",
+          "label": "Section 6 — opening hours",
+          "assets": [
+            "composition/hours/heading-table"
+          ],
+          "image": "img/p12-s6.jpg"
+        },
+        {
+          "id": "s7",
+          "label": "Section 7 — service area",
+          "assets": [
+            "composition/area/where-with-pin"
+          ],
+          "image": "img/p12-s7.jpg"
+        },
+        {
+          "id": "s8",
+          "label": "Section 8 — contact",
+          "assets": [
+            "composition/contact/details-and-map"
+          ],
+          "image": "img/p12-s8.jpg"
+        },
+        {
+          "id": "colours",
+          "label": "Colours",
+          "assets": [
+            "palette/docket-carbon"
+          ],
+          "image": null,
+          "swatches": [
+            "#ffffff",
+            "#edf1f8",
+            "#172036",
+            "#2a4a9a",
+            "#d9483b",
+            "#c63a30"
+          ]
+        },
+        {
+          "id": "fonts",
+          "label": "Fonts",
+          "assets": [
+            "pairing/archivo-public-sans"
+          ],
+          "image": "img/p12-s1.jpg"
+        },
+        {
+          "id": "lettering",
+          "label": "Name lettering",
+          "assets": [
+            "wordmark/plate"
+          ],
+          "image": "img/p12-lettering.jpg"
+        }
+      ]
+    },
+    {
+      "id": "p13",
+      "title": "Pekarna Kvas — beehive panel",
+      "fixtureId": "pekarna-kvas",
+      "stance": "beehive-panel",
+      "seed": 14,
+      "kind": "extra",
+      "desktop": "img/p13-desk.jpg",
+      "phone": "img/p13-phone.jpg",
+      "parts": [
+        {
+          "id": "s1",
+          "label": "Section 1 — opening",
+          "assets": [
+            "composition/hero/disc-photo-tag",
+            "fact/tag",
+            "mask/circle",
+            "ornament/beehive-panel-line"
+          ],
+          "image": "img/p13-s1.jpg"
+        },
+        {
+          "id": "s2",
+          "label": "Section 2 — highlights",
+          "assets": [
+            "composition/highlights/broadsheet",
+            "type-treatment/masthead"
+          ],
+          "image": "img/p13-s2.jpg"
+        },
+        {
+          "id": "s3",
+          "label": "Section 3 — story",
+          "assets": [
+            "composition/story/photo-right-text"
+          ],
+          "image": "img/p13-s3.jpg"
+        },
+        {
+          "id": "s4",
+          "label": "Section 4 — products",
+          "assets": [
+            "composition/products/round-plates",
+            "mask/circle"
+          ],
+          "image": "img/p13-s4.jpg"
+        },
+        {
+          "id": "s5",
+          "label": "Section 5 — menu",
+          "assets": [
+            "composition/menu/leaders-column"
+          ],
+          "image": "img/p13-s5.jpg"
+        },
+        {
+          "id": "s6",
+          "label": "Section 6 — opening hours",
+          "assets": [
+            "composition/hours/compact-list"
+          ],
+          "image": "img/p13-s6.jpg"
+        },
+        {
+          "id": "s7",
+          "label": "Section 7 — service area",
+          "assets": [
+            "composition/area/signpost-band",
+            "fact/signpost"
+          ],
+          "image": "img/p13-s7.jpg"
+        },
+        {
+          "id": "s8",
+          "label": "Section 8 — contact",
+          "assets": [
+            "composition/contact/details-and-map"
+          ],
+          "image": "img/p13-s8.jpg"
+        },
+        {
+          "id": "colours",
+          "label": "Colours",
+          "assets": [
+            "palette/beehive-sky"
+          ],
+          "image": null,
+          "swatches": [
+            "#e5eff9",
+            "#eff5fb",
+            "#1a2433",
+            "#b8322a",
+            "#c8622a",
+            "#3d7a46"
+          ]
+        },
+        {
+          "id": "fonts",
+          "label": "Fonts",
+          "assets": [
+            "pairing/bitter-karla"
+          ],
+          "image": "img/p13-s1.jpg"
+        },
+        {
+          "id": "lettering",
+          "label": "Name lettering",
+          "assets": [
+            "wordmark/plain"
+          ],
+          "image": "img/p13-lettering.jpg"
+        }
+      ]
+    },
+    {
+      "id": "p14",
+      "title": "Avtoservis Mrak — registration plate",
+      "fixtureId": "avtoservis-mrak",
+      "stance": "registration-plate",
+      "seed": 15,
+      "kind": "extra",
+      "desktop": "img/p14-desk.jpg",
+      "phone": "img/p14-phone.jpg",
+      "parts": [
+        {
+          "id": "s1",
+          "label": "Section 1 — opening",
+          "assets": [
+            "composition/hero/plate-ribbon",
+            "fact/plate",
+            "ornament/rope-line"
+          ],
+          "image": "img/p14-s1.jpg"
+        },
+        {
+          "id": "s2",
+          "label": "Section 2 — highlights",
+          "assets": [
+            "composition/highlights/ruled-rows"
+          ],
+          "image": "img/p14-s2.jpg"
+        },
+        {
+          "id": "s3",
+          "label": "Section 3 — services",
+          "assets": [
+            "composition/services/photo-cards-lead"
+          ],
+          "image": "img/p14-s3.jpg"
+        },
+        {
+          "id": "s4",
+          "label": "Section 4 — prices",
+          "assets": [
+            "composition/prices/price-tags-row"
+          ],
+          "image": "img/p14-s4.jpg"
+        },
+        {
+          "id": "s5",
+          "label": "Section 5 — team",
+          "assets": [
+            "composition/team/name-role-list"
+          ],
+          "image": "img/p14-s5.jpg"
+        },
+        {
+          "id": "s6",
+          "label": "Section 6 — opening hours",
+          "assets": [
+            "composition/hours/arch-photo-hours",
+            "mask/arch",
+            "mask/circle"
+          ],
+          "image": "img/p14-s6.jpg"
+        },
+        {
+          "id": "s7",
+          "label": "Section 7 — contact",
+          "assets": [
+            "composition/contact/facts-cards"
+          ],
+          "image": "img/p14-s7.jpg"
+        },
+        {
+          "id": "colours",
+          "label": "Colours",
+          "assets": [
+            "palette/stencil-crate"
+          ],
+          "image": null,
+          "swatches": [
+            "#ffffff",
+            "#eef1ec",
+            "#1f2318",
+            "#4d5a2a",
+            "#c8602a",
+            "#d9b44a"
+          ]
+        },
+        {
+          "id": "fonts",
+          "label": "Fonts",
+          "assets": [
+            "pairing/space-grotesk-public-sans"
+          ],
+          "image": "img/p14-s1.jpg"
+        },
+        {
+          "id": "lettering",
+          "label": "Name lettering",
+          "assets": [
+            "wordmark/stamp"
+          ],
+          "image": "img/p14-lettering.jpg"
+        }
+      ]
+    },
+    {
+      "id": "p15",
+      "title": "Pekarna Kvas — meadow orchard",
+      "fixtureId": "pekarna-kvas",
+      "stance": "meadow-orchard",
+      "seed": 16,
+      "kind": "extra",
+      "desktop": "img/p15-desk.jpg",
+      "phone": "img/p15-phone.jpg",
+      "parts": [
+        {
+          "id": "s1",
+          "label": "Section 1 — opening",
+          "assets": [
+            "composition/hero/arch-on-dark",
+            "fact/numeral",
+            "mask/arch",
+            "motif/bakery/loaf-potica-scene-solid"
+          ],
+          "image": "img/p15-s1.jpg"
+        },
+        {
+          "id": "s2",
+          "label": "Section 2 — story",
+          "assets": [
+            "composition/story/text-owner"
+          ],
+          "image": "img/p15-s2.jpg"
+        },
+        {
+          "id": "s3",
+          "label": "Section 3 — products",
+          "assets": [
+            "composition/products/photo-grid"
+          ],
+          "image": "img/p15-s3.jpg"
+        },
+        {
+          "id": "s4",
+          "label": "Section 4 — menu",
+          "assets": [
+            "composition/menu/leaders-two-columns"
+          ],
+          "image": "img/p15-s4.jpg"
+        },
+        {
+          "id": "s5",
+          "label": "Section 5 — prices",
+          "assets": [
+            "composition/prices/band-large-rows"
+          ],
+          "image": "img/p15-s5.jpg"
+        },
+        {
+          "id": "s6",
+          "label": "Section 6 — team",
+          "assets": [
+            "composition/team/door-plates",
+            "fact/door-plate"
+          ],
+          "image": "img/p15-s6.jpg"
+        },
+        {
+          "id": "s7",
+          "label": "Section 7 — opening hours",
+          "assets": [
+            "composition/hours/compact-list"
+          ],
+          "image": "img/p15-s7.jpg"
+        },
+        {
+          "id": "s8",
+          "label": "Section 8 — contact",
+          "assets": [
+            "composition/contact/details-hours"
+          ],
+          "image": "img/p15-s8.jpg"
+        },
+        {
+          "id": "colours",
+          "label": "Colours",
+          "assets": [
+            "palette/seed-packet-bean"
+          ],
+          "image": null,
+          "swatches": [
+            "#e8f2dc",
+            "#f1f7ea",
+            "#1f2a18",
+            "#4a7428",
+            "#a8631a",
+            "#f0c64a"
+          ]
+        },
+        {
+          "id": "fonts",
+          "label": "Fonts",
+          "assets": [
+            "pairing/bitter-nunito-sans"
+          ],
+          "image": "img/p15-s1.jpg"
+        },
+        {
+          "id": "lettering",
+          "label": "Name lettering",
+          "assets": [
+            "wordmark/stacked-caps"
+          ],
+          "image": "img/p15-lettering.jpg"
+        }
+      ]
+    },
+    {
+      "id": "p16",
+      "title": "Pekarna Kvas — pratika almanac",
+      "fixtureId": "pekarna-kvas",
+      "stance": "pratika-almanac",
+      "seed": 17,
+      "kind": "extra",
+      "desktop": "img/p16-desk.jpg",
+      "phone": "img/p16-phone.jpg",
+      "parts": [
+        {
+          "id": "s1",
+          "label": "Section 1 — opening",
+          "assets": [
+            "composition/hero/signpost-pole",
+            "fact/signpost",
+            "ornament/idrija-lace-line"
+          ],
+          "image": "img/p16-s1.jpg"
+        },
+        {
+          "id": "s2",
+          "label": "Section 2 — highlights",
+          "assets": [
+            "composition/highlights/two-columns"
+          ],
+          "image": "img/p16-s2.jpg"
+        },
+        {
+          "id": "s3",
+          "label": "Section 3 — story",
+          "assets": [
+            "composition/story/name-figure",
+            "fact/numeral"
+          ],
+          "image": "img/p16-s3.jpg"
+        },
+        {
+          "id": "s4",
+          "label": "Section 4 — products",
+          "assets": [
+            "composition/products/round-plates",
+            "mask/circle"
+          ],
+          "image": "img/p16-s4.jpg"
+        },
+        {
+          "id": "s5",
+          "label": "Section 5 — menu",
+          "assets": [
+            "composition/menu/card-over-photo"
+          ],
+          "image": "img/p16-s5.jpg"
+        },
+        {
+          "id": "s6",
+          "label": "Section 6 — opening hours",
+          "assets": [
+            "composition/hours/compact-list"
+          ],
+          "image": "img/p16-s6.jpg"
+        },
+        {
+          "id": "s7",
+          "label": "Section 7 — call to action",
+          "assets": [
+            "composition/call/photo-scrim"
+          ],
+          "image": "img/p16-s7.jpg"
+        },
+        {
+          "id": "s8",
+          "label": "Section 8 — contact",
+          "assets": [
+            "composition/contact/details-and-map"
+          ],
+          "image": "img/p16-s8.jpg"
+        },
+        {
+          "id": "colours",
+          "label": "Colours",
+          "assets": [
+            "palette/recipe-card"
+          ],
+          "image": null,
+          "swatches": [
+            "#fbe9e5",
+            "#fdf3f0",
+            "#2d1b1b",
+            "#9e2f3a",
+            "#3f7a64",
+            "#3e7863"
+          ]
+        },
+        {
+          "id": "fonts",
+          "label": "Fonts",
+          "assets": [
+            "pairing/bitter-karla"
+          ],
+          "image": "img/p16-s1.jpg"
+        },
+        {
+          "id": "lettering",
+          "label": "Name lettering",
+          "assets": [
+            "wordmark/plain"
+          ],
+          "image": "img/p16-lettering.jpg"
+        }
+      ]
+    },
+    {
+      "id": "p17",
+      "title": "Inštalacije Rebernik — line drawing",
+      "fixtureId": "instalacije-rebernik",
+      "stance": "line-drawing",
+      "seed": 18,
+      "kind": "extra",
+      "desktop": "img/p17-desk.jpg",
+      "phone": "img/p17-phone.jpg",
+      "parts": [
+        {
+          "id": "s1",
+          "label": "Section 1 — opening",
+          "assets": [
+            "composition/hero/headline-drawn-trade",
+            "fact/numeral",
+            "motif/electrical/cable-coil-line",
+            "motif/pipes"
+          ],
+          "image": "img/p17-s1.jpg"
+        },
+        {
+          "id": "s2",
+          "label": "Section 2 — highlights",
+          "assets": [
+            "composition/highlights/lead-statement"
+          ],
+          "image": "img/p17-s2.jpg"
+        },
+        {
+          "id": "s3",
+          "label": "Section 3 — story",
+          "assets": [
+            "composition/story/door-plate",
+            "fact/door-plate"
+          ],
+          "image": "img/p17-s3.jpg"
+        },
+        {
+          "id": "s4",
+          "label": "Section 4 — services",
+          "assets": [
+            "composition/services/photo-bleed-list"
+          ],
+          "image": "img/p17-s4.jpg"
+        },
+        {
+          "id": "s5",
+          "label": "Section 5 — team",
+          "assets": [
+            "composition/team/dark-roster"
+          ],
+          "image": "img/p17-s5.jpg"
+        },
+        {
+          "id": "s6",
+          "label": "Section 6 — opening hours",
+          "assets": [
+            "composition/hours/heading-table"
+          ],
+          "image": "img/p17-s6.jpg"
+        },
+        {
+          "id": "s7",
+          "label": "Section 7 — contact",
+          "assets": [
+            "composition/contact/facts-strip"
+          ],
+          "image": "img/p17-s7.jpg"
+        },
+        {
+          "id": "colours",
+          "label": "Colours",
+          "assets": [
+            "palette/bauhaus"
+          ],
+          "image": null,
+          "swatches": [
+            "#ffffff",
+            "#f1f2f4",
+            "#17181c",
+            "#1f3c8f",
+            "#e03a2b",
+            "#f2c230"
+          ]
+        },
+        {
+          "id": "fonts",
+          "label": "Fonts",
+          "assets": [
+            "pairing/figtree-figtree"
+          ],
+          "image": "img/p17-s1.jpg"
+        },
+        {
+          "id": "lettering",
+          "label": "Name lettering",
+          "assets": [
+            "wordmark/plain"
+          ],
+          "image": "img/p17-lettering.jpg"
+        }
+      ]
+    },
+    {
+      "id": "p18",
+      "title": "Pekarna Kvas — cross stitch",
+      "fixtureId": "pekarna-kvas",
+      "stance": "cross-stitch",
+      "seed": 19,
+      "kind": "extra",
+      "desktop": "img/p18-desk.jpg",
+      "phone": "img/p18-phone.jpg",
+      "parts": [
+        {
+          "id": "s1",
+          "label": "Section 1 — opening",
+          "assets": [
+            "composition/hero/label-card-arch",
+            "mask/arch",
+            "mask/circle",
+            "motif/bakery/boule-linocut-solid"
+          ],
+          "image": "img/p18-s1.jpg"
+        },
+        {
+          "id": "s2",
+          "label": "Section 2 — story",
+          "assets": [
+            "composition/story/round-photo",
+            "mask/circle"
+          ],
+          "image": "img/p18-s2.jpg"
+        },
+        {
+          "id": "s3",
+          "label": "Section 3 — products",
+          "assets": [
+            "composition/products/price-columns"
+          ],
+          "image": "img/p18-s3.jpg"
+        },
+        {
+          "id": "s4",
+          "label": "Section 4 — menu",
+          "assets": [
+            "composition/menu/dark-board"
+          ],
+          "image": "img/p18-s4.jpg"
+        },
+        {
+          "id": "s5",
+          "label": "Section 5 — prices",
+          "assets": [
+            "composition/prices/board-offers"
+          ],
+          "image": "img/p18-s5.jpg"
+        },
+        {
+          "id": "s6",
+          "label": "Section 6 — opening hours",
+          "assets": [
+            "composition/hours/compact-list"
+          ],
+          "image": "img/p18-s6.jpg"
+        },
+        {
+          "id": "s7",
+          "label": "Section 7 — contact",
+          "assets": [
+            "composition/contact/facts-cards"
+          ],
+          "image": "img/p18-s7.jpg"
+        },
+        {
+          "id": "colours",
+          "label": "Colours",
+          "assets": [
+            "palette/kozolec"
+          ],
+          "image": null,
+          "swatches": [
+            "#ffffff",
+            "#eef2e8",
+            "#22180f",
+            "#6b4226",
+            "#4f7a2f",
+            "#e3b84c"
+          ]
+        },
+        {
+          "id": "fonts",
+          "label": "Fonts",
+          "assets": [
+            "pairing/bitter-karla"
+          ],
+          "image": "img/p18-s1.jpg"
+        },
+        {
+          "id": "lettering",
+          "label": "Name lettering",
+          "assets": [
+            "wordmark/plain"
+          ],
+          "image": "img/p18-lettering.jpg"
+        }
+      ]
+    },
+    {
+      "id": "p19",
+      "title": "Avtoservis Mrak — brutalist minimal",
+      "fixtureId": "avtoservis-mrak",
+      "stance": "brutalist-minimal",
+      "seed": 20,
+      "kind": "extra",
+      "desktop": "img/p19-desk.jpg",
+      "phone": "img/p19-phone.jpg",
+      "parts": [
+        {
+          "id": "s1",
+          "label": "Section 1 — opening",
+          "assets": [
+            "composition/hero/three-arches",
+            "mask/arch",
+            "motif/car-repair/torque-wrench-line"
+          ],
+          "image": "img/p19-s1.jpg"
+        },
+        {
+          "id": "s2",
+          "label": "Section 2 — highlights",
+          "assets": [
+            "composition/highlights/lead-statement"
+          ],
+          "image": "img/p19-s2.jpg"
+        },
+        {
+          "id": "s3",
+          "label": "Section 3 — services",
+          "assets": [
+            "composition/services/poster-names"
+          ],
+          "image": "img/p19-s3.jpg"
+        },
+        {
+          "id": "s4",
+          "label": "Section 4 — prices",
+          "assets": [
+            "composition/prices/leader-rows-notes"
+          ],
+          "image": "img/p19-s4.jpg"
+        },
+        {
+          "id": "s5",
+          "label": "Section 5 — gallery",
+          "assets": [
+            "composition/gallery/photo-grid"
+          ],
+          "image": "img/p19-s5.jpg"
+        },
+        {
+          "id": "s6",
+          "label": "Section 6 — opening hours",
+          "assets": [
+            "composition/hours/compact-list"
+          ],
+          "image": "img/p19-s6.jpg"
+        },
+        {
+          "id": "s7",
+          "label": "Section 7 — contact",
+          "assets": [
+            "composition/contact/details-and-map"
+          ],
+          "image": "img/p19-s7.jpg"
+        },
+        {
+          "id": "colours",
+          "label": "Colours",
+          "assets": [
+            "palette/red-pencil"
+          ],
+          "image": null,
+          "swatches": [
+            "#18191b",
+            "#202124",
+            "#eceef0",
+            "#ff6a5a",
+            "#ff6a5a",
+            "#ff6a5a"
+          ]
+        },
+        {
+          "id": "fonts",
+          "label": "Fonts",
+          "assets": [
+            "pairing/space-grotesk-plex"
+          ],
+          "image": "img/p19-s1.jpg"
+        },
+        {
+          "id": "lettering",
+          "label": "Name lettering",
+          "assets": [
+            "wordmark/stacked-caps"
+          ],
+          "image": "img/p19-lettering.jpg"
+        }
+      ]
+    },
+    {
+      "id": "p20",
+      "title": "Pekarna Kvas — idrija lace",
+      "fixtureId": "pekarna-kvas",
+      "stance": "idrija-lace",
+      "seed": 21,
+      "kind": "extra",
+      "desktop": "img/p20-desk.jpg",
+      "phone": "img/p20-phone.jpg",
+      "parts": [
+        {
+          "id": "s1",
+          "label": "Section 1 — opening",
+          "assets": [
+            "composition/hero/bleed-print",
+            "ornament/idrija-lace-line",
+            "treatment/matte"
+          ],
+          "image": "img/p20-s1.jpg"
+        },
+        {
+          "id": "s2",
+          "label": "Section 2 — highlights",
+          "assets": [
+            "composition/highlights/over-photo"
+          ],
+          "image": "img/p20-s2.jpg"
+        },
+        {
+          "id": "s3",
+          "label": "Section 3 — products",
+          "assets": [
+            "composition/products/price-columns"
+          ],
+          "image": "img/p20-s3.jpg"
+        },
+        {
+          "id": "s4",
+          "label": "Section 4 — menu",
+          "assets": [
+            "composition/menu/first-two-band"
+          ],
+          "image": "img/p20-s4.jpg"
+        },
+        {
+          "id": "s5",
+          "label": "Section 5 — opening hours",
+          "assets": [
+            "composition/hours/heading-table"
+          ],
+          "image": "img/p20-s5.jpg"
+        },
+        {
+          "id": "s6",
+          "label": "Section 6 — contact",
+          "assets": [
+            "composition/contact/details-and-map"
+          ],
+          "image": "img/p20-s6.jpg"
+        },
+        {
+          "id": "colours",
+          "label": "Colours",
+          "assets": [
+            "palette/shopfront-gilt"
+          ],
+          "image": null,
+          "swatches": [
+            "#0f2a20",
+            "#143327",
+            "#edf1ea",
+            "#d4a84a",
+            "#d4a84a",
+            "#d4a84a"
+          ]
+        },
+        {
+          "id": "fonts",
+          "label": "Fonts",
+          "assets": [
+            "pairing/garamond-karla"
+          ],
+          "image": "img/p20-s1.jpg"
+        },
+        {
+          "id": "lettering",
+          "label": "Name lettering",
+          "assets": [
+            "wordmark/monogram"
+          ],
+          "image": "img/p20-lettering.jpg"
+        }
+      ]
+    },
+    {
+      "id": "p21",
+      "title": "Pekarna Kvas — photocopied zine",
+      "fixtureId": "pekarna-kvas",
+      "stance": "photocopied-zine",
+      "seed": 22,
+      "kind": "extra",
+      "desktop": "img/p21-desk.jpg",
+      "phone": "img/p21-phone.jpg",
+      "parts": [
+        {
+          "id": "s1",
+          "label": "Section 1 — opening",
+          "assets": [
+            "composition/hero/card-over-photo",
+            "motif/bakery/wheat-ear-line"
+          ],
+          "image": "img/p21-s1.jpg"
+        },
+        {
+          "id": "s2",
+          "label": "Section 2 — highlights",
+          "assets": [
+            "composition/highlights/staircase",
+            "type-treatment/typed-line"
+          ],
+          "image": "img/p21-s2.jpg"
+        },
+        {
+          "id": "s3",
+          "label": "Section 3 — products",
+          "assets": [
+            "composition/products/round-plates",
+            "mask/circle"
+          ],
+          "image": "img/p21-s3.jpg"
+        },
+        {
+          "id": "s4",
+          "label": "Section 4 — prices",
+          "assets": [
+            "composition/prices/ledger-sheet",
+            "type-treatment/ruled-total"
+          ],
+          "image": "img/p21-s4.jpg"
+        },
+        {
+          "id": "s5",
+          "label": "Section 5 — gallery",
+          "assets": [
+            "composition/gallery/triptych-aside",
+            "mask/triptych"
+          ],
+          "image": "img/p21-s5.jpg"
+        },
+        {
+          "id": "s6",
+          "label": "Section 6 — opening hours",
+          "assets": [
+            "composition/hours/compact-list"
+          ],
+          "image": "img/p21-s6.jpg"
+        },
+        {
+          "id": "s7",
+          "label": "Section 7 — contact",
+          "assets": [
+            "composition/contact/facts-cards"
+          ],
+          "image": "img/p21-s7.jpg"
+        },
+        {
+          "id": "colours",
+          "label": "Colours",
+          "assets": [
+            "palette/mint-kiosk"
+          ],
+          "image": null,
+          "swatches": [
+            "#cdeadb",
+            "#dcf1e6",
+            "#10261c",
+            "#0e5a3c",
+            "#cb303e",
+            "#b02a36"
+          ]
+        },
+        {
+          "id": "fonts",
+          "label": "Fonts",
+          "assets": [
+            "pairing/bricolage-figtree"
+          ],
+          "image": "img/p21-s1.jpg"
+        },
+        {
+          "id": "lettering",
+          "label": "Name lettering",
+          "assets": [
+            "wordmark/lockup"
+          ],
+          "image": "img/p21-lettering.jpg"
+        }
+      ]
+    },
+    {
+      "id": "p22",
+      "title": "Avtoservis Mrak — transit diagram",
+      "fixtureId": "avtoservis-mrak",
+      "stance": "transit-diagram",
+      "seed": 23,
+      "kind": "extra",
+      "desktop": "img/p22-desk.jpg",
+      "phone": "img/p22-phone.jpg",
+      "parts": [
+        {
+          "id": "s1",
+          "label": "Section 1 — opening",
+          "assets": [
+            "composition/hero/photo-bottom-band",
+            "motif/car-repair/torque-wrench-line"
+          ],
+          "image": "img/p22-s1.jpg"
+        },
+        {
+          "id": "s2",
+          "label": "Section 2 — highlights",
+          "assets": [
+            "composition/highlights/photo-list",
+            "mask/arch-low"
+          ],
+          "image": "img/p22-s2.jpg"
+        },
+        {
+          "id": "s3",
+          "label": "Section 3 — services",
+          "assets": [
+            "composition/services/two-column-named"
+          ],
+          "image": "img/p22-s3.jpg"
+        },
+        {
+          "id": "s4",
+          "label": "Section 4 — gallery",
+          "assets": [
+            "composition/gallery/mosaic"
+          ],
+          "image": "img/p22-s4.jpg"
+        },
+        {
+          "id": "s5",
+          "label": "Section 5 — opening hours",
+          "assets": [
+            "composition/hours/week-chart"
+          ],
+          "image": "img/p22-s5.jpg"
+        },
+        {
+          "id": "s6",
+          "label": "Section 6 — contact",
+          "assets": [
+            "composition/contact/facts-strip"
+          ],
+          "image": "img/p22-s6.jpg"
+        },
+        {
+          "id": "colours",
+          "label": "Colours",
+          "assets": [
+            "palette/beton-brut"
+          ],
+          "image": null,
+          "swatches": [
+            "#d9dee2",
+            "#e4e8eb",
+            "#1a1d20",
+            "#b83e1b",
+            "#2e69b3",
+            "#b83e1b"
+          ]
+        },
+        {
+          "id": "fonts",
+          "label": "Fonts",
+          "assets": [
+            "pairing/space-grotesk-public-sans"
+          ],
+          "image": "img/p22-s1.jpg"
+        },
+        {
+          "id": "lettering",
+          "label": "Name lettering",
+          "assets": [
+            "wordmark/monogram"
+          ],
+          "image": "img/p22-lettering.jpg"
+        }
+      ]
+    },
+    {
+      "id": "p23",
+      "title": "Avtoservis Mrak — stencil crate",
+      "fixtureId": "avtoservis-mrak",
+      "stance": "stencil-crate",
+      "seed": 24,
+      "kind": "extra",
+      "desktop": "img/p23-desk.jpg",
+      "phone": "img/p23-phone.jpg",
+      "parts": [
+        {
+          "id": "s1",
+          "label": "Section 1 — opening",
+          "assets": [
+            "composition/hero/photo-bottom-band",
+            "motif/car-repair/torque-wrench-line"
+          ],
+          "image": "img/p23-s1.jpg"
+        },
+        {
+          "id": "s2",
+          "label": "Section 2 — highlights",
+          "assets": [
+            "composition/highlights/dark-panel"
+          ],
+          "image": "img/p23-s2.jpg"
+        },
+        {
+          "id": "s3",
+          "label": "Section 3 — services",
+          "assets": [
+            "composition/services/aside-note"
+          ],
+          "image": "img/p23-s3.jpg"
+        },
+        {
+          "id": "s4",
+          "label": "Section 4 — gallery",
+          "assets": [
+            "composition/gallery/wide-then-pair"
+          ],
+          "image": "img/p23-s4.jpg"
+        },
+        {
+          "id": "s5",
+          "label": "Section 5 — opening hours",
+          "assets": [
+            "composition/hours/heading-table"
+          ],
+          "image": "img/p23-s5.jpg"
+        },
+        {
+          "id": "s6",
+          "label": "Section 6 — contact",
+          "assets": [
+            "composition/contact/details-hours"
+          ],
+          "image": "img/p23-s6.jpg"
+        },
+        {
+          "id": "colours",
+          "label": "Colours",
+          "assets": [
+            "palette/departure-board"
+          ],
+          "image": null,
+          "swatches": [
+            "#e0edfb",
+            "#ecf3fc",
+            "#13213a",
+            "#0d4fa8",
+            "#c43b2a",
+            "#ffcf3a"
+          ]
+        },
+        {
+          "id": "fonts",
+          "label": "Fonts",
+          "assets": [
+            "pairing/archivo-archivo"
+          ],
+          "image": "img/p23-s1.jpg"
+        },
+        {
+          "id": "lettering",
+          "label": "Name lettering",
+          "assets": [
+            "wordmark/lockup"
+          ],
+          "image": "img/p23-lettering.jpg"
+        }
+      ]
+    },
+    {
+      "id": "p24",
+      "title": "Pekarna Kvas — market broadsheet",
+      "fixtureId": "pekarna-kvas",
+      "stance": "market-broadsheet",
+      "seed": 25,
+      "kind": "extra",
+      "desktop": "img/p24-desk.jpg",
+      "phone": "img/p24-phone.jpg",
+      "parts": [
+        {
+          "id": "s1",
+          "label": "Section 1 — opening",
+          "assets": [
+            "composition/hero/broadsheet-masthead",
+            "fact/split",
+            "ornament/gorenjska-rosette-line",
+            "type-treatment/masthead"
+          ],
+          "image": "img/p24-s1.jpg"
+        },
+        {
+          "id": "s2",
+          "label": "Section 2 — products",
+          "assets": [
+            "composition/products/round-plates",
+            "mask/circle"
+          ],
+          "image": "img/p24-s2.jpg"
+        },
+        {
+          "id": "s3",
+          "label": "Section 3 — menu",
+          "assets": [
+            "composition/menu/plates-then-list",
+            "mask/circle"
+          ],
+          "image": "img/p24-s3.jpg"
+        },
+        {
+          "id": "s4",
+          "label": "Section 4 — opening hours",
+          "assets": [
+            "composition/hours/compact-list"
+          ],
+          "image": "img/p24-s4.jpg"
+        },
+        {
+          "id": "s5",
+          "label": "Section 5 — contact",
+          "assets": [
+            "composition/contact/details-and-map"
+          ],
+          "image": "img/p24-s5.jpg"
+        },
+        {
+          "id": "colours",
+          "label": "Colours",
+          "assets": [
+            "palette/damson"
+          ],
+          "image": null,
+          "swatches": [
+            "#efe6f2",
+            "#f6f0f8",
+            "#2a1730",
+            "#6a2a6e",
+            "#b0602a",
+            "#d4b0da"
+          ]
+        },
+        {
+          "id": "fonts",
+          "label": "Fonts",
+          "assets": [
+            "pairing/bitter-karla"
+          ],
+          "image": "img/p24-s1.jpg"
+        },
+        {
+          "id": "lettering",
+          "label": "Name lettering",
+          "assets": [
+            "wordmark/plate"
+          ],
+          "image": "img/p24-lettering.jpg"
+        }
+      ]
+    },
+    {
+      "id": "p25",
+      "title": "Avtoservis Mrak — tool shadow board",
+      "fixtureId": "avtoservis-mrak",
+      "stance": "tool-shadow-board",
+      "seed": 26,
+      "kind": "extra",
+      "desktop": "img/p25-desk.jpg",
+      "phone": "img/p25-phone.jpg",
+      "parts": [
+        {
+          "id": "s1",
+          "label": "Section 1 — opening",
+          "assets": [
+            "composition/hero/photo-bottom-band",
+            "motif/car-repair/torque-wrench-line"
+          ],
+          "image": "img/p25-s1.jpg"
+        },
+        {
+          "id": "s2",
+          "label": "Section 2 — highlights",
+          "assets": [
+            "composition/highlights/two-columns"
+          ],
+          "image": "img/p25-s2.jpg"
+        },
+        {
+          "id": "s3",
+          "label": "Section 3 — services",
+          "assets": [
+            "composition/services/two-column-named"
+          ],
+          "image": "img/p25-s3.jpg"
+        },
+        {
+          "id": "s4",
+          "label": "Section 4 — gallery",
+          "assets": [
+            "composition/gallery/arch-row",
+            "mask/arch"
+          ],
+          "image": "img/p25-s4.jpg"
+        },
+        {
+          "id": "s5",
+          "label": "Section 5 — opening hours",
+          "assets": [
+            "composition/hours/heading-table"
+          ],
+          "image": "img/p25-s5.jpg"
+        },
+        {
+          "id": "s6",
+          "label": "Section 6 — contact",
+          "assets": [
+            "composition/contact/details-row-map"
+          ],
+          "image": "img/p25-s6.jpg"
+        },
+        {
+          "id": "colours",
+          "label": "Colours",
+          "assets": [
+            "palette/detour-orange"
+          ],
+          "image": null,
+          "swatches": [
+            "#17191c",
+            "#1f2226",
+            "#eef0f2",
+            "#f0592a",
+            "#f0592a",
+            "#f0592a"
+          ]
+        },
+        {
+          "id": "fonts",
+          "label": "Fonts",
+          "assets": [
+            "pairing/space-grotesk-public-sans"
+          ],
+          "image": "img/p25-s1.jpg"
+        },
+        {
+          "id": "lettering",
+          "label": "Name lettering",
+          "assets": [
+            "wordmark/stacked-caps"
+          ],
+          "image": "img/p25-lettering.jpg"
+        }
+      ]
+    },
+    {
+      "id": "p26",
+      "title": "Pekarna Kvas — market stall cards",
+      "fixtureId": "pekarna-kvas",
+      "stance": "market-stall-cards",
+      "seed": 27,
+      "kind": "extra",
+      "desktop": "img/p26-desk.jpg",
+      "phone": "img/p26-phone.jpg",
+      "parts": [
+        {
+          "id": "s1",
+          "label": "Section 1 — opening",
+          "assets": [
+            "composition/hero/photo-bottom-band",
+            "motif/bakery/sun-loaf-shapes-cut"
+          ],
+          "image": "img/p26-s1.jpg"
+        },
+        {
+          "id": "s2",
+          "label": "Section 2 — products",
+          "assets": [
+            "composition/products/price-columns"
+          ],
+          "image": "img/p26-s2.jpg"
+        },
+        {
+          "id": "s3",
+          "label": "Section 3 — gallery",
+          "assets": [
+            "composition/gallery/wall-bleed"
+          ],
+          "image": "img/p26-s3.jpg"
+        },
+        {
+          "id": "s4",
+          "label": "Section 4 — opening hours",
+          "assets": [
+            "composition/hours/heading-table"
+          ],
+          "image": "img/p26-s4.jpg"
+        },
+        {
+          "id": "s5",
+          "label": "Section 5 — service area",
+          "assets": [
+            "composition/area/heading-beside-line"
+          ],
+          "image": "img/p26-s5.jpg"
+        },
+        {
+          "id": "s6",
+          "label": "Section 6 — contact",
+          "assets": [
+            "composition/contact/details-and-map"
+          ],
+          "image": "img/p26-s6.jpg"
+        },
+        {
+          "id": "colours",
+          "label": "Colours",
+          "assets": [
+            "palette/cafe-awning"
+          ],
+          "image": null,
+          "swatches": [
+            "#ffffff",
+            "#eef5f1",
+            "#18221d",
+            "#1e6b4a",
+            "#d94b3f",
+            "#c23b2f"
+          ]
+        },
+        {
+          "id": "fonts",
+          "label": "Fonts",
+          "assets": [
+            "pairing/bitter-nunito-sans"
+          ],
+          "image": "img/p26-s1.jpg"
+        },
+        {
+          "id": "lettering",
+          "label": "Name lettering",
+          "assets": [
+            "wordmark/monogram"
+          ],
+          "image": "img/p26-lettering.jpg"
+        }
+      ]
+    },
+    {
+      "id": "p27",
+      "title": "Avtoservis Mrak — yugoslav modernism",
+      "fixtureId": "avtoservis-mrak",
+      "stance": "yugoslav-modernism",
+      "seed": 28,
+      "kind": "extra",
+      "desktop": "img/p27-desk.jpg",
+      "phone": "img/p27-phone.jpg",
+      "parts": [
+        {
+          "id": "s1",
+          "label": "Section 1 — opening",
+          "assets": [
+            "composition/hero/split-photo",
+            "motif/car-repair/torque-wrench-line"
+          ],
+          "image": "img/p27-s1.jpg"
+        },
+        {
+          "id": "s2",
+          "label": "Section 2 — services",
+          "assets": [
+            "composition/services/two-column-named"
+          ],
+          "image": "img/p27-s2.jpg"
+        },
+        {
+          "id": "s3",
+          "label": "Section 3 — gallery",
+          "assets": [
+            "composition/gallery/postcards",
+            "mask/postcard"
+          ],
+          "image": "img/p27-s3.jpg"
+        },
+        {
+          "id": "s4",
+          "label": "Section 4 — opening hours",
+          "assets": [
+            "composition/hours/compact-list"
+          ],
+          "image": "img/p27-s4.jpg"
+        },
+        {
+          "id": "s5",
+          "label": "Section 5 — contact",
+          "assets": [
+            "composition/contact/details-row-map"
+          ],
+          "image": "img/p27-s5.jpg"
+        },
+        {
+          "id": "colours",
+          "label": "Colours",
+          "assets": [
+            "palette/overalls"
+          ],
+          "image": null,
+          "swatches": [
+            "#121821",
+            "#19212c",
+            "#e9eef4",
+            "#5b9bf0",
+            "#f2b33d",
+            "#f2b33d"
+          ]
+        },
+        {
+          "id": "fonts",
+          "label": "Fonts",
+          "assets": [
+            "pairing/space-grotesk-public-sans"
+          ],
+          "image": "img/p27-s1.jpg"
+        },
+        {
+          "id": "lettering",
+          "label": "Name lettering",
+          "assets": [
+            "wordmark/lockup"
+          ],
+          "image": "img/p27-lettering.jpg"
+        }
+      ]
+    },
+    {
+      "id": "p28",
+      "title": "Pekarna Kvas — modular kiosk",
+      "fixtureId": "pekarna-kvas",
+      "stance": "modular-kiosk",
+      "seed": 29,
+      "kind": "extra",
+      "desktop": "img/p28-desk.jpg",
+      "phone": "img/p28-phone.jpg",
+      "parts": [
+        {
+          "id": "s1",
+          "label": "Section 1 — opening",
+          "assets": [
+            "composition/hero/photo-bottom-band",
+            "ornament/gorenjska-rosette-line"
+          ],
+          "image": "img/p28-s1.jpg"
+        },
+        {
+          "id": "s2",
+          "label": "Section 2 — products",
+          "assets": [
+            "composition/products/price-columns"
+          ],
+          "image": "img/p28-s2.jpg"
+        },
+        {
+          "id": "s3",
+          "label": "Section 3 — gallery",
+          "assets": [
+            "composition/gallery/fan-beside"
+          ],
+          "image": "img/p28-s3.jpg"
+        },
+        {
+          "id": "s4",
+          "label": "Section 4 — opening hours",
+          "assets": [
+            "composition/hours/compact-list"
+          ],
+          "image": "img/p28-s4.jpg"
+        },
+        {
+          "id": "s5",
+          "label": "Section 5 — contact",
+          "assets": [
+            "composition/contact/facts-strip"
+          ],
+          "image": "img/p28-s5.jpg"
+        },
+        {
+          "id": "colours",
+          "label": "Colours",
+          "assets": [
+            "palette/cornflower-rye"
+          ],
+          "image": null,
+          "swatches": [
+            "#ffffff",
+            "#ecf0fb",
+            "#1a1f33",
+            "#3552b8",
+            "#9d6b18",
+            "#c8342a"
+          ]
+        },
+        {
+          "id": "fonts",
+          "label": "Fonts",
+          "assets": [
+            "pairing/bricolage-figtree"
+          ],
+          "image": "img/p28-s1.jpg"
+        },
+        {
+          "id": "lettering",
+          "label": "Name lettering",
+          "assets": [
+            "wordmark/monogram"
+          ],
+          "image": "img/p28-lettering.jpg"
+        }
+      ]
+    },
+    {
+      "id": "p29",
+      "title": "Inštalacije Rebernik — bauhaus geometry",
+      "fixtureId": "instalacije-rebernik",
+      "stance": "bauhaus-geometry",
+      "seed": 30,
+      "kind": "extra",
+      "desktop": "img/p29-desk.jpg",
+      "phone": "img/p29-phone.jpg",
+      "parts": [
+        {
+          "id": "s1",
+          "label": "Section 1 — opening",
+          "assets": [
+            "composition/hero/headline-drawn-trade",
+            "fact/numeral",
+            "motif/pipes",
+            "ornament/gorenjska-rosette-line"
+          ],
+          "image": "img/p29-s1.jpg"
+        },
+        {
+          "id": "s2",
+          "label": "Section 2 — services",
+          "assets": [
+            "composition/services/photo-cards-lead"
+          ],
+          "image": "img/p29-s2.jpg"
+        },
+        {
+          "id": "s3",
+          "label": "Section 3 — opening hours",
+          "assets": [
+            "composition/hours/heading-table"
+          ],
+          "image": "img/p29-s3.jpg"
+        },
+        {
+          "id": "s4",
+          "label": "Section 4 — contact",
+          "assets": [
+            "composition/contact/details-row-map"
+          ],
+          "image": "img/p29-s4.jpg"
+        },
+        {
+          "id": "colours",
+          "label": "Colours",
+          "assets": [
+            "palette/cable-colours"
+          ],
+          "image": null,
+          "swatches": [
+            "#ffffff",
+            "#eef2f8",
+            "#15191f",
+            "#6e3b1c",
+            "#b07d12",
+            "#1f4fa3"
+          ]
+        },
+        {
+          "id": "fonts",
+          "label": "Fonts",
+          "assets": [
+            "pairing/archivo-archivo"
+          ],
+          "image": "img/p29-s1.jpg"
+        },
+        {
+          "id": "lettering",
+          "label": "Name lettering",
+          "assets": [
+            "wordmark/stamp"
+          ],
+          "image": "img/p29-lettering.jpg"
+        }
+      ]
+    },
+    {
+      "id": "p30",
+      "title": "Inštalacije Rebernik — split screen",
+      "fixtureId": "instalacije-rebernik",
+      "stance": "split-screen",
+      "seed": 31,
+      "kind": "extra",
+      "desktop": "img/p30-desk.jpg",
+      "phone": "img/p30-phone.jpg",
+      "parts": [
+        {
+          "id": "s1",
+          "label": "Section 1 — opening",
+          "assets": [
+            "composition/hero/enamel-house-number",
+            "fact/house-number",
+            "fact/numeral",
+            "motif/electrical/cable-coil-line"
+          ],
+          "image": "img/p30-s1.jpg"
+        },
+        {
+          "id": "s2",
+          "label": "Section 2 — services",
+          "assets": [
+            "composition/services/named-rows"
+          ],
+          "image": "img/p30-s2.jpg"
+        },
+        {
+          "id": "s3",
+          "label": "Section 3 — opening hours",
+          "assets": [
+            "composition/hours/heading-table"
+          ],
+          "image": "img/p30-s3.jpg"
+        },
+        {
+          "id": "s4",
+          "label": "Section 4 — contact",
+          "assets": [
+            "composition/contact/facts-cards"
+          ],
+          "image": "img/p30-s4.jpg"
+        },
+        {
+          "id": "colours",
+          "label": "Colours",
+          "assets": [
+            "palette/copper-slate"
+          ],
+          "image": null,
+          "swatches": [
+            "#161c22",
+            "#1d252d",
+            "#e8edf1",
+            "#d98a5a",
+            "#d98a5a",
+            "#3c5568"
+          ]
+        },
+        {
+          "id": "fonts",
+          "label": "Fonts",
+          "assets": [
+            "pairing/manrope-public-sans"
+          ],
+          "image": "img/p30-s1.jpg"
+        },
+        {
+          "id": "lettering",
+          "label": "Name lettering",
+          "assets": [
+            "wordmark/stamp"
+          ],
+          "image": "img/p30-lettering.jpg"
+        }
+      ]
+    }
+  ]
+}
