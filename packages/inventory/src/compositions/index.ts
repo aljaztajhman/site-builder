@@ -22,17 +22,24 @@ import galleryPhotoGrid from "./gallery/photo-grid.ts";
 import galleryWallBleed from "./gallery/wall-bleed.ts";
 import heroArchOnDark from "./hero/arch-on-dark.ts";
 import heroBendPhoto from "./hero/bend-photo.ts";
+import heroBleedPrint from "./hero/bleed-print.ts";
+import heroBroadsheetMasthead from "./hero/broadsheet-masthead.ts";
 import heroCardOverPhoto from "./hero/card-over-photo.ts";
 import heroDiscPhotoTag from "./hero/disc-photo-tag.ts";
 import heroDocketOnBand from "./hero/docket-on-band.ts";
+import heroEnamelHouseNumber from "./hero/enamel-house-number.ts";
 import heroHeadlineDrawnTrade from "./hero/headline-drawn-trade.ts";
 import heroHeadlineFacts from "./hero/headline-facts.ts";
 import heroHeadlineLargeRuled from "./hero/headline-large-ruled.ts";
 import heroLabelCardArch from "./hero/label-card-arch.ts";
+import heroPebblePair from "./hero/pebble-pair.ts";
+import heroPhoneGiantRope from "./hero/phone-giant-rope.ts";
 import heroPhotoBottomBand from "./hero/photo-bottom-band.ts";
 import heroPhotoCoverBand from "./hero/photo-cover-band.ts";
 import heroPhotoDarkPanel from "./hero/photo-dark-panel.ts";
 import heroPhotoLeft from "./hero/photo-left.ts";
+import heroPlateRibbon from "./hero/plate-ribbon.ts";
+import heroSignpostPole from "./hero/signpost-pole.ts";
 import heroSplitPhoto from "./hero/split-photo.ts";
 import heroThreeArches from "./hero/three-arches.ts";
 import highlightsLargeLines from "./highlights/large-lines.ts";
@@ -97,17 +104,24 @@ export const COMPOSITION_PRESETS: readonly CompositionPreset[] = [
   galleryWallBleed,
   heroArchOnDark,
   heroBendPhoto,
+  heroBleedPrint,
+  heroBroadsheetMasthead,
   heroCardOverPhoto,
   heroDiscPhotoTag,
   heroDocketOnBand,
+  heroEnamelHouseNumber,
   heroHeadlineDrawnTrade,
   heroHeadlineFacts,
   heroHeadlineLargeRuled,
   heroLabelCardArch,
+  heroPebblePair,
+  heroPhoneGiantRope,
   heroPhotoBottomBand,
   heroPhotoCoverBand,
   heroPhotoDarkPanel,
   heroPhotoLeft,
+  heroPlateRibbon,
+  heroSignpostPole,
   heroSplitPhoto,
   heroThreeArches,
   highlightsLargeLines,
