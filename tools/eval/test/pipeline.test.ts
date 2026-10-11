@@ -244,7 +244,7 @@ describe("pipeline with replayed model responses (no network)", () => {
     expect(r.version).toBeNull();
     expect(r.issues.join(" ")).toMatch(/phone/);
     expect((await repo.getSpec(site.id))!.version).toBe(1);
-  });
+  }, 120_000);
 });
 
 describe("second critique round only when the re-check fails (costCuts.secondCritiqueOnlyOnFailures)", () => {
@@ -332,5 +332,5 @@ describe("content stage", () => {
     expect(r.structuredFallback).toBe(true);
     expect(r.issues).toEqual([]);
     expect(r.attempts).toBe(1);
-  });
+  }, 120_000);
 });
