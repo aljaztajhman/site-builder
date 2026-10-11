@@ -1,0 +1,5 @@
+/* notch: a square bite out of the top left corner, room for a fact or a heading to sit in. */
+.cx-mask-notch {
+  --shape-notch: polygon(20% 0, 100% 0, 100% 100%, 0 100%, 0 18%, 20% 18%);
+  clip-path: var(--shape-notch);
+}

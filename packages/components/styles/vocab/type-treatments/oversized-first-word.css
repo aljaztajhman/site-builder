@@ -1,0 +1,12 @@
+/* oversized-first-word: the heading's first word on its own line at nearly twice the size, the rest after it at the
+   heading's size. --wl is the first word's length: the word is never wider than the heading's box (a narrow cell or a
+   phone sizes it down). Needs two words and a first word of at most 14 characters (G20). */
+.cx-tt-oversized-first-word {
+  --cx-w: 100%;
+  container-type: inline-size;
+}
+.cx-tt-oversized-first-word .cx-tt__w {
+  display: block;
+  font-size: min(1.9em, calc(100cqw / (var(--wl) * 0.62)));
+  line-height: 0.95;
+}

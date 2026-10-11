@@ -1,0 +1,19 @@
+/* house-number: an enamel house-number plate: the value large and centred on the primary colour, a rim line inset in its
+   own ink, the label (a street) under it, rounded corners. Own ground: @sb/spec factObjectGround (G9), flipped on a band
+   section; a fill replaces it. */
+.cx-fact--house-number .cx-fact__obj {
+  display: grid;
+  justify-items: center;
+  gap: 0.06em;
+  padding: max(0.5rem, 0.3em) max(0.8rem, 0.55em) max(0.6rem, 0.4em);
+  border-radius: max(0.4rem, 0.28em);
+  outline: max(2px, 0.05em) solid;
+  outline-offset: calc(-1 * max(0.25rem, 0.2em));
+  background: var(--c-primary);
+  color: var(--c-on-primary);
+  text-align: center;
+}
+:where(.tone-band) .cx-fact--house-number .cx-fact__obj {
+  background: var(--c-on-band, var(--c-on-primary));
+  color: var(--c-band, var(--c-primary));
+}

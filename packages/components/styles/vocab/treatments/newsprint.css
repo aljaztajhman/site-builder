@@ -1,0 +1,18 @@
+/* newsprint: black-and-white on newsprint. The photo in grey on paper (onInverse), its blacks lifted to the palette's
+   inverse colour, so the darkest ink is the site's own dark, never a pure black. Works on every palette. */
+.cx-tr-newsprint {
+  background: var(--c-on-inverse);
+}
+.cx-tr-newsprint > .media img {
+  filter: grayscale(1) contrast(1.1);
+  mix-blend-mode: multiply;
+}
+.cx-tr-newsprint::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--c-inverse);
+  mix-blend-mode: lighten;
+  pointer-events: none;
+}

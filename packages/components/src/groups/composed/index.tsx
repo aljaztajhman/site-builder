@@ -64,6 +64,7 @@ export function Composed({ section, ctx, index }: SectionProps<"composed">) {
         over={overPhoto(el, props.elements)}
         titleId={el === heading ? titleId(section.id) : undefined}
         priority={lead?.id === el.id}
+        sectionId={section.id}
       />
     );
     // Text on a field takes the field's ground: its colour and the ground a backing panel paints (G2, G9).

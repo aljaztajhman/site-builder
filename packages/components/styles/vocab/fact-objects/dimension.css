@@ -1,0 +1,26 @@
+/* dimension: the value on a dimension line as on a technical drawing: end ticks and a line each side across the cell, the
+   label under it. It draws the measure line only; the value is the client's own (a length, a weight, a load), never a
+   scale. In the text colour; no ground of its own. */
+.cx-fact--dimension .cx-fact__obj {
+  display: grid;
+  text-align: center;
+}
+.cx-fact--dimension :is(.cx-fact__obj, .cx-fact__a) {
+  width: 100%;
+}
+.cx-fact--dimension .cx-fact__label {
+  max-width: none;
+}
+.cx-fact--dimension .cx-fact__value {
+  display: flex;
+  align-items: center;
+  gap: 0.2em;
+  padding-inline: 0.06em;
+  border-inline: max(2px, 0.04em) solid;
+}
+.cx-fact--dimension .cx-fact__value::before,
+.cx-fact--dimension .cx-fact__value::after {
+  content: "";
+  flex: 1 0 0.5em;
+  border-top: max(2px, 0.04em) solid;
+}

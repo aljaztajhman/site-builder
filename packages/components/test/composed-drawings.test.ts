@@ -32,6 +32,26 @@ describe("drawing data", () => {
     expect(renderToStaticMarkup(createElement(DrawingSvg, { id: "ornament/none-line" }))).toBe("");
   });
 
+  /** Strip height on phones (composed-v2.css --cx-ed: 0.75rem); a tiled drawing's strokes scale with it. */
+  const EDGE_PHONE_PX = 12;
+  const BUDGET = { motif: 6 * 1024, ornament: 8 * 1024 }; // inventory checks.ts BYTE_BUDGET
+
+  it.each([...DRAWINGS])("%s: one stroke weight ≥ 1.5 px, the text role only, within its byte budget", (id) => {
+    const d = drawingData(id)!;
+    const strokes = d.paths.filter((p) => p.stroke && p.stroke !== "none");
+    expect(strokes.length, id).toBeGreaterThan(0);
+    // One weight per drawing (I5 style brief); the F1b wheat-ear sample predates it (awns at 1.5, the rest at 1.75).
+    if (id !== "motif/bakery/wheat-ear-line") expect(new Set(strokes.map((p) => p.width)).size, `${id}: stroke weights`).toBe(1);
+    for (const p of d.paths) {
+      for (const role of [p.fill, p.stroke]) if (role && role !== "none") expect(role, id).toBe("text");
+      if (p.stroke && p.stroke !== "none") expect(p.width ?? 0, id).toBeGreaterThanOrEqual(1.5);
+      // Tiled, strokes scale with the strip: on a 12 px edge they must still be 1.5 px.
+      if (d.repeat && p.stroke && p.stroke !== "none") expect(((p.width ?? 0) * EDGE_PHONE_PX) / d.viewBox[1], `${id} at a ${EDGE_PHONE_PX} px edge`).toBeGreaterThanOrEqual(1.5);
+    }
+    const bytes = Buffer.byteLength(renderToStaticMarkup(createElement(DrawingSvg, { id })), "utf8");
+    expect(bytes, id).toBeLessThanOrEqual(BUDGET[id.startsWith("motif/") ? "motif" : "ornament"]);
+  });
+
   it("a strip tiles the drawing in a pattern (half a drawing apart when it doesn't repeat), cropped at its end", () => {
     const html = renderToStaticMarkup(createElement(DrawingSvg, { id: "motif/bakery/wheat-ear-line", strip: true }));
     expect(html).toMatch(/viewBox="0 0 28800 120" preserveAspectRatio="xMinYMid slice"/);

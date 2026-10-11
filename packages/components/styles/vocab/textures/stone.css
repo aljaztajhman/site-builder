@@ -1,0 +1,12 @@
+/* Karst limestone: weathered pits of every size, scattered unevenly.
+   Painted in the section's text colour (currentColor) through one SVG tile; the opacity is its max alpha (contrast). */
+.cx-tex-stone::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: currentColor;
+  opacity: 0.1;
+  mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='480' height='480'><filter id='a'><feTurbulence type='fractalNoise' baseFrequency='.06' numOctaves='4' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 14 0 0 0 -9.5'/></filter><rect x='40' y='40' width='400' height='400' filter='url(%23a)'/></svg>");
+}

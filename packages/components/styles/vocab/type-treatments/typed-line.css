@@ -1,0 +1,15 @@
+/* typed-line: the words, then a rule on the baseline from the last word to the end of the box, as an entry written on a
+   form's line. The rule is an empty inline box as wide as the heading that takes no room on its line (a negative margin)
+   and is clipped at the box's edge, so it starts at the last word on any line count. In the text colour. */
+.cx-tt-typed-line {
+  --cx-w: 100%;
+  overflow: clip;
+  padding-bottom: 0.12em;
+}
+.cx-tt-typed-line::after {
+  content: "";
+  display: inline-block;
+  width: 100%;
+  margin: 0 -100% 0 0.3em;
+  border-bottom: max(2px, 0.04em) solid;
+}

@@ -1,0 +1,20 @@
+/* rise (entrance): text-bearing elements lift 12px into place as they come into view. A quieter reveal: the same
+   distance on every width, a short range. Final state is the default (no animation). Never hides at load (G7). */
+.cx-mo-rise {
+  --cx-ry: 0.75rem;
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes cx-mo-rise {
+      from {
+        opacity: 0;
+        transform: translateY(var(--cx-ry));
+      }
+    }
+    .cx-mo-rise :is(.cx-el--heading, .cx-el--text, .cx-el--list, .cx-el--fact, .cx-el--prices, .cx-el--quote) {
+      animation: cx-mo-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 70%;
+    }
+  }
+}

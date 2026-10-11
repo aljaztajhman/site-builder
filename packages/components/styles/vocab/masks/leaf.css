@@ -1,0 +1,4 @@
+/* leaf: two opposite corners (top left, bottom right) rounded deep, the other two square. */
+.cx-mask-leaf {
+  border-radius: 45% 0;
+}

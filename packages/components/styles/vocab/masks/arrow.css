@@ -1,0 +1,9 @@
+/* arrow: a direction sign, the right end pointed (2.5 rem deep). */
+.cx-mask-arrow {
+  --shape-arrow: polygon(0 0, calc(100% - 2.5rem) 0, 100% 50%, calc(100% - 2.5rem) 100%, 0 100%);
+  clip-path: var(--shape-arrow);
+}
+.cx-mask-arrow .media--ai::after {
+  right: auto;
+  left: 0.5rem;
+}

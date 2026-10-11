@@ -1,0 +1,7 @@
+/* total: the value between a thin rule and a double one, as a ledger's total is ruled off; the label with it. Rules in the
+   text colour; no ground of its own. */
+.cx-fact--total .cx-fact__value {
+  padding: 0.06em 0.08em 0.05em;
+  border-top: max(1px, 0.03em) solid;
+  border-bottom: max(4px, 0.13em) double;
+}
