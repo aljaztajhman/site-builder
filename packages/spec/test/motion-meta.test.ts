@@ -99,8 +99,8 @@ describe("MOTION_META and the CSS of each preset", () => {
       const css = blocksOf(m).rules.map((b) => b.prelude).join(" ");
       expect(css, m).not.toMatch(/\[data-|\.is-live/);
     }
-    // No preset needs the motion island yet; one that does must say so (js: true) and ship it.
-    expect(MOTIONS.filter((m) => MOTION_META[m].js)).toEqual([]);
+    // Only counter needs the motion island (islands/composed/motion.js); one that does must say so (js: true) and ship it.
+    expect(MOTIONS.filter((m) => MOTION_META[m].js)).toEqual(["counter"]);
   });
 
   it("safeAtLoad is true exactly when the start state hides nothing (no opacity or clip-path in the keyframes)", () => {
@@ -115,7 +115,8 @@ describe("MOTION_META and the CSS of each preset", () => {
       const { targets } = MOTION_META[m];
       for (const t of targets) expect(ELEMENT_KINDS as readonly string[], `${m} ${t}`).toContain(t);
       const selectors = animating(blocksOf(m).rules).map((b) => b.prelude).join(" ");
-      if (targets.length === 0) expect(selectors, m).toMatch(/\.cx-bg-/);
+      // No targets: the preset moves a background layer (.cx-bg-) or the section itself (the bare .cx-mo-<name> rule).
+      if (targets.length === 0) expect(selectors, m).toMatch(new RegExp(`\\.cx-bg-|(^|\\s)\\.cx-mo-${m}(\\s|$)`));
       else for (const t of targets) expect(selectors, `${m} ${t}`).toContain(`.cx-el--${t}`);
     }
   });

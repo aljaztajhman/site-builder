@@ -1,0 +1,25 @@
+/* photo-unmask (entrance): a photo's mask opens from its middle outward as it comes into view (clip-path through the
+   --shape- tokens), settling from a slight enlargement. */
+.cx-mo-photo-unmask {
+  --shape-pufrom: inset(50% 0);
+  --shape-puto: inset(0);
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes cx-mo-photo-unmask {
+      from {
+        clip-path: var(--shape-pufrom);
+        transform: scale(1.06);
+      }
+      to {
+        clip-path: var(--shape-puto);
+        transform: none;
+      }
+    }
+    .cx-mo-photo-unmask :is(.cx-el--image, .cx-el--photos) img {
+      animation: cx-mo-photo-unmask linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 35%;
+    }
+  }
+}

@@ -1,0 +1,29 @@
+/* sticky-stack (entrance): consecutive sections carrying it pin to the top of the screen in turn, each covering the one
+   before as you scroll. Desktop only (from 64rem wide and 40rem tall) and never under reduced motion; on a phone and
+   when reduced they are ordinary static sections. A later section that does not carry it is lifted above the pinned
+   ones so they never cover it. A section taller than the screen would hide its lower part: author it on short sections. */
+@media (min-width: 64rem) and (min-height: 40rem) and (prefers-reduced-motion: no-preference) {
+  .cx-mo-sticky-stack {
+    position: sticky;
+    top: 0;
+  }
+  .cx-mo-sticky-stack ~ .s:not(.cx-mo-sticky-stack) {
+    position: relative;
+  }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    @media (min-width: 64rem) and (min-height: 40rem) {
+      @keyframes cx-mo-sticky-stack {
+        from {
+          transform: translateY(2rem);
+        }
+      }
+      .cx-mo-sticky-stack {
+        animation: cx-mo-sticky-stack linear both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 50%;
+      }
+    }
+  }
+}
