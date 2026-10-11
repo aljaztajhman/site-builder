@@ -1,0 +1,8 @@
+{
+  "id": "mizarstvo-rozman",
+  "stance": "technical-drawing",
+  "trades": ["builder"],
+  "title": "Mizarstvo Rozman, delavniški načrt",
+  "gapNote": "There is no furniture drawing in the inventory: the table elevation is a hand-written decor svg (10 paths), with the hidden drawer line and the centre line faked as rows of short segments because a path has no dash style. The dimension fact under the table is a separate element: it matches the drawing's width only because both take columns 7-12, so its ticks never meet the table's edges and the two drift apart on phones. The drawing sheet has no frame: there is no border round the page or section, so the title block (type-treatment title-block) is a boxed heading in the last row, not the cell grid in the sheet's corner (no drawn-by, scale or date cells, and nothing to say they are empty). The drafting-grid texture (stance signature) doesn't exist, so the sheet is plain white. Saturday 'po dogovoru' can only be an hours note; an hours entry can't say 'by appointment'.",
+  "sources": ["S Cevi (one drawn object carries the hero, the phone as the call)", "stance technical-drawing (dimension lines, a title block in the corner, one ink on white)"]
+}

@@ -1,0 +1,205 @@
+{
+  "specVersion": 20,
+  "slug": "mizarstvo-rozman",
+  "locales": { "default": "sl", "enabled": ["sl"] },
+  "business": {
+    "name": "Mizarstvo Rozman",
+    "type": "builder",
+    "subtype": "carpentry",
+    "phone": "+38631555274",
+    "email": "gregor@mizarstvo-rozman.example",
+    "address": { "street": "Tržaška cesta 40", "postalCode": "1370", "city": "Logatec" },
+    "hours": {
+      "entries": [
+        { "from": "mon", "to": "fri", "open": "07:00", "close": "15:00" },
+        { "from": "sun", "to": "sun", "closed": true }
+      ],
+      "note": "Ob sobotah po dogovoru."
+    },
+    "provider": {
+      "legalName": { "$placeholder": "legalName" },
+      "registrationNumber": { "$placeholder": "registrationNumber" },
+      "taxNumber": { "$placeholder": "taxNumber" }
+    },
+    "serviceArea": ["Logatec in okolica do 40 km"],
+    "amenities": ["invoice", "parking"]
+  },
+  "design": {
+    "direction": "racun",
+    "fontPair": "ibm-plex-sans",
+    "colors": {
+      "background": "#ffffff",
+      "surface": "#eef2f8",
+      "text": "#14203a",
+      "muted": "#4a556b",
+      "primary": "#1d4bb8",
+      "onPrimary": "#ffffff",
+      "accent": "#c4372c",
+      "border": "#c5d0e2",
+      "inverse": "#13203a",
+      "onInverse": "#eef1f7"
+    },
+    "radius": 4,
+    "baseFontSize": 17,
+    "scale": 1.333,
+    "headingWeight": 700,
+    "headingCase": "normal",
+    "headingTracking": -0.03,
+    "density": "regular",
+    "shadow": "none",
+    "imagery": "natural",
+    "motion": "still",
+    "wordmark": { "style": "plain" }
+  },
+  "assets": { "images": [] },
+  "chrome": {
+    "header": { "variant": "bar", "cta": "none" },
+    "footer": { "variant": "compact" },
+    "mobileActionBar": true
+  },
+  "pages": [
+    {
+      "id": "p_home",
+      "kind": "home",
+      "slug": "",
+      "nav": { "label": "Domov", "show": true },
+      "seo": {
+        "title": "Mizarstvo Rozman, Logatec – pohištvo iz masivnega lesa",
+        "description": "Mizarja Gregor in Janez Rozman iz Logatca izdelujeta kuhinje, vgradne omare, mize in stopnice iz hrasta, oreha in smreke. Meritev je brezplačna."
+      },
+      "sections": [
+        {
+          "id": "s_sheet",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "hero",
+            "width": "contained",
+            "rows": 5,
+            "gap": 2,
+            "elements": [
+              { "id": "e_where", "kind": "text", "paragraphs": ["Tržaška cesta 40, Logatec"], "color": "muted", "desk": { "col": 1, "span": 6, "row": 1, "alignY": "end" }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_title", "kind": "heading", "text": "Kuhinje, omare, mize in stopnice", "level": 1, "size": 6, "measure": "m", "color": "primary", "desk": { "col": 1, "span": 7, "row": 2 }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_lead", "kind": "text", "paragraphs": ["Iz masivnega lesa, po naročilu. Gregor in Janez Rozman, mizarja, delava največ s hrastom, orehom in smreko, za stanovanja in hiše v Logatcu in okolici do 40 km."], "size": 1, "desk": { "col": 1, "span": 6, "row": 3 }, "phone": { "order": 2, "span": "full" } },
+              {
+                "id": "e_table",
+                "kind": "decor",
+                "svg": {
+                  "width": 400,
+                  "height": 250,
+                  "paths": [
+                    { "d": "M0 232 H400", "fill": "none", "stroke": "border", "width": 1.5 },
+                    { "d": "M20 60 H380 V80 H20 Z", "fill": "none", "stroke": "primary", "width": 2.5 },
+                    { "d": "M52 80 V100 H348 V80", "fill": "none", "stroke": "primary", "width": 2 },
+                    { "d": "M52 100 V232 H74 V100", "fill": "none", "stroke": "primary", "width": 2.5 },
+                    { "d": "M326 100 V232 H348 V100", "fill": "none", "stroke": "primary", "width": 2.5 },
+                    { "d": "M150 90 H166 M176 90 H192 M202 90 H218 M228 90 H244 M254 90 H262", "fill": "none", "stroke": "muted", "width": 1.2 },
+                    { "d": "M36 70 C120 66 210 74 300 68 S360 71 368 70", "fill": "none", "stroke": "border", "width": 1 },
+                    { "d": "M394 60 V232 M388 60 H400 M388 232 H400", "fill": "none", "stroke": "accent", "width": 1.2 },
+                    { "d": "M200 20 V48 M200 112 V124 M200 136 V148 M200 160 V172 M200 184 V196 M200 208 V220", "fill": "none", "stroke": "accent", "width": 1 },
+                    { "d": "M20 40 V52 M380 40 V52 M20 46 H380", "fill": "none", "stroke": "accent", "width": 1.2 }
+                  ]
+                },
+                "fit": "cell",
+                "desk": { "col": 7, "span": 6, "row": 1, "rowSpan": 3, "alignY": "end" },
+                "phone": { "order": 3, "span": "full" }
+              },
+              { "id": "e_make", "kind": "fact", "value": "6–8 tednov", "label": "izdelava, od potrjenega načrta do montaže", "treatment": "dimension", "size": 4, "color": "accent", "desk": { "col": 7, "span": 6, "row": 4, "alignY": "start" }, "phone": { "order": 4, "span": "full" } },
+              { "id": "e_phone", "kind": "fact", "value": "031 555 274", "label": "Pokličite, pridem izmerit prostor", "treatment": "numeral", "size": 4, "color": "primary", "link": { "action": "call" }, "desk": { "col": 1, "span": 5, "row": 5, "alignY": "end" }, "phone": { "order": 5, "span": "full" } },
+              { "id": "e_block", "kind": "heading", "text": "Mizarstvo Rozman, Logatec", "level": 2, "size": 2, "treatment": "title-block", "desk": { "col": 8, "span": 5, "row": 5, "alignY": "end", "alignX": "end" }, "phone": { "order": 6, "span": "full" } }
+            ]
+          }
+        },
+        {
+          "id": "s_steps",
+          "type": "composed",
+          "variant": "free",
+          "tone": "alt",
+          "props": {
+            "intent": "steps",
+            "width": "contained",
+            "rows": 3,
+            "elements": [
+              { "id": "e_h", "kind": "heading", "text": "Od meritve do montaže", "level": 2, "size": 5, "treatment": "corner-marks", "desk": { "col": 1, "span": 7, "row": 1 }, "phone": { "order": 0, "span": "full" } },
+              {
+                "id": "e_l",
+                "kind": "list",
+                "marker": "line",
+                "weight": "medium",
+                "items": [
+                  { "lead": "Meritev", "text": "Pridem k vam izmerit prostor. Ogled in meritev sta brezplačna." },
+                  { "lead": "Načrt", "text": "V 10 dneh dobite načrt z merami in pisno ponudbo." },
+                  { "lead": "Izdelava", "text": "Ko načrt potrdite, izdelava traja od 6 do 8 tednov." },
+                  { "lead": "Montaža", "text": "Kuhinjo ali omaro sama pripeljeva in zmontirava." }
+                ],
+                "desk": { "col": 1, "span": 7, "row": 2, "rowSpan": 2 },
+                "phone": { "order": 1, "span": "full" }
+              },
+              { "id": "e_plan", "kind": "fact", "value": "10 dni", "label": "do načrta z merami in pisne ponudbe", "treatment": "dimension", "size": 5, "color": "primary", "desk": { "col": 9, "span": 4, "row": 2, "alignY": "start" }, "phone": { "order": 2, "span": "full" } },
+              { "id": "e_free", "kind": "fact", "value": "Brezplačno", "label": "ogled in meritev", "treatment": "numeral", "size": 3, "desk": { "col": 9, "span": 4, "row": 3, "alignY": "start" }, "phone": { "order": 3, "span": "full" } }
+            ]
+          }
+        },
+        {
+          "id": "s_work",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "services",
+            "width": "contained",
+            "rows": 3,
+            "elements": [
+              { "id": "e_h", "kind": "heading", "text": "Kaj izdelujeva", "level": 2, "size": 5, "color": "primary", "desk": { "col": 1, "span": 5, "row": 1 }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_t", "kind": "text", "paragraphs": ["Vse po naročilu in iz masivnega lesa, največ iz hrasta, oreha in smreke. Cen ne objavljava, ker je vsak kos drugačen."], "desk": { "col": 1, "span": 5, "row": 2, "alignY": "start" }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_l", "kind": "list", "marker": "rule", "weight": "bold", "size": 2, "items": ["Kuhinje", "Vgradne omare", "Mize", "Stopnice"], "desk": { "col": 7, "span": 6, "row": 1, "rowSpan": 2 }, "phone": { "order": 2, "span": "full" } },
+              { "id": "e_p", "kind": "prices", "style": "leaders", "size": 1, "items": [{ "name": "Masivna hrastova miza za šest oseb", "price": { "amount": 1400, "from": true } }], "desk": { "col": 7, "span": 6, "row": 3 }, "phone": { "order": 3, "span": "full" } },
+              { "id": "e_since", "kind": "fact", "value": "1987", "label": "delavnico je odprl Janez Rozman", "treatment": "ruler", "size": 4, "desk": { "col": 1, "span": 4, "row": 3, "alignY": "end" }, "phone": { "order": 4, "span": "full" } }
+            ]
+          }
+        },
+        {
+          "id": "s_shop",
+          "type": "composed",
+          "variant": "free",
+          "tone": "inverse",
+          "props": {
+            "intent": "contact",
+            "width": "contained",
+            "rows": 4,
+            "elements": [
+              { "id": "e_h", "kind": "heading", "text": "Delavnica na dvorišču za hišo", "level": 2, "size": 4, "measure": "m", "desk": { "col": 1, "span": 6, "row": 1 }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_contact", "kind": "contact", "show": ["phone", "email", "address"], "desk": { "col": 1, "span": 5, "row": 2 }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_hours", "kind": "hours", "style": "table", "desk": { "col": 1, "span": 5, "row": 3 }, "phone": { "order": 2, "span": "full" } },
+              { "id": "e_if", "kind": "iconFacts", "icons": "line", "items": [{ "fact": "invoice", "note": "Plačilo na račun" }, { "fact": "parking", "note": "Pred vrati delavnice" }], "desk": { "col": 1, "span": 5, "row": 4 }, "phone": { "order": 3, "span": "full" } },
+              { "id": "e_map", "kind": "map", "style": "street", "note": "Delavnica je na dvorišču za hišo, parkirate lahko pred vrati.", "desk": { "col": 7, "span": 6, "row": 1, "rowSpan": 4 }, "phone": { "order": 4, "span": "full" } }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "nav": { "label": "Zasebnost", "show": false },
+      "seo": { "title": "Varstvo osebnih podatkov | Mizarstvo Rozman", "description": "Kako Mizarstvo Rozman obdeluje osebne podatke obiskovalcev spletne strani." },
+      "sections": [{ "id": "s_legal_privacy", "type": "legal", "variant": "default", "props": { "kind": "privacy" } }]
+    },
+    {
+      "id": "p_dostopnost",
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "nav": { "label": "Dostopnost", "show": false },
+      "seo": { "title": "Izjava o dostopnosti | Mizarstvo Rozman", "description": "Izjava o dostopnosti spletne strani Mizarstvo Rozman." },
+      "sections": [{ "id": "s_legal_accessibility", "type": "legal", "variant": "default", "props": { "kind": "accessibility" } }]
+    },
+    {
+      "id": "p_404",
+      "kind": "not-found",
+      "slug": "404",
+      "nav": { "label": "Ni najdeno", "show": false },
+      "seo": { "title": "Strani ni mogoče najti | Mizarstvo Rozman", "description": "Iskane strani ni. Vrnite se na domačo stran." },
+      "sections": [{ "id": "s_not_found", "type": "not-found", "variant": "default", "props": { "title": "Te strani ni mogoče najti", "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo." } }]
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "id": "mizarstvo-rozman",
+  "businessType": "builder",
+  "town": "Logatec",
+  "description": "Mizarstvo Rozman, Tržaška cesta 40, 1370 Logatec. Sem Gregor Rozman, mizar. V delavnici sva dva, jaz in oče Janez, ki je delavnico odprl leta 1987. Izdelujeva kuhinje, vgradne omare, mize in stopnice iz masivnega lesa, največ iz hrasta, oreha in smreke. Delava po naročilu, za stanovanja in hiše v Logatcu in okolici do 40 km.\n\nKako poteka: najprej pridem k vam izmerit prostor. Ogled in meritev sta brezplačna. V 10 dneh dobite načrt z merami in pisno ponudbo. Ko načrt potrdite, izdelava traja od 6 do 8 tednov, potem kuhinjo ali omaro sama pripeljeva in zmontirava.\n\nCen na strani ne bi objavljal, ker je vsak kos drugačen. Lahko pa napišete, da je masivna hrastova miza za šest oseb pri nas od 1.400 € naprej.\n\nV delavnici sva od ponedeljka do petka od 7.00 do 15.00, ob sobotah po dogovoru. Pokličite me na 031 555 274 ali pišite na gregor@mizarstvo-rozman.example. Delavnica je na dvorišču za hišo, parkirate lahko pred vrati. Plačilo na račun.\n\nRad bi, da je stran kot načrt, ki ga narišem za vsako kuhinjo: tanke črte, mere in okvir z mojim imenom v kotu.",
+  "photos": null,
+  "facts": {
+    "name": "Mizarstvo Rozman",
+    "phone": "+38631555274",
+    "email": "gregor@mizarstvo-rozman.example",
+    "address": { "street": "Tržaška cesta 40", "postalCode": "1370", "city": "Logatec" },
+    "hours": [{ "from": "mon", "to": "fri", "open": "07:00", "close": "15:00" }],
+    "prices": [{ "item": "masivna hrastova miza za šest oseb", "amount": 1400, "from": true }],
+    "people": [
+      { "name": "Gregor Rozman", "role": "mizar" },
+      { "name": "Janez Rozman", "role": "mizar, delavnico odprl leta 1987" }
+    ],
+    "amenities": ["invoice", "parking"],
+    "other": [
+      "Kuhinje, vgradne omare, mize in stopnice iz masivnega lesa (hrast, oreh, smreka)",
+      "Delava po naročilu, v Logatcu in okolici do 40 km",
+      "Ogled in meritev sta brezplačna",
+      "V 10 dneh načrt z merami in pisna ponudba",
+      "Izdelava od 6 do 8 tednov od potrjenega načrta",
+      "Ob sobotah po dogovoru",
+      "Delavnica je na dvorišču za hišo, parkirate lahko pred vrati"
+    ]
+  }
+}
