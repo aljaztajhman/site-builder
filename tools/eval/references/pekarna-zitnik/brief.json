@@ -1,0 +1,81 @@
+{
+  "id": "pekarna-zitnik",
+  "businessType": "bakery",
+  "town": "Kamnik",
+  "description": "Pekarna Žitnik je družinska pekarna v Kamniku, naslov je Šutna 9, 1240 Kamnik. Vodim jo jaz, Mihael Žitnik, z ženo Heleno. Kruh pečemo v krušni peči, ki jo kurimo z bukovimi drvmi, in zato je skorja debela in temna. Testo zamesimo zvečer in ga pustimo čez noč, zjutraj ga oblikujemo in spečemo.\n\nVsak dan imamo hlebec iz krušne peči, ržen kruh, koruzni kruh in žemlje. Ob petkih spečemo še potico z orehi, ob sobotah pa makovo štruco.\n\nCene: hlebec iz krušne peči 3,80 €, ržen kruh 4,20 €, koruzni kruh 4,00 €, žemlja 0,60 €, potica z orehi (kos) 2,80 €, makova štruca 4,50 €.\n\nOdprto: pon–pet 6.30–15.00, sobota 6.30–12.00, ob nedeljah zaprto.\n\nKruh lahko naročite po telefonu 031 555 742 ali na helena@pekarna-zitnik.example. Plačate lahko tudi s kartico. Za pekarno je parkirišče. Stran naj bo preprosta in močna, kot je naš kruh: črno na belem, brez okraskov.",
+  "photos": {
+    "fixture": "pekarna-kvas",
+    "subjects": [
+      "hlebci kruha na leseni polici"
+    ]
+  },
+  "facts": {
+    "name": "Pekarna Žitnik",
+    "phone": "+38631555742",
+    "email": "helena@pekarna-zitnik.example",
+    "address": {
+      "street": "Šutna 9",
+      "postalCode": "1240",
+      "city": "Kamnik"
+    },
+    "hours": [
+      {
+        "from": "mon",
+        "to": "fri",
+        "open": "06:30",
+        "close": "15:00"
+      },
+      {
+        "from": "sat",
+        "to": "sat",
+        "open": "06:30",
+        "close": "12:00"
+      }
+    ],
+    "prices": [
+      {
+        "item": "hlebec iz krušne peči",
+        "amount": 3.8
+      },
+      {
+        "item": "ržen kruh",
+        "amount": 4.2
+      },
+      {
+        "item": "koruzni kruh",
+        "amount": 4
+      },
+      {
+        "item": "žemlja",
+        "amount": 0.6
+      },
+      {
+        "item": "potica z orehi (kos)",
+        "amount": 2.8
+      },
+      {
+        "item": "makova štruca",
+        "amount": 4.5
+      }
+    ],
+    "people": [
+      {
+        "name": "Mihael Žitnik",
+        "role": "vodja, peka"
+      },
+      {
+        "name": "Helena",
+        "role": "žena, soustanoviteljica"
+      }
+    ],
+    "amenities": [
+      "card",
+      "parking"
+    ],
+    "other": [
+      "Kruh pečemo v krušni peči, ki jo kurimo z bukovimi drvmi",
+      "Testo zamesimo zvečer in ga pustimo čez noč",
+      "Ob petkih potica z orehi, ob sobotah makova štruca"
+    ]
+  }
+}
