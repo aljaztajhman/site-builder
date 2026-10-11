@@ -1,0 +1,54 @@
+{
+  "id": "zidarstvo-cok",
+  "businessType": "builder",
+  "town": "Koper",
+  "description": "Zidarstvo Čok je majhno zidarsko podjetje v Kopru, naslov je Kidričeva ulica 18, 6000 Koper. Vodim ga jaz, Rok Čok, z dvema zidarjema. Delamo zidarska dela, fasade s toplotno izolacijo in betonske plošče, tako pri novogradnjah kot pri obnovah.\n\nCene: delo zidarja (na uro) 30 €, fasada s toplotno izolacijo (na kvadratni meter) 45 €, betonska plošča (na kvadratni meter) 60 €.\n\nOdprto: pon–pet 6.30–15.00. Na gradbišče pridem pogledat po dogovoru.\n\nPokličite na 05 555 27 94 ali pišite na rok@zidarstvo-cok.example. Račun izdamo za vsako delo. Stran naj bo gola in jasna: velike črke, tanke črte, ena trda barva in nič okraskov.",
+  "photos": null,
+  "facts": {
+    "name": "Zidarstvo Čok",
+    "phone": "+38655552794",
+    "email": "rok@zidarstvo-cok.example",
+    "address": {
+      "street": "Kidričeva ulica 18",
+      "postalCode": "6000",
+      "city": "Koper"
+    },
+    "hours": [
+      {
+        "from": "mon",
+        "to": "fri",
+        "open": "06:30",
+        "close": "15:00"
+      }
+    ],
+    "prices": [
+      {
+        "item": "delo zidarja (na uro)",
+        "amount": 30
+      },
+      {
+        "item": "fasada s toplotno izolacijo (na kvadratni meter)",
+        "amount": 45
+      },
+      {
+        "item": "betonska plošča (na kvadratni meter)",
+        "amount": 60
+      }
+    ],
+    "people": [
+      {
+        "name": "Rok Čok",
+        "role": "vodja"
+      }
+    ],
+    "amenities": [
+      "invoice",
+      "home-visits"
+    ],
+    "other": [
+      "Delamo zidarska dela, fasade s toplotno izolacijo in betonske plošče",
+      "Na gradbišče pridem pogledat po dogovoru",
+      "Račun izdamo za vsako delo"
+    ]
+  }
+}
