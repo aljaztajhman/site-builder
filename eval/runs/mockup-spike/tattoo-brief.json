@@ -1,0 +1,26 @@
+{
+  "$comment": "INVENTED FIXTURE DATA for the mockup spike (docs/plans/mockup-spike.md). Not a real business: the name, address number, phone, email, person and hours are made up for testing. Never publish.",
+  "id": "tattoo-rja",
+  "businessType": "tattoo studio",
+  "description": "Rja je majhen tatu studio v Mariboru, na Koroški cesti 41. Tetoviram jaz, Nika Zorman. Vsak motiv narišem na novo, po vaši zgodbi, nič iz kataloga. Delam fine-line in drobne motive, večje tetovaže po meri in prekrivanja ter popravke starih tetovaž. Pred vsako tetovažo je posvet, na katerem skupaj naredimo osnutek. Delam samo z naročili.",
+  "photos": [],
+  "facts": {
+    "name": "Rja tatu studio",
+    "phone": "+38640555318",
+    "email": "studio@rja-tatu.example",
+    "address": { "street": "Koroška cesta 41", "postalCode": "2000", "city": "Maribor" },
+    "hours": [
+      { "from": "tue", "to": "fri", "open": "12:00", "close": "20:00" },
+      { "from": "sat", "to": "sat", "open": "10:00", "close": "15:00" }
+    ],
+    "services": [
+      { "name": "Tetovaže po meri", "detail": "vsak motiv narisan na novo, po vaši zgodbi" },
+      { "name": "Fine-line in drobni motivi", "detail": "tanke linije, botanika, pisava" },
+      { "name": "Prekrivanje in popravki", "detail": "stare tetovaže prekrijemo ali osvežimo" },
+      { "name": "Posvet in osnutek", "detail": "pred vsako tetovažo skupaj naredimo osnutek" }
+    ],
+    "people": [{ "name": "Nika Zorman", "role": "tatu umetnica" }],
+    "other": ["samo z naročili", "nič iz kataloga"]
+  },
+  "missing": ["photos", "logo", "prices", "legal"]
+}

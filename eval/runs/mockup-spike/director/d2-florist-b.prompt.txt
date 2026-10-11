@@ -1,0 +1,11 @@
+One flat full-page desktop website screenshot, 1536×1024, with no browser or device frame. Page ground is deep garden green #163A2A. Top left is the wordmark "Šipek" in an upright sharp high-contrast serif, off-white #F3F1EA, with "cvetličarna" in small lowercase sans below it. Navigation sits at top left after the wordmark, in small sans: "Domov", "Šopki", "Poroke", "Kontakt". The right third shows a tall two-colour linocut-style print of loose seasonal flower stems and leaves in hip orange #E2552B and pale leaf green #9CC08A, with visible carved texture, bleeding off the top and right edges. There is no text in the print and a tiny caption beside it reads "AI ilustracija". At lower left, spanning 8 columns, is the large upright serif headline "Šopki iz cvetja tega tedna" in off-white. Below it is the intro in light sans: "Majhna cvetličarna na Glavnem trgu v Novem mestu. Šopke vežemo sproti, iz sezonskega cvetja z vrtnarij v Beli krajini." Next comes one rectangular orange button with square corners, "Pokličite". The bottom band is a full-width darker strip #0E241A divided by thin lines #3E6650 into six day cells. The first five cells are grouped under "Pon–pet 8.00–19.00" and the last under "Sob 8.00–13.00". At the left of the strip sits the large serif numeral "031 555 427", with the orange note "Šopek naročite po telefonu dan prej." beneath. A peek of the next section shows "Šopki po naročilu", "Poročna floristika", "Žalni aranžmaji", "Sobne rastline" stacked left, and "Glavni trg 9, 8000 Novo mesto" right. The look is flat, with no gradients, no shadows and nothing centred.
+
+Required texts, verbatim and spelled exactly (use only these; every word legible):
+- the wordmark "Šipek" with the small line "cvetličarna" and navigation: "Domov", "Šopki", "Poroke", "Kontakt"
+- headline: "Šopki iz cvetja tega tedna"
+- intro: "Majhna cvetličarna na Glavnem trgu v Novem mestu. Šopke vežemo sproti, iz sezonskega cvetja z vrtnarij v Beli krajini."
+- four services: "Šopki po naročilu", "Poročna floristika", "Žalni aranžmaji", "Sobne rastline"
+- a note: "Šopek naročite po telefonu dan prej."
+- opening hours: "Pon–pet 8.00–19.00", "Sob 8.00–13.00"
+- address: "Glavni trg 9, 8000 Novo mesto"
+- phone: "031 555 427" with one button "Pokličite"
