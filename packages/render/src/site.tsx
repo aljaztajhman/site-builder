@@ -439,7 +439,7 @@ function renderDocument(spec: SiteSpec, localized: SiteSpec, opts: RenderOptions
       {/* The stylesheet without other trades' motif rules (shared.ts stylesheetFor). */}
       <link rel="stylesheet" href={ctx.shared(stylesheetName({ motif, sub }))} />
       {/* Composed sections have stylesheets of their own (spec v19 core, spec v20 additions), linked only by pages that use them. */}
-      {composedSheets(doc.sections).map((k) => (
+      {composedSheets(doc.sections, undefined, design.wordmark ? { style: design.wordmark.style, chrome: localized.assets.logo === undefined } : undefined).map((k) => (
         <link key={k} rel="stylesheet" href={ctx.shared(COMPOSED_SHEETS[k]().name)} />
       ))}
       <style dangerouslySetInnerHTML={{ __html: fontFaceCss(design, fontsBase) + tokensCss(design, sub) }} />

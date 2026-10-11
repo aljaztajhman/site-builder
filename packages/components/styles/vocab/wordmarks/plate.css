@@ -1,0 +1,22 @@
+/* wordmark plate: the name in capitals on a filled plate with chamfered corners and a thin inner line (an outline; the chamfer is a --shape- token), in the palette's primary pair. */
+.wm-plate {
+  display: block;
+}
+.wm-plate .wm__box {
+  --shape-plate: polygon(0.5em 0, calc(100% - 0.5em) 0, 100% 0.5em, 100% calc(100% - 0.5em), calc(100% - 0.5em) 100%, 0.5em 100%, 0 calc(100% - 0.5em), 0 0.5em);
+  display: inline-block;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 0.5em 0.9em;
+  background: var(--c-primary);
+  color: var(--c-on-primary);
+  outline: 0.05em solid var(--c-on-primary);
+  outline-offset: -0.18em;
+  clip-path: var(--shape-plate);
+  font-size: 0.6em;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+}

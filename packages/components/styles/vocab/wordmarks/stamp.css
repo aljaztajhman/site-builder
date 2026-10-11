@@ -1,0 +1,20 @@
+/* wordmark stamp: the name in capitals inside a ruled rectangle with a second, thinner rule within. Ink only (currentColor). */
+.wm-stamp {
+  display: block;
+}
+.wm-stamp .wm__box {
+  display: inline-block;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 0.5em 0.85em;
+  border: 0.09em solid currentColor;
+  border-radius: 0.1em;
+  outline: 0.04em solid currentColor;
+  outline-offset: -0.32em;
+  font-size: 0.6em;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.12em;
+  text-align: center;
+  text-transform: uppercase;
+}

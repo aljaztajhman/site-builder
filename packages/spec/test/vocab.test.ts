@@ -46,7 +46,7 @@ const SHIPPED: Record<VocabKey, readonly string[]> = {
   FACT_OBJECTS: ["numeral", "plate", "stamp", "ticket", "seal", "tag", "house-number", "signpost", "timetable", "receipt", "total", "dimension", "index-tab", "calendar", "split", "door-plate", "ruler"],
   TYPE_TREATMENTS: ["none", "stacked", "knockout", "circle", "vertical", "oversized-first-word", "ruled-total", "title-block", "masthead", "typed-line", "rule-flanked", "fascia-lettering", "marker-highlight", "drop-numeral", "corner-marks"],
   MOTIONS: ["reveal", "unmask", "rise", "wipe", "stagger", "drift-bg"],
-  WORDMARK_STYLES: ["plain"],
+  WORDMARK_STYLES: ["plain", "lockup", "stamp", "plate", "circle", "monogram", "stacked-caps"],
   DRAWINGS: [
     "motif/bakery/wheat-ear-line",
     "ornament/rope-line",

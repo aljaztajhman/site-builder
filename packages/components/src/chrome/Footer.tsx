@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import { DIRECTIONS, isPlaceholder, isWebUrl } from "@sb/spec";
 import type { RenderCtx } from "../types.ts";
 import { AddressText, EmailLink, HoursList, Icon, MaybeText, PhoneLink, cx } from "../primitives/index.tsx";
+import { ChromeWordmark } from "../groups/composed/kinds/wordmark.tsx";
 
 /** Characters of the longest word: the wordmark's size is set so it fits the width (skeleton.css). */
 const longestWord = (s: string): number => Math.max(4, ...s.split(/\s+/).map((w) => w.length));
@@ -78,7 +79,7 @@ export function Footer({ ctx }: { ctx: RenderCtx }) {
         <div className="site-footer__grid">
           <div className="site-footer__block site-footer__contact">
             <h2 className={headingClass}>{ctx.t("contact")}</h2>
-            <p className="site-footer__name">{b.name}</p>
+            <p className="site-footer__name">{ChromeWordmark({ ctx }) ?? b.name}</p>
             {variant !== "visit" && <AddressText ctx={ctx} />}
             <ul className="site-footer__facts" role="list">
               <li>

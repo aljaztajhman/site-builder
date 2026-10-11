@@ -20,6 +20,7 @@ export * from "./composition/preset.ts";
 export * from "./design-rules.ts";
 export * from "./directions.ts";
 export * from "./fonts.ts";
+export * from "./wordmark.ts";
 export * from "./color.ts";
 export * from "./format.ts";
 export * from "./banned.ts";

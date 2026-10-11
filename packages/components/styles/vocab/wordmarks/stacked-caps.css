@@ -1,0 +1,12 @@
+/* wordmark stacked-caps: the words stacked, one to a line, in heavy capitals with open tracking. Short names only. */
+.wm-stacked-caps {
+  display: block;
+  font-size: calc(var(--fz) * 0.7);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.wm-stacked-caps .wm__l {
+  display: block;
+}
