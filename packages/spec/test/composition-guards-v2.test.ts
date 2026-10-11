@@ -558,6 +558,12 @@ describe("G9 element colours", () => {
     expect(validateComposition(s, C)).toEqual([]);
   });
 
+  it("checks a map's colour role (it paints the pin, frame and street names), not only its absence", () => {
+    const s = composed([heading("e_head", { col: 1, span: 6, row: 1 }, 0), map("e_m", { col: 1, span: 6, row: 2 }, 1, { color: "border" })]);
+    expect(issue(s, /e_m: border on background fails contrast/, C)).toMatchObject({ code: "design", path: "/props/elements/1/color" });
+    expect(has(composed([heading("e_head", { col: 1, span: 6, row: 1 }, 0), map("e_m", { col: 1, span: 6, row: 2 }, 1, { color: "text" })]), /e_m: /, C)).toBe(false);
+  });
+
   it("rejects a colour that fails against the tone's ground, and repairs by dropping it", () => {
     const s = composed([heading("e_head", { col: 1, span: 6, row: 1 }, 0, { color: "accent", size: 2 }), text("e_text", { col: 1, span: 6, row: 2 }, 1, { color: "border" })]);
     expect(issue(s, /e_text: border on background fails contrast \([\d.]+ < 4\.5\)/, C)).toMatchObject({ code: "design", path: "/props/elements/1/color" });
