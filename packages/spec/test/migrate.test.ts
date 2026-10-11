@@ -482,7 +482,7 @@ describe("migration 20 → 21 (the steps and qa element kinds, studio I3b)", () 
     return JSON.parse(readFileSync(new URL(`../../../tools/eval/${rel}`, import.meta.url), "utf8")) as SiteSpec;
   };
 
-  it("is the identity on every golden, the composed sheets and the references: deep-equal at v21 and still schema-valid", async () => {
+  it("is the identity on every golden and the composed sheets (m, s, j, kitchen sink): deep-equal at v21 and still schema-valid", async () => {
     const { readdirSync } = await import("node:fs");
     const { validateSite } = await import("../src/index.ts");
     const goldens = readdirSync(new URL("../../../tools/eval/golden/", import.meta.url))
@@ -501,7 +501,7 @@ describe("migration 20 → 21 (the steps and qa element kinds, studio I3b)", () 
     expect(SPEC_VERSION).toBe(21);
   });
 
-  it("changes no value of a v20 spec that holds every v20 kind: only the version moves", async () => {
+  it("moves only the version when the stored kitchen sink (v20 kinds and the v21 steps and qa) is relabelled v20 and migrated", async () => {
     const stored = await load("composed/kitchen-sink.json");
     const v20 = { ...structuredClone(stored), specVersion: 20 } as unknown as { specVersion: number };
     const v21 = migrateSpec(v20) as unknown as { specVersion: number };

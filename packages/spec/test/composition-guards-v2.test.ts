@@ -1187,6 +1187,16 @@ describe("G22 and G29: steps and qa (spec v21)", () => {
     expect(has(over, /overlap/, C)).toBe(true);
   });
 
+  it("rejects numbered step titles and numbered questions, like numbered list leads", () => {
+    const numbered = composed([head, steps("e_s", { col: 1, span: 8, row: 2 }, 1, { items: [{ title: "01 Klic", text: "Pokličete nas." }, { title: "02 / Ogled", text: "Pridemo na ogled." }] })], { intent: "steps" });
+    expect(issue(numbered, /numbered label: "01 Klic"/, C)).toMatchObject({ code: "banned", path: "/props/elements/1/items/0/title" });
+    expect(issue(numbered, /numbered label: "02 \/ Ogled"/, C)).toMatchObject({ code: "banned", path: "/props/elements/1/items/1/title" });
+    const q = composed([head, qa("e_q", { col: 1, span: 8, row: 2 }, 1, { items: [{ question: "01 Ali dostavljate?", answer: "Ne." }] })], { intent: "faq" });
+    expect(issue(q, /numbered label: "01 Ali dostavljate\?"/, C)).toMatchObject({ code: "banned", path: "/props/elements/1/items/0/question" });
+    const fine = composed([head, steps("e_s", { col: 1, span: 8, row: 2 }, 1, { items: [{ title: "Klic", text: "Pokličete nas." }, { title: "Ogled", text: "Pridemo." }] })], { intent: "steps" });
+    expect(has(fine, /numbered label/, C)).toBe(false);
+  });
+
   it("text beyond the limits never gets through: the schema refuses it and nothing in repair lengthens it", () => {
     const long = composed([head, steps("e_x", { col: 1, span: 8, row: 2 }, 1, { items: [{ title: "x".repeat(61), text: "ok" }, { title: "ok", text: "ok" }] })], { intent: "steps" });
     expect(Section.safeParse(long).success).toBe(false);

@@ -268,11 +268,11 @@ export const QuoteElement = z.strictObject({
   ...Paint,
 });
 
-/** The business's own process, step by step (spec v21): a title and a sentence each. The order is the <ol>'s; no step carries a "01" label. */
+/** The business's own process, step by step (spec v21): a title and, when the client gave one, a sentence each. The order is the <ol>'s; no step carries a "01" label. */
 export const StepsElement = z.strictObject({
   ...base,
   kind: z.enum(["steps"]),
-  items: z.array(z.strictObject({ title: text(60), text: text(240) })).min(2).max(6),
+  items: z.array(z.strictObject({ title: text(60), text: text(240).optional() })).min(2).max(6),
   style: z.enum(["numbered", "line"]).optional(),
   ...Paint,
 });

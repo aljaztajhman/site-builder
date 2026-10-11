@@ -37,7 +37,10 @@ describe("steps and qa: schema", () => {
     expect(ok({ ...STEPS, items: [{ title: "t".repeat(60), text: "x".repeat(240) }, step(2)] })).toBe(true);
     expect(ok({ ...STEPS, items: [{ title: "t".repeat(61), text: "x" }, step(2)] })).toBe(false);
     expect(ok({ ...STEPS, items: [{ title: "t", text: "x".repeat(241) }, step(2)] })).toBe(false);
-    expect(ok({ ...STEPS, items: [{ title: "t" }, step(2)] })).toBe(false);
+    // The text is optional (a client may list steps as titles only); the title is not.
+    expect(ok({ ...STEPS, items: [{ title: "t" }, step(2)] })).toBe(true);
+    expect(ok({ ...STEPS, items: [{ text: "x" }, step(2)] })).toBe(false);
+    expect(ok({ ...STEPS, items: [{ title: "", text: "x" }, step(2)] })).toBe(false);
     expect(ok({ kind: "steps", items: [step(1), step(2)] })).toBe(true);
     for (const style of ["numbered", "line"]) expect(ok({ ...STEPS, style }), style).toBe(true);
     expect(ok({ ...STEPS, style: "timeline" })).toBe(false);
@@ -142,6 +145,21 @@ describe("steps and qa: presets", () => {
     const noFaq = fillPreset(faqPreset(), sources({}));
     expect(noFaq).toMatchObject({ ok: false, reason: "invalid", dropped: [{ id: "e_qa", kind: "qa" }] });
     expect(noFaq.ok ? [] : noFaq.issues.join(";")).toMatch(/intent faq needs a qa element/);
+  });
+
+  it("a step with a title and no text stays, in its place, and the steps after it keep their order", () => {
+    const r = fillPreset(stepsPreset(), sources({ steps: [{ title: "Klic", text: "Pokličete nas." }, { title: "Ogled", text: "" }, { title: "Ponudba", text: "Pošljemo ponudbo." }, { title: "Delo", text: "" }] }));
+    if (!r.ok) throw new Error(r.issues.join("; "));
+    const e = r.props.elements.find((x) => x.kind === "steps");
+    expect(e && e.kind === "steps" && e.items).toEqual([{ title: "Klic", text: "Pokličete nas." }, { title: "Ogled" }, { title: "Ponudba", text: "Pošljemo ponudbo." }, { title: "Delo" }]);
+    // Titles only: a process of two titles is still a process.
+    const t = fillPreset(stepsPreset(), sources({ steps: [{ title: "Klic", text: "" }, { title: "Ogled", text: "" }] }));
+    expect(t.ok).toBe(true);
+    // A step with text but no title is left out (the title is the step).
+    const n = fillPreset(stepsPreset(), sources({ steps: [{ title: "", text: "Pokličete nas." }, { title: "Ogled", text: "" }, { title: "Delo", text: "" }] }));
+    if (!n.ok) throw new Error(n.issues.join("; "));
+    const ne = n.props.elements.find((x) => x.kind === "steps");
+    expect(ne && ne.kind === "steps" && ne.items.map((i) => i.title)).toEqual(["Ogled", "Delo"]);
   });
 
   it("elsewhere the element is just dropped and the section closes up behind it", () => {

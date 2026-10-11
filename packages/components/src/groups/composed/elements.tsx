@@ -343,9 +343,11 @@ export interface ElementProps {
   priority: boolean;
   /** Unique on the page (the section's id): ids an element draws with (a circle heading's SVG path) are made from it. */
   sectionId?: string;
+  /** The heading level of a steps title or a question: one below the section's own heading (h2 with none). */
+  itemLevel?: number;
 }
 
-export function ElementView({ el, ctx, width, over, titleId, priority, sectionId }: ElementProps) {
+export function ElementView({ el, ctx, width, over, titleId, priority, sectionId, itemLevel = 2 }: ElementProps) {
   switch (el.kind) {
     case "heading":
       return <Heading el={el} over={over} id={titleId} uid={`${sectionId ?? "s"}-${el.id}`} />;
@@ -396,8 +398,8 @@ export function ElementView({ el, ctx, width, over, titleId, priority, sectionId
       return <QuoteBlock el={el} ctx={ctx} over={over} />;
     // Spec v21 kinds.
     case "steps":
-      return <StepsBlock el={el} over={over} />;
+      return <StepsBlock el={el} over={over} level={itemLevel} />;
     case "qa":
-      return <QaBlock el={el} over={over} />;
+      return <QaBlock el={el} over={over} level={itemLevel} />;
   }
 }

@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { checkFacts } from "@sb/engine";
 import { ELEMENT_KINDS, validateSite, type ComposedProps } from "@sb/spec";
@@ -12,7 +13,14 @@ describe("kitchen-sink fixture", () => {
     expect(v.ok ? [] : v.issues.map((i) => `${i.path}: ${i.message}`)).toEqual([]);
     // The one exception is the before-after pair: the brief has no words for "before" and "after" and none are invented,
     // so the pair is unlabelled and a real site could not publish it (the renderer's own Prej/Potem labels are what it shows).
-    const found = checkFacts(spec, loadFixture(KITCHEN_SINK_FIXTURE).brief.description);
+    // The steps and the questions are the pekarna brief's own (the inventory's preset sources), so they count as client text.
+    const own = JSON.parse(readFileSync(new URL("../../../packages/inventory/test/fixtures/preset-sources.json", import.meta.url), "utf-8")) as Record<
+      string,
+      { brief: { faq: { question: string; answer: string }[]; steps: { title: string; text: string }[] } }
+    >;
+    const { faq, steps } = own[KITCHEN_SINK_FIXTURE]!.brief;
+    const corpus = [loadFixture(KITCHEN_SINK_FIXTURE).brief.description, ...faq.flatMap((f) => [f.question, f.answer]), ...steps.flatMap((x) => [x.title, x.text])].join(" ");
+    const found = checkFacts(spec, corpus);
     expect(found.map((f) => `${f.kind} ${f.path}`)).toEqual(["photo /pages/1/sections/0/props/elements/1/captions"]);
   });
 

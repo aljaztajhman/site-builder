@@ -197,4 +197,48 @@ describe("steps and qa in the renderer", () => {
       }
     }
   }, 120_000);
+
+  it("item headings sit one level below the section's own heading: h3 under an h2, h2 under an h1 or with no heading (no heading-order violation)", async () => {
+    const bare = composed("s_faq_bare", "faq", [{ id: "e_q", kind: "qa", style: "open", items: QA, ...place(1, 0) }]);
+    const inH1 = composed("s_steps_h1", "page-head", [
+      { id: "e_h1", kind: "heading", text: "Avtoservis Mrak", level: 1, size: 4, desk: { col: 1, span: 8, row: 1 }, phone: { order: 0, span: "full" } },
+      { id: "e_s", kind: "steps", style: "numbered", items: STEPS, ...place(2, 1) },
+    ]);
+    for (const w of WIDTHS) {
+      // A faq section with only a qa element, straight after the h1 hero.
+      const a = await open([opener, bare], w);
+      try {
+        const r = await a.page.evaluate(() => [...document.querySelectorAll("#s_faq_bare li > h2, #s_faq_bare li > h3")].map((h) => h.tagName));
+        expect(r, `bare faq ${w.width} px`).toEqual(QA.map(() => "H2"));
+        const checks = await checkPage(a.page);
+        expect(checks.axe, `bare faq ${w.width} px`).toEqual([]);
+      } finally {
+        await a.ctx.close();
+      }
+      // A steps element inside the section that holds the h1.
+      const b = await open([inH1], w);
+      try {
+        const r = await b.page.evaluate(() => [...document.querySelectorAll("#s_steps_h1 ol > li > h2, #s_steps_h1 ol > li > h3")].map((h) => h.tagName));
+        expect(r, `steps in the h1 section ${w.width} px`).toEqual(STEPS.map(() => "H2"));
+      } finally {
+        await b.ctx.close();
+      }
+    }
+  }, 120_000);
+
+  it("a title-only step renders its title and no empty paragraph; axe clean", async () => {
+    const titles = composed("s_steps_titles", "steps", [head("Kako poteka popravilo"), { id: "e_s", kind: "steps", style: "line", items: [{ title: "Naročilo" }, { title: "Pregled", text: "Pogledamo vozilo." }, { title: "Prevzem" }], ...place(2, 1) }]);
+    for (const w of WIDTHS) {
+      const { page, ctx } = await open([opener, titles], w);
+      try {
+        const r = await page.evaluate(() => [...document.querySelectorAll("#s_steps_titles ol > li")].map((li) => [li.querySelector("h3")?.textContent, li.querySelectorAll("p").length]));
+        expect(r, `${w.width} px`).toEqual([["Naročilo", 0], ["Pregled", 1], ["Prevzem", 0]]);
+        const checks = await checkPage(page);
+        expect(checks.axe, `${w.width} px`).toEqual([]);
+        expect(checks.horizontalScroll).toBe(false);
+      } finally {
+        await ctx.close();
+      }
+    }
+  }, 120_000);
 });

@@ -677,6 +677,16 @@ function g15to17(env: Env): Finding[] {
       if (e.marker === "drawing" && e.drawing === undefined) out.push(both(`${at}/marker`, "structure", `composed: ${e.id}: marker "drawing" needs a drawing`, { path: `${at}/marker`, what: "marker dropped", run: () => void delete o.marker }));
       if (e.marker !== "drawing" && e.drawing !== undefined) out.push(both(`${at}/drawing`, "structure", `composed: ${e.id}: a drawing only with marker "drawing"`, { path: `${at}/drawing`, what: "drawing dropped", run: () => void delete o.drawing }));
     }
+    if (e.kind === "steps") {
+      e.items.forEach((x, k) => {
+        if (NUMBERED_LABEL.test(x.title)) out.push(issue("banned", `${at}/items/${k}/title`, `numbered label: "${x.title}"`));
+      });
+    }
+    if (e.kind === "qa") {
+      e.items.forEach((x, k) => {
+        if (NUMBERED_LABEL.test(x.question)) out.push(issue("banned", `${at}/items/${k}/question`, `numbered label: "${x.question}"`));
+      });
+    }
     if (e.kind === "prices" && e.phoneColumns === 2 && (!["plates", "tags"].includes(e.style) || e.items.some((x) => x.name.length > PHONE_COLUMNS_NAME_MAX))) {
       out.push(both(`${at}/phoneColumns`, "structure", `composed: ${e.id} can't set 2 columns on phones (only plates and tags with names up to ${PHONE_COLUMNS_NAME_MAX} characters)`, { path: `${at}/phoneColumns`, what: "phoneColumns set to 1", run: () => void (o.phoneColumns = 1) }));
     }
