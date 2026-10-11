@@ -17,9 +17,13 @@ import contactDetailsRowMap from "./contact/details-row-map.ts";
 import contactFactsCards from "./contact/facts-cards.ts";
 import contactFactsStrip from "./contact/facts-strip.ts";
 import contactPhoneCallOut from "./contact/phone-call-out.ts";
+import galleryFanBeside from "./gallery/fan-beside.ts";
 import galleryMosaic from "./gallery/mosaic.ts";
 import galleryPhotoGrid from "./gallery/photo-grid.ts";
+import galleryPostcards from "./gallery/postcards.ts";
+import galleryTriptychAside from "./gallery/triptych-aside.ts";
 import galleryWallBleed from "./gallery/wall-bleed.ts";
+import galleryWideThenPair from "./gallery/wide-then-pair.ts";
 import heroArchOnDark from "./hero/arch-on-dark.ts";
 import heroBendPhoto from "./hero/bend-photo.ts";
 import heroBleedPrint from "./hero/bleed-print.ts";
@@ -105,9 +109,13 @@ export const COMPOSITION_PRESETS: readonly CompositionPreset[] = [
   contactFactsCards,
   contactFactsStrip,
   contactPhoneCallOut,
+  galleryFanBeside,
   galleryMosaic,
   galleryPhotoGrid,
+  galleryPostcards,
+  galleryTriptychAside,
   galleryWallBleed,
+  galleryWideThenPair,
   heroArchOnDark,
   heroBendPhoto,
   heroBleedPrint,
