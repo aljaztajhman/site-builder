@@ -39,6 +39,8 @@ import {
 import { composedRuleBytes, fontBytes, motifBytes, sharedRuleBytes, subMotifBytes, word } from "./bytes.ts";
 import type { Asset, AssetTags, Ground } from "./schema.ts";
 import { CURATED_PALETTES } from "./palettes/curated.ts";
+import { factObjectDraftAssets, typeTreatmentDraftAssets } from "./type-and-facts.ts";
+import { STARTER_NAMES } from "@sb/render";
 
 const uniq = <T>(xs: Iterable<T>): T[] => [...new Set(xs)];
 const sorted = <T extends string>(xs: Iterable<T>): T[] => uniq(xs).sort();
@@ -264,8 +266,9 @@ export function maskAssets(): Asset[] {
   }));
 }
 
+/** The fact objects that shipped with the composition language (the starters); the batch's drafts are in type-and-facts.ts. */
 export function factObjectAssets(): Asset[] {
-  return FACT_TREATMENTS.map((f) => ({
+  return FACT_TREATMENTS.filter((f) => STARTER_NAMES["fact-objects"].includes(f)).map((f) => ({
     id: `fact/${f}`,
     kind: "factObject",
     tags: tags({ ground: ALL_GROUNDS }),
@@ -358,5 +361,5 @@ export function todaysAssets(): Asset[] {
 
 /** New assets of the inventory phase, registered as drafts (design-studio.md §4.3): the director curates, the owner approves. */
 export function draftAssets(): Asset[] {
-  return [...curatedPaletteAssets()];
+  return [...curatedPaletteAssets(), ...typeTreatmentDraftAssets(), ...factObjectDraftAssets()];
 }

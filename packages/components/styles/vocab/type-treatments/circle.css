@@ -1,0 +1,21 @@
+/* circle: the heading's words arched along the top of a circle, in an aria-hidden inline SVG; the real text stays in the
+   heading, visually hidden (elements.tsx CircleText). Short headings only (G20: at most 40 characters, size 2 or more).
+   --n is the character count. The words take about 62 % of the circle (at most 30 units of the 200-unit view box, so a
+   short heading arcs over the top without crowding), and the circle is as wide as it must be for them to set at the
+   heading's size (--fz), never wider than its cell, nor than 80 % of a phone screen (20 rem). The view box keeps the top
+   of the circle only: below the words it is empty. */
+.cx-tt-circle .cx-tt__c {
+  display: block;
+  width: min(100%, 80vw, 20rem, calc(var(--fz) * max(6.67, var(--n) * 0.38)));
+  overflow: visible;
+  fill: currentColor;
+}
+.cx-tt-circle text {
+  font-size: min(30px, calc(528px / var(--n)));
+  letter-spacing: 0;
+}
+@media (min-width: 64rem) {
+  .cx-tt-circle .cx-tt__c {
+    width: min(100%, calc(var(--fz) * max(6.67, var(--n) * 0.38)));
+  }
+}

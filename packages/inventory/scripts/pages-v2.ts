@@ -1,7 +1,8 @@
 /**
  * Contact-sheet pages for the composition language's inventory kinds (docs/plans/studio-phase1-design.md §5): drawings
  * (motifs and ornaments in the Drawing format), compositions (filled presets), motion presets (three frames),
- * practical-fact icons, wordmarks (20 real Slovene names) and dividers (the edge between two sections). Each page is a
+ * practical-fact icons, wordmarks (20 real Slovene names), dividers (the edge between two sections), type treatments
+ * (real headings at sizes 2/5/8) and fact objects (the three fixtures' facts at sizes 2/5/8). Each page is a
  * small site spec the real component library renders, so a sheet equals what a site renders. `pagesFor` here is the
  * sheet's entry point: these kinds first, then the older kinds in pages.ts.
  */
@@ -10,7 +11,10 @@ import { drawingData } from "@sb/components";
 import {
   ComposedProps,
   EDGES,
+  FACT_OBJECTS,
   MOTION_META,
+  TYPE_TREATMENTS,
+  TYPE_TREATMENT_LIMITS,
   WORDMARK_STYLES,
   direction,
   fillPreset,
@@ -275,6 +279,165 @@ export function motionPages(asset: Asset): SheetPage[] {
   });
 }
 
+/** The tones a type treatment or fact object page shows its three sizes on, then the band (where own grounds flip). */
+const SIZE_TONES = ["default", "alt", "inverse", "band"] as const;
+
+/**
+ * Headings for the type treatment sheets: three per treatment, one per size, each a heading of the three fixtures'
+ * goldens (tools/eval/golden: pekarna-kvas, avtoservis-mrak, instalacije-rebernik) or, for fascia-lettering and
+ * masthead, a business name. drop-numeral needs a heading that starts with a number, which no golden heading does: its
+ * three are written from the fixtures' own facts (od leta 2008, pirin kruh z drožmi 4,20 €, od leta 2011), nothing added.
+ */
+export const TYPE_TREATMENT_SAMPLES: Readonly<Record<string, readonly [string, string, string]>> = {
+  circle: ["Potica za praznike", "Servis vseh znamk v Kranju", "Ogled je brezplačen"],
+  vertical: ["Kontakt", "Pokličite", "Popravilo"],
+  "oversized-first-word": ["Kruh z drožmi, ki vzhaja čez noč", "Servis vseh znamk v Kranju", "Vodovod, ogrevanje, toplotne črpalke in prenove kopalnic"],
+  "ruled-total": ["Potica za praznike", "Storitve in cene", "Pisna ponudba"],
+  "title-block": ["Vsak dan v pekarni", "Kaj naredimo v delavnici", "Od klica do pisne ponudbe"],
+  masthead: ["Pekarna Kvas", "Storitve in cene", "Inštalacije Rebernik"],
+  "typed-line": ["Pokličite ali pišite", "Najhitreje nas dobite po telefonu", "Dogovorite se za brezplačen ogled"],
+  "rule-flanked": ["Kdaj smo odprti", "Kje smo", "Kje delamo"],
+  "fascia-lettering": ["Pekarna Kvas", "Avtoservis Mrak", "Inštalacije Rebernik"],
+  "marker-highlight": ["Kruh z drožmi, ki vzhaja čez noč", "Najprej predračun, potem popravilo", "Ogled je brezplačen"],
+  "drop-numeral": ["4,20 € pirin kruh z drožmi", "2008 – družinski servis v Kranju", "2011 – samostojni podjetnik na Ptuju"],
+  "corner-marks": ["Drožmi, ki jih gojimo sami", "Kaj servisiramo", "Sedež na Ptuju"],
+};
+
+/** The three sizes a treatment is shown at: 2, 5, 8, clamped to its G20 size limits (vertical: 4, 5, 5). */
+export function treatmentSizes(name: string): [number, number, number] {
+  const l = (TYPE_TREATMENT_LIMITS as Record<string, { minSize?: number; maxSize?: number }>)[name] ?? {};
+  const clamp = (n: number) => Math.min(Math.max(n, l.minSize ?? 0), l.maxSize ?? 8);
+  return [clamp(2), clamp(5), clamp(8)];
+}
+
+/** The desktop span of a treated heading: a circle or a vertical word is an object; display type takes 8 columns, 12 at size 8. */
+const treatmentSpan = (name: string, size: number): number => (name === "circle" ? 5 : name === "vertical" ? 3 : size >= 8 ? 12 : 8);
+
+/**
+ * A type treatment: its three real headings at sizes 2, 5 and 8 on paper, alt and inverse, then the middle one again on
+ * the band, beside a line of running text from the same golden pages (so the heading's scale reads against the body), in
+ * two palettes. vertical is set in capitals at weight 800, as G20 asks.
+ */
+export function typeTreatmentPages(asset: Asset): SheetPage[] {
+  const { base, page } = pageMaker(asset);
+  const name = assetName(asset.id);
+  const samples = TYPE_TREATMENT_SAMPLES[name];
+  if (!samples || !(TYPE_TREATMENTS as readonly string[]).includes(name)) return [];
+  const sizes = treatmentSizes(name);
+  const body = "Naročilo sprejmemo po telefonu ali e-pošti.";
+  const caps = name === "vertical" ? { case: "uppercase", weight: 800 } : {};
+  return palettes().map((dir, i) => {
+    const sections = SIZE_TONES.map((tone, k) => {
+      const n = k < 3 ? k : 1;
+      const size = sizes[n]!;
+      const span = treatmentSpan(name, size);
+      const text = span === 12 ? el("t", { kind: "text", paragraphs: [body] }, 1, 5, 2, 1) : el("t", { kind: "text", paragraphs: [body] }, span < 8 ? span + 2 : 9, 4, 1, 1);
+      return section(tone as Tone, { elements: [el("h", { kind: "heading", text: samples[n], level: 2, size, treatment: name, ...caps }, 1, span, 1, 0), text] }, `s_g_${k}`);
+    });
+    return page(LETTER(i), dir.id, withHome(inDirection(base, dir), sections, "x"));
+  });
+}
+
+/**
+ * Facts for the fact object sheets, three per object (one per size), each a fact of the three fixtures (tools/eval/fixtures:
+ * pekarna-kvas, avtoservis-mrak, instalacije-rebernik) as the client wrote it: a street number, a town, opening hours, a
+ * price, a weight limit, a phone, a year, a person. Where a fixture has no such fact (Rebernik gives no hours or prices) another
+ * fixture's is used; nothing is made up.
+ */
+export const FACT_OBJECT_SAMPLES: Readonly<Record<string, readonly [FactSample, FactSample, FactSample]>> = {
+  "house-number": [
+    { value: "30", label: "Šutna, Kamnik" },
+    { value: "52", label: "Savska cesta, Kranj" },
+    { value: "18", label: "Ormoška cesta, Ptuj" },
+  ],
+  signpost: [
+    { value: "Kamnik", label: "Šutna 30" },
+    { value: "Kranj", label: "Savska cesta 52" },
+    { value: "Ptuj", label: "Ormoška cesta 18" },
+  ],
+  timetable: [
+    { value: "6.30–18.00", label: "pon–pet", labelAt: "before" },
+    { value: "7.00–16.00", label: "pon–pet", labelAt: "before" },
+    { value: "6.30–12.00", label: "sobota", labelAt: "before" },
+  ],
+  receipt: [
+    { value: "4,20 €", label: "pirin kruh z drožmi", labelAt: "before" },
+    { value: "30 €", label: "diagnostika", labelAt: "before" },
+    { value: "1,30 €", label: "rogljiček z maslom", labelAt: "before" },
+  ],
+  total: [
+    { value: "od 18 €", label: "orehova potica (1 kg)" },
+    { value: "59 €", label: "polnjenje klime" },
+    { value: "40 €", label: "hramba gum na sezono" },
+  ],
+  dimension: [
+    { value: "1 kg", label: "orehova potica" },
+    { value: "3,5 t", label: "kombiji do" },
+    { value: "3,5 t", label: "servisiramo kombije do" },
+  ],
+  "index-tab": [
+    { value: "041 555 906", label: "Naročila", labelAt: "before" },
+    { value: "041 555 730", label: "Pokličite", labelAt: "before" },
+    { value: "041 555 118", label: "Pokličite", labelAt: "before" },
+  ],
+  calendar: [
+    { value: "6.30–12.00", label: "sobota", labelAt: "before" },
+    { value: "po dogovoru", label: "sobota", labelAt: "before" },
+    { value: "7.00–10.00", label: "nedelja", labelAt: "before" },
+  ],
+  split: [
+    { value: "4,20 €", label: "pirin kruh z drožmi", labelAt: "before" },
+    { value: "2008", label: "od leta", labelAt: "before" },
+    { value: "2011", label: "od leta", labelAt: "before" },
+  ],
+  "door-plate": [
+    { value: "Jure Petek", label: "pek" },
+    { value: "Rok Mrak", label: "vodja servisa" },
+    { value: "Matej Rebernik", label: "inštalater z mojstrskim izpitom" },
+  ],
+  ruler: [
+    { value: "2011", label: "od leta" },
+    { value: "2008", label: "od leta" },
+    { value: "3,5 t", label: "kombiji do" },
+  ],
+};
+interface FactSample {
+  value: string;
+  label: string;
+  labelAt?: "before";
+}
+
+/** The link the sheet puts on a fact object's smallest size (the whole object is the target, ≥ 44 px): directions for a place, else a call. */
+const factLink = (name: string) => ({ action: name === "house-number" || name === "signpost" ? "directions" : "call" });
+
+/**
+ * A fact object: its three fixture facts at sizes 2, 5 and 8 on paper, alt and inverse (the size-2 one linked), then the
+ * middle one again on the band, in two palettes.
+ */
+export function factObjectPages(asset: Asset): SheetPage[] {
+  const { base, page } = pageMaker(asset);
+  const name = assetName(asset.id);
+  const samples = FACT_OBJECT_SAMPLES[name];
+  if (!samples || !(FACT_OBJECTS as readonly string[]).includes(name)) return [];
+  const sizes = [2, 5, 8] as const;
+  return palettes().map((dir, i) => {
+    const sections = SIZE_TONES.map((tone, k) => {
+      const n = k < 3 ? k : 1;
+      const f = samples[n]!;
+      const span = sizes[n] === 8 ? 8 : 6;
+      return {
+        ...section(tone as Tone, {
+          elements: [
+            el("f", { kind: "fact", treatment: name, size: sizes[n], value: f.value, label: f.label, ...(f.labelAt ? { labelAt: f.labelAt } : {}), ...(k === 0 ? { link: factLink(name) } : {}) }, 1, span, 1, 0),
+          ],
+        }, `s_g_${k}`),
+        ...(tone !== "default" ? { tone } : {}),
+      } as Section;
+    });
+    return page(LETTER(i), dir.id, withHome(inDirection(base, dir), sections, "x"));
+  });
+}
+
 /** The pages a contact sheet photographs for an asset: the composition-language kinds here, the rest in pages.ts. */
 export function pagesFor(asset: Asset): SheetPage[] {
   switch (asset.kind) {
@@ -292,6 +455,12 @@ export function pagesFor(asset: Asset): SheetPage[] {
       return wordmarkPages(asset);
     case "divider":
       return dividerPages(asset);
+    case "typeTreatment":
+      return typeTreatmentPages(asset);
+    case "factObject": {
+      const own = factObjectPages(asset);
+      return own.length ? own : pagesForV1(asset);
+    }
     default:
       return pagesForV1(asset);
   }

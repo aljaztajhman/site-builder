@@ -20,9 +20,45 @@ export const TEXTURES = ["none", "grain", "lines"] as const;
 /** A section's top edge (`top.edge`); "drawing" takes `top.drawing`. I5 fills it to 20. */
 export const EDGES = ["straight", "rule", "cut", "torn", "drawing"] as const;
 /** Fact objects (`fact.treatment`). I6 fills it to 20. */
-export const FACT_OBJECTS = ["numeral", "plate", "stamp", "ticket", "seal", "tag"] as const;
+export const FACT_OBJECTS = [
+  "numeral",
+  "plate",
+  "stamp",
+  "ticket",
+  "seal",
+  "tag",
+  // I6b (drafts until the owner approves them in the gallery; CSS: components styles/vocab/fact-objects/<name>.css)
+  "house-number",
+  "signpost",
+  "timetable",
+  "receipt",
+  "total",
+  "dimension",
+  "index-tab",
+  "calendar",
+  "split",
+  "door-plate",
+  "ruler",
+] as const;
 /** Heading type treatments (`heading.treatment`). I6 fills it to 15. */
-export const TYPE_TREATMENTS = ["none", "stacked", "knockout"] as const;
+export const TYPE_TREATMENTS = [
+  "none",
+  "stacked",
+  "knockout",
+  // I6a (drafts until the owner approves them in the gallery; CSS: components styles/vocab/type-treatments/<name>.css)
+  "circle",
+  "vertical",
+  "oversized-first-word",
+  "ruled-total",
+  "title-block",
+  "masthead",
+  "typed-line",
+  "rule-flanked",
+  "fascia-lettering",
+  "marker-highlight",
+  "drop-numeral",
+  "corner-marks",
+] as const;
 /** Section motion presets (`motion`), described in MOTION_META. I7 fills it to 20. */
 export const MOTIONS = ["reveal", "unmask"] as const;
 /** Typographic wordmark styles (`design.wordmark.style`). I9 adds the rest. */

@@ -1,0 +1,14 @@
+/* fascia-lettering: the heading on a sign board across its box, as a name painted on a shopfront fascia: the band colour
+   with its own text colour, flipped on a band section. That ground is @sb/spec typeTreatmentGround (G9 checks an own
+   colour or a fill against it); a fill (--cx-f, --cx-o) replaces it. */
+.cx-tt-fascia-lettering {
+  --cx-w: 100%;
+  padding: 0.24em 0.45em 0.3em;
+  background: var(--cx-f, var(--c-band, var(--c-primary)));
+  color: var(--cx-o, var(--c-on-band, var(--c-on-primary)));
+  text-align: center;
+}
+:where(.tone-band) .cx-tt-fascia-lettering {
+  background: var(--cx-f, var(--c-on-band, var(--c-on-primary)));
+  color: var(--cx-o, var(--c-band, var(--c-primary)));
+}

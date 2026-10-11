@@ -16,7 +16,8 @@ import type { Colors } from "../design.ts";
 import { NUMBERED_LABEL } from "../banned.ts";
 import { contrast, mix } from "../color.ts";
 import { KIND_PREFIX } from "../assets.ts";
-import { ON_ROLE, factObjectGround } from "./roles.ts";
+import { ON_ROLE, factObjectGround, typeTreatmentGround } from "./roles.ts";
+import { typeTreatmentProblem } from "./type-treatments.ts";
 import { MOTION_META, REPEATABLE, inVocab, type VocabKey } from "./vocab.ts";
 import type { ColorRole, Element, Scrim } from "./schema.ts";
 import {
@@ -176,8 +177,11 @@ function painted(e: Element): Painted | undefined {
 const minOf = (p: Painted) => (p.large && !p.label ? CONTRAST_MIN.large : CONTRAST_MIN.text);
 const ratio = (x: number) => x.toFixed(2);
 
-/** Elements that sit on a ground of their own, not on the tone or the field behind them: a sticker, and the fact objects that paint one. */
-const hasOwnGround = (env: Env, e: Element): boolean => e.kind === "sticker" || (e.kind === "fact" && factObjectGround(e.treatment, env.s.tone ?? "default") !== undefined);
+/** Elements that sit on a ground of their own, not on the tone or the field behind them: a sticker, and the fact objects and heading treatments that paint one. */
+const hasOwnGround = (env: Env, e: Element): boolean =>
+  e.kind === "sticker" ||
+  (e.kind === "fact" && factObjectGround(e.treatment, env.s.tone ?? "default") !== undefined) ||
+  (e.kind === "heading" && typeTreatmentGround(e.treatment, env.s.tone ?? "default") !== undefined);
 
 /** The scrim holders: a photo layer (over the section's texts) or an image element with a scrim (over the texts overlapping it). */
 interface Holder {
@@ -334,6 +338,10 @@ function pairsOf(env: Env, e: Element, p: Painted, useColor: boolean): Pair[] {
     }
   } else if (e.kind === "sticker") {
     add(p.fill ?? "primary", p.fill ? "fill" : "own", true, minOf(p), false);
+  } else if (e.kind === "heading" && typeTreatmentGround(e.treatment, env.s.tone ?? "default")) {
+    // A treatment that paints its own ground (fascia-lettering, marker-highlight) keeps its own ink on it, as a fact object does.
+    const own = typeTreatmentGround(e.treatment, env.s.tone ?? "default")!;
+    add(p.fill ?? own, p.fill ? "fill" : "own", true, minOf(p), false);
   } else {
     add(p.fill ?? outer.ground, p.fill ? "fill" : outer.src, true, minOf(p), false);
   }
@@ -677,6 +685,8 @@ function g18to21(env: Env): Finding[] {
         const over = fs.some((f) => within(b, f.box)) || hasPhotoLayer || els.some((x) => x.e.kind === "image" && meets(b, boxOf(x.e)));
         if (!over) out.push(both(`${at}/treatment`, "structure", `composed: ${e.id}: knockout only over a photo or a field`, drop));
       }
+      const problem = typeTreatmentProblem(e);
+      if (problem) out.push(both(`${at}/treatment`, "structure", `composed: ${e.id}: ${problem}`, drop));
     }
     if (e.kind === "photos") {
       const [min, max] = PHOTOS_COUNT[e.arrangement];
