@@ -64,6 +64,8 @@ import menuLeadersColumn from "./menu/leaders-column.ts";
 import menuLeadersTwoColumns from "./menu/leaders-two-columns.ts";
 import noticeFramedCard from "./notice/framed-card.ts";
 import noticeOneLineBar from "./notice/one-line-bar.ts";
+import pageHeadMarkerDisc from "./page-head/marker-disc.ts";
+import pageHeadTitleBlock from "./page-head/title-block.ts";
 import pageHeadTitlePhoto from "./page-head/title-photo.ts";
 import pageHeadTitleRuled from "./page-head/title-ruled.ts";
 import pricesBoardOffers from "./prices/board-offers.ts";
@@ -156,6 +158,8 @@ export const COMPOSITION_PRESETS: readonly CompositionPreset[] = [
   menuLeadersTwoColumns,
   noticeFramedCard,
   noticeOneLineBar,
+  pageHeadMarkerDisc,
+  pageHeadTitleBlock,
   pageHeadTitlePhoto,
   pageHeadTitleRuled,
   pricesBoardOffers,
