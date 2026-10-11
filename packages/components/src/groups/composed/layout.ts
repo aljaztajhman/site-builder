@@ -111,6 +111,13 @@ export function leadPhoto(width: ComposedProps["width"], el: ElOf<"image"> | ElO
 /** CSS variable of a type-scale step (composed.css defines --cx-fs-<step>; −1 is written m1). */
 export const stepVar = (step: number): string => `var(--cx-fs-${step < 0 ? "m1" : step})`;
 
+/**
+ * A fact object's type size: the heading ramp, and from step 6 a display floor (8, 10, 12 rem) so a size 8 numeral or plate is a
+ * wall-sized object on a desktop. A phone shrinks it to its cell (composed.css .cx-fact__obj), not to the ramp's 12vw cap.
+ */
+const FACT_DISPLAY_REM: Record<number, number> = { 6: 8, 7: 10, 8: 12 };
+export const factStepVar = (step: number): string => (FACT_DISPLAY_REM[step] ? `max(${stepVar(step)}, ${FACT_DISPLAY_REM[step]}rem)` : stepVar(step));
+
 /* ---------- spec v20 section level (docs/plans/studio-phase1-design.md §1.3, §3.4) ---------- */
 
 /** One background layer of a composed section, and one kind of them. */

@@ -117,7 +117,7 @@ main > .s.s-composed.cx-v2.cx-v2:first-child {
 .cx-field {
   position: absolute;
   z-index: 0;
-  inset: var(--fpt, calc(var(--cx-gap) * -1)) -100vmax var(--fpb, calc(var(--cx-gap) * -1));
+  inset: var(--fpt, calc(var(--cx-gap) * -0.5)) -100vmax var(--fpb, calc(var(--cx-gap) * -0.5));
   grid-column: 1 / -1;
   grid-row: var(--pr0) / var(--pr1);
   background: var(--cx-rc);
@@ -209,6 +209,16 @@ main > .s.s-composed.cx-v2.cx-v2:first-child {
   display: contents;
   color: var(--cx-ro);
   --cx-ground: var(--cx-rc);
+}
+/* On phones the field stops half a gap past the rows (as on desktop: the next element is not touched) and what sits on it
+   has .5rem above and below; a second element on it takes the padding back, so the rhythm inside is unchanged. */
+@media (max-width: 63.999rem) {
+  .cx-on > .cx-el {
+    padding-block: 0.5rem;
+  }
+  .cx-on + .cx-on > .cx-el {
+    margin-top: -1rem;
+  }
 }
 
 /* Phones: the photo is a band above the content (default) or stays behind it (cover); a drawing is cropped. */
