@@ -6,18 +6,28 @@
 import { parsePresetId, type CompositionPreset } from "@sb/spec";
 import type { Asset, AssetTags } from "../schema.ts";
 import areaHeadingBesideLine from "./area/heading-beside-line.ts";
+import areaSignpostBand from "./area/signpost-band.ts";
 import areaWhereWithPin from "./area/where-with-pin.ts";
+import bookingBandSplit from "./booking/band-split.ts";
 import bookingBookBesideHours from "./booking/book-beside-hours.ts";
 import bookingHeadingBookCall from "./booking/heading-book-call.ts";
+import bookingTownStamp from "./booking/town-stamp.ts";
 import callHeadingActionsBand from "./call/heading-actions-band.ts";
 import callHeadingSplitRuled from "./call/heading-split-ruled.ts";
+import callPhonePlate from "./call/phone-plate.ts";
+import callPhotoScrim from "./call/photo-scrim.ts";
 import contactDetailsAndMap from "./contact/details-and-map.ts";
 import contactDetailsHours from "./contact/details-hours.ts";
 import contactDetailsRowMap from "./contact/details-row-map.ts";
 import contactFactsCards from "./contact/facts-cards.ts";
 import contactFactsStrip from "./contact/facts-strip.ts";
+import contactHousePlateMap from "./contact/house-plate-map.ts";
 import contactPhoneCallOut from "./contact/phone-call-out.ts";
+import faqBandToggle from "./faq/band-toggle.ts";
+import faqPinnedOpen from "./faq/pinned-open.ts";
+import faqQuestionsThenPhone from "./faq/questions-then-phone.ts";
 import faqToggleList from "./faq/toggle-list.ts";
+import galleryArchRow from "./gallery/arch-row.ts";
 import galleryFanBeside from "./gallery/fan-beside.ts";
 import galleryMosaic from "./gallery/mosaic.ts";
 import galleryPhotoGrid from "./gallery/photo-grid.ts";
@@ -52,6 +62,7 @@ import highlightsCheckerFields from "./highlights/checker-fields.ts";
 import highlightsDarkPanel from "./highlights/dark-panel.ts";
 import highlightsLargeLines from "./highlights/large-lines.ts";
 import highlightsLeadStatement from "./highlights/lead-statement.ts";
+import highlightsOverPhoto from "./highlights/over-photo.ts";
 import highlightsPhotoList from "./highlights/photo-list.ts";
 import highlightsRuledRows from "./highlights/ruled-rows.ts";
 import highlightsStaircase from "./highlights/staircase.ts";
@@ -60,19 +71,27 @@ import hoursArchPhotoHours from "./hours/arch-photo-hours.ts";
 import hoursCompactList from "./hours/compact-list.ts";
 import hoursHeadingTable from "./hours/heading-table.ts";
 import hoursPosterBandHours from "./hours/poster-band-hours.ts";
+import hoursStationBoard from "./hours/station-board.ts";
 import hoursWeekChart from "./hours/week-chart.ts";
+import menuCardOverPhoto from "./menu/card-over-photo.ts";
+import menuDarkBoard from "./menu/dark-board.ts";
+import menuFirstTwoBand from "./menu/first-two-band.ts";
 import menuLeadersColumn from "./menu/leaders-column.ts";
 import menuLeadersTwoColumns from "./menu/leaders-two-columns.ts";
+import menuPlatesThenList from "./menu/plates-then-list.ts";
 import noticeFramedCard from "./notice/framed-card.ts";
 import noticeOneLineBar from "./notice/one-line-bar.ts";
 import pageHeadMarkerDisc from "./page-head/marker-disc.ts";
 import pageHeadTitleBlock from "./page-head/title-block.ts";
 import pageHeadTitlePhoto from "./page-head/title-photo.ts";
 import pageHeadTitleRuled from "./page-head/title-ruled.ts";
+import pricesBandLargeRows from "./prices/band-large-rows.ts";
 import pricesBoardOffers from "./prices/board-offers.ts";
 import pricesLeaderRowsNotes from "./prices/leader-rows-notes.ts";
+import pricesLedgerSheet from "./prices/ledger-sheet.ts";
 import pricesPhotoRates from "./prices/photo-rates.ts";
 import pricesPriceTagsRow from "./prices/price-tags-row.ts";
+import pricesReceiptDocket from "./prices/receipt-docket.ts";
 import pricesRowsTable from "./prices/rows-table.ts";
 import productsPhotoGrid from "./products/photo-grid.ts";
 import productsPriceColumns from "./products/price-columns.ts";
@@ -82,10 +101,18 @@ import roomsPhotoRows from "./rooms/photo-rows.ts";
 import servicesAsideNote from "./services/aside-note.ts";
 import servicesListBeside from "./services/list-beside.ts";
 import servicesNamedRows from "./services/named-rows.ts";
+import servicesPhotoBleedList from "./services/photo-bleed-list.ts";
 import servicesPhotoCardsLead from "./services/photo-cards-lead.ts";
+import servicesPosterNames from "./services/poster-names.ts";
 import servicesSmallCards from "./services/small-cards.ts";
 import servicesTwoColumnNamed from "./services/two-column-named.ts";
+import stepsBesideArch from "./steps/beside-arch.ts";
+import stepsInverseBand from "./steps/inverse-band.ts";
 import stepsNumberedColumn from "./steps/numbered-column.ts";
+import stepsRecipeCard from "./steps/recipe-card.ts";
+import stepsThenCall from "./steps/then-call.ts";
+import stepsTurnedHeading from "./steps/turned-heading.ts";
+import storyDoorPlate from "./story/door-plate.ts";
 import storyHeadingBesideText from "./story/heading-beside-text.ts";
 import storyNameFigure from "./story/name-figure.ts";
 import storyNarrowColumn from "./story/narrow-column.ts";
@@ -95,6 +122,9 @@ import storyPhotoPairOffset from "./story/photo-pair-offset.ts";
 import storyPhotoRightText from "./story/photo-right-text.ts";
 import storyRoundPhoto from "./story/round-photo.ts";
 import storyTextOwner from "./story/text-owner.ts";
+import teamDarkRoster from "./team/dark-roster.ts";
+import teamDoorPlates from "./team/door-plates.ts";
+import teamLeadName from "./team/lead-name.ts";
 import teamNameRoleList from "./team/name-role-list.ts";
 import teamNamesInColumns from "./team/names-in-columns.ts";
 import teamPhotoBesideNames from "./team/photo-beside-names.ts";
@@ -102,18 +132,28 @@ import teamPhotoBesideNames from "./team/photo-beside-names.ts";
 /** Every preset, in a fixed order (by intent, then name). */
 export const COMPOSITION_PRESETS: readonly CompositionPreset[] = [
   areaHeadingBesideLine,
+  areaSignpostBand,
   areaWhereWithPin,
+  bookingBandSplit,
   bookingBookBesideHours,
   bookingHeadingBookCall,
+  bookingTownStamp,
   callHeadingActionsBand,
   callHeadingSplitRuled,
+  callPhonePlate,
+  callPhotoScrim,
   contactDetailsAndMap,
   contactDetailsHours,
   contactDetailsRowMap,
   contactFactsCards,
   contactFactsStrip,
+  contactHousePlateMap,
   contactPhoneCallOut,
+  faqBandToggle,
+  faqPinnedOpen,
+  faqQuestionsThenPhone,
   faqToggleList,
+  galleryArchRow,
   galleryFanBeside,
   galleryMosaic,
   galleryPhotoGrid,
@@ -148,6 +188,7 @@ export const COMPOSITION_PRESETS: readonly CompositionPreset[] = [
   highlightsDarkPanel,
   highlightsLargeLines,
   highlightsLeadStatement,
+  highlightsOverPhoto,
   highlightsPhotoList,
   highlightsRuledRows,
   highlightsStaircase,
@@ -156,19 +197,27 @@ export const COMPOSITION_PRESETS: readonly CompositionPreset[] = [
   hoursCompactList,
   hoursHeadingTable,
   hoursPosterBandHours,
+  hoursStationBoard,
   hoursWeekChart,
+  menuCardOverPhoto,
+  menuDarkBoard,
+  menuFirstTwoBand,
   menuLeadersColumn,
   menuLeadersTwoColumns,
+  menuPlatesThenList,
   noticeFramedCard,
   noticeOneLineBar,
   pageHeadMarkerDisc,
   pageHeadTitleBlock,
   pageHeadTitlePhoto,
   pageHeadTitleRuled,
+  pricesBandLargeRows,
   pricesBoardOffers,
   pricesLeaderRowsNotes,
+  pricesLedgerSheet,
   pricesPhotoRates,
   pricesPriceTagsRow,
+  pricesReceiptDocket,
   pricesRowsTable,
   productsPhotoGrid,
   productsPriceColumns,
@@ -178,10 +227,18 @@ export const COMPOSITION_PRESETS: readonly CompositionPreset[] = [
   servicesAsideNote,
   servicesListBeside,
   servicesNamedRows,
+  servicesPhotoBleedList,
   servicesPhotoCardsLead,
+  servicesPosterNames,
   servicesSmallCards,
   servicesTwoColumnNamed,
+  stepsBesideArch,
+  stepsInverseBand,
   stepsNumberedColumn,
+  stepsRecipeCard,
+  stepsThenCall,
+  stepsTurnedHeading,
+  storyDoorPlate,
   storyHeadingBesideText,
   storyNameFigure,
   storyNarrowColumn,
@@ -191,6 +248,9 @@ export const COMPOSITION_PRESETS: readonly CompositionPreset[] = [
   storyPhotoRightText,
   storyRoundPhoto,
   storyTextOwner,
+  teamDarkRoster,
+  teamDoorPlates,
+  teamLeadName,
   teamNameRoleList,
   teamNamesInColumns,
   teamPhotoBesideNames,
