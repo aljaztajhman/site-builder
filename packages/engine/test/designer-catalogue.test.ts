@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
+import { loadConfig } from "@sb/config";
 import { ComposedProps, DecorPath, VOCAB_KEY, VOCABS, Vocab, expandRefs, toModelJsonSchema } from "@sb/spec";
 import {
   COMPACT_NOTATION,
@@ -144,10 +145,21 @@ describe("designer catalogue, compact (shared types and vocabularies named once)
     expect(canonical(parsed)).toBe(canonical(normal(expanded)));
   });
 
-  it("is under 2.6k tokens (chars / 4) for the shared types and props", () => {
-    const body = text.slice(text.indexOf("Shared types:\n"));
-    console.log(`designer catalogue (compact): ${text.length} chars ≈ ${Math.round(text.length / 4)} tokens; shared types + props ${body.length} ≈ ${Math.round(body.length / 4)}`);
-    expect(body.length / 4).toBeLessThanOrEqual(2600);
+  it("is within the static catalogue budget of config designer.budgets (characters / charsPerToken)", () => {
+    const { charsPerToken, catalogue, moodboard, examples, request } = loadConfig().designer.budgets;
+    console.log(`designer catalogue (compact): ${text.length} chars ≈ ${Math.round(text.length / charsPerToken)} tokens at ${charsPerToken} chars/token (budget ${catalogue})`);
+    expect(text.length / charsPerToken).toBeLessThanOrEqual(catalogue);
+    // The per-call budgets are configured now, enforced where the moodboard, the examples and the request are built (S-units).
+    expect(moodboard + examples).toBeLessThan(request);
+    expect(catalogue).toBeLessThan(request);
+  });
+
+  it("explains the steps and qa styles and that their items are the client's own words", () => {
+    const props = sectionsOf(text).get("composed")!.props;
+    expect(props).toMatch(/numbered: a numbered list; line: a timeline/);
+    expect(props).toMatch(/open: every answer shown; toggle: tap a question/);
+    expect(props).toMatch(/client's own steps in their words/);
+    expect(props).toMatch(/client's own questions and answers, copied word for word/);
   });
 
   it("without the vocabularies the writer refuses x-vocab as before (the designer-off writers)", () => {

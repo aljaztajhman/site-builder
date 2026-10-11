@@ -94,12 +94,11 @@ describe("today's assets are registered", () => {
 });
 
 describe("the composed sheets stay within COMPOSED_SHEET_BUDGET", () => {
-  it("core ≤ 16 KiB, each v20 region ≤ 12 KiB, everything one page can link ≤ 32 KiB", () => {
+  it("core ≤ 16 KiB, each v20 region ≤ 12 KiB (what a page downloads: tools/eval composed-css-weight, gzip per page)", () => {
     const core = Buffer.byteLength(composedStylesheet().css);
     const regions = COMPOSED_V2_REGIONS.map((r) => Buffer.byteLength(composedV2Sheets()[r].css));
     expect(core).toBeLessThanOrEqual(COMPOSED_SHEET_BUDGET.core);
     for (const [i, n] of regions.entries()) expect(n, COMPOSED_V2_REGIONS[i]).toBeLessThanOrEqual(COMPOSED_SHEET_BUDGET.region);
-    expect(core + regions.reduce((a, b) => a + b, 0)).toBeLessThanOrEqual(COMPOSED_SHEET_BUDGET.linked);
     expect(byteBudget({ id: "section/composed:free", kind: "section" })).toBe(COMPOSED_SHEET_BUDGET.core);
   });
 
