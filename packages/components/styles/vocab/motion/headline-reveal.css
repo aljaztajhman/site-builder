@@ -1,0 +1,27 @@
+/* headline-reveal (entrance): a display heading rises out of a clip as it comes into view, uncovered from the top, so
+   the lines arrive in reading order. The words are in the DOM and show without it: the start state exists only inside
+   the scroll-driven animation, never without @supports (animation-timeline: view()) or under reduced motion. */
+.cx-mo-headline-reveal {
+  --shape-hlfrom: inset(0 0 100% 0);
+  --shape-hlto: inset(0);
+  --cx-hy: 0.4em;
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes cx-mo-headline-reveal {
+      from {
+        clip-path: var(--shape-hlfrom);
+        transform: translateY(var(--cx-hy));
+      }
+      to {
+        clip-path: var(--shape-hlto);
+        transform: none;
+      }
+    }
+    .cx-mo-headline-reveal .cx-el--heading {
+      animation: cx-mo-headline-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 5% entry 85%;
+    }
+  }
+}

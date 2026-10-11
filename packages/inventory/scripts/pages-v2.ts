@@ -264,7 +264,7 @@ export function texturePages(asset: Asset): SheetPage[] {
 }
 
 /** Sample elements for the kinds a motion preset animates. */
-function motionElements(targets: readonly string[], images: string[]): Props[] {
+function motionElements(targets: readonly string[], images: string[], countable = false): Props[] {
   const out: Props[] = [];
   let row = 0;
   const has = (k: string) => targets.includes(k);
@@ -277,7 +277,7 @@ function motionElements(targets: readonly string[], images: string[]): Props[] {
   if (has("heading")) left.push(["h", { kind: "heading", text: "Kruh, ki vzhaja čez noč", level: 2, size: 5 }]);
   if (has("text")) left.push(["t", { kind: "text", paragraphs: ["Vsako jutro zamesimo, počakamo in spečemo."] }]);
   if (has("list")) left.push(["l", { kind: "list", items: ["Beli kruh", "Kvasni kruh", "Pecivo"] }]);
-  if (has("fact")) left.push(["f", { kind: "fact", value: "041 555 730", label: "Pokličite", treatment: "plate", size: 4 }]);
+  if (has("fact")) left.push(["f", countable ? { kind: "fact", value: "12", label: "vrst kruha", treatment: "numeral", size: 5 } : { kind: "fact", value: "041 555 730", label: "Pokličite", treatment: "plate", size: 4 }]);
   const withImage = has("image");
   for (const [id, props] of left) {
     row++;
@@ -310,7 +310,7 @@ export function motionPages(asset: Asset): SheetPage[] {
     const opener = section("default", { elements: [el("h", { kind: "heading", text: "Domača pekarna", level: 2, size: 4 }, 1, 8, 1, 0)] }, "s_open");
     // A preset with no element targets moves the background layer: the section gets a photo layer under a scrim.
     const layer = targets.length === 0 ? { background: [{ kind: "photo", image: imageIds(base)[0], scrim: { role: "inverse", strength: 3 } }] } : {};
-    const subject = section(targets.length === 0 ? "inverse" : "default", { motion: name, ...layer, elements: motionElements(targets, imageIds(base)) }, "s_motion");
+    const subject = section(targets.length === 0 ? "inverse" : "default", { motion: name, ...layer, elements: motionElements(targets, imageIds(base), name === "counter") }, "s_motion");
     const spec = withHome(inDirection(base, dir), [opener, subject], "x");
     if (meta?.minLevel === "lively") spec.design = { ...spec.design, motion: "lively" };
     return page(LETTER(i), dir.id, spec, { motion: name });

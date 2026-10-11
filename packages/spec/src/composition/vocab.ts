@@ -110,8 +110,8 @@ export const TYPE_TREATMENTS = [
   "drop-numeral",
   "corner-marks",
 ] as const;
-/** Section motion presets (`motion`), described in MOTION_META. I7 fills it to 20. */
-export const MOTIONS = ["reveal", "unmask", "rise", "wipe", "stagger", "drift-bg"] as const;
+/** Section motion presets (`motion`), described in MOTION_META. I7 fills it to 10 (the 2026-10-11 scope cut). */
+export const MOTIONS = ["reveal", "unmask", "rise", "wipe", "stagger", "drift-bg", "headline-reveal", "photo-unmask", "counter", "sticky-stack"] as const;
 /** Typographic wordmark styles (`design.wordmark.style`); I9a: plain and six treatments of the business name as type. */
 export const WORDMARK_STYLES = ["plain", "lockup", "stamp", "plate", "circle", "monogram", "stacked-caps"] as const;
 /**
@@ -239,6 +239,14 @@ export const MOTION_META: Readonly<Record<(typeof MOTIONS)[number], MotionMeta>>
   stagger: { kind: "entrance", targets: ["heading", "text", "list", "fact", "prices", "quote"], safeAtLoad: false, js: false, minLevel: "calm" },
   /** Moves the section's background photo layer (no element kind); starts fully visible, so it may open a page. */
   "drift-bg": { kind: "scroll", targets: [], safeAtLoad: true, js: false, minLevel: "lively" },
+  /** A display heading rises out of a clip, uncovered from the top (the lines arrive in reading order). */
+  "headline-reveal": { kind: "entrance", targets: ["heading"], safeAtLoad: false, js: false, minLevel: "calm" },
+  /** A photo's mask opens from its middle outward. */
+  "photo-unmask": { kind: "entrance", targets: ["image", "photos"], safeAtLoad: false, js: false, minLevel: "calm" },
+  /** A numeral fact lifts in while the motion island counts a plain whole number (up to four digits, never a year, price, phone number or linked fact) up once. Starts fully visible. */
+  counter: { kind: "entrance", targets: ["fact"], safeAtLoad: true, js: true, minLevel: "calm" },
+  /** The section itself pins to the top in turn on desktop (no element kind); starts fully visible. */
+  "sticky-stack": { kind: "entrance", targets: [], safeAtLoad: true, js: false, minLevel: "calm" },
 };
 
 const NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;

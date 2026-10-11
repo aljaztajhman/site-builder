@@ -1,6 +1,7 @@
 import { definePreset } from "@sb/spec";
 
-const priced = (i: number) => ({ name: `{brief.priced[${i}].name}`, note: `{brief.priced[${i}].description}`, price: `{brief.priced[${i}].price}` });
+// No notes: the list sits on the band, where a note's muted colour doesn't read (G9 note check).
+const priced = (i: number) => ({ name: `{brief.priced[${i}].name}`, price: `{brief.priced[${i}].price}` });
 
 /** The whole section on the band colour: the heading at display size and the lead on the left, the priced offerings as large ruled rows on the right. */
 export default definePreset({
