@@ -5,7 +5,7 @@
     const to = Number(el.dataset.to);
     el.style.minWidth = `${el.offsetWidth}px`;
     el.style.fontVariantNumeric = "tabular-nums";
-    const t0 = performance.now();
+    const t0 = window.performance.now();
     const step = (t) => {
       const k = Math.min((t - t0) / 1100, 1);
       el.textContent = k < 1 ? String(Math.round(to * (1 - (1 - k) ** 3))) : el.dataset.to;
@@ -13,7 +13,7 @@
     };
     requestAnimationFrame(step);
   };
-  const seen = new IntersectionObserver((list) => {
+  const seen = new window.IntersectionObserver((list) => {
     for (const e of list) if (e.isIntersecting) { seen.unobserve(e.target); run(e.target); }
   }, { threshold: 0.4 });
   document.querySelectorAll(".cx-mo-counter .cx-fact__value").forEach((el) => {
