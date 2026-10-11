@@ -118,9 +118,11 @@ import {
   photo,
   photos,
   prices,
+  qa,
   quote,
   repairPath,
   ribbon,
+  steps,
   sticker,
   text,
   withId,
@@ -1135,5 +1137,70 @@ describe("G26 text over a photo is on a higher layer than the photo", () => {
   it("takes the highest layer of the photos it lies over", () => {
     const s = composed([photo("e_a", { col: 1, span: 6, row: 1, rowSpan: 3, layer: 1 }, 0), photo("e_b", { col: 7, span: 6, row: 1, rowSpan: 3, layer: 2 }, 1, "img_02"), heading("e_t", { col: 5, span: 4, row: 2 }, 2)]);
     expect(repairComposition(s, C).section.props.elements[2]!.desk.layer).toBe(3);
+  });
+});
+
+describe("G22 and G29: steps and qa (spec v21)", () => {
+  const head = heading("e_head", { col: 1, span: 6, row: 1 }, 0);
+
+  it("passes a steps and a qa element in their own sections", () => {
+    expect(validateComposition(composed([head, steps("e_s", { col: 1, span: 8, row: 2 }, 1)], { intent: "steps" }), C)).toEqual([]);
+    expect(validateComposition(composed([head, qa("e_q", { col: 1, span: 8, row: 2 }, 1)], { intent: "faq" }), C)).toEqual([]);
+  });
+
+  it("rejects a second qa in a section, without a repair", () => {
+    const s = composed([head, qa("e_q1", { col: 1, span: 8, row: 2 }, 1), qa("e_q2", { col: 1, span: 8, row: 3 }, 2)], { intent: "faq" });
+    expect(issue(s, /at most one qa per section/, C)).toMatchObject({ code: "structure", path: "/props/elements/2" });
+    expect(paths(repairComposition(s, C))).not.toContain("/props/elements/2");
+  });
+
+  it("a faq section needs a qa element; a steps section a steps element or a list with a lead on every item", () => {
+    const noQa = composed([head, text("e_t", { col: 1, span: 6, row: 2 }, 1)], { intent: "faq" });
+    expect(issue(noQa, /intent faq needs a qa element/, C)).toMatchObject({ code: "structure", path: "/props/intent" });
+    const noSteps = composed([head, text("e_t", { col: 1, span: 6, row: 2 }, 1)], { intent: "steps" });
+    expect(issue(noSteps, /intent steps needs a steps element or a list with a lead/, C)).toMatchObject({ path: "/props/intent" });
+    const plain = composed([head, list("e_l", { col: 1, span: 6, row: 2 }, 1)], { intent: "steps" });
+    expect(has(plain, /intent steps needs/, C)).toBe(true);
+    const dated = composed([head, list("e_l", { col: 1, span: 6, row: 2 }, 1, { marker: "line", items: [{ lead: "1998", text: "Začetek" }, { lead: "2004", text: "Delavnica" }] })], { intent: "steps" });
+    expect(has(dated, /intent steps needs/, C)).toBe(false);
+    // Other intents say nothing about their elements.
+    expect(has(composed([head, text("e_t", { col: 1, span: 6, row: 2 }, 1)], { intent: "story" }), /needs a/, C)).toBe(false);
+  });
+
+  it("steps and qa are checked as text: a colour that fails contrast is dropped (G9)", () => {
+    for (const make of [steps, qa]) {
+      const s = composed([head, make("e_x", { col: 1, span: 8, row: 2 }, 1, { color: "border" })], { intent: make === steps ? "steps" : "faq" });
+      expect(issue(s, /e_x: border on background fails contrast/, C), make === steps ? "steps" : "qa").toMatchObject({ code: "design", path: "/props/elements/1/color" });
+      const r = repairComposition(s, C);
+      expect(paths(r)).toContain("/props/elements/1/color");
+      expect(has(r.section, /fails contrast/, C)).toBe(false);
+    }
+  });
+
+  it("neither is half width on phones, and neither overlaps other text (G12, G23)", () => {
+    for (const make of [steps, qa]) {
+      const half = composed([head, make("e_x", { col: 1, span: 8, row: 2 }, 1, {})], { intent: make === steps ? "steps" : "faq" });
+      half.props.elements[1]!.phone.span = "half";
+      expect(has(half, /can't be half width on phones/, C), make === steps ? "steps" : "qa").toBe(true);
+    }
+    const over = composed([head, steps("e_x", { col: 1, span: 8, row: 1 }, 1)], { intent: "steps" });
+    expect(has(over, /overlap/, C)).toBe(true);
+  });
+
+  it("rejects numbered step titles and numbered questions, like numbered list leads", () => {
+    const numbered = composed([head, steps("e_s", { col: 1, span: 8, row: 2 }, 1, { items: [{ title: "01 Klic", text: "Pokličete nas." }, { title: "02 / Ogled", text: "Pridemo na ogled." }] })], { intent: "steps" });
+    expect(issue(numbered, /numbered label: "01 Klic"/, C)).toMatchObject({ code: "banned", path: "/props/elements/1/items/0/title" });
+    expect(issue(numbered, /numbered label: "02 \/ Ogled"/, C)).toMatchObject({ code: "banned", path: "/props/elements/1/items/1/title" });
+    const q = composed([head, qa("e_q", { col: 1, span: 8, row: 2 }, 1, { items: [{ question: "01 Ali dostavljate?", answer: "Ne." }] })], { intent: "faq" });
+    expect(issue(q, /numbered label: "01 Ali dostavljate\?"/, C)).toMatchObject({ code: "banned", path: "/props/elements/1/items/0/question" });
+    const fine = composed([head, steps("e_s", { col: 1, span: 8, row: 2 }, 1, { items: [{ title: "Klic", text: "Pokličete nas." }, { title: "Ogled", text: "Pridemo." }] })], { intent: "steps" });
+    expect(has(fine, /numbered label/, C)).toBe(false);
+  });
+
+  it("text beyond the limits never gets through: the schema refuses it and nothing in repair lengthens it", () => {
+    const long = composed([head, steps("e_x", { col: 1, span: 8, row: 2 }, 1, { items: [{ title: "x".repeat(61), text: "ok" }, { title: "ok", text: "ok" }] })], { intent: "steps" });
+    expect(Section.safeParse(long).success).toBe(false);
+    const longQ = composed([head, qa("e_x", { col: 1, span: 8, row: 2 }, 1, { items: [{ question: "q".repeat(141), answer: "ok" }] })], { intent: "faq" });
+    expect(Section.safeParse(longQ).success).toBe(false);
   });
 });

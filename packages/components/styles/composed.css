@@ -110,7 +110,6 @@
   --cx-fs-6: max(var(--cx-fs-5), min(12vw, 4rem));
   --cx-fs-7: max(var(--cx-fs-6), min(13.5vw, 5rem));
   --cx-fs-8: max(var(--cx-fs-7), min(15vw, 6rem));
-  --cx-dh: 40vh;
   --cx-gap: max(0.75rem, calc(var(--g, 3) * 0.4rem));
   --cx-step: 1.25rem;
   display: grid;
@@ -238,7 +237,6 @@
     --cx-fs-6: max(var(--cx-fs-5), min(calc(var(--fs-h1) * 1.4), 12vw));
     --cx-fs-7: max(var(--cx-fs-6), min(calc(var(--fs-h1) * 1.9), 12vw));
     --cx-fs-8: max(var(--cx-fs-7), min(calc(var(--fs-h1) * 2.6), 12vw));
-    --cx-dh: 60vh;
   }
 }
 @media (min-width: 64rem) {
@@ -629,11 +627,9 @@ body:not([data-motif="plate"]) .cx-prices--plates .plate__eu {
   font-size: var(--fs-h3);
   line-height: 1.2;
 }
-/* A drawing is as wide as its cell, but never taller than 40vh (60vh on desktop): a tall thin one keeps its aspect ratio and is centred. */
 .cx-decor svg {
   width: 100%;
   height: auto;
-  max-height: var(--cx-dh);
 }
 .cx-decor .branch,
 .cx-decor .spoon {

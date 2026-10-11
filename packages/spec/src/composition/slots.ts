@@ -31,7 +31,9 @@ export type SlotType = "text" | "price" | "image" | "amenity";
  *   address ("Šutna 30, 1241 Kamnik"), `phone` the number as dialled at home ("041 555 906"), `hours.note` the hours'
  *   note. A placeholder fact (the client didn't give it) has no value.
  * - `brief.*`: the engine's Brief (engine brief.ts): `summary`, `highlights[]`, `offerings[]` (name, description,
- *   group, price), `priced[]` (the offerings that have a price, in order), `people[]` (brief.facts.people: name, role).
+ *   group, price), `priced[]` (the offerings that have a price, in order), `people[]` (brief.facts.people: name, role),
+ *   `steps[]` (the client's own process: title, text) and `faq[]` (their own questions: question, answer). Only what the
+ *   client wrote: a brief without them gives no value, and the element that reads them is dropped.
  * - `copy.*`: the copy the content stage wrote for this section (its headline and lead paragraph).
  * - `images[]`: spec.assets.images in order; `photos[]` only the client's own photos (origin client), for the photo
  *   arrangements that must be the client's (strip, before-after).
@@ -57,6 +59,10 @@ export const SLOTS: Readonly<Record<string, SlotType>> = {
   "brief.priced[].price": "price",
   "brief.people[].name": "text",
   "brief.people[].role": "text",
+  "brief.steps[].title": "text",
+  "brief.steps[].text": "text",
+  "brief.faq[].question": "text",
+  "brief.faq[].answer": "text",
   "copy.headline": "text",
   "copy.lead": "text",
   "images[]": "image",

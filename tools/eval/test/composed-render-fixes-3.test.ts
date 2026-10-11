@@ -10,8 +10,7 @@ import { COMPOSED, WIDTHS, loadComposed, openPage, writeComposedSite, checkPage 
 /**
  * Five composition-language gaps found making presets (HQ it-studio-lang-gaps-i3b), each held in a browser at 1280 and
  * 360 px: fact objects and display numerals grow with `size` like headings do, a photo strip is named by the section's
- * heading, elements on a colour block keep their inner padding on phones, a decor drawing never makes the section very
- * tall. No model call.
+ * heading, elements on a colour block keep their inner padding on phones (decor height: HQ it-studio-css-budget). No model call.
  */
 let browser: Browser;
 let dir: string;
@@ -179,23 +178,4 @@ describe("composed language gaps, round 3", () => {
     }
   }, 120_000);
 
-  it("a tall thin decor drawing does not make its section very tall", async () => {
-    const tall = { id: "e_d", kind: "decor", svg: { width: 40, height: 400, paths: [{ d: "M20 0 L20 400", fill: "none", stroke: "primary", width: 2 }] }, desk: { col: 1, span: 4, row: 1 }, phone: { order: 1, span: "full" } };
-    const head = { id: "e_h", kind: "heading", text: "Naša zgodba", level: 2, size: 3, desk: { col: 5, span: 8, row: 1 }, phone: { order: 0, span: "full" } };
-    for (const w of WIDTHS) {
-      const { page, ctx } = await open([composed("s_t", 1, [head, tall])], w);
-      try {
-        await shot(page, "decor", w.width);
-        const m = await page.evaluate(() => {
-          const d = document.querySelector("#s_t .cx-decor")!.getBoundingClientRect();
-          const svg = document.querySelector("#s_t .cx-decor svg")!.getBoundingClientRect();
-          return { h: d.height, svgH: svg.height, svgW: svg.width, vh: innerHeight };
-        });
-        expect(m.h, `${w.width} px decor height`).toBeLessThanOrEqual(m.vh * (w.width >= 1280 ? 0.6 : 0.4) + 1);
-        expect((await checkPage(page)).horizontalScroll).toBe(false);
-      } finally {
-        await ctx.close();
-      }
-    }
-  }, 120_000);
 });

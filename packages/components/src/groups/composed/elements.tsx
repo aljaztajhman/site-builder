@@ -10,8 +10,10 @@ import { drawingData } from "./drawings/index.ts";
 import { IconFactsBlock } from "./kinds/icon-facts.tsx";
 import { MapBlock } from "./kinds/map.tsx";
 import { PhotosBlock } from "./kinds/photos.tsx";
+import { QaBlock } from "./kinds/qa.tsx";
 import { QuoteBlock } from "./kinds/quote.tsx";
 import { RibbonBlock } from "./kinds/ribbon.tsx";
+import { StepsBlock } from "./kinds/steps.tsx";
 import { StickerBlock } from "./kinds/sticker.tsx";
 import { WordmarkBlock } from "./kinds/wordmark.tsx";
 import { factStepVar, imageSizes, stepVar, type El, type ElOf } from "./layout.ts";
@@ -347,9 +349,11 @@ export interface ElementProps {
   sectionId?: string;
   /** The id of the heading that names the section, when it has one (a photo strip is named by it). */
   headingId?: string | undefined;
+  /** The heading level of a steps title or a question: one below the section's own heading (h2 with none). */
+  itemLevel?: number;
 }
 
-export function ElementView({ el, ctx, width, over, titleId, priority, sectionId, headingId }: ElementProps) {
+export function ElementView({ el, ctx, width, over, titleId, priority, sectionId, headingId, itemLevel = 2 }: ElementProps) {
   switch (el.kind) {
     case "heading":
       return <Heading el={el} over={over} id={titleId} uid={`${sectionId ?? "s"}-${el.id}`} />;
@@ -398,5 +402,10 @@ export function ElementView({ el, ctx, width, over, titleId, priority, sectionId
       return <IconFactsBlock el={el} ctx={ctx} over={over} />;
     case "quote":
       return <QuoteBlock el={el} ctx={ctx} over={over} />;
+    // Spec v21 kinds.
+    case "steps":
+      return <StepsBlock el={el} over={over} level={itemLevel} />;
+    case "qa":
+      return <QaBlock el={el} over={over} level={itemLevel} />;
   }
 }

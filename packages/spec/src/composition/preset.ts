@@ -79,6 +79,10 @@ export interface PresetBrief {
     price?: { amount: number; from?: boolean | null; unit?: string | null } | null;
   }[];
   facts?: { people?: readonly { name: string; role?: string | null }[] };
+  /** The business's own process steps, as the client described them (spec v21; absent when they gave none). */
+  steps?: readonly { title: string; text: string }[];
+  /** The questions and answers the client gave (spec v21; absent when they gave none). */
+  faq?: readonly { question: string; answer: string }[];
 }
 
 /** Everything a preset is filled from. */
@@ -159,6 +163,14 @@ export function slotValue(name: string, src: PresetSources): string | Price | un
       return str(src.brief?.facts?.people?.[i]?.name);
     case "brief.people[].role":
       return str(src.brief?.facts?.people?.[i]?.role);
+    case "brief.steps[].title":
+      return str(src.brief?.steps?.[i]?.title);
+    case "brief.steps[].text":
+      return str(src.brief?.steps?.[i]?.text);
+    case "brief.faq[].question":
+      return str(src.brief?.faq?.[i]?.question);
+    case "brief.faq[].answer":
+      return str(src.brief?.faq?.[i]?.answer);
     case "copy.headline":
       return str(src.copy?.headline);
     case "copy.lead":
@@ -311,7 +323,7 @@ export type FillResult =
     };
 
 /** Fluid kinds widen into a dropped neighbour's columns; the rest keep their size (a button, a fact object, a drawing). */
-const FLUID: ReadonlySet<string> = new Set(["heading", "text", "list", "prices", "hours", "contact", "quote", "ribbon", "image", "photos", "map", "iconFacts"]);
+const FLUID: ReadonlySet<string> = new Set(["heading", "text", "list", "prices", "hours", "contact", "quote", "ribbon", "image", "photos", "map", "iconFacts", "steps", "qa"]);
 
 interface Box {
   c0: number;
@@ -461,6 +473,8 @@ export function fullSources(): PresetSources {
       highlights: Array.from({ length: n }, () => "Poudarek"),
       offerings: Array.from({ length: n }, () => ({ name: "Storitev", description: "Opis", group: "Skupina", price: { amount: 10, from: false, unit: null } })),
       facts: { people: Array.from({ length: n }, () => ({ name: "Oseba", role: "Vloga" })) },
+      steps: Array.from({ length: n }, () => ({ title: "Korak", text: "Opis koraka" })),
+      faq: Array.from({ length: n }, () => ({ question: "Vprašanje", answer: "Odgovor" })),
     },
     copy: { headline: "Naslov", lead: "Uvod" },
   };

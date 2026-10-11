@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { SiteSpec } from "@sb/spec";
 import { checkFacts } from "../src/index.ts";
@@ -232,6 +233,47 @@ describe("checkFacts on the v20 composed kinds (studio-phase1-design.md §1.8)",
       `name:Mojca K., stalna stranka:${at}/0/by`,
       `quote:najboljše striženje v celju:${at}/1/text`,
     ]);
+  });
+
+  describe("steps and qa are the client's own content (spec v21)", () => {
+    const brief = (
+      JSON.parse(readFileSync(new URL("../../inventory/test/fixtures/preset-sources.json", import.meta.url), "utf-8")) as Record<
+        string,
+        { brief: { faq: { question: string; answer: string }[]; steps: { title: string; text: string }[] } }
+      >
+    )["pekarna-kvas"]!.brief;
+    const clientText = [...brief.faq.flatMap((f) => [f.question, f.answer]), ...brief.steps.flatMap((x) => [x.title, x.text])].join("\n");
+
+    it("passes a qa and a steps built from the client's own brief", () => {
+      const s = spec({
+        sections: [composed({ kind: "qa", items: brief.faq.map((f) => ({ ...f })) }, { kind: "steps", items: brief.steps.map((x) => ({ ...x })) })],
+      });
+      expect(checkFacts(s, `${corpus}
+${clientText}`)).toEqual([]);
+    });
+
+    it("passes a qa the client wrote in their description, whitespace aside", () => {
+      const s = spec({ sections: [composed({ kind: "qa", items: [{ question: "Ali imate parkirišče?", answer: "Imamo   parkirišče." }] })] });
+      expect(checkFacts(s, `${corpus} Ali imate parkirišče? Imamo parkirišče. Pokličite.`)).toEqual([]);
+    });
+
+    it("reports a qa the client never gave and a step they never described", () => {
+      const s = spec({
+        sections: [
+          composed(
+            { kind: "qa", items: [{ question: "Ali dostavljate?", answer: "Da, brezplačno po vsej Sloveniji." }, brief.faq[0]!] },
+            { kind: "steps", items: [{ title: "Brezplačen ogled", text: "Pridemo k vam domov." }, brief.steps[0]!] },
+          ),
+        ],
+      });
+      expect(checkFacts(s, `${corpus}
+${clientText}`).map((v) => `${v.kind}:${v.value}:${v.path}`)).toEqual([
+        `quote:Ali dostavljate?:${at}/0/items/0/question`,
+        `quote:Da, brezplačno po vsej Sloveniji.:${at}/0/items/0/answer`,
+        `quote:Brezplačen ogled:${at}/1/items/0/title`,
+        `quote:Pridemo k vam domov.:${at}/1/items/0/text`,
+      ]);
+    });
   });
 
   it("keeps ratings, awards, certificates and superlatives off stickers and ribbons, in any inflection", () => {
