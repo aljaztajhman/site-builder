@@ -775,6 +775,11 @@ body[data-hdr="over"] .site-header--sticky::before {
 .cx-map__pin {
   fill: var(--cx-ink, var(--c-primary));
 }
+/* The map's colour role (cx-fg-<role> on the drawing) paints the pin, its ring and the frame, not the words under it. */
+.cx-map__art.cx-pf {
+  --cx-ink: currentColor;
+  border-color: currentColor;
+}
 .cx-map__dot {
   fill: var(--c-bg);
 }
@@ -1098,6 +1103,8 @@ body[data-hdr="over"] .site-header--sticky::before {
   gap: 0;
 }
 .cx-l--line li {
+  /* The ring is .8em wide: the gap after it is in em too, so it scales with the list size (rem left 1 px at size 2). */
+  padding-left: 1.6em;
   padding-bottom: 1.25rem;
 }
 .cx-l--line li:last-child {
@@ -1233,17 +1240,19 @@ body[data-hdr="over"] .site-header--sticky::before {
   background: var(--c-inverse);
   color: var(--c-on-inverse);
   border: 3px solid currentColor;
-  text-align: center;
 }
+/* A menu board: name (and note) left, price right on one line; where they do not fit one line (a phone, a long name) the
+   price wraps under the name from the same edge (the base row is a flex row). */
 .cx-prices--board .prices__row {
-  display: grid;
-  justify-items: center;
-  gap: .2rem;
+  flex-wrap: wrap;
+  row-gap: .2rem;
   border-color: currentColor;
+}
+.cx-prices--board .prices__row dt {
+  flex: 1 1 12rem;
 }
 .cx-prices--board .prices__row dd {
   max-width: none;
-  text-align: center;
   font: var(--fw-heading) var(--fs-h3) var(--font-heading);
 }
 .cx-prices--board .prices__note {

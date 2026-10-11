@@ -169,7 +169,8 @@ function painted(e: Element): Painted | undefined {
     case "photos":
       return (e.captions?.length ?? 0) > 0 ? { large: false } : undefined;
     case "map":
-      return { large: false };
+      // The colour role paints the drawing (pin, ring, frame) and the street names on it, so it is checked as text; the address under it keeps the ground's own colour.
+      return { ...paint, large: false };
     default:
       return undefined;
   }
