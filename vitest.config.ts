@@ -6,6 +6,8 @@ export default defineConfig({
     // Unit tests must never reach the network; see test-setup.ts.
     setupFiles: ["./test-setup.ts"],
     testTimeout: 30_000,
-    pool: "threads",
+    // Forks, not threads: worker threads crashed Node 24 on CI with a V8 wasm JIT check (exit 132, "Illegal instruction";
+    // docs/plans/studio-phase1-review.md B2).
+    pool: "forks",
   },
 });
