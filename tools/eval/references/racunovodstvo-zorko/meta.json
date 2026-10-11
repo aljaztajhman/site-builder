@@ -1,0 +1,13 @@
+{
+  "id": "racunovodstvo-zorko",
+  "stance": "account-ledger",
+  "trades": [
+    "accountant"
+  ],
+  "title": "Računovodstvo Zorko, knjiga",
+  "gapNote": "There is no double rule (divider/double-rule) and no ledger motif: the double rule and the red rule are inline svg decor lines, stretched to their cell, so their stroke width follows the cell width and had to be tuned by eye; a section edge can only be a single rule. A ledger page has figures in a firm column under each other with a total, but the prices element rows the amount beside its name and there is no total row, no tabular-figures type treatment and no ruled-total heading treatment in use, and a sum would be an invented fact in any case. The prices 'sheet' style is the nearest thing to the ledger: one ruled list in the hero, with no column heads or account columns. The ledger's margin line down the page can not be drawn (no vertical rule). The page is deliberately free of photos and charts (the stance's trap), so it is mostly type and rules; there is no object to put in the corner.",
+  "sources": [
+    "stance account-ledger (ruled rows, figures flush right, a double rule, one red rule)",
+    "R Račun (a ledger and a receipt column)"
+  ]
+}

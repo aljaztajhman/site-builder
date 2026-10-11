@@ -1,0 +1,80 @@
+{
+  "id": "frizerstvo-kroj",
+  "businessType": "hairdresser",
+  "town": "Kranj",
+  "description": "Frizerstvo Kroj je majhen frizerski salon v Kranju, naslov je Koroška cesta 12, 4000 Kranj. Salon vodim jaz, Tina Kroj, delava pa še s sodelavko Evo. Strižem ženske in moške, barvam, delam pramene in pričeske za posebne priložnosti.\n\nCene: žensko striženje 28 €, moško striženje 16 €, barvanje od 40 €, prameni od 55 €, pričeska za posebne priložnosti od 45 €.\n\nOdprto: torek–petek 9.00–18.00, sobota 8.00–13.00. Ob nedeljah in ponedeljkih zaprto.\n\nNaročite se po telefonu 04 555 63 08 ali na tina@frizerstvo-kroj.example. Plačate lahko s kartico. Salon je v pritličju, brez stopnic. Na strani si želim samo preproste like: krog, kvadrat, trikotnik, in veliko belega prostora.",
+  "photos": {
+    "fixture": "frizerstvo-lana",
+    "subjects": [
+      "notranjost salona z dvema stoloma in ogledali",
+      "frizerka striže stranko s škarjami in glavnikom"
+    ]
+  },
+  "facts": {
+    "name": "Frizerstvo Kroj",
+    "phone": "+38645556308",
+    "email": "tina@frizerstvo-kroj.example",
+    "address": {
+      "street": "Koroška cesta 12",
+      "postalCode": "4000",
+      "city": "Kranj"
+    },
+    "hours": [
+      {
+        "from": "tue",
+        "to": "fri",
+        "open": "09:00",
+        "close": "18:00"
+      },
+      {
+        "from": "sat",
+        "to": "sat",
+        "open": "08:00",
+        "close": "13:00"
+      }
+    ],
+    "prices": [
+      {
+        "item": "žensko striženje",
+        "amount": 28
+      },
+      {
+        "item": "moško striženje",
+        "amount": 16
+      },
+      {
+        "item": "barvanje",
+        "amount": 40,
+        "from": true
+      },
+      {
+        "item": "prameni",
+        "amount": 55,
+        "from": true
+      },
+      {
+        "item": "pričeska za posebne priložnosti",
+        "amount": 45,
+        "from": true
+      }
+    ],
+    "people": [
+      {
+        "name": "Tina Kroj",
+        "role": "vodja, frizerka"
+      },
+      {
+        "name": "Eva",
+        "role": "frizerka"
+      }
+    ],
+    "amenities": [
+      "card",
+      "step-free"
+    ],
+    "other": [
+      "Salon je v pritličju, brez stopnic",
+      "Strižem ženske in moške, barvam, delam pramene in pričeske za posebne priložnosti"
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "id": "kmetija-kramar",
+  "stance": "hut-stamp-booklet",
+  "trades": [
+    "tourist-farm"
+  ],
+  "title": "Kmetija Kramar, planinski žig",
+  "gapNote": "The stamps are the stamp fact object, tilted by up to 4 degrees on desktop only: phones never tilt, so the off-true, hand-pressed look that carries the stance is gone on a phone and the three stamps are neat boxes. There is no trail motif or rubber-stamp ornament in the sheet (motif/trail, ornament/rubber-stamp are missing), so no stamp carries a drawn emblem; each is a value and a label in a double rule. A stamp holds only a value of 24 characters and a label of 60, so no place name or date can sit in it (and the client gave none to invent). No ink-pad texture: stamp edges are clean vectors with no uneven pressure. The stamp image mask is a perforated edge, which reads as a postage stamp, not as a rubber stamp. Everything is one ink (the primary blue); the second colour in the palette is not used on the page.",
+  "sources": [
+    "stance hut-stamp-booklet (rubber stamps in one ink, each in its own box, slightly off true)",
+    "N Markacija (a mountain farm with rooms and a meal for walkers)"
+  ]
+}

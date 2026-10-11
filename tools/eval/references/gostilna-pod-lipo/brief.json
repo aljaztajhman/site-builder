@@ -1,0 +1,82 @@
+{
+  "id": "gostilna-pod-lipo",
+  "businessType": "restaurant",
+  "town": "Radovljica",
+  "description": "Gostilna Pod Lipo stoji na Linhartovem trgu 11, 4240 Radovljica, v beli hiši z lipo pred vhodom. Kuham jaz, Franc Zupan, strežeta pa žena Ana in hči Lara. Kuhamo, kar smo jedli doma: jota, kranjska klobasa z zeljem, svinjska pečenka s praženim krompirjem, domači štruklji in kremšnita.\n\nCene: jota 6,50 €, kranjska klobasa z zeljem 9,50 €, svinjska pečenka s praženim krompirjem 12,00 €, štruklji 5,00 €, kremšnita 4,50 €.\n\nOdprto: torek–sobota 11.00–22.00, nedelja 11.00–16.00, ob ponedeljkih zaprto.\n\nMizo rezerviraj po telefonu 04 555 91 20 ali na franc@gostilna-pod-lipo.example. Poleti imamo teraso pod lipo, plačate lahko s kartico, otroci so dobrodošli. Na strani bi rad en velik znak, kot ga ima gostilna, ime pod njim in ob njem fotografijo hiše.",
+  "photos": {
+    "fixture": "gostilna-zlata-zlica",
+    "subjects": [
+      "bela gostilna z zelenimi polkni in lipo pred vhodom"
+    ]
+  },
+  "facts": {
+    "name": "Gostilna Pod Lipo",
+    "phone": "+38645559120",
+    "email": "franc@gostilna-pod-lipo.example",
+    "address": {
+      "street": "Linhartov trg 11",
+      "postalCode": "4240",
+      "city": "Radovljica"
+    },
+    "hours": [
+      {
+        "from": "tue",
+        "to": "sat",
+        "open": "11:00",
+        "close": "22:00"
+      },
+      {
+        "from": "sun",
+        "to": "sun",
+        "open": "11:00",
+        "close": "16:00"
+      }
+    ],
+    "prices": [
+      {
+        "item": "jota",
+        "amount": 6.5
+      },
+      {
+        "item": "kranjska klobasa z zeljem",
+        "amount": 9.5
+      },
+      {
+        "item": "svinjska pečenka s praženim krompirjem",
+        "amount": 12
+      },
+      {
+        "item": "štruklji",
+        "amount": 5
+      },
+      {
+        "item": "kremšnita",
+        "amount": 4.5
+      }
+    ],
+    "people": [
+      {
+        "name": "Franc Zupan",
+        "role": "kuhar, vodja"
+      },
+      {
+        "name": "Ana",
+        "role": "strežba"
+      },
+      {
+        "name": "Lara",
+        "role": "strežba"
+      }
+    ],
+    "amenities": [
+      "card",
+      "terrace",
+      "kids-welcome"
+    ],
+    "other": [
+      "Poleti imamo teraso pod lipo",
+      "Otroci so dobrodošli",
+      "Mizo rezerviraj po telefonu"
+    ]
+  }
+}

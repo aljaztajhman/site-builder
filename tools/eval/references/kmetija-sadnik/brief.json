@@ -1,0 +1,84 @@
+{
+  "id": "kmetija-sadnik",
+  "businessType": "tourist-farm",
+  "town": "Luče",
+  "description": "Turistična kmetija Sadnik stoji v Lučah, naslov je Luče 41, 3334 Luče. Gospodarimo jaz, Marija Sadnik, z možem Jožetom in sinom Urbanom. Okoli hiše imamo visokodebelni travniški sadovnjak: jablane, hruške in češnje. Iz jabolk delamo sok, kis in zavitek.\n\nGostom oddajamo tri sobe. Zajtrk je kmečki, s sirom, skuto, marmelado in kruhom.\n\nCene: nočitev z zajtrkom 38 € na osebo, kmečki zajtrk za obiskovalce 9 €, jabolčni sok 3,00 €, jabolčni kis 4,50 €, kos jabolčnega zavitka 2,50 €.\n\nPridelke prodajamo na domu: pon–sob 9.00–18.00, v nedeljo 9.00–12.00.\n\nSobe rezervirate po telefonu 03 555 21 63 ali na marija@kmetija-sadnik.example. Pred hišo je parkirišče, otroci so dobrodošli, doma pridelano prodajamo sami. Stran naj bo zračna, z veliko zelenega in z majhnimi rdečimi jabolki, kot je pri nas spomladi in jeseni.",
+  "photos": {
+    "fixture": "kmetija-grabnar",
+    "subjects": [
+      "kmečka hiša z lesenim balkonom in rdečimi pelargonijami pod gorami",
+      "soba z dvema lesenima posteljama in karirasto posteljnino",
+      "kmečki zajtrk: sir, skuta, marmelada, kruh, maslo in mleko"
+    ]
+  },
+  "facts": {
+    "name": "Turistična kmetija Sadnik",
+    "phone": "+38635552163",
+    "email": "marija@kmetija-sadnik.example",
+    "address": {
+      "street": "Luče 41",
+      "postalCode": "3334",
+      "city": "Luče"
+    },
+    "hours": [
+      {
+        "from": "mon",
+        "to": "sat",
+        "open": "09:00",
+        "close": "18:00"
+      },
+      {
+        "from": "sun",
+        "to": "sun",
+        "open": "09:00",
+        "close": "12:00"
+      }
+    ],
+    "prices": [
+      {
+        "item": "nočitev z zajtrkom na osebo",
+        "amount": 38
+      },
+      {
+        "item": "kmečki zajtrk za obiskovalce",
+        "amount": 9
+      },
+      {
+        "item": "jabolčni sok",
+        "amount": 3
+      },
+      {
+        "item": "jabolčni kis",
+        "amount": 4.5
+      },
+      {
+        "item": "kos jabolčnega zavitka",
+        "amount": 2.5
+      }
+    ],
+    "people": [
+      {
+        "name": "Marija Sadnik",
+        "role": "gospodinja"
+      },
+      {
+        "name": "Jože",
+        "role": "mož"
+      },
+      {
+        "name": "Urban",
+        "role": "sin"
+      }
+    ],
+    "amenities": [
+      "parking",
+      "kids-welcome",
+      "local-produce"
+    ],
+    "other": [
+      "Okoli hiše imamo visokodebelni travniški sadovnjak",
+      "Gostom oddajamo tri sobe",
+      "Zajtrk je kmečki, s sirom, skuto, marmelado in kruhom"
+    ]
+  }
+}

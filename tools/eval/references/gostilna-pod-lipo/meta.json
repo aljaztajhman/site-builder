@@ -1,0 +1,13 @@
+{
+  "id": "gostilna-pod-lipo",
+  "stance": "bracket-sign",
+  "trades": [
+    "restaurant"
+  ],
+  "title": "Gostilna Pod Lipo, kovinski konzolni znak",
+  "gapNote": "There is no bracket sign: no cut-out silhouette (ornament/bracket-silhouette doesn't exist), no iron bracket and no thin iron frame (divider/iron-line). The sign is approximated by a flat surface field in the right columns holding the ladle-pot line drawing and the plain wordmark, so it reads as a grey panel, not a hanging board with an outline. A field has no border role and no outline of its own, so the frame round the silhouette and the name can't be drawn; the field also bleeds to the page edge on desktop. The arch photo mask is the only 'sign' shape, and the arch is a window shape rather than the hanging board's. The ladle-pot drawing is a thin line drawing, not a solid silhouette. On phones the field becomes a full-width grey band between menu and story, with no sign shape left.",
+  "sources": [
+    "stance bracket-sign (one silhouette of the trade, the name beneath, a frame round both)",
+    "J Skorja (the house photo and a short menu)"
+  ]
+}

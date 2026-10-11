@@ -1,0 +1,590 @@
+{
+  "specVersion": 20,
+  "slug": "racunovodstvo-zorko",
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Računovodstvo Zorko",
+    "type": "accountant",
+    "phone": "+38635556217",
+    "email": "barbara@racunovodstvo-zorko.example",
+    "address": {
+      "street": "Prešernova cesta 14",
+      "postalCode": "3320",
+      "city": "Velenje"
+    },
+    "hours": {
+      "entries": [
+        {
+          "from": "mon",
+          "to": "thu",
+          "open": "08:00",
+          "close": "16:00"
+        },
+        {
+          "from": "fri",
+          "to": "fri",
+          "open": "08:00",
+          "close": "13:00"
+        },
+        {
+          "from": "sat",
+          "to": "sun",
+          "closed": true
+        }
+      ]
+    },
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      }
+    },
+    "amenities": [
+      "appointment-only",
+      "card",
+      "parking"
+    ]
+  },
+  "design": {
+    "direction": "racun",
+    "fontPair": "ibm-plex-sans",
+    "colors": {
+      "background": "#ffffff",
+      "surface": "#f2f2f0",
+      "text": "#171717",
+      "muted": "#505050",
+      "primary": "#1f2937",
+      "onPrimary": "#ffffff",
+      "accent": "#d02a2a",
+      "border": "#d4d4d0",
+      "inverse": "#171717",
+      "onInverse": "#f2f2f0"
+    },
+    "radius": 4,
+    "baseFontSize": 17,
+    "scale": 1.3,
+    "headingWeight": 700,
+    "headingCase": "normal",
+    "headingTracking": -0.035,
+    "density": "regular",
+    "shadow": "none",
+    "imagery": "natural",
+    "motion": "still",
+    "wordmark": {
+      "style": "plain"
+    }
+  },
+  "assets": {
+    "images": []
+  },
+  "chrome": {
+    "header": {
+      "variant": "split-cta",
+      "cta": "call"
+    },
+    "footer": {
+      "variant": "compact"
+    },
+    "mobileActionBar": true
+  },
+  "pages": [
+    {
+      "id": "p_home",
+      "kind": "home",
+      "slug": "",
+      "nav": {
+        "label": "Domov",
+        "show": true
+      },
+      "seo": {
+        "title": "Računovodstvo Zorko, Velenje – knjige, plače, davki",
+        "description": "Majhna računovodska pisarna na Prešernovi cesti 14 v Velenju: poslovne knjige za s.p., obračun plač, davčne napovedi, ustanovitev s.p."
+      },
+      "sections": [
+        {
+          "id": "s_hero",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "hero",
+            "width": "contained",
+            "minHeight": "l",
+            "rows": 5,
+            "elements": [
+              {
+                "id": "e_where",
+                "kind": "text",
+                "paragraphs": [
+                  "Prešernova cesta 14, Velenje"
+                ],
+                "color": "muted",
+                "desk": {
+                  "col": 1,
+                  "span": 6,
+                  "row": 1,
+                  "alignY": "end"
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_title",
+                "kind": "heading",
+                "text": "Poslovne knjige, plače in davki",
+                "level": 1,
+                "size": 6,
+                "measure": "m",
+                "color": "text",
+                "desk": {
+                  "col": 1,
+                  "span": 6,
+                  "row": 2
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_red",
+                "kind": "decor",
+                "svg": {
+                  "width": 400,
+                  "height": 8,
+                  "paths": [
+                    {
+                      "d": "M0 4 H400",
+                      "fill": "none",
+                      "stroke": "accent",
+                      "width": 3
+                    }
+                  ]
+                },
+                "fit": "cell",
+                "color": "accent",
+                "desk": {
+                  "col": 1,
+                  "span": 4,
+                  "row": 3,
+                  "alignY": "center"
+                },
+                "phone": {
+                  "order": 2,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_lead",
+                "kind": "text",
+                "paragraphs": [
+                  "Delam jaz, Barbara Zorko, računovodkinja. Vodim poslovne knjige za samostojne podjetnike, obračunavam plače in pripravljam davčne napovedi."
+                ],
+                "size": 1,
+                "desk": {
+                  "col": 1,
+                  "span": 6,
+                  "row": 4
+                },
+                "phone": {
+                  "order": 3,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_call",
+                "kind": "action",
+                "action": "call",
+                "label": "Naročite se po telefonu",
+                "style": "primary",
+                "desk": {
+                  "col": 1,
+                  "span": 4,
+                  "row": 5,
+                  "alignY": "start"
+                },
+                "phone": {
+                  "order": 4,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_sheet",
+                "kind": "prices",
+                "style": "sheet",
+                "size": 1,
+                "items": [
+                  {
+                    "name": "Vodenje knjigovodstva za s.p.",
+                    "note": "Mesečno",
+                    "price": {
+                      "amount": 80,
+                      "from": true
+                    }
+                  },
+                  {
+                    "name": "Obračun plač",
+                    "note": "Na zaposlenega",
+                    "price": {
+                      "amount": 15
+                    }
+                  },
+                  {
+                    "name": "Letna davčna napoved",
+                    "note": "Fizična oseba",
+                    "price": {
+                      "amount": 45
+                    }
+                  },
+                  {
+                    "name": "Ustanovitev s.p.",
+                    "price": {
+                      "amount": 90
+                    }
+                  }
+                ],
+                "desk": {
+                  "col": 8,
+                  "span": 5,
+                  "row": 2,
+                  "rowSpan": 3,
+                  "alignY": "center"
+                },
+                "phone": {
+                  "order": 5,
+                  "span": "full"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_services",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "services",
+            "width": "contained",
+            "rows": 3,
+            "elements": [
+              {
+                "id": "e_dbl",
+                "kind": "decor",
+                "svg": {
+                  "width": 400,
+                  "height": 10,
+                  "paths": [
+                    {
+                      "d": "M0 2 H400",
+                      "fill": "none",
+                      "stroke": "text",
+                      "width": 0.7
+                    },
+                    {
+                      "d": "M0 8 H400",
+                      "fill": "none",
+                      "stroke": "text",
+                      "width": 0.7
+                    }
+                  ]
+                },
+                "fit": "cell",
+                "color": "text",
+                "desk": {
+                  "col": 1,
+                  "span": 12,
+                  "row": 1,
+                  "alignY": "start"
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_h",
+                "kind": "heading",
+                "text": "Kaj vodim",
+                "level": 2,
+                "size": 5,
+                "color": "text",
+                "desk": {
+                  "col": 1,
+                  "span": 5,
+                  "row": 2
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_l",
+                "kind": "list",
+                "marker": "rule",
+                "weight": "medium",
+                "size": 1,
+                "items": [
+                  "Poslovne knjige za samostojne podjetnike",
+                  "Obračun plač",
+                  "Davčne napovedi",
+                  "Pomoč pri ustanovitvi podjetja"
+                ],
+                "desk": {
+                  "col": 6,
+                  "span": 7,
+                  "row": 2,
+                  "rowSpan": 2,
+                  "alignY": "start"
+                },
+                "phone": {
+                  "order": 2,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_t",
+                "kind": "text",
+                "paragraphs": [
+                  "Samo po naročilu. Plačate lahko s kartico."
+                ],
+                "color": "muted",
+                "desk": {
+                  "col": 1,
+                  "span": 5,
+                  "row": 3,
+                  "alignY": "start"
+                },
+                "phone": {
+                  "order": 3,
+                  "span": "full"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_visit",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "contact",
+            "width": "contained",
+            "rows": 5,
+            "elements": [
+              {
+                "id": "e_dbl",
+                "kind": "decor",
+                "svg": {
+                  "width": 400,
+                  "height": 10,
+                  "paths": [
+                    {
+                      "d": "M0 2 H400",
+                      "fill": "none",
+                      "stroke": "text",
+                      "width": 0.7
+                    },
+                    {
+                      "d": "M0 8 H400",
+                      "fill": "none",
+                      "stroke": "text",
+                      "width": 0.7
+                    }
+                  ]
+                },
+                "fit": "cell",
+                "color": "text",
+                "desk": {
+                  "col": 1,
+                  "span": 12,
+                  "row": 1,
+                  "alignY": "start"
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_h",
+                "kind": "heading",
+                "text": "Odprto",
+                "level": 2,
+                "size": 4,
+                "color": "text",
+                "desk": {
+                  "col": 1,
+                  "span": 5,
+                  "row": 2,
+                  "alignY": "start"
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_hours",
+                "kind": "hours",
+                "style": "table",
+                "desk": {
+                  "col": 1,
+                  "span": 5,
+                  "row": 3,
+                  "alignY": "start"
+                },
+                "phone": {
+                  "order": 2,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_if",
+                "kind": "iconFacts",
+                "icons": "line",
+                "items": [
+                  {
+                    "fact": "appointment-only"
+                  },
+                  {
+                    "fact": "card"
+                  },
+                  {
+                    "fact": "parking",
+                    "note": "Pred pisarno"
+                  }
+                ],
+                "desk": {
+                  "col": 1,
+                  "span": 5,
+                  "row": 4,
+                  "alignY": "start"
+                },
+                "phone": {
+                  "order": 3,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_contact",
+                "kind": "contact",
+                "show": [
+                  "phone",
+                  "email",
+                  "address"
+                ],
+                "desk": {
+                  "col": 7,
+                  "span": 6,
+                  "row": 2,
+                  "rowSpan": 2
+                },
+                "phone": {
+                  "order": 4,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_map",
+                "kind": "map",
+                "style": "street",
+                "desk": {
+                  "col": 7,
+                  "span": 6,
+                  "row": 4,
+                  "rowSpan": 2
+                },
+                "phone": {
+                  "order": 5,
+                  "span": "full"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "nav": {
+        "label": "Zasebnost",
+        "show": false
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Računovodstvo Zorko",
+        "description": "Kako Računovodstvo Zorko obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "variant": "default",
+          "props": {
+            "kind": "privacy"
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "nav": {
+        "label": "Dostopnost",
+        "show": false
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Računovodstvo Zorko",
+        "description": "Izjava o dostopnosti spletne strani Računovodstvo Zorko."
+      },
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "variant": "default",
+          "props": {
+            "kind": "accessibility"
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "kind": "not-found",
+      "slug": "404",
+      "nav": {
+        "label": "Ni najdeno",
+        "show": false
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Računovodstvo Zorko",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "variant": "default",
+          "props": {
+            "title": "Te strani ni mogoče najti",
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo."
+          }
+        }
+      ]
+    }
+  ]
+}

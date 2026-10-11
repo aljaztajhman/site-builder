@@ -1,0 +1,13 @@
+{
+  "id": "pekarna-zitnik",
+  "stance": "woodcut",
+  "trades": [
+    "bakery"
+  ],
+  "title": "Pekarna Žitnik, lesorez",
+  "gapNote": "There is no heavy cut drawing: the only loaf drawing is peel-loaf-line, a thin outline, so the loaf reads as a technical line sketch rather than a block of solid ink with the gouge marks left in (the full-strength solid bakery drawings are not on main yet). The gouge texture is one even stripe pattern over the whole hero section; it can't be limited to a field or a shape, and it can't give the heading and the drawing a printed, slightly misregistered second colour. A decor drawing takes one colour role, so the 'dark ink plus one colour' is the heading in ink and the drawing in accent, not two overprinted layers. The photo is only mono-contrast; there is no cut or print-grain treatment that would turn it into a block print, so it stays a black and white photograph.",
+  "sources": [
+    "stance woodcut (dark ink and one colour, gouge marks left in)",
+    "A Kruh iz krušne peči (a loaf as one heavy drawn object)"
+  ]
+}

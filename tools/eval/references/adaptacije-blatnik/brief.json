@@ -1,0 +1,63 @@
+{
+  "id": "adaptacije-blatnik",
+  "businessType": "builder",
+  "town": "Slovenj Gradec",
+  "description": "Adaptacije Blatnik so majhno gradbeno podjetje v Slovenj Gradcu, naslov je Celjska cesta 31, 2380 Slovenj Gradec. Vodim jih jaz, Boštjan Blatnik, z zidarjema Mitjem in Darkom. Obnavljamo kopalnice, kuhinje in strehe. Pred delom pridem pogledat in narišem načrt z merami.\n\nCene: obnova kopalnice od 4500 €, polaganje ploščic (na m²) 28 €, delo zidarja (na uro) 32 €. Strehe po ogledu.\n\nOdprto: pon–pet 7.00–15.00. Za oglede se dogovorimo po telefonu.\n\nPokličite na 02 555 83 47 ali pišite na bostjan@adaptacije-blatnik.example. Račun izdamo za vsako delo. Stran naj bo kot risba z mero: ravne črte pod kotom, nekaj barve in malo besed.",
+  "photos": null,
+  "facts": {
+    "name": "Adaptacije Blatnik",
+    "phone": "+38625558347",
+    "email": "bostjan@adaptacije-blatnik.example",
+    "address": {
+      "street": "Celjska cesta 31",
+      "postalCode": "2380",
+      "city": "Slovenj Gradec"
+    },
+    "hours": [
+      {
+        "from": "mon",
+        "to": "fri",
+        "open": "07:00",
+        "close": "15:00"
+      }
+    ],
+    "prices": [
+      {
+        "item": "obnova kopalnice",
+        "amount": 4500,
+        "from": true
+      },
+      {
+        "item": "polaganje ploščic (na m²)",
+        "amount": 28
+      },
+      {
+        "item": "delo zidarja (na uro)",
+        "amount": 32
+      }
+    ],
+    "people": [
+      {
+        "name": "Boštjan Blatnik",
+        "role": "vodja"
+      },
+      {
+        "name": "Mitja",
+        "role": "zidar"
+      },
+      {
+        "name": "Darko",
+        "role": "zidar"
+      }
+    ],
+    "amenities": [
+      "invoice",
+      "home-visits"
+    ],
+    "other": [
+      "Obnavljamo kopalnice, kuhinje in strehe",
+      "Pred delom pridem pogledat in narišem načrt z merami",
+      "Račun izdamo za vsako delo"
+    ]
+  }
+}

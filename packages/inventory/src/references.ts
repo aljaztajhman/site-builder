@@ -32,6 +32,19 @@ export const STUDIO_REFERENCES: readonly ReferenceEntry[] = [
   { id: "fizioterapija-kobal", stance: "soca-green", trades: ["physio"] },
   { id: "cvetlicarna-pirc", stance: "line-drawing", trades: ["shop"] },
   { id: "siviljstvo-mlakar", stance: "sewing-pattern", trades: ["shop"] },
+  // I10c: twelve more (24 in all).
+  { id: "pekarna-zitnik", stance: "woodcut", trades: ["bakery"] },
+  { id: "gostilna-pod-lipo", stance: "bracket-sign", trades: ["restaurant"] },
+  { id: "jedilnica-brin", stance: "colour-block", trades: ["restaurant"] },
+  { id: "frizerstvo-kroj", stance: "bauhaus-geometry", trades: ["hairdresser"] },
+  { id: "avtomehanika-sever", stance: "registration-plate", trades: ["car-repair"] },
+  { id: "kmetija-sadnik", stance: "meadow-orchard", trades: ["tourist-farm"] },
+  { id: "kmetija-kramar", stance: "hut-stamp-booklet", trades: ["tourist-farm"] },
+  { id: "zobna-ravnik", stance: "glazed-tile", trades: ["dental"] },
+  { id: "fizioterapija-spik", stance: "julian-alps", trades: ["physio"] },
+  { id: "racunovodstvo-zorko", stance: "account-ledger", trades: ["accountant"] },
+  { id: "adaptacije-blatnik", stance: "axonometric", trades: ["builder"] },
+  { id: "zidarstvo-cok", stance: "brutalist-minimal", trades: ["builder"] },
 ];
 
 /** The references as inventory assets: drafts, no bytes of their own (a page, not a part of one). */

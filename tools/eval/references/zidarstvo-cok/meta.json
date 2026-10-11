@@ -1,0 +1,13 @@
+{
+  "id": "zidarstvo-cok",
+  "stance": "brutalist-minimal",
+  "trades": [
+    "builder"
+  ],
+  "title": "Zidarstvo Čok, goli brutalizem",
+  "gapNote": "The structure that should be on show is faked: there are no visible grid lines, only hairline rules drawn as inline svg decor strips (a 0.6 stroke stretched to its cell) at the top of each section, and no vertical rules between columns (a vertical decor line was never needed because a cell-fit decor can not run the full height of a row span). The type is not flush-left display for its own sake: heading size 8 is the largest step and is clamped to 12vw, and the one hard colour is the primary red on the buttons only, with the type in black. There is no flush-left-display type treatment and no divider/hairline asset, so the rules are per-section decor elements counted against the 12-element limit. The page is deliberately photo-free and monochrome, which leaves an honest but thin trade page: nothing says what the walls look like. Found while shooting: a section with width wide starts its content at the page margin (32 px) while the header content starts at 64 px at 1280, so the wide page is misaligned with its own header.",
+  "sources": [
+    "stance brutalist-minimal (raw structure, hairline rules, big flush-left type, one hard colour)",
+    "R Račun (a plain page of rules and figures)"
+  ]
+}

@@ -1,0 +1,912 @@
+{
+  "specVersion": 20,
+  "slug": "zobna-ravnik",
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Zobna ordinacija Ravnik",
+    "type": "dental",
+    "phone": "+38625558736",
+    "email": "ordinacija@zobna-ravnik.example",
+    "address": {
+      "street": "Murkova ulica 12",
+      "postalCode": "2250",
+      "city": "Ptuj"
+    },
+    "hours": {
+      "entries": [
+        {
+          "from": "mon",
+          "to": "mon",
+          "open": "08:00",
+          "close": "15:00"
+        },
+        {
+          "from": "tue",
+          "to": "tue",
+          "open": "12:00",
+          "close": "19:00"
+        },
+        {
+          "from": "wed",
+          "to": "wed",
+          "open": "08:00",
+          "close": "15:00"
+        },
+        {
+          "from": "thu",
+          "to": "thu",
+          "open": "12:00",
+          "close": "19:00"
+        },
+        {
+          "from": "fri",
+          "to": "fri",
+          "open": "08:00",
+          "close": "15:00"
+        },
+        {
+          "from": "sat",
+          "to": "sun",
+          "closed": true
+        }
+      ]
+    },
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      }
+    },
+    "amenities": [
+      "appointment-only",
+      "step-free",
+      "card"
+    ]
+  },
+  "design": {
+    "direction": "clinical-calm",
+    "fontPair": "manrope-public-sans",
+    "colors": {
+      "background": "#f3f8fa",
+      "surface": "#e3eef2",
+      "text": "#14262e",
+      "muted": "#4a5f68",
+      "primary": "#16708f",
+      "onPrimary": "#ffffff",
+      "accent": "#2386b3",
+      "border": "#b9d1da",
+      "inverse": "#10222a",
+      "onInverse": "#ecf4f7"
+    },
+    "radius": 8,
+    "baseFontSize": 17,
+    "scale": 1.22,
+    "headingWeight": 700,
+    "headingCase": "normal",
+    "headingTracking": -0.01,
+    "density": "regular",
+    "shadow": "none",
+    "imagery": "rounded",
+    "motion": "calm",
+    "wordmark": {
+      "style": "plain"
+    }
+  },
+  "assets": {
+    "images": [
+      {
+        "id": "img_01",
+        "src": "uploads/01.jpg",
+        "width": 1536,
+        "height": 1024,
+        "alt": "Svetla zobna ordinacija z zobozdravstvenim stolom, svetilko in belimi omarami"
+      },
+      {
+        "id": "img_02",
+        "src": "uploads/02.jpg",
+        "width": 1536,
+        "height": 1024,
+        "alt": "Majhna čakalnica z vrsto zelenih stolov, rastlino in nizko leseno mizico"
+      }
+    ]
+  },
+  "chrome": {
+    "header": {
+      "variant": "split-cta",
+      "cta": "call"
+    },
+    "footer": {
+      "variant": "compact"
+    },
+    "mobileActionBar": true
+  },
+  "pages": [
+    {
+      "id": "p_home",
+      "kind": "home",
+      "slug": "",
+      "nav": {
+        "label": "Domov",
+        "show": true
+      },
+      "seo": {
+        "title": "Zobna ordinacija Ravnik, Ptuj – pregled, plombe, beljenje",
+        "description": "Zasebna zobna ordinacija na Murkovi ulici 12 v Ptuju: pregled, čiščenje zobnega kamna, plombe in beljenje zob. Samo po naročilu."
+      },
+      "sections": [
+        {
+          "id": "s_hero",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "hero",
+            "width": "contained",
+            "rows": 4,
+            "elements": [
+              {
+                "id": "e_where",
+                "kind": "text",
+                "paragraphs": [
+                  "Murkova ulica 12, Ptuj"
+                ],
+                "color": "muted",
+                "desk": {
+                  "col": 1,
+                  "span": 5,
+                  "row": 1,
+                  "alignY": "end"
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_title",
+                "kind": "heading",
+                "text": "Pregled, čiščenje, plombe in beljenje zob",
+                "level": 1,
+                "size": 6,
+                "measure": "l",
+                "color": "primary",
+                "desk": {
+                  "col": 1,
+                  "span": 6,
+                  "row": 2
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_lead",
+                "kind": "text",
+                "paragraphs": [
+                  "Zasebna zobna ordinacija v Ptuju. Samo po naročilu, tudi za otroke."
+                ],
+                "size": 1,
+                "desk": {
+                  "col": 1,
+                  "span": 5,
+                  "row": 3
+                },
+                "phone": {
+                  "order": 2,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_call",
+                "kind": "action",
+                "action": "call",
+                "label": "Naročite se po telefonu",
+                "style": "primary",
+                "desk": {
+                  "col": 1,
+                  "span": 4,
+                  "row": 4,
+                  "alignY": "start"
+                },
+                "phone": {
+                  "order": 3,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_t1",
+                "kind": "decor",
+                "svg": {
+                  "width": 100,
+                  "height": 100,
+                  "paths": [
+                    {
+                      "d": "M2 2 H98 V98 H2 Z",
+                      "fill": "surface",
+                      "stroke": "border",
+                      "width": 2
+                    },
+                    {
+                      "d": "M50 18 A32 32 0 0 1 82 50 A32 32 0 0 1 50 82 A32 32 0 0 1 18 50 A32 32 0 0 1 50 18 Z",
+                      "fill": "primary"
+                    },
+                    {
+                      "d": "M50 38 A12 12 0 0 1 62 50 A12 12 0 0 1 50 62 A12 12 0 0 1 38 50 A12 12 0 0 1 50 38 Z",
+                      "fill": "onPrimary"
+                    }
+                  ]
+                },
+                "fit": "fixed",
+                "size": 6,
+                "color": "primary",
+                "desk": {
+                  "col": 7,
+                  "span": 2,
+                  "row": 1,
+                  "rowSpan": 2,
+                  "alignX": "center",
+                  "alignY": "center"
+                },
+                "phone": {
+                  "order": 4,
+                  "span": "half",
+                  "alignX": "center"
+                }
+              },
+              {
+                "id": "e_t2",
+                "kind": "decor",
+                "svg": {
+                  "width": 100,
+                  "height": 100,
+                  "paths": [
+                    {
+                      "d": "M2 2 H98 V98 H2 Z",
+                      "fill": "primary",
+                      "stroke": "border",
+                      "width": 2
+                    },
+                    {
+                      "d": "M50 14 L86 50 L50 86 L14 50 Z",
+                      "fill": "onPrimary"
+                    },
+                    {
+                      "d": "M50 34 L66 50 L50 66 L34 50 Z",
+                      "fill": "primary"
+                    }
+                  ]
+                },
+                "fit": "fixed",
+                "size": 6,
+                "color": "primary",
+                "desk": {
+                  "col": 9,
+                  "span": 2,
+                  "row": 1,
+                  "rowSpan": 2,
+                  "alignX": "center",
+                  "alignY": "center"
+                },
+                "phone": {
+                  "order": 5,
+                  "span": "half",
+                  "alignX": "center"
+                }
+              },
+              {
+                "id": "e_t3",
+                "kind": "decor",
+                "svg": {
+                  "width": 100,
+                  "height": 100,
+                  "paths": [
+                    {
+                      "d": "M2 2 H98 V98 H2 Z",
+                      "fill": "surface",
+                      "stroke": "border",
+                      "width": 2
+                    },
+                    {
+                      "d": "M2 2 H50 A48 48 0 0 1 2 50 Z",
+                      "fill": "primary"
+                    },
+                    {
+                      "d": "M98 98 H50 A48 48 0 0 1 98 50 Z",
+                      "fill": "primary"
+                    },
+                    {
+                      "d": "M98 2 V50 A48 48 0 0 1 50 2 Z",
+                      "fill": "accent"
+                    }
+                  ]
+                },
+                "fit": "fixed",
+                "size": 6,
+                "color": "primary",
+                "desk": {
+                  "col": 11,
+                  "span": 2,
+                  "row": 1,
+                  "rowSpan": 2,
+                  "alignX": "center",
+                  "alignY": "center"
+                },
+                "phone": {
+                  "order": 9,
+                  "span": "half",
+                  "hidden": true
+                }
+              },
+              {
+                "id": "e_t4",
+                "kind": "decor",
+                "svg": {
+                  "width": 100,
+                  "height": 100,
+                  "paths": [
+                    {
+                      "d": "M2 2 H98 V98 H2 Z",
+                      "fill": "surface",
+                      "stroke": "border",
+                      "width": 2
+                    },
+                    {
+                      "d": "M2 2 H50 A48 48 0 0 1 2 50 Z",
+                      "fill": "primary"
+                    },
+                    {
+                      "d": "M98 98 H50 A48 48 0 0 1 98 50 Z",
+                      "fill": "primary"
+                    },
+                    {
+                      "d": "M98 2 V50 A48 48 0 0 1 50 2 Z",
+                      "fill": "accent"
+                    }
+                  ]
+                },
+                "fit": "fixed",
+                "size": 6,
+                "color": "primary",
+                "desk": {
+                  "col": 7,
+                  "span": 2,
+                  "row": 3,
+                  "rowSpan": 2,
+                  "alignX": "center",
+                  "alignY": "center"
+                },
+                "phone": {
+                  "order": 9,
+                  "span": "half",
+                  "hidden": true
+                }
+              },
+              {
+                "id": "e_t5",
+                "kind": "decor",
+                "svg": {
+                  "width": 100,
+                  "height": 100,
+                  "paths": [
+                    {
+                      "d": "M2 2 H98 V98 H2 Z",
+                      "fill": "surface",
+                      "stroke": "border",
+                      "width": 2
+                    },
+                    {
+                      "d": "M50 18 A32 32 0 0 1 82 50 A32 32 0 0 1 50 82 A32 32 0 0 1 18 50 A32 32 0 0 1 50 18 Z",
+                      "fill": "primary"
+                    },
+                    {
+                      "d": "M50 38 A12 12 0 0 1 62 50 A12 12 0 0 1 50 62 A12 12 0 0 1 38 50 A12 12 0 0 1 50 38 Z",
+                      "fill": "onPrimary"
+                    }
+                  ]
+                },
+                "fit": "fixed",
+                "size": 6,
+                "color": "primary",
+                "desk": {
+                  "col": 9,
+                  "span": 2,
+                  "row": 3,
+                  "rowSpan": 2,
+                  "alignX": "center",
+                  "alignY": "center"
+                },
+                "phone": {
+                  "order": 9,
+                  "span": "half",
+                  "hidden": true
+                }
+              },
+              {
+                "id": "e_t6",
+                "kind": "decor",
+                "svg": {
+                  "width": 100,
+                  "height": 100,
+                  "paths": [
+                    {
+                      "d": "M2 2 H98 V98 H2 Z",
+                      "fill": "primary",
+                      "stroke": "border",
+                      "width": 2
+                    },
+                    {
+                      "d": "M50 14 L86 50 L50 86 L14 50 Z",
+                      "fill": "onPrimary"
+                    },
+                    {
+                      "d": "M50 34 L66 50 L50 66 L34 50 Z",
+                      "fill": "primary"
+                    }
+                  ]
+                },
+                "fit": "fixed",
+                "size": 6,
+                "color": "primary",
+                "desk": {
+                  "col": 11,
+                  "span": 2,
+                  "row": 3,
+                  "rowSpan": 2,
+                  "alignX": "center",
+                  "alignY": "center"
+                },
+                "phone": {
+                  "order": 9,
+                  "span": "half",
+                  "hidden": true
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_prices",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "prices",
+            "width": "contained",
+            "rows": 3,
+            "top": {
+              "edge": "rule"
+            },
+            "elements": [
+              {
+                "id": "e_h",
+                "kind": "heading",
+                "text": "Cenik",
+                "level": 2,
+                "size": 5,
+                "color": "primary",
+                "desk": {
+                  "col": 1,
+                  "span": 5,
+                  "row": 1
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_p",
+                "kind": "prices",
+                "style": "rows",
+                "size": 1,
+                "items": [
+                  {
+                    "name": "Pregled",
+                    "price": {
+                      "amount": 25
+                    }
+                  },
+                  {
+                    "name": "Čiščenje zobnega kamna",
+                    "price": {
+                      "amount": 45
+                    }
+                  },
+                  {
+                    "name": "Plomba",
+                    "price": {
+                      "amount": 60,
+                      "from": true
+                    }
+                  },
+                  {
+                    "name": "Beljenje zob",
+                    "price": {
+                      "amount": 190
+                    }
+                  }
+                ],
+                "desk": {
+                  "col": 6,
+                  "span": 7,
+                  "row": 1,
+                  "rowSpan": 3,
+                  "alignY": "center"
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_note",
+                "kind": "text",
+                "paragraphs": [
+                  "Samo po naročilu. Plačate lahko s kartico."
+                ],
+                "color": "muted",
+                "desk": {
+                  "col": 1,
+                  "span": 4,
+                  "row": 2,
+                  "alignY": "start"
+                },
+                "phone": {
+                  "order": 2,
+                  "span": "full"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_wall",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "gallery",
+            "width": "contained",
+            "rows": 3,
+            "top": {
+              "edge": "rule"
+            },
+            "motion": "reveal",
+            "elements": [
+              {
+                "id": "e_h",
+                "kind": "heading",
+                "text": "Ordinacija in čakalnica",
+                "level": 2,
+                "size": 5,
+                "color": "primary",
+                "desk": {
+                  "col": 1,
+                  "span": 7,
+                  "row": 1
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_ta",
+                "kind": "decor",
+                "svg": {
+                  "width": 100,
+                  "height": 100,
+                  "paths": [
+                    {
+                      "d": "M2 2 H98 V98 H2 Z",
+                      "fill": "surface",
+                      "stroke": "border",
+                      "width": 2
+                    },
+                    {
+                      "d": "M50 18 A32 32 0 0 1 82 50 A32 32 0 0 1 50 82 A32 32 0 0 1 18 50 A32 32 0 0 1 50 18 Z",
+                      "fill": "primary"
+                    },
+                    {
+                      "d": "M50 38 A12 12 0 0 1 62 50 A12 12 0 0 1 50 62 A12 12 0 0 1 38 50 A12 12 0 0 1 50 38 Z",
+                      "fill": "onPrimary"
+                    }
+                  ]
+                },
+                "fit": "fixed",
+                "size": 6,
+                "color": "primary",
+                "desk": {
+                  "col": 1,
+                  "span": 3,
+                  "row": 2,
+                  "alignX": "center",
+                  "alignY": "center"
+                },
+                "phone": {
+                  "order": 9,
+                  "span": "half",
+                  "hidden": true
+                }
+              },
+              {
+                "id": "e_p1",
+                "kind": "image",
+                "image": "img_01",
+                "ratio": "1:1",
+                "desk": {
+                  "col": 4,
+                  "span": 3,
+                  "row": 2,
+                  "alignY": "center"
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_tb",
+                "kind": "decor",
+                "svg": {
+                  "width": 100,
+                  "height": 100,
+                  "paths": [
+                    {
+                      "d": "M2 2 H98 V98 H2 Z",
+                      "fill": "primary",
+                      "stroke": "border",
+                      "width": 2
+                    },
+                    {
+                      "d": "M50 14 L86 50 L50 86 L14 50 Z",
+                      "fill": "onPrimary"
+                    },
+                    {
+                      "d": "M50 34 L66 50 L50 66 L34 50 Z",
+                      "fill": "primary"
+                    }
+                  ]
+                },
+                "fit": "fixed",
+                "size": 6,
+                "color": "primary",
+                "desk": {
+                  "col": 7,
+                  "span": 3,
+                  "row": 2,
+                  "alignX": "center",
+                  "alignY": "center"
+                },
+                "phone": {
+                  "order": 10,
+                  "span": "half",
+                  "hidden": true
+                }
+              },
+              {
+                "id": "e_p2",
+                "kind": "image",
+                "image": "img_02",
+                "ratio": "1:1",
+                "desk": {
+                  "col": 10,
+                  "span": 3,
+                  "row": 2,
+                  "alignY": "center"
+                },
+                "phone": {
+                  "order": 2,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_who",
+                "kind": "text",
+                "paragraphs": [
+                  "Delam jaz, dr. Petra Ravnik, z zobno asistentko Jano."
+                ],
+                "size": 1,
+                "desk": {
+                  "col": 1,
+                  "span": 6,
+                  "row": 3,
+                  "alignY": "start"
+                },
+                "phone": {
+                  "order": 3,
+                  "span": "full"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_visit",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "contact",
+            "width": "contained",
+            "rows": 4,
+            "top": {
+              "edge": "rule"
+            },
+            "elements": [
+              {
+                "id": "e_h",
+                "kind": "heading",
+                "text": "Ordiniramo",
+                "level": 2,
+                "size": 4,
+                "color": "primary",
+                "desk": {
+                  "col": 1,
+                  "span": 5,
+                  "row": 1
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_hours",
+                "kind": "hours",
+                "style": "week",
+                "desk": {
+                  "col": 1,
+                  "span": 5,
+                  "row": 2,
+                  "rowSpan": 2,
+                  "alignY": "start"
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_if",
+                "kind": "iconFacts",
+                "icons": "line",
+                "items": [
+                  {
+                    "fact": "appointment-only"
+                  },
+                  {
+                    "fact": "step-free",
+                    "note": "Ordinacija je v pritličju"
+                  },
+                  {
+                    "fact": "card"
+                  }
+                ],
+                "desk": {
+                  "col": 1,
+                  "span": 5,
+                  "row": 4
+                },
+                "phone": {
+                  "order": 2,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_contact",
+                "kind": "contact",
+                "show": [
+                  "phone",
+                  "email",
+                  "address"
+                ],
+                "desk": {
+                  "col": 7,
+                  "span": 6,
+                  "row": 1
+                },
+                "phone": {
+                  "order": 3,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_map",
+                "kind": "map",
+                "style": "street",
+                "desk": {
+                  "col": 7,
+                  "span": 6,
+                  "row": 2,
+                  "rowSpan": 3
+                },
+                "phone": {
+                  "order": 4,
+                  "span": "full"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "nav": {
+        "label": "Zasebnost",
+        "show": false
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Zobna ordinacija Ravnik",
+        "description": "Kako Zobna ordinacija Ravnik obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "variant": "default",
+          "props": {
+            "kind": "privacy"
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "nav": {
+        "label": "Dostopnost",
+        "show": false
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Zobna ordinacija Ravnik",
+        "description": "Izjava o dostopnosti spletne strani Zobna ordinacija Ravnik."
+      },
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "variant": "default",
+          "props": {
+            "kind": "accessibility"
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "kind": "not-found",
+      "slug": "404",
+      "nav": {
+        "label": "Ni najdeno",
+        "show": false
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Zobna ordinacija Ravnik",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "variant": "default",
+          "props": {
+            "title": "Te strani ni mogoče najti",
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo."
+          }
+        }
+      ]
+    }
+  ]
+}
