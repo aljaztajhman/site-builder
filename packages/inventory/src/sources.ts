@@ -36,11 +36,17 @@ import {
   type Direction,
   type FontFace,
 } from "./spec.ts";
+import { STARTER_NAMES } from "@sb/render";
 import { composedRuleBytes, fontBytes, motifBytes, sharedRuleBytes, subMotifBytes, word } from "./bytes.ts";
 import type { Asset, AssetTags, Ground } from "./schema.ts";
 import { CURATED_PALETTES } from "./palettes/curated.ts";
 
 const uniq = <T>(xs: Iterable<T>): T[] => [...new Set(xs)];
+/** Names a vocab family shipped with; the names batches add are drafts (imagery.ts). */
+const shipped =
+  (family: "masks" | "treatments") =>
+  (name: string): boolean =>
+    STARTER_NAMES[family].includes(name);
 const sorted = <T extends string>(xs: Iterable<T>): T[] => uniq(xs).sort();
 
 /** The trades a direction is made for: its bestFor and, for a trade template, the trades it is first choice for. */
@@ -232,7 +238,7 @@ export function subMotifAssets(): Asset[] {
 
 /** Site imagery treatments (design.imagery) and composed image treatments, one asset per name. */
 export function treatmentAssets(): Asset[] {
-  const names = uniq([...Imagery.options, ...IMAGE_TREATMENTS]);
+  const names = uniq([...Imagery.options, ...IMAGE_TREATMENTS.filter(shipped("treatments"))]);
   return names.map((t) => {
     const site = (Imagery.options as readonly string[]).includes(t);
     const element = (IMAGE_TREATMENTS as readonly string[]).includes(t);
@@ -252,7 +258,7 @@ export function treatmentAssets(): Asset[] {
 }
 
 export function maskAssets(): Asset[] {
-  return IMAGE_MASKS.map((m) => ({
+  return IMAGE_MASKS.filter(shipped("masks")).map((m) => ({
     id: `mask/${m}`,
     kind: "mask",
     tags: tags({ ground: ALL_GROUNDS }),

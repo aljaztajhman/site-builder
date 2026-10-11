@@ -1,0 +1,8 @@
+/* postcard: the photo printed with a paper border (the surface role) and a hairline edge (the border role). */
+.cx-mask-postcard {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+}
+.cx-mask-postcard > .media {
+  inset: 0.75rem;
+}

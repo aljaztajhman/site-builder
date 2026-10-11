@@ -1,0 +1,5 @@
+/* cut-paper: cut with scissors, each edge in two slightly uneven straight cuts; the top right corner stays square. */
+.cx-mask-cut-paper {
+  --shape-cutpaper: polygon(1.5% 1.2%, 48% 0, 100% 0, 98.6% 52%, 99.2% 98.8%, 51% 100%, 0 98%, 1% 47%);
+  clip-path: var(--shape-cutpaper);
+}

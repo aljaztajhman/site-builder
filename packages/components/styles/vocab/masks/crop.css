@@ -1,0 +1,16 @@
+/* crop: crop marks at two opposite corners, in the section's text colour, round a photo set in by 0.75 rem. The marks
+   are the frame's border, clipped to two corner squares (the diagonal between them is a zero-width bridge). */
+.cx-mask-crop {
+  border-radius: 0;
+}
+.cx-mask-crop > .media {
+  inset: 0.75rem;
+}
+.cx-mask-crop::before {
+  --shape-crop: polygon(0 0, 1.25rem 0, 1.25rem 1.25rem, calc(100% - 1.25rem) calc(100% - 1.25rem), 100% calc(100% - 1.25rem), 100% 100%, calc(100% - 1.25rem) 100%, calc(100% - 1.25rem) calc(100% - 1.25rem), 1.25rem 1.25rem, 0 1.25rem);
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid currentColor;
+  clip-path: var(--shape-crop);
+}

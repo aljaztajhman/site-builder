@@ -1,0 +1,5 @@
+/* bookmark: a ribbon end, a shallow V cut into the foot. */
+.cx-mask-bookmark {
+  --shape-bookmark: polygon(0 0, 100% 0, 100% 100%, 50% 90%, 0 100%);
+  clip-path: var(--shape-bookmark);
+}

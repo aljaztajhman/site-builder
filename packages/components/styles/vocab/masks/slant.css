@@ -1,0 +1,5 @@
+/* slant: a parallelogram, both sides leaning right by a tenth of the width. */
+.cx-mask-slant {
+  --shape-slant: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+  clip-path: var(--shape-slant);
+}

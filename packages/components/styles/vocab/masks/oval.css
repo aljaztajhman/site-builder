@@ -1,0 +1,8 @@
+/* oval: a cameo, the ellipse of the frame's own ratio (circle forces a square). */
+.cx-mask-oval {
+  border-radius: 50%;
+}
+.cx-mask-oval .media--ai::after {
+  inset: auto auto 1.5rem 50%;
+  translate: -50%;
+}

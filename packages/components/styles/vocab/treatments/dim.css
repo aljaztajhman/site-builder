@@ -1,0 +1,16 @@
+/* dim: a photo light text can sit on. brightness(.5) caps every channel at 50 % (saturate below 1 never raises one),
+   and the veil mixes in the inverse colour, so no pixel is lighter than mix(inverse, grey 50 %, .3): onInverse text
+   holds 4.5:1 on any part of the photo, checked for every palette in packages/inventory/test/imagery.test.ts (which
+   reads both numbers from this file). The veil sits over the scrim, as tint does: it only darkens. */
+.cx-tr-dim > .media img {
+  filter: brightness(0.5) saturate(0.8);
+}
+.cx-tr-dim::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--c-inverse);
+  opacity: 0.3;
+  pointer-events: none;
+}

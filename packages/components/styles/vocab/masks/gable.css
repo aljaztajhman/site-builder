@@ -1,0 +1,9 @@
+/* gable: a house front, the roof over the top fifth. */
+.cx-mask-gable {
+  --shape-gable: polygon(50% 0, 100% 20%, 100% 100%, 0 100%, 0 20%);
+  clip-path: var(--shape-gable);
+}
+.cx-mask-gable .media--ai::after {
+  top: auto;
+  bottom: 0.5rem;
+}
