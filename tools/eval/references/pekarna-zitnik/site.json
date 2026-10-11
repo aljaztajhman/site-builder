@@ -1,0 +1,590 @@
+{
+  "specVersion": 20,
+  "slug": "pekarna-zitnik",
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Pekarna Žitnik",
+    "type": "bakery",
+    "phone": "+38631555742",
+    "email": "helena@pekarna-zitnik.example",
+    "address": {
+      "street": "Šutna 9",
+      "postalCode": "1240",
+      "city": "Kamnik"
+    },
+    "hours": {
+      "entries": [
+        {
+          "from": "mon",
+          "to": "fri",
+          "open": "06:30",
+          "close": "15:00"
+        },
+        {
+          "from": "sat",
+          "to": "sat",
+          "open": "06:30",
+          "close": "12:00"
+        },
+        {
+          "from": "sun",
+          "to": "sun",
+          "closed": true
+        }
+      ]
+    },
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      }
+    },
+    "amenities": [
+      "card",
+      "parking"
+    ]
+  },
+  "design": {
+    "direction": "skorja",
+    "fontPair": "bitter-karla",
+    "colors": {
+      "background": "#ffffff",
+      "surface": "#f1efec",
+      "text": "#1b1916",
+      "muted": "#524c45",
+      "primary": "#231f1a",
+      "onPrimary": "#ffffff",
+      "accent": "#b8391f",
+      "border": "#cdc7bf",
+      "inverse": "#1d1a16",
+      "onInverse": "#f4f1ec"
+    },
+    "radius": 8,
+    "baseFontSize": 18,
+    "scale": 1.3,
+    "headingWeight": 880,
+    "headingCase": "normal",
+    "headingTracking": -0.02,
+    "density": "regular",
+    "shadow": "none",
+    "imagery": "rounded",
+    "motion": "calm",
+    "wordmark": {
+      "style": "plain"
+    }
+  },
+  "assets": {
+    "images": [
+      {
+        "id": "img_01",
+        "src": "uploads/01.jpg",
+        "width": 1600,
+        "height": 1200,
+        "alt": "Hlebci kruha na leseni polici"
+      }
+    ]
+  },
+  "chrome": {
+    "header": {
+      "variant": "split-cta",
+      "cta": "call"
+    },
+    "footer": {
+      "variant": "compact"
+    },
+    "mobileActionBar": true
+  },
+  "pages": [
+    {
+      "id": "p_home",
+      "kind": "home",
+      "slug": "",
+      "nav": {
+        "label": "Domov",
+        "show": true
+      },
+      "seo": {
+        "title": "Pekarna Žitnik, Kamnik – kruh iz krušne peči",
+        "description": "Družinska pekarna na Šutni 9 v Kamniku: hlebec iz krušne peči, ržen in koruzni kruh, žemlje, ob petkih potica, ob sobotah makova štruca."
+      },
+      "sections": [
+        {
+          "id": "s_hero",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "hero",
+            "width": "contained",
+            "minHeight": "l",
+            "rows": 4,
+            "surface": {
+              "texture": "gouge"
+            },
+            "elements": [
+              {
+                "id": "e_where",
+                "kind": "text",
+                "paragraphs": [
+                  "Šutna 9, Kamnik"
+                ],
+                "color": "muted",
+                "desk": {
+                  "col": 1,
+                  "span": 6,
+                  "row": 1,
+                  "alignY": "end"
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_title",
+                "kind": "heading",
+                "text": "Kruh iz krušne peči na bukova drva",
+                "level": 1,
+                "size": 6,
+                "measure": "l",
+                "weight": 880,
+                "color": "primary",
+                "desk": {
+                  "col": 1,
+                  "span": 7,
+                  "row": 2
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_lead",
+                "kind": "text",
+                "paragraphs": [
+                  "Debela in temna skorja pride iz peči, ki jo kurimo z bukovimi drvmi. Testo zamesimo zvečer in ga pustimo čez noč."
+                ],
+                "size": 1,
+                "desk": {
+                  "col": 1,
+                  "span": 5,
+                  "row": 3
+                },
+                "phone": {
+                  "order": 2,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_order",
+                "kind": "action",
+                "action": "call",
+                "label": "Naročite po telefonu",
+                "style": "primary",
+                "desk": {
+                  "col": 1,
+                  "span": 4,
+                  "row": 4,
+                  "alignY": "start"
+                },
+                "phone": {
+                  "order": 3,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_loaf",
+                "kind": "decor",
+                "drawing": "motif/bakery/peel-loaf-line",
+                "fit": "cell",
+                "color": "accent",
+                "desk": {
+                  "col": 8,
+                  "span": 5,
+                  "row": 1,
+                  "rowSpan": 4,
+                  "alignY": "center"
+                },
+                "phone": {
+                  "order": 4,
+                  "span": "full"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_prices",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "prices",
+            "width": "contained",
+            "rows": 3,
+            "top": {
+              "edge": "rule"
+            },
+            "elements": [
+              {
+                "id": "e_h",
+                "kind": "heading",
+                "text": "Na polici vsak dan",
+                "level": 2,
+                "size": 5,
+                "color": "primary",
+                "desk": {
+                  "col": 1,
+                  "span": 6,
+                  "row": 1
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_p",
+                "kind": "prices",
+                "style": "leaders",
+                "size": 1,
+                "items": [
+                  {
+                    "name": "Hlebec iz krušne peči",
+                    "price": {
+                      "amount": 3.8
+                    }
+                  },
+                  {
+                    "name": "Ržen kruh",
+                    "price": {
+                      "amount": 4.2
+                    }
+                  },
+                  {
+                    "name": "Koruzni kruh",
+                    "price": {
+                      "amount": 4
+                    }
+                  },
+                  {
+                    "name": "Žemlja",
+                    "price": {
+                      "amount": 0.6
+                    }
+                  },
+                  {
+                    "name": "Potica z orehi (kos)",
+                    "note": "Ob petkih",
+                    "price": {
+                      "amount": 2.8
+                    }
+                  },
+                  {
+                    "name": "Makova štruca",
+                    "note": "Ob sobotah",
+                    "price": {
+                      "amount": 4.5
+                    }
+                  }
+                ],
+                "desk": {
+                  "col": 1,
+                  "span": 7,
+                  "row": 2,
+                  "rowSpan": 2
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_note",
+                "kind": "text",
+                "paragraphs": [
+                  "Kruh lahko naročite po telefonu. Plačate lahko tudi s kartico."
+                ],
+                "color": "muted",
+                "desk": {
+                  "col": 9,
+                  "span": 4,
+                  "row": 2,
+                  "alignY": "start"
+                },
+                "phone": {
+                  "order": 2,
+                  "span": "full"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_night",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "story",
+            "width": "contained",
+            "rows": 3,
+            "motion": "reveal",
+            "elements": [
+              {
+                "id": "e_photo",
+                "kind": "image",
+                "image": "img_01",
+                "ratio": "4:3",
+                "treatment": "mono-contrast",
+                "desk": {
+                  "col": 1,
+                  "span": 6,
+                  "row": 1,
+                  "rowSpan": 3,
+                  "alignY": "center"
+                },
+                "phone": {
+                  "order": 2,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_h",
+                "kind": "heading",
+                "text": "Zvečer zamesimo, zjutraj spečemo",
+                "level": 2,
+                "size": 5,
+                "measure": "m",
+                "color": "primary",
+                "desk": {
+                  "col": 8,
+                  "span": 5,
+                  "row": 1,
+                  "alignY": "end"
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_q",
+                "kind": "quote",
+                "text": "Kruh pečemo v krušni peči, ki jo kurimo z bukovimi drvmi, in zato je skorja debela in temna.",
+                "by": "Mihael Žitnik",
+                "size": 1,
+                "desk": {
+                  "col": 8,
+                  "span": 5,
+                  "row": 2
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_who",
+                "kind": "text",
+                "paragraphs": [
+                  "Pekarno vodimo Mihael in Helena Žitnik."
+                ],
+                "color": "muted",
+                "desk": {
+                  "col": 8,
+                  "span": 5,
+                  "row": 3,
+                  "alignY": "start"
+                },
+                "phone": {
+                  "order": 3,
+                  "span": "full"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_visit",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "contact",
+            "width": "contained",
+            "rows": 4,
+            "top": {
+              "edge": "rule"
+            },
+            "elements": [
+              {
+                "id": "e_h",
+                "kind": "heading",
+                "text": "Odprto",
+                "level": 2,
+                "size": 4,
+                "color": "primary",
+                "desk": {
+                  "col": 1,
+                  "span": 5,
+                  "row": 1
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_hours",
+                "kind": "hours",
+                "style": "week",
+                "desk": {
+                  "col": 1,
+                  "span": 5,
+                  "row": 2
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_if",
+                "kind": "iconFacts",
+                "icons": "solid",
+                "items": [
+                  {
+                    "fact": "card"
+                  },
+                  {
+                    "fact": "parking",
+                    "note": "Za pekarno"
+                  }
+                ],
+                "desk": {
+                  "col": 1,
+                  "span": 5,
+                  "row": 3
+                },
+                "phone": {
+                  "order": 2,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_map",
+                "kind": "map",
+                "style": "street",
+                "desk": {
+                  "col": 7,
+                  "span": 6,
+                  "row": 1,
+                  "rowSpan": 2
+                },
+                "phone": {
+                  "order": 3,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_contact",
+                "kind": "contact",
+                "show": [
+                  "phone",
+                  "email"
+                ],
+                "desk": {
+                  "col": 7,
+                  "span": 6,
+                  "row": 3
+                },
+                "phone": {
+                  "order": 4,
+                  "span": "full"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "nav": {
+        "label": "Zasebnost",
+        "show": false
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Pekarna Žitnik",
+        "description": "Kako Pekarna Žitnik obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "variant": "default",
+          "props": {
+            "kind": "privacy"
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "nav": {
+        "label": "Dostopnost",
+        "show": false
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Pekarna Žitnik",
+        "description": "Izjava o dostopnosti spletne strani Pekarna Žitnik."
+      },
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "variant": "default",
+          "props": {
+            "kind": "accessibility"
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "kind": "not-found",
+      "slug": "404",
+      "nav": {
+        "label": "Ni najdeno",
+        "show": false
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Pekarna Žitnik",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "variant": "default",
+          "props": {
+            "title": "Te strani ni mogoče najti",
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo."
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "id": "zobna-ravnik",
+  "businessType": "dental",
+  "town": "Ptuj",
+  "description": "Zobna ordinacija Ravnik je zasebna zobna ordinacija v Ptuju, naslov je Murkova ulica 12, 2250 Ptuj. Delam jaz, dr. Petra Ravnik, z zobno asistentko Jano. Pregledujemo, čistimo zobni kamen, plombiramo, beljimo zobe in skrbimo za zobe otrok.\n\nCene: pregled 25 €, čiščenje zobnega kamna 45 €, plomba od 60 €, beljenje zob 190 €.\n\nOrdiniramo: ponedeljek, sreda in petek 8.00–15.00, torek in četrtek 12.00–19.00. Ob sobotah in nedeljah zaprto.\n\nNaročite se po telefonu 02 555 87 36 ali na ordinacija@zobna-ravnik.example. Samo po naročilu. Ordinacija je v pritličju, brez stopnic. Plačate lahko s kartico. Na stran bi rada svetle ploščice kot v naši čakalnici, modre in bele, in nekaj fotografij.",
+  "photos": {
+    "fixture": "zobozdravstvo-lebar",
+    "subjects": [
+      "svetla zobna ordinacija z zobozdravstvenim stolom, svetilko in belimi omarami",
+      "majhna čakalnica z vrsto zelenih stolov, rastlino in nizko leseno mizico"
+    ]
+  },
+  "facts": {
+    "name": "Zobna ordinacija Ravnik",
+    "phone": "+38625558736",
+    "email": "ordinacija@zobna-ravnik.example",
+    "address": {
+      "street": "Murkova ulica 12",
+      "postalCode": "2250",
+      "city": "Ptuj"
+    },
+    "hours": [
+      {
+        "from": "mon",
+        "to": "mon",
+        "open": "08:00",
+        "close": "15:00"
+      },
+      {
+        "from": "tue",
+        "to": "tue",
+        "open": "12:00",
+        "close": "19:00"
+      },
+      {
+        "from": "wed",
+        "to": "wed",
+        "open": "08:00",
+        "close": "15:00"
+      },
+      {
+        "from": "thu",
+        "to": "thu",
+        "open": "12:00",
+        "close": "19:00"
+      },
+      {
+        "from": "fri",
+        "to": "fri",
+        "open": "08:00",
+        "close": "15:00"
+      }
+    ],
+    "prices": [
+      {
+        "item": "pregled",
+        "amount": 25
+      },
+      {
+        "item": "čiščenje zobnega kamna",
+        "amount": 45
+      },
+      {
+        "item": "plomba",
+        "amount": 60,
+        "from": true
+      },
+      {
+        "item": "beljenje zob",
+        "amount": 190
+      }
+    ],
+    "people": [
+      {
+        "name": "Petra Ravnik",
+        "role": "zobozdravnica"
+      },
+      {
+        "name": "Jana",
+        "role": "zobna asistentka"
+      }
+    ],
+    "amenities": [
+      "appointment-only",
+      "step-free",
+      "card"
+    ],
+    "other": [
+      "Samo po naročilu",
+      "Ordinacija je v pritličju, brez stopnic",
+      "Skrbimo za zobe otrok"
+    ]
+  }
+}

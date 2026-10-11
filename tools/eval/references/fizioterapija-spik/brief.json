@@ -1,0 +1,70 @@
+{
+  "id": "fizioterapija-spik",
+  "businessType": "physio",
+  "town": "Kranjska Gora",
+  "description": "Fizioterapija Špik je majhna fizioterapevtska ordinacija v Kranjski Gori, naslov je Borovška cesta 13, 4280 Kranjska Gora. Delam sam, Anže Rogelj, fizioterapevt. Največ imam opravka s poškodbami po smučanju in hoji v hribe: zvini gležnja, bolečine v kolenu, bolečine v hrbtu. Delam tudi rehabilitacijo po operaciji kolena.\n\nCene: prvi pregled z obravnavo (60 minut) 55 €, nadaljnja obravnava (45 minut) 42 €, športna masaža (30 minut) 30 €, kinesiotaping 12 €.\n\nOdprto: pon–pet 8.00–18.00, sobota 9.00–12.00, ob nedeljah zaprto.\n\nNaročite se po telefonu 04 555 39 74 ali na anze@fizioterapija-spik.example. Plačate lahko s kartico, pred ordinacijo je parkirišče. Na dom pridem po dogovoru. Stran naj bo hladna in svetla, z veliko belega in eno modro, kot jutro v gorah.",
+  "photos": {
+    "fixture": "fizioterapija-pregib",
+    "subjects": [
+      "terapevtska miza v svetli sobi z oknom, letvenikom in žogami"
+    ]
+  },
+  "facts": {
+    "name": "Fizioterapija Špik",
+    "phone": "+38645553974",
+    "email": "anze@fizioterapija-spik.example",
+    "address": {
+      "street": "Borovška cesta 13",
+      "postalCode": "4280",
+      "city": "Kranjska Gora"
+    },
+    "hours": [
+      {
+        "from": "mon",
+        "to": "fri",
+        "open": "08:00",
+        "close": "18:00"
+      },
+      {
+        "from": "sat",
+        "to": "sat",
+        "open": "09:00",
+        "close": "12:00"
+      }
+    ],
+    "prices": [
+      {
+        "item": "prvi pregled z obravnavo (60 minut)",
+        "amount": 55
+      },
+      {
+        "item": "nadaljnja obravnava (45 minut)",
+        "amount": 42
+      },
+      {
+        "item": "športna masaža (30 minut)",
+        "amount": 30
+      },
+      {
+        "item": "kinesiotaping",
+        "amount": 12
+      }
+    ],
+    "people": [
+      {
+        "name": "Anže Rogelj",
+        "role": "fizioterapevt"
+      }
+    ],
+    "amenities": [
+      "card",
+      "parking",
+      "home-visits"
+    ],
+    "other": [
+      "Poškodbe po smučanju in hoji v hribe",
+      "Rehabilitacija po operaciji kolena",
+      "Na dom pridem po dogovoru"
+    ]
+  }
+}

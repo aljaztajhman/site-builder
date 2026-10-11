@@ -1,0 +1,619 @@
+{
+  "specVersion": 20,
+  "slug": "fizioterapija-spik",
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Fizioterapija Špik",
+    "type": "physio",
+    "phone": "+38645553974",
+    "email": "anze@fizioterapija-spik.example",
+    "address": {
+      "street": "Borovška cesta 13",
+      "postalCode": "4280",
+      "city": "Kranjska Gora"
+    },
+    "hours": {
+      "entries": [
+        {
+          "from": "mon",
+          "to": "fri",
+          "open": "08:00",
+          "close": "18:00"
+        },
+        {
+          "from": "sat",
+          "to": "sat",
+          "open": "09:00",
+          "close": "12:00"
+        },
+        {
+          "from": "sun",
+          "to": "sun",
+          "closed": true
+        }
+      ]
+    },
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      }
+    },
+    "amenities": [
+      "card",
+      "parking",
+      "home-visits"
+    ]
+  },
+  "design": {
+    "direction": "clean-swiss",
+    "fontPair": "inter-tight-inter",
+    "colors": {
+      "background": "#ffffff",
+      "surface": "#eef1f5",
+      "text": "#1b232c",
+      "muted": "#4d5a68",
+      "primary": "#1f4f9c",
+      "onPrimary": "#ffffff",
+      "accent": "#3c6fc4",
+      "border": "#d3dae3",
+      "inverse": "#161f29",
+      "onInverse": "#eff2f6"
+    },
+    "radius": 0,
+    "baseFontSize": 17,
+    "scale": 1.25,
+    "headingWeight": 650,
+    "headingCase": "normal",
+    "headingTracking": -0.015,
+    "density": "regular",
+    "shadow": "none",
+    "imagery": "natural",
+    "motion": "calm",
+    "wordmark": {
+      "style": "plain"
+    }
+  },
+  "assets": {
+    "images": [
+      {
+        "id": "img_01",
+        "src": "uploads/01.jpg",
+        "width": 1536,
+        "height": 1024,
+        "alt": "Terapevtska miza v svetli sobi z oknom, letvenikom in žogami"
+      }
+    ]
+  },
+  "chrome": {
+    "header": {
+      "variant": "split-cta",
+      "cta": "call"
+    },
+    "footer": {
+      "variant": "compact"
+    },
+    "mobileActionBar": true
+  },
+  "pages": [
+    {
+      "id": "p_home",
+      "kind": "home",
+      "slug": "",
+      "nav": {
+        "label": "Domov",
+        "show": true
+      },
+      "seo": {
+        "title": "Fizioterapija Špik, Kranjska Gora – poškodbe v hribih",
+        "description": "Fizioterapija na Borovški cesti 13 v Kranjski Gori: poškodbe po smučanju in hoji v hribe, rehabilitacija po operaciji kolena, športna masaža."
+      },
+      "sections": [
+        {
+          "id": "s_hero",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "hero",
+            "width": "contained",
+            "rows": 4,
+            "elements": [
+              {
+                "id": "e_ridge",
+                "kind": "decor",
+                "svg": {
+                  "width": 400,
+                  "height": 60,
+                  "paths": [
+                    {
+                      "d": "M0 60 L60 33 L95 42 L170 6 L215 30 L260 18 L330 45 L400 36",
+                      "fill": "none",
+                      "stroke": "primary",
+                      "width": 2
+                    }
+                  ]
+                },
+                "fit": "cell",
+                "color": "primary",
+                "desk": {
+                  "col": 1,
+                  "span": 12,
+                  "row": 1,
+                  "alignY": "end"
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_title",
+                "kind": "heading",
+                "text": "Fizioterapija za smučarje in pohodnike",
+                "level": 1,
+                "size": 6,
+                "measure": "m",
+                "color": "text",
+                "desk": {
+                  "col": 1,
+                  "span": 7,
+                  "row": 2
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_lead",
+                "kind": "text",
+                "paragraphs": [
+                  "Zvini gležnja, bolečine v kolenu in v hrbtu, rehabilitacija po operaciji kolena. Delam sam, Anže Rogelj, fizioterapevt."
+                ],
+                "size": 1,
+                "desk": {
+                  "col": 1,
+                  "span": 6,
+                  "row": 3
+                },
+                "phone": {
+                  "order": 2,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_call",
+                "kind": "action",
+                "action": "call",
+                "label": "Naročite se po telefonu",
+                "style": "primary",
+                "desk": {
+                  "col": 1,
+                  "span": 4,
+                  "row": 4,
+                  "alignY": "start"
+                },
+                "phone": {
+                  "order": 3,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_min",
+                "kind": "fact",
+                "value": "60",
+                "label": "minut traja prvi pregled z obravnavo",
+                "treatment": "numeral",
+                "size": 6,
+                "color": "primary",
+                "count": true,
+                "desk": {
+                  "col": 9,
+                  "span": 4,
+                  "row": 2,
+                  "rowSpan": 2,
+                  "alignY": "center"
+                },
+                "phone": {
+                  "order": 4,
+                  "span": "full"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_prices",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "prices",
+            "width": "contained",
+            "rows": 3,
+            "top": {
+              "edge": "rule"
+            },
+            "elements": [
+              {
+                "id": "e_h",
+                "kind": "heading",
+                "text": "Cenik",
+                "level": 2,
+                "size": 5,
+                "color": "text",
+                "desk": {
+                  "col": 1,
+                  "span": 4,
+                  "row": 1
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_p",
+                "kind": "prices",
+                "style": "rows",
+                "size": 1,
+                "items": [
+                  {
+                    "name": "Prvi pregled z obravnavo (60 minut)",
+                    "price": {
+                      "amount": 55
+                    }
+                  },
+                  {
+                    "name": "Nadaljnja obravnava (45 minut)",
+                    "price": {
+                      "amount": 42
+                    }
+                  },
+                  {
+                    "name": "Športna masaža (30 minut)",
+                    "price": {
+                      "amount": 30
+                    }
+                  },
+                  {
+                    "name": "Kinesiotaping",
+                    "price": {
+                      "amount": 12
+                    }
+                  }
+                ],
+                "desk": {
+                  "col": 5,
+                  "span": 8,
+                  "row": 1,
+                  "rowSpan": 3,
+                  "alignY": "center"
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_note",
+                "kind": "text",
+                "paragraphs": [
+                  "Na dom pridem po dogovoru. Plačate lahko s kartico."
+                ],
+                "color": "muted",
+                "desk": {
+                  "col": 1,
+                  "span": 4,
+                  "row": 2,
+                  "alignY": "start"
+                },
+                "phone": {
+                  "order": 2,
+                  "span": "full"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_room",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "gallery",
+            "width": "full",
+            "rows": 1,
+            "motion": "unmask",
+            "elements": [
+              {
+                "id": "e_photo",
+                "kind": "image",
+                "image": "img_01",
+                "ratio": "21:9",
+                "desk": {
+                  "col": 1,
+                  "span": 12,
+                  "row": 1,
+                  "bleedX": "both"
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "bleed"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_who",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "story",
+            "width": "contained",
+            "rows": 2,
+            "elements": [
+              {
+                "id": "e_ridge",
+                "kind": "decor",
+                "svg": {
+                  "width": 400,
+                  "height": 40,
+                  "paths": [
+                    {
+                      "d": "M0 40 L60 22 L95 28 L170 4 L215 20 L260 12 L330 30 L400 24",
+                      "fill": "none",
+                      "stroke": "primary",
+                      "width": 2
+                    }
+                  ]
+                },
+                "fit": "fixed",
+                "size": 10,
+                "color": "primary",
+                "desk": {
+                  "col": 1,
+                  "span": 4,
+                  "row": 1,
+                  "alignY": "end"
+                },
+                "phone": {
+                  "order": 2,
+                  "span": "half",
+                  "hidden": true
+                }
+              },
+              {
+                "id": "e_h",
+                "kind": "heading",
+                "text": "Poškodbe po smučanju in hoji v hribe",
+                "level": 2,
+                "size": 5,
+                "measure": "l",
+                "color": "text",
+                "desk": {
+                  "col": 1,
+                  "span": 7,
+                  "row": 2,
+                  "alignY": "start"
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_t",
+                "kind": "text",
+                "paragraphs": [
+                  "Največ imam opravka z zvini gležnja, bolečinami v kolenu in v hrbtu. Delam tudi rehabilitacijo po operaciji kolena."
+                ],
+                "size": 1,
+                "desk": {
+                  "col": 8,
+                  "span": 5,
+                  "row": 1,
+                  "rowSpan": 2,
+                  "alignY": "center"
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_visit",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "contact",
+            "width": "contained",
+            "rows": 4,
+            "top": {
+              "edge": "rule"
+            },
+            "elements": [
+              {
+                "id": "e_h",
+                "kind": "heading",
+                "text": "Odprto",
+                "level": 2,
+                "size": 4,
+                "color": "text",
+                "desk": {
+                  "col": 1,
+                  "span": 5,
+                  "row": 1,
+                  "alignY": "end"
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_hours",
+                "kind": "hours",
+                "style": "table",
+                "desk": {
+                  "col": 1,
+                  "span": 5,
+                  "row": 2,
+                  "alignY": "start"
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_if",
+                "kind": "iconFacts",
+                "icons": "line",
+                "items": [
+                  {
+                    "fact": "card"
+                  },
+                  {
+                    "fact": "parking",
+                    "note": "Pred ordinacijo"
+                  },
+                  {
+                    "fact": "home-visits",
+                    "note": "Po dogovoru"
+                  }
+                ],
+                "desk": {
+                  "col": 1,
+                  "span": 5,
+                  "row": 3,
+                  "alignY": "start"
+                },
+                "phone": {
+                  "order": 2,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_contact",
+                "kind": "contact",
+                "show": [
+                  "phone",
+                  "email",
+                  "address"
+                ],
+                "desk": {
+                  "col": 7,
+                  "span": 6,
+                  "row": 1
+                },
+                "phone": {
+                  "order": 3,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_map",
+                "kind": "map",
+                "style": "pin",
+                "desk": {
+                  "col": 7,
+                  "span": 6,
+                  "row": 2,
+                  "rowSpan": 3
+                },
+                "phone": {
+                  "order": 4,
+                  "span": "full"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "nav": {
+        "label": "Zasebnost",
+        "show": false
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Fizioterapija Špik",
+        "description": "Kako Fizioterapija Špik obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "variant": "default",
+          "props": {
+            "kind": "privacy"
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "nav": {
+        "label": "Dostopnost",
+        "show": false
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Fizioterapija Špik",
+        "description": "Izjava o dostopnosti spletne strani Fizioterapija Špik."
+      },
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "variant": "default",
+          "props": {
+            "kind": "accessibility"
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "kind": "not-found",
+      "slug": "404",
+      "nav": {
+        "label": "Ni najdeno",
+        "show": false
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Fizioterapija Špik",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "variant": "default",
+          "props": {
+            "title": "Te strani ni mogoče najti",
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo."
+          }
+        }
+      ]
+    }
+  ]
+}

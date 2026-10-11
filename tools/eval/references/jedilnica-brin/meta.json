@@ -1,0 +1,13 @@
+{
+  "id": "jedilnica-brin",
+  "stance": "colour-block",
+  "trades": [
+    "restaurant"
+  ],
+  "title": "Jedilnica Brin, barvni bloki",
+  "gapNote": "A field layer spans rows by fraction and can not be bound to the elements on it, so a section with two side by side colour blocks (field in columns 1-6, another in 7-12) breaks on phones: the stacked elements cross the boundary at half the section height, text lands on the wrong colour or touches the edge. The two blocks had to become two full-width one-row sections, so the desktop split is stacked stripes, not a block meeting a block in one row. The hero field split (primary / accent) also leaves the accent block as a short band on phones with the price in it; a field has no minimum height of its own. No shape of a field other than a rectangle: no cut corner, circle or hard diagonal edge, no photo cut into a field (the offset-block image treatment exists, but there is no photo here). The call button inside the primary field is the secondary style (white outline) because a primary button would vanish on the primary colour.",
+  "sources": [
+    "stance colour-block (flat fields meeting at hard edges, type sitting on them)",
+    "L Ogledalo (big colour, little text)"
+  ]
+}

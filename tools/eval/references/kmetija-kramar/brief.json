@@ -1,0 +1,65 @@
+{
+  "id": "kmetija-kramar",
+  "businessType": "tourist-farm",
+  "town": "Solčava",
+  "description": "Turistična kmetija Kramar stoji v Solčavi, naslov je Solčava 62, 3335 Solčava. Gospodarimo jaz, Franci Kramar, z ženo Heleno. Planinci, ki jih pot pelje mimo, dobijo pri nas žig v planinski dnevnik. Imamo štiri sobe z osmimi posteljami.\n\nZa pohodnike kuhamo planinski krožnik in žgance s kislim mlekom. Kosila so vsak dan 11.00–18.00.\n\nCene: nočitev z zajtrkom 36 € na osebo, planinski krožnik 11 €, žganci s kislim mlekom 8 €.\n\nSobe rezervirate po telefonu 03 555 41 28 ali na franci@kmetija-kramar.example. Pred hišo je parkirišče, pasji prijatelji so dobrodošli. Plačilo samo z gotovino. Stran naj bo kot planinski dnevnik: ploščati žigi v eni barvi, vsak v svojem okvirčku.",
+  "photos": {
+    "fixture": "kmetija-grabnar",
+    "subjects": [
+      "kmečka hiša z lesenim balkonom in rdečimi pelargonijami pod gorami",
+      "soba z dvema lesenima posteljama in karirasto posteljnino"
+    ]
+  },
+  "facts": {
+    "name": "Turistična kmetija Kramar",
+    "phone": "+38635554128",
+    "email": "franci@kmetija-kramar.example",
+    "address": {
+      "street": "Solčava 62",
+      "postalCode": "3335",
+      "city": "Solčava"
+    },
+    "hours": [
+      {
+        "from": "mon",
+        "to": "sun",
+        "open": "11:00",
+        "close": "18:00"
+      }
+    ],
+    "prices": [
+      {
+        "item": "nočitev z zajtrkom na osebo",
+        "amount": 36
+      },
+      {
+        "item": "planinski krožnik",
+        "amount": 11
+      },
+      {
+        "item": "žganci s kislim mlekom",
+        "amount": 8
+      }
+    ],
+    "people": [
+      {
+        "name": "Franci Kramar",
+        "role": "gospodar"
+      },
+      {
+        "name": "Helena",
+        "role": "žena"
+      }
+    ],
+    "amenities": [
+      "cash-only",
+      "parking",
+      "pets-welcome"
+    ],
+    "other": [
+      "Planinci dobijo pri nas žig v planinski dnevnik",
+      "Imamo štiri sobe z osmimi posteljami",
+      "Kosila so vsak dan 11.00–18.00"
+    ]
+  }
+}

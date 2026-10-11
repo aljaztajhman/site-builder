@@ -1,0 +1,78 @@
+{
+  "id": "avtomehanika-sever",
+  "businessType": "car-repair",
+  "town": "Murska Sobota",
+  "description": "Avtomehanika Sever je družinski servis v Murski Soboti, naslov je Panonska ulica 18, 9000 Murska Sobota. Vodim ga jaz, Dejan Sever, z mehanikom Markom. Popravljamo osebne avtomobile in kombije: servis, zavore, izpušni sistem, menjava pnevmatik in priprava na tehnični pregled.\n\nCene: mali servis (delo) 60 €, menjava zavornih ploščic (delo) 45 €, menjava pnevmatik 30 €, diagnostika 35 €, priprava na tehnični pregled 25 €.\n\nOdprto: pon–pet 7.00–16.00, sobota 8.00–12.00, ob nedeljah zaprto.\n\nTermin si rezervirajte po telefonu 02 555 71 40 ali na dejan@avtomehanika-sever.example. Plačate lahko s kartico. Pred delavnico je parkirišče. Stran naj izgleda kot registrska tablica: velike črke, čisto belo ozadje in en sam pas barve.",
+  "photos": {
+    "fixture": "avtoservis-mrak",
+    "subjects": [
+      "osebni avto na dvigalu v avtomehanični delavnici",
+      "mehanik pregleduje motor pod odprtim pokrovom"
+    ]
+  },
+  "facts": {
+    "name": "Avtomehanika Sever",
+    "phone": "+38625557140",
+    "email": "dejan@avtomehanika-sever.example",
+    "address": {
+      "street": "Panonska ulica 18",
+      "postalCode": "9000",
+      "city": "Murska Sobota"
+    },
+    "hours": [
+      {
+        "from": "mon",
+        "to": "fri",
+        "open": "07:00",
+        "close": "16:00"
+      },
+      {
+        "from": "sat",
+        "to": "sat",
+        "open": "08:00",
+        "close": "12:00"
+      }
+    ],
+    "prices": [
+      {
+        "item": "mali servis (delo)",
+        "amount": 60
+      },
+      {
+        "item": "menjava zavornih ploščic (delo)",
+        "amount": 45
+      },
+      {
+        "item": "menjava pnevmatik",
+        "amount": 30
+      },
+      {
+        "item": "diagnostika",
+        "amount": 35
+      },
+      {
+        "item": "priprava na tehnični pregled",
+        "amount": 25
+      }
+    ],
+    "people": [
+      {
+        "name": "Dejan Sever",
+        "role": "vodja, mehanik"
+      },
+      {
+        "name": "Marko",
+        "role": "mehanik"
+      }
+    ],
+    "amenities": [
+      "card",
+      "parking"
+    ],
+    "other": [
+      "Popravljamo osebne avtomobile in kombije",
+      "Termin si rezervirajte po telefonu",
+      "Pred delavnico je parkirišče"
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "id": "adaptacije-blatnik",
+  "stance": "axonometric",
+  "trades": [
+    "builder"
+  ],
+  "title": "Adaptacije Blatnik, aksonometrija",
+  "gapNote": "There is no axonometric-object ornament and no motif/pipes drawing in the sheet, so the room is a hand-computed svg decor (one element, 12 paths in roles, projected at 30 degrees by a script, within the 400 x 400 and 24-path limits). It is one fixed bathroom: the page can not show a kitchen or a roof, and a different job means a new hand-built svg. The stance asks for small notes pointing at the parts that matter: the language has no leader line or callout, and a text element cannot be pinned to a point inside a decor, so the page has no annotations and the drawing is not labelled (the pipe in accent colour is the only highlight). Strokes are one weight per path in text colour; there is no hatching or dimension line (a dimension fact object exists, but it needs a number from the client, and the client gave no dimensions). The drawing fills its cell, so its size follows the column span and it can not be sized to the type.",
+  "sources": [
+    "stance axonometric (the job drawn at 30 degrees, flat fills, notes pointing at parts)",
+    "C Cevi (an installer's technical sheet)"
+  ]
+}
