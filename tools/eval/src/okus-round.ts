@@ -1,11 +1,12 @@
 /**
  * Okus (docs/plans/design-studio.md §8): the owner rates homepages so taste becomes measurable. This module is the
  * round's data model, pure: which items a round holds (round 1: the 19 hand-made references, the 10 goldens and the
- * 3 composed sheet specs; lab sketches have a slot for later rounds), the order the owner sees them in, and the
+ * 3 composed sheet specs; round 2: the studio references of tools/eval/references with the goldens and the 19
+ * hand-made references; lab sketches have a slot for later rounds), the order the owner sees them in, and the
  * pairwise "which is better" questions. Rendering is tools/eval/src/okus-items.ts; calibration okus-calibrate.ts.
  * Everything here is deterministic: the same inputs give byte-identical items.json and pairs.json.
  */
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
@@ -18,7 +19,8 @@ export const roundDir = (round: number): string => path.join(OKUS_DIR, "rounds",
 /** Item and pair ids become document ids in the artifact's database: letters, digits, `-` only. */
 const Id = z.string().regex(/^[a-z0-9][a-z0-9-]{0,80}$/);
 
-export const ItemKind = z.enum(["reference", "golden", "composed", "sketch"]);
+/** reference: hand-made HTML (round 1); studio: a studio reference in the composition language (tools/eval/references, I10). */
+export const ItemKind = z.enum(["reference", "golden", "composed", "sketch", "studio"]);
 export type ItemKind = z.infer<typeof ItemKind>;
 
 /** Image paths are relative to the round's directory (or absolute URLs, when the director rewrites them to assets). */
@@ -41,7 +43,7 @@ export type OkusItem = z.infer<typeof OkusItem>;
 export const ItemsFile = z.strictObject({ round: z.number().int().min(1), items: z.array(OkusItem).min(1) });
 export type ItemsFile = z.infer<typeof ItemsFile>;
 
-export const PairKind = z.enum(["reference-golden", "golden-composed", "reference-composed", "within-trade", "cross-trade"]);
+export const PairKind = z.enum(["reference-golden", "golden-composed", "reference-composed", "within-trade", "cross-trade", "studio-golden", "studio-reference"]);
 export type PairKind = z.infer<typeof PairKind>;
 
 export const OkusPair = z.strictObject({ id: Id, kind: PairKind, a: Id, b: Id });
@@ -53,9 +55,9 @@ export type PairsFile = z.infer<typeof PairsFile>;
 /** rounds/index.json: the rounds that exist; the rating page opens the last one. */
 export const RoundsIndex = z.strictObject({ rounds: z.array(z.number().int().min(1)).min(1) });
 
-/** A source page before rendering: an item without its images, plus how to render it. */
+/** A source page before rendering: an item without its images, plus how to render it (`media`: the fixture whose photos the spec uses). */
 export type ItemSource = Omit<OkusItem, "images"> &
-  ({ render: "html"; file: string } | { render: "spec"; specFile: string; fixture: string });
+  ({ render: "html"; file: string } | { render: "spec"; specFile: string; media: string | null });
 
 // ---------------------------------------------------------------------------------------------------------------
 // Determinism helpers
@@ -143,7 +145,7 @@ export function goldenSources(): ItemSource[] {
       const fixture = f.replace(/\.json$/, "");
       const brief = fixtureBrief(fixture);
       const specFile = `tools/eval/golden/${f}`;
-      return { id: `golden-${fixture}`, kind: "golden" as const, label: `${brief.name} (golden)`, trade: brief.businessType, fixture, source: specFile, render: "spec" as const, specFile };
+      return { id: `golden-${fixture}`, kind: "golden" as const, label: `${brief.name} (golden)`, trade: brief.businessType, fixture, source: specFile, render: "spec" as const, specFile, media: fixture };
     });
 }
 
@@ -160,6 +162,35 @@ export function composedSources(): ItemSource[] {
       source: specFile,
       render: "spec" as const,
       specFile,
+      media: c.fixture,
+    };
+  });
+}
+
+/**
+ * The studio references (tools/eval/references/<id>/: site.json, brief.json, meta.json; harness references.ts), rendered
+ * from their v20 site spec with the photos their brief borrows. They are about a fixture business of their own, so
+ * `fixture` is null; pairs match them by trade.
+ */
+export function studioSources(): ItemSource[] {
+  const dir = path.join(REPO_ROOT, "tools/eval/references");
+  if (!existsSync(dir)) return [];
+  const ids = readdirSync(dir, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name).sort();
+  return ids.map((id) => {
+    const base = `tools/eval/references/${id}`;
+    const meta = readJson(`${base}/meta.json`) as { title: string; stance: string };
+    const brief = readJson(`${base}/brief.json`) as { businessType: string; photos: { fixture: string } | null };
+    const specFile = `${base}/site.json`;
+    return {
+      id: `studio-${id}`,
+      kind: "studio" as const,
+      label: `${meta.title} (studio reference, ${meta.stance})`,
+      trade: brief.businessType,
+      fixture: null,
+      source: specFile,
+      render: "spec" as const,
+      specFile,
+      media: brief.photos?.fixture ?? null,
     };
   });
 }
@@ -169,8 +200,14 @@ export function composedSources(): ItemSource[] {
  * interleave and nothing about the order gives away which page is hand-made. Lab sketches join from round 2.
  */
 export function roundSources(round: number): ItemSource[] {
-  if (round !== 1) throw new Error(`Round ${round} is not defined yet (round 1 only; lab sketches come with round 2)`);
-  return shuffle([...referenceSources(), ...goldenSources(), ...composedSources()], `okus-round-${round}`);
+  if (round === 1) return shuffle([...referenceSources(), ...goldenSources(), ...composedSources()], `okus-round-${round}`);
+  if (round === 2) return shuffle([...studioSources(), ...goldenSources(), ...referenceSources()], `okus-round-${round}`);
+  throw new Error(`Round ${round} is not defined yet (rounds 1 and 2)`);
+}
+
+/** The pairwise questions of a round: round 1 buildPairs, round 2 buildStudioPairs. */
+export function roundPairs(round: number, items: readonly Lite[]): OkusPair[] {
+  return round === 2 ? buildStudioPairs(items, `okus-round-${round}`) : buildPairs(items, `okus-round-${round}`);
 }
 
 /** Where an item's four pictures go, relative to the round's directory. */
@@ -247,9 +284,62 @@ export function buildPairs(items: readonly Lite[], seed: string): OkusPair[] {
   pick("cross-trade", across(goldens, goldens).filter(([x, y]) => x.id < y.id), PAIR_QUOTA.crossGoldens, "cross-goldens");
   pick("cross-trade", across(refs, goldens), PAIR_QUOTA.crossReferenceGolden, "cross-ref-golden");
 
+  return finishPairs(out, seed);
+}
+
+/** Which side is left is random per pair; question order is shuffled; ids p01, p02 … in that order. */
+function finishPairs(out: readonly Omit<OkusPair, "id">[], seed: string): OkusPair[] {
   const r = rng(`${seed}:sides`);
   const sided = out.map((p) => (r() < 0.5 ? p : { ...p, a: p.b, b: p.a }));
   return shuffle(sided, `${seed}:order`).map((p, i) => ({ id: `p${String(i + 1).padStart(2, "0")}`, ...p }));
+}
+
+/** Round 2: how many studio-vs-studio pairs within a trade. */
+const STUDIO_WITHIN_TRADE = 6;
+
+/**
+ * Round 2's questions, every one about a studio reference: each against a golden of its trade (seeded pick) and a
+ * hand-made reference of its trade (seeded pick); a studio reference whose trade has neither gets a cross-trade golden;
+ * then up to STUDIO_WITHIN_TRADE pairs of studio references of one trade, spread so no reference repeats while others
+ * are unused. Deterministic for the same items and seed; each unordered pair once.
+ */
+export function buildStudioPairs(items: readonly Lite[], seed: string): OkusPair[] {
+  const seen = new Set<string>();
+  const out: Omit<OkusPair, "id">[] = [];
+  const add = (kind: PairKind, a: Lite | undefined, b: Lite | undefined): boolean => {
+    if (!a || !b || a.id === b.id) return false;
+    const key = [a.id, b.id].sort().join("|");
+    if (seen.has(key)) return false;
+    seen.add(key);
+    out.push({ kind, a: a.id, b: b.id });
+    return true;
+  };
+  const of = (k: ItemKind) => items.filter((i) => i.kind === k).sort((x, y) => x.id.localeCompare(y.id));
+  const studio = of("studio");
+  const goldens = of("golden");
+  const handMade = of("reference");
+  const pickOne = (xs: Lite[], tag: string) => shuffle(xs, `${seed}:${tag}`)[0];
+  for (const s of studio) {
+    const g = pickOne(goldens.filter((x) => x.trade === s.trade), `${s.id}:golden`);
+    const h = pickOne(handMade.filter((x) => x.trade === s.trade), `${s.id}:reference`);
+    add("studio-golden", s, g);
+    add("studio-reference", s, h);
+    if (!g && !h) add("cross-trade", s, pickOne(goldens, `${s.id}:cross`));
+  }
+  const within = shuffle(studio.flatMap((x, i) => studio.slice(i + 1).filter((y) => y.trade === x.trade).map((y) => [x, y] as const)), `${seed}:within`);
+  const used = new Set<string>();
+  let made = 0;
+  for (const spread of [true, false]) {
+    for (const [x, y] of within) {
+      if (made >= STUDIO_WITHIN_TRADE) break;
+      if (spread && (used.has(x.id) || used.has(y.id))) continue;
+      if (add("within-trade", x, y)) {
+        made++;
+        used.add(x.id).add(y.id);
+      }
+    }
+  }
+  return finishPairs(out, seed);
 }
 
 /** The JSON text of a round's files, as written (stable key order, trailing newline). */

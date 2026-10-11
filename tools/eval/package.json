@@ -6,6 +6,7 @@
   "dependencies": {
     "@sb/config": "workspace:*",
     "@sb/engine": "workspace:*",
+    "@sb/inventory": "workspace:*",
     "@sb/platform": "workspace:*",
     "@sb/render": "workspace:*",
     "@sb/spec": "workspace:*",

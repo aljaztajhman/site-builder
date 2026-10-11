@@ -1,0 +1,191 @@
+{
+  "specVersion": 20,
+  "slug": "pekarna-zrno",
+  "locales": { "default": "sl", "enabled": ["sl"] },
+  "business": {
+    "name": "Pekarna Zrno",
+    "type": "bakery",
+    "phone": "+38641555218",
+    "email": "mojca@pekarna-zrno.example",
+    "address": { "street": "Mestni trg 14", "postalCode": "4220", "city": "Škofja Loka" },
+    "hours": {
+      "entries": [
+        { "from": "mon", "to": "fri", "open": "06:00", "close": "14:00" },
+        { "from": "sat", "to": "sat", "open": "06:00", "close": "12:00" },
+        { "from": "sun", "to": "sun", "closed": true }
+      ]
+    },
+    "provider": {
+      "legalName": { "$placeholder": "legalName" },
+      "registrationNumber": { "$placeholder": "registrationNumber" },
+      "taxNumber": { "$placeholder": "taxNumber" }
+    },
+    "amenities": ["card", "parking"]
+  },
+  "design": {
+    "direction": "etiketa",
+    "fontPair": "lora-karla",
+    "colors": {
+      "background": "#ffffff",
+      "surface": "#eef2f9",
+      "text": "#1a2233",
+      "muted": "#4b5568",
+      "primary": "#213f8f",
+      "onPrimary": "#ffffff",
+      "accent": "#c8423a",
+      "border": "#c6d1e6",
+      "inverse": "#141c36",
+      "onInverse": "#eef1f6"
+    },
+    "radius": 6,
+    "baseFontSize": 18,
+    "scale": 1.25,
+    "headingWeight": 700,
+    "headingCase": "normal",
+    "headingTracking": -0.02,
+    "density": "regular",
+    "shadow": "none",
+    "imagery": "natural",
+    "motion": "calm",
+    "wordmark": { "style": "plain" }
+  },
+  "assets": {
+    "images": [
+      { "id": "img_01", "src": "uploads/01.jpg", "width": 1600, "height": 1200, "alt": "Hlebci kruha na leseni polici" },
+      { "id": "img_02", "src": "uploads/02.jpg", "width": 1200, "height": 1600, "alt": "Pek oblikuje testo na pomokani mizi" },
+      { "id": "img_03", "src": "uploads/03.jpg", "width": 1600, "height": 1200, "alt": "Rogljički in cimetovi polži na pladnju" }
+    ]
+  },
+  "chrome": {
+    "header": { "variant": "split-cta", "cta": "call" },
+    "footer": { "variant": "compact" },
+    "mobileActionBar": true
+  },
+  "pages": [
+    {
+      "id": "p_home",
+      "kind": "home",
+      "slug": "",
+      "nav": { "label": "Domov", "show": true },
+      "seo": {
+        "title": "Pekarna Zrno, Škofja Loka – kruh z Mestnega trga",
+        "description": "Majhna pekarna na Mestnem trgu 14 v Škofji Loki: domači beli kruh, ajdov kruh z orehi, kruh s semeni, rogljički in cimetovi polži. Naročila dan prej."
+      },
+      "sections": [
+        {
+          "id": "s_card",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "hero",
+            "width": "contained",
+            "minHeight": "l",
+            "rows": 4,
+            "surface": { "texture": "lines" },
+            "elements": [
+              { "id": "e_where", "kind": "text", "paragraphs": ["Mestni trg 14, Škofja Loka"], "color": "muted", "desk": { "col": 1, "span": 6, "row": 1, "alignY": "end" }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_title", "kind": "heading", "text": "Vsak dan pečemo od pete ure zjutraj", "level": 1, "size": 6, "measure": "m", "color": "primary", "desk": { "col": 1, "span": 7, "row": 2 }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_offer", "kind": "list", "marker": "rule", "weight": "medium", "size": 1, "items": ["Domači beli kruh", "Ajdov kruh z orehi", "Kruh s semeni", "Rogljički in cimetovi polži"], "desk": { "col": 1, "span": 6, "row": 3 }, "phone": { "order": 2, "span": "full" } },
+              { "id": "e_order", "kind": "action", "action": "call", "label": "Naročite dan prej po telefonu", "style": "text", "desk": { "col": 1, "span": 5, "row": 4, "alignY": "start" }, "phone": { "order": 3, "span": "full" } },
+              { "id": "e_wheat", "kind": "decor", "drawing": "motif/bakery/wheat-ear-line", "fit": "fixed", "size": 4, "color": "accent", "desk": { "col": 7, "span": 1, "row": 1, "alignY": "start" }, "phone": { "order": 5, "span": "half", "hidden": true } },
+              { "id": "e_photo", "kind": "image", "image": "img_01", "ratio": "4:5", "desk": { "col": 8, "span": 5, "row": 1, "rowSpan": 4, "alignY": "center", "tilt": 2 }, "phone": { "order": 4, "span": "full" } }
+            ]
+          }
+        },
+        {
+          "id": "s_prices",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "prices",
+            "width": "contained",
+            "rows": 3,
+            "top": { "edge": "rule" },
+            "surface": { "texture": "lines" },
+            "background": [{ "kind": "field", "role": "surface", "cols": { "from": 2, "to": 11 } }],
+            "elements": [
+              { "id": "e_h", "kind": "heading", "text": "Na polici vsak dan", "level": 2, "size": 4, "color": "primary", "desk": { "col": 3, "span": 8, "row": 1 }, "phone": { "order": 0, "span": "full" } },
+              {
+                "id": "e_p",
+                "kind": "prices",
+                "style": "leaders",
+                "size": 1,
+                "items": [
+                  { "name": "Domači beli kruh", "price": { "amount": 3.2 } },
+                  { "name": "Ajdov kruh z orehi", "price": { "amount": 4.6 } },
+                  { "name": "Kruh s semeni", "price": { "amount": 4.4 } },
+                  { "name": "Rogljiček", "price": { "amount": 1.2 } },
+                  { "name": "Cimetov polž", "price": { "amount": 1.8 } },
+                  { "name": "Jabolčni zavitek (kos)", "note": "Ob sobotah", "price": { "amount": 2.5 } }
+                ],
+                "desk": { "col": 3, "span": 8, "row": 2 },
+                "phone": { "order": 1, "span": "full" }
+              },
+              { "id": "e_note", "kind": "text", "paragraphs": ["Ob sobotah spečemo še makovke in jabolčni zavitek. Kruh lahko naročite dan prej."], "desk": { "col": 3, "span": 7, "row": 3 }, "phone": { "order": 2, "span": "full" } }
+            ]
+          }
+        },
+        {
+          "id": "s_dough",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "story",
+            "width": "contained",
+            "rows": 4,
+            "motion": "reveal",
+            "elements": [
+              { "id": "e_photo", "kind": "image", "image": "img_02", "ratio": "3:4", "desk": { "col": 1, "span": 5, "row": 1, "rowSpan": 4, "alignY": "center" }, "phone": { "order": 3, "span": "full" } },
+              { "id": "e_h", "kind": "heading", "text": "Testo mesimo ročno", "level": 2, "size": 5, "color": "primary", "desk": { "col": 7, "span": 6, "row": 1, "alignY": "end" }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_hours", "kind": "fact", "value": "12", "label": "ur najmanj počiva testo, preden gre v peč", "treatment": "numeral", "size": 7, "count": true, "color": "accent", "desk": { "col": 7, "span": 5, "row": 2 }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_q", "kind": "quote", "text": "Vodim jo jaz, Mojca Kos, pečeva pa skupaj s sinom Tilnom.", "by": "Mojca Kos", "size": 1, "desk": { "col": 7, "span": 6, "row": 3 }, "phone": { "order": 2, "span": "full" } },
+              { "id": "e_rolls", "kind": "image", "image": "img_03", "ratio": "3:2", "desk": { "col": 9, "span": 4, "row": 4 }, "phone": { "order": 4, "span": "inset" } }
+            ]
+          }
+        },
+        {
+          "id": "s_visit",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "contact",
+            "width": "contained",
+            "rows": 4,
+            "top": { "edge": "rule" },
+            "elements": [
+              { "id": "e_h", "kind": "heading", "text": "Odprto", "level": 2, "size": 4, "color": "primary", "desk": { "col": 1, "span": 5, "row": 1 }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_hours", "kind": "hours", "style": "week", "desk": { "col": 1, "span": 5, "row": 2 }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_if", "kind": "iconFacts", "icons": "line", "items": [{ "fact": "card" }, { "fact": "parking", "note": "Javno parkirišče" }], "desk": { "col": 1, "span": 5, "row": 3 }, "phone": { "order": 2, "span": "full" } },
+              { "id": "e_map", "kind": "map", "style": "street", "desk": { "col": 7, "span": 6, "row": 1, "rowSpan": 2 }, "phone": { "order": 3, "span": "full" } },
+              { "id": "e_contact", "kind": "contact", "show": ["phone", "email"], "desk": { "col": 7, "span": 6, "row": 3 }, "phone": { "order": 4, "span": "full" } }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "nav": { "label": "Zasebnost", "show": false },
+      "seo": { "title": "Varstvo osebnih podatkov | Pekarna Zrno", "description": "Kako Pekarna Zrno obdeluje osebne podatke obiskovalcev spletne strani." },
+      "sections": [{ "id": "s_legal_privacy", "type": "legal", "variant": "default", "props": { "kind": "privacy" } }]
+    },
+    {
+      "id": "p_dostopnost",
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "nav": { "label": "Dostopnost", "show": false },
+      "seo": { "title": "Izjava o dostopnosti | Pekarna Zrno", "description": "Izjava o dostopnosti spletne strani Pekarna Zrno." },
+      "sections": [{ "id": "s_legal_accessibility", "type": "legal", "variant": "default", "props": { "kind": "accessibility" } }]
+    },
+    {
+      "id": "p_404",
+      "kind": "not-found",
+      "slug": "404",
+      "nav": { "label": "Ni najdeno", "show": false },
+      "seo": { "title": "Strani ni mogoče najti | Pekarna Zrno", "description": "Iskane strani ni. Vrnite se na domačo stran." },
+      "sections": [{ "id": "s_not_found", "type": "not-found", "variant": "default", "props": { "title": "Te strani ni mogoče najti", "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo." } }]
+    }
+  ]
+}

@@ -14,6 +14,7 @@ import { imageryDraftAssets } from "./imagery.ts";
 import { textureAssets } from "./textures.ts";
 import { motionAssets } from "./motion.ts";
 import { factObjectDraftAssets, typeTreatmentDraftAssets } from "./type-and-facts.ts";
+import { referenceAssets } from "./references.ts";
 import type { Asset } from "./schema.ts";
 
 export * from "./schema.ts";
@@ -37,11 +38,12 @@ export { ICON_NOTES, iconAssets, iconBytes } from "./icons.ts";
 export { MASK_DRAFTS, TREATMENT_DRAFTS, addedNames, imageryDraftAssets, type ImageryDraft } from "./imagery.ts";
 export { TEXTURE_TAGS, textureAssets, textureNames, texturePartial, texturePartialFile, type TexturePartial } from "./textures.ts";
 export { motionAssets, motionBytes } from "./motion.ts";
+export { STUDIO_REFERENCES, referenceAssets, type ReferenceEntry } from "./references.ts";
 export { FACT_OBJECT_DRAFTS, TYPE_TREATMENT_DRAFTS, factObjectDraftAssets, typeTreatmentDraftAssets } from "./type-and-facts.ts";
 
 /**
  * Every registered asset: what ships today (approved), then the drafts (curated palettes, the type inventory, the
- * composition presets, then the inventory batches: drawings, practical-fact icons, masks and treatments, textures, motion presets), before the owner's decisions are applied.
+ * composition presets, then the inventory batches: drawings, practical-fact icons, masks and treatments, textures, motion presets, type treatments, fact objects, studio references), before the owner's decisions are applied.
  */
 export function registeredAssets(): Asset[] {
   return [
@@ -57,6 +59,7 @@ export function registeredAssets(): Asset[] {
     ...motionAssets(),
     ...typeTreatmentDraftAssets(),
     ...factObjectDraftAssets(),
+    ...referenceAssets(),
   ];
 }
 
