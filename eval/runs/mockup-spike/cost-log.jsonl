@@ -1,0 +1,10 @@
+{"at":"2026-10-11T21:13:47.834Z","job":"seedream-pekarna","endpoint":"bytedance/seedream/v5/lite/edit","images":2,"costEur":0.060200000000000004,"seconds":145.362,"ok":true,"requestId":"01a12cce-4ee4-7fd0-b07b-15d46ddb7455"}
+{"at":"2026-10-11T21:14:07.465Z","job":"nano-tattoo","endpoint":"fal-ai/nano-banana-2","images":2,"costEur":0.1376,"seconds":12.812,"ok":true,"requestId":"01a12cd0-a0b7-7ff3-a5ff-ffa339ea28c9"}
+{"at":"2026-10-11T21:14:08.782Z","job":"ideogram-pekarna","endpoint":"fal-ai/ideogram/v3","images":2,"costEur":0.1032,"seconds":14.242,"ok":true,"requestId":"01a12cd0-a0bb-75c0-a0b2-4ab1f97aff13"}
+{"at":"2026-10-11T21:14:08.977Z","job":"ideogram-tattoo","endpoint":"fal-ai/ideogram/v3","images":2,"costEur":0.1032,"seconds":14.759,"ok":true,"requestId":"01a12cd0-a0bf-71f0-93a4-f85c11589640"}
+{"at":"2026-10-11T21:14:11.097Z","job":"gpt-tattoo","endpoint":"openai/gpt-image-2.5/flare/text-to-image","images":2,"costEur":0.1376,"seconds":17.039,"ok":true,"requestId":"01a12cd0-a0af-79a0-bedb-f083b5a8957a"}
+{"at":"2026-10-11T21:14:15.854Z","job":"gpt-pekarna","endpoint":"openai/gpt-image-2.5/flare/edit","images":2,"costEur":0.17200000000000001,"seconds":20.956,"ok":true,"requestId":"01a12cd0-a1f3-7e52-9613-6533ef0a9509"}
+{"at":"2026-10-11T21:14:17.443Z","job":"nano-pekarna","endpoint":"fal-ai/nano-banana-2/edit","images":2,"costEur":0.1376,"seconds":22.967,"ok":true,"requestId":"01a12cd0-a1fe-7803-8cc4-70f9ca71764b"}
+{"at":"2026-10-11T21:15:33.204Z","job":"seedream-tattoo","endpoint":"bytedance/seedream/v5/lite/text-to-image","images":2,"costEur":0.060200000000000004,"seconds":98.558,"ok":true,"requestId":"01a12cd0-a0bd-7f92-ad38-881733895a6b"}
+{"at":"2026-10-11T21:16:36.784Z","job":"gpt-tattoo-phone","endpoint":"openai/gpt-image-2.5/flare/text-to-image","images":1,"costEur":0.0688,"seconds":17.874,"ok":true,"requestId":"01a12cd2-d8cc-73f3-aa3f-a371621d2c38"}
+{"at":"2026-10-11T21:16:41.529Z","job":"gpt-pekarna-phone","endpoint":"openai/gpt-image-2.5/flare/edit","images":1,"costEur":0.08600000000000001,"seconds":22.375,"ok":true,"requestId":"01a12cd2-d9cb-7d00-b193-813e0a25c27b"}
