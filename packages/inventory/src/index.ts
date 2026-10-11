@@ -9,6 +9,7 @@ import { draftAssets, todaysAssets } from "./sources.ts";
 import { compositionAssets } from "./compositions/index.ts";
 import { inventoryFontAssets, inventoryPairingAssets } from "./type-inventory.ts";
 import { drawingAssets } from "./drawings.ts";
+import { iconAssets } from "./icons.ts";
 import type { Asset } from "./schema.ts";
 
 export * from "./schema.ts";
@@ -28,10 +29,11 @@ export { COMPOSITION_PRESETS, compositionAssets, compositionPreset } from "./com
 export { inventoryFontAssets, inventoryPairingAssets, FONT_TAGS, STANCE_FAMILIES, VOICES, type PairingTags, type StanceFamily, type Voice } from "./type-inventory.ts";
 export { PAIRING_TAGS } from "./pairing-tags.ts";
 export { DRAWING_DATA, DRAWING_META, drawingAssets, drawingBytes, drawingStyleOf } from "./drawings.ts";
+export { ICON_NOTES, iconAssets, iconBytes } from "./icons.ts";
 
 /**
  * Every registered asset: what ships today (approved), then the drafts (curated palettes, the type inventory, the
- * composition presets, then the inventory batches: drawings), before the owner's decisions are applied.
+ * composition presets, then the inventory batches: drawings, practical-fact icons), before the owner's decisions are applied.
  */
 export function registeredAssets(): Asset[] {
   return [
@@ -41,6 +43,7 @@ export function registeredAssets(): Asset[] {
     ...inventoryPairingAssets(),
     ...compositionAssets(),
     ...drawingAssets(),
+    ...iconAssets(),
   ];
 }
 
