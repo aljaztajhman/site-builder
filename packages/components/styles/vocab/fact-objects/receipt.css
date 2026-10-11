@@ -1,0 +1,31 @@
+/* receipt: one line of a till receipt: the label and the value joined by a dotted leader on a strip of paper (surface; the
+   page's own ground on an alt section) with a torn lower edge (a --shape- token). The leader sits between them in either
+   order (labelAt); in a narrow cell the second goes to the next line, at the end. Own ground: @sb/spec factObjectGround
+   (G9); a fill replaces it. */
+.cx-fact--receipt .cx-fact__obj {
+  --shape-receipt: polygon(0 0, 100% 0, 100% 100%, 95% 88%, 90% 100%, 85% 88%, 80% 100%, 75% 88%, 70% 100%, 65% 88%, 60% 100%, 55% 88%, 50% 100%, 45% 88%, 40% 100%, 35% 88%, 30% 100%, 25% 88%, 20% 100%, 15% 88%, 10% 100%, 5% 88%, 0 100%);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 0.3em;
+  padding: 0.35em 0.5em 0.6em;
+  background: var(--c-surface);
+  color: var(--c-text);
+  clip-path: var(--shape-receipt);
+}
+.cx-fact--receipt :is(.cx-fact__obj, .cx-fact__a) {
+  width: 100%;
+}
+.cx-fact--receipt .cx-fact__obj::before {
+  content: "";
+  order: 1;
+  flex: 1 0 1em;
+  border-bottom: max(2px, 0.05em) dotted;
+}
+.cx-fact--receipt .cx-fact__obj > :last-child {
+  order: 2;
+  margin-left: auto;
+}
+:where(.tone-alt) .cx-fact--receipt .cx-fact__obj {
+  background: var(--c-bg);
+}

@@ -43,8 +43,8 @@ const SHIPPED: Record<VocabKey, readonly string[]> = {
   IMAGE_TREATMENTS: ["none", "duotone", "tint", "grain", "mono-contrast", "bleach", "high-key", "low-key", "faded", "matte", "toned", "newsprint", "grade", "overprint", "field", "dim"],
   TEXTURES: ["none", "grain", "lines", "press-grain", "linen-weave", "stone", "bark", "raw-board", "board-concrete", "laid-paper", "kraft-fibre", "gouge", "terrazzo"],
   EDGES: ["straight", "rule", "cut", "torn", "drawing"],
-  FACT_OBJECTS: ["numeral", "plate", "stamp", "ticket", "seal", "tag"],
-  TYPE_TREATMENTS: ["none", "stacked", "knockout"],
+  FACT_OBJECTS: ["numeral", "plate", "stamp", "ticket", "seal", "tag", "house-number", "signpost", "timetable", "receipt", "total", "dimension", "index-tab", "calendar", "split", "door-plate", "ruler"],
+  TYPE_TREATMENTS: ["none", "stacked", "knockout", "circle", "vertical", "oversized-first-word", "ruled-total", "title-block", "masthead", "typed-line", "rule-flanked", "fascia-lettering", "marker-highlight", "drop-numeral", "corner-marks"],
   MOTIONS: ["reveal", "unmask", "rise", "wipe", "stagger", "drift-bg"],
   WORDMARK_STYLES: ["plain"],
   DRAWINGS: [

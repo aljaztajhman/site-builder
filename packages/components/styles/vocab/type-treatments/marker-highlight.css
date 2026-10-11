@@ -1,0 +1,18 @@
+/* marker-highlight: a flat band of the primary colour behind every line of the heading (one span, its box cloned per
+   line), the primary's own text colour on it, flipped on a band section. No gradient: the band is the line's whole box.
+   That ground is @sb/spec typeTreatmentGround (G9); a fill replaces it. The leading opens so one line's band never covers
+   the line above. */
+.cx-h.cx-tt-marker-highlight {
+  line-height: 1.5;
+}
+.cx-tt-marker-highlight .cx-tt__t {
+  padding: 0 0.16em;
+  background: var(--cx-f, var(--c-primary));
+  color: var(--cx-o, var(--c-on-primary));
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+:where(.tone-band) .cx-tt-marker-highlight .cx-tt__t {
+  background: var(--cx-f, var(--c-on-band, var(--c-on-primary)));
+  color: var(--cx-o, var(--c-band, var(--c-primary)));
+}

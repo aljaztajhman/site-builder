@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { ColorRole, ON_ROLE, factObjectGround } from "@sb/spec";
+import { ColorRole, ON_ROLE, factObjectGround, typeTreatmentGround } from "@sb/spec";
 
 /**
  * The text role on each ground is named once, in @sb/spec (ON_ROLE); the stylesheet repeats it as --cx-ro (.cx-ro-<role>,
@@ -90,5 +90,60 @@ describe("the starter type treatments have rules (cx-tt-<name>, extensions regio
     expect(rules).toHaveLength(2);
     for (const r of rules) expect(r).not.toMatch(/blend|blur|gradient|shadow/);
     expect(rules[0]).toContain("inline-size: min-content"); // one word to a line
+  });
+});
+
+describe("the I6 own grounds in their vocab partials (what G9 checks against: factObjectGround, typeTreatmentGround)", () => {
+  const partial = (family: string, name: string) => readFileSync(new URL(`../../components/styles/vocab/${family}/${name}.css`, import.meta.url), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  /** The first palette role a declaration reads (`var(--cx-f, var(--c-band, …))` reads band), or undefined. */
+  const role = (decl: string | undefined) => {
+    const v = decl && /var\((--c-[\w-]+)/.exec(decl)?.[1];
+    return v ? roleOf(v) : undefined;
+  };
+  const decl = (body: string, prop: string) => [...body.matchAll(new RegExp(String.raw`(?:^|[;{\s])${prop}:\s*([^;]+)`, "g"))].map((m) => m[1]!.trim()).find((v) => v !== "none");
+  /** The rules of a partial that aren't the tone flip, and the flip rule (`:where(.tone-<t>) …`). */
+  function grounds(css: string) {
+    const rules = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((m) => ({ sel: m[1]!.trim(), body: m[2]! }));
+    const flip = rules.find((r) => r.sel.startsWith(":where(.tone-"));
+    const own = rules
+      .filter((r) => r !== flip)
+      .map((r) => r.body)
+      .join(";");
+    return {
+      base: { bg: role(decl(own, "background")), ink: role(decl(own, "color")) },
+      flip: flip && { tone: /\.tone-(\w+)/.exec(flip.sel)![1] as "alt" | "inverse" | "band", bg: role(decl(flip.body, "background")), ink: role(decl(flip.body, "color")) },
+    };
+  }
+
+  const FACTS = ["house-number", "signpost", "timetable", "receipt", "total", "dimension", "index-tab", "calendar", "split", "door-plate", "ruler"];
+  it("a fact object's partial paints the ground factObjectGround names, its text role on it, and flips where the table flips", () => {
+    for (const t of FACTS) {
+      const g = grounds(partial("fact-objects", t));
+      expect(g.base.bg, t).toBe(factObjectGround(t, "default"));
+      if (!g.base.bg) {
+        expect(g.flip, t).toBeUndefined();
+        continue;
+      }
+      expect(g.base.ink, t).toBe(ON_ROLE[g.base.bg as ColorRole]);
+      expect(g.flip, t).toBeDefined();
+      expect(g.flip!.bg, t).toBe(factObjectGround(t, g.flip!.tone));
+      expect(g.flip!.ink ?? g.base.ink, t).toBe(ON_ROLE[g.flip!.bg as ColorRole]);
+      // Every other tone keeps the default ground.
+      for (const tone of ["default", "alt", "inverse", "band"] as const) if (tone !== g.flip!.tone) expect(factObjectGround(t, tone), `${t} ${tone}`).toBe(g.base.bg);
+    }
+  });
+
+  it("a type treatment's partial paints the ground typeTreatmentGround names (fascia-lettering, marker-highlight) and no other paints one", () => {
+    for (const t of ["fascia-lettering", "marker-highlight"]) {
+      const g = grounds(partial("type-treatments", t));
+      expect(g.base.bg, t).toBe(typeTreatmentGround(t, "default"));
+      expect(g.base.ink, t).toBe(ON_ROLE[g.base.bg as ColorRole]);
+      expect(g.flip!.bg, t).toBe(typeTreatmentGround(t, g.flip!.tone));
+      expect(g.flip!.ink, t).toBe(ON_ROLE[g.flip!.bg as ColorRole]);
+    }
+    for (const t of ["circle", "vertical", "oversized-first-word", "ruled-total", "title-block", "masthead", "typed-line", "rule-flanked", "drop-numeral", "corner-marks"]) {
+      expect(grounds(partial("type-treatments", t)).base.bg, t).toBeUndefined();
+      expect(typeTreatmentGround(t, "default"), t).toBeUndefined();
+    }
   });
 });

@@ -1,0 +1,9 @@
+/* ruled-total: a thin rule over the heading and a double rule under it, as wide as its longest line: the total line of a
+   receipt or a ledger. Rules in the text colour. */
+.cx-tt-ruled-total {
+  --cx-w: fit-content;
+  max-width: 100%;
+  padding-block: 0.12em 0.1em;
+  border-top: max(1px, 0.03em) solid;
+  border-bottom: max(4px, 0.13em) double;
+}

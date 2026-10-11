@@ -15,6 +15,7 @@ export * from "./composition/copy.ts";
 export * from "./composition/slots.ts";
 export * from "./composition/roles.ts";
 export * from "./composition/blend-meta.ts";
+export * from "./composition/type-treatments.ts";
 export * from "./composition/preset.ts";
 export * from "./design-rules.ts";
 export * from "./directions.ts";

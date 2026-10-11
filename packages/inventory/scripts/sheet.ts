@@ -26,7 +26,7 @@ import { fixturesDir, paletteOverviewHtml, repoRoot, type SheetPage } from "./pa
 import { pagesFor } from "./pages-v2.ts";
 import { emptySheetHtml, sheetGroups, sheetHtml, type Shot } from "./sheet-html.ts";
 
-const SHEET_KINDS: AssetKind[] = ["font", "pairing", "palette", "motif", "submotif", "treatment", "mask", "factObject", "header", "footer", "section", "ornament", "divider", "texture", "composition", "icon", "motion", "wordmark"];
+const SHEET_KINDS: AssetKind[] = ["font", "pairing", "palette", "motif", "submotif", "treatment", "mask", "typeTreatment", "factObject", "header", "footer", "section", "ornament", "divider", "texture", "composition", "icon", "motion", "wordmark"];
 const WIDTHS = [360, 1280] as const;
 /** The tallest part of a page a thumbnail keeps, per width. */
 const MAX_HEIGHT: Record<(typeof WIDTHS)[number], number> = { 360: 3600, 1280: 2400 };

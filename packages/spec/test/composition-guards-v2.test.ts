@@ -891,7 +891,8 @@ describe("G20 type treatments", () => {
     }
   });
 
-  it.todo("vertical (size ≥ 4), circle (≤ 40 characters, size ≥ 2) and photo-fill (size ≥ 6, fillImage, 3:1 duotone roles): not in TYPE_TREATMENTS yet");
+  // vertical, circle and the other I6a treatments: composition-i6.test.ts.
+  it.todo("photo-fill (size ≥ 6, fillImage, 3:1 duotone roles): not in TYPE_TREATMENTS yet");
 });
 
 describe("G21 photos", () => {

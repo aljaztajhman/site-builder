@@ -270,8 +270,9 @@ export function maskAssets(): Asset[] {
   }));
 }
 
+/** The fact objects that shipped with the composition language (the starters); the batch's drafts are in type-and-facts.ts. */
 export function factObjectAssets(): Asset[] {
-  return FACT_TREATMENTS.map((f) => ({
+  return FACT_TREATMENTS.filter((f) => STARTER_NAMES["fact-objects"].includes(f)).map((f) => ({
     id: `fact/${f}`,
     kind: "factObject",
     tags: tags({ ground: ALL_GROUNDS }),

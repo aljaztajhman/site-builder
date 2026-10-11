@@ -1,0 +1,16 @@
+/* signpost: a direction board as at a village crossroads: the value (a town, a street) on the band colour, the board
+   pointed at its end. It points the way; it never claims a distance. The point is a --shape- token; the type leaves room
+   for it. Own ground: @sb/spec factObjectGround (G9), flipped on a band section; a fill replaces it. */
+.cx-fact--signpost .cx-fact__obj {
+  --shape-signpost: polygon(0 0, calc(100% - 0.7em) 0, 100% 50%, calc(100% - 0.7em) 100%, 0 100%);
+  display: grid;
+  padding: 0.3em 1.2em 0.36em 0.5em;
+  font-size: min(var(--fz), calc(100cqw / (var(--n, 6) * 0.62 + 2.2)));
+  background: var(--c-band, var(--c-primary));
+  color: var(--c-on-band, var(--c-on-primary));
+  clip-path: var(--shape-signpost);
+}
+:where(.tone-band) .cx-fact--signpost .cx-fact__obj {
+  background: var(--c-on-band, var(--c-on-primary));
+  color: var(--c-band, var(--c-primary));
+}
