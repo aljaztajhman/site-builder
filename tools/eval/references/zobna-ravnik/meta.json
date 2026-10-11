@@ -1,0 +1,13 @@
+{
+  "id": "zobna-ravnik",
+  "stance": "glazed-tile",
+  "trades": [
+    "dental"
+  ],
+  "title": "Zobna ordinacija Ravnik, glazirane ploščice",
+  "gapNote": "There is no tile-pattern ornament (ornament/tile-pattern): the tiles are inline svg decor paths drawn by hand (a ring, a diamond, four quarter circles), one decor element per tile, so a wall of tiles costs six of the twelve elements a section may hold and can only be 2-column cells on the 12-column grid. No grout lines run between them; each tile has its own border stroke, so the gaps are the grid gap, not a continuous tiled surface, and a tile pattern can not fill a whole field or a section ground (the repeat option is for the drawn strips only). Photos are set beside the tiles as plain squares: no tile-shaped mask with a glazed edge and no inset frame, and the photo grid and the tile grid share cells only by hand placement. On phones the tile wall is reduced to the first two tiles and the gallery tiles are hidden, so the stance is a hint there. A primary and an accent blue are the only glaze colours; no gloss, which is right (shine is the stance's trap) but means no depth either.",
+  "sources": [
+    "stance glazed-tile (square panels with a two-colour pattern, grout showing, photos set in like tiles)",
+    "O Nasmeh (a calm clinic)"
+  ]
+}
