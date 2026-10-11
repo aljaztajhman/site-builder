@@ -1,5 +1,5 @@
 /**
- * pnpm okus:items --round 1 [--only <id>,<id>] [--local-fonts]
+ * pnpm okus:items --round 1|2 [--only <id>,<id>] [--local-fonts]   (round 2 also: pnpm references:okus)
  *
  * Builds a round of Okus (docs/plans/design-studio.md §8) into tools/okus/rounds/<round>/: per item a first screen
  * and a whole page at 1280 px and at 360 px (phones at 2× pixel density, so they stay sharp on a phone), as JPEG at
@@ -23,9 +23,9 @@ import {
   OKUS_DIR,
   REPO_ROOT,
   RoundsIndex,
-  buildPairs,
   itemsJson,
   pairsJson,
+  roundPairs,
   roundSources,
   toItem,
   type ItemSource,
@@ -60,7 +60,7 @@ function localFontsCss(base: string): string {
 }
 
 /** The fixture's photos and logo, processed as the pipeline does, for a spec that uses them (no shared cache). */
-async function specMedia(fixtureId: string, spec: SiteSpec): Promise<Map<string, Uint8Array>> {
+export async function specMedia(fixtureId: string, spec: SiteSpec): Promise<Map<string, Uint8Array>> {
   const config = loadConfig();
   const fixture = loadFixture(fixtureId);
   const media = new Map<string, Uint8Array>();
@@ -83,7 +83,7 @@ async function specMedia(fixtureId: string, spec: SiteSpec): Promise<Map<string,
 /** Writes a spec's static site under `dir/<id>/` and returns its homepage path relative to `dir`. */
 async function writeSpecSite(s: Extract<ItemSource, { render: "spec" }>, dir: string): Promise<string> {
   const spec = migrateSpec(JSON.parse(await readFile(path.join(REPO_ROOT, s.specFile), "utf8")));
-  const media = await specMedia(s.fixture, spec);
+  const media = s.media ? await specMedia(s.media, spec) : new Map<string, Uint8Array>();
   for (const [rel, data] of siteFiles(spec, media, { imageWidths: loadConfig().images.widths })) {
     const file = path.join(dir, s.id, rel);
     await mkdir(path.dirname(file), { recursive: true });
@@ -107,8 +107,8 @@ async function hideFixedBars(page: Page): Promise<void> {
 
 type Shot = "desk" | "deskFull" | "phone" | "phoneFull";
 
-/** Renders one page at both widths into four PNGs in `pngDir` (`<id>-<shot>.png`). */
-async function shoot(browser: Browser, id: string, url: string, pngDir: string, fontsCss: string | null): Promise<void> {
+/** Renders one page at both widths into four PNGs in `pngDir` (`<id>-<shot>.png`); also pnpm references:shots. */
+export async function shoot(browser: Browser, id: string, url: string, pngDir: string, fontsCss: string | null): Promise<void> {
   for (const [name, s] of Object.entries(SHOTS) as [keyof typeof SHOTS, (typeof SHOTS)[keyof typeof SHOTS]][]) {
     const phone = name === "phone";
     const ctx = await browser.newContext({
@@ -198,7 +198,7 @@ export async function buildRound(opts: BuildOptions): Promise<BuildResult> {
     sources = sources.filter((s) => opts.only!.includes(s.id));
   }
   const items = sources.map(toItem);
-  const pairs = buildPairs(items, `okus-round-${opts.round}`);
+  const pairs = roundPairs(opts.round, items);
 
   const work = await mkdtemp(path.join(tmpdir(), "sb-okus-"));
   const pngDir = path.join(work, "png");
@@ -270,7 +270,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   const r = await buildRound({ round, ...(only ? { only } : {}), localFonts: args.includes("--local-fonts"), log: (l) => console.log(l) });
   const count = (k: string) => r.items.filter((i) => i.kind === k).length;
   console.log(`\nRound ${round}: ${path.relative(REPO_ROOT, r.dir)}`);
-  console.log(`  items ${r.items.length} (references ${count("reference")}, goldens ${count("golden")}, composed ${count("composed")}, sketches ${count("sketch")}), pairs ${r.pairs.length}`);
+  console.log(`  items ${r.items.length} (references ${count("reference")}, goldens ${count("golden")}, composed ${count("composed")}, studio ${count("studio")}, sketches ${count("sketch")}), pairs ${r.pairs.length}`);
   console.log(`  pictures ${r.items.length * 4}, total ${(r.bytes / 1024 / 1024).toFixed(2)} MB (budget ${ROUND_BUDGET_BYTES / 1024 / 1024} MB); whole pages q${r.step.quality} at ${r.step.deskWidth}/${r.step.phoneWidth} px`);
   if (r.cut.length) console.log(`  cut at ${JPEG_MAX} px: ${r.cut.join(", ")}`);
   console.log(`  ${Math.round((Date.now() - started) / 1000)} s`);

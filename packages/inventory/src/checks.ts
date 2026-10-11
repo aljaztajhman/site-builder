@@ -53,6 +53,8 @@ export const BYTE_BUDGET: Partial<Record<AssetKind, number>> = {
   icon: 1024,
   /** A motion preset: its own partial (styles/vocab/motion/<name>.css), minified; the family sheet joins them. */
   motion: 1024,
+  /** A studio reference is a whole page made of other assets; it adds nothing of its own (references.ts). */
+  reference: 0,
 };
 /**
  * The composed stylesheets, minified (docs/plans/studio-phase1-design.md §3.4.1, §3.4.7): the core sheet (spec v19,
