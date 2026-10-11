@@ -1,0 +1,13 @@
+{
+  "id": "avtomehanika-sever",
+  "stance": "registration-plate",
+  "trades": [
+    "car-repair"
+  ],
+  "title": "Avtomehanika Sever, registrska tablica",
+  "gapNote": "The plate is a fact object (plate treatment with the town code written by code), so it is a small plate of the phone number, not the business name set as a short plate across the hero (type-treatment/plate-numerals doesn't exist, and a fact value is capped at 24 characters). Its code is MS with a dot, as the table gives it; there is no way to make the plate a full-width band with a rim, only a pill sized to its text. Prices as plates put the amount on a small plate with the name beneath, which reads well, but the plate is always the same blue-edged chip: no rim colour from the palette and no embossed type. The hero's uppercase heading breaks mid-word when a word is longer than the measure (found at size 5: AVTOMOBIL / E), so the size had to drop to 4; the language has no way to set a longer measure or hyphenation for uppercase display type. The single band of colour the client asked for is the primary blue in type; there is no band element (a ribbon needs text, a field spans a whole column range).",
+  "sources": [
+    "stance registration-plate (a plate with the contact number, capitals, one band of colour)",
+    "M Tablica (workshop sign with a big number)"
+  ]
+}
