@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { STANCES, fillPreset, hasSlotMarker, parsePresetId, presetContext, presetSection, slotValue, validateComposition, validatePreset, walkStrings, type PresetSources } from "@sb/spec";
-import { COMPOSITION_PRESETS, inventory, shortlist } from "../src/index.ts";
+import { COMPOSITION_PRESETS, Registry, registeredAssets, shortlist } from "../src/index.ts";
 
 /**
  * Composition presets (studio-phase1-design.md §5, I3): every preset is well formed, registered as a draft, and, filled
@@ -27,7 +27,7 @@ function sourcesFor(fixture: string, intent: string): PresetSources {
 
 describe("composition presets are registered", () => {
   it("as kind composition drafts with their intent, never in a shortlist until approved", () => {
-    const reg = inventory();
+    const reg = new Registry().registerAll(registeredAssets());
     expect(COMPOSITION_PRESETS.length).toBeGreaterThanOrEqual(3);
     for (const p of COMPOSITION_PRESETS) {
       const a = reg.byId(p.id);

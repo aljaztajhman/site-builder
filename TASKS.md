@@ -36,6 +36,9 @@ Phase 2, the studio (paid ≈ €27 in October, per meta/budget; model roles: Op
 - [ ] S6 site kit + other pages composed with it ≈ €3
 - [ ] S7 owner UX: "Oblikovalec dela" progress, "Druge zamisli", "Predlagaj drugačno", editor slots (free)
 (S1–S7 are one HQ item, `it-ai-designer`, until Phase 1 lands; split then.)
+- [x] P4b approval round 1 applied (2026-10-11): owner rated all 30 pages, 51 parts flagged → 106 approved, 49 rejected in `packages/inventory/src/decisions.json` (213 decisions). Heroes flagged on 17 of 30 pages ("too basic", "drawings too basic"), colours on 10 ("rumeno ozadje je katastrofa"); p03's headings read oddly in Slovene. 286 drafts stay unshown (88 pairings, 50 palettes, 38 fonts, 18 compositions …) (`it-studio-approval-round`)
+- [ ] The composer places none of the 18 remaining draft compositions (faq, steps, page-head, rooms intents aren't on a composed homepage), so a round 2 can't show them; and only 5 of 50 draft palettes. Round 2 needs other pages or a palette-first plan (`it-studio-approval-round`)
+- [ ] Hero bar: 9 of 20 shown hero presets were rejected and the owner's notes say heroes and line drawings are too basic; the director must lean on photo, AI picture and linocut/poster heroes (`sb-hero-style`), and the S4 critic should weigh the first screen hardest
 Phase 3, measure and ship (≈ €15–20 + €15 reserve): 40 fixtures + twins, pairwise "same template?", owner blind A/B in Okus, report in eval/, HQ decision on switching on.
 Phase 4: scoped CSS (own decision), sketch lab weekly, inventory waves 2–3, whole-site redesign in the editor, photo shot list from the analyst.
 Found while planning: ai-designer-spec.md allowed a `dots` surface texture, which the 2026-10-01 decision (`sb-images-more`) keeps out; removed from the spec.

@@ -2,10 +2,12 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { BusinessType, IMAGE_TREATMENTS, Imagery, MASKS, STANCES, TREATMENT_META, contrast, mix, subtypeFits } from "@sb/spec";
 import { STARTER_NAMES, VOCAB_DIR } from "@sb/render";
-import { MASK_DRAFTS, TREATMENT_DRAFTS, addedNames, inventory, paletteOf, shippedColors } from "../src/index.ts";
+import { MASK_DRAFTS, Registry, TREATMENT_DRAFTS, addedNames, inventory, paletteOf, registeredAssets, shippedColors } from "../src/index.ts";
 
 /** The I4 imagery drafts (I4a masks, I4b treatments): registered as drafts, tagged with real trades and stances, and dim's contrast promise. */
 const registry = inventory();
+/** As each batch registered it, before the owner's gallery decisions (approval rounds) are applied. */
+const registered = new Registry().registerAll(registeredAssets());
 const added = { mask: addedNames(MASKS, STARTER_NAMES.masks), treatment: addedNames(IMAGE_TREATMENTS, STARTER_NAMES.treatments) };
 const tables = { mask: MASK_DRAFTS, treatment: TREATMENT_DRAFTS };
 const stanceIds = new Set(STANCES.map((s) => s.id));
@@ -17,7 +19,7 @@ describe.each(["mask", "treatment"] as const)("%s drafts", (kind) => {
 
   it("each is registered as a draft of its kind, with bytes of its own (its partial's rules)", () => {
     for (const n of added[kind]) {
-      const a = registry.byId(`${kind}/${n}`);
+      const a = registered.byId(`${kind}/${n}`);
       expect(a, n).toBeDefined();
       expect(a!.status, n).toBe("draft");
       expect(a!.license, n).toBe("own");

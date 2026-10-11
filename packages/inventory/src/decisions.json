@@ -1,4 +1,549 @@
 {
+  "composition/area/heading-beside-line": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p10, p26, not flagged"
+  },
+  "composition/area/signpost-band": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p13"
+  },
+  "composition/area/where-with-pin": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p12, not flagged"
+  },
+  "composition/booking/band-split": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p05, not flagged"
+  },
+  "composition/booking/book-beside-hours": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p03, p04, p08"
+  },
+  "composition/booking/heading-book-call": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p11, not flagged"
+  },
+  "composition/booking/town-stamp": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p07, p09, not flagged"
+  },
+  "composition/call/heading-actions-band": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p10"
+  },
+  "composition/call/heading-split-ruled": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p05, not flagged"
+  },
+  "composition/call/phone-plate": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p06, not flagged"
+  },
+  "composition/call/photo-scrim": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p16, not flagged"
+  },
+  "composition/contact/details-and-map": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p26"
+  },
+  "composition/contact/details-hours": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p10, p15, p23, not flagged"
+  },
+  "composition/contact/details-row-map": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p04, p05, p06, p25, p27, p29, not flagged"
+  },
+  "composition/contact/facts-cards": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p08, p14, p18, p21, p30, not flagged"
+  },
+  "composition/contact/facts-strip": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p07, p17, p22, p28, not flagged"
+  },
+  "composition/contact/house-plate-map": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p09, not flagged"
+  },
+  "composition/contact/phone-call-out": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p01, not flagged"
+  },
+  "composition/gallery/arch-row": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p25, not flagged"
+  },
+  "composition/gallery/fan-beside": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p28, not flagged"
+  },
+  "composition/gallery/mosaic": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p22, not flagged"
+  },
+  "composition/gallery/photo-grid": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p19, not flagged"
+  },
+  "composition/gallery/postcards": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p27, not flagged"
+  },
+  "composition/gallery/triptych-aside": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p11, p21, not flagged"
+  },
+  "composition/gallery/wall-bleed": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p26"
+  },
+  "composition/gallery/wide-then-pair": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p23"
+  },
+  "composition/hero/arch-on-dark": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p15, not flagged"
+  },
+  "composition/hero/bleed-print": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p20, not flagged"
+  },
+  "composition/hero/broadsheet-masthead": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p07, p24"
+  },
+  "composition/hero/card-over-photo": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p21, not flagged"
+  },
+  "composition/hero/disc-photo-tag": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p13, not flagged"
+  },
+  "composition/hero/docket-on-band": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p06"
+  },
+  "composition/hero/enamel-house-number": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p09"
+  },
+  "composition/hero/headline-drawn-trade": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p17, p29, not flagged"
+  },
+  "composition/hero/headline-facts": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p04, p08"
+  },
+  "composition/hero/headline-large-ruled": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p01"
+  },
+  "composition/hero/label-card-arch": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p18"
+  },
+  "composition/hero/phone-giant-rope": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p02"
+  },
+  "composition/hero/photo-bottom-band": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p23, p26, p28"
+  },
+  "composition/hero/photo-cover-band": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p11"
+  },
+  "composition/hero/photo-dark-panel": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p03, not flagged"
+  },
+  "composition/hero/photo-left": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p10, not flagged"
+  },
+  "composition/hero/plate-ribbon": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p14, not flagged"
+  },
+  "composition/hero/signpost-pole": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p16, not flagged"
+  },
+  "composition/hero/split-photo": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p12, p27, not flagged"
+  },
+  "composition/hero/three-arches": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p19, not flagged"
+  },
+  "composition/highlights/broadsheet": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p13, not flagged"
+  },
+  "composition/highlights/checker-fields": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p12"
+  },
+  "composition/highlights/dark-panel": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p23, not flagged"
+  },
+  "composition/highlights/large-lines": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p01"
+  },
+  "composition/highlights/lead-statement": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p17, p19, not flagged"
+  },
+  "composition/highlights/over-photo": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p20, not flagged"
+  },
+  "composition/highlights/photo-list": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p22, not flagged"
+  },
+  "composition/highlights/ruled-rows": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p14, not flagged"
+  },
+  "composition/highlights/staircase": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p21"
+  },
+  "composition/highlights/two-columns": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p16, p25, not flagged"
+  },
+  "composition/hours/arch-photo-hours": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p06, p14, not flagged"
+  },
+  "composition/hours/compact-list": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p07, p09, p13, p15, p16, p18, p19, p21, p24, p27, p28, not flagged"
+  },
+  "composition/hours/heading-table": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p04, p08, p12"
+  },
+  "composition/hours/poster-band-hours": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p03"
+  },
+  "composition/hours/station-board": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p02, not flagged"
+  },
+  "composition/hours/week-chart": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p10, p22, not flagged"
+  },
+  "composition/menu/card-over-photo": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p16, not flagged"
+  },
+  "composition/menu/dark-board": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p18, not flagged"
+  },
+  "composition/menu/first-two-band": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p20, not flagged"
+  },
+  "composition/menu/leaders-column": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p13, not flagged"
+  },
+  "composition/menu/leaders-two-columns": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p15, not flagged"
+  },
+  "composition/menu/plates-then-list": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p24, not flagged"
+  },
+  "composition/notice/framed-card": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p10, not flagged"
+  },
+  "composition/notice/one-line-bar": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p01"
+  },
+  "composition/prices/band-large-rows": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p15"
+  },
+  "composition/prices/board-offers": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p18"
+  },
+  "composition/prices/leader-rows-notes": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p19, not flagged"
+  },
+  "composition/prices/ledger-sheet": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p21, not flagged"
+  },
+  "composition/prices/photo-rates": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p11"
+  },
+  "composition/prices/price-tags-row": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p14"
+  },
+  "composition/prices/receipt-docket": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p12, not flagged"
+  },
+  "composition/prices/rows-table": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p01, p02, not flagged"
+  },
+  "composition/products/photo-grid": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p02, p03, p15, not flagged"
+  },
+  "composition/products/price-columns": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p10, p11, p18, p20, p26, p28, not flagged"
+  },
+  "composition/products/round-plates": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p01, p13, p16, p21, p24, not flagged"
+  },
+  "composition/services/aside-note": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p12, p23, not flagged"
+  },
+  "composition/services/list-beside": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p04, p09, not flagged"
+  },
+  "composition/services/named-rows": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p08, p30"
+  },
+  "composition/services/photo-bleed-list": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p17, not flagged"
+  },
+  "composition/services/photo-cards-lead": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p14"
+  },
+  "composition/services/poster-names": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p19"
+  },
+  "composition/services/small-cards": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p05, p07, not flagged"
+  },
+  "composition/services/two-column-named": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p27"
+  },
+  "composition/story/door-plate": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p17, not flagged"
+  },
+  "composition/story/heading-beside-text": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p10, not flagged"
+  },
+  "composition/story/name-figure": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p16, not flagged"
+  },
+  "composition/story/narrow-column": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p06, p09, not flagged"
+  },
+  "composition/story/photo-left-text": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p05, not flagged"
+  },
+  "composition/story/photo-owner": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p02, not flagged"
+  },
+  "composition/story/photo-pair-offset": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p11, not flagged"
+  },
+  "composition/story/photo-right-text": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p13, not flagged"
+  },
+  "composition/story/round-photo": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p18, not flagged"
+  },
+  "composition/story/text-owner": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p15, not flagged"
+  },
+  "composition/team/dark-roster": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p17, not flagged"
+  },
+  "composition/team/door-plates": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p15"
+  },
+  "composition/team/lead-name": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p07, not flagged"
+  },
+  "composition/team/name-role-list": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p14, not flagged"
+  },
+  "composition/team/names-in-columns": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p12"
+  },
+  "composition/team/photo-beside-names": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p06, not flagged"
+  },
+  "fact/door-plate": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p15"
+  },
+  "fact/house-number": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p09"
+  },
+  "fact/signpost": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p13"
+  },
+  "fact/split": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p07, p24"
+  },
   "icon/line/accessible-toilet": {
     "status": "rejected",
     "at": "2026-10-11T11:52:59.931Z"
@@ -159,13 +704,48 @@
     "status": "approved",
     "at": "2026-10-11T11:52:59.931Z"
   },
+  "mask/arch-low": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p22, not flagged"
+  },
+  "mask/postcard": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p27, not flagged"
+  },
+  "mask/triptych": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p11, p21, not flagged"
+  },
   "motif/accountant/ledger-pen-line": {
     "status": "approved",
     "at": "2026-10-11T11:52:59.931Z"
   },
+  "motif/bakery/boule-linocut-solid": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p18"
+  },
+  "motif/bakery/loaf-potica-scene-solid": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p15, not flagged"
+  },
   "motif/bakery/peel-loaf-line": {
     "status": "rejected",
     "at": "2026-10-11T11:52:59.931Z"
+  },
+  "motif/bakery/sun-loaf-shapes-cut": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p01, p26"
+  },
+  "motif/bakery/wheat-ear-line": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p03, p21, not flagged"
   },
   "motif/car-repair/torque-wrench-line": {
     "status": "approved",
@@ -227,8 +807,203 @@
     "status": "rejected",
     "at": "2026-10-11T11:52:59.931Z"
   },
+  "ornament/rope-line": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p02"
+  },
   "ornament/trail-blaze-line": {
     "status": "rejected",
     "at": "2026-10-11T11:52:59.931Z"
+  },
+  "palette/bakery-blue": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p03, not flagged"
+  },
+  "palette/bauhaus": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p17, not flagged"
+  },
+  "palette/beehive-panel": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p11"
+  },
+  "palette/beehive-sky": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p13"
+  },
+  "palette/beton-brut": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p22, not flagged"
+  },
+  "palette/cable-colours": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p29, not flagged"
+  },
+  "palette/cafe-awning": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p26, not flagged"
+  },
+  "palette/copper-slate": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p30, not flagged"
+  },
+  "palette/cornflower-rye": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p28, not flagged"
+  },
+  "palette/damson": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p24, not flagged"
+  },
+  "palette/departure-board": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p23, not flagged"
+  },
+  "palette/detour-orange": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p25, not flagged"
+  },
+  "palette/docket-carbon": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p12, not flagged"
+  },
+  "palette/docket-pink-copy": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p06, not flagged"
+  },
+  "palette/enamel-cobalt": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p09, not flagged"
+  },
+  "palette/hazard-yellow": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p05"
+  },
+  "palette/kozolec": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p18, not flagged"
+  },
+  "palette/licitar": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p10, not flagged"
+  },
+  "palette/linocut": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p02, not flagged"
+  },
+  "palette/mint-kiosk": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p21, not flagged"
+  },
+  "palette/overalls": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p27"
+  },
+  "palette/photo-book": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p07"
+  },
+  "palette/recipe-card": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p16"
+  },
+  "palette/red-pencil": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p19"
+  },
+  "palette/seed-packet-bean": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p15"
+  },
+  "palette/shopfront-gilt": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p20"
+  },
+  "palette/stencil-crate": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p14, not flagged"
+  },
+  "palette/swiss-red": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p04, p08, not flagged"
+  },
+  "treatment/matte": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p20, not flagged"
+  },
+  "type-treatment/masthead": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p07, p24"
+  },
+  "type-treatment/ruled-total": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p21, not flagged"
+  },
+  "type-treatment/typed-line": {
+    "status": "rejected",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "flagged on p21"
+  },
+  "wordmark/lockup": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p01, p03, p08, p21, p23, p27, not flagged"
+  },
+  "wordmark/monogram": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p05, p06, p20, p22, p26, p28, not flagged"
+  },
+  "wordmark/plain": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p11, p13, p16, p17, p18, not flagged"
+  },
+  "wordmark/plate": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p12, p24, not flagged"
+  },
+  "wordmark/stacked-caps": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p10, p15, p19, p25, not flagged"
+  },
+  "wordmark/stamp": {
+    "status": "approved",
+    "at": "2026-10-11T18:39:34.680Z",
+    "reason": "shown on p02, p04, p07, p09, p14, p29, p30, not flagged"
   }
 }
