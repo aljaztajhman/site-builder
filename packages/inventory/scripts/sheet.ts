@@ -3,8 +3,8 @@
  *
  * Kinds without assets get an empty sheet (<kind>.html) with a note. `--ids` also photographs ids that are not
  * registered yet, as draft assets (an asset maker's preview before registering). Drawings, compositions (one sheet per
- * intent), motion presets (three frames: start, mid, end), practical-fact icons, wordmarks (20 Slovene names) and
- * dividers (the edge between two sections) are rendered by pages-v2.ts.
+ * intent), motion presets (three frames: start, mid, end), practical-fact icons, wordmarks (20 Slovene names), dividers
+ * (the edge between two sections) and textures (behind text on the three grounds) are rendered by pages-v2.ts.
  *
  * Contact sheets of the design inventory (design-studio.md §4.2): every asset of a kind photographed at 360 and 1280 px
  * into eval/runs/inventory/ (gitignored). Components (sections, motifs, treatments, masks, fact objects, header and
@@ -26,7 +26,7 @@ import { fixturesDir, paletteOverviewHtml, repoRoot, type SheetPage } from "./pa
 import { pagesFor } from "./pages-v2.ts";
 import { emptySheetHtml, sheetGroups, sheetHtml, type Shot } from "./sheet-html.ts";
 
-const SHEET_KINDS: AssetKind[] = ["font", "pairing", "palette", "motif", "submotif", "treatment", "mask", "factObject", "header", "footer", "section", "ornament", "divider", "composition", "icon", "motion", "wordmark"];
+const SHEET_KINDS: AssetKind[] = ["font", "pairing", "palette", "motif", "submotif", "treatment", "mask", "factObject", "header", "footer", "section", "ornament", "divider", "texture", "composition", "icon", "motion", "wordmark"];
 const WIDTHS = [360, 1280] as const;
 /** The tallest part of a page a thumbnail keeps, per width. */
 const MAX_HEIGHT: Record<(typeof WIDTHS)[number], number> = { 360: 3600, 1280: 2400 };

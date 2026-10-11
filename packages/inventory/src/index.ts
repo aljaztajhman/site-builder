@@ -11,6 +11,7 @@ import { inventoryFontAssets, inventoryPairingAssets } from "./type-inventory.ts
 import { drawingAssets } from "./drawings.ts";
 import { iconAssets } from "./icons.ts";
 import { imageryDraftAssets } from "./imagery.ts";
+import { textureAssets } from "./textures.ts";
 import type { Asset } from "./schema.ts";
 
 export * from "./schema.ts";
@@ -32,10 +33,11 @@ export { PAIRING_TAGS } from "./pairing-tags.ts";
 export { DRAWING_DATA, DRAWING_META, drawingAssets, drawingBytes, drawingStyleOf } from "./drawings.ts";
 export { ICON_NOTES, iconAssets, iconBytes } from "./icons.ts";
 export { MASK_DRAFTS, TREATMENT_DRAFTS, addedNames, imageryDraftAssets, type ImageryDraft } from "./imagery.ts";
+export { TEXTURE_TAGS, textureAssets, textureNames, texturePartial, texturePartialFile, type TexturePartial } from "./textures.ts";
 
 /**
  * Every registered asset: what ships today (approved), then the drafts (curated palettes, the type inventory, the
- * composition presets, then the inventory batches: drawings, practical-fact icons, masks and treatments), before the owner's decisions are applied.
+ * composition presets, then the inventory batches: drawings, practical-fact icons, masks and treatments, textures), before the owner's decisions are applied.
  */
 export function registeredAssets(): Asset[] {
   return [
@@ -47,6 +49,7 @@ export function registeredAssets(): Asset[] {
     ...drawingAssets(),
     ...iconAssets(),
     ...imageryDraftAssets(),
+    ...textureAssets(),
   ];
 }
 

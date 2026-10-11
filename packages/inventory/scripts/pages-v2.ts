@@ -1,9 +1,9 @@
 /**
  * Contact-sheet pages for the composition language's inventory kinds (docs/plans/studio-phase1-design.md §5): drawings
  * (motifs and ornaments in the Drawing format), compositions (filled presets), motion presets (three frames),
- * practical-fact icons, wordmarks (20 real Slovene names) and dividers (the edge between two sections). Each page is a
- * small site spec the real component library renders, so a sheet equals what a site renders. `pagesFor` here is the
- * sheet's entry point: these kinds first, then the older kinds in pages.ts.
+ * practical-fact icons, wordmarks (20 real Slovene names), dividers (the edge between two sections) and section
+ * textures. Each page is a small site spec the real component library renders, so a sheet equals what a site renders.
+ * `pagesFor` here is the sheet's entry point: these kinds first, then the older kinds in pages.ts.
  */
 import { readFileSync } from "node:fs";
 import { drawingData } from "@sb/components";
@@ -225,6 +225,35 @@ export function dividerPages(asset: Asset): SheetPage[] {
   });
 }
 
+/**
+ * A section texture (`surface.texture`) behind a heading and a paragraph on the three grounds, in two palettes: the
+ * texture as a site paints it, under the text it must stay quiet behind.
+ */
+export function texturePages(asset: Asset): SheetPage[] {
+  const { base, page } = pageMaker(asset);
+  const surface = { texture: assetName(asset.id) };
+  return palettes().map((dir, i) =>
+    page(
+      LETTER(i),
+      dir.id,
+      withHome(
+        inDirection(base, dir),
+        TONES.map((tone) =>
+          section(tone, {
+            surface,
+            minHeight: "s",
+            elements: [
+              el("h", { kind: "heading", text: `Kruh, ki vzhaja čez noč · ${TONE_LABEL[tone]}`, level: 2, size: 5 }, 1, 8, 1, 0),
+              el("t", { kind: "text", paragraphs: ["Vsako jutro zamesimo, počakamo in spečemo. Testo počiva vso noč, zato je skorja hrustljava in sredica mehka."] }, 1, 7, 2, 1),
+            ],
+          }),
+        ),
+        "x",
+      ),
+    ),
+  );
+}
+
 /** Sample elements for the kinds a motion preset animates. */
 function motionElements(targets: readonly string[], images: string[]): Props[] {
   const out: Props[] = [];
@@ -292,6 +321,8 @@ export function pagesFor(asset: Asset): SheetPage[] {
       return wordmarkPages(asset);
     case "divider":
       return dividerPages(asset);
+    case "texture":
+      return texturePages(asset);
     default:
       return pagesForV1(asset);
   }

@@ -11,6 +11,7 @@ import {
   drawingAssets,
   iconAssets,
   imageryDraftAssets,
+  textureAssets,
   needsPatternCheck,
   patternCheck,
   assetName,
@@ -71,7 +72,7 @@ describe("today's assets are registered", () => {
     // The registered defaults; the owner's decisions (decisions.json, decisions.test.ts) may change them.
     expect(todaysAssets().every((a) => a.status === "approved")).toBe(true);
     expect(draftAssets().length).toBeGreaterThan(0);
-    const newOnes = [...draftAssets(), ...inventoryFontAssets(), ...inventoryPairingAssets(), ...compositionAssets(), ...drawingAssets(), ...iconAssets(), ...imageryDraftAssets()];
+    const newOnes = [...draftAssets(), ...inventoryFontAssets(), ...inventoryPairingAssets(), ...compositionAssets(), ...drawingAssets(), ...iconAssets(), ...imageryDraftAssets(), ...textureAssets()];
     expect(newOnes.every((a) => a.status === "draft")).toBe(true);
     expect(assets.map((a) => a.id)).toEqual([...todaysAssets(), ...newOnes].map((a) => a.id));
     const unpickable = assets.filter((a) => a.pickable === false).map((a) => a.id);

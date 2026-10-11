@@ -41,7 +41,7 @@ const SHIPPED: Record<VocabKey, readonly string[]> = {
     "crop",
   ],
   IMAGE_TREATMENTS: ["none", "duotone", "tint", "grain", "mono-contrast", "bleach", "high-key", "low-key", "faded", "matte", "toned", "newsprint", "grade", "overprint", "field", "dim"],
-  TEXTURES: ["none", "grain", "lines"],
+  TEXTURES: ["none", "grain", "lines", "press-grain", "linen-weave", "stone", "bark", "raw-board", "board-concrete", "laid-paper", "kraft-fibre", "gouge", "terrazzo"],
   EDGES: ["straight", "rule", "cut", "torn", "drawing"],
   FACT_OBJECTS: ["numeral", "plate", "stamp", "ticket", "seal", "tag"],
   TYPE_TREATMENTS: ["none", "stacked", "knockout"],
