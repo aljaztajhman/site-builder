@@ -6,6 +6,7 @@ import {
   CONTRAST_RULES,
   OFF_BLACK_MIN,
   OFF_WHITE_MAX,
+  REPEATABLE,
   contrast,
   enforceDesign,
   hexToHsl,
@@ -25,7 +26,8 @@ import { PATTERN_TILES, type PatternTile } from "./tiles.ts";
 
 /**
  * Bytes an asset may add to a page, per kind. Fonts: per file (a pairing is two files). Motifs and the rest: the CSS
- * rules that apply only when the asset is used (bytes.ts); a motif's inline SVG is in the page HTML and not counted.
+ * rules that apply only when the asset is used (bytes.ts); a code-drawn motif's inline SVG is in the page HTML and not
+ * counted. A drawn motif or ornament (Drawing format, drawings.ts) counts its inline SVG: motif ≤ 6 KiB, ornament ≤ 8 KiB.
  * composed:free carries the whole composed stylesheet (linked only by pages with a composed section), hence its own line.
  */
 export const BYTE_BUDGET: Partial<Record<AssetKind, number>> = {
@@ -33,6 +35,7 @@ export const BYTE_BUDGET: Partial<Record<AssetKind, number>> = {
   pairing: 240 * 1024,
   palette: 0,
   motif: 6 * 1024,
+  ornament: 8 * 1024,
   submotif: 1.5 * 1024,
   treatment: 2 * 1024,
   mask: 2 * 1024,
@@ -109,13 +112,11 @@ export function shippedColors(colors: Colors, dir: Direction): Colors {
   return enforceDesign(design, dir).colors;
 }
 
-/**
- * The kinds the dot/grid detector checks (G19). Textures only for now: REPEATABLE drawings join when the drawing list
- * and its REPEATABLE set exist (I5), through a tag or this list.
- */
+/** The kinds the dot/grid detector checks (G19): every texture; drawings only when they tile (spec REPEATABLE). */
 export const PATTERN_CHECKED_KINDS: readonly AssetKind[] = ["texture"];
 
-export const needsPatternCheck = (a: Pick<Asset, "kind">): boolean => PATTERN_CHECKED_KINDS.includes(a.kind);
+export const needsPatternCheck = (a: Pick<Asset, "kind"> & { id?: string }): boolean =>
+  PATTERN_CHECKED_KINDS.includes(a.kind) || (a.id !== undefined && (REPEATABLE as readonly string[]).includes(a.id));
 
 /** The dot/grid verdict for an asset's tile (tiles.ts); an asset that needs the check and has no tile fails. */
 export function patternCheck(a: Pick<Asset, "id">, tiles: Readonly<Record<string, PatternTile>> = PATTERN_TILES): PatternVerdict | { ok: false; reason: "no-tile"; detail: string } {

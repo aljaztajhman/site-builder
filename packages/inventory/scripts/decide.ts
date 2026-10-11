@@ -9,7 +9,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { Decisions, GalleryExport, formatDecisions, mergeDecisions, unknownDecisionIds } from "../src/decisions.ts";
-import { todaysAssets } from "../src/sources.ts";
+import { registeredAssets } from "../src/index.ts";
 
 const DEFAULT_FILE = path.join(path.dirname(fileURLToPath(import.meta.url)), "../src/decisions.json");
 
@@ -24,7 +24,7 @@ function main(argv: string[]): void {
   const rows = GalleryExport.parse(JSON.parse(readFileSync(input, "utf8")));
   const current = Decisions.parse(JSON.parse(readFileSync(file, "utf8")));
   const merged = mergeDecisions(current, rows, new Date());
-  const unknown = unknownDecisionIds(todaysAssets(), merged);
+  const unknown = unknownDecisionIds(registeredAssets(), merged);
   if (unknown.length) {
     console.error(`Not registered in the inventory: ${unknown.join(", ")}`);
     process.exit(1);

@@ -8,6 +8,8 @@ import { applyDecisions, shippedDecisions } from "./decisions.ts";
 import { draftAssets, todaysAssets } from "./sources.ts";
 import { compositionAssets } from "./compositions/index.ts";
 import { inventoryFontAssets, inventoryPairingAssets } from "./type-inventory.ts";
+import { drawingAssets } from "./drawings.ts";
+import type { Asset } from "./schema.ts";
 
 export * from "./schema.ts";
 export * from "./decisions.ts";
@@ -25,15 +27,26 @@ export { fontFile, fontLicenseFile } from "./bytes.ts";
 export { COMPOSITION_PRESETS, compositionAssets, compositionPreset } from "./compositions/index.ts";
 export { inventoryFontAssets, inventoryPairingAssets, FONT_TAGS, STANCE_FAMILIES, VOICES, type PairingTags, type StanceFamily, type Voice } from "./type-inventory.ts";
 export { PAIRING_TAGS } from "./pairing-tags.ts";
+export { DRAWING_DATA, DRAWING_META, drawingAssets, drawingBytes, drawingStyleOf } from "./drawings.ts";
+
+/**
+ * Every registered asset: what ships today (approved), then the drafts (curated palettes, the type inventory, the
+ * composition presets, then the inventory batches: drawings), before the owner's decisions are applied.
+ */
+export function registeredAssets(): Asset[] {
+  return [
+    ...todaysAssets(),
+    ...draftAssets(),
+    ...inventoryFontAssets(),
+    ...inventoryPairingAssets(),
+    ...compositionAssets(),
+    ...drawingAssets(),
+  ];
+}
 
 let cached: Registry | undefined;
 
-/**
- * The registry: every asset that ships today (approved), then the drafts (curated palettes, the type inventory, the
- * composition presets), each with the owner's gallery decision applied (built once).
- */
+/** The registry with every registered asset, each with the owner's gallery decision applied (built once). */
 export function inventory(): Registry {
-  return (cached ??= new Registry().registerAll(
-    applyDecisions([...todaysAssets(), ...draftAssets(), ...inventoryFontAssets(), ...inventoryPairingAssets(), ...compositionAssets()], shippedDecisions()),
-  ));
+  return (cached ??= new Registry().registerAll(applyDecisions(registeredAssets(), shippedDecisions())));
 }
