@@ -204,7 +204,8 @@ describe("composed-v2.css", () => {
 
   it("has a rule for every motion preset in MOTIONS, on its targets", () => {
     for (const m of MOTIONS) {
-      const block = walk(guarded()).find((b) => b.prelude.startsWith(`.cx-mo-${m} `));
+      // The animating rule (not the one that sets the preset's custom properties); a section-level preset's is the bare class.
+      const block = walk(guarded()).find((b) => new RegExp(`^\\.cx-mo-${m}(?![\\w-])`).test(b.prelude) && /(^|;)animation:/.test(b.body));
       expect(block, m).toBeDefined();
       for (const t of MOTION_META[m].targets) expect(block!.prelude, `${m} ${t}`).toContain(`.cx-el--${t}`);
     }
@@ -282,14 +283,15 @@ describe("motion", () => {
     for (const m of MOTIONS) {
       const later = render([plain("s_a"), sectionOf(props({ motion: m }))]);
       expect(openTag(later.html), m).toContain(`cx-mo-${m}`);
-      expect(composedIslands(later.page.sections)).toEqual([]);
+      expect(composedIslands(later.page.sections).length, m).toBe(MOTION_META[m].js ? 1 : 0);
       const opener = openTag(render([sectionOf(props({ motion: m }))]).html);
       if (MOTION_META[m].safeAtLoad) expect(opener, m).toContain(`cx-mo-${m}`);
       else expect(opener, m).not.toContain("cx-mo-");
     }
-    expect(MOTIONS.every((m) => MOTION_META[m].js === false)).toBe(true);
+    // Only counter needs the motion island (motion.js); every other preset is CSS.
+    expect(MOTIONS.filter((m) => MOTION_META[m].js)).toEqual(["counter"]);
     // The composed islands: the bar stepping aside for a calling fact, the marquee's pause (R2, ribbon move "loop") and the count-up (R3, fact.count); none is a motion preset.
-    expect(composedIslandFiles()).toEqual(["bar.js", "count.js", "ribbon.js"]);
+    expect(composedIslandFiles()).toEqual(["bar.js", "count.js", "motion.js", "ribbon.js"]);
     expect(COMPOSED_MOTION_ISLAND).toBe("motion.js");
   });
 });

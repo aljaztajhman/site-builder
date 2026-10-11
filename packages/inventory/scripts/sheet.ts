@@ -137,7 +137,8 @@ async function photographMotion(page: Page, base: string, url: string, width: nu
     }
     return n;
   });
-  if (!count) problems.push(`no cx-mo animation found for ${motion} (is animation-timeline supported?)`);
+  // sticky-stack is desktop only: on a phone it is a static section (three equal frames).
+  if (!count && !(motion === "sticky-stack" && width < 1024)) problems.push(`no cx-mo animation found for ${motion} (is animation-timeline supported?)`);
   const section = page.locator(`.cx-mo-${motion}`).first();
   for (const [i, f] of FRAMES.entries()) {
     await page.evaluate((at) => {
