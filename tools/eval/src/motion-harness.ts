@@ -56,14 +56,16 @@ function showcase(id: string, motion: string | undefined, o: { image?: string; l
       ? [
           el("e_l", { kind: "list", items: ["Beli kruh", "Kvasni kruh", "Pecivo"] }, 1, 6, 3, 2),
           el("e_f", { kind: "fact", value: "041 555 730", label: "Pokličite", treatment: "plate", size: 3 }, 1, 4, 4, 3),
-          el("e_i", { kind: "image", image: o.image, ratio: "4:3", mask: "none" }, 8, 5, 1, 4, 4),
+          // A countable numeral beside the phone number: the counter preset counts this one and must leave the phone alone.
+          el("e_n", { kind: "fact", value: "12", label: "vrst kruha", treatment: "numeral", size: 3 }, 1, 4, 5, 4),
+          el("e_i", { kind: "image", image: o.image, ratio: "4:3", mask: "none" }, 8, 5, 1, 5, 4),
         ]
       : []),
   ];
   const props = ComposedProps.parse({
     intent: "story",
     width: "contained",
-    rows: o.image ? 4 : 2,
+    rows: o.image ? 5 : 2,
     elements,
     ...(o.layer ? { background: [{ kind: "photo", image: o.layer, scrim: { role: "inverse", strength: 3 } }] } : {}),
     ...(motion ? { motion } : {}),
@@ -115,6 +117,11 @@ export interface MotionRun {
 export interface Harness {
   /** Measures one preset at one width. */
   measure(preset: string, width: Width): Promise<MotionRun>;
+  /**
+   * The counter preset's page at 1280 px: which fact values the island picked up (aria-label set), what the values read
+   * shortly after the section came into view, and what they read once the count has finished.
+   */
+  counter(reduce: boolean): Promise<{ picked: string[]; mid: string[]; end: string[] }>;
   close(): Promise<void>;
 }
 
@@ -221,6 +228,24 @@ export async function startHarness(presets: readonly string[] = MOTIONS): Promis
       const lcpMs = median(on);
       const lcpOffMs = median(off);
       return { preset, width, cls, lcpMs, lcpOffMs, lcpDelta: lcpMs - lcpOffMs, animations, reducedRunning: motion.running, reducedDiff: await pixelDiff(motion.png, still.png) };
+    },
+    async counter(reduce) {
+      const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, reducedMotion: reduce ? "reduce" : "no-preference" });
+      try {
+        const page = await ctx.newPage();
+        await page.goto(url("counter"), { waitUntil: "load" });
+        await page.waitForLoadState("networkidle");
+        const values = ".cx-mo-counter .cx-fact__value, .cx-mo-counter .plate__num";
+        const read = () => page.evaluate((q) => [...document.querySelectorAll(q)].map((e) => (e.textContent ?? "").trim()), values);
+        await page.evaluate(() => document.querySelector(".cx-mo-counter")!.scrollIntoView());
+        await page.waitForTimeout(250);
+        const mid = await read();
+        const picked = await page.evaluate(() => [...document.querySelectorAll(".cx-mo-counter [aria-label]")].map((e) => e.getAttribute("aria-label")!));
+        await page.waitForTimeout(1600);
+        return { picked, mid, end: await read() };
+      } finally {
+        await ctx.close();
+      }
     },
     async close() {
       await browser.close();
