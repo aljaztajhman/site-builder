@@ -1,0 +1,8 @@
+{
+  "id": "kmetija-ravnjak",
+  "stance": "pratika-almanac",
+  "trades": ["tourist-farm"],
+  "title": "Kmetija Ravnjak, pratika",
+  "gapNote": "The almanac's small one-colour pictures beside each entry don't exist (ornament/almanac-picture is pending, and the only farm drawing is a milk can): the months are h3 headings with one line each, and the single picture is the jam photo in a toned treatment, set below the September line rather than beside it. A month and its line take two elements, so five months use eleven of the twelve elements and two of the eight rows each; there is no room for a second picture. fact/calendar was tried for the months: its boxes shrink to their words (julij, avgust came out smaller than maj), it ignores the element colour (the red days stayed black) and reads as a form, so the red days are now heading colours. The column rule between the two almanac columns can't be drawn (divider/column-rule is pending; a section has no inner rules). The house photo sits in the ruled mask, the nearest to a printed picture frame; a woodcut or engraved treatment for it doesn't exist.",
+  "sources": ["N Markacija (the farm's place and season up front)", "stance pratika-almanac (a month per entry, small pictures, red for the days that matter)"]
+}
