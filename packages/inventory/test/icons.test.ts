@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { PRACTICAL_FACTS } from "@sb/spec";
-import { BYTE_BUDGET, ICON_NOTES, byteBudget, iconAssets, inventory, registeredAssets, shortlist, unknownDecisionIds } from "../src/index.ts";
+import { BYTE_BUDGET, ICON_NOTES, byteBudget, iconAssets, inventory, registeredAssets, shippedDecisions, shortlist, unknownDecisionIds } from "../src/index.ts";
 
 /** The practical-fact icon pilot (I9-p, studio-phase1-design.md §5): 40 line icons registered as drafts. */
 describe("practical-fact line icons", () => {
@@ -10,7 +10,8 @@ describe("practical-fact line icons", () => {
     expect(BYTE_BUDGET.icon).toBe(1024);
     for (const fact of PRACTICAL_FACTS) {
       const a = reg.byId(`icon/line/${fact}`)!;
-      expect(a, fact).toMatchObject({ kind: "icon", status: "draft", license: "own", phone: "ok" });
+      expect(a, fact).toMatchObject({ kind: "icon", license: "own", phone: "ok" });
+      expect(a.status, fact).toBe(shippedDecisions()[a.id]?.status ?? "draft");
       expect(a.tags.mood).toEqual(["line"]);
       expect(a.note).toBe(`I9-p: ${ICON_NOTES[fact]}`);
       expect(a.bytes, fact).toBeGreaterThan(200);
@@ -18,8 +19,10 @@ describe("practical-fact line icons", () => {
     }
   });
 
-  it("stay out of the director's shortlist until the owner approves them", () => {
-    expect(shortlist(inventory(), { trade: "bakery", limit: 1000 }).some((a) => a.kind === "icon")).toBe(false);
+  it("reach the director's shortlist only once the owner approves them", () => {
+    const icons = shortlist(inventory(), { trade: "bakery", limit: 1000 }).filter((a) => a.kind === "icon");
+    expect(icons.length).toBeGreaterThan(0);
+    for (const a of icons) expect(a.status, a.id).toBe("approved");
   });
 
   it("are registered, so the gallery's decisions on them merge (inventory:decide)", () => {
