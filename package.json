@@ -38,6 +38,8 @@
     "inventory:sheet": "tsx packages/inventory/scripts/sheet.ts",
     "inventory:pilot-context": "tsx packages/inventory/scripts/pilot-context.ts",
     "inventory:decide": "tsx packages/inventory/scripts/decide.ts",
+    "approval:build": "tsx tools/eval/src/approval-build.ts",
+    "approval:export": "tsx packages/inventory/scripts/approval-export.ts",
     "variety:skeleton": "tsx tools/eval/src/skeleton-sheet.ts",
     "variety:genome": "tsx tools/eval/src/genome-sheet.ts",
     "recordings:home":"tsx tools/eval/src/home-recordings.ts",

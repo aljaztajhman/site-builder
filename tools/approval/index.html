@@ -1,0 +1,268 @@
+<title>Approval round</title>
+<style>
+/* One example page at a time: the whole page at desktop and phone width, then its parts as cards to tap. */
+:root {
+  --bg: #eceeec;
+  --surface: #ffffff;
+  --fg: #151917;
+  --muted: #5a625e;
+  --line: #cfd5d1;
+  --accent: #2b44c9;
+  --accent-fg: #ffffff;
+  --yes: #17714a;
+  --no: #c02f22;
+  --no-bg: #fde9e6;
+  --shot: #dde1de;
+  --radius: 10px;
+  --font-ui: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121514; --surface: #1b1f1d; --fg: #e8ebe9; --muted: #9aa39e; --line: #323936;
+    --accent: #8e9dff; --accent-fg: #0e1230; --yes: #5ccf95; --no: #ff8f80; --no-bg: #3a1f1b; --shot: #262b29;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121514; --surface: #1b1f1d; --fg: #e8ebe9; --muted: #9aa39e; --line: #323936;
+  --accent: #8e9dff; --accent-fg: #0e1230; --yes: #5ccf95; --no: #ff8f80; --no-bg: #3a1f1b; --shot: #262b29;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font: 16px/1.5 var(--font-ui); margin: 0; }
+button, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.bar { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+.bar-in { max-width: 1240px; margin: 0 auto; padding: 10px 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.brand { font-weight: 800; font-size: 20px; }
+.count { color: var(--muted); font-variant-numeric: tabular-nums; margin-left: auto; }
+.progress { height: 4px; background: var(--line); }
+.progress span { display: block; height: 100%; background: var(--accent); transition: width .2s; }
+main { max-width: 1240px; margin: 0 auto; padding: 16px 16px 48px; }
+.ask { margin: 0 0 16px; max-width: 70ch; font-size: 17px; }
+.ask b { font-weight: 700; }
+h1 { font-size: clamp(22px, 3vw, 30px); line-height: 1.15; margin: 0 0 4px; }
+.sub { color: var(--muted); margin: 0 0 14px; font-size: 14px; }
+.shots { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 0.5fr); gap: 16px; align-items: start; }
+.shot { margin: 0; min-width: 0; display: grid; gap: 6px; }
+.frame { border: 1px solid var(--line); border-radius: var(--radius); background: var(--shot); overflow: hidden; max-height: 70vh; overflow-y: auto; }
+.frame img { display: block; width: 100%; height: auto; }
+.shot figcaption { font-size: 13px; color: var(--muted); }
+h2 { font-size: 18px; margin: 24px 0 8px; }
+.parts { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 12px; padding: 0; margin: 0; list-style: none; }
+.part { width: 100%; text-align: left; border: 2px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 0; cursor: pointer; overflow: hidden; display: block; }
+.part .pic { display: block; background: var(--shot); min-height: 48px; }
+.part img { display: block; width: 100%; height: auto; }
+.part .cap { display: flex; justify-content: space-between; gap: 8px; padding: 8px 10px; font-size: 14px; }
+.part .tag { font-weight: 600; color: var(--muted); white-space: nowrap; }
+.part .sw { display: flex; height: 56px; }
+.part .sw i { flex: 1; }
+.part .txt { padding: 14px 10px; font-size: 14px; color: var(--muted); overflow-wrap: anywhere; }
+.part[aria-pressed="true"] { border-color: var(--no); background: var(--no-bg); }
+.part[aria-pressed="true"] .tag { color: var(--no); }
+label.note { display: grid; gap: 6px; font-weight: 600; margin-top: 20px; max-width: 70ch; }
+textarea { width: 100%; min-height: 72px; resize: vertical; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 10px 12px; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 18px; }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: var(--radius); padding: 12px 20px; cursor: pointer; font-weight: 600; min-height: 48px; }
+.btn.primary { background: var(--yes); color: var(--surface); border-color: var(--yes); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.status { font-size: 13px; color: var(--muted); }
+.status.err { color: var(--no); font-weight: 600; }
+@media (max-width: 760px) {
+  .shots { grid-template-columns: minmax(0, 1fr); }
+  .shot.phone { width: min(260px, 72%); justify-self: center; }
+  .frame { max-height: 60vh; }
+}
+</style>
+
+<div class="bar"><div class="bar-in"><span class="brand">Approval round</span><span class="status" id="where"></span><span class="count" id="count"></span></div><div class="progress"><span id="bar" style="width:0"></span></div></div>
+<main id="app"><p class="status">Loading…</p></main>
+
+<script>
+/*
+ * Storage adapter (as tools/okus): in a claude.ai artifact with the `db` capability the taps go to the artifact's shared
+ * database, collection `flags`; anywhere else to localStorage (`approval:flags`). Every write is mirrored locally.
+ * Documents: flags/<pageId> = { pageId, flagged: [partId], note, done, at }
+ */
+window.ApprovalStore = (() => {
+  const KEY = (col) => `approval:${col}`;
+  const memory = {};
+  function localRead(col) {
+    try {
+      const raw = window.localStorage.getItem(KEY(col));
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return memory[col] ?? {};
+    }
+  }
+  function localWrite(col, all) {
+    memory[col] = all;
+    try {
+      window.localStorage.setItem(KEY(col), JSON.stringify(all));
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  const local = {
+    kind: "local",
+    async list(col) {
+      return Object.entries(localRead(col)).map(([id, data]) => ({ id, ...data }));
+    },
+    async get(col, id) {
+      return localRead(col)[id] ?? null;
+    },
+    async set(col, id, data) {
+      const all = localRead(col);
+      all[id] = data;
+      localWrite(col, all);
+    },
+  };
+  function shared(db) {
+    return {
+      kind: "db",
+      async list(col) {
+        const snap = await db.collection(col).get();
+        return snap.docs.filter((d) => d.exists).map((d) => ({ id: d.id, ...d.data() }));
+      },
+      async get(col, id) {
+        const snap = await db.collection(col).doc(id).get();
+        return snap.exists ? snap.data() : null;
+      },
+      async set(col, id, data) {
+        await local.set(col, id, data);
+        try {
+          await db.collection(col).doc(id).set(data);
+        } catch (e) {
+          if (e && e.code === "unavailable") {
+            await new Promise((r) => setTimeout(r, 400 + Math.random() * 600));
+            await db.collection(col).doc(id).set(data);
+          } else throw e;
+        }
+      },
+    };
+  }
+  async function open() {
+    let db = null;
+    try {
+      if (window.claude && typeof window.claude.use === "function") db = await window.claude.use("db");
+    } catch {
+      db = null;
+    }
+    return db ? shared(db) : local;
+  }
+  return { open, local, shared };
+})();
+</script>
+
+<script>
+(() => {
+  const app = document.getElementById("app");
+  const S = { pages: [], flags: new Map(), i: 0, store: null, err: "" };
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const cur = () => S.pages[S.i];
+  const doc = (p) => S.flags.get(p.id) ?? { pageId: p.id, flagged: [], note: "", done: false };
+
+  async function save(p, patch) {
+    const d = { ...doc(p), ...patch, pageId: p.id, at: new Date().toISOString() };
+    S.flags.set(p.id, d);
+    S.err = "";
+    try {
+      await S.store.set("flags", p.id, d);
+    } catch {
+      S.err = "Could not save to the shared store. Your taps are kept on this device.";
+    }
+    status();
+  }
+
+  function status() {
+    const done = [...S.flags.values()].filter((d) => d.done).length;
+    document.getElementById("count").textContent = `${S.i + 1} of ${S.pages.length} · ${done} done`;
+    document.getElementById("bar").style.width = `${(done / Math.max(1, S.pages.length)) * 100}%`;
+    const el = document.getElementById("where");
+    if (el) el.textContent = S.store ? (S.store.kind === "db" ? "saved to the shared store" : "saved in this browser only") : "";
+    const e = document.getElementById("err");
+    if (e) e.textContent = S.err;
+  }
+
+  function render() {
+    const p = cur();
+    const d = doc(p);
+    app.innerHTML = `
+      <p class="ask"><b>Would you be happy if a client's site looked like this?</b> Tap any part you don't like. Everything you don't tap on a page you mark done is approved.</p>
+      <h1>${esc(p.title)}</h1>
+      <p class="sub">Page ${esc(p.id)} · ${esc(p.fixtureId)} · seed ${p.seed}</p>
+      <div class="shots">
+        <figure class="shot desk"><div class="frame"><img src="${esc(p.desktop)}" alt="Whole page on a desktop screen" loading="lazy"></div><figcaption>On a desktop screen</figcaption></figure>
+        <figure class="shot phone"><div class="frame"><img src="${esc(p.phone)}" alt="Whole page on a phone" loading="lazy"></div><figcaption>On a phone</figcaption></figure>
+      </div>
+      <h2>Parts of this page: tap what you don't like</h2>
+      <ul class="parts">${p.parts.map(partCard).join("")}</ul>
+      <label class="note">Anything else about this page? (optional)<textarea id="note" maxlength="400">${esc(d.note ?? "")}</textarea></label>
+      <div class="actions">
+        <button type="button" class="btn" id="prev" ${S.i === 0 ? "disabled" : ""}>Previous</button>
+        <button type="button" class="btn primary" id="done">${d.done ? "Done (tap to reopen)" : "Done with this page"}</button>
+        <button type="button" class="btn" id="next" ${S.i === S.pages.length - 1 ? "disabled" : ""}>Next</button>
+        <span class="status err" id="err"></span>
+      </div>`;
+    app.querySelectorAll(".part").forEach((b) => b.addEventListener("click", () => toggle(b.dataset.part)));
+    document.getElementById("note").addEventListener("change", (e) => save(p, { note: e.target.value }));
+    document.getElementById("prev").addEventListener("click", () => go(S.i - 1));
+    document.getElementById("next").addEventListener("click", () => go(S.i + 1));
+    document.getElementById("done").addEventListener("click", markDone);
+    status();
+  }
+
+  function partCard(part) {
+    const flagged = doc(cur()).flagged.includes(part.id);
+    let pic = "";
+    if (part.swatches) pic = `<span class="sw">${part.swatches.map((c) => `<i style="background:${esc(c)}"></i>`).join("")}</span>`;
+    else if (part.image) pic = `<span class="pic"><img src="${esc(part.image)}" alt="" loading="lazy"></span>`;
+    else pic = `<span class="txt">${esc(part.assets.map((a) => a.split("/").slice(1).join("/")).join(", "))}</span>`;
+    return `<li><button type="button" class="part" data-part="${esc(part.id)}" aria-pressed="${flagged}">${pic}<span class="cap"><span>${esc(part.label)}</span><span class="tag">${flagged ? "Don't like" : "OK"}</span></span></button></li>`;
+  }
+
+  async function toggle(partId) {
+    const p = cur();
+    const d = doc(p);
+    const flagged = d.flagged.includes(partId) ? d.flagged.filter((x) => x !== partId) : [...d.flagged, partId];
+    const btn = app.querySelector(`.part[data-part="${CSS.escape(partId)}"]`);
+    btn.setAttribute("aria-pressed", String(flagged.includes(partId)));
+    btn.querySelector(".tag").textContent = flagged.includes(partId) ? "Don't like" : "OK";
+    await save(p, { flagged });
+  }
+
+  async function markDone() {
+    const p = cur();
+    const note = document.getElementById("note").value;
+    if (doc(p).done) {
+      await save(p, { done: false, note });
+      render();
+      return;
+    }
+    await save(p, { done: true, note });
+    if (S.i < S.pages.length - 1) go(S.i + 1);
+    else render();
+  }
+
+  function go(i) {
+    S.i = Math.max(0, Math.min(S.pages.length - 1, i));
+    render();
+    window.scrollTo(0, 0);
+  }
+
+  async function load() {
+    try {
+      S.pages = (await fetch("items.json").then((r) => r.json())).pages;
+    } catch {
+      app.innerHTML = `<p class="status err">The pages did not load. Reload; if that does not help, tell Claude.</p>`;
+      return;
+    }
+    S.store = await window.ApprovalStore.open();
+    for (const d of await S.store.list("flags").catch(() => [])) S.flags.set(d.pageId ?? d.id, d);
+    S.i = Math.max(0, S.pages.findIndex((p) => !doc(p).done));
+    render();
+  }
+  load();
+})();
+</script>

@@ -27,3 +27,7 @@ eval/look/
 
 # Okus round pictures: published as the Okus artifact's files, not kept in git (regenerate with pnpm okus:items).
 tools/okus/rounds/*/img/
+
+# Approval round pictures and sites: published as the approval artifact files, not kept in git (regenerate with pnpm approval:build).
+tools/approval/round/img/
+tools/approval/round/site/
