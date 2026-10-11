@@ -554,6 +554,36 @@ describe("G8 vocabulary names", () => {
   });
 });
 
+describe("G3 band photo on phones", () => {
+  const lightText = () => [heading("e_head", { col: 1, span: 6, row: 1 }, 0, { color: "background" }), text("e_text", { col: 1, span: 6, row: 2 }, 1, { color: "background" })];
+  it("rejects text that is light for the photo when the photo is a band above the content on phones (it sits on paper there)", () => {
+    const s = composed(lightText(), { background: [photoLayer(4)] });
+    expect(issue(s, /e_text is coloured for the photo but sits on the section's ground on phones \(band photo\) \([\d.]+ < 4\.5\)/, C)).toMatchObject({ code: "design", path: "/props/background/0/phone" });
+    expect(has(s, /e_head is coloured for the photo but sits on the section/, C)).toBe(true);
+    expect(has(composed(lightText(), { background: [{ ...photoLayer(4), phone: "band" }] }), /on phones/, C)).toBe(true);
+  });
+
+  it("passes with a cover photo, with a dark section ground, and with text in the tone's own colour", () => {
+    expect(has(composed(lightText(), { background: [{ ...photoLayer(4), phone: "cover" }] }), /on phones/, C)).toBe(false);
+    expect(has(composed(lightText(), { background: [photoLayer(4)] }, "inverse"), /on phones/, C)).toBe(false);
+    expect(has(composed(base(), { background: [photoLayer(3)] }, "inverse"), /on phones/, C)).toBe(false);
+  });
+
+  it("repairs by switching the photo to cover when the scrim holds the text there", () => {
+    const r = repairComposition(composed(lightText(), { background: [photoLayer(4)] }), C);
+    expect(paths(r)).toEqual(["/props/background/0/phone"]);
+    expect(props(r.section).background).toEqual([{ ...photoLayer(4), phone: "cover" }]);
+    expect(validateComposition(r.section, C)).toEqual([]);
+  });
+
+  it("reports without the phone repair when cover would not hold either", () => {
+    const s = composed(lightText(), { background: [photoLayer(1)] });
+    expect(has(s, /on phones/, C)).toBe(true);
+    expect(issue(s, /on phones/, C)).toMatchObject({ path: "/props/background/0/phone" });
+    expect(paths(repairComposition(s, C))).not.toContain("/props/background/0/phone");
+  });
+});
+
 describe("G9 element colours", () => {
   it("passes colours that hold against their ground (large text 3:1)", () => {
     const s = composed([heading("e_head", { col: 1, span: 6, row: 1 }, 0, { color: "accent", size: 3 }), text("e_text", { col: 1, span: 6, row: 2 }, 1, { color: "muted" }), sticker("e_s", { col: 8, span: 3, row: 1 }, 2, { fill: "band" })]);
@@ -585,6 +615,26 @@ describe("G9 element colours", () => {
     const r = repairComposition(onFill, C);
     expect(paths(r)).toEqual(["/props/elements/0/color"]);
     expect(elAt(r.section, 0)).toMatchObject({ fill: "band" });
+  });
+
+  it("checks a prices note (muted text) against the field it sits on, not the section's ground", () => {
+    const items = [{ name: "Hlebec", note: "Brez glutena", price: { amount: 3.2 } }];
+    const pr = (style = "rows") => prices("e_p", { col: 1, span: 6, row: 1 }, 0, { style, items });
+    // Inverse section: the note is on-inverse (light), but the field behind it is light.
+    const lightField = composed([pr()], { background: [field("background", [1, 6])] }, "inverse");
+    expect(issue(lightField, /e_p: onInverse on background \(note\) fails contrast \([\d.]+ < 4\.5\)/, C)).toMatchObject({ code: "design", path: "/props/background/0" });
+    // Default section: the note is muted, the field behind it is dark.
+    const darkField = composed([pr()], { background: [field("inverse", [1, 6])] });
+    expect(has(darkField, /e_p: muted on inverse \(note\) fails contrast/, C)).toBe(true);
+    // Passing: muted on a light field in a default section; a note-less prices; board notes inherit; no field, no extra check.
+    expect(has(composed([pr()], { background: [field("surface", [1, 6])] }), /\(note\)/, C)).toBe(false);
+    expect(has(composed([prices("e_p", { col: 1, span: 6, row: 1 }, 0)], { background: [field("background", [1, 6])] }, "inverse"), /\(note\)/, C)).toBe(false);
+    expect(has(composed([pr("board")], { background: [field("background", [1, 6])] }, "inverse"), /\(note\)/, C)).toBe(false);
+    expect(has(composed([pr()], {}, "inverse"), /\(note\)/, C)).toBe(false);
+    // Repair: the field goes (the note then sits on the section's ground again).
+    const r = repairComposition(lightField, C);
+    expect(paths(r)).toEqual(["/props/background/0"]);
+    expect(validateComposition(r.section, C)).toEqual([]);
   });
 
   it("checks a fact's colour against its object's own ground (a ticket is primary, a seal band, a tag inverse)", () => {
