@@ -3,7 +3,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { STYLE_FILES } from "@sb/components";
-import { EDGES, FACT_OBJECTS, IMAGE_TREATMENTS, MASKS, MOTIONS, MOTION_META, SUBMOTIF_BASE, TEXTURES, TYPE_TREATMENTS, allFontFaces, type Section } from "@sb/spec";
+import { EDGES, FACT_OBJECTS, IMAGE_TREATMENTS, MASKS, MOTIONS, MOTION_META, SUBMOTIF_BASE, TEXTURES, TYPE_TREATMENTS, WORDMARK_STYLES, allFontFaces, type Section } from "@sb/spec";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const componentsDir = path.resolve(here, "../../components");
@@ -211,7 +211,7 @@ const named = (css: string, stem: string): Sheet => ({ name: `${stem}-${createHa
  * The names in the spec lists when the sheets were introduced (STARTER_NAMES) are drawn by the core sheet and the v2
  * region sheets and stay there (their shared mechanics are grouped with other names' rules); partials are for new names.
  */
-export const VOCAB_FAMILIES = ["masks", "treatments", "textures", "edges", "fact-objects", "type-treatments", "motion"] as const;
+export const VOCAB_FAMILIES = ["masks", "treatments", "textures", "edges", "fact-objects", "type-treatments", "motion", "wordmarks"] as const;
 export type VocabFamily = (typeof VOCAB_FAMILIES)[number];
 
 /** The spec list each family's names come from. */
@@ -223,6 +223,7 @@ export const FAMILY_LISTS: Record<VocabFamily, readonly string[]> = {
   "fact-objects": FACT_OBJECTS,
   "type-treatments": TYPE_TREATMENTS,
   motion: MOTIONS,
+  wordmarks: WORDMARK_STYLES,
 };
 
 /** The names each list had when the family sheets were introduced: their CSS is in composed.css / composed-v2.css. */
@@ -234,6 +235,7 @@ export const STARTER_NAMES: Record<VocabFamily, readonly string[]> = {
   "fact-objects": ["numeral", "plate", "stamp", "ticket", "seal", "tag"],
   "type-treatments": ["none", "stacked", "knockout"],
   motion: ["reveal", "unmask"],
+  wordmarks: ["plain"],
 };
 
 export const VOCAB_DIR = path.join(componentsDir, "styles", "vocab");
@@ -286,6 +288,7 @@ export const COMPOSED_SHEETS = {
   "vocab-fact-objects": () => vocabFamilySheets()["fact-objects"],
   "vocab-type-treatments": () => vocabFamilySheets()["type-treatments"],
   "vocab-motion": () => vocabFamilySheets().motion,
+  "vocab-wordmarks": () => vocabFamilySheets().wordmarks,
 } as const satisfies Record<"core" | ComposedRegion | `vocab-${VocabFamily}`, () => Sheet>;
 export type ComposedSheet = keyof typeof COMPOSED_SHEETS;
 
@@ -294,7 +297,7 @@ type ComposedSection = Extract<Section, { type: "composed" }>;
 /** The vocab names a section uses, by family. */
 export function vocabNamesOf(s: ComposedSection): Record<VocabFamily, Set<string>> {
   const p = s.props;
-  const out: Record<VocabFamily, Set<string>> = { masks: new Set(), treatments: new Set(), textures: new Set(), edges: new Set(), "fact-objects": new Set(), "type-treatments": new Set(), motion: new Set() };
+  const out: Record<VocabFamily, Set<string>> = { masks: new Set(), treatments: new Set(), textures: new Set(), edges: new Set(), "fact-objects": new Set(), "type-treatments": new Set(), motion: new Set(), wordmarks: new Set() };
   const add = (f: VocabFamily, n: string | undefined) => {
     if (n !== undefined) out[f].add(n);
   };
@@ -371,11 +374,17 @@ function regionsOf(s: ComposedSection): Set<ComposedRegion> {
 /**
  * The composed stylesheets a page links, in link order: none without a composed section; the core sheet with one; after
  * it, each v20 region sheet one of them uses (section-level fields: section; the new kinds: kinds; the extensions of the
- * existing kinds: extensions); then each vocab family sheet (VOCAB_FAMILIES) holding a name the page uses. One place decides every link (extensible: design.wordmark).
+ * existing kinds: extensions); then each vocab family sheet (VOCAB_FAMILIES) holding a name the page uses. One place decides every link.
+ *
+ * `wordmark` is the site's design.wordmark style, with whether the header or footer shows it (a site without a logo): the
+ * kinds region (the base `.cx-wm` rules) and the wordmarks family sheet are linked when a page's wordmark block or its
+ * chrome uses a style that has a partial, also on a page with no composed section (then without the core sheet, which
+ * the wordmark does not need). Absent: nothing changes (every site before I9a).
  */
-export function composedSheets(sections: readonly Section[], families: Record<VocabFamily, VocabSheet> = vocabFamilySheets()): ComposedSheet[] {
+export function composedSheets(sections: readonly Section[], families: Record<VocabFamily, VocabSheet> = vocabFamilySheets(), wordmark?: { style: string; chrome: boolean }): ComposedSheet[] {
   const own = sections.filter(isComposed);
-  if (own.length === 0) return [];
+  const wmIn = wordmark !== undefined && (wordmark.chrome || own.some((s) => s.props.elements.some((e) => e.kind === "wordmark")));
+  if (own.length === 0 && !wmIn) return [];
   const used = new Set<ComposedRegion>();
   const names = VOCAB_FAMILIES.map((): Set<string> => new Set());
   for (const s of own) {
@@ -383,9 +392,13 @@ export function composedSheets(sections: readonly Section[], families: Record<Vo
     const byFamily = vocabNamesOf(s);
     VOCAB_FAMILIES.forEach((f, i) => byFamily[f].forEach((n) => names[i]!.add(n)));
   }
+  if (wmIn) {
+    used.add("kinds");
+    names[VOCAB_FAMILIES.indexOf("wordmarks")]!.add(wordmark!.style);
+  }
   // A family sheet follows the region sheets, when the page uses one of the names it holds (starter names: none).
   const familySheets = VOCAB_FAMILIES.filter((f, i) => families[f].css !== "" && families[f].names.some((n) => names[i]!.has(n))).map((f) => `vocab-${f}` as const);
-  return ["core", ...COMPOSED_V2_REGIONS.filter((r) => used.has(r) && composedV2Sheets()[r].css !== ""), ...familySheets];
+  return [...(own.length > 0 ? (["core"] as const) : []), ...COMPOSED_V2_REGIONS.filter((r) => used.has(r) && composedV2Sheets()[r].css !== ""), ...familySheets];
 }
 
 /**

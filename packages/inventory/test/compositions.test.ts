@@ -2,15 +2,17 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { fillPreset, hasSlotMarker, parsePresetId, presetSection, validateComposition, validatePreset, walkStrings, type PresetSources } from "@sb/spec";
+import { STANCES, fillPreset, hasSlotMarker, parsePresetId, presetContext, presetSection, slotValue, validateComposition, validatePreset, walkStrings, type PresetSources } from "@sb/spec";
 import { COMPOSITION_PRESETS, inventory, shortlist } from "../src/index.ts";
 
 /**
  * Composition presets (studio-phase1-design.md §5, I3): every preset is well formed, registered as a draft, and, filled
  * by fillPreset from the three fixtures (pekarna-kvas, avtoservis-mrak, instalacije-rebernik), passes the composition
- * guards with 0 issues and keeps no slot marker. The fixtures (test/fixtures/preset-sources.json) are each golden's
- * business, images and colours, its recorded brief (tools/eval/recordings/<id>/001-brief.json) and the copy of its
- * golden sections per intent.
+ * guards with 0 issues and 0 repairs and keeps no slot marker, or is cleanly not usable for that business (a slot in
+ * its `needs` is empty: a photo hero for a client without photos); every preset fills from at least one fixture. The
+ * fixtures (test/fixtures/preset-sources.json) are each golden's business, images and colours, its recorded brief
+ * (tools/eval/recordings/<id>/001-brief.json) and the copy of its golden sections per intent; an intent the golden has
+ * no section for gets a plain label of the intent as its headline (no facts, no lead), so a preset's heading shows.
  */
 const here = path.dirname(fileURLToPath(import.meta.url));
 type Fixture = Omit<PresetSources, "copy"> & { copy: Record<string, PresetSources["copy"]> };
@@ -43,16 +45,31 @@ describe.each(COMPOSITION_PRESETS.map((p) => [p.id, p] as const))("%s", (_id, pr
     expect(validatePreset(preset)).toEqual([]);
   });
 
-  it.each(FIXTURE_IDS)("filled from %s: 0 guard issues, no marker left", (fixture) => {
+  it.each(FIXTURE_IDS)("filled from %s: 0 guard issues, 0 repairs, no marker left (or a needed slot is empty)", (fixture) => {
     const intent = parsePresetId(preset.id)!.intent;
-    const r = fillPreset(preset, sourcesFor(fixture, intent));
-    if (!r.ok) throw new Error(`${r.reason}: ${[...r.missing, ...r.issues].join("; ")}`);
+    const src = sourcesFor(fixture, intent);
+    const r = fillPreset(preset, src);
+    if (!r.ok) {
+      // Not usable for this business only because a slot it needs has no value there; never a hole or a failed guard.
+      expect(r.reason, [...r.missing, ...r.issues].join("; ")).toBe("needs");
+      expect(r.missing.length).toBeGreaterThan(0);
+      for (const n of r.missing) expect(slotValue(n, src), n).toBeUndefined();
+      return;
+    }
+    expect(r.repairs).toEqual([]);
     const left: string[] = [];
     walkStrings(r.props, (s, p) => {
       if (hasSlotMarker(s)) left.push(`${p}: ${s}`);
     });
     expect(left).toEqual([]);
-    expect(validateComposition(presetSection(preset, r.props))).toEqual([]);
+    expect(validateComposition(presetSection(preset, r.props), presetContext(src))).toEqual([]);
+  });
+
+  it("fills from at least one fixture, and its stance tags are real stances", () => {
+    const intent = parsePresetId(preset.id)!.intent;
+    expect(FIXTURE_IDS.some((f) => fillPreset(preset, sourcesFor(f, intent)).ok)).toBe(true);
+    const stances = new Set(STANCES.map((s) => s.id));
+    for (const s of preset.tags?.stances ?? []) expect(stances.has(s), s).toBe(true);
   });
 });
 

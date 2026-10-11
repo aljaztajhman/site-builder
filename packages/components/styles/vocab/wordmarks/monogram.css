@@ -1,0 +1,28 @@
+/* wordmark monogram: the initials in a box in the palette's primary pair, the name beside it (it wraps; it never leaves the row). */
+.wm-monogram {
+  display: flex;
+  align-items: center;
+  gap: 0.45em;
+}
+.wm-monogram .wm__mk {
+  flex: none;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  min-width: 1.7em;
+  height: 1.7em;
+  padding-inline: 0.2em;
+  background: var(--c-primary);
+  color: var(--c-on-primary);
+  border-radius: 0.1em;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+.wm-monogram .wm__nm {
+  min-width: 0;
+  font-size: 0.55em;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+}

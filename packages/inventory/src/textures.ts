@@ -5,8 +5,9 @@
  * every tone) at a low opacity, through a mask that is one hand-written SVG data-URI tile. This module reads the tile
  * (the dot/grid detector's input, tiles.ts) and the opacity (the texture's max alpha, for the contrast check) from it.
  *
- * The starter names (grain, lines) are drawn by the core sheet and not registered here. New textures register as
- * drafts; the owner's gallery decisions (decisions.json) approve them.
+ * The starter names (grain, lines) are drawn by the core sheet (composed.css) and register as approved assets
+ * (starterTextureAssets), their tile read from that sheet. New textures register as drafts; the owner's gallery
+ * decisions (decisions.json) approve them.
  */
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
@@ -105,6 +106,14 @@ export function texturePartial(name: string, dir: string = VOCAB_DIR): TexturePa
   return { css, tile, maxAlpha: Number(opacity) };
 }
 
+/** The starter textures' tile: the mask data URI of `.cx-tex-<name>::before` in the core sheet (composed.css), the tile shipped. */
+export function starterTextureTile(name: string, dir: string = VOCAB_DIR): string {
+  const core = readFileSync(path.join(dir, "..", "composed.css"), "utf8");
+  const rule = new RegExp(`\\.cx-tex-${name}::before \\{[^}]*?\\bmask:\\s*url\\("(data:image/svg\\+xml,[^"]*)"\\)`).exec(core);
+  if (!rule) throw new Error(`composed.css: no mask tile for .cx-tex-${name}::before`);
+  return rule[1]!;
+}
+
 const ALL_GROUNDS: AssetTags["ground"] = ["dark", "tint", "white"];
 const ALL_DENSITIES: AssetTags["density"] = ["airy", "compact", "regular"];
 
@@ -125,4 +134,28 @@ export function textureAssets(): Asset[] {
       note,
     } satisfies Asset;
   });
+}
+
+const STARTER_NOTES: Readonly<Record<string, string>> = {
+  grain: "Fine noise in the section's text colour: a paper-like grain, drawn as turbulence, never as dots.",
+  lines: "Ruled horizontal lines in the section's text colour, eight pixels apart: lined paper, one direction only.",
+};
+
+/** The starter textures (the core sheet's grain and lines) as approved assets; their tiles are checked like every texture's (tiles.ts). */
+export function starterTextureAssets(): Asset[] {
+  return STARTER_NAMES.textures
+    .filter((name) => name !== "none")
+    .map(
+      (name) =>
+        ({
+          id: `texture/${name}`,
+          kind: "texture",
+          tags: { trades: [], stances: [], intents: [], mood: [], ground: ALL_GROUNDS, density: ALL_DENSITIES },
+          phone: "ok",
+          bytes: composedRuleBytes(word(`.cx-tex-${name}`)),
+          license: "own",
+          status: "approved",
+          note: STARTER_NOTES[name] ?? "Starter texture in the core composed sheet",
+        }) satisfies Asset,
+    );
 }

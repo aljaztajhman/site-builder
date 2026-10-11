@@ -1,0 +1,29 @@
+/* wordmark circle: the name set round two thin rings, the initials inside. Short names only; the header draws a monogram. */
+.wm-circle {
+  display: block;
+}
+.wm-circle .wm__ring {
+  display: block;
+  width: min(6em, 100%);
+  height: auto;
+  overflow: visible;
+}
+.wm-circle .wm__c {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.2;
+}
+.wm-circle .wm__rt,
+.wm-circle .wm__ini {
+  fill: currentColor;
+  font-weight: 700;
+}
+.wm-circle .wm__rt {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.wm-circle .wm__ini {
+  font-size: 24px;
+  font-weight: 800;
+}

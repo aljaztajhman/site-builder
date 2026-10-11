@@ -41,10 +41,12 @@ export function MapBlock({ el, ctx, over }: { el: MapEl; ctx: RenderCtx; over: b
   const cross = shape.cross && el.cross ? el.cross : undefined;
   const [px, py] = shape.pin;
   const label = `${kindText(ctx, "mapOf")}${street ? `: ${street}` : ""}${cross ? `, ${cross}` : ""}`;
-  const p = placement(el, over);
+  // The colour role paints the drawing (pin, ring, frame) only: the address, the note and the link under it keep the
+  // section's own text colour, so an accent role can never tint them (nor drop them below contrast on a dark section).
+  const p = placement({ ...el, color: undefined }, over);
   return (
     <div {...p} className={cx(p.className, "cx-map", `cx-map--${el.style}`)}>
-      <div className="cx-map__art" role="img" aria-label={label}>
+      <div className={cx("cx-map__art", el.color && `cx-pf cx-fg-${el.color}`)} role="img" aria-label={label}>
         <svg viewBox="0 0 320 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
           <path className="cx-map__road" d={shape.roads} />
           {shape.cross && (cross || el.style === "corner") && <path className="cx-map__road cx-map__road--x" d={shape.cross} />}

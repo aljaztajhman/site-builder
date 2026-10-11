@@ -3,7 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { BusinessType, STANCES, SUBTYPES, TEXTURES, TEXTURE_META, contrast, direction, mix, repairComposition, validateComposition, type Colors, type ComposedSection } from "@sb/spec";
 import { STARTER_NAMES, VOCAB_DIR, vocabFamilySheets } from "@sb/render";
-import { PATTERN_TILES, TEXTURE_TAGS, applyDecisions, detectPattern, inventory, paletteOf, registeredAssets, shippedColors, textureNames, texturePartial } from "../src/index.ts";
+import { PATTERN_TILES, TEXTURE_TAGS, applyDecisions, detectPattern, inventory, paletteOf, registeredAssets, shippedColors, starterTextureTile, textureNames, texturePartial } from "../src/index.ts";
 import { SHEET_PALETTES } from "../scripts/pages.ts";
 
 /**
@@ -49,7 +49,9 @@ describe("textures: names, partials, assets", () => {
       expect(TEXTURE_TAGS[n], n).toBeDefined();
       expect(registry.byId(`texture/${n}`)?.status, n).toBe("draft");
     }
-    expect(registry.byKind("texture").map((a) => a.id).sort()).toEqual(names.map((n) => `texture/${n}`).sort());
+    const starters = STARTER_NAMES.textures.filter((n) => n !== "none");
+    expect(registry.byKind("texture").map((a) => a.id).sort()).toEqual([...starters, ...names].map((n) => `texture/${n}`).sort());
+    for (const n of starters) expect(registry.byId(`texture/${n}`)?.status, n).toBe("approved");
     expect(Object.keys(TEXTURE_TAGS).sort()).toEqual([...names].sort());
   });
 
@@ -79,6 +81,13 @@ describe("textures: names, partials, assets", () => {
     const p = texturePartial(n)!;
     expect(PATTERN_TILES[`texture/${n}`]?.tile).toBe(p.tile);
     expect(detectPattern(p.tile)).toEqual({ ok: true });
+  });
+
+  it("the starters' tiles are the core sheet's and pass the dot/grid detector", () => {
+    for (const n of STARTER_NAMES.textures.filter((x) => x !== "none")) {
+      expect(PATTERN_TILES[`texture/${n}`]?.tile, n).toBe(starterTextureTile(n));
+      expect(detectPattern(starterTextureTile(n)), n).toEqual({ ok: true });
+    }
   });
 
   it("the textures family sheet holds every partial", () => {
@@ -197,6 +206,6 @@ describe("textures: the meta table the guard reads is the CSS", () => {
     const approved = applyDecisions(registeredAssets(), { "texture/stone": { status: "approved", at: "2026-10-11T00:00:00.000Z" } })
       .filter((a) => a.status === "approved" && a.kind === "texture")
       .map((a) => a.id);
-    expect(approved).toEqual(["texture/stone"]);
+    expect(approved.sort()).toEqual(["texture/grain", "texture/lines", "texture/stone"]);
   });
 });

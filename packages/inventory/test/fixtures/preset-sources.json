@@ -151,6 +151,57 @@
       },
       "contact": {
         "headline": "Kje nas najdete"
+      },
+      "story": {
+        "headline": "Drožmi, ki jih gojimo sami",
+        "lead": "Kruh pečemo samo z drožmi in ga pustimo vzhajati čez noč, zato je bolj okusen in dlje ostane svež."
+      },
+      "steps": {
+        "headline": "Potica za praznike",
+        "lead": "Potico lahko naročite za praznike in praznovanja."
+      },
+      "hours": {
+        "headline": "Kdaj smo odprti"
+      },
+      "products": {
+        "headline": "Vsak dan v pekarni",
+        "lead": "Ob petkih in sobotah pečemo še orehovo potico in kvašene krofe."
+      },
+      "page-head": {
+        "headline": "Ponudba"
+      },
+      "highlights": {
+        "headline": "Na kratko"
+      },
+      "call": {
+        "headline": "Pokličite nas"
+      },
+      "booking": {
+        "headline": "Naročila in termini"
+      },
+      "prices": {
+        "headline": "Cenik"
+      },
+      "menu": {
+        "headline": "Ponudba"
+      },
+      "faq": {
+        "headline": "Pogosta vprašanja"
+      },
+      "team": {
+        "headline": "Ekipa"
+      },
+      "gallery": {
+        "headline": "Fotografije"
+      },
+      "rooms": {
+        "headline": "Sobe"
+      },
+      "area": {
+        "headline": "Območje"
+      },
+      "notice": {
+        "headline": "Obvestilo"
       }
     }
   },
@@ -317,6 +368,57 @@
       "contact": {
         "headline": "Kje smo",
         "lead": "Savska cesta 52, za trgovino s ploščicami. Vhod je z dvorišča."
+      },
+      "story": {
+        "headline": "Družinski servis od leta 2008",
+        "lead": "Avtoservis Mrak vodi Rok Mrak. Servisiramo osebna vozila vseh znamk in kombije do 3,5 t, imamo pa tudi vlečno službo za vso Gorenjsko."
+      },
+      "steps": {
+        "headline": "Najprej predračun, potem popravilo"
+      },
+      "page-head": {
+        "headline": "Storitve in cene",
+        "lead": "Za popravila, ki niso v ceniku, dobite predračun pred začetkom dela."
+      },
+      "call": {
+        "headline": "Najhitreje nas dobite po telefonu",
+        "lead": "Odprto od ponedeljka do petka od 7.00 do 16.00, v soboto po dogovoru."
+      },
+      "highlights": {
+        "headline": "Na kratko"
+      },
+      "booking": {
+        "headline": "Naročila in termini"
+      },
+      "prices": {
+        "headline": "Cenik"
+      },
+      "menu": {
+        "headline": "Ponudba"
+      },
+      "hours": {
+        "headline": "Odpiralni čas"
+      },
+      "faq": {
+        "headline": "Pogosta vprašanja"
+      },
+      "team": {
+        "headline": "Ekipa"
+      },
+      "gallery": {
+        "headline": "Fotografije"
+      },
+      "products": {
+        "headline": "Ponudba"
+      },
+      "rooms": {
+        "headline": "Sobe"
+      },
+      "area": {
+        "headline": "Območje"
+      },
+      "notice": {
+        "headline": "Obvestilo"
       }
     }
   },
@@ -407,6 +509,58 @@
       "contact": {
         "headline": "Sedež na Ptuju",
         "lead": "Večinoma smo na terenu, zato se za obisk sedeža prej dogovorite po telefonu."
+      },
+      "story": {
+        "headline": "Mojstrski izpit in štirje sodelavci",
+        "lead": "Sem Matej Rebernik, inštalater z mojstrskim izpitom. Od leta 2011 delam kot samostojni podjetnik, danes s štirimi sodelavci."
+      },
+      "steps": {
+        "headline": "Od klica do pisne ponudbe"
+      },
+      "area": {
+        "headline": "Kje delamo",
+        "lead": "Sedež imamo na Ptuju, delamo pa večinoma na terenu."
+      },
+      "call": {
+        "headline": "Ogled je brezplačen",
+        "lead": "Cen ne objavljamo, ker je vsak objekt drugačen. Pokličite in dogovorimo se za ogled."
+      },
+      "page-head": {
+        "headline": "Storitve",
+        "lead": "Vodovod, ogrevanje, toplotne črpalke in prenove kopalnic. Za vsako delo najprej pridemo na brezplačen ogled."
+      },
+      "faq": {
+        "headline": "Pogosta vprašanja"
+      },
+      "highlights": {
+        "headline": "Na kratko"
+      },
+      "booking": {
+        "headline": "Naročila in termini"
+      },
+      "prices": {
+        "headline": "Cenik"
+      },
+      "menu": {
+        "headline": "Ponudba"
+      },
+      "hours": {
+        "headline": "Odpiralni čas"
+      },
+      "team": {
+        "headline": "Ekipa"
+      },
+      "gallery": {
+        "headline": "Fotografije"
+      },
+      "products": {
+        "headline": "Ponudba"
+      },
+      "rooms": {
+        "headline": "Sobe"
+      },
+      "notice": {
+        "headline": "Obvestilo"
       }
     }
   }
