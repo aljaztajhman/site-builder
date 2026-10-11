@@ -61,11 +61,13 @@
   opacity: 0.07;
 }
 .cx-tex-grain.tone-inverse::before,
-.cx-tex-lines.tone-inverse::before {
+.cx-tex-lines.tone-inverse::before,
+.tone-inverse .cx-mask-stamp {
   background: var(--c-on-inverse);
 }
 .cx-tex-grain.tone-band::before,
-.cx-tex-lines.tone-band::before {
+.cx-tex-lines.tone-band::before,
+.tone-band .cx-mask-stamp {
   background: var(--c-on-band, var(--c-on-primary));
 }
 .cx-tex-grain::before {
@@ -345,8 +347,8 @@
   gap: 0.625rem;
 }
 .cx-fact__obj {
-  /* The size step, but never wider than the cell: about 0.62 em per character, and room for the object's own padding. */
-  font-size: min(var(--fz), calc(100cqw / (var(--n, 6) * 0.62 + 1.7)));
+  /* The size step, but never wider than the cell: about 0.62 em per character, and room for the object's own padding (--p em: a ticket, tag or seal needs the most, a plate and a numeral least). */
+  font-size: min(var(--fz), calc(100cqw / (var(--n, 6) * 0.62 + var(--p, 2.6))));
   max-width: 100%;
 }
 .cx-fact__value {
@@ -532,12 +534,6 @@ body:not([data-motif="plate"]) .cx-prices--plates .plate__eu {
 .cx-mask-stamp {
   background: var(--c-border);
   clip-path: var(--shape-stamp);
-}
-.tone-inverse .cx-mask-stamp {
-  background: var(--c-on-inverse);
-}
-.tone-band .cx-mask-stamp {
-  background: var(--c-on-band, var(--c-on-primary));
 }
 .cx-mask-stamp > .media {
   inset: 0.9rem;

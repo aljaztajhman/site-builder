@@ -16,7 +16,7 @@ import { RibbonBlock } from "./kinds/ribbon.tsx";
 import { StepsBlock } from "./kinds/steps.tsx";
 import { StickerBlock } from "./kinds/sticker.tsx";
 import { WordmarkBlock } from "./kinds/wordmark.tsx";
-import { imageSizes, stepVar, type El, type ElOf } from "./layout.ts";
+import { factStepVar, imageSizes, stepVar, type El, type ElOf } from "./layout.ts";
 
 /**
  * What every element carries: its place as custom properties (composed.css reads them: --c column, --s span, --r row,
@@ -204,7 +204,9 @@ function FactBlock({ el, ctx, over }: { el: ElOf<"fact">; ctx: RenderCtx; over: 
   // The plate's registration area, written by code from the business address (a town that is no area seat: none).
   const code = el.plateCode && t === "plate" ? townCode(ctx) : null;
   // --n sizes the object's type to its cell: the value's characters, and on a plate the code with its dot.
-  const p = placement(el, over, { "--fz": stepVar(el.size), "--n": Math.min(Math.max(el.value.length + (code ? code.length + 1 : 0), 3), 24) });
+  // --p: the em the object's own padding takes beside its characters (composed.css .cx-fact__obj; a ticket, tag or seal need the most).
+  const pad = t === "plate" ? 1.7 : t === "numeral" ? 0.6 : undefined;
+  const p = placement(el, over, { "--fz": factStepVar(el.size), "--n": Math.min(Math.max(el.value.length + (code ? code.length + 1 : 0), 3), 24), ...(pad ? { "--p": pad } : {}) });
   // A seal sizes its label by the longest word, which never breaks (composed.css).
   const longest = t === "seal" ? Math.max(...el.label.split(/\s+/).map((w) => w.length)) : undefined;
   const label = (
@@ -345,11 +347,13 @@ export interface ElementProps {
   priority: boolean;
   /** Unique on the page (the section's id): ids an element draws with (a circle heading's SVG path) are made from it. */
   sectionId?: string;
+  /** The id of the heading that names the section, when it has one (a photo strip is named by it). */
+  headingId?: string | undefined;
   /** The heading level of a steps title or a question: one below the section's own heading (h2 with none). */
   itemLevel?: number;
 }
 
-export function ElementView({ el, ctx, width, over, titleId, priority, sectionId, itemLevel = 2 }: ElementProps) {
+export function ElementView({ el, ctx, width, over, titleId, priority, sectionId, headingId, itemLevel = 2 }: ElementProps) {
   switch (el.kind) {
     case "heading":
       return <Heading el={el} over={over} id={titleId} uid={`${sectionId ?? "s"}-${el.id}`} />;
@@ -385,7 +389,7 @@ export function ElementView({ el, ctx, width, over, titleId, priority, sectionId
       return <DecorBlock el={el} over={false} />;
     // Spec v20 kinds (kinds/*.tsx; their rules are in composed-v2.css, region kinds).
     case "photos":
-      return <PhotosBlock el={el} ctx={ctx} width={width} priority={priority} />;
+      return <PhotosBlock el={el} ctx={ctx} width={width} priority={priority} headingId={headingId} />;
     case "wordmark":
       return <WordmarkBlock el={el} ctx={ctx} over={over} />;
     case "ribbon":

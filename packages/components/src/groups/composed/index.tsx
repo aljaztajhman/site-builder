@@ -67,6 +67,7 @@ export function Composed({ section, ctx, index }: SectionProps<"composed">) {
         titleId={el === heading ? titleId(section.id) : undefined}
         priority={lead?.id === el.id}
         sectionId={section.id}
+        headingId={heading ? titleId(section.id) : undefined}
         itemLevel={itemLevel}
       />
     );

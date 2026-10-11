@@ -65,7 +65,11 @@ describe("photos", () => {
 
   it("strip: a focusable, labelled region that scrolls inside itself, each photo a figure with its caption", () => {
     const h = el(render([sectionOf(at({ kind: "photos", images: [IMG1, IMG2, IMG3], arrangement: "strip", captions: ["Ena", "Dve"] }))]));
-    expect(h).toMatch(/<div class="cx-ph__row" role="region" aria-label="Fotografije" tabindex="0">/);
+    // The section has a heading: the strip is named by it (a group: the section is already the region of that name).
+    expect(h).toMatch(/<div class="cx-ph__row" role="group" aria-labelledby="s_k-title" tabindex="0">/);
+    // Without a heading it is a region of its own named Fotografije.
+    const bare = el(render([{ ...sectionOf(at({ kind: "photos", images: [IMG1, IMG2, IMG3], arrangement: "strip" })), props: ComposedProps.parse({ intent: "story", width: "wide", rows: 1, elements: [{ id: "e_k", desk: desk(1, 6, 1), phone: { order: 0, span: "full" }, kind: "photos", images: [IMG1, IMG2, IMG3], arrangement: "strip" }] }) } as Section]));
+    expect(bare).toMatch(/<div class="cx-ph__row" role="region" aria-label="Fotografije" tabindex="0">/);
     expect(h.match(/<figure class="cx-ph__fig">/g)).toHaveLength(3);
     expect(h).toContain('<figcaption class="cx-ph__cap">Ena</figcaption>');
     expect(composedV2Sheets().kinds.css).toMatch(/\.cx-ph__row\{[^}]*overflow-x:auto[^}]*scroll-snap-type:x mandatory/);
