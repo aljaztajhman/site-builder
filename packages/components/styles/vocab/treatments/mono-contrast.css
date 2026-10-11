@@ -1,0 +1,4 @@
+/* mono-contrast: a hard black-and-white print, as documentary photos are printed. No colour of its own. */
+.cx-tr-mono-contrast > .media img {
+  filter: grayscale(1) contrast(1.35) brightness(1.04);
+}

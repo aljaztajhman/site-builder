@@ -1,0 +1,8 @@
+{
+  "id": "avtoservis-golob",
+  "stance": "enamel-house-plate",
+  "trades": ["car-repair"],
+  "title": "Avtoservis Golob, emajlirana tablica",
+  "gapNote": "There is no house-plate fact object: fact/plate draws a registration plate (SLO strip, town code), not an enamel house-number plate (deep blue field, thin off-white rim, rounded corners, centred numerals). The house number 71 is faked with a primary field layer in columns 9-12, rows 1-2, and an onPrimary numeral: a square box stuck to the header and the page edge, with no rim, no corner radius and no inset from the grid. `fill` on a numeral paints only the value, so its label would fall on the page (the contrast guard refuses it); a fact object can't own its whole ground. The stance's signatures ornament/enamel-rim and type-treatment/plate-numerals don't exist yet. One display size per section forced the headline down to size 5 beside the 71. Prices as plates repeat the registration plate, not the house plate.",
+  "sources": ["M Tablica (the phone as a registration plate, prices as plates)", "stance enamel-house-plate (the address number as the hero object)"]
+}

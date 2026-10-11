@@ -1,0 +1,34 @@
+/* index-tab: a card of a card index: the label on the tab, the value on the card, both in the primary colour (a fill, --cx-f
+   and --cx-o, replaces it). The tab is on the side the label comes (labelAt before: on top). Own ground: @sb/spec
+   factObjectGround (G9), flipped on a band section. */
+.cx-fact--index-tab.cx-fact .cx-fact__obj {
+  display: grid;
+  justify-items: start;
+  gap: 0;
+  background: none;
+}
+.cx-fact--index-tab .cx-fact__obj > * {
+  margin: 0;
+  background: var(--cx-f, var(--c-primary));
+  color: var(--cx-o, var(--c-on-primary));
+}
+.cx-fact--index-tab .cx-fact__value {
+  justify-self: stretch;
+  padding: 0.2em 0.45em 0.28em;
+  border-radius: 0 0.12em 0.12em;
+}
+.cx-fact--index-tab .cx-fact__label {
+  padding: 0.3rem 0.75rem 0.15rem;
+  border-radius: 0.45rem 0.45rem 0 0;
+}
+.cx-fact--index-tab:not(.cx-fact--lb) .cx-fact__value {
+  border-radius: 0.12em 0.12em 0.12em 0;
+}
+.cx-fact--index-tab:not(.cx-fact--lb) .cx-fact__label {
+  padding: 0.15rem 0.75rem 0.3rem;
+  border-radius: 0 0 0.45rem 0.45rem;
+}
+:where(.tone-band) .cx-fact--index-tab .cx-fact__obj > * {
+  background: var(--cx-f, var(--c-on-band, var(--c-on-primary)));
+  color: var(--cx-o, var(--c-band, var(--c-primary)));
+}

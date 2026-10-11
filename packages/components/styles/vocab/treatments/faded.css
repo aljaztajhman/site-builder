@@ -1,0 +1,5 @@
+/* faded: an old print left in the light. Softer contrast, less colour, lifted a little (filter only, so a scrim over a
+   background photo keeps the contrast the guard measured). */
+.cx-tr-faded > .media img {
+  filter: contrast(0.8) saturate(0.55) brightness(1.08);
+}

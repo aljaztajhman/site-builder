@@ -1,0 +1,12 @@
+/* vertical: one word in upright capitals stacked in a column, as a blade sign on a shopfront reads. Desktop only: phones
+   set the word on its line. One word of at most 10 characters, in capitals (weight 700+), size 4-5 (G20). Nothing
+   rotates; the letters keep their order, so the heading reads as written, and the column is set tight (an em box per
+   letter would leave a gap under every capital). (A sideways heading is the heading's own `rotate`.) */
+@media (min-width: 64rem) {
+  .cx-h.cx-tt-vertical {
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    line-height: 1;
+    letter-spacing: -0.2em;
+  }
+}

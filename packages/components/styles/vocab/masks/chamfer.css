@@ -1,0 +1,5 @@
+/* chamfer: an enamel plate, all four corners cut small and square. */
+.cx-mask-chamfer {
+  --shape-chamfer: polygon(0.9rem 0, calc(100% - 0.9rem) 0, 100% 0.9rem, 100% calc(100% - 0.9rem), calc(100% - 0.9rem) 100%, 0.9rem 100%, 0 calc(100% - 0.9rem), 0 0.9rem);
+  clip-path: var(--shape-chamfer);
+}

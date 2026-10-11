@@ -6,6 +6,7 @@ import {
   COMPOSED_SHARED,
   CompactWriter,
   VOCAB_NOTATION,
+  approvedVocabs,
   canonical,
   catalogueAliases,
   compactPattern,
@@ -108,16 +109,32 @@ describe("designer catalogue, compact (shared types and vocabularies named once)
     for (const w of words) expect(aliases, w).toHaveProperty(w);
   });
 
-  it("each vocabulary is its full list, and every name in it passes the field's own schema", () => {
+  it("each vocabulary is its approved names only (the starters and what the registry approves), and every name in it passes the field's own schema", () => {
     const aliases = aliasesOf(text);
+    const offered = approvedVocabs();
     for (const [list, node] of vocab) {
-      expect(aliases[list], list).toEqual({ type: "string", enum: [...VOCABS[list as keyof typeof VOCABS]] });
+      expect(aliases[list], list).toEqual({ type: "string", enum: [...offered[list as keyof typeof VOCABS]] });
       const re = new RegExp(node.pattern as string);
-      for (const n of VOCABS[list as keyof typeof VOCABS]) {
+      for (const n of offered[list as keyof typeof VOCABS]) {
         expect(re.test(n), `${list} ${n}`).toBe(true);
         if (node.maxLength !== undefined) expect(n.length).toBeLessThanOrEqual(node.maxLength as number);
       }
     }
+  });
+
+  it("a draft name is absent from the catalogue; approving it puts it in, and only it", () => {
+    const listed = (t: string, list: string) => (aliasesOf(t)[list] as { enum: string[] }).enum;
+    for (const draft of ["stone", "press-grain"]) expect(listed(text, "TEXTURES"), draft).not.toContain(draft);
+    expect(listed(text, "TEXTURES")).toEqual(["none", "grain", "lines"]);
+    expect(listed(text, "MASKS")).not.toContain("window");
+    expect(listed(text, "DRAWINGS")).toEqual(["motif/bakery/wheat-ear-line", "ornament/rope-line"]);
+    const approved = new Set(["texture/stone", "mask/window", "ornament/idrija-lace-line", "texture/not-a-name"]);
+    const after = designerCatalogue({ compact: true, approved });
+    expect(listed(after, "TEXTURES")).toEqual(["none", "grain", "lines", "stone"]);
+    expect(listed(after, "MASKS")).toContain("window");
+    expect(listed(after, "MASKS")).not.toContain("arch-low");
+    expect(listed(after, "DRAWINGS")).toContain("ornament/idrija-lace-line");
+    expect(after).not.toContain("press-grain");
   });
 
   it("round trip: the props parse back into exactly the expanded JSON Schema (vocabulary names read as their fields)", () => {

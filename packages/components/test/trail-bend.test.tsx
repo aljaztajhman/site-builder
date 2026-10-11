@@ -186,7 +186,10 @@ describe("phone bar", () => {
 });
 
 describe("cut shapes", () => {
-  const styles = readdirSync(path.join(here, "../styles")).filter((f) => f.endsWith(".css"));
+  // Every sheet, the vocab partials (styles/vocab/<family>/<name>.css) included.
+  const styles = readdirSync(path.join(here, "../styles"), { recursive: true })
+    .map(String)
+    .filter((f) => f.endsWith(".css"));
 
   it("cuts shapes only through the shape tokens (or the visually-hidden idiom), never a free polygon", () => {
     for (const f of styles) {

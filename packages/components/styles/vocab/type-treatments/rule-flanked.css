@@ -1,0 +1,17 @@
+/* rule-flanked: the heading centred between two rules that run to the edges of its box. One short line (G20: at most 30
+   characters); where it still wraps (a display size on a phone) the rules give way to the words, down to 1 rem each.
+   Rules in the text colour. */
+.cx-tt-rule-flanked {
+  --cx-w: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  text-align: center;
+}
+.cx-tt-rule-flanked::before,
+.cx-tt-rule-flanked::after {
+  content: "";
+  flex: 1 1 0;
+  min-width: 1rem;
+  border-top: max(2px, 0.04em) solid;
+}

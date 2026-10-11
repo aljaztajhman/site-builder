@@ -1,0 +1,8 @@
+{
+  "id": "pekarna-zrno",
+  "stance": "kitchen-index-card",
+  "trades": ["bakery"],
+  "title": "Pekarna Zrno, kuhinjska kartica",
+  "gapNote": "There is no card object: the index card is approximated by the `lines` texture over the whole section plus a surface field in columns 2-11, so the ruling runs edge to edge (behind the photo too) and the card has no edge, corner or head line of its own. The red margin rule of an index card can't be drawn (no vertical rule in a colour role; a single-side accent stripe is banned on cards anyway, so it needs its own drawn divider). The heading can't sit on the card's top ruled line: textures don't align to the type's baseline. The only bakery drawing is wheat-ear-line, so the 'one drawn object in the corner' is a stock wheat ear rather than the stance's spoon or bowl. List rules use the border role at one weight; an ink-coloured hairline rule is not expressible.",
+  "sources": ["J Skorja (prices on a ruled board)", "stance kitchen-index-card (a ruled card, one ink colour, one drawn object)"]
+}

@@ -1,0 +1,4 @@
+/* low-key: darker and firmer, for a lit room at night, a workshop, a cellar. */
+.cx-tr-low-key > .media img {
+  filter: brightness(0.82) contrast(1.12) saturate(0.9);
+}

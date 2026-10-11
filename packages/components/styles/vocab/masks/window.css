@@ -1,0 +1,6 @@
+/* window: a casement window with a transom. A glazing bar under the top fifth, the top light split in two; the
+   main pane (the lower four fifths, the centre) is never crossed. The bars show the section's ground. */
+.cx-mask-window {
+  --shape-window: polygon(0 0, calc(50% - 0.25rem) 0, calc(50% - 0.25rem) calc(18% - 0.25rem), calc(50% + 0.25rem) calc(18% - 0.25rem), calc(50% + 0.25rem) 0, 100% 0, 100% calc(18% - 0.25rem), 0 calc(18% - 0.25rem), 0 calc(18% + 0.25rem), 100% calc(18% + 0.25rem), 100% 100%, 0 100%, 0 calc(18% + 0.25rem));
+  clip-path: var(--shape-window);
+}

@@ -1,0 +1,22 @@
+/* wipe (entrance): a photo uncovers left to right as it comes into view (clip-path through the --shape- tokens). */
+.cx-mo-wipe {
+  --shape-wipefrom: inset(0 100% 0 0);
+  --shape-wipeto: inset(0);
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes cx-mo-wipe {
+      from {
+        clip-path: var(--shape-wipefrom);
+      }
+      to {
+        clip-path: var(--shape-wipeto);
+      }
+    }
+    .cx-mo-wipe :is(.cx-el--image, .cx-el--photos) img {
+      animation: cx-mo-wipe linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 30%;
+    }
+  }
+}

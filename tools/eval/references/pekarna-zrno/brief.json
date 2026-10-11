@@ -1,0 +1,39 @@
+{
+  "id": "pekarna-zrno",
+  "businessType": "bakery",
+  "town": "Škofja Loka",
+  "description": "Pekarna Zrno je majhna pekarna v starem delu Škofje Loke, naslov je Mestni trg 14, 4220 Škofja Loka. Vodim jo jaz, Mojca Kos, pečeva pa skupaj s sinom Tilnom. Pečemo vsak dan od pete ure zjutraj. Testo mesimo ročno in ga pustimo počivati vsaj 12 ur, preden gre v peč.\n\nVsak dan imamo domači beli kruh, ajdov kruh z orehi, kruh s semeni, rogljičke in cimetove polže. Ob sobotah spečemo še makovke in jabolčni zavitek.\n\nCene: domači beli kruh 3,20 €, ajdov kruh z orehi 4,60 €, kruh s semeni 4,40 €, rogljiček 1,20 €, cimetov polž 1,80 €, jabolčni zavitek (kos) 2,50 €.\n\nOdprto: pon–pet 6.00–14.00, sobota 6.00–12.00, ob nedeljah zaprto.\n\nKruh lahko naročite dan prej po telefonu 041 555 218 ali na mojca@pekarna-zrno.example. Plačate lahko tudi s kartico. Za pekarno je javno parkirišče. Na strani bi rada, da je čim bolj preprosto, kot listek z receptom, ki ga imaš v kuhinjskem predalu.",
+  "photos": {
+    "fixture": "pekarna-kvas",
+    "subjects": ["hlebci kruha na leseni polici", "pek oblikuje testo na pomokani mizi", "rogljički in cimetovi polži na pladnju"]
+  },
+  "facts": {
+    "name": "Pekarna Zrno",
+    "phone": "+38641555218",
+    "email": "mojca@pekarna-zrno.example",
+    "address": { "street": "Mestni trg 14", "postalCode": "4220", "city": "Škofja Loka" },
+    "hours": [
+      { "from": "mon", "to": "fri", "open": "06:00", "close": "14:00" },
+      { "from": "sat", "to": "sat", "open": "06:00", "close": "12:00" }
+    ],
+    "prices": [
+      { "item": "domači beli kruh", "amount": 3.2 },
+      { "item": "ajdov kruh z orehi", "amount": 4.6 },
+      { "item": "kruh s semeni", "amount": 4.4 },
+      { "item": "rogljiček", "amount": 1.2 },
+      { "item": "cimetov polž", "amount": 1.8 },
+      { "item": "jabolčni zavitek (kos)", "amount": 2.5 }
+    ],
+    "people": [
+      { "name": "Mojca Kos", "role": "vodja, peka" },
+      { "name": "Tilen", "role": "peka" }
+    ],
+    "amenities": ["card", "parking"],
+    "other": [
+      "Pečemo vsak dan od pete ure zjutraj",
+      "Testo mesimo ročno in ga pustimo počivati vsaj 12 ur",
+      "Ob sobotah spečemo še makovke in jabolčni zavitek",
+      "Kruh lahko naročite dan prej"
+    ]
+  }
+}

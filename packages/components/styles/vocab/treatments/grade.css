@@ -1,0 +1,12 @@
+/* grade: a colour grade toward the accent role (blend mode soft-light): warm palettes warm the photo, cool ones cool
+   it; light and shade stay the photo's own. */
+.cx-tr-grade::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--c-accent);
+  mix-blend-mode: soft-light;
+  opacity: 0.45;
+  pointer-events: none;
+}

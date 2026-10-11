@@ -1,0 +1,8 @@
+/* stepped: the top corners step in twice, like a stepped stone cornice; the middle half of the top edge stays whole. */
+.cx-mask-stepped {
+  --shape-stepped: polygon(0 2.5rem, 12% 2.5rem, 12% 1.25rem, 24% 1.25rem, 24% 0, 76% 0, 76% 1.25rem, 88% 1.25rem, 88% 2.5rem, 100% 2.5rem, 100% 100%, 0 100%);
+  clip-path: var(--shape-stepped);
+}
+.cx-mask-stepped .media--ai::after {
+  top: 3rem;
+}

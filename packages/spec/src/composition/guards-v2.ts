@@ -16,8 +16,10 @@ import type { Colors } from "../design.ts";
 import { NUMBERED_LABEL } from "../banned.ts";
 import { contrast, mix } from "../color.ts";
 import { KIND_PREFIX } from "../assets.ts";
-import { ON_ROLE, factObjectGround } from "./roles.ts";
+import { ON_ROLE, factObjectGround, typeTreatmentGround } from "./roles.ts";
+import { typeTreatmentProblem } from "./type-treatments.ts";
 import { MOTION_META, REPEATABLE, inVocab, type VocabKey } from "./vocab.ts";
+import { FIELD_CLASH_MASKS, TEXTURE_META, TREATMENT_META } from "./blend-meta.ts";
 import type { ColorRole, Element, Scrim } from "./schema.ts";
 import {
   BACKGROUND_LIMITS,
@@ -176,8 +178,11 @@ function painted(e: Element): Painted | undefined {
 const minOf = (p: Painted) => (p.large && !p.label ? CONTRAST_MIN.large : CONTRAST_MIN.text);
 const ratio = (x: number) => x.toFixed(2);
 
-/** Elements that sit on a ground of their own, not on the tone or the field behind them: a sticker, and the fact objects that paint one. */
-const hasOwnGround = (env: Env, e: Element): boolean => e.kind === "sticker" || (e.kind === "fact" && factObjectGround(e.treatment, env.s.tone ?? "default") !== undefined);
+/** Elements that sit on a ground of their own, not on the tone or the field behind them: a sticker, and the fact objects and heading treatments that paint one. */
+const hasOwnGround = (env: Env, e: Element): boolean =>
+  e.kind === "sticker" ||
+  (e.kind === "fact" && factObjectGround(e.treatment, env.s.tone ?? "default") !== undefined) ||
+  (e.kind === "heading" && typeTreatmentGround(e.treatment, env.s.tone ?? "default") !== undefined);
 
 /** The scrim holders: a photo layer (over the section's texts) or an image element with a scrim (over the texts overlapping it). */
 interface Holder {
@@ -186,6 +191,10 @@ interface Holder {
   /** Path of the holder below the section ("/props/background/0", "/props/elements/2"). */
   path: string;
   scrim: Scrim;
+  /** The holder itself (the photo layer or the image element), for a repair that edits it. */
+  ref: object;
+  /** Its photo treatment, when it has one: it changes what the scrim sits on (TREATMENT_META). */
+  treatment?: string;
   layer: boolean;
   texts: { e: Element; p: Painted }[];
 }
@@ -198,20 +207,27 @@ function holders(env: Env): Holder[] {
   });
   for (const { l, k } of layerEntries(env)) {
     if (l.kind !== "photo") continue;
-    out.push({ path: `${BG}/${k}`, scrim: l.scrim, layer: true, texts: texts.filter((t) => !fieldOf(env, t.e)) });
+    out.push({ path: `${BG}/${k}`, scrim: l.scrim, ref: l, treatment: l.treatment, layer: true, texts: texts.filter((t) => !fieldOf(env, t.e)) });
   }
   for (const { e, i } of entries(env)) {
     if (e.kind !== "image" || !e.scrim) continue;
-    out.push({ el: e, path: `${EL}/${i}`, scrim: e.scrim, layer: false, texts: texts.filter((t) => meets(boxOf(t.e), boxOf(e))) });
+    out.push({ el: e, path: `${EL}/${i}`, scrim: e.scrim, ref: e, treatment: e.treatment, layer: false, texts: texts.filter((t) => meets(boxOf(t.e), boxOf(e))) });
   }
   return out;
 }
 
-/** The worst contrast of `fg` against the scrim over a black and a white pixel. */
-function scrimContrast(colors: Colors, scrim: Scrim, strength: number, fg: string): number {
+/**
+ * The worst contrast of `fg` against the scrim over a black and a white pixel, with the photo treatment's worst case
+ * (TREATMENT_META): a darkening treatment caps the white pixel at grey 1 − factor; a lightening one lifts both pixels,
+ * after the scrim, `factor` of the way to white (an upper bound on any veil or filter it adds).
+ */
+function scrimContrast(colors: Colors, scrim: Scrim, strength: number, fg: string, treatment?: string): number {
   const a = SCRIM_ALPHA[strength - 1]!;
   const s = hexOf(colors, scrim.role);
-  return Math.min(contrast(fg, mix(s, "#000000", a)), contrast(fg, mix(s, "#ffffff", a)));
+  const meta = treatment !== undefined ? (TREATMENT_META as Readonly<Record<string, { shift: string; factor: number } | undefined>>)[treatment] : undefined;
+  const lift = (c: string) => (meta?.shift === "lighten" ? mix("#ffffff", c, meta.factor) : c);
+  const white = meta?.shift === "darken" ? mix("#ffffff", "#000000", 1 - meta.factor) : "#ffffff";
+  return Math.min(contrast(fg, lift(mix(s, "#000000", a))), contrast(fg, lift(mix(s, white, a))));
 }
 
 function fgOver(env: Env, colors: Colors, p: Painted): string {
@@ -272,16 +288,28 @@ function g3(env: Env): Finding[] {
   const out: Finding[] = [];
   for (const h of holders(env)) {
     if (h.texts.length === 0) continue;
-    const need = [1, 2, 3, 4].find((n) => h.texts.every((t) => scrimContrast(colors, h.scrim, n, fgOver(env, colors, t.p)) >= minOf(t.p)));
+    const holds = (n: number, treatment: string | undefined) => h.texts.every((t) => scrimContrast(colors, h.scrim, n, fgOver(env, colors, t.p), treatment) >= minOf(t.p));
+    // The scrim goes up first; when even the strongest one can't hold the treatment's worst case, the treatment goes (and the scrim the plain photo needs stays).
+    const need = [1, 2, 3, 4].find((n) => holds(n, h.treatment));
+    const plain = h.treatment !== undefined && h.treatment !== "none" ? [1, 2, 3, 4].find((n) => holds(n, undefined)) : undefined;
     const fix: Fix | undefined =
       need !== undefined
         ? { path: `${h.path}/scrim/strength`, what: `scrim raised to ${need}`, run: () => void (h.scrim.strength = need) }
-        : !h.layer
-          ? { path: `${h.path}/scrim`, what: "scrim dropped; the solid panel applies", run: () => void delete loose(h.el).scrim }
-          : undefined;
+        : plain !== undefined
+          ? {
+              path: `${h.path}/treatment`,
+              what: `treatment dropped (its worst case fails contrast at every scrim); scrim ${plain}`,
+              run: () => {
+                delete loose(h.ref).treatment;
+                h.scrim.strength = Math.max(h.scrim.strength, plain) as typeof h.scrim.strength;
+              },
+            }
+          : !h.layer
+            ? { path: `${h.path}/scrim`, what: "scrim dropped; the solid panel applies", run: () => void delete loose(h.el).scrim }
+            : undefined;
     let first = true;
     for (const { e, p } of h.texts) {
-      const got = scrimContrast(colors, h.scrim, h.scrim.strength, fgOver(env, colors, p));
+      const got = scrimContrast(colors, h.scrim, h.scrim.strength, fgOver(env, colors, p), h.treatment);
       if (got >= minOf(p)) continue;
       const f = issue("design", `${h.path}/scrim`, `composed: ${e.id} over the photo fails contrast (${ratio(got)} < ${minOf(p)})`);
       if (first && fix) f.fix = fix;
@@ -334,6 +362,10 @@ function pairsOf(env: Env, e: Element, p: Painted, useColor: boolean): Pair[] {
     }
   } else if (e.kind === "sticker") {
     add(p.fill ?? "primary", p.fill ? "fill" : "own", true, minOf(p), false);
+  } else if (e.kind === "heading" && typeTreatmentGround(e.treatment, env.s.tone ?? "default")) {
+    // A treatment that paints its own ground (fascia-lettering, marker-highlight) keeps its own ink on it, as a fact object does.
+    const own = typeTreatmentGround(e.treatment, env.s.tone ?? "default")!;
+    add(p.fill ?? own, p.fill ? "fill" : "own", true, minOf(p), false);
   } else {
     add(p.fill ?? outer.ground, p.fill ? "fill" : outer.src, true, minOf(p), false);
   }
@@ -677,6 +709,8 @@ function g18to21(env: Env): Finding[] {
         const over = fs.some((f) => within(b, f.box)) || hasPhotoLayer || els.some((x) => x.e.kind === "image" && meets(b, boxOf(x.e)));
         if (!over) out.push(both(`${at}/treatment`, "structure", `composed: ${e.id}: knockout only over a photo or a field`, drop));
       }
+      const problem = typeTreatmentProblem(e);
+      if (problem) out.push(both(`${at}/treatment`, "structure", `composed: ${e.id}: ${problem}`, drop));
     }
     if (e.kind === "photos") {
       const [min, max] = PHOTOS_COUNT[e.arrangement];
@@ -770,8 +804,60 @@ function g26(env: Env): Finding[] {
   return out;
 }
 
-/** The rules in repair order: layers and names first (they change what the later rules see), restraint last. */
-const RULES: ((env: Env) => Finding[])[] = [g1, g8, g4, g5, g6, g7, g2, g9, g3, g10to12, g14, g15to17, g18to21, photoRefs, g26, g22];
+// ---------- G27 contrast on a texture, G28 the field treatment's frame ----------
+
+/**
+ * G27 (docs/plans/studio-phase1-design.md §2.1): a texture paints the section's text colour over the ground at up to its
+ * max alpha (TEXTURE_META), so the words on the ground see that blend, not the plain ground. Every ink a text sets on the
+ * tone's ground (not on a fill, an own ground, a field, a photo or an image's scrim: those cover the texture) is held to its
+ * threshold (4.5, or 3 for large text) against the blended ground; repair drops the texture. A section with a photo layer
+ * hides its texture and is not checked.
+ */
+function g27(env: Env): Finding[] {
+  const colors = env.ctx.colors;
+  const texture = env.s.props.surface?.texture;
+  if (!colors || texture === undefined || texture === "none") return [];
+  const meta = (TEXTURE_META as Readonly<Record<string, { maxAlpha: number } | undefined>>)[texture];
+  if (!meta || layerEntries(env).some(({ l }) => l.kind === "photo")) return [];
+  const ground = toneGround(env);
+  const ink = hexOf(colors, onRole(ground));
+  const under = mix(ink, hexOf(colors, ground), meta.maxAlpha);
+  const over = new Set(holders(env).flatMap((h) => h.texts.map((t) => t.e)));
+  const path = "/props/surface/texture";
+  const fix: Fix = { path, what: "texture dropped", run: () => void delete (env.s.props.surface as Loose).texture };
+  const out: Finding[] = [];
+  for (const { e } of entries(env)) {
+    const p = painted(e);
+    if (!p || p.fill || hasOwnGround(env, e) || fieldOf(env, e) || over.has(e)) continue;
+    const fg = p.color ?? onRole(ground);
+    const got = contrast(hexOf(colors, fg), under);
+    if (got >= minOf(p)) continue;
+    const f = issue("design", path, `composed: ${e.id}: ${fg} on the "${texture}" texture over ${ground} fails contrast (${ratio(got)} < ${minOf(p)} at alpha ${meta.maxAlpha})`);
+    if (out.length === 0) f.fix = fix;
+    out.push(f);
+  }
+  return out;
+}
+
+const FIELD_CLASH: ReadonlySet<string> = new Set(FIELD_CLASH_MASKS);
+
+/** G28: the field treatment sets the photo's inset, as the postcard, ruled and crop frames do; the two never meet. Repair drops the frame. */
+function g28(env: Env): Finding[] {
+  const out: Finding[] = [];
+  for (const { e, i } of entries(env)) {
+    if ((e.kind !== "image" && e.kind !== "photos") || e.treatment !== "field" || e.mask === undefined || !FIELD_CLASH.has(e.mask)) continue;
+    const o = loose(e);
+    const path = `${EL}/${i}/mask`;
+    out.push(both(path, "structure", `composed: ${e.id}: the field treatment can't be combined with the ${e.mask} frame`, { path, what: "mask dropped", run: () => void delete o.mask }));
+  }
+  return out;
+}
+
+/**
+ * The rules in repair order: layers and names first (they change what the later rules see), restraint last. G4 runs after
+ * G9 and G3: G9 may drop the field layer a headerOver opener rested on, and G4 then drops headerOver with it.
+ */
+const RULES: ((env: Env) => Finding[])[] = [g1, g8, g5, g6, g7, g2, g9, g3, g4, g27, g28, g10to12, g14, g15to17, g18to21, photoRefs, g26, g22];
 
 /** Every issue G1–G22 find in the section (paths include `ctx.at`). */
 export function validateV2(section: ComposedSection, ctx: CompositionContext): Issue[] {

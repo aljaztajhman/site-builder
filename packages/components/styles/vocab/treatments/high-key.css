@@ -1,0 +1,4 @@
+/* high-key: brighter and a little softer, for light, clean rooms (a practice, a studio). */
+.cx-tr-high-key > .media img {
+  filter: brightness(1.12) contrast(0.9) saturate(0.9);
+}

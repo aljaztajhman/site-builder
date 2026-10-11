@@ -1,0 +1,25 @@
+/* corner-marks: two corner marks, top left and bottom right, round a heading as wide as its words, as a printer marks a
+   picture's corners. Marks in the text colour. */
+.cx-tt-corner-marks {
+  --cx-w: fit-content;
+  max-width: 100%;
+  padding: max(0.45rem, 0.22em) max(0.7rem, 0.38em);
+}
+.cx-tt-corner-marks::before,
+.cx-tt-corner-marks::after {
+  content: "";
+  position: absolute;
+  width: max(0.75rem, 0.45em);
+  height: max(0.75rem, 0.45em);
+  border: 0 solid;
+}
+.cx-tt-corner-marks::before {
+  top: 0;
+  left: 0;
+  border-width: max(2px, 0.04em) 0 0 max(2px, 0.04em);
+}
+.cx-tt-corner-marks::after {
+  right: 0;
+  bottom: 0;
+  border-width: 0 max(2px, 0.04em) max(2px, 0.04em) 0;
+}

@@ -1,0 +1,4 @@
+/* bleach: most of the colour washed out, the contrast up; a hard, silvery documentary look. */
+.cx-tr-bleach > .media img {
+  filter: saturate(0.35) contrast(1.25);
+}
