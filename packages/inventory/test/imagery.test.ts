@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { BusinessType, IMAGE_TREATMENTS, Imagery, MASKS, STANCES, contrast, mix, subtypeFits } from "@sb/spec";
+import { BusinessType, IMAGE_TREATMENTS, Imagery, MASKS, STANCES, TREATMENT_META, contrast, mix, subtypeFits } from "@sb/spec";
 import { STARTER_NAMES, VOCAB_DIR } from "@sb/render";
 import { MASK_DRAFTS, TREATMENT_DRAFTS, addedNames, inventory, paletteOf, shippedColors } from "../src/index.ts";
 
@@ -67,5 +67,33 @@ describe("dim: onInverse text holds 4.5:1 on any part of the photo, in every pal
       const lightest = mix(colors.inverse, grey, veil);
       expect(contrast(colors.onInverse, lightest), `${colors.onInverse} on ${lightest}`).toBeGreaterThanOrEqual(4.5);
     }
+  });
+});
+
+describe("TREATMENT_META (the guards' worst case) agrees with the treatment CSS", () => {
+  const sheet = (n: string) => readFileSync(`${VOCAB_DIR}/treatments/${n}.css`, "utf8");
+  const core = readFileSync(`${VOCAB_DIR}/../composed.css`, "utf8");
+  const brightness = (css: string) => Number(/brightness\(([\d.]+)\)/.exec(css)?.[1] ?? 1);
+
+  it("every added treatment: a lighten blend or a brighter filter is `lighten`, a dimmer filter is `darken`, with the factor the CSS gives", () => {
+    for (const n of added.treatment) {
+      const css = sheet(n);
+      const meta = TREATMENT_META[n as keyof typeof TREATMENT_META];
+      const b = brightness(css);
+      if (/mix-blend-mode:\s*lighten/.test(css)) expect(meta.shift, n).toBe("lighten");
+      else if (b > 1) expect(meta, n).toEqual({ shift: "lighten", factor: Number((b - 1).toFixed(2)) });
+      else if (b < 1) expect(meta, n).toEqual({ shift: "darken", factor: Number((1 - b).toFixed(2)) });
+    }
+  });
+
+  it("the veils: grade's lift stays within its soft-light veil (soft-light lifts at most a quarter of the range), tint's factor is its veil's opacity", () => {
+    expect(TREATMENT_META.grade.shift).toBe("lighten");
+    expect(TREATMENT_META.grade.factor).toBeLessThanOrEqual(Number(/opacity:\s*([\d.]+)/.exec(sheet("grade"))![1]) * 0.25 + 0.01);
+    const tint = /\.cx-tr-tint::after \{[^}]*?opacity:\s*([\d.]+)/.exec(core)![1];
+    expect(TREATMENT_META.tint).toEqual({ shift: "lighten", factor: Number(tint) });
+  });
+
+  it("dim: the cap the guard assumes is the partial's brightness", () => {
+    expect(TREATMENT_META.dim).toEqual({ shift: "darken", factor: Number((1 - brightness(sheet("dim"))).toFixed(2)) });
   });
 });

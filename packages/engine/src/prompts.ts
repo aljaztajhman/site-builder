@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { BANNED_PHRASES, Business, DIRECTIONS, SECTION_DEFS, VOCABS, toModelJsonSchema, type Motif } from "@sb/spec";
+import { BANNED_PHRASES, Business, DIRECTIONS, KIND_PREFIX, SECTION_DEFS, VOCABS, toModelJsonSchema, type Motif, type VocabKey } from "@sb/spec";
+import { STARTER_NAMES, type VocabFamily } from "@sb/render";
 import {
   ALT_SYSTEM_FIXED,
   BRIEF_FACTS_NEW,
@@ -97,6 +98,44 @@ export function sectionCatalogue(f: PromptFixes = NO_PROMPT_FIXES, opts: Catalog
 /** Config prompts.compactCatalogue: the compact notation instead of JSON Schema (compact-catalogue.ts). Off: today's prompts. */
 export interface CatalogueOptions {
   compact?: boolean;
+  /**
+   * The designer catalogue only: ids of the inventory assets approved for the runtime (`mask/arch`, `texture/stone`, a
+   * drawing's full id …), from the registry's approved assets. The v19/v20 starter names are always offered; every other
+   * name is offered only when its id is here, so a draft is never put in front of the designer. Absent: the starters only.
+   */
+  approved?: ReadonlySet<string>;
+}
+
+/** The drawings the Drawing format started with (vocab.ts DRAWINGS, the first two): approved from the start. */
+const STARTER_DRAWINGS: readonly string[] = ["motif/bakery/wheat-ear-line", "ornament/rope-line"];
+
+/** The vocabularies that are a family of styles/vocab/ partials: their starters (STARTER_NAMES) and their asset id prefix. */
+const FAMILY_OF: Partial<Record<VocabKey, { family: VocabFamily; prefix: string }>> = {
+  MASKS: { family: "masks", prefix: KIND_PREFIX.mask },
+  IMAGE_TREATMENTS: { family: "treatments", prefix: KIND_PREFIX.treatment },
+  TEXTURES: { family: "textures", prefix: KIND_PREFIX.texture },
+  EDGES: { family: "edges", prefix: KIND_PREFIX.divider },
+  FACT_OBJECTS: { family: "fact-objects", prefix: KIND_PREFIX.factObject },
+  TYPE_TREATMENTS: { family: "type-treatments", prefix: KIND_PREFIX.typeTreatment },
+  MOTIONS: { family: "motion", prefix: KIND_PREFIX.motion },
+};
+
+/**
+ * The vocabulary names the designer may be offered, per list, in the spec's order: the starter names plus the names whose
+ * asset id is in `approved`. DRAWINGS and REPEATABLE (full ids) likewise, with the two starter drawings (REPEATABLE: the
+ * offered drawings that tile); PRACTICAL_FACTS is a closed list of 40 and WORDMARK_STYLES has one name: both whole.
+ */
+export function approvedVocabs(approved: ReadonlySet<string> = new Set()): Record<VocabKey, readonly string[]> {
+  const out = {} as Record<VocabKey, readonly string[]>;
+  const drawings = VOCABS.DRAWINGS.filter((n) => STARTER_DRAWINGS.includes(n) || approved.has(n));
+  for (const key of Object.keys(VOCABS) as VocabKey[]) {
+    const fam = FAMILY_OF[key];
+    if (fam) out[key] = VOCABS[key].filter((n) => STARTER_NAMES[fam.family].includes(n) || approved.has(`${fam.prefix}/${n}`));
+    else if (key === "DRAWINGS") out[key] = drawings;
+    else if (key === "REPEATABLE") out[key] = VOCABS.REPEATABLE.filter((n) => drawings.includes(n));
+    else out[key] = VOCABS[key];
+  }
+  return out;
 }
 
 /**
@@ -139,7 +178,7 @@ export function designerCatalogue(opts: CatalogueOptions = {}): string {
     const blocks = defs.map((d) => [...head(d), `Props schema: ${JSON.stringify(toModelJsonSchema(d.props, { shared: COMPOSED_SHARED }))}`].join("\n"));
     return `# Composed sections\n\n${blocks.join("\n\n")}`;
   }
-  const w = new CompactWriter(composedAliases(), VOCABS);
+  const w = new CompactWriter(composedAliases(), approvedVocabs(opts.approved));
   const blocks = defs.map((d) => [...head(d), `Props: ${w.type(toModelJsonSchema(d.props))}`].join("\n"));
   return `# Composed sections\n\n${COMPACT_NOTATION} ${VOCAB_NOTATION}\nShared types:\n${w.definitions()}\n\n${blocks.join("\n\n")}`;
 }

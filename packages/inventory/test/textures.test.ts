@@ -1,7 +1,9 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { BusinessType, STANCES, SUBTYPES, TEXTURES, contrast, direction, mix, type Colors } from "@sb/spec";
-import { STARTER_NAMES, vocabFamilySheets } from "@sb/render";
-import { PATTERN_TILES, TEXTURE_TAGS, detectPattern, inventory, paletteOf, shippedColors, textureNames, texturePartial } from "../src/index.ts";
+import { BusinessType, STANCES, SUBTYPES, TEXTURES, TEXTURE_META, contrast, direction, mix, repairComposition, validateComposition, type Colors, type ComposedSection } from "@sb/spec";
+import { STARTER_NAMES, VOCAB_DIR, vocabFamilySheets } from "@sb/render";
+import { PATTERN_TILES, TEXTURE_TAGS, applyDecisions, detectPattern, inventory, paletteOf, registeredAssets, shippedColors, textureNames, texturePartial } from "../src/index.ts";
 import { SHEET_PALETTES } from "../scripts/pages.ts";
 
 /**
@@ -95,28 +97,106 @@ describe("textures: text keeps its contrast at the texture's max alpha", () => {
     }
   });
 
-  const allMisses = (alpha: number): string[] =>
-    registry.byKind("palette").flatMap((a) => {
-      const p = paletteOf(a.id)!;
-      // A curated palette (main's drafts) belongs to no direction: it renders as stored.
-      return misses(p.direction ? shippedColors(p.colors, p.direction) : p.colors, alpha).map((m) => `${a.id}: ${m}`);
-    });
+  /**
+   * The invariant (spec G27, composition/blend-meta.ts): in every registered palette, on every ground, with every texture,
+   * either each text role keeps its threshold against the ground blended with the texture's ink at its max alpha, or the
+   * guard rejects the combination and the repair drops the texture. A section is built per ground with every text role the
+   * ground carries (muted too on paper and alt); the thresholds are the guards' (4.5 for these body-size texts).
+   */
+  const TONES = [
+    { tone: "default", ground: "background", ink: "text", roles: ["text", "muted"] },
+    { tone: "alt", ground: "surface", ink: "text", roles: ["text", "muted"] },
+    { tone: "inverse", ground: "inverse", ink: "onInverse", roles: ["onInverse"] },
+    { tone: "band", ground: "band", ink: "onBand", roles: ["onBand"] },
+  ] as const;
 
-  it.each(names)("%s: in every registered palette, as a site renders it (paper, alt and inverse; band: the known misses only)", (n) => {
-    const failed = allMisses(texturePartial(n)!.maxAlpha);
-    expect(failed.filter((m) => !BAND_MISSES.some((id) => m.startsWith(`${id}: onBand on band `)))).toEqual([]);
+  const textAt = (id: string, row: number, color?: string) => ({
+    id,
+    kind: "text",
+    paragraphs: ["Kruh pečemo ob štirih zjutraj."],
+    ...(color ? { color } : {}),
+    desk: { col: 1, span: 6, row },
+    phone: { order: row - 1, span: "full" },
   });
+  const sectionFor = (tone: string, roles: readonly string[], texture: string): ComposedSection =>
+    ({
+      id: "s_t",
+      type: "composed",
+      variant: "free",
+      tone,
+      props: { intent: "story", width: "wide", rows: roles.length, elements: roles.map((r, i) => textAt(`e_${i}`, i + 1, r)), surface: { texture } },
+    }) as unknown as ComposedSection;
+  const colorsOf = (id: string): Colors => {
+    const p = paletteOf(id)!;
+    // A curated palette (main's drafts) belongs to no direction: it renders as stored.
+    return p.direction ? shippedColors(p.colors, p.direction) : p.colors;
+  };
+  const textureIssues = (s: ComposedSection, colors: Colors) => validateComposition(s, { colors }).filter((i) => i.path === "/props/surface/texture");
 
-  it("the band misses are real: every listed palette misses with at least one texture", () => {
-    const failed = names.flatMap((n) => allMisses(texturePartial(n)!.maxAlpha));
-    for (const id of BAND_MISSES) expect(failed.some((m) => m.startsWith(`${id}: onBand on band `)), id).toBe(true);
+  it.each(names)("%s: in every registered palette and on every ground, the blended contrast holds or the guard rejects and the repair drops the texture", (n) => {
+    const alpha = texturePartial(n)!.maxAlpha;
+    for (const a of registry.byKind("palette")) {
+      const colors = colorsOf(a.id);
+      for (const t of TONES) {
+        const ground = t.ground === "band" ? (colors.band ?? colors.primary) : colors[t.ground];
+        const ink = t.ink === "onBand" ? (colors.onBand ?? colors.onPrimary) : colors[t.ink];
+        const under = mix(ink, ground, alpha);
+        const fg = (r: string) => (r === "onBand" ? (colors.onBand ?? colors.onPrimary) : colors[r as keyof Colors]!);
+        const holds = t.roles.every((r) => contrast(fg(r), under) >= 4.5);
+        const s = sectionFor(t.tone, t.roles, n);
+        const flagged = textureIssues(s, colors);
+        const where = `${a.id} ${t.tone}`;
+        if (holds) expect(flagged, where).toEqual([]);
+        else {
+          expect(flagged.length, where).toBeGreaterThan(0);
+          const r = repairComposition(s, { colors });
+          expect(r.repairs.some((l) => l.startsWith("/props/surface/texture: ")), where).toBe(true);
+          expect((r.section.props.surface as { texture?: string } | undefined)?.texture, where).toBeUndefined();
+          expect(textureIssues(r.section, colors), where).toEqual([]);
+        }
+      }
+    }
   });
 });
 
-/**
- * Palettes whose band text sits so close to 4.5:1 (about 4.6 to 4.8) that any visible texture on a band-toned section
- * takes it under: measured 11 Oct 2026, onBand on band 3.90 to 4.48 at alpha 0.10 to 0.12. A texture must not go on a
- * band section in these palettes; the composition guard has to drop it there (open item for the director). Remove an
- * entry when its palette or the guard changes; the test above fails on a stale one.
- */
-const BAND_MISSES = ["palette/cevi-hot-cold", "palette/etiketa-terracotta", "palette/nasmeh-teal", "palette/tablica-blue"];
+describe("textures: the guard is exercised by the curated palettes", () => {
+  it("rejects a texture on a band in the palettes that sit just over 4.5:1 (measured 11 Oct 2026), and on muted text in others", () => {
+    const rejected = new Set<string>();
+    for (const a of registry.byKind("palette")) {
+      const p = paletteOf(a.id)!;
+      const colors = p.direction ? shippedColors(p.colors, p.direction) : p.colors;
+      for (const n of names) {
+        for (const [tone, role] of [["band", "onBand"], ["default", "muted"]] as const) {
+          const s = {
+            id: "s_t",
+            type: "composed",
+            variant: "free",
+            tone,
+            props: { intent: "story", width: "wide", rows: 1, elements: [{ id: "e_0", kind: "text", paragraphs: ["Kruh."], color: role, desk: { col: 1, span: 6, row: 1 }, phone: { order: 0, span: "full" } }], surface: { texture: n } },
+          } as unknown as ComposedSection;
+          if (validateComposition(s, { colors }).some((i) => i.path === "/props/surface/texture")) rejected.add(`${a.id} ${tone}`);
+        }
+      }
+    }
+    for (const id of ["palette/cevi-hot-cold", "palette/etiketa-terracotta", "palette/nasmeh-teal", "palette/tablica-blue"]) expect(rejected.has(`${id} band`), id).toBe(true);
+    expect([...rejected].some((r) => r.endsWith(" default"))).toBe(true);
+  });
+});
+
+describe("textures: the meta table the guard reads is the CSS", () => {
+  it("TEXTURE_META names every texture with the alpha its partial (or the core sheet, for the starters) paints", () => {
+    const core = readFileSync(path.join(VOCAB_DIR, "..", "composed.css"), "utf8");
+    const starter = Number(/\.cx-tex-grain::before,\s*\.cx-tex-lines::before \{[^}]*?opacity:\s*([\d.]+)/.exec(core)![1]);
+    expect(TEXTURE_META.none.maxAlpha).toBe(0);
+    expect(TEXTURE_META.grain.maxAlpha).toBe(starter);
+    expect(TEXTURE_META.lines.maxAlpha).toBe(starter);
+    for (const n of names) expect(TEXTURE_META[n as keyof typeof TEXTURE_META].maxAlpha, n).toBe(texturePartial(n)!.maxAlpha);
+  });
+
+  it("a decision approving a texture gives the asset id the designer catalogue reads (`texture/<name>`)", () => {
+    const approved = applyDecisions(registeredAssets(), { "texture/stone": { status: "approved", at: "2026-10-11T00:00:00.000Z" } })
+      .filter((a) => a.status === "approved" && a.kind === "texture")
+      .map((a) => a.id);
+    expect(approved).toEqual(["texture/stone"]);
+  });
+});
