@@ -486,6 +486,9 @@ importers:
       '@sb/engine':
         specifier: workspace:*
         version: link:../../packages/engine
+      '@sb/inventory':
+        specifier: workspace:*
+        version: link:../../packages/inventory
       '@sb/platform':
         specifier: workspace:*
         version: link:../../packages/platform

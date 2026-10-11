@@ -1,0 +1,31 @@
+{
+  "id": "avtoservis-golob",
+  "businessType": "car-repair",
+  "town": "Celje",
+  "description": "Avtoservis Golob, Ljubljanska cesta 71, 3000 Celje. Servis vodim jaz, Marko Golob, v delavnici sva dva mehanika. Popravljamo osebna vozila vseh znamk.\n\nDelamo redne servise po navodilih proizvajalca, menjavo olja in filtrov, zavore, podvozje, računalniško diagnostiko in pripravo na tehnični pregled. Gume tudi menjamo in hranimo.\n\nCene: računalniška diagnostika 35 €, menjava olja (delo) 25 €, menjava gum 24 € za komplet, hramba gum 45 € na sezono, priprava na tehnični pregled 30 €. Za večja popravila dobite predračun, preden začnemo.\n\nOdprto pon–pet od 7.30 do 17.00, ob sobotah zaprto.\n\nPokličite na 041 555 384, e-pošta servis@avtoservis-golob.example. Vhod je s strani, nasproti bencinske črpalke. Plačilo s kartico ali na račun za podjetja, parkirišče je pred delavnico. Želim, da je stran preprosta in da se takoj vidi naslov in telefon, kot modra tablica s hišno številko.",
+  "photos": {
+    "fixture": "avtoservis-mrak",
+    "subjects": ["osebni avto na dvigalu v avtomehanični delavnici", "mehanik pregleduje motor pod odprtim pokrovom", "regal z zloženimi pnevmatikami za hrambo"]
+  },
+  "facts": {
+    "name": "Avtoservis Golob",
+    "phone": "+38641555384",
+    "email": "servis@avtoservis-golob.example",
+    "address": { "street": "Ljubljanska cesta 71", "postalCode": "3000", "city": "Celje" },
+    "hours": [{ "from": "mon", "to": "fri", "open": "07:30", "close": "17:00" }],
+    "prices": [
+      { "item": "računalniška diagnostika", "amount": 35 },
+      { "item": "menjava olja (delo)", "amount": 25 },
+      { "item": "menjava gum (komplet)", "amount": 24 },
+      { "item": "hramba gum (sezona)", "amount": 45 },
+      { "item": "priprava na tehnični pregled", "amount": 30 }
+    ],
+    "people": [{ "name": "Marko Golob", "role": "vodja servisa" }],
+    "amenities": ["card", "invoice", "parking"],
+    "other": [
+      "Popravljamo osebna vozila vseh znamk",
+      "Za večja popravila dobite predračun, preden začnemo",
+      "Vhod je s strani, nasproti bencinske črpalke"
+    ]
+  }
+}

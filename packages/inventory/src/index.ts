@@ -8,6 +8,7 @@ import { applyDecisions, shippedDecisions } from "./decisions.ts";
 import { draftAssets, todaysAssets } from "./sources.ts";
 import { compositionAssets } from "./compositions/index.ts";
 import { inventoryFontAssets, inventoryPairingAssets } from "./type-inventory.ts";
+import { referenceAssets } from "./references.ts";
 
 export * from "./schema.ts";
 export * from "./decisions.ts";
@@ -25,15 +26,16 @@ export { fontFile, fontLicenseFile } from "./bytes.ts";
 export { COMPOSITION_PRESETS, compositionAssets, compositionPreset } from "./compositions/index.ts";
 export { inventoryFontAssets, inventoryPairingAssets, FONT_TAGS, STANCE_FAMILIES, VOICES, type PairingTags, type StanceFamily, type Voice } from "./type-inventory.ts";
 export { PAIRING_TAGS } from "./pairing-tags.ts";
+export { STUDIO_REFERENCES, referenceAssets, type ReferenceEntry } from "./references.ts";
 
 let cached: Registry | undefined;
 
 /**
  * The registry: every asset that ships today (approved), then the drafts (curated palettes, the type inventory, the
- * composition presets), each with the owner's gallery decision applied (built once).
+ * composition presets, the studio references), each with the owner's gallery decision applied (built once).
  */
 export function inventory(): Registry {
   return (cached ??= new Registry().registerAll(
-    applyDecisions([...todaysAssets(), ...draftAssets(), ...inventoryFontAssets(), ...inventoryPairingAssets(), ...compositionAssets()], shippedDecisions()),
+    applyDecisions([...todaysAssets(), ...draftAssets(), ...inventoryFontAssets(), ...inventoryPairingAssets(), ...compositionAssets(), ...referenceAssets()], shippedDecisions()),
   ));
 }

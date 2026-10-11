@@ -42,6 +42,8 @@ export const BYTE_BUDGET: Partial<Record<AssetKind, number>> = {
   section: 4 * 1024,
   /** A composition preset adds no CSS of its own: it renders with the composed sheet (section/composed:free). */
   composition: 0,
+  /** A studio reference is a whole page made of other assets; it adds nothing of its own (references.ts). */
+  reference: 0,
 };
 /**
  * The composed stylesheets, minified (docs/plans/studio-phase1-design.md §3.4.1, §3.4.7): the core sheet (spec v19,
