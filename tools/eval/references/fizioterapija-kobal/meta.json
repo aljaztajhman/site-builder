@@ -1,0 +1,8 @@
+{
+  "id": "fizioterapija-kobal",
+  "stance": "soca-green",
+  "trades": ["physio"],
+  "title": "Fizioterapija Kobal, Soča",
+  "gapNote": "The white pebbles are a hand-written decor svg (four closed curves, one in the accent green): ornament/pebble-shape (stance signature) doesn't exist. They can only sit in their own grid cell, shifted up two steps under the photo, so they read as a separate cluster rather than stones the photo rests on, and on phones they are hidden because a half-width block of blobs looks like a stray icon. mask/pebble gives the photo a lopsided round outline, close to the idea; there is no way to set two or three photos as stones of different sizes (photos arrangements are fan, stack, offset-pair, strip, before-after, all rectangular). The Soča water is only colour: a flat pale-green band section and the primary emerald; there is no clear-water treatment or gradient-free depth, and the stone texture on the services section is a speckle that reads as terrazzo more than river stone. Smooth open space is the airy density alone; minHeight can't be set per breakpoint, so the hero is content-height.",
+  "sources": ["P Pregib (one therapist, one photo, calm)", "stance soca-green (cold emerald, pale stone, the photo in a pebble shape, open space)"]
+}
