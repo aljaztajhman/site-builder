@@ -24,11 +24,11 @@ import heroArchOnDark from "./hero/arch-on-dark.ts";
 import heroBendPhoto from "./hero/bend-photo.ts";
 import heroCardOverPhoto from "./hero/card-over-photo.ts";
 import heroDiscPhotoTag from "./hero/disc-photo-tag.ts";
+import heroDocketOnBand from "./hero/docket-on-band.ts";
 import heroHeadlineDrawnTrade from "./hero/headline-drawn-trade.ts";
 import heroHeadlineFacts from "./hero/headline-facts.ts";
 import heroHeadlineLargeRuled from "./hero/headline-large-ruled.ts";
 import heroLabelCardArch from "./hero/label-card-arch.ts";
-import heroOfferingsSlip from "./hero/offerings-slip.ts";
 import heroPhotoBottomBand from "./hero/photo-bottom-band.ts";
 import heroPhotoCoverBand from "./hero/photo-cover-band.ts";
 import heroPhotoDarkPanel from "./hero/photo-dark-panel.ts";
@@ -99,11 +99,11 @@ export const COMPOSITION_PRESETS: readonly CompositionPreset[] = [
   heroBendPhoto,
   heroCardOverPhoto,
   heroDiscPhotoTag,
+  heroDocketOnBand,
   heroHeadlineDrawnTrade,
   heroHeadlineFacts,
   heroHeadlineLargeRuled,
   heroLabelCardArch,
-  heroOfferingsSlip,
   heroPhotoBottomBand,
   heroPhotoCoverBand,
   heroPhotoDarkPanel,
