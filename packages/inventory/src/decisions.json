@@ -1,1 +1,234 @@
-{}
+{
+  "icon/line/accessible-toilet": {
+    "status": "rejected",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/air-con": {
+    "status": "rejected",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/appointment-only": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/baby-change": {
+    "status": "rejected",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/bike-parking": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/card": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/cash-only": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/contactless": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/delivery": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/emergency": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/english": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/ev-charging": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/free-parking": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/garden": {
+    "status": "rejected",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/german": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/gift-voucher": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/gluten-free": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/home-visits": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/invoice": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/italian": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/kids-welcome": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/lift": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/local-produce": {
+    "status": "rejected",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/no-pets": {
+    "status": "rejected",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/online-booking": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/parking": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/pets-welcome": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/phone-booking": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/pickup-service": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/play-corner": {
+    "status": "rejected",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/public-transport": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/step-free": {
+    "status": "rejected",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/takeaway": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/terrace": {
+    "status": "rejected",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/toilets": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/vegan": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/vegetarian": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/walk-ins": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/wheelchair": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "icon/line/wifi": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "motif/accountant/ledger-pen-line": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "motif/bakery/peel-loaf-line": {
+    "status": "rejected",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "motif/car-repair/torque-wrench-line": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "motif/deli/olive-salt-line": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "motif/dental/mirror-probe-line": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "motif/electrical/cable-coil-line": {
+    "status": "rejected",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "motif/florist/secateurs-stem-line": {
+    "status": "rejected",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "motif/hairdresser/shears-comb-line": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "motif/physio/spine-model-line": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "motif/plumbing/ball-valve-line": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "motif/restaurant/ladle-pot-line": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "motif/tourist-farm/milk-can-line": {
+    "status": "rejected",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "ornament/beehive-panel-line": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "ornament/gorenjska-rosette-line": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "ornament/idrija-lace-line": {
+    "status": "approved",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "ornament/pisanica-band-line": {
+    "status": "rejected",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "ornament/prekmurje-pottery-band-line": {
+    "status": "rejected",
+    "at": "2026-10-11T11:52:59.931Z"
+  },
+  "ornament/trail-blaze-line": {
+    "status": "rejected",
+    "at": "2026-10-11T11:52:59.931Z"
+  }
+}
