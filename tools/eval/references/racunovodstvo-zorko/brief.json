@@ -1,0 +1,66 @@
+{
+  "id": "racunovodstvo-zorko",
+  "businessType": "accountant",
+  "town": "Velenje",
+  "description": "Računovodstvo Zorko je majhna računovodska pisarna v Velenju, naslov je Prešernova cesta 14, 3320 Velenje. Delam jaz, Barbara Zorko, računovodkinja. Vodim poslovne knjige za samostojne podjetnike, obračunavam plače, pripravljam davčne napovedi in pomagam pri ustanovitvi podjetja.\n\nCene: vodenje knjigovodstva za s.p. mesečno od 80 €, obračun plač (na zaposlenega) 15 €, letna davčna napoved fizične osebe 45 €, ustanovitev s.p. 90 €.\n\nOdprto: pon–čet 8.00–16.00, petek 8.00–13.00, ob sobotah in nedeljah zaprto.\n\nNaročite se po telefonu 03 555 62 17 ali na barbara@racunovodstvo-zorko.example. Pred pisarno je parkirišče, plačate lahko s kartico. Samo po naročilu. Stran naj bo kot stran iz knjige: ravne vrstice, številke desno in ena rdeča črta pod tistim, kar šteje.",
+  "photos": null,
+  "facts": {
+    "name": "Računovodstvo Zorko",
+    "phone": "+38635556217",
+    "email": "barbara@racunovodstvo-zorko.example",
+    "address": {
+      "street": "Prešernova cesta 14",
+      "postalCode": "3320",
+      "city": "Velenje"
+    },
+    "hours": [
+      {
+        "from": "mon",
+        "to": "thu",
+        "open": "08:00",
+        "close": "16:00"
+      },
+      {
+        "from": "fri",
+        "to": "fri",
+        "open": "08:00",
+        "close": "13:00"
+      }
+    ],
+    "prices": [
+      {
+        "item": "vodenje knjigovodstva za s.p. mesečno",
+        "amount": 80,
+        "from": true
+      },
+      {
+        "item": "obračun plač (na zaposlenega)",
+        "amount": 15
+      },
+      {
+        "item": "letna davčna napoved fizične osebe",
+        "amount": 45
+      },
+      {
+        "item": "ustanovitev s.p.",
+        "amount": 90
+      }
+    ],
+    "people": [
+      {
+        "name": "Barbara Zorko",
+        "role": "računovodkinja"
+      }
+    ],
+    "amenities": [
+      "appointment-only",
+      "card",
+      "parking"
+    ],
+    "other": [
+      "Vodim poslovne knjige za samostojne podjetnike",
+      "Obračunavam plače in pripravljam davčne napovedi",
+      "Samo po naročilu"
+    ]
+  }
+}
