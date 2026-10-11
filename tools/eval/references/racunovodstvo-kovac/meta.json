@@ -1,0 +1,8 @@
+{
+  "id": "racunovodstvo-kovac",
+  "stance": "brass-door-plate",
+  "trades": ["accountant"],
+  "title": "Računovodstvo Kovač, tablica pri vratih",
+  "gapNote": "fact/door-plate is the right object but it can't be the hero: its type is capped by its container (min of the size and 100cqw over the name's length), so size 7 or a wider span left it at the same modest plate on desktop, and alignX stretch doesn't widen it. It is a flat band-coloured box with two screw rings: no thin engraved frame, no four screws, no engraved capitals (type-treatment/engraved-capitals and ornament/screw-frame, the stance's signatures, don't exist). The three plates in the team section shrink to their words, so Maja's plate is half Tanja's; a building's directory has equal plates. The page has nothing to hang the plate on (no door, wall or frame), so it floats beside the headline. The metal is one flat ochre band colour; that is right for the banned-shine rule, but it reads as mustard on the dark ground more than brass.",
+  "sources": ["R Račun (s.p. and d.o.o. as the first words)", "stance brass-door-plate (the name and profession on a plate, one metal tone, airy)"]
+}

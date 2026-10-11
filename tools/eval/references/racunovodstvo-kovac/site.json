@@ -1,0 +1,181 @@
+{
+  "specVersion": 20,
+  "slug": "racunovodstvo-kovac",
+  "locales": { "default": "sl", "enabled": ["sl"] },
+  "business": {
+    "name": "Računovodstvo Kovač",
+    "type": "accountant",
+    "phone": "+38645557210",
+    "email": "tanja@racunovodstvo-kovac.example",
+    "address": { "street": "Koroška cesta 14", "postalCode": "4000", "city": "Kranj" },
+    "hours": {
+      "entries": [
+        { "from": "mon", "to": "thu", "open": "08:00", "close": "16:00" },
+        { "from": "fri", "to": "fri", "open": "08:00", "close": "13:00" },
+        { "from": "sat", "to": "sun", "closed": true }
+      ],
+      "note": "Stranke sprejemamo po dogovoru."
+    },
+    "provider": {
+      "legalName": { "$placeholder": "legalName" },
+      "registrationNumber": { "$placeholder": "registrationNumber" },
+      "taxNumber": { "$placeholder": "taxNumber" }
+    },
+    "amenities": ["lift", "appointment-only", "parking"]
+  },
+  "design": {
+    "direction": "dark-elegant",
+    "fontPair": "garamond-karla",
+    "colors": {
+      "background": "#15171c",
+      "surface": "#1e2128",
+      "text": "#ece8df",
+      "muted": "#b4ada0",
+      "primary": "#c9a85a",
+      "onPrimary": "#15171c",
+      "accent": "#c9a85a",
+      "border": "#3a3d45",
+      "inverse": "#0e0f13",
+      "onInverse": "#ece8df",
+      "band": "#b8954a",
+      "onBand": "#15171c"
+    },
+    "radius": 0,
+    "baseFontSize": 18,
+    "scale": 1.333,
+    "headingWeight": 500,
+    "headingCase": "normal",
+    "headingTracking": 0,
+    "density": "airy",
+    "shadow": "none",
+    "imagery": "framed",
+    "motion": "still",
+    "wordmark": { "style": "plain" }
+  },
+  "assets": { "images": [] },
+  "chrome": {
+    "header": { "variant": "bar", "cta": "none" },
+    "footer": { "variant": "compact" },
+    "mobileActionBar": true
+  },
+  "pages": [
+    {
+      "id": "p_home",
+      "kind": "home",
+      "slug": "",
+      "nav": { "label": "Domov", "show": true },
+      "seo": {
+        "title": "Računovodstvo Kovač, Kranj – knjige za s.p. in d.o.o.",
+        "description": "Vodenje knjig, plače, DDV in letna poročila za s.p. in mala d.o.o. iz Kranja. Koroška cesta 14, 2. nadstropje. Prvi pogovor je brezplačen."
+      },
+      "sections": [
+        {
+          "id": "s_door",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "hero",
+            "width": "contained",
+            "minHeight": "l",
+            "rows": 4,
+            "elements": [
+              { "id": "e_where", "kind": "text", "paragraphs": ["Koroška cesta 14, Kranj, 2. nadstropje"], "color": "muted", "desk": { "col": 1, "span": 6, "row": 1, "alignY": "end" }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_title", "kind": "heading", "text": "Knjige za s.p. in mala d.o.o.", "level": 1, "size": 6, "measure": "m", "desk": { "col": 1, "span": 6, "row": 2 }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_lead", "kind": "text", "paragraphs": ["Vodimo knjige za 45 strank iz Kranja in okolice: knjige, plače, DDV in letna poročila. Prvi pogovor je brezplačen."], "size": 1, "desk": { "col": 1, "span": 5, "row": 3 }, "phone": { "order": 2, "span": "full" } },
+              { "id": "e_phone", "kind": "fact", "value": "04 555 72 10", "label": "Stranke sprejemamo po dogovoru", "treatment": "numeral", "size": 4, "color": "primary", "link": { "action": "call" }, "desk": { "col": 1, "span": 5, "row": 4, "alignY": "end" }, "phone": { "order": 3, "span": "full" } },
+              { "id": "e_plate", "kind": "fact", "value": "Tanja Kovač", "label": "računovodja", "treatment": "door-plate", "size": 6, "desk": { "col": 8, "span": 5, "row": 1, "rowSpan": 4, "alignY": "center", "alignX": "center" }, "phone": { "order": 4, "span": "full" } }
+            ]
+          }
+        },
+        {
+          "id": "s_work",
+          "type": "composed",
+          "variant": "free",
+          "tone": "alt",
+          "props": {
+            "intent": "services",
+            "width": "contained",
+            "rows": 3,
+            "elements": [
+              { "id": "e_h", "kind": "heading", "text": "Kaj delamo", "level": 2, "size": 5, "desk": { "col": 1, "span": 5, "row": 1 }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_l", "kind": "list", "marker": "rule", "size": 1, "items": ["Vodenje poslovnih knjig", "Obračun plač", "Obračun DDV", "Letna poročila za AJPES in FURS", "Pomoč pri odprtju s.p."], "desk": { "col": 1, "span": 5, "row": 2, "rowSpan": 2 }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_ph", "kind": "heading", "text": "Mesečno vodenje knjig", "level": 3, "size": 3, "desk": { "col": 7, "span": 6, "row": 1, "alignY": "end" }, "phone": { "order": 2, "span": "full" } },
+              {
+                "id": "e_p",
+                "kind": "prices",
+                "style": "leaders",
+                "size": 1,
+                "items": [
+                  { "name": "s.p. normiranec", "price": { "amount": 60, "from": true } },
+                  { "name": "s.p. z dejanskimi stroški", "price": { "amount": 120, "from": true } },
+                  { "name": "d.o.o.", "price": { "amount": 180, "from": true } }
+                ],
+                "desk": { "col": 7, "span": 6, "row": 2 },
+                "phone": { "order": 3, "span": "full" }
+              },
+              { "id": "e_t", "kind": "text", "paragraphs": ["Točno ceno povemo po prvem pogovoru."], "color": "muted", "desk": { "col": 7, "span": 6, "row": 3 }, "phone": { "order": 4, "span": "full" } }
+            ]
+          }
+        },
+        {
+          "id": "s_board",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "team",
+            "width": "contained",
+            "rows": 2,
+            "elements": [
+              { "id": "e_h", "kind": "heading", "text": "V pisarni smo tri", "level": 2, "size": 5, "desk": { "col": 1, "span": 6, "row": 1 }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_tanja", "kind": "fact", "value": "Tanja Kovač", "label": "vodi knjige", "treatment": "door-plate", "size": 3, "desk": { "col": 1, "span": 4, "row": 2 }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_maja", "kind": "fact", "value": "Maja", "label": "plače", "treatment": "door-plate", "size": 3, "desk": { "col": 5, "span": 4, "row": 2 }, "phone": { "order": 2, "span": "full" } },
+              { "id": "e_petra", "kind": "fact", "value": "Petra", "label": "DDV in poročila", "treatment": "door-plate", "size": 3, "desk": { "col": 9, "span": 4, "row": 2 }, "phone": { "order": 3, "span": "full" } }
+            ]
+          }
+        },
+        {
+          "id": "s_office",
+          "type": "composed",
+          "variant": "free",
+          "tone": "alt",
+          "props": {
+            "intent": "contact",
+            "width": "contained",
+            "rows": 3,
+            "elements": [
+              { "id": "e_h", "kind": "heading", "text": "Uradne ure", "level": 2, "size": 5, "desk": { "col": 1, "span": 5, "row": 1 }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_hours", "kind": "hours", "style": "table", "desk": { "col": 1, "span": 5, "row": 2 }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_if", "kind": "iconFacts", "icons": "line", "items": [{ "fact": "lift", "note": "Pisarna v 2. nadstropju" }, { "fact": "appointment-only" }, { "fact": "parking", "note": "Za stavbo, plačljivo" }], "desk": { "col": 1, "span": 5, "row": 3 }, "phone": { "order": 2, "span": "full" } },
+              { "id": "e_contact", "kind": "contact", "show": ["phone", "email", "address"], "desk": { "col": 7, "span": 6, "row": 1, "rowSpan": 2 }, "phone": { "order": 3, "span": "full" } },
+              { "id": "e_map", "kind": "map", "style": "corner", "desk": { "col": 7, "span": 6, "row": 3 }, "phone": { "order": 4, "span": "full" } }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "nav": { "label": "Zasebnost", "show": false },
+      "seo": { "title": "Varstvo osebnih podatkov | Računovodstvo Kovač", "description": "Kako Računovodstvo Kovač obdeluje osebne podatke obiskovalcev spletne strani." },
+      "sections": [{ "id": "s_legal_privacy", "type": "legal", "variant": "default", "props": { "kind": "privacy" } }]
+    },
+    {
+      "id": "p_dostopnost",
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "nav": { "label": "Dostopnost", "show": false },
+      "seo": { "title": "Izjava o dostopnosti | Računovodstvo Kovač", "description": "Izjava o dostopnosti spletne strani Računovodstvo Kovač." },
+      "sections": [{ "id": "s_legal_accessibility", "type": "legal", "variant": "default", "props": { "kind": "accessibility" } }]
+    },
+    {
+      "id": "p_404",
+      "kind": "not-found",
+      "slug": "404",
+      "nav": { "label": "Ni najdeno", "show": false },
+      "seo": { "title": "Strani ni mogoče najti | Računovodstvo Kovač", "description": "Iskane strani ni. Vrnite se na domačo stran." },
+      "sections": [{ "id": "s_not_found", "type": "not-found", "variant": "default", "props": { "title": "Te strani ni mogoče najti", "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo." } }]
+    }
+  ]
+}
