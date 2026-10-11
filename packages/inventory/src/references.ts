@@ -24,6 +24,7 @@ export const STUDIO_REFERENCES: readonly ReferenceEntry[] = [
   // I10b: the first ten of the forty (decision D3).
   { id: "mizarstvo-rozman", stance: "technical-drawing", trades: ["builder"] },
   { id: "zobna-ambulanta-hribar", stance: "station-timetable", trades: ["dental"] },
+  { id: "cebelarstvo-zalokar", stance: "beehive-panel", trades: ["shop"] },
 ];
 
 /** The references as inventory assets: drafts, no bytes of their own (a page, not a part of one). */

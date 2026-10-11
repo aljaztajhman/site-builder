@@ -1,0 +1,184 @@
+{
+  "specVersion": 20,
+  "slug": "cebelarstvo-zalokar",
+  "locales": { "default": "sl", "enabled": ["sl"] },
+  "business": {
+    "name": "Čebelarstvo Zalokar",
+    "type": "shop",
+    "subtype": "deli",
+    "phone": "+38641555763",
+    "email": "anze@cebelarstvo-zalokar.example",
+    "address": { "street": "Begunje na Gorenjskem 86", "postalCode": "4275", "city": "Begunje na Gorenjskem" },
+    "hours": {
+      "entries": [
+        { "from": "mon", "to": "fri", "open": "16:00", "close": "19:00" },
+        { "from": "sat", "to": "sat", "open": "09:00", "close": "12:00" },
+        { "from": "sun", "to": "sun", "closed": true }
+      ],
+      "note": "Prej pokličite, da sem doma."
+    },
+    "provider": {
+      "legalName": { "$placeholder": "legalName" },
+      "registrationNumber": { "$placeholder": "registrationNumber" },
+      "taxNumber": { "$placeholder": "taxNumber" }
+    },
+    "amenities": ["parking", "cash-only"]
+  },
+  "design": {
+    "direction": "warm-craft",
+    "fontPair": "fraunces-source-sans",
+    "colors": {
+      "background": "#ffffff",
+      "surface": "#f3f0f7",
+      "text": "#1c1f2a",
+      "muted": "#4f5363",
+      "primary": "#22509c",
+      "onPrimary": "#ffffff",
+      "accent": "#cc3b2e",
+      "border": "#d9d6e0",
+      "inverse": "#1c1f2a",
+      "onInverse": "#f4f2ee",
+      "band": "#eab53c",
+      "onBand": "#1c1f2a"
+    },
+    "radius": 6,
+    "baseFontSize": 18,
+    "scale": 1.333,
+    "headingWeight": 650,
+    "headingCase": "normal",
+    "headingTracking": -0.015,
+    "density": "regular",
+    "shadow": "none",
+    "imagery": "offset-block",
+    "motion": "still",
+    "wordmark": { "style": "plain" }
+  },
+  "assets": { "images": [] },
+  "chrome": {
+    "header": { "variant": "bar", "cta": "none" },
+    "footer": { "variant": "compact" },
+    "mobileActionBar": true
+  },
+  "pages": [
+    {
+      "id": "p_home",
+      "kind": "home",
+      "slug": "",
+      "nav": { "label": "Domov", "show": true },
+      "seo": {
+        "title": "Čebelarstvo Zalokar, Begunje – med iz čebelnjaka",
+        "description": "Cvetlični, lipov, gozdni in smrekov med kranjske čebele iz Begunj na Gorenjskem. Prodaja doma, od ponedeljka do sobote; prej pokličite."
+      },
+      "sections": [
+        {
+          "id": "s_panel",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "hero",
+            "width": "wide",
+            "rows": 5,
+            "background": [{ "kind": "field", "role": "primary", "cols": { "from": 1, "to": 8 } }],
+            "elements": [
+              { "id": "e_where", "kind": "text", "paragraphs": ["Begunje na Gorenjskem 86"], "desk": { "col": 2, "span": 5, "row": 1, "alignY": "end" }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_title", "kind": "heading", "text": "Med iz čebelnjaka pod Begunjščico", "level": 1, "size": 6, "measure": "m", "desk": { "col": 2, "span": 7, "row": 2, "rowSpan": 2 }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_lead", "kind": "text", "paragraphs": ["Anže Zalokar, čebelar. Cvetlični, lipov, gozdni in smrekov med od 60 panjev kranjske čebele."], "size": 1, "desk": { "col": 2, "span": 5, "row": 4 }, "phone": { "order": 2, "span": "full" } },
+              { "id": "e_phone", "kind": "fact", "value": "041 555 763", "label": "Prej pokličite, da sem doma", "treatment": "numeral", "size": 4, "link": { "action": "call" }, "desk": { "col": 2, "span": 5, "row": 5, "alignY": "end" }, "phone": { "order": 3, "span": "full" } },
+              { "id": "e_hive", "kind": "decor", "drawing": "ornament/beehive-panel-line", "color": "accent", "fit": "cell", "desk": { "col": 9, "span": 4, "row": 1, "rowSpan": 5, "alignY": "center" }, "phone": { "order": 4, "span": "full" } },
+              { "id": "e_hives", "kind": "fact", "value": "60", "label": "panjev kranjske čebele", "treatment": "seal", "size": 4, "desk": { "col": 10, "span": 2, "row": 1, "rowSpan": 5, "alignY": "center", "alignX": "center", "tilt": -6, "layer": 1 }, "phone": { "order": 5, "span": "half", "alignX": "end" } }
+            ]
+          }
+        },
+        {
+          "id": "s_honey",
+          "type": "composed",
+          "variant": "free",
+          "tone": "band",
+          "props": {
+            "intent": "prices",
+            "width": "contained",
+            "rows": 3,
+            "elements": [
+              { "id": "e_h", "kind": "heading", "text": "Štiri vrste medu", "level": 2, "size": 5, "desk": { "col": 1, "span": 6, "row": 1 }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_jar", "kind": "fact", "value": "900 g", "label": "kozarec", "treatment": "stamp", "size": 4, "desk": { "col": 10, "span": 3, "row": 1, "alignY": "center", "alignX": "end", "tilt": 4 }, "phone": { "order": 1, "span": "half" } },
+              {
+                "id": "e_p",
+                "kind": "prices",
+                "style": "tags",
+                "size": 2,
+                "phoneColumns": 2,
+                "items": [
+                  { "name": "Cvetlični", "price": { "amount": 12 } },
+                  { "name": "Lipov", "price": { "amount": 13 } },
+                  { "name": "Gozdni", "price": { "amount": 14 } },
+                  { "name": "Smrekov", "price": { "amount": 15 } }
+                ],
+                "desk": { "col": 1, "span": 12, "row": 2 },
+                "phone": { "order": 2, "span": "full" }
+              },
+              { "id": "e_t", "kind": "text", "paragraphs": ["Ali bo kakšno leto smrekovega dovolj, je odvisno od gozda. Prodajam tudi propolisove kapljice (8 €) in cvetni prah, 200 g za 9 €."], "desk": { "col": 1, "span": 7, "row": 3 }, "phone": { "order": 3, "span": "full" } }
+            ]
+          }
+        },
+        {
+          "id": "s_hive",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "story",
+            "width": "contained",
+            "rows": 4,
+            "elements": [
+              { "id": "e_q", "kind": "quote", "text": "Na čebelnjaku so poslikane panjske končnice, ki jih je slikal moj stari oče.", "by": "Anže Zalokar", "size": 3, "color": "primary", "desk": { "col": 1, "span": 8, "row": 2 }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_l", "kind": "list", "marker": "rule", "weight": "medium", "size": 1, "items": ["Čebelnjak za hišo", "Dve stojišči pod Begunjščico", "Za skupine do 10 ljudi pokažem čebelnjak po dogovoru"], "desk": { "col": 1, "span": 6, "row": 3, "rowSpan": 2 }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_band", "kind": "decor", "drawing": "ornament/pisanica-band-line", "repeat": "x", "color": "accent", "desk": { "col": 1, "span": 12, "row": 1, "alignY": "start" }, "phone": { "order": 2, "span": "full" } }
+            ]
+          }
+        },
+        {
+          "id": "s_visit",
+          "type": "composed",
+          "variant": "free",
+          "tone": "inverse",
+          "props": {
+            "intent": "contact",
+            "width": "contained",
+            "rows": 4,
+            "top": { "edge": "cut" },
+            "elements": [
+              { "id": "e_h", "kind": "heading", "text": "Med prodajam doma", "level": 2, "size": 5, "desk": { "col": 1, "span": 6, "row": 1 }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_hours", "kind": "hours", "style": "table", "desk": { "col": 1, "span": 5, "row": 2 }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_contact", "kind": "contact", "show": ["phone", "email", "address"], "desk": { "col": 1, "span": 5, "row": 3 }, "phone": { "order": 2, "span": "full" } },
+              { "id": "e_if", "kind": "iconFacts", "icons": "solid", "items": [{ "fact": "cash-only", "note": "Plačilo samo z gotovino" }, { "fact": "parking", "note": "Na dvorišču" }], "desk": { "col": 1, "span": 5, "row": 4 }, "phone": { "order": 3, "span": "full" } },
+              { "id": "e_map", "kind": "map", "style": "pin", "desk": { "col": 7, "span": 6, "row": 1, "rowSpan": 4 }, "phone": { "order": 4, "span": "full" } }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "nav": { "label": "Zasebnost", "show": false },
+      "seo": { "title": "Varstvo osebnih podatkov | Čebelarstvo Zalokar", "description": "Kako Čebelarstvo Zalokar obdeluje osebne podatke obiskovalcev spletne strani." },
+      "sections": [{ "id": "s_legal_privacy", "type": "legal", "variant": "default", "props": { "kind": "privacy" } }]
+    },
+    {
+      "id": "p_dostopnost",
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "nav": { "label": "Dostopnost", "show": false },
+      "seo": { "title": "Izjava o dostopnosti | Čebelarstvo Zalokar", "description": "Izjava o dostopnosti spletne strani Čebelarstvo Zalokar." },
+      "sections": [{ "id": "s_legal_accessibility", "type": "legal", "variant": "default", "props": { "kind": "accessibility" } }]
+    },
+    {
+      "id": "p_404",
+      "kind": "not-found",
+      "slug": "404",
+      "nav": { "label": "Ni najdeno", "show": false },
+      "seo": { "title": "Strani ni mogoče najti | Čebelarstvo Zalokar", "description": "Iskane strani ni. Vrnite se na domačo stran." },
+      "sections": [{ "id": "s_not_found", "type": "not-found", "variant": "default", "props": { "title": "Te strani ni mogoče najti", "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo." } }]
+    }
+  ]
+}

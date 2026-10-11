@@ -1,0 +1,35 @@
+{
+  "id": "cebelarstvo-zalokar",
+  "businessType": "shop",
+  "town": "Begunje na Gorenjskem",
+  "description": "Čebelarstvo Zalokar, Begunje na Gorenjskem 86, 4275 Begunje na Gorenjskem. Sem Anže Zalokar, čebelar. Imam 60 panjev kranjske čebele. Panji stojijo v čebelnjaku za hišo in na dveh stojiščih pod Begunjščico. Na čebelnjaku so poslikane panjske končnice, ki jih je slikal moj stari oče.\n\nTočimo štiri vrste medu: cvetlični, lipov, gozdni in smrekov. Ali bo kakšno leto smrekovega dovolj, je odvisno od gozda. Prodajam tudi propolisove kapljice in cvetni prah.\n\nCene za kozarec 900 g: cvetlični med 12 €, lipov med 13 €, gozdni med 14 €, smrekov med 15 €. Propolisove kapljice 8 €, cvetni prah 200 g 9 €.\n\nMed prodajam doma, od ponedeljka do petka od 16.00 do 19.00, ob sobotah od 9.00 do 12.00. Prej pokličite na 041 555 763, da sem doma. E-pošta: anze@cebelarstvo-zalokar.example. Parkirate lahko na dvorišču. Plačilo samo z gotovino. Za skupine do 10 ljudi pokažem čebelnjak po dogovoru.\n\nRad bi stran v barvah naših končnic: modra, rumena in rdeča, kot poslikana deska na čebelnjaku.",
+  "photos": null,
+  "facts": {
+    "name": "Čebelarstvo Zalokar",
+    "phone": "+38641555763",
+    "email": "anze@cebelarstvo-zalokar.example",
+    "address": { "street": "Begunje na Gorenjskem 86", "postalCode": "4275", "city": "Begunje na Gorenjskem" },
+    "hours": [
+      { "from": "mon", "to": "fri", "open": "16:00", "close": "19:00" },
+      { "from": "sat", "to": "sat", "open": "09:00", "close": "12:00" }
+    ],
+    "prices": [
+      { "item": "cvetlični med (900 g)", "amount": 12 },
+      { "item": "lipov med (900 g)", "amount": 13 },
+      { "item": "gozdni med (900 g)", "amount": 14 },
+      { "item": "smrekov med (900 g)", "amount": 15 },
+      { "item": "propolisove kapljice", "amount": 8 },
+      { "item": "cvetni prah (200 g)", "amount": 9 }
+    ],
+    "people": [{ "name": "Anže Zalokar", "role": "čebelar" }],
+    "amenities": ["parking", "cash-only"],
+    "other": [
+      "60 panjev kranjske čebele",
+      "Čebelnjak za hišo in dve stojišči pod Begunjščico",
+      "Poslikane panjske končnice je slikal stari oče",
+      "Smrekovega medu ni vsako leto dovolj",
+      "Prej pokličite, da sem doma",
+      "Za skupine do 10 ljudi ogled čebelnjaka po dogovoru"
+    ]
+  }
+}
