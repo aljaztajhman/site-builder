@@ -1,0 +1,13 @@
+{
+  "id": "kmetija-sadnik",
+  "stance": "meadow-orchard",
+  "trades": [
+    "tourist-farm"
+  ],
+  "title": "Kmetija Sadnik, travniški sadovnjak",
+  "gapNote": "There is no canopy-shape ornament (ornament/canopy-shape) and no meadow or tree drawing: the canopies and the fruit are hand-drawn circles in inline svg decor paths, so the orchard is one pale-green disc and three red dots beside a circle-masked photo, not many trees scattered over a meadow with uneven spacing. A page holds at most 12 elements per section and decor can be placed only on the 12-column grid, so the scatter is three or four fixed points; there is no way to place decor by hand or in a loose random pattern. On phones the decor is hidden, which leaves circle photos stacked in a column: the one stance idea that is not drawn on a phone is the orchard itself. The circle mask crops the landscape farmhouse photo to its centre. The soft green ground is a surface field in one rectangle; no ground texture of grass or meadow exists.",
+  "sources": [
+    "stance meadow-orchard (round canopies scattered on a meadow, the fruit the only bright colour)",
+    "N Markacija (a farm with rooms, a breakfast and a shop)"
+  ]
+}
