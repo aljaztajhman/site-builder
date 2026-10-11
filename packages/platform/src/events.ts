@@ -270,6 +270,8 @@ export interface GenerationProps {
   caps: { spend: boolean; pictures: boolean };
   direction: string | null;
   hero: string | null;
+  /** Design studio 0.5: whether the studio composed the homepage, the director's idea and stance, or why it kept today's. Absent: the studio didn't run. */
+  studio?: { composed: boolean; idea: string | null; stance: string | null; reason: string | null } | null;
 }
 
 export interface EngineSummary {
@@ -286,6 +288,8 @@ export interface EngineSummary {
   pictures: { jobs: number; total: number };
   retries: number;
   directions: { direction: string; n: number }[];
+  /** Design studio 0.5 runs, latest first (at most 10): the director's idea, or why the job kept today's homepage. */
+  studio: { at: string; siteId: string | null; composed: boolean; idea: string | null; stance: string | null; reason: string | null }[];
   /** The slowest jobs, slowest first. */
   slowest: { at: string; siteId: string | null; tier: string | null; seconds: number; eur: number; outcome: string }[];
 }
@@ -327,6 +331,11 @@ export function engineSummary(rows: Pick<ProductEventRow, "at" | "site_id" | "ti
     pictures: { jobs: jobs.filter((j) => num(j.p.pictures) > 0).length, total: jobs.reduce((n, j) => n + num(j.p.pictures), 0) },
     retries: jobs.reduce((n, j) => n + num(j.p.retries), 0),
     directions: tally(jobs.map((j) => j.p.direction).filter((d): d is string => typeof d === "string")).map(([direction, n]) => ({ direction, n })),
+    studio: jobs
+      .filter((j) => j.p.studio)
+      .sort((a, b) => (a.at < b.at ? 1 : a.at > b.at ? -1 : 0))
+      .slice(0, 10)
+      .map((j) => ({ at: j.at, siteId: j.site_id, composed: j.p.studio!.composed, idea: j.p.studio!.idea, stance: j.p.studio!.stance, reason: j.p.studio!.reason })),
     slowest: [...jobs]
       .sort((a, b) => num(b.p.seconds) - num(a.p.seconds))
       .slice(0, slowest)

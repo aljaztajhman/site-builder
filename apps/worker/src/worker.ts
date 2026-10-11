@@ -30,6 +30,7 @@ import {
   pruneAllSites,
   pruneSite,
   republishStaleAddresses,
+  studioEnabled,
   type ModelTransport,
   type SpendLedger,
   type UrlCheckResult,
@@ -154,6 +155,20 @@ export function defaultTransport(job: "generate" | "edit", editIndex = 0, scope:
   if (job !== "edit" || !recordings.length) return new ReplayTransport(recordings);
   const n = editIndex % recordings.length;
   return new ReplayTransport([...recordings.slice(n), ...recordings.slice(0, n)]);
+}
+
+/**
+ * Design studio 0.5 (docs/plans/studio-0.5.md): whether this job's homepage goes through the studio. Config designer.agent
+ * "on": every job; "trial": only a signed-in account whose email is in DESIGNER_TRIAL_EMAILS (an admin password session
+ * or a guest has no account, so never); "off": never.
+ */
+export async function studioForJob(platform: Pick<Platform, "repo">, config: AppConfig, ctx: CallContext, trialEmails = process.env.DESIGNER_TRIAL_EMAILS): Promise<boolean> {
+  const mode = config.designer.agent;
+  if (mode === "off") return false;
+  if (mode === "on") return true;
+  if (!ctx.accountId || !trialEmails?.trim()) return false;
+  const account = await platform.repo.accounts.get(ctx.accountId);
+  return studioEnabled(mode, account?.email, trialEmails);
 }
 
 /** A site's scope as its intake says (what the pipeline builds): which recordings a replayed job gets. */
@@ -347,7 +362,8 @@ export async function startWorker(platform: Platform, config = loadConfig(), job
       const images = imageGeneratorFor(platform, config, ctx, pictureCap);
       // The domain step's names are asked while the site generates (it-zero-to-live).
       const onBrief = () => void warmDomainSuggestions(domainDeps, job.siteId);
-      const r = await run.generateSite({ config, repo, storage, client, pictures, onBrief, ...(images ? { images } : {}) }, job.siteId, jobId);
+      const studio = await studioForJob(platform, config, ctx);
+      const r = await run.generateSite({ config, repo, storage, client, pictures, onBrief, ...(images ? { images } : {}), ...(studio ? { studio } : {}) }, job.siteId, jobId);
       if (r.critiqueSkipped) console.log(`[generate] ${job.siteId}: finished with the critique skipped (${r.critiqueSkipped})`);
       await finish(ctx.aiJobId, "done");
       await telemetry({ outcome: "done", saved: true, result: r });

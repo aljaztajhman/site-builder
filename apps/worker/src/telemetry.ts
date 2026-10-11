@@ -118,6 +118,13 @@ export async function generationProps(platform: Pick<Platform, "repo">, o: Gener
     caps: { spend: o.error instanceof SpendCapError || o.result?.critiqueSkipped === "spend_cap", pictures: pictureLimit },
     direction: spec?.design.direction ?? direction,
     hero: hero ? `${hero.type}:${String((hero as { variant?: unknown }).variant ?? "")}` : null,
+    ...(o.result?.studio
+      ? {
+          studio: o.result.studio.composed
+            ? { composed: true, idea: o.result.studio.idea, stance: o.result.studio.stance, reason: null }
+            : { composed: false, idea: o.result.studio.idea ?? null, stance: null, reason: o.result.studio.reason },
+        }
+      : {}),
   };
 }
 

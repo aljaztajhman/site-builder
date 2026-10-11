@@ -26,6 +26,7 @@ import {
   STANCES,
   enforceDesign,
   fillPreset,
+  intentOfSection,
   migrateSpec,
   presetSection,
   semanticIssues,
@@ -76,6 +77,8 @@ export interface ComposeUsed {
   wordmark: string | null;
   /** Presets that could not be filled or did not validate here, as "id: reason". */
   skipped: string[];
+  /** With a director's choice: the picks that fell back to the composer's own ("palette <id>", "<intent> <preset id>"). */
+  fallbacks?: string[];
 }
 
 export interface ComposeResult {
@@ -93,7 +96,9 @@ export class ComposerError extends Error {
 
 // ---------- the fixtures ----------
 
-type FixtureSources = Omit<PresetSources, "copy"> & { copy: Record<string, PresetSources["copy"]> };
+/** What a page is filled from: the business, its images, the brief, and the copy written for each intent. */
+export type ComposeSources = Omit<PresetSources, "copy"> & { copy: Record<string, PresetSources["copy"]> };
+type FixtureSources = ComposeSources;
 
 /** The engine's verbatimForm (composed-facts.ts; the inventory can't import the engine): quote marks dropped, whitespace collapsed, a leading or trailing ellipsis dropped. */
 const verbatimForm = (s: string): string =>
@@ -104,6 +109,19 @@ const verbatimForm = (s: string): string =>
     .replace(/^(?:…|\.\.\.)\s*/, "")
     .replace(/\s*(?:…|\.\.\.)$/, "")
     .trim();
+
+/**
+ * The brief with only the steps and questions the client's text holds verbatim (the fact check wants a client's steps and
+ * answers in their own words, engine composed-facts.ts); the rest of the brief as it is.
+ */
+export function clientWordsOnly<B extends PresetSources["brief"]>(brief: B | undefined, clientText: string): PresetSources["brief"] {
+  const text = verbatimForm(clientText);
+  const said = (s: string): boolean => verbatimForm(s) !== "" && text.includes(verbatimForm(s));
+  const { steps, faq, ...rest } = brief ?? {};
+  const keptSteps = (steps ?? []).filter((s) => said(s.title) && said(s.text));
+  const keptFaq = (faq ?? []).filter((q) => said(q.question) && said(q.answer));
+  return { ...rest, ...(keptSteps.length ? { steps: keptSteps } : {}), ...(keptFaq.length ? { faq: keptFaq } : {}) };
+}
 
 /**
  * The fixture's sources. The recorded brief's steps and questions were written by the extraction model; the fact check
@@ -119,12 +137,8 @@ const fixtureSources = (() => {
     raw ??= JSON.parse(readFileSync(new URL("../test/fixtures/preset-sources.json", import.meta.url), "utf8")) as Record<string, FixtureSources>;
     const f = raw[id];
     if (!f) throw new ComposerError(`no preset sources for fixture ${id}`);
-    const text = verbatimForm((JSON.parse(readFileSync(new URL(`../../../tools/eval/fixtures/${id}/brief.json`, import.meta.url), "utf8")) as { description: string }).description);
-    const said = (s: string): boolean => verbatimForm(s) !== "" && text.includes(verbatimForm(s));
-    const { steps, faq, ...brief } = f.brief ?? {};
-    const keptSteps = (steps ?? []).filter((s) => said(s.title) && said(s.text));
-    const keptFaq = (faq ?? []).filter((q) => said(q.question) && said(q.answer));
-    const out: FixtureSources = { ...f, brief: { ...brief, ...(keptSteps.length ? { steps: keptSteps } : {}), ...(keptFaq.length ? { faq: keptFaq } : {}) } };
+    const description = (JSON.parse(readFileSync(new URL(`../../../tools/eval/fixtures/${id}/brief.json`, import.meta.url), "utf8")) as { description: string }).description;
+    const out: FixtureSources = { ...f, brief: clientWordsOnly(f.brief, description) };
     cache.set(id, out);
     return out;
   };
@@ -363,52 +377,175 @@ function drawingCandidates(st: Stance, type: string, word: string | undefined, c
   return ranked(list, score, (d) => d, seed, `drawing:${st.id}`, 1.5);
 }
 
+/**
+ * The studio director's picks (engine studio/director.ts), already checked against the shortlist by the engine. Each one is
+ * a preference: an id the catalogue doesn't offer here, or a preset that can't be filled or breaks a guard, falls back to
+ * the composer's own deterministic pick for that intent.
+ */
+export interface ComposeChoice {
+  palette?: string;
+  pairing?: string;
+  wordmark?: string;
+  /**
+   * The page's sections in order (the hero is moved first and the contact last, added when missing; an intent at most
+   * twice). `preset` absent: the composer's own pick. `copy`: the section's headline and lead, over the sources' copy for
+   * the intent's first section; a second section of an intent has only its own copy.
+   */
+  sections?: readonly ChoiceSection[];
+}
+
+export interface ChoiceSection {
+  intent: string;
+  preset?: string;
+  copy?: { headline?: string; lead?: string };
+}
+
+/** A homepage composed over any site spec (the live studio), not only the eval fixtures. */
+export interface BaseComposeInput {
+  /** The site as today's pipeline wrote it: its business, photos, other pages and system pages are kept. */
+  base: SiteSpec;
+  sources: ComposeSources;
+  stance: string;
+  seed: number;
+  catalogue: ComposerCatalogue;
+  prefer?: readonly string[];
+  /** The trade word drawings are named by, for a site without a subtype ("plumbing"). */
+  tradeWord?: string;
+  choice?: ComposeChoice;
+  /** Names the page in `used` and in errors (the fixture id, or the site's slug). */
+  label?: string;
+  /** The fixture pages' own slug and no logo (approval pages); live sites keep both. */
+  fixture?: { slug: string };
+  /** An intent no preset can fill keeps the base homepage's own section of that intent (live: never lose a section the site had). */
+  keepBaseSections?: boolean;
+}
+
 export function composeHomepageDetailed(input: ComposeInput): ComposeResult {
-  const { fixtureId, seed, catalogue } = input;
+  const { fixtureId, seed } = input;
   if (!Number.isInteger(seed) || seed < 0) throw new ComposerError(`seed must be a whole number ≥ 0, not ${seed}`);
   const st = STANCES.find((s) => s.id === input.stance);
   if (!st) throw new ComposerError(`unknown stance ${input.stance}`);
   const base = golden(fixtureId);
+  if (!stanceFitsSubtype(st, base.business.type, base.business.subtype)) throw new ComposerError(`stance ${st.id} does not fit ${base.business.type}`);
+  const word = base.business.subtype ?? FIXTURE_TRADE_WORD[fixtureId];
+  return composeFromBase({
+    base,
+    sources: fixtureSources(fixtureId),
+    stance: st.id,
+    seed,
+    catalogue: input.catalogue,
+    ...(input.prefer ? { prefer: input.prefer } : {}),
+    ...(word ? { tradeWord: word } : {}),
+    label: fixtureId,
+    fixture: { slug: `${`${fixtureId}-${st.id}`.slice(0, 40).replace(/-+$/, "")}-${seed}` },
+  });
+}
+
+interface PlannedSection {
+  intent: string;
+  /** 0 for the intent's first section on the page, 1 for its second. */
+  nth: number;
+  want?: string;
+  copy?: { headline?: string; lead?: string };
+}
+
+/** The page plan the director chose: its sections in its order, one hero first, one contact last, a middle intent at most twice. */
+function choicePlan(choice: readonly ChoiceSection[]): PlannedSection[] {
+  const known = new Set<string>(["hero", ...MIDDLE_ORDER, "contact"]);
+  const one = (intent: string): PlannedSection => {
+    const c = choice.find((x) => x.intent === intent);
+    return { intent, nth: 0, ...(c?.preset ? { want: c.preset } : {}), ...(c?.copy ? { copy: c.copy } : {}) };
+  };
+  const seen = new Map<string, number>();
+  const middle: PlannedSection[] = [];
+  for (const c of choice) {
+    if (!known.has(c.intent) || c.intent === "hero" || c.intent === "contact") continue;
+    const nth = seen.get(c.intent) ?? 0;
+    if (nth >= 2) continue;
+    seen.set(c.intent, nth + 1);
+    middle.push({ intent: c.intent, nth, ...(c.preset ? { want: c.preset } : {}), ...(c.copy ? { copy: c.copy } : {}) });
+  }
+  return [one("hero"), ...middle, one("contact")];
+}
+
+/** A homepage composed over `base` (see BaseComposeInput). Throws ComposerError when it cannot be built. */
+export function composeFromBase(input: BaseComposeInput): ComposeResult {
+  const { seed, catalogue, sources, choice } = input;
+  if (!Number.isInteger(seed) || seed < 0) throw new ComposerError(`seed must be a whole number ≥ 0, not ${seed}`);
+  const st = STANCES.find((s) => s.id === input.stance);
+  if (!st) throw new ComposerError(`unknown stance ${input.stance}`);
+  const base = structuredClone(input.base);
+  const label = input.label ?? base.slug;
   const type = base.business.type;
   if (!stanceFitsSubtype(st, type, base.business.subtype)) throw new ComposerError(`stance ${st.id} does not fit ${type}`);
-  const sources = fixtureSources(fixtureId);
-  const word = base.business.subtype ?? FIXTURE_TRADE_WORD[fixtureId];
+  const word = base.business.subtype ?? input.tradeWord;
   const prefer = new Set(input.prefer ?? []);
+  const baseSections = home(base).sections.slice();
+  const fallbacks: string[] = [];
 
   // The look: a palette and a pairing that fit the stance and the trade, tokens from the stance's axes.
   const chosen = choose(st, type, word, seed, catalogue, prefer);
+  if (choice?.palette !== undefined) {
+    const p = assetsOf("palette", catalogue).find((a) => a.id === choice.palette && paletteOf(a.id));
+    if (p) Object.assign(chosen, { palette: p, colors: { ...paletteOf(p.id)!.colors } });
+    else fallbacks.push(`palette ${choice.palette}`);
+  }
+  if (choice?.pairing !== undefined) {
+    const p = assetsOf("pairing", catalogue).find((a) => a.id === choice.pairing && RENDERABLE_PAIRS.has(a.id.slice("pairing/".length)));
+    if (p) Object.assign(chosen, { pairing: p, pairId: p.id.slice("pairing/".length) });
+    else fallbacks.push(`pairing ${choice.pairing}`);
+  }
   const spec = base;
-  spec.slug = `${`${fixtureId}-${st.id}`.slice(0, 40).replace(/-+$/, "")}-${seed}`;
+  if (input.fixture) spec.slug = input.fixture.slug;
   spec.design = designFor(st, type, chosen, seed);
-  delete spec.assets.logo;
+  if (input.fixture) delete spec.assets.logo;
   home(spec).sections = [];
   if (spec.design.wordmark) delete spec.design.wordmark;
 
-  // The wordmark: a typographic mark for the header, from the wordmark styles the catalogue allows.
-  const wordmarks = assetsOf("wordmark", catalogue)
-    .map((a) => a.id.slice("wordmark/".length))
-    .filter((w) => wordmarkFits(spec.business.name, w as never, "header"));
-  const wordmarkOrder = ranked(wordmarks, (w) => (prefer.has(`wordmark/${w}`) ? 3 : 0), (w) => w, seed, `wordmark:${st.id}`, 1);
+  // The wordmark: a typographic mark for the header, from the wordmark styles the catalogue allows (a site with its own logo keeps the logo).
+  const wordmarks = spec.assets.logo
+    ? []
+    : assetsOf("wordmark", catalogue)
+        .map((a) => a.id.slice("wordmark/".length))
+        .filter((w) => wordmarkFits(spec.business.name, w as never, "header"));
+  let wordmarkOrder = ranked(wordmarks, (w) => (prefer.has(`wordmark/${w}`) ? 3 : 0), (w) => w, seed, `wordmark:${st.id}`, 1);
+  if (choice?.wordmark !== undefined) {
+    const w = choice.wordmark.slice("wordmark/".length);
+    if (wordmarkOrder.includes(w)) wordmarkOrder = [w, ...wordmarkOrder.filter((x) => x !== w)];
+    else fallbacks.push(`wordmark ${choice.wordmark}`);
+  }
 
   const skipped: string[] = [];
   const sections: Section[] = [];
   const used: string[] = [];
-  const src = (intent: string, at: number): PresetSources => ({
-    ...fixtureSources(fixtureId),
-    images: rotated(sources.images ?? [], at),
-    colors: spec.design.colors,
-    ...(sources.copy[intent] ? { copy: sources.copy[intent] } : {}),
-  }) as PresetSources;
+  const src = (plan: PlannedSection, at: number): PresetSources => {
+    const own = plan.nth === 0 ? sources.copy[plan.intent] : undefined;
+    const copy = plan.copy ? { ...own, ...plan.copy } : plan.nth === 0 ? sources.copy[plan.intent] : undefined;
+    return {
+      ...sources,
+      images: rotated(sources.images ?? [], at),
+      colors: spec.design.colors,
+      ...(copy ? { copy } : {}),
+    } as PresetSources;
+  };
+  const plan: PlannedSection[] = choice?.sections?.length ? choicePlan(choice.sections) : pagePlan(type, seed, st.id, prefer).map((intent) => ({ intent, nth: 0 }));
 
-  for (const intent of pagePlan(type, seed, st.id, prefer)) {
+  for (const p of plan) {
+    const { intent, want } = p;
     let placed = false;
-    for (const preset of candidatesFor(intent, st, type, word, catalogue, seed, prefer)) {
-      const filled = fillPreset(preset, src(intent, sections.length));
+    // A second section of an intent takes another preset than the first.
+    let candidates = candidatesFor(intent, st, type, word, catalogue, seed, prefer).filter((c) => p.nth === 0 || !used.includes(c.id));
+    if (want !== undefined) {
+      const hit = candidates.find((c) => c.id === want);
+      if (hit) candidates = [hit, ...candidates.filter((c) => c !== hit)];
+    }
+    for (const preset of candidates) {
+      const filled = fillPreset(preset, src(p, sections.length));
       if (!filled.ok) {
         skipped.push(`${preset.id}: ${filled.reason}`);
         continue;
       }
-      const section = presetSection(preset, filled.props as ComposedProps, `s_${intent}`) as unknown as Section;
+      const section = presetSection(preset, filled.props as ComposedProps, p.nth === 0 ? `s_${intent}` : `s_${intent}_${p.nth + 1}`) as unknown as Section;
       if (!addsNoIssue(spec, sections, section)) {
         skipped.push(`${preset.id}: guards`);
         continue;
@@ -418,9 +555,19 @@ export function composeHomepageDetailed(input: ComposeInput): ComposeResult {
       placed = true;
       break;
     }
-    if (!placed && intent === "hero") throw new ComposerError(`no ${catalogue} hero preset fills for ${fixtureId} under ${st.id}`);
+    if (want !== undefined && used.at(-1) !== want) fallbacks.push(`${intent} ${want}`);
+    if (!placed && input.keepBaseSections) {
+      // Today's section of this intent, when the site had one and it still fits the new page.
+      const own = baseSections.find((s) => intentOfSection(s) === intent && !sections.includes(s));
+      if (own && addsNoIssue(spec, sections, own)) {
+        sections.push(own);
+        used.push(`kept:${own.type}`);
+        placed = true;
+      }
+    }
+    if (!placed && intent === "hero") throw new ComposerError(`no ${catalogue} hero preset fills for ${label} under ${st.id}`);
   }
-  if (sections.length < 3) throw new ComposerError(`only ${sections.length} sections could be composed for ${fixtureId} under ${st.id} (${catalogue})`);
+  if (sections.length < 3) throw new ComposerError(`only ${sections.length} sections could be composed for ${label} under ${st.id} (${catalogue})`);
   home(spec).sections = sections;
 
   // A drawing behind one section (the hero first), when one suits the trade and the guards agree.
@@ -458,10 +605,10 @@ export function composeHomepageDetailed(input: ComposeInput): ComposeResult {
   }
 
   const result = validateSite(spec);
-  if (!result.ok) throw new ComposerError(`${fixtureId} under ${st.id} (seed ${seed}) does not validate: ${result.issues.slice(0, 3).map((i) => `${i.path} ${i.message}`).join("; ")}`);
+  if (!result.ok) throw new ComposerError(`${label} under ${st.id} (seed ${seed}) does not validate: ${result.issues.slice(0, 3).map((i) => `${i.path} ${i.message}`).join("; ")}`);
   return {
     spec: result.spec,
-    used: { fixtureId, stance: st.id, seed, catalogue, presets: used, palette: chosen.palette.id, pairing: chosen.pairing.id, drawing, wordmark: wordmark && `wordmark/${wordmark}`, skipped },
+    used: { fixtureId: label, stance: st.id, seed, catalogue, presets: used, palette: chosen.palette.id, pairing: chosen.pairing.id, drawing, wordmark: wordmark && `wordmark/${wordmark}`, skipped, ...(choice ? { fallbacks } : {}) },
   };
 }
 
@@ -476,6 +623,75 @@ export function composeHomepage(input: ComposeInput): SiteSpec {
 export function fittingStances(fixtureId: string): Stance[] {
   const g = golden(fixtureId);
   return STANCES.filter((s) => stanceFitsSubtype(s, g.business.type, g.business.subtype));
+}
+
+/** An eval fixture as the composer reads it: its golden spec, its sources, its trade word and the client's own text (the studio's proof-of-concept runs). */
+export function composerFixture(fixtureId: string): { base: SiteSpec; sources: ComposeSources; tradeWord?: string; description: string } {
+  const base = golden(fixtureId);
+  const description = (JSON.parse(readFileSync(new URL(`../../../tools/eval/fixtures/${fixtureId}/brief.json`, import.meta.url), "utf8")) as { description: string }).description;
+  const word = FIXTURE_TRADE_WORD[fixtureId];
+  return { base, sources: fixtureSources(fixtureId), ...(word ? { tradeWord: word } : {}), description };
+}
+
+// ---------- the studio's shortlist ----------
+
+export interface ShortlistEntry {
+  id: string;
+  /** One line for the director. */
+  line: string;
+}
+
+/** What the live studio may offer the director for one site: approved assets only, each one usable here. */
+export interface StudioShortlist {
+  stances: ShortlistEntry[];
+  /** Per intent, the approved presets that fill from this site's sources. */
+  presets: Record<string, ShortlistEntry[]>;
+  palettes: ShortlistEntry[];
+  pairings: ShortlistEntry[];
+  wordmarks: ShortlistEntry[];
+}
+
+const oneLine = (s: string | undefined, max = 140): string => {
+  const t = (s ?? "").replace(/\s+/g, " ").trim();
+  return t.length > max ? `${t.slice(0, max - 1)}…` : t;
+};
+
+/**
+ * The approved assets that fit the site: stances that fit its trade, per intent the approved presets that fit the trade and
+ * fill from its sources (no colours yet: the contrast guards run when the page is composed), approved palettes, the
+ * approved pairings a spec can set, the approved wordmark styles that fit the name (none when the site has its own logo).
+ */
+export function studioShortlist(base: SiteSpec, sources: ComposeSources, tradeWord?: string): StudioShortlist {
+  const type = base.business.type;
+  const word = base.business.subtype ?? tradeWord;
+  const stances = STANCES.filter((s) => stanceFitsSubtype(s, type, base.business.subtype)).map((s) => ({ id: s.id, line: `${s.name} (${s.family}): ${oneLine(s.pitch)}` }));
+  const approved = new Set(assetsOf("composition", "approved").map((a) => a.id));
+  const presets: Record<string, ShortlistEntry[]> = {};
+  for (const p of COMPOSITION_PRESETS) {
+    if (!approved.has(p.id) || tradeFit(p.tags?.trades ?? [], type, word) === "no") continue;
+    const intent = intentOf(p.id);
+    const copy = sources.copy[intent];
+    const filled = fillPreset(p, { ...sources, ...(copy ? { copy } : {}) } as PresetSources);
+    if (!filled.ok) continue;
+    const mood = p.tags?.mood?.length ? ` [${p.tags.mood.join(", ")}]` : "";
+    (presets[intent] ??= []).push({ id: p.id, line: `${oneLine(p.note) || p.id}${mood}` });
+  }
+  const tagLine = (a: Asset): string => [a.tags.mood.join(", "), a.tags.ground.length ? `ground ${a.tags.ground.join("/")}` : ""].filter(Boolean).join("; ");
+  const palettes = assetsOf("palette", "approved")
+    .filter((a) => paletteOf(a.id) && tradeFit(a.tags.trades, type, word) !== "no")
+    .map((a) => {
+      const c = paletteOf(a.id)!.colors;
+      return { id: a.id, line: `${tagLine(a)}; ${c.background} / ${c.primary} / ${c.text}${a.note ? `; ${oneLine(a.note, 90)}` : ""}` };
+    });
+  const pairings = assetsOf("pairing", "approved")
+    .filter((a) => RENDERABLE_PAIRS.has(a.id.slice("pairing/".length)))
+    .map((a) => ({ id: a.id, line: oneLine(a.note, 100) || FONT_PAIRS.find((f) => `pairing/${f.id}` === a.id)?.id || a.id }));
+  const wordmarks = base.assets.logo
+    ? []
+    : assetsOf("wordmark", "approved")
+        .filter((a) => wordmarkFits(base.business.name, a.id.slice("wordmark/".length) as never, "header"))
+        .map((a) => ({ id: a.id, line: oneLine(a.note, 100) || a.id }));
+  return { stances, presets, palettes, pairings, wordmarks };
 }
 
 // ---------- the approval set ----------

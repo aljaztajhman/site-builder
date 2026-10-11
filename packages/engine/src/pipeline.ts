@@ -21,6 +21,7 @@ import { keepOwnerFacts } from "./owner-facts.ts";
 import { keepOwnerText } from "./owner-text.ts";
 import { claimImageIds } from "./image-ids.ts";
 import { STORAGE_CONCURRENCY, mapLimit } from "./parallel.ts";
+import { runStudio, studioSeed } from "./studio/run.ts";
 
 export interface PipelineDeps {
   config: AppConfig;
@@ -41,6 +42,11 @@ export interface PipelineDeps {
   pictures?: { fillTo?: number; max?: number; note?: string | null };
   /** Called once the brief (with the business name) is saved, beside the rest of the generation; not awaited. */
   onBrief?: () => void;
+  /**
+   * Design studio 0.5 (docs/plans/studio-0.5.md): recompose the homepage with the director and the approved presets after
+   * the content is merged. The worker sets it from config designer.agent (studioEnabled). Any failure keeps today's spec.
+   */
+  studio?: boolean;
 }
 
 /** The event a regeneration logs with the owner's texts it kept and those it couldn't (the editor words it). */
@@ -111,7 +117,14 @@ export interface GenerateResult {
   homepageMs?: number;
   /** The job finished with the critique skipped: the daily spend cap was reached after the version was saved. */
   critiqueSkipped?: "spend_cap";
+  /** Studio 0.5 ran: the director's idea and stance when the composed homepage was kept, or why today's was kept. */
+  studio?: { composed: true; idea: string; stance: string } | { composed: false; reason: string; idea?: string };
 }
+
+/** The log line of a homepage the studio composed. */
+export const STUDIO_COMPOSED = "Design studio composed the homepage";
+/** The log line when the studio kept today's homepage. */
+export const STUDIO_FELL_BACK = "Design studio kept today's homepage";
 
 /** The editor's log line when the spend cap skipped the critique (the site itself is ready). */
 export const CRITIQUE_SKIPPED_NOTE = "Današnja omejitev porabe je dosežena, zato zadnjega pregleda strani nismo naredili. Stran je pripravljena in jo lahko urejate.";
@@ -383,6 +396,20 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     spec = text.spec;
     if (text.kept.length || text.dropped.length) await log("content", OWNER_TEXT_NOTE, { kept: text.kept, dropped: text.dropped });
   }
+  // Design studio 0.5: the director and the approved presets recompose the homepage; any failure keeps today's spec.
+  let studio: GenerateResult["studio"];
+  if (deps.studio) {
+    const today = spec;
+    const r = await stageTime("studio", () => runStudio(client, config, { spec: today, brief, corpus, seed: studioSeed(siteId) }));
+    if (r.ok) {
+      spec = r.spec;
+      studio = { composed: true, idea: r.idea, stance: r.stance };
+      await log("studio", STUDIO_COMPOSED, { idea: r.idea, stance: r.stance, presets: r.used.presets, palette: r.used.palette, pairing: r.used.pairing, wordmark: r.used.wordmark, dropped: r.dropped, eur: r.costEur });
+    } else {
+      studio = { composed: false, reason: r.reason, ...(r.idea ? { idea: r.idea } : {}) };
+      await log("studio", STUDIO_FELL_BACK, { reason: r.reason, idea: r.idea ?? null, eur: r.costEur });
+    }
+  }
   let version = await repo.saveSpec(siteId, spec, "generate");
   const firstVersionMs = Date.now() - started;
   await log("preview", "First version saved; the editor shows it while checks and critique run", { ms: firstVersionMs, version });
@@ -407,10 +434,12 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     // runs its own checklist), it just gets no critique.
     await log("check", "Checks failed to run; kept the saved version without critique", (e as Error).message.slice(0, 300));
     await repo.setStatus(siteId, "ready");
-    return { version, check: null, critiqueRounds: 0, timings, firstVersionMs, ...(homepageMs !== undefined ? { homepageMs } : {}) };
+    return { version, check: null, critiqueRounds: 0, timings, firstVersionMs, ...(homepageMs !== undefined ? { homepageMs } : {}), ...(studio ? { studio } : {}) };
   }
   await log("check", check.failures.length ? "Checks found problems" : "All checks passed", { failures: check.failures, lighthouse: check.lighthouse });
-  while (rounds < config.limits.critiqueIterations) {
+  // The critique can only fix copy: a composed homepage skips it (studio 0.5).
+  if (studio?.composed) await log("critique", "Skipped: the design studio composed the homepage");
+  while (!studio?.composed && rounds < config.limits.critiqueIterations) {
     rounds++;
     let c: Awaited<ReturnType<typeof critique>>;
     try {
@@ -466,7 +495,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     }
   }
   await repo.setStatus(siteId, "ready");
-  return { version, check, critiqueRounds: rounds, timings, firstVersionMs, ...(homepageMs !== undefined ? { homepageMs } : {}), ...(critiqueSkipped ? { critiqueSkipped } : {}) };
+  return { version, check, critiqueRounds: rounds, timings, firstVersionMs, ...(homepageMs !== undefined ? { homepageMs } : {}), ...(critiqueSkipped ? { critiqueSkipped } : {}), ...(studio ? { studio } : {}) };
 }
 
 /**

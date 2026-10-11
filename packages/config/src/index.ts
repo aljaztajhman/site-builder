@@ -215,6 +215,8 @@ export const AppConfigSchema = z.object({
     fullBuild: ModelStage,
     /** Eval only: scores generated homepages from screenshots (tools/eval/src/judge.ts). */
     judge: ModelStage,
+    /** Design studio 0.5 (docs/plans/studio-0.5.md): the director picks the homepage's stance, presets, palette and hero copy. */
+    director: ModelStage,
   }),
   useFullBuildModel: z.boolean(),
   /**
@@ -243,12 +245,13 @@ export const AppConfigSchema = z.object({
    * is not unique enough. Calibrated offline on the goldens and twins (switches off: known look-alikes).
    */
   /**
-   * The AI designer (docs/plans/design-studio.md): agent switches the studio pipeline on for new sites. Off until the
-   * owner's blind A/B passes (§9); while off, every request and rendered byte is as before.
+   * The AI designer (docs/plans/design-studio.md, studio-0.5.md): agent switches the studio on for new homepages. "off":
+   * every request and rendered byte is as before; "trial": only for accounts whose email is in DESIGNER_TRIAL_EMAILS
+   * (comma list); "on": every generation. The old boolean is read as "off" (false) or "on" (true).
    */
   designer: z.strictObject({
     $comment: z.string().optional(),
-    agent: z.boolean(),
+    agent: z.preprocess((v) => (v === false ? "off" : v === true ? "on" : v), z.enum(["off", "trial", "on"])),
     /**
      * Prompt size budgets of the designer, in tokens estimated as characters / charsPerToken (Haiku 5.5 counts about 30 %
      * more tokens than the old chars / 4 rule). catalogue: the static designer catalogue (a cached system block, so the cap
@@ -264,6 +267,9 @@ export const AppConfigSchema = z.object({
   }),
   studio: z.strictObject({
     $comment: z.string().optional(),
+    $perRunMaxEurComment: z.string().optional(),
+    /** Studio 0.5: € one studio run may spend (the director call's estimate must fit under it; it is sent once, no retry). */
+    perRunMaxEur: z.number().positive(),
     uniqueness: z.strictObject({
       sameTradeMin: z.number().min(0).max(1),
       sameTownMin: z.number().min(0).max(1),
