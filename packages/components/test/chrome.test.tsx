@@ -80,6 +80,21 @@ describe("Header", () => {
     expect(html(<Header ctx={testCtx(withHero, withHero.pages[0])} />)).toContain("site-header__cta--wide-only");
   });
 
+  it("leaves the call out when a composed opener carries it (one call per screen), keeps it when the opener doesn't", () => {
+    const s = spec();
+    const opener = (elements: object[]) => {
+      const hero = { id: "s_hero", type: "composed", variant: "free", props: { intent: "hero", width: "wide", rows: 1, elements } };
+      const pages = [{ ...s.pages[0]!, sections: [hero, ...s.pages[0]!.sections] } as unknown as (typeof s.pages)[number], ...s.pages.slice(1)];
+      return html(<Header ctx={testCtx({ ...s, pages }, pages[0])} />);
+    };
+    const title = { id: "e_t", kind: "heading", text: "Kruh", level: 1, size: 6, desk: { col: 1, span: 6, row: 1 }, phone: { order: 0, span: "full" } };
+    const plate = { id: "e_p", kind: "fact", value: "041 123 456", label: "Pokličite", treatment: "plate", size: 5, link: { action: "call" }, desk: { col: 7, span: 6, row: 1 }, phone: { order: 1, span: "full" } };
+    const button = { id: "e_c", kind: "action", action: "call", label: "Pokličite", style: "primary", desk: { col: 7, span: 3, row: 1 }, phone: { order: 1, span: "full" } };
+    expect(opener([title, plate])).not.toContain("site-header__cta");
+    expect(opener([title, button])).not.toContain("site-header__cta");
+    expect(opener([title])).toContain("site-header__cta");
+  });
+
   it("renders a booking CTA and hides a CTA whose fact is missing", () => {
     const booking = html(<Header ctx={testCtx(spec({ chrome: chrome({ cta: "booking" }) }))} />);
     expect(booking).toMatch(/href="https:\/\/booking.example.com\/lipa" rel="noopener" target="_blank">Rezervirajte termin</);

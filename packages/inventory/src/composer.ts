@@ -37,6 +37,7 @@ import {
   type CompositionPreset,
   type Design,
   type Direction,
+  type ImageAsset,
   type PresetSources,
   type Section,
   type SiteSpec,
@@ -61,6 +62,14 @@ export interface ComposeInput {
   catalogue: ComposerCatalogue;
   /** Asset ids to favour when they fit (the approval planner passes the ones no page shows yet). */
   prefer?: readonly string[];
+  /**
+   * Fixed picks instead of the seed's, for a page built to show one design (the hero-bar sheet): the hero preset, the
+   * palette, the pairing and the wordmark by asset id, the imagery treatment; `drawing: null` keeps the drawing layer off. Each must be usable in
+   * the catalogue; a pinned hero that doesn't fill throws rather than falling back to another.
+   */
+  pin?: { hero?: string; palette?: string; pairing?: string; wordmark?: string; drawing?: null; imagery?: Design["imagery"] };
+  /** AI-made pictures (origin "generated") the hero may use, ahead of the client's photos; no other section sees them (validateSite allows them only in the opener). */
+  pictures?: readonly ImageAsset[];
 }
 
 /** What a page is made of, for the coverage report and the approval pages' captions. */
@@ -265,9 +274,23 @@ function scorePairing(a: Asset, st: Stance, type: string, prefer: ReadonlySet<st
 /** The pairings a spec can set today: the starter pairs. */
 const RENDERABLE_PAIRS: ReadonlySet<string> = new Set(FONT_PAIRS.map((p) => p.id));
 
-function choose(st: Stance, type: BusinessType, word: string | undefined, seed: number, catalogue: ComposerCatalogue, prefer: ReadonlySet<string>): Chosen {
-  const palettes = assetsOf("palette", catalogue).filter((a) => paletteOf(a.id));
-  const pairings = assetsOf("pairing", catalogue).filter((a) => RENDERABLE_PAIRS.has(a.id.slice("pairing/".length)));
+function choose(st: Stance, type: BusinessType, word: string | undefined, seed: number, catalogue: ComposerCatalogue, prefer: ReadonlySet<string>, pin: NonNullable<ComposeInput["pin"]>): Chosen {
+  const pinned = (list: Asset[], id: string | undefined, what: string): Asset[] => {
+    if (id === undefined) return list;
+    const hit = list.filter((a) => a.id === id);
+    if (!hit.length) throw new ComposerError(`pinned ${what} ${id} is not a usable ${catalogue} ${what}`);
+    return hit;
+  };
+  const palettes = pinned(
+    assetsOf("palette", catalogue).filter((a) => paletteOf(a.id)),
+    pin.palette,
+    "palette",
+  );
+  const pairings = pinned(
+    assetsOf("pairing", catalogue).filter((a) => RENDERABLE_PAIRS.has(a.id.slice("pairing/".length))),
+    pin.pairing,
+    "pairing",
+  );
   if (!palettes.length) throw new ComposerError(`no ${catalogue} palette`);
   if (!pairings.length) throw new ComposerError(`no ${catalogue} pairing that a spec can set`);
   const pick = <T>(list: T[], score: (t: T) => number, key: (t: T) => string, salt: string): T => {
@@ -282,13 +305,13 @@ function choose(st: Stance, type: BusinessType, word: string | undefined, seed: 
   return { palette, colors: { ...paletteOf(palette.id)!.colors }, pairing, pairId: pairing.id.slice("pairing/".length) };
 }
 
-function designFor(st: Stance, type: BusinessType, ch: Chosen, seed: number): Design {
+function designFor(st: Stance, type: BusinessType, ch: Chosen, seed: number, pinnedImagery?: Design["imagery"]): Design {
   const ground = ch.palette.tags.ground[0] ?? "white";
   const dir = pickDirection(type, ground, seed, st.id);
   const pickOf = <T>(xs: readonly T[], salt: string): T => xs[Math.floor(unit(seed, salt, st.id) * xs.length)]!;
   const shape = pickOf(st.axes.shape.filter((s) => (SHAPES as readonly string[]).includes(s)), "shape");
   const density = pickOf(st.axes.density, "density");
-  const imagery = pickOf(st.axes.imagery, "imagery");
+  const imagery = pinnedImagery ?? pickOf(st.axes.imagery, "imagery");
   const design: Design = {
     direction: dir.id,
     fontPair: ch.pairId,
@@ -374,20 +397,23 @@ export function composeHomepageDetailed(input: ComposeInput): ComposeResult {
   const sources = fixtureSources(fixtureId);
   const word = base.business.subtype ?? FIXTURE_TRADE_WORD[fixtureId];
   const prefer = new Set(input.prefer ?? []);
+  const pin = input.pin ?? {};
 
   // The look: a palette and a pairing that fit the stance and the trade, tokens from the stance's axes.
-  const chosen = choose(st, type, word, seed, catalogue, prefer);
+  const chosen = choose(st, type, word, seed, catalogue, prefer, pin);
   const spec = base;
   spec.slug = `${`${fixtureId}-${st.id}`.slice(0, 40).replace(/-+$/, "")}-${seed}`;
-  spec.design = designFor(st, type, chosen, seed);
+  spec.design = designFor(st, type, chosen, seed, pin.imagery);
   delete spec.assets.logo;
+  const pictures = (input.pictures ?? []).map((p) => ({ ...p, origin: "generated" as const }));
+  spec.assets.images.push(...pictures);
   home(spec).sections = [];
   if (spec.design.wordmark) delete spec.design.wordmark;
 
   // The wordmark: a typographic mark for the header, from the wordmark styles the catalogue allows.
   const wordmarks = assetsOf("wordmark", catalogue)
     .map((a) => a.id.slice("wordmark/".length))
-    .filter((w) => wordmarkFits(spec.business.name, w as never, "header"));
+    .filter((w) => wordmarkFits(spec.business.name, w as never, "header") && (pin.wordmark === undefined || `wordmark/${w}` === pin.wordmark));
   const wordmarkOrder = ranked(wordmarks, (w) => (prefer.has(`wordmark/${w}`) ? 3 : 0), (w) => w, seed, `wordmark:${st.id}`, 1);
 
   const skipped: string[] = [];
@@ -395,14 +421,16 @@ export function composeHomepageDetailed(input: ComposeInput): ComposeResult {
   const used: string[] = [];
   const src = (intent: string, at: number): PresetSources => ({
     ...fixtureSources(fixtureId),
-    images: rotated(sources.images ?? [], at),
+    images: [...(intent === "hero" ? pictures.map((p) => ({ id: p.id, origin: "generated" as const })) : []), ...rotated(sources.images ?? [], at)],
     colors: spec.design.colors,
     ...(sources.copy[intent] ? { copy: sources.copy[intent] } : {}),
   }) as PresetSources;
 
   for (const intent of pagePlan(type, seed, st.id, prefer)) {
     let placed = false;
-    for (const preset of candidatesFor(intent, st, type, word, catalogue, seed, prefer)) {
+    const candidates = candidatesFor(intent, st, type, word, catalogue, seed, prefer).filter((p) => intent !== "hero" || pin.hero === undefined || p.id === pin.hero);
+    if (intent === "hero" && pin.hero !== undefined && !candidates.length) throw new ComposerError(`pinned hero ${pin.hero} is not a usable ${catalogue} hero preset for ${fixtureId}`);
+    for (const preset of candidates) {
       const filled = fillPreset(preset, src(intent, sections.length));
       if (!filled.ok) {
         skipped.push(`${preset.id}: ${filled.reason}`);
@@ -425,7 +453,7 @@ export function composeHomepageDetailed(input: ComposeInput): ComposeResult {
 
   // A drawing behind one section (the hero first), when one suits the trade and the guards agree.
   let drawing: string | null = null;
-  for (const d of drawingCandidates(st, type, word, catalogue, seed, prefer)) {
+  for (const d of pin.drawing === null ? [] : drawingCandidates(st, type, word, catalogue, seed, prefer)) {
     for (const i of [0, sections.length - 1, 1, 2].filter((x, n, a) => x >= 0 && x < sections.length && a.indexOf(x) === n)) {
       const s = sections[i]!;
       const props = s.props as { background?: { kind: string }[] };

@@ -65,4 +65,16 @@ describe("overPhoto", () => {
     const both = els(image({ scrim: { role: "inverse", strength: 3 } }), image({ id: "e_img2", desk: desk(4, 6, 1), phone: { order: 2, span: "full" } }));
     expect(overPhoto(both[0]!, both)).toBe(true);
   });
+
+  it("gives prices hung as tags or plates no panel (each item is on its own ground), but a price list in rows gets one", () => {
+    const prices = (style: string) =>
+      ComposedProps.parse({
+        intent: "hero",
+        width: "wide",
+        rows: 2,
+        elements: [{ id: "e_p", kind: "prices", style, items: [{ name: "Kruh", price: { amount: 4 } }], desk: desk(2, 4, 1, { layer: 1 }), phone: { order: 0, span: "full" } }, image()],
+      }).elements;
+    for (const style of ["tags", "plates"]) expect(overPhoto(prices(style)[0]!, prices(style))).toBe(false);
+    expect(overPhoto(prices("rows")[0]!, prices("rows"))).toBe(true);
+  });
 });

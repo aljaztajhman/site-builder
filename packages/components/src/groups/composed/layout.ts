@@ -58,6 +58,8 @@ const TEXTLESS: ReadonlySet<El["kind"]> = new Set(["image", "photos", "decor"]);
 export function overPhoto(el: El, all: readonly El[]): boolean {
   if (TEXTLESS.has(el.kind)) return false;
   if (el.kind === "fact" && ["plate", "seal", "ticket", "tag"].includes(el.treatment)) return false;
+  // Prices as hang tags or plates: each item is an object on its own ground, the gaps between them show the photo.
+  if (el.kind === "prices" && (el.style === "tags" || el.style === "plates")) return false;
   if (el.kind === "action" && el.style === "primary") return false;
   // A sticker and a ribbon are objects on a ground of their own (composed-v2.css, region kinds).
   if (el.kind === "sticker" || el.kind === "ribbon") return false;

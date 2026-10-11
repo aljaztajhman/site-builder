@@ -145,6 +145,9 @@ export const DRAWINGS = [
   "motif/bakery/loaf-potica-scene-solid",
   "motif/bakery/boule-linocut-solid",
   "motif/bakery/sun-loaf-shapes-cut",
+  // Hero bar (HQ it-studio-hero-art-trades): poster and linocut hero art for the trades beyond the bakery, drafts.
+  "motif/plumbing/heat-pump-radiator-solid",
+  "motif/bakery/oven-night-linocut-solid",
 ] as const;
 /** Drawings that tile along x into a strip (`decor.repeat: "x"`, G19). Each one is in DRAWINGS. */
 export const REPEATABLE = ["ornament/rope-line", "ornament/idrija-lace-line", "ornament/pisanica-band-line", "ornament/prekmurje-pottery-band-line"] as const;
