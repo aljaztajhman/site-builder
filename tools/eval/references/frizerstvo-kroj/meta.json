@@ -1,0 +1,13 @@
+{
+  "id": "frizerstvo-kroj",
+  "stance": "bauhaus-geometry",
+  "trades": [
+    "hairdresser"
+  ],
+  "title": "Frizerstvo Kroj, krog, kvadrat, trikotnik",
+  "gapNote": "There is no primary-figure ornament (ornament/primary-figure) and no figure-and-name hero composition: the square and the triangle are inline svg decor paths drawn by hand in the spec (a square and a right triangle), the circle is the photo mask. They float as decor on the grid, so overlapping the photo circle relies on a layer and a shift, not a figure that owns the composition. A decor svg can be hidden on phones but cannot be moved or scaled for them, so the phone page loses the geometry entirely and is the circle photo plus type. Colour is only a role: red primary and blue accent, with no flat field limited to one grid cell and no rotated or quarter-circle shape. The fact object (phone number as numeral) is plain red type, not a geometric figure doing a job.",
+  "sources": [
+    "stance bauhaus-geometry (circle, square, triangle; one primary figure per section)",
+    "L Ogledalo (a salon with one strong shape)"
+  ]
+}
