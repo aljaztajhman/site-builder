@@ -20,7 +20,7 @@ const PILED = new Set<Photos["arrangement"]>(["fan", "stack", "offset-pair"]);
  * so the keyboard scrolls it. before-after: two frames side by side (stacked on phones), each labelled before and after.
  * The first photo is the element's lead (the LCP one when it opens the page).
  */
-export function PhotosBlock({ el, ctx, width, priority }: { el: Photos; ctx: RenderCtx; width: "contained" | "wide" | "full"; priority: boolean }) {
+export function PhotosBlock({ el, ctx, width, priority, headingId }: { el: Photos; ctx: RenderCtx; width: "contained" | "wide" | "full"; priority: boolean; headingId?: string | undefined }) {
   const piled = PILED.has(el.arrangement);
   const images = el.images.slice(0, el.arrangement === "offset-pair" || el.arrangement === "before-after" ? 2 : piled ? 4 : 12);
   const caps = el.captions ?? [];
@@ -73,8 +73,8 @@ export function PhotosBlock({ el, ctx, width, priority }: { el: Photos; ctx: Ren
   }
   return (
     <div {...p} className={cx(p.className, "cx-ph", "cx-ph--strip")}>
-      {/* The row scrolls by itself: a labelled region in the tab order, so arrow keys scroll it (WCAG 2.1.1). */}
-      <div className="cx-ph__row" role="region" aria-label={kindText(ctx, "photos")} tabIndex={0}>
+      {/* The row scrolls by itself: labelled and in the tab order, so arrow keys scroll it (WCAG 2.1.1). Named by the section's heading when there is one (a group: the section is already the region of that name), else a region of its own. */}
+      <div className="cx-ph__row" {...(headingId ? { role: "group", "aria-labelledby": headingId } : { role: "region", "aria-label": kindText(ctx, "photos") })} tabIndex={0}>
         {figures}
       </div>
     </div>

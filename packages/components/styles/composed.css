@@ -61,11 +61,13 @@
   opacity: 0.07;
 }
 .cx-tex-grain.tone-inverse::before,
-.cx-tex-lines.tone-inverse::before {
+.cx-tex-lines.tone-inverse::before,
+.tone-inverse .cx-mask-stamp {
   background: var(--c-on-inverse);
 }
 .cx-tex-grain.tone-band::before,
-.cx-tex-lines.tone-band::before {
+.cx-tex-lines.tone-band::before,
+.tone-band .cx-mask-stamp {
   background: var(--c-on-band, var(--c-on-primary));
 }
 .cx-tex-grain::before {
@@ -108,6 +110,7 @@
   --cx-fs-6: max(var(--cx-fs-5), min(12vw, 4rem));
   --cx-fs-7: max(var(--cx-fs-6), min(13.5vw, 5rem));
   --cx-fs-8: max(var(--cx-fs-7), min(15vw, 6rem));
+  --cx-dh: 40vh;
   --cx-gap: max(0.75rem, calc(var(--g, 3) * 0.4rem));
   --cx-step: 1.25rem;
   display: grid;
@@ -235,6 +238,7 @@
     --cx-fs-6: max(var(--cx-fs-5), min(calc(var(--fs-h1) * 1.4), 12vw));
     --cx-fs-7: max(var(--cx-fs-6), min(calc(var(--fs-h1) * 1.9), 12vw));
     --cx-fs-8: max(var(--cx-fs-7), min(calc(var(--fs-h1) * 2.6), 12vw));
+    --cx-dh: 60vh;
   }
 }
 @media (min-width: 64rem) {
@@ -345,8 +349,8 @@
   gap: 0.625rem;
 }
 .cx-fact__obj {
-  /* The size step, but never wider than the cell: about 0.62 em per character, and room for the object's own padding. */
-  font-size: min(var(--fz), calc(100cqw / (var(--n, 6) * 0.62 + 1.7)));
+  /* The size step, but never wider than the cell: about 0.62 em per character, and room for the object's own padding (--p em: a ticket, tag or seal needs the most, a plate and a numeral least). */
+  font-size: min(var(--fz), calc(100cqw / (var(--n, 6) * 0.62 + var(--p, 2.6))));
   max-width: 100%;
 }
 .cx-fact__value {
@@ -533,12 +537,6 @@ body:not([data-motif="plate"]) .cx-prices--plates .plate__eu {
   background: var(--c-border);
   clip-path: var(--shape-stamp);
 }
-.tone-inverse .cx-mask-stamp {
-  background: var(--c-on-inverse);
-}
-.tone-band .cx-mask-stamp {
-  background: var(--c-on-band, var(--c-on-primary));
-}
 .cx-mask-stamp > .media {
   inset: 0.9rem;
 }
@@ -631,9 +629,11 @@ body:not([data-motif="plate"]) .cx-prices--plates .plate__eu {
   font-size: var(--fs-h3);
   line-height: 1.2;
 }
+/* A drawing is as wide as its cell, but never taller than 40vh (60vh on desktop): a tall thin one keeps its aspect ratio and is centred. */
 .cx-decor svg {
   width: 100%;
   height: auto;
+  max-height: var(--cx-dh);
 }
 .cx-decor .branch,
 .cx-decor .spoon {
