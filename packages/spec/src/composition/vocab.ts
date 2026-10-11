@@ -25,8 +25,8 @@ export const FACT_OBJECTS = ["numeral", "plate", "stamp", "ticket", "seal", "tag
 export const TYPE_TREATMENTS = ["none", "stacked", "knockout"] as const;
 /** Section motion presets (`motion`), described in MOTION_META. I7 fills it to 20. */
 export const MOTIONS = ["reveal", "unmask"] as const;
-/** Typographic wordmark styles (`design.wordmark.style`). I9 adds the rest. */
-export const WORDMARK_STYLES = ["plain"] as const;
+/** Typographic wordmark styles (`design.wordmark.style`); I9a: plain and six treatments of the business name as type. */
+export const WORDMARK_STYLES = ["plain", "lockup", "stamp", "plate", "circle", "monogram", "stacked-caps"] as const;
 /**
  * Drawings (`decor.drawing`, the drawing layer, the list marker, the ribbon separator, the edge drawing): full asset ids
  * (DrawingId), `motif/<trade>/<subject>-<style>` or `ornament/<name>-<style>`. I5 draws them; these two are the samples

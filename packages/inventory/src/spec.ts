@@ -18,6 +18,7 @@ export {
   SUBMOTIFS,
   SUBMOTIF_BASE,
   SUBTYPE_MOTIF,
+  WORDMARK_STYLES,
   acceptedFontPairs,
   hexToHsl,
   intentOf,

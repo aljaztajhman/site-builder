@@ -5,6 +5,7 @@ import { Icon, cx } from "../primitives/index.tsx";
 import { heroOwnsCall } from "../groups/heroes/HeroSignature.tsx";
 import type { UiKey } from "../i18n.ts";
 import { nameEm, navFit, type NavRow } from "./nav-fit.ts";
+import { ChromeWordmark } from "../groups/composed/kinds/wordmark.tsx";
 
 const CTA_LABEL: Record<"call" | "booking" | "directions", UiKey> = { call: "call", booking: "book", directions: "directions" };
 
@@ -40,7 +41,7 @@ export function Header({ ctx }: { ctx: RenderCtx }) {
           {logo ? (
             <img className="site-header__logo" src={ctx.media(logo.file)} width={logo.width} height={logo.height} alt={site.business.name} />
           ) : (
-            <span className="site-header__name">{site.business.name}</span>
+            (ChromeWordmark({ ctx }) ?? <span className="site-header__name">{site.business.name}</span>)
           )}
         </a>
         {navPages.length > 0 && (
@@ -126,11 +127,13 @@ function SkeletonHeader({ ctx, skeleton }: { ctx: RenderCtx; skeleton: Skeleton 
             <img className="site-header__logo" src={ctx.media(logo.file)} width={logo.width} height={logo.height} alt={site.business.name} />
           ) : (
             // On phones the name is set at the size that fits its row (skeleton.css), so a long name stays on one line.
-            <span className="site-header__name site-header__name--fit">
-              <span className="site-header__name-text" style={{ "--name-em": nameEm(site.business.name, site.design).toFixed(2) } as CSSProperties}>
-                {site.business.name}
+            (ChromeWordmark({ ctx }) ?? (
+              <span className="site-header__name site-header__name--fit">
+                <span className="site-header__name-text" style={{ "--name-em": nameEm(site.business.name, site.design).toFixed(2) } as CSSProperties}>
+                  {site.business.name}
+                </span>
               </span>
-            </span>
+            ))
           )}
         </a>
         {family === "phone" && callHref && (

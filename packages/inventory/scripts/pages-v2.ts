@@ -12,6 +12,8 @@ import {
   EDGES,
   MOTION_META,
   WORDMARK_STYLES,
+  wordmarkLayout,
+  type WordmarkStyle,
   direction,
   fillPreset,
   parsePresetId,
@@ -192,7 +194,10 @@ export function wordmarkPages(asset: Asset): SheetPage[] {
     const spec = inDirection(base, dir);
     spec.business.name = name;
     spec.design.wordmark = { style };
-    return page(`n${String(n + 1).padStart(2, "0")}`, `${known ? "" : `NOT IN WORDMARK_STYLES, drawn as plain · `}${name} · ${dir.id}`, withHome(spec, [grounds(() => [el("w", { kind: "wordmark", size: 5 }, 5, 8, 1, 1)])[n % TONES.length]!], "x"));
+    // A name the style cannot carry (too long, one word …) is drawn as another style: say which, so the sheet shows what the site would get.
+    const drawn = known ? wordmarkLayout(name, style as WordmarkStyle).style : "plain";
+    const fallback = known && drawn !== style ? `falls back to ${drawn} · ` : "";
+    return page(`n${String(n + 1).padStart(2, "0")}`, `${known ? "" : `NOT IN WORDMARK_STYLES, drawn as plain · `}${fallback}${name} · ${dir.id}`, withHome(spec, [grounds(() => [el("w", { kind: "wordmark", size: 5 }, 5, 8, 1, 1)])[n % TONES.length]!], "x"));
   });
 }
 

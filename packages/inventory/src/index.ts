@@ -19,7 +19,7 @@ export * from "./export.ts";
 export * from "./checks.ts";
 export * from "./signatures.ts";
 export * from "./must-draw.ts";
-export { todaysAssets, draftAssets, curatedPaletteAssets, groundOf, temperatureOf, paletteOf } from "./sources.ts";
+export { todaysAssets, draftAssets, wordmarkAssets, curatedPaletteAssets, groundOf, temperatureOf, paletteOf } from "./sources.ts";
 export { CURATED_PALETTES, type CuratedPalette } from "./palettes/curated.ts";
 export { fontFile, fontLicenseFile } from "./bytes.ts";
 export { COMPOSITION_PRESETS, compositionAssets, compositionPreset } from "./compositions/index.ts";

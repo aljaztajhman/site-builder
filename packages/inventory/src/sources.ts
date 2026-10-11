@@ -25,6 +25,7 @@ import {
   SUBMOTIFS,
   SUBMOTIF_BASE,
   SUBTYPE_MOTIF,
+  WORDMARK_STYLES,
   acceptedFontPairs,
   composedStylesheetBytes,
   hexToHsl,
@@ -356,7 +357,21 @@ export function todaysAssets(): Asset[] {
   ];
 }
 
+/** Wordmark styles (I9a): the business name set as type; the rules of each are one partial in styles/vocab/wordmarks (plain: the kinds sheet). */
+export function wordmarkAssets(): Asset[] {
+  return WORDMARK_STYLES.map((w) => ({
+    id: `wordmark/${w}`,
+    kind: "wordmark",
+    tags: tags({ ground: ALL_GROUNDS }),
+    phone: "ok",
+    bytes: composedRuleBytes(word(`.wm-${w}`)),
+    license: "own",
+    status: "draft",
+    note: "Typographic wordmark for a site without a logo; the name only, never a drawn mark",
+  }));
+}
+
 /** New assets of the inventory phase, registered as drafts (design-studio.md §4.3): the director curates, the owner approves. */
 export function draftAssets(): Asset[] {
-  return [...curatedPaletteAssets()];
+  return [...curatedPaletteAssets(), ...wordmarkAssets()];
 }
