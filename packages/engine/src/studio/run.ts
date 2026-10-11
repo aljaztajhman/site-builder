@@ -11,7 +11,7 @@ import { ModelOutputError, estimateCallEur, type ModelClient } from "../llm/clie
 import { checkFacts } from "../facts.ts";
 import { DirectorAnswer, MAX_PROPS, checkDirection, directorRequest, knownNumbers } from "./director.ts";
 import type { ArtDirection } from "./art-director.ts";
-import { runMockup, runTotal, type MockupDeps, type MockupRun } from "./mockup.ts";
+import { newMockupRun, runMockup, runTotal, type MockupDeps, type MockupRun } from "./mockup.ts";
 
 /** config designer.agent: "on" for everyone, "trial" only for the accounts in DESIGNER_TRIAL_EMAILS, "off" for no one. */
 export function studioEnabled(mode: AppConfig["designer"]["agent"], email: string | null | undefined, trialEmails: string | undefined): boolean {
@@ -130,6 +130,15 @@ export function studioGuards(composed: SiteSpec, today: SiteSpec, corpus: string
  * studio.perRunMaxEur. "picker": the picker only.
  */
 export async function runStudio(client: ModelClient, config: AppConfig, input: StudioInput): Promise<StudioOutcome> {
+  // Nothing may throw into the pipeline: an unexpected error keeps today's spec like any other failure.
+  try {
+    return await studioRun(client, config, input);
+  } catch (e) {
+    return { ok: false, reason: `studio: ${(e as Error)?.name ?? "Error"}: ${String((e as Error)?.message ?? e)}`.slice(0, 400), costEur: 0 };
+  }
+}
+
+async function studioRun(client: ModelClient, config: AppConfig, input: StudioInput): Promise<StudioOutcome> {
   if (config.studio.mode !== "mockup") return runPicker(client, config, input, config.studio.perRunMaxEur);
   const m = await mockupWithTimeout(client, config, input);
   const report: MockupReport = {
@@ -141,7 +150,8 @@ export async function runStudio(client: ModelClient, config: AppConfig, input: S
     crops: m.crops.map((c) => ({ id: c.id, ok: c.ok, ...(c.reason ? { reason: c.reason } : {}) })),
     eur: m.eur,
   };
-  const spent = runTotal(m);
+  // Booked, plus what a cut-off run still had in flight (it will be billed).
+  const spent = runTotal(m) + m.inFlightEur;
   const extra = { ...(m.mockup ? { mockupImage: m.mockup } : {}), ...(m.art ? { art: m.art } : {}) };
   if (m.ok && m.spec) {
     const why = studioGuards(m.spec, input.spec, input.corpus);
@@ -168,18 +178,27 @@ export async function runStudio(client: ModelClient, config: AppConfig, input: S
   return { ...p, costEur: p.costEur + spent, mockup: report, ...extra };
 }
 
-/** The mockup path under studio.mockup.timeoutSeconds (calls already sent finish in the background and are booked). */
+/**
+ * The mockup path under studio.mockup.timeoutSeconds. At the limit the run is aborted: it sends nothing more (the call in
+ * flight finishes and is booked), and the result carries what it booked plus that call's estimate.
+ */
 async function mockupWithTimeout(client: ModelClient, config: AppConfig, input: StudioInput): Promise<MockupRun> {
-  const empty: MockupRun = { ok: false, dropped: [], crops: [], eur: { artDirector: 0, mockup: 0, rebuild: 0 } };
-  if (!input.mockup) return { ...empty, reason: "no image generator (FAL_KEY not set or imageGen.pipeline off)" };
+  const run = newMockupRun();
+  if (!input.mockup) return { ...run, reason: "no image generator (FAL_KEY not set or imageGen.pipeline off)" };
   const sources = sourcesOf(input.spec, input.brief, input.corpus);
   const known = knownNumbers(input.spec, sources, input.corpus);
+  const stop = new AbortController();
+  const limit = `timed out after ${config.studio.mockup.timeoutSeconds} s`;
   let timer: ReturnType<typeof setTimeout> | undefined;
   const timeout = new Promise<MockupRun>((resolve) => {
-    timer = setTimeout(() => resolve({ ...empty, reason: `timed out after ${config.studio.mockup.timeoutSeconds} s` }), config.studio.mockup.timeoutSeconds * 1000);
+    timer = setTimeout(() => {
+      stop.abort(limit);
+      // A snapshot: the run goes on only to book the call in flight, and starts nothing new.
+      resolve({ ...run, eur: { ...run.eur }, dropped: [...run.dropped], crops: [...run.crops], ok: false, reason: limit });
+    }, config.studio.mockup.timeoutSeconds * 1000);
   });
   try {
-    return await Promise.race([runMockup(client, config, { spec: input.spec, sources, known, deps: input.mockup, budget: config.studio.perRunMaxEur }), timeout]);
+    return await Promise.race([runMockup(client, config, { spec: input.spec, sources, known, corpus: input.corpus, deps: input.mockup, budget: config.studio.perRunMaxEur, signal: stop.signal, run }), timeout]);
   } finally {
     clearTimeout(timer);
   }

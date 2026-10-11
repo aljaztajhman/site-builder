@@ -56,6 +56,15 @@ export class ImageBilledError extends Error {
   }
 }
 
+/**
+ * Whether a failed image request may still be billed: the image was made but not fetched (ImageBilledError), or we
+ * stopped waiting (a timeout or an abort) while fal may have gone on making it. Those are booked at the image's price.
+ */
+export function mayBeBilled(e: unknown): boolean {
+  const name = (e as { name?: unknown })?.name;
+  return e instanceof ImageBilledError || name === "TimeoutError" || name === "AbortError";
+}
+
 export class FalImageTransport implements ImageTransport {
   constructor(private readonly key = process.env.FAL_KEY) {
     if (!key) throw new Error("FAL_KEY is not set");
@@ -148,13 +157,17 @@ export class ImageGenerator {
     const price = imageCostEur(config, model, size.width, size.height);
     opts.signal?.throwIfAborted();
     const reservation = await this.ledger.reserve({ stage: opts.stage, model: modelName, estimateEur: price, capEur: config.limits.dailyModelSpendCapEur });
+    if (opts.signal?.aborted) {
+      await reservation.release();
+      throw opts.signal.reason;
+    }
     const started = Date.now();
     const book = (costEur: number, ok: boolean) => reservation.settle({ stage: opts.stage, model: modelName, usage: NO_TOKENS, costEur, durationMs: Date.now() - started, ok });
     let raw: Uint8Array;
     try {
       raw = await this.opts.transport.generate(model, { ...model.params, ...body, num_images: 1 });
     } catch (e) {
-      await book(e instanceof ImageBilledError ? price : 0, false);
+      await book(mayBeBilled(e) ? price : 0, false);
       throw e;
     }
     try {
@@ -193,9 +206,9 @@ export class ImageGenerator {
     try {
       raw = await this.opts.transport.generate(model, requestBody(config, model, `${prompt} ${pipelineStyle(config)}`, false));
     } catch (e) {
-      // A failed request is logged at no cost (fal bills only delivered images); an image fal made but we
-      // couldn't fetch is booked at its price, because we were billed for it.
-      await book(e instanceof ImageBilledError ? price : 0, false);
+      // A refused request is logged at no cost (fal bills only delivered images); an image fal made but we
+      // couldn't fetch, or a request we gave up on while fal may still be making it, is booked at its price.
+      await book(mayBeBilled(e) ? price : 0, false);
       throw e;
     }
     // From here the image was delivered, so billed, whatever happens to it next.

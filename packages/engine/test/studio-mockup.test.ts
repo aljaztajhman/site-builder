@@ -4,13 +4,15 @@ import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 import { describe, expect, it } from "vitest";
 import { loadConfig, type AppConfig } from "@sb/config";
-import { composerFixture } from "@sb/inventory";
-import type { SiteSpec } from "@sb/spec";
+import { composerFixture, inventory } from "@sb/inventory";
+import { VOCABS, type SiteSpec } from "@sb/spec";
 import {
   ImageGenerator,
   ModelClient,
   StandInImageTransport,
   checkCrops,
+  rebuildVocabs,
+  unknownNames,
   runStudio,
   sanitiseProps,
   sourcesOf,
@@ -337,6 +339,7 @@ describe("the crop rule", () => {
 describe("sanitiseProps", () => {
   const fx = composerFixture("pekarna-kvas");
   const known = new Set(["041", "555", "906", "041555906", "30", "1241"]);
+  const ctx = { known, words: new Set(["vsak", "dan", "pot", "do", "nas", "pekarna", "kvas"]), urls: new Set<string>() };
   it("keeps slots and short labels; drops sentences, invented numbers, call buttons and a crop where AI pictures can't go", () => {
     const dropped: string[] = [];
     const props = sanitiseProps(
@@ -353,7 +356,7 @@ describe("sanitiseProps", () => {
         ],
       },
       "products",
-      known,
+      ctx,
       new Map([["crop1", "img_g1"]]),
       dropped,
       "s",
@@ -364,6 +367,149 @@ describe("sanitiseProps", () => {
     expect(els.find((e) => e.id === "e_f")!.image).toBe("{crop.1}");
     expect(dropped.join("; ")).toMatch(/e_b.text literal text removed.*e_c: call button removed.*literal list items removed.*no AI picture in a products section.*e_g: quote is not the client's words/);
     expect(sourcesOf(fx.base, fx.sources.brief, fx.description).business.name).toBe("Pekarna Kvas");
+  });
+});
+
+describe("review fixes (studio 0.5b)", () => {
+  const run = (answer: RebuildAnswer, cfg: AppConfig = config, seen: ModelRequest[] = [], bodies: { model: ImageGenModelConfig; body: Record<string, unknown> }[] = [], delayMs = 0) => {
+    const fx = pekarna(bodies);
+    return {
+      fx,
+      result: runStudio(scripted({ artDirector: [JSON.stringify(direction)], rebuild: [JSON.stringify(answer)], director: [new Error("no picker in this test")] }, seen, cfg, delayMs), cfg, {
+        spec: fx.spec,
+        brief: fx.brief as never,
+        corpus: fx.corpus,
+        seed: 1,
+        mockup: fx.deps,
+      }),
+    };
+  };
+
+  it("an invented web address and an invented name are removed, and the page is still built", async () => {
+    const a = rebuild();
+    const products = a.sections[1]!.props as { elements: Record<string, unknown>[] };
+    products.elements.push(
+      { id: "e_ig", kind: "action", action: "link", label: "Instagram", link: { label: "Instagram", target: { url: "https://instagram.com/pekarna-izmisljena" } }, style: "secondary", desk: desk(8, 3, 6), phone: phone(9) },
+      { id: "e_master", kind: "heading", text: "Mojster Janez Novak", level: 3, size: 2, desk: desk(1, 7, 6), phone: phone(10) },
+    );
+    const contact = a.sections[3]!.props as { elements: Record<string, unknown>[] };
+    (contact.elements[0] as { link: unknown }).link = { url: "https://example.org/narocila" };
+    a.sections[2]!.copy = { headline: "Pri mojstru Petru Kovaču" };
+    const { fx, result } = run(a);
+    const r = await result;
+    if (!r.ok) throw new Error(`${r.reason} / ${r.mockup?.reason}`);
+    expect(r.path).toBe("mockup");
+    const text = JSON.stringify(home(r.spec).sections);
+    expect(text).not.toMatch(/instagram|example\.org|Janez|Novak|Kovač/);
+    expect(text).toContain("041 555 906");
+    expect(r.dropped.join("; ")).toMatch(/link to https:\/\/instagram\.com.*removed/);
+    expect(r.dropped.join("; ")).toMatch(/e_master\.text literal text removed/);
+    expect(r.dropped.join("; ")).toMatch(/Petru, Kovaču not in the client's words/);
+    expect(studioGuards(r.spec, fx.spec, fx.corpus)).toBeNull();
+  }, 60_000);
+
+  it("names: a client's place in another case passes, an invented person does not", () => {
+    const words = new Set(["ptuj", "sorškega", "jure", "petek", "kamnik"]);
+    expect(unknownNames("Delamo na Ptuju in v okolici.", words)).toEqual([]);
+    expect(unknownNames("Cvetje s Sorškem polju.", words)).toEqual([]);
+    expect(unknownNames("Mojster Janez Novak in Petru Kovaču", words)).toEqual(["Janez", "Novak", "Petru", "Kovaču"]);
+  });
+
+  it("a link to the business's own booking or social address is kept", () => {
+    const ctx = { known: new Set<string>(), words: new Set<string>(), urls: new Set(["https://instagram.com/pekarnakvas"]) };
+    const props = sanitiseProps({ elements: [{ id: "e_ig", kind: "action", action: "link", label: "Instagram", link: { label: "Instagram", target: { url: "https://instagram.com/pekarnakvas/" } } }] }, "contact", ctx, new Map(), [], "s");
+    expect((props.elements as unknown[]).length).toBe(1);
+  });
+
+  it("after the time limit nothing more is sent: no image, no rebuild; the spend so far is the picker's to subtract", async () => {
+    const seen: ModelRequest[] = [];
+    const bodies: { model: ImageGenModelConfig; body: Record<string, unknown> }[] = [];
+    // The art director answers after 1.5 s; the limit is 0.8 s (the photos are prepared well before it).
+    const quick = { ...config, studio: { ...config.studio, mockup: { ...config.studio.mockup, timeoutSeconds: 0.8 } } };
+    const r = await run(rebuild(), quick, seen, bodies, 1500).result;
+    expect(r.mockup?.reason).toMatch(/timed out/);
+    expect(seen.map((q) => q.stage)).toContain("artDirector");
+    // The art director's call was in flight: its estimate counts as spent (the picker gets perRunMaxEur less it).
+    expect(r.costEur).toBeGreaterThan(0.05);
+    // Let the art director's late answer arrive: the run must stop there.
+    await new Promise((res) => setTimeout(res, 1500));
+    expect(bodies).toHaveLength(0);
+    expect(seen.map((q) => q.stage)).not.toContain("rebuild");
+  }, 20_000);
+
+  it("refuses every crop when the business has photos and the rebuild named no photo region; work and products are not decoration", () => {
+    const crops = [{ id: "crop1", box: { x: 10, y: 10, w: 200, h: 200 }, shows: "an ornament", alt: "Okras", contains: [] }];
+    const size = { width: 1536, height: 1024 };
+    expect(checkCrops({ photoRegions: [], crops }, size, 3, { clientPhotos: 3 })[0]).toMatchObject({ ok: false, reason: expect.stringMatching(/no photo regions/) });
+    expect(checkCrops({ photoRegions: [], crops }, size, 3, { clientPhotos: 0 })[0]!.ok).toBe(true);
+    for (const shows of ["the client's work", "a product shot", "izdelek", "a finished tattoo, their work"]) expect(checkCrops({ photoRegions: [], crops: [{ ...crops[0]!, shows }] }, size, 3)[0]!.ok, shows).toBe(false);
+  });
+
+  it("drops a rejected drawing (decor, list marker, background layer) and unknown masks or treatments", () => {
+    const rejected = inventory()
+      .all()
+      .find((a) => a.status === "rejected" && (VOCABS.DRAWINGS as readonly string[]).includes(a.id))!.id;
+    const ctx = { known: new Set<string>(), words: new Set<string>(), urls: new Set<string>() };
+    const dropped: string[] = [];
+    const props = sanitiseProps(
+      {
+        elements: [
+          { id: "e_d", kind: "decor", drawing: rejected },
+          { id: "e_l", kind: "list", items: ["{brief.offerings[0].name}"], marker: "drawing", drawing: rejected },
+          { id: "e_i", kind: "image", image: "img_01", ratio: "1:1", mask: "no-such-mask", treatment: "no-such-treatment" },
+          { id: "e_ok", kind: "decor", drawing: rebuildVocabs().DRAWINGS[0] },
+        ],
+        background: [{ kind: "drawing", drawing: rejected, scale: 2, anchor: "end" }],
+      },
+      "story",
+      ctx,
+      new Map(),
+      dropped,
+      "s",
+    );
+    const els = props.elements as Record<string, unknown>[];
+    expect(els.map((e) => e.id)).toEqual(["e_l", "e_i", "e_ok"]);
+    expect(els[0]).toMatchObject({ marker: "dot" });
+    expect(els[0]!.drawing).toBeUndefined();
+    expect(els[1]!.mask).toBeUndefined();
+    expect(els[1]!.treatment).toBeUndefined();
+    expect(props.background).toBeUndefined();
+    expect(dropped.join("; ")).toContain(`drawing ${rejected} is not approved`);
+  });
+
+  it("runStudio never throws: an unexpected error is ok:false and today's spec stays", async () => {
+    const fx = pekarna();
+    const r = await runStudio(scripted({}), config, { spec: {} as SiteSpec, corpus: "", seed: 1, mockup: fx.deps });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.reason).toMatch(/^studio: /);
+  });
+});
+
+describe("images that may have been billed", () => {
+  for (const name of ["TimeoutError", "AbortError"]) {
+    it(`a fal ${name} is booked at the image's price (generate and paint)`, async () => {
+      const booked: number[] = [];
+      const gen = new ImageGenerator({
+        config,
+        transport: {
+          async generate() {
+            throw new DOMException("gave up", name);
+          },
+        },
+        spentToday: async () => 0,
+        onCall: async (c) => void booked.push(c.costEur),
+      });
+      await expect(gen.generate("x")).rejects.toThrow("gave up");
+      await expect(gen.paint(config.studio.mockup.model, { prompt: "x", image_size: { width: 1536, height: 1024 } }, { stage: "mockup" })).rejects.toThrow("gave up");
+      expect(booked).toHaveLength(2);
+      for (const b of booked) expect(b).toBeGreaterThan(0);
+    });
+  }
+  it("a refused request (HTTP 4xx) is still booked at €0", async () => {
+    const booked: number[] = [];
+    const gen = new ImageGenerator({ config, transport: { generate: async () => Promise.reject(new Error("HTTP 422")) }, spentToday: async () => 0, onCall: async (c) => void booked.push(c.costEur) });
+    await expect(gen.paint(config.studio.mockup.model, { prompt: "x" }, { stage: "mockup" })).rejects.toThrow();
+    expect(booked).toEqual([0]);
   });
 });
 

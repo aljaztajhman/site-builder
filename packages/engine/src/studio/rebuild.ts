@@ -29,6 +29,7 @@ import {
   presetSection,
   semanticIssues,
   slotValue,
+  walkStrings,
   validateSite,
   wordmarkFits,
   type ComposedProps,
@@ -38,9 +39,11 @@ import {
   type PresetSources,
   type Section,
   type SiteSpec,
+  type VocabKey,
+  KIND_PREFIX,
 } from "@sb/spec";
 import { inventory, type ComposeSources } from "@sb/inventory";
-import { designerCatalogue } from "../prompts.ts";
+import { approvedVocabs, designerCatalogue } from "../prompts.ts";
 import type { ModelRequest } from "../llm/client.ts";
 import { HEADLINE_MAX, LEAD_MAX, keptCopy, digitRuns } from "./director.ts";
 
@@ -188,7 +191,8 @@ export function rebuildRequest(input: RebuildInput): ModelRequest {
 // ---------- the crops ----------
 
 /** What a crop may never show (its own words, or the kinds it says it contains). */
-const NOT_DECOR = /\b(person|people|man|woman|child|face|portrait|hand|hands|finger|arm|body|skin|tattooed|staff|customer|building|premises|shop ?front|storefront|interior|room|sign|signage|text|letter|lettering|word|logo|photo|photograph|screenshot)s?\b/i;
+const NOT_DECOR =
+  /\b(person|people|man|woman|child|face|portrait|hand|hands|finger|arm|body|skin|tattooed|staff|customer|building|premises|shop ?front|storefront|interior|room|sign|signage|text|letter|lettering|word|logo|photo|photograph|screenshot|work|works|product|products|izdelek|izdelki|izdelka|delo|dela|del)s?\b/i;
 
 export interface CropVerdict {
   id: string;
@@ -204,10 +208,12 @@ const overlap = (a: Box, b: Box): number => Math.max(0, Math.min(a.x + a.w, b.x 
  * The crop rule: only decorative art. A crop is refused when it says it holds people, hands, premises, signs, text,
  * logos, a photo or the client's work; when it overlaps a region where the client's photo is painted (the client's
  * photos are always their real files, never a crop of the mockup); when it is tiny or a large share of the mockup;
- * past `max` crops.
+ * past `max` crops. When the business has photos but the rebuild named no photo region, no crop can be checked against
+ * them, so every crop is refused (a per-crop vision check is 1.0's).
  */
-export function checkCrops(answer: Pick<RebuildAnswer, "crops" | "photoRegions">, size: { width: number; height: number }, max: number): CropVerdict[] {
+export function checkCrops(answer: Pick<RebuildAnswer, "crops" | "photoRegions">, size: { width: number; height: number }, max: number, opts: { clientPhotos: number } = { clientPhotos: 0 }): CropVerdict[] {
   let accepted = 0;
+  const unmapped = opts.clientPhotos > 0 && answer.photoRegions.length === 0;
   return answer.crops.map((c) => {
     const x = Math.max(0, Math.round(c.box.x));
     const y = Math.max(0, Math.round(c.box.y));
@@ -215,6 +221,7 @@ export function checkCrops(answer: Pick<RebuildAnswer, "crops" | "photoRegions">
     const alt = c.alt.replace(/\s+/g, " ").trim().slice(0, 150);
     const refuse = (reason: string): CropVerdict => ({ id: c.id, box, alt, ok: false, reason });
     if (!/^crop[1-9]$/.test(c.id)) return refuse(`id ${c.id} is not crop1…crop9`);
+    if (unmapped) return refuse("the business has photos and the rebuild gave no photo regions to check against");
     if (c.contains.length) return refuse(`contains ${c.contains.join(", ")}`);
     if (NOT_DECOR.test(c.shows)) return refuse(`shows "${c.shows.slice(0, 60)}"`);
     if (box.w < 48 || box.h < 48) return refuse("smaller than 48 px");
@@ -230,19 +237,107 @@ export function checkCrops(answer: Pick<RebuildAnswer, "crops" | "photoRegions">
 
 // ---------- the props ----------
 
-/** Text kinds whose literal (slot-free) strings code removes; labels are kept when short and number-free. */
-function literalOk(s: string, known: ReadonlySet<string>, max = LABEL_MAX): boolean {
+/**
+ * What the model's own words are checked against: the digit runs the client gave (`known`), every word the client's
+ * text, the business facts and the brief hold (`words`, lower case), and the web addresses the page may link to
+ * (`urls`: the booking link, the social links, any address in the client's text).
+ */
+export interface LiteralContext {
+  known: ReadonlySet<string>;
+  words: ReadonlySet<string>;
+  urls: ReadonlySet<string>;
+}
+
+const WORD = /\p{L}[\p{L}'’-]*/gu;
+const normUrl = (u: string): string => u.trim().replace(/\/+$/, "").toLowerCase();
+
+/** The literal check's context for a site: its client text, business facts and brief. */
+export function literalContext(spec: SiteSpec, sources: ComposeSources, corpus: string, known: ReadonlySet<string>): LiteralContext {
+  const b = spec.business;
+  const text = [corpus, JSON.stringify(b), JSON.stringify(sources.brief ?? {})].join("\n");
+  const words = new Set([...text.matchAll(WORD)].map((m) => m[0].toLowerCase()));
+  const urls = new Set([...(b.bookingUrl ? [b.bookingUrl] : []), ...(b.social ?? []).map((s) => s.url), ...(corpus.match(/https?:\/\/[^\s"'<>)]+/g) ?? [])].map(normUrl));
+  return { known, words, urls };
+}
+
+/**
+ * Capitalised words in the model's own text that the client never wrote (an invented name: "Mojster Janez Novak"). The
+ * first word of each sentence is skipped; everything else that starts with a capital must be among the client's words.
+ */
+export function unknownNames(s: string, words: ReadonlySet<string>): string[] {
+  const out: string[] = [];
+  for (const sentence of s.split(/(?<=[.!?:])\s+/)) {
+    const ws = [...sentence.matchAll(WORD)].map((m) => m[0]);
+    for (const w of ws.slice(1)) if (/^\p{Lu}/u.test(w) && !knownWord(w.toLowerCase(), words)) out.push(w);
+  }
+  return out;
+}
+
+/**
+ * A client's word in another case (Slovene declension: "Ptuj" → "na Ptuju", "Sorškega" → "Sorškem"): the two share a
+ * stem of at least 4 letters that leaves at most 3 letters of ending on the shorter one. "Janez" is not "Jure".
+ */
+function knownWord(w: string, words: ReadonlySet<string>): boolean {
+  if (words.has(w)) return true;
+  if (w.length < 4) return false;
+  for (const c of words) {
+    if (c.length < 4 || c.slice(0, 4) !== w.slice(0, 4)) continue;
+    let n = 4;
+    while (n < w.length && n < c.length && w[n] === c[n]) n++;
+    if (n >= Math.min(w.length, c.length) - 3) return true;
+  }
+  return false;
+}
+
+/** A literal (slot-free) label is kept when short, with no number and no name the client never gave. */
+function literalOk(s: string, ctx: LiteralContext, max = LABEL_MAX): boolean {
   const t = s.replace(/\s+/g, " ").trim();
-  return t.length > 0 && t.length <= max && digitRuns(t).every((n) => known.has(n));
+  return t.length > 0 && t.length <= max && digitRuns(t).every((n) => ctx.known.has(n)) && unknownNames(t, ctx.words).length === 0 && !/https?:\/\/|www\./i.test(t);
 }
 const slotted = (s: unknown): s is string => typeof s === "string" && hasSlotMarker(s);
+
+/** A web address the page may link to: only the business's own (booking, social, or one in the client's text). */
+const urlOk = (u: unknown, ctx: LiteralContext): boolean => typeof u === "string" && ctx.urls.has(normUrl(u));
+
+/** The vocabulary each asset field names, so only approved inventory assets reach a page. */
+type Vocabs = Record<VocabKey, readonly string[]>;
+let approvedCache: Vocabs | undefined;
+const VOCAB_PREFIX: Partial<Record<VocabKey, string>> = {
+  MASKS: KIND_PREFIX.mask,
+  IMAGE_TREATMENTS: KIND_PREFIX.treatment,
+  TEXTURES: KIND_PREFIX.texture,
+  EDGES: KIND_PREFIX.divider,
+  FACT_OBJECTS: KIND_PREFIX.factObject,
+  TYPE_TREATMENTS: KIND_PREFIX.typeTreatment,
+  MOTIONS: KIND_PREFIX.motion,
+};
+/**
+ * The names a rebuilt page may use: the designer's offer (starters plus approved assets), less any whose inventory
+ * asset is not approved (a starter the owner rejected in the approval round goes too).
+ */
+export function rebuildVocabs(): Vocabs {
+  if (approvedCache) return approvedCache;
+  const reg = inventory();
+  const offered = approvedVocabs(new Set(reg.all().filter((a) => a.status === "approved").map((a) => a.id)));
+  const out = {} as Record<VocabKey, readonly string[]>;
+  for (const key of Object.keys(offered) as VocabKey[]) {
+    const prefix = key === "DRAWINGS" || key === "REPEATABLE" ? "" : VOCAB_PREFIX[key];
+    out[key] = prefix === undefined ? offered[key] : offered[key].filter((n) => {
+      const a = reg.byId(prefix ? `${prefix}/${n}` : n);
+      return !a || a.status === "approved";
+    });
+  }
+  approvedCache = out;
+  return out;
+}
+const inVocab = (v: Vocabs, key: VocabKey, value: unknown): boolean => typeof value !== "string" || v[key].includes(value);
 
 /**
  * The rebuild's props for one section as a preset's props: crop references mapped to their image ids (or left as an
  * unknown slot, so fillPreset drops the element), call buttons removed, literal sentences removed, labels kept when
  * short and free of numbers the client never gave. Mutates and returns `props`; `dropped` hears what went.
  */
-export function sanitiseProps(props: Record<string, unknown>, intent: string, known: ReadonlySet<string>, crops: ReadonlyMap<string, string>, dropped: string[], where: string): Record<string, unknown> {
+export function sanitiseProps(props: Record<string, unknown>, intent: string, ctx: LiteralContext, crops: ReadonlyMap<string, string>, dropped: string[], where: string): Record<string, unknown> {
   props.intent = intent;
   const decorOk = !(GENERATED_DECOR_EXCLUDED_INTENTS as readonly string[]).includes(intent);
   const els = Array.isArray(props.elements) ? (props.elements as Record<string, unknown>[]) : [];
@@ -254,7 +349,7 @@ export function sanitiseProps(props: Record<string, unknown>, intent: string, kn
     const lit = (key: string, max = LABEL_MAX): boolean => {
       const v = e[key];
       if (v === undefined || slotted(v)) return true;
-      if (typeof v === "string" && literalOk(v, known, max)) return true;
+      if (typeof v === "string" && literalOk(v, ctx, max)) return true;
       note(`${id}.${key} literal text removed`);
       delete e[key];
       return false;
@@ -285,14 +380,14 @@ export function sanitiseProps(props: Record<string, unknown>, intent: string, kn
         break;
       }
       case "list": {
-        const items = (Array.isArray(e.items) ? e.items : []).filter((it: unknown) => (typeof it === "string" ? slotted(it) : !!it && typeof it === "object" && slotted((it as { text?: unknown }).text) && (slotted((it as { lead?: unknown }).lead) || (typeof (it as { lead?: unknown }).lead === "string" && literalOk((it as { lead: string }).lead, known, 24)))));
+        const items = (Array.isArray(e.items) ? e.items : []).filter((it: unknown) => (typeof it === "string" ? slotted(it) : !!it && typeof it === "object" && slotted((it as { text?: unknown }).text) && (slotted((it as { lead?: unknown }).lead) || (typeof (it as { lead?: unknown }).lead === "string" && literalOk((it as { lead: string }).lead, ctx, 24)))));
         if (items.length !== (Array.isArray(e.items) ? e.items.length : 0)) note(`${id}: literal list items removed`);
         if (!items.length) continue;
         e.items = items;
         break;
       }
       case "ribbon": {
-        const items = (Array.isArray(e.items) ? e.items : []).filter((it: unknown) => slotted(it) || (typeof it === "string" && literalOk(it, known, 24)));
+        const items = (Array.isArray(e.items) ? e.items : []).filter((it: unknown) => slotted(it) || (typeof it === "string" && literalOk(it, ctx, 24)));
         if (!items.length) continue;
         e.items = items;
         break;
@@ -350,10 +445,67 @@ export function sanitiseProps(props: Record<string, unknown>, intent: string, kn
         break;
       }
     }
+    // Links: a web address only when it is the business's own (booking, social, or in the client's text).
+    const link = e.link as { url?: unknown; target?: { url?: unknown } } | undefined;
+    const url = link?.url ?? link?.target?.url;
+    if (url !== undefined && !urlOk(url, ctx)) {
+      note(`${id}: link to ${String(url).slice(0, 60)} removed (not the business's own address)`);
+      if (e.kind === "action") continue;
+      delete e.link;
+    }
+    let stray: string | undefined;
+    walkStrings(e, (s) => {
+      if (!stray && /https?:\/\/|www\./i.test(s) && !urlOk(s, ctx)) stray = s;
+    });
+    if (stray) {
+      note(`${id}: web address ${stray.slice(0, 60)} removed`);
+      continue;
+    }
+    // Inventory assets: only approved (or starter) ones; a draft or rejected drawing, mask, treatment or marker goes.
+    const v = rebuildVocabs();
+    if (!inVocab(v, "DRAWINGS", e.drawing)) {
+      note(`${id}: drawing ${String(e.drawing)} is not approved`);
+      if (e.kind === "decor") continue;
+      delete e.drawing;
+      if (e.marker === "drawing") e.marker = "dot";
+    }
+    if (e.kind === "ribbon" && !inVocab(v, "DRAWINGS", e.separator)) delete e.separator;
+    if (!inVocab(v, "MASKS", e.mask)) {
+      note(`${id}: mask ${String(e.mask)} is not approved`);
+      delete e.mask;
+    }
+    if (e.kind === "heading" && !inVocab(v, "TYPE_TREATMENTS", e.treatment)) {
+      note(`${id}: treatment ${String(e.treatment)} is not approved`);
+      delete e.treatment;
+    }
+    if ((e.kind === "image" || e.kind === "photos") && !inVocab(v, "IMAGE_TREATMENTS", e.treatment)) {
+      note(`${id}: treatment ${String(e.treatment)} is not approved`);
+      delete e.treatment;
+    }
+    if (e.kind === "fact" && !inVocab(v, "FACT_OBJECTS", e.treatment)) {
+      note(`${id}: fact object ${String(e.treatment)} is not approved`);
+      if (!v.FACT_OBJECTS.includes("numeral")) continue;
+      e.treatment = "numeral";
+    }
     // A crop anywhere else (a photo ground, a heading's fill) stays an unknown slot and goes with its element or layer.
     keep.push(e);
   }
   props.elements = keep;
+  const v = rebuildVocabs();
+  const surface = props.surface as { texture?: unknown } | undefined;
+  if (surface && !inVocab(v, "TEXTURES", surface.texture)) delete surface.texture;
+  const top = props.top as { edge?: unknown; drawing?: unknown } | undefined;
+  if (top && (!inVocab(v, "EDGES", top.edge) || !inVocab(v, "DRAWINGS", top.drawing))) {
+    dropped.push(`${where}: top edge not approved`);
+    delete props.top;
+  }
+  if (!inVocab(v, "MOTIONS", props.motion)) delete props.motion;
+  if (Array.isArray(props.background))
+    props.background = (props.background as Record<string, unknown>[]).filter((l) => {
+      const ok = inVocab(v, "DRAWINGS", l?.drawing) && inVocab(v, "IMAGE_TREATMENTS", l?.treatment);
+      if (!ok) dropped.push(`${where}: background layer with an unapproved drawing or treatment removed`);
+      return ok;
+    });
   if (Array.isArray(props.background)) props.background = (props.background as Record<string, unknown>[]).filter((l) => !(typeof l?.image === "string" && CROP_REF.test(l.image)));
   if (Array.isArray(props.background) && !(props.background as unknown[]).length) delete props.background;
   return props;
@@ -436,11 +588,19 @@ export function assembleRebuild(input: {
   sources: ComposeSources;
   answer: RebuildAnswer;
   heroCopy: { headline?: string; lead?: string };
-  known: ReadonlySet<string>;
+  /** The literal check's context (literalContext). */
+  literal: LiteralContext;
   crops: ReadonlyMap<string, ImageAsset>;
   idea: string;
 }): RebuiltPage {
-  const { answer, known, sources } = input;
+  const { answer, literal, sources } = input;
+  const known = literal.known;
+  /** The model's copy, unless it names someone or something the client never did. */
+  const named = (s: string | undefined, what: string): string | undefined => {
+    const names = s ? unknownNames(s, literal.words) : [];
+    if (names.length) dropped.push(`${what}: ${names.join(", ")} not in the client's words`);
+    return names.length ? undefined : s;
+  };
   const spec = structuredClone(input.base);
   const baseSections = home(spec).sections.slice();
   const dropped: string[] = [];
@@ -467,12 +627,12 @@ export function assembleRebuild(input: {
       dropped.push(`${where}: a third section of the intent`);
       continue;
     }
-    const headline = keptCopy(s.copy?.headline, HEADLINE_MAX, known, dropped, `${where} headline`);
-    const lead = keptCopy(s.copy?.lead, LEAD_MAX, known, dropped, `${where} lead`);
+    const headline = named(keptCopy(s.copy?.headline, HEADLINE_MAX, known, dropped, `${where} headline`), `${where} headline`);
+    const lead = named(keptCopy(s.copy?.lead, LEAD_MAX, known, dropped, `${where} lead`), `${where} lead`);
     const todays = nth === 0 ? sources.copy[intent] : undefined;
     const hero = intent === "hero" ? input.heroCopy : undefined;
     const copy = { ...todays, ...hero, ...(headline ? { headline } : {}), ...(lead ? { lead } : {}) };
-    const props = sanitiseProps(structuredClone(s.props), intent, known, cropIds, dropped, where);
+    const props = sanitiseProps(structuredClone(s.props), intent, literal, cropIds, dropped, where);
     const tone = s.tone && TONES.has(s.tone) ? (s.tone as "default" | "alt" | "inverse" | "band") : undefined;
     const preset: CompositionPreset = { id: `composition/${intent}/mockup-${i + 1}`, ...(tone && tone !== "default" ? { tone } : {}), props: props as unknown as CompositionPreset["props"] };
     const src: PresetSources = { business: sources.business, images, ...(sources.brief ? { brief: sources.brief } : {}), colors: spec.design.colors, ...(copy.headline || copy.lead ? { copy } : {}) };

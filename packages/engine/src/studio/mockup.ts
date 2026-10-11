@@ -18,7 +18,7 @@ import { ModelOutputError, estimateCallEur, extractJson, type ModelClient, type 
 import { imageCostEur, type ImageGenerator } from "../image-gen.ts";
 import { ArtDirection, artDirectorRequest, mockupPrompt, mockupTexts } from "./art-director.ts";
 import { HEADLINE_MAX, LEAD_MAX, keptCopy } from "./director.ts";
-import { RebuildAnswer, RebuildError, assembleRebuild, checkCrops, rebuildRequest, rebuildWordmarks, type CropVerdict } from "./rebuild.ts";
+import { RebuildAnswer, RebuildError, assembleRebuild, checkCrops, literalContext, rebuildRequest, rebuildWordmarks, unknownNames, type CropVerdict } from "./rebuild.ts";
 
 /** What the mockup path needs from its host (the pipeline's storage, the eval's fixture files). */
 export interface MockupDeps {
@@ -49,8 +49,13 @@ export interface MockupRun {
   mockup?: Uint8Array;
   /** The art director's whole answer (the eval writes it next to the shots). */
   art?: ArtDirection;
+  /** Estimates of paid calls sent and not yet booked (counted as spent when the run is cut off). */
+  inFlightEur: number;
 }
 
+export const newMockupRun = (): MockupRun => ({ ok: false, dropped: [], crops: [], eur: { artDirector: 0, mockup: 0, rebuild: 0 }, inFlightEur: 0 });
+
+/** What the run has booked. */
 export const runTotal = (r: Pick<MockupRun, "eur">): number => r.eur.artDirector + r.eur.mockup + r.eur.rebuild;
 
 class MockupStop extends Error {
@@ -77,24 +82,51 @@ const priced = (config: AppConfig, stage: ModelStageName, client: ModelClient, r
  * The mockup path on one site. Never throws. `known`: the digit runs the client gave (director.ts knownNumbers);
  * `budget`: what the run may still spend.
  */
-export async function runMockup(client: ModelClient, config: AppConfig, input: { spec: SiteSpec; sources: ComposeSources; known: ReadonlySet<string>; deps: MockupDeps; budget: number }): Promise<MockupRun> {
-  const run: MockupRun = { ok: false, dropped: [], crops: [], eur: { artDirector: 0, mockup: 0, rebuild: 0 } };
+export async function runMockup(
+  client: ModelClient,
+  config: AppConfig,
+  input: {
+    spec: SiteSpec;
+    sources: ComposeSources;
+    known: ReadonlySet<string>;
+    /** Everything the client wrote: the literal check's words and web addresses. */
+    corpus: string;
+    deps: MockupDeps;
+    budget: number;
+    /** Aborted (the time limit): nothing more is sent; the run stops at its next step. */
+    signal?: AbortSignal;
+    /** The run's record, when the caller wants to read its spend while it runs (the time limit). */
+    run?: MockupRun;
+  },
+): Promise<MockupRun> {
+  const run: MockupRun = input.run ?? newMockupRun();
   const m = config.studio.mockup;
   const spent = () => runTotal(run);
   const fits = (what: string, estimate: number) => {
+    if (input.signal?.aborted) throw new MockupStop(`stopped before ${what}: ${String(input.signal.reason ?? "aborted")}`);
     if (spent() + estimate > input.budget) throw new MockupStop(`cost cap: ${what} (est. €${estimate.toFixed(3)}) would take the run to €${(spent() + estimate).toFixed(3)}, over €${input.budget.toFixed(2)}`);
   };
-  const call = async (req: ModelRequest, stage: "artDirector" | "rebuild"): Promise<ModelResponse> => {
-    fits(stage, estimateCallEur(config, client.stageConfig(stage), req));
+  /** A paid step: its estimate counts as in flight until it is booked. */
+  const paid = async <T>(what: string, estimate: number, fn: () => Promise<T>): Promise<T> => {
+    fits(what, estimate);
+    run.inFlightEur += estimate;
     try {
-      const res = await client.call(req);
-      run.eur[stage] += priced(config, stage, client, res);
-      return res;
-    } catch (e) {
-      if (e instanceof ModelOutputError) run.eur[stage] += e.costEur;
-      throw e;
+      return await fn();
+    } finally {
+      run.inFlightEur -= estimate;
     }
   };
+  const call = async (req: ModelRequest, stage: "artDirector" | "rebuild"): Promise<ModelResponse> =>
+    paid(stage, estimateCallEur(config, client.stageConfig(stage), req), async () => {
+      try {
+        const res = await client.call(req);
+        run.eur[stage] += priced(config, stage, client, res);
+        return res;
+      } catch (e) {
+        if (e instanceof ModelOutputError) run.eur[stage] += e.costEur;
+        throw e;
+      }
+    });
   try {
     const { spec, sources, deps } = input;
     // The client's photos (never generated pictures) and logo, once for both vision calls and the image model.
@@ -121,8 +153,14 @@ export async function runMockup(client: ModelClient, config: AppConfig, input: {
     run.idea = direction.idea;
     run.direction = direction.name;
     // The hero copy: the art director's where it passes the copy checks, else today's.
-    const headline = keptCopy(direction.copy.headline, HEADLINE_MAX, input.known, run.dropped, "art director headline");
-    const lead = keptCopy(direction.copy.lead, LEAD_MAX, input.known, run.dropped, "art director lead");
+    const literal = literalContext(spec, sources, input.corpus, input.known);
+    const named = (s: string | undefined, what: string): string | undefined => {
+      const names = s ? unknownNames(s, literal.words) : [];
+      if (names.length) run.dropped.push(`${what}: ${names.join(", ")} not in the client's words`);
+      return names.length ? undefined : s;
+    };
+    const headline = named(keptCopy(direction.copy.headline, HEADLINE_MAX, input.known, run.dropped, "art director headline"), "art director headline");
+    const lead = named(keptCopy(direction.copy.lead, LEAD_MAX, input.known, run.dropped, "art director lead"), "art director lead");
     const heroCopy = { ...sources.copy.hero, ...(headline ? { headline } : {}), ...(lead ? { lead } : {}) };
 
     // 2. The mockup.
@@ -130,16 +168,15 @@ export async function runMockup(client: ModelClient, config: AppConfig, input: {
     const modelName = refs ? m.model : m.textModel;
     const model = config.imageGen.models[modelName];
     if (!model) throw new MockupStop(`config: imageGen.models has no ${modelName}`);
-    fits("mockup", imageCostEur(config, model, m.width, m.height));
     const refUrls = refs ? [...(await Promise.all(photoBytes.map(async (p) => `data:image/jpeg;base64,${b64(await visionJpeg(p.data, m.refMaxSide, 85))}`))), ...(logo ? [`data:image/png;base64,${b64(logo)}`] : [])] : [];
     const prompt = mockupPrompt(direction, mockupTexts(spec, sources, heroCopy), { photos: photoBytes.length > 0, logo: !!logo });
-    const painted = await (async () => {
+    const painted = await paid("mockup", imageCostEur(config, model, m.width, m.height), async () => {
       try {
-        return await deps.painter.paint(modelName, { prompt, image_size: { width: m.width, height: m.height }, quality: m.quality, output_format: "jpeg", ...(refUrls.length ? { image_urls: refUrls } : {}) }, { stage: "mockup" });
+        return await deps.painter.paint(modelName, { prompt, image_size: { width: m.width, height: m.height }, quality: m.quality, output_format: "jpeg", ...(refUrls.length ? { image_urls: refUrls } : {}) }, { stage: "mockup", ...(input.signal ? { signal: input.signal } : {}) });
       } catch (e) {
         throw new MockupStop(`mockup image: ${(e as Error).message.slice(0, 200)}`);
       }
-    })();
+    });
     run.eur.mockup += painted.costEur;
     run.mockup = painted.data;
 
@@ -163,7 +200,7 @@ export async function runMockup(client: ModelClient, config: AppConfig, input: {
     }
 
     // 4. The crops, then the page.
-    run.crops = checkCrops(answer, { width: painted.width, height: painted.height }, m.maxCrops);
+    run.crops = checkCrops(answer, { width: painted.width, height: painted.height }, m.maxCrops, { clientPhotos: photoBytes.length });
     const ok = run.crops.filter((c) => c.ok);
     const ids = ok.length ? await deps.imageIds(ok.length) : [];
     const crops = new Map<string, ImageAsset>();
@@ -173,7 +210,7 @@ export async function runMockup(client: ModelClient, config: AppConfig, input: {
       const src = await deps.store(id, jpeg);
       crops.set(c.id, { id, src, width: c.box.w, height: c.box.h, alt: c.alt, origin: "generated" });
     }
-    const page = assembleRebuild({ base: spec, sources, answer, heroCopy, known: input.known, crops, idea: direction.idea });
+    const page = assembleRebuild({ base: spec, sources, answer, heroCopy, literal, crops, idea: direction.idea });
     run.dropped.push(...run.crops.filter((c) => !c.ok).map((c) => `${c.id} refused: ${c.reason}`), ...page.dropped);
     return { ...run, ok: true, spec: page.spec, sections: page.sections };
   } catch (e) {

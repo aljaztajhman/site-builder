@@ -12,7 +12,9 @@
   "palette": "mockup",
   "pairing": "pairing/archivo-archivo",
   "wordmark": "wordmark/plain",
-  "dropped": [],
+  "dropped": [
+    "section 1 (hero): h1 size 6 → 5 for a 52-character headline"
+  ],
   "mockup": {
     "ok": true,
     "idea": "A workshop seen at dusk, true to the Mrak name: a deep blue-black page where the work is lit like under an inspection lamp, held up by one blue column taken from the lift that holds the cars.",
