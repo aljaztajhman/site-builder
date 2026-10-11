@@ -5,12 +5,154 @@
  */
 import { parsePresetId, type CompositionPreset } from "@sb/spec";
 import type { Asset, AssetTags } from "../schema.ts";
+import areaHeadingBesideLine from "./area/heading-beside-line.ts";
+import areaWhereWithPin from "./area/where-with-pin.ts";
+import bookingBookBesideHours from "./booking/book-beside-hours.ts";
+import bookingHeadingBookCall from "./booking/heading-book-call.ts";
+import callHeadingActionsBand from "./call/heading-actions-band.ts";
+import callHeadingSplitRuled from "./call/heading-split-ruled.ts";
+import contactDetailsAndMap from "./contact/details-and-map.ts";
 import contactDetailsHours from "./contact/details-hours.ts";
+import contactDetailsRowMap from "./contact/details-row-map.ts";
+import contactFactsCards from "./contact/facts-cards.ts";
+import contactFactsStrip from "./contact/facts-strip.ts";
+import contactPhoneCallOut from "./contact/phone-call-out.ts";
+import galleryMosaic from "./gallery/mosaic.ts";
+import galleryPhotoGrid from "./gallery/photo-grid.ts";
+import galleryWallBleed from "./gallery/wall-bleed.ts";
+import heroArchOnDark from "./hero/arch-on-dark.ts";
+import heroBendPhoto from "./hero/bend-photo.ts";
+import heroCardOverPhoto from "./hero/card-over-photo.ts";
+import heroDiscPhotoTag from "./hero/disc-photo-tag.ts";
+import heroDocketOnBand from "./hero/docket-on-band.ts";
+import heroHeadlineDrawnTrade from "./hero/headline-drawn-trade.ts";
+import heroHeadlineFacts from "./hero/headline-facts.ts";
+import heroHeadlineLargeRuled from "./hero/headline-large-ruled.ts";
+import heroLabelCardArch from "./hero/label-card-arch.ts";
+import heroPhotoBottomBand from "./hero/photo-bottom-band.ts";
+import heroPhotoCoverBand from "./hero/photo-cover-band.ts";
+import heroPhotoDarkPanel from "./hero/photo-dark-panel.ts";
+import heroPhotoLeft from "./hero/photo-left.ts";
 import heroSplitPhoto from "./hero/split-photo.ts";
+import heroThreeArches from "./hero/three-arches.ts";
+import highlightsLargeLines from "./highlights/large-lines.ts";
+import highlightsRuledRows from "./highlights/ruled-rows.ts";
+import highlightsTwoColumns from "./highlights/two-columns.ts";
+import hoursArchPhotoHours from "./hours/arch-photo-hours.ts";
+import hoursCompactList from "./hours/compact-list.ts";
+import hoursHeadingTable from "./hours/heading-table.ts";
+import hoursPosterBandHours from "./hours/poster-band-hours.ts";
+import hoursWeekChart from "./hours/week-chart.ts";
+import menuLeadersColumn from "./menu/leaders-column.ts";
+import menuLeadersTwoColumns from "./menu/leaders-two-columns.ts";
+import noticeFramedCard from "./notice/framed-card.ts";
+import noticeOneLineBar from "./notice/one-line-bar.ts";
+import pageHeadTitlePhoto from "./page-head/title-photo.ts";
+import pageHeadTitleRuled from "./page-head/title-ruled.ts";
+import pricesBoardOffers from "./prices/board-offers.ts";
+import pricesLeaderRowsNotes from "./prices/leader-rows-notes.ts";
+import pricesPhotoRates from "./prices/photo-rates.ts";
+import pricesPriceTagsRow from "./prices/price-tags-row.ts";
+import pricesRowsTable from "./prices/rows-table.ts";
+import productsPhotoGrid from "./products/photo-grid.ts";
+import productsPriceColumns from "./products/price-columns.ts";
+import productsRoundPlates from "./products/round-plates.ts";
+import roomsPhotoCards from "./rooms/photo-cards.ts";
+import roomsPhotoRows from "./rooms/photo-rows.ts";
+import servicesAsideNote from "./services/aside-note.ts";
 import servicesListBeside from "./services/list-beside.ts";
+import servicesNamedRows from "./services/named-rows.ts";
+import servicesPhotoCardsLead from "./services/photo-cards-lead.ts";
+import servicesSmallCards from "./services/small-cards.ts";
+import servicesTwoColumnNamed from "./services/two-column-named.ts";
+import storyHeadingBesideText from "./story/heading-beside-text.ts";
+import storyNameFigure from "./story/name-figure.ts";
+import storyNarrowColumn from "./story/narrow-column.ts";
+import storyPhotoLeftText from "./story/photo-left-text.ts";
+import storyPhotoOwner from "./story/photo-owner.ts";
+import storyPhotoPairOffset from "./story/photo-pair-offset.ts";
+import storyPhotoRightText from "./story/photo-right-text.ts";
+import storyRoundPhoto from "./story/round-photo.ts";
+import storyTextOwner from "./story/text-owner.ts";
+import teamNameRoleList from "./team/name-role-list.ts";
+import teamNamesInColumns from "./team/names-in-columns.ts";
+import teamPhotoBesideNames from "./team/photo-beside-names.ts";
 
 /** Every preset, in a fixed order (by intent, then name). */
-export const COMPOSITION_PRESETS: readonly CompositionPreset[] = [contactDetailsHours, heroSplitPhoto, servicesListBeside];
+export const COMPOSITION_PRESETS: readonly CompositionPreset[] = [
+  areaHeadingBesideLine,
+  areaWhereWithPin,
+  bookingBookBesideHours,
+  bookingHeadingBookCall,
+  callHeadingActionsBand,
+  callHeadingSplitRuled,
+  contactDetailsAndMap,
+  contactDetailsHours,
+  contactDetailsRowMap,
+  contactFactsCards,
+  contactFactsStrip,
+  contactPhoneCallOut,
+  galleryMosaic,
+  galleryPhotoGrid,
+  galleryWallBleed,
+  heroArchOnDark,
+  heroBendPhoto,
+  heroCardOverPhoto,
+  heroDiscPhotoTag,
+  heroDocketOnBand,
+  heroHeadlineDrawnTrade,
+  heroHeadlineFacts,
+  heroHeadlineLargeRuled,
+  heroLabelCardArch,
+  heroPhotoBottomBand,
+  heroPhotoCoverBand,
+  heroPhotoDarkPanel,
+  heroPhotoLeft,
+  heroSplitPhoto,
+  heroThreeArches,
+  highlightsLargeLines,
+  highlightsRuledRows,
+  highlightsTwoColumns,
+  hoursArchPhotoHours,
+  hoursCompactList,
+  hoursHeadingTable,
+  hoursPosterBandHours,
+  hoursWeekChart,
+  menuLeadersColumn,
+  menuLeadersTwoColumns,
+  noticeFramedCard,
+  noticeOneLineBar,
+  pageHeadTitlePhoto,
+  pageHeadTitleRuled,
+  pricesBoardOffers,
+  pricesLeaderRowsNotes,
+  pricesPhotoRates,
+  pricesPriceTagsRow,
+  pricesRowsTable,
+  productsPhotoGrid,
+  productsPriceColumns,
+  productsRoundPlates,
+  roomsPhotoCards,
+  roomsPhotoRows,
+  servicesAsideNote,
+  servicesListBeside,
+  servicesNamedRows,
+  servicesPhotoCardsLead,
+  servicesSmallCards,
+  servicesTwoColumnNamed,
+  storyHeadingBesideText,
+  storyNameFigure,
+  storyNarrowColumn,
+  storyPhotoLeftText,
+  storyPhotoOwner,
+  storyPhotoPairOffset,
+  storyPhotoRightText,
+  storyRoundPhoto,
+  storyTextOwner,
+  teamNameRoleList,
+  teamNamesInColumns,
+  teamPhotoBesideNames,
+];
 
 /** A preset by id. */
 export const compositionPreset = (id: string): CompositionPreset | undefined => COMPOSITION_PRESETS.find((p) => p.id === id);

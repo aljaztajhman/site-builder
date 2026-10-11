@@ -19,5 +19,5 @@ export default definePreset({
   },
   // Without a photo the headline takes the width and the lead a long measure.
   reflow: { e_photo: { e_title: { span: 10 }, e_lead: { span: 7 } } },
-  note: "I3-0 format example: a split opener with the client's photo.",
+  note: "I3-0 format example; re-expresses hero-split:image-right: a split opener with the client's photo.",
 });

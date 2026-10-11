@@ -17,7 +17,7 @@ export default definePreset({
       { id: "e_dir", kind: "action", action: "directions", label: "Pot do nas", style: "secondary", desk: { col: 7, span: 3, row: 3, alignY: "start" }, phone: { order: 4, span: "full" } },
     ],
   },
-  // Without a lead the contact lines move up beside the hours.
-  reflow: { e_t: { e_c: { row: 2, rowSpan: 2 } } },
+  // Without a lead the contact lines move up beside the hours; without hours the heading widens and the lead keeps a readable measure.
+  reflow: { e_t: { e_c: { row: 2, rowSpan: 2 } }, e_hours: { e_h: { span: 12 }, e_t: { span: 8 } } },
   note: "I3-0 format example: contact lines beside the hours; without hours the heading and lead widen.",
 });
