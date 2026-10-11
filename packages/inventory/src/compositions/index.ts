@@ -18,26 +18,43 @@ import contactFactsCards from "./contact/facts-cards.ts";
 import contactFactsStrip from "./contact/facts-strip.ts";
 import contactPhoneCallOut from "./contact/phone-call-out.ts";
 import faqToggleList from "./faq/toggle-list.ts";
+import galleryFanBeside from "./gallery/fan-beside.ts";
 import galleryMosaic from "./gallery/mosaic.ts";
 import galleryPhotoGrid from "./gallery/photo-grid.ts";
+import galleryPostcards from "./gallery/postcards.ts";
+import galleryTriptychAside from "./gallery/triptych-aside.ts";
 import galleryWallBleed from "./gallery/wall-bleed.ts";
+import galleryWideThenPair from "./gallery/wide-then-pair.ts";
 import heroArchOnDark from "./hero/arch-on-dark.ts";
 import heroBendPhoto from "./hero/bend-photo.ts";
+import heroBleedPrint from "./hero/bleed-print.ts";
+import heroBroadsheetMasthead from "./hero/broadsheet-masthead.ts";
 import heroCardOverPhoto from "./hero/card-over-photo.ts";
 import heroDiscPhotoTag from "./hero/disc-photo-tag.ts";
 import heroDocketOnBand from "./hero/docket-on-band.ts";
+import heroEnamelHouseNumber from "./hero/enamel-house-number.ts";
 import heroHeadlineDrawnTrade from "./hero/headline-drawn-trade.ts";
 import heroHeadlineFacts from "./hero/headline-facts.ts";
 import heroHeadlineLargeRuled from "./hero/headline-large-ruled.ts";
 import heroLabelCardArch from "./hero/label-card-arch.ts";
+import heroPebblePair from "./hero/pebble-pair.ts";
+import heroPhoneGiantRope from "./hero/phone-giant-rope.ts";
 import heroPhotoBottomBand from "./hero/photo-bottom-band.ts";
 import heroPhotoCoverBand from "./hero/photo-cover-band.ts";
 import heroPhotoDarkPanel from "./hero/photo-dark-panel.ts";
 import heroPhotoLeft from "./hero/photo-left.ts";
+import heroPlateRibbon from "./hero/plate-ribbon.ts";
+import heroSignpostPole from "./hero/signpost-pole.ts";
 import heroSplitPhoto from "./hero/split-photo.ts";
 import heroThreeArches from "./hero/three-arches.ts";
+import highlightsBroadsheet from "./highlights/broadsheet.ts";
+import highlightsCheckerFields from "./highlights/checker-fields.ts";
+import highlightsDarkPanel from "./highlights/dark-panel.ts";
 import highlightsLargeLines from "./highlights/large-lines.ts";
+import highlightsLeadStatement from "./highlights/lead-statement.ts";
+import highlightsPhotoList from "./highlights/photo-list.ts";
 import highlightsRuledRows from "./highlights/ruled-rows.ts";
+import highlightsStaircase from "./highlights/staircase.ts";
 import highlightsTwoColumns from "./highlights/two-columns.ts";
 import hoursArchPhotoHours from "./hours/arch-photo-hours.ts";
 import hoursCompactList from "./hours/compact-list.ts";
@@ -48,6 +65,8 @@ import menuLeadersColumn from "./menu/leaders-column.ts";
 import menuLeadersTwoColumns from "./menu/leaders-two-columns.ts";
 import noticeFramedCard from "./notice/framed-card.ts";
 import noticeOneLineBar from "./notice/one-line-bar.ts";
+import pageHeadMarkerDisc from "./page-head/marker-disc.ts";
+import pageHeadTitleBlock from "./page-head/title-block.ts";
 import pageHeadTitlePhoto from "./page-head/title-photo.ts";
 import pageHeadTitleRuled from "./page-head/title-ruled.ts";
 import pricesBoardOffers from "./prices/board-offers.ts";
@@ -95,26 +114,43 @@ export const COMPOSITION_PRESETS: readonly CompositionPreset[] = [
   contactFactsStrip,
   contactPhoneCallOut,
   faqToggleList,
+  galleryFanBeside,
   galleryMosaic,
   galleryPhotoGrid,
+  galleryPostcards,
+  galleryTriptychAside,
   galleryWallBleed,
+  galleryWideThenPair,
   heroArchOnDark,
   heroBendPhoto,
+  heroBleedPrint,
+  heroBroadsheetMasthead,
   heroCardOverPhoto,
   heroDiscPhotoTag,
   heroDocketOnBand,
+  heroEnamelHouseNumber,
   heroHeadlineDrawnTrade,
   heroHeadlineFacts,
   heroHeadlineLargeRuled,
   heroLabelCardArch,
+  heroPebblePair,
+  heroPhoneGiantRope,
   heroPhotoBottomBand,
   heroPhotoCoverBand,
   heroPhotoDarkPanel,
   heroPhotoLeft,
+  heroPlateRibbon,
+  heroSignpostPole,
   heroSplitPhoto,
   heroThreeArches,
+  highlightsBroadsheet,
+  highlightsCheckerFields,
+  highlightsDarkPanel,
   highlightsLargeLines,
+  highlightsLeadStatement,
+  highlightsPhotoList,
   highlightsRuledRows,
+  highlightsStaircase,
   highlightsTwoColumns,
   hoursArchPhotoHours,
   hoursCompactList,
@@ -125,6 +161,8 @@ export const COMPOSITION_PRESETS: readonly CompositionPreset[] = [
   menuLeadersTwoColumns,
   noticeFramedCard,
   noticeOneLineBar,
+  pageHeadMarkerDisc,
+  pageHeadTitleBlock,
   pageHeadTitlePhoto,
   pageHeadTitleRuled,
   pricesBoardOffers,
