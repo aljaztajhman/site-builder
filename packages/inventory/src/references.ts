@@ -43,6 +43,7 @@ export const STUDIO_REFERENCES: readonly ReferenceEntry[] = [
   { id: "zobna-ravnik", stance: "glazed-tile", trades: ["dental"] },
   { id: "fizioterapija-spik", stance: "julian-alps", trades: ["physio"] },
   { id: "racunovodstvo-zorko", stance: "account-ledger", trades: ["accountant"] },
+  { id: "adaptacije-blatnik", stance: "axonometric", trades: ["builder"] },
 ];
 
 /** The references as inventory assets: drafts, no bytes of their own (a page, not a part of one). */
