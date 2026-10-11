@@ -67,8 +67,16 @@ export const BYTE_BUDGET: Partial<Record<AssetKind, number>> = {
  */
 export const COMPOSED_SHEET_BUDGET = { core: 16 * 1024, region: 12 * 1024, linked: 32 * 1024, family: 6 * 1024, families: 42 * 1024 } as const;
 
-export function byteBudget(a: { id: string; kind: AssetKind }): number | undefined {
-  return a.id === "section/composed:free" ? COMPOSED_SHEET_BUDGET.core : BYTE_BUDGET[a.kind];
+/**
+ * Hero art (the hero style pilots, mood "hero-art"): a drawn motif in several palette tones shown at full strength as a
+ * hero's picture, in place of a photo. Its inline SVG may weigh what a small photo would, ≤ 25 KiB.
+ */
+export const HERO_ART_BUDGET = 25 * 1024;
+
+export function byteBudget(a: { id: string; kind: AssetKind; tags?: { mood?: readonly string[] } }): number | undefined {
+  if (a.id === "section/composed:free") return COMPOSED_SHEET_BUDGET.core;
+  if (a.kind === "motif" && a.tags?.mood?.includes("hero-art")) return HERO_ART_BUDGET;
+  return BYTE_BUDGET[a.kind];
 }
 
 /** The Slovene letters (and Croatian/Serbian ć đ that Slovene names use) every font must draw. */

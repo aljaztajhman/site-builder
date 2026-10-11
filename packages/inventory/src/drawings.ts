@@ -17,6 +17,8 @@ interface DrawingMeta {
   mood?: string[];
   /** For ornaments: "Provenance: …", the tradition it draws on. */
   note: string;
+  /** Grounds it was drawn for; default white, tint and dark (a one-ink line drawing takes any ground's ink). */
+  ground?: AssetTags["ground"];
 }
 
 /** Per drawing: what it was drawn for. Every id in DRAWINGS has a row (drawings.test.ts). */
@@ -119,6 +121,27 @@ export const DRAWING_META: Readonly<Record<(typeof DRAWINGS)[number], DrawingMet
     mood: ["band", "slovene"],
     note: "Provenance: drawn new after the combed wave bands on Prekmurje pottery (Filovci and the Pannonian potters' villages); no vessel copied.",
   },
+  "motif/bakery/loaf-potica-scene-solid": {
+    trades: ["bakery"],
+    stances: ["still-life", "risograph", "editorial-magazine"],
+    mood: ["hero-art", "illustration", "poster"],
+    ground: ["white"],
+    note: "Hero style pilot 1 (printed poster): a scored round loaf and a cut walnut potica on a red-striped linen cloth, a peel leaning in a pale arch behind; flat palette tones in overlapping planes, stipple grain. Full strength beside the headline, never a ghosted background layer.",
+  },
+  "motif/bakery/boule-linocut-solid": {
+    trades: ["bakery"],
+    stances: ["woodcut", "letterpress-proof"],
+    mood: ["hero-art", "linocut"],
+    ground: ["white"],
+    note: "Hero style pilot 2 (linocut): a round loaf with banneton rings and one curved score on a board, wheat behind, in one ink with the paper cut out of it; large, cropped at its right and bottom edges.",
+  },
+  "motif/bakery/sun-loaf-shapes-cut": {
+    trades: ["bakery"],
+    stances: ["oversized-type", "cut-paper"],
+    mood: ["hero-art", "shapes"],
+    ground: ["white"],
+    note: "Hero style pilot 4 (bold shapes): a terracotta sun, a dark loaf dome with three score cuts and a pale quarter round, cropped by the section's edges beside oversized type; for a site without photos.",
+  },
 };
 
 /** The style a drawing's name ends in (`…-line` → line). */
@@ -153,7 +176,7 @@ export function drawingAssets(): Asset[] {
       stances: meta.stances,
       intents: [],
       mood: [style, ...(meta.mood ?? []), ...((REPEATABLE as readonly string[]).includes(id) ? ["repeatable"] : [])],
-      ground: ["white", "tint", "dark"],
+      ground: meta.ground ?? ["white", "tint", "dark"],
       density: ["compact", "regular", "airy"],
     };
     return { id, kind, tags, phone: "ok", bytes: drawingBytes(d), license: "own", status: "draft", note: meta.note } satisfies Asset;
