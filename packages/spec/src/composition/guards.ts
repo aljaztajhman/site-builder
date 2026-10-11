@@ -117,7 +117,7 @@ export const BLEED_X_KINDS: ReadonlySet<Element["kind"]> = new Set(["image", "ph
 /** Kinds that may bleed past the section's top or bottom (G11, `desk.bleedY`). */
 export const BLEED_Y_KINDS: ReadonlySet<Element["kind"]> = new Set(["decor", "ribbon", "sticker"]);
 /** Kinds never half width on phones (G12). */
-export const NO_PHONE_HALF_KINDS: ReadonlySet<Element["kind"]> = new Set(["text", "list", "quote", "prices"]);
+export const NO_PHONE_HALF_KINDS: ReadonlySet<Element["kind"]> = new Set(["text", "list", "quote", "prices", "steps", "qa"]);
 /** The narrow-text relaxation of TEXT_SPAN (G13): span 3 at size 0, one paragraph this long at most, next to a text-bearing element of span 3–4. */
 export const TEXT_SPAN_NARROW = { span: 3, maxChars: 140, partner: { min: 3, max: 4 } } as const;
 /** Photos per arrangement (G21), inclusive. */
@@ -127,10 +127,10 @@ export const STACKED_MAX_LINES = 4;
 /** Two price plates per phone row only when every name is at most this long (G17). */
 export const PHONE_COLUMNS_NAME_MAX = 24;
 /** Restraint (G22). */
-export const RESTRAINT = { stickersPerSection: 1, stickersPerPage: 2, wordmarksPerPage: 1, quotesPerSection: 1 } as const;
+export const RESTRAINT = { stickersPerSection: 1, stickersPerPage: 2, wordmarksPerPage: 1, quotesPerSection: 1, qaPerSection: 1 } as const;
 
 /** Elements that carry words, numbers or links: they never overlap each other and are never hidden on phones. */
-const TEXT_KINDS: ReadonlySet<Element["kind"]> = new Set(["heading", "text", "list", "fact", "action", "hours", "contact", "prices", "ribbon", "sticker", "map", "iconFacts", "quote", "wordmark"]);
+const TEXT_KINDS: ReadonlySet<Element["kind"]> = new Set(["heading", "text", "list", "fact", "action", "hours", "contact", "prices", "ribbon", "sticker", "map", "iconFacts", "quote", "wordmark", "steps", "qa"]);
 /** Words, numbers or links; a photos element only with captions (G23). */
 export const isTextBearing = (e: Element): boolean => TEXT_KINDS.has(e.kind) || (e.kind === "photos" && (e.captions?.length ?? 0) > 0);
 /** An image or a photos element without captions: the elements the second-photo hiding rule is about. */

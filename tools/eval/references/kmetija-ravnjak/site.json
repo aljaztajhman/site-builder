@@ -1,5 +1,5 @@
 {
-  "specVersion": 20,
+  "specVersion": 21,
   "slug": "kmetija-ravnjak",
   "locales": { "default": "sl", "enabled": ["sl"] },
   "business": {

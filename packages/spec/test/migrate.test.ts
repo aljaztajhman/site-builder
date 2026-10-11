@@ -423,7 +423,8 @@ describe("migration 19 → 20 (composition language v2, studio-phase1-design.md 
     expect(goldens.length).toBe(10);
     for (const rel of [...goldens, "composed/m.json", "composed/s.json", "composed/j.json"]) {
       const stored = await load(rel);
-      expect(stored.specVersion, rel).toBe(20);
+      expect(stored.specVersion, rel).toBe(21);
+      // From v19 the chain runs through 19 → 20 and on to the current version; nothing but the version moves.
       const v20 = migrateSpec({ ...stored, specVersion: 19 });
       expect(v20, rel).toEqual(stored);
       // The goldens validate clean; the sheets carry their own guard notes (composition.test.ts), never a schema issue.
@@ -431,7 +432,7 @@ describe("migration 19 → 20 (composition language v2, studio-phase1-design.md 
       if (rel.startsWith("golden/")) expect(issues, rel).toEqual([]);
       else expect(issues.filter((i) => i.code === "schema"), rel).toEqual([]);
     }
-    expect(SPEC_VERSION).toBe(20);
+    expect(SPEC_VERSION).toBeGreaterThanOrEqual(20);
   });
 
   it("keeps every v19 enum value valid: a v19 spec using each of them migrates to itself and parses", async () => {
@@ -470,7 +471,40 @@ describe("migration 19 → 20 (composition language v2, studio-phase1-design.md 
     v19.specVersion = 19;
     v19.pages[0]!.sections.push(...sections);
     const v20 = migrateSpec(v19);
-    expect(v20).toEqual({ ...v19, specVersion: 20 });
+    expect(v20).toEqual({ ...v19, specVersion: SPEC_VERSION });
     expect(validateSite(v20).issues.filter((i) => i.code === "schema")).toEqual([]);
+  });
+});
+
+describe("migration 20 → 21 (the steps and qa element kinds, studio I3b)", () => {
+  const load = async (rel: string) => {
+    const { readFileSync } = await import("node:fs");
+    return JSON.parse(readFileSync(new URL(`../../../tools/eval/${rel}`, import.meta.url), "utf8")) as SiteSpec;
+  };
+
+  it("is the identity on every golden and the composed sheets (m, s, j, kitchen sink): deep-equal at v21 and still schema-valid", async () => {
+    const { readdirSync } = await import("node:fs");
+    const { validateSite } = await import("../src/index.ts");
+    const goldens = readdirSync(new URL("../../../tools/eval/golden/", import.meta.url))
+      .filter((f) => f.endsWith(".json"))
+      .map((f) => `golden/${f}`);
+    expect(goldens.length).toBe(10);
+    for (const rel of [...goldens, "composed/m.json", "composed/s.json", "composed/j.json", "composed/kitchen-sink.json"]) {
+      const stored = await load(rel);
+      expect(stored.specVersion, rel).toBe(21);
+      const v21 = migrateSpec({ ...stored, specVersion: 20 });
+      expect(v21, rel).toEqual(stored);
+      const issues = validateSite(v21).issues;
+      if (rel.startsWith("golden/")) expect(issues, rel).toEqual([]);
+      else expect(issues.filter((i) => i.code === "schema"), rel).toEqual([]);
+    }
+    expect(SPEC_VERSION).toBe(21);
+  });
+
+  it("moves only the version when the stored kitchen sink (v20 kinds and the v21 steps and qa) is relabelled v20 and migrated", async () => {
+    const stored = await load("composed/kitchen-sink.json");
+    const v20 = { ...structuredClone(stored), specVersion: 20 } as unknown as { specVersion: number };
+    const v21 = migrateSpec(v20) as unknown as { specVersion: number };
+    expect(v21).toEqual({ ...v20, specVersion: 21 });
   });
 });

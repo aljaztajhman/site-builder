@@ -10,8 +10,10 @@ import { drawingData } from "./drawings/index.ts";
 import { IconFactsBlock } from "./kinds/icon-facts.tsx";
 import { MapBlock } from "./kinds/map.tsx";
 import { PhotosBlock } from "./kinds/photos.tsx";
+import { QaBlock } from "./kinds/qa.tsx";
 import { QuoteBlock } from "./kinds/quote.tsx";
 import { RibbonBlock } from "./kinds/ribbon.tsx";
+import { StepsBlock } from "./kinds/steps.tsx";
 import { StickerBlock } from "./kinds/sticker.tsx";
 import { WordmarkBlock } from "./kinds/wordmark.tsx";
 import { imageSizes, stepVar, type El, type ElOf } from "./layout.ts";
@@ -132,7 +134,9 @@ function Heading({ el, over, id, uid }: { el: ElOf<"heading">; over: boolean; id
   const H = HEADINGS[el.level - 1]!;
   const rotate = el.rotate === "90" || el.rotate === "-90" ? el.rotate : undefined;
   const { body, vars } = headingBody(el, uid);
-  const p = placement(el, over, { "--fz": stepVar(el.size), ...(el.weight ? { "--w": el.weight } : {}), ...vars });
+  // --lw: the longest word, in letters: on a phone an uppercase display heading shrinks until it fits (composed.css).
+  const lw = Math.max(1, ...el.text.split(/[\s-]+/).map((w) => w.length));
+  const p = placement(el, over, { "--fz": stepVar(el.size), "--lw": lw, ...(el.weight ? { "--w": el.weight } : {}), ...vars });
   // Below size 2 a heading is never all caps, whatever the direction's --case-heading: a small uppercase line is the
   // banned tracked eyebrow (an explicit uppercase there is the guard's to drop).
   const textCase = el.size < UPPERCASE_MIN.size ? "normal" : el.case;
@@ -341,9 +345,11 @@ export interface ElementProps {
   priority: boolean;
   /** Unique on the page (the section's id): ids an element draws with (a circle heading's SVG path) are made from it. */
   sectionId?: string;
+  /** The heading level of a steps title or a question: one below the section's own heading (h2 with none). */
+  itemLevel?: number;
 }
 
-export function ElementView({ el, ctx, width, over, titleId, priority, sectionId }: ElementProps) {
+export function ElementView({ el, ctx, width, over, titleId, priority, sectionId, itemLevel = 2 }: ElementProps) {
   switch (el.kind) {
     case "heading":
       return <Heading el={el} over={over} id={titleId} uid={`${sectionId ?? "s"}-${el.id}`} />;
@@ -392,5 +398,10 @@ export function ElementView({ el, ctx, width, over, titleId, priority, sectionId
       return <IconFactsBlock el={el} ctx={ctx} over={over} />;
     case "quote":
       return <QuoteBlock el={el} ctx={ctx} over={over} />;
+    // Spec v21 kinds.
+    case "steps":
+      return <StepsBlock el={el} over={over} level={itemLevel} />;
+    case "qa":
+      return <QaBlock el={el} over={over} level={itemLevel} />;
   }
 }

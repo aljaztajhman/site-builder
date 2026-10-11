@@ -79,7 +79,10 @@ describe("composed v20 sections: preview equals published", () => {
     spec.slug = `cp-${id}`;
     expect(publishBlockers(spec).filter((b) => !/photo|alt/i.test(b)), "nothing but the photo descriptions may block publishing").toEqual([]);
     const brief = (JSON.parse(await readFile(path.join(here, "../../../tools/eval/fixtures", FIXTURE[id]!, "brief.json"), "utf8")) as { description: string }).description;
-    const site = await platform.repo.createSite({ name: id, slug: spec.slug, intake: { description: `${brief} Prej Potem Test d.o.o. 1234567000 SI12345678 info@primer.example`, photoAssetIds: [], scope: "home" } });
+    // The kitchen sink's steps and questions are the pekarna brief's own (the inventory's preset sources): client text too.
+    const own = id === "kitchen-sink" ? (JSON.parse(await readFile(path.join(here, "../../../packages/inventory/test/fixtures/preset-sources.json"), "utf8")) as Record<string, { brief: { faq?: { question: string; answer: string }[]; steps?: { title: string; text?: string }[] } }>)[FIXTURE[id]!]?.brief : undefined;
+    const extra = [...(own?.faq ?? []).flatMap((f) => [f.question, f.answer]), ...(own?.steps ?? []).flatMap((x) => [x.title, x.text ?? ""])].join(" ");
+    const site = await platform.repo.createSite({ name: id, slug: spec.slug, intake: { description: `${brief} ${extra} Prej Potem Test d.o.o. 1234567000 SI12345678 info@primer.example`, photoAssetIds: [], scope: "home" } });
     await platform.repo.saveSpec(site.id, spec, "generate");
     const pub = await app.request(`/api/sites/${site.id}/publish`, { method: "POST", headers: { cookie } });
     expect(pub.status, JSON.stringify(await pub.clone().json())).toBe(200);

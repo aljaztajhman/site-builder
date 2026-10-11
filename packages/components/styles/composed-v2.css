@@ -176,7 +176,8 @@ main > .s.s-composed.cx-v2.cx-v2:first-child {
   color: var(--cx-rc);
   pointer-events: none;
 }
-.cx-bg-art > svg {
+.cx-bg-art > svg,
+.cx-edge-art > svg {
   display: block;
   width: 100%;
   height: 100%;
@@ -278,11 +279,6 @@ main > .s.s-composed.cx-v2.cx-v2:first-child {
   height: var(--cx-ed);
   overflow: hidden;
   pointer-events: none;
-}
-.cx-edge-art > svg {
-  display: block;
-  width: 100%;
-  height: 100%;
 }
 @media (min-width: 64rem) {
   .cx-edge-cut,
@@ -869,6 +865,21 @@ body[data-hdr="over"] .site-header--sticky::before {
   font-size: var(--fs-base);
 }
 
+/* steps and qa (spec v21) reuse the list's rules: steps is a .cx-l (numbered: the ol's own decimal markers; line: the
+   timeline rail of marker "line", region extensions), qa a ruled .cx-l with one item per question. toggle: a details
+   element per question (no script), the question's h3 beside the disclosure marker. */
+ol.cx-st {
+  list-style: decimal;
+  padding-left: 1.75em;
+}
+.cx-ask summary {
+  min-height: 44px;
+  cursor: pointer;
+}
+.cx-ask h3 {
+  display: inline;
+}
+
 /* region: extensions */
 
 /* Extensions of the existing kinds (spec v20, F1b-R3). Elements get their classes from placement() (elements.tsx).
@@ -1157,9 +1168,11 @@ body[data-hdr="over"] .site-header--sticky::before {
 .cx-lw-bold {
   font-weight: 700;
 }
+.cx-psz-1,
 .cx-ls-1 {
   font-size: var(--cx-fs-1);
 }
+.cx-psz-2,
 .cx-ls-2 {
   font-size: var(--cx-fs-2);
 }
@@ -1185,13 +1198,7 @@ body[data-hdr="over"] .site-header--sticky::before {
   display: inline-block;
 }
 
-/* Prices: sizes, two to a row on phones, and the styles leaders, board, docket and sheet (the rows' markup). */
-.cx-psz-1 {
-  font-size: var(--cx-fs-1);
-}
-.cx-psz-2 {
-  font-size: var(--cx-fs-2);
-}
+/* Prices: sizes (the font sizes are the list's, above), two to a row on phones, and the styles leaders, board, docket and sheet (the rows' markup). */
 .cx-psz-1.price-tags {
   grid-template-columns: repeat(auto-fill, minmax(14.5rem, 1fr));
 }

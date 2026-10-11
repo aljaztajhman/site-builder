@@ -1,5 +1,5 @@
 {
-  "specVersion": 20,
+  "specVersion": 21,
   "slug": "kitchen-sink",
   "locales": {
     "default": "sl",
@@ -773,6 +773,123 @@
                 },
                 "phone": {
                   "order": 2,
+                  "span": "full"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_k_process",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "steps",
+            "width": "contained",
+            "rows": 2,
+            "elements": [
+              {
+                "id": "e_h",
+                "kind": "heading",
+                "text": "Kako nastane kruh",
+                "level": 2,
+                "size": 4,
+                "desk": {
+                  "col": 1,
+                  "span": 8,
+                  "row": 1
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_steps",
+                "kind": "steps",
+                "style": "line",
+                "items": [
+                  {
+                    "title": "Moka iz mlina",
+                    "text": "Moko kupujemo pri mlinu v bližini."
+                  },
+                  {
+                    "title": "Droži",
+                    "text": "Kruh pečemo samo z drožmi, kvasom, ki ga gojimo sami."
+                  },
+                  {
+                    "title": "Čez noč",
+                    "text": "Testo pustimo vzhajati čez noč, zato je kruh bolj okusen in dlje ostane svež."
+                  },
+                  {
+                    "title": "Ročno delo",
+                    "text": "Brez aditivov in brez zamrznjenega testa."
+                  }
+                ],
+                "desk": {
+                  "col": 1,
+                  "span": 8,
+                  "row": 2
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_k_faq",
+          "type": "composed",
+          "variant": "free",
+          "tone": "alt",
+          "props": {
+            "intent": "faq",
+            "width": "contained",
+            "rows": 2,
+            "elements": [
+              {
+                "id": "e_h",
+                "kind": "heading",
+                "text": "Pogosta vprašanja",
+                "level": 2,
+                "size": 4,
+                "desk": {
+                  "col": 1,
+                  "span": 8,
+                  "row": 1
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_qa",
+                "kind": "qa",
+                "style": "toggle",
+                "items": [
+                  {
+                    "question": "Ali lahko potico naročim za praznik?",
+                    "answer": "Da, potico se lahko naroči tudi za praznike in praznovanja, najmanj dva dni prej."
+                  },
+                  {
+                    "question": "Kdaj pečete orehovo potico in kvašene krofe?",
+                    "answer": "Ob petkih in sobotah."
+                  },
+                  {
+                    "question": "Je v vašem kruhu kaj aditivov?",
+                    "answer": "Ne, kruh je ročno delo, brez aditivov in brez zamrznjenega testa."
+                  }
+                ],
+                "desk": {
+                  "col": 1,
+                  "span": 8,
+                  "row": 2
+                },
+                "phone": {
+                  "order": 1,
                   "span": "full"
                 }
               }
