@@ -319,6 +319,21 @@ function g3(env: Env): Finding[] {
       first = false;
       out.push(f);
     }
+    // On phones a "band" photo sits above the content: text coloured for the photo then sits on the section's own ground.
+    if (h.layer && ((loose(h.ref).phone as string | undefined) ?? "band") === "band") {
+      const ground = hexOf(colors, toneGround(env));
+      const coverHolds = h.texts.every((t) => scrimContrast(colors, h.scrim, h.scrim.strength, fgOver(env, colors, t.p), h.treatment) >= minOf(t.p));
+      const toCover: Fix | undefined = coverHolds ? { path: `${h.path}/phone`, what: "photo kept behind the content on phones (cover)", run: () => void (loose(h.ref).phone = "cover") } : undefined;
+      let firstPhone = true;
+      for (const { e, p } of h.texts) {
+        if (!p.color || e.phone.hidden) continue; // the tone's own text colour reads on its own ground
+        const got = contrast(fgOver(env, colors, p), ground);
+        if (got >= minOf(p)) continue;
+        const msg = `composed: ${e.id} is coloured for the photo but sits on the section's ground on phones (band photo) (${ratio(got)} < ${minOf(p)})`;
+        out.push(firstPhone && toCover ? both(`${h.path}/phone`, "design", msg, toCover) : issue("design", `${h.path}/phone`, msg));
+        firstPhone = false;
+      }
+    }
   }
   return out;
 }
@@ -330,6 +345,8 @@ interface Pair {
   min: number;
   via: "color" | "fill" | "field";
   label: boolean;
+  /** A prices note (muted text), not the element's own words. */
+  note?: boolean;
 }
 
 /**
@@ -372,6 +389,13 @@ function pairsOf(env: Env, e: Element, p: Painted, useColor: boolean): Pair[] {
   } else {
     add(p.fill ?? outer.ground, p.fill ? "fill" : outer.src, true, minOf(p), false);
   }
+  // A prices note in rows-like styles is `.muted`: muted on default and alt tones, the tone's own ink on inverse and band
+  // (base.css), whatever the element's colour; the field or fill behind it does not change that.
+  if (e.kind === "prices" && e.style !== "board" && e.style !== "plates" && e.style !== "tags" && e.items.some((it) => it.note) && (p.fill || fld)) {
+    const tone = env.s.tone ?? "default";
+    const ink: ColorRole = tone === "inverse" || tone === "band" ? onRole(toneGround(env)) : "muted";
+    out.push({ fg: ink, ground: p.fill ?? fld!.l.role, min: CONTRAST_MIN.text, via: p.fill ? "fill" : "field", label: false, note: true });
+  }
   return out.filter((x) => contrast(hexOf(env.ctx.colors!, x.fg), hexOf(env.ctx.colors!, x.ground)) < x.min);
 }
 
@@ -387,7 +411,7 @@ function g9(env: Env): Finding[] {
     const o = loose(e);
     const fails = pairsOf(env, e, p, true);
     if (fails.length === 0) continue;
-    const msg = (x: Pair) => `composed: ${e.id}: ${x.fg} on ${x.ground}${x.label ? " (label)" : ""} fails contrast (${ratio(contrast(hexOf(colors, x.fg), hexOf(colors, x.ground)))} < ${x.min})`;
+    const msg = (x: Pair) => `composed: ${e.id}: ${x.fg} on ${x.ground}${x.label ? " (label)" : ""}${x.note ? " (note)" : ""} fails contrast (${ratio(contrast(hexOf(colors, x.fg), hexOf(colors, x.ground)))} < ${x.min})`;
     const colorFail = fails.find((x) => x.via === "color");
     if (colorFail) out.push(both(`${EL}/${i}/color`, "design", msg(colorFail), drop(o, "color", i)));
     // What still fails without the own colour is the fill's or the field's.
