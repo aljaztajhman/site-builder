@@ -21,8 +21,19 @@ export const KITCHEN_SINK_FILE = path.resolve(here, "../composed/kitchen-sink.js
 /** The golden the fixture's photos come from (tools/eval/fixtures/<id>/photos). */
 export const KITCHEN_SINK_FIXTURE = "pekarna-kvas";
 
+/**
+ * The fixture's spec as stored, without its photos processed. For checks of the spec itself (validation, facts, element
+ * coverage): processing the photos encodes 23 AVIF/WebP variants, ≈ 3 s locally and ≈ 17 s on one libvips thread, which
+ * pushed the spec-only test past its 30 s timeout on a busy CI runner. Processing changes only `assets` (image and logo
+ * dimensions, the logo's file name), which neither validation nor the fact check reads differently.
+ */
+export async function kitchenSinkSpecOnly(): Promise<SiteSpec> {
+  return migrateSpec(JSON.parse(await readFile(KITCHEN_SINK_FILE, "utf8"))) as SiteSpec;
+}
+
+/** The fixture's spec with its photos processed (assets updated to the processed sizes) and the media files to publish. */
 export async function kitchenSinkSpec(): Promise<{ spec: SiteSpec; media: Map<string, Uint8Array> }> {
-  const spec = migrateSpec(JSON.parse(await readFile(KITCHEN_SINK_FILE, "utf8"))) as SiteSpec;
+  const spec = await kitchenSinkSpecOnly();
   const media = await fixtureMedia(KITCHEN_SINK_FIXTURE, spec);
   return { spec, media };
 }
