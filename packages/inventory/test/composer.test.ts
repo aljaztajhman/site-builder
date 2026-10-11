@@ -112,7 +112,8 @@ describe("approvalPlan", () => {
     expect(c.compositions.total).toBe(all.compositions.length);
     expect(c.compositions.covered).toBeGreaterThanOrEqual(100);
     expect(c.palettes.covered).toBeGreaterThanOrEqual(24);
-    expect(c.drawings.covered).toBeGreaterThanOrEqual(12);
+    // Rated pilot drawings (decisions.json) are no longer drafts; every remaining draft drawing is shown.
+    expect(c.drawings.covered).toBe(all.drawings.length);
     expect(c.wordmarks.covered).toBeGreaterThanOrEqual(5);
     expect(c.stances.covered).toBe(30);
     // The 88 inventory pairs can't be set in a spec yet: the pages show none of them.

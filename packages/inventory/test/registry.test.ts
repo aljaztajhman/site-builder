@@ -70,8 +70,8 @@ describe("shortlist", () => {
   it("keeps a trade's own motif and leaves out motifs of other trades", () => {
     const ids = shortlist(r, { trade: "builder/electrical", kinds: ["motif", "submotif"] }).map((a) => a.id);
     expect(ids).toEqual(["submotif/wire"]);
-    expect(shortlist(r, { trade: "builder/plumbing", kinds: ["motif", "submotif"] }).map((a) => a.id)).toEqual(["motif/pipes"]);
-    expect(shortlist(r, { trade: "car-repair", kinds: ["motif"] }).map((a) => a.id)).toEqual(["motif/plate"]);
+    expect(shortlist(r, { trade: "builder/plumbing", kinds: ["motif", "submotif"] }).map((a) => a.id)).toEqual(["motif/pipes", "motif/plumbing/ball-valve-line"]);
+    expect(shortlist(r, { trade: "car-repair", kinds: ["motif"] }).map((a) => a.id)).toEqual(["motif/car-repair/torque-wrench-line", "motif/plate"]);
   });
 
   it("ranks trade fit first, and neighbours' assets after every fresh one", () => {
