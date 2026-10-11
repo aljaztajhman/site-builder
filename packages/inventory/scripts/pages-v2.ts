@@ -266,12 +266,16 @@ function motionElements(targets: readonly string[], images: string[]): Props[] {
 export function motionPages(asset: Asset): SheetPage[] {
   const { base, page } = pageMaker(asset);
   const name = assetName(asset.id);
-  const meta = (MOTION_META as Record<string, { targets: readonly string[] } | undefined>)[name];
+  const meta = (MOTION_META as Record<string, { targets: readonly string[]; minLevel: string } | undefined>)[name];
   const targets = meta?.targets ?? ["heading", "text", "image"];
   return palettes().map((dir, i) => {
     const opener = section("default", { elements: [el("h", { kind: "heading", text: "Domača pekarna", level: 2, size: 4 }, 1, 8, 1, 0)] }, "s_open");
-    const subject = section("default", { motion: name, elements: motionElements(targets, imageIds(base)) }, "s_motion");
-    return page(LETTER(i), dir.id, withHome(inDirection(base, dir), [opener, subject], "x"), { motion: name });
+    // A preset with no element targets moves the background layer: the section gets a photo layer under a scrim.
+    const layer = targets.length === 0 ? { background: [{ kind: "photo", image: imageIds(base)[0], scrim: { role: "inverse", strength: 3 } }] } : {};
+    const subject = section(targets.length === 0 ? "inverse" : "default", { motion: name, ...layer, elements: motionElements(targets, imageIds(base)) }, "s_motion");
+    const spec = withHome(inDirection(base, dir), [opener, subject], "x");
+    if (meta?.minLevel === "lively") spec.design = { ...spec.design, motion: "lively" };
+    return page(LETTER(i), dir.id, spec, { motion: name });
   });
 }
 

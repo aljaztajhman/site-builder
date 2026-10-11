@@ -19,7 +19,7 @@ const asset = (id: string, kind: AssetKind, more: Partial<Asset> = {}): Asset =>
 const CASES: [AssetKind, string[]][] = [
   ["motif", ["motif/bakery/wheat-ear-line"]],
   ["ornament", ["ornament/rope-line"]],
-  ["motion", ["motion/reveal", "motion/unmask"]],
+  ["motion", ["motion/reveal", "motion/unmask", "motion/rise", "motion/wipe", "motion/stagger", "motion/drift-bg"]],
   ["icon", ["icon/line/parking", "icon/line/wifi"]],
   ["wordmark", ["wordmark/plain"]],
   ["divider", ["divider/rule", "divider/rope-line"]],

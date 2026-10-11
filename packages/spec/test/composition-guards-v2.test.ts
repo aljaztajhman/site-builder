@@ -423,7 +423,20 @@ describe("G7 motion", () => {
     expect(paths(repairComposition(one, still))).toEqual(["/props/elements/1/move"]);
   });
 
-  it.todo("calm allows entrance presets only; scroll presets need lively (no scroll preset in MOTIONS yet)");
+  it("calm allows entrance presets only; a scroll preset needs lively", () => {
+    const s = moving("s_m", "drift-bg");
+    const calm = onPage([quiet(), s], 1, ctxWith({ motionLevel: "calm" }));
+    expect(issue(s, /motion "drift-bg" needs motion level lively \(is calm\)/, calm)).toMatchObject({ code: "structure", path: "/props/motion" });
+    expect(paths(repairComposition(s, calm))).toEqual(["/props/motion"]);
+    expect(has(s, /needs motion level/, onPage([quiet(), s], 1, ctxWith({ motionLevel: "lively" })))).toBe(false);
+    for (const m of ["rise", "wipe", "stagger"]) expect(has(moving("s_x", m), /needs motion level/, onPage([quiet(), moving("s_x", m)], 1, ctxWith({ motionLevel: "calm" })))).toBe(false);
+  });
+
+  it("drift-bg (safe at load) may open a page at lively; the entrance presets may not", () => {
+    const s = moving("s_m", "drift-bg");
+    expect(has(s, /safe at load/, onPage([s], 0, ctxWith({ motionLevel: "lively" })))).toBe(false);
+    for (const m of ["rise", "wipe", "stagger"]) expect(has(moving("s_y", m), /safe at load/, onPage([moving("s_y", m)], 0, ctxWith({ motionLevel: "lively" })))).toBe(true);
+  });
   it.todo("`loop` only on a ribbon, which renders a pause control (no `loop` in MOTIONS / ribbon.move yet)");
   it.todo("`counter` only on a fact whose value is a client number (no `counter` in MOTIONS yet)");
 });

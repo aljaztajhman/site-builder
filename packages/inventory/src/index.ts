@@ -7,6 +7,7 @@ import { Registry } from "./registry.ts";
 import { applyDecisions, shippedDecisions } from "./decisions.ts";
 import { todaysAssets } from "./sources.ts";
 import { compositionAssets } from "./compositions/index.ts";
+import { motionAssets } from "./motion.ts";
 
 export * from "./schema.ts";
 export * from "./decisions.ts";
@@ -21,6 +22,7 @@ export * from "./must-draw.ts";
 export { todaysAssets, groundOf, temperatureOf, paletteOf } from "./sources.ts";
 export { fontFile, fontLicenseFile } from "./bytes.ts";
 export { COMPOSITION_PRESETS, compositionAssets, compositionPreset } from "./compositions/index.ts";
+export { motionAssets, motionBytes } from "./motion.ts";
 
 let cached: Registry | undefined;
 
@@ -29,5 +31,5 @@ let cached: Registry | undefined;
  * owner's gallery decision applied (built once).
  */
 export function inventory(): Registry {
-  return (cached ??= new Registry().registerAll(applyDecisions([...todaysAssets(), ...compositionAssets()], shippedDecisions())));
+  return (cached ??= new Registry().registerAll(applyDecisions([...todaysAssets(), ...compositionAssets(), ...motionAssets()], shippedDecisions())));
 }

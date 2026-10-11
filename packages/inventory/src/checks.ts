@@ -26,6 +26,8 @@ export const BYTE_BUDGET: Partial<Record<AssetKind, number>> = {
   section: 4 * 1024,
   /** A composition preset adds no CSS of its own: it renders with the composed sheet (section/composed:free). */
   composition: 0,
+  /** A motion preset: its own partial (styles/vocab/motion/<name>.css), minified; the family sheet joins them. */
+  motion: 1024,
 };
 /**
  * The composed stylesheets, minified (docs/plans/studio-phase1-design.md §3.4.1, §3.4.7): the core sheet (spec v19,
