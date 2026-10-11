@@ -39,6 +39,7 @@ export { MASK_DRAFTS, TREATMENT_DRAFTS, addedNames, imageryDraftAssets, type Ima
 export { TEXTURE_TAGS, starterTextureAssets, starterTextureTile, textureAssets, textureNames, texturePartial, texturePartialFile, type TexturePartial } from "./textures.ts";
 export { motionAssets, motionBytes } from "./motion.ts";
 export { STUDIO_REFERENCES, referenceAssets, type ReferenceEntry } from "./references.ts";
+export * from "./composer.ts";
 export { FACT_OBJECT_DRAFTS, TYPE_TREATMENT_DRAFTS, factObjectDraftAssets, typeTreatmentDraftAssets } from "./type-and-facts.ts";
 
 /**

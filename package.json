@@ -27,6 +27,7 @@
     "designer:compose-sheet": "tsx tools/eval/src/compose-sheet.ts",
     "okus:items": "tsx tools/eval/src/okus-items.ts",
     "okus:calibrate": "tsx tools/eval/src/okus-calibrate.ts",
+    "studio:compose": "tsx tools/eval/src/studio-compose.ts",
     "references:shots": "tsx tools/eval/src/references.ts shots",
     "references:okus": "tsx tools/eval/src/references.ts okus",
     "study": "tsx tools/eval/src/study.ts",
