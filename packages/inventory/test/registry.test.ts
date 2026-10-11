@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { Registry, assetSlug, inventory, inventoryJson, shortlist, tradeScore, writeInventoryJson, type Asset } from "../src/index.ts";
+import { Registry, assetSlug, inventory, inventoryJson, registeredAssets, shortlist, tradeScore, writeInventoryJson, type Asset } from "../src/index.ts";
 
 const base = (id: string, kind: Asset["kind"], more: Partial<Asset> = {}): Asset => ({
   id,
@@ -94,7 +94,7 @@ describe("shortlist", () => {
 
   it("a stance tag outranks trade fit, and the list mixes kinds", () => {
     const reg = new Registry().registerAll([
-      ...r.all().filter((a) => a.kind === "palette"),
+      ...registeredAssets().filter((a) => a.kind === "palette"),
       base("palette/docket-blue", "palette", { tags: { trades: [], stances: ["workshop-docket"], intents: [], mood: [], ground: ["white"], density: [] } }),
     ]);
     expect(shortlist(reg, { trade: "car-repair", stance: "workshop-docket", limit: 1 })[0]!.id).toBe("palette/docket-blue");

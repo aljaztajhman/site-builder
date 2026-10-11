@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { FACT_OBJECTS, STANCES, TYPE_TREATMENTS, validateSite } from "@sb/spec";
 import { STARTER_NAMES } from "@sb/render";
-import { BYTE_BUDGET, inventory } from "../src/index.ts";
+import { BYTE_BUDGET, Registry, inventory, registeredAssets } from "../src/index.ts";
 import { FACT_OBJECT_DRAFTS, TYPE_TREATMENT_DRAFTS, factObjectDraftAssets, typeTreatmentDraftAssets } from "../src/type-and-facts.ts";
 import { FACT_OBJECT_SAMPLES, TYPE_TREATMENT_SAMPLES, pagesFor, treatmentSizes } from "../scripts/pages-v2.ts";
 
@@ -10,6 +10,8 @@ const added = (list: readonly string[], starters: readonly string[]) => list.fil
 const NEW_TYPE = added(TYPE_TREATMENTS, STARTER_NAMES["type-treatments"]);
 const NEW_FACT = added(FACT_OBJECTS, STARTER_NAMES["fact-objects"]);
 const registry = inventory();
+/** As each batch registered it, before the owner's gallery decisions (approval rounds) are applied. */
+const registered = new Registry().registerAll(registeredAssets());
 
 /** The facts of the three fixtures the sheets may show (tools/eval/fixtures: pekarna-kvas, avtoservis-mrak, instalacije-rebernik), as the client gave them. */
 const FIXTURE_VALUES = new Set(["30", "52", "18", "Kamnik", "Kranj", "Ptuj", "6.30–18.00", "7.00–16.00", "6.30–12.00", "7.00–10.00", "po dogovoru", "4,20 €", "1,30 €", "30 €", "59 €", "40 €", "od 18 €", "1 kg", "3,5 t", "041 555 906", "041 555 730", "041 555 118", "2008", "2011", "Jure Petek", "Rok Mrak", "Matej Rebernik"]);
@@ -18,7 +20,7 @@ describe("I6 draft assets", () => {
   it("every name the batch added is registered once, as a draft, with a note, its own licence and its bytes within the kind's budget", () => {
     const ids = [...NEW_TYPE.map((n) => `type-treatment/${n}`), ...NEW_FACT.map((n) => `fact/${n}`)];
     for (const id of ids) {
-      const a = registry.byId(id);
+      const a = registered.byId(id);
       expect(a, id).toBeDefined();
       expect(a!.status, id).toBe("draft");
       expect(a!.license, id).toBe("own");

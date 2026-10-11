@@ -186,7 +186,7 @@ describe("approvalDecisions", () => {
 describe("export round trip", () => {
   it("approval:export then inventory:decide: new ratings land, the pilot ratings stay as they were", () => {
     const reg = inventory();
-    const drafts = reg.byKind("wordmark").filter((a) => a.status === "draft").map((a) => a.id);
+    const drafts = reg.byKind("palette").filter((a) => a.status === "draft").map((a) => a.id);
     expect(drafts.length).toBeGreaterThanOrEqual(3);
     const [kept, flagged, fine, unseen] = drafts as [string, string, string, string];
     const dir = mkdtempSync(path.join(tmpdir(), "approval-rt-"));
