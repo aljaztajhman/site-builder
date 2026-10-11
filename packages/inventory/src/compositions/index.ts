@@ -6,11 +6,43 @@
 import { parsePresetId, type CompositionPreset } from "@sb/spec";
 import type { Asset, AssetTags } from "../schema.ts";
 import contactDetailsHours from "./contact/details-hours.ts";
+import heroArchOnDark from "./hero/arch-on-dark.ts";
+import heroBendPhoto from "./hero/bend-photo.ts";
+import heroCardOverPhoto from "./hero/card-over-photo.ts";
+import heroDiscPhotoTag from "./hero/disc-photo-tag.ts";
+import heroHeadlineDrawnTrade from "./hero/headline-drawn-trade.ts";
+import heroHeadlineFacts from "./hero/headline-facts.ts";
+import heroHeadlineLargeRuled from "./hero/headline-large-ruled.ts";
+import heroLabelCardArch from "./hero/label-card-arch.ts";
+import heroOfferingsSlip from "./hero/offerings-slip.ts";
+import heroPhotoBottomBand from "./hero/photo-bottom-band.ts";
+import heroPhotoCoverBand from "./hero/photo-cover-band.ts";
+import heroPhotoDarkPanel from "./hero/photo-dark-panel.ts";
+import heroPhotoLeft from "./hero/photo-left.ts";
 import heroSplitPhoto from "./hero/split-photo.ts";
+import heroThreeArches from "./hero/three-arches.ts";
 import servicesListBeside from "./services/list-beside.ts";
 
 /** Every preset, in a fixed order (by intent, then name). */
-export const COMPOSITION_PRESETS: readonly CompositionPreset[] = [contactDetailsHours, heroSplitPhoto, servicesListBeside];
+export const COMPOSITION_PRESETS: readonly CompositionPreset[] = [
+  contactDetailsHours,
+  heroArchOnDark,
+  heroBendPhoto,
+  heroCardOverPhoto,
+  heroDiscPhotoTag,
+  heroHeadlineDrawnTrade,
+  heroHeadlineFacts,
+  heroHeadlineLargeRuled,
+  heroLabelCardArch,
+  heroOfferingsSlip,
+  heroPhotoBottomBand,
+  heroPhotoCoverBand,
+  heroPhotoDarkPanel,
+  heroPhotoLeft,
+  heroSplitPhoto,
+  heroThreeArches,
+  servicesListBeside,
+];
 
 /** A preset by id. */
 export const compositionPreset = (id: string): CompositionPreset | undefined => COMPOSITION_PRESETS.find((p) => p.id === id);
