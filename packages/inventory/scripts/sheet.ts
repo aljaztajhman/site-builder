@@ -184,7 +184,8 @@ async function main(): Promise<void> {
   try {
     for (const kind of kinds) {
       const assets = [
-        ...registry.byKind(kind).filter((a) => !status || a.status === status),
+        // `--ids` narrows a kind to those ids (with or without `--kind`); without it, every asset of the kind.
+        ...registry.byKind(kind).filter((a) => (!status || a.status === status) && (!ids.length || ids.includes(a.id))),
         ...ids.filter((id) => kindOfId(id) === kind && !registry.byId(id)).map((id) => previewAsset(id, kind)),
       ];
       // A status filter that leaves a kind empty skips it (its sheet stays as it was); otherwise an empty kind gets a note.
