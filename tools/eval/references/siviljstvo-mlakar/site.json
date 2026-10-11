@@ -1,0 +1,188 @@
+{
+  "specVersion": 20,
+  "slug": "siviljstvo-mlakar",
+  "locales": { "default": "sl", "enabled": ["sl"] },
+  "business": {
+    "name": "Šiviljstvo Mlakar",
+    "type": "shop",
+    "subtype": "boutique",
+    "phone": "+38631555905",
+    "email": "ana@siviljstvo-mlakar.example",
+    "address": { "street": "Gosposka ulica 21", "postalCode": "2000", "city": "Maribor" },
+    "hours": {
+      "entries": [
+        { "from": "mon", "to": "fri", "open": "09:00", "close": "17:00" },
+        { "from": "sat", "to": "sat", "open": "09:00", "close": "12:00" },
+        { "from": "sun", "to": "sun", "closed": true }
+      ]
+    },
+    "provider": {
+      "legalName": { "$placeholder": "legalName" },
+      "registrationNumber": { "$placeholder": "registrationNumber" },
+      "taxNumber": { "$placeholder": "taxNumber" }
+    },
+    "amenities": ["walk-ins", "card"]
+  },
+  "design": {
+    "direction": "pregib",
+    "fontPair": "bricolage-public-sans",
+    "colors": {
+      "background": "#ffffff",
+      "surface": "#e4ebf2",
+      "text": "#18202b",
+      "muted": "#4a5463",
+      "primary": "#2b4a7a",
+      "onPrimary": "#ffffff",
+      "accent": "#e4604f",
+      "border": "#c6d2df",
+      "inverse": "#18202b",
+      "onInverse": "#eef2f6"
+    },
+    "radius": 6,
+    "baseFontSize": 17,
+    "scale": 1.333,
+    "headingWeight": 800,
+    "headingCase": "normal",
+    "headingTracking": -0.03,
+    "density": "regular",
+    "shadow": "none",
+    "imagery": "natural",
+    "motion": "calm",
+    "wordmark": { "style": "plain" }
+  },
+  "assets": { "images": [] },
+  "chrome": {
+    "header": { "variant": "bar", "cta": "none", "tone": "alt" },
+    "footer": { "variant": "compact" },
+    "mobileActionBar": true
+  },
+  "pages": [
+    {
+      "id": "p_home",
+      "kind": "home",
+      "slug": "",
+      "nav": { "label": "Domov", "show": true },
+      "seo": {
+        "title": "Šiviljstvo Mlakar, Maribor – popravila oblačil",
+        "description": "Šivilja Ana Mlakar na Gosposki ulici 21 v Mariboru: krajšanje, ožanje, zadrge, zavese in obleke po meri. Za popravila se ni treba naročiti."
+      },
+      "sections": [
+        {
+          "id": "s_pattern",
+          "type": "composed",
+          "variant": "free",
+          "tone": "alt",
+          "props": {
+            "intent": "hero",
+            "width": "contained",
+            "rows": 4,
+            "elements": [
+              { "id": "e_where", "kind": "text", "paragraphs": ["Gosposka ulica 21, Maribor"], "color": "muted", "desk": { "col": 1, "span": 5, "row": 1, "alignY": "end" }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_title", "kind": "heading", "text": "Krajšam, ožam in menjam zadrge", "level": 1, "size": 6, "measure": "m", "color": "primary", "desk": { "col": 1, "span": 6, "row": 2 }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_lead", "kind": "text", "paragraphs": ["Ana Mlakar, šivilja. Za popravila se ni treba naročiti, kar prinesite oblačilo. Po meri šivam obleke za posebne priložnosti."], "size": 1, "desk": { "col": 1, "span": 5, "row": 3 }, "phone": { "order": 2, "span": "full" } },
+              { "id": "e_phone", "kind": "fact", "value": "031 555 905", "label": "Za šivanje po meri: termin po dogovoru", "treatment": "numeral", "size": 4, "link": { "action": "call" }, "desk": { "col": 1, "span": 6, "row": 4, "alignY": "end" }, "phone": { "order": 3, "span": "full" } },
+              {
+                "id": "e_pieces",
+                "kind": "decor",
+                "svg": {
+                  "width": 400,
+                  "height": 400,
+                  "paths": [
+                    { "d": "M70 20 H220 L240 130 L224 386 H140 L130 176 C112 152 70 142 52 128 L70 20 Z", "fill": "background", "stroke": "primary", "width": 2 },
+                    { "d": "M84 34 H100 M110 34 H126 M136 34 H152 M162 34 H178 M188 34 H204", "fill": "none", "stroke": "primary", "width": 1.2 },
+                    { "d": "M152 372 H168 M178 372 H194 M204 372 H212", "fill": "none", "stroke": "primary", "width": 1.2 },
+                    { "d": "M226 140 L220 270 M219 290 L214 372", "fill": "none", "stroke": "border", "width": 1.2 },
+                    { "d": "M120 20 L128 84 L136 20", "fill": "none", "stroke": "primary", "width": 1.5 },
+                    { "d": "M170 90 V320 M161 103 L170 90 L179 103 M161 307 L170 320 L179 307", "fill": "none", "stroke": "accent", "width": 2 },
+                    { "d": "M240 168 L230 172 L240 176 M234 250 L224 254 L234 258", "fill": "none", "stroke": "primary", "width": 1.5 },
+                    { "d": "M276 70 H380 V180 C360 212 296 212 276 180 Z", "fill": "background", "stroke": "primary", "width": 2 },
+                    { "d": "M288 84 H304 M314 84 H330 M340 84 H356 M364 84 H368", "fill": "none", "stroke": "primary", "width": 1.2 },
+                    { "d": "M328 104 V170 M321 114 L328 104 L335 114 M321 160 L328 170 L335 160", "fill": "none", "stroke": "accent", "width": 2 },
+                    { "d": "M276 250 H380 V300 H276 Z", "fill": "background", "stroke": "primary", "width": 2 },
+                    { "d": "M288 262 H304 M314 262 H330 M340 262 H356 M364 262 H368 M288 288 H304 M314 288 H330 M340 288 H356 M364 288 H368", "fill": "none", "stroke": "primary", "width": 1.2 }
+                  ]
+                },
+                "fit": "cell",
+                "desk": { "col": 7, "span": 6, "row": 1, "rowSpan": 4, "alignY": "center", "tilt": -3 },
+                "phone": { "order": 4, "span": "full" }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_work",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "services",
+            "width": "contained",
+            "rows": 3,
+            "top": { "edge": "cut" },
+            "elements": [
+              { "id": "e_h", "kind": "heading", "text": "Popravila in predelave", "level": 2, "size": 5, "desk": { "col": 1, "span": 6, "row": 1 }, "phone": { "order": 0, "span": "full" } },
+              {
+                "id": "e_p",
+                "kind": "prices",
+                "style": "sheet",
+                "size": 1,
+                "items": [
+                  { "name": "Krajšanje hlač", "price": { "amount": 9 } },
+                  { "name": "Menjava zadrge", "note": "na hlačah", "price": { "amount": 12 } },
+                  { "name": "Menjava zadrge", "note": "na jakni", "price": { "amount": 20 } },
+                  { "name": "Ožanje obleke", "price": { "amount": 18, "from": true } },
+                  { "name": "Šivanje zaves", "price": { "amount": 6, "from": true, "unit": "za meter" } }
+                ],
+                "desk": { "col": 1, "span": 7, "row": 2, "rowSpan": 2 },
+                "phone": { "order": 1, "span": "full" }
+              },
+              { "id": "e_days", "kind": "fact", "value": "3 delovne dni", "label": "toliko navadno trajajo popravila", "treatment": "ruler", "size": 4, "color": "primary", "desk": { "col": 9, "span": 4, "row": 2, "alignY": "end" }, "phone": { "order": 2, "span": "full" } },
+              { "id": "e_rush", "kind": "text", "paragraphs": ["Nujna popravila so gotova isti dan, za doplačilo 5 €."], "desk": { "col": 9, "span": 4, "row": 3, "alignY": "start" }, "phone": { "order": 3, "span": "full" } }
+            ]
+          }
+        },
+        {
+          "id": "s_shop",
+          "type": "composed",
+          "variant": "free",
+          "tone": "alt",
+          "props": {
+            "intent": "contact",
+            "width": "contained",
+            "rows": 3,
+            "elements": [
+              { "id": "e_h", "kind": "heading", "text": "Kar prinesite oblačilo", "level": 2, "size": 5, "color": "primary", "desk": { "col": 1, "span": 6, "row": 1 }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_hours", "kind": "hours", "style": "table", "desk": { "col": 1, "span": 5, "row": 2 }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_if", "kind": "iconFacts", "icons": "cut", "items": [{ "fact": "walk-ins", "note": "Za popravila" }, { "fact": "card", "note": "Ali z gotovino" }], "desk": { "col": 1, "span": 5, "row": 3, "alignY": "start" }, "phone": { "order": 2, "span": "full" } },
+              { "id": "e_contact", "kind": "contact", "show": ["phone", "email", "address"], "desk": { "col": 7, "span": 6, "row": 1, "rowSpan": 2 }, "phone": { "order": 3, "span": "full" } },
+              { "id": "e_map", "kind": "map", "style": "street", "desk": { "col": 7, "span": 6, "row": 3 }, "phone": { "order": 4, "span": "full" } }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "nav": { "label": "Zasebnost", "show": false },
+      "seo": { "title": "Varstvo osebnih podatkov | Šiviljstvo Mlakar", "description": "Kako Šiviljstvo Mlakar obdeluje osebne podatke obiskovalcev spletne strani." },
+      "sections": [{ "id": "s_legal_privacy", "type": "legal", "variant": "default", "props": { "kind": "privacy" } }]
+    },
+    {
+      "id": "p_dostopnost",
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "nav": { "label": "Dostopnost", "show": false },
+      "seo": { "title": "Izjava o dostopnosti | Šiviljstvo Mlakar", "description": "Izjava o dostopnosti spletne strani Šiviljstvo Mlakar." },
+      "sections": [{ "id": "s_legal_accessibility", "type": "legal", "variant": "default", "props": { "kind": "accessibility" } }]
+    },
+    {
+      "id": "p_404",
+      "kind": "not-found",
+      "slug": "404",
+      "nav": { "label": "Ni najdeno", "show": false },
+      "seo": { "title": "Strani ni mogoče najti | Šiviljstvo Mlakar", "description": "Iskane strani ni. Vrnite se na domačo stran." },
+      "sections": [{ "id": "s_not_found", "type": "not-found", "variant": "default", "props": { "title": "Te strani ni mogoče najti", "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo." } }]
+    }
+  ]
+}

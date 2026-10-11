@@ -1,0 +1,34 @@
+{
+  "id": "siviljstvo-mlakar",
+  "businessType": "shop",
+  "town": "Maribor",
+  "description": "Šiviljstvo Mlakar, Gosposka ulica 21, 2000 Maribor. Sem Ana Mlakar, šivilja. Popravljam in predelujem oblačila: krajšam hlače in krila, ožam in širim, menjam zadrge, šivam zavese. Po meri šivam obleke za posebne priložnosti.\n\nZa popravila se ni treba naročiti, kar prinesite oblačilo. Za šivanje po meri se dogovoriva za termin in pomerjanje. Popravila so navadno gotova v 3 delovnih dneh, nujna isti dan za doplačilo 5 €.\n\nCene: krajšanje hlač 9 €, menjava zadrge na hlačah 12 €, menjava zadrge na jakni 20 €, ožanje obleke od 18 €, šivanje zaves od 6 € za meter.\n\nOdprto od ponedeljka do petka od 9.00 do 17.00, v soboto od 9.00 do 12.00. Telefon 031 555 905, e-pošta ana@siviljstvo-mlakar.example. Plačilo s kartico ali z gotovino.\n\nStran naj bo kot kroj iz papirja: tanke črtkane črte, oznake in kosi blaga, razloženi na mizi.",
+  "photos": null,
+  "facts": {
+    "name": "Šiviljstvo Mlakar",
+    "phone": "+38631555905",
+    "email": "ana@siviljstvo-mlakar.example",
+    "address": { "street": "Gosposka ulica 21", "postalCode": "2000", "city": "Maribor" },
+    "hours": [
+      { "from": "mon", "to": "fri", "open": "09:00", "close": "17:00" },
+      { "from": "sat", "to": "sat", "open": "09:00", "close": "12:00" }
+    ],
+    "prices": [
+      { "item": "krajšanje hlač", "amount": 9 },
+      { "item": "menjava zadrge na hlačah", "amount": 12 },
+      { "item": "menjava zadrge na jakni", "amount": 20 },
+      { "item": "ožanje obleke", "amount": 18, "from": true },
+      { "item": "šivanje zaves (za meter)", "amount": 6, "from": true },
+      { "item": "doplačilo za nujno popravilo isti dan", "amount": 5 }
+    ],
+    "people": [{ "name": "Ana Mlakar", "role": "šivilja" }],
+    "amenities": ["walk-ins", "card"],
+    "other": [
+      "Popravila in predelave: krajšanje hlač in kril, ožanje in širjenje, zadrge, zavese",
+      "Šivanje oblek po meri za posebne priložnosti, po dogovoru",
+      "Za popravila se ni treba naročiti",
+      "Popravila navadno gotova v 3 delovnih dneh, nujna isti dan za doplačilo 5 €",
+      "Plačilo s kartico ali z gotovino"
+    ]
+  }
+}
