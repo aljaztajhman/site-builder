@@ -42,8 +42,14 @@ import heroPlateRibbon from "./hero/plate-ribbon.ts";
 import heroSignpostPole from "./hero/signpost-pole.ts";
 import heroSplitPhoto from "./hero/split-photo.ts";
 import heroThreeArches from "./hero/three-arches.ts";
+import highlightsBroadsheet from "./highlights/broadsheet.ts";
+import highlightsCheckerFields from "./highlights/checker-fields.ts";
+import highlightsDarkPanel from "./highlights/dark-panel.ts";
 import highlightsLargeLines from "./highlights/large-lines.ts";
+import highlightsLeadStatement from "./highlights/lead-statement.ts";
+import highlightsPhotoList from "./highlights/photo-list.ts";
 import highlightsRuledRows from "./highlights/ruled-rows.ts";
+import highlightsStaircase from "./highlights/staircase.ts";
 import highlightsTwoColumns from "./highlights/two-columns.ts";
 import hoursArchPhotoHours from "./hours/arch-photo-hours.ts";
 import hoursCompactList from "./hours/compact-list.ts";
@@ -124,8 +130,14 @@ export const COMPOSITION_PRESETS: readonly CompositionPreset[] = [
   heroSignpostPole,
   heroSplitPhoto,
   heroThreeArches,
+  highlightsBroadsheet,
+  highlightsCheckerFields,
+  highlightsDarkPanel,
   highlightsLargeLines,
+  highlightsLeadStatement,
+  highlightsPhotoList,
   highlightsRuledRows,
+  highlightsStaircase,
   highlightsTwoColumns,
   hoursArchPhotoHours,
   hoursCompactList,
