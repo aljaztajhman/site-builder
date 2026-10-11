@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
-import { UPPERCASE_MIN, type Link, type LinkTarget } from "@sb/spec";
+import { UPPERCASE_MIN, splitFirstWord, splitLeadingNumber, type Link, type LinkTarget } from "@sb/spec";
 import { PlateStrip } from "../../motifs/index.tsx";
 import { ActionLink, Picture, cx } from "../../primitives/index.tsx";
 import type { RenderCtx } from "../../types.ts";
@@ -59,17 +59,88 @@ export function placement(el: El, over: boolean, extra: Record<string, string | 
 
 const HEADINGS = ["h1", "h2", "h3"] as const;
 
-function Heading({ el, over, id }: { el: ElOf<"heading">; over: boolean; id: string | undefined }) {
+/**
+ * A circle of words (type treatment circle): the heading's text along a circle in an inline SVG, aria-hidden; the real
+ * text stays in the heading, visually hidden, so the accessible name and the reading order are the words themselves.
+ * The path starts at the bottom and runs clockwise, so the middle of the text (text-anchor middle at 50 %) sits at the
+ * top. The type size comes from the character count (--n, the vocab sheet): short headings arc over the top, 40 fill it.
+ */
+function CircleText({ text, uid }: { text: string; uid: string }) {
+  const id = `cx-c-${uid}`;
+  return (
+    <svg className="cx-tt__c" viewBox="0 0 200 140" aria-hidden="true" focusable="false">
+      <path id={id} d="M100 176a76 76 0 1 1 0-152a76 76 0 1 1 0 152" fill="none" />
+      <text>
+        <textPath href={`#${id}`} startOffset="50%" textAnchor="middle">
+          {text}
+        </textPath>
+      </text>
+    </svg>
+  );
+}
+
+/**
+ * The heading's words as the type treatment needs them. Most treatments are classes only (cx-tt-<name>, the vocab sheet);
+ * four wrap a part of the same text: circle (the SVG above), oversized-first-word (the first word, --wl its length),
+ * drop-numeral (the number the heading starts with, never one it doesn't have) and marker-highlight (the line boxes
+ * the band paints). A text the treatment can't use renders plain (G20 drops the treatment there).
+ */
+function headingBody(el: ElOf<"heading">, uid: string): { body: ReactNode; vars: Record<string, number> } {
+  switch (el.treatment) {
+    case "circle":
+      return {
+        body: (
+          <>
+            <span className="visually-hidden">{el.text}</span>
+            <CircleText text={el.text} uid={uid} />
+          </>
+        ),
+        vars: { "--n": Math.max([...el.text].length, 8) },
+      };
+    case "oversized-first-word": {
+      const s = splitFirstWord(el.text);
+      if (!s) return { body: el.text, vars: {} };
+      return {
+        body: (
+          <>
+            <span className="cx-tt__w">{s.first}</span> {s.rest}
+          </>
+        ),
+        vars: { "--wl": Math.max([...s.first].length, 3) },
+      };
+    }
+    case "drop-numeral": {
+      const s = splitLeadingNumber(el.text);
+      if (!s) return { body: el.text, vars: {} };
+      return {
+        body: (
+          <>
+            <span className="cx-tt__n">{s.number}</span> <span>{s.rest}</span>
+          </>
+        ),
+        vars: {},
+      };
+    }
+    case "marker-highlight":
+      return { body: <span className="cx-tt__t">{el.text}</span>, vars: {} };
+    default:
+      return { body: el.text, vars: {} };
+  }
+}
+
+function Heading({ el, over, id, uid }: { el: ElOf<"heading">; over: boolean; id: string | undefined; uid: string }) {
   const H = HEADINGS[el.level - 1]!;
   const rotate = el.rotate === "90" || el.rotate === "-90" ? el.rotate : undefined;
-  const p = placement(el, over, { "--fz": stepVar(el.size), ...(el.weight ? { "--w": el.weight } : {}) });
+  const { body, vars } = headingBody(el, uid);
+  const p = placement(el, over, { "--fz": stepVar(el.size), ...(el.weight ? { "--w": el.weight } : {}), ...vars });
   // Below size 2 a heading is never all caps, whatever the direction's --case-heading: a small uppercase line is the
   // banned tracked eyebrow (an explicit uppercase there is the guard's to drop).
   const textCase = el.size < UPPERCASE_MIN.size ? "normal" : el.case;
   return (
-    // The type treatment (spec v20) is a hook: the class cx-tt-<name> and its rules are the inventory's (composed-v2.css, region vocab).
+    // The type treatment (spec v20) is a hook: the class cx-tt-<name>; its rules are the inventory's (composed-v2.css
+    // extensions for the starters, the type-treatments vocab sheet for the rest).
     <H id={id} {...p} className={cx(p.className, "cx-h", textCase && `cx-h--${textCase}`, el.treatment && el.treatment !== "none" && `cx-tt-${el.treatment}`)} data-sz={el.size} data-measure={el.measure} data-rotate={rotate}>
-      {el.text}
+      {body}
     </H>
   );
 }
@@ -268,12 +339,14 @@ export interface ElementProps {
   titleId: string | undefined;
   /** This image is the page's opening one (eager, high priority). */
   priority: boolean;
+  /** Unique on the page (the section's id): ids an element draws with (a circle heading's SVG path) are made from it. */
+  sectionId?: string;
 }
 
-export function ElementView({ el, ctx, width, over, titleId, priority }: ElementProps) {
+export function ElementView({ el, ctx, width, over, titleId, priority, sectionId }: ElementProps) {
   switch (el.kind) {
     case "heading":
-      return <Heading el={el} over={over} id={titleId} />;
+      return <Heading el={el} over={over} id={titleId} uid={`${sectionId ?? "s"}-${el.id}`} />;
     case "text":
       return <TextBlock el={el} over={over} />;
     case "list":

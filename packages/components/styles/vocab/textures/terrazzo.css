@@ -1,0 +1,12 @@
+/* Terrazzo: stone chips of three sizes, each turned its own way, scattered unevenly.
+   Painted in the section's text colour (currentColor) through one SVG tile; the opacity is its max alpha (contrast). */
+.cx-tex-terrazzo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: currentColor;
+  opacity: 0.12;
+  mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><path d='M155 186l7-9 11 4-2 13-8 1zM51 146l4 3-1 2-4 0-1-1zM21 145l-6-2 0-4 8-2 3 3zM172 112l-2-4 3 0 2 1zM219 50l6 7-7 3-7-5zM160 14l-13-10 6-8 11-1 8 8zM160 254l-13-10 6-8 11-1 8 8zM106 73l6-5 7 4-6 5zM63 5l-2 2-3-1 2-3 2-1zM110 235l10 0-4 6-9 0zM110-5l10 0-4 6-9 0zM63 93l1-3 5 0-1 3zM40 206l11-2 10 0-1 8-12 4zM126 192l0 2-6 0 1-3zM151 134l8 3-4 5-7-2zM60 40l2 2-3 1-2-3zM232 4l5-3 8-1-2 7-4 2zM232 244l5-3 8-1-2 7-4 2zM-8 4l5-3 8-1-2 7-4 2zM-8 244l5-3 8-1-2 7-4 2zM80 189l-5-8 12-10 8 13zM6 176l7-6 5 8-7 2zM202 142l-2-5 3 0 4 2-1 1z'/></svg>");
+}

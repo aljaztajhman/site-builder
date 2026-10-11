@@ -1,0 +1,12 @@
+/* Board-formed concrete: plank seams in one direction over a soft mottle.
+   Painted in the section's text colour (currentColor) through one SVG tile; the opacity is its max alpha (contrast). */
+.cx-tex-board-concrete::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: currentColor;
+  opacity: 0.1;
+  mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='480' height='360'><filter id='a'><feTurbulence type='fractalNoise' baseFrequency='.035 .07' numOctaves='5' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.6 0 0 0 -1.15'/></filter><rect x='40' y='30' width='400' height='300' filter='url(%23a)'/><rect y='0' width='480' height='2'/><rect y='196' width='480' height='2'/></svg>");
+}

@@ -1,0 +1,24 @@
+/* split: the value and its label side by side with a rule between them; in a cell narrower than 28 rem (phones) the label
+   goes under the value and the rule with it. The value's size leaves the label room. In the text colour; no ground of
+   its own. */
+.cx-fact--split .cx-fact__obj {
+  display: flex;
+  align-items: center;
+  gap: max(0.6rem, 0.3em);
+  font-size: min(var(--fz), calc(62cqw / (var(--n, 6) * 0.62 + 0.6)));
+}
+.cx-fact--split .cx-fact__obj > :first-child {
+  padding-right: max(0.6rem, 0.3em);
+  border-right: max(2px, 0.04em) solid;
+}
+@container (width < 28rem) {
+  .cx-fact--split .cx-fact__obj {
+    display: grid;
+    font-size: min(var(--fz), calc(100cqw / (var(--n, 6) * 0.62 + 0.6)));
+  }
+  .cx-fact--split .cx-fact__obj > :first-child {
+    padding: 0 0 0.2em;
+    border: 0;
+    border-bottom: max(2px, 0.04em) solid;
+  }
+}

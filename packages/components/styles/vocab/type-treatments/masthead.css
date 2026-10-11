@@ -1,0 +1,9 @@
+/* masthead: a heavy rule over the heading and a thin one under it, the words centred between them across the box, as a
+   newspaper's name sits. Size 3 or more (G20). Rules in the text colour. */
+.cx-tt-masthead {
+  --cx-w: 100%;
+  padding-block: 0.16em 0.12em;
+  border-top: max(3px, 0.09em) solid;
+  border-bottom: max(1px, 0.03em) solid;
+  text-align: center;
+}

@@ -1,0 +1,36 @@
+/* stagger (entrance): the section's text-bearing elements rise one after another. An animation-delay does nothing on a
+   scroll-driven timeline, so the element's place in the section (--cx-i, capped at 5) moves its range later instead.
+   transform and opacity only. */
+.cx-mo-stagger {
+  --cx-ry: 0.75rem;
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes cx-mo-stagger {
+      from {
+        opacity: 0;
+        transform: translateY(var(--cx-ry));
+      }
+    }
+    .cx-mo-stagger :is(.cx-el--heading, .cx-el--text, .cx-el--list, .cx-el--fact, .cx-el--prices, .cx-el--quote) {
+      animation: cx-mo-stagger linear both;
+      animation-timeline: view();
+      animation-range: entry calc(var(--cx-i, 0) * 8%) entry calc(40% + var(--cx-i, 0) * 8%);
+    }
+    .cx-mo-stagger .cx-el:nth-child(2) {
+      --cx-i: 1;
+    }
+    .cx-mo-stagger .cx-el:nth-child(3) {
+      --cx-i: 2;
+    }
+    .cx-mo-stagger .cx-el:nth-child(4) {
+      --cx-i: 3;
+    }
+    .cx-mo-stagger .cx-el:nth-child(5) {
+      --cx-i: 4;
+    }
+    .cx-mo-stagger .cx-el:nth-child(n + 6) {
+      --cx-i: 5;
+    }
+  }
+}

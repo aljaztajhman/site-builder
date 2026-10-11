@@ -1,0 +1,12 @@
+/* Linen weave: uneven thread slubs in two directions, drawn as noise, never as crossing lines.
+   Painted in the section's text colour (currentColor) through one SVG tile; the opacity is its max alpha (contrast). */
+.cx-tex-linen-weave::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: currentColor;
+  opacity: 0.11;
+  mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='480' height='480'><filter id='a'><feTurbulence type='fractalNoise' baseFrequency='.03 .7' numOctaves='2' stitchTiles='stitch' result='h'/><feTurbulence type='fractalNoise' baseFrequency='.7 .03' numOctaves='2' seed='7' stitchTiles='stitch'/><feComposite in2='h' operator='arithmetic' k2='.5' k3='.5'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 7 0 0 0 -3.3'/></filter><rect x='40' y='40' width='400' height='400' filter='url(%23a)'/></svg>");
+}

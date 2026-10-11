@@ -441,7 +441,21 @@ describe("G7 motion", () => {
     expect(paths(repairComposition(one, still))).toEqual(["/props/elements/1/move"]);
   });
 
-  it.todo("calm allows entrance presets only; scroll presets need lively (no scroll preset in MOTIONS yet)");
+  it("calm allows entrance presets only; a scroll preset needs lively", () => {
+    const s = moving("s_m", "drift-bg");
+    const calm = onPage([quiet(), s], 1, ctxWith({ motionLevel: "calm" }));
+    expect(issue(s, /motion "drift-bg" needs motion level lively \(is calm\)/, calm)).toMatchObject({ code: "structure", path: "/props/motion" });
+    expect(paths(repairComposition(s, calm))).toEqual(["/props/motion"]);
+    expect(has(s, /needs motion level/, onPage([quiet(), s], 1, ctxWith({ motionLevel: "lively" })))).toBe(false);
+    for (const m of ["rise", "wipe", "stagger"]) expect(has(moving("s_x", m), /needs motion level/, onPage([quiet(), moving("s_x", m)], 1, ctxWith({ motionLevel: "calm" })))).toBe(false);
+  });
+
+  it("drift-bg (safe at load) may open a page at lively; the entrance presets may not", () => {
+    const s = moving("s_m", "drift-bg");
+    expect(has(s, /safe at load/, onPage([s], 0, ctxWith({ motionLevel: "lively" })))).toBe(false);
+    for (const m of ["rise", "wipe", "stagger"]) expect(has(moving("s_y", m), /safe at load/, onPage([moving("s_y", m)], 0, ctxWith({ motionLevel: "lively" })))).toBe(true);
+  });
+
   it("a looping ribbon needs motion level lively (the pause control is the renderer's), and repairs to no move", () => {
     const loop = composed([heading("e_head", { col: 1, span: 6, row: 1 }, 0), ribbon("e_r", { col: 1, span: 12, row: 2 }, 1, { move: "loop" })]);
     const calm = onPage([quiet(), loop], 1, ctxWith({ motionLevel: "calm" }));
@@ -877,7 +891,8 @@ describe("G20 type treatments", () => {
     }
   });
 
-  it.todo("vertical (size ≥ 4), circle (≤ 40 characters, size ≥ 2) and photo-fill (size ≥ 6, fillImage, 3:1 duotone roles): not in TYPE_TREATMENTS yet");
+  // vertical, circle and the other I6a treatments: composition-i6.test.ts.
+  it.todo("photo-fill (size ≥ 6, fillImage, 3:1 duotone roles): not in TYPE_TREATMENTS yet");
 });
 
 describe("G21 photos", () => {

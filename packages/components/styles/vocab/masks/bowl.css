@@ -1,0 +1,5 @@
+/* bowl: an arch upside down, the foot rounded over the lower third, as a turned bowl or a clay pot holds it. The radii
+   are a share of the frame, so a wide frame keeps its straight sides instead of turning into a half disc. */
+.cx-mask-bowl {
+  border-radius: 0 0 50% 50% / 0 0 34% 34%;
+}

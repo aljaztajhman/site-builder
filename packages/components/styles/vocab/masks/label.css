@@ -1,0 +1,8 @@
+/* label: a printed label with scooped (concave) corners, each a quarter circle of 1.5 rem in three chords. */
+.cx-mask-label {
+  --shape-label: polygon(0 1.5rem, 0.75rem 1.3rem, 1.3rem 0.75rem, 1.5rem 0, calc(100% - 1.5rem) 0, calc(100% - 1.3rem) 0.75rem, calc(100% - 0.75rem) 1.3rem, 100% 1.5rem, 100% calc(100% - 1.5rem), calc(100% - 0.75rem) calc(100% - 1.3rem), calc(100% - 1.3rem) calc(100% - 0.75rem), calc(100% - 1.5rem) 100%, 1.5rem 100%, 1.3rem calc(100% - 0.75rem), 0.75rem calc(100% - 1.3rem), 0 calc(100% - 1.5rem));
+  clip-path: var(--shape-label);
+}
+.cx-mask-label .media--ai::after {
+  right: 1.75rem;
+}

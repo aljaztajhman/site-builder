@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { ComposedProps, validateSite } from "@sb/spec";
+import { ComposedProps, DRAWINGS, PRACTICAL_FACTS, validateSite } from "@sb/spec";
 import { Registry, compositionAssets, type Asset, type AssetKind } from "../src/index.ts";
 import { PRESET_FIXTURES, PRESET_SOURCE, WORDMARK_NAMES, pagesFor, presetsFromFixtures } from "../scripts/pages-v2.ts";
 import { emptySheetHtml, sheetGroups, sheetHtml, type Shot } from "../scripts/sheet-html.ts";
@@ -15,14 +15,15 @@ const asset = (id: string, kind: AssetKind, more: Partial<Asset> = {}): Asset =>
   ...more,
 });
 
-/** Per kind: assets with a render source today (the sample drawings, the preset motions, the sample facts). */
+/** Per kind: assets with a render source today (the drawings, the preset motions, the sample facts). */
 const CASES: [AssetKind, string[]][] = [
-  ["motif", ["motif/bakery/wheat-ear-line"]],
-  ["ornament", ["ornament/rope-line"]],
-  ["motion", ["motion/reveal", "motion/unmask"]],
-  ["icon", ["icon/line/parking", "icon/line/wifi"]],
+  ["motif", DRAWINGS.filter((id) => id.startsWith("motif/"))],
+  ["ornament", DRAWINGS.filter((id) => id.startsWith("ornament/"))],
+  ["motion", ["motion/reveal", "motion/unmask", "motion/rise", "motion/wipe", "motion/stagger", "motion/drift-bg"]],
+  ["icon", PRACTICAL_FACTS.map((f) => `icon/line/${f}`)],
   ["wordmark", ["wordmark/plain"]],
   ["divider", ["divider/rule", "divider/rope-line"]],
+  ["texture", ["texture/stone", "texture/gouge"]],
 ];
 
 const shotsOf = (a: Asset): Shot[] => pagesFor(a).map((p) => ({ asset: a.id, variant: p.variant, label: p.label, width: 360, file: `/out/x/${p.variant}.jpg`, problems: [] }));
