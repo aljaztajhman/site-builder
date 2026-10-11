@@ -39,6 +39,7 @@ import {
 import { STARTER_NAMES } from "@sb/render";
 import { composedRuleBytes, fontBytes, motifBytes, sharedRuleBytes, subMotifBytes, word } from "./bytes.ts";
 import type { Asset, AssetTags, Ground } from "./schema.ts";
+import { starterTextureAssets } from "./textures.ts";
 import { CURATED_PALETTES } from "./palettes/curated.ts";
 
 const uniq = <T>(xs: Iterable<T>): T[] => [...new Set(xs)];
@@ -358,6 +359,7 @@ export function todaysAssets(): Asset[] {
     ...treatmentAssets(),
     ...maskAssets(),
     ...factObjectAssets(),
+    ...starterTextureAssets(),
     ...chromeAssets(),
     ...sectionAssets(),
   ];
