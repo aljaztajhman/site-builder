@@ -15,8 +15,8 @@ import type { ElementKind } from "./schema.ts";
 export const MASKS = ["none", "arch", "circle", "cut", "stamp", "ticket"] as const;
 /** Image treatments (`image.treatment`, `photos.treatment`, the photo layer). I4 fills it to 16. */
 export const IMAGE_TREATMENTS = ["none", "duotone", "tint", "grain"] as const;
-/** Section textures (`surface.texture`). I4 adds 12. */
-export const TEXTURES = ["none", "grain", "lines"] as const;
+/** Section textures (`surface.texture`). I4c added 10 (12 with the two starters); their CSS: styles/vocab/textures/<name>.css. */
+export const TEXTURES = ["none", "grain", "lines", "press-grain", "linen-weave", "stone", "bark", "raw-board", "board-concrete", "laid-paper", "kraft-fibre", "gouge", "terrazzo"] as const;
 /** A section's top edge (`top.edge`); "drawing" takes `top.drawing`. I5 fills it to 20. */
 export const EDGES = ["straight", "rule", "cut", "torn", "drawing"] as const;
 /** Fact objects (`fact.treatment`). I6 fills it to 20. */

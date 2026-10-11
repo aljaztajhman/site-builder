@@ -23,6 +23,7 @@ const CASES: [AssetKind, string[]][] = [
   ["icon", ["icon/line/parking", "icon/line/wifi"]],
   ["wordmark", ["wordmark/plain"]],
   ["divider", ["divider/rule", "divider/rope-line"]],
+  ["texture", ["texture/stone", "texture/gouge"]],
 ];
 
 const shotsOf = (a: Asset): Shot[] => pagesFor(a).map((p) => ({ asset: a.id, variant: p.variant, label: p.label, width: 360, file: `/out/x/${p.variant}.jpg`, problems: [] }));

@@ -9,7 +9,7 @@ import { DRAWINGS, DrawingId, ELEMENT_KINDS, LANGUAGE_VERSION, MOTIONS, MOTION_M
 const SHIPPED: Record<VocabKey, readonly string[]> = {
   MASKS: ["none", "arch", "circle", "cut", "stamp", "ticket"],
   IMAGE_TREATMENTS: ["none", "duotone", "tint", "grain"],
-  TEXTURES: ["none", "grain", "lines"],
+  TEXTURES: ["none", "grain", "lines", "press-grain", "linen-weave", "stone", "bark", "raw-board", "board-concrete", "laid-paper", "kraft-fibre", "gouge", "terrazzo"],
   EDGES: ["straight", "rule", "cut", "torn", "drawing"],
   FACT_OBJECTS: ["numeral", "plate", "stamp", "ticket", "seal", "tag"],
   TYPE_TREATMENTS: ["none", "stacked", "knockout"],
