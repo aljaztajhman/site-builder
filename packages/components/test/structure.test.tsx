@@ -71,14 +71,15 @@ describe("legal", () => {
     expect(out).not.toContain('class="ph"');
   });
 
-  it("renders the accessibility statement with WCAG 2.2 AA, ZDSMA, the inspectorate and today's date", () => {
-    const out = html(<Legal section={a11y} ctx={testCtx()} index={0} />);
+  it("renders the accessibility statement with WCAG 2.2 AA, ZDSMA, the inspectorate and the day of rendering (ctx.today)", () => {
+    const ctx = testCtx();
+    const out = html(<Legal section={a11y} ctx={ctx} index={0} />);
     expect(out).toMatch(/<h1 id="s_a11y-title"[^>]*>Izjava o dostopnosti<\/h1>/);
     expect(out).toContain("WCAG 2.2 na ravni AA");
     expect(out).toContain("ZDSMA");
     expect(out).toContain("Inšpektorat Republike Slovenije");
     expect(out).toContain("inspektorat-za-informacijsko-druzbo");
-    expect(out).toContain(formatDate(new Date()));
+    expect(out).toContain(formatDate(ctx.today));
     // No placeholder the spec has no field for: with every fact present the statement is complete.
     expect(out).toContain("Znane omejitve");
     expect(out).toContain("Vsebine tretjih oseb, na primer vdelani zemljevidi, morda niso v celoti dostopne.");

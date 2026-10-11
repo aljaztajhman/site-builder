@@ -4,7 +4,7 @@
  */
 import { statSync } from "node:fs";
 import path from "node:path";
-import { FONTS_DIR, composedStylesheet, minifyCss, sharedStylesheet, stylesheetFor } from "@sb/render";
+import { COMPOSED_V2_REGIONS, FONTS_DIR, VOCAB_FAMILIES, composedStylesheet, composedV2Sheets, minifyCss, sharedStylesheet, stylesheetFor, vocabFamilySheets } from "@sb/render";
 
 export const fontFile = (file: string): string => path.join(FONTS_DIR, `${file}.woff2`);
 export const fontLicenseFile = (file: string): string => path.join(FONTS_DIR, "LICENSES", `${file}.txt`);
@@ -60,7 +60,9 @@ export function ruleBytes(css: string, needle: RegExp): number {
 }
 
 export const sharedRuleBytes = (needle: RegExp): number => ruleBytes(sharedCss(), needle);
-export const composedRuleBytes = (needle: RegExp): number => ruleBytes(composedStylesheet().css, needle);
+/** Bytes of the matching rules in every composed sheet: the core sheet, the spec v20 region sheets and the vocab family sheets. */
+export const composedRuleBytes = (needle: RegExp): number =>
+  [composedStylesheet().css, ...COMPOSED_V2_REGIONS.map((r) => composedV2Sheets()[r].css), ...VOCAB_FAMILIES.map((f) => vocabFamilySheets()[f].css)].reduce((n, css) => n + ruleBytes(css, needle), 0);
 
 const esc = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 export const word = (cls: string): RegExp => new RegExp(`${esc(cls)}(?![a-z0-9_-])`);

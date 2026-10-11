@@ -36,4 +36,20 @@ describe("keepOwnerFacts", () => {
     expect(r.spec.business.email).toBe("info@pekarnakvas.si");
     expect(r.kept).toEqual([]);
   });
+
+  it("keeps the owner's amenities (spec v20), which a regeneration never fills", () => {
+    const current = golden();
+    current.business.amenities = ["parking", "card", "wifi"];
+    const regenerated = golden();
+    const r = keepOwnerFacts(current, regenerated);
+    expect(r.spec.business.amenities).toEqual(["parking", "card", "wifi"]);
+    expect(r.kept).toEqual(["/business/amenities"]);
+    expect(validateSite(r.spec).ok).toBe(true);
+    // A copy, not the current version's array.
+    expect(r.spec.business.amenities).not.toBe(current.business.amenities);
+    // Without amenities on the current version, the regenerated ones (none, or any) stand.
+    const fresh = golden();
+    fresh.business.amenities = ["terrace"];
+    expect(keepOwnerFacts(golden(), fresh)).toMatchObject({ spec: { business: { amenities: ["terrace"] } }, kept: [] });
+  });
 });

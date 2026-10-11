@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { BANNED_PHRASES, Business, DIRECTIONS, SECTION_DEFS, toModelJsonSchema, type Motif } from "@sb/spec";
+import { BANNED_PHRASES, Business, DIRECTIONS, SECTION_DEFS, VOCABS, toModelJsonSchema, type Motif } from "@sb/spec";
 import {
   ALT_SYSTEM_FIXED,
   BRIEF_FACTS_NEW,
@@ -34,7 +34,7 @@ import {
   swap,
   type PromptFixes,
 } from "./prompt-fixes.ts";
-import { COMPACT_NOTATION, CompactWriter, catalogueAliases, compactBusinessSchema } from "./compact-catalogue.ts";
+import { COMPACT_NOTATION, COMPOSED_SHARED, CompactWriter, catalogueAliases, compactBusinessSchema, composedAliases } from "./compact-catalogue.ts";
 
 /**
  * Static prompt parts. They must be byte-stable across calls so prompt caching works:
@@ -121,6 +121,27 @@ export function compactSectionCatalogue(f: PromptFixes = NO_PROMPT_FIXES): strin
   // As `swap`: the eyebrow fix must find its passage, or it would silently do nothing.
   if (f.catalogue && !out.includes(HERO_EYEBROW_NEW)) throw new Error(`prompt fix: passage not found: ${HERO_EYEBROW_OLD.slice(0, 80)}`);
   return out;
+}
+
+/** What a vocabulary name means in the designer's compact catalogue. */
+export const VOCAB_NOTATION = `A name in capitals (MASKS, DRAWINGS …) is a list of inventory names, written once under shared types: the field takes exactly one name from it.`;
+
+/**
+ * The designer's section catalogue (HQ it-studio-catalogue-aliases): the designerOnly sections (composed), with the
+ * shapes they repeat named once (COMPOSED_SHARED) and every vocabulary field as its list's name, the list written once.
+ * Compact: the notation, shared types and vocabularies in the header. JSON: each section's props schema with `$defs` and
+ * `$ref` (structured outputs accept internal refs). The designer-off catalogues above never include these sections.
+ */
+export function designerCatalogue(opts: CatalogueOptions = {}): string {
+  const defs = SECTION_DEFS.filter((d) => d.designerOnly);
+  const head = (d: (typeof defs)[number]) => [`### ${d.type}`, `Variants: ${d.variants.join(", ")}. Photos: ${d.images}.`, d.description, `Mobile: ${d.mobile}`];
+  if (!opts.compact) {
+    const blocks = defs.map((d) => [...head(d), `Props schema: ${JSON.stringify(toModelJsonSchema(d.props, { shared: COMPOSED_SHARED }))}`].join("\n"));
+    return `# Composed sections\n\n${blocks.join("\n\n")}`;
+  }
+  const w = new CompactWriter(composedAliases(), VOCABS);
+  const blocks = defs.map((d) => [...head(d), `Props: ${w.type(toModelJsonSchema(d.props))}`].join("\n"));
+  return `# Composed sections\n\n${COMPACT_NOTATION} ${VOCAB_NOTATION}\nShared types:\n${w.definitions()}\n\n${blocks.join("\n\n")}`;
 }
 
 /** Schema of /business for edits: facts the client gives in chat (hours, address, phone) must match it exactly. */

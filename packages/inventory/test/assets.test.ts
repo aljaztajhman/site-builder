@@ -2,9 +2,14 @@ import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { describe, expect, it } from "vitest";
 import { BusinessType, DIRECTIONS, FAMILIES, FONTS, FONT_PAIRS, Imagery, MOTIFS, SECTION_DEFS, SUBMOTIFS, SUBTYPES, type Colors } from "@sb/spec";
+import { COMPOSED_V2_REGIONS, VOCAB_FAMILIES, composedStylesheet, composedV2Sheets, vocabFamilySheets } from "@sb/render";
 import {
+  COMPOSED_SHEET_BUDGET,
   CURATED_PALETTES,
   SLOVENE_GLYPHS,
+  compositionAssets,
+  needsPatternCheck,
+  patternCheck,
   assetName,
   byteBudget,
   draftAssets,
@@ -60,11 +65,12 @@ describe("today's assets are registered", () => {
   });
 
   it("existing assets start approved, new ones as drafts; system- and owner-only sections are not pickable", () => {
+    // The registered defaults; the owner's decisions (decisions.json, decisions.test.ts) may change them.
     expect(todaysAssets().every((a) => a.status === "approved")).toBe(true);
     expect(draftAssets().length).toBeGreaterThan(0);
-    const drafts = assets.filter((a) => a.status !== "approved");
-    expect(drafts.map((a) => a.id)).toEqual([...draftAssets(), ...inventoryFontAssets(), ...inventoryPairingAssets()].map((a) => a.id));
-    expect(drafts.every((a) => a.status === "draft")).toBe(true);
+    const newOnes = [...draftAssets(), ...inventoryFontAssets(), ...inventoryPairingAssets(), ...compositionAssets()];
+    expect(newOnes.every((a) => a.status === "draft")).toBe(true);
+    expect(assets.map((a) => a.id)).toEqual([...todaysAssets(), ...newOnes].map((a) => a.id));
     const unpickable = assets.filter((a) => a.pickable === false).map((a) => a.id);
     expect(unpickable.sort()).toEqual(["section/collection:cards", "section/collection:list", "section/legal:default", "section/not-found:default"]);
   });
@@ -76,6 +82,23 @@ describe("today's assets are registered", () => {
     expect(registry.byId("motif/plate")!.tags.trades).toContain("car-repair/tyres");
     expect(registry.byId("palette/dark-elegant")!.tags.ground).toEqual(["dark"]);
     expect(registry.byId("section/menu:classic")!.tags.intents).toEqual(["menu"]);
+  });
+});
+
+describe("the composed sheets stay within COMPOSED_SHEET_BUDGET", () => {
+  it("core ≤ 16 KiB, each v20 region ≤ 12 KiB, everything one page can link ≤ 32 KiB", () => {
+    const core = Buffer.byteLength(composedStylesheet().css);
+    const regions = COMPOSED_V2_REGIONS.map((r) => Buffer.byteLength(composedV2Sheets()[r].css));
+    expect(core).toBeLessThanOrEqual(COMPOSED_SHEET_BUDGET.core);
+    for (const [i, n] of regions.entries()) expect(n, COMPOSED_V2_REGIONS[i]).toBeLessThanOrEqual(COMPOSED_SHEET_BUDGET.region);
+    expect(core + regions.reduce((a, b) => a + b, 0)).toBeLessThanOrEqual(COMPOSED_SHEET_BUDGET.linked);
+    expect(byteBudget({ id: "section/composed:free", kind: "section" })).toBe(COMPOSED_SHEET_BUDGET.core);
+  });
+
+  it("each vocab family sheet ≤ 6 KiB, the seven together ≤ 42 KiB", () => {
+    const sizes = VOCAB_FAMILIES.map((f) => Buffer.byteLength(vocabFamilySheets()[f].css));
+    for (const [i, n] of sizes.entries()) expect(n, VOCAB_FAMILIES[i]).toBeLessThanOrEqual(COMPOSED_SHEET_BUDGET.family);
+    expect(sizes.reduce((a, b) => a + b, 0)).toBeLessThanOrEqual(COMPOSED_SHEET_BUDGET.families);
   });
 });
 
@@ -106,6 +129,12 @@ describe.each(assets.map((a) => [a.id, a] as const))("%s", (_id, asset) => {
         return g.id === 0 || g.path.commands.length === 0;
       });
       expect(missing.join("")).toBe("");
+    });
+  }
+
+  if (needsPatternCheck(asset)) {
+    it("is not a dot grid, a lattice of crosses or grid paper (G19 detector)", () => {
+      expect(patternCheck(asset)).toEqual({ ok: true });
     });
   }
 

@@ -15,9 +15,33 @@ import type { SiteSpec } from "../site.ts";
 import { BANNED_HEADLINE, NUMBERED_LABEL, findBannedCopy, repairEmDashes } from "../banned.ts";
 import { MAIN_HEADING_TYPES, hasComposedH1 } from "../headings.ts";
 import { walkStrings } from "../pointer.ts";
+import { isPlaceholder } from "../common.ts";
+import type { Colors } from "../design.ts";
+import type { MotionLevel } from "./vocab.ts";
+import { repairV2, validateV2 } from "./guards-v2.ts";
+import { SLOT_MARKER } from "./slots.ts";
 import { DecorPath, GRID_COLUMNS, MAX_ELEMENTS, type Element } from "./schema.ts";
 
 export type ComposedSection = Extract<Section, { type: "composed" }>;
+
+/**
+ * The business facts the v20 rules read (G14 link targets, iconFacts, plate codes). A field is present only when the
+ * client gave it: placeholders are absent.
+ */
+export interface CompositionBusiness {
+  /** E.164 phone: a call link (action or `fact.link`) needs it. */
+  phone?: string;
+  /** An email link needs it. */
+  email?: string;
+  /** The address on one line ("Savska cesta 52, 4000 Kranj"): a directions link and the map need it. */
+  address?: string;
+  /** address.city, for plate codes. */
+  town?: string;
+  /** business.amenities (PRACTICAL_FACTS names). */
+  amenities?: readonly string[];
+  /** business.bookingUrl: a booking link needs it. */
+  bookingUrl?: string;
+}
 
 /** What a rule needs besides the section itself. Everything is optional: a rule without its context is skipped. */
 export interface CompositionContext {
@@ -29,21 +53,88 @@ export interface CompositionContext {
   hasBookingUrl?: boolean;
   /** The page the section is on, for the rules across sections (one h1, display sizes, photo use). */
   page?: { sections: readonly Section[]; index: number };
+  /** Spec v20: design.colors, for the contrast rules (G3, G4, G9, G20). Without it the contrast rules are skipped. */
+  colors?: Colors;
+  /** Spec v20: the client's business facts (G14 link targets). Without it link targets aren't checked. */
+  business?: CompositionBusiness;
+  /** Spec v20: every spec.assets.images entry by id, with its origin (absent origin = the client's photo). */
+  images?: ReadonlyMap<string, { origin: "client" | "generated" }>;
+  /** Spec v20: design.motion; validateSite passes "calm" when the design has none (G7). */
+  motionLevel?: MotionLevel;
+  /** Spec v20: asset ids allowed at runtime, from the inventory (the engine passes it; publish-time validation omits it). Absent: vocabulary membership only (G8). */
+  approved?: ReadonlySet<string>;
+  /** Spec v20: the previous section on the page, for the top edge and its rise (G5). */
+  prev?: Section;
 }
 
 /** The context validateSite uses for the section at `pageIndex` / `sectionIndex`. */
 export function compositionContext(spec: SiteSpec, pageIndex: number, sectionIndex: number): CompositionContext {
+  const sections = spec.pages[pageIndex]!.sections;
+  const b = spec.business;
+  const address = isPlaceholder(b.address) ? undefined : b.address;
+  const business: CompositionBusiness = {
+    ...(typeof b.phone === "string" ? { phone: b.phone } : {}),
+    ...(typeof b.email === "string" ? { email: b.email } : {}),
+    ...(address ? { address: `${address.street}, ${address.postalCode} ${address.city}`, town: address.city } : {}),
+    ...(b.amenities ? { amenities: b.amenities } : {}),
+    ...(b.bookingUrl ? { bookingUrl: b.bookingUrl } : {}),
+  };
   return {
     at: `/pages/${pageIndex}/sections/${sectionIndex}`,
     imageIds: new Set(spec.assets.images.map((i) => i.id)),
     hasBookingUrl: !!spec.business.bookingUrl,
-    page: { sections: spec.pages[pageIndex]!.sections, index: sectionIndex },
+    page: { sections, index: sectionIndex },
+    colors: spec.design.colors,
+    business,
+    images: new Map(spec.assets.images.map((i) => [i.id, { origin: i.origin ?? "client" }])),
+    motionLevel: spec.design.motion ?? "calm",
+    ...(sectionIndex > 0 ? { prev: sections[sectionIndex - 1]! } : {}),
   };
 }
 
+// ---------- v20 limits (studio-phase1-design.md §2), read by the rules G1–G25 and their tests ----------
+
+/** Contrast minimums (WCAG): large text 3:1, everything else 4.5:1. */
+export const CONTRAST_MIN = { text: 4.5, large: 3 } as const;
+/** "Large": a heading of this size or more, a fact value of this size or more, and every sticker. */
+export const LARGE_TEXT = { headingSize: 3, factSize: 4 } as const;
+/** Scrim opacity by strength 1–4 (index strength − 1). The scrim colour is mixed per sRGB channel over a black and a white pixel. */
+export const SCRIM_ALPHA = [0.35, 0.5, 0.65, 0.8] as const;
+/** A background drawing is quiet: its ink against the ground at most this ratio (G9). */
+export const QUIET_INK_MAX = 1.6;
+/** Background layers (G1). */
+export const BACKGROUND_LIMITS = { layers: 2, photos: 1, drawings: 1 } as const;
+/** A pinned column (G6). */
+export const PIN_LIMITS = { maxElements: 4, minRows: 3 } as const;
+/** Sections with motion per page, by the site's motion level (G7); still allows none. */
+export const MOTION_BUDGET = { still: 0, calm: 3, lively: 5 } as const;
+/** Moving ribbons per page (G7). */
+export const MAX_MOVING_RIBBONS = 1;
+/** Kinds that may tilt (G10); a fact only when its treatment isn't "numeral". */
+export const TILT_KINDS: ReadonlySet<Element["kind"]> = new Set(["fact", "sticker", "image", "photos", "decor"]);
+/** Kinds that may bleed to the page edge (G11, `desk.bleedX`) and edge to edge on phones (G12, `phone.span: "bleed"`). */
+export const BLEED_X_KINDS: ReadonlySet<Element["kind"]> = new Set(["image", "photos", "decor"]);
+/** Kinds that may bleed past the section's top or bottom (G11, `desk.bleedY`). */
+export const BLEED_Y_KINDS: ReadonlySet<Element["kind"]> = new Set(["decor", "ribbon", "sticker"]);
+/** Kinds never half width on phones (G12). */
+export const NO_PHONE_HALF_KINDS: ReadonlySet<Element["kind"]> = new Set(["text", "list", "quote", "prices"]);
+/** The narrow-text relaxation of TEXT_SPAN (G13): span 3 at size 0, one paragraph this long at most, next to a text-bearing element of span 3–4. */
+export const TEXT_SPAN_NARROW = { span: 3, maxChars: 140, partner: { min: 3, max: 4 } } as const;
+/** Photos per arrangement (G21), inclusive. */
+export const PHOTOS_COUNT = { fan: [2, 4], stack: [2, 4], "offset-pair": [2, 4], strip: [3, 12], "before-after": [2, 2] } as const;
+/** A stacked heading sets one word per line, at most this many (G20). */
+export const STACKED_MAX_LINES = 4;
+/** Two price plates per phone row only when every name is at most this long (G17). */
+export const PHONE_COLUMNS_NAME_MAX = 24;
+/** Restraint (G22). */
+export const RESTRAINT = { stickersPerSection: 1, stickersPerPage: 2, wordmarksPerPage: 1, quotesPerSection: 1 } as const;
+
 /** Elements that carry words, numbers or links: they never overlap each other and are never hidden on phones. */
-const TEXT_KINDS: ReadonlySet<Element["kind"]> = new Set(["heading", "text", "list", "fact", "action", "hours", "contact", "prices"]);
-export const isTextBearing = (e: Element): boolean => TEXT_KINDS.has(e.kind);
+const TEXT_KINDS: ReadonlySet<Element["kind"]> = new Set(["heading", "text", "list", "fact", "action", "hours", "contact", "prices", "ribbon", "sticker", "map", "iconFacts", "quote", "wordmark"]);
+/** Words, numbers or links; a photos element only with captions (G23). */
+export const isTextBearing = (e: Element): boolean => TEXT_KINDS.has(e.kind) || (e.kind === "photos" && (e.captions?.length ?? 0) > 0);
+/** An image or a photos element without captions: the elements the second-photo hiding rule is about. */
+const isPhoto = (e: Element): boolean => e.kind === "image" || (e.kind === "photos" && !isTextBearing(e));
 
 /** Running text spans at least this many columns (never a sliver) and at most this many (45–75 characters at 1280 px). */
 export const TEXT_SPAN = { min: 4, max: 8 } as const;
@@ -53,11 +144,11 @@ const SHIFT_CELLS = 0.75;
 const ROTATE_MIN_SIZE = 4;
 /** All caps only this heavy and this large (smaller is the banned tracked eyebrow; the renderer sets normal case below). */
 export const UPPERCASE_MIN = { weight: 700, size: 2 } as const;
-const DISPLAY = { headingSize: 6, factSize: 7, perSection: 1, perPage: 2 } as const;
-const MAX_PHOTO_USES = 2;
+const DISPLAY = { headingSize: 6, factSize: 7, quoteSize: 4, perSection: 1, perPage: 2 } as const;
+export const MAX_PHOTO_USES = 2;
 const MAX_SVG_PATHS = 24;
 
-const isDisplay = (e: Element): boolean => (e.kind === "heading" && e.size >= DISPLAY.headingSize) || (e.kind === "fact" && e.size >= DISPLAY.factSize);
+const isDisplay = (e: Element): boolean => (e.kind === "heading" && e.size >= DISPLAY.headingSize) || (e.kind === "fact" && e.size >= DISPLAY.factSize) || (e.kind === "quote" && (e.size ?? 0) >= DISPLAY.quoteSize);
 
 /** Reading order is phone.order, ties by position in the list (the order the renderer stacks them in). */
 export function readingOrder(elements: readonly Element[]): { e: Element; i: number }[] {
@@ -93,7 +184,7 @@ export function isCentredComposed(props: ComposedSection["props"]): boolean {
 }
 
 /** Number of times each photo id appears in the sections' props. */
-function photoUses(sections: readonly Section[]): Map<string, number> {
+export function photoUses(sections: readonly Section[]): Map<string, number> {
   const uses = new Map<string, number>();
   for (const s of sections) {
     walkStrings(s.props, (v) => {
@@ -103,14 +194,17 @@ function photoUses(sections: readonly Section[]): Map<string, number> {
   return uses;
 }
 
+/** What stands for an icon in a card: a drawing, a fact (any object), practical-fact icons or a sticker (G25). */
+const isIconBlock = (e: Element): boolean => e.kind === "decor" || e.kind === "fact" || e.kind === "iconFacts" || e.kind === "sticker";
+
 /** Blocks of a decor or fact, a heading and a text that sit side by side with equal spans (the "row of three icon cards"). */
 function cardRows(elements: readonly Element[]): { start: number; span: number }[] {
   const headings = elements.filter((e) => e.kind === "heading");
   const cols = (e: Element) => ({ a: e.desk.col, b: e.desk.col + e.desk.span - 1 });
   const meets = (e: Element, h: Element) => cols(e).a <= cols(h).b && cols(h).a <= cols(e).b;
   const blocks = headings.flatMap((h) => {
-    const members = elements.filter((e) => e !== h && (e.kind === "decor" || e.kind === "fact" || e.kind === "text") && meets(e, h) && !headings.some((o) => o !== h && meets(e, o)));
-    if (!members.some((e) => e.kind === "decor" || e.kind === "fact") || !members.some((e) => e.kind === "text")) return [];
+    const members = elements.filter((e) => e !== h && (isIconBlock(e) || e.kind === "text") && meets(e, h) && !headings.some((o) => o !== h && meets(e, o)));
+    if (!members.some(isIconBlock) || !members.some((e) => e.kind === "text")) return [];
     const all = [h, ...members];
     return [{ h, y0: Math.min(...all.map((e) => e.desk.row)), y1: Math.max(...all.map((e) => e.desk.row + (e.desk.rowSpan ?? 1))) }];
   });
@@ -168,7 +262,7 @@ export function validateComposition(section: ComposedSection, ctx: CompositionCo
   els.forEach((e, i) => {
     if (!e.phone.hidden) return;
     if (isTextBearing(e)) add(`${base}/${i}/phone/hidden`, "structure", `composed: ${e.id} (${e.kind}) carries words and can't be hidden on phones`);
-    else if (e.kind === "image" && !els.some((o) => o !== e && o.kind === "image" && !o.phone.hidden)) add(`${base}/${i}/phone/hidden`, "structure", `composed: ${e.id} is the only photo shown on phones; only a second photo may be hidden`);
+    else if (isPhoto(e) && !els.some((o) => o !== e && isPhoto(o) && !o.phone.hidden)) add(`${base}/${i}/phone/hidden`, "structure", `composed: ${e.id} is the only photo shown on phones; only a second photo may be hidden`);
   });
 
   // Desktop: text never overlaps text (it may overlap a photo or a drawing).
@@ -201,8 +295,6 @@ export function validateComposition(section: ComposedSection, ctx: CompositionCo
   const actions = els.flatMap((e, i) => (e.kind === "action" ? [{ e, i }] : []));
   const primaries = actions.filter((a) => a.e.kind === "action" && a.e.style === "primary");
   if (primaries.length > 1) add(`${base}/${primaries[1]!.i}/style`, "banned", "composed: one primary action per section (the others are secondary)");
-  const calls = actions.filter((a) => a.e.kind === "action" && a.e.action === "call");
-  if (calls.length > 1) add(`${base}/${calls[1]!.i}/action`, "banned", "composed: at most one call action per section");
   for (const { e, i } of actions) {
     if (e.kind !== "action") continue;
     if (e.action === "link" && e.link === undefined) add(`${base}/${i}/link`, "structure", `composed: ${e.id} is a link action and needs a link`);
@@ -216,6 +308,13 @@ export function validateComposition(section: ComposedSection, ctx: CompositionCo
     if (e.kind !== "heading") return;
     if (NUMBERED_LABEL.test(e.text)) add(`${base}/${i}/text`, "banned", `numbered label: "${e.text}"`);
     for (const b of BANNED_HEADLINE) if (b.pattern.test(e.text)) add(`${base}/${i}/text`, "banned", `${b.label}: "${e.text}"`);
+  });
+
+  // Preset slot markers (./slots.ts): a composition preset is filled (fillPreset) before it reaches a site; a marker
+  // left in any string of the section means it wasn't, and the section never publishes.
+  walkStrings(section.props, (v, p) => {
+    const m = SLOT_MARKER.exec(v);
+    if (m) add(`${at}/props${p}`, "structure", `composed: unfilled slot marker ${m[0]} (a composition preset must be filled by fillPreset)`);
   });
 
   // Uppercase headings: heavy and sized, never a small tracked eyebrow.
@@ -236,21 +335,10 @@ export function validateComposition(section: ComposedSection, ctx: CompositionCo
     if (before + display.length > DISPLAY.perPage) add(`${base}/${display[0]}`, "structure", `composed: at most ${DISPLAY.perPage} display sizes per page (${before} earlier on the page)`);
   }
 
-  // Photos exist and are not used more than twice on a page.
-  const earlier = ctx.page ? photoUses(ctx.page.sections.slice(0, ctx.page.index)) : new Map<string, number>();
-  const used = new Map<string, number>();
-  els.forEach((e, i) => {
-    if (e.kind !== "image") return;
-    if (ctx.imageIds && !ctx.imageIds.has(e.image)) add(`${base}/${i}/image`, "reference", `unknown image ${e.image}`);
-    const n = (used.get(e.image) ?? 0) + 1;
-    used.set(e.image, n);
-    if ((earlier.get(e.image) ?? 0) + n > MAX_PHOTO_USES) add(`${base}/${i}/image`, "structure", `composed: ${e.image} is used more than ${MAX_PHOTO_USES} times on the page`);
-  });
-
   // Drawings: a motif or an svg, never both or neither; at most 24 paths, each only the allowed characters.
   els.forEach((e, i) => {
     if (e.kind !== "decor") return;
-    if ((e.motif === undefined) === (e.svg === undefined)) add(`${base}/${i}`, "structure", `composed: ${e.id} needs exactly one of motif and svg`);
+    if ([e.motif, e.drawing, e.svg].filter((x) => x !== undefined).length !== 1) add(`${base}/${i}`, "structure", `composed: ${e.id} needs exactly one of motif and svg (or drawing)`);
     if (e.svg) {
       if (e.svg.paths.length > MAX_SVG_PATHS) add(`${base}/${i}/svg/paths`, "structure", `composed: a drawing has at most ${MAX_SVG_PATHS} paths (${e.svg.paths.length})`);
       e.svg.paths.forEach((p, k) => {
@@ -262,10 +350,20 @@ export function validateComposition(section: ComposedSection, ctx: CompositionCo
   // Measure: running text is never a sliver and never a long line.
   els.forEach((e, i) => {
     if (e.kind !== "text") return;
-    if (e.desk.span < TEXT_SPAN.min || e.desk.span > TEXT_SPAN.max) add(`${base}/${i}/desk/span`, "structure", `composed: running text spans ${TEXT_SPAN.min}–${TEXT_SPAN.max} columns on desktop (${e.id} spans ${e.desk.span})`);
+    if ((e.desk.span < TEXT_SPAN.min || e.desk.span > TEXT_SPAN.max) && !narrowText(e, els, section.props.width)) add(`${base}/${i}/desk/span`, "structure", `composed: running text spans ${TEXT_SPAN.min}–${TEXT_SPAN.max} columns on desktop (${e.id} spans ${e.desk.span})`);
   });
 
+  issues.push(...validateV2(section, ctx));
   return issues;
+}
+
+/** G13: a text of 3 columns at body size, one short paragraph, in a wide or full section, beside another text-bearing element of 3–4 columns on a shared row (never part of a card row). */
+function narrowText(e: Element, els: readonly Element[], width: ComposedSection["props"]["width"]): boolean {
+  if (e.kind !== "text" || e.desk.span !== TEXT_SPAN_NARROW.span || (e.size ?? 0) !== 0 || e.paragraphs.length !== 1 || e.paragraphs[0]!.length > TEXT_SPAN_NARROW.maxChars || width === "contained") return false;
+  const rows = (o: Element) => [o.desk.row, o.desk.row + (o.desk.rowSpan ?? 1) - 1] as const;
+  const [a0, a1] = rows(e);
+  const partner = els.some((o) => o !== e && isTextBearing(o) && o.desk.span >= TEXT_SPAN_NARROW.partner.min && o.desk.span <= TEXT_SPAN_NARROW.partner.max && rows(o)[0] <= a1 && a0 <= rows(o)[1]);
+  return partner && cardRows(els).length === 0;
 }
 
 /**
@@ -283,7 +381,7 @@ export function repairComposition(section: ComposedSection, ctx: CompositionCont
   repairs.push(...repairEmDashes(els, base));
 
   els.forEach((e, i) => {
-    if (e.phone.hidden && (isTextBearing(e) || (e.kind === "image" && !els.some((o) => o !== e && o.kind === "image" && !o.phone.hidden)))) {
+    if (e.phone.hidden && (isTextBearing(e) || (isPhoto(e) && !els.some((o) => o !== e && isPhoto(o) && !o.phone.hidden)))) {
       delete e.phone.hidden;
       log(`${base}/${i}/phone/hidden`, `${e.kind} is shown on phones`);
     }
@@ -317,7 +415,7 @@ export function repairComposition(section: ComposedSection, ctx: CompositionCont
   }
 
   els.forEach((e, i) => {
-    if (e.kind === "text" && (e.desk.span < TEXT_SPAN.min || e.desk.span > TEXT_SPAN.max)) {
+    if (e.kind === "text" && (e.desk.span < TEXT_SPAN.min || e.desk.span > TEXT_SPAN.max) && !narrowText(e, els, next.props.width)) {
       const span = Math.min(TEXT_SPAN.max, Math.max(TEXT_SPAN.min, e.desk.span));
       const col = Math.min(e.desk.col, GRID_COLUMNS - span + 1);
       log(`${base}/${i}/desk`, `text spans ${span} columns (was ${e.desk.span})${col !== e.desk.col ? ` from column ${col}` : ""}`);
@@ -329,6 +427,8 @@ export function repairComposition(section: ComposedSection, ctx: CompositionCont
       log(`${base}/${i}/case`, "uppercase dropped (needs weight 700+ and size 2+)");
     }
   });
+
+  repairV2(next, ctx, log);
 
   return repairs.length ? { section: next, repairs } : { section, repairs };
 }

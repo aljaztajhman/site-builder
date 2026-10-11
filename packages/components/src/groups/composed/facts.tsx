@@ -5,7 +5,7 @@
  * the same; the week chart and the hours table are copies of Info.tsx's, which keeps those files untouched.
  */
 import type { CSSProperties } from "react";
-import { capitalize, dayName, hoursRows, isPlaceholder, weekChart, type Hours, type Placeholder } from "@sb/spec";
+import { capitalize, dayName, formatPrice, hoursRows, isPlaceholder, isPriceOnRequest, plateCode, weekChart, type Hours, type Placeholder, type Price } from "@sb/spec";
 import { AddressText, EmailLink, HoursList, Icon, Ph, PhoneLink, PriceText, cx } from "../../primitives/index.tsx";
 import { PlateStrip } from "../../motifs/index.tsx";
 import type { RenderCtx } from "../../types.ts";
@@ -159,11 +159,36 @@ export function ContactFact({ el, ctx }: { el: ElOf<"contact">; ctx: RenderCtx }
 /** What a price list item says when it is not available right now (as Prices.tsx). */
 const Unavailable = ({ ctx }: { ctx: RenderCtx }) => <span className="unavailable prices__flag">{ctx.t("unavailable")}</span>;
 
+/** The registration area of the business's town (a plate's "KR"), written by code from the address; none where the town is no area seat. */
+export function townCode(ctx: RenderCtx): string | null {
+  const address = ctx.site.business.address;
+  return address === undefined || isPlaceholder(address) ? null : plateCode(address.city);
+}
+
+/** About how many characters a price takes on a plate (its amount, "od", the unit), to size the plate's type to its column. */
+const priceLength = (price: Price, ctx: RenderCtx): number =>
+  isPlaceholder(price) || isPriceOnRequest(price) ? 8 : (price.from ? ctx.t("from").length + 1 : 0) + formatPrice(price.amount, ctx.locale).length + (price.unit ? price.unit.length + 1 : 0);
+
+/**
+ * Price lists. Spec v20 adds the styles leaders (a dotted leader from the name to the price), board (a menu board),
+ * docket (a till receipt) and sheet (a ruled price sheet), which are the rows' markup under their own class; a size
+ * (0-2: bigger plates and type), two columns on phones for plates and tags, and the plate's town code.
+ */
 export function PricesFact({ el, ctx }: { el: ElOf<"prices">; ctx: RenderCtx }) {
+  const size = el.size ? `cx-psz-${el.size}` : undefined;
   if (el.style === "plates" || el.style === "tags") {
     const plate = el.style === "plates";
+    const code = plate && el.plateCode ? townCode(ctx) : null;
+    // A plate with a v20 extension (a size, two to a row, a town code) sizes its type to its column: --n is its longest
+    // price in characters with the town code and its dot counted (composed-v2.css reads it as the fact objects' CSS does).
+    const sized = plate && (code !== null || (el.size ?? 0) > 0 || el.phoneColumns === 2);
+    const n = sized ? Math.max(...el.items.map((it) => priceLength(it.price, ctx))) + (code ? code.length + 1 : 0) : 0;
     return (
-      <ul className={cx("price-tags", "cx-prices", plate ? "cx-prices--plates" : "cx-prices--tags")} role="list">
+      <ul
+        className={cx("price-tags", "cx-prices", plate ? "cx-prices--plates" : "cx-prices--tags", size, el.phoneColumns === 2 && "cx-pc2")}
+        style={sized ? ({ "--n": n } as CSSProperties) : undefined}
+        role="list"
+      >
         {el.items.map((it, i) => (
           <li className={cx("price-tags__item", it.unavailable && "is-unavailable")} key={i}>
             {plate ? (
@@ -171,6 +196,12 @@ export function PricesFact({ el, ctx }: { el: ElOf<"prices">; ctx: RenderCtx }) 
                 <p className="price-tag plate">
                   <PlateStrip />
                   <span className="price-tag__value">
+                    {code && (
+                      <span className="plate__code" aria-hidden="true">
+                        {code}
+                        <span className="plate__dot" />
+                      </span>
+                    )}
                     <PriceText price={it.price} ctx={ctx} />
                   </span>
                 </p>
@@ -202,7 +233,7 @@ export function PricesFact({ el, ctx }: { el: ElOf<"prices">; ctx: RenderCtx }) 
     );
   }
   return (
-    <div className="prices cx-prices cx-prices--rows">
+    <div className={cx("prices", "cx-prices", `cx-prices--${el.style}`, size)}>
       <dl className="prices__dl">
         {el.items.map((it, i) => (
           <div className={cx("prices__row", it.unavailable && "is-unavailable")} key={i}>

@@ -1,8 +1,8 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { lcpImageFor } from "@sb/components";
+import { composedActions, heroOwnsCall, lcpImageFor } from "@sb/components";
 import { ComposedProps, migrateSpec, type ELEMENT_KINDS, type Page, type Section, type SiteSpec } from "@sb/spec";
-import { composedStylesheet, renderPage, sharedBundle } from "../src/index.ts";
+import { COMPOSED_BAR_ISLAND, composedIslandPath, composedStylesheet, renderPage, sharedBundle } from "../src/index.ts";
 
 /** Composed sections (spec v19) in the rendered page; no browser (the browser checks: tools/eval/test/composed-render.test.ts). */
 const golden = (id: string) => migrateSpec(JSON.parse(readFileSync(new URL(`../../../tools/eval/golden/${id}.json`, import.meta.url), "utf8"))) as SiteSpec;
@@ -43,7 +43,7 @@ function render(sections: Section[], edit: (s: SiteSpec) => void = () => {}): { 
 const sectionHtml = (html: string, id = "s_composed") => new RegExp(`<section id="${id}"[\\s\\S]*?</section>`).exec(html)![0];
 
 /** One element of each kind, at an own place. */
-const KINDS: Record<(typeof ELEMENT_KINDS)[number], object> = {
+const KINDS = {
   heading: { kind: "heading", text: "Naslov", level: 2, size: 4, case: "uppercase", rotate: "90" },
   text: { kind: "text", paragraphs: ["Prvi odstavek.", "Drugi odstavek."], size: 1 },
   list: { kind: "list", items: ["Menjava olja", "Zavore"], marker: "dot" },
@@ -54,9 +54,10 @@ const KINDS: Record<(typeof ELEMENT_KINDS)[number], object> = {
   contact: { kind: "contact", show: ["phone", "email", "address", "map"] },
   prices: { kind: "prices", style: "rows", items: [{ name: "Menjava olja", price: { amount: 59 } }, { name: "Pregled", price: { amount: 20, from: true } }] },
   decor: { kind: "decor", svg: { width: 40, height: 20, paths: [{ d: "M0 0L40 20", fill: "none", stroke: "accent", width: 2 }] } },
-};
+  // The spec v20 kinds (photos, wordmark, ribbon, sticker, map, iconFacts, quote) join with their renderer (F1b-R2).
+} satisfies Partial<Record<(typeof ELEMENT_KINDS)[number], object>>;
 
-function one(kind: (typeof ELEMENT_KINDS)[number], more: object = {}) {
+function one(kind: keyof typeof KINDS, more: object = {}) {
   return sectionOf({ intent: "story", width: "contained", rows: 1, elements: [{ id: `e_${kind}`, ...KINDS[kind], desk: desk(1, 6, 1), phone: { order: 0, span: "full" }, ...more }] });
 }
 
@@ -367,6 +368,52 @@ describe("composed sections render", () => {
     it("leaves the bar alone when the composed section is not the opener", () => {
       const { html } = render([one("text", { id: "e_t" }), sectionOf(SAMPLE, "s_second")], noSkeleton);
       expect(bodyClass(html)).not.toContain("bar-covers-hero");
+    });
+
+    // A plate that calls can't become a text link: the bar's call waits (reveal.js) while the opener is on screen.
+    const plateCalls = { ...SAMPLE, elements: SAMPLE.elements.filter((e) => e.id !== "e_call").map((e) => (e.id === "e_plate" ? { ...e, link: { action: "call" } } : e)) };
+    const barCall = (html: string) => /<a [^>]*class="btn btn--primary action-bar__btn"[^>]*>/.exec(html)?.[0] ?? "";
+
+    it("an opener whose fact object calls: the bar's call waits for it, with or without a skeleton", () => {
+      for (const skeleton of [false, true]) {
+        const { html } = render([sectionOf(plateCalls)], (s) => {
+          if (!skeleton) delete s.design.skeleton;
+          else s.design.skeleton = { header: "bar", actions: "bar", footer: "compact", footerTone: "inverse", width: "contained", cards: "none", buttons: "soft", dividers: "none", photoRatio: "standard" };
+          s.chrome.mobileActionBar = true;
+        });
+        expect(barCall(html), `skeleton ${skeleton}`).toContain('href="tel:');
+        expect(barCall(html), `skeleton ${skeleton}`).toContain("data-after-hero");
+        // The composed bar.js runs the marks in place of reveal.js (which keeps its bytes in the shared bundle).
+        expect(html, `skeleton ${skeleton}`).toContain(`/js/${composedIslandPath(COMPOSED_BAR_ISLAND)}"`);
+        expect(html, `skeleton ${skeleton}`).not.toContain("reveal.js");
+      }
+    });
+
+    it("bar.js is reveal.js with the composed facts that call among its call objects, nothing else", () => {
+      const body = (src: string) => src.slice(src.indexOf("(() => {"));
+      const reveal = readFileSync(new URL("../../components/islands/reveal.js", import.meta.url), "utf8");
+      const bar = readFileSync(new URL("../../components/islands/composed/bar.js", import.meta.url), "utf8");
+      const from = 'document.querySelectorAll("main a.plate, main a.callblock, main a.bignum")';
+      expect(body(reveal)).toContain(from);
+      expect(body(bar)).toBe(body(reveal).replace(from, `document.querySelectorAll('main a.plate, main a.callblock, main a.bignum, main a.cx-fact__a[href^="tel:"]')`));
+    });
+
+    it("a page with a skeleton and no calling fact keeps reveal.js and loads no bar.js", () => {
+      const { html } = render([sectionOf(SAMPLE)], (s) => {
+        s.design.skeleton = { header: "bar", actions: "bar", footer: "compact", footerTone: "inverse", width: "contained", cards: "none", buttons: "soft", dividers: "none", photoRatio: "standard" };
+        s.chrome.mobileActionBar = true;
+      });
+      expect(html).not.toContain("composed/bar-");
+    });
+
+    it("a fact that calls counts as the opener's call; a plain fact, or one in a later section, does not", () => {
+      const sec = sectionOf(plateCalls) as Parameters<typeof composedActions>[0];
+      expect(composedActions(sec)).toEqual(["call"]);
+      expect(heroOwnsCall(sec)).toBe(true);
+      expect(heroOwnsCall(sectionOf(SAMPLE))).toBe(false);
+      const later = render([one("text", { id: "e_t" }), sectionOf(plateCalls, "s_second")], noSkeleton).html;
+      expect(barCall(later)).not.toContain("data-after-hero");
+      expect(later).not.toContain("reveal.js");
     });
   });
 });

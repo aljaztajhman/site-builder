@@ -89,6 +89,13 @@ export type Link = z.infer<typeof Link>;
 export const OWNER_ONLY = "x-owner-only";
 
 /**
+ * JSON Schema key of an object property the model is never offered (set with `.meta` on an optional field):
+ * toModelJsonSchema drops the property. Spec v20's design studio fields (business.amenities, design.motion,
+ * design.wordmark) carry it, so model requests with the designer off stay as they were.
+ */
+export const SYSTEM_ONLY = "x-system-only";
+
+/**
  * Spec v17: "Cena po dogovoru" (it-price-on-request, owner's decision sb-price-on-request). The owner chose to give
  * the price on request instead of an amount: rendered as "po dogovoru", never a placeholder (it doesn't block
  * publishing) and never an offer price in JSON-LD. Only the owner sets it in the editor (config

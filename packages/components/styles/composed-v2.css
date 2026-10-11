@@ -1,0 +1,1292 @@
+/*
+ * Composed sections, spec v20 additions (docs/plans/studio-phase1-design.md §3.4). The core sheet (composed.css, v19) is
+ * frozen except for bug fixes; everything spec v20 adds is here. Not part of STYLE_FILES.
+ *
+ * Four regions, one owner each: section (F1b-R1), kinds (F1b-R2), extensions (F1b-R3), vocab (the inventory batches).
+ * Each region ships as its own sheet (§3.4.7): split at the region markers, minified, content-addressed
+ * (composed-v2-<region>-<hash>.css), and linked after the core sheet only by pages that use it (@sb/render shared.ts
+ * composedSheets). So a region's rules must not need another region's: what two regions share goes in the core sheet,
+ * or composedSheets links both (an image scrim links section with extensions). Budgets: a region ≤ 12 KiB minified, the
+ * core sheet and every region together ≤ 32 KiB.
+ *
+ * Same bans as every sheet: no gradients, no blur or backdrop-filter, no heavy shadows, no pills, no accent-coloured
+ * single-side borders. Motion: @keyframes and animations only inside @supports (animation-timeline: …) and
+ * @media (prefers-reduced-motion: no-preference); only transform, opacity and clip-path (through --shape-* tokens)
+ * animate, never infinite; the default (no support, reduced motion) is the final, still state. A test parses this.
+ */
+
+/* region: section */
+
+/* Colour roles of layers and grounds: --cx-rc the role, --cx-ro the text role on it. The header over the opener takes
+   the opener's ground the same way: its cx-hg-<role> class (cx-hgp-<role> on phones where it differs). */
+.cx-ro-background,
+[data-hdr=over]:has(.cx-hg-background) {
+  --cx-rc: var(--c-bg);
+  --cx-ro: var(--c-text);
+}
+.cx-ro-surface,
+[data-hdr=over]:has(.cx-hg-surface) {
+  --cx-rc: var(--c-surface);
+  --cx-ro: var(--c-text);
+}
+.cx-ro-text,
+[data-hdr=over]:has(.cx-hg-text) {
+  --cx-rc: var(--c-text);
+  --cx-ro: var(--c-bg);
+}
+.cx-ro-muted,
+[data-hdr=over]:has(.cx-hg-muted) {
+  --cx-rc: var(--c-muted);
+  --cx-ro: var(--c-bg);
+}
+.cx-ro-primary,
+[data-hdr=over]:has(.cx-hg-primary) {
+  --cx-rc: var(--c-primary);
+  --cx-ro: var(--c-on-primary);
+}
+.cx-ro-onPrimary,
+[data-hdr=over]:has(.cx-hg-onPrimary) {
+  --cx-rc: var(--c-on-primary);
+  --cx-ro: var(--c-primary);
+}
+.cx-ro-accent,
+[data-hdr=over]:has(.cx-hg-accent) {
+  --cx-rc: var(--c-accent);
+  --cx-ro: var(--c-text);
+}
+.cx-ro-border,
+[data-hdr=over]:has(.cx-hg-border) {
+  --cx-rc: var(--c-border);
+  --cx-ro: var(--c-text);
+}
+.cx-ro-inverse,
+[data-hdr=over]:has(.cx-hg-inverse) {
+  --cx-rc: var(--c-inverse);
+  --cx-ro: var(--c-on-inverse);
+}
+.cx-ro-onInverse,
+[data-hdr=over]:has(.cx-hg-onInverse) {
+  --cx-rc: var(--c-on-inverse);
+  --cx-ro: var(--c-inverse);
+}
+.cx-ro-band,
+[data-hdr=over]:has(.cx-hg-band) {
+  --cx-rc: var(--c-band, var(--c-primary));
+  --cx-ro: var(--c-on-band, var(--c-on-primary));
+}
+.cx-ro-onBand,
+[data-hdr=over]:has(.cx-hg-onBand) {
+  --cx-rc: var(--c-on-band, var(--c-on-primary));
+  --cx-ro: var(--c-band, var(--c-primary));
+}
+
+/* A section with a layer, an edge or the header over it sets its own paddings: the layers and the edge need to know
+   them. The doubled class outranks base.css's same-tone rule (.s.tone-x + .s.tone-x); --cx-ed is the edge's depth,
+   --cx-rs the rise, --cx-hx the room the header takes over the opener. Its own ground stays in its own box. */
+.s.s-composed.cx-v2.cx-v2 {
+  --cx-pt: var(--space-section);
+  --cx-ru: 0.75rem;
+  --cx-top: calc(var(--cx-pt) + var(--cx-ed, 0px) + var(--cx-hx, 0px));
+  padding-top: var(--cx-top);
+  padding-bottom: var(--space-section);
+  margin-top: calc(-1 * (var(--cx-ed, 0px) + var(--cx-rs, 0) * var(--cx-ru) + var(--cx-hx, 0px)));
+  z-index: 1;
+  overflow: clip;
+}
+main > .s.s-composed.cx-v2.cx-v2:first-child {
+  --cx-pt: calc(var(--space-section) * 0.5);
+}
+/* The section after a layered one keeps its own top padding even on the same tone: the layer ended the shared ground. */
+.s-composed.cx-bgl + .s.s.s:not(.cx-v2) {
+  padding-top: var(--space-section);
+}
+@media (min-width: 64rem) {
+  .s.s-composed.cx-v2.cx-v2 {
+    --cx-ru: 1.5rem;
+  }
+}
+
+/* Background layers. A field sits on the grid's lines (absolutely: it takes no cell); a photo and a drawing sit behind
+   the container. Elements stay above them (.cx-el is z-index 1 and up). */
+.cx-bgl .cx {
+  position: relative;
+}
+/* The field reaches past its grid area: half a gap on a side inside the grid (a gap above and below on phones), to the
+   section's top or bottom edge on the first or last row, and past the page edge on a side that touches column 1 or 12
+   (the section clips it there). --cx-top (set on the section) is its whole top padding. */
+.cx-field {
+  position: absolute;
+  z-index: 0;
+  inset: var(--fpt, calc(var(--cx-gap) * -1)) -100vmax var(--fpb, calc(var(--cx-gap) * -1));
+  grid-column: 1 / -1;
+  grid-row: var(--pr0) / var(--pr1);
+  background: var(--cx-rc);
+  pointer-events: none;
+}
+.cx-fpb-t {
+  --fpt: calc(-1 * var(--cx-top));
+}
+.cx-fpb-b {
+  --fpb: calc(-1 * var(--space-section));
+}
+.cx-bg-photo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.cx-bg-photo > .media {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  overflow: hidden;
+}
+.cx-bg-photo > .media::before {
+  content: none;
+}
+.cx-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--cx-rc);
+  pointer-events: none;
+}
+.cx-scrim-1 {
+  opacity: 0.35;
+}
+.cx-scrim-2 {
+  opacity: 0.5;
+}
+.cx-scrim-3 {
+  opacity: 0.65;
+}
+.cx-scrim-4 {
+  opacity: 0.8;
+}
+.cx-bg-art {
+  position: absolute;
+  top: 50%;
+  z-index: 0;
+  width: var(--cx-bs);
+  max-width: 100vw;
+  aspect-ratio: 1;
+  translate: 0 -50%;
+  color: var(--cx-rc);
+  pointer-events: none;
+}
+.cx-bg-art > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.cx-bgs-1 {
+  --cx-bs: 25%;
+}
+.cx-bgs-2 {
+  --cx-bs: 50%;
+}
+.cx-bgs-3 {
+  --cx-bs: 75%;
+}
+.cx-bgs-4 {
+  --cx-bs: 130%;
+}
+.cx-bga-start {
+  left: 0;
+}
+.cx-bga-center {
+  left: 50%;
+  translate: -50% -50%;
+}
+.cx-bga-end {
+  right: 0;
+}
+/* Elements on a field: its text role and its ground (a backing panel paints it). No box of their own. */
+.cx-on {
+  display: contents;
+  color: var(--cx-ro);
+  --cx-ground: var(--cx-rc);
+}
+
+/* Phones: the photo is a band above the content (default) or stays behind it (cover); a drawing is cropped. */
+@media (max-width: 63.999rem) {
+  .cx-bgp--band .cx-bg-photo {
+    position: relative;
+    height: calc(75vw + var(--cx-hx, 0px));
+    margin-top: calc(-1 * var(--cx-top));
+    margin-bottom: var(--cx-pt);
+  }
+  /* Under a band photo a field on the first phone row starts where the band ends. */
+  .cx-bgp--band .cx-fpb-t {
+    --fpt: calc(-1 * var(--cx-pt));
+  }
+}
+@media (min-width: 64rem) {
+  .cx-field {
+    inset: var(--ft, calc(var(--cx-gap) * -0.5)) var(--fe, calc(var(--cx-gap) * -0.5)) var(--fb, calc(var(--cx-gap) * -0.5)) var(--fs, calc(var(--cx-gap) * -0.5));
+    grid-column: var(--fc0) / var(--fc1);
+    grid-row: var(--fr0) / var(--fr1);
+  }
+  .cx-fb-s {
+    --fs: -100vmax;
+  }
+  .cx-fb-e {
+    --fe: -100vmax;
+  }
+  .cx-fb-t {
+    --ft: calc(-1 * var(--cx-top));
+  }
+  .cx-fb-b {
+    --fb: calc(-1 * var(--space-section));
+  }
+}
+
+/* The top edge: straight, a rule, or a shape the section's own ground cuts into the one above (it overlaps it by the
+   edge's depth, halved on phones); rise lifts the section further over the one above. */
+.cx-edge-rule {
+  border-top: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+}
+.cx-edge-cut,
+.cx-edge-torn,
+.cx-edge-drawing {
+  --cx-ed: 0.75rem;
+}
+.cx-rise-1 {
+  --cx-rs: 1;
+}
+.cx-rise-2 {
+  --cx-rs: 2;
+}
+.cx-edge-cut {
+  --shape-edgecut: polygon(0 var(--cx-ed), 100% 0, 100% 100%, 0 100%);
+  clip-path: var(--shape-edgecut);
+}
+.cx-edge-torn {
+  --e: var(--cx-ed);
+  --shape-edgetorn: polygon(0 calc(var(--e) * 0.6), 4% calc(var(--e) * 0.2), 9% calc(var(--e) * 0.9), 13% calc(var(--e) * 0.3), 18% calc(var(--e) * 0.7), 22% 0, 27% calc(var(--e) * 0.8), 31% calc(var(--e) * 0.35), 36% calc(var(--e) * 0.95), 41% calc(var(--e) * 0.15), 45% calc(var(--e) * 0.6), 50% calc(var(--e) * 0.25), 55% calc(var(--e) * 0.85), 59% calc(var(--e) * 0.1), 64% calc(var(--e) * 0.7), 68% calc(var(--e) * 0.4), 73% var(--e), 77% calc(var(--e) * 0.2), 82% calc(var(--e) * 0.75), 86% calc(var(--e) * 0.3), 91% calc(var(--e) * 0.9), 95% calc(var(--e) * 0.45), 100% calc(var(--e) * 0.55), 100% 100%, 0 100%);
+  clip-path: var(--shape-edgetorn);
+}
+/* A drawn edge: the drawing (R2's Drawing, by its id) runs along the boundary in the section's text colour. */
+.cx-edge-art {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  height: var(--cx-ed);
+  overflow: hidden;
+  pointer-events: none;
+}
+.cx-edge-art > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+@media (min-width: 64rem) {
+  .cx-edge-cut,
+  .cx-edge-torn,
+  .cx-edge-drawing {
+    --cx-ed: 1.5rem;
+  }
+}
+
+/* A pinned column (desktop): its elements stack in reading order and stay on screen while the rest scrolls past.
+   Phones: no pin, the elements are in the stack like any other. */
+@media (min-width: 64rem) {
+  .cx-pin {
+    position: sticky;
+    top: 1.5rem;
+    z-index: 1;
+    grid-column: var(--pc) / span var(--ps);
+    grid-row: 1 / -1;
+    align-self: start;
+    display: flex;
+    flex-direction: column;
+    gap: var(--cx-gap);
+  }
+  html:has(.site-header--sticky) .cx-pin {
+    top: 6rem;
+  }
+  .cx-pin .cx-el {
+    grid-column: auto;
+    grid-row: auto;
+  }
+  .cx-pin .cx-el[data-ax=center] {
+    align-self: center;
+  }
+  .cx-pin .cx-el[data-ax=end] {
+    align-self: flex-end;
+  }
+}
+@media (max-width: 63.999rem) {
+  .cx-pin {
+    display: contents;
+  }
+}
+
+/* The header over the opener (body[data-hdr="over"]): the opener's ground runs up behind the header (the section is
+   pulled up by more than any header is tall and pads its content down by as much, so its content starts where it
+   would), and the header takes that ground's colours. A static header stays in its place, a sticky one stays sticky
+   and turns solid in the opener's ground once the page scrolls (solid from the start without scroll timelines or with
+   reduced motion). The open menu is solid. */
+.cx-hdr0 {
+  --cx-hx: 16rem;
+}
+body[data-hdr="over"] {
+  --hx-p: var(--c-primary);
+  --hx-op: var(--c-on-primary);
+}
+@media (max-width: 63.999rem) {
+  [data-hdr=over]:has(.cx-hgp-background) {
+    --cx-rc: var(--c-bg);
+    --cx-ro: var(--c-text);
+  }
+  [data-hdr=over]:has(.cx-hgp-surface) {
+    --cx-rc: var(--c-surface);
+    --cx-ro: var(--c-text);
+  }
+  [data-hdr=over]:has(.cx-hgp-text) {
+    --cx-rc: var(--c-text);
+    --cx-ro: var(--c-bg);
+  }
+  [data-hdr=over]:has(.cx-hgp-muted) {
+    --cx-rc: var(--c-muted);
+    --cx-ro: var(--c-bg);
+  }
+  [data-hdr=over]:has(.cx-hgp-primary) {
+    --cx-rc: var(--c-primary);
+    --cx-ro: var(--c-on-primary);
+  }
+  [data-hdr=over]:has(.cx-hgp-onPrimary) {
+    --cx-rc: var(--c-on-primary);
+    --cx-ro: var(--c-primary);
+  }
+  [data-hdr=over]:has(.cx-hgp-accent) {
+    --cx-rc: var(--c-accent);
+    --cx-ro: var(--c-text);
+  }
+  [data-hdr=over]:has(.cx-hgp-border) {
+    --cx-rc: var(--c-border);
+    --cx-ro: var(--c-text);
+  }
+  [data-hdr=over]:has(.cx-hgp-inverse) {
+    --cx-rc: var(--c-inverse);
+    --cx-ro: var(--c-on-inverse);
+  }
+  [data-hdr=over]:has(.cx-hgp-onInverse) {
+    --cx-rc: var(--c-on-inverse);
+    --cx-ro: var(--c-inverse);
+  }
+  [data-hdr=over]:has(.cx-hgp-band) {
+    --cx-rc: var(--c-band, var(--c-primary));
+    --cx-ro: var(--c-on-band, var(--c-on-primary));
+  }
+  [data-hdr=over]:has(.cx-hgp-onBand) {
+    --cx-rc: var(--c-on-band, var(--c-on-primary));
+    --cx-ro: var(--c-band, var(--c-primary));
+  }
+  body[data-hdr="over"] .site-header .site-nav {
+    margin-inline: -1rem;
+    padding-inline: 1rem;
+    background: var(--c-bg);
+  }
+}
+body[data-hdr="over"] .site-header {
+  z-index: 40;
+  background: transparent;
+  border-bottom-color: transparent;
+  --c-bg: var(--cx-rc);
+  --c-surface: var(--cx-rc);
+  --c-text: var(--cx-ro);
+  --c-muted: var(--cx-ro);
+  --c-border: var(--cx-ro);
+  --c-primary: var(--hx-p);
+  --c-on-primary: var(--hx-op);
+  color: var(--cx-ro);
+}
+body[data-hdr="over"] .site-header:not(.site-header--sticky, .site-header--overlay) {
+  position: relative;
+}
+body[data-hdr="over"] .site-header--sticky::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--cx-rc);
+  pointer-events: none;
+}
+
+/* Motion presets (spec MOTIONS, MOTION_META): entrance on view, scroll timelines only. reveal: text-bearing elements
+   rise into place; unmask: photos open from the bottom. Distances are halved on phones. Never on the opener (G7). */
+.cx-mo-reveal {
+  --cx-md: 0.75rem;
+}
+.cx-mo-unmask {
+  --shape-unmaskfrom: inset(0 0 100% 0);
+  --shape-unmaskto: inset(0);
+}
+@media (min-width: 64rem) {
+  .cx-mo-reveal {
+    --cx-md: 1.5rem;
+  }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes cx-mo-reveal {
+      from {
+        opacity: 0;
+        transform: translateY(var(--cx-md));
+      }
+    }
+    @keyframes cx-mo-unmask {
+      from {
+        clip-path: var(--shape-unmaskfrom);
+      }
+      to {
+        clip-path: var(--shape-unmaskto);
+      }
+    }
+    .cx-mo-reveal :is(.cx-el--heading, .cx-el--text, .cx-el--list, .cx-el--fact, .cx-el--prices, .cx-el--quote) {
+      animation: cx-mo-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 30%;
+    }
+    .cx-mo-unmask :is(.cx-el--image, .cx-el--photos) img {
+      animation: cx-mo-unmask linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 35%;
+    }
+  }
+}
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes cx-hdr-solid {
+      from {
+        opacity: 0;
+      }
+    }
+    body[data-hdr="over"] .site-header--sticky::before {
+      animation: cx-hdr-solid linear both;
+      animation-timeline: scroll();
+      animation-range: 0 6rem;
+    }
+  }
+}
+
+/* region: kinds */
+
+/* The spec v20 kinds (groups/composed/kinds). Objects size to their cell; colours are the palette's roles. */
+.cx-ph,
+.cx-rb,
+.cx-map,
+.cx-if {
+  --cx-w: 100%;
+}
+.cx-ph__fig,
+.cx-wm,
+.cx-rb__t,
+.cx-sk,
+.cx-map__note,
+.cx-if,
+.cx-q,
+.cx-q__b,
+.cx-q__t {
+  margin: 0;
+}
+
+/* photos. fan, stack, offset-pair: frames piled in one 4:5 box (square for the pair), the first on top; fan turns its
+   frames on desktop, phones only offset them. strip: a row scrolling inside itself. before-after: side by side. */
+.cx-ph__box {
+  position: relative;
+  aspect-ratio: 4 / 5;
+}
+.cx-ph--offset-pair .cx-ph__box {
+  aspect-ratio: 1;
+}
+/* A fan's frames are 62 % wide at 4:5 (0.775 of the box's width high) and sit on its floor: a 4:5 box left a band of
+   about half its width empty above them (the gap under a heading, F1b-A2). 5:4 is just taller than the frames. */
+.cx-ph--fan .cx-ph__box {
+  aspect-ratio: 5 / 4;
+}
+.cx-ph__box > .cx-ph__f {
+  position: absolute;
+  z-index: calc(4 - var(--i));
+  width: 62%;
+  aspect-ratio: 4 / 5;
+}
+.cx-ph--fan .cx-ph__f {
+  bottom: 0;
+  left: 19%;
+  transform-origin: 50% 110%;
+  translate: calc(var(--o) * 18%) 0;
+}
+.cx-ph--stack .cx-ph__f {
+  width: 72%;
+  left: calc(var(--i) * 28% / max(var(--n) - 1, 1));
+  top: calc(var(--i) * 28% / max(var(--n) - 1, 1));
+}
+.cx-ph--offset-pair .cx-ph__f {
+  left: calc(var(--i) * 38%);
+  top: calc(var(--i) * 22.5%);
+}
+.cx-ph__caps {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.25rem 1.25rem;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-sm);
+}
+.cx-ph__fig > .cx-ph__f {
+  aspect-ratio: 4 / 5;
+}
+.cx-ph--before-after .cx-ph__f {
+  aspect-ratio: 4 / 3;
+}
+.cx-ph__cap {
+  margin-top: 0.5rem;
+  font-size: var(--fs-sm);
+}
+.cx-ph__ba {
+  margin-inline-end: 0.5rem;
+  font-weight: 700;
+}
+.cx-ph--before-after {
+  display: grid;
+  gap: var(--cx-gap);
+}
+.cx-ph__row {
+  display: flex;
+  gap: var(--cx-gap);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 0.75rem;
+}
+.cx-ph__row > .cx-ph__fig {
+  flex: 0 0 80%;
+  scroll-snap-align: start;
+}
+@media (min-width: 64rem) {
+  .cx-ph--fan .cx-ph__f {
+    translate: calc(var(--o) * 16%) 0;
+    rotate: calc(var(--o) * 6deg);
+  }
+  .cx-ph--before-after {
+    grid-template-columns: 1fr 1fr;
+  }
+  .cx-ph__row > .cx-ph__fig {
+    flex-basis: 40%;
+  }
+}
+
+/* wordmark: the business name in the display face (the text face by design.wordmark.role); styles: region vocab. */
+.cx-wm {
+  font-family: var(--font-heading);
+  font-size: var(--fz);
+  font-weight: var(--fw-heading);
+  line-height: 1;
+  overflow-wrap: anywhere;
+}
+.cx-wm--text {
+  font-family: var(--font-body);
+}
+
+/* ribbon: a band of its own, the items between separators. Moving ribbons (drift, a live loop) show the track of copies
+   instead of the row, and only where scroll timelines exist and motion is welcome; the button sits at the band's end. */
+.cx-rb {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0.75rem 1rem;
+  overflow: hidden;
+  background: var(--c-band, var(--c-primary));
+  color: var(--c-on-band, var(--c-on-primary));
+  font-family: var(--font-heading);
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-heading);
+  line-height: 1.3;
+}
+.cx-rb__t,
+.cx-rb__run {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+}
+.cx-rb__s {
+  display: inline-flex;
+}
+.cx-rb__sep {
+  width: auto;
+  height: 0.9em;
+}
+.cx-rb__track {
+  display: none;
+}
+.cx-rb__run {
+  flex-wrap: nowrap;
+  padding-inline-end: 0.75rem;
+  white-space: nowrap;
+}
+.cx-rb__btn {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  min-width: 2.75rem;
+  padding: 0 1rem;
+  border: 0;
+  background: inherit;
+  color: inherit;
+  font: 600 var(--fs-sm) / 1 var(--font-body);
+  cursor: pointer;
+  outline-offset: -0.25rem;
+}
+/* Stopped: the pressed state shows as a bar along the button's foot. */
+.cx-rb__btn[aria-pressed=true] {
+  box-shadow: inset 0 -0.25rem currentColor;
+}
+.cx-rb--drift {
+  --rb-dx: -6rem;
+}
+@media (min-width: 64rem) {
+  .cx-rb--drift {
+    --rb-dx: -12rem;
+  }
+}
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes cx-rb-loop {
+      to {
+        transform: translateX(calc(-100% / var(--rb-n)));
+      }
+    }
+    @keyframes cx-rb-drift {
+      to {
+        transform: translateX(var(--rb-dx));
+      }
+    }
+    .cx-rb--drift .cx-rb__t,
+    .cx-rb--loop.is-live .cx-rb__t {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+    }
+    .cx-rb--drift .cx-rb__track,
+    .cx-rb--loop.is-live .cx-rb__track {
+      display: flex;
+      flex: none;
+    }
+    .cx-rb--loop.is-live {
+      padding-inline-end: 11rem;
+    }
+    .cx-rb--loop.is-live .cx-rb__track {
+      animation: cx-rb-loop var(--rb-t) linear infinite;
+    }
+    .cx-rb--loop:is(:hover, :focus-within, .is-off, .is-paused) .cx-rb__track {
+      animation-play-state: paused;
+    }
+    .cx-rb--drift .cx-rb__track {
+      animation: cx-rb-drift linear both;
+      animation-timeline: view();
+    }
+  }
+}
+
+/* sticker: a short line on a label of its own, turned a few degrees on desktop only. */
+.cx-sk {
+  display: grid;
+  place-items: center;
+  justify-self: start;
+  align-self: start;
+  max-width: 100%;
+  padding: 0.625rem 1rem;
+  background: var(--c-primary);
+  color: var(--c-on-primary);
+  font-family: var(--font-heading);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: center;
+  text-wrap: balance;
+}
+.cx-sk--round,
+.cx-sk--oval {
+  border-radius: 50%;
+  padding: 1rem;
+}
+.cx-sk--round {
+  width: clamp(6.5rem, calc(3rem + var(--n) * 0.3rem), 10rem);
+  aspect-ratio: 1;
+}
+.cx-sk--oval {
+  min-width: 8rem;
+  aspect-ratio: 3 / 2;
+  padding-inline: 1.5rem;
+}
+.cx-sk--rect {
+  border-radius: calc(var(--radius) / 2);
+}
+.cx-sk--tag {
+  padding-inline-start: 2rem;
+  clip-path: var(--shape-tag);
+}
+@media (min-width: 64rem) {
+  .cx-sk {
+    rotate: calc(var(--tilt, -4) * 1deg);
+  }
+}
+
+/* map: the drawn streets in a framed box (never taller than 60 % of the screen), the pin in the ink (--cx-ink, the
+   primary role by default), the street names on it; under it the address, the note and the directions button. */
+.cx-map {
+  display: grid;
+  gap: 1rem;
+}
+.cx-map__art {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  max-height: 60vh;
+  overflow: hidden;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+}
+.cx-map__art > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.cx-map__road {
+  fill: none;
+  stroke: var(--c-border);
+  stroke-width: 14;
+}
+.cx-map__road--x {
+  stroke-width: 10;
+}
+.cx-map__pin {
+  fill: var(--cx-ink, var(--c-primary));
+}
+.cx-map__dot {
+  fill: var(--c-bg);
+}
+.cx-map__ring {
+  fill: none;
+  stroke: var(--cx-ink, var(--c-primary));
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+/* A street name sits beside its street: --lx, --ly (per cent of the box, from the drawing) place it. */
+.cx-map__l {
+  position: absolute;
+  left: calc(var(--lx) * 1% + 0.75rem);
+  bottom: calc(var(--ly) * 1% + 0.75rem);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  line-height: 1.2;
+  max-width: 36%;
+}
+.cx-map__cap {
+  display: grid;
+  justify-items: start;
+  gap: 0.5rem;
+}
+.cx-map__cap address {
+  font-style: normal;
+}
+
+/* iconFacts: icon and label rows; one column on phones (two when every label is short), a grid on desktop. */
+.cx-if {
+  align-content: start;
+  display: grid;
+  gap: 0.875rem 1.5rem;
+  padding: 0;
+  list-style: none;
+}
+.cx-if--2 {
+  grid-template-columns: 1fr 1fr;
+}
+.cx-if__i {
+  display: grid;
+  grid-template-columns: 1.5rem minmax(0, 1fr);
+  gap: 0.125rem 0.75rem;
+  align-items: start;
+}
+.cx-if__ic {
+  grid-row: span 2;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+.cx-if__l {
+  font-weight: 600;
+  line-height: 1.5rem;
+}
+.cx-if__n {
+  grid-column: 2;
+  font-size: var(--fs-sm);
+}
+/* The column minimum falls with the number of facts (--n): 4 facts keep the old 11.8rem (2 + 2 in a half-width cell), 6 get 10.7rem so a row of six
+   fits the 1152 px of a full-width cell at 1280 (it was 5 + 1). */
+@media (min-width: 64rem) {
+  .cx-if {
+    grid-template-columns: repeat(auto-fit, minmax(calc(14rem - var(--n, 5) * .55rem), 1fr));
+  }
+}
+
+/* quote: the client's words in the display face, the opening mark hanging in the margin, the speaker under them. */
+.cx-q {
+  font-size: var(--fz);
+}
+.cx-q__t {
+  max-width: 34em;
+  font-family: var(--font-heading);
+  font-weight: var(--fw-heading);
+  line-height: 1.25;
+  text-wrap: pretty;
+  hyphens: manual;
+}
+.cx-q__o {
+  margin-inline-start: -0.42em;
+}
+.cx-q[data-ax=center] .cx-q__o {
+  margin: 0;
+}
+.cx-q__by {
+  margin-top: 0.75rem;
+  font-size: var(--fs-base);
+}
+
+/* region: extensions */
+
+/* Extensions of the existing kinds (spec v20, F1b-R3). Elements get their classes from placement() (elements.tsx).
+   Rules are terse on purpose (the core sheet and every region together stay under 32 KiB). */
+
+/* Stacking (layers count in twos, the G26 bug fix) is the core sheet's: every composed page needs it. */
+
+/* Paint: an element's own colours as roles. cx-bg-<role> its own ground (cx-pb) with the text role on it, cx-fg-<role> its
+   text colour (cx-pf). Not the shared cx-ro-* table (that is the layers' and the header's). */
+.cx-bg-background {
+  --cx-f: var(--c-bg);
+  --cx-o: var(--c-text);
+}
+.cx-bg-surface {
+  --cx-f: var(--c-surface);
+  --cx-o: var(--c-text);
+}
+.cx-bg-text {
+  --cx-f: var(--c-text);
+  --cx-o: var(--c-bg);
+}
+.cx-bg-muted {
+  --cx-f: var(--c-muted);
+  --cx-o: var(--c-bg);
+}
+.cx-bg-primary {
+  --cx-f: var(--c-primary);
+  --cx-o: var(--c-on-primary);
+}
+.cx-bg-onPrimary {
+  --cx-f: var(--c-on-primary);
+  --cx-o: var(--c-primary);
+}
+.cx-bg-accent {
+  --cx-f: var(--c-accent);
+  --cx-o: var(--c-text);
+}
+.cx-bg-border {
+  --cx-f: var(--c-border);
+  --cx-o: var(--c-text);
+}
+.cx-bg-inverse {
+  --cx-f: var(--c-inverse);
+  --cx-o: var(--c-on-inverse);
+}
+.cx-bg-onInverse {
+  --cx-f: var(--c-on-inverse);
+  --cx-o: var(--c-inverse);
+}
+.cx-bg-band {
+  --cx-f: var(--c-band, var(--c-primary));
+  --cx-o: var(--c-on-band, var(--c-on-primary));
+}
+.cx-bg-onBand {
+  --cx-f: var(--c-on-band, var(--c-on-primary));
+  --cx-o: var(--c-band, var(--c-primary));
+}
+/* A fill is the element's ground: a fact paints its object only (its plate, its seal ...), the rest paint their box. */
+.cx-pb:where(:not(.cx-fact)) {
+  padding: .75rem 1rem;
+  border-radius: var(--radius);
+  background: var(--cx-f);
+  color: var(--cx-o);
+}
+.cx-pb.cx-fact .cx-fact__obj {
+  background: var(--cx-f);
+  color: var(--cx-o);
+}
+.cx-fact--numeral.cx-pb .cx-fact__obj {
+  padding: .05em .25em;
+}
+.cx-fact--plate.cx-fact.cx-pb {
+  --plate-ground: var(--cx-f);
+  --plate-ink: var(--cx-o);
+}
+/* An own text colour comes after (so it wins over the text role of a fill) and reaches the objects and the links inside. */
+.cx-fg-background {
+  color: var(--c-bg);
+}
+.cx-fg-surface {
+  color: var(--c-surface);
+}
+.cx-fg-text {
+  color: var(--c-text);
+}
+.cx-fg-muted {
+  color: var(--c-muted);
+}
+.cx-fg-primary {
+  color: var(--c-primary);
+}
+.cx-fg-onPrimary {
+  color: var(--c-on-primary);
+}
+.cx-fg-accent {
+  color: var(--c-accent);
+}
+.cx-fg-border {
+  color: var(--c-border);
+}
+.cx-fg-inverse {
+  color: var(--c-inverse);
+}
+.cx-fg-onInverse {
+  color: var(--c-on-inverse);
+}
+.cx-fg-band {
+  color: var(--c-band, var(--c-primary));
+}
+.cx-fg-onBand {
+  color: var(--c-on-band, var(--c-on-primary));
+}
+/* Only objects without a ground of their own take the colour into the object (numeral, stamp); a ticket, seal or tag keeps its
+   own ink on its own ground, a plate its plate ink (inheriting would set the colour on the object's own ground). */
+.cx-pf:is(.cx-fact--numeral, .cx-fact--stamp) .cx-fact__obj,
+.cx-pf a:not(.btn) {
+  color: inherit;
+}
+
+/* Type treatments of a heading (class cx-tt-<name>; the guards: G20). stacked: one word to a line, the box as wide as the longest
+   word, set tight. knockout: reversed display type over a photo or a field: tight tracking and
+   leading, in the ink the ground's own text role gives (the guards check that ink, G3 and G9), so no blend modes. */
+.cx-h.cx-tt-stacked {
+  inline-size: min-content;
+  line-height: .92;
+}
+.cx-h.cx-tt-knockout {
+  letter-spacing: -.03em;
+  line-height: .92;
+}
+
+/* Place: --tilt in degrees and a bleed past the section's edge are desktop only; phones keep the stack (G10, G11, G12).
+   A bleed runs from a grid edge the element touches to the page edge: --cx-be is the room between the grid and the page
+   edge (the container's width and its padding), the element's width is its cell's plus that room. cx-ps-bleed is the phone
+   place: edge to edge, no side padding. Sections clip what leaves them sideways, so no bleed makes the page scroll. */
+.s-composed {
+  --cx-mw: 76rem;
+  --cx-pad: 1rem;
+  --cx-be: calc(max(0px, (100vw - var(--cx-mw))/2) + var(--cx-pad));
+}
+.cx-w-wide {
+  --cx-mw: 90rem;
+}
+.cx-w-full {
+  --cx-mw: 100vw;
+}
+@media (min-width: 48rem) {
+  .s-composed {
+    --cx-pad: 2rem;
+  }
+}
+@media (max-width: 63.999rem) {
+  .cx-el.cx-ps-bleed {
+    --cx-w: auto;
+    justify-self: stretch;
+    margin-inline: calc(-1*var(--cx-pad));
+  }
+  .cx-ps-bleed.cx-mask-none {
+    border-radius: 0;
+  }
+}
+@media (min-width: 64rem) {
+  .cx-w-full {
+    --cx-pad: clamp(1rem, 3vw, 3rem);
+  }
+  .cx-tilt {
+    rotate: calc(var(--tilt)*1deg);
+  }
+  .cx-el:is(.cx-bx-start, .cx-bx-end, .cx-bx-both) {
+    --cx-w: auto;
+    justify-self: stretch;
+  }
+  .cx-bx-start,
+  .cx-bx-both {
+    margin-left: calc(-1*var(--cx-be));
+  }
+  .cx-bx-end,
+  .cx-bx-both {
+    margin-right: calc(-1*var(--cx-be));
+  }
+  /* Past the section's edge by one and a half paddings (translate, so the row keeps its height); the section clips it. */
+  .cx-by-top {
+    align-self: start;
+    --cx-by: calc(var(--cx-pt, var(--space-section))*-1.5);
+  }
+  .cx-by-bottom {
+    align-self: end;
+    --cx-by: calc(var(--space-section)*1.5);
+  }
+  .cx-by-top,
+  .cx-by-bottom {
+    translate: calc(var(--sx, 0)*var(--cx-step)) calc(var(--sy, 0)*var(--cx-step) + var(--cx-by));
+  }
+  .s-composed:has(.cx-by-top, .cx-by-bottom) {
+    overflow: clip;
+  }
+}
+
+/* Image scrim: the photo layer's flat scrim (.cx-scrim-<strength>, .cx-ro-<role>, region section) over one picture.
+   Heading: the type treatment is the inventory's (region vocab). Text: a drop cap. */
+.cx-t--drop > p:first-child::first-letter {
+  float: left;
+  margin: .05em .1em 0 0;
+  font: var(--fw-heading) 3.4em/.8 var(--font-heading);
+}
+
+/* List: a lead column, markers (dash, a timeline rail, a drawing), weight and size. */
+.cx-l--dash li,
+.cx-l--line li {
+  padding-left: 1.25rem;
+}
+.cx-l--drawing li {
+  padding-left: 1.75rem;
+}
+.cx-l--dash li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: .8em;
+  width: .7em;
+  height: 2px;
+  background: currentColor;
+}
+.cx-l__mk {
+  position: absolute;
+  left: 0;
+  top: .1em;
+  width: 1.25em;
+  height: 1.25em;
+}
+.cx-l--line {
+  gap: 0;
+}
+.cx-l--line li {
+  padding-bottom: 1.25rem;
+}
+.cx-l--line li:last-child {
+  padding-bottom: 0;
+}
+.cx-l--line li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: .3em;
+  width: .8em;
+  height: .8em;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  background: var(--cx-ground, var(--c-bg));
+}
+.cx-l--line li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: calc(.4em - 1px);
+  top: 1.1em;
+  bottom: -.3em;
+  width: 2px;
+  background: color-mix(in srgb, currentColor 35%, transparent);
+}
+.cx-l--leads li {
+  --cx-lw: 6.5rem;
+  display: grid;
+  grid-template-columns: var(--cx-lw) minmax(0, 1fr);
+  gap: 0 1rem;
+}
+.cx-l--leads .cx-l__txt {
+  grid-column: 1/-1;
+}
+.cx-l--leads .cx-l__lead + .cx-l__txt {
+  grid-column: 2;
+}
+.cx-l__lead {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+@media (min-width: 64rem) {
+  .cx-l--leads li {
+    --cx-lw: 9rem;
+  }
+}
+.cx-lw-medium {
+  font-weight: 500;
+}
+.cx-lw-bold {
+  font-weight: 700;
+}
+.cx-ls-1 {
+  font-size: var(--cx-fs-1);
+}
+.cx-ls-2 {
+  font-size: var(--cx-fs-2);
+}
+
+/* Fact: the whole object a link (at least 44 px), the label before the value, the plate's town code, the count-up value. */
+.cx-fact__a {
+  display: grid;
+  gap: inherit;
+  justify-items: inherit;
+  align-content: start;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  color: inherit;
+  text-decoration: none;
+}
+.cx-fact__a:hover .cx-fact__label {
+  text-decoration: underline;
+}
+.plate__code {
+  display: contents;
+}
+.cx-count {
+  display: inline-block;
+}
+
+/* Prices: sizes, two to a row on phones, and the styles leaders, board, docket and sheet (the rows' markup). */
+.cx-psz-1 {
+  font-size: var(--cx-fs-1);
+}
+.cx-psz-2 {
+  font-size: var(--cx-fs-2);
+}
+.cx-psz-1.price-tags {
+  grid-template-columns: repeat(auto-fill, minmax(14.5rem, 1fr));
+}
+.cx-psz-2.price-tags {
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+}
+/* A plate sizes its type to its column when it has a size, two to a row or a town code (--n: its longest price in characters). */
+.cx-prices--plates .price-tags__item {
+  container-type: inline-size;
+}
+.cx-prices--plates .price-tag.plate {
+  font-size: min(var(--pf, clamp(1.5rem, 1.1rem + 1.2vw, 2.125rem)), calc(100cqw/(var(--n, 8)*.62 + 2.4)));
+}
+.cx-psz-1 {
+  --pf: clamp(1.9rem, 1.2rem + 2.2vw, 2.8rem);
+}
+.cx-psz-2 {
+  --pf: clamp(2.3rem, 1.4rem + 3.2vw, 3.6rem);
+}
+@media (max-width: 63.999rem) {
+  .cx-pc2.price-tags {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem .75rem;
+  }
+  .cx-pc2 {
+    --pf: clamp(1.1rem, 5.2vw, 1.6rem);
+  }
+}
+.cx-prices--leaders .prices__row {
+  gap: .5rem;
+  border: 0;
+}
+.cx-prices--leaders .prices__row::after {
+  content: "";
+  order: 1;
+  flex: 1;
+  min-width: 1.5rem;
+  translate: 0 -.25em;
+  border-bottom: 2px dotted;
+}
+.cx-prices--leaders dd {
+  order: 2;
+}
+.cx-prices--board {
+  padding: 1.5rem 1.25rem;
+  background: var(--c-inverse);
+  color: var(--c-on-inverse);
+  border: 3px solid currentColor;
+  text-align: center;
+}
+.cx-prices--board .prices__row {
+  display: grid;
+  justify-items: center;
+  gap: .2rem;
+  border-color: currentColor;
+}
+.cx-prices--board .prices__row dd {
+  max-width: none;
+  text-align: center;
+  font: var(--fw-heading) var(--fs-h3) var(--font-heading);
+}
+.cx-prices--board .prices__note {
+  color: inherit;
+}
+.cx-prices-el .cx-prices--docket {
+  max-width: 26rem;
+  padding: 1rem 1.25rem;
+  border-block: 2px dashed;
+  font-variant-numeric: tabular-nums;
+}
+.cx-prices--docket .prices__row {
+  border-bottom: 1px dashed;
+}
+.cx-prices--docket .prices__row:last-child {
+  border: 0;
+}
+.cx-prices--sheet {
+  border-top: 3px solid;
+}
+.cx-prices--sheet .prices__row {
+  padding-block: .9rem;
+}
+.cx-prices--sheet .prices__row dd {
+  font: var(--fw-heading) var(--fs-h3) var(--font-heading);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Decor: a fixed size (--sz x 2 rem, at most 40vw on phones, its cell on desktop) and a strip of a repeating drawing. */
+.cx-decor--fx {
+  --cx-w: min(calc(var(--sz)*2rem), 40vw);
+}
+@media (min-width: 64rem) {
+  .cx-decor--fx {
+    --cx-w: min(calc(var(--sz)*2rem), 100%);
+  }
+}
+.cx-decor--strip {
+  --cx-w: 100%;
+}
+.cx-decor .cx-strip {
+  width: 100%;
+  height: calc(var(--sz, 2)*2rem);
+}
+
+/* region: vocab */

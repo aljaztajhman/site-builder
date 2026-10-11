@@ -1,0 +1,1168 @@
+{
+  "specVersion": 20,
+  "slug": "kitchen-sink",
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Pekarna Kvas",
+    "type": "bakery",
+    "phone": "+38641555906",
+    "email": "pekarna@pekarna-kvas.example",
+    "address": {
+      "street": "Šutna 30",
+      "postalCode": "1241",
+      "city": "Kamnik"
+    },
+    "hours": {
+      "entries": [
+        {
+          "from": "mon",
+          "to": "fri",
+          "open": "06:30",
+          "close": "18:00"
+        },
+        {
+          "from": "sat",
+          "to": "sat",
+          "open": "06:30",
+          "close": "12:00"
+        },
+        {
+          "from": "sun",
+          "to": "sun",
+          "open": "07:00",
+          "close": "10:00"
+        }
+      ]
+    },
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      }
+    },
+    "amenities": [
+      "parking",
+      "card",
+      "wifi"
+    ]
+  },
+  "design": {
+    "direction": "warm-craft",
+    "fontPair": "fraunces-source-sans",
+    "colors": {
+      "background": "#ffffff",
+      "surface": "#edf2ef",
+      "text": "#221b17",
+      "muted": "#5b504a",
+      "primary": "#b4441f",
+      "onPrimary": "#ffffff",
+      "accent": "#c65a2e",
+      "border": "#d9e0dc",
+      "inverse": "#2b211c",
+      "onInverse": "#f5f5f5"
+    },
+    "radius": 6,
+    "baseFontSize": 17,
+    "scale": 1.28,
+    "headingWeight": 600,
+    "headingCase": "normal",
+    "headingTracking": -0.01,
+    "density": "regular",
+    "shadow": "none",
+    "imagery": "offset-block",
+    "genome": {
+      "source": "preset",
+      "palette": "preset",
+      "rhythm": "alternate",
+      "shape": "soft"
+    },
+    "motion": "lively",
+    "wordmark": {
+      "style": "plain"
+    }
+  },
+  "assets": {
+    "logo": {
+      "src": "uploads/logo.svg",
+      "width": 160,
+      "height": 48,
+      "file": "logo.svg"
+    },
+    "images": [
+      {
+        "id": "img_01",
+        "src": "uploads/01.jpg",
+        "width": 1600,
+        "height": 1200,
+        "alt": "Hlebci kruha z drožmi na leseni polici"
+      },
+      {
+        "id": "img_02",
+        "src": "uploads/02.jpg",
+        "width": 1200,
+        "height": 1600,
+        "alt": "Pek oblikuje testo na pomokani mizi"
+      },
+      {
+        "id": "img_03",
+        "src": "uploads/03.jpg",
+        "width": 1600,
+        "height": 1200,
+        "alt": "Rogljički in cimetovi polži na pladnju"
+      }
+    ]
+  },
+  "chrome": {
+    "header": {
+      "variant": "split-cta",
+      "cta": "call"
+    },
+    "footer": {
+      "variant": "columns"
+    },
+    "mobileActionBar": true
+  },
+  "pages": [
+    {
+      "id": "p_home",
+      "kind": "home",
+      "slug": "",
+      "nav": {
+        "label": "Domov",
+        "show": true
+      },
+      "seo": {
+        "title": "Pekarna Kvas, Kamnik – kruh z drožmi",
+        "description": "Družinska pekarna na Šutni v Kamniku: pirin in rženi kruh z drožmi, rogljički, cimetovi polži, ob petkih in sobotah potica in krofi."
+      },
+      "sections": [
+        {
+          "id": "s_k_hero",
+          "type": "composed",
+          "variant": "free",
+          "tone": "inverse",
+          "props": {
+            "intent": "hero",
+            "width": "wide",
+            "minHeight": "l",
+            "rows": 4,
+            "headerOver": true,
+            "background": [
+              {
+                "kind": "photo",
+                "image": "img_02",
+                "scrim": {
+                  "role": "inverse",
+                  "strength": 3
+                },
+                "phone": "band"
+              }
+            ],
+            "elements": [
+              {
+                "id": "e_h1",
+                "kind": "heading",
+                "text": "Kruh z drožmi, ki vzhaja čez noč",
+                "level": 1,
+                "size": 5,
+                "weight": 900,
+                "measure": "m",
+                "desk": {
+                  "col": 1,
+                  "span": 7,
+                  "row": 1
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_lead",
+                "kind": "text",
+                "paragraphs": [
+                  "Mala družinska pekarna na začetku stare ulice. Vse je ročno delo, brez aditivov in brez zamrznjenega testa."
+                ],
+                "size": 1,
+                "desk": {
+                  "col": 1,
+                  "span": 6,
+                  "row": 2
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_plate",
+                "kind": "fact",
+                "value": "041 555 906",
+                "label": "Naročila po telefonu",
+                "treatment": "plate",
+                "size": 4,
+                "plateCode": true,
+                "link": {
+                  "action": "call"
+                },
+                "desk": {
+                  "col": 1,
+                  "span": 5,
+                  "row": 3
+                },
+                "phone": {
+                  "order": 2,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_dir",
+                "kind": "action",
+                "action": "directions",
+                "label": "Navodila za pot",
+                "style": "secondary",
+                "desk": {
+                  "col": 1,
+                  "span": 3,
+                  "row": 4,
+                  "alignY": "start"
+                },
+                "phone": {
+                  "order": 3,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_fan",
+                "kind": "photos",
+                "images": [
+                  "img_01",
+                  "img_03"
+                ],
+                "arrangement": "fan",
+                "mask": "arch",
+                "desk": {
+                  "col": 8,
+                  "span": 5,
+                  "row": 1,
+                  "rowSpan": 4,
+                  "layer": 1
+                },
+                "phone": {
+                  "order": 4,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_sticker",
+                "kind": "sticker",
+                "text": "Odprto tudi ob nedeljah",
+                "shape": "round",
+                "desk": {
+                  "col": 7,
+                  "span": 2,
+                  "row": 3,
+                  "rowSpan": 2,
+                  "layer": 2,
+                  "tilt": -6
+                },
+                "phone": {
+                  "order": 5,
+                  "span": "half"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_k_ribbon",
+          "type": "composed",
+          "variant": "free",
+          "tone": "band",
+          "props": {
+            "intent": "highlights",
+            "width": "full",
+            "rows": 2,
+            "elements": [
+              {
+                "id": "e_word",
+                "kind": "wordmark",
+                "size": 6,
+                "desk": {
+                  "col": 1,
+                  "span": 12,
+                  "row": 1
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_ribbon",
+                "kind": "ribbon",
+                "items": [
+                  "Pirin kruh z drožmi",
+                  "Rženi kruh",
+                  "Polnozrnate žemlje",
+                  "Rogljički z maslom"
+                ],
+                "separator": "ornament/rope-line",
+                "move": "loop",
+                "desk": {
+                  "col": 1,
+                  "span": 12,
+                  "row": 2
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_k_products",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "prices",
+            "width": "contained",
+            "rows": 3,
+            "top": {
+              "edge": "torn"
+            },
+            "motion": "reveal",
+            "background": [
+              {
+                "kind": "drawing",
+                "drawing": "motif/bakery/wheat-ear-line",
+                "scale": 4,
+                "anchor": "end",
+                "color": "border"
+              }
+            ],
+            "elements": [
+              {
+                "id": "e_h",
+                "kind": "heading",
+                "text": "Vsak dan na polici",
+                "level": 2,
+                "size": 4,
+                "color": "primary",
+                "desk": {
+                  "col": 1,
+                  "span": 7,
+                  "row": 1
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_p",
+                "kind": "prices",
+                "style": "leaders",
+                "items": [
+                  {
+                    "name": "Pirin kruh z drožmi",
+                    "price": {
+                      "amount": 4.2
+                    }
+                  },
+                  {
+                    "name": "Rženi kruh",
+                    "price": {
+                      "amount": 3.9
+                    }
+                  },
+                  {
+                    "name": "Rogljiček z maslom",
+                    "price": {
+                      "amount": 1.3
+                    }
+                  },
+                  {
+                    "name": "Orehova potica (1 kg)",
+                    "price": {
+                      "amount": 18,
+                      "from": true
+                    }
+                  }
+                ],
+                "desk": {
+                  "col": 1,
+                  "span": 7,
+                  "row": 2
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_fixed",
+                "kind": "decor",
+                "drawing": "motif/bakery/wheat-ear-line",
+                "fit": "fixed",
+                "size": 6,
+                "color": "primary",
+                "desk": {
+                  "col": 9,
+                  "span": 3,
+                  "row": 1,
+                  "alignY": "end"
+                },
+                "phone": {
+                  "order": 3,
+                  "span": "inset"
+                }
+              },
+              {
+                "id": "e_count",
+                "kind": "fact",
+                "value": "18",
+                "label": "Orehova potica (1 kg), cena v evrih od",
+                "treatment": "stamp",
+                "size": 4,
+                "count": true,
+                "desk": {
+                  "col": 9,
+                  "span": 4,
+                  "row": 2
+                },
+                "phone": {
+                  "order": 2,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_rope",
+                "kind": "decor",
+                "drawing": "ornament/rope-line",
+                "repeat": "x",
+                "color": "border",
+                "desk": {
+                  "col": 1,
+                  "span": 12,
+                  "row": 3
+                },
+                "phone": {
+                  "order": 4,
+                  "span": "full"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_k_story",
+          "type": "composed",
+          "variant": "free",
+          "tone": "alt",
+          "props": {
+            "intent": "story",
+            "width": "contained",
+            "rows": 5,
+            "surface": {
+              "texture": "grain"
+            },
+            "top": {
+              "edge": "drawing",
+              "drawing": "ornament/rope-line",
+              "rise": 1
+            },
+            "motion": "unmask",
+            "elements": [
+              {
+                "id": "e_h",
+                "kind": "heading",
+                "text": "Pečemo z drožmi",
+                "level": 2,
+                "size": 5,
+                "treatment": "stacked",
+                "desk": {
+                  "col": 1,
+                  "span": 5,
+                  "row": 1,
+                  "rowSpan": 2
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_t",
+                "kind": "text",
+                "paragraphs": [
+                  "Brez aditivov in brez zamrznjenega testa. Moko kupujemo pri mlinu v bližini."
+                ],
+                "dropCap": true,
+                "desk": {
+                  "col": 1,
+                  "span": 5,
+                  "row": 3
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_l",
+                "kind": "list",
+                "marker": "line",
+                "weight": "medium",
+                "items": [
+                  {
+                    "lead": "Kvas",
+                    "text": "Gojimo ga sami."
+                  },
+                  {
+                    "lead": "Noč",
+                    "text": "Testo vzhaja čez noč."
+                  },
+                  {
+                    "lead": "Moka",
+                    "text": "Iz mlina v bližini."
+                  }
+                ],
+                "desk": {
+                  "col": 7,
+                  "span": 6,
+                  "row": 1,
+                  "rowSpan": 3
+                },
+                "phone": {
+                  "order": 2,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_q",
+                "kind": "quote",
+                "text": "Kruh pečemo samo z drožmi (kvasom, ki ga gojimo sami) in ga pustimo vzhajati čez noč, zato je bolj okusen in dlje ostane svež.",
+                "by": "Jure Petek",
+                "size": 1,
+                "desk": {
+                  "col": 2,
+                  "span": 9,
+                  "row": 4
+                },
+                "phone": {
+                  "order": 3,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_strip",
+                "kind": "photos",
+                "images": [
+                  "img_01",
+                  "img_02",
+                  "img_03"
+                ],
+                "arrangement": "strip",
+                "desk": {
+                  "col": 1,
+                  "span": 12,
+                  "row": 5
+                },
+                "phone": {
+                  "order": 4,
+                  "span": "full"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_k_practical",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "contact",
+            "width": "contained",
+            "rows": 3,
+            "surface": {
+              "texture": "lines"
+            },
+            "top": {
+              "edge": "cut"
+            },
+            "elements": [
+              {
+                "id": "e_map",
+                "kind": "map",
+                "style": "street",
+                "desk": {
+                  "col": 1,
+                  "span": 5,
+                  "row": 1,
+                  "rowSpan": 2
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_h",
+                "kind": "heading",
+                "text": "Obiščite nas",
+                "level": 2,
+                "size": 4,
+                "desk": {
+                  "col": 7,
+                  "span": 6,
+                  "row": 1
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_if",
+                "kind": "iconFacts",
+                "items": [
+                  {
+                    "fact": "parking"
+                  },
+                  {
+                    "fact": "card"
+                  },
+                  {
+                    "fact": "wifi"
+                  }
+                ],
+                "desk": {
+                  "col": 7,
+                  "span": 6,
+                  "row": 2
+                },
+                "phone": {
+                  "order": 2,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_hours",
+                "kind": "hours",
+                "style": "week",
+                "desk": {
+                  "col": 7,
+                  "span": 6,
+                  "row": 3
+                },
+                "phone": {
+                  "order": 3,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_contact",
+                "kind": "contact",
+                "show": [
+                  "phone",
+                  "email",
+                  "address"
+                ],
+                "desk": {
+                  "col": 1,
+                  "span": 5,
+                  "row": 3
+                },
+                "phone": {
+                  "order": 4,
+                  "span": "full"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_k_pin",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "story",
+            "width": "contained",
+            "rows": 3,
+            "top": {
+              "edge": "rule"
+            },
+            "pin": {
+              "col": 1,
+              "span": 5
+            },
+            "motion": "reveal",
+            "background": [
+              {
+                "kind": "field",
+                "role": "surface",
+                "cols": {
+                  "from": 1,
+                  "to": 5
+                }
+              }
+            ],
+            "elements": [
+              {
+                "id": "e_h",
+                "kind": "heading",
+                "text": "Pečem jaz, v trgovini pa je Katja",
+                "level": 2,
+                "size": 4,
+                "desk": {
+                  "col": 1,
+                  "span": 5,
+                  "row": 1
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_t",
+                "kind": "text",
+                "paragraphs": [
+                  "Pečem jaz, Jure Petek, v trgovini pa je večinoma moja žena Katja."
+                ],
+                "desk": {
+                  "col": 1,
+                  "span": 5,
+                  "row": 2
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_l",
+                "kind": "list",
+                "marker": "dash",
+                "size": 1,
+                "items": [
+                  "Kruh z drožmi",
+                  "Rženi kruh",
+                  "Polnozrnate žemlje",
+                  "Rogljički z maslom",
+                  "Cimetovi polži"
+                ],
+                "desk": {
+                  "col": 7,
+                  "span": 6,
+                  "row": 1,
+                  "rowSpan": 3
+                },
+                "phone": {
+                  "order": 2,
+                  "span": "full"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_galerija",
+      "kind": "standard",
+      "slug": "galerija",
+      "nav": {
+        "label": "Galerija",
+        "show": true
+      },
+      "seo": {
+        "title": "Galerija | Pekarna Kvas",
+        "description": "Pogled v pekarno: kruh z drožmi, testo na mizi in pecivo na pladnju."
+      },
+      "sections": [
+        {
+          "id": "s_g_a",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "gallery",
+            "width": "wide",
+            "rows": 3,
+            "elements": [
+              {
+                "id": "e_h1",
+                "kind": "heading",
+                "text": "Pogled v pekarno",
+                "level": 1,
+                "size": 5,
+                "desk": {
+                  "col": 1,
+                  "span": 6,
+                  "row": 1
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_ba",
+                "kind": "photos",
+                "images": [
+                  "img_01",
+                  "img_02"
+                ],
+                "arrangement": "before-after",
+                "desk": {
+                  "col": 1,
+                  "span": 6,
+                  "row": 2,
+                  "rowSpan": 2
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_stack",
+                "kind": "photos",
+                "images": [
+                  "img_03",
+                  "img_01"
+                ],
+                "arrangement": "stack",
+                "desk": {
+                  "col": 8,
+                  "span": 5,
+                  "row": 1,
+                  "rowSpan": 3
+                },
+                "phone": {
+                  "order": 2,
+                  "span": "full"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_g_b",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "gallery",
+            "width": "wide",
+            "rows": 2,
+            "elements": [
+              {
+                "id": "e_pair",
+                "kind": "photos",
+                "images": [
+                  "img_02",
+                  "img_03"
+                ],
+                "arrangement": "offset-pair",
+                "treatment": "tint",
+                "desk": {
+                  "col": 1,
+                  "span": 6,
+                  "row": 1,
+                  "rowSpan": 2
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_h",
+                "kind": "heading",
+                "text": "Ročno delo vsak dan",
+                "level": 2,
+                "size": 4,
+                "desk": {
+                  "col": 8,
+                  "span": 5,
+                  "row": 1
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_t",
+                "kind": "text",
+                "paragraphs": [
+                  "Brez aditivov in brez zamrznjenega testa."
+                ],
+                "desk": {
+                  "col": 8,
+                  "span": 5,
+                  "row": 2
+                },
+                "phone": {
+                  "order": 2,
+                  "span": "full"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_slike",
+      "kind": "standard",
+      "slug": "slike",
+      "nav": {
+        "label": "Slike",
+        "show": true
+      },
+      "seo": {
+        "title": "Slike | Pekarna Kvas",
+        "description": "Slike iz pekarne Kvas."
+      },
+      "sections": [
+        {
+          "id": "s_i_a",
+          "type": "composed",
+          "variant": "free",
+          "tone": "inverse",
+          "props": {
+            "intent": "gallery",
+            "width": "full",
+            "minHeight": "m",
+            "rows": 3,
+            "elements": [
+              {
+                "id": "e_photo",
+                "kind": "image",
+                "image": "img_01",
+                "ratio": "fill",
+                "scrim": {
+                  "role": "inverse",
+                  "strength": 3
+                },
+                "desk": {
+                  "col": 1,
+                  "span": 12,
+                  "row": 1,
+                  "rowSpan": 3
+                },
+                "phone": {
+                  "order": 2,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_h1",
+                "kind": "heading",
+                "text": "Hlebci na leseni polici",
+                "level": 1,
+                "size": 5,
+                "desk": {
+                  "col": 2,
+                  "span": 7,
+                  "row": 2,
+                  "layer": 1
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_t",
+                "kind": "text",
+                "paragraphs": [
+                  "Kruh pečemo samo z drožmi."
+                ],
+                "desk": {
+                  "col": 2,
+                  "span": 6,
+                  "row": 3,
+                  "layer": 1,
+                  "alignY": "start"
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_i_b",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "gallery",
+            "width": "contained",
+            "rows": 2,
+            "elements": [
+              {
+                "id": "e_circle",
+                "kind": "image",
+                "image": "img_02",
+                "ratio": "1:1",
+                "mask": "circle",
+                "treatment": "duotone",
+                "desk": {
+                  "col": 1,
+                  "span": 5,
+                  "row": 1,
+                  "rowSpan": 2,
+                  "bleedX": "start",
+                  "tilt": 3
+                },
+                "phone": {
+                  "order": 2,
+                  "span": "bleed"
+                }
+              },
+              {
+                "id": "e_h",
+                "kind": "heading",
+                "text": "Testo na pomokani mizi",
+                "level": 2,
+                "size": 4,
+                "desk": {
+                  "col": 7,
+                  "span": 5,
+                  "row": 1
+                },
+                "phone": {
+                  "order": 0,
+                  "span": "full"
+                }
+              },
+              {
+                "id": "e_stamp",
+                "kind": "image",
+                "image": "img_03",
+                "ratio": "4:3",
+                "mask": "stamp",
+                "treatment": "grain",
+                "desk": {
+                  "col": 7,
+                  "span": 4,
+                  "row": 2,
+                  "alignY": "start"
+                },
+                "phone": {
+                  "order": 3,
+                  "span": "inset"
+                }
+              },
+              {
+                "id": "e_side",
+                "kind": "heading",
+                "text": "Od leta",
+                "level": 2,
+                "size": 4,
+                "rotate": "-90",
+                "desk": {
+                  "col": 12,
+                  "span": 1,
+                  "row": 1,
+                  "rowSpan": 2
+                },
+                "phone": {
+                  "order": 1,
+                  "span": "full"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "nav": {
+        "label": "Zasebnost",
+        "show": false
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Pekarna Kvas",
+        "description": "Kako Pekarna Kvas obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "variant": "default",
+          "props": {
+            "kind": "privacy"
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "nav": {
+        "label": "Dostopnost",
+        "show": false
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Pekarna Kvas",
+        "description": "Izjava o dostopnosti spletne strani Pekarna Kvas."
+      },
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "variant": "default",
+          "props": {
+            "kind": "accessibility"
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "kind": "not-found",
+      "slug": "404",
+      "nav": {
+        "label": "Ni najdeno",
+        "show": false
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Pekarna Kvas",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "variant": "default",
+          "props": {
+            "title": "Te strani ni mogoče najti",
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo."
+          }
+        }
+      ]
+    }
+  ]
+}

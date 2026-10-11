@@ -9,7 +9,7 @@ Architect's design for F1b (spec v20) and batches I3–I7, I9, I10 of `docs/plan
 3. **One asset id scheme** owned by `@sb/spec` (`packages/spec/src/assets.ts`). The inventory kind `shape` becomes `mask`. A spec field holds the id's name part. Drawings hold the full id, because one field spans two kinds.
 4. **Contrast over photos is checked against the worst case.** A scrim must pass over both a black and a white pixel. A guard enforces it and the repair raises the scrim. No photo analysis is needed.
 5. **Per-site composed sheet.** `composed.css` stays the only source. Each site ships its own filtered `composed-<sha10>.css` in `RenderedSite.files`, containing only the families it uses. Sites without composed sections or studio features keep exactly today's bytes.
-6. **Motion never loops on its own and never shows a number the client didn't give.** The marquee is scroll-linked. No counter preset. Every animation runs under reduced-motion and `@supports` guards. The final state is the default.
+6. **Motion (owner decision D2: allow).** A ribbon may loop as a marquee, with a visible pause control; a `counter` preset counts a fact up to a number the client gave. Every animation runs under reduced-motion and `@supports` guards, and the final state is the default: the counter's final value is in the HTML from the start, and reduced motion or no JS shows the still ribbon and the final number.
 7. **F1b ships the mechanisms plus 1–3 starter names per vocabulary.** The batches fill them. Drawings are path data (one `Drawing` format), so asset makers can start now.
 
 ## 1. Composition language v2 (spec v20)
@@ -124,7 +124,7 @@ How each §7.2 row is expressed:
 | wordmark | `wordmark` (new) | No text field: the name comes from `business` and the style from `design.wordmark`. |
 | factObject | `fact.treatment` grows to 20 | Already the fact-object slot. A new kind would duplicate value, label and size. |
 | typeTreatment | `heading.treatment`, `text.dropCap` | They are still headings, so h1 and order rules apply unchanged. |
-| marquee, ribbon | `ribbon` (+ motion preset `drift`) | Structure is a kind and movement is a motion preset. One kind, no autonomous loop. |
+| marquee, ribbon | `ribbon` (+ motion preset `drift`, scroll-linked, or `loop`, a marquee with a pause control) | Structure is a kind and movement is a motion preset. One kind. |
 | sticker | `sticker` (new) | Short copy on its own ground, not a fact (no value). Needs the rating/award ban. |
 | map | `map` (new) | A drawn object built from the address. Contact lines can't carry its geometry or phone layout. |
 | timeline | `list` items with `lead` + `marker: "line"` | Dated steps are a list. checkFacts already checks numbers in leads. |
@@ -191,7 +191,7 @@ The engine's `COMPOSED_LAYOUT_KEYS` (skipped by facts and translation) adds `arr
 | G4 | `headerOver` only on the page's first section with a field or photo layer; header text passes G3 or G9 at 360 and 1280 (on phones against the band photo, or the field) | legible header | repair: drop `headerOver` |
 | G5 | `top`: not on the first section; `rise` only when this ground differs from the previous section's and that section has no `surface.divider`; `drawing` iff edge "drawing"; one divider per boundary | honest overlaps, no double dividers | repair: rise → 0; drop this `top` when the previous has a divider |
 | G6 | `pin`: pinned elements lie wholly inside its columns, are contiguous in reading order, ≤ 4 elements, no image taller than 4:5, rows ≥ 3, and something outside the pin spans more rows | sticky column that fits a screen; DOM = phone order | repair: drop `pin` |
-| G7 | motion: preset in MOTIONS and allowed at the level (still: none; calm: ≤ 3 sections per page, entrance only; lively: ≤ 5, scroll allowed); section 0 only `safeAtLoad` presets; ≤ 1 moving ribbon per page | motion budget, LCP | repair: drop `motion` / `move` |
+| G7 | motion: preset in MOTIONS and allowed at the level (still: none; calm: ≤ 3 sections per page, entrance only; lively: ≤ 5, scroll allowed); section 0 only `safeAtLoad` presets; ≤ 1 moving ribbon per page; `loop` only on a ribbon, which then renders a pause control; `counter` only on a fact whose value is a client number (checkFacts) | motion budget, LCP | repair: drop `motion` / `move` |
 | G8 | every vocab name is in its list; with `ctx.approved`, its asset is approved | only real, approved assets | repair: mask, treatment, texture → "none"; type treatment → none; unknown edge → drop `top`; unknown motion → drop; fact object → "numeral"; drawing → drop the decor element or layer |
 | G9 | `color`/`fill`: fg against its effective ground (own fill > field > tone) ≥ threshold; a background drawing is quiet (ink vs ground ≤ 1.6:1) and every text role in the section vs its ink ≥ threshold | per-element colours stay legible | repair: drop `color`/`fill`; drawing ink → `border` if that passes, else drop the layer |
 | G10 | `tilt` only on fact (not numeral), sticker, image, photos, decor | no tilted running text | repair: drop `tilt` |
@@ -229,13 +229,27 @@ The engine's `COMPOSED_LAYOUT_KEYS` (skipped by facts and translation) adds `arr
 | pin, tilt, bleedY, heading rotate/vertical | Off: a static stack, no rotation, nothing past the section. |
 | motion | lively runs as calm, distances halved; reduced motion: none. |
 | photos | fan/stack/offset-pair in a fixed 4:5 box at preset offsets; strip: an inner scroll-snap row (80 % items, `tabindex=0`, `role=region`, labelled), never page scroll; before-after stacked, labelled. |
-| ribbon | Wraps when still; drift clipped to its own box. |
+| ribbon | Wraps when still; drift clipped to its own box. `loop`: a pause/play button (≥ 44 px, `aria-pressed`, Slovene label) in the ribbon's box; the loop also pauses off-screen and on hover/focus, never runs under reduced motion, and the moving copy is `aria-hidden` next to a static copy for screen readers (WCAG 2.2.2). |
 | map | Full width, height ≤ 60 vh, directions link ≥ 44 × 44. |
 | fact.link | The whole object is a ≥ 44 × 44 target. |
 | iconFacts | One column; two per row when every label ≤ 16 characters. |
 | prices phoneColumns 2 | Two plates per row from 360 px. |
 | decor fixed | width `min(size × 2rem, 40vw)`. |
 | circle text | Circle at `min(60vw, 14rem)`, real heading text visually hidden, SVG `aria-hidden`. |
+
+### 2.1 Director's notes after the guards and facts scout (2026-10-11)
+
+- **G23 photos captions:** a `photos` element whose arrangement shows captions counts as text-bearing: it can't be hidden on phones and its box never overlaps other text. Without captions it is an image (the second-photo hiding rule applies).
+- **G24:** there is no "giant numeral" heading field. Display sizes count `heading` at size ≥ 4 (as today), `fact` (as today) and `quote` at size 4; no other kind.
+- **CompositionContext** (`guards.ts:23-32`, built by `compositionContext` at :35-42, called from `validate.ts:99`) gains the optional fields §2 names: `colors`, `business` (for amenities and plate codes), `images` (origin, for before-after), `motionLevel`, `approved` (asset ids allowed at runtime; absent = vocab membership only), `prev` (the previous section, for top/rise). F1b-2a defines the type and the builder; 2b fills the checks.
+- **Not wired yet:** the engine never calls `repairComposition` or `composedFallback` (only tests do). With the designer off this is fine; Phase 2 (S-units) wires repair → validate → fallback. F1b does not.
+- **Owner amenities survive regeneration:** `packages/engine/src/owner-facts.ts:10` `FACTS` gains `amenities` (F1b-3).
+- **Plate codes** already exist (`packages/spec/src/format.ts:67-82`, `PLATE_CODES`, `plateCode()`); F1b-3 reuses them.
+- **Loop and counter (D2) in the schema:** the marquee is `ribbon.move: "loop"` (beside still and drift) and the counter is `fact.count: boolean` (both layout keys). G7: `loop` needs level lively and renders a pause control (R2); `count` only on a fact whose value is a plain whole number found in the client facts (checked by guards when `ctx.business` is given, and by F1b-3/I7). Their guard tests are written in I7.
+- **G4 header contrast** is not a guard (the context has no header tone); R1’s `composed-v2.css` makes the header over the opener follow section 0’s tone, and F1b-A checks it in the browser at 360/1280.
+- **G24 heading size:** today’s code counts headings from size 6 and facts from 7; that stays (the design’s “≥ 4” was a misreading).
+- **G26 (new, found by R1, already in v19):** a text-bearing element may share desktop grid cells with an `image` or `photos` element only when it is an intended over-photo element (`overPhoto`), and then its `layer` must be higher than the image's; repair: raise its layer; otherwise reject. The core sheet also gets a bug fix so `.cx-over` paints above images on the same layer. Both go into F1b-A, with a browser assertion (no text box intersects an image box unless marked over-photo and on top).
+- **Quotes are never translated:** `isCopy` (`packages/spec/src/translatable.ts:58-62`) gains the quote case (F1b-3).
 
 ## 3. Renderer
 
@@ -295,6 +309,34 @@ The m/s/j composed fixtures change on purpose (the sheet becomes a site file).
 3. Every `cx-` class in the HTML must be covered by that sheet.
 4. Once, in Playwright at 360 and 1280, compare preview and published screenshots pixel for pixel. Also assert no horizontal scroll at 360 and that every link and button box is ≥ 44 × 44 except text links in running text.
 
+### 3.4 Director's amendments after the renderer scout (2026-10-11)
+
+The code differs from §3.1–3.3 in six places. These rules replace the matching parts of §3.1–3.3 and §1.3, and the renderer units build to them.
+
+1. **Two shared sheets instead of a per-site sheet.** `composed.css` today ships in the shared bundle (`packages/render/src/shared.ts:185`, after the hash). The preview serves only HTML and `/preview/_shared/:hash/*` (`apps/web/src/app.ts:976, 999`), so a sheet in `RenderedSite.files` would 404 in the preview. Instead:
+   - `composed.css` stays as it is: the **core** sheet (v19 features), byte-identical, linked exactly as today.
+   - A new `composed-v2.css` holds every v20 addition (section background/top/motion/pin/headerOver, the 7 kinds, the extensions, vocab assets). It is minified and content-addressed like the core sheet (`composed-v2-<sha10>.css`), added to the bundle **after** the hash, and linked only on pages that use a v20 feature. One helper decides both links: `composedSheets(doc, page) → ("core" | "v2")[]`, extensible for `design.wordmark` (I9a).
+   - Budgets: core ≤ 16 KiB minified (today 12.5 KiB), v2 ≤ 16 KiB, the pair ≤ 28 KiB. The inventory's `COMPOSED_SHEET_BUDGET` checks each sheet.
+   - §3.3's preview = published test compares the HTML and both sheets' bytes as fetched from preview and published routes. No new preview route.
+2. **New islands go after the hash.** Islands are read into the bundle **before** the hash (`shared.ts:169-172`), so a new island would change every golden. Composed JS (motion presets that need JS, the marquee pause and the counter) lives in `islands/composed/*.js`, added after the hash like the sheets, and is linked only on pages that use it.
+3. **Animation guards.** Scroll-driven presets use `@supports (animation-timeline: view())` (entrance on view) or `scroll()` (scroll-linked drift), and `@media (prefers-reduced-motion: no-preference)`. Only `transform`, `opacity` and `clip-path` (through `--shape-*` tokens) animate; never `visibility`, layout properties or colour. The default (unsupported, reduced motion) is the final, still state.
+4. **headerOver positioning.** The default header is static (`chrome.css:9-13`); skeleton families can be sticky (`skeleton.css:36-40`); `.site-header--overlay` is already used by the hero-photo family (`skeleton.ts:111-126`) and must not be reused. `headerOver` sets `data-hdr="over"` on `<body>` and the rules live in `composed-v2.css`: a static header becomes absolute over section 0 with a transparent background and the composed opener gets top padding equal to the header height; a sticky header stays sticky, section 0 is pulled up under it (negative margin of the header height) and the header turns solid once scrolled (scroll-driven, `@supports`), solid without support. Text colour over the opener follows section 0's tone so contrast holds (G-rule on contrast applies to the header too). Both header kinds get a test at 360 and 1280.
+5. **Regions in the sheets.** `composed.css` has no region markers. The core sheet is frozen (no edits except bug fixes). `composed-v2.css` starts with marker comments `/* region: section */`, `/* region: kinds */`, `/* region: extensions */`, `/* region: vocab */`; R1 owns `section`, R2 `kinds`, R3 `extensions`, the batches `vocab`.
+7. **v2 splits per region (decided after R2, 2026-10-11).** With R1+R2 the v2 sheet is 13.8 KB and core+v2 26.6 KB of the 28 KiB pair budget, leaving ≈ 2 KB for R3 and every batch's vocab. Instead of raising the budget, `composed-v2.css` is split at its region markers into `composed-v2-section`, `-kinds`, `-extensions` and `-vocab` sheets, each minified, content-addressed and in the shared bundle after the hash; `composedSheets()` links only the regions a page uses (vocab by the names it uses, later per asset family if it grows). Budgets: each region ≤ 12 KiB, the sheets a page links ≤ 32 KiB together. Done right after R3 merges (F1b-A or a small unit). Firefox without scroll timelines shows the still ribbon (accepted).
+6. **LCP.** `firstImage` (`layout.ts:69-71`) only looks at `image`; R1 extends LCP to a background photo layer and R2 to `photos`.
+
+8. **Vocab CSS is linked per asset family (decided after F1b-A1, 2026-10-11).** With core + section + kinds + extensions at 32,667 of 32,768 B, the vocab region never ships as one sheet: each vocab family (masks, treatments, textures, edges, fact objects, type treatments, motion) gets its own content-addressed sheet, linked only when a page uses one of its names. Each family ≤ 6 KiB; a page using every v20 feature plus its vocab families may reach 40 KiB, measured and reported per page in F1b-A2.
+
+### 3.5 F1b-A checklist (collected from the units)
+
+- Split composed-v2.css per region (§3.4.7).
+- G26 + the browser assertion (text over images, stickers/ribbons over text or actions) as a committed test under tools/eval/test.
+- Export the Drawing data (`drawingData`, `DrawingSvg`) from `@sb/components`; inventory sheets import it from there, not by relative path.
+- Decor `drawing` renders through `DrawingSvg` (R3) and the drawing sheet adds a small-size view.
+- Trace the large gap between the hero heading and the photo fan at 360 (R2 sample page).
+- Preview = published test through apps/web (§3.3).
+- Wordmark sheet warns when a style isn't in WORDMARK_STYLES (I9a).
+
 ## 4. Asset ids
 
 One table in `packages/spec/src/assets.ts` (new): `ASSET_KINDS`, `KIND_PREFIX`, `AssetId`, `assetId(kind, name)`, `parseAssetId(id) → { kind, name }`. The inventory re-exports it and I8 imports it.
@@ -348,7 +390,7 @@ Signatures stay hints: the shortlist boosts them and nothing at runtime requires
 | **I4** imagery | I4a masks +25 (to 30), I4b composed treatments +13 (to 16), I4c textures 12 | the vocab list (F1b-1), not the renderer | Masks: clip-path via tokens, 3 ratios. Treatments: roles only, no gradient or blur. Textures: data-URI tile, dot/grid detector, contrast at the texture's max alpha. | photo set × 3 grounds |
 | **I5** drawings | I5-p pilot, I5a ≈ 50 line, I5b solid and cut where they read (≤ 100), I5c ornaments 24, I5d edges +15 (to 20) | I5-p, I5a–c: no (Drawing format, INV-1 sheet); I5d: F1b-R1 | `Drawing` schema, ≤ 24 paths, budgets, stroke ≥ 1.5 px at the smallest size, REPEATABLE pass the detector, 8 must-draw motifs from I8 | per trade; edges between two sections |
 | **I6** type and facts | I6a type treatments +13 (to 15), I6b fact objects +14 (to 20) | yes (F1b merged) | I6a: G20 limits as tests, real heading text in circle/vertical, banned (italic accent, tracked caps). I6b: values only from fixture facts, linked object ≥ 44 px, seal/badge never reads as an award (owner sheet). | each at sizes 2/5/8 |
-| **I7** motion | I7a harness, MOTION_META tests, presets to 6 (F1b ships reveal, unmask); I7b 14 presets (≤ 2 JS on `@sb/morph`, e.g. decode headline with `aria-label`) | F1b-R1 | CSS-guard test (§3.2). Playwright at 360/1280 with 4× CPU throttle: CLS = 0, LCP Δ ≤ 100 ms against motion off. Reduced-motion screenshots equal static. JS ≤ 3 KiB gzip. No counter. | 3-frame strips (start/mid/end) |
+| **I7** motion | I7a harness, MOTION_META tests, presets to 6 (F1b ships reveal, unmask); I7b 14 presets (≤ 2 JS on `@sb/morph`, e.g. decode headline with `aria-label`) | F1b-R1 | CSS-guard test (§3.2). Playwright at 360/1280 with 4× CPU throttle: CLS = 0, LCP Δ ≤ 100 ms against motion off. Reduced-motion screenshots equal static. JS ≤ 3 KiB gzip. `counter` (JS on `@sb/morph`): counts from 0 to the client's value once, on first view, ≤ 1.2 s; the element's text and `aria-label` hold the final value from the start (intermediate numbers are `aria-hidden`); only plain integers (a value with other characters stays still). `loop`: pause control test (keyboard, 44 px, reduced motion = still). | 3-frame strips (start/mid/end) |
 | **I9** wordmarks and icons | I9a generator, I9-p 40 line icons, I9c solid + cut (80) | I9a: F1b-R2; icons: no | I9a: deterministic per name and seed; č š ž ć đ glyph check; 40-character names fit the 360 header; contrast; header/footer use only the site sheet; goldens unchanged. Icons ≤ 1 KiB, legible at 24 px, practical facts only. | 20 real Slovene business names × styles |
 | **I10** references, 40 | I10a format and harness, I10b–e 4 × 10 | yes, and better after I4/I6 | Written as v20 site specs plus a fixture brief (decision D3). 0 guard issues, 0 invented facts, 360/1280, a gap note per reference (what the language couldn't say). Okus round-1 export. | Okus |
 
@@ -397,10 +439,10 @@ Overnight sessions before F1b merges branch from `claude/studio-f1b` (or main fo
 
 ## Decisions for the owner
 
-- **D1. Inventory names grow without a spec version bump.** New masks, fact objects, motions and so on are added to an append-only list checked by a guard, instead of v21, v22… per batch. Stored sites stay valid and a test forbids removals. *Recommendation: yes.* Otherwise every batch bumps the version and batches can't run in parallel.
-- **D2. Motion: no endless marquee and no counter.** The ribbon drifts with the page scroll instead of looping by itself (WCAG pause rule, battery). A counter shows numbers the client never gave while it runs. *Recommendation: yes.* 18 CSS presets and up to 2 JS ones still reach 20.
-- **D3. The 40 new references are made in the composition language** (v20 site specs rendered by our renderer), not as free HTML like the 19 old ones. Each comes with a note on what the language couldn't say. *Recommendation: yes.* The director should be shown pages the studio can actually make, and the notes feed Phase 4 (scoped CSS).
-- **D4. Pilot gates.** You rate a pilot of 10–12 (≈ 5 minutes each) before motifs, ornaments and icons are drawn in bulk. *Recommendation: yes.* If not, the director curates and you sample the gallery later.
+- **D1. Inventory names grow without a spec version bump. Decided: yes (owner, 2026-10-10).** New masks, fact objects, motions and so on are added to an append-only list checked by a guard, instead of v21, v22… per batch. Stored sites stay valid and a test forbids removals. *Recommendation: yes.* Otherwise every batch bumps the version and batches can't run in parallel.
+- **D2. Motion: endless marquee and counter. Decided by the owner (2026-10-10): allow**, a looping marquee with a pause control and a number counter. Built with the rules in §0.6, G7, §3 (ribbon) and I7: pause control, reduced motion = still, final value in the HTML, counter only to a client number. Still ≤ 2 JS presets (counter is one of them).
+- **D3. The 40 new references are made in the composition language. Decided: yes (owner, 2026-10-10).** (v20 site specs rendered by our renderer), not as free HTML like the 19 old ones. Each comes with a note on what the language couldn't say. *Recommendation: yes.* The director should be shown pages the studio can actually make, and the notes feed Phase 4 (scoped CSS).
+- **D4. Pilot gates. Decided: yes (owner, 2026-10-10).** You rate a pilot of 10–12 (≈ 5 minutes each) before motifs, ornaments and icons are drawn in bulk. *Recommendation: yes.* If not, the director curates and you sample the gallery later.
 
 ## Units table
 

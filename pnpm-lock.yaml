@@ -327,6 +327,9 @@ importers:
 
   packages/inventory:
     dependencies:
+      '@sb/components':
+        specifier: workspace:*
+        version: link:../components
       '@sb/render':
         specifier: workspace:*
         version: link:../render

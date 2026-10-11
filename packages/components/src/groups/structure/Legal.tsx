@@ -12,8 +12,8 @@ function legalFacts(ctx: RenderCtx, date: string | undefined): LegalFacts {
     reg: <MaybeText value={b.provider.registrationNumber} ctx={ctx} />,
     email: <EmailLink ctx={ctx} />,
     phone: <PhoneLink ctx={ctx} />,
-    // The day the statement was prepared, from the spec; a site made before v11 shows the day it is rendered.
-    date: formatDate(date ? dayDate(date) : new Date()),
+    // The day the statement was prepared, from the spec; a site made before v11 shows the day it is rendered (ctx.today).
+    date: formatDate(date ? dayDate(date) : ctx.today),
     contactForm: ctx.site.pages.some((p) => p.sections.some((s) => s.type === "contact-form")),
   };
 }

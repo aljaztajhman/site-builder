@@ -18,8 +18,10 @@ import {
   type Design,
   type Direction,
 } from "@sb/spec";
-import type { AssetKind, Ground } from "./schema.ts";
+import { detectPattern, type PatternVerdict } from "./pattern-detector.ts";
+import type { Asset, AssetKind, Ground } from "./schema.ts";
 import { groundOf } from "./sources.ts";
+import { PATTERN_TILES, type PatternTile } from "./tiles.ts";
 
 /**
  * Bytes an asset may add to a page, per kind. Fonts: per file (a pairing is two files). Motifs and the rest: the CSS
@@ -33,16 +35,27 @@ export const BYTE_BUDGET: Partial<Record<AssetKind, number>> = {
   motif: 6 * 1024,
   submotif: 1.5 * 1024,
   treatment: 2 * 1024,
-  shape: 2 * 1024,
+  mask: 2 * 1024,
   factObject: 2 * 1024,
   header: 2 * 1024,
   footer: 2 * 1024,
   section: 4 * 1024,
+  /** A composition preset adds no CSS of its own: it renders with the composed sheet (section/composed:free). */
+  composition: 0,
 };
-export const COMPOSED_SHEET_BUDGET = 20 * 1024;
+/**
+ * The composed stylesheets, minified (docs/plans/studio-phase1-design.md §3.4.1, §3.4.7): the core sheet (spec v19,
+ * composed.css) ≤ 16 KiB; each spec v20 region sheet (composed-v2.css split at its markers: section, kinds, extensions,
+ * vocab) ≤ 12 KiB; the sheets one page links (core plus the regions it uses; at most all of them) ≤ 32 KiB together; each
+ * vocab family sheet (masks, treatments, textures, edges, fact-objects, type-treatments, motion; the partials under
+ * styles/vocab/<family>/, §3.4.8) ≤ 6 KiB, and all seven together ≤ 42 KiB.
+ * The asset section/composed:free measures the core sheet; the inventory's and @sb/render's composed tests check the
+ * regions and the linked total against the same numbers.
+ */
+export const COMPOSED_SHEET_BUDGET = { core: 16 * 1024, region: 12 * 1024, linked: 32 * 1024, family: 6 * 1024, families: 42 * 1024 } as const;
 
 export function byteBudget(a: { id: string; kind: AssetKind }): number | undefined {
-  return a.id === "section/composed:free" ? COMPOSED_SHEET_BUDGET : BYTE_BUDGET[a.kind];
+  return a.id === "section/composed:free" ? COMPOSED_SHEET_BUDGET.core : BYTE_BUDGET[a.kind];
 }
 
 /** The Slovene letters (and Croatian/Serbian ć đ that Slovene names use) every font must draw. */
@@ -94,6 +107,21 @@ export function shippedColors(colors: Colors, dir: Direction): Colors {
     imagery: dir.imagery,
   };
   return enforceDesign(design, dir).colors;
+}
+
+/**
+ * The kinds the dot/grid detector checks (G19). Textures only for now: REPEATABLE drawings join when the drawing list
+ * and its REPEATABLE set exist (I5), through a tag or this list.
+ */
+export const PATTERN_CHECKED_KINDS: readonly AssetKind[] = ["texture"];
+
+export const needsPatternCheck = (a: Pick<Asset, "kind">): boolean => PATTERN_CHECKED_KINDS.includes(a.kind);
+
+/** The dot/grid verdict for an asset's tile (tiles.ts); an asset that needs the check and has no tile fails. */
+export function patternCheck(a: Pick<Asset, "id">, tiles: Readonly<Record<string, PatternTile>> = PATTERN_TILES): PatternVerdict | { ok: false; reason: "no-tile"; detail: string } {
+  const t = tiles[a.id];
+  if (!t) return { ok: false, reason: "no-tile", detail: `${a.id} has no tile in packages/inventory/src/tiles.ts` };
+  return detectPattern(t.tile, t.repeat ? { repeat: t.repeat } : {});
 }
 
 const inRange = (v: number, lo: number, hi: number): boolean => v >= lo && v <= hi;

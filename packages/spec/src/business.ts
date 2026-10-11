@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { orPlaceholder, text } from "./common.ts";
+import { SYSTEM_ONLY, orPlaceholder, text } from "./common.ts";
+import { Vocab } from "./composition/vocab.ts";
 
 export const BusinessType = z.enum([
   "hairdresser",
@@ -98,5 +99,10 @@ export const Business = z.strictObject({
     registry: z.string().max(120).optional().describe('e.g. "AJPES"'),
   }),
   serviceArea: z.array(text(40)).max(20).optional(),
+  /**
+   * Spec v20: practical facts (PRACTICAL_FACTS: parking, card, wheelchair …), only from the client's input or the
+   * owner; the composed `iconFacts` element shows them. Never offered to the model (studio-phase1-design.md §1.6).
+   */
+  amenities: z.array(Vocab("PRACTICAL_FACTS")).max(20).meta({ [SYSTEM_ONLY]: true }).optional(),
 });
 export type Business = z.infer<typeof Business>;

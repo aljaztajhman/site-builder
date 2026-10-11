@@ -1,8 +1,13 @@
 /**
- * pnpm inventory:sheet [--kind <kind>] [--status draft|approved|rejected]
+ * pnpm inventory:sheet [--kind <kind>] [--status draft|approved|rejected] [--ids <id,id,...>]
+ *
+ * Kinds without assets get an empty sheet (<kind>.html) with a note. `--ids` also photographs ids that are not
+ * registered yet, as draft assets (an asset maker's preview before registering). Drawings, compositions (one sheet per
+ * intent), motion presets (three frames: start, mid, end), practical-fact icons, wordmarks (20 Slovene names) and
+ * dividers (the edge between two sections) are rendered by pages-v2.ts.
  *
  * Contact sheets of the design inventory (design-studio.md §4.2): every asset of a kind photographed at 360 and 1280 px
- * into eval/runs/inventory/ (gitignored). Components (sections, motifs, treatments, shapes, fact objects, header and
+ * into eval/runs/inventory/ (gitignored). Components (sections, motifs, treatments, masks, fact objects, header and
  * footer families) are rendered by @sb/render from a small spec in two palettes, on the default, alternate and inverse
  * grounds; fonts as specimens with the Slovene letters; palettes as swatches with their contrast numbers.
  *
@@ -16,10 +21,12 @@ import path from "node:path";
 import { chromium, type Page } from "playwright";
 import { FONTS_DIR, sharedBundle, siteFiles } from "@sb/render";
 import { validateSite } from "@sb/spec";
-import { ASSET_KINDS, AssetStatus, assetSlug, inventory, writeInventoryJson, type Asset, type AssetKind } from "../src/index.ts";
-import { fixturesDir, pagesFor, paletteOverviewHtml, repoRoot, type SheetPage } from "./pages.ts";
+import { ASSET_KINDS, AssetStatus, KIND_PREFIX, Asset as AssetSchema, assetSlug, inventory, writeInventoryJson, type Asset, type AssetKind } from "../src/index.ts";
+import { fixturesDir, paletteOverviewHtml, repoRoot, type SheetPage } from "./pages.ts";
+import { pagesFor } from "./pages-v2.ts";
+import { emptySheetHtml, sheetGroups, sheetHtml, type Shot } from "./sheet-html.ts";
 
-const SHEET_KINDS: AssetKind[] = ["font", "pairing", "palette", "motif", "submotif", "treatment", "shape", "factObject", "header", "footer", "section"];
+const SHEET_KINDS: AssetKind[] = ["font", "pairing", "palette", "motif", "submotif", "treatment", "mask", "factObject", "header", "footer", "section", "ornament", "divider", "composition", "icon", "motion", "wordmark"];
 const WIDTHS = [360, 1280] as const;
 /** The tallest part of a page a thumbnail keeps, per width. */
 const MAX_HEIGHT: Record<(typeof WIDTHS)[number], number> = { 360: 3600, 1280: 2400 };
@@ -68,15 +75,6 @@ function serve(): Promise<{ server: Server; url: string }> {
   return new Promise((resolve) => server.listen(0, "127.0.0.1", () => resolve({ server, url: `http://127.0.0.1:${(server.address() as { port: number }).port}` })));
 }
 
-interface Shot {
-  asset: string;
-  variant: string;
-  label: string;
-  width: number;
-  file: string;
-  problems: string[];
-}
-
 /** Writes a page's files and returns its URL path. */
 function writePage(p: SheetPage, sharedWritten: { done: boolean }): { url: string; problems: string[] } {
   const slug = `${assetSlug(p.asset)}-${p.variant}`;
@@ -112,42 +110,61 @@ async function photograph(page: Page, base: string, url: string, width: number, 
   return problems;
 }
 
-const esc = (s: string): string => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const FRAMES = [
+  { name: "start", at: 0 },
+  { name: "mid", at: 0.5 },
+  { name: "end", at: 1 },
+] as const;
 
-function sheetHtml(kind: AssetKind, assets: Asset[], shots: Shot[], part?: { n: number; of: number }): string {
-  const rows = assets
-    .map((a) => {
-      const mine = shots.filter((s) => s.asset === a.id);
-      const variants = [...new Set(mine.map((s) => s.variant))];
-      const problems = [...new Set(mine.flatMap((s) => s.problems))];
-      const cells = variants
-        .map((v) => {
-          const vs = mine.filter((s) => s.variant === v);
-          return `<div class="v"><div class="vl">${esc(vs[0]!.label)}</div><div class="pair">${vs.filter((s) => s.file).map((s) => `<div class="w${s.width}"><img src="${esc(path.relative(outDir, s.file).replace(/\\/g, "/"))}" loading="eager"></div>`).join("")}</div></div>`;
-        })
-        .join("");
-      const tags = Object.entries(a.tags)
-        .filter(([, v]) => (v as string[]).length)
-        .map(([k, v]) => `<div><b>${k}</b> ${esc((v as string[]).join(", "))}</div>`)
-        .join("");
-      return `<section class="row"><div class="meta"><h2>${esc(a.id)}</h2><div>${a.status} · ${(a.bytes / 1024).toFixed(1)} KB · ${a.license} · phone ${a.phone}${a.pickable === false ? " · not pickable" : ""}</div>${a.note ? `<div class="note">${esc(a.note)}</div>` : ""}${tags}${problems.length ? `<ul class="prob">${problems.map((p) => `<li>${esc(p)}</li>`).join("")}</ul>` : ""}</div><div class="vs">${cells}</div></section>`;
-    })
-    .join("");
-  const title = `${kind} · ${assets.length} assets${part ? ` · part ${part.n}/${part.of}` : ""}`;
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Inventory: ${esc(title)}</title><style>
-body{margin:0;padding:16px;background:#e9e9ea;font:13px/1.4 system-ui,sans-serif;color:#1a1a1a}
-h1{font-size:20px;margin:0 0 12px}.row{display:flex;gap:12px;background:#fff;border-radius:6px;padding:10px;margin-bottom:12px;align-items:flex-start}
-.meta{width:220px;flex:none}.meta h2{font-size:14px;margin:0 0 4px;word-break:break-all}.meta div{margin-bottom:2px;color:#444}.note{font-style:italic}
-.prob{color:#b00020;padding-left:16px;margin:6px 0 0;font-weight:600}.vs{display:flex;gap:14px;flex-wrap:wrap}.vl{font-weight:600;margin-bottom:4px}
-.pair{display:flex;gap:8px;align-items:flex-start}.pair div{overflow:hidden;border:1px solid #ccc;background:#fff}
-.w360{width:180px;max-height:900px}.w1280{width:560px;max-height:900px}.pair img{width:100%;display:block}
-</style></head><body><h1>${esc(title)}</h1>${rows}</body></html>`;
+/**
+ * Three frames (start, mid, end) of the section a motion preset runs on. The preset's scroll-driven animations
+ * (animation-timeline: view()) are moved onto the document timeline, paused and set to 0, 50 and 100 % of their span,
+ * so each frame is exact whatever the scroll position. Needs a context without reduced motion.
+ */
+async function photographMotion(page: Page, base: string, url: string, width: number, motion: string, files: string[]): Promise<{ problems: string[] }> {
+  await page.goto(`${base}${url}`, { waitUntil: "networkidle" });
+  await page.evaluate(() => document.fonts.ready);
+  await page.addStyleTag({ content: ".action-bar,.site-header,.site-footer,.skip-link{display:none!important}" });
+  const problems: string[] = [];
+  const count = await page.evaluate(() => {
+    let n = 0;
+    for (const a of document.getAnimations()) {
+      if (!(a instanceof CSSAnimation) || !a.animationName.startsWith("cx-mo-")) continue;
+      a.timeline = document.timeline;
+      (a.effect as KeyframeEffect).updateTiming({ duration: 1000, delay: 0, endDelay: 0, iterations: 1, fill: "both", easing: "linear" });
+      a.pause();
+      n++;
+    }
+    return n;
+  });
+  if (!count) problems.push(`no cx-mo animation found for ${motion} (is animation-timeline supported?)`);
+  const section = page.locator(`.cx-mo-${motion}`).first();
+  for (const [i, f] of FRAMES.entries()) {
+    await page.evaluate((at) => {
+      for (const a of document.getAnimations()) if (a instanceof CSSAnimation && a.animationName.startsWith("cx-mo-")) a.currentTime = at * 1000;
+    }, f.at);
+    await section.screenshot({ path: files[i]!, type: "jpeg", quality: 72 });
+  }
+  const sw = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, iw: window.innerWidth }));
+  if (sw.sw > sw.iw + 1) problems.push(`horizontal scroll at ${width} px (${sw.sw} px)`);
+  return { problems };
+}
+
+/** Assets named by `--ids` that the registry doesn't have: drafts with no tags, for previewing before registering. */
+function previewAsset(id: string, kind: AssetKind): Asset {
+  return AssetSchema.parse({ id, kind, tags: { trades: [], stances: [], intents: [], mood: [], ground: [], density: [] }, phone: "ok", bytes: 0, license: "own", status: "draft", note: "Preview: not registered." });
 }
 
 async function main(): Promise<void> {
   const only = arg("kind");
   if (only && !(ASSET_KINDS as readonly string[]).includes(only)) throw new Error(`Unknown kind ${only}; one of ${ASSET_KINDS.join(", ")}`);
-  const kinds = only ? [only as AssetKind] : SHEET_KINDS;
+  const ids = (arg("ids") ?? "").split(",").map((x) => x.trim()).filter(Boolean);
+  const kindOfId = (id: string): AssetKind => {
+    const k = ASSET_KINDS.find((x) => id.startsWith(`${KIND_PREFIX[x]}/`));
+    if (!k) throw new Error(`No kind for id ${id}`);
+    return k;
+  };
+  const kinds = only ? [only as AssetKind] : ids.length ? [...new Set(ids.map(kindOfId))] : SHEET_KINDS;
   const status = arg("status");
   if (status && !(AssetStatus.options as readonly string[]).includes(status)) throw new Error(`Unknown status ${status}; one of ${AssetStatus.options.join(", ")}`);
   const registry = inventory();
@@ -159,15 +176,27 @@ async function main(): Promise<void> {
   const browser = await chromium.launch();
   const contexts = await Promise.all(WIDTHS.map((w) => browser.newContext({ viewport: { width: w, height: 800 }, deviceScaleFactor: 1, reducedMotion: "reduce" })));
   const pages = await Promise.all(contexts.map((c) => c.newPage()));
+  // Motion frames need animations on (the sheet's other pages run with reduced motion, the still state).
+  const motionContexts = await Promise.all(WIDTHS.map((w) => browser.newContext({ viewport: { width: w, height: 800 }, deviceScaleFactor: 1, reducedMotion: "no-preference" })));
+  const motionPages = await Promise.all(motionContexts.map((c) => c.newPage()));
   const shared = { done: false };
   const allShots: Shot[] = [];
   try {
     for (const kind of kinds) {
-      const assets = registry.byKind(kind).filter((a) => !status || a.status === status);
-      if (!assets.length) continue;
+      const assets = [
+        ...registry.byKind(kind).filter((a) => !status || a.status === status),
+        ...ids.filter((id) => kindOfId(id) === kind && !registry.byId(id)).map((id) => previewAsset(id, kind)),
+      ];
+      // A status filter that leaves a kind empty skips it (its sheet stays as it was); otherwise an empty kind gets a note.
+      if (!assets.length && status) continue;
       const kindDir = path.join(outDir, kind);
       rmSync(kindDir, { recursive: true, force: true });
       mkdirSync(kindDir, { recursive: true });
+      if (!assets.length) {
+        writeFileSync(path.join(outDir, `${kind}.html`), emptySheetHtml(kind));
+        console.log(`${kind}: no assets registered; wrote an empty sheet with a note`);
+        continue;
+      }
       const shots: Shot[] = [];
       for (const a of assets) {
         const sheetPages = pagesFor(a);
@@ -183,6 +212,12 @@ async function main(): Promise<void> {
           }
           const { url: pageUrl, problems } = written;
           for (const [i, w] of WIDTHS.entries()) {
+            if (p.kind === "site" && p.motion) {
+              const files = FRAMES.map((f) => path.join(kindDir, `${assetSlug(a.id)}-${p.variant}-${f.name}-${w}.jpg`));
+              const { problems: found } = await photographMotion(motionPages[i]!, url, pageUrl, w, p.motion, files);
+              for (const [k, f] of FRAMES.entries()) shots.push({ asset: a.id, variant: `${p.variant}-${f.name}`, label: `${p.label} · ${f.name}`, width: w, file: files[k]!, problems: k === 0 ? [...problems, ...found] : [] });
+              continue;
+            }
             const file = path.join(kindDir, `${assetSlug(a.id)}-${p.variant}-${w}.jpg`);
             const found = await photograph(pages[i]!, url, pageUrl, w, p.kind === "site" && !p.showChrome, file);
             shots.push({ asset: a.id, variant: p.variant, label: p.label, width: w, file, problems: [...problems, ...found] });
@@ -190,16 +225,21 @@ async function main(): Promise<void> {
         }
       }
       allShots.push(...shots);
-      writeFileSync(path.join(outDir, `${kind}.html`), sheetHtml(kind, assets, shots));
-      const parts = Math.ceil(assets.length / ROWS_PER_PNG);
-      for (let n = 0; n < parts; n++) {
-        const html = path.join(outDir, `_${kind}-${n + 1}.html`);
-        writeFileSync(html, sheetHtml(kind, assets.slice(n * ROWS_PER_PNG, (n + 1) * ROWS_PER_PNG), shots, parts > 1 ? { n: n + 1, of: parts } : undefined));
-        const sheetPage = await browser.newPage({ viewport: { width: 1700, height: 900 } });
-        await sheetPage.goto(`${url}/_${kind}-${n + 1}.html`, { waitUntil: "load" });
-        await sheetPage.screenshot({ path: path.join(outDir, `${kind}-${n + 1}.png`), fullPage: true });
-        await sheetPage.close();
-        rmSync(html);
+      let sheets = 0;
+      for (const group of sheetGroups(kind, assets)) {
+        const stem = group.name ? `${kind}-${group.name}` : kind;
+        writeFileSync(path.join(outDir, `${stem}.html`), sheetHtml(kind, group.assets, shots, outDir, undefined, group.name || undefined));
+        const parts = Math.ceil(group.assets.length / ROWS_PER_PNG);
+        for (let n = 0; n < parts; n++) {
+          const html = path.join(outDir, `_${stem}-${n + 1}.html`);
+          writeFileSync(html, sheetHtml(kind, group.assets.slice(n * ROWS_PER_PNG, (n + 1) * ROWS_PER_PNG), shots, outDir, parts > 1 ? { n: n + 1, of: parts } : undefined, group.name || undefined));
+          const sheetPage = await browser.newPage({ viewport: { width: 1700, height: 900 } });
+          await sheetPage.goto(`${url}/_${stem}-${n + 1}.html`, { waitUntil: "load" });
+          await sheetPage.screenshot({ path: path.join(outDir, `${stem}-${n + 1}.png`), fullPage: true });
+          await sheetPage.close();
+          rmSync(html);
+          sheets++;
+        }
       }
       if (kind === "palette") {
         // Every palette side by side, 48 a picture (eight rows of six).
@@ -213,7 +253,7 @@ async function main(): Promise<void> {
         }
       }
       const bad = shots.filter((s) => s.problems.length);
-      console.log(`${kind}: ${assets.length} assets, ${shots.length} pictures, ${parts} sheet PNG(s)${bad.length ? `, ${new Set(bad.map((s) => s.asset)).size} with problems` : ""}`);
+      console.log(`${kind}: ${assets.length} assets, ${shots.length} pictures, ${sheets} sheet PNG(s)${bad.length ? `, ${new Set(bad.map((s) => s.asset)).size} with problems` : ""}`);
       for (const s of bad) console.log(`  ${s.asset} ${s.variant} ${s.width}: ${s.problems.join("; ")}`);
     }
   } finally {

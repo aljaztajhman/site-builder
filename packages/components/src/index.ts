@@ -6,5 +6,7 @@ export * from "./chrome/index.tsx";
 export { STYLE_FILES } from "./styles.ts";
 export * from "./motifs/index.tsx";
 export { composedActions } from "./groups/composed/index.tsx";
+export { DrawingSvg } from "./groups/composed/drawing.tsx";
+export { DRAWING_DATA, drawingData } from "./groups/composed/drawings/index.ts";
 export { signatureActions, signatureLink, signatureOffersDirections, signatureOwnsCall, heroOwnsCall } from "./groups/heroes/HeroSignature.tsx";
 export { Collection, ENTRY_IMAGE_SIZES, EntryArticle, eventWhen } from "./groups/content/Collection.tsx";

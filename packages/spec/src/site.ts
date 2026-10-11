@@ -7,7 +7,7 @@ import { SectionId } from "./sections/define.ts";
 import { Collections } from "./collections.ts";
 import type { Intent } from "./intents-list.ts";
 
-export const SPEC_VERSION = 19 as const;
+export const SPEC_VERSION = 20 as const;
 
 export const PageKind = z.enum(["home", "standard", "privacy", "accessibility", "not-found"]);
 export type PageKind = z.infer<typeof PageKind>;

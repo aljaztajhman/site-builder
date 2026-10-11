@@ -50,7 +50,7 @@ import {
 } from "@sb/spec";
 import { fontFaceCss, fontFiles, tokensCss } from "./tokens.ts";
 import { DEFAULT_IMAGE_WIDTHS, variantFile, variantHeight, variantWidths } from "./images.ts";
-import { composedStylesheet, sharedBundle } from "./shared.ts";
+import { COMPOSED_SHEETS, composedIslands, composedSheets, hasComposedCallFact, sharedBundle } from "./shared.ts";
 import { entryJsonLd, faqJsonLd, jsonLd } from "./jsonld.ts";
 import { feedOf, rssXml } from "./feed.ts";
 import { OG_LOCALE, SHARE_IMAGE, indexable, normaliseSiteUrl, pagePath, robotsTxt, shareImageOf, sitemapEntries, sitemapXml } from "./seo.ts";
@@ -100,6 +100,13 @@ export interface RenderOptions {
    * the same address, so the pages are the same.
    */
   siteUrl?: string | null;
+  /**
+   * The day the page is rendered on, for the dates a spec may not carry: a site generated before spec v11 has no
+   * accessibility statement date (legal `date`) and no footer year (chrome.footer.year), and shows this day's. A site
+   * generated since carries both (the engine's assemble sets them to the day it was generated), so preview, publish
+   * and export show the same day whenever they run. Default: now. Tests pass a fixed day so their output never moves.
+   */
+  now?: Date;
 }
 
 export function pageFile(page: Pick<Page, "slug">): string {
@@ -192,6 +199,7 @@ export function makeCtx(spec: SiteSpec, page: Page, opts: RenderOptions & { entr
     entryHref: (path) => down + path,
     shared: (file) => `${up}../_shared/${hash}/${file}`,
     media,
+    today: opts.now ?? new Date(),
   };
 }
 
@@ -293,6 +301,8 @@ function renderDocument(spec: SiteSpec, localized: SiteSpec, opts: RenderOptions
   // nav.js (the menu) and stats.js (cookieless tap counts, live address only) are on every page.
   const islands = new Set<string>(["nav.js", "stats.js", ...doc.islands]);
   for (const s of doc.sections) for (const i of islandsFor(s)) islands.add(i);
+  // Composed motion presets that need JS (spec v20), served after the bundle hash (shared.ts composedIslands).
+  for (const i of composedIslands(doc.sections)) islands.add(i);
   // A wide header with more menu entries than its row holds lists the rest under "Več" (Plus has up to 20 pages).
   if (navHasMore(ctx)) islands.add("nav-more.js");
   // The privacy policy says consent can be withdrawn with the footer's "cookie settings" button, which consent.js
@@ -331,8 +341,14 @@ function renderDocument(spec: SiteSpec, localized: SiteSpec, opts: RenderOptions
   const bodyClass =
     fixed === "bar" ? ["has-action-bar", ...covered.map((a) => `bar-covers-hero-${a}`)].join(" ") : fixed === "float" ? "has-call-float" : undefined;
   // A hero whose call object owns the call (a plate, a call block): only the fixed element's call waits for it.
-  const waitCall = skeleton !== undefined && !afterHero && heroOwnsCall(first);
-  if (skeleton && ((fixed && (afterHero || waitCall)) || (skeleton.actions === "header" && heroOwnsCall(first)))) islands.add("reveal.js");
+  // Without a skeleton a composed opener's fact object that calls (a plate) still makes the bar's call wait: the bar may
+  // be on screen from the start (with reduced motion, or a browser without scroll timelines, even after a hero that
+  // offers call and directions), and the plate can't be turned into a text link.
+  const waitCall = heroOwnsCall(first) && (skeleton !== undefined ? !afterHero : first?.type === "composed");
+  const reveal = skeleton ? (fixed !== null && (afterHero || waitCall)) || (skeleton.actions === "header" && heroOwnsCall(first)) : fixed !== null && waitCall;
+  // A page with a composed fact that calls loads the composed bar.js instead (composedIslands): reveal.js with those facts
+  // among its call objects, on the same marks, so one script runs them and the shared reveal.js keeps its bytes.
+  if (reveal && !hasComposedCallFact(doc.sections)) islands.add("reveal.js");
   const skeletonAttrs = skeleton
     ? {
         "data-skeleton": "",
@@ -349,8 +365,10 @@ function renderDocument(spec: SiteSpec, localized: SiteSpec, opts: RenderOptions
   const shape = design.genome?.source === "picked" && (design.genome.shape === "cut" || design.genome.shape === "arch") ? design.genome.shape : undefined;
   // The page's one centred section (design.skeleton.centred), if any; none without a skeleton.
   const centred = centredOn(skeleton, doc.sections, motif);
+  // Spec v20: the page's opening composed section has the header over it (composed-v2.css, body[data-hdr="over"]).
+  const headerOver = doc.sections === doc.page.sections && first?.type === "composed" && (first as SectionOf<"composed">).props.headerOver === true;
   const renderBody = (suffixes: ReadonlyMap<string, string>) => renderToStaticMarkup(
-    <body data-imagery={design.imagery} data-motif={motif} data-submotif={sub} data-shape={shape} className={bodyClass} {...skeletonAttrs}>
+    <body data-imagery={design.imagery} data-motif={motif} data-submotif={sub} data-shape={shape} data-hdr={headerOver ? "over" : undefined} className={bodyClass} {...skeletonAttrs}>
       <a className="skip-link" href="#main">
         {ctx.t("skipToContent")}
       </a>
@@ -420,8 +438,10 @@ function renderDocument(spec: SiteSpec, localized: SiteSpec, opts: RenderOptions
       )}
       {/* The stylesheet without other trades' motif rules (shared.ts stylesheetFor). */}
       <link rel="stylesheet" href={ctx.shared(stylesheetName({ motif, sub }))} />
-      {/* Composed sections (spec v19) have a stylesheet of their own, linked only by pages that have one. */}
-      {doc.sections.some((s) => s.type === "composed") && <link rel="stylesheet" href={ctx.shared(composedStylesheet().name)} />}
+      {/* Composed sections have stylesheets of their own (spec v19 core, spec v20 additions), linked only by pages that use them. */}
+      {composedSheets(doc.sections).map((k) => (
+        <link key={k} rel="stylesheet" href={ctx.shared(COMPOSED_SHEETS[k]().name)} />
+      ))}
       <style dangerouslySetInnerHTML={{ __html: fontFaceCss(design, fontsBase) + tokensCss(design, sub) }} />
       {doc.jsonLd.map((json, i) => (
         <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: json }} />
