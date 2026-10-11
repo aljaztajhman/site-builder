@@ -84,7 +84,13 @@ function overlapProbe() {
       if (!hit) continue;
       met++;
       if (!(t.classList.contains("cx-over") || ownGround(t) || scrolled)) problems.push(`${name(t)} meets ${name(box)} and is not marked over-photo`);
-      else if (!onTop(t, { x: hit.x, y: hit.y + 0 })) problems.push(`${name(t)} meets ${name(box)} but is not painted on top`);
+      else {
+        // A round sticker or seal paints a circle in its box: probe the overlap's point nearest the object's centre, which
+        // lies inside the shape, not the overlap's centre, which can fall in the box's empty corner.
+        const r = t.getBoundingClientRect(), b = img.getBoundingClientRect();
+        const at = ownGround(t) ? { x: Math.min(Math.max(r.left + r.width / 2, Math.max(r.left, b.left) + SMALL), Math.min(r.right, b.right) - SMALL), y: Math.min(Math.max(r.top + r.height / 2, Math.max(r.top, b.top) + SMALL), Math.min(r.bottom, b.bottom) - SMALL) } : hit;
+        if (!onTop(t, at)) problems.push(`${name(t)} meets ${name(box)} but is not painted on top`);
+      }
     }
   }
   // 2 A sticker or ribbon meets no text, link or button inside main.

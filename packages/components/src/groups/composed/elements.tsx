@@ -132,7 +132,9 @@ function Heading({ el, over, id, uid }: { el: ElOf<"heading">; over: boolean; id
   const H = HEADINGS[el.level - 1]!;
   const rotate = el.rotate === "90" || el.rotate === "-90" ? el.rotate : undefined;
   const { body, vars } = headingBody(el, uid);
-  const p = placement(el, over, { "--fz": stepVar(el.size), ...(el.weight ? { "--w": el.weight } : {}), ...vars });
+  // --lw: the longest word, in letters: on a phone an uppercase display heading shrinks until it fits (composed.css).
+  const lw = Math.max(1, ...el.text.split(/[\s-]+/).map((w) => w.length));
+  const p = placement(el, over, { "--fz": stepVar(el.size), "--lw": lw, ...(el.weight ? { "--w": el.weight } : {}), ...vars });
   // Below size 2 a heading is never all caps, whatever the direction's --case-heading: a small uppercase line is the
   // banned tracked eyebrow (an explicit uppercase there is the guard's to drop).
   const textCase = el.size < UPPERCASE_MIN.size ? "normal" : el.case;

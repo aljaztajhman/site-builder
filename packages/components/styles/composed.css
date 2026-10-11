@@ -25,7 +25,8 @@
   --shape-tagfact: polygon(0.9em 0, 100% 0, 100% 100%, 0.9em 100%, 0 50%);
   --shape-maskcut: polygon(0 0, 100% 0, 100% calc(100% - 2.5rem), calc(100% - 2.5rem) 100%, 0 100%);
   --shape-maskticket: polygon(0 0, 100% 0, 100% calc(50% - 1.25rem), calc(100% - 1.25rem) 50%, 100% calc(50% + 1.25rem), 100% 100%, 0 100%, 0 calc(50% + 1.25rem), 1.25rem 50%, 0 calc(50% - 1.25rem));
-  --shape-stamp: polygon(0% 0, 6.25% 0.4rem, 12.5% 0, 18.75% 0.4rem, 25% 0, 31.25% 0.4rem, 37.5% 0, 43.75% 0.4rem, 50% 0, 56.25% 0.4rem, 62.5% 0, 68.75% 0.4rem, 75% 0, 81.25% 0.4rem, 87.5% 0, 93.75% 0.4rem, 100% 0, calc(100% - 0.4rem) 5%, 100% 10%, calc(100% - 0.4rem) 15%, 100% 20%, calc(100% - 0.4rem) 25%, 100% 30%, calc(100% - 0.4rem) 35%, 100% 40%, calc(100% - 0.4rem) 45%, 100% 50%, calc(100% - 0.4rem) 55%, 100% 60%, calc(100% - 0.4rem) 65%, 100% 70%, calc(100% - 0.4rem) 75%, 100% 80%, calc(100% - 0.4rem) 85%, 100% 90%, calc(100% - 0.4rem) 95%, 100% 100%, 93.75% calc(100% - 0.4rem), 87.5% 100%, 81.25% calc(100% - 0.4rem), 75% 100%, 68.75% calc(100% - 0.4rem), 62.5% 100%, 56.25% calc(100% - 0.4rem), 50% 100%, 43.75% calc(100% - 0.4rem), 37.5% 100%, 31.25% calc(100% - 0.4rem), 25% 100%, 18.75% calc(100% - 0.4rem), 12.5% 100%, 6.25% calc(100% - 0.4rem), 0% 100%, 0.4rem 95%, 0 90%, 0.4rem 85%, 0 80%, 0.4rem 75%, 0 70%, 0.4rem 65%, 0 60%, 0.4rem 55%, 0 50%, 0.4rem 45%, 0 40%, 0.4rem 35%, 0 30%, 0.4rem 25%, 0 20%, 0.4rem 15%, 0 10%, 0.4rem 5%);
+  --sd: calc(100% - 0.4rem);
+  --shape-stamp: polygon(0% 0, 6.25% 0.4rem, 12.5% 0, 18.75% 0.4rem, 25% 0, 31.25% 0.4rem, 37.5% 0, 43.75% 0.4rem, 50% 0, 56.25% 0.4rem, 62.5% 0, 68.75% 0.4rem, 75% 0, 81.25% 0.4rem, 87.5% 0, 93.75% 0.4rem, 100% 0, var(--sd) 5%, 100% 10%, var(--sd) 15%, 100% 20%, var(--sd) 25%, 100% 30%, var(--sd) 35%, 100% 40%, var(--sd) 45%, 100% 50%, var(--sd) 55%, 100% 60%, var(--sd) 65%, 100% 70%, var(--sd) 75%, 100% 80%, var(--sd) 85%, 100% 90%, var(--sd) 95%, 100% 100%, 93.75% var(--sd), 87.5% 100%, 81.25% var(--sd), 75% 100%, 68.75% var(--sd), 62.5% 100%, 56.25% var(--sd), 50% 100%, 43.75% var(--sd), 37.5% 100%, 31.25% var(--sd), 25% 100%, 18.75% var(--sd), 12.5% 100%, 6.25% var(--sd), 0% 100%, 0.4rem 95%, 0 90%, 0.4rem 85%, 0 80%, 0.4rem 75%, 0 70%, 0.4rem 65%, 0 60%, 0.4rem 55%, 0 50%, 0.4rem 45%, 0 40%, 0.4rem 35%, 0 30%, 0.4rem 25%, 0 20%, 0.4rem 15%, 0 10%, 0.4rem 5%);
   --shape-tag: polygon(1.25rem 0, 100% 0, 100% 100%, 1.25rem 100%, 0 50%);
 }
 /* The section's own ground: what a backing panel and a hang tag's hole are painted in. */
@@ -237,6 +238,10 @@
   }
 }
 @media (min-width: 64rem) {
+  /* A wide section's content starts where the header's does (the header's container: 76 rem, 2 rem of padding). */
+  .cx-w-wide > .container {
+    padding-inline: max(2rem, min(50%, 45rem) - 36rem);
+  }
   /* A full-width section keeps a gutter that grows with the screen. */
   .cx-w-full > .container {
     padding-inline: clamp(1rem, 3vw, 3rem);
@@ -261,8 +266,10 @@
 .cx-h--normal {
   text-transform: none;
 }
+/* Uppercase never breaks inside a word: the size shrinks until the longest word (--lw letters, about 0.78 em each) fits the screen. */
 .cx-h--uppercase {
   text-transform: uppercase;
+  font-size: min(var(--fz), calc((100vw - 2rem) / (var(--lw, 1) * 0.78)));
 }
 @media (min-width: 64rem) {
   /* Line length at display sizes, in characters of the heading font. */
