@@ -19,6 +19,9 @@ import { gorenjskaRosetteLine } from "./ornament-gorenjska-rosette-line.ts";
 import { trailBlazeLine } from "./ornament-trail-blaze-line.ts";
 import { pisanicaBandLine } from "./ornament-pisanica-band-line.ts";
 import { prekmurjePotteryBandLine } from "./ornament-prekmurje-pottery-band-line.ts";
+import { loafPoticaSceneSolid } from "./motif-bakery-loaf-potica-scene-solid.ts";
+import { bouleLinocutSolid } from "./motif-bakery-boule-linocut-solid.ts";
+import { sunLoafShapesCut } from "./motif-bakery-sun-loaf-shapes-cut.ts";
 
 /**
  * The inventory's drawings as path data (spec Drawing format, docs/plans/studio-phase1-design.md §3.1), by their full
@@ -47,6 +50,10 @@ export const DRAWING_DATA: Readonly<Record<string, Drawing>> = {
   [trailBlazeLine.id]: trailBlazeLine,
   [pisanicaBandLine.id]: pisanicaBandLine,
   [prekmurjePotteryBandLine.id]: prekmurjePotteryBandLine,
+  // Hero style pilots: full-strength hero art in several palette roles (a decor element in its own roles, not as ink).
+  [loafPoticaSceneSolid.id]: loafPoticaSceneSolid,
+  [bouleLinocutSolid.id]: bouleLinocutSolid,
+  [sunLoafShapesCut.id]: sunLoafShapesCut,
 };
 
 export function drawingData(id: string): Drawing | undefined {
