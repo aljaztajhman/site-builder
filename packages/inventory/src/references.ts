@@ -27,6 +27,7 @@ export const STUDIO_REFERENCES: readonly ReferenceEntry[] = [
   { id: "cebelarstvo-zalokar", stance: "beehive-panel", trades: ["shop"] },
   { id: "kmetija-ravnjak", stance: "pratika-almanac", trades: ["tourist-farm"] },
   { id: "gostilna-horvat", stance: "prekmurje-pottery", trades: ["restaurant"] },
+  { id: "frizerstvo-vesna", stance: "ljubljana-sixties-poster", trades: ["hairdresser"] },
 ];
 
 /** The references as inventory assets: drafts, no bytes of their own (a page, not a part of one). */
