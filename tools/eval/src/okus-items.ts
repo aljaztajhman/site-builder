@@ -59,13 +59,28 @@ function localFontsCss(base: string): string {
     .join("\n");
 }
 
+const stem = (file: string) => file.split("/").pop()!.replace(/\.[^.]+$/, "");
+const num = (text: string) => text.match(/(\d+)\D*$/)?.[1];
+
+/**
+ * The fixture photo a spec image shows: the one whose file name is the one the spec names (src `uploads/02.jpg` is photos/02.jpg),
+ * else the one whose number is the image id's (`img_02`), else the one at the image's position in the spec's list.
+ */
+export function photoForImage<P extends { file: string }>(photos: readonly P[], img: { id: string; src: string }, index: number): P | undefined {
+  const byName = photos.find((p) => stem(p.file) === stem(img.src));
+  if (byName) return byName;
+  const n = num(img.id);
+  const byNumber = n === undefined ? undefined : photos.find((p) => num(stem(p.file)) !== undefined && Number(num(stem(p.file))) === Number(n));
+  return byNumber ?? photos[index];
+}
+
 /** The fixture's photos and logo, processed as the pipeline does, for a spec that uses them (no shared cache). */
 export async function specMedia(fixtureId: string, spec: SiteSpec, widths?: readonly number[]): Promise<Map<string, Uint8Array>> {
   const config = loadConfig();
   const fixture = loadFixture(fixtureId);
   const media = new Map<string, Uint8Array>();
   for (const [i, img] of spec.assets.images.entries()) {
-    const photo = fixture.photos[i];
+    const photo = photoForImage(fixture.photos, img, i);
     if (!photo) continue;
     const processed = await processPhoto(img.id, new Uint8Array(await readFile(photo.path)), [...(widths ?? config.images.widths)], { avif: config.images.avifQuality, webp: config.images.webpQuality });
     for (const v of processed.variants) media.set(v.file, v.data);

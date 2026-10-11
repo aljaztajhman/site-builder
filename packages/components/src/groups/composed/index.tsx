@@ -158,33 +158,30 @@ function OnField({ role, children }: { role: string; children: ReactNode }) {
 /**
  * A field layer: a flat colour on the grid, positioned on the grid's lines (absolutely, so it takes no cell from the
  * elements); touching column 1 or 12 it runs to the page edge, touching the first or last row to the section's edge.
- * On phones it is a full-bleed band over the phone rows of the elements inside it (G2: they are contiguous), and hidden
- * when none of them shows on phones.
+ * On phones it is a full-bleed band over each run of phone rows of the elements inside it (one band when they are
+ * contiguous, G2; on desktop the runs paint the same box), and hidden when none of them shows on phones.
  */
 function FieldLayer({ field, rows, ordered, phone }: { field: LayerOf<"field">; rows: number; ordered: readonly El[]; phone: ReadonlyMap<string, number> }) {
   const r = fieldRect(field, rows);
-  const inside = ordered.filter((el) => insideField(el, field, rows) && phone.has(el.id)).map((el) => phone.get(el.id)!);
-  const p0 = inside.length ? Math.min(...inside) : 0;
-  const p1 = inside.length ? Math.max(...inside) : 0;
+  const inside = [...new Set(ordered.filter((el) => insideField(el, field, rows) && phone.has(el.id)).map((el) => phone.get(el.id)!))].sort((x, y) => x - y);
   const last = phoneRowCount(phone);
-  const style: Record<string, number> = { "--fc0": r.c0, "--fc1": r.c1 + 1, "--fr0": r.r0, "--fr1": r.r1 + 1 };
-  if (inside.length) Object.assign(style, { "--pr0": p0, "--pr1": p1 + 1 });
+  const cls = (...more: (string | false)[]) => cx("cx-field", roleClass(field.role), r.c0 === 1 && "cx-fb-s", r.c1 === 12 && "cx-fb-e", r.r0 === 1 && "cx-fb-t", r.r1 === rows && "cx-fb-b", ...more);
+  const base: Record<string, number> = { "--fc0": r.c0, "--fc1": r.c1 + 1, "--fr0": r.r0, "--fr1": r.r1 + 1 };
+  if (inside.length === 0) return <div className={cls("cx-nophone")} style={base as CSSProperties} aria-hidden="true" />;
+  // Fields side by side whose elements interleave when the columns stack: one band per run of phone rows, so each
+  // band sits behind the elements it holds and no other field's text.
+  const runs: [number, number][] = [];
+  for (const n of inside) {
+    const run = runs[runs.length - 1];
+    if (run && n === run[1] + 1) run[1] = n;
+    else runs.push([n, n]);
+  }
   return (
-    <div
-      className={cx(
-        "cx-field",
-        roleClass(field.role),
-        r.c0 === 1 && "cx-fb-s",
-        r.c1 === 12 && "cx-fb-e",
-        r.r0 === 1 && "cx-fb-t",
-        r.r1 === rows && "cx-fb-b",
-        inside.length === 0 && "cx-nophone",
-        inside.length > 0 && p0 === 1 && "cx-fpb-t",
-        inside.length > 0 && p1 === last && "cx-fpb-b",
-      )}
-      style={style as CSSProperties}
-      aria-hidden="true"
-    />
+    <>
+      {runs.map(([p0, p1]) => (
+        <div key={p0} className={cls(p0 === 1 && "cx-fpb-t", p1 === last && "cx-fpb-b")} style={{ ...base, "--pr0": p0, "--pr1": p1 + 1 } as CSSProperties} aria-hidden="true" />
+      ))}
+    </>
   );
 }
 
