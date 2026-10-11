@@ -164,6 +164,11 @@
     "at": "2026-10-11T18:39:34.680Z",
     "reason": "flagged on p09"
   },
+  "composition/hero/hands-and-hours": {
+    "status": "approved",
+    "at": "2026-10-11T20:16:00.832Z",
+    "reason": "hero bar B: go live, 4/5"
+  },
   "composition/hero/headline-drawn-trade": {
     "status": "approved",
     "at": "2026-10-11T18:39:34.680Z",
@@ -183,6 +188,16 @@
     "status": "rejected",
     "at": "2026-10-11T18:39:34.680Z",
     "reason": "flagged on p18"
+  },
+  "composition/hero/night-print-centred": {
+    "status": "approved",
+    "at": "2026-10-11T20:16:00.832Z",
+    "reason": "hero bar C: go live, 4/5"
+  },
+  "composition/hero/painting-on-dark": {
+    "status": "approved",
+    "at": "2026-10-11T20:16:00.832Z",
+    "reason": "hero bar H: go live, 3/5"
   },
   "composition/hero/phone-giant-rope": {
     "status": "rejected",
@@ -214,6 +229,21 @@
     "at": "2026-10-11T18:39:34.680Z",
     "reason": "shown on p14, not flagged"
   },
+  "composition/hero/poster-call-block": {
+    "status": "approved",
+    "at": "2026-10-11T20:16:00.832Z",
+    "reason": "hero bar G: go live, 4/5, 'nice generated visual'"
+  },
+  "composition/hero/price-board-band": {
+    "status": "rejected",
+    "at": "2026-10-11T20:16:00.832Z",
+    "reason": "hero bar E: no, 3/5, 'this licence plate thing is overused'"
+  },
+  "composition/hero/shop-window-tags": {
+    "status": "approved",
+    "at": "2026-10-11T20:16:00.832Z",
+    "reason": "hero bar A: go live, 4/5"
+  },
   "composition/hero/signpost-pole": {
     "status": "approved",
     "at": "2026-10-11T18:39:34.680Z",
@@ -228,6 +258,16 @@
     "status": "approved",
     "at": "2026-10-11T18:39:34.680Z",
     "reason": "shown on p19, not flagged"
+  },
+  "composition/hero/type-wall-strip": {
+    "status": "rejected",
+    "at": "2026-10-11T20:16:00.832Z",
+    "reason": "hero bar F: no, 3/5"
+  },
+  "composition/hero/workshop-door": {
+    "status": "approved",
+    "at": "2026-10-11T20:16:00.832Z",
+    "reason": "hero bar D: go live, 4/5"
   },
   "composition/highlights/broadsheet": {
     "status": "approved",
@@ -733,6 +773,11 @@
     "at": "2026-10-11T18:39:34.680Z",
     "reason": "shown on p15, not flagged"
   },
+  "motif/bakery/oven-night-linocut-solid": {
+    "status": "approved",
+    "at": "2026-10-11T20:16:00.832Z",
+    "reason": "hero bar C art: go live, 4/5"
+  },
   "motif/bakery/peel-loaf-line": {
     "status": "rejected",
     "at": "2026-10-11T11:52:59.931Z"
@@ -778,6 +823,11 @@
   "motif/plumbing/ball-valve-line": {
     "status": "approved",
     "at": "2026-10-11T11:52:59.931Z"
+  },
+  "motif/plumbing/heat-pump-radiator-solid": {
+    "status": "approved",
+    "at": "2026-10-11T20:16:00.832Z",
+    "reason": "hero bar G art: go live, 4/5"
   },
   "motif/restaurant/ladle-pot-line": {
     "status": "approved",
