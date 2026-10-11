@@ -35,7 +35,7 @@ export { PAIRING_TAGS } from "./pairing-tags.ts";
 export { DRAWING_DATA, DRAWING_META, drawingAssets, drawingBytes, drawingStyleOf } from "./drawings.ts";
 export { ICON_NOTES, iconAssets, iconBytes } from "./icons.ts";
 export { MASK_DRAFTS, TREATMENT_DRAFTS, addedNames, imageryDraftAssets, type ImageryDraft } from "./imagery.ts";
-export { TEXTURE_TAGS, textureAssets, textureNames, texturePartial, texturePartialFile, type TexturePartial } from "./textures.ts";
+export { TEXTURE_TAGS, starterTextureAssets, starterTextureTile, textureAssets, textureNames, texturePartial, texturePartialFile, type TexturePartial } from "./textures.ts";
 export { motionAssets, motionBytes } from "./motion.ts";
 export { FACT_OBJECT_DRAFTS, TYPE_TREATMENT_DRAFTS, factObjectDraftAssets, typeTreatmentDraftAssets } from "./type-and-facts.ts";
 

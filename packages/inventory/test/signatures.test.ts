@@ -68,7 +68,7 @@ describe("resolveSignature", () => {
 
   it("KIND_COMPLETE holds the merged batches", () => {
     expect([...KIND_COMPLETE].sort()).toEqual(
-      ["factObject", "font", "footer", "header", "mask", "motif", "submotif", "pairing", "palette", "section", "treatment"].sort(),
+      ["factObject", "font", "footer", "header", "mask", "motif", "submotif", "pairing", "palette", "section", "treatment", "texture"].sort(),
     );
   });
 });

@@ -23,6 +23,7 @@ export const KIND_COMPLETE: ReadonlySet<AssetKind> = new Set<AssetKind>([
   "footer",
   "motif",
   "submotif",
+  "texture",
 ]);
 
 export type SignatureState = "resolved" | "pending" | "unknown";
