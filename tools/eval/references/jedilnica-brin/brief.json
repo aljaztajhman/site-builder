@@ -1,0 +1,74 @@
+{
+  "id": "jedilnica-brin",
+  "businessType": "restaurant",
+  "town": "Maribor",
+  "description": "Jedilnica Brin je majhna restavracija v Mariboru, naslov je Vetrinjska ulica 5, 2000 Maribor. Vodim jo jaz, Nina Brin, kuhava pa z bratom Lukom. Vsak dan kuhamo dnevno kosilo, juho in glavno jed, poleg tega imamo rižoto z gobami, burger z domačo žemljo in tiramisu.\n\nCene: dnevna juha 3,50 €, dnevno kosilo 8,90 €, rižota z gobami 9,50 €, burger z domačo žemljo 10,50 €, tiramisu 4,00 €.\n\nOdprto: pon–pet 10.00–20.00, sobota 12.00–22.00, ob nedeljah zaprto.\n\nNaročila na 02 555 34 71 ali na nina@jedilnica-brin.example. Hrano lahko vzamete s sabo, plačate lahko s kartico, imamo brezplačen wifi in vegetarijanske jedi. Stran naj bo glasna in preprosta: velike ploskve barve in malo besed, kot na plakatu za koncert.",
+  "photos": null,
+  "facts": {
+    "name": "Jedilnica Brin",
+    "phone": "+38625553471",
+    "email": "nina@jedilnica-brin.example",
+    "address": {
+      "street": "Vetrinjska ulica 5",
+      "postalCode": "2000",
+      "city": "Maribor"
+    },
+    "hours": [
+      {
+        "from": "mon",
+        "to": "fri",
+        "open": "10:00",
+        "close": "20:00"
+      },
+      {
+        "from": "sat",
+        "to": "sat",
+        "open": "12:00",
+        "close": "22:00"
+      }
+    ],
+    "prices": [
+      {
+        "item": "dnevna juha",
+        "amount": 3.5
+      },
+      {
+        "item": "dnevno kosilo",
+        "amount": 8.9
+      },
+      {
+        "item": "rižota z gobami",
+        "amount": 9.5
+      },
+      {
+        "item": "burger z domačo žemljo",
+        "amount": 10.5
+      },
+      {
+        "item": "tiramisu",
+        "amount": 4
+      }
+    ],
+    "people": [
+      {
+        "name": "Nina Brin",
+        "role": "vodja, kuhinja"
+      },
+      {
+        "name": "Luka",
+        "role": "kuhinja"
+      }
+    ],
+    "amenities": [
+      "card",
+      "takeaway",
+      "wifi",
+      "vegetarian"
+    ],
+    "other": [
+      "Vsak dan kuhamo dnevno kosilo, juho in glavno jed",
+      "Hrano lahko vzamete s sabo",
+      "Brezplačen wifi in vegetarijanske jedi"
+    ]
+  }
+}
