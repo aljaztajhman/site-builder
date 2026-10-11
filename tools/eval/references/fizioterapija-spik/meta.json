@@ -1,0 +1,13 @@
+{
+  "id": "fizioterapija-spik",
+  "stance": "julian-alps",
+  "trades": [
+    "physio"
+  ],
+  "title": "Fizioterapija Špik, visoka alpska svetloba",
+  "gapNote": "There is no ridge-line divider (divider/ridge-line) and no trail motif: the ridge is an inline svg decor of one stroked polyline, a hand-drawn zigzag, placed once in the hero and once small in the last text section, so it is not a line that runs across the top of every section as the stance asks. A section edge can only be straight, rule, cut, torn or a drawing from the sheet, and no ridge drawing exists to use as one. The decor line stretches with its cell, so its slope changes between desktop and phone. The brief wanted wide photos of open sky, but the one photo is a treatment room: it is set full bleed at 21:9, which crops the table and the window, and the language has no way to say sky or distance. The gentian blue is the primary role; slate is the text colour, so there is no separate rock grey. A calm count-up numeral (60) is the only object near the ridge.",
+  "sources": [
+    "stance julian-alps (cold white ground, slate and one gentian blue, a ridge line across the top)",
+    "P Pregib (a physio with one calm photo)"
+  ]
+}
