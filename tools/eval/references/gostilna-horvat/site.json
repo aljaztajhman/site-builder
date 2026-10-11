@@ -1,0 +1,193 @@
+{
+  "specVersion": 20,
+  "slug": "gostilna-horvat",
+  "locales": { "default": "sl", "enabled": ["sl"] },
+  "business": {
+    "name": "Gostilna Horvat",
+    "type": "restaurant",
+    "phone": "+38625554830",
+    "email": "gostilna@gostilna-horvat.example",
+    "address": { "street": "Filovci 45", "postalCode": "9222", "city": "Bogojina" },
+    "hours": {
+      "entries": [
+        { "from": "mon", "to": "mon", "closed": true },
+        { "from": "tue", "to": "fri", "open": "10:00", "close": "22:00" },
+        { "from": "sat", "to": "sat", "open": "11:00", "close": "23:00" },
+        { "from": "sun", "to": "sun", "open": "11:00", "close": "17:00" }
+      ]
+    },
+    "provider": {
+      "legalName": { "$placeholder": "legalName" },
+      "registrationNumber": { "$placeholder": "registrationNumber" },
+      "taxNumber": { "$placeholder": "taxNumber" }
+    },
+    "amenities": ["parking", "card", "terrace"]
+  },
+  "design": {
+    "direction": "skorja",
+    "fontPair": "bitter-karla",
+    "colors": {
+      "background": "#ffffff",
+      "surface": "#ecebea",
+      "text": "#262321",
+      "muted": "#5a534f",
+      "primary": "#a3402a",
+      "onPrimary": "#ffffff",
+      "accent": "#d0643f",
+      "border": "#ddd6d2",
+      "inverse": "#2b2826",
+      "onInverse": "#f3eeea"
+    },
+    "radius": 10,
+    "baseFontSize": 18,
+    "scale": 1.3,
+    "headingWeight": 850,
+    "headingCase": "normal",
+    "headingTracking": -0.02,
+    "density": "regular",
+    "shadow": "none",
+    "imagery": "rounded",
+    "motion": "calm",
+    "wordmark": { "style": "plain" }
+  },
+  "assets": {
+    "images": [
+      { "id": "img_01", "src": "uploads/01.jpg", "width": 1536, "height": 1024, "alt": "Bela gostilna z zelenimi polkni in lipo pred vhodom" },
+      { "id": "img_02", "src": "uploads/02.jpg", "width": 1024, "height": 1536, "alt": "Jedilnica z lesenimi mizami in kmečko pečjo" },
+      { "id": "img_03", "src": "uploads/03.jpg", "width": 1536, "height": 1024, "alt": "Ajdovi žganci z ocvirki in kislo mleko na leseni mizi" },
+      { "id": "img_04", "src": "uploads/04.jpg", "width": 1536, "height": 1024, "alt": "Narezani orehovi štruklji z maslom in drobtinami" },
+      { "id": "img_05", "src": "uploads/05.jpg", "width": 1024, "height": 1536, "alt": "Terasa pod lipo s pogrnjenimi mizami" },
+      { "id": "img_06", "src": "uploads/06.jpg", "width": 1536, "height": 1024, "alt": "Skodelica telečje obare s kruhom" },
+      { "id": "img_07", "src": "uploads/07.jpg", "width": 1536, "height": 1024, "alt": "Kuharica meša lonec v gostilniški kuhinji" },
+      { "id": "img_08", "src": "uploads/08.jpg", "width": 1024, "height": 1536, "alt": "Dolga pogrnjena miza za družinsko praznovanje" }
+    ]
+  },
+  "chrome": {
+    "header": { "variant": "bar", "cta": "none", "tone": "inverse" },
+    "footer": { "variant": "compact" },
+    "mobileActionBar": true
+  },
+  "pages": [
+    {
+      "id": "p_home",
+      "kind": "home",
+      "slug": "",
+      "nav": { "label": "Domov", "show": true },
+      "seo": {
+        "title": "Gostilna Horvat, Filovci – ob petkih bograč",
+        "description": "Domača gostilna v Filovcih: ajdovi žganci z ocvirki, telečja obara, orehovi štruklji, prekmurska gibanica, ob petkih bograč. Malica med tednom 9 €."
+      },
+      "sections": [
+        {
+          "id": "s_pot",
+          "type": "composed",
+          "variant": "free",
+          "tone": "inverse",
+          "props": {
+            "intent": "hero",
+            "width": "contained",
+            "rows": 4,
+            "elements": [
+              { "id": "e_where", "kind": "text", "paragraphs": ["Filovci 45, Bogojina"], "desk": { "col": 1, "span": 5, "row": 1, "alignY": "end" }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_title", "kind": "heading", "text": "Ob petkih bograč iz glinenega lonca", "level": 1, "size": 6, "measure": "m", "desk": { "col": 1, "span": 6, "row": 2 }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_lead", "kind": "text", "paragraphs": ["Simona kuha domače jedi: ajdove žgance z ocvirki, telečjo obaro, orehove štruklje in prekmursko gibanico. Med tednom je od 11.00 do 14.00 malica za 9 €."], "size": 1, "desk": { "col": 1, "span": 6, "row": 3 }, "phone": { "order": 2, "span": "full" } },
+              { "id": "e_phone", "kind": "fact", "value": "02 555 48 30", "label": "Rezervacije po telefonu", "treatment": "numeral", "size": 4, "link": { "action": "call" }, "desk": { "col": 1, "span": 5, "row": 4, "alignY": "end" }, "phone": { "order": 3, "span": "full" } },
+              { "id": "e_dish", "kind": "image", "image": "img_03", "ratio": "1:1", "mask": "bowl", "desk": { "col": 7, "span": 6, "row": 1, "rowSpan": 4, "alignY": "center" }, "phone": { "order": 4, "span": "full" } }
+            ]
+          }
+        },
+        {
+          "id": "s_menu",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "menu",
+            "width": "contained",
+            "rows": 4,
+            "top": { "edge": "drawing", "drawing": "ornament/prekmurje-pottery-band-line" },
+            "motion": "unmask",
+            "elements": [
+              { "id": "e_h", "kind": "heading", "text": "Kaj kuhamo", "level": 2, "size": 5, "color": "primary", "desk": { "col": 1, "span": 6, "row": 1 }, "phone": { "order": 0, "span": "full" } },
+              {
+                "id": "e_p",
+                "kind": "prices",
+                "style": "leaders",
+                "size": 1,
+                "items": [
+                  { "name": "Ajdovi žganci z ocvirki", "note": "s kislim mlekom", "price": { "amount": 8.5 } },
+                  { "name": "Telečja obara s kruhom", "price": { "amount": 7 } },
+                  { "name": "Bograč", "note": "ob petkih", "price": { "amount": 11 } },
+                  { "name": "Orehovi štruklji", "price": { "amount": 5.5 } },
+                  { "name": "Prekmurska gibanica", "price": { "amount": 4.5 } }
+                ],
+                "desk": { "col": 1, "span": 6, "row": 2, "rowSpan": 2 },
+                "phone": { "order": 1, "span": "full" }
+              },
+              { "id": "e_t", "kind": "text", "paragraphs": ["Med tednom je od 11.00 do 14.00 malica za 9 €: juha, glavna jed in solata."], "desk": { "col": 1, "span": 6, "row": 4 }, "phone": { "order": 2, "span": "full" } },
+              { "id": "e_soup", "kind": "image", "image": "img_06", "ratio": "4:5", "mask": "barrel", "desk": { "col": 8, "span": 5, "row": 1, "rowSpan": 3, "alignY": "start" }, "phone": { "order": 3, "span": "inset" } },
+              { "id": "e_struk", "kind": "image", "image": "img_04", "ratio": "1:1", "mask": "oval", "desk": { "col": 7, "span": 3, "row": 3, "rowSpan": 2, "alignY": "end", "layer": 1, "shiftY": 1 }, "phone": { "order": 4, "span": "half", "hidden": true } }
+            ]
+          }
+        },
+        {
+          "id": "s_party",
+          "type": "composed",
+          "variant": "free",
+          "tone": "band",
+          "props": {
+            "intent": "story",
+            "width": "contained",
+            "rows": 3,
+            "elements": [
+              { "id": "e_room", "kind": "image", "image": "img_02", "ratio": "3:4", "mask": "arch", "desk": { "col": 1, "span": 4, "row": 1, "rowSpan": 3 }, "phone": { "order": 3, "span": "inset" } },
+              { "id": "e_seats", "kind": "fact", "value": "40", "label": "mest v jedilnici s kmečko pečjo", "treatment": "numeral", "size": 6, "desk": { "col": 6, "span": 6, "row": 1, "alignY": "end" }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_h", "kind": "heading", "text": "Za praznovanja do 60 ljudi", "level": 2, "size": 4, "measure": "m", "desk": { "col": 6, "span": 6, "row": 2 }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_t", "kind": "text", "paragraphs": ["Za družinska praznovanja pripravimo meni po dogovoru. Poleti je odprta terasa pod lipo."], "size": 1, "desk": { "col": 6, "span": 6, "row": 3, "alignY": "start" }, "phone": { "order": 2, "span": "full" } }
+            ]
+          }
+        },
+        {
+          "id": "s_visit",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "contact",
+            "width": "contained",
+            "rows": 3,
+            "elements": [
+              { "id": "e_h", "kind": "heading", "text": "Odprto", "level": 2, "size": 5, "color": "primary", "desk": { "col": 1, "span": 5, "row": 1 }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_hours", "kind": "hours", "style": "table", "desk": { "col": 1, "span": 5, "row": 2 }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_if", "kind": "iconFacts", "icons": "line", "items": [{ "fact": "terrace", "note": "Poleti, pod lipo" }, { "fact": "parking", "note": "Za gostilno" }, { "fact": "card" }], "desk": { "col": 1, "span": 5, "row": 3 }, "phone": { "order": 2, "span": "full" } },
+              { "id": "e_contact", "kind": "contact", "show": ["phone", "email", "address"], "desk": { "col": 7, "span": 6, "row": 1, "rowSpan": 2 }, "phone": { "order": 3, "span": "full" } },
+              { "id": "e_map", "kind": "map", "style": "pin", "desk": { "col": 7, "span": 6, "row": 3 }, "phone": { "order": 4, "span": "full" } }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "nav": { "label": "Zasebnost", "show": false },
+      "seo": { "title": "Varstvo osebnih podatkov | Gostilna Horvat", "description": "Kako Gostilna Horvat obdeluje osebne podatke obiskovalcev spletne strani." },
+      "sections": [{ "id": "s_legal_privacy", "type": "legal", "variant": "default", "props": { "kind": "privacy" } }]
+    },
+    {
+      "id": "p_dostopnost",
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "nav": { "label": "Dostopnost", "show": false },
+      "seo": { "title": "Izjava o dostopnosti | Gostilna Horvat", "description": "Izjava o dostopnosti spletne strani Gostilna Horvat." },
+      "sections": [{ "id": "s_legal_accessibility", "type": "legal", "variant": "default", "props": { "kind": "accessibility" } }]
+    },
+    {
+      "id": "p_404",
+      "kind": "not-found",
+      "slug": "404",
+      "nav": { "label": "Ni najdeno", "show": false },
+      "seo": { "title": "Strani ni mogoče najti | Gostilna Horvat", "description": "Iskane strani ni. Vrnite se na domačo stran." },
+      "sections": [{ "id": "s_not_found", "type": "not-found", "variant": "default", "props": { "title": "Te strani ni mogoče najti", "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo." } }]
+    }
+  ]
+}

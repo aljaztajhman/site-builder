@@ -1,0 +1,8 @@
+{
+  "id": "gostilna-horvat",
+  "stance": "prekmurje-pottery",
+  "trades": ["restaurant"],
+  "title": "Gostilna Horvat, prekmurski lonec",
+  "gapNote": "The masks are geometric, not vessels: bowl, barrel, oval and arch round a photo's corners but none has a pot's profile (a neck, a belly, a foot), so the photos sit in rounded boxes rather than clay pots; ornament/vessel-silhouette (stance signature) doesn't exist to draw one beside them. The incised band is the pottery band line as the menu's top edge: an edge drawing takes the text colour at a fixed small height, so on the smoked-grey hero it reads as a thin zigzag, not a band cut round a form, and it can't be repeated round each photo. The smoked grey and earth red are colour roles only; there is no clay or slip texture, and the band section's ground is the primary red. The hero photo is the žganci (the fixture has no bograč), next to a headline about bograč. The second food photo overlaps the first by a shift step; on phones it is hidden because two masked photos stacked read as a gallery.",
+  "sources": ["K Jedilnik (dishes and prices as the menu, the house's room)", "stance prekmurje-pottery (vessel shapes holding the photos, an incised band, earth red and smoked grey)"]
+}
