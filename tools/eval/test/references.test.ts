@@ -121,7 +121,7 @@ describe("references in a browser at 360 and 1280 px", () => {
       // Each reference is built in its own test (once, shared by both widths), so setup time doesn't grow with the set.
       if (!homes.has(id)) {
         const r = refs.find((x) => x.id === id)!;
-        homes.set(id, `${id}/${await writeReferenceSite(r, path.join(dir, id))}`);
+        homes.set(id, `${id}/${await writeReferenceSite(r, path.join(dir, id), { widths: config.images.widths.slice(0, 1) })}`);
       }
       const page = await ctx.newPage();
       await page.goto(`${base}/${homes.get(id)}`, { waitUntil: "networkidle" });

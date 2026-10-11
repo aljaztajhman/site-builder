@@ -60,14 +60,14 @@ function localFontsCss(base: string): string {
 }
 
 /** The fixture's photos and logo, processed as the pipeline does, for a spec that uses them (no shared cache). */
-export async function specMedia(fixtureId: string, spec: SiteSpec): Promise<Map<string, Uint8Array>> {
+export async function specMedia(fixtureId: string, spec: SiteSpec, widths?: readonly number[]): Promise<Map<string, Uint8Array>> {
   const config = loadConfig();
   const fixture = loadFixture(fixtureId);
   const media = new Map<string, Uint8Array>();
   for (const [i, img] of spec.assets.images.entries()) {
     const photo = fixture.photos[i];
     if (!photo) continue;
-    const processed = await processPhoto(img.id, new Uint8Array(await readFile(photo.path)), config.images.widths, { avif: config.images.avifQuality, webp: config.images.webpQuality });
+    const processed = await processPhoto(img.id, new Uint8Array(await readFile(photo.path)), [...(widths ?? config.images.widths)], { avif: config.images.avifQuality, webp: config.images.webpQuality });
     for (const v of processed.variants) media.set(v.file, v.data);
     img.width = processed.width;
     img.height = processed.height;

@@ -179,16 +179,19 @@ export function checkReference(ref: Reference): string[] {
 }
 
 /** The spec with its photos processed (the fixture's photos, as the pipeline would), ready to render. */
-export async function referenceSite(ref: Reference): Promise<{ spec: SiteSpec; media: Map<string, Uint8Array> }> {
+export async function referenceSite(ref: Reference, widths?: readonly number[]): Promise<{ spec: SiteSpec; media: Map<string, Uint8Array> }> {
   const spec = structuredClone(ref.spec);
-  const media = ref.brief.photos ? await specMedia(ref.brief.photos.fixture, spec) : new Map<string, Uint8Array>();
+  const media = ref.brief.photos ? await specMedia(ref.brief.photos.fixture, spec, widths) : new Map<string, Uint8Array>();
   return { spec, media };
 }
 
-/** Writes the reference's published files into `dir` and returns the homepage path relative to it. */
-export async function writeReferenceSite(ref: Reference, dir: string): Promise<string> {
-  const { spec, media } = await referenceSite(ref);
-  await writeSiteFiles(spec, media, dir);
+/**
+ * Writes the reference's published files into `dir` and returns the homepage path relative to it. `widths` limits the
+ * image sizes encoded (tests that only check layout and axe use one, so CI doesn't spend minutes on AVIF variants).
+ */
+export async function writeReferenceSite(ref: Reference, dir: string, opts: { widths?: readonly number[] } = {}): Promise<string> {
+  const { spec, media } = await referenceSite(ref, opts.widths);
+  await writeSiteFiles(spec, media, dir, opts.widths);
   return `${spec.slug}/index.html`;
 }
 

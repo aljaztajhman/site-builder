@@ -28,8 +28,8 @@ export async function kitchenSinkSpec(): Promise<{ spec: SiteSpec; media: Map<st
 }
 
 /** Writes the published files of a site into `dir` (as the preview-free static export). */
-export async function writeSiteFiles(spec: SiteSpec, media: Map<string, Uint8Array>, dir: string): Promise<void> {
-  for (const [rel, data] of siteFiles(spec, media, { imageWidths: loadConfig().images.widths })) {
+export async function writeSiteFiles(spec: SiteSpec, media: Map<string, Uint8Array>, dir: string, widths?: readonly number[]): Promise<void> {
+  for (const [rel, data] of siteFiles(spec, media, { imageWidths: [...(widths ?? loadConfig().images.widths)] })) {
     await mkdir(path.dirname(path.join(dir, rel)), { recursive: true });
     await writeFile(path.join(dir, rel), data);
   }
