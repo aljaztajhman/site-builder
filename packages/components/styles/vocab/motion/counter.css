@@ -1,0 +1,20 @@
+/* counter (entrance + the motion island): a numeral fact lifts 0.5rem into place as it comes into view while
+   islands/composed/motion.js counts its digits up once. The final value is the markup's text from the start; only a plain
+   whole number of up to four digits counts (never a year, a price, a phone number or a linked fact: the island decides). */
+.cx-mo-counter {
+  --cx-cy: 0.5rem;
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes cx-mo-counter {
+      from {
+        transform: translateY(var(--cx-cy));
+      }
+    }
+    .cx-mo-counter .cx-el--fact {
+      animation: cx-mo-counter linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 60%;
+    }
+  }
+}

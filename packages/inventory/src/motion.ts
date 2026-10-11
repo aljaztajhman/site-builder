@@ -16,6 +16,10 @@ const NOTES: Readonly<Record<string, string>> = {
   wipe: "I7a: a photo uncovers left to right as it enters the view (clip-path through a --shape- token).",
   stagger: "I7a: the section's text-bearing elements rise one after another (the range shifts by the element's place).",
   "drift-bg": "I7a: the background photo moves slower than the content (scroll timeline, transform only; lively).",
+  "headline-reveal": "I7b: a display heading rises out of a clip as it enters the view, uncovered from the top so the lines arrive in reading order; the words are in the DOM throughout.",
+  "photo-unmask": "I7b: a photo's mask opens from its middle outward as it enters the view (clip-path through a --shape- token, a slight settle).",
+  counter: "I7b: a numeral fact counts up once on first view (the motion island): only a plain whole number up to four digits, never a year, a price, a phone number or a linked fact; the value is in the HTML throughout.",
+  "sticky-stack": "I7b: consecutive sections pin to the top in turn and cover one another (desktop only: static on phones and under reduced motion).",
 };
 
 /** Bytes a preset adds to a page: its own partial, minified as the family sheet is. */

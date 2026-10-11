@@ -3,12 +3,12 @@ import { MOTIONS, MOTION_META } from "@sb/spec";
 import { STARTER_NAMES, vocabCoverage } from "@sb/render";
 import { byteBudget, inventory, motionAssets } from "../src/index.ts";
 
-/** The motion presets beyond the starters (I7a): one draft asset each, measured on its own partial. */
+/** The motion presets beyond the starters (I7a, I7b): one draft asset each, measured on its own partial. */
 describe("motion assets", () => {
   const added = MOTIONS.filter((m) => !STARTER_NAMES.motion.includes(m));
 
   it("every preset beyond the starters is a registered draft motion/<name>, and nothing else is", () => {
-    expect(added).toEqual(["rise", "wipe", "stagger", "drift-bg"]);
+    expect(added).toEqual(["rise", "wipe", "stagger", "drift-bg", "headline-reveal", "photo-unmask", "counter", "sticky-stack"]);
     expect(motionAssets().map((a) => a.id)).toEqual(added.map((m) => `motion/${m}`));
     for (const a of motionAssets()) {
       expect(a.status).toBe("draft");
