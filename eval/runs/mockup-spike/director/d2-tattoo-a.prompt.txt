@@ -1,0 +1,10 @@
+One flat full-page website screenshot, 1536×1024, no browser or device frame. Page ground deep rust #8A3216. Top left wordmark "Rja" in tall condensed black grotesque, off-white #F3ECE6; top right nav, small sans: "Domov", "Delo", "Posvet", "Kontakt". Hero, left-aligned on 12-column grid: headline "Vsak motiv narisan na novo" in huge tall condensed heavy sans, off-white, three stacked lines spanning columns 1–9. Lower right, columns 9–12, intro in clean sans: "Majhen tatu studio v Mariboru. Tetovaže po vaši zgodbi, nič iz kataloga. Samo z naročili." One continuous single-weight off-white hairline drawing of a fern passes behind the headline and bleeds off the right edge, with a few dashed segments in stencil lilac #B9A8F0. Below, a full-width band in deep oxide #4A1A0C: left-aligned list of four large condensed service names, "Tetovaže po meri", "Fine-line in drobni motivi", "Prekrivanje in popravki", "Posvet in osnutek", with the same hairline weaving between them into a small swallow. Bottom section back on rust: left, the phone "040 555 318" as a giant condensed numeral underlined by the hairline, with one rectangular lilac button with square corners and off-black text "Pokličite"; right, a simple hours table "Tor–pet 12.00–20.00", "Sob 10.00–15.00" and address "Koroška cesta 41, 2000 Maribor". No gradients, no shadows, no photos, no people.
+
+Required texts, verbatim and spelled exactly (use only these; every word legible):
+- the wordmark "Rja" and navigation: "Domov", "Delo", "Posvet", "Kontakt"
+- headline: "Vsak motiv narisan na novo"
+- intro: "Majhen tatu studio v Mariboru. Tetovaže po vaši zgodbi, nič iz kataloga. Samo z naročili."
+- four services: "Tetovaže po meri", "Fine-line in drobni motivi", "Prekrivanje in popravki", "Posvet in osnutek"
+- opening hours: "Tor–pet 12.00–20.00", "Sob 10.00–15.00"
+- address: "Koroška cesta 41, 2000 Maribor"
+- phone: "040 555 318" with one button "Pokličite"

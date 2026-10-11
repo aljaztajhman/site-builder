@@ -6,17 +6,23 @@
  * billing needs a billing key, so the booking is the pricing API's rate, see BOOK).
  *   FAL_KEY in the environment; pnpm tsx tools/eval/src/mockup-spike.ts <job>[,<job>…]   (jobs: see JOBS, or "list")
  * Writes eval/runs/mockup-spike/mockups/<job>-<n>.jpg.
+ *
+ * Spike 2 (`--spike2`): the prompts are the Opus art director's (mockup-director.ts, director/<business>.json), one
+ * image per direction: jobs `d2-<pekarna|tattoo|florist>-<a|b>`, and `…-phone` for a phone version. Its own cap: €0.60
+ * and 13 images across the ledger's spike-2 rows.
  */
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
+import { TEXTS, type Business } from "./mockup-director.ts";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const OUT = path.join(repoRoot, "eval/runs/mockup-spike");
 const LOG = path.join(OUT, "cost-log.jsonl");
-const CAP_EUR = 1.2;
-const CAP_IMAGES = 20;
+const SPIKE2 = process.argv.includes("--spike2");
+const CAP_EUR = SPIKE2 ? 0.6 : 1.2;
+const CAP_IMAGES = SPIKE2 ? 13 : 20;
 const EUR_PER_USD = 0.86;
 
 /** USD per output image as booked. gpt-image-2.5 is token-billed: config's $0.0502/MP × 1.57 MP plus ~$0.02 for the reference images. Ideogram BALANCED is 2× its TURBO $0.03. */
@@ -68,8 +74,10 @@ const PHONE = DESKTOP.replace("desktop homepage", "phone homepage").replace(
 
 interface Job {
   endpoint: string;
-  business: "pekarna" | "tattoo";
+  business: Business;
   phone?: boolean;
+  /** The whole prompt (spike 2); otherwise DESKTOP or PHONE with the business filled in. */
+  prompt?: string;
   input: (prompt: string, refs: string[]) => Record<string, unknown>;
   n: number;
 }
@@ -105,6 +113,25 @@ export function phoneJob(base: string): Job {
   return { ...j, phone: true, input: portrait, n: 1 };
 }
 
+/** Spike 2: one GPT Image 2.5 image (high) from the art director's prompt for direction a or b, the required texts appended verbatim. */
+function directorJob(name: string): Job {
+  const m = /^d2-(pekarna|tattoo|florist)-([ab])(-phone)?$/.exec(name);
+  if (!m) throw new Error(`no job ${name}`);
+  const business = m[1] as Business;
+  const phone = !!m[3];
+  const dir = JSON.parse(readFileSync(path.join(OUT, "director", `${business}.json`), "utf8")) as { directions: { imagePrompt: string }[] };
+  const d = dir.directions[m[2] === "a" ? 0 : 1]!;
+  const photos =
+    business === "pekarna" ? "\n\nUse the attached photographs as the website's photos (keep them recognisable, crop them as a designer would, do not redraw them or add other photos); the attached logo is the business's logo." : "";
+  const texts = `\n\nRequired texts, verbatim and spelled exactly (use only these; every word legible):\n${TEXTS[business]}`;
+  const body = phone
+    ? `PHONE VERSION of this homepage: one flat tall screenshot of a 390-pixel-wide phone screen (the first screen and the start of the next section; no phone frame, no browser bar, no perspective), one column, large tap targets, the same art direction:\n\n${d.imagePrompt}`
+    : d.imagePrompt;
+  const size = phone ? { width: 1024, height: 1536 } : { width: 1536, height: 1024 };
+  const endpoint = business === "pekarna" ? "openai/gpt-image-2.5/flare/edit" : "openai/gpt-image-2.5/flare/text-to-image";
+  return { endpoint, business, phone, n: 1, prompt: body + photos + texts, input: (p, r) => ({ ...gpt(size)(p, r), num_images: 1 }) };
+}
+
 interface Row {
   at: string;
   job: string;
@@ -113,13 +140,20 @@ interface Row {
   costEur: number;
   seconds: number;
   ok: boolean;
+  provider?: string;
+  spike?: number;
   requestId?: string;
   error?: string;
 }
 
+/** The fal rows of this spike (spike 2's own cap; the director's Anthropic rows are capped in mockup-director.ts). */
 function ledger(): { eur: number; images: number } {
   if (!existsSync(LOG)) return { eur: 0, images: 0 };
-  const rows = readFileSync(LOG, "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l) as Row);
+  const rows = readFileSync(LOG, "utf8")
+    .split("\n")
+    .filter(Boolean)
+    .map((l) => JSON.parse(l) as Row)
+    .filter((r) => r.provider !== "anthropic" && (r.spike === 2) === SPIKE2);
   return { eur: rows.reduce((s, r) => s + r.costEur, 0), images: rows.reduce((s, r) => s + r.images, 0) };
 }
 
@@ -147,7 +181,8 @@ async function run(name: string, job: Job): Promise<void> {
   if (before.eur + est > CAP_EUR) throw new Error(`cap: €${before.eur.toFixed(3)} booked, €${est.toFixed(3)} more would pass €${CAP_EUR}`);
   const refs = job.business === "pekarna" && job.endpoint.endsWith("/edit") ? await pekarnaRefs() : [];
   const template = job.phone ? PHONE : DESKTOP;
-  const prompt = template.replace("%BUSINESS%", job.business === "pekarna" ? PEKARNA : TATTOO);
+  const prompt = job.prompt ?? template.replace("%BUSINESS%", job.business === "pekarna" ? PEKARNA : TATTOO);
+  if (SPIKE2) writeFileSync(path.join(OUT, "director", `${name}.prompt.txt`), prompt);
   const t0 = Date.now();
   let row: Row;
   try {
@@ -162,7 +197,7 @@ async function run(name: string, job: Job): Promise<void> {
     if (!res.ok) {
       const text = (await res.text()).slice(0, 400);
       // A 4xx validation error may still be billed; book it at one image.
-      row = { at: new Date().toISOString(), job: name, endpoint: job.endpoint, images: 0, costEur: res.status < 500 ? usd * EUR_PER_USD : 0, seconds, ok: false, requestId, error: `${res.status} ${text}` };
+      row = { at: new Date().toISOString(), ...(SPIKE2 ? { spike: 2 } : {}), job: name, endpoint: job.endpoint, images: 0, costEur: res.status < 500 ? usd * EUR_PER_USD : 0, seconds, ok: false, requestId, error: `${res.status} ${text}` };
     } else {
       const body = (await res.json()) as { images: { url: string }[] };
       mkdirSync(path.join(OUT, "mockups"), { recursive: true });
@@ -170,10 +205,10 @@ async function run(name: string, job: Job): Promise<void> {
         const data = img.url.startsWith("data:") ? Buffer.from(img.url.split(",")[1]!, "base64") : Buffer.from(await (await fetch(img.url)).arrayBuffer());
         await sharp(data).jpeg({ quality: 90 }).toFile(path.join(OUT, "mockups", `${name}-${i + 1}.jpg`));
       }
-      row = { at: new Date().toISOString(), job: name, endpoint: job.endpoint, images: body.images.length, costEur: usd * EUR_PER_USD * body.images.length, seconds, ok: true, requestId };
+      row = { at: new Date().toISOString(), ...(SPIKE2 ? { spike: 2 } : {}), job: name, endpoint: job.endpoint, images: body.images.length, costEur: usd * EUR_PER_USD * body.images.length, seconds, ok: true, requestId };
     }
   } catch (e) {
-    row = { at: new Date().toISOString(), job: name, endpoint: job.endpoint, images: 0, costEur: 0, seconds: (Date.now() - t0) / 1000, ok: false, error: String(e) };
+    row = { at: new Date().toISOString(), ...(SPIKE2 ? { spike: 2 } : {}), job: name, endpoint: job.endpoint, images: 0, costEur: 0, seconds: (Date.now() - t0) / 1000, ok: false, error: String(e) };
   }
   appendFileSync(LOG, JSON.stringify(row) + "\n");
   const l = ledger();
@@ -186,7 +221,7 @@ async function main(): Promise<void> {
   mkdirSync(OUT, { recursive: true });
   const names = arg.split(",");
   // Jobs run in parallel only when the ledger has room for all of them together.
-  const jobs = names.map((n) => [n, n.endsWith("-phone") ? phoneJob(n.replace(/-phone$/, "")) : JOBS[n]] as const);
+  const jobs = names.map((n) => [n, n.startsWith("d2-") ? directorJob(n) : n.endsWith("-phone") ? phoneJob(n.replace(/-phone$/, "")) : JOBS[n]] as const);
   for (const [n, j] of jobs) if (!j) throw new Error(`no job ${n}`);
   const l = ledger();
   const est = jobs.reduce((s, [, j]) => s + BOOK[j!.endpoint]! * EUR_PER_USD * j!.n, 0);

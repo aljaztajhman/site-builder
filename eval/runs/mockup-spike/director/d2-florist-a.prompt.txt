@@ -1,0 +1,11 @@
+One flat full-page desktop website screenshot, 1536×1024, with no browser or device frame. Page ground is saturated rosehip red #B3261E. Top left is the wordmark "Šipek" in heavy rounded grotesque in off-white #FBF4EF, with the small line "cvetličarna" beneath it in lowercase regular sans. Navigation sits top right in small off-white sans: "Domov", "Šopki", "Poroke", "Kontakt". The left 7 columns hold the enormous headline "Šopki iz cvetja tega tedna" in tight extra-bold grotesque, off-white, across three lines. Below it is the intro in regular sans: "Majhna cvetličarna na Glavnem trgu v Novem mestu. Šopke vežemo sproti, iz sezonskega cvetja z vrtnarij v Beli krajini." Under that is one rectangular square-cornered off-white button with red text, "Pokličite", next to "031 555 427". From the right edge, a large single-weight line drawing of a wild dog-rose branch with thorns, leaves and oval hips in deep red #5E0F0C, with a few leaves filled green #2F5D3A, passes behind the headline and continues down off the screen. The lower third shows the start of a pure white section. On it, a left-aligned stacked list separated by thin rules shows large red names "Šopki po naročilu", "Poročna floristika", "Žalni aranžmaji", "Sobne rastline". To the right, in off-black #1E1412: "Šopek naročite po telefonu dan prej.", the hours "Pon–pet 8.00–19.00" and "Sob 8.00–13.00", and "Glavni trg 9, 8000 Novo mesto". The look is flat, with no gradients, no shadows, nothing centred and no photos.
+
+Required texts, verbatim and spelled exactly (use only these; every word legible):
+- the wordmark "Šipek" with the small line "cvetličarna" and navigation: "Domov", "Šopki", "Poroke", "Kontakt"
+- headline: "Šopki iz cvetja tega tedna"
+- intro: "Majhna cvetličarna na Glavnem trgu v Novem mestu. Šopke vežemo sproti, iz sezonskega cvetja z vrtnarij v Beli krajini."
+- four services: "Šopki po naročilu", "Poročna floristika", "Žalni aranžmaji", "Sobne rastline"
+- a note: "Šopek naročite po telefonu dan prej."
+- opening hours: "Pon–pet 8.00–19.00", "Sob 8.00–13.00"
+- address: "Glavni trg 9, 8000 Novo mesto"
+- phone: "031 555 427" with one button "Pokličite"

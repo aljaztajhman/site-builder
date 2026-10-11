@@ -43,3 +43,41 @@ The mockups use the client's own photos as references, so the page photos must s
 4. Decorative art cut from the mockup → labelled AI asset.
 
 Next step: fix gaps 1–4 (open business type, generated art beyond the opener, per-site drawing, tokens unlocked from directions), then a paid 5-fixture run of steps 1–3 with a real Opus call, measuring € and judge scores against the hero bar.
+
+## Spike 2: Opus art-directs, GPT Image paints (2026-10-11)
+
+Question: with an Opus art director in front, do the mockups stop being conventional and become unique per business, and still rebuildable? Evidence: `docs/design/mockup-spike/sheet-2.jpg`. Scripts: `mockup-director.ts` (one real Opus 5.5 call per business, config `models.fullBuild` at effort medium, structured output, the client's photos and logo sent as images, our banned list and the owner's taste in the system prompt), `mockup-spike.ts --spike2`, `mockup-recreate2.ts`, `mockup-sheet2.ts`. Businesses: pekarna-kvas, the tattoo studio Rja and an invented florist, Cvetličarna Šipek in Novo mesto (`eval/runs/mockup-spike/florist-brief.json`, marked invented, no photos).
+
+**Directions** (the director's own words, shortened):
+- Pekarna A "Nočno vzhajanje": a night-blue page lit by the loaves, the logo's three scores as long wheat slashes. B "Polica" (rebuilt): white page, the daily breads stacked as giant condensed words on oak planks, like Jure's shelf.
+- Tattoo A "Rust line" (rebuilt): the name as the ground, a deep rust field crossed by one unbroken off-white hairline that becomes a fern, then a swallow, then underlines the phone. B "Osnutek": every drawing twice, a grey draft under the final rust line, on white.
+- Florist A "Rosehip Red" (rebuilt): one saturated hip-red field crossed by a drawn dog-rose briar. B "Week Print": deep garden green, a two-colour linocut of this week's stems, the hours as a week strip.
+
+**Verdict: yes.** All six are distinctive, none is cream with a warm serif, and each could only belong to its business. The bakery's "Polica" and the florist's briar clear the hero bar's A, B and G and sit with C, the linocut, for character. The tattoo's "Rust line" is the strongest page either spike made. Text stayed exact in all six. Slips:
+- Florist B repeats "Pon–pet" five times in its week strip.
+- Pekarna B has slight halos around the headline.
+- The phone mockup is a narrow desktop, not a phone layout.
+
+**Rebuildable: mostly.** All three rebuilds validate and render at 1280 and 360 px: axe 0/0, no horizontal scroll, one h1 and one call button per screen. Each keeps its idea: the hip-red briar field, the rust field with the hairline fern, the bakery's huge stacked bread names. What the language lost, with what it would take:
+1. **Display faces.** Anton and Big Shoulders (condensed) are not in our font pairs, so we use Archivo heavy and the condensed poster voice is gone. Fix: add 2–3 condensed display faces and let a page pick a font pair outside its direction (token override).
+2. **The bakery's planks.** A decor may not share a cell with text, and a row per plank would need 11 rows (max 8). Fix: a heading treatment "plank": a thick rule in a colour role under the line.
+3. **One line through the whole page** (tattoo signature). Fix: a page-level drawing layer that spans sections. Today it is three separate cut-outs at most.
+4. **AI art outside the opener** (WORKAROUND(ai-art-outside-hero), the tattoo swallow). validateSite rejects it; the page renders. Fix: allow labelled AI art in any section.
+5. **Cut-outs keep the mockup's painted ground** (WORKAROUND(art-ground-match)): the band colour is sampled to match. Fix: background removal or transparent PNG assets.
+6. **No florist or tattoo business type** (WORKAROUND(invented-business-type)), as in spike 1.
+7. **The director's palettes must clear our contrast rules.** Two `accent on inverse` failures needed a role swap; the director should get the role contrast rules in its prompt.
+
+**€ measured:**
+- Director, one call per business: €0.062–0.106 (2.3k–5.4k in, 3.1k–5.1k out, 34–57 s). The bakery call carries 4 images.
+- GPT Image 2.5 high: €0.069 per image without references, €0.086 with them (booked rate, 17–27 s).
+- Per site, as run here (director + 2 directions × 1 image) ≈ €0.21–0.28. Adding the Opus vision rebuild (≈ €0.17) and one revise round (≈ €0.10) **≈ €0.50–0.55 per homepage**, or ≈ €0.65–0.70 with 2 images per direction.
+
+**Cap note:** the brief asked for 2 images × 2 directions × 3 businesses (12 at high), which is ≈ €0.90 at the booked rate, over the €0.60 fal cap. I made 1 image per direction (6) plus 1 phone image, €0.52.
+
+**Recommended pipeline (replaces spike 1's step 1):**
+1. Opus director: brief + photos + banned list + role contrast rules + "what the layout system can build" → 2 directions with prompts.
+2. GPT Image 2.5 high: 1 desktop image per direction. The owner picks, or an Opus judge picks against the banned list.
+3. Opus vision rebuild into composed sections, facts through slots.
+4. One revise round against the mockup.
+
+Before productising, fix gaps 1, 2, 4 and 5 above and gaps 1–4 from spike 1. Then a paid 10-business run to measure judge scores and the owner's picks against the hero bar.
