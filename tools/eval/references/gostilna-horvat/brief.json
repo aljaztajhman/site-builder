@@ -1,0 +1,50 @@
+{
+  "id": "gostilna-horvat",
+  "businessType": "restaurant",
+  "town": "Bogojina",
+  "description": "Gostilna Horvat, Filovci 45, 9222 Bogojina. Gostilno vodiva Simona in Marko Horvat, kuha Simona. Kuhamo domače jedi: ajdove žgance z ocvirki, telečjo obaro, orehove štruklje in prekmursko gibanico. Ob petkih kuhamo bograč v glinenem loncu.\n\nMed tednom je od 11.00 do 14.00 malica za 9 €: juha, glavna jed in solata. Cene: ajdovi žganci z ocvirki in kislim mlekom 8,50 €, telečja obara s kruhom 7 €, bograč 11 €, orehovi štruklji 5,50 €, prekmurska gibanica 4,50 €.\n\nOdprto: od torka do petka od 10.00 do 22.00, v soboto od 11.00 do 23.00, v nedeljo od 11.00 do 17.00, ob ponedeljkih zaprto.\n\nV jedilnici s kmečko pečjo je 40 mest. Za družinska praznovanja sprejmemo do 60 ljudi, meni pripravimo po dogovoru. Poleti je odprta terasa pod lipo. Rezervacije po telefonu 02 555 48 30 ali na gostilna@gostilna-horvat.example. Parkirišče je za gostilno. Plačilo s kartico.\n\nRada bi barve prekmurske lončenine: rdeča zemlja in temno siva, okrogle oblike kot lonci.",
+  "photos": {
+    "fixture": "gostilna-zlata-zlica",
+    "subjects": [
+      "bela gostilna z zelenimi polkni in lipo pred vhodom",
+      "jedilnica z lesenimi mizami in kmečko pečjo",
+      "ajdovi žganci z ocvirki in kislo mleko na leseni mizi",
+      "narezani orehovi štruklji z maslom in drobtinami",
+      "terasa pod lipo s pogrnjenimi mizami",
+      "skodelica telečje obare s kruhom",
+      "kuharica meša lonec v gostilniški kuhinji",
+      "dolga pogrnjena miza za družinsko praznovanje"
+    ]
+  },
+  "facts": {
+    "name": "Gostilna Horvat",
+    "phone": "+38625554830",
+    "email": "gostilna@gostilna-horvat.example",
+    "address": { "street": "Filovci 45", "postalCode": "9222", "city": "Bogojina" },
+    "hours": [
+      { "from": "tue", "to": "fri", "open": "10:00", "close": "22:00" },
+      { "from": "sat", "to": "sat", "open": "11:00", "close": "23:00" },
+      { "from": "sun", "to": "sun", "open": "11:00", "close": "17:00" }
+    ],
+    "prices": [
+      { "item": "malica (juha, glavna jed, solata)", "amount": 9 },
+      { "item": "ajdovi žganci z ocvirki in kislim mlekom", "amount": 8.5 },
+      { "item": "telečja obara s kruhom", "amount": 7 },
+      { "item": "bograč", "amount": 11 },
+      { "item": "orehovi štruklji", "amount": 5.5 },
+      { "item": "prekmurska gibanica", "amount": 4.5 }
+    ],
+    "people": [
+      { "name": "Simona Horvat", "role": "kuharica, vodi gostilno" },
+      { "name": "Marko Horvat", "role": "vodi gostilno" }
+    ],
+    "amenities": ["parking", "card", "terrace"],
+    "other": [
+      "Ob petkih bograč v glinenem loncu",
+      "Malica med tednom od 11.00 do 14.00",
+      "Jedilnica s kmečko pečjo, 40 mest",
+      "Družinska praznovanja do 60 ljudi, meni po dogovoru",
+      "Poleti terasa pod lipo"
+    ]
+  }
+}

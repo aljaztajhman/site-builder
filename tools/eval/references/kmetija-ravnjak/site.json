@@ -1,0 +1,178 @@
+{
+  "specVersion": 20,
+  "slug": "kmetija-ravnjak",
+  "locales": { "default": "sl", "enabled": ["sl"] },
+  "business": {
+    "name": "Turistična kmetija Ravnjak",
+    "type": "tourist-farm",
+    "phone": "+38631555492",
+    "email": "sobe@kmetija-ravnjak.example",
+    "address": { "street": "Krnica 22", "postalCode": "3334", "city": "Luče" },
+    "provider": {
+      "legalName": { "$placeholder": "legalName" },
+      "registrationNumber": { "$placeholder": "registrationNumber" },
+      "taxNumber": { "$placeholder": "taxNumber" }
+    },
+    "amenities": ["parking", "no-pets", "german", "english", "cash-only"]
+  },
+  "design": {
+    "direction": "editorial",
+    "fontPair": "garamond-karla",
+    "colors": {
+      "background": "#ffffff",
+      "surface": "#eff1f0",
+      "text": "#1e1b18",
+      "muted": "#55504a",
+      "primary": "#b3261e",
+      "onPrimary": "#ffffff",
+      "accent": "#d23a2c",
+      "border": "#d6d3cf",
+      "inverse": "#1e1b18",
+      "onInverse": "#f2efea"
+    },
+    "radius": 0,
+    "baseFontSize": 18,
+    "scale": 1.333,
+    "headingWeight": 500,
+    "headingCase": "normal",
+    "headingTracking": -0.01,
+    "density": "airy",
+    "shadow": "none",
+    "imagery": "framed",
+    "motion": "still",
+    "wordmark": { "style": "plain" }
+  },
+  "assets": {
+    "images": [
+      { "id": "img_01", "src": "uploads/01.jpg", "width": 1536, "height": 1024, "alt": "Kmečka hiša z lesenim balkonom in rdečimi pelargonijami pod gorami" },
+      { "id": "img_02", "src": "uploads/02.jpg", "width": 1024, "height": 1536, "alt": "Soba z dvema lesenima posteljama in karirasto posteljnino" },
+      { "id": "img_03", "src": "uploads/03.jpg", "width": 1536, "height": 1024, "alt": "Kmečki zajtrk s sirom, skuto, marmelado, kruhom, maslom in mlekom" },
+      { "id": "img_04", "src": "uploads/04.jpg", "width": 1536, "height": 1024, "alt": "Krave na strmem planinskem pašniku" },
+      { "id": "img_05", "src": "uploads/05.jpg", "width": 1024, "height": 1536, "alt": "Kos domačega jabolčnega zavitka" },
+      { "id": "img_06", "src": "uploads/06.jpg", "width": 1536, "height": 1024, "alt": "Otroka hranita koze čez lesen plot" },
+      { "id": "img_07", "src": "uploads/07.jpg", "width": 1536, "height": 1024, "alt": "Razgled s terase na zeleno dolino" },
+      { "id": "img_08", "src": "uploads/08.jpg", "width": 1024, "height": 1536, "alt": "Kozarci domače marmelade na leseni polici" }
+    ]
+  },
+  "chrome": {
+    "header": { "variant": "bar", "cta": "none" },
+    "footer": { "variant": "compact" },
+    "mobileActionBar": true
+  },
+  "pages": [
+    {
+      "id": "p_home",
+      "kind": "home",
+      "slug": "",
+      "nav": { "label": "Domov", "show": true },
+      "seo": {
+        "title": "Turistična kmetija Ravnjak, Luče – sobe od maja do oktobra",
+        "description": "Štiri sobe z lastno kopalnico in domač zajtrk na kmetiji v Lučah, na 900 m nadmorske višine. Nočitev z zajtrkom 38 € na osebo."
+      },
+      "sections": [
+        {
+          "id": "s_almanac",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "hero",
+            "width": "contained",
+            "rows": 4,
+            "elements": [
+              { "id": "e_title", "kind": "heading", "text": "Leto na kmetiji Ravnjak", "level": 1, "size": 6, "treatment": "masthead", "desk": { "col": 1, "span": 12, "row": 1 }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_lead", "kind": "text", "paragraphs": ["Krnica 22, Luče, na 900 m nadmorske višine, na sončni strani doline. Družina Ravnjak oddaja 4 sobe z lastno kopalnico, za 2 do 4 osebe, z zajtrkom iz domačih stvari."], "size": 1, "desk": { "col": 1, "span": 5, "row": 2 }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_season", "kind": "fact", "value": "maj–oktober", "label": "sobe za goste", "treatment": "numeral", "size": 5, "color": "primary", "desk": { "col": 1, "span": 5, "row": 3, "alignY": "center" }, "phone": { "order": 2, "span": "full" } },
+              { "id": "e_phone", "kind": "fact", "value": "031 555 492", "label": "Rezervacije po telefonu", "treatment": "numeral", "size": 4, "link": { "action": "call" }, "desk": { "col": 1, "span": 5, "row": 4, "alignY": "end" }, "phone": { "order": 3, "span": "full" } },
+              { "id": "e_house", "kind": "image", "image": "img_01", "ratio": "3:2", "mask": "ruled", "desk": { "col": 6, "span": 7, "row": 2, "rowSpan": 3, "alignY": "start" }, "phone": { "order": 4, "span": "full" } }
+            ]
+          }
+        },
+        {
+          "id": "s_year",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "highlights",
+            "width": "contained",
+            "rows": 7,
+            "gap": 2,
+            "top": { "edge": "rule" },
+            "elements": [
+              { "id": "e_h", "kind": "heading", "text": "Vsak mesec svoje delo", "level": 2, "size": 5, "desk": { "col": 1, "span": 8, "row": 1 }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_may", "kind": "heading", "text": "Maj", "level": 3, "size": 4, "color": "primary", "desk": { "col": 1, "span": 4, "row": 2, "alignY": "end" }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_may_t", "kind": "text", "paragraphs": ["Krave gredo na pašo in odpremo sobe."], "size": 1, "desk": { "col": 1, "span": 4, "row": 3 }, "phone": { "order": 2, "span": "full" } },
+              { "id": "e_jun", "kind": "heading", "text": "Junij", "level": 3, "size": 4, "desk": { "col": 1, "span": 4, "row": 4, "alignY": "end" }, "phone": { "order": 3, "span": "full" } },
+              { "id": "e_jun_t", "kind": "text", "paragraphs": ["Kosimo."], "size": 1, "desk": { "col": 1, "span": 4, "row": 5 }, "phone": { "order": 4, "span": "full" } },
+              { "id": "e_jul", "kind": "heading", "text": "Julij, avgust", "level": 3, "size": 4, "desk": { "col": 1, "span": 4, "row": 6, "alignY": "start" }, "phone": { "order": 5, "span": "full" } },
+              { "id": "e_jul_t", "kind": "text", "paragraphs": ["Krave so na planini."], "size": 1, "desk": { "col": 1, "span": 4, "row": 7, "alignY": "start" }, "phone": { "order": 6, "span": "full" } },
+              { "id": "e_sep", "kind": "heading", "text": "September", "level": 3, "size": 4, "desk": { "col": 7, "span": 4, "row": 2, "alignY": "end" }, "phone": { "order": 7, "span": "full" } },
+              { "id": "e_sep_t", "kind": "text", "paragraphs": ["Pobiramo jabolka in kuhamo marmelado."], "size": 1, "desk": { "col": 7, "span": 4, "row": 3 }, "phone": { "order": 8, "span": "full" } },
+              { "id": "e_oct", "kind": "heading", "text": "Oktober", "level": 3, "size": 4, "color": "primary", "desk": { "col": 7, "span": 4, "row": 4, "alignY": "end" }, "phone": { "order": 9, "span": "full" } },
+              { "id": "e_oct_t", "kind": "text", "paragraphs": ["Zapremo sobe za goste."], "size": 1, "desk": { "col": 7, "span": 4, "row": 5 }, "phone": { "order": 10, "span": "full" } },
+              { "id": "e_jam", "kind": "image", "image": "img_08", "ratio": "4:3", "treatment": "toned", "desk": { "col": 7, "span": 4, "row": 6, "rowSpan": 2, "alignY": "end" }, "phone": { "order": 11, "span": "inset" } }
+            ]
+          }
+        },
+        {
+          "id": "s_rooms",
+          "type": "composed",
+          "variant": "free",
+          "tone": "alt",
+          "props": {
+            "intent": "rooms",
+            "width": "contained",
+            "rows": 4,
+            "elements": [
+              { "id": "e_photos", "kind": "photos", "images": ["img_02", "img_03"], "arrangement": "offset-pair", "desk": { "col": 1, "span": 6, "row": 1, "rowSpan": 4, "alignY": "center" }, "phone": { "order": 4, "span": "full" } },
+              { "id": "e_h", "kind": "heading", "text": "4 sobe in zajtrk iz domačih stvari", "level": 2, "size": 4, "measure": "m", "desk": { "col": 8, "span": 5, "row": 1 }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_t", "kind": "text", "paragraphs": ["Vse sobe imajo lastno kopalnico, za 2 do 4 osebe. Za zajtrk so sir, skuta, maslo, mleko, kruh in marmelada."], "desk": { "col": 8, "span": 5, "row": 2 }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_p", "kind": "prices", "style": "leaders", "size": 1, "items": [{ "name": "Nočitev z zajtrkom", "price": { "amount": 38, "unit": "na osebo" } }, { "name": "Otroci do 12 let", "price": { "amount": 20 } }], "desk": { "col": 8, "span": 5, "row": 3 }, "phone": { "order": 2, "span": "full" } },
+              { "id": "e_rules", "kind": "list", "marker": "dash", "items": ["Najmanj dve noči", "Prihod od 14.00, odhod do 10.00", "Plačilo z gotovino"], "desk": { "col": 8, "span": 5, "row": 4 }, "phone": { "order": 3, "span": "full" } }
+            ]
+          }
+        },
+        {
+          "id": "s_book",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "contact",
+            "width": "contained",
+            "rows": 3,
+            "elements": [
+              { "id": "e_h", "kind": "heading", "text": "Rezervacije", "level": 2, "size": 4, "treatment": "rule-flanked", "desk": { "col": 1, "span": 12, "row": 1 }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_contact", "kind": "contact", "show": ["phone", "email", "address"], "desk": { "col": 1, "span": 4, "row": 2, "rowSpan": 2 }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_if", "kind": "iconFacts", "icons": "line", "items": [{ "fact": "parking", "note": "Pri hiši" }, { "fact": "no-pets", "note": "Psi pri nas žal ne smejo bivati" }, { "fact": "german" }, { "fact": "english" }], "desk": { "col": 5, "span": 3, "row": 2, "rowSpan": 2 }, "phone": { "order": 2, "span": "full" } },
+              { "id": "e_goats", "kind": "image", "image": "img_06", "ratio": "4:3", "desk": { "col": 9, "span": 4, "row": 2 }, "phone": { "order": 3, "span": "full" } },
+              { "id": "e_goat_t", "kind": "text", "paragraphs": ["Redimo 12 krav in nekaj koz, otroci jih lahko hranijo."], "color": "muted", "desk": { "col": 9, "span": 4, "row": 3 }, "phone": { "order": 4, "span": "full" } }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "nav": { "label": "Zasebnost", "show": false },
+      "seo": { "title": "Varstvo osebnih podatkov | Kmetija Ravnjak", "description": "Kako Turistična kmetija Ravnjak obdeluje osebne podatke obiskovalcev spletne strani." },
+      "sections": [{ "id": "s_legal_privacy", "type": "legal", "variant": "default", "props": { "kind": "privacy" } }]
+    },
+    {
+      "id": "p_dostopnost",
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "nav": { "label": "Dostopnost", "show": false },
+      "seo": { "title": "Izjava o dostopnosti | Kmetija Ravnjak", "description": "Izjava o dostopnosti spletne strani Turistična kmetija Ravnjak." },
+      "sections": [{ "id": "s_legal_accessibility", "type": "legal", "variant": "default", "props": { "kind": "accessibility" } }]
+    },
+    {
+      "id": "p_404",
+      "kind": "not-found",
+      "slug": "404",
+      "nav": { "label": "Ni najdeno", "show": false },
+      "seo": { "title": "Strani ni mogoče najti | Kmetija Ravnjak", "description": "Iskane strani ni. Vrnite se na domačo stran." },
+      "sections": [{ "id": "s_not_found", "type": "not-found", "variant": "default", "props": { "title": "Te strani ni mogoče najti", "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo." } }]
+    }
+  ]
+}

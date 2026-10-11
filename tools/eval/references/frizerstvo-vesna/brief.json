@@ -1,0 +1,39 @@
+{
+  "id": "frizerstvo-vesna",
+  "businessType": "hairdresser",
+  "town": "Nova Gorica",
+  "description": "Frizerstvo Vesna, Delpinova ulica 8, 5000 Nova Gorica. Sem Vesna Leban, frizerka. Salon imam od leta 2009. Strižem ženske, moške in otroke, barvam, delam pramene in trajno. Delam sama, zato samo po naročilu, da nihče ne čaka.\n\nCene: žensko striženje s fenom 26 €, moško striženje 14 €, otroško striženje do 10 let 10 €, barvanje od 38 €, prameni od 45 €, trajna od 50 €.\n\nOdprto: torek in četrtek od 12.00 do 20.00, sreda in petek od 8.00 do 16.00, sobota od 7.00 do 12.00. Ob nedeljah in ponedeljkih zaprto.\n\nNaročite se po telefonu 040 555 318 ali na vesna@frizerstvo-vesna.example. Plačilo s kartico. Salon je v pritličju, vhod z ulice.\n\nNa strani si želim veliko barve in en sam velik znak, kot na starih plakatih, besedila pa malo.",
+  "photos": {
+    "fixture": "frizerstvo-lana",
+    "subjects": ["notranjost salona z dvema stoloma in ogledali", "frizerka striže stranko s škarjami in glavnikom"]
+  },
+  "facts": {
+    "name": "Frizerstvo Vesna",
+    "phone": "+38640555318",
+    "email": "vesna@frizerstvo-vesna.example",
+    "address": { "street": "Delpinova ulica 8", "postalCode": "5000", "city": "Nova Gorica" },
+    "hours": [
+      { "from": "tue", "to": "tue", "open": "12:00", "close": "20:00" },
+      { "from": "wed", "to": "wed", "open": "08:00", "close": "16:00" },
+      { "from": "thu", "to": "thu", "open": "12:00", "close": "20:00" },
+      { "from": "fri", "to": "fri", "open": "08:00", "close": "16:00" },
+      { "from": "sat", "to": "sat", "open": "07:00", "close": "12:00" }
+    ],
+    "prices": [
+      { "item": "žensko striženje s fenom", "amount": 26 },
+      { "item": "moško striženje", "amount": 14 },
+      { "item": "otroško striženje do 10 let", "amount": 10 },
+      { "item": "barvanje", "amount": 38, "from": true },
+      { "item": "prameni", "amount": 45, "from": true },
+      { "item": "trajna", "amount": 50, "from": true }
+    ],
+    "people": [{ "name": "Vesna Leban", "role": "frizerka" }],
+    "amenities": ["appointment-only", "card"],
+    "other": [
+      "Salon od leta 2009",
+      "Ženske, moški in otroci; barvanje, prameni, trajna",
+      "Dela sama, samo po naročilu, da nihče ne čaka",
+      "Salon v pritličju, vhod z ulice"
+    ]
+  }
+}

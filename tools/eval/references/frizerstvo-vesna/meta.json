@@ -1,0 +1,8 @@
+{
+  "id": "frizerstvo-vesna",
+  "stance": "ljubljana-sixties-poster",
+  "trades": ["hairdresser"],
+  "title": "Frizerstvo Vesna, plakat",
+  "gapNote": "The abstract sign is a hand-written decor svg (a white quarter disc and a dark circle, 2 paths): ornament/abstract-sign (stance signature) doesn't exist, and the svg can't be checked for originality or balance by any guard. The sign scales with its cell, so it can't bleed off the field's edge or be cropped by it the way a poster sign is. The 'precise grotesk set small' can't go below heading size 4 without losing the h1's weight, so the words are larger than a poster's. composition/hero/sign-and-field doesn't exist, so the field is a band-coloured layer over the whole section with headerOver; on phones the sign drops to a half-width block below the words, so the phone's first screen is all words on orange. The duotone treatment turned the price-list photo navy from edge to edge (it takes the primary, not the field's orange), so that photo uses grade.",
+  "sources": ["F Lido (one colour field carries the first screen)", "stance ljubljana-sixties-poster (one abstract sign from two flat shapes, small precise type, a wide field of colour)"]
+}

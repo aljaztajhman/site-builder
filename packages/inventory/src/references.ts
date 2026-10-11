@@ -21,6 +21,17 @@ export interface ReferenceEntry {
 export const STUDIO_REFERENCES: readonly ReferenceEntry[] = [
   { id: "avtoservis-golob", stance: "enamel-house-plate", trades: ["car-repair"] },
   { id: "pekarna-zrno", stance: "kitchen-index-card", trades: ["bakery"] },
+  // I10b: the first ten of the forty (decision D3).
+  { id: "mizarstvo-rozman", stance: "technical-drawing", trades: ["builder"] },
+  { id: "zobna-ambulanta-hribar", stance: "station-timetable", trades: ["dental"] },
+  { id: "cebelarstvo-zalokar", stance: "beehive-panel", trades: ["shop"] },
+  { id: "kmetija-ravnjak", stance: "pratika-almanac", trades: ["tourist-farm"] },
+  { id: "gostilna-horvat", stance: "prekmurje-pottery", trades: ["restaurant"] },
+  { id: "frizerstvo-vesna", stance: "ljubljana-sixties-poster", trades: ["hairdresser"] },
+  { id: "racunovodstvo-kovac", stance: "brass-door-plate", trades: ["accountant"] },
+  { id: "fizioterapija-kobal", stance: "soca-green", trades: ["physio"] },
+  { id: "cvetlicarna-pirc", stance: "line-drawing", trades: ["shop"] },
+  { id: "siviljstvo-mlakar", stance: "sewing-pattern", trades: ["shop"] },
 ];
 
 /** The references as inventory assets: drafts, no bytes of their own (a page, not a part of one). */

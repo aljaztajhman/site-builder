@@ -104,11 +104,10 @@ describe("references in a browser at 360 and 1280 px", () => {
   beforeAll(async () => {
     browser = await chromium.launch();
     dir = await mkdtemp(path.join(tmpdir(), "sb-refs-"));
-    for (const r of refs) homes.set(r.id, `${r.id}/${await writeReferenceSite(r, path.join(dir, r.id))}`);
     const server = await serveStatic(dir);
     base = server.url;
     close = server.close;
-  }, 180_000);
+  }, 60_000);
   afterAll(async () => {
     await browser?.close();
     await close?.();
@@ -119,6 +118,11 @@ describe("references in a browser at 360 and 1280 px", () => {
     const phone = w < 768;
     const ctx = await browser.newContext({ viewport: { width: w, height: 800 }, reducedMotion: "reduce", ...(phone ? { isMobile: true, hasTouch: true } : {}) });
     try {
+      // Each reference is built in its own test (once, shared by both widths), so setup time doesn't grow with the set.
+      if (!homes.has(id)) {
+        const r = refs.find((x) => x.id === id)!;
+        homes.set(id, `${id}/${await writeReferenceSite(r, path.join(dir, id), { widths: config.images.widths.slice(0, 1) })}`);
+      }
       const page = await ctx.newPage();
       await page.goto(`${base}/${homes.get(id)}`, { waitUntil: "networkidle" });
       await page.evaluate(() => document.fonts.ready);

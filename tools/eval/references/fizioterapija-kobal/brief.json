@@ -1,0 +1,32 @@
+{
+  "id": "fizioterapija-kobal",
+  "businessType": "physio",
+  "town": "Tolmin",
+  "description": "Fizioterapija Kobal, Prešernova ulica 6, 5220 Tolmin. Sem Nika Kobal, diplomirana fizioterapevtka. Delam sama, zato je vsaka obravnava samo z mano, od začetka do konca.\n\nObravnavam bolečine v hrbtu in vratu, stanja po poškodbah in operacijah ter športne poškodbe. Delam tudi limfno drenažo. Za obravnavo ne potrebujete napotnice, plačilo je samoplačniško.\n\nCene: prvi pregled z obravnavo (60 minut) 50 €, nadaljnja obravnava (45 minut) 40 €, limfna drenaža (60 minut) 45 €. Na dom pridem v Tolminu in okolici, doplačilo za obisk na domu je 15 €.\n\nDelam od ponedeljka do petka od 7.00 do 19.00, samo po dogovoru. Pokličite ali pošljite sporočilo na 041 555 627, e-pošta nika@fizioterapija-kobal.example. Ambulanta je v pritličju, brez stopnic. Parkirišče pred hišo je brezplačno.\n\nRada bi barve Soče: zelena voda in beli prodniki, veliko prostora.",
+  "photos": {
+    "fixture": "fizioterapija-pregib",
+    "subjects": ["terapevtska miza v svetli sobi z oknom, letvenikom in žogami"]
+  },
+  "facts": {
+    "name": "Fizioterapija Kobal",
+    "phone": "+38641555627",
+    "email": "nika@fizioterapija-kobal.example",
+    "address": { "street": "Prešernova ulica 6", "postalCode": "5220", "city": "Tolmin" },
+    "hours": [{ "from": "mon", "to": "fri", "open": "07:00", "close": "19:00" }],
+    "prices": [
+      { "item": "prvi pregled z obravnavo (60 minut)", "amount": 50 },
+      { "item": "nadaljnja obravnava (45 minut)", "amount": 40 },
+      { "item": "limfna drenaža (60 minut)", "amount": 45 },
+      { "item": "doplačilo za obisk na domu", "amount": 15 }
+    ],
+    "people": [{ "name": "Nika Kobal", "role": "diplomirana fizioterapevtka" }],
+    "amenities": ["appointment-only", "step-free", "free-parking", "home-visits"],
+    "other": [
+      "Dela sama, vsaka obravnava od začetka do konca z njo",
+      "Brez napotnice, samoplačniško",
+      "Na dom v Tolminu in okolici",
+      "Samo po dogovoru",
+      "Ambulanta v pritličju, brez stopnic"
+    ]
+  }
+}

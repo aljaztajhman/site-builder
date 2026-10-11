@@ -1,0 +1,36 @@
+{
+  "id": "racunovodstvo-kovac",
+  "businessType": "accountant",
+  "town": "Kranj",
+  "description": "Računovodstvo Kovač, Koroška cesta 14, 4000 Kranj. Pisarna je v 2. nadstropju, v stavbi je dvigalo. Sem Tanja Kovač, računovodja. V pisarni smo tri: jaz vodim knjige, Maja skrbi za plače, Petra za DDV in poročila. Vodimo knjige za 45 strank, večinoma s.p. in mala d.o.o. iz Kranja in okolice.\n\nDelamo: vodenje poslovnih knjig, obračun plač, obračun DDV, letna poročila za AJPES in FURS, pomoč pri odprtju s.p. Prvi pogovor je brezplačen.\n\nCene: mesečno vodenje knjig za s.p. normiranca od 60 €, za s.p. z dejanskimi stroški od 120 €, za d.o.o. od 180 €. Točno ceno povemo po prvem pogovoru.\n\nUradne ure: od ponedeljka do četrtka od 8.00 do 16.00, v petek od 8.00 do 13.00. Stranke sprejemamo po dogovoru. Pokličite na 04 555 72 10 ali pišite na tanja@racunovodstvo-kovac.example. Parkirišče za stavbo je plačljivo.\n\nRada bi stran, mirno in resno kot medeninasta tablica pri vratih pisarne: ime, kaj delam, nič odveč.",
+  "photos": null,
+  "facts": {
+    "name": "Računovodstvo Kovač",
+    "phone": "+38645557210",
+    "email": "tanja@racunovodstvo-kovac.example",
+    "address": { "street": "Koroška cesta 14", "postalCode": "4000", "city": "Kranj" },
+    "hours": [
+      { "from": "mon", "to": "thu", "open": "08:00", "close": "16:00" },
+      { "from": "fri", "to": "fri", "open": "08:00", "close": "13:00" }
+    ],
+    "prices": [
+      { "item": "vodenje knjig za s.p. normiranca (mesečno)", "amount": 60, "from": true },
+      { "item": "vodenje knjig za s.p. z dejanskimi stroški (mesečno)", "amount": 120, "from": true },
+      { "item": "vodenje knjig za d.o.o. (mesečno)", "amount": 180, "from": true }
+    ],
+    "people": [
+      { "name": "Tanja Kovač", "role": "računovodja, vodi knjige" },
+      { "name": "Maja", "role": "plače" },
+      { "name": "Petra", "role": "DDV in poročila" }
+    ],
+    "amenities": ["lift", "appointment-only", "parking"],
+    "other": [
+      "Pisarna v 2. nadstropju, v stavbi je dvigalo",
+      "45 strank, večinoma s.p. in mala d.o.o.",
+      "Prvi pogovor je brezplačen",
+      "Točno ceno povemo po prvem pogovoru",
+      "Stranke sprejemamo po dogovoru",
+      "Parkirišče za stavbo je plačljivo"
+    ]
+  }
+}

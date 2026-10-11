@@ -1,0 +1,165 @@
+{
+  "specVersion": 20,
+  "slug": "zobna-ambulanta-hribar",
+  "locales": { "default": "sl", "enabled": ["sl"] },
+  "business": {
+    "name": "Zobna ambulanta Hribar",
+    "type": "dental",
+    "phone": "+38635556120",
+    "email": "ambulanta@zobna-hribar.example",
+    "address": { "street": "Šaleška cesta 19", "postalCode": "3320", "city": "Velenje" },
+    "hours": {
+      "entries": [
+        { "from": "mon", "to": "mon", "open": "07:00", "close": "13:00" },
+        { "from": "tue", "to": "tue", "open": "13:00", "close": "19:00" },
+        { "from": "wed", "to": "wed", "open": "07:00", "close": "13:00" },
+        { "from": "thu", "to": "thu", "open": "13:00", "close": "19:00" },
+        { "from": "fri", "to": "fri", "open": "07:00", "close": "12:00" },
+        { "from": "sat", "to": "sun", "closed": true }
+      ]
+    },
+    "provider": {
+      "legalName": { "$placeholder": "legalName" },
+      "registrationNumber": { "$placeholder": "registrationNumber" },
+      "taxNumber": { "$placeholder": "taxNumber" }
+    },
+    "amenities": ["step-free", "parking", "card", "phone-booking"]
+  },
+  "design": {
+    "direction": "clean-swiss",
+    "fontPair": "inter-tight-inter",
+    "colors": {
+      "background": "#ffffff",
+      "surface": "#f0f2f5",
+      "text": "#15181f",
+      "muted": "#4b5260",
+      "primary": "#1b3fa6",
+      "onPrimary": "#ffffff",
+      "accent": "#3d6fe0",
+      "border": "#d3d8e0",
+      "inverse": "#15181f",
+      "onInverse": "#f2f3f5",
+      "band": "#f4c300",
+      "onBand": "#15181f"
+    },
+    "radius": 0,
+    "baseFontSize": 17,
+    "scale": 1.3,
+    "headingWeight": 700,
+    "headingCase": "normal",
+    "headingTracking": -0.02,
+    "density": "regular",
+    "shadow": "none",
+    "imagery": "natural",
+    "motion": "still",
+    "wordmark": { "style": "plain" }
+  },
+  "assets": {
+    "images": [
+      { "id": "img_01", "src": "uploads/01.jpg", "width": 1536, "height": 1024, "alt": "Svetla zobna ordinacija z zobozdravniškim stolom" },
+      { "id": "img_02", "src": "uploads/02.jpg", "width": 1024, "height": 1536, "alt": "Čakalnica z zelenimi stoli in vrčem vode" }
+    ]
+  },
+  "chrome": {
+    "header": { "variant": "bar", "cta": "none" },
+    "footer": { "variant": "compact" },
+    "mobileActionBar": true
+  },
+  "pages": [
+    {
+      "id": "p_home",
+      "kind": "home",
+      "slug": "",
+      "nav": { "label": "Domov", "show": true },
+      "seo": {
+        "title": "Zobna ambulanta Hribar, Velenje – ordinacijski čas",
+        "description": "Zasebna zobna ambulanta s koncesijo na Šaleški cesti 19 v Velenju. Ob torkih in četrtkih ordiniramo do 19.00. Nove paciente vpisujemo."
+      },
+      "sections": [
+        {
+          "id": "s_board",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "hero",
+            "width": "contained",
+            "rows": 6,
+            "gap": 2,
+            "background": [{ "kind": "field", "role": "band", "cols": { "from": 6, "to": 12 }, "rows": { "from": 4, "to": 4 } }],
+            "elements": [
+              { "id": "e_where", "kind": "text", "paragraphs": ["Šaleška cesta 19, Velenje"], "color": "muted", "desk": { "col": 1, "span": 5, "row": 1, "alignY": "end" }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_title", "kind": "heading", "text": "Ob torkih in četrtkih ordiniramo do 19.00", "level": 1, "size": 6, "measure": "m", "desk": { "col": 1, "span": 5, "row": 2, "rowSpan": 3 }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_lead", "kind": "text", "paragraphs": ["Zasebna ambulanta s koncesijo: na pregled pridete z zdravstveno kartico. Nove paciente vpisujemo."], "size": 1, "desk": { "col": 1, "span": 5, "row": 5 }, "phone": { "order": 2, "span": "full" } },
+              { "id": "e_phone", "kind": "fact", "value": "03 555 61 20", "label": "Naročanje po telefonu", "treatment": "numeral", "size": 4, "color": "primary", "link": { "action": "call" }, "desk": { "col": 1, "span": 5, "row": 6, "alignY": "end" }, "phone": { "order": 3, "span": "full" } },
+              { "id": "e_h", "kind": "heading", "text": "Ordinacijski čas", "level": 2, "size": 2, "desk": { "col": 7, "span": 6, "row": 1, "alignY": "end" }, "phone": { "order": 4, "span": "full" } },
+              { "id": "e_mw", "kind": "fact", "value": "7.00–13.00", "label": "ponedeljek, sreda", "treatment": "numeral", "labelAt": "before", "size": 5, "desk": { "col": 7, "span": 6, "row": 2, "alignY": "center" }, "phone": { "order": 5, "span": "full" } },
+              { "id": "e_f", "kind": "fact", "value": "7.00–12.00", "label": "petek", "treatment": "numeral", "labelAt": "before", "size": 5, "desk": { "col": 7, "span": 6, "row": 3, "alignY": "center" }, "phone": { "order": 6, "span": "full" } },
+              { "id": "e_tt", "kind": "fact", "value": "13.00–19.00", "label": "torek, četrtek", "treatment": "numeral", "labelAt": "before", "size": 5, "desk": { "col": 7, "span": 6, "row": 4, "alignY": "center" }, "phone": { "order": 7, "span": "full" } },
+              { "id": "e_closed", "kind": "text", "paragraphs": ["Ob sobotah in nedeljah je zaprto. Če vas boli, vas sprejmemo isti dan; pokličite ob začetku ordinacijskega časa."], "desk": { "col": 7, "span": 6, "row": 5, "rowSpan": 2, "alignY": "start" }, "phone": { "order": 8, "span": "full" } }
+            ]
+          }
+        },
+        {
+          "id": "s_care",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "services",
+            "width": "contained",
+            "rows": 4,
+            "top": { "edge": "rule" },
+            "elements": [
+              { "id": "e_photo", "kind": "image", "image": "img_01", "ratio": "4:3", "treatment": "mono-contrast", "desk": { "col": 1, "span": 6, "row": 1, "rowSpan": 3, "alignY": "start" }, "phone": { "order": 3, "span": "full" } },
+              { "id": "e_us", "kind": "text", "paragraphs": ["V ambulanti sva zobozdravnica Petra Hribar, dr. dent. med., in medicinska sestra Urška."], "color": "muted", "desk": { "col": 1, "span": 5, "row": 4 }, "phone": { "order": 4, "span": "full" } },
+              { "id": "e_h", "kind": "heading", "text": "S kartico ali samoplačniško", "level": 2, "size": 4, "desk": { "col": 8, "span": 5, "row": 1 }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_l", "kind": "list", "marker": "rule", "weight": "medium", "items": ["Pregledi", "Zalivke", "Zdravljenje zob in dlesni", "Čiščenje zobnega kamna", "Proteze"], "desk": { "col": 8, "span": 5, "row": 2 }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_p", "kind": "prices", "style": "rows", "items": [{ "name": "Beljenje zob", "price": { "amount": 250 } }, { "name": "Čiščenje zobnega kamna", "note": "brez napotnice", "price": { "amount": 45 } }], "desk": { "col": 8, "span": 5, "row": 3 }, "phone": { "order": 2, "span": "full" } }
+            ]
+          }
+        },
+        {
+          "id": "s_visit",
+          "type": "composed",
+          "variant": "free",
+          "tone": "alt",
+          "props": {
+            "intent": "contact",
+            "width": "contained",
+            "rows": 4,
+            "elements": [
+              { "id": "e_h", "kind": "heading", "text": "V pritličju, brez stopnic", "level": 2, "size": 4, "desk": { "col": 1, "span": 6, "row": 1 }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_hours", "kind": "hours", "style": "week", "desk": { "col": 1, "span": 7, "row": 2 }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_contact", "kind": "contact", "show": ["phone", "email", "address"], "desk": { "col": 1, "span": 4, "row": 3, "rowSpan": 2 }, "phone": { "order": 2, "span": "full" } },
+              { "id": "e_if", "kind": "iconFacts", "icons": "line", "items": [{ "fact": "step-free", "note": "Ambulanta je v pritličju" }, { "fact": "parking", "note": "Za blokom" }, { "fact": "card" }, { "fact": "phone-booking" }], "desk": { "col": 5, "span": 3, "row": 3, "rowSpan": 2 }, "phone": { "order": 3, "span": "full" } },
+              { "id": "e_room", "kind": "image", "image": "img_02", "ratio": "3:4", "desk": { "col": 9, "span": 4, "row": 1, "rowSpan": 4, "alignY": "start" }, "phone": { "order": 4, "span": "inset" } }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "nav": { "label": "Zasebnost", "show": false },
+      "seo": { "title": "Varstvo osebnih podatkov | Zobna ambulanta Hribar", "description": "Kako Zobna ambulanta Hribar obdeluje osebne podatke obiskovalcev spletne strani." },
+      "sections": [{ "id": "s_legal_privacy", "type": "legal", "variant": "default", "props": { "kind": "privacy" } }]
+    },
+    {
+      "id": "p_dostopnost",
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "nav": { "label": "Dostopnost", "show": false },
+      "seo": { "title": "Izjava o dostopnosti | Zobna ambulanta Hribar", "description": "Izjava o dostopnosti spletne strani Zobna ambulanta Hribar." },
+      "sections": [{ "id": "s_legal_accessibility", "type": "legal", "variant": "default", "props": { "kind": "accessibility" } }]
+    },
+    {
+      "id": "p_404",
+      "kind": "not-found",
+      "slug": "404",
+      "nav": { "label": "Ni najdeno", "show": false },
+      "seo": { "title": "Strani ni mogoče najti | Zobna ambulanta Hribar", "description": "Iskane strani ni. Vrnite se na domačo stran." },
+      "sections": [{ "id": "s_not_found", "type": "not-found", "variant": "default", "props": { "title": "Te strani ni mogoče najti", "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo." } }]
+    }
+  ]
+}

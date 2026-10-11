@@ -1,0 +1,39 @@
+{
+  "id": "zobna-ambulanta-hribar",
+  "businessType": "dental",
+  "town": "Velenje",
+  "description": "Zobna ambulanta Hribar, Šaleška cesta 19, 3320 Velenje. Sem Petra Hribar, dr. dent. med., zobozdravnica. V ambulanti sva z medicinsko sestro Urško. Smo zasebna ambulanta s koncesijo, zato pridete na pregled z zdravstveno kartico. Nove paciente vpisujemo.\n\nDelamo preglede, zalivke, zdravljenje zob in dlesni, čiščenje zobnega kamna in proteze. Samoplačniško: beljenje zob 250 €, čiščenje zobnega kamna brez napotnice 45 €.\n\nOrdinacijski čas: ponedeljek in sreda od 7.00 do 13.00, torek in četrtek od 13.00 do 19.00, petek od 7.00 do 12.00. Ob torkih in četrtkih ordiniramo popoldne, da pridete po službi. Ob sobotah in nedeljah je zaprto.\n\nNa pregled se naročite po telefonu 03 555 61 20, telefon dvigamo v ordinacijskem času. Če vas boli, vas sprejmemo isti dan; pokličite ob začetku ordinacijskega časa. E-pošta: ambulanta@zobna-hribar.example.\n\nAmbulanta je v pritličju, brez stopnic. Parkirišče je za blokom. Plačilo s kartico. Želim, da je stran pregledna kot vozni red na postaji: da se ordinacijski čas vidi takoj in v velikih številkah.",
+  "photos": {
+    "fixture": "zobozdravstvo-lebar",
+    "subjects": ["svetla zobna ordinacija z zobozdravniškim stolom", "majhna čakalnica z zelenimi stoli in vrčem vode"]
+  },
+  "facts": {
+    "name": "Zobna ambulanta Hribar",
+    "phone": "+38635556120",
+    "email": "ambulanta@zobna-hribar.example",
+    "address": { "street": "Šaleška cesta 19", "postalCode": "3320", "city": "Velenje" },
+    "hours": [
+      { "from": "mon", "to": "mon", "open": "07:00", "close": "13:00" },
+      { "from": "tue", "to": "tue", "open": "13:00", "close": "19:00" },
+      { "from": "wed", "to": "wed", "open": "07:00", "close": "13:00" },
+      { "from": "thu", "to": "thu", "open": "13:00", "close": "19:00" },
+      { "from": "fri", "to": "fri", "open": "07:00", "close": "12:00" }
+    ],
+    "prices": [
+      { "item": "beljenje zob", "amount": 250 },
+      { "item": "čiščenje zobnega kamna brez napotnice", "amount": 45 }
+    ],
+    "people": [
+      { "name": "Petra Hribar", "role": "dr. dent. med., zobozdravnica" },
+      { "name": "Urška", "role": "medicinska sestra" }
+    ],
+    "amenities": ["step-free", "parking", "card", "phone-booking"],
+    "other": [
+      "Zasebna ambulanta s koncesijo, pregled z zdravstveno kartico",
+      "Nove paciente vpisujemo",
+      "Ob torkih in četrtkih ordiniramo popoldne, da pridete po službi",
+      "Če vas boli, vas sprejmemo isti dan",
+      "Telefon dvigamo v ordinacijskem času"
+    ]
+  }
+}

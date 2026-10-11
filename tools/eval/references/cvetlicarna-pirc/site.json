@@ -1,0 +1,190 @@
+{
+  "specVersion": 20,
+  "slug": "cvetlicarna-pirc",
+  "locales": { "default": "sl", "enabled": ["sl"] },
+  "business": {
+    "name": "Cvetličarna Pirc",
+    "type": "shop",
+    "subtype": "florist",
+    "phone": "+38640555846",
+    "email": "lara@cvetlicarna-pirc.example",
+    "address": { "street": "Glavni trg 9", "postalCode": "8000", "city": "Novo mesto" },
+    "hours": {
+      "entries": [
+        { "from": "mon", "to": "fri", "open": "08:00", "close": "18:00" },
+        { "from": "sat", "to": "sat", "open": "08:00", "close": "13:00" },
+        { "from": "sun", "to": "sun", "closed": true }
+      ]
+    },
+    "provider": {
+      "legalName": { "$placeholder": "legalName" },
+      "registrationNumber": { "$placeholder": "registrationNumber" },
+      "taxNumber": { "$placeholder": "taxNumber" }
+    },
+    "amenities": ["delivery", "card"]
+  },
+  "design": {
+    "direction": "soft-studio",
+    "fontPair": "lora-dm-sans",
+    "colors": {
+      "background": "#ffffff",
+      "surface": "#f1f2f0",
+      "text": "#1d2a24",
+      "muted": "#4f5b55",
+      "primary": "#a82d55",
+      "onPrimary": "#ffffff",
+      "accent": "#d0507a",
+      "border": "#d9dcd8",
+      "inverse": "#1d2a24",
+      "onInverse": "#f3f1ee"
+    },
+    "radius": 6,
+    "baseFontSize": 18,
+    "scale": 1.28,
+    "headingWeight": 500,
+    "headingCase": "normal",
+    "headingTracking": -0.01,
+    "density": "airy",
+    "shadow": "none",
+    "imagery": "duotone",
+    "motion": "calm",
+    "wordmark": { "style": "plain" }
+  },
+  "assets": { "images": [] },
+  "chrome": {
+    "header": { "variant": "bar", "cta": "none" },
+    "footer": { "variant": "compact" },
+    "mobileActionBar": true
+  },
+  "pages": [
+    {
+      "id": "p_home",
+      "kind": "home",
+      "slug": "",
+      "nav": { "label": "Domov", "show": true },
+      "seo": {
+        "title": "Cvetličarna Pirc, Novo mesto – šopki iz sezonskega cvetja",
+        "description": "Šopki iz cvetja, ki je v sezoni, poročni šopki, žalni venci in lončnice na Glavnem trgu 9 v Novem mestu. Dostava po Novem mestu 5 €."
+      },
+      "sections": [
+        {
+          "id": "s_line",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "hero",
+            "width": "contained",
+            "minHeight": "l",
+            "rows": 4,
+            "elements": [
+              { "id": "e_where", "kind": "text", "paragraphs": ["Glavni trg 9, Novo mesto"], "color": "muted", "desk": { "col": 1, "span": 5, "row": 1, "alignY": "end" }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_title", "kind": "heading", "text": "Šopki iz cvetja, ki je takrat v sezoni", "level": 1, "size": 6, "measure": "m", "desk": { "col": 1, "span": 6, "row": 2 }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_lead", "kind": "text", "paragraphs": ["Lara Pirc, cvetličarka. Spomladi tulipani in potonike, poleti dalije in sončnice, jeseni astre in hortenzije, pozimi suho cvetje in vejice."], "size": 1, "desk": { "col": 1, "span": 5, "row": 3 }, "phone": { "order": 2, "span": "full" } },
+              { "id": "e_phone", "kind": "fact", "value": "040 555 846", "label": "Večji šopek naročite dan prej", "treatment": "numeral", "size": 4, "color": "primary", "link": { "action": "call" }, "desk": { "col": 1, "span": 5, "row": 4, "alignY": "end" }, "phone": { "order": 3, "span": "full" } },
+              { "id": "e_draw", "kind": "decor", "drawing": "motif/florist/secateurs-stem-line", "color": "accent", "fit": "cell", "desk": { "col": 7, "span": 6, "row": 1, "rowSpan": 4, "alignY": "center" }, "phone": { "order": 4, "span": "full" } }
+            ]
+          }
+        },
+        {
+          "id": "s_seasons",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "highlights",
+            "width": "contained",
+            "rows": 2,
+            "top": { "edge": "rule" },
+            "motion": "stagger",
+            "elements": [
+              { "id": "e_h", "kind": "heading", "text": "Kaj je v šopku", "level": 2, "size": 5, "desk": { "col": 1, "span": 5, "row": 1 }, "phone": { "order": 0, "span": "full" } },
+              {
+                "id": "e_l",
+                "kind": "list",
+                "marker": "line",
+                "size": 1,
+                "items": [
+                  { "lead": "Pomlad", "text": "Tulipani in potonike" },
+                  { "lead": "Poletje", "text": "Dalije in sončnice" },
+                  { "lead": "Jesen", "text": "Astre in hortenzije" },
+                  { "lead": "Zima", "text": "Suho cvetje in vejice" }
+                ],
+                "desk": { "col": 7, "span": 6, "row": 1, "rowSpan": 2 },
+                "phone": { "order": 2, "span": "full" }
+              },
+              { "id": "e_t", "kind": "text", "paragraphs": ["Delam šopke, poročne šopke in dekoracijo za poroke po dogovoru, žalne vence in aranžmaje. Imam tudi lončnice."], "desk": { "col": 1, "span": 5, "row": 2, "alignY": "start" }, "phone": { "order": 1, "span": "full" } }
+            ]
+          }
+        },
+        {
+          "id": "s_prices",
+          "type": "composed",
+          "variant": "free",
+          "tone": "alt",
+          "props": {
+            "intent": "prices",
+            "width": "contained",
+            "rows": 2,
+            "elements": [
+              { "id": "e_h", "kind": "heading", "text": "Cene", "level": 2, "size": 5, "desk": { "col": 1, "span": 4, "row": 1 }, "phone": { "order": 0, "span": "full" } },
+              {
+                "id": "e_p",
+                "kind": "prices",
+                "style": "leaders",
+                "size": 2,
+                "items": [
+                  { "name": "Šopek", "price": { "amount": 15, "from": true } },
+                  { "name": "Poročni šopek", "price": { "amount": 70, "from": true } },
+                  { "name": "Žalni venec", "price": { "amount": 60, "from": true } }
+                ],
+                "desk": { "col": 1, "span": 7, "row": 2 },
+                "phone": { "order": 1, "span": "full" }
+              },
+              { "id": "e_del", "kind": "fact", "value": "5 €", "label": "dostava po Novem mestu", "treatment": "tag", "size": 4, "desk": { "col": 9, "span": 4, "row": 2, "alignY": "center", "tilt": -4 }, "phone": { "order": 2, "span": "full" } }
+            ]
+          }
+        },
+        {
+          "id": "s_shop",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "contact",
+            "width": "contained",
+            "rows": 3,
+            "elements": [
+              { "id": "e_h", "kind": "heading", "text": "Na Glavnem trgu", "level": 2, "size": 5, "desk": { "col": 1, "span": 5, "row": 1 }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_hours", "kind": "hours", "style": "table", "desk": { "col": 1, "span": 5, "row": 2 }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_if", "kind": "iconFacts", "icons": "line", "items": [{ "fact": "delivery", "note": "Po Novem mestu, 5 €" }, { "fact": "card" }], "desk": { "col": 1, "span": 5, "row": 3 }, "phone": { "order": 2, "span": "full" } },
+              { "id": "e_contact", "kind": "contact", "show": ["phone", "email", "address"], "desk": { "col": 7, "span": 6, "row": 1, "rowSpan": 2 }, "phone": { "order": 3, "span": "full" } },
+              { "id": "e_map", "kind": "map", "style": "corner", "color": "primary", "desk": { "col": 7, "span": 6, "row": 3 }, "phone": { "order": 4, "span": "full" } }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "nav": { "label": "Zasebnost", "show": false },
+      "seo": { "title": "Varstvo osebnih podatkov | Cvetličarna Pirc", "description": "Kako Cvetličarna Pirc obdeluje osebne podatke obiskovalcev spletne strani." },
+      "sections": [{ "id": "s_legal_privacy", "type": "legal", "variant": "default", "props": { "kind": "privacy" } }]
+    },
+    {
+      "id": "p_dostopnost",
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "nav": { "label": "Dostopnost", "show": false },
+      "seo": { "title": "Izjava o dostopnosti | Cvetličarna Pirc", "description": "Izjava o dostopnosti spletne strani Cvetličarna Pirc." },
+      "sections": [{ "id": "s_legal_accessibility", "type": "legal", "variant": "default", "props": { "kind": "accessibility" } }]
+    },
+    {
+      "id": "p_404",
+      "kind": "not-found",
+      "slug": "404",
+      "nav": { "label": "Ni najdeno", "show": false },
+      "seo": { "title": "Strani ni mogoče najti | Cvetličarna Pirc", "description": "Iskane strani ni. Vrnite se na domačo stran." },
+      "sections": [{ "id": "s_not_found", "type": "not-found", "variant": "default", "props": { "title": "Te strani ni mogoče najti", "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo." } }]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "id": "cebelarstvo-zalokar",
+  "stance": "beehive-panel",
+  "trades": ["shop"],
+  "title": "Čebelarstvo Zalokar, panjska končnica",
+  "gapNote": "A row of three boards can't be built: a section takes two background layers, and the red line drawing needs the white ground, so the hero is one blue board (a primary field, columns 1-8) beside the page instead of blue, yellow and red boards side by side; the yellow comes only from the next section's band tone. ornament/beehive-panel-line is an empty outline of a board with two sprigs: there is no painted version (filled colour areas) and no small scene to put in it, so the round seal (60 panjev) is laid over its middle and spills past the frame's top and bottom because a fact can't be sized to a drawing. The rosette as a list marker sits glued to the words (no gap after a drawing marker), so the list went back to rules. Prices as tags are the generic dark hang tags, not painted boards. The map's accent colour also tints the address lines, which fail contrast on inverse, so the map stays uncoloured. mask/arch and the framed treatment (stance signatures) need photos, which a beekeeper without pictures doesn't have.",
+  "sources": ["T Etiketa (prices on labels, one drawn object)", "stance beehive-panel (saturated folk colours, panels side by side, the panel as the hero)"]
+}

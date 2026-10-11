@@ -1,0 +1,188 @@
+{
+  "specVersion": 20,
+  "slug": "frizerstvo-vesna",
+  "locales": { "default": "sl", "enabled": ["sl"] },
+  "business": {
+    "name": "Frizerstvo Vesna",
+    "type": "hairdresser",
+    "phone": "+38640555318",
+    "email": "vesna@frizerstvo-vesna.example",
+    "address": { "street": "Delpinova ulica 8", "postalCode": "5000", "city": "Nova Gorica" },
+    "hours": {
+      "entries": [
+        { "from": "mon", "to": "mon", "closed": true },
+        { "from": "tue", "to": "tue", "open": "12:00", "close": "20:00" },
+        { "from": "wed", "to": "wed", "open": "08:00", "close": "16:00" },
+        { "from": "thu", "to": "thu", "open": "12:00", "close": "20:00" },
+        { "from": "fri", "to": "fri", "open": "08:00", "close": "16:00" },
+        { "from": "sat", "to": "sat", "open": "07:00", "close": "12:00" },
+        { "from": "sun", "to": "sun", "closed": true }
+      ]
+    },
+    "provider": {
+      "legalName": { "$placeholder": "legalName" },
+      "registrationNumber": { "$placeholder": "registrationNumber" },
+      "taxNumber": { "$placeholder": "taxNumber" }
+    },
+    "amenities": ["appointment-only", "card"]
+  },
+  "design": {
+    "direction": "ogledalo",
+    "fontPair": "inter-tight-dm-sans",
+    "colors": {
+      "background": "#ffffff",
+      "surface": "#f3f1f4",
+      "text": "#1a1714",
+      "muted": "#57514c",
+      "primary": "#2a2f8f",
+      "onPrimary": "#ffffff",
+      "accent": "#e2552d",
+      "border": "#dcd8de",
+      "inverse": "#1a1714",
+      "onInverse": "#f5f1ec",
+      "band": "#f0643a",
+      "onBand": "#1a1714"
+    },
+    "radius": 6,
+    "baseFontSize": 17,
+    "scale": 1.25,
+    "headingWeight": 800,
+    "headingCase": "normal",
+    "headingTracking": -0.03,
+    "density": "airy",
+    "shadow": "none",
+    "imagery": "natural",
+    "motion": "still",
+    "wordmark": { "style": "plain" }
+  },
+  "assets": {
+    "images": [
+      { "id": "img_01", "src": "uploads/01.jpg", "width": 1536, "height": 1024, "alt": "Notranjost salona z dvema stoloma in ogledali" },
+      { "id": "img_02", "src": "uploads/02.jpg", "width": 1024, "height": 1536, "alt": "Frizerka striže stranko s škarjami in glavnikom" }
+    ]
+  },
+  "chrome": {
+    "header": { "variant": "bar", "cta": "none" },
+    "footer": { "variant": "compact" },
+    "mobileActionBar": true
+  },
+  "pages": [
+    {
+      "id": "p_home",
+      "kind": "home",
+      "slug": "",
+      "nav": { "label": "Domov", "show": true },
+      "seo": {
+        "title": "Frizerstvo Vesna, Nova Gorica – samo po naročilu",
+        "description": "Frizerka Vesna Leban na Delpinovi ulici 8 v Novi Gorici: striženje za ženske, moške in otroke, barvanje, prameni in trajna. Samo po naročilu."
+      },
+      "sections": [
+        {
+          "id": "s_poster",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "hero",
+            "width": "contained",
+            "minHeight": "l",
+            "rows": 4,
+            "headerOver": true,
+            "background": [{ "kind": "field", "role": "band" }],
+            "elements": [
+              { "id": "e_where", "kind": "text", "paragraphs": ["Delpinova ulica 8, Nova Gorica"], "desk": { "col": 1, "span": 5, "row": 1, "alignY": "end" }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_title", "kind": "heading", "text": "Striženje, barvanje, prameni in trajna", "level": 1, "size": 4, "measure": "m", "desk": { "col": 1, "span": 5, "row": 2, "alignY": "end" }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_lead", "kind": "text", "paragraphs": ["Vesna Leban, frizerka. Delam sama, zato samo po naročilu, da nihče ne čaka."], "desk": { "col": 1, "span": 4, "row": 3, "alignY": "start" }, "phone": { "order": 2, "span": "full" } },
+              { "id": "e_phone", "kind": "fact", "value": "040 555 318", "label": "Naročite se po telefonu", "treatment": "numeral", "size": 4, "link": { "action": "call" }, "desk": { "col": 1, "span": 5, "row": 4, "alignY": "end" }, "phone": { "order": 3, "span": "full" } },
+              {
+                "id": "e_sign",
+                "kind": "decor",
+                "svg": {
+                  "width": 400,
+                  "height": 400,
+                  "paths": [
+                    { "d": "M40 390 V90 A300 300 0 0 1 340 390 Z", "fill": "background" },
+                    { "d": "M384 132 A104 104 0 1 1 176 132 A104 104 0 1 1 384 132 Z", "fill": "inverse" }
+                  ]
+                },
+                "fit": "cell",
+                "desk": { "col": 7, "span": 6, "row": 1, "rowSpan": 4, "alignY": "center" },
+                "phone": { "order": 4, "span": "half", "alignX": "end" }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_prices",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "prices",
+            "width": "contained",
+            "rows": 3,
+            "elements": [
+              { "id": "e_h", "kind": "heading", "text": "Cenik", "level": 2, "size": 5, "desk": { "col": 1, "span": 4, "row": 1 }, "phone": { "order": 0, "span": "full" } },
+              {
+                "id": "e_p",
+                "kind": "prices",
+                "style": "rows",
+                "size": 1,
+                "items": [
+                  { "name": "Žensko striženje s fenom", "price": { "amount": 26 } },
+                  { "name": "Moško striženje", "price": { "amount": 14 } },
+                  { "name": "Otroško striženje", "note": "do 10 let", "price": { "amount": 10 } },
+                  { "name": "Barvanje", "price": { "amount": 38, "from": true } },
+                  { "name": "Prameni", "price": { "amount": 45, "from": true } },
+                  { "name": "Trajna", "price": { "amount": 50, "from": true } }
+                ],
+                "desk": { "col": 1, "span": 6, "row": 2, "rowSpan": 2 },
+                "phone": { "order": 1, "span": "full" }
+              },
+              { "id": "e_photo", "kind": "image", "image": "img_02", "ratio": "4:5", "treatment": "grade", "desk": { "col": 8, "span": 5, "row": 1, "rowSpan": 3, "alignY": "start" }, "phone": { "order": 2, "span": "inset" } }
+            ]
+          }
+        },
+        {
+          "id": "s_visit",
+          "type": "composed",
+          "variant": "free",
+          "tone": "inverse",
+          "props": {
+            "intent": "contact",
+            "width": "contained",
+            "rows": 3,
+            "elements": [
+              { "id": "e_since", "kind": "fact", "value": "2009", "label": "salon imam od leta", "labelAt": "before", "treatment": "numeral", "size": 6, "color": "accent", "desk": { "col": 1, "span": 6, "row": 1 }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_hours", "kind": "hours", "style": "table", "desk": { "col": 1, "span": 5, "row": 2, "rowSpan": 2 }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_contact", "kind": "contact", "show": ["phone", "email", "address"], "desk": { "col": 7, "span": 5, "row": 2 }, "phone": { "order": 2, "span": "full" } },
+              { "id": "e_if", "kind": "iconFacts", "icons": "cut", "items": [{ "fact": "appointment-only", "note": "Da nihče ne čaka" }, { "fact": "card" }], "desk": { "col": 7, "span": 5, "row": 3 }, "phone": { "order": 3, "span": "full" } }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "nav": { "label": "Zasebnost", "show": false },
+      "seo": { "title": "Varstvo osebnih podatkov | Frizerstvo Vesna", "description": "Kako Frizerstvo Vesna obdeluje osebne podatke obiskovalcev spletne strani." },
+      "sections": [{ "id": "s_legal_privacy", "type": "legal", "variant": "default", "props": { "kind": "privacy" } }]
+    },
+    {
+      "id": "p_dostopnost",
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "nav": { "label": "Dostopnost", "show": false },
+      "seo": { "title": "Izjava o dostopnosti | Frizerstvo Vesna", "description": "Izjava o dostopnosti spletne strani Frizerstvo Vesna." },
+      "sections": [{ "id": "s_legal_accessibility", "type": "legal", "variant": "default", "props": { "kind": "accessibility" } }]
+    },
+    {
+      "id": "p_404",
+      "kind": "not-found",
+      "slug": "404",
+      "nav": { "label": "Ni najdeno", "show": false },
+      "seo": { "title": "Strani ni mogoče najti | Frizerstvo Vesna", "description": "Iskane strani ni. Vrnite se na domačo stran." },
+      "sections": [{ "id": "s_not_found", "type": "not-found", "variant": "default", "props": { "title": "Te strani ni mogoče najti", "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo." } }]
+    }
+  ]
+}

@@ -1,0 +1,199 @@
+{
+  "specVersion": 20,
+  "slug": "fizioterapija-kobal",
+  "locales": { "default": "sl", "enabled": ["sl"] },
+  "business": {
+    "name": "Fizioterapija Kobal",
+    "type": "physio",
+    "phone": "+38641555627",
+    "email": "nika@fizioterapija-kobal.example",
+    "address": { "street": "Prešernova ulica 6", "postalCode": "5220", "city": "Tolmin" },
+    "hours": {
+      "entries": [
+        { "from": "mon", "to": "fri", "open": "07:00", "close": "19:00" },
+        { "from": "sat", "to": "sun", "closed": true }
+      ],
+      "note": "Samo po dogovoru."
+    },
+    "provider": {
+      "legalName": { "$placeholder": "legalName" },
+      "registrationNumber": { "$placeholder": "registrationNumber" },
+      "taxNumber": { "$placeholder": "taxNumber" }
+    },
+    "serviceArea": ["Tolmin in okolica"],
+    "amenities": ["appointment-only", "step-free", "free-parking", "home-visits"]
+  },
+  "design": {
+    "direction": "clinical-calm",
+    "fontPair": "manrope-public-sans",
+    "colors": {
+      "background": "#ffffff",
+      "surface": "#eceeec",
+      "text": "#13201e",
+      "muted": "#4c5a57",
+      "primary": "#0b7466",
+      "onPrimary": "#ffffff",
+      "accent": "#0f8f7f",
+      "border": "#d3d8d6",
+      "inverse": "#0f2a27",
+      "onInverse": "#eef4f2",
+      "band": "#bfe3dc",
+      "onBand": "#13201e"
+    },
+    "radius": 10,
+    "baseFontSize": 18,
+    "scale": 1.25,
+    "headingWeight": 700,
+    "headingCase": "normal",
+    "headingTracking": -0.02,
+    "density": "airy",
+    "shadow": "none",
+    "imagery": "rounded",
+    "motion": "calm",
+    "wordmark": { "style": "plain" }
+  },
+  "assets": {
+    "images": [{ "id": "img_01", "src": "uploads/01.jpg", "width": 1536, "height": 1024, "alt": "Terapevtska miza v svetli sobi z oknom, letvenikom in žogami" }]
+  },
+  "chrome": {
+    "header": { "variant": "bar", "cta": "none" },
+    "footer": { "variant": "compact" },
+    "mobileActionBar": true
+  },
+  "pages": [
+    {
+      "id": "p_home",
+      "kind": "home",
+      "slug": "",
+      "nav": { "label": "Domov", "show": true },
+      "seo": {
+        "title": "Fizioterapija Kobal, Tolmin – tudi na domu",
+        "description": "Diplomirana fizioterapevtka Nika Kobal v Tolminu: hrbet in vrat, poškodbe in operacije, športne poškodbe, limfna drenaža. Brez napotnice."
+      },
+      "sections": [
+        {
+          "id": "s_river",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "hero",
+            "width": "contained",
+            "rows": 4,
+            "elements": [
+              { "id": "e_where", "kind": "text", "paragraphs": ["Prešernova ulica 6, Tolmin"], "color": "muted", "desk": { "col": 1, "span": 5, "row": 1, "alignY": "end" }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_title", "kind": "heading", "text": "Fizioterapevtka v Tolminu, tudi na domu", "level": 1, "size": 6, "measure": "m", "color": "primary", "desk": { "col": 1, "span": 6, "row": 2 }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_lead", "kind": "text", "paragraphs": ["Nika Kobal, diplomirana fizioterapevtka. Delam sama, zato je vsaka obravnava samo z mano, od začetka do konca. Napotnice ne potrebujete."], "size": 1, "desk": { "col": 1, "span": 5, "row": 3 }, "phone": { "order": 2, "span": "full" } },
+              { "id": "e_phone", "kind": "fact", "value": "041 555 627", "label": "Pokličite ali pošljite sporočilo", "treatment": "numeral", "size": 4, "link": { "action": "call" }, "desk": { "col": 1, "span": 5, "row": 4, "alignY": "start" }, "phone": { "order": 3, "span": "full" } },
+              { "id": "e_photo", "kind": "image", "image": "img_01", "ratio": "1:1", "mask": "pebble", "desk": { "col": 7, "span": 6, "row": 1, "rowSpan": 3, "alignY": "end" }, "phone": { "order": 4, "span": "full" } },
+              {
+                "id": "e_stones",
+                "kind": "decor",
+                "svg": {
+                  "width": 400,
+                  "height": 210,
+                  "paths": [
+                    { "d": "M60 120 C40 80 90 40 150 45 C215 50 245 90 225 125 C205 160 90 165 60 120 Z", "fill": "surface", "stroke": "border", "width": 1.5 },
+                    { "d": "M240 140 C235 110 270 90 310 98 C350 106 365 135 345 155 C325 175 245 172 240 140 Z", "fill": "border" },
+                    { "d": "M150 180 C150 165 175 158 195 162 C215 166 222 182 208 192 C192 202 150 198 150 180 Z", "fill": "surface", "stroke": "border", "width": 1.5 },
+                    { "d": "M300 50 C298 35 315 25 335 30 C352 34 356 50 345 58 C333 66 302 64 300 50 Z", "fill": "accent" }
+                  ]
+                },
+                "fit": "cell",
+                "desk": { "col": 6, "span": 5, "row": 4, "alignY": "start", "layer": 1, "shiftY": -2 },
+                "phone": { "order": 5, "span": "half", "hidden": true }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s_care",
+          "type": "composed",
+          "variant": "free",
+          "tone": "alt",
+          "props": {
+            "intent": "services",
+            "width": "contained",
+            "rows": 3,
+            "surface": { "texture": "stone" },
+            "motion": "rise",
+            "elements": [
+              { "id": "e_h", "kind": "heading", "text": "Kaj obravnavam", "level": 2, "size": 5, "color": "primary", "desk": { "col": 1, "span": 5, "row": 1 }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_l", "kind": "list", "marker": "dot", "size": 2, "items": ["Bolečine v hrbtu in vratu", "Stanja po poškodbah in operacijah", "Športne poškodbe", "Limfna drenaža"], "desk": { "col": 1, "span": 5, "row": 2, "rowSpan": 2 }, "phone": { "order": 1, "span": "full" } },
+              {
+                "id": "e_p",
+                "kind": "prices",
+                "style": "rows",
+                "size": 1,
+                "items": [
+                  { "name": "Prvi pregled z obravnavo", "note": "60 minut", "price": { "amount": 50 } },
+                  { "name": "Nadaljnja obravnava", "note": "45 minut", "price": { "amount": 40 } },
+                  { "name": "Limfna drenaža", "note": "60 minut", "price": { "amount": 45 } }
+                ],
+                "desk": { "col": 7, "span": 6, "row": 1, "rowSpan": 2 },
+                "phone": { "order": 2, "span": "full" }
+              },
+              { "id": "e_t", "kind": "text", "paragraphs": ["Za obravnavo ne potrebujete napotnice, plačilo je samoplačniško."], "color": "muted", "desk": { "col": 7, "span": 6, "row": 3 }, "phone": { "order": 3, "span": "full" } }
+            ]
+          }
+        },
+        {
+          "id": "s_home",
+          "type": "composed",
+          "variant": "free",
+          "tone": "band",
+          "props": {
+            "intent": "highlights",
+            "width": "contained",
+            "rows": 2,
+            "elements": [
+              { "id": "e_h", "kind": "heading", "text": "Na dom pridem v Tolminu in okolici", "level": 2, "size": 4, "measure": "m", "desk": { "col": 1, "span": 7, "row": 1 }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_fee", "kind": "fact", "value": "15 €", "label": "doplačilo za obisk na domu", "treatment": "numeral", "size": 6, "desk": { "col": 9, "span": 4, "row": 1, "rowSpan": 2, "alignY": "center" }, "phone": { "order": 2, "span": "full" } },
+              { "id": "e_t", "kind": "text", "paragraphs": ["Od ponedeljka do petka, samo po dogovoru."], "size": 1, "desk": { "col": 1, "span": 6, "row": 2 }, "phone": { "order": 1, "span": "full" } }
+            ]
+          }
+        },
+        {
+          "id": "s_visit",
+          "type": "composed",
+          "variant": "free",
+          "props": {
+            "intent": "contact",
+            "width": "contained",
+            "rows": 3,
+            "elements": [
+              { "id": "e_h", "kind": "heading", "text": "V pritličju, brez stopnic", "level": 2, "size": 5, "color": "primary", "desk": { "col": 1, "span": 6, "row": 1 }, "phone": { "order": 0, "span": "full" } },
+              { "id": "e_hours", "kind": "hours", "style": "compact", "desk": { "col": 1, "span": 5, "row": 2 }, "phone": { "order": 1, "span": "full" } },
+              { "id": "e_if", "kind": "iconFacts", "icons": "line", "items": [{ "fact": "appointment-only" }, { "fact": "step-free" }, { "fact": "free-parking", "note": "Pred hišo" }, { "fact": "home-visits", "note": "Tolmin in okolica" }], "desk": { "col": 1, "span": 5, "row": 3 }, "phone": { "order": 2, "span": "full" } },
+              { "id": "e_contact", "kind": "contact", "show": ["phone", "email", "address"], "desk": { "col": 7, "span": 6, "row": 1, "rowSpan": 2 }, "phone": { "order": 3, "span": "full" } },
+              { "id": "e_map", "kind": "map", "style": "street", "desk": { "col": 7, "span": 6, "row": 3 }, "phone": { "order": 4, "span": "full" } }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "nav": { "label": "Zasebnost", "show": false },
+      "seo": { "title": "Varstvo osebnih podatkov | Fizioterapija Kobal", "description": "Kako Fizioterapija Kobal obdeluje osebne podatke obiskovalcev spletne strani." },
+      "sections": [{ "id": "s_legal_privacy", "type": "legal", "variant": "default", "props": { "kind": "privacy" } }]
+    },
+    {
+      "id": "p_dostopnost",
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "nav": { "label": "Dostopnost", "show": false },
+      "seo": { "title": "Izjava o dostopnosti | Fizioterapija Kobal", "description": "Izjava o dostopnosti spletne strani Fizioterapija Kobal." },
+      "sections": [{ "id": "s_legal_accessibility", "type": "legal", "variant": "default", "props": { "kind": "accessibility" } }]
+    },
+    {
+      "id": "p_404",
+      "kind": "not-found",
+      "slug": "404",
+      "nav": { "label": "Ni najdeno", "show": false },
+      "seo": { "title": "Strani ni mogoče najti | Fizioterapija Kobal", "description": "Iskane strani ni. Vrnite se na domačo stran." },
+      "sections": [{ "id": "s_not_found", "type": "not-found", "variant": "default", "props": { "title": "Te strani ni mogoče najti", "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo." } }]
+    }
+  ]
+}

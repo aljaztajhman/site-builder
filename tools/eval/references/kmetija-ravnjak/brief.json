@@ -1,0 +1,44 @@
+{
+  "id": "kmetija-ravnjak",
+  "businessType": "tourist-farm",
+  "town": "Luče",
+  "description": "Turistična kmetija Ravnjak, Krnica 22, 3334 Luče. Smo družina Ravnjak: Marija, Tone in sin Matic. Kmetija je na 900 m nadmorske višine, na sončni strani doline. Imamo 4 sobe z lastno kopalnico, za 2 do 4 osebe. Zajtrk je iz domačih stvari: sir, skuta, maslo, mleko, kruh in marmelada. Na kmetiji redimo 12 krav in nekaj koz, otroci jih lahko hranijo.\n\nSobe oddajamo od maja do oktobra. Naše leto gre takole: maja gredo krave na pašo in odpremo sobe, junija kosimo, julija in avgusta so krave na planini, septembra pobiramo jabolka in kuhamo marmelado, oktobra zapremo sobe za goste.\n\nCene: nočitev z zajtrkom 38 € na osebo, otroci do 12 let 20 €. Najmanj dve noči. Prihod od 14.00, odhod do 10.00.\n\nRezervacije po telefonu 031 555 492 ali po e-pošti sobe@kmetija-ravnjak.example. Parkirišče je pri hiši. Psi pri nas žal ne smejo bivati. Govorimo nemško in angleško. Plačilo z gotovino.\n\nŽelimo si stran kot stara pratika: vsak mesec svoje delo, majhne slike in rdeča barva za dneve, ki štejejo.",
+  "photos": {
+    "fixture": "kmetija-grabnar",
+    "subjects": [
+      "kmečka hiša z lesenim balkonom in rdečimi pelargonijami pod gorami",
+      "soba z dvema lesenima posteljama in karirasto posteljnino",
+      "kmečki zajtrk: sir, skuta, marmelada, kruh, maslo in mleko",
+      "krave na strmem planinskem pašniku",
+      "kos domačega jabolčnega zavitka",
+      "otroka hranita koze čez lesen plot",
+      "razgled s terase na zeleno dolino",
+      "kozarci domače marmelade na leseni polici"
+    ]
+  },
+  "facts": {
+    "name": "Turistična kmetija Ravnjak",
+    "phone": "+38631555492",
+    "email": "sobe@kmetija-ravnjak.example",
+    "address": { "street": "Krnica 22", "postalCode": "3334", "city": "Luče" },
+    "prices": [
+      { "item": "nočitev z zajtrkom (na osebo)", "amount": 38 },
+      { "item": "otroci do 12 let", "amount": 20 }
+    ],
+    "people": [
+      { "name": "Marija Ravnjak", "role": "gospodinja" },
+      { "name": "Tone Ravnjak", "role": "gospodar" },
+      { "name": "Matic Ravnjak", "role": "sin" }
+    ],
+    "amenities": ["parking", "no-pets", "german", "english", "cash-only"],
+    "other": [
+      "900 m nadmorske višine, na sončni strani doline",
+      "4 sobe z lastno kopalnico, za 2 do 4 osebe",
+      "Zajtrk iz domačih stvari",
+      "12 krav in nekaj koz, otroci jih lahko hranijo",
+      "Sobe od maja do oktobra",
+      "Maj paša, junij košnja, julij in avgust planina, september jabolka in marmelada, oktober zapremo",
+      "Najmanj dve noči; prihod od 14.00, odhod do 10.00"
+    ]
+  }
+}

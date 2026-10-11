@@ -1,0 +1,8 @@
+{
+  "id": "zobna-ambulanta-hribar",
+  "stance": "station-timetable",
+  "trades": ["dental"],
+  "title": "Zobna ambulanta Hribar, vozni red",
+  "gapNote": "There is no timetable board: each line is its own numeral fact (label before, value large), stacked in rows 2-4, with no hairline rule between them (a section has no inner rules) and no column for the day, so the board is a list of big times rather than a grid. fact/split would put the day beside the time, but its values don't line up because the label width varies. Figures are not tabular (type-treatment/tabular-figures doesn't exist), so 7.00 and 13.00 don't share digit widths. The colour band can't mark today's line (nothing reads the day), so it marks the afternoon line the client asked to stress, as a static band field; a field gives its content no inset, so it starts a column before the times (6-12) to let the label breathe and the heading gives up a column for it. The hours element can't take the board's look, so the hours appear a second time as the week chart in the visit section.",
+  "sources": ["B Proge (times as the hero, strict lines)", "stance station-timetable (big figures in columns, one colour band marking a line)"]
+}

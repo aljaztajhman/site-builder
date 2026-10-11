@@ -1,0 +1,31 @@
+{
+  "id": "cvetlicarna-pirc",
+  "businessType": "shop",
+  "town": "Novo mesto",
+  "description": "Cvetličarna Pirc, Glavni trg 9, 8000 Novo mesto. Sem Lara Pirc, cvetličarka. Šopke vežem iz cvetja, ki je takrat v sezoni: spomladi tulipani in potonike, poleti dalije in sončnice, jeseni astre in hortenzije. Pozimi delam šopke s suhim cvetjem in vejicami.\n\nDelam šopke, poročne šopke in dekoracijo za poroke po dogovoru, žalne vence in aranžmaje. Imam tudi lončnice.\n\nCene: šopek od 15 €, poročni šopek od 70 €, žalni venec od 60 €. Dostava po Novem mestu 5 €.\n\nOdprto od ponedeljka do petka od 8.00 do 18.00, v soboto od 8.00 do 13.00, ob nedeljah zaprto. Večji šopek naročite dan prej po telefonu 040 555 846 ali na lara@cvetlicarna-pirc.example. Plačilo s kartico.\n\nNa strani bi rada samo risbo, tanko linijo kot na mojih ročno napisanih listkih, in malo besedila.",
+  "photos": null,
+  "facts": {
+    "name": "Cvetličarna Pirc",
+    "phone": "+38640555846",
+    "email": "lara@cvetlicarna-pirc.example",
+    "address": { "street": "Glavni trg 9", "postalCode": "8000", "city": "Novo mesto" },
+    "hours": [
+      { "from": "mon", "to": "fri", "open": "08:00", "close": "18:00" },
+      { "from": "sat", "to": "sat", "open": "08:00", "close": "13:00" }
+    ],
+    "prices": [
+      { "item": "šopek", "amount": 15, "from": true },
+      { "item": "poročni šopek", "amount": 70, "from": true },
+      { "item": "žalni venec", "amount": 60, "from": true },
+      { "item": "dostava po Novem mestu", "amount": 5 }
+    ],
+    "people": [{ "name": "Lara Pirc", "role": "cvetličarka" }],
+    "amenities": ["delivery", "card"],
+    "other": [
+      "Šopki iz sezonskega cvetja: spomladi tulipani in potonike, poleti dalije in sončnice, jeseni astre in hortenzije, pozimi suho cvetje in vejice",
+      "Poročni šopki in dekoracija za poroke po dogovoru",
+      "Žalni venci in aranžmaji, lončnice",
+      "Večji šopek naročite dan prej"
+    ]
+  }
+}
