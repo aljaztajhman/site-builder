@@ -43,8 +43,8 @@ const section = (more: object = {}) => ({
 const okSection = (more: object) => ComposedProps.safeParse(section(more)).success;
 
 describe("composition language v2: new kinds", () => {
-  it("has 17 kinds, each new one parsing as an Element", () => {
-    expect(ELEMENT_KINDS.length).toBe(17);
+  it("has 19 kinds, each new one parsing as an Element", () => {
+    expect(ELEMENT_KINDS.length).toBe(19);
     for (const [kind, fields] of Object.entries(NEW_KINDS)) {
       expect(ELEMENT_KINDS as readonly string[]).toContain(kind);
       expect(okEl(fields), kind).toBe(true);

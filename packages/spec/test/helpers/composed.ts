@@ -54,6 +54,11 @@ export const map = (id: string, desk: Desk, order: number, rest: Rest = {}) => e
 export const iconFacts = (id: string, desk: Desk, order: number, rest: Rest = {}) => el(id, "iconFacts", desk, { order }, { items: [{ fact: "parking" }, { fact: "card" }], ...rest });
 export const quote = (id: string, desk: Desk, order: number, rest: Rest = {}) => el(id, "quote", desk, { order }, { text: "Pečemo kot nekoč.", ...rest });
 
+export const steps = (id: string, desk: Desk, order: number, rest: Rest = {}) =>
+  el(id, "steps", desk, { order }, { items: [{ title: "Naročilo", text: "Pokličete ali pišete nam." }, { title: "Pregled", text: "Pogledamo, kaj je treba narediti." }], ...rest });
+export const qa = (id: string, desk: Desk, order: number, rest: Rest = {}) =>
+  el(id, "qa", desk, { order }, { items: [{ question: "Ali delate ob sobotah?", answer: "Da, do poldneva." }], ...rest });
+
 /** A clean two-column story: heading and text on the left, a photo on the right. */
 export const base = (): Element[] => [heading("e_head", { col: 1, span: 6, row: 1 }, 0), text("e_text", { col: 1, span: 6, row: 2 }, 1), photo("e_photo", { col: 8, span: 5, row: 1, rowSpan: 2 }, 2)];
 

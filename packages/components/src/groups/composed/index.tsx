@@ -37,6 +37,8 @@ export function Composed({ section, ctx, index }: SectionProps<"composed">) {
   const { props } = section;
   const ordered = readingOrder(props.elements);
   const heading = firstHeading(ordered);
+  // Item headings (steps titles, questions) sit one level below the section's own heading; with none, they are h2.
+  const itemLevel = heading ? heading.level + 1 : 2;
   const photo = photoLayer(props);
   // The page's opening section loads its first photo eagerly, the one composedLcp preloads: the photo layer if it has
   // one, else its first image element.
@@ -65,6 +67,7 @@ export function Composed({ section, ctx, index }: SectionProps<"composed">) {
         titleId={el === heading ? titleId(section.id) : undefined}
         priority={lead?.id === el.id}
         sectionId={section.id}
+        itemLevel={itemLevel}
       />
     );
     // Text on a field takes the field's ground: its colour and the ground a backing panel paints (G2, G9).

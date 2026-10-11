@@ -1,13 +1,13 @@
 /**
  * The studio's reference homepages (docs/plans/studio-phase1-design.md §5 I10, decision D3): made in the composition
- * language, as v20 site specs our renderer draws, never as free HTML. One folder per reference under
+ * language, as v21 site specs our renderer draws, never as free HTML. One folder per reference under
  * tools/eval/references/<id>/:
  *
  * - brief.json: a fixture business (fictional but realistic Slovene small business). `description` is the client's own
  *   words and the only source of facts: checkFacts holds the page to it. `facts` restates them in structure (name,
  *   phone, address …) and must agree with the spec. `photos` borrows a golden fixture's photos (tools/eval/fixtures/<id>/
  *   photos, used in order for the spec's images) or is null for a page without photos.
- * - site.json: a spec v20 site (the homepage at least, plus the three system pages validateSite requires). It may use
+ * - site.json: a spec v21 site (the homepage at least, plus the three system pages validateSite requires). It may use
  *   any vocabulary name that exists (approved or draft).
  * - meta.json: id, stance (an id of the stance deck), trades, title, the gap note (what the language couldn't say:
  *   it feeds Phase 4) and sources (which hand-made reference or idea it draws on).
@@ -144,7 +144,7 @@ export function checkReference(ref: Reference): string[] {
   // The spec: valid, and no fact the brief doesn't give.
   const v = validateSite(spec);
   if (!v.ok) for (const i of v.issues) out.push(`validateSite ${i.path}: ${i.message}`);
-  if (spec.specVersion !== 20) out.push(`site.json is spec v${spec.specVersion}; references are written in spec v20`);
+  if (spec.specVersion !== 21) out.push(`site.json is spec v${spec.specVersion}; references are written in spec v21`);
   if (v.ok) for (const f of checkFacts(v.spec, brief.description)) out.push(`checkFacts ${f.kind} ${f.path}: ${f.value}${f.detail ? ` (${f.detail})` : ""}`);
 
   // The brief's structured facts agree with the spec (and so with the description, through checkFacts).

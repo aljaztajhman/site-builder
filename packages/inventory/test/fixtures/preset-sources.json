@@ -138,7 +138,39 @@
             "role": "Prodaja v trgovini"
           }
         ]
-      }
+      },
+      "steps": [
+        {
+          "title": "Moka iz mlina",
+          "text": "Moko kupujemo pri mlinu v bližini."
+        },
+        {
+          "title": "Droži",
+          "text": "Kruh pečemo samo z drožmi, kvasom, ki ga gojimo sami."
+        },
+        {
+          "title": "Čez noč",
+          "text": "Testo pustimo vzhajati čez noč, zato je kruh bolj okusen in dlje ostane svež."
+        },
+        {
+          "title": "Ročno delo",
+          "text": "Brez aditivov in brez zamrznjenega testa."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Ali lahko potico naročim za praznik?",
+          "answer": "Da, potico se lahko naroči tudi za praznike in praznovanja, najmanj dva dni prej."
+        },
+        {
+          "question": "Kdaj pečete orehovo potico in kvašene krofe?",
+          "answer": "Ob petkih in sobotah."
+        },
+        {
+          "question": "Je v vašem kruhu kaj aditivov?",
+          "answer": "Ne, kruh je ročno delo, brez aditivov in brez zamrznjenega testa."
+        }
+      ]
     },
     "copy": {
       "hero": {

@@ -317,7 +317,7 @@ export function vocabNamesOf(s: ComposedSection): Record<VocabFamily, Set<string
 const isComposed = (s: Section): s is ComposedSection => s.type === "composed";
 
 /** The element kinds spec v20 adds (§1.5): their rules are in composed-v2.css region kinds. */
-const V2_KINDS: ReadonlySet<string> = new Set(["photos", "wordmark", "ribbon", "sticker", "map", "iconFacts", "quote"]);
+const V2_KINDS: ReadonlySet<string> = new Set(["photos", "wordmark", "ribbon", "sticker", "map", "iconFacts", "quote", "steps", "qa"]);
 
 /** The mask, image treatment and fact object names the core sheet (spec v19) draws. */
 const V19_MASKS: ReadonlySet<string> = new Set(["none", "arch", "circle", "cut", "stamp", "ticket"]);
@@ -352,6 +352,9 @@ function elementUsesExtension(el: ComposedElement): boolean {
       return !["rows", "plates", "tags"].includes(el.style) || el.phoneColumns !== undefined || (el.size !== undefined && el.size > 0) || el.plateCode === true;
     case "decor":
       return el.drawing !== undefined || el.fit !== undefined || el.size !== undefined || el.repeat !== undefined;
+    // The timeline style of steps shares the ring and rail rules of a list with marker "line" (extensions region).
+    case "steps":
+      return el.style === "line";
     default:
       return false;
   }

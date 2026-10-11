@@ -108,6 +108,10 @@ export function composedFacts(spec: SiteSpec, input: string, translated = false)
           const v = e[field];
           if (str(v) && !isVerbatim(v, input)) out.push({ path: `${at}/${field}`, kind, value: v, detail: QUOTE_VERBATIM });
         };
+        /** A question, an answer, a step: the client's own words (spec v21), never a designer's FAQ or process. */
+        const ownWords = (v: unknown, path: string) => {
+          if (str(v) && !isVerbatim(v, input)) out.push({ path, kind: "quote", value: v, detail: QUOTE_VERBATIM });
+        };
         const noClaim = (v: unknown, path: string) => {
           if (str(v) && CLAIM_WORDS.test(v) && !isVerbatim(v, input)) out.push({ path, kind: "claim", value: v, detail: CLAIM });
         };
@@ -135,6 +139,18 @@ export function composedFacts(spec: SiteSpec, input: string, translated = false)
             ((e.items ?? []) as unknown[]).forEach((x, i) => {
               const lead = x && typeof x === "object" ? (x as { lead?: unknown }).lead : undefined;
               if (str(lead) && NUMBERED_LABEL.test(lead)) out.push({ path: `${at}/items/${i}/lead`, kind: "label", value: lead, detail: NUMBERED });
+            });
+            break;
+          case "qa":
+            ((e.items ?? []) as { question?: unknown; answer?: unknown }[]).forEach((x, i) => {
+              ownWords(x?.question, `${at}/items/${i}/question`);
+              ownWords(x?.answer, `${at}/items/${i}/answer`);
+            });
+            break;
+          case "steps":
+            ((e.items ?? []) as { title?: unknown; text?: unknown }[]).forEach((x, i) => {
+              ownWords(x?.title, `${at}/items/${i}/title`);
+              ownWords(x?.text, `${at}/items/${i}/text`);
             });
             break;
           case "photos": {
