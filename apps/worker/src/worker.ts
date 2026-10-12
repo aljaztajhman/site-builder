@@ -159,13 +159,14 @@ export function defaultTransport(job: "generate" | "edit", editIndex = 0, scope:
 
 /**
  * Design studio 0.5 (docs/plans/studio-0.5.md): whether this job's homepage goes through the studio. Config designer.agent
- * "on": every job; "trial": only a signed-in account whose email is in DESIGNER_TRIAL_EMAILS (an admin password session
- * or a guest has no account, so never); "off": never.
+ * "on": every job; "trial": only a signed-in account whose email is in DESIGNER_TRIAL_EMAILS, plus the admin password
+ * session's sites (tier "admin", no account) when DESIGNER_TRIAL_ADMIN is "1"; a guest never; "off": never.
  */
-export async function studioForJob(platform: Pick<Platform, "repo">, config: AppConfig, ctx: CallContext, trialEmails = process.env.DESIGNER_TRIAL_EMAILS): Promise<boolean> {
+export async function studioForJob(platform: Pick<Platform, "repo">, config: AppConfig, ctx: CallContext, trialEmails = process.env.DESIGNER_TRIAL_EMAILS, trialAdmin = process.env.DESIGNER_TRIAL_ADMIN): Promise<boolean> {
   const mode = config.designer.agent;
   if (mode === "off") return false;
   if (mode === "on") return true;
+  if (!ctx.accountId && ctx.tier === "admin" && trialAdmin?.trim() === "1") return true;
   if (!ctx.accountId || !trialEmails?.trim()) return false;
   const account = await platform.repo.accounts.get(ctx.accountId);
   return studioEnabled(mode, account?.email, trialEmails);

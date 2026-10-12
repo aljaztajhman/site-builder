@@ -99,6 +99,17 @@ describe("the studio switch in the worker", () => {
     expect(await studioForJob(platform, config, { ...ctx, accountId: null }, OWNER)).toBe(false);
     expect(await studioForJob(platform, on, { ...ctx, accountId: null }, undefined)).toBe(true);
   });
+
+  it("trial: the admin password session's sites only with DESIGNER_TRIAL_ADMIN=1; guests never", async () => {
+    const admin = { siteId: null, jobId: null, tier: "admin" as const, accountId: null };
+    const guest = { ...admin, tier: "anonymous" as const };
+    expect(await studioForJob(platform, config, admin, undefined, "1")).toBe(true);
+    expect(await studioForJob(platform, config, admin, undefined, undefined)).toBe(false);
+    expect(await studioForJob(platform, config, admin, undefined, "0")).toBe(false);
+    expect(await studioForJob(platform, config, guest, undefined, "1")).toBe(false);
+    const off = { ...config, designer: { ...config.designer, agent: "off" as const } };
+    expect(await studioForJob(platform, off, admin, undefined, "1")).toBe(false);
+  });
 });
 
 describe("a homepage job with the studio", () => {
