@@ -1752,7 +1752,7 @@ function collectionPane(): HTMLElement {
   return pane;
 }
 
-const COST_STAGE: Record<string, string> = { classify: "Vrsta dejavnosti", brief: "Razumevanje opisa", design: "Oblikovna smer", altText: "Opisi fotografij", imageGen: "Ustvarjene slike", content: "Besedila in postavitev", critique: "Samopregled", edit: "Pomočnik" };
+const COST_STAGE: Record<string, string> = { classify: "Vrsta dejavnosti", brief: "Razumevanje opisa", design: "Oblikovna smer", altText: "Opisi fotografij", imageGen: "Ustvarjene slike", content: "Besedila in postavitev", director: "Oblikovanje domače strani", artDirector: "Umetniški vodja", mockup: "Osnutek domače strani", rebuild: "Prenos osnutka v stran", critique: "Samopregled", edit: "Pomočnik" };
 const n0 = (n: number) => n.toLocaleString("sl-SI");
 
 /** A panel opened from the ⋯ menu or the assistant box: its title and a way back to editing. */
@@ -1957,13 +1957,14 @@ const STAGES: [string, string][] = [
   ["imageGen", "Ustvarjanje slik"],
   ["images", "Fotografije"],
   ["content", "Besedila in postavitev"],
+  ["studio", "Oblikovanje domače strani"],
   ["check", "Preverjanje na telefonu in namizju"],
   ["critique", "Samopregled in popravki"],
 ];
 /** Stages that only some runs have: listed once they start. */
-const OPTIONAL_STAGES = new Set(["imageGen"]);
+const OPTIONAL_STAGES = new Set(["imageGen", "studio"]);
 /** Which running stage the live preview names when several run side by side (the one the owner waits on). */
-const ACTIVITY_ORDER = ["content", "imageGen", "images", "design", "brief", "classify", "check", "critique"];
+const ACTIVITY_ORDER = ["studio", "content", "imageGen", "images", "design", "brief", "classify", "check", "critique"];
 
 type RunEvent = State["events"][number];
 
@@ -2587,6 +2588,7 @@ function moreMenu(): HTMLElement {
     h("div", { class: "list" },
       h("a", { href: `/sites/${siteId}/messages` }, state.messages ? `Sporočila (${state.messages})` : "Sporočila"),
       h("button", { type: "button", onClick: go("versions") }, "Zgodovina sprememb"),
+      state.spec ? h("button", { type: "button", onClick: () => { menuOpen = false; openFullView(); } }, "Celoten zaslon") : null,
       h("a", { href: previewUrl(), target: "_blank", rel: "noopener" }, "Predogled v novem zavihku"),
       s.published_version ? h("a", { href: `/s/${s.slug}/`, target: "_blank", rel: "noopener" }, "Odpri objavljeno stran") : null,
       can("export") ? h("button", { type: "button", id: "export-start", onClick: () => { menuOpen = false; void startExport(); } }, "Prenesi stran (.zip)") : null,
@@ -2631,7 +2633,40 @@ function barItems(): Child[] {
     ),
     h("span", { class: "sp" }),
     h("span", { class: "muted where" }, p ? String((p.nav as Obj).label) : ""),
+    state.spec ? h("button", { type: "button", class: "btn quiet sm", id: "full-view", onClick: () => openFullView() }, "Celoten zaslon") : null,
   ];
+}
+
+/**
+ * The generated page over the whole window, read only, at phone or desktop width: links move between the site's
+ * pages inside the viewer. A native modal dialog (focus stays inside, Escape closes), outside the re-rendered shell.
+ */
+function openFullView(): void {
+  let width: "mobile" | "desktop" = device;
+  const frame = h("iframe", { title: "Celozaslonski predogled strani", src: previewUrl() });
+  const box = h("div", { class: "fv-frame" }, frame);
+  const dialog = h("dialog", { class: "fullview", "aria-label": "Celozaslonski predogled" });
+  const sizeBtn = (w: "mobile" | "desktop", label: string) =>
+    h("button", { type: "button", "aria-pressed": String(width === w), onClick: (e: Event) => {
+      width = w;
+      box.classList.toggle("mobile", w === "mobile");
+      for (const b of (e.currentTarget as HTMLElement).parentElement!.children) b.setAttribute("aria-pressed", String(b === e.currentTarget));
+    } }, label);
+  box.classList.toggle("mobile", width === "mobile");
+  dialog.append(
+    h("div", { class: "fv-bar" },
+      h("div", { class: "seg", role: "group", "aria-label": "Velikost predogleda" }, sizeBtn("mobile", "Telefon"), sizeBtn("desktop", "Računalnik")),
+      h("span", { class: "sp" }),
+      h("button", { type: "button", class: "btn sm", onClick: () => dialog.close() }, "Zapri"),
+    ),
+    box,
+  );
+  dialog.addEventListener("close", () => {
+    dialog.remove();
+    document.getElementById("full-view")?.focus();
+  });
+  document.body.append(dialog);
+  dialog.showModal();
 }
 
 /**

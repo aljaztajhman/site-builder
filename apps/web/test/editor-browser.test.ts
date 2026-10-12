@@ -291,6 +291,29 @@ describe("editor in a browser", () => {
     }
   }, 60_000);
 
+  it("shows the generated page full screen at either width, and Escape gives the editor back", async () => {
+    const id = await bakery("celoten-zaslon");
+    const { page, close } = await open(id);
+    try {
+      await page.getByRole("button", { name: "Celoten zaslon" }).click();
+      const dialog = page.locator("dialog.fullview[open]");
+      await dialog.waitFor();
+      const frame = dialog.locator("iframe");
+      // Desktop: the page takes the whole window width.
+      await page.getByRole("dialog").getByRole("button", { name: "Računalnik" }).click();
+      await expect.poll(async () => (await frame.boundingBox())!.width).toBe(1280);
+      await expect.poll(() => page.frameLocator("dialog.fullview iframe").locator("h1").first().textContent()).toBeTruthy();
+      // Phone: 360 px wide, centred.
+      await page.getByRole("dialog").getByRole("button", { name: "Telefon" }).click();
+      await expect.poll(async () => Math.round((await frame.boundingBox())!.width)).toBe(360);
+      await page.keyboard.press("Escape");
+      await expect.poll(() => page.locator("dialog.fullview").count()).toBe(0);
+      await expect.poll(() => page.evaluate(() => document.activeElement?.id)).toBe("full-view");
+    } finally {
+      await close();
+    }
+  });
+
   it("keeps the side panel on a wide screen (no sheet)", async () => {
     const id = await bakery("urejanje-siroko");
     const { page, close } = await open(id, 1280);

@@ -552,3 +552,13 @@ details.more>summary{padding:12px 0;font-weight:600;cursor:pointer}
 .legal-page .legal-links{margin-top:24px;font-size:15px;color:var(--ink-3)}
 .legal-page .legal-links a{display:inline-block;padding:10px 0}
 .legal-page .when{color:var(--ink-3);font-size:14px}
+
+/* Full-screen viewer of the generated page (editor "Celoten zaslon") */
+dialog.fullview{position:fixed;inset:0;width:100%;max-width:none;height:100%;max-height:none;margin:0;padding:0;border:0;background:var(--canvas);color:var(--ink);display:flex;flex-direction:column}
+dialog.fullview:not([open]){display:none}
+dialog.fullview::backdrop{background:var(--canvas)}
+.fv-bar{display:flex;align-items:center;gap:8px;padding:8px 16px;border-bottom:1px solid var(--line);background:var(--surface)}
+.fv-frame{flex:1;min-height:0;display:flex;justify-content:center}
+.fv-frame iframe{display:block;width:100%;height:100%;border:0;background:#fff}
+.fv-frame.mobile{padding:16px 0}
+.fv-frame.mobile iframe{width:360px;max-width:100%;outline:1px solid var(--line-2)}

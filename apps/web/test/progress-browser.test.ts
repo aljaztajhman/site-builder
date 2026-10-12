@@ -128,6 +128,16 @@ describe("generation progress in a browser", () => {
           await expect.poll(async () => (await page.locator(".frame.live").boundingBox())!.width, { timeout: 5000 }).toBeGreaterThan(640);
           await expect.poll(() => page.locator(".sk-hero").evaluate((n) => getComputedStyle(n).gridTemplateColumns.split(" ").length)).toBe(2);
           await shot(page, "4-desktop-1280");
+
+          // The design studio recomposes the homepage after the content: listed once it starts, and named in the preview.
+          expect(await page.locator(".stages li").allTextContents()).not.toEqual(expect.arrayContaining([expect.stringContaining("Oblikovanje domače strani")]));
+          await event(site.id, "imageGen", "done", { ms: 20_000 });
+          await event(site.id, "content", "start");
+          await event(site.id, "content", "done", { ms: 18_000 });
+          await event(site.id, "studio", "start");
+          await expect.poll(() => page.locator(".stages li.run").allTextContents(), { timeout: 10_000 }).toEqual([expect.stringContaining("Oblikovanje domače strani")]);
+          await expect.poll(() => page.locator(".sk-activity").textContent()).toContain("Oblikovanje domače strani");
+          await shot(page, "5-studio-1280");
         } else {
           await page.waitForTimeout(1200);
           await shot(page, "3-picture-360");
