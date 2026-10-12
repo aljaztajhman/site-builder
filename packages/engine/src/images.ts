@@ -18,7 +18,8 @@ const AVIF_EFFORT = 4;
 
 /** Key processPhoto uses in an installed ProcessPhotoCache: input bytes, widths, qualities and the sharp/libvips build. */
 export function processPhotoCacheKey(data: Uint8Array, widths: number[], quality: { avif: number; webp: number }): string {
-  return photoCacheKey(data, { widths, avif: quality.avif, webp: quality.webp, avifEffort: AVIF_EFFORT, sharp: sharp.versions });
+  // encodePhoto's own source is part of the key, so editing the encode needs no manual bump of PHOTO_CACHE_FORMAT.
+  return photoCacheKey(data, { widths, avif: quality.avif, webp: quality.webp, avifEffort: AVIF_EFFORT, maxPixels: MAX_INPUT_PIXELS, sharp: sharp.versions, encode: encodePhoto.toString() });
 }
 
 /**
@@ -30,11 +31,19 @@ export async function processPhoto(id: string, data: Uint8Array, widths: number[
   const cache = getProcessPhotoCache();
   const key = cache ? processPhotoCacheKey(data, widths, quality) : "";
   let encoded = cache ? await cache.get(key) : null;
+  // The variant list comes from variantWidths (@sb/render), which the key doesn't cover: an entry that no longer matches is a miss.
+  if (encoded && !sameVariants(encoded, widths)) encoded = null;
   if (!encoded) {
     encoded = await encodePhoto(data, widths, quality);
     if (cache) await cache.put(key, encoded);
   }
   return { width: encoded.width, height: encoded.height, variants: encoded.variants.map((v) => ({ file: variantFile(id, v.width, v.format), data: v.data })) };
+}
+
+function sameVariants(c: CachedPhoto, widths: number[]): boolean {
+  const want = variantWidths({ width: c.width }, widths).flatMap((w) => [`${w}.avif`, `${w}.webp`]);
+  const got = c.variants.map((v) => `${v.width}.${v.format}`);
+  return want.length === got.length && want.every((x, i) => x === got[i]);
 }
 
 async function encodePhoto(data: Uint8Array, widths: number[], quality: { avif: number; webp: number }): Promise<CachedPhoto> {

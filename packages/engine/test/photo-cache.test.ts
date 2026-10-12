@@ -64,9 +64,22 @@ describe("processPhoto with a cache installed", () => {
     // A hit does not encode: whatever the cache holds is what comes back.
     const key = processPhotoCacheKey(photo, [360, 720], quality);
     expect([...store.keys()]).toEqual([key]);
-    store.set(key, { width: 7, height: 5, variants: [{ width: 7, format: "webp", data: new Uint8Array([1, 2, 3]) }] });
+    const real = store.get(key)!;
+    store.set(key, { ...real, variants: real.variants.map((v) => ({ ...v, data: new Uint8Array([1, 2, 3]) })) });
     const planted = await processPhoto("img_02", photo, [360, 720], quality);
-    expect(planted).toEqual({ width: 7, height: 5, variants: [{ file: "img_02-7.webp", data: new Uint8Array([1, 2, 3]) }] });
+    expect(planted.variants.map((v) => [...v.data])).toEqual(real.variants.map(() => [1, 2, 3]));
+  });
+
+  it("treats an entry whose variant list no longer matches variantWidths as a miss", async () => {
+    const photo = await jpeg(800, 600, "#a1b");
+    const { cache, store, calls } = memoryCache();
+    setProcessPhotoCache(cache);
+    const key = processPhotoCacheKey(photo, [360, 720], quality);
+    store.set(key, { width: 7, height: 5, variants: [{ width: 7, format: "webp", data: new Uint8Array([1, 2, 3]) }] });
+    const r = await processPhoto("img_04", photo, [360, 720], quality);
+    expect([r.width, r.height]).toEqual([800, 600]);
+    expect(r.variants.map((v) => v.file)).toEqual(["img_04-360.avif", "img_04-360.webp", "img_04-720.avif", "img_04-720.webp"]);
+    expect(calls.put).toBe(1);
   });
 
   it("gives the same result as encoding without a cache", async () => {
