@@ -6,7 +6,7 @@ import sharp from "sharp";
 import { chromium, type Browser, type BrowserContext, type Page } from "playwright";
 import { serveStatic, type StaticServer } from "@sb/engine";
 import { stageOkus } from "../src/okus-page.ts";
-import { imagePaths, itemsJson, pairsJson, type OkusItem, type OkusPair } from "../src/okus-round.ts";
+import { MadeFile, imagePaths, itemsJson, pairsJson, type OkusItem, type OkusPair } from "../src/okus-round.ts";
 
 /**
  * The Okus rating page (tools/okus/index.html) in Chromium on a tiny made-up round (3 items, 1 pair, plain-colour
@@ -168,6 +168,115 @@ describe("Okus page with the db capability", () => {
       await ctx.close();
     }
   }, 60_000);
+});
+
+describe("Okus round 3: how a studio homepage was made", () => {
+  // Round 3 on its own server: a studio homepage and today's homepage of one business, and the run's made/ document.
+  const R3: OkusItem[] = [
+    { id: "run-kvas", kind: "studio-run", label: "studio run: x", trade: "bakery", fixture: "kvas", source: "none", images: imagePaths("run-kvas") },
+    { id: "today-kvas", kind: "today", label: "today: kvas", trade: "bakery", fixture: "kvas", source: "none", images: imagePaths("today-kvas") },
+  ];
+  const MADE: MadeFile = {
+    itemId: "run-kvas",
+    fixture: "kvas",
+    idea: "From night to morning.",
+    direction: { name: "Iz noči v jutro", palette: [{ role: "inverse", hex: "#1d1712" }], pairing: "fraunces-source-sans", composition: "Hero inverse.", copy: { headline: "Kruh z drožmi" } },
+    mockupImage: "img/run-kvas-mockup.jpg",
+    // One very long unbroken line: it must wrap or scroll inside its box, never the page.
+    calls: [{ stage: "artDirector", model: "claude-opus-5-5", system: `SYSTEM-MARK ${"x".repeat(4000)}\nsecond line`, messages: [{ role: "user", text: "USER-MARK brief" }], response: "RESPONSE-MARK" }],
+    mockupPrompt: "MOCKUP-PROMPT-MARK one flat screenshot",
+    mockupReferences: [],
+    eur: { artDirector: 0.0886, mockup: 0.086 },
+    eurTotal: 0.326,
+  };
+  let r3dir: string;
+  let r3: StaticServer;
+  beforeAll(async () => {
+    r3dir = await mkdtemp(path.join(tmpdir(), "sb-okus-page3-"));
+    await stageOkus(r3dir, { copyRounds: false });
+    const round = path.join(r3dir, "rounds/3");
+    await mkdir(path.join(round, "img"), { recursive: true });
+    await mkdir(path.join(round, "made"), { recursive: true });
+    await writeFile(path.join(r3dir, "rounds/index.json"), JSON.stringify({ rounds: [1, 3] }));
+    await writeFile(path.join(round, "items.json"), itemsJson(3, R3));
+    await writeFile(path.join(round, "pairs.json"), pairsJson(3, [{ id: "p01", kind: "studio-today", a: "today-kvas", b: "run-kvas" }]));
+    await writeFile(path.join(round, "made/run-kvas.json"), JSON.stringify(MadeFile.parse(MADE)));
+    const jpg = (w: number, h: number, c: string) => sharp({ create: { width: w, height: h, channels: 3, background: c } }).jpeg().toBuffer();
+    for (const it of R3) {
+      await writeFile(path.join(round, it.images.desk), await jpg(1280, 800, "#c0392b"));
+      await writeFile(path.join(round, it.images.deskFull), await jpg(1280, 3000, "#c0392b"));
+      await writeFile(path.join(round, it.images.phone), await jpg(720, 1600, "#2c7a4b"));
+      await writeFile(path.join(round, it.images.phoneFull), await jpg(720, 6000, "#2c7a4b"));
+    }
+    await writeFile(path.join(round, "img/run-kvas-mockup.jpg"), await jpg(1280, 853, "#d9a441"));
+    r3 = await serveStatic(r3dir);
+  }, 60_000);
+  afterAll(async () => {
+    await r3?.close();
+    if (r3dir) await rm(r3dir, { recursive: true, force: true });
+  });
+
+  for (const width of [1280, 360]) {
+    it(`shows "Kako je nastalo" only after the studio homepage is rated, fetched lazily (${width} px)`, async () => {
+      const ctx = await browser.newContext({ viewport: { width, height: 900 } });
+      await ctx.route(/fonts\.(googleapis|gstatic)\.com/, (r) => r.abort());
+      const page = await ctx.newPage();
+      const madeRequests: string[] = [];
+      page.on("request", (r) => {
+        if (r.url().includes("/made/")) madeRequests.push(r.url());
+      });
+      try {
+        await page.goto(`${r3.url}/index.html`);
+        await page.getByText("Stran 1 od 2").waitFor();
+        expect(await page.locator("#round-label").textContent()).toBe("runda 3");
+        // Blind before the rating: no block, no fetch, nothing of the prompts in the page.
+        expect(await page.locator("details.made").count()).toBe(0);
+        expect(await page.content()).not.toContain("SYSTEM-MARK");
+        await page.locator("#score-4").check({ force: true });
+        await page.locator("#show-da").check({ force: true });
+        await page.locator("#next").click();
+        // Stays on the rated studio homepage with the block closed; still nothing fetched.
+        await page.locator("details.made").waitFor();
+        expect(await page.getByText("Stran 1 od 2").count()).toBe(1);
+        expect(await page.locator("details.made").evaluate((d) => (d as HTMLDetailsElement).open)).toBe(false);
+        expect(madeRequests).toEqual([]);
+        expect((await stored(page, "ratings"))["r3-run-kvas"]).toMatchObject({ itemId: "run-kvas", round: 3, score: 4, showCustomer: true });
+
+        await page.locator("details.made > summary").click();
+        await page.getByText("Klici modela (1)").waitFor();
+        expect(madeRequests.length).toBe(1);
+        for (const b of await page.locator("details.made details.block > summary").all()) await b.click();
+        const text = await page.locator("details.made").innerText();
+        for (const mark of ["Iz noči v jutro", "artDirector", "claude-opus-5-5", "SYSTEM-MARK", "USER-MARK", "RESPONSE-MARK", "MOCKUP-PROMPT-MARK", "0,326 €"]) expect(text).toContain(mark);
+        expect(await page.locator("details.made img").getAttribute("src")).toBe("rounds/3/img/run-kvas-mockup.jpg");
+        expect(await noSideScroll(page)).toBe(true);
+        // The long prompt stays inside its own box.
+        expect(await page.locator("details.made pre").first().evaluate((el) => el.getBoundingClientRect().right)).toBeLessThanOrEqual(width);
+        if (process.env.OKUS_SHOTS) await page.screenshot({ path: path.join(process.env.OKUS_SHOTS, `okus-r3-made-${width}.png`), fullPage: true });
+
+        // On, unchanged: no second write; today's homepage never gets the block.
+        const before = (await stored(page, "ratings"))["r3-run-kvas"]!.at;
+        await page.locator("#next").click();
+        await page.getByText("Stran 2 od 2").waitFor();
+        expect((await stored(page, "ratings"))["r3-run-kvas"]!.at).toBe(before);
+        await page.locator("#score-2").check({ force: true });
+        await page.locator("#show-ne").check({ force: true });
+        await page.locator("#next").click();
+        await page.getByText("Katera je boljša?").waitFor();
+        expect(await page.locator("details.made").count()).toBe(0);
+
+        // From the review list, after rating: only the studio homepage has the link, and it opens the block.
+        await page.locator("#tab-review").click();
+        expect(await page.locator("button[data-made]").count()).toBe(1);
+        await page.locator("button[data-made]").click();
+        await page.getByText("Klici modela (1)").waitFor();
+        expect(await page.locator("details.made").evaluate((d) => (d as HTMLDetailsElement).open)).toBe(true);
+        expect(madeRequests.length).toBe(1);
+      } finally {
+        await ctx.close();
+      }
+    }, 60_000);
+  }
 });
 
 describe("Okus page layout", () => {

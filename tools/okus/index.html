@@ -113,6 +113,32 @@ dialog::backdrop { background: rgb(0 0 0 / .6); }
 .dlg img { display: block; margin: 0 auto; max-width: 100%; height: auto; border: 1px solid var(--line); }
 .dlg img.phone { width: 390px; }
 
+/* "Kako je nastalo": how a studio homepage was made, only after it is rated. Long prompts scroll inside their own box. */
+.made { margin-top: 28px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); min-width: 0; }
+.made > summary { cursor: pointer; padding: 14px 16px; font: 800 20px/1.2 var(--font-display); list-style-position: inside; }
+.made-body { padding: 0 16px 18px; display: grid; gap: 18px; min-width: 0; }
+.made-body h3 { font: 800 17px/1.2 var(--font-display); margin: 0 0 6px; }
+.made-body p { margin: 0; }
+.made-mock img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--shot); }
+.made dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 14px; margin: 0; }
+.made dt { color: var(--muted); font-size: 14px; }
+.made dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.swatches { display: flex; flex-wrap: wrap; gap: 6px; }
+.swatch { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-variant-numeric: tabular-nums; border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px 2px 3px; }
+.swatch i { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--line); }
+.call { border-top: 1px solid var(--line); padding-top: 12px; display: grid; gap: 8px; min-width: 0; }
+.call-head { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+.call-head b { font-family: var(--font-display); font-size: 17px; }
+.call-head span { color: var(--muted); font-size: 14px; }
+.made details.block { min-width: 0; }
+.made details.block > summary { cursor: pointer; font-size: 14px; font-weight: 600; padding: 4px 0; }
+.made pre { margin: 6px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; overflow: auto; max-height: 60vh; padding: 10px 12px; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; font: 12.5px/1.5 ui-monospace, "Cascadia Mono", Consolas, monospace; }
+.made table { border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.made td { padding: 3px 16px 3px 0; }
+.made td + td { text-align: right; }
+.made tr.total td { font-weight: 700; border-top: 1px solid var(--line); }
+.list .made-link { margin-top: 4px; padding: 6px 10px; font-size: 13px; font-weight: 600; color: var(--accent); text-align: center; }
+
 @media (max-width: 760px) {
   .shots, .side .shots { grid-template-columns: minmax(0, 1fr); }
   .shot.phone { width: min(260px, 72%); justify-self: center; }
@@ -124,6 +150,9 @@ dialog::backdrop { background: rgb(0 0 0 / .6); }
   .tabs { margin-left: 0; width: 100%; }
   .tabs button { flex: 1; padding: 6px 4px; font-size: 13px; white-space: nowrap; }
   .hint.keys { display: none; }
+  .made dl { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .made dd { margin-bottom: 8px; }
+  .made-body { padding: 0 12px 16px; }
 }
 @media (prefers-reduced-motion: reduce) { .progress span { transition: none; } }
 </style>
@@ -237,7 +266,8 @@ window.OkusStore = (() => {
 (() => {
   const app = document.getElementById("app");
   const dlg = document.getElementById("full");
-  const S = { round: 1, items: [], pairs: [], ratings: new Map(), answers: new Map(), view: "items", i: 0, p: 0, store: null, draft: null };
+  // made: the "how it was made" documents fetched so far; madeOpen: the item whose "Kako je nastalo" is open; flash: a one-off status line.
+  const S = { round: 1, items: [], pairs: [], ratings: new Map(), answers: new Map(), view: "items", i: 0, p: 0, store: null, draft: null, made: new Map(), madeOpen: null, flash: "" };
   const base = () => `rounds/${S.round}/`;
   const src = (p) => (/^(https?:)?\/\//.test(p) || p.startsWith("/") ? p : base() + p);
   const ratingId = (itemId) => `r${S.round}-${itemId}`;
@@ -324,9 +354,12 @@ window.OkusStore = (() => {
             <button type="submit" class="btn primary" id="next" ${d.score && d.showCustomer !== null ? "" : "disabled"}>${S.i === S.items.length - 1 ? "Shrani in na primerjave" : "Shrani in naprej"}</button>
           </div>
           <p class="hint keys">Tipke: 1–5 ocena, D ali N, Enter shrani, ← nazaj.</p>
-          <p class="status" id="status">${saved ? "Ta stran je že ocenjena; spremembo shranite z gumbom." : ""} ${storeNote()}</p>
+          <p class="status" id="status">${S.flash || (saved ? "Ta stran je že ocenjena; spremembo shranite z gumbom." : "")} ${storeNote()}</p>
         </div>
-      </form>`;
+      </form>
+      ${madeHtml(item, saved)}`;
+    S.flash = "";
+    bindMade(item);
     preload(S.items[S.i + 1]);
     const form = document.getElementById("rate");
     form.addEventListener("change", () => {
@@ -346,6 +379,9 @@ window.OkusStore = (() => {
   async function saveRating() {
     const d = S.draft;
     if (!d || !d.score || d.showCustomer === null) return;
+    const before = S.ratings.get(d.itemId);
+    // Nothing changed on an already rated page: just move on.
+    if (before && before.score === d.score && before.showCustomer === d.showCustomer && before.note === d.note.trim()) return advance();
     const doc = { itemId: d.itemId, round: S.round, score: d.score, showCustomer: d.showCustomer, note: d.note.trim(), at: new Date().toISOString() };
     const btn = document.getElementById("next");
     if (btn) btn.disabled = true;
@@ -362,6 +398,17 @@ window.OkusStore = (() => {
     }
     S.ratings.set(d.itemId, doc);
     S.draft = null;
+    // A studio homepage rated for the first time: stay, so "Kako je nastalo" can be opened under it.
+    const item = S.items.find((it) => it.id === d.itemId);
+    if (item && item.kind === "studio-run" && !before) {
+      S.flash = "Ocena je shranjena. Spodaj lahko pogledate, kako je stran nastala; naprej z gumbom.";
+      render();
+      return;
+    }
+    advance();
+  }
+
+  function advance() {
     if (S.i < S.items.length - 1) go(S.i + 1);
     else {
       const next = S.items.findIndex((it) => !S.ratings.has(it.id));
@@ -376,6 +423,90 @@ window.OkusStore = (() => {
     S.view = "items";
     render();
     window.scrollTo({ top: 0 });
+  }
+
+  // ---- How it was made (studio homepages, only after rating) ----------------------------------------------------
+  /** The collapsible block under a rated studio homepage; nothing before the rating is saved (the owner rates blind). */
+  function madeHtml(item, saved) {
+    if (!saved || item.kind !== "studio-run") return "";
+    return `<details class="made" id="made" data-item="${esc(item.id)}" ${S.madeOpen === item.id ? "open" : ""}>
+      <summary>Kako je nastalo</summary>
+      <div class="made-body" id="made-body"><p class="status">Nalagam …</p></div>
+    </details>`;
+  }
+
+  function bindMade(item) {
+    const el = document.getElementById("made");
+    if (!el) return;
+    el.addEventListener("toggle", () => {
+      S.madeOpen = el.open ? item.id : null;
+      if (el.open) loadMade(item.id);
+    });
+    if (el.open) loadMade(item.id);
+  }
+
+  async function loadMade(id) {
+    let m = S.made.get(id);
+    if (!m) {
+      try {
+        const r = await fetch(`${base()}made/${encodeURIComponent(id)}.json`);
+        if (!r.ok) throw new Error(String(r.status));
+        m = await r.json();
+        S.made.set(id, m);
+      } catch {
+        const body = document.getElementById("made-body");
+        if (body && document.getElementById("made").dataset.item === id) body.innerHTML = `<p class="status err">Podatki o nastanku se niso naložili.</p>`;
+        return;
+      }
+    }
+    const body = document.getElementById("made-body");
+    if (body && document.getElementById("made").dataset.item === id) body.innerHTML = madeBody(m);
+  }
+
+  const eur = (n) => `${Number(n).toFixed(3).replace(".", ",")} €`;
+  const chars = (s) => `${s.length.toLocaleString("sl-SI")} znakov`;
+  const block = (title, text) => (text ? `<details class="block"><summary>${esc(title)} · ${chars(text)}</summary><pre>${esc(text)}</pre></details>` : "");
+
+  function madeBody(m) {
+    const d = m.direction || {};
+    const row = (k, v) => (v ? `<dt>${k}</dt><dd>${v}</dd>` : "");
+    const palette = (d.palette || []).map((p) => `<span class="swatch"><i style="background:${/^#[0-9a-f]{3,8}$/i.test(p.hex) ? p.hex : "transparent"}"></i>${p.role ? `${esc(p.role)} ` : ""}${esc(p.hex)}</span>`).join("");
+    const copy = Object.entries(d.copy || {}).map(([k, v]) => `<b>${esc(k)}:</b> ${esc(v)}`).join("<br>");
+    const stages = Object.entries(m.eur || {});
+    return `
+      ${m.idea ? `<p>${esc(m.idea)}</p>` : ""}
+      ${m.mockupImage ? `<figure class="made-mock" style="margin:0"><h3>Osnutek (slika modela)</h3><img src="${esc(src(m.mockupImage))}" alt="Osnutek strani, ki ga je narisal model za slike" loading="lazy"></figure>` : ""}
+      <section><h3>Smer</h3><dl>
+        ${row("Ime", d.name ? esc(d.name) : "")}
+        ${row("Zamisel", d.idea && d.idea !== m.idea ? esc(d.idea) : "")}
+        ${row("Barve", palette ? `<span class="swatches">${palette}</span>` : "")}
+        ${row("Pisave", d.pairing ? esc(d.pairing) : "")}
+        ${row("Značaj pisave", d.typeCharacter ? esc(d.typeCharacter) : "")}
+        ${row("Kompozicija", d.composition ? esc(d.composition) : "")}
+        ${row("Slike", d.imagery ? esc(d.imagery) : "")}
+        ${row("Podpis", d.signature ? esc(d.signature) : "")}
+        ${row("Besedilo", copy)}
+      </dl></section>
+      <section><h3>Klici modela (${m.calls.length})</h3>${
+        m.calls.length
+          ? m.calls
+              .map(
+                (c) => `<div class="call">
+          <div class="call-head"><b>${esc(c.stage)}</b><span>${esc(c.model || "")}</span>${m.eur && c.stage in m.eur ? `<span>${eur(m.eur[c.stage])}</span>` : ""}</div>
+          ${block("Sistemski poziv", c.system)}
+          ${c.messages.map((msg) => block(`Sporočilo (${msg.role})`, msg.text)).join("")}
+          ${block("Odgovor", c.response)}
+        </div>`,
+              )
+              .join("")
+          : `<p class="status">Pozivi tega zagona niso shranjeni.</p>`
+      }</section>
+      ${m.mockupPrompt ? `<section><h3>Poziv za osnutek</h3>${block("Poziv modelu za slike", m.mockupPrompt)}${m.mockupReferences && m.mockupReferences.length ? `<p class="status">Referenčne slike: ${m.mockupReferences.map(esc).join(", ")}</p>` : ""}</section>` : ""}
+      ${
+        stages.length || m.eurTotal != null
+          ? `<section><h3>Stroški</h3><table><tbody>${stages.map(([k, v]) => `<tr><td>${esc(k)}</td><td>${eur(v)}</td></tr>`).join("")}${m.eurTotal != null ? `<tr class="total"><td>Skupaj</td><td>${eur(m.eurTotal)}</td></tr>` : ""}</tbody></table></section>`
+          : ""
+      }`;
   }
 
   // ---- Pairs ---------------------------------------------------------------------------------------------------
@@ -457,7 +588,7 @@ window.OkusStore = (() => {
       <ul class="list">${S.items
         .map((it, k) => {
           const r = S.ratings.get(it.id);
-          return `<li><button type="button" data-go="${k}"><img src="${esc(src(it.images.desk))}" alt="" loading="lazy" width="1280" height="800"><span class="meta"><span>Stran ${k + 1}</span><b>${r ? r.score : "–"}</b><span>${r ? (r.showCustomer ? "da" : "ne") : ""}</span></span></button></li>`;
+          return `<li><button type="button" data-go="${k}"><img src="${esc(src(it.images.desk))}" alt="" loading="lazy" width="1280" height="800"><span class="meta"><span>Stran ${k + 1}</span><b>${r ? r.score : "–"}</b><span>${r ? (r.showCustomer ? "da" : "ne") : ""}</span></span></button>${r && it.kind === "studio-run" ? `<button type="button" class="made-link" data-made="${k}">Kako je nastalo</button>` : ""}</li>`;
         })
         .join("")}</ul>`;
   }
@@ -496,6 +627,14 @@ window.OkusStore = (() => {
     }
     const g = e.target.closest("button[data-go]");
     if (g) go(Number(g.dataset.go));
+    const mk = e.target.closest("button[data-made]");
+    if (mk) {
+      const k = Number(mk.dataset.made);
+      S.madeOpen = S.items[k].id;
+      go(k);
+      const el = document.getElementById("made");
+      if (el) el.scrollIntoView({ block: "start" });
+    }
   });
   document.getElementById("full-close").addEventListener("click", () => dlg.close());
 
@@ -503,6 +642,8 @@ window.OkusStore = (() => {
     if (dlg.open || e.altKey || e.ctrlKey || e.metaKey) return;
     const typing = e.target instanceof HTMLTextAreaElement || (e.target instanceof HTMLInputElement && e.target.type === "text");
     if (typing) return;
+    // Reading "Kako je nastalo": its toggles take Enter, and keys don't change the rating.
+    if (e.target instanceof Element && e.target.closest("details.made")) return;
     const click = (id) => {
       const el = document.getElementById(id);
       if (el) {
