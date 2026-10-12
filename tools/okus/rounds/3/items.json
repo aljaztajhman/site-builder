@@ -1,0 +1,425 @@
+{
+  "round": 3,
+  "items": [
+    {
+      "id": "today-fizioterapija-pregib",
+      "kind": "today",
+      "label": "today: fizioterapija-pregib",
+      "trade": "physio",
+      "fixture": "fizioterapija-pregib",
+      "source": "eval/runs/studio-poc/fizioterapija-pregib-today-desk.png",
+      "images": {
+        "desk": "img/today-fizioterapija-pregib-desk.jpg",
+        "deskFull": "img/today-fizioterapija-pregib-desk-full.jpg",
+        "phone": "img/today-fizioterapija-pregib-phone.jpg",
+        "phoneFull": "img/today-fizioterapija-pregib-phone-full.jpg"
+      }
+    },
+    {
+      "id": "today-racunovodstvo-seliskar",
+      "kind": "today",
+      "label": "today: racunovodstvo-seliskar",
+      "trade": "accountant",
+      "fixture": "racunovodstvo-seliskar",
+      "source": "eval/runs/studio-poc/racunovodstvo-seliskar-today-desk.png",
+      "images": {
+        "desk": "img/today-racunovodstvo-seliskar-desk.jpg",
+        "deskFull": "img/today-racunovodstvo-seliskar-desk-full.jpg",
+        "phone": "img/today-racunovodstvo-seliskar-phone.jpg",
+        "phoneFull": "img/today-racunovodstvo-seliskar-phone-full.jpg"
+      }
+    },
+    {
+      "id": "run-racunovodstvo-seliskar",
+      "kind": "studio-run",
+      "label": "studio run: Ledger of the Plain",
+      "trade": "accountant",
+      "fixture": "racunovodstvo-seliskar",
+      "source": "eval/runs/studio-poc/racunovodstvo-seliskar.studio.json",
+      "images": {
+        "desk": "img/run-racunovodstvo-seliskar-desk.jpg",
+        "deskFull": "img/run-racunovodstvo-seliskar-desk-full.jpg",
+        "phone": "img/run-racunovodstvo-seliskar-phone.jpg",
+        "phoneFull": "img/run-racunovodstvo-seliskar-phone-full.jpg"
+      }
+    },
+    {
+      "id": "run-kmetija-grabnar",
+      "kind": "studio-run",
+      "label": "studio run: Okno pod Raduho",
+      "trade": "tourist-farm",
+      "fixture": "kmetija-grabnar",
+      "source": "eval/runs/studio-poc/kmetija-grabnar.studio.json",
+      "images": {
+        "desk": "img/run-kmetija-grabnar-desk.jpg",
+        "deskFull": "img/run-kmetija-grabnar-desk-full.jpg",
+        "phone": "img/run-kmetija-grabnar-phone.jpg",
+        "phoneFull": "img/run-kmetija-grabnar-phone-full.jpg"
+      }
+    },
+    {
+      "id": "run-trgovina-oljka-in-sol",
+      "kind": "studio-run",
+      "label": "studio run: Oil Over Salt Pans",
+      "trade": "shop",
+      "fixture": "trgovina-oljka-in-sol",
+      "source": "eval/runs/studio-poc/trgovina-oljka-in-sol.studio.json",
+      "images": {
+        "desk": "img/run-trgovina-oljka-in-sol-desk.jpg",
+        "deskFull": "img/run-trgovina-oljka-in-sol-desk-full.jpg",
+        "phone": "img/run-trgovina-oljka-in-sol-phone.jpg",
+        "phoneFull": "img/run-trgovina-oljka-in-sol-phone-full.jpg"
+      }
+    },
+    {
+      "id": "run-gostilna-zlata-zlica",
+      "kind": "studio-run",
+      "label": "studio run: Pod zlato lipo",
+      "trade": "restaurant",
+      "fixture": "gostilna-zlata-zlica",
+      "source": "eval/runs/studio-poc/gostilna-zlata-zlica.studio.json",
+      "images": {
+        "desk": "img/run-gostilna-zlata-zlica-desk.jpg",
+        "deskFull": "img/run-gostilna-zlata-zlica-desk-full.jpg",
+        "phone": "img/run-gostilna-zlata-zlica-phone.jpg",
+        "phoneFull": "img/run-gostilna-zlata-zlica-phone-full.jpg"
+      }
+    },
+    {
+      "id": "run-frizerstvo-lana",
+      "kind": "studio-run",
+      "label": "studio run: Pramen v vinski",
+      "trade": "hairdresser",
+      "fixture": "frizerstvo-lana",
+      "source": "eval/runs/studio-poc/frizerstvo-lana.studio.json",
+      "images": {
+        "desk": "img/run-frizerstvo-lana-desk.jpg",
+        "deskFull": "img/run-frizerstvo-lana-desk-full.jpg",
+        "phone": "img/run-frizerstvo-lana-phone.jpg",
+        "phoneFull": "img/run-frizerstvo-lana-phone-full.jpg"
+      }
+    },
+    {
+      "id": "today-apartmaji-pod-voglom",
+      "kind": "today",
+      "label": "today: apartmaji-pod-voglom",
+      "trade": "tourist-farm",
+      "fixture": "apartmaji-pod-voglom",
+      "source": "eval/runs/studio-poc/apartmaji-pod-voglom-today-desk.png",
+      "images": {
+        "desk": "img/today-apartmaji-pod-voglom-desk.jpg",
+        "deskFull": "img/today-apartmaji-pod-voglom-desk-full.jpg",
+        "phone": "img/today-apartmaji-pod-voglom-phone.jpg",
+        "phoneFull": "img/today-apartmaji-pod-voglom-phone-full.jpg"
+      }
+    },
+    {
+      "id": "run-fizioterapija-pregib",
+      "kind": "studio-run",
+      "label": "studio run: Ura v pregibu",
+      "trade": "physio",
+      "fixture": "fizioterapija-pregib",
+      "source": "eval/runs/studio-poc/fizioterapija-pregib.studio.json",
+      "images": {
+        "desk": "img/run-fizioterapija-pregib-desk.jpg",
+        "deskFull": "img/run-fizioterapija-pregib-desk-full.jpg",
+        "phone": "img/run-fizioterapija-pregib-phone.jpg",
+        "phoneFull": "img/run-fizioterapija-pregib-phone-full.jpg"
+      }
+    },
+    {
+      "id": "run-veterina-sapa",
+      "kind": "studio-run",
+      "label": "studio run: Smrček do zob",
+      "trade": "dental",
+      "fixture": "veterina-sapa",
+      "source": "eval/runs/studio-poc/veterina-sapa.studio.json",
+      "images": {
+        "desk": "img/run-veterina-sapa-desk.jpg",
+        "deskFull": "img/run-veterina-sapa-desk-full.jpg",
+        "phone": "img/run-veterina-sapa-phone.jpg",
+        "phoneFull": "img/run-veterina-sapa-phone-full.jpg"
+      }
+    },
+    {
+      "id": "run-cebelarstvo-medved",
+      "kind": "studio-run",
+      "label": "studio run: Kranjič Honey Shelf",
+      "trade": "shop",
+      "fixture": "cebelarstvo-medved",
+      "source": "eval/runs/studio-poc/cebelarstvo-medved.studio.json",
+      "images": {
+        "desk": "img/run-cebelarstvo-medved-desk.jpg",
+        "deskFull": "img/run-cebelarstvo-medved-desk-full.jpg",
+        "phone": "img/run-cebelarstvo-medved-phone.jpg",
+        "phoneFull": "img/run-cebelarstvo-medved-phone-full.jpg"
+      }
+    },
+    {
+      "id": "today-gostilna-zlata-zlica",
+      "kind": "today",
+      "label": "today: gostilna-zlata-zlica",
+      "trade": "restaurant",
+      "fixture": "gostilna-zlata-zlica",
+      "source": "eval/runs/studio-poc/gostilna-zlata-zlica-today-desk.png",
+      "images": {
+        "desk": "img/today-gostilna-zlata-zlica-desk.jpg",
+        "deskFull": "img/today-gostilna-zlata-zlica-desk-full.jpg",
+        "phone": "img/today-gostilna-zlata-zlica-phone.jpg",
+        "phoneFull": "img/today-gostilna-zlata-zlica-phone-full.jpg"
+      }
+    },
+    {
+      "id": "today-frizerstvo-lana",
+      "kind": "today",
+      "label": "today: frizerstvo-lana",
+      "trade": "hairdresser",
+      "fixture": "frizerstvo-lana",
+      "source": "eval/runs/studio-poc/frizerstvo-lana-today-desk.png",
+      "images": {
+        "desk": "img/today-frizerstvo-lana-desk.jpg",
+        "deskFull": "img/today-frizerstvo-lana-desk-full.jpg",
+        "phone": "img/today-frizerstvo-lana-phone.jpg",
+        "phoneFull": "img/today-frizerstvo-lana-phone-full.jpg"
+      }
+    },
+    {
+      "id": "today-elektro-zupan",
+      "kind": "today",
+      "label": "today: elektro-zupan",
+      "trade": "unknown",
+      "fixture": "elektro-zupan",
+      "source": "eval/runs/studio-poc/elektro-zupan-today-desk.png",
+      "images": {
+        "desk": "img/today-elektro-zupan-desk.jpg",
+        "deskFull": "img/today-elektro-zupan-desk-full.jpg",
+        "phone": "img/today-elektro-zupan-phone.jpg",
+        "phoneFull": "img/today-elektro-zupan-phone-full.jpg"
+      }
+    },
+    {
+      "id": "run-pizzeria-oljka",
+      "kind": "studio-run",
+      "label": "studio run: Olive in Ember",
+      "trade": "unknown",
+      "fixture": "pizzeria-oljka",
+      "source": "eval/runs/studio-poc/pizzeria-oljka.studio.json",
+      "images": {
+        "desk": "img/run-pizzeria-oljka-desk.jpg",
+        "deskFull": "img/run-pizzeria-oljka-desk-full.jpg",
+        "phone": "img/run-pizzeria-oljka-phone.jpg",
+        "phoneFull": "img/run-pizzeria-oljka-phone-full.jpg"
+      }
+    },
+    {
+      "id": "today-veterina-sapa",
+      "kind": "today",
+      "label": "today: veterina-sapa",
+      "trade": "dental",
+      "fixture": "veterina-sapa",
+      "source": "eval/runs/studio-poc/veterina-sapa-today-desk.png",
+      "images": {
+        "desk": "img/today-veterina-sapa-desk.jpg",
+        "deskFull": "img/today-veterina-sapa-desk-full.jpg",
+        "phone": "img/today-veterina-sapa-phone.jpg",
+        "phoneFull": "img/today-veterina-sapa-phone-full.jpg"
+      }
+    },
+    {
+      "id": "run-foto-rozman",
+      "kind": "studio-run",
+      "label": "studio run: Svetloba v prostoru",
+      "trade": "shop",
+      "fixture": "foto-rozman",
+      "source": "eval/runs/studio-poc/foto-rozman.studio.json",
+      "images": {
+        "desk": "img/run-foto-rozman-desk.jpg",
+        "deskFull": "img/run-foto-rozman-desk-full.jpg",
+        "phone": "img/run-foto-rozman-phone.jpg",
+        "phoneFull": "img/run-foto-rozman-phone-full.jpg"
+      }
+    },
+    {
+      "id": "today-cebelarstvo-medved",
+      "kind": "today",
+      "label": "today: cebelarstvo-medved",
+      "trade": "shop",
+      "fixture": "cebelarstvo-medved",
+      "source": "eval/runs/studio-poc/cebelarstvo-medved-today-desk.png",
+      "images": {
+        "desk": "img/today-cebelarstvo-medved-desk.jpg",
+        "deskFull": "img/today-cebelarstvo-medved-desk-full.jpg",
+        "phone": "img/today-cebelarstvo-medved-phone.jpg",
+        "phoneFull": "img/today-cebelarstvo-medved-phone-full.jpg"
+      }
+    },
+    {
+      "id": "today-pizzeria-oljka",
+      "kind": "today",
+      "label": "today: pizzeria-oljka",
+      "trade": "unknown",
+      "fixture": "pizzeria-oljka",
+      "source": "eval/runs/studio-poc/pizzeria-oljka-today-desk.png",
+      "images": {
+        "desk": "img/today-pizzeria-oljka-desk.jpg",
+        "deskFull": "img/today-pizzeria-oljka-desk-full.jpg",
+        "phone": "img/today-pizzeria-oljka-phone.jpg",
+        "phoneFull": "img/today-pizzeria-oljka-phone-full.jpg"
+      }
+    },
+    {
+      "id": "today-kmetija-grabnar",
+      "kind": "today",
+      "label": "today: kmetija-grabnar",
+      "trade": "tourist-farm",
+      "fixture": "kmetija-grabnar",
+      "source": "eval/runs/studio-poc/kmetija-grabnar-today-desk.png",
+      "images": {
+        "desk": "img/today-kmetija-grabnar-desk.jpg",
+        "deskFull": "img/today-kmetija-grabnar-desk-full.jpg",
+        "phone": "img/today-kmetija-grabnar-phone.jpg",
+        "phoneFull": "img/today-kmetija-grabnar-phone-full.jpg"
+      }
+    },
+    {
+      "id": "run-zobozdravstvo-lebar",
+      "kind": "studio-run",
+      "label": "studio run: Pot do stola",
+      "trade": "dental",
+      "fixture": "zobozdravstvo-lebar",
+      "source": "eval/runs/studio-poc/zobozdravstvo-lebar.studio.json",
+      "images": {
+        "desk": "img/run-zobozdravstvo-lebar-desk.jpg",
+        "deskFull": "img/run-zobozdravstvo-lebar-desk-full.jpg",
+        "phone": "img/run-zobozdravstvo-lebar-phone.jpg",
+        "phoneFull": "img/run-zobozdravstvo-lebar-phone-full.jpg"
+      }
+    },
+    {
+      "id": "today-mizarstvo-lesnik",
+      "kind": "today",
+      "label": "today: mizarstvo-lesnik",
+      "trade": "unknown",
+      "fixture": "mizarstvo-lesnik",
+      "source": "eval/runs/studio-poc/mizarstvo-lesnik-today-desk.png",
+      "images": {
+        "desk": "img/today-mizarstvo-lesnik-desk.jpg",
+        "deskFull": "img/today-mizarstvo-lesnik-desk-full.jpg",
+        "phone": "img/today-mizarstvo-lesnik-phone.jpg",
+        "phoneFull": "img/today-mizarstvo-lesnik-phone-full.jpg"
+      }
+    },
+    {
+      "id": "today-brivnica-kos",
+      "kind": "today",
+      "label": "today: brivnica-kos",
+      "trade": "unknown",
+      "fixture": "brivnica-kos",
+      "source": "eval/runs/studio-poc/brivnica-kos-today-desk.png",
+      "images": {
+        "desk": "img/today-brivnica-kos-desk.jpg",
+        "deskFull": "img/today-brivnica-kos-desk-full.jpg",
+        "phone": "img/today-brivnica-kos-phone.jpg",
+        "phoneFull": "img/today-brivnica-kos-phone-full.jpg"
+      }
+    },
+    {
+      "id": "run-brivnica-kos",
+      "kind": "studio-run",
+      "label": "studio run: Steel and Steam",
+      "trade": "unknown",
+      "fixture": "brivnica-kos",
+      "source": "eval/runs/studio-poc/brivnica-kos.studio.json",
+      "images": {
+        "desk": "img/run-brivnica-kos-desk.jpg",
+        "deskFull": "img/run-brivnica-kos-desk-full.jpg",
+        "phone": "img/run-brivnica-kos-phone.jpg",
+        "phoneFull": "img/run-brivnica-kos-phone-full.jpg"
+      }
+    },
+    {
+      "id": "today-trgovina-oljka-in-sol",
+      "kind": "today",
+      "label": "today: trgovina-oljka-in-sol",
+      "trade": "shop",
+      "fixture": "trgovina-oljka-in-sol",
+      "source": "eval/runs/studio-poc/trgovina-oljka-in-sol-today-desk.png",
+      "images": {
+        "desk": "img/today-trgovina-oljka-in-sol-desk.jpg",
+        "deskFull": "img/today-trgovina-oljka-in-sol-desk-full.jpg",
+        "phone": "img/today-trgovina-oljka-in-sol-phone.jpg",
+        "phoneFull": "img/today-trgovina-oljka-in-sol-phone-full.jpg"
+      }
+    },
+    {
+      "id": "run-apartmaji-pod-voglom",
+      "kind": "studio-run",
+      "label": "studio run: Under the Ridge",
+      "trade": "tourist-farm",
+      "fixture": "apartmaji-pod-voglom",
+      "source": "eval/runs/studio-poc/apartmaji-pod-voglom.studio.json",
+      "images": {
+        "desk": "img/run-apartmaji-pod-voglom-desk.jpg",
+        "deskFull": "img/run-apartmaji-pod-voglom-desk-full.jpg",
+        "phone": "img/run-apartmaji-pod-voglom-phone.jpg",
+        "phoneFull": "img/run-apartmaji-pod-voglom-phone-full.jpg"
+      }
+    },
+    {
+      "id": "run-elektro-zupan",
+      "kind": "studio-run",
+      "label": "studio run: Nova omarica",
+      "trade": "unknown",
+      "fixture": "elektro-zupan",
+      "source": "eval/runs/studio-poc/elektro-zupan.studio.json",
+      "images": {
+        "desk": "img/run-elektro-zupan-desk.jpg",
+        "deskFull": "img/run-elektro-zupan-desk-full.jpg",
+        "phone": "img/run-elektro-zupan-phone.jpg",
+        "phoneFull": "img/run-elektro-zupan-phone-full.jpg"
+      }
+    },
+    {
+      "id": "run-mizarstvo-lesnik",
+      "kind": "studio-run",
+      "label": "studio run: Skica in letnice",
+      "trade": "unknown",
+      "fixture": "mizarstvo-lesnik",
+      "source": "eval/runs/studio-poc/mizarstvo-lesnik.studio.json",
+      "images": {
+        "desk": "img/run-mizarstvo-lesnik-desk.jpg",
+        "deskFull": "img/run-mizarstvo-lesnik-desk-full.jpg",
+        "phone": "img/run-mizarstvo-lesnik-phone.jpg",
+        "phoneFull": "img/run-mizarstvo-lesnik-phone-full.jpg"
+      }
+    },
+    {
+      "id": "today-zobozdravstvo-lebar",
+      "kind": "today",
+      "label": "today: zobozdravstvo-lebar",
+      "trade": "dental",
+      "fixture": "zobozdravstvo-lebar",
+      "source": "eval/runs/studio-poc/zobozdravstvo-lebar-today-desk.png",
+      "images": {
+        "desk": "img/today-zobozdravstvo-lebar-desk.jpg",
+        "deskFull": "img/today-zobozdravstvo-lebar-desk-full.jpg",
+        "phone": "img/today-zobozdravstvo-lebar-phone.jpg",
+        "phoneFull": "img/today-zobozdravstvo-lebar-phone-full.jpg"
+      }
+    },
+    {
+      "id": "today-foto-rozman",
+      "kind": "today",
+      "label": "today: foto-rozman",
+      "trade": "shop",
+      "fixture": "foto-rozman",
+      "source": "eval/runs/studio-poc/foto-rozman-today-desk.png",
+      "images": {
+        "desk": "img/today-foto-rozman-desk.jpg",
+        "deskFull": "img/today-foto-rozman-desk-full.jpg",
+        "phone": "img/today-foto-rozman-phone.jpg",
+        "phoneFull": "img/today-foto-rozman-phone-full.jpg"
+      }
+    }
+  ]
+}

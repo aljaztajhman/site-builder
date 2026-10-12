@@ -1,0 +1,95 @@
+{
+  "round": 3,
+  "pairs": [
+    {
+      "id": "p01",
+      "kind": "studio-today",
+      "a": "run-trgovina-oljka-in-sol",
+      "b": "today-trgovina-oljka-in-sol"
+    },
+    {
+      "id": "p02",
+      "kind": "studio-today",
+      "a": "today-racunovodstvo-seliskar",
+      "b": "run-racunovodstvo-seliskar"
+    },
+    {
+      "id": "p03",
+      "kind": "studio-today",
+      "a": "today-cebelarstvo-medved",
+      "b": "run-cebelarstvo-medved"
+    },
+    {
+      "id": "p04",
+      "kind": "studio-today",
+      "a": "today-zobozdravstvo-lebar",
+      "b": "run-zobozdravstvo-lebar"
+    },
+    {
+      "id": "p05",
+      "kind": "studio-today",
+      "a": "run-apartmaji-pod-voglom",
+      "b": "today-apartmaji-pod-voglom"
+    },
+    {
+      "id": "p06",
+      "kind": "studio-today",
+      "a": "today-frizerstvo-lana",
+      "b": "run-frizerstvo-lana"
+    },
+    {
+      "id": "p07",
+      "kind": "studio-today",
+      "a": "today-brivnica-kos",
+      "b": "run-brivnica-kos"
+    },
+    {
+      "id": "p08",
+      "kind": "studio-today",
+      "a": "today-veterina-sapa",
+      "b": "run-veterina-sapa"
+    },
+    {
+      "id": "p09",
+      "kind": "studio-today",
+      "a": "run-kmetija-grabnar",
+      "b": "today-kmetija-grabnar"
+    },
+    {
+      "id": "p10",
+      "kind": "studio-today",
+      "a": "today-gostilna-zlata-zlica",
+      "b": "run-gostilna-zlata-zlica"
+    },
+    {
+      "id": "p11",
+      "kind": "studio-today",
+      "a": "run-mizarstvo-lesnik",
+      "b": "today-mizarstvo-lesnik"
+    },
+    {
+      "id": "p12",
+      "kind": "studio-today",
+      "a": "run-pizzeria-oljka",
+      "b": "today-pizzeria-oljka"
+    },
+    {
+      "id": "p13",
+      "kind": "studio-today",
+      "a": "today-fizioterapija-pregib",
+      "b": "run-fizioterapija-pregib"
+    },
+    {
+      "id": "p14",
+      "kind": "studio-today",
+      "a": "run-elektro-zupan",
+      "b": "today-elektro-zupan"
+    },
+    {
+      "id": "p15",
+      "kind": "studio-today",
+      "a": "run-foto-rozman",
+      "b": "today-foto-rozman"
+    }
+  ]
+}

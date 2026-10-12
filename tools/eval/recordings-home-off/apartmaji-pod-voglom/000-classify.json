@@ -1,0 +1,18 @@
+{
+  "seq": 0,
+  "stage": "classify",
+  "model": "claude-haiku-4-5-20251001",
+  "hash": "3c5eb0893b4da6ea",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"businessType\": \"tourist-farm\", \"confidence\": 0.92}",
+    "stopReason": "end_turn",
+    "model": "claude-haiku-4-5-20251001",
+    "usage": {
+      "input_tokens": 859,
+      "output_tokens": 20,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

@@ -383,7 +383,7 @@ const RunPrompts = z.object({
   calls: z
     .array(z.object({ stage: z.string(), model: z.string().optional(), system: z.unknown().optional(), messages: z.array(z.object({ role: z.string(), text: z.unknown() })).default([]), response: z.unknown().optional() }))
     .default([]),
-  mockup: z.object({ prompt: z.string().optional(), references: z.array(z.unknown()).optional(), image: z.unknown().optional() }).nullable().optional(),
+  mockup: z.object({ prompt: z.string().optional(), references: z.union([z.array(z.unknown()), z.number().int().min(0)]).optional(), image: z.unknown().optional() }).nullable().optional(),
 });
 type RunPrompts = z.infer<typeof RunPrompts>;
 
@@ -478,7 +478,8 @@ export function madeDoc(itemId: string, fixture: string, run: StudioRun, prompts
       response: asText(c.response),
     })),
     mockupPrompt: str(prompts?.mockup?.prompt) ?? str(run.art?.imagePrompt) ?? null,
-    mockupReferences: (prompts?.mockup?.references ?? []).map((r) => (typeof r === "string" ? r : JSON.stringify(r))),
+    // studio-poc writes the number of reference pictures (the client's photos and logo); a list is kept as it is.
+    mockupReferences: (typeof prompts?.mockup?.references === "number" ? (prompts.mockup.references ? [String(prompts.mockup.references)] : []) : (prompts?.mockup?.references ?? [])).map((r) => (typeof r === "string" ? r : JSON.stringify(r))),
     eur: run.mockup?.eur ?? {},
     eurTotal: run.eur ?? null,
   });
@@ -513,8 +514,8 @@ export const madePath = (itemId: string): string => `made/${itemId}.json`;
 const posixRel = (abs: string) => path.relative(REPO_ROOT, abs).split(path.sep).join("/");
 
 /**
- * Round 3's items from a studio-poc runs dir: per business that built on the mockup path (`<id>.studio.json` with ok
- * true and path "mockup") and has all eight screenshots (`<id>-<shot>.png`, `<id>-today-<shot>.png`), a `run-<id>`
+ * Round 3's items from a studio-poc runs dir: per business the studio built (`<id>.studio.json` with ok
+ * true and path "mockup", or "picker" when the mockup fell back) and has all eight screenshots (`<id>-<shot>.png`, `<id>-today-<shot>.png`), a `run-<id>`
  * and a `today-<id>` item whose pictures are copied, not rendered. Everything else is skipped with a reason.
  */
 export function runSources(fromDir: string, round = 3): RunSources {
@@ -542,8 +543,9 @@ export function runSources(fromDir: string, round = 3): RunSources {
       skipped.push({ fixture: id, reason: "studio run did not build (ok false)" });
       continue;
     }
-    if (run.path !== "mockup") {
-      skipped.push({ fixture: id, reason: `studio run took path ${JSON.stringify(run.path ?? null)}, not the mockup path` });
+    // The picker is the studio's own fallback when the mockup can't be built: what the client would get, so it is rated too.
+    if (run.path !== "mockup" && run.path !== "picker") {
+      skipped.push({ fixture: id, reason: `studio run took path ${JSON.stringify(run.path ?? null)}, not the mockup or picker path` });
       continue;
     }
     const pngs = (stem: string) => Object.fromEntries(SHOT_NAMES.map((s) => [s, path.join(from, `${stem}-${s}.png`)])) as Record<ShotName, string>;

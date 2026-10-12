@@ -54,13 +54,14 @@ beforeAll(async () => {
           { stage: "artDirector", model: "claude-opus-5-5", system: "SYSTEM ART", messages: [{ role: "user", text: "Brief text" }], response: { name: "Iz noči v jutro" } },
           { stage: "rebuild", model: "claude-opus-5-5", system: [{ type: "text", text: "SYSTEM REBUILD" }], messages: [{ role: "user", text: "Rebuild it" }], response: "spec json" },
         ],
-        mockup: { prompt: "One flat full-page screenshot.", references: ["ref-a.png"], image: "pekarna-kvas-mockup.jpg" },
+        mockup: { prompt: "One flat full-page screenshot.", references: 3, image: "pekarna-kvas-mockup.jpg" },
       },
     },
   );
   await business("frizerstvo-lana", { ok: true, path: "mockup", idea: "Hair.", art: null });
   await business("avtoservis-mrak", { ok: false, path: null });
   await business("kmetija-grabnar", { ok: true, path: "direct", idea: "No mockup." });
+  await business("zobozdravstvo-lebar", { ok: true, path: "picker", idea: "The mockup fell back." });
   await business("gostilna-zlata-zlica", { ok: true, path: "mockup" }, { today: false });
 });
 afterAll(async () => {
@@ -68,9 +69,9 @@ afterAll(async () => {
 });
 
 describe("round 3 items from a runs dir", () => {
-  it("a studio-run and a today item per business that built on the mockup path; the rest skipped with a reason", () => {
+  it("a studio-run and a today item per business the studio built (mockup or picker path); the rest skipped with a reason", () => {
     const r = runSources(runs);
-    expect(r.sources.map((s) => s.id).sort()).toEqual(["run-frizerstvo-lana", "run-pekarna-kvas", "today-frizerstvo-lana", "today-pekarna-kvas"]);
+    expect(r.sources.map((s) => s.id).sort()).toEqual(["run-frizerstvo-lana", "run-pekarna-kvas", "run-zobozdravstvo-lebar", "today-frizerstvo-lana", "today-pekarna-kvas", "today-zobozdravstvo-lebar"]);
     for (const s of r.sources) {
       expect(s.kind).toBe(s.id.startsWith("run-") ? "studio-run" : "today");
       expect(s.render).toBe("copy");
@@ -81,7 +82,7 @@ describe("round 3 items from a runs dir", () => {
     expect(r.skipped.map((s) => s.fixture).sort()).toEqual(["avtoservis-mrak", "gostilna-zlata-zlica", "kmetija-grabnar"]);
     const why = Object.fromEntries(r.skipped.map((s) => [s.fixture, s.reason]));
     expect(why["avtoservis-mrak"]).toMatch(/did not build/);
-    expect(why["kmetija-grabnar"]).toMatch(/not the mockup path/);
+    expect(why["kmetija-grabnar"]).toMatch(/not the mockup or picker path/);
     expect(why["gostilna-zlata-zlica"]).toMatch(/missing screenshots: gostilna-zlata-zlica-today-desk\.png/);
   });
 
@@ -94,7 +95,7 @@ describe("round 3 items from a runs dir", () => {
 
   it("makes a made/ document per run item: direction, calls with stage names, mockup prompt, € by stage", () => {
     const { made } = runSources(runs);
-    expect(made.map((m) => m.itemId).sort()).toEqual(["run-frizerstvo-lana", "run-pekarna-kvas"]);
+    expect(made.map((m) => m.itemId).sort()).toEqual(["run-frizerstvo-lana", "run-pekarna-kvas", "run-zobozdravstvo-lebar"]);
     const kvas = made.find((m) => m.itemId === "run-pekarna-kvas")!;
     expect(kvas.mockupJpg).toBe(path.join(runs, "pekarna-kvas-mockup.jpg"));
     const doc = MadeFile.parse(kvas.doc);
@@ -115,7 +116,7 @@ describe("round 3 items from a runs dir", () => {
     expect(doc.calls[0]).toEqual({ stage: "artDirector", model: "claude-opus-5-5", system: "SYSTEM ART", messages: [{ role: "user", text: "Brief text" }], response: JSON.stringify({ name: "Iz noči v jutro" }, null, 2) });
     expect(doc.calls[1]!.system).toBe("SYSTEM REBUILD");
     expect(doc.mockupPrompt).toBe("One flat full-page screenshot.");
-    expect(doc.mockupReferences).toEqual(["ref-a.png"]);
+    expect(doc.mockupReferences).toEqual(["3"]); // studio-poc writes the count of reference pictures
     expect(doc.eur).toEqual({ artDirector: 0.0886, mockup: 0.086, rebuild: 0.1514 });
     expect(doc.eurTotal).toBe(0.326);
     // No prompts.json, no mockup: still a document, with what there is.
@@ -169,7 +170,7 @@ describe("okus:items --round 3 --from <runs dir>", () => {
     const items = ItemsFile.parse(JSON.parse(await readFile(path.join(dir, "items.json"), "utf8")));
     expect(items.items.map((i) => i.id)).toEqual(runSources(runs).sources.map((s) => s.id));
     const pairs = PairsFile.parse(JSON.parse(await readFile(path.join(dir, "pairs.json"), "utf8")));
-    expect(pairs.pairs.length).toBe(2);
+    expect(pairs.pairs.length).toBe(3);
     expect(RoundsIndex.parse(JSON.parse(await readFile(path.join(okusDir, "rounds/index.json"), "utf8"))).rounds).toEqual([1, 3]);
     for (const it of items.items) for (const rel of Object.values(it.images)) expect((await sharp(path.join(dir, rel)).metadata()).format).toBe("jpeg");
     expect(result.skipped.length).toBe(3);
@@ -178,7 +179,7 @@ describe("okus:items --round 3 --from <runs dir>", () => {
 
   it("writes made/<itemId>.json and the mockup for run items only, and keeps them out of items.json", async () => {
     const dir = path.join(okusDir, "rounds/3");
-    expect((await readdir(path.join(dir, "made"))).sort()).toEqual(["run-frizerstvo-lana.json", "run-pekarna-kvas.json"]);
+    expect((await readdir(path.join(dir, "made"))).sort()).toEqual(["run-frizerstvo-lana.json", "run-pekarna-kvas.json", "run-zobozdravstvo-lebar.json"]);
     const doc = MadeFile.parse(JSON.parse(await readFile(path.join(dir, "made/run-pekarna-kvas.json"), "utf8")));
     expect(doc.calls.length).toBe(2);
     const mock = await sharp(path.join(dir, doc.mockupImage!)).metadata();
