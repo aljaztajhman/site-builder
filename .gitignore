@@ -31,3 +31,4 @@ tools/okus/rounds/*/img/
 # Approval round pictures and sites: published as the approval artifact files, not kept in git (regenerate with pnpm approval:build).
 tools/approval/round/img/
 tools/approval/round/site/
+.claude/plans/

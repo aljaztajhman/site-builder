@@ -73,3 +73,27 @@ Before any paid call (evals, judge runs, generated pictures, smoke tests on the 
 - Responsive, not mobile-first: every site must be excellent at desktop widths (1280 px and up) and on phones (360 px). Build, look at and test both. The mobile checklist in docs/PRODUCT.md still applies in full.
 - The banned-patterns list in docs/PRODUCT.md is a hard list. Enforce it in code wherever possible (token ranges, component variants that can't produce the pattern); the critique pass catches the rest.
 - Never invent facts: no testimonials, reviews, ratings, awards, client logos, statistics, certifications, prices, opening hours, addresses, names or phone numbers that aren't in the client's input. Use a marked placeholder instead. A site with unfilled required placeholders can't be published.
+
+## Commands
+
+pnpm 12 workspaces, Node 24+, TypeScript, Vitest, ESLint. Run from the repo root; quiet forms:
+
+- Install: `pnpm install --frozen-lockfile`
+- Test one file: `pnpm exec vitest run <file> --reporter=dot`
+- Test one package: `pnpm exec vitest run packages/<p>/test --reporter=dot --maxWorkers=1`
+- Test all: `pnpm test --reporter=dot` (browser tests need `pnpm --filter @sb/engine exec playwright install chromium` once)
+- Type-check: `pnpm typecheck`
+- Lint: `pnpm lint --quiet`
+- Build (web client): `pnpm --filter @sb/web build`
+- Offline eval (free, as CI runs it): `pnpm eval --offline --strict`
+
+## Structure
+
+- `apps/web`: dashboard, editor, API, landing page and published-site serving; `apps/worker`: pg-boss queue jobs and housekeeping
+- `packages/spec`: site spec schemas, versions and migrations; `engine`: generation pipeline, facts, publishing; `components` + `render`: the one renderer for preview, publish and export; `platform`: DB, costs, mail; `config`: loads `config/app.config.json`; `inventory`, `morph`: design assets and transitions
+- `tools/eval`: `pnpm eval` and the sheet/compare scripts, fixtures and recordings
+- `docs/dev/`: architecture, components, agent team, workflow
+
+## Compact instructions
+
+When compacting, keep: the current task goal, HQ item ids, the plan file path, decisions made and why, files changed, checks still failing. Drop file contents and command output already acted on.
