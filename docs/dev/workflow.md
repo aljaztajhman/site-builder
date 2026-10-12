@@ -58,7 +58,7 @@ Every PR, human or agent:
 
 | Workflow | When | Does |
 | --- | --- | --- |
-| `ci` (today) | every PR, push to `main` | typecheck, lint, `pnpm test` |
+| `ci` (today) | every PR, push to `main` | typecheck, lint, `pnpm test` (fast tier, one runner), `pnpm test:slow` (slow tier, three shards; agent-team.md "Test tiers") |
 | `ci` additions | every PR | `pnpm eval --offline` (free: golden specs through every check), `pnpm --filter @sb/web build` so a broken editor bundle fails before deploy, migration smoke (`migrate` on an empty Postgres) |
 | `promote` (new) | by hand | §3: fast-forward `release`, tag, release notes, migrate-check, deployed smoke test |
 | `nightly` (new) | 03:00 | dependency audit (`pnpm audit --prod`), the backup's existence and size checked, stale-branch report (merged branches older than 7 days deleted) |
