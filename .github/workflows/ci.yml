@@ -60,6 +60,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Install Chromium for render checks
         run: pnpm --filter @sb/engine exec playwright install --with-deps chromium
+      # Processed fixture photos (test-setup.ts): a re-run on the same encode settings and sharp build skips the AVIF/WebP work.
+      - uses: actions/cache@v4
+        with:
+          path: node_modules/.cache/sb-test-media
+          key: test-media-${{ hashFiles('pnpm-lock.yaml', 'packages/engine/src/images.ts', 'packages/engine/src/photo-cache.ts', 'config/app.config.json') }}
       - run: pnpm test:slow --shard=${{ matrix.shard }}/3
 
   # docs/dev/workflow.md §6, CI additions: the hand-authored golden specs through every automated check (render,

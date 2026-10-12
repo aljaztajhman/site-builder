@@ -104,6 +104,8 @@ Report: status; branch and commits; files; evidence; what's left; decisions for 
 - `pnpm test:slow`: the slow tier (CI's `test-slow` job, three shards).
 - `pnpm test:all`: both. One file, whatever its tier: `pnpm exec vitest run <file>`.
 
+Tests share an on-disk cache of processed fixture photos (`node_modules/.cache/sb-test-media`, installed by `test-setup.ts`, `packages/engine/src/photo-cache.ts`): AVIF/WebP encoding was ~10 s per photo and was redone in every test file. The first run is cold, later runs and later files hit. If you change the encode inside `processPhoto`, bump `PHOTO_CACHE_FORMAT`; `SB_TEST_MEDIA_CACHE=off` encodes for real.
+
 ## 8. Logging and measuring
 
 - The hook appends every agent launch to `.claude/agent-log.jsonl` (gitignored): time, role, model, effort, isolation, mode, description.
