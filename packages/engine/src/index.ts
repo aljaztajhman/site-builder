@@ -7,6 +7,7 @@ export * from "./repair.ts";
 export * from "./facts.ts";
 export * from "./palette.ts";
 export * from "./images.ts";
+export * from "./photo-cache.ts";
 export * from "./image-gen.ts";
 export * from "./photos.ts";
 export * from "./image-ids.ts";
