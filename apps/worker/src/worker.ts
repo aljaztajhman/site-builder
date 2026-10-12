@@ -364,8 +364,11 @@ export async function startWorker(platform: Platform, config = loadConfig(), job
       // The domain step's names are asked while the site generates (it-zero-to-live).
       const onBrief = () => void warmDomainSuggestions(domainDeps, job.siteId);
       const studio = await studioForJob(platform, config, ctx);
+      // Studio 0.5 trial: why a job did or didn't go through the studio (no email, only whether one is set).
+      if (config.designer.agent === "trial") console.log(`[studio] ${job.siteId}: ${studio ? "on" : "off"} (tier ${ctx.tier ?? "none"}, account ${ctx.accountId ? "yes" : "no"})`);
       const r = await run.generateSite({ config, repo, storage, client, pictures, onBrief, ...(images ? { images } : {}), ...(studio ? { studio } : {}) }, job.siteId, jobId);
       if (r.critiqueSkipped) console.log(`[generate] ${job.siteId}: finished with the critique skipped (${r.critiqueSkipped})`);
+      if (r.studio) console.log(`[studio] ${job.siteId}: ${r.studio.composed ? `composed: ${r.studio.idea}` : `kept today's homepage: ${r.studio.reason}`}`.slice(0, 500));
       await finish(ctx.aiJobId, "done");
       await telemetry({ outcome: "done", saved: true, result: r });
     } catch (e) {
