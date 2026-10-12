@@ -6,9 +6,13 @@
  * most 1600 px wide, plus items.json and pairs.json (okus-round.ts), and tools/okus/rounds/index.json. The whole
  * round is kept under 15 MB (artifact upload limit) by lowering the whole pages' quality, then width, until it fits.
  * Hand-made references load their Google Fonts from the network unless --local-fonts (the repo's subset files, as the
- * offline sheets do). No model call, € 0.
+ * offline sheets do). Round 3 renders nothing: it copies the screenshots a studio-poc run already took (studio homepage
+ * and today's homepage per business) and writes, per studio homepage, made/<itemId>.json and its mockup picture (how
+ * it was made; the page shows it only after the owner rated the item). No model call, € 0.
+ *
+ * pnpm okus:items --round 3 --from eval/runs/studio-poc [--only <business or item id>,...]
  */
-import { mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -23,12 +27,16 @@ import {
   OKUS_DIR,
   REPO_ROOT,
   RoundsIndex,
+  SHOT_NAMES,
   itemsJson,
+  madePath,
   pairsJson,
   roundPairs,
   roundSources,
+  runSources,
   toItem,
   type ItemSource,
+  type RunSources,
   type OkusItem,
   type OkusPair,
 } from "./okus-round.ts";
@@ -157,7 +165,7 @@ async function encode(items: readonly OkusItem[], pngDir: string, outDir: string
   let bytes = 0;
   const cut: string[] = [];
   for (const item of items) {
-    for (const shot of ["desk", "deskFull", "phone", "phoneFull"] as Shot[]) {
+    for (const shot of SHOT_NAMES as readonly Shot[]) {
       const png = await readFile(path.join(pngDir, `${item.id}-${shot}.png`));
       const full = shot.endsWith("Full");
       const width = shot === "desk" ? SHOTS.desk.width : shot === "phone" ? SHOTS.phone.width * SHOTS.phone.scale : shot === "deskFull" ? step.deskWidth : step.phoneWidth;
@@ -186,6 +194,8 @@ export interface BuildOptions {
   /** Serve the hand-made pages' Google Fonts from the repo's subset files (offline). */
   localFonts?: boolean;
   budgetBytes?: number;
+  /** Round 3: the studio-poc runs dir whose screenshots, studio.json and prompts.json the round is built from. */
+  from?: string;
   log?: (line: string) => void;
 }
 
@@ -198,38 +208,67 @@ export interface BuildResult {
   /** The whole-page JPEG step that fit the budget. */
   step: (typeof FULL_STEPS)[number];
   cut: string[];
+  /** Round 3: businesses left out, with why. */
+  skipped: RunSources["skipped"];
 }
 
-/** Renders a round's items and writes its directory. */
+/** A run item's mockup as the round keeps it: JPEG, at most 1280 px wide. */
+const MOCKUP = { width: 1280, quality: 78 } as const;
+
+/** Renders (or, for round 3, copies) a round's items and writes its directory. */
 export async function buildRound(opts: BuildOptions): Promise<BuildResult> {
   const log = opts.log ?? (() => {});
   const okusDir = opts.okusDir ?? OKUS_DIR;
   const dir = path.join(okusDir, "rounds", String(opts.round));
   const budget = opts.budgetBytes ?? ROUND_BUDGET_BYTES;
-  let sources = roundSources(opts.round);
+  let runs: RunSources | null = null;
+  let sources: ItemSource[];
+  if (opts.round === 3) {
+    if (!opts.from) throw new Error("Round 3 needs --from <studio-poc runs dir>");
+    runs = runSources(opts.from, opts.round);
+    for (const s of runs.skipped) log(`  skipped ${s.fixture}: ${s.reason}`);
+    sources = runs.sources;
+  } else sources = roundSources(opts.round);
   if (opts.only?.length) {
-    const unknown = opts.only.filter((id) => !sources.some((s) => s.id === id));
+    // Round 3 also takes business ids (both of its items).
+    const matches = (s: ItemSource, id: string) => s.id === id || (opts.round === 3 && s.fixture === id);
+    const unknown = opts.only.filter((id) => !sources.some((s) => matches(s, id)));
     if (unknown.length) throw new Error(`Unknown item ids: ${unknown.join(", ")}`);
-    sources = sources.filter((s) => opts.only!.includes(s.id));
+    sources = sources.filter((s) => opts.only!.some((id) => matches(s, id)));
   }
+  if (!sources.length) throw new Error(`Round ${opts.round} has no items${runs ? " (no studio run in the runs dir built on the mockup path with all its screenshots)" : ""}`);
   const items = sources.map(toItem);
   const pairs = roundPairs(opts.round, items);
+  const made = (runs?.made ?? []).filter((m) => items.some((i) => i.id === m.itemId));
 
   const work = await mkdtemp(path.join(tmpdir(), "sb-okus-"));
   const pngDir = path.join(work, "png");
   const siteDir = path.join(work, "site");
   await mkdir(pngDir, { recursive: true });
   await mkdir(siteDir, { recursive: true });
-  const repoServer = await serveStatic(REPO_ROOT);
-  const siteServer = await serveStatic(siteDir);
-  const browser = await chromium.launch();
+  // Servers and a browser only when something is rendered (round 3 copies).
+  const rendering = sources.some((s) => s.render !== "copy");
+  const repoServer = rendering ? await serveStatic(REPO_ROOT) : null;
+  const siteServer = rendering ? await serveStatic(siteDir) : null;
+  const browser = rendering ? await chromium.launch() : null;
   try {
-    const fontsCss = opts.localFonts ? localFontsCss(repoServer.url) : null;
+    const fontsCss = opts.localFonts && repoServer ? localFontsCss(repoServer.url) : null;
     for (const [i, s] of sources.entries()) {
       log(`[${i + 1}/${sources.length}] ${s.id}`);
-      if (s.render === "html") await shoot(browser, s.id, `${repoServer.url}/${s.file}`, pngDir, fontsCss);
-      else await shoot(browser, s.id, `${siteServer.url}/${await writeSpecSite(s, siteDir)}`, pngDir, null);
+      if (s.render === "copy") for (const shot of SHOT_NAMES) await copyFile(s.pngs[shot], path.join(pngDir, `${s.id}-${shot}.png`));
+      else if (s.render === "html") await shoot(browser!, s.id, `${repoServer!.url}/${s.file}`, pngDir, fontsCss);
+      else await shoot(browser!, s.id, `${siteServer!.url}/${await writeSpecSite(s, siteDir)}`, pngDir, null);
     }
+    // How each studio homepage was made: its mockup (recompressed) and its made/ document; both count toward the budget.
+    const madeFiles: { rel: string; data: Buffer }[] = [];
+    for (const m of made) {
+      if (m.mockupJpg && m.doc.mockupImage) {
+        const jpg = await sharp(await readFile(m.mockupJpg)).resize({ width: MOCKUP.width, withoutEnlargement: true }).flatten({ background: "#ffffff" }).jpeg({ quality: MOCKUP.quality, mozjpeg: true }).toBuffer();
+        madeFiles.push({ rel: m.doc.mockupImage, data: jpg });
+      }
+      madeFiles.push({ rel: madePath(m.itemId), data: Buffer.from(`${JSON.stringify(m.doc, null, 2)}\n`) });
+    }
+    const madeBytes = madeFiles.reduce((n, f) => n + f.data.length, 0);
     await rm(dir, { recursive: true, force: true });
     await mkdir(dir, { recursive: true });
     const json = itemsJson(opts.round, items) + pairsJson(opts.round, pairs);
@@ -241,18 +280,22 @@ export async function buildRound(opts: BuildOptions): Promise<BuildResult> {
       chosen = step;
       cut = r.cut;
       log(`  whole pages at q${step.quality}, ${step.deskWidth}/${step.phoneWidth} px: ${(r.bytes / 1024 / 1024).toFixed(2)} MB`);
-      if (r.bytes + json.length <= budget) break;
+      if (r.bytes + json.length + madeBytes <= budget) break;
+    }
+    for (const f of madeFiles) {
+      await mkdir(path.dirname(path.join(dir, f.rel)), { recursive: true });
+      await writeFile(path.join(dir, f.rel), f.data);
     }
     await writeFile(path.join(dir, "items.json"), itemsJson(opts.round, items));
     await writeFile(path.join(dir, "pairs.json"), pairsJson(opts.round, pairs));
     await writeRoundsIndex(okusDir, opts.round);
     const bytes = await dirBytes(dir);
     if (bytes > budget) throw new Error(`Round ${opts.round} is ${(bytes / 1024 / 1024).toFixed(2)} MB, over the ${(budget / 1024 / 1024).toFixed(0)} MB budget even at the smallest step`);
-    return { dir, items, pairs, bytes, step: chosen, cut };
+    return { dir, items, pairs, bytes, step: chosen, cut, skipped: runs?.skipped ?? [] };
   } finally {
-    await browser.close();
-    await repoServer.close();
-    await siteServer.close();
+    await browser?.close();
+    await repoServer?.close();
+    await siteServer?.close();
     await rm(work, { recursive: true, force: true });
   }
 }
@@ -281,11 +324,13 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   };
   const round = Number(val("--round") ?? "1");
   const only = val("--only")?.split(",").map((s) => s.trim()).filter(Boolean);
+  const from = val("--from");
   const started = Date.now();
-  const r = await buildRound({ round, ...(only ? { only } : {}), localFonts: args.includes("--local-fonts"), log: (l) => console.log(l) });
+  const r = await buildRound({ round, ...(only ? { only } : {}), ...(from ? { from: path.resolve(from) } : {}), localFonts: args.includes("--local-fonts"), log: (l) => console.log(l) });
   const count = (k: string) => r.items.filter((i) => i.kind === k).length;
   console.log(`\nRound ${round}: ${path.relative(REPO_ROOT, r.dir)}`);
-  console.log(`  items ${r.items.length} (references ${count("reference")}, goldens ${count("golden")}, composed ${count("composed")}, studio ${count("studio")}, sketches ${count("sketch")}), pairs ${r.pairs.length}`);
+  console.log(`  items ${r.items.length} (references ${count("reference")}, goldens ${count("golden")}, composed ${count("composed")}, studio ${count("studio")}, studio runs ${count("studio-run")}, today ${count("today")}, sketches ${count("sketch")}), pairs ${r.pairs.length}`);
+  if (r.skipped.length) console.log(`  skipped ${r.skipped.length}: ${r.skipped.map((s) => `${s.fixture} (${s.reason})`).join("; ")}`);
   console.log(`  pictures ${r.items.length * 4}, total ${(r.bytes / 1024 / 1024).toFixed(2)} MB (budget ${ROUND_BUDGET_BYTES / 1024 / 1024} MB); whole pages q${r.step.quality} at ${r.step.deskWidth}/${r.step.phoneWidth} px`);
   if (r.cut.length) console.log(`  cut at ${JPEG_MAX} px: ${r.cut.join(", ")}`);
   console.log(`  ${Math.round((Date.now() - started) / 1000)} s`);
