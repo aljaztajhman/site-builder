@@ -1,3 +1,4 @@
+// @module-tag slow
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createServer, type Server } from "node:http";
 import { readFile } from "node:fs/promises";

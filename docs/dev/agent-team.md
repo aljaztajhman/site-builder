@@ -91,10 +91,18 @@ Report: status; branch and commits; files; evidence; what's left; decisions for 
 
 1. Read the diff (`git diff --stat`, then the parts that matter).
 2. Typecheck and lint.
-3. Run the tests of **every package the diff touches**, not just the new tests: `git diff --name-only <base>... | <packages>` → `vitest run packages/<p>/test ... --maxWorkers=1`. (F1 missed the components package this way and CI caught it.)
+3. Run `pnpm test --maxWorkers=1` (the fast tier of **every** package, not just the touched ones: F1 missed the components package by running only the new tests, and CI caught it), plus `pnpm exec vitest run <each test file the diff adds or changes> --maxWorkers=1`, which runs a file whatever its tier. The rest of the slow tier is CI's job (`test-slow`); don't run it locally. Builders' done-check is the same: typecheck, lint, `pnpm test`, and their own test files.
 4. Look at any screenshots or contact sheets the change produces.
 5. A reviewer runs when the change touches the spec (version, migration), money, security, publishing rules, a database migration, or more than about 500 lines of logic; otherwise the director's check is the review. Reviewers report correctness and requirement gaps only.
 6. CI green before merging; a red check is read, never re-run blindly more than once.
+
+### Test tiers
+
+`vitest.config.ts` splits the tests into two projects. **slow**: files whose first line is `// @module-tag slow`; **fast**: every other test file (slow files are never even imported). A file is slow when it launches a browser or replays a generation and takes 2 s or more, or takes 5 s or more for any reason (`--maxWorkers=1`); otherwise it is fast. A file is one tier: when only some of its tests are slow, split it. `tools/eval/test/test-tiers.test.ts` guards the split.
+
+- `pnpm test`: the fast tier (local runs, builders' done-check, CI's `test` job).
+- `pnpm test:slow`: the slow tier (CI's `test-slow` job, three shards).
+- `pnpm test:all`: both. One file, whatever its tier: `pnpm exec vitest run <file>`.
 
 ## 8. Logging and measuring
 

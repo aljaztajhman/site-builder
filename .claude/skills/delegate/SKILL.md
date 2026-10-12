@@ -57,7 +57,7 @@ At most 3 builders/mechanics/asset makers at once on the local machine (scouts d
 
 1. Read the diff.
 2. Typecheck + lint.
-3. Tests of **every touched package**: `git diff --name-only origin/main... | grep -oE '^(packages|apps|tools)/[^/]+(/[^/]+)?' | sort -u` → `corepack pnpm exec vitest run <those>/test --maxWorkers=1`.
+3. Tests: `corepack pnpm test --maxWorkers=1` (fast tier, every package) + `corepack pnpm exec vitest run <each test file the diff adds or changes> --maxWorkers=1` (runs slow files too). The rest of the slow tier is CI's job (`test-slow`). Builders' done-check is the same: typecheck, lint, `pnpm test`, their own test files. Tiers: agent-team.md "Test tiers".
 4. Look at screenshots/sheets the change produces.
 5. Reviewer when it touches spec version/migration, money, security, publishing rules, a DB migration, or > ~500 lines of logic.
 6. CI green before merge; read a red check, rerun at most once if it's a known flaky test.

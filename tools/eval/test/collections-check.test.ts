@@ -1,3 +1,4 @@
+// @module-tag slow
 import { describe, expect, it } from "vitest";
 import { loadConfig } from "@sb/config";
 import { checkSite } from "@sb/engine";
@@ -14,7 +15,7 @@ describe("collection pages in the site checks", () => {
     spec.collections!.services = { page: "p_novice", items: [{ name: "Peka po naročilu", summary: "Torte in pecivo.", body: ["Naročila sprejemamo tri dni prej."], price: { amount: 25, from: true } }] };
     spec.pages[1]!.sections.push({ id: "s_svc", type: "collection", variant: "list", props: { kind: "services", title: "Storitve" } });
     const pages = ["index.html", "novice.html", "novice/kvasni-tecaj-za-zacetnike.html", "dogodki/dan-odprtih-vrat.html", "storitve/peka-po-narocilu.html"];
-    const r = await checkSite(spec, siteFiles(spec, new Map()), { config: loadConfig(), corpus: "", pages });
+    const r = await checkSite(spec, siteFiles(spec, new Map()), { config: loadConfig(), corpus: "", pages, lighthouse: false });
     expect(r.pages.map((p) => p.file)).toEqual(pages);
     for (const p of r.pages) {
       expect(p.axe.map((a) => a.id), p.file).toEqual([]);

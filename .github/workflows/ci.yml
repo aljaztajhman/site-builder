@@ -25,16 +25,11 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm lint
 
-  # Every test runs, split over three runners by file (vitest --shard): the browser suites made one runner take
-  # 15–20 minutes (the job's limit).
+  # Tests in two tiers (vitest.config.ts; docs/dev/agent-team.md, "Test tiers"); both run on every PR. The fast tier
+  # (`pnpm test`: unit tests and cheap browser checks) on one runner.
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2, 3]
-    name: test (${{ matrix.shard }}/3)
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -44,7 +39,28 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Install Chromium for render checks
         run: pnpm --filter @sb/engine exec playwright install --with-deps chromium
-      - run: pnpm test --shard=${{ matrix.shard }}/3
+      - run: pnpm test
+
+  # The slow tier (`pnpm test:slow`: files marked `// @module-tag slow`, the browser suites and generation replays),
+  # split over three runners by file (vitest --shard): on one runner they take far longer than the job's limit.
+  test-slow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
+    name: test-slow (${{ matrix.shard }}/3)
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - name: Install Chromium for render checks
+        run: pnpm --filter @sb/engine exec playwright install --with-deps chromium
+      - run: pnpm test:slow --shard=${{ matrix.shard }}/3
 
   # docs/dev/workflow.md §6, CI additions: the hand-authored golden specs through every automated check (render,
   # axe, Lighthouse, 360 px, facts, placeholders, export). No model calls, free. --strict fails the job when a

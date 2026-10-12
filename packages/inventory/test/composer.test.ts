@@ -1,3 +1,4 @@
+// @module-tag slow
 import { describe, expect, it } from "vitest";
 import { FONT_PAIRS, STANCES, validateSite } from "@sb/spec";
 import { COMPOSER_FIXTURES, ComposerError, composeHomepage, composeHomepageDetailed, fittingStances, inventory } from "../src/index.ts";
