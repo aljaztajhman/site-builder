@@ -1,29 +1,40 @@
 /**
- * pnpm studio:poc --fixture <id> [--record | --replay] [--picker] [--max-eur 2.00] [--max-fal 0.60]   (or --all)
+ * pnpm studio:poc --fixture <id> | --fixtures a,b,c | --all  [--record | --replay | --bases-only] [--lenient-bases] [--picker] [--max-eur 2.00] [--max-fal 0.60]
  *
  * Design studio 0.5 / 0.5b (docs/plans/studio-0.5.md) on an eval fixture, exactly as the worker runs it for a trial
- * account: the fixture's golden spec stands in for today's pipeline output (the edge fixtures: a stand-in base,
- * studio-edge.ts). config studio.mode "mockup" (default) runs the mockup path (art director, GPT Image mockup, rebuild)
- * and falls back to the picker; --picker runs the 0.5 picker only.
+ * account. config studio.mode "mockup" (default) runs the mockup path (art director, GPT Image mockup, rebuild) and falls
+ * back to the picker; --picker runs the 0.5 picker only.
+ *
+ * Fixtures (studio-fixtures.ts): --all is the original five (pekarna-kvas, avtoservis-mrak, instalacije-rebernik with
+ * the golden spec as today's site; cvetlicarna-zvoncek, tattoo-crnilo with a hand-made stand-in base, studio-edge.ts).
+ * Any other golden (tools/eval/fixtures: the golden spec and its recorded brief), twin (tools/eval/twins) or hard fixture
+ * (tools/eval/hard) can be named with --fixture or --fixtures. A twin's or hard fixture's base is today's pipeline,
+ * replayed for free from tools/eval/recordings-home-off/<id>/; one without recordings, or whose requests changed since they
+ * were recorded (the twins' were recorded on 2026-10-08 and the brief prompt has changed since), fails with the (paid)
+ * command that records them, one fixture per command (a multi-fixture eval run makes earlier sites the later ones' neighbours):
+ *   pnpm eval --record-missing --recordings tools/eval/recordings-home-off --only <id> --twins|--hard --scope home --photos 0 --no-edits --no-judge --no-lighthouse
+ * --lenient-bases replays changed requests anyway (the recorded answers through today's code, the count in the log line),
+ * free; a run that then needs a call the recordings don't have (a content retry) still fails.
  *
  * --record (the default without --replay) makes real calls: Anthropic (the art director, the rebuild, and the picker's
  * director if it falls back) and fal (the mockup). Model answers are recorded to tools/eval/recordings-studio-mockup/<id>/
  * (the picker only: tools/eval/recordings-studio/<id>/), the mockup image beside them (mockup.jpg) with its prompt; the unit
  * tests replay these. Every paid call is logged in eval/runs/studio-poc/cost-log.jsonl (provider, stage, model, tokens, €)
  * and stops before it would take this tool's total past --max-eur (Anthropic, all runs in the log) or --max-fal (fal).
- * --replay answers from the recordings for free.
+ * --replay answers from the recordings for free. --bases-only builds and validates today's spec only (no studio call, no
+ * key needed, nothing paid) and writes `<id>.today.spec.json` and the today screenshots.
  *
- * Writes eval/runs/studio-poc/: `<id>.spec.json`, `<id>.studio.json` (path, idea, sections, crops, dropped, € by stage),
- * `<id>-mockup.jpg`, and screenshots of the composed homepage and of today's (the golden, or the edge stand-in) at 1280
- * and 360 px, first screen and whole page: `<id>-desk.png`, `<id>-deskFull.png`, `<id>-phone.png`, `<id>-phoneFull.png`,
- * and `<id>-today-*.png`.
+ * Writes eval/runs/studio-poc/: `<id>.today.spec.json` (today's spec), `<id>.spec.json` (the studio's), `<id>.studio.json`
+ * (path, idea, sections, crops, dropped, € by stage), `<id>.prompts.json` (every model request the studio sent, pictures
+ * as `[image: <type>, <n> KB]`, with its answer, and the mockup's prompt and reference count), `<id>-mockup.jpg`,
+ * `<id>-crops/<imgId>.jpg`, and screenshots of the composed homepage and of today's at 1280 and 360 px, first screen and
+ * whole page: `<id>-desk.png`, `<id>-deskFull.png`, `<id>-phone.png`, `<id>-phoneFull.png`, and `<id>-today-*.png`.
  */
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import sharp from "sharp";
-import { chromium } from "playwright";
 import { loadConfig, repoRoot } from "@sb/config";
 import {
   AnthropicTransport,
@@ -32,39 +43,45 @@ import {
   ModelClient,
   RecordMissingTransport,
   ReplayTransport,
-  processLogo,
-  processPhoto,
+  launchCheckBrowser,
   runStudio,
   serveStatic,
+  type CheckBrowser,
   type ImageGenModelConfig,
   type ImageTransport,
   type MockupDeps,
   type ModelTransport,
 } from "@sb/engine";
-import { COMPOSER_FIXTURES, composerFixture } from "@sb/inventory";
-import type { PresetBrief, SiteSpec } from "@sb/spec";
-import { loadFixture } from "./fixtures/load.ts";
+import { validateSite, type SiteSpec } from "@sb/spec";
 import { writeSiteFiles } from "./kitchen-sink.ts";
-import { photoForImage, shoot } from "./okus-items.ts";
-import { EDGE_FIXTURES, edgeFixture, isEdgeFixture } from "./studio-edge.ts";
+import { shoot } from "./okus-items.ts";
+import { CaptureImageTransport, CaptureTransport, type PromptsFile } from "./studio-capture.ts";
+import { fileFixture, fixtureKind, knownFixtures, parseFixtureArgs, replayedFixture, type StudioFixture } from "./studio-fixtures.ts";
 
 const args = process.argv.slice(2);
 const val = (flag: string) => (args.includes(flag) ? args[args.indexOf(flag) + 1] : undefined);
 const replay = args.includes("--replay");
+const basesOnly = args.includes("--bases-only");
 const pickerOnly = args.includes("--picker");
+// Twins and hard fixtures: replay recordings whose requests changed since they were recorded (the recorded answers, today's code).
+const lenient = args.includes("--lenient-bases");
 const maxEur = Number(val("--max-eur") ?? 2.0);
 const maxFal = Number(val("--max-fal") ?? 0.6);
-const ALL = [...COMPOSER_FIXTURES, ...EDGE_FIXTURES] as string[];
-const fixtures = args.includes("--all") ? ALL : [val("--fixture") ?? ""];
-if (fixtures.some((f) => !ALL.includes(f)) || !Number.isFinite(maxEur) || !Number.isFinite(maxFal)) {
-  console.error(`Usage: studio:poc --fixture <id> | --all [--record | --replay] [--picker] [--max-eur 2.00] [--max-fal 0.60]\nfixtures: ${ALL.join(", ")}`);
+const known = knownFixtures();
+const KNOWN = [...known.golden, ...known.twins, ...known.hard, ...known.edge];
+const parsed = parseFixtureArgs(args, KNOWN);
+if (!parsed.ok || !Number.isFinite(maxEur) || !Number.isFinite(maxFal)) {
+  console.error(
+    `${parsed.ok ? "" : `${parsed.error}\n`}Usage: studio:poc --fixture <id> | --fixtures a,b,c | --all [--record | --replay | --bases-only] [--lenient-bases] [--picker] [--max-eur 2.00] [--max-fal 0.60]\n--all: the original five\ngoldens: ${known.golden.join(", ")}\ntwins: ${known.twins.join(", ")}\nhard: ${known.hard.join(", ")}\nedge: ${known.edge.join(", ")}`,
+  );
   process.exit(1);
 }
-if (!replay && !process.env.ANTHROPIC_API_KEY) {
-  console.error("ANTHROPIC_API_KEY is not set. Use --replay to run on the recorded answers.");
+const fixtures = parsed.fixtures;
+if (!replay && !basesOnly && !process.env.ANTHROPIC_API_KEY) {
+  console.error("ANTHROPIC_API_KEY is not set. Use --replay to run on the recorded answers, or --bases-only.");
   process.exit(2);
 }
-if (!replay && !pickerOnly && !process.env.FAL_KEY) {
+if (!replay && !basesOnly && !pickerOnly && !process.env.FAL_KEY) {
   console.error("FAL_KEY is not set (the mockup image). Use --replay, or --picker for the picker only.");
   process.exit(2);
 }
@@ -113,139 +130,136 @@ class MockupImageTransport implements ImageTransport {
   }
 }
 
-/** A fixture as the studio reads it: today's spec, the brief, the client's text, the trade word, its photo files. */
-function fixtureOf(id: string): { spec: SiteSpec; brief?: PresetBrief; corpus: string; tradeWord?: string; general?: boolean; photo: (imgId: string) => Promise<Uint8Array | undefined>; logo?: () => Promise<Uint8Array | undefined> } {
-  if (isEdgeFixture(id)) {
-    const e = edgeFixture(id);
-    return { spec: e.base, brief: e.brief, corpus: e.description, general: true, photo: async () => undefined };
-  }
-  const fx = composerFixture(id);
-  const files = loadFixture(id);
-  return {
-    spec: fx.base,
-    ...(fx.sources.brief ? { brief: fx.sources.brief } : {}),
-    corpus: fx.description,
-    ...(fx.tradeWord ? { tradeWord: fx.tradeWord } : {}),
-    photo: async (imgId) => {
-      const i = fx.base.assets.images.findIndex((x) => x.id === imgId);
-      const p = i >= 0 ? photoForImage(files.photos, fx.base.assets.images[i]!, i) : undefined;
-      return p ? new Uint8Array(await readFile(p.path)) : undefined;
-    },
-    ...(files.logoPath ? { logo: async () => new Uint8Array(await readFile(files.logoPath!)) } : {}),
-  };
-}
-
-/** The site's media: the fixture's photos and logo for its own images, the crops from `crops`. */
-async function mediaOf(id: string, spec: SiteSpec, crops: ReadonlyMap<string, Uint8Array>): Promise<Map<string, Uint8Array>> {
-  const media = new Map<string, Uint8Array>();
-  const widths = config.images.widths;
-  const fx = isEdgeFixture(id) ? null : loadFixture(id);
-  for (const [i, img] of spec.assets.images.entries()) {
-    const crop = crops.get(img.id);
-    const data = crop ?? (fx && img.origin !== "generated" ? await (async () => {
-      const p = photoForImage(fx.photos, img, i);
-      return p ? new Uint8Array(await readFile(p.path)) : undefined;
-    })() : undefined);
-    if (!data) continue;
-    const processed = await processPhoto(img.id, data, [...widths], { avif: config.images.avifQuality, webp: config.images.webpQuality });
-    for (const v of processed.variants) media.set(v.file, v.data);
-    img.width = processed.width;
-    img.height = processed.height;
-  }
-  if (spec.assets.logo && fx?.logoPath) {
-    const logo = await processLogo(new Uint8Array(await readFile(fx.logoPath)), "image/svg+xml");
-    media.set(logo.file, logo.data);
-    spec.assets.logo = { ...spec.assets.logo, file: logo.file, width: logo.width, height: logo.height };
-  }
-  return media;
-}
-
-async function shots(entries: { id: string; fixtureId: string; spec: SiteSpec; crops: ReadonlyMap<string, Uint8Array> }[]): Promise<void> {
+async function shots(browser: CheckBrowser, entries: { id: string; fx: StudioFixture; spec: SiteSpec; crops: ReadonlyMap<string, Uint8Array> }[]): Promise<void> {
   const work = await mkdtemp(path.join(tmpdir(), "sb-studio-poc-"));
   const server = await serveStatic(work);
-  const browser = await chromium.launch();
   try {
     for (const e of entries) {
       const spec = structuredClone(e.spec);
-      await writeSiteFiles(spec, await mediaOf(e.fixtureId, spec, e.crops), path.join(work, e.id));
-      await shoot(browser, e.id, `${server.url}/${e.id}/${spec.slug}/index.html`, out, null);
+      await writeSiteFiles(spec, await e.fx.media(spec, e.crops), path.join(work, e.id));
+      await shoot(browser.browser, e.id, `${server.url}/${e.id}/${spec.slug}/index.html`, out, null);
     }
   } finally {
-    await browser.close();
     await server.close();
     await rm(work, { recursive: true, force: true });
   }
 }
 
+const writeJson = (file: string, data: unknown) => writeFileSync(path.join(out, file), `${JSON.stringify(data, null, 2)}\n`);
+
 mkdirSync(out, { recursive: true });
-for (const id of fixtures) {
-  const dir = path.join(pickerOnly ? STUDIO_RECORDINGS : MOCKUP_RECORDINGS, id);
-  // Recording keeps what is still valid: a call whose request is unchanged (same hash) is answered from the recording
-  // for free, and a mockup whose prompt is unchanged is reused, so a re-run after a fix pays only for what changed.
-  let transport: ModelTransport;
-  let recorder: RecordMissingTransport | null = null;
-  if (replay) transport = new ReplayTransport(dir);
-  else transport = recorder = new RecordMissingTransport(new AnthropicTransport(), dir);
-  let recorded = 0;
-  const paid = (provider: Row["provider"]): boolean => {
-    if (replay) return false;
-    if (provider === "fal") return !images.reused;
-    const now = recorder!.stats.recorded;
-    const was = recorded;
-    recorded = now;
-    return now > was;
-  };
-  const log = (provider: Row["provider"]) => async (c: { stage: string; model: string; usage: unknown; costEur: number; durationMs: number; ok: boolean }) => {
-    const spent = paid(provider);
-    if (spent) appendFileSync(LOG, `${JSON.stringify({ at: new Date().toISOString(), provider, fixture: id, stage: c.stage, model: c.model, usage: c.usage, costEur: c.costEur, seconds: c.durationMs / 1000, ok: c.ok })}\n`);
-    console.log(`  ${c.stage} ${c.model}: €${c.costEur.toFixed(4)}${spent ? "" : " (from the recording, not spent)"}`);
-  };
-  const images = new MockupImageTransport(dir, replay ? null : new FalImageTransport());
-  // This tool's caps stand in for the daily cap: a call whose estimate would take the logged total past them is refused
-  // (SpendCapError) before it is sent, and the studio falls back.
-  const modelConfig = { ...config, limits: { ...config.limits, dailyModelSpendCapEur: maxEur } };
-  const client = new ModelClient({ config: modelConfig, transport, spentToday: async () => (replay ? 0 : logged("anthropic")), onCall: log("anthropic") });
-  const painter = new ImageGenerator({
-    config: { ...config, limits: { ...config.limits, dailyModelSpendCapEur: maxFal } },
-    transport: images,
-    spentToday: async () => (replay ? 0 : logged("fal")),
-    onCall: log("fal"),
-  });
-  const fx = fixtureOf(id);
-  const crops = new Map<string, Uint8Array>();
-  const deps: MockupDeps = {
-    painter,
-    photo: fx.photo,
-    ...(fx.logo ? { logo: fx.logo } : {}),
-    imageIds: async (n) => Array.from({ length: n }, (_, i) => `img_mock${i + 1}`),
-    store: async (imgId, jpeg) => {
-      crops.set(imgId, jpeg);
-      return `uploads/${imgId}.jpg`;
-    },
-  };
-  console.log(`${id}:`);
-  const r = await runStudio(client, modelConfig, {
-    spec: fx.spec,
-    ...(fx.brief ? { brief: fx.brief } : {}),
-    corpus: fx.corpus,
-    seed: 1,
-    ...(fx.tradeWord ? { tradeWord: fx.tradeWord } : {}),
-    ...(fx.general ? { general: true } : {}),
-    ...(pickerOnly ? {} : { mockup: deps }),
-  });
-  recorder?.finish();
-  const report = {
-    ok: r.ok,
-    ...(r.ok ? { path: r.path, idea: r.idea, stance: r.stance, presets: r.used.presets, palette: r.used.palette, pairing: r.used.pairing, wordmark: r.used.wordmark, dropped: r.dropped } : { reason: r.reason, idea: r.idea ?? null }),
-    mockup: r.mockup ?? null,
-    art: r.art ?? null,
-    eur: r.costEur,
-  };
-  writeFileSync(path.join(out, `${id}.studio.json`), `${JSON.stringify(report, null, 2)}\n`);
-  if (r.mockupImage) await writeFile(path.join(out, `${id}-mockup.jpg`), r.mockupImage);
-  const m = r.mockup;
-  console.log(`  ${m ? `mockup: ${m.ok ? `built (${m.sections?.join(", ")})` : `fell back: ${m.reason}`}${m.idea ? `\n  idea: ${m.idea}` : ""}\n  ` : ""}${r.ok ? `${r.path}: ${r.idea}${r.dropped.length ? `\n  dropped: ${r.dropped.join("; ")}` : ""}` : `today's site kept: ${r.reason}`}`);
-  if (r.ok) writeFileSync(path.join(out, `${id}.spec.json`), `${JSON.stringify(r.spec, null, 2)}\n`);
-  await shots([...(r.ok ? [{ id, fixtureId: id, spec: r.spec, crops }] : []), { id: `${id}-today`, fixtureId: id, spec: fx.spec, crops: new Map() }]);
+const browser = await launchCheckBrowser();
+const failed: string[] = [];
+try {
+  for (const id of fixtures) {
+    const kind = fixtureKind(id, known)!;
+    console.log(`${id} (${kind}):`);
+    let fx: StudioFixture;
+    try {
+      fx = kind === "twin" || kind === "hard" ? await replayedFixture(id, kind, config, browser, !lenient) : fileFixture(id, config);
+      const v = validateSite(fx.spec);
+      if (!v.ok) throw new Error(`today's spec does not validate: ${v.issues.slice(0, 4).map((i) => `${i.path} ${i.message}`).join("; ")}`);
+    } catch (e) {
+      console.error(`  FAILED: ${(e as Error).message}`);
+      failed.push(id);
+      continue;
+    }
+    writeJson(`${id}.today.spec.json`, fx.spec);
+    const home = fx.spec.pages.find((p) => p.kind === "home");
+    console.log(`  today: ${fx.note}; ${home?.sections.length ?? 0} homepage sections, ${fx.spec.assets.images.length} images${fx.brief ? ", brief" : ", no brief"}${fx.general ? ", general" : ""}`);
+    if (basesOnly) {
+      await shots(browser, [{ id: `${id}-today`, fx, spec: fx.spec, crops: new Map() }]);
+      continue;
+    }
+
+    const dir = path.join(pickerOnly ? STUDIO_RECORDINGS : MOCKUP_RECORDINGS, id);
+    // Recording keeps what is still valid: a call whose request is unchanged (same hash) is answered from the recording
+    // for free, and a mockup whose prompt is unchanged is reused, so a re-run after a fix pays only for what changed.
+    let recorder: RecordMissingTransport | null = null;
+    const inner: ModelTransport = replay ? new ReplayTransport(dir) : (recorder = new RecordMissingTransport(new AnthropicTransport(), dir));
+    const transport = new CaptureTransport(inner);
+    let recorded = 0;
+    const paid = (provider: Row["provider"]): boolean => {
+      if (replay) return false;
+      if (provider === "fal") return !images.reused;
+      const now = recorder!.stats.recorded;
+      const was = recorded;
+      recorded = now;
+      return now > was;
+    };
+    const log = (provider: Row["provider"]) => async (c: { stage: string; model: string; usage: unknown; costEur: number; durationMs: number; ok: boolean }) => {
+      const spent = paid(provider);
+      if (spent) appendFileSync(LOG, `${JSON.stringify({ at: new Date().toISOString(), provider, fixture: id, stage: c.stage, model: c.model, usage: c.usage, costEur: c.costEur, seconds: c.durationMs / 1000, ok: c.ok })}\n`);
+      console.log(`  ${c.stage} ${c.model}: €${c.costEur.toFixed(4)}${spent ? "" : " (from the recording, not spent)"}`);
+    };
+    const images = new MockupImageTransport(dir, replay ? null : new FalImageTransport());
+    const imageCapture = new CaptureImageTransport(images);
+    // This tool's caps stand in for the daily cap: a call whose estimate would take the logged total past them is refused
+    // (SpendCapError) before it is sent, and the studio falls back.
+    const modelConfig = { ...config, limits: { ...config.limits, dailyModelSpendCapEur: maxEur } };
+    const client = new ModelClient({ config: modelConfig, transport, spentToday: async () => (replay ? 0 : logged("anthropic")), onCall: log("anthropic") });
+    const painter = new ImageGenerator({
+      config: { ...config, limits: { ...config.limits, dailyModelSpendCapEur: maxFal } },
+      transport: imageCapture,
+      spentToday: async () => (replay ? 0 : logged("fal")),
+      onCall: log("fal"),
+    });
+    const crops = new Map<string, Uint8Array>();
+    const deps: MockupDeps = {
+      painter,
+      photo: fx.photo,
+      ...(fx.logo ? { logo: fx.logo } : {}),
+      imageIds: async (n) => Array.from({ length: n }, (_, i) => `img_mock${i + 1}`),
+      store: async (imgId, jpeg) => {
+        crops.set(imgId, jpeg);
+        return `uploads/${imgId}.jpg`;
+      },
+    };
+    const r = await runStudio(client, modelConfig, {
+      spec: fx.spec,
+      ...(fx.brief ? { brief: fx.brief } : {}),
+      corpus: fx.corpus,
+      seed: 1,
+      ...(fx.tradeWord ? { tradeWord: fx.tradeWord } : {}),
+      ...(fx.general ? { general: true } : {}),
+      ...(pickerOnly ? {} : { mockup: deps }),
+    });
+    recorder?.finish();
+    const report = {
+      ok: r.ok,
+      ...(r.ok ? { path: r.path, idea: r.idea, stance: r.stance, presets: r.used.presets, palette: r.used.palette, pairing: r.used.pairing, wordmark: r.used.wordmark, dropped: r.dropped } : { reason: r.reason, idea: r.idea ?? null }),
+      mockup: r.mockup ?? null,
+      art: r.art ?? null,
+      eur: r.costEur,
+    };
+    writeJson(`${id}.studio.json`, report);
+    if (r.mockupImage) await writeFile(path.join(out, `${id}-mockup.jpg`), r.mockupImage);
+    const prompts: PromptsFile = {
+      fixture: id,
+      at: new Date().toISOString(),
+      calls: transport.calls,
+      mockup: imageCapture.last ? { ...imageCapture.last, image: `${id}-mockup.jpg` } : null,
+    };
+    writeJson(`${id}.prompts.json`, prompts);
+    if (crops.size) {
+      mkdirSync(path.join(out, `${id}-crops`), { recursive: true });
+      for (const [imgId, jpeg] of crops) writeFileSync(path.join(out, `${id}-crops`, `${imgId}.jpg`), jpeg);
+    }
+    const m = r.mockup;
+    console.log(`  ${m ? `mockup: ${m.ok ? `built (${m.sections?.join(", ")})` : `fell back: ${m.reason}`}${m.idea ? `\n  idea: ${m.idea}` : ""}\n  ` : ""}${r.ok ? `${r.path}: ${r.idea}${r.dropped.length ? `\n  dropped: ${r.dropped.join("; ")}` : ""}` : `today's site kept: ${r.reason}`}`);
+    console.log(`  prompts: ${transport.calls.length} model call(s)${imageCapture.last ? `, mockup prompt with ${imageCapture.last.references} reference image(s)` : ""}; crops: ${crops.size}`);
+    if (r.ok) writeJson(`${id}.spec.json`, r.spec);
+    await shots(browser, [...(r.ok ? [{ id, fx, spec: r.spec, crops }] : []), { id: `${id}-today`, fx, spec: fx.spec, crops: new Map() }]);
+  }
+} finally {
+  await browser.close();
 }
-console.log(replay ? "replayed" : `logged so far: Anthropic €${logged("anthropic").toFixed(4)} of €${maxEur}, fal €${logged("fal").toFixed(4)} of €${maxFal}; shots in ${path.relative(repoRoot, out)}`);
+if (failed.length) console.error(`failed: ${failed.join(", ")}`);
+console.log(
+  basesOnly
+    ? `bases: ${fixtures.length - failed.length} of ${fixtures.length} built; in ${path.relative(repoRoot, out)}`
+    : replay
+      ? "replayed"
+      : `logged so far: Anthropic €${logged("anthropic").toFixed(4)} of €${maxEur}, fal €${logged("fal").toFixed(4)} of €${maxFal}; shots in ${path.relative(repoRoot, out)}`,
+);
+if (failed.length) process.exitCode = 1;

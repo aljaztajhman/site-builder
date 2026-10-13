@@ -1,0 +1,18 @@
+{
+  "seq": 4,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "53974bb1a8361285",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\",\"tone\":\"default\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Foto Rozman – fotograf v Murski Soboti\",\"description\":\"Fotograf Tilen Rozman iz Murske Sobote: poroke, družine, nosečnice, novorojenčki, poslovni portreti in izdelki. Naravna svetloba, sproščene fotografije.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-split\",\"variant\":\"image-left\",\"tone\":\"default\",\"props\":{\"eyebrow\":\"Fotograf iz Murske Sobote\",\"headline\":\"Sproščene fotografije v naravni svetlobi\",\"intro\":\"Fotografiram poroke, družine, nosečnice, novorojenčke, poslovne portrete in izdelke. Brez dolgega postavljanja, s svetlobo, ki je že v prostoru.\",\"primary\":{\"label\":\"Pošljite povpraševanje\",\"target\":{\"action\":\"email\"}},\"secondary\":{\"label\":\"Poglejte cene\",\"target\":{\"page\":\"p_home\",\"section\":\"s_cene\"}},\"image\":\"img_g1\"}},{\"id\":\"s_cene\",\"type\":\"price-list\",\"variant\":\"tags\",\"tone\":\"alt\",\"props\":{\"title\":\"Izbrane cene\",\"intro\":\"Cene za fotografiranja, ki jih največkrat izberete. Za nosečnice in izdelke me pokličite za ponudbo.\",\"groups\":[{\"items\":[{\"name\":\"Poroka, cel dan (od)\",\"note\":\"Galerija v 6 tednih\",\"price\":{\"amount\":1200,\"from\":true}},{\"name\":\"Družinsko fotografiranje\",\"note\":\"Galerija v 3 tednih\",\"price\":{\"amount\":150}},{\"name\":\"Fotografiranje novorojenčkov\",\"note\":\"Galerija v 3 tednih\",\"price\":{\"amount\":180}},{\"name\":\"Poslovni portret\",\"note\":\"Galerija v 3 tednih\",\"price\":{\"amount\":60}}]}]}},{\"id\":\"s_storitve\",\"type\":\"services-list\",\"variant\":\"rows\",\"tone\":\"default\",\"props\":{\"title\":\"Kaj fotografiram\",\"intro\":\"Obdelane fotografije prejmete v spletni galeriji, za poroke v 6 tednih, za ostalo v 3 tednih.\",\"items\":[{\"name\":\"Poroke\",\"description\":\"Fotografiranje celega dne. Datum se dogovori vsaj pol leta prej.\"},{\"name\":\"Družine\",\"description\":\"Sproščeno fotografiranje, kjer se otroci in starši počutijo domače.\"},{\"name\":\"Nosečnice\",\"description\":\"Nežne fotografije za spomin na čas pričakovanja.\"},{\"name\":\"Novorojenčki\",\"description\":\"Mirno fotografiranje najmanjših.\"},{\"name\":\"Poslovni portreti\",\"description\":\"Portreti za podjetnike in ekipe.\"},{\"name\":\"Izdelki za spletne trgovine\",\"description\":\"Fotografije izdelkov, primerne za vašo spletno trgovino.\"}]}},{\"id\":\"s_o_meni\",\"type\":\"image-text\",\"variant\":\"image-right\",\"tone\":\"alt\",\"props\":{\"eyebrow\":\"Moj način dela\",\"heading\":\"Naravna svetloba, brez dolgega postavljanja\",\"paragraphs\":[\"Sem Tilen Rozman. Fotografiram po Prekmurju, Štajerski in Hrvaški ter fotografiral sem več kot 150 porok.\",\"Rad imam naravno svetlobo in trenutke, ki se zgodijo sami od sebe. Fotografiranje v studiu je mogoče samo po dogovoru.\"],\"image\":\"img_g2\"}},{\"id\":\"s_cta\",\"type\":\"cta\",\"variant\":\"band\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Načrtujete fotografiranje?\",\"text\":\"Za poroke se dogovorite vsaj pol leta prej. Napišite mi, kaj iščete, in odgovorim vam.\",\"primary\":{\"label\":\"Pišite mi\",\"target\":{\"action\":\"email\"}}}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2845,
+      "output_tokens": 1428,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

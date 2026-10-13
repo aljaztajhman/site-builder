@@ -1,0 +1,18 @@
+{
+  "seq": 4,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "a65fdb0ebe028144",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Veterinarska ambulanta Šapa, Ajdovščina\",\"description\":\"Veterinarska ambulanta v Ajdovščini za pse, mačke, zajce in druge male živali. Pregledi, cepljenja, operacije. Nujni primeri imajo prednost.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"disc\",\"props\":{\"headline\":\"Nujni primeri imajo prednost\",\"intro\":\"Skrbimo za pse, mačke, zajce in druge male živali iz Ajdovščine in okolice. Na pregled se naročite po telefonu.\",\"fact\":\"phone\",\"factLabel\":\"Naročite se po telefonu\",\"factNote\":\"Za nujne primere smo dosegljivi tudi izven ordinacijskega časa.\",\"image\":\"img_g1\",\"secondary\":{\"label\":\"Pišite nam\",\"target\":{\"action\":\"email\"}}}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"week\",\"tone\":\"alt\",\"props\":{\"title\":\"Ordinacijski čas ambulante\",\"note\":\"Na pregled se naročite po telefonu. Nujni primeri imajo prednost.\"}},{\"id\":\"s_services\",\"type\":\"services-list\",\"variant\":\"aside\",\"props\":{\"title\":\"Kaj vse delamo\",\"items\":[{\"name\":\"Preventivni pregledi\"},{\"name\":\"Cepljenje psa proti steklini\"},{\"name\":\"Čipiranje\"},{\"name\":\"Potni listi za hišne ljubljenčke\"},{\"name\":\"Ultrazvok\"},{\"name\":\"Rentgen\"},{\"name\":\"Laboratorij\"},{\"name\":\"Zobozdravstvo\"},{\"name\":\"Operacije\"},{\"name\":\"Kastracija mačka\"}],\"note\":{\"title\":\"Cene\",\"text\":\"Cene storitev, ki smo jih navedli, so v cenovnem pregledu spodaj. Za preostale vas prosimo, da nas pokličete.\"}}},{\"id\":\"s_price\",\"type\":\"price-list\",\"variant\":\"table\",\"props\":{\"title\":\"Cene, ki jih že lahko navedemo\",\"groups\":[{\"items\":[{\"name\":\"Cepljenje psa proti steklini\",\"price\":{\"amount\":35}},{\"name\":\"Čipiranje\",\"price\":{\"amount\":30}},{\"name\":\"Kastracija mačka\",\"price\":{\"amount\":60,\"from\":true}}]}]}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"inverse\",\"props\":{\"title\":\"Pokličite nas in se naročite\",\"intro\":\"Na pregled se naročite po telefonu. Parkirišče je pred ambulanto.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 3045,
+      "output_tokens": 992,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

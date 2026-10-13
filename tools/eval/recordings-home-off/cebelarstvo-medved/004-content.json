@@ -1,0 +1,18 @@
+{
+  "seq": 4,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "e450dc3dd7d55a59",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Domač med iz Radovljice | Čebelarstvo Medved\",\"description\":\"Lasten domač med, propolis, cvetni prah in svečke iz voska neposredno od čebelarja Franca Medveda v Radovljici. Pošiljamo po vsej Sloveniji.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"label\",\"tone\":\"inverse\",\"props\":{\"eyebrow\":\"Prodaja na domu\",\"headline\":\"Domač med od čebelarja\",\"intro\":\"Prodajamo samo lasten med, propolis, cvetni prah in svečke iz voska. Čebelarimo že 32 let.\",\"fact\":\"address\",\"primary\":{\"label\":\"Darilna škatla\",\"target\":{\"page\":\"p_home\",\"section\":\"s_gift\"}},\"secondary\":{\"label\":\"Naši medovi\",\"target\":{\"page\":\"p_home\",\"section\":\"s_prices\"}},\"image\":\"img_g1\"}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"week\",\"props\":{\"title\":\"Kdaj nas najdete\",\"note\":\"Ob nedeljah samo, če prej pokličete.\"}},{\"id\":\"s_gift\",\"type\":\"image-text\",\"variant\":\"round\",\"tone\":\"alt\",\"props\":{\"eyebrow\":\"Za darilo\",\"heading\":\"Lesena darilna škatla s tremi kozarčki\",\"paragraphs\":[\"Tri vrste našega medu v leseni škatli. Cena po dogovoru.\",\"Za naročilo nas pokličite, škatlo pa lahko pošljemo tudi po pošti po Sloveniji.\"],\"link\":{\"label\":\"Naročite po telefonu\",\"target\":{\"action\":\"call\"}},\"image\":\"img_g2\"}},{\"id\":\"s_prices\",\"type\":\"price-list\",\"variant\":\"tags\",\"props\":{\"title\":\"Naši medovi\",\"intro\":\"Prodajamo izključno med iz lastnega čebelarstva, z dveh stojišč: pod Jelovico in doma za hišo.\",\"groups\":[{\"items\":[{\"name\":\"Cvetlični med\",\"note\":\"450 g\",\"price\":{\"amount\":7}},{\"name\":\"Gozdni med\",\"note\":\"450 g\",\"price\":{\"amount\":8}},{\"name\":\"Akacijev med\",\"note\":\"450 g\",\"price\":{\"amount\":9}},{\"name\":\"Kostanjev med\",\"note\":\"900 g\",\"price\":{\"amount\":15}}]}]}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"inverse\",\"props\":{\"title\":\"Pokličite za naročilo ali obisk\",\"intro\":\"Med prodajamo na domu, pošiljamo pa ga po pošti po Sloveniji.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2983,
+      "output_tokens": 991,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}
