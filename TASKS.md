@@ -340,6 +340,7 @@ Owner, 2026-10-10: get the most out of agents, develop more efficiently, keep or
 - [ ] First project: the design studio's free phases in Mode D/W (agent-team.md §9); each PR records mode, agents, hours, first-push CI, reviewer catches
 - [ ] After about 10 team PRs: compare with the last 10 solo PRs (agent-team.md §8), write the result in HQ, adjust the score
 - [ ] Owner: confirm Claude Code isn't billed through the product's API key (HQ `it-claude-code-billing`)
+- [x] Test speed (PR 211; HQ `it-test-speed`, owner 2026-10-12 "these tests are waay too long"): tools/eval took 55 min locally, 3746 s in a cloud container at --maxWorkers=1; CI test shards 16.5–19.1 min of a 20-min timeout. Fix: disk cache for processed fixture photos in tests (processPhoto ~10 s per photo, redone in every file), fast tier (`pnpm test`) vs slow tier (`// @module-tag slow`, `pnpm test:slow`, its own CI job); builders run the fast tier plus the files they touched. Target: tools/eval fast tier < 3 min. Done 2026-10-12: tools/eval fast tier 47 s, whole-repo fast tier 417 s (was 3746 s + 1725 s); the slow tier runs in CI (`test-slow`, 3 shards), not yet run in full there. Open: first CI run's shard times, branch-protection check names
 
 ## After 1.0: development rules and analytics (proposals 2026-10-04; HQ `sb-dev-workflow`, `sb-analytics`)
 Development rules: docs/dev/workflow.md. Analytics: docs/plans/analytics.md. Nothing below starts before the owner decides; the order is the one in each document.

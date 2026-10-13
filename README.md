@@ -17,8 +17,9 @@ No Docker? Set `DATABASE_URL=pglite://./.data/pg` and `STORAGE_DRIVER=fs` in `.e
 
 | Command | What |
 | --- | --- |
-| `pnpm test` | Unit tests. No network; model responses come from recordings. |
-| `pnpm typecheck`, `pnpm lint` | CI runs these plus `pnpm test` on every PR. |
+| `pnpm test` | Fast tier: unit tests and cheap browser checks. No network; model responses come from recordings. |
+| `pnpm test:slow`, `pnpm test:all` | Slow tier (browser suites, generation replays; files marked `// @module-tag slow`) / both tiers. See docs/dev/agent-team.md, "Test tiers". |
+| `pnpm typecheck`, `pnpm lint` | CI runs these plus `pnpm test` and `pnpm test:slow` on every PR. |
 | `pnpm eval [--only <id>]` | Generates the 10 fixtures with real model calls, applies the scripted edits, writes `eval/report.md` and `eval/contact-sheet.png` (`--scope home`: `report-home.md`; with `--only`: `eval/runs/`, so the baseline stays). Costs money. |
 | `pnpm eval --offline` | Same checks on hand-authored golden specs, no model calls (`eval/offline-report.md`). |
 | `pnpm eval --record` / `--replay` | Record model exchanges for tests / replay them. |

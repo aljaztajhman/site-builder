@@ -1,5 +1,6 @@
 import sharp from "sharp";
 import { SHARE_IMAGE, variantFile, variantWidths } from "@sb/render";
+import { getProcessPhotoCache, photoCacheKey, type CachedPhoto } from "./photo-cache.ts";
 
 export interface ProcessedImage {
   width: number;
@@ -13,8 +14,39 @@ export interface ProcessedImage {
  */
 export const MAX_INPUT_PIXELS = 60_000_000;
 
-/** Normalises orientation and writes AVIF + WebP variants at the configured widths. */
+const AVIF_EFFORT = 4;
+
+/** Key processPhoto uses in an installed ProcessPhotoCache: input bytes, widths, qualities and the sharp/libvips build. */
+export function processPhotoCacheKey(data: Uint8Array, widths: number[], quality: { avif: number; webp: number }): string {
+  // encodePhoto's own source is part of the key, so editing the encode needs no manual bump of PHOTO_CACHE_FORMAT.
+  return photoCacheKey(data, { widths, avif: quality.avif, webp: quality.webp, avifEffort: AVIF_EFFORT, maxPixels: MAX_INPUT_PIXELS, sharp: sharp.versions, encode: encodePhoto.toString() });
+}
+
+/**
+ * Normalises orientation and writes AVIF + WebP variants at the configured widths. With a ProcessPhotoCache installed
+ * (tests only, see photo-cache.ts) an input already encoded with the same settings is served from it; only successful
+ * encodes are stored, so an input that fails (a decompression bomb) always goes through the checks below.
+ */
 export async function processPhoto(id: string, data: Uint8Array, widths: number[], quality: { avif: number; webp: number }): Promise<ProcessedImage> {
+  const cache = getProcessPhotoCache();
+  const key = cache ? processPhotoCacheKey(data, widths, quality) : "";
+  let encoded = cache ? await cache.get(key) : null;
+  // The variant list comes from variantWidths (@sb/render), which the key doesn't cover: an entry that no longer matches is a miss.
+  if (encoded && !sameVariants(encoded, widths)) encoded = null;
+  if (!encoded) {
+    encoded = await encodePhoto(data, widths, quality);
+    if (cache) await cache.put(key, encoded);
+  }
+  return { width: encoded.width, height: encoded.height, variants: encoded.variants.map((v) => ({ file: variantFile(id, v.width, v.format), data: v.data })) };
+}
+
+function sameVariants(c: CachedPhoto, widths: number[]): boolean {
+  const want = variantWidths({ width: c.width }, widths).flatMap((w) => [`${w}.avif`, `${w}.webp`]);
+  const got = c.variants.map((v) => `${v.width}.${v.format}`);
+  return want.length === got.length && want.every((x, i) => x === got[i]);
+}
+
+async function encodePhoto(data: Uint8Array, widths: number[], quality: { avif: number; webp: number }): Promise<CachedPhoto> {
   const base = sharp(data, { failOn: "error", limitInputPixels: MAX_INPUT_PIXELS }).rotate();
   const meta = await base.metadata();
   // After rotate(), width/height of the output follow the EXIF orientation.
@@ -22,11 +54,11 @@ export async function processPhoto(id: string, data: Uint8Array, widths: number[
   const width = (swap ? meta.height : meta.width) ?? 0;
   const height = (swap ? meta.width : meta.height) ?? 0;
   if (!width || !height) throw new Error("Unreadable image");
-  const variants: ProcessedImage["variants"] = [];
+  const variants: CachedPhoto["variants"] = [];
   for (const w of variantWidths({ width }, widths)) {
     const resized = base.clone().resize({ width: w, withoutEnlargement: true });
-    variants.push({ file: variantFile(id, w, "avif"), data: await resized.clone().avif({ quality: quality.avif, effort: 4 }).toBuffer() });
-    variants.push({ file: variantFile(id, w, "webp"), data: await resized.clone().webp({ quality: quality.webp }).toBuffer() });
+    variants.push({ width: w, format: "avif", data: await resized.clone().avif({ quality: quality.avif, effort: AVIF_EFFORT }).toBuffer() });
+    variants.push({ width: w, format: "webp", data: await resized.clone().webp({ quality: quality.webp }).toBuffer() });
   }
   return { width, height, variants };
 }

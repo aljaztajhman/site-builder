@@ -1,3 +1,4 @@
+// @module-tag slow
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { gzipSync } from "node:zlib";
 import { MOTIONS, MOTION_META } from "@sb/spec";
