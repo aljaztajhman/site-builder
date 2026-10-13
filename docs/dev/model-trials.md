@@ -44,3 +44,16 @@ Costs from session c60f7eb8 (design studio), 2026-10-11. Earlier units ran at ef
 | F1b-R1 renderer section level | opus · medium | code, design-heavy | — | ≈ 270k tokens | 19 + 20 min | yes; browser check found a v19 overlap (not R1) | design G26 | — |
 
 First reading (2026-10-11): on the paired unit Sonnet used ≈ 20 % fewer tokens and was faster but missed two requirements Opus caught; as implementer against fixed failing tests (F1b-2b) Sonnet delivered clean. $ per row to be filled from `pnpm agents:costs` at the next run.
+
+### 2026-10-11, second batch (tokens from the agent reports; $ at the next agents:costs run)
+
+| Unit | Model · effort | Kind | Tokens | Wall-clock | First report passes | Director fix-up | Later findings |
+|---|---|---|---:|---:|---|---|---|
+| F1b-R2 new kinds renderer | opus · medium | code, design-heavy | ≈ 307k + 17k fix round | 7 + 10 min | yes; 3 issues after my screenshot review (1 was my misread) | label + caption fixes by the same agent | — |
+| F1b-R3 extensions renderer | **sonnet · high** (trial) | code, design-heavy | ≈ 376k | 23 min | yes (66 new tests, browser check); flagged a date-sensitive golden and budget | merge conflicts with R2; drawing renderer duplicated (unified in F1b-A1) | — |
+| I8-fix stances onto asset ids | sonnet · medium | code, exact list | ≈ 127k | 6 min | yes (1,726 tests) | 1 mapping (index-card → menu) | — |
+| INV-1b sheets | sonnet · medium | code, spec'd | ≈ 184k | 9 min | yes (592 tests, real sheet runs) | 0 | — |
+| I3-0 preset format | opus · medium | code, design | ≈ 247k | 13 min | yes (spec 638, inventory 598, browser) | 0 | — |
+
+Reading so far: Sonnet at **medium** on exact-list and spec'd units (F1b-2b, I8-fix, INV-1b) delivered clean at the lowest token counts. Sonnet at **high** (R3) used ≈ 1.4× the tokens of Opus medium on a comparable renderer unit (R1 ≈ 261k) for similar quality — no case for lifting the medium cap yet. Opus keeps design-heavy and paired-trial wins (F1b-3).
+
