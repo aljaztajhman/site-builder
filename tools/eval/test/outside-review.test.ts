@@ -397,6 +397,21 @@ describe("claude reviewer", () => {
     expect((err as ReviewHttpError).refusedBeforeRun).toBe(true);
   });
 
+  it("in a batch, an error status after the batch was created is booked at its worst case, not taken as refused", async () => {
+    const batchingEngine = { ...engine([Object.assign(new Error("rate limited while polling"), { status: 429 })]), drain: async () => {} };
+    const t = new ClaudeReviewTransport(claude, batchingEngine as never);
+    const err = await t.complete(buildRequest(claude, await preparePage(items[0]!))).catch((x: unknown) => x);
+    expect(err).not.toBeInstanceOf(ReviewHttpError);
+    const body = buildRequest(claude, await preparePage(items[0]!));
+    const worst = estimateCall(config, claude, body).worstEur;
+    const failing: OutsideTransport = { paid: true, complete: () => t.complete(body), drain: async (w) => void (await Promise.allSettled(w)) };
+    const lines: Record<string, unknown>[] = [];
+    const run = await runReview({ config, reviewers: [claude], items: [items[0]!], transport: failing, maxEur: 5, onCost: (l) => lines.push(l as never) });
+    expect(run.results.claude!["item-a"]).toMatchObject({ status: "failed" });
+    expect(lines).toHaveLength(1);
+    expect(run.spentEur).toBeCloseTo(worst, 10);
+  });
+
   it("needs ANTHROPIC_API_KEY for a live run", () => {
     expect(() => makeTransport({ baseUrl: "https://x", env: {}, reviewer: claude })).toThrow(/ANTHROPIC_API_KEY/);
   });
@@ -453,6 +468,44 @@ describe("claude reviewer", () => {
     const poor = await runReview({ config, reviewers: [claude], items, transport: none, maxEur: 0.0001, onCost: () => {} });
     expect(none.calls).toBe(0);
     expect(poor.results.claude).toEqual({ "item-a": { status: "skipped" }, "item-b": { status: "skipped" } });
+  });
+
+  it("an invalid answer whose retry doesn't fit the wave fails only that page; the next wave still goes", async () => {
+    const worst = estimateCall(config, claude, buildRequest(claude, await preparePage(items[0]!))).worstEur;
+    let n = 0;
+    // Answers one queued request per round, so page b's call is still reserved when page a's invalid answer is
+    // retried: the retry doesn't fit right then.
+    const queue: (() => void)[] = [];
+    const t: OutsideTransport = {
+      paid: true,
+      complete: () => new Promise((resolve) => queue.push(() => resolve(n++ === 0 ? result("not json", { prompt_tokens: 1000, completion_tokens: 100 }) : result(answer(4, 4), { prompt_tokens: 1000, completion_tokens: 100 })))),
+      async drain(work) {
+        let done = false;
+        const all = Promise.allSettled(work).then(() => void (done = true));
+        while (!done) {
+          await new Promise((r) => setTimeout(r, 5));
+          queue.shift()?.();
+          await Promise.race([all, new Promise((r) => setTimeout(r, 5))]);
+        }
+      },
+    };
+    const three = [items[0]!, { ...items[0]!, id: "item-b" }, { ...items[0]!, id: "item-c" }]; // the same page, the same worst case
+    const run = await runReview({ config, reviewers: [claude], items: three, transport: t, maxEur: worst * 2 + 0.001, onCost: () => {} });
+    expect(run.results.claude!["item-a"]).toMatchObject({ status: "failed", reason: expect.stringMatching(/before the retry/) });
+    expect(run.results.claude!["item-b"]).toMatchObject({ status: "ok" });
+    expect(run.results.claude!["item-c"]).toMatchObject({ status: "ok" });
+    expect(run.stoppedByBudget).toBe(false);
+  });
+
+  it("asks a transport factory once per reviewer, so a batch's queue and its drain are the same object", async () => {
+    let made = 0;
+    const factory = () => {
+      made++;
+      return batching(() => result(answer(4, 4), { prompt_tokens: 1000, completion_tokens: 100 }));
+    };
+    const run = await runReview({ config, reviewers: [claude], items, transport: factory, maxEur: 50, onCost: () => {} });
+    expect(made).toBe(1);
+    expect(scoresFor(run, "claude")).toEqual({ "item-a": 4, "item-b": 4 });
   });
 
   it("runs OpenRouter and batching reviewers in one run, each through its own transport", async () => {

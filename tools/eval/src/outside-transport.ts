@@ -182,9 +182,14 @@ export class ClaudeReviewTransport implements OutsideTransport {
 
   constructor(
     private readonly reviewer: ClaudeReviewer,
-    private readonly inner: ModelTransport & { drain?(work: Promise<unknown>[]): Promise<void> },
+    private readonly inner: ModelTransport & { drain?(work: Promise<unknown>[]): Promise<void>; batches?: readonly string[] },
   ) {
     if (inner.drain) this.drain = (work) => inner.drain!(work);
+  }
+
+  /** The Message Batches sent so far (ids, for the Console when a run is interrupted). */
+  get batches(): readonly string[] {
+    return this.inner.batches ?? [];
   }
 
   async complete(body: ChatBody): Promise<ChatResult> {
@@ -211,8 +216,11 @@ export class ClaudeReviewTransport implements OutsideTransport {
     try {
       res = await this.inner.send(req, stage);
     } catch (e) {
+      // Only a direct call's error status means the request was refused before the model ran. In a batch, an error
+      // status can come from polling or reading results after the batch was created and billed: a plain Error, so
+      // runReview books it at its worst case.
       const status = (e as { status?: unknown }).status;
-      if (typeof status === "number") throw new ReviewHttpError(status, `${body.model}: HTTP ${status} ${(e as Error).message.slice(0, 300)}`);
+      if (typeof status === "number" && !this.drain) throw new ReviewHttpError(status, `${body.model}: HTTP ${status} ${(e as Error).message.slice(0, 300)}`);
       throw e;
     }
     const u = res.usage;

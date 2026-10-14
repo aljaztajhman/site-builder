@@ -134,6 +134,9 @@ const imagesIn = (body: ChatBody) => body.messages.reduce((n, m) => n + (typeof 
 const charsIn = (body: ChatBody) =>
   body.messages.reduce((n, m) => n + (typeof m.content === "string" ? m.content.length : m.content.reduce((k, p) => k + (p.type === "text" ? p.text.length : 0), 0)), 0);
 
+/** Under the Message Batches API's 256 MB request limit. */
+const MAX_BATCH_BYTES = 200_000_000;
+
 /** An Anthropic reviewer in Message Batches pays `batchPriceFactor` of the list price. */
 const priceFactor = (config: AppConfig, reviewer: Reviewer) => (reviewer.provider === "anthropic" && reviewer.batch ? config.batchPriceFactor : 1);
 
@@ -235,10 +238,11 @@ export interface ReviewRun {
 }
 
 /**
- * Asks every reviewer about every item (item by item, so a budget stop leaves whole items). Before each call it
- * checks that what is spent plus the call's estimate stays within `maxEur`; otherwise the run stops and the rest is
- * "skipped". An invalid answer is asked for once more; a second one fails the item (never a made-up score). Each call
- * is passed to `onCost`.
+ * Asks every reviewer about every item: reviewers that answer one call at a time item by item (a budget stop leaves
+ * whole items for them), then each batching reviewer in waves. Before each call it checks that what is spent, plus
+ * what in-flight calls reserve, plus the call's worst case stays within `maxEur`; otherwise the run stops and the rest
+ * is "skipped" (a reviewer stopped earlier than another leaves pages the filter calls "unreviewed"). An invalid
+ * answer is asked for once more; a second one fails the item (never a made-up score). Each call is passed to `onCost`.
  */
 export async function runReview(o: {
   config: AppConfig;
@@ -254,7 +258,13 @@ export async function runReview(o: {
   const now = o.now ?? (() => new Date());
   const run: ReviewRun = { results: {}, spentEur: 0, calls: 0, stoppedByBudget: false };
   for (const r of o.reviewers) run.results[r.id] = {};
-  const transportOf = (r: Reviewer) => (typeof o.transport === "function" ? o.transport(r) : o.transport);
+  // One transport per reviewer for the whole run: a batching transport's queue and its drain must be the same object.
+  const transports = new Map<string, OutsideTransport>();
+  const transportOf = (r: Reviewer) => {
+    let t = transports.get(r.id);
+    if (!t) transports.set(r.id, (t = typeof o.transport === "function" ? o.transport(r) : o.transport));
+    return t;
+  };
   /** The worst case of the calls sent and not yet booked (a batch's pages wait together). */
   let reservedEur = 0;
 
@@ -270,11 +280,13 @@ export async function runReview(o: {
    * the guard never undercounts; one the provider refused before the model ran (a 4xx but 408) is not booked. An
    * answer reused from a recording is booked at € 0.
    */
-  const ask = async (r: Reviewer, itemId: string, body: ChatBody): Promise<ChatResult | null> => {
+  const ask = async (r: Reviewer, itemId: string, body: ChatBody, opts: { retry?: boolean } = {}): Promise<ChatResult | null> => {
     const t = transportOf(r);
     const est = estimateCall(o.config, r, body);
     if (run.stoppedByBudget || run.spentEur + reservedEur + est.worstEur > o.maxEur) {
-      run.stoppedByBudget = true;
+      // A retry that doesn't fit fails its page only: in a batch wave the room is still held by the wave's other
+      // calls and comes back when they are booked.
+      if (!opts.retry) run.stoppedByBudget = true;
       return null;
     }
     reservedEur += est.worstEur;
@@ -322,7 +334,7 @@ export async function runReview(o: {
               { role: "user", content: `That answer was not valid (${problem}). Answer again with only the JSON object in the schema.` },
             ],
           };
-          const again = await ask(r, item.id, retry);
+          const again = await ask(r, item.id, retry, { retry: true });
           if (!again) {
             problem = `stopped by --max-eur before the retry (${problem})`;
             break;
@@ -365,12 +377,17 @@ export async function runReview(o: {
       const room = o.maxEur - run.spentEur;
       const wave: { item: ReviewItem; parts: Part[] }[] = [];
       let worst = 0;
+      let bytes = 0;
       for (const item of pending) {
         const parts = await partsOf(item);
-        const w = estimateCall(o.config, r, buildRequest(r, parts)).worstEur;
-        if (worst + w > room) break;
+        const body = buildRequest(r, parts);
+        const w = estimateCall(o.config, r, body).worstEur;
+        // The Message Batches API takes at most 256 MB per batch; a page is about 3 MB of base64 screenshots.
+        const b = JSON.stringify(body).length;
+        if (worst + w > room || (wave.length && bytes + b > MAX_BATCH_BYTES)) break;
         wave.push({ item, parts });
         worst += w;
+        bytes += b;
       }
       if (!wave.length) {
         run.stoppedByBudget = true;
@@ -379,6 +396,8 @@ export async function runReview(o: {
       pending = pending.slice(wave.length);
       o.onProgress?.(`${r.id}: sending ${wave.length} page(s) as one batch (worst case €${worst.toFixed(2)}, €${room.toFixed(2)} left)`);
       await t.drain!(wave.map(({ item, parts }) => reviewOne(r, item, parts)));
+      const ids = (t as { batches?: readonly string[] }).batches;
+      if (ids?.length) o.onProgress?.(`${r.id}: batches so far ${ids.join(", ")}`);
     }
     for (const item of pending) run.results[r.id]![item.id] ??= { status: "skipped" };
   }
