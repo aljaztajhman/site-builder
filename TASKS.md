@@ -340,8 +340,7 @@ Owner, 2026-10-10: get the most out of agents, develop more efficiently, keep or
 - [ ] First project: the design studio's free phases in Mode D/W (agent-team.md §9); each PR records mode, agents, hours, first-push CI, reviewer catches
 - [ ] After about 10 team PRs: compare with the last 10 solo PRs (agent-team.md §8), write the result in HQ, adjust the score
 - [ ] Owner: confirm Claude Code isn't billed through the product's API key (HQ `it-claude-code-billing`)
-- [x] HQ as a one-screen CEO view (owner 2026-10-14: "too information heavy"; no overnight work any more): source `tools/hq/index.html`, `meta/dashboard` rewritten each run, agent numbers from `tools/hq/agent-stats.mjs`. First count: 68 sub-agents since 29 Sep, 34 % of output; before the 11 Oct rules 41 of 56 were untyped Opus, since then 5 of 12 on Haiku, the Sonnet implementer unused
-- [ ] Publish `tools/hq/index.html` to the HQ URL and seed `meta/dashboard` from its snapshot (needs a session with the Artifact tools; the T3 Code session on 2026-10-14 had none)
+- [x] HQ as a one-screen CEO view (owner 2026-10-14: "too information heavy"; no overnight work any more; T3 Code can't open artifacts, so HQ moved into the repo): page `tools/hq/index.html`, served by `node tools/hq/serve.mjs` for the T3 preview, data in `.hq/data.js` (gitignored) rewritten each run, agent numbers from `tools/hq/agent-stats.mjs`. First count: 68 sub-agents since 29 Sep, 34 % of output; before the 11 Oct rules 41 of 56 were untyped Opus, since then 5 of 12 on Haiku, the Sonnet implementer unused
 - [ ] The Sonnet implementer has 0 launches since the team rules: route the next test-covered unit to it and compare
 - [ ] Open a PR for `claude/stepper-studio-step` (studio step in the generation stepper, full-screen viewer; one commit from 2026-10-12, never opened)
 - [ ] Remove the ~55 stale worktrees under `.claude/worktrees/` whose branches are merged (owner OK first: not all were created in one run)
