@@ -81,7 +81,7 @@ describe("request", () => {
   it("sends the judge's system prompt and four screenshot groups as data URLs, in order", async () => {
     const parts = await preparePage(items[0]!);
     const body = buildRequest(gemini, parts);
-    expect(body.model).toBe("google/gemini-3.1-pro-preview");
+    expect(body.model).toBe("google/gemini-4-argon");
     expect(body.max_tokens).toBe(gemini.maxTokens);
     expect(body.messages[0]).toMatchObject({ role: "system" });
     const system = body.messages[0]!.content as string;
@@ -191,9 +191,10 @@ describe("cost", () => {
   it("falls back to the configured prices, and says so", () => {
     const c = callCost(config, gemini, result("", { prompt_tokens: 10_000, completion_tokens: 500 }), body());
     expect(c.costSource).toBe("config");
-    expect(c.usd).toBeCloseTo((10_000 * 2 + 500 * 12) / 1e6, 10);
+    const price = (m: string) => config.outsideReview.pricesUsdPerMTok[m]!;
+    expect(c.usd).toBeCloseTo((10_000 * price(gemini.model).input + 500 * price(gemini.model).output) / 1e6, 10);
     const g = callCost(config, gpt, result("", { prompt_tokens: 10_000, completion_tokens: 500 }), body(gpt.model));
-    expect(g.usd).toBeCloseTo((10_000 * 2 + 500 * 10) / 1e6, 10);
+    expect(g.usd).toBeCloseTo((10_000 * price(gpt.model).input + 500 * price(gpt.model).output) / 1e6, 10);
   });
 
   it("estimates a call from its text and images when the answer reports no usage", async () => {
