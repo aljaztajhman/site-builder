@@ -32,3 +32,6 @@ tools/okus/rounds/*/img/
 tools/approval/round/img/
 tools/approval/round/site/
 .claude/plans/
+
+# Stranko HQ data (tools/hq): local, rewritten by Claude each run; seed from tools/hq/data.example.js.
+.hq/

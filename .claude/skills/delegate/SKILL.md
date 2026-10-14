@@ -10,7 +10,7 @@ The rules and the research behind them are in `docs/dev/agent-team.md`. This is 
 ## 1. Triage (before any work)
 
 Score the task, one point each: **independent** units · **disjoint** files/packages · **checkable** units · **big** (≥ 30 min each) · **broad** reading.
-- 0–2 → **S** (solo with Haiku scouts) · 3–4 → **D** · 5 and ≥ 8 similar units → **W** (overnight only with an approved `mode: "W"` HQ plan)
+- 0–2 → **S** (solo with Haiku scouts) · 3–4 → **D** · 5 and ≥ 8 similar units → **W** (only when the owner asks for a workflow)
 - **Hard no → S**: units share files; design not settled; mostly a decision; or the work fits one context at lower effort (Anthropic measured: then the strongest model alone at lower effort wins).
 
 Write the status line first: `Mode D · score 4/5 · team: scout(haiku) → 2 builder(opus·medium) → reviewer(opus·high)`.

@@ -21,8 +21,13 @@ export default tseslint.config(
     languageOptions: { sourceType: "script", globals: { document: "readonly" } },
   },
   {
-    // Plain Node scripts that run without a build (the morph example's static server).
-    files: ["packages/morph/examples/*.mjs"],
+    // The HQ data file, loaded by tools/hq/index.html as a plain script.
+    files: ["tools/hq/*.js"],
+    languageOptions: { sourceType: "script", globals: { window: "writable" } },
+  },
+  {
+    // Plain Node scripts that run without a build (the morph example's static server, the HQ agent stats).
+    files: ["packages/morph/examples/*.mjs", "tools/hq/*.mjs"],
     languageOptions: { globals: { process: "readonly", console: "readonly", URL: "readonly" } },
   },
   {

@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stranko HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
+<style>
+/*
+ * Stranko HQ, the owner's one-screen view: where the project is, what was done lately, what is next, what needs the
+ * owner, money, and how the agent team is used. Sections read top to bottom in that order; detail lives in PRs and
+ * TASKS.md, never here.
+ */
+:root {
+  --bg: #f1f1ee;
+  --surface: #ffffff;
+  --fg: #141614;
+  --muted: #5d625e;
+  --line: #d9dbd6;
+  --track: #e6e7e2;
+  --accent: #2a78d6;
+  --good: #17714a;
+  --warn: #a86400;
+  --bad: #b23a2e;
+  --s1: #2a78d6; /* opus */
+  --s2: #eb6834; /* sonnet */
+  --s3: #1baf7a; /* haiku */
+  --s4: #eda100; /* fable */
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-ui: "Hanken Grotesk", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --radius: 12px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111312; --surface: #1a1c1b; --fg: #eceeec; --muted: #a0a6a2; --line: #2e3230; --track: #2a2e2c;
+    --accent: #3987e5; --good: #5ccf95; --warn: #f0b04a; --bad: #ff8f80;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111312; --surface: #1a1c1b; --fg: #eceeec; --muted: #a0a6a2; --line: #2e3230; --track: #2a2e2c;
+  --accent: #3987e5; --good: #5ccf95; --warn: #f0b04a; --bad: #ff8f80;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.45 var(--font-ui); }
+a { color: var(--accent); }
+main { max-width: 1180px; margin: 0 auto; padding: 28px 20px 60px; display: grid; gap: 18px; }
+h1, h2 { font-family: var(--font-display); margin: 0; }
+h1 { font-size: clamp(26px, 3.4vw, 38px); line-height: 1.1; font-weight: 800; letter-spacing: -0.01em; }
+h2 { font-size: 13px; font-family: var(--font-ui); font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.grid2 { display: grid; grid-template-columns: 1.35fr 1fr; gap: 18px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+@media (max-width: 860px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+
+/* Top bar */
+.top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.brand { font-family: var(--font-display); font-weight: 800; font-size: 15px; }
+.links { display: flex; gap: 14px; flex-wrap: wrap; font-size: 14px; }
+
+/* Hero: headline + phase road */
+.hero p.lead { font-size: 17px; margin: 10px 0 0; max-width: 70ch; }
+.road { display: grid; grid-template-columns: repeat(var(--n, 4), 1fr); gap: 6px; margin-top: 22px; }
+.road .ph { position: relative; }
+.road .bar { height: 10px; border-radius: 5px; background: var(--track); overflow: hidden; }
+.road .bar i { display: block; height: 100%; background: var(--fg); border-radius: 5px; }
+.road .ph.now .bar i { background: var(--accent); }
+.road .lbl { margin-top: 8px; font-size: 13px; line-height: 1.3; }
+.road .lbl b { display: block; font-size: 14px; }
+.road .ph.now .lbl b::after { content: "  ← we are here"; color: var(--accent); font-weight: 600; font-size: 12px; }
+@media (max-width: 640px) { .road { grid-template-columns: 1fr 1fr; row-gap: 16px; } .tiles { grid-template-columns: 1fr 1fr; } .stackrow { grid-template-columns: 96px 1fr; } .role { grid-template-columns: 96px 1fr 30px; } }
+
+/* Needs you */
+.needs { display: grid; gap: 10px; }
+.need { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: start; padding: 12px 14px; border-radius: 10px; background: color-mix(in srgb, var(--warn) 9%, var(--surface)); border: 1px solid color-mix(in srgb, var(--warn) 30%, var(--line)); }
+.need .tag { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--warn); padding-top: 2px; min-width: 66px; }
+.need b { display: block; }
+.none { color: var(--good); font-weight: 600; }
+
+/* Workstreams */
+.ws { display: grid; gap: 14px; }
+.w { display: grid; grid-template-columns: minmax(0, 1fr) 56px; gap: 4px 14px; align-items: center; }
+.w .name { font-weight: 600; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.w .pct { font-family: var(--font-display); font-weight: 800; font-size: 20px; text-align: right; grid-row: span 2; }
+.w .track { height: 8px; background: var(--track); border-radius: 4px; overflow: hidden; }
+.w .track i { display: block; height: 100%; border-radius: 4px; }
+.w .left { grid-column: 1 / -1; font-size: 13px; color: var(--muted); }
+.pill { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; text-transform: uppercase; letter-spacing: .05em; border: 1px solid currentColor; }
+.st-moving { color: var(--good); } .st-moving-bg { background: var(--good); }
+.st-waiting { color: var(--warn); } .st-waiting-bg { background: var(--warn); }
+.st-paused { color: var(--muted); } .st-paused-bg { background: var(--muted); }
+.st-done { color: var(--fg); } .st-done-bg { background: var(--fg); }
+
+/* Recent: timeline */
+.tl { list-style: none; margin: 0; padding: 0; position: relative; }
+.tl::before { content: ""; position: absolute; left: 47px; top: 6px; bottom: 6px; width: 2px; background: var(--line); }
+.tl li { display: grid; grid-template-columns: 40px 16px 1fr; gap: 8px; padding: 6px 0; align-items: start; }
+.tl .d { font-size: 12px; color: var(--muted); padding-top: 2px; text-align: right; }
+.tl .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); margin: 5px 0 0 2px; box-shadow: 0 0 0 3px var(--surface); position: relative; }
+
+/* Next */
+.next { counter-reset: n; display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.next li { counter-increment: n; display: grid; grid-template-columns: 28px 1fr; gap: 10px; }
+.next li::before { content: counter(n); font-family: var(--font-display); font-weight: 800; font-size: 20px; color: var(--accent); line-height: 1.2; }
+.next .who { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-left: 6px; }
+
+/* Stat tiles */
+.tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.tile .v { font-family: var(--font-display); font-weight: 800; font-size: 28px; line-height: 1; }
+.tile .k { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+/* Budget meter */
+.meter { height: 12px; border-radius: 6px; background: var(--track); overflow: hidden; margin: 10px 0 6px; }
+.meter i { display: block; height: 100%; background: var(--accent); }
+.meter i.over { background: var(--bad); }
+
+/* Team chart: one 100 % bar per period, segments by model, 2px surface gaps */
+.stack { display: flex; height: 26px; gap: 2px; border-radius: 4px; overflow: hidden; margin: 6px 0 4px; }
+.stack span { display: block; height: 100%; min-width: 2px; position: relative; }
+.stack span:first-child { border-radius: 4px 0 0 4px; } .stack span:last-child { border-radius: 0 4px 4px 0; }
+.stackrow { display: grid; grid-template-columns: 112px 1fr; gap: 10px; align-items: center; margin-bottom: 10px; }
+.stackrow .t { font-size: 13px; line-height: 1.25; }
+.stackrow .t small { display: block; color: var(--muted); }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; margin-top: 4px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.roles { display: grid; gap: 6px; margin-top: 14px; }
+.role { display: grid; grid-template-columns: 112px 1fr 34px; gap: 10px; align-items: center; font-size: 13px; }
+.role .b { height: 8px; border-radius: 0 4px 4px 0; background: var(--accent); }
+.role .n { text-align: right; font-weight: 700; }
+.tip { position: fixed; pointer-events: none; background: var(--fg); color: var(--bg); font-size: 12px; padding: 5px 8px; border-radius: 6px; opacity: 0; transition: opacity .1s; z-index: 9; }
+
+.foot { font-size: 12px; color: var(--muted); text-align: center; }
+</style>
+</head>
+<body>
+<main>
+  <div class="top">
+    <div class="brand">Stranko HQ</div>
+    <div class="links" id="links"></div>
+  </div>
+
+  <section class="card hero">
+    <h1 id="headline"></h1>
+    <p class="lead" id="summary"></p>
+    <div class="road" id="road"></div>
+  </section>
+
+  <div class="grid2">
+    <section class="card">
+      <h2>Needs you</h2>
+      <div class="needs" id="needs"></div>
+    </section>
+    <section class="card">
+      <h2>Next steps</h2>
+      <ol class="next" id="next"></ol>
+    </section>
+  </div>
+
+  <div class="grid2">
+    <section class="card">
+      <h2>Workstreams</h2>
+      <div class="ws" id="streams"></div>
+    </section>
+    <section class="card">
+      <h2>Lately</h2>
+      <ul class="tl" id="recent"></ul>
+    </section>
+  </div>
+
+  <div class="grid2">
+    <section class="card">
+      <h2>Agent team</h2>
+      <div class="tiles" id="teamTiles"></div>
+      <div style="margin-top:18px" id="teamMix"></div>
+      <div class="roles" id="teamRoles"></div>
+      <p class="small muted" id="teamNote" style="margin:12px 0 0"></p>
+    </section>
+    <div style="display:grid; gap:18px; align-content:start">
+      <section class="card">
+        <h2>Development money this month</h2>
+        <div id="budget"></div>
+      </section>
+    </div>
+  </div>
+
+  <p class="foot" id="foot"></p>
+</main>
+<div class="tip" id="tip"></div>
+
+<script src="../../.hq/data.js"></script>
+<script>if (!window.HQ) { window.HQ_SEED = true; document.write('<script src="data.example.js"><\/script>'); }</script>
+
+<script>
+const LINKS = [
+  { label: "Okus (taste ratings)", href: "https://claude.ai/artifact/BpRbQkZJocuicszmjUPRQC" },
+  { label: "Design canvas", href: "https://claude.ai/artifact/GBMesX76huidKKUswuk1i5" },
+  { label: "GitHub", href: "https://github.com/aljaztajhman/site-builder/pulls?q=is%3Apr" },
+];
+const PR = (n) => `https://github.com/aljaztajhman/site-builder/pull/${n}`;
+const SERIES = { Opus: "var(--s1)", Sonnet: "var(--s2)", Haiku: "var(--s3)", Fable: "var(--s4)" };
+const el = (tag, attrs = {}, ...kids) => {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "style") n.style.cssText = v;
+    else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+    else n.setAttribute(k, v);
+  }
+  for (const k of kids.flat()) if (k != null) n.append(k instanceof Node ? k : document.createTextNode(String(k)));
+  return n;
+};
+
+function renderHero(d) {
+  document.getElementById("headline").textContent = d.headline;
+  document.getElementById("summary").textContent = d.summary;
+  const road = document.getElementById("road");
+  road.style.setProperty("--n", d.phases.length);
+  road.replaceChildren(...d.phases.map((p) => el("div", { class: "ph" + (p.now ? " now" : ""), "data-tip": `${p.name}: ${p.pct} %` },
+    el("div", { class: "bar" }, el("i", { style: `width:${p.pct}%` })),
+    el("div", { class: "lbl" }, el("b", {}, p.name), el("span", { class: "muted" }, `${p.pct} % · ${p.note}`)))));
+}
+
+function renderStreams(d) {
+  const label = { moving: "Moving", waiting: "Waits for you", paused: "Parked", done: "Done" };
+  document.getElementById("streams").replaceChildren(...d.streams.map((s) => el("div", { class: "w" },
+    el("div", { class: "name" }, s.name, el("span", { class: `pill st-${s.status}` }, label[s.status] ?? s.status)),
+    el("div", { class: "pct" }, `${s.pct}%`),
+    el("div", { class: "track", "data-tip": `${s.pct} % · last work ${s.last}` }, el("i", { class: `st-${s.status}-bg`, style: `width:${s.pct}%` })),
+    el("div", { class: "left" }, `${s.left} · last ${s.last}`))));
+}
+
+function renderRecent(d) {
+  document.getElementById("recent").replaceChildren(...d.recent.map((r) => el("li", {},
+    el("span", { class: "d" }, r.date), el("span", { class: "dot" }),
+    el("span", {}, r.text, r.pr ? [" ", el("a", { href: PR(r.pr), target: "_blank", rel: "noopener" }, `#${r.pr}`)] : null))));
+}
+
+function renderNext(d) {
+  document.getElementById("next").replaceChildren(...d.next.map((n) => el("li", {},
+    el("div", {}, n.text, el("span", { class: "who" }, n.who === "you" ? "you" : "Claude"), n.eur ? el("span", { class: "who" }, `≈ €${n.eur}`) : null))));
+}
+
+function renderNeeds(d) {
+  const rows = [
+    ...(d.decisions ?? []).map((x) => ({ kind: "Decide", title: x.title, why: x.recommendation ? `Recommended: ${x.recommendation}` : "" })),
+    ...(d.approvals ?? []).filter((x) => x.status === "pending").map((x) => ({ kind: "Approve", title: `${x.title} · €${x.eur}`, why: x.why || "" })),
+    ...(d.needs ?? []),
+  ];
+  const box = document.getElementById("needs");
+  if (!rows.length) { box.replaceChildren(el("div", { class: "none" }, "Nothing. Claude can keep going.")); return; }
+  box.replaceChildren(...rows.slice(0, 6).map((r) => el("div", { class: "need" },
+    el("span", { class: "tag" }, r.kind), el("div", {}, el("b", {}, r.title), r.why ? el("span", { class: "small muted" }, r.why) : null))));
+}
+
+function stackRow(label, sub, n, mix) {
+  const total = Object.values(mix).reduce((a, b) => a + b, 0) || 1;
+  return el("div", { class: "stackrow" },
+    el("div", { class: "t" }, label, el("small", {}, `${sub} · ${n} launches`)),
+    el("div", { class: "stack" }, ...Object.entries(mix).filter(([, v]) => v > 0).map(([k, v]) =>
+      el("span", { style: `flex:${v};background:${SERIES[k]}`, "data-tip": `${k}: ${v} of ${n} (${Math.round((v / total) * 100)} %)` }))));
+}
+
+function renderTeam(d) {
+  const t = d.team;
+  const haikuNow = Math.round(((t.after.mix.Haiku || 0) / (t.after.n || 1)) * 100);
+  const tile = (v, k) => el("div", { class: "tile" }, el("div", { class: "v" }, v), el("div", { class: "k" }, k));
+  document.getElementById("teamTiles").replaceChildren(
+    tile(t.launches, `sub-agents since ${t.since}`),
+    tile(`${t.subShareOut}%`, "of all output written by sub-agents"),
+    tile(`${haikuNow}%`, "of launches on Haiku since the rules"));
+  document.getElementById("teamMix").replaceChildren(
+    stackRow(t.before.label, t.before.sub, t.before.n, t.before.mix),
+    stackRow(t.after.label, t.after.sub, t.after.n, t.after.mix),
+    el("div", { class: "legend" }, ...Object.keys(SERIES).map((k) => el("span", {}, el("i", { style: `background:${SERIES[k]}` }), k))));
+  const max = Math.max(...Object.values(t.roles), 1);
+  document.getElementById("teamRoles").replaceChildren(...Object.entries(t.roles).map(([k, v]) => el("div", { class: "role" },
+    el("span", {}, k), el("div", {}, el("div", { class: "b", style: `width:${Math.max((v / max) * 100, v ? 2 : 0)}%;${v ? "" : "display:none"}` })), el("span", { class: "n" }, v))));
+  document.getElementById("teamNote").textContent = t.note;
+}
+
+function renderBudget(b) {
+  const box = document.getElementById("budget");
+  if (!b) { box.replaceChildren(el("p", { class: "muted small", style: "margin:0" }, "No budget set.")); return; }
+  const month = new Date().toISOString().slice(0, 7);
+  const rows = (b.spend ?? []).filter((s) => String(s.at).startsWith(month));
+  const used = rows.reduce((a, s) => a + (Number(s.eur) || 0), 0);
+  const cap = Number(b.monthlyEur) || 0;
+  const pct = cap ? Math.min((used / cap) * 100, 100) : 0;
+  const mode = { none: "Spend nothing", ask: "Claude asks first", within: "Within limits" }[b.mode] ?? b.mode;
+  box.replaceChildren(...[
+    el("div", { style: "display:flex;justify-content:space-between;align-items:baseline" },
+      el("span", { class: "tile" }, el("span", { class: "v" }, `€${used.toFixed(2)}`)),
+      el("span", { class: "muted small" }, cap ? `of €${cap} · ${mode}` : mode)),
+    el("div", { class: "meter", "data-tip": `€${used.toFixed(2)} of €${cap} this month` }, el("i", { class: used > cap ? "over" : "", style: `width:${pct}%` })),
+    b.note ? el("div", { class: "small muted" }, b.note) : null,
+    b.liveDailyCap != null ? el("div", { class: "small muted" }, `Live app cap: €${b.liveDailyCap} per day`) : null,
+  ].filter(Boolean));
+}
+
+function wireTips() {
+  const tip = document.getElementById("tip");
+  document.addEventListener("mousemove", (e) => {
+    const t = e.target.closest("[data-tip]");
+    if (!t) { tip.style.opacity = 0; return; }
+    tip.textContent = t.dataset.tip;
+    tip.style.left = `${e.clientX + 12}px`;
+    tip.style.top = `${e.clientY + 12}px`;
+    tip.style.opacity = 1;
+  });
+}
+
+(function main() {
+  document.getElementById("links").replaceChildren(...LINKS.map((l) => el("a", { href: l.href, target: "_blank", rel: "noopener" }, l.label)));
+  const d = window.HQ;
+  if (!d) { document.getElementById("headline").textContent = "No HQ data: copy tools/hq/data.example.js to .hq/data.js"; return; }
+  renderHero(d); renderNeeds(d); renderNext(d); renderStreams(d); renderRecent(d); renderTeam(d); renderBudget(d.budget); wireTips();
+  document.getElementById("foot").textContent = `Updated ${d.updatedAt}${window.HQ_SEED ? " · seed copy, .hq/data.js missing" : ""} · detail lives in PRs and TASKS.md`;
+})();
+</script>
+</body>
+</html>
