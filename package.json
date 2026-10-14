@@ -29,6 +29,7 @@
     "designer:compose-sheet": "tsx tools/eval/src/compose-sheet.ts",
     "okus:items": "tsx tools/eval/src/okus-items.ts",
     "okus:calibrate": "tsx tools/eval/src/okus-calibrate.ts",
+    "outside-review": "tsx --env-file-if-exists=.env tools/eval/src/outside-review-cli.ts",
     "studio:compose": "tsx tools/eval/src/studio-compose.ts",
     "studio:poc": "tsx --env-file-if-exists=.env tools/eval/src/studio-poc.ts",
     "references:shots": "tsx tools/eval/src/references.ts shots",
