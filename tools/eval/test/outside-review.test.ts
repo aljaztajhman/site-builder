@@ -22,7 +22,7 @@ import {
   selectItems,
   type ReviewItem,
 } from "../src/outside-review.ts";
-import { RecordedTransport, makeTransport, requestHash, type ChatBody, type ChatResult, type OutsideTransport } from "../src/outside-transport.ts";
+import { OpenRouterHttpError, RecordedTransport, makeTransport, requestHash, type ChatBody, type ChatResult, type OutsideTransport } from "../src/outside-transport.ts";
 
 const config = loadConfig();
 const [gemini, gpt] = config.outsideReview.reviewers;
@@ -255,6 +255,29 @@ describe("budget guard", () => {
     // The failed call used most of the room, so the next page is not sent.
     expect(t.calls).toHaveLength(1);
     expect(run.results.gemini!["item-b"]).toMatchObject({ status: "skipped" });
+  });
+
+  it("books nothing for a call OpenRouter refused before the model ran (4xx), but a 408 or 5xx at its worst case", async () => {
+    const body = buildRequest(gemini, await preparePage(items[0]!));
+    const worst = estimateCall(config, gemini, body).worstEur;
+    for (const status of [400, 402, 429]) {
+      const lines: Record<string, unknown>[] = [];
+      const t = scripted(new OpenRouterHttpError(status, `HTTP ${status}`), result(answer(4, 4), { prompt_tokens: 1, completion_tokens: 1, cost: 0.001 }));
+      const run = await runReview({ config, reviewers: [gemini], items, transport: t, maxEur: worst * 1.5, onCost: (l) => lines.push(l as never) });
+      expect(run.results.gemini!["item-a"]).toMatchObject({ status: "failed", reason: expect.stringContaining(String(status)) });
+      // Only the second page's answer is booked, so the refused call left room for it.
+      expect(lines.map((l) => l.itemId)).toEqual(["item-b"]);
+      expect(run.spentEur).toBeCloseTo(0.001 * config.eurPerUsd, 10);
+      expect(run.results.gemini!["item-b"]).toMatchObject({ status: "ok" });
+    }
+    for (const status of [408, 500, 503]) {
+      const lines: Record<string, unknown>[] = [];
+      const t = scripted(new OpenRouterHttpError(status, `HTTP ${status}`), result(answer(4, 4)));
+      const run = await runReview({ config, reviewers: [gemini], items, transport: t, maxEur: worst * 1.5, onCost: (l) => lines.push(l as never) });
+      expect(lines).toHaveLength(1);
+      expect(lines[0]).toMatchObject({ itemId: "item-a", costSource: "estimate" });
+      expect(run.spentEur).toBeCloseTo(worst, 10);
+    }
   });
 
   it("books replayed answers at € 0", async () => {

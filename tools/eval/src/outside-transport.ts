@@ -30,6 +30,24 @@ export interface OutsideTransport {
   complete(body: ChatBody): Promise<ChatResult>;
 }
 
+/**
+ * OpenRouter answered with an error status. A 4xx other than 408 (timeout) is refused before the model runs (no
+ * credit, bad request, rate limit) and costs nothing; a 408 or 5xx may come after the model ran.
+ */
+export class OpenRouterHttpError extends Error {
+  constructor(
+    readonly status: number,
+    message: string,
+  ) {
+    super(message);
+    this.name = "OpenRouterHttpError";
+  }
+
+  get refusedBeforeRun(): boolean {
+    return this.status >= 400 && this.status < 500 && this.status !== 408;
+  }
+}
+
 /** sha256 of the model and messages: the same page asked of the same model has the same hash whatever the key. */
 export function requestHash(body: Pick<ChatBody, "model" | "messages">): string {
   return createHash("sha256").update(JSON.stringify({ model: body.model, messages: body.messages })).digest("hex");
@@ -64,7 +82,7 @@ export class OpenRouterTransport implements OutsideTransport {
       }
       const text = (await res.text()).slice(0, 300);
       if (res.status >= 500 && attempt < 2) continue;
-      throw new Error(`${body.model}: HTTP ${res.status} ${text}`);
+      throw new OpenRouterHttpError(res.status, `${body.model}: HTTP ${res.status} ${text}`);
     }
   }
 }

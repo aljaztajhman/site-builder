@@ -14,7 +14,7 @@ import { toModelJsonSchema } from "@sb/spec";
 import { JudgeOutputNotesFirst, judgeSystem, mean } from "./judge.ts";
 import { ItemsFile } from "./okus-round.ts";
 import { pairwiseAgreement, spearman, type Agreement } from "./okus-calibrate.ts";
-import type { ChatBody, ChatMessage, ChatPart, ChatResult, OutsideTransport } from "./outside-transport.ts";
+import { OpenRouterHttpError, type ChatBody, type ChatMessage, type ChatPart, type ChatResult, type OutsideTransport } from "./outside-transport.ts";
 
 export type Reviewer = OutsideReviewConfig["reviewers"][number];
 export type ReviewOutput = z.infer<typeof JudgeOutputNotesFirst>;
@@ -248,7 +248,8 @@ export async function runReview(o: {
 
   /**
    * One call within the budget (reserving its longest possible answer); null when it would not fit. A paid call that
-   * throws after it was sent (timeout, unreadable answer) is booked at that worst case, so the guard never undercounts.
+   * throws after it was sent (timeout, 5xx, unreadable answer) is booked at that worst case, so the guard never
+   * undercounts; one OpenRouter refused before the model ran (a 4xx but 408) is not booked.
    */
   const ask = async (r: Reviewer, itemId: string, body: ChatBody): Promise<ChatResult | null> => {
     const est = estimateCall(o.config, r, body);
@@ -260,7 +261,7 @@ export async function runReview(o: {
     try {
       res = await o.transport.complete(body);
     } catch (e) {
-      if (o.transport.paid) book(r, itemId, { inputTokens: est.inputTokens, outputTokens: r.maxTokens, usd: est.worstEur / o.config.eurPerUsd, eur: est.worstEur, costSource: "estimate" });
+      if (o.transport.paid && !(e instanceof OpenRouterHttpError && e.refusedBeforeRun)) book(r, itemId, { inputTokens: est.inputTokens, outputTokens: r.maxTokens, usd: est.worstEur / o.config.eurPerUsd, eur: est.worstEur, costSource: "estimate" });
       throw e;
     }
     const c = o.transport.paid ? callCost(o.config, r, res, body) : { ...callCost(o.config, r, res, body), usd: 0, eur: 0, costSource: "replay" as const };
