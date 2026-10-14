@@ -29,8 +29,8 @@ const [gemini, gpt] = config.outsideReview.reviewers;
 if (!gemini || !gpt) throw new Error("config needs two outside reviewers");
 
 const scores = (n: number) => ({ impression: n, hierarchy: n, imagery: n, spacing: n, clutter: n, distinctiveness: n });
-const answer = (phone: number, desktop: number, fix = "Bigger photo") =>
-  JSON.stringify({ phoneNote: "p", desktopNote: "d", phone: scores(phone), desktop: scores(desktop), fixes: [fix] });
+const answer = (phone: number, desktop: number, fix = "Bigger photo", blockers: string[] = []) =>
+  JSON.stringify({ phoneNote: "p", desktopNote: "d", phone: scores(phone), desktop: scores(desktop), fixes: [fix], blockers });
 const result = (content: string, usage?: ChatResult["usage"]): ChatResult => ({ content, ...(usage ? { usage } : {}) });
 
 let dir: string;
@@ -121,7 +121,7 @@ describe("request", () => {
     const strict = buildRequest({ ...gemini, structured: "json_schema" }, parts);
     expect(strict.response_format).toMatchObject({ type: "json_schema", json_schema: { strict: true } });
     const schema = (strict.response_format as unknown as { json_schema: { schema: { properties: Record<string, unknown> } } }).json_schema.schema;
-    expect(Object.keys(schema.properties)).toEqual(["phoneNote", "desktopNote", "phone", "desktop", "fixes"]); // notes first
+    expect(Object.keys(schema.properties)).toEqual(["phoneNote", "desktopNote", "phone", "desktop", "fixes", "blockers"]); // notes first
     const loose = buildRequest({ ...gpt, structured: "json_object" }, parts);
     expect(loose.response_format).toEqual({ type: "json_object" });
     expect(loose.model).toBe("openai/gpt-6.1-sol");
@@ -142,6 +142,16 @@ describe("answers", () => {
     expect(() => parseAnswer("not json")).toThrow();
     expect(() => parseAnswer(JSON.stringify({ phone: scores(9) }))).toThrow();
     expect(() => parseAnswer(answer(6, 3))).toThrow();
+    // The filter's question is part of every answer: an answer without blockers is invalid.
+    const { blockers: _, ...noBlockers } = JSON.parse(answer(4, 3)) as Record<string, unknown>;
+    expect(() => parseAnswer(JSON.stringify(noBlockers))).toThrow();
+    expect(parseAnswer(answer(4, 3, "f", ["Phone: the headline breaks ZAMENJAM/O"])).blockers).toHaveLength(1);
+  });
+
+  it("asks for blockers, and says taste is not one", async () => {
+    const system = buildRequest(gemini, await preparePage(items[0]!)).messages[0]!.content as string;
+    expect(system).toMatch(/Blockers: the defects you would refuse to hand to the client/);
+    expect(system).toMatch(/Taste and polish are not blockers/);
   });
 
   it("retries once on an invalid answer, then takes the valid one", async () => {
@@ -366,6 +376,29 @@ describe("page sources", () => {
     expect(found.map((i) => i.id)).toEqual(["one", "two"]);
   });
 
+  it("tells the reviewer the fixture's trade, reads a regenerated site as its own page, and drops pages older than --since", async () => {
+    const evalDir = path.join(dir, "eval-tree");
+    mkdirSync(path.join(evalDir, "twins", "salon-x"), { recursive: true });
+    writeFileSync(path.join(evalDir, "twins", "salon-x", "brief.json"), JSON.stringify({ id: "salon-x", businessType: "hairdresser", trade: "frizer" }));
+    const runDir = path.join(dir, "runs-regen");
+    const d = path.join(runDir, "salon-x");
+    mkdirSync(d, { recursive: true });
+    const shot = await png(8, 40);
+    for (const f of ["home-360-first", "home-360", "home-1280-first", "home-1280"]) writeFileSync(path.join(d, `${f}.png`), shot);
+    // Only the first screens of the regenerated site: not a page yet.
+    for (const f of ["regenerated-360-first", "regenerated-1280-first"]) writeFileSync(path.join(d, `${f}.png`), shot);
+    expect(loadRunDirItems(runDir, { evalDir }).map((i) => i.id)).toEqual(["salon-x"]);
+    for (const f of ["regenerated-360", "regenerated-1280"]) writeFileSync(path.join(d, `${f}.png`), shot);
+    const found = loadRunDirItems(runDir, { evalDir });
+    expect(found.map((i) => [i.id, i.businessType])).toEqual([
+      ["salon-x", "hairdresser, frizer"],
+      ["salon-x-regenerated", "hairdresser, frizer"],
+    ]);
+    expect(found[1]!.files.deskFull).toBe(path.join(d, "regenerated-1280.png"));
+    expect(loadRunDirItems(path.join(dir, "run-dir"), { evalDir })[0]!.businessType).toBe("not given");
+    expect(() => loadRunDirItems(runDir, { evalDir, since: new Date(Date.now() + 60_000) })).toThrow(/written since/);
+  });
+
   it("takes the first n by id, or the named ids, and refuses an unknown id", () => {
     const many = ["c", "a", "b"].map((id) => ({ id, businessType: "x", files: items[0]!.files }));
     expect(selectItems(many, { count: 2 }).map((i) => i.id)).toEqual(["a", "b"]);
@@ -412,6 +445,26 @@ describe("report", () => {
     expect(md).toContain("item-c");
     expect(md).toMatch(/failed/i);
     expect(md).toMatch(/all items count/i);
+  });
+
+  it("filters: a page passes only when every reviewer answered and none named a blocker", async () => {
+    const t = scripted(
+      result(answer(4, 4)), // a / gemini: clean
+      result(answer(4, 4)), // a / gpt: clean
+      result(answer(4, 4)), // b / gemini: clean
+      result(answer(3, 3, "f", ["Desktop: the hero photo is cut off"])), // b / gpt: a blocker
+      result(answer(4, 4)), // c / gemini: clean
+      result("bad"),
+      result("bad"), // c / gpt fails twice
+    );
+    const three = [items[0]!, items[1]!, { ...items[0]!, id: "item-c" }];
+    const run = await runReview({ config, reviewers: [gemini, gpt], items: three, transport: t, maxEur: 5, onCost: () => {} });
+    const summary = buildSummary({ config, reviewers: [gemini, gpt], run, items: three });
+    expect(summary.filter).toEqual({ passed: ["item-a"], held: ["item-b"], unreviewed: ["item-c"] });
+    expect(summary.rows[1]!.blockers).toEqual({ gemini: [], gpt: ["Desktop: the hero photo is cut off"] });
+    const md = formatReport(summary);
+    expect(md).toContain("1 of 3 pages pass");
+    expect(md).toContain("Desktop: the hero photo is cut off");
   });
 });
 

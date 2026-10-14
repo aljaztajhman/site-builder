@@ -5,9 +5,9 @@
  * Eval only; nothing here touches generation or the live app. Pure where it can be: request building, answer
  * parsing, scoring, cost and the budget guard take a transport (outside-transport.ts), so tests never need a network.
  */
-import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
-import type { z } from "zod";
+import { z } from "zod";
 import type { AppConfig, OutsideReviewConfig } from "@sb/config";
 import { fitImageForModel, sliceScreenshot } from "@sb/engine";
 import { toModelJsonSchema } from "@sb/spec";
@@ -17,7 +17,12 @@ import { pairwiseAgreement, spearman, type Agreement } from "./okus-calibrate.ts
 import { OpenRouterHttpError, type ChatBody, type ChatMessage, type ChatPart, type ChatResult, type OutsideTransport } from "./outside-transport.ts";
 
 export type Reviewer = OutsideReviewConfig["reviewers"][number];
-export type ReviewOutput = z.infer<typeof JudgeOutputNotesFirst>;
+/**
+ * The judge's answer plus the filter's question (the reviewers screen pages before the owner or the design consultants
+ * see them): the defects that would stop the page from going to the client as it is. Empty when nothing would.
+ */
+export const ReviewAnswer = JudgeOutputNotesFirst.extend({ blockers: z.array(z.string().max(200)).max(5) });
+export type ReviewOutput = z.infer<typeof ReviewAnswer>;
 
 // ---------------------------------------------------------------------------------------------------------------
 // Pages
@@ -69,11 +74,16 @@ const dataUrl = (b: Uint8Array) => `data:${isJpeg(b) ? "image/jpeg" : "image/png
 
 const SCHEMA_NAME = "design_review";
 
+/** What makes a defect a blocker: the page would not be handed to the client as it is. */
+export const BLOCKERS = `
+
+Blockers: the defects you would refuse to hand to the client as they are, one short sentence each naming where (phone or desktop, which section): a word broken or clipped, text over a picture where it can't be read, elements overlapping or cut off, a broken, empty or nonsensical picture, the same section, photo or contact block repeated, a layout that falls apart on one of the two screens. Leave the list empty when nothing would stop you. Taste and polish are not blockers; they go in the fixes.`;
+
 /** The judge's rubric (with the intended-faults paragraph) plus how to answer. In JSON mode the schema is spelled out. */
 export function reviewSystem(reviewer: Reviewer): string {
-  const how = `\n\nAnswer with one JSON object and nothing else, matching the schema: the two notes first, then the scores, then the fixes.`;
-  const schema = reviewer.structured === "json_object" ? `\n\nJSON schema:\n${JSON.stringify(toModelJsonSchema(JudgeOutputNotesFirst))}` : "";
-  return `${judgeSystem(true)}${how}${schema}`;
+  const how = `\n\nAnswer with one JSON object and nothing else, matching the schema: the two notes first, then the scores, then the fixes, then the blockers.`;
+  const schema = reviewer.structured === "json_object" ? `\n\nJSON schema:\n${JSON.stringify(toModelJsonSchema(ReviewAnswer))}` : "";
+  return `${judgeSystem(true)}${BLOCKERS}${how}${schema}`;
 }
 
 export function buildRequest(reviewer: Reviewer, parts: readonly Part[]): ChatBody {
@@ -88,15 +98,15 @@ export function buildRequest(reviewer: Reviewer, parts: readonly Part[]): ChatBo
     max_tokens: reviewer.maxTokens,
     response_format:
       reviewer.structured === "json_schema"
-        ? { type: "json_schema", json_schema: { name: SCHEMA_NAME, strict: true, schema: toModelJsonSchema(JudgeOutputNotesFirst) } }
+        ? { type: "json_schema", json_schema: { name: SCHEMA_NAME, strict: true, schema: toModelJsonSchema(ReviewAnswer) } }
         : { type: "json_object" },
   };
 }
 
-/** Parses a reviewer's answer: JSON (a ```json fence is tolerated) in the judge's schema. Throws on anything else. */
-export function parseAnswer(content: string) {
+/** Parses a reviewer's answer: JSON (a ```json fence is tolerated) in the review schema. Throws on anything else. */
+export function parseAnswer(content: string): ReviewOutput {
   const text = content.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
-  return JudgeOutputNotesFirst.parse(JSON.parse(text));
+  return ReviewAnswer.parse(JSON.parse(text));
 }
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -364,22 +374,41 @@ export function loadOkusItems(roundPath: string): ReviewItem[] {
 }
 
 const RUN_FILES = { phoneFirst: "home-360-first.png", phoneFull: "home-360.png", deskFirst: "home-1280-first.png", deskFull: "home-1280.png" } as const;
+/** `pnpm eval --regenerate`: the site after "Ustvari znova", reviewed as a page of its own (`<id>-regenerated`). */
+const REGENERATED_FILES = { phoneFirst: "regenerated-360-first.png", phoneFull: "regenerated-360.png", deskFirst: "regenerated-1280-first.png", deskFull: "regenerated-1280.png" } as const;
+const FIXTURE_GROUPS = ["fixtures", "twins", "hard"] as const;
 
-/** An eval run directory: each subdirectory that holds the four home-*.png screenshots is one page. */
-export function loadRunDirItems(runDir: string): ReviewItem[] {
+/** The trade the reviewer is told, from the eval fixture's brief (fixtures, twins, hard); "not given" for any other dir. */
+export function fixtureBusinessType(id: string, evalDir = path.resolve(import.meta.dirname, "..")): string {
+  for (const g of FIXTURE_GROUPS) {
+    const file = path.join(evalDir, g, id, "brief.json");
+    if (!existsSync(file)) continue;
+    const b = JSON.parse(readFileSync(file, "utf8")) as { businessType?: string; trade?: string };
+    return [b.businessType, b.trade].filter(Boolean).join(", ") || "not given";
+  }
+  return "not given";
+}
+
+/**
+ * An eval run directory (`pnpm eval` writes eval/runs/<fixture id>/): each subdirectory that holds the four home-*.png
+ * screenshots is one page, and with the four regenerated-*.png a second one. The reviewer is told the fixture's trade.
+ * `since` drops screenshots older than that (eval/runs keeps earlier runs' pages).
+ */
+export function loadRunDirItems(runDir: string, o: { since?: Date; evalDir?: string } = {}): ReviewItem[] {
   if (!existsSync(runDir)) throw new Error(`${runDir} not found`);
   const items: ReviewItem[] = [];
   for (const e of readdirSync(runDir, { withFileTypes: true })) {
     if (!e.isDirectory()) continue;
     const d = path.join(runDir, e.name);
-    if (!Object.values(RUN_FILES).every((f) => existsSync(path.join(d, f)))) continue;
-    items.push({
-      id: e.name,
-      businessType: "not given",
-      files: { phoneFirst: path.join(d, RUN_FILES.phoneFirst), phoneFull: path.join(d, RUN_FILES.phoneFull), deskFirst: path.join(d, RUN_FILES.deskFirst), deskFull: path.join(d, RUN_FILES.deskFull) },
-    });
+    const businessType = fixtureBusinessType(e.name, o.evalDir);
+    for (const [id, names] of [[e.name, RUN_FILES], [`${e.name}-regenerated`, REGENERATED_FILES]] as const) {
+      const files = { phoneFirst: path.join(d, names.phoneFirst), phoneFull: path.join(d, names.phoneFull), deskFirst: path.join(d, names.deskFirst), deskFull: path.join(d, names.deskFull) };
+      if (!Object.values(files).every((f) => existsSync(f))) continue;
+      if (o.since && Object.values(files).some((f) => statSync(f).mtime < o.since!)) continue;
+      items.push({ id, businessType, files });
+    }
   }
-  if (!items.length) throw new Error(`No page in ${runDir}: expected subdirectories holding ${Object.values(RUN_FILES).join(", ")}`);
+  if (!items.length) throw new Error(`No page in ${runDir}: expected subdirectories holding ${Object.values(RUN_FILES).join(", ")}${o.since ? ` written since ${o.since.toISOString()}` : ""}`);
   return items.sort((a, b) => a.id.localeCompare(b.id));
 }
 
@@ -411,7 +440,9 @@ export interface Summary {
   spentEur: number;
   calls: number;
   stoppedByBudget: boolean;
-  rows: { itemId: string; owner: number | null; scores: Record<string, number | null>; topFix: Record<string, string | null> }[];
+  rows: { itemId: string; owner: number | null; scores: Record<string, number | null>; topFix: Record<string, string | null>; blockers: Record<string, string[] | null> }[];
+  /** The filter: a page passes when every reviewer answered and none named a blocker; held when any named one. */
+  filter: { passed: string[]; held: string[]; unreviewed: string[] };
 }
 
 function compare(a: ReadonlyMap<string, number>, b: ReadonlyMap<string, number>): Comparison {
@@ -430,6 +461,7 @@ export function buildSummary(o: { config: AppConfig; reviewers: readonly Reviewe
     calls: o.run.calls,
     stoppedByBudget: o.run.stoppedByBudget,
     rows: [],
+    filter: { passed: [], held: [], unreviewed: [] },
   };
   for (const r of o.reviewers) {
     const res = o.run.results[r.id] ?? {};
@@ -445,12 +477,17 @@ export function buildSummary(o: { config: AppConfig; reviewers: readonly Reviewe
   for (const it of o.items) {
     const scores: Record<string, number | null> = {};
     const topFix: Record<string, string | null> = {};
+    const blockers: Record<string, string[] | null> = {};
     for (const r of o.reviewers) {
       const out = o.run.results[r.id]?.[it.id];
       scores[r.id] = out?.status === "ok" ? out.score : null;
       topFix[r.id] = out?.status === "ok" ? (out.output.fixes[0] ?? null) : null;
+      blockers[r.id] = out?.status === "ok" ? out.output.blockers : null;
     }
-    summary.rows.push({ itemId: it.id, owner: o.owner?.get(it.id) ?? null, scores, topFix });
+    summary.rows.push({ itemId: it.id, owner: o.owner?.get(it.id) ?? null, scores, topFix, blockers });
+    const named = Object.values(blockers).some((b) => b !== null && b.length > 0);
+    const all = Object.values(blockers).every((b) => b !== null);
+    summary.filter[named ? "held" : all ? "passed" : "unreviewed"].push(it.id);
   }
   return summary;
 }
@@ -477,6 +514,18 @@ export function formatReport(s: Summary): string {
   if (s.reviewerPairs.length) {
     L.push("## Reviewers against each other", "", "| Pair | Pages | Pairwise agreement | Spearman ρ |", "|---|---|---|---|");
     for (const p of s.reviewerPairs) L.push(`| ${p.a} vs ${p.b} | ${p.n} | ${pct(p.pairwise.agreement)} (${p.pairwise.pairs} pairs) | ${rho(p.spearman)} |`);
+    L.push("");
+  }
+  L.push(
+    "## Filter",
+    "",
+    `${s.filter.passed.length} of ${s.items.length} pages pass (every reviewer answered, none named a blocker), ${s.filter.held.length} held${s.filter.unreviewed.length ? `, ${s.filter.unreviewed.length} not reviewed by every reviewer` : ""}.`,
+    "",
+  );
+  const held = s.rows.filter((r) => s.filter.held.includes(r.itemId));
+  if (held.length) {
+    L.push(`| Page | ${ids.map((id) => `${id}: blockers`).join(" | ")} |`, `|---|${ids.map(() => "---|").join("")}`);
+    for (const r of held) L.push(`| ${r.itemId} | ${ids.map((id) => cell((r.blockers[id] ?? []).join(" · "))).join(" | ")} |`);
     L.push("");
   }
   L.push("## Scores and top fix per page", "", `| Page | Owner | ${ids.map((id) => `${id} | ${id}: top fix`).join(" | ")} |`, `|---|---|${ids.map(() => "---|---|").join("")}`);

@@ -445,6 +445,9 @@ export async function runFixture(fixture: Fixture, opts: RunOptions): Promise<Fi
         const regenerated: LookSite = { ...result.look.site, features, shots: { mobile: await screenPrint(again.report.screenshots.mobile), desktop: await screenPrint(again.report.screenshots.desktopFirst) } };
         await writeFile(path.join(dir, "regenerated-360-first.png"), again.report.screenshots.mobile);
         await writeFile(path.join(dir, "regenerated-1280-first.png"), again.report.screenshots.desktopFirst);
+        // Whole pages too, so pnpm outside-review can review the regenerated site as a page of its own.
+        await writeFile(path.join(dir, "regenerated-360.png"), again.report.screenshots.mobileFull);
+        await writeFile(path.join(dir, "regenerated-1280.png"), again.report.screenshots.desktop);
         await writeFile(path.join(dir, "spec-regenerated.json"), JSON.stringify(again.current.spec, null, 2));
         result.regenerated = {
           distance: pairDistance(result.look.site, regenerated).total,

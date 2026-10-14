@@ -1,5 +1,5 @@
 /**
- * pnpm outside-review (--okus-round <n> | --run-dir <dir>) [--items <n>] [--only <id>,...] [--reviewers gemini,gpt]
+ * pnpm outside-review (--okus-round <n> | --run-dir <dir> [--since <ISO time>]) [--items <n>] [--only <id>,...] [--reviewers gemini,gpt]
  *                     --max-eur <eur> | --dry-run   [--out <dir>] [--record <dir> | --replay <dir>]
  *
  * Scores pages (four screenshots each) with each outside reviewer (config `outsideReview`, OpenRouter) and writes, in
@@ -19,7 +19,7 @@ import { buildSummary, formatReport, loadOkusItems, loadRunDirItems, planReview,
 import { makeTransport } from "./outside-transport.ts";
 
 const USAGE =
-  "Usage: pnpm outside-review (--okus-round <n> | --run-dir <dir>) [--items <n>] [--only <id>,...] [--reviewers gemini,gpt] (--max-eur <eur> | --dry-run) [--out <dir>] [--record <dir> | --replay <dir>]";
+  "Usage: pnpm outside-review (--okus-round <n> | --run-dir <dir> [--since <ISO time>]) [--items <n>] [--only <id>,...] [--reviewers gemini,gpt] (--max-eur <eur> | --dry-run) [--out <dir>] [--record <dir> | --replay <dir>]";
 
 const eur = (x: number) => `€${x.toFixed(4)}`;
 
@@ -32,6 +32,7 @@ export async function main(argv: string[], env: Record<string, string | undefine
       options: {
         "okus-round": { type: "string" },
         "run-dir": { type: "string" },
+        since: { type: "string" },
         items: { type: "string" },
         only: { type: "string" },
         reviewers: { type: "string" },
@@ -90,7 +91,9 @@ export async function main(argv: string[], env: Record<string, string | undefine
   let owner: Map<string, number> | undefined;
   try {
     const round = v["okus-round"] ? Number(v["okus-round"]) : undefined;
-    const all = round !== undefined ? loadOkusItems(roundDir(round)) : loadRunDirItems(path.resolve(v["run-dir"]!));
+    const since = v.since ? new Date(v.since) : undefined;
+    if (since && Number.isNaN(since.getTime())) throw new Error(`--since takes an ISO time, not ${v.since}`);
+    const all = round !== undefined ? loadOkusItems(roundDir(round)) : loadRunDirItems(path.resolve(v["run-dir"]!), since ? { since } : {});
     items = selectItems(all, { ...(v.only ? { only: v.only.split(",").map((s) => s.trim()) } : {}), ...(v.items ? { count: Number(v.items) } : {}) });
     const ownerFile = round !== undefined ? path.join(roundDir(round), "owner.json") : undefined;
     if (round !== undefined && ownerFile && existsSync(ownerFile)) {
