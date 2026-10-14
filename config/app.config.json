@@ -91,15 +91,15 @@
   },
   "eurPerUsd": 0.86,
   "outsideReview": {
-    "$comment": "Eval only (pnpm outside-review): two vision reviewers from other labs score a page's screenshots with the judge's rubric, through OpenRouter (owner's decision 2026-10-14). Prices as of 2026-10-14; the OpenRouter credit is taken as USD. structured: json_schema sends a strict response_format; json_object puts the schema in the prompt (use it if a model rejects json_schema). estimate: tokens per screenshot and the expected answer length, used only to price a run before it is sent and to stop it at --max-eur.",
+    "$comment": "Eval only (pnpm outside-review): two vision reviewers from other labs score a page's screenshots with the judge's rubric, through OpenRouter (owner's decision 2026-10-14: Gemini 4 Argon, released on OpenRouter 2026-10-13, instead of Gemini 3.1 Pro Preview; and GPT-6.1). Prices from OpenRouter's model list, 2026-10-14; the OpenRouter credit is taken as USD. structured: json_schema sends a strict response_format; json_object puts the schema in the prompt (use it if a model rejects json_schema). estimate: tokens per screenshot and the expected answer length, used only to price a run before it is sent and to stop it at --max-eur.",
     "provider": "openrouter",
     "baseUrl": "https://openrouter.ai/api/v1",
     "reviewers": [
-      { "id": "gemini", "model": "google/gemini-3.1-pro-preview", "maxTokens": 4000, "structured": "json_schema" },
+      { "id": "gemini", "model": "google/gemini-4-argon", "maxTokens": 4000, "structured": "json_schema" },
       { "id": "gpt", "model": "openai/gpt-6.1-sol", "maxTokens": 4000, "structured": "json_schema" }
     ],
     "pricesUsdPerMTok": {
-      "google/gemini-3.1-pro-preview": { "input": 2.0, "output": 12.0 },
+      "google/gemini-4-argon": { "input": 2.0, "output": 10.0 },
       "openai/gpt-6.1-sol": { "input": 2.0, "output": 10.0 }
     },
     "estimate": { "tokensPerImage": 1500, "charsPerToken": 3, "outputTokens": 700 }

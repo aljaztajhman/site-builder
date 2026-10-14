@@ -1,6 +1,6 @@
 /**
  * Outside design reviewers (owner's decision 2026-10-14): vision models from other labs (config `outsideReview`:
- * Gemini 3.1 Pro and GPT-6.1 through OpenRouter) score a page's four screenshots with the judge's own rubric and
+ * Gemini 4 Argon and GPT-6.1 through OpenRouter) score a page's four screenshots with the judge's own rubric and
  * output schema (judge.ts), so their scores can sit beside the owner's Okus ratings and the Anthropic judge's.
  * Eval only; nothing here touches generation or the live app. Pure where it can be: request building, answer
  * parsing, scoring, cost and the budget guard take a transport (outside-transport.ts), so tests never need a network.

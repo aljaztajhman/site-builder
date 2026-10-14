@@ -509,7 +509,7 @@ Product work (not started):
 - [x] Lucide line icons (2026-10-01, branch claude/fact-icons): `Icon` primitive (phone, map-pin, clock, mail; inline SVG, currentColor, aria-hidden) only on fact labels in hero-type with-facts, contact, contact-strip, and on the phone call bar's two buttons. Not in services, highlights, steps, header, footer (tested). Call bar buttons now size from their content so icon + "Navodila za pot" stays on one line at 360 px (all 10 goldens: 48–50 px tall, was wrapping to 66–71 px with equal halves). Offline check on 3 goldens: axe 0, LH accessibility 100, 360 px width ok
 - [x] Client-facing generation/edits: generated pictures in the pipeline with origin + "Ustvarjeno z UI" label (spec v3, PR #24); the owner replaces them with their own photos in the editor (PR #25)
 
-## Outside design reviewers (owner's decision 2026-10-14: Gemini 3.1 Pro + GPT-6.1 via OpenRouter)
+## Outside design reviewers (owner's decision 2026-10-14: Gemini 4 Argon + GPT-6.1 via OpenRouter)
 - [x] PR 1, the reviewer: `pnpm outside-review` (tools/eval/src/outside-review*.ts, config `outsideReview`) scores pages with the judge's rubric, writes per-reviewer scores for `okus:calibrate`, a cost log and a report against the owner's Okus ratings. Free to build; dry run for Okus round 1: 32 pages × 2 reviewers = 64 calls, ≈ €2.05 estimated (needs the images: `pnpm okus:items --round 1 --local-fonts`)
 - [ ] First paid scoring of Okus round 1 (blocked: the owner creates the OpenRouter key and puts `OPENROUTER_API_KEY` in .env; €2 approved, the dry-run estimate is slightly above it, so use `--items` or raise the approval)
 - [ ] PR 2, the dialogue: Claude answers the review, changes the spec, re-render, re-score (not started)
