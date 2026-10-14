@@ -1,0 +1,539 @@
+{
+  "items": [
+    "composed-j",
+    "composed-m",
+    "composed-s",
+    "golden-avtoservis-mrak",
+    "golden-fizioterapija-pregib",
+    "golden-frizerstvo-lana",
+    "golden-gostilna-zlata-zlica",
+    "golden-instalacije-rebernik",
+    "golden-kmetija-grabnar",
+    "golden-pekarna-kvas",
+    "golden-racunovodstvo-seliskar",
+    "golden-trgovina-oljka-in-sol",
+    "golden-zobozdravstvo-lebar",
+    "ref-a",
+    "ref-b",
+    "ref-c",
+    "ref-d",
+    "ref-e",
+    "ref-f",
+    "ref-g",
+    "ref-h",
+    "ref-i",
+    "ref-j",
+    "ref-k",
+    "ref-l",
+    "ref-m",
+    "ref-n",
+    "ref-o",
+    "ref-p",
+    "ref-r",
+    "ref-s",
+    "ref-t"
+  ],
+  "reviewers": {
+    "gemini": {
+      "model": "google/gemini-4-argon",
+      "scored": [
+        "composed-j",
+        "composed-m",
+        "composed-s",
+        "golden-avtoservis-mrak",
+        "golden-fizioterapija-pregib",
+        "golden-frizerstvo-lana",
+        "golden-gostilna-zlata-zlica",
+        "golden-instalacije-rebernik",
+        "golden-kmetija-grabnar",
+        "golden-pekarna-kvas",
+        "golden-racunovodstvo-seliskar",
+        "golden-trgovina-oljka-in-sol",
+        "golden-zobozdravstvo-lebar",
+        "ref-a",
+        "ref-b",
+        "ref-c",
+        "ref-d",
+        "ref-e",
+        "ref-f",
+        "ref-g",
+        "ref-h",
+        "ref-i",
+        "ref-j",
+        "ref-k",
+        "ref-l",
+        "ref-m",
+        "ref-n",
+        "ref-o",
+        "ref-p",
+        "ref-r",
+        "ref-s",
+        "ref-t"
+      ],
+      "failed": [],
+      "skipped": [],
+      "vsOwner": {
+        "pairwise": {
+          "agreement": 0.6716738197424893,
+          "pairs": 233,
+          "agreed": 156.5,
+          "judgeTies": 13
+        },
+        "spearman": 0.29307116912711967,
+        "n": 32
+      }
+    },
+    "gpt": {
+      "model": "openai/gpt-6.1-sol",
+      "scored": [
+        "composed-j",
+        "composed-m",
+        "composed-s",
+        "golden-avtoservis-mrak",
+        "golden-fizioterapija-pregib",
+        "golden-frizerstvo-lana",
+        "golden-gostilna-zlata-zlica",
+        "golden-instalacije-rebernik",
+        "golden-kmetija-grabnar",
+        "golden-pekarna-kvas",
+        "golden-racunovodstvo-seliskar",
+        "golden-trgovina-oljka-in-sol",
+        "golden-zobozdravstvo-lebar",
+        "ref-a",
+        "ref-b",
+        "ref-c",
+        "ref-d",
+        "ref-e",
+        "ref-f",
+        "ref-g",
+        "ref-h",
+        "ref-i",
+        "ref-j",
+        "ref-k",
+        "ref-l",
+        "ref-m",
+        "ref-n",
+        "ref-o",
+        "ref-p",
+        "ref-r",
+        "ref-s",
+        "ref-t"
+      ],
+      "failed": [],
+      "skipped": [],
+      "vsOwner": {
+        "pairwise": {
+          "agreement": 0.7317596566523605,
+          "pairs": 233,
+          "agreed": 170.5,
+          "judgeTies": 11
+        },
+        "spearman": 0.39658042613296085,
+        "n": 32
+      }
+    }
+  },
+  "reviewerPairs": [
+    {
+      "a": "gemini",
+      "b": "gpt",
+      "pairwise": {
+        "agreement": 0.7983014861995754,
+        "pairs": 471,
+        "agreed": 376,
+        "judgeTies": 20
+      },
+      "spearman": 0.7539668409993646,
+      "n": 32
+    }
+  ],
+  "spentEur": 1.432760344,
+  "calls": 64,
+  "stoppedByBudget": false,
+  "rows": [
+    {
+      "itemId": "composed-j",
+      "owner": 4,
+      "scores": {
+        "gemini": 3.083333333333333,
+        "gpt": 3.333333333333333
+      },
+      "topFix": {
+        "gemini": "Remove one of the two consecutive story sections ('Kruh pečemo samo z drožmi' and 'Drožmi, ki jih gojimo sami') so the dough-shaping photo and baker's quote are not duplicated back-to-back.",
+        "gpt": "On phones, replace the standalone opening-hours circle with a compact label over the bread photograph and tighten the hero spacing so a substantial portion of the bread is visible above the fixed bar."
+      }
+    },
+    {
+      "itemId": "composed-m",
+      "owner": 2,
+      "scores": {
+        "gemini": 4.083333333333334,
+        "gpt": 3.833333333333333
+      },
+      "topFix": {
+        "gemini": "Adjust the mobile hero image crop (e.g. object-position: top or center-top) so the lifted car is clearly visible instead of the empty garage floor.",
+        "gpt": "Shorten the mobile photo area and reposition its crop around the raised car and lift rather than the floor, bringing the service headline higher into the first screen."
+      }
+    },
+    {
+      "itemId": "composed-s",
+      "owner": 5,
+      "scores": {
+        "gemini": 4.166666666666666,
+        "gpt": 3.5833333333333335
+      },
+      "topFix": {
+        "gemini": "Remove the secondary 'Pokličite za ogled' button below the red phone number block on desktop, as it duplicates the call to action right above it.",
+        "gpt": "Compact the mobile hero with a slightly smaller headline, tighter vertical spacing and a smaller radiator illustration positioned before the supporting paragraph."
+      }
+    },
+    {
+      "itemId": "golden-avtoservis-mrak",
+      "owner": 2,
+      "scores": {
+        "gemini": 3.75,
+        "gpt": 3
+      },
+      "topFix": {
+        "gemini": "Put the three service cards in a 3-column grid on desktop and give each photo a full-width top crop instead of a tiny side thumbnail.",
+        "gpt": "Bring a substantial workshop or mechanic photo into the opening composition, keeping the headline and call action visible on phones."
+      }
+    },
+    {
+      "itemId": "golden-fizioterapija-pregib",
+      "owner": 4,
+      "scores": {
+        "gemini": 3.916666666666667,
+        "gpt": 3.6666666666666665
+      },
+      "topFix": {
+        "gemini": "Reposition or fade the background graphic's orange joint circle so it never overlaps the hero text on either viewport.",
+        "gpt": "Reduce the hero headline size on both viewports and make the physiotherapy descriptor more prominent before the address; on phones, use the recovered space to bring the clinic photo higher."
+      }
+    },
+    {
+      "itemId": "golden-frizerstvo-lana",
+      "owner": 4,
+      "scores": {
+        "gemini": 4,
+        "gpt": 3.666666666666667
+      },
+      "topFix": {
+        "gemini": "Add bottom padding to the hero section so the rightmost arched photo does not touch the burgundy banner, or show only two wider arches on mobile.",
+        "gpt": "Reduce the desktop hero headline size so it fits two balanced lines, remove forced body-text hyphenation, and give the booking button clear space above the burgundy section."
+      }
+    },
+    {
+      "itemId": "golden-gostilna-zlata-zlica",
+      "owner": 4,
+      "scores": {
+        "gemini": 4.416666666666667,
+        "gpt": 4
+      },
+      "topFix": {
+        "gemini": "On mobile, stack the hero text card below the photo or adjust the image crop so the gostilna and its outdoor tables are visible instead of just tree leaves.",
+        "gpt": "Rework the mobile hero into a shorter, deliberately cropped photograph showing the building or terrace, followed by the text panel; reduce the foliage-only area above the headline."
+      }
+    },
+    {
+      "itemId": "golden-instalacije-rebernik",
+      "owner": 2,
+      "scores": {
+        "gemini": 3.833333333333333,
+        "gpt": 3.5
+      },
+      "topFix": {
+        "gemini": "Remove the repeated 'Pokličite' buttons from the middle sections ('Od klica do pisne ponudbe' and 'Kje delamo') so the hero and final CTA carry the action.",
+        "gpt": "Combine the process and free-visit sections into one clear block with one call button; remove the additional call button from the service-area section."
+      }
+    },
+    {
+      "itemId": "golden-kmetija-grabnar",
+      "owner": 4,
+      "scores": {
+        "gemini": 4.166666666666667,
+        "gpt": 4.083333333333334
+      },
+      "topFix": {
+        "gemini": "Remove the duplicate list of three trail destinations ('Raduha', 'Logarska dolina', 'Smučišče') in the 'Kako do nas' section since they are already featured on the hero signpost.",
+        "gpt": "Compact the phone hero by reducing its top padding and shrinking the signpost; make the room photo below span the available content width instead of leaving a large empty strip beside it."
+      }
+    },
+    {
+      "itemId": "golden-pekarna-kvas",
+      "owner": 4,
+      "scores": {
+        "gemini": 3.5,
+        "gpt": 3.6666666666666665
+      },
+      "topFix": {
+        "gemini": "Remove the redundant 'Kdaj smo odprti' section and the duplicate hours table inside 'Kje nas najdete', keeping the opening hours in one place.",
+        "gpt": "Consolidate opening hours into one contact/location section instead of showing them three times; keep the introductory contact strip compact."
+      }
+    },
+    {
+      "itemId": "golden-racunovodstvo-seliskar",
+      "owner": 4,
+      "scores": {
+        "gemini": 4.333333333333334,
+        "gpt": 4
+      },
+      "topFix": {
+        "gemini": "Keep the header brand name on a single line on mobile by reducing its font size or dropping 'd.o.o.' from the logo mark.",
+        "gpt": "On phones, replace the three oversized audience blocks with a compact list and reduce their vertical padding."
+      }
+    },
+    {
+      "itemId": "golden-trgovina-oljka-in-sol",
+      "owner": 4,
+      "scores": {
+        "gemini": 4.5,
+        "gpt": 3.583333333333333
+      },
+      "topFix": {
+        "gemini": "Tighten the vertical padding and olive-branch illustration inside the mobile hero card so the arched shop photo is clearly visible on the first screen.",
+        "gpt": "Compact the mobile header and hero ornament, reduce the headline slightly, and move the shop photograph into the first screen above the fixed action bar."
+      }
+    },
+    {
+      "itemId": "golden-zobozdravstvo-lebar",
+      "owner": 4,
+      "scores": {
+        "gemini": 4.333333333333334,
+        "gpt": 3.916666666666667
+      },
+      "topFix": {
+        "gemini": "Tighten the vertical gap between the 'Pišite nam' link and the circular hero image on mobile so the layout feels cohesive.",
+        "gpt": "Reduce the mobile hero headline size and tighten the gaps around the description and email link so more of the practice photo is visible above the fixed bar."
+      }
+    },
+    {
+      "itemId": "ref-a",
+      "owner": 4,
+      "scores": {
+        "gemini": 4,
+        "gpt": 3.5
+      },
+      "topFix": {
+        "gemini": "Fix the clipping of the yellow '17.00' card on mobile so the full number is visible and properly padded above the dark info strip.",
+        "gpt": "Reduce the hero headline size, especially on phones, and shorten the desktop gap beneath the navigation so the introduction, action and schedule form one compact composition."
+      }
+    },
+    {
+      "itemId": "ref-b",
+      "owner": 3,
+      "scores": {
+        "gemini": 4.166666666666667,
+        "gpt": 3.25
+      },
+      "topFix": {
+        "gemini": "Slightly reduce the font size of '17.00' and tighten vertical margins on the mobile hero so a meaningful portion of the pool photo is visible on the first screen.",
+        "gpt": "Make teaching children to swim the primary headline, with Celje and 17.00 as compact supporting details; substantially reduce the time’s size on both viewports."
+      }
+    },
+    {
+      "itemId": "ref-c",
+      "owner": 4,
+      "scores": {
+        "gemini": 3.833333333333333,
+        "gpt": 3.3333333333333335
+      },
+      "topFix": {
+        "gemini": "Reduce the mobile hero headline font size and vertical margins slightly so the pool photo and '17.00' badge fit comfortably above the fold.",
+        "gpt": "Reduce the mobile headline to roughly 34–38px and tighten the hero spacing so the pool image is meaningfully visible in the first screen."
+      }
+    },
+    {
+      "itemId": "ref-d",
+      "owner": 3,
+      "scores": {
+        "gemini": 4,
+        "gpt": 3.5
+      },
+      "topFix": {
+        "gemini": "Remove the redundant 'Kdaj: Vsak popoldan ob 17.00' and 'Kje: Celje' items from the 4-column info strip since they are already featured prominently in the large '17.00' callout right above it.",
+        "gpt": "Reduce the mobile headline size and hero gaps so a substantial pool image appears earlier, while keeping the primary contact action visible."
+      }
+    },
+    {
+      "itemId": "ref-e",
+      "owner": 4,
+      "scores": {
+        "gemini": 3.3333333333333335,
+        "gpt": 3.166666666666667
+      },
+      "topFix": {
+        "gemini": "Move the hero wave boundary below the main headline so the text sits cleanly on either the white or blue background instead of being sliced in half.",
+        "gpt": "Move the wave below the complete headline on both viewports, keeping every letter on one contrasting background; reduce the mobile headline size."
+      }
+    },
+    {
+      "itemId": "ref-f",
+      "owner": 4,
+      "scores": {
+        "gemini": 3.8333333333333335,
+        "gpt": 3.5833333333333335
+      },
+      "topFix": {
+        "gemini": "Reduce the desktop hero headline size and top awning height so the 'Pokličite nas' button and 'Pišite nam' link are clearly visible above the fold.",
+        "gpt": "Reduce the hero headline size and canopy height; use a wider desktop text column so the headline takes fewer lines and the primary contact button fits within the first screen."
+      }
+    },
+    {
+      "itemId": "ref-g",
+      "owner": 4,
+      "scores": {
+        "gemini": 3.416666666666667,
+        "gpt": 3.166666666666667
+      },
+      "topFix": {
+        "gemini": "Reduce the hero headline size on desktop so the underwater pool photo is clearly visible in the first screen, and replace the water-texture fill on subheadings with solid white or light blue text.",
+        "gpt": "Reduce the hero headline substantially, especially on desktop, and establish children's swimming lessons as the primary message, with location and timetable beneath it."
+      }
+    },
+    {
+      "itemId": "ref-h",
+      "owner": 4,
+      "scores": {
+        "gemini": 4.166666666666667,
+        "gpt": 4
+      },
+      "topFix": {
+        "gemini": "Remove the redundant blue \"vsak popoldan ob 17.00\" kickboard badge from the hero, as the exact same time is already stated in the hero subtext and in the coral card right below.",
+        "gpt": "Compress the mobile hero’s decorative space and replace the three tall information kickboards with a compact facts panel, bringing the training section much closer to the top."
+      }
+    },
+    {
+      "itemId": "ref-i",
+      "owner": 4,
+      "scores": {
+        "gemini": 3.5,
+        "gpt": 3.583333333333333
+      },
+      "topFix": {
+        "gemini": "Adjust the mobile hero wave shape or text width so the headline and eyebrow stay completely inside the dark background instead of spilling onto the bright photo.",
+        "gpt": "Shorten the hero on both viewports: reduce the wave height, headline size and time badge so the primary action and a compact location summary fit comfortably within the first screen."
+      }
+    },
+    {
+      "itemId": "ref-j",
+      "owner": 4,
+      "scores": {
+        "gemini": 4.5,
+        "gpt": 4.25
+      },
+      "topFix": {
+        "gemini": "On mobile, move the yellow 'pon–sob odprto od 6.30' badge to the top-right of the arched photo or tighten vertical hero spacing so the fixed bottom bar does not slice through the '6.30' text.",
+        "gpt": "Reduce the phone hero headline to roughly 38–40px and tighten the gap before the photograph so more bread is visible in the first screen."
+      }
+    },
+    {
+      "itemId": "ref-k",
+      "owner": 4,
+      "scores": {
+        "gemini": 4.166666666666667,
+        "gpt": 3.916666666666667
+      },
+      "topFix": {
+        "gemini": "Reduce the vertical padding and top margin of the hero card on both viewports so the 'Rezervirajte mizo' button and 'Jedilni list' link sit comfortably above the fold without clipping.",
+        "gpt": "Move the hero panel upward and reduce its vertical padding so the complete introduction and reservation action fit comfortably within the first screen on both viewports."
+      }
+    },
+    {
+      "itemId": "ref-l",
+      "owner": 5,
+      "scores": {
+        "gemini": 4,
+        "gpt": 3.666666666666667
+      },
+      "topFix": {
+        "gemini": "On mobile, display the hero photos in a 2-column staggered layout or feature the central hair photo much larger instead of squeezing three narrow arches into one row.",
+        "gpt": "Compact the mobile hero: reduce headline and body type slightly, tighten vertical gaps, and bring the hairstyle photos higher so meaningful examples are visible above the fixed bar."
+      }
+    },
+    {
+      "itemId": "ref-m",
+      "owner": 4,
+      "scores": {
+        "gemini": 4.583333333333334,
+        "gpt": 3.916666666666667
+      },
+      "topFix": {
+        "gemini": "Make the mechanic photo in the mobile 'Kaj delamo' section span the full width of the content column instead of leaving an empty gap on the right.",
+        "gpt": "Reduce the desktop hero headline and tighten its vertical spacing so the entire phone action fits comfortably within the first screen."
+      }
+    },
+    {
+      "itemId": "ref-n",
+      "owner": 5,
+      "scores": {
+        "gemini": 4.75,
+        "gpt": 4.083333333333334
+      },
+      "topFix": {
+        "gemini": "Hide or reposition the wooden signpost graphic in the mobile hero so it doesn't get cut off at the fold and repeat information already shown in the 'Planinske poti' section below.",
+        "gpt": "Shorten the mobile hero by reducing the gap below the header and replacing the tall signpost with a compact trail motif, bringing accommodation and prices closer to the first screen."
+      }
+    },
+    {
+      "itemId": "ref-o",
+      "owner": 4,
+      "scores": {
+        "gemini": 4.333333333333334,
+        "gpt": 3.75
+      },
+      "topFix": {
+        "gemini": "Slightly tighten the phone hero typography and vertical margins so the circular clinic photo is clearly visible above the fold.",
+        "gpt": "Compact the mobile header, reduce the hero headline to roughly 30–32px and tighten the gap before the photo so a meaningful portion of the practice is visible above the fixed bar."
+      }
+    },
+    {
+      "itemId": "ref-p",
+      "owner": 4,
+      "scores": {
+        "gemini": 4.333333333333334,
+        "gpt": 3.916666666666667
+      },
+      "topFix": {
+        "gemini": "Make the mobile hero photo span the full width of the content container instead of indenting it on the left.",
+        "gpt": "On phones, reduce the hero headline slightly, tighten the gap below the contact link, and make the clinic photo span the content width so it has more presence in the first screen."
+      }
+    },
+    {
+      "itemId": "ref-r",
+      "owner": 4,
+      "scores": {
+        "gemini": 4.083333333333334,
+        "gpt": 3.833333333333333
+      },
+      "topFix": {
+        "gemini": "Merge or differentiate the checklist inside the hero receipt graphic and the 'Storitve' list below so the same five services aren't listed twice in a row.",
+        "gpt": "Replace the three enormous stacked audience labels on phones with a compact, clearly grouped row or list, and reduce the gap between the hero actions and receipt."
+      }
+    },
+    {
+      "itemId": "ref-s",
+      "owner": 5,
+      "scores": {
+        "gemini": 4.5,
+        "gpt": 4
+      },
+      "topFix": {
+        "gemini": "Add top margin above the hero radiator illustration on mobile so the red pipe does not overlap the text 'dan'.",
+        "gpt": "On phones, reduce the radiator illustration to a compact graphic and keep its pipe clear of the callback text so the services appear substantially sooner."
+      }
+    },
+    {
+      "itemId": "ref-t",
+      "owner": 4,
+      "scores": {
+        "gemini": 4.75,
+        "gpt": 3.833333333333333
+      },
+      "topFix": {
+        "gemini": "Remove the repeated olive-sprig illustration from the three 'Na policah' price cards, or give each product its own distinct icon (bottle, salt crystal, gift box).",
+        "gpt": "Rework the mobile hero: reduce the headline size, olive illustration and frame padding, place the location beneath the headline, and bring a meaningful portion of the shop photo into the first screen."
+      }
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+{"at":"2026-10-14T20:17:05.529Z","stage":"outside-review","reviewer":"gemini","model":"google/gemini-4-argon","itemId":"composed-j","inputTokens":12319,"outputTokens":285,"usd":0.027488,"eur":0.02363968,"costSource":"openrouter"}
+{"at":"2026-10-14T20:17:18.999Z","stage":"outside-review","reviewer":"gpt","model":"openai/gpt-6.1-sol","itemId":"composed-j","inputTokens":9935,"outputTokens":415,"usd":0.028986,"eur":0.024927960000000002,"costSource":"openrouter"}

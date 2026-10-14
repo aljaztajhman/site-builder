@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The farm-specific styling feels cohesive, but the large gap below the header and extended signpost illustration make the mobile hero unnecessarily tall.\",\n  \"desktopNote\": \"The alpine identity is distinctive and well coordinated, but the oversized headline and heavy image overlay overpower the scenic view.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 4,\n    \"spacing\": 3,\n    \"clutter\": 4,\n    \"distinctiveness\": 5\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 4,\n    \"spacing\": 4,\n    \"clutter\": 4,\n    \"distinctiveness\": 5\n  },\n  \"fixes\": [\n    \"Shorten the mobile hero by reducing the gap below the header and replacing the tall signpost with a compact trail motif, bringing accommodation and prices closer to the first screen.\",\n    \"Reduce the desktop hero headline slightly and use a localized dark gradient behind the text instead of dimming the entire photograph.\",\n    \"Give the mobile room and preserves photographs the full content width, eliminating the conspicuous unused space beside them.\"\n  ]\n}",
+  "usage": {
+    "prompt_tokens": 9907,
+    "completion_tokens": 471,
+    "cost": 0.029476
+  }
+}

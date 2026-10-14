@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The oversized stacked audience labels and repeated service lists make an otherwise polished typographic page unnecessarily long.\",\n  \"desktopNote\": \"The accounting-style receipt gives the hero character, but the audience strip and service section repeat information already prominent above.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 4,\n    \"spacing\": 3,\n    \"clutter\": 3,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 5,\n    \"spacing\": 4,\n    \"clutter\": 3,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Replace the three enormous stacked audience labels on phones with a compact, clearly grouped row or list, and reduce the gap between the hero actions and receipt.\",\n    \"Keep the distinctive receipt as the service overview, but make the later service section provide additional detail rather than repeat essentially the same list.\",\n    \"Reduce the desktop headline slightly and give the location a quieter position beneath it, establishing a clearer business–location–contact reading order.\"\n  ]\n}",
+  "usage": {
+    "prompt_tokens": 8285,
+    "completion_tokens": 425,
+    "cost": 0.024961
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The oversized text-led hero pushes the distinctive radiator illustration almost entirely below the first screen, while the narrow process columns create awkward wrapping further down.\",\n  \"desktopNote\": \"The radiator illustration and red–blue palette give the page a clear trade identity, but the telephone ticket and separate call button unnecessarily repeat the same action.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 3,\n    \"imagery\": 3,\n    \"spacing\": 3,\n    \"clutter\": 3,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 4,\n    \"spacing\": 4,\n    \"clutter\": 3,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Compact the mobile hero with a slightly smaller headline, tighter vertical spacing and a smaller radiator illustration positioned before the supporting paragraph.\",\n    \"Make the red telephone ticket the sole desktop hero call action; remove the separate button beneath it and the standalone call link after the service-area section.\",\n    \"On phones, place each process description beneath its step label instead of in a narrow second column, eliminating forced word breaks.\"\n  ]\n}",
+  "usage": {
+    "prompt_tokens": 8453,
+    "completion_tokens": 464,
+    "cost": 0.025771
+  }
+}

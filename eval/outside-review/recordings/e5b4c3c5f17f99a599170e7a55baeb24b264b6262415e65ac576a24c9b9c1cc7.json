@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The oversized opening-hours badge pushes the bread photograph almost entirely below the first screen, weakening an otherwise warm, bakery-specific design.\",\n  \"desktopNote\": \"The strong photographic hero is undermined further down by two consecutive sourdough-story sections using the same kneading photograph.\",\n  \"phone\": {\n    \"impression\": 3,\n    \"hierarchy\": 3,\n    \"imagery\": 2,\n    \"spacing\": 3,\n    \"clutter\": 3,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 4,\n    \"spacing\": 3,\n    \"clutter\": 3,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"On phones, replace the standalone opening-hours circle with a compact label over the bread photograph and tighten the hero spacing so a substantial portion of the bread is visible above the fixed bar.\",\n    \"Merge the two sourdough-story sections into one focused section with a single kneading photograph, removing the repeated heading, explanation and attribution.\",\n    \"Rebalance the desktop yellow promotion: give its headline a wider column so it does not break into four short lines, and group the supporting text and order link beneath it.\"\n  ]\n}",
+  "usage": {
+    "prompt_tokens": 9935,
+    "completion_tokens": 411,
+    "cost": 0.0051092
+  }
+}

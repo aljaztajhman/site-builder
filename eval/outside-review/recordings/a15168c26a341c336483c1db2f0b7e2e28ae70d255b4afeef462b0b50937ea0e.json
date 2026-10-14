@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The oversized radiator illustration pushes the services far down the page, and its red pipe crowds the callback note.\",\n  \"desktopNote\": \"The trade-specific graphic identity works well, but generously padded secondary sections make the lower page feel stretched.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 3,\n    \"spacing\": 3,\n    \"clutter\": 4,\n    \"distinctiveness\": 5\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 4,\n    \"spacing\": 4,\n    \"clutter\": 4,\n    \"distinctiveness\": 5\n  },\n  \"fixes\": [\n    \"On phones, reduce the radiator illustration to a compact graphic and keep its pipe clear of the callback text so the services appear substantially sooner.\",\n    \"Tighten vertical padding around the subsidy banner, process and coverage sections, retaining the pipe motif without letting it dictate oversized section heights.\",\n    \"Remove repeated callback and free-visit explanations from the closing contact block; keep the phone number prominent and reserve supporting space for the address.\"\n  ]\n}",
+  "usage": {
+    "prompt_tokens": 8867,
+    "completion_tokens": 428,
+    "cost": 0.026446
+  }
+}

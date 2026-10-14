@@ -1,0 +1,74 @@
+{
+  "items": [
+    "composed-j"
+  ],
+  "reviewers": {
+    "gemini": {
+      "model": "google/gemini-4-argon",
+      "scored": [
+        "composed-j"
+      ],
+      "failed": [],
+      "skipped": [],
+      "vsOwner": {
+        "pairwise": {
+          "agreement": null,
+          "pairs": 0,
+          "agreed": 0,
+          "judgeTies": 0
+        },
+        "spearman": null,
+        "n": 1
+      }
+    },
+    "gpt": {
+      "model": "openai/gpt-6.1-sol",
+      "scored": [
+        "composed-j"
+      ],
+      "failed": [],
+      "skipped": [],
+      "vsOwner": {
+        "pairwise": {
+          "agreement": null,
+          "pairs": 0,
+          "agreed": 0,
+          "judgeTies": 0
+        },
+        "spearman": null,
+        "n": 1
+      }
+    }
+  },
+  "reviewerPairs": [
+    {
+      "a": "gemini",
+      "b": "gpt",
+      "pairwise": {
+        "agreement": null,
+        "pairs": 0,
+        "agreed": 0,
+        "judgeTies": 0
+      },
+      "spearman": null,
+      "n": 1
+    }
+  ],
+  "spentEur": 0.04856764,
+  "calls": 2,
+  "stoppedByBudget": false,
+  "rows": [
+    {
+      "itemId": "composed-j",
+      "owner": 4,
+      "scores": {
+        "gemini": 3.083333333333333,
+        "gpt": 3.166666666666667
+      },
+      "topFix": {
+        "gemini": "Merge the two consecutive 'Kruh pečemo samo z drožmi' and 'Drožmi, ki jih gojimo sami' sections into one, and remove the duplicate dough-kneading photo.",
+        "gpt": "On phones, move the bread photograph directly beneath the main offer button and overlay a smaller opening-hours badge on it; tighten the hero spacing so meaningful bread imagery appears above the call"
+      }
+    }
+  ]
+}

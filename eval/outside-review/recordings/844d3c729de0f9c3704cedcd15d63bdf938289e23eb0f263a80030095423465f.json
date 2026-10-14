@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The mobile hero devotes too much of the first screen to a crop of foliage, hiding the restaurant’s character behind an otherwise polished text panel.\",\n  \"desktopNote\": \"The photography, serif typography and green-and-gold palette suit the gostilna, but the low hero panel leaves the reservation button clipped at the bottom of the first screen.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 3,\n    \"imagery\": 3,\n    \"spacing\": 4,\n    \"clutter\": 5,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 5,\n    \"spacing\": 4,\n    \"clutter\": 4,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Rework the mobile hero into a shorter, deliberately cropped photograph showing the building or terrace, followed by the text panel; reduce the foliage-only area above the headline.\",\n    \"Move the desktop hero panel upward and slightly reduce its padding so the complete reservation button is comfortably visible within the first 800 pixels.\",\n    \"Tighten the mobile menu section by reducing the circular photo sizes and the gaps between dishes, keeping each photograph, dish name and price together as a compact unit.\"\n  ]\n}",
+  "usage": {
+    "prompt_tokens": 9635,
+    "completion_tokens": 431,
+    "cost": 0.028396
+  }
+}

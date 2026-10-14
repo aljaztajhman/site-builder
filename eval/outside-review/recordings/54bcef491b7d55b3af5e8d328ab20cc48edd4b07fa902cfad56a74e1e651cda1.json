@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The branding is strong, but the large text-first hero relegates the clinic photo to a narrow, low-positioned crop, while the two-column pricing cards become awkwardly tall.\",\n  \"desktopNote\": \"The prominent clinic photo and logo-derived graphics create a coherent identity, though repeated booking controls and opening-hours information weaken the otherwise clear layout.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 3,\n    \"spacing\": 3,\n    \"clutter\": 4,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 5,\n    \"spacing\": 4,\n    \"clutter\": 4,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"On phones, reduce the hero headline slightly, tighten the gap below the contact link, and make the clinic photo span the content width so it has more presence in the first screen.\",\n    \"Replace the phone’s tall two-column pricing cards with compact full-width rows, keeping each amount and its euro symbol together.\",\n    \"Keep opening hours in the dedicated contact section rather than repeating them in the statistics and booking bands, and use a quieter desktop navigation link instead of a second orange booking button.\"\n  ]\n}",
+  "usage": {
+    "prompt_tokens": 8646,
+    "completion_tokens": 481,
+    "cost": 0.0264235
+  }
+}
