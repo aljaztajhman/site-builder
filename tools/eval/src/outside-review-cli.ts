@@ -61,6 +61,10 @@ export async function main(argv: string[], env: Record<string, string | undefine
       return 2;
     }
   }
+  if (v.items !== undefined && !(Number.isInteger(Number(v.items)) && Number(v.items) > 0)) {
+    print(`--items needs a whole number above 0, got "${v.items}".\n${USAGE}`);
+    return 2;
+  }
   let reviewers = oc.reviewers;
   if (v.reviewers) {
     const want = v.reviewers.split(",").map((s) => s.trim());

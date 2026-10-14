@@ -106,6 +106,8 @@ export interface CallEstimate {
   inputTokens: number;
   outputTokens: number;
   eur: number;
+  /** The same call with the longest answer the reviewer may give (`maxTokens`; reasoning counts as answer tokens): what the budget guard reserves. */
+  worstEur: number;
 }
 
 const priceOf = (config: AppConfig, model: string) => {
@@ -127,7 +129,12 @@ export function estimateCall(config: AppConfig, reviewer: Reviewer, body: ChatBo
   const e = config.outsideReview.estimate;
   const inputTokens = Math.ceil(charsIn(body) / e.charsPerToken) + imagesIn(body) * e.tokensPerImage;
   const outputTokens = e.outputTokens;
-  return { inputTokens, outputTokens, eur: usdFor(config, reviewer.model, inputTokens, outputTokens) * config.eurPerUsd };
+  return {
+    inputTokens,
+    outputTokens,
+    eur: usdFor(config, reviewer.model, inputTokens, outputTokens) * config.eurPerUsd,
+    worstEur: usdFor(config, reviewer.model, inputTokens, reviewer.maxTokens) * config.eurPerUsd,
+  };
 }
 
 export interface CallCost {
@@ -135,15 +142,18 @@ export interface CallCost {
   outputTokens: number;
   usd: number;
   eur: number;
-  /** openrouter: the cost OpenRouter reported; config: its token counts at the configured prices; estimate: no usage came back. */
-  costSource: "openrouter" | "config" | "estimate";
+  /**
+   * openrouter: the cost OpenRouter reported; config: its token counts at the configured prices; estimate: no usage came
+   * back, or the call failed after it was sent (priced at the longest answer); replay: a recorded answer, nothing paid.
+   */
+  costSource: "openrouter" | "config" | "estimate" | "replay";
 }
 
 export function callCost(config: AppConfig, reviewer: Reviewer, res: ChatResult, body: ChatBody): CallCost {
   const u = res.usage;
   const known = u && typeof u.prompt_tokens === "number" && typeof u.completion_tokens === "number";
   const inputTokens = known ? u.prompt_tokens! : estimateCall(config, reviewer, body).inputTokens;
-  const outputTokens = known ? u.completion_tokens! : config.outsideReview.estimate.outputTokens;
+  const outputTokens = known ? u.completion_tokens! : reviewer.maxTokens;
   let usd: number;
   let costSource: CallCost["costSource"];
   if (u && typeof u.cost === "number" && Number.isFinite(u.cost) && u.cost >= 0) {
@@ -230,17 +240,31 @@ export async function runReview(o: {
   const run: ReviewRun = { results: {}, spentEur: 0, calls: 0, stoppedByBudget: false };
   for (const r of o.reviewers) run.results[r.id] = {};
 
-  /** One call within the budget; null when it would not fit. */
-  const ask = async (r: Reviewer, itemId: string, body: ChatBody): Promise<ChatResult | null> => {
-    if (run.stoppedByBudget || run.spentEur + estimateCall(o.config, r, body).eur > o.maxEur) {
-      run.stoppedByBudget = true;
-      return null;
-    }
-    const res = await o.transport.complete(body);
-    const c = callCost(o.config, r, res, body);
+  const book = (r: Reviewer, itemId: string, c: CallCost) => {
     run.spentEur += c.eur;
     run.calls++;
     o.onCost({ at: now().toISOString(), stage: "outside-review", reviewer: r.id, model: r.model, itemId, ...c });
+  };
+
+  /**
+   * One call within the budget (reserving its longest possible answer); null when it would not fit. A paid call that
+   * throws after it was sent (timeout, unreadable answer) is booked at that worst case, so the guard never undercounts.
+   */
+  const ask = async (r: Reviewer, itemId: string, body: ChatBody): Promise<ChatResult | null> => {
+    const est = estimateCall(o.config, r, body);
+    if (run.stoppedByBudget || run.spentEur + est.worstEur > o.maxEur) {
+      run.stoppedByBudget = true;
+      return null;
+    }
+    let res: ChatResult;
+    try {
+      res = await o.transport.complete(body);
+    } catch (e) {
+      if (o.transport.paid) book(r, itemId, { inputTokens: est.inputTokens, outputTokens: r.maxTokens, usd: est.worstEur / o.config.eurPerUsd, eur: est.worstEur, costSource: "estimate" });
+      throw e;
+    }
+    const c = o.transport.paid ? callCost(o.config, r, res, body) : { ...callCost(o.config, r, res, body), usd: 0, eur: 0, costSource: "replay" as const };
+    book(r, itemId, c);
     return res;
   };
 

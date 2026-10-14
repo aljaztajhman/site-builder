@@ -65,6 +65,7 @@ afterAll(() => rmSync(dir, { recursive: true, force: true }));
 function scripted(...answers: (ChatResult | Error)[]): OutsideTransport & { calls: ChatBody[] } {
   const calls: ChatBody[] = [];
   return {
+    paid: true,
     calls,
     async complete(body) {
       calls.push(body);
@@ -216,8 +217,8 @@ describe("cost", () => {
 describe("budget guard", () => {
   it("stops before a call that would take the run over --max-eur and lists what it skipped", async () => {
     const body = buildRequest(gemini, await preparePage(items[0]!));
-    const est = estimateCall(config, gemini, body).eur;
-    // Room for exactly one call at the estimate; the first call costs 90 % of the room, so the second does not fit.
+    const est = estimateCall(config, gemini, body).worstEur;
+    // Room for exactly one call at its worst case; the first call costs 90 % of the room, so the second does not fit.
     const t = scripted(result(answer(4, 4), { prompt_tokens: 1, completion_tokens: 1, cost: (est * 0.9) / config.eurPerUsd }), result(answer(4, 4)));
     const run = await runReview({ config, reviewers: [gemini], items, transport: t, maxEur: est * 1.2, onCost: () => {} });
     expect(t.calls).toHaveLength(1);
@@ -225,6 +226,42 @@ describe("budget guard", () => {
     expect(run.results.gemini!["item-b"]).toMatchObject({ status: "skipped" });
     expect(run.stoppedByBudget).toBe(true);
     expect(run.spentEur).toBeLessThanOrEqual(est * 1.2);
+  });
+
+  it("reserves the longest answer: a call that uses all of maxTokens still keeps the run within --max-eur", async () => {
+    const body = buildRequest(gemini, await preparePage(items[0]!));
+    const e = estimateCall(config, gemini, body);
+    expect(e.worstEur).toBeGreaterThan(e.eur);
+    const maxEur = e.worstEur * 1.5;
+    // Every answer uses the whole answer budget at the configured prices; only one such call fits in 1.5× its worst case.
+    const full = () => result(answer(4, 4), { prompt_tokens: e.inputTokens, completion_tokens: gemini.maxTokens });
+    const t = scripted(full(), full());
+    const run = await runReview({ config, reviewers: [gemini], items, transport: t, maxEur, onCost: () => {} });
+    expect(t.calls).toHaveLength(1);
+    expect(run.spentEur).toBeLessThanOrEqual(maxEur);
+  });
+
+  it("books a paid call that fails after it was sent at its worst case, and the guard counts it", async () => {
+    const lines: Record<string, unknown>[] = [];
+    const body = buildRequest(gemini, await preparePage(items[0]!));
+    const worst = estimateCall(config, gemini, body).worstEur;
+    const t = scripted(new Error("timeout"), result(answer(4, 4)));
+    const run = await runReview({ config, reviewers: [gemini], items, transport: t, maxEur: worst * 1.5, onCost: (l) => lines.push(l as never) });
+    expect(run.results.gemini!["item-a"]).toMatchObject({ status: "failed" });
+    expect(lines).toHaveLength(1);
+    expect(lines[0]).toMatchObject({ itemId: "item-a", costSource: "estimate", outputTokens: gemini.maxTokens });
+    expect(run.spentEur).toBeCloseTo(worst, 10);
+    // The failed call used most of the room, so the next page is not sent.
+    expect(t.calls).toHaveLength(1);
+    expect(run.results.gemini!["item-b"]).toMatchObject({ status: "skipped" });
+  });
+
+  it("books replayed answers at € 0", async () => {
+    const lines: Record<string, unknown>[] = [];
+    const t = { ...scripted(result(answer(4, 4), { prompt_tokens: 9000, completion_tokens: 400, cost: 0.03 })), paid: false };
+    const run = await runReview({ config, reviewers: [gemini], items: [items[0]!], transport: t, maxEur: 1, onCost: (l) => lines.push(l as never) });
+    expect(run.spentEur).toBe(0);
+    expect(lines[0]).toMatchObject({ eur: 0, usd: 0, costSource: "replay" });
   });
 
   it("makes no call at all when the first does not fit", async () => {

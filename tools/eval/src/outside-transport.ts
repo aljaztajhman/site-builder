@@ -25,6 +25,8 @@ export interface ChatResult {
 }
 
 export interface OutsideTransport {
+  /** Whether an answer costs money (live OpenRouter, recording); a replay is free and its calls are booked at € 0. */
+  readonly paid: boolean;
   complete(body: ChatBody): Promise<ChatResult>;
 }
 
@@ -39,6 +41,7 @@ const ApiResponse = z.object({
 });
 
 export class OpenRouterTransport implements OutsideTransport {
+  readonly paid = true;
   constructor(
     private readonly baseUrl: string,
     private readonly key: string | undefined = process.env.OPENROUTER_API_KEY,
@@ -51,7 +54,8 @@ export class OpenRouterTransport implements OutsideTransport {
       const res = await fetch(`${this.baseUrl}/chat/completions`, {
         method: "POST",
         headers: { Authorization: `Bearer ${this.key}`, "Content-Type": "application/json", "X-OpenRouter-Title": "Stranko eval" },
-        body: JSON.stringify(body),
+        // usage.include asks OpenRouter to report the call's cost in the answer.
+        body: JSON.stringify({ ...body, usage: { include: true } }),
         signal: AbortSignal.timeout(300_000),
       });
       if (res.ok) {
@@ -70,12 +74,14 @@ export class OpenRouterTransport implements OutsideTransport {
  * answer under the request's hash, returns it.
  */
 export class RecordedTransport implements OutsideTransport {
+  readonly paid: boolean;
   constructor(
     private readonly dir: string,
     private readonly mode: "replay" | "record",
     private readonly inner?: OutsideTransport,
   ) {
     if (mode === "record" && !inner) throw new Error("RecordedTransport: record mode needs a transport to record");
+    this.paid = mode === "record" && inner!.paid;
   }
 
   async complete(body: ChatBody): Promise<ChatResult> {
