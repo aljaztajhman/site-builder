@@ -203,6 +203,26 @@ const Domains = z.object({
   notify: z.object({ everyMinutes: z.number().int().min(1), maxAttempts: z.number().int().min(1).max(10) }),
 });
 
+const OutsideReviewer = z.strictObject({
+  id: z.string().regex(/^[a-z][a-z0-9-]{0,20}$/),
+  /** OpenRouter model slug. */
+  model: z.string().min(1),
+  maxTokens: z.number().int().positive(),
+  /** How the answer's shape is asked for: a strict JSON schema, or JSON mode with the schema in the prompt. */
+  structured: z.enum(["json_schema", "json_object"]),
+});
+const OutsideReviewSchema = z.strictObject({
+  $comment: z.string().optional(),
+  provider: z.literal("openrouter"),
+  baseUrl: z.url(),
+  reviewers: z.array(OutsideReviewer).min(1),
+  /** USD per million tokens, by slug; every reviewer's model needs one. */
+  pricesUsdPerMTok: z.record(z.string(), z.strictObject({ input: z.number().nonnegative(), output: z.number().nonnegative() })),
+  /** Cost estimate before a call: tokens per screenshot, characters per token of the text, expected answer length. */
+  estimate: z.strictObject({ tokensPerImage: z.number().int().positive(), charsPerToken: z.number().positive(), outputTokens: z.number().int().positive() }),
+});
+export type OutsideReviewConfig = z.infer<typeof OutsideReviewSchema>;
+
 export const AppConfigSchema = z.object({
   models: z.object({
     classify: ModelStage,
@@ -360,6 +380,12 @@ export const AppConfigSchema = z.object({
   eurPerUsd: z.number().positive(),
   /** Message Batches API: every token at this share of `pricesUsdPerMTok` (0.5). Eval only (the judge's batch). */
   batchPriceFactor: z.number().positive().max(1),
+  /**
+   * Outside design reviewers (eval only, tools/eval/src/outside-review.ts): vision models from other labs, reached
+   * through OpenRouter, that score a page's screenshots with the judge's rubric. Their prices are kept apart from
+   * `pricesUsdPerMTok` (Anthropic) so the cost code for generation is untouched.
+   */
+  outsideReview: OutsideReviewSchema,
   limits: z.object({
     dailyModelSpendCapEur: z.number().nonnegative(),
     /**
@@ -652,6 +678,9 @@ export function loadConfig(file = process.env.APP_CONFIG_PATH || path.join(repoR
   // Every model a stage can use must have a price, or its spend couldn't be counted against the cap.
   for (const [stage, m] of Object.entries(config.models)) {
     if (!config.pricesUsdPerMTok[m.model]) throw new Error(`config: no price for ${m.model} (stage ${stage})`);
+  }
+  for (const r of config.outsideReview.reviewers) {
+    if (!config.outsideReview.pricesUsdPerMTok[r.model]) throw new Error(`config: no price for ${r.model} (outside reviewer ${r.id})`);
   }
   for (const [model, t] of Object.entries(config.modelTraits ?? {})) {
     if (t.refusalRetryModel && !config.pricesUsdPerMTok[t.refusalRetryModel]) throw new Error(`config: no price for ${t.refusalRetryModel} (refusal retry of ${model})`);
