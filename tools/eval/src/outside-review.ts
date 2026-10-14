@@ -14,7 +14,7 @@ import { toModelJsonSchema } from "@sb/spec";
 import { JudgeOutputNotesFirst, judgeSystem, mean } from "./judge.ts";
 import { ItemsFile } from "./okus-round.ts";
 import { pairwiseAgreement, spearman, type Agreement } from "./okus-calibrate.ts";
-import { OpenRouterHttpError, type ChatBody, type ChatMessage, type ChatPart, type ChatResult, type OutsideTransport } from "./outside-transport.ts";
+import { ReviewHttpError, type ChatBody, type ChatMessage, type ChatPart, type ChatResult, type OutsideTransport } from "./outside-transport.ts";
 
 export type Reviewer = OutsideReviewConfig["reviewers"][number];
 /**
@@ -134,16 +134,20 @@ const imagesIn = (body: ChatBody) => body.messages.reduce((n, m) => n + (typeof 
 const charsIn = (body: ChatBody) =>
   body.messages.reduce((n, m) => n + (typeof m.content === "string" ? m.content.length : m.content.reduce((k, p) => k + (p.type === "text" ? p.text.length : 0), 0)), 0);
 
+/** An Anthropic reviewer in Message Batches pays `batchPriceFactor` of the list price. */
+const priceFactor = (config: AppConfig, reviewer: Reviewer) => (reviewer.provider === "anthropic" && reviewer.batch ? config.batchPriceFactor : 1);
+
 /** What a call is expected to cost before it is sent: text at `charsPerToken`, each picture at `tokensPerImage`, the answer at `outputTokens`. */
 export function estimateCall(config: AppConfig, reviewer: Reviewer, body: ChatBody): CallEstimate {
   const e = config.outsideReview.estimate;
   const inputTokens = Math.ceil(charsIn(body) / e.charsPerToken) + imagesIn(body) * e.tokensPerImage;
   const outputTokens = e.outputTokens;
+  const f = priceFactor(config, reviewer) * config.eurPerUsd;
   return {
     inputTokens,
     outputTokens,
-    eur: usdFor(config, reviewer.model, inputTokens, outputTokens) * config.eurPerUsd,
-    worstEur: usdFor(config, reviewer.model, inputTokens, reviewer.maxTokens) * config.eurPerUsd,
+    eur: usdFor(config, reviewer.model, inputTokens, outputTokens) * f,
+    worstEur: usdFor(config, reviewer.model, inputTokens, reviewer.maxTokens) * f,
   };
 }
 
@@ -170,7 +174,7 @@ export function callCost(config: AppConfig, reviewer: Reviewer, res: ChatResult,
     usd = u.cost;
     costSource = "openrouter";
   } else {
-    usd = usdFor(config, reviewer.model, inputTokens, outputTokens);
+    usd = usdFor(config, reviewer.model, inputTokens, outputTokens) * priceFactor(config, reviewer);
     costSource = known ? "config" : "estimate";
   }
   return { inputTokens, outputTokens, usd, eur: usd * config.eurPerUsd, costSource };
@@ -240,7 +244,8 @@ export async function runReview(o: {
   config: AppConfig;
   reviewers: readonly Reviewer[];
   items: readonly ReviewItem[];
-  transport: OutsideTransport;
+  /** One transport for every reviewer, or one per reviewer (OpenRouter and Anthropic in one run). */
+  transport: OutsideTransport | ((r: Reviewer) => OutsideTransport);
   maxEur: number;
   onCost: (line: CostLine) => void;
   now?: () => Date;
@@ -249,6 +254,9 @@ export async function runReview(o: {
   const now = o.now ?? (() => new Date());
   const run: ReviewRun = { results: {}, spentEur: 0, calls: 0, stoppedByBudget: false };
   for (const r of o.reviewers) run.results[r.id] = {};
+  const transportOf = (r: Reviewer) => (typeof o.transport === "function" ? o.transport(r) : o.transport);
+  /** The worst case of the calls sent and not yet booked (a batch's pages wait together). */
+  let reservedEur = 0;
 
   const book = (r: Reviewer, itemId: string, c: CallCost) => {
     run.spentEur += c.eur;
@@ -257,81 +265,122 @@ export async function runReview(o: {
   };
 
   /**
-   * One call within the budget (reserving its longest possible answer); null when it would not fit. A paid call that
-   * throws after it was sent (timeout, 5xx, unreadable answer) is booked at that worst case, so the guard never
-   * undercounts; one OpenRouter refused before the model ran (a 4xx but 408) is not booked.
+   * One call within the budget (reserving its longest possible answer until it is booked); null when it would not
+   * fit. A paid call that throws after it was sent (timeout, 5xx, unreadable answer) is booked at that worst case, so
+   * the guard never undercounts; one the provider refused before the model ran (a 4xx but 408) is not booked. An
+   * answer reused from a recording is booked at € 0.
    */
   const ask = async (r: Reviewer, itemId: string, body: ChatBody): Promise<ChatResult | null> => {
+    const t = transportOf(r);
     const est = estimateCall(o.config, r, body);
-    if (run.stoppedByBudget || run.spentEur + est.worstEur > o.maxEur) {
+    if (run.stoppedByBudget || run.spentEur + reservedEur + est.worstEur > o.maxEur) {
       run.stoppedByBudget = true;
       return null;
     }
+    reservedEur += est.worstEur;
     let res: ChatResult;
     try {
-      res = await o.transport.complete(body);
+      res = await t.complete(body);
     } catch (e) {
-      if (o.transport.paid && !(e instanceof OpenRouterHttpError && e.refusedBeforeRun)) book(r, itemId, { inputTokens: est.inputTokens, outputTokens: r.maxTokens, usd: est.worstEur / o.config.eurPerUsd, eur: est.worstEur, costSource: "estimate" });
+      reservedEur -= est.worstEur;
+      if (t.paid && !(e instanceof ReviewHttpError && e.refusedBeforeRun)) book(r, itemId, { inputTokens: est.inputTokens, outputTokens: r.maxTokens, usd: est.worstEur / o.config.eurPerUsd, eur: est.worstEur, costSource: "estimate" });
       throw e;
     }
-    const c = o.transport.paid ? callCost(o.config, r, res, body) : { ...callCost(o.config, r, res, body), usd: 0, eur: 0, costSource: "replay" as const };
+    reservedEur -= est.worstEur;
+    const c = t.paid && !res.replayed ? callCost(o.config, r, res, body) : { ...callCost(o.config, r, res, body), usd: 0, eur: 0, costSource: "replay" as const };
     book(r, itemId, c);
     return res;
   };
 
+  /** One reviewer's answer for one page: asked once more after an invalid answer, never a made-up score. */
+  const reviewOne = async (r: Reviewer, item: ReviewItem, parts: readonly Part[]) => {
+    const out = run.results[r.id]!;
+    if (run.stoppedByBudget) {
+      out[item.id] = { status: "skipped" };
+      return;
+    }
+    const body = buildRequest(r, parts);
+    try {
+      let res = await ask(r, item.id, body);
+      if (!res) {
+        out[item.id] = { status: "skipped" };
+        return;
+      }
+      let parsed: ReviewOutput | undefined;
+      let problem = "";
+      for (let attempt = 1; attempt <= 2 && !parsed; attempt++) {
+        try {
+          parsed = parseAnswer(res.content);
+        } catch (e) {
+          problem = (e instanceof Error ? e.message : String(e)).slice(0, 300);
+          if (attempt === 2) break;
+          const retry: ChatBody = {
+            ...body,
+            messages: [
+              ...body.messages,
+              { role: "assistant", content: res.content || "(empty)" },
+              { role: "user", content: `That answer was not valid (${problem}). Answer again with only the JSON object in the schema.` },
+            ],
+          };
+          const again = await ask(r, item.id, retry);
+          if (!again) {
+            problem = `stopped by --max-eur before the retry (${problem})`;
+            break;
+          }
+          res = again;
+        }
+      }
+      if (parsed) {
+        const phone = mean(parsed.phone);
+        const desktop = mean(parsed.desktop);
+        out[item.id] = { status: "ok", output: parsed, phone, desktop, score: (phone + desktop) / 2 };
+      } else out[item.id] = { status: "failed", reason: `invalid answer: ${problem}` };
+    } catch (e) {
+      out[item.id] = { status: "failed", reason: e instanceof Error ? e.message : String(e) };
+    }
+    o.onProgress?.(`${item.id} / ${r.id}: ${out[item.id]!.status}`);
+  };
+
+  // Reviewers answering one call at a time: page by page, so a budget stop leaves whole pages.
+  const direct = o.reviewers.filter((r) => !transportOf(r).drain);
+  const batched = o.reviewers.filter((r) => transportOf(r).drain);
+  const partsCache = new Map<string, Part[]>();
+  const partsOf = async (item: ReviewItem) => partsCache.get(item.id) ?? partsCache.set(item.id, await preparePage(item)).get(item.id)!;
   for (const item of o.items) {
     if (run.stoppedByBudget) {
-      for (const r of o.reviewers) run.results[r.id]![item.id] = { status: "skipped" };
+      for (const r of direct) run.results[r.id]![item.id] = { status: "skipped" };
       continue;
     }
-    const parts = await preparePage(item);
-    for (const r of o.reviewers) {
-      const out = run.results[r.id]!;
-      if (run.stoppedByBudget) {
-        out[item.id] = { status: "skipped" };
-        continue;
+    if (!direct.length) break;
+    const parts = await partsOf(item);
+    for (const r of direct) await reviewOne(r, item, parts);
+  }
+
+  // Batching reviewers: in waves, each as many pages as fit the money left at their worst case; a wave's real cost
+  // (usually far below its worst case) frees the room for the next.
+  for (const r of batched) {
+    const t = transportOf(r);
+    let pending = [...o.items];
+    while (pending.length && !run.stoppedByBudget) {
+      const room = o.maxEur - run.spentEur;
+      const wave: { item: ReviewItem; parts: Part[] }[] = [];
+      let worst = 0;
+      for (const item of pending) {
+        const parts = await partsOf(item);
+        const w = estimateCall(o.config, r, buildRequest(r, parts)).worstEur;
+        if (worst + w > room) break;
+        wave.push({ item, parts });
+        worst += w;
       }
-      const body = buildRequest(r, parts);
-      try {
-        let res = await ask(r, item.id, body);
-        if (!res) {
-          out[item.id] = { status: "skipped" };
-          continue;
-        }
-        let parsed: ReviewOutput | undefined;
-        let problem = "";
-        for (let attempt = 1; attempt <= 2 && !parsed; attempt++) {
-          try {
-            parsed = parseAnswer(res.content);
-          } catch (e) {
-            problem = (e instanceof Error ? e.message : String(e)).slice(0, 300);
-            if (attempt === 2) break;
-            const retry: ChatBody = {
-              ...body,
-              messages: [
-                ...body.messages,
-                { role: "assistant", content: res.content || "(empty)" },
-                { role: "user", content: `That answer was not valid (${problem}). Answer again with only the JSON object in the schema.` },
-              ],
-            };
-            const again = await ask(r, item.id, retry);
-            if (!again) {
-              problem = `stopped by --max-eur before the retry (${problem})`;
-              break;
-            }
-            res = again;
-          }
-        }
-        if (parsed) {
-          const phone = mean(parsed.phone);
-          const desktop = mean(parsed.desktop);
-          out[item.id] = { status: "ok", output: parsed, phone, desktop, score: (phone + desktop) / 2 };
-        } else out[item.id] = { status: "failed", reason: `invalid answer: ${problem}` };
-      } catch (e) {
-        out[item.id] = { status: "failed", reason: e instanceof Error ? e.message : String(e) };
+      if (!wave.length) {
+        run.stoppedByBudget = true;
+        break;
       }
-      o.onProgress?.(`${item.id} / ${r.id}: ${out[item.id]!.status}`);
+      pending = pending.slice(wave.length);
+      o.onProgress?.(`${r.id}: sending ${wave.length} page(s) as one batch (worst case €${worst.toFixed(2)}, €${room.toFixed(2)} left)`);
+      await t.drain!(wave.map(({ item, parts }) => reviewOne(r, item, parts)));
     }
+    for (const item of pending) run.results[r.id]![item.id] ??= { status: "skipped" };
   }
   return run;
 }

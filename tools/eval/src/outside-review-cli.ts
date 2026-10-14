@@ -1,12 +1,14 @@
 /**
  * pnpm outside-review (--okus-round <n> | --run-dir <dir> [--since <ISO time>]) [--items <n>] [--only <id>,...] [--reviewers gemini,gpt]
- *                     --max-eur <eur> | --dry-run   [--out <dir>] [--record <dir> | --replay <dir>]
+ *                     --max-eur <eur> | --dry-run   [--out <dir>] [--record <dir> | --record-missing <dir> | --replay <dir>]
  *
  * Scores pages (four screenshots each) with each outside reviewer (config `outsideReview`, OpenRouter) and writes, in
  * <out> (default eval/runs/outside-review-<time>): scores-<reviewer>.json (what `pnpm okus:calibrate --judge` reads),
  * reviews.json (every answer), cost-log.jsonl, report.md and summary.json. --dry-run builds every request and prints the
  * estimate without a network call or a key. A live run needs OPENROUTER_API_KEY and --max-eur (it stops before a call
- * that would go over). --replay answers from recordings (€ 0, no key); --record saves the live answers.
+ * that would go over). --replay answers from recordings (€ 0, no key); --record saves the live answers;
+ * --record-missing reuses the answers already recorded there (€ 0) and asks and records only the rest. An Anthropic
+ * reviewer (config provider "anthropic") needs ANTHROPIC_API_KEY; with `batch` its pages go as Message Batches.
  */
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -16,10 +18,10 @@ import { loadConfig, repoRoot } from "@sb/config";
 import { latestRatings, parseOwnerExport } from "./okus-calibrate.ts";
 import { roundDir } from "./okus-round.ts";
 import { buildSummary, formatReport, loadOkusItems, loadRunDirItems, planReview, runReview, scoresFor, selectItems } from "./outside-review.ts";
-import { makeTransport } from "./outside-transport.ts";
+import { makeTransport, type OutsideTransport } from "./outside-transport.ts";
 
 const USAGE =
-  "Usage: pnpm outside-review (--okus-round <n> | --run-dir <dir> [--since <ISO time>]) [--items <n>] [--only <id>,...] [--reviewers gemini,gpt] (--max-eur <eur> | --dry-run) [--out <dir>] [--record <dir> | --replay <dir>]";
+  "Usage: pnpm outside-review (--okus-round <n> | --run-dir <dir> [--since <ISO time>]) [--items <n>] [--only <id>,...] [--reviewers gemini,gpt] (--max-eur <eur> | --dry-run) [--out <dir>] [--record <dir> | --record-missing <dir> | --replay <dir>]";
 
 const eur = (x: number) => `€${x.toFixed(4)}`;
 
@@ -40,6 +42,7 @@ export async function main(argv: string[], env: Record<string, string | undefine
         "dry-run": { type: "boolean" },
         out: { type: "string" },
         record: { type: "string" },
+        "record-missing": { type: "string" },
         replay: { type: "string" },
       },
     }).values;
@@ -77,10 +80,26 @@ export async function main(argv: string[], env: Record<string, string | undefine
     reviewers = oc.reviewers.filter((r) => want.includes(r.id));
   }
 
-  let transport;
+  if ([v.replay, v.record, v["record-missing"]].filter(Boolean).length > 1) {
+    print(`Give at most one of --replay, --record and --record-missing.\n${USAGE}`);
+    return 2;
+  }
+  const transports = new Map<string, OutsideTransport>();
   if (!v["dry-run"]) {
     try {
-      transport = makeTransport({ baseUrl: oc.baseUrl, env, ...(v.replay ? { replay: path.resolve(v.replay) } : {}), ...(v.record ? { record: path.resolve(v.record) } : {}) });
+      for (const r of reviewers) {
+        transports.set(
+          r.id,
+          makeTransport({
+            baseUrl: oc.baseUrl,
+            env,
+            reviewer: r,
+            ...(v.replay ? { replay: path.resolve(v.replay) } : {}),
+            ...(v.record ? { record: path.resolve(v.record) } : {}),
+            ...(v["record-missing"] ? { recordMissing: path.resolve(v["record-missing"]) } : {}),
+          }),
+        );
+      }
     } catch (e) {
       print(e instanceof Error ? e.message : String(e));
       return 2;
@@ -121,7 +140,7 @@ export async function main(argv: string[], env: Record<string, string | undefine
     config,
     reviewers,
     items,
-    transport: transport!,
+    transport: (r) => transports.get(r.id)!,
     maxEur,
     onCost: (line) => appendFileSync(costLog, `${JSON.stringify(line)}\n`),
     onProgress: print,

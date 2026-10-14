@@ -205,11 +205,18 @@ const Domains = z.object({
 
 const OutsideReviewer = z.strictObject({
   id: z.string().regex(/^[a-z][a-z0-9-]{0,20}$/),
-  /** OpenRouter model slug. */
+  /** Where the reviewer runs: OpenRouter (the default, `outsideReview.provider`) or Anthropic's own API (ANTHROPIC_API_KEY). */
+  provider: z.enum(["openrouter", "anthropic"]).optional(),
+  /** OpenRouter model slug, or the Anthropic model id. */
   model: z.string().min(1),
+  /** The whole answer's budget; on Anthropic models with thinking always on, the thinking counts toward it. */
   maxTokens: z.number().int().positive(),
   /** How the answer's shape is asked for: a strict JSON schema, or JSON mode with the schema in the prompt. */
   structured: z.enum(["json_schema", "json_object"]),
+  /** Anthropic only: output_config.effort. */
+  effort: Effort.optional(),
+  /** Anthropic only: send every page in one Message Batch (priced at `batchPriceFactor`, answered within hours). */
+  batch: z.boolean().optional(),
 });
 const OutsideReviewSchema = z.strictObject({
   $comment: z.string().optional(),

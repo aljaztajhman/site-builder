@@ -22,7 +22,7 @@ import {
   selectItems,
   type ReviewItem,
 } from "../src/outside-review.ts";
-import { OpenRouterHttpError, RecordedTransport, makeTransport, requestHash, type ChatBody, type ChatResult, type OutsideTransport } from "../src/outside-transport.ts";
+import { ClaudeReviewTransport, ReviewHttpError, RecordedTransport, makeTransport, requestHash, type ChatBody, type ChatResult, type OutsideTransport } from "../src/outside-transport.ts";
 
 const config = loadConfig();
 const [gemini, gpt] = config.outsideReview.reviewers;
@@ -272,7 +272,7 @@ describe("budget guard", () => {
     const worst = estimateCall(config, gemini, body).worstEur;
     for (const status of [400, 402, 429]) {
       const lines: Record<string, unknown>[] = [];
-      const t = scripted(new OpenRouterHttpError(status, `HTTP ${status}`), result(answer(4, 4), { prompt_tokens: 1, completion_tokens: 1, cost: 0.001 }));
+      const t = scripted(new ReviewHttpError(status, `HTTP ${status}`), result(answer(4, 4), { prompt_tokens: 1, completion_tokens: 1, cost: 0.001 }));
       const run = await runReview({ config, reviewers: [gemini], items, transport: t, maxEur: worst * 1.5, onCost: (l) => lines.push(l as never) });
       expect(run.results.gemini!["item-a"]).toMatchObject({ status: "failed", reason: expect.stringContaining(String(status)) });
       // Only the second page's answer is booked, so the refused call left room for it.
@@ -282,7 +282,7 @@ describe("budget guard", () => {
     }
     for (const status of [408, 500, 503]) {
       const lines: Record<string, unknown>[] = [];
-      const t = scripted(new OpenRouterHttpError(status, `HTTP ${status}`), result(answer(4, 4)));
+      const t = scripted(new ReviewHttpError(status, `HTTP ${status}`), result(answer(4, 4)));
       const run = await runReview({ config, reviewers: [gemini], items, transport: t, maxEur: worst * 1.5, onCost: (l) => lines.push(l as never) });
       expect(lines).toHaveLength(1);
       expect(lines[0]).toMatchObject({ itemId: "item-a", costSource: "estimate" });
@@ -331,7 +331,7 @@ describe("dry run", () => {
     const out: string[] = [];
     const code = await main(["--run-dir", roundDir, "--dry-run"], {}, (l) => out.push(l));
     expect(code).toBe(0);
-    expect(out.join("\n")).toMatch(/4 calls/);
+    expect(out.join("\n")).toMatch(/6 calls/); // 2 pages × 3 reviewers
     expect(out.join("\n")).toMatch(/€/);
     expect(fetchSpy).not.toHaveBeenCalled();
     fetchSpy.mockRestore();
@@ -357,7 +357,133 @@ describe("key", () => {
   });
 });
 
+describe("claude reviewer", () => {
+  const claude = config.outsideReview.reviewers.find((r) => r.id === "claude")!;
+  type Sent = { req: { system: string[]; messages: { role: string; content: unknown }[]; schema?: unknown; cache?: boolean }; stage: { model: string; maxTokens: number; effort?: string } };
+  const engine = (answers: (string | Error)[]) => {
+    const sent: Sent[] = [];
+    return {
+      sent,
+      async send(req: Sent["req"], stage: Sent["stage"]) {
+        sent.push({ req, stage });
+        const a = answers[sent.length - 1];
+        if (a === undefined) throw new Error("fake engine ran out of answers");
+        if (a instanceof Error) throw a;
+        return { text: a, stopReason: "end_turn", model: stage.model, usage: { input_tokens: 9000, output_tokens: 1200, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 }, batch: true };
+      },
+    };
+  };
+
+  it("sends the same review as Anthropic's request: one system block, base64 images, the schema, the reviewer's effort", async () => {
+    const e = engine([answer(4, 4)]);
+    const t = new ClaudeReviewTransport(claude, e as never);
+    const body = buildRequest(claude, await preparePage(items[0]!));
+    const res = await t.complete(body);
+    const { req, stage } = e.sent[0]!;
+    expect(stage).toEqual({ model: "claude-fable-5-1", maxTokens: claude.maxTokens, effort: "medium" });
+    expect(req.system).toEqual([body.messages[0]!.content]);
+    expect(req.cache).toBe(false);
+    const content = req.messages[0]!.content as { type: string; source?: { type: string; media_type: string; data: string } }[];
+    expect(content.filter((b) => b.type === "image").length).toBe(body.messages[1]!.content.length - content.filter((b) => b.type === "text").length);
+    expect(content.find((b) => b.type === "image")!.source).toMatchObject({ type: "base64", media_type: "image/png" });
+    expect(req.schema).toEqual((body.response_format as { json_schema: { schema: unknown } }).json_schema.schema);
+    expect(res).toMatchObject({ usage: { prompt_tokens: 9000, completion_tokens: 1200 }, batch: true });
+  });
+
+  it("turns an API error status into a ReviewHttpError, so a refused call is not booked", async () => {
+    const t = new ClaudeReviewTransport(claude, engine([Object.assign(new Error("credit balance too low"), { status: 400 })]) as never);
+    const err = await t.complete(buildRequest(claude, await preparePage(items[0]!))).catch((x: unknown) => x);
+    expect(err).toBeInstanceOf(ReviewHttpError);
+    expect((err as ReviewHttpError).refusedBeforeRun).toBe(true);
+  });
+
+  it("needs ANTHROPIC_API_KEY for a live run", () => {
+    expect(() => makeTransport({ baseUrl: "https://x", env: {}, reviewer: claude })).toThrow(/ANTHROPIC_API_KEY/);
+  });
+
+  /** A batching transport: `complete` queues, `drain` answers the queue (and any retries it queues) as one batch. */
+  const batching = (answerFor: () => ChatResult) => {
+    let queue: (() => void)[] = [];
+    const t: OutsideTransport & { batches: number; calls: number } = {
+      paid: true,
+      batches: 0,
+      calls: 0,
+      complete() {
+        t.calls++;
+        return new Promise((resolve) => queue.push(() => resolve(answerFor())));
+      },
+      async drain(work) {
+        let done = false;
+        const all = Promise.allSettled(work).then(() => void (done = true));
+        while (!done) {
+          await new Promise((r) => setTimeout(r, 5));
+          if (!queue.length) continue;
+          t.batches++;
+          const q = queue;
+          queue = [];
+          for (const f of q) f();
+          await Promise.race([all, new Promise((r) => setTimeout(r, 5))]);
+        }
+      },
+    };
+    return t;
+  };
+
+  it("sends a batching reviewer's pages in waves that fit the money left at their worst case, priced at batchPriceFactor", async () => {
+    const worst = estimateCall(config, claude, buildRequest(claude, await preparePage(items[0]!))).worstEur;
+    // Each answer costs little, so after the first wave (one page fits) the second page fits too.
+    const t = batching(() => result(answer(4, 4), { prompt_tokens: 1000, completion_tokens: 100 }));
+    const lines: Record<string, unknown>[] = [];
+    const run = await runReview({ config, reviewers: [claude], items, transport: t, maxEur: worst * 1.5, onCost: (l) => lines.push(l as never) });
+    expect(t.batches).toBe(2);
+    expect(run.results.claude).toMatchObject({ "item-a": { status: "ok" }, "item-b": { status: "ok" } });
+    const price = config.outsideReview.pricesUsdPerMTok["claude-fable-5-1"]!;
+    expect(lines[0]).toMatchObject({ costSource: "config" });
+    expect(lines[0]!.usd).toBeCloseTo(((1000 * price.input + 100 * price.output) / 1e6) * config.batchPriceFactor, 10);
+    expect(run.spentEur).toBeLessThanOrEqual(worst * 1.5);
+  });
+
+  it("sends a whole wave at once when the money allows, and skips what never fits", async () => {
+    const t = batching(() => result(answer(4, 4), { prompt_tokens: 1000, completion_tokens: 100 }));
+    const run = await runReview({ config, reviewers: [claude], items, transport: t, maxEur: 50, onCost: () => {} });
+    expect(t.batches).toBe(1);
+    expect(t.calls).toBe(2);
+    expect(run.results.claude!["item-b"]).toMatchObject({ status: "ok" });
+    const none = batching(() => result(answer(4, 4)));
+    const poor = await runReview({ config, reviewers: [claude], items, transport: none, maxEur: 0.0001, onCost: () => {} });
+    expect(none.calls).toBe(0);
+    expect(poor.results.claude).toEqual({ "item-a": { status: "skipped" }, "item-b": { status: "skipped" } });
+  });
+
+  it("runs OpenRouter and batching reviewers in one run, each through its own transport", async () => {
+    const direct = scripted(result(answer(3, 3)), result(answer(3, 3)));
+    const batch = batching(() => result(answer(5, 5), { prompt_tokens: 1000, completion_tokens: 100 }));
+    const run = await runReview({ config, reviewers: [gemini, claude], items, transport: (r) => (r.id === "claude" ? batch : direct), maxEur: 50, onCost: () => {} });
+    expect(direct.calls).toHaveLength(2);
+    expect(direct.calls.every((b) => b.model === gemini.model)).toBe(true);
+    expect(scoresFor(run, "gemini")).toEqual({ "item-a": 3, "item-b": 3 });
+    expect(scoresFor(run, "claude")).toEqual({ "item-a": 5, "item-b": 5 });
+  });
+});
+
 describe("recordings", () => {
+  it("record-missing reuses a recorded answer at € 0 and asks (and records) only the new ones", async () => {
+    const rec = path.join(dir, "rec-missing");
+    const first = buildRequest(gemini, await preparePage(items[0]!));
+    await new RecordedTransport(rec, "record", scripted(result(answer(4, 4), { prompt_tokens: 5, completion_tokens: 6, cost: 0.01 }))).complete(first);
+    const live = scripted(result(answer(2, 2), { prompt_tokens: 5, completion_tokens: 6, cost: 0.02 }));
+    const t = new RecordedTransport(rec, "record-missing", live);
+    const lines: Record<string, unknown>[] = [];
+    const run = await runReview({ config, reviewers: [gemini], items, transport: t, maxEur: 1, onCost: (l) => lines.push(l as never) });
+    expect(live.calls).toHaveLength(1); // only item-b was asked
+    expect(lines.map((l) => [l.itemId, l.costSource])).toEqual([
+      ["item-a", "replay"],
+      ["item-b", "openrouter"],
+    ]);
+    expect(run.spentEur).toBeCloseTo(0.02 * config.eurPerUsd, 10);
+    expect(scoresFor(run, "gemini")).toEqual({ "item-a": 4, "item-b": 2 });
+  });
+
   it("records an answer under the request hash and replays it without the inner transport", async () => {
     const rec = path.join(dir, "rec");
     const body = buildRequest(gemini, await preparePage(items[0]!));
@@ -469,8 +595,9 @@ describe("report", () => {
 });
 
 describe("config", () => {
-  it("loads two reviewers, each with a price, apart from the Anthropic prices", () => {
-    expect(config.outsideReview.reviewers.map((r) => r.id)).toEqual(["gemini", "gpt"]);
+  it("loads the three reviewers, each with a price; Claude runs on Anthropic's API in batches", () => {
+    expect(config.outsideReview.reviewers.map((r) => r.id)).toEqual(["gemini", "gpt", "claude"]);
+    expect(config.outsideReview.reviewers[2]).toMatchObject({ provider: "anthropic", model: "claude-fable-5-1", batch: true });
     for (const r of config.outsideReview.reviewers) expect(config.outsideReview.pricesUsdPerMTok[r.model]).toBeDefined();
     expect(config.pricesUsdPerMTok[gemini.model]).toBeUndefined();
   });
