@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The warm palette and serif typography suit the gostilna, but the tall hero card obscures most of the dish and leaves an unhelpful crop above it.\",\n  \"desktopNote\": \"The food-led hero feels inviting, but oversized headings, the enormous year and the giant footer wordmark overwhelm the page’s otherwise restrained design.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 3,\n    \"spacing\": 3,\n    \"clutter\": 3,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 3,\n    \"imagery\": 4,\n    \"spacing\": 3,\n    \"clutter\": 3,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Recompose the phone hero with a shorter text card and a deliberate food crop, keeping the dish recognizable rather than mostly covered.\",\n    \"Reduce the desktop hero headline, oversized year and footer wordmark; tighten section padding so practical information has more visual weight and the hero action fits comfortably in the first screen.\",\n    \"Keep the reservation section as the single contact block and simplify the footer to legal details and navigation, removing the repeated address, phone and email.\"\n  ],\n  \"blockers\": [\n    \"Phone and desktop: the footer repeats the reservation section’s address, phone and email contact block.\"\n  ]\n}",
+  "usage": {
+    "prompt_tokens": 9753,
+    "completion_tokens": 526,
+    "cost": 0.029641
+  }
+}

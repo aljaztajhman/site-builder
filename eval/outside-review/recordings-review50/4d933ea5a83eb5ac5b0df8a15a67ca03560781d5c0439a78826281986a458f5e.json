@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The salon has a coherent visual identity, but excessive gaps between the introduction, links and photo push the hairstyle work too far down the first screen.\",\n  \"desktopNote\": \"The photography and restrained palette suit the salon, but the oversized four-line headline dominates the hero while the location remains buried below.\",\n  \"phone\": {\n    \"impression\": 3,\n    \"hierarchy\": 3,\n    \"imagery\": 3,\n    \"spacing\": 2,\n    \"clutter\": 2,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 2,\n    \"imagery\": 4,\n    \"spacing\": 3,\n    \"clutter\": 2,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Rebalance the hero: reduce the desktop headline to two or three lines, bring the phone photo directly beneath the introduction, and show the salon location near the opening text.\",\n    \"Use the balayage photo only once and consolidate booking, address, directions and opening hours into one contact section rather than repeating them in the footer.\",\n    \"Tighten the phone’s vertical rhythm, place the hero links on one compact row, and replace the tall opening-hours chart with a concise day-and-time list.\"\n  ],\n  \"blockers\": [\n    \"Phone and desktop: the hero’s balayage photo is repeated in the salon introduction section.\",\n    \"Phone and desktop: the address and directions block is repeated immediately below the main contact section.\"\n  ]\n}",
+  "usage": {
+    "prompt_tokens": 10009,
+    "completion_tokens": 465,
+    "cost": 0.029671
+  }
+}

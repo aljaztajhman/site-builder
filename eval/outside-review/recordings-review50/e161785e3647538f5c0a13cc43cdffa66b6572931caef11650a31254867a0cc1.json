@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The hero text card covers almost the entire bowl of soup, leaving only an indistinct rim and tabletop visible.\",\n  \"desktopNote\": \"In the '1968' section, the label 'Kuhamo od leta' directly overlaps the top of the large '19' numerals.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 3,\n    \"spacing\": 4,\n    \"clutter\": 4,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 4,\n    \"spacing\": 4,\n    \"clutter\": 4,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Add line-height or bottom margin to the 'Kuhamo od leta' eyebrow so it stops colliding with the large '1968' numerals.\",\n    \"Adjust the mobile hero layout so the soup photo sits clearly above the white card instead of being hidden behind it.\",\n    \"Include a few specific house specialties in the dark burgundy menu section rather than just two summary price blocks.\"\n  ],\n  \"blockers\": [\n    \"On desktop (and slightly on phone) in the '1968' section, the text 'Kuhamo od leta' overlaps the top of the '1968' numerals.\"\n  ]\n}",
+  "usage": {
+    "prompt_tokens": 11495,
+    "completion_tokens": 346,
+    "cost": 0.02645
+  }
+}

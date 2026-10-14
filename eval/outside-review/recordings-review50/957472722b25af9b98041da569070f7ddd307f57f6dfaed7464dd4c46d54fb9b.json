@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The typography is readable, but the header overlays the introductory copy in the full-page view and the stacked contact links stretch the hero.\",\n  \"desktopNote\": \"The oversized headline and large empty areas weaken the hierarchy, while the header obscures the headline in the full-page view.\",\n  \"phone\": {\n    \"impression\": 3,\n    \"hierarchy\": 3,\n    \"imagery\": 4,\n    \"spacing\": 3,\n    \"clutter\": 3,\n    \"distinctiveness\": 3\n  },\n  \"desktop\": {\n    \"impression\": 3,\n    \"hierarchy\": 2,\n    \"imagery\": 4,\n    \"spacing\": 2,\n    \"clutter\": 3,\n    \"distinctiveness\": 3\n  },\n  \"fixes\": [\n    \"Correct the sticky header positioning on both viewports so it never covers the hero headline, introduction or contact links.\",\n    \"Reduce the desktop headline size and hero height, bring the introduction closer to the heading, and surface Maribor and online availability before the contact action.\",\n    \"Tighten section padding and consolidate the repeated tutor introduction; on phones, place the hero contact links on one row with a clearly stronger primary action.\"\n  ],\n  \"blockers\": [\n    \"Phone, full-page hero: the header overlaps the introductory paragraph and hides part of the content.\",\n    \"Desktop, full-page hero: the header covers part of the headline.\"\n  ]\n}",
+  "usage": {
+    "prompt_tokens": 8353,
+    "completion_tokens": 579,
+    "cost": 0.026671
+  }
+}

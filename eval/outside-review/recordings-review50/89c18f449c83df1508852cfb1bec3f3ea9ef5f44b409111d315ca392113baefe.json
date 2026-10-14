@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The oversized hero card leaves mostly cropped foliage visible, hiding the restaurant’s character until much farther down the page.\",\n  \"desktopNote\": \"The photography and burgundy-and-gold palette feel appropriate, but repeated contact and opening-hours blocks make the lower page unnecessarily repetitive.\",\n  \"phone\": {\n    \"impression\": 3,\n    \"hierarchy\": 4,\n    \"imagery\": 2,\n    \"spacing\": 3,\n    \"clutter\": 2,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 4,\n    \"spacing\": 3,\n    \"clutter\": 2,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Consolidate reservations, address, directions and opening hours into one practical contact section; keep the footer for legal details and secondary navigation.\",\n    \"On phones, use a separately cropped hero photo that clearly shows the restaurant or terrace, and shorten the text card so the venue remains visible in the first screen.\",\n    \"Reduce the desktop founding-year numeral and opening-hours heading, and tighten their surrounding whitespace to give practical information a more balanced visual weight.\"\n  ],\n  \"blockers\": [\n    \"Phone and desktop: the lower contact area repeats the address and directions block, while the footer repeats the opening-hours block already shown above.\"\n  ]\n}",
+  "usage": {
+    "prompt_tokens": 9854,
+    "completion_tokens": 477,
+    "cost": 0.0294035
+  }
+}

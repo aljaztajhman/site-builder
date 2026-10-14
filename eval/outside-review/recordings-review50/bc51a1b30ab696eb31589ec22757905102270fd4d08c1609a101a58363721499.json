@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The bold, practical typography suits a tyre workshop, but the long introductory contact stack delays the services and only photograph.\",\n  \"desktopNote\": \"The service table and contact sidebar are clear, but the header crosses the hero headline in the whole-page view and the oversized footer feels disproportionate.\",\n  \"phone\": {\n    \"impression\": 3,\n    \"hierarchy\": 3,\n    \"imagery\": 2,\n    \"spacing\": 3,\n    \"clutter\": 3,\n    \"distinctiveness\": 3\n  },\n  \"desktop\": {\n    \"impression\": 3,\n    \"hierarchy\": 3,\n    \"imagery\": 2,\n    \"spacing\": 3,\n    \"clutter\": 3,\n    \"distinctiveness\": 3\n  },\n  \"fixes\": [\n    \"Correct the header positioning on both viewports so it stays at the viewport edge without obscuring hero content.\",\n    \"Bring the tyre photograph into the opening composition and compact the phone contact stack so visitors reach the services sooner.\",\n    \"Reduce the oversized desktop footer wordmark and simplify the repeated in-page call and directions prompts, retaining the required phone action bar.\"\n  ],\n  \"blockers\": [\n    \"Phone, whole-page hero: the header and action strip obscure the introductory paragraph.\",\n    \"Desktop, whole-page hero: the header overlaps the headline and part of the address sidebar.\"\n  ]\n}",
+  "usage": {
+    "prompt_tokens": 8116,
+    "completion_tokens": 490,
+    "cost": 0.0251885
+  }
+}

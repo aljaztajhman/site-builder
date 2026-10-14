@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The salon photo and readable typography work well, but the oversized opening-hours section delays the salon story, services and prices.\",\n  \"desktopNote\": \"The photo-led hero feels polished, but generous section padding creates empty bands and the location is absent from the opening screen.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 3,\n    \"imagery\": 4,\n    \"spacing\": 3,\n    \"clutter\": 4,\n    \"distinctiveness\": 3\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 3,\n    \"imagery\": 4,\n    \"spacing\": 3,\n    \"clutter\": 4,\n    \"distinctiveness\": 3\n  },\n  \"fixes\": [\n    \"Add a compact location line beneath the hero headline on both viewports, so visitors see the service, location and contact action together.\",\n    \"Replace the tall opening-hours chart with a compact schedule, especially on phones, and move it below the salon introduction and services.\",\n    \"Reduce desktop section padding and the phone hero’s bottom gap to create a tighter, more consistent vertical rhythm.\"\n  ],\n  \"blockers\": []\n}",
+  "usage": {
+    "prompt_tokens": 10283,
+    "completion_tokens": 426,
+    "cost": 0.029966
+  }
+}
