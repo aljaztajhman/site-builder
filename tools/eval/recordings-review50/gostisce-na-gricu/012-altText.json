@@ -1,0 +1,18 @@
+{
+  "seq": 12,
+  "stage": "altText",
+  "model": "claude-sonnet-5-5",
+  "hash": "89ba6c80b8437744",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"images\":[{\"index\":0,\"alt\":\"Bela hiša z zelenimi polkni in cvetjem na oknih, pred njo velika lipa ter lesene mize in klopi na kamnitem dvorišču.\",\"focalX\":0.55,\"focalY\":0.5,\"heroSuitable\":true},{\"index\":1,\"alt\":\"Mize s karirastimi prti na senčni kamniti terasi pod staro lipo, v ozadju zelena pokrajina in hribi.\",\"focalX\":0.4,\"focalY\":0.6,\"heroSuitable\":false},{\"index\":2,\"alt\":\"Družba za dolgo obloženo mizo v rustikalni jedilnici, natakarica jim streže vino, na mizi so kozarci rdečega vina in šopek cvetja.\",\"focalX\":0.55,\"focalY\":0.4,\"heroSuitable\":false}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2218,
+      "output_tokens": 294,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

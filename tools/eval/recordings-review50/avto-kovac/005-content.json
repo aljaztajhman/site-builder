@@ -1,0 +1,18 @@
+{
+  "seq": 5,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "a2715c351b98454b",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Avto Kovač | Servis za Audi, BMW, Mercedes, VW\",\"description\":\"Specializiran servis za nemška vozila v Ljubljani. Servisiramo samo Audi, BMW, Mercedes-Benz in Volkswagen, z originalnimi deli. Pokličite nas.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"photo\",\"tone\":\"inverse\",\"props\":{\"eyebrow\":\"Servis za nemška vozila\",\"headline\":\"Samo Audi, BMW, Mercedes in VW\",\"intro\":\"Servisiramo štiri znamke in jih poznamo do zadnjega vijaka. Delamo z originalnimi deli in originalno diagnostično opremo.\",\"fact\":\"phone\",\"factLabel\":\"Pokličite nas za naročilo\",\"factNote\":\"Brezplačno nadomestno vozilo med popravilom, če se naročite vsaj teden prej.\",\"image\":\"img_01\"}},{\"id\":\"s_about\",\"type\":\"about\",\"variant\":\"figure\",\"props\":{\"eyebrow\":\"Naša specializacija\",\"heading\":\"Nemška vozila in nič drugega\",\"paragraphs\":[\"Servisiramo samo Audi, BMW, Mercedes-Benz in Volkswagen. Ker delamo samo to, poznamo značilnosti teh vozil in njihove običajne težave.\",\"Servis vodi mojster Gregor Kovač z dvajsetimi leti izkušenj v pooblaščenih servisih. Uporabljamo originalne dele in originalno diagnostično opremo.\"],\"ownerName\":\"Gregor Kovač\",\"ownerRole\":\"vodja servisa, mojster\",\"figure\":{\"label\":\"Delamo od leta\",\"value\":\"2012\"}}},{\"id\":\"s_services\",\"type\":\"services-list\",\"variant\":\"two-column\",\"tone\":\"alt\",\"props\":{\"eyebrow\":\"Storitve\",\"title\":\"Kaj vse uredimo na vašem vozilu\",\"items\":[{\"name\":\"Redni servisi\",\"description\":\"Po predpisih proizvajalca, z originalnimi deli.\"},{\"name\":\"Diagnostika\",\"description\":\"Z originalno opremo.\"},{\"name\":\"Popravila menjalnikov\",\"description\":\"Menjalniki DSG in avtomatski menjalniki.\"},{\"name\":\"Priprava na tehnični pregled\",\"description\":\"Vozilo pripravimo na tehnični pregled.\"},{\"name\":\"Programiranje ključev\",\"description\":\"Programiramo ključe za vaše vozilo.\"}]}},{\"id\":\"s_steps\",\"type\":\"steps\",\"variant\":\"vertical\",\"props\":{\"eyebrow\":\"Naročilo\",\"heading\":\"Kako poteka popravilo\",\"intro\":\"Če se naročite vsaj teden prej, vam med popravilom brezplačno zagotovimo nadomestno vozilo.\",\"steps\":[{\"title\":\"Pokličite nas\",\"text\":\"Povejte nam znamko vozila in kaj vas moti, mi pa vam predlagamo termin.\"},{\"title\":\"Pripeljite vozilo\",\"text\":\"Vozilo pripeljite na Leskoškovo cesto 9 v Ljubljani. Med popravilom lahko dobite nadomestno vozilo.\"},{\"title\":\"Prevzem popravljenega vozila\",\"text\":\"Povemo vam, kaj smo naredili, in vam vrnemo vozilo.\"}]}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"band\",\"props\":{\"title\":\"Pokličite nas in se naročite\",\"intro\":\"Servisiramo vozila Audi, BMW, Mercedes-Benz in Volkswagen.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2570,
+      "output_tokens": 1329,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

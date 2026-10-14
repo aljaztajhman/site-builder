@@ -1,0 +1,18 @@
+{
+  "seq": 0,
+  "stage": "classify",
+  "model": "claude-haiku-4-5-20251001",
+  "hash": "7563cc584700530b",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"businessType\": \"dental\", \"confidence\": 0.99}",
+    "stopReason": "end_turn",
+    "model": "claude-haiku-4-5-20251001",
+    "usage": {
+      "input_tokens": 892,
+      "output_tokens": 18,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "seq": 4,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "68eb5a5bccc7529d",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"stacked\",\"cta\":\"call\",\"tone\":\"default\"},\"footer\":{\"variant\":\"columns\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Sodna tolmačka za nemščino in angleščino, Ljubljana\",\"description\":\"Overjeni prevodi listin, strokovni prevodi za podjetja in tolmačenje na sodišču, pri notarju in na upravni enoti. Nujni prevod v 24 urah.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-type\",\"variant\":\"with-facts\",\"tone\":\"default\",\"props\":{\"eyebrow\":\"Sodna tolmačka\",\"headline\":\"Overjeni prevodi in tolmačenje za nemščino ter angleščino\",\"intro\":\"Prevajam in overjam listine za tujino in iz tujine, delam strokovne prevode za podjetja in tolmačim na sodišču, pri notarju in na upravni enoti.\",\"primary\":{\"label\":\"Pošljite dokument\",\"target\":{\"action\":\"email\"}}}},{\"id\":\"s_cene\",\"type\":\"price-list\",\"variant\":\"tags\",\"tone\":\"alt\",\"props\":{\"title\":\"Cene overjenih prevodov\",\"intro\":\"Cene, ki jih navajam za listine in overitev.\",\"groups\":[{\"items\":[{\"name\":\"Prevod in overitev listin, na stran\",\"price\":{\"amount\":25,\"from\":true,\"unit\":\"stran\"}},{\"name\":\"Sodna overitev, na dokument\",\"price\":{\"amount\":10,\"unit\":\"dokument\"}}]}],\"footnote\":\"Za nujni prevod v 24 urah je cena za polovico višja.\"}},{\"id\":\"s_kaj\",\"type\":\"services-list\",\"variant\":\"rows\",\"tone\":\"default\",\"props\":{\"eyebrow\":\"Kaj prevajam\",\"title\":\"Prevodi, overitve in tolmačenje\",\"items\":[{\"name\":\"Prevod in overitev listin\",\"description\":\"Rojstni listi, diplome, spričevala, pogodbe, sodbe, zdravniški izvidi in dokumenti za uvoz avta, za tujino in iz tujine.\",\"price\":{\"amount\":25,\"from\":true,\"unit\":\"stran\"}},{\"name\":\"Sodna overitev\",\"description\":\"Overitev prevedenega dokumenta.\",\"price\":{\"amount\":10,\"unit\":\"dokument\"}},{\"name\":\"Strokovni prevodi za podjetja\",\"description\":\"Tehnična navodila, spletne strani in katalogi. Za večje prevode pošljite dokument po e-pošti, ponudbo dobite v enem dnevu.\"},{\"name\":\"Tolmačenje\",\"description\":\"Na sodišču, pri notarju in na upravni enoti.\",\"price\":{\"$placeholder\":\"price\",\"note\":\"Cena tolmačenja\"}}]}},{\"id\":\"s_slika\",\"type\":\"image-text\",\"variant\":\"image-left\",\"tone\":\"alt\",\"props\":{\"heading\":\"Nujni prevod v 24 urah\",\"paragraphs\":[\"Če rok ne počaka, prevod izdelam v enem dnevu. Cena nujnega prevoda je za polovico višja.\",\"Za večje prevode pošljite dokument po e-pošti in ponudbo dobite v enem dnevu.\"],\"image\":\"img_g1\",\"link\":{\"label\":\"Pošljite dokument\",\"target\":{\"action\":\"email\"}}}},{\"id\":\"s_cta\",\"type\":\"cta\",\"variant\":\"band\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Potrebujete overjen prevod?\",\"text\":\"Pišite mi ali pokličite v uradnih urah. Pisarna je v 2. nadstropju, parkirišče je za stavbo.\",\"primary\":{\"label\":\"Pišite mi\",\"target\":{\"action\":\"email\"}}}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2619,
+      "output_tokens": 1295,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

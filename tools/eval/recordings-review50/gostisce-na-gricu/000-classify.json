@@ -1,0 +1,18 @@
+{
+  "seq": 0,
+  "stage": "classify",
+  "model": "claude-haiku-4-5-20251001",
+  "hash": "7ead157f571b15b5",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"businessType\": \"restaurant\", \"confidence\": 0.98}",
+    "stopReason": "end_turn",
+    "model": "claude-haiku-4-5-20251001",
+    "usage": {
+      "input_tokens": 743,
+      "output_tokens": 18,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

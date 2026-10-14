@@ -1,0 +1,18 @@
+{
+  "seq": 4,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "4651e3225a3dc6c8",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Inštalacije Rebernik, Ptuj: vodovod, ogrevanje, črpalke\",\"description\":\"Inštalater z mojstrskim izpitom iz Ptuja. Vodovod, talno ogrevanje, toplotne črpalke in kopalnice na ključ. Ogled in pisna ponudba sta brezplačna.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"drawing\",\"props\":{\"headline\":\"Inštalater za Ptuj in okolico\",\"intro\":\"Delamo vodovod, ogrevanje, toplotne črpalke in kopalnice na ključ. Ogled in pisna ponudba sta brezplačna.\",\"fact\":\"phone\",\"factLabel\":\"Pokličite za brezplačen ogled\",\"factNote\":\"Če ne dvignem, pokličem nazaj isti dan.\"}},{\"id\":\"s_services\",\"type\":\"services-list\",\"variant\":\"rows\",\"props\":{\"title\":\"Kaj delamo\",\"items\":[{\"name\":\"Vodovodne in odtočne inštalacije\",\"description\":\"V novogradnjah in pri prenovah.\"},{\"name\":\"Talno in radiatorsko ogrevanje\",\"description\":\"Izvedemo ga v novogradnji ali pri prenovi.\"},{\"name\":\"Toplotne črpalke zrak-voda\",\"description\":\"Montaža in servis.\"},{\"name\":\"Zamenjava kotla na olje\",\"description\":\"Staro kurilnico zamenjamo s toplotno črpalko. Pomagamo pri vlogi za subvencijo Eko sklada.\"},{\"name\":\"Prenove kopalnic na ključ\",\"description\":\"Delamo skupaj s keramikom.\"}]}},{\"id\":\"s_area\",\"type\":\"service-area\",\"variant\":\"list\",\"props\":{\"title\":\"Kje delamo\",\"intro\":\"Na terenu po severovzhodni Sloveniji.\"}},{\"id\":\"s_steps\",\"type\":\"steps\",\"variant\":\"horizontal\",\"tone\":\"alt\",\"props\":{\"heading\":\"Kako poteka delo\",\"steps\":[{\"title\":\"Pokličete nas\",\"text\":\"Povejte, kaj potrebujete. Če ne dvignem, pokličem nazaj isti dan.\"},{\"title\":\"Pridemo na ogled\",\"text\":\"Ogled na vašem objektu je brezplačen.\"},{\"title\":\"Dobite pisno ponudbo\",\"text\":\"Pisno ponudbo dobite za vsako delo, brezplačno.\"},{\"title\":\"Opravimo delo\",\"text\":\"Delo izvedemo mi, pri kopalnicah skupaj s keramikom.\"}]}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"inverse\",\"props\":{\"title\":\"Pokličite nas za ogled\",\"intro\":\"Povejte, kaj potrebujete, in dogovorili se bomo za brezplačen ogled.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2759,
+      "output_tokens": 1063,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

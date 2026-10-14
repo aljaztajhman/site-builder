@@ -1,0 +1,18 @@
+{
+  "seq": 11,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "2c0f40b57f9cdf24",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"split-cta\",\"cta\":\"call\"},\"footer\":{\"variant\":\"columns\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Pizzeria Oljka Izola | Pice iz krušne peči na drva\",\"description\":\"Pice iz krušne peči na drva, testo zori 48 ur. Pizzeria Oljka v Izoli, dve minuti od marine. Odprto vsak dan od 12. do 23. ure.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-split\",\"variant\":\"image-left\",\"tone\":\"default\",\"props\":{\"eyebrow\":\"Dve minuti od marine\",\"headline\":\"Pica iz krušne peči na drva, v Izoli\",\"intro\":\"Testo zori 48 ur, pice pečemo na drva. Pri nas sedite ali pico odnesete s seboj.\",\"primary\":{\"label\":\"Poglejte jedilnik\",\"target\":{\"page\":\"p_jedilnik\"}},\"image\":\"img_g3\"}},{\"id\":\"s_contact\",\"type\":\"contact-strip\",\"variant\":\"bar\",\"tone\":\"alt\",\"props\":{}},{\"id\":\"s_about\",\"type\":\"about\",\"variant\":\"figure\",\"tone\":\"default\",\"props\":{\"eyebrow\":\"Naša pizzerija\",\"heading\":\"Odprti smo od leta 2015\",\"paragraphs\":[\"Pizzerijo vodi Marko Benčič. Testo pustimo zoreti 48 ur, pice pa pečemo v krušni peči na drva.\",\"Poleg pic pripravljamo testenine z morskimi sadeži, rižote, solate in domač tiramisu.\"],\"figure\":{\"label\":\"Delamo od leta\",\"value\":\"2015\"}}},{\"id\":\"s_menu\",\"type\":\"menu\",\"variant\":\"classic\",\"tone\":\"alt\",\"props\":{\"eyebrow\":\"Jedilnik\",\"title\":\"Kaj vam postrežemo\",\"intro\":\"Izbor jedi. Cene za preostale pice, rižote in solate vam povemo po telefonu.\",\"categories\":[{\"name\":\"Pice\",\"dishes\":[{\"name\":\"Margerita\",\"price\":{\"amount\":9}},{\"name\":\"Pica Oljka\",\"description\":\"S pršutom in rukolo.\",\"price\":{\"amount\":13}}]},{\"name\":\"Testenine\",\"dishes\":[{\"name\":\"Testenine z morskimi sadeži\",\"price\":{\"amount\":14}}]},{\"name\":\"Rižote\",\"dishes\":[{\"name\":\"Rižote\",\"price\":{\"$placeholder\":\"price\",\"note\":\"Dodajte ceno rižot\"}}]},{\"name\":\"Solate\",\"dishes\":[{\"name\":\"Solate\",\"price\":{\"$placeholder\":\"price\",\"note\":\"Dodajte ceno solat\"}}]},{\"name\":\"Sladice\",\"dishes\":[{\"name\":\"Domači tiramisu\",\"price\":{\"amount\":5}}]}]}},{\"id\":\"s_oven\",\"type\":\"image-text\",\"variant\":\"image-left\",\"tone\":\"default\",\"props\":{\"eyebrow\":\"Krušna peč\",\"heading\":\"Pečemo na drva\",\"paragraphs\":[\"Vsaka pica gre v krušno peč na drva. Testo zori 48 ur, zato je lahko in prhko.\",\"Pice lahko odnesete s seboj. Dostave nimamo.\"],\"link\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}},\"image\":\"img_g4\"}},{\"id\":\"s_cta\",\"type\":\"cta\",\"variant\":\"band\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Želite mizo?\",\"text\":\"Mizo rezervirate po telefonu. Od novembra do marca ob ponedeljkih ne obratujemo.\",\"primary\":{\"label\":\"Kako do nas\",\"target\":{\"action\":\"directions\"}}}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2451,
+      "output_tokens": 1291,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

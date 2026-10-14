@@ -1,0 +1,18 @@
+{
+  "seq": 6,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "5e902dcbdfe2ff36",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Gostilna Pri mostu Kamnik – domača malica in kosilo\",\"description\":\"Družinska gostilna ob reki Bistrici v Kamniku. Dnevne malice, nedeljska kosila, kamniški štruklji in telečja obara. Rezervirajte mizo.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"card\",\"props\":{\"headline\":\"Domača kuhinja ob starem mostu\",\"intro\":\"Pri nas kuhamo dnevne malice in nedeljska kosila. Posedite ob reki Bistrici, kjer v tretji generaciji pripravljamo domače jedi.\",\"fact\":\"address\",\"image\":\"img_03\",\"primary\":{\"label\":\"Rezervirajte mizo\",\"target\":{\"action\":\"call\"}},\"secondary\":{\"label\":\"Oglejte si ponudbo\",\"target\":{\"page\":\"p_home\",\"section\":\"s_offers\"}}}},{\"id\":\"s_about\",\"type\":\"about\",\"variant\":\"figure\",\"props\":{\"heading\":\"Domača hrana, ki jo kuhamo že tretji rod\",\"paragraphs\":[\"Pri nas kuhamo domačo hrano: dnevne malice med tednom in nedeljska kosila. Specialiteti hiše sta kamniški štruklji in telečja obara.\",\"Gostilna stoji tik ob starem mostu, na terasi pa lahko posedite ob reki Bistrici. Imamo prostor za 60 gostov.\"],\"figure\":{\"label\":\"Kuhamo od leta\",\"value\":\"1968\"}}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"table\",\"props\":{\"title\":\"Kdaj nas obiščete\",\"note\":\"Mizo rezervirate po telefonu. Pokličite nas in poskrbimo za vas.\"}},{\"id\":\"s_offers\",\"type\":\"price-list\",\"variant\":\"offers\",\"tone\":\"inverse\",\"props\":{\"title\":\"Malica in nedeljsko kosilo\",\"groups\":[{\"name\":\"Med tednom\",\"items\":[{\"name\":\"Dnevna malica\",\"note\":\"Domača malica med tednom.\",\"price\":{\"amount\":9.5}}]},{\"name\":\"Ob nedeljah\",\"items\":[{\"name\":\"Nedeljsko kosilo\",\"note\":\"Juha, pečenka in štruklji.\",\"price\":{\"amount\":16}}]}]}},{\"id\":\"s_team\",\"type\":\"team\",\"variant\":\"photo\",\"props\":{\"title\":\"Naša družina\",\"members\":[{\"name\":\"Peter Kosmač\",\"role\":\"Vodi gostilno\"},{\"name\":\"Jure Kosmač\",\"role\":\"Vodi gostilno\"}],\"image\":\"img_01\"}},{\"id\":\"s_cta\",\"type\":\"cta\",\"variant\":\"band\",\"props\":{\"heading\":\"Rezervirajte mizo za malico ali kosilo\",\"text\":\"Za nedeljsko kosilo ali pogostitev nas pokličite in mizo pripravimo za vas.\",\"primary\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}}}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"inverse\",\"props\":{\"title\":\"Za rezervacijo mize pokličite nas\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 3951,
+      "output_tokens": 1591,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

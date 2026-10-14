@@ -1,0 +1,18 @@
+{
+  "seq": 5,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "580237491a77d066",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\",\"tone\":\"default\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Turistična kmetija Grabnar, Luče\",\"description\":\"Sobe in apartma s pogledom na gore, domač zajtrk in kosila ob koncih tedna na družinski kmetiji v Zgornji Savinjski dolini.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"view\",\"props\":{\"eyebrow\":\"Zgornja Savinjska dolina\",\"headline\":\"Zjutraj gore pred oknom\",\"intro\":\"Pri nas spite v sobah s pogledom na gore, zajtrkujete pa z izdelki z naše kmetije. Ob koncih tedna kuhamo kosila.\",\"fact\":\"phone\",\"factLabel\":\"Rezervirajte\",\"factNote\":\"Otroci do 6 let so pri polpenzionu brezplačni.\",\"secondary\":{\"label\":\"Oglejte si sobe\",\"target\":{\"page\":\"p_sobe\"}},\"image\":\"img_07\",\"signs\":[{\"label\":\"Raduha\"},{\"label\":\"Logarska dolina\"},{\"label\":\"Smučišče\",\"note\":\"10 min\"}]}},{\"id\":\"s_prices\",\"type\":\"price-list\",\"variant\":\"tags\",\"tone\":\"alt\",\"props\":{\"title\":\"Nočitev in polpenzion\",\"intro\":\"Cene veljajo na osebo.\",\"groups\":[{\"items\":[{\"name\":\"Nočitev z zajtrkom\",\"note\":\"na osebo\",\"price\":{\"amount\":38,\"unit\":\"na osebo\"}},{\"name\":\"Polpenzion\",\"note\":\"na osebo\",\"price\":{\"amount\":52,\"unit\":\"na osebo\"}}]}]}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"poster\",\"tone\":\"band\",\"props\":{\"eyebrow\":\"Izletniška kmetija\",\"title\":\"Ob sobotah in nedeljah kuhamo kosila\",\"note\":\"Juha, pečenka, štruklji in jabolčni zavitek. Za skupine kuhamo tudi med tednom po dogovoru.\"}},{\"id\":\"s_trails\",\"type\":\"services-list\",\"variant\":\"aside\",\"props\":{\"title\":\"Poti in cilji v bližini\",\"items\":[{\"name\":\"Raduha\",\"description\":\"Planinska pot, ki vodi na goro.\"},{\"name\":\"Logarska dolina\",\"description\":\"Planinske poti v dolino.\"},{\"name\":\"Manjše smučišče\",\"description\":\"Pozimi je 10 minut stran.\"}],\"note\":{\"title\":\"Pot do nas\",\"text\":\"Kmetija je v Podveži pri Lučah. Navodila za pot so na strani Kontakt.\"}}},{\"id\":\"s_team\",\"type\":\"team\",\"variant\":\"list\",\"tone\":\"inverse\",\"props\":{\"title\":\"Kmetujemo od leta 1996\",\"members\":[{\"name\":\"Mojca Grabnar\",\"role\":\"Gostje in kuhinja\"},{\"name\":\"Tone Grabnar\",\"role\":\"Živina in gozd\"}]}},{\"id\":\"s_cta\",\"type\":\"cta\",\"variant\":\"band\",\"props\":{\"heading\":\"Rezervirajte sobo ali kosilo\",\"text\":\"Pokličite nas ali nam pišite, z veseljem vas pričakamo.\",\"primary\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}}}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"inverse\",\"props\":{\"title\":\"Rezervacije po telefonu ali e-pošti\",\"intro\":\"Pokličite nas ali nam pišite, odgovorimo vam isti dan.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 3507,
+      "output_tokens": 1281,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "seq": 11,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "91e21caf9362b37b",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\",\"tone\":\"default\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Cvetličarna Marjetica, Novo mesto\",\"description\":\"Šopki za vsak dan, poročno in žalno cvetje, aranžmaji in darilne košarice na Glavnem trgu v Novem mestu. Dostava po mestu.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-split\",\"variant\":\"image-left\",\"tone\":\"default\",\"props\":{\"eyebrow\":\"Floristka Petra Hočevar\",\"headline\":\"Šopki iz sezonskega cvetja za vsak dan\",\"intro\":\"Vežem šopke za vsak dan, poročno cvetje, aranžmaje za cerkev in dvorano ter žalne vence. Cvetje izbiram pri bližnjih vrtnarijah.\",\"primary\":{\"label\":\"Pot do trgovine\",\"target\":{\"action\":\"directions\"}},\"image\":\"img_g3\"}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"week\",\"tone\":\"alt\",\"props\":{\"title\":\"Kdaj sem odprta\",\"note\":\"Za praznike imam odprto tudi v nedeljo dopoldne.\"}},{\"id\":\"s_offer\",\"type\":\"price-list\",\"variant\":\"grouped\",\"tone\":\"default\",\"props\":{\"title\":\"Kaj vam privežem\",\"intro\":\"Nekaj cen za orientacijo. Za aranžmaje, lončnice in darilne košarice me pokličite ali se oglasite v trgovini.\",\"groups\":[{\"name\":\"Šopki\",\"items\":[{\"name\":\"Šopek iz sezonskega cvetja\",\"note\":\"Cvetje z bližnjih vrtnarij\",\"price\":{\"amount\":20,\"from\":true}},{\"name\":\"Poročni šopek\",\"price\":{\"amount\":90,\"from\":true}}]},{\"name\":\"Žalno cvetje\",\"items\":[{\"name\":\"Žalni venec\",\"price\":{\"amount\":70,\"from\":true}}]},{\"name\":\"Dostava\",\"items\":[{\"name\":\"Dostava po Novem mestu\",\"price\":{\"amount\":5}}]}]}},{\"id\":\"s_services\",\"type\":\"image-text\",\"variant\":\"image-right\",\"tone\":\"alt\",\"props\":{\"eyebrow\":\"Poleg šopkov\",\"heading\":\"Aranžmaji, lončnice in darila\",\"paragraphs\":[\"Pripravljam aranžmaje za cerkev in dvorano ter ikebane.\",\"V trgovini najdete tudi lončnice in darilne košarice.\"],\"image\":\"img_g4\"}},{\"id\":\"s_cta\",\"type\":\"cta\",\"variant\":\"band\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Iščete šopek ali aranžma?\",\"text\":\"Pridite na Glavni trg ali mi pišite, z veseljem svetujem.\",\"primary\":{\"label\":\"Pošljite e-pošto\",\"target\":{\"action\":\"email\"}}}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 3954,
+      "output_tokens": 1464,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

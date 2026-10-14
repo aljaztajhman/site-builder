@@ -1,0 +1,18 @@
+{
+  "seq": 4,
+  "stage": "altText",
+  "model": "claude-sonnet-5-5",
+  "hash": "89ba6c80b8437744",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"images\":[{\"index\":0,\"alt\":\"Belo podeželsko gostišče z zelenimi polkni, velika lipa pred vhodom in lesene mize s klopmi na tlakovanem dvorišču.\",\"focalX\":0.55,\"focalY\":0.5,\"heroSuitable\":true},{\"index\":1,\"alt\":\"Senčna terasa pod staro lipo z lesenimi mizami, karirastimi prti in pogledom na zeleno dolino ter hribe v ozadju.\",\"focalX\":0.4,\"focalY\":0.45,\"heroSuitable\":false},{\"index\":2,\"alt\":\"Družba za dolgo obloženo mizo v jedilnici, gostiteljica z buteljko vina stoji ob koncu mize, pred gosti kozarci rdečega vina.\",\"focalX\":0.55,\"focalY\":0.3,\"heroSuitable\":false}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2218,
+      "output_tokens": 300,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

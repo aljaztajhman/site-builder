@@ -1,0 +1,18 @@
+{
+  "seq": 5,
+  "stage": "altText",
+  "model": "claude-sonnet-5-5",
+  "hash": "1974785db385fa0a",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"images\":[{\"index\":0,\"alt\":\"Lesene police s steklenicami zlatega oljčnega olja, kozarci in česnom ob oknu z razgledom na vas s cerkvijo.\",\"focalX\":0.35,\"focalY\":0.4,\"heroSuitable\":true},{\"index\":1,\"alt\":\"Pletena košara s platnenimi vrečkami in papirnatimi embalažami soli na lesenem pultu.\",\"focalX\":0.5,\"focalY\":0.6,\"heroSuitable\":false},{\"index\":2,\"alt\":\"Darilna škatla s steklenico oljčnega olja, vrečko morske soli in kozarcem medu na slami.\",\"focalX\":0.55,\"focalY\":0.55,\"heroSuitable\":true},{\"index\":3,\"alt\":\"Kamnita hiša z lesenimi vrati, lončnicami in klopjo na tlakovani ulici, ki vodi proti morju.\",\"focalX\":0.4,\"focalY\":0.45,\"heroSuitable\":true},{\"index\":4,\"alt\":\"Narezan pršut, cela gnata in kosi sira na lesenem pultu z nožem v trgovini.\",\"focalX\":0.35,\"focalY\":0.5,\"heroSuitable\":false}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 3302,
+      "output_tokens": 420,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

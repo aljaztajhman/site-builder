@@ -1,0 +1,18 @@
+{
+  "seq": 14,
+  "stage": "critique",
+  "model": "claude-sonnet-5-5",
+  "hash": "8b208a690689b386",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"issues\":[\"The price of the tasting menu with wine pairing is a placeholder, but the client gave 68 €.\",\"The opening-hours section repeats the closed-Monday-and-Tuesday note twice, because the business facts already render it.\"],\"patches\":[{\"op\":\"replace\",\"path\":\"/pages/0/sections/2/props/categories/1/dishes/1/price\",\"value\":{\"amount\":68}},{\"op\":\"remove\",\"path\":\"/pages/0/sections/5/props/note\"}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 7512,
+      "output_tokens": 591,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 22242
+    }
+  }
+}

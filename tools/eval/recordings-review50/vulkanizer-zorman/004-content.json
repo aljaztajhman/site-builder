@@ -1,0 +1,18 @@
+{
+  "seq": 4,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "8a0e8c511606c30f",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\",\"tone\":\"default\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Vulkanizerstvo Zorman Ptuj | Gume, menjava, krpanje\",\"description\":\"Družinska vulkanizerska delavnica v Ptuju na Ormoški cesti. Menjava, centriranje, krpanje, hramba in prodaja gum. Pokličite in se naročite.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"photo\",\"tone\":\"inverse\",\"props\":{\"eyebrow\":\"Družinska delavnica od leta 1994\",\"headline\":\"Gume menjamo hitro in pošteno\",\"intro\":\"Menjamo in centriramo gume za osebna vozila, kombije in manjše traktorje. Spomladi in jeseni je gneča, zato se naročite po telefonu.\",\"fact\":\"phone\",\"factLabel\":\"Naročite se po telefonu\",\"image\":\"img_g1\"}},{\"id\":\"s_services\",\"type\":\"services-list\",\"variant\":\"two-column\",\"tone\":\"default\",\"props\":{\"title\":\"Kaj delamo\",\"items\":[{\"name\":\"Menjava in centriranje\",\"description\":\"Za osebna vozila, kombije in manjše traktorje.\",\"price\":{\"amount\":28,\"from\":false,\"unit\":\"komplet\"}},{\"name\":\"Krpanje gume\",\"description\":\"Popravilo predrte gume.\",\"price\":{\"amount\":12,\"from\":false}},{\"name\":\"Hramba kompleta\",\"description\":\"Hranimo vaše gume čez eno sezono.\",\"price\":{\"amount\":35,\"from\":false,\"unit\":\"sezona\"}},{\"name\":\"Polnjenje z dušikom\",\"description\":\"Gume napolnimo z dušikom.\"},{\"name\":\"Prodaja novih gum\",\"description\":\"Nove gume vseh večjih znamk, cene po ponudbi.\"}]}},{\"id\":\"s_area\",\"type\":\"service-area\",\"variant\":\"list\",\"tone\":\"alt\",\"props\":{\"title\":\"Kje nas najdete\",\"intro\":\"Takoj za bencinsko črpalko na Ormoški cesti v Ptuju.\"}},{\"id\":\"s_steps\",\"type\":\"steps\",\"variant\":\"vertical\",\"tone\":\"default\",\"props\":{\"heading\":\"Kako poteka obisk\",\"steps\":[{\"title\":\"Pokličete nas\",\"text\":\"Dogovorimo se za termin, spomladi in jeseni je gneča.\"},{\"title\":\"Pridete v delavnico\",\"text\":\"Peljete na Ormoško cesto 41, takoj za bencinsko črpalko.\"},{\"title\":\"Uredimo gume\",\"text\":\"Zamenjamo, centriramo, zakrpamo ali shranimo vaš komplet.\"}]}},{\"id\":\"s_prices\",\"type\":\"price-list\",\"variant\":\"tags\",\"tone\":\"inverse\",\"props\":{\"title\":\"Cene storitev\",\"groups\":[{\"items\":[{\"name\":\"Menjava in centriranje kompleta\",\"price\":{\"amount\":28}},{\"name\":\"Krpanje gume\",\"price\":{\"amount\":12}},{\"name\":\"Hramba kompleta za sezono\",\"price\":{\"amount\":35}}]}],\"footnote\":\"Cene novih gum so po ponudbi.\"}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"alt\",\"props\":{\"title\":\"Pokličite nas in se naročite\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2885,
+      "output_tokens": 1190,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

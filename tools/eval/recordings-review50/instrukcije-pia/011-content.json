@@ -1,0 +1,18 @@
+{
+  "seq": 11,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "68f63a0366312965",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"stacked\",\"cta\":\"call\",\"tone\":\"default\"},\"footer\":{\"variant\":\"columns\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Inštrukcije matematike in fizike Maribor | Pia\",\"description\":\"Inštrukcije matematike in fizike za osnovno in srednjo šolo v Mariboru. Priprava na NPZ in maturo, doma, online ali na domu dijaka.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-type\",\"variant\":\"large\",\"tone\":\"default\",\"props\":{\"eyebrow\":\"Matematika in fizika\",\"headline\":\"Matematika in fizika, ki ju razumete, ne le naučite\",\"intro\":\"Sem Pia Lešnik, profesorica matematike. Že 9 let dajem inštrukcije za osnovno in srednjo šolo: sproti, pred testi, za NPZ in maturo. Delava v vašem tempu, brez pritiska.\",\"primary\":{\"label\":\"Pokličite me\",\"target\":{\"action\":\"call\"}},\"secondary\":{\"label\":\"Pišite mi\",\"target\":{\"action\":\"email\"}}}},{\"id\":\"s_cene\",\"type\":\"price-list\",\"variant\":\"tags\",\"tone\":\"alt\",\"props\":{\"title\":\"Cene inštrukcij\",\"intro\":\"Prvo srečanje je za spoznavanje: pogledava, kje so težave, in naredim načrt.\",\"groups\":[{\"items\":[{\"name\":\"Ura inštrukcij (60 minut)\",\"price\":{\"amount\":18,\"from\":false,\"unit\":\"ura\"}},{\"name\":\"Paket 10 ur\",\"price\":{\"amount\":160,\"from\":false,\"unit\":\"paket\"}},{\"name\":\"Priprava na maturo v skupini, do 4 dijakov\",\"price\":{\"amount\":12,\"from\":false,\"unit\":\"ura/dijak\"}}]}]}},{\"id\":\"s_nacin\",\"type\":\"highlights\",\"variant\":\"list\",\"tone\":\"default\",\"props\":{\"heading\":\"Kako delam\",\"items\":[{\"title\":\"V vašem tempu\",\"text\":\"Z vsakim učencem delam posebej, brez pritiska.\"},{\"title\":\"Prvo srečanje za spoznavanje\",\"text\":\"Pogledava, kje so težave, in naredim načrt.\"},{\"title\":\"NPZ in matura\",\"text\":\"Priprava na osnovni in višji ravni, tudi v manjši skupini.\"}]}},{\"id\":\"s_kje\",\"type\":\"image-text\",\"variant\":\"image-right\",\"tone\":\"alt\",\"props\":{\"eyebrow\":\"Kje poteka\",\"heading\":\"Doma pri meni, online ali na vašem domu\",\"paragraphs\":[\"Inštrukcije potekajo pri meni doma v Mariboru, online prek Zooma ali na domu dijaka iz Maribora.\",\"Termine dogovoriva sproti, večinoma popoldne in ob sobotah, med počitnicami tudi dopoldne.\"],\"image\":\"img_g4\"}},{\"id\":\"s_o_meni\",\"type\":\"about\",\"variant\":\"text-only\",\"tone\":\"default\",\"props\":{\"heading\":\"Pia Lešnik, profesorica matematike\",\"paragraphs\":[\"Matematiko in fiziko poučujem že 9 let, osnovnošolcem in dijakom. Pomagam pri sprotnem delu, pred testi ter pri pripravi na NPZ in maturo.\",\"Če niste prepričani, ali vam lahko pomagam, me pokličite ali mi pišite. Skupaj bova poiskala pravi začetek.\"],\"ownerName\":\"Pia Lešnik\",\"ownerRole\":\"profesorica matematike\"}},{\"id\":\"s_cta\",\"type\":\"cta\",\"variant\":\"band\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Dogovoriva se za prvo srečanje\",\"text\":\"Pokličite ali pišite, pa poiščeva termin, ki vam ustreza.\",\"primary\":{\"label\":\"Pišite mi\",\"target\":{\"action\":\"email\"}}}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2419,
+      "output_tokens": 1373,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "seq": 12,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "7dc5eae2ab17250d",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"stacked\",\"cta\":\"call\",\"tone\":\"inverse\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Brivnica Kos Maribor | Moška brivnica\",\"description\":\"Klasična moška brivnica v starem mestnem jedru Maribora. Striženje, fade, urejanje brade in britje z britvijo. Naročite se po telefonu ali SMS.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-image\",\"variant\":\"overlay-left\",\"tone\":\"inverse\",\"props\":{\"eyebrow\":\"Klasična moška brivnica\",\"headline\":\"Brivnica v starem jedru Maribora\",\"intro\":\"Striženje, fade, urejanje brade in britje z britvijo in vročo brisačo. Pri nas vas postriže brivec Luka Kos.\",\"primary\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}},\"image\":\"img_g3\"}},{\"id\":\"s_cene\",\"type\":\"price-list\",\"variant\":\"tags\",\"tone\":\"alt\",\"props\":{\"title\":\"Cene storitev\",\"intro\":\"Pri nas so cene jasne, brez presenečenj.\",\"groups\":[{\"items\":[{\"name\":\"Moško striženje\",\"price\":{\"amount\":20}},{\"name\":\"Fade\",\"price\":{\"amount\":23}},{\"name\":\"Urejanje brade\",\"price\":{\"amount\":14}},{\"name\":\"Britje z britvijo\",\"price\":{\"amount\":25}},{\"name\":\"Striženje in brada skupaj\",\"price\":{\"amount\":30}}]}],\"footnote\":\"Striženje za fante do 12 let: ceno vam povemo po telefonu.\"}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"table\",\"tone\":\"default\",\"props\":{\"title\":\"Kdaj imamo odprto\",\"note\":\"Naročite se po telefonu ali SMS. Brez naročila samo, če je prost stol.\"}},{\"id\":\"s_story\",\"type\":\"image-text\",\"variant\":\"image-right\",\"tone\":\"alt\",\"props\":{\"eyebrow\":\"Brivec Luka Kos\",\"heading\":\"Klasična obrt iz Zagreba in z Dunaja\",\"paragraphs\":[\"Naš brivec Luka Kos se je obrti učil v Zagrebu in na Dunaju. Zdaj jo opravlja v starem mestnem jedru Maribora.\",\"Škarje, strojček, britev in vroča brisača: delamo klasično, v miru in brez naglice.\"],\"image\":\"img_g4\"}},{\"id\":\"s_cta\",\"type\":\"cta\",\"variant\":\"band\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Naročite se na striženje\",\"text\":\"Pokličite ali pošljite SMS. Če je stol prost, vas postrižemo tudi brez naročila.\",\"primary\":{\"label\":\"Kje smo\",\"target\":{\"action\":\"directions\"}}}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 3649,
+      "output_tokens": 1601,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

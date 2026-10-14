@@ -1,0 +1,18 @@
+{
+  "seq": 10,
+  "stage": "design",
+  "model": "claude-sonnet-5-5",
+  "hash": "d63a1f63316ec990",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"direction\":\"bold-local\",\"fontPair\":\"archivo-archivo\",\"primary\":\"#2e2f30\",\"accent\":null,\"radius\":2,\"baseFontSize\":17,\"scale\":1.25,\"headingWeight\":800,\"headingCase\":\"uppercase\",\"headingTracking\":-0.01,\"density\":\"regular\",\"shadow\":\"none\",\"reason\":\"The owner wants a change from tablica, so bold-local fits a practical, call-driven family garage. It has a white page, near-black bands from the photo palette and natural photos. The fact-led hero can feature the 2008 start.\"}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 8900,
+      "output_tokens": 189,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}
