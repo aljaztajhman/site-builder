@@ -1,0 +1,65 @@
+{
+  "id": "pasji-salon-kodra",
+  "businessType": "hairdresser",
+  "trade": "pasji salon",
+  "description": "Pasji salon Kodra v Kočevju. Sem Nina Mihelič in pse strižem in kopam že 8 let. Salon je na naslovu Ljubljanska cesta 22, 1330 Kočevje, parkirate lahko kar pred vrati.\n\nDelam z vsemi pasmami, od čivav do bernskih planšarjev. Vsak pes je pri meni sam, brez kletk in brez pomirjeval, zato si za vsakega vzamem dovolj časa. Plašne in starejše pse lahko lastnik pripelje tudi na krajši prvi obisk, da se navadijo.\n\nCene:\n- kopanje in sušenje malega psa 25 €\n- striženje malega psa 35 €\n- striženje srednjega psa 45 €\n- striženje velikega psa od 60 €\n- striženje krempljev 8 €\n\nDelam po naročilu od torka do sobote od 8.00 do 16.00. Naročite se po telefonu ali sporočilu na 040 555 381, za sporočila sem dosegljiva tudi zvečer.\n\nFotk še nimam, ker so moje stranke preveč živahne.",
+  "logo": null,
+  "photos": [],
+  "facts": {
+    "name": "Pasji salon Kodra",
+    "phone": "+38640555381",
+    "address": {
+      "street": "Ljubljanska cesta 22",
+      "postalCode": "1330",
+      "city": "Kočevje"
+    },
+    "hours": [
+      {
+        "from": "tue",
+        "to": "sat",
+        "open": "08:00",
+        "close": "16:00"
+      }
+    ],
+    "prices": [
+      {
+        "item": "kopanje in sušenje malega psa",
+        "amount": 25
+      },
+      {
+        "item": "striženje malega psa",
+        "amount": 35
+      },
+      {
+        "item": "striženje srednjega psa",
+        "amount": 45
+      },
+      {
+        "item": "striženje velikega psa",
+        "amount": 60,
+        "from": true
+      },
+      {
+        "item": "striženje krempljev",
+        "amount": 8
+      }
+    ],
+    "people": [
+      {
+        "name": "Nina Mihelič"
+      }
+    ],
+    "other": [
+      "že 8 let",
+      "vsemi pasmami",
+      "brez kletk in brez pomirjeval",
+      "krajši prvi obisk",
+      "po naročilu"
+    ]
+  },
+  "missing": [
+    "photos",
+    "email",
+    "legal"
+  ]
+}

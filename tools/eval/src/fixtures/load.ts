@@ -16,6 +16,8 @@ export const TWINS_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url
  * edits, recordings or golden specs: opt-in with `pnpm eval --hard` in a paid mode, so `--offline` and CI never run them.
  */
 export const HARD_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../hard");
+/** Businesses never generated before (tools/eval/fresh): a first look at how the pipeline and the outside reviewers do on new input. */
+export const FRESH_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../fresh");
 
 function readJson(file: string): unknown {
   return JSON.parse(readFileSync(file, "utf8")) as unknown;
@@ -69,6 +71,11 @@ export function loadFixtures(): Fixture[] {
 /** The twins, sorted by id. */
 export function loadTwins(): Fixture[] {
   return loadAll(TWINS_DIR);
+}
+
+/** The fresh businesses, sorted by id (no edits, no recordings, no goldens: live or --record-missing only). */
+export function loadFresh(): Fixture[] {
+  return loadAll(FRESH_DIR);
 }
 
 /** The hard fixtures, sorted by id. Their photos exist only after `pnpm fixtures:ai-photos generate --hard`. */

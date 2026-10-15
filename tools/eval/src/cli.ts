@@ -26,6 +26,8 @@
  *                   name, 20 prices, tourism with English, new trades; no scripted edits). Like --twins: no recordings or
  *                   goldens, so live, --record or --record-missing only, and their photos must be generated first
  *                   (`pnpm fixtures:ai-photos generate --model <name> --hard`). --offline and CI never load them.
+ * --fresh:          also run the fresh businesses (tools/eval/fresh: never generated before, no photos given, no
+ *                   scripted edits). Like --twins: live, --record or --record-missing only; --offline and CI never load them.
  * --prompt-fixes all|<name>[,<name>]: turns those config promptFixes switches on for this run (docs/dev/prompt-fixes.md),
  *                   e.g. --record-missing --only avtoservis-mrak --prompt-fixes catalogue. --replay says per fixture how
  *                   many requests changed since the recording (a changed prompt still replays the recorded answer).
@@ -63,7 +65,7 @@ import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
 import { loadConfig } from "@sb/config";
 import { BatchTransport, NO_PROMPT_FIXES, launchCheckBrowser } from "@sb/engine";
-import { loadFixtures, loadHard, loadTwins } from "./fixtures/load.ts";
+import { loadFixtures, loadFresh, loadHard, loadTwins } from "./fixtures/load.ts";
 import { VARIETY_SWITCHES, renderVariety, varietyData } from "./variety-report.ts";
 import { runFixture, type FixtureResult, type Mode } from "./runner.ts";
 import { contactSheet, renderReport } from "./report.ts";
@@ -125,9 +127,14 @@ if (hard && !paid) {
   console.error("--hard needs real generations (live, --record or --record-missing): the hard fixtures have no recordings or golden specs.");
   process.exit(2);
 }
+const fresh = flag("fresh");
+if (fresh && !paid) {
+  console.error("--fresh needs real generations (live, --record or --record-missing): the fresh businesses have no recordings or golden specs.");
+  process.exit(2);
+}
 const hardFixtures = hard ? loadHard() : [];
 const photoLimit = value("photos") === undefined ? undefined : Number(value("photos"));
-const fixtures = [...loadFixtures(), ...(twins ? loadTwins() : []), ...hardFixtures]
+const fixtures = [...loadFixtures(), ...(twins ? loadTwins() : []), ...hardFixtures, ...(fresh ? loadFresh() : [])]
   .filter((f) => !onlyArg || onlyArg.includes(f.id))
   .filter((_, i) => !shard || i % Number(shard[2]) === Number(shard[1]) - 1)
   .map((f) => (photoLimit === undefined ? f : { ...f, photos: f.photos.slice(0, photoLimit) }));

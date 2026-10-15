@@ -1,0 +1,57 @@
+{
+  "id": "plesna-sola-takt",
+  "businessType": "physio",
+  "trade": "plesna šola",
+  "description": "Plesna šola Takt, Slovenj Gradec.\n\nUčimo standardne in latinskoameriške plese, salso, swing in hip hop za otroke. Tečaje vodita Eva in Rok Pečovnik, nekdanji tekmovalni par in učitelja plesa z licenco Plesne zveze Slovenije.\n\nTečaji:\n- plesni tečaj za pare (10 srečanj) 120 € na par\n- priprava na poročni ples (3 ure) 90 € na par\n- hip hop za otroke od 7 do 12 let, mesečno 35 €\n- salsa za začetnike, mesečno 40 €\n\nVadimo v dvorani na naslovu Francetova cesta 7, 2380 Slovenj Gradec. Tečaji so od ponedeljka do četrtka zvečer, točen urnik je odvisen od skupine. Za poročni ples se dogovorimo za termin posebej.\n\nPrijave in vprašanja: 051 555 774 ali plesna.takt@takt.example.\n\nNovi tečaji se začnejo septembra in februarja. Prvo srečanje je brezplačno, da vidite, ali vam ustreza.",
+  "logo": null,
+  "photos": [],
+  "facts": {
+    "name": "Plesna šola Takt",
+    "phone": "+38651555774",
+    "email": "plesna.takt@takt.example",
+    "address": {
+      "street": "Francetova cesta 7",
+      "postalCode": "2380",
+      "city": "Slovenj Gradec"
+    },
+    "prices": [
+      {
+        "item": "plesni tečaj za pare (10 srečanj)",
+        "amount": 120
+      },
+      {
+        "item": "priprava na poročni ples (3 ure)",
+        "amount": 90
+      },
+      {
+        "item": "hip hop za otroke od 7 do 12 let, mesečno",
+        "amount": 35
+      },
+      {
+        "item": "salsa za začetnike, mesečno",
+        "amount": 40
+      }
+    ],
+    "people": [
+      {
+        "name": "Eva Pečovnik"
+      },
+      {
+        "name": "Rok Pečovnik"
+      }
+    ],
+    "other": [
+      "standardne in latinskoameriške plese",
+      "nekdanji tekmovalni par",
+      "licenco Plesne zveze Slovenije",
+      "od ponedeljka do četrtka zvečer",
+      "septembra in februarja",
+      "Prvo srečanje je brezplačno"
+    ]
+  },
+  "missing": [
+    "photos",
+    "hours",
+    "legal"
+  ]
+}

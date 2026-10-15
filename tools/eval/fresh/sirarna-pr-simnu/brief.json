@@ -1,0 +1,69 @@
+{
+  "id": "sirarna-pr-simnu",
+  "businessType": "bakery",
+  "trade": "sirarna",
+  "description": "Sirarna Pr' Šimnu, Lancovo 41, 4240 Radovljica.\n\nNa kmetiji imamo 30 krav in iz njihovega mleka vsak dan delamo sir. Sirarna je odprta od leta 2011, sir delata Anže in Maja Šimnovec. Mleko ne potuje nikamor, od hleva do kotla je 20 metrov.\n\nV naši trgovinici na kmetiji prodajamo:\n- poltrdi sir Lancovčan, 18 € za kilogram\n- sir z bohinjskimi zelišči, 21 € za kilogram\n- skuto, 7 € za kilogram\n- jogurt in sirotko\n- maslo\n- darilne pakete po naročilu.\n\nOb sobotah dopoldne smo na tržnici v Radovljici. Trgovinica na kmetiji je odprta od ponedeljka do sobote od 8.00 do 18.00, v nedeljo zaprto.\n\nZa skupine pripravimo tudi ogled sirarne in pokušino (najmanj 8 oseb, 12 € na osebo, najava vsaj tri dni prej).\n\nTelefon: 04 555 73 09, e-pošta: sirarna@prsimnu.example",
+  "logo": null,
+  "photos": [],
+  "facts": {
+    "name": "Sirarna Pr' Šimnu",
+    "phone": "+38645557309",
+    "email": "sirarna@prsimnu.example",
+    "address": {
+      "street": "Lancovo 41",
+      "postalCode": "4240",
+      "city": "Radovljica"
+    },
+    "hours": [
+      {
+        "from": "mon",
+        "to": "sat",
+        "open": "08:00",
+        "close": "18:00"
+      },
+      {
+        "from": "sun",
+        "to": "sun",
+        "closed": true
+      }
+    ],
+    "prices": [
+      {
+        "item": "poltrdi sir Lancovčan",
+        "amount": 18
+      },
+      {
+        "item": "sir z bohinjskimi zelišči",
+        "amount": 21
+      },
+      {
+        "item": "skuto",
+        "amount": 7
+      },
+      {
+        "item": "ogled sirarne in pokušino",
+        "amount": 12
+      }
+    ],
+    "people": [
+      {
+        "name": "Anže Šimnovec"
+      },
+      {
+        "name": "Maja Šimnovec"
+      }
+    ],
+    "other": [
+      "30 krav",
+      "od leta 2011",
+      "od hleva do kotla je 20 metrov",
+      "na tržnici v Radovljici",
+      "najmanj 8 oseb",
+      "darilne pakete po naročilu"
+    ]
+  },
+  "missing": [
+    "photos",
+    "legal"
+  ]
+}

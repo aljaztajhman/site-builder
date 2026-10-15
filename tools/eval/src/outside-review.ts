@@ -444,9 +444,9 @@ export function loadOkusItems(roundPath: string): ReviewItem[] {
 const RUN_FILES = { phoneFirst: "home-360-first.png", phoneFull: "home-360.png", deskFirst: "home-1280-first.png", deskFull: "home-1280.png" } as const;
 /** `pnpm eval --regenerate`: the site after "Ustvari znova", reviewed as a page of its own (`<id>-regenerated`). */
 const REGENERATED_FILES = { phoneFirst: "regenerated-360-first.png", phoneFull: "regenerated-360.png", deskFirst: "regenerated-1280-first.png", deskFull: "regenerated-1280.png" } as const;
-const FIXTURE_GROUPS = ["fixtures", "twins", "hard"] as const;
+const FIXTURE_GROUPS = ["fixtures", "twins", "hard", "fresh"] as const;
 
-/** The trade the reviewer is told, from the eval fixture's brief (fixtures, twins, hard); "not given" for any other dir. */
+/** The trade the reviewer is told, from the eval fixture's brief (fixtures, twins, hard, fresh); "not given" for any other dir. */
 export function fixtureBusinessType(id: string, evalDir = path.resolve(import.meta.dirname, "..")): string {
   for (const g of FIXTURE_GROUPS) {
     const file = path.join(evalDir, g, id, "brief.json");
