@@ -212,8 +212,9 @@ export function failuresOf(spec: SiteSpec, r: SiteCheckReport, config: AppConfig
   const lhT = config.checks.lighthouse;
   if (r.validation.length) f.push(`spec invalid: ${r.validation.slice(0, 3).map((i) => `${i.path} ${i.message}`).join("; ")}`);
   if (r.facts.length) f.push(`facts not in brief: ${r.facts.slice(0, 5).map((x) => `${x.kind} ${x.value}`).join(", ")}`);
-  // An image at most once per page (generation repairs what it can; what is left shows here).
+  // A template motif only for the trades it fits (the design step swaps a misfit; an older site may still have one).
   for (const i of tradeMotifIssues(spec)) f.push(`trade-foreign motif: ${i.message}`);
+  // An image at most once per page (generation repairs what it can; what is left shows here).
   const twice = repeatedImageIssues(spec);
   if (twice.length) f.push(`same image twice on a page: ${twice.slice(0, 3).map((i) => `${i.path} ${i.message.split(";")[0]}`).join("; ")}`);
   const hasPhone = typeof spec.business.phone === "string";
