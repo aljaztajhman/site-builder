@@ -30,6 +30,7 @@
     "okus:items": "tsx tools/eval/src/okus-items.ts",
     "okus:calibrate": "tsx tools/eval/src/okus-calibrate.ts",
     "outside-review": "tsx --env-file-if-exists=.env tools/eval/src/outside-review-cli.ts",
+    "review50:render": "tsx tools/eval/src/review50-render.ts",
     "studio:compose": "tsx tools/eval/src/studio-compose.ts",
     "studio:poc": "tsx --env-file-if-exists=.env tools/eval/src/studio-poc.ts",
     "references:shots": "tsx tools/eval/src/references.ts shots",

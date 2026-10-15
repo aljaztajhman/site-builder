@@ -7,6 +7,7 @@ import { loadConfig } from "@sb/config";
 import { parseJudgeScores } from "../src/okus-calibrate.ts";
 import { main } from "../src/outside-review-cli.ts";
 import {
+  blockersNeeded,
   buildRequest,
   buildSummary,
   callCost,
@@ -645,7 +646,42 @@ describe("report", () => {
     expect(md).toContain("1 of 3 pages pass");
     expect(md).toContain("Desktop: the hero photo is cut off");
   });
+
+  it("two-of-three filter: held when at least two reviewers name a blocker; one alone is only in the any-reviewer count", async () => {
+    const third = { ...gpt, id: "third" };
+    const t = scripted(
+      result(answer(4, 4)), result(answer(4, 4)), result(answer(4, 4)), // a: clean
+      blocker2("one"), result(answer(4, 4)), result(answer(4, 4)), // b: one reviewer names a blocker
+      blocker2("one"), blocker2("two"), result(answer(4, 4)), // c: two name one
+    );
+    const three = [items[0]!, items[1]!, { ...items[0]!, id: "item-c" }];
+    const run = await runReview({ config, reviewers: [gemini, gpt, third], items: three, transport: t, maxEur: 5, onCost: () => {} });
+    const summary = buildSummary({ config, reviewers: [gemini, gpt, third], run, items: three });
+    expect(summary.filter).toEqual({ passed: ["item-a"], held: ["item-b", "item-c"], unreviewed: [] });
+    expect(summary.agreedFilter).toEqual({ rule: "two-of-three", needed: 2, passed: ["item-a", "item-b"], held: ["item-c"], unreviewed: [] });
+    const md = formatReport(summary);
+    expect(md).toContain("1 of 3 pages pass all reviewers");
+    expect(md).toContain("are held by any reviewer");
+    expect(md).toMatch(/Held by the filter \(at least 2 of 3 reviewers name a blocker\): 1 of 3/);
+  });
+
+  it("two-of-three filter with two reviewers needs both; a failed reviewer leaves the page open only when it could still be held", async () => {
+    expect(blockersNeeded(3)).toBe(2);
+    expect(blockersNeeded(2)).toBe(2);
+    expect(blockersNeeded(1)).toBe(1);
+    const t = scripted(
+      blocker2("x"), blocker2("y"), // a: both name one -> held
+      blocker2("x"), result(answer(4, 4)), // b: one of two -> passes the filter
+      result("bad"), result("bad"), blocker2("y"), // c: gemini fails, gpt names one -> open
+    );
+    const three = [items[0]!, items[1]!, { ...items[0]!, id: "item-c" }];
+    const run = await runReview({ config, reviewers: [gemini, gpt], items: three, transport: t, maxEur: 5, onCost: () => {} });
+    const summary = buildSummary({ config, reviewers: [gemini, gpt], run, items: three });
+    expect(summary.agreedFilter).toMatchObject({ needed: 2, held: ["item-a"], passed: ["item-b"], unreviewed: ["item-c"] });
+  });
 });
+
+const blocker2 = (n: string) => result(answer(3, 3, "f", [n]));
 
 describe("config", () => {
   it("loads the three reviewers, each with a price; Claude runs on Anthropic's API in batches", () => {

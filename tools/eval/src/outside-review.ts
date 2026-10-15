@@ -511,6 +511,17 @@ export interface Summary {
   rows: { itemId: string; owner: number | null; scores: Record<string, number | null>; topFix: Record<string, string | null>; blockers: Record<string, string[] | null> }[];
   /** The filter: a page passes when every reviewer answered and none named a blocker; held when any named one. */
   filter: { passed: string[]; held: string[]; unreviewed: string[] };
+  /**
+   * The filter the owner chose: a page is held when at least two reviewers name a blocker ("two-of-three" with three
+   * reviewers; with two reviewers both must, with one it is that one). `needed` is that count. Passed when the missing
+   * answers could not reach it; unreviewed when failures leave it open.
+   */
+  agreedFilter: { rule: "two-of-three"; needed: number; passed: string[]; held: string[]; unreviewed: string[] };
+}
+
+/** How many reviewers must name a blocker to hold a page: two, or all of them when fewer than two answer. */
+export function blockersNeeded(reviewerCount: number): number {
+  return Math.max(1, Math.min(2, reviewerCount));
 }
 
 function compare(a: ReadonlyMap<string, number>, b: ReadonlyMap<string, number>): Comparison {
@@ -530,6 +541,7 @@ export function buildSummary(o: { config: AppConfig; reviewers: readonly Reviewe
     stoppedByBudget: o.run.stoppedByBudget,
     rows: [],
     filter: { passed: [], held: [], unreviewed: [] },
+    agreedFilter: { rule: "two-of-three", needed: blockersNeeded(o.reviewers.length), passed: [], held: [], unreviewed: [] },
   };
   for (const r of o.reviewers) {
     const res = o.run.results[r.id] ?? {};
@@ -556,6 +568,11 @@ export function buildSummary(o: { config: AppConfig; reviewers: readonly Reviewe
     const named = Object.values(blockers).some((b) => b !== null && b.length > 0);
     const all = Object.values(blockers).every((b) => b !== null);
     summary.filter[named ? "held" : all ? "passed" : "unreviewed"].push(it.id);
+    const lists = Object.values(blockers);
+    const namers = lists.filter((b) => b !== null && b.length > 0).length;
+    const missing = lists.filter((b) => b === null).length;
+    const need = summary.agreedFilter.needed;
+    summary.agreedFilter[namers >= need ? "held" : namers + missing < need ? "passed" : "unreviewed"].push(it.id);
   }
   return summary;
 }
@@ -587,13 +604,15 @@ export function formatReport(s: Summary): string {
   L.push(
     "## Filter",
     "",
-    `${s.filter.passed.length} of ${s.items.length} pages pass (every reviewer answered, none named a blocker), ${s.filter.held.length} held${s.filter.unreviewed.length ? `, ${s.filter.unreviewed.length} not reviewed by every reviewer` : ""}.`,
+    `${s.filter.passed.length} of ${s.items.length} pages pass all reviewers (every reviewer answered, none named a blocker). ${s.filter.held.length} are held by any reviewer${s.filter.unreviewed.length ? `, ${s.filter.unreviewed.length} not reviewed by every reviewer` : ""}.`,
+    "",
+    `Held by the filter (at least ${s.agreedFilter.needed} of ${ids.length} reviewers name a blocker): ${s.agreedFilter.held.length} of ${s.items.length} pages. Passed it: ${s.agreedFilter.passed.length}${s.agreedFilter.unreviewed.length ? `. Open because a reviewer failed: ${s.agreedFilter.unreviewed.length}` : ""}.`,
     "",
   );
   const held = s.rows.filter((r) => s.filter.held.includes(r.itemId));
   if (held.length) {
-    L.push(`| Page | ${ids.map((id) => `${id}: blockers`).join(" | ")} |`, `|---|${ids.map(() => "---|").join("")}`);
-    for (const r of held) L.push(`| ${r.itemId} | ${ids.map((id) => cell((r.blockers[id] ?? []).join(" · "))).join(" | ")} |`);
+    L.push(`| Page | Filter | ${ids.map((id) => `${id}: blockers`).join(" | ")} |`, `|---|---|${ids.map(() => "---|").join("")}`);
+    for (const r of held) L.push(`| ${r.itemId} | ${s.agreedFilter.held.includes(r.itemId) ? "held" : "not held"} | ${ids.map((id) => cell((r.blockers[id] ?? []).join(" · "))).join(" | ")} |`);
     L.push("");
   }
   L.push("## Scores and top fix per page", "", `| Page | Owner | ${ids.map((id) => `${id} | ${id}: top fix`).join(" | ")} |`, `|---|---|${ids.map(() => "---|---|").join("")}`);
