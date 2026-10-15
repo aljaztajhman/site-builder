@@ -1,0 +1,36 @@
+{
+  "gpt": {
+    "steklarstvo-vrhovnik": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "The tall hero image followed by an oversized headline consumes the first screen without presenting a complete service message.",
+        "desktopNote": "The six-line hero headline pushes the contact buttons below the first screen, while sparse lower sections create an uneven rhythm.",
+        "phone": {
+          "impression": 3,
+          "hierarchy": 2,
+          "imagery": 3,
+          "spacing": 3,
+          "clutter": 4,
+          "distinctiveness": 2
+        },
+        "desktop": {
+          "impression": 3,
+          "hierarchy": 2,
+          "imagery": 3,
+          "spacing": 2,
+          "clutter": 4,
+          "distinctiveness": 2
+        },
+        "fixes": [
+          "Rebalance the hero: on phone, place a smaller headline before a shorter image; on desktop, reduce headline size and widen its column so the message and primary call button fit above the fold.",
+          "Replace the large landscape image with glazing work or a workshop detail, making the supporting imagery specific to the trade rather than the region.",
+          "Tighten the lower-page layout by grouping opening hours with contact details and reducing the large gaps between headings, supporting text and sections."
+        ],
+        "blockers": []
+      },
+      "phone": 2.8333333333333335,
+      "desktop": 2.6666666666666665,
+      "score": 2.75
+    }
+  }
+}

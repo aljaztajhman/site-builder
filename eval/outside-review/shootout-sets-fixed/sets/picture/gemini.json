@@ -1,0 +1,60 @@
+{
+  "set": "picture",
+  "reviewer": "gemini",
+  "model": "google/gemini-4-argon",
+  "pages": [
+    "atelje-bergant",
+    "kolesarski-servis-ovinek",
+    "optika-jasna",
+    "pasji-salon-kodra",
+    "pivovarna-rov",
+    "plesna-sola-takt",
+    "sirarna-pr-simnu",
+    "steklarstvo-vrhovnik",
+    "urarstvo-tic",
+    "vinarstvo-pinteric"
+  ],
+  "status": "ok",
+  "answer": {
+    "sameness": "Almost every page uses the exact same two-column split hero (text stack on the left, square or vertical visual box on the right). The header navigation is identical across all ten sites: plain text logo on the left, 'Domov' link and a rectangular CTA button on the right. On mobile, every single site shares the exact same bordered 'Meni' button and a fixed bottom bar with 'Klic' and 'Navodila za pot' buttons. A horizontal ticker/list bar with slash-separated items appears at the bottom of the hero in kolesarski-servis-ovinek, pivovarna-rov, and plesna-sola-takt. Almost all visuals have an identical 'Ustvarjeno z UI' badge in the top right corner.",
+    "recurringIssues": [
+      "Intrusive 'Ustvarjeno z UI' (Created with AI) badges sit prominently on nearly all hero images, cheapening the brand perception.",
+      "The persistent mobile bottom bar covers content and creates a rigid, app-like template stamp across every business.",
+      "AI-generated illustrations and graphics often look crude, low-resolution, or poorly cropped (especially pivovarna-rov and atelje-bergant).",
+      "Header navigation is sparse and lacks visual weight, reading like an unstyled wireframe rather than a finished brand header.",
+      "Awkward cropping of the second section at the bottom of the desktop viewport, often slicing right through headings or coloured bars."
+    ],
+    "overall": 3,
+    "variety": 2,
+    "best": [
+      {
+        "id": "urarstvo-tic",
+        "why": "The dark forest green and gold palette paired with sharp serif typography and an intricate watch movement illustration feels genuinely bespoke and appropriate for a traditional watchmaker."
+      },
+      {
+        "id": "vinarstvo-pinteric",
+        "why": "The overlapping photo composition, soft warm background, and classic serif type break away from the rigid boxy feel of the other pages and suit a winery well."
+      },
+      {
+        "id": "kolesarski-servis-ovinek",
+        "why": "Strong high-contrast dark mode palette with punchy mint green accents and a topographic map graphic that immediately communicates an outdoor sports service."
+      }
+    ],
+    "weakest": [
+      {
+        "id": "pivovarna-rov",
+        "why": "The hero graphic is a blurry, awkwardly cropped vertical sliver of a glowing chain that looks like a broken image placeholder."
+      },
+      {
+        "id": "atelje-bergant",
+        "why": "The childish, clip-art style house drawing undermines the credibility of an architectural studio, and the vast white space feels unfinished rather than minimal."
+      },
+      {
+        "id": "optika-jasna",
+        "why": "Lacks any imagery of glasses or eye care, relying on a sterile white top half and jarring red/green blocks that do not say 'optician'."
+      }
+    ],
+    "oneChange": "Break the single master wireframe: stop forcing every site into the identical 'left text, right AI-graphic, identical header and mobile bottom bar' shell, and instead vary hero compositions (full-bleed photography, centered typography, asymmetric grids) using authentic imagery without AI watermarks.",
+    "summary": "Your studio has good instincts for color palettes and basic typographic hierarchy—sites like Urarstvo Tič and Kolesarski servis Ovinek set the right mood immediately. However, looking at all ten together reveals a rigid single-template operation. Nine of the ten desktop pages use the exact same two-column split, and every mobile view is stamped with the identical 'Meni' button and bottom action bar. Worse, the crude AI illustrations with visible 'Ustvarjeno z UI' badges make these local businesses look fake rather than trustworthy. Drop the AI watermarks, use real client photography, and introduce three or four genuinely different layout structures so your portfolio looks designed, not generated."
+  }
+}

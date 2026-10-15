@@ -1,0 +1,54 @@
+{
+  "items": [
+    "kolesarski-servis-ovinek"
+  ],
+  "reviewers": {
+    "claude": {
+      "model": "claude-fable-5-1",
+      "scored": [
+        "kolesarski-servis-ovinek"
+      ],
+      "failed": [],
+      "skipped": [],
+      "vsOwner": null
+    }
+  },
+  "reviewerPairs": [],
+  "spentEur": 0.080625,
+  "calls": 1,
+  "stoppedByBudget": false,
+  "rows": [
+    {
+      "itemId": "kolesarski-servis-ovinek",
+      "owner": null,
+      "scores": {
+        "claude": 3.083333333333333
+      },
+      "topFix": {
+        "claude": "Collapse the seven identical opening-hour bars into one line ('Vsak dan 8.30–18.30, april–oktober') and drop the timeline grid that adds nothing."
+      },
+      "blockers": {
+        "claude": [
+          "Phone, 'Kolesarite po dolini Soče': the chain picture is cropped to a corner fragment and followed by an empty teal band, reading as a broken image.",
+          "Desktop, 'Obiščite nas': the 'Navodila za pot' button is stretched into a tall empty square floating in a dead gap below the address."
+        ]
+      }
+    }
+  ],
+  "filter": {
+    "passed": [],
+    "held": [
+      "kolesarski-servis-ovinek"
+    ],
+    "unreviewed": []
+  },
+  "agreedFilter": {
+    "rule": "two-of-three",
+    "needed": 1,
+    "passed": [],
+    "held": [
+      "kolesarski-servis-ovinek"
+    ],
+    "unreviewed": []
+  }
+}

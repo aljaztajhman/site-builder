@@ -38,3 +38,19 @@ Why the studios lose:
 Every reviewer, on every set: one split-hero template in ten outfits.
 
 Spent: €15.03.
+
+## Re-score after the studio pages got the Review 50 checks (2026-10-15, €3.48)
+
+After the checks, zero repeat, empty-section or image-twice defects were left. The 20 pages were re-rendered free from the recordings and scored by the same 3 reviewers.
+
+| | today | picture (fixed) | fable (fixed) |
+|---|---|---|---|
+| Per-page mean (Gemini / GPT / Fable) | 3.47 | 3.09 (3.52 / 2.84 / 2.91) | 3.22 (3.67 / 2.99 / 2.99) |
+| Blockers | 9 | 37 (was 65) | 25 (was 57) |
+| Distinctiveness | 3.45 | 3.37 | 3.52 |
+| Imagery | 3.50 | 2.40 | 2.91 |
+| Set verdict, overall / variety (Gemini · GPT · Fable) | 2/2 · 3/3 · 3/2 | 3/2 · 3/3 · 3/2 | 2/1 · 3/3 · 3/2 |
+
+- The fixes closed about a third of the gap. Both studios are still below today, mostly on imagery and spacing, and set variety did not move.
+- The Fable reviewer's answer on fable/vinarstvo-pinteric was rejected because a suggested fix ran past its 200-character limit, so Fable's mean for the Fable studio covers 9 pages.
+- The next step is in docs/plans/phase-layout-variety.md, with Fable's direction in docs/plans/design-direction-2026-10.md.

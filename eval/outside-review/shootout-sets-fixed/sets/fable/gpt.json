@@ -1,0 +1,61 @@
+{
+  "set": "fable",
+  "reviewer": "gpt",
+  "model": "openai/gpt-6.1-sol",
+  "pages": [
+    "atelje-bergant",
+    "kolesarski-servis-ovinek",
+    "optika-jasna",
+    "pasji-salon-kodra",
+    "pivovarna-rov",
+    "plesna-sola-takt",
+    "sirarna-pr-simnu",
+    "steklarstvo-vrhovnik",
+    "urarstvo-tic",
+    "vinarstvo-pinteric"
+  ],
+  "status": "ok",
+  "answer": {
+    "sameness": "Most desktop heroes repeat left-aligned headline and short copy with a photograph or thin-line trade symbol on the right. The architecture, grooming and glazing pages share nearly identical white layouts, heavy sans-serif headings and small rectangular buttons. Brewery, dance, cheese and watch pages reuse dark backgrounds with one warm accent and oversized outline illustrations. Headers are consistently shallow, with tiny wordmarks and sparse navigation; every phone uses the same outlined menu control and bottom utility bar. Typography largely alternates between bold sans-serif and traditional serif rather than establishing ten distinct identities.",
+    "recurringIssues": [
+      "Mobile compositions often give oversized decorative symbols priority over the business message, pushing headlines or actions far down the screen.",
+      "Several desktop heroes have large inactive areas, while their supporting text and buttons are disproportionately small.",
+      "The repeated thin-line trade illustrations feel like a studio-wide graphic kit rather than distinctive business identities.",
+      "Photographic pages visibly carry AI-generation badges, and the generic scenes offer little sense of a particular business or its people.",
+      "Contrast is uneven: black text on the optician’s saturated blue panel and faint watch details on near-black are especially weak.",
+      "Identical mobile utility bars and menu treatments make otherwise different businesses feel like products from the same template system."
+    ],
+    "overall": 3,
+    "variety": 3,
+    "best": [
+      {
+        "id": "sirarna-pr-simnu",
+        "why": "Forest green, yellow serif typography and the cheese-shaped outline form the set’s most coherent and recognizable identity, with a prominent phone number."
+      },
+      {
+        "id": "plesna-sola-takt",
+        "why": "The red footwork diagram connects directly to the service, creates a purposeful composition and supports a clear registration action."
+      },
+      {
+        "id": "atelje-bergant",
+        "why": "The overlapping desktop photographs introduce layering and spatial interest absent from most of the set, while the mobile headline remains prominent."
+      }
+    ],
+    "weakest": [
+      {
+        "id": "optika-jasna",
+        "why": "The heavy blue service panel has poor text contrast and an awkward visual hierarchy, compounded by a disconnected blue strip on mobile."
+      },
+      {
+        "id": "vinarstvo-pinteric",
+        "why": "The desktop composition is underdeveloped, and the phone loses its vineyard illustration while retaining a large empty hero area."
+      },
+      {
+        "id": "kolesarski-servis-ovinek",
+        "why": "Repeated business identification, a detached address block and an oversized abstract corner create a fragmented hierarchy rather than a convincing service identity."
+      }
+    ],
+    "oneChange": "Require a genuinely business-specific hero concept for every project, designed on mobile first, instead of repeatedly pairing a left-hand headline with a stock photograph or oversized trade icon.",
+    "summary": "This is competent template-shop work with a few stronger identities, not yet a distinctive studio portfolio. The cheese and dance pages show how a focused visual idea can give a small business character. Too many others substitute an outline symbol or generic photograph for that idea. Mobile exposes the biggest weaknesses: decorative graphics dominate, empty space persists and shared utility chrome reinforces the template feel. Keep the practical contact tools, but make composition, imagery and visual hierarchy specific to each business."
+  }
+}

@@ -1,0 +1,377 @@
+{
+  "items": [
+    "atelje-bergant",
+    "kolesarski-servis-ovinek",
+    "optika-jasna",
+    "pasji-salon-kodra",
+    "pivovarna-rov",
+    "plesna-sola-takt",
+    "sirarna-pr-simnu",
+    "steklarstvo-vrhovnik",
+    "urarstvo-tic",
+    "vinarstvo-pinteric"
+  ],
+  "reviewers": {
+    "gemini": {
+      "model": "google/gemini-4-argon",
+      "scored": [
+        "atelje-bergant",
+        "kolesarski-servis-ovinek",
+        "optika-jasna",
+        "pasji-salon-kodra",
+        "pivovarna-rov",
+        "plesna-sola-takt",
+        "sirarna-pr-simnu",
+        "steklarstvo-vrhovnik",
+        "urarstvo-tic",
+        "vinarstvo-pinteric"
+      ],
+      "failed": [],
+      "skipped": [],
+      "vsOwner": null
+    },
+    "gpt": {
+      "model": "openai/gpt-6.1-sol",
+      "scored": [
+        "atelje-bergant",
+        "kolesarski-servis-ovinek",
+        "optika-jasna",
+        "pasji-salon-kodra",
+        "pivovarna-rov",
+        "plesna-sola-takt",
+        "sirarna-pr-simnu",
+        "steklarstvo-vrhovnik",
+        "urarstvo-tic",
+        "vinarstvo-pinteric"
+      ],
+      "failed": [],
+      "skipped": [],
+      "vsOwner": null
+    },
+    "claude": {
+      "model": "claude-fable-5-1",
+      "scored": [
+        "atelje-bergant",
+        "kolesarski-servis-ovinek",
+        "optika-jasna",
+        "pasji-salon-kodra",
+        "pivovarna-rov",
+        "plesna-sola-takt",
+        "sirarna-pr-simnu",
+        "steklarstvo-vrhovnik",
+        "urarstvo-tic"
+      ],
+      "failed": [
+        "vinarstvo-pinteric"
+      ],
+      "skipped": [],
+      "vsOwner": null
+    }
+  },
+  "reviewerPairs": [
+    {
+      "a": "gemini",
+      "b": "gpt",
+      "pairwise": {
+        "agreement": 0.8181818181818182,
+        "pairs": 44,
+        "agreed": 36,
+        "judgeTies": 4
+      },
+      "spearman": 0.7963569872987316,
+      "n": 10
+    },
+    {
+      "a": "gemini",
+      "b": "claude",
+      "pairwise": {
+        "agreement": 0.8857142857142857,
+        "pairs": 35,
+        "agreed": 31,
+        "judgeTies": 0
+      },
+      "spearman": 0.8786687791935092,
+      "n": 9
+    },
+    {
+      "a": "gpt",
+      "b": "claude",
+      "pairwise": {
+        "agreement": 0.8181818181818182,
+        "pairs": 33,
+        "agreed": 27,
+        "judgeTies": 0
+      },
+      "spearman": 0.7458698539828915,
+      "n": 9
+    }
+  ],
+  "spentEur": 1.52016997,
+  "calls": 32,
+  "stoppedByBudget": false,
+  "rows": [
+    {
+      "itemId": "atelje-bergant",
+      "owner": null,
+      "scores": {
+        "gemini": 4,
+        "gpt": 3.083333333333333,
+        "claude": 3.333333333333333
+      },
+      "topFix": {
+        "gemini": "In the desktop hero, remove the rotation on the smaller vineyard photo and align it cleanly on a grid or move it to illustrate the 'Stara domačija' section below.",
+        "gpt": "Recompose the desktop renovation and architect sections into a balanced two-column layout, pairing the short text and credentials rather than leaving most of the right side empty.",
+        "claude": "Fill the empty right columns on desktop ('Stara domačija', 'Najprej si ogledam', CTA) with a project photo or a plan drawing so sections don't read as half-finished."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [],
+        "claude": [
+          "Desktop hero: the tilted vineyard photo extends past the first screen and is clipped by the viewport bottom, hanging into the next section's margin.",
+          "Desktop 'Najprej si ogledam hišo ali parcelo': heading spans full width with only a narrow credential row beneath and a large empty block, layout falls apart."
+        ]
+      }
+    },
+    {
+      "itemId": "kolesarski-servis-ovinek",
+      "owner": null,
+      "scores": {
+        "gemini": 3.583333333333333,
+        "gpt": 2.8333333333333335,
+        "claude": 2.75
+      },
+      "topFix": {
+        "gemini": "Pull the 'Kako do nas' button up directly beneath the hero body text on desktop so it sits comfortably above the fold and eliminates the dead white space.",
+        "gpt": "Remove the hero's excessive vertical space, place the directions button directly beneath the introductory text, and shrink the corner graphic on phones.",
+        "claude": "Fix the hero: put 'Kako do nas' directly under the intro text on desktop and give the curve a fixed height so it frames the hero instead of trailing as an empty stripe on phone."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [],
+        "claude": [
+          "Desktop hero: 'Kako do nas' button sits below the fold, separated from its text by a ~350px empty band; the layout falls apart.",
+          "Phone, between hero and 'Kaj delamo': the curve graphic runs as a bare green stripe for a full screen of otherwise empty space."
+        ]
+      }
+    },
+    {
+      "itemId": "optika-jasna",
+      "owner": null,
+      "scores": {
+        "gemini": 2.8333333333333335,
+        "gpt": 2.666666666666667,
+        "claude": 2.583333333333333
+      },
+      "topFix": {
+        "gemini": "Change the text color inside the hero's royal blue services banner to white, or remove the banner altogether since the exact same services are listed in the 'Kaj vse vam nudimo' section below.",
+        "gpt": "Condense the blue benefits section into a short heading and three compact points, substantially reducing its mobile type sizes and removing information already covered in the hero and services.",
+        "claude": "Shrink the blue statement section's headline and claims to one phone screen; the repeated 'tri dni' message is already in the hero."
+      },
+      "blockers": {
+        "gemini": [
+          "Phone and desktop hero: black text over the dark royal blue services box is almost impossible to read.",
+          "Desktop hero: a vertical grey line cuts directly through the main headline and lead paragraph.",
+          "Phone and desktop: the exact same list of six services is repeated in the hero banner and again in the 'Kaj vse vam nudimo' section.",
+          "Desktop 'Kdo vas sprejme' section: a large empty blue circle sits on the right looking like a broken image or missing illustration."
+        ],
+        "gpt": [],
+        "claude": [
+          "Desktop 'Kdo vas sprejme': large empty blue circle placeholder where a portrait should be.",
+          "Phone statement section: headline is so large it spans almost two screens and the hero claim is repeated verbatim.",
+          "Desktop 'Kaj vse vam nudimo': headline 'Kaj vse vam nudimo' is cut by the section edge/overlaps the service list start."
+        ]
+      }
+    },
+    {
+      "itemId": "pasji-salon-kodra",
+      "owner": null,
+      "scores": {
+        "gemini": 3.5833333333333335,
+        "gpt": 2.75,
+        "claude": 2.916666666666667
+      },
+      "topFix": {
+        "gemini": "Arrange the desktop 'Nikamor se ne mudi', 'Cene storitev', and 'Delovni čas' sections into a balanced two-column grid so the right half of the viewport isn't dead white space.",
+        "gpt": "Replace the tools-only hero with a dog-grooming image; use a shorter landscape crop on phones so it supports rather than dominates the introduction.",
+        "claude": "Replace the hero mood picture (human hairbrush, towels) with a photo of a dog being groomed, and add at least one more dog photo beside the price list or the 'Nikamor se ne mudi' section."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [],
+        "claude": []
+      }
+    },
+    {
+      "itemId": "pivovarna-rov",
+      "owner": null,
+      "scores": {
+        "gemini": 3.5,
+        "gpt": 3,
+        "claude": 2.8333333333333335
+      },
+      "topFix": {
+        "gemini": "Fix the typography in the mobile beer list so 'Kopalnica' does not break mid-word onto a new line.",
+        "gpt": "On phone, put the headline and introduction directly beneath the header; shrink the hanging-glass illustration into a supporting accent rather than a tall opening block.",
+        "claude": "Redesign the beer section: four compact cards (name, style, colour swatch or glass illustration) instead of oversized stacked headings, and either explain the orange step-bars or remove them."
+      },
+      "blockers": {
+        "gemini": [
+          "On phone, the beer subheading 'Kopalnica' breaks mid-word with a single 'a' on the next line.",
+          "On phone, the 4-column yellow bar graphic sits below a vertically stacked list of beers, making the visual completely disconnected and nonsensical."
+        ],
+        "gpt": [
+          "Phone, beer range: “Kopalnica” breaks into “Kopalnic” and an isolated “a.”"
+        ],
+        "claude": [
+          "Phone, beer section: the heading 'Kopalnica' is broken across two lines as 'Kopalnic / a'.",
+          "Both viewports, beer section: the orange stepped-bar graphic has no labels or caption and reads as a broken or nonsensical element.",
+          "Phone, opening hours: the timeline bars have no hour labels so the grid lines are meaningless; the 12.00–23.00 bar overlaps the left margin.",
+          "Desktop, beer section: the 'Jamar, Šoht, Kopalnica in Smuk' heading overlaps/sits with no gap against the beer names row."
+        ]
+      }
+    },
+    {
+      "itemId": "plesna-sola-takt",
+      "owner": null,
+      "scores": {
+        "gemini": 4.333333333333333,
+        "gpt": 3.5,
+        "claude": 3.1666666666666665
+      },
+      "topFix": {
+        "gemini": "Replace the single 'Domov' link in the navigation with anchor links to the sections ('Učitelja', 'Prijava') or remove the menu altogether.",
+        "gpt": "On phones, shrink the dance-step illustration substantially and place the introductory text and registration action before it so the primary action fits above the fixed bar.",
+        "claude": "Add real photos of the teachers and a class in the 'Kdo vas uči' section; a dance school with no people on the page feels empty."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [],
+        "claude": []
+      }
+    },
+    {
+      "itemId": "sirarna-pr-simnu",
+      "owner": null,
+      "scores": {
+        "gemini": 4.083333333333334,
+        "gpt": 3.333333333333333,
+        "claude": 3.083333333333333
+      },
+      "topFix": {
+        "gemini": "In the 'Iz naše trgovinice' section, populate the product list or give 'Ogled sirarne s pokušino' proper body copy and a clear call-to-action so it doesn't look like an orphaned heading.",
+        "gpt": "On phones, put the headline before the cheese outline and shrink the illustration to a small accent so the introduction, location and phone number appear much earlier.",
+        "claude": "Fill the „Iz naše trgovinice"
+      },
+      "blockers": {
+        "gemini": [
+          "On both phone and desktop, the 'Iz naše trgovinice' section appears unfinished, with the heading 'Ogled sirarne s pokušino' floating by itself without supporting text or products.",
+          "On both phone and desktop in the contact section, the light grey 'E-pošta' label on the yellow background has almost no contrast and is unreadable."
+        ],
+        "gpt": [],
+        "claude": [
+          "Phone and desktop, „Od hleva do kotla"
+        ]
+      }
+    },
+    {
+      "itemId": "steklarstvo-vrhovnik",
+      "owner": null,
+      "scores": {
+        "gemini": 4.333333333333333,
+        "gpt": 3,
+        "claude": 3.25
+      },
+      "topFix": {
+        "gemini": "Replace the generic Vipava valley vineyard image in the 'O nas' section with a workshop or glass installation photo.",
+        "gpt": "Reduce the phone hero headline to roughly 34–36px and scale down subsequent headings so the introduction and glass image fit more comfortably in the opening screen.",
+        "claude": "Reduce the phone headline to three lines max and lift the glass photo into the first screen so the trade is visible immediately."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [],
+        "claude": []
+      }
+    },
+    {
+      "itemId": "urarstvo-tic",
+      "owner": null,
+      "scores": {
+        "gemini": 3.75,
+        "gpt": 3,
+        "claude": 3
+      },
+      "topFix": {
+        "gemini": "Restyle the opening hours timeline bars so they do not use the exact same gold fill and rounded corners as primary action buttons.",
+        "gpt": "On phones, place the headline before the clock and reduce the clock to a compact supporting motif; on desktop, align both within a shorter hero and bring the primary button closer to the description.",
+        "claude": "Shrink the hero clock on phone (or set it beside/behind the headline) so the headline, trade and location read in the first screen."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [],
+        "claude": [
+          "Desktop contact section: left column has large empty gaps between the heading, the paragraph, the email and the button, so the layout looks broken.",
+          "Phone and desktop: directions is offered three times (header/sticky bar, 'Pot do delavnice', 'Navodila za pot' under the map) in the same section."
+        ]
+      }
+    },
+    {
+      "itemId": "vinarstvo-pinteric",
+      "owner": null,
+      "scores": {
+        "gemini": 2.6666666666666665,
+        "gpt": 2.75,
+        "claude": null
+      },
+      "topFix": {
+        "gemini": "Change the text color inside the ochre highlight banner and the hour markers above the schedule bars to dark brown or black so they are clearly legible.",
+        "gpt": "Remove the phone hero’s excessive minimum height, slightly reduce its headline, and tighten desktop section heights so content replaces the large empty bands.",
+        "claude": null
+      },
+      "blockers": {
+        "gemini": [
+          "Phone and desktop, 'Stara klet' section: light grey text inside the ochre highlight box has almost no contrast and cannot be read.",
+          "Desktop, 'Kdaj vas pričakujemo' section: faint grey hour labels (11.00, 13.00, 15.00, 17.00) above the Saturday bar are unreadable against the ochre background."
+        ],
+        "gpt": [],
+        "claude": null
+      }
+    }
+  ],
+  "filter": {
+    "passed": [
+      "pasji-salon-kodra",
+      "plesna-sola-takt",
+      "steklarstvo-vrhovnik"
+    ],
+    "held": [
+      "atelje-bergant",
+      "kolesarski-servis-ovinek",
+      "optika-jasna",
+      "pivovarna-rov",
+      "sirarna-pr-simnu",
+      "urarstvo-tic",
+      "vinarstvo-pinteric"
+    ],
+    "unreviewed": []
+  },
+  "agreedFilter": {
+    "rule": "two-of-three",
+    "needed": 2,
+    "passed": [
+      "atelje-bergant",
+      "kolesarski-servis-ovinek",
+      "pasji-salon-kodra",
+      "plesna-sola-takt",
+      "steklarstvo-vrhovnik",
+      "urarstvo-tic"
+    ],
+    "held": [
+      "optika-jasna",
+      "pivovarna-rov",
+      "sirarna-pr-simnu"
+    ],
+    "unreviewed": [
+      "vinarstvo-pinteric"
+    ]
+  }
+}

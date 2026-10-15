@@ -1,0 +1,51 @@
+{
+  "items": [
+    "steklarstvo-vrhovnik"
+  ],
+  "reviewers": {
+    "gpt": {
+      "model": "openai/gpt-6.1-sol",
+      "scored": [
+        "steklarstvo-vrhovnik"
+      ],
+      "failed": [],
+      "skipped": [],
+      "vsOwner": null
+    }
+  },
+  "reviewerPairs": [],
+  "spentEur": 0.032953909999999996,
+  "calls": 1,
+  "stoppedByBudget": false,
+  "rows": [
+    {
+      "itemId": "steklarstvo-vrhovnik",
+      "owner": null,
+      "scores": {
+        "gpt": 2.75
+      },
+      "topFix": {
+        "gpt": "Rebalance the hero: on phone, place a smaller headline before a shorter image; on desktop, reduce headline size and widen its column so the message and primary call button fit above the fold."
+      },
+      "blockers": {
+        "gpt": []
+      }
+    }
+  ],
+  "filter": {
+    "passed": [
+      "steklarstvo-vrhovnik"
+    ],
+    "held": [],
+    "unreviewed": []
+  },
+  "agreedFilter": {
+    "rule": "two-of-three",
+    "needed": 1,
+    "passed": [
+      "steklarstvo-vrhovnik"
+    ],
+    "held": [],
+    "unreviewed": []
+  }
+}

@@ -1,0 +1,5 @@
+{"at":"2026-10-15T16:08:10.481Z","stage":"outside-review","reviewer":"gemini","model":"google/gemini-4-argon","itemId":"set:picture","inputTokens":3414,"outputTokens":903,"usd":0.015858,"eur":0.01363788,"costSource":"openrouter"}
+{"at":"2026-10-15T16:08:25.283Z","stage":"outside-review","reviewer":"gemini","model":"google/gemini-4-argon","itemId":"set:fable","inputTokens":3415,"outputTokens":888,"usd":0.01571,"eur":0.013510599999999998,"costSource":"openrouter"}
+{"at":"2026-10-15T16:08:50.462Z","stage":"outside-review","reviewer":"gpt","model":"openai/gpt-6.1-sol","itemId":"set:picture","inputTokens":4502,"outputTokens":902,"usd":0.0202735,"eur":0.01743521,"costSource":"openrouter"}
+{"at":"2026-10-15T16:09:12.293Z","stage":"outside-review","reviewer":"gpt","model":"openai/gpt-6.1-sol","itemId":"set:fable","inputTokens":4503,"outputTokens":832,"usd":0.019576,"eur":0.01683536,"costSource":"openrouter"}
+{"at":"2026-10-15T16:11:15.858Z","stage":"outside-review","reviewer":"claude","model":"claude-fable-5-1","itemId":"set:picture","inputTokens":5760,"outputTokens":1299,"usd":0.061275,"eur":0.0526965,"costSource":"config"}

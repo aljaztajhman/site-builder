@@ -1,0 +1,62 @@
+{
+  "set": "picture",
+  "reviewer": "claude",
+  "model": "claude-fable-5-1",
+  "pages": [
+    "atelje-bergant",
+    "kolesarski-servis-ovinek",
+    "optika-jasna",
+    "pasji-salon-kodra",
+    "pivovarna-rov",
+    "plesna-sola-takt",
+    "sirarna-pr-simnu",
+    "steklarstvo-vrhovnik",
+    "urarstvo-tic",
+    "vinarstvo-pinteric"
+  ],
+  "status": "ok",
+  "answer": {
+    "sameness": "Nine of ten heroes are the same split: big headline + short paragraph + one small button on the left, a single illustration or photo on the right. Headline type alternates between just two voices: a heavy grotesk (Ovinek, Jasna, Kodra, Rov, Takt, Šimnu, Vrhovnik) and a serif (Bergant, Tič, Pinterič). Same tiny top bar with 'Domov' link and a small filled 'Pokličite' pill; same small rectangular CTA. Four dark navy/black heroes (Ovinek, Rov, Takt, Tič) with a line-art 'Ustvarjeno z UI' illustration in a tile. A strip of slash-separated service keywords repeats on Ovinek, Takt and Rov. Phone views all end with the identical 'Klic / Navodila za pot' button pair. Body text set in the same grey…",
+    "recurringIssues": [
+      "AI-generated illustrations with a visible 'Ustvarjeno z UI' badge appear on 8 of 10 pages and read as placeholder art rather than the business.",
+      "Hero illustrations float in empty space (house, chain, dog, cheese) with no relation to the real place, people or product.",
+      "Dark heroes (Ovinek, Rov, Takt, Tič) are nearly interchangeable; palette alone does not carry identity.",
+      "Right-hand image area is often weak or thin: Pivovarna's blurry chain, Optika's block of small grey text where an image should be.",
+      "Small CTAs and tiny nav links undersized against very large headlines; hierarchy jumps from huge to minuscule.",
+      "Mobile heroes push imagery below the fold and leave the first screen as text plus a button on most pages.",
+      "Desktop second-section strips are cut or crammed (Rov, Bergant, Takt) hinting at loose section rhythm."
+    ],
+    "overall": 3,
+    "variety": 2,
+    "best": [
+      {
+        "id": "vinarstvo-pinteric",
+        "why": "Real photography, a warm lilac ground and a distinctive serif give it an atmosphere specific to a family winery."
+      },
+      {
+        "id": "steklarstvo-vrhovnik",
+        "why": "The only page that shows the actual craft with a real workshop photo; the headline and photo work as a convincing pair."
+      },
+      {
+        "id": "sirarna-pr-simnu",
+        "why": "Bold yellow block and the cheese cut-out give it a cheerful, poster-like identity that stands apart from the dark heroes."
+      }
+    ],
+    "weakest": [
+      {
+        "id": "pivovarna-rov",
+        "why": "A small, blurry chain picture on a black field says nothing about beer or the mine; the hero feels empty and gloomy."
+      },
+      {
+        "id": "optika-jasna",
+        "why": "No imagery at all, a tiny grey address block where the visual should be, then two loud red and green panels that clash with the quiet top."
+      },
+      {
+        "id": "kolesarski-servis-ovinek",
+        "why": "Generic dark hero with abstract contour scribbles; interchangeable with the dance school and watchmaker pages."
+      }
+    ],
+    "oneChange": "Replace the generated line-art tiles with real photographs of each business—the owner, the workshop, the product—and let the image, not the colour swap, drive the hero composition.",
+    "summary": "This batch is competent and tidy, but it is one layout worn ten times: huge headline left, small button, a picture on the right, phone footer with the same two buttons. Half of the pages sit on the same dark navy ground and use the same heavy sans, so the dance school, bike shop, brewery and watchmaker could trade places. The biggest weakness is the AI-generated illustrations with their visible badge; they look like placeholders and tell nothing about the real business. The three pages that use real photography or a strong colour block (Pinterič, Vrhovnik, Šimnu) immediately feel like someone's actual company. Shoot or source real photos, vary the hero structure, and shrink the gap between oversized headlines and tiny controls."
+  }
+}
