@@ -1,4 +1,4 @@
-import { ActionLink, Actions, AddressText, HoursList, Icon, PhoneLink, Section, titleId } from "../../primitives/index.tsx";
+import { ActionLink, Actions, AddressText, FitText, HoursList, Icon, PhoneLink, Section, titleId } from "../../primitives/index.tsx";
 import type { RenderCtx, SectionProps } from "../../types.ts";
 
 /** Phone, address with a directions link, and opening hours, straight from the business facts. */
@@ -49,7 +49,7 @@ export function HeroType({ section, ctx }: SectionProps<"hero-type">) {
         <div className="hero-type__head">
           {props.eyebrow && <p className="eyebrow">{props.eyebrow}</p>}
           <h1 id={titleId(section.id)} className={props.headline.length > 44 ? "hero-title hero-title--long" : "hero-title"}>
-            {props.headline}
+            <FitText text={props.headline} />
           </h1>
         </div>
         <div className="hero-type__body">

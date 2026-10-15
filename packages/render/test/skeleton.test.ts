@@ -131,13 +131,28 @@ describe("the skeleton in the page", () => {
   });
 
   it("footer visit: where and when before the provider rows, the address once", () => {
-    const spec = golden("pekarna-kvas");
+    const base = golden("pekarna-kvas");
+    // Without a section that shows the address or the hours (the page's contact section says them otherwise).
+    const shows = new Set(["contact", "contact-strip", "opening-hours"]);
+    const pages = base.pages.map((p, i) => (i === 0 ? { ...p, sections: p.sections.filter((s) => !shows.has(s.type)) } : p));
+    const spec = { ...base, pages } as SiteSpec;
     const html = home(withSkeleton(spec, { footer: "visit", footerTone: "default" }));
     const footer = /<footer[\s\S]*<\/footer>/.exec(html)![0];
     expect(footer).toContain("Obiščite nas");
     expect(footer).toContain("site-footer__directions");
     expect(footer).toContain("Delovni čas");
     expect(footer.match(/<address>/g)).toHaveLength(1);
+  });
+
+  it("footer visit under a contact section: no second address or hours, the provider rows stay (review 50)", () => {
+    const spec = golden("pekarna-kvas");
+    expect(spec.pages[0]!.sections.some((s) => s.type === "contact")).toBe(true);
+    const html = home(withSkeleton(spec, { footer: "visit", footerTone: "default" }));
+    const footer = /<footer[\s\S]*<\/footer>/.exec(html)![0];
+    expect(footer).not.toContain("site-footer__visit");
+    expect(footer).not.toContain("<address>");
+    expect(footer).toContain("site-footer__provider");
+    expect(html.match(/<address>/g)).toHaveLength(1);
   });
 });
 

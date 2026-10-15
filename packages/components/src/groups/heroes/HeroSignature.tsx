@@ -1,5 +1,5 @@
 import { formatAddress, isPlaceholder, type Link, type SectionOf } from "@sb/spec";
-import { ActionLink, Actions, HoursList, Picture, Ph, Section, titleId } from "../../primitives/index.tsx";
+import { ActionLink, Actions, FitText, HoursList, Ph, Picture, Section, titleId } from "../../primitives/index.tsx";
 import { CallObject, LabelMark, Limb, Receipt, Seal, TradeDrawing } from "../../motifs/index.tsx";
 import type { RenderCtx, SectionProps } from "../../types.ts";
 import { composedOwnsCall } from "../composed/index.tsx";
@@ -131,7 +131,7 @@ export function HeroSignature({ section, ctx, index }: SectionProps<"hero-signat
   const image = HERO_SIGNATURE_SIZES[variant] === null ? undefined : props.image;
   const title = (
     <h1 id={titleId(section.id)} className={props.headline.length > 34 ? "hsig__title hsig__title--long" : "hsig__title"}>
-      {props.headline}
+      <FitText text={props.headline} />
     </h1>
   );
   const head = (

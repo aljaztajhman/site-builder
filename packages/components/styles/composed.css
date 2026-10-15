@@ -265,14 +265,20 @@
 .cx-h[data-sz="6"],
 .cx-h[data-sz="7"],
 .cx-h[data-sz="8"] {
-  line-height: 1.02;
+  line-height: max(var(--lh-floor, 0), 1.02);
 }
 .cx-h--normal {
   text-transform: none;
 }
+/* Not in capitals: no caron floor (tokens.ts sets one for a site with uppercase headings). */
+.cx-h.cx-h--normal {
+  --lh-floor: 0;
+}
 /* Uppercase never breaks inside a word: the size shrinks until the longest word (--lw letters, about 0.78 em each) fits the screen. */
 .cx-h--uppercase {
   text-transform: uppercase;
+  /* Room for the carons of Č Š Ž above the capitals (tokens.ts sets the same floor for uppercase sites). */
+  --lh-floor: 1.05;
   font-size: min(var(--fz), calc((100vw - 2rem) / (var(--lw, 1) * 0.78)));
 }
 @media (min-width: 64rem) {
@@ -307,7 +313,7 @@
 .cx-t--lead p {
   font-size: var(--fs-lg);
   line-height: 1.5;
-  /* Lead text holds names and short phrases: it breaks between words only (base.css hyphenates body text). */
+  /* Lead text holds names and short phrases: it breaks between words only (as all text does, base.css). */
   hyphens: manual;
 }
 .cx-l {

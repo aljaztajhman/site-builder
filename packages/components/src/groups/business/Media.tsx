@@ -275,7 +275,9 @@ export function ServiceArea({ section, ctx }: SectionProps<"service-area">) {
   const areas = ctx.site.business.serviceArea ?? [];
   return (
     <Section id={section.id} type={section.type} variant={section.variant} tone={section.tone}>
-      <div className="area">
+      {/* One or two places fill no second column (review 50: a lone "Gorenjska" beside the head): one narrow column.
+          The pipes motif sets its places as stops in one column already. */}
+      <div className={cx("area", areas.length > 0 && areas.length <= 2 && motifOf(ctx) !== "pipes" && "area--few")}>
         <SectionHead id={section.id} eyebrow={props.eyebrow} title={props.title} intro={props.intro} />
         <div className="area__body">
           {areas.length > 0 ? (

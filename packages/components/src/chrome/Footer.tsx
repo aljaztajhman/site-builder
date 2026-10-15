@@ -3,6 +3,7 @@ import { DIRECTIONS, isPlaceholder, isWebUrl } from "@sb/spec";
 import type { RenderCtx } from "../types.ts";
 import { AddressText, EmailLink, HoursList, Icon, MaybeText, PhoneLink, cx } from "../primitives/index.tsx";
 import { ChromeWordmark } from "../groups/composed/kinds/wordmark.tsx";
+import { pageFacts } from "./page-facts.ts";
 
 /** Characters of the longest word: the wordmark's size is set so it fits the width (skeleton.css). */
 const longestWord = (s: string): number => Math.max(4, ...s.split(/\s+/).map((w) => w.length));
@@ -40,6 +41,11 @@ export function Footer({ ctx }: { ctx: RenderCtx }) {
   const headingClass = compact ? "visually-hidden" : "site-footer__heading";
   // Only http(s) links: z.url() also accepts javascript: and data:.
   const social = (b.social ?? []).filter((s) => isWebUrl(s.url));
+  // Say each thing once: the visit block leaves out what a section of this page already shows (the address with its
+  // directions, the hours); with both shown above, the footer has no visit block. The provider rows always stay.
+  const shown = variant === "visit" ? pageFacts(ctx.page, b) : { address: false, hours: false };
+  const visitWhere = !shown.address;
+  const visitHours = b.hours !== undefined && !shown.hours;
 
   return (
     <footer
@@ -56,19 +62,21 @@ export function Footer({ ctx }: { ctx: RenderCtx }) {
             {b.name}
           </p>
         )}
-        {variant === "visit" && (
+        {variant === "visit" && (visitWhere || visitHours) && (
           <div className="site-footer__visit">
-            <div className="site-footer__visit-where">
-              <h2 className="site-footer__visit-title">{ctx.t("visitUs")}</h2>
-              <AddressText ctx={ctx} />
-              {directions && (
-                <a className="text-link site-footer__directions" href={directions} rel="noopener" target="_blank">
-                  <Icon name="map-pin" />
-                  {ctx.t("directions")}
-                </a>
-              )}
-            </div>
-            {b.hours && (
+            {visitWhere && (
+              <div className="site-footer__visit-where">
+                <h2 className="site-footer__visit-title">{ctx.t("visitUs")}</h2>
+                <AddressText ctx={ctx} />
+                {directions && (
+                  <a className="text-link site-footer__directions" href={directions} rel="noopener" target="_blank">
+                    <Icon name="map-pin" />
+                    {ctx.t("directions")}
+                  </a>
+                )}
+              </div>
+            )}
+            {visitHours && (
               <div className="site-footer__visit-hours">
                 <h2 className="site-footer__visit-title">{ctx.t("openingHours")}</h2>
                 <HoursList ctx={ctx} />
