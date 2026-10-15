@@ -63,12 +63,76 @@ async function encodePhoto(data: Uint8Array, widths: number[], quality: { avif: 
   return { width, height, variants };
 }
 
+const SVG_ROOT = /<svg\b[^>]*>/i;
+const attr = (tag: string, name: string): string | undefined => new RegExp(`\\s${name}\\s*=\\s*("([^"]*)"|'([^']*)')`, "i").exec(tag)?.slice(2).find((x) => x !== undefined);
+const setAttr = (tag: string, name: string, value: string): string => {
+  const re = new RegExp(`\\s${name}\\s*=\\s*("[^"]*"|'[^']*')`, "i");
+  return re.test(tag) ? tag.replace(re, ` ${name}="${value}"`) : tag.replace(/^<svg\b/i, `<svg ${name}="${value}"`);
+};
+/** A plain length in user units ("280", "280px"); anything else (%, cm, em) is not one. */
+const userUnits = (v: string | undefined): number | undefined => (v && /^\s*[\d.]+\s*(px)?\s*$/.test(v) ? Number.parseFloat(v) : undefined);
+
+/** Root <svg> tag with its viewBox (and width and height, in the same proportion) set to the box. */
+function withViewBox(text: string, tag: string, box: { x: number; y: number; w: number; h: number }): Uint8Array {
+  let t = setAttr(tag, "viewBox", `${box.x} ${box.y} ${box.w} ${box.h}`);
+  t = setAttr(t, "width", String(box.w));
+  t = setAttr(t, "height", String(box.h));
+  return new TextEncoder().encode(text.replace(tag, t));
+}
+
+/**
+ * A logo SVG whose drawing runs outside its own viewBox (pekarna-kvas: the tagline "PEKARNA · KAMNIK" set past the
+ * right edge) is clipped when rasterised. Grows the viewBox to take in everything drawn: renders the logo on a canvas
+ * three times its size, finds the drawn pixels (trim), and sets the viewBox to the union of the original box and
+ * those, so a logo that fits keeps its own margins. A file it can't read (no root tag, sizes in units other than
+ * px) is returned as it is.
+ */
+export async function fitSvgViewBox(data: Uint8Array): Promise<Uint8Array> {
+  const text = new TextDecoder().decode(data);
+  const tag = SVG_ROOT.exec(text)?.[0];
+  if (!tag) return data;
+  const vb = attr(tag, "viewBox")
+    ?.trim()
+    .split(/[\s,]+/)
+    .map(Number);
+  const w = userUnits(attr(tag, "width"));
+  const h = userUnits(attr(tag, "height"));
+  const box = vb && vb.length === 4 && vb.every(Number.isFinite) && vb[2]! > 0 && vb[3]! > 0 ? { x: vb[0]!, y: vb[1]!, w: vb[2]!, h: vb[3]! } : w && h ? { x: 0, y: 0, w, h } : undefined;
+  if (!box) return data;
+  // The probe: the box with its own width and height around it on every side, at 2 px per unit (or less for a big box).
+  const probe = { x: box.x - box.w, y: box.y - box.h, w: box.w * 3, h: box.h * 3 };
+  const scale = Math.min(2, 4000 / Math.max(probe.w, probe.h));
+  try {
+    const out = await sharp(withViewBox(text, tag, probe), { density: 72 * scale, limitInputPixels: MAX_INPUT_PIXELS })
+      .ensureAlpha()
+      .trim({ background: { r: 0, g: 0, b: 0, alpha: 0 }, threshold: 1 })
+      .toBuffer({ resolveWithObject: true });
+    const info = out.info as typeof out.info & { trimOffsetLeft?: number; trimOffsetTop?: number };
+    const px = probe.w / Math.round(probe.w * scale);
+    const left = probe.x + Math.abs(info.trimOffsetLeft ?? 0) * px;
+    const top = probe.y + Math.abs(info.trimOffsetTop ?? 0) * px;
+    const right = left + info.width * px;
+    const bottom = top + info.height * px;
+    // One unit of room past the drawing (anti-aliased edges), only on the sides where it runs out of the box.
+    const x0 = left < box.x ? Math.floor(left - 1) : box.x;
+    const y0 = top < box.y ? Math.floor(top - 1) : box.y;
+    const x1 = right > box.x + box.w ? Math.ceil(right + 1) : box.x + box.w;
+    const y1 = bottom > box.y + box.h ? Math.ceil(bottom + 1) : box.y + box.h;
+    if (x0 === box.x && y0 === box.y && x1 === box.x + box.w && y1 === box.y + box.h) return data;
+    return withViewBox(text, tag, { x: x0, y: y0, w: x1 - x0, h: y1 - y0 });
+  } catch {
+    // Nothing drawn (trim of an empty canvas) or a file librsvg refuses: rasterise it as it is.
+    return data;
+  }
+}
+
 /**
  * Logo for the header, always a 2x PNG. SVG uploads are rasterised too: an uploaded SVG served from
  * our origin could carry script, and a PNG is safe everywhere (preview, published site, export).
  */
 export async function processLogo(data: Uint8Array, mime: string): Promise<{ file: string; data: Uint8Array; width: number; height: number }> {
-  const input = mime === "image/svg+xml" ? sharp(data, { density: 300, limitInputPixels: MAX_INPUT_PIXELS }) : sharp(data, { limitInputPixels: MAX_INPUT_PIXELS });
+  const svg = mime === "image/svg+xml" ? await fitSvgViewBox(data) : data;
+  const input = mime === "image/svg+xml" ? sharp(svg, { density: 300, limitInputPixels: MAX_INPUT_PIXELS }) : sharp(data, { limitInputPixels: MAX_INPUT_PIXELS });
   const out = await input.resize({ height: 96, withoutEnlargement: mime !== "image/svg+xml" }).png().toBuffer({ resolveWithObject: true });
   return { file: "logo.png", data: out.data, width: Math.round(out.info.width / 2), height: Math.round(out.info.height / 2) };
 }

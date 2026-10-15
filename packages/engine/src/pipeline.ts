@@ -13,7 +13,7 @@ import { applyGenome } from "./genome.ts";
 import { extractSwatches, type Swatch } from "./palette.ts";
 import { processLogo, processPhoto, shareJpeg, visionJpeg } from "./images.ts";
 import type { ImageGenerator } from "./image-gen.ts";
-import { checkSite, type CheckBrowser, type SiteCheckReport } from "./check/index.ts";
+import { checkSite, failuresOf, repairPhoneOverflow, type CheckBrowser, type SiteCheckReport } from "./check/index.ts";
 import { typedText } from "./editor.ts";
 import { checkFacts } from "./facts.ts";
 import { newReleaseId, writeRelease } from "./published.ts";
@@ -424,15 +424,16 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
   let check: SiteCheckReport | null = null;
   let rounds = 0;
   let critiqueSkipped: GenerateResult["critiqueSkipped"];
-  const runCheck = async () => {
-    const media = await loadMedia(storage, siteId, spec, config.images.widths);
-    return checkSite(spec, siteFiles(spec, media, { imageWidths: config.images.widths }), {
+  const checkOf = async (s: SiteSpec, lighthouse: boolean) => {
+    const media = await loadMedia(storage, siteId, s, config.images.widths);
+    return checkSite(s, siteFiles(s, media, { imageWidths: config.images.widths }), {
       config,
       corpus,
-      lighthouse: deps.lighthouse ?? true,
+      lighthouse,
       ...(deps.browser ? { browser: deps.browser } : {}),
     });
   };
+  const runCheck = () => checkOf(spec, deps.lighthouse ?? true);
   try {
     check = await stageTime("check", runCheck);
   } catch (e) {
@@ -443,6 +444,25 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     return { version, check: null, critiqueRounds: 0, timings, firstVersionMs, ...(homepageMs !== undefined ? { homepageMs } : {}), ...(studio ? { studio } : {}) };
   }
   await log("check", check.failures.length ? "Checks found problems" : "All checks passed", { failures: check.failures, lighthouse: check.lighthouse });
+  // A page that scrolls sideways at 360 px is repaired in code when a heading causes it (a lower type scale, re-checked
+  // without Lighthouse, whose scores the first check keeps); otherwise the failure stands and is logged as such.
+  if (check.pages.some((p) => p.mobile.horizontalScroll)) {
+    const first = check;
+    try {
+      const fix = await stageTime("check", () => repairPhoneOverflow(spec, first, (s) => checkOf(s, false)));
+      if (fix.changed) {
+        fix.report.lighthouse = first.lighthouse;
+        fix.report.lighthousePages = first.lighthousePages;
+        fix.report.failures = failuresOf(fix.spec, fix.report, config);
+        version = await repo.saveSpec(siteId, fix.spec, "critique", fix.log.join("; ").slice(0, 500), undefined, version);
+        spec = fix.spec;
+        check = fix.report;
+      }
+      await log("check", fix.changed ? "Phone overflow repaired" : "Phone overflow not repaired: the page scrolls sideways at 360 px", { repair: fix.log, failures: check.failures });
+    } catch (e) {
+      await log("check", e instanceof VersionConflictError ? "Site changed during the overflow repair; repair not applied" : "Overflow repair failed to run", (e as Error).message.slice(0, 300));
+    }
+  }
   // The critique can only fix copy: a composed homepage skips it (studio 0.5).
   if (studio?.composed) await log("critique", "Skipped: the design studio composed the homepage");
   while (!studio?.composed && rounds < config.limits.critiqueIterations) {

@@ -8,6 +8,7 @@ import {
   SIGNATURE_PHOTO_VARIANTS,
   direction as directionById,
   awayFromShowcases,
+  directionFitsTrade,
   enforceDesign,
   templateFor,
   type BusinessType,
@@ -15,6 +16,7 @@ import {
   contrast,
   mainHeadingIssues,
   repairMainHeadings,
+  repairRepeatedImages,
   repairSiteCopy,
   addedOnRequest,
   stripModelOnRequest,
@@ -198,9 +200,23 @@ export async function chooseDesign(
     ],
     schema: toModelJsonSchema(DesignChoice),
   }, (d) => DesignChoice.parse(d));
-  const choice = data;
+  // A template's motif only for the trades it fits (the plate is car repair's): another trade gets its own direction.
+  const choice = { ...data, direction: tradeFitDirection(data.direction, input.brief.businessType, pictures) };
   const r = designWithVariety(choice, input.variety ? { ...input.variety, swatches: input.swatches } : undefined, input.holdPrimary === true, designRepair(client.promptFixes));
   return { design: r.design, reason: choice.reason, ...(r.hero ? { hero: r.hero } : {}) };
+}
+
+/**
+ * The chosen direction when its template motif fits the trade (MOTIF_TRADES); otherwise the trade's own template
+ * (when the pictures allow it and its motif fits), else the first direction made for the trade, else the first plain
+ * direction. A locksmith (builder) who was given the car-repair template gets builder's direction instead.
+ */
+export function tradeFitDirection(directionId: string, type: BusinessType, pictures: number): string {
+  if (directionFitsTrade(directionId, type)) return directionId;
+  const own = templateFor(type, pictures);
+  if (own && directionFitsTrade(own.id, type)) return own.id;
+  const plain = DIRECTIONS.filter((d) => !d.template);
+  return (plain.find((d) => (d.bestFor as readonly string[]).includes(type)) ?? plain[0]!).id;
 }
 
 /**
@@ -474,6 +490,8 @@ export async function generateContent(client: ModelClient, input: ContentInput):
     repairs.push(...stripModelOnRequest(built, null).map((p) => `${p}: price "on request" is set by the owner only; made a price placeholder`));
     // promptFixes.oneHero: exactly one main heading per page, first; the safe cases are repaired in code.
     if (fixes.oneHero) repairs.push(...repairMainHeadings(built));
+    // An image at most once per page (the outside review): a later repeat takes a free picture or drops an optional one.
+    repairs.push(...repairRepeatedImages(built));
     const v = validateSite(built);
     const issues = v.ok ? (fixes.oneHero ? mainHeadingIssues(built).map(issueLine) : []) : v.issues.map(issueLine);
     issues.push(...checkFacts(built, input.corpus).map(factLine));
