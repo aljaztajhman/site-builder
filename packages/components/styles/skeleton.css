@@ -450,7 +450,7 @@ body[data-skeleton] .site-footer--tone-band :focus-visible {
   font-weight: var(--fw-heading);
   text-transform: var(--case-heading);
   letter-spacing: -0.02em;
-  line-height: 0.92;
+  line-height: max(var(--lh-floor, 0), 0.92);
   font-size: min(9rem, calc((100vw - 2rem) / (var(--wm-chars, 10) * 0.74)));
   overflow-wrap: normal;
   hyphens: manual;
@@ -556,6 +556,14 @@ body[data-buttons="underline"] main .btn--primary {
 }
 body[data-buttons="underline"] main :is(.tone-inverse, .tone-band) .btn {
   text-decoration-color: currentColor;
+}
+/* A band's action as a link belongs under its text, not alone at the band's far edge (review 50: a lone "Pišite nam"
+   across an empty half). Buttons keep their place beside the text. */
+@media (min-width: 64rem) {
+  body[data-buttons="underline"] .s-cta--band .cta {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+  }
 }
 
 /* ---------- Dividers between sections: the motif's, a rule, or none ---------- */

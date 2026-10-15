@@ -1,5 +1,5 @@
 import type { SectionOf } from "@sb/spec";
-import { Picture, Section, titleId } from "../../primitives/index.tsx";
+import { FitText, Picture, Section, titleId } from "../../primitives/index.tsx";
 import type { SectionProps } from "../../types.ts";
 
 export const PAGE_HEADER_SIZES = "(min-width: 76rem) 72rem, (min-width: 48rem) calc(100vw - 4rem), 100vw";
@@ -24,7 +24,7 @@ export function PageHeader({ section, ctx, index }: SectionProps<"page-header">)
       <header className="page-header">
         {props.eyebrow && <p className="eyebrow">{props.eyebrow}</p>}
         <h1 id={titleId(section.id)} className="page-header__title">
-          {props.title}
+          <FitText text={props.title} />
         </h1>
         {props.intro && <p className="lead">{props.intro}</p>}
       </header>

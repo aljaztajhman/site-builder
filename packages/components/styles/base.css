@@ -66,7 +66,10 @@ body {
   font-size: var(--fs-base);
   line-height: 1.6;
   overflow-wrap: break-word;
-  hyphens: auto;
+  /* No automatic hyphenation anywhere (review 50): Chromium's Slovene patterns break words where Slovene doesn't
+     ("Polnoz-rnate", "zaključ-ene", "Rezerv-acija", names like "Gre-gor"). Lines break between words; overflow-wrap
+     only splits a word that can't fit a line at all. A soft hyphen (&shy;) in the text still breaks there. */
+  hyphens: manual;
   -webkit-font-smoothing: antialiased;
 }
 main {
@@ -86,6 +89,19 @@ main {
 h1,
 .hero-title {
   font-size: var(--fs-h1);
+}
+/* A heading with a long word (FitText): the heading's own size, capped so its longest word (--lw letters, --fit-k em
+   each: tokens.ts) fits the screen's line, so the word is set whole instead of widening a phone page (review 50). */
+.fit {
+  display: block;
+  font-size: min(1em, calc((100vw - 2rem) / (var(--lw, 1) * var(--fit-k, 0.62))));
+}
+/* On phones the line is the screen less the gutters: a face wider than --fit-k breaks the word as a last resort
+   (anywhere also keeps the word out of min-content, which is what widened the page). */
+@media (max-width: 47.99rem) {
+  .fit {
+    overflow-wrap: anywhere;
+  }
 }
 .hero-title--long {
   font-size: calc(var(--fs-h1) * 0.8);

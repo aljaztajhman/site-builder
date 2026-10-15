@@ -595,7 +595,7 @@ body[data-hdr="over"] .site-header--sticky::before {
   font-family: var(--font-heading);
   font-size: var(--fz);
   font-weight: var(--fw-heading);
-  line-height: 1;
+  line-height: max(var(--lh-floor, 0), 1);
   overflow-wrap: anywhere;
 }
 .cx-wm--text {

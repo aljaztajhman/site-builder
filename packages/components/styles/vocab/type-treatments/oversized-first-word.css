@@ -8,5 +8,5 @@
 .cx-tt-oversized-first-word .cx-tt__w {
   display: block;
   font-size: min(1.9em, calc(100cqw / (var(--wl) * 0.62)));
-  line-height: 0.95;
+  line-height: max(var(--lh-floor, 0), 0.95);
 }

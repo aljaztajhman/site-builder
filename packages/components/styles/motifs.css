@@ -10,7 +10,7 @@
   max-width: 60rem;
 }
 [data-motif] :where(h2) {
-  line-height: 1;
+  line-height: max(var(--lh-floor, 0), 1);
 }
 /* The footer stands on the dark ground, like the hero and the closing band. */
 [data-motif] .site-footer {
@@ -123,7 +123,7 @@ a.plate:hover .plate__num {
   color: var(--c-band);
 }
 [data-motif="plate"] .hsig__title {
-  line-height: 0.9;
+  line-height: max(var(--lh-floor, 0), 0.9);
 }
 [data-motif="plate"] .hsig__strip-item dd {
   font-family: var(--font-heading);
@@ -629,7 +629,7 @@ a.plate:hover .plate__num {
   font-weight: 600;
 }
 [data-motif="ledger"] .hsig__title {
-  line-height: 0.98;
+  line-height: max(var(--lh-floor, 0), 0.98);
 }
 [data-motif="ledger"] .hsig__lead {
   color: var(--c-muted);
@@ -1001,7 +1001,7 @@ a.plate:hover .plate__num {
 /* The price list set like a masthead: a giant title beside a ruled list. */
 [data-motif="mirror"] .s-price-list--grouped .section-title {
   font-size: clamp(4.5rem, 1.5rem + 11vw, 11rem);
-  line-height: 0.84;
+  line-height: max(var(--lh-floor, 0), 0.84);
   letter-spacing: -0.06em;
   color: var(--c-primary);
 }
@@ -1043,7 +1043,7 @@ a.plate:hover .plate__num {
 /* The booking sentence on the wine band at a sentence's size, not a headline's. */
 [data-motif="mirror"] .s-cta--band .cta__title {
   font-size: calc(var(--fs-h2) * 0.78);
-  line-height: 1.02;
+  line-height: max(var(--lh-floor, 0), 1.02);
 }
 /* The salon photo first, in a tall mirror arch, a small arch over its corner in the ground's colour. */
 [data-motif="mirror"] .team-photo__figure {
@@ -1204,7 +1204,7 @@ a.plate:hover .plate__num {
 /* Rooms: the photo beside the prices; the footnote marked with a blaze. */
 [data-motif="trail"] .s-price-list--rates .section-title {
   font-size: clamp(2.5rem, 1.4rem + 3.4vw, 5rem);
-  line-height: 0.94;
+  line-height: max(var(--lh-floor, 0), 0.94);
 }
 [data-motif="trail"] .rates__footnote::before {
   content: "";
@@ -1219,7 +1219,7 @@ a.plate:hover .plate__num {
 /* Headings beside a list or the weekend times at a sentence's size, not a headline's. */
 [data-motif="trail"] :is(.s-services-list, .s-opening-hours--poster) .section-title {
   font-size: clamp(2rem, 1.3rem + 2.2vw, 3.75rem);
-  line-height: 1;
+  line-height: max(var(--lh-floor, 0), 1);
 }
 [data-motif="trail"] .hsig--view .hsig__eyebrow {
   font-size: var(--fs-base);
@@ -1227,7 +1227,7 @@ a.plate:hover .plate__num {
 /* From the farm: the heading at a sentence's size. */
 [data-motif="trail"] .s-image-text .section-title {
   font-size: clamp(2.125rem, 1.4rem + 2.4vw, 4.25rem);
-  line-height: 1;
+  line-height: max(var(--lh-floor, 0), 1);
 }
 /* Trails: a blaze before every name, the name in the heading face, a description to the right. */
 [data-motif="trail"] .s-services-list--aside .svc-list {
@@ -1268,7 +1268,7 @@ a.plate:hover .plate__num {
   font-family: var(--font-heading);
   font-weight: var(--fw-heading);
   font-size: clamp(1.75rem, 1.3rem + 1.6vw, 3.25rem);
-  line-height: 1;
+  line-height: max(var(--lh-floor, 0), 1);
   letter-spacing: -0.025em;
   color: var(--c-text);
 }

@@ -55,6 +55,13 @@ export function tokensCss(design: Design, sub?: SubMotif): string {
     "--fw-heading": String(design.headingWeight),
     "--tracking-heading": `${design.headingTracking}em`,
     "--case-heading": design.headingCase === "uppercase" ? "uppercase" : "none",
+    // Capitals with Č Š Ž: the caron rises above the cap height, so tight display lines (0.84–1.02) set it on the
+    // line above (review 50, "HITRO / POŠTENO"). Display rules take max(var(--lh-floor, 0), their own value).
+    ...(design.headingCase === "uppercase" ? { "--lh-floor": "1.05" } : {}),
+    // Em per letter of a heading's longest word for FitText (base.css .fit; 0.62 there: lower case, no tracking).
+    ...(design.headingCase === "uppercase" || design.headingTracking > 0
+      ? { "--fit-k": String(Math.round(((design.headingCase === "uppercase" ? 0.8 : 0.62) + Math.max(0, design.headingTracking)) * 1000) / 1000) }
+      : {}),
     "--fs-base": rem(b),
     "--fs-sm": rem(Math.max(14, b / s)),
     "--fs-lg": fluid(b * 1.06, b * s),

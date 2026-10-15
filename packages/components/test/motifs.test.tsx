@@ -124,7 +124,7 @@ describe("hero-signature receipt (Račun)", () => {
 
   it("lists what the office does on a receipt with the business name from the facts, the call as the one button", () => {
     const out = html(<HeroSignature section={receipt()} ctx={ctxFor("racun", SOBOTA)} index={0} />);
-    expect(out).toMatch(/<h1 id="s_hero-title" class="hsig__title[^"]*">Računovodstvo za s.p., d.o.o. in društva<\/h1>/);
+    expect(out).toMatch(/<h1 id="s_hero-title" class="hsig__title[^"]*"><span class="fit" style="--lw:13">Računovodstvo za s.p., d.o.o. in društva<\/span><\/h1>/);
     // The address line comes from the facts, not from props.
     expect(out).toContain('<p class="eyebrow hsig__eyebrow">Slovenska ulica 41, Murska Sobota</p>');
     expect(out.match(/btn btn--primary/g)).toHaveLength(1);
@@ -183,7 +183,7 @@ describe("hero-signature label (Etiketa)", () => {
     expect(out).toContain("s-hero-signature--label tone-inverse");
     expect(out).toMatch(/<div class="label-card hsig__card"><svg class="branch"[^>]*aria-hidden="true"/);
     expect(out).toContain('<p class="hsig__where">Kidričeva ulica 22, Koper</p>');
-    expect(out).toMatch(/<h1 id="s_hero-title" class="hsig__title[^"]*">Istrske dobrote manjših pridelovalcev<\/h1>/);
+    expect(out).toMatch(/<h1 id="s_hero-title" class="hsig__title[^"]*"><span class="fit" style="--lw:13">Istrske dobrote manjših pridelovalcev<\/span><\/h1>/);
     expect(out.match(/btn btn--primary/g)).toHaveLength(1);
     expect(out).toContain('class="text-link">Kaj prodajamo</a>');
     expect(out).toMatch(/<figure class="hsig__door"><picture class="media hsig__door-media arch-top media--contained">/);
