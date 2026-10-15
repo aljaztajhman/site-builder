@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The hero spends too much of the first screen on indistinct scenery, while its crop hides the mining buildings that make the brewery’s setting distinctive.\",\n  \"desktopNote\": \"The atmospheric hero looks considered, but its low-positioned text panel pushes the primary action partly below the first screen.\",\n  \"phone\": {\n    \"impression\": 3,\n    \"hierarchy\": 3,\n    \"imagery\": 3,\n    \"spacing\": 3,\n    \"clutter\": 4,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 3,\n    \"imagery\": 4,\n    \"spacing\": 3,\n    \"clutter\": 4,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Move the hero text panel higher on both screens so its action fits comfortably within the first viewport; use a phone-specific image crop that retains the mining buildings.\",\n    \"Tighten the opening-hours section, replacing the phone’s unlabelled timeline grid with compact day-and-time rows, and reduce the oversized desktop hours heading and footer wordmark.\",\n    \"Make the beer section visually specific to the offering: feature the four beers or a poured pint rather than relying solely on the generic hops-and-grain image.\"\n  ],\n  \"blockers\": []\n}",
+  "usage": {
+    "prompt_tokens": 8432,
+    "completion_tokens": 475,
+    "cost": 0.0258285
+  }
+}

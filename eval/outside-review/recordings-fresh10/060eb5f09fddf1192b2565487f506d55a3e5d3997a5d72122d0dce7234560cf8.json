@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The headline is readable, but widely separated text-link actions weaken the first screen and the image labels are visibly clipped by the curved crops.\",\n  \"desktopNote\": \"The layout is orderly, but generic imagery and broad, sparsely occupied sections make it feel more like a template than a distinctive dance school.\",\n  \"phone\": {\n    \"impression\": 3,\n    \"hierarchy\": 3,\n    \"imagery\": 3,\n    \"spacing\": 3,\n    \"clutter\": 4,\n    \"distinctiveness\": 2\n  },\n  \"desktop\": {\n    \"impression\": 3,\n    \"hierarchy\": 4,\n    \"imagery\": 3,\n    \"spacing\": 3,\n    \"clutter\": 4,\n    \"distinctiveness\": 2\n  },\n  \"fixes\": [\n    \"Move image labels outside the curved clipping masks, or inset them far enough that every word remains fully visible on both viewports.\",\n    \"Replace the landscape image with dance instruction or instructor imagery; use the photography to show the school's activity rather than simply decorate a section.\",\n    \"Make “Pišite nam” a clear primary button with a nearby secondary pricing link, tighten their mobile spacing, and reduce excessive desktop section padding and unused space beside the price table.\"\n  ],\n  \"blockers\": [\n    \"Phone: the labels on both curved images are cut off by the image masks.\",\n    \"Desktop: the image label in the free-first-meeting section is almost entirely clipped by the curved crop.\"\n  ]\n}",
+  "usage": {
+    "prompt_tokens": 8276,
+    "completion_tokens": 483,
+    "cost": 0.0255185
+  }
+}

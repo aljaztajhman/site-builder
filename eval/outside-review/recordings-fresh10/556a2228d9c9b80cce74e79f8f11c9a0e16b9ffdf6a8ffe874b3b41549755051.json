@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\": \"The hero text card hides the historic mine buildings in the background photo, leaving only generic foggy hills visible on the first screen.\", \"desktopNote\": \"The asymmetric hero card over the moody mining landscape and the timeline-style opening hours give the site strong local character and clear hierarchy.\", \"phone\": {\"impression\": 4, \"hierarchy\": 5, \"imagery\": 3, \"spacing\": 4, \"clutter\": 5, \"distinctiveness\": 4}, \"desktop\": {\"impression\": 4, \"hierarchy\": 5, \"imagery\": 4, \"spacing\": 4, \"clutter\": 5, \"distinctiveness\": 5}, \"fixes\": [\"Replace the generic spoon icon in the header logo with a hops cone, beer glass, or mining symbol—especially since the business explicitly states they don't serve food.\", \"Adjust the mobile hero layout or crop so the mining complex in the background photo is visible above the white text card instead of completely covered by it.\", \"Display the four core beers (Jamar, Šoht, Kopalnica, Smuk) as a structured 2x2 grid or list with style tags rather than burying them in a plain text paragraph.\"], \"blockers\": []}",
+  "usage": {
+    "prompt_tokens": 10433,
+    "completion_tokens": 279,
+    "cost": 0.023656
+  }
+}

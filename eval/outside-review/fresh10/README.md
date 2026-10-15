@@ -1,4 +1,4 @@
-# Fresh 10: businesses the pipeline had never seen (2026-10-15)
+4.08 | 3.50 |4.08 | 3.58 |4.17 | 3.17 |4.25 | 3.75 |3.42 | 3.08 |4.33 | 3.50 |# Fresh 10: businesses the pipeline had never seen (2026-10-15)
 
 Ten new businesses in `tools/eval/fresh/`: trades and towns no fixture, twin, hard case or reference used, no photos
 given (two AI pictures per page), written in the owner's voice (watchmaker in Idrija, dog groomer in Kočevje, bike
@@ -8,9 +8,7 @@ cheese dairy near Radovljica, craft brewery in Trbovlje, architect in Ormož). G
 --no-lighthouse`), then scored with `pnpm outside-review --record-missing eval/outside-review/recordings-fresh10`.
 
 - Generation: 10 of 10 homepages, no automated check failure, €2.50 (€0.23–0.28 a page, two pictures each).
-- Scoring: €0.86. Claude Fable scored all 10; Gemini and GPT scored 4 each, then OpenRouter refused the rest (HTTP 402,
-  the account's credit ran out; refused calls cost nothing). After a top-up the same command pays only the 12 missing
-  calls (≈ €0.30); the 18 answers already paid replay for €0.
+- Scoring: €1.14 (€0.86, then €0.28 after an OpenRouter top-up for the 12 answers refused at first; the paid answers replayed for €0). All three reviewers scored all 10.
 
 | Page | Gemini | GPT | Fable | Blockers |
 |---|---|---|---|---|
@@ -25,6 +23,8 @@ cheese dairy near Radovljica, craft brewery in Trbovlje, architect in Ormož). G
 | urarstvo-tic (watchmaker) | – | – | 3.75 | none |
 | vinarstvo-pinteric (winery) | – | – | 3.58 | none |
 
-Means where scored: Gemini 3.90 (4 pages), GPT 3.21 (4), Fable 3.39 (10; on the 50 known pages after the fixes 3.32).
-Fable passes 7 of 10. The three blockers are known kinds: the arched photo cut at the phone edge (also on frizerstvo-lana
-and zobozdravstvo-lebar after the fixes), the AI label in a non-round crop, and the week chart without hour labels.
+Means: Gemini 3.99, GPT 3.34, Fable 3.39 (on the 50 known pages after the fixes: 3.95, 3.45, 3.32). All three pass 7 of
+10; the two-of-three filter passes 8 (holds plesna-sola-takt and sirarna-pr-simnu). The blockers are known kinds: the AI label
+clipped by an arched crop (all three reviewers), an arched photo cut at the phone's edge, a caron touching the line above
+in the footer wordmark, the phone bar over a hero link, and a week chart without hour labels. Report page:
+eval/outside-review/scores.html.
