@@ -1,3 +1,4 @@
+// @module-tag slow
 import { describe, expect, it } from "vitest";
 import { loadConfig } from "@sb/config";
 import { validateSite } from "@sb/spec";

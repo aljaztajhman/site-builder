@@ -84,8 +84,13 @@ describe("pages of a set", () => {
       mkdirSync(path.join(run, id), { recursive: true });
       writeFileSync(path.join(run, id, "home-1280-first.png"), await png(1280, 800));
       writeFileSync(path.join(run, id, "home-360-first.png"), await png(360, 800));
+      // An eval run also keeps the alternative look's screens and (on alfa) the regenerated page beside home.
+      writeFileSync(path.join(run, id, "another-look-1280-first.png"), await png(1280, 800));
+      writeFileSync(path.join(run, id, "another-look-360-first.png"), await png(360, 800));
     }
-    expect(loadSetPages(run).map((p) => p.id)).toEqual(["alfa", "zeta"]);
+    writeFileSync(path.join(run, "alfa", "regenerated-1280-first.png"), await png(1280, 800));
+    writeFileSync(path.join(run, "alfa", "regenerated-360-first.png"), await png(360, 800));
+    expect(loadSetPages(run).map((p) => p.id)).toEqual(["alfa", "alfa-regenerated", "zeta"]);
 
     const manifest = path.join(dir, "manifest.json");
     const poc = path.join(dir, "poc");

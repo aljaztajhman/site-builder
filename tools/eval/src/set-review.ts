@@ -42,16 +42,19 @@ export function scanSetDir(dir: string, o: { today?: boolean } = {}): SetPage[] 
     const isToday = id.endsWith("-today");
     if (isToday !== !!o.today) return;
     const key2 = isToday ? id.slice(0, -"-today".length) : id;
+    if (found.get(key2)?.[key]) throw new Error(`${dir}: page ${key2} appears twice (${found.get(key2)![key]}, ${file})`);
     found.set(key2, { ...found.get(key2), id: key2, [key]: file });
   };
+  // In an eval run's subdirectory only the homepage and its regeneration are pages; `another-look-*` and other
+  // screenshots there are not (they would land in the set under a shared id).
+  const subId = (sub: string, prefix: string): string | null => (prefix === "home" ? sub : prefix === "regenerated" ? `${sub}-regenerated` : null);
   const scan = (d: string, subdir: string | null) => {
     for (const e of readdirSync(d, { withFileTypes: true })) {
       if (!e.isFile()) continue;
-      const desk = DESK_RE.exec(e.name);
-      const phone = PHONE_RE.exec(e.name);
-      const file = path.join(d, e.name);
-      if (desk) add(subdir && desk[1] === "home" ? subdir : desk[1]!, "desk", file);
-      else if (phone) add(subdir && phone[1] === "home" ? subdir : phone[1]!, "phone", file);
+      const m = DESK_RE.exec(e.name) ?? PHONE_RE.exec(e.name);
+      if (!m) continue;
+      const id = subdir ? subId(subdir, m[1]!) : m[1]!;
+      if (id) add(id, DESK_RE.test(e.name) ? "desk" : "phone", path.join(d, e.name));
     }
   };
   scan(dir, null);
