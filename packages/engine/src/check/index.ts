@@ -13,7 +13,8 @@ import { serveStatic } from "./static-server.ts";
 
 export { launchCheckBrowser, type CheckBrowser } from "./browser.ts";
 export { serveStatic, type StaticServer } from "./static-server.ts";
-export type { AxeViolation, CallButtons, MobileReport } from "./page-checks.ts";
+export type { AxeViolation, CallButtons, MobileReport, Overflow } from "./page-checks.ts";
+export { lowestAllowedScale, repairPhoneOverflow, type OverflowRepair } from "./overflow-repair.ts";
 export { LEGAL_ROW, callButtonsPerScreen, hideFixedForFullPage, loadLazyImages, measurePage, repeatedContact, runAxe } from "./page-checks.ts";
 export type { LighthouseScores } from "./lighthouse.ts";
 export type { Composition } from "./composition.ts";
@@ -218,7 +219,10 @@ export function failuresOf(spec: SiteSpec, r: SiteCheckReport, config: AppConfig
   const hasAddress = !("$placeholder" in (spec.business.address as object));
   for (const p of r.pages) {
     if (p.axe.length) f.push(`${p.file}: axe ${p.axe.map((v) => `${v.id}(${v.nodes})`).join(", ")}`);
-    if (p.mobile.horizontalScroll) f.push(`${p.file}: horizontal scroll at 360 px (${p.mobile.scrollWidth})`);
+    if (p.mobile.horizontalScroll) {
+      const what = (p.mobile.overflowing ?? []).slice(0, 3).map((o) => `${o.what} +${o.by}px`);
+      f.push(`${p.file}: horizontal scroll at 360 px (${p.mobile.scrollWidth})${what.length ? `: ${what.join("; ")}` : ""}`);
+    }
     if (p.desktop.horizontalScroll) f.push(`${p.file}: horizontal scroll at 1280 px`);
     if (p.mobile.tinyTargets.length) f.push(`${p.file}: targets < 24px: ${p.mobile.tinyTargets.slice(0, 3).join("; ")}`);
     if (p.mobile.smallPrimaryTargets.length) f.push(`${p.file}: primary targets < 44px: ${p.mobile.smallPrimaryTargets.slice(0, 3).join("; ")}`);

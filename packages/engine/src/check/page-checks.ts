@@ -43,6 +43,18 @@ export interface MobileReport {
   lineLengths: number[];
   /** Visual banned patterns found in computed styles. */
   banned: string[];
+  /**
+   * With a horizontal scroll: the innermost elements whose box or content runs past the viewport's right edge (at
+   * most 8), and whether each is a heading's text (a display or h1–h3 line), which a smaller type scale can fix.
+   */
+  overflowing?: Overflow[];
+}
+
+export interface Overflow {
+  what: string;
+  heading: boolean;
+  /** How far past the viewport's right edge it reaches (px). */
+  by: number;
 }
 
 /**
@@ -52,6 +64,7 @@ export interface MobileReport {
 export async function measurePage(page: Page, opts: { primaryMin: number; primaryGap: number; absoluteMin: number }): Promise<MobileReport> {
   // tsx/esbuild wrap named functions with a __name() helper that doesn't exist in the page.
   await page.evaluate("globalThis.__name = globalThis.__name || ((f) => f)");
+  const viewportWidth = page.viewportSize()?.width;
   return page.evaluate((o) => {
     const describe = (el: Element) => {
       const id = el.id ? `#${el.id}` : "";
@@ -65,7 +78,9 @@ export async function measurePage(page: Page, opts: { primaryMin: number; primar
       // checkVisibility: not inside a closed <details> (the wide header's "Več") or another skipped subtree.
       return r.width > 0 && r.height > 0 && cs.visibility !== "hidden" && cs.display !== "none" && el.checkVisibility();
     };
-    const vw = window.innerWidth;
+    // The viewport the page was opened at: in mobile emulation a page wider than the screen widens the layout viewport
+    // to its content (a 434 px page at 360 px reported innerWidth 434), so innerWidth alone never saw the scroll.
+    const vw = Math.min(window.innerWidth, o.viewportWidth ?? window.innerWidth);
     const vh = window.innerHeight;
     const doc = document.documentElement;
     const interactive = [...document.querySelectorAll("a[href], button, summary, input, select, textarea, [role=button]")].filter(visible);
@@ -190,6 +205,47 @@ export async function measurePage(page: Page, opts: { primaryMin: number; primar
       return heads.length > 0 && heads.every((h) => getComputedStyle(h).textAlign === "center");
     });
     if (sections.length >= 3 && centred.length > 1) banned.push(`${centred.length} centred sections`);
+    // What makes the page scroll sideways: elements whose box ends past the right edge, or whose content does (a
+    // word wider than its heading's box spills out of it); the innermost of them, so a section isn't blamed for its
+    // heading. Text is measured by its own line boxes, since a block's box stays inside while its long word does not.
+    const overflowing: { what: string; heading: boolean; by: number }[] = [];
+    if (doc.scrollWidth > vw) {
+      const reach = (el: Element) => {
+        let right = el.getBoundingClientRect().right;
+        for (const n of el.childNodes) {
+          if (n.nodeType !== 3 || !(n.textContent ?? "").trim()) continue;
+          const range = document.createRange();
+          range.selectNodeContents(n);
+          for (const r of range.getClientRects()) right = Math.max(right, r.right);
+        }
+        return right + window.scrollX;
+      };
+      const past = [...document.body.querySelectorAll("*")].filter((el) => visible(el) && reach(el) > vw + 0.5 && !el.closest("[aria-hidden=true], .visually-hidden, .skip-link"));
+      const inner = past.filter((el) => !past.some((o) => o !== el && el.contains(o)));
+      // A long word widens its whole column (a grid track takes its widest word), so its neighbours run past the edge
+      // too. Blame the ones that cause it: per section, the elements whose removal ends that section's overflow.
+      const blockOf = (el: Element) => el.closest("main > *, body > header, body > footer, body > *") ?? document.body;
+      const spills = (b: Element) => b.scrollWidth > b.clientWidth + 0.5 || b.getBoundingClientRect().right > vw + 0.5;
+      const groups = new Map<Element, Element[]>();
+      for (const el of inner) groups.set(blockOf(el), [...(groups.get(blockOf(el)) ?? []), el]);
+      const blamed: Element[] = [];
+      for (const [block, els] of groups) {
+        const causes = els.slice(0, 20).filter((el) => {
+          const h = el as HTMLElement;
+          const prior = h.style.getPropertyValue("display");
+          const priority = h.style.getPropertyPriority("display");
+          h.style.setProperty("display", "none", "important");
+          const clears = !spills(block);
+          h.style.setProperty("display", prior, priority);
+          return clears;
+        });
+        blamed.push(...(causes.length ? causes : els));
+      }
+      for (const el of blamed.slice(0, 8)) {
+        const heading = !!el.closest("h1, h2, h3, .display, [class*='__title'], [class*='headline']");
+        overflowing.push({ what: describe(el), heading, by: Math.round(reach(el) - vw) });
+      }
+    }
     return {
       width: vw,
       scrollWidth: doc.scrollWidth,
@@ -204,8 +260,9 @@ export async function measurePage(page: Page, opts: { primaryMin: number; primar
       lcpPreload: !!document.querySelector('link[rel="preload"][as="image"]'),
       lineLengths,
       banned: [...new Set(banned)].slice(0, 30),
+      overflowing,
     };
-  }, opts);
+  }, { ...opts, ...(viewportWidth ? { viewportWidth } : {}) } as typeof opts & { viewportWidth?: number });
 }
 
 export interface CallButtons {
