@@ -1,0 +1,18 @@
+{
+  "seq": 5,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "e1f216dbd0af5b00",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Sirarna Pr' Šimnu, domači sir iz Lancovega\",\"description\":\"Sirarna na kmetiji v Lancovem pri Radovljici. Sir, skuta, jogurt, maslo in darilni paketi iz mleka naših 30 krav. Ogled sirarne s pokušino za skupine.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"label\",\"tone\":\"inverse\",\"props\":{\"eyebrow\":\"Sirarna na kmetiji\",\"headline\":\"Sir iz hleva za vogalom\",\"intro\":\"Iz mleka naših 30 krav vsak dan izdelujemo sir. V trgovinici na kmetiji vas čakajo sir, skuta, jogurt, maslo in darilni paketi.\",\"fact\":\"address\",\"primary\":{\"label\":\"Darilni paketi\",\"target\":{\"page\":\"p_home\",\"section\":\"s_gift\"}},\"secondary\":{\"label\":\"Naši izdelki\",\"target\":{\"page\":\"p_home\",\"section\":\"s_prices\"}},\"image\":\"img_g1\",\"inset\":\"img_g2\"}},{\"id\":\"s_area\",\"type\":\"service-area\",\"variant\":\"list\",\"props\":{\"title\":\"Od hleva do kotla je 20 metrov\",\"intro\":\"Mleko pri nas ne potuje nikamor. Sir nastane tam, kjer se krave pasejo in molzejo.\"}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"table\",\"tone\":\"alt\",\"props\":{\"title\":\"Kdaj nas obiščete\",\"note\":\"Ob sobotah dopoldne smo tudi na tržnici v Radovljici.\"}},{\"id\":\"s_gift\",\"type\":\"image-text\",\"variant\":\"round\",\"tone\":\"band\",\"props\":{\"eyebrow\":\"Za darilo\",\"heading\":\"Darilni paketi iz naše sirarne\",\"paragraphs\":[\"Darilne pakete pripravimo po naročilu. Pokličite nas in povejte, komu jih namenjate.\"],\"link\":{\"label\":\"Naročite po telefonu\",\"target\":{\"action\":\"call\"}},\"image\":\"img_g2\"}},{\"id\":\"s_prices\",\"type\":\"price-list\",\"variant\":\"tags\",\"props\":{\"title\":\"Iz naše trgovinice\",\"intro\":\"Vse delamo iz mleka lastnih krav, na kmetiji v Lancovem.\",\"groups\":[{\"items\":[{\"name\":\"Poltrdi sir Lancovčan\",\"price\":{\"amount\":18,\"unit\":\"kg\"}},{\"name\":\"Sir z bohinjskimi zelišči\",\"price\":{\"amount\":21,\"unit\":\"kg\"}},{\"name\":\"Skuta\",\"price\":{\"amount\":7,\"unit\":\"kg\"}}]}]}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"inverse\",\"props\":{\"title\":\"Pokličite za naročilo ali ogled\",\"intro\":\"Za skupine pripravimo ogled sirarne s pokušino. Najava vsaj tri dni prej.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 4778,
+      "output_tokens": 1532,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

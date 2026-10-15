@@ -1,0 +1,18 @@
+{
+  "seq": 4,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "a93d08f82b5920ac",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"split-cta\",\"cta\":\"call\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Plesna šola Takt, Slovenj Gradec\",\"description\":\"Plesni tečaji za pare, poročni ples, salsa in hip hop za otroke v Slovenj Gradcu. Prvo srečanje je brezplačno.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-split\",\"variant\":\"image-right\",\"tone\":\"default\",\"props\":{\"headline\":\"Plesni tečaji za pare in otroke v Slovenj Gradcu\",\"intro\":\"Učimo standardne in latinskoameriške plese, salso, swing in hip hop. Prvo srečanje je brezplačno, novi tečaji se začnejo septembra in februarja.\",\"primary\":{\"label\":\"Pišite nam\",\"target\":{\"action\":\"email\"}},\"secondary\":{\"label\":\"Poglejte cene\",\"target\":{\"page\":\"p_home\",\"section\":\"s_cene\"}},\"image\":\"img_g1\"}},{\"id\":\"s_cene\",\"type\":\"price-list\",\"variant\":\"tags\",\"tone\":\"alt\",\"props\":{\"title\":\"Naši tečaji in cene\",\"intro\":\"Vse cene so tako, kot jih objavljamo za posamezen tečaj.\",\"groups\":[{\"items\":[{\"name\":\"Plesni tečaj za pare, 10 srečanj\",\"price\":{\"amount\":120,\"unit\":\"na par\"}},{\"name\":\"Priprava na poročni ples, 3 ure\",\"price\":{\"amount\":90,\"unit\":\"na par\"}},{\"name\":\"Hip hop za otroke, 7 do 12 let\",\"price\":{\"amount\":35,\"unit\":\"mesečno\"}},{\"name\":\"Salsa za začetnike\",\"price\":{\"amount\":40,\"unit\":\"mesečno\"}}]}]}},{\"id\":\"s_prvo\",\"type\":\"image-text\",\"variant\":\"image-left\",\"tone\":\"default\",\"props\":{\"eyebrow\":\"Prvo srečanje\",\"heading\":\"Prvo srečanje je brezplačno\",\"paragraphs\":[\"Pridite, preizkusite in se odločite. Tečaji so od ponedeljka do četrtka zvečer, točen urnik je odvisen od skupine.\",\"Novi tečaji se začnejo septembra in februarja.\"],\"link\":{\"label\":\"Pišite nam\",\"target\":{\"action\":\"email\"}},\"image\":\"img_g2\"}},{\"id\":\"s_tocke\",\"type\":\"highlights\",\"variant\":\"list\",\"tone\":\"alt\",\"props\":{\"heading\":\"Kdo vas uči\",\"items\":[{\"title\":\"Nekdanji tekmovalni par\",\"text\":\"Tečaje vodita Eva in Rok Pečovnik, učitelja plesa z licenco Plesne zveze Slovenije.\"},{\"title\":\"Za pare in otroke\",\"text\":\"Pari, ženini in neveste, začetniki v salsi ter otroci od 7 do 12 let.\"}]}},{\"id\":\"s_cta\",\"type\":\"cta\",\"variant\":\"split\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Prijavite se na tečaj\",\"text\":\"Napišite nam, za kateri tečaj se zanimate, in dogovorili se bomo za prvo srečanje.\",\"primary\":{\"label\":\"Pošljite e-pošto\",\"target\":{\"action\":\"email\"}},\"secondary\":{\"label\":\"Pot do dvorane\",\"target\":{\"action\":\"directions\"}}}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2389,
+      "output_tokens": 1192,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "seq": 4,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "4193558890a9bcac",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\",\"tone\":\"default\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Pivovarna Rov Trbovlje – mala pivovarna s pivnico\",\"description\":\"Mala pivovarna s pivnico v stari rudniški kopalnici v Trbovljah. Štiri stalna piva, vsak mesec novo sezonsko. Odprto od srede do sobote.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"card\",\"props\":{\"eyebrow\":\"Pivnica v rudniški kopalnici\",\"headline\":\"Pivo iz stare kopalnice\",\"intro\":\"Smo mala pivovarna s pivnico v Trbovljah. Varimo štiri stalna piva in vsak mesec eno sezonsko. Pridite na pivo, na degustacijo ali po sodček za zabavo.\",\"fact\":\"address\",\"primary\":{\"label\":\"Kako do nas\",\"target\":{\"action\":\"directions\"}},\"secondary\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}},\"image\":\"img_g2\"}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"week\",\"props\":{\"title\":\"Kdaj smo odprti\",\"note\":\"Ogled pivovarne za skupine je po dogovoru. Pokličite nas in se dogovorimo.\"}},{\"id\":\"s_beers\",\"type\":\"image-text\",\"variant\":\"image-right\",\"tone\":\"inverse\",\"props\":{\"eyebrow\":\"Štiri stalna piva\",\"heading\":\"Jamar, Šoht, Kopalnica in Smuk\",\"paragraphs\":[\"Jamar je svetli lager, Šoht je IPA, Kopalnica je temni porter, Smuk pa pšenično pivo.\",\"Vsak mesec skuhamo še eno novo sezonsko pivo. Pivo točimo v pivnici, prodajamo pa ga tudi v steklenicah in sodčkih za zabave.\"],\"image\":\"img_g1\",\"link\":{\"label\":\"Pokličite za sodček\",\"target\":{\"action\":\"call\"}}}},{\"id\":\"s_prices\",\"type\":\"price-list\",\"variant\":\"offers\",\"tone\":\"inverse\",\"props\":{\"title\":\"Cene v pivnici\",\"groups\":[{\"name\":\"V pivnici\",\"items\":[{\"name\":\"Kozarec piva 0,5 l\",\"note\":\"Točeno pivo iz naše pivovarne\",\"price\":{\"amount\":3.8,\"from\":true}}]},{\"name\":\"Za skupine in pokušino\",\"items\":[{\"name\":\"Degustacija štirih piv\",\"note\":\"Vsa štiri stalna piva\",\"price\":{\"amount\":7}}]}],\"footnote\":\"Hrane ne kuhamo. Pico iz sosednje picerije lahko prinesete s seboj.\"}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"inverse\",\"props\":{\"title\":\"Pokličite za ogled ali sodček\",\"intro\":\"Dogovorimo se za ogled pivovarne za skupine ali za pivo v sodčku za vašo zabavo.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 3230,
+      "output_tokens": 1105,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

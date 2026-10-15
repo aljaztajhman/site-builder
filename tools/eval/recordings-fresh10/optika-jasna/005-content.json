@@ -1,0 +1,18 @@
+{
+  "seq": 5,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "4bf559d004db3bc9",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\",\"tone\":\"default\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Optika Jasna Postojna – pregled vida in očala po meri\",\"description\":\"Optika v Postojni: pregled vida, svetovanje pri izbiri okvirja in očala po meri iz lastne delavnice, večinoma v treh delovnih dneh. Sprejemamo naročilnice ZZZS.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"disc\",\"props\":{\"headline\":\"Očala po meri v treh dneh\",\"intro\":\"Izmerimo vid, svetujemo pri izbiri okvirja in očala naredimo v lastni delavnici. Večinoma so gotova v treh delovnih dneh.\",\"fact\":\"phone\",\"factLabel\":\"Naročite se na pregled\",\"factNote\":\"Sprejemamo naročilnice ZZZS za otroke in odrasle.\",\"image\":\"img_g1\",\"secondary\":{\"label\":\"Pišite nam\",\"target\":{\"action\":\"email\"}}}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"week\",\"tone\":\"alt\",\"props\":{\"title\":\"Kdaj nas najdete v Postojni\",\"note\":\"Na pregled se naročite po telefonu, okvir lahko izberete tudi brez naročila.\"}},{\"id\":\"s_booking\",\"type\":\"booking\",\"variant\":\"simple\",\"props\":{\"heading\":\"Na pregled se naročite po telefonu\",\"text\":\"Pregled vida opravi optometristka. Če očala kupite pri nas, je pregled brezplačen. Okvir lahko pridete izbirat tudi brez naročila.\",\"action\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}}}},{\"id\":\"s_services\",\"type\":\"services-list\",\"variant\":\"aside\",\"props\":{\"title\":\"Kaj vse vam nudimo\",\"items\":[{\"name\":\"Pregled vida pri optometristu\",\"description\":\"Če kupite očala pri nas, je pregled brezplačen.\"},{\"name\":\"Okvirji\",\"description\":\"Okvir lahko izberete tudi brez naročila.\"},{\"name\":\"Očala po meri\",\"description\":\"Naredimo jih v lastni delavnici, večinoma v treh delovnih dneh.\"},{\"name\":\"Kontaktne leče\"},{\"name\":\"Sončna očala z dioptrijo\"},{\"name\":\"Očala za računalnik\"},{\"name\":\"Naročilnice ZZZS\",\"description\":\"Sprejemamo jih za očala, za otroke in odrasle.\"}],\"note\":{\"title\":\"Cene\",\"text\":\"Pregled vida stane 25 €, okvirji so od 59 €. Če očala kupite pri nas, je pregled brezplačen.\"}}},{\"id\":\"s_team\",\"type\":\"team\",\"variant\":\"list\",\"props\":{\"title\":\"Kdo vas sprejme\",\"members\":[{\"name\":\"Tina Kalan\",\"role\":\"Diplomirana optometristka\"}]}},{\"id\":\"s_cta\",\"type\":\"cta\",\"variant\":\"band\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Na pregled se naročite po telefonu\",\"text\":\"Pokličite nas in dogovorili se bomo za termin, ki vam ustreza.\",\"primary\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}}}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"band\",\"props\":{\"title\":\"Naročite se po telefonu\",\"intro\":\"Pokličite nas in dogovorite se za termin pregleda.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 4552,
+      "output_tokens": 1582,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

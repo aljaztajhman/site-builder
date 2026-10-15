@@ -1,0 +1,18 @@
+{
+  "seq": 4,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "73bc837c7bff3826",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"split-cta\",\"cta\":\"call\"},\"footer\":{\"variant\":\"columns\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Kolesarski servis Ovinek, servis in izposoja koles v Tolminu\",\"description\":\"Servis in izposoja koles ob Soči v Tolminu. Cestna, gorska, treking in električna kolesa vseh znamk. Hitri popravki poleti isti dan, če je mogoče.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-split\",\"variant\":\"image-right\",\"tone\":\"default\",\"props\":{\"eyebrow\":\"Servis in izposoja koles\",\"headline\":\"Kolo popravimo še danes, če je le mogoče\",\"intro\":\"Servisiramo cestna, gorska, treking in električna kolesa vseh znamk. Poleti hitre popravke naredimo isti dan. Govorimo tudi angleško in italijansko.\",\"primary\":{\"label\":\"Poglejte, kje smo\",\"target\":{\"action\":\"directions\"}},\"image\":\"img_g1\"}},{\"id\":\"s_prices\",\"type\":\"price-list\",\"variant\":\"tags\",\"tone\":\"alt\",\"props\":{\"title\":\"Cene izposoje in servisa\",\"intro\":\"Pri izposoji sta čelada in ključavnica v ceni.\",\"groups\":[{\"items\":[{\"name\":\"Gorsko kolo, izposoja\",\"price\":{\"amount\":30,\"unit\":\"dan\"}},{\"name\":\"Električno kolo, izposoja\",\"price\":{\"amount\":45,\"unit\":\"dan\"}},{\"name\":\"Osnovni servis\",\"price\":{\"amount\":35}},{\"name\":\"Veliki servis\",\"price\":{\"amount\":70}},{\"name\":\"Krpanje zračnice\",\"price\":{\"amount\":8}}]}]}},{\"id\":\"s_contact\",\"type\":\"contact-strip\",\"variant\":\"bar\",\"tone\":\"default\",\"props\":{\"title\":\"Obiščite nas\"}},{\"id\":\"s_services\",\"type\":\"services-cards\",\"variant\":\"compact\",\"tone\":\"default\",\"props\":{\"title\":\"Kaj delamo\",\"items\":[{\"title\":\"Servis koles\",\"text\":\"Cestna, gorska, treking in električna kolesa vseh znamk. Hitre popravke poleti naredimo isti dan, če je mogoče.\"},{\"title\":\"Izposoja koles\",\"text\":\"Gorsko in električno kolo na dan. Čelada in ključavnica sta v ceni.\"}]}},{\"id\":\"s_about\",\"type\":\"image-text\",\"variant\":\"image-left\",\"tone\":\"alt\",\"props\":{\"eyebrow\":\"Ob Soči\",\"heading\":\"Kolesarite po dolini Soče\",\"paragraphs\":[\"Naš servis je v Tolminu, zato vam hitro popravimo kolo ali vam ga posodimo za izlet.\",\"Od aprila do oktobra smo odprti vsak dan, pozimi samo po dogovoru.\"],\"image\":\"img_g2\"}},{\"id\":\"s_steps\",\"type\":\"steps\",\"variant\":\"horizontal\",\"tone\":\"default\",\"props\":{\"heading\":\"Kako poteka popravilo\",\"steps\":[{\"title\":\"Pripeljete kolo\",\"text\":\"Pridite v servis v Tolminu in povejte, kaj se je pokvarilo.\"},{\"title\":\"Pogledamo okvaro\",\"text\":\"Povemo vam, kaj je treba narediti in kakšna je cena.\"},{\"title\":\"Popravimo\",\"text\":\"Poleti hitre popravke naredimo isti dan, če je mogoče.\"}]}},{\"id\":\"s_cta\",\"type\":\"cta\",\"variant\":\"band\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Imate okvaro ali iščete kolo za izlet?\",\"text\":\"Pokličite nas ali se oglasite v Tolminu. Govorimo slovensko, angleško in italijansko.\",\"primary\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}}}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2481,
+      "output_tokens": 1346,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}
