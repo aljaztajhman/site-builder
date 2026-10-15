@@ -3,7 +3,7 @@ import { DIRECTIONS, isPlaceholder, isWebUrl } from "@sb/spec";
 import type { RenderCtx } from "../types.ts";
 import { AddressText, EmailLink, HoursList, Icon, MaybeText, PhoneLink, cx } from "../primitives/index.tsx";
 import { ChromeWordmark } from "../groups/composed/kinds/wordmark.tsx";
-import { pageFacts } from "./page-facts.ts";
+import { contactShown, pageFacts } from "./page-facts.ts";
 
 /** Characters of the longest word: the wordmark's size is set so it fits the width (skeleton.css). */
 const longestWord = (s: string): number => Math.max(4, ...s.split(/\s+/).map((w) => w.length));
@@ -46,6 +46,9 @@ export function Footer({ ctx }: { ctx: RenderCtx }) {
   const shown = variant === "visit" ? pageFacts(ctx.page, b) : { address: false, hours: false };
   const visitWhere = !shown.address;
   const visitHours = b.hours !== undefined && !shown.hours;
+  // After a contact section the contact row keeps only the name (owner's decision 2026-10-15): the provider rows
+  // (legal name, registration and tax numbers) stay, phone, e-mail and address are already on the page.
+  const reach = contactShown(ctx.page, b);
 
   return (
     <footer
@@ -88,17 +91,23 @@ export function Footer({ ctx }: { ctx: RenderCtx }) {
           <div className="site-footer__block site-footer__contact">
             <h2 className={headingClass}>{ctx.t("contact")}</h2>
             <p className="site-footer__name">{ChromeWordmark({ ctx }) ?? b.name}</p>
-            {variant !== "visit" && <AddressText ctx={ctx} />}
-            <ul className="site-footer__facts" role="list">
-              <li>
-                <span className="visually-hidden">{ctx.t("phone")}: </span>
-                <PhoneLink ctx={ctx} className="site-footer__link" />
-              </li>
-              <li>
-                <span className="visually-hidden">{ctx.t("emailLabel")}: </span>
-                <EmailLink ctx={ctx} className="site-footer__link" />
-              </li>
-            </ul>
+            {variant !== "visit" && !reach.address && <AddressText ctx={ctx} />}
+            {(!reach.phone || !reach.email) && (
+              <ul className="site-footer__facts" role="list">
+                {!reach.phone && (
+                  <li>
+                    <span className="visually-hidden">{ctx.t("phone")}: </span>
+                    <PhoneLink ctx={ctx} className="site-footer__link" />
+                  </li>
+                )}
+                {!reach.email && (
+                  <li>
+                    <span className="visually-hidden">{ctx.t("emailLabel")}: </span>
+                    <EmailLink ctx={ctx} className="site-footer__link" />
+                  </li>
+                )}
+              </ul>
+            )}
           </div>
 
           <div className="site-footer__block site-footer__provider">
