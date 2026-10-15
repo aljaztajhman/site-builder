@@ -3,7 +3,7 @@
  * stock ornaments. Every fact they show comes from the business facts; every colour from the site's
  * tokens (CSS classes in styles/motifs.css), so a motif follows a colour edit.
  */
-import { DIRECTIONS, earliestOpening, formatPhoneNational, isPlaceholder, plateCode, siteMotif, type Motif, type SubMotif } from "@sb/spec";
+import { earliestOpening, formatPhoneNational, isPlaceholder, plateCode, siteMotif, type Motif, type SubMotif } from "@sb/spec";
 import { Ph, cx } from "../primitives/index.tsx";
 import type { RenderCtx } from "../types.ts";
 import { JointDrawing, Stem, StripDrawing, Tag, TilesDrawing, WireDrawing } from "./trades.tsx";
