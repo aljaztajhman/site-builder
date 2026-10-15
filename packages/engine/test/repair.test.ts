@@ -169,6 +169,11 @@ describe("generateContent", () => {
     expect(calls).toBe(1);
     expect(r.attempts).toBe(1);
     expect(r.issues).toEqual([]);
-    expect(r.repairs).toEqual(['/pages/0/sections/3/props: trimmed key " link"', "/pages/0/sections/3/props/link: dropped null"]);
+    // The third: the contact page's intro said the hours note again (a sentence once per page, the outside review).
+    expect(r.repairs).toEqual([
+      '/pages/0/sections/3/props: trimmed key " link"',
+      "/pages/0/sections/3/props/link: dropped null",
+      '/pages/2/sections/0/props/intro: "za skupine med tednom po dogovoru" was shown twice on the page; dropped it here',
+    ]);
   });
 });

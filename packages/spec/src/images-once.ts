@@ -1,7 +1,7 @@
 import type { Issue } from "./validate.ts";
-import { validateSite } from "./validate.ts";
 import type { SiteSpec } from "./site.ts";
-import { getAt, parsePointer, setAt, walkStrings } from "./pointer.ts";
+import { setAt, walkStrings } from "./pointer.ts";
+import { issueKeys, noNewIssues, removeAt } from "./repair-util.ts";
 
 /**
  * An image at most once per page (the outside review, 2026-10-14: the hero's photo again in a later section reads as
@@ -59,24 +59,6 @@ function isPortrait(s: Section, at: string): boolean {
   if (s.type === "team") return !/^\/(image|inset)$/.test(at);
   if (s.type === "composed") return (s.props as { intent?: string }).intent === "team";
   return false;
-}
-
-const issueKeys = (spec: SiteSpec): Set<string> => {
-  const v = validateSite(spec);
-  return new Set(v.ok ? [] : v.issues.map((i) => `${i.path} ${i.message}`));
-};
-
-/** Every issue of `after` was already there before (the change made nothing invalid). */
-const noNewIssues = (before: Set<string>, after: Set<string>) => [...after].every((k) => before.has(k));
-
-/** Removes the value at `at` inside props: the key of an object, or the item of an array. */
-function removeAt(props: unknown, at: string): void {
-  const keys = parsePointer(at);
-  const last = keys.pop()!;
-  const parentAt = keys.length ? `/${keys.map((k) => k.replace(/~/g, "~0").replace(/\//g, "~1")).join("/")}` : "";
-  const parent = parentAt ? getAt(props, parentAt) : props;
-  if (Array.isArray(parent)) parent.splice(Number(last), 1);
-  else if (parent && typeof parent === "object") delete (parent as Record<string, unknown>)[last];
 }
 
 /**
