@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"The hero card is pushed so far down that the headline only appears mid-screen and the CTA sits right against the fixed bar, while the opening-hours chart shows bars without any hour labels, so the empty gridlines mean nothing.\",\"desktopNote\":\"The hero works well with the card over the mining-town photo, but the CTA is cut at the fold and the lower half of the page is a wall of navy with a huge empty band and an oversized footer wordmark.\",\"phone\":{\"impression\":3,\"hierarchy\":3,\"imagery\":3,\"spacing\":2,\"clutter\":4,\"distinctiveness\":3},\"desktop\":{\"impression\":4,\"hierarchy\":4,\"imagery\":4,\"spacing\":3,\"clutter\":4,\"distinctiveness\":4},\"fixes\":[\"Move the hero card up on phone so address, headline and CTA all sit in the first screen; on desktop pull the card up so 'Kako do nas' is fully visible above the fold.\",\"Give the opening-hours chart its hour scale on phone (or switch to a simple list), and tighten the empty gaps around it.\",\"Reduce the footer wordmark and merge the navy beer, contact and footer blocks with a lighter band or photo so the lower page is not one continuous dark slab.\"],\"blockers\":[\"Phone, hero: the 'Kako do nas' button is nearly covered by the fixed bottom bar.\",\"Phone, opening hours: the timeline bars have no hour labels, so the chart is unreadable.\"]}",
+  "usage": {
+    "prompt_tokens": 10357,
+    "completion_tokens": 494
+  },
+  "batch": true
+}

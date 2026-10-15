@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"The opening-hours section turns five identical 7.00–15.00 rows into a tall column of blue bars that pushes the services far down and reads like a chart with no information.\",\"desktopNote\":\"The hero's call-to-action is a thin underlined text link next to a large empty band below, and the giant footer wordmark dwarfs the actual hero headline.\",\"phone\":{\"impression\":3,\"hierarchy\":3,\"imagery\":3,\"spacing\":3,\"clutter\":3,\"distinctiveness\":3},\"desktop\":{\"impression\":3,\"hierarchy\":3,\"imagery\":3,\"spacing\":2,\"clutter\":3,\"distinctiveness\":3},\"fixes\":[\"Collapse the five identical opening-hours bars into one line ('Pon–Pet 7.00–15.00') so the services and location come up sooner on both screens.\",\"Give the hero a real primary button for calling and tighten the empty band under the desktop hero; drop the oversized footer wordmark to the headline size.\",\"Replace the stock-feeling glass-crate and valley photos with imagery of finished work (shower cabins, mirrors, shopfronts) and add a small photo per service on desktop.\"],\"blockers\":[]}",
+  "usage": {
+    "prompt_tokens": 11993,
+    "completion_tokens": 398
+  },
+  "batch": true
+}

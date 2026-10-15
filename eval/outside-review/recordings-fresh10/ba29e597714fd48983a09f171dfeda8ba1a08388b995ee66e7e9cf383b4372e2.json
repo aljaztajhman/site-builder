@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"The framed hero card pushes the workshop photo almost entirely below the first screen, so only a sliver of the arch peeks in behind the directions bar.\",\"desktopNote\":\"The hero works well as a composition, but the arched photo is cut flat at the viewport edge and the circular strap photo later sits in a huge wine band with a lot of dead space below it.\",\"phone\":{\"impression\":4,\"hierarchy\":4,\"imagery\":3,\"spacing\":3,\"clutter\":4,\"distinctiveness\":4},\"desktop\":{\"impression\":4,\"hierarchy\":4,\"imagery\":4,\"spacing\":3,\"clutter\":4,\"distinctiveness\":4},\"fixes\":[\"On phone, shrink the hero card (smaller description, remove the ornament) so the workshop photo arch is visible in the first screen.\",\"Tighten the wine strap section on desktop: reduce the padding above and below the circular photo so it does not leave a dead band.\",\"Give the services list a visual anchor (a small photo or price column aligned for all rows) so unpriced rows don't leave a ragged empty right side on desktop.\"],\"blockers\":[]}",
+  "usage": {
+    "prompt_tokens": 12083,
+    "completion_tokens": 377
+  },
+  "batch": true
+}

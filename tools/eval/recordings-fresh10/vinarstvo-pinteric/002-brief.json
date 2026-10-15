@@ -1,0 +1,18 @@
+{
+  "seq": 2,
+  "stage": "brief",
+  "model": "claude-sonnet-5-5",
+  "hash": "5e48cfdfa52d21b2",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"businessType\":\"tourist-farm\",\"name\":\"Vinarstvo Pinterič\",\"town\":\"Bizeljsko\",\"summary\":\"Družinska vinska klet na Bizeljskem. Vinograde obdelujemo že štiri generacije, imamo 6 hektarjev vinogradov in delamo bizeljsko penino po klasični metodi. Vabimo na degustacije v zidanici in v stari kleti, vkopani v pesek.\",\"audience\":\"Ljubitelji vina, pari, družine in skupine, ki želijo degustacijo vin ter nakup vina v kleti na Bizeljskem.\",\"tone\":\"warm\",\"offerings\":[{\"group\":\"Degustacije\",\"name\":\"Degustacija petih vin\",\"description\":\"Pet vin s kruhom in domačo salamo.\",\"price\":{\"amount\":15,\"from\":false,\"unit\":\"na osebo\"}},{\"group\":\"Degustacije\",\"name\":\"Degustacija s penino\",\"description\":\"Degustacija s penino in sirovim krožnikom.\",\"price\":{\"amount\":25,\"from\":false,\"unit\":\"na osebo\"}},{\"group\":\"Skupine\",\"name\":\"Vodeni ogled vinograda\",\"description\":\"Za skupine nad 10 oseb.\",\"price\":null},{\"group\":\"Vino\",\"name\":\"Nakup vina v kleti\",\"description\":\"Vino lahko kupite tudi v kleti.\",\"price\":null}],\"highlights\":[\"Štiri generacije vinogradnikov\",\"6 hektarjev vinogradov\",\"Bizeljska penina po klasični metodi\",\"Stara klet, vkopana v pesek, v kateri vino hranimo od leta 1897\"],\"facts\":{\"phone\":\"+38675552814\",\"email\":\"klet@pinteric.example\",\"address\":{\"street\":\"Bizeljska cesta 112\",\"postalCode\":\"8259\",\"city\":\"Bizeljsko\"},\"hours\":[{\"from\":\"sat\",\"to\":\"sun\",\"open\":\"11:00\",\"close\":\"19:00\",\"closed\":false}],\"hoursNote\":\"Med tednom za skupine po dogovoru.\",\"bookingUrl\":null,\"social\":[],\"legalName\":null,\"registrationNumber\":null,\"taxNumber\":null,\"vatPayer\":null,\"serviceArea\":[],\"people\":[{\"name\":\"Gregor Pinterič\",\"role\":\"Vodi vinograde\"},{\"name\":\"Tomaž Pinterič\",\"role\":\"Vodi vinograde\"}]},\"pages\":[{\"kind\":\"home\",\"slug\":\"\",\"navLabel\":\"Domov\",\"purpose\":\"Predstavitev kleti, termini degustacij, ponudba in rezervacija.\"},{\"kind\":\"standard\",\"slug\":\"degustacije\",\"navLabel\":\"Degustacije\",\"purpose\":\"Paketa degustacij s cenami, vodeni ogled za skupine, rezervacija.\"},{\"kind\":\"standard\",\"slug\":\"vina\",\"navLabel\":\"Vina\",\"purpose\":\"Sorte in penina, nakup v kleti.\"},{\"kind\":\"standard\",\"slug\":\"o-nas\",\"navLabel\":\"O nas\",\"purpose\":\"Zgodba družine, brata Gregor in Tomaž, stara klet iz leta 1897.\"},{\"kind\":\"standard\",\"slug\":\"kontakt\",\"navLabel\":\"Kontakt\",\"purpose\":\"Naslov, telefon, e-pošta, delovni čas, navodila za rezervacijo.\"}],\"missing\":[\"cene vin in penine\",\"imena in opisi posameznih vin\",\"več o skupinskih ogledih in ceni\",\"družabna omrežja\",\"matična številka\"],\"imageIdeas\":[{\"subject\":\"Close-up of dark blue Frankinja grapes hanging on a vine in warm late summer light, vineyard hills blurred in the background\",\"alt\":\"Grozdje modre frankinje na trti v vinogradu\"},{\"subject\":\"Rustic wooden table with a loaf of bread, slices of cured salami, cheese and an empty wine glass, soft daylight\",\"alt\":\"Kruh, salama, sir in kozarec na leseni mizi\"}],\"concept\":{\"subtype\":null,\"goal\":\"book\",\"angle\":\"family-history\",\"signatureFact\":\"founding-year\",\"materials\":[\"modra frankinja\",\"laški rizling\",\"rumeni muškat\",\"penina\",\"pesek\"],\"localAnchor\":\"Bizeljsko\"}}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 5000,
+      "output_tokens": 1424,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}
