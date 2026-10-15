@@ -1,0 +1,84 @@
+{
+  "id": "optika-jasna",
+  "businessType": "dental",
+  "trade": "optika",
+  "description": "Optika Jasna, Tržaška cesta 18, 6230 Postojna.\n\nSem Tina Kalan, diplomirana optometristka. Pri nas vam izmerimo vid, svetujemo pri izbiri okvirja in naredimo očala po meri v lastni delavnici, večinoma v treh delovnih dneh. Imamo tudi kontaktne leče, sončna očala z dioptrijo in očala za računalnik.\n\nPregled vida pri optometristu 25 €. Če kupite očala pri nas, je pregled brezplačen. Okvirji od 59 €.\n\nSprejemamo naročilnice ZZZS za očala, za otroke in odrasle.\n\nDelovni čas: ponedeljek, sreda in petek od 8.00 do 16.00, torek in četrtek od 12.00 do 19.00, sobota od 8.00 do 12.00. Na pregled se naročite po telefonu 05 555 64 30, okvir lahko izberete tudi brez naročila.\n\nE-pošta: optika.jasna@jasna.example",
+  "logo": null,
+  "photos": [],
+  "facts": {
+    "name": "Optika Jasna",
+    "phone": "+38655556430",
+    "email": "optika.jasna@jasna.example",
+    "address": {
+      "street": "Tržaška cesta 18",
+      "postalCode": "6230",
+      "city": "Postojna"
+    },
+    "hours": [
+      {
+        "from": "mon",
+        "to": "mon",
+        "open": "08:00",
+        "close": "16:00"
+      },
+      {
+        "from": "tue",
+        "to": "tue",
+        "open": "12:00",
+        "close": "19:00"
+      },
+      {
+        "from": "wed",
+        "to": "wed",
+        "open": "08:00",
+        "close": "16:00"
+      },
+      {
+        "from": "thu",
+        "to": "thu",
+        "open": "12:00",
+        "close": "19:00"
+      },
+      {
+        "from": "fri",
+        "to": "fri",
+        "open": "08:00",
+        "close": "16:00"
+      },
+      {
+        "from": "sat",
+        "to": "sat",
+        "open": "08:00",
+        "close": "12:00"
+      }
+    ],
+    "prices": [
+      {
+        "item": "Pregled vida pri optometristu",
+        "amount": 25
+      },
+      {
+        "item": "Okvirji",
+        "amount": 59,
+        "from": true
+      }
+    ],
+    "people": [
+      {
+        "name": "Tina Kalan",
+        "role": "diplomirana optometristka"
+      }
+    ],
+    "other": [
+      "v lastni delavnici",
+      "v treh delovnih dneh",
+      "naročilnice ZZZS",
+      "pregled brezplačen",
+      "brez naročila"
+    ]
+  },
+  "missing": [
+    "photos",
+    "legal"
+  ]
+}

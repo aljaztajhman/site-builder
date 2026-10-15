@@ -190,7 +190,23 @@ describe("Footer", () => {
       expect(out).not.toContain("<address>");
       expect(out).toContain("<dt>Matična številka</dt><dd>1234567000</dd>");
       expect(out).toContain("Frizerski salon Lipa, Ana Novak s.p.");
-      expect(out).toContain('href="tel:+38641123456"');
+    });
+
+    it("after a contact section the contact row keeps only the name: no phone, e-mail or address (owner, 2026-10-15)", () => {
+      const out = visit([about, contact]);
+      expect(out).not.toContain('href="tel:');
+      expect(out).not.toContain('href="mailto:');
+      expect(out).not.toContain("site-footer__facts");
+      expect(out).toContain("site-footer__name");
+      expect(out).toContain("<dt>Matična številka</dt><dd>1234567000</dd>");
+      // Without a contact section the row keeps them.
+      const plain = visit([about]);
+      expect(plain).toContain('href="tel:+38641123456"');
+      expect(plain).toContain('href="mailto:info@salon-lipa.si"');
+      // A composed contact element showing only the phone leaves the e-mail in the footer.
+      const phoneOnly = visit([composed([{ id: "e_c", kind: "contact", show: ["phone"], ...at }])]);
+      expect(phoneOnly).not.toContain('href="tel:');
+      expect(phoneOnly).toContain('href="mailto:info@salon-lipa.si"');
     });
 
     it("drops only the part shown above: hours in an opening-hours section, the address in a composed map", () => {

@@ -1,0 +1,42 @@
+{
+  "id": "atelje-bergant",
+  "businessType": "accountant",
+  "trade": "arhitektura",
+  "description": "Arhitekturni atelje Bergant, Ormož.\n\nSem Lina Bergant, univ. dipl. inž. arhitekture s pooblastilom ZAPS. Projektiram enodružinske hiše, prenove starih hiš in vinskih kleti ter notranjo opremo. Največ delam v Prlekiji in Prekmurju, kjer imajo stare domačije svoj značaj, ki ga pri prenovi rada ohranim.\n\nKaj naredim:\n- idejno zasnovo in 3D prikaz,\n- projektno dokumentacijo za gradbeno dovoljenje (DGD) in za izvedbo (PZI),\n- pridobitev gradbenega dovoljenja,\n- projektantski nadzor med gradnjo,\n- notranjo opremo po meri.\n\nPrvi pogovor je brezplačen, pridem tudi na ogled parcele ali hiše. Cene so odvisne od velikosti in zahtevnosti projekta, zato jih pošljem v ponudbi.\n\nNaslov ateljeja: Kerenčičev trg 5, 2270 Ormož. Stranke sprejemam po dogovoru.\n\nTelefon: 031 555 860\nE-pošta: lina@atelje-bergant.example\n\nLina Bergant s.p., matična številka 8123456000, davčna številka 81234567.",
+  "logo": null,
+  "photos": [],
+  "facts": {
+    "name": "Arhitekturni atelje Bergant",
+    "phone": "+38631555860",
+    "email": "lina@atelje-bergant.example",
+    "address": {
+      "street": "Kerenčičev trg 5",
+      "postalCode": "2270",
+      "city": "Ormož"
+    },
+    "people": [
+      {
+        "name": "Lina Bergant",
+        "role": "univ. dipl. inž. arhitekture"
+      }
+    ],
+    "legal": {
+      "legalName": "Lina Bergant s.p.",
+      "registrationNumber": "8123456000",
+      "taxNumber": "81234567"
+    },
+    "other": [
+      "pooblastilom ZAPS",
+      "v Prlekiji in Prekmurju",
+      "Prvi pogovor je brezplačen",
+      "ogled parcele ali hiše",
+      "po dogovoru",
+      "3D prikaz"
+    ]
+  },
+  "missing": [
+    "photos",
+    "prices",
+    "hours"
+  ]
+}

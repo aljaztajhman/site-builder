@@ -1,0 +1,65 @@
+{
+  "id": "pivovarna-rov",
+  "businessType": "restaurant",
+  "trade": "pivovarna",
+  "description": "Pivovarna Rov je mala pivovarna s pivnico v Trbovljah, v stari stavbi rudniške kopalnice, naslov Rudarska cesta 3, 1420 Trbovlje. Ime smo dali po rudniškem rovu, v katerem je delal dedek enega od nas.\n\nVarimo štiri stalna piva: svetli lager Jamar, IPA Šoht, temni porter Kopalnica in pšenično Smuk, poleg tega vsak mesec še eno sezonsko. Pivo točimo v pivnici in ga prodajamo v steklenicah in sodčkih za zabave.\n\nKozarec 0,5 l stane od 3,80 €, degustacija štirih piv 7 €. Hrane ne kuhamo, imamo pa domače prigrizke in lahko si prinesete pico iz sosednje picerije.\n\nPivnica je odprta od srede do petka od 16.00 do 23.00, v soboto od 12.00 do 23.00. Ogled pivovarne za skupine po dogovoru.\n\nPivovarno vodita Luka Plahuta in Matic Ocvirk. Kontakt: 070 555 418, pivo@rov.example",
+  "logo": null,
+  "photos": [],
+  "facts": {
+    "name": "Pivovarna Rov",
+    "phone": "+38670555418",
+    "email": "pivo@rov.example",
+    "address": {
+      "street": "Rudarska cesta 3",
+      "postalCode": "1420",
+      "city": "Trbovlje"
+    },
+    "hours": [
+      {
+        "from": "wed",
+        "to": "fri",
+        "open": "16:00",
+        "close": "23:00"
+      },
+      {
+        "from": "sat",
+        "to": "sat",
+        "open": "12:00",
+        "close": "23:00"
+      }
+    ],
+    "prices": [
+      {
+        "item": "Kozarec 0,5 l",
+        "amount": 3.8,
+        "from": true
+      },
+      {
+        "item": "degustacija štirih piv",
+        "amount": 7
+      }
+    ],
+    "people": [
+      {
+        "name": "Luka Plahuta"
+      },
+      {
+        "name": "Matic Ocvirk"
+      }
+    ],
+    "other": [
+      "stari stavbi rudniške kopalnice",
+      "svetli lager Jamar",
+      "IPA Šoht",
+      "temni porter Kopalnica",
+      "pšenično Smuk",
+      "vsak mesec še eno sezonsko",
+      "Hrane ne kuhamo",
+      "v steklenicah in sodčkih"
+    ]
+  },
+  "missing": [
+    "photos",
+    "legal"
+  ]
+}
