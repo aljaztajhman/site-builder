@@ -214,11 +214,11 @@
 /* A name keeps its words whole (no automatic hyphens since the 50-page review): it never shrinks below its longest
    word; a wide price (a placeholder chip at 360 px) wraps inside its own column instead. */
 .prices__row dt {
-  min-width: min(min-content, 60%);
+  min-width: min(min-content, 50%);
 }
 .prices__row dd {
   flex: 0 1 auto;
-  min-width: 0;
+  min-width: min-content;
   max-width: 50%;
   text-align: right;
 }
