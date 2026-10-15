@@ -270,12 +270,16 @@ export async function callButtonsPerScreen(page: Page): Promise<CallButtons> {
   })()`);
 }
 
-/** Scrolls through the page so lazy images load, then back to the top (for full-page screenshots). */
+/**
+ * Scrolls through the page so lazy images load, then back to the top (for full-page screenshots). Scrolls instantly:
+ * the sites scroll smoothly (base.css), and a smooth scroll back to the top was still under way when the screenshot was
+ * taken, so a sticky header was drawn where the scroll had got to, in the middle of the page.
+ */
 export async function loadLazyImages(page: Page): Promise<void> {
   await page.evaluate("globalThis.__name = globalThis.__name || ((f) => f)");
   await page.evaluate(async () => {
     for (let y = 0; y < document.body.scrollHeight; y += Math.round(window.innerHeight * 0.8)) {
-      window.scrollTo(0, y);
+      window.scrollTo({ top: y, behavior: "instant" });
       await new Promise((r) => setTimeout(r, 50));
     }
     await Promise.all(
@@ -289,20 +293,27 @@ export async function loadLazyImages(page: Page): Promise<void> {
             }),
         ),
     );
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: "instant" });
   });
 }
 
 /**
- * Hides position:fixed elements (mobile action bar, desktop consent box) before a full-page
- * screenshot. Chromium draws them once, at their place in the first viewport, so on a long page
- * they seem to cover content in the middle; the critique read that as a layout bug. Only the
- * screenshot changes, never the page files.
+ * Prepares a full-page screenshot. Chromium draws the whole page from the current scroll position in one go, so
+ * anything pinned to the screen lands in the wrong place on a long page: position:fixed elements (mobile action bar,
+ * desktop consent box) are hidden (the critique read them as covering content), and sticky ones (the header, a pinned
+ * column) go back into the flow, so the header is drawn once, at the top. The page is put at the top without smooth
+ * scrolling, and scroll-driven marks (reveal.js, bar.js) get two frames to settle. Only the screenshot changes, never
+ * the page files.
  */
 export async function hideFixedForFullPage(page: Page): Promise<void> {
-  await page.evaluate(`(() => {
+  await page.evaluate(`(async () => {
+    document.documentElement.style.setProperty("scroll-behavior", "auto", "important");
     for (const el of document.querySelectorAll("body *")) {
-      if (getComputedStyle(el).position === "fixed") el.style.setProperty("visibility", "hidden", "important");
+      const pos = getComputedStyle(el).position;
+      if (pos === "fixed") el.style.setProperty("visibility", "hidden", "important");
+      else if (pos === "sticky") el.style.setProperty("position", "static", "important");
     }
+    window.scrollTo({ top: 0, behavior: "instant" });
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(r, 30))));
   })()`);
 }
