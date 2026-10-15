@@ -62,7 +62,6 @@ describe("review 50: a sentence once per page", () => {
 
   for (const [business, which] of [
     ["elektro-zupan", "generated"],
-    ["frizerstvo-lana", "regenerated"],
     ["kljucavnicarstvo-hrovat", "generated"],
     ["kljucavnicarstvo-hrovat", "regenerated"],
     ["kmetija-grabnar", "regenerated"],

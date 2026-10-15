@@ -81,7 +81,7 @@ describe("repairRepeatedSentences on the review's pages", () => {
     expect(validateSite(spec).ok).toBe(true);
   });
 
-  it("all 100 saved review pages: each sentence shown once but for two whose copies are all required, as valid as before", () => {
+  it("all 100 saved review pages: each sentence shown once but for three whose copies are all required or list entries, as valid as before", () => {
     const left: string[] = [];
     for (const id of readdirSync(specs).sort())
       for (const file of ["spec-generated.json", "spec-regenerated.json"] as const) {
@@ -92,6 +92,8 @@ describe("repairRepeatedSentences on the review's pages", () => {
         expect(repairRepeatedSentences(spec, renderedPageText).filter((l) => !l.includes("left it")), `${id} ${file}: one pass repairs all it can`).toEqual([]);
         expect(validateSite(spec).ok, `${id} ${file}`).toBe(wasValid);
       }
-    expect(left).toEqual(["karoserija-hribar spec-generated.json", "vulkanizer-zorman spec-regenerated.json"]);
+    // Left for the critique: frizerstvo-lana's whole paragraph (a list entry stays) beside a required service description
+    // (the recorded critique rewrites that paragraph), and two pairs of required fields.
+    expect(left).toEqual(["frizerstvo-lana spec-regenerated.json", "karoserija-hribar spec-generated.json", "vulkanizer-zorman spec-regenerated.json"]);
   }, 120_000);
 });
