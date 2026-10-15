@@ -297,11 +297,23 @@ describe("the requests without a mockup", () => {
   });
 });
 
-/** The mockup path's requests (art director, rebuild) on the recorded runs, hashed before direct mode existed. */
+/** The mockup path's requests (art director, rebuild) on the recorded runs, hashed before direct mode existed, pictures left out (withoutPictures). */
 const MOCKUP_HASHES: Record<string, string[]> = {
-  "pekarna-kvas": ["b023d7c3eb067d8b", "558f7d38171d2994"],
-  "avtoservis-mrak": ["f2cb1cb8978ccba0", "1e8a57131365329b"],
+  "pekarna-kvas": ["f149d013fef601c7", "8ba96bd35fb1b161"],
+  "avtoservis-mrak": ["5473c75b9ab93a57", "34cbcc3f7735f1b0"],
 };
+
+/**
+ * The request with every picture's bytes left out: the logo is rasterised from SVG, and the rasteriser gives other bytes
+ * on Linux (CI) than on Windows. The prompts, schema and the pictures' order and types are what must not change.
+ */
+function withoutPictures(req: ModelRequest): ModelRequest {
+  const blank = (b: unknown): unknown => {
+    const block = b as { type?: string; source?: Record<string, unknown> };
+    return block?.type === "image" && block.source ? { ...block, source: { ...block.source, data: "[picture]" } } : b;
+  };
+  return { ...req, messages: req.messages.map((m) => (Array.isArray(m.content) ? { ...m, content: m.content.map(blank) } : m)) as ModelRequest["messages"] };
+}
 
 describe("mockup mode is unchanged", () => {
   it.each(["pekarna-kvas", "avtoservis-mrak"])("%s: the art director's and the rebuild's requests are byte for byte as before", async (id) => {
@@ -309,7 +321,7 @@ describe("mockup mode is unchanged", () => {
     const dir = path.join(ROOT, "tools/eval/recordings-studio-mockup", id);
     const replay = new ReplayTransport(dir);
     const hashes: string[] = [];
-    const client = new ModelClient({ config, spentToday: async () => 0, onCall: async () => undefined, transport: { send: (req, stage) => (hashes.push(requestHash(req, stage.model)), replay.send(req, stage)) } });
+    const client = new ModelClient({ config, spentToday: async () => 0, onCall: async () => undefined, transport: { send: (req, stage) => (hashes.push(requestHash(withoutPictures(req), stage.model)), replay.send(req, stage)) } });
     const painter = new ImageGenerator({ config, transport: { generate: async () => new Uint8Array(readFileSync(path.join(dir, "mockup.jpg"))) }, spentToday: async () => 0, onCall: async () => undefined });
     const photo = (n: number) => new Uint8Array(readFileSync(path.join(ROOT, "tools/eval/fixtures", id, "photos", `0${n}.jpg`)));
     const deps: MockupDeps = {
