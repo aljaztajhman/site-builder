@@ -1,0 +1,61 @@
+{
+  "set": "fable",
+  "reviewer": "gemini",
+  "model": "google/gemini-4-argon",
+  "pages": [
+    "atelje-bergant",
+    "kolesarski-servis-ovinek",
+    "optika-jasna",
+    "pasji-salon-kodra",
+    "pivovarna-rov",
+    "plesna-sola-takt",
+    "sirarna-pr-simnu",
+    "steklarstvo-vrhovnik",
+    "urarstvo-tic",
+    "vinarstvo-pinteric"
+  ],
+  "status": "ok",
+  "answer": {
+    "sameness": "Every single page uses the exact same two-column desktop hero layout: left-aligned headline, short paragraph, and small rectangular CTA button on the left; a single image or simple monoline vector illustration on the right. Navigation headers are identical across the board (plain text logo on the left, underlined 'Domov' link on the right, separated by a full-width hairline border). On mobile, every site shares the exact same 'Meni' hamburger button and a pinned bottom action bar with 'Klic' and 'Navodila za pot' buttons. Even the 1px stroke weight of the vector graphics repeats across seven different pages.",
+    "recurringIssues": [
+      "Seven pages rely on overly simplistic, thin-line vector doodles instead of photography, making the sites look unfinished and bare.",
+      "Severe contrast failure on optika-jasna where black text is placed over a dark royal blue background.",
+      "Photography pages leave a tacky 'Ustvarjeno z UI' (Created with AI) watermark badge in the top-right corner of the images.",
+      "Desktop buttons are tiny and lack visual weight, getting lost in the vast empty space of the hero sections.",
+      "Mobile sticky bottom bars collide with or awkward-crop the page content just above them (notably on vinarstvo-pinteric and plesna-sola-takt).",
+      "Header navigation is stripped down to a single 'Domov' link on desktop, making the top bar look broken or empty."
+    ],
+    "overall": 2,
+    "variety": 2,
+    "best": [
+      {
+        "id": "sirarna-pr-simnu",
+        "why": "The rich dark green and cheddar-yellow palette, paired with a chunky serif headline and bold phone number, gives it the most convincing brand presence."
+      },
+      {
+        "id": "atelje-bergant",
+        "why": "The overlapping two-photo collage adds visual depth and breaks the rigid flatness that plagues the rest of the batch."
+      },
+      {
+        "id": "urarstvo-tic",
+        "why": "The high-contrast dark theme with a warm cream header and understated clock graphic feels appropriately refined for a traditional watchmaker."
+      }
+    ],
+    "weakest": [
+      {
+        "id": "optika-jasna",
+        "why": "Black text on a dark blue block is nearly unreadable, and the clip-art glasses icon looks amateurish."
+      },
+      {
+        "id": "vinarstvo-pinteric",
+        "why": "The desktop screen is mostly empty beige space with a tiny, cryptic line drawing in the corner, and the mobile view cuts off a heading at the bottom."
+      },
+      {
+        "id": "kolesarski-servis-ovinek",
+        "why": "It duplicates the studio name right below the header and uses an abstract green pipe shape that fails to communicate bicycle repair."
+      }
+    ],
+    "oneChange": "Stop using a single rigid 50/50 split-screen wireframe with thin vector doodles for every client; introduce real, authentic photography (without AI watermarks) and vary the hero compositions (full-bleed imagery, centered typography, or multi-card grids).",
+    "summary": "This portfolio looks like a single wireframe repeated ten times with only colors and fonts swapped. While your typography is clean and legible, relying on the exact same left-text, right-graphic split layout makes the studio look like a basic template factory. Worse, seven sites use sparse, 1px-stroke vector doodles instead of real imagery, leaving the pages feeling hollow and unfinished. On the few sites with images, visible 'Created with AI' badges immediately cheapen the work. Fix the unreadable black-on-blue text on Optika Jasna, vary your layouts, and invest in real photography to look like a serious design studio."
+  }
+}

@@ -198,6 +198,16 @@ describe("answer", () => {
     expect(() => parseSetAnswer(JSON.stringify({ ...JSON.parse(verdict(3, 3)), extra: 1 }))).toThrow();
     expect(() => parseSetAnswer(JSON.stringify({ ...JSON.parse(verdict(3, 3)), best: [1, 2, 3, 4].map((i) => ({ id: `p${i}`, why: "x" })) }))).toThrow();
   });
+
+  it("cuts prose past its limit instead of failing the answer (Fable wrote 700+ characters of sameness on 50 pages)", () => {
+    const long = { ...JSON.parse(verdict(3, 3)), sameness: "a ".repeat(500), recurringIssues: ["b".repeat(300)], best: [{ id: "page-01", why: "c".repeat(300) }] };
+    const a = parseSetAnswer(JSON.stringify(long));
+    expect(a.sameness.length).toBeLessThanOrEqual(700);
+    expect(a.sameness.endsWith("…")).toBe(true);
+    expect(a.recurringIssues[0]!.length).toBe(240);
+    expect(a.best[0]!.why.length).toBe(240);
+    expect(a.best[0]!.id).toBe("page-01");
+  });
 });
 
 describe("request", () => {

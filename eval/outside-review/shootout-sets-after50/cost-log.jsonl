@@ -1,0 +1,3 @@
+{"at":"2026-10-15T14:43:51.393Z","stage":"outside-review","reviewer":"gemini","model":"google/gemini-4-argon","itemId":"set:after50","inputTokens":6858,"outputTokens":903,"usd":0.022746,"eur":0.01956156,"costSource":"openrouter"}
+{"at":"2026-10-15T14:44:14.971Z","stage":"outside-review","reviewer":"gpt","model":"openai/gpt-6.1-sol","itemId":"set:after50","inputTokens":9089,"outputTokens":779,"usd":0.0087046,"eur":0.007485955999999999,"costSource":"openrouter"}
+{"at":"2026-10-15T14:47:20.956Z","stage":"outside-review","reviewer":"claude","model":"claude-fable-5-1","itemId":"set:after50","inputTokens":11322,"outputTokens":1402,"usd":0.09166,"eur":0.0788276,"costSource":"config"}

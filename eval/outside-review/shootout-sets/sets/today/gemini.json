@@ -1,0 +1,60 @@
+{
+  "set": "today",
+  "reviewer": "gemini",
+  "model": "google/gemini-4-argon",
+  "pages": [
+    "atelje-bergant",
+    "kolesarski-servis-ovinek",
+    "optika-jasna",
+    "pasji-salon-kodra",
+    "pivovarna-rov",
+    "plesna-sola-takt",
+    "sirarna-pr-simnu",
+    "steklarstvo-vrhovnik",
+    "urarstvo-tic",
+    "vinarstvo-pinteric"
+  ],
+  "status": "ok",
+  "answer": {
+    "sameness": "Almost every page uses the same two-column split hero (text on one side, single photo on the other). `sirarna-pr-simnu` and `urarstvo-tic` are literal clones: a dark background, a double-bordered white card on the left with the exact same leafy branch icon, and an arch-masked photo on the right (`plesna-sola-takt` also reuses this arch mask). `pivovarna-rov` and `vinarstvo-pinteric` share the same overlapping box-on-landscape layout. Typography is limited to two pairings across all ten sites, and every text block follows an identical formula: tiny eyebrow, three-line heading, short paragraph, solid button, and underlined link.",
+    "recurringIssues": [
+      "Navigation headers are broken or incomplete on almost every desktop page, showing only a lonely 'Domov' link instead of a real menu.",
+      "Intrusive 'Ustvarjeno z UI' (Created with AI) watermarks are left visible on every single hero photograph, immediately cheapening the work.",
+      "Persistent floating action bars on mobile (`kolesarski-servis-ovinek`, `pasji-salon-kodra`, `pivovarna-rov`, `plesna-sola-takt`) collide with page content and create redundant competing buttons.",
+      "Several pages (`steklarstvo-vrhovnik`, `pivovarna-rov`, `vinarstvo-pinteric`) have awkward, unstyled text links sitting where primary buttons should be.",
+      "Exact template duplication (`sirarna-pr-simnu` and `urarstvo-tic`) makes the portfolio look mass-produced."
+    ],
+    "overall": 2,
+    "variety": 2,
+    "best": [
+      {
+        "id": "atelje-bergant",
+        "why": "Clean, well-proportioned layout and one of the only pages in the batch with a functional, believable desktop header showing contact details."
+      },
+      {
+        "id": "kolesarski-servis-ovinek",
+        "why": "Strong, bold typographic hierarchy and high-contrast photography that immediately communicates the trade with confidence."
+      },
+      {
+        "id": "vinarstvo-pinteric",
+        "why": "Rich dark green colour palette and editorial overlapping card layout give it a more custom, atmospheric feel on both desktop and mobile."
+      }
+    ],
+    "weakest": [
+      {
+        "id": "steklarstvo-vrhovnik",
+        "why": "Looks like an unfinished wireframe with a bizarre two-line centered header, vast empty whitespace, and plain underlined text links instead of buttons."
+      },
+      {
+        "id": "optika-jasna",
+        "why": "Features an unstyled yellow form input without a submit button, a clumsy tilted badge, and an AI watermark awkwardly cut off by a circular crop on mobile."
+      },
+      {
+        "id": "urarstvo-tic",
+        "why": "It is a 1:1 clone of `sirarna-pr-simnu` down to the botanical leaf ornament, which makes zero sense for a watchmaker."
+      }
+    ],
+    "oneChange": "Stop shipping raw AI-generated templates: build complete, functional navigation headers for desktop, remove the 'Ustvarjeno z UI' watermarks from imagery, and never reuse exact decorative frames and icons across unrelated trades.",
+    "summary": "This portfolio looks like the output of an automated site generator rather than a bespoke design studio. While typography is legible and colour palettes are generally pleasant, the batch fails on basic execution. Almost every desktop site lacks a real navigation menu (showing only 'Domov'), and every hero image bears a visible 'Created with AI' badge. Worse, two sites—a cheese maker and a watchmaker—use the exact same template down to the leafy branch illustration. Mobile views are cluttered by floating bottom bars that cover the content. To charge studio rates, you must fix the broken headers, clean up the mobile UI collisions, and design distinct layouts for each client."
+  }
+}

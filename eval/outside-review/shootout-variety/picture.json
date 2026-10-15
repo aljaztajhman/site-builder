@@ -1,0 +1,60 @@
+{
+  "picture": {
+    "pages": 10,
+    "directions": {
+      "distinct": 6,
+      "counts": {
+        "dark-elegant": 3,
+        "alpine-nature": 2,
+        "warm-craft": 2,
+        "bold-local": 1,
+        "clean-swiss": 1,
+        "clinical-calm": 1
+      }
+    },
+    "fontPairs": {
+      "distinct": 6,
+      "counts": {
+        "bricolage-figtree": 4,
+        "newsreader-libre-franklin": 2,
+        "archivo-archivo": 1,
+        "archivo-public-sans": 1,
+        "fraunces-source-sans": 1,
+        "space-grotesk-plex": 1
+      }
+    },
+    "heroes": {
+      "distinct": 1,
+      "counts": {
+        "composed:free": 10
+      }
+    },
+    "primaryColours": {
+      "distinct": 10,
+      "counts": {
+        "#15233a": 1,
+        "#1f4a2c": 1,
+        "#2a4a9a": 1,
+        "#35c9a6": 1,
+        "#6a2a6e": 1,
+        "#9f3f27": 1,
+        "#ae7c17": 1,
+        "#c8371e": 1,
+        "#c9a24e": 1,
+        "#ff6a4d": 1
+      }
+    },
+    "distance": {
+      "pairs": 45,
+      "mean": 0.5641416907235471,
+      "min": 0.40636902899918637,
+      "closest": {
+        "a": "atelje-bergant",
+        "b": "pasji-salon-kodra",
+        "distance": 0.40636902899918637
+      },
+      "withPictures": 10,
+      "pairsWithPhash": 45
+    }
+  }
+}

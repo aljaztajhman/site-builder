@@ -293,7 +293,19 @@ export function buildSetRequest(reviewer: Reviewer, parts: readonly SetPart[]): 
 /** Parses a reviewer's set verdict (a ```json fence is tolerated). Throws on anything else. */
 export function parseSetAnswer(content: string): SetAnswer {
   const text = content.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
-  return SetAnswer.parse(JSON.parse(text));
+  return SetAnswer.parse(clipProse(JSON.parse(text)));
+}
+
+/** Prose limits of the answer: a reviewer that writes past one (Fable's sameness on 50 pages) is cut there with "…", not thrown away. */
+const PROSE_MAX: Record<string, number> = { sameness: 700, oneChange: 400, summary: 900, why: 240 };
+function clipProse(v: unknown, key = ""): unknown {
+  if (typeof v === "string") {
+    const max = key === "recurringIssues" ? 240 : PROSE_MAX[key];
+    return max && v.length > max ? `${v.slice(0, max - 1).trimEnd()}…` : v;
+  }
+  if (Array.isArray(v)) return v.map((x) => clipProse(x, key));
+  if (v && typeof v === "object") return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, clipProse(x, k)]));
+  return v;
 }
 
 // ---------------------------------------------------------------------------------------------------------------

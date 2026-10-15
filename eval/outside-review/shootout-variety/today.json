@@ -1,0 +1,68 @@
+{
+  "today": {
+    "pages": 10,
+    "directions": {
+      "distinct": 8,
+      "counts": {
+        "bold-local": 2,
+        "etiketa": 2,
+        "alpine-nature": 1,
+        "clean-swiss": 1,
+        "jedilnik": 1,
+        "nasmeh": 1,
+        "playful-modern": 1,
+        "warm-craft": 1
+      }
+    },
+    "fontPairs": {
+      "distinct": 7,
+      "counts": {
+        "archivo-archivo": 2,
+        "fraunces-source-sans": 2,
+        "newsreader-libre-franklin": 2,
+        "bricolage-figtree": 1,
+        "figtree-figtree": 1,
+        "garamond-figtree": 1,
+        "inter-tight-inter": 1
+      }
+    },
+    "heroes": {
+      "distinct": 6,
+      "counts": {
+        "hero-split:image-right": 4,
+        "hero-signature:label": 2,
+        "hero-image:overlay-bottom": 1,
+        "hero-signature:card": 1,
+        "hero-signature:disc": 1,
+        "hero-split:image-left": 1
+      }
+    },
+    "primaryColours": {
+      "distinct": 10,
+      "counts": {
+        "#0c7a70": 1,
+        "#16382b": 1,
+        "#1e4e3a": 1,
+        "#1f5f7a": 1,
+        "#1f5fa8": 1,
+        "#2f5d3a": 1,
+        "#7b2d4a": 1,
+        "#ac8318": 1,
+        "#b5573a": 1,
+        "#c2255c": 1
+      }
+    },
+    "distance": {
+      "pairs": 45,
+      "mean": 0.5758880486790036,
+      "min": 0.36607524689952653,
+      "closest": {
+        "a": "kolesarski-servis-ovinek",
+        "b": "steklarstvo-vrhovnik",
+        "distance": 0.36607524689952653
+      },
+      "withPictures": 10,
+      "pairsWithPhash": 45
+    }
+  }
+}

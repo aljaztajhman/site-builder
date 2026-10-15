@@ -1,0 +1,102 @@
+{
+  "set": "after50",
+  "reviewer": "claude",
+  "model": "claude-fable-5-1",
+  "pages": [
+    "avto-kovac",
+    "avto-kovac-regenerated",
+    "avtoservis-mrak",
+    "avtoservis-mrak-regenerated",
+    "brivnica-kos",
+    "brivnica-kos-regenerated",
+    "cvetlicarna-marjetica",
+    "cvetlicarna-marjetica-regenerated",
+    "elektro-zupan",
+    "elektro-zupan-regenerated",
+    "fizioterapija-pregib",
+    "fizioterapija-pregib-regenerated",
+    "frizerski-salon-mia",
+    "frizerski-salon-mia-regenerated",
+    "frizerstvo-lana",
+    "frizerstvo-lana-regenerated",
+    "gostilna-pri-mostu",
+    "gostilna-pri-mostu-regenerated",
+    "gostilna-zlata-zlica",
+    "gostilna-zlata-zlica-regenerated",
+    "gostisce-na-gricu",
+    "gostisce-na-gricu-regenerated",
+    "instalacije-rebernik",
+    "instalacije-rebernik-regenerated",
+    "instrukcije-pia",
+    "instrukcije-pia-regenerated",
+    "karoserija-hribar",
+    "karoserija-hribar-regenerated",
+    "kljucavnicarstvo-hrovat",
+    "kljucavnicarstvo-hrovat-regenerated",
+    "kmetija-grabnar",
+    "kmetija-grabnar-regenerated",
+    "mizarstvo-lesnik",
+    "mizarstvo-lesnik-regenerated",
+    "pekarna-kvas",
+    "pekarna-kvas-regenerated",
+    "pizzeria-oljka",
+    "pizzeria-oljka-regenerated",
+    "prevajanje-kolar",
+    "prevajanje-kolar-regenerated",
+    "racunovodstvo-seliskar",
+    "racunovodstvo-seliskar-regenerated",
+    "salon-tina",
+    "salon-tina-regenerated",
+    "trgovina-oljka-in-sol",
+    "trgovina-oljka-in-sol-regenerated",
+    "vulkanizer-zorman",
+    "vulkanizer-zorman-regenerated",
+    "zobozdravstvo-lebar",
+    "zobozdravstvo-lebar-regenerated"
+  ],
+  "status": "ok",
+  "answer": {
+    "sameness": "Two template families dominate. (1) Originals: a full-bleed photo hero with a white or dark card overlapping it bottom-left, serif headline (gostilna-pri-mostu, zlata-zlica, na-gricu, pizzeria-oljka, trgovina-oljka-in-sol, cvetlicarna) or a dark photo hero with heavy condensed sans in caps and a fake licence-plate phone number plus blue/yellow strip (avto-kovac, avtoservis-mrak, karoserija-hribar, vulkanizer-zorman, kljucavnicarstvo). (2) Regenerated: a near-identical split layout, text left on white/light grey, one rectangular photo right, same small 'Pokličite / Navodila za pot' pill pair in the header, same contact block (phone, address, hours) in three columns. Giant pale script word be…",
+    "recurringIssues": [
+      "Regenerated versions collapse into one anonymous white split layout; business identity is lost and empty right-hand areas appear (prevajanje, racunovodstvo, vulkanizer regenerated).",
+      "Hero text cut off at the fold or sections starting mid-way with orphaned headings ('Kdaj sem odprta', 'Cene inštrukcij', 'Delamo od leta' with half-cropped '2004').",
+      "Phone versions stack hero photo under long text so many first screens are text-only or show photos chopped at the bottom.",
+      "Identical hair-salon imagery (same blonde balayage photo) across Lana and Tina; same house-under-tree photo across Zlata Žlica and Na Griču.",
+      "Low-contrast small body text on dark photo heros (kmetija-grabnar, gostisce, vulkanizer); readability on phone weak.",
+      "Decorative details (zigzag strips, licence plates, giant script words) are repeated across unrelated trades, so they read as studio tics not brand ideas.",
+      "Photos are generic stock crops (keys, copper pipes, plug illustration) with little relation to the actual business."
+    ],
+    "overall": 3,
+    "variety": 2,
+    "best": [
+      {
+        "id": "pekarna-kvas",
+        "why": "Dark warm palette, strong bread photo, price badge and good serif headline give a real bakery mood with clear hierarchy on both desktop and phone."
+      },
+      {
+        "id": "brivnica-kos-regenerated",
+        "why": "Burgundy split hero with atmospheric shaving-brush photo feels specifically like a barbershop rather than a template."
+      },
+      {
+        "id": "kmetija-grabnar",
+        "why": "Full-bleed mountain photo with location pills and a serif headline gives place and hospitality; the mobile version holds together."
+      }
+    ],
+    "weakest": [
+      {
+        "id": "vulkanizer-zorman-regenerated",
+        "why": "Bare white text block with no imagery, a stray heading floating below, and no visual sense of a tyre shop."
+      },
+      {
+        "id": "prevajanje-kolar-regenerated",
+        "why": "Dense grey text and contact list, no image or colour, hierarchy flat; reads as an unfinished document."
+      },
+      {
+        "id": "racunovodstvo-seliskar-regenerated",
+        "why": "Empty right half, headline then void; the only visual is a giant cropped year further down."
+      }
+    ],
+    "oneChange": "Stop regenerating into the one white split-hero template; give each trade a committed art direction (palette, type pairing, one signature photo treatment) and make the first phone screen show headline, image and one action without cropping.",
+    "summary": "As a portfolio this reads as two templates: a photo-with-overlapping-card look and a text-left/photo-right white look, with a condensed-caps 'garage' variant for car trades. A few pages (pekarna-kvas, brivnica-kos-regenerated, kmetija-grabnar) show real character; most regenerated pages drain it out, leaving white space, repeated header pills and stock crops. Recurring faults: headings cut at the fold, duplicated photos between clients, weak contrast on dark heroes, and phone screens that are mostly text. Competent and tidy, but a client could mistake half of these sites for each other. Commit to distinct art direction per business and fix the fold and mobile composition before adding more pages."
+  }
+}

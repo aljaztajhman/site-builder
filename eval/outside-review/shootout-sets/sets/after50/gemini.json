@@ -1,0 +1,101 @@
+{
+  "set": "after50",
+  "reviewer": "gemini",
+  "model": "google/gemini-4-argon",
+  "pages": [
+    "avto-kovac",
+    "avto-kovac-regenerated",
+    "avtoservis-mrak",
+    "avtoservis-mrak-regenerated",
+    "brivnica-kos",
+    "brivnica-kos-regenerated",
+    "cvetlicarna-marjetica",
+    "cvetlicarna-marjetica-regenerated",
+    "elektro-zupan",
+    "elektro-zupan-regenerated",
+    "fizioterapija-pregib",
+    "fizioterapija-pregib-regenerated",
+    "frizerski-salon-mia",
+    "frizerski-salon-mia-regenerated",
+    "frizerstvo-lana",
+    "frizerstvo-lana-regenerated",
+    "gostilna-pri-mostu",
+    "gostilna-pri-mostu-regenerated",
+    "gostilna-zlata-zlica",
+    "gostilna-zlata-zlica-regenerated",
+    "gostisce-na-gricu",
+    "gostisce-na-gricu-regenerated",
+    "instalacije-rebernik",
+    "instalacije-rebernik-regenerated",
+    "instrukcije-pia",
+    "instrukcije-pia-regenerated",
+    "karoserija-hribar",
+    "karoserija-hribar-regenerated",
+    "kljucavnicarstvo-hrovat",
+    "kljucavnicarstvo-hrovat-regenerated",
+    "kmetija-grabnar",
+    "kmetija-grabnar-regenerated",
+    "mizarstvo-lesnik",
+    "mizarstvo-lesnik-regenerated",
+    "pekarna-kvas",
+    "pekarna-kvas-regenerated",
+    "pizzeria-oljka",
+    "pizzeria-oljka-regenerated",
+    "prevajanje-kolar",
+    "prevajanje-kolar-regenerated",
+    "racunovodstvo-seliskar",
+    "racunovodstvo-seliskar-regenerated",
+    "salon-tina",
+    "salon-tina-regenerated",
+    "trgovina-oljka-in-sol",
+    "trgovina-oljka-in-sol-regenerated",
+    "vulkanizer-zorman",
+    "vulkanizer-zorman-regenerated",
+    "zobozdravstvo-lebar",
+    "zobozdravstvo-lebar-regenerated"
+  ],
+  "status": "ok",
+  "answer": {
+    "sameness": "The portfolio relies on four rigid, repeating hero formulas: (1) full-bleed dark photo with left-aligned uppercase sans-serif and a licence-plate phone number box (used across auto and tire shops); (2) white background with a left text column and a right-hand photo cropped into an arch, circle, or rectangle; (3) full-bleed photo with a white text box anchored to the bottom-left corner (used on almost all hospitality pages); and (4) text-only split layouts pairing a large headline on the left with a plain contact-details stack on the right. Typography is limited to two system-feeling sans-serifs and one editorial serif, and mobile screens share an identical sticky bottom bar.",
+    "recurringIssues": [
+      "Many regenerated pages replace custom graphics or full-bleed heroes with plain white boxes and unstyled text stacks, leaving large dead white areas on desktop.",
+      "The licence-plate motif (blue EU strip with bold black digits) is overused across four different automotive businesses, turning a clever idea into a cliché.",
+      "Faint watermark background letters behind hair salon headlines ('Mia', 'Lana', 'Tina') look dated and reduce text legibility.",
+      "Several mobile headers stack action pills ('Pokličite', 'Navodila za pot') awkwardly above the hero image, pushing the actual headline too far down.",
+      "A dark 'Ustvarjeno z UI' (Created with AI) badge is left visible in the corner of many hero photos, cheapening the perceived authenticity of the businesses.",
+      "Secondary sections barely peek above the bottom of the desktop viewport with clipped headlines, creating an accidental, unpolished bottom edge."
+    ],
+    "overall": 3,
+    "variety": 3,
+    "best": [
+      {
+        "id": "racunovodstvo-seliskar",
+        "why": "The cobalt blue palette and the tilted invoice graphic with a serrated edge give an otherwise dry accounting service genuine visual character and clear hierarchy."
+      },
+      {
+        "id": "pekarna-kvas",
+        "why": "Warm dark-brown tones, appetizing close-up photography, and the kraft-paper price tag ('od 6.30') create a tactile, authentic bakery atmosphere."
+      },
+      {
+        "id": "elektro-zupan",
+        "why": "The clean technical line illustration of an outlet and wiring paired with a high-contrast burnt-orange callout box feels purposeful and distinct from the photo-heavy templates."
+      }
+    ],
+    "weakest": [
+      {
+        "id": "instrukcije-pia-regenerated",
+        "why": "Stripping away the image leaves an empty, unstyled white page with a giant serif headline and floating text that looks like an unformatted document."
+      },
+      {
+        "id": "racunovodstvo-seliskar-regenerated",
+        "why": "It discards the strong blue visual identity of the original in favour of a barren white screen with zero visual interest or brand presence."
+      },
+      {
+        "id": "vulkanizer-zorman-regenerated",
+        "why": "Replacing the atmospheric hero photo with a plain white background and a tiny right-hand contact column makes a hands-on tire shop look like a generic directory listing."
+      }
+    ],
+    "oneChange": "Stop stripping visual assets out of the text-led layouts; instead, introduce bespoke art direction—custom colour-blocked backgrounds, industry-specific graphic motifs, and varied grid proportions—so every page feels built around its specific trade rather than slotted into one of four wireframes.",
+    "summary": "This is a competent, functional body of work with clear typography, sensible mobile ergonomics, and strong local-service clarity (phone numbers, hours, and locations are immediately accessible). However, looking at all 50 screens together reveals a classic template shop operating on four strict layout formulas. While the original batch had moments of charm—like the invoice graphic for the accountant, line art for the electrician, and warm dark themes for the bakery—many of the 'regenerated' versions strip away colour and imagery, leaving sterile white screens. Push beyond swapping stock photos and text boxes: give each trade its own grid, colour mood, and graphic detail."
+  }
+}

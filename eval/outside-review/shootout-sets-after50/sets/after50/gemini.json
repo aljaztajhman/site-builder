@@ -1,0 +1,100 @@
+{
+  "set": "after50",
+  "reviewer": "gemini",
+  "model": "google/gemini-4-argon",
+  "pages": [
+    "avto-kovac",
+    "avto-kovac-regenerated",
+    "avtoservis-mrak",
+    "avtoservis-mrak-regenerated",
+    "brivnica-kos",
+    "brivnica-kos-regenerated",
+    "cvetlicarna-marjetica",
+    "cvetlicarna-marjetica-regenerated",
+    "elektro-zupan",
+    "elektro-zupan-regenerated",
+    "fizioterapija-pregib",
+    "fizioterapija-pregib-regenerated",
+    "frizerski-salon-mia",
+    "frizerski-salon-mia-regenerated",
+    "frizerstvo-lana",
+    "frizerstvo-lana-regenerated",
+    "gostilna-pri-mostu",
+    "gostilna-pri-mostu-regenerated",
+    "gostilna-zlata-zlica",
+    "gostilna-zlata-zlica-regenerated",
+    "gostisce-na-gricu",
+    "gostisce-na-gricu-regenerated",
+    "instalacije-rebernik",
+    "instalacije-rebernik-regenerated",
+    "instrukcije-pia",
+    "instrukcije-pia-regenerated",
+    "karoserija-hribar",
+    "karoserija-hribar-regenerated",
+    "kljucavnicarstvo-hrovat",
+    "kljucavnicarstvo-hrovat-regenerated",
+    "kmetija-grabnar",
+    "kmetija-grabnar-regenerated",
+    "mizarstvo-lesnik",
+    "mizarstvo-lesnik-regenerated",
+    "pekarna-kvas",
+    "pekarna-kvas-regenerated",
+    "pizzeria-oljka",
+    "pizzeria-oljka-regenerated",
+    "prevajanje-kolar",
+    "prevajanje-kolar-regenerated",
+    "racunovodstvo-seliskar",
+    "racunovodstvo-seliskar-regenerated",
+    "salon-tina",
+    "salon-tina-regenerated",
+    "trgovina-oljka-in-sol",
+    "trgovina-oljka-in-sol-regenerated",
+    "vulkanizer-zorman",
+    "vulkanizer-zorman-regenerated",
+    "zobozdravstvo-lebar",
+    "zobozdravstvo-lebar-regenerated"
+  ],
+  "status": "ok",
+  "answer": {
+    "sameness": "Every single site uses the exact same top navigation bar (brand name left, 'Domov', pill button, and 'Navodila za pot' right) and identical sticky bottom action bars on mobile. Layouts rely heavily on a 50/50 split with text on the left and a square or circular photo on the right, or a full-bleed photo with a white card in the bottom-left corner. Typography is limited to two pairings: a heavy condensed uppercase sans for trades and a generic high-contrast serif for hospitality/crafts. Automotive sites all use the exact same Slovenian license plate graphic for phone numbers, and hair salons repeat oversized faded watermark text behind the hero.",
+    "recurringIssues": [
+      "The 'regenerated' versions frequently strip out the visual personality and custom motifs of the originals, replacing them with sterile, uninspired 50/50 split layouts.",
+      "Massive empty white gaps appear on the right side of text-only heroes (such as instrukcije-pia-regenerated and racunovodstvo-seliskar-regenerated), making the pages look unfinished.",
+      "The top navigation bar is hard-coded across all 50 sites without any adaptation to the brand's visual weight or industry.",
+      "Several dark full-bleed hero images have murky overlays that make the photography look dull and reduce text legibility.",
+      "Mobile views suffer from redundant navigation, often stacking top call/direction pills at the top while pinning another action bar at the bottom."
+    ],
+    "overall": 3,
+    "variety": 3,
+    "best": [
+      {
+        "id": "pekarna-kvas",
+        "why": "Rich dark palette, warm photography, and the clever paper-bag price tag graphic create an authentic, tactile bakery atmosphere."
+      },
+      {
+        "id": "racunovodstvo-seliskar",
+        "why": "The receipt graphic on a crisp blue background turns a dry accounting service into an immediately engaging, well-balanced visual concept."
+      },
+      {
+        "id": "avto-kovac",
+        "why": "Strong industrial typography, the license-plate phone CTA, and the yellow hazard-stripe footer give it great trade character."
+      }
+    ],
+    "weakest": [
+      {
+        "id": "instrukcije-pia-regenerated",
+        "why": "It has no imagery or visual hook at all, leaving a vast, awkward expanse of empty white space across the entire right half of the screen."
+      },
+      {
+        "id": "racunovodstvo-seliskar-regenerated",
+        "why": "It throws away the clever receipt illustration of the original for a barren, unstyled text block floating in an empty white frame."
+      },
+      {
+        "id": "frizerstvo-lana-regenerated",
+        "why": "The muddy dark overlay and dull maroon footer bar feel heavy and dated, lacking the freshness expected of a modern hair salon."
+      }
+    ],
+    "oneChange": "Stop stripping away bespoke industry motifs in the 'regenerated' pass—keep the tactile graphics (like receipts, price tags, and line art) and break out of the rigid 50/50 split and identical top header bar.",
+    "summary": "Your studio builds clean, functional, and trustworthy websites with clear calls to action, which puts you comfortably above the average local template shop. However, looking at the portfolio as a whole, your system relies too heavily on a single navigation shell and a default 50/50 split layout. Worse, your 'regenerated' versions often downgrade the best work: you had great visual ideas in the originals—like the receipt on racunovodstvo-seliskar, the price tag on pekarna-kvas, and the line-art diagrams on elektro-zupan—that were wiped out in favor of plain boxes or empty white space. Trust those original graphic instincts and vary your header structures so every client feels they got a custom design."
+  }
+}

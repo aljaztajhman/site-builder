@@ -1,0 +1,101 @@
+{
+  "set": "after50",
+  "reviewer": "gpt",
+  "model": "openai/gpt-6.1-sol",
+  "pages": [
+    "avto-kovac",
+    "avto-kovac-regenerated",
+    "avtoservis-mrak",
+    "avtoservis-mrak-regenerated",
+    "brivnica-kos",
+    "brivnica-kos-regenerated",
+    "cvetlicarna-marjetica",
+    "cvetlicarna-marjetica-regenerated",
+    "elektro-zupan",
+    "elektro-zupan-regenerated",
+    "fizioterapija-pregib",
+    "fizioterapija-pregib-regenerated",
+    "frizerski-salon-mia",
+    "frizerski-salon-mia-regenerated",
+    "frizerstvo-lana",
+    "frizerstvo-lana-regenerated",
+    "gostilna-pri-mostu",
+    "gostilna-pri-mostu-regenerated",
+    "gostilna-zlata-zlica",
+    "gostilna-zlata-zlica-regenerated",
+    "gostisce-na-gricu",
+    "gostisce-na-gricu-regenerated",
+    "instalacije-rebernik",
+    "instalacije-rebernik-regenerated",
+    "instrukcije-pia",
+    "instrukcije-pia-regenerated",
+    "karoserija-hribar",
+    "karoserija-hribar-regenerated",
+    "kljucavnicarstvo-hrovat",
+    "kljucavnicarstvo-hrovat-regenerated",
+    "kmetija-grabnar",
+    "kmetija-grabnar-regenerated",
+    "mizarstvo-lesnik",
+    "mizarstvo-lesnik-regenerated",
+    "pekarna-kvas",
+    "pekarna-kvas-regenerated",
+    "pizzeria-oljka",
+    "pizzeria-oljka-regenerated",
+    "prevajanje-kolar",
+    "prevajanje-kolar-regenerated",
+    "racunovodstvo-seliskar",
+    "racunovodstvo-seliskar-regenerated",
+    "salon-tina",
+    "salon-tina-regenerated",
+    "trgovina-oljka-in-sol",
+    "trgovina-oljka-in-sol-regenerated",
+    "vulkanizer-zorman",
+    "vulkanizer-zorman-regenerated",
+    "zobozdravstvo-lebar",
+    "zobozdravstvo-lebar-regenerated"
+  ],
+  "status": "ok",
+  "answer": {
+    "sameness": "The set resolves into a handful of repeated systems: dark photographic trade heroes with heavy uppercase headings, oversized registration-plate phone numbers and zigzag footers; cream bordered text cards overlapping restaurant photographs; salon layouts with oversized pale lettering and arched image crops; and teal shop layouts with framed white cards and circular photographs. Many regenerated pages converge on an even plainer formula: small white header, one rectangular photograph beside text, two modest links and a pale section below. Mobile repeatedly becomes photograph, heading, paragraph and links, with similar call/directions bars. Typography largely alternates between the same heavy,紧",
+    "recurringIssues": [
+      "Identical photographs represent multiple businesses: the lifted car, tree-fronted inn, salon hair and mountain landscape recur across different identities.",
+      "Many regenerated pages remove distinctive composition without replacing it with business-specific art direction.",
+      "Several photographs fail to demonstrate the service: mountain scenery fronts both a carpenter and a tyre business.",
+      "Desktop navigation, supporting text and action links are frequently undersized relative to the hero headings and available space.",
+      "Mobile image-first layouts often push the business proposition and primary content well below repeated contact controls.",
+      "Large dark overlays, uppercase blocks and oversized phone treatments make several trade businesses look interchangeable."
+    ],
+    "overall": 3,
+    "variety": 2,
+    "best": [
+      {
+        "id": "pekarna-kvas",
+        "why": "The warm brown palette, expressive bread typography, shaped photograph and circular opening-time badge form one of the most cohesive and business-specific identities."
+      },
+      {
+        "id": "fizioterapija-pregib",
+        "why": "The restrained mint palette, confident heading and treatment-room image create a clear, calm composition that retains its hierarchy on mobile."
+      },
+      {
+        "id": "brivnica-kos",
+        "why": "Strong editorial typography and paired arched photographs give the barber a recognisable visual character without relying on a dark full-screen stock hero."
+      }
+    ],
+    "weakest": [
+      {
+        "id": "vulkanizer-zorman",
+        "why": "A mountain landscape supplies no visible evidence of tyre work, while the dark overlay, giant uppercase text and number-plate phone treatment repeat the automotive template."
+      },
+      {
+        "id": "mizarstvo-lesnik",
+        "why": "The dominant landscape photograph communicates neither furniture nor craftsmanship, leaving a sparse composition with little visual reason to choose this carpenter."
+      },
+      {
+        "id": "karoserija-hribar-regenerated",
+        "why": "The reused lifted-car photograph and generic white split layout make the page difficult to distinguish from the other regenerated automotive businesses."
+      }
+    ],
+    "oneChange": "Require a distinct, business-specific visual concept and service-relevant lead image for every homepage before adapting it to desktop and mobile; do not approve a page that could represent another client by changing its name.",
+    "summary": "This is competent template production rather than a distinctive studio portfolio. Most screens are orderly, and several originals have memorable visual character. Across fifty pages, however, repeated photographs, typography and hero systems become conspicuous. The regenerated versions often improve simplicity but flatten the identities into another shared layout. Mobile is generally structured, yet repeated contact bars and image-first stacking reinforce the sameness. Preserve the strongest compositions, replace unrelated imagery with evidence of the actual business, and demand clearer visual separation between clients."
+  }
+}

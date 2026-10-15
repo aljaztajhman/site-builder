@@ -1,0 +1,62 @@
+{
+  "set": "fable",
+  "reviewer": "claude",
+  "model": "claude-fable-5-1",
+  "pages": [
+    "atelje-bergant",
+    "kolesarski-servis-ovinek",
+    "optika-jasna",
+    "pasji-salon-kodra",
+    "pivovarna-rov",
+    "plesna-sola-takt",
+    "sirarna-pr-simnu",
+    "steklarstvo-vrhovnik",
+    "urarstvo-tic",
+    "vinarstvo-pinteric"
+  ],
+  "status": "ok",
+  "answer": {
+    "sameness": "Every page is the same split hero: big left-aligned headline, two or three lines of small grey body copy, one tiny pill button, decorative element on the right. Headlines are all the same heavy geometric grotesk at the same size (bergant, ovinek, jasna, kodra, takt, vrhovnik) or the same two serifs (rov/simnu, tic/pinteric). Dark pages are all near-black with one single-weight line icon (clock, feet, hanging cones, pie-chart cheese, vine trellis) drawn in one accent colour; light pages all pair a 'Ustvarjeno z UI' stamped photo in a plain rectangle. Mobile layouts are identical: nav bar, headline, text, image/icon, Klic + Navodila za pot buttons.",
+    "recurringIssues": [
+      "Thin line illustrations float in large empty right halves with no relation to the type, leaving the hero feeling half-finished (jasna, takt, pinteric, ovinek).",
+      "Microscopic body copy and tiny single buttons give every page a weak, under-scaled call to action.",
+      "Large dead vertical space under the headline on desktop (jasna, pinteric, bergant) because content stops halfway down.",
+      "Photo tiles sit as un-cropped rectangles pasted onto white, flat and stock-like (kodra, vrhovnik, bergant).",
+      "Mobile first screens cut off awkwardly: pinteric shows a sliced heading, takt overlaps phone number and button, jasna shows an empty blue bar.",
+      "Visible 'Ustvarjeno z UI' badges on hero images undermine credibility.",
+      "Only two palettes in effect: cream/white with one accent, or near-black with one accent."
+    ],
+    "overall": 3,
+    "variety": 2,
+    "best": [
+      {
+        "id": "sirarna-pr-simnu",
+        "why": "Deep green, warm yellow serif and the cheese-wheel mark combine into a confident, memorable identity that fits a farm dairy."
+      },
+      {
+        "id": "pivovarna-rov",
+        "why": "The hanging lamp drawing, dark ground and amber accent actually evoke an old mine bath, and the phone number reads as a design element."
+      },
+      {
+        "id": "urarstvo-tic",
+        "why": "The oversized clock face and serif headline give a quiet, credible craftsman tone, and the mobile stack holds together."
+      }
+    ],
+    "weakest": [
+      {
+        "id": "vinarstvo-pinteric",
+        "why": "Headline marooned top-left with a tiny vine doodle in the corner; the desktop hero is mostly empty beige and the mobile crop slices a heading."
+      },
+      {
+        "id": "optika-jasna",
+        "why": "Clip-art glasses outline, an awkward blue service bar and dead space below make it the most template-like page."
+      },
+      {
+        "id": "kolesarski-servis-ovinek",
+        "why": "The green bent pipe is meaningless as a bike motif and the address block jammed beside the logo looks unresolved."
+      }
+    ],
+    "oneChange": "Break the single hero template: give each business its own composition and scale (full-bleed photography, type that fills the screen, real illustration systems instead of one thin line icon) and let the imagery dominate rather than sit as a decorative afterthought beside a fixed text column.",
+    "summary": "The set is clean, legible and consistent, but it is one layout wearing ten outfits: same headline block, same small grey paragraph, same small button, same lonely line icon or stamped photo on the right. The dark serif pages (Simnu, Rov, Tič) show the studio can build character; the light pages fall back to a generic template with too much empty space and tiny calls to action. Mobile screens are competent but mechanical, and several first screens cut content awkwardly. Lose the visible AI watermarks, scale up body copy and buttons, and design each hero around the business's imagery rather than slotting it into the fixed frame. Right now a client could not tell which site is theirs from across the room."
+  }
+}

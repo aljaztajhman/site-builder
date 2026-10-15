@@ -1,0 +1,61 @@
+{
+  "set": "today",
+  "reviewer": "gpt",
+  "model": "openai/gpt-6.1-sol",
+  "pages": [
+    "atelje-bergant",
+    "kolesarski-servis-ovinek",
+    "optika-jasna",
+    "pasji-salon-kodra",
+    "pivovarna-rov",
+    "plesna-sola-takt",
+    "sirarna-pr-simnu",
+    "steklarstvo-vrhovnik",
+    "urarstvo-tic",
+    "vinarstvo-pinteric"
+  ],
+  "status": "ok",
+  "answer": {
+    "sameness": "The set resolves into a few repeated families: white split heroes with bold sans-serif headings and rectangular photographs (atelje-bergant, kolesarski-servis-ovinek, steklarstvo-vrhovnik); framed cream cards, serif headings, leafy ornaments and arched photographs on dark backgrounds (sirarna-pr-simnu, urarstvo-tic); and landscape photographs with overlapping editorial cards (pivovarna-rov, vinarstvo-pinteric). Plesna-sola-takt adds an arch to the familiar split hero. Small wordmark headers, underlined secondary links, compact coloured buttons and image-first mobile stacks recur throughout. Burgundy, teal and forest green differentiate pages, but the underlying compositions remain conspicu­“",
+    "recurringIssues": [
+      "Identical compositions and decorative details are reused across unrelated businesses, making parts of the portfolio look reskinned rather than individually designed.",
+      "Several desktop heroes leave substantial white space around small text blocks, weakening presence and making the layouts feel underdeveloped.",
+      "Mobile bottom action bars compete with page content and, on several screens, sit across photographs, cards or the beginning of the following section.",
+      "Many hero photographs show objects rather than people, premises or work in progress, giving the portfolio an impersonal, interchangeable promotional feel.",
+      "Tiny dark labels repeat across hero photographs and distract from otherwise clean presentations.",
+      "Optika-jasna's yellow, bracketed phone-number field looks like an unfinished implementation rather than a resolved form component."
+    ],
+    "overall": 3,
+    "variety": 3,
+    "best": [
+      {
+        "id": "optika-jasna",
+        "why": "The circular eyewear image, mint surround, coral arc and tilted information tag create the clearest distinctive visual identity, despite the unresolved-looking form."
+      },
+      {
+        "id": "vinarstvo-pinteric",
+        "why": "The vineyard photograph and deep-green editorial panel establish a coherent atmosphere, with a particularly convincing image-to-content transition on mobile."
+      },
+      {
+        "id": "pivovarna-rov",
+        "why": "The expansive landscape, prominent masthead and inset cream card give this page a stronger sense of place and a more memorable composition than the standard split heroes."
+      }
+    ],
+    "weakest": [
+      {
+        "id": "steklarstvo-vrhovnik",
+        "why": "The generic centred header, small copy block, disconnected glass photograph and large white gaps produce the least distinctive desktop composition."
+      },
+      {
+        "id": "atelje-bergant",
+        "why": "A conventional split hero and broadly illustrative photograph underplay an architecture business, while the tall mobile contact header delays the main content."
+      },
+      {
+        "id": "urarstvo-tic",
+        "why": "Although visually tidy, its double-bordered card, leafy ornament and arched image duplicate the cheese page so closely that the watchmaker lacks an independent design language."
+      }
+    ],
+    "oneChange": "Require a genuinely different art-direction concept for each business before production, with its own hero structure, typographic hierarchy and photographic brief—not another palette applied to an existing composition.",
+    "summary": "This is a competent template portfolio, not yet a distinctive studio portfolio. Most pages are readable, the colour choices are controlled, and several mobile layouts hold together well. The weakness is repetition: unrelated businesses share not just components but entire visual concepts. The optics, brewery and winery pages show more character; the basic split heroes and duplicated ornamental cards pull the set back toward ordinary template work. Invest in business-specific art direction before adding more decorative variations, then tighten mobile action-bar behaviour and remove unfinished-looking interface details."
+  }
+}
