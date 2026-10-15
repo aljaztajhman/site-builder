@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The readable, trade-appropriate typography works, but the long introductory contact stack delays the services and leaves the tyre image far down the page.\",\n  \"desktopNote\": \"The opening service-and-contact layout is clear, but generous empty bands and the oversized footer wordmark make the page feel unnecessarily stretched.\",\n  \"phone\": {\n    \"impression\": 3,\n    \"hierarchy\": 4,\n    \"imagery\": 3,\n    \"spacing\": 3,\n    \"clutter\": 3,\n    \"distinctiveness\": 3\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 3,\n    \"spacing\": 3,\n    \"clutter\": 3,\n    \"distinctiveness\": 3\n  },\n  \"fixes\": [\n    \"Compact the phone introduction: tighten the headline-to-body spacing, group address and opening hours more efficiently, and remove the extra standalone call link so services appear sooner.\",\n    \"Reduce desktop section padding and shrink the footer wordmark substantially, keeping the service list and practical contact information visually dominant.\",\n    \"Move the tyre image closer to the opening service content, using a compact crop on phones and an integrated image panel on desktop to establish the trade earlier.\"\n  ],\n  \"blockers\": []\n}",
+  "usage": {
+    "prompt_tokens": 8309,
+    "completion_tokens": 398,
+    "cost": 0.024751
+  }
+}

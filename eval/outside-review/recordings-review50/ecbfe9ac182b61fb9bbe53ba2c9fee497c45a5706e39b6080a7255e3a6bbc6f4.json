@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The opening photo and typography are inviting, but the oversized opening-hours section delays services and prices while the address remains buried in the footer.\",\n  \"desktopNote\": \"The hero is well balanced, but generous empty bands and a full-width opening-hours chart give secondary information too much prominence.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 3,\n    \"imagery\": 4,\n    \"spacing\": 3,\n    \"clutter\": 4,\n    \"distinctiveness\": 3\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 3,\n    \"imagery\": 4,\n    \"spacing\": 3,\n    \"clutter\": 4,\n    \"distinctiveness\": 3\n  },\n  \"fixes\": [\n    \"Add a compact location line beneath the hero headline on both viewports so visitors see the salon’s location before the contact action.\",\n    \"Replace the oversized hours chart with a compact day-and-time list, and reduce desktop section padding and the phone hero’s trailing empty space.\",\n    \"Combine service descriptions and prices into one scannable section, positioned before the salon story, to avoid making visitors traverse two separate service lists.\"\n  ],\n  \"blockers\": []\n}",
+  "usage": {
+    "prompt_tokens": 10283,
+    "completion_tokens": 411,
+    "cost": 0.029816
+  }
+}

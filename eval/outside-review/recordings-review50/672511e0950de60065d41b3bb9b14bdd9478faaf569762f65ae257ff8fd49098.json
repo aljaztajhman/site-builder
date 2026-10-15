@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"The hero photo is a misty forest landscape, not the workshop or furniture, so the first screen shows nothing of what the mizar actually makes.\",\"desktopNote\":\"The hero sits in a half-empty band with the headline column floating, and the hero image again shows a valley rather than wood or furniture; the nav is a lone 'Domov' link.\",\"phone\":{\"impression\":3,\"hierarchy\":4,\"imagery\":2,\"spacing\":3,\"clutter\":4,\"distinctiveness\":3},\"desktop\":{\"impression\":3,\"hierarchy\":3,\"imagery\":2,\"spacing\":2,\"clutter\":4,\"distinctiveness\":3},\"fixes\":[\"Replace the landscape hero with a photo of the workshop, a finished kitchen or table, and give the product list (Kuhinje, Mize…) at least small images so the trade is visible.\",\"Tighten the desktop hero and the 1979 band: reduce the dead space below the hero and around the oversized year, and let the 'Čakalna doba' notice span or sit beside content instead of a lone box.\",\"Drop the single-item 'Domov' nav row on desktop or fill it with section links (Kaj izdelujemo, Les, Kontakt) so the header earns its height.\"],\"blockers\":[]}",
+  "usage": {
+    "prompt_tokens": 12006,
+    "completion_tokens": 423
+  },
+  "batch": true
+}

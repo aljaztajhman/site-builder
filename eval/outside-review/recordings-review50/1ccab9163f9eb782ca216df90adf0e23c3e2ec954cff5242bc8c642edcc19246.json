@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"The hero card hides the soup photo almost entirely and the footer repeats address, phone and e-mail already shown in the maroon contact band directly above.\",\"desktopNote\":\"Hero works well with the overlapping card on the soup photo, but the footer's giant 'Gostilna Pri mostu' wordmark and duplicated contact block add a dead, repetitive tail.\",\"phone\":{\"impression\":3,\"hierarchy\":3,\"imagery\":3,\"spacing\":3,\"clutter\":3,\"distinctiveness\":3},\"desktop\":{\"impression\":4,\"hierarchy\":4,\"imagery\":4,\"spacing\":3,\"clutter\":3,\"distinctiveness\":4},\"fixes\":[\"Merge the maroon reservation band and the footer into one contact block; drop the oversized footer wordmark and the second address/phone/e-mail listing.\",\"On phone, shrink the hero card or let it sit below the photo so the soup is actually visible in the first screen, and give the primary action a real button instead of an underlined link.\",\"Move the interior photo up next to the 'Naša družina' or 1968 story and tighten the empty bands around the price section and family list.\"],\"blockers\":[\"Phone and desktop footer: the address, phone and e-mail are repeated immediately after the maroon contact section that shows the same details.\"]}",
+  "usage": {
+    "prompt_tokens": 11763,
+    "completion_tokens": 435
+  },
+  "batch": true
+}

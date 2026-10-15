@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The arched images and serif typography feel considered, but the oversized opening-hours section pushes prices and location too far down the page.\",\n  \"desktopNote\": \"The four-line hero headline dominates the first screen, while oversized section headings and a sparse biography section weaken the page’s rhythm.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 3,\n    \"imagery\": 4,\n    \"spacing\": 3,\n    \"clutter\": 4,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 3,\n    \"hierarchy\": 2,\n    \"imagery\": 4,\n    \"spacing\": 3,\n    \"clutter\": 4,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Reduce the desktop hero headline to two or three lines and add a compact location line near the business description on both screens.\",\n    \"Replace the tall opening-hours chart with compact day-and-time rows, especially on phone, so visitors reach the price list sooner.\",\n    \"Use a consistent, smaller section-heading scale and reduce the biography section’s padding and footer wordmark size to remove low-content expanses.\"\n  ],\n  \"blockers\": []\n}",
+  "usage": {
+    "prompt_tokens": 9230,
+    "completion_tokens": 420,
+    "cost": 0.0272735
+  }
+}

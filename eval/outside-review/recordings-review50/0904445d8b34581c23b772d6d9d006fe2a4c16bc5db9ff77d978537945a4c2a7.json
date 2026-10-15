@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"Large gaps between the hero text, links and narrow photo push most of the hairstyle below the first screen and make the opening feel unfinished.\",\n  \"desktopNote\": \"The oversized four-line headline overwhelms the hero, while the enlarged hairstyle photo looks soft and the location remains buried below.\",\n  \"phone\": {\n    \"impression\": 3,\n    \"hierarchy\": 3,\n    \"imagery\": 3,\n    \"spacing\": 2,\n    \"clutter\": 3,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 3,\n    \"hierarchy\": 2,\n    \"imagery\": 3,\n    \"spacing\": 3,\n    \"clutter\": 3,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Recompose the hero: reduce the desktop headline to two or three lines, add a compact location line near the introduction, and make booking the clear primary action.\",\n    \"On phone, remove the large gaps around the hero links and bring a wider hairstyle photo higher so the finished hairstyle is visible in the first screen.\",\n    \"Remove the repeated hairstyle inset from the about section and use the bridal photo alone; use a sharper source for the large desktop hero image.\"\n  ],\n  \"blockers\": [\n    \"Phone and desktop, about section: the inset repeats the same hairstyle photo already used in the hero.\"\n  ]\n}",
+  "usage": {
+    "prompt_tokens": 9673,
+    "completion_tokens": 417,
+    "cost": 0.028351
+  }
+}

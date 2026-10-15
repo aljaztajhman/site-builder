@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"Phone first screen works: salon photo, name, headline and intro in order, but the hero lacks any sense of place and the opening-hours timeline turns into tall repetitive bars that eat a full screen.\",\"desktopNote\":\"Desktop hero is solid, yet the page has dead bands between sections (below the hero, under the hours, under the services) and a near-empty 'Kdo vas postriže' team block with no faces.\",\"phone\":{\"impression\":4,\"hierarchy\":4,\"imagery\":4,\"spacing\":3,\"clutter\":4,\"distinctiveness\":3},\"desktop\":{\"impression\":4,\"hierarchy\":4,\"imagery\":4,\"spacing\":2,\"clutter\":4,\"distinctiveness\":3},\"fixes\":[\"Tighten vertical padding: remove the empty bands after the hero, hours and services on desktop (and the gap below the phone hero) for a consistent rhythm.\",\"Add a short address/location line to the hero so where the salon is reads right after what it does.\",\"Give 'Kdo vas postriže' portraits or at least a short line per person; two names with underlines on an empty band looks unfinished.\"],\"blockers\":[]}",
+  "usage": {
+    "prompt_tokens": 12333,
+    "completion_tokens": 387
+  },
+  "batch": true
+}

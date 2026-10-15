@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"The hero's primary action is a plain underlined text link with no button weight, and the footer repeats the restaurant name three times under an oversized wordmark.\",\"desktopNote\":\"Below the hero the page runs down the left half only (menu, hours) leaving dead bands on the right, and the footer wordmark balloons to two 200px lines.\",\"phone\":{\"impression\":3,\"hierarchy\":4,\"imagery\":4,\"spacing\":3,\"clutter\":3,\"distinctiveness\":3},\"desktop\":{\"impression\":3,\"hierarchy\":4,\"imagery\":4,\"spacing\":2,\"clutter\":3,\"distinctiveness\":3},\"fixes\":[\"Make 'Pokličite nas' a filled button on phone and in the dark CTA band (as in the desktop hero) so one primary action reads clearly on each screen.\",\"On desktop lay the menu and opening hours out in two columns (e.g. hours beside the menu or paired with the interior photo) so the right half of the page is not empty.\",\"Shrink the footer wordmark to a single line and drop the duplicate bold business name underneath; keep one address/contact block.\"],\"blockers\":[]}",
+  "usage": {
+    "prompt_tokens": 11783,
+    "completion_tokens": 1360
+  },
+  "batch": true
+}

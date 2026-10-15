@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"The hero card works, but the phone number and directions in the header duplicate the fixed bottom bar, and the team section is a near-empty block with just one name.\",\"desktopNote\":\"The hero is handsome, yet the team section is a huge headline over a single name with a dead right half, and the menu band has empty space below the prices.\",\"phone\":{\"impression\":3,\"hierarchy\":4,\"imagery\":4,\"spacing\":3,\"clutter\":3,\"distinctiveness\":3},\"desktop\":{\"impression\":4,\"hierarchy\":4,\"imagery\":4,\"spacing\":2,\"clutter\":3,\"distinctiveness\":3},\"fixes\":[\"Cut the 'Kdo skrbi za peč in mize' section to a small line in the contact block or add a photo of the staff/oven; a giant heading over one name is a dead band.\",\"Drop the phone/directions row under the phone header; the fixed bar already carries both, and the header on desktop already shows the number.\",\"Tighten the dark menu band (less bottom padding, smaller prices) and add a pizza photo so the food, not the dough still-life, carries the page.\"],\"blockers\":[]}",
+  "usage": {
+    "prompt_tokens": 9174,
+    "completion_tokens": 377
+  },
+  "batch": true
+}

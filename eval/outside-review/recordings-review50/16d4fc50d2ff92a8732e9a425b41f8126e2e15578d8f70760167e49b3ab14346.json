@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"Phone first screen is strong: photo, headline, one orange CTA all above the fold, though phone and directions appear three times (header bar, contact block, fixed bar) before the fold.\",\"desktopNote\":\"Desktop hero works, but the menu section leaves the right half of a wide pale band empty and the '2015' numeral plus wide gaps make the middle of the page feel sparse.\",\"phone\":{\"impression\":4,\"hierarchy\":4,\"imagery\":4,\"spacing\":3,\"clutter\":3,\"distinctiveness\":4},\"desktop\":{\"impression\":4,\"hierarchy\":4,\"imagery\":4,\"spacing\":2,\"clutter\":4,\"distinctiveness\":4},\"fixes\":[\"Desktop menu: use the empty right half (second column of dishes or the oven photo) instead of a single 740px list in a full-width band.\",\"Phone: drop the phone/directions row under the header – the fixed bottom bar and the contact block already cover it.\",\"Tighten the '2015' / 'Kdo smo' section: reduce the numeral and the vertical padding so it doesn't read as a dead band on desktop.\"],\"blockers\":[]}",
+  "usage": {
+    "prompt_tokens": 11880,
+    "completion_tokens": 385
+  },
+  "batch": true
+}

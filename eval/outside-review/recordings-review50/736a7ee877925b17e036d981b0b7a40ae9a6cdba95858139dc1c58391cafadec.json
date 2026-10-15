@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"Phone reads well: photo first, headline fits, one button; the footer's huge 'Gostilna Pri Zlati Žlici' heading wraps awkwardly and the price grid leaves ragged gaps.\",\"desktopNote\":\"Desktop hero card overlapping the photo works, but the prices section and opening hours leave the right half of the 1280px canvas empty.\",\"phone\":{\"impression\":4,\"hierarchy\":4,\"imagery\":4,\"spacing\":3,\"clutter\":4,\"distinctiveness\":4},\"desktop\":{\"impression\":4,\"hierarchy\":4,\"imagery\":4,\"spacing\":2,\"clutter\":4,\"distinctiveness\":4},\"fixes\":[\"Desktop: fill the right half of 'Kdaj smo odprti' with a map or address block, and tighten the price grid so 'Orehovi štruklji' doesn't sit alone on a second row with large empty bands.\",\"Phone: shrink the footer business-name heading to the body-brand size; its two-line display setting dwarfs the hero headline.\",\"Both: give the text columns beside the dish/terrace/kitchen photos a vertical centre and cap the photo heights so the 'Z domače mize' block isn't a wide shallow text next to a tall image.\"],\"blockers\":[]}",
+  "usage": {
+    "prompt_tokens": 12527,
+    "completion_tokens": 430
+  },
+  "batch": true
+}

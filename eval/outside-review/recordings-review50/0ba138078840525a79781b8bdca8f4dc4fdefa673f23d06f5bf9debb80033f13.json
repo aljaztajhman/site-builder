@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The electrical graphic gives the page character, but the tall hero delays the service area and credentials while repeating the directions link.\",\n  \"desktopNote\": \"The coordinated wiring graphics feel trade-specific, but oversized typography and generous empty bands make the page less efficient to scan.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 3,\n    \"imagery\": 4,\n    \"spacing\": 3,\n    \"clutter\": 3,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 3,\n    \"imagery\": 4,\n    \"spacing\": 3,\n    \"clutter\": 3,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Bring the service area into the hero, immediately after the service description and before the call action, so visitors see what, where and how to contact you in order.\",\n    \"Compact the hero on both screens: reduce the desktop headline slightly, tighten the mobile gaps around the socket illustration, and bring the credentials section closer.\",\n    \"Keep one directions link in the hero/header area and remove the repeated phone and email row from the footer, leaving legal and navigation information there.\"\n  ],\n  \"blockers\": [\n    \"Phone and desktop footer: the phone and email contact row repeats the contact section immediately above it.\"\n  ]\n}",
+  "usage": {
+    "prompt_tokens": 10024,
+    "completion_tokens": 454,
+    "cost": 0.0295985
+  }
+}

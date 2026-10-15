@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The oversized hero card hides most of the food photograph, leaving the first screen dominated by text and an uninformative crop of the tabletop.\",\n  \"desktopNote\": \"The warm palette and restaurant photography work well, but oversized typography—especially the year and footer name—overpowers practical information.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 3,\n    \"imagery\": 2,\n    \"spacing\": 3,\n    \"clutter\": 3,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 3,\n    \"imagery\": 4,\n    \"spacing\": 3,\n    \"clutter\": 3,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Recompose the phone hero with a shorter text panel and a food-focused crop so the dish remains clearly visible and the offer link sits comfortably above the fixed bar.\",\n    \"Reduce the desktop hero headline, founding year and footer wordmark; tighten oversized section padding to give opening hours and meal offers greater prominence.\",\n    \"Keep the reservation section as the single complete contact block and simplify the footer to business identification, legal details and utility links.\"\n  ],\n  \"blockers\": [\n    \"Phone and desktop: the footer repeats the address, telephone and email immediately after the complete reservation/contact section.\"\n  ]\n}",
+  "usage": {
+    "prompt_tokens": 9768,
+    "completion_tokens": 463,
+    "cost": 0.0290485
+  }
+}

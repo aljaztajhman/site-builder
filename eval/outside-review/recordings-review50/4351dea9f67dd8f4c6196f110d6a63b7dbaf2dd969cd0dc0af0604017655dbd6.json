@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"Phone first screen is clean but the phone number and directions appear three times before the services start (header strip, hero link, contact block), and the vineyard mood picture has nothing to do with plumbing.\",\"desktopNote\":\"Desktop hero is a solid split layout, but the tall portrait vineyard photo beside two short paragraphs leaves a large dead band and the picture is off-trade.\",\"phone\":{\"impression\":3,\"hierarchy\":4,\"imagery\":3,\"spacing\":3,\"clutter\":2,\"distinctiveness\":3},\"desktop\":{\"impression\":3,\"hierarchy\":4,\"imagery\":3,\"spacing\":3,\"clutter\":3,\"distinctiveness\":3},\"fixes\":[\"Remove the grey phone/address block directly under the hero (contact is already in the header and the fixed bar) so the services start right after the hero.\",\"Replace the vineyard landscape with a trade picture (installed heat pump, bathroom, boiler room) and crop it to the text height on desktop to kill the empty band.\",\"Give the 'Pokličite nas' call-to-action a real button style with the brand blue so the primary action reads at a glance instead of as a small underlined link.\"],\"blockers\":[]}",
+  "usage": {
+    "prompt_tokens": 12145,
+    "completion_tokens": 401
+  },
+  "batch": true
+}

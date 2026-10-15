@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The hero text card covers almost the entire bowl of soup, leaving only wood grain and the rim of the bowl visible on the first screen.\",\n  \"desktopNote\": \"The editorial layout, warm burgundy palette, and double-bordered hero card create a very fitting, authentic atmosphere for a traditional gostilna.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 2,\n    \"spacing\": 4,\n    \"clutter\": 5,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 5,\n    \"hierarchy\": 5,\n    \"imagery\": 4,\n    \"spacing\": 5,\n    \"clutter\": 5,\n    \"distinctiveness\": 5\n  },\n  \"fixes\": [\n    \"On phone, stack the hero card below the image or increase top image height so the bowl of soup is actually visible rather than covered by the white box.\",\n    \"Reduce the oversized 'Gostilna Pri mostu' display heading in the white footer so it doesn't compete with the main hero headline.\",\n    \"Replace the single 'Domov' link in the desktop header with anchor links to the menu, opening hours, and contact section.\"\n  ],\n  \"blockers\": []\n}",
+  "usage": {
+    "prompt_tokens": 11472,
+    "completion_tokens": 318,
+    "cost": 0.026124
+  }
+}

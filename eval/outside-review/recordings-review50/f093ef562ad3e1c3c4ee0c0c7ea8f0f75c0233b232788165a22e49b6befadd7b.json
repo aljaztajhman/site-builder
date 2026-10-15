@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"Clean, readable first screen with photo, headline and one CTA, but the price grid breaks into an uneven 2+1 layout and the hero photo is a generic desk stock mood.\",\"desktopNote\":\"Hero and sections are tidy, but the 'Za koga delam' block leaves a huge empty right column under the text while the tall photo runs on, and the footer wordmark is oversized.\",\"phone\":{\"impression\":3,\"hierarchy\":4,\"imagery\":3,\"spacing\":3,\"clutter\":4,\"distinctiveness\":2},\"desktop\":{\"impression\":3,\"hierarchy\":4,\"imagery\":3,\"spacing\":2,\"clutter\":4,\"distinctiveness\":2},\"fixes\":[\"Desktop 'Za koga delam': shorten the photo or add content so the right column isn't a dead band; on phone lay the three prices out as a single column or equal 3-up cards.\",\"Replace the generic desk mood photos with something tied to tutoring (a worked problem, a student at a table) and drop the hero image so it sits higher on phone.\",\"Scale down the footer wordmark on desktop and give the hero on desktop a tighter vertical rhythm so text doesn't float in the middle of the left column.\"],\"blockers\":[]}",
+  "usage": {
+    "prompt_tokens": 11573,
+    "completion_tokens": 416
+  },
+  "batch": true
+}

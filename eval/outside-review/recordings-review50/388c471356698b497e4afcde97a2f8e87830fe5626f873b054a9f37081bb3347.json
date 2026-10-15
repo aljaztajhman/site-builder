@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"Phone first screen works well—photo, headline and call link in order—but the footer repeats the business name three times and the price grid breaks the fifth item onto a lone row.\",\"desktopNote\":\"Desktop hero is handsome, yet the lower sections sit in large dead bands: the opening-hours block and the story section have huge empty areas and the price grid leaves most of the row empty.\",\"phone\":{\"impression\":4,\"hierarchy\":4,\"imagery\":4,\"spacing\":3,\"clutter\":3,\"distinctiveness\":4},\"desktop\":{\"impression\":4,\"hierarchy\":4,\"imagery\":4,\"spacing\":2,\"clutter\":3,\"distinctiveness\":4},\"fixes\":[\"Tighten the vertical padding of the price, hours and story sections on desktop; the hours and story blocks each sit in roughly a full screen of empty dark space.\",\"Lay out the five prices so they don't leave a lone orphan in a second row (e.g. a single column list or 5-across on desktop, 2+2+1 centred on phone).\",\"Reduce footer repetition: the giant 'Brivnica Kos' wordmark, the bold 'Brivnica Kos' line and the logo say the same thing; keep one and merge the contact CTA with the footer address.\"],\"blockers\":[]}",
+  "usage": {
+    "prompt_tokens": 11279,
+    "completion_tokens": 430
+  },
+  "batch": true
+}
