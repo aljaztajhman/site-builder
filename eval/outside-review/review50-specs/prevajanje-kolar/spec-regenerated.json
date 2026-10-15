@@ -1,0 +1,310 @@
+{
+  "slug": "prevajanje-kolar",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Sodna tolmačka za nemščino in angleščino, Ljubljana",
+        "description": "Nina Kolar prevaja in overja listine, dela strokovne prevode ter tolmači na sodišču, pri notarju in na upravni enoti. Pisarna v Ljubljani."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "tone": "default",
+          "type": "hero-type",
+          "props": {
+            "intro": "Prevajam in overjam listine za tujino in iz tujine, delam strokovne prevode za podjetja ter tolmačim na sodišču, pri notarju in na upravni enoti.",
+            "eyebrow": "Sodna tolmačka, Ljubljana",
+            "primary": {
+              "label": "Pošljite povpraševanje",
+              "target": {
+                "action": "email"
+              }
+            },
+            "headline": "Overjeni prevodi listin za nemščino in angleščino"
+          },
+          "variant": "with-facts"
+        },
+        {
+          "id": "s_prices",
+          "type": "price-list",
+          "props": {
+            "intro": "Cene, ki jih že lahko povem vnaprej.",
+            "title": "Cene prevodov in overitev",
+            "groups": [
+              {
+                "items": [
+                  {
+                    "name": "Prevod listin",
+                    "price": {
+                      "from": true,
+                      "unit": "na stran",
+                      "amount": 25
+                    }
+                  },
+                  {
+                    "name": "Sodna overitev",
+                    "price": {
+                      "unit": "na dokument",
+                      "amount": 10
+                    }
+                  }
+                ]
+              }
+            ],
+            "footnote": "Nujni prevod v 24 urah stane za polovico več od običajnega."
+          },
+          "variant": "table"
+        },
+        {
+          "id": "s_services",
+          "tone": "default",
+          "type": "services-list",
+          "props": {
+            "items": [
+              {
+                "name": "Prevod listin z overitvijo",
+                "description": "Rojstne liste, diplome, spričevala, pogodbe, sodbe, zdravniške izvide in dokumente za uvoz avta, za tujino in iz tujine."
+              },
+              {
+                "name": "Nujni prevod v 24 urah",
+                "description": "Cena je za polovico višja od običajne."
+              },
+              {
+                "name": "Prevodi za podjetja",
+                "description": "Tehnična navodila, spletne strani in katalogi."
+              },
+              {
+                "name": "Sodno tolmačenje",
+                "description": "Tolmačim na sodišču, pri notarju in na upravni enoti."
+              },
+              {
+                "name": "Ponudba za večje prevode",
+                "description": "Dokument mi pošljete po e-pošti, ponudbo dobite v enem dnevu."
+              }
+            ],
+            "title": "Kaj prevajam in tolmačim",
+            "eyebrow": "Storitve"
+          },
+          "variant": "rows"
+        },
+        {
+          "id": "s_about",
+          "type": "about",
+          "props": {
+            "eyebrow": "Nina Kolar",
+            "heading": "Sodna tolmačka za nemški in angleški jezik",
+            "paragraphs": [
+              "Sem Nina Kolar. Prevajam in overjam listine za posameznike ter delam strokovne prevode za podjetja."
+            ]
+          },
+          "variant": "text-only"
+        },
+        {
+          "id": "s_cta",
+          "tone": "inverse",
+          "type": "cta",
+          "props": {
+            "text": "Pošljite ga po e-pošti, pa vam v enem dnevu odgovorim s ponudbo.",
+            "heading": "Imate dokument za prevod?",
+            "primary": {
+              "label": "Pišite mi",
+              "target": {
+                "action": "email"
+              }
+            }
+          },
+          "variant": "band"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Prevajanje Kolar",
+        "description": "Kako Prevajanje Kolar obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Prevajanje Kolar",
+        "description": "Izjava o dostopnosti spletne strani Prevajanje Kolar."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-15",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Prevajanje Kolar",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "logo": {
+      "src": "sites/site_f64e7c409606f116/uploads/logo.svg",
+      "file": "logo.png",
+      "width": 150,
+      "height": 48
+    },
+    "images": [
+      {
+        "id": "img_g3",
+        "alt": "Pisalna miza s kupom papirja, nalivnim peresom in blazinico za žig",
+        "src": "sites/site_f64e7c409606f116/generated/img_g3.jpg",
+        "width": 1536,
+        "height": 1024,
+        "origin": "generated"
+      },
+      {
+        "id": "img_g4",
+        "alt": "Odprta nemški in angleški slovar na leseni mizi",
+        "src": "sites/site_f64e7c409606f116/generated/img_g4.jpg",
+        "width": 1536,
+        "height": 1024,
+        "origin": "generated"
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "columns"
+    },
+    "header": {
+      "cta": "call",
+      "tone": "default",
+      "variant": "bar"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.25,
+    "colors": {
+      "text": "#111418",
+      "muted": "#4a5360",
+      "accent": "#4a6487",
+      "border": "#d5dbe3",
+      "inverse": "#111418",
+      "primary": "#264064",
+      "surface": "#f1f4f8",
+      "onInverse": "#f5f5f5",
+      "onPrimary": "#ffffff",
+      "background": "#ffffff"
+    },
+    "radius": 2,
+    "shadow": "none",
+    "density": "regular",
+    "imagery": "natural",
+    "fontPair": "inter-tight-inter",
+    "skeleton": {
+      "cards": "none",
+      "width": "full",
+      "footer": "visit",
+      "header": "compact",
+      "actions": "header",
+      "buttons": "soft",
+      "dividers": "rule",
+      "footerTone": "default",
+      "photoRatio": "portrait"
+    },
+    "direction": "clean-swiss",
+    "headingCase": "normal",
+    "baseFontSize": 17,
+    "headingWeight": 700,
+    "headingTracking": -0.015
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Prevajanje Kolar",
+    "type": "accountant",
+    "email": "nina@prevodi-kolar.example",
+    "hours": {
+      "note": "Petek po dogovoru. Pisarna je v 2. nadstropju, parkirišče je za stavbo.",
+      "entries": [
+        {
+          "to": "thu",
+          "from": "mon",
+          "open": "09:00",
+          "close": "15:00"
+        }
+      ]
+    },
+    "phone": "+38640555274",
+    "address": {
+      "city": "Ljubljana",
+      "street": "Vošnjakova ulica 3",
+      "postalCode": "1000"
+    },
+    "provider": {
+      "vatPayer": true,
+      "legalName": "Nina Kolar s.p.",
+      "taxNumber": "SI55512847",
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      }
+    }
+  },
+  "specVersion": 21
+}

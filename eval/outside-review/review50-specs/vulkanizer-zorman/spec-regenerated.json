@@ -1,0 +1,310 @@
+{
+  "slug": "vulkanizer-zorman",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Vulkanizerstvo Zorman Ptuj | Menjava in hramba gum",
+        "description": "Družinska vulkanizerska delavnica v Ptuju. Menjava, centriranje, krpanje, dušik in hramba gum. Naročite se po telefonu."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "tone": "default",
+          "type": "hero-type",
+          "props": {
+            "intro": "Za osebna vozila, kombije in manjše traktorje. Spomladi in jeseni je gneča, zato se prej naročite po telefonu.",
+            "eyebrow": "Vulkanizerstvo v Ptuju",
+            "primary": {
+              "label": "Pokličite nas",
+              "target": {
+                "action": "call"
+              }
+            },
+            "headline": "Gume menjamo, krpamo in hranimo"
+          },
+          "variant": "with-facts"
+        },
+        {
+          "id": "s_services",
+          "tone": "default",
+          "type": "services-list",
+          "props": {
+            "intro": "Cene veljajo za posamezno storitev.",
+            "items": [
+              {
+                "name": "Menjava in centriranje kompleta gum",
+                "price": {
+                  "unit": "komplet",
+                  "amount": 28
+                },
+                "description": "Za osebna vozila, kombije in manjše traktorje."
+              },
+              {
+                "name": "Krpanje predrte gume",
+                "price": {
+                  "unit": "guma",
+                  "amount": 12
+                },
+                "description": "Popravilo predrte gume."
+              },
+              {
+                "name": "Hramba gum čez sezono",
+                "price": {
+                  "unit": "komplet",
+                  "amount": 35
+                },
+                "description": "Hramba kompleta za eno sezono."
+              },
+              {
+                "name": "Polnjenje z dušikom",
+                "price": {
+                  "note": "Dodajte ceno polnjenja z dušikom",
+                  "$placeholder": "price"
+                },
+                "description": "Gume napolnimo z dušikom."
+              },
+              {
+                "name": "Nove gume vseh večjih znamk",
+                "description": "Cena po ponudbi."
+              }
+            ],
+            "title": "Storitve za vaše gume",
+            "eyebrow": "Kaj delamo"
+          },
+          "variant": "rows"
+        },
+        {
+          "id": "s_story",
+          "tone": "alt",
+          "type": "image-text",
+          "props": {
+            "image": "img_g4",
+            "eyebrow": "Družina Zorman",
+            "heading": "Od očeta Stanka do sina Mateja",
+            "paragraphs": [
+              "Delavnico je leta 1994 odprl Stanko Zorman. Danes jo vodi sin Matej.",
+              "Najdete nas takoj za bencinsko črpalko na Ormoški cesti."
+            ]
+          },
+          "variant": "image-left"
+        },
+        {
+          "id": "s_cta",
+          "tone": "band",
+          "type": "cta",
+          "props": {
+            "text": "Naročite se po telefonu in prihranite čakanje v sezoni.",
+            "heading": "Potrebujete nove ali popravljene gume?",
+            "primary": {
+              "label": "Pokličite nas",
+              "target": {
+                "action": "call"
+              }
+            },
+            "secondary": {
+              "label": "Navodila za pot",
+              "target": {
+                "action": "directions"
+              }
+            }
+          },
+          "variant": "band"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Vulkanizerstvo Zorman",
+        "description": "Kako Vulkanizerstvo Zorman obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Vulkanizerstvo Zorman",
+        "description": "Izjava o dostopnosti spletne strani Vulkanizerstvo Zorman."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-15",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Vulkanizerstvo Zorman",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "images": [
+      {
+        "id": "img_g3",
+        "alt": "Kup avtomobilskih pnevmatik z vidnim profilom",
+        "src": "sites/site_1af9772eca35dfb2/generated/img_g3.jpg",
+        "width": 1536,
+        "height": 1024,
+        "origin": "generated"
+      },
+      {
+        "id": "img_g4",
+        "alt": "Ventil in platišče kolesa, od blizu",
+        "src": "sites/site_1af9772eca35dfb2/generated/img_g4.jpg",
+        "width": 1536,
+        "height": 1024,
+        "origin": "generated"
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "columns"
+    },
+    "header": {
+      "cta": "call",
+      "variant": "split-cta"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.28,
+    "colors": {
+      "text": "#0e0f12",
+      "muted": "#474c55",
+      "accent": "#6454bd",
+      "border": "#d3d7dd",
+      "inverse": "#111317",
+      "primary": "#b77f1a",
+      "surface": "#eef0f3",
+      "onInverse": "#f5f5f5",
+      "onPrimary": "#212121",
+      "background": "#ffffff"
+    },
+    "radius": 0,
+    "shadow": "none",
+    "density": "regular",
+    "imagery": "natural",
+    "fontPair": "archivo-archivo",
+    "skeleton": {
+      "cards": "filled",
+      "width": "contained",
+      "footer": "wordmark",
+      "header": "compact",
+      "actions": "header",
+      "buttons": "underline",
+      "dividers": "rule",
+      "footerTone": "inverse",
+      "photoRatio": "landscape"
+    },
+    "direction": "bold-local",
+    "headingCase": "uppercase",
+    "baseFontSize": 17,
+    "headingWeight": 800,
+    "headingTracking": -0.01
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Vulkanizerstvo Zorman",
+    "type": "car-repair",
+    "email": {
+      "$placeholder": "email"
+    },
+    "hours": {
+      "note": "Spomladi in jeseni je gneča, zato se prej naročite po telefonu.",
+      "entries": [
+        {
+          "to": "fri",
+          "from": "mon",
+          "open": "07:30",
+          "close": "17:00"
+        },
+        {
+          "to": "sat",
+          "from": "sat",
+          "open": "08:00",
+          "close": "12:00"
+        }
+      ]
+    },
+    "phone": "+38641555864",
+    "address": {
+      "city": "Ptuj",
+      "street": "Ormoška cesta 41",
+      "postalCode": "2250"
+    },
+    "subtype": "tyres",
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      }
+    }
+  },
+  "specVersion": 21
+}

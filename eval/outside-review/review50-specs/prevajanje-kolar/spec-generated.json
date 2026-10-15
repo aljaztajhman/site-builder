@@ -1,0 +1,293 @@
+{
+  "slug": "prevajanje-kolar",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Sodna tolmačka za nemščino in angleščino, Ljubljana",
+        "description": "Overjeni prevodi listin, strokovni prevodi za podjetja in tolmačenje na sodišču, pri notarju in na upravni enoti. Nujni prevod v 24 urah."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "tone": "default",
+          "type": "hero-type",
+          "props": {
+            "intro": "Prevajam in overjam listine za tujino in iz tujine, delam strokovne prevode za podjetja in tolmačim na sodišču, pri notarju in na upravni enoti.",
+            "primary": {
+              "label": "Pošljite dokument",
+              "target": {
+                "action": "email"
+              }
+            },
+            "headline": "Overjeni prevodi in tolmačenje za nemščino ter angleščino"
+          },
+          "variant": "with-facts"
+        },
+        {
+          "id": "s_cene",
+          "type": "price-list",
+          "props": {
+            "intro": "Cene, ki jih navajam za listine in overitev.",
+            "title": "Cene overjenih prevodov",
+            "groups": [
+              {
+                "items": [
+                  {
+                    "name": "Prevod in overitev listin, na stran",
+                    "price": {
+                      "from": true,
+                      "unit": "/ stran",
+                      "amount": 25
+                    }
+                  },
+                  {
+                    "name": "Sodna overitev, na dokument",
+                    "price": {
+                      "unit": "/ dokument",
+                      "amount": 10
+                    }
+                  }
+                ]
+              }
+            ],
+            "footnote": "Za nujni prevod v 24 urah je cena za polovico višja."
+          },
+          "variant": "table"
+        },
+        {
+          "id": "s_kaj",
+          "tone": "default",
+          "type": "services-list",
+          "props": {
+            "items": [
+              {
+                "name": "Prevod in overitev listin",
+                "description": "Rojstni listi, diplome, spričevala, pogodbe, sodbe, zdravniški izvidi in dokumenti za uvoz avta, za tujino in iz tujine."
+              },
+              {
+                "name": "Sodna overitev",
+                "description": "Overitev prevedenega dokumenta."
+              },
+              {
+                "name": "Strokovni prevodi za podjetja",
+                "description": "Tehnična navodila, spletne strani in katalogi. Za večje prevode pošljite dokument po e-pošti, ponudbo dobite v enem dnevu."
+              },
+              {
+                "name": "Tolmačenje",
+                "description": "Na sodišču, pri notarju in na upravni enoti."
+              }
+            ],
+            "title": "Prevodi, overitve in tolmačenje",
+            "eyebrow": "Kaj prevajam"
+          },
+          "variant": "rows"
+        },
+        {
+          "id": "s_cta",
+          "tone": "inverse",
+          "type": "cta",
+          "props": {
+            "text": "Pišite mi ali pokličite v uradnih urah. Ponudbo za večje prevode dobite v enem dnevu.",
+            "heading": "Potrebujete overjen prevod?",
+            "primary": {
+              "label": "Pišite mi",
+              "target": {
+                "action": "email"
+              }
+            }
+          },
+          "variant": "band"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Prevajanje Kolar",
+        "description": "Kako Prevajanje Kolar obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Prevajanje Kolar",
+        "description": "Izjava o dostopnosti spletne strani Prevajanje Kolar."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-15",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Prevajanje Kolar",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "logo": {
+      "src": "sites/site_f64e7c409606f116/uploads/logo.svg",
+      "file": "logo.png",
+      "width": 150,
+      "height": 48
+    },
+    "images": [
+      {
+        "id": "img_g1",
+        "alt": "Nalivnik na listu papirja ob zaprtem slovarju na leseni mizi",
+        "src": "sites/site_f64e7c409606f116/generated/img_g1.jpg",
+        "width": 1536,
+        "height": 1024,
+        "origin": "generated"
+      },
+      {
+        "id": "img_g2",
+        "alt": "Kup praznih listov s sponko in okroglim pečatom na svetli mizi",
+        "src": "sites/site_f64e7c409606f116/generated/img_g2.jpg",
+        "width": 1536,
+        "height": 1024,
+        "origin": "generated"
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "columns"
+    },
+    "header": {
+      "cta": "call",
+      "tone": "default",
+      "variant": "stacked"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.333,
+    "colors": {
+      "text": "#16161a",
+      "muted": "#55555f",
+      "accent": "#4c678a",
+      "border": "#d9d9de",
+      "inverse": "#16161a",
+      "primary": "#30425a",
+      "surface": "#f2f3f5",
+      "onInverse": "#f5f5f5",
+      "onPrimary": "#ffffff",
+      "background": "#ffffff"
+    },
+    "radius": 0,
+    "shadow": "none",
+    "density": "airy",
+    "imagery": "framed",
+    "fontPair": "newsreader-libre-franklin",
+    "skeleton": {
+      "cards": "filled",
+      "width": "contained",
+      "footer": "wordmark",
+      "header": "word",
+      "actions": "header",
+      "buttons": "underline",
+      "dividers": "rule",
+      "footerTone": "inverse",
+      "photoRatio": "landscape"
+    },
+    "direction": "editorial",
+    "headingCase": "normal",
+    "baseFontSize": 18,
+    "headingWeight": 400,
+    "headingTracking": -0.01
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Prevajanje Kolar",
+    "type": "accountant",
+    "email": "nina@prevodi-kolar.example",
+    "hours": {
+      "note": "Petek po dogovoru. Pisarna je v 2. nadstropju, parkirišče je za stavbo.",
+      "entries": [
+        {
+          "to": "thu",
+          "from": "mon",
+          "open": "09:00",
+          "close": "15:00"
+        }
+      ]
+    },
+    "phone": "+38640555274",
+    "address": {
+      "city": "Ljubljana",
+      "street": "Vošnjakova ulica 3",
+      "postalCode": "1000"
+    },
+    "provider": {
+      "vatPayer": true,
+      "legalName": "Nina Kolar s.p.",
+      "taxNumber": "SI55512847",
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      }
+    }
+  },
+  "specVersion": 21
+}

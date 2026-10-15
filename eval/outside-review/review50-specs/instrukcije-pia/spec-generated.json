@@ -1,0 +1,328 @@
+{
+  "slug": "instrukcije-pia",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Inštrukcije matematike in fizike v Mariboru",
+        "description": "Pia Lešnik, profesorica matematike, že 9 let daje inštrukcije matematike in fizike za osnovno in srednjo šolo. Doma v Mariboru ali online."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "tone": "default",
+          "type": "hero-split",
+          "props": {
+            "image": "img_g1",
+            "intro": "Že 9 let dajem inštrukcije za osnovno in srednjo šolo. Pomagam pri sprotnem delu, pred testi ter pri pripravi na NPZ in maturo.",
+            "headline": "Matematika in fizika v vašem tempu",
+            "secondary": {
+              "label": "Oglejte si cene",
+              "target": {
+                "page": "p_home",
+                "section": "s_prices"
+              }
+            }
+          },
+          "variant": "image-right"
+        },
+        {
+          "id": "s_prices",
+          "type": "price-list",
+          "props": {
+            "intro": "Cene, ki jih zaračunavam za inštrukcije in skupinsko pripravo na maturo.",
+            "title": "Cene inštrukcij",
+            "groups": [
+              {
+                "items": [
+                  {
+                    "name": "Ura inštrukcij (60 minut)",
+                    "price": {
+                      "unit": "ura",
+                      "amount": 18
+                    }
+                  },
+                  {
+                    "name": "Paket 10 ur",
+                    "price": {
+                      "unit": "paket",
+                      "amount": 160
+                    }
+                  },
+                  {
+                    "name": "Priprava na maturo v skupini, do 4 dijakov",
+                    "price": {
+                      "unit": "ura/dijak",
+                      "amount": 12
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "variant": "tags"
+        },
+        {
+          "id": "s_about",
+          "tone": "default",
+          "type": "image-text",
+          "props": {
+            "image": "img_g2",
+            "eyebrow": "Za koga delam",
+            "heading": "Za osnovnošolce, srednješolce in njihove starše",
+            "paragraphs": [
+              "Delam z vsakim učencem posebej, v njegovem tempu in brez pritiska. Pomagam pri sprotnem delu, pred testi ter pri pripravi na NPZ in maturo, na osnovni in višji ravni.",
+              "Inštrukcije potekajo doma v Mariboru ali online prek Zooma. Dijakom iz Maribora pridem tudi na dom."
+            ]
+          },
+          "variant": "image-left"
+        },
+        {
+          "id": "s_steps",
+          "type": "steps",
+          "props": {
+            "intro": "Prvo srečanje je namenjeno spoznavanju.",
+            "steps": [
+              {
+                "text": "Skupaj pogledava, pri čem se zatika in kje so težave.",
+                "title": "Spoznavanje"
+              },
+              {
+                "text": "Naredim načrt dela, prilagojen vašemu otroku ali vam.",
+                "title": "Načrt"
+              },
+              {
+                "text": "Delam v vašem tempu, sprotno ali pred testi, NPZ in maturo.",
+                "title": "Redne ure"
+              }
+            ],
+            "heading": "Kako poteka prvo srečanje"
+          },
+          "variant": "horizontal"
+        },
+        {
+          "id": "s_faq",
+          "tone": "default",
+          "type": "faq",
+          "props": {
+            "items": [
+              {
+                "answer": "Doma v Mariboru ali online prek Zooma. Dijakom iz Maribora pridem tudi na dom.",
+                "question": "Kje potekajo inštrukcije?"
+              },
+              {
+                "answer": "Termine dogovorim sproti, večinoma popoldne in ob sobotah, med počitnicami tudi dopoldne.",
+                "question": "Kdaj so termini?"
+              },
+              {
+                "answer": "Matematika in fizika za osnovno in srednjo šolo, vključno s pripravo na NPZ in maturo.",
+                "question": "Kateri predmeti so na voljo?"
+              }
+            ],
+            "title": "Pogosta vprašanja"
+          },
+          "variant": "accordion"
+        },
+        {
+          "id": "s_cta",
+          "tone": "inverse",
+          "type": "cta",
+          "props": {
+            "text": "Povejte, pri čem potrebujete pomoč, in dogovorim se za prvo srečanje.",
+            "heading": "Pišite mi ali me pokličite",
+            "primary": {
+              "label": "Pišite mi",
+              "target": {
+                "action": "email"
+              }
+            },
+            "secondary": {
+              "label": "Pokličite me",
+              "target": {
+                "action": "call"
+              }
+            }
+          },
+          "variant": "band"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Inštrukcije Pia",
+        "description": "Kako Inštrukcije Pia obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Inštrukcije Pia",
+        "description": "Izjava o dostopnosti spletne strani Inštrukcije Pia."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-15",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Inštrukcije Pia",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "images": [
+      {
+        "id": "img_g1",
+        "alt": "Zvezek z matematičnimi nalogami, svinčnik, ravnilo in šestilo na leseni mizi",
+        "src": "sites/site_220b36413da7feb3/generated/img_g1.jpg",
+        "width": 1536,
+        "height": 1024,
+        "origin": "generated"
+      },
+      {
+        "id": "img_g2",
+        "alt": "Kup učbenikov, računalo in skodelica na mizi ob oknu",
+        "src": "sites/site_220b36413da7feb3/generated/img_g2.jpg",
+        "width": 1536,
+        "height": 1024,
+        "origin": "generated"
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "columns"
+    },
+    "header": {
+      "cta": "call",
+      "variant": "bar"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.25,
+    "colors": {
+      "text": "#111418",
+      "muted": "#4a5360",
+      "accent": "#1f5fbf",
+      "border": "#d5dbe3",
+      "inverse": "#111418",
+      "primary": "#1f5fbf",
+      "surface": "#f1f4f8",
+      "onInverse": "#f5f5f5",
+      "onPrimary": "#ffffff",
+      "background": "#ffffff"
+    },
+    "radius": 2,
+    "shadow": "none",
+    "density": "regular",
+    "imagery": "natural",
+    "fontPair": "inter-tight-inter",
+    "skeleton": {
+      "cards": "none",
+      "width": "full",
+      "footer": "wordmark",
+      "header": "compact",
+      "actions": "bar",
+      "buttons": "soft",
+      "dividers": "rule",
+      "footerTone": "default",
+      "photoRatio": "portrait"
+    },
+    "direction": "clean-swiss",
+    "headingCase": "normal",
+    "baseFontSize": 17,
+    "headingWeight": 700,
+    "headingTracking": -0.015
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Inštrukcije Pia",
+    "type": "shop",
+    "email": "pia.lesnik@mail.example",
+    "hours": {
+      "$placeholder": "hours"
+    },
+    "phone": "+38631555906",
+    "address": {
+      "$placeholder": "address"
+    },
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      }
+    },
+    "serviceArea": [
+      "Maribor"
+    ]
+  },
+  "specVersion": 21
+}

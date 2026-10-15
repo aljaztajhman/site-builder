@@ -1,0 +1,383 @@
+{
+  "slug": "pekarna-kvas",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Pekarna Kvas Kamnik – kruh z drožmi in potica",
+        "description": "Družinska pekarna v Kamniku. Kruh z lastnimi drožmi, ki vzhaja čez noč, pecivo in orehova potica. Poglejte, kdaj smo odprti, in naročite."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "tone": "default",
+          "type": "hero-split",
+          "props": {
+            "image": "img_01",
+            "intro": "Smo mala družinska pekarna v Kamniku. Vse delamo ročno, brez aditivov in brez zamrznjenega testa.",
+            "primary": {
+              "label": "Poglejte, kje smo",
+              "target": {
+                "action": "directions"
+              }
+            },
+            "headline": "Kruh z lastnimi drožmi, vzhajan čez noč",
+            "secondary": {
+              "label": "Naročilo potice",
+              "target": {
+                "page": "p_home",
+                "section": "s_potica"
+              }
+            }
+          },
+          "variant": "image-left"
+        },
+        {
+          "id": "s_hours",
+          "tone": "alt",
+          "type": "opening-hours",
+          "props": {
+            "title": "Kdaj smo odprti"
+          },
+          "variant": "week"
+        },
+        {
+          "id": "s_menu",
+          "tone": "default",
+          "type": "menu",
+          "props": {
+            "intro": "Kruh in pecivo pečemo vsak dan, potico in krofe ob petkih in sobotah.",
+            "title": "Kaj pečemo",
+            "categories": [
+              {
+                "name": "Kruh",
+                "dishes": [
+                  {
+                    "name": "Pirin kruh z drožmi",
+                    "price": {
+                      "amount": 4.2
+                    },
+                    "description": "Peče se vsak dan, z lastnimi drožmi."
+                  },
+                  {
+                    "name": "Rženi kruh",
+                    "price": {
+                      "amount": 3.9
+                    },
+                    "description": "Peče se vsak dan."
+                  },
+                  {
+                    "name": "Polnozrnate žemlje",
+                    "price": {
+                      "note": "Dodajte ceno žemelj",
+                      "$placeholder": "price"
+                    },
+                    "description": "Pečemo vsak dan."
+                  }
+                ]
+              },
+              {
+                "name": "Pecivo",
+                "dishes": [
+                  {
+                    "name": "Rogljiček z maslom",
+                    "price": {
+                      "amount": 1.3
+                    },
+                    "description": "Pečemo vsak dan."
+                  },
+                  {
+                    "name": "Cimetov polž",
+                    "price": {
+                      "note": "Dodajte ceno polža",
+                      "$placeholder": "price"
+                    },
+                    "description": "Pečemo vsak dan."
+                  }
+                ]
+              },
+              {
+                "name": "Petek in sobota",
+                "dishes": [
+                  {
+                    "name": "Orehova potica",
+                    "price": {
+                      "from": true,
+                      "unit": "1 kg",
+                      "amount": 18
+                    },
+                    "description": "Pečemo ob petkih in sobotah."
+                  },
+                  {
+                    "name": "Kvašeni krofi",
+                    "price": {
+                      "note": "Dodajte ceno krofov",
+                      "$placeholder": "price"
+                    },
+                    "description": "Pečemo ob petkih in sobotah."
+                  }
+                ]
+              }
+            ]
+          },
+          "variant": "classic"
+        },
+        {
+          "id": "s_dough",
+          "tone": "alt",
+          "type": "image-text",
+          "props": {
+            "image": "img_02",
+            "eyebrow": "Ročno delo",
+            "heading": "Droži, moka in čas",
+            "paragraphs": [
+              "Kruh pečemo samo z drožmi, ki jih gojimo sami. Testo vzhaja čez noč, zato je kruh bolj okusen in dlje ostane svež.",
+              "Moko kupujemo pri mlinu v bližini."
+            ]
+          },
+          "variant": "image-left"
+        },
+        {
+          "id": "s_potica",
+          "tone": "band",
+          "type": "image-text",
+          "props": {
+            "link": {
+              "label": "Pišite nam",
+              "target": {
+                "action": "email"
+              }
+            },
+            "image": "img_03",
+            "eyebrow": "Za praznike in praznovanja",
+            "heading": "Orehovo potico naročite vnaprej",
+            "paragraphs": [
+              "Potico pečemo ob petkih in sobotah, naročite pa jo lahko tudi za praznike in praznovanja. Naročite jo najmanj dva dni prej, po telefonu ali e-pošti."
+            ]
+          },
+          "variant": "image-right"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Pekarna Kvas",
+        "description": "Kako Pekarna Kvas obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Pekarna Kvas",
+        "description": "Izjava o dostopnosti spletne strani Pekarna Kvas."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-14",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Pekarna Kvas",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "logo": {
+      "src": "sites/site_62e86bf60efd9409/uploads/logo.svg",
+      "file": "logo.png",
+      "width": 140,
+      "height": 48
+    },
+    "images": [
+      {
+        "id": "img_01",
+        "alt": "Veliki hlebi z drobno moko na lesenih policah v pekarni, skozi okno se vidi cerkvica in griči.",
+        "src": "sites/site_62e86bf60efd9409/uploads/photo0.jpg",
+        "focal": {
+          "x": 0.3,
+          "y": 0.45
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_02",
+        "alt": "Pek z moke polnimi rokami oblikuje testo na lesenem pultu, ob njem je pletena košara za vzhajanje.",
+        "src": "sites/site_62e86bf60efd9409/uploads/photo1.jpg",
+        "focal": {
+          "x": 0.55,
+          "y": 0.6
+        },
+        "width": 1024,
+        "height": 1536
+      },
+      {
+        "id": "img_03",
+        "alt": "Pekač s svežimi zlatimi rogljički in cimetovimi polžki na lesenem pultu v pekarni.",
+        "src": "sites/site_62e86bf60efd9409/uploads/photo2.jpg",
+        "focal": {
+          "x": 0.45,
+          "y": 0.55
+        },
+        "width": 1536,
+        "height": 1024
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "columns"
+    },
+    "header": {
+      "cta": "call",
+      "tone": "default",
+      "variant": "split-cta"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.25,
+    "colors": {
+      "text": "#221b17",
+      "muted": "#5b504a",
+      "accent": "#a25f21",
+      "border": "#d9e0dc",
+      "inverse": "#2b211c",
+      "primary": "#6f4c2f",
+      "surface": "#edf2ef",
+      "onInverse": "#f5f5f5",
+      "onPrimary": "#ffffff",
+      "background": "#ffffff"
+    },
+    "radius": 6,
+    "shadow": "none",
+    "density": "airy",
+    "imagery": "offset-block",
+    "fontPair": "bitter-nunito-sans",
+    "skeleton": {
+      "cards": "none",
+      "width": "full",
+      "footer": "wordmark",
+      "header": "compact",
+      "actions": "float",
+      "buttons": "square",
+      "dividers": "none",
+      "footerTone": "alt",
+      "photoRatio": "square"
+    },
+    "direction": "warm-craft",
+    "headingCase": "normal",
+    "baseFontSize": 17,
+    "headingWeight": 650,
+    "headingTracking": -0.01
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Pekarna Kvas",
+    "type": "bakery",
+    "email": "pekarna@pekarna-kvas.example",
+    "hours": {
+      "note": "Naročila vsaj dva dni prej.",
+      "entries": [
+        {
+          "to": "fri",
+          "from": "mon",
+          "open": "06:30",
+          "close": "18:00"
+        },
+        {
+          "to": "sat",
+          "from": "sat",
+          "open": "06:30",
+          "close": "12:00"
+        },
+        {
+          "to": "sun",
+          "from": "sun",
+          "open": "07:00",
+          "close": "10:00"
+        }
+      ]
+    },
+    "phone": "+38641555906",
+    "address": {
+      "city": "Kamnik",
+      "street": "Šutna 30",
+      "postalCode": "1241"
+    },
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      }
+    }
+  },
+  "specVersion": 21
+}

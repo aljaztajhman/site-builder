@@ -1,0 +1,311 @@
+{
+  "slug": "avto-kovac",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Avto Kovač | Servis za Audi, BMW, Mercedes, VW",
+        "description": "Specializiran servis za nemška vozila v Ljubljani. Servisiramo samo Audi, BMW, Mercedes-Benz in Volkswagen, z originalnimi deli. Pokličite nas."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "tone": "inverse",
+          "type": "hero-signature",
+          "props": {
+            "fact": "phone",
+            "image": "img_01",
+            "intro": "Servisiramo štiri znamke in jih poznamo do zadnjega vijaka. Delamo z originalnimi deli in originalno diagnostično opremo.",
+            "factNote": "Brezplačno nadomestno vozilo med popravilom, če se naročite vsaj teden prej.",
+            "headline": "Samo Audi, BMW, Mercedes in VW",
+            "factLabel": "Pokličite nas za naročilo"
+          },
+          "variant": "photo"
+        },
+        {
+          "id": "s_about",
+          "type": "about",
+          "props": {
+            "figure": {
+              "label": "Delamo od leta",
+              "value": "2012"
+            },
+            "eyebrow": "Naša specializacija",
+            "heading": "Nemška vozila in nič drugega",
+            "ownerName": "Gregor Kovač",
+            "ownerRole": "vodja servisa, mojster",
+            "paragraphs": [
+              "Servisiramo samo Audi, BMW, Mercedes-Benz in Volkswagen. Ker delamo samo to, poznamo značilnosti teh vozil in njihove običajne težave.",
+              "Pri nas delate z mojstrom Gregorjem Kovačem, ki ima dvajset let izkušenj v pooblaščenih servisih. Uporabljamo originalne dele in originalno diagnostično opremo."
+            ]
+          },
+          "variant": "figure"
+        },
+        {
+          "id": "s_services",
+          "tone": "alt",
+          "type": "services-list",
+          "props": {
+            "items": [
+              {
+                "name": "Redni servisi",
+                "description": "Po predpisih proizvajalca, z originalnimi deli."
+              },
+              {
+                "name": "Diagnostika",
+                "description": "Z originalno opremo."
+              },
+              {
+                "name": "Popravila menjalnikov",
+                "description": "Menjalniki DSG in avtomatski menjalniki."
+              },
+              {
+                "name": "Priprava na tehnični pregled",
+                "description": "Vozilo pripravimo na tehnični pregled."
+              },
+              {
+                "name": "Programiranje ključev",
+                "description": "Programiramo ključe za vaše vozilo."
+              }
+            ],
+            "title": "Kaj vse uredimo na vašem vozilu",
+            "eyebrow": "Storitve"
+          },
+          "variant": "two-column"
+        },
+        {
+          "id": "s_steps",
+          "type": "steps",
+          "props": {
+            "intro": "Če se naročite vsaj teden prej, vam med popravilom brezplačno zagotovimo nadomestno vozilo.",
+            "steps": [
+              {
+                "text": "Povejte nam znamko vozila in kaj vas moti, mi pa vam predlagamo termin.",
+                "title": "Pokličite nas"
+              },
+              {
+                "text": "Vozilo pripeljite na Leskoškovo cesto 9 v Ljubljani. Med popravilom lahko dobite nadomestno vozilo.",
+                "title": "Pripeljite vozilo"
+              },
+              {
+                "text": "Povemo vam, kaj smo naredili, in vam vrnemo vozilo.",
+                "title": "Prevzem popravljenega vozila"
+              }
+            ],
+            "eyebrow": "Naročilo",
+            "heading": "Kako poteka popravilo"
+          },
+          "variant": "vertical"
+        },
+        {
+          "id": "s_contact",
+          "tone": "band",
+          "type": "contact",
+          "props": {
+            "intro": "Servisiramo vozila Audi, BMW, Mercedes-Benz in Volkswagen.",
+            "title": "Pokličite nas in se naročite"
+          },
+          "variant": "call-out"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Avto Kovač",
+        "description": "Kako Avto Kovač obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Avto Kovač",
+        "description": "Izjava o dostopnosti spletne strani Avto Kovač."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-14",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Avto Kovač",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "logo": {
+      "src": "sites/site_29992f4e6ec14bef/uploads/logo.svg",
+      "file": "logo.png",
+      "width": 144,
+      "height": 48
+    },
+    "images": [
+      {
+        "id": "img_01",
+        "alt": "Siv karavan na dvigalu v svetli avtomehanični delavnici, ob njem rdeč voziček z orodjem in zložene pnevmatike.",
+        "src": "sites/site_29992f4e6ec14bef/uploads/photo0.jpg",
+        "focal": {
+          "x": 0.5,
+          "y": 0.4
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_02",
+        "alt": "Mehanik v delovni obleki s svetilko pregleduje motor avtomobila z dvignjenim pokrovom v delavnici.",
+        "src": "sites/site_29992f4e6ec14bef/uploads/photo1.jpg",
+        "focal": {
+          "x": 0.4,
+          "y": 0.35
+        },
+        "width": 1024,
+        "height": 1536
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "compact"
+    },
+    "header": {
+      "cta": "none",
+      "variant": "bar"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.25,
+    "colors": {
+      "band": "#ffcc00",
+      "text": "#15181c",
+      "muted": "#4a525c",
+      "accent": "#2761c2",
+      "border": "#d9dee4",
+      "onBand": "#15181c",
+      "inverse": "#15181c",
+      "primary": "#1f4e9c",
+      "surface": "#eef0f3",
+      "onInverse": "#f5f5f5",
+      "onPrimary": "#ffffff",
+      "background": "#ffffff"
+    },
+    "radius": 4,
+    "shadow": "none",
+    "density": "regular",
+    "imagery": "natural",
+    "fontPair": "space-grotesk-public-sans",
+    "skeleton": {
+      "cards": "filled",
+      "width": "contained",
+      "footer": "visit",
+      "header": "compact",
+      "actions": "header",
+      "buttons": "underline",
+      "dividers": "none",
+      "footerTone": "default",
+      "photoRatio": "landscape"
+    },
+    "direction": "tablica",
+    "headingCase": "uppercase",
+    "baseFontSize": 17,
+    "headingWeight": 850,
+    "headingTracking": -0.02
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Avto Kovač",
+    "type": "car-repair",
+    "email": "servis@avtokovac.example",
+    "hours": {
+      "entries": [
+        {
+          "to": "fri",
+          "from": "mon",
+          "open": "08:00",
+          "close": "18:00"
+        }
+      ]
+    },
+    "phone": "+38615554417",
+    "address": {
+      "city": "Ljubljana",
+      "street": "Leskoškova cesta 9",
+      "postalCode": "1000"
+    },
+    "subtype": "repair",
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      }
+    }
+  },
+  "specVersion": 21
+}

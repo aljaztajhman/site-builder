@@ -1,0 +1,352 @@
+{
+  "slug": "kljucavnicarstvo-hrovat",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Ključavničar Celje, nujno odpiranje 24 ur | Hrovat",
+        "description": "Ključavničarstvo Hrovat v Celju: nujno odpiranje vrat, avtomobilov in sefov 24 ur na dan, menjava cilindrov in kopiranje ključev."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "tone": "inverse",
+          "type": "hero-signature",
+          "props": {
+            "fact": "phone",
+            "image": "img_g3",
+            "intro": "Vrata, avtomobile in sefe odpiram vse dni v letu, tudi za praznike. V Celju sem ponavadi v 30 minutah.",
+            "headline": "Zaklenjeni? Pokličite, pridem.",
+            "factLabel": "Najhitreje me dobite po telefonu"
+          },
+          "variant": "photo"
+        },
+        {
+          "id": "s_services",
+          "tone": "default",
+          "type": "services-list",
+          "props": {
+            "intro": "Od nujnega odpiranja do novih ključavnic in kopij ključev.",
+            "items": [
+              {
+                "name": "Odpiranje vrat",
+                "price": {
+                  "from": true,
+                  "amount": 60
+                },
+                "description": "Brez poškodb, kadar se le da."
+              },
+              {
+                "name": "Odpiranje avtomobilov",
+                "description": "Nujno odpiranje vozila, kadar so ključi ostali notri."
+              },
+              {
+                "name": "Odpiranje sefov",
+                "description": "Odprem vaš sef, ko ključa ali kode ni pri roki."
+              },
+              {
+                "name": "Zlomljen ključ",
+                "description": "Odstranim ga iz ključavnice."
+              },
+              {
+                "name": "Menjava cilindrov in ključavnic",
+                "price": {
+                  "from": true,
+                  "amount": 45
+                },
+                "description": "Cena zamenjave cilindra vključuje material."
+              },
+              {
+                "name": "Varnostni cilindri",
+                "description": "Vgradim varnostne cilindre in dodatne ključavnice."
+              },
+              {
+                "name": "Kopiranje ključev",
+                "description": "V delavnici na Mariborski cesti 88."
+              },
+              {
+                "name": "Ključi za avto s čipom",
+                "description": "Izdelam tudi ključe za avtomobile s čipom."
+              }
+            ],
+            "title": "Kaj vse naredim"
+          },
+          "variant": "two-column"
+        },
+        {
+          "id": "s_area",
+          "tone": "alt",
+          "type": "service-area",
+          "props": {
+            "intro": "Na terenu sem v Celju in okolici.",
+            "title": "Kje delam"
+          },
+          "variant": "list"
+        },
+        {
+          "id": "s_steps",
+          "tone": "default",
+          "type": "steps",
+          "props": {
+            "steps": [
+              {
+                "text": "Povejte, kje ste in kaj se je zgodilo. Ponoči in za praznike je cena višja za dodatek.",
+                "title": "Pokličete me"
+              },
+              {
+                "text": "V Celju sem ponavadi v 30 minutah.",
+                "title": "Pridem na kraj"
+              },
+              {
+                "text": "Pred odpiranjem preverim osebno izkaznico lastnika ali najemnika.",
+                "title": "Preverim izkaznico"
+              },
+              {
+                "text": "Vrata odprem brez poškodb, kadar se le da.",
+                "title": "Odprem brez poškodb"
+              }
+            ],
+            "heading": "Kako poteka delo"
+          },
+          "variant": "vertical"
+        },
+        {
+          "id": "s_prices",
+          "tone": "inverse",
+          "type": "price-list",
+          "props": {
+            "title": "Cene, ki jih že lahko povem",
+            "groups": [
+              {
+                "items": [
+                  {
+                    "name": "Odpiranje vrat",
+                    "price": {
+                      "from": true,
+                      "amount": 60
+                    }
+                  },
+                  {
+                    "name": "Menjava cilindra",
+                    "price": {
+                      "from": true,
+                      "amount": 45
+                    }
+                  },
+                  {
+                    "name": "Nočni in praznični dodatek",
+                    "price": {
+                      "amount": 30
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "variant": "tags"
+        },
+        {
+          "id": "s_contact",
+          "tone": "inverse",
+          "type": "contact",
+          "props": {
+            "intro": "Telefon je odprt 24 ur na dan, vse dni v letu.",
+            "title": "Pokličite me, ko ste pred zaklenjenimi vrati"
+          },
+          "variant": "call-out"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Ključavničarstvo Hrovat",
+        "description": "Kako Ključavničarstvo Hrovat obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Ključavničarstvo Hrovat",
+        "description": "Izjava o dostopnosti spletne strani Ključavničarstvo Hrovat."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-15",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Ključavničarstvo Hrovat",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "images": [
+      {
+        "id": "img_g3",
+        "alt": "Medeninast cilinder in ključi na temni leseni delovni mizi",
+        "src": "sites/site_43212ca63cb9b0a5/generated/img_g3.jpg",
+        "width": 1536,
+        "height": 1024,
+        "origin": "generated"
+      },
+      {
+        "id": "img_g4",
+        "alt": "Surovi ključi in pilica na obrabljeni kovinski površini",
+        "src": "sites/site_43212ca63cb9b0a5/generated/img_g4.jpg",
+        "width": 1536,
+        "height": 1024,
+        "origin": "generated"
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "compact"
+    },
+    "header": {
+      "cta": "none",
+      "tone": "inverse",
+      "variant": "bar"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.25,
+    "colors": {
+      "band": "#3d8bfd",
+      "text": "#15181c",
+      "muted": "#4a525c",
+      "accent": "#3d8bfd",
+      "border": "#d9dee4",
+      "onBand": "#15181c",
+      "inverse": "#15181c",
+      "primary": "#15181c",
+      "surface": "#e9eef6",
+      "onInverse": "#f5f5f5",
+      "onPrimary": "#ffffff",
+      "background": "#ffffff"
+    },
+    "radius": 4,
+    "shadow": "none",
+    "density": "regular",
+    "imagery": "natural",
+    "fontPair": "archivo-archivo",
+    "skeleton": {
+      "cards": "none",
+      "width": "full",
+      "footer": "visit",
+      "header": "compact",
+      "actions": "header",
+      "buttons": "soft",
+      "dividers": "motif",
+      "footerTone": "alt",
+      "photoRatio": "portrait"
+    },
+    "direction": "tablica",
+    "headingCase": "uppercase",
+    "baseFontSize": 17,
+    "headingWeight": 850,
+    "headingTracking": -0.02
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Ključavničarstvo Hrovat",
+    "type": "builder",
+    "email": {
+      "$placeholder": "email"
+    },
+    "hours": {
+      "note": "Delavnica za kopiranje ključev: pon–pet 8.00–16.00. Nujne intervencije 24 ur na dan, vse dni v letu, tudi za praznike.",
+      "entries": [
+        {
+          "to": "fri",
+          "from": "mon",
+          "open": "08:00",
+          "close": "16:00"
+        }
+      ]
+    },
+    "phone": "+386041555772",
+    "address": {
+      "city": "Celje",
+      "street": "Mariborska cesta 88",
+      "postalCode": "3000"
+    },
+    "provider": {
+      "legalName": "Matjaž Hrovat s.p.",
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      }
+    },
+    "serviceArea": [
+      "Celje",
+      "okolica Celja"
+    ]
+  },
+  "specVersion": 21
+}

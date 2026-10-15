@@ -1,0 +1,428 @@
+{
+  "slug": "kmetija-grabnar",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Turistična kmetija Grabnar, Luče",
+        "description": "Sobe in apartma s pogledom na gore, domač zajtrk in kosila ob koncih tedna na družinski kmetiji v Zgornji Savinjski dolini."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "type": "hero-signature",
+          "props": {
+            "fact": "phone",
+            "image": "img_07",
+            "intro": "Pri nas spite v sobah s pogledom na gore, zajtrkujete pa z izdelki z naše kmetije. Ob koncih tedna kuhamo kosila.",
+            "signs": [
+              {
+                "label": "Raduha"
+              },
+              {
+                "label": "Logarska dolina"
+              },
+              {
+                "note": "10 min",
+                "label": "Smučišče"
+              }
+            ],
+            "primary": {
+              "label": "Navodila za pot",
+              "target": {
+                "action": "directions"
+              }
+            },
+            "factNote": "Otroci do 6 let so pri polpenzionu brezplačni.",
+            "headline": "Zjutraj gore pred oknom",
+            "factLabel": "Rezervirajte"
+          },
+          "variant": "view"
+        },
+        {
+          "id": "s_rooms",
+          "type": "rooms",
+          "props": {
+            "intro": "Vse enote imajo lastno kopalnico.",
+            "items": [
+              {
+                "name": "Sobe",
+                "features": [
+                  "Lastna kopalnica",
+                  "Pogled na gore"
+                ],
+                "description": "Imamo štiri sobe z lastno kopalnico in pogledom na gore. Zajtrk je domač, z izdelki z naše kmetije."
+              },
+              {
+                "name": "Apartma",
+                "capacity": 4,
+                "features": [
+                  "Lastna kopalnica",
+                  "Pogled na gore"
+                ],
+                "description": "Apartma je za štiri osebe, z lastno kopalnico in pogledom na gore."
+              }
+            ],
+            "title": "Sobe in apartma s pogledom na gore"
+          },
+          "variant": "rows"
+        },
+        {
+          "id": "s_prices",
+          "tone": "alt",
+          "type": "price-list",
+          "props": {
+            "intro": "Cene veljajo na osebo.",
+            "title": "Nočitev in polpenzion",
+            "groups": [
+              {
+                "items": [
+                  {
+                    "name": "Nočitev z zajtrkom",
+                    "note": "na osebo",
+                    "price": {
+                      "amount": 38
+                    }
+                  },
+                  {
+                    "name": "Polpenzion",
+                    "note": "na osebo",
+                    "price": {
+                      "amount": 52
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "variant": "tags"
+        },
+        {
+          "id": "s_hours",
+          "tone": "band",
+          "type": "opening-hours",
+          "props": {
+            "note": "Juha, pečenka, štruklji in jabolčni zavitek. Za skupine kuhamo tudi med tednom po dogovoru.",
+            "title": "Ob sobotah in nedeljah kuhamo kosila",
+            "eyebrow": "Izletniška kmetija"
+          },
+          "variant": "poster"
+        },
+        {
+          "id": "s_trails",
+          "type": "services-list",
+          "props": {
+            "note": {
+              "text": "Kmetija je v Podveži pri Lučah.",
+              "title": "Pot do nas"
+            },
+            "items": [
+              {
+                "name": "Raduha",
+                "description": "Planinska pot na goro."
+              },
+              {
+                "name": "Logarska dolina",
+                "description": "Planinske poti v dolino."
+              },
+              {
+                "name": "Manjše smučišče",
+                "description": "Pozimi je 10 minut stran."
+              }
+            ],
+            "title": "Poti in cilji v bližini"
+          },
+          "variant": "aside"
+        },
+        {
+          "id": "s_team",
+          "tone": "inverse",
+          "type": "team",
+          "props": {
+            "title": "Kmetujemo od leta 1996",
+            "members": [
+              {
+                "name": "Mojca Grabnar",
+                "role": "Gostje in kuhinja"
+              },
+              {
+                "name": "Tone Grabnar",
+                "role": "Živina in gozd"
+              }
+            ]
+          },
+          "variant": "list"
+        },
+        {
+          "id": "s_contact",
+          "tone": "inverse",
+          "type": "contact",
+          "props": {
+            "intro": "Pokličite nas ali nam pišite, z veseljem vam pomagamo.",
+            "title": "Rezervacije po telefonu ali e-pošti"
+          },
+          "variant": "call-out"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Turistična kmetija Grabnar",
+        "description": "Kako Turistična kmetija Grabnar obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Turistična kmetija Grabnar",
+        "description": "Izjava o dostopnosti spletne strani Turistična kmetija Grabnar."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-14",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Turistična kmetija Grabnar",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "images": [
+      {
+        "id": "img_01",
+        "alt": "Lesena planinska hiša z balkonom, polnim rdečega cvetja, na travnatem pobočju pod gozdnatimi gorami.",
+        "src": "sites/site_318f3536f41768d3/uploads/photo0.jpg",
+        "focal": {
+          "x": 0.5,
+          "y": 0.45
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_02",
+        "alt": "Preprosta lesena soba z dvema posteljama z rdeče-belo karirasto posteljnino in oknom z razgledom na zelene griče.",
+        "src": "sites/site_318f3536f41768d3/uploads/photo1.jpg",
+        "focal": {
+          "x": 0.5,
+          "y": 0.4
+        },
+        "width": 1024,
+        "height": 1536
+      },
+      {
+        "id": "img_03",
+        "alt": "Miza z domačim sirom, skuto, maslom, kruhom, mlekom v vrču in marmelado ter šopkom poljskih cvetlic.",
+        "src": "sites/site_318f3536f41768d3/uploads/photo2.jpg",
+        "focal": {
+          "x": 0.5,
+          "y": 0.55
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_04",
+        "alt": "Rjavo-bele krave se pasejo na strmem travniku v večerni svetlobi, v ozadju so visoke gore.",
+        "src": "sites/site_318f3536f41768d3/uploads/photo3.jpg",
+        "focal": {
+          "x": 0.35,
+          "y": 0.45
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_05",
+        "alt": "Kos jabolčnega zavitka, posut s sladkorjem v prahu, na belem krožniku na starem lesenem mizi.",
+        "src": "sites/site_318f3536f41768d3/uploads/photo4.jpg",
+        "focal": {
+          "x": 0.5,
+          "y": 0.6
+        },
+        "width": 1024,
+        "height": 1536
+      },
+      {
+        "id": "img_06",
+        "alt": "Fantek in deklica ob leseni ograji hranita koze, v ozadju so zelen travnik in gore.",
+        "src": "sites/site_318f3536f41768d3/uploads/photo5.jpg",
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_07",
+        "alt": "Pogled z lesenega balkona na dolino z meglico, zelenimi travniki, posameznimi hišami in gorami v jutranji svetlobi.",
+        "src": "sites/site_318f3536f41768d3/uploads/photo6.jpg",
+        "focal": {
+          "x": 0.55,
+          "y": 0.4
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_08",
+        "alt": "Lesene police z vrstami domačih marmelad in vložnin v kozarcih s karirastimi pokrovčki, spodaj krompir.",
+        "src": "sites/site_318f3536f41768d3/uploads/photo7.jpg",
+        "focal": {
+          "x": 0.5,
+          "y": 0.45
+        },
+        "width": 1024,
+        "height": 1536
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "compact"
+    },
+    "header": {
+      "cta": "none",
+      "tone": "default",
+      "variant": "bar"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.28,
+    "colors": {
+      "band": "#1f5aa6",
+      "text": "#17241b",
+      "muted": "#48584c",
+      "accent": "#5a9468",
+      "border": "#d0dcea",
+      "onBand": "#ffffff",
+      "inverse": "#1b2e4a",
+      "primary": "#1f5aa6",
+      "surface": "#e6eef7",
+      "onInverse": "#f2f6f0",
+      "onPrimary": "#ffffff",
+      "background": "#ffffff"
+    },
+    "radius": 7,
+    "shadow": "none",
+    "density": "regular",
+    "imagery": "full-bleed",
+    "fontPair": "newsreader-libre-franklin",
+    "skeleton": {
+      "cards": "filled",
+      "width": "contained",
+      "footer": "visit",
+      "header": "word",
+      "actions": "bar",
+      "buttons": "underline",
+      "dividers": "none",
+      "footerTone": "default",
+      "photoRatio": "square"
+    },
+    "direction": "markacija",
+    "headingCase": "normal",
+    "baseFontSize": 17,
+    "headingWeight": 900,
+    "headingTracking": -0.03
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Turistična kmetija Grabnar",
+    "type": "tourist-farm",
+    "email": "mojca@kmetija-grabnar.example",
+    "hours": {
+      "note": "Izletniška kmetija je odprta ob sobotah in nedeljah. Za skupine kuhamo tudi med tednom po dogovoru.",
+      "entries": [
+        {
+          "to": "sun",
+          "from": "sat",
+          "open": "11:00",
+          "close": "19:00"
+        }
+      ]
+    },
+    "phone": "+38631555408",
+    "address": {
+      "city": "Luče",
+      "street": "Podveža 41",
+      "postalCode": "3334"
+    },
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      }
+    }
+  },
+  "specVersion": 21
+}

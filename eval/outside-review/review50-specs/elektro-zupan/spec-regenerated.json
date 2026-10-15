@@ -1,0 +1,340 @@
+{
+  "slug": "elektro-zupan",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Elektro Župan Velenje | Elektroinštalacije",
+        "description": "Elektroinštalacije v novogradnjah in obnovah, nove omarice, polnilnice, strelovodi in meritve v Šaleški dolini in na Koroškem. Ogled je brezplačen."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "tone": "default",
+          "type": "hero-split",
+          "props": {
+            "image": "img_g1",
+            "intro": "Delamo v novogradnjah in pri obnovah. Pokličite nas, pridemo na brezplačen ogled, cena pa sledi po ogledu.",
+            "primary": {
+              "label": "Pokličite nas",
+              "target": {
+                "action": "call"
+              }
+            },
+            "headline": "Elektroinštalacije za hiše in stanovanja",
+            "secondary": {
+              "label": "Naše storitve",
+              "target": {
+                "page": "p_home",
+                "section": "s_services"
+              }
+            }
+          },
+          "variant": "image-right"
+        },
+        {
+          "id": "s_year",
+          "tone": "band",
+          "type": "about",
+          "props": {
+            "figure": {
+              "label": "Delamo od leta",
+              "value": "2006"
+            },
+            "heading": "Mojster z licenco in dva sodelavca",
+            "paragraphs": [
+              "Delamo od leta 2006. Naš mojster elektroinštalater ima licenco, zato delo opravimo zanesljivo in po predpisih. Delamo z dvema sodelavcema."
+            ]
+          },
+          "variant": "figure"
+        },
+        {
+          "id": "s_strip",
+          "tone": "alt",
+          "type": "contact-strip",
+          "props": {},
+          "variant": "bar"
+        },
+        {
+          "id": "s_services",
+          "tone": "default",
+          "type": "services-cards",
+          "props": {
+            "intro": "Od nove inštalacije do meritev za tehnični pregled.",
+            "items": [
+              {
+                "text": "Elektroinštalacije v novogradnjah, od vgradnje do zaključka.",
+                "title": "Novogradnje"
+              },
+              {
+                "text": "Elektroinštalacije pri obnovah starejših hiš in stanovanj.",
+                "title": "Obnove hiš in stanovanj"
+              },
+              {
+                "text": "Pametne inštalacije za sodobno upravljanje doma.",
+                "title": "Pametne inštalacije"
+              },
+              {
+                "text": "Zamenjamo stare varovalke z novimi omaricami.",
+                "title": "Nove omarice namesto starih varovalk"
+              },
+              {
+                "text": "Montaža polnilnic na vašem domu.",
+                "title": "Polnilnice za električne avtomobile"
+              },
+              {
+                "text": "Postavimo strelovod za zaščito objekta.",
+                "title": "Strelovodi"
+              },
+              {
+                "text": "Meritve z zapisnikom za tehnični pregled.",
+                "title": "Meritve z zapisnikom"
+              },
+              {
+                "text": "Pri sončnih elektrarnah sodelujemo s preverjenim partnerjem.",
+                "title": "Sončne elektrarne"
+              }
+            ],
+            "title": "Kaj vse naredimo"
+          },
+          "variant": "compact"
+        },
+        {
+          "id": "s_photo",
+          "tone": "alt",
+          "type": "image-text",
+          "props": {
+            "image": "img_g2",
+            "eyebrow": "Šaleška dolina in Koroška",
+            "heading": "Delamo v vaši bližini",
+            "paragraphs": [
+              "Smo iz Velenja. K vam pridemo na brezplačen ogled po celi Šaleški dolini in Koroški."
+            ]
+          },
+          "variant": "image-left"
+        },
+        {
+          "id": "s_steps",
+          "tone": "default",
+          "type": "steps",
+          "props": {
+            "steps": [
+              {
+                "text": "Povejte, kaj potrebujete: novo inštalacijo, omarico, polnilnico ali meritve.",
+                "title": "Pokličete nas"
+              },
+              {
+                "text": "Ogled je brezplačen. Ogledamo si objekt in se pogovorimo o delu.",
+                "title": "Pridemo na ogled"
+              },
+              {
+                "text": "Ceno povemo po ogledu, ko vemo, kaj je treba narediti.",
+                "title": "Cena po ogledu"
+              },
+              {
+                "text": "Delo opravimo in po potrebi izmerimo inštalacijo z zapisnikom.",
+                "title": "Opravimo delo"
+              }
+            ],
+            "heading": "Kako poteka delo"
+          },
+          "variant": "horizontal"
+        },
+        {
+          "id": "s_cta",
+          "tone": "inverse",
+          "type": "cta",
+          "props": {
+            "text": "Pokličite nas za brezplačen ogled. Pridemo k vam, cena pa sledi po ogledu.",
+            "heading": "Potrebujete elektroinštalaterja?",
+            "primary": {
+              "label": "Pokličite nas",
+              "target": {
+                "action": "call"
+              }
+            }
+          },
+          "variant": "band"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Elektro Župan",
+        "description": "Kako Elektro Župan obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Elektro Župan",
+        "description": "Izjava o dostopnosti spletne strani Elektro Župan."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-14",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Elektro Župan",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "images": [
+      {
+        "id": "img_g1",
+        "alt": "Bakreni kabli, klešče za slačenje žic in izvijač na delovni mizi",
+        "src": "sites/site_b843e10a092c8ecb/generated/img_g1.jpg",
+        "width": 1536,
+        "height": 1024,
+        "origin": "generated"
+      },
+      {
+        "id": "img_g2",
+        "alt": "Zeleni griči doline in mesto v daljavi v jasnem jutru",
+        "src": "sites/site_b843e10a092c8ecb/generated/img_g2.jpg",
+        "width": 1536,
+        "height": 1024,
+        "origin": "generated"
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "columns"
+    },
+    "header": {
+      "cta": "call",
+      "variant": "split-cta"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.28,
+    "colors": {
+      "text": "#0e0f12",
+      "muted": "#474c55",
+      "accent": "#616161",
+      "border": "#d3d7dd",
+      "inverse": "#111317",
+      "primary": "#ac8204",
+      "surface": "#eef0f3",
+      "onInverse": "#f5f5f5",
+      "onPrimary": "#111111",
+      "background": "#ffffff"
+    },
+    "radius": 1,
+    "shadow": "none",
+    "density": "regular",
+    "imagery": "natural",
+    "fontPair": "archivo-archivo",
+    "skeleton": {
+      "cards": "none",
+      "width": "full",
+      "footer": "visit",
+      "header": "compact",
+      "actions": "header",
+      "buttons": "soft",
+      "dividers": "rule",
+      "footerTone": "alt",
+      "photoRatio": "portrait"
+    },
+    "direction": "bold-local",
+    "headingCase": "uppercase",
+    "baseFontSize": 17,
+    "headingWeight": 800,
+    "headingTracking": -0.01
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Elektro Župan",
+    "type": "builder",
+    "email": "andrej@elektrozupan.example",
+    "phone": "+38641555917",
+    "address": {
+      "city": "Velenje",
+      "street": "Kidričeva cesta 55",
+      "postalCode": "3320"
+    },
+    "subtype": "electrical",
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      }
+    },
+    "serviceArea": [
+      "Šaleška dolina",
+      "Koroška"
+    ]
+  },
+  "specVersion": 21
+}

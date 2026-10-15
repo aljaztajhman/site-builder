@@ -1,0 +1,328 @@
+{
+  "slug": "gostisce-na-gricu",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Gostišče Na griču, prleška kuhinja v Ivanjkovcih",
+        "description": "Družinsko gostišče nad Ormožem, sredi vinogradov Jeruzalema. Prleška kuhinja, domača vina in degustacijski meniji. Rezervacija je obvezna."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "type": "hero-signature",
+          "props": {
+            "fact": "address",
+            "image": "img_01",
+            "intro": "Kuhamo prleške jedi in točimo domača vina, sredi vinogradov Jeruzalema. Terasa ima pogled na gorice.",
+            "primary": {
+              "label": "Rezervirajte mizo",
+              "target": {
+                "action": "call"
+              }
+            },
+            "headline": "Prleška kuhinja na griču",
+            "secondary": {
+              "label": "Poglejte ponudbo",
+              "target": {
+                "page": "p_home",
+                "section": "s_offers"
+              }
+            }
+          },
+          "variant": "card"
+        },
+        {
+          "id": "s_about",
+          "type": "about",
+          "props": {
+            "figure": {
+              "label": "Kuhamo in točimo od leta",
+              "value": "1990"
+            },
+            "heading": "Domača kuhinja in vina iz družinske kleti",
+            "paragraphs": [
+              "Družina Šnajder kuha prleško kuhinjo in toči domača vina. Na jedilniku so prleška tünka, bograč, gibanica in kisla juha.",
+              "Ob vikendih pripravljamo degustacijske menije. Prirejamo tudi poroke, obletnice in zaključke do 120 gostov."
+            ]
+          },
+          "variant": "figure"
+        },
+        {
+          "id": "s_hours",
+          "type": "opening-hours",
+          "props": {
+            "title": "Kdaj nas lahko obiščete"
+          },
+          "variant": "table"
+        },
+        {
+          "id": "s_offers",
+          "tone": "inverse",
+          "type": "price-list",
+          "props": {
+            "title": "Degustacijski meni ob vikendih",
+            "groups": [
+              {
+                "name": "Ob vikendih",
+                "items": [
+                  {
+                    "name": "Degustacijski meni s petimi hodi",
+                    "note": "Pet hodov.",
+                    "price": {
+                      "amount": 48
+                    }
+                  }
+                ]
+              },
+              {
+                "name": "Ob vikendih, z vinom",
+                "items": [
+                  {
+                    "name": "Degustacijski meni z vinsko spremljavo",
+                    "note": "Pet hodov z vini iz naše kleti.",
+                    "price": {
+                      "amount": 68
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "variant": "offers"
+        },
+        {
+          "id": "s_team",
+          "type": "team",
+          "props": {
+            "image": "img_03",
+            "inset": "img_02",
+            "intro": "Pri nas kuhamo in strežemo družina Šnajder.",
+            "title": "Za mizo in v kuhinji",
+            "members": [
+              {
+                "name": "Nina Šnajder",
+                "role": "Vodi gostilno"
+              }
+            ]
+          },
+          "variant": "photo"
+        },
+        {
+          "id": "s_contact",
+          "tone": "inverse",
+          "type": "contact",
+          "props": {
+            "intro": "Odgovorimo na vprašanja o menijih, porokah in obletnicah.",
+            "title": "Pokličite za rezervacijo mize ali zaključene družbe"
+          },
+          "variant": "call-out"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Gostišče Na griču",
+        "description": "Kako Gostišče Na griču obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Gostišče Na griču",
+        "description": "Izjava o dostopnosti spletne strani Gostišče Na griču."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-15",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Gostišče Na griču",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "images": [
+      {
+        "id": "img_01",
+        "alt": "Belo podeželsko gostišče z zelenimi polkni, velika lipa pred vhodom in lesene mize s klopmi na tlakovanem dvorišču.",
+        "src": "sites/site_9eab3d14ca8873a3/uploads/photo0.jpg",
+        "focal": {
+          "x": 0.55,
+          "y": 0.5
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_02",
+        "alt": "Senčna terasa pod staro lipo z lesenimi mizami, karirastimi prti in pogledom na zeleno dolino ter hribe v ozadju.",
+        "src": "sites/site_9eab3d14ca8873a3/uploads/photo1.jpg",
+        "focal": {
+          "x": 0.4,
+          "y": 0.45
+        },
+        "width": 1024,
+        "height": 1536
+      },
+      {
+        "id": "img_03",
+        "alt": "Družba za dolgo obloženo mizo v jedilnici, gostiteljica z buteljko vina stoji ob koncu mize, pred gosti kozarci rdečega vina.",
+        "src": "sites/site_9eab3d14ca8873a3/uploads/photo2.jpg",
+        "focal": {
+          "x": 0.55,
+          "y": 0.3
+        },
+        "width": 1024,
+        "height": 1536
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "compact"
+    },
+    "header": {
+      "cta": "none",
+      "tone": "default",
+      "variant": "bar"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.28,
+    "colors": {
+      "band": "#d9b36c",
+      "text": "#1b241f",
+      "muted": "#4d5a52",
+      "accent": "#3da82f",
+      "border": "#e4d6d6",
+      "onBand": "#2a0c10",
+      "inverse": "#5a1a23",
+      "primary": "#585a1a",
+      "surface": "#f4ecec",
+      "onInverse": "#f2f5f3",
+      "onPrimary": "#ffffff",
+      "background": "#ffffff"
+    },
+    "radius": 4,
+    "shadow": "none",
+    "density": "regular",
+    "imagery": "natural",
+    "fontPair": "garamond-figtree",
+    "skeleton": {
+      "cards": "filled",
+      "width": "contained",
+      "footer": "visit",
+      "header": "compact",
+      "actions": "bar",
+      "buttons": "underline",
+      "dividers": "none",
+      "footerTone": "inverse",
+      "photoRatio": "landscape"
+    },
+    "direction": "jedilnik",
+    "headingCase": "normal",
+    "baseFontSize": 17,
+    "headingWeight": 600,
+    "headingTracking": -0.02
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Gostišče Na griču",
+    "type": "restaurant",
+    "email": "info@nagricu.example",
+    "hours": {
+      "note": "V ponedeljek in torek samo za zaključene družbe. Rezervacija je obvezna.",
+      "entries": [
+        {
+          "to": "sun",
+          "from": "wed",
+          "open": "11:00",
+          "close": "22:00"
+        }
+      ]
+    },
+    "phone": "+38625557194",
+    "address": {
+      "city": "Ivanjkovci",
+      "street": "Svetinje 18",
+      "postalCode": "2259"
+    },
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      }
+    }
+  },
+  "specVersion": 21
+}

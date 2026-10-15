@@ -1,0 +1,286 @@
+{
+  "slug": "pizzeria-oljka",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Pizzeria Oljka Izola – pice iz krušne peči",
+        "description": "Pice iz krušne peči na drva in 48 ur zorjeno testo, dve minuti od marine v Izoli. Odprto vsak dan od 12. do 23. ure. Rezervirajte mizo."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "type": "hero-signature",
+          "props": {
+            "fact": "address",
+            "image": "img_g1",
+            "intro": "Testo zori 48 ur, pečemo ga na drva. Pridite dve minuti od marine ali pico odnesite s seboj.",
+            "primary": {
+              "label": "Rezervirajte mizo",
+              "target": {
+                "action": "call"
+              }
+            },
+            "headline": "Pice iz krušne peči na drva",
+            "secondary": {
+              "label": "Oglejte si ponudbo",
+              "target": {
+                "page": "p_home",
+                "section": "s_offers"
+              }
+            }
+          },
+          "variant": "card"
+        },
+        {
+          "id": "s_offers",
+          "tone": "inverse",
+          "type": "price-list",
+          "props": {
+            "title": "Naša ponudba iz krušne peči",
+            "groups": [
+              {
+                "name": "Vsak dan",
+                "items": [
+                  {
+                    "name": "Pica Oljka",
+                    "note": "S pršutom in rukolo, pečena v krušni peči na drva.",
+                    "price": {
+                      "amount": 13
+                    }
+                  }
+                ]
+              },
+              {
+                "name": "Za konec obroka",
+                "items": [
+                  {
+                    "name": "Domači tiramisu",
+                    "note": "Sladica hiše.",
+                    "price": {
+                      "amount": 5
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "variant": "offers"
+        },
+        {
+          "id": "s_team",
+          "type": "team",
+          "props": {
+            "title": "Kdo skrbi za peč in mize",
+            "members": [
+              {
+                "name": "Marko Benčič",
+                "role": "Vodja"
+              }
+            ]
+          },
+          "variant": "list"
+        },
+        {
+          "id": "s_contact",
+          "tone": "inverse",
+          "type": "contact",
+          "props": {
+            "intro": "Radi vas sprejmemo, v Izoli smo dve minuti od marine.",
+            "title": "Pokličite za rezervacijo mize"
+          },
+          "variant": "call-out"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Pizzeria Oljka",
+        "description": "Kako Pizzeria Oljka obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Pizzeria Oljka",
+        "description": "Izjava o dostopnosti spletne strani Pizzeria Oljka."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-15",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Pizzeria Oljka",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "images": [
+      {
+        "id": "img_g1",
+        "alt": "Lesena lopata za pico, moka in hlebček testa na leseni mizi, v ozadju drva",
+        "src": "sites/site_4e2e368eaa5a952c/generated/img_g1.jpg",
+        "width": 1536,
+        "height": 1024,
+        "origin": "generated"
+      },
+      {
+        "id": "img_g2",
+        "alt": "Rukola, bazilika, olive in oljčno olje na rustikalni mizi",
+        "src": "sites/site_4e2e368eaa5a952c/generated/img_g2.jpg",
+        "width": 1536,
+        "height": 1024,
+        "origin": "generated"
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "compact"
+    },
+    "header": {
+      "cta": "none",
+      "tone": "default",
+      "variant": "bar"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.25,
+    "colors": {
+      "band": "#e0b75a",
+      "text": "#1b241f",
+      "muted": "#4d5a52",
+      "accent": "#a8862f",
+      "border": "#d5dce6",
+      "onBand": "#101a2c",
+      "inverse": "#1b2a44",
+      "primary": "#1b2a44",
+      "surface": "#ecf0f5",
+      "onInverse": "#f2f5f3",
+      "onPrimary": "#ffffff",
+      "background": "#ffffff"
+    },
+    "radius": 4,
+    "shadow": "none",
+    "density": "regular",
+    "imagery": "natural",
+    "fontPair": "newsreader-libre-franklin",
+    "skeleton": {
+      "cards": "none",
+      "width": "full",
+      "footer": "visit",
+      "header": "phone",
+      "actions": "bar",
+      "buttons": "soft",
+      "dividers": "motif",
+      "footerTone": "inverse",
+      "photoRatio": "portrait"
+    },
+    "direction": "jedilnik",
+    "headingCase": "normal",
+    "baseFontSize": 17,
+    "headingWeight": 600,
+    "headingTracking": -0.02
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Pizzeria Oljka",
+    "type": "restaurant",
+    "email": {
+      "$placeholder": "email"
+    },
+    "hours": {
+      "note": "Od novembra do marca ob ponedeljkih zaprto.",
+      "entries": [
+        {
+          "to": "sun",
+          "from": "mon",
+          "open": "12:00",
+          "close": "23:00"
+        }
+      ]
+    },
+    "phone": "+38655553071",
+    "address": {
+      "city": "Izola",
+      "street": "Ljubljanska ulica 21",
+      "postalCode": "6310"
+    },
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      }
+    }
+  },
+  "specVersion": 21
+}

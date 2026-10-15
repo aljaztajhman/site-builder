@@ -1,0 +1,442 @@
+{
+  "slug": "gostilna-zlata-zlica",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Gostilna Pri Zlati Žlici, Škofja Loka",
+        "description": "Družinska gostilna v starem delu Škofje Loke. Domače jedi iz sestavin lokalnih kmetov, dnevna malica, nedeljsko kosilo in terasa pod lipo."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "tone": "default",
+          "type": "hero-image",
+          "props": {
+            "image": "img_01",
+            "intro": "Kuhamo iz sestavin lokalnih kmetov. Vsak dan vas čaka malica, ob nedeljah kosilo, poleti pa terasa pod lipo.",
+            "eyebrow": "Družinska gostilna",
+            "primary": {
+              "label": "Oglejte si cene",
+              "target": {
+                "page": "p_home",
+                "section": "s_prices"
+              }
+            },
+            "headline": "Domače jedi pod lipo v starem delu mesta",
+            "secondary": {
+              "label": "Skupine do 60 oseb",
+              "target": {
+                "page": "p_home",
+                "section": "s_groups"
+              }
+            }
+          },
+          "variant": "overlay-bottom"
+        },
+        {
+          "id": "s_prices",
+          "tone": "alt",
+          "type": "price-list",
+          "props": {
+            "intro": "Malica in nedeljsko kosilo ter nekaj jedi z jedilnega lista.",
+            "title": "Naše cene na kratko",
+            "groups": [
+              {
+                "items": [
+                  {
+                    "name": "Dnevna malica",
+                    "note": "Juha, glavna jed in solata",
+                    "price": {
+                      "amount": 11.5
+                    }
+                  },
+                  {
+                    "name": "Nedeljsko kosilo",
+                    "note": "Štirje hodi, ob nedeljah",
+                    "price": {
+                      "amount": 19
+                    }
+                  },
+                  {
+                    "name": "Ajdovi žganci z ocvirki in kislim mlekom",
+                    "price": {
+                      "amount": 9.8
+                    }
+                  },
+                  {
+                    "name": "Telečja obara",
+                    "price": {
+                      "amount": 8.5
+                    }
+                  },
+                  {
+                    "name": "Orehovi štruklji",
+                    "price": {
+                      "amount": 5.2
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "variant": "tags"
+        },
+        {
+          "id": "s_dishes",
+          "tone": "default",
+          "type": "image-text",
+          "props": {
+            "image": "img_03",
+            "eyebrow": "Z domače mize",
+            "heading": "Ajdovi žganci, ričet in telečja obara",
+            "paragraphs": [
+              "Na jedilniku so ajdovi žganci z ocvirki in kislim mlekom, telečja obara, ričet, pečenke in orehovi štruklji. Po receptih naše družine."
+            ]
+          },
+          "variant": "image-left"
+        },
+        {
+          "id": "s_hours",
+          "tone": "alt",
+          "type": "opening-hours",
+          "props": {
+            "title": "Kdaj smo odprti"
+          },
+          "variant": "compact"
+        },
+        {
+          "id": "s_terrace",
+          "tone": "default",
+          "type": "image-text",
+          "props": {
+            "image": "img_05",
+            "eyebrow": "Poleti",
+            "heading": "Terasa pod lipo s 40 sedeži",
+            "paragraphs": [
+              "Poleti je odprta terasa pod staro lipo. Posedite na prostem in uživajte v domači hrani."
+            ]
+          },
+          "variant": "image-right"
+        },
+        {
+          "id": "s_family",
+          "tone": "alt",
+          "type": "about",
+          "props": {
+            "image": "img_07",
+            "eyebrow": "Družina Bizjak",
+            "heading": "Gostilno vodi že tretja generacija",
+            "ownerName": "Marko Bizjak",
+            "ownerRole": "glavni kuhar",
+            "paragraphs": [
+              "Kuhamo tako, kot se pri naši družini kuha že generacije.",
+              "V kuhinji kuha Marko, strežbo in rezervacije vodi Nina."
+            ]
+          },
+          "variant": "image-side"
+        },
+        {
+          "id": "s_groups",
+          "tone": "default",
+          "type": "image-text",
+          "props": {
+            "image": "img_08",
+            "heading": "Praznovanja in pogostitve do 60 oseb",
+            "paragraphs": [
+              "Pri nas lahko pripravimo praznovanje, obletnico ali pogostitev po pogrebu. Rezervacije sprejemamo za skupine do 60 oseb."
+            ]
+          },
+          "variant": "image-left"
+        },
+        {
+          "id": "s_cta",
+          "tone": "inverse",
+          "type": "cta",
+          "props": {
+            "text": "Za skupine in nedeljsko kosilo nam pišite ali nas obiščite.",
+            "heading": "Rezervirajte mizo",
+            "primary": {
+              "label": "Pišite nam",
+              "target": {
+                "action": "email"
+              }
+            },
+            "secondary": {
+              "label": "Kako do nas",
+              "target": {
+                "action": "directions"
+              }
+            }
+          },
+          "variant": "band"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Gostilna Pri Zlati Žlici",
+        "description": "Kako Gostilna Pri Zlati Žlici obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Gostilna Pri Zlati Žlici",
+        "description": "Izjava o dostopnosti spletne strani Gostilna Pri Zlati Žlici."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-14",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Gostilna Pri Zlati Žlici",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "images": [
+      {
+        "id": "img_01",
+        "alt": "Belo kmečko poslopje z zelenimi polkni, velika lipa in lesene mize s klopmi pred vhodom.",
+        "src": "sites/site_d7be74e779dfa966/uploads/photo0.jpg",
+        "focal": {
+          "x": 0.55,
+          "y": 0.5
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_02",
+        "alt": "Rustikalna jedilnica z lesenimi stoli, belimi prti, lesenim stropom in zeleno kahlasto pečjo.",
+        "src": "sites/site_d7be74e779dfa966/uploads/photo1.jpg",
+        "focal": {
+          "x": 0.7,
+          "y": 0.4
+        },
+        "width": 1024,
+        "height": 1536
+      },
+      {
+        "id": "img_03",
+        "alt": "Krožnik ajdove kaše z ocvirki, ob njem kozarec mleka na leseni mizi.",
+        "src": "sites/site_d7be74e779dfa966/uploads/photo2.jpg",
+        "focal": {
+          "x": 0.45,
+          "y": 0.55
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_04",
+        "alt": "Narezani zvitki testa z nadevom, posuti z zlatimi drobtinami in prelito z maslom na belem krožniku.",
+        "src": "sites/site_d7be74e779dfa966/uploads/photo3.jpg",
+        "focal": {
+          "x": 0.5,
+          "y": 0.55
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_05",
+        "alt": "Zunanja terasa pod staro lipo z mizami s karirastimi prti in razgledom na gore.",
+        "src": "sites/site_d7be74e779dfa966/uploads/photo4.jpg",
+        "focal": {
+          "x": 0.5,
+          "y": 0.45
+        },
+        "width": 1024,
+        "height": 1536
+      },
+      {
+        "id": "img_06",
+        "alt": "Skleda goveje enolončnice z zelenjavo, zraven kos kruha in žlica na leseni mizi.",
+        "src": "sites/site_d7be74e779dfa966/uploads/photo5.jpg",
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_07",
+        "alt": "Kuhar v beli jopi meša lonec na štedilniku v kuhinji z viseči ponvami.",
+        "src": "sites/site_d7be74e779dfa966/uploads/photo6.jpg",
+        "focal": {
+          "x": 0.45,
+          "y": 0.5
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_08",
+        "alt": "Skupina gostov ob dolgi pogrnjeni mizi z rdečim vinom, gostiteljica z butelko v ozadju.",
+        "src": "sites/site_d7be74e779dfa966/uploads/photo7.jpg",
+        "focal": {
+          "x": 0.55,
+          "y": 0.4
+        },
+        "width": 1024,
+        "height": 1536
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "columns"
+    },
+    "header": {
+      "cta": "call",
+      "tone": "default",
+      "variant": "bar"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.25,
+    "colors": {
+      "text": "#13261a",
+      "muted": "#44574a",
+      "accent": "#8e6140",
+      "border": "#cfdcd2",
+      "inverse": "#12241a",
+      "primary": "#455030",
+      "surface": "#ffffff",
+      "onInverse": "#f5f5f5",
+      "onPrimary": "#ffffff",
+      "background": "#eef5ef"
+    },
+    "radius": 4,
+    "shadow": "none",
+    "density": "regular",
+    "imagery": "full-bleed",
+    "fontPair": "bitter-nunito-sans",
+    "skeleton": {
+      "cards": "none",
+      "width": "full",
+      "footer": "wordmark",
+      "header": "word",
+      "actions": "float",
+      "buttons": "square",
+      "centred": [
+        "s_cta"
+      ],
+      "dividers": "none",
+      "footerTone": "alt",
+      "photoRatio": "square"
+    },
+    "direction": "alpine-nature",
+    "headingCase": "normal",
+    "baseFontSize": 17,
+    "headingWeight": 650,
+    "headingTracking": -0.01
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Gostilna Pri Zlati Žlici",
+    "type": "restaurant",
+    "email": "rezervacije@zlata-zlica.example",
+    "hours": {
+      "entries": [
+        {
+          "to": "sat",
+          "from": "tue",
+          "open": "10:00",
+          "close": "22:00"
+        },
+        {
+          "to": "sun",
+          "from": "sun",
+          "open": "11:00",
+          "close": "17:00"
+        },
+        {
+          "to": "mon",
+          "from": "mon",
+          "closed": true
+        }
+      ]
+    },
+    "phone": "+38645551234",
+    "address": {
+      "city": "Škofja Loka",
+      "street": "Kapucinski trg 7",
+      "postalCode": "4220"
+    },
+    "provider": {
+      "vatPayer": true,
+      "legalName": "Gostinstvo Bizjak d.o.o.",
+      "taxNumber": "SI87654321",
+      "registrationNumber": "8765432000"
+    }
+  },
+  "specVersion": 21
+}

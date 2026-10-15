@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 96" width="280" height="96" role="img" aria-label="Pekarna Kvas">
+  <ellipse cx="46" cy="56" rx="38" ry="26" fill="#9a5a1f"/>
+  <path d="M24 46 L34 60 M40 40 L50 56 M56 40 L64 54" stroke="#f3dcb8" stroke-width="5" stroke-linecap="round"/>
+  <text x="98" y="50" font-family="Georgia, 'Times New Roman', serif" font-size="38" font-weight="700" fill="#3b2410">Kvas</text>
+  <text x="100" y="76" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#9a5a1f" letter-spacing="3.5">PEKARNA · KAMNIK</text>
+</svg>

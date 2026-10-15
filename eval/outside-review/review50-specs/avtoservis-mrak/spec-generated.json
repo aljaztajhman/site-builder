@@ -1,0 +1,382 @@
+{
+  "slug": "avtoservis-mrak",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Avtoservis Mrak Kranj – servis vozil in vlečna služba",
+        "description": "Družinski avtoservis v Kranju od leta 2008. Servis vseh znamk in kombijev do 3,5 t, gume, klima, diagnostika in vlečna služba za Gorenjsko."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "tone": "inverse",
+          "type": "hero-signature",
+          "props": {
+            "fact": "phone",
+            "image": "img_01",
+            "intro": "Servisiramo osebna vozila vseh znamk in kombije do 3,5 t. Pred popravilom dobite predračun, brez presenečenj.",
+            "eyebrow": "Družinski servis od leta 2008",
+            "factNote": "Sobota po dogovoru.",
+            "headline": "Avtoservis Mrak, hiter in pošten servis",
+            "factLabel": "Najhitreje nas dobite po telefonu"
+          },
+          "variant": "photo"
+        },
+        {
+          "id": "s_services",
+          "tone": "default",
+          "type": "services-list",
+          "props": {
+            "items": [
+              {
+                "name": "Redni servis",
+                "description": "Po navodilih proizvajalca, tako da garancija ostane."
+              },
+              {
+                "name": "Menjava olja in filtrov",
+                "description": "Olje in filtre zamenjamo med rednim servisom ali posebej."
+              },
+              {
+                "name": "Zavore",
+                "description": "Pregled in popravilo zavornega sistema."
+              },
+              {
+                "name": "Sklopke",
+                "description": "Popravilo in menjava sklopk."
+              },
+              {
+                "name": "Zobati jermeni",
+                "description": "Menjava zobatih jermenov."
+              },
+              {
+                "name": "Izpušni sistemi",
+                "description": "Popravilo in menjava izpušnih sistemov."
+              },
+              {
+                "name": "Računalniška diagnostika",
+                "description": "Preverimo, kaj javlja računalnik vašega vozila."
+              },
+              {
+                "name": "Polnjenje klime",
+                "description": "Napolnimo klimatsko napravo v vozilu."
+              },
+              {
+                "name": "Menjava gum",
+                "description": "Gume zamenjamo na kompletu vozila."
+              },
+              {
+                "name": "Hramba gum",
+                "description": "Vaše gume hranimo čez sezono."
+              },
+              {
+                "name": "Vlečna služba",
+                "description": "Pomoč na cesti za vso Gorenjsko."
+              }
+            ],
+            "title": "Storitve za vaše vozilo",
+            "eyebrow": "Kaj delamo"
+          },
+          "variant": "two-column"
+        },
+        {
+          "id": "s_area",
+          "tone": "alt",
+          "type": "service-area",
+          "props": {
+            "intro": "Če obstanete na poti, nas pokličite. Pridemo po vaše vozilo.",
+            "title": "Vlečna služba za Gorenjsko",
+            "eyebrow": "Pomoč na cesti"
+          },
+          "variant": "list"
+        },
+        {
+          "id": "s_steps",
+          "tone": "default",
+          "type": "steps",
+          "props": {
+            "steps": [
+              {
+                "text": "Opišete težavo in se dogovorimo za termin.",
+                "title": "Pokličete nas"
+              },
+              {
+                "text": "Vhod je z dvorišča, za trgovino s ploščicami.",
+                "title": "Pripeljete vozilo"
+              },
+              {
+                "text": "Pred popravilom vam povemo, kaj bo delo stalo.",
+                "title": "Dobite predračun"
+              },
+              {
+                "text": "Delo opravimo po dogovoru, brez presenečenj.",
+                "title": "Popravimo vozilo"
+              }
+            ],
+            "eyebrow": "Kako poteka delo",
+            "heading": "Od klica do popravila"
+          },
+          "variant": "vertical"
+        },
+        {
+          "id": "s_prices",
+          "tone": "inverse",
+          "type": "price-list",
+          "props": {
+            "title": "Cene, ki smo jih že določili",
+            "groups": [
+              {
+                "items": [
+                  {
+                    "name": "Računalniška diagnostika",
+                    "price": {
+                      "amount": 30
+                    }
+                  },
+                  {
+                    "name": "Polnjenje klime",
+                    "price": {
+                      "amount": 59
+                    }
+                  },
+                  {
+                    "name": "Menjava gum, komplet",
+                    "price": {
+                      "amount": 20
+                    }
+                  },
+                  {
+                    "name": "Hramba gum, sezona",
+                    "price": {
+                      "amount": 40
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "variant": "tags"
+        },
+        {
+          "id": "s_contact",
+          "tone": "band",
+          "type": "contact",
+          "props": {
+            "title": "Pokličite nas za termin"
+          },
+          "variant": "call-out"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Avtoservis Mrak",
+        "description": "Kako Avtoservis Mrak obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Avtoservis Mrak",
+        "description": "Izjava o dostopnosti spletne strani Avtoservis Mrak."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-14",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Avtoservis Mrak",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "images": [
+      {
+        "id": "img_01",
+        "alt": "Siv karavan na dvigalu v svetli avtomehanični delavnici z rdečim orodnim vozičkom in zloženimi pnevmatikami.",
+        "src": "sites/site_db82e8bba487c191/uploads/photo0.jpg",
+        "focal": {
+          "x": 0.45,
+          "y": 0.35
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_02",
+        "alt": "Mehanik v delovni obleki s svetilko pregleduje motor avtomobila z dvignjenim pokrovom v delavnici.",
+        "src": "sites/site_db82e8bba487c191/uploads/photo1.jpg",
+        "focal": {
+          "x": 0.4,
+          "y": 0.35
+        },
+        "width": 1024,
+        "height": 1536
+      },
+      {
+        "id": "img_03",
+        "alt": "Kovinska polica z zloženimi pnevmatikami v skladišču delavnice, ob oknu in modrem orodnem predalniku.",
+        "src": "sites/site_db82e8bba487c191/uploads/photo2.jpg",
+        "focal": {
+          "x": 0.4,
+          "y": 0.5
+        },
+        "width": 1536,
+        "height": 1024
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "compact"
+    },
+    "header": {
+      "cta": "none",
+      "tone": "inverse",
+      "variant": "bar"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.25,
+    "colors": {
+      "band": "#3d8bfd",
+      "text": "#15181c",
+      "muted": "#4a525c",
+      "accent": "#3d8bfd",
+      "border": "#d9dee4",
+      "onBand": "#15181c",
+      "inverse": "#15181c",
+      "primary": "#15181c",
+      "surface": "#e9eef6",
+      "onInverse": "#f5f5f5",
+      "onPrimary": "#ffffff",
+      "background": "#ffffff"
+    },
+    "radius": 5,
+    "shadow": "none",
+    "density": "regular",
+    "imagery": "natural",
+    "fontPair": "space-grotesk-public-sans",
+    "skeleton": {
+      "cards": "none",
+      "width": "full",
+      "footer": "wordmark",
+      "header": "overlay",
+      "actions": "bar",
+      "buttons": "square",
+      "dividers": "none",
+      "footerTone": "inverse",
+      "photoRatio": "square"
+    },
+    "direction": "tablica",
+    "headingCase": "uppercase",
+    "baseFontSize": 17,
+    "headingWeight": 850,
+    "headingTracking": -0.02
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Avtoservis Mrak",
+    "type": "car-repair",
+    "email": {
+      "$placeholder": "email"
+    },
+    "hours": {
+      "note": "Sobota po dogovoru. Vhod z dvorišča, za trgovino s ploščicami.",
+      "entries": [
+        {
+          "to": "fri",
+          "from": "mon",
+          "open": "07:00",
+          "close": "16:00"
+        }
+      ]
+    },
+    "phone": "+38641555730",
+    "address": {
+      "city": "Kranj",
+      "street": "Savska cesta 52",
+      "postalCode": "4000"
+    },
+    "subtype": "repair",
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      }
+    },
+    "serviceArea": [
+      "Gorenjska"
+    ]
+  },
+  "specVersion": 21
+}

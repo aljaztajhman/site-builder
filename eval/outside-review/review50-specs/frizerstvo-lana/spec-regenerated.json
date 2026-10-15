@@ -1,0 +1,410 @@
+{
+  "slug": "frizerstvo-lana",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Frizerstvo Lana Celje | Striženje, barvanje, pričeske",
+        "description": "Frizerstvo Lana v Celju: striženje žensk, moških in otrok, barve brez amoniaka, pramene in svečane pričeske. Naročite se po telefonu."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "tone": "default",
+          "type": "hero-signature",
+          "props": {
+            "fact": "phone",
+            "image": "img_01",
+            "intro": "V salonu strižemo ženske, moške in otroke, barvamo z barvami brez amoniaka in delamo svečane pričeske. Pri nas se najprej pogovorimo, nato primemo za škarje.",
+            "headline": "Lasje, ki jih boste radi nosili",
+            "factLabel": "Naročite se po telefonu"
+          },
+          "variant": "photo"
+        },
+        {
+          "id": "s_hours",
+          "tone": "alt",
+          "type": "image-text",
+          "props": {
+            "image": "img_02",
+            "inset": "img_05",
+            "heading": "Salon je v pritličju, parkirišče za stavbo",
+            "paragraphs": [
+              "Do nas pridete brez stopnic, saj je salon v pritličju. Parkirišče je za stavbo."
+            ]
+          },
+          "variant": "pair"
+        },
+        {
+          "id": "s_services",
+          "tone": "default",
+          "type": "services-list",
+          "props": {
+            "intro": "Od hitrega striženja do poročne pričeske.",
+            "items": [
+              {
+                "name": "Žensko striženje s fenom",
+                "price": {
+                  "amount": 28
+                },
+                "description": "Striženje in oblikovanje s fenom."
+              },
+              {
+                "name": "Moško striženje",
+                "price": {
+                  "amount": 15
+                },
+                "description": "Čisto in natančno striženje."
+              },
+              {
+                "name": "Otroško striženje (do 10 let)",
+                "price": {
+                  "amount": 10
+                },
+                "description": "Striženje otrok do 10 let."
+              },
+              {
+                "name": "Barvanje",
+                "price": {
+                  "from": true,
+                  "amount": 45
+                },
+                "description": "Barve brez amoniaka, primerne tudi za občutljivo lasišče."
+              },
+              {
+                "name": "Pramene",
+                "price": {
+                  "note": "Vpišite ceno pramenov",
+                  "$placeholder": "price"
+                },
+                "description": "Pramene dela Petra Kos, specialistka za barvanje in pramene."
+              },
+              {
+                "name": "Svečana pričeska",
+                "price": {
+                  "from": true,
+                  "amount": 40
+                },
+                "description": "Za poroke in maturantske plese."
+              },
+              {
+                "name": "Fen frizura",
+                "price": {
+                  "note": "Vpišite ceno fen frizure",
+                  "$placeholder": "price"
+                },
+                "description": "Oblikovanje las s fenom za posebne priložnosti."
+              }
+            ],
+            "title": "Kaj vse počnemo v salonu"
+          },
+          "variant": "rows"
+        },
+        {
+          "id": "s_color",
+          "tone": "alt",
+          "type": "image-text",
+          "props": {
+            "image": "img_03",
+            "eyebrow": "Barvanje in pramene",
+            "heading": "Barve brez amoniaka",
+            "paragraphs": [
+              "Barvamo z barvami brez amoniaka, ki so primerne tudi za občutljivo lasišče.",
+              "Pramene dela Petra Kos, specialistka za barvanje in pramene."
+            ]
+          },
+          "variant": "image-left"
+        },
+        {
+          "id": "s_bride",
+          "tone": "default",
+          "type": "image-text",
+          "props": {
+            "image": "img_04",
+            "eyebrow": "Poroke in plesi",
+            "heading": "Svečana pričeska za vaš veliki dan",
+            "paragraphs": [
+              "Za neveste in maturante pripravimo svečane pričeske. Pokličite nas in dogovorimo se za termin."
+            ]
+          },
+          "variant": "image-right"
+        },
+        {
+          "id": "s_team",
+          "tone": "alt",
+          "type": "team",
+          "props": {
+            "title": "Kdo vas postriže",
+            "members": [
+              {
+                "name": "Lana Vidmar",
+                "role": "Vodja salona, frizerka"
+              },
+              {
+                "name": "Petra Kos",
+                "role": "Specialistka za barvanje in pramene"
+              }
+            ]
+          },
+          "variant": "grid"
+        },
+        {
+          "id": "s_book",
+          "tone": "inverse",
+          "type": "booking",
+          "props": {
+            "text": "Brez naročila težko pridete na vrsto, zato nas raje pokličite. Radi vam najdemo čas.",
+            "action": {
+              "label": "Pokličite nas",
+              "target": {
+                "action": "call"
+              }
+            },
+            "heading": "Naročite se na termin"
+          },
+          "variant": "simple"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Frizerstvo Lana",
+        "description": "Kako Frizerstvo Lana obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Frizerstvo Lana",
+        "description": "Izjava o dostopnosti spletne strani Frizerstvo Lana."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-14",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Frizerstvo Lana",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "logo": {
+      "src": "sites/site_74e709eeaeb1209e/uploads/logo.svg",
+      "file": "logo.png",
+      "width": 160,
+      "height": 48
+    },
+    "images": [
+      {
+        "id": "img_01",
+        "alt": "Svetel frizerski salon z dvema črnima stoloma, lesenimi ogledali, polico z izdelki za lase in veliko zeleno rastlino ob oknu.",
+        "src": "sites/site_74e709eeaeb1209e/uploads/photo0.jpg",
+        "focal": {
+          "x": 0.5,
+          "y": 0.55
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_02",
+        "alt": "Frizerka v črni predpasnik s škarjami striže pramen las stranki, ki sedi v pelerini v salonu z rastlinami.",
+        "src": "sites/site_74e709eeaeb1209e/uploads/photo1.jpg",
+        "focal": {
+          "x": 0.4,
+          "y": 0.3
+        },
+        "width": 1024,
+        "height": 1536
+      },
+      {
+        "id": "img_03",
+        "alt": "Stranka s karamelnimi prameni in valovitimi dolgimi lasmi sedi s hrbtom proti kameri v frizerskem salonu.",
+        "src": "sites/site_74e709eeaeb1209e/uploads/photo2.jpg",
+        "focal": {
+          "x": 0.5,
+          "y": 0.45
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_04",
+        "alt": "Nevesta z elegantno figo, spleteno pletenico in okrasnimi lasnimi sponkami s kristali, fotografirana od zadaj.",
+        "src": "sites/site_74e709eeaeb1209e/uploads/photo3.jpg",
+        "focal": {
+          "x": 0.45,
+          "y": 0.4
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_05",
+        "alt": "Na lesenem pultu stojijo stekleničke in lončki z izdelki za lase, glavnik, škarje in zloženi temni brisači.",
+        "src": "sites/site_74e709eeaeb1209e/uploads/photo4.jpg",
+        "focal": {
+          "x": 0.4,
+          "y": 0.55
+        },
+        "width": 1024,
+        "height": 1536
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "compact"
+    },
+    "header": {
+      "cta": "call",
+      "variant": "bar"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.24,
+    "colors": {
+      "text": "#2a2024",
+      "muted": "#65575c",
+      "accent": "#b3878d",
+      "border": "#e6d9de",
+      "inverse": "#3a2a30",
+      "primary": "#a8566a",
+      "surface": "#f6eff1",
+      "onInverse": "#f5f5f5",
+      "onPrimary": "#ffffff",
+      "background": "#ffffff"
+    },
+    "radius": 6,
+    "shadow": "none",
+    "density": "airy",
+    "imagery": "duotone",
+    "fontPair": "lora-dm-sans",
+    "skeleton": {
+      "cards": "filled",
+      "width": "contained",
+      "footer": "visit",
+      "header": "compact",
+      "actions": "header",
+      "buttons": "underline",
+      "dividers": "rule",
+      "footerTone": "alt",
+      "photoRatio": "landscape"
+    },
+    "direction": "soft-studio",
+    "headingCase": "normal",
+    "baseFontSize": 17,
+    "headingWeight": 500,
+    "headingTracking": 0
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Frizerstvo Lana",
+    "type": "hairdresser",
+    "email": "lana@frizerstvo-lana.example",
+    "hours": {
+      "note": "Brez naročila težko pridete na vrsto, zato raje pokličite.",
+      "entries": [
+        {
+          "to": "fri",
+          "from": "tue",
+          "open": "08:00",
+          "close": "19:00"
+        },
+        {
+          "to": "sat",
+          "from": "sat",
+          "open": "07:00",
+          "close": "13:00"
+        },
+        {
+          "to": "mon",
+          "from": "sun",
+          "closed": true
+        }
+      ]
+    },
+    "phone": "+38641555213",
+    "address": {
+      "city": "Celje",
+      "street": "Stanetova ulica 14",
+      "postalCode": "3000"
+    },
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      }
+    }
+  },
+  "specVersion": 21
+}
