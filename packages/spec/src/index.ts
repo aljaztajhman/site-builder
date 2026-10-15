@@ -48,3 +48,4 @@ export * from "./studio/index.ts";
 // Named, not `export *`: studio/deck.ts still has its own ASSET_KINDS/AssetKind/AssetId for stance signatures (I8
 // drops them, studio-phase1-design.md §4); a named export wins over the star export, so @sb/spec exposes these.
 export { ASSET_KINDS, AssetKind, KIND_PREFIX, AssetId, assetId, parseAssetId, type AssetPrefix } from "./assets.ts";
+export * from "./images-once.ts";

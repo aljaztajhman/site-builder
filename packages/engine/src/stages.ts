@@ -15,6 +15,7 @@ import {
   contrast,
   mainHeadingIssues,
   repairMainHeadings,
+  repairRepeatedImages,
   repairSiteCopy,
   addedOnRequest,
   stripModelOnRequest,
@@ -474,6 +475,8 @@ export async function generateContent(client: ModelClient, input: ContentInput):
     repairs.push(...stripModelOnRequest(built, null).map((p) => `${p}: price "on request" is set by the owner only; made a price placeholder`));
     // promptFixes.oneHero: exactly one main heading per page, first; the safe cases are repaired in code.
     if (fixes.oneHero) repairs.push(...repairMainHeadings(built));
+    // An image at most once per page (the outside review): a later repeat takes a free picture or drops an optional one.
+    repairs.push(...repairRepeatedImages(built));
     const v = validateSite(built);
     const issues = v.ok ? (fixes.oneHero ? mainHeadingIssues(built).map(issueLine) : []) : v.issues.map(issueLine);
     issues.push(...checkFacts(built, input.corpus).map(factLine));

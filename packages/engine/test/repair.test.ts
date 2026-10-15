@@ -152,6 +152,18 @@ describe("generateContent", () => {
     expect(r.spec.pages[0]!.sections[0]!.props).toMatchObject({ intro: expect.stringMatching(/ – vse leto\.$/) });
   });
 
+  it("gives a later section that repeats the hero's photo another picture, without a retry", async () => {
+    const { r, calls } = await grabnarContent((a) => {
+      a.pages[0]!.sections[3]!.props.image = a.pages[0]!.sections[0]!.props.image;
+    });
+    expect(calls).toBe(1);
+    expect(r.issues).toEqual([]);
+    expect(r.repairs).toContainEqual(expect.stringMatching(/^\/pages\/0\/sections\/3\/props\/image: img_01 is already shown higher on the page; used img_\w+ instead$/));
+    const home = JSON.stringify(r.spec.pages[0]!.sections.slice(1));
+    expect(home).not.toContain('"img_01"');
+    expect(r.spec.pages[0]!.sections[0]!.props).toMatchObject({ image: "img_01" });
+  });
+
   it("keeps the repaired kmetija-grabnar first answer without a retry and reports the repairs", async () => {
     const { r, calls } = await grabnarContent();
     expect(calls).toBe(1);
