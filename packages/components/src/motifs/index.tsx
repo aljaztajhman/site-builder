@@ -10,9 +10,9 @@ import { JointDrawing, Stem, StripDrawing, Tag, TilesDrawing, WireDrawing } from
 
 export * from "./trades.tsx";
 
-/** The motif of the site's design direction, if it is a template direction. */
+/** The motif of the site's design direction, if it is a template direction and the motif fits the trade (spec siteMotif). */
 export function motifOf(ctx: RenderCtx): Motif | undefined {
-  return DIRECTIONS.find((d) => d.id === ctx.site.design.direction)?.template?.motif;
+  return siteMotif(ctx.site).motif;
 }
 
 /** The sub-trade motif drawn on the template's layout (spec v15 business.subtype), if any. */

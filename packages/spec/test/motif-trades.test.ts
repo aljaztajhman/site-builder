@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { BusinessType, DIRECTIONS, MOTIFS, MOTIF_TRADES, directionFitsTrade, motifFitsTrade, tradeMotifIssues, type SiteSpec } from "../src/index.ts";
+import { BusinessType, DIRECTIONS, MOTIFS, MOTIF_TRADES, directionFitsTrade, motifFitsTrade, siteMotif, tradeMotifIssues, type SiteSpec } from "../src/index.ts";
 
 /** Motifs carry the trades they fit: the outside review found the licence plate on a locksmith's site. */
 const specs = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../eval/outside-review/review50-specs");
@@ -31,5 +31,14 @@ describe("motifs and trades", () => {
     expect(spec.business.type).toBe("builder");
     expect(tradeMotifIssues(spec)).toEqual([{ path: "/design/direction", message: `the plate motif of direction ${spec.design.direction} is for car-repair, not builder` }]);
     expect(tradeMotifIssues({ ...spec, business: { ...spec.business, type: "car-repair" } })).toEqual([]);
+  });
+});
+
+describe("siteMotif gates the trade", () => {
+  it("a locksmith (builder) on the plate template gets no motif; car repair and callers without a type keep it", () => {
+    const plate = DIRECTIONS.find((d) => d.template?.motif === "plate")!;
+    expect(siteMotif({ design: { direction: plate.id }, business: { type: "builder" } })).toEqual({});
+    expect(siteMotif({ design: { direction: plate.id }, business: { type: "car-repair" } })).toEqual({ motif: "plate" });
+    expect(siteMotif({ design: { direction: plate.id }, business: {} })).toEqual({ motif: "plate" });
   });
 });

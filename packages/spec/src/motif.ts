@@ -24,9 +24,10 @@ export interface SiteMotif {
   sub?: SubMotif;
 }
 
-export function siteMotif(site: { design: { direction: string }; business: { subtype?: BusinessSubtype | undefined } }): SiteMotif {
+export function siteMotif(site: { design: { direction: string }; business: { type?: string; subtype?: BusinessSubtype | undefined } }): SiteMotif {
   const motif = DIRECTIONS.find((d) => d.id === site.design.direction)?.template?.motif;
-  if (!motif) return {};
+  // A motif that doesn't fit the trade (MOTIF_TRADES) isn't drawn: the site keeps the direction without it.
+  if (!motif || !motifFitsTrade(motif, site.business.type ?? motifAnyTrade(motif))) return {};
   const sub = site.business.subtype ? SUBTYPE_MOTIF[site.business.subtype] : undefined;
   return sub && SUBMOTIF_BASE[sub] === motif ? { motif, sub } : { motif };
 }
@@ -49,6 +50,12 @@ export const MOTIF_TRADES: Record<Motif, readonly BusinessType[] | "any"> = {
   trail: "any",
   bend: "any",
 };
+
+/** A trade the motif fits, for callers that don't know the business type (no gate then). */
+function motifAnyTrade(motif: Motif): string | undefined {
+  const trades = MOTIF_TRADES[motif];
+  return trades === "any" ? undefined : trades[0];
+}
 
 /** Whether a template motif fits the business type (no motif, or one open to any trade, always fits). */
 export function motifFitsTrade(motif: Motif | undefined, type: string | undefined): boolean {
