@@ -248,6 +248,10 @@ export const AppConfigSchema = z.object({
     artDirector: ModelStage,
     /** Studio 0.5b mockup pipeline: rebuilds the mockup (vision) into composed sections, facts through slots. */
     rebuild: ModelStage,
+    /** Studio direct (the Fable studio): the art director, writing for direct composition (no image model). */
+    artDirectorDirect: ModelStage,
+    /** Studio direct: composes the homepage from the art direction in the rebuild's answer format (no mockup, no crops). */
+    composeDirect: ModelStage,
   }),
   useFullBuildModel: z.boolean(),
   /**
@@ -303,8 +307,19 @@ export const AppConfigSchema = z.object({
     /** Studio 0.5: € one studio run may spend, all its calls together (each is sent only when its estimate still fits; no retries). */
     perRunMaxEur: z.number().positive(),
     $modeComment: z.string().optional(),
-    /** Studio 0.5b: "mockup" (art director → mockup image → rebuild, falling back to the picker) or "picker" (the 0.5 preset picker only). */
-    mode: z.enum(["mockup", "picker"]).default("mockup"),
+    /**
+     * Studio 0.5b: "mockup" (art director → mockup image → rebuild, falling back to the picker), "picker" (the 0.5 preset
+     * picker only) or "direct" (the Fable studio: art director → composer from the direction, no image model, falling
+     * back to the picker).
+     */
+    mode: z.enum(["mockup", "picker", "direct"]).default("mockup"),
+    $directComment: z.string().optional(),
+    /**
+     * studio.mode "direct": the whole direct path's time limit (past it the picker runs), and the € one direct run may
+     * spend, all its calls together (used instead of perRunMaxEur in direct mode: two Fable calls at full maxTokens
+     * cost more than the mockup path, whose cap stays as it is).
+     */
+    direct: z.strictObject({ timeoutSeconds: z.number().positive(), perRunMaxEur: z.number().positive() }),
     $mockupComment: z.string().optional(),
     /** Studio 0.5b: the mockup image (keys of imageGen.models), its size and quality, the decorative crops and the mockup path's time limit. */
     mockup: z.strictObject({

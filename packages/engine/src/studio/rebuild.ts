@@ -86,7 +86,42 @@ const HEX = /^#[0-9a-fA-F]{6}$/;
 /** A crop reference in the rebuild's props: "{crop.1}" for the crop with id "crop1". */
 const CROP_REF = /^\{crop\.(\d)\}$/;
 
-const SYSTEM = `You rebuild a painted homepage mockup in our composition language. Code fills in the client's facts and checks every rule; you decide the layout, so stay close to the mockup's idea, rhythm, scale and colour.
+/**
+ * What differs when there is no mockup (studio.mode "direct", stage composeDirect): the page is composed from the art
+ * direction's words, the answer has no photo regions and no crops, and no "{crop.N}" picture exists.
+ */
+const MODE_TEXT = {
+  mockup: {
+    intro: "You rebuild a painted homepage mockup in our composition language. Code fills in the client's facts and checks every rule; you decide the layout, so stay close to the mockup's idea, rhythm, scale and colour.",
+    regions: `
+  "photoRegions": [{"image": "<the client photo's id>", "box": {"x", "y", "w", "h"}}],
+  "crops": [{"id": "crop1", "box": {"x", "y", "w", "h"}, "shows": "what the art is, in English", "alt": "the same in Slovene", "contains": []}],`,
+    order: "top to bottom as in the mockup",
+    elsewhere: "unless the mockup shows them elsewhere",
+    pictures: `- Where the mockup shows one of the client's photos, use that photo's real id (img_…) in an image, photos or photo-ground layer, and list the region in photoRegions. Never a crop for a client photo.
+- crops: at most 3 pieces of decorative art painted in the mockup (a drawn plant, an ornament, a printed pattern, an object drawn in ink) that you want on the page as a labelled AI picture. Box in mockup pixels, tight around the art. Never a crop with people, faces, hands, buildings or premises, signs, any text or letters, logos, a photo, or the client's work; "contains" lists any of those it holds (then code refuses it). Place a crop with an image element whose image is "{crop.1}" for crop1, "{crop.2}" for crop2; only in hero, story, highlights, services, steps, notice, area, hours, faq, call or contact sections.
+- A business without photos gets no photos: type, colour fields, drawings and crops only.`,
+    match: "pick what matches the mockup",
+    saturated: "A saturated colour from the mockup",
+    signature: "- Keep the mockup's signature move where the language can say it (a colour field, a huge headline, a photo bled to the edge, a crop beside the type).",
+  },
+  direct: {
+    intro: "You compose a homepage in our composition language from an art direction; there is no mockup picture. Code fills in the client's facts and checks every rule; you decide the layout, so realise the direction's idea, composition, signature, palette and type.",
+    regions: "",
+    order: "top to bottom as the direction's composition orders them",
+    elsewhere: "unless the direction places them elsewhere",
+    pictures: `- Use the client's photos by their real id (img_…) in an image, photos or photo-ground layer, chosen, cropped and placed as the direction's imagery says.
+- There is no mockup to cut art from: no crops, no "{crop.N}" images, no generated pictures. Decorative art only as the catalogue's own drawings.
+- A business without photos gets no photos: type, colour fields and drawings only.`,
+    match: "take the direction's palette",
+    saturated: "A saturated colour from the direction",
+    signature: "- Build the direction's signature move where the language can say it (a colour field, a huge headline, a photo bled to the edge, a drawing beside the type).",
+  },
+} as const;
+
+const system = (mode: keyof typeof MODE_TEXT): string => {
+  const t = MODE_TEXT[mode];
+  return `${t.intro}
 
 Answer with ONE JSON object and nothing else:
 {
@@ -95,13 +130,11 @@ Answer with ONE JSON object and nothing else:
     "pairing": one of the font pair ids given,
     "radius": 0..12, "headingWeight": 400..900, "headingCase": "normal"|"uppercase", "density": "compact"|"regular"|"airy",
     "wordmark": one of the wordmark styles given, or "none"
-  },
-  "photoRegions": [{"image": "<the client photo's id>", "box": {"x", "y", "w", "h"}}],
-  "crops": [{"id": "crop1", "box": {"x", "y", "w", "h"}, "shows": "what the art is, in English", "alt": "the same in Slovene", "contains": []}],
+  },${t.regions}
   "sections": [{"intent": "...", "tone": "default"|"alt"|"inverse"|"band", "copy": {"headline": "...", "lead": "..."}, "props": { composed section props }}]
 }
 
-Sections: 4 to 7, top to bottom as in the mockup. The first is the hero (intent "hero", the page's only level-1 heading). The opening hours, the address and the phone must be on the page (a contact section near the end, unless the mockup shows them elsewhere). Intents: ${REBUILD_INTENTS.join(", ")}. "props" is a composed section's props exactly as the catalogue below defines them (intent, width, rows, elements with desk and phone places, background, …); props.intent equals the section's intent.
+Sections: 4 to 7, ${t.order}. The first is the hero (intent "hero", the page's only level-1 heading). The opening hours, the address and the phone must be on the page (a contact section near the end, ${t.elsewhere}). Intents: ${REBUILD_INTENTS.join(", ")}. "props" is a composed section's props exactly as the catalogue below defines them (intent, width, rows, elements with desk and phone places, background, …); props.intent equals the section's intent.
 
 Words and facts (hard rules):
 - Every fact and every sentence reaches the page through a slot marker, never as your own text: names, the phone, the address, hours (the hours element), offerings, prices, people, steps, questions. The slots this business has are listed with their values; a slot not listed has no value and its element would be dropped.
@@ -110,28 +143,34 @@ Words and facts (hard rules):
 - No call buttons: an action with action "call" is removed by code (the header and the phone bar carry the call). Show the phone as a fact with treatment "numeral", value "{business.phone}" and link {"action": "call"}. At most one other action per section.
 
 Pictures:
-- Where the mockup shows one of the client's photos, use that photo's real id (img_…) in an image, photos or photo-ground layer, and list the region in photoRegions. Never a crop for a client photo.
-- crops: at most 3 pieces of decorative art painted in the mockup (a drawn plant, an ornament, a printed pattern, an object drawn in ink) that you want on the page as a labelled AI picture. Box in mockup pixels, tight around the art. Never a crop with people, faces, hands, buildings or premises, signs, any text or letters, logos, a photo, or the client's work; "contains" lists any of those it holds (then code refuses it). Place a crop with an image element whose image is "{crop.1}" for crop1, "{crop.2}" for crop2; only in hero, story, highlights, services, steps, notice, area, hours, faq, call or contact sections.
-- A business without photos gets no photos: type, colour fields, drawings and crops only.
+${t.pictures}
 
-Colour (code enforces contrast, so pick what matches the mockup):
-- background: the page ground: #ffffff, a light tint (never cream or beige) or a deep dark colour. A saturated colour from the mockup goes to band (a section with tone "band", or a field layer with role "band") with onBand as its text colour; inverse/onInverse is the dark or contrasting field; surface the quiet alternate ground (tone "alt"); primary the button and accent colour, onPrimary the text on it.
+Colour (code enforces contrast, so ${t.match}):
+- background: the page ground: #ffffff, a light tint (never cream or beige) or a deep dark colour. ${t.saturated} goes to band (a section with tone "band", or a field layer with role "band") with onBand as its text colour; inverse/onInverse is the dark or contrasting field; surface the quiet alternate ground (tone "alt"); primary the button and accent colour, onPrimary the text on it.
 - Text on its ground at least 4.5:1, large type at least 3:1, accent on inverse at least 3:1.
 
 Layout:
 - Desktop: 12 columns; running text spans 4 to 8 columns; text never overlaps text. Display sizes (6 to 8) at most twice on the whole page. The hero's headline at size 6 or 7 with measure "l" across at least 7 columns, so it sets in two or three lines and the lead shows on the first 1280×800 screen too. Phones: every element gets phone.order; images may bleed.
-- Keep the mockup's signature move where the language can say it (a colour field, a huge headline, a photo bled to the edge, a crop beside the type). Leave out what it can't build rather than faking it.
+${t.signature} Leave out what it can't build rather than faking it.
 - Fonts: only the font pair ids given; never ask for condensed faces.`;
+};
+const SYSTEM = { mockup: system("mockup"), direct: system("direct") };
 
 export interface RebuildInput {
   spec: SiteSpec;
   sources: ComposeSources;
-  /** The mockup as a base64 JPEG and its size. */
-  mockup: { jpegBase64: string; width: number; height: number };
+  /**
+   * The mockup as a base64 JPEG and its size. Absent (studio.mode "direct"): the page is composed from the direction
+   * alone, on stage composeDirect, with no image but the client's photos and no photo regions or crops asked for.
+   */
+  mockup?: { jpegBase64: string; width: number; height: number };
   /** The client's photos for vision: id, its description, base64 JPEG. */
   photos: { id: string; alt: string; jpegBase64: string }[];
-  /** The art director's direction, and the hero copy that passed the checks. */
-  direction: { name: string; idea: string; signature: string; composition: string; pairing: string };
+  /**
+   * The art director's direction, and the hero copy that passed the checks. Without a mockup the composer also reads the
+   * palette, the type's character and the imagery, which a mockup would otherwise show.
+   */
+  direction: { name: string; idea: string; signature: string; composition: string; pairing: string; palette?: readonly { role: string; hex: string }[]; typeCharacter?: string; imagery?: string };
   heroCopy: { headline?: string; lead?: string };
   /** Approved wordmark styles that fit the name (empty when the business has a logo). */
   wordmarks: readonly string[];
@@ -159,20 +198,27 @@ export function slotTable(sources: ComposeSources): string[] {
   return out;
 }
 
-/** The rebuild's request: the catalogue and rules as system blocks, the mockup and photos as images. */
+/**
+ * The rebuild's request: the catalogue and rules as system blocks, the mockup and photos as images. Without a mockup
+ * (studio.mode "direct") it is the composer's request on stage composeDirect: the direction in full, the photos only.
+ */
 export function rebuildRequest(input: RebuildInput): ModelRequest {
   const approved = new Set(inventory().all().filter((a) => a.status === "approved").map((a) => a.id));
   const catalogue = designerCatalogue({ compact: true, approved });
-  const { spec, sources, photos } = input;
+  const { spec, sources, photos, mockup } = input;
+  const d = input.direction;
   const todays = Object.entries(sources.copy)
     .filter(([, c]) => c?.headline || c?.lead)
     .map(([intent, c]) => `- ${intent}: ${[c?.headline, c?.lead].filter(Boolean).join(" / ")}`);
+  const looks = mockup
+    ? ""
+    : [d.palette?.length ? `\nPalette: ${d.palette.map((p) => `${p.role} ${p.hex}`).join(", ")}` : "", d.typeCharacter ? `\nType: ${d.typeCharacter}` : "", d.imagery ? `\nImagery: ${d.imagery}` : ""].join("");
   const text = [
-    `The mockup above is ${input.mockup.width}×${input.mockup.height} px; boxes are in its pixels.`,
+    mockup ? `The mockup above is ${mockup.width}×${mockup.height} px; boxes are in its pixels.` : "There is no mockup: compose the homepage from this art direction.",
     `Business: ${spec.business.name} (${spec.business.type}). Own logo: ${spec.assets.logo ? "yes (the header shows it)" : "no"}.`,
-    `Direction "${input.direction.name}": ${input.direction.idea}\nSignature: ${input.direction.signature}\nComposition: ${input.direction.composition}\nFont pair the art director chose: ${input.direction.pairing}`,
+    `Direction "${d.name}": ${d.idea}\nSignature: ${d.signature}\nComposition: ${d.composition}${looks}\nFont pair the art director chose: ${d.pairing}`,
     `Hero copy (use it, or improve it within the rules): ${[input.heroCopy.headline, input.heroCopy.lead].filter(Boolean).join(" / ") || "none"}`,
-    photos.length ? `The client's photos (attached after the mockup, in this order):\n${photos.map((p) => `- ${p.id}: ${p.alt || "no description"}`).join("\n")}` : "The business has no photos.",
+    photos.length ? `The client's photos (attached ${mockup ? "after the mockup" : "above"}, in this order):\n${photos.map((p) => `- ${p.id}: ${p.alt || "no description"}`).join("\n")}` : "The business has no photos.",
     `Slots with a value:\n${slotTable(sources).join("\n")}`,
     todays.length ? `Today's copy by section (you may reuse it as copy):\n${todays.join("\n")}` : "",
     `Font pair ids: ${FONT_PAIRS.map((p) => `${p.id} (${p.label})`).join(", ")}`,
@@ -181,11 +227,11 @@ export function rebuildRequest(input: RebuildInput): ModelRequest {
     .filter(Boolean)
     .join("\n\n");
   const content: Anthropic.ContentBlockParam[] = [
-    { type: "image", source: { type: "base64", media_type: "image/jpeg", data: input.mockup.jpegBase64 } },
+    ...(mockup ? [{ type: "image", source: { type: "base64", media_type: "image/jpeg", data: mockup.jpegBase64 } } satisfies Anthropic.ImageBlockParam] : []),
     ...photos.map((p): Anthropic.ImageBlockParam => ({ type: "image", source: { type: "base64", media_type: "image/jpeg", data: p.jpegBase64 } })),
     { type: "text", text },
   ];
-  return { stage: "rebuild", system: [SYSTEM, catalogue], cache: false, messages: [{ role: "user", content }] };
+  return { stage: mockup ? "rebuild" : "composeDirect", system: [SYSTEM[mockup ? "mockup" : "direct"], catalogue], cache: false, messages: [{ role: "user", content }] };
 }
 
 // ---------- the crops ----------
