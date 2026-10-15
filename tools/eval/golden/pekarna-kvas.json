@@ -87,7 +87,7 @@
             "title": "Vsak dan v pekarni",
             "intro": "Ob petkih in sobotah pečemo še orehovo potico in kvašene krofe.",
             "items": [
-              { "name": "Pirin kruh z drožmi", "price": { "amount": 4.2 }, "image": "img_01" },
+              { "name": "Pirin kruh z drožmi", "price": { "amount": 4.2 } },
               { "name": "Rženi kruh", "price": { "amount": 3.9 } },
               { "name": "Rogljiček z maslom", "price": { "amount": 1.3 }, "image": "img_03" },
               { "name": "Orehova potica", "unit": "1 kg", "price": { "amount": 18, "from": true } },

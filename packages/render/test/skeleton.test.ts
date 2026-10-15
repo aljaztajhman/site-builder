@@ -152,7 +152,8 @@ describe("the skeleton in the page", () => {
     expect(footer).not.toContain("site-footer__visit");
     expect(footer).not.toContain("<address>");
     expect(footer).toContain("site-footer__provider");
-    expect(html.match(/<address>/g)).toHaveLength(1);
+    // Once on the page: the contact strip near the top says it, the contact section below leaves it out.
+    expect((html.match(/<address>|class="contact-strip__value"/g) ?? []).length).toBe(1);
   });
 });
 

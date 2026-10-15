@@ -1,6 +1,7 @@
 import { formatAddress, isPlaceholder } from "@sb/spec";
 import { HoursList, Icon, PhoneLink, Ph, Section, cx, titleId } from "../../primitives/index.tsx";
 import type { SectionProps } from "../../types.ts";
+import { shownElsewhere } from "../../chrome/page-facts.ts";
 
 /**
  * Quick facts near the top of the homepage: phone, address with directions, weekly hours.
@@ -11,6 +12,8 @@ export function ContactStrip({ section, ctx }: SectionProps<"contact-strip">) {
   const { props } = section;
   const b = ctx.site.business;
   const directions = ctx.href({ action: "directions" });
+  // Say each thing once: what a section above showed, and hours that have their own section, aren't repeated here.
+  const elsewhere = shownElsewhere(ctx.page, section.id, b);
   return (
     <Section id={section.id} type={section.type} variant={section.variant} tone={section.tone}>
       <h2 id={titleId(section.id)} className={props.title ? "section-title contact-strip__title" : "visually-hidden"}>
@@ -24,6 +27,7 @@ export function ContactStrip({ section, ctx }: SectionProps<"contact-strip">) {
           </h3>
           <PhoneLink ctx={ctx} className="contact-strip__action contact-strip__phone" />
         </li>
+        {!elsewhere.address && (
         <li className={cx("contact-strip__item", section.variant === "cards" && "card")}>
           <h3 className="contact-strip__label fact-label">
             <Icon name="map-pin" />
@@ -42,7 +46,8 @@ export function ContactStrip({ section, ctx }: SectionProps<"contact-strip">) {
             </>
           )}
         </li>
-        {b.hours !== undefined && (
+        )}
+        {b.hours !== undefined && !elsewhere.hours && (
           <li className={cx("contact-strip__item", section.variant === "cards" && "card")}>
             <h3 className="contact-strip__label fact-label">
               <Icon name="clock" />

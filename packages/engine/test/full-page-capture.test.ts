@@ -75,3 +75,32 @@ describe("full-page capture", () => {
     });
   }
 });
+
+/** A header over the opener (composed-v2 data-hdr="over"): the opener is pulled up under it and positioned. */
+const OVER = `<!doctype html><html lang="sl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body { margin: 0; background: #fff; }
+.site-header--sticky { position: sticky; top: 0; z-index: 40; height: 60px; background: rgb(255, 0, 0); }
+.opener { position: relative; margin-top: -60px; min-height: 600px; background: rgb(0, 128, 0); }
+section { min-height: 700px; }
+</style></head><body>
+<header class="site-header site-header--sticky">Glava</header>
+<main><div class="opener"></div><section></section><section></section></main>
+</body></html>`;
+
+describe("full-page capture, header over the opener", () => {
+  it("keeps the header painted above the opener pulled up under it", async () => {
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, deviceScaleFactor: 1 });
+    try {
+      const page = await ctx.newPage();
+      await page.setContent(OVER, { waitUntil: "load" });
+      await hideFixedForFullPage(page);
+      const rows = await redRows(await page.screenshot({ type: "png", fullPage: true }));
+      expect(rows.length).toBeGreaterThan(50);
+      expect(Math.min(...rows)).toBe(0);
+      expect(Math.max(...rows)).toBeLessThan(60);
+    } finally {
+      await ctx.close();
+    }
+  });
+});

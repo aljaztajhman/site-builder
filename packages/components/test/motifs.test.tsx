@@ -434,6 +434,18 @@ describe("contact call-out", () => {
     expect(html(<Contact section={section} ctx={ctx} index={5} />)).toContain("Delovni čas");
   });
 
+  it("leaves out the address and hours the hero's fact strip already showed above it (say each thing once)", () => {
+    const ctx = ctxFor("tablica");
+    const strip = { ...ctx, page: { ...ctx.page, sections: [hero("photo"), section] } } as typeof ctx;
+    const out = html(<Contact section={section} ctx={strip} index={5} />);
+    expect(out).not.toContain("Savska cesta 52");
+    expect(out).not.toContain("Delovni čas");
+    expect(out).toContain('class="plate plate--poster"');
+    // Below the call-out the strip doesn't count: the call-out is first, it shows both.
+    const after = { ...ctx, page: { ...ctx.page, sections: [section, hero("photo")] } } as typeof ctx;
+    expect(html(<Contact section={section} ctx={after} index={0} />)).toContain("Savska cesta 52");
+  });
+
   it("leaves out an e-mail the owner doesn't have", () => {
     const out = html(<Contact section={section} ctx={ctxFor("cevi", { ...KRANJ, email: { $placeholder: "email" } })} index={5} />);
     expect(out).not.toContain("E-pošta");

@@ -431,24 +431,12 @@
             "title": "V trgovini",
             "images": [
               {
-                "image": "img_01",
-                "caption": "Police z oljčnim oljem"
-              },
-              {
-                "image": "img_02",
-                "caption": "Piranska sol"
-              },
-              {
                 "image": "img_03",
                 "caption": "Darilni paket"
               },
               {
                 "image": "img_04",
                 "caption": "Vhod v trgovino"
-              },
-              {
-                "image": "img_05",
-                "caption": "Pršut in sir"
               }
             ]
           }

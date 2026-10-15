@@ -408,7 +408,9 @@ export async function hideFixedForFullPage(page: Page): Promise<void> {
     for (const el of document.querySelectorAll("body *")) {
       const pos = getComputedStyle(el).position;
       if (pos === "fixed") el.style.setProperty("visibility", "hidden", "important");
-      else if (pos === "sticky") el.style.setProperty("position", "static", "important");
+      // relative, not static: in flow at its own place, but keeps its z-index (a header over the opener stays on top).
+      else if (pos === "sticky") el.style.setProperty("position", "relative", "important");
+      if (pos === "sticky") el.style.setProperty("top", "auto", "important");
     }
     window.scrollTo({ top: 0, behavior: "instant" });
     await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(r, 30))));

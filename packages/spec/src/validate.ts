@@ -1,6 +1,7 @@
 import type { z } from "zod";
 import { GENERATED_DECOR_EXCLUDED_INTENTS, GENERATED_IMAGE_INTENTS, GENERATED_IMAGE_SECTIONS, SiteSpec } from "./site.ts";
 import { SECTION_DEFS } from "./sections/index.ts";
+import { siteMotif } from "./motif.ts";
 import { DIRECTIONS } from "./directions.ts";
 import { subtypeFits } from "./business.ts";
 import { checkDesign } from "./design-rules.ts";
@@ -85,7 +86,7 @@ export function semanticIssues(spec: SiteSpec): Issue[] {
 
   // Banned: everything centred. At most one centred section per page: a centred variant, or the one the site's
   // skeleton centres (spec v15, design.skeleton.centred; centredOn keeps at most one per page).
-  const motif = DIRECTIONS.find((d) => d.id === spec.design.direction)?.template?.motif;
+  const motif = siteMotif(spec).motif;
   spec.pages.forEach((p, pi) => {
     const byAlign = centredOn(spec.design.skeleton, p.sections, motif);
     // Spec v19: a composed section whose text is all centred counts too.

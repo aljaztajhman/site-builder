@@ -45,7 +45,7 @@ function privacySl(f: LegalFacts) {
       </p>
 
       <h2>Upravljavec</h2>
-      <p>
+      <p data-legal="">
         Upravljavec osebnih podatkov je {f.legal}, {f.address}, matična številka {f.reg}. Z nami se lahko povežete po e-pošti {f.email}{" "}
         ali po telefonu {f.phone}.
       </p>

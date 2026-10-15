@@ -39,6 +39,27 @@ export function sectionFacts(section: Section, business: Business): PageFacts {
   }
 }
 
+/** The visit facts the sections above this one show (a later contact block leaves those out: say each thing once). */
+export function factsAbove(page: Page, sectionId: string, business: Business): PageFacts {
+  const out: PageFacts = { address: false, hours: false };
+  for (const s of page.sections) {
+    if (s.id === sectionId) break;
+    const f = sectionFacts(s, business);
+    out.address ||= f.address;
+    out.hours ||= f.hours;
+  }
+  return out;
+}
+
+/**
+ * What a contact block (contact, contact-strip) leaves out to say each thing once: what a section above it showed,
+ * and the hours when the page has its own opening-hours section (that section is where the hours live).
+ */
+export function shownElsewhere(page: Page, sectionId: string, business: Business): PageFacts {
+  const above = factsAbove(page, sectionId, business);
+  return { address: above.address, hours: above.hours || page.sections.some((s) => s.type === "opening-hours" && s.id !== sectionId) };
+}
+
 /** The visit facts any section of the page shows. */
 export function pageFacts(page: Page, business: Business): PageFacts {
   const out: PageFacts = { address: false, hours: false };

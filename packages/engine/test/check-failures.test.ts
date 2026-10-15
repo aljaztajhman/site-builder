@@ -31,10 +31,8 @@ describe("failuresOf", () => {
     expect(f).toContainEqual(expect.stringMatching(/^same image twice on a page: \/pages\/0\/sections\/2\/props\/items\/0\/image image img_01 is already shown higher on this page$/));
   });
 
-  it("names a trade-foreign motif (the plate on a locksmith's site)", () => {
-    const f = failuresOf(load("kljucavnicarstvo-hrovat", "spec-regenerated.json"), empty(), config);
-    expect(f).toContainEqual(expect.stringMatching(/^trade-foreign motif: the plate motif of direction \S+ is for car-repair, not builder$/));
-    expect(failuresOf(load("avto-kovac", "spec-generated.json"), empty(), config).join("\n")).not.toMatch(/trade-foreign/);
+  it("has no line for a trade-foreign motif: the renderer doesn't draw it (spec siteMotif), so the critique couldn't fix it", () => {
+    expect(failuresOf(load("kljucavnicarstvo-hrovat", "spec-regenerated.json"), empty(), config).join("\n")).not.toMatch(/motif/);
   });
 
   it("is quiet about images when each is shown once", () => {
