@@ -49,3 +49,4 @@ export * from "./studio/index.ts";
 // drops them, studio-phase1-design.md §4); a named export wins over the star export, so @sb/spec exposes these.
 export { ASSET_KINDS, AssetKind, KIND_PREFIX, AssetId, assetId, parseAssetId, type AssetPrefix } from "./assets.ts";
 export * from "./images-once.ts";
+export * from "./text-once.ts";

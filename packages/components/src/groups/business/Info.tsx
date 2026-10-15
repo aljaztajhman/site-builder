@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { capitalize, dayName, formatAddress, hoursRows, isPlaceholder, weekChart, type Hours, type Placeholder } from "@sb/spec";
+import { capitalize, dayName, formatAddress, hoursRows, isPlaceholder, weekChart, withoutShown, type Hours, type Placeholder } from "@sb/spec";
 import {
   AddressText,
   EmailLink,
@@ -95,6 +95,10 @@ export function OpeningHours({ section, ctx, index }: SectionProps<"opening-hour
   const { props } = section;
   const hours = ctx.site.business.hours ?? MISSING_HOURS;
   const image = section.variant === "photo" ? props.image : undefined;
+  // The hours print their own note (all but the poster); the section note leaves out what it already says (the outside
+  // review: the same sentence twice under the hours).
+  const hoursNote = !isPlaceholder(hours) && section.variant !== "poster" ? hours.note : undefined;
+  const note = props.note ? withoutShown(props.note, [hoursNote]) : undefined;
   const text = (
     <>
       <SectionHead id={section.id} eyebrow={props.eyebrow} title={props.title} />
@@ -120,7 +124,7 @@ export function OpeningHours({ section, ctx, index }: SectionProps<"opening-hour
         ) : (
           <HoursTable hours={hours} ctx={ctx} labelledBy={titleId(section.id)} />
         )}
-        {props.note && <p className="oh__note">{props.note}</p>}
+        {note && <p className="oh__note">{note}</p>}
       </div>
     </>
   );

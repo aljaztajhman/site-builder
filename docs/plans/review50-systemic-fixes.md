@@ -68,7 +68,7 @@ engine rules: free to build, and measurable for free by re-rendering the 100 sav
    (`page-checks.ts:196`) but the regenerated site shipped with it: make that failure a repair trigger, not a note.
    Unconfirmed whether the check fired on that site (the eval run's result file was lost, see Found).
 6. **A sentence printed twice** (an hours note shown in the hours list and again in the section text). Assembly
-   drops a note identical to text already in the section; the duplicate-text banned pattern from 2 covers sentences.
+   drops a note identical to text already in the section; the duplicate-text banned pattern from 2 covers sentences. **Done (2026-10-15):** the hours section drops a note the hours print; `repeatedSentences` (browser) and generation's `repairRepeatedSentences` (counted on the rendered page) cover sentences across sections; 3 of the 100 saved specs keep a repeat whose copies are required fields or list entries (left for the critique).
 7. **Clipped logo tagline and AI-picture labels in small round crops.** Logo: fit the SVG's viewBox to its contents
    when the logo is placed. Labels: inside the crop's safe area (or outside the shape) for circular and arched crops.
 8. **Trade-foreign motifs**: the licence-plate motif on a locksmith. Motifs carry the trades they fit (`trade` is in
