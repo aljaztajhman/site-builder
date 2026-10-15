@@ -211,12 +211,18 @@
   padding-block: 0.75rem;
   border-bottom: 1px solid var(--b-rule);
 }
+/* A name keeps its words whole (no automatic hyphens since the 50-page review): when its longest word and the
+   price don't fit one line beside each other (a placeholder price chip at 360 px), the price wraps under it. */
+.prices__row {
+  flex-wrap: wrap;
+}
 .prices__row dt {
-  min-width: 0;
+  min-width: min(min-content, 100%);
 }
 .prices__row dd {
   flex: none;
   max-width: 50%;
+  margin-inline-start: auto;
   text-align: right;
 }
 .prices__footnote {

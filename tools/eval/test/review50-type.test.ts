@@ -200,4 +200,34 @@ describe("review 50: type", () => {
       }
     }
   }, 120_000);
+  it("a price name keeps its words whole beside a wide price (pekarna-kvas: Polnozrnate žemlje beside [Vnesite ceno], 360 px)", async () => {
+    const spec = await reviewSpec("pekarna-kvas", "generated");
+    for (const w of WIDTHS) {
+      const { page, ctx } = await open(spec, w);
+      try {
+        await shot(page, "prices", w.width, ".prices");
+        const words = await page.evaluate(() =>
+          [...document.querySelectorAll(".prices__name")].flatMap((el) => {
+            const text = el.textContent ?? "";
+            const node = el.firstChild!;
+            const out: { word: string; rects: number }[] = [];
+            let at = 0;
+            for (const word of text.split(" ")) {
+              const r = document.createRange();
+              r.setStart(node, at);
+              r.setEnd(node, at + word.length);
+              out.push({ word, rects: new Set([...r.getClientRects()].map((x) => Math.round(x.top))).size });
+              at += word.length + 1;
+            }
+            return out;
+          }),
+        );
+        expect(words.length).toBeGreaterThan(3);
+        expect(words.filter((x) => x.rects > 1), `${w.width} px: words split across lines`).toEqual([]);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(w.width);
+      } finally {
+        await ctx.close();
+      }
+    }
+  }, 120_000);
 });
