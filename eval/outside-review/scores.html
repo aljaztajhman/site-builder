@@ -121,6 +121,36 @@ tr.detail td { background: color-mix(in oklab, var(--accent) 4%, var(--surface))
 .dgrid .fix { font-size: 0.84rem; color: var(--muted); margin-top: 6px; }
 .dgrid .none { color: var(--muted); font-size: 0.86rem; }
 .count { color: var(--muted); font-size: 0.85rem; }
+
+/* Gallery */
+.gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: 18px; }
+.card { display: grid; gap: 10px; align-content: start; text-align: left; font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 10px; cursor: pointer; min-width: 0; }
+.card:hover { border-color: color-mix(in oklab, var(--accent) 50%, var(--rule)); }
+.card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.shots { display: grid; grid-template-columns: 1fr 26%; gap: 8px; align-items: start; }
+.shots img { width: 100%; height: auto; display: block; border-radius: 5px; border: 1px solid var(--rule); background: var(--rule); }
+.shots .d { aspect-ratio: 1280 / 800; object-fit: cover; object-position: top; }
+.shots .m { aspect-ratio: 360 / 800; object-fit: cover; object-position: top; }
+.cmeta { display: flex; justify-content: space-between; gap: 8px; align-items: start; padding-inline: 2px; }
+.cscores { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; padding-inline: 2px; }
+.cscores .sc { min-width: 3rem; font-size: 0.85rem; }
+.cscores .who { font-size: 0.75rem; color: var(--muted); gap: 4px; }
+.cfoot { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding-inline: 2px; }
+.cfoot .m { font-family: var(--font-num); font-size: 0.85rem; color: var(--muted); }
+
+dialog { width: min(1180px, 100vw - 24px); max-height: calc(100vh - 24px); padding: 0; border: 1px solid var(--rule); border-radius: 12px; background: var(--bg); color: var(--ink); }
+dialog::backdrop { background: rgb(0 0 0 / 0.55); }
+.dhead { position: sticky; top: 0; z-index: 1; display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; padding: 14px 18px; background: var(--surface); border-bottom: 1px solid var(--rule); }
+.close { font: inherit; font-weight: 600; font-size: 0.85rem; padding: 7px 12px; border-radius: 8px; border: 1px solid var(--rule); background: transparent; color: var(--ink); cursor: pointer; }
+.dbody { display: grid; gap: 18px; padding: 18px; }
+.dscores { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
+.dscores .who { gap: 6px; font-weight: 600; }
+.full { display: grid; grid-template-columns: 1fr minmax(0, 300px); gap: 16px; align-items: start; }
+.full figure { margin: 0; display: grid; gap: 6px; min-width: 0; }
+.full figcaption { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); font-weight: 600; }
+.fscroll { max-height: 70vh; overflow: auto; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); }
+.fscroll img { display: block; width: 100%; height: auto; }
+@media (max-width: 700px) { .full { grid-template-columns: 1fr; } .full .phone { max-width: 300px; } }
 .notes { display: grid; gap: 10px; color: var(--muted); font-size: 0.9rem; max-width: 70ch; }
 .notes b { color: var(--ink); }
 @media (max-width: 560px) {
@@ -197,7 +227,7 @@ tr.detail td { background: color-mix(in oklab, var(--accent) 4%, var(--surface))
 
   <section aria-labelledby="h-pages">
     <div class="controls">
-      <h2 id="h-pages">Every page</h2>
+      <h2 id="h-pages">The designs</h2>
       <div class="seg" role="group" aria-label="Run" id="tabRun">
         <button type="button" data-run="after" aria-pressed="true">After fixes</button>
         <button type="button" data-run="before" aria-pressed="false">Before</button>
@@ -210,14 +240,24 @@ tr.detail td { background: color-mix(in oklab, var(--accent) 4%, var(--surface))
       </div>
     </div>
     <p class="count" id="pcount"></p>
-    <div class="panel scroll" style="padding:6px 10px">
-      <table class="pages">
-        <thead><tr><th>Page</th><th>Gemini</th><th>GPT</th><th>Fable</th><th class="r">Mean</th><th class="r" id="dHead">vs before</th><th>Blockers</th></tr></thead>
-        <tbody id="pages"></tbody>
-      </table>
-    </div>
-    <p class="count">Click a page to read each reviewer's blockers and their single most useful fix.</p>
+    <div class="gallery" id="pages"></div>
   </section>
+
+  <dialog id="dlg" aria-labelledby="dTitle">
+    <div class="dhead">
+      <div class="pg"><b id="dTitle"></b><small id="dSub"></small></div>
+      <div class="seg" role="group" aria-label="Version" id="dRun"></div>
+      <button type="button" class="close" id="dClose" aria-label="Close">Close</button>
+    </div>
+    <div class="dbody">
+      <div class="dscores" id="dScores"></div>
+      <div class="dgrid" id="dNotes"></div>
+      <div class="full">
+        <figure><figcaption>Desktop, 1280 px</figcaption><div class="fscroll"><img id="dDesk" alt=""></div></figure>
+        <figure class="phone"><figcaption>Phone, 360 px</figcaption><div class="fscroll"><img id="dPhone" alt=""></div></figure>
+      </div>
+    </div>
+  </dialog>
 
   <section aria-labelledby="h-notes" class="col">
     <h2 id="h-notes">Read with care</h2>
@@ -330,40 +370,68 @@ tr.detail td { background: color-mix(in oklab, var(--accent) 4%, var(--surface))
     const t = Math.max(0, Math.min(1, (s - 2.5) / 2));
     return `background: color-mix(in oklab, color-mix(in oklab, var(--hi) ${Math.round(t * 100)}%, var(--lo)) ${Math.round(18 + Math.abs(t - 0.5) * 44)}%, var(--surface))`;
   };
-  let runKey = "after", show = "all", open = null;
-  const label = (r) => `<div class="pg"><b>${esc(r.name ?? r.id)}${r.id.endsWith("-regenerated") ? " · regenerated" : ""}</b><small>${esc([r.trade ?? r.type, r.city].filter(Boolean).join(" · "))}</small></div>`;
+  let runKey = "after", show = "all";
+  const shot = (run, id, kind) => `shots/${run}/${id}-${kind}.jpg`;
+  const title = (r) => `${r.name ?? r.id}${r.id.endsWith("-regenerated") ? " · regenerated" : ""}`;
+  const sub = (r) => [r.trade ?? r.type, r.city].filter(Boolean).join(" · ");
   const chip = (n) => (n === 0 ? `<span class="chip ok">passes</span>` : n === 1 ? `<span class="chip one">1 reviewer</span>` : `<span class="chip many">${n} reviewers · held</span>`);
+  const pill = (s) => `<span class="sc" style="${heat(s)}">${s == null ? '<span class="na">–</span>' : fmt(s)}</span>`;
+  const RUN_LABEL = { before: "Before (re-render of the old code)", after: "After fixes", fresh: "Fresh 10" };
   function render() {
     const rows = D.runs[runKey].rows
       .filter((r) => show === "all" || (show === "held" ? holders(r) >= 2 : holders(r) === 0))
       .map((r) => ({ r, m: mean(r) }))
       .sort((p, q) => (q.m ?? 0) - (p.m ?? 0));
-    document.getElementById("dHead").style.visibility = runKey === "after" ? "visible" : "hidden";
-    document.getElementById("pcount").textContent = `${rows.length} of ${D.runs[runKey].rows.length} pages, best mean first.`;
+    document.getElementById("pcount").textContent = `${rows.length} of ${D.runs[runKey].rows.length} pages, best mean first. Click a page for the full design and the reviewers' notes.` +
+      (runKey === "before" ? " The original before screenshots stayed on the cloud machine; these are the old code re-rendered from the same saved pages." : "");
     document.getElementById("pages").innerHTML = rows.map(({ r, m }) => {
       const b = runKey === "after" ? before.get(r.id) : null;
-      const d = b ? m - mean(b) : null;
-      const delta = d == null ? "" : `<span class="delta ${d > 0.005 ? "up" : d < -0.005 ? "down" : ""}">${d > 0 ? "+" : ""}${d.toFixed(2)}</span>`;
-      const cells = RV.map((v) => `<td><span class="sc" style="${heat(r.scores[v])}">${r.scores[v] == null ? '<span class="na">–</span>' : fmt(r.scores[v])}</span></td>`).join("");
-      let html = `<tr class="row" tabindex="0" data-id="${esc(r.id)}" aria-expanded="${open === r.id}"><td>${label(r)}</td>${cells}<td class="r num">${fmt(m)}</td><td class="r">${delta}</td><td>${chip(holders(r))}</td></tr>`;
-      if (open === r.id) {
-        html += `<tr class="detail"><td colspan="7"><div class="dgrid">` + RV.map((v) => {
-          const bl = r.blockers[v];
-          return `<div><h3><span class="dot ${v}"></span>${RV_NAME[v]}</h3>` +
-            (bl.length ? `<ul>${bl.map((x) => `<li>${esc(x.text)} <span class="cause">(${esc(x.cause)})</span></li>`).join("")}</ul>` : `<p class="none">No blocker.</p>`) +
-            (r.topFix[v] ? `<p class="fix">Top fix: ${esc(r.topFix[v])}</p>` : "") + `</div>`;
-        }).join("") + `</div></td></tr>`;
-      }
-      return html;
+      const d0 = b ? m - mean(b) : null; const d = d0 == null ? null : Math.abs(d0) < 0.005 ? 0 : d0;
+      const delta = d == null ? "" : ` <span class="delta ${d > 0.005 ? "up" : d < -0.005 ? "down" : ""}">${d > 0 ? "+" : ""}${d.toFixed(2)} vs before</span>`;
+      return `<button type="button" class="card" data-id="${esc(r.id)}">
+        <div class="shots"><img class="d" loading="lazy" src="${shot(runKey, r.id, "d")}" alt="${esc(title(r))}, desktop first screen"><img class="m" loading="lazy" src="${shot(runKey, r.id, "m")}" alt="${esc(title(r))}, phone first screen"></div>
+        <div class="cmeta"><div class="pg"><b>${esc(title(r))}</b><small>${esc(sub(r))}</small></div></div>
+        <div class="cscores">${RV.map((v) => `<span class="who"><span class="dot ${v}"></span>${pill(r.scores[v])}</span>`).join("")}</div>
+        <div class="cfoot"><span class="m">mean ${fmt(m)}${delta}</span>${chip(holders(r))}</div>
+      </button>`;
     }).join("");
   }
-  const toggle = (id) => { open = open === id ? null : id; render(); };
-  document.getElementById("pages").addEventListener("click", (e) => { const tr = e.target.closest("tr.row"); if (tr) toggle(tr.dataset.id); });
-  document.getElementById("pages").addEventListener("keydown", (e) => { const tr = e.target.closest("tr.row"); if (tr && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); toggle(tr.dataset.id); } });
+
+  // Detail dialog: the full pages and every reviewer's notes; review pages switch between before and after.
+  const dlg = document.getElementById("dlg");
+  let dId = null, dRun = null;
+  function fill() {
+    const r = D.runs[dRun].rows.find((x) => x.id === dId);
+    document.getElementById("dTitle").textContent = title(r);
+    document.getElementById("dSub").textContent = `${sub(r)} · ${RUN_LABEL[dRun]}`;
+    const runs = dRun === "fresh" ? [] : ["before", "after"];
+    document.getElementById("dRun").innerHTML = runs.map((k) => `<button type="button" data-run="${k}" aria-pressed="${k === dRun}">${k === "before" ? "Before" : "After fixes"}</button>`).join("");
+    document.getElementById("dRun").hidden = !runs.length;
+    document.getElementById("dScores").innerHTML = RV.map((v) => `<span class="who"><span class="dot ${v}"></span>${RV_NAME[v]} ${pill(r.scores[v])}</span>`).join("") + `<span class="m num">mean ${fmt(mean(r))}</span>${chip(holders(r))}`;
+    document.getElementById("dNotes").innerHTML = RV.map((v) => {
+      const bl = r.blockers[v];
+      return `<div><h3><span class="dot ${v}"></span>${RV_NAME[v]}</h3>` +
+        (bl.length ? `<ul>${bl.map((x) => `<li>${esc(x.text)} <span class="cause">(${esc(x.cause)})</span></li>`).join("")}</ul>` : `<p class="none">No blocker.</p>`) +
+        (r.topFix[v] ? `<p class="fix">Top fix: ${esc(r.topFix[v])}</p>` : "") + `</div>`;
+    }).join("");
+    const desk = document.getElementById("dDesk"), phone = document.getElementById("dPhone");
+    desk.src = shot(dRun, dId, "dfull"); desk.alt = `${title(r)}, whole page at 1280 px`;
+    phone.src = shot(dRun, dId, "mfull"); phone.alt = `${title(r)}, whole page at 360 px`;
+    for (const s of dlg.querySelectorAll(".fscroll")) s.scrollTop = 0;
+  }
+  document.getElementById("pages").addEventListener("click", (e) => {
+    const card = e.target.closest(".card"); if (!card) return;
+    dId = card.dataset.id; dRun = runKey; fill();
+    if (!dlg.open) dlg.showModal();
+  });
+  document.getElementById("dRun").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) { dRun = b.dataset.run; fill(); } });
+  document.getElementById("dClose").addEventListener("click", () => dlg.close());
+  dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); });
+
   const seg = (id, attr, set) => document.getElementById(id).addEventListener("click", (e) => {
     const btn = e.target.closest("button"); if (!btn) return;
     for (const b of e.currentTarget.querySelectorAll("button")) b.setAttribute("aria-pressed", String(b === btn));
-    set(btn.dataset[attr]); open = null; render();
+    set(btn.dataset[attr]); render();
   });
   seg("tabRun", "run", (v) => (runKey = v));
   seg("tabShow", "show", (v) => (show = v));
