@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"The hero stacks a full contact block (phone, address, directions, hours) right under the CTA, and the same address, hours and directions return in the footer, so the page reads as two contact pages.\",\"desktopNote\":\"Pricing and about sections sit in the left half with a dead empty right column, and the hero contact sidebar duplicates the header's call/directions and the footer's address and hours.\",\"phone\":{\"impression\":3,\"hierarchy\":4,\"imagery\":3,\"spacing\":3,\"clutter\":2,\"distinctiveness\":3},\"desktop\":{\"impression\":3,\"hierarchy\":4,\"imagery\":3,\"spacing\":2,\"clutter\":2,\"distinctiveness\":3},\"fixes\":[\"Keep contact details in one place: drop address, hours and directions from the hero (phone is already in the header) and leave them in the footer.\",\"On desktop, let the price table and about text span the content width or fill the empty right column with a stamp/seal graphic or document image.\",\"Add a trade-specific accent for a sodna tolmačka: a large stamp or seal motif, bilingual DE/EN type detail or a photo of a stamped document in the hero.\"],\"blockers\":[\"Both viewports: address, opening hours and 'Navodila za pot' appear in the hero contact block and again in the footer, a repeated contact block.\",\"Phone: 'Navodila za pot' appears three times (sticky bar, hero block, footer) and the phone number three times.\"]}",
+  "usage": {
+    "prompt_tokens": 10715,
+    "completion_tokens": 478
+  },
+  "batch": true
+}

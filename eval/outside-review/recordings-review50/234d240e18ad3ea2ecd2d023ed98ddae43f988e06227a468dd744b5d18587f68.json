@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"The hero card has a dead band under the CTA and the only visible action is a plain text link; then the contact section repeats address, directions and hours twice in a row.\",\"desktopNote\":\"The hero card hangs over the image edge with a large empty band inside it, the 'Kdo skrbi' section is a mostly empty block, and address/hours/directions appear in both the call section and the footer.\",\"phone\":{\"impression\":3,\"hierarchy\":4,\"imagery\":3,\"spacing\":2,\"clutter\":2,\"distinctiveness\":3},\"desktop\":{\"impression\":3,\"hierarchy\":3,\"imagery\":3,\"spacing\":2,\"clutter\":2,\"distinctiveness\":3},\"fixes\":[\"Merge the 'Pokličite za rezervacijo' block and the footer's 'Obiščite nas / Delovni čas' into one contact section so address, directions and hours appear once.\",\"Trim the hero card's bottom padding so it ends just below the buttons, and on desktop keep the card within the photo instead of spilling over its edge.\",\"Give the team and menu sections real content weight: a photo of the oven or pizza beside 'Kdo skrbi za peč in mize' and photos for the two dishes instead of empty dark space.\"],\"blockers\":[\"Phone and desktop: address, 'Navodila za pot' and opening hours are repeated in the contact section and again in the footer immediately below.\",\"Desktop: 'Kdo skrbi za peč in mize' section is a near-empty band with a single name and large unused space.\"]}",
+  "usage": {
+    "prompt_tokens": 9711,
+    "completion_tokens": 506
+  },
+  "batch": true
+}

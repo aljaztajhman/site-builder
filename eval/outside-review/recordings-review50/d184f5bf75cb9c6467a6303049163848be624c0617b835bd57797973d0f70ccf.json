@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"The hero card hangs off the photo's bottom edge and the footer repeats the full contact block already shown in the reservation section, with a huge 'Gostilna Pri mostu' wordmark that adds nothing.\",\"desktopNote\":\"The hero card breaks out of the photo into a white band and leaves a dead strip, the price cards are stranded in a mostly empty maroon band, and the oversized footer wordmark repeats the brand a third time.\",\"phone\":{\"impression\":3,\"hierarchy\":4,\"imagery\":3,\"spacing\":3,\"clutter\":3,\"distinctiveness\":3},\"desktop\":{\"impression\":3,\"hierarchy\":3,\"imagery\":3,\"spacing\":2,\"clutter\":3,\"distinctiveness\":3},\"fixes\":[\"Keep the hero card inside the photo (or end the photo cleanly below it) so the card doesn't spill into a white band on both viewports.\",\"Drop the giant footer wordmark and the duplicated address/phone/email in the footer; keep one compact legal line under the reservation block.\",\"Tighten the price and family sections on desktop: narrower maroon band with the two offers side by side at a readable size, and let the interior photo share the first screen instead of sitting near the bottom.\"],\"blockers\":[\"Desktop and phone hero: the text card extends past the bottom of the photo into a blank white strip, so the layout reads as broken.\",\"Phone and desktop footer: address, phone and e-mail repeat the reservation block directly above it.\"]}",
+  "usage": {
+    "prompt_tokens": 11737,
+    "completion_tokens": 497
+  },
+  "batch": true
+}

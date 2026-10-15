@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"Phone works well: the façade photo, then eyebrow, headline, text and one button fit the first screen, though the footer wordmark 'Gostilna Pri Zlati Žlici' is set so large it breaks mid-word across the slice.\",\"desktopNote\":\"On desktop the hero card sits over the photo's bottom edge and spills below the fold, so the headline and button are cut off at 800px, and the following sections leave wide dead bands to the right of narrow text columns.\",\"phone\":{\"impression\":4,\"hierarchy\":4,\"imagery\":4,\"spacing\":4,\"clutter\":4,\"distinctiveness\":4},\"desktop\":{\"impression\":3,\"hierarchy\":3,\"imagery\":4,\"spacing\":2,\"clutter\":4,\"distinctiveness\":3},\"fixes\":[\"Desktop hero: shrink the photo height or move the dark card to sit fully within the first screen so headline and 'Oglejte si cene' are visible without scrolling.\",\"Fill the empty right half of the desktop price, menu and hours sections: pair the hours with a map or address, and let the price grid use the full width with tighter vertical gaps.\",\"Reduce the footer wordmark size on phone so it doesn't wrap and dominate; set it at the same scale as the header brand.\"],\"blockers\":[\"Phone footer: the giant wordmark 'Gostilna Pri Zlati Žlici' wraps and is clipped at the slice boundary, overwhelming the contact block.\",\"Desktop first screen: hero card is cut off at the fold, hiding the intro text and the primary button.\"]}",
+  "usage": {
+    "prompt_tokens": 12501,
+    "completion_tokens": 526
+  },
+  "batch": true
+}

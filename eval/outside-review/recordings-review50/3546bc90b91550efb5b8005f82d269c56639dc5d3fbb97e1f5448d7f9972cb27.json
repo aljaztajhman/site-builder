@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"Phone first screen works: photo, headline and one CTA fit, but phone, address and directions repeat three times down the page (header strip, info block, footer).\",\"desktopNote\":\"Desktop hero leaves large empty bands above and below the text, and the menu sits in a half-width column with the whole right side of the section blank.\",\"phone\":{\"impression\":4,\"hierarchy\":4,\"imagery\":4,\"spacing\":3,\"clutter\":3,\"distinctiveness\":3},\"desktop\":{\"impression\":3,\"hierarchy\":4,\"imagery\":4,\"spacing\":2,\"clutter\":3,\"distinctiveness\":3},\"fixes\":[\"Desktop: shrink the hero to the photo height, centre the text block and add hours/address under the CTA; make the menu two columns or place the oven photo beside it to fill the empty right half.\",\"Merge the repeated contact blocks: keep the header strip and one info block after the hero; reduce the footer to legal data and drop the phone number and directions link from it.\",\"Scale down the giant '2015' so it does not outweigh the main headline, and add dish or oven details to the menu so the page feels like this pizzeria rather than a typographic template.\"],\"blockers\":[\"Desktop: hero and 'Pečemo na drva' sections leave large dead bands, and the menu section's right half is blank — the layout looks unfinished.\",\"Phone: phone number, address and directions link repeat in the header strip, the info block and the footer; the 'Obiščite nas'/'Delovni čas' block repeats the earlier info block.\"]}",
+  "usage": {
+    "prompt_tokens": 12765,
+    "completion_tokens": 513
+  },
+  "batch": true
+}

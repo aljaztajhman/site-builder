@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"Phone first screen works: the food photo leads, headline sits at a comfortable size, but the two hero links read as plain underlined text rather than a clear primary action.\",\"desktopNote\":\"Desktop first screen is sound, but the page below has a wide empty right half beside the menu list and a huge footer wordmark that dwarfs the content.\",\"phone\":{\"impression\":4,\"hierarchy\":4,\"imagery\":4,\"spacing\":4,\"clutter\":3,\"distinctiveness\":4},\"desktop\":{\"impression\":3,\"hierarchy\":3,\"imagery\":4,\"spacing\":2,\"clutter\":3,\"distinctiveness\":3},\"fixes\":[\"Fill the empty right column beside the desktop menu list (second photo, opening hours or a map) or centre/narrow the section so it doesn't leave a dead band.\",\"Make 'Pokličite nas' a real button on phone and in the dark CTA band; the two text links there repeat the hero pair and footer phone, so drop one pair.\",\"Shrink the footer wordmark on both screens; it is larger than the hero headline and pushes the actual contact details far down.\"],\"blockers\":[]}",
+  "usage": {
+    "prompt_tokens": 11770,
+    "completion_tokens": 383
+  },
+  "batch": true
+}

@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"The sticky header re-renders mid-page over the hero in the full-page capture and the hero text sits over a busy photo with only a tint, so legibility is marginal; „Navodila za pot\", \"desktopNote\": \",\",\"phone\":{\"impression\":3,\"hierarchy\":3,\"imagery\":3,\"spacing\":3,\"clutter\":2,\"distinctiveness\":3},\"desktop\":{\"impression\":3,\"hierarchy\":4,\"imagery\":3,\"spacing\":2,\"clutter\":2,\"distinctiveness\":3},\"fixes\":[\"Reduce „Navodila za pot\"],\"blockers\":[]}",
+  "usage": {
+    "prompt_tokens": 12554,
+    "completion_tokens": 221
+  },
+  "batch": true
+}

@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"The first screen works (photo, headline, one action), but the second generated photo fills an entire screen on its own before the 'Za koga delam' text appears.\",\"desktopNote\":\"The hero's text column floats in a large white field while the photo runs past the fold, and the pricing row leaves the right third of the page empty.\",\"phone\":{\"impression\":4,\"hierarchy\":4,\"imagery\":4,\"spacing\":4,\"clutter\":4,\"distinctiveness\":3},\"desktop\":{\"impression\":3,\"hierarchy\":3,\"imagery\":3,\"spacing\":3,\"clutter\":4,\"distinctiveness\":3},\"fixes\":[\"Desktop hero: crop the photo to fit within the 800px viewport and vertically centre the text column with it, reducing the ~250px dead space above the headline.\",\"Desktop pricing: stretch the three price cards across the full content width or add a short note column so the right third is not empty.\",\"Phone 'Za koga delam': shorten the generated photo (max ~240px) so it does not consume a whole screen before any text; on desktop align the text block to the top of the photo.\"],\"blockers\":[]}",
+  "usage": {
+    "prompt_tokens": 11560,
+    "completion_tokens": 1434
+  },
+  "batch": true
+}

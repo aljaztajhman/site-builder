@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"The phone page stacks the same call and directions links five times (header, hero link, contact block, gold CTA, footer) and repeats the 'spomladi in jeseni je gneča' sentence twice, while the only photo is buried two-thirds down.\",\"desktopNote\":\"The desktop hero reads cleanly as headline plus contact card, but it is photo-less, the services rows leave a wide dead middle column and the hero sentence is duplicated verbatim in the hours note.\",\"phone\":{\"impression\":3,\"hierarchy\":3,\"imagery\":2,\"spacing\":3,\"clutter\":2,\"distinctiveness\":3},\"desktop\":{\"impression\":3,\"hierarchy\":4,\"imagery\":2,\"spacing\":3,\"clutter\":2,\"distinctiveness\":3},\"fixes\":[\"Bring the tyre photo (or a workshop photo) into the first screen: on desktop as a right-hand image beside the headline with the contact card below, on phone directly under the headline.\",\"Cut the contact repetition: keep the header buttons and one contact block, drop the 'Pokličite nas' hero link, remove the gold CTA's duplicated links and the repeated 'gneča' sentence in the hours note.\",\"Tighten the desktop services table into two columns (service + description left, price right) and reduce the footer wordmark so the footer does not dwarf the hero.\"],\"blockers\":[\"Phone and desktop hero: the sentence 'Spomladi in jeseni je gneča, zato se prej naročite po telefonu.' appears twice within the first screen (intro paragraph and hours note).\",\"Phone: the call/directions pair is repeated in the header, hero, contact block, gold CTA section and footer – the same contact block five times on one page.\"]}",
+  "usage": {
+    "prompt_tokens": 10011,
+    "completion_tokens": 1936
+  },
+  "batch": true
+}

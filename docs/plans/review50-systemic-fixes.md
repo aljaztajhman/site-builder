@@ -25,6 +25,21 @@ block (pizzeria-oljka desktop), the phone overflow (elektro-zupan-regenerated: t
 360 px viewport; the only one of the 50), the caron collision (vulkanizer-zorman "HITRO / POŠTENO"), the clipped logo
 tagline (pekarna-kvas).
 
+## With Claude Fable 5.1 as the third reviewer (2026-10-15)
+
+`eval/outside-review/review50-three/` (Gemini and GPT replayed, Fable €4.34). Fable is the strictest (mean 3.10,
+range 2.42–3.83; holds 42 of 50) and ranks pages most like GPT (77 % same order, ρ 0.70; Gemini–Fable 67 %, ρ 0.46).
+Its blockers by cause (pages): contact details repeated 27, header capture artefact 16, overflow or clipping 7,
+half-empty desktop bands and other layout gaps ≈ 8, a sentence twice 4, Slovene hyphenation breaking words (names
+too: "Gre-gor Kovač", "Polnozr-nate", "la-stne", "zak-ljučene") 3. All three pass 5 pages today; with 1 → 9, + 2 → 18,
++ 3–7 → 23 (upper bounds). A two-of-three rule (a page is held when at least two reviewers name a blocker) passes 10
+today. Added to the free fixes:
+
+- **Hyphenation:** no automatic hyphenation in headings, names, prices or short lines; only long body text, with
+  correct Slovene break points.
+- **Content-aware sections:** a section with little content (one name, one link, one word) falls back to one narrow
+  column instead of a full-width band with an empty half; cards don't stretch to a neighbour's height.
+
 ## Fixes, in order of leverage
 
 Each is enforced in code where it can be (CLAUDE.md: banned patterns in code first) and has a test. 1–7 are render or
