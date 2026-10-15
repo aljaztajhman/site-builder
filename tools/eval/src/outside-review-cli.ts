@@ -9,6 +9,16 @@
  * that would go over). --replay answers from recordings (€ 0, no key); --record saves the live answers;
  * --record-missing reuses the answers already recorded there (€ 0) and asks and records only the rest. An Anthropic
  * reviewer (config provider "anthropic") needs ANTHROPIC_API_KEY; with `batch` its pages go as Message Batches.
+ *
+ * pnpm outside-review --set <name>=<source> [--set ...] (--max-eur <eur> | --dry-run) [--out <dir>] [--record... | --replay <dir>]
+ *
+ * The whole-set round (set-review.ts): each reviewer sees every page of a set at once as two contact sheets (desktop 1280 px
+ * first screens, phone 360 px first screens) and judges the set (overall, variety, sameness, recurring issues, best and
+ * weakest pages, one change). A source is a directory (<id>-1280-first.png + <id>-360-first.png, <id>-desk.png +
+ * <id>-phone.png, or <id>/home-1280-first.png + home-360-first.png), a manifest JSON ([{id, desk, phone}]), or a
+ * comma-separated list of those (`today:<dir>` reads a studio-poc directory's `<id>-today-*` pages, today's site, instead
+ * of the studio's). One call per reviewer per set; same transports, recordings, pricing and --max-eur stop.
+ * Writes <out>/sets/<set>/{desk-N.jpg,phone-N.jpg,<reviewer>.json}, sets.md and cost-log.jsonl.
  */
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -19,9 +29,10 @@ import { latestRatings, parseOwnerExport } from "./okus-calibrate.ts";
 import { roundDir } from "./okus-round.ts";
 import { buildSummary, formatReport, loadOkusItems, loadRunDirItems, planReview, runReview, scoresFor, selectItems } from "./outside-review.ts";
 import { makeTransport, type OutsideTransport } from "./outside-transport.ts";
+import { buildSet, loadSetPages, parseSetArg, planSets, runSets, writeSetOutputs, type BuiltSet } from "./set-review.ts";
 
 const USAGE =
-  "Usage: pnpm outside-review (--okus-round <n> | --run-dir <dir> [--since <ISO time>]) [--items <n>] [--only <id>,...] [--reviewers gemini,gpt] (--max-eur <eur> | --dry-run) [--out <dir>] [--record <dir> | --record-missing <dir> | --replay <dir>]";
+  "Usage: pnpm outside-review (--okus-round <n> | --run-dir <dir> [--since <ISO time>] | --set <name>=<dir|manifest.json|a,b>... ) [--items <n>] [--only <id>,...] [--reviewers gemini,gpt] (--max-eur <eur> | --dry-run) [--out <dir>] [--record <dir> | --record-missing <dir> | --replay <dir>]";
 
 const eur = (x: number) => `€${x.toFixed(4)}`;
 
@@ -44,6 +55,7 @@ export async function main(argv: string[], env: Record<string, string | undefine
         record: { type: "string" },
         "record-missing": { type: "string" },
         replay: { type: "string" },
+        set: { type: "string", multiple: true },
       },
     }).values;
   } catch (e) {
@@ -53,8 +65,13 @@ export async function main(argv: string[], env: Record<string, string | undefine
   const config = loadConfig();
   const oc = config.outsideReview;
   const live = !v["dry-run"] && !v.replay;
-  if (!v["okus-round"] === !v["run-dir"]) {
-    print(`Give exactly one of --okus-round and --run-dir.\n${USAGE}`);
+  const setMode = (v.set?.length ?? 0) > 0;
+  if (setMode && (v["okus-round"] || v["run-dir"] || v.items || v.only || v.since)) {
+    print(`--set (the whole-set round) is a round of its own: leave out --okus-round, --run-dir, --items, --only and --since.\n${USAGE}`);
+    return 2;
+  }
+  if (!setMode && !v["okus-round"] === !v["run-dir"]) {
+    print(`Give exactly one of --okus-round and --run-dir (or --set <name>=<source> for the whole-set round).\n${USAGE}`);
     return 2;
   }
   let maxEur = Number.POSITIVE_INFINITY;
@@ -104,6 +121,41 @@ export async function main(argv: string[], env: Record<string, string | undefine
       print(e instanceof Error ? e.message : String(e));
       return 2;
     }
+  }
+
+  if (setMode) {
+    let built: BuiltSet[];
+    try {
+      const names = new Set<string>();
+      built = [];
+      for (const arg of v.set!) {
+        const { name, source } = parseSetArg(arg);
+        if (names.has(name)) throw new Error(`--set ${name} given twice`);
+        names.add(name);
+        built.push(await buildSet(name, loadSetPages(source)));
+      }
+    } catch (e) {
+      print(e instanceof Error ? e.message : String(e));
+      return 1;
+    }
+    const plan = planSets({ config, reviewers, sets: built });
+    const e = oc.estimate;
+    print(
+      `${v["dry-run"] ? "Dry run: " : ""}${plan.sets} sets (${Object.entries(plan.bySet)
+        .map(([n, s]) => `${n}: ${s.pages} pages, ${s.images} sheets, ${eur(s.eur)}`)
+        .join("; ")}) × ${reviewers.length} reviewers = ${plan.calls} calls, ${plan.images} pictures; estimate ${eur(plan.eur)} (${Object.entries(plan.byReviewer)
+        .map(([id, b]) => `${id} ${eur(b.eur)}`)
+        .join(", ")}) at ${e.tokensPerImage} tokens per picture and ${e.outputTokens} answer tokens. No call is made${v["dry-run"] ? "" : " yet"}.`,
+    );
+    if (v["dry-run"]) return 0;
+    if (live && plan.eur > maxEur) print(`Note: the estimate is over --max-eur ${eur(maxEur)}; the run will stop when the budget is reached.`);
+    const out = path.resolve(v.out ?? path.join(repoRoot, "eval/runs", `outside-review-sets-${new Date().toISOString().replace(/[:.]/g, "-")}`));
+    mkdirSync(out, { recursive: true });
+    const costLog = path.join(out, "cost-log.jsonl");
+    const run = await runSets({ config, reviewers, sets: built, transport: (r) => transports.get(r.id)!, maxEur, onCost: (line) => appendFileSync(costLog, `${JSON.stringify(line)}\n`), onProgress: print });
+    writeSetOutputs({ out, reviewers, sets: built, run });
+    print(`${run.calls} calls, ${eur(run.spentEur)} spent${run.stoppedByBudget ? " (stopped at --max-eur)" : ""}. Written to ${out} (sets.md, sets/<set>/<reviewer>.json and the sheets)`);
+    return 0;
   }
 
   let items;

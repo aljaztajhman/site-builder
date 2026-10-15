@@ -44,7 +44,7 @@ import { Repo, createDb, createFsStorage, migrate } from "@sb/platform";
 import { variantFile, variantWidths } from "@sb/render";
 import { migrateSpec, type PresetBrief, type SiteSpec } from "@sb/spec";
 import { pictureKey } from "./eval-transports.ts";
-import { FIXTURES_DIR, HARD_DIR, TWINS_DIR, loadFixture } from "./fixtures/load.ts";
+import { FIXTURES_DIR, FRESH_DIR, HARD_DIR, TWINS_DIR, loadFixture } from "./fixtures/load.ts";
 import { photoForImage } from "./okus-items.ts";
 import { CaptureTransport } from "./studio-capture.ts";
 import { EDGE_FIXTURES, edgeFixture, isEdgeFixture } from "./studio-edge.ts";
@@ -53,15 +53,37 @@ import { EDGE_FIXTURES, edgeFixture, isEdgeFixture } from "./studio-edge.ts";
 export const ORIGINAL_FIXTURES: readonly string[] = [...COMPOSER_FIXTURES, ...EDGE_FIXTURES];
 export const HOME_OFF_RECORDINGS = path.join(repoRoot, "tools/eval/recordings-home-off");
 const FULL_RECORDINGS = path.join(repoRoot, "tools/eval/recordings");
+/** The ten fresh businesses' homepages as today's pipeline made them (pnpm eval --fresh, 2026-10-15, default config). */
+export const FRESH10_RECORDINGS = path.join(repoRoot, "tools/eval/recordings-fresh10");
 const IMAGE_CACHE = path.join(repoRoot, "tools/eval/image-cache");
 
-export type FixtureKind = "composer" | "edge" | "golden" | "twin" | "hard";
+export type FixtureKind = "composer" | "edge" | "golden" | "twin" | "hard" | "fresh";
+
+/** The kinds whose base is today's pipeline replayed from recordings. */
+export type ReplayedKind = "twin" | "hard" | "fresh";
+
+/** The studio modes studio:poc can run; "direct" is accepted by the config schema once the engine unit has merged. */
+export const STUDIO_MODES = ["mockup", "picker", "direct"] as const;
+export type StudioPocMode = (typeof STUDIO_MODES)[number];
+
+/**
+ * Where a mode's run writes: its own output directory (shots, specs, cost log) and its own recordings directory, so
+ * the modes never share a recording. `--mode` not given keeps the older layout (eval/runs/studio-poc).
+ */
+export function modeDirs(mode: StudioPocMode, id: string): { out: string; recordings: string } {
+  return { out: path.join(repoRoot, "eval/runs", `studio-poc-${mode}`), recordings: path.join(repoRoot, "tools/eval", `recordings-studio-${mode}`, id) };
+}
+
+/** The recordings directory of a replayed base: the twins' and hard fixtures' (variety switches off, no photos) or the fresh ones'. */
+export function baseRecordings(kind: ReplayedKind, id: string): string {
+  return path.join(kind === "fresh" ? FRESH10_RECORDINGS : HOME_OFF_RECORDINGS, id);
+}
 
 const dirsIn = (root: string): string[] => (existsSync(root) ? readdirSync(root).filter((d) => existsSync(path.join(root, d, "brief.json"))).sort() : []);
 
 /** Every fixture id studio:poc knows, by where it comes from. */
-export function knownFixtures(): { golden: string[]; twins: string[]; hard: string[]; edge: string[] } {
-  return { golden: dirsIn(FIXTURES_DIR), twins: dirsIn(TWINS_DIR), hard: dirsIn(HARD_DIR), edge: [...EDGE_FIXTURES] };
+export function knownFixtures(): { golden: string[]; twins: string[]; hard: string[]; edge: string[]; fresh: string[] } {
+  return { golden: dirsIn(FIXTURES_DIR), twins: dirsIn(TWINS_DIR), hard: dirsIn(HARD_DIR), edge: [...EDGE_FIXTURES], fresh: dirsIn(FRESH_DIR) };
 }
 
 export function fixtureKind(id: string, known = knownFixtures()): FixtureKind | null {
@@ -70,16 +92,24 @@ export function fixtureKind(id: string, known = knownFixtures()): FixtureKind | 
   if (known.golden.includes(id)) return "golden";
   if (known.twins.includes(id)) return "twin";
   if (known.hard.includes(id)) return "hard";
+  if (known.fresh.includes(id)) return "fresh";
   return null;
 }
 
 /**
- * The fixtures named on the command line: `--all` (the original five), `--fixtures a,b,c` and/or `--fixture <id>`
- * (repeatable), in that order, without repeats. An unknown id or no fixture at all is an error.
+ * The fixtures named on the command line: `--all` (the original five), `--fresh` (the ten fresh businesses),
+ * `--fixtures a,b,c` and/or `--fixture <id>` (repeatable), in that order, without repeats. An unknown id or no fixture
+ * at all is an error.
  */
-export function parseFixtureArgs(args: readonly string[], known: readonly string[], all: readonly string[] = ORIGINAL_FIXTURES): { ok: true; fixtures: string[] } | { ok: false; error: string } {
+export function parseFixtureArgs(
+  args: readonly string[],
+  known: readonly string[],
+  all: readonly string[] = ORIGINAL_FIXTURES,
+  fresh: readonly string[] = [],
+): { ok: true; fixtures: string[] } | { ok: false; error: string } {
   const picked: string[] = [];
   if (args.includes("--all")) picked.push(...all);
+  if (args.includes("--fresh")) picked.push(...fresh);
   for (const [i, a] of args.entries()) {
     const next = args[i + 1];
     if (a === "--fixtures") {
@@ -91,14 +121,15 @@ export function parseFixtureArgs(args: readonly string[], known: readonly string
     }
   }
   const fixtures = [...new Set(picked)];
-  if (!fixtures.length) return { ok: false, error: "no fixture given (--fixture <id>, --fixtures a,b,c or --all)" };
+  if (!fixtures.length) return { ok: false, error: "no fixture given (--fixture <id>, --fixtures a,b,c, --fresh or --all)" };
   const unknown = fixtures.filter((f) => !known.includes(f));
   if (unknown.length) return { ok: false, error: `unknown fixture(s): ${unknown.join(", ")}` };
   return { ok: true, fixtures };
 }
 
-/** The (paid) command that records a twin's or hard fixture's homepage in tools/eval/recordings-home-off. */
-export function recordCommand(id: string, kind: "twin" | "hard"): string {
+/** The (paid) command that records a twin's, hard or fresh fixture's homepage (tools/eval/recordings-home-off, or recordings-fresh10). */
+export function recordCommand(id: string, kind: ReplayedKind): string {
+  if (kind === "fresh") return `pnpm eval --fresh --record-missing --recordings tools/eval/recordings-fresh10 --only ${id} --scope home --no-edits --no-judge --no-lighthouse`;
   return `pnpm eval --record-missing --recordings tools/eval/recordings-home-off --only ${id} ${kind === "twin" ? "--twins" : "--hard"} --scope home --photos 0 --no-edits --no-judge --no-lighthouse`;
 }
 
@@ -240,9 +271,9 @@ export class CachedOrStandInImages implements ImageTransport {
  * A twin's or hard fixture's homepage as today's pipeline makes it, replayed from tools/eval/recordings-home-off/<id>/
  * (no network, no cost). `strict`: a request that changed since it was recorded fails the fixture.
  */
-export async function replayedFixture(id: string, kind: "twin" | "hard", config: AppConfig, browser: CheckBrowser, strict = true): Promise<StudioFixture> {
-  const fixture = loadFixture(id, kind === "twin" ? TWINS_DIR : HARD_DIR);
-  const recordings = path.join(HOME_OFF_RECORDINGS, id);
+export async function replayedFixture(id: string, kind: ReplayedKind, config: AppConfig, browser: CheckBrowser, strict = true): Promise<StudioFixture> {
+  const fixture = loadFixture(id, kind === "twin" ? TWINS_DIR : kind === "hard" ? HARD_DIR : FRESH_DIR);
+  const recordings = baseRecordings(kind, id);
   const record = recordCommand(id, kind);
   if (!existsSync(recordings) || !readdirSync(recordings).some((f) => f.endsWith(".json"))) throw new Error(`${id}: no recordings in ${path.relative(repoRoot, recordings)}; record them (paid) with: ${record}`);
   const work = await mkdtemp(path.join(tmpdir(), `sb-studio-base-${id}-`));
