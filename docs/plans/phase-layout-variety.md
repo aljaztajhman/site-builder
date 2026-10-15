@@ -44,6 +44,16 @@ What this changes:
 
 ## Owner decisions
 
+**Answered by the owner on 2026-10-15:**
+- **D1:** caption plus hidden file mark (B + C).
+- **D2:** an AI picture may be the hero when the business has no client photo that passes the grade.
+- **D3:** trial accounts get today's pipeline (`designer.agent` "off").
+- **D4:** €18.80 in October; November is decided later.
+
+D2 changes R7: "an AI picture is never the hero's subject *when a client photo graded window or better exists*". With none, an AI picture may lead, labelled with the caption (D1).
+
+The options as they were put to the owner:
+
 **D1 AI label** (legal and transparency):
 - Options:
   - A: a chip over the picture (today), kept inside crops.
@@ -143,7 +153,7 @@ Rules:
 - R4: the contact and visit block once.
 - R5: the hours note once.
 - R6: no empty section.
-- R7: an AI picture is never the hero's subject.
+- R7: an AI picture is never the hero's subject when a client photo graded window or better exists (owner D2: with none, an AI picture may lead).
 - R8: a full-bleed or split photo needs grade "bleed".
 
 Modes:

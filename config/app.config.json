@@ -28,8 +28,8 @@
     "genome": false
   },
   "designer": {
-    "$comment": "The AI designer (docs/plans/design-studio.md). agent: \"off\" | \"trial\" | \"on\". trial (studio 0.5, docs/plans/studio-0.5.md, 2026-10-11): the studio recomposes new homepages only for accounts whose email is in DESIGNER_TRIAL_EMAILS (Railway web + worker; empty: no one). Everyone else unchanged. on: every generation, not before the owner's blind A/B passes (plan §9).",
-    "agent": "trial",
+    "$comment": "The AI designer (docs/plans/design-studio.md). agent: \"off\" | \"trial\" | \"on\". Owner 2026-10-15 (studio shoot-out, docs/plans/phase-layout-variety.md D3): off; trial accounts get today's pipeline, which scored best (3.47 vs picture studio 3.09, Fable studio 3.22). trial (studio 0.5, docs/plans/studio-0.5.md, 2026-10-11): the studio recomposes new homepages only for accounts whose email is in DESIGNER_TRIAL_EMAILS (Railway web + worker; empty: no one). Everyone else unchanged. on: every generation, not before the owner's blind A/B passes (plan §9).",
+    "agent": "off",
     "budgets": { "charsPerToken": 3, "catalogue": 4500, "moodboard": 3000, "examples": 6000, "request": 16000 }
   },
   "studio": {
