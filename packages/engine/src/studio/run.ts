@@ -12,6 +12,7 @@ import { checkFacts } from "../facts.ts";
 import { DirectorAnswer, MAX_PROPS, checkDirection, directorRequest, knownNumbers } from "./director.ts";
 import type { ArtDirection } from "./art-director.ts";
 import { newMockupRun, runMockup, runTotal, type MockupDeps, type MockupRun } from "./mockup.ts";
+import { repairStudioPage } from "./page-rules.ts";
 
 /** config designer.agent: "on" for everyone, "trial" only for the accounts in DESIGNER_TRIAL_EMAILS, "off" for no one. */
 export function studioEnabled(mode: AppConfig["designer"]["agent"], email: string | null | undefined, trialEmails: string | undefined): boolean {
@@ -163,6 +164,8 @@ async function studioRun(client: ModelClient, config: AppConfig, input: StudioIn
   const spent = runTotal(m) + m.inFlightEur;
   const extra = { ...(m.mockup ? { mockupImage: m.mockup } : {}), ...(m.art ? { art: m.art } : {}) };
   if (m.ok && m.spec) {
+    // The Review 50 rules on the built page, in code (no call): before the guards, so they judge what is published.
+    m.dropped.push(...repairStudioPage(m.spec).map((l) => `page rules: ${l}`));
     const why = studioGuards(m.spec, input.spec, input.corpus);
     if (!why) {
       const sections = m.sections ?? [];
@@ -266,9 +269,10 @@ async function runPicker(client: ModelClient, config: AppConfig, input: StudioIn
       checked.dropped.push(`hero ${hero}: ${e.message}`);
       composed = compose(undefined);
     }
+    const rules = repairStudioPage(composed.spec).map((l) => `page rules: ${l}`);
     const why = studioGuards(composed.spec, input.spec, input.corpus);
     if (why) return { ok: false, reason: `guards: ${why}`, idea, costEur };
-    return { ok: true, path: "picker", spec: composed.spec, idea, stance, used: composed.used, dropped: [...checked.dropped, ...(composed.used.fallbacks ?? []).map((f) => `fell back: ${f}`)], costEur };
+    return { ok: true, path: "picker", spec: composed.spec, idea, stance, used: composed.used, dropped: [...checked.dropped, ...(composed.used.fallbacks ?? []).map((f) => `fell back: ${f}`), ...rules], costEur };
   } catch (e) {
     if (e instanceof ModelOutputError) costEur = e.costEur;
     const reason = e instanceof ComposerError ? `composer: ${e.message}` : `${(e as Error).name}: ${(e as Error).message}`;

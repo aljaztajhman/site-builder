@@ -7,3 +7,4 @@ export * from "./run.ts";
 export * from "./art-director.ts";
 export * from "./rebuild.ts";
 export * from "./mockup.ts";
+export * from "./page-rules.ts";

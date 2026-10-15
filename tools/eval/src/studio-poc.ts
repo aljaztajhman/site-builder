@@ -212,7 +212,8 @@ try {
       if (spent) appendFileSync(LOG, `${JSON.stringify({ at: new Date().toISOString(), provider, fixture: id, stage: c.stage, model: c.model, usage: c.usage, costEur: c.costEur, seconds: c.durationMs / 1000, ok: c.ok })}\n`);
       console.log(`  ${c.stage} ${c.model}: €${c.costEur.toFixed(4)}${spent ? "" : " (from the recording, not spent)"}`);
     };
-    const images = new MockupImageTransport(dir, replay ? null : new FalImageTransport());
+    // fal only where a mockup is painted: the direct and picker paths never call it, and need no FAL_KEY.
+    const images = new MockupImageTransport(dir, replay || mode !== "mockup" ? null : new FalImageTransport());
     const imageCapture = new CaptureImageTransport(images);
     // This tool's caps stand in for the daily cap: a call whose estimate would take the logged total past them is refused
     // (SpendCapError) before it is sent, and the studio falls back.

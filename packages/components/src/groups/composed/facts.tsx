@@ -5,11 +5,11 @@
  * the same; the week chart and the hours table are copies of Info.tsx's, which keeps those files untouched.
  */
 import type { CSSProperties } from "react";
-import { capitalize, dayName, formatPrice, hoursRows, isPlaceholder, isPriceOnRequest, plateCode, weekChart, type Hours, type Placeholder, type Price } from "@sb/spec";
+import { capitalize, dayName, factShowsPhone, formatPrice, hoursRows, isPlaceholder, isPriceOnRequest, plateCode, weekChart, type Hours, type Placeholder, type Price } from "@sb/spec";
 import { AddressText, EmailLink, HoursList, Icon, Ph, PhoneLink, PriceText, cx } from "../../primitives/index.tsx";
 import { PlateStrip } from "../../motifs/index.tsx";
 import type { RenderCtx } from "../../types.ts";
-import type { ElOf } from "./layout.ts";
+import type { El, ElOf } from "./layout.ts";
 
 const MISSING_HOURS: Placeholder = { $placeholder: "hours" };
 
@@ -92,12 +92,25 @@ export function HoursFact({ el, ctx }: { el: ElOf<"hours">; ctx: RenderCtx }) {
   return <HoursTable hours={hours} ctx={ctx} />;
 }
 
-/** Phone, e-mail, address, and a plain link to the map (no embed: a composed section loads no script and no third party). */
-export function ContactFact({ el, ctx }: { el: ElOf<"contact">; ctx: RenderCtx }) {
+/** What a contact element shows beside its section's other elements (`siblings`): see ContactFact. */
+export function contactShows(el: ElOf<"contact">, siblings: readonly El[], ctx: RenderCtx): ElOf<"contact">["show"] {
+  const map = siblings.some((s) => s.kind === "map");
+  const phoneFact = siblings.some((s) => factShowsPhone(s, ctx.site.business));
+  return el.show.filter((w) => !(map && (w === "address" || w === "map")) && !(phoneFact && w === "phone"));
+}
+
+/**
+ * Phone, e-mail, address, and a plain link to the map (no embed: a composed section loads no script and no third party).
+ * What the section shows already is left out (`siblings`, its elements): beside a map element the address and the
+ * directions link (the map prints both), beside a fact that shows the phone the phone.
+ */
+export function ContactFact({ el, ctx, siblings = [] }: { el: ElOf<"contact">; ctx: RenderCtx; siblings?: readonly El[] }) {
   const directions = ctx.href({ action: "directions" });
+  const show = contactShows(el, siblings, ctx);
+  if (!show.length) return null;
   return (
     <dl className="contact__facts">
-      {el.show.map((what) => {
+      {show.map((what) => {
         switch (what) {
           case "phone":
             return (
