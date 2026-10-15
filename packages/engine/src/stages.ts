@@ -8,6 +8,7 @@ import {
   SIGNATURE_PHOTO_VARIANTS,
   direction as directionById,
   awayFromShowcases,
+  directionFitsTrade,
   enforceDesign,
   templateFor,
   type BusinessType,
@@ -199,9 +200,23 @@ export async function chooseDesign(
     ],
     schema: toModelJsonSchema(DesignChoice),
   }, (d) => DesignChoice.parse(d));
-  const choice = data;
+  // A template's motif only for the trades it fits (the plate is car repair's): another trade gets its own direction.
+  const choice = { ...data, direction: tradeFitDirection(data.direction, input.brief.businessType, pictures) };
   const r = designWithVariety(choice, input.variety ? { ...input.variety, swatches: input.swatches } : undefined, input.holdPrimary === true, designRepair(client.promptFixes));
   return { design: r.design, reason: choice.reason, ...(r.hero ? { hero: r.hero } : {}) };
+}
+
+/**
+ * The chosen direction when its template motif fits the trade (MOTIF_TRADES); otherwise the trade's own template
+ * (when the pictures allow it and its motif fits), else the first direction made for the trade, else the first plain
+ * direction. A locksmith (builder) who was given the car-repair template gets builder's direction instead.
+ */
+export function tradeFitDirection(directionId: string, type: BusinessType, pictures: number): string {
+  if (directionFitsTrade(directionId, type)) return directionId;
+  const own = templateFor(type, pictures);
+  if (own && directionFitsTrade(own.id, type)) return own.id;
+  const plain = DIRECTIONS.filter((d) => !d.template);
+  return (plain.find((d) => (d.bestFor as readonly string[]).includes(type)) ?? plain[0]!).id;
 }
 
 /**
