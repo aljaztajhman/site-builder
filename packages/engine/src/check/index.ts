@@ -2,11 +2,11 @@ import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import type { AppConfig } from "@sb/config";
-import { collectPlaceholders, entryPages, validateSite, type Issue, type SiteSpec } from "@sb/spec";
+import { collectPlaceholders, entryPages, isPlaceholder, validateSite, type Issue, type SiteSpec } from "@sb/spec";
 import { pageFile } from "@sb/render";
 import { checkFacts, type FactViolation } from "../facts.ts";
 import { launchCheckBrowser, type CheckBrowser } from "./browser.ts";
-import { callButtonsPerScreen, hideFixedForFullPage, loadLazyImages, measurePage, runAxe, type AxeViolation, type CallButtons, type MobileReport } from "./page-checks.ts";
+import { callButtonsPerScreen, hideFixedForFullPage, loadLazyImages, measurePage, repeatedContact, runAxe, type AxeViolation, type CallButtons, type MobileReport } from "./page-checks.ts";
 import { runLighthouse, type LighthouseScores } from "./lighthouse.ts";
 import { measureComposition, type Composition } from "./composition.ts";
 import { serveStatic } from "./static-server.ts";
@@ -14,7 +14,7 @@ import { serveStatic } from "./static-server.ts";
 export { launchCheckBrowser, type CheckBrowser } from "./browser.ts";
 export { serveStatic, type StaticServer } from "./static-server.ts";
 export type { AxeViolation, CallButtons, MobileReport } from "./page-checks.ts";
-export { callButtonsPerScreen, loadLazyImages, measurePage, runAxe } from "./page-checks.ts";
+export { LEGAL_ROW, callButtonsPerScreen, hideFixedForFullPage, loadLazyImages, measurePage, repeatedContact, runAxe } from "./page-checks.ts";
 export type { LighthouseScores } from "./lighthouse.ts";
 export type { Composition } from "./composition.ts";
 export { checkExportOffline, unzipTo, type ExportCheck } from "./export-offline.ts";
@@ -112,6 +112,8 @@ export async function checkSite(spec: SiteSpec, files: Map<string, Uint8Array>, 
     let composition: SiteCheckReport["composition"] = null;
     const shots = new Set(opts.shots ?? []);
     const pageShots: SiteCheckReport["pageShots"] = [];
+    const a = spec.business.address;
+    const address = isPlaceholder(a) ? undefined : { street: a.street, place: `${a.postalCode} ${a.city}` };
 
     for (const file of files) {
       const url = `${server.url}/${spec.slug}/${file}`;
@@ -123,6 +125,7 @@ export async function checkSite(spec: SiteSpec, files: Map<string, Uint8Array>, 
       const axe = await runAxe(mp);
       // A site with a skeleton (spec v15) promises one call button per screen; checked on every screen of the page.
       if (spec.design.skeleton) mobile.banned.push(...callsBanned(await callButtonsPerScreen(mp)));
+      mobile.banned.push(...(await repeatedContact(mp, address)));
       let shotMobile: Buffer | undefined;
       let shotMobileFull: Buffer | undefined;
       if (file === "index.html") {
@@ -147,6 +150,7 @@ export async function checkSite(spec: SiteSpec, files: Map<string, Uint8Array>, 
       const d = await measurePage(dp, { primaryMin: t.primaryMin, primaryGap: t.primaryGap, absoluteMin: t.absoluteMin });
       const desktopAxe = await runAxe(dp);
       if (spec.design.skeleton) d.banned.push(...callsBanned(await callButtonsPerScreen(dp)));
+      d.banned.push(...(await repeatedContact(dp, address)));
       if (file === "index.html" && shotMobile && shotMobileFull) {
         const desktopComposition = await measureComposition(dp);
         if (mobileComposition) composition = { mobile: mobileComposition, desktop: desktopComposition };

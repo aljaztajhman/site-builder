@@ -271,6 +271,46 @@ export async function callButtonsPerScreen(page: Page): Promise<CallButtons> {
 }
 
 /**
+ * Where the provider information ZEPT requires lives (the footer's contact and provider blocks, its bottom line, or
+ * anything marked data-legal): an address there is the legal row, not a contact block, and is not counted.
+ */
+export const LEGAL_ROW = ".site-footer__contact, .site-footer__provider, .site-footer__bottom, [data-legal]";
+
+/**
+ * Banned (docs/PRODUCT.md): the address or the opening hours rendered in full more than once on a page. Counts the
+ * visible blocks outside the legal row: for the address, the smallest elements whose text holds both the street and
+ * the postcode and town; for the hours, the hours lists, tables and week charts the components render (.hours, .week,
+ * .oh__table, outermost only). Returns the banned-pattern lines (none when each shows at most once).
+ */
+export async function repeatedContact(page: Page, address?: { street: string; place: string }): Promise<string[]> {
+  return page.evaluate(
+    `((address, legal) => {
+    const norm = (s) => (s || "").replace(/[\\s\\u00a0,]+/g, " ").trim().toLowerCase();
+    const shown = (el) => {
+      const r = el.getBoundingClientRect();
+      const cs = getComputedStyle(el);
+      return r.width > 1 && r.height > 1 && cs.visibility !== "hidden" && cs.display !== "none" && el.checkVisibility();
+    };
+    const describe = (el) => el.tagName.toLowerCase() + (el.className && typeof el.className === "string" ? "." + el.className.trim().split(/\\s+/).slice(0, 2).join(".") : "");
+    const out = [];
+    const counted = (els) => els.filter((el) => shown(el) && !el.closest(legal));
+    if (address && address.street && address.place) {
+      const street = norm(address.street), place = norm(address.place);
+      const has = (el) => { const t = norm(el.innerText); return t.includes(street) && t.includes(place); };
+      const matching = [...document.body.querySelectorAll("*")].filter((el) => !["SCRIPT", "STYLE", "TEMPLATE"].includes(el.tagName) && shown(el) && has(el));
+      const smallest = matching.filter((el) => !matching.some((o) => o !== el && el.contains(o)));
+      const blocks = counted(smallest);
+      if (blocks.length > 1) out.push("address shown in full " + blocks.length + " times: " + blocks.map(describe).join(", "));
+    }
+    const hoursSel = ".hours, .week, .oh__table";
+    const hours = counted([...document.querySelectorAll(hoursSel)].filter((el) => !el.parentElement || !el.parentElement.closest(hoursSel)));
+    if (hours.length > 1) out.push("opening hours shown in full " + hours.length + " times: " + hours.map(describe).join(", "));
+    return out;
+  })(${JSON.stringify(address ?? null)}, ${JSON.stringify(LEGAL_ROW)})`,
+  );
+}
+
+/**
  * Scrolls through the page so lazy images load, then back to the top (for full-page screenshots). Scrolls instantly:
  * the sites scroll smoothly (base.css), and a smooth scroll back to the top was still under way when the screenshot was
  * taken, so a sticky header was drawn where the scroll had got to, in the middle of the page.

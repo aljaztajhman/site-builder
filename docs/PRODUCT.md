@@ -93,6 +93,7 @@ Hard list. Add to it whenever a new default shows up in eval screenshots.
 - Pure black (#000) text or surfaces, and pure white (#fff) text: text and surface colours stay off-black, text stays off-white (lightness bounds in the design rules; a pure white page in the white directions is fine)
 - More than one primary action in a hero, such as two identical full-width buttons stacked under the headline; the second action is a text link or the phone number
 - More than one call button on one screen (360 or 1280 px), counting the header, the hero, the phone bar or floating button and the sections; other calls are the phone number or a text link. Enforced for sites with a skeleton (spec v15, `callButtonsPerScreen`)
+- The address or the opening hours rendered in full more than once on a page (visible text): one contact block per page; the footer's legal row (the provider's address ZEPT requires) does not count. Checked in the browser on every page (`repeatedContact`)
 
 ## Pricing (in config, `plans`)
 
