@@ -1,4 +1,4 @@
-import { isPlaceholder, type Business, type Page, type Section } from "@sb/spec";
+import { factShowsPhone, isPlaceholder, type Business, type Page, type Section } from "@sb/spec";
 
 /** Which of the visit facts (the full address, the opening hours) a page's sections already show. */
 export interface PageFacts {
@@ -69,7 +69,8 @@ export interface ContactShown {
 
 /**
  * What the page's contact sections show of phone, e-mail and address (Info.tsx Contact: phone, e-mail and address
- * always; its call-out: phone, address, and the e-mail when there is one; composed contact elements: what they list).
+ * always; its call-out: phone, address, and the e-mail when there is one; composed contact elements: what they list;
+ * a composed map element: the address; a composed fact that shows the phone: the phone).
  * The footer's contact row leaves these out (owner's decision 2026-10-15: after a contact section the legal row keeps
  * only the name, registration and tax number; reviewers held 8 of 50 pages for the repeat).
  */
@@ -82,6 +83,9 @@ export function contactShown(page: Page, business: Business): ContactShown {
       out.email ||= s.variant !== "call-out" || !isPlaceholder(business.email);
     } else if (s.type === "composed") {
       for (const el of s.props.elements) {
+        // A map element prints the address under its drawing; a fact can show the phone (a hero's call plate).
+        if (el.kind === "map") out.address = true;
+        if (factShowsPhone(el, business)) out.phone = true;
         if (el.kind !== "contact") continue;
         out.phone ||= el.show.includes("phone");
         out.email ||= el.show.includes("email");

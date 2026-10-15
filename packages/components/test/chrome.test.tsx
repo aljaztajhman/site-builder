@@ -209,6 +209,16 @@ describe("Footer", () => {
       expect(phoneOnly).toContain('href="mailto:info@salon-lipa.si"');
     });
 
+    it("a composed fact that shows the phone and a map count as shown: the contact row leaves them out (studio pages)", () => {
+      const fact = { id: "e_ph", kind: "fact", value: "041 123 456", label: "Telefon", treatment: "numeral", size: 6, link: { action: "call" }, ...at };
+      const out = visit([composed([fact, { id: "e_map", kind: "map", style: "pin", ...at }])]);
+      expect(out).not.toContain('href="tel:');
+      expect(out).toContain('href="mailto:info@salon-lipa.si"');
+      // A number that isn't the phone (a year, a count) is no phone fact.
+      const year = visit([composed([{ ...fact, value: "1988", label: "Od leta", link: undefined }])]);
+      expect(year).toContain('href="tel:+38641123456"');
+    });
+
     it("drops only the part shown above: hours in an opening-hours section, the address in a composed map", () => {
       const onlyHours = visit([hours]);
       expect(onlyHours).toContain("Obiščite nas");

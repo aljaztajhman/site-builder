@@ -69,6 +69,7 @@ export function Composed({ section, ctx, index }: SectionProps<"composed">) {
         sectionId={section.id}
         headingId={heading ? titleId(section.id) : undefined}
         itemLevel={itemLevel}
+        siblings={props.elements}
       />
     );
     // Text on a field takes the field's ground: its colour and the ground a backing panel paints (G2, G9).
