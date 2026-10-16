@@ -148,12 +148,27 @@ const DISPLAY_SIZE = 6;
  * width (capitals wider), with a margin; a short headline is not capped by it (28vh in details.css is).
  */
 export function displayCap(text: string, span: number, caps: boolean): string {
-  const n = [...text].length;
+  const words = text.split(/\s+/).filter(Boolean);
   const width = (Math.min(12, Math.max(1, span)) / 12) * 1152;
-  // A heavy display face's average letter, spaces included (Archivo 800 capitals measured 0.73 em on the proof pages).
-  const em = caps ? 0.76 : 0.6;
+  // A heavy display face's average letter, spaces included (Archivo 800 capitals measured 0.73 em on the proof pages;
+  // tracked geometric capitals run wider).
+  const em = caps ? 0.82 : 0.6;
+  // Lines as the browser breaks them: whole words, greedy.
+  const lines = (px: number) => {
+    let n = 1;
+    let used = 0;
+    for (const w of words) {
+      const len = ([...w].length + (used ? 1 : 0)) * em * px;
+      if (used && used + len > width) {
+        n += 1;
+        used = [...w].length * em * px;
+      } else used += len;
+    }
+    return n;
+  };
+  // At most about a third of a 1280 x 800 screen: a photo, a paragraph or a button shares the first screen with it.
   let px = 240;
-  while (px > 24 && Math.ceil((n * em * px) / width) * 1.05 * px > 0.45 * 800) px -= 2;
+  while (px > 24 && lines(px) * 1.05 * px > 0.32 * 800) px -= 2;
   return (px / 8).toFixed(1);
 }
 

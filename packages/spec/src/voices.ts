@@ -29,7 +29,7 @@ export interface TypeVoice {
 }
 
 export const TYPE_VOICES: readonly TypeVoice[] = [
-  { id: "grotesk", label: "Tight grotesk", class: "grotesque", pair: "inter-tight-inter", headingWeight: 750, headingTracking: -0.03, headingCase: "normal", baseFontSize: 17, scale: 1.333, tone: ["exact", "new"] },
+  { id: "grotesk", label: "Tight grotesk", class: "grotesque", pair: "inter-tight-inter", headingWeight: 750, headingTracking: -0.015, headingCase: "normal", baseFontSize: 17, scale: 1.333, tone: ["exact", "new"] },
   { id: "editorial", label: "Light editorial serif", class: "transitional", pair: "newsreader-libre-franklin", headingWeight: 400, headingTracking: -0.02, headingCase: "normal", baseFontSize: 18, scale: 1.414, tone: ["quiet", "old"] },
   { id: "oldstyle", label: "Warm old-style", class: "old-style", pair: "young-serif-alegreya", headingWeight: 400, headingTracking: -0.01, headingCase: "normal", baseFontSize: 18, scale: 1.333, tone: ["warm", "old"] },
   { id: "signage", label: "Condensed signage capitals", class: "condensed", pair: "oswald-source-sans", headingWeight: 600, headingTracking: 0.01, headingCase: "uppercase", baseFontSize: 17, scale: 1.414, tone: ["loud", "exact"] },
