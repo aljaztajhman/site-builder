@@ -53,7 +53,7 @@ describe("assignVoices", () => {
 
   it("is deterministic and takes overrides", () => {
     expect([...assignVoices(ten)]).toEqual([...assignVoices(ten)]);
-    expect(assignVoices(ten, { overrides: { p3: "wide" } }).get("p3")).toBe("wide");
+    expect(assignVoices(ten, { overrides: { p3: "slab" } }).get("p3")).toBe("slab");
   });
 });
 
@@ -67,7 +67,7 @@ describe("applyDetails", () => {
       expect({ ...out, design: golden.design }).toEqual(golden);
       expect(validateSite(out).ok).toBe(true);
     }
-    expect(voiceOf(golden.design)).not.toBe("wide");
+    expect(voiceOf(golden.design)).not.toBe("slab");
   });
 });
 

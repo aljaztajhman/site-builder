@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { voiceFontFaces } from "@sb/spec";
 import { minifyCss, motifsIn, sharedBundle, sharedStylesheet, stylesheetFor, subMotifsIn } from "../src/index.ts";
 
 describe("minifyCss", () => {
@@ -71,7 +72,7 @@ describe("shared stylesheet", () => {
 
   it("ships every font face and island", () => {
     const files = [...sharedBundle().files.keys()];
-    expect(files.filter((f) => f.startsWith("fonts/"))).toHaveLength(19);
+    expect(files.filter((f) => f.startsWith("fonts/"))).toHaveLength(19 + voiceFontFaces().length);
     expect(files).toEqual(expect.arrayContaining(["js/nav.js", "js/consent.js", "js/gallery.js", "site.css"]));
   });
 });

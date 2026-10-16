@@ -105,15 +105,10 @@ describe("Header with Plus's 20 pages", () => {
 });
 
 describe("type voice pairs (fonts.ts VOICE_PAIRS)", () => {
-  it("are measured by their own faces: Krona One sets a name wider than an unknown face, Oswald narrower", () => {
+  it("are measured by their own faces: Besley sets a name wider than Oswald, Oswald narrower than an unknown face", () => {
     const name = "Optika Jasna";
     const plain = textEm(name);
-    expect(nameEm(name, { ...DESIGN, fontPair: "krona-karla" }) / plain).toBeGreaterThan(1.15 * 1.05 + 0.1);
     expect(nameEm(name, { ...DESIGN, fontPair: "oswald-source-sans" }) / plain).toBeLessThan(0.95);
-  });
-
-  it("fit fewer menu entries in the row with a wide heading face", () => {
-    const fitted = (fontPair: string) => navFit(LABELS, row({ family: "word", design: { ...DESIGN, fontPair } })).filter((f) => f === undefined).length;
-    expect(fitted("krona-karla")).toBeLessThan(fitted("oswald-source-sans"));
+    expect(nameEm(name, { ...DESIGN, fontPair: "besley-work-sans" })).toBeGreaterThan(nameEm(name, { ...DESIGN, fontPair: "oswald-source-sans" }));
   });
 });

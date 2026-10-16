@@ -321,7 +321,6 @@ export const VOICE_PAIRS: FontPair[] = [
   { id: "oswald-source-sans", label: "Oswald / Source Sans 3", heading: served(I.oswald, "sans-serif"), body: F.sourceSans3, fitK: 0.46 },
   { id: "bodoni-albert-sans", label: "Bodoni Moda / Albert Sans", heading: served(I.bodoniModa, "serif"), body: served(I.albertSans, "sans-serif"), fitK: 0.58 },
   { id: "besley-work-sans", label: "Besley / Work Sans", heading: served(I.besley, "serif"), body: served(I.workSans, "sans-serif"), fitK: 0.64 },
-  { id: "krona-karla", label: "Krona One / Karla", heading: served(I.kronaOne, "sans-serif"), body: F.karla, fitK: 0.84 },
   { id: "jost-literata", label: "Jost / Literata", heading: served(I.jost, "sans-serif"), body: served(I.literata, "serif"), fitK: 0.55 },
 ];
 
