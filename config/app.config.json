@@ -12,7 +12,9 @@
     "judge": { "model": "claude-sonnet-5-5", "effort": "medium", "maxTokens": 4000 },
     "director": { "model": "claude-opus-5-5", "effort": "medium", "maxTokens": 8000 },
     "artDirector": { "model": "claude-opus-5-5", "effort": "medium", "maxTokens": 8000 },
-    "rebuild": { "model": "claude-opus-5-5", "effort": "medium", "maxTokens": 16000 }
+    "rebuild": { "model": "claude-opus-5-5", "effort": "medium", "maxTokens": 16000 },
+    "artDirectorDirect": { "model": "claude-fable-5-1", "effort": "medium", "maxTokens": 8000 },
+    "composeDirect": { "model": "claude-fable-5-1", "effort": "medium", "maxTokens": 24000 }
   },
   "useFullBuildModel": false,
   "variety": {
@@ -26,16 +28,18 @@
     "genome": false
   },
   "designer": {
-    "$comment": "The AI designer (docs/plans/design-studio.md). agent: \"off\" | \"trial\" | \"on\". trial (studio 0.5, docs/plans/studio-0.5.md, 2026-10-11): the studio recomposes new homepages only for accounts whose email is in DESIGNER_TRIAL_EMAILS (Railway web + worker; empty: no one). Everyone else unchanged. on: every generation, not before the owner's blind A/B passes (plan §9).",
-    "agent": "trial",
+    "$comment": "The AI designer (docs/plans/design-studio.md). agent: \"off\" | \"trial\" | \"on\". Owner 2026-10-15 (studio shoot-out, docs/plans/phase-layout-variety.md D3): off; trial accounts get today's pipeline, which scored best (3.47 vs picture studio 3.09, Fable studio 3.22). trial (studio 0.5, docs/plans/studio-0.5.md, 2026-10-11): the studio recomposes new homepages only for accounts whose email is in DESIGNER_TRIAL_EMAILS (Railway web + worker; empty: no one). Everyone else unchanged. on: every generation, not before the owner's blind A/B passes (plan §9).",
+    "agent": "off",
     "budgets": { "charsPerToken": 3, "catalogue": 4500, "moodboard": 3000, "examples": 6000, "request": 16000 }
   },
   "studio": {
     "$comment": "Design studio (docs/plans/design-studio.md). uniqueness (§5.4, engine studio/look.ts, platform look_fingerprints): look distance 0..1 = weighted mean of genome axes differing (of 11), composition signature (homepage intent:layout sequence, edit distance), palette (ΔE76 in Lab of background, primary, band, accent, capped at 50), perceptual hash of the first screens at 360 and 1280 px (dHash Hamming of 64 bits) and stance (same or not); parts missing on either side are left out. The gate: closer than sameTradeMin to a site of the same trade, or sameTownMin to one in the same town, is not unique enough. Calibrated 2026-10-10 on the goldens and twins replayed free (engine test/fixtures/studio-look-prints.json, studio-look.test.ts): switches off, the 7 same-trade pairs on one template and palette are 0.02–0.19 apart and every other same-trade pair ≥ 0.52; switches on, same-trade pairs 0.18–0.82 (3 below 0.35: two jedilnik, two etiketa, two ogledalo with near-equal palettes); across trades ≥ 0.155 off and ≥ 0.27 on, below 0.25 only three warm-craft pairs (one template and palette in other trades). sameTradeMin 0.35 sits between 0.19 and 0.52; sameTownMin 0.25 lets other trades in one town pass unless they are one template and palette.",
     "$perRunMaxEurComment": "Studio 0.5: the most one studio run may spend, all calls together (mockup path: art director, mockup image, rebuild; then the picker's director call if it falls back). A call is sent only when the run's spend so far plus its estimate (input at limits.spendReservation.charsPerToken, output at the stage's maxTokens; the image at its configured price) is at most this; no retries.",
     "perRunMaxEur": 0.9,
-    "$modeComment": "Studio 0.5b (docs/plans/studio-0.5.md, 'Mockup pipeline'): mockup = Opus art director (vision) -> one GPT Image mockup of the homepage -> Opus vision rebuild into composed sections, falling back to the picker, then to today's site; picker = the 0.5 preset picker only.",
+    "$modeComment": "Studio 0.5b (docs/plans/studio-0.5.md, 'Mockup pipeline'): mockup = Opus art director (vision) -> one GPT Image mockup of the homepage -> Opus vision rebuild into composed sections, falling back to the picker, then to today's site; picker = the 0.5 preset picker only; direct = the Fable studio (.claude/plans/studio-shootout.md): no image model, the art director (models.artDirectorDirect) writes the direction for direct composition and the composer (models.composeDirect) writes the homepage from it in the rebuild's answer format, no mockup and no crops, then the same guards and fallbacks.",
     "mode": "mockup",
+    "$directComment": "studio.mode direct: timeoutSeconds bounds the whole direct path (two Fable calls with thinking); past it the run falls back to the picker (calls already sent still finish and are booked). perRunMaxEur replaces studio.perRunMaxEur in direct mode, so the mockup path's cap (the live trial) is unchanged: the art director's call is estimated at about €0.43 and the composer's at about €1.15 (Fable 5.1, $10/$50 per MTok, full maxTokens, 4 photos and a logo), the picker's director call after a failure about €0.21; €1.79 in all for pekarna-kvas (engine test studio-direct.test.ts).",
+    "direct": { "timeoutSeconds": 900, "perRunMaxEur": 1.8 },
     "$mockupComment": "The mockup image: imageGen.models[model] when the client gave photos or a logo (they go as references, refMaxSide px on the long side), imageGen.models[textModel] when not; width x height and quality as sent to fal. maxCrops: decorative art cut from the mockup (labelled AI images). timeoutSeconds: the whole mockup path; past it the run falls back to the picker (calls already sent still finish and are booked).",
     "mockup": { "model": "gpt-image-2.5-edit", "textModel": "gpt-image-2.5", "width": 1536, "height": 1024, "quality": "high", "refMaxSide": 1024, "maxCrops": 3, "timeoutSeconds": 300 },
     "$generalBelowConfidenceComment": "Studio 0.5: a classification below this confidence means a business outside the ten trades; the shortlist then offers only stances for any trade and presets with no trade tag.",
@@ -80,14 +84,16 @@
     "claude-haiku-4-5-20251001": { "input": 1.0, "output": 5.0, "cacheWrite5m": 1.25, "cacheRead": 0.1 },
     "claude-sonnet-5-5": { "input": 2.0, "output": 10.0, "cacheWrite5m": 2.5, "cacheRead": 0.2 },
     "claude-opus-5-5": { "input": 4.0, "output": 20.0, "cacheWrite5m": 5.0, "cacheRead": 0.2 },
+    "claude-fable-5-1": { "input": 10.0, "output": 50.0, "cacheWrite5m": 12.5, "cacheRead": 0.25 },
     "claude-haiku-5-5": {
       "input": 0.1, "output": 0.5, "cacheWrite5m": 0.125, "cacheRead": 0.01,
       "longPrompt": { "above": 100000, "input": 0.5, "output": 2.5, "cacheWrite5m": 0.625, "cacheRead": 0.05 }
     }
   },
-  "$modelTraitsComment": "What the model client must do for a model beyond its stage's settings (packages/config ModelTraits). Haiku 5.5 (model migration guide): adaptive thinking is on by default and counts toward max_tokens, so every call gets at least minMaxTokens; effort defaults to medium on the API but is always sent explicitly (defaultEffort when the stage sets none); no server-side refusal fallback, so a refused call is sent once more on refusalRetryModel (both billed). The client never sends sampling params, a thinking budget or an assistant prefill to any model. No stage runs on Haiku 5.5 yet: the bake-off (pnpm eval --stage-model) decides.",
+  "$modelTraitsComment": "What the model client must do for a model beyond its stage's settings (packages/config ModelTraits). Haiku 5.5 (model migration guide): adaptive thinking is on by default and counts toward max_tokens, so every call gets at least minMaxTokens; effort defaults to medium on the API but is always sent explicitly (defaultEffort when the stage sets none); no server-side refusal fallback, so a refused call is sent once more on refusalRetryModel (both billed). The client never sends sampling params, a thinking budget or an assistant prefill to any model. No stage runs on Haiku 5.5 yet: the bake-off (pnpm eval --stage-model) decides. Fable 5.1 (studio.mode direct's stages): thinking is always on (the client sends no thinking parameter, which runs adaptive) and counts toward max_tokens, so at least minMaxTokens; effort always explicit. No refusalRetryModel: a declined studio call falls back to the picker, inside the run's € cap.",
   "modelTraits": {
-    "claude-haiku-5-5": { "thinkingDefaultOn": true, "minMaxTokens": 2048, "defaultEffort": "medium", "refusalRetryModel": "claude-opus-5-5" }
+    "claude-haiku-5-5": { "thinkingDefaultOn": true, "minMaxTokens": 2048, "defaultEffort": "medium", "refusalRetryModel": "claude-opus-5-5" },
+    "claude-fable-5-1": { "thinkingDefaultOn": true, "minMaxTokens": 8000, "defaultEffort": "medium" }
   },
   "eurPerUsd": 0.86,
   "outsideReview": {

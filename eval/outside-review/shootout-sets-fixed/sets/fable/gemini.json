@@ -1,0 +1,61 @@
+{
+  "set": "fable",
+  "reviewer": "gemini",
+  "model": "google/gemini-4-argon",
+  "pages": [
+    "atelje-bergant",
+    "kolesarski-servis-ovinek",
+    "optika-jasna",
+    "pasji-salon-kodra",
+    "pivovarna-rov",
+    "plesna-sola-takt",
+    "sirarna-pr-simnu",
+    "steklarstvo-vrhovnik",
+    "urarstvo-tic",
+    "vinarstvo-pinteric"
+  ],
+  "status": "ok",
+  "answer": {
+    "sameness": "Every single page uses the exact same two-column split hero layout: left-aligned headline, short paragraph, and small rectangular button on the left; a single visual element on the right. The header bar is identical across all ten sites (plain text business name on the left, 'Domov' link on the right, thin bottom border). On mobile, every site has the exact same boxed '= Meni' button in the top right and an identical sticky bottom bar ('Klic' and/or 'Navodila za pot'). Seven out of ten sites substitute photography with a thin-stroke minimalist vector illustration on the right (glasses, footsteps, cheese wheel, clock face, vineyard sticks, hanging baskets).",
+    "recurringIssues": [
+      "Thin-stroke vector illustrations look barren and unfinished at full desktop scale, leaving vast expanses of empty background.",
+      "Severe contrast failure on optika-jasna where black text is placed on a dark royal blue background block.",
+      "Awkward, cramped element positioning on mobile, such as the tiny glasses icon on optika-jasna and the clipped bottom section on vinarstvo-pinteric.",
+      "Visible 'Ustvarjeno z UI' (Created with AI) watermark badges left on all photographic images, cheapening the businesses.",
+      "Microscopic, timid CTA buttons and navigation links on desktop that fail to anchor the layout.",
+      "Cold, uninviting art direction for craft, food, and service businesses that rely on warmth, texture, and human trust."
+    ],
+    "overall": 2,
+    "variety": 1,
+    "best": [
+      {
+        "id": "atelje-bergant",
+        "why": "The overlapping two-photo collage gives the right column actual visual weight and depth that the other pages lack."
+      },
+      {
+        "id": "sirarna-pr-simnu",
+        "why": "Strong dark green and warm yellow color palette paired with a chunky display serif gives the page some character despite the sparse vector graphic."
+      },
+      {
+        "id": "steklarstvo-vrhovnik",
+        "why": "Clean, high-contrast utilitarian typography paired with a relevant, textured image of glass panes works well for a trade business."
+      }
+    ],
+    "weakest": [
+      {
+        "id": "optika-jasna",
+        "why": "Black text on a dark blue block is nearly illegible, and the tiny clip-art glasses float awkwardly in empty white space."
+      },
+      {
+        "id": "vinarstvo-pinteric",
+        "why": "The desktop screen is 80% empty beige space with a tiny corner doodle, and the mobile layout is completely devoid of imagery while clipping the next section's title."
+      },
+      {
+        "id": "kolesarski-servis-ovinek",
+        "why": "Repeating the business name twice in the top-left looks like a template glitch, and the abstract green corner line doesn't communicate bike repair."
+      }
+    ],
+    "oneChange": "Break the single two-column split template and replace the sparse, thin-line vector doodles with rich, authentic photography and varied hero compositions (full-bleed imagery, centered typography, or multi-card grids).",
+    "summary": "This portfolio looks like a single wireframe populated ten times. While the typography is clean and readable, every site shares the exact same header, left-text/right-visual split, and identical mobile header and footer bars. Worse, seven of the ten sites avoid photography altogether in favor of tiny, thin-line vector doodles floating in vast empty backgrounds—making a winery, a brewery, and a watchmaker look like unfinished placeholders. Where photos are used, they carry visible 'Created with AI' badges. To charge professional studio rates, you must introduce real structural variety, fix accessibility errors like black-on-blue text, and use rich visual assets that build genuine local trust."
+  }
+}

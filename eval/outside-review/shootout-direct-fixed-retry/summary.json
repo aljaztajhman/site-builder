@@ -1,0 +1,51 @@
+{
+  "items": [
+    "vinarstvo-pinteric"
+  ],
+  "reviewers": {
+    "claude": {
+      "model": "claude-fable-5-1",
+      "scored": [],
+      "failed": [
+        "vinarstvo-pinteric"
+      ],
+      "skipped": [],
+      "vsOwner": null
+    }
+  },
+  "reviewerPairs": [],
+  "spentEur": 0.0869976,
+  "calls": 1,
+  "stoppedByBudget": false,
+  "rows": [
+    {
+      "itemId": "vinarstvo-pinteric",
+      "owner": null,
+      "scores": {
+        "claude": null
+      },
+      "topFix": {
+        "claude": null
+      },
+      "blockers": {
+        "claude": null
+      }
+    }
+  ],
+  "filter": {
+    "passed": [],
+    "held": [],
+    "unreviewed": [
+      "vinarstvo-pinteric"
+    ]
+  },
+  "agreedFilter": {
+    "rule": "two-of-three",
+    "needed": 1,
+    "passed": [],
+    "held": [],
+    "unreviewed": [
+      "vinarstvo-pinteric"
+    ]
+  }
+}

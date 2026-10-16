@@ -12,6 +12,7 @@ import { checkFacts } from "../facts.ts";
 import { DirectorAnswer, MAX_PROPS, checkDirection, directorRequest, knownNumbers } from "./director.ts";
 import type { ArtDirection } from "./art-director.ts";
 import { newMockupRun, runMockup, runTotal, type MockupDeps, type MockupRun } from "./mockup.ts";
+import { repairStudioPage } from "./page-rules.ts";
 
 /** config designer.agent: "on" for everyone, "trial" only for the accounts in DESIGNER_TRIAL_EMAILS, "off" for no one. */
 export function studioEnabled(mode: AppConfig["designer"]["agent"], email: string | null | undefined, trialEmails: string | undefined): boolean {
@@ -56,7 +57,10 @@ export function studioSeed(key: string): number {
   return (h >>> 0) % 1_000_000;
 }
 
-/** What the mockup path did (studio.mode "mockup"): its direction, the sections it placed, the crops, € by stage. */
+/**
+ * What the mockup path did (studio.mode "mockup"), or the direct path (studio.mode "direct": no crops, nothing for a
+ * mockup): its direction, the sections it placed, the crops, € by step.
+ */
 export interface MockupReport {
   ok: boolean;
   reason?: string;
@@ -71,14 +75,14 @@ export type StudioOutcome =
   | {
       ok: true;
       /** Which path built the homepage. */
-      path: "mockup" | "picker";
+      path: "mockup" | "direct" | "picker";
       spec: SiteSpec;
       idea: string;
       stance: string;
       used: ComposeUsed;
       dropped: string[];
       costEur: number;
-      /** The mockup path's run, when it ran (also when it fell back to the picker). */
+      /** The mockup path's run, or the direct path's, when it ran (also when it fell back to the picker). */
       mockup?: MockupReport;
       /** The mockup as painted (JPEG), never published: for the eval's sheets. */
       mockupImage?: Uint8Array;
@@ -100,7 +104,10 @@ export interface StudioInput {
    * for a trade are offered.
    */
   general?: boolean;
-  /** The mockup path's host (photos, logo, the painter, crop storage). Absent: the mockup path can't run and the picker does. */
+  /**
+   * The mockup path's host (photos, logo, the painter, crop storage); the direct path reads only the photos and logo.
+   * Absent: neither can run and the picker does.
+   */
   mockup?: MockupDeps;
 }
 
@@ -127,7 +134,8 @@ export function studioGuards(composed: SiteSpec, today: SiteSpec, corpus: string
  * The studio on one site. Never throws: a failure is `ok: false` and the caller keeps today's spec. studio.mode
  * "mockup": the mockup path first (art director, mockup image, rebuild: mockup.ts); when it fails for any reason (no
  * painter, a cost cap, an unusable answer, the guards, the time limit) the picker runs with what is left of
- * studio.perRunMaxEur. "picker": the picker only.
+ * studio.perRunMaxEur. "direct": the same with the direct path (art director and composer on their direct stages, no
+ * image call, under studio.direct.timeoutSeconds). "picker": the picker only.
  */
 export async function runStudio(client: ModelClient, config: AppConfig, input: StudioInput): Promise<StudioOutcome> {
   // Nothing may throw into the pipeline: an unexpected error keeps today's spec like any other failure.
@@ -139,8 +147,10 @@ export async function runStudio(client: ModelClient, config: AppConfig, input: S
 }
 
 async function studioRun(client: ModelClient, config: AppConfig, input: StudioInput): Promise<StudioOutcome> {
-  if (config.studio.mode !== "mockup") return runPicker(client, config, input, config.studio.perRunMaxEur);
-  const m = await mockupWithTimeout(client, config, input);
+  if (config.studio.mode === "picker") return runPicker(client, config, input, config.studio.perRunMaxEur);
+  const path = config.studio.mode;
+  const cap = runCapEur(config);
+  const m = await mockupWithTimeout(client, config, input, path === "direct");
   const report: MockupReport = {
     ok: m.ok,
     ...(m.reason ? { reason: m.reason } : {}),
@@ -154,51 +164,63 @@ async function studioRun(client: ModelClient, config: AppConfig, input: StudioIn
   const spent = runTotal(m) + m.inFlightEur;
   const extra = { ...(m.mockup ? { mockupImage: m.mockup } : {}), ...(m.art ? { art: m.art } : {}) };
   if (m.ok && m.spec) {
+    // The Review 50 rules on the built page, in code (no call): before the guards, so they judge what is published.
+    m.dropped.push(...repairStudioPage(m.spec).map((l) => `page rules: ${l}`));
     const why = studioGuards(m.spec, input.spec, input.corpus);
     if (!why) {
       const sections = m.sections ?? [];
       const used: ComposeUsed = {
         fixtureId: input.spec.slug,
-        stance: "mockup",
+        stance: path,
         seed: input.seed,
         catalogue: "approved",
-        presets: sections.map((x) => `mockup:${x}`),
-        palette: "mockup",
+        presets: sections.map((x) => `${path}:${x}`),
+        palette: path,
         pairing: `pairing/${m.spec.design.fontPair}`,
         drawing: null,
         wordmark: m.spec.design.wordmark ? `wordmark/${m.spec.design.wordmark.style}` : null,
         skipped: [],
       };
-      return { ok: true, path: "mockup", spec: m.spec, idea: m.idea ?? "", stance: "mockup", used, dropped: m.dropped, costEur: spent, mockup: report, ...extra };
+      return { ok: true, path, spec: m.spec, idea: m.idea ?? "", stance: path, used, dropped: m.dropped, costEur: spent, mockup: report, ...extra };
     }
     report.ok = false;
     report.reason = `guards: ${why}`;
   }
-  const p = await runPicker(client, config, input, Math.max(0, config.studio.perRunMaxEur - spent));
+  const p = await runPicker(client, config, input, Math.max(0, cap - spent));
   return { ...p, costEur: p.costEur + spent, mockup: report, ...extra };
 }
 
 /**
- * The mockup path under studio.mockup.timeoutSeconds. At the limit the run is aborted: it sends nothing more (the call in
- * flight finishes and is booked), and the result carries what it booked plus that call's estimate.
+ * The most one studio run may spend, all its calls together: studio.direct.perRunMaxEur in direct mode (two Fable calls
+ * at full maxTokens cost more than the mockup path), else studio.perRunMaxEur.
  */
-async function mockupWithTimeout(client: ModelClient, config: AppConfig, input: StudioInput): Promise<MockupRun> {
+export function runCapEur(config: AppConfig): number {
+  return config.studio.mode === "direct" ? config.studio.direct.perRunMaxEur : config.studio.perRunMaxEur;
+}
+
+/**
+ * The mockup path under studio.mockup.timeoutSeconds (the direct path under studio.direct.timeoutSeconds). At the limit
+ * the run is aborted: it sends nothing more (the call in flight finishes and is booked), and the result carries what it
+ * booked plus that call's estimate.
+ */
+async function mockupWithTimeout(client: ModelClient, config: AppConfig, input: StudioInput, direct: boolean): Promise<MockupRun> {
   const run = newMockupRun();
-  if (!input.mockup) return { ...run, reason: "no image generator (FAL_KEY not set or imageGen.pipeline off)" };
+  if (!input.mockup) return { ...run, reason: direct ? "no studio host for the client's photos (needs the image pipeline's storage)" : "no image generator (FAL_KEY not set or imageGen.pipeline off)" };
   const sources = sourcesOf(input.spec, input.brief, input.corpus);
   const known = knownNumbers(input.spec, sources, input.corpus);
   const stop = new AbortController();
-  const limit = `timed out after ${config.studio.mockup.timeoutSeconds} s`;
+  const seconds = direct ? config.studio.direct.timeoutSeconds : config.studio.mockup.timeoutSeconds;
+  const limit = `timed out after ${seconds} s`;
   let timer: ReturnType<typeof setTimeout> | undefined;
   const timeout = new Promise<MockupRun>((resolve) => {
     timer = setTimeout(() => {
       stop.abort(limit);
       // A snapshot: the run goes on only to book the call in flight, and starts nothing new.
       resolve({ ...run, eur: { ...run.eur }, dropped: [...run.dropped], crops: [...run.crops], ok: false, reason: limit });
-    }, config.studio.mockup.timeoutSeconds * 1000);
+    }, seconds * 1000);
   });
   try {
-    return await Promise.race([runMockup(client, config, { spec: input.spec, sources, known, corpus: input.corpus, deps: input.mockup, budget: config.studio.perRunMaxEur, signal: stop.signal, run }), timeout]);
+    return await Promise.race([runMockup(client, config, { spec: input.spec, sources, known, corpus: input.corpus, deps: input.mockup, budget: runCapEur(config), signal: stop.signal, run, ...(direct ? { direct } : {}) }), timeout]);
   } finally {
     clearTimeout(timer);
   }
@@ -215,8 +237,8 @@ async function runPicker(client: ModelClient, config: AppConfig, input: StudioIn
     if (!shortlist.presets.hero?.length) return { ok: false, reason: "no approved hero preset fills for this site", costEur };
     const req = directorRequest({ spec: input.spec, sources, shortlist });
     const estimate = estimateCallEur(config, client.stageConfig("director"), req);
-    if (estimate > budget) return { ok: false, reason: `the director call's estimate €${estimate.toFixed(3)} is over what studio.perRunMaxEur €${config.studio.perRunMaxEur} leaves (€${budget.toFixed(3)})`, costEur };
-    // No retry: one call bounds the run's cost under perRunMaxEur; an unusable answer falls back to today's site.
+    if (estimate > budget) return { ok: false, reason: `the director call's estimate €${estimate.toFixed(3)} is over what ${config.studio.mode === "direct" ? "studio.direct.perRunMaxEur" : "studio.perRunMaxEur"} €${runCapEur(config)} leaves (€${budget.toFixed(3)})`, costEur };
+    // No retry: one call bounds the run's cost under the run's cap; an unusable answer falls back to today's site.
     const { data, response } = await client.callJson(req, (d) => DirectorAnswer.parse(d), 0);
     costEur = priceOf(config, config.pricesUsdPerMTok[response.model] ? response.model : client.stageConfig("director").model, response.usage);
     idea = data.idea;
@@ -247,9 +269,10 @@ async function runPicker(client: ModelClient, config: AppConfig, input: StudioIn
       checked.dropped.push(`hero ${hero}: ${e.message}`);
       composed = compose(undefined);
     }
+    const rules = repairStudioPage(composed.spec).map((l) => `page rules: ${l}`);
     const why = studioGuards(composed.spec, input.spec, input.corpus);
     if (why) return { ok: false, reason: `guards: ${why}`, idea, costEur };
-    return { ok: true, path: "picker", spec: composed.spec, idea, stance, used: composed.used, dropped: [...checked.dropped, ...(composed.used.fallbacks ?? []).map((f) => `fell back: ${f}`)], costEur };
+    return { ok: true, path: "picker", spec: composed.spec, idea, stance, used: composed.used, dropped: [...checked.dropped, ...(composed.used.fallbacks ?? []).map((f) => `fell back: ${f}`), ...rules], costEur };
   } catch (e) {
     if (e instanceof ModelOutputError) costEur = e.costEur;
     const reason = e instanceof ComposerError ? `composer: ${e.message}` : `${(e as Error).name}: ${(e as Error).message}`;

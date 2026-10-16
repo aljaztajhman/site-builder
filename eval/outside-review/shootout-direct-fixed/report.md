@@ -1,0 +1,47 @@
+# Outside design reviewers
+
+10 pages, 32 calls, €1.5202 spent.
+
+All items count: agreement is measured on every page that has both scores, with no held-out split (nothing is tuned on these scores).
+
+## Reviewers against each other
+
+| Pair | Pages | Pairwise agreement | Spearman ρ |
+|---|---|---|---|
+| gemini vs gpt | 10 | 82 % (44 pairs) | 0.80 |
+| gemini vs claude | 9 | 89 % (35 pairs) | 0.88 |
+| gpt vs claude | 9 | 82 % (33 pairs) | 0.75 |
+
+## Filter
+
+3 of 10 pages pass all reviewers (every reviewer answered, none named a blocker). 7 are held by any reviewer.
+
+Held by the filter (at least 2 of 3 reviewers name a blocker): 3 of 10 pages. Passed it: 6. Open because a reviewer failed: 1.
+
+| Page | Filter | gemini: blockers | gpt: blockers | claude: blockers |
+|---|---|---|---|---|
+| atelje-bergant | not held |  |  | Desktop hero: the tilted vineyard photo extends past the first screen and is clipped by the viewport bottom, hanging into the next section's margin. · Desktop 'Najprej si ogledam hišo ali parcelo': heading spans full width with only a narrow credential row beneath and a large empty block, layout falls apart. |
+| kolesarski-servis-ovinek | not held |  |  | Desktop hero: 'Kako do nas' button sits below the fold, separated from its text by a ~350px empty band; the layout falls apart. · Phone, between hero and 'Kaj delamo': the curve graphic runs as a bare green stripe for a full screen of otherwise empty space. |
+| optika-jasna | held | Phone and desktop hero: black text over the dark royal blue services box is almost impossible to read. · Desktop hero: a vertical grey line cuts directly through the main headline and lead paragraph. · Phone and desktop: the exact same list of six services is repeated in the hero banner and again in the 'Kaj vse vam nudimo' section. · Desktop 'Kdo vas sprejme' section: a large empty blue circle sits on the right looking like a broken image or missing illustration. |  | Desktop 'Kdo vas sprejme': large empty blue circle placeholder where a portrait should be. · Phone statement section: headline is so large it spans almost two screens and the hero claim is repeated verbatim. · Desktop 'Kaj vse vam nudimo': headline 'Kaj vse vam nudimo' is cut by the section edge/overlaps the service list start. |
+| pivovarna-rov | held | On phone, the beer subheading 'Kopalnica' breaks mid-word with a single 'a' on the next line. · On phone, the 4-column yellow bar graphic sits below a vertically stacked list of beers, making the visual completely disconnected and nonsensical. | Phone, beer range: “Kopalnica” breaks into “Kopalnic” and an isolated “a.” | Phone, beer section: the heading 'Kopalnica' is broken across two lines as 'Kopalnic / a'. · Both viewports, beer section: the orange stepped-bar graphic has no labels or caption and reads as a broken or nonsensical element. · Phone, opening hours: the timeline bars have no hour labels so the grid lines are meaningless; the 12.00–23.00 bar overlaps the left margin. · Desktop, beer section: the 'Jamar, Šoht, Kopalnica in Smuk' heading overlaps/sits with no gap against the beer names row. |
+| sirarna-pr-simnu | held | On both phone and desktop, the 'Iz naše trgovinice' section appears unfinished, with the heading 'Ogled sirarne s pokušino' floating by itself without supporting text or products. · On both phone and desktop in the contact section, the light grey 'E-pošta' label on the yellow background has almost no contrast and is unreadable. |  | Phone and desktop, „Od hleva do kotla |
+| urarstvo-tic | not held |  |  | Desktop contact section: left column has large empty gaps between the heading, the paragraph, the email and the button, so the layout looks broken. · Phone and desktop: directions is offered three times (header/sticky bar, 'Pot do delavnice', 'Navodila za pot' under the map) in the same section. |
+| vinarstvo-pinteric | not held | Phone and desktop, 'Stara klet' section: light grey text inside the ochre highlight box has almost no contrast and cannot be read. · Desktop, 'Kdaj vas pričakujemo' section: faint grey hour labels (11.00, 13.00, 15.00, 17.00) above the Saturday bar are unreadable against the ochre background. |  |  |
+
+## Scores and top fix per page
+
+| Page | Owner | gemini | gemini: top fix | gpt | gpt: top fix | claude | claude: top fix |
+|---|---|---|---|---|---|---|---|
+| atelje-bergant | – | 4 | In the desktop hero, remove the rotation on the smaller vineyard photo and align it cleanly on a grid or move it to illustrate the 'Stara domačija' section below. | 3.08 | Recompose the desktop renovation and architect sections into a balanced two-column layout, pairing the short text and credentials rather than leaving most of the right side empty. | 3.33 | Fill the empty right columns on desktop ('Stara domačija', 'Najprej si ogledam', CTA) with a project photo or a plan drawing so sections don't read as half-finished. |
+| kolesarski-servis-ovinek | – | 3.58 | Pull the 'Kako do nas' button up directly beneath the hero body text on desktop so it sits comfortably above the fold and eliminates the dead white space. | 2.83 | Remove the hero's excessive vertical space, place the directions button directly beneath the introductory text, and shrink the corner graphic on phones. | 2.75 | Fix the hero: put 'Kako do nas' directly under the intro text on desktop and give the curve a fixed height so it frames the hero instead of trailing as an empty stripe on phone. |
+| optika-jasna | – | 2.83 | Change the text color inside the hero's royal blue services banner to white, or remove the banner altogether since the exact same services are listed in the 'Kaj vse vam nudimo' section below. | 2.67 | Condense the blue benefits section into a short heading and three compact points, substantially reducing its mobile type sizes and removing information already covered in the hero and services. | 2.58 | Shrink the blue statement section's headline and claims to one phone screen; the repeated 'tri dni' message is already in the hero. |
+| pasji-salon-kodra | – | 3.58 | Arrange the desktop 'Nikamor se ne mudi', 'Cene storitev', and 'Delovni čas' sections into a balanced two-column grid so the right half of the viewport isn't dead white space. | 2.75 | Replace the tools-only hero with a dog-grooming image; use a shorter landscape crop on phones so it supports rather than dominates the introduction. | 2.92 | Replace the hero mood picture (human hairbrush, towels) with a photo of a dog being groomed, and add at least one more dog photo beside the price list or the 'Nikamor se ne mudi' section. |
+| pivovarna-rov | – | 3.5 | Fix the typography in the mobile beer list so 'Kopalnica' does not break mid-word onto a new line. | 3 | On phone, put the headline and introduction directly beneath the header; shrink the hanging-glass illustration into a supporting accent rather than a tall opening block. | 2.83 | Redesign the beer section: four compact cards (name, style, colour swatch or glass illustration) instead of oversized stacked headings, and either explain the orange step-bars or remove them. |
+| plesna-sola-takt | – | 4.33 | Replace the single 'Domov' link in the navigation with anchor links to the sections ('Učitelja', 'Prijava') or remove the menu altogether. | 3.5 | On phones, shrink the dance-step illustration substantially and place the introductory text and registration action before it so the primary action fits above the fixed bar. | 3.17 | Add real photos of the teachers and a class in the 'Kdo vas uči' section; a dance school with no people on the page feels empty. |
+| sirarna-pr-simnu | – | 4.08 | In the 'Iz naše trgovinice' section, populate the product list or give 'Ogled sirarne s pokušino' proper body copy and a clear call-to-action so it doesn't look like an orphaned heading. | 3.33 | On phones, put the headline before the cheese outline and shrink the illustration to a small accent so the introduction, location and phone number appear much earlier. | 3.08 | Fill the „Iz naše trgovinice |
+| steklarstvo-vrhovnik | – | 4.33 | Replace the generic Vipava valley vineyard image in the 'O nas' section with a workshop or glass installation photo. | 3 | Reduce the phone hero headline to roughly 34–36px and scale down subsequent headings so the introduction and glass image fit more comfortably in the opening screen. | 3.25 | Reduce the phone headline to three lines max and lift the glass photo into the first screen so the trade is visible immediately. |
+| urarstvo-tic | – | 3.75 | Restyle the opening hours timeline bars so they do not use the exact same gold fill and rounded corners as primary action buttons. | 3 | On phones, place the headline before the clock and reduce the clock to a compact supporting motif; on desktop, align both within a shorter hero and bring the primary button closer to the description. | 3 | Shrink the hero clock on phone (or set it beside/behind the headline) so the headline, trade and location read in the first screen. |
+| vinarstvo-pinteric | – | 2.67 | Change the text color inside the ochre highlight banner and the hour markers above the schedule bars to dark brown or black so they are clearly legible. | 2.75 | Remove the phone hero’s excessive minimum height, slightly reduce its headline, and tighten desktop section heights so content replaces the large empty bands. | – |  |
+
+Failed (claude, no score given): vinarstvo-pinteric
+

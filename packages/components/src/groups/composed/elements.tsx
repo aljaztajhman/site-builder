@@ -4,7 +4,7 @@ import { PlateStrip } from "../../motifs/index.tsx";
 import { ActionLink, Picture, cx } from "../../primitives/index.tsx";
 import type { RenderCtx } from "../../types.ts";
 import { DecorDrawing } from "./decor.tsx";
-import { ContactFact, HoursFact, PricesFact, townCode } from "./facts.tsx";
+import { ContactFact, HoursFact, PricesFact, contactShows, townCode } from "./facts.tsx";
 import { DrawingSvg } from "./drawing.tsx";
 import { drawingData } from "./drawings/index.ts";
 import { IconFactsBlock } from "./kinds/icon-facts.tsx";
@@ -351,9 +351,11 @@ export interface ElementProps {
   headingId?: string | undefined;
   /** The heading level of a steps title or a question: one below the section's own heading (h2 with none). */
   itemLevel?: number;
+  /** The section's elements: a contact element leaves out what another one shows (a map's address, a phone fact). */
+  siblings?: readonly El[];
 }
 
-export function ElementView({ el, ctx, width, over, titleId, priority, sectionId, headingId, itemLevel = 2 }: ElementProps) {
+export function ElementView({ el, ctx, width, over, titleId, priority, sectionId, headingId, itemLevel = 2, siblings = [] }: ElementProps) {
   switch (el.kind) {
     case "heading":
       return <Heading el={el} over={over} id={titleId} uid={`${sectionId ?? "s"}-${el.id}`} />;
@@ -374,11 +376,11 @@ export function ElementView({ el, ctx, width, over, titleId, priority, sectionId
         </Block>
       );
     case "contact":
-      return (
+      return contactShows(el, siblings, ctx).length ? (
         <Block el={el} over={over} className="cx-contact contact">
-          <ContactFact el={el} ctx={ctx} />
+          <ContactFact el={el} ctx={ctx} siblings={siblings} />
         </Block>
-      );
+      ) : null;
     case "prices":
       return (
         <Block el={el} over={over} className="cx-prices-el">

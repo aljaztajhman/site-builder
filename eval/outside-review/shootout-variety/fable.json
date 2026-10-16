@@ -1,0 +1,55 @@
+{
+  "fable": {
+    "pages": 10,
+    "directions": {
+      "distinct": 3,
+      "counts": {
+        "dark-elegant": 5,
+        "warm-craft": 3,
+        "bold-local": 2
+      }
+    },
+    "fontPairs": {
+      "distinct": 5,
+      "counts": {
+        "fraunces-source-sans": 3,
+        "bricolage-figtree": 2,
+        "bricolage-public-sans": 2,
+        "space-grotesk-plex": 2,
+        "archivo-archivo": 1
+      }
+    },
+    "heroes": {
+      "distinct": 1,
+      "counts": {
+        "composed:free": 10
+      }
+    },
+    "primaryColours": {
+      "distinct": 9,
+      "counts": {
+        "#2a4a9a": 2,
+        "#0f7b6c": 1,
+        "#1b3fb8": 1,
+        "#b01f5c": 1,
+        "#c8893a": 1,
+        "#c8a24e": 1,
+        "#e8473f": 1,
+        "#e8a23a": 1,
+        "#e9c43f": 1
+      }
+    },
+    "distance": {
+      "pairs": 45,
+      "mean": 0.5598764350512732,
+      "min": 0.18595271915584416,
+      "closest": {
+        "a": "atelje-bergant",
+        "b": "steklarstvo-vrhovnik",
+        "distance": 0.18595271915584416
+      },
+      "withPictures": 10,
+      "pairsWithPhash": 45
+    }
+  }
+}

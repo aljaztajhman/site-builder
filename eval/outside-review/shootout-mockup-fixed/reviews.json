@@ -1,0 +1,1024 @@
+{
+  "gemini": {
+    "atelje-bergant": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "The typographic layout and color palette are tasteful, but the generic child-like house vector drawings undermine the professional credibility of an architecture studio.",
+        "desktopNote": "The layout is clean and well-structured, though the simplistic house illustrations and repeated bullet points across sections weaken the overall impression.",
+        "phone": {
+          "impression": 3,
+          "hierarchy": 4,
+          "imagery": 2,
+          "spacing": 4,
+          "clutter": 3,
+          "distinctiveness": 3
+        },
+        "desktop": {
+          "impression": 3,
+          "hierarchy": 4,
+          "imagery": 2,
+          "spacing": 4,
+          "clutter": 3,
+          "distinctiveness": 3
+        },
+        "fixes": [
+          "Replace the simplistic vector house drawings with detailed architectural CAD elevations, floor-plan snippets, or go purely typographic.",
+          "Consolidate the repeated facts ('Prvi pogovor je brezplačen', ZAPS, pricing in offer) so they aren't restated in almost every section.",
+          "Make the service list in 'Kaj projektiram' consistent: either give all eight items a short description or make all of them simple list items."
+        ],
+        "blockers": []
+      },
+      "phone": 3.1666666666666665,
+      "desktop": 3.1666666666666665,
+      "score": 3.1666666666666665
+    },
+    "kolesarski-servis-ovinek": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "The green tag bar immediately repeats the exact list of services shown in the 'Kaj delamo' section right below it, and the daily opening hours bars take up too much vertical space.",
+        "desktopNote": "The 'Navodila za pot' button under the map is styled as a tall square instead of a normal button, and there is a large empty gap between the map and the address below it.",
+        "phone": {
+          "impression": 4,
+          "hierarchy": 4,
+          "imagery": 3,
+          "spacing": 3,
+          "clutter": 3,
+          "distinctiveness": 4
+        },
+        "desktop": {
+          "impression": 4,
+          "hierarchy": 4,
+          "imagery": 3,
+          "spacing": 3,
+          "clutter": 3,
+          "distinctiveness": 4
+        },
+        "fixes": [
+          "Fix the 'Navodila za pot' button on desktop so it has normal horizontal button proportions instead of a tall square box, and tighten the vertical gap above the address.",
+          "Remove the green keyword banner below the hero or replace its text, as it repeats the exact five service titles listed immediately below in 'Kaj delamo'.",
+          "Group Monday–Sunday into a single 'Vsak dan: 8.30–18.30' row or compact the schedule bars so identical opening hours don't take up a full screen of scrolling."
+        ],
+        "blockers": []
+      },
+      "phone": 3.5,
+      "desktop": 3.5,
+      "score": 3.5
+    },
+    "optika-jasna": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "The bold typographic hierarchy and color-block layout work well on mobile, though the top padding above the green block's heading ('Pregled ob nakupu očal') is missing.",
+        "desktopNote": "In the services section ('Kaj vse vam nudimo'), the illustration of the trial frame overlaps with the body text, and the section's grid alignment is broken.",
+        "phone": {
+          "impression": 4,
+          "hierarchy": 4,
+          "imagery": 4,
+          "spacing": 3,
+          "clutter": 4,
+          "distinctiveness": 4
+        },
+        "desktop": {
+          "impression": 3,
+          "hierarchy": 4,
+          "imagery": 2,
+          "spacing": 2,
+          "clutter": 4,
+          "distinctiveness": 4
+        },
+        "fixes": [
+          "Fix the grid layout in the desktop 'Kaj vse vam nudimo' section so the trial frame illustration sits in its own column without overlapping the service descriptions.",
+          "Align each service heading directly with its corresponding description row on desktop, and add subtle horizontal dividers to connect the columns cleanly.",
+          "Add proper top padding to the green 'Pregled ob nakupu očal' block on mobile so the heading doesn't touch the top edge of the container."
+        ],
+        "blockers": [
+          "Desktop, 'Kaj vse vam nudimo' section: the trial frame illustration overlaps and obscures the middle column of body text."
+        ]
+      },
+      "phone": 3.8333333333333335,
+      "desktop": 3.1666666666666665,
+      "score": 3.5
+    },
+    "pasji-salon-kodra": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "The opening hours bars are styled identically to full-width orange CTA buttons, and the AI-generated sketches have cropped text and subject artifacts at the edges.",
+        "desktopNote": "The layout is clean and distinctive with bold editorial typography, but the AI illustrations have visible cropping defects and the services section has an awkward gap below the intro text.",
+        "phone": {
+          "impression": 4,
+          "hierarchy": 4,
+          "imagery": 2,
+          "spacing": 4,
+          "clutter": 4,
+          "distinctiveness": 4
+        },
+        "desktop": {
+          "impression": 4,
+          "hierarchy": 5,
+          "imagery": 2,
+          "spacing": 4,
+          "clutter": 5,
+          "distinctiveness": 4
+        },
+        "fixes": [
+          "Restyle the opening hours timeline bars (especially on mobile) so they look like an informational schedule rather than clickable orange CTA buttons.",
+          "Match the off-white background of the line-art illustrations to the page background (e.g. via multiply blend mode) so they don't sit in gray rectangles.",
+          "Align the intro paragraph in 'Za vsako velikost, vsako pasmo' with the illustration on desktop so there isn't a large empty gap above the service list."
+        ],
+        "blockers": [
+          "On both phone and desktop, the hero dog illustration has clipped text artifacts ('00 405...') along the top right edge above the AI badge.",
+          "On both phone and desktop, the second dog illustration ('Za vsako velikost...') has a clipped black shape cut off on the far right edge."
+        ]
+      },
+      "phone": 3.6666666666666665,
+      "desktop": 4,
+      "score": 3.833333333333333
+    },
+    "pivovarna-rov": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "The hero image is a blurry, extreme crop of a gold chain ornament that looks broken and makes no sense for a brewery.",
+        "desktopNote": "The hero image on the right is a narrow, pixelated vertical strip of a gold chain that ruins an otherwise bold typographic layout.",
+        "phone": {
+          "impression": 2,
+          "hierarchy": 4,
+          "imagery": 1,
+          "spacing": 4,
+          "clutter": 4,
+          "distinctiveness": 4
+        },
+        "desktop": {
+          "impression": 2,
+          "hierarchy": 4,
+          "imagery": 1,
+          "spacing": 4,
+          "clutter": 4,
+          "distinctiveness": 4
+        },
+        "fixes": [
+          "Replace the blurry, nonsensical chain graphic in the hero with a real photo of the taproom, beer glasses, or the old mining bathhouse—or drop the image completely for a pure typographic hero.",
+          "Differentiate the beer names from the glass size in the gold banner ('Kozarec piva 0,5 l' is not a beer variety like Jamar or Šoht).",
+          "Add prices or brief descriptions to the five offer rows in the green section so they read like a menu rather than bare text lines."
+        ],
+        "blockers": [
+          "Phone and desktop hero: the AI-generated picture is a blurry, pixelated crop of a gold chain that looks broken and nonsensical."
+        ]
+      },
+      "phone": 3.1666666666666665,
+      "desktop": 3.1666666666666665,
+      "score": 3.1666666666666665
+    },
+    "plesna-sola-takt": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "The bold dark and coral palette gives the dance school real character, though the small generated footprint diagrams look like awkwardly cropped icons rather than proper visuals.",
+        "desktopNote": "The layout falls apart in the instructors section where huge empty vertical gaps separate the names from their titles, and the tiny image in the 'Tečaji' header is covered by its own AI badge.",
+        "phone": {
+          "impression": 4,
+          "hierarchy": 4,
+          "imagery": 2,
+          "spacing": 4,
+          "clutter": 4,
+          "distinctiveness": 4
+        },
+        "desktop": {
+          "impression": 2,
+          "hierarchy": 3,
+          "imagery": 2,
+          "spacing": 2,
+          "clutter": 4,
+          "distinctiveness": 4
+        },
+        "fixes": [
+          "Fix the desktop 'Eva Pečovnik / Rok Pečovnik' section by removing the massive empty vertical space and tall divider lines between the names and their 'učitelj plesa' subtitles.",
+          "Remove the tiny, badge-obscured footprint thumbnail in the 'Tečaji' section header and either make the remaining diagram graphics full-width or go purely typographic.",
+          "Left-align 'Prvo srečanje je brezplačno' with the phone number in the desktop coral address banner, and add breathing room between 'Prijavite se na tečaj' and the phone number below."
+        ],
+        "blockers": [
+          "On desktop in the 'Tečaji' header, the tiny footprint image on the right is almost completely obscured by the 'Ustvarjeno z UI' label.",
+          "On desktop in the instructors section ('Eva Pečovnik' / 'Rok Pečovnik'), the layout is broken with a huge empty gap separating the headings from their subtitles below."
+        ]
+      },
+      "phone": 3.6666666666666665,
+      "desktop": 2.8333333333333335,
+      "score": 3.25
+    },
+    "sirarna-pr-simnu": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "The opening hours bars look exactly like clickable full-width buttons, and the hero cheese illustration is cropped awkwardly on the sides.",
+        "desktopNote": "The generated illustrations have visible rectangular bounding boxes that mismatch the background colors, and the contact section repeats the directions button right next to itself.",
+        "phone": {
+          "impression": 4,
+          "hierarchy": 4,
+          "imagery": 3,
+          "spacing": 4,
+          "clutter": 3,
+          "distinctiveness": 4
+        },
+        "desktop": {
+          "impression": 4,
+          "hierarchy": 4,
+          "imagery": 3,
+          "spacing": 4,
+          "clutter": 3,
+          "distinctiveness": 4
+        },
+        "fixes": [
+          "Give the AI-generated illustrations padding or blend their background colors seamlessly so they aren't clipped on the edges and don't show rectangular bounding boxes.",
+          "Remove the redundant 'Pot do Lancovega' button in the contact section so it doesn't compete with 'Navodila za pot' right next to it.",
+          "Restyle the opening hours timeline bars (especially on mobile) so they don't look like primary call-to-action buttons."
+        ],
+        "blockers": []
+      },
+      "phone": 3.6666666666666665,
+      "desktop": 3.6666666666666665,
+      "score": 3.6666666666666665
+    },
+    "steklarstvo-vrhovnik": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "The hero image is too tall, pushing the main headline down so that it gets cut off mid-sentence by the bottom bar on the first screen.",
+        "desktopNote": "The hero text column is slightly too tall for an 800px screen, clipping the primary action buttons at the bottom edge of the first viewport.",
+        "phone": {
+          "impression": 4,
+          "hierarchy": 3,
+          "imagery": 4,
+          "spacing": 4,
+          "clutter": 4,
+          "distinctiveness": 4
+        },
+        "desktop": {
+          "impression": 4,
+          "hierarchy": 4,
+          "imagery": 4,
+          "spacing": 3,
+          "clutter": 4,
+          "distinctiveness": 4
+        },
+        "fixes": [
+          "Reduce the aspect ratio of the mobile hero image to 4:3 or 16:9 so the entire main headline fits comfortably on the first screen above the fixed bottom bar.",
+          "Slightly reduce the desktop H1 font size or top padding in the hero section so the 'Pokličite' and 'Pot do nas' buttons are fully visible without scrolling.",
+          "Tighten the vertical gap between the 'Kaj izdelamo iz stekla' heading and its introductory sentence in the left column on desktop."
+        ],
+        "blockers": []
+      },
+      "phone": 3.8333333333333335,
+      "desktop": 3.8333333333333335,
+      "score": 3.8333333333333335
+    },
+    "urarstvo-tic": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "The hero image contains clipped website navigation text at the top right, and the opening hours look like a stack of identical call-to-action buttons.",
+        "desktopNote": "The opening hours timeline bars look like giant clickable buttons, the hero image has clipped UI text baked into its top edge, and the contact section leaves a large empty gap on the left.",
+        "phone": {
+          "impression": 3,
+          "hierarchy": 4,
+          "imagery": 2,
+          "spacing": 4,
+          "clutter": 4,
+          "distinctiveness": 4
+        },
+        "desktop": {
+          "impression": 3,
+          "hierarchy": 4,
+          "imagery": 2,
+          "spacing": 3,
+          "clutter": 4,
+          "distinctiveness": 4
+        },
+        "fixes": [
+          "Crop or regenerate the hero illustration so the stray 'Domov / O nas' text at its top-right edge is removed.",
+          "Redesign the opening hours display into a clean typographic table or thinner timeline bars so the time ranges do not look like primary gold CTA buttons.",
+          "On desktop, group the physical address and 'Navodila za pot' button with the email in the left column next to the map to eliminate the dead space."
+        ],
+        "blockers": [
+          "Both phone and desktop hero section: the generated watch illustration has clipped navigation words ('Domov', 'O nas') baked into its top-right edge."
+        ]
+      },
+      "phone": 3.5,
+      "desktop": 3.3333333333333335,
+      "score": 3.416666666666667
+    },
+    "vinarstvo-pinteric": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "The hero section is clean and well-balanced, but after the first photo the page turns into a repetitive stack of plain text blocks with no visual variety.",
+        "desktopNote": "The body sections below the hero are heavily left-aligned with single-column tables, leaving the right half of the screen completely empty and unbalanced.",
+        "phone": {
+          "impression": 4,
+          "hierarchy": 4,
+          "imagery": 3,
+          "spacing": 4,
+          "clutter": 5,
+          "distinctiveness": 4
+        },
+        "desktop": {
+          "impression": 3,
+          "hierarchy": 4,
+          "imagery": 4,
+          "spacing": 3,
+          "clutter": 5,
+          "distinctiveness": 4
+        },
+        "fixes": [
+          "Convert the 'Stara klet', 'Štiri generacije', and 'Kdaj vas pričakujemo' sections on desktop into two-column layouts (like 'Degustacije') to eliminate the empty right half of the screen.",
+          "Merge the redundant 'Stara klet' and 'Štiri generacije vinogradnikov' sections into one cohesive story block, and show the second wine-tasting photo on mobile as well.",
+          "Replace the useless single-item 'Domov' navigation link in the header with anchor links to Ponudba, O nas, and Kontakt."
+        ],
+        "blockers": []
+      },
+      "phone": 4,
+      "desktop": 3.8333333333333335,
+      "score": 3.916666666666667
+    }
+  },
+  "gpt": {
+    "atelje-bergant": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "The opening is clear and readable, but the long service list and repeated credentials and consultation messages make the page feel padded.",
+        "desktopNote": "The restrained typography and architectural drawings feel coherent, but oversized gaps and a fragmented contact layout weaken the composition.",
+        "phone": {
+          "impression": 3,
+          "hierarchy": 4,
+          "imagery": 3,
+          "spacing": 3,
+          "clutter": 3,
+          "distinctiveness": 3
+        },
+        "desktop": {
+          "impression": 3,
+          "hierarchy": 4,
+          "imagery": 3,
+          "spacing": 3,
+          "clutter": 3,
+          "distinctiveness": 3
+        },
+        "fixes": [
+          "Replace the basic house outlines with more distinctive architectural drawings or project imagery, keeping a strong visual in the first screen on both viewports.",
+          "Consolidate the repeated consultation, pricing and qualification messages; shorten the service section and stack its labels above descriptions on phones.",
+          "Tighten desktop section spacing and rebuild the contact area as a compact, aligned grid linking the invitation, phone, email and location."
+        ],
+        "blockers": []
+      },
+      "phone": 3.1666666666666665,
+      "desktop": 3.1666666666666665,
+      "score": 3.1666666666666665
+    },
+    "kolesarski-servis-ovinek": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "The opening is clear and readable, but the oversized seven-row opening-hours display makes the contact section unnecessarily long.",
+        "desktopNote": "The strong contrast and clear headline work, but the contact section has large disconnected gaps between the map, address and directions button.",
+        "phone": {
+          "impression": 3,
+          "hierarchy": 4,
+          "imagery": 2,
+          "spacing": 2,
+          "clutter": 3,
+          "distinctiveness": 3
+        },
+        "desktop": {
+          "impression": 3,
+          "hierarchy": 4,
+          "imagery": 2,
+          "spacing": 2,
+          "clutter": 3,
+          "distinctiveness": 3
+        },
+        "fixes": [
+          "Replace the soft, enlarged contour and chain graphics with sharper, purpose-made illustrations or workshop and bicycle photography; give the hero image a consistent inset on desktop.",
+          "Replace the opening-hours chart with a compact timetable and group the map, address and directions button tightly together; use a normal-height directions button on desktop.",
+          "Remove the turquoise keyword strip above “Kaj delamo,” which repeats the service list, and bring the actual services closer to the hero."
+        ],
+        "blockers": []
+      },
+      "phone": 2.8333333333333335,
+      "desktop": 2.8333333333333335,
+      "score": 2.8333333333333335
+    },
+    "optika-jasna": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "Oversized headings and tall promotional bands make the phone page unnecessarily long before visitors reach the services and booking details.",
+        "desktopNote": "The services illustration overlaps its descriptions, while the spacious hero leaves the booking action far below the first screen.",
+        "phone": {
+          "impression": 3,
+          "hierarchy": 3,
+          "imagery": 2,
+          "spacing": 2,
+          "clutter": 3,
+          "distinctiveness": 3
+        },
+        "desktop": {
+          "impression": 2,
+          "hierarchy": 3,
+          "imagery": 2,
+          "spacing": 2,
+          "clutter": 3,
+          "distinctiveness": 3
+        },
+        "fixes": [
+          "Rebuild the desktop services section with separate, non-overlapping columns for service names, descriptions and the illustration.",
+          "Reduce phone heading sizes and section padding, and condense the red and green benefit panels so they do not repeat the services at such length.",
+          "Bring a clear booking action into the desktop hero and move the optical illustration higher, using a tighter composition instead of the large empty areas."
+        ],
+        "blockers": [
+          "Desktop services section: the optical illustration overlaps the service descriptions and obscures parts of the text."
+        ]
+      },
+      "phone": 2.6666666666666665,
+      "desktop": 2.5,
+      "score": 2.583333333333333
+    },
+    "pasji-salon-kodra": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "The oversized hero typography and long opening copy push the illustration down, while the bulky opening-hours display makes the page unnecessarily long.",
+        "desktopNote": "The hero has a clear reading order and prominent call action, but blurry illustrations and oversized utility sections undermine the otherwise coherent design.",
+        "phone": {
+          "impression": 3,
+          "hierarchy": 3,
+          "imagery": 2,
+          "spacing": 3,
+          "clutter": 4,
+          "distinctiveness": 3
+        },
+        "desktop": {
+          "impression": 3,
+          "hierarchy": 4,
+          "imagery": 2,
+          "spacing": 3,
+          "clutter": 3,
+          "distinctiveness": 3
+        },
+        "fixes": [
+          "Replace the blurry raster sketches with crisp, consistently styled illustrations, and reframe the services and salon images to avoid awkward fragments at their edges.",
+          "Reduce the phone hero headline and tighten its vertical spacing so the introduction, call action and illustration form a more balanced first screen.",
+          "Replace the oversized opening-hours bars with compact day-and-time rows, and consolidate the nearby contact area and closing booking banner into one clear booking section."
+        ],
+        "blockers": []
+      },
+      "phone": 3,
+      "desktop": 3,
+      "score": 3
+    },
+    "pivovarna-rov": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "The hero’s heavily blurred, tightly cropped chain image undermines an otherwise readable page with a coherent dark-green-and-gold palette.",
+        "desktopNote": "The narrow, pixelated chain image leaves the oversized hero feeling unbalanced and does little to establish the brewery’s atmosphere.",
+        "phone": {
+          "impression": 2,
+          "hierarchy": 3,
+          "imagery": 1,
+          "spacing": 3,
+          "clutter": 4,
+          "distinctiveness": 3
+        },
+        "desktop": {
+          "impression": 2,
+          "hierarchy": 3,
+          "imagery": 1,
+          "spacing": 3,
+          "clutter": 4,
+          "distinctiveness": 3
+        },
+        "fixes": [
+          "Replace the blurry chain with a sharp, substantial image of the beer, brewery or taproom, using separate desktop and phone crops that preserve the subject.",
+          "Rebalance the hero: reduce the desktop headline and excess empty space, widen the image column, and tighten the phone introduction so the visual appears earlier.",
+          "Make the phone opening-hours section more compact with aligned day-and-time rows instead of tall chart bars."
+        ],
+        "blockers": [
+          "Phone hero: the image is cropped into an indistinct, heavily pixelated fragment."
+        ]
+      },
+      "phone": 2.6666666666666665,
+      "desktop": 2.6666666666666665,
+      "score": 2.6666666666666665
+    },
+    "plesna-sola-takt": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "The dark-and-coral styling is coherent, but the oversized headline and late location information weaken the opening hierarchy, while blurry footstep graphics add little visual appeal.",
+        "desktopNote": "The opening is readable, but enormous empty instructor panels and undersized illustrations make the full page feel unfinished.",
+        "phone": {
+          "impression": 3,
+          "hierarchy": 3,
+          "imagery": 2,
+          "spacing": 3,
+          "clutter": 3,
+          "distinctiveness": 3
+        },
+        "desktop": {
+          "impression": 2,
+          "hierarchy": 3,
+          "imagery": 2,
+          "spacing": 2,
+          "clutter": 3,
+          "distinctiveness": 3
+        },
+        "fixes": [
+          "Rebuild the desktop instructor section as compact profiles, placing each role directly beneath its name and removing the tall empty panels and double vertical divider.",
+          "Replace the blurry footstep graphics with crisp, consistently sized illustrations or strong dance imagery; give the hero visual more prominence on desktop.",
+          "Reduce the headline and address sizes, introduce the town near the opening description, and consolidate the location and registration contact details into one clear section."
+        ],
+        "blockers": [
+          "Desktop location section: the free-meeting text panel overlaps and visibly obscures the lower-left portion of the footstep illustration."
+        ]
+      },
+      "phone": 2.8333333333333335,
+      "desktop": 2.5,
+      "score": 2.666666666666667
+    },
+    "sirarna-pr-simnu": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "The oversized cheese illustration delays the introduction, while the opening-hours chart makes the page unnecessarily long.",
+        "desktopNote": "The split hero is clear and readable, but the enlarged, soft cheese illustration makes the page feel less polished than its typography and colour palette.",
+        "phone": {
+          "impression": 3,
+          "hierarchy": 3,
+          "imagery": 2,
+          "spacing": 2,
+          "clutter": 3,
+          "distinctiveness": 3
+        },
+        "desktop": {
+          "impression": 3,
+          "hierarchy": 4,
+          "imagery": 2,
+          "spacing": 3,
+          "clutter": 3,
+          "distinctiveness": 3
+        },
+        "fixes": [
+          "Replace the blurry cheese, cow and kettle graphics with crisp, consistently styled illustrations or well-cropped product and farm photography.",
+          "On phones, put the headline and location before the hero image and reduce the image height so the business introduction leads the first screen.",
+          "Replace the oversized opening-hours chart with a compact day-and-time table, grouping days with identical hours to reduce scrolling."
+        ],
+        "blockers": []
+      },
+      "phone": 2.6666666666666665,
+      "desktop": 3,
+      "score": 2.833333333333333
+    },
+    "steklarstvo-vrhovnik": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "The tall hero image followed by an oversized headline consumes the first screen without presenting a complete service message.",
+        "desktopNote": "The six-line hero headline pushes the contact buttons below the first screen, while sparse lower sections create an uneven rhythm.",
+        "phone": {
+          "impression": 3,
+          "hierarchy": 2,
+          "imagery": 3,
+          "spacing": 3,
+          "clutter": 4,
+          "distinctiveness": 2
+        },
+        "desktop": {
+          "impression": 3,
+          "hierarchy": 2,
+          "imagery": 3,
+          "spacing": 2,
+          "clutter": 4,
+          "distinctiveness": 2
+        },
+        "fixes": [
+          "Rebalance the hero: on phone, place a smaller headline before a shorter image; on desktop, reduce headline size and widen its column so the message and primary call button fit above the fold.",
+          "Replace the large landscape image with glazing work or a workshop detail, making the supporting imagery specific to the trade rather than the region.",
+          "Tighten the lower-page layout by grouping opening hours with contact details and reducing the large gaps between headings, supporting text and sections."
+        ],
+        "blockers": []
+      },
+      "phone": 2.8333333333333335,
+      "desktop": 2.6666666666666665,
+      "score": 2.75
+    },
+    "urarstvo-tic": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "The restrained palette suits a watchmaker, but the oversized opening-hours chart stretches a simple practical detail across multiple screens.",
+        "desktopNote": "The hero has a clear editorial hierarchy, but the contaminated watch illustration and sprawling contact section undermine the otherwise coherent presentation.",
+        "phone": {
+          "impression": 3,
+          "hierarchy": 3,
+          "imagery": 2,
+          "spacing": 2,
+          "clutter": 4,
+          "distinctiveness": 3
+        },
+        "desktop": {
+          "impression": 3,
+          "hierarchy": 4,
+          "imagery": 2,
+          "spacing": 3,
+          "clutter": 4,
+          "distinctiveness": 3
+        },
+        "fixes": [
+          "Replace the hero image with a clean watch illustration or workshop photograph without embedded navigation, retaining the dark-green and brass palette.",
+          "Replace the opening-hours bars with a compact day-and-time table, especially on phones, and reserve the gold button treatment for actions.",
+          "Consolidate email, address and directions into a compact contact layout; shrink or replace the mostly empty schematic map and remove the large unused desktop space beside it."
+        ],
+        "blockers": [
+          "Phone and desktop hero: the watch image contains clipped navigation text along its upper edge and must be replaced with a clean asset."
+        ]
+      },
+      "phone": 2.8333333333333335,
+      "desktop": 3.1666666666666665,
+      "score": 3
+    },
+    "vinarstvo-pinteric": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "The oversized five-line headline dominates the opening, while the rest of the page becomes a long sequence of similarly styled text sections.",
+        "desktopNote": "The prominent imagery and wine-toned palette work, but the oversized headline and sparse lower sections make the layout feel stretched rather than composed.",
+        "phone": {
+          "impression": 3,
+          "hierarchy": 2,
+          "imagery": 3,
+          "spacing": 3,
+          "clutter": 4,
+          "distinctiveness": 3
+        },
+        "desktop": {
+          "impression": 3,
+          "hierarchy": 2,
+          "imagery": 3,
+          "spacing": 2,
+          "clutter": 4,
+          "distinctiveness": 3
+        },
+        "fixes": [
+          "Reduce the hero headline on both screens so it takes fewer lines; on desktop, move the call button directly beneath the introduction and fully into the first screen.",
+          "Combine the short cellar and family sections into one tighter editorial block, and group opening hours with booking details to remove sparse bands and shorten the phone page.",
+          "Give cellar and tasting imagery more prominence instead of relying on the grape close-up; carry photography into the lower page to make the visit feel more tangible."
+        ],
+        "blockers": []
+      },
+      "phone": 3,
+      "desktop": 2.8333333333333335,
+      "score": 2.916666666666667
+    }
+  },
+  "claude": {
+    "kolesarski-servis-ovinek": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "Phone: the dark hero with the river line drawing works, but the page sprawls with a tag strip that duplicates the service list, seven identical opening-hour bars and a chain picture cropped to an unreadable corner.",
+        "desktopNote": "Desktop: hero is well composed, but the lower half collapses into a tall sparse contact column with a square 'Navodila za pot' button floating in empty space and the chain image cropped to a sliver.",
+        "phone": {
+          "impression": 3,
+          "hierarchy": 4,
+          "imagery": 3,
+          "spacing": 2,
+          "clutter": 2,
+          "distinctiveness": 4
+        },
+        "desktop": {
+          "impression": 3,
+          "hierarchy": 4,
+          "imagery": 3,
+          "spacing": 2,
+          "clutter": 3,
+          "distinctiveness": 4
+        },
+        "fixes": [
+          "Collapse the seven identical opening-hour bars into one line ('Vsak dan 8.30–18.30, april–oktober') and drop the timeline grid that adds nothing.",
+          "Remove the teal tag strip under the hero; it repeats the 'Kaj delamo' list word for word and adds a second coloured band before the content starts.",
+          "Recrop the chain/sprocket picture to show a whole gear and chain, and on desktop align the map, address and directions button into one compact block without the dead gap."
+        ],
+        "blockers": [
+          "Phone, 'Kolesarite po dolini Soče': the chain picture is cropped to a corner fragment and followed by an empty teal band, reading as a broken image.",
+          "Desktop, 'Obiščite nas': the 'Navodila za pot' button is stretched into a tall empty square floating in a dead gap below the address."
+        ]
+      },
+      "phone": 3,
+      "desktop": 3.1666666666666665,
+      "score": 3.083333333333333
+    },
+    "pivovarna-rov": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "The hero image is a blurry, pixelated close-up of a chain hook that says nothing about beer or the pivnica and is badly cropped on phone.",
+        "desktopNote": "The hero shows the same low-resolution chain strip as a narrow sliver beside a huge headline, leaving the right half of the dark hero mostly empty.",
+        "phone": {
+          "impression": 2,
+          "hierarchy": 3,
+          "imagery": 1,
+          "spacing": 3,
+          "clutter": 4,
+          "distinctiveness": 3
+        },
+        "desktop": {
+          "impression": 2,
+          "hierarchy": 3,
+          "imagery": 1,
+          "spacing": 2,
+          "clutter": 4,
+          "distinctiveness": 3
+        },
+        "fixes": [
+          "Replace the pixelated chain picture with a proper photo of the taps, glasses or the old bathhouse interior, filling the right half of the desktop hero and the full width on phone.",
+          "Tighten the hero's vertical padding on desktop and remove the dead band between hero text and the green section; make the beer-name strip a real list of the four beers with short notes.",
+          "Move the opening hours or a single beer teaser higher so the first phone screen shows more than headline, paragraph and button."
+        ],
+        "blockers": [
+          "Phone and desktop hero: the generated picture is a blurry, upscaled fragment of a chain with no connection to the brewery, not fit to publish.",
+          "Phone hero: the picture is cropped so the chain hook is cut off top and bottom, reading as a broken image."
+        ]
+      },
+      "phone": 2.6666666666666665,
+      "desktop": 2.5,
+      "score": 2.583333333333333
+    },
+    "pasji-salon-kodra": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "The hero illustration carries a garbled text fragment in its top-right corner and sits narrower than the text column, and the services list has an empty row, so the first impression is of unfinished work.",
+        "desktopNote": "The split hero works, but the same garbled fragment in the poodle picture, the blank service row and the cocker-spaniel strip cut off at both edges undermine it.",
+        "phone": {
+          "impression": 3,
+          "hierarchy": 4,
+          "imagery": 2,
+          "spacing": 3,
+          "clutter": 3,
+          "distinctiveness": 3
+        },
+        "desktop": {
+          "impression": 3,
+          "hierarchy": 4,
+          "imagery": 2,
+          "spacing": 3,
+          "clutter": 3,
+          "distinctiveness": 3
+        },
+        "fixes": [
+          "Replace or regenerate the three illustrations: clean poodle without the text artefact, a cocker spaniel framed whole instead of a strip cut at both edges, and a towel picture that fills its box.",
+          "Show the real salon or the groomer at work in the first screen instead of a mood drawing; the drawing style can stay as section accents.",
+          "Remove the empty service row and give the price list real content (duration or price), and drop one of the three repeated phone-number blocks."
+        ],
+        "blockers": [
+          "Phone and desktop hero: the poodle picture has a clipped, nonsensical text fragment in its top-right corner.",
+          "Phone and desktop services list: an empty row with doubled dividers sits between 'Striženje srednjega psa' and 'Striženje velikega psa'.",
+          "Phone and desktop 'Za vsako velikost': the cocker-spaniel strip is badly cropped, with a second dog cut off at the right edge.",
+          "Phone and desktop 'Salon na Ljubljanski cesti': the towel picture does not fill its frame, leaving a visible lighter rectangle in the lower right."
+        ]
+      },
+      "phone": 3,
+      "desktop": 3,
+      "score": 3
+    },
+    "optika-jasna": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "The services list collapses into headings of wildly different sizes with three items lacking any text, followed by a cropped generated drawing, so the middle of the page looks unfinished.",
+        "desktopNote": "In the services section the generated trial-frame image overlaps the description text and the heading cascade shrinks unevenly, while the navy ZZZS band is a near-empty dead strip.",
+        "phone": {
+          "impression": 3,
+          "hierarchy": 3,
+          "imagery": 2,
+          "spacing": 2,
+          "clutter": 3,
+          "distinctiveness": 3
+        },
+        "desktop": {
+          "impression": 2,
+          "hierarchy": 3,
+          "imagery": 2,
+          "spacing": 2,
+          "clutter": 3,
+          "distinctiveness": 3
+        },
+        "fixes": [
+          "Rebuild the services section as a uniform list or grid: one heading size, a line of text for every item, and the image placed in its own column with a clear gap on both viewports.",
+          "Merge the red/green bands with the hero text and services so the workshop and free-exam claims appear once, and turn the ZZZS line into a compact badge instead of a full-height navy band.",
+          "Put a real or generated photo of the shop or workshop in the hero (right column on desktop, under the headline on phone) and add hour labels to the phone timetable."
+        ],
+        "blockers": [
+          "Desktop, services section: the trial-frame image overlaps the text 'Okvir lahko izberete tudi brez naročila.'",
+          "Desktop and phone, services section: headings shrink inconsistently and the last three items have no description, so the layout falls apart.",
+          "Phone, services section: the generated trial-frame drawing is cropped at both left and right edges.",
+          "Both viewports: the 'Lastna delavnica' and 'Pregled ob nakupu očal' bands repeat the same statements as the hero paragraph and the services items."
+        ]
+      },
+      "phone": 2.6666666666666665,
+      "desktop": 2.5,
+      "score": 2.583333333333333
+    },
+    "atelje-bergant": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "The hero stacks headline, two paragraphs and a button before the line drawing, so the first screen is text-heavy and the illustration only peeks in at the bottom.",
+        "desktopNote": "The contact section falls apart: the heading, phone number, email and map are scattered across three columns with large dead space between the title and the final line.",
+        "phone": {
+          "impression": 3,
+          "hierarchy": 3,
+          "imagery": 3,
+          "spacing": 3,
+          "clutter": 3,
+          "distinctiveness": 3
+        },
+        "desktop": {
+          "impression": 3,
+          "hierarchy": 3,
+          "imagery": 3,
+          "spacing": 2,
+          "clutter": 3,
+          "distinctiveness": 3
+        },
+        "fixes": [
+          "Rebuild the desktop contact section as one coherent block: heading and intro text together on the left, phone, email and map stacked on the right, no large gap between title and paragraph.",
+          "Trim the hero: drop the second paragraph on phone so the house drawing rises into the first screen, and give the drawings a tinted background so they read as deliberate artwork.",
+          "Remove the repeated trust lines (free first talk, price in offer, ZAPS licence) that appear in the hero, the Stara domačija list and the red process band; state each once."
+        ],
+        "blockers": [
+          "Desktop contact section: heading, intro paragraph, phone, email and map are misaligned across columns with a large empty gap, the layout does not hold together.",
+          "Desktop 'Od prvega pogovora do gradnje' band: the two-item list sits on the left with the right half of the band empty, the section reads unfinished."
+        ]
+      },
+      "phone": 3,
+      "desktop": 2.8333333333333335,
+      "score": 2.916666666666667
+    },
+    "sirarna-pr-simnu": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "The yellow cheese illustration is cropped on the right and the hero image, headline and paragraph push the only action to the very bottom of the first screen, while the contact section repeats the directions button twice.",
+        "desktopNote": "The hero works well with the two-tone split, but the contact block offers both 'Pot do Lancovega' and 'Navodila za pot' for the same action and the opening-hours timeline is a tall band of identical bars.",
+        "phone": {
+          "impression": 3,
+          "hierarchy": 3,
+          "imagery": 3,
+          "spacing": 3,
+          "clutter": 3,
+          "distinctiveness": 4
+        },
+        "desktop": {
+          "impression": 4,
+          "hierarchy": 4,
+          "imagery": 4,
+          "spacing": 3,
+          "clutter": 3,
+          "distinctiveness": 4
+        },
+        "fixes": [
+          "Merge the duplicated directions buttons ('Pot do Lancovega' and 'Navodila za pot') into one and keep the map stub smaller or drop it, since it shows no real map.",
+          "Collapse the opening hours: six identical 8.00–18.00 rows can be one line 'Pon–Sob 8.00–18.00, Ned zaprto', freeing a full screen of scrolling on phone.",
+          "Replace the clip-art-style cheese, cow and kettle illustrations with photos of the farm, shop and cheese wheels, or at least crop the cheese so it is not cut off at the right edge."
+        ],
+        "blockers": [
+          "Phone and desktop, contact section: two buttons for the same action ('Pot do Lancovega' and 'Navodila za pot') plus the hero 'Pot do kmetije' repeat each other.",
+          "Phone and desktop, contact section: the 'map' is an empty green box with a single line and a dot, not a usable map."
+        ]
+      },
+      "phone": 3.1666666666666665,
+      "desktop": 3.6666666666666665,
+      "score": 3.4166666666666665
+    },
+    "plesna-sola-takt": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "Phone: the course list ticker and the Tečaji section repeat the same four courses back to back, and the orange address block has a tiny stray image under it instead of a map or photo.",
+        "desktopNote": "Desktop: the team section collapses into a huge dead band with two vertical lines and names floating far from their roles, and the address-block image is a badly cropped tile fragment.",
+        "phone": {
+          "impression": 3,
+          "hierarchy": 3,
+          "imagery": 2,
+          "spacing": 3,
+          "clutter": 2,
+          "distinctiveness": 3
+        },
+        "desktop": {
+          "impression": 2,
+          "hierarchy": 3,
+          "imagery": 2,
+          "spacing": 2,
+          "clutter": 2,
+          "distinctiveness": 3
+        },
+        "fixes": [
+          "Rebuild the team section on desktop as two tight columns (name, role, photo) and drop the decorative vertical lines that create a 500px empty band.",
+          "Remove the orange course ticker under the hero or the Tečaji list; show the four courses once, each with a thumbnail, and keep one phone number block instead of three.",
+          "Replace the small footstep tiles in the address and course sections with a real studio/couple photo or a map; crop the address image so it is not a visible tile seam."
+        ],
+        "blockers": [
+          "Desktop team section: names sit in a huge empty band separated from their roles by ~300px, layout falls apart.",
+          "Desktop address block: the generated image is a visibly broken tile with a cut fragment in the lower left.",
+          "Phone and desktop: the four course names repeat immediately (orange bar, then Tečaji list); phone number repeats in address block and contact section."
+        ]
+      },
+      "phone": 2.6666666666666665,
+      "desktop": 2.3333333333333335,
+      "score": 2.5
+    },
+    "steklarstvo-vrhovnik": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "The tall hero photo pushes the headline to the very bottom of the first screen, where it is cut mid-sentence and the oversized headline then runs for another half screen.",
+        "desktopNote": "The headline is set so large it stacks seven lines and shoves both buttons off the first screen, while the services and about sections leave wide empty bands beside short text.",
+        "phone": {
+          "impression": 3,
+          "hierarchy": 2,
+          "imagery": 3,
+          "spacing": 3,
+          "clutter": 3,
+          "distinctiveness": 3
+        },
+        "desktop": {
+          "impression": 3,
+          "hierarchy": 2,
+          "imagery": 3,
+          "spacing": 2,
+          "clutter": 3,
+          "distinctiveness": 3
+        },
+        "fixes": [
+          "Shrink the headline on both viewports (max 3–4 lines) and shorten the phone hero image so the headline, address and primary button all fit in the first screen.",
+          "On desktop, tighten the services and about sections: pull the intro text beside the heading, fill the empty right column of the hours block or merge it with the contact block.",
+          "Remove the duplicated contact details: the hero buttons, the closing CTA, the phone/address block and the footer all repeat call and directions; keep one strong contact block."
+        ],
+        "blockers": [
+          "Phone, hero: the headline is clipped at the bottom of the first screen behind the fixed bar, cut mid-word ('isti ali').",
+          "Desktop, hero: the headline wraps to seven lines and pushes the primary buttons below the fold, leaving them cropped at the screen edge."
+        ]
+      },
+      "phone": 2.8333333333333335,
+      "desktop": 2.6666666666666665,
+      "score": 2.75
+    },
+    "urarstvo-tic": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "The dark green and gold watchmaker look is strong, but the hero picture carries garbled fake navigation text and the opening hours become a long stack of full-width gold bars that read as buttons.",
+        "desktopNote": "The split hero works, yet the generated picture shows clipped ghost text in its top-right corner and there are dead dark bands between hero, services and the visit section.",
+        "phone": {
+          "impression": 3,
+          "hierarchy": 4,
+          "imagery": 2,
+          "spacing": 3,
+          "clutter": 3,
+          "distinctiveness": 4
+        },
+        "desktop": {
+          "impression": 3,
+          "hierarchy": 4,
+          "imagery": 2,
+          "spacing": 3,
+          "clutter": 3,
+          "distinctiveness": 4
+        },
+        "fixes": [
+          "Regenerate or crop the hero picture so no baked-in 'Domov / O nas' text remains, and keep it bleeding to the right edge on desktop.",
+          "On phone replace the Gantt-style hour bars with a compact two-column day/time list so the hours take one screen and don't look like six buttons.",
+          "Swap the empty bordered map box for a real embedded map or static map image, and tighten the gaps between hero, services and the visit section."
+        ],
+        "blockers": [
+          "Phone and desktop, hero: the generated picture contains garbled navigation text ('Domov', 'O nas') along its top edge, clipped and nonsensical.",
+          "Phone, services: a doubled divider leaves an empty row between 'Popravilo stenskih in starinskih ur' and 'Krajšanje kovinskih paščkov'.",
+          "Phone and desktop, visit section: the map is an empty bordered box with only a pin and a street label, a placeholder rather than a picture."
+        ]
+      },
+      "phone": 3.1666666666666665,
+      "desktop": 3.1666666666666665,
+      "score": 3.1666666666666665
+    },
+    "vinarstvo-pinteric": {
+      "status": "ok",
+      "output": {
+        "phoneNote": "The phone hero headline fills almost the whole first screen so the photo only peeks in at the bottom, and the second hero photo never appears on phone at all.",
+        "desktopNote": "The desktop hero's tilted second photo collides with the grape image and hangs below the fold into the next section, while the 'Pokličite' button is cut off at the bottom edge of the first screen.",
+        "phone": {
+          "impression": 3,
+          "hierarchy": 3,
+          "imagery": 3,
+          "spacing": 3,
+          "clutter": 4,
+          "distinctiveness": 3
+        },
+        "desktop": {
+          "impression": 3,
+          "hierarchy": 3,
+          "imagery": 3,
+          "spacing": 2,
+          "clutter": 4,
+          "distinctiveness": 3
+        },
+        "fixes": [
+          "Shrink the hero headline to two or three lines so the vineyard photo and the call button land inside the first screen on both viewports.",
+          "On desktop, keep the photo collage inside the hero without crashing into the grapes or spilling past the section edge; add an image to the text-only Degustacije and Štiri generacije bands.",
+          "Tighten vertical padding in the lower sections (Stara klet, Kdaj vas pričakujemo, contact), which leave half the width empty on desktop; list Tomaž too or drop the one-row team table."
+        ],
+        "blockers": [
+          "Desktop hero: the tilted food photo overlaps the grape photo and is cut off at the bottom of the first screen, spilling into the 'Stara klet' section.",
+          "Desktop hero: the 'Pokličite' button is clipped at the bottom edge of the first screen."
+        ]
+      },
+      "phone": 3.1666666666666665,
+      "desktop": 3,
+      "score": 3.083333333333333
+    }
+  }
+}

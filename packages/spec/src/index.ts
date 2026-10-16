@@ -50,3 +50,4 @@ export * from "./studio/index.ts";
 export { ASSET_KINDS, AssetKind, KIND_PREFIX, AssetId, assetId, parseAssetId, type AssetPrefix } from "./assets.ts";
 export * from "./images-once.ts";
 export * from "./text-once.ts";
+export * from "./composed-once.ts";

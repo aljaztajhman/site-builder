@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { loadConfig } from "@sb/config";
 import { composerFixture } from "@sb/inventory";
 import { publishChecklist, type SiteSpec } from "@sb/spec";
-import { ImageGenerator, ModelClient, ReplayTransport, runStudio, studioGuards, type MockupDeps, type ModelRequest } from "../src/index.ts";
+import { ImageGenerator, ModelClient, ReplayTransport, runStudio, studioGuards, studioPageIssues, type MockupDeps, type ModelRequest } from "../src/index.ts";
 
 /**
  * Studio 0.5b on recorded runs (pnpm studio:poc --fixture <id> --record, tools/eval/recordings-studio-mockup): the art
@@ -64,5 +64,7 @@ describe("the mockup pipeline on recorded runs", () => {
     const kinds = (s: SiteSpec) => new Set(publishChecklist(s).map((b) => `${b.kind}:${b.kind === "placeholder" ? b.detail : ""}`));
     for (const k of kinds(r.spec)) expect(kinds(fx.base).has(k), k).toBe(true);
     expect(r.mockup!.eur.mockup).toBeGreaterThan(0);
+    // The Review 50 rules hold on the built page (runStudio repairs it before the guards).
+    expect(studioPageIssues(r.spec)).toEqual([]);
   }, 60_000);
 });

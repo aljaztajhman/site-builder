@@ -1,0 +1,60 @@
+{
+  "set": "picture",
+  "reviewer": "gpt",
+  "model": "openai/gpt-6.1-sol",
+  "pages": [
+    "atelje-bergant",
+    "kolesarski-servis-ovinek",
+    "optika-jasna",
+    "pasji-salon-kodra",
+    "pivovarna-rov",
+    "plesna-sola-takt",
+    "sirarna-pr-simnu",
+    "steklarstvo-vrhovnik",
+    "urarstvo-tic",
+    "vinarstvo-pinteric"
+  ],
+  "status": "ok",
+  "answer": {
+    "sameness": "Most desktop pages use a thin header above a two-column hero: oversized left-aligned headline and short copy on the left, one rectangular illustration or photograph on the right. Heavy sans-serif headlines dominate, with serif typography distinguishing the architect, watchmaker and winery. Small square-cornered buttons, flat colour fields and minimal decoration recur throughout. The bicycle service, brewery and dance school are particularly close relatives: dark backgrounds, pale bold headings, coloured CTAs and isolated artwork. On phones, almost every page becomes the same narrow header, outlined menu button, stacked hero and fixed call/directions strip.",
+    "recurringIssues": [
+      "Mobile stacking often postpones essential content: the glassmaker's headline extends below the first screen, while the winery's main CTA is absent from it.",
+      "Several hero images feel like loosely related decoration rather than convincing evidence of the business, particularly the brewery chain and bicycle-service contour graphic.",
+      "The repeated header, button and mobile utility-bar treatment makes otherwise different businesses feel like products from one template system.",
+      "Small body text and undersized desktop CTAs leave a large gap between headline emphasis and practical information.",
+      "Visible image-generation labels repeatedly interrupt the artwork and make the pages feel like studio previews rather than finished client websites."
+    ],
+    "overall": 3,
+    "variety": 3,
+    "best": [
+      {
+        "id": "urarstvo-tic",
+        "why": "The dark green, restrained gold, serif typography and detailed watch mechanism create the set's most coherent business-specific identity across desktop and phone."
+      },
+      {
+        "id": "vinarstvo-pinteric",
+        "why": "Lavender colouring, expressive serif typography and overlapping vineyard photography give this page an editorial character distinct from the heavier service-business layouts."
+      },
+      {
+        "id": "sirarna-pr-simnu",
+        "why": "The green-and-yellow palette and oversized cheese drawing create an immediately recognisable identity, with a clear mobile progression from image to proposition to action."
+      }
+    ],
+    "weakest": [
+      {
+        "id": "pivovarna-rov",
+        "why": "The blurry, tightly cropped chain image is visually weak and insufficiently evocative of a brewery, leaving the familiar dark split hero to carry almost everything."
+      },
+      {
+        "id": "steklarstvo-vrhovnik",
+        "why": "The tall workshop photograph and long headline compete on desktop, while the image-first mobile layout pushes much of the main proposition and its action below the opening screen."
+      },
+      {
+        "id": "kolesarski-servis-ovinek",
+        "why": "The contour illustration supplies atmosphere but little cycling specificity, and the dark hero with bright accent strips closely resembles the studio's dance-school formula."
+      }
+    ],
+    "oneChange": "Require a genuinely business-specific hero concept and mobile content hierarchy before applying the shared component system, rather than starting each commission with the same headline-copy-artwork composition.",
+    "summary": "This is competent, readable small-business work with several appealing identities, but not yet a convincingly bespoke studio portfolio. Colour and illustration provide more differentiation than layout or interaction. The watchmaker, winery and cheesemaker show that the studio can build a coherent visual world; the brewery and bicycle service expose the underlying formula. Mobile layouts are generally orderly, but automatic stacking sometimes gives imagery priority over the business proposition. Keep the useful consistency of navigation and contact tools, but demand more distinctive hero concepts, stronger business-specific imagery and deliberate mobile priorities."
+  }
+}

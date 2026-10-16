@@ -1,0 +1,8 @@
+{
+  "claude": {
+    "vinarstvo-pinteric": {
+      "status": "failed",
+      "reason": "invalid answer: stopped by --max-eur before the retry ([\n  {\n    \"origin\": \"string\",\n    \"code\": \"too_big\",\n    \"maximum\": 200,\n    \"inclusive\": true,\n    \"path\": [\n      \"fixes\",\n      0\n    ],\n    \"message\": \"Too big: expected string to have <=200 characters\"\n  }\n])"
+    }
+  }
+}

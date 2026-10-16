@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import { AppConfigSchema, loadConfig } from "../src/index.ts";
 
 describe("designer switch", () => {
-  it("is on trial (studio 0.5): only DESIGNER_TRIAL_EMAILS accounts get the studio until the owner's blind A/B passes", () => {
-    expect(loadConfig().designer.agent).toBe("trial");
+  it("is off (owner 2026-10-15, D3): no account gets the studio; today's pipeline scored best in the shoot-out", () => {
+    expect(loadConfig().designer.agent).toBe("off");
   });
 
   it("reads the old boolean as off / on, and refuses anything else", () => {

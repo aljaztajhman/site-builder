@@ -1,8 +1,10 @@
+// @module-tag slow
 import { describe, expect, it } from "vitest";
 import { loadConfig } from "@sb/config";
 import { validateSite } from "@sb/spec";
-import { ORIGINAL_FIXTURES, fileFixture, fixtureKind, knownFixtures, parseFixtureArgs, recordCommand, recordedBrief } from "../src/studio-fixtures.ts";
-import { loadFixture } from "../src/fixtures/load.ts";
+import { launchCheckBrowser } from "@sb/engine";
+import { ORIGINAL_FIXTURES, STUDIO_MODES, baseRecordings, fileFixture, fixtureKind, knownFixtures, modeDirs, parseFixtureArgs, recordCommand, recordedBrief, replayedFixture } from "../src/studio-fixtures.ts";
+import { FRESH_DIR, loadFixture } from "../src/fixtures/load.ts";
 
 const KNOWN = ["pekarna-kvas", "avtoservis-mrak", "instalacije-rebernik", "cvetlicarna-zvoncek", "tattoo-crnilo", "frizerstvo-lana", "salon-tina", "foto-rozman"];
 
@@ -65,4 +67,45 @@ describe("the fixtures studio:poc knows", () => {
     expect(recordCommand("salon-tina", "twin")).toBe("pnpm eval --record-missing --recordings tools/eval/recordings-home-off --only salon-tina --twins --scope home --photos 0 --no-edits --no-judge --no-lighthouse");
     expect(recordCommand("foto-rozman", "hard")).toContain("--only foto-rozman --hard ");
   });
+});
+
+describe("fresh fixtures and the studio modes", () => {
+  const known = knownFixtures();
+
+  it("knows the ten fresh businesses; --fresh picks them all", () => {
+    expect(known.fresh).toHaveLength(10);
+    expect(known.fresh).toEqual(expect.arrayContaining(["atelje-bergant", "urarstvo-tic"]));
+    expect(fixtureKind("urarstvo-tic", known)).toBe("fresh");
+    expect(parseFixtureArgs(["--fresh", "--replay"], [...KNOWN, ...known.fresh], undefined, known.fresh)).toEqual({ ok: true, fixtures: known.fresh });
+    expect(parseFixtureArgs(["--fixtures", "urarstvo-tic,optika-jasna"], [...KNOWN, ...known.fresh])).toEqual({ ok: true, fixtures: ["urarstvo-tic", "optika-jasna"] });
+  });
+
+  it("a fresh fixture's base is the recorded fresh run, with the paid command to re-record it", () => {
+    expect(baseRecordings("fresh", "urarstvo-tic")).toMatch(/recordings-fresh10[\\/]urarstvo-tic$/);
+    expect(baseRecordings("twin", "salon-tina")).toMatch(/recordings-home-off[\\/]salon-tina$/);
+    expect(recordCommand("urarstvo-tic", "fresh")).toBe("pnpm eval --fresh --record-missing --recordings tools/eval/recordings-fresh10 --only urarstvo-tic --scope home --no-edits --no-judge --no-lighthouse");
+  });
+
+  it("every mode has its own output and recordings directories", () => {
+    const dirs = STUDIO_MODES.map((m) => modeDirs(m, "urarstvo-tic"));
+    expect(new Set(dirs.map((d) => d.out)).size).toBe(3);
+    expect(new Set(dirs.map((d) => d.recordings)).size).toBe(3);
+    expect(modeDirs("direct", "urarstvo-tic").out).toMatch(/eval[\\/]runs[\\/]studio-poc-direct$/);
+    expect(modeDirs("mockup", "urarstvo-tic").recordings).toMatch(/tools[\\/]eval[\\/]recordings-studio-mockup[\\/]urarstvo-tic$/);
+  });
+
+  it("replays a fresh fixture's recorded pipeline into a valid homepage, with no network", async () => {
+    const browser = await launchCheckBrowser();
+    try {
+      const fx = await replayedFixture("urarstvo-tic", "fresh", loadConfig(), browser, false);
+      expect(fx.kind).toBe("fresh");
+      expect(validateSite(fx.spec).ok).toBe(true);
+      expect(fx.spec.pages.find((p) => p.kind === "home")!.sections.length).toBeGreaterThan(3);
+      expect(fx.brief?.summary).toBeTruthy();
+      expect(fx.corpus).toBe(loadFixture("urarstvo-tic", FRESH_DIR).brief.description);
+      expect(fx.note).toContain("today's pipeline replayed");
+    } finally {
+      await browser.close();
+    }
+  }, 120_000);
 });

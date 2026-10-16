@@ -1,0 +1,62 @@
+{
+  "set": "today",
+  "reviewer": "claude",
+  "model": "claude-fable-5-1",
+  "pages": [
+    "atelje-bergant",
+    "kolesarski-servis-ovinek",
+    "optika-jasna",
+    "pasji-salon-kodra",
+    "pivovarna-rov",
+    "plesna-sola-takt",
+    "sirarna-pr-simnu",
+    "steklarstvo-vrhovnik",
+    "urarstvo-tic",
+    "vinarstvo-pinteric"
+  ],
+  "status": "ok",
+  "answer": {
+    "sameness": "Seven of ten desktops use the same two-column hero: eyebrow, 2-line headline, 3-line paragraph, filled button plus underlined link on the left, one rectangular photo on the right. The 'bordered card over photo' device repeats on pivovarna-rov, sirarna-pr-simnu and urarstvo-tic, with an identical olive-branch ornament on the last two. Serif display face on five pages, grotesk on the rest. Palette is uniformly muted dark green/burgundy/navy with one warm accent. Imagery is the same tabletop still-life stock crop (objects on wood). Every mobile ends with the same pin + call twin-button bar.",
+    "recurringIssues": [
+      "The framed card with olive-branch ornament is copy-pasted across three unrelated businesses (brewery, cheese dairy, watchmaker), exposing the template.",
+      "Desktop heroes leave large empty white areas left and under the image (vrhovnik, kodra, ovinek, bergant).",
+      "Stock-style object still lifes on wooden tables make unrelated trades look like one lifestyle brand.",
+      "The 'Ustvarjeno z UI' badge clutters the corner of almost every hero photo.",
+      "Eyebrows and text links are tiny, low-contrast grey on several pages; headline is the only hierarchy.",
+      "Centred logo headers (pivovarna-rov, steklarstvo-vrhovnik) push content below the fold and leave an empty band.",
+      "optika-jasna's unlabelled yellow form field floats under the paragraph and clashes with the palette."
+    ],
+    "overall": 3,
+    "variety": 2,
+    "best": [
+      {
+        "id": "optika-jasna",
+        "why": "Only hero with a bespoke composition: circular photo mask, teal and coral palette and tilted badge give it real brand personality."
+      },
+      {
+        "id": "vinarstvo-pinteric",
+        "why": "Full-bleed vineyard photo with an overlapping dark caption block feels editorial and specific to a winery; mobile stack holds together."
+      },
+      {
+        "id": "kolesarski-servis-ovinek",
+        "why": "Heavy uppercase headline and gritty drivetrain close-up feel like a workshop rather than a boutique; mobile hero is compact."
+      }
+    ],
+    "weakest": [
+      {
+        "id": "steklarstvo-vrhovnik",
+        "why": "Centred logo, isolated 'Domov' link and a half-empty white hero look unfinished; the next section title is cut off at the fold."
+      },
+      {
+        "id": "pasji-salon-kodra",
+        "why": "Generic brush-and-towel stock image with a stray green border and tiny nav; nothing says dog grooming and the mobile hero is mostly empty."
+      },
+      {
+        "id": "urarstvo-tic",
+        "why": "Near-identical to sirarna-pr-simnu including olive ornament and bordered card, just recoloured navy; right-hand photo is cramped."
+      }
+    ],
+    "oneChange": "Retire the two default hero recipes (two-column text/photo, and bordered card-on-photo with olive ornament) and require each page to start from a composition and image treatment that belongs to that trade, with at least one distinctive device (mask, crop, texture, type pairing) that could not be swapped onto another client.",
+    "summary": "Clean, legible and consistent, but this batch reads as one template shop, not ten clients. Most desktops are the same left-text/right-photo hero with the same button pairing; three pages reuse an identical framed card and olive-branch ornament. Palettes are all muted jewel tones with a warm accent, and photos are all tabletop still lifes. Optika Jasna, Vinarstvo Pinterič and Kolesarski servis Ovinek show the studio can design for a business; Steklarstvo Vrhovnik, Pasji salon Kodra and Urarstvo Tič show the template leaking through. Fix the empty white heroes, drop the AI badge from photos, and give each brand its own hero device. Solid 3, not yet a studio to be proud of."
+  }
+}

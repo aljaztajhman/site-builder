@@ -1,0 +1,431 @@
+{
+  "items": [
+    "atelje-bergant",
+    "kolesarski-servis-ovinek",
+    "optika-jasna",
+    "pasji-salon-kodra",
+    "pivovarna-rov",
+    "plesna-sola-takt",
+    "sirarna-pr-simnu",
+    "steklarstvo-vrhovnik",
+    "urarstvo-tic",
+    "vinarstvo-pinteric"
+  ],
+  "reviewers": {
+    "gemini": {
+      "model": "google/gemini-4-argon",
+      "scored": [
+        "atelje-bergant",
+        "kolesarski-servis-ovinek",
+        "optika-jasna",
+        "pasji-salon-kodra",
+        "pivovarna-rov",
+        "plesna-sola-takt",
+        "sirarna-pr-simnu",
+        "steklarstvo-vrhovnik",
+        "urarstvo-tic",
+        "vinarstvo-pinteric"
+      ],
+      "failed": [],
+      "skipped": [],
+      "vsOwner": null
+    },
+    "gpt": {
+      "model": "openai/gpt-6.1-sol",
+      "scored": [
+        "atelje-bergant",
+        "kolesarski-servis-ovinek",
+        "optika-jasna",
+        "pasji-salon-kodra",
+        "pivovarna-rov",
+        "plesna-sola-takt",
+        "sirarna-pr-simnu",
+        "steklarstvo-vrhovnik",
+        "urarstvo-tic",
+        "vinarstvo-pinteric"
+      ],
+      "failed": [],
+      "skipped": [],
+      "vsOwner": null
+    },
+    "claude": {
+      "model": "claude-fable-5-1",
+      "scored": [
+        "atelje-bergant",
+        "kolesarski-servis-ovinek",
+        "optika-jasna",
+        "pasji-salon-kodra",
+        "pivovarna-rov",
+        "plesna-sola-takt",
+        "sirarna-pr-simnu",
+        "steklarstvo-vrhovnik",
+        "urarstvo-tic",
+        "vinarstvo-pinteric"
+      ],
+      "failed": [],
+      "skipped": [],
+      "vsOwner": null
+    }
+  },
+  "reviewerPairs": [
+    {
+      "a": "gemini",
+      "b": "gpt",
+      "pairwise": {
+        "agreement": 0.5813953488372093,
+        "pairs": 43,
+        "agreed": 25,
+        "judgeTies": 2
+      },
+      "spearman": 0.31901840490797545,
+      "n": 10
+    },
+    {
+      "a": "gemini",
+      "b": "claude",
+      "pairwise": {
+        "agreement": 0.5581395348837209,
+        "pairs": 43,
+        "agreed": 24,
+        "judgeTies": 4
+      },
+      "spearman": 0.14551711260655806,
+      "n": 10
+    },
+    {
+      "a": "gpt",
+      "b": "claude",
+      "pairwise": {
+        "agreement": 0.686046511627907,
+        "pairs": 43,
+        "agreed": 29.5,
+        "judgeTies": 3
+      },
+      "spearman": 0.5665879065319175,
+      "n": 10
+    }
+  ],
+  "spentEur": 1.67327706,
+  "calls": 34,
+  "stoppedByBudget": false,
+  "rows": [
+    {
+      "itemId": "atelje-bergant",
+      "owner": null,
+      "scores": {
+        "gemini": 3.083333333333333,
+        "gpt": 3.083333333333333,
+        "claude": 2.75
+      },
+      "topFix": {
+        "gemini": "Replace the simplistic SVG house drawings with genuine architectural elevation drawings, CAD details, or move to a purely typographic layout.",
+        "gpt": "Merge the credentials and process sections into one concise section, showing the free consultation, site visit and pricing information only once.",
+        "claude": "Merge the 'Stara domačija' bullet list and the 'Od prvega pogovora' list into one section; the same three points currently appear twice in a row."
+      },
+      "blockers": {
+        "gemini": [
+          "Both viewports: The exact same bullet points ('Prvi pogovor je brezplačen' and 'Ogled parcele...') are repeated verbatim in two consecutive sections.",
+          "Both viewports, 'Kaj projektiram': The first two list items have descriptions in a second column while the remaining six are empty, looking unfinished."
+        ],
+        "gpt": [],
+        "claude": [
+          "Phone and desktop: list items 'Prvi pogovor je brezplačen' and 'Ogled parcele ali hiše na terenu' are repeated verbatim in the 'Stara domačija' and 'Od prvega pogovora' sections.",
+          "Desktop contact section: 'Načrtujete hišo ali prenovo?' heading is separated from its intro sentence by a ~250px empty band, and the layout falls apart against the map column."
+        ]
+      }
+    },
+    {
+      "itemId": "kolesarski-servis-ovinek",
+      "owner": null,
+      "scores": {
+        "gemini": 3.083333333333333,
+        "gpt": 2.6666666666666665,
+        "claude": 2.8333333333333335
+      },
+      "topFix": {
+        "gemini": "Populate the 'Cene izposoje in servisa' section with actual price rows or remove the orphaned heading.",
+        "gpt": "Rebuild the visit section as a compact opening-hours list alongside a tightly grouped map, address and directions button; retain only one address and one seasonal-hours note.",
+        "claude": "Collapse the seven identical hours bars into one line 'Pon–Ned 8.30–18.30' and remove the duplicate address block and duplicate seasonal note in 'Obiščite nas'."
+      },
+      "blockers": {
+        "gemini": [
+          "On both phone and desktop, the 'Cene izposoje in servisa' section has a heading and subtitle but is completely missing its content.",
+          "On both phone and desktop in the 'Obiščite nas' section, the seasonal note 'Od aprila do oktobra vsak dan, pozimi samo po dogovoru.' is printed twice in a row.",
+          "On both phone and desktop in the 'Obiščite nas' section, the street address 'Padlih borcev 9, 5220 Tolmin' is repeated twice right below the map.",
+          "On desktop below the map, the 'Navodila za pot' button is stretched into a tall empty square with a large gap above it."
+        ],
+        "gpt": [
+          "Phone and desktop, visit section: the address block and seasonal opening-hours note are each repeated."
+        ],
+        "claude": [
+          "Phone and desktop, 'Cene izposoje in servisa' section is a heading and one line with no prices or content.",
+          "Phone and desktop, 'Obiščite nas': address 'Padlih borcev 9, 5220 Tolmin' appears twice and the seasonal note is repeated twice in a row.",
+          "Desktop hero image is clipped at the right viewport edge and does not sit within the page grid.",
+          "Desktop 'Obiščite nas': large empty gap between the map and the address, and 'Navodila za pot' button is cut across the slice/misplaced far below the map."
+        ]
+      }
+    },
+    {
+      "itemId": "optika-jasna",
+      "owner": null,
+      "scores": {
+        "gemini": 3.5,
+        "gpt": 2.666666666666667,
+        "claude": 2.6666666666666665
+      },
+      "topFix": {
+        "gemini": "Fix the desktop layout in the 'Kaj vse vam nudimo' section so the trial frame illustration stays in its own column and does not overlap the text.",
+        "gpt": "Rebuild the services section with consistent heading sizes and clearly separated text and illustration columns; use compact stacked rows on phones.",
+        "claude": "Rebuild „Kaj vse vam nudimo"
+      },
+      "blockers": {
+        "gemini": [
+          "On desktop, the trial frame illustration in the 'Kaj vse vam nudimo' section overlaps and obscures the descriptive text next to 'Okvirji' and 'Očala po meri'."
+        ],
+        "gpt": [
+          "Desktop services section: the instrument illustration overlaps the service descriptions; give the text and image separate layout space."
+        ],
+        "claude": [
+          "Both viewports, services section: heading sizes cascade from huge to small (Kontaktne leče → Sončna očala → Očala za računalnik) with no descriptions, reading as a broken heading hierarchy.",
+          "Desktop, services section: descriptions on the right don't align with their headings on the left, so it's unclear which text belongs to which service.",
+          "Desktop, services section: the AI trial-frame picture is cropped at the left edge and butts into the description column.",
+          "Both viewports, ZZZS band: a full dark band holding a single sentence surrounded by empty space."
+        ]
+      }
+    },
+    {
+      "itemId": "pasji-salon-kodra",
+      "owner": null,
+      "scores": {
+        "gemini": 3.75,
+        "gpt": 2.6666666666666665,
+        "claude": 2.8333333333333335
+      },
+      "topFix": {
+        "gemini": "Redesign the working hours display so the orange time bars do not look like five identical clickable CTA buttons.",
+        "gpt": "Consolidate the hours-and-location section into one appointment note, one address and one directions action; remove the adjacent duplicates.",
+        "claude": "Crop or regenerate the hero illustration so no stray text fragment shows at the top, and let it fill the first screen beside the headline."
+      },
+      "blockers": {
+        "gemini": [
+          "Phone and desktop, working hours section: the sentence 'Delam po naročilu. Za sporočila sem dosegljiva tudi zvečer.' is printed twice in a row.",
+          "Phone and desktop, hero and services images: the hero illustration has clipped numbers at the top-right edge, and the spaniel illustration has a cut-off shape on the far right."
+        ],
+        "gpt": [
+          "Phone and desktop, hours-and-location section: the appointment-availability note appears twice consecutively.",
+          "Phone and desktop, location section: the address block is repeated above and below the map."
+        ],
+        "claude": [
+          "Phone and desktop hero: the illustration has a clipped text fragment visible at its top edge.",
+          "Desktop and phone services: the spaniel illustration is badly cropped, the dog cut off and a second dog fragment at the right edge.",
+          "Phone and desktop hours section: the sentence 'Delam po naročilu. Za sporočila sem dosegljiva tudi zvečer.' appears twice in different sizes.",
+          "Phone contact section: the address is repeated above and below the map, and the phone number is shown in the hero, contact block and CTA."
+        ]
+      }
+    },
+    {
+      "itemId": "pivovarna-rov",
+      "owner": null,
+      "scores": {
+        "gemini": 3.1666666666666665,
+        "gpt": 2.5,
+        "claude": 2.25
+      },
+      "topFix": {
+        "gemini": "Replace the blurry, low-resolution chain graphic in the hero with a sharp, well-proportioned mood image of the brewery or remove it completely for a purely typographic hero.",
+        "gpt": "Replace the pixelated chain with a sharp, substantial brewery, beer or interior image; use a wide mobile crop and a properly filled desktop hero column.",
+        "claude": "Replace the blurry chain picture with a sharp, wide photo of the taproom or the four beers filling the hero's right half (desktop) and sitting right under the headline (phone)."
+      },
+      "blockers": {
+        "gemini": [
+          "Both viewports, hero section: the generated picture is a blurry, pixelated, nonsensical crop of a chain.",
+          "Both viewports, Obratovalni čas section: the sentence 'Ogled pivovarne za skupine po dogovoru.' is repeated twice in a row."
+        ],
+        "gpt": [
+          "Phone and desktop, opening-hours section: the group-tour notice appears twice consecutively.",
+          "Phone and desktop, contact section: the full address block is repeated before and after the map."
+        ],
+        "claude": [
+          "Phone and desktop hero: the generated picture is a pixelated, unrecognisable chain crop that looks broken.",
+          "Phone and desktop Obratovalni čas: the line 'Ogled pivovarne za skupine po dogovoru.' is printed twice in different sizes.",
+          "Phone and desktop Kontakt: the address 'Rudarska cesta 3, 1420 Trbovlje' appears twice within the same section.",
+          "Phone and desktop: the beer ticker and the service list both repeat 'Kozarec piva 0,5 l'."
+        ]
+      }
+    },
+    {
+      "itemId": "plesna-sola-takt",
+      "owner": null,
+      "scores": {
+        "gemini": 3.166666666666667,
+        "gpt": 2.333333333333333,
+        "claude": 2.5
+      },
+      "topFix": {
+        "gemini": "Fix the desktop instructors section by removing the tall vertical gap between the names ('Eva Pečovnik', 'Rok Pečovnik') and their subtitles ('učiteljica plesa').",
+        "gpt": "Remove the excessive desktop section heights: place instructor roles directly beneath their names and keep the registration button immediately below its introductory text.",
+        "claude": "Merge the orange address banner, the team section and the 'Prijavite se na tečaj' block into one contact section so phone and address appear once."
+      },
+      "blockers": {
+        "gemini": [
+          "Desktop 'Eva Pečovnik / Rok Pečovnik' section has a broken layout with a massive empty gap separating the headings from their subtitles.",
+          "Desktop 'Tečaji' header has horizontal decorative lines cutting straight through the small image on the right."
+        ],
+        "gpt": [
+          "Phone and desktop: the orange location section and closing registration section repeat the same phone-and-address contact block.",
+          "Desktop contact section: the full address is repeated immediately above and below the map."
+        ],
+        "claude": [
+          "Desktop team section: 'Eva Pečovnik' and 'Rok Pečovnik' sit with ~250px of empty space and a stray double vertical line between them, layout looks broken.",
+          "Desktop address section: the generated picture at right shows a visible rectangular patch over the footprint, a broken image.",
+          "Phone and desktop: address and phone number are repeated in three separate blocks (orange banner, contact section, footer).",
+          "Phone: 'Tečaji' section ends with a small square footprint image floating alone on the left, leaving a dead band of empty space."
+        ]
+      }
+    },
+    {
+      "itemId": "sirarna-pr-simnu",
+      "owner": null,
+      "scores": {
+        "gemini": 2.5,
+        "gpt": 2.583333333333333,
+        "claude": 3
+      },
+      "topFix": {
+        "gemini": "Populate the empty 'Iz naše trgovinice' section with actual product cards or a structured list of the dairy products mentioned in the hero.",
+        "gpt": "Replace the visibly soft raster illustrations with crisp, consistently styled artwork; reduce the phone hero image height so the business introduction appears sooner.",
+        "claude": "Collapse the opening hours into a compact Mon–Sat 8.00–18.00 / Sun closed list, especially on phone where the seven bars and empty grid lines take two screens."
+      },
+      "blockers": {
+        "gemini": [
+          "Both phone and desktop, 'Iz naše trgovinice' section: the section contains only a heading and a one-line intro with the actual product listing completely missing.",
+          "Both phone and desktop, 'Kdaj nas obiščete' section: the sentence 'Ob sobotah dopoldne smo tudi na tržnici v Radovljici.' is printed twice in a row.",
+          "Both phone and desktop, contact section: the street address 'Lancovo 41, 4240 Radovljica' (and on desktop a second directions button) is repeated twice within the same block."
+        ],
+        "gpt": [
+          "Phone and desktop, opening-hours section: the Saturday market note appears twice consecutively."
+        ],
+        "claude": [
+          "Phone and desktop, opening hours: the sentence 'Ob sobotah dopoldne smo tudi na tržnici v Radovljici.' is printed twice, in two sizes.",
+          "Phone and desktop, contact section: the address Lancovo 41 / 4240 Radovljica is repeated in the contact block and again under the map; the map itself is an empty green box with a single dot.",
+          "Phone, opening hours: grey timeline grid lines run through the day labels and the 'Nedelja zaprto' row with no hour markers, looking like a rendering leftover."
+        ]
+      }
+    },
+    {
+      "itemId": "steklarstvo-vrhovnik",
+      "owner": null,
+      "scores": {
+        "gemini": 2.5,
+        "gpt": 2.5,
+        "claude": 2.5
+      },
+      "topFix": {
+        "gemini": "Replace the duplicated image in the 'Steklarska obrt' section with a different photo or remove it altogether.",
+        "gpt": "Rebalance the hero: use a shorter landscape image on phone, reduce headline sizes on both viewports, and bring the service summary and desktop primary action into the first screen.",
+        "claude": "Shrink the hero headline (and the phone hero photo height) so address, headline, intro and buttons all fit the first screen on both viewports."
+      },
+      "blockers": {
+        "gemini": [
+          "Phone and desktop: The exact same AI-generated glass photo from the hero is repeated in the 'Steklarska obrt iz Ajdovščine od leta 1988' section.",
+          "Phone and desktop: The opening hours block ('Pon–pet 7.00–15.00') is duplicated verbatim in both the 'Kdaj je delavnica odprta' section and the contact section."
+        ],
+        "gpt": [
+          "Phone and desktop: the about section repeats the hero photograph.",
+          "Phone and desktop: the opening-hours block is repeated in the lower contact area."
+        ],
+        "claude": [
+          "Phone and desktop: the same AI photo is used both in the hero and in the 'Steklarska obrt' section.",
+          "Phone and desktop: opening hours and the 'Delavnica je odprta…' note appear twice, in 'Kdaj je delavnica odprta' and again in the contact block."
+        ]
+      }
+    },
+    {
+      "itemId": "urarstvo-tic",
+      "owner": null,
+      "scores": {
+        "gemini": 3.416666666666667,
+        "gpt": 3,
+        "claude": 3.083333333333333
+      },
+      "topFix": {
+        "gemini": "Crop the top edge of the hero illustration or regenerate it to remove the Hallucinated 'Domov / O nas / Kontakt' text.",
+        "gpt": "Replace the screenshot-like hero asset with clean watchmaking artwork or workshop photography, retaining the generation label where applicable but removing embedded navigation.",
+        "claude": "Replace or re-crop the hero image so no fake menu text shows; on phone move it above or beside the headline so the first screen opens with the watch movement, not a button."
+      },
+      "blockers": {
+        "gemini": [
+          "Both phone and desktop hero section: the generated watch illustration has clipped navigation text ('Domov', 'O nas', 'Kon...') baked into its top-right edge."
+        ],
+        "gpt": [
+          "Phone and desktop hero: the illustration contains clipped navigation text from another page along its top edge."
+        ],
+        "claude": [
+          "Phone and desktop hero: the generated picture has nonsensical navigation text (\"Domov\", \"O nas\", \"Kon…\") rendered inside the image along its top edge.",
+          "Phone and desktop contact section: the map box is essentially empty (dark rectangle with a lone pin and a stray strip), reading as a broken placeholder.",
+          "Phone and desktop contact section: the address Mestni trg 4, 5280 Idrija appears twice, once under \"Naslov\" and again under the map."
+        ]
+      }
+    },
+    {
+      "itemId": "vinarstvo-pinteric",
+      "owner": null,
+      "scores": {
+        "gemini": 3.583333333333333,
+        "gpt": 2.8333333333333335,
+        "claude": 2.8333333333333335
+      },
+      "topFix": {
+        "gemini": "Remove the standalone 'Kdaj vas pričakujemo' section since the exact same opening hours are already shown in the contact block right below it.",
+        "gpt": "Reduce the hero headline size and vertical spacing on both screens; on desktop, bring the call button directly beneath the introduction and fully inside the first viewport.",
+        "claude": "Reduce the hero headline size so the photo and first CTA fit the first screen on both viewports, and show the second (tasting table) photo on phone too."
+      },
+      "blockers": {
+        "gemini": [
+          "Phone and desktop, lower page: the opening hours block is repeated verbatim in both 'Kdaj vas pričakujemo' and the contact section immediately below."
+        ],
+        "gpt": [
+          "Phone and desktop: the opening-hours block, including the weekday arrangement note, is repeated in the contact area after its standalone section."
+        ],
+        "claude": [
+          "Phone and desktop: the Sob–ned 11.00–19.00 hours block is repeated twice ('Kdaj vas pričakujemo' and again in the contact row).",
+          "Phone: in 'Štiri generacije vinogradnikov' the team row only shows Gregor Pinterič while the copy names two brothers; the list looks truncated with no second row."
+        ]
+      }
+    }
+  ],
+  "filter": {
+    "passed": [],
+    "held": [
+      "atelje-bergant",
+      "kolesarski-servis-ovinek",
+      "optika-jasna",
+      "pasji-salon-kodra",
+      "pivovarna-rov",
+      "plesna-sola-takt",
+      "sirarna-pr-simnu",
+      "steklarstvo-vrhovnik",
+      "urarstvo-tic",
+      "vinarstvo-pinteric"
+    ],
+    "unreviewed": []
+  },
+  "agreedFilter": {
+    "rule": "two-of-three",
+    "needed": 2,
+    "passed": [],
+    "held": [
+      "atelje-bergant",
+      "kolesarski-servis-ovinek",
+      "optika-jasna",
+      "pasji-salon-kodra",
+      "pivovarna-rov",
+      "plesna-sola-takt",
+      "sirarna-pr-simnu",
+      "steklarstvo-vrhovnik",
+      "urarstvo-tic",
+      "vinarstvo-pinteric"
+    ],
+    "unreviewed": []
+  }
+}

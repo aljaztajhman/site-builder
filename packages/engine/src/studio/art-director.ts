@@ -32,8 +32,11 @@ export const ArtDirection = z.object({
 });
 export type ArtDirection = z.infer<typeof ArtDirection>;
 
-/** The answer's JSON Schema (structured output): the pairing is one of the font pairs a page can set. */
-export function artDirectorSchema(): Record<string, unknown> {
+/**
+ * The answer's JSON Schema (structured output): the pairing is one of the font pairs a page can set. `direct`: no image
+ * model reads the image prompt, so it is only the first screen in a sentence or two (the schema's shape is the same).
+ */
+export function artDirectorSchema(direct = false): Record<string, unknown> {
   const str = { type: "string" };
   return {
     type: "object",
@@ -58,14 +61,39 @@ export function artDirectorSchema(): Record<string, unknown> {
         required: ["headline", "lead"],
         properties: { headline: { ...str, description: "The hero's headline in Slovene, at most 70 characters." }, lead: { ...str, description: "The hero's lead in Slovene, at most 220 characters." } },
       },
-      imagePrompt: { ...str, description: "The complete prompt for the image model, in English (the required texts are appended by code)." },
+      imagePrompt: direct
+        ? { ...str, description: "No image model reads this: the first screen in one or two English sentences, for the composer (at least 40 characters)." }
+        : { ...str, description: "The complete prompt for the image model, in English (the required texts are appended by code)." },
     },
   };
 }
 
 const PAIRS = FONT_PAIRS.map((p) => `- ${p.id}: ${p.label} (${p.heading.fallback === "serif" ? "serif" : "sans"} headings, ${p.body.fallback === "serif" ? "serif" : "sans"} text)`).join("\n");
 
-const SYSTEM = `You are the art director of a studio that designs one-of-a-kind websites for small Slovenian businesses. An image model (GPT Image 2.5) paints the homepage as one desktop mockup from your prompt; a second designer then rebuilds that mockup in our layout system, with the client's real photos and facts. So it must be buildable, and it must be this business and no other.
+/**
+ * What differs when there is no image model (studio.mode "direct"): the composer builds the page from the direction's
+ * words, so the direction carries the whole design and decorative art comes only from the layout system's own drawings.
+ */
+const MODE_TEXT = {
+  mockup: {
+    intro: "An image model (GPT Image 2.5) paints the homepage as one desktop mockup from your prompt; a second designer then rebuilds that mockup in our layout system, with the client's real photos and facts.",
+    colour: "the rebuild enforces these; a mockup that breaks them can't be rebuilt as painted",
+    art: "- Drawn, printed or painted decorative art (botanical lines, an ornament, a pattern, an object drawn in ink): it is cut out of the mockup and shown as a labelled AI picture, so paint each piece on a plain ground, apart from any text, with no letters, people, hands, buildings, signs or logos in it, and never as a stand-in for the client's own work.",
+    prompt:
+      "The image prompt (English): one flat full-page screenshot of the desktop homepage at the size given, no browser window, no device frame, no perspective; describe colours by hex, type by character (the pairing's faces by name), and the layout section by section precisely enough to rebuild. Use the attached photographs as the website's photos (recognisable, cropped as a designer would); never invent other photos. Do not list the page's texts: code appends them verbatim.",
+  },
+  direct: {
+    intro: "There is no image model: a second designer composes the homepage directly in our layout system from your direction alone, with the client's real photos and facts. Your words are all it has to go on, so the composition, palette, type and imagery must be precise enough to build without a picture.",
+    colour: "code enforces these",
+    art: "- No painted or generated pictures: imagery is the client's own photos, type, colour fields and the layout system's simple line drawings and ornaments.",
+    prompt:
+      "The image prompt: there is no image model. Write one or two sentences in English that sum up the first screen for the composer (what fills it, the scale of the type, the colour field); the composition carries the rest, section by section, with columns, sizes and grounds.",
+  },
+} as const;
+
+const system = (mode: keyof typeof MODE_TEXT): string => {
+  const t = MODE_TEXT[mode];
+  return `You are the art director of a studio that designs one-of-a-kind websites for small Slovenian businesses. ${t.intro} So it must be buildable, and it must be this business and no other.
 
 The owner's taste: bold, characterful, immersive; unmistakably this business; never a template, never a safe default. Find the idea in what this business really is and does: its work, its photos, its words, its place.
 
@@ -83,21 +111,23 @@ Banned on every page (hard rules):
 
 Trade props: number plates, price tags, receipts, dockets, tickets, stamps, enamel signs and the like are at most one small accent on the whole page, and never the idea.
 
-Colour and contrast (the rebuild enforces these; a mockup that breaks them can't be rebuilt as painted):
+Colour and contrast (${t.colour}):
 - The page ground is pure white #ffffff, a light tint (very light, never cream or beige), or a deep near-black or deep dark colour. A saturated colour (a red, a rust, a green, a blue) is a full-width section field or band, not the page ground.
 - Body text on its ground at least 4.5:1; large headings at least 3:1. Any colour used as text on the inverse or band field must reach that on it too. Prefer one strong colour plus ink and paper over many mid tones.
 
 What the layout system can build (stay inside it):
 - Full-width sections stacked top to bottom. Each section is a 12-column grid with 1 to 8 rows on desktop; on phones the same elements stack in one column (two small ones may pair up).
 - Per section: a colour field behind the whole section or part of its columns; large display type up to about 12vw (one h1 on the page); running text spanning 4 to 8 columns; lists; the phone as a large numeral; opening hours as a table, a compact list or a week strip; the address and a simple schematic map; one action button; a strip or ribbon of short words; the client's photos cropped, masked (arch, circle, cut corners) and bled to the page edge; one photo as a section ground under a flat colour scrim; small overlaps of a photo and type, never text over text; rules and dividers; a simple line drawing or ornament.
-- Drawn, printed or painted decorative art (botanical lines, an ornament, a pattern, an object drawn in ink): it is cut out of the mockup and shown as a labelled AI picture, so paint each piece on a plain ground, apart from any text, with no letters, people, hands, buildings, signs or logos in it, and never as a stand-in for the client's own work.
+${t.art}
 - It cannot build 3D, video, curved text, hand lettering, collages of cut-out photos, text inside pictures, or a single drawn line running through several sections.
 - Fonts: only these pairings exist (no condensed or poster faces such as Anton, Bebas or Oswald; never ask for one). Pick the pairing and describe its use:
 ${PAIRS}
 
-The image prompt (English): one flat full-page screenshot of the desktop homepage at the size given, no browser window, no device frame, no perspective; describe colours by hex, type by character (the pairing's faces by name), and the layout section by section precisely enough to rebuild. Use the attached photographs as the website's photos (recognisable, cropped as a designer would); never invent other photos. Do not list the page's texts: code appends them verbatim.
+${t.prompt}
 
 The hero copy (Slovene, formal "vi"): a headline of at most 70 characters and a lead of at most 220, natural and specific to this business. No numbers of any kind unless they appear in the facts given, no superlatives, no filler ("vrhunski", "kakovost na prvem mestu", "dobrodošli"), no English, no em dash.`;
+};
+const SYSTEM = { mockup: system("mockup"), direct: system("direct") };
 
 export interface ArtDirectorInput {
   spec: SiteSpec;
@@ -106,8 +136,13 @@ export interface ArtDirectorInput {
   photos: { id: string; alt: string; jpegBase64: string }[];
   /** The logo as a base64 PNG, when the client gave one. */
   logoPngBase64?: string;
-  /** The mockup's size in pixels. */
-  size: { width: number; height: number };
+  /** The mockup's size in pixels (mockup mode). */
+  size?: { width: number; height: number };
+  /**
+   * studio.mode "direct": no image model; the direction is written for a composer who works from its words alone
+   * (stage artDirectorDirect).
+   */
+  direct?: boolean;
 }
 
 const has = (v: unknown): boolean => v !== undefined && v !== null && !(typeof v === "object" && "$placeholder" in (v as object));
@@ -129,7 +164,7 @@ export function artDirectorRequest(input: ArtDirectorInput): ModelRequest & { sc
     offerings.length ? `Offerings:\n${offerings.join("\n")}` : "",
     photos.length ? `Photos (attached in this order):\n${photos.map((p) => `- ${p.id}: ${p.alt || "no description"}`).join("\n")}` : "The business has no photographs: no photos on the page at all.",
     copy.length ? `Today's copy by section:\n${copy.join("\n")}` : "",
-    `Mockup size: ${input.size.width}×${input.size.height} px.`,
+    input.size && !input.direct ? `Mockup size: ${input.size.width}×${input.size.height} px.` : "",
   ]
     .filter((x) => x !== "")
     .join("\n\n");
@@ -138,7 +173,8 @@ export function artDirectorRequest(input: ArtDirectorInput): ModelRequest & { sc
     ...(input.logoPngBase64 ? [{ type: "image", source: { type: "base64", media_type: "image/png", data: input.logoPngBase64 } } satisfies Anthropic.ImageBlockParam] : []),
     { type: "text", text },
   ];
-  return { stage: "artDirector", system: [SYSTEM], cache: false, messages: [{ role: "user", content }], schema: artDirectorSchema() };
+  const direct = input.direct === true;
+  return { stage: direct ? "artDirectorDirect" : "artDirector", system: [SYSTEM[direct ? "direct" : "mockup"]], cache: false, messages: [{ role: "user", content }], schema: artDirectorSchema(direct) };
 }
 
 /** The palette as roles → hex (valid #rrggbb only, the last one per role). */

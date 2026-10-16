@@ -1,5 +1,5 @@
 /**
- * pnpm studio:poc --fixture <id> | --fixtures a,b,c | --all  [--record | --replay | --bases-only] [--lenient-bases] [--picker] [--max-eur 2.00] [--max-fal 0.60]
+ * pnpm studio:poc --fixture <id> | --fixtures a,b,c | --fresh | --all  [--record | --replay | --bases-only] [--lenient-bases] [--mode mockup|picker|direct] [--picker] [--max-eur 2.00] [--max-fal 0.60]
  *
  * Design studio 0.5 / 0.5b (docs/plans/studio-0.5.md) on an eval fixture, exactly as the worker runs it for a trial
  * account. config studio.mode "mockup" (default) runs the mockup path (art director, GPT Image mockup, rebuild) and falls
@@ -7,6 +7,14 @@
  *
  * Fixtures (studio-fixtures.ts): --all is the original five (pekarna-kvas, avtoservis-mrak, instalacije-rebernik with
  * the golden spec as today's site; cvetlicarna-zvoncek, tattoo-crnilo with a hand-made stand-in base, studio-edge.ts).
+ * --fresh runs the ten fresh businesses (tools/eval/fresh, also nameable with --fixture/--fixtures): their base is today's
+ * pipeline replayed for free from tools/eval/recordings-fresh10/<id>/ (the recorded --fresh eval run, default config). The
+ * brief prompt has changed since they were recorded (2026-10-15), so their bases are always replayed leniently (--lenient-bases
+ * behaviour: the recorded answers through today's code; the changed-request count is in the log line).
+ * --mode mockup|picker|direct overrides config studio.mode for the run ("direct": Fable composes from the art direction, no
+ * mockup image; the config schema accepts it once the engine unit has merged) and gives the mode its own output directory,
+ * eval/runs/studio-poc-<mode>/ (shots, specs, cost-log.jsonl), and its own recordings, tools/eval/recordings-studio-<mode>/<id>/.
+ * Without --mode the older layout stays (eval/runs/studio-poc; --picker records in tools/eval/recordings-studio).
  * Any other golden (tools/eval/fixtures: the golden spec and its recorded brief), twin (tools/eval/twins) or hard fixture
  * (tools/eval/hard) can be named with --fixture or --fixtures. A twin's or hard fixture's base is today's pipeline,
  * replayed for free from tools/eval/recordings-home-off/<id>/; one without recordings, or whose requests changed since they
@@ -56,23 +64,33 @@ import { validateSite, type SiteSpec } from "@sb/spec";
 import { writeSiteFiles } from "./kitchen-sink.ts";
 import { shoot } from "./okus-items.ts";
 import { CaptureImageTransport, CaptureTransport, type PromptsFile } from "./studio-capture.ts";
-import { fileFixture, fixtureKind, knownFixtures, parseFixtureArgs, replayedFixture, type StudioFixture } from "./studio-fixtures.ts";
+import { STUDIO_MODES, fileFixture, fixtureKind, knownFixtures, modeDirs, parseFixtureArgs, replayedFixture, type StudioFixture, type StudioPocMode } from "./studio-fixtures.ts";
 
 const args = process.argv.slice(2);
 const val = (flag: string) => (args.includes(flag) ? args[args.indexOf(flag) + 1] : undefined);
 const replay = args.includes("--replay");
 const basesOnly = args.includes("--bases-only");
-const pickerOnly = args.includes("--picker");
+const modeArg = val("--mode");
+if (modeArg !== undefined && !(STUDIO_MODES as readonly string[]).includes(modeArg)) {
+  console.error(`--mode needs one of ${STUDIO_MODES.join(", ")}, got "${modeArg}"`);
+  process.exit(1);
+}
+if (modeArg !== undefined && args.includes("--picker") && modeArg !== "picker") {
+  console.error(`--picker means --mode picker; it conflicts with --mode ${modeArg}`);
+  process.exit(1);
+}
+const mode: StudioPocMode = (modeArg as StudioPocMode | undefined) ?? (args.includes("--picker") ? "picker" : "mockup");
+const pickerOnly = mode === "picker";
 // Twins and hard fixtures: replay recordings whose requests changed since they were recorded (the recorded answers, today's code).
 const lenient = args.includes("--lenient-bases");
 const maxEur = Number(val("--max-eur") ?? 2.0);
 const maxFal = Number(val("--max-fal") ?? 0.6);
 const known = knownFixtures();
 const KNOWN = [...known.golden, ...known.twins, ...known.hard, ...known.edge];
-const parsed = parseFixtureArgs(args, KNOWN);
+const parsed = parseFixtureArgs(args, [...KNOWN, ...known.fresh], undefined, known.fresh);
 if (!parsed.ok || !Number.isFinite(maxEur) || !Number.isFinite(maxFal)) {
   console.error(
-    `${parsed.ok ? "" : `${parsed.error}\n`}Usage: studio:poc --fixture <id> | --fixtures a,b,c | --all [--record | --replay | --bases-only] [--lenient-bases] [--picker] [--max-eur 2.00] [--max-fal 0.60]\n--all: the original five\ngoldens: ${known.golden.join(", ")}\ntwins: ${known.twins.join(", ")}\nhard: ${known.hard.join(", ")}\nedge: ${known.edge.join(", ")}`,
+    `${parsed.ok ? "" : `${parsed.error}\n`}Usage: studio:poc --fixture <id> | --fixtures a,b,c | --fresh | --all [--record | --replay | --bases-only] [--lenient-bases] [--mode mockup|picker|direct] [--picker] [--max-eur 2.00] [--max-fal 0.60]\n--all: the original five; --fresh: the ten fresh businesses\ngoldens: ${known.golden.join(", ")}\ntwins: ${known.twins.join(", ")}\nhard: ${known.hard.join(", ")}\nedge: ${known.edge.join(", ")}\nfresh: ${known.fresh.join(", ")}`,
   );
   process.exit(1);
 }
@@ -81,17 +99,19 @@ if (!replay && !basesOnly && !process.env.ANTHROPIC_API_KEY) {
   console.error("ANTHROPIC_API_KEY is not set. Use --replay to run on the recorded answers, or --bases-only.");
   process.exit(2);
 }
-if (!replay && !basesOnly && !pickerOnly && !process.env.FAL_KEY) {
-  console.error("FAL_KEY is not set (the mockup image). Use --replay, or --picker for the picker only.");
+if (!replay && !basesOnly && mode === "mockup" && !process.env.FAL_KEY) {
+  console.error("FAL_KEY is not set (the mockup image). Use --replay, or --mode picker / --mode direct (no mockup image).");
   process.exit(2);
 }
 
 export const STUDIO_RECORDINGS = path.join(repoRoot, "tools/eval/recordings-studio");
 export const MOCKUP_RECORDINGS = path.join(repoRoot, "tools/eval/recordings-studio-mockup");
-const out = path.join(repoRoot, "eval/runs/studio-poc");
+// --mode gives each mode its own output and recordings directories; without it the older layout stays.
+const out = modeArg !== undefined ? modeDirs(mode, "").out : path.join(repoRoot, "eval/runs/studio-poc");
 const LOG = path.join(out, "cost-log.jsonl");
 const base = loadConfig();
-const config = pickerOnly ? { ...base, studio: { ...base.studio, mode: "picker" as const } } : base;
+// The schema's mode enum gains "direct" with the engine unit; the string is passed through, typed loosely until then.
+const config = mode === base.studio.mode ? base : ({ ...base, studio: { ...base.studio, mode } } as typeof base);
 
 interface Row {
   provider: "anthropic" | "fal";
@@ -156,7 +176,7 @@ try {
     console.log(`${id} (${kind}):`);
     let fx: StudioFixture;
     try {
-      fx = kind === "twin" || kind === "hard" ? await replayedFixture(id, kind, config, browser, !lenient) : fileFixture(id, config);
+      fx = kind === "twin" || kind === "hard" || kind === "fresh" ? await replayedFixture(id, kind, base, browser, !lenient && kind !== "fresh") : fileFixture(id, config);
       const v = validateSite(fx.spec);
       if (!v.ok) throw new Error(`today's spec does not validate: ${v.issues.slice(0, 4).map((i) => `${i.path} ${i.message}`).join("; ")}`);
     } catch (e) {
@@ -172,7 +192,7 @@ try {
       continue;
     }
 
-    const dir = path.join(pickerOnly ? STUDIO_RECORDINGS : MOCKUP_RECORDINGS, id);
+    const dir = modeArg !== undefined ? modeDirs(mode, id).recordings : path.join(pickerOnly ? STUDIO_RECORDINGS : MOCKUP_RECORDINGS, id);
     // Recording keeps what is still valid: a call whose request is unchanged (same hash) is answered from the recording
     // for free, and a mockup whose prompt is unchanged is reused, so a re-run after a fix pays only for what changed.
     let recorder: RecordMissingTransport | null = null;
@@ -192,7 +212,8 @@ try {
       if (spent) appendFileSync(LOG, `${JSON.stringify({ at: new Date().toISOString(), provider, fixture: id, stage: c.stage, model: c.model, usage: c.usage, costEur: c.costEur, seconds: c.durationMs / 1000, ok: c.ok })}\n`);
       console.log(`  ${c.stage} ${c.model}: €${c.costEur.toFixed(4)}${spent ? "" : " (from the recording, not spent)"}`);
     };
-    const images = new MockupImageTransport(dir, replay ? null : new FalImageTransport());
+    // fal only where a mockup is painted: the direct and picker paths never call it, and need no FAL_KEY.
+    const images = new MockupImageTransport(dir, replay || mode !== "mockup" ? null : new FalImageTransport());
     const imageCapture = new CaptureImageTransport(images);
     // This tool's caps stand in for the daily cap: a call whose estimate would take the logged total past them is refused
     // (SpendCapError) before it is sent, and the studio falls back.

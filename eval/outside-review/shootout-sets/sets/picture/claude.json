@@ -1,0 +1,62 @@
+{
+  "set": "picture",
+  "reviewer": "claude",
+  "model": "claude-fable-5-1",
+  "pages": [
+    "atelje-bergant",
+    "kolesarski-servis-ovinek",
+    "optika-jasna",
+    "pasji-salon-kodra",
+    "pivovarna-rov",
+    "plesna-sola-takt",
+    "sirarna-pr-simnu",
+    "steklarstvo-vrhovnik",
+    "urarstvo-tic",
+    "vinarstvo-pinteric"
+  ],
+  "status": "ok",
+  "answer": {
+    "sameness": "Every page is the same skeleton: thin top bar (wordmark left, 'Domov' + small CTA pill right), then a split hero with a 3–4 line headline top-left, a short grey paragraph, one small rectangular button, and an illustration or photo on the right. Type is two voices only: a grotesque bold (Ovinek, Jasna, Kodra, Rov, Takt, Šimnu, Vrhovnik) or a serif (Bergant, Tič, Pinterič), always at the same headline size and leading. Dark navy/black heroes repeat on four pages (Ovinek, Rov, Takt, Tič), each with a thin-line or glowing illustration on black. A 'Ustvarjeno z UI' tag sits on every image. Mobile heroes stack identically with the same Klic / Navodila za pot footer bar on all ten.",
+    "recurringIssues": [
+      "AI-generated imagery stamped with a visible 'Ustvarjeno z UI' badge on every page undermines credibility and cheapens the whole set.",
+      "Four black-background heroes with neon/thin-line drawings (Ovinek, Rov, Takt, Tič) are interchangeable in mood.",
+      "Hero bottoms are cut off mid-section on desktop (Bergant, Rov, Vrhovnik, Pinterič) showing sloppy fold management.",
+      "Right-hand image column often floats with dead space around a small isolated graphic (Rov chain, Kodra dog, Bergant house).",
+      "Small, low-emphasis CTA buttons that barely read as primary actions, especially on the dark pages.",
+      "Pinterič stacks two photos awkwardly, overlapping and clipped at the fold.",
+      "Mobile heroes push the image below the fold so the first screen is mostly text with a bare button."
+    ],
+    "overall": 3,
+    "variety": 2,
+    "best": [
+      {
+        "id": "sirarna-pr-simnu",
+        "why": "Bold yellow block with a confident cheese illustration gives it a distinct, warm identity that reads as its own brand."
+      },
+      {
+        "id": "optika-jasna",
+        "why": "Clean white hero with a strong red/green tile pair below gives real structure and a crisp, clinical optician feel."
+      },
+      {
+        "id": "urarstvo-tic",
+        "why": "Serif headline against the detailed watch-movement drawing feels crafted and specific to a traditional watchmaker."
+      }
+    ],
+    "weakest": [
+      {
+        "id": "pivovarna-rov",
+        "why": "A lone blurry glowing chain on black is a weak, mismatched image for a brewery and leaves a large empty field."
+      },
+      {
+        "id": "vinarstvo-pinteric",
+        "why": "Two overlapping photos clipped at the fold and a lilac background feel unresolved and cluttered."
+      },
+      {
+        "id": "pasji-salon-kodra",
+        "why": "Generic stock-style dog drawing, a visible second one cropped below, and dead space make it feel like placeholder art."
+      }
+    ],
+    "oneChange": "Break the single split-hero template: give each business a different hero composition and real photography of the actual place or people, and remove the AI-generated placeholder art with its 'Ustvarjeno z UI' badges.",
+    "summary": "Taken together, the ten homepages read as one template dressed in ten colours. The grid, headline size, button style, nav bar and mobile footer are identical everywhere, and four pages share the same black-with-neon-drawing look. Typography is clean and the Slovene headlines are given room, which keeps the set above average, and Šimnu, Jasna and Tič show genuine character. But the AI-generated illustrations, each stamped with a visible badge, make the pages feel unfinished and cheap, and several heroes are clipped at the fold or leave large empty areas. To become a studio owners are proud to hire, vary the hero structure per business and replace placeholder art with real, specific imagery."
+  }
+}

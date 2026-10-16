@@ -66,9 +66,11 @@ function isPortrait(s: Section, at: string): boolean {
  * assets the page doesn't show yet (one the site doesn't use anywhere first, the owner's photos before generated ones),
  * provided the swap leaves the spec as valid as it was (a generated picture only where one may stand); a portrait is
  * never swapped. Without one, the later section drops the image where its schema and variant allow none; otherwise it
- * stays and the returned line says so. Returns what was repaired (and what was left).
+ * stays and the returned line says so. With `opts.composedEntries` (the studio's freshly built homepage) a composed
+ * section's image element or photo layer that can neither swap nor lose its image goes as a whole (never a portrait).
+ * Returns what was repaired (and what was left).
  */
-export function repairRepeatedImages(spec: SiteSpec): string[] {
+export function repairRepeatedImages(spec: SiteSpec, opts: { composedEntries?: boolean } = {}): string[] {
   const log: string[] = [];
   const siteUsed = new Set<string>();
   walkStrings(spec.pages, (v) => siteUsed.add(v));
@@ -98,12 +100,18 @@ export function repairRepeatedImages(spec: SiteSpec): string[] {
       }
       if (done) continue;
       const snapshot = structuredClone(section.props);
-      removeAt(section.props, u.at);
-      if (noNewIssues(before, issueKeys(spec))) {
-        log.push(`${where}: ${u.image} is already shown higher on the page; dropped it here (no other image fits)`);
-        continue;
+      // The image alone, else (opts.composedEntries) the composed element or background layer that shows it.
+      const holder = opts.composedEntries && section.type === "composed" && !isPortrait(section, u.at) ? /^\/(elements|background)\/\d+/.exec(u.at)?.[0] : undefined;
+      for (const at of [u.at, ...(holder && holder !== u.at ? [holder] : [])]) {
+        removeAt(section.props, at);
+        if (noNewIssues(before, issueKeys(spec))) {
+          log.push(`${where}: ${u.image} is already shown higher on the page; dropped ${at === u.at ? "it" : `its ${at.split("/")[1] === "elements" ? "element" : "layer"}`} here (no other image fits)`);
+          done = true;
+          break;
+        }
+        (section as { props: unknown }).props = structuredClone(snapshot);
       }
-      (section as { props: unknown }).props = snapshot;
+      if (done) continue;
       log.push(`${where}: ${u.image} is already shown higher on the page; left it (no other image fits and the section needs one)`);
     }
   }

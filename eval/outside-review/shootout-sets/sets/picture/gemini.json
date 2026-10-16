@@ -1,0 +1,60 @@
+{
+  "set": "picture",
+  "reviewer": "gemini",
+  "model": "google/gemini-4-argon",
+  "pages": [
+    "atelje-bergant",
+    "kolesarski-servis-ovinek",
+    "optika-jasna",
+    "pasji-salon-kodra",
+    "pivovarna-rov",
+    "plesna-sola-takt",
+    "sirarna-pr-simnu",
+    "steklarstvo-vrhovnik",
+    "urarstvo-tic",
+    "vinarstvo-pinteric"
+  ],
+  "status": "ok",
+  "answer": {
+    "sameness": "Almost every page relies on a strict two-column split hero (text stack on the left, boxed graphic on the right, flipped only on steklarstvo-vrhovnik). Header bars are identical: plain text logo on the left, 'Domov' link and rectangular CTA on the right. On mobile, every site shares the exact same wireframe: identical 'Meni' button at top right and an identical sticky bottom action bar ('Klic' + 'Navodila za pot'). A horizontal ticker bar of slash-separated services repeats on kolesarski-servis-ovinek, pivovarna-rov, and plesna-sola-takt. Finally, an intrusive 'Ustvarjeno z UI' badge is stamped onto the corner of nearly every image.",
+    "recurringIssues": [
+      "Intrusive 'Ustvarjeno z UI' (Created with AI) badges appear on almost all hero visuals, immediately cheapening the brand perception.",
+      "Hero illustrations and AI-generated graphics look low-budget, clip-art-like, or blurry (especially pivovarna-rov, atelje-bergant, and sirarna-pr-simnu).",
+      "The navigation header is bare and under-designed, using default-looking text logos instead of proper brand marks.",
+      "The sticky mobile bottom bar is mechanically applied to every site without adapting to the specific visual style or needs of the business.",
+      "Awkward image cropping and cramped spacing occur in several heroes, notably the overlapping thumbnail on vinarstvo-pinteric and narrow strip on pivovarna-rov."
+    ],
+    "overall": 2,
+    "variety": 2,
+    "best": [
+      {
+        "id": "urarstvo-tic",
+        "why": "The dark green and gold palette paired with a crisp serif typeface and detailed watch-mechanism graphic feels genuinely tailored and appropriate for a traditional watchmaker."
+      },
+      {
+        "id": "optika-jasna",
+        "why": "It is the only layout that breaks the left-right split formula, using bold typographic hierarchy and clean red/green color blocking."
+      },
+      {
+        "id": "kolesarski-servis-ovinek",
+        "why": "The topographic river illustration and high-contrast mint green accents on a dark background create a cohesive, sporty atmosphere."
+      }
+    ],
+    "weakest": [
+      {
+        "id": "pivovarna-rov",
+        "why": "The hero image is a bizarrely cropped, blurry vertical strip of a glowing chain that looks like a broken placeholder."
+      },
+      {
+        "id": "atelje-bergant",
+        "why": "For an architectural studio, the naive MS-Paint-style line drawing of a house looks deeply unprofessional and undermines credibility."
+      },
+      {
+        "id": "sirarna-pr-simnu",
+        "why": "The crude, clip-art-like cheese illustration and stark white-and-yellow blocks feel like an unfinished wireframe rather than a warm local dairy."
+      }
+    ],
+    "oneChange": "Replace the crude AI-generated illustrations (and their mandatory 'Ustvarjeno z UI' watermarks) with authentic, art-directed photography of the actual businesses, craftspeople, and products.",
+    "summary": "Your studio has solid fundamentals in typography, color contrast, and mobile usability—the copy is legible, the hierarchy is clear, and the sticky mobile contact bars are practical for local businesses. However, the portfolio reads like a single, rigid wireframe generator rather than a bespoke design studio. Eight out of ten sites use the exact same split-screen hero and identical header/footer chrome. Worse, the reliance on cheap AI-generated graphics—complete with visible 'Created with AI' badges—destroys the authenticity that small local businesses rely on. Ditch the AI clip-art for real local photography and introduce 3–4 genuinely distinct layout structures to elevate your work from a template factory to a real studio."
+  }
+}
