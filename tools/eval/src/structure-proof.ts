@@ -1,5 +1,9 @@
 /**
- * pnpm structure-proof --set review50|fresh10 [--out <dir>] [--assign <json>] [--only <id,..>] [--concurrency 2] [--fresh-dir <dir>]
+ * pnpm structure-proof --set review50|fresh10 [--out <dir>] [--assign <json>] [--only <id,..>] [--concurrency 2] [--fresh-dir <dir>] [--details]
+ *
+ * `--details` (M1 type and details, docs/plans/m1-type-details.md): also gives each page a type voice (assignVoices,
+ * applyDetails) and renders with every detail switch on (PROOF_DETAILS); the default --out becomes
+ * eval/runs/structure-proof-details/<set> and the voice goes into assign.json and manifest.json.
  *
  * Design 5 Wave P (docs/plans/wave-p-harness.md): the proof that the eight first-screen structures, each with its own
  * chrome (header family, header tone, phone action), make a set of sites look like different sites. Free: no model, no
@@ -24,17 +28,23 @@ import {
   HEADER_FAMILIES,
   PHONE_ACTIONS,
   STRUCTURES,
+  VOICE_IDS,
+  applyVoice,
   fillPreset,
   migrateSpec,
   presetSection,
   presetSources,
+  shapeOfRadius,
   skeletonOfChrome,
+  typeVoice,
   validateSite,
   type HeaderFamily,
   type PhoneActions,
   type SiteSpec,
   type Structure,
   type Tone,
+  type TypeVoice,
+  type VoiceId,
 } from "@sb/spec";
 import { DEFAULT_SPECS_DIR, plannedSpecs, pageIds, rebuildMedia, shotFileNames, type MediaCache } from "./review50-render.ts";
 import { planSheet, type SheetKind } from "./set-review.ts";
@@ -152,6 +162,87 @@ export function assignChrome(pages: readonly ProofPage[]): Map<string, ProofChro
       { header: CHROME_HEADERS[k % CHROME_HEADERS.length]!, tone: CHROME_TONES[k % CHROME_TONES.length]!, actions: PHONE_ACTIONS[k % PHONE_ACTIONS.length]! },
     ]),
   );
+}
+
+/** The detail switches `--details` turns on (RenderOptions.details): every one of them. */
+export const PROOF_DETAILS = { cta: true, header: true, aiCaption: true, fit: true, scale: true } as const;
+
+type Tones = TypeVoice["tone"];
+
+/**
+ * The voice words a trade leans toward (the first row whose pattern matches the lower-cased trade; Slovene and the
+ * briefs' English). Only a tie-break for assignVoices: balance across the set comes first.
+ */
+const TRADE_TONES: readonly [RegExp, Tones][] = [
+  [/(računovod|accountant|prevaj|inštrukc|arhitekt|avtošol|translat|tutor|architect|office)/, ["exact", "quiet"]],
+  [/(frizer|brivnic|hairdress|kozmet|beauty|physio|fizio|masaž|dental|zob|optik|veterin|pasji|joga|plesn|fotograf|dance|health)/, ["quiet", "new"]],
+  [/(avto|karoserij|car-|servis|gume|kolesar|ključavn|elektro|vodovod|install|builder|gradb|steklar|repair|locksmith)/, ["loud", "exact"]],
+  [/(pek|bakery|restaur|pizz|okrepč|cvetli|vinar|sirarn|čebel|pivovar|farm|kmet|apart|hotel|mizar|keramič|kovač|šivilj|urar|craft|food|shop)/, ["warm", "old"]],
+];
+const toneAffinity = (trade: string, v: TypeVoice): number => {
+  const wanted = TRADE_TONES.find(([re]) => re.test(trade.toLowerCase()))?.[1] ?? [];
+  return v.tone.filter((t) => wanted.includes(t)).length;
+};
+
+/**
+ * A type voice for each page. Deterministic. Per voice at most max(1, floor(0.25 · n)) pages. Hard: a page differs from
+ * its neighbours in list order and from the other pages of its business, and, while the trade has at most TRADE_SPREAD_MAX
+ * pages, from the pages of its trade. Soft: among the least-used voices, the one whose tone words fit the trade (TRADE_TONES),
+ * then STRUCTURES-style rotation per page index. When no voice satisfies every hard rule, the trade rule, then the business
+ * rule, then the neighbour rule give way, in that order (the cap never does, unless overrides alone have filled it).
+ */
+export function assignVoices(pages: readonly ProofPage[], o: { overrides?: Readonly<Record<string, VoiceId>> } = {}): Map<string, VoiceId> {
+  const out = new Map<string, VoiceId>();
+  const cap = Math.max(1, Math.floor(0.25 * pages.length));
+  const used = new Map<VoiceId, number>();
+  const bump = (v: VoiceId) => used.set(v, (used.get(v) ?? 0) + 1);
+  for (const p of pages) {
+    const forced = o.overrides?.[p.id];
+    if (forced) {
+      out.set(p.id, forced);
+      bump(forced);
+    }
+  }
+  const takenBy = (key: (q: ProofPage) => string, p: ProofPage) => new Set(pages.filter((q) => q.id !== p.id && key(q) === key(p)).flatMap((q) => (out.has(q.id) ? [out.get(q.id)!] : [])));
+  const tradeSize = new Map<string, number>();
+  for (const p of pages) tradeSize.set(p.trade, (tradeSize.get(p.trade) ?? 0) + 1);
+
+  for (const [i, p] of pages.entries()) {
+    if (out.has(p.id)) continue;
+    const near = new Set([pages[i - 1], pages[i + 1]].flatMap((q) => (q && out.has(q.id) ? [out.get(q.id)!] : [])));
+    const sameBusiness = takenBy((q) => q.business, p);
+    const sameTrade = (tradeSize.get(p.trade) ?? 0) <= TRADE_SPREAD_MAX ? takenBy((q) => q.trade, p) : new Set<VoiceId>();
+    const rotation = (v: VoiceId) => (VOICE_IDS.indexOf(v) - i + VOICE_IDS.length * 4) % VOICE_IDS.length;
+    const rules: ((v: VoiceId) => boolean)[][] = [
+      [(v) => (used.get(v) ?? 0) < cap, (v) => !near.has(v), (v) => !sameBusiness.has(v), (v) => !sameTrade.has(v)],
+      [(v) => (used.get(v) ?? 0) < cap, (v) => !near.has(v), (v) => !sameBusiness.has(v)],
+      [(v) => (used.get(v) ?? 0) < cap, (v) => !near.has(v)],
+      [(v) => (used.get(v) ?? 0) < cap],
+      [],
+    ];
+    let candidates: VoiceId[] = [];
+    for (const level of rules) {
+      candidates = VOICE_IDS.filter((v) => level.every((r) => r(v)));
+      if (candidates.length) break;
+    }
+    const best = [...candidates].sort((a, b) => (used.get(a) ?? 0) - (used.get(b) ?? 0) || toneAffinity(p.trade, typeVoice(b)) - toneAffinity(p.trade, typeVoice(a)) || rotation(a) - rotation(b))[0]!;
+    out.set(p.id, best);
+    bump(best);
+  }
+  return new Map(pages.map((p) => [p.id, out.get(p.id)!]));
+}
+
+/**
+ * The spec with the voice's type set on a copy (font pair, heading weight, tracking and case, body size, scale); nothing
+ * outside `design` changes. A voice's type lies outside the direction's token ranges, so the genome is marked picked
+ * (genome.ts: a picked genome's type-system rules hold the design instead of the direction's ranges, as for a site made
+ * with the variety genome on); its palette, rhythm and shape stay.
+ */
+export function applyDetails(spec: SiteSpec, voice: VoiceId): SiteSpec {
+  const out = structuredClone(spec);
+  const genome = out.design.genome ?? { palette: "preset", rhythm: "alternate" as const, shape: shapeOfRadius(out.design.radius) };
+  out.design = { ...applyVoice(out.design, typeVoice(voice)), genome: { ...genome, source: "picked" } };
+  return out;
 }
 
 /** A page's facts from its spec. */
@@ -319,19 +410,31 @@ async function writeSheets(rows: { id: string; structure: string; chrome: string
 // ---------------------------------------------------------------------------------------------------------------
 // CLI
 
-const USAGE = "Usage: pnpm structure-proof --set review50|fresh10 [--out <dir>] [--assign <json>] [--only <id,..>] [--concurrency 2] [--fresh-dir <dir>]";
+const USAGE = "Usage: pnpm structure-proof --set review50|fresh10 [--out <dir>] [--assign <json>] [--only <id,..>] [--concurrency 2] [--fresh-dir <dir>] [--details]";
 
 interface Assignment {
   structure: Structure;
   header: HeaderFamily;
   tone: Tone;
   actions: PhoneActions;
+  /** The type voice; only with --details. */
+  voice?: VoiceId;
+}
+
+/** The command line, parsed: the raw option values, and `details` (PROOF_DETAILS) when `--details` is given. Throws on an unknown option. */
+export function parseProofArgs(argv: string[]) {
+  const { values } = parseArgs({
+    args: argv,
+    options: { set: { type: "string" }, out: { type: "string" }, assign: { type: "string" }, only: { type: "string" }, concurrency: { type: "string" }, "fresh-dir": { type: "string" }, details: { type: "boolean" } },
+  });
+  const { details, ...rest } = values;
+  return { ...rest, ...(details ? { details: PROOF_DETAILS } : {}) };
 }
 
 export async function main(argv: string[], print: (line: string) => void = console.log): Promise<number> {
   let v;
   try {
-    v = parseArgs({ args: argv, options: { set: { type: "string" }, out: { type: "string" }, assign: { type: "string" }, only: { type: "string" }, concurrency: { type: "string" }, "fresh-dir": { type: "string" } } }).values;
+    v = parseProofArgs(argv);
   } catch (e) {
     print(`${e instanceof Error ? e.message : String(e)}\n${USAGE}`);
     return 2;
@@ -346,7 +449,8 @@ export async function main(argv: string[], print: (line: string) => void = conso
     print(`--concurrency needs a whole number above 0, got "${v.concurrency}".\n${USAGE}`);
     return 2;
   }
-  const out = path.resolve(v.out ?? path.join(repoRoot, "eval/runs/structure-proof", set));
+  const details = v.details;
+  const out = path.resolve(v.out ?? path.join(repoRoot, "eval/runs", details ? "structure-proof-details" : "structure-proof", set));
   const only = v.only?.split(",").map((s) => s.trim()).filter(Boolean);
   let given: Record<string, Partial<Assignment>> = {};
   if (v.assign) {
@@ -378,6 +482,9 @@ export async function main(argv: string[], print: (line: string) => void = conso
       chromes.set(id, { header: g.header ?? c.header, tone: g.tone ?? c.tone, actions: g.actions ?? c.actions });
     }
 
+    const voiceOverrides = Object.fromEntries(Object.entries(given).flatMap(([id, a]) => (a.voice && VOICE_IDS.includes(a.voice) ? [[id, a.voice] as const] : [])));
+    const voices = details ? assignVoices(proofPages, { overrides: voiceOverrides }) : undefined;
+
     const cap = Math.max(1, Math.floor(0.25 * proofPages.length));
     const useCount = (s: Structure) => [...structures.values()].filter((x) => x === s).length;
     const issues: Record<string, { fallbacks: string[]; pageRules: string[]; log: string[] }> = {};
@@ -394,7 +501,7 @@ export async function main(argv: string[], print: (line: string) => void = conso
         const r = applyStructure(src.spec, s, chromes.get(src.id)!);
         if (r.ok) {
           structures.set(src.id, s);
-          built.set(src.id, r.spec);
+          built.set(src.id, voices ? applyDetails(r.spec, voices.get(src.id)!) : r.spec);
           entry.pageRules = r.issues;
           entry.log = r.log;
           break;
@@ -414,7 +521,7 @@ export async function main(argv: string[], print: (line: string) => void = conso
 
     mkdirSync(out, { recursive: true });
     const assignment: Record<string, Assignment> = {};
-    for (const src of wanted) if (built.has(src.id)) assignment[src.id] = { structure: structures.get(src.id)!, ...chromes.get(src.id)! };
+    for (const src of wanted) if (built.has(src.id)) assignment[src.id] = { structure: structures.get(src.id)!, ...chromes.get(src.id)!, ...(voices ? { voice: voices.get(src.id)! } : {}) };
     writeFileSync(path.join(out, "assign.json"), `${JSON.stringify(assignment, null, 2)}\n`);
 
     const t0 = Date.now();
@@ -426,7 +533,9 @@ export async function main(argv: string[], print: (line: string) => void = conso
           const spec = built.get(src.id)!;
           try {
             const media = await src.media();
-            const files = siteFiles(spec, media, { imageWidths: config.images.widths });
+            // RenderOptions.details (piece A) comes from a variable, so the object literal's extra-key check does not apply.
+            const renderOpts = { imageWidths: config.images.widths, ...(details ? { details } : {}) };
+            const files = siteFiles(spec, media, renderOpts);
             const report = await checkSite(spec, files, { config, corpus: "", lighthouse: false, browser, pages: ["index.html"] });
             const names = shotFileNames(src.id);
             for (const k of Object.keys(names) as (keyof typeof names)[]) {
@@ -435,7 +544,7 @@ export async function main(argv: string[], print: (line: string) => void = conso
               writeFileSync(path.join(out, names[k]), shot);
             }
             writeFileSync(path.join(out, `${src.id}.spec.json`), `${JSON.stringify(spec, null, 2)}\n`);
-            print(`${src.id}: ${structures.get(src.id)} ${chromeKey(chromes.get(src.id)!)}${issues[src.id]!.pageRules.length ? `, ${issues[src.id]!.pageRules.length} page-rule issue(s)` : ""}`);
+            print(`${src.id}: ${structures.get(src.id)} ${chromeKey(chromes.get(src.id)!)}${voices ? ` ${voices.get(src.id)}` : ""}${issues[src.id]!.pageRules.length ? `, ${issues[src.id]!.pageRules.length} page-rule issue(s)` : ""}`);
           } catch (e) {
             failed.push(src.id);
             print(`${src.id}: FAILED ${(e as Error).message}`);
@@ -452,20 +561,23 @@ export async function main(argv: string[], print: (line: string) => void = conso
       phone: `${s.id}-360-first.png`,
       trade: trade.get(s.id)!,
       structure: structures.get(s.id)!,
+      ...(voices ? { voice: voices.get(s.id)! } : {}),
     }));
     writeFileSync(path.join(out, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
     // `pnpm outside-review --set` reads only {id, desk, phone}.
     writeFileSync(path.join(out, "review-manifest.json"), `${JSON.stringify(manifest.map(({ id, desk, phone }) => ({ id, desk, phone })), null, 2)}\n`);
     writeFileSync(path.join(out, "issues.json"), `${JSON.stringify(issues, null, 2)}\n`);
-    const rows = done.map((s) => ({ id: s.id, structure: structures.get(s.id)!, chrome: chromeKey(chromes.get(s.id)!), desk: path.join(out, `${s.id}-1280-first.png`), phone: path.join(out, `${s.id}-360-first.png`) }));
+    const rows = done.map((s) => ({ id: s.id, structure: structures.get(s.id)!, chrome: `${chromeKey(chromes.get(s.id)!)}${voices ? ` · ${voices.get(s.id)}` : ""}`, desk: path.join(out, `${s.id}-1280-first.png`), phone: path.join(out, `${s.id}-360-first.png`) }));
     const sheets = rows.length ? [...(await writeSheets(rows, "desk", out)), ...(await writeSheets(rows, "phone", out))] : [];
 
     const counts = Object.fromEntries(STRUCTURES.map((s) => [s, done.filter((d) => structures.get(d.id) === s).length]));
+    const voiceCounts = voices ? Object.fromEntries(VOICE_IDS.map((x) => [x, done.filter((d) => voices.get(d.id) === x).length])) : undefined;
     const keys = new Set(done.map((d) => chromeKey(chromes.get(d.id)!)));
     const fallbacks = done.filter((d) => issues[d.id]!.fallbacks.length).length;
     const ruleIssues = done.reduce((n, d) => n + issues[d.id]!.pageRules.length, 0);
     print(`${done.length} of ${wanted.length} pages -> ${out} in ${((Date.now() - t0) / 1000).toFixed(0)} s. No model call.`);
     print(`structures: ${Object.entries(counts).map(([k, n]) => `${k} ${n}`).join(", ")}`);
+    if (voiceCounts) print(`voices: ${Object.entries(voiceCounts).map(([k, n]) => `${k} ${n}`).join(", ")}`);
     print(`distinct chrome keys: ${keys.size} of ${done.length}; fill fallbacks: ${fallbacks}; page-rule issues: ${ruleIssues} on ${done.filter((d) => issues[d.id]!.pageRules.length).length} pages`);
     for (const f of sheets) print(`sheet: ${f}`);
     return failed.length ? 1 : 0;
