@@ -6,7 +6,7 @@ import { collectPlaceholders, entryPages, isPlaceholder, repeatedImageIssues, va
 import { pageFile } from "@sb/render";
 import { checkFacts, type FactViolation } from "../facts.ts";
 import { launchCheckBrowser, type CheckBrowser } from "./browser.ts";
-import { callButtonsPerScreen, hideFixedForFullPage, loadLazyImages, measurePage, repeatedContact, runAxe, type AxeViolation, type CallButtons, type MobileReport } from "./page-checks.ts";
+import { callButtonsPerScreen, hideFixedForFullPage, loadLazyImages, measurePage, repeatedContact, repeatedSentences, runAxe, type AxeViolation, type CallButtons, type MobileReport } from "./page-checks.ts";
 import { runLighthouse, type LighthouseScores } from "./lighthouse.ts";
 import { measureComposition, type Composition } from "./composition.ts";
 import { serveStatic } from "./static-server.ts";
@@ -15,7 +15,7 @@ export { launchCheckBrowser, type CheckBrowser } from "./browser.ts";
 export { serveStatic, type StaticServer } from "./static-server.ts";
 export type { AxeViolation, CallButtons, MobileReport, Overflow } from "./page-checks.ts";
 export { lowestAllowedScale, repairPhoneOverflow, type OverflowRepair } from "./overflow-repair.ts";
-export { LEGAL_ROW, callButtonsPerScreen, hideFixedForFullPage, loadLazyImages, measurePage, repeatedContact, runAxe } from "./page-checks.ts";
+export { LEGAL_ROW, callButtonsPerScreen, hideFixedForFullPage, loadLazyImages, measurePage, repeatedContact, repeatedSentences, runAxe } from "./page-checks.ts";
 export type { LighthouseScores } from "./lighthouse.ts";
 export type { Composition } from "./composition.ts";
 export { checkExportOffline, unzipTo, type ExportCheck } from "./export-offline.ts";
@@ -126,7 +126,7 @@ export async function checkSite(spec: SiteSpec, files: Map<string, Uint8Array>, 
       const axe = await runAxe(mp);
       // A site with a skeleton (spec v15) promises one call button per screen; checked on every screen of the page.
       if (spec.design.skeleton) mobile.banned.push(...callsBanned(await callButtonsPerScreen(mp)));
-      mobile.banned.push(...(await repeatedContact(mp, address)));
+      mobile.banned.push(...(await repeatedContact(mp, address)), ...(await repeatedSentences(mp)));
       let shotMobile: Buffer | undefined;
       let shotMobileFull: Buffer | undefined;
       if (file === "index.html") {
@@ -151,7 +151,7 @@ export async function checkSite(spec: SiteSpec, files: Map<string, Uint8Array>, 
       const d = await measurePage(dp, { primaryMin: t.primaryMin, primaryGap: t.primaryGap, absoluteMin: t.absoluteMin });
       const desktopAxe = await runAxe(dp);
       if (spec.design.skeleton) d.banned.push(...callsBanned(await callButtonsPerScreen(dp)));
-      d.banned.push(...(await repeatedContact(dp, address)));
+      d.banned.push(...(await repeatedContact(dp, address)), ...(await repeatedSentences(dp)));
       if (file === "index.html" && shotMobile && shotMobileFull) {
         const desktopComposition = await measureComposition(dp);
         if (mobileComposition) composition = { mobile: mobileComposition, desktop: desktopComposition };

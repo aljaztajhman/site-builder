@@ -17,6 +17,7 @@ import {
   mainHeadingIssues,
   repairMainHeadings,
   repairRepeatedImages,
+  repairRepeatedSentences,
   repairSiteCopy,
   addedOnRequest,
   stripModelOnRequest,
@@ -58,6 +59,7 @@ import { awayFromNeighbours, fittingDirections, pickFromFamily, type LookKey } f
 import { BRIEF_CONCEPT_SYSTEM, conceptLine, conceptOutline, subtypeDesignLine, verifyConcept, type ConceptPlan } from "./concept.ts";
 import { holdPrimary, skeletonLine } from "./skeleton.ts";
 import { homepageFirst, type HomepageReady } from "./homepage-first.ts";
+import { renderedPageText } from "./page-text.ts";
 
 // ---------- 1. Intake -> brief ----------
 
@@ -492,6 +494,14 @@ export async function generateContent(client: ModelClient, input: ContentInput):
     if (fixes.oneHero) repairs.push(...repairMainHeadings(built));
     // An image at most once per page (the outside review): a later repeat takes a free picture or drops an optional one.
     repairs.push(...repairRepeatedImages(built));
+    // A sentence at most once per page (the outside review): a later copy goes where the page stays valid, counted on
+    // the rendered page (a field its variant doesn't draw isn't a copy). A spec that can't be drawn yet is left as is:
+    // the validation below reports why.
+    try {
+      repairs.push(...repairRepeatedSentences(built, renderedPageText));
+    } catch {
+      repairs.push("repeated sentences: not checked (the spec doesn't render yet)");
+    }
     const v = validateSite(built);
     const issues = v.ok ? (fixes.oneHero ? mainHeadingIssues(built).map(issueLine) : []) : v.issues.map(issueLine);
     issues.push(...checkFacts(built, input.corpus).map(factLine));

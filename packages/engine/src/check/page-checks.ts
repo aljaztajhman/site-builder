@@ -1,4 +1,5 @@
 import type { Page } from "playwright";
+import { REPEATED_SENTENCE_MIN_WORDS } from "@sb/spec";
 
 export interface AxeViolation {
   id: string;
@@ -364,6 +365,74 @@ export async function repeatedContact(page: Page, address?: { street: string; pl
     if (hours.length > 1) out.push("opening hours shown in full " + hours.length + " times: " + hours.map(describe).join(", "));
     return out;
   })(${JSON.stringify(address ?? null)}, ${JSON.stringify(LEGAL_ROW)})`,
+  );
+}
+
+
+/**
+ * Banned (docs/PRODUCT.md): the same sentence visible twice on a page (the outside review: an hours note printed in
+ * the hours list and again under it, a hero intro repeated in a later section). Reads the visible text per block (the
+ * text of each element that isn't displayed inline, its inline children included), splits it into sentences and
+ * compares them normalised (case, spacing, quotes and the closing stop ignored); sentences of fewer than
+ * REPEATED_SENTENCE_MIN_WORDS words (@sb/spec text-once.ts, which the generation repair shares), copies in different
+ * items of one section's list (a fact two dishes share), link and button labels
+ * (actions repeat by design), aria-hidden copies (a looping ticker) and the legal row are not counted.
+ * Returns the banned-pattern lines (none when every sentence shows once).
+ */
+export async function repeatedSentences(page: Page): Promise<string[]> {
+  return page.evaluate(
+    `((legal, minWords) => {
+    const shown = (el) => {
+      const r = el.getBoundingClientRect();
+      const cs = getComputedStyle(el);
+      return r.width > 1 && r.height > 1 && cs.visibility !== "hidden" && cs.display !== "none" && el.checkVisibility();
+    };
+    const describe = (el) => el.tagName.toLowerCase() + (el.className && typeof el.className === "string" ? "." + el.className.trim().split(/\\s+/).slice(0, 2).join(".") : "");
+    const isInline = (el) => { const d = getComputedStyle(el).display; return d === "inline" || d === "contents"; };
+    const blocks = new Map();
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+      if (!n.nodeValue || !n.nodeValue.trim()) continue;
+      const parent = n.parentElement;
+      if (!parent || parent.closest("script, style, noscript, template, a, button, [aria-hidden='true']") || parent.closest(legal)) continue;
+      let block = parent;
+      while (block.parentElement && block !== document.body && isInline(block)) block = block.parentElement;
+      if (!blocks.has(block)) blocks.set(block, []);
+      blocks.get(block).push(n.nodeValue);
+    }
+    const norm = (s) => s.normalize("NFC").toLowerCase().replace(/[\\u201e\\u201c\\u201d\\u2018\\u2019\\u00ab\\u00bb"']/g, "").replace(/[\\s\\u00a0]+/g, " ").replace(/[\\s.!?\\u2026:;,]+$/, "").trim();
+    const seen = new Map();
+    for (const [el, parts] of blocks) {
+      if (!shown(el)) continue;
+      const text = parts.join("").replace(/[\\s\\u00a0]+/g, " ").trim();
+      for (const sentence of text.split(/(?<=[.!?\\u2026])\\s+/)) {
+        const key = norm(sentence);
+        if (key.split(" ").length < minWords) continue;
+        if (!seen.has(key)) seen.set(key, { text: sentence.trim(), at: [], els: [] });
+        seen.get(key).at.push(describe(el));
+        seen.get(key).els.push(el);
+      }
+    }
+    // Items of one section's list may share a fact on purpose (two pastries "on Fridays and Saturdays"): copies in
+    // different items of one section count as one.
+    const itemOf = (el) => el.closest("li, tr, dl > div, [role='listitem']");
+    const sectionOf = (el) => el.closest("section") || document.body;
+    const units = (els) => {
+      const mates = new Set();
+      let n = 0;
+      for (const el of els) {
+        const item = itemOf(el);
+        const mate = item && els.some((o) => o !== el && sectionOf(o) === sectionOf(el) && itemOf(o) && itemOf(o) !== item);
+        if (mate) mates.add(sectionOf(el));
+        else n++;
+      }
+      return n + mates.size;
+    };
+    const out = [];
+    for (const { text, at, els } of seen.values())
+      if (at.length > 1 && units(els) > 1) out.push("sentence shown " + at.length + " times: \\u201e" + (text.length > 80 ? text.slice(0, 79) + "\\u2026" : text) + "\\u201c (" + at.join(", ") + ")");
+    return out;
+  })(${JSON.stringify(LEGAL_ROW)}, ${REPEATED_SENTENCE_MIN_WORDS})`,
   );
 }
 
