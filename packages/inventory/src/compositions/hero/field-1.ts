@@ -9,7 +9,7 @@ export default definePreset({
   props: {
     intent: "hero",
     width: "wide",
-    minHeight: "l",
+    minHeight: "tall",
     rows: 4,
     headerOver: true,
     background: [{ kind: "field", role: "band" }],
@@ -18,7 +18,7 @@ export default definePreset({
       { id: "e_title", kind: "heading", text: "{copy.headline}", level: 1, size: 7, weight: 800, desk: { col: 1, span: 9, row: 2, rowSpan: 2, alignY: "end" }, phone: { order: 0, span: "full" } },
       { id: "e_lead", kind: "text", paragraphs: ["{copy.lead}"], size: 1, desk: { col: 1, span: 5, row: 4, alignY: "start" }, phone: { order: 3, span: "full" } },
       { id: "e_call", kind: "action", action: "call", label: "Pokličite", style: "primary", desk: { col: 7, span: 3, row: 4, alignY: "start" }, phone: { order: 2, span: "full" } },
-      { id: "e_window", kind: "image", image: "{images[0]}", ratio: "4:5", desk: { col: 10, span: 3, row: 1, rowSpan: 3, alignY: "center", shiftY: 2 }, phone: { order: 4, span: "inset" } },
+      { id: "e_window", kind: "image", image: "{images[0]}", ratio: "4:5", crop: "thirds", desk: { col: 10, span: 3, row: 1, rowSpan: 3, alignY: "center", shiftX: 3, shiftY: 2 }, phone: { order: 4, span: "inset" } },
     ],
   },
   reflow: { e_call: {}, e_where: {}, e_window: {} },

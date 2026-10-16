@@ -9,7 +9,7 @@ export default definePreset({
   props: {
     intent: "hero",
     width: "wide",
-    minHeight: "l",
+    minHeight: "tall",
     rows: 4,
     elements: [
       { id: "e_lead", kind: "text", paragraphs: ["{copy.lead}"], size: 1, desk: { col: 8, span: 5, row: 1, alignY: "start" }, phone: { order: 3, span: "full" } },

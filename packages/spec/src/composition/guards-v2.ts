@@ -38,7 +38,9 @@ import {
   RESTRAINT,
   SCRIM_ALPHA,
   STACKED_MAX_LINES,
+  TILE_KINDS,
   TILT_KINDS,
+  deskColumns,
   isTextBearing,
   photoUses,
   type ComposedSection,
@@ -93,6 +95,8 @@ interface Box {
   r1: number;
 }
 const boxOf = (e: Element): Box => ({ c0: e.desk.col, c1: e.desk.col + e.desk.span - 1, r0: e.desk.row, r1: e.desk.row + (e.desk.rowSpan ?? 1) - 1 });
+/** The box an element reaches over a neighbour: its own, widened by a column toward a shift of REACH_SHIFT steps (deskColumns). */
+const reachOf = (e: Element): Box => ({ ...boxOf(e), ...deskColumns(e.desk) });
 const within = (a: Box, b: Box) => a.c0 >= b.c0 && a.c1 <= b.c1 && a.r0 >= b.r0 && a.r1 <= b.r1;
 const meets = (a: Box, b: Box) => a.c0 <= b.c1 && b.c0 <= a.c1 && a.r0 <= b.r1 && b.r0 <= a.r1;
 
@@ -214,7 +218,7 @@ function holders(env: Env): Holder[] {
   }
   for (const { e, i } of entries(env)) {
     if (e.kind !== "image" || !e.scrim) continue;
-    out.push({ el: e, path: `${EL}/${i}`, scrim: e.scrim, ref: e, treatment: e.treatment, layer: false, texts: texts.filter((t) => meets(boxOf(t.e), boxOf(e))) });
+    out.push({ el: e, path: `${EL}/${i}`, scrim: e.scrim, ref: e, treatment: e.treatment, layer: false, texts: texts.filter((t) => meets(reachOf(t.e), reachOf(e))) });
   }
   return out;
 }
@@ -638,6 +642,12 @@ function g10to12(env: Env): Finding[] {
     const fix: Fix = { path: `${at}/phone/span`, what: "phone span set to full", run: () => void ((e.phone as Loose).span = "full") };
     if (e.phone.span === "bleed" && !BLEED_X_KINDS.has(e.kind)) out.push(both(`${at}/phone/span`, "structure", `composed: ${e.id} (${e.kind}) can't bleed on phones`, fix));
     if (e.phone.span === "half" && NO_PHONE_HALF_KINDS.has(e.kind)) out.push(both(`${at}/phone/span`, "structure", `composed: ${e.id} (${e.kind}) can't be half width on phones`, fix));
+    if (e.phone.span === "tile") {
+      const to = NO_PHONE_HALF_KINDS.has(e.kind) ? "full" : "half";
+      const half: Fix = { path: `${at}/phone/span`, what: `phone span set to ${to}`, run: () => void ((e.phone as Loose).span = to) };
+      if (!TILE_KINDS.has(e.kind)) out.push(both(`${at}/phone/span`, "structure", `composed: ${e.id} (${e.kind}) can't be a phone tile`, half));
+      else if (isTextBearing(e) && !("fill" in e && e.fill !== undefined)) out.push(both(`${at}/phone/span`, "structure", `composed: ${e.id} (${e.kind}) is a phone tile with words and needs its own ground (fill)`, half));
+    }
   }
   return out;
 }
@@ -743,7 +753,7 @@ function g18to21(env: Env): Finding[] {
       }
       if (e.treatment === "knockout") {
         const b = boxOf(e);
-        const over = fs.some((f) => within(b, f.box)) || hasPhotoLayer || els.some((x) => x.e.kind === "image" && meets(b, boxOf(x.e)));
+        const over = fs.some((f) => within(b, f.box)) || hasPhotoLayer || els.some((x) => x.e.kind === "image" && meets(reachOf(e), reachOf(x.e)));
         if (!over) out.push(both(`${at}/treatment`, "structure", `composed: ${e.id}: knockout only over a photo or a field`, drop));
       }
       const problem = typeTreatmentProblem(e);
@@ -837,6 +847,8 @@ function g29(env: Env): Finding[] {
  * there. The panel's rule stays in the renderer (spec cannot import components); this one is the part both share: who
  * overlaps whom, and who is on top. A repair raises the layer (at most 3); when the photo is already on layer 3 the
  * section is rejected. A captioned `photos` element is text-bearing itself, so its overlap with other text is G23's.
+ * A shift of REACH_SHIFT steps counts the next column as covered (deskColumns): a split headline shifted over the photo's
+ * edge is over the photo.
  */
 function g26(env: Env): Finding[] {
   const out: Finding[] = [];
@@ -846,7 +858,7 @@ function g26(env: Env): Finding[] {
     let need = 0;
     const under: string[] = [];
     for (const o of els) {
-      if (o.e === e || (o.e.kind !== "image" && o.e.kind !== "photos") || isTextBearing(o.e) || !meets(boxOf(e), boxOf(o.e))) continue;
+      if (o.e === e || (o.e.kind !== "image" && o.e.kind !== "photos") || isTextBearing(o.e) || !meets(reachOf(e), reachOf(o.e))) continue;
       const layer = o.e.desk.layer ?? 0;
       if ((e.desk.layer ?? 0) > layer) continue;
       need = Math.max(need, layer + 1);

@@ -30,7 +30,7 @@ export type Desk = {
   bleedX?: "start" | "end" | "both";
   bleedY?: "top" | "bottom";
 };
-export type Phone = { order: number; span?: "full" | "inset" | "half" | "bleed"; hidden?: boolean };
+export type Phone = { order: number; span?: "full" | "inset" | "half" | "bleed" | "tile"; hidden?: boolean };
 
 /** An element with its places; `rest` is the kind's own props. */
 export const el = (id: string, kind: Element["kind"], desk: Desk, phone: Phone, rest: Record<string, unknown> = {}): Element =>

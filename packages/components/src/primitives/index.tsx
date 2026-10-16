@@ -102,6 +102,8 @@ export function Picture(props: {
   className?: string;
   /** Override alt (e.g. "" when the image is decorative next to identical text). */
   alt?: string;
+  /** Override the object-position the focal point gives (a composed image's crop on thirds). */
+  objectPosition?: string;
 }) {
   const img = props.ctx.image(props.id);
   const focal = img.asset.focal;
@@ -121,7 +123,7 @@ export function Picture(props: {
         loading={props.priority ? "eager" : "lazy"}
         decoding={props.priority ? "sync" : "async"}
         fetchPriority={props.priority ? "high" : undefined}
-        style={focal ? { objectPosition: `${Math.round(focal.x * 100)}% ${Math.round(focal.y * 100)}%` } : undefined}
+        style={props.objectPosition ? { objectPosition: props.objectPosition } : focal ? { objectPosition: `${Math.round(focal.x * 100)}% ${Math.round(focal.y * 100)}%` } : undefined}
       />
     </picture>
   );
