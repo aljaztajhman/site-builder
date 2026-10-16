@@ -31,11 +31,13 @@ export interface VarietyEntry {
   phone?: string;
   /** The first-screen structure the page was built with (structure-proof.ts writes it); absent: not given. */
   structure?: string;
+  /** The type voice the page was set in (structure-proof.ts --details writes it); absent: not given. */
+  voice?: string;
 }
 
 const ManifestEntry = z.union([
   z.string().min(1),
-  z.strictObject({ id: z.string().min(1).optional(), spec: z.string().min(1), trade: z.string().optional(), desk: z.string().optional(), phone: z.string().optional(), structure: z.string().optional() }),
+  z.strictObject({ id: z.string().min(1).optional(), spec: z.string().min(1), trade: z.string().optional(), desk: z.string().optional(), phone: z.string().optional(), structure: z.string().optional(), voice: z.string().optional() }),
 ]);
 const Manifest = z.union([z.array(ManifestEntry), z.strictObject({ pages: z.array(ManifestEntry) })]);
 
@@ -60,11 +62,11 @@ function entriesOfManifest(file: string): VarietyEntry[] {
   return list.map((e) => {
     const spec = at(typeof e === "string" ? e : e.spec);
     if (!existsSync(spec)) throw new Error(`${file}: ${spec} not found`);
-    const given: { id?: string | undefined; trade?: string | undefined; desk?: string | undefined; phone?: string | undefined; structure?: string | undefined } = typeof e === "string" ? {} : e;
+    const given: { id?: string | undefined; trade?: string | undefined; desk?: string | undefined; phone?: string | undefined; structure?: string | undefined; voice?: string | undefined } = typeof e === "string" ? {} : e;
     const shots = siblingShots(spec);
     const desk = given.desk ? at(given.desk) : shots.desk;
     const phone = given.phone ? at(given.phone) : shots.phone;
-    return { id: given.id ?? idOf(spec), spec, ...(given.trade ? { trade: given.trade } : {}), ...(given.structure ? { structure: given.structure } : {}), ...(desk ? { desk } : {}), ...(phone ? { phone } : {}) };
+    return { id: given.id ?? idOf(spec), spec, ...(given.trade ? { trade: given.trade } : {}), ...(given.structure ? { structure: given.structure } : {}), ...(given.voice ? { voice: given.voice } : {}),...(desk ? { desk } : {}), ...(phone ? { phone } : {}) };
   });
 }
 
@@ -109,6 +111,8 @@ export interface VarietyReport {
   primaryColours: { distinct: number; counts: Record<string, number> };
   /** Present when pages name their first-screen structure (manifest `structure`): `maxShare` is the largest structure's share of the pages that do. */
   structures?: { pages: number; distinct: number; maxShare: number; counts: Record<string, number> };
+  /** Present when pages name their type voice (manifest `voice`): `maxShare` is the largest voice's share of the pages that do. */
+  voices?: { pages: number; distinct: number; maxShare: number; counts: Record<string, number> };
   /** The chrome tuple `header|tone|actions` each page renders with (skeleton header and actions, header tone); `largestRepeat` is the most pages sharing one tuple. */
   chromeTuples: { distinct: number; largestRepeat: number; counts: Record<string, number> };
   distance: {
@@ -129,6 +133,7 @@ export interface VarietyPage {
   print: LookPrint;
   pictures: boolean;
   structure?: string;
+  voice?: string;
 }
 
 /** One page's look print: the spec, and the perceptual hash of its first screens when the pictures are there. */
@@ -139,7 +144,7 @@ export async function loadPrint(e: VarietyEntry): Promise<VarietyPage> {
   const address = spec.business.address;
   const town = address && "city" in address ? address.city : null;
   const print = lookPrintOf(spec, { trade: e.trade ?? spec.business.type, town, phash1280, phash360 });
-  return { id: e.id, spec, print, pictures: phash1280 !== null || phash360 !== null, ...(e.structure ? { structure: e.structure } : {}) };
+  return { id: e.id, spec, print, pictures: phash1280 !== null || phash360 !== null, ...(e.structure ? { structure: e.structure } : {}), ...(e.voice ? { voice: e.voice } : {}) };
 }
 
 /** A page's chrome tuple `header|tone|actions`, as the skeleton (or, before one, the chrome variant) renders it. */
@@ -159,6 +164,8 @@ export function varietyOf(pages: VarietyPage[], weights: AppConfig["studio"]["un
   }
   const named = pages.flatMap((p) => (p.structure ? [p.structure] : []));
   const structureCounts = counts(named);
+  const voiced = pages.flatMap((p) => (p.voice ? [p.voice] : []));
+  const voiceCounts = counts(voiced);
   const chromeCounts = counts(pages.map((p) => chromeTupleOf(p.spec)));
   const closest = ds.length ? ds.reduce((m, x) => (x.distance < m.distance ? x : m)) : null;
   return {
@@ -168,6 +175,7 @@ export function varietyOf(pages: VarietyPage[], weights: AppConfig["studio"]["un
     heroes: group(feats.map((f) => `${f.hero.type}:${f.hero.variant}`)),
     primaryColours: group(feats.map((f) => f.palette.primary.toLowerCase())),
     ...(named.length ? { structures: { pages: named.length, distinct: Object.keys(structureCounts).length, maxShare: Math.max(...Object.values(structureCounts)) / named.length, counts: structureCounts } } : {}),
+    ...(voiced.length ? { voices: { pages: voiced.length, distinct: Object.keys(voiceCounts).length, maxShare: Math.max(...Object.values(voiceCounts)) / voiced.length, counts: voiceCounts } } : {}),
     chromeTuples: { distinct: Object.keys(chromeCounts).length, largestRepeat: Math.max(0, ...Object.values(chromeCounts)), counts: chromeCounts },
     distance: {
       pairs: ds.length,
@@ -188,8 +196,9 @@ export function markdownLine(name: string, r: VarietyReport): string {
   const shots = d.withPictures ? `first-screen hashes on ${d.withPictures} of ${r.pages} pages (${d.pairsWithPhash} of ${d.pairs} pairs)` : "no first-screen pictures: spec parts only (no perceptual hash)";
   const counted = (c: Record<string, number>) => Object.entries(c).map(([k, v]) => `${k} ${v}`).join(", ");
   const structure = r.structures ? `structure share max ${Math.round(r.structures.maxShare * 100)} % over ${r.structures.distinct} structures (${counted(r.structures.counts)}); ` : "";
+  const voice = r.voices ? `voice share max ${Math.round(r.voices.maxShare * 100)} % over ${r.voices.distinct} voices (${counted(r.voices.counts)}); ` : "";
   const chrome = `chrome tuples ${r.chromeTuples.distinct} distinct, largest repeat ${r.chromeTuples.largestRepeat}; `;
-  return `**${name}** (${r.pages} pages): ${r.directions.distinct} directions, ${r.fontPairs.distinct} font pairs, ${r.heroes.distinct} hero variants, ${r.primaryColours.distinct} primary colours; ${structure}${chrome}look distance mean ${n2(d.mean)}, closest ${n2(d.min)}${d.closest ? ` (${d.closest.a} / ${d.closest.b})` : ""}; ${shots}.`;
+  return `**${name}** (${r.pages} pages): ${r.directions.distinct} directions, ${r.fontPairs.distinct} font pairs, ${r.heroes.distinct} hero variants, ${r.primaryColours.distinct} primary colours; ${structure}${voice}${chrome}look distance mean ${n2(d.mean)}, closest ${n2(d.min)}${d.closest ? ` (${d.closest.a} / ${d.closest.b})` : ""}; ${shots}.`;
 }
 
 export async function main(argv: string[], print: (line: string) => void = console.log): Promise<number> {
