@@ -44,18 +44,20 @@ export const Place = z.strictObject({
   layer: z.number().int().min(0).max(3).optional().describe("Stacking order where elements overlap; default 0"),
   alignX: AlignX.optional(),
   alignY: AlignY.optional(),
-  shiftX: z.number().int().min(-2).max(2).optional().describe("Nudge in spacing steps, for a deliberate overlap; text never overlaps text"),
+  shiftX: z.number().int().min(-3).max(3).optional().describe("Nudge in spacing steps, for a deliberate overlap; text never overlaps text"),
   shiftY: z.number().int().min(-3).max(3).optional(),
   tilt: z.number().int().min(-8).max(8).optional().describe("Degrees, desktop only; fact (not numeral), sticker, image, photos, decor"),
   bleedX: z.enum(["start", "end", "both"]).optional().describe("To the page edge from a grid edge the element touches; image, photos, decor"),
-  bleedY: z.enum(["top", "bottom"]).optional().describe("Past the section edge, at most its padding; decor, ribbon, sticker"),
+  bleedY: z.enum(["top", "bottom"]).optional().describe("Past the section edge, at most its padding; decor, ribbon, sticker; an image reaches the section edge"),
 });
 export type Place = z.infer<typeof Place>;
 
 /** Where an element sits on phones: stacked in `order`; `half` elements pair up two to a row. */
 export const PhonePlace = z.strictObject({
   order: z.number().int().min(0).max(20),
-  span: z.enum(["full", "inset", "half", "bleed"]).describe("bleed: edge to edge, only image, photos, decor"),
+  span: z
+    .enum(["full", "inset", "half", "bleed", "tile"])
+    .describe("bleed: edge to edge, only image, photos, decor; tile: half width with no gap or side padding, a 2-column mosaic edge to edge"),
   alignX: z.enum(["start", "center", "end"]).optional(),
   hidden: z.boolean().optional().describe("Only decor and a second image may be hidden on phones"),
 });
@@ -132,6 +134,7 @@ export const ImageElement = z.strictObject({
   mask: Vocab("MASKS").optional(),
   treatment: Vocab("IMAGE_TREATMENTS").optional(),
   scrim: Scrim.optional(),
+  crop: z.enum(["thirds"]).optional().describe("thirds: the photo's focal point on the nearest third line, the subject off-centre"),
 });
 
 export const ActionElement = z.strictObject({
@@ -337,7 +340,10 @@ export const ComposedIntent = z.enum(INTENTS.filter((i) => i !== "system") as [E
 export const ComposedProps = z.strictObject({
   intent: ComposedIntent.describe("What the section is for; a preset layout of the same intent replaces it if it fails the checks"),
   width: z.enum(["contained", "wide", "full"]),
-  minHeight: z.enum(["none", "s", "m", "l", "screen"]).optional().describe("screen = the viewport minus the header, desktop only; phones cap at l"),
+  minHeight: z
+    .enum(["none", "s", "m", "l", "screen", "tall"])
+    .optional()
+    .describe("screen = the viewport minus the header, desktop only; phones cap at l. tall = 80 % of the viewport on desktop, 55 % on phones"),
   rows: z.number().int().min(1).max(MAX_ROWS),
   gap: z.number().int().min(0).max(6).optional().describe("Steps of the spacing scale; default 3"),
   surface: z

@@ -1090,6 +1090,36 @@ ol.cx-st {
   .s-composed:has(.cx-by-top, .cx-by-bottom) {
     overflow: clip;
   }
+  /* An image reaches the section's edge instead of passing it (Design 5: a mosaic or band photo): it grows into the
+     padding (a fill photo stretches; a fixed ratio moves). The section's padding on that side is set to a known value
+     here (--cx-ptop: the opener's half padding, a section with its own paddings their --cx-top), so the image takes
+     exactly that much. */
+  .s-composed:has(.cx-img.cx-by-top) {
+    --cx-ptop: var(--space-section);
+  }
+  main > .s-composed:first-child:has(.cx-img.cx-by-top) {
+    --cx-ptop: calc(var(--space-section) * 0.5);
+  }
+  .s-composed.cx-v2:has(.cx-img.cx-by-top) {
+    --cx-ptop: var(--cx-top);
+  }
+  .s.s.s.s-composed:has(.cx-img.cx-by-top) {
+    padding-top: var(--cx-ptop);
+  }
+  .s.s.s.s-composed:has(.cx-img.cx-by-bottom) {
+    padding-bottom: var(--space-section);
+  }
+  .cx-img.cx-by-top {
+    --cx-by: 0px;
+    margin-top: calc(-1 * var(--cx-ptop));
+  }
+  .cx-img.cx-by-bottom {
+    --cx-by: 0px;
+    margin-bottom: calc(-1 * var(--space-section));
+  }
+  .cx-img.cx-r-fill:is(.cx-by-top, .cx-by-bottom) {
+    align-self: stretch;
+  }
 }
 
 /* Image scrim: the photo layer's flat scrim (.cx-scrim-<strength>, .cx-ro-<role>, region section) over one picture.
