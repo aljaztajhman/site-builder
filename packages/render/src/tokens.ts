@@ -59,9 +59,12 @@ export function tokensCss(design: Design, sub?: SubMotif): string {
     // line above (review 50, "HITRO / POŠTENO"). Display rules take max(var(--lh-floor, 0), their own value).
     ...(design.headingCase === "uppercase" ? { "--lh-floor": "1.05" } : {}),
     // Em per letter of a heading's longest word for FitText (base.css .fit; 0.62 there: lower case, no tracking).
-    ...(design.headingCase === "uppercase" || design.headingTracking > 0
-      ? { "--fit-k": String(Math.round(((design.headingCase === "uppercase" ? 0.8 : 0.62) + Math.max(0, design.headingTracking)) * 1000) / 1000) }
-      : {}),
+    // A type voice's pair carries its face's own letter width (fonts.ts fitK): a condensed face fits bigger, a wide one smaller.
+    ...(pair.fitK !== undefined
+      ? { "--fit-k": String(Math.round(((design.headingCase === "uppercase" ? pair.fitK * 1.3 : pair.fitK) + Math.max(0, design.headingTracking)) * 1000) / 1000) }
+      : design.headingCase === "uppercase" || design.headingTracking > 0
+        ? { "--fit-k": String(Math.round(((design.headingCase === "uppercase" ? 0.8 : 0.62) + Math.max(0, design.headingTracking)) * 1000) / 1000) }
+        : {}),
     "--fs-base": rem(b),
     "--fs-sm": rem(Math.max(14, b / s)),
     "--fs-lg": fluid(b * 1.06, b * s),

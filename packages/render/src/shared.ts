@@ -3,7 +3,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { STYLE_FILES } from "@sb/components";
-import { EDGES, FACT_OBJECTS, IMAGE_TREATMENTS, MASKS, MOTIONS, MOTION_META, SUBMOTIF_BASE, TEXTURES, TYPE_TREATMENTS, WORDMARK_STYLES, allFontFaces, type Section } from "@sb/spec";
+import { EDGES, FACT_OBJECTS, IMAGE_TREATMENTS, MASKS, MOTIONS, MOTION_META, SUBMOTIF_BASE, TEXTURES, TYPE_TREATMENTS, WORDMARK_STYLES, allFontFaces, voiceFontFaces, type Section } from "@sb/spec";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const componentsDir = path.resolve(here, "../../components");
@@ -498,6 +498,8 @@ export function sharedBundle(): SharedBundle {
   // After the hash: the composed sheets and islands (see composedStylesheet, composedIslandFiles).
   for (const sheet of Object.values(COMPOSED_SHEETS).map((get) => get())) if (sheet.css !== "") files.set(sheet.name, Buffer.from(sheet.css, "utf8"));
   for (const f of composedIslandFiles()) files.set(`js/${composedIslandPath(f)}`, readFileSync(path.join(COMPOSED_ISLANDS_DIR, f)));
+  // And the type voices' faces (fonts.ts VOICE_PAIRS): only a spec that names a voice pair loads them.
+  for (const face of voiceFontFaces()) files.set(`fonts/${face.file}.woff2`, readFileSync(path.join(FONTS_DIR, `${face.file}.woff2`)));
   cached = { hash, files };
   return cached;
 }

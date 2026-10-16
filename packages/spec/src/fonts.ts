@@ -18,6 +18,11 @@ export interface FontPair {
   label: string;
   heading: FontFace;
   body: FontFace;
+  /**
+   * The heading face's mean letter width in em, lower case (capitals: × 1.3), for display-headline fitting (render tokens
+   * --fit-k). Absent: the renderer's defaults (0.62 lower case, 0.8 capitals), as for every pair before the type voices.
+   */
+  fitK?: number;
 }
 
 function face(family: string, pkg: string, fallback: FontFace["fallback"], weights: [number, number]): FontFace {
@@ -76,9 +81,14 @@ export const FONT_PAIRS: FontPair[] = [
 ];
 
 export function fontPair(id: string): FontPair {
-  const p = FONT_PAIRS.find((f) => f.id === id);
+  const p = findFontPair(id);
   if (!p) throw new Error(`Unknown font pair: ${id}`);
   return p;
+}
+
+/** A pair the renderer can set: one of FONT_PAIRS or of the type voices' VOICE_PAIRS; undefined for any other id. */
+export function findFontPair(id: string): FontPair | undefined {
+  return FONT_PAIRS.find((f) => f.id === id) ?? VOICE_PAIRS.find((f) => f.id === id);
 }
 
 export function allFontFaces(): FontFace[] {
@@ -292,3 +302,33 @@ export const INVENTORY_FONT_PAIRS: InventoryFontPair[] = [
   ipair(F.newsreader, I.instrumentSans),
   ipair(F.bricolage, I.literata),
 ];
+
+// -------------------------------------------------------------------------------------------------
+// Type voices (M1 type and details, docs/plans/m1-type-details.md; voices.ts)
+
+/** An inventory family as a face the renderer serves (monospace never heads a voice). */
+function served(f: InventoryFontFace, fallback: FontFace["fallback"]): FontFace {
+  return { family: f.family, source: f.source, file: f.file, fallback, weights: f.weights };
+}
+
+/**
+ * The pairs the type voices add, from families already in the inventory (no new download). Not in FONT_PAIRS: the editor's
+ * menu, generation and every stored site are unchanged, and only a spec that names one of these ids renders it. Their
+ * files are served from the shared bundle after its hash (render shared.ts), so the hash stays the same.
+ */
+export const VOICE_PAIRS: FontPair[] = [
+  { id: "young-serif-alegreya", label: "Young Serif / Alegreya", heading: served(I.youngSerif, "serif"), body: served(I.alegreya, "serif"), fitK: 0.62 },
+  { id: "oswald-source-sans", label: "Oswald / Source Sans 3", heading: served(I.oswald, "sans-serif"), body: F.sourceSans3, fitK: 0.46 },
+  { id: "bodoni-albert-sans", label: "Bodoni Moda / Albert Sans", heading: served(I.bodoniModa, "serif"), body: served(I.albertSans, "sans-serif"), fitK: 0.58 },
+  { id: "besley-work-sans", label: "Besley / Work Sans", heading: served(I.besley, "serif"), body: served(I.workSans, "sans-serif"), fitK: 0.64 },
+  { id: "krona-karla", label: "Krona One / Karla", heading: served(I.kronaOne, "sans-serif"), body: F.karla, fitK: 0.84 },
+  { id: "jost-literata", label: "Jost / Literata", heading: served(I.jost, "sans-serif"), body: served(I.literata, "serif"), fitK: 0.55 },
+];
+
+/** The faces of VOICE_PAIRS that FONTS does not already serve. */
+export function voiceFontFaces(): FontFace[] {
+  const own = new Set(allFontFaces().map((f) => f.file));
+  const out = new Map<string, FontFace>();
+  for (const p of VOICE_PAIRS) for (const f of [p.heading, p.body]) if (!own.has(f.file)) out.set(f.file, f);
+  return [...out.values()];
+}
