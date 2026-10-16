@@ -1,0 +1,295 @@
+{
+  "slug": "elektro-zupan",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Elektro Župan Velenje – elektroinštalacije",
+        "description": "Elektroinštalacije v novogradnjah in pri obnovah v Šaleški dolini in na Koroškem. Ogled je brezplačen, cena po ogledu."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "tone": "default",
+          "type": "hero-signature",
+          "props": {
+            "fact": "phone",
+            "intro": "Električno napeljavo naredimo v novogradnjah in pri obnovah hiš in stanovanj. Ogled je brezplačen, cena po ogledu.",
+            "factNote": "Na email odgovorimo isti dan.",
+            "headline": "Elektroinštalacije za vašo hišo",
+            "factLabel": "Pokličite za brezplačen ogled"
+          },
+          "variant": "drawing"
+        },
+        {
+          "id": "s_about",
+          "tone": "default",
+          "type": "about",
+          "props": {
+            "figure": {
+              "label": "Delamo od leta",
+              "value": "2006"
+            },
+            "heading": "Mojster z licenco, ki dela po pravilih",
+            "ownerName": "Andrej Župan",
+            "ownerRole": "mojster elektroinštalater",
+            "paragraphs": [
+              "Vodi nas mojster elektroinštalater Andrej Župan. Delamo trije: mojster in dva sodelavca."
+            ]
+          },
+          "variant": "figure"
+        },
+        {
+          "id": "s_services",
+          "tone": "default",
+          "type": "services-list",
+          "props": {
+            "items": [
+              {
+                "name": "Novogradnje",
+                "description": "Elektroinštalacije v novih hišah in stanovanjih."
+              },
+              {
+                "name": "Obnove",
+                "description": "Elektroinštalacije pri obnovah hiš in stanovanj."
+              },
+              {
+                "name": "Nove omarice",
+                "description": "Zamenjamo stare varovalke z novimi omaricami."
+              },
+              {
+                "name": "Pametne inštalacije",
+                "description": "Napeljava za pametno upravljanje doma."
+              },
+              {
+                "name": "Polnilnice",
+                "description": "Polnilnice za električne avtomobile."
+              },
+              {
+                "name": "Strelovodi",
+                "description": "Postavimo strelovodno zaščito."
+              },
+              {
+                "name": "Meritve",
+                "description": "Meritve z zapisnikom za tehnični pregled."
+              },
+              {
+                "name": "Sončne elektrarne",
+                "description": "Sodelujemo s preverjenim partnerjem."
+              }
+            ],
+            "title": "Kaj vam naredimo"
+          },
+          "variant": "rows"
+        },
+        {
+          "id": "s_area",
+          "tone": "default",
+          "type": "service-area",
+          "props": {
+            "intro": "Prihajamo po celi Šaleški dolini in Koroški.",
+            "title": "Kje delamo"
+          },
+          "variant": "list"
+        },
+        {
+          "id": "s_steps",
+          "tone": "alt",
+          "type": "steps",
+          "props": {
+            "steps": [
+              {
+                "text": "Povejte, kaj potrebujete, in dogovorimo se za ogled.",
+                "title": "Pokličete nas"
+              },
+              {
+                "text": "Ogled je brezplačen. Pogledamo, kaj je treba narediti.",
+                "title": "Pridemo na ogled"
+              },
+              {
+                "text": "Po ogledu vam povemo ceno. Nato se dogovorimo za delo.",
+                "title": "Dobite ponudbo"
+              }
+            ],
+            "heading": "Kako poteka delo"
+          },
+          "variant": "horizontal"
+        },
+        {
+          "id": "s_contact",
+          "tone": "inverse",
+          "type": "contact",
+          "props": {
+            "intro": "Ogled je brezplačen, cena po ogledu.",
+            "title": "Pokličite nas, pridemo na ogled"
+          },
+          "variant": "call-out"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Elektro Župan",
+        "description": "Kako Elektro Župan obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Elektro Župan",
+        "description": "Izjava o dostopnosti spletne strani Elektro Župan."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-14",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Elektro Župan",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "images": []
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "compact"
+    },
+    "header": {
+      "cta": "none",
+      "tone": "default",
+      "variant": "bar"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.25,
+    "colors": {
+      "band": "#12395e",
+      "text": "#101820",
+      "muted": "#465361",
+      "accent": "#a8481a",
+      "border": "#d3dae1",
+      "onBand": "#ffffff",
+      "inverse": "#101820",
+      "primary": "#a8481a",
+      "surface": "#eef1f4",
+      "onInverse": "#f5f5f5",
+      "onPrimary": "#ffffff",
+      "background": "#ffffff"
+    },
+    "radius": 8,
+    "shadow": "none",
+    "density": "regular",
+    "imagery": "natural",
+    "fontPair": "manrope-public-sans",
+    "skeleton": {
+      "cards": "filled",
+      "width": "contained",
+      "footer": "visit",
+      "header": "word",
+      "actions": "header",
+      "buttons": "underline",
+      "dividers": "none",
+      "footerTone": "default",
+      "photoRatio": "landscape"
+    },
+    "direction": "cevi",
+    "headingCase": "normal",
+    "baseFontSize": 17,
+    "headingWeight": 700,
+    "headingTracking": -0.03
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Elektro Župan",
+    "type": "builder",
+    "email": "andrej@elektrozupan.example",
+    "phone": "+38641555917",
+    "address": {
+      "city": "Velenje",
+      "street": "Kidričeva cesta 55",
+      "postalCode": "3320"
+    },
+    "subtype": "electrical",
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      }
+    },
+    "serviceArea": [
+      "Šaleška dolina",
+      "Koroška"
+    ]
+  },
+  "specVersion": 21
+}

@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"The hero stacks a bare 'Pokličite nas' link right under a 'Pokličite' button, and address with 'Navodila za pot' is then repeated three times down the page.\",\"desktopNote\":\"The hero's left column goes dead below the two small text links while the receipt card fills the right, and 'Kje delamo' leaves two thin chips in a vast empty row.\",\"phone\":{\"impression\":3,\"hierarchy\":3,\"imagery\":3,\"spacing\":3,\"clutter\":2,\"distinctiveness\":3},\"desktop\":{\"impression\":3,\"hierarchy\":3,\"imagery\":3,\"spacing\":2,\"clutter\":2,\"distinctiveness\":4},\"fixes\":[\"Merge 'Pred obiskom nas pokličite', 'Obiščite nas' and the footer contact row into one contact block with the address, phone and 'Navodila za pot' appearing once.\",\"Make the hero actions one proper button (Pišite nam or a form) and drop 'Pokličite nas', since the header/bottom bar already carries the call action; style links as buttons instead of thin underlines.\",\"Desktop: let the receipt card sit beside a shorter hero so the left column has no empty band, shrink the '2004' figure, and fill the 'Kje delamo' row with a map or wider region list.\"],\"blockers\":[\"Phone and desktop whole-page captures show the header band laid over the receipt card and headline mid-page, hiding 'Kaj uredimo za vas' and clipping 'Računovodstvo'.\",\"Phone and desktop: the address and 'Navodila za pot' appear in 'Pred obiskom nas pokličite', again in 'Obiščite nas' and the phone/e-mail again in the footer – the same contact block repeated.\"]}",
+  "usage": {
+    "prompt_tokens": 12172,
+    "completion_tokens": 1949
+  },
+  "batch": true
+}

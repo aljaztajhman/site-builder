@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The salon feels recognisable and polished, but generous gaps around the price link push the hairstyle photos unnecessarily low in the first screen.\",\n  \"desktopNote\": \"Strong salon photography and a coherent burgundy palette are undermined by an oversized three-line headline and uneven spacing, especially in the booking section.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 4,\n    \"spacing\": 3,\n    \"clutter\": 4,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 3,\n    \"imagery\": 4,\n    \"spacing\": 3,\n    \"clutter\": 3,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Reduce the desktop hero headline size so it fits two balanced lines, remove forced body-text hyphenation, and give the booking button clear space above the burgundy section.\",\n    \"Tighten the phone hero’s gaps before and after the price link, bringing the three hairstyle photos higher without shrinking them.\",\n    \"Combine the desktop hero booking action and immediate call banner into one clear booking treatment, then place the booking heading directly above the phone number in the contact section.\"\n  ]\n}",
+  "usage": {
+    "prompt_tokens": 8058,
+    "completion_tokens": 423,
+    "cost": 0.0243735
+  }
+}

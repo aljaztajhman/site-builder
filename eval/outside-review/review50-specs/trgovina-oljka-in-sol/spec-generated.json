@@ -1,0 +1,349 @@
+{
+  "slug": "trgovina-oljka-in-sol",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Oljka in sol – istrske dobrote v Kopru",
+        "description": "Majhna trgovina v starem jedru Kopra z izdelki manjših pridelovalcev iz slovenske Istre in Krasa. Darilni paketi in poslovna darila."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "tone": "inverse",
+          "type": "hero-signature",
+          "props": {
+            "fact": "address",
+            "image": "img_01",
+            "inset": "img_02",
+            "intro": "Prodajamo samo izdelke manjših pridelovalcev iz slovenske Istre in Krasa. Darilne pakete sestavimo po vaši želji.",
+            "primary": {
+              "label": "Darilni paketi",
+              "target": {
+                "page": "p_home",
+                "section": "s_gifts"
+              }
+            },
+            "headline": "Okusite Istro iz majhnih rok",
+            "secondary": {
+              "label": "Poglejte izdelke",
+              "target": {
+                "page": "p_home",
+                "section": "s_prices"
+              }
+            }
+          },
+          "variant": "label"
+        },
+        {
+          "id": "s_prices",
+          "type": "price-list",
+          "props": {
+            "intro": "Vsi izdelki prihajajo od manjših pridelovalcev iz slovenske Istre in Krasa.",
+            "title": "Izbrani izdelki",
+            "groups": [
+              {
+                "items": [
+                  {
+                    "name": "Ekstra deviško oljčno olje",
+                    "note": "0,5 l",
+                    "price": {
+                      "amount": 14
+                    }
+                  },
+                  {
+                    "name": "Piranska sol",
+                    "note": "1 kg",
+                    "price": {
+                      "amount": 4.5
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "variant": "tags"
+        },
+        {
+          "id": "s_gifts",
+          "tone": "inverse",
+          "type": "image-text",
+          "props": {
+            "link": {
+              "label": "Naročite po telefonu",
+              "target": {
+                "action": "call"
+              }
+            },
+            "image": "img_03",
+            "heading": "Darilni paket po vaši želji",
+            "paragraphs": [
+              "Paket sestavimo po vaši želji in ga lepo zavijemo. Naročite po telefonu ali e-pošti, prevzem je v trgovini.",
+              "Za podjetja pripravljamo poslovna darila v večjih količinah."
+            ]
+          },
+          "variant": "round"
+        },
+        {
+          "id": "s_gallery",
+          "type": "gallery",
+          "props": {
+            "title": "Utrinki iz trgovine",
+            "images": [
+              {
+                "image": "img_05"
+              },
+              {
+                "image": "img_04"
+              }
+            ]
+          },
+          "variant": "grid"
+        },
+        {
+          "id": "s_contact",
+          "tone": "inverse",
+          "type": "contact",
+          "props": {
+            "intro": "Naročila in vprašanja sprejemamo po telefonu ali e-pošti.",
+            "title": "Pokličite za naročilo darila ali obiščite trgovino"
+          },
+          "variant": "call-out"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Oljka in sol",
+        "description": "Kako Oljka in sol obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Oljka in sol",
+        "description": "Izjava o dostopnosti spletne strani Oljka in sol."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-14",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Oljka in sol",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "images": [
+      {
+        "id": "img_01",
+        "alt": "Lesene police s steklenicami zlatega oljčnega olja, kozarci in česnom ob oknu z razgledom na vas s cerkvijo.",
+        "src": "sites/site_aba838c13c920461/uploads/photo0.jpg",
+        "focal": {
+          "x": 0.35,
+          "y": 0.4
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_02",
+        "alt": "Pletena košara s platnenimi vrečkami in papirnatimi embalažami soli na lesenem pultu.",
+        "src": "sites/site_aba838c13c920461/uploads/photo1.jpg",
+        "focal": {
+          "x": 0.5,
+          "y": 0.6
+        },
+        "width": 1024,
+        "height": 1536
+      },
+      {
+        "id": "img_03",
+        "alt": "Darilna škatla s steklenico oljčnega olja, vrečko morske soli in kozarcem medu na slami.",
+        "src": "sites/site_aba838c13c920461/uploads/photo2.jpg",
+        "focal": {
+          "x": 0.55,
+          "y": 0.55
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_04",
+        "alt": "Kamnita hiša z lesenimi vrati, lončnicami in klopjo na tlakovani ulici, ki vodi proti morju.",
+        "src": "sites/site_aba838c13c920461/uploads/photo3.jpg",
+        "focal": {
+          "x": 0.4,
+          "y": 0.45
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_05",
+        "alt": "Narezan pršut, cela gnata in kosi sira na lesenem pultu z nožem v trgovini.",
+        "src": "sites/site_aba838c13c920461/uploads/photo4.jpg",
+        "focal": {
+          "x": 0.35,
+          "y": 0.5
+        },
+        "width": 1024,
+        "height": 1536
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "compact"
+    },
+    "header": {
+      "cta": "call",
+      "tone": "inverse",
+      "variant": "bar"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.25,
+    "colors": {
+      "band": "#1f5f7a",
+      "text": "#23281a",
+      "muted": "#4d5440",
+      "accent": "#b07a22",
+      "border": "#cadde4",
+      "onBand": "#ffffff",
+      "inverse": "#12384a",
+      "primary": "#1f5f7a",
+      "surface": "#e2eef2",
+      "onInverse": "#f5f5f5",
+      "onPrimary": "#ffffff",
+      "background": "#ffffff"
+    },
+    "radius": 6,
+    "shadow": "none",
+    "density": "regular",
+    "imagery": "natural",
+    "fontPair": "newsreader-libre-franklin",
+    "skeleton": {
+      "cards": "filled",
+      "width": "contained",
+      "footer": "visit",
+      "header": "word",
+      "actions": "bar",
+      "buttons": "underline",
+      "dividers": "none",
+      "footerTone": "inverse",
+      "photoRatio": "landscape"
+    },
+    "direction": "etiketa",
+    "headingCase": "normal",
+    "baseFontSize": 17,
+    "headingWeight": 700,
+    "headingTracking": -0.025
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Oljka in sol",
+    "type": "shop",
+    "email": "narocila@oljka-in-sol.example",
+    "hours": {
+      "note": "Julija in avgusta smo odprti tudi ob nedeljah od 9.00 do 12.00.",
+      "entries": [
+        {
+          "to": "fri",
+          "from": "mon",
+          "open": "08:00",
+          "close": "19:00"
+        },
+        {
+          "to": "sat",
+          "from": "sat",
+          "open": "08:00",
+          "close": "13:00"
+        },
+        {
+          "to": "sun",
+          "from": "sun",
+          "closed": true
+        }
+      ]
+    },
+    "phone": "+38655551860",
+    "address": {
+      "city": "Koper",
+      "street": "Kidričeva ulica 22",
+      "postalCode": "6000"
+    },
+    "subtype": "deli",
+    "provider": {
+      "vatPayer": true,
+      "legalName": "Oljka in sol, trgovina, d.o.o.",
+      "taxNumber": "SI91234567",
+      "registrationNumber": "9123456000"
+    }
+  },
+  "specVersion": 21
+}

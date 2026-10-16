@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The workshop photography and restrained dark palette feel appropriate, but the first screen omits the location and gives call and directions links equal visual weight.\",\n  \"desktopNote\": \"The oversized hero photograph pushes the primary action below the first screen, while the location appears much farther down the page.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 3,\n    \"imagery\": 4,\n    \"spacing\": 3,\n    \"clutter\": 3,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 2,\n    \"imagery\": 5,\n    \"spacing\": 3,\n    \"clutter\": 3,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Reduce the desktop hero height and move its text panel upward so the headline, a compact location line and a prominent call button all fit within the first screen; use the same action hierarchy on the\"\n  ],\n  \"blockers\": []\n}",
+  "usage": {
+    "prompt_tokens": 10228,
+    "completion_tokens": 382,
+    "cost": 0.0293885
+  }
+}

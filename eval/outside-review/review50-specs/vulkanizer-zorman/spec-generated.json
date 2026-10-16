@@ -1,0 +1,320 @@
+{
+  "slug": "vulkanizer-zorman",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Vulkanizerstvo Zorman Ptuj | Gume, menjava, krpanje",
+        "description": "Družinska vulkanizerska delavnica v Ptuju na Ormoški cesti. Menjava, centriranje, krpanje, hramba in prodaja gum. Pokličite in se naročite."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "tone": "inverse",
+          "type": "hero-signature",
+          "props": {
+            "fact": "phone",
+            "image": "img_g1",
+            "intro": "Menjamo in centriramo gume za osebna vozila, kombije in manjše traktorje. Spomladi in jeseni je gneča, zato se naročite po telefonu.",
+            "headline": "Gume menjamo hitro in pošteno",
+            "factLabel": "Naročite se po telefonu"
+          },
+          "variant": "photo"
+        },
+        {
+          "id": "s_services",
+          "tone": "default",
+          "type": "services-list",
+          "props": {
+            "items": [
+              {
+                "name": "Menjava in centriranje",
+                "description": "Za osebna vozila, kombije in manjše traktorje."
+              },
+              {
+                "name": "Krpanje gume",
+                "description": "Popravilo predrte gume."
+              },
+              {
+                "name": "Hramba kompleta",
+                "description": "Hranimo vaše gume čez eno sezono."
+              },
+              {
+                "name": "Polnjenje z dušikom",
+                "description": "Gume napolnimo z dušikom."
+              },
+              {
+                "name": "Prodaja novih gum",
+                "description": "Nove gume vseh večjih znamk, cene po ponudbi."
+              }
+            ],
+            "title": "Kaj delamo"
+          },
+          "variant": "two-column"
+        },
+        {
+          "id": "s_steps",
+          "tone": "default",
+          "type": "steps",
+          "props": {
+            "steps": [
+              {
+                "text": "Dogovorimo se za termin, spomladi in jeseni je gneča.",
+                "title": "Pokličete nas"
+              },
+              {
+                "text": "Peljete na Ormoško cesto 41, takoj za bencinsko črpalko.",
+                "title": "Pridete v delavnico"
+              },
+              {
+                "text": "Zamenjamo, centriramo, zakrpamo ali shranimo vaš komplet.",
+                "title": "Uredimo gume"
+              }
+            ],
+            "heading": "Kako poteka obisk"
+          },
+          "variant": "vertical"
+        },
+        {
+          "id": "s_prices",
+          "tone": "inverse",
+          "type": "price-list",
+          "props": {
+            "title": "Cene storitev",
+            "groups": [
+              {
+                "items": [
+                  {
+                    "name": "Menjava in centriranje kompleta",
+                    "price": {
+                      "amount": 28
+                    }
+                  },
+                  {
+                    "name": "Krpanje gume",
+                    "price": {
+                      "amount": 12
+                    }
+                  },
+                  {
+                    "name": "Hramba kompleta za sezono",
+                    "price": {
+                      "amount": 35
+                    }
+                  }
+                ]
+              }
+            ],
+            "footnote": "Cene novih gum so po ponudbi."
+          },
+          "variant": "tags"
+        },
+        {
+          "id": "s_contact",
+          "tone": "alt",
+          "type": "contact",
+          "props": {
+            "title": "Pokličite nas in se naročite"
+          },
+          "variant": "call-out"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Vulkanizerstvo Zorman",
+        "description": "Kako Vulkanizerstvo Zorman obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Vulkanizerstvo Zorman",
+        "description": "Izjava o dostopnosti spletne strani Vulkanizerstvo Zorman."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-15",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Vulkanizerstvo Zorman",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "images": [
+      {
+        "id": "img_g1",
+        "alt": "Kup avtomobilskih gum s profilom, naslonjen na steno",
+        "src": "sites/site_1af9772eca35dfb2/generated/img_g1.jpg",
+        "width": 1536,
+        "height": 1024,
+        "origin": "generated"
+      },
+      {
+        "id": "img_g2",
+        "alt": "Bližnji posnetek ventila in bočnice pnevmatike z vodnimi kapljicami",
+        "src": "sites/site_1af9772eca35dfb2/generated/img_g2.jpg",
+        "width": 1536,
+        "height": 1024,
+        "origin": "generated"
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "compact"
+    },
+    "header": {
+      "cta": "none",
+      "tone": "inverse",
+      "variant": "bar"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.28,
+    "colors": {
+      "band": "#3d8bfd",
+      "text": "#15181c",
+      "muted": "#4a525c",
+      "accent": "#3d8bfd",
+      "border": "#d9dee4",
+      "onBand": "#15181c",
+      "inverse": "#15181c",
+      "primary": "#15181c",
+      "surface": "#e9eef6",
+      "onInverse": "#f5f5f5",
+      "onPrimary": "#ffffff",
+      "background": "#ffffff"
+    },
+    "radius": 5,
+    "shadow": "none",
+    "density": "regular",
+    "imagery": "natural",
+    "fontPair": "archivo-public-sans",
+    "skeleton": {
+      "cards": "none",
+      "width": "full",
+      "footer": "wordmark",
+      "header": "phone",
+      "actions": "header",
+      "buttons": "soft",
+      "dividers": "motif",
+      "footerTone": "alt",
+      "photoRatio": "portrait"
+    },
+    "direction": "tablica",
+    "headingCase": "uppercase",
+    "baseFontSize": 17,
+    "headingWeight": 900,
+    "headingTracking": -0.02
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Vulkanizerstvo Zorman",
+    "type": "car-repair",
+    "email": {
+      "$placeholder": "email"
+    },
+    "hours": {
+      "note": "Spomladi in jeseni je gneča, zato se prej naročite po telefonu.",
+      "entries": [
+        {
+          "to": "fri",
+          "from": "mon",
+          "open": "07:30",
+          "close": "17:00"
+        },
+        {
+          "to": "sat",
+          "from": "sat",
+          "open": "08:00",
+          "close": "12:00"
+        }
+      ]
+    },
+    "phone": "+38641555864",
+    "address": {
+      "city": "Ptuj",
+      "street": "Ormoška cesta 41",
+      "postalCode": "2250"
+    },
+    "subtype": "tyres",
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      }
+    }
+  },
+  "specVersion": 21
+}

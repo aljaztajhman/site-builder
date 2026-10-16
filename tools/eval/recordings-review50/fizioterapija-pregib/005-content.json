@@ -1,0 +1,18 @@
+{
+  "seq": 5,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "a2d6488d13f0d4b2",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"booking\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Fizioterapija Pregib, Novo mesto\",\"description\":\"Individualna fizioterapevtska ambulanta v Novem mestu. Tina Zupan, dipl. fiziot. Ena ura je namenjena enemu pacientu. Napotnica ni potrebna.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"bend\",\"props\":{\"headline\":\"Ena ura, en pacient\",\"intro\":\"Sem Tina Zupan, dipl. fiziot. Obravnavam bolečine v hrbtu in vratu, poškodbe in stanja po operacijah. Napotnica ni potrebna.\",\"fact\":\"address\",\"image\":\"img_01\",\"primary\":{\"label\":\"Naročite se na termin\",\"target\":{\"action\":\"booking\"}},\"secondary\":{\"label\":\"Pokličite me\",\"target\":{\"action\":\"call\"}}}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"week\",\"tone\":\"alt\",\"props\":{\"title\":\"Kdaj vas sprejmem\",\"note\":\"Samo po predhodnem naročilu. Vhod z dvorišča, 2. nadstropje.\"}},{\"id\":\"s_booking\",\"type\":\"booking\",\"variant\":\"simple\",\"props\":{\"heading\":\"Pridite po dogovoru\",\"text\":\"Delam samo po predhodnem naročilu, od ponedeljka do petka. Termin si izberete na spletu ali me pokličete.\",\"action\":{\"label\":\"Izberite termin\",\"target\":{\"action\":\"booking\"}}}},{\"id\":\"s_services\",\"type\":\"services-list\",\"variant\":\"aside\",\"tone\":\"alt\",\"props\":{\"title\":\"Kdo pride k meni\",\"items\":[{\"name\":\"Bolečine v hrbtu in vratu\"},{\"name\":\"Poškodbe kolena\"},{\"name\":\"Poškodbe rame\"},{\"name\":\"Stanja po operacijah\"},{\"name\":\"Športniki\"}],\"note\":{\"title\":\"Samoplačniške storitve\",\"text\":\"Napotnica ni potrebna. Storitve plačate sami.\"}}},{\"id\":\"s_team\",\"type\":\"team\",\"variant\":\"grid\",\"props\":{\"title\":\"Kdo vas obravnava\",\"members\":[{\"name\":\"Tina Zupan\",\"role\":\"dipl. fiziot.\"}]}},{\"id\":\"s_cta\",\"type\":\"cta\",\"variant\":\"band\",\"tone\":\"band\",\"props\":{\"heading\":\"Rezervirajte svoj termin\",\"text\":\"Ena ura je namenjena samo vam. Naročite se na spletu ali me pokličite.\",\"primary\":{\"label\":\"Naročite se\",\"target\":{\"action\":\"booking\"}},\"secondary\":{\"label\":\"Pokličite me\",\"target\":{\"action\":\"call\"}}}},{\"id\":\"s_strip\",\"type\":\"contact-strip\",\"variant\":\"cards\",\"props\":{\"title\":\"Obiščite me\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2928,
+      "output_tokens": 1041,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "seq": 6,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "4fccfc8827999e2f",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\",\"tone\":\"default\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Oljka in sol – istrske dobrote v Kopru\",\"description\":\"Majhna trgovina v starem jedru Kopra z izdelki manjših pridelovalcev iz slovenske Istre in Krasa. Darilni paketi in poslovna darila.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"label\",\"tone\":\"inverse\",\"props\":{\"eyebrow\":\"Istrske dobrote\",\"headline\":\"Okusi Istre iz majhnih rok\",\"intro\":\"Prodajamo samo izdelke manjših pridelovalcev iz slovenske Istre in Krasa. Darilne pakete sestavimo po vaši želji.\",\"fact\":\"address\",\"image\":\"img_01\",\"inset\":\"img_02\",\"primary\":{\"label\":\"Darilni paketi\",\"target\":{\"page\":\"p_home\",\"section\":\"s_gifts\"}},\"secondary\":{\"label\":\"Poglejte izdelke\",\"target\":{\"page\":\"p_home\",\"section\":\"s_prices\"}}}},{\"id\":\"s_prices\",\"type\":\"price-list\",\"variant\":\"tags\",\"props\":{\"title\":\"Izbrani izdelki\",\"intro\":\"Vsi izdelki prihajajo od manjših pridelovalcev iz slovenske Istre in Krasa.\",\"groups\":[{\"items\":[{\"name\":\"Ekstra deviško oljčno olje\",\"note\":\"0,5 l\",\"price\":{\"amount\":14}},{\"name\":\"Piranska sol\",\"note\":\"1 kg\",\"price\":{\"amount\":4.5}}]}]}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"photo\",\"tone\":\"alt\",\"props\":{\"title\":\"Kdaj smo odprti\",\"note\":\"Julija in avgusta smo odprti tudi ob nedeljah od 9.00 do 12.00.\",\"image\":\"img_04\",\"inset\":\"img_05\"}},{\"id\":\"s_gifts\",\"type\":\"image-text\",\"variant\":\"round\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Darilni paket po vaši želji\",\"paragraphs\":[\"Paket sestavimo po vaši želji in ga lepo zavijemo. Naročite po telefonu ali e-pošti, prevzem je v trgovini.\",\"Za podjetja pripravljamo poslovna darila v večjih količinah.\"],\"image\":\"img_03\",\"link\":{\"label\":\"Naročite po telefonu\",\"target\":{\"action\":\"call\"}}}},{\"id\":\"s_gallery\",\"type\":\"gallery\",\"variant\":\"grid\",\"props\":{\"title\":\"Utrinki iz trgovine\",\"images\":[{\"image\":\"img_05\"},{\"image\":\"img_02\"},{\"image\":\"img_04\"},{\"image\":\"img_03\"}]}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"inverse\",\"props\":{\"title\":\"Pokličite za naročilo darila ali obiščite trgovino\",\"intro\":\"Naročila in vprašanja sprejemamo po telefonu ali e-pošti.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 3143,
+      "output_tokens": 1086,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

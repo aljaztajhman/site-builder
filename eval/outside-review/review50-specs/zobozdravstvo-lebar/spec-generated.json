@@ -1,0 +1,329 @@
+{
+  "slug": "zobozdravstvo-lebar",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Zobozdravstvo Lebar Maribor – zobna ambulanta",
+        "description": "Zasebna zobna ambulanta v središču Maribora. Prvi obisk je pogovor in pregled, brez posegov. Sprejemamo odrasle in otroke od 3. leta."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "type": "hero-signature",
+          "props": {
+            "fact": "phone",
+            "image": "img_03",
+            "intro": "Smo zasebna zobna ambulanta v središču Maribora. Brez posegov in brez naglice vam prisluhnemo, tudi če vas je zobozdravnika strah.",
+            "factNote": "Sprejemamo tudi otroke od 3. leta.",
+            "headline": "Prvi obisk je le pogovor in pregled",
+            "factLabel": "Naročite se",
+            "secondary": {
+              "label": "Pišite nam",
+              "target": {
+                "action": "email"
+              }
+            }
+          },
+          "variant": "disc"
+        },
+        {
+          "id": "s_hours",
+          "tone": "alt",
+          "type": "opening-hours",
+          "props": {
+            "note": "Za pregled se naročite po telefonu, da imamo zanj dovolj časa.",
+            "title": "Kdaj vas sprejmemo"
+          },
+          "variant": "week"
+        },
+        {
+          "id": "s_services",
+          "type": "services-list",
+          "props": {
+            "note": {
+              "text": "Nismo koncesionarji ZZZS, vse storitve so samoplačniške.",
+              "title": "Samoplačniško"
+            },
+            "items": [
+              {
+                "name": "Preventivni pregledi"
+              },
+              {
+                "name": "Čiščenje zobnega kamna"
+              },
+              {
+                "name": "Zalivke"
+              },
+              {
+                "name": "Beljenje zob"
+              },
+              {
+                "name": "Prevleke"
+              },
+              {
+                "name": "Mostički"
+              },
+              {
+                "name": "Proteze"
+              },
+              {
+                "name": "Vsaditve (implantati)",
+                "description": "Kirurški del opravi zunanji oralni kirurg, s katerim sodelujemo. Protetični del opravimo pri nas."
+              }
+            ],
+            "title": "Naše storitve"
+          },
+          "variant": "aside"
+        },
+        {
+          "id": "s_team",
+          "type": "team",
+          "props": {
+            "image": "img_01",
+            "inset": "img_02",
+            "title": "Ljudje v ambulanti",
+            "members": [
+              {
+                "name": "dr. Urška Lebar, dr. dent. med.",
+                "role": "Vodja ambulante, specialistka stomatološke protetike"
+              },
+              {
+                "name": "Maja Horvat",
+                "role": "Zobna asistentka"
+              }
+            ]
+          },
+          "variant": "photo"
+        },
+        {
+          "id": "s_contact",
+          "tone": "band",
+          "type": "contact",
+          "props": {
+            "title": "Za termin nas pokličite"
+          },
+          "variant": "call-out"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Zobozdravstvo Lebar",
+        "description": "Kako Zobozdravstvo Lebar obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Zobozdravstvo Lebar",
+        "description": "Izjava o dostopnosti spletne strani Zobozdravstvo Lebar."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-14",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Zobozdravstvo Lebar",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "images": [
+      {
+        "id": "img_01",
+        "alt": "Svetla zobozdravstvena ordinacija z modrim zobnim stolom, svetilko in belimi omarami, skozi okno se vidi grajen hribovit pokrajinski razgled.",
+        "src": "sites/site_8010f25366852585/uploads/photo0.jpg",
+        "focal": {
+          "x": 0.4,
+          "y": 0.55
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_02",
+        "alt": "Čakalnica z zelenimi stoli ob steni, mizico s steklenico vode in kozarci ter zelenimi rastlinami pod sliko gora.",
+        "src": "sites/site_8010f25366852585/uploads/photo1.jpg",
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "width": 1024,
+        "height": 1536
+      },
+      {
+        "id": "img_03",
+        "alt": "Zobozdravnica z masko in rokavicami pregleduje pacientko, ki leži na zobnem stolu, na pladnju v ospredju so instrumenti.",
+        "src": "sites/site_8010f25366852585/uploads/photo2.jpg",
+        "focal": {
+          "x": 0.45,
+          "y": 0.45
+        },
+        "width": 1536,
+        "height": 1024
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "compact"
+    },
+    "header": {
+      "cta": "none",
+      "tone": "default",
+      "variant": "bar"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.25,
+    "colors": {
+      "band": "#1d3557",
+      "text": "#13213a",
+      "muted": "#47546a",
+      "accent": "#d4573c",
+      "border": "#d3dbe5",
+      "onBand": "#ffffff",
+      "inverse": "#13213a",
+      "primary": "#1d3557",
+      "surface": "#e8edf3",
+      "onInverse": "#eef1f6",
+      "onPrimary": "#ffffff",
+      "background": "#ffffff"
+    },
+    "radius": 11,
+    "shadow": "none",
+    "density": "airy",
+    "imagery": "natural",
+    "fontPair": "inter-tight-inter",
+    "skeleton": {
+      "cards": "none",
+      "width": "full",
+      "footer": "wordmark",
+      "header": "word",
+      "actions": "bar",
+      "buttons": "square",
+      "centred": [
+        "s_cta"
+      ],
+      "dividers": "none",
+      "footerTone": "alt",
+      "photoRatio": "square"
+    },
+    "direction": "nasmeh",
+    "headingCase": "normal",
+    "baseFontSize": 17,
+    "headingWeight": 800,
+    "headingTracking": -0.03
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Zobozdravstvo Lebar",
+    "type": "dental",
+    "email": "info@zobozdravstvo-lebar.example",
+    "hours": {
+      "entries": [
+        {
+          "to": "mon",
+          "from": "mon",
+          "open": "12:00",
+          "close": "19:00"
+        },
+        {
+          "to": "tue",
+          "from": "tue",
+          "open": "07:00",
+          "close": "14:00"
+        },
+        {
+          "to": "wed",
+          "from": "wed",
+          "open": "12:00",
+          "close": "19:00"
+        },
+        {
+          "to": "fri",
+          "from": "thu",
+          "open": "07:00",
+          "close": "14:00"
+        }
+      ]
+    },
+    "phone": "+38625553120",
+    "address": {
+      "city": "Maribor",
+      "street": "Gosposvetska cesta 36",
+      "postalCode": "2000"
+    },
+    "provider": {
+      "legalName": "Lebar zobozdravstvo d.o.o.",
+      "taxNumber": "SI77889900",
+      "registrationNumber": "7788990000"
+    }
+  },
+  "specVersion": 21
+}

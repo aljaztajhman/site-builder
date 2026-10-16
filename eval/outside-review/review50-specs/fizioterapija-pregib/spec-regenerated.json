@@ -1,0 +1,300 @@
+{
+  "slug": "fizioterapija-pregib",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Fizioterapija Pregib, Novo mesto",
+        "description": "Individualna fizioterapevtska ambulanta v Novem mestu. Manualna terapija, terapevtske vaje, dry needling in kinesio taping. Naročanje na spletu."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "tone": "default",
+          "type": "hero-split",
+          "props": {
+            "image": "img_01",
+            "intro": "Sem Tina Zupan, diplomirana fizioterapevtka. Pomagam vam pri bolečinah v hrbtu in vratu, po poškodbah in operacijah. Napotnica ni potrebna.",
+            "eyebrow": "Fizioterapevtska ambulanta",
+            "primary": {
+              "label": "Naročite se na obravnavo",
+              "target": {
+                "action": "booking"
+              }
+            },
+            "headline": "Ena ura je namenjena samo vam"
+          },
+          "variant": "image-right"
+        },
+        {
+          "id": "s_hours",
+          "tone": "alt",
+          "type": "opening-hours",
+          "props": {
+            "title": "Kdaj vas sprejmem"
+          },
+          "variant": "week"
+        },
+        {
+          "id": "s_about",
+          "tone": "default",
+          "type": "image-text",
+          "props": {
+            "image": "img_g2",
+            "eyebrow": "Individualna obravnava",
+            "heading": "Obravnava, ki ji je namenjen ves čas",
+            "paragraphs": [
+              "Delam z manualno terapijo, terapevtskimi vajami, dry needlingom in kinesio tapingom. Obravnavo izberem glede na vaše težave.",
+              "Dvanajst let sem delala v bolnišnici, zadnja štiri leta imam lastno ambulanto. Storitve so samoplačniške."
+            ]
+          },
+          "variant": "image-left"
+        },
+        {
+          "id": "s_services",
+          "tone": "alt",
+          "type": "services-list",
+          "props": {
+            "items": [
+              {
+                "name": "Prva obravnava s pregledom",
+                "price": {
+                  "amount": 55
+                },
+                "description": "Pregled in prva obravnava, 60 minut."
+              },
+              {
+                "name": "Terapija",
+                "price": {
+                  "amount": 45
+                },
+                "description": "Individualna terapija, 45 minut."
+              },
+              {
+                "name": "Dry needling kot dodatek",
+                "price": {
+                  "amount": 30
+                },
+                "description": "Dodatek k terapiji."
+              },
+              {
+                "name": "Paket 5 terapij",
+                "price": {
+                  "amount": 200
+                },
+                "description": "Pet terapij po ugodnejši ceni."
+              }
+            ],
+            "title": "Obravnave in cene"
+          },
+          "variant": "two-column"
+        },
+        {
+          "id": "s_booking",
+          "tone": "inverse",
+          "type": "booking",
+          "props": {
+            "text": "Naročite se prek spleta ali me pokličite. Sprejemam samo po predhodnem naročilu.",
+            "action": {
+              "label": "Naročite se",
+              "target": {
+                "action": "booking"
+              }
+            },
+            "heading": "Rezervirajte svoj termin"
+          },
+          "variant": "simple"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Fizioterapija Pregib",
+        "description": "Kako Fizioterapija Pregib obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Fizioterapija Pregib",
+        "description": "Izjava o dostopnosti spletne strani Fizioterapija Pregib."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-14",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Fizioterapija Pregib",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "logo": {
+      "src": "sites/site_4cb14c70058e7e46/uploads/logo.svg",
+      "file": "logo.png",
+      "width": 180,
+      "height": 48
+    },
+    "images": [
+      {
+        "id": "img_01",
+        "alt": "Svetla fizioterapevtska ordinacija z masažno mizo, švedsko lestvijo, žogami za vadbo in elastikami ter oknom s pogledom na hribe.",
+        "src": "sites/site_4cb14c70058e7e46/uploads/photo0.jpg",
+        "focal": {
+          "x": 0.4,
+          "y": 0.6
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_g2",
+        "alt": "Kinesio trak, lesena masažna žoga in zložena bela brisača na svetli leseni mizi",
+        "src": "sites/site_4cb14c70058e7e46/generated/img_g2.jpg",
+        "width": 1536,
+        "height": 1024,
+        "origin": "generated"
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "columns"
+    },
+    "header": {
+      "cta": "booking",
+      "tone": "default",
+      "variant": "bar"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.22,
+    "colors": {
+      "text": "#102230",
+      "muted": "#4a5d6b",
+      "accent": "#137970",
+      "border": "#d3e0ea",
+      "inverse": "#0c2331",
+      "primary": "#116c64",
+      "surface": "#ffffff",
+      "onInverse": "#f5f5f5",
+      "onPrimary": "#ffffff",
+      "background": "#f1f6fb"
+    },
+    "radius": 10,
+    "shadow": "subtle",
+    "density": "airy",
+    "imagery": "rounded",
+    "fontPair": "manrope-public-sans",
+    "skeleton": {
+      "cards": "bordered",
+      "width": "wide",
+      "footer": "wordmark",
+      "header": "compact",
+      "actions": "header",
+      "buttons": "underline",
+      "dividers": "none",
+      "footerTone": "default",
+      "photoRatio": "standard"
+    },
+    "direction": "clinical-calm",
+    "headingCase": "normal",
+    "baseFontSize": 17,
+    "headingWeight": 700,
+    "headingTracking": -0.01
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Fizioterapija Pregib",
+    "type": "physio",
+    "email": "tina@pregib.example",
+    "hours": {
+      "note": "Samo po predhodnem naročilu. Vhod z dvorišča, 2. nadstropje.",
+      "entries": [
+        {
+          "to": "fri",
+          "from": "mon",
+          "open": "07:00",
+          "close": "20:00"
+        }
+      ]
+    },
+    "phone": "+38651555642",
+    "address": {
+      "city": "Novo mesto",
+      "street": "Glavni trg 9",
+      "postalCode": "8000"
+    },
+    "provider": {
+      "legalName": "Tina Zupan s.p.",
+      "taxNumber": "60112233",
+      "registrationNumber": "6011223000"
+    },
+    "bookingUrl": "https://pregib.example/narocanje"
+  },
+  "specVersion": 21
+}

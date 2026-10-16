@@ -1,0 +1,18 @@
+{
+  "seq": 3,
+  "stage": "brief",
+  "model": "claude-sonnet-5-5",
+  "hash": "c877ffe8d8aa8208",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"businessType\":\"shop\",\"name\":\"Inštrukcije Pia\",\"town\":\"Maribor\",\"summary\":\"Pia Lešnik, profesorica matematike, že 9 let daje inštrukcije matematike in fizike za osnovno in srednjo šolo. Pomaga pri sprotnem delu, pred testi ter pri pripravi na NPZ in maturo. Inštrukcije potekajo doma v Mariboru ali online prek Zooma.\",\"audience\":\"Osnovnošolci, srednješolci in njihovi starši v Mariboru in okolici ter dijaki, ki se pripravljajo na NPZ in maturo.\",\"tone\":\"friendly\",\"offerings\":[{\"group\":\"Inštrukcije\",\"name\":\"Ura inštrukcij (60 minut)\",\"description\":\"Matematika in fizika za osnovno in srednjo šolo.\",\"price\":{\"amount\":18,\"from\":false,\"unit\":\"ura\"}},{\"group\":\"Inštrukcije\",\"name\":\"Paket 10 ur\",\"description\":\"Paket desetih ur inštrukcij.\",\"price\":{\"amount\":160,\"from\":false,\"unit\":\"paket\"}},{\"group\":\"Priprava na maturo\",\"name\":\"Priprava na maturo v skupini\",\"description\":\"Skupina do 4 dijakov.\",\"price\":{\"amount\":12,\"from\":false,\"unit\":\"ura/dijak\"}}],\"highlights\":[\"Profesorica matematike z 9 leti inštruiranja\",\"Delo z vsakim posebej, v njegovem tempu, brez pritiska\",\"Prvo srečanje je za spoznavanje: pogledava, kje so težave, in naredim načrt\",\"Osnovna in višja raven pri NPZ in maturi\",\"Za dijake iz Maribora tudi na domu\"],\"facts\":{\"phone\":\"+38631555906\",\"email\":\"pia.lesnik@mail.example\",\"address\":null,\"hours\":null,\"hoursNote\":\"Termine dogovorimo sproti, večinoma popoldne in ob sobotah, med počitnicami tudi dopoldne.\",\"bookingUrl\":null,\"social\":[],\"legalName\":null,\"registrationNumber\":null,\"taxNumber\":null,\"vatPayer\":null,\"serviceArea\":[\"Maribor\"],\"people\":[{\"name\":\"Pia Lešnik\",\"role\":\"profesorica matematike\"}]},\"pages\":[{\"kind\":\"home\",\"slug\":\"\",\"navLabel\":\"Domov\",\"purpose\":\"Kaj nudim, za koga, cene in kako me pokličete ali pišete.\"},{\"kind\":\"standard\",\"slug\":\"instrukcije\",\"navLabel\":\"Inštrukcije\",\"purpose\":\"Predmeti, ravni, priprava na NPZ in maturo, potek prvega srečanja.\"},{\"kind\":\"standard\",\"slug\":\"cenik\",\"navLabel\":\"Cenik\",\"purpose\":\"Cena ure, paket 10 ur in skupinska priprava na maturo.\"},{\"kind\":\"standard\",\"slug\":\"o-meni\",\"navLabel\":\"O meni\",\"purpose\":\"Pia Lešnik, profesorica matematike, način dela.\"},{\"kind\":\"standard\",\"slug\":\"kontakt\",\"navLabel\":\"Kontakt\",\"purpose\":\"Telefon, sms, e-pošta, kje poteka pouk (doma, online, na domu).\"}],\"missing\":[\"delovni čas\",\"spletna stran ali povezava do Zooma\",\"ravni in razredi, ki jih poučuje\"],\"imageIdeas\":[{\"subject\":\"Open maths notebook with a pencil, ruler and compass on a wooden desk, soft daylight from a window, no people, no text\",\"alt\":\"Zvezek z matematičnimi nalogami, svinčnik, ravnilo in šestilo na leseni mizi\"},{\"subject\":\"Stack of textbooks with a simple scientific calculator and a mug on a table near a window, warm afternoon light, no people, no text\",\"alt\":\"Kup učbenikov, računalo in skodelica na mizi ob oknu\"}],\"concept\":{\"subtype\":null,\"goal\":\"call\",\"angle\":\"person\",\"signatureFact\":\"price\",\"materials\":[\"matematika\",\"fizika\",\"NPZ\",\"matura\"],\"localAnchor\":\"Maribor\"}}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6658,
+      "output_tokens": 1397,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

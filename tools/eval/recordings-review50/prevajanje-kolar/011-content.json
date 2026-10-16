@@ -1,0 +1,18 @@
+{
+  "seq": 11,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "ce4c7cd37c324a94",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\",\"tone\":\"default\"},\"footer\":{\"variant\":\"columns\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Sodna tolmačka za nemščino in angleščino, Ljubljana\",\"description\":\"Nina Kolar prevaja in overja listine, dela strokovne prevode ter tolmači na sodišču, pri notarju in na upravni enoti. Pisarna v Ljubljani.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-split\",\"variant\":\"image-right\",\"tone\":\"default\",\"props\":{\"eyebrow\":\"Sodna tolmačka\",\"headline\":\"Overjeni prevodi listin za nemščino in angleščino\",\"intro\":\"Prevajam in overjam listine za tujino in iz tujine, delam strokovne prevode za podjetja ter tolmačim na sodišču, pri notarju in na upravni enoti.\",\"primary\":{\"label\":\"Pošljite povpraševanje\",\"target\":{\"action\":\"email\"}},\"secondary\":{\"label\":\"Pot do pisarne\",\"target\":{\"action\":\"directions\"}},\"image\":\"img_g3\"}},{\"id\":\"s_prices\",\"type\":\"price-list\",\"variant\":\"tags\",\"tone\":\"alt\",\"props\":{\"title\":\"Cene prevodov in overitev\",\"intro\":\"Cene, ki jih že lahko povem vnaprej.\",\"groups\":[{\"items\":[{\"name\":\"Prevod listin z overitvijo, na stran\",\"price\":{\"amount\":25,\"from\":true,\"unit\":\"stran\"}},{\"name\":\"Sodna overitev, na dokument\",\"price\":{\"amount\":10,\"unit\":\"dokument\"}}]}],\"footnote\":\"Nujni prevod v 24 urah stane za polovico več od običajnega.\"}},{\"id\":\"s_services\",\"type\":\"services-list\",\"variant\":\"rows\",\"tone\":\"default\",\"props\":{\"eyebrow\":\"Storitve\",\"title\":\"Kaj prevajam in tolmačim\",\"items\":[{\"name\":\"Prevod listin z overitvijo\",\"description\":\"Rojstne liste, diplome, spričevala, pogodbe, sodbe, zdravniške izvide in dokumente za uvoz avta, za tujino in iz tujine.\",\"price\":{\"amount\":25,\"from\":true,\"unit\":\"stran\"}},{\"name\":\"Nujni prevod v 24 urah\",\"description\":\"Cena je za polovico višja od običajne.\"},{\"name\":\"Prevodi za podjetja\",\"description\":\"Tehnična navodila, spletne strani in katalogi.\"},{\"name\":\"Sodno tolmačenje\",\"description\":\"Tolmačim na sodišču, pri notarju in na upravni enoti.\"},{\"name\":\"Ponudba za večje prevode\",\"description\":\"Dokument mi pošljete po e-pošti, ponudbo dobite v enem dnevu.\"}]}},{\"id\":\"s_about\",\"type\":\"image-text\",\"variant\":\"image-left\",\"tone\":\"alt\",\"props\":{\"eyebrow\":\"Nina Kolar\",\"heading\":\"Sodna tolmačka za nemški in angleški jezik\",\"paragraphs\":[\"Sem Nina Kolar. Prevajam in overjam listine za posameznike ter delam strokovne prevode za podjetja.\",\"Pisarna je v 2. nadstropju, parkirišče je za stavbo.\"],\"image\":\"img_g4\"}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"table\",\"tone\":\"default\",\"props\":{\"title\":\"Uradne ure pisarne\",\"note\":\"Petek po dogovoru. Pisarna je v 2. nadstropju, parkirišče je za stavbo.\"}},{\"id\":\"s_cta\",\"type\":\"cta\",\"variant\":\"band\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Imate dokument za prevod?\",\"text\":\"Pošljite ga po e-pošti, pa vam v enem dnevu odgovorim s ponudbo.\",\"primary\":{\"label\":\"Pišite mi\",\"target\":{\"action\":\"email\"}}}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2682,
+      "output_tokens": 1370,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

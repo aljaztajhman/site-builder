@@ -1,0 +1,360 @@
+{
+  "slug": "zobozdravstvo-lebar",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Zobozdravstvo Lebar Maribor | Zasebna zobna ambulanta",
+        "description": "Zasebna samoplačniška zobna ambulanta v središču Maribora. Preventiva, zalivke, beljenje, protetika. Sprejemamo tudi otroke od 3. leta."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "tone": "default",
+          "type": "hero-split",
+          "props": {
+            "image": "img_03",
+            "intro": "Pri nas se najprej pogovorimo in pregledamo zobe, brez posegov. Sprejemamo odrasle in otroke od 3. leta, tudi tiste, ki jih je strah zobozdravnika.",
+            "primary": {
+              "label": "Pokličite nas",
+              "target": {
+                "action": "call"
+              }
+            },
+            "headline": "Zobozdravnik, pri katerem je prvi obisk le pogovor",
+            "secondary": {
+              "label": "Naše storitve",
+              "target": {
+                "page": "p_home",
+                "section": "s_services"
+              }
+            }
+          },
+          "variant": "image-right"
+        },
+        {
+          "id": "s_hours",
+          "tone": "alt",
+          "type": "opening-hours",
+          "props": {
+            "note": "Za termin nas pokličite, uredimo ga skupaj z vami.",
+            "title": "Kdaj vas sprejmemo"
+          },
+          "variant": "week"
+        },
+        {
+          "id": "s_services",
+          "tone": "default",
+          "type": "services-list",
+          "props": {
+            "intro": "Smo samoplačniška ambulanta. Cene vam povemo ob pregledu ali po telefonu.",
+            "items": [
+              {
+                "name": "Preventivni pregledi",
+                "description": "Redni pregled zob in dlesni, da težave opazimo pravočasno."
+              },
+              {
+                "name": "Čiščenje zobnega kamna",
+                "description": "Odstranimo zobni kamen in poskrbimo za zdrave dlesni."
+              },
+              {
+                "name": "Zalivke",
+                "description": "Zdravljenje zob z zalivkami."
+              },
+              {
+                "name": "Beljenje zob",
+                "description": "Svetlejši nasmeh z estetskim beljenjem."
+              },
+              {
+                "name": "Prevleke",
+                "description": "Protetična oskrba zob s prevlekami."
+              },
+              {
+                "name": "Mostički",
+                "description": "Nadomestilo za manjkajoče zobe z mostičkom."
+              },
+              {
+                "name": "Proteze",
+                "description": "Proteze za tiste, ki potrebujejo več zob."
+              },
+              {
+                "name": "Vsaditve (implantati)",
+                "description": "Kirurški del opravi zunanji oralni kirurg, protetični del opravimo pri nas."
+              }
+            ],
+            "title": "Kaj vam nudimo"
+          },
+          "variant": "two-column"
+        },
+        {
+          "id": "s_fear",
+          "tone": "alt",
+          "type": "image-text",
+          "props": {
+            "link": {
+              "label": "Pokličite nas",
+              "target": {
+                "action": "call"
+              }
+            },
+            "image": "img_02",
+            "eyebrow": "Za tiste, ki jih je strah",
+            "heading": "Brez naglice in brez posegov ob prvem obisku",
+            "paragraphs": [
+              "Če vas je strah zobozdravnika, nas to ne moti. Ob prvem obisku se samo pogovorimo in pregledamo zobe.",
+              "Poseg načrtujemo šele potem, ko vam je jasno, kaj nas čaka, in ko ste pripravljeni."
+            ]
+          },
+          "variant": "image-left"
+        },
+        {
+          "id": "s_team",
+          "tone": "default",
+          "type": "team",
+          "props": {
+            "title": "Kdo vas sprejme",
+            "members": [
+              {
+                "name": "dr. Urška Lebar, dr. dent. med.",
+                "role": "Vodja ambulante, specialistka stomatološke protetike"
+              },
+              {
+                "name": "Maja Horvat",
+                "role": "Zobna asistentka"
+              }
+            ]
+          },
+          "variant": "grid"
+        },
+        {
+          "id": "s_book",
+          "tone": "inverse",
+          "type": "booking",
+          "props": {
+            "text": "Pokličite nas in izberemo termin, ki vam ustreza. Najdete nas v prvem nadstropju, do nas vas pripelje dvigalo.",
+            "action": {
+              "label": "Pokličite nas",
+              "target": {
+                "action": "call"
+              }
+            },
+            "heading": "Dogovorimo se za obisk"
+          },
+          "variant": "simple"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Zobozdravstvo Lebar",
+        "description": "Kako Zobozdravstvo Lebar obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Zobozdravstvo Lebar",
+        "description": "Izjava o dostopnosti spletne strani Zobozdravstvo Lebar."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-14",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Zobozdravstvo Lebar",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "images": [
+      {
+        "id": "img_01",
+        "alt": "Svetla zobozdravstvena ordinacija z modrim zobozdravniškim stolom, svetilko, belim pohištvom in oknom z razgledom na griče.",
+        "src": "sites/site_8010f25366852585/uploads/photo0.jpg",
+        "focal": {
+          "x": 0.38,
+          "y": 0.55
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_02",
+        "alt": "Čakalnica z zelenimi stoli ob steni, mizico s karafo vode in kozarci ter zelenimi rastlinami.",
+        "src": "sites/site_8010f25366852585/uploads/photo1.jpg",
+        "focal": {
+          "x": 0.55,
+          "y": 0.55
+        },
+        "width": 1024,
+        "height": 1536
+      },
+      {
+        "id": "img_03",
+        "alt": "Zobozdravnica z masko in rokavicami pregleduje pacientko, ki leži na zobozdravniškem stolu, ob njej je instrumentarij.",
+        "src": "sites/site_8010f25366852585/uploads/photo2.jpg",
+        "focal": {
+          "x": 0.5,
+          "y": 0.45
+        },
+        "width": 1536,
+        "height": 1024
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "columns"
+    },
+    "header": {
+      "cta": "call",
+      "variant": "bar"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.22,
+    "colors": {
+      "text": "#102230",
+      "muted": "#4a5d6b",
+      "accent": "#d27350",
+      "border": "#d3e0ea",
+      "inverse": "#0c2331",
+      "primary": "#2f6f73",
+      "surface": "#ffffff",
+      "onInverse": "#f5f5f5",
+      "onPrimary": "#ffffff",
+      "background": "#f1f6fb"
+    },
+    "radius": 10,
+    "shadow": "subtle",
+    "density": "airy",
+    "imagery": "rounded",
+    "fontPair": "manrope-public-sans",
+    "skeleton": {
+      "cards": "filled",
+      "width": "contained",
+      "footer": "visit",
+      "header": "word",
+      "actions": "header",
+      "buttons": "underline",
+      "dividers": "rule",
+      "footerTone": "default",
+      "photoRatio": "landscape"
+    },
+    "direction": "clinical-calm",
+    "headingCase": "normal",
+    "baseFontSize": 17,
+    "headingWeight": 650,
+    "headingTracking": -0.01
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Zobozdravstvo Lebar",
+    "type": "dental",
+    "email": "info@zobozdravstvo-lebar.example",
+    "hours": {
+      "entries": [
+        {
+          "to": "mon",
+          "from": "mon",
+          "open": "12:00",
+          "close": "19:00"
+        },
+        {
+          "to": "tue",
+          "from": "tue",
+          "open": "07:00",
+          "close": "14:00"
+        },
+        {
+          "to": "wed",
+          "from": "wed",
+          "open": "12:00",
+          "close": "19:00"
+        },
+        {
+          "to": "fri",
+          "from": "thu",
+          "open": "07:00",
+          "close": "14:00"
+        }
+      ]
+    },
+    "phone": "+38625553120",
+    "address": {
+      "city": "Maribor",
+      "street": "Gosposvetska cesta 36",
+      "postalCode": "2000"
+    },
+    "provider": {
+      "legalName": "Lebar zobozdravstvo d.o.o.",
+      "taxNumber": "SI77889900",
+      "registrationNumber": "7788990000"
+    }
+  },
+  "specVersion": 21
+}

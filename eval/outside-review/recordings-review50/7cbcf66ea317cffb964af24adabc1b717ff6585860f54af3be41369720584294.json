@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"The hero photo sits almost entirely below the fold while two weak text links and a dead gap take its place, and the bottom of the page repeats address, directions and hours three times.\",\"desktopNote\":\"The headline is broken into four giant one-word lines that swallow the left half of the screen, while contact details and hours are repeated across the booking section, the footer block and the footer line.\",\"phone\":{\"impression\":3,\"hierarchy\":3,\"imagery\":2,\"spacing\":3,\"clutter\":2,\"distinctiveness\":3},\"desktop\":{\"impression\":3,\"hierarchy\":2,\"imagery\":3,\"spacing\":3,\"clutter\":2,\"distinctiveness\":3},\"fixes\":[\"Merge the booking section, 'Obiščite nas' and the footer into one contact block with a single address, directions link and set of hours; drop the duplicate hours table.\",\"Shrink the hero headline to two lines on desktop and pull the photo above the fold on phone; make 'Naročite se' a real primary button instead of an underlined link.\",\"Replace the reused balayage photo in 'Kdo vas počesa' with a portrait of Tina or a different shot, and tighten the empty bands around the booking section on desktop.\"],\"blockers\":[\"Both viewports, 'Kdo vas počesa': the same balayage photo from the hero is reused as the inset picture.\",\"Both viewports: address, directions link, phone and email are repeated in the booking section, 'Obiščite nas' and the footer, and hours appear twice.\",\"Desktop and phone full page: the sticky header lands over the hero headline, clipping the top of 'Pričeska' on desktop and splitting headline from buttons on phone.\"]}",
+  "usage": {
+    "prompt_tokens": 12799,
+    "completion_tokens": 556
+  },
+  "batch": true
+}

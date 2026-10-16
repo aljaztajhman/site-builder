@@ -22,15 +22,15 @@ import {
   selectItems,
   type ReviewItem,
 } from "../src/outside-review.ts";
-import { RecordedTransport, makeTransport, requestHash, type ChatBody, type ChatResult, type OutsideTransport } from "../src/outside-transport.ts";
+import { ClaudeReviewTransport, ReviewHttpError, RecordedTransport, makeTransport, requestHash, type ChatBody, type ChatResult, type OutsideTransport } from "../src/outside-transport.ts";
 
 const config = loadConfig();
 const [gemini, gpt] = config.outsideReview.reviewers;
 if (!gemini || !gpt) throw new Error("config needs two outside reviewers");
 
 const scores = (n: number) => ({ impression: n, hierarchy: n, imagery: n, spacing: n, clutter: n, distinctiveness: n });
-const answer = (phone: number, desktop: number, fix = "Bigger photo") =>
-  JSON.stringify({ phoneNote: "p", desktopNote: "d", phone: scores(phone), desktop: scores(desktop), fixes: [fix] });
+const answer = (phone: number, desktop: number, fix = "Bigger photo", blockers: string[] = []) =>
+  JSON.stringify({ phoneNote: "p", desktopNote: "d", phone: scores(phone), desktop: scores(desktop), fixes: [fix], blockers });
 const result = (content: string, usage?: ChatResult["usage"]): ChatResult => ({ content, ...(usage ? { usage } : {}) });
 
 let dir: string;
@@ -121,7 +121,7 @@ describe("request", () => {
     const strict = buildRequest({ ...gemini, structured: "json_schema" }, parts);
     expect(strict.response_format).toMatchObject({ type: "json_schema", json_schema: { strict: true } });
     const schema = (strict.response_format as unknown as { json_schema: { schema: { properties: Record<string, unknown> } } }).json_schema.schema;
-    expect(Object.keys(schema.properties)).toEqual(["phoneNote", "desktopNote", "phone", "desktop", "fixes"]); // notes first
+    expect(Object.keys(schema.properties)).toEqual(["phoneNote", "desktopNote", "phone", "desktop", "fixes", "blockers"]); // notes first
     const loose = buildRequest({ ...gpt, structured: "json_object" }, parts);
     expect(loose.response_format).toEqual({ type: "json_object" });
     expect(loose.model).toBe("openai/gpt-6.1-sol");
@@ -142,6 +142,16 @@ describe("answers", () => {
     expect(() => parseAnswer("not json")).toThrow();
     expect(() => parseAnswer(JSON.stringify({ phone: scores(9) }))).toThrow();
     expect(() => parseAnswer(answer(6, 3))).toThrow();
+    // The filter's question is part of every answer: an answer without blockers is invalid.
+    const { blockers: _, ...noBlockers } = JSON.parse(answer(4, 3)) as Record<string, unknown>;
+    expect(() => parseAnswer(JSON.stringify(noBlockers))).toThrow();
+    expect(parseAnswer(answer(4, 3, "f", ["Phone: the headline breaks ZAMENJAM/O"])).blockers).toHaveLength(1);
+  });
+
+  it("asks for blockers, and says taste is not one", async () => {
+    const system = buildRequest(gemini, await preparePage(items[0]!)).messages[0]!.content as string;
+    expect(system).toMatch(/Blockers: the defects you would refuse to hand to the client/);
+    expect(system).toMatch(/Taste and polish are not blockers/);
   });
 
   it("retries once on an invalid answer, then takes the valid one", async () => {
@@ -257,6 +267,29 @@ describe("budget guard", () => {
     expect(run.results.gemini!["item-b"]).toMatchObject({ status: "skipped" });
   });
 
+  it("books nothing for a call OpenRouter refused before the model ran (4xx), but a 408 or 5xx at its worst case", async () => {
+    const body = buildRequest(gemini, await preparePage(items[0]!));
+    const worst = estimateCall(config, gemini, body).worstEur;
+    for (const status of [400, 402, 429]) {
+      const lines: Record<string, unknown>[] = [];
+      const t = scripted(new ReviewHttpError(status, `HTTP ${status}`), result(answer(4, 4), { prompt_tokens: 1, completion_tokens: 1, cost: 0.001 }));
+      const run = await runReview({ config, reviewers: [gemini], items, transport: t, maxEur: worst * 1.5, onCost: (l) => lines.push(l as never) });
+      expect(run.results.gemini!["item-a"]).toMatchObject({ status: "failed", reason: expect.stringContaining(String(status)) });
+      // Only the second page's answer is booked, so the refused call left room for it.
+      expect(lines.map((l) => l.itemId)).toEqual(["item-b"]);
+      expect(run.spentEur).toBeCloseTo(0.001 * config.eurPerUsd, 10);
+      expect(run.results.gemini!["item-b"]).toMatchObject({ status: "ok" });
+    }
+    for (const status of [408, 500, 503]) {
+      const lines: Record<string, unknown>[] = [];
+      const t = scripted(new ReviewHttpError(status, `HTTP ${status}`), result(answer(4, 4)));
+      const run = await runReview({ config, reviewers: [gemini], items, transport: t, maxEur: worst * 1.5, onCost: (l) => lines.push(l as never) });
+      expect(lines).toHaveLength(1);
+      expect(lines[0]).toMatchObject({ itemId: "item-a", costSource: "estimate" });
+      expect(run.spentEur).toBeCloseTo(worst, 10);
+    }
+  });
+
   it("books replayed answers at € 0", async () => {
     const lines: Record<string, unknown>[] = [];
     const t = { ...scripted(result(answer(4, 4), { prompt_tokens: 9000, completion_tokens: 400, cost: 0.03 })), paid: false };
@@ -298,7 +331,7 @@ describe("dry run", () => {
     const out: string[] = [];
     const code = await main(["--run-dir", roundDir, "--dry-run"], {}, (l) => out.push(l));
     expect(code).toBe(0);
-    expect(out.join("\n")).toMatch(/4 calls/);
+    expect(out.join("\n")).toMatch(/6 calls/); // 2 pages × 3 reviewers
     expect(out.join("\n")).toMatch(/€/);
     expect(fetchSpy).not.toHaveBeenCalled();
     fetchSpy.mockRestore();
@@ -324,7 +357,186 @@ describe("key", () => {
   });
 });
 
+describe("claude reviewer", () => {
+  const claude = config.outsideReview.reviewers.find((r) => r.id === "claude")!;
+  type Sent = { req: { system: string[]; messages: { role: string; content: unknown }[]; schema?: unknown; cache?: boolean }; stage: { model: string; maxTokens: number; effort?: string } };
+  const engine = (answers: (string | Error)[]) => {
+    const sent: Sent[] = [];
+    return {
+      sent,
+      async send(req: Sent["req"], stage: Sent["stage"]) {
+        sent.push({ req, stage });
+        const a = answers[sent.length - 1];
+        if (a === undefined) throw new Error("fake engine ran out of answers");
+        if (a instanceof Error) throw a;
+        return { text: a, stopReason: "end_turn", model: stage.model, usage: { input_tokens: 9000, output_tokens: 1200, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 }, batch: true };
+      },
+    };
+  };
+
+  it("sends the same review as Anthropic's request: one system block, base64 images, the schema, the reviewer's effort", async () => {
+    const e = engine([answer(4, 4)]);
+    const t = new ClaudeReviewTransport(claude, e as never);
+    const body = buildRequest(claude, await preparePage(items[0]!));
+    const res = await t.complete(body);
+    const { req, stage } = e.sent[0]!;
+    expect(stage).toEqual({ model: "claude-fable-5-1", maxTokens: claude.maxTokens, effort: "medium" });
+    expect(req.system).toEqual([body.messages[0]!.content]);
+    expect(req.cache).toBe(false);
+    const content = req.messages[0]!.content as { type: string; source?: { type: string; media_type: string; data: string } }[];
+    expect(content.filter((b) => b.type === "image").length).toBe(body.messages[1]!.content.length - content.filter((b) => b.type === "text").length);
+    expect(content.find((b) => b.type === "image")!.source).toMatchObject({ type: "base64", media_type: "image/png" });
+    expect(req.schema).toEqual((body.response_format as { json_schema: { schema: unknown } }).json_schema.schema);
+    expect(res).toMatchObject({ usage: { prompt_tokens: 9000, completion_tokens: 1200 }, batch: true });
+  });
+
+  it("turns an API error status into a ReviewHttpError, so a refused call is not booked", async () => {
+    const t = new ClaudeReviewTransport(claude, engine([Object.assign(new Error("credit balance too low"), { status: 400 })]) as never);
+    const err = await t.complete(buildRequest(claude, await preparePage(items[0]!))).catch((x: unknown) => x);
+    expect(err).toBeInstanceOf(ReviewHttpError);
+    expect((err as ReviewHttpError).refusedBeforeRun).toBe(true);
+  });
+
+  it("in a batch, an error status after the batch was created is booked at its worst case, not taken as refused", async () => {
+    const batchingEngine = { ...engine([Object.assign(new Error("rate limited while polling"), { status: 429 })]), drain: async () => {} };
+    const t = new ClaudeReviewTransport(claude, batchingEngine as never);
+    const err = await t.complete(buildRequest(claude, await preparePage(items[0]!))).catch((x: unknown) => x);
+    expect(err).not.toBeInstanceOf(ReviewHttpError);
+    const body = buildRequest(claude, await preparePage(items[0]!));
+    const worst = estimateCall(config, claude, body).worstEur;
+    const failing: OutsideTransport = { paid: true, complete: () => t.complete(body), drain: async (w) => void (await Promise.allSettled(w)) };
+    const lines: Record<string, unknown>[] = [];
+    const run = await runReview({ config, reviewers: [claude], items: [items[0]!], transport: failing, maxEur: 5, onCost: (l) => lines.push(l as never) });
+    expect(run.results.claude!["item-a"]).toMatchObject({ status: "failed" });
+    expect(lines).toHaveLength(1);
+    expect(run.spentEur).toBeCloseTo(worst, 10);
+  });
+
+  it("needs ANTHROPIC_API_KEY for a live run", () => {
+    expect(() => makeTransport({ baseUrl: "https://x", env: {}, reviewer: claude })).toThrow(/ANTHROPIC_API_KEY/);
+  });
+
+  /** A batching transport: `complete` queues, `drain` answers the queue (and any retries it queues) as one batch. */
+  const batching = (answerFor: () => ChatResult) => {
+    let queue: (() => void)[] = [];
+    const t: OutsideTransport & { batches: number; calls: number } = {
+      paid: true,
+      batches: 0,
+      calls: 0,
+      complete() {
+        t.calls++;
+        return new Promise((resolve) => queue.push(() => resolve(answerFor())));
+      },
+      async drain(work) {
+        let done = false;
+        const all = Promise.allSettled(work).then(() => void (done = true));
+        while (!done) {
+          await new Promise((r) => setTimeout(r, 5));
+          if (!queue.length) continue;
+          t.batches++;
+          const q = queue;
+          queue = [];
+          for (const f of q) f();
+          await Promise.race([all, new Promise((r) => setTimeout(r, 5))]);
+        }
+      },
+    };
+    return t;
+  };
+
+  it("sends a batching reviewer's pages in waves that fit the money left at their worst case, priced at batchPriceFactor", async () => {
+    const worst = estimateCall(config, claude, buildRequest(claude, await preparePage(items[0]!))).worstEur;
+    // Each answer costs little, so after the first wave (one page fits) the second page fits too.
+    const t = batching(() => result(answer(4, 4), { prompt_tokens: 1000, completion_tokens: 100 }));
+    const lines: Record<string, unknown>[] = [];
+    const run = await runReview({ config, reviewers: [claude], items, transport: t, maxEur: worst * 1.5, onCost: (l) => lines.push(l as never) });
+    expect(t.batches).toBe(2);
+    expect(run.results.claude).toMatchObject({ "item-a": { status: "ok" }, "item-b": { status: "ok" } });
+    const price = config.outsideReview.pricesUsdPerMTok["claude-fable-5-1"]!;
+    expect(lines[0]).toMatchObject({ costSource: "config" });
+    expect(lines[0]!.usd).toBeCloseTo(((1000 * price.input + 100 * price.output) / 1e6) * config.batchPriceFactor, 10);
+    expect(run.spentEur).toBeLessThanOrEqual(worst * 1.5);
+  });
+
+  it("sends a whole wave at once when the money allows, and skips what never fits", async () => {
+    const t = batching(() => result(answer(4, 4), { prompt_tokens: 1000, completion_tokens: 100 }));
+    const run = await runReview({ config, reviewers: [claude], items, transport: t, maxEur: 50, onCost: () => {} });
+    expect(t.batches).toBe(1);
+    expect(t.calls).toBe(2);
+    expect(run.results.claude!["item-b"]).toMatchObject({ status: "ok" });
+    const none = batching(() => result(answer(4, 4)));
+    const poor = await runReview({ config, reviewers: [claude], items, transport: none, maxEur: 0.0001, onCost: () => {} });
+    expect(none.calls).toBe(0);
+    expect(poor.results.claude).toEqual({ "item-a": { status: "skipped" }, "item-b": { status: "skipped" } });
+  });
+
+  it("an invalid answer whose retry doesn't fit the wave fails only that page; the next wave still goes", async () => {
+    const worst = estimateCall(config, claude, buildRequest(claude, await preparePage(items[0]!))).worstEur;
+    let n = 0;
+    // Answers one queued request per round, so page b's call is still reserved when page a's invalid answer is
+    // retried: the retry doesn't fit right then.
+    const queue: (() => void)[] = [];
+    const t: OutsideTransport = {
+      paid: true,
+      complete: () => new Promise((resolve) => queue.push(() => resolve(n++ === 0 ? result("not json", { prompt_tokens: 1000, completion_tokens: 100 }) : result(answer(4, 4), { prompt_tokens: 1000, completion_tokens: 100 })))),
+      async drain(work) {
+        let done = false;
+        const all = Promise.allSettled(work).then(() => void (done = true));
+        while (!done) {
+          await new Promise((r) => setTimeout(r, 5));
+          queue.shift()?.();
+          await Promise.race([all, new Promise((r) => setTimeout(r, 5))]);
+        }
+      },
+    };
+    const three = [items[0]!, { ...items[0]!, id: "item-b" }, { ...items[0]!, id: "item-c" }]; // the same page, the same worst case
+    const run = await runReview({ config, reviewers: [claude], items: three, transport: t, maxEur: worst * 2 + 0.001, onCost: () => {} });
+    expect(run.results.claude!["item-a"]).toMatchObject({ status: "failed", reason: expect.stringMatching(/before the retry/) });
+    expect(run.results.claude!["item-b"]).toMatchObject({ status: "ok" });
+    expect(run.results.claude!["item-c"]).toMatchObject({ status: "ok" });
+    expect(run.stoppedByBudget).toBe(false);
+  });
+
+  it("asks a transport factory once per reviewer, so a batch's queue and its drain are the same object", async () => {
+    let made = 0;
+    const factory = () => {
+      made++;
+      return batching(() => result(answer(4, 4), { prompt_tokens: 1000, completion_tokens: 100 }));
+    };
+    const run = await runReview({ config, reviewers: [claude], items, transport: factory, maxEur: 50, onCost: () => {} });
+    expect(made).toBe(1);
+    expect(scoresFor(run, "claude")).toEqual({ "item-a": 4, "item-b": 4 });
+  });
+
+  it("runs OpenRouter and batching reviewers in one run, each through its own transport", async () => {
+    const direct = scripted(result(answer(3, 3)), result(answer(3, 3)));
+    const batch = batching(() => result(answer(5, 5), { prompt_tokens: 1000, completion_tokens: 100 }));
+    const run = await runReview({ config, reviewers: [gemini, claude], items, transport: (r) => (r.id === "claude" ? batch : direct), maxEur: 50, onCost: () => {} });
+    expect(direct.calls).toHaveLength(2);
+    expect(direct.calls.every((b) => b.model === gemini.model)).toBe(true);
+    expect(scoresFor(run, "gemini")).toEqual({ "item-a": 3, "item-b": 3 });
+    expect(scoresFor(run, "claude")).toEqual({ "item-a": 5, "item-b": 5 });
+  });
+});
+
 describe("recordings", () => {
+  it("record-missing reuses a recorded answer at € 0 and asks (and records) only the new ones", async () => {
+    const rec = path.join(dir, "rec-missing");
+    const first = buildRequest(gemini, await preparePage(items[0]!));
+    await new RecordedTransport(rec, "record", scripted(result(answer(4, 4), { prompt_tokens: 5, completion_tokens: 6, cost: 0.01 }))).complete(first);
+    const live = scripted(result(answer(2, 2), { prompt_tokens: 5, completion_tokens: 6, cost: 0.02 }));
+    const t = new RecordedTransport(rec, "record-missing", live);
+    const lines: Record<string, unknown>[] = [];
+    const run = await runReview({ config, reviewers: [gemini], items, transport: t, maxEur: 1, onCost: (l) => lines.push(l as never) });
+    expect(live.calls).toHaveLength(1); // only item-b was asked
+    expect(lines.map((l) => [l.itemId, l.costSource])).toEqual([
+      ["item-a", "replay"],
+      ["item-b", "openrouter"],
+    ]);
+    expect(run.spentEur).toBeCloseTo(0.02 * config.eurPerUsd, 10);
+    expect(scoresFor(run, "gemini")).toEqual({ "item-a": 4, "item-b": 2 });
+  });
+
   it("records an answer under the request hash and replays it without the inner transport", async () => {
     const rec = path.join(dir, "rec");
     const body = buildRequest(gemini, await preparePage(items[0]!));
@@ -341,6 +553,29 @@ describe("page sources", () => {
   it("reads a run dir's subdirectories that hold the four home screenshots, sorted by id", async () => {
     const found = await loadRunDirItems(path.join(dir, "run-dir"));
     expect(found.map((i) => i.id)).toEqual(["one", "two"]);
+  });
+
+  it("tells the reviewer the fixture's trade, reads a regenerated site as its own page, and drops pages older than --since", async () => {
+    const evalDir = path.join(dir, "eval-tree");
+    mkdirSync(path.join(evalDir, "twins", "salon-x"), { recursive: true });
+    writeFileSync(path.join(evalDir, "twins", "salon-x", "brief.json"), JSON.stringify({ id: "salon-x", businessType: "hairdresser", trade: "frizer" }));
+    const runDir = path.join(dir, "runs-regen");
+    const d = path.join(runDir, "salon-x");
+    mkdirSync(d, { recursive: true });
+    const shot = await png(8, 40);
+    for (const f of ["home-360-first", "home-360", "home-1280-first", "home-1280"]) writeFileSync(path.join(d, `${f}.png`), shot);
+    // Only the first screens of the regenerated site: not a page yet.
+    for (const f of ["regenerated-360-first", "regenerated-1280-first"]) writeFileSync(path.join(d, `${f}.png`), shot);
+    expect(loadRunDirItems(runDir, { evalDir }).map((i) => i.id)).toEqual(["salon-x"]);
+    for (const f of ["regenerated-360", "regenerated-1280"]) writeFileSync(path.join(d, `${f}.png`), shot);
+    const found = loadRunDirItems(runDir, { evalDir });
+    expect(found.map((i) => [i.id, i.businessType])).toEqual([
+      ["salon-x", "hairdresser, frizer"],
+      ["salon-x-regenerated", "hairdresser, frizer"],
+    ]);
+    expect(found[1]!.files.deskFull).toBe(path.join(d, "regenerated-1280.png"));
+    expect(loadRunDirItems(path.join(dir, "run-dir"), { evalDir })[0]!.businessType).toBe("not given");
+    expect(() => loadRunDirItems(runDir, { evalDir, since: new Date(Date.now() + 60_000) })).toThrow(/written since/);
   });
 
   it("takes the first n by id, or the named ids, and refuses an unknown id", () => {
@@ -390,11 +625,32 @@ describe("report", () => {
     expect(md).toMatch(/failed/i);
     expect(md).toMatch(/all items count/i);
   });
+
+  it("filters: a page passes only when every reviewer answered and none named a blocker", async () => {
+    const t = scripted(
+      result(answer(4, 4)), // a / gemini: clean
+      result(answer(4, 4)), // a / gpt: clean
+      result(answer(4, 4)), // b / gemini: clean
+      result(answer(3, 3, "f", ["Desktop: the hero photo is cut off"])), // b / gpt: a blocker
+      result(answer(4, 4)), // c / gemini: clean
+      result("bad"),
+      result("bad"), // c / gpt fails twice
+    );
+    const three = [items[0]!, items[1]!, { ...items[0]!, id: "item-c" }];
+    const run = await runReview({ config, reviewers: [gemini, gpt], items: three, transport: t, maxEur: 5, onCost: () => {} });
+    const summary = buildSummary({ config, reviewers: [gemini, gpt], run, items: three });
+    expect(summary.filter).toEqual({ passed: ["item-a"], held: ["item-b"], unreviewed: ["item-c"] });
+    expect(summary.rows[1]!.blockers).toEqual({ gemini: [], gpt: ["Desktop: the hero photo is cut off"] });
+    const md = formatReport(summary);
+    expect(md).toContain("1 of 3 pages pass");
+    expect(md).toContain("Desktop: the hero photo is cut off");
+  });
 });
 
 describe("config", () => {
-  it("loads two reviewers, each with a price, apart from the Anthropic prices", () => {
-    expect(config.outsideReview.reviewers.map((r) => r.id)).toEqual(["gemini", "gpt"]);
+  it("loads the three reviewers, each with a price; Claude runs on Anthropic's API in batches", () => {
+    expect(config.outsideReview.reviewers.map((r) => r.id)).toEqual(["gemini", "gpt", "claude"]);
+    expect(config.outsideReview.reviewers[2]).toMatchObject({ provider: "anthropic", model: "claude-fable-5-1", batch: true });
     for (const r of config.outsideReview.reviewers) expect(config.outsideReview.pricesUsdPerMTok[r.model]).toBeDefined();
     expect(config.pricesUsdPerMTok[gemini.model]).toBeUndefined();
   });

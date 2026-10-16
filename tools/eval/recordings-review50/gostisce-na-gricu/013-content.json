@@ -1,0 +1,18 @@
+{
+  "seq": 13,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "6129a38069a0ed4c",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"split-cta\",\"cta\":\"call\"},\"footer\":{\"variant\":\"columns\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Gostišče Na griču, prleška kuhinja v Ivanjkovcih\",\"description\":\"Družinsko gostišče sredi vinogradov Jeruzalema. Prleška kuhinja, domača vina, vikend degustacijski meniji in slovesnosti do 120 gostov.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-split\",\"variant\":\"image-left\",\"tone\":\"default\",\"props\":{\"eyebrow\":\"Družinsko gostišče v vinogradih\",\"headline\":\"Prleška kuhinja in domača vina nad Ormožem\",\"intro\":\"Pri nas kuhamo tünko, bograč in gibanico, točimo vina iz lastne kleti. Odprti smo od srede do nedelje, rezervacija je obvezna.\",\"primary\":{\"label\":\"Rezervirajte mizo\",\"target\":{\"action\":\"call\"}},\"secondary\":{\"label\":\"Poglejte, kako do nas\",\"target\":{\"action\":\"directions\"}},\"image\":\"img_01\"}},{\"id\":\"s_about\",\"type\":\"about\",\"variant\":\"figure\",\"tone\":\"alt\",\"props\":{\"eyebrow\":\"Družina Šnajder\",\"heading\":\"Gostišče, ki ga vodimo kot družina\",\"paragraphs\":[\"Kuhamo prleško kuhinjo in točimo domača vina. Pri nas je tako od začetka, družinsko in brez naglice.\",\"Sedimo sredi vinogradov Jeruzalema, nad Ormožem. Pridite lačni, pri nas boste sedeli v miru.\"],\"figure\":{\"label\":\"Kuhamo od leta\",\"value\":\"1990\"}}},{\"id\":\"s_menu\",\"type\":\"menu\",\"variant\":\"classic\",\"tone\":\"default\",\"props\":{\"eyebrow\":\"Naša kuhinja\",\"title\":\"Kaj kuhamo\",\"intro\":\"Prleške jedi in ob vikendih degustacijski meni.\",\"categories\":[{\"name\":\"Prleška kuhinja\",\"dishes\":[{\"name\":\"Prleška tünka\",\"price\":{\"$placeholder\":\"price\"}},{\"name\":\"Bograč\",\"price\":{\"$placeholder\":\"price\"}},{\"name\":\"Gibanica\",\"price\":{\"$placeholder\":\"price\"}},{\"name\":\"Kisla juha\",\"price\":{\"$placeholder\":\"price\"}}]},{\"name\":\"Degustacijski meni ob vikendih\",\"dishes\":[{\"name\":\"Degustacijski meni s petimi hodi\",\"description\":\"Ob vikendih, pet hodov.\",\"price\":{\"amount\":48}},{\"name\":\"Degustacijski meni z vinsko spremljavo\",\"description\":\"Pet hodov z vini iz naše kleti.\",\"price\":{\"$placeholder\":\"price\"}}]}]}},{\"id\":\"s_terasa\",\"type\":\"image-text\",\"variant\":\"image-left\",\"tone\":\"alt\",\"props\":{\"eyebrow\":\"Terasa\",\"heading\":\"Terasa s pogledom na gorice\",\"paragraphs\":[\"Pod staro lipo postrežemo kosilo in kozarec vina iz naše kleti. Prostor je primeren tudi za poroke, obletnice in zaključke do 120 gostov.\"],\"image\":\"img_02\"}},{\"id\":\"s_druzba\",\"type\":\"image-text\",\"variant\":\"image-right\",\"tone\":\"default\",\"props\":{\"heading\":\"Za dolgo obloženo mizo\",\"paragraphs\":[\"Pri nas se družba zbere ob jedeh in vinu. Za zaključene družbe smo odprti tudi v ponedeljek in torek, po dogovoru.\"],\"image\":\"img_03\"}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"compact\",\"tone\":\"alt\",\"props\":{\"title\":\"Kdaj smo odprti\",\"note\":\"V ponedeljek in torek samo za zaključene družbe. Rezervacija je obvezna.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2447,
+      "output_tokens": 1375,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

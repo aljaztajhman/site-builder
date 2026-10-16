@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The custom hot/cold pipe graphics and radiator illustration give this page a great trade-specific personality, with crystal-clear hierarchy and a prominent call button.\",\n  \"desktopNote\": \"The header wastes vertical space with a gigantic centered title and a lonely 'Domov' link, while the footer repeats contact details and the business name redundantly.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 5,\n    \"imagery\": 4,\n    \"spacing\": 4,\n    \"clutter\": 4,\n    \"distinctiveness\": 5\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 4,\n    \"spacing\": 4,\n    \"clutter\": 4,\n    \"distinctiveness\": 5\n  },\n  \"fixes\": [\n    \"Compact the desktop header into a single horizontal bar with the brand on the left and anchor links (Kaj delamo, Kje delamo, Kontakt) on the right instead of a lonely 'Domov' link.\",\n    \"Merge the dark pre-footer contact block and the footer so the business name, address, and phone number are not repeated twice in immediate succession.\",\n    \"Add a 3-column grid of real project photos (heat pumps, boiler rooms, finished bathrooms) or refine the hero radiator vector to look more technical and less like basic clip-art.\"\n  ],\n  \"blockers\": []\n}",
+  "usage": {
+    "prompt_tokens": 11512,
+    "completion_tokens": 351,
+    "cost": 0.026534
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The warm typography and prominent food imagery work well, but repeated contact information and a stretched-out menu make the page unnecessarily long.\",\n  \"desktopNote\": \"The opening composition is polished, but the narrow, single-column menu leaves substantial unused space and weakens the page’s rhythm.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 4,\n    \"spacing\": 3,\n    \"clutter\": 3,\n    \"distinctiveness\": 3\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 4,\n    \"spacing\": 3,\n    \"clutter\": 4,\n    \"distinctiveness\": 3\n  },\n  \"fixes\": [\n    \"Consolidate the address, directions and opening hours into one practical-information section on phone, retaining the required fixed action bar.\",\n    \"Lay out desktop menu categories in two balanced columns and tighten the gaps between categories on phone.\",\n    \"Reduce the desktop hero’s height and the oversized “2015” treatment so the menu arrives sooner and supporting information receives less visual weight.\"\n  ],\n  \"blockers\": [\n    \"Phone: the address, directions and opening-hours block below the hero is repeated in the footer.\"\n  ]\n}",
+  "usage": {
+    "prompt_tokens": 10012,
+    "completion_tokens": 448,
+    "cost": 0.0295085
+  }
+}

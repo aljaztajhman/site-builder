@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The smile motif feels bespoke, but the large four-line headline and generous hero gaps push most of the practice photo beneath the first screen.\",\n  \"desktopNote\": \"The branded photo treatment gives the page character, but the oversized opening-hours chart dominates the page ahead of services and the team.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 3,\n    \"imagery\": 3,\n    \"spacing\": 3,\n    \"clutter\": 4,\n    \"distinctiveness\": 5\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 4,\n    \"spacing\": 4,\n    \"clutter\": 4,\n    \"distinctiveness\": 5\n  },\n  \"fixes\": [\n    \"Reduce the mobile hero headline size and tighten the gaps around the description and email link so more of the practice photo is visible above the fixed bar.\",\n    \"Make opening hours more compact: use simple day-and-time rows on phones and reduce the chart’s height and surrounding padding on desktop.\",\n    \"Keep the prominent booking section, but remove repeated address, phone and email details from the footer, leaving business identification and utility links.\"\n  ]\n}",
+  "usage": {
+    "prompt_tokens": 8525,
+    "completion_tokens": 485,
+    "cost": 0.026161
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"The hero stacks a full contact block (phone, address, directions, hours) right under the CTA, and the same address, hours and directions return in the footer, so the page reads as two contact pages with a price list between.\",\"desktopNote\":\"Pricing and about sections sit in the left half with a dead empty right column, and the hero contact sidebar duplicates the header's call/directions and the footer's address and hours.\",\"phone\":{\"impression\":3,\"hierarchy\":4,\"imagery\":3,\"spacing\":3,\"clutter\":2,\"distinctiveness\":3},\"desktop\":{\"impression\":3,\"hierarchy\":4,\"imagery\":3,\"spacing\":2,\"clutter\":2,\"distinctiveness\":3},\"fixes\":[\"Keep contact details in one place: drop the address/hours/directions block from the hero (phone is already in the header) and leave them in the footer, or vice versa.\",\"On desktop, let the price table and about text use the full content width or pair them with a second column (e.g. a court-interpreter stamp/seal graphic or document illustration) so the right half isn't empty.\",\"Give the typographic design a specific accent for a sodna tolmačka: a large stamp or seal motif, bilingual DE/EN type detail or a photo of the stamped document in the hero to make it feel like her office, not a generic layout.\"],\"blockers\":[\"Both viewports: address, opening hours and 'Navodila za pot' appear in the hero contact block and again in the footer, a repeated contact block.\",\"Phone: 'Navodila za pot' appears three times (sticky bar, hero contact block, footer) and the phone number three times.\"]}",
+  "usage": {
+    "prompt_tokens": 10026,
+    "completion_tokens": 1562
+  },
+  "batch": true
+}

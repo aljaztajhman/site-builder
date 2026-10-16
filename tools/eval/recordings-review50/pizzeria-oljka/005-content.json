@@ -1,0 +1,18 @@
+{
+  "seq": 5,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "3c2cdacc1cedc242",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\",\"tone\":\"default\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Pizzeria Oljka Izola – pice iz krušne peči\",\"description\":\"Pice iz krušne peči na drva in 48 ur zorjeno testo, dve minuti od marine v Izoli. Odprto vsak dan od 12. do 23. ure. Rezervirajte mizo.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"card\",\"props\":{\"headline\":\"Pice iz krušne peči na drva\",\"intro\":\"Testo zori 48 ur, pečemo ga na drva. Pridite dve minuti od marine ali pico odnesite s seboj.\",\"fact\":\"opening\",\"factLabel\":\"Odprti smo vsak dan\",\"primary\":{\"label\":\"Rezervirajte mizo\",\"target\":{\"action\":\"call\"}},\"secondary\":{\"label\":\"Oglejte si ponudbo\",\"target\":{\"page\":\"p_home\",\"section\":\"s_offers\"}},\"image\":\"img_g1\"}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"table\",\"props\":{\"title\":\"Kdaj lahko pridete\",\"note\":\"Od novembra do marca ob ponedeljkih zaprto. Mizo rezervirate po telefonu.\"}},{\"id\":\"s_offers\",\"type\":\"price-list\",\"variant\":\"offers\",\"tone\":\"inverse\",\"props\":{\"title\":\"Naša ponudba iz krušne peči\",\"groups\":[{\"name\":\"Vsak dan\",\"items\":[{\"name\":\"Pica Oljka\",\"note\":\"S pršutom in rukolo, pečena v krušni peči na drva.\",\"price\":{\"amount\":13}}]},{\"name\":\"Za konec obroka\",\"items\":[{\"name\":\"Domači tiramisu\",\"note\":\"Sladica hiše.\",\"price\":{\"amount\":5}}]}]}},{\"id\":\"s_team\",\"type\":\"team\",\"variant\":\"list\",\"props\":{\"title\":\"Kdo skrbi za peč in mize\",\"members\":[{\"name\":\"Marko Benčič\",\"role\":\"Vodja\"}]}},{\"id\":\"s_cta\",\"type\":\"cta\",\"variant\":\"band\",\"props\":{\"heading\":\"Rezervirajte mizo po telefonu\",\"text\":\"Pokličite nas in pripravili vam bomo mizo. Pice lahko tudi odnesete s seboj.\",\"primary\":{\"label\":\"Rezervirajte mizo\",\"target\":{\"action\":\"call\"}}}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"inverse\",\"props\":{\"title\":\"Pokličite za rezervacijo mize\",\"intro\":\"Radi vas sprejmemo, v Izoli smo dve minuti od marine.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 3873,
+      "output_tokens": 1260,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

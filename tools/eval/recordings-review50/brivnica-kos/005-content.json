@@ -1,0 +1,18 @@
+{
+  "seq": 5,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "a976298b0ee41b3c",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\",\"tone\":\"default\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Brivnica Kos – moška brivnica v Mariboru\",\"description\":\"Klasična moška brivnica v starem mestnem jedru Maribora. Striženje, fade, urejanje brade in britje z britvijo. Naročite se po telefonu ali SMS.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"mirrors\",\"tone\":\"default\",\"props\":{\"eyebrow\":\"Klasična moška brivnica\",\"headline\":\"Škarje, britev in vroča brisača\",\"intro\":\"Strižemo s škarjami ali strojčkom, delamo fade, urejamo brado in brijemo z britvijo. Striženje tudi za fante do 12 let.\",\"fact\":\"phone\",\"factLabel\":\"Naročite se po telefonu ali SMS\",\"factNote\":\"Brez naročila samo, če je prost stol.\",\"secondary\":{\"label\":\"Poglejte cenik\",\"target\":{\"page\":\"p_home\",\"section\":\"s_prices\"}},\"wordmark\":\"Kos\",\"images\":[\"img_g1\",\"img_g2\"]}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"week\",\"tone\":\"alt\",\"props\":{\"title\":\"Kdaj smo odprti\",\"note\":\"Naročite se po telefonu ali SMS. Brez naročila samo, če je prost stol.\"}},{\"id\":\"s_booking\",\"type\":\"booking\",\"variant\":\"simple\",\"tone\":\"default\",\"props\":{\"heading\":\"Naročite se po telefonu ali SMS\",\"text\":\"Pokličite ali nam pošljite SMS in poiščemo termin zase. Brez naročila vas postrežemo samo, če je prost stol.\",\"action\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}}}},{\"id\":\"s_prices\",\"type\":\"price-list\",\"variant\":\"grouped\",\"tone\":\"default\",\"props\":{\"title\":\"Cenik\",\"intro\":\"Britje z britvijo opravimo z vročo brisačo, striženje pa s škarjami ali strojčkom.\",\"groups\":[{\"items\":[{\"name\":\"Moško striženje\",\"note\":\"S škarjami ali strojčkom.\",\"price\":{\"amount\":20}},{\"name\":\"Fade\",\"price\":{\"amount\":23}},{\"name\":\"Striženje za fante do 12 let\",\"price\":{\"$placeholder\":\"price\",\"note\":\"Vpišite ceno striženja za fante\"}},{\"name\":\"Urejanje brade\",\"price\":{\"amount\":14}},{\"name\":\"Britje z britvijo\",\"note\":\"Z vročo brisačo.\",\"price\":{\"amount\":25}},{\"name\":\"Striženje in brada skupaj\",\"price\":{\"amount\":30}}]}]}},{\"id\":\"s_team\",\"type\":\"team\",\"variant\":\"list\",\"tone\":\"alt\",\"props\":{\"title\":\"Kdo vas postriže\",\"members\":[{\"name\":\"Luka Kos\",\"role\":\"Brivec\",\"bio\":\"Obrti sem se učil v Zagrebu in na Dunaju.\"}]}},{\"id\":\"s_cta\",\"type\":\"cta\",\"variant\":\"band\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Naročite se po telefonu ali SMS\",\"text\":\"Brez naročila vas postrežemo samo, če je prost stol.\",\"primary\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}}}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"default\",\"props\":{\"title\":\"Pokličite ali pošljite SMS\",\"intro\":\"Najdete nas v starem mestnem jedru Maribora.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 4330,
+      "output_tokens": 1550,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

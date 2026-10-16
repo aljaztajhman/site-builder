@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"Hero photo and headline read well, but the „Vlečemo po vsej Savinjski regiji\", \"desktopNote\":\"The region section is a near-empty band with a lone „Savinjska regija\", \"phone\":{\"impression\":3,\"hierarchy\":4,\"imagery\":4,\"spacing\":3,\"clutter\":3,\"distinctiveness\":2},\"desktop\":{\"impression\":3,\"hierarchy\":4,\"imagery\":3,\"spacing\":2,\"clutter\":3,\"distinctiveness\":2},\"fixes\":[\"Give the „Vlečemo po vsej Savinjski regiji\"],\"blockers\":[\"Desktop and phone, „Vlečemo po vsej Savinjski regiji\"]}",
+  "usage": {
+    "prompt_tokens": 12048,
+    "completion_tokens": 930
+  },
+  "batch": true
+}

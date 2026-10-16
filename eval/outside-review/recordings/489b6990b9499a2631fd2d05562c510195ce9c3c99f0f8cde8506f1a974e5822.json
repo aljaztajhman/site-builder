@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The branded styling is attractive, but the tall introductory panel pushes the shop photography almost entirely below the first screen.\",\n  \"desktopNote\": \"The olive-and-terracotta palette and shop photography feel tailored, but the three large product cards repeat the same ornament instead of showcasing the products.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 3,\n    \"imagery\": 2,\n    \"spacing\": 3,\n    \"clutter\": 3,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 4,\n    \"spacing\": 4,\n    \"clutter\": 4,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Compact the mobile header and hero ornament, reduce the headline slightly, and move the shop photograph into the first screen above the fixed action bar.\",\n    \"Replace the repeated olive sprigs in the product cards with product photographs and reduce card padding, especially on mobile, to shorten the long catalogue section.\",\n    \"Keep the main contact section, but remove the repeated address, phone and email from the footer so it contains only business registration details and secondary links.\"\n  ]\n}",
+  "usage": {
+    "prompt_tokens": 9274,
+    "completion_tokens": 456,
+    "cost": 0.0277435
+  }
+}

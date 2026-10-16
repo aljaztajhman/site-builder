@@ -1,0 +1,364 @@
+{
+  "slug": "salon-tina",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Salon Tina Kranj – svečane pričeske in barvanje las",
+        "description": "Frizerstvo za posebne priložnosti v Kranju: poročne in maturantske pričeske ter barvanje las. Delamo samo po naročilu."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "tone": "default",
+          "type": "hero-split",
+          "props": {
+            "image": "img_01",
+            "intro": "Specializirana sem za barvanje las in svečane pričeske. Delam samo po naročilu, zato imam za vas ves čas, ki ga potrebujete.",
+            "primary": {
+              "label": "Pokličite me",
+              "target": {
+                "action": "call"
+              }
+            },
+            "headline": "Pričeske za dan, ki si ga boste zapomnili",
+            "secondary": {
+              "label": "Oglejte si cene",
+              "target": {
+                "page": "p_home",
+                "section": "s_prices"
+              }
+            }
+          },
+          "variant": "image-left"
+        },
+        {
+          "id": "s_prices",
+          "tone": "alt",
+          "type": "price-list",
+          "props": {
+            "intro": "Za ostale storitve vam ceno povem ob naročilu.",
+            "title": "Cene, ki jih že poznamo",
+            "groups": [
+              {
+                "items": [
+                  {
+                    "name": "Poročna pričeska s poskusno",
+                    "price": {
+                      "amount": 150
+                    }
+                  },
+                  {
+                    "name": "Maturantska pričeska",
+                    "price": {
+                      "amount": 55
+                    }
+                  },
+                  {
+                    "name": "Barvanje las",
+                    "price": {
+                      "from": true,
+                      "amount": 50
+                    }
+                  },
+                  {
+                    "name": "Pramene",
+                    "price": {
+                      "from": true,
+                      "amount": 70
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "variant": "tags"
+        },
+        {
+          "id": "s_services",
+          "tone": "default",
+          "type": "services-list",
+          "props": {
+            "items": [
+              {
+                "name": "Poročna pričeska s poskusno",
+                "description": "Pričeska za nevesto skupaj s poskusno pričesko."
+              },
+              {
+                "name": "Maturantska pričeska",
+                "description": "Svečana pričeska za maturantski ples."
+              },
+              {
+                "name": "Poskusna pričeska",
+                "description": "Pričesko preizkusim vnaprej, da je na dan dogodka vse dogovorjeno."
+              },
+              {
+                "name": "Kite",
+                "description": "Pletene in povzdignjene kite za svečane priložnosti."
+              },
+              {
+                "name": "Barvanje las",
+                "description": "Naravni prehodi barv in odsevi, ki ustrezajo vašim lasem."
+              },
+              {
+                "name": "Pramene",
+                "description": "Pramene za svetlejši, bolj živ videz las."
+              },
+              {
+                "name": "Nega las",
+                "description": "Nega las ob barvanju ali pred posebno priložnostjo."
+              }
+            ],
+            "title": "Svečane pričeske ter barvanje in nega las",
+            "eyebrow": "Kaj delam"
+          },
+          "variant": "rows"
+        },
+        {
+          "id": "s_nevesta",
+          "tone": "alt",
+          "type": "image-text",
+          "props": {
+            "link": {
+              "label": "Dogovorite se po telefonu",
+              "target": {
+                "action": "call"
+              }
+            },
+            "image": "img_02",
+            "eyebrow": "Za neveste",
+            "heading": "Pridem tudi k vam na dom ali v hotel",
+            "paragraphs": [
+              "Za neveste pridem po dogovoru tja, kjer se pripravljate. Tako je jutro pred poroko mirnejše.",
+              "Doplačilo za obisk vam povem ob naročilu."
+            ]
+          },
+          "variant": "image-right"
+        },
+        {
+          "id": "s_hours",
+          "tone": "default",
+          "type": "opening-hours",
+          "props": {
+            "note": "Termin se dogovorite po telefonu.",
+            "title": "Kdaj delam"
+          },
+          "variant": "table"
+        },
+        {
+          "id": "s_book",
+          "tone": "inverse",
+          "type": "booking",
+          "props": {
+            "text": "Pokličite me in poiščem termin, ki vam ustreza.",
+            "action": {
+              "label": "Pokličite me",
+              "target": {
+                "action": "call"
+              }
+            },
+            "heading": "Naročite se na pričesko ali barvanje"
+          },
+          "variant": "simple"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Salon Tina",
+        "description": "Kako Salon Tina obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Salon Tina",
+        "description": "Izjava o dostopnosti spletne strani Salon Tina."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-15",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Salon Tina",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "images": [
+      {
+        "id": "img_01",
+        "alt": "Ženska na stolu v frizerskem salonu, od zadaj, z dolgimi valovitimi lasmi z medenimi odsevi in naravnim prehodom barve.",
+        "src": "sites/site_7d98d1456f18beb4/uploads/photo0.jpg",
+        "focal": {
+          "x": 0.5,
+          "y": 0.45
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_02",
+        "alt": "Nevestina povzdignjena figa s figo, pleteno kito in drobnimi okrasnimi lasnimi sponkami s kristalčki, posneta od zadaj.",
+        "src": "sites/site_7d98d1456f18beb4/uploads/photo1.jpg",
+        "focal": {
+          "x": 0.4,
+          "y": 0.35
+        },
+        "width": 1536,
+        "height": 1024
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "compact"
+    },
+    "header": {
+      "cta": "call",
+      "tone": "default",
+      "variant": "bar"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.25,
+    "colors": {
+      "text": "#2a2024",
+      "muted": "#65575c",
+      "accent": "#996d52",
+      "border": "#e6d9de",
+      "inverse": "#3a2a30",
+      "primary": "#924e4e",
+      "surface": "#f6eff1",
+      "onInverse": "#f5f5f5",
+      "onPrimary": "#ffffff",
+      "background": "#ffffff"
+    },
+    "radius": 6,
+    "shadow": "none",
+    "density": "airy",
+    "imagery": "duotone",
+    "fontPair": "lora-dm-sans",
+    "skeleton": {
+      "cards": "filled",
+      "width": "contained",
+      "footer": "wordmark",
+      "header": "compact",
+      "actions": "header",
+      "buttons": "underline",
+      "dividers": "rule",
+      "footerTone": "default",
+      "photoRatio": "landscape"
+    },
+    "direction": "soft-studio",
+    "headingCase": "normal",
+    "baseFontSize": 17,
+    "headingWeight": 500,
+    "headingTracking": 0
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Salon Tina",
+    "type": "hairdresser",
+    "email": "tina@salontina.example",
+    "hours": {
+      "note": "Samo po naročilu.",
+      "entries": [
+        {
+          "to": "fri",
+          "from": "wed",
+          "open": "12:00",
+          "close": "20:00"
+        },
+        {
+          "to": "sat",
+          "from": "sat",
+          "open": "07:00",
+          "close": "15:00"
+        }
+      ]
+    },
+    "phone": "+38651555641",
+    "address": {
+      "city": "Kranj",
+      "street": "Koroška cesta 14",
+      "postalCode": "4000"
+    },
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      }
+    }
+  },
+  "specVersion": 21
+}

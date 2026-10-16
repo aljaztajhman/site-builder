@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The tall header and four-line hero headline push most of the practice photo below the first screen, weakening an otherwise cohesive, reassuring design.\",\n  \"desktopNote\": \"The practice photography, smile motif and opening-hours graphic feel business-specific, but the oversized four-line headline dominates the hero unnecessarily.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 3,\n    \"imagery\": 2,\n    \"spacing\": 3,\n    \"clutter\": 4,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 5,\n    \"spacing\": 4,\n    \"clutter\": 4,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Compact the mobile header, reduce the hero headline to roughly 30–32px and tighten the gap before the photo so a meaningful portion of the practice is visible above the fixed bar.\",\n    \"Reduce the desktop headline size and adjust its line breaks to three lines, preserving the prominent photo while giving the introduction and booking action more breathing room.\",\n    \"Replace the tall mobile opening-hours chart with compact day-and-time rows; retain the timeline treatment on desktop, where its scale is readable.\"\n  ]\n}",
+  "usage": {
+    "prompt_tokens": 8681,
+    "completion_tokens": 502,
+    "cost": 0.026721
+  }
+}

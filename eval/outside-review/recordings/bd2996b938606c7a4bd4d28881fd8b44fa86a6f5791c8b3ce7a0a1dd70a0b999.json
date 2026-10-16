@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The text-heavy hero and gap above the photos push the salon’s best visual evidence to the bottom of the first screen, partly behind the fixed bar.\",\n  \"desktopNote\": \"The arched photography gives the salon a strong identity, but the large booking strip repeats the hero action and interrupts the flow into pricing.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 3,\n    \"imagery\": 3,\n    \"spacing\": 3,\n    \"clutter\": 3,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 5,\n    \"spacing\": 4,\n    \"clutter\": 3,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Compact the mobile hero: reduce headline and body type slightly, tighten vertical gaps, and bring the hairstyle photos higher so meaningful examples are visible above the fixed bar.\",\n    \"Remove the standalone burgundy booking strip and place its short appointment reminder beside the main booking action or in the contact section.\",\n    \"Show the hairdressing descriptor beside LANA on mobile, and place the address beneath the main business message rather than before it.\"\n  ]\n}",
+  "usage": {
+    "prompt_tokens": 8454,
+    "completion_tokens": 512,
+    "cost": 0.0262535
+  }
+}

@@ -1,0 +1,317 @@
+{
+  "slug": "brivnica-kos",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Brivnica Kos Maribor | Moška brivnica",
+        "description": "Klasična moška brivnica v starem mestnem jedru Maribora. Striženje, fade, urejanje brade in britje z britvijo. Naročite se po telefonu ali SMS."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "tone": "inverse",
+          "type": "hero-image",
+          "props": {
+            "image": "img_g3",
+            "intro": "Striženje, fade, urejanje brade ter britje z britvijo in vročo brisačo. Pri nas vas postriže brivec Luka Kos.",
+            "primary": {
+              "label": "Pokličite nas",
+              "target": {
+                "action": "call"
+              }
+            },
+            "headline": "Brivnica v starem jedru Maribora"
+          },
+          "variant": "overlay-left"
+        },
+        {
+          "id": "s_cene",
+          "tone": "alt",
+          "type": "price-list",
+          "props": {
+            "intro": "Pri nas so cene jasne, brez presenečenj.",
+            "title": "Cene storitev",
+            "groups": [
+              {
+                "items": [
+                  {
+                    "name": "Moško striženje",
+                    "price": {
+                      "amount": 20
+                    }
+                  },
+                  {
+                    "name": "Fade",
+                    "price": {
+                      "amount": 23
+                    }
+                  },
+                  {
+                    "name": "Urejanje brade",
+                    "price": {
+                      "amount": 14
+                    }
+                  },
+                  {
+                    "name": "Britje z britvijo",
+                    "price": {
+                      "amount": 25
+                    }
+                  },
+                  {
+                    "name": "Striženje in brada skupaj",
+                    "price": {
+                      "amount": 30
+                    }
+                  }
+                ]
+              }
+            ],
+            "footnote": "Striženje za fante do 12 let: ceno vam povemo po telefonu."
+          },
+          "variant": "tags"
+        },
+        {
+          "id": "s_hours",
+          "tone": "default",
+          "type": "opening-hours",
+          "props": {
+            "title": "Kdaj imamo odprto"
+          },
+          "variant": "table"
+        },
+        {
+          "id": "s_story",
+          "tone": "alt",
+          "type": "image-text",
+          "props": {
+            "image": "img_g4",
+            "eyebrow": "Brivec Luka Kos",
+            "heading": "Klasična obrt iz Zagreba in z Dunaja",
+            "paragraphs": [
+              "Naš brivec Luka Kos se je obrti učil v Zagrebu in na Dunaju. Zdaj jo opravlja v starem mestnem jedru Maribora.",
+              "Škarje, strojček, britev in vroča brisača: delamo klasično, v miru in brez naglice."
+            ]
+          },
+          "variant": "image-right"
+        },
+        {
+          "id": "s_cta",
+          "tone": "inverse",
+          "type": "cta",
+          "props": {
+            "text": "Pokličite ali pošljite SMS. Če je stol prost, vas postrižemo tudi brez naročila.",
+            "heading": "Naročite se na striženje",
+            "primary": {
+              "label": "Pokličite nas",
+              "target": {
+                "action": "call"
+              }
+            },
+            "secondary": {
+              "label": "Kje smo",
+              "target": {
+                "action": "directions"
+              }
+            }
+          },
+          "variant": "band"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Brivnica Kos",
+        "description": "Kako Brivnica Kos obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Brivnica Kos",
+        "description": "Izjava o dostopnosti spletne strani Brivnica Kos."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-14",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Brivnica Kos",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "images": [
+      {
+        "id": "img_g3",
+        "alt": "Britev, čopič za britje in zložena vroča brisača na temni leseni polici",
+        "src": "sites/site_69b8f9d64ebe4536/generated/img_g3.jpg",
+        "width": 1536,
+        "height": 1024,
+        "origin": "generated"
+      },
+      {
+        "id": "img_g4",
+        "alt": "Kamnita ulica v starem mestnem jedru ob večerni svetlobi",
+        "src": "sites/site_69b8f9d64ebe4536/generated/img_g4.jpg",
+        "width": 1536,
+        "height": 1024,
+        "origin": "generated"
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "compact"
+    },
+    "header": {
+      "cta": "call",
+      "tone": "inverse",
+      "variant": "stacked"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.3,
+    "colors": {
+      "text": "#f2ece5",
+      "muted": "#b9ada1",
+      "accent": "#b08d57",
+      "border": "#3a322b",
+      "inverse": "#3a1d25",
+      "primary": "#b08d57",
+      "surface": "#1f1a17",
+      "onInverse": "#f2ece5",
+      "onPrimary": "#111111",
+      "background": "#14110f"
+    },
+    "radius": 1,
+    "shadow": "none",
+    "density": "airy",
+    "imagery": "framed",
+    "fontPair": "garamond-karla",
+    "skeleton": {
+      "cards": "none",
+      "width": "full",
+      "footer": "wordmark",
+      "header": "compact",
+      "actions": "header",
+      "buttons": "soft",
+      "dividers": "rule",
+      "footerTone": "inverse",
+      "photoRatio": "portrait"
+    },
+    "direction": "dark-elegant",
+    "headingCase": "normal",
+    "baseFontSize": 17,
+    "headingWeight": 500,
+    "headingTracking": 0
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Brivnica Kos",
+    "type": "hairdresser",
+    "email": {
+      "$placeholder": "email"
+    },
+    "hours": {
+      "note": "Naročite se po telefonu ali SMS. Brez naročila samo, če je prost stol.",
+      "entries": [
+        {
+          "to": "fri",
+          "from": "tue",
+          "open": "10:00",
+          "close": "20:00"
+        },
+        {
+          "to": "sat",
+          "from": "sat",
+          "open": "09:00",
+          "close": "14:00"
+        }
+      ]
+    },
+    "phone": "+38631555270",
+    "address": {
+      "city": "Maribor",
+      "street": "Poštna ulica 6",
+      "postalCode": "2000"
+    },
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      }
+    }
+  },
+  "specVersion": 21
+}

@@ -1,0 +1,18 @@
+{
+  "seq": 5,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "8a9646a43443425c",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"columns\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Inštrukcije matematike in fizike v Mariboru\",\"description\":\"Pia Lešnik, profesorica matematike, že 9 let daje inštrukcije matematike in fizike za osnovno in srednjo šolo. Doma v Mariboru ali online.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-split\",\"variant\":\"image-right\",\"tone\":\"default\",\"props\":{\"eyebrow\":\"Profesorica matematike\",\"headline\":\"Matematika in fizika v vašem tempu\",\"intro\":\"Že 9 let dajem inštrukcije za osnovno in srednjo šolo. Pomagam pri sprotnem delu, pred testi ter pri pripravi na NPZ in maturo.\",\"secondary\":{\"label\":\"Oglejte si cene\",\"target\":{\"page\":\"p_home\",\"section\":\"s_prices\"}},\"image\":\"img_g1\"}},{\"id\":\"s_prices\",\"type\":\"price-list\",\"variant\":\"tags\",\"tone\":\"alt\",\"props\":{\"title\":\"Cene inštrukcij\",\"intro\":\"Cene, ki jih zaračunavam za inštrukcije in skupinsko pripravo na maturo.\",\"groups\":[{\"items\":[{\"name\":\"Ura inštrukcij (60 minut)\",\"price\":{\"amount\":18,\"unit\":\"ura\"}},{\"name\":\"Paket 10 ur\",\"price\":{\"amount\":160,\"unit\":\"paket\"}},{\"name\":\"Priprava na maturo v skupini, do 4 dijakov\",\"price\":{\"amount\":12,\"unit\":\"ura/dijak\"}}]}]}},{\"id\":\"s_about\",\"type\":\"image-text\",\"variant\":\"image-left\",\"tone\":\"default\",\"props\":{\"eyebrow\":\"Za koga delam\",\"heading\":\"Za osnovnošolce, srednješolce in njihove starše\",\"paragraphs\":[\"Delam z vsakim učencem posebej, v njegovem tempu in brez pritiska. Pomagam pri sprotnem delu, pred testi ter pri pripravi na NPZ in maturo, na osnovni in višji ravni.\",\"Inštrukcije potekajo doma v Mariboru ali online prek Zooma. Dijakom iz Maribora pridem tudi na dom.\"],\"image\":\"img_g2\"}},{\"id\":\"s_steps\",\"type\":\"steps\",\"variant\":\"horizontal\",\"tone\":\"alt\",\"props\":{\"heading\":\"Kako poteka prvo srečanje\",\"intro\":\"Prvo srečanje je namenjeno spoznavanju.\",\"steps\":[{\"title\":\"Spoznavanje\",\"text\":\"Skupaj pogledava, pri čem se zatika in kje so težave.\"},{\"title\":\"Načrt\",\"text\":\"Naredim načrt dela, prilagojen vašemu otroku ali vam.\"},{\"title\":\"Redne ure\",\"text\":\"Delava v vašem tempu, sprotno ali pred testi, NPZ in maturo.\"}]}},{\"id\":\"s_faq\",\"type\":\"faq\",\"variant\":\"accordion\",\"tone\":\"default\",\"props\":{\"title\":\"Pogosta vprašanja\",\"items\":[{\"question\":\"Kje potekajo inštrukcije?\",\"answer\":\"Doma v Mariboru ali online prek Zooma. Dijakom iz Maribora pridem tudi na dom.\"},{\"question\":\"Kdaj so termini?\",\"answer\":\"Termine dogovoriva sproti, večinoma popoldne in ob sobotah, med počitnicami tudi dopoldne.\"},{\"question\":\"Kateri predmeti so na voljo?\",\"answer\":\"Matematika in fizika za osnovno in srednjo šolo, vključno s pripravo na NPZ in maturo.\"}]}},{\"id\":\"s_cta\",\"type\":\"cta\",\"variant\":\"band\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Pišite mi ali me pokličite\",\"text\":\"Povejte, pri čem potrebujete pomoč, in dogovoriva se za prvo srečanje.\",\"primary\":{\"label\":\"Pišite mi\",\"target\":{\"action\":\"email\"}}}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2469,
+      "output_tokens": 1428,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

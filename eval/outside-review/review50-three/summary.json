@@ -1,0 +1,1585 @@
+{
+  "items": [
+    "avto-kovac",
+    "avto-kovac-regenerated",
+    "avtoservis-mrak",
+    "avtoservis-mrak-regenerated",
+    "brivnica-kos",
+    "brivnica-kos-regenerated",
+    "cvetlicarna-marjetica",
+    "cvetlicarna-marjetica-regenerated",
+    "elektro-zupan",
+    "elektro-zupan-regenerated",
+    "fizioterapija-pregib",
+    "fizioterapija-pregib-regenerated",
+    "frizerski-salon-mia",
+    "frizerski-salon-mia-regenerated",
+    "frizerstvo-lana",
+    "frizerstvo-lana-regenerated",
+    "gostilna-pri-mostu",
+    "gostilna-pri-mostu-regenerated",
+    "gostilna-zlata-zlica",
+    "gostilna-zlata-zlica-regenerated",
+    "gostisce-na-gricu",
+    "gostisce-na-gricu-regenerated",
+    "instalacije-rebernik",
+    "instalacije-rebernik-regenerated",
+    "instrukcije-pia",
+    "instrukcije-pia-regenerated",
+    "karoserija-hribar",
+    "karoserija-hribar-regenerated",
+    "kljucavnicarstvo-hrovat",
+    "kljucavnicarstvo-hrovat-regenerated",
+    "kmetija-grabnar",
+    "kmetija-grabnar-regenerated",
+    "mizarstvo-lesnik",
+    "mizarstvo-lesnik-regenerated",
+    "pekarna-kvas",
+    "pekarna-kvas-regenerated",
+    "pizzeria-oljka",
+    "pizzeria-oljka-regenerated",
+    "prevajanje-kolar",
+    "prevajanje-kolar-regenerated",
+    "racunovodstvo-seliskar",
+    "racunovodstvo-seliskar-regenerated",
+    "salon-tina",
+    "salon-tina-regenerated",
+    "trgovina-oljka-in-sol",
+    "trgovina-oljka-in-sol-regenerated",
+    "vulkanizer-zorman",
+    "vulkanizer-zorman-regenerated",
+    "zobozdravstvo-lebar",
+    "zobozdravstvo-lebar-regenerated"
+  ],
+  "reviewers": {
+    "gemini": {
+      "model": "google/gemini-4-argon",
+      "scored": [
+        "avto-kovac",
+        "avto-kovac-regenerated",
+        "avtoservis-mrak",
+        "avtoservis-mrak-regenerated",
+        "brivnica-kos",
+        "brivnica-kos-regenerated",
+        "cvetlicarna-marjetica",
+        "cvetlicarna-marjetica-regenerated",
+        "elektro-zupan",
+        "elektro-zupan-regenerated",
+        "fizioterapija-pregib",
+        "fizioterapija-pregib-regenerated",
+        "frizerski-salon-mia",
+        "frizerski-salon-mia-regenerated",
+        "frizerstvo-lana",
+        "frizerstvo-lana-regenerated",
+        "gostilna-pri-mostu",
+        "gostilna-pri-mostu-regenerated",
+        "gostilna-zlata-zlica",
+        "gostilna-zlata-zlica-regenerated",
+        "gostisce-na-gricu",
+        "gostisce-na-gricu-regenerated",
+        "instalacije-rebernik",
+        "instalacije-rebernik-regenerated",
+        "instrukcije-pia",
+        "instrukcije-pia-regenerated",
+        "karoserija-hribar",
+        "karoserija-hribar-regenerated",
+        "kljucavnicarstvo-hrovat",
+        "kljucavnicarstvo-hrovat-regenerated",
+        "kmetija-grabnar",
+        "kmetija-grabnar-regenerated",
+        "mizarstvo-lesnik",
+        "mizarstvo-lesnik-regenerated",
+        "pekarna-kvas",
+        "pekarna-kvas-regenerated",
+        "pizzeria-oljka",
+        "pizzeria-oljka-regenerated",
+        "prevajanje-kolar",
+        "prevajanje-kolar-regenerated",
+        "racunovodstvo-seliskar",
+        "racunovodstvo-seliskar-regenerated",
+        "salon-tina",
+        "salon-tina-regenerated",
+        "trgovina-oljka-in-sol",
+        "trgovina-oljka-in-sol-regenerated",
+        "vulkanizer-zorman",
+        "vulkanizer-zorman-regenerated",
+        "zobozdravstvo-lebar",
+        "zobozdravstvo-lebar-regenerated"
+      ],
+      "failed": [],
+      "skipped": [],
+      "vsOwner": null
+    },
+    "gpt": {
+      "model": "openai/gpt-6.1-sol",
+      "scored": [
+        "avto-kovac",
+        "avto-kovac-regenerated",
+        "avtoservis-mrak",
+        "avtoservis-mrak-regenerated",
+        "brivnica-kos",
+        "brivnica-kos-regenerated",
+        "cvetlicarna-marjetica",
+        "cvetlicarna-marjetica-regenerated",
+        "elektro-zupan",
+        "elektro-zupan-regenerated",
+        "fizioterapija-pregib",
+        "fizioterapija-pregib-regenerated",
+        "frizerski-salon-mia",
+        "frizerski-salon-mia-regenerated",
+        "frizerstvo-lana",
+        "frizerstvo-lana-regenerated",
+        "gostilna-pri-mostu",
+        "gostilna-pri-mostu-regenerated",
+        "gostilna-zlata-zlica",
+        "gostilna-zlata-zlica-regenerated",
+        "gostisce-na-gricu",
+        "gostisce-na-gricu-regenerated",
+        "instalacije-rebernik",
+        "instalacije-rebernik-regenerated",
+        "instrukcije-pia",
+        "instrukcije-pia-regenerated",
+        "karoserija-hribar",
+        "karoserija-hribar-regenerated",
+        "kljucavnicarstvo-hrovat",
+        "kljucavnicarstvo-hrovat-regenerated",
+        "kmetija-grabnar",
+        "kmetija-grabnar-regenerated",
+        "mizarstvo-lesnik",
+        "mizarstvo-lesnik-regenerated",
+        "pekarna-kvas",
+        "pekarna-kvas-regenerated",
+        "pizzeria-oljka",
+        "pizzeria-oljka-regenerated",
+        "prevajanje-kolar",
+        "prevajanje-kolar-regenerated",
+        "racunovodstvo-seliskar",
+        "racunovodstvo-seliskar-regenerated",
+        "salon-tina",
+        "salon-tina-regenerated",
+        "trgovina-oljka-in-sol",
+        "trgovina-oljka-in-sol-regenerated",
+        "vulkanizer-zorman",
+        "vulkanizer-zorman-regenerated",
+        "zobozdravstvo-lebar",
+        "zobozdravstvo-lebar-regenerated"
+      ],
+      "failed": [],
+      "skipped": [],
+      "vsOwner": null
+    },
+    "claude": {
+      "model": "claude-fable-5-1",
+      "scored": [
+        "avto-kovac",
+        "avto-kovac-regenerated",
+        "avtoservis-mrak",
+        "avtoservis-mrak-regenerated",
+        "brivnica-kos",
+        "brivnica-kos-regenerated",
+        "cvetlicarna-marjetica",
+        "cvetlicarna-marjetica-regenerated",
+        "elektro-zupan",
+        "elektro-zupan-regenerated",
+        "fizioterapija-pregib",
+        "fizioterapija-pregib-regenerated",
+        "frizerski-salon-mia",
+        "frizerski-salon-mia-regenerated",
+        "frizerstvo-lana",
+        "frizerstvo-lana-regenerated",
+        "gostilna-pri-mostu",
+        "gostilna-pri-mostu-regenerated",
+        "gostilna-zlata-zlica",
+        "gostilna-zlata-zlica-regenerated",
+        "gostisce-na-gricu",
+        "gostisce-na-gricu-regenerated",
+        "instalacije-rebernik",
+        "instalacije-rebernik-regenerated",
+        "instrukcije-pia",
+        "instrukcije-pia-regenerated",
+        "karoserija-hribar",
+        "karoserija-hribar-regenerated",
+        "kljucavnicarstvo-hrovat",
+        "kljucavnicarstvo-hrovat-regenerated",
+        "kmetija-grabnar",
+        "kmetija-grabnar-regenerated",
+        "mizarstvo-lesnik",
+        "mizarstvo-lesnik-regenerated",
+        "pekarna-kvas",
+        "pekarna-kvas-regenerated",
+        "pizzeria-oljka",
+        "pizzeria-oljka-regenerated",
+        "prevajanje-kolar",
+        "prevajanje-kolar-regenerated",
+        "racunovodstvo-seliskar",
+        "racunovodstvo-seliskar-regenerated",
+        "salon-tina",
+        "salon-tina-regenerated",
+        "trgovina-oljka-in-sol",
+        "trgovina-oljka-in-sol-regenerated",
+        "vulkanizer-zorman",
+        "vulkanizer-zorman-regenerated",
+        "zobozdravstvo-lebar",
+        "zobozdravstvo-lebar-regenerated"
+      ],
+      "failed": [],
+      "skipped": [],
+      "vsOwner": null
+    }
+  },
+  "reviewerPairs": [
+    {
+      "a": "gemini",
+      "b": "gpt",
+      "pairwise": {
+        "agreement": 0.7064741907261592,
+        "pairs": 1143,
+        "agreed": 807.5,
+        "judgeTies": 55
+      },
+      "spearman": 0.5537336272369685,
+      "n": 50
+    },
+    {
+      "a": "gemini",
+      "b": "claude",
+      "pairwise": {
+        "agreement": 0.6741032370953631,
+        "pairs": 1143,
+        "agreed": 770.5,
+        "judgeTies": 53
+      },
+      "spearman": 0.45706990170280404,
+      "n": 50
+    },
+    {
+      "a": "gpt",
+      "b": "claude",
+      "pairwise": {
+        "agreement": 0.7684391080617495,
+        "pairs": 1166,
+        "agreed": 896,
+        "judgeTies": 54
+      },
+      "spearman": 0.6999204343335894,
+      "n": 50
+    }
+  ],
+  "spentEur": 4.335225599999999,
+  "calls": 162,
+  "stoppedByBudget": false,
+  "rows": [
+    {
+      "itemId": "avto-kovac",
+      "owner": null,
+      "scores": {
+        "gemini": 3.916666666666667,
+        "gpt": 3.083333333333333,
+        "claude": 3.166666666666667
+      },
+      "topFix": {
+        "gemini": "Remove the redundant white 'Obiščite nas / Delovni čas' block at the bottom, as the exact same address and hours are already inside the yellow contact section right above it.",
+        "gpt": "Reduce the desktop hero headline and number-plate CTA, bring the location into the first screen, and give the workshop photo a clearer, less darkened area on both viewports.",
+        "claude": "Merge the yellow 'Pokličite nas' block, 'Obiščite nas' and the footer into one contact section; address, hours and phone currently appear three times on both viewports."
+      },
+      "blockers": {
+        "gemini": [
+          "On phone, the 'Obiščite nas' and 'Delovni čas' block at the bottom repeats the exact same address, hours, and directions link already shown in the yellow contact block directly above it."
+        ],
+        "gpt": [
+          "Phone and desktop full-page views: the white navigation header overlays and obscures hero text.",
+          "Phone closing sections: the yellow contact block is immediately followed by another block repeating the address, directions and opening hours."
+        ],
+        "claude": [
+          "Desktop and phone: the sticky header overlaps and hides part of the hero headline 'SAMO AUDI, BMW' in the scrolled whole-page view.",
+          "Phone and desktop bottom: address, opening hours and phone number are repeated in three consecutive blocks (yellow CTA, 'Obiščite nas', footer).",
+          "Phone first screen: hero headline 'SAMO AUDI, BMW,' sits over light ceiling area of the photo with marginal contrast."
+        ]
+      }
+    },
+    {
+      "itemId": "avto-kovac-regenerated",
+      "owner": null,
+      "scores": {
+        "gemini": 3.8333333333333335,
+        "gpt": 3.5,
+        "claude": 3.3333333333333335
+      },
+      "topFix": {
+        "gemini": "Change the 'AVTO KOVAČ' text in the top navigation bar from dark blue to white so it is readable against the dark header.",
+        "gpt": "Reduce the desktop hero height and move its text panel upward so the headline, a compact location line and a prominent call button all fit within the first screen; use the same action hierarchy on the",
+        "claude": "Turn the hero 'Pokličite nas' into a solid button showing the phone number and keep 'Kako do nas' as a secondary link; on desktop tighten the hero so the buttons sit above 800px."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [],
+        "claude": [
+          "Desktop hero: the owner's name is hyphenated across lines as 'Gre-gor Kovač'."
+        ]
+      }
+    },
+    {
+      "itemId": "avtoservis-mrak",
+      "owner": null,
+      "scores": {
+        "gemini": 4.083333333333334,
+        "gpt": 3.166666666666667,
+        "claude": 3.1666666666666665
+      },
+      "topFix": {
+        "gemini": "Increase the line-height slightly on large uppercase headings so diacritics like 'Š' and 'Č' do not collide with the text line above them.",
+        "gpt": "Reduce desktop headline and phone-plate sizes; make the towing section compact and arrange the four process steps horizontally to eliminate empty right-hand areas.",
+        "claude": "Merge the three address/hours/directions blocks (blue band under hero, blue 'Pokličite nas' section, footer) into one contact section plus a minimal footer."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [
+          "Phone: the upper blue information panel and lower booking panel repeat the same address, opening hours and directions block."
+        ],
+        "claude": [
+          "Desktop, 'Vlečna služba' section: right column is essentially empty apart from a stray 'Gorenjska' line under a rule, leaving a large dead band.",
+          "Phone and desktop: address, opening hours and 'Navodila za pot' are repeated in three separate sections (hero band, call-to-action block, footer)."
+        ]
+      }
+    },
+    {
+      "itemId": "avtoservis-mrak-regenerated",
+      "owner": null,
+      "scores": {
+        "gemini": 3.583333333333333,
+        "gpt": 3.083333333333333,
+        "claude": 3.083333333333333
+      },
+      "topFix": {
+        "gemini": "Remove the redundant 'Obiščite nas / Delovni čas' section above the footer since those exact details are already prominently displayed in the dark bar below the hero.",
+        "gpt": "Consolidate the address, directions and opening hours into one contact section; remove the duplicate visit/hours block and redundant hero links, retaining the required phone action bar.",
+        "claude": "Keep one contact block: drop the 'Obiščite nas / Delovni čas' repeat near the footer (or the strip under the hero) so address and hours appear once."
+      },
+      "blockers": {
+        "gemini": [
+          "Both phone and desktop repeat the full address, directions link, and opening hours block twice on the same page (in the dark bar under the hero and again in 'Obiščite nas' above the footer).",
+          "On both phone and desktop, the 'Vlečna služba za Gorenjsko' section has a solitary word 'Gorenjska' floating in empty space, looking like an unstyled or broken element."
+        ],
+        "gpt": [
+          "Phone and desktop: the closing visit/opening-hours section repeats the address, directions, hours and access note already shown in the dark contact section."
+        ],
+        "claude": [
+          "Phone and desktop: address, 'Navodila za pot' and the full working-hours block with the same Sobota note are repeated in the contact strip and again in the 'Obiščite nas / Delovni čas' section.",
+          "Phone and desktop, 'Vlečna služba za Gorenjsko' section: a near-empty band containing only the word 'Gorenjska' with large blank space reads as broken content."
+        ]
+      }
+    },
+    {
+      "itemId": "brivnica-kos",
+      "owner": null,
+      "scores": {
+        "gemini": 4.166666666666667,
+        "gpt": 3.583333333333333,
+        "claude": 3.6666666666666665
+      },
+      "topFix": {
+        "gemini": "Add the city or neighborhood (Maribor) to the hero eyebrow or lead paragraph so visitors immediately know where the barbershop is.",
+        "gpt": "Fix the header positioning so it stays at the viewport top without obscuring hero content in the full-page views.",
+        "claude": "Reduce the desktop headline size so it sits in two or three lines and the photos align with it; on phone pull the photos up by tightening hero text spacing."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [
+          "Phone and desktop, full-page hero views: the navigation bar overlaps and obscures the headline and hero content."
+        ],
+        "claude": [
+          "Phone, whole page: the sticky header overlaps and hides the hero paragraph in the capture, cutting the text 'Strižemo s škarjami ali strojčkom, de-'.",
+          "Desktop, whole page: the sticky header overlaps the hero headline, cutting the word 'britev'."
+        ]
+      }
+    },
+    {
+      "itemId": "brivnica-kos-regenerated",
+      "owner": null,
+      "scores": {
+        "gemini": 3.833333333333333,
+        "gpt": 3.75,
+        "claude": 3.25
+      },
+      "topFix": {
+        "gemini": "Move the mobile call/directions bar to a fixed position at the bottom of the screen instead of stacking it beneath the top header.",
+        "gpt": "Correct the phone navigation positioning so the brand and action rows never obscure the hero heading or description.",
+        "claude": "Give the hero one real primary button (Pokličite nas) and drop the duplicate call button/link row at the top of the phone page; keep header to logo + menu."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [
+          "Phone, hero in the full-page view: the navigation covers the headline and part of the description."
+        ],
+        "claude": [
+          "Phone, hero: the fixed header row with 'Pokličite' and 'Navodila za pot' overlaps the hero and covers the headline 'Brivnica v starem jedru Maribora'.",
+          "Phone and desktop, top: an empty dark band (about 115px on phone, 57px on desktop) sits above the hero before any content."
+        ]
+      }
+    },
+    {
+      "itemId": "cvetlicarna-marjetica",
+      "owner": null,
+      "scores": {
+        "gemini": 3.1666666666666665,
+        "gpt": 3,
+        "claude": 3
+      },
+      "topFix": {
+        "gemini": "Merge the 'Pokličite za šopek' contact section and the 'Obiščite nas' footer area so the address, directions link, and opening hours only appear once.",
+        "gpt": "Shorten the phone hero’s framed panel and decorative spacing so a prominent bouquet image appears in the first screen; make ordering flowers the primary hero action.",
+        "claude": "On phone, bring the arch photo into the first screen (e.g. smaller card over the top of the photo, or photo above the card) instead of a text-only white box."
+      },
+      "blockers": {
+        "gemini": [
+          "Both viewports, hero and 'Lončnice in darilne košarice' section: the exact same bouquet photo is used twice in consecutive sections.",
+          "Both viewports, bottom contact section and footer: the address, directions link, and opening hours are completely duplicated right on top of each other.",
+          "Both viewports, circular image badges: the 'Ustvarjeno z UI' label is clipped by the circular border crop on the inset photos."
+        ],
+        "gpt": [
+          "Phone and desktop: the bouquet photo is repeated in the hero inset and gift section.",
+          "Phone and desktop: the footer repeats the address, directions and opening-hours block immediately after the contact section.",
+          "Phone and desktop: image attribution text is clipped in the small shaped photo crops."
+        ],
+        "claude": [
+          "Desktop and phone hero: the 'Ustvarjeno z UI' label on the small bouquet circle is clipped at the circle edge.",
+          "Phone and desktop: the sticky header overlaps the hero card content (headline/logo hidden) when scrolling.",
+          "Phone and desktop footer: address, directions link, opening hours and holiday note are repeated right below the contact section that already shows them."
+        ]
+      }
+    },
+    {
+      "itemId": "cvetlicarna-marjetica-regenerated",
+      "owner": null,
+      "scores": {
+        "gemini": 3.6666666666666665,
+        "gpt": 3.3333333333333335,
+        "claude": 3.333333333333333
+      },
+      "topFix": {
+        "gemini": "Remove the oversized bar-chart ",
+        "gpt": "Replace the six-row opening-hours chart with one compact schedule near the shop address, bring the location into the hero, and remove the duplicate footer schedule.",
+        "claude": "Replace the six-row hours chart with a compact Mon–Fri / Sat table and keep only one hours block on the page (drop the footer copy or the section)."
+      },
+      "blockers": {
+        "gemini": [
+          "On both phone and desktop, the opening hours section is repeated twice (once as a visual bar chart near the top and again as a text table in the footer)."
+        ],
+        "gpt": [
+          "Phone and desktop: opening hours and the holiday-opening note are repeated in the main schedule section and footer."
+        ],
+        "claude": [
+          "Opening hours appear twice: in the 'Kdaj sem odprta' section and again verbatim in the footer 'Delovni čas' on both phone and desktop."
+        ]
+      }
+    },
+    {
+      "itemId": "elektro-zupan",
+      "owner": null,
+      "scores": {
+        "gemini": 4,
+        "gpt": 3.1666666666666665,
+        "claude": 2.8333333333333335
+      },
+      "topFix": {
+        "gemini": "Remove the redundant white 'Obiščite nas' address section at the bottom, as the exact same address and directions link already appear in the dark contact block right above it.",
+        "gpt": "Correct the sticky navigation positioning on both viewports so it never masks hero text or contact links.",
+        "claude": "Remove the 'Obiščite nas' section and the hero/footer duplicates so address, phone and directions appear once in the dark contact block plus the footer legal line."
+      },
+      "blockers": {
+        "gemini": [
+          "On both phone and desktop, the physical address and 'Navodila za pot' link are repeated consecutively in the dark contact section and the white 'Obiščite nas' block immediately below it."
+        ],
+        "gpt": [
+          "Phone: navigation overlaps the hero’s supporting contact content in the full-page view.",
+          "Desktop: navigation obscures the second line of the hero headline in the full-page view.",
+          "Phone and desktop: the address and directions block is repeated immediately below the main contact section."
+        ],
+        "claude": [
+          "Desktop and phone, after the dark contact section: 'Obiščite nas' repeats the same address and directions link that were shown a few hundred pixels above.",
+          "Desktop whole page, hero: the sticky header overlays and clips the second headline line 'za vašo hišo' when scrolled — verify header behaviour."
+        ]
+      }
+    },
+    {
+      "itemId": "elektro-zupan-regenerated",
+      "owner": null,
+      "scores": {
+        "gemini": 3.333333333333333,
+        "gpt": 2.916666666666667,
+        "claude": 2.416666666666667
+      },
+      "topFix": {
+        "gemini": "Fix the mobile viewport width and font scaling on long words like 'ELEKTROINŠTALACIJE' and 'ELEKTROINŠTALATERJA?' so nothing overflows or clips horizontally on phone screens.",
+        "gpt": "Make every phone section fit within 360px: remove minimum-width overflow, allow long headings to wrap, and reduce mobile headline sizes so text stays inside its background.",
+        "claude": "Fix horizontal overflow on phone: size the hero headline and CTA heading to the viewport (break long words or scale down) and keep body text inside the 360px column."
+      },
+      "blockers": {
+        "gemini": [
+          "Phone hero section: the headline 'ELEKTROINŠTALACIJE' and the paragraph below it are cut off on the right edge due to horizontal overflow.",
+          "Phone dark callout section ('POTREBUJETE ELEKTROINŠTALATERJA?'): the headline and body text extend outside the dark container and are clipped off the right side of the screen.",
+          "Phone whole page: background blocks and images do not match the width of the fixed header, creating a broken right margin down the entire page."
+        ],
+        "gpt": [
+          "Phone hero: the headline, introductory text and image label are clipped at the right edge.",
+          "Phone closing call-to-action: the heading and paragraph overflow the dark panel, leaving white text unreadable on the white area beside it."
+        ],
+        "claude": [
+          "Phone hero: headline 'ELEKTROINŠTALACIJE' is clipped at the right edge of the screen.",
+          "Phone hero: intro paragraph overflows the viewport ('Pokličite nas,' cut off).",
+          "Phone dark CTA: heading '?' and 'Pridemo k' are cut off at the right edge.",
+          "Phone and desktop: phone number, address and 'Navodila za pot' repeat in three separate blocks (after 2006 section, Obiščite nas, footer)."
+        ]
+      }
+    },
+    {
+      "itemId": "fizioterapija-pregib",
+      "owner": null,
+      "scores": {
+        "gemini": 3.5,
+        "gpt": 3.416666666666667,
+        "claude": 2.9166666666666665
+      },
+      "topFix": {
+        "gemini": "Make the hero photo full-width within the content container on mobile and remove the background decorative graphic behind the mobile headline.",
+        "gpt": "Replace the five identical timetable bars with one compact weekday-hours row beside the booking action, and remove the repeated hours and arrival instructions from the footer.",
+        "claude": "Collapse the five identical day bars into one 'Ponedeljek–petek 7.00–20.00' row (or keep the timeline only on desktop) and remove the duplicate Delovni čas block from the footer."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [
+          "Phone and desktop: the footer repeats the opening hours and arrival instructions already presented in the timetable section."
+        ],
+        "claude": [
+          "Both phone and desktop: the opening hours and the note 'Samo po predhodnem naročilu. Vhod z dvorišča, 2. nadstropje.' appear twice, in the hours section and again in the footer."
+        ]
+      }
+    },
+    {
+      "itemId": "fizioterapija-pregib-regenerated",
+      "owner": null,
+      "scores": {
+        "gemini": 3.833333333333333,
+        "gpt": 3.5,
+        "claude": 3.25
+      },
+      "topFix": {
+        "gemini": "Restyle the 'Kdaj vas sprejmem' schedule bars using a subtle tint or simple typography so they do not look like five giant green CTA buttons.",
+        "gpt": "Add a compact location line beside the clinic descriptor in both heroes, so visitors see the business type and location before the booking action.",
+        "claude": "Replace the gantt-style hours chart with a compact two-column list (Pon–Pet 7.00–20.00, note below); on desktop pair it with the address/map so the section earns its height."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [],
+        "claude": []
+      }
+    },
+    {
+      "itemId": "frizerski-salon-mia",
+      "owner": null,
+      "scores": {
+        "gemini": 3.8333333333333335,
+        "gpt": 3.5,
+        "claude": 3.0833333333333335
+      },
+      "topFix": {
+        "gemini": "Merge the 'Cene, ki jih poznate vnaprej' and 'Kaj vam lahko uredimo' sections into a single unified service and price list so visitors don't read the same services twice.",
+        "gpt": "Add a concise location line to both heroes; reduce the desktop headline size and distinguish phone booking as the primary action from the secondary price link.",
+        "claude": "Drop the opening-hours table and address block from the footer (or from the sections above) so each contact fact appears once; keep only the name, legal data and policy links in the footer."
+      },
+      "blockers": {
+        "gemini": [
+          "On both phone and desktop, the 'Pokličite za termin' contact section and the 'Kdaj nas obiščete' hours section are immediately repeated inside the dark footer."
+        ],
+        "gpt": [
+          "Phone and desktop footers repeat the address-and-directions block and opening-hours table already presented above."
+        ],
+        "claude": [
+          "Phone and desktop: the opening-hours table is shown in full in 'Kdaj nas obiščete' and again in the footer 'Delovni čas'.",
+          "Phone and desktop: address with 'Navodila za pot' and the phone number are repeated in the contact section and again in the footer 'Obiščite nas'."
+        ]
+      }
+    },
+    {
+      "itemId": "frizerski-salon-mia-regenerated",
+      "owner": null,
+      "scores": {
+        "gemini": 3.8333333333333335,
+        "gpt": 3.5,
+        "claude": 3.6666666666666665
+      },
+      "topFix": {
+        "gemini": "Merge 'Kaj vam ponujamo' and 'Cenik' into a single, unified services-and-pricing section so the same five treatments aren't listed twice in a row.",
+        "gpt": "Add a compact location line beneath the hero headline on both viewports, so visitors see the service, location and contact action together.",
+        "claude": "Compress the opening-hours timeline into a compact two-column list (or shorter bars) so it doesn't take a full screen on phone and desktop."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [],
+        "claude": []
+      }
+    },
+    {
+      "itemId": "frizerstvo-lana",
+      "owner": null,
+      "scores": {
+        "gemini": 3.5,
+        "gpt": 3.0833333333333335,
+        "claude": 2.8333333333333335
+      },
+      "topFix": {
+        "gemini": "Remove the duplicate 'Brez naročila težko pridete na vrsto...' sentence at the bottom of the opening hours section.",
+        "gpt": "Reduce the desktop hero headline to two or three lines; on phone, tighten the gaps around the links and bring a larger hairstyle photo higher into the first screen.",
+        "claude": "Remove duplicated content: the 'Brez naročila…' note appears twice under the hours, and the contact section repeats address, directions and hours twice in a row."
+      },
+      "blockers": {
+        "gemini": [
+          "On both phone and desktop in the 'Kdaj smo odprti' section, the sentence 'Brez naročila težko pridete na vrsto, zato raje pokličite.' is printed twice in a row.",
+          "On the phone in the dark bottom area, the address and 'Navodila za pot' link are repeated in two consecutive sections ('Pokličite in se naročite' and 'Obiščite nas')."
+        ],
+        "gpt": [
+          "Phone, contact section and footer: the address and directions block is repeated immediately, followed by another repetition of the phone and email."
+        ],
+        "claude": [
+          "Phone and desktop, hours section: the sentence 'Brez naročila težko pridete na vrsto…' is repeated twice back to back.",
+          "Phone, contact section: address, directions link and hours are repeated in two consecutive blocks ('Pokličite in se naročite' and 'Obiščite nas').",
+          "Phone and desktop, services list: heading 'Striženje žensk' is truncated/mislabelled (should read 'Žensko striženje')."
+        ]
+      }
+    },
+    {
+      "itemId": "frizerstvo-lana-regenerated",
+      "owner": null,
+      "scores": {
+        "gemini": 3.75,
+        "gpt": 3.416666666666667,
+        "claude": 2.8333333333333335
+      },
+      "topFix": {
+        "gemini": "Remove the duplicate opening hours and address section from the footer since it is already prominently displayed in the burgundy bar right below the hero.",
+        "gpt": "Shorten the hero on both screens, place the salon identity and Celje before the booking action, and reduce the phone number’s display size.",
+        "claude": "Reduce „Navodila za pot"
+      },
+      "blockers": {
+        "gemini": [
+          "Phone: The entire opening hours, note, and address block is repeated verbatim in both the top burgundy bar and the footer."
+        ],
+        "gpt": [
+          "Phone: the footer repeats the address, directions and opening-hours block already shown directly below the hero."
+        ],
+        "claude": []
+      }
+    },
+    {
+      "itemId": "gostilna-pri-mostu",
+      "owner": null,
+      "scores": {
+        "gemini": 3.916666666666667,
+        "gpt": 3.5,
+        "claude": 3
+      },
+      "topFix": {
+        "gemini": "Add line-height or bottom margin to the 'Kuhamo od leta' eyebrow so it stops colliding with the large '1968' numerals.",
+        "gpt": "Recompose the phone hero with a shorter text card and a deliberate food crop, keeping the dish recognizable rather than mostly covered.",
+        "claude": "Keep the hero card inside the photo (or end the photo cleanly below it) so the card doesn't spill into a white band on both viewports."
+      },
+      "blockers": {
+        "gemini": [
+          "On desktop (and slightly on phone) in the '1968' section, the text 'Kuhamo od leta' overlaps the top of the '1968' numerals."
+        ],
+        "gpt": [
+          "Phone and desktop: the footer repeats the reservation section’s address, phone and email contact block."
+        ],
+        "claude": [
+          "Desktop and phone hero: the text card extends past the bottom of the photo into a blank white strip, so the layout reads as broken.",
+          "Phone and desktop footer: address, phone and e-mail repeat the reservation block directly above it."
+        ]
+      }
+    },
+    {
+      "itemId": "gostilna-pri-mostu-regenerated",
+      "owner": null,
+      "scores": {
+        "gemini": 4.083333333333334,
+        "gpt": 3.8333333333333335,
+        "claude": 3.416666666666667
+      },
+      "topFix": {
+        "gemini": "Style the primary hero action ('Pokličite nas') on mobile as a filled brown button like on desktop, and place 'Pot do nas' beside it rather than stacked below.",
+        "gpt": "On phone, give the call action a filled button treatment, keep directions as a compact secondary link, and reduce the large vertical gaps between them.",
+        "claude": "Fill the empty right column beside the desktop menu list (second photo, opening hours or a map) or centre/narrow the section so it doesn't leave a dead band."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [],
+        "claude": []
+      }
+    },
+    {
+      "itemId": "gostilna-zlata-zlica",
+      "owner": null,
+      "scores": {
+        "gemini": 3.583333333333333,
+        "gpt": 3.1666666666666665,
+        "claude": 3.083333333333333
+      },
+      "topFix": {
+        "gemini": "Remove the duplicate address, opening hours, and contact details from the 'Pokličite za rezervacijo mize' section so they only appear once in the footer.",
+        "gpt": "Merge the reservation contact section and footer contact blocks into one area containing the phone number, address, directions, hours and email; retain only legal information beneath it.",
+        "claude": "Merge the 'Pokličite za rezervacijo' contact block and the footer 'Obiščite nas'/'Delovni čas' into one contact section so address, hours and directions appear once."
+      },
+      "blockers": {
+        "gemini": [
+          "On both phone and desktop, the address, opening hours, and contact info are repeated in two consecutive sections at the bottom of the page."
+        ],
+        "gpt": [
+          "Phone: the footer repeats the address, directions and opening hours immediately after the reservation contact section.",
+          "Desktop: the footer repeats the address, directions and opening hours already presented in the reservation contact section."
+        ],
+        "claude": [
+          "Desktop hero: the 'Rezervirajte mizo' and 'Poglejte ponudbo' links are clipped at the bottom edge of the first screen.",
+          "Phone and desktop: the dining-room photo overflows the gallery and runs into the next section's divider.",
+          "Phone and desktop: address, directions link and opening hours are repeated in the contact section and again in the footer.",
+          "Desktop 'Sprejemamo rezervacije' section: layout leaves a large empty band on the right with only a lone link."
+        ]
+      }
+    },
+    {
+      "itemId": "gostilna-zlata-zlica-regenerated",
+      "owner": null,
+      "scores": {
+        "gemini": 4.083333333333333,
+        "gpt": 3.833333333333333,
+        "claude": 3.583333333333333
+      },
+      "topFix": {
+        "gemini": "Reduce the height of the desktop hero image or move the dark green text card higher up so the headline, body copy, and primary CTA button are fully visible on the first screen.",
+        "gpt": "Shorten the desktop hero photograph and move its text panel upward so the headline, introduction and primary action fit within the first screen; include a concise location line in the hero on both",
+        "claude": "Desktop hero: shrink the photo height or move the dark card to sit fully within the first screen so headline and 'Oglejte si cene' are visible without scrolling."
+      },
+      "blockers": {
+        "gemini": [
+          "On phone in the footer, the giant display text 'Gostilna Pri Zlati Žlici' has tight line-height causing the 'l' in 'Gostilna' to overlap the 'Ž' in 'Žlici'.",
+          "On the desktop first screen, the hero text box extends past the bottom of the viewport, cutting off the body text and hiding the primary CTA buttons below the fold."
+        ],
+        "gpt": [],
+        "claude": [
+          "Phone footer: the giant wordmark 'Gostilna Pri Zlati Žlici' wraps and is clipped at the slice boundary, overwhelming the contact block.",
+          "Desktop first screen: hero card is cut off at the fold, hiding the intro text and the primary button."
+        ]
+      }
+    },
+    {
+      "itemId": "gostisce-na-gricu",
+      "owner": null,
+      "scores": {
+        "gemini": 3.4166666666666665,
+        "gpt": 3.25,
+        "claude": 3.166666666666667
+      },
+      "topFix": {
+        "gemini": "Merge the reservation contact block and the footer so the address, 'Navodila za pot' link, phone number,email, and opening hours are not repeated back-to-back.",
+        "gpt": "Consolidate reservations, address, directions and opening hours into one practical contact section; keep the footer for legal details and secondary navigation.",
+        "claude": "Merge the contact section and footer: show address, directions and hours once; keep the big phone number as the single contact call to action."
+      },
+      "blockers": {
+        "gemini": [
+          "On both phone and desktop, the bottom burgundy reservation block and the footer directly beneath it repeat the exact same address, 'Navodila za pot' link, phone number, and email."
+        ],
+        "gpt": [
+          "Phone and desktop: the lower contact area repeats the address and directions block, while the footer repeats the opening-hours block already shown above."
+        ],
+        "claude": [
+          "Desktop whole page: the header appears twice at the top with an empty white band above the first one and a photo strip between them.",
+          "Phone whole page: a bare photo strip sits above the header, duplicating the hero image before the real header starts.",
+          "Both viewports: address, 'Navodila za pot' and opening hours are repeated in the hours section, the contact section and the footer."
+        ]
+      }
+    },
+    {
+      "itemId": "gostisce-na-gricu-regenerated",
+      "owner": null,
+      "scores": {
+        "gemini": 3.8333333333333335,
+        "gpt": 3.666666666666667,
+        "claude": 3.333333333333333
+      },
+      "topFix": {
+        "gemini": "Style the primary 'Rezervirajte mizo' CTA on mobile as a solid dark-green button just like on desktop so the main action stands out.",
+        "gpt": "Consolidate opening hours into one block on phone; remove the duplicate reservation note and the repeated hours block in the footer.",
+        "claude": "Desktop: cap the hero and section photos to viewport height and vertically centre the text column beside them to remove the empty bands under 'Terasa' and beside '1990'."
+      },
+      "blockers": {
+        "gemini": [
+          "On phone in the 'Kdaj smo odprti' section, the note 'V ponedeljek in torek samo za zaključene družbe. Rezervacija je obvezna.' is printed twice in a row.",
+          "On phone, the 'Kdaj smo odprti' section and the 'Delovni čas' block immediately below it in the footer repeat the exact same opening hours back-to-back."
+        ],
+        "gpt": [
+          "Phone opening-hours section repeats the same reservation note twice, and the footer repeats the opening-hours block."
+        ],
+        "claude": [
+          "Phone, 'Kdaj smo odprti': the sentence 'V ponedeljek in torek samo za zaključene družbe. Rezervacija je obvezna.' appears twice in a row.",
+          "Desktop, 'Terasa' section: the photo is ~900px tall with the heading and text pushed to the very bottom, leaving the right column mostly empty and the heading cut across the slice.",
+          "Desktop, hero: paragraph breaks 'la-stne' and phone breaks 'Or-možem'/'Re-zervacija' and 'zak-ljučene' with hard hyphenation mid-word."
+        ]
+      }
+    },
+    {
+      "itemId": "instalacije-rebernik",
+      "owner": null,
+      "scores": {
+        "gemini": 4.25,
+        "gpt": 3.5,
+        "claude": 3.5
+      },
+      "topFix": {
+        "gemini": "Compact the desktop header into a single horizontal bar with the brand on the left and anchor links (Kaj delamo, Kje delamo, Kontakt) on the right instead of a lonely 'Domov' link.",
+        "gpt": "Reduce the desktop masthead and headline sizes, and replace the enormous footer business name with a compact wordmark.",
+        "claude": "Shrink the giant centred header logo and single-link nav into a compact header, and merge the dark CTA block with the footer so phone and address appear only once beyond the hero."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [
+          "Phone and desktop: the footer repeats the address and phone details immediately after the dedicated contact section."
+        ],
+        "claude": [
+          "Desktop 'Kje delamo': 'Slovenska Bistrica' and 'okolica Maribora' wrap onto a second line that is cut off at the slice edge, breaking the city row."
+        ]
+      }
+    },
+    {
+      "itemId": "instalacije-rebernik-regenerated",
+      "owner": null,
+      "scores": {
+        "gemini": 3.8333333333333335,
+        "gpt": 3.083333333333333,
+        "claude": 2.916666666666667
+      },
+      "topFix": {
+        "gemini": "Style the primary 'Pokličite nas' links in the hero and footer CTA sections as solid, high-contrast buttons so the main action stands out.",
+        "gpt": "Correct the sticky-header positioning so it does not cover the phone hero heading or interrupt the desktop hero image.",
+        "claude": "Drop the phone/address block directly under the hero; the header already carries both and the footer repeats them, so leave contact in header and footer only."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [
+          "Phone, full-page hero: the displaced header covers most of the main heading.",
+          "Desktop, full-page hero: the displaced header overlays and interrupts the main image."
+        ],
+        "claude": [
+          "Phone and desktop: phone number and directions link appear three times – in the header, in the contact block right below the hero and again in the footer."
+        ]
+      }
+    },
+    {
+      "itemId": "instrukcije-pia",
+      "owner": null,
+      "scores": {
+        "gemini": 3.916666666666667,
+        "gpt": 3.25,
+        "claude": 3.5
+      },
+      "topFix": {
+        "gemini": "Include the location (Maribor / online) in the hero section so visitors immediately know where the tutoring takes place.",
+        "gpt": "Put the mobile headline before a shorter hero image, bring Maribor/online information into the hero on both screens, and add a discreet desktop contact link.",
+        "claude": "Desktop hero: crop the photo to fit within the 800px viewport and vertically centre the text column with it, reducing the ~250px dead space above the headline."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [],
+        "claude": []
+      }
+    },
+    {
+      "itemId": "instrukcije-pia-regenerated",
+      "owner": null,
+      "scores": {
+        "gemini": 3.8333333333333335,
+        "gpt": 3,
+        "claude": 2.75
+      },
+      "topFix": {
+        "gemini": "Remove or rewrite the 'Pia Lešnik, profesorica matematike' section lower down so it does not repeat the exact same bio facts from the hero.",
+        "gpt": "Correct the sticky header positioning on both viewports so it never covers the hero headline, introduction or contact links.",
+        "claude": "Fill the empty right half on desktop: place a portrait of Pia or a notebook/formula detail beside the hero text and beside 'Kje poteka', or narrow the container to a readable single column."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [
+          "Phone, full-page hero: the header overlaps the introductory paragraph and hides part of the content.",
+          "Desktop, full-page hero: the header covers part of the headline."
+        ],
+        "claude": [
+          "Footer (both viewports): the name 'Inštrukcije Pia' appears as a giant wordmark and again as a bold line directly beneath it, a repeated block.",
+          "Desktop full page: the sticky header renders over the first line of the headline ('Matematika in fizika, ki') in the capture, hiding it."
+        ]
+      }
+    },
+    {
+      "itemId": "karoserija-hribar",
+      "owner": null,
+      "scores": {
+        "gemini": 3.833333333333333,
+        "gpt": 2.916666666666667,
+        "claude": 3.166666666666667
+      },
+      "topFix": {
+        "gemini": "Fix the column width or heading font size in the desktop 'Vlečemo po vsej Savinjski regiji' section so the heading does not overlap and clip the adjacent text.",
+        "gpt": "Rebuild the desktop towing-region section with non-overlapping columns and a smaller heading; remove the largely empty right-hand area.",
+        "claude": "Remove repeated contact blocks: keep address/hours once (blue band) and drop the duplicates in „Pokličite nas"
+      },
+      "blockers": {
+        "gemini": [
+          "On desktop, the heading 'VLEČEMO PO VSEJ SAVINJSKI REGIJI' overlaps the right column and clips the 'S' in 'Savinjska regija'.",
+          "On phone, the complete address and working hours block is repeated three times, including twice back-to-back at the bottom of the page."
+        ],
+        "gpt": [
+          "Desktop towing-region section: the heading overlaps and obscures the adjacent “Savinjska regija” label.",
+          "Phone closing sections: the address, directions and opening-hours block is repeated immediately in the footer."
+        ],
+        "claude": [
+          "Phone: „Navodila za pot",
+          "Desktop: sticky header overlaps and hides the hero headline „VLEKA IN"
+        ]
+      }
+    },
+    {
+      "itemId": "karoserija-hribar-regenerated",
+      "owner": null,
+      "scores": {
+        "gemini": 4.166666666666667,
+        "gpt": 3.416666666666667,
+        "claude": 3
+      },
+      "topFix": {
+        "gemini": "In the 'Vlečemo po vsej Savinjski regiji' section on desktop, flesh out the right column (e.g., list key towns or add a simple map) so 'Savinjska regija' doesn't float in an empty space.",
+        "gpt": "Reduce the hero headline size, especially on phone, and place a compact Celje location line alongside the business introduction so trade, location and contact are clear in the first screen.",
+        "claude": "Give the „Vlečemo po vsej Savinjski regiji"
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [],
+        "claude": [
+          "Desktop and phone, „Vlečemo po vsej Savinjski regiji"
+        ]
+      }
+    },
+    {
+      "itemId": "kljucavnicarstvo-hrovat",
+      "owner": null,
+      "scores": {
+        "gemini": 3.916666666666667,
+        "gpt": 3.333333333333333,
+        "claude": 3.1666666666666665
+      },
+      "topFix": {
+        "gemini": "Remove the redundant 'Pokličite me' and 'Pot do delavnice' text links from the hero body copy, since the sticky header and the contact strip right below already provide those exact actions.",
+        "gpt": "Correct the sticky-header positioning so it does not cover the hero headline in the full-page views on either viewport.",
+        "claude": "Keep one strong 'Pokličite' as the hero primary button and drop the duplicate 'Pokličite me' / 'Pot do delavnice' text links (and the header pair on phone) so each screen has a single clear action."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [
+          "Phone, hero: the header shown in the full-page capture covers the emergency headline.",
+          "Desktop, hero: the header shown in the full-page capture overlaps and obscures the headline."
+        ],
+        "claude": []
+      }
+    },
+    {
+      "itemId": "kljucavnicarstvo-hrovat-regenerated",
+      "owner": null,
+      "scores": {
+        "gemini": 3.416666666666667,
+        "gpt": 3.1666666666666665,
+        "claude": 3
+      },
+      "topFix": {
+        "gemini": "Replace the car license plate styling on the phone number and price badges with a locksmith-appropriate motif or high-contrast emergency button.",
+        "gpt": "Correct the navigation positioning so it stays at the viewport top without obscuring hero text or the phone number in the full-page views.",
+        "claude": "Merge the blue info block, the 'Pokličite me' block and 'Obiščite nas' into one closing contact section; keep the hero phone plate as the single primary action."
+      },
+      "blockers": {
+        "gemini": [
+          "Phone and desktop: The exact same address and opening hours block is repeated both inside the dark bottom CTA section and immediately below it in the footer.",
+          "Phone and desktop: Phone numbers and prices are styled as car registration plates (with 'SLO' and 'CE' prefixes), which is nonsensical for a locksmith and corrupts the phone number."
+        ],
+        "gpt": [
+          "Phone hero, full-page view: the navigation bar overlaps the description and partially hides the phone-number plate.",
+          "Desktop hero, full-page view: the navigation bar cuts across the headline.",
+          "Phone contact section and footer: the address, directions and opening-hours block is repeated consecutively."
+        ],
+        "claude": [
+          "Phone: address, opening hours and 'Navodila za pot' appear three times (blue block, 'Pokličite me' section, 'Obiščite nas') plus phone repeated in footer – duplicate contact blocks.",
+          "Phone hero: 'Navodila za pot' link sits directly under the identical link in the header, duplicating the same action twice in the first screen."
+        ]
+      }
+    },
+    {
+      "itemId": "kmetija-grabnar",
+      "owner": null,
+      "scores": {
+        "gemini": 3.916666666666667,
+        "gpt": 3.5,
+        "claude": 2.8333333333333335
+      },
+      "topFix": {
+        "gemini": "Arrange 'Sobe' and 'Apartma' (and the pricing beside it) into a two-column layout on desktop to eliminate the large empty right half of the page.",
+        "gpt": "Consolidate reservations, address, directions and opening hours into one contact section, leaving only legal information in the footer.",
+        "claude": "Lift the dark overlay to a gradient behind the text only so the valley photo actually shows, and drop or shrink the hero signposts since the same trails are listed in 'Poti in cilji v bližini'."
+      },
+      "blockers": {
+        "gemini": [
+          "Phone bottom sections: the full address, phone, email, and weekend hours are repeated across three consecutive blocks ('Rezervacije', 'Obiščite nas', and footer)."
+        ],
+        "gpt": [
+          "Phone: the address and directions block appears in both the reservations section and the immediately following “Obiščite nas” section."
+        ],
+        "claude": [
+          "Phone and desktop: address, 'Navodila za pot' link and email are repeated in the Rezervacije section, the 'Obiščite nas' section and the footer.",
+          "Phone and desktop: the Raduha/Logarska dolina/Smučišče signposts in the hero duplicate the same three items in the 'Poti in cilji v bližini' section."
+        ]
+      }
+    },
+    {
+      "itemId": "kmetija-grabnar-regenerated",
+      "owner": null,
+      "scores": {
+        "gemini": 3.75,
+        "gpt": 3.5833333333333335,
+        "claude": 3.416666666666667
+      },
+      "topFix": {
+        "gemini": "Reduce the desktop hero image height or move the overlapping dark text card higher so the full intro paragraph and primary links fit inside the first 800px screen.",
+        "gpt": "Reduce the desktop hero height and move its text panel upward so the location, complete introduction and primary reservation action fit within the first screen.",
+        "claude": "Give the apartment card its own photo (or let cards size to content) so the desktop accommodation grid has no empty half-card."
+      },
+      "blockers": {
+        "gemini": [
+          "On the desktop first screen, the hero text box is cut off at the bottom of the viewport, slicing through the first line of body copy and hiding the call-to-action links.",
+          "On desktop in the 'Nastanitev' section, the right-hand card ('Apartma za 4 osebe') stretches to the height of the image card next to it, creating a broken-looking empty box."
+        ],
+        "gpt": [],
+        "claude": [
+          "Desktop, Nastanitev: the 'Apartma za 4 osebe' card is stretched to match the photo card and shows a large empty area.",
+          "Phone, footer: the farm name appears as a giant three-line heading and is repeated verbatim immediately below it."
+        ]
+      }
+    },
+    {
+      "itemId": "mizarstvo-lesnik",
+      "owner": null,
+      "scores": {
+        "gemini": 3.5,
+        "gpt": 2.75,
+        "claude": 2.583333333333333
+      },
+      "topFix": {
+        "gemini": "Remove the duplicate 'Obiščite nas' and 'Delovni čas' section below the dark CTA banner so contact details appear only once.",
+        "gpt": "Lead with furniture or workshop imagery rather than the landscape, and add a few visually strong examples alongside the product categories.",
+        "claude": "Replace the landscape hero with a photo of finished furniture or the workshop, and add a photo to each of the six product items so the page shows the trade instead of listing it."
+      },
+      "blockers": {
+        "gemini": [
+          "On both phone and desktop, the 'Obiščite nas' address, directions link, and 'Delovni čas' block are repeated immediately above and below the dark brown CTA banner."
+        ],
+        "gpt": [
+          "Phone and desktop: the footer repeats the address, directions and opening-hours blocks already presented in the workshop contact section."
+        ],
+        "claude": [
+          "Phone and desktop: address, directions link and opening hours are repeated in the footer directly after the 'Obiščite nas v delavnici' contact cards.",
+          "Desktop, waiting-time section: the card occupies only the left half, leaving the right half of the band empty."
+        ]
+      }
+    },
+    {
+      "itemId": "mizarstvo-lesnik-regenerated",
+      "owner": null,
+      "scores": {
+        "gemini": 3.75,
+        "gpt": 3,
+        "claude": 2.75
+      },
+      "topFix": {
+        "gemini": "Increase the line-height or bottom margin on 'Delavnica od leta' so it does not collide with the '1979' numeral below it.",
+        "gpt": "Correct the sticky header positioning: in the full-page views it interrupts the phone hero and overlays the desktop headline and address.",
+        "claude": "Add workshop or furniture photos: a hero image or a photo strip in 'Kaj izdelujemo' so each product line shows real work instead of a bare text list."
+      },
+      "blockers": {
+        "gemini": [
+          "On both phone and desktop, the label 'Delavnica od leta' overlaps the top of the giant '1979' numeral.",
+          "The full address, directions link, and opening hours block from the hero section is repeated verbatim at the bottom of the page."
+        ],
+        "gpt": [
+          "Desktop full-page hero: the navigation header overlaps and obscures the headline and address.",
+          "Phone and desktop: the address, directions and opening-hours block is repeated in the hero and near the footer."
+        ],
+        "claude": [
+          "Phone: the fixed header (logo, Pokličite, Navodila za pot) overlaps the hero text in the whole-page view.",
+          "Desktop: the fixed header bar overlaps and cuts through the hero headline and the Naslov label in the whole-page view.",
+          "Both: the address, hours and 'Navodila za pot' block is repeated in the hero and again in 'Obiščite nas'."
+        ]
+      }
+    },
+    {
+      "itemId": "pekarna-kvas",
+      "owner": null,
+      "scores": {
+        "gemini": 3.666666666666667,
+        "gpt": 3.5,
+        "claude": 3.4166666666666665
+      },
+      "topFix": {
+        "gemini": "Remove the redundant 'Obiščite nas' / 'Delovni čas' pre-footer section so the address and hours only appear once beneath the big phone number.",
+        "gpt": "Keep one consolidated contact section with address, directions and opening hours; reduce the footer to business identification and legal links.",
+        "claude": "Merge the contact section and footer: show address, hours and email once, and drop the phone number from the phone header since the fixed bar already carries it."
+      },
+      "blockers": {
+        "gemini": [
+          "Both phone and desktop repeat the complete address, directions link, and opening hours block twice in a row at the bottom of the page.",
+          "In the top-left logo on both phone and desktop, the subtitle 'PEKARNA · KAMNIK' is clipped on the right edge."
+        ],
+        "gpt": [
+          "On phone and desktop, the footer repeats the address, directions and full opening-hours block immediately after the main contact section."
+        ],
+        "claude": [
+          "Phone, price list: 'Polnozrnate' is hyphenated across two lines as 'Polnozr-nate'.",
+          "Phone and desktop: address, directions link and opening hours appear twice, in the contact section and again in the footer directly below."
+        ]
+      }
+    },
+    {
+      "itemId": "pekarna-kvas-regenerated",
+      "owner": null,
+      "scores": {
+        "gemini": 4.416666666666666,
+        "gpt": 3.916666666666667,
+        "claude": 3.8333333333333335
+      },
+      "topFix": {
+        "gemini": "Arrange the 'Kaj pečemo' menu categories into a two-column grid on desktop so the section does not leave the right half of the screen completely empty.",
+        "gpt": "Replace the large opening-hours chart with compact day-and-time rows, grouping weekdays with identical hours and keeping weekends separate.",
+        "claude": "Desktop: use the empty right half of the menu section for the pastry photo or the potica call-out, and trim the white band below the hero so the hours section starts closer."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [],
+        "claude": []
+      }
+    },
+    {
+      "itemId": "pizzeria-oljka",
+      "owner": null,
+      "scores": {
+        "gemini": 3.333333333333333,
+        "gpt": 2.833333333333333,
+        "claude": 2.75
+      },
+      "topFix": {
+        "gemini": "Remove the redundant 'Obiščite nas' and 'Delovni čas' row in the footer, since the exact same information is already displayed in the reservation section immediately above it.",
+        "gpt": "Combine reservations, address, directions and opening hours into one contact section; retain only business and legal details in the footer.",
+        "claude": "Merge the 'Pokličite za rezervacijo' block and the footer's 'Obiščite nas / Delovni čas' into one contact section so address, directions and hours appear once."
+      },
+      "blockers": {
+        "gemini": [
+          "On both phone and desktop, the address, directions link, and opening hours are repeated twice in a row in the bottom reservation and footer sections."
+        ],
+        "gpt": [
+          "On both phone and desktop, the footer repeats the address, directions and opening-hours block immediately after the contact section."
+        ],
+        "claude": [
+          "Phone and desktop: address, 'Navodila za pot' and opening hours are repeated in the contact section and again in the footer immediately below.",
+          "Desktop: 'Kdo skrbi za peč in mize' section is a near-empty band with a single name and large unused space."
+        ]
+      }
+    },
+    {
+      "itemId": "pizzeria-oljka-regenerated",
+      "owner": null,
+      "scores": {
+        "gemini": 3.75,
+        "gpt": 3.583333333333333,
+        "claude": 3.333333333333333
+      },
+      "topFix": {
+        "gemini": "Arrange the desktop menu into a two-column grid so it fills the horizontal space instead of leaving the right side empty.",
+        "gpt": "Consolidate the address, directions and opening hours into one practical-information section on phone, retaining the required fixed action bar.",
+        "claude": "Desktop: shrink the hero to the photo height, centre the text block and add hours/address under the CTA; make the menu two columns or place the oven photo beside it to fill the empty right half."
+      },
+      "blockers": {
+        "gemini": [
+          "Phone and desktop: The address, directions link, and opening hours block is repeated twice on the page (below the hero and again in the 'Obiščite nas' section)."
+        ],
+        "gpt": [
+          "Phone: the address, directions and opening-hours block below the hero is repeated in the footer."
+        ],
+        "claude": [
+          "Desktop: hero and 'Pečemo na drva' sections leave large dead bands, and the menu section's right half is blank — the layout looks unfinished.",
+          "Phone: phone number, address and directions link repeat in the header strip, the info block and the footer; the 'Obiščite nas'/'Delovni čas' block repeats the earlier info block."
+        ]
+      }
+    },
+    {
+      "itemId": "prevajanje-kolar",
+      "owner": null,
+      "scores": {
+        "gemini": 4.083333333333334,
+        "gpt": 3.916666666666667,
+        "claude": 3.6666666666666665
+      },
+      "topFix": {
+        "gemini": "Move the phone call/directions bar to the bottom of the viewport so the top header stays clean and doesn't stack right above the inline contact block.",
+        "gpt": "Correct the header positioning on both viewports so it stays at the viewport edge without obscuring hero content.",
+        "claude": "Turn off hyphenation in the price table and service descriptions (li-stin, par-kirišče, stro-kovne) and give price labels room so they don't wrap."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [
+          "Phone hero: the header covers description text and the document action in the full-page view.",
+          "Desktop hero: the header overlaps and obscures the headline in the full-page view."
+        ],
+        "claude": []
+      }
+    },
+    {
+      "itemId": "prevajanje-kolar-regenerated",
+      "owner": null,
+      "scores": {
+        "gemini": 3.833333333333333,
+        "gpt": 3.166666666666667,
+        "claude": 2.916666666666667
+      },
+      "topFix": {
+        "gemini": "Remove the duplicate 'Obiščite nas' and 'Delovni čas' section above the footer since those exact details are already prominently displayed in the hero section.",
+        "gpt": "Correct the sticky navigation positioning so it cannot cover the desktop headline or phone contact content, while preserving the required phone call/directions bar.",
+        "claude": "Keep contact details in one place: drop address, hours and directions from the hero (phone is already in the header) and leave them in the footer."
+      },
+      "blockers": {
+        "gemini": [
+          "On both phone and desktop, the address, directions link, and opening hours block is repeated verbatim in both the hero section and above the footer."
+        ],
+        "gpt": [
+          "Desktop full-page view: the navigation bar overlaps and obscures the hero headline.",
+          "Phone full-page view: the navigation and action bar cover the telephone block.",
+          "Phone and desktop: the address and opening-hours block is repeated near the top and again above the footer."
+        ],
+        "claude": [
+          "Both viewports: address, opening hours and 'Navodila za pot' appear in the hero contact block and again in the footer, a repeated contact block.",
+          "Phone: 'Navodila za pot' appears three times (sticky bar, hero block, footer) and the phone number three times."
+        ]
+      }
+    },
+    {
+      "itemId": "racunovodstvo-seliskar",
+      "owner": null,
+      "scores": {
+        "gemini": 3.8333333333333335,
+        "gpt": 3.416666666666667,
+        "claude": 2.8333333333333335
+      },
+      "topFix": {
+        "gemini": "Merge the 'Pred obiskom nas pokličite' and 'Obiščite nas' sections at the bottom so the address, 'Navodila za pot' link, phone, and email are not repeated twice in the dark footer area.",
+        "gpt": "Consolidate the closing contact section and “Obiščite nas” into one block; leave only business identification and legal links in the footer.",
+        "claude": "Merge 'Pred obiskom nas pokličite', 'Obiščite nas' and the footer contact row into one contact block with the address, phone and 'Navodila za pot' appearing once."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [
+          "On phone and desktop, the closing contact section is immediately followed by another address-and-directions block, then repeated phone and email details in the footer."
+        ],
+        "claude": [
+          "Phone and desktop whole-page captures show the header band laid over the receipt card and headline mid-page, hiding 'Kaj uredimo za vas' and clipping 'Računovodstvo'.",
+          "Phone and desktop: the address and 'Navodila za pot' appear in 'Pred obiskom nas pokličite', again in 'Obiščite nas' and the phone/e-mail again in the footer – the same contact block repeated."
+        ]
+      }
+    },
+    {
+      "itemId": "racunovodstvo-seliskar-regenerated",
+      "owner": null,
+      "scores": {
+        "gemini": 3.8333333333333335,
+        "gpt": 3.25,
+        "claude": 2.583333333333333
+      },
+      "topFix": {
+        "gemini": "Remove the redundant 'Obiščite nas' address and directions section at the bottom, as the exact same information is already shown immediately above it in 'Kje nas najdete'.",
+        "gpt": "Merge “Kje nas najdete” and “Obiščite nas” into one contact section with a single address and directions link; keep the footer focused on company and legal information.",
+        "claude": "Fill the empty left half of the desktop hero (and the gap below the phone hero) with a photo of the office/team or a strong typographic device so the first screen is not half blank."
+      },
+      "blockers": {
+        "gemini": [
+          "On both phone and desktop, the 'Obiščite nas' block at the bottom repeats the exact same address and directions link already shown immediately above in 'Kje nas najdete'."
+        ],
+        "gpt": [
+          "Phone and desktop: “Obiščite nas” repeats the address and directions block immediately after “Kje nas najdete”."
+        ],
+        "claude": [
+          "Desktop, whole page: the sticky header bar is rendered on top of the hero headline, covering 'podjetja in društva v Pomurju'.",
+          "Phone, whole page: the sticky header and call bar overlap the 'Naša zgodba' section text.",
+          "Desktop, 'Delamo od leta' section: the giant '2004' overlaps the 'Delamo od leta' label and the section heading above is clipped.",
+          "Both viewports: address and 'Navodila za pot' are repeated in 'Kje nas najdete' and again in 'Obiščite nas' directly below."
+        ]
+      }
+    },
+    {
+      "itemId": "salon-tina",
+      "owner": null,
+      "scores": {
+        "gemini": 3.583333333333333,
+        "gpt": 3,
+        "claude": 2.6666666666666665
+      },
+      "topFix": {
+        "gemini": "Replace or remove the smaller inset photo in the 'Kdo vas počesa' section so the hero image is not used twice on the same page.",
+        "gpt": "Rebalance the hero: reduce the desktop headline to two or three lines, bring the phone photo directly beneath the introduction, and show the salon location near the opening text.",
+        "claude": "Merge the booking section, 'Obiščite nas' and the footer into one contact block with a single address, directions link and set of hours; drop the duplicate hours table."
+      },
+      "blockers": {
+        "gemini": [
+          "Both phone and desktop repeat the exact same wavy hair photo from the hero section inside the 'Kdo vas počesa' collage.",
+          "Both phone and desktop repeat the full address and directions link in two consecutive sections ('Naročite se po telefonu' and 'Obiščite nas') at the bottom of the page."
+        ],
+        "gpt": [
+          "Phone and desktop: the hero’s balayage photo is repeated in the salon introduction section.",
+          "Phone and desktop: the address and directions block is repeated immediately below the main contact section."
+        ],
+        "claude": [
+          "Both viewports, 'Kdo vas počesa': the same balayage photo from the hero is reused as the inset picture.",
+          "Both viewports: address, directions link, phone and email are repeated in the booking section, 'Obiščite nas' and the footer, and hours appear twice.",
+          "Desktop and phone full page: the sticky header lands over the hero headline, clipping the top of 'Pričeska' on desktop and splitting headline from buttons on phone."
+        ]
+      }
+    },
+    {
+      "itemId": "salon-tina-regenerated",
+      "owner": null,
+      "scores": {
+        "gemini": 4,
+        "gpt": 3.916666666666667,
+        "claude": 3
+      },
+      "topFix": {
+        "gemini": "Add the city or address (Kranj) into the hero or header so visitors immediately know where the salon is located without scrolling to the footer.",
+        "gpt": "Add a compact salon-and-location line near the hero heading so visitors can identify the business and Kranj before reaching the contact action.",
+        "claude": "Make the header static or ensure it never covers the hero headline and photo; on phone also give the fixed bar room so „Navodila za pot“ isn't cut off."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [],
+        "claude": [
+          "Phone: fixed header bar clips the „Navodila za pot“ label at the right edge.",
+          "Phone: sticky header overlaps the hero photo and hides the headline in the full-page view.",
+          "Desktop: sticky header overlaps the hero headline „ga boste zapomnili“ in the full-page view."
+        ]
+      }
+    },
+    {
+      "itemId": "trgovina-oljka-in-sol",
+      "owner": null,
+      "scores": {
+        "gemini": 3.583333333333333,
+        "gpt": 3.0833333333333335,
+        "claude": 2.916666666666667
+      },
+      "topFix": {
+        "gemini": "Remove the duplicate address, directions link, and opening hours from the 'Obiščite nas' footer block since they appear immediately above in the contact section.",
+        "gpt": "Consolidate the contact section and footer into one contact area with a single address, opening-hours table, phone number and email; keep the legal footer compact.",
+        "claude": "Merge the contact section and footer into one block: show address, directions, hours, phone and e-mail exactly once."
+      },
+      "blockers": {
+        "gemini": [
+          "On both phone and desktop, the entire address, directions link, and opening hours table are repeated verbatim in the contact section and the footer right below it."
+        ],
+        "gpt": [
+          "Phone and desktop: the footer repeats the address, directions, opening hours and seasonal-hours note already displayed in the contact section directly above."
+        ],
+        "claude": [
+          "Phone and desktop: the contact block (address, Navodila za pot, full opening-hours table, phone, e-mail) is repeated in the contact section and again in the footer."
+        ]
+      }
+    },
+    {
+      "itemId": "trgovina-oljka-in-sol-regenerated",
+      "owner": null,
+      "scores": {
+        "gemini": 4,
+        "gpt": 3.6666666666666665,
+        "claude": 3
+      },
+      "topFix": {
+        "gemini": "Replace the 'Ekstra deviško oljčno olje' product photo with a close-up of a single bottle so it does not duplicate the hero image.",
+        "gpt": "Replace the tall opening-hours bars with a compact timetable on both screens, bringing the product section substantially higher.",
+        "claude": "Replace the day-by-day timeline bars with a compact hours table (Mon–Fri 8–19, Sat 8–13, Sun closed) so hours take one small block instead of a full screen."
+      },
+      "blockers": {
+        "gemini": [
+          "Phone and desktop: the exact same olive oil shelf photo is used in both the hero section and the 'Kaj najdete pri nas' product grid."
+        ],
+        "gpt": [
+          "Phone and desktop, hero and product section: the same olive-oil shelf photograph is repeated."
+        ],
+        "claude": [
+          "Desktop, product grid: the 'Pršut in siri' card has no price line while the others do, leaving an uneven row and empty space to the right.",
+          "Phone, opening hours: the 'Nedelja' row is cut by the slice edge with 'zaprto' half visible — verify the row renders fully and isn't clipped."
+        ]
+      }
+    },
+    {
+      "itemId": "vulkanizer-zorman",
+      "owner": null,
+      "scores": {
+        "gemini": 3.75,
+        "gpt": 2.833333333333333,
+        "claude": 2.75
+      },
+      "topFix": {
+        "gemini": "Replace the hero background photo of hills and vineyards with an image of tires, a workshop, or a wheel being balanced.",
+        "gpt": "Correct the header positioning on both viewports so it stays at the viewport edge without covering hero content or leaving a blank band above it.",
+        "claude": "Collapse contact repetition: keep one hours/address block (contact section) and drop the extra 'Navodila za pot' links in header row 2, hero and hours band."
+      },
+      "blockers": {
+        "gemini": [
+          "Phone hero section: the letter 'O' in 'HITRO' overlaps with the caron of 'Š' in 'POŠTENO' due to overly tight line-height.",
+          "Phone and desktop hero section: the background image shows vineyards and a castle instead of a tire shop or automotive subject."
+        ],
+        "gpt": [
+          "Phone and desktop full-page views: the header overlaps and obscures the hero text.",
+          "Phone and desktop: the address and opening-hours block is repeated below the hero and again in the closing contact section."
+        ],
+        "claude": [
+          "Phone and desktop full page: the same address, hours and 'Navodila za pot' contact block is repeated in the hours band, contact section and footer.",
+          "Phone and desktop full-page capture: the sticky header sits over the hero headline, hiding 'HITRO IN' — check the fixed header does not cover content on scroll."
+        ]
+      }
+    },
+    {
+      "itemId": "vulkanizer-zorman-regenerated",
+      "owner": null,
+      "scores": {
+        "gemini": 3.916666666666667,
+        "gpt": 2.8333333333333335,
+        "claude": 2.75
+      },
+      "topFix": {
+        "gemini": "Remove the duplicate 'Spomladi in jeseni je gneča, zato se prej naročite po telefonu' sentence from beneath the working hours so it only appears once in the hero.",
+        "gpt": "Correct the header positioning on both viewports so it stays at the viewport edge without obscuring hero content.",
+        "claude": "Bring the tyre or workshop photo into the first screen: on desktop as a right-hand image beside the headline with the contact card below, on phone directly under the headline."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [
+          "Phone, whole-page hero: the header and action strip obscure the introductory paragraph.",
+          "Desktop, whole-page hero: the header overlaps the headline and part of the address sidebar."
+        ],
+        "claude": [
+          "Phone and desktop hero: the sentence 'Spomladi in jeseni je gneča, zato se prej naročite po telefonu.' appears twice within the first screen (intro paragraph and hours note).",
+          "Phone: the call/directions pair is repeated in the header, hero, contact block, gold CTA section and footer – the same contact block five times on one page."
+        ]
+      }
+    },
+    {
+      "itemId": "zobozdravstvo-lebar",
+      "owner": null,
+      "scores": {
+        "gemini": 4.416666666666666,
+        "gpt": 3.833333333333333,
+        "claude": 3.6666666666666665
+      },
+      "topFix": {
+        "gemini": "Replace the downward-chevron icons in 'Naše storitve' with static bullet icons or simple dashes so non-expandable items do not look like interactive accordions.",
+        "gpt": "Keep contact details in the dark appointment section; remove their repetition from the footer and retain only legal information and utility links.",
+        "claude": "Merge the dark 'Za termin nas pokličite' block and the footer: keep address, phone and e-mail once and leave the footer to legal data and links."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [
+          "Phone: the footer repeats the address, telephone and email already presented in the immediately preceding contact section."
+        ],
+        "claude": [
+          "Phone and desktop: the contact block (address, phone, e-mail) is repeated twice in a row – in the dark 'Za termin' section and again in the footer."
+        ]
+      }
+    },
+    {
+      "itemId": "zobozdravstvo-lebar-regenerated",
+      "owner": null,
+      "scores": {
+        "gemini": 3.75,
+        "gpt": 3.6666666666666665,
+        "claude": 3.0833333333333335
+      },
+      "topFix": {
+        "gemini": "Balance the desktop layout of the 'Kdo vas sprejme' and dark 'Dogovorimo se za obisk' sections so they do not leave the right half of the screen empty.",
+        "gpt": "Add a compact location line beside the hero introduction so visitors see what the practice is, where it is and how to contact it immediately.",
+        "claude": "Fix the sticky header so it doesn't cover content mid-scroll; give it a solid background and let the hero sit directly under it."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [
+          "Phone: the opening-hours schedule is repeated in both “Kdaj vas sprejmemo” and the footer’s “Delovni čas” block."
+        ],
+        "claude": [
+          "Phone, mid-page: the fixed header overlaps and hides the hero headline while scrolling.",
+          "Both viewports: opening hours repeated in the 'Kdaj vas sprejmemo' timeline and again in the footer 'Delovni čas' table."
+        ]
+      }
+    }
+  ],
+  "filter": {
+    "passed": [
+      "fizioterapija-pregib-regenerated",
+      "frizerski-salon-mia-regenerated",
+      "gostilna-pri-mostu-regenerated",
+      "instrukcije-pia",
+      "pekarna-kvas-regenerated"
+    ],
+    "held": [
+      "avto-kovac",
+      "avto-kovac-regenerated",
+      "avtoservis-mrak",
+      "avtoservis-mrak-regenerated",
+      "brivnica-kos",
+      "brivnica-kos-regenerated",
+      "cvetlicarna-marjetica",
+      "cvetlicarna-marjetica-regenerated",
+      "elektro-zupan",
+      "elektro-zupan-regenerated",
+      "fizioterapija-pregib",
+      "frizerski-salon-mia",
+      "frizerstvo-lana",
+      "frizerstvo-lana-regenerated",
+      "gostilna-pri-mostu",
+      "gostilna-zlata-zlica",
+      "gostilna-zlata-zlica-regenerated",
+      "gostisce-na-gricu",
+      "gostisce-na-gricu-regenerated",
+      "instalacije-rebernik",
+      "instalacije-rebernik-regenerated",
+      "instrukcije-pia-regenerated",
+      "karoserija-hribar",
+      "karoserija-hribar-regenerated",
+      "kljucavnicarstvo-hrovat",
+      "kljucavnicarstvo-hrovat-regenerated",
+      "kmetija-grabnar",
+      "kmetija-grabnar-regenerated",
+      "mizarstvo-lesnik",
+      "mizarstvo-lesnik-regenerated",
+      "pekarna-kvas",
+      "pizzeria-oljka",
+      "pizzeria-oljka-regenerated",
+      "prevajanje-kolar",
+      "prevajanje-kolar-regenerated",
+      "racunovodstvo-seliskar",
+      "racunovodstvo-seliskar-regenerated",
+      "salon-tina",
+      "salon-tina-regenerated",
+      "trgovina-oljka-in-sol",
+      "trgovina-oljka-in-sol-regenerated",
+      "vulkanizer-zorman",
+      "vulkanizer-zorman-regenerated",
+      "zobozdravstvo-lebar",
+      "zobozdravstvo-lebar-regenerated"
+    ],
+    "unreviewed": []
+  }
+}

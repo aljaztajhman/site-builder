@@ -1,0 +1,18 @@
+{
+  "seq": 12,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "220f2fb1680bd7b7",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"booking\",\"tone\":\"default\"},\"footer\":{\"variant\":\"columns\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Fizioterapija Pregib, Novo mesto\",\"description\":\"Individualna fizioterapevtska ambulanta v Novem mestu. Manualna terapija, terapevtske vaje, dry needling in kinesio taping. Naročanje na spletu.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-split\",\"variant\":\"image-right\",\"tone\":\"default\",\"props\":{\"eyebrow\":\"Fizioterapevtska ambulanta\",\"headline\":\"Ena ura je namenjena samo vam\",\"intro\":\"Sem Tina Zupan, diplomirana fizioterapevtka. Pomagam vam pri bolečinah v hrbtu in vratu, po poškodbah in operacijah. Napotnica ni potrebna.\",\"primary\":{\"label\":\"Naročite se na obravnavo\",\"target\":{\"action\":\"booking\"}},\"image\":\"img_01\"}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"week\",\"tone\":\"alt\",\"props\":{\"title\":\"Kdaj vas sprejmem\",\"note\":\"Samo po predhodnem naročilu. Vhod z dvorišča, 2. nadstropje.\"}},{\"id\":\"s_about\",\"type\":\"image-text\",\"variant\":\"image-left\",\"tone\":\"default\",\"props\":{\"eyebrow\":\"Individualna obravnava\",\"heading\":\"Obravnava, ki ji je namenjen ves čas\",\"paragraphs\":[\"Delam z manualno terapijo, terapevtskimi vajami, dry needlingom in kinesio tapingom. Obravnavo izberem glede na vaše težave.\",\"Dvanajst let sem delala v bolnišnici, zadnja štiri leta imam lastno ambulanto. Storitve so samoplačniške.\"],\"image\":\"img_g2\"}},{\"id\":\"s_services\",\"type\":\"services-list\",\"variant\":\"two-column\",\"tone\":\"alt\",\"props\":{\"title\":\"Obravnave in cene\",\"items\":[{\"name\":\"Prva obravnava s pregledom\",\"description\":\"Pregled in prva obravnava, 60 minut.\",\"price\":{\"amount\":55}},{\"name\":\"Terapija\",\"description\":\"Individualna terapija, 45 minut.\",\"price\":{\"amount\":45}},{\"name\":\"Dry needling kot dodatek\",\"description\":\"Dodatek k terapiji.\",\"price\":{\"amount\":30}},{\"name\":\"Paket 5 terapij\",\"description\":\"Pet terapij po ugodnejši ceni.\",\"price\":{\"amount\":200}}]}},{\"id\":\"s_booking\",\"type\":\"booking\",\"variant\":\"with-hours\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Rezervirajte svoj termin\",\"text\":\"Naročite se prek spleta ali me pokličite. Sprejemam samo po predhodnem naročilu.\",\"action\":{\"label\":\"Naročite se\",\"target\":{\"action\":\"booking\"}}}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2505,
+      "output_tokens": 1048,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

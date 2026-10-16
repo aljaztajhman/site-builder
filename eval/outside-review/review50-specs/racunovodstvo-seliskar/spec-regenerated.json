@@ -1,0 +1,287 @@
+{
+  "slug": "racunovodstvo-seliskar",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Računovodstvo Seliškar, Murska Sobota",
+        "description": "Računovodski servis v Murski Soboti za samostojne podjetnike, manjša podjetja in društva. Poslovne knjige, plače, DDV in letna poročila. Delamo od leta 2004."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "tone": "default",
+          "type": "hero-type",
+          "props": {
+            "intro": "Vodimo poslovne knjige, obračunavamo plače in DDV ter pripravljamo letna poročila. Stranke sprejemamo tudi v madžarskem jeziku. Pred obiskom nas pokličite.",
+            "primary": {
+              "label": "Pokličite nas",
+              "target": {
+                "action": "call"
+              }
+            },
+            "headline": "Računovodstvo za podjetnike, podjetja in društva v Pomurju",
+            "secondary": {
+              "label": "Oglejte si storitve",
+              "target": {
+                "page": "p_home",
+                "section": "s_services"
+              }
+            }
+          },
+          "variant": "large"
+        },
+        {
+          "id": "s_about",
+          "type": "about",
+          "props": {
+            "figure": {
+              "label": "Delamo od leta",
+              "value": "2004"
+            },
+            "eyebrow": "Naša zgodba",
+            "heading": "Računovodstvo, ki ga v Murski Soboti vodimo vse od začetka",
+            "ownerName": "Branka Seliškar",
+            "ownerRole": "direktorica",
+            "paragraphs": [
+              "Za samostojne podjetnike, manjša podjetja in društva delamo od leta 2004. Večina naših strank je iz Pomurja, delamo pa za podjetja po vsej Sloveniji."
+            ]
+          },
+          "variant": "figure"
+        },
+        {
+          "id": "s_services",
+          "tone": "default",
+          "type": "services-list",
+          "props": {
+            "intro": "Od vsakodnevnih knjigovodskih opravil do letnih poročil in nasvetov za tiste, ki šele začenjajo.",
+            "items": [
+              {
+                "name": "Vodenje poslovnih knjig in davčne evidence",
+                "description": "Redno vodimo vaše poslovne knjige in davčno evidenco."
+              },
+              {
+                "name": "Obračun plač in potnih stroškov",
+                "description": "Obračunamo plače in potne stroške vaših zaposlenih."
+              },
+              {
+                "name": "Obračun DDV in poročanje FURS",
+                "description": "Pripravimo obračun DDV in poročamo davčni upravi."
+              },
+              {
+                "name": "Letna poročila za AJPES in davčni obračuni",
+                "description": "Pripravimo letna poročila za AJPES in davčne obračune."
+              },
+              {
+                "name": "Pomoč pri odprtju s.p. ali d.o.o.",
+                "description": "Pomagamo vam pri odprtju samostojnega podjetja ali družbe."
+              },
+              {
+                "name": "Davčno svetovanje za začetnike",
+                "description": "Svetujemo vam, če šele začenjate s podjetniško potjo."
+              }
+            ],
+            "title": "Kaj vse uredimo za vas"
+          },
+          "variant": "rows"
+        },
+        {
+          "id": "s_text",
+          "type": "text",
+          "props": {
+            "eyebrow": "Cene in dokumenti",
+            "heading": "Cena je po dogovoru, dokumente pa oddate, kakor vam ustreza",
+            "paragraphs": [
+              "Cene so po dogovoru in so odvisne od števila prejetih in izdanih računov. Povejte nam, koliko dokumentov imate, in skupaj se dogovorimo.",
+              "Dokumente lahko pošljete po e-pošti ali jih prinesete osebno. Pred obiskom se vedno najavite po telefonu."
+            ]
+          },
+          "variant": "two-column"
+        },
+        {
+          "id": "s_contact",
+          "tone": "default",
+          "type": "contact",
+          "props": {
+            "intro": "Za pogovor ali predajo dokumentov se najavite po telefonu.",
+            "title": "Kje nas najdete"
+          },
+          "variant": "split-map"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Računovodstvo Seliškar d.o.o.",
+        "description": "Kako Računovodstvo Seliškar d.o.o. obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Računovodstvo Seliškar d.o.o.",
+        "description": "Izjava o dostopnosti spletne strani Računovodstvo Seliškar d.o.o.."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-14",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Računovodstvo Seliškar d.o.o.",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "images": [
+      {
+        "id": "img_g1",
+        "alt": "Pisalna miza z računovodsko knjigo, kalkulatorjem, peresom in mapami",
+        "src": "sites/site_8b85b1d0e6d5a4e3/generated/img_g1.jpg",
+        "width": 1536,
+        "height": 1024,
+        "origin": "generated"
+      },
+      {
+        "id": "img_g2",
+        "alt": "Ravnica v Pomurju z njivo in drevesi v jutranji svetlobi",
+        "src": "sites/site_8b85b1d0e6d5a4e3/generated/img_g2.jpg",
+        "width": 1536,
+        "height": 1024,
+        "origin": "generated"
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "columns"
+    },
+    "header": {
+      "cta": "call",
+      "tone": "default",
+      "variant": "stacked"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.333,
+    "colors": {
+      "text": "#16161a",
+      "muted": "#55555f",
+      "accent": "#bf263b",
+      "border": "#d9d9de",
+      "inverse": "#16161a",
+      "primary": "#8c1c2b",
+      "surface": "#f2f3f5",
+      "onInverse": "#f5f5f5",
+      "onPrimary": "#ffffff",
+      "background": "#ffffff"
+    },
+    "radius": 0,
+    "shadow": "none",
+    "density": "airy",
+    "imagery": "framed",
+    "fontPair": "newsreader-libre-franklin",
+    "skeleton": {
+      "cards": "filled",
+      "width": "contained",
+      "footer": "visit",
+      "header": "compact",
+      "actions": "header",
+      "buttons": "underline",
+      "dividers": "rule",
+      "footerTone": "default",
+      "photoRatio": "landscape"
+    },
+    "direction": "editorial",
+    "headingCase": "normal",
+    "baseFontSize": 18,
+    "headingWeight": 450,
+    "headingTracking": -0.01
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Računovodstvo Seliškar d.o.o.",
+    "type": "accountant",
+    "email": "pisarna@racunovodstvo-seliskar.example",
+    "phone": "+38625554710",
+    "address": {
+      "city": "Murska Sobota",
+      "street": "Slovenska ulica 41",
+      "postalCode": "9000"
+    },
+    "provider": {
+      "vatPayer": true,
+      "legalName": "Računovodstvo Seliškar d.o.o.",
+      "taxNumber": "SI65432109",
+      "registrationNumber": "6543210000"
+    },
+    "serviceArea": [
+      "Pomurje",
+      "Slovenija"
+    ]
+  },
+  "specVersion": 21
+}

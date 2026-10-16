@@ -1,0 +1,342 @@
+{
+  "slug": "cvetlicarna-marjetica",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Cvetličarna Marjetica, Novo mesto",
+        "description": "Šopki, poročno in žalno cvetje, lončnice in darilne košarice na Glavnem trgu v Novem mestu. Šopke dostavim po Novem mestu."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "tone": "inverse",
+          "type": "hero-signature",
+          "props": {
+            "fact": "address",
+            "image": "img_g1",
+            "inset": "img_g2",
+            "intro": "Vežem šopke za vsak dan, poročne šopke, aranžmaje in žalne vence. Cvetje izbiram sezonsko, pri bližnjih vrtnarjih.",
+            "primary": {
+              "label": "Darilne košarice",
+              "target": {
+                "page": "p_home",
+                "section": "s_gift"
+              }
+            },
+            "headline": "Šopki z Glavnega trga",
+            "secondary": {
+              "label": "Kaj vežem",
+              "target": {
+                "page": "p_home",
+                "section": "s_services"
+              }
+            }
+          },
+          "variant": "label"
+        },
+        {
+          "id": "s_about",
+          "type": "about",
+          "props": {
+            "figure": {
+              "label": "Cvetličarno imam od leta",
+              "value": "2010"
+            },
+            "heading": "Cvetje, vezano z roko",
+            "ownerName": "Petra Hočevar",
+            "ownerRole": "floristka",
+            "paragraphs": [
+              "Cvetličarno imam od leta 2010. Šopke vežem sproti, iz sezonskega cvetja z bližnjih vrtnarij.",
+              "Pri meni dobite šopek za vsak dan, cvetje za poroko ali slovo in majhno darilo za koga, ki ga imate radi."
+            ]
+          },
+          "variant": "figure"
+        },
+        {
+          "id": "s_gift",
+          "tone": "band",
+          "type": "image-text",
+          "props": {
+            "link": {
+              "label": "Naročite po telefonu",
+              "target": {
+                "action": "call"
+              }
+            },
+            "image": "img_g2",
+            "heading": "Lončnice in darilne košarice",
+            "paragraphs": [
+              "Za darilo, ki ostane dlje od šopka, imam lončnice in darilne košarice. Povejte mi, komu je darilo namenjeno, in ga bom pripravila."
+            ]
+          },
+          "variant": "round"
+        },
+        {
+          "id": "s_services",
+          "type": "services-list",
+          "props": {
+            "items": [
+              {
+                "name": "Šopek iz sezonskega cvetja",
+                "price": {
+                  "from": true,
+                  "amount": 20
+                },
+                "description": "Šopek za vsak dan iz sezonskega cvetja z bližnjih vrtnarij."
+              },
+              {
+                "name": "Poročni šopek",
+                "price": {
+                  "from": true,
+                  "amount": 90
+                },
+                "description": "Poročni šopki ter aranžmaji za cerkev in dvorano."
+              },
+              {
+                "name": "Žalni venec",
+                "price": {
+                  "from": true,
+                  "amount": 70
+                },
+                "description": "Žalni venci in ikebane."
+              },
+              {
+                "name": "Dostava po Novem mestu",
+                "price": {
+                  "amount": 5
+                },
+                "description": "Šopke dostavim po Novem mestu."
+              },
+              {
+                "name": "Lončnice",
+                "price": {
+                  "note": "Vpišite ceno lončnic",
+                  "$placeholder": "price"
+                },
+                "description": "Lončnice za dom in za darilo."
+              },
+              {
+                "name": "Darilne košarice",
+                "price": {
+                  "note": "Vpišite ceno košaric",
+                  "$placeholder": "price"
+                },
+                "description": "Darilne košarice, pripravljene po dogovoru."
+              }
+            ],
+            "title": "Kaj vežem in koliko stane"
+          },
+          "variant": "rows"
+        },
+        {
+          "id": "s_contact",
+          "tone": "inverse",
+          "type": "contact",
+          "props": {
+            "intro": "Naročite šopek, povprašajte po poroki ali žalnem cvetju, ali me obiščite na Glavnem trgu.",
+            "title": "Pokličite za šopek ali pridite mimo"
+          },
+          "variant": "call-out"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Cvetličarna Marjetica",
+        "description": "Kako Cvetličarna Marjetica obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Cvetličarna Marjetica",
+        "description": "Izjava o dostopnosti spletne strani Cvetličarna Marjetica."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-14",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Cvetličarna Marjetica",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "images": [
+      {
+        "id": "img_g1",
+        "alt": "Sezonsko cvetje, vrvica in škarje na lesenem delovnem pultu",
+        "src": "sites/site_83934a86b1ef4ae4/generated/img_g1.jpg",
+        "width": 1536,
+        "height": 1024,
+        "origin": "generated"
+      },
+      {
+        "id": "img_g2",
+        "alt": "Lončnice in darilna košarica na kamnitem oknu v jutranji svetlobi",
+        "src": "sites/site_83934a86b1ef4ae4/generated/img_g2.jpg",
+        "width": 1536,
+        "height": 1024,
+        "origin": "generated"
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "compact"
+    },
+    "header": {
+      "cta": "call",
+      "tone": "inverse",
+      "variant": "bar"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.25,
+    "colors": {
+      "band": "#1f5f7a",
+      "text": "#23281a",
+      "muted": "#4d5440",
+      "accent": "#b07a22",
+      "border": "#cadde4",
+      "onBand": "#ffffff",
+      "inverse": "#12384a",
+      "primary": "#1f5f7a",
+      "surface": "#e2eef2",
+      "onInverse": "#f5f5f5",
+      "onPrimary": "#ffffff",
+      "background": "#ffffff"
+    },
+    "radius": 6,
+    "shadow": "none",
+    "density": "airy",
+    "imagery": "natural",
+    "fontPair": "garamond-karla",
+    "skeleton": {
+      "cards": "filled",
+      "width": "contained",
+      "footer": "visit",
+      "header": "compact",
+      "actions": "bar",
+      "buttons": "underline",
+      "dividers": "none",
+      "footerTone": "band",
+      "photoRatio": "landscape"
+    },
+    "direction": "etiketa",
+    "headingCase": "normal",
+    "baseFontSize": 17,
+    "headingWeight": 700,
+    "headingTracking": -0.025
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Cvetličarna Marjetica",
+    "type": "shop",
+    "email": "petra@marjetica.example",
+    "hours": {
+      "note": "Za praznike smo odprti tudi v nedeljo dopoldne.",
+      "entries": [
+        {
+          "to": "fri",
+          "from": "mon",
+          "open": "08:00",
+          "close": "19:00"
+        },
+        {
+          "to": "sat",
+          "from": "sat",
+          "open": "08:00",
+          "close": "13:00"
+        }
+      ]
+    },
+    "phone": "+38675553368",
+    "address": {
+      "city": "Novo mesto",
+      "street": "Glavni trg 7",
+      "postalCode": "8000"
+    },
+    "subtype": "florist",
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      }
+    },
+    "serviceArea": [
+      "Novo mesto"
+    ]
+  },
+  "specVersion": 21
+}

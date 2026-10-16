@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The photography and forest-green typography suit the gostilna, but its location is buried in the footer rather than introduced alongside the business.\",\n  \"desktopNote\": \"The oversized hero photograph pushes the primary action below the first screen, while the pricing and opening-hours sections leave substantial unused space.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 3,\n    \"imagery\": 5,\n    \"spacing\": 4,\n    \"clutter\": 4,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 2,\n    \"imagery\": 5,\n    \"spacing\": 3,\n    \"clutter\": 4,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Shorten the desktop hero photograph and move its text panel upward so the headline, introduction and primary action fit within the first screen; include a concise location line in the hero on both\"\n  ]\n,\"blockers\":[]\n}",
+  "usage": {
+    "prompt_tokens": 10440,
+    "completion_tokens": 403,
+    "cost": 0.0301285
+  }
+}

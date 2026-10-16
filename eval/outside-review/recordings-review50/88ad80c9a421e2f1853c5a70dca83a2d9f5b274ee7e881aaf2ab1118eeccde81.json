@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The licence-plate call button gives the page a trade-specific identity, but the workshop photo is obscured and the address arrives after the call action.\",\n  \"desktopNote\": \"Oversized headings and the enormous phone plate dominate the hero, while the towing and process sections leave large areas of unused space.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 3,\n    \"imagery\": 3,\n    \"spacing\": 4,\n    \"clutter\": 3,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 3,\n    \"hierarchy\": 2,\n    \"imagery\": 3,\n    \"spacing\": 2,\n    \"clutter\": 3,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Reduce desktop headline and phone-plate sizes; make the towing section compact and arrange the four process steps horizontally to eliminate empty right-hand areas.\",\n    \"Show the location before the hero call action, and consolidate the repeated address, hours and directions into one contact section.\",\n    \"Give the workshop photo a clearer area beside the desktop hero text and a recognisable crop on phone, rather than obscuring it beneath text and a uniform dark overlay.\"\n  ],\n  \"blockers\": [\n    \"Phone: the upper blue information panel and lower booking panel repeat the same address, opening hours and directions block.\"\n  ]\n}",
+  "usage": {
+    "prompt_tokens": 10327,
+    "completion_tokens": 490,
+    "cost": 0.030716
+  }
+}

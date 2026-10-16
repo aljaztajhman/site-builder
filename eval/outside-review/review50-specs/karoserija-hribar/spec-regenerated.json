@@ -1,0 +1,330 @@
+{
+  "slug": "karoserija-hribar",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Karoserija in vleka Hribar, Celje",
+        "description": "Popravilo karoserij po nesreči, lakiranje, odprava udrtin po toči in vleka vozil po Savinjski regiji, 24 ur na dan. Škodo uredimo z zavarovalnico."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "type": "hero-split",
+          "props": {
+            "image": "img_01",
+            "intro": "Popravljamo karoserije po nesrečah, lakiramo in odpravljamo udrtine po toči. Z lastnim vlečnim vozilom vlečemo po vsej Savinjski regiji, 24 ur na dan.",
+            "eyebrow": "Karoserija in vleka",
+            "primary": {
+              "label": "Pokličite nas",
+              "target": {
+                "action": "call"
+              }
+            },
+            "headline": "Karoserijo popravimo, vozilo odvlečemo",
+            "secondary": {
+              "label": "Naše storitve",
+              "target": {
+                "page": "p_home",
+                "section": "s_services"
+              }
+            }
+          },
+          "variant": "image-right"
+        },
+        {
+          "id": "s_strip",
+          "tone": "inverse",
+          "type": "contact-strip",
+          "props": {},
+          "variant": "bar"
+        },
+        {
+          "id": "s_services",
+          "type": "services-list",
+          "props": {
+            "items": [
+              {
+                "name": "Popravilo karoserije po nesreči",
+                "description": "Popravljamo karoserije po prometnih nesrečah."
+              },
+              {
+                "name": "Ravnanje pločevine",
+                "description": "Poškodovano pločevino poravnamo in pripravimo za lakiranje."
+              },
+              {
+                "name": "Lakiranje",
+                "description": "Lakiramo cel avtomobil ali samo posamezne dele. Odpravimo tudi praske."
+              },
+              {
+                "name": "Odprava udrtin po toči",
+                "price": {
+                  "from": true,
+                  "unit": "udrtina",
+                  "amount": 45
+                },
+                "description": "Cena velja za posamezno udrtino."
+              },
+              {
+                "name": "Poliranje avtomobila",
+                "price": {
+                  "amount": 90
+                },
+                "description": "Poliranje celega avtomobila."
+              },
+              {
+                "name": "Vleka vozil",
+                "description": "Okvarjena ali poškodovana vozila vlečemo z lastnim vozilom, tudi ob praznikih."
+              }
+            ],
+            "title": "Karoserija, lak in vleka na enem mestu",
+            "eyebrow": "Kaj delamo"
+          },
+          "variant": "two-column"
+        },
+        {
+          "id": "s_insurance",
+          "tone": "alt",
+          "type": "image-text",
+          "props": {
+            "image": "img_g2",
+            "eyebrow": "Po nesreči",
+            "heading": "Škodo uredimo namesto vas",
+            "paragraphs": [
+              "Sodelujemo z vsemi zavarovalnicami. Vi nam pripeljete vozilo, o škodi se z zavarovalnico dogovorimo mi.",
+              "V delavnici smo štirje in vsako delo opravimo skrbno, od ravnanja pločevine do končnega laka."
+            ]
+          },
+          "variant": "image-left"
+        },
+        {
+          "id": "s_area",
+          "type": "service-area",
+          "props": {
+            "intro": "Telefon za vleko je vedno vklopljen, 24 ur na dan, tudi ob praznikih.",
+            "title": "Vlečemo po vsej Savinjski regiji"
+          },
+          "variant": "inline"
+        },
+        {
+          "id": "s_cta",
+          "tone": "inverse",
+          "type": "cta",
+          "props": {
+            "text": "Pokličite nas, svetujemo vam in dogovorimo naslednji korak.",
+            "heading": "Potrebujete vleko ali popravilo?",
+            "primary": {
+              "label": "Pokličite nas",
+              "target": {
+                "action": "call"
+              }
+            },
+            "secondary": {
+              "label": "Kako do nas",
+              "target": {
+                "action": "directions"
+              }
+            }
+          },
+          "variant": "band"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Karoserija in vleka Hribar",
+        "description": "Kako Karoserija in vleka Hribar obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Karoserija in vleka Hribar",
+        "description": "Izjava o dostopnosti spletne strani Karoserija in vleka Hribar."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-15",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Karoserija in vleka Hribar",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "images": [
+      {
+        "id": "img_01",
+        "alt": "Sivo karavansko vozilo, dvignjeno na dvostebrnem dvigalu v svetli avtomehanični delavnici z orodnim vozičkom in zloženimi pnevmatikami.",
+        "src": "sites/site_cc6d2a6d2f28cbee/uploads/photo0.jpg",
+        "focal": {
+          "x": 0.45,
+          "y": 0.35
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_g2",
+        "alt": "Zaprta svetlikajoča se rdeča lakirana površina avtomobila z drobnimi kapljicami vode",
+        "src": "sites/site_cc6d2a6d2f28cbee/generated/img_g2.jpg",
+        "width": 1536,
+        "height": 1024,
+        "origin": "generated"
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "columns"
+    },
+    "header": {
+      "cta": "call",
+      "variant": "split-cta"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.28,
+    "colors": {
+      "text": "#0e0f12",
+      "muted": "#474c55",
+      "accent": "#6454bd",
+      "border": "#d3d7dd",
+      "inverse": "#111317",
+      "primary": "#b77f1a",
+      "surface": "#eef0f3",
+      "onInverse": "#f5f5f5",
+      "onPrimary": "#212121",
+      "background": "#ffffff"
+    },
+    "radius": 0,
+    "shadow": "none",
+    "density": "regular",
+    "imagery": "natural",
+    "fontPair": "archivo-archivo",
+    "skeleton": {
+      "cards": "none",
+      "width": "full",
+      "footer": "wordmark",
+      "header": "word",
+      "actions": "bar",
+      "buttons": "square",
+      "centred": [
+        "s_cta"
+      ],
+      "dividers": "none",
+      "footerTone": "alt",
+      "photoRatio": "square"
+    },
+    "direction": "bold-local",
+    "headingCase": "uppercase",
+    "baseFontSize": 17,
+    "headingWeight": 800,
+    "headingTracking": -0.01
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Karoserija in vleka Hribar",
+    "type": "car-repair",
+    "email": {
+      "$placeholder": "email"
+    },
+    "hours": {
+      "note": "Vleka je na voljo 24 ur na dan, tudi ob praznikih.",
+      "entries": [
+        {
+          "to": "fri",
+          "from": "mon",
+          "open": "07:00",
+          "close": "15:30"
+        }
+      ]
+    },
+    "phone": "+38641555702",
+    "address": {
+      "city": "Celje",
+      "street": "Mariborska cesta 120",
+      "postalCode": "3000"
+    },
+    "subtype": "bodywork",
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      }
+    },
+    "serviceArea": [
+      "Savinjska regija"
+    ]
+  },
+  "specVersion": 21
+}

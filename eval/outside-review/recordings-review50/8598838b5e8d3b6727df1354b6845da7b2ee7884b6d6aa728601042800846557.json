@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The clinic photo and readable typography make a reassuring first impression, but the location appears only in the footer and the five oversized opening-hours rows slow the page down.\",\n  \"desktopNote\": \"The hero is balanced and inviting, but generous section padding and an enormous footer title make the page feel unnecessarily stretched.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 3,\n    \"imagery\": 4,\n    \"spacing\": 3,\n    \"clutter\": 4,\n    \"distinctiveness\": 3\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 3,\n    \"imagery\": 4,\n    \"spacing\": 3,\n    \"clutter\": 4,\n    \"distinctiveness\": 3\n  },\n  \"fixes\": [\n    \"Add a compact location line beside the clinic descriptor in both heroes, so visitors see the business type and location before the booking action.\",\n    \"Replace the five identical opening-hours bars with a compact weekday schedule, and reduce desktop section padding to remove the broad empty bands.\",\n    \"Reduce the desktop footer title to a restrained brand heading and group the address and contact links beneath it.\"\n  ],\n  \"blockers\": []\n}",
+  "usage": {
+    "prompt_tokens": 9457,
+    "completion_tokens": 434,
+    "cost": 0.027981
+  }
+}

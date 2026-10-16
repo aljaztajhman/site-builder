@@ -1,0 +1,410 @@
+{
+  "slug": "frizerski-salon-mia",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Frizerski salon Mia Ljubljana – striženje in barvanje",
+        "description": "Frizerski salon Mia na Celovški cesti v Ljubljani: striženje za ženske, moške in otroke, barvanje z veganskimi barvami brez amoniaka, balayage."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "tone": "default",
+          "type": "hero-split",
+          "props": {
+            "image": "img_01",
+            "intro": "Strižemo ženske, moške in otroke. Lase barvamo z veganskimi barvami brez amoniaka. Pokličite nas in se dogovorimo za termin.",
+            "eyebrow": "Frizerski salon Mia",
+            "primary": {
+              "label": "Pokličite nas",
+              "target": {
+                "action": "call"
+              }
+            },
+            "headline": "Striženje in barvanje za vso družino"
+          },
+          "variant": "image-left"
+        },
+        {
+          "id": "s_hours",
+          "tone": "alt",
+          "type": "opening-hours",
+          "props": {
+            "note": "Za termin nas pokličite. V nedeljo in ponedeljek smo zaprti.",
+            "title": "Kdaj vas pričakamo"
+          },
+          "variant": "week"
+        },
+        {
+          "id": "s_about",
+          "tone": "default",
+          "type": "image-text",
+          "props": {
+            "image": "img_02",
+            "eyebrow": "Od leta 2017",
+            "heading": "Salon, ki ga je odprla Mia Golob",
+            "paragraphs": [
+              "Salon Mia smo odprli leta 2017 v Ljubljani. Pri nas se lahko postrižejo ženske, moški in otroci.",
+              "Pri barvanju uporabljamo veganske barve brez amoniaka."
+            ]
+          },
+          "variant": "image-right"
+        },
+        {
+          "id": "s_services",
+          "tone": "alt",
+          "type": "services-list",
+          "props": {
+            "items": [
+              {
+                "name": "Striženje",
+                "description": "Žensko striženje s fenom, moško in otroško striženje."
+              },
+              {
+                "name": "Barvanje",
+                "description": "Veganske barve brez amoniaka."
+              },
+              {
+                "name": "Balayage",
+                "description": "Naravni prelivi barve na vaših laseh."
+              },
+              {
+                "name": "Prameni",
+                "description": "Posvetlitev posameznih pramenov."
+              },
+              {
+                "name": "Keratinska nega",
+                "description": "Nega za bolj gladke in obnovljene lase."
+              }
+            ],
+            "title": "Kaj vam ponujamo"
+          },
+          "variant": "rows"
+        },
+        {
+          "id": "s_prices",
+          "tone": "default",
+          "type": "price-list",
+          "props": {
+            "title": "Cenik",
+            "groups": [
+              {
+                "name": "Striženje",
+                "items": [
+                  {
+                    "name": "Žensko striženje s fenom",
+                    "price": {
+                      "amount": 32
+                    }
+                  },
+                  {
+                    "name": "Moško striženje",
+                    "price": {
+                      "amount": 18
+                    }
+                  },
+                  {
+                    "name": "Otroško striženje",
+                    "price": {
+                      "amount": 12
+                    }
+                  }
+                ]
+              },
+              {
+                "name": "Barvanje",
+                "items": [
+                  {
+                    "name": "Barvanje",
+                    "price": {
+                      "from": true,
+                      "amount": 45
+                    }
+                  },
+                  {
+                    "name": "Balayage",
+                    "price": {
+                      "from": true,
+                      "amount": 85
+                    }
+                  },
+                  {
+                    "name": "Prameni",
+                    "price": {
+                      "note": "Vpišite ceno pramenov",
+                      "$placeholder": "price"
+                    }
+                  }
+                ]
+              },
+              {
+                "name": "Nega",
+                "items": [
+                  {
+                    "name": "Keratinska nega",
+                    "price": {
+                      "note": "Vpišite ceno keratinske nege",
+                      "$placeholder": "price"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "variant": "grouped"
+        },
+        {
+          "id": "s_team",
+          "tone": "alt",
+          "type": "team",
+          "props": {
+            "title": "Kdo vas postriže",
+            "members": [
+              {
+                "name": "Mia Golob",
+                "role": "Lastnica salona"
+              },
+              {
+                "name": "Ana Rus",
+                "role": "Pomočnica"
+              }
+            ]
+          },
+          "variant": "grid"
+        },
+        {
+          "id": "s_cta",
+          "tone": "inverse",
+          "type": "cta",
+          "props": {
+            "text": "Pokličite nas in izberemo čas, ki vam ustreza.",
+            "heading": "Želite termin?",
+            "primary": {
+              "label": "Pokličite nas",
+              "target": {
+                "action": "call"
+              }
+            }
+          },
+          "variant": "band"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Frizerski salon Mia",
+        "description": "Kako Frizerski salon Mia obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Frizerski salon Mia",
+        "description": "Izjava o dostopnosti spletne strani Frizerski salon Mia."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-15",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Frizerski salon Mia",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "images": [
+      {
+        "id": "img_01",
+        "alt": "Svetel frizerski salon z dvema črnima stolama, ogledaloma, lesenimi policami z izdelki za lase in veliko zeleno rastlino ob oknu.",
+        "src": "sites/site_aa956549a5cf68b4/uploads/photo0.jpg",
+        "focal": {
+          "x": 0.5,
+          "y": 0.55
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_02",
+        "alt": "Frizerka v črni predpasnik škarjami striže ramenske lase stranki, ki sedi v črni pelerini v salonu z rastlinami.",
+        "src": "sites/site_aa956549a5cf68b4/uploads/photo1.jpg",
+        "focal": {
+          "x": 0.45,
+          "y": 0.35
+        },
+        "width": 1024,
+        "height": 1536
+      },
+      {
+        "id": "img_03",
+        "alt": "Na leseni polici stojijo steklenice in lončki z izdelki za nego las, glavnik, frizerske škarje in zloženo temno brisačo.",
+        "src": "sites/site_aa956549a5cf68b4/uploads/photo2.jpg",
+        "focal": {
+          "x": 0.4,
+          "y": 0.5
+        },
+        "width": 1024,
+        "height": 1536
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "compact"
+    },
+    "header": {
+      "cta": "call",
+      "tone": "default",
+      "variant": "bar"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.24,
+    "colors": {
+      "text": "#2a2024",
+      "muted": "#65575c",
+      "accent": "#837560",
+      "border": "#e6d9de",
+      "inverse": "#3a2a30",
+      "primary": "#ae6e6e",
+      "surface": "#f6eff1",
+      "onInverse": "#f5f5f5",
+      "onPrimary": "#111111",
+      "background": "#ffffff"
+    },
+    "radius": 6,
+    "shadow": "none",
+    "density": "airy",
+    "imagery": "duotone",
+    "fontPair": "lora-dm-sans",
+    "skeleton": {
+      "cards": "none",
+      "width": "full",
+      "footer": "wordmark",
+      "header": "word",
+      "actions": "bar",
+      "buttons": "square",
+      "centred": [
+        "s_cta"
+      ],
+      "dividers": "none",
+      "footerTone": "inverse",
+      "photoRatio": "square"
+    },
+    "direction": "soft-studio",
+    "headingCase": "normal",
+    "baseFontSize": 17,
+    "headingWeight": 500,
+    "headingTracking": 0
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Frizerski salon Mia",
+    "type": "hairdresser",
+    "email": "mia@salonmia.example",
+    "hours": {
+      "entries": [
+        {
+          "to": "fri",
+          "from": "tue",
+          "open": "09:00",
+          "close": "19:00"
+        },
+        {
+          "to": "sat",
+          "from": "sat",
+          "open": "08:00",
+          "close": "13:00"
+        },
+        {
+          "to": "mon",
+          "from": "sun",
+          "closed": true
+        }
+      ]
+    },
+    "phone": "+38640555318",
+    "address": {
+      "city": "Ljubljana",
+      "street": "Celovška cesta 88",
+      "postalCode": "1000"
+    },
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      }
+    }
+  },
+  "specVersion": 21
+}

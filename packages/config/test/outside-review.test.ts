@@ -24,14 +24,15 @@ function loadFrom(c: unknown) {
 }
 
 describe("outsideReview config", () => {
-  it("ships two reviewers, each with a price, apart from the Anthropic price list", () => {
+  it("ships three reviewers, each with a price; the OpenRouter ones apart from the Anthropic price list", () => {
     const c = loadConfig();
     expect(c.outsideReview.provider).toBe("openrouter");
-    expect(c.outsideReview.reviewers.map((r) => r.id)).toEqual(["gemini", "gpt"]);
+    expect(c.outsideReview.reviewers.map((r) => r.id)).toEqual(["gemini", "gpt", "claude"]);
     for (const r of c.outsideReview.reviewers) {
       expect(c.outsideReview.pricesUsdPerMTok[r.model]).toBeDefined();
-      expect(c.pricesUsdPerMTok[r.model]).toBeUndefined();
+      if (r.provider !== "anthropic") expect(c.pricesUsdPerMTok[r.model]).toBeUndefined();
     }
+    expect(c.outsideReview.reviewers.find((r) => r.id === "claude")).toMatchObject({ provider: "anthropic", model: "claude-fable-5-1", batch: true });
   });
 
   it("rejects a reviewer whose model has no price", () => {

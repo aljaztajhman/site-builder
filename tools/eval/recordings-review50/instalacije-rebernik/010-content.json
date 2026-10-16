@@ -1,0 +1,18 @@
+{
+  "seq": 10,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "d3b7c9c11d51eb17",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"split-cta\",\"cta\":\"call\"},\"footer\":{\"variant\":\"columns\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Inštalater Ptuj: vodovod, ogrevanje, toplotne črpalke\",\"description\":\"Inštalacije Rebernik, Ptuj. Vodovod, talno in radiatorsko ogrevanje, toplotne črpalke in prenove kopalnic. Brezplačen ogled in pisna ponudba.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-split\",\"variant\":\"image-right\",\"props\":{\"eyebrow\":\"Inštalater z mojstrskim izpitom\",\"headline\":\"Vodovod, ogrevanje in toplotne črpalke na Ptujskem\",\"intro\":\"Delamo vodovodne in odtočne inštalacije, talno in radiatorsko ogrevanje, toplotne črpalke ter prenove kopalnic na ključ. Ogled in pisna ponudba sta brezplačna.\",\"primary\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}},\"image\":\"img_g1\"}},{\"id\":\"s_strip\",\"type\":\"contact-strip\",\"variant\":\"bar\",\"tone\":\"alt\",\"props\":{}},{\"id\":\"s_services\",\"type\":\"services-list\",\"variant\":\"rows\",\"props\":{\"eyebrow\":\"Kaj delamo\",\"title\":\"Pet vrst del, en izvajalec\",\"items\":[{\"name\":\"Vodovodne in odtočne inštalacije\",\"description\":\"V novogradnjah in pri prenovah.\"},{\"name\":\"Talno in radiatorsko ogrevanje\",\"description\":\"Ogrevanje za novogradnje in prenove hiš ter stanovanj.\"},{\"name\":\"Toplotne črpalke zrak-voda\",\"description\":\"Montaža in servis toplotnih črpalk.\"},{\"name\":\"Zamenjava oljnega kotla\",\"description\":\"Stari kotel na olje zamenjamo s toplotno črpalko. Pomagamo tudi pri vlogi za subvencijo Eko sklada.\"},{\"name\":\"Prenove kopalnic na ključ\",\"description\":\"Kopalnico prenovimo skupaj s keramikom.\"}]}},{\"id\":\"s_offer\",\"type\":\"image-text\",\"variant\":\"image-left\",\"tone\":\"alt\",\"props\":{\"eyebrow\":\"Brezplačen ogled\",\"heading\":\"Pridemo na ogled, vi dobite pisno ponudbo\",\"paragraphs\":[\"Za vsako delo pridemo pogledat, kako je na terenu, in pripravimo pisno ponudbo. Ogled vas do ponudbe ničesar ne stane.\",\"Če ne dvignemo telefona, pokličemo nazaj isti dan.\"],\"image\":\"img_g2\"}},{\"id\":\"s_steps\",\"type\":\"steps\",\"variant\":\"horizontal\",\"props\":{\"heading\":\"Kako poteka delo\",\"steps\":[{\"title\":\"Pokličete nas\",\"text\":\"Povejte, kaj potrebujete. Če ne dvignemo, pokličemo nazaj isti dan.\"},{\"title\":\"Pridemo na ogled\",\"text\":\"Ogled na vašem objektu je brezplačen.\"},{\"title\":\"Prejmete pisno ponudbo\",\"text\":\"Ponudbo dobite za vsako delo, napisano.\"},{\"title\":\"Opravimo delo\",\"text\":\"Delo izvedemo mi, pri kopalnicah skupaj s keramikom.\"}]}},{\"id\":\"s_area\",\"type\":\"service-area\",\"variant\":\"inline\",\"tone\":\"alt\",\"props\":{\"title\":\"Kje delamo\",\"intro\":\"Na terenu delamo po Ptuju in okolici.\"}},{\"id\":\"s_cta\",\"type\":\"cta\",\"variant\":\"band\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Načrtujete vodovod, ogrevanje ali kopalnico?\",\"text\":\"Pokličite nas in dogovorimo brezplačen ogled.\",\"primary\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}}}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2672,
+      "output_tokens": 1403,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

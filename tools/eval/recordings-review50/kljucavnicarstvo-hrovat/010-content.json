@@ -1,0 +1,18 @@
+{
+  "seq": 10,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "662ddba684e0e87f",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\",\"tone\":\"default\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Ključavničar Celje, nujno odpiranje 24 ur | Hrovat\",\"description\":\"Ključavničarstvo Hrovat v Celju: nujno odpiranje vrat, avtomobilov in sefov 24 ur na dan, menjava cilindrov in kopiranje ključev.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"photo\",\"tone\":\"inverse\",\"props\":{\"eyebrow\":\"Nujna pomoč 24 ur\",\"headline\":\"Zaklenjeni? Pokličite, pridem.\",\"intro\":\"Vrata, avtomobile in sefe odpiram vse dni v letu, tudi za praznike. V Celju sem ponavadi v 30 minutah.\",\"fact\":\"phone\",\"factLabel\":\"Najhitreje me dobite po telefonu\",\"image\":\"img_g3\"}},{\"id\":\"s_services\",\"type\":\"services-list\",\"variant\":\"two-column\",\"tone\":\"default\",\"props\":{\"title\":\"Kaj vse naredim\",\"intro\":\"Od nujnega odpiranja do novih ključavnic in kopij ključev.\",\"items\":[{\"name\":\"Odpiranje vrat\",\"description\":\"Brez poškodb, kadar se le da.\",\"price\":{\"amount\":60,\"from\":true}},{\"name\":\"Odpiranje avtomobilov\",\"description\":\"Nujno odpiranje vozila, kadar so ključi ostali notri.\"},{\"name\":\"Odpiranje sefov\",\"description\":\"Odprem vaš sef, ko ključa ali kode ni pri roki.\"},{\"name\":\"Zlomljen ključ\",\"description\":\"Odstranim ga iz ključavnice.\"},{\"name\":\"Menjava cilindrov in ključavnic\",\"description\":\"Cena zamenjave cilindra vključuje material.\",\"price\":{\"amount\":45,\"from\":true}},{\"name\":\"Varnostni cilindri\",\"description\":\"Vgradim varnostne cilindre in dodatne ključavnice.\"},{\"name\":\"Kopiranje ključev\",\"description\":\"V delavnici na Mariborski cesti 88.\"},{\"name\":\"Ključi za avto s čipom\",\"description\":\"Izdelam tudi ključe za avtomobile s čipom.\"}]}},{\"id\":\"s_area\",\"type\":\"service-area\",\"variant\":\"list\",\"tone\":\"alt\",\"props\":{\"title\":\"Kje delam\",\"intro\":\"Na terenu sem v Celju in okolici.\"}},{\"id\":\"s_steps\",\"type\":\"steps\",\"variant\":\"vertical\",\"tone\":\"default\",\"props\":{\"heading\":\"Kako poteka delo\",\"steps\":[{\"title\":\"Pokličete me\",\"text\":\"Povejte, kje ste in kaj se je zgodilo. Ponoči in za praznike je cena višja za dodatek.\"},{\"title\":\"Pridem na kraj\",\"text\":\"V Celju sem ponavadi v 30 minutah.\"},{\"title\":\"Preverim izkaznico\",\"text\":\"Pred odpiranjem preverim osebno izkaznico lastnika ali najemnika.\"},{\"title\":\"Odprem brez poškodb\",\"text\":\"Vrata odprem brez poškodb, kadar se le da.\"}]}},{\"id\":\"s_prices\",\"type\":\"price-list\",\"variant\":\"tags\",\"tone\":\"inverse\",\"props\":{\"title\":\"Cene, ki jih že lahko povem\",\"groups\":[{\"items\":[{\"name\":\"Odpiranje vrat\",\"price\":{\"amount\":60,\"from\":true}},{\"name\":\"Menjava cilindra\",\"price\":{\"amount\":45,\"from\":true}},{\"name\":\"Nočni in praznični dodatek\",\"price\":{\"amount\":30}}]}]}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"inverse\",\"props\":{\"title\":\"Pokličite me, ko ste pred zaklenjenimi vrati\",\"intro\":\"Telefon je odprt 24 ur na dan, vse dni v letu.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 3038,
+      "output_tokens": 1395,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

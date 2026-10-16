@@ -1,0 +1,267 @@
+{
+  "slug": "instalacije-rebernik",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Inštalacije Rebernik, Ptuj: vodovod, ogrevanje, črpalke",
+        "description": "Inštalater z mojstrskim izpitom iz Ptuja. Vodovod, talno ogrevanje, toplotne črpalke in kopalnice na ključ. Ogled in pisna ponudba sta brezplačna."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "type": "hero-signature",
+          "props": {
+            "fact": "phone",
+            "intro": "Delamo vodovod, ogrevanje, toplotne črpalke in kopalnice na ključ. Ogled in pisna ponudba sta brezplačna.",
+            "factNote": "Če se ne oglasimo, vas pokličemo nazaj isti dan.",
+            "headline": "Inštalater za Ptuj in okolico",
+            "factLabel": "Pokličite za brezplačen ogled"
+          },
+          "variant": "drawing"
+        },
+        {
+          "id": "s_services",
+          "type": "services-list",
+          "props": {
+            "items": [
+              {
+                "name": "Vodovodne in odtočne inštalacije",
+                "description": "V novogradnjah in pri prenovah."
+              },
+              {
+                "name": "Talno in radiatorsko ogrevanje",
+                "description": "Izvedemo ga v novogradnji ali pri prenovi."
+              },
+              {
+                "name": "Toplotne črpalke zrak-voda",
+                "description": "Montaža in servis."
+              },
+              {
+                "name": "Zamenjava kotla na olje",
+                "description": "Staro kurilnico zamenjamo s toplotno črpalko. Pomagamo pri vlogi za subvencijo Eko sklada."
+              },
+              {
+                "name": "Prenove kopalnic na ključ",
+                "description": "Delamo skupaj s keramikom."
+              }
+            ],
+            "title": "Kaj delamo"
+          },
+          "variant": "rows"
+        },
+        {
+          "id": "s_area",
+          "type": "service-area",
+          "props": {
+            "intro": "Na terenu po severovzhodni Sloveniji.",
+            "title": "Kje delamo"
+          },
+          "variant": "list"
+        },
+        {
+          "id": "s_steps",
+          "tone": "alt",
+          "type": "steps",
+          "props": {
+            "steps": [
+              {
+                "text": "Povejte, kaj potrebujete, in dogovorimo se za ogled.",
+                "title": "Pokličete nas"
+              },
+              {
+                "text": "Ogled na vašem objektu je brezplačen.",
+                "title": "Pridemo na ogled"
+              },
+              {
+                "text": "Pisno ponudbo dobite za vsako delo, brezplačno.",
+                "title": "Dobite pisno ponudbo"
+              },
+              {
+                "text": "Delo izvedemo mi, pri kopalnicah skupaj s keramikom.",
+                "title": "Opravimo delo"
+              }
+            ],
+            "heading": "Kako poteka delo"
+          },
+          "variant": "horizontal"
+        },
+        {
+          "id": "s_contact",
+          "tone": "inverse",
+          "type": "contact",
+          "props": {
+            "intro": "Povejte, kaj potrebujete, in dogovorili se bomo za brezplačen ogled.",
+            "title": "Pokličite nas za ogled"
+          },
+          "variant": "call-out"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Inštalacije Rebernik",
+        "description": "Kako Inštalacije Rebernik obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Inštalacije Rebernik",
+        "description": "Izjava o dostopnosti spletne strani Inštalacije Rebernik."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-14",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Inštalacije Rebernik",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "images": []
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "compact"
+    },
+    "header": {
+      "cta": "none",
+      "variant": "bar"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.25,
+    "colors": {
+      "band": "#1f6fe0",
+      "text": "#101820",
+      "muted": "#465361",
+      "accent": "#1f6fe0",
+      "border": "#d3dae1",
+      "onBand": "#ffffff",
+      "inverse": "#101820",
+      "primary": "#d63c22",
+      "surface": "#e6ebf0",
+      "onInverse": "#f5f5f5",
+      "onPrimary": "#ffffff",
+      "background": "#ffffff"
+    },
+    "radius": 9,
+    "shadow": "none",
+    "density": "regular",
+    "imagery": "natural",
+    "fontPair": "space-grotesk-public-sans",
+    "skeleton": {
+      "cards": "bordered",
+      "width": "wide",
+      "footer": "wordmark",
+      "header": "centred",
+      "actions": "bar",
+      "buttons": "underline",
+      "centred": [
+        "s_steps"
+      ],
+      "dividers": "rule",
+      "footerTone": "inverse",
+      "photoRatio": "standard"
+    },
+    "direction": "cevi",
+    "headingCase": "normal",
+    "baseFontSize": 17,
+    "headingWeight": 700,
+    "headingTracking": -0.03
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Inštalacije Rebernik",
+    "type": "builder",
+    "email": {
+      "$placeholder": "email"
+    },
+    "phone": "+38641555118",
+    "address": {
+      "city": "Ptuj",
+      "street": "Ormoška cesta 18",
+      "postalCode": "2250"
+    },
+    "subtype": "plumbing",
+    "provider": {
+      "legalName": "Matej Rebernik s.p.",
+      "taxNumber": "39876543",
+      "registrationNumber": "3987654000"
+    },
+    "serviceArea": [
+      "Ptuj",
+      "Ormož",
+      "Slovenska Bistrica",
+      "Lenart",
+      "okolica Maribora"
+    ]
+  },
+  "specVersion": 21
+}

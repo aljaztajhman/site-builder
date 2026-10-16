@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"The sticky header overlaps the hero in the whole-page capture and the first screen stacks three contact actions (Pokličite, Navodila za pot, Pošljite povpraševanje) plus a full contact block above the fold, with no imagery anywhere.\",\"desktopNote\":\"A typographic hero with the contact card works, but the page has no photos at all for a joinery, the 1979 numeral is oversized and sits in a half-empty band, and the sticky header overlaps the headline in the full capture.\",\"phone\":{\"impression\":3,\"hierarchy\":3,\"imagery\":2,\"spacing\":3,\"clutter\":2,\"distinctiveness\":3},\"desktop\":{\"impression\":3,\"hierarchy\":3,\"imagery\":2,\"spacing\":3,\"clutter\":3,\"distinctiveness\":3},\"fixes\":[\"Add workshop or furniture photos: a hero image or a photo strip in 'Kaj izdelujemo' so each product line shows real work instead of a bare text list.\",\"Remove the duplicated phone/address/hours block from the phone first screen (it repeats the header actions and the footer) and keep one primary CTA per screen.\",\"Tame the 1979 numeral and fill the empty left column on desktop; also fix the header so it does not overlap the hero and 'Navodila za pot' stops repeating three times.\"],\"blockers\":[\"Phone: the fixed header (logo, Pokličite, Navodila za pot) overlaps the hero text in the whole-page view.\",\"Desktop: the fixed header bar overlaps and cuts through the hero headline and the Naslov label in the whole-page view.\",\"Both: the address, hours and 'Navodila za pot' block is repeated in the hero and again in 'Obiščite nas'.\"]}",
+  "usage": {
+    "prompt_tokens": 11540,
+    "completion_tokens": 580
+  },
+  "batch": true
+}

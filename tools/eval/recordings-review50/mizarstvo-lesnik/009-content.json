@@ -1,0 +1,18 @@
+{
+  "seq": 9,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "fe3a23c17b9a6890",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"stacked\",\"cta\":\"call\",\"tone\":\"default\"},\"footer\":{\"variant\":\"columns\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Mizarstvo Lesnik, pohištvo po meri iz masivnega lesa\",\"description\":\"Mizarstvo Lesnik iz Škofje Loke izdeluje kuhinje, vgradne omare, mize, postelje, stopnice in vrata iz masivnega lesa. Narišemo, izdelamo in montiramo.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-type\",\"variant\":\"with-facts\",\"tone\":\"default\",\"props\":{\"eyebrow\":\"Družinsko mizarstvo\",\"headline\":\"Pohištvo iz masivnega lesa, narejeno za vaš dom\",\"intro\":\"Vsak kos narišemo skupaj z vami, izdelamo v delavnici in sami montiramo. Les kupujemo pri žagah v Poljanski dolini.\",\"primary\":{\"label\":\"Pošljite povpraševanje\",\"target\":{\"action\":\"email\"}}}},{\"id\":\"s_about\",\"type\":\"about\",\"variant\":\"figure\",\"tone\":\"alt\",\"props\":{\"heading\":\"Delavnica, ki jo družina vodi že generacije\",\"paragraphs\":[\"Delavnico je leta 1979 odprl dedek, danes jo vodi Jaka Lesnik.\",\"Les kupujemo pri žagah v Poljanski dolini, največ hrast, oreh in macesen.\"],\"figure\":{\"label\":\"Delavnica od leta\",\"value\":\"1979\"},\"ownerName\":\"Jaka Lesnik\",\"ownerRole\":\"vodja mizarstva\"}},{\"id\":\"s_services\",\"type\":\"services-list\",\"variant\":\"rows\",\"tone\":\"default\",\"props\":{\"title\":\"Kaj izdelujemo\",\"intro\":\"Pohištvo po meri iz masivnega lesa. Cene določimo po izmeri in ponudbi.\",\"items\":[{\"name\":\"Kuhinje\",\"description\":\"Kuhinje iz masivnega lesa, narisane skupaj z vami. Trenutno je čakalna doba tri do štiri mesece.\"},{\"name\":\"Vgradne omare\",\"description\":\"Omare iz masivnega lesa, prilagojene vašemu prostoru.\"},{\"name\":\"Mize\",\"description\":\"Mize po meri iz masivnega lesa.\"},{\"name\":\"Postelje\",\"description\":\"Postelje po meri iz masivnega lesa.\"},{\"name\":\"Stopnice\",\"description\":\"Stopnice, izdelane in montirane po izmeri.\"},{\"name\":\"Notranja vrata\",\"description\":\"Notranja vrata po meri iz masivnega lesa.\"}]}},{\"id\":\"s_steps\",\"type\":\"steps\",\"variant\":\"horizontal\",\"tone\":\"alt\",\"props\":{\"heading\":\"Kako delamo\",\"steps\":[{\"title\":\"Narišemo skupaj z vami\",\"text\":\"Povejte nam, kaj potrebujete, in skupaj narišemo vaš kos pohištva.\"},{\"title\":\"Izdelamo v delavnici\",\"text\":\"Pohištvo izdelamo iz masivnega lesa v naši delavnici v Škofji Loki.\"},{\"title\":\"Sami montiramo\",\"text\":\"Izdelek pripeljemo in postavimo sami.\"}],\"action\":{\"label\":\"Pošljite povpraševanje\",\"target\":{\"action\":\"email\"}}}},{\"id\":\"s_cta\",\"type\":\"cta\",\"variant\":\"split\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Imate idejo za pohištvo po meri?\",\"text\":\"Opišite nam jo in pripravimo ponudbo po izmeri. Ob sobotah smo na voljo po dogovoru.\",\"primary\":{\"label\":\"Pišite nam\",\"target\":{\"action\":\"email\"}}}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2426,
+      "output_tokens": 1318,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

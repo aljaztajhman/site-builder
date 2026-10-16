@@ -1,0 +1,334 @@
+{
+  "slug": "gostilna-pri-mostu",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Gostilna Pri mostu Kamnik – domača malica in kosilo",
+        "description": "Družinska gostilna ob reki Bistrici v Kamniku. Dnevne malice, nedeljska kosila, kamniški štruklji in telečja obara. Rezervirajte mizo."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "type": "hero-signature",
+          "props": {
+            "fact": "address",
+            "image": "img_03",
+            "intro": "Pri nas kuhamo dnevne malice in nedeljska kosila. Posedite ob reki Bistrici, kjer v tretji generaciji pripravljamo domače jedi.",
+            "primary": {
+              "label": "Rezervirajte mizo",
+              "target": {
+                "action": "call"
+              }
+            },
+            "headline": "Domača kuhinja ob starem mostu",
+            "secondary": {
+              "label": "Oglejte si ponudbo",
+              "target": {
+                "page": "p_home",
+                "section": "s_offers"
+              }
+            }
+          },
+          "variant": "card"
+        },
+        {
+          "id": "s_about",
+          "type": "about",
+          "props": {
+            "figure": {
+              "label": "Kuhamo od leta",
+              "value": "1968"
+            },
+            "heading": "Domača hrana, ki jo kuhamo že tretji rod",
+            "paragraphs": [
+              "Pri nas kuhamo domačo hrano: dnevne malice med tednom in nedeljska kosila. Specialiteti hiše sta kamniški štruklji in telečja obara.",
+              "Gostilna stoji tik ob starem mostu, na terasi pa lahko posedite ob reki Bistrici. Imamo prostor za 60 gostov."
+            ]
+          },
+          "variant": "figure"
+        },
+        {
+          "id": "s_hours",
+          "type": "opening-hours",
+          "props": {
+            "note": "Mizo rezervirate po telefonu. Pokličite nas in poskrbimo za vas.",
+            "title": "Kdaj nas obiščete"
+          },
+          "variant": "table"
+        },
+        {
+          "id": "s_offers",
+          "tone": "inverse",
+          "type": "price-list",
+          "props": {
+            "title": "Malica in nedeljsko kosilo",
+            "groups": [
+              {
+                "name": "Med tednom",
+                "items": [
+                  {
+                    "name": "Dnevna malica",
+                    "note": "Domača malica med tednom.",
+                    "price": {
+                      "amount": 9.5
+                    }
+                  }
+                ]
+              },
+              {
+                "name": "Ob nedeljah",
+                "items": [
+                  {
+                    "name": "Nedeljsko kosilo",
+                    "note": "Juha, pečenka in štruklji.",
+                    "price": {
+                      "amount": 16
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "variant": "offers"
+        },
+        {
+          "id": "s_team",
+          "type": "team",
+          "props": {
+            "image": "img_01",
+            "title": "Naša družina",
+            "members": [
+              {
+                "name": "Peter Kosmač",
+                "role": "Vodi gostilno"
+              },
+              {
+                "name": "Jure Kosmač",
+                "role": "Vodi gostilno"
+              }
+            ]
+          },
+          "variant": "photo"
+        },
+        {
+          "id": "s_contact",
+          "tone": "inverse",
+          "type": "contact",
+          "props": {
+            "title": "Za rezervacijo mize pokličite nas"
+          },
+          "variant": "call-out"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Gostilna Pri mostu",
+        "description": "Kako Gostilna Pri mostu obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Gostilna Pri mostu",
+        "description": "Izjava o dostopnosti spletne strani Gostilna Pri mostu."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-15",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Gostilna Pri mostu",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "images": [
+      {
+        "id": "img_01",
+        "alt": "Rustikalna gostilniška jedilnica z lesenimi stoli, mizami z belimi prti in zeleno kakljevo pečjo v ozadju.",
+        "src": "sites/site_acb3efec26e93654/uploads/photo0.jpg",
+        "focal": {
+          "x": 0.7,
+          "y": 0.4
+        },
+        "width": 1024,
+        "height": 1536
+      },
+      {
+        "id": "img_02",
+        "alt": "Krožnik ajdovih žgancev s ocvirki in kozarec kislega mleka na leseni mizi.",
+        "src": "sites/site_acb3efec26e93654/uploads/photo1.jpg",
+        "focal": {
+          "x": 0.45,
+          "y": 0.55
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_03",
+        "alt": "Skleda domače goveje juhe z zelenjavo, poleg kos kmečkega kruha in žlica na leseni mizi.",
+        "src": "sites/site_acb3efec26e93654/uploads/photo2.jpg",
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "width": 1536,
+        "height": 1024
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "compact"
+    },
+    "header": {
+      "cta": "none",
+      "variant": "bar"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.28,
+    "colors": {
+      "band": "#d9b36c",
+      "text": "#1b241f",
+      "muted": "#4d5a52",
+      "accent": "#a8862f",
+      "border": "#e4d6d6",
+      "onBand": "#2a0c10",
+      "inverse": "#5a1a23",
+      "primary": "#5a1a23",
+      "surface": "#f4ecec",
+      "onInverse": "#f2f5f3",
+      "onPrimary": "#ffffff",
+      "background": "#ffffff"
+    },
+    "radius": 4,
+    "shadow": "none",
+    "density": "regular",
+    "imagery": "natural",
+    "fontPair": "newsreader-libre-franklin",
+    "skeleton": {
+      "cards": "filled",
+      "width": "contained",
+      "footer": "wordmark",
+      "header": "word",
+      "actions": "bar",
+      "buttons": "underline",
+      "dividers": "none",
+      "footerTone": "default",
+      "photoRatio": "landscape"
+    },
+    "direction": "jedilnik",
+    "headingCase": "normal",
+    "baseFontSize": 17,
+    "headingWeight": 600,
+    "headingTracking": -0.02
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Gostilna Pri mostu",
+    "type": "restaurant",
+    "email": "gostilna@primostu.example",
+    "hours": {
+      "entries": [
+        {
+          "to": "sat",
+          "from": "mon",
+          "open": "10:00",
+          "close": "22:00"
+        },
+        {
+          "to": "sun",
+          "from": "sun",
+          "open": "11:00",
+          "close": "17:00"
+        }
+      ]
+    },
+    "phone": "+38615558820",
+    "address": {
+      "city": "Kamnik",
+      "street": "Šutna 2",
+      "postalCode": "1241"
+    },
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      }
+    }
+  },
+  "specVersion": 21
+}
