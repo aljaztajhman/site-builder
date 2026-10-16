@@ -5,6 +5,7 @@ import type { LcpResolvers, RenderCtx, SectionProps } from "../../types.ts";
 import { DrawingSvg } from "./drawing.tsx";
 import { ElementView } from "./elements.tsx";
 import {
+  TILE_EDGES,
   TONE_GROUND,
   fieldRect,
   firstHeading,
@@ -17,6 +18,7 @@ import {
   phoneRows,
   photoLayer,
   readingOrder,
+  tileEdges,
   type El,
   type Layer,
   type LayerOf,
@@ -53,6 +55,7 @@ export function Composed({ section, ctx, index }: SectionProps<"composed">) {
   // Sections with a layer, an edge or the header over them set their own paddings (composed-v2.css .cx-v2).
   const own = layers.length > 0 || top !== undefined || headerOver;
   const rows = phoneRows(ordered);
+  for (const [id, edge] of tileEdges(ordered)) TILE_EDGES.set(ordered.find((el) => el.id === id)!, edge);
   const fields = layers.filter((l): l is LayerOf<"field"> => l.kind === "field");
   const fieldOf = (el: El) => fields.find((f) => insideField(el, f, props.rows));
 

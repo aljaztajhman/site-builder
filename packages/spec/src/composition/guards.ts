@@ -114,10 +114,35 @@ export const MAX_MOVING_RIBBONS = 1;
 export const TILT_KINDS: ReadonlySet<Element["kind"]> = new Set(["fact", "sticker", "image", "photos", "decor"]);
 /** Kinds that may bleed to the page edge (G11, `desk.bleedX`) and edge to edge on phones (G12, `phone.span: "bleed"`). */
 export const BLEED_X_KINDS: ReadonlySet<Element["kind"]> = new Set(["image", "photos", "decor"]);
-/** Kinds that may bleed past the section's top or bottom (G11, `desk.bleedY`). */
-export const BLEED_Y_KINDS: ReadonlySet<Element["kind"]> = new Set(["decor", "ribbon", "sticker"]);
+/**
+ * Kinds that may bleed past the section's top or bottom (G11, `desk.bleedY`). An image (Design 5 Wave P) reaches the
+ * section's edge instead of passing it: a mosaic or band photo runs to the top or bottom of the section.
+ */
+export const BLEED_Y_KINDS: ReadonlySet<Element["kind"]> = new Set(["decor", "ribbon", "sticker", "image"]);
 /** Kinds never half width on phones (G12). */
 export const NO_PHONE_HALF_KINDS: ReadonlySet<Element["kind"]> = new Set(["text", "list", "quote", "prices", "steps", "qa"]);
+/**
+ * Kinds that may be a phone tile (G12, `phone.span: "tile"`: half width, edge to edge, no gap; a 2-column mosaic). A tile
+ * that carries words needs its own ground (`fill`), which pads it: otherwise its text would touch the screen's edge.
+ */
+export const TILE_KINDS: ReadonlySet<Element["kind"]> = new Set(["image", "decor", "heading", "fact", "sticker", "iconFacts"]);
+
+/**
+ * A horizontal shift of this many steps or more (3 × 1.25 rem = 60 px, wider than the widest desktop gap, 6 × 0.5 rem)
+ * reaches into the next column: the text-over-photo rules (G3's scrim, G26's layer) and the renderer's backing panel
+ * count that column as covered. Smaller shifts are counted as before (only by the conservative text-on-text rectangle).
+ */
+export const REACH_SHIFT = 3;
+
+/** The desktop columns an element covers, 1-based and inclusive, with the next column toward a shift of REACH_SHIFT steps or more. */
+export function deskColumns(desk: { col: number; span: number; shiftX?: number | undefined }): { c0: number; c1: number } {
+  const c0 = desk.col;
+  const c1 = desk.col + desk.span - 1;
+  const sx = desk.shiftX ?? 0;
+  if (sx >= REACH_SHIFT) return { c0, c1: Math.min(c1 + 1, GRID_COLUMNS) };
+  if (sx <= -REACH_SHIFT) return { c0: Math.max(c0 - 1, 1), c1 };
+  return { c0, c1 };
+}
 /** The narrow-text relaxation of TEXT_SPAN (G13): span 3 at size 0, one paragraph this long at most, next to a text-bearing element of span 3–4. */
 export const TEXT_SPAN_NARROW = { span: 3, maxChars: 140, partner: { min: 3, max: 4 } } as const;
 /** Photos per arrangement (G21), inclusive. */
