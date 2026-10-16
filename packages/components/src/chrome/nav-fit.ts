@@ -1,4 +1,4 @@
-import { FONT_PAIRS, type Design, type HeaderFamily } from "@sb/spec";
+import { findFontPair, type Design, type HeaderFamily } from "@sb/spec";
 
 /**
  * How many menu entries fit in one row of the wide header (it-plan-limits: Plus has up to 20 pages). The rest sit
@@ -41,7 +41,7 @@ export function textEm(text: string, upper = false, tracking = 0): number {
 /**
  * Each face's widest measured width over textEm (Chromium, 2026-10-08: Slovene menu labels and business names, weight
  * 600 for body faces, 400–900 with upper case and tracking for heading faces), times 1.05. A face not listed: the
- * widest of all (body 1.04, heading 1.15) times 1.05.
+ * widest before the type voices (body 1.04, heading 1.15) times 1.05.
  */
 const BODY_FACE: Record<string, number> = {
   Inter: 1.033,
@@ -54,6 +54,12 @@ const BODY_FACE: Record<string, number> = {
   Figtree: 0.983,
   "IBM Plex Sans": 0.985,
   "DM Sans": 1.021,
+  // The type voices' faces (fonts.ts VOICE_PAIRS), measured 2026-10-16 on a wider set of labels and names and scaled to
+  // the set above by the four faces measured in both (x 0.906).
+  Alegreya: 0.917,
+  "Albert Sans": 0.979,
+  "Work Sans": 1.061,
+  Literata: 1.128,
 };
 const HEADING_FACE: Record<string, number> = {
   "Inter Tight": 1.035,
@@ -68,6 +74,13 @@ const HEADING_FACE: Record<string, number> = {
   Lora: 1.041,
   "IBM Plex Sans": 1.016,
   Figtree: 1.025,
+  // The type voices' faces, measured as their body faces above.
+  "Young Serif": 1.12,
+  Oswald: 0.857,
+  "Bodoni Moda": 1.167,
+  Besley: 1.364,
+  "Krona One": 1.346,
+  Jost: 1.046,
 };
 const MARGIN = 1.05;
 
@@ -86,6 +99,8 @@ export interface NavRow {
   design: TypeTokens;
   /** The business name as the brand, or the logo's size (shown at most 2.5rem tall, 2rem in the compact family). */
   brand: { name: string } | { logo: { width: number; height: number } };
+  /** How much larger the brand is set than its family's own size (render details.header); 1 when absent. */
+  brandScale?: number;
   /** The header's button at wide widths. */
   button?: { label: string; icon: boolean; large: boolean };
   /** The directions link's label, when the header carries it. */
@@ -100,7 +115,7 @@ export interface NavRow {
 export function navFit(labels: string[], row: NavRow): (NavFit | undefined)[] {
   const d = row.design;
   const upper = d.headingCase === "uppercase";
-  const pair = FONT_PAIRS.find((p) => p.id === d.fontPair);
+  const pair = findFontPair(d.fontPair);
   const headingFace = (HEADING_FACE[pair?.heading.family ?? ""] ?? 1.15) * MARGIN;
   const bodyFace = (BODY_FACE[pair?.body.family ?? ""] ?? 1.04) * MARGIN;
   const heading = (s: string, size: number) => textEm(s, upper, d.headingTracking) * size * headingFace;
@@ -120,8 +135,8 @@ export function navFit(labels: string[], row: NavRow): (NavFit | undefined)[] {
       const parts: number[] = [];
       if ("logo" in row.brand) {
         const h = row.family === "compact" ? 32 : 40;
-        parts.push(Math.max(44, (row.brand.logo.width / row.brand.logo.height) * h));
-      } else parts.push(Math.max(44, heading(row.brand.name, row.family === "compact" ? b : lg)));
+        parts.push(Math.max(44, (row.brand.logo.width / row.brand.logo.height) * h * (row.brandScale ?? 1)));
+      } else parts.push(Math.max(44, heading(row.brand.name, row.family === "compact" ? b : lg) * (row.brandScale ?? 1)));
       if (row.phone) parts.push(heading(row.phone, lg) + 1.15 * lg + 0.4 * lg);
       const actions: number[] = [];
       if (row.button) {
@@ -158,6 +173,6 @@ export function navFit(labels: string[], row: NavRow): (NavFit | undefined)[] {
  * --name-em), so a long name stays on one line (HQ it-skeleton-phone-header-wrap).
  */
 export function nameEm(name: string, d: TypeTokens): number {
-  const pair = FONT_PAIRS.find((p) => p.id === d.fontPair);
+  const pair = findFontPair(d.fontPair);
   return textEm(name, d.headingCase === "uppercase", d.headingTracking) * (HEADING_FACE[pair?.heading.family ?? ""] ?? 1.15) * MARGIN;
 }

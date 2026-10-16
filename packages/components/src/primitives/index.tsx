@@ -12,10 +12,12 @@ import {
   type Link,
   type Placeholder,
   type Price,
+  type Section as SpecSection,
+  type SiteSpec,
   type Tone,
 } from "@sb/spec";
 import { placeholderLabel } from "../i18n.ts";
-import type { RenderCtx } from "../types.ts";
+import type { RenderCtx, RenderDetails } from "../types.ts";
 
 /** Joins class names, skipping falsy values. */
 export function cx(...names: (string | false | null | undefined)[]): string {
@@ -45,6 +47,45 @@ export const LandmarkSuffixes = createContext<ReadonlyMap<string, string>>(new M
  */
 export const CentredSections = createContext<ReadonlySet<string>>(new Set());
 
+const DETAIL_CLASS: Record<keyof RenderDetails, string> = { cta: "dt-cta", header: "dt-header", aiCaption: "dt-ai-caption", fit: "dt-fit", scale: "dt-scale" };
+
+/** The class list on <html> that turns details.css's rules on (RenderDetails): "" when no switch is on. */
+export function detailsClass(details: RenderDetails | undefined): string {
+  return (Object.keys(DETAIL_CLASS) as (keyof RenderDetails)[])
+    .filter((k) => details?.[k] === true)
+    .map((k) => DETAIL_CLASS[k])
+    .join(" ");
+}
+
+/**
+ * details.aiCaption: the section that ends with the page's one AI caption (aiCaptionSection) and its text. Null (the
+ * default) draws none.
+ */
+export const AiCaption = createContext<{ section: string | null; text: string } | null>(null);
+
+/** Whether a value names one of the ids anywhere (an image reference is a plain string). */
+function mentions(value: unknown, ids: ReadonlySet<string>): boolean {
+  if (typeof value === "string") return ids.has(value);
+  if (Array.isArray(value)) return value.some((v) => mentions(v, ids));
+  if (value && typeof value === "object") return Object.values(value).some((v) => mentions(v, ids));
+  return false;
+}
+
+const generatedIds = (site: Pick<SiteSpec, "assets">) => new Set(site.assets.images.filter((i) => i.origin === "generated").map((i) => i.id));
+
+/** Whether content (a section's props, a collection entry) shows a generated picture: it names one. */
+export function showsGenerated(content: unknown, site: Pick<SiteSpec, "assets">): boolean {
+  const ids = generatedIds(site);
+  return ids.size > 0 && mentions(content, ids);
+}
+
+/** The first of the sections that shows a generated picture, or null. */
+export function aiCaptionSection(sections: readonly SpecSection[], site: Pick<SiteSpec, "assets">): string | null {
+  const ids = generatedIds(site);
+  if (ids.size === 0) return null;
+  return sections.find((s) => mentions(s.props, ids))?.id ?? null;
+}
+
 /**
  * Wrapper for every section: landmark, tone, variant classes and the width container; `data-align="centre"` on the one
  * centred section of a page with a skeleton (skeleton.css).
@@ -64,6 +105,7 @@ export function Section(props: {
   const { id, type, variant, tone = "default", labelled = true, className, bleed, children } = props;
   const suffixes = useContext(LandmarkSuffixes);
   const centred = useContext(CentredSections).has(id);
+  const caption = useContext(AiCaption);
   const suffix = labelled ? suffixes.get(id) : undefined;
   return (
     <section
@@ -78,6 +120,8 @@ export function Section(props: {
         </span>
       )}
       {bleed ? children : <div className="container">{children}</div>}
+      {/* details.aiCaption: under the section's pictures, never on one (no mask clips it, it never covers a photo). */}
+      {caption?.section === id && <p className="container ai-caption">{caption.text}</p>}
     </section>
   );
 }
@@ -108,10 +152,13 @@ export function Picture(props: {
   const img = props.ctx.image(props.id);
   const focal = img.asset.focal;
   // AI-generated pictures carry a visible label (EU AI Act Art. 50) and say so in their alt text.
+  // With details.aiCaption the label is the page's one caption (AiCaption) instead, and the picture is only marked.
   const generated = img.asset.origin === "generated";
+  const captioned = generated && props.ctx.details?.aiCaption === true;
   const alt = props.alt ?? img.alt;
+  const mark = captioned ? { "data-ai": "generated" } : generated ? { "data-ai-label": props.ctx.t("aiGenerated") } : {};
   return (
-    <picture className={cx("media", generated && "media--ai", props.className)} {...(generated ? { "data-ai-label": props.ctx.t("aiGenerated") } : {})}>
+    <picture className={cx("media", generated && !captioned && "media--ai", props.className)} {...mark}>
       {img.sources.map((s) => (
         <source key={s.type} type={s.type} srcSet={s.srcSet} sizes={props.sizes} />
       ))}
@@ -139,13 +186,16 @@ export function ActionLink(props: { link: Link; ctx: RenderCtx; kind?: "primary"
   const external = "url" in props.link.target || ("action" in props.link.target && props.link.target.action === "directions");
   const kind = props.kind ?? "primary";
   const action = "action" in props.link.target ? props.link.target.action : undefined;
+  // details.cta: a call button is the real thing, with the phone icon (details.css .btn--call).
+  const call = kind !== "text" && action === "call" && props.ctx.details?.cta === true;
   return (
     <a
       href={href}
       data-action={action}
-      className={cx(kind === "text" ? "text-link" : `btn btn--${kind}`, props.className)}
+      className={cx(kind === "text" ? "text-link" : `btn btn--${kind}`, call && "btn--call", props.className)}
       {...(external ? { rel: "noopener", target: "_blank" } : {})}
     >
+      {call && <Icon name="phone" />}
       {props.link.label}
     </a>
   );

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { HEADER_FAMILIES, type Page, type SiteSpec } from "@sb/spec";
 import { Header } from "../src/chrome/index.tsx";
-import { navFit, textEm, type NavRow } from "../src/chrome/nav-fit.ts";
+import { nameEm, navFit, textEm, type NavRow } from "../src/chrome/nav-fit.ts";
 import { html, testCtx, testSpec } from "./helpers.ts";
 
 /** Plus's 20 menu entries (it-plan-limits), several at the spec's 24-character limit; the browser check is tools/eval/test/nav-pages-render.test.ts. */
@@ -101,5 +101,19 @@ describe("Header with Plus's 20 pages", () => {
     expect(out).not.toContain("site-nav__more");
     expect(out).not.toContain("data-nav-fit");
     expect(out).toContain('<ul class="site-nav__list" role="list"><li><a href="index.html" aria-current="page">Domov</a></li>');
+  });
+});
+
+describe("type voice pairs (fonts.ts VOICE_PAIRS)", () => {
+  it("are measured by their own faces: Krona One sets a name wider than an unknown face, Oswald narrower", () => {
+    const name = "Optika Jasna";
+    const plain = textEm(name);
+    expect(nameEm(name, { ...DESIGN, fontPair: "krona-karla" }) / plain).toBeGreaterThan(1.15 * 1.05 + 0.1);
+    expect(nameEm(name, { ...DESIGN, fontPair: "oswald-source-sans" }) / plain).toBeLessThan(0.95);
+  });
+
+  it("fit fewer menu entries in the row with a wide heading face", () => {
+    const fitted = (fontPair: string) => navFit(LABELS, row({ family: "word", design: { ...DESIGN, fontPair } })).filter((f) => f === undefined).length;
+    expect(fitted("krona-karla")).toBeLessThan(fitted("oswald-source-sans"));
   });
 });

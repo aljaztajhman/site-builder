@@ -136,21 +136,56 @@ function headingBody(el: ElOf<"heading">, uid: string): { body: ReactNode; vars:
   }
 }
 
-function Heading({ el, over, id, uid }: { el: ElOf<"heading">; over: boolean; id: string | undefined; uid: string }) {
+/** details.fit: the longest word (in letters) that never breaks inside; a longer one may, as a last resort. */
+const WHOLE_WORD_MAX = 14;
+/** The display steps (composed.css --cx-fs-6 to 8). */
+const DISPLAY_SIZE = 6;
+
+/**
+ * details.fit on wide screens: the largest display size (in vh, read at a 1280 x 800 screen) at which the headline, set
+ * in its desktop columns of the 1152 px container, is at most 45 % of the screen deep, so it stays in the first screen
+ * below the header and what the opener puts above it. Lines are estimated from the characters at an average letter
+ * width (capitals wider), with a margin; a short headline is not capped by it (28vh in details.css is).
+ */
+export function displayCap(text: string, span: number, caps: boolean): string {
+  const n = [...text].length;
+  const width = (Math.min(12, Math.max(1, span)) / 12) * 1152;
+  // A heavy display face's average letter, spaces included (Archivo 800 capitals measured 0.73 em on the proof pages).
+  const em = caps ? 0.76 : 0.6;
+  let px = 240;
+  while (px > 24 && Math.ceil((n * em * px) / width) * 1.05 * px > 0.45 * 800) px -= 2;
+  return (px / 8).toFixed(1);
+}
+
+function Heading({ el, over, id, uid, fit }: { el: ElOf<"heading">; over: boolean; id: string | undefined; uid: string; fit?: { siteCaps: boolean } | undefined }) {
   const H = HEADINGS[el.level - 1]!;
   const rotate = el.rotate === "90" || el.rotate === "-90" ? el.rotate : undefined;
   const { body, vars } = headingBody(el, uid);
   // --lw: the longest word, in letters: on a phone an uppercase display heading shrinks until it fits (composed.css).
   const lw = Math.max(1, ...el.text.split(/[\s-]+/).map((w) => w.length));
-  const p = placement(el, over, { "--fz": stepVar(el.size), "--lw": lw, ...(el.weight ? { "--w": el.weight } : {}), ...vars });
   // Below size 2 a heading is never all caps, whatever the direction's --case-heading: a small uppercase line is the
   // banned tracked eyebrow (an explicit uppercase there is the guard's to drop).
   const textCase = el.size < UPPERCASE_MIN.size ? "normal" : el.case;
+  // details.fit: plain text (no treatment, not rotated) is set in a block sized by the heading's own width (details.css),
+  // at --fk em a letter: the face's --fit-k (tokens.ts), wider for capitals on a site set in lower case and narrower
+  // for lower case on one set in capitals.
+  const fitted = fit !== undefined && rotate === undefined && (el.treatment === undefined || el.treatment === "none");
+  const caps = textCase === "uppercase" || (textCase === undefined && fit?.siteCaps === true);
+  const fk = !fitted || caps === fit.siteCaps ? undefined : caps ? "calc(var(--fit-k, 0.62) * 1.3)" : "calc(var(--fit-k, 0.8) / 1.3)";
+  const fitVars = fitted ? { ...(fk ? { "--fk": fk } : {}), ...(el.size >= DISPLAY_SIZE ? { "--fcap": displayCap(el.text, el.desk.span, caps) } : {}) } : {};
+  const p = placement(el, over, { "--fz": stepVar(el.size), "--lw": lw, ...(el.weight ? { "--w": el.weight } : {}), ...vars, ...fitVars });
   return (
     // The type treatment (spec v20) is a hook: the class cx-tt-<name>; its rules are the inventory's (composed-v2.css
     // extensions for the starters, the type-treatments vocab sheet for the rest).
-    <H id={id} {...p} className={cx(p.className, "cx-h", textCase && `cx-h--${textCase}`, el.treatment && el.treatment !== "none" && `cx-tt-${el.treatment}`)} data-sz={el.size} data-measure={el.measure} data-rotate={rotate}>
-      {body}
+    <H
+      id={id}
+      {...p}
+      className={cx(p.className, "cx-h", textCase && `cx-h--${textCase}`, el.treatment && el.treatment !== "none" && `cx-tt-${el.treatment}`, fitted && lw <= WHOLE_WORD_MAX && "cx-h--whole")}
+      data-sz={el.size}
+      data-measure={el.measure}
+      data-rotate={rotate}
+    >
+      {fitted ? <span className="cx-fit">{body}</span> : body}
     </H>
   );
 }
@@ -323,14 +358,23 @@ function DecorBlock({ el, over }: { el: ElOf<"decor">; over: boolean }) {
 }
 
 /** call: the phone, directions: the maps link, book: the booking link, link: its own target. A fact still missing renders nothing, as ActionLink does. */
-function ActionBlock({ el, ctx, over }: { el: ElOf<"action">; ctx: RenderCtx; over: boolean }) {
+function ActionBlock({ el, ctx, over, sectionId, siblings }: { el: ElOf<"action">; ctx: RenderCtx; over: boolean; sectionId: string | undefined; siblings: readonly El[] }) {
   const link: Link | null =
     el.action === "link" ? (el.link ? { label: el.label, target: el.link.target } : null) : { label: el.label, target: { action: el.action === "book" ? "booking" : el.action } };
   if (!link || ctx.href(link.target) === null) return null;
   const p = placement(el, over);
+  // details.cta: the opener's call set as a text link becomes its primary call button, unless the opener has a button
+  // already (one button per hero) or a fact object that calls (a plate: one call button per screen).
+  const asButton =
+    ctx.details?.cta === true &&
+    el.action === "call" &&
+    el.style === "text" &&
+    sectionId !== undefined &&
+    ctx.page.sections[0]?.id === sectionId &&
+    !siblings.some((s) => s !== el && ((s.kind === "action" && s.style !== "text") || (s.kind === "fact" && s.link !== undefined && "action" in s.link && s.link.action === "call")));
   return (
     <div {...p} className={cx(p.className, "cx-act")}>
-      <ActionLink link={link} ctx={ctx} kind={el.style} />
+      <ActionLink link={link} ctx={ctx} kind={asButton ? "primary" : el.style} />
     </div>
   );
 }
@@ -367,7 +411,7 @@ export interface ElementProps {
 export function ElementView({ el, ctx, width, over, titleId, priority, sectionId, headingId, itemLevel = 2, siblings = [] }: ElementProps) {
   switch (el.kind) {
     case "heading":
-      return <Heading el={el} over={over} id={titleId} uid={`${sectionId ?? "s"}-${el.id}`} />;
+      return <Heading el={el} over={over} id={titleId} uid={`${sectionId ?? "s"}-${el.id}`} fit={ctx.details?.fit === true ? { siteCaps: ctx.site.design.headingCase === "uppercase" } : undefined} />;
     case "text":
       return <TextBlock el={el} over={over} />;
     case "list":
@@ -377,7 +421,7 @@ export function ElementView({ el, ctx, width, over, titleId, priority, sectionId
     case "image":
       return <ImageBlock el={el} ctx={ctx} width={width} priority={priority} />;
     case "action":
-      return <ActionBlock el={el} ctx={ctx} over={over} />;
+      return <ActionBlock el={el} ctx={ctx} over={over} sectionId={sectionId} siblings={siblings} />;
     case "hours":
       return (
         <Block el={el} over={over} className="cx-hours">

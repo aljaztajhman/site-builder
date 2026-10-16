@@ -18,6 +18,24 @@ export interface ResolvedImage {
 }
 
 /**
+ * Render-time details (docs/plans/m1-type-details.md, piece A): each switch is off when absent, and a page rendered with
+ * none of them on is byte-identical to one rendered without the option. They change markup only where noted and are
+ * otherwise CSS (styles/details.css, scoped to the matching class on <html>, primitives detailsClass).
+ */
+export interface RenderDetails {
+  /** Hero and header calls as a real primary button (phone icon, heavy, body size, 48 px). */
+  cta?: boolean;
+  /** Fuller header: section anchors instead of a lone home entry, a taller header, the stacked family as a masthead. */
+  header?: boolean;
+  /** No chip on each generated picture: one caption under the first one on the page. */
+  aiCaption?: boolean;
+  /** Composed display headlines fit their own column, short words never break, the first screen holds them. */
+  fit?: boolean;
+  /** Small things small, big things big: body-size nav and hero facts, 40 px section headings, one eyebrow a page. */
+  scale?: boolean;
+}
+
+/**
  * Everything a component needs to render. Built by @sb/render; identical for preview and publish,
  * so preview output equals published output.
  */
@@ -41,6 +59,8 @@ export interface RenderCtx {
   media: (file: string) => string;
   /** The day of rendering (@sb/render RenderOptions.now): only for a date the spec doesn't carry (a site from before spec v11). */
   today: Date;
+  /** Render-time details (RenderDetails); absent: all off. */
+  details?: RenderDetails;
 }
 
 export interface SectionProps<T extends SectionType> {
