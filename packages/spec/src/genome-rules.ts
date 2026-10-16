@@ -14,9 +14,10 @@ import { luminance } from "./color.ts";
 import type { Design, Direction, Imagery } from "./design.ts";
 import { DIRECTIONS } from "./directions.ts";
 import { acceptedFontPairs } from "./families.ts";
-import { FONT_PAIRS } from "./fonts.ts";
+import { FONT_PAIRS, VOICE_PAIRS } from "./fonts.ts";
 import type { Genome, Ground, Rhythm, Shape } from "./genome.ts";
 import { siteMotif } from "./motif.ts";
+import { TYPE_VOICES } from "./voices.ts";
 import { OVERLAY_HEROES, type FooterFamily, type HeaderFamily, type Skeleton } from "./skeleton.ts";
 
 type Range = [number, number];
@@ -148,7 +149,7 @@ export function typeSystem(pairId: string): TypeSystem | undefined {
 function buildTypeSystem(pairId: string): TypeSystem | undefined {
   const pair = FONT_PAIRS.find((p) => p.id === pairId);
   const presets = DIRECTIONS.filter((d) => acceptedFontPairs(d).includes(pairId));
-  if (!pair || !presets.length) return undefined;
+  if (!pair || !presets.length) return voiceTypeSystem(pairId);
   const lo = Math.max(pair.heading.weights[0], 400, Math.min(...presets.map((d) => d.ranges.headingWeight[0])));
   const hi = Math.min(pair.heading.weights[1], Math.max(...presets.map((d) => d.ranges.headingWeight[1])));
   const heavy = HEAVY_GROTESKS.includes(pair.heading.family);
@@ -162,10 +163,28 @@ function buildTypeSystem(pairId: string): TypeSystem | undefined {
   };
 }
 
-/** Uppercase headings: only a heavy grotesk heading face at UPPERCASE_MIN_WEIGHT or more. */
+/**
+ * A type voice's own pair (voices.ts, VOICE_PAIRS): no preset uses it, so its system is the voice's setting, its weight
+ * exactly and its tracking within 0.01 em. Capitals only where the voice sets them.
+ */
+function voiceTypeSystem(pairId: string): TypeSystem | undefined {
+  const pair = VOICE_PAIRS.find((p) => p.id === pairId);
+  const voice = TYPE_VOICES.find((v) => v.pair === pairId);
+  if (!pair || !voice) return undefined;
+  return {
+    pair: pairId,
+    weight: [voice.headingWeight, voice.headingWeight],
+    tracking: [voice.headingTracking - 0.01, voice.headingTracking + 0.01],
+    cases: [voice.headingCase],
+    serif: pair.heading.fallback === "serif",
+  };
+}
+
+/** Uppercase headings: only a heavy grotesk heading face (or a voice set in capitals) at UPPERCASE_MIN_WEIGHT or more. */
 export function uppercaseAllowed(pairId: string, weight: number): boolean {
   const pair = FONT_PAIRS.find((p) => p.id === pairId);
-  return !!pair && HEAVY_GROTESKS.includes(pair.heading.family) && weight >= UPPERCASE_MIN_WEIGHT;
+  const voice = TYPE_VOICES.find((v) => v.pair === pairId && v.headingCase === "uppercase");
+  return ((!!pair && HEAVY_GROTESKS.includes(pair.heading.family)) || !!voice) && weight >= UPPERCASE_MIN_WEIGHT;
 }
 
 // ---------- Compatibility rules ----------

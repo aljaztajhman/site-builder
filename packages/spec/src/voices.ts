@@ -35,7 +35,7 @@ export const TYPE_VOICES: readonly TypeVoice[] = [
   { id: "didone", label: "High-contrast didone", class: "didone", pair: "bodoni-albert-sans", headingWeight: 500, headingTracking: -0.02, headingCase: "normal", baseFontSize: 17, scale: 1.414, tone: ["quiet", "new"] },
   { id: "slab", label: "Clarendon slab", class: "slab", pair: "besley-work-sans", headingWeight: 700, headingTracking: -0.01, headingCase: "normal", baseFontSize: 17, scale: 1.333, tone: ["warm", "loud", "old"] },
   { id: "wide", label: "Wide grotesque", class: "wide", pair: "krona-karla", headingWeight: 400, headingTracking: -0.02, headingCase: "normal", baseFontSize: 17, scale: 1.25, tone: ["loud", "new"] },
-  { id: "geometric", label: "Tracked geometric capitals", class: "geometric", pair: "jost-literata", headingWeight: 500, headingTracking: 0.06, headingCase: "uppercase", baseFontSize: 18, scale: 1.333, tone: ["exact", "quiet", "new"] },
+  { id: "geometric", label: "Tracked geometric capitals", class: "geometric", pair: "jost-literata", headingWeight: 600, headingTracking: 0.06, headingCase: "uppercase", baseFontSize: 18, scale: 1.333, tone: ["exact", "quiet", "new"] },
 ];
 
 export function typeVoice(id: VoiceId): TypeVoice {

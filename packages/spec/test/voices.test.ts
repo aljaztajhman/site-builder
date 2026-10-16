@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Design, FONT_PAIRS, TYPE_VOICES, VOICE_PAIRS, applyVoice, findFontPair, fontPair, typeVoice, voiceOf } from "../src/index.ts";
+import { Design, FONT_PAIRS, typeSystem, uppercaseAllowed, TYPE_VOICES, VOICE_PAIRS, applyVoice, findFontPair, fontPair, typeVoice, voiceOf } from "../src/index.ts";
 import { golden } from "./helpers/composed.ts";
 
 describe("type voices (M1 type and details, docs/plans/m1-type-details.md)", () => {
@@ -43,6 +43,19 @@ describe("type voices (M1 type and details, docs/plans/m1-type-details.md)", () 
         scale: v.scale,
       });
       expect(voiceOf(out)).toBe(v.id);
+    }
+  });
+
+  it("gives each voice pair a type system of its own setting, so a voiced design passes the genome's type rules", () => {
+    for (const v of TYPE_VOICES) {
+      const ts = typeSystem(v.pair)!;
+      expect(ts, v.id).toBeDefined();
+      expect(v.headingWeight).toBeGreaterThanOrEqual(ts.weight[0]);
+      expect(v.headingWeight).toBeLessThanOrEqual(ts.weight[1]);
+      expect(v.headingTracking).toBeGreaterThanOrEqual(ts.tracking[0]);
+      expect(v.headingTracking).toBeLessThanOrEqual(ts.tracking[1]);
+      expect(ts.cases).toContain(v.headingCase);
+      if (v.headingCase === "uppercase") expect(uppercaseAllowed(v.pair, v.headingWeight), v.id).toBe(true);
     }
   });
 
