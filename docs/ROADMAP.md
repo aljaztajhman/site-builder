@@ -10,7 +10,7 @@ Written on 2026-10-16 from an inventory of TASKS.md (263 done, 158 open), HQ, do
 
 ## Now
 
-- **Current milestone:** M1 Design good enough. Design 5 Wave P ran on 2026-10-16 and **failed** the bar (variety 3/3/2 and 2/2/2; Review 50's overall dropped). Next: the owner decides the §6 plan (type voice, scale, CTA and chrome, imagery) that replaces U1–U5; meanwhile the headline-fitting defect and the open reviewer blockers.
+- **Current milestone:** M1 Design good enough. Wave P (layouts) failed the variety bar on 2026-10-16. The owner chose option A, type and details first (docs/plans/m1-type-details.md): built behind switches and rendered free on the 60 proof pages; next the owner's look at the sheets, then the ≈ €0.30 set round against the same bar.
 - **Owner, in parallel (long lead times):** register the company (M3), buy the platform domain (M5), find a lawyer for the legal pages (M3).
 - **Last updated:** 2026-10-16.
 
