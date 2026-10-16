@@ -595,5 +595,192 @@
         "headline": "Obvestilo"
       }
     }
+  },
+  "fizioterapija-pregib": {
+    "business": {
+      "name": "Fizioterapija Pregib",
+      "phone": "+38651555642",
+      "email": "tina@pregib.example",
+      "address": {
+        "street": "Glavni trg 9",
+        "postalCode": "8000",
+        "city": "Novo mesto"
+      },
+      "hours": {
+        "entries": [
+          {
+            "from": "mon",
+            "to": "fri",
+            "open": "07:00",
+            "close": "20:00"
+          }
+        ],
+        "note": "Samo po predhodnem naročilu."
+      },
+      "bookingUrl": "https://pregib.example/narocanje"
+    },
+    "images": [
+      {
+        "id": "img_01",
+        "origin": "client"
+      }
+    ],
+    "colors": {
+      "background": "#ffffff",
+      "surface": "#e6f2f0",
+      "text": "#10302d",
+      "muted": "#44605c",
+      "primary": "#0f6b63",
+      "onPrimary": "#ffffff",
+      "accent": "#de7b2d",
+      "border": "#cfe0dd",
+      "inverse": "#10302d",
+      "onInverse": "#e6f2f0",
+      "band": "#0f6b63",
+      "onBand": "#ffffff"
+    },
+    "brief": {
+      "summary": "Samostojna fizioterapevtska ambulanta v Novem mestu. Tina Zupan, dipl. fiziot., dela individualno: ena ura je namenjena samo enemu pacientu. Uporablja manualno terapijo, terapevtske vaje, dry needling in kinesio taping.",
+      "highlights": [
+        "Ena ura je samo za enega pacienta.",
+        "12 let dela v bolnišnici, zadnja štiri leta lastna ambulanta.",
+        "Napotnica ni potrebna, storitve so samoplačniške.",
+        "Vhod z dvorišča, 2. nadstropje.",
+        "Termin je mogoče rezervirati online ali po telefonu."
+      ],
+      "offerings": [
+        {
+          "group": "Obravnave",
+          "name": "Prva obravnava s pregledom",
+          "description": "Pregled in prva obravnava, 60 minut.",
+          "price": {
+            "amount": 55,
+            "from": false,
+            "unit": null
+          }
+        },
+        {
+          "group": "Obravnave",
+          "name": "Terapija",
+          "description": "Individualna terapija, 45 minut.",
+          "price": {
+            "amount": 45,
+            "from": false,
+            "unit": null
+          }
+        },
+        {
+          "group": "Obravnave",
+          "name": "Dry needling kot dodatek",
+          "description": "Dodatek k terapiji.",
+          "price": {
+            "amount": 30,
+            "from": false,
+            "unit": null
+          }
+        },
+        {
+          "group": "Paketi",
+          "name": "Paket 5 terapij",
+          "description": null,
+          "price": {
+            "amount": 200,
+            "from": false,
+            "unit": null
+          }
+        },
+        {
+          "group": "Metode",
+          "name": "Manualna terapija",
+          "description": null,
+          "price": null
+        },
+        {
+          "group": "Metode",
+          "name": "Terapevtske vaje",
+          "description": null,
+          "price": null
+        },
+        {
+          "group": "Metode",
+          "name": "Kinesio taping",
+          "description": null,
+          "price": null
+        }
+      ],
+      "facts": {
+        "people": [
+          {
+            "name": "Tina Zupan",
+            "role": "dipl. fiziot."
+          }
+        ]
+      }
+    },
+    "copy": {
+      "hero": {
+        "headline": "Ena ura je samo za enega pacienta",
+        "lead": "Tina Zupan, dipl. fiziot. Delam individualno, napotnica ni potrebna."
+      },
+      "services": {
+        "headline": "S čim ljudje najpogosteje pridejo"
+      },
+      "contact": {
+        "headline": "Kje sem",
+        "lead": "Ambulanta je na Glavnem trgu 9 v 2. nadstropju, vhod je z dvorišča."
+      },
+      "story": {
+        "headline": "Kako delam",
+        "lead": "Manualna terapija, terapevtske vaje, dry needling in kinesio taping."
+      },
+      "page-head": {
+        "headline": "Storitve in cenik",
+        "lead": "Vse storitve so samoplačniške, napotnica ni potrebna."
+      },
+      "call": {
+        "headline": "Termin si rezervirate na spletu",
+        "lead": "Delam samo po predhodnem naročilu, od ponedeljka do petka od 7.00 do 20.00."
+      },
+      "highlights": {
+        "headline": "V številkah"
+      },
+      "booking": {
+        "headline": "Izberite prost termin",
+        "lead": "Termin lahko rezervirate online kadarkoli, tudi zvečer, ali pa pokličete."
+      },
+      "prices": {
+        "headline": "Cenik"
+      },
+      "hours": {
+        "headline": "Delovni čas"
+      },
+      "faq": {
+        "headline": "Pogosta vprašanja"
+      },
+      "steps": {
+        "headline": "Potek"
+      },
+      "menu": {
+        "headline": "Ponudba"
+      },
+      "team": {
+        "headline": "Ekipa"
+      },
+      "gallery": {
+        "headline": "Fotografije"
+      },
+      "products": {
+        "headline": "Ponudba"
+      },
+      "rooms": {
+        "headline": "Sobe"
+      },
+      "area": {
+        "headline": "Območje"
+      },
+      "notice": {
+        "headline": "Obvestilo"
+      }
+    }
   }
 }
