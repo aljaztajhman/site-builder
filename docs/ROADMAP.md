@@ -10,7 +10,7 @@ Written on 2026-10-16 from an inventory of TASKS.md (263 done, 158 open), HQ, do
 
 ## Now
 
-- **Current milestone:** M1 Design good enough. Wave P (layouts) failed the variety bar on 2026-10-16. The owner chose option A, type and details first (docs/plans/m1-type-details.md): built behind switches and rendered free on the 60 proof pages; next the owner's look at the sheets, then the ≈ €0.30 set round against the same bar.
+- **Current milestone:** M1 Design good enough. Two cheap proofs failed the variety bar on 2026-10-16: Wave P (layouts) and type and details (docs/plans/m1-type-details.md; overall recovered to 3, variety still 2–3). Next: the owner decides option B (pictures lead, no text-only first screens) and the phone bar overlap.
 - **Owner, in parallel (long lead times):** register the company (M3), buy the platform domain (M5), find a lawyer for the legal pages (M3).
 - **Last updated:** 2026-10-16.
 

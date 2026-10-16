@@ -1,0 +1,102 @@
+{
+  "set": "review50-details",
+  "reviewer": "gpt",
+  "model": "openai/gpt-6.1-sol",
+  "pages": [
+    "avto-kovac-gen",
+    "avto-kovac-regen",
+    "avtoservis-mrak-gen",
+    "avtoservis-mrak-regen",
+    "brivnica-kos-gen",
+    "brivnica-kos-regen",
+    "cvetlicarna-marjetica-gen",
+    "cvetlicarna-marjetica-regen",
+    "elektro-zupan-gen",
+    "elektro-zupan-regen",
+    "fizioterapija-pregib-gen",
+    "fizioterapija-pregib-regen",
+    "frizerski-salon-mia-gen",
+    "frizerski-salon-mia-regen",
+    "frizerstvo-lana-gen",
+    "frizerstvo-lana-regen",
+    "gostilna-pri-mostu-gen",
+    "gostilna-pri-mostu-regen",
+    "gostilna-zlata-zlica-gen",
+    "gostilna-zlata-zlica-regen",
+    "gostisce-na-gricu-gen",
+    "gostisce-na-gricu-regen",
+    "instalacije-rebernik-gen",
+    "instalacije-rebernik-regen",
+    "instrukcije-pia-gen",
+    "instrukcije-pia-regen",
+    "karoserija-hribar-gen",
+    "karoserija-hribar-regen",
+    "kljucavnicarstvo-hrovat-gen",
+    "kljucavnicarstvo-hrovat-regen",
+    "kmetija-grabnar-gen",
+    "kmetija-grabnar-regen",
+    "mizarstvo-lesnik-gen",
+    "mizarstvo-lesnik-regen",
+    "pekarna-kvas-gen",
+    "pekarna-kvas-regen",
+    "pizzeria-oljka-gen",
+    "pizzeria-oljka-regen",
+    "prevajanje-kolar-gen",
+    "prevajanje-kolar-regen",
+    "racunovodstvo-seliskar-gen",
+    "racunovodstvo-seliskar-regen",
+    "salon-tina-gen",
+    "salon-tina-regen",
+    "trgovina-oljka-in-sol-gen",
+    "trgovina-oljka-in-sol-regen",
+    "vulkanizer-zorman-gen",
+    "vulkanizer-zorman-regen",
+    "zobozdravstvo-lebar-gen",
+    "zobozdravstvo-lebar-regen"
+  ],
+  "status": "ok",
+  "answer": {
+    "sameness": "The set repeatedly cycles through a small family of compositions: oversized heading low on the left with a short paragraph high on the right; heading beside a narrow photograph with a drop-cap paragraph underneath; image above a dark title band; and a rectangular photo collage with one coloured headline tile. The same high-contrast serif, condensed uppercase display type and heavy sans-serif recur across unrelated trades. Navy, burgundy, mustard, forest green and cream provide most of the differentiation. Thin mastheads, small wordmarks, rectangular call buttons, pale address strips and opening-hours tables repeat throughout. Several unrelated businesses share the same car-on-a-lift or leafy",
+    "recurringIssues": [
+      "Photography sometimes contradicts the business: vineyard scenery fronts tyre services, and a landscape substitutes for evidence of woodworking.",
+      "Large blank desktop areas repeatedly separate headlines, supporting text and actions without creating a convincing hierarchy.",
+      "Shared photographs across different businesses make the portfolio feel assembled rather than individually art-directed.",
+      "Oversized headings wrap into long, awkward stacks on phones, particularly with condensed capitals and widely spaced uppercase lettering.",
+      "Mobile headers often stack navigation, phone details, directions and address bands before the main message, consuming valuable first-screen space.",
+      "Repeated fixed mobile action bars visibly sit over text or imagery near the bottom of the screen.",
+      "Supporting text, navigation and several wordmarks are too small or too low-contrast relative to the dominant headings."
+    ],
+    "overall": 3,
+    "variety": 2,
+    "best": [
+      {
+        "id": "salon-tina-regen",
+        "why": "The large finished-hairstyle photograph supplies relevant visual proof, while the muted burgundy header and condensed heading create a coherent composition on both screen sizes."
+      },
+      {
+        "id": "trgovina-oljka-in-sol-regen",
+        "why": "Warm colours and a varied arrangement of shop and product photographs communicate a tangible retail identity rather than relying on typography alone."
+      },
+      {
+        "id": "pekarna-kvas-gen",
+        "why": "Bread, pastry and preparation photographs work together with the warm brown palette and bold headline tile to give the bakery an immediate, appetising presence."
+      }
+    ],
+    "weakest": [
+      {
+        "id": "vulkanizer-zorman-regen",
+        "why": "The dominant vineyard photograph makes the page look like a tourism or wine business, leaving the tyre-service identity almost entirely dependent on the heading."
+      },
+      {
+        "id": "mizarstvo-lesnik-regen",
+        "why": "A generic mountain landscape occupies the main image position without showing furniture, materials or craft, wasting the page's strongest opportunity for differentiation."
+      },
+      {
+        "id": "elektro-zupan-gen",
+        "why": "The desktop hero is largely empty, with an isolated upper-right paragraph and a headline pushed to the bottom, while mobile falls back on oversized typography and a year counter."
+      }
+    ],
+    "oneChange": "Make a business-specific visual concept mandatory before selecting a layout: require relevant work, products or premises to determine the hero composition instead of rotating businesses through the same preset structures.",
+    "summary": "This is a competent template-shop portfolio, not yet a distinctive studio portfolio. Colour and headline styles change more than the underlying design decisions. The strongest pages show relevant products, results and places; the weakest replace that evidence with empty space or unrelated scenery. Mobile layouts generally remain readable, but repeated utility stacks, tall headings and floating action bars make them feel mechanically adapted. Build each homepage around what customers need to see from that particular business, and let that evidence shape the layout."
+  }
+}

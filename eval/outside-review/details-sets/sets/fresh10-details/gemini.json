@@ -1,0 +1,60 @@
+{
+  "set": "fresh10-details",
+  "reviewer": "gemini",
+  "model": "google/gemini-4-argon",
+  "pages": [
+    "atelje-bergant",
+    "kolesarski-servis-ovinek",
+    "optika-jasna",
+    "pasji-salon-kodra",
+    "pivovarna-rov",
+    "plesna-sola-takt",
+    "sirarna-pr-simnu",
+    "steklarstvo-vrhovnik",
+    "urarstvo-tic",
+    "vinarstvo-pinteric"
+  ],
+  "status": "ok",
+  "answer": {
+    "sameness": "Instead of one universal template, the studio relies on four rigid micro-templates repeated in pairs: 1) 'atelje-bergant' and 'urarstvo-tic' share the exact same imageless layout (top-right intro paragraph, huge bottom-left headline, full-width tinted address bar); 2) 'kolesarski-servis-ovinek' and 'vinarstvo-pinteric' use identical wide photo strips over dark banners; 3) 'sirarna-pr-simnu' and 'steklarstvo-vrhovnik' use the exact same right-aligned photo with an overlapping white headline box. Every single page uses the identical pill-shaped 'Pokličite' button with the same phone icon, and mobile views repeatedly rely on the same fixed bottom action bars.",
+    "recurringIssues": [
+      "Floating bottom action buttons on mobile collide directly with text and headings in 'kolesarski-servis-ovinek', 'pivovarna-rov', and 'steklarstvo-vrhovnik'.",
+      "Complete absence of visual imagery on 'atelje-bergant', 'plesna-sola-takt', and 'urarstvo-tic' makes the pages look unfinished and uninviting.",
+      "Awkwardly placed AI-generation disclaimer text ('Slike na tej strani so ustvarjene z umetno inteligenco') leaks into the mobile hero viewports.",
+      "Long email addresses wrap poorly on narrow screens, leaving a single orphaned character on a new line in 'plesna-sola-takt'.",
+      "Desktop compositions on text-only pages have vast, uncalibrated empty spaces that feel like missing assets rather than intentional minimalism."
+    ],
+    "overall": 3,
+    "variety": 3,
+    "best": [
+      {
+        "id": "optika-jasna",
+        "why": "Editorial layout with a pleasant mint palette, refined serif typography, and a well-proportioned vertical image that translates cleanly to mobile."
+      },
+      {
+        "id": "sirarna-pr-simnu",
+        "why": "Warm, appetizing photography paired with a strong overlapping headline box and a cohesive burgundy color scheme."
+      },
+      {
+        "id": "kolesarski-servis-ovinek",
+        "why": "Strong industrial character on desktop with bold condensed typography and an authentic, close-up mechanical photo."
+      }
+    ],
+    "weakest": [
+      {
+        "id": "plesna-sola-takt",
+        "why": "Completely devoid of visual energy or dance imagery, looking like a raw contact directory with a broken email wrap on mobile."
+      },
+      {
+        "id": "atelje-bergant",
+        "why": "An architecture studio homepage with zero photography or drawings, relying on a disjointed text-only layout with vast empty space."
+      },
+      {
+        "id": "pivovarna-rov",
+        "why": "The tiny, awkwardly cropped square photo gets lost in a sea of mustard yellow on desktop and collides with the floating CTA on mobile."
+      }
+    ],
+    "oneChange": "Stop cloning layouts in exact pairs and ensure every homepage—especially visual trades like architecture and dance—features strong, well-integrated photography while fixing the mobile floating CTA overlap bug.",
+    "summary": "Your studio avoids the trap of using a single master template for everything, and your typography and color palettes are thoughtfully chosen for each trade. However, you are cloning exact layouts in pairs (Bergant/Tič, Ovinek/Pinterič, Šimnu/Vrhovnik), which exposes a template-driven workflow when viewed as a portfolio. Furthermore, launching websites for visual businesses like an architect or a dance school with zero photography makes them look unfinished. Finally, you have a critical responsive bug: your floating mobile call buttons cover up body text and headings on multiple sites. Fix the mobile overlaps, require strong imagery on every site, and break up the cloned layout pairs."
+  }
+}
