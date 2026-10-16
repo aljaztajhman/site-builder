@@ -9,7 +9,7 @@ export default definePreset({
   props: {
     intent: "hero",
     width: "full",
-    minHeight: "l",
+    minHeight: "tall",
     rows: 5,
     gap: 1,
     background: [
@@ -18,9 +18,9 @@ export default definePreset({
     ],
     elements: [
       { id: "e_title", kind: "heading", text: "{copy.headline}", level: 1, size: 6, weight: 800, desk: { col: 1, span: 5, row: 1, rowSpan: 2, alignY: "end" }, phone: { order: 0, span: "full" } },
-      { id: "e_p1", kind: "image", image: "{photos[0]}", ratio: "fill", desk: { col: 6, span: 7, row: 1, rowSpan: 2, bleedX: "end" }, phone: { order: 4, span: "bleed" } },
-      { id: "e_p2", kind: "image", image: "{photos[1]}", ratio: "fill", desk: { col: 1, span: 3, row: 3, rowSpan: 3, bleedX: "start" }, phone: { order: 5, span: "half" } },
-      { id: "e_p3", kind: "image", image: "{photos[2]}", ratio: "fill", desk: { col: 4, span: 5, row: 3, rowSpan: 3 }, phone: { order: 6, span: "half" } },
+      { id: "e_p1", kind: "image", image: "{photos[0]}", ratio: "fill", crop: "thirds", desk: { col: 6, span: 7, row: 1, rowSpan: 2, bleedX: "end" }, phone: { order: 4, span: "bleed" } },
+      { id: "e_p2", kind: "image", image: "{photos[1]}", ratio: "fill", crop: "thirds", desk: { col: 1, span: 3, row: 3, rowSpan: 3, bleedX: "start" }, phone: { order: 5, span: "tile" } },
+      { id: "e_p3", kind: "image", image: "{photos[2]}", ratio: "fill", crop: "thirds", desk: { col: 4, span: 5, row: 3, rowSpan: 3 }, phone: { order: 6, span: "tile" } },
       { id: "e_lead", kind: "text", paragraphs: ["{copy.lead}"], desk: { col: 9, span: 4, row: 3, alignY: "start" }, phone: { order: 3, span: "full" } },
       { id: "e_where", kind: "text", paragraphs: ["{business.street}, {business.town}"], desk: { col: 9, span: 4, row: 4, alignY: "end" }, phone: { order: 2, span: "full" } },
       { id: "e_call", kind: "action", action: "call", label: "Pokličite", style: "primary", desk: { col: 9, span: 4, row: 5, alignY: "end" }, phone: { order: 1, span: "full" } },
