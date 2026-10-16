@@ -1,0 +1,102 @@
+{
+  "set": "review50-proof",
+  "reviewer": "claude",
+  "model": "claude-fable-5-1",
+  "pages": [
+    "avto-kovac-gen",
+    "avto-kovac-regen",
+    "avtoservis-mrak-gen",
+    "avtoservis-mrak-regen",
+    "brivnica-kos-gen",
+    "brivnica-kos-regen",
+    "cvetlicarna-marjetica-gen",
+    "cvetlicarna-marjetica-regen",
+    "elektro-zupan-gen",
+    "elektro-zupan-regen",
+    "fizioterapija-pregib-gen",
+    "fizioterapija-pregib-regen",
+    "frizerski-salon-mia-gen",
+    "frizerski-salon-mia-regen",
+    "frizerstvo-lana-gen",
+    "frizerstvo-lana-regen",
+    "gostilna-pri-mostu-gen",
+    "gostilna-pri-mostu-regen",
+    "gostilna-zlata-zlica-gen",
+    "gostilna-zlata-zlica-regen",
+    "gostisce-na-gricu-gen",
+    "gostisce-na-gricu-regen",
+    "instalacije-rebernik-gen",
+    "instalacije-rebernik-regen",
+    "instrukcije-pia-gen",
+    "instrukcije-pia-regen",
+    "karoserija-hribar-gen",
+    "karoserija-hribar-regen",
+    "kljucavnicarstvo-hrovat-gen",
+    "kljucavnicarstvo-hrovat-regen",
+    "kmetija-grabnar-gen",
+    "kmetija-grabnar-regen",
+    "mizarstvo-lesnik-gen",
+    "mizarstvo-lesnik-regen",
+    "pekarna-kvas-gen",
+    "pekarna-kvas-regen",
+    "pizzeria-oljka-gen",
+    "pizzeria-oljka-regen",
+    "prevajanje-kolar-gen",
+    "prevajanje-kolar-regen",
+    "racunovodstvo-seliskar-gen",
+    "racunovodstvo-seliskar-regen",
+    "salon-tina-gen",
+    "salon-tina-regen",
+    "trgovina-oljka-in-sol-gen",
+    "trgovina-oljka-in-sol-regen",
+    "vulkanizer-zorman-gen",
+    "vulkanizer-zorman-regen",
+    "zobozdravstvo-lebar-gen",
+    "zobozdravstvo-lebar-regen"
+  ],
+  "status": "ok",
+  "answer": {
+    "sameness": "Five hero recipes rotate across all 50: (1) big serif/sans headline left, photo block right, small underlined 'Pokličite' link; (2) tinted top band with address, headline, photo below; (3) full-bleed photo with dark navy/black caption bar; (4) headline plus grey 'Naslov/Telefon/E-pošta' contact table with hours rules (cvetlicarna, gostilna-pri-mostu, salon-tina, oljka-in-sol, kljucavnicarstvo, instrukcije, instalacije); (5) text-only hero with dropped-cap paragraph. Type is two families only: one high-contrast serif and one grotesk at the same weights and sizes. Palettes repeat: navy, wine red, mustard, forest green, black. Same workshop/interior photo crops, 'Delamo od leta' year block, ri…",
+    "recurringIssues": [
+      "Headlines run off the first screen or wrap mid-word on desktop (instalacije-rebernik-regen, racunovodstvo-seliskar-regen, instrukcije-pia-regen, prevajanje-kolar-gen, karoserija-hribar-gen).",
+      "Large dead white areas with content shoved to one edge (elektro-zupan-gen, pizzeria-oljka-gen, instalacije-rebernik-regen, mizarstvo-lesnik-gen).",
+      "Tiny underlined text link as the only CTA; no visual call to action in most heroes.",
+      "Contact-table hero (name/phone/email rows) makes several services look like a directory listing rather than a designed page.",
+      "Drop-cap paragraph with inconsistent wrap looks like a template artefact repeated across businesses.",
+      "Photos stacked below the fold on phones leave text-only first screens for many pages.",
+      "Same dark caption-bar-under-photo block reused regardless of trade."
+    ],
+    "overall": 3,
+    "variety": 2,
+    "best": [
+      {
+        "id": "gostisce-na-gricu-regen",
+        "why": "Overlapping headline card on a warm photo, serif type suits the inn, confident composition on both screens."
+      },
+      {
+        "id": "pekarna-kvas-regen",
+        "why": "Full-bleed bread photo with a stacked low-left headline; feels like a bakery, not a template, and holds on phone."
+      },
+      {
+        "id": "fizioterapija-pregib-regen",
+        "why": "Clean green band, right-sized headline and treatment-room photo give a calm, specific clinical identity."
+      }
+    ],
+    "weakest": [
+      {
+        "id": "instalacije-rebernik-regen",
+        "why": "Giant headline is clipped mid-word on desktop and sits in a wasteland of white with text jammed into the right corner."
+      },
+      {
+        "id": "racunovodstvo-seliskar-regen",
+        "why": "Headline breaks 'Računovo-dstvo' and overflows the screen; stray comma at line start, hero cut off."
+      },
+      {
+        "id": "pizzeria-oljka-gen",
+        "why": "Nearly empty first screen, no image, headline alone in a grey strip; could be any business."
+      }
+    ],
+    "oneChange": "Stop using a fixed set of five hero recipes with two typefaces; give each trade its own hero built around a strong, properly fitted headline (no clipping, no mid-word breaks) and a real button CTA, so the layout, type and image are chosen for the business rather than swapped in.",
+    "summary": "Competent but formulaic. The 50 homepages are visibly five layouts, two fonts and five colours in rotation; the regen pages are sometimes better (bakery, inn, physio) but also carry the worst defects: headlines that clip off-screen or break inside words, huge empty white areas, and a weak underlined text link as the only call to action. The contact-table hero makes several services read like a listing. Photos are decent but their crops and placements repeat. Fix the type fitting first, then force each page to find its own composition. Right now a business owner would recognise the neighbour's site in their own."
+  }
+}

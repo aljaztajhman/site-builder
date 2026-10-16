@@ -1,0 +1,61 @@
+{
+  "set": "fresh10-proof",
+  "reviewer": "gpt",
+  "model": "openai/gpt-6.1-sol",
+  "pages": [
+    "atelje-bergant",
+    "kolesarski-servis-ovinek",
+    "optika-jasna",
+    "pasji-salon-kodra",
+    "pivovarna-rov",
+    "plesna-sola-takt",
+    "sirarna-pr-simnu",
+    "steklarstvo-vrhovnik",
+    "urarstvo-tic",
+    "vinarstvo-pinteric"
+  ],
+  "status": "ok",
+  "answer": {
+    "sameness": "The set uses a small family of hero templates rather than ten distinct identities. Atelje Bergant and Urarstvo Tič share a largely empty white desktop hero, upper-right description, oversized lower-left headline and pale address strip. Ovinek and Pinterič both place a wide photo above a dark headline panel. Sirarna and Steklarstvo use left-hand copy beside a large right-hand product image. Heavy black sans-serif headlines alternate with a similarly heavy traditional serif; small wordmarks, thin header rules, underlined links and compact rectangular buttons recur throughout. Mobile layouts mostly become image-and-headline stacks with repeated call/directions bars. The mustard, navy, burgundy,",
+    "recurringIssues": [
+      "Several desktop heroes have large unproductive blank areas, most noticeably Bergant, Tič and Takt, without imagery or detail strong enough to justify the space.",
+      "Repeated hero structures and typography make unrelated businesses look like variants of the same studio system.",
+      "Desktop calls to action, navigation and supporting text are frequently too small relative to the dominant headlines.",
+      "Mobile contact controls compete with content; Steklarstvo's floating buttons visibly cover the introductory text.",
+      "Photography is relevant but mostly generic product illustration, offering little distinctive sense of the people, premises or craft behind each business.",
+      "Narrow mobile headline columns create abrupt, heavy stacks on Ovinek, Kodra and Steklarstvo."
+    ],
+    "overall": 3,
+    "variety": 3,
+    "best": [
+      {
+        "id": "optika-jasna",
+        "why": "The light blue field, restrained typography, navy header and well-framed glasses image form the most coherent, distinctive identity across both screen sizes."
+      },
+      {
+        "id": "sirarna-pr-simnu",
+        "why": "Warm product photography, burgundy accents and substantial serif typography create a convincing craft-food character, with a strong overlapping desktop composition."
+      },
+      {
+        "id": "pasji-salon-kodra",
+        "why": "The terracotta contact band, expressive serif headline and grooming photograph establish a recognizable personality that carries onto mobile."
+      }
+    ],
+    "weakest": [
+      {
+        "id": "atelje-bergant",
+        "why": "The desktop screen spends much of its space on emptiness while showing no architectural work, and its composition is closely repeated by the watchmaker."
+      },
+      {
+        "id": "urarstvo-tic",
+        "why": "A generic serif headline and address strip cannot compensate for the empty desktop composition or the absence of visible watches and craftsmanship."
+      },
+      {
+        "id": "plesna-sola-takt",
+        "why": "The oversized text column and administrative contact table feel more like an information sheet than a dance school, with little visual energy on either device."
+      }
+    ],
+    "oneChange": "Require a business-specific visual concept before selecting a layout: commission or select distinctive imagery, then build the hero composition and typography around that material rather than reusing the same hero families.",
+    "summary": "This is a competent template-shop batch, not yet a distinctive studio portfolio. There is genuine palette and typographic variation, and the optician, cheesemaker and dog groomer have credible visual personalities. But repeated hero structures, undersized desktop controls and several conspicuously empty screens weaken the whole set. Mobile generally retains a clear hierarchy, though floating contact controls sometimes intrude. The next improvement should be stronger business-specific art direction—not more colour variations—so each homepage shows something memorable about the actual business."
+  }
+}

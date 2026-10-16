@@ -1,4 +1,4 @@
-import type { ColorRole, ComposedProps } from "@sb/spec";
+import { deskColumns, type ColorRole, type ComposedProps } from "@sb/spec";
 
 /** One element of a composed section, and one kind of them. */
 export type El = ComposedProps["elements"][number];
@@ -37,10 +37,13 @@ function rect(el: El) {
   return { c0: col, c1: col + span - 1, r0: row, r1: row + rowSpan - 1 };
 }
 
-/** Whether two elements' desktop rectangles share a grid cell. */
+/**
+ * Whether two elements' desktop rectangles share a grid cell. A shift of REACH_SHIFT steps (@sb/spec deskColumns) reaches
+ * into the next column: a split headline shifted over a photo's edge is over the photo, as the guards (G3, G26) count it.
+ */
 export function overlaps(a: El, b: El): boolean {
-  const p = rect(a);
-  const q = rect(b);
+  const p = { ...rect(a), ...deskColumns(a.desk) };
+  const q = { ...rect(b), ...deskColumns(b.desk) };
   return p.c0 <= q.c1 && q.c0 <= p.c1 && p.r0 <= q.r1 && q.r0 <= p.r1;
 }
 
@@ -94,7 +97,7 @@ export const PHOTO_FRAME: Record<ElOf<"photos">["arrangement"], { desk: number; 
  */
 export function imageSizes(width: ComposedProps["width"], el: El, part: { desk: number; phone: number } = { desk: 1, phone: 1 }): string {
   const span = el.desk.span * part.desk;
-  const base = el.phone.span === "half" ? "(100vw - 3rem) / 2" : el.phone.span === "inset" ? "(100vw - 2rem) * 0.82" : "100vw - 2rem";
+  const base = el.phone.span === "tile" ? "100vw / 2" : el.phone.span === "half" ? "(100vw - 3rem) / 2" : el.phone.span === "inset" ? "(100vw - 2rem) * 0.82" : "100vw - 2rem";
   const phone = part.phone === 1 ? `calc(${base})` : `calc((${base}) * ${part.phone})`;
   const rem = (n: number) => `${Math.round(n * 100) / 100}rem`;
   const cols = Math.round(span * 100) / 100;
@@ -144,22 +147,30 @@ export function insideField(el: El, f: LayerOf<"field">, rows: number): boolean 
   return e.c0 >= r.c0 && e.c1 <= r.c1 && e.r0 >= r.r0 && e.r1 <= r.r1;
 }
 
+/** Phone places two to a row: half, and tile (half without the gap and the side padding). */
+const pairs = (el: El): boolean => el.phone.span === "half" || el.phone.span === "tile";
+
 /**
  * The phone rows (1-based, inclusive) each element shown on phones takes on the 4-column phone grid, as composed.css
- * places them: in reading order, a half element takes two columns and the rest a full row (the grid's auto-placement).
+ * places them: in reading order, a half or tile element takes two columns and the rest a full row (the grid's auto-placement).
  */
 export function phoneRows(ordered: readonly El[]): Map<string, number> {
-  const out = new Map<string, number>();
+  return new Map([...phoneCells(ordered)].map(([id, c]) => [id, c.row]));
+}
+
+/** Each shown element's phone row and its first column (0 or 2), as phoneRows places them. */
+export function phoneCells(ordered: readonly El[]): Map<string, { row: number; col: number }> {
+  const out = new Map<string, { row: number; col: number }>();
   let row = 1;
   let col = 0;
   for (const el of ordered) {
     if (el.phone.hidden) continue;
-    const w = el.phone.span === "half" ? 2 : 4;
+    const w = pairs(el) ? 2 : 4;
     if (col + w > 4) {
       row++;
       col = 0;
     }
-    out.set(el.id, row);
+    out.set(el.id, { row, col });
     col += w;
     if (col === 4) {
       row++;
@@ -171,6 +182,53 @@ export function phoneRows(ordered: readonly El[]): Map<string, number> {
 
 /** The number of phone rows the elements shown on phones fill. */
 export const phoneRowCount = (rows: ReadonlyMap<string, number>): number => Math.max(0, ...rows.values());
+
+/**
+ * Where each phone tile sits in its 2-column mosaic (composed.css .cx-ps-tile): the side of the screen it runs to, and
+ * whether the phone row above holds a tile too (then it closes the gap between the two rows).
+ */
+export interface TileEdge {
+  side: "l" | "r";
+  joined: boolean;
+}
+export function tileEdges(ordered: readonly El[]): Map<string, TileEdge> {
+  const cells = phoneCells(ordered);
+  const tileRows = new Set<number>();
+  for (const el of ordered) {
+    const c = cells.get(el.id);
+    if (el.phone.span === "tile" && c) tileRows.add(c.row);
+  }
+  const out = new Map<string, TileEdge>();
+  for (const el of ordered) {
+    const c = cells.get(el.id);
+    if (el.phone.span !== "tile" || !c) continue;
+    out.set(el.id, { side: c.col === 0 ? "l" : "r", joined: tileRows.has(c.row - 1) });
+  }
+  return out;
+}
+
+/**
+ * Each rendered tile's edge, by its element (the section sets them from tileEdges before its elements render; placement
+ * reads them). Keyed by the element object, so it holds only for the render that set it and frees itself with the spec.
+ */
+export const TILE_EDGES = new WeakMap<El, TileEdge>();
+
+/**
+ * The custom properties of an image cropped on thirds (image `crop: "thirds"`, Design 5): the focal point (--fx, --fy,
+ * 0–1 of the photo), the third line each goes to (--tx, --ty: ⅓ or ⅔, the nearer; a point at the very centre goes to ⅓)
+ * and the photo's width / height (--ia). composed.css works the object-position out from the frame's own size
+ * (container units), so it is exact on every screen and for a "fill" frame too: on the axis the photo overflows, the
+ * offset t·frame − f·photo, clamped so the photo still covers the frame (the focal point then stays inside it). Without
+ * a focal point the photo's centre goes to the left third and stays centred vertically. Browsers without container
+ * units show the focal point as it is (composed.css).
+ */
+export function thirdsVars(focal: { x: number; y: number } | undefined, photo: { width: number; height: number }): Record<string, number> {
+  const third = (f: number) => (f > 0.5 ? 2 / 3 : 1 / 3);
+  const r = (v: number) => Math.round(v * 1000) / 1000;
+  const fx = focal?.x ?? 0.5;
+  const fy = focal?.y ?? 0.5;
+  return { "--fx": r(fx), "--fy": r(fy), "--tx": r(third(fx)), "--ty": r(focal ? third(fy) : fy), "--ia": r(photo.width / photo.height) };
+}
 
 /**
  * What the header sits on when the section opens the page with `headerOver`, on desktop and on phones: the photo's scrim

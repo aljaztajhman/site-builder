@@ -62,6 +62,8 @@ export const COMPOSED_LAYOUT_KEYS: ReadonlySet<string> = new Set([
   "color",
   "bleedX",
   "bleedY",
+  // Design 5 Wave P: an image's crop ("thirds").
+  "crop",
   "tilt",
   "drawing",
   "separator",

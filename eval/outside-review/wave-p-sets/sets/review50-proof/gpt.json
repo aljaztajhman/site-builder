@@ -1,0 +1,102 @@
+{
+  "set": "review50-proof",
+  "reviewer": "gpt",
+  "model": "openai/gpt-6.1-sol",
+  "pages": [
+    "avto-kovac-gen",
+    "avto-kovac-regen",
+    "avtoservis-mrak-gen",
+    "avtoservis-mrak-regen",
+    "brivnica-kos-gen",
+    "brivnica-kos-regen",
+    "cvetlicarna-marjetica-gen",
+    "cvetlicarna-marjetica-regen",
+    "elektro-zupan-gen",
+    "elektro-zupan-regen",
+    "fizioterapija-pregib-gen",
+    "fizioterapija-pregib-regen",
+    "frizerski-salon-mia-gen",
+    "frizerski-salon-mia-regen",
+    "frizerstvo-lana-gen",
+    "frizerstvo-lana-regen",
+    "gostilna-pri-mostu-gen",
+    "gostilna-pri-mostu-regen",
+    "gostilna-zlata-zlica-gen",
+    "gostilna-zlata-zlica-regen",
+    "gostisce-na-gricu-gen",
+    "gostisce-na-gricu-regen",
+    "instalacije-rebernik-gen",
+    "instalacije-rebernik-regen",
+    "instrukcije-pia-gen",
+    "instrukcije-pia-regen",
+    "karoserija-hribar-gen",
+    "karoserija-hribar-regen",
+    "kljucavnicarstvo-hrovat-gen",
+    "kljucavnicarstvo-hrovat-regen",
+    "kmetija-grabnar-gen",
+    "kmetija-grabnar-regen",
+    "mizarstvo-lesnik-gen",
+    "mizarstvo-lesnik-regen",
+    "pekarna-kvas-gen",
+    "pekarna-kvas-regen",
+    "pizzeria-oljka-gen",
+    "pizzeria-oljka-regen",
+    "prevajanje-kolar-gen",
+    "prevajanje-kolar-regen",
+    "racunovodstvo-seliskar-gen",
+    "racunovodstvo-seliskar-regen",
+    "salon-tina-gen",
+    "salon-tina-regen",
+    "trgovina-oljka-in-sol-gen",
+    "trgovina-oljka-in-sol-regen",
+    "vulkanizer-zorman-gen",
+    "vulkanizer-zorman-regen",
+    "zobozdravstvo-lebar-gen",
+    "zobozdravstvo-lebar-regen"
+  ],
+  "status": "ok",
+  "answer": {
+    "sameness": "The set repeatedly cycles through a small library of compositions: oversized headline beside a narrow portrait photo and drop-cap paragraph; full-width photo above a dark headline panel; coloured headline tile within a photo collage; sparse white page with a low-positioned headline and small upper-right paragraph; and headline beside contact-and-hours tables. Heavy condensed sans-serif marks the trades, while the same bold editorial serif marks hospitality, beauty and retail. Navy, burgundy, mustard and pale sage recur as interchangeable accents. Thin headers, tiny underlined call links, address strips, rectangular buttons and mobile call/directions bars repeat almost everywhere. Workshop, l",
+    "recurringIssues": [
+      "Some imagery is visibly unrelated to the business: vineyard landscapes front tyre services, and a mountain landscape fronts a furniture maker.",
+      "Forced word breaks and oversized headlines damage readability, particularly in the electrical, accounting and body-repair pages.",
+      "Several desktop layouts leave large empty areas while compressing supporting information and actions into tiny text.",
+      "Photography is reused across different businesses, making ostensibly individual identities feel interchangeable.",
+      "Mobile pages often become long stacks of headline, address, description and image rather than deliberately recomposed first screens.",
+      "Persistent mobile action bars sometimes crowd or cover lower content, while competing call links add clutter.",
+      "Small wordmarks and generic typography provide little distinctive identity beyond the category colour."
+    ],
+    "overall": 2,
+    "variety": 2,
+    "best": [
+      {
+        "id": "brivnica-kos-regen",
+        "why": "The dark brown palette, substantial shaving-tool photograph and serif typography form a coherent barber identity that remains convincing on mobile."
+      },
+      {
+        "id": "pekarna-kvas-gen",
+        "why": "Bread, preparation and pastry photography give the desktop collage genuine product richness, with a warm palette and a clear mobile hierarchy."
+      },
+      {
+        "id": "zobozdravstvo-lebar-gen",
+        "why": "A prominent treatment-room image, restrained navy panel and accessible mobile contact-and-hours section make this one of the clearest, most credible executions."
+      }
+    ],
+    "weakest": [
+      {
+        "id": "racunovodstvo-seliskar-regen",
+        "why": "The desktop headline breaks words into awkward fragments and overwhelms the composition, while the generic desk photograph adds little identity."
+      },
+      {
+        "id": "vulkanizer-zorman-regen",
+        "why": "A dominant vineyard photograph communicates the wrong business, and the dark headline panel cannot compensate for that fundamental visual mismatch."
+      },
+      {
+        "id": "elektro-zupan-regen",
+        "why": "The relevant tool photograph is undermined by a cramped all-caps headline with conspicuous mid-word wrapping on both desktop and mobile."
+      }
+    ],
+    "oneChange": "Replace interchangeable hero presets with a business-specific art-direction requirement: each homepage must establish a distinctive composition around imagery that visibly belongs to that business, at both screen sizes.",
+    "summary": "There are competent individual screens, but the portfolio exposes a small template system rather than 50 considered identities. Colour changes and serif-versus-sans choices do too much of the differentiation. The strongest pages connect relevant photography, palette and hierarchy; the weakest combine unrelated landscapes, awkward headline wrapping and wasted desktop space. Mobile generally preserves access to contact actions, but often feels mechanically stacked. Raise the standard for business-specific visual direction before producing more variants."
+  }
+}

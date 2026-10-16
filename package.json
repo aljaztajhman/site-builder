@@ -37,6 +37,7 @@
     "references:okus": "tsx tools/eval/src/references.ts okus",
     "study": "tsx tools/eval/src/study.ts",
     "zero-to-live": "tsx tools/eval/src/zero-to-live.ts",
+    "structure-proof": "tsx tools/eval/src/structure-proof.ts",
     "variety": "tsx --env-file-if-exists=.env tools/eval/src/set-variety.ts",
     "variety:sheet": "tsx tools/eval/src/families-sheet.ts",
     "variety:compare": "tsx tools/eval/src/variety-compare.ts",

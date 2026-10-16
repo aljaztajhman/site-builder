@@ -10,7 +10,7 @@ Written on 2026-10-16 from an inventory of TASKS.md (263 done, 158 open), HQ, do
 
 ## Now
 
-- **Current milestone:** M1 Design good enough. Next: Design 5 Wave P, the proof (docs/plans/phase-layout-variety.md).
+- **Current milestone:** M1 Design good enough. Design 5 Wave P ran on 2026-10-16 and **failed** the bar (variety 3/3/2 and 2/2/2; Review 50's overall dropped). Next: the owner decides the §6 plan (type voice, scale, CTA and chrome, imagery) that replaces U1–U5; meanwhile the headline-fitting defect and the open reviewer blockers.
 - **Owner, in parallel (long lead times):** register the company (M3), buy the platform domain (M5), find a lawyer for the legal pages (M3).
 - **Last updated:** 2026-10-16.
 
@@ -28,6 +28,7 @@ Sites pass the three outside reviewers and the owner's eye, with a set of ten th
 
 Exit criteria:
 - [ ] Design 5 Wave P passes: set variety ≥ 3.5 from 2 of 3 reviewers on both proof sets, and the owner agrees on the contact sheets. If it fails, the plan switches to §6 of the direction (scale, type, second moment). M1 continues either way.
+  - 2026-10-16: **failed** (€0.21). fresh 10 variety 3/3/2, Review 50 2/2/2, Review 50 overall 3 → 2 for Gemini and GPT. eval/outside-review/wave-p-sets/README.md. The switch to §6 and what happens to the next criterion (U1–U9) is the owner's call.
 - [ ] Design 5 waves needed for launch are built and on. U1 is v22, the gate and the structures; U2 is the page gate on every path; U3–U5 bring presets, photo grade and the variety rule; U8 is chrome and the single-page nav; U9 is the AI caption. U6/U7 (studio wiring, hybrid designer) are parking lot, not M1.
 - [ ] Every open reviewer blocker is fixed in code, with a test:
   - AI label clipped by arched crops;

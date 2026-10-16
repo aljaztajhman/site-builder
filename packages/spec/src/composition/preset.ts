@@ -39,6 +39,13 @@ export type PresetProps = Slotted<z.input<typeof ComposedProps>>;
 /** Where elements move when one is dropped: dropped element id → { other element id → its new desktop place (merged) }. */
 export type PresetReflow = Readonly<Record<string, Readonly<Record<string, Partial<Place>>>>>;
 
+/**
+ * First-screen structures (Design 5, docs/plans/design-direction-2026-10.md §2). A hero preset names the one it builds;
+ * plain data for now (Wave P), checked against the geometry once `structureOf` exists (U1).
+ */
+export const STRUCTURES = ["poster", "band", "magazine", "strata", "mosaic", "field", "ledger", "split"] as const;
+export type Structure = (typeof STRUCTURES)[number];
+
 export interface CompositionPreset {
   /** `composition/<intent>/<name>`; the intent is props.intent. */
   id: string;
@@ -46,6 +53,8 @@ export interface CompositionPreset {
   tone?: Tone;
   /** Inventory tags: trades it fits (empty: any), stance ids, mood words read from the layout. */
   tags?: { trades?: readonly string[]; stances?: readonly string[]; mood?: readonly string[] };
+  /** Hero presets: the first-screen structure the layout builds. */
+  structure?: Structure;
   /** Slot names (without braces) that must have a value, else the preset can't be used for this business at all. */
   needs?: readonly string[];
   props: PresetProps;

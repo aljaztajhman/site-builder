@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { SiteSpec } from "./site.ts";
 import { VOCAB_KEY } from "./composition/vocab.ts";
-import { OWNER_ONLY, SYSTEM_ONLY } from "./common.ts";
+import { MODEL_VIEW, OWNER_ONLY, SYSTEM_ONLY } from "./common.ts";
 
 /**
  * JSON Schema export for the model. Structured outputs accept anyOf but not oneOf, and require
@@ -128,11 +128,14 @@ function normalise(v: unknown): unknown {
   if (!v || typeof v !== "object") return v;
   const out: Record<string, unknown> = {};
   for (const [k, x] of Object.entries(v)) {
-    if (k === "$schema") continue;
+    if (k === "$schema" || k === MODEL_VIEW) continue;
     // The model is never offered what only the owner sets: the union loses that member, the rest stays as it was.
     const kept = (k === "anyOf" || k === "oneOf") && Array.isArray(x) ? x.filter((o) => !ownerOnly(o)) : x;
     out[k === "oneOf" ? "anyOf" : k] = normalise(kept);
   }
+  // What the model is offered instead (MODEL_VIEW): those keys over the node's own, in the node's key order.
+  const view = (v as Record<string, unknown>)[MODEL_VIEW];
+  if (view && typeof view === "object") for (const [k, x] of Object.entries(view)) out[k] = x;
   // Nor what only the system sets (SYSTEM_ONLY): the property goes, and with it its place in `required`.
   const props = out.properties as Record<string, unknown> | undefined;
   if (props && typeof props === "object" && !Array.isArray(props)) {

@@ -122,6 +122,12 @@
 .cx--mh-screen {
   min-height: min(32rem, 80svh);
 }
+/* tall (Design 5, a full-bleed photo with its type band, a colour field): 55 % of a phone's screen, 80 % of a desktop's.
+   svh where the browser has it (the screen with its bars shown: no jump as they hide), vh before. */
+.cx--mh-tall {
+  min-height: 55vh;
+  min-height: 55svh;
+}
 
 /* Layers count in twos (G26 bug fix): an element is at 2 x layer + 1, one over a photo (cx-over, a backing panel) at
    2 x layer + 2, so over-photo text is on top of an image of its own layer that comes later in the DOM, and below the
@@ -168,6 +174,33 @@
   .cx-act .btn {
     width: 100%;
   }
+  /* Tile (Design 5, a mosaic): half the row, edge to edge. It runs over the container's padding to its screen edge
+     (cx-pt-l, cx-pt-r) and over half the gap to its neighbour, so two tiles share the row with no seam; under a row of
+     tiles it closes the gap above too (cx-pt-j). Square corners: tiles meet. */
+  .cx-el.cx-ps-tile {
+    --cx-tp: 1rem;
+    --cx-w: auto;
+    grid-column: span 2;
+    justify-self: stretch;
+    align-self: stretch;
+    border-radius: 0;
+  }
+  .cx-pt-l {
+    margin-left: calc(-1 * var(--cx-tp));
+    margin-right: calc(-0.5 * var(--cx-gap));
+  }
+  .cx-pt-r {
+    margin-left: calc(-0.5 * var(--cx-gap));
+    margin-right: calc(-1 * var(--cx-tp));
+  }
+  .cx-pt-j {
+    margin-top: calc(-1 * var(--cx-gap));
+  }
+}
+@media (min-width: 48rem) and (max-width: 63.999rem) {
+  .cx-el.cx-ps-tile {
+    --cx-tp: 2rem;
+  }
 }
 
 /* ---------- desktop: 12 columns, each element on its own place ---------- */
@@ -191,6 +224,10 @@
   /* The screen less the header (about 5 rem). */
   .cx--mh-screen {
     min-height: calc(100svh - 5rem);
+  }
+  .cx--mh-tall {
+    min-height: 80vh;
+    min-height: 80svh;
   }
   .cx-el {
     grid-column: var(--c) / span var(--s);
@@ -516,6 +553,25 @@ body:not([data-motif="plate"]) .cx-prices--plates .plate__eu {
 }
 .cx-r-fill {
   aspect-ratio: 4 / 3;
+}
+/* Crop on thirds (Design 5): the focal point (--fx, --fy) goes to its third line (--tx, --ty) of the frame, worked out
+   from the frame's own size (container units: exact on every screen and in a "fill" cell). On each axis the photo
+   (object-fit: cover, width / height --ia) is --cx-iw × --cx-ih; its offset is t·frame − f·photo, clamped so it still
+   covers the frame, which keeps the focal point inside it. Without container units: the focal point as it is. */
+.cx-img[data-crop="thirds"] {
+  --cx-op: calc(var(--fx) * 100%) calc(var(--fy) * 100%);
+}
+@supports (width: 1cqw) {
+  /* The picture is the container: it is placed absolutely over the frame, so its size is the frame's final one (a
+     stretched "fill" frame queried itself before the stretch, as 0 high). */
+  .cx-img[data-crop="thirds"] > .media {
+    container-type: size;
+  }
+  .cx-img[data-crop="thirds"] {
+    --cx-iw: max(100cqw, 100cqh * var(--ia));
+    --cx-ih: max(100cqh, 100cqw / var(--ia));
+    --cx-op: clamp(100cqw - var(--cx-iw), var(--tx) * 100cqw - var(--fx) * var(--cx-iw), 0px) clamp(100cqh - var(--cx-ih), var(--ty) * 100cqh - var(--fy) * var(--cx-ih), 0px);
+  }
 }
 @media (min-width: 64rem) {
   /* fill: the photo takes its cell, whatever rows the other elements make. */

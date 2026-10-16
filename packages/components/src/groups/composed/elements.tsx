@@ -16,7 +16,7 @@ import { RibbonBlock } from "./kinds/ribbon.tsx";
 import { StepsBlock } from "./kinds/steps.tsx";
 import { StickerBlock } from "./kinds/sticker.tsx";
 import { WordmarkBlock } from "./kinds/wordmark.tsx";
-import { factStepVar, imageSizes, stepVar, type El, type ElOf } from "./layout.ts";
+import { TILE_EDGES, factStepVar, imageSizes, stepVar, thirdsVars, type El, type ElOf } from "./layout.ts";
 
 /**
  * What every element carries: its place as custom properties (composed.css reads them: --c column, --s span, --r row,
@@ -27,6 +27,9 @@ import { factStepVar, imageSizes, stepVar, type El, type ElOf } from "./layout.t
  * and cx-by-<top|bottom> (a bleed to the page edge or past the section edge, desktop), cx-ps-bleed (the phone place),
  * and the element's Paint: cx-pf cx-fg-<role> for its text colour, cx-pb cx-bg-<role> for its own ground. An element with
  * its own ground needs no backing panel over a photo, so it never gets cx-over. The new kinds (F1b-R2) use this too.
+ *
+ * A phone tile (Design 5, composed.css) also carries cx-pt-l or cx-pt-r, the screen edge it runs to, and cx-pt-j when the
+ * phone row above it is tiles too (TILE_EDGES, set by the section from tileEdges before its elements render).
  */
 export function placement(el: El, over: boolean, extra: Record<string, string | number> = {}) {
   const d = el.desk;
@@ -39,11 +42,14 @@ export function placement(el: El, over: boolean, extra: Record<string, string | 
   if (d.tilt) style["--tilt"] = d.tilt;
   const color = "color" in el ? el.color : undefined;
   const fill = "fill" in el ? el.fill : undefined;
+  const tile = p.span === "tile" ? TILE_EDGES.get(el) : undefined;
   return {
     className: cx(
       "cx-el",
       `cx-el--${el.kind}`,
       `cx-ps-${p.span}`,
+      tile && `cx-pt-${tile.side}`,
+      tile?.joined && "cx-pt-j",
       p.hidden && "cx-nophone",
       over && !fill && "cx-over",
       d.tilt ? "cx-tilt" : false,
@@ -287,14 +293,17 @@ const RATIO_CLASS: Record<ElOf<"image">["ratio"], string> = {
 };
 
 function ImageBlock({ el, ctx, width, priority }: { el: ElOf<"image">; ctx: RenderCtx; width: "contained" | "wide" | "full"; priority: boolean }) {
-  const p = placement(el, false);
+  // A crop on thirds: the focal point and its third lines as custom properties; composed.css sets the position from them.
+  const photo = el.crop === "thirds" ? ctx.image(el.image) : undefined;
+  const thirds = photo ? thirdsVars(photo.asset.focal, photo) : undefined;
+  const p = placement(el, false, thirds ?? {});
   // A bleed runs to the page edge: the picture is as wide as the screen where it bleeds (phones, or a desktop bleedX).
   let sizes = imageSizes(width, el);
   if (el.desk.bleedX) sizes = "100vw";
   else if (el.phone.span === "bleed") sizes = sizes.replace(/, calc\(100vw - 2rem\)$/, ", 100vw");
   return (
-    <div {...p} className={cx(p.className, "cx-img", RATIO_CLASS[el.ratio], `cx-mask-${el.mask ?? "none"}`, el.treatment && el.treatment !== "none" && `cx-tr-${el.treatment}`)}>
-      <Picture id={el.image} ctx={ctx} sizes={sizes} priority={priority} className="media--contained" />
+    <div {...p} className={cx(p.className, "cx-img", RATIO_CLASS[el.ratio], `cx-mask-${el.mask ?? "none"}`, el.treatment && el.treatment !== "none" && `cx-tr-${el.treatment}`)} data-crop={el.crop}>
+      <Picture id={el.image} ctx={ctx} sizes={sizes} priority={priority} className="media--contained" {...(thirds ? { objectPosition: "var(--cx-op)" } : {})} />
       {/* A flat scrim over the picture (spec v20): a role at a strength, the section's photo layer's own classes. */}
       {el.scrim && <span className={cx("cx-scrim", `cx-scrim-${el.scrim.strength}`, `cx-ro-${el.scrim.role}`)} aria-hidden="true" />}
     </div>

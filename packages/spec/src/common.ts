@@ -96,6 +96,14 @@ export const OWNER_ONLY = "x-owner-only";
 export const SYSTEM_ONLY = "x-system-only";
 
 /**
+ * JSON Schema key holding what the model is offered instead of a field's full schema (set with `.meta`): toModelJsonSchema
+ * puts these keys over the node's own. Design 5 Wave P widened the composition vocabulary (minHeight "tall", phone span
+ * "tile", shiftX ±3) for the structure presets only; the model keeps seeing the earlier values until the structures are
+ * switched on (U1), so its requests stay byte for byte as they were.
+ */
+export const MODEL_VIEW = "x-model-view";
+
+/**
  * Spec v17: "Cena po dogovoru" (it-price-on-request, owner's decision sb-price-on-request). The owner chose to give
  * the price on request instead of an amount: rendered as "po dogovoru", never a placeholder (it doesn't block
  * publishing) and never an offer price in JSON-LD. Only the owner sets it in the editor (config
