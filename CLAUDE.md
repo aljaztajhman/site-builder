@@ -2,6 +2,13 @@
 
 AI website builder for Slovenian small businesses. Product brief: docs/PRODUCT.md. Current phase: docs/phases/.
 
+## Roadmap (read first)
+
+The goal is a launch-ready v1.0. docs/ROADMAP.md is the plan: "Now", milestones M1–M7 with exit criteria, and a parking lot. A SessionStart hook prints "Now"; the first reply of a session opens with one line on where we are and what's next.
+- Before starting anything that isn't "Now" or an open exit criterion, whether I asked for it or you're drifting into it, say it's off the roadmap and ask "park it or switch?". Wait for my answer.
+- Finish open criteria before opening new fronts. New ideas and half-built extras go to the parking lot.
+- At the end of a run, tick the criteria that landed, update "Now" and the counts. Only I move milestones or criteria; you propose.
+
 ## How to work
 
 - When a step doesn't need my input, keep going. Put a one-line status note in the same message as your next action.
