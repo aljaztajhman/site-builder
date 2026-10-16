@@ -638,6 +638,13 @@ function g10to12(env: Env): Finding[] {
       else if (e.desk.bleedX !== "start" && b.c1 !== 12) out.push(both(`${at}/desk/bleedX`, "structure", `composed: ${e.id} bleeds to the end but doesn't touch column 12`, f));
     }
     if (e.desk.bleedY && !BLEED_Y_KINDS.has(e.kind)) out.push(both(`${at}/desk/bleedY`, "structure", `composed: ${e.id} (${e.kind}) can't bleed past the section`, drop("bleedY", `${at}/desk/bleedY`)));
+    // An image grows into the section's padding: only from the edge row it sits on, or it would cover the rows between.
+    else if (e.kind === "image" && e.desk.bleedY) {
+      const b = boxOf(e);
+      const rows = env.s.props.rows;
+      if (e.desk.bleedY === "top" && b.r0 !== 1) out.push(both(`${at}/desk/bleedY`, "structure", `composed: ${e.id} reaches the section's top but doesn't start in row 1`, drop("bleedY", `${at}/desk/bleedY`)));
+      if (e.desk.bleedY === "bottom" && b.r1 !== rows) out.push(both(`${at}/desk/bleedY`, "structure", `composed: ${e.id} reaches the section's bottom but doesn't end in row ${rows}`, drop("bleedY", `${at}/desk/bleedY`)));
+    }
     // G12
     const fix: Fix = { path: `${at}/phone/span`, what: "phone span set to full", run: () => void ((e.phone as Loose).span = "full") };
     if (e.phone.span === "bleed" && !BLEED_X_KINDS.has(e.kind)) out.push(both(`${at}/phone/span`, "structure", `composed: ${e.id} (${e.kind}) can't bleed on phones`, fix));
