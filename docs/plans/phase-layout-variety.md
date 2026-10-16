@@ -1,4 +1,4 @@
-# Phase plan: layout variety
+# Design 5 · Structures: phase plan (layout variety)
 
 Status: plan, 2026-10-15. Architect: Opus xhigh.
 

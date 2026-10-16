@@ -1,4 +1,4 @@
-# Design direction, October 2026 (Fable, design director)
+# Design direction for Design 5 · Structures (October 2026, Fable, design director)
 
 Written by Fable 5.1 (FABLE: project-design) on 2026-10-15, from:
 - the shoot-out: today's pages 3.47, picture studio 2.86, Fable studio 2.98, distinctiveness 3.45 / 3.20 / 3.58;
