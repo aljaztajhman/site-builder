@@ -1,0 +1,61 @@
+{
+  "set": "fresh10-proof",
+  "reviewer": "claude",
+  "model": "claude-fable-5-1",
+  "pages": [
+    "atelje-bergant",
+    "kolesarski-servis-ovinek",
+    "optika-jasna",
+    "pasji-salon-kodra",
+    "pivovarna-rov",
+    "plesna-sola-takt",
+    "sirarna-pr-simnu",
+    "steklarstvo-vrhovnik",
+    "urarstvo-tic",
+    "vinarstvo-pinteric"
+  ],
+  "status": "ok",
+  "answer": {
+    "sameness": "Every page: thin top bar with small brand name left and 'Domov'/'Meni' right, then one big headline, address line, one small dark 'Pokličite' pill. Two headline faces alternate across the whole set: a tight grotesk (Bergant, Ovinek, Jasna, Takt, Vrhovnik) and the same heavy serif (Kodra, Rov, Simnu, Tič, Pinterič). Two hero skeletons: full-width photo band with dark text block below (Ovinek, Pinterič) or text-left/photo-right (Jasna, Simnu, Vrhovnik, Rov). Same pale address strip (Bergant, Tič). Identical 'Ustvarjeno z UI' corner badge on every photo. Mobile: identical fixed Klic/Navodila bar on most pages.",
+    "recurringIssues": [
+      "Half the first screens are mostly empty: huge white areas with no image or product (Bergant, Tič, Takt desktop).",
+      "Hero photos are generic product-style stock and crop awkwardly into text (Vrhovnik headline overlaps glass, Simnu white block cuts the cheese photo).",
+      "Nearly every page uses the same two typefaces and headline scale, so pages differ by colour not by design.",
+      "Desktop heroes read as mobile layouts stretched: single column text with no composition using the 1280px width.",
+      "Calls to action are tiny grey pills, easy to miss against the oversized headlines.",
+      "Mobile sticky action bar covers content on several pages (Simnu, Vrhovnik, Rov)."
+    ],
+    "overall": 3,
+    "variety": 2,
+    "best": [
+      {
+        "id": "pivovarna-rov",
+        "why": "The mustard full-bleed background, serif headline and hops photo give it a distinct, confident character not seen elsewhere in the set."
+      },
+      {
+        "id": "pasji-salon-kodra",
+        "why": "Terracotta address band, serif brand mark and warm photo make it feel like its own small-shop identity with clear hierarchy."
+      },
+      {
+        "id": "optika-jasna",
+        "why": "Navy bar, cool pale ground and well-placed product photo form a coherent, calm composition suited to an optician."
+      }
+    ],
+    "weakest": [
+      {
+        "id": "urarstvo-tic",
+        "why": "Desktop first screen is headline and address on a blank white page; nothing shows watches or craft."
+      },
+      {
+        "id": "atelje-bergant",
+        "why": "Same empty white layout as Tič: an architecture studio with no architecture visible above the fold."
+      },
+      {
+        "id": "steklarstvo-vrhovnik",
+        "why": "Headline collides with the glass photo and the composition looks accidental rather than designed."
+      }
+    ],
+    "oneChange": "Break the single hero skeleton: give each business a composition, image treatment and type pairing chosen for it (e.g. full-bleed craft photo for the watchmaker, project photography for the architect), and stop reusing the two house typefaces and the small grey pill button on every page.",
+    "summary": "The set is clean and legible, and the mobile versions are consistent and usable. But seen together it is clearly one template: same top bar, same two typefaces, same big headline over a small grey button, same corner badge, and photos that are either missing or generic stock. Pivovarna Rov, Pasji salon Kodra and Optika Jasna show you can give a page personality with colour and a decent photo; Urarstvo Tič and Atelje Bergant are blank first screens. Desktop layouts waste the width. To move from template shop to studio, design each hero for the business, invest in real imagery, and make the call to action count."
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "set": "review50-proof",
+  "reviewer": "gemini",
+  "model": "google/gemini-4-argon",
+  "pages": [
+    "avto-kovac-gen",
+    "avto-kovac-regen",
+    "avtoservis-mrak-gen",
+    "avtoservis-mrak-regen",
+    "brivnica-kos-gen",
+    "brivnica-kos-regen",
+    "cvetlicarna-marjetica-gen",
+    "cvetlicarna-marjetica-regen",
+    "elektro-zupan-gen",
+    "elektro-zupan-regen",
+    "fizioterapija-pregib-gen",
+    "fizioterapija-pregib-regen",
+    "frizerski-salon-mia-gen",
+    "frizerski-salon-mia-regen",
+    "frizerstvo-lana-gen",
+    "frizerstvo-lana-regen",
+    "gostilna-pri-mostu-gen",
+    "gostilna-pri-mostu-regen",
+    "gostilna-zlata-zlica-gen",
+    "gostilna-zlata-zlica-regen",
+    "gostisce-na-gricu-gen",
+    "gostisce-na-gricu-regen",
+    "instalacije-rebernik-gen",
+    "instalacije-rebernik-regen",
+    "instrukcije-pia-gen",
+    "instrukcije-pia-regen",
+    "karoserija-hribar-gen",
+    "karoserija-hribar-regen",
+    "kljucavnicarstvo-hrovat-gen",
+    "kljucavnicarstvo-hrovat-regen",
+    "kmetija-grabnar-gen",
+    "kmetija-grabnar-regen",
+    "mizarstvo-lesnik-gen",
+    "mizarstvo-lesnik-regen",
+    "pekarna-kvas-gen",
+    "pekarna-kvas-regen",
+    "pizzeria-oljka-gen",
+    "pizzeria-oljka-regen",
+    "prevajanje-kolar-gen",
+    "prevajanje-kolar-regen",
+    "racunovodstvo-seliskar-gen",
+    "racunovodstvo-seliskar-regen",
+    "salon-tina-gen",
+    "salon-tina-regen",
+    "trgovina-oljka-in-sol-gen",
+    "trgovina-oljka-in-sol-regen",
+    "vulkanizer-zorman-gen",
+    "vulkanizer-zorman-regen",
+    "zobozdravstvo-lebar-gen",
+    "zobozdravstvo-lebar-regen"
+  ],
+  "status": "ok",
+  "answer": {
+    "sameness": "Almost every page uses the exact same bento-box grid system or a rigid 2-column split (headline on left, contact/hours table or single photo on right). A 3-photo collage (one top-right, two bottom) repeats verbatim across frizerski-salon-mia-gen, gostilna-pri-mostu-gen, kmetija-grabnar-gen, pekarna-kvas-gen, and trgovina-oljka-in-sol-regen. Another layout—a full-width top photo above a dark horizontal band with a left headline—repeats on avto-kovac-gen, elektro-zupan-regen, pizzeria-oljka-regen, vulkanizer-zorman-regen, and zobozdravstvo-lebar-gen. Mobile views all share identical sticky bottom action bars ('Klic / Navodila za pot' or 'Pokličite') and identical 'Meni' buttons.",
+    "recurringIssues": [
+      "Long Slovenian words break mid-word across lines without hyphens, ruining headlines (e.g., racunovodstvo-seliskar-regen, elektro-zupan-regen, kljucavnicarstvo-hrovat-regen).",
+      "Text-only hero screens leave huge, unstyled white voids that look unfinished and uninviting (e.g., pizzeria-oljka-gen, instrukcije-pia-gen, elektro-zupan-gen).",
+      "Oversized display type gets clipped or collides with the bottom edge of the first screen (e.g., instalacije-rebernik-regen, prevajanje-kolar-gen, instrukcije-pia-regen).",
+      "Sticky bottom CTA bars on mobile cover body text, drop caps, and photos directly beneath them.",
+      "Awkward, oversized drop caps in the body copy create visual clutter and fight with the main headlines (e.g., avto-kovac-regen, fizioterapija-pregib-gen).",
+      "Boring administrative tables (address, phone, opening hours) are used as the primary visual element on the right half of the hero screen.",
+      "Several trades and service pages use landscape or vineyard photos that have nothing to do with the business (e.g., vulkanizer-zorman-gen, mizarstvo-lesnik-regen)."
+    ],
+    "overall": 2,
+    "variety": 2,
+    "best": [
+      {
+        "id": "pekarna-kvas-gen",
+        "why": "Warm, cohesive earth tones pair naturally with authentic bakery photography, and the typography fits the grid comfortably on both desktop and mobile."
+      },
+      {
+        "id": "trgovina-oljka-in-sol-regen",
+        "why": "Rich dark brown and olive palette feels genuinely tailored to an Istrian delicacies shop, with well-cropped product imagery and balanced hierarchy."
+      },
+      {
+        "id": "brivnica-kos-regen",
+        "why": "Dark moody aesthetic, sharp serif headlines, and warm photography create an authentic barbershop atmosphere that holds together well."
+      }
+    ],
+    "weakest": [
+      {
+        "id": "racunovodstvo-seliskar-regen",
+        "why": "The headline font is far too large for the column, breaking 'Računovodstvo' awkwardly across lines and leaving dangling commas at the start of lines."
+      },
+      {
+        "id": "pizzeria-oljka-gen",
+        "why": "A pizzeria homepage with zero food photography and a vast, empty white void in the center looks like a broken wireframe."
+      },
+      {
+        "id": "kljucavnicarstvo-hrovat-regen",
+        "why": "The narrow left column forces 'ZAKLENJENI?' to break mid-word and puts a comma at the start of a line, paired with a sterile text table."
+      }
+    ],
+    "oneChange": "Enforce responsive typography scaling (using clamp() and proper Slovenian hyphenation/word-break rules) so long words never split mid-word without hyphens, and ban photography-free hero layouts that rely on plain text tables to fill the screen.",
+    "summary": "This portfolio looks like the output of an automated layout generator cycling through four rigid wireframes rather than a bespoke design studio. While the color palettes and serif/sans-serif pairings attempt to match each industry, the underlying structures are repetitive and mechanical. The biggest flaw is poor typographic control: long Slovenian words frequently snap in half without hyphens or overflow the viewport. Furthermore, several pages lack hero imagery altogether, leaving stark white voids or dull address tables where a strong visual hook should be. Fix the broken word-wrapping, eliminate the text-only hero screens, and stop relying on the exact same three-photo bento grid for every craft and food business."
+  }
+}
