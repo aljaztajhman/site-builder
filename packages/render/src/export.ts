@@ -1,6 +1,6 @@
 import { zipSync, strToU8 } from "fflate";
 import type { SiteSpec } from "@sb/spec";
-import { renderSite } from "./site.tsx";
+import { renderSite, type RenderOptions } from "./site.tsx";
 import { sharedBundle } from "./shared.ts";
 
 /** Every file of a published site, keyed by path relative to the publish root (which holds `{slug}/` and `_shared/`). */
@@ -8,6 +8,8 @@ export interface SiteFileOptions {
   imageWidths?: number[];
   /** The site's absolute address, when it has a domain (RenderOptions.siteUrl). */
   siteUrl?: string | null;
+  /** Render-time details (RenderOptions.details); absent: all off. */
+  details?: RenderOptions["details"];
 }
 
 export function siteFiles(spec: SiteSpec, media: Map<string, Uint8Array>, opts: SiteFileOptions = {}): Map<string, Uint8Array> {

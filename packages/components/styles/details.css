@@ -1,0 +1,199 @@
+/*
+ * Render-time details (docs/plans/m1-type-details.md, piece A; @sb/components RenderDetails). Not part of the shared
+ * stylesheet: the renderer inlines this sheet only on a page rendered with a switch on, and every rule is scoped to the
+ * switch's class on <html> (dt-cta, dt-header, dt-ai-caption, dt-fit, dt-scale), so a page without them is unchanged.
+ * Within the banned list: no pills (the spec's radius stays), no gradients, no shadows.
+ */
+
+/* ---------- cta: the call is a real button ---------- */
+/*
+ * Heavy, body-size (17 px and more), 48 px tall, the phone icon. The specificity (three classes, the switch inside
+ * :where) is above the underline buttons' (skeleton.css) and below "one call button per screen", which still turns every
+ * other call button into a text link where the bar, the floating button or the header carries the call.
+ */
+:where(.dt-cta) .btn.btn--call.btn--call,
+:where(.dt-cta) .site-header__cta.site-header__cta.site-header__cta {
+  min-height: 3rem;
+  padding: 0.85rem 1.5rem;
+  gap: 0.6rem;
+  font-size: max(var(--fs-base), 1.0625rem);
+  font-weight: 700;
+  line-height: 1.15;
+}
+:where(.dt-cta) .btn--call .icon,
+:where(.dt-cta) .site-header__cta .icon {
+  width: 1.25em;
+  height: 1.25em;
+  flex: none;
+}
+/* Underline buttons (skeleton buttons "underline") keep a call that is a button a button, in its section's colours. */
+:where(.dt-cta body[data-buttons="underline"]) main .btn.btn--primary.btn--call {
+  padding-inline: 1.5rem;
+  background: var(--c-primary);
+  border-color: transparent;
+  color: var(--c-on-primary);
+  text-decoration: none;
+}
+:where(.dt-cta body[data-buttons="underline"]) main :where(.tone-inverse) .btn.btn--primary.btn--call {
+  background: var(--c-on-inverse);
+  color: var(--c-inverse);
+}
+:where(.dt-cta body[data-buttons="underline"]) main :where(.tone-band) .btn.btn--primary.btn--call {
+  background: var(--c-on-band, var(--c-on-primary));
+  color: var(--c-band, var(--c-primary));
+}
+
+/* ---------- header: fuller chrome ---------- */
+/*
+ * The band tone on a site without a band colour (no --c-band token): chrome.css then sets the header's --c-primary from
+ * its --c-on-primary and that from its --c-primary, a cycle that leaves both, and the ground made from them, invalid: no
+ * ground and a call button with no box. The band's colours are taken once on <html> instead.
+ */
+html.dt-header {
+  --dt-band: var(--c-band, var(--c-primary));
+  --dt-on-band: var(--c-on-band, var(--c-on-primary));
+}
+.dt-header .site-header--band {
+  --c-bg: var(--dt-band);
+  --c-surface: var(--dt-band);
+  --c-text: var(--dt-on-band);
+  --c-muted: var(--dt-on-band);
+  --c-primary: var(--dt-on-band);
+  --c-on-primary: var(--dt-band);
+  --c-border: var(--dt-band);
+}
+.dt-header .site-header__inner {
+  min-height: 4.5rem;
+  padding-block: 0.75rem;
+}
+@media (min-width: 48rem) {
+  /* The brand a third larger on wide screens (Header.tsx BRAND_SCALE, which the menu's fit counts): name, wordmark or
+     logo alike. Phones keep the size that fits the name on its row (skeleton.css). */
+  .dt-header .site-header__brand {
+    zoom: 1.35;
+  }
+  .dt-header .site-header__inner {
+    min-height: 5.5rem;
+    padding-block: 1.25rem;
+  }
+  /* stacked: the menu's own row sits on the rule under the brand row. */
+  .dt-header .site-header--stacked .site-header__inner {
+    padding-bottom: 0;
+  }
+}
+/* The masthead (the stacked family): the facts row beside the brand, then the menu on its own row. */
+.dt-header .site-header__facts {
+  order: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1.5rem;
+  margin: 0;
+  font-size: var(--fs-base);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--c-text);
+}
+.dt-header .site-header__fact {
+  white-space: nowrap;
+}
+@media (min-width: 48rem) {
+  .dt-header .site-header__facts {
+    margin-inline-start: auto;
+  }
+}
+/* Phones: the town and the number on one line of their own under the brand; the hours are on the page. */
+@media (max-width: 47.99rem) {
+  .dt-header .site-header__facts {
+    order: 4;
+    flex: 1 1 100%;
+    gap: 0.25rem 1rem;
+    font-size: var(--fs-sm);
+  }
+  .dt-header .site-header__fact--hours {
+    display: none;
+  }
+}
+
+/* ---------- aiCaption: one caption per page ---------- */
+/* Below the section's content, never on a picture: in the eyebrow's type, small and muted, contrast from the palette. */
+.dt-ai-caption .ai-caption {
+  position: relative;
+  margin-top: 1.25rem;
+  margin-bottom: 0;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+  color: var(--c-muted);
+}
+.dt-ai-caption .tone-inverse .ai-caption {
+  color: var(--c-on-inverse);
+}
+.dt-ai-caption .tone-band .ai-caption {
+  color: var(--c-on-band, var(--c-on-primary));
+}
+
+/* ---------- fit: display headlines fit their own column ---------- */
+/*
+ * The heading is the container its text is sized by (elements.tsx .cx-fit): the longest word (--lw letters, --fk em a
+ * letter, the face's --fit-k from tokens.ts) fits the heading's own width, not the screen's. It stretches across its
+ * cell (a start, centre or end alignment is the text's), since a contained box no longer grows with its text. The size is
+ * at most 28vh, so a headline of two lines stays inside the first screen, and on wide screens a long display headline
+ * at most --fcap vh (elements.tsx displayCap: at most 45 % of the screen deep).
+ */
+.dt-fit .cx-h:has(> .cx-fit) {
+  container-type: inline-size;
+  justify-self: stretch;
+}
+.dt-fit .cx-h[data-ax="center"]:has(> .cx-fit) {
+  margin-inline: auto;
+}
+.dt-fit .cx-h[data-ax="end"]:has(> .cx-fit) {
+  margin-inline-start: auto;
+}
+.dt-fit .cx-h--uppercase:has(> .cx-fit) {
+  font-size: var(--fz);
+}
+.dt-fit .cx-fit {
+  display: block;
+  font-size: min(1em, calc(100cqi / (var(--lw, 1) * var(--fk, var(--fit-k, 0.62)))), 28vh);
+}
+@media (min-width: 48rem) {
+  .dt-fit .cx-fit {
+    font-size: min(1em, calc(100cqi / (var(--lw, 1) * var(--fk, var(--fit-k, 0.62)))), 28vh, calc(var(--fcap, 100) * 1vh));
+  }
+}
+/* Words of 14 letters and fewer never break inside ("Računovodstvo", "Ključavničarstvo" set whole). */
+.dt-fit .cx-h--whole,
+.dt-fit .cx-h--whole .cx-fit {
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+/* ---------- scale: small things small, big things big ---------- */
+/* One eyebrow, headline, paragraph stack a page: an eyebrow only on the first section that has one. */
+:where(.dt-scale) main > .s:has(.eyebrow) ~ .s .eyebrow {
+  display: none;
+}
+/* The menu and the header's button at the body size (word and overlay set their menu in the heading face on purpose). */
+:where(.dt-scale) .site-header:not(.site-header--word, .site-header--overlay) .site-nav__list a,
+:where(.dt-scale) .site-header:not(.site-header--word, .site-header--overlay) .site-nav__more > details > summary,
+:where(.dt-scale) .site-header .site-header__cta {
+  font-size: var(--fs-base);
+}
+/* Section headings: 40 px and more on a 1280 px screen. */
+:where(.dt-scale) main h2.section-title {
+  font-size: max(var(--fs-h2), min(2.5rem, calc(1.5rem + 1.25vw)));
+}
+:where(.dt-scale) .cx {
+  --cx-fs-3: max(var(--cx-fs-2), min(var(--fs-h2), var(--fs-h1)), min(2.5rem, calc(1.5rem + 1.25vw)));
+}
+/* The opener's supporting lines (facts, the address) at the body size, not smaller. */
+:where(.dt-scale) main > .s:first-child .cx {
+  --cx-fs-m1: var(--fs-base);
+}
+:where(.dt-scale) .hero-facts dt,
+:where(.dt-scale) .hsig__strip-item dt {
+  font-size: var(--fs-base);
+}

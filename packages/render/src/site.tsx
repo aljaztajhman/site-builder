@@ -1,5 +1,12 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { renderToStaticMarkup } from "react-dom/server";
 import {
+  AiCaption,
+  aiCaptionSection,
+  detailsClass,
+  showsGenerated,
   CallFloat,
   CookieConsent,
   ENTRY_IMAGE_SIZES,
@@ -21,6 +28,7 @@ import {
   uiStrings,
   type LcpImage,
   type RenderCtx,
+  type RenderDetails,
   type ResolvedImage,
 } from "@sb/components";
 import type { ReactNode } from "react";
@@ -50,7 +58,7 @@ import {
 } from "@sb/spec";
 import { fontFaceCss, fontFiles, tokensCss } from "./tokens.ts";
 import { DEFAULT_IMAGE_WIDTHS, variantFile, variantHeight, variantWidths } from "./images.ts";
-import { COMPOSED_SHEETS, composedIslands, composedSheets, hasComposedCallFact, sharedBundle } from "./shared.ts";
+import { COMPOSED_SHEETS, composedIslands, composedSheets, hasComposedCallFact, minifyCss, sharedBundle } from "./shared.ts";
 import { entryJsonLd, faqJsonLd, jsonLd } from "./jsonld.ts";
 import { feedOf, rssXml } from "./feed.ts";
 import { OG_LOCALE, SHARE_IMAGE, indexable, normaliseSiteUrl, pagePath, robotsTxt, shareImageOf, sitemapEntries, sitemapXml } from "./seo.ts";
@@ -107,6 +115,21 @@ export interface RenderOptions {
    * and export show the same day whenever they run. Default: now. Tests pass a fixed day so their output never moves.
    */
   now?: Date;
+  /**
+   * Render-time details (docs/plans/m1-type-details.md, piece A): each switch off when absent, and a page with none on
+   * is byte-identical to one rendered without the option. No live path sets them yet (the proof harness does).
+   */
+  details?: RenderDetails;
+}
+
+/**
+ * The details stylesheet (packages/components/styles/details.css), minified. Inlined only into a page rendered with a
+ * switch on, so the shared bundle, its hash and every stored site's pages stay as they are.
+ */
+let detailsSheet: string | undefined;
+function detailsCss(): string {
+  detailsSheet ??= minifyCss(readFileSync(path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../components/styles/details.css"), "utf8"));
+  return detailsSheet;
 }
 
 export function pageFile(page: Pick<Page, "slug">): string {
@@ -200,6 +223,7 @@ export function makeCtx(spec: SiteSpec, page: Page, opts: RenderOptions & { entr
     shared: (file) => `${up}../_shared/${hash}/${file}`,
     media,
     today: opts.now ?? new Date(),
+    ...(opts.details ? { details: opts.details } : {}),
   };
 }
 
@@ -220,6 +244,8 @@ interface Doc {
   lcp: LcpImage | null;
   islands: string[];
   jsonLd: string[];
+  /** A page without sections (an entry's) that shows a generated picture: details.aiCaption ends its main with the caption. */
+  aiPictures?: boolean;
 }
 
 /** Renders one page to a complete HTML document. Same function for preview, publish and export. */
@@ -282,6 +308,7 @@ export function renderEntryPage(spec: SiteSpec, ref: Pick<ResolvedEntry, "kind" 
     lcp: e.entry.image ? { image: e.entry.image, sizes: ENTRY_IMAGE_SIZES } : null,
     islands: e.kind === "events" ? ["events.js"] : [],
     jsonLd: [entryJsonLd(localized, e, siteUrl ? siteUrl + path(locale) : null, siteUrl, siteUrl ? largestImageUrl(spec, e.entry.image, siteUrl, opts.imageWidths) : null)],
+    aiPictures: showsGenerated(e.entry, localized),
   });
 }
 
@@ -297,6 +324,8 @@ function renderDocument(spec: SiteSpec, localized: SiteSpec, opts: RenderOptions
   const locale = opts.locale ?? spec.locales.default;
   const ctx = makeCtx(localized, doc.page, opts);
   const design = localized.design;
+  // The details switches that are on, as the <html> class list details.css is scoped by ("" with none).
+  const details = detailsClass(opts.details);
 
   // nav.js (the menu) and stats.js (cookieless tap counts, live address only) are on every page.
   const islands = new Set<string>(["nav.js", "stats.js", ...doc.islands]);
@@ -367,6 +396,17 @@ function renderDocument(spec: SiteSpec, localized: SiteSpec, opts: RenderOptions
   const centred = centredOn(skeleton, doc.sections, motif);
   // Spec v20: the page's opening composed section has the header over it (composed-v2.css, body[data-hdr="over"]).
   const headerOver = doc.sections === doc.page.sections && first?.type === "composed" && (first as SectionOf<"composed">).props.headerOver === true;
+  // details.aiCaption: the page's one caption ends the first section that shows a generated picture (or an entry's page).
+  const aiCaption = opts.details?.aiCaption === true ? { section: aiCaptionSection(doc.sections, localized), text: ctx.t("aiCaption") } : null;
+  const main = (content: ReactNode) =>
+    aiCaption ? (
+      <AiCaption.Provider value={aiCaption}>
+        {content}
+        {doc.aiPictures && <p className="container ai-caption">{aiCaption.text}</p>}
+      </AiCaption.Provider>
+    ) : (
+      content
+    );
   const renderBody = (suffixes: ReadonlyMap<string, string>) => renderToStaticMarkup(
     <body data-imagery={design.imagery} data-motif={motif} data-submotif={sub} data-shape={shape} data-hdr={headerOver ? "over" : undefined} className={bodyClass} {...skeletonAttrs}>
       <a className="skip-link" href="#main">
@@ -375,7 +415,7 @@ function renderDocument(spec: SiteSpec, localized: SiteSpec, opts: RenderOptions
       <Header ctx={ctx} />
       <main id="main" tabIndex={-1}>
         <LandmarkSuffixes.Provider value={suffixes}>
-          <CentredSections.Provider value={centred}>{doc.main(ctx)}</CentredSections.Provider>
+          <CentredSections.Provider value={centred}>{main(doc.main(ctx))}</CentredSections.Provider>
         </LandmarkSuffixes.Provider>
       </main>
       <Footer ctx={ctx} />
@@ -442,14 +482,14 @@ function renderDocument(spec: SiteSpec, localized: SiteSpec, opts: RenderOptions
       {composedSheets(doc.sections, undefined, design.wordmark ? { style: design.wordmark.style, chrome: localized.assets.logo === undefined } : undefined).map((k) => (
         <link key={k} rel="stylesheet" href={ctx.shared(COMPOSED_SHEETS[k]().name)} />
       ))}
-      <style dangerouslySetInnerHTML={{ __html: fontFaceCss(design, fontsBase) + tokensCss(design, sub) }} />
+      <style dangerouslySetInnerHTML={{ __html: fontFaceCss(design, fontsBase) + tokensCss(design, sub) + (details ? detailsCss() : "") }} />
       {doc.jsonLd.map((json, i) => (
         <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: json }} />
       ))}
     </head>,
   );
 
-  return `<!doctype html><html lang="${locale}">${head}${body}</html>`;
+  return `<!doctype html><html lang="${locale}"${details ? ` class="${details}"` : ""}>${head}${body}</html>`;
 }
 
 export interface RenderedSite {
