@@ -16,7 +16,7 @@ import { RibbonBlock } from "./kinds/ribbon.tsx";
 import { StepsBlock } from "./kinds/steps.tsx";
 import { StickerBlock } from "./kinds/sticker.tsx";
 import { WordmarkBlock } from "./kinds/wordmark.tsx";
-import { TILE_EDGES, factStepVar, imageSizes, stepVar, thirdsPosition, type El, type ElOf } from "./layout.ts";
+import { TILE_EDGES, factStepVar, imageSizes, stepVar, thirdsVars, type El, type ElOf } from "./layout.ts";
 
 /**
  * What every element carries: its place as custom properties (composed.css reads them: --c column, --s span, --r row,
@@ -292,26 +292,18 @@ const RATIO_CLASS: Record<ElOf<"image">["ratio"], string> = {
   fill: "cx-r-fill",
 };
 
-/**
- * A frame's width / height by ratio, for the crop on thirds. "fill" takes its cell, which differs by screen (a wide band on
- * desktop, near square on phones): 3:2 is the estimate between them.
- */
-const RATIO_ASPECT: Record<ElOf<"image">["ratio"], number> = { "1:1": 1, "4:5": 4 / 5, "3:4": 3 / 4, "4:3": 4 / 3, "3:2": 3 / 2, "16:9": 16 / 9, "21:9": 21 / 9, fill: 3 / 2 };
-
 function ImageBlock({ el, ctx, width, priority }: { el: ElOf<"image">; ctx: RenderCtx; width: "contained" | "wide" | "full"; priority: boolean }) {
-  const p = placement(el, false);
+  // A crop on thirds: the focal point and its third lines as custom properties; composed.css sets the position from them.
+  const photo = el.crop === "thirds" ? ctx.image(el.image) : undefined;
+  const thirds = photo ? thirdsVars(photo.asset.focal, photo) : undefined;
+  const p = placement(el, false, thirds ?? {});
   // A bleed runs to the page edge: the picture is as wide as the screen where it bleeds (phones, or a desktop bleedX).
   let sizes = imageSizes(width, el);
   if (el.desk.bleedX) sizes = "100vw";
   else if (el.phone.span === "bleed") sizes = sizes.replace(/, calc\(100vw - 2rem\)$/, ", 100vw");
-  let objectPosition: string | undefined;
-  if (el.crop === "thirds") {
-    const img = ctx.image(el.image);
-    objectPosition = thirdsPosition(img.asset.focal, img, RATIO_ASPECT[el.ratio]);
-  }
   return (
     <div {...p} className={cx(p.className, "cx-img", RATIO_CLASS[el.ratio], `cx-mask-${el.mask ?? "none"}`, el.treatment && el.treatment !== "none" && `cx-tr-${el.treatment}`)} data-crop={el.crop}>
-      <Picture id={el.image} ctx={ctx} sizes={sizes} priority={priority} className="media--contained" {...(objectPosition ? { objectPosition } : {})} />
+      <Picture id={el.image} ctx={ctx} sizes={sizes} priority={priority} className="media--contained" {...(thirds ? { objectPosition: "var(--cx-op)" } : {})} />
       {/* A flat scrim over the picture (spec v20): a role at a strength, the section's photo layer's own classes. */}
       {el.scrim && <span className={cx("cx-scrim", `cx-scrim-${el.scrim.strength}`, `cx-ro-${el.scrim.role}`)} aria-hidden="true" />}
     </div>

@@ -554,6 +554,25 @@ body:not([data-motif="plate"]) .cx-prices--plates .plate__eu {
 .cx-r-fill {
   aspect-ratio: 4 / 3;
 }
+/* Crop on thirds (Design 5): the focal point (--fx, --fy) goes to its third line (--tx, --ty) of the frame, worked out
+   from the frame's own size (container units: exact on every screen and in a "fill" cell). On each axis the photo
+   (object-fit: cover, width / height --ia) is --cx-iw × --cx-ih; its offset is t·frame − f·photo, clamped so it still
+   covers the frame, which keeps the focal point inside it. Without container units: the focal point as it is. */
+.cx-img[data-crop="thirds"] {
+  --cx-op: calc(var(--fx) * 100%) calc(var(--fy) * 100%);
+}
+@supports (width: 1cqw) {
+  /* The picture is the container: it is placed absolutely over the frame, so its size is the frame's final one (a
+     stretched "fill" frame queried itself before the stretch, as 0 high). */
+  .cx-img[data-crop="thirds"] > .media {
+    container-type: size;
+  }
+  .cx-img[data-crop="thirds"] {
+    --cx-iw: max(100cqw, 100cqh * var(--ia));
+    --cx-ih: max(100cqh, 100cqw / var(--ia));
+    --cx-op: clamp(100cqw - var(--cx-iw), var(--tx) * 100cqw - var(--fx) * var(--cx-iw), 0px) clamp(100cqh - var(--cx-ih), var(--ty) * 100cqh - var(--fy) * var(--cx-ih), 0px);
+  }
+}
 @media (min-width: 64rem) {
   /* fill: the photo takes its cell, whatever rows the other elements make. */
   .cx-r-fill {

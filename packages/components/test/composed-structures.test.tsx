@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { ComposedProps, type Section } from "@sb/spec";
 import { Composed } from "../src/groups/composed/index.tsx";
-import { imageSizes, overPhoto, phoneRows, readingOrder, thirdsPosition, tileEdges } from "../src/groups/composed/layout.ts";
+import { imageSizes, overPhoto, phoneRows, readingOrder, thirdsVars, tileEdges } from "../src/groups/composed/layout.ts";
 import { html, testCtx, testSpec } from "./helpers.ts";
 
 /**
@@ -35,40 +35,59 @@ describe("1. minHeight tall", () => {
 });
 
 describe("2. crop on thirds", () => {
-  it("puts the focal point on the nearest third line of the frame, on the axis the photo overflows", () => {
-    // A 16:9 photo in a square frame overflows sideways: the frame is 9/16 of the photo's width.
-    const k = 9 / 16;
-    const pos = thirdsPosition({ x: 0.7, y: 0.4 }, { width: 1600, height: 900 }, 1);
-    const [px, py] = pos.split(" ").map((v) => Number.parseFloat(v) / 100) as [number, number];
-    expect(py).toBeCloseTo(0.4, 2); // no overflow vertically: the focal y as it is
-    // Where the focal point lands in the frame, as a share of its width: (f − p·(1 − k)) / k.
-    expect((0.7 - px * (1 - k)) / k).toBeCloseTo(2 / 3, 1);
-    const left = thirdsPosition({ x: 0.3, y: 0.5 }, { width: 1600, height: 900 }, 1).split(" ").map((v) => Number.parseFloat(v) / 100) as [number, number];
-    expect((0.3 - left[0] * (1 - k)) / k).toBeCloseTo(1 / 3, 1);
-    // A tall photo in a wide frame overflows vertically.
-    const tall = thirdsPosition({ x: 0.5, y: 0.2 }, { width: 1200, height: 1600 }, 16 / 9);
-    expect(tall.startsWith("50% ")).toBe(true);
+  /**
+   * composed.css's offset on one axis, in frame units (frame = 1): the photo is `size` frames long on that axis, the
+   * offset t − f·size clamped to [1 − size, 0]. Returns where the focal point lands in the frame (0–1).
+   */
+  const landing = (f: number, t: number, size: number) => Math.min(0, Math.max(1 - size, t - f * size)) + f * size;
+  /** The photo's length on each axis in frame units, for object-fit cover of a photo of aspect `ia` in a frame of aspect `fa`. */
+  const cover = (ia: number, fa: number) => ({ w: Math.max(1, ia / fa), h: Math.max(1, fa / ia) });
+
+  it("gives the focal point, the nearer third line and the photo's aspect as custom properties", () => {
+    expect(thirdsVars({ x: 0.7, y: 0.4 }, { width: 1600, height: 900 })).toEqual({ "--fx": 0.7, "--fy": 0.4, "--tx": 0.667, "--ty": 0.333, "--ia": 1.778 });
+    expect(thirdsVars({ x: 0.5, y: 0.5 }, { width: 1200, height: 1600 })).toEqual({ "--fx": 0.5, "--fy": 0.5, "--tx": 0.333, "--ty": 0.333, "--ia": 0.75 });
+    // Without a focal point: the centre to the left third, vertically where it is.
+    expect(thirdsVars(undefined, { width: 1500, height: 1000 })).toEqual({ "--fx": 0.5, "--fy": 0.5, "--tx": 0.333, "--ty": 0.5, "--ia": 1.5 });
   });
 
-  it("clamps to the photo's edge, keeps a photo that doesn't overflow as it is, and falls back to 33 % 50 % without a focal point", () => {
-    expect(thirdsPosition({ x: 0.98, y: 0.5 }, { width: 2000, height: 1000 }, 1.9)).toBe("100% 50%");
-    expect(thirdsPosition({ x: 0.6, y: 0.3 }, { width: 1500, height: 1000 }, 1.5)).toBe("60% 30%");
-    expect(thirdsPosition(undefined, { width: 1500, height: 1000 }, 1)).toBe("33% 50%");
+  it("composed.css works the offset out from the frame's size (container units), clamped so the photo still covers it", () => {
+    const f = flat(css);
+    expect(f).toMatch(/\.cx-img\[data-crop="thirds"\] \{ --cx-op: calc\(var\(--fx\) \* 100%\) calc\(var\(--fy\) \* 100%\); \}/);
+    expect(f).toMatch(/@supports \(width: 1cqw\) \{ \.cx-img\[data-crop="thirds"\] > \.media \{ container-type: size; \}/);
+    expect(f).toContain("--cx-op: clamp(100cqw - var(--cx-iw), var(--tx) * 100cqw - var(--fx) * var(--cx-iw), 0px) clamp(100cqh - var(--cx-ih), var(--ty) * 100cqh - var(--fy) * var(--cx-ih), 0px);");
   });
 
-  it("renders the position on the image (from the asset's focal point and the element's ratio), and nothing new without crop", () => {
+  it("that offset puts the focal point on its third line, and never out of the frame (a 4:3 photo in a 3.5:1 fill band)", () => {
+    // A 16:9 photo in a square frame: x lands on ⅔.
+    const sq = cover(16 / 9, 1);
+    expect(landing(0.7, 2 / 3, sq.w)).toBeCloseTo(2 / 3, 5);
+    // The reviewer's case: a 4:3 photo, focal y .45, in a wide fill band (3.5:1). The estimate-based crop sent it to
+    // "50% 100%" and the subject out of the frame; the frame's own size puts it on the upper third.
+    const band = cover(4 / 3, 3.5);
+    expect(landing(0.45, 1 / 3, band.h)).toBeCloseTo(1 / 3, 5);
+    // And the same photo in a phone's 4:3 frame: no overflow, the focal point stays where it is.
+    const phone = cover(4 / 3, 4 / 3);
+    expect(landing(0.45, 1 / 3, phone.h)).toBeCloseTo(0.45, 5);
+    // Whatever the frame, the clamp keeps the focal point inside it.
+    for (const fa of [0.5, 0.8, 1, 4 / 3, 2, 3.5, 5]) for (const fy of [0.02, 0.2, 0.45, 0.55, 0.8, 0.98]) {
+      const at = landing(fy, fy > 0.5 ? 2 / 3 : 1 / 3, cover(4 / 3, fa).h);
+      expect(at, `${fa} ${fy}`).toBeGreaterThanOrEqual(0);
+      expect(at, `${fa} ${fy}`).toBeLessThanOrEqual(1);
+    }
+  });
+
+  it("renders the properties on the image and the position from them; nothing new without crop", () => {
     const base = testSpec();
     const spec = testSpec({ assets: { ...base.assets, images: base.assets.images.map((i) => (i.id === "img_salon" ? { ...i, focal: { x: 0.75, y: 0.5 } } : i)) } });
-    const el = (more: object) => image("e_i", "img_salon", { col: 7, span: 6, row: 1, rowSpan: 2 }, { order: 1, span: "full" }, { ratio: "1:1", ...more });
+    const el = (more: object) => image("e_i", "img_salon", { col: 7, span: 6, row: 1, rowSpan: 2 }, { order: 1, span: "full" }, { ratio: "fill", ...more });
     const cropped = html(<Composed section={section({ elements: [headline(), el({ crop: "thirds" })] })} ctx={testCtx(spec)} index={0} />);
-    // img_salon is 4:3; the test ctx serves it 720 × 540. In a square frame k = 3/4: p = (0.75 − ⅔·¾) / ¼ = 1.
     expect(cropped).toContain('data-crop="thirds"');
-    expect(cropped).toContain("object-position:100% 50%");
+    expect(cropped).toContain("--fx:0.75;--fy:0.5;--tx:0.667;--ty:0.333;--ia:1.333");
+    expect(cropped).toContain("object-position:var(--cx-op)");
     const plain = html(<Composed section={section({ elements: [headline(), el({})] })} ctx={testCtx(spec)} index={0} />);
     expect(plain).not.toContain("data-crop");
+    expect(plain).not.toContain("--fx");
     expect(plain).toContain("object-position:75% 50%");
-    const noFocal = html(<Composed section={section({ elements: [headline(), el({ crop: "thirds" })] })} ctx={testCtx()} index={0} />);
-    expect(noFocal).toContain("object-position:33% 50%");
   });
 });
 

@@ -214,26 +214,20 @@ export function tileEdges(ordered: readonly El[]): Map<string, TileEdge> {
 export const TILE_EDGES = new WeakMap<El, TileEdge>();
 
 /**
- * The object-position that puts a photo's focal point on the nearest third line (image `crop: "thirds"`, Design 5): on
- * each axis the photo overflows its frame (object-fit: cover), the position p puts the point at f of the photo on the
- * line t of the frame: p = (f − t·k) / (1 − k), k the frame's share of the scaled photo on that axis, clamped to 0–100 %.
- * t is ⅓ or ⅔, whichever is nearer to f (a point at the very centre goes to ⅓). The axis that doesn't overflow keeps f.
- * Without a focal point: 33 % 50 %, the subject a little off-centre. `frame` is the frame's width / height: the element's
- * ratio, or for a "fill" frame an estimate (it differs by screen; the formula falls back gracefully when it is off).
+ * The custom properties of an image cropped on thirds (image `crop: "thirds"`, Design 5): the focal point (--fx, --fy,
+ * 0–1 of the photo), the third line each goes to (--tx, --ty: ⅓ or ⅔, the nearer; a point at the very centre goes to ⅓)
+ * and the photo's width / height (--ia). composed.css works the object-position out from the frame's own size
+ * (container units), so it is exact on every screen and for a "fill" frame too: on the axis the photo overflows, the
+ * offset t·frame − f·photo, clamped so the photo still covers the frame (the focal point then stays inside it). Without
+ * a focal point the photo's centre goes to the left third and stays centred vertically. Browsers without container
+ * units show the focal point as it is (composed.css).
  */
-export function thirdsPosition(focal: { x: number; y: number } | undefined, photo: { width: number; height: number }, frame: number): string {
-  if (!focal) return "33% 50%";
-  const imgAspect = photo.width / photo.height;
-  // Cover scales the photo so it fills the frame: the axis with the larger ratio overflows.
-  const kx = imgAspect > frame ? frame / imgAspect : 1;
-  const ky = imgAspect < frame ? imgAspect / frame : 1;
-  const axis = (f: number, k: number) => {
-    if (k >= 1) return f;
-    const t = f > 0.5 ? 2 / 3 : 1 / 3;
-    return Math.min(1, Math.max(0, (f - t * k) / (1 - k)));
-  };
-  const pct = (v: number) => `${Math.round(v * 100)}%`;
-  return `${pct(axis(focal.x, kx))} ${pct(axis(focal.y, ky))}`;
+export function thirdsVars(focal: { x: number; y: number } | undefined, photo: { width: number; height: number }): Record<string, number> {
+  const third = (f: number) => (f > 0.5 ? 2 / 3 : 1 / 3);
+  const r = (v: number) => Math.round(v * 1000) / 1000;
+  const fx = focal?.x ?? 0.5;
+  const fy = focal?.y ?? 0.5;
+  return { "--fx": r(fx), "--fy": r(fy), "--tx": r(third(fx)), "--ty": r(focal ? third(fy) : fy), "--ia": r(photo.width / photo.height) };
 }
 
 /**

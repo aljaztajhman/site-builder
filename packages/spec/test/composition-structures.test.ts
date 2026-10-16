@@ -9,6 +9,7 @@
 import { describe, expect, it } from "vitest";
 import {
   BLEED_Y_KINDS,
+  COMPOSED_LAYOUT_KEYS,
   ComposedProps,
   ImageElement,
   Place,
@@ -21,7 +22,7 @@ import {
   type Colors,
   type CompositionContext,
 } from "../src/index.ts";
-import { composed, has, heading, issue, photo, repairPath, text } from "./helpers/composed.ts";
+import { composed, decor, has, heading, issue, photo, repairPath, text } from "./helpers/composed.ts";
 
 const PALETTE: Colors = {
   background: "#ffffff",
@@ -80,6 +81,24 @@ describe("4. bleedY on an image", () => {
     expect(has(s, /can't bleed past the section/, C)).toBe(false);
     const t = composed([heading("e_h", { col: 1, span: 5, row: 1, bleedY: "top" }, 0)]);
     expect(issue(t, /e_h \(heading\) can't bleed past the section/, C)).toMatchObject({ code: "structure", path: "/props/elements/0/desk/bleedY" });
+  });
+
+  it("reaches the top only from row 1 and the bottom only from the last row (else it would cover the rows between); repair drops it", () => {
+    // Rows = 3. An image in row 2 reaching the top would cover row 1's heading.
+    const top = composed([heading("e_h", { col: 1, span: 12, row: 1 }, 0), photo("e_p", { col: 7, span: 6, row: 2, rowSpan: 2, bleedY: "top" }, 1)]);
+    expect(issue(top, /e_p reaches the section's top but doesn't start in row 1/, C)).toMatchObject({ code: "structure", path: "/props/elements/1/desk/bleedY" });
+    const r = repairComposition(top, C);
+    expect(r.repairs.map(repairPath)).toEqual(["/props/elements/1/desk/bleedY"]);
+    expect(r.section.props.elements[1]!.desk.bleedY).toBeUndefined();
+    const bottom = composed([heading("e_h", { col: 1, span: 6, row: 3 }, 1), photo("e_p", { col: 7, span: 6, row: 1, rowSpan: 2, bleedY: "bottom" }, 0)]);
+    expect(issue(bottom, /e_p reaches the section's bottom but doesn't end in row 3/, C)).toMatchObject({ path: "/props/elements/1/desk/bleedY" });
+    expect(has(composed([photo("e_p", { col: 7, span: 6, row: 2, rowSpan: 2, bleedY: "bottom" }, 0), heading("e_h", { col: 1, span: 6, row: 1 }, 1)]), /reaches the section/, C)).toBe(false);
+    // Decor keeps passing the edge from any row, as before.
+    expect(has(composed([heading("e_h", { col: 1, span: 6, row: 1 }, 0), decor("e_d", { col: 7, span: 6, row: 2, bleedY: "top" }, 1)]), /bleed|reaches/, C)).toBe(false);
+  });
+
+  it("crop is layout, not copy: never sent for translation", () => {
+    expect(COMPOSED_LAYOUT_KEYS.has("crop")).toBe(true);
   });
 });
 
