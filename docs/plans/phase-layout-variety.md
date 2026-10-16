@@ -189,7 +189,49 @@ It filters out what breaks a rule, then samples with a penalty for what neighbou
 - The hybrid's brief must name an allowed structure, and `structureOf` checks the build.
 - The critique keeps running; the composed hero is outside its catalogue.
 
+## Wave P · Proof first (owner, 2026-10-16)
+
+Before any plumbing (U1, U2, U4, U5), prove that the structures themselves make a set look varied. Designs 2–4 each took days to build before we learned they didn't change set variety. This wave answers that question in about two days for about €0.30.
+
+**Units:**
+
+| Unit | Owns | Role · model · effort | Done = | Size | € |
+|---|---|---|---|---|---|
+| P0 Map | read-only | scout · Haiku · medium | hero-copy slot sources; renderer gaps per structure; how a composed hero replaces a section hero in a replayed spec | S | 0 |
+| P1 Renderer gaps | components groups/composed/*, styles/structures.css, styles.ts | builder · Opus · medium | U3a's tests, for the 8 structures only | M | 0 |
+| P2 One preset per structure | inventory compositions/hero/<structure>-1 (8 new), tag field, tests | asset-maker · Opus · high | each fills for a photo-rich, a one-photo and a no-photo business; guards pass at 360 and 1280; contact sheet | M–L | 0 |
+| P3 Proof harness | tools/eval/src/structure-proof.ts (new), test | implementer · Sonnet · medium | see below | S–M | 0 |
+
+The structure tag on presets is plain data, so no spec bump and no `structureOf` yet.
+
+**What P3 does:**
+- Takes the already-generated specs: the 25 Review 50 businesses (home + regenerated = 50 pages, eval/outside-review/review50-specs) and the fresh 10 (today's specs).
+- Replaces each page's first section with a hand-assigned structure preset, filled from that page's own hero copy and photos. The assignment rules follow direction §3:
+  - photo-led structures only where client photos exist;
+  - no structure on more than 25 % of pages;
+  - neighbours in a trade or town differ.
+- Varies the chrome by hand across the set, using the existing skeleton header families, tones and phone actions, so no two pages share a chrome.
+- Applies the existing once-rules, renders at 360 and 1280, and writes the specs and screenshots.
+
+All of this is free.
+
+**Measures:**
+- Free: `pnpm variety` (structure share, chrome tuples) and look distance.
+- Paid: the whole-set round (`pnpm outside-review --set`) on the proof sets, fresh-10-proof and review50-proof, at about €0.15 a set with all three reviewers.
+- Compare against the same sets' existing verdicts: fresh 10 today 2/2 · 3/3 · 3/2; the 50 at 3/3 · 3/2 · 3/2.
+
+**Pass bar:**
+- variety ≥ 3.5 from 2 of 3 reviewers on both sets;
+- no reviewer's set "overall" drops;
+- the owner, looking at the contact sheets, agrees the set reads as different designs.
+
+**Then:**
+- **Pass:** continue with U1 → the rest of the plan in wave order. P1 and P2 become the start of U3a and U3b.
+- **Fail:** stop the plumbing. Read the reviewers' sameness notes. The next lever is likely §6 (scale system, type voice, second moment), so plan that instead. Spend so far: about €0.30.
+
 ## Units
+
+Wave P runs first (see above). The waves below start only after Wave P passes.
 
 Size: S under half a day, M about a day, L 2–3 days. Builds cost €0 (plan usage).
 
