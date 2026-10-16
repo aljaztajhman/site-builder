@@ -27,6 +27,14 @@
     "$genomeComment": "genome: Step 5, design in parts (spec v18 design.genome; packages/spec/src/genome.ts, genome-rules.ts, intents.ts; engine genome.ts). After the content step code picks the site's genome: font pair (with its type system), palette and page ground, hero (only where the written hero's props fit the other layout: section intents), header and footer (the skeleton's when variety.skeleton is on, else the chrome's), section rhythm, imagery, shape (square, soft, cut corners, arched tops), density; the motif follows the preset (trade templates keep their motif, type family, rhythm and natural photos). From the site seed, at least 4 axes away from every neighbour of the same trade, inside the compatibility rules; no model call, the content is not rewritten. Druga podoba (POST /api/sites/:id/look) then moves along the axes for every style, not only template families. Off: no genome is picked, a site gets none from the generator (a migrated site has its direction's preset genome, which changes nothing), every request is today's. Turning it on needs the twin judge (pnpm eval --twins --no-edits --variety genome, ≈ €10 with Step 5's iterations); contact sheet: pnpm variety:genome.",
     "genome": false
   },
+  "details": {
+    "$comment": "M1 type and details (docs/plans/m1-type-details.md): render-time switches, the same for preview and published site. All off until the proof's set round passes and the owner turns them on.",
+    "cta": false,
+    "header": false,
+    "aiCaption": false,
+    "fit": false,
+    "scale": false
+  },
   "designer": {
     "$comment": "The AI designer (docs/plans/design-studio.md). agent: \"off\" | \"trial\" | \"on\". Owner 2026-10-15 (studio shoot-out, docs/plans/phase-layout-variety.md D3): off; trial accounts get today's pipeline, which scored best (3.47 vs picture studio 3.09, Fable studio 3.22). trial (studio 0.5, docs/plans/studio-0.5.md, 2026-10-11): the studio recomposes new homepages only for accounts whose email is in DESIGNER_TRIAL_EMAILS (Railway web + worker; empty: no one). Everyone else unchanged. on: every generation, not before the owner's blind A/B passes (plan §9).",
     "agent": "off",

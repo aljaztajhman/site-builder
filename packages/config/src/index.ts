@@ -274,6 +274,14 @@ export const AppConfigSchema = z.object({
    */
   variety: z.object({ families: z.boolean(), skeleton: z.boolean(), neighbours: z.number().int().min(0).max(500), concept: z.boolean(), genome: z.boolean() }),
   /**
+   * Type and details (M1, docs/plans/m1-type-details.md): render-time switches the preview and the published site read
+   * alike (render RenderOptions.details). cta: the call is a real primary button; header: a fuller header (masthead with
+   * business facts, no lone "Domov"); aiCaption: one caption per page instead of a chip on every AI picture (owner D1);
+   * fit: display headlines fit their column without mid-word breaks; scale: body and small type at a real scale, one
+   * eyebrow per page. All off: every rendered byte is as before. On after the proof's set round and the owner's look.
+   */
+  details: z.strictObject({ $comment: z.string().optional(), cta: z.boolean(), header: z.boolean(), aiCaption: z.boolean(), fit: z.boolean(), scale: z.boolean() }),
+  /**
    * The design studio (docs/plans/design-studio.md). uniqueness (§5.4, engine studio/look.ts): the look distance's part
    * weights (genome axes, composition signature, palette in Lab, perceptual hash of the first screens, stance) and the
    * gate: a look closer than sameTradeMin to a site of the same trade, or than sameTownMin to a site in the same town,

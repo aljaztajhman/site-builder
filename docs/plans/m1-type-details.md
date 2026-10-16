@@ -37,8 +37,8 @@ Tests: each voice validates against `Design`; ≥ 6 distinct heading classes; fo
 ### C. Harness (implementer · Sonnet · medium, tools/**) — owns tools/eval/src/structure-proof.ts, tools/eval/test/structure-proof.test.ts, tools/eval/src/details-sheet.ts (new)
 
 - `assignVoices(pages)`: deterministic; no voice on more than 25 % of a set (floor(0.25 n), min 1); neighbours in list order differ; same business (gen/regen) differ; trade affinity table as a soft preference.
-- `--details` flag: applies the voice to each spec's design, runs `oneStack(spec)` (drops eyebrows after the first, a spec transform — the pages' words otherwise unchanged) and renders with `details: { cta, header, aiCaption, fit, scale }` all true. Without the flag, output is Wave P's.
-- Writes `voice` into manifest.json and assign.json; `pnpm variety` prints the voice share.
+- `--details` flag: applies the voice to each spec's design and renders with `details: { cta, header, aiCaption, fit, scale }` all true. Without the flag, output is Wave P's.
+- Writes `voice` into manifest.json and assign.json; `pnpm variety` prints the voice share. (The one-stack rule is the renderer's `scale` switch, not a spec edit.)
 - `pnpm details-sheet --before <dir> --after <dir> --out <dir>`: side-by-side contact sheets (Wave P left, new right) for desktop and phone.
 
 Tests written first by the director (failing), implementer makes them pass.
