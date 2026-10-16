@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The narrow, right-offset hero photo and widely spaced service grid make an otherwise clean, branded page feel uneven and unnecessarily long.\",\n  \"desktopNote\": \"The prominent treatment-room photo and coordinated branding work well, but oversized headings and sparse lower sections weaken the page’s rhythm.\",\n  \"phone\": {\n    \"impression\": 3,\n    \"hierarchy\": 3,\n    \"imagery\": 3,\n    \"spacing\": 2,\n    \"clutter\": 3,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 3,\n    \"imagery\": 4,\n    \"spacing\": 2,\n    \"clutter\": 3,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Compress the opening-hours display and service grid, reduce section padding, and integrate the standalone booking section into the hours section.\",\n    \"On phone, bring the treatment-room photo closer to the introduction and use nearly the full content width rather than a narrow, right-offset crop.\",\n    \"Make physiotherapy explicit above the hero headline and reduce desktop headline sizes so the business identity leads rather than the slogan.\"\n  ],\n  \"blockers\": []\n}",
+  "usage": {
+    "prompt_tokens": 8463,
+    "completion_tokens": 435,
+    "cost": 0.025506
+  }
+}

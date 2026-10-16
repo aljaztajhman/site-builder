@@ -1,4 +1,4 @@
-import { Actions, Section, titleId } from "../../primitives/index.tsx";
+import { Actions, FitText, Section, titleId } from "../../primitives/index.tsx";
 import type { SectionProps } from "../../types.ts";
 
 /** Call to action. Left-aligned in both variants. */
@@ -9,7 +9,7 @@ export function Cta({ section, ctx }: SectionProps<"cta">) {
       <div className="cta">
         <div className="cta__text">
           <h2 id={titleId(section.id)} className="cta__title">
-            {props.heading}
+            <FitText text={props.heading} />
           </h2>
           {props.text && <p className="cta__lead">{props.text}</p>}
         </div>

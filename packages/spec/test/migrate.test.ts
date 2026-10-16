@@ -236,12 +236,13 @@ describe("migration 10 → 11 (footer year and statement date in the spec)", () 
 });
 
 describe("generated images", () => {
-  it("may fill a hero but not a products section (pekarna-kvas uses img_01 in both)", async () => {
+  it("may fill a hero but not a products section (pekarna-kvas's hero photo put on a product too)", async () => {
     const { readFileSync } = await import("node:fs");
     const { validateSite } = await import("../src/index.ts");
-    type Spec = { assets: { images: { id: string; origin?: string }[] }; pages: { sections: { type: string }[] }[] };
+    type Spec = { assets: { images: { id: string; origin?: string }[] }; pages: { sections: { type: string; props?: { items?: { image?: string }[] } }[] }[] };
     const spec = JSON.parse(readFileSync(new URL("../../../tools/eval/golden/pekarna-kvas.json", import.meta.url), "utf8")) as Spec;
     spec.assets.images[0]!.origin = "generated";
+    spec.pages[0]!.sections.find((s) => s.type === "products")!.props!.items![0]!.image = spec.assets.images[0]!.id;
     const r = validateSite(spec);
     expect(r.ok).toBe(false);
     const home = spec.pages[0]!.sections;

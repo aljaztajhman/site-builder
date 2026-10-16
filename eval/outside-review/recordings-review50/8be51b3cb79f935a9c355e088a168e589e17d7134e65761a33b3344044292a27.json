@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The hero photo loses its dough focal point behind the text card, leaving the first screen dominated by foliage, cloth and text rather than food.\",\n  \"desktopNote\": \"The warm hero and confident typography work well, but the oversized, nearly empty staff section interrupts the page’s rhythm.\",\n  \"phone\": {\n    \"impression\": 3,\n    \"hierarchy\": 3,\n    \"imagery\": 2,\n    \"spacing\": 3,\n    \"clutter\": 4,\n    \"distinctiveness\": 3\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 3,\n    \"imagery\": 4,\n    \"spacing\": 2,\n    \"clutter\": 4,\n    \"distinctiveness\": 3\n  },\n  \"fixes\": [\n    \"Recompose the mobile hero so the dough remains visible above the text card; shorten the two-row header and reduce the card’s internal spacing.\",\n    \"Reduce the desktop hero’s height and move its text card upward so the reservation button is fully visible within the first screen.\",\n    \"Turn the sparse staff section into a compact introduction, reduce its oversized desktop heading, and tighten the surrounding whitespace.\"\n  ],\n  \"blockers\": []\n}",
+  "usage": {
+    "prompt_tokens": 7370,
+    "completion_tokens": 414,
+    "cost": 0.0225635
+  }
+}

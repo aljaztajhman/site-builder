@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"The opening-hours section turns six rows of identical magenta bars into a tall wall that dominates the page out of proportion to its value.\",\"desktopNote\":\"Hero sits in a wide empty band and the price list leaves the right half blank below the fold while hours again sprawl over a full screen.\",\"phone\":{\"impression\":4,\"hierarchy\":4,\"imagery\":4,\"spacing\":3,\"clutter\":4,\"distinctiveness\":3},\"desktop\":{\"impression\":3,\"hierarchy\":4,\"imagery\":4,\"spacing\":2,\"clutter\":4,\"distinctiveness\":3},\"fixes\":[\"Collapse opening hours into a compact Mon–Fri / Sat text table; the six-bar timeline wastes a full screen on both viewports.\",\"Tighten desktop vertical rhythm: cut the dead space under the hero and after hours, and lay the price list in a balanced three-column grid instead of leaving the right half empty.\",\"Make the hero link a proper button and bring the bouquet photo or a price teaser into the first screen so the desktop above-the-fold does more than show one picture and a headline.\"],\"blockers\":[]}",
+  "usage": {
+    "prompt_tokens": 11611,
+    "completion_tokens": 381
+  },
+  "batch": true
+}

@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The hero image is pushed below the fold and awkwardly right-aligned, leaving an unbalanced dark empty gap on the left.\",\n  \"desktopNote\": \"The layout has strong traditional character and clear hierarchy, though the botanical branch illustration inside the hero card feels unrelated to watchmaking.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 3,\n    \"spacing\": 3,\n    \"clutter\": 5,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 5,\n    \"imagery\": 4,\n    \"spacing\": 4,\n    \"clutter\": 5,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Center or widen the arched hero image on mobile so it does not leave a wide, awkward dark gap on the left.\",\n    \"Replace the generic botanical branch illustration in the hero card with a horological or Idrija-lace motif.\",\n    \"Replace the lone 'Domov' link in the desktop header with anchor links to the page sections (Ponudba, Kontakt) so the navigation is useful.\"\n  ],\n  \"blockers\": []\n}",
+  "usage": {
+    "prompt_tokens": 11509,
+    "completion_tokens": 303,
+    "cost": 0.026048
+  }
+}

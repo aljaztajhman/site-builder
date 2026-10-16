@@ -31,7 +31,7 @@ function templateDesign(id: string): Design {
   };
 }
 
-const KRANJ: Business = { ...FULL_BUSINESS, phone: "+38641555730", address: { street: "Savska cesta 52", postalCode: "4000", city: "Kranj" } };
+const KRANJ: Business = { ...FULL_BUSINESS, type: "car-repair", phone: "+38641555730", address: { street: "Savska cesta 52", postalCode: "4000", city: "Kranj" } };
 const ctxFor = (dir: string, business: Business = KRANJ) => testCtx(testSpec({ design: templateDesign(dir), business }));
 
 const hero = (variant: SectionOf<"hero-signature">["variant"], props: Partial<SectionOf<"hero-signature">["props"]> = {}): SectionOf<"hero-signature"> =>
@@ -124,7 +124,7 @@ describe("hero-signature receipt (Račun)", () => {
 
   it("lists what the office does on a receipt with the business name from the facts, the call as the one button", () => {
     const out = html(<HeroSignature section={receipt()} ctx={ctxFor("racun", SOBOTA)} index={0} />);
-    expect(out).toMatch(/<h1 id="s_hero-title" class="hsig__title[^"]*">Računovodstvo za s.p., d.o.o. in društva<\/h1>/);
+    expect(out).toMatch(/<h1 id="s_hero-title" class="hsig__title[^"]*"><span class="fit" style="--lw:13">Računovodstvo za s.p., d.o.o. in društva<\/span><\/h1>/);
     // The address line comes from the facts, not from props.
     expect(out).toContain('<p class="eyebrow hsig__eyebrow">Slovenska ulica 41, Murska Sobota</p>');
     expect(out.match(/btn btn--primary/g)).toHaveLength(1);
@@ -183,7 +183,7 @@ describe("hero-signature label (Etiketa)", () => {
     expect(out).toContain("s-hero-signature--label tone-inverse");
     expect(out).toMatch(/<div class="label-card hsig__card"><svg class="branch"[^>]*aria-hidden="true"/);
     expect(out).toContain('<p class="hsig__where">Kidričeva ulica 22, Koper</p>');
-    expect(out).toMatch(/<h1 id="s_hero-title" class="hsig__title[^"]*">Istrske dobrote manjših pridelovalcev<\/h1>/);
+    expect(out).toMatch(/<h1 id="s_hero-title" class="hsig__title[^"]*"><span class="fit" style="--lw:13">Istrske dobrote manjših pridelovalcev<\/span><\/h1>/);
     expect(out.match(/btn btn--primary/g)).toHaveLength(1);
     expect(out).toContain('class="text-link">Kaj prodajamo</a>');
     expect(out).toMatch(/<figure class="hsig__door"><picture class="media hsig__door-media arch-top media--contained">/);
@@ -432,6 +432,18 @@ describe("contact call-out", () => {
     const withHours = { ...ctx, page: { ...ctx.page, sections: [section, { id: "s_oh", type: "opening-hours", variant: "photo", props: { title: "Odprto" } }] } } as typeof ctx;
     expect(html(<Contact section={section} ctx={withHours} index={5} />)).not.toContain("Delovni čas");
     expect(html(<Contact section={section} ctx={ctx} index={5} />)).toContain("Delovni čas");
+  });
+
+  it("leaves out the address and hours the hero's fact strip already showed above it (say each thing once)", () => {
+    const ctx = ctxFor("tablica");
+    const strip = { ...ctx, page: { ...ctx.page, sections: [hero("photo"), section] } } as typeof ctx;
+    const out = html(<Contact section={section} ctx={strip} index={5} />);
+    expect(out).not.toContain("Savska cesta 52");
+    expect(out).not.toContain("Delovni čas");
+    expect(out).toContain('class="plate plate--poster"');
+    // Below the call-out the strip doesn't count: the call-out is first, it shows both.
+    const after = { ...ctx, page: { ...ctx.page, sections: [section, hero("photo")] } } as typeof ctx;
+    expect(html(<Contact section={section} ctx={after} index={0} />)).toContain("Savska cesta 52");
   });
 
   it("leaves out an e-mail the owner doesn't have", () => {

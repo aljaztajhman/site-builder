@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The number-plate call button gives the page a trade-specific identity, but the heavily darkened workshop photo barely registers behind the hero text.\",\n  \"desktopNote\": \"Oversized headings and the enormous phone-number plate overwhelm the hero, while the towing-region section leaves much of the screen unused.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 3,\n    \"spacing\": 4,\n    \"clutter\": 3,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 3,\n    \"hierarchy\": 2,\n    \"imagery\": 3,\n    \"spacing\": 2,\n    \"clutter\": 3,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Reduce desktop hero and section-heading sizes substantially, and shrink the number-plate button so the service, location and call action form a compact hierarchy.\",\n    \"Give the workshop photo a clearer crop on phone and use a localized dark gradient rather than darkening the entire image; make the blue call prompt white for stronger contrast.\",\n    \"Turn the desktop towing-region section into a compact two-column block and consolidate the repeated directions links so each section has one purposeful action.\"\n  ],\n  \"blockers\": []\n}",
+  "usage": {
+    "prompt_tokens": 10028,
+    "completion_tokens": 438,
+    "cost": 0.0294485
+  }
+}

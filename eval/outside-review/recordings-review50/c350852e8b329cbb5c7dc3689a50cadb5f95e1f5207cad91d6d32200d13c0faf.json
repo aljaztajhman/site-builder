@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The photography and restrained green palette suit the gostilna, but its location is buried in the footer rather than established near the introduction.\",\n  \"desktopNote\": \"The oversized hero pushes every action below the first screen, while the prices and opening-hours sections leave substantial unused space.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 3,\n    \"imagery\": 5,\n    \"spacing\": 4,\n    \"clutter\": 4,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 2,\n    \"imagery\": 5,\n    \"spacing\": 3,\n    \"clutter\": 4,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Reduce the desktop hero image height and move its text panel upward so the headline, supporting text and primary action all fit within the first 800 pixels.\",\n    \"Place a compact address line near the introductory heading on both layouts, with a visible desktop contact or directions link.\",\n    \"Make the desktop prices a balanced five-item layout with smaller price typography, and combine opening hours with location details to eliminate the mostly empty full-width section.\"\n  ],\n  \"blockers\": []\n}",
+  "usage": {
+    "prompt_tokens": 10484,
+    "completion_tokens": 378,
+    "cost": 0.0299885
+  }
+}

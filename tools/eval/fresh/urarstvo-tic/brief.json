@@ -1,0 +1,68 @@
+{
+  "id": "urarstvo-tic",
+  "businessType": "shop",
+  "trade": "urar",
+  "description": "Urarstvo Tič, Mestni trg 4, 5280 Idrija.\n\nSem Marko Tič, urar v tretji generaciji. Delavnico je leta 1961 odprl moj dedek. Popravljam ročne, žepne, stenske in stoječe ure, tudi stare mehanske ure s kukavico. Menjam baterije in paščke, krajšam kovinske paščke in poliram stekla.\n\nCene: menjava baterije 8 €, menjava paščka od 15 €, servis mehanske ročne ure od 60 €. Za stenske in starinske ure naredim oceno po pregledu.\n\nProdajam tudi nove ure slovenskih in švicarskih znamk ter usnjene paščke z idrijsko čipko, ki jih izdeluje moja žena Mojca.\n\nOdprto od ponedeljka do petka od 9.00 do 17.00, v soboto od 9.00 do 12.00.\n\nTelefon: 05 555 31 62\nE-pošta: urarstvo.tic@urar.example\n\nSlike delavnice bomo še naredili.",
+  "logo": null,
+  "photos": [],
+  "facts": {
+    "name": "Urarstvo Tič",
+    "phone": "+38655553162",
+    "email": "urarstvo.tic@urar.example",
+    "address": {
+      "street": "Mestni trg 4",
+      "postalCode": "5280",
+      "city": "Idrija"
+    },
+    "hours": [
+      {
+        "from": "mon",
+        "to": "fri",
+        "open": "09:00",
+        "close": "17:00"
+      },
+      {
+        "from": "sat",
+        "to": "sat",
+        "open": "09:00",
+        "close": "12:00"
+      }
+    ],
+    "prices": [
+      {
+        "item": "menjava baterije",
+        "amount": 8
+      },
+      {
+        "item": "menjava paščka",
+        "amount": 15,
+        "from": true
+      },
+      {
+        "item": "servis mehanske ročne ure",
+        "amount": 60,
+        "from": true
+      }
+    ],
+    "people": [
+      {
+        "name": "Marko Tič",
+        "role": "urar"
+      },
+      {
+        "name": "Mojca"
+      }
+    ],
+    "other": [
+      "urar v tretji generaciji",
+      "leta 1961",
+      "ure s kukavico",
+      "slovenskih in švicarskih znamk",
+      "paščke z idrijsko čipko"
+    ]
+  },
+  "missing": [
+    "photos",
+    "legal"
+  ]
+}

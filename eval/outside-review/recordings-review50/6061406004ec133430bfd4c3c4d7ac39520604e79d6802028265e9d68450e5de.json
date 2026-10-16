@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"The phone hero crops the photo to a wall of leaves and trunk so the house is lost, though the overlapping white card with address, headline and one link reads cleanly.\",\"desktopNote\":\"Below the hero the layout loosens: the group-reservation headline wraps into four lines in a narrow column leaving the right 60% of the section empty, and the contact block has a large dead band above its headline.\",\"phone\":{\"impression\":4,\"hierarchy\":4,\"imagery\":3,\"spacing\":4,\"clutter\":4,\"distinctiveness\":4},\"desktop\":{\"impression\":3,\"hierarchy\":3,\"imagery\":4,\"spacing\":2,\"clutter\":4,\"distinctiveness\":4},\"fixes\":[\"Desktop: let the group-reservation and call-to-reserve headlines run wider (max two lines) and tighten vertical padding so sections have no empty halves or dead bands.\",\"Phone: refocus the hero image on the house front, door and benches so the first screen shows the gostilna, not only foliage.\",\"Both: the footer repeats phone and e-mail already shown in the contact section above; reduce footer to company data, legal links and copyright.\"],\"blockers\":[\"Desktop, family section: the dining-room photo hangs below its section and crosses the divider line above 'Sprejemamo rezervacije', overlapping the next section's top edge.\"]}",
+  "usage": {
+    "prompt_tokens": 11636,
+    "completion_tokens": 449
+  },
+  "batch": true
+}

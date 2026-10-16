@@ -3,16 +3,16 @@
  * stock ornaments. Every fact they show comes from the business facts; every colour from the site's
  * tokens (CSS classes in styles/motifs.css), so a motif follows a colour edit.
  */
-import { DIRECTIONS, earliestOpening, formatPhoneNational, isPlaceholder, plateCode, siteMotif, type Motif, type SubMotif } from "@sb/spec";
+import { earliestOpening, formatPhoneNational, isPlaceholder, plateCode, siteMotif, type Motif, type SubMotif } from "@sb/spec";
 import { Ph, cx } from "../primitives/index.tsx";
 import type { RenderCtx } from "../types.ts";
 import { JointDrawing, Stem, StripDrawing, Tag, TilesDrawing, WireDrawing } from "./trades.tsx";
 
 export * from "./trades.tsx";
 
-/** The motif of the site's design direction, if it is a template direction. */
+/** The motif of the site's design direction, if it is a template direction and the motif fits the trade (spec siteMotif). */
 export function motifOf(ctx: RenderCtx): Motif | undefined {
-  return DIRECTIONS.find((d) => d.id === ctx.site.design.direction)?.template?.motif;
+  return siteMotif(ctx.site).motif;
 }
 
 /** The sub-trade motif drawn on the template's layout (spec v15 business.subtype), if any. */

@@ -1,0 +1,18 @@
+{
+  "seq": 4,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "ee70074741945fba",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"split-cta\",\"cta\":\"call\"},\"footer\":{\"variant\":\"columns\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Pasji salon Kodra Kočevje | Striženje in kopanje psov\",\"description\":\"Pasji salon v Kočevju: striženje, kopanje in nega krempljev za pse vseh pasem. Vsak pes je sam, brez kletk in pomirjeval. Delo po naročilu.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-split\",\"variant\":\"image-left\",\"props\":{\"eyebrow\":\"Pasja frizerka Nina\",\"headline\":\"Vsak pes pride na vrsto sam, brez kletk\",\"intro\":\"Že 8 let strižem in kopam pse vseh pasem. Brez kletk in brez pomirjeval, z mirnim tempom, tudi za plašne in starejše pse.\",\"primary\":{\"label\":\"Pokličite me\",\"target\":{\"action\":\"call\"}},\"secondary\":{\"label\":\"Poglejte cene\",\"target\":{\"page\":\"p_home\",\"section\":\"s_cene\"}},\"image\":\"img_g1\"}},{\"id\":\"s_cene\",\"type\":\"price-list\",\"variant\":\"tags\",\"props\":{\"title\":\"Cene storitev\",\"intro\":\"Delam po naročilu, zato se za termin dogovoriva po telefonu ali sporočilu.\",\"groups\":[{\"items\":[{\"name\":\"Kopanje in sušenje malega psa\",\"price\":{\"amount\":25}},{\"name\":\"Striženje malega psa\",\"price\":{\"amount\":35}},{\"name\":\"Striženje srednjega psa\",\"price\":{\"amount\":45}},{\"name\":\"Striženje velikega psa\",\"price\":{\"amount\":60,\"from\":true}},{\"name\":\"Striženje krempljev\",\"price\":{\"amount\":8}}]}]}},{\"id\":\"s_nacin\",\"type\":\"highlights\",\"variant\":\"list\",\"tone\":\"alt\",\"props\":{\"heading\":\"Kako delam\",\"items\":[{\"title\":\"Vse pasme\",\"text\":\"Delam z vsemi pasmami, od čivav do bernskih planšarjev.\"},{\"title\":\"Pes je sam\",\"text\":\"Vsak pes je sam, brez kletk in brez pomirjeval.\"},{\"title\":\"Plašni in starejši psi\",\"text\":\"Pridejo lahko na krajši prvi obisk, da se navadijo.\"},{\"title\":\"Parkiranje\",\"text\":\"Parkirate lahko pred vrati.\"}]}},{\"id\":\"s_kocevje\",\"type\":\"image-text\",\"variant\":\"image-right\",\"props\":{\"eyebrow\":\"V Kočevju\",\"heading\":\"Salon na Ljubljanski cesti\",\"paragraphs\":[\"Pri meni je pes v središču pozornosti. Nikamor se ne mudi, zato se lahko tudi plašni psi v miru navadijo name in na salon.\",\"Pišete mi lahko tudi zvečer, odgovorim vam, ko lahko.\"],\"image\":\"img_g2\"}},{\"id\":\"s_ure\",\"type\":\"opening-hours\",\"variant\":\"compact\",\"tone\":\"alt\",\"props\":{\"title\":\"Delovni čas\",\"note\":\"Delam po naročilu. Za sporočila sem dosegljiva tudi zvečer.\"}},{\"id\":\"s_cta\",\"type\":\"cta\",\"variant\":\"band\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Dogovorimo termin za vašega psa\",\"text\":\"Povejte mi, kakšne pasme je pes in kaj potrebuje, in poiščeva čas, ki vama ustreza.\",\"primary\":{\"label\":\"Pot do salona\",\"target\":{\"action\":\"directions\"}}}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2455,
+      "output_tokens": 1256,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 21583
+    }
+  }
+}

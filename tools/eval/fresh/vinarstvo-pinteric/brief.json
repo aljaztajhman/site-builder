@@ -1,0 +1,58 @@
+{
+  "id": "vinarstvo-pinteric",
+  "businessType": "tourist-farm",
+  "trade": "vinarstvo",
+  "description": "Vinarstvo Pinterič, Bizeljska cesta 112, 8259 Bizeljsko.\n\nSmo družinska vinska klet na Bizeljskem. Vinograde obdelujemo že štiri generacije, danes jih vodita brata Gregor in Tomaž Pinterič. Imamo 6 hektarjev vinogradov, največ je modre frankinje, laškega rizlinga in rumenega muškata. Ponosni smo na bizeljsko penino, ki jo delamo po klasični metodi.\n\nVabimo na degustacije v naši zidanici in v stari kleti, vkopani v pesek, v kateri vino hranimo že od leta 1897.\n\nDegustacija petih vin s kruhom in domačo salamo 15 € na osebo, degustacija s penino in sirovim krožnikom 25 € na osebo. Za skupine nad 10 oseb pripravimo tudi vodeni ogled vinograda.\n\nDegustacije so ob sobotah in nedeljah od 11.00 do 19.00, med tednom za skupine po dogovoru. Vino lahko kupite tudi v kleti.\n\nRezervacije: 07 555 28 14 ali klet@pinteric.example",
+  "logo": null,
+  "photos": [],
+  "facts": {
+    "name": "Vinarstvo Pinterič",
+    "phone": "+38675552814",
+    "email": "klet@pinteric.example",
+    "address": {
+      "street": "Bizeljska cesta 112",
+      "postalCode": "8259",
+      "city": "Bizeljsko"
+    },
+    "hours": [
+      {
+        "from": "sat",
+        "to": "sun",
+        "open": "11:00",
+        "close": "19:00"
+      }
+    ],
+    "prices": [
+      {
+        "item": "Degustacija petih vin s kruhom in domačo salamo",
+        "amount": 15
+      },
+      {
+        "item": "degustacija s penino in sirovim krožnikom",
+        "amount": 25
+      }
+    ],
+    "people": [
+      {
+        "name": "Gregor Pinterič"
+      },
+      {
+        "name": "Tomaž Pinterič"
+      }
+    ],
+    "other": [
+      "štiri generacije",
+      "6 hektarjev vinogradov",
+      "modre frankinje, laškega rizlinga in rumenega muškata",
+      "po klasični metodi",
+      "vkopani v pesek",
+      "od leta 1897",
+      "skupine nad 10 oseb",
+      "vodeni ogled vinograda"
+    ]
+  },
+  "missing": [
+    "photos",
+    "legal"
+  ]
+}

@@ -277,7 +277,7 @@ main > .s-hero-signature:first-child {
 }
 .hsig__title {
   font-size: var(--fs-display, calc(var(--fs-h1) * 1.3));
-  line-height: 0.94;
+  line-height: max(var(--lh-floor, 0), 0.94);
   max-width: 14ch;
 }
 .hsig__title--long {
@@ -525,7 +525,7 @@ main > .s-hero-signature:first-child {
 .hsig--label .hsig__title--long {
   max-width: none;
   font-size: var(--fs-display, calc(var(--fs-h1) * 1.3));
-  line-height: 1;
+  line-height: max(var(--lh-floor, 0), 1);
 }
 .hsig__where {
   font-weight: 700;
@@ -604,7 +604,7 @@ main > .s-hero-signature:first-child {
 .hsig--card .hsig__title--long {
   max-width: none;
   font-size: var(--fs-display, calc(var(--fs-h1) * 1.3));
-  line-height: 0.98;
+  line-height: max(var(--lh-floor, 0), 0.98);
 }
 /* .s.x + .s.s: outranks the shared rule that lets two sections on the same ground share one gap. */
 .s.s-hero-signature--card + .s.s {
@@ -665,7 +665,7 @@ main > .s-hero-signature:first-child {
 .hsig--mirrors .hsig__title--long {
   max-width: none;
   font-size: var(--fs-display, calc(var(--fs-h1) * 1.3));
-  line-height: 0.92;
+  line-height: max(var(--lh-floor, 0), 0.92);
 }
 .hsig__mirrors {
   display: grid;
@@ -732,7 +732,7 @@ main > .s-hero-signature:first-child {
 .hsig--disc .hsig__title--long {
   max-width: none;
   font-size: var(--fs-display, calc(var(--fs-h1) * 1.3));
-  line-height: 1;
+  line-height: max(var(--lh-floor, 0), 1);
 }
 .hsig__face {
   position: relative;
@@ -820,7 +820,7 @@ main > .s-hero-signature:first-child {
 .hsig--view .hsig__title--long {
   max-width: none;
   font-size: var(--fs-display, calc(var(--fs-h1) * 1.3));
-  line-height: 0.92;
+  line-height: max(var(--lh-floor, 0), 0.92);
 }
 .hsig--view .hsig__lead {
   max-width: 27em;
@@ -937,7 +937,7 @@ main > .s-hero-signature:first-child {
   max-width: none;
   margin-top: 0.75rem;
   font-size: var(--fs-display, calc(var(--fs-h1) * 1.3));
-  line-height: 0.92;
+  line-height: max(var(--lh-floor, 0), 0.92);
 }
 .hsig--bend .hsig__lead {
   max-width: 25em;

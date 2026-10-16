@@ -1,0 +1,46 @@
+{
+  "id": "steklarstvo-vrhovnik",
+  "businessType": "builder",
+  "trade": "steklar",
+  "description": "Steklarstvo Vrhovnik, Goriška cesta 30, 5270 Ajdovščina. Rezanje in brušenje stekla po meri, zamenjava razbitih stekel na oknih in vratih, steklene tuš kabine, ogledala, kaljena stekla za kuhinje in steklene ograje. Izmerimo pri vas in tudi montiramo, delamo po vsej Vipavski dolini in na Goriškem. Za nujne zamenjave razbitega stekla pridemo isti ali naslednji dan. Delavnica je odprta od ponedeljka do petka od 7.00 do 15.00. Ponudbo pošljemo po ogledu, ogled je brezplačen. Pokličite Boštjana na 041 555 219 ali pišite na steklarstvo.vrhovnik@steklo.example. Delamo tudi okvirje za slike po meri, za trgovine in lokale zastekljujemo izložbe. Steklo imamo na zalogi, zato manjša naročila naredimo v enem tednu. Obrt od leta 1988.",
+  "logo": null,
+  "photos": [],
+  "facts": {
+    "name": "Steklarstvo Vrhovnik",
+    "phone": "+38641555219",
+    "email": "steklarstvo.vrhovnik@steklo.example",
+    "address": {
+      "street": "Goriška cesta 30",
+      "postalCode": "5270",
+      "city": "Ajdovščina"
+    },
+    "hours": [
+      {
+        "from": "mon",
+        "to": "fri",
+        "open": "07:00",
+        "close": "15:00"
+      }
+    ],
+    "people": [
+      {
+        "name": "Boštjan"
+      }
+    ],
+    "other": [
+      "po vsej Vipavski dolini in na Goriškem",
+      "isti ali naslednji dan",
+      "ogled je brezplačen",
+      "od leta 1988",
+      "steklene tuš kabine",
+      "kaljena stekla za kuhinje",
+      "v enem tednu",
+      "zastekljujemo izložbe"
+    ]
+  },
+  "missing": [
+    "photos",
+    "prices",
+    "legal"
+  ]
+}

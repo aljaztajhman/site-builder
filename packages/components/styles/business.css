@@ -211,11 +211,14 @@
   padding-block: 0.75rem;
   border-bottom: 1px solid var(--b-rule);
 }
+/* A name keeps its words whole (no automatic hyphens since the 50-page review): it never shrinks below its longest
+   word; a wide price (a placeholder chip at 360 px) wraps inside its own column instead. */
 .prices__row dt {
-  min-width: 0;
+  min-width: min(min-content, 50%);
 }
 .prices__row dd {
-  flex: none;
+  flex: 0 1 auto;
+  min-width: min-content;
   max-width: 50%;
   text-align: right;
 }
@@ -560,7 +563,7 @@
 .offers__name {
   margin-top: 0.5rem;
   font-size: clamp(2.125rem, 1.2rem + 2.9vw, 3.375rem);
-  line-height: 1;
+  line-height: max(var(--lh-floor, 0), 1);
 }
 .offers__note {
   margin-top: 0.625rem;
@@ -1290,6 +1293,10 @@
 .room.card {
   overflow: hidden;
 }
+/* A card without a photo beside one with a photo keeps its own height (review 50: an empty half-card). */
+.room--text {
+  align-self: start;
+}
 .room__media {
   aspect-ratio: 3 / 2;
 }
@@ -1422,6 +1429,31 @@
     column-gap: 4rem;
     align-items: start;
   }
+}
+/* One or two places: one narrow column, the places set inline under the head (no list grid with empty cells). */
+.area.area--few {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 44rem;
+}
+.area--few .area__list {
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: 0.25rem;
+  border: 0;
+  font-family: var(--font-heading);
+  font-size: var(--fs-h3);
+  line-height: 1.35;
+}
+.area--few .area__list li {
+  padding: 0;
+  border: 0;
+}
+.area--few .area__list li:not(:last-child)::after {
+  content: "";
+  display: inline-block;
+  margin-inline: 0.5em;
+  vertical-align: middle;
+  border: 0.15em solid currentColor;
 }
 
 /* ---------- imagery treatments on small or tiled photos ---------- */

@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The hero card covers the main subject of the background image (the dough), leaving only a blurred bottle and towel visible, while the top contact bar duplicates the fixed bottom bar.\",\n  \"desktopNote\": \"The framed hero card and navy-and-gold palette create a strong, editorial impression, though the team section below feels sparse with a single name and a large empty right side.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 3,\n    \"spacing\": 4,\n    \"clutter\": 3,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 5,\n    \"imagery\": 4,\n    \"spacing\": 4,\n    \"clutter\": 5,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Remove the phone number and directions bar below the mobile header, as it duplicates the sticky bottom action bar.\",\n    \"Adjust the mobile hero image crop or card position so the pizza dough is clearly visible above the text box.\",\n    \"Make the 'Kdo skrbi za peč in mize' section more compact or place the heading and name side-by-side on desktop so it does not look empty.\"\n  ],\n  \"blockers\": []\n}",
+  "usage": {
+    "prompt_tokens": 9293,
+    "completion_tokens": 325,
+    "cost": 0.021836
+  }
+}

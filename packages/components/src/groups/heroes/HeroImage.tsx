@@ -1,4 +1,4 @@
-import { Actions, Picture, Section, titleId } from "../../primitives/index.tsx";
+import { Actions, FitText, Picture, Section, titleId } from "../../primitives/index.tsx";
 import type { SectionProps } from "../../types.ts";
 
 /** The photo spans the container: full viewport on mobile, container width (max 72rem) on desktop. */
@@ -17,7 +17,7 @@ export function HeroImage({ section, ctx, index }: SectionProps<"hero-image">) {
         <div className="hero-image__panel tone-inverse">
           {props.eyebrow && <p className="eyebrow">{props.eyebrow}</p>}
           <h1 id={titleId(section.id)} className={props.headline.length > 44 ? "hero-title hero-title--long" : "hero-title"}>
-            {props.headline}
+            <FitText text={props.headline} />
           </h1>
           <p className="lead">{props.intro}</p>
           <Actions primary={props.primary} secondary={props.secondary} ctx={ctx} />

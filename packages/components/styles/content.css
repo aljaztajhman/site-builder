@@ -435,6 +435,9 @@
   font-weight: var(--fw-heading);
   font-size: var(--fs-figure-xl, clamp(6.5rem, 0.5rem + 19vw, 16.75rem));
   line-height: 0.8;
+  /* The tight line lets a numeral's top rise above its line box (old-style and display serifs most): room for it so
+     the label above stays clear (review 50: "Kuhamo od leta" on the top of "1968"). */
+  padding-top: 0.14em;
   letter-spacing: -0.07em;
   margin-left: -0.04em;
   font-variant-numeric: tabular-nums;

@@ -33,6 +33,19 @@
   top: auto;
   bottom: 0.5rem;
 }
+/* A round picture (a disc, or a picture inside one) cuts every corner (review 50: the label clipped on a small round
+   inset): the label sits centred a fifth up from the bottom, where the circle is wide enough for it, a size smaller.
+   At 8rem across (the smallest inset) the circle there is about 6.6rem wide, the label about 5.3rem. */
+.disc .media--ai::after,
+.media--ai.disc::after {
+  top: auto;
+  right: auto;
+  bottom: 22%;
+  left: 50%;
+  translate: -50% 0;
+  font-size: 0.6875rem;
+  white-space: nowrap;
+}
 
 [data-imagery="natural"] .media {
   border-radius: 0;

@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The photo-first hero delays the service headline and call action, while the oversized landscape section makes the page unnecessarily long.\",\n  \"desktopNote\": \"The layout is readable and orderly, but oversized image sections and generic styling make it feel more like a template than a distinctive installer’s website.\",\n  \"phone\": {\n    \"impression\": 3,\n    \"hierarchy\": 3,\n    \"imagery\": 3,\n    \"spacing\": 3,\n    \"clutter\": 3,\n    \"distinctiveness\": 2\n  },\n  \"desktop\": {\n    \"impression\": 3,\n    \"hierarchy\": 4,\n    \"imagery\": 3,\n    \"spacing\": 3,\n    \"clutter\": 3,\n    \"distinctiveness\": 2\n  },\n  \"fixes\": [\n    \"On phone, put the service headline before the photo, reduce the photo height, and bring a clearly styled primary call button higher into the first screen.\",\n    \"Replace the oversized landscape with installation-related imagery, or remove it and combine the free-visit message with the process section.\",\n    \"Remove the standalone contact strip beneath the hero, retaining contact access in the header and footer, and reduce desktop hero padding to bring services closer to the first screen.\"\n  ],\n  \"blockers\": []\n}",
+  "usage": {
+    "prompt_tokens": 10109,
+    "completion_tokens": 474,
+    "cost": 0.030011
+  }
+}

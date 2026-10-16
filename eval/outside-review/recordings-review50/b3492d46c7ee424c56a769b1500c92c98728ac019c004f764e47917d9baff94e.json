@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The workshop photo and readable typography work, but the location appears too late and the two equally styled hero links fail to establish a primary action.\",\n  \"desktopNote\": \"The oversized hero photo pushes the primary action below the first screen, while the location is buried beneath the dominant founding-year section.\",\n  \"phone\": {\n    \"impression\": 3,\n    \"hierarchy\": 3,\n    \"imagery\": 4,\n    \"spacing\": 3,\n    \"clutter\": 3,\n    \"distinctiveness\": 3\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 2,\n    \"imagery\": 4,\n    \"spacing\": 3,\n    \"clutter\": 3,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Recompose the hero so the service headline, location and prominent call button appear within the first screen on both viewports; reduce the desktop photo height and make directions a secondary link.\",\n    \"Shrink the oversized founding year and tighten the hero’s trailing space and contact-section gaps to create a more consistent vertical rhythm.\",\n    \"Consolidate the repeated brand-specialisation and booking messages into fewer sections, retaining one strong closing contact prompt rather than restating the hero.\"\n  ],\n  \"blockers\": []\n}",
+  "usage": {
+    "prompt_tokens": 10272,
+    "completion_tokens": 397,
+    "cost": 0.0296485
+  }
+}

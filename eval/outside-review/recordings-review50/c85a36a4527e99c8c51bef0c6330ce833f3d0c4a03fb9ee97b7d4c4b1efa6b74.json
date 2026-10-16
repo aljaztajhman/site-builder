@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"The first screen stacks a sticky Pokličite/Navodila bar, a hero photo, headline and then two more text links (Pokličite me, Oglejte si cene), so the call action appears twice above the fold.\",\"desktopNote\":\"The hero sits in a tall white band with ~110px of dead space under the photo, and the price strip below is left-heavy with an empty right half, making the top of the page feel loosely composed.\",\"phone\":{\"impression\":4,\"hierarchy\":4,\"imagery\":4,\"spacing\":3,\"clutter\":3,\"distinctiveness\":3},\"desktop\":{\"impression\":3,\"hierarchy\":4,\"imagery\":4,\"spacing\":2,\"clutter\":3,\"distinctiveness\":3},\"fixes\":[\"Remove the duplicate 'Pokličite me' text link from the hero (and the dark CTA band repeats it again); keep one primary call action per screen and let 'Oglejte si cene' be the hero's secondary link.\",\"Tighten vertical rhythm on desktop: cut the empty space under the hero and the half-empty 'Kaj delam' and 'Kdaj delam' two-column blocks, or fill the right column of 'Kdaj delam' with address/map.\",\"Make the hero photo full-bleed or larger (crop to the hair, not the salon background) and use the bride photo as a second visual in the services list to break the long text-only run of seven rows.\"],\"blockers\":[]}",
+  "usage": {
+    "prompt_tokens": 12083,
+    "completion_tokens": 476
+  },
+  "batch": true
+}

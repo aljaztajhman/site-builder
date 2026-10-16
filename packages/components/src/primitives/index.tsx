@@ -1,4 +1,4 @@
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, type CSSProperties, type ReactNode } from "react";
 import {
   formatAddress,
   formatPhone,
@@ -303,13 +303,39 @@ export function Icon({ name }: { name: IconName }) {
 }
 
 /** Section heading block: optional eyebrow, the h2 title, optional intro. */
+/** Characters (code points) of the text's longest word. */
+export function longestWordLength(text: string): number {
+  return Math.max(0, ...text.split(/\s+/).map((w) => [...w].length));
+}
+
+/**
+ * Words shorter than this fit a 360 px phone at every heading size the tokens allow (display at most 44 px there,
+ * capitals about 0.8 em a letter: 9 x 0.8 x 44 = 317 px of the 328 px line); longer ones get FitText's clamp.
+ */
+export const FIT_WORD_FROM = 9;
+
+/**
+ * Heading text whose longest word could be wider than a phone (review 50: "ELEKTROINŠTALACIJE" made a 360 px page
+ * 435 px wide): the text in a block whose size is the heading's own, capped so the longest word fits the screen
+ * (base.css .fit, --lw letters at --fit-k em each). Shorter text is returned as it is.
+ */
+export function FitText({ text }: { text: string }) {
+  const n = longestWordLength(text);
+  if (n < FIT_WORD_FROM) return <>{text}</>;
+  return (
+    <span className="fit" style={{ "--lw": n } as CSSProperties}>
+      {text}
+    </span>
+  );
+}
+
 export function SectionHead(props: { id: string; eyebrow?: string | undefined; title: string; intro?: string | undefined; level?: 1 | 2 }) {
   const H = props.level === 1 ? "h1" : "h2";
   return (
     <header className="section-head">
       {props.eyebrow && <p className="eyebrow">{props.eyebrow}</p>}
       <H id={titleId(props.id)} className="section-title">
-        {props.title}
+        <FitText text={props.title} />
       </H>
       {props.intro && <p className="lead">{props.intro}</p>}
     </header>

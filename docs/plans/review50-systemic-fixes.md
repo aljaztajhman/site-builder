@@ -104,3 +104,17 @@ paid), compare the pass rate (8 / 50 today) and the blockers by cause. Report th
 - The filter in the product: Gemini + GPT cost ≈ €0.05 a page. Running them on every studio candidate before the
   owner or the consultants see it is cheap but changes the outside-review decision (eval only today).
 - 15 above (town in the hero vs the skeleton rule).
+
+## After the free fixes (2026-10-15, PR #216)
+
+Fixes 1–5, 7 and 8 built (6, a sentence twice, not yet), plus no automatic hyphenation and content-aware sections. The
+100 saved specs re-rendered for free (`pnpm review50:render`) and re-scored by all three reviewers (€6.21):
+
+- Means: Gemini 3.81 → 3.95, GPT 3.34 → 3.45, Fable 3.10 → 3.32.
+- All three pass 5 → **28** pages (the simulated upper bound was 23); the two-of-three filter passes 10 → **37**; held by
+  any reviewer 45 → 22.
+- Gone: the header capture artefact, address or hours repeated, the trade-foreign motif. Left: the footer's phone and
+  e-mail row after a contact section (8 pages), a sentence twice (5), layout-specific clipping (7) and empty bands (6),
+  the same photo twice (3, because the re-render skips the generation repair).
+- Before shots came from the cloud generation, after shots from a local re-render: part of the change may be the
+  environment. Details: `eval/outside-review/review50-after/before-after.md`.

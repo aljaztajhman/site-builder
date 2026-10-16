@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"Phone hero is text-first with the two arched photos pushed to the bottom edge of the first screen, and the second photo is a generic street scene that says nothing about a barbershop.\",\"desktopNote\":\"Desktop hero works well with the giant 'Kos' watermark and arched photos, but lower sections (team, contact) are half-empty single-column blocks leaving large dead space on the right.\",\"phone\":{\"impression\":3,\"hierarchy\":3,\"imagery\":3,\"spacing\":3,\"clutter\":4,\"distinctiveness\":3},\"desktop\":{\"impression\":4,\"hierarchy\":4,\"imagery\":3,\"spacing\":2,\"clutter\":4,\"distinctiveness\":4},\"fixes\":[\"Replace the street-scene photo with a shop interior, chair or barber at work so both hero images speak to the trade; on phone show one photo above the fold next to the headline.\",\"Fill the desktop 'Kdo vas postriže' and contact sections: add a portrait of Luka Kos and put phone/address side by side so the right half isn't empty.\",\"Tighten vertical padding across desktop sections (hours, price list, team) for a steadier rhythm; the hours chart bars could also sit in a two-column layout on phone to shorten the scroll.\"],\"blockers\":[]}",
+  "usage": {
+    "prompt_tokens": 11232,
+    "completion_tokens": 428
+  },
+  "batch": true
+}

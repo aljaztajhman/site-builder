@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The hero card covers the restaurant building in the photo, leaving only a dark tree canopy visible above it.\",\n  \"desktopNote\": \"The layout is clean, warm, and editorial, though the top navigation only shows a redundant 'Domov' link.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 5,\n    \"imagery\": 3,\n    \"spacing\": 4,\n    \"clutter\": 5,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 5,\n    \"hierarchy\": 5,\n    \"imagery\": 4,\n    \"spacing\": 4,\n    \"clutter\": 5,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Adjust the mobile hero image crop or place the text card below the photo so the charming restaurant facade and terrace are visible instead of just tree leaves.\",\n    \"Replace the lonely 'Domov' link in the desktop header with useful anchor links (e.g., Ponudba, Odpiralni čas, Kontakt) or a reservation call-to-action.\",\n    \"Increase the size of the secondary terrace photo in the 'Za mizo in v kuhinji' section so the view and outdoor seating can be better appreciated.\"\n  ],\n  \"blockers\": []\n}",
+  "usage": {
+    "prompt_tokens": 11499,
+    "completion_tokens": 323,
+    "cost": 0.026228
+  }
+}

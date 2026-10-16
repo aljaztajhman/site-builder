@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The warm typography and colours suit the restaurant, but the first-screen photograph is reduced to blurry foliage behind a large white card.\",\n  \"desktopNote\": \"The prominent exterior photograph establishes the restaurant well, but oversized secondary headings and the enormous founding year make the lower page unnecessarily sprawling.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 3,\n    \"spacing\": 3,\n    \"clutter\": 4,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 4,\n    \"spacing\": 3,\n    \"clutter\": 4,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Rework the phone hero crop to show the building or terrace rather than mostly foliage, and shorten the white card so more of the photograph remains visible.\",\n    \"Reduce the desktop founding year and secondary heading sizes, then tighten the history and opening-hours sections into a more balanced vertical rhythm.\",\n    \"Keep the reservation section as the main contact destination and remove the repeated phone and email links from the footer.\"\n  ],\n  \"blockers\": []\n}",
+  "usage": {
+    "prompt_tokens": 9360,
+    "completion_tokens": 401,
+    "cost": 0.0274085
+  }
+}

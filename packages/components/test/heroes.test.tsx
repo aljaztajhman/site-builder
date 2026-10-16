@@ -29,7 +29,7 @@ describe("hero-split", () => {
     it(`renders ${variant} with h1, actions and a preloaded-priority photo`, () => {
       const out = html(<HeroSplit section={{ ...section, variant }} ctx={testCtx()} index={0} />);
       expect(out).toContain(`s-hero-split--${variant}`);
-      expect(out).toMatch(/<h1 id="s_hero-title"[^>]*>Striženje in barvanje brez čakanja<\/h1>/);
+      expect(out).toMatch(/<h1 id="s_hero-title"[^>]*><span class="fit" style="--lw:9">Striženje in barvanje brez čakanja<\/span><\/h1>/);
       expect(out).toContain('href="tel:+38641123456"');
       expect(out).toContain('href="storitve.html"');
       expect(out).toContain('fetchPriority="high"');
@@ -112,7 +112,7 @@ describe("hero-type", () => {
   it("renders large without facts or images", () => {
     const out = html(<HeroType section={section} ctx={testCtx()} index={0} />);
     expect(out).toContain("s-hero-type--large");
-    expect(out).toMatch(/<h1 id="s_hero-title"[^>]*>Računovodske storitve/);
+    expect(out).toMatch(/<h1 id="s_hero-title"[^>]*><span class="fit" style="--lw:12">Računovodske storitve/);
     expect(out).not.toContain("hero-facts");
     expect(out).not.toContain("<img");
     expect(out).toContain('href="tel:+38641123456"');
@@ -168,7 +168,7 @@ describe("page-header", () => {
   it("renders with-image with h1 and a priority photo", () => {
     const out = html(<PageHeader section={section} ctx={testCtx()} index={0} />);
     expect(out).toContain("s-page-header--with-image");
-    expect(out).toMatch(/<h1 id="s_head-title"[^>]*>Najpogostejša vprašanja<\/h1>/);
+    expect(out).toMatch(/<h1 id="s_head-title"[^>]*><span class="fit" style="--lw:13">Najpogostejša vprašanja<\/span><\/h1>/);
     expect(out).toContain('fetchPriority="high"');
     expect(out).toContain(`sizes="${PAGE_HEADER_SIZES}"`);
     expect(heroLcp["page-header"]?.(section)).toEqual({ image: "img_detail", sizes: PAGE_HEADER_SIZES });

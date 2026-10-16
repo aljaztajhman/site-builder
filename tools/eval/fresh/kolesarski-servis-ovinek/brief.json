@@ -1,0 +1,67 @@
+{
+  "id": "kolesarski-servis-ovinek",
+  "businessType": "shop",
+  "trade": "kolesarski servis",
+  "description": "Kolesarski servis Ovinek, Tolmin.\n\nServis in izposoja koles ob Soči. Servisiramo cestna, gorska, treking in električna kolesa vseh znamk. Poleti imamo veliko turistov, zato hitre popravke naredimo isti dan, če je le mogoče. Govorimo tudi angleško in italijansko.\n\nIzposoja: gorsko kolo 30 € na dan, električno kolo 45 € na dan. Čelado in ključavnico dobite zraven.\nServis: osnovni servis 35 €, veliki servis 70 €, krpanje zračnice 8 €.\n\nNajdete nas na Padlih borcev 9, 5220 Tolmin, pri mostu čez Tolminko. Od aprila do oktobra smo odprti vsak dan od 8.30 do 18.30, pozimi samo po dogovoru.\n\nKontakt: 041 555 642, info@ovinek-tolmin.example\n\nServis vodi Jure Kavčič, kolesarski mehanik in vodnik.",
+  "logo": null,
+  "photos": [],
+  "facts": {
+    "name": "Kolesarski servis Ovinek",
+    "phone": "+38641555642",
+    "email": "info@ovinek-tolmin.example",
+    "address": {
+      "street": "Padlih borcev 9",
+      "postalCode": "5220",
+      "city": "Tolmin"
+    },
+    "hours": [
+      {
+        "from": "mon",
+        "to": "sun",
+        "open": "08:30",
+        "close": "18:30"
+      }
+    ],
+    "prices": [
+      {
+        "item": "gorsko kolo",
+        "amount": 30
+      },
+      {
+        "item": "električno kolo",
+        "amount": 45
+      },
+      {
+        "item": "osnovni servis",
+        "amount": 35
+      },
+      {
+        "item": "veliki servis",
+        "amount": 70
+      },
+      {
+        "item": "krpanje zračnice",
+        "amount": 8
+      }
+    ],
+    "people": [
+      {
+        "name": "Jure Kavčič",
+        "role": "kolesarski mehanik in vodnik"
+      }
+    ],
+    "other": [
+      "ob Soči",
+      "isti dan",
+      "angleško in italijansko",
+      "pri mostu čez Tolminko",
+      "Od aprila do oktobra",
+      "pozimi samo po dogovoru",
+      "Čelado in ključavnico dobite zraven"
+    ]
+  },
+  "missing": [
+    "photos",
+    "legal"
+  ]
+}

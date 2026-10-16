@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"The primary call to action „Rezervirajte mizo\",\"desktopNote\":\"Below the hero the layout leaks space: the 1990 band, the menu confined to the left 800px and the tall portrait terrace photo beside a four-line text leave large dead areas on the right.\",\"phone\":{\"impression\":3,\"hierarchy\":4,\"imagery\":4,\"spacing\":3,\"clutter\":4,\"distinctiveness\":3},\"desktop\":{\"impression\":3,\"hierarchy\":4,\"imagery\":3,\"spacing\":2,\"clutter\":4,\"distinctiveness\":3},\"fixes\":[\"Give the phone hero the same solid green „Rezervirajte mizo\"],\"blockers\":[\"Phone, Kdaj smo odprti: the note „V ponedeljek in torek samo za zaključene družbe. Rezervacija je obvezna.\"]}",
+  "usage": {
+    "prompt_tokens": 12186,
+    "completion_tokens": 1008
+  },
+  "batch": true
+}

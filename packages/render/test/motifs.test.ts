@@ -134,3 +134,16 @@ describe("template tokens", () => {
     expect(renderPage(golden, golden.pages[0]!)).not.toContain("data-motif");
   });
 });
+
+describe("motifs only for their trades (outside review 2026-10-14)", () => {
+  it("a locksmith on the car-repair template draws no licence plate; a car repair shop still does", () => {
+    const raw = JSON.parse(readFileSync(new URL("../../../eval/outside-review/review50-specs/kljucavnicarstvo-hrovat/spec-regenerated.json", import.meta.url), "utf8")) as SiteSpec;
+    const lock = migrateSpec(raw);
+    expect(DIRECTIONS.find((d) => d.id === lock.design.direction)?.template?.motif).toBe("plate");
+    const html = renderPage(lock, lock.pages[0]!);
+    expect(html).not.toContain('data-motif="plate"');
+    expect(html).not.toContain('class="plate');
+    const car = { ...lock, business: { ...lock.business, type: "car-repair" as const } };
+    expect(renderPage(car, car.pages[0]!)).toContain('data-motif="plate"');
+  });
+});

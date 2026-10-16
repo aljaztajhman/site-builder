@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"The hero photo is cropped to a wall of leaves and trunk, so the gostilna itself is never seen on the first screen and the overlapping card pushes the headline well down.\",\"desktopNote\":\"A handsome, deliberately cropped hero with the house and tree works well, but the overlapping card hides the entrance and the 1990/hours section leaves a large empty band on the left.\",\"phone\":{\"impression\":3,\"hierarchy\":3,\"imagery\":2,\"spacing\":3,\"clutter\":3,\"distinctiveness\":3},\"desktop\":{\"impression\":4,\"hierarchy\":4,\"imagery\":4,\"spacing\":3,\"clutter\":3,\"distinctiveness\":4},\"fixes\":[\"On phone, crop the hero photo to show the house facade and terrace (focal point lower), and stack the card below the image rather than over it so the headline appears higher.\",\"Rebalance the 1990 / hours section on desktop: put '1990' and the hours heading in a tighter grid or add the second photo there to fill the empty left column.\",\"Merge the phone/address block of the call-to-action section with the footer contact row so phone and email are not repeated twice in two adjoining maroon blocks.\"],\"blockers\":[]}",
+  "usage": {
+    "prompt_tokens": 11350,
+    "completion_tokens": 403
+  },
+  "batch": true
+}

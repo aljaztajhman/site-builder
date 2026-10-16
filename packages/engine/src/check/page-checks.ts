@@ -43,6 +43,18 @@ export interface MobileReport {
   lineLengths: number[];
   /** Visual banned patterns found in computed styles. */
   banned: string[];
+  /**
+   * With a horizontal scroll: the innermost elements whose box or content runs past the viewport's right edge (at
+   * most 8), and whether each is a heading's text (a display or h1–h3 line), which a smaller type scale can fix.
+   */
+  overflowing?: Overflow[];
+}
+
+export interface Overflow {
+  what: string;
+  heading: boolean;
+  /** How far past the viewport's right edge it reaches (px). */
+  by: number;
 }
 
 /**
@@ -52,6 +64,7 @@ export interface MobileReport {
 export async function measurePage(page: Page, opts: { primaryMin: number; primaryGap: number; absoluteMin: number }): Promise<MobileReport> {
   // tsx/esbuild wrap named functions with a __name() helper that doesn't exist in the page.
   await page.evaluate("globalThis.__name = globalThis.__name || ((f) => f)");
+  const viewportWidth = page.viewportSize()?.width;
   return page.evaluate((o) => {
     const describe = (el: Element) => {
       const id = el.id ? `#${el.id}` : "";
@@ -65,7 +78,9 @@ export async function measurePage(page: Page, opts: { primaryMin: number; primar
       // checkVisibility: not inside a closed <details> (the wide header's "Več") or another skipped subtree.
       return r.width > 0 && r.height > 0 && cs.visibility !== "hidden" && cs.display !== "none" && el.checkVisibility();
     };
-    const vw = window.innerWidth;
+    // The viewport the page was opened at: in mobile emulation a page wider than the screen widens the layout viewport
+    // to its content (a 434 px page at 360 px reported innerWidth 434), so innerWidth alone never saw the scroll.
+    const vw = Math.min(window.innerWidth, o.viewportWidth ?? window.innerWidth);
     const vh = window.innerHeight;
     const doc = document.documentElement;
     const interactive = [...document.querySelectorAll("a[href], button, summary, input, select, textarea, [role=button]")].filter(visible);
@@ -190,6 +205,47 @@ export async function measurePage(page: Page, opts: { primaryMin: number; primar
       return heads.length > 0 && heads.every((h) => getComputedStyle(h).textAlign === "center");
     });
     if (sections.length >= 3 && centred.length > 1) banned.push(`${centred.length} centred sections`);
+    // What makes the page scroll sideways: elements whose box ends past the right edge, or whose content does (a
+    // word wider than its heading's box spills out of it); the innermost of them, so a section isn't blamed for its
+    // heading. Text is measured by its own line boxes, since a block's box stays inside while its long word does not.
+    const overflowing: { what: string; heading: boolean; by: number }[] = [];
+    if (doc.scrollWidth > vw) {
+      const reach = (el: Element) => {
+        let right = el.getBoundingClientRect().right;
+        for (const n of el.childNodes) {
+          if (n.nodeType !== 3 || !(n.textContent ?? "").trim()) continue;
+          const range = document.createRange();
+          range.selectNodeContents(n);
+          for (const r of range.getClientRects()) right = Math.max(right, r.right);
+        }
+        return right + window.scrollX;
+      };
+      const past = [...document.body.querySelectorAll("*")].filter((el) => visible(el) && reach(el) > vw + 0.5 && !el.closest("[aria-hidden=true], .visually-hidden, .skip-link"));
+      const inner = past.filter((el) => !past.some((o) => o !== el && el.contains(o)));
+      // A long word widens its whole column (a grid track takes its widest word), so its neighbours run past the edge
+      // too. Blame the ones that cause it: per section, the elements whose removal ends that section's overflow.
+      const blockOf = (el: Element) => el.closest("main > *, body > header, body > footer, body > *") ?? document.body;
+      const spills = (b: Element) => b.scrollWidth > b.clientWidth + 0.5 || b.getBoundingClientRect().right > vw + 0.5;
+      const groups = new Map<Element, Element[]>();
+      for (const el of inner) groups.set(blockOf(el), [...(groups.get(blockOf(el)) ?? []), el]);
+      const blamed: Element[] = [];
+      for (const [block, els] of groups) {
+        const causes = els.slice(0, 20).filter((el) => {
+          const h = el as HTMLElement;
+          const prior = h.style.getPropertyValue("display");
+          const priority = h.style.getPropertyPriority("display");
+          h.style.setProperty("display", "none", "important");
+          const clears = !spills(block);
+          h.style.setProperty("display", prior, priority);
+          return clears;
+        });
+        blamed.push(...(causes.length ? causes : els));
+      }
+      for (const el of blamed.slice(0, 8)) {
+        const heading = !!el.closest("h1, h2, h3, .display, [class*='__title'], [class*='headline']");
+        overflowing.push({ what: describe(el), heading, by: Math.round(reach(el) - vw) });
+      }
+    }
     return {
       width: vw,
       scrollWidth: doc.scrollWidth,
@@ -204,8 +260,9 @@ export async function measurePage(page: Page, opts: { primaryMin: number; primar
       lcpPreload: !!document.querySelector('link[rel="preload"][as="image"]'),
       lineLengths,
       banned: [...new Set(banned)].slice(0, 30),
+      overflowing,
     };
-  }, opts);
+  }, { ...opts, ...(viewportWidth ? { viewportWidth } : {}) } as typeof opts & { viewportWidth?: number });
 }
 
 export interface CallButtons {
@@ -270,12 +327,56 @@ export async function callButtonsPerScreen(page: Page): Promise<CallButtons> {
   })()`);
 }
 
-/** Scrolls through the page so lazy images load, then back to the top (for full-page screenshots). */
+/**
+ * Where the provider information ZEPT requires lives (the footer's contact and provider blocks, its bottom line, or
+ * anything marked data-legal): an address there is the legal row, not a contact block, and is not counted.
+ */
+export const LEGAL_ROW = ".site-footer__contact, .site-footer__provider, .site-footer__bottom, [data-legal]";
+
+/**
+ * Banned (docs/PRODUCT.md): the address or the opening hours rendered in full more than once on a page. Counts the
+ * visible blocks outside the legal row: for the address, the smallest elements whose text holds both the street and
+ * the postcode and town; for the hours, the hours lists, tables and week charts the components render (.hours, .week,
+ * .oh__table, outermost only). Returns the banned-pattern lines (none when each shows at most once).
+ */
+export async function repeatedContact(page: Page, address?: { street: string; place: string }): Promise<string[]> {
+  return page.evaluate(
+    `((address, legal) => {
+    const norm = (s) => (s || "").replace(/[\\s\\u00a0,]+/g, " ").trim().toLowerCase();
+    const shown = (el) => {
+      const r = el.getBoundingClientRect();
+      const cs = getComputedStyle(el);
+      return r.width > 1 && r.height > 1 && cs.visibility !== "hidden" && cs.display !== "none" && el.checkVisibility();
+    };
+    const describe = (el) => el.tagName.toLowerCase() + (el.className && typeof el.className === "string" ? "." + el.className.trim().split(/\\s+/).slice(0, 2).join(".") : "");
+    const out = [];
+    const counted = (els) => els.filter((el) => shown(el) && !el.closest(legal));
+    if (address && address.street && address.place) {
+      const street = norm(address.street), place = norm(address.place);
+      const has = (el) => { const t = norm(el.innerText); return t.includes(street) && t.includes(place); };
+      const matching = [...document.body.querySelectorAll("*")].filter((el) => !["SCRIPT", "STYLE", "TEMPLATE"].includes(el.tagName) && shown(el) && has(el));
+      const smallest = matching.filter((el) => !matching.some((o) => o !== el && el.contains(o)));
+      const blocks = counted(smallest);
+      if (blocks.length > 1) out.push("address shown in full " + blocks.length + " times: " + blocks.map(describe).join(", "));
+    }
+    const hoursSel = ".hours, .week, .oh__table";
+    const hours = counted([...document.querySelectorAll(hoursSel)].filter((el) => !el.parentElement || !el.parentElement.closest(hoursSel)));
+    if (hours.length > 1) out.push("opening hours shown in full " + hours.length + " times: " + hours.map(describe).join(", "));
+    return out;
+  })(${JSON.stringify(address ?? null)}, ${JSON.stringify(LEGAL_ROW)})`,
+  );
+}
+
+/**
+ * Scrolls through the page so lazy images load, then back to the top (for full-page screenshots). Scrolls instantly:
+ * the sites scroll smoothly (base.css), and a smooth scroll back to the top was still under way when the screenshot was
+ * taken, so a sticky header was drawn where the scroll had got to, in the middle of the page.
+ */
 export async function loadLazyImages(page: Page): Promise<void> {
   await page.evaluate("globalThis.__name = globalThis.__name || ((f) => f)");
   await page.evaluate(async () => {
     for (let y = 0; y < document.body.scrollHeight; y += Math.round(window.innerHeight * 0.8)) {
-      window.scrollTo(0, y);
+      window.scrollTo({ top: y, behavior: "instant" });
       await new Promise((r) => setTimeout(r, 50));
     }
     await Promise.all(
@@ -289,20 +390,29 @@ export async function loadLazyImages(page: Page): Promise<void> {
             }),
         ),
     );
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: "instant" });
   });
 }
 
 /**
- * Hides position:fixed elements (mobile action bar, desktop consent box) before a full-page
- * screenshot. Chromium draws them once, at their place in the first viewport, so on a long page
- * they seem to cover content in the middle; the critique read that as a layout bug. Only the
- * screenshot changes, never the page files.
+ * Prepares a full-page screenshot. Chromium draws the whole page from the current scroll position in one go, so
+ * anything pinned to the screen lands in the wrong place on a long page: position:fixed elements (mobile action bar,
+ * desktop consent box) are hidden (the critique read them as covering content), and sticky ones (the header, a pinned
+ * column) go back into the flow, so the header is drawn once, at the top. The page is put at the top without smooth
+ * scrolling, and scroll-driven marks (reveal.js, bar.js) get two frames to settle. Only the screenshot changes, never
+ * the page files.
  */
 export async function hideFixedForFullPage(page: Page): Promise<void> {
-  await page.evaluate(`(() => {
+  await page.evaluate(`(async () => {
+    document.documentElement.style.setProperty("scroll-behavior", "auto", "important");
     for (const el of document.querySelectorAll("body *")) {
-      if (getComputedStyle(el).position === "fixed") el.style.setProperty("visibility", "hidden", "important");
+      const pos = getComputedStyle(el).position;
+      if (pos === "fixed") el.style.setProperty("visibility", "hidden", "important");
+      // relative, not static: in flow at its own place, but keeps its z-index (a header over the opener stays on top).
+      else if (pos === "sticky") el.style.setProperty("position", "relative", "important");
+      if (pos === "sticky") el.style.setProperty("top", "auto", "important");
     }
+    window.scrollTo({ top: 0, behavior: "instant" });
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(r, 30))));
   })()`);
 }

@@ -14,6 +14,7 @@ import {
 } from "../../primitives/index.tsx";
 import type { RenderCtx, SectionProps } from "../../types.ts";
 import { CallObject } from "../../motifs/index.tsx";
+import { shownElsewhere } from "../../chrome/page-facts.ts";
 
 const MISSING_HOURS: Placeholder = { $placeholder: "hours" };
 
@@ -152,8 +153,10 @@ export function OpeningHours({ section, ctx, index }: SectionProps<"opening-hour
 function ContactCallOut({ section, ctx }: SectionProps<"contact">) {
   const { props } = section;
   const b = ctx.site.business;
-  // Say each thing once: a page that has its own opening-hours section doesn't repeat the hours here.
-  const hoursElsewhere = ctx.page.sections.some((s) => s.type === "opening-hours");
+  // Say each thing once: a page that has its own opening-hours section doesn't repeat the hours here, and what a
+  // section above already showed (the hero's fact strip) isn't repeated either.
+  const above = shownElsewhere(ctx.page, section.id, b);
+  const hoursElsewhere = above.hours;
   const directions = ctx.href({ action: "directions" });
   return (
     <Section id={section.id} type={section.type} variant={section.variant} tone={section.tone}>
@@ -163,17 +166,19 @@ function ContactCallOut({ section, ctx }: SectionProps<"contact">) {
           <CallObject ctx={ctx} size="poster" />
         </p>
         <dl className="callout__facts">
-          <div className="callout__fact">
-            <dt>{ctx.t("address")}</dt>
-            <dd>
-              <AddressText ctx={ctx} />
-              {directions && (
-                <a href={directions} className="text-link" rel="noopener" target="_blank">
-                  {ctx.t("directions")}
-                </a>
-              )}
-            </dd>
-          </div>
+          {!above.address && (
+            <div className="callout__fact">
+              <dt>{ctx.t("address")}</dt>
+              <dd>
+                <AddressText ctx={ctx} />
+                {directions && (
+                  <a href={directions} className="text-link" rel="noopener" target="_blank">
+                    {ctx.t("directions")}
+                  </a>
+                )}
+              </dd>
+            </div>
+          )}
           {b.hours !== undefined && !hoursElsewhere && (
             <div className="callout__fact">
               <dt>{ctx.t("openingHours")}</dt>
@@ -201,6 +206,8 @@ export function Contact({ section, ctx, index }: SectionProps<"contact">) {
   const { props } = section;
   const b = ctx.site.business;
   const directions = ctx.href({ action: "directions" });
+  // Say each thing once: what a section above showed, and hours that have their own section, aren't repeated here.
+  const elsewhere = shownElsewhere(ctx.page, section.id, b);
   const address = b.address;
   const embedSrc = isPlaceholder(address)
     ? null
@@ -229,21 +236,23 @@ export function Contact({ section, ctx, index }: SectionProps<"contact">) {
                 <EmailLink ctx={ctx} className="contact__link" />
               </dd>
             </div>
-            <div className="contact__fact">
-              <dt className="fact-label">
-                <Icon name="map-pin" />
-                {ctx.t("address")}
-              </dt>
-              <dd>
-                <AddressText ctx={ctx} />
-                {directions && (
-                  <a href={directions} className="btn btn--secondary contact__directions" rel="noopener" target="_blank">
-                    {ctx.t("directions")}
-                  </a>
-                )}
-              </dd>
-            </div>
-            {b.hours !== undefined && (
+            {!elsewhere.address && (
+              <div className="contact__fact">
+                <dt className="fact-label">
+                  <Icon name="map-pin" />
+                  {ctx.t("address")}
+                </dt>
+                <dd>
+                  <AddressText ctx={ctx} />
+                  {directions && (
+                    <a href={directions} className="btn btn--secondary contact__directions" rel="noopener" target="_blank">
+                      {ctx.t("directions")}
+                    </a>
+                  )}
+                </dd>
+              </div>
+            )}
+            {b.hours !== undefined && !elsewhere.hours && (
               <div className="contact__fact contact__fact--hours">
                 <dt className="fact-label">
                   <Icon name="clock" />

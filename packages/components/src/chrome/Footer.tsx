@@ -3,6 +3,7 @@ import { DIRECTIONS, isPlaceholder, isWebUrl } from "@sb/spec";
 import type { RenderCtx } from "../types.ts";
 import { AddressText, EmailLink, HoursList, Icon, MaybeText, PhoneLink, cx } from "../primitives/index.tsx";
 import { ChromeWordmark } from "../groups/composed/kinds/wordmark.tsx";
+import { contactShown, pageFacts } from "./page-facts.ts";
 
 /** Characters of the longest word: the wordmark's size is set so it fits the width (skeleton.css). */
 const longestWord = (s: string): number => Math.max(4, ...s.split(/\s+/).map((w) => w.length));
@@ -40,6 +41,14 @@ export function Footer({ ctx }: { ctx: RenderCtx }) {
   const headingClass = compact ? "visually-hidden" : "site-footer__heading";
   // Only http(s) links: z.url() also accepts javascript: and data:.
   const social = (b.social ?? []).filter((s) => isWebUrl(s.url));
+  // Say each thing once: the visit block leaves out what a section of this page already shows (the address with its
+  // directions, the hours); with both shown above, the footer has no visit block. The provider rows always stay.
+  const shown = variant === "visit" ? pageFacts(ctx.page, b) : { address: false, hours: false };
+  const visitWhere = !shown.address;
+  const visitHours = b.hours !== undefined && !shown.hours;
+  // After a contact section the contact row keeps only the name (owner's decision 2026-10-15): the provider rows
+  // (legal name, registration and tax numbers) stay, phone, e-mail and address are already on the page.
+  const reach = contactShown(ctx.page, b);
 
   return (
     <footer
@@ -56,19 +65,21 @@ export function Footer({ ctx }: { ctx: RenderCtx }) {
             {b.name}
           </p>
         )}
-        {variant === "visit" && (
+        {variant === "visit" && (visitWhere || visitHours) && (
           <div className="site-footer__visit">
-            <div className="site-footer__visit-where">
-              <h2 className="site-footer__visit-title">{ctx.t("visitUs")}</h2>
-              <AddressText ctx={ctx} />
-              {directions && (
-                <a className="text-link site-footer__directions" href={directions} rel="noopener" target="_blank">
-                  <Icon name="map-pin" />
-                  {ctx.t("directions")}
-                </a>
-              )}
-            </div>
-            {b.hours && (
+            {visitWhere && (
+              <div className="site-footer__visit-where">
+                <h2 className="site-footer__visit-title">{ctx.t("visitUs")}</h2>
+                <AddressText ctx={ctx} />
+                {directions && (
+                  <a className="text-link site-footer__directions" href={directions} rel="noopener" target="_blank">
+                    <Icon name="map-pin" />
+                    {ctx.t("directions")}
+                  </a>
+                )}
+              </div>
+            )}
+            {visitHours && (
               <div className="site-footer__visit-hours">
                 <h2 className="site-footer__visit-title">{ctx.t("openingHours")}</h2>
                 <HoursList ctx={ctx} />
@@ -80,17 +91,23 @@ export function Footer({ ctx }: { ctx: RenderCtx }) {
           <div className="site-footer__block site-footer__contact">
             <h2 className={headingClass}>{ctx.t("contact")}</h2>
             <p className="site-footer__name">{ChromeWordmark({ ctx }) ?? b.name}</p>
-            {variant !== "visit" && <AddressText ctx={ctx} />}
-            <ul className="site-footer__facts" role="list">
-              <li>
-                <span className="visually-hidden">{ctx.t("phone")}: </span>
-                <PhoneLink ctx={ctx} className="site-footer__link" />
-              </li>
-              <li>
-                <span className="visually-hidden">{ctx.t("emailLabel")}: </span>
-                <EmailLink ctx={ctx} className="site-footer__link" />
-              </li>
-            </ul>
+            {variant !== "visit" && !reach.address && <AddressText ctx={ctx} />}
+            {(!reach.phone || !reach.email) && (
+              <ul className="site-footer__facts" role="list">
+                {!reach.phone && (
+                  <li>
+                    <span className="visually-hidden">{ctx.t("phone")}: </span>
+                    <PhoneLink ctx={ctx} className="site-footer__link" />
+                  </li>
+                )}
+                {!reach.email && (
+                  <li>
+                    <span className="visually-hidden">{ctx.t("emailLabel")}: </span>
+                    <EmailLink ctx={ctx} className="site-footer__link" />
+                  </li>
+                )}
+              </ul>
+            )}
           </div>
 
           <div className="site-footer__block site-footer__provider">

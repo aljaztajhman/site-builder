@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"The hero photo is a human hairbrush and comb on towels, so nothing in the first screen reads as a dog salon until the headline.\",\"desktopNote\":\"The hero image is tall and strong, but the whole page is a thin left-aligned column with half the width empty in the prices, hours and location sections.\",\"phone\":{\"impression\":3,\"hierarchy\":4,\"imagery\":2,\"spacing\":3,\"clutter\":4,\"distinctiveness\":3},\"desktop\":{\"impression\":3,\"hierarchy\":4,\"imagery\":2,\"spacing\":2,\"clutter\":4,\"distinctiveness\":3},\"fixes\":[\"Replace the hairbrush/comb mood picture with a photo of a groomed dog or the salon table; the current image says hairdresser, not pasji salon.\",\"On desktop fill the right half of the prices, hours and location sections (second photo, map, or a two-column layout) and tighten the dead band under the hero.\",\"Shrink the giant footer wordmark on phone and desktop; it dwarfs the real hero headline and pushes the address and phone far down.\"],\"blockers\":[]}",
+  "usage": {
+    "prompt_tokens": 11083,
+    "completion_tokens": 368
+  },
+  "batch": true
+}

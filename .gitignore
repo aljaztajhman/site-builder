@@ -18,6 +18,8 @@ eval/runs/*
 !eval/runs/templates-*/
 eval/runs/templates-*/site/
 eval/runs/templates-*/*.png
+# Free re-renders of the Review 50 pages (pnpm review50:render): screenshots, regenerated at will.
+eval/runs-review50-*/
 test-results/
 playwright-report/
 .claude/launch.json
