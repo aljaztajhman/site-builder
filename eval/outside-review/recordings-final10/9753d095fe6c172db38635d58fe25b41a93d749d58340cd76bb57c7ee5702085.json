@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"Phone first screen is a framed white card with the hero photo pushed below the fold, and the four price cards repeat a decorative olive-branch motif that has nothing to do with a laundry.\",\"desktopNote\":\"Desktop hero works as a split card-plus-arched photo, but the olive-branch icon repeated on every price card is off-trade decoration and the price cards hold large empty bands below the labels.\",\"phone\":{\"impression\":3,\"hierarchy\":4,\"imagery\":3,\"spacing\":3,\"clutter\":4,\"distinctiveness\":3},\"desktop\":{\"impression\":4,\"hierarchy\":4,\"imagery\":4,\"spacing\":3,\"clutter\":4,\"distinctiveness\":3},\"fixes\":[\"Replace the repeated olive-branch ornament on hero and price cards with laundry-specific icons (shirt, duvet, curtain) or drop it entirely.\",\"On phone, shrink the hero card so the arched shirt photo peeks into the first screen, or stack address and headline tighter to free space.\",\"Equalise price-card content so the price sits on one baseline across cards and the empty band between label and price disappears; tighten the Delovni čas band on desktop.\"],\"blockers\":[]}",
+  "usage": {
+    "prompt_tokens": 10590,
+    "completion_tokens": 404
+  },
+  "batch": true
+}

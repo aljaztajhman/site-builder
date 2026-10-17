@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The photography and forest-green palette suit the campsite, but the location appears too late and the contact-card section interrupts the photographic introduction.\",\n  \"desktopNote\": \"The oversized hero pushes the primary action below the first screen, while broad empty bands weaken the otherwise coherent layout.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 3,\n    \"imagery\": 4,\n    \"spacing\": 4,\n    \"clutter\": 5,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 3,\n    \"imagery\": 4,\n    \"spacing\": 3,\n    \"clutter\": 5,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Reduce the desktop hero height and move its text panel upward so the full introduction and price link are visible within the first 800 pixels.\",\n    \"Put a concise Kobarid location line in the hero and condense the contact cards into a compact practical-information section, allowing the campsite photographs to follow the introduction sooner on the‑\"\n  ],\n  \"blockers\": []\n}",
+  "usage": {
+    "prompt_tokens": 9541,
+    "completion_tokens": 464,
+    "cost": 0.028491
+  }
+}

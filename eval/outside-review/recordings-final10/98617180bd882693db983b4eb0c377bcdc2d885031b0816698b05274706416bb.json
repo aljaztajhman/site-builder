@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The framed hero takes most of the first screen, pushing the useful shop photography below it and leaving the location until much later.\",\n  \"desktopNote\": \"The herbal palette and prominent photography feel appropriate, but oversized secondary headings, sparse product cards and a monumental footer make the page unnecessarily long.\",\n  \"phone\": {\n    \"impression\": 3,\n    \"hierarchy\": 3,\n    \"imagery\": 2,\n    \"spacing\": 3,\n    \"clutter\": 4,\n    \"distinctiveness\": 3\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 3,\n    \"imagery\": 4,\n    \"spacing\": 3,\n    \"clutter\": 4,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Compact the phone hero by reducing decorative space and stacking fewer actions, bring the herb photograph clearly into the first screen, and add a short location line near the introduction on both ⇢.\"\n  ],\n  \"blockers\": []\n}",
+  "usage": {
+    "prompt_tokens": 9956,
+    "completion_tokens": 310,
+    "cost": 0.0279885
+  }
+}
