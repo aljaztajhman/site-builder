@@ -81,6 +81,24 @@ describe("the call and the directions at most twice on a phone (markRepeatedActi
   it("marks nothing without a bar, a floating button or a header that carries the actions", () => {
     const spec = golden("instalacije-rebernik");
     spec.chrome.mobileActionBar = false;
+    spec.chrome.header.cta = "none";
     expect(renderPage(spec, spec.pages[0]!)).not.toContain("data-repeat");
+  });
+
+  it("at every width when the header carries the action (review 50 at 1280 px), on phones only when only the bar does", () => {
+    // instalacije-rebernik: the chrome header's call button is there at desktop width too.
+    const spec = golden("instalacije-rebernik");
+    expect(renderPage(spec, spec.pages[0]!)).toContain('data-repeat="all"');
+    spec.chrome.header.cta = "none";
+    const barOnly = renderPage(spec, spec.pages[0]!);
+    expect(barOnly).toContain('data-repeat=""');
+    expect(barOnly).not.toContain('data-repeat="all"');
+    // The header that carries call and directions (actions "header"): both kinds at every width.
+    const header = golden("pekarna-kvas");
+    header.design.skeleton = { header: "bar", actions: "header", footer: "columns", footerTone: "alt", width: "contained", cards: "filled", buttons: "soft", dividers: "motif", photoRatio: "standard" };
+    const out = renderPage(header, header.pages[0]!);
+    const repeats = [...out.matchAll(/<a data-repeat="([^"]*)"[^>]*>/g)];
+    expect(repeats.some((m) => m[0].includes("google.com/maps"))).toBe(true);
+    expect(repeats.every((m) => m[1] === "all")).toBe(true);
   });
 });

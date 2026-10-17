@@ -1,4 +1,5 @@
 import { DIRECTIONS, fontPair, type Colors, type Design, type FontFace, type Motif, type SubMotif } from "@sb/spec";
+import { markRoom } from "./mark-room.ts";
 
 const px = (n: number) => `${Math.round(n * 100) / 100}px`;
 const rem = (n: number) => `${Math.round((n / 16) * 1000) / 1000}rem`;
@@ -58,6 +59,10 @@ export function tokensCss(design: Design, sub?: SubMotif): string {
     // Capitals with Č Š Ž: the caron rises above the cap height, so tight display lines (0.84–1.02) set it on the
     // line above (review 50, "HITRO / POŠTENO"). Display rules take max(var(--lh-floor, 0), their own value).
     ...(design.headingCase === "uppercase" ? { "--lh-floor": "1.05" } : {}),
+    // A display line with a marked capital in its text (site.tsx markMarkedLines): room for the mark above the deepest
+    // descender of the line above, in this heading face (mark-room.ts; base.css [data-marks]).
+    "--lh-marks": String(markRoom(pair.heading.file, false)),
+    "--lh-marks-caps": String(markRoom(pair.heading.file, true)),
     // Em per letter of a heading's longest word for FitText (base.css .fit; 0.62 there: lower case, no tracking).
     ...(design.headingCase === "uppercase" || design.headingTracking > 0
       ? { "--fit-k": String(Math.round(((design.headingCase === "uppercase" ? 0.8 : 0.62) + Math.max(0, design.headingTracking)) * 1000) / 1000) }

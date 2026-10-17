@@ -13,6 +13,7 @@ import {
   lcpImageFor,
   rendererFor,
   barActions,
+  headerCarriesWide,
   heroOwnsCall,
   navHasMore,
   openerActions,
@@ -54,28 +55,34 @@ import { entryJsonLd, faqJsonLd, jsonLd } from "./jsonld.ts";
 import { feedOf, rssXml } from "./feed.ts";
 import { OG_LOCALE, SHARE_IMAGE, indexable, normaliseSiteUrl, pagePath, robotsTxt, shareImageOf, sitemapEntries, sitemapXml } from "./seo.ts";
 import { landmarkSuffixes } from "./landmarks.ts";
+import { markMarkedLines } from "./mark-room.ts";
 
 const unescapeAttr = (v: string) => v.replace(/&quot;/g, '"').replace(/&#x27;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
 
+/** Where a fixed element carries an action: at every width (the header), on phones only (the bar, the floating button). */
+export type Carried = "all" | "phone" | null;
+
 /**
- * On phones a page shows the call and the directions the fixed element carries (the bar, the floating button, the
- * header that carries them) at most twice: there, and once in the page (M1: the call three times, "Navodila za pot"
- * three times). Every later call action (data-action="call") and directions link (a button or text link to the
- * directions) in the page and the footer is marked data-repeat; chrome.css hides it below 48rem. Phone numbers, and the
- * fact objects that call (a plate, a big number), are facts and stay. Marked on the rendered markup, in document
- * order, so the links of every section kind count, whichever component drew them.
+ * A page shows the call and the directions a fixed element carries (the bar, the floating button, the header) at most
+ * twice: there, and once in the page (M1: the call three times, "Navodila za pot" three times, on phones and at
+ * 1280 px). Every later call action (data-action="call") and directions link (a button or text link to the
+ * directions) in the page and the footer is marked data-repeat: "all" when the header carries it (chrome.css hides it at
+ * every width), "" when only the bar or the floating button does (hidden below 48rem). Phone numbers, and the fact
+ * objects that call (a plate, a big number), are facts and stay. Marked on the rendered markup, in document order, so
+ * the links of every section kind count, whichever component drew them.
  */
-export function markRepeatedActions(html: string, carried: { call: boolean; directions: string | null }): string {
+export function markRepeatedActions(html: string, carried: { call: Carried; directions: Carried; directionsHref: string | null }): string {
   const start = html.indexOf("<main");
-  if (start < 0 || (!carried.call && !carried.directions)) return html;
+  const dirs = carried.directionsHref === null ? null : carried.directions;
+  if (start < 0 || (!carried.call && !dirs)) return html;
   const close = html.lastIndexOf("</footer>");
   const stop = close < start ? html.length : close;
   const seen = new Set<string>();
-  const kindOf = (attrs: string): string | null => {
+  const kindOf = (attrs: string): "call" | "directions" | null => {
     if (carried.call && / data-action="call"/.test(attrs)) return "call";
-    if (!carried.directions || !/ class="[^"]*\b(btn|text-link|contact-strip__action)\b/.test(attrs)) return null;
+    if (!dirs || !/ class="[^"]*\b(btn|text-link|contact-strip__action)\b/.test(attrs)) return null;
     const href = / href="([^"]*)"/.exec(attrs)?.[1];
-    return href !== undefined && unescapeAttr(href) === carried.directions ? "directions" : null;
+    return href !== undefined && unescapeAttr(href) === carried.directionsHref ? "directions" : null;
   };
   const region = html.slice(start, stop).replace(/<a\b([^>]*)>/g, (tag, attrs: string) => {
     const kind = kindOf(attrs);
@@ -84,7 +91,7 @@ export function markRepeatedActions(html: string, carried: { call: boolean; dire
       seen.add(kind);
       return tag;
     }
-    return `<a data-repeat=""${attrs}>`;
+    return `<a data-repeat="${kind === "call" ? carried.call === "all" ? "all" : "" : dirs === "all" ? "all" : ""}"${attrs}>`;
   });
   return html.slice(0, start) + region + html.slice(stop);
 }
@@ -356,12 +363,12 @@ function renderDocument(spec: SiteSpec, localized: SiteSpec, opts: RenderOptions
       ...(fixed === "bar" ? ["has-action-bar", ...covered.map((a) => `bar-covers-hero-${a}`)] : fixed === "float" ? ["has-call-float"] : []),
       ...headerCovers.map((a) => `header-covers-hero-${a}`),
     ].join(" ") || undefined;
-  // What the bar, the floating button or the header carries on phones: the page repeats each at most once (markRepeatedActions).
+  // What the bar, the floating button or the header carries on phones, and what the header carries at desktop width: the
+  // page repeats each at most once (markRepeatedActions).
   const carriedActions: string[] = fixed === "bar" ? barActions(ctx) : fixed === "float" || inHeader ? ["call", "directions"] : [];
-  const carried = {
-    call: carriedActions.includes("call") && ctx.href({ action: "call" }) !== null,
-    directions: carriedActions.includes("directions") ? ctx.href({ action: "directions" }) : null,
-  };
+  const wide = headerCarriesWide(ctx);
+  const scope = (a: "call" | "directions"): Carried => (ctx.href({ action: a }) === null ? null : wide[a] ? "all" : carriedActions.includes(a) ? "phone" : null);
+  const carried = { call: scope("call"), directions: scope("directions"), directionsHref: ctx.href({ action: "directions" }) };
   // A hero whose call object owns the call (a plate, a call block): only the fixed element's call waits for it.
   // Without a skeleton a composed opener's fact object that calls (a plate) still makes the bar's call wait: the bar may
   // be on screen from the start (with reduced motion, or a browser without scroll timelines, even after a hero that
@@ -413,7 +420,8 @@ function renderDocument(spec: SiteSpec, localized: SiteSpec, opts: RenderOptions
   // from an edit), render again with a hidden "(2)" on the repeat so every landmark name stays unique.
   const firstBody = renderBody(new Map());
   const suffixes = landmarkSuffixes(firstBody, doc.landmarks);
-  const body = markRepeatedActions(suffixes.size ? renderBody(suffixes) : firstBody, carried);
+  // Display lines with Č Š Ž (as set) get room for the marks (mark-room.ts).
+  const body = markMarkedLines(markRepeatedActions(suffixes.size ? renderBody(suffixes) : firstBody, carried), localized.design.headingCase === "uppercase");
 
   // Search and sharing (seo.ts). A 404 page is never indexed and has no address of its own.
   const siteUrl = normaliseSiteUrl(opts.siteUrl);

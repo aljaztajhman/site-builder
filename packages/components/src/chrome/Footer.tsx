@@ -9,19 +9,6 @@ import { menuPages } from "./nav-fit.ts";
 /** Characters of the longest word: the wordmark's size is set so it fits the width (skeleton.css). */
 const longestWord = (s: string): number => Math.max(4, ...s.split(/\s+/).map((w) => w.length));
 
-/**
- * Whether `text`, as set (upper: the site's headings are capitals), has a capital with a mark above it (Č Š Ž Ć …). Its
- * caron rises above the cap height (0.77–1.08 em in the faces we ship), so a wordmark's tight lines (0.92) set it on
- * the line above (fresh 10, sirarna-pr-simnu: "Sirarna Pr' / Šimnu").
- */
-export function hasMarkedCapital(text: string, upper: boolean): boolean {
-  for (const ch of upper ? text.toLocaleUpperCase("sl") : text) {
-    const parts = ch.normalize("NFD");
-    if (parts.length > 1 && /\p{Lu}/u.test(parts[0]!) && /[̀-̽̕̚-̈́͆͊-͌]/u.test(parts.slice(1))) return true;
-  }
-  return false;
-}
-
 const NETWORK_LABEL = {
   facebook: "Facebook",
   instagram: "Instagram",
@@ -75,11 +62,8 @@ export function Footer({ ctx }: { ctx: RenderCtx }) {
       <div className="container">
         {variant === "wordmark" && (
           // The name set wall-sized as the page's last word; decorative (the name follows as text below).
-          <p
-            className={cx("site-footer__wordmark", hasMarkedCapital(b.name, site.design.headingCase === "uppercase") && "site-footer__wordmark--marks")}
-            aria-hidden="true"
-            style={{ "--wm-chars": longestWord(b.name) } as CSSProperties}
-          >
+          // A name with Č Š Ž gets room for the marks (render markMarkedLines, base.css).
+          <p className="site-footer__wordmark" aria-hidden="true" style={{ "--wm-chars": longestWord(b.name) } as CSSProperties}>
             {b.name}
           </p>
         )}

@@ -5,9 +5,11 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { chromium, type Browser, type Page } from "playwright";
 import { serveStatic, type StaticServer } from "@sb/engine";
-import { mapsUrl, migrateSpec, type Address, type Skeleton, type SiteSpec } from "@sb/spec";
+import { FONT_PAIRS, mapsUrl, migrateSpec, type Address, type Skeleton, type SiteSpec } from "@sb/spec";
+import { MARK_INK } from "@sb/render";
 import { openPage, repoRoot } from "../src/compose-sheet.ts";
 import { renderToDir } from "../src/lib/render-dir.ts";
+import { headingFaces, measureMarkInk, type MarkInk } from "../src/lib/mark-metrics.ts";
 
 /**
  * M1 reviewer blockers in the chrome, in a real browser (no model call):
@@ -86,20 +88,23 @@ describe("1. the phone bar over the first section", () => {
   }
 });
 
-/** On the whole page at 360 px: the call and directions controls a visitor sees (the bar's counted whether or not it has slid in yet). */
-function actionsShown(page: Page, directions: string): Promise<{ call: string[]; directions: string[] }> {
-  return page.evaluate((dirHref) => {
+/**
+ * On the whole page: the call and directions controls a visitor sees. On a phone the bar's and the floating button's
+ * count whether or not they have slid in yet; at desktop width only what is visible.
+ */
+function actionsShown(page: Page, directions: string, wide = false): Promise<{ call: string[]; directions: string[] }> {
+  return page.evaluate(([dirHref, desk]) => {
     const seen = (el: Element) => el.checkVisibility({ visibilityProperty: true, opacityProperty: true });
     const fixed = (el: Element) => el.closest(".action-bar, .call-float") !== null;
     const label = (el: Element) => `${el.closest(".action-bar, .call-float, header, footer, section")?.className.split(" ").slice(0, 2).join(".")} "${(el.textContent ?? "").trim().slice(0, 24)}"`;
     // The bar and the floating button wait for the hero (reveal.js): they count as shown.
-    const pick = (all: Element[]) => all.filter((el) => (fixed(el) ? true : seen(el))).map(label);
+    const pick = (all: Element[]) => all.filter((el) => (fixed(el) && !desk ? true : seen(el))).map(label);
     const call = [...document.querySelectorAll('a[data-action="call"], .action-bar a[href^="tel:"], .call-float a[href^="tel:"], .site-header a[href^="tel:"]')];
     const dirs = [...document.querySelectorAll("a")].filter(
       (a) => a.href === dirHref && (fixed(a) || a.closest(".site-header") !== null || /\b(btn|text-link|contact-strip__action)\b/.test(a.className)),
     );
     return { call: pick([...new Set(call)]), directions: pick(dirs) };
-  }, directions);
+  }, [directions, wide] as const);
 }
 
 const directionsHref = (s: SiteSpec) => mapsUrl(s.business.address as Address);
@@ -127,7 +132,28 @@ describe("2. the call and the directions at most twice on a phone", () => {
   }
 });
 
-const WORDMARK: Skeleton = { header: "bar", actions: "bar", footer: "wordmark", footerTone: "alt", width: "contained", cards: "filled", buttons: "soft", dividers: "motif", photoRatio: "standard" };
+describe("2. the call and the directions at most twice at 1280 px too", () => {
+  // Review 50 at desktop width: the header's "Navodila za pot", the hero's and a later section's (avto-kovac, elektro-zupan).
+  const pages = ["avto-kovac", "elektro-zupan", "avtoservis-mrak", "prevajanje-kolar", "frizerstvo-lana", "zobozdravstvo-lebar", "instalacije-rebernik"];
+  for (const id of pages) {
+    it(`review 50 ${id}: the header and at most one in the page, for each`, async () => {
+      const s = await review(id);
+      s.slug = `m1-desk-${id}`;
+      await renderToDir(s, dir);
+      const { page, ctx } = await openPage(browser, { width: 1280, height: 800 }, `${server.url}/${s.slug}/index.html`);
+      try {
+        await shot(page, `twice-1280-${id}`);
+        const shown = await actionsShown(page, directionsHref(s), true);
+        expect(shown.call.length, `call: ${shown.call.join(" | ")}`).toBeLessThanOrEqual(2);
+        expect(shown.directions.length, `directions: ${shown.directions.join(" | ")}`).toBeLessThanOrEqual(2);
+      } finally {
+        await ctx.close();
+      }
+    }, 120_000);
+  }
+});
+
+const WORDMARK: Skeleton ={ header: "bar", actions: "bar", footer: "wordmark", footerTone: "alt", width: "contained", cards: "filled", buttons: "soft", dividers: "motif", photoRatio: "standard" };
 
 /**
  * Each capital with a mark above it (as set) on a line after the first, against the glyphs of the line above that share
@@ -170,6 +196,83 @@ function caronClearance(page: Page, selector: string): Promise<{ lines: number; 
     return { lines: bases.length, worst, at };
   }, selector);
 }
+
+/**
+ * Every element set in the heading face whose own text has a capital with a mark above it (as set) and that wraps to two
+ * lines or more: its lines are far enough apart for the tallest marked capital to clear the deepest descender of the line
+ * above, with 0.03 em of air (the face's ink measured here, in this browser).
+ */
+function tightMarkedLines(page: Page, heading: string, ink: MarkInk): Promise<string[]> {
+  return page.evaluate(
+    ([family, ink]) => {
+      const marked = (s: string) =>
+        [...s].some((ch) => {
+          const p = ch.normalize("NFD");
+          return p.length > 1 && /\p{Lu}/u.test(p[0]!) && /[̀-̽̕̚-̈́͆͊-͌]/u.test(p.slice(1));
+        });
+      const bad: string[] = [];
+      for (const el of document.querySelectorAll<HTMLElement>("body *")) {
+        const cs = getComputedStyle(el);
+        if (!cs.fontFamily.startsWith(`"${family}"`) && !cs.fontFamily.startsWith(family)) continue;
+        if (!el.checkVisibility()) continue;
+        const upper = cs.textTransform === "uppercase";
+        const own = [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent ?? "").join("");
+        if (!marked(upper ? own.toLocaleUpperCase("sl") : own)) continue;
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const tops = new Set([...range.getClientRects()].filter((r) => r.width > 0).map((r) => Math.round(r.top)));
+        if (tops.size < 2) continue;
+        const size = parseFloat(cs.fontSize);
+        const lh = cs.lineHeight === "normal" ? Infinity : parseFloat(cs.lineHeight) / size;
+        const need = ink.mark + (upper ? ink.capsDesc : ink.desc) + 0.03;
+        if (lh < need - 0.005) bad.push(`${el.tagName.toLowerCase()}.${el.className.split(" ")[0]} "${own.trim().slice(0, 24)}": ${lh.toFixed(3)} < ${need.toFixed(3)}`);
+      }
+      return bad;
+    },
+    [heading, ink] as const,
+  );
+}
+
+describe("4. display lines with a marked capital clear it, in every heading face", () => {
+  let ink: Record<string, MarkInk>;
+  beforeAll(async () => {
+    ink = await measureMarkInk(browser);
+  }, 120_000);
+
+  it("the table of mark room (packages/render) is the ink measured in Chromium, for every heading face", () => {
+    for (const f of headingFaces()) {
+      const m = ink[f.file]!;
+      expect(MARK_INK[f.file], f.file).toBeDefined();
+      expect(Math.abs(MARK_INK[f.file]!.mark - m.mark), `${f.file} mark`).toBeLessThan(0.002);
+      expect(Math.abs(MARK_INK[f.file]!.desc - m.desc), `${f.file} desc`).toBeLessThan(0.002);
+      expect(Math.abs(MARK_INK[f.file]!.capsDesc - m.capsDesc), `${f.file} capsDesc`).toBeLessThan(0.002);
+    }
+  });
+
+  const pairs = [...new Map(FONT_PAIRS.map((p) => [p.heading.file, p])).values()];
+  for (const pair of pairs) {
+    for (const headingCase of ["normal", "uppercase"] as const) {
+      it(`${pair.heading.family}, ${headingCase}: footer wordmark, hero and section titles at 360 and 1280 px`, async () => {
+        const s = await load("tools/eval/golden/pekarna-kvas.json", `m1-marks-${pair.heading.file}-${headingCase}`);
+        s.design.fontPair = pair.id;
+        s.design.headingCase = headingCase;
+        s.design.skeleton = WORDMARK;
+        s.business.name = "Pekarna Šimnu Žagar";
+        const hero = s.pages[0]!.sections[0]! as { props: Record<string, unknown> };
+        hero.props = { ...hero.props, headline: "Kruh, ki ga pečemo že od jutra. Čas, Škofja Loka, Žiri" };
+        await renderToDir(s, dir);
+        for (const w of [{ width: 360, height: 800 }, { width: 1280, height: 800 }]) {
+          const { page, ctx } = await openPage(browser, w, `${server.url}/${s.slug}/index.html`);
+          try {
+            expect(await tightMarkedLines(page, pair.heading.family, ink[pair.heading.file]!), `${w.width} px`).toEqual([]);
+          } finally {
+            await ctx.close();
+          }
+        }
+      }, 120_000);
+    }
+  }
+});
 
 describe("4. the footer wordmark's carons", () => {
   it("sirarna-pr-simnu: the Š of the second line clears the line above, at 360 and 1280 px", async () => {

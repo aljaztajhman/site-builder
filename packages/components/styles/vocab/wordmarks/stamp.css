@@ -13,7 +13,7 @@
   outline-offset: -0.32em;
   font-size: 0.6em;
   font-weight: 700;
-  line-height: 1.2;
+  line-height: max(var(--lh-floor, 0), 1.2);
   letter-spacing: 0.12em;
   text-align: center;
   text-transform: uppercase;

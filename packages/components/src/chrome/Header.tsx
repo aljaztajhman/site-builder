@@ -61,8 +61,7 @@ export function Header({ ctx }: { ctx: RenderCtx }) {
   const ctaWideOnly = (site.chrome.mobileActionBar && (cta === "call" || cta === "directions")) || heroHasCta;
   // A composed opener that shows the same action (a call button, or a plate or number that calls) carries it on the first
   // screen; this header is not sticky, so its button would only repeat it beside the opener's: two calls on one screen.
-  const first = page.sections[0];
-  const openerCarries = cta !== "none" && first?.type === "composed" && composedActions(first as SectionOf<"composed">).includes(cta);
+  const openerCarries = composedOpenerCarries(page.sections[0], cta);
   const logo = site.assets.logo;
 
   return (
@@ -128,6 +127,26 @@ function skeletonParts(ctx: RenderCtx, skeleton: Skeleton) {
   const own = cta === "booking" && ctx.href({ action: "booking" }) ? "booking" : null;
   const button: "call" | "booking" | null = inHeader ? (callHref ? (family === "phone" ? null : "call") : own) : own;
   return { family, inHeader, callHref, directionsHref, button };
+}
+
+/** A composed opener that shows the header's action itself: the (not sticky) chrome header leaves its button out. */
+const composedOpenerCarries = (first: Opener, cta: string): boolean =>
+  cta !== "none" && first?.type === "composed" && composedActions(first as SectionOf<"composed">).includes(cta);
+
+/**
+ * The call and the directions the header shows at desktop width on this page: the header that carries them (actions
+ * "header"), the phone family's number, a chrome header's call or directions button. The page repeats each at most once
+ * after it, at every width (site.tsx markRepeatedActions; review 50: "Navodila za pot" three times at 1280 px).
+ */
+export function headerCarriesWide(ctx: RenderCtx): { call: boolean; directions: boolean } {
+  const skeleton = ctx.site.design.skeleton;
+  if (!skeleton) {
+    const { cta } = ctx.site.chrome.header;
+    const shows = (a: "call" | "directions") => cta === a && ctx.href({ action: a }) !== null && !composedOpenerCarries(ctx.page.sections[0], a);
+    return { call: shows("call"), directions: shows("directions") };
+  }
+  const { family, inHeader, callHref, directionsHref, button } = skeletonParts(ctx, skeleton);
+  return { call: (family === "phone" && callHref !== null) || button === "call", directions: inHeader && directionsHref !== null };
 }
 
 function SkeletonHeader({ ctx, skeleton }: { ctx: RenderCtx; skeleton: Skeleton }) {

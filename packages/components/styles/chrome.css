@@ -57,7 +57,7 @@
   letter-spacing: var(--tracking-heading);
   text-transform: var(--case-heading);
   font-size: var(--fs-lg);
-  line-height: 1.2;
+  line-height: max(var(--lh-floor, 0), 1.2);
   overflow-wrap: break-word;
   hyphens: manual;
 }
@@ -510,6 +510,12 @@ body.has-action-bar:not(:has(.action-bar)) {
   .site-footer a[data-repeat] {
     display: none !important;
   }
+}
+/* The header carries it at every width (actions "header", the phone family's number, a call or directions button):
+   the page's later ones go at desktop width too (review 50, 1280 px: "Navodila za pot" three times). */
+main a[data-repeat="all"],
+.site-footer a[data-repeat="all"] {
+  display: none !important;
 }
 @keyframes action-bar-in {
   0%,

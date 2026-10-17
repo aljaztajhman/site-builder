@@ -23,6 +23,6 @@
   min-width: 0;
   font-size: 0.55em;
   font-weight: 700;
-  line-height: 1.15;
+  line-height: max(var(--lh-floor, 0), 1.15);
   letter-spacing: 0.02em;
 }
