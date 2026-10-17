@@ -71,7 +71,7 @@ Before any paid call (evals, judge runs, generated pictures, smoke tests on the 
 - Log tokens and € cost per pipeline stage for every real model call.
 - Check the current Anthropic API docs for parameter names (effort, structured outputs, prompt caching). Don't guess field names.
 - Secrets in .env locally and in Railway variables when deployed. .env.example documents every variable. Never print secret values in messages or reports.
-- Every PR runs CI: typecheck, lint, `pnpm test` (fast tier) and `pnpm test:slow` (slow tier). Never make CI pass by skipping or deleting tests.
+- Every PR runs CI: typecheck, lint, `pnpm test` (fast tier) and `pnpm test:slow` (slow tier); a PR that changes only docs (.md files, docs/) runs typecheck, lint, the build and migrations only. Never make CI pass by skipping or deleting tests.
 - Deployed environments are public URLs: keep the dashboard and API behind the access password, send noindex, and enforce the daily model-spend cap.
 
 ## Rules for generated sites
