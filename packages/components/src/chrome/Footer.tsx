@@ -29,6 +29,7 @@ export function Footer({ ctx }: { ctx: RenderCtx }) {
   const skeleton = site.design.skeleton;
   const variant = skeleton?.footer ?? site.chrome.footer.variant;
   const compact = variant !== "columns";
+  const wordmark = variant === "wordmark";
   const directions = ctx.href({ action: "directions" });
   // A band footer needs a band colour (a template always has one); without it the dark ground.
   const hasBand = site.design.colors.band !== undefined || DIRECTIONS.some((d) => d.id === site.design.direction && d.template);
@@ -60,10 +61,10 @@ export function Footer({ ctx }: { ctx: RenderCtx }) {
       }
     >
       <div className="container">
-        {variant === "wordmark" && (
-          // The name set wall-sized as the page's last word; decorative (the name follows as text below).
+        {wordmark && (
+          // The name set large as the page's last word; decorative for screen readers (they read the name line below).
           // A name with Č Š Ž gets room for the marks (render markMarkedLines, base.css).
-          <p className="site-footer__wordmark" aria-hidden="true" style={{ "--wm-chars": longestWord(b.name) } as CSSProperties}>
+          <p className="site-footer__wordmark" aria-hidden="true" style={{ "--wm-chars": longestWord(b.name), "--wm-line": b.name.length } as CSSProperties}>
             {b.name}
           </p>
         )}
@@ -90,9 +91,17 @@ export function Footer({ ctx }: { ctx: RenderCtx }) {
           </div>
         )}
         <div className="site-footer__grid">
-          <div className="site-footer__block site-footer__contact">
+          {/* A contact block left with nothing to show (the name under the wordmark, the rest on the page) keeps its
+              text for screen readers but no empty grid row. */}
+          <div className={cx("site-footer__block site-footer__contact", wordmark && reach.address && reach.phone && reach.email && "visually-hidden")}>
             <h2 className={headingClass}>{ctx.t("contact")}</h2>
-            <p className="site-footer__name">{ChromeWordmark({ ctx }) ?? b.name}</p>
+            {wordmark ? (
+              // Under the big wordmark a visible name line was the name's third print with the © line (Fable, M1 final
+              // check): it stays for screen readers only, since the wordmark is aria-hidden.
+              <p className="site-footer__name visually-hidden">{b.name}</p>
+            ) : (
+              <p className="site-footer__name">{ChromeWordmark({ ctx }) ?? b.name}</p>
+            )}
             {variant !== "visit" && !reach.address && <AddressText ctx={ctx} />}
             {(!reach.phone || !reach.email) && (
               <ul className="site-footer__facts" role="list">

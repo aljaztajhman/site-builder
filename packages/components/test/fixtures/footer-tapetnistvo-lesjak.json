@@ -1,0 +1,320 @@
+{
+  "slug": "tapetnistvo-lesjak",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Tapetništvo Lesjak, Sevnica – prevleke in obnova pohištva",
+        "description": "Tapetnik Marjan Lesjak v Sevnici obnavlja fotelje, stole in kotne garniture. Blago izberete iz vzorčnika ali prinesete svoje."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "type": "hero-split",
+          "props": {
+            "image": "img_01",
+            "intro": "Če je ogrodje fotelja, kavča ali stola še dobro, ga obnovim. V delavnici v Sevnici delam že 26 let.",
+            "primary": {
+              "label": "Poglejte cene prevlek",
+              "target": {
+                "page": "p_home",
+                "section": "s_cene"
+              }
+            },
+            "headline": "Staro pohištvo dobi novo prevleko"
+          },
+          "variant": "image-left"
+        },
+        {
+          "id": "s_cene",
+          "tone": "alt",
+          "type": "price-list",
+          "props": {
+            "intro": "Natančno ceno povem po ogledu.",
+            "title": "Okvirne cene prevlek",
+            "groups": [
+              {
+                "items": [
+                  {
+                    "name": "Prevleka stola",
+                    "price": {
+                      "amount": 45
+                    }
+                  },
+                  {
+                    "name": "Prevleka dvosedeža",
+                    "price": {
+                      "amount": 280
+                    }
+                  },
+                  {
+                    "name": "Prevleka trosedeža",
+                    "price": {
+                      "amount": 390
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "variant": "tags"
+        },
+        {
+          "id": "s_delo",
+          "type": "image-text",
+          "props": {
+            "image": "img_03",
+            "eyebrow": "Kaj obnavljam",
+            "heading": "Od prevleke do vzmeti in polnila",
+            "paragraphs": [
+              "Obnovim obrabljene prevleke fotelj in kotnih garnitur. Po potrebi zamenjam tudi vzmeti in polnilo.",
+              "Šivam blazine z roko ter izdelam klopi za gostilne in vinotoče."
+            ]
+          },
+          "variant": "image-right"
+        },
+        {
+          "id": "s_prednosti",
+          "tone": "alt",
+          "type": "highlights",
+          "props": {
+            "items": [
+              {
+                "text": "Izberete ga iz vzorčnika ali prinesete svoje.",
+                "title": "Blago po vaši izbiri"
+              },
+              {
+                "text": "Za večje kose pridem na ogled tudi k vam.",
+                "title": "Ogled na domu"
+              }
+            ],
+            "heading": "Kako poteka obnova"
+          },
+          "variant": "list"
+        },
+        {
+          "id": "s_primer",
+          "type": "image-text",
+          "props": {
+            "image": "img_02",
+            "heading": "Dober kos si zasluži novo življenje",
+            "paragraphs": [
+              "Ogrodje je pogosto trpežnejše od novega pohištva. Z novo prevleko in polnilom ga lahko uporabljate še dolgo."
+            ]
+          },
+          "variant": "image-left"
+        },
+        {
+          "id": "s_ure",
+          "tone": "alt",
+          "type": "opening-hours",
+          "props": {
+            "note": "Za dogovor o terminu me pokličite.",
+            "title": "Delovni čas delavnice"
+          },
+          "variant": "compact"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Tapetništvo Lesjak",
+        "description": "Kako Tapetništvo Lesjak obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Tapetništvo Lesjak",
+        "description": "Izjava o dostopnosti spletne strani Tapetništvo Lesjak."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-17",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Tapetništvo Lesjak",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "images": [
+      {
+        "id": "img_01",
+        "alt": "Star fotelj s cvetličnim vzorcem brez oblazinjenja, vidni so vzmeti in juta, v delavnici z orodjem na steni.",
+        "src": "sites/site_c30d6bb5afdb5377/uploads/photo0.jpg",
+        "focal": {
+          "x": 0.4,
+          "y": 0.55
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_02",
+        "alt": "Svetla dnevna soba z zeleno kotno sedežno garnituro, leseno klubsko mizico in pletenim tepihom.",
+        "src": "sites/site_c30d6bb5afdb5377/uploads/photo1.jpg",
+        "focal": {
+          "x": 0.45,
+          "y": 0.5
+        },
+        "width": 1024,
+        "height": 1536
+      },
+      {
+        "id": "img_03",
+        "alt": "Delovna miza z vzorci tkanin, metrom, kladivom in škarjami ter zvitki blaga v ozadju.",
+        "src": "sites/site_c30d6bb5afdb5377/uploads/photo2.jpg",
+        "focal": {
+          "x": 0.45,
+          "y": 0.6
+        },
+        "width": 1536,
+        "height": 1024
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "columns"
+    },
+    "header": {
+      "cta": "call",
+      "variant": "split-cta"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.25,
+    "colors": {
+      "text": "#221b17",
+      "muted": "#5b504a",
+      "accent": "#3ea490",
+      "border": "#d9e0dc",
+      "inverse": "#2b211c",
+      "primary": "#2a7061",
+      "surface": "#edf2ef",
+      "onInverse": "#f5f5f5",
+      "onPrimary": "#ffffff",
+      "background": "#ffffff"
+    },
+    "radius": 6,
+    "shadow": "none",
+    "density": "regular",
+    "imagery": "offset-block",
+    "fontPair": "fraunces-source-sans",
+    "skeleton": {
+      "cards": "none",
+      "width": "full",
+      "footer": "wordmark",
+      "header": "word",
+      "actions": "bar",
+      "buttons": "square",
+      "dividers": "none",
+      "footerTone": "inverse",
+      "photoRatio": "square"
+    },
+    "direction": "warm-craft",
+    "headingCase": "normal",
+    "baseFontSize": 17,
+    "headingWeight": 600,
+    "headingTracking": -0.01
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Tapetništvo Lesjak",
+    "type": "builder",
+    "email": "marjan@tapetnistvo-lesjak.example",
+    "hours": {
+      "entries": [
+        {
+          "to": "fri",
+          "from": "mon",
+          "open": "07:00",
+          "close": "15:00"
+        }
+      ]
+    },
+    "phone": "+38641555318",
+    "address": {
+      "city": "Sevnica",
+      "street": "Trg svobode 4",
+      "postalCode": "8290"
+    },
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      }
+    }
+  },
+  "specVersion": 21
+}

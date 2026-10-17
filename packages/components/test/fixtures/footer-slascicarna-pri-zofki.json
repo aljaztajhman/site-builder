@@ -1,0 +1,339 @@
+{
+  "slug": "slascicarna-pri-zofki",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Slaščičarna Pri Zofki, Slovenske Konjice",
+        "description": "Domače slaščice po receptih Zofijine mame, torte po naročilu in kava v lokalu na Starem trgu v Slovenskih Konjicah."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "tone": "inverse",
+          "type": "hero-signature",
+          "props": {
+            "fact": "opening",
+            "image": "img_01",
+            "intro": "Ob torkih in petkih pečemo kremšnite, potico in jabolčni zavitek. Torte pripravimo po naročilu, kavo postrežemo v lokalu ali na vrtu.",
+            "primary": {
+              "label": "Poglejte ponudbo",
+              "target": {
+                "page": "p_home",
+                "section": "s_offer"
+              }
+            },
+            "headline": "Slaščice po receptih Zofijine mame",
+            "factLabel": "Zjutraj smo odprti od",
+            "secondary": {
+              "label": "Naročite torto",
+              "target": {
+                "action": "email"
+              }
+            }
+          },
+          "variant": "arch"
+        },
+        {
+          "id": "s_about",
+          "tone": "default",
+          "type": "about",
+          "props": {
+            "heading": "Pečemo tako, kot je pekla Zofijina mama za konjiške poroke.",
+            "ownerName": "Zofija Kolar",
+            "ownerRole": "lastnica",
+            "paragraphs": [
+              "Recepte smo podedovali od mame, ki je slaščice delala za vse konjiške poroke. Vse naredimo sami, brez polnil iz vrečk."
+            ]
+          },
+          "variant": "text-only"
+        },
+        {
+          "id": "s_making",
+          "tone": "inverse",
+          "type": "image-text",
+          "props": {
+            "image": "img_02",
+            "heading": "Torte po naročilu, kava na stari mašini",
+            "paragraphs": [
+              "Torte naredimo po naročilu, zato jih naročite vsaj dva dni prej.",
+              "Kavo kuhamo na stari mašini. Spijete jo lahko pri nas, v lokalu s šestimi mizami, ali na majhnem vrtu."
+            ]
+          },
+          "variant": "image-left"
+        },
+        {
+          "id": "s_offer",
+          "tone": "default",
+          "type": "services-list",
+          "props": {
+            "items": [
+              {
+                "name": "Kremšnita",
+                "price": {
+                  "amount": 3.2
+                },
+                "description": "Pečemo ob torkih in petkih."
+              },
+              {
+                "name": "Potica",
+                "price": {
+                  "unit": "rezina",
+                  "amount": 2.5
+                },
+                "description": "Pečemo ob torkih in petkih. Cena velja za rezino."
+              },
+              {
+                "name": "Jabolčni zavitek",
+                "price": {
+                  "amount": 2.8
+                },
+                "description": "Pečemo ob torkih in petkih."
+              },
+              {
+                "name": "Torta za osem oseb",
+                "price": {
+                  "amount": 32
+                },
+                "description": "Za rojstne dneve, krste in obletnice. Naročila sprejemamo vsaj dva dni prej."
+              },
+              {
+                "name": "Kava",
+                "description": "Kuhamo jo na stari mašini, pijete jo lahko v lokalu ali na vrtu."
+              }
+            ],
+            "title": "Kaj pečemo in kuhamo"
+          },
+          "variant": "rows"
+        },
+        {
+          "id": "s_contact",
+          "tone": "inverse",
+          "type": "contact",
+          "props": {
+            "title": "Pokličite za torto ali obisk"
+          },
+          "variant": "call-out"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Slaščičarna Pri Zofki",
+        "description": "Kako Slaščičarna Pri Zofki obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Slaščičarna Pri Zofki",
+        "description": "Izjava o dostopnosti spletne strani Slaščičarna Pri Zofki."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-17",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Slaščičarna Pri Zofki",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "logo": {
+      "src": "sites/site_9e396def278d673d/uploads/logo.svg",
+      "file": "logo.png",
+      "width": 138,
+      "height": 48
+    },
+    "images": [
+      {
+        "id": "img_01",
+        "alt": "Kremna rezina s sladkorjem v prahu na belem krožniku in skodelica kave na lesenem pultu pekarne.",
+        "src": "sites/site_9e396def278d673d/uploads/photo0.jpg",
+        "focal": {
+          "x": 0.45,
+          "y": 0.55
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_02",
+        "alt": "Torta s stepeno smetano in svežimi jagodami na beli stojalu za torte ob oknu s pogledom na hribe.",
+        "src": "sites/site_9e396def278d673d/uploads/photo1.jpg",
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "width": 1024,
+        "height": 1536
+      },
+      {
+        "id": "img_03",
+        "alt": "Steklena vitrina s sladicami: orehova in jabolčna zavitka, kremne rezine, čokoladne rezine in torta z jagodičevjem.",
+        "src": "sites/site_9e396def278d673d/uploads/photo2.jpg",
+        "focal": {
+          "x": 0.45,
+          "y": 0.6
+        },
+        "width": 1536,
+        "height": 1024
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "compact"
+    },
+    "header": {
+      "cta": "call",
+      "variant": "bar"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.28,
+    "colors": {
+      "band": "#f4b942",
+      "text": "#24130a",
+      "muted": "#5c4636",
+      "accent": "#a7415a",
+      "border": "#e2d3c5",
+      "onBand": "#24130a",
+      "inverse": "#24130a",
+      "primary": "#9c3d54",
+      "surface": "#eef1f0",
+      "onInverse": "#f5f5f5",
+      "onPrimary": "#ffffff",
+      "background": "#ffffff"
+    },
+    "radius": 10,
+    "shadow": "none",
+    "density": "regular",
+    "imagery": "rounded",
+    "fontPair": "bitter-karla",
+    "skeleton": {
+      "cards": "bordered",
+      "width": "wide",
+      "footer": "wordmark",
+      "header": "centred",
+      "actions": "float",
+      "buttons": "underline",
+      "centred": [
+        "s_about"
+      ],
+      "dividers": "rule",
+      "footerTone": "band",
+      "photoRatio": "standard"
+    },
+    "direction": "skorja",
+    "headingCase": "normal",
+    "baseFontSize": 18,
+    "headingWeight": 900,
+    "headingTracking": -0.02
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Slaščičarna Pri Zofki",
+    "type": "bakery",
+    "email": "zofka@slascicarna-zofka.example",
+    "hours": {
+      "note": "Kremšnite, potico in jabolčni zavitek pečemo ob torkih in petkih. Torte sprejemamo po naročilu vsaj dva dni prej.",
+      "entries": [
+        {
+          "to": "sat",
+          "from": "mon",
+          "open": "08:00",
+          "close": "19:00"
+        },
+        {
+          "to": "sun",
+          "from": "sun",
+          "open": "09:00",
+          "close": "13:00"
+        }
+      ]
+    },
+    "phone": "+38631555936",
+    "address": {
+      "city": "Slovenske Konjice",
+      "street": "Stari trg 18",
+      "postalCode": "3210"
+    },
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      }
+    }
+  },
+  "specVersion": 21
+}

@@ -182,6 +182,23 @@ describe("Footer", () => {
     expect(out).not.toContain("<script");
   });
 
+  it("wordmark family prints the name twice, the wordmark and the ©, not a third time as a bold name line (M1 final check)", () => {
+    const skeleton = { header: "bar", actions: "bar", footer: "wordmark", footerTone: "inverse", width: "contained", cards: "bordered", buttons: "soft", dividers: "none", photoRatio: "standard" } as const;
+    const s = spec();
+    const b = { ...SPARSE_BUSINESS, name: "Slaščičarna Pri Zofki" };
+    const out = html(<Footer ctx={testCtx({ ...s, business: b, design: { ...s.design, skeleton } })} />);
+    // Shown copies: the markup with the screen-reader-only elements taken out.
+    const shown = out.replace(/<(p|span) class="[^"]*visually-hidden[^"]*">[\s\S]*?<\/\1>/g, "");
+    expect(count(shown, /Slaščičarna Pri Zofki/g)).toBe(2);
+    expect(shown).toMatch(/<p class="site-footer__wordmark" aria-hidden="true" style="--wm-chars:11;--wm-line:21">Slaščičarna Pri Zofki<\/p>/);
+    expect(shown).toContain("© ");
+    // Screen readers still read the name once: the wordmark is aria-hidden, the name line stays for them.
+    expect(out).toContain('<p class="site-footer__name visually-hidden">Slaščičarna Pri Zofki</p>');
+    // Without the wordmark the bold name line stays visible.
+    const columns = html(<Footer ctx={testCtx({ ...s, business: b })} />);
+    expect(columns).toContain('<p class="site-footer__name">Slaščičarna Pri Zofki</p>');
+  });
+
   describe("visit footer says each fact once (review 50: address and hours printed two or three times)", () => {
     const skeleton = { header: "bar", actions: "bar", footer: "visit", footerTone: "default", width: "contained", cards: "bordered", buttons: "soft", dividers: "none", photoRatio: "standard" } as const;
     const visit = (sections: object[]) => {

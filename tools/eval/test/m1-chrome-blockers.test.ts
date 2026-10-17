@@ -479,9 +479,12 @@ describe("4. the room for marks keeps the hero's button on the first phone scree
 });
 
 describe("4. the footer wordmark's carons", () => {
-  it("sirarna-pr-simnu: the Š of the second line clears the line above, at 360 and 1280 px", async () => {
+  // The footer wordmark now fits a short name on one line (min(6rem, 2 × h2)), so the name is lengthened until it wraps
+  // on a phone; at 1280 px it may fit one line, and a wordmark on one line has no line above to touch.
+  it("sirarna-pr-simnu: the Š of a wrapped line clears the line above, at 360 px (and at 1280 px when it wraps)", async () => {
     const s = await studio("sirarna-pr-simnu");
     s.design.skeleton = WORDMARK;
+    s.business.name = "Sirarna in mlekarna Pr' Šimnu";
     await renderToDir(s, dir);
     for (const w of [{ width: 360, height: 800 }, { width: 1280, height: 800 }]) {
       const { page, ctx } = await openPage(browser, w, `${server.url}/${s.slug}/index.html`);
@@ -489,7 +492,8 @@ describe("4. the footer wordmark's carons", () => {
         await page.locator(".site-footer__wordmark").scrollIntoViewIfNeeded();
         if (process.env.SB_SHOTS) await page.locator(".site-footer__wordmark").screenshot({ path: path.join(process.env.SB_SHOTS, `m1-wordmark-${w.width}.png`) });
         const c = await caronClearance(page, ".site-footer__wordmark");
-        expect(c.lines, `${w.width} px: the name wraps`).toBeGreaterThanOrEqual(2);
+        if (w.width === 360) expect(c.lines, `${w.width} px: the name wraps`).toBeGreaterThanOrEqual(2);
+        else if (c.lines < 2) continue;
         // A hairline of air at least (0.03 em is 4 px at the 9rem desktop size).
         expect(c.worst, `${w.width} px: ${c.at}`).toBeGreaterThanOrEqual(0.03);
       } finally {
