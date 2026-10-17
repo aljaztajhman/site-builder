@@ -1,6 +1,6 @@
 # postavi.si coming-soon page
 
-Static page shown on postavi.si until the product launches there. Served by Caddy in the Railway service `coming-soon` (project site-builder), root directory `/infra/coming-soon`; deploys on push to main when files here change.
+Static page shown on postavi.si until the product launches there. Served by Caddy in the Railway service `coming-soon` (project site-builder). Its settings live on the service, not in a file: root directory `/infra/coming-soon`, builds the Dockerfile, healthcheck `/`, watch pattern `/infra/coming-soon/**`, deploys on push to main.
 
 - `site/` is served as is. Fonts are copies of `packages/render/assets/fonts` (SIL OFL, see `packages/render/assets/fonts/LICENSES`).
 - `www.postavi.si` redirects to `postavi.si`. DNS is at Namecheap.
