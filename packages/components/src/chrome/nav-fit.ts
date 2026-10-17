@@ -1,4 +1,13 @@
-import { FONT_PAIRS, type Design, type HeaderFamily } from "@sb/spec";
+import { FONT_PAIRS, type Design, type HeaderFamily, type Page, type SiteSpec } from "@sb/spec";
+
+/**
+ * The pages the menu lists (header and footer). A site whose only menu entry is its homepage (a one-page site) has no
+ * menu: a lone "Domov" leads nowhere new, and the brand already links home (review: lone "Domov" in the nav).
+ */
+export function menuPages(site: Pick<SiteSpec, "pages">): Page[] {
+  const pages = site.pages.filter((p) => p.nav.show);
+  return pages.length === 1 && pages[0]!.kind === "home" ? [] : pages;
+}
 
 /**
  * How many menu entries fit in one row of the wide header (it-plan-limits: Plus has up to 20 pages). The rest sit

@@ -15,7 +15,7 @@ const files = readdirSync(goldenDir).filter((f) => f.endsWith(".json")).sort();
 const NOW = new Date("2026-10-10T12:00:00Z");
 const home = (spec: SiteSpec) => renderSite(spec, { now: NOW }).pages.get("index.html")!;
 const header = (html: string) => /<header[\s\S]*?<\/header>/.exec(html)![0];
-const footerName = (html: string) => /<p class="site-footer__name">[\s\S]*?<\/p>/.exec(html)![0];
+const footerName = (html: string) => /<p class="site-footer__name"[^>]*>[\s\S]*?<\/p>/.exec(html)![0];
 
 function without(f: string, style?: WordmarkStyle, logo = false): SiteSpec {
   const spec = golden(f);

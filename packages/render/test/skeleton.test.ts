@@ -141,7 +141,7 @@ describe("the skeleton in the page", () => {
     expect(footer).toContain("Obiščite nas");
     expect(footer).toContain("site-footer__directions");
     expect(footer).toContain("Delovni čas");
-    expect(footer.match(/<address>/g)).toHaveLength(1);
+    expect(footer.match(/<address[ >]/g)).toHaveLength(1);
   });
 
   it("footer visit under a contact section: no second address or hours, the provider rows stay (review 50)", () => {

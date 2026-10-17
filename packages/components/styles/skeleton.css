@@ -239,7 +239,7 @@ html:has(.site-header--sticky) {
   }
   .site-header__name-text {
     font-size: max(var(--fs-sm), min(1em, 100cqi / var(--name-em, 10)));
-    line-height: 1.2;
+    line-height: max(var(--lh-floor, 0), 1.2);
   }
   .site-header--centred .site-header__brand {
     flex: 1 1 0;
@@ -476,7 +476,7 @@ body[data-skeleton] .site-footer--tone-band :focus-visible {
 }
 .site-footer__visit-where address {
   font-size: var(--fs-lg);
-  line-height: 1.4;
+  line-height: max(var(--lh-floor, 0), 1.4);
 }
 .site-footer__directions {
   gap: 0.4rem;

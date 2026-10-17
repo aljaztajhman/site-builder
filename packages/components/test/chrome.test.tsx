@@ -119,6 +119,27 @@ describe("Header", () => {
     expect(out).not.toContain("nav-toggle");
     expect(out).not.toContain("<nav");
   });
+
+  it("has no menu on a one-page site: no lone \"Domov\" in the header or the footer (M1 blocker)", () => {
+    const s = spec();
+    const onePage = { ...s, pages: s.pages.filter((p) => p.id !== "p_storitve") };
+    const skeleton = { header: "centred", actions: "bar", footer: "columns", footerTone: "alt", width: "contained", cards: "filled", buttons: "soft", dividers: "motif", photoRatio: "standard" } as const;
+    for (const site of [onePage, { ...onePage, design: { ...onePage.design, skeleton } }]) {
+      const ctx = testCtx(site);
+      const header = html(<Header ctx={ctx} />);
+      expect(header).not.toContain(">Domov<");
+      expect(header).not.toContain("nav-toggle");
+      expect(header).not.toContain('id="site-nav"');
+      expect(header).toContain('class="site-header__brand" href="index.html"');
+      const footer = html(<Footer ctx={ctx} />);
+      expect(footer).not.toContain(">Domov<");
+      // The legal pages stay linked.
+      expect(footer).toContain('href="zasebnost.html">Zasebnost</a>');
+    }
+    // Two menu pages keep the menu, the homepage included.
+    expect(html(<Header ctx={testCtx(s)} />)).toContain(">Domov</a>");
+    expect(html(<Footer ctx={testCtx(s)} />)).toContain(">Domov</a>");
+  });
 });
 
 describe("Footer", () => {

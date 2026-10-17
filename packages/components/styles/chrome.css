@@ -57,7 +57,7 @@
   letter-spacing: var(--tracking-heading);
   text-transform: var(--case-heading);
   font-size: var(--fs-lg);
-  line-height: 1.2;
+  line-height: max(var(--lh-floor, 0), 1.2);
   overflow-wrap: break-word;
   hyphens: manual;
 }
@@ -495,11 +495,27 @@ body.has-action-bar:not(:has(.action-bar)) {
   }
 }
 /* The bar is on screen from the start: on a phone the hero's own call (or booking) would sit right above the bar's. */
+/* The same for its directions (the hero's link sat under the bar's), and for the header that carries call and directions. */
 @media (max-width: 47.99rem) {
   body.bar-covers-hero-call main > :first-child [data-action="call"],
-  body.bar-covers-hero-booking main > :first-child [data-action="booking"] {
+  body.bar-covers-hero-booking main > :first-child [data-action="booking"],
+  body.bar-covers-hero-directions main > :first-child [data-action="directions"],
+  body.header-covers-hero-call main > :first-child [data-action="call"],
+  body.header-covers-hero-directions main > :first-child [data-action="directions"] {
     display: none;
   }
+  /* The call and the directions the bar, the floating button or the header carries, a second time further down the page
+     (site.tsx markRepeatedActions): the carrier and one in the page are enough. */
+  main a[data-repeat],
+  .site-footer a[data-repeat] {
+    display: none !important;
+  }
+}
+/* The header carries it at every width (actions "header", the phone family's number, a call or directions button):
+   the page's later ones go at desktop width too (review 50, 1280 px: "Navodila za pot" three times). */
+main a[data-repeat="all"],
+.site-footer a[data-repeat="all"] {
+  display: none !important;
 }
 @keyframes action-bar-in {
   0%,

@@ -4,6 +4,7 @@ import type { RenderCtx } from "../types.ts";
 import { AddressText, EmailLink, HoursList, Icon, MaybeText, PhoneLink, cx } from "../primitives/index.tsx";
 import { ChromeWordmark } from "../groups/composed/kinds/wordmark.tsx";
 import { contactShown, pageFacts } from "./page-facts.ts";
+import { menuPages } from "./nav-fit.ts";
 
 /** Characters of the longest word: the wordmark's size is set so it fits the width (skeleton.css). */
 const longestWord = (s: string): number => Math.max(4, ...s.split(/\s+/).map((w) => w.length));
@@ -32,7 +33,7 @@ export function Footer({ ctx }: { ctx: RenderCtx }) {
   // A band footer needs a band colour (a template always has one); without it the dark ground.
   const hasBand = site.design.colors.band !== undefined || DIRECTIONS.some((d) => d.id === site.design.direction && d.template);
   const tone = skeleton && skeleton.footerTone === "band" && !hasBand ? "inverse" : skeleton?.footerTone;
-  const navPages = site.pages.filter((x) => x.nav.show);
+  const navPages = menuPages(site);
   const legalPages = (["privacy", "accessibility"] as const)
     .map((kind) => site.pages.find((x) => x.kind === kind))
     .filter((x) => x !== undefined);
@@ -61,6 +62,7 @@ export function Footer({ ctx }: { ctx: RenderCtx }) {
       <div className="container">
         {variant === "wordmark" && (
           // The name set wall-sized as the page's last word; decorative (the name follows as text below).
+          // A name with Č Š Ž gets room for the marks (render markMarkedLines, base.css).
           <p className="site-footer__wordmark" aria-hidden="true" style={{ "--wm-chars": longestWord(b.name) } as CSSProperties}>
             {b.name}
           </p>

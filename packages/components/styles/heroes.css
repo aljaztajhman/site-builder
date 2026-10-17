@@ -360,7 +360,7 @@ main > .s-hero-signature:first-child {
   max-width: none;
   font-weight: 600;
   font-size: var(--fs-lg);
-  line-height: 1.3;
+  line-height: max(var(--lh-floor, 0), 1.3);
 }
 .hsig__strip .hours__row {
   border-color: currentColor;
@@ -780,7 +780,7 @@ main > .s-hero-signature:first-child {
   background: var(--c-inverse);
   color: var(--c-on-inverse);
   font-weight: 700;
-  line-height: 1.25;
+  line-height: max(var(--lh-floor, 0), 1.25);
   rotate: -4deg;
 }
 .hsig__chip--alone {
@@ -873,7 +873,7 @@ main > .s-hero-signature:first-child {
   font-family: var(--font-heading);
   font-weight: var(--fw-heading);
   font-size: 1.3125rem;
-  line-height: 1.05;
+  line-height: max(var(--lh-floor, 0), 1.05);
   clip-path: var(--shape-sign);
 }
 .hsig__sign:nth-child(1) {
@@ -1010,7 +1010,7 @@ main > .s-hero-signature:first-child {
   text-align: center;
   font-size: 1rem;
   font-weight: 700;
-  line-height: 1.15;
+  line-height: max(var(--lh-floor, 0), 1.15);
 }
 .seal__days {
   font-size: 0.875rem;
