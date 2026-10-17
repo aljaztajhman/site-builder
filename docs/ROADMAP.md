@@ -10,7 +10,7 @@ Written on 2026-10-16 from an inventory of TASKS.md (263 done, 158 open), HQ, do
 
 ## Now
 
-- **Current milestone:** M1 Design good enough. On 2026-10-17 the owner locked the design: today's pipeline (Design 3) plus the Review 50 fixes. Now: polish it. Check fonts and details (PR #221) per page, fix the known blockers, then a final check on 10 new businesses and the owner's approval. Variety work is parked.
+- **Current milestone:** M1 Design good enough. On 2026-10-17 the owner locked the design: today's pipeline (Design 3) plus the Review 50 fixes. Now: polish it. Check fonts and details (PR #221) per page, turn on six prompt fixes after their evals, fix the known blockers, then a final check on 10 new businesses and the owner's approval. Variety work is parked.
 - **Owner, in parallel (long lead times):** register the company (M3), buy the platform domain (M5), find a lawyer for the legal pages (M3).
 - **Last updated:** 2026-10-17.
 
@@ -22,7 +22,7 @@ Claude's track runs in order: M1 → M2 → M4 → M5 → M6 → M7. M3 is mostl
 
 Each milestone has exit criteria. A milestone is done only when every criterion is met and checked. No "80 %" milestones: half-done work stays open on this page, and is not quietly left behind for something new.
 
-### M1 · Design good enough (Claude) — 0 of 3 criteria met
+### M1 · Design good enough (Claude) — 0 of 4 criteria met
 
 Sites pass the three outside reviewers and the owner's eye. Set variety is not a v1.0 goal (owner, 2026-10-17).
 
@@ -39,6 +39,7 @@ Exit criteria:
   - call action shown three times on phones;
   - lone "Domov" in the nav on single-page sites;
   - any other open reviewer blocker in eval/outside-review (fresh10, review50-after) that is still real.
+- [ ] Six prompt fixes are on after their evals (owner, 2026-10-17), or a measured reason why one stays off: `promptFixes.directions` (no B&W or duotone promises, editorial photo hero), `beige` and `warmSurface` (no cream or beige page backgrounds), `catalogue` (incl. the call-button rule), `oneHero` (one main heading per page), `sloveneStyle` (formal vi, Slovene typography, no English words). The final check runs with them on.
 - [ ] Final check on 10 brand-new businesses (never tested; new trades and towns; with and without photos): at least 8 of 10 pass all three reviewers (Gemini, GPT, Fable), scored per page.
 - [ ] The owner looks at the pages (desktop and phone contact sheets) and approves them.
 
@@ -94,7 +95,7 @@ Exit criteria:
 - [ ] Backups with a restore drill done once (TASKS:353).
 - [ ] Monitoring and alerts on errors and spend (TASKS:358). Daily spend cap set on Railway.
 - [ ] Analytics events on (TASKS:360, `analytics.events`).
-- [ ] **Switches cleaned up.** Every feature flag that is off (config: promptFixes ×13, costCuts, compactCatalogue, homepageFirst, structuredOutputForContent, genome, useFullBuildModel, designer studio) is either turned on after an eval or deleted with its code. No dead switches at launch.
+- [ ] **Switches cleaned up** (owner, 2026-10-17: must happen before launch). All remaining `promptFixes` (pictures, critique, altText, judge, brief, classifier, edit) and the cost and speed switches (`costCuts.secondCritiqueOnlyOnFailures`, `costCuts.contentRetryAsPatch`, `prompts.compactCatalogue`, `pipeline.homepageFirst`, `structuredOutputForContent`) are turned on after an eval. The experiments (`designer.agent` studio, `variety.genome`, `useFullBuildModel`) are deleted with their code. No dead switches at launch.
 
 ### M7 · Launch (owner + Claude) — 0 of 5 met
 
