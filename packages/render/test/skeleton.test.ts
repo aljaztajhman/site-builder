@@ -38,7 +38,7 @@ describe("the skeleton in the page", () => {
     expect(html).toContain('class="site-header site-header--centred"');
     expect(html).toContain('class="nav-toggle nav-toggle--icon"');
     expect(html).toContain('class="site-footer site-footer--compact site-footer--wordmark site-footer--tone-inverse"');
-    expect(html).toMatch(/<p class="site-footer__wordmark" aria-hidden="true" style="--wm-chars:\d+">Avtoservis Mrak<\/p>/);
+    expect(html).toMatch(/<p class="site-footer__wordmark" aria-hidden="true" style="--wm-chars:\d+;--wm-line:15">Avtoservis Mrak<\/p>/);
   });
 
   it("draws the menu as a word, an icon or today's box by header family", () => {
