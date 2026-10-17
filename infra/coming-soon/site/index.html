@@ -305,12 +305,17 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
   .field .btn{border-radius:0;width:100%}
   .field input{flex:none}
 }
-/* the phone intro (see the script): the preview holds still mid-screen while the site goes up */
-.pin-sp{display:none}
-@media (max-width:860px){
-  .pintro .demo{position:sticky;top:12px;top:max(12px,calc((100svh - var(--dh))/2))}
-  .pintro .pin-sp{display:block;height:80svh}
-}
+/* the phone intro (see the script): a pinned first screen with the headline and your words */
+.ph{height:220vh;height:calc(100svh + 120svh)}
+.ph-st{position:sticky;top:0;height:100vh;height:100svh;display:flex;flex-direction:column;justify-content:center}
+.ph h1{margin:0}
+.ph .demo{margin-top:26px}
+.ph .note{display:none}
+.ph #stage{margin:0 auto}
+.ph h1,.ph .say,.ph #stage{will-change:transform}
+.ph .cue{display:inline-flex;position:fixed;bottom:24px;pointer-events:none}
+.phi .work .who{margin-bottom:14px}
+.phi .work{margin-top:0}
 /* reduced motion: the page still builds and reveals itself, but nothing loops or jumps */
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
@@ -605,7 +610,7 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
   input.addEventListener("focus",stopAuto);
   input.addEventListener("input",function(){userName=input.value.trim();stopAuto();setName()});
   $("#try").addEventListener("submit",function(e){e.preventDefault();stopAuto();show(cur);
-    if(matchMedia("(max-width: 860px)").matches)stage.scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"})});
+    if(matchMedia("(max-width: 860px)").matches)toPreview()});
   $$("[data-focus]").forEach(function(a){a.addEventListener("click",function(e){e.preventDefault();stopAuto();
     input.scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"});setTimeout(function(){input.focus({preventScroll:true})},reduce?0:500)})});
   addEventListener("resize",moveInd);
@@ -668,24 +673,49 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
   }
   setupIntro();
 
-  // the phone intro: in one column the preview stays in the middle of the screen for about a screen of
-  // scrolling while the site goes up block by block; then it scrolls on and behaves as usual
-  var phone=false,demoEl=$(".demo"),work=$(".work"),pinSp=null,pgap=0,narrow=matchMedia("(max-width: 860px)");
+  // the phone intro: like the wide screen, the first screen is only the headline and your words. The
+  // headline and your words sit in a pinned screen; scrolling brings the browser up from below and puts
+  // the site up block by block, then the page scrolls on (the try-it form, the tabs, the rest).
+  var phone=false,narrow=matchMedia("(max-width: 860px)"),demoEl=$(".demo"),work=$(".work"),whoEl=$(".who"),ph=null,phSt=null,pg=null;
+  function measurePhone(){
+    [h1,sayEl,stage].forEach(function(e){e.style.transform=""});stage.style.maxWidth="";
+    var vh=innerHeight,top=phSt.getBoundingClientRect().top,gap=parseFloat(getComputedStyle(sayEl).marginBottom)||0;
+    var over=h1.offsetHeight+parseFloat(getComputedStyle(demoEl).marginTop)+demoEl.offsetHeight+72-vh;
+    if(over>0){var w=Math.floor(stage.offsetWidth*(1-over/stage.offsetHeight));if(w<220)return false;stage.style.maxWidth=w+"px"}
+    pg={shift:(stage.offsetHeight+gap)/2,drop:vh+24-(stage.getBoundingClientRect().top-top)};
+    return true;
+  }
   function applyPhone(){
-    var d=demoEl.getBoundingClientRect(),s=pinSp.getBoundingClientRect(),p=clamp((d.bottom-s.top+pgap)/(pinSp.offsetHeight+pgap));
+    var len=ph.offsetHeight-innerHeight,p=len>0?clamp(-ph.getBoundingClientRect().top/len):1,r=ease(clamp(p/.3)),s=pg.shift*(1-r);
+    h1.style.transform=sayEl.style.transform=s>.5?"translateY("+s.toFixed(1)+"px)":"";
+    stage.style.transform=r<1?"translateY("+(pg.drop*(1-r)).toFixed(1)+"px)":"";
+    cueEl.style.opacity=clamp(1-p*6);
     if(p>.02)endTyping();
-    scrub((p-.08)/.72,p>=.9);
+    scrub((p-.3)/.6,p>=.95);
+  }
+  function undoPhone(){
+    phone=false;html.classList.remove("phi");
+    hero.insertBefore(whoEl,ph);hero.insertBefore(h1,ph);work.appendChild(demoEl);hero.appendChild(cueEl);ph.remove();
+    [h1,sayEl,stage].forEach(function(e){e.style.transform=""});stage.style.maxWidth="";cueEl.style.opacity="";
   }
   function setupPhone(){
-    if(intro||reduce||!narrow.matches||demoEl.offsetHeight+24>innerHeight)return;
-    pinSp=document.createElement("div");pinSp.className="pin-sp";pinSp.setAttribute("aria-hidden","true");work.appendChild(pinSp);
-    html.classList.add("pintro");html.style.setProperty("--dh",demoEl.offsetHeight+"px");
-    pgap=parseFloat(getComputedStyle(work).rowGap)||0;
-    phone=true;introDone=false;
+    if(intro||reduce||!narrow.matches)return;
+    ph=document.createElement("div");ph.className="ph";phSt=document.createElement("div");phSt.className="ph-st";ph.appendChild(phSt);
+    hero.insertBefore(ph,work);phSt.appendChild(h1);phSt.appendChild(demoEl);phSt.appendChild(cueEl);
+    work.firstElementChild.insertBefore(whoEl,work.firstElementChild.firstChild);
+    html.classList.add("phi");
+    if(!measurePhone()){undoPhone();return}
+    phone=true;introDone=false;applyPhone();
     addEventListener("scroll",onScroll,{passive:true});
     addEventListener("resize",function(){if(!phone)return;
-      if(!narrow.matches||demoEl.offsetHeight+24>innerHeight){phone=false;html.classList.remove("pintro");pinSp.remove();endTyping();scrub(1,true);return}
-      html.style.setProperty("--dh",demoEl.offsetHeight+"px");applyPhone()});
+      if(!narrow.matches||!measurePhone()){undoPhone();endTyping();scrub(1,true);return}
+      applyPhone()});
+    document.fonts&&document.fonts.ready.then(function(){if(phone&&measurePhone())applyPhone()});
+  }
+  // after "Postavi" on a phone, show the finished preview (the end of the pinned screen)
+  function toPreview(){
+    if(phone){var y=ph.getBoundingClientRect().top+scrollY+ph.offsetHeight-innerHeight;scrollTo({top:y,behavior:reduce?"auto":"smooth"})}
+    else stage.scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"});
   }
   setupPhone();
   show(0);requestAnimationFrame(function(){tabs.classList.add("ready")});
