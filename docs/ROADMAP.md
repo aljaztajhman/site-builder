@@ -10,9 +10,9 @@ Written on 2026-10-16 from an inventory of TASKS.md (263 done, 158 open), HQ, do
 
 ## Now
 
-- **Current milestone:** M1 Design good enough. Design 5 Wave P ran on 2026-10-16 and **failed** the bar (variety 3/3/2 and 2/2/2; Review 50's overall dropped). Next: the owner decides the §6 plan (type voice, scale, CTA and chrome, imagery) that replaces U1–U5; meanwhile the headline-fitting defect and the open reviewer blockers.
+- **Current milestone:** M1 Design good enough. On 2026-10-17 the owner locked the design: today's pipeline (Design 3) plus the Review 50 fixes. Now: polish it. Check fonts and details (PR #221) per page, fix the known blockers, then a final check on 10 new businesses and the owner's approval. Variety work is parked.
 - **Owner, in parallel (long lead times):** register the company (M3), buy the platform domain (M5), find a lawyer for the legal pages (M3).
-- **Last updated:** 2026-10-16.
+- **Last updated:** 2026-10-17.
 
 ---
 
@@ -22,27 +22,25 @@ Claude's track runs in order: M1 → M2 → M4 → M5 → M6 → M7. M3 is mostl
 
 Each milestone has exit criteria. A milestone is done only when every criterion is met and checked. No "80 %" milestones: half-done work stays open on this page, and is not quietly left behind for something new.
 
-### M1 · Design good enough (Claude) — 0 of 6 criteria met
+### M1 · Design good enough (Claude) — 0 of 3 criteria met
 
-Sites pass the three outside reviewers and the owner's eye, with a set of ten that reads as ten designs.
+Sites pass the three outside reviewers and the owner's eye. Set variety is not a v1.0 goal (owner, 2026-10-17).
+
+Decision 2026-10-17 (owner): lock today's design (Design 3 + the Review 50 fixes; it beat both AI studios: 28 of 50 pages pass all three reviewers, 7 of 10 new businesses). Two cheap variety proofs failed to move set variety (Wave P layouts, PR #220; type and details, PR #221), so variety work goes to the parking lot. The six earlier criteria (Wave P, Design 5 waves U1–U9, the blocker list, the owner's critiques, G2 on 20 businesses, the town in the hero) are replaced by these three.
 
 Exit criteria:
-- [ ] Design 5 Wave P passes: set variety ≥ 3.5 from 2 of 3 reviewers on both proof sets, and the owner agrees on the contact sheets. If it fails, the plan switches to §6 of the direction (scale, type, second moment). M1 continues either way.
-  - 2026-10-16: **failed** (€0.21). fresh 10 variety 3/3/2, Review 50 2/2/2, Review 50 overall 3 → 2 for Gemini and GPT. eval/outside-review/wave-p-sets/README.md. The switch to §6 and what happens to the next criterion (U1–U9) is the owner's call.
-- [ ] Design 5 waves needed for launch are built and on. U1 is v22, the gate and the structures; U2 is the page gate on every path; U3–U5 bring presets, photo grade and the variety rule; U8 is chrome and the single-page nav; U9 is the AI caption. U6/U7 (studio wiring, hybrid designer) are parking lot, not M1.
-- [ ] Every open reviewer blocker is fixed in code, with a test:
-  - AI label clipped by arched crops;
+- [ ] Every known blocker is fixed in code, with a test that failed before:
+  - AI label clipped in arched photo crops;
   - arched photo cut at the phone edge;
-  - caron touching the line above in the footer wordmark;
+  - č/š/ž touching the line above in the footer wordmark;
   - phone bar over a hero link;
   - week chart without hour labels;
   - logo viewBox clipped;
   - call action shown three times on phones;
-  - lone "Domov" in the nav;
-  - Review 50 items 9–13 (compact hours, two-column desktop variants, headline and wordmark caps, phone hero button).
-- [ ] The owner's critiques are closed: heroes and drawings too basic (9 of 20 presets rejected), the yellow background, direction summaries that promise B&W photos.
-- [ ] G2 measured on 20 new businesses. Per page ≥ 3.6 (today 3.47), all three reviewers pass ≥ 8 of 10, set variety ≥ 4 from 2 of 3, and fewer than 5 agreed blockers per 10 pages.
-- [ ] Owner decides on the town in the hero (Review 50 item 15).
+  - lone "Domov" in the nav on single-page sites;
+  - any other open reviewer blocker in eval/outside-review (fresh10, review50-after) that is still real.
+- [ ] Final check on 10 brand-new businesses (never tested; new trades and towns; with and without photos): at least 8 of 10 pass all three reviewers (Gemini, GPT, Fable), scored per page.
+- [ ] The owner looks at the pages (desktop and phone contact sheets) and approves them.
 
 ### M2 · Launch gate: accounts, editor, email (Claude + an owner check) — 0 of 6 met (much of the work under them is built)
 
@@ -113,6 +111,8 @@ Exit criteria:
 
 Ideas and half-built things that are **not** on the way to 1.0. Something leaves the parking lot only when the owner moves it into a milestone.
 
+- **Set variety for v1.0 (owner, 2026-10-17).** Set variety ≥ 4 from 2 of 3 reviewers, the rest of Design 5 (U1–U7, incl. Wave P's structure presets, off since PR #220), option B "pictures lead every first screen", new hero structures, direction §6, and the AI studios (picture studio, Fable studio). Why: two cheap proofs (layouts, PR #220; type and details, PR #221) did not move the reviewers' variety score (2–3), while today's per-page quality already beats both studios. Revisit after launch.
+- Town in the hero lead (Review 50 item 15), G2 on 20 businesses, the owner's preset critiques (heroes and drawings too basic, the yellow background, direction summaries promising B&W photos) unless the final check's approval names them.
 - Studio 1.0 (S0–S7 tournament), the hybrid designer (Design 5 U6/U7, G3), the Fable studio, the picture studio.
 - Okus round 3 ratings. Rate them if an M1 decision needs the owner's taste.
 - Puck editor (unless M2's decision picks it). Section AI actions (TASKS:136), the Slovene copy judge (TASKS:137), editor keyboard paths (TASKS:564).
