@@ -128,6 +128,8 @@ h1 em{font-style:normal;color:var(--accent)}
 @keyframes shine{to{transform:translateX(100%)}}
 /* services: a row of names on a hairline, as a site lists what it does */
 .m-list{display:flex;border-top:1px solid var(--lm)}
+.js .anim .m-list{border-color:transparent;transition:border-color .4s}
+.js .anim .m-list:has(.on){border-color:var(--lm)}
 .m-item{flex:1;padding:2.2cqw 0 0;font-size:max(9px,2cqw);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .m-item+.m-item{padding-left:2.4cqw;margin-left:2.4cqw;border-left:1px solid var(--lm)}
 .m-foot{display:flex;justify-content:space-between;gap:2cqw;font-size:max(8px,1.8cqw);color:var(--t2);white-space:nowrap;overflow:hidden}
@@ -156,6 +158,21 @@ h1 em{font-style:normal;color:var(--accent)}
 .v3{--bg:#15181b;--t:#f1f3f5;--t2:#9aa5ad;--a:#f0b323;--ai:#15181b;--lm:rgb(241 243 245/.16);--r:4px;--pr:6px;--hf:var(--ui);--hw:900;--hls:-.02em;--htt:uppercase;
   --photo:linear-gradient(140deg,#5a6570,#2a3138 60%,#0f1214);--motif:repeating-linear-gradient(90deg,rgb(240 179 35/.35) 0 3px,transparent 3px 26px)}
 
+/* the scroll intro (wide screens, full motion): the hero stays pinned while your words turn into the site */
+.intro .pin{height:calc(100vh + 150vh)}
+.intro .hero{position:sticky;top:0;min-height:100vh;padding:0;display:flex;flex-direction:column;justify-content:center}
+.intro .work{margin-top:32px}
+.intro h1{width:max-content;max-width:100%}
+.intro h1,.intro .say,.intro #stage{transform-origin:0 0;will-change:transform}
+.intro .hero{animation:fadeIn .8s var(--ease) both}
+@keyframes fadeIn{from{opacity:0}}
+.intro .who,.intro .lead,.intro .try,.intro .tabs-w,.intro .more,.intro .note{opacity:0;animation:none}
+.intro .ln>span{animation:none}
+.cue{display:none;position:absolute;left:50%;bottom:28px;transform:translateX(-50%);align-items:center;gap:8px;font:500 14px/1 var(--ui);color:var(--ink-3);white-space:nowrap}
+.cue svg{width:14px;height:14px;animation:nudge 1.6s var(--ease) infinite}
+@keyframes nudge{50%{transform:translateY(4px)}}
+.intro .cue{display:inline-flex}
+
 /* sections */
 section{padding:110px 0;border-top:1px solid var(--line)}
 h2{font:800 clamp(32px,4.2vw,58px)/1.02 var(--display);letter-spacing:-.035em;max-width:14em}
@@ -168,17 +185,21 @@ h2{font:800 clamp(32px,4.2vw,58px)/1.02 var(--display);letter-spacing:-.035em;ma
 .why p{color:var(--ink-2);font-size:18px;max-width:30em}
 .why p+p{margin-top:18px}
 .why p strong{color:var(--ink);font-weight:600}
-.srch{margin-top:34px;max-width:360px}
-.srch .q{display:flex;align-items:center;gap:10px;border:1px solid var(--line-2);border-radius:6px;padding:10px 14px;font-size:15px;color:var(--ink);background:var(--surface)}
+.srch{margin-top:36px;max-width:420px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);overflow:hidden}
+.srch .q{display:flex;align-items:center;gap:10px;padding:12px 16px;font-size:15px;color:var(--ink);border-bottom:1px solid var(--line)}
 .srch svg{flex:none;width:16px;height:16px;color:var(--ink-3)}
-.res{display:grid;gap:6px;padding:14px 14px 0}
-.js .res{opacity:0}
-.res i{display:block;height:8px;border-radius:2px;background:var(--surface-2)}
-.res i:first-child{width:46%;background:var(--line-2)}.res i:last-child{width:72%}
-.res.you{border:1.5px dashed var(--accent);border-radius:6px;padding:8px 12px;margin:14px 14px 0;font:600 14px/1.2 var(--ui);color:var(--accent-text)}
-.js .in .res{opacity:1;animation:fade .6s var(--ease) both}
-.in .res:nth-child(3){animation-delay:.2s}.in .res:nth-child(4){animation-delay:.35s}.in .res.you{animation:pop .7s .9s var(--spring) both}
-@keyframes pop{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
+.hit{padding:14px 16px;border-bottom:1px solid var(--line);display:grid;gap:6px}
+.hit:last-child{border-bottom:0}
+.js .hit{opacity:0}
+.hit i{display:block;height:8px;border-radius:2px;background:var(--surface-2)}
+.hit i:first-child{width:52%;background:var(--line-2)}.hit i:nth-child(2){width:34%}.hit i:last-child{width:80%}
+.hit.you{background:var(--accent-soft);gap:3px}
+.hit.you b{font:600 15px/1.3 var(--ui);color:var(--ink)}
+.hit.you .u{font-size:13px;color:var(--accent-text)}
+.hit.you .s{font-size:14px;color:var(--ink-2)}
+.js .in .hit{opacity:1;animation:fade .6s var(--ease) both}
+.in .hit:nth-child(3){animation-delay:.2s}.in .hit.you{animation:pop .7s .9s var(--spring) both}
+@keyframes pop{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .roads{margin-top:72px;display:grid;gap:34px}
 .road{display:grid;grid-template-columns:160px 1fr;gap:28px;align-items:baseline}
 .road h3{font:600 16px/1.3 var(--ui);color:var(--ink-2)}
@@ -186,11 +207,11 @@ h2{font:800 clamp(32px,4.2vw,58px)/1.02 var(--display);letter-spacing:-.035em;ma
 .path{display:flex;flex-wrap:wrap;align-items:center;row-gap:10px;font:500 15px/1.2 var(--ui);color:var(--ink-3)}
 .path span{position:relative;padding:4px 0}
 .path span+span{margin-left:40px}
-.path span+span::before{content:"";position:absolute;left:-34px;top:50%;width:28px;height:1px;background:var(--line-2)}
+.path span+span::before{content:"";position:absolute;left:-34px;top:50%;width:28px;border-top:1px dashed var(--line-2)}
 .road.ok .path{color:var(--ink);font-weight:600}
-.road.ok .path span+span::before{background:var(--accent)}
-.path .end{font-weight:600;color:var(--ink-3)}
-.road.ok .path .end{color:var(--accent-text)}
+.road.ok .path span+span::before{border-top:2px solid var(--accent);margin-top:-1px}
+.path .fin{font-weight:600;color:var(--ink-2)}
+.road.ok .path .fin{color:var(--accent-text)}
 .js .path span{opacity:0;transform:translateX(-8px);transition:opacity .5s var(--ease),transform .5s var(--ease)}
 .js .in .path span{opacity:1;transform:none}
 .path span:nth-child(2){transition-delay:.15s}.path span:nth-child(3){transition-delay:.3s}.path span:nth-child(4){transition-delay:.45s}.path span:nth-child(5){transition-delay:.6s}.path span:nth-child(6){transition-delay:.75s}.path span:nth-child(7){transition-delay:.9s}
@@ -271,7 +292,8 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
   </header>
 
   <main>
-  <div class="hero">
+  <div class="pin" id="pin">
+  <div class="hero" id="hero">
     <p class="who">Za obrtnike, salone, gostilne in trgovine</p>
     <h1><span class="ln"><span>Vaše podjetje na spletu.</span></span><span class="ln"><span><em>V nekaj minutah.</em></span></span></h1>
 
@@ -327,6 +349,9 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
         <p class="note" id="note">Topel, mehek videz z zaobljenimi oblikami in pisavo, ki diši po pekarni.</p>
       </div>
     </div>
+    <span class="cue" id="cue" aria-hidden="true">Pomaknite se
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4v12M5 11l5 5 5-5"/></svg></span>
+  </div>
   </div>
 
   <section id="zakaj">
@@ -334,10 +359,10 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
       <div>
         <h2 class="rv">Stranke vas iščejo na spletu. Naj vas tam tudi najdejo.</h2>
         <div class="srch rv d1" aria-hidden="true">
-          <div class="q"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4.5 4.5"/></svg>mizar v bližini</div>
-          <div class="res"><i></i><i></i></div>
-          <div class="res"><i></i><i></i></div>
-          <div class="res you">Vaše podjetje?</div>
+          <div class="q"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4.5 4.5"/></svg><span id="sq">pekarna Kamnik</span></div>
+          <div class="hit"><i></i><i></i><i></i></div>
+          <div class="hit"><i></i><i></i><i></i></div>
+          <div class="hit you"><b id="hit-t">Pekarna Skorja · Kamnik</b><span class="u" id="hit-u">pekarna-skorja.si</span><span class="s" id="hit-s">Pečemo kruh z drožmi, pecivo in torte po naročilu.</span></div>
         </div>
       </div>
       <div class="rv d2">
@@ -349,11 +374,11 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
     <div class="roads">
       <div class="road rv">
         <h3>Z agencijo ali predlogo</h3>
-        <div class="path"><span>sestanek</span><span>ponudba</span><span>osnutek</span><span>popravki</span><span>še popravki</span><span>čakanje</span><span class="end">…</span></div>
+        <div class="path"><span>sestanek</span><span>ponudba</span><span>osnutek</span><span>popravki</span><span>še popravki</span><span>čakanje</span><span class="fin">čez nekaj tednov</span></div>
       </div>
       <div class="road ok rv d1">
         <h3>S Postavi</h3>
-        <div class="path"><span>opišete</span><span>pregledate</span><span>objavite</span><span class="end">na spletu</span></div>
+        <div class="path"><span>opišete</span><span>pregledate</span><span>objavite</span><span class="fin">čez nekaj minut</span></div>
       </div>
     </div>
   </section>
@@ -411,16 +436,16 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
   var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
   // the four example businesses (fictional) and how each one's site looks
   var looks=[
-    {name:"Pekarna Skorja",cls:"v0 lay-a",links:["Kruh","Pecivo","Kontakt"],h:"Kruh z drožmi, pečen vsako jutro.",cta:"Naročite kruh",items:["Kruh","Pecivo","Torte po naročilu"],hours:"Tor–sob 6.00–13.00",city:"Kamnik",
+    {name:"Pekarna Skorja",q:"pekarna Kamnik",cls:"v0 lay-a",links:["Kruh","Pecivo","Kontakt"],h:"Kruh z drožmi, pečen vsako jutro.",cta:"Naročite kruh",items:["Kruh","Pecivo","Torte po naročilu"],hours:"Tor–sob 6.00–13.00",city:"Kamnik",
      s:["{n} iz Kamnika.","Pečemo kruh z drožmi, pecivo in torte po naročilu.","Odprto od torka do sobote, od 6. do 13. ure."],
      note:"Topel, mehek videz z zaobljenimi oblikami in pisavo, ki diši po pekarni."},
-    {name:"Salon Ostrina",cls:"v1 lay-b",links:["Storitve","Salon","Kontakt"],h:"Striženje, barvanje in nega las.",cta:"Naročite se",items:["Striženje","Barvanje","Nega las"],hours:"Pon–pet 8.00–19.00",city:"Ljubljana",
+    {name:"Salon Ostrina",q:"frizer Ljubljana",cls:"v1 lay-b",links:["Storitve","Salon","Kontakt"],h:"Striženje, barvanje in nega las.",cta:"Naročite se",items:["Striženje","Barvanje","Nega las"],hours:"Pon–pet 8.00–19.00",city:"Ljubljana",
      s:["{n}, frizerski salon v Ljubljani.","Striženje, barvanje in nega las za ženske in moške.","Odprto od ponedeljka do petka, od 8. do 19. ure."],
      note:"Eleganten, zračen videz s tanko pisavo in fotografijo čez celo širino."},
-    {name:"Vrtnarstvo Zelenka",cls:"v2 lay-c",links:["Storitve","Vrtovi","Kontakt"],h:"Vrt, ki ga boste imeli radi.",cta:"Pošljite povpraševanje",items:["Načrtovanje","Zasaditev","Vzdrževanje"],hours:"Ogled po dogovoru",city:"Maribor",
+    {name:"Vrtnarstvo Zelenka",q:"vrtnar Maribor",cls:"v2 lay-c",links:["Storitve","Vrtovi","Kontakt"],h:"Vrt, ki ga boste imeli radi.",cta:"Pošljite povpraševanje",items:["Načrtovanje","Zasaditev","Vzdrževanje"],hours:"Ogled po dogovoru",city:"Maribor",
      s:["{n} iz Maribora.","Načrtujemo in zasadimo vrtove ter skrbimo za njihovo vzdrževanje.","Na ogled pridemo po dogovoru."],
      note:"Zelen, zaobljen videz s fotografijo spredaj, kot vrt pred hišo."},
-    {name:"Avtoservis Jeklo",cls:"v3 lay-a",links:["Servis","Gume","Kontakt"],h:"Servis, gume in diagnostika za vse znamke.",cta:"Pokličite nas",items:["Servis","Vulkanizerstvo","Diagnostika"],hours:"Pon–pet 7.00–17.00",city:"Celje",
+    {name:"Avtoservis Jeklo",q:"avtoservis Celje",cls:"v3 lay-a",links:["Servis","Gume","Kontakt"],h:"Servis, gume in diagnostika za vse znamke.",cta:"Pokličite nas",items:["Servis","Vulkanizerstvo","Diagnostika"],hours:"Pon–pet 7.00–17.00",city:"Celje",
      s:["{n}, avtoservis v Celju.","Servis, vulkanizerstvo in diagnostika za vse znamke.","Odprto od ponedeljka do petka, od 7. do 17. ure."],
      note:"Temen, odločen videz z velikim napisom in gumbom, ki ga ni mogoče zgrešiti."}
   ];
@@ -457,11 +482,13 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
     $$(".m-sub,.m-who",mock).forEach(function(e){e.textContent=n+" · "+l.city});
     $(".host",mock).textContent=slug(n)+".si";
     if(typedUpTo>0)sents[0].textContent=sent(0)+" ";
+    setHit();
   }
+  function setHit(){var n=name(),l=looks[cur];$("#sq").textContent=l.q;$("#hit-t").textContent=n+" · "+l.city;$("#hit-u").textContent=slug(n)+".si";$("#hit-s").textContent=l.s[1]}
   function show(i){
     clearAll();cur=i;typedUpTo=0;
     tbtns.forEach(function(b,k){b.setAttribute("aria-pressed",k===i?"true":"false")});moveInd();
-    noteEl.textContent=looks[i].note;
+    noteEl.textContent=looks[i].note;setHit();
     mock.className="browser "+looks[i].cls+" anim";mock.innerHTML=mockHTML(looks[i],name());
     sents.forEach(function(s){s.textContent="";s.classList.remove("hl")});
     caret.hidden=false;
@@ -470,13 +497,14 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
       var full=sent(k);n++;sents[k].textContent=full.slice(0,n)+(n<full.length?"":" ");
       if(n<full.length)typing=setTimeout(step,speed);
       else{typedUpTo=k+1;if(++k<3){n=0;typing=setTimeout(step,220)}
+      else if(intro&&!introDone){caret.hidden=true}
       else{caret.hidden=true;timers=build(mock,1,function(ev,j){
         if(ev==="s")sents.forEach(function(s,q){s.classList.toggle("hl",q===j)});
         else{timers.push(setTimeout(function(){sents.forEach(function(s){s.classList.remove("hl")})},900));
           if(auto)cycle=setTimeout(function(){show((cur+1)%looks.length)},4600)}})}}
     })();
   }
-  function stopAuto(){auto=false;clearTimeout(cycle)}
+  function stopAuto(){auto=false;clearTimeout(cycle);introDone=true}
   tbtns.forEach(function(b){b.addEventListener("click",function(){stopAuto();show(+b.dataset.v);b.scrollIntoView({block:"nearest",inline:"nearest"})})});
   input.addEventListener("focus",stopAuto);
   input.addEventListener("input",function(){userName=input.value.trim();stopAuto();setName()});
@@ -485,9 +513,63 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
   $$("[data-focus]").forEach(function(a){a.addEventListener("click",function(e){e.preventDefault();stopAuto();
     input.scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"});setTimeout(function(){input.focus({preventScroll:true})},reduce?0:500)})});
   addEventListener("resize",moveInd);
-  document.addEventListener("visibilitychange",function(){if(document.hidden)clearTimeout(cycle);else if(auto&&!timers.length)cycle=setTimeout(function(){show((cur+1)%looks.length)},1500)});
+  document.addEventListener("visibilitychange",function(){if(document.hidden)clearTimeout(cycle);else if(auto&&introDone&&!timers.length)cycle=setTimeout(function(){show((cur+1)%looks.length)},1500)});
   document.fonts&&document.fonts.ready.then(moveInd);
+
+  // the scroll intro: on a wide screen the hero is pinned for a screen and a half; scrolling moves the
+  // headline and your words into place, brings the browser up from below and puts the site up block by
+  // block. Once it is built the demo behaves as usual (tabs, your name, the cycle of looks).
+  var intro=false,introDone=true,hero=$("#hero"),pinEl=$("#pin"),cueEl=$("#cue"),sayEl=$(".say"),h1=$("h1"),
+      fadeEls=$$(".who,.lead,.try,.tabs-w,.more,.note"),geo=null,html=document.documentElement;
+  function ease(x){return x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2}
+  function clamp(x){return x<0?0:x>1?1:x}
+  function tf(el,g,t){el.style.transform=t<=0?"":"translate("+(g.dx*t).toFixed(1)+"px,"+(g.dy*t).toFixed(1)+"px) scale("+(1+(g.s-1)*t).toFixed(4)+")"}
+  function measure(){
+    [h1,sayEl,stage].forEach(function(e){e.style.transform=""});
+    var vw=innerWidth,vh=innerHeight,ht=hero.getBoundingClientRect().top;
+    function r(e){var b=e.getBoundingClientRect();return{l:b.left,t:b.top-ht,w:b.width,h:b.height}}
+    var a=r(h1),b=r(sayEl),c=r(stage);
+    var s0=Math.min(1.18,(vw-80)/a.w),cy=vh*.42;
+    var g0={s:s0,dx:vw/2-a.l-a.w*s0/2,dy:cy-a.t-a.h*s0/2};
+    var s1=Math.min(1.08,(vw-80)/b.w),by=cy+a.h*s0/2+36;
+    var g1={s:s1,dx:vw/2-b.l-b.w*s1/2,dy:by-b.t};
+    var s2=.88;
+    var g2={s:s2,dx:vw/2-c.l-c.w*s2/2,dy:vh+24-c.t};
+    geo={h1:g0,say:g1,stage:g2};
+  }
+  function progress(){var top=pinEl.getBoundingClientRect().top,len=pinEl.offsetHeight-innerHeight;return len>0?clamp(-top/len):1}
+  function applyIntro(){
+    if(!geo)measure();
+    var p=progress(),r=ease(clamp(p/.6)),q=ease(clamp((p-.08)/.5)),o=clamp((p-.78)/.22);
+    tf(h1,geo.h1,1-r);tf(sayEl,geo.say,1-r);tf(stage,geo.stage,1-q);
+    fadeEls.forEach(function(e){e.style.opacity=o;e.style.transform=o<1?"translateY("+((1-o)*16).toFixed(1)+"px)":""});
+    cueEl.style.opacity=clamp(1-p*5);
+    if(p>.05&&typing){clearTimeout(typing);typing=0;for(var k=0;k<3;k++)sents[k].textContent=sent(k)+(k<2?" ":"");typedUpTo=3;caret.hidden=true}
+    if(!introDone){
+      var ld=$(".ld",mock),n=0;
+      SEQ.forEach(function(s,i){var on=p>=.42+i*(.5/(SEQ.length-1)),el=$('[data-b="'+s[0]+'"]',mock);if(el)el.classList.toggle("on",on);if(on){n=i+1;if(s[2]!=null)sents.forEach(function(x,q2){x.classList.toggle("hl",q2===s[2])})}});
+      if(ld){ld.classList.remove("done");ld.style.width=n?Math.round(n/SEQ.length*92)+"%":"0"}
+      if(!n)sents.forEach(function(x){x.classList.remove("hl")});
+      if(p>=.999){introDone=true;finish(mock);sents.forEach(function(x){x.classList.remove("hl")});if(auto)cycle=setTimeout(function(){show((cur+1)%looks.length)},4600)}
+    }
+  }
+  var introRaf=0;
+  function onScroll(){if(introRaf)return;introRaf=requestAnimationFrame(function(){introRaf=0;applyIntro()})}
+  function setupIntro(){
+    if(reduce||!matchMedia("(min-width: 981px) and (min-height: 680px) and (pointer: fine)").matches)return;
+    html.classList.add("intro");
+    if(hero.offsetHeight>innerHeight+8){html.classList.remove("intro");return}
+    intro=true;introDone=false;measure();applyIntro();
+    addEventListener("scroll",onScroll,{passive:true});
+    addEventListener("resize",function(){if(!intro)return;if(hero.offsetHeight>innerHeight+8||!matchMedia("(min-width: 981px)").matches){
+      intro=false;introDone=true;html.classList.remove("intro");[h1,sayEl,stage].concat(fadeEls).forEach(function(e){e.style.transform="";e.style.opacity=""});finish(mock);
+      if(auto)cycle=setTimeout(function(){show((cur+1)%looks.length)},2000);return}
+      measure();applyIntro()});
+  }
+  setupIntro();
   show(0);requestAnimationFrame(function(){tabs.classList.add("ready")});
+  if(intro)applyIntro();
+  if(intro)document.fonts&&document.fonts.ready.then(function(){measure();applyIntro()});
 
   // scroll: reveal, and build the small site when it comes into view
   var mini=$("#mini"),typed=$("#typed"),caret2=$("#caret2"),story=typed.textContent;
