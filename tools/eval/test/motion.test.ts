@@ -21,8 +21,12 @@ afterAll(async () => {
   if (runs.length) await writeReport(runs);
 });
 
+// SB_MOTION_SLICE="i/n" (CI's test-motion job) measures every n-th preset starting at i; without it, all of them.
+const slice = /^(\d+)\/(\d+)$/.exec(process.env.SB_MOTION_SLICE ?? "");
+const presets = slice ? MOTIONS.filter((_, i) => i % Number(slice[2]) === Number(slice[1]) - 1) : MOTIONS;
+
 describe("motion presets in a browser", () => {
-  for (const preset of MOTIONS) {
+  for (const preset of presets) {
     for (const width of WIDTHS) {
       it(`${preset} at ${width}px: CLS 0, LCP within ${LCP_BUDGET_MS} ms of motion off, still under reduced motion`, async () => {
         const r = await harness.measure(preset, width);

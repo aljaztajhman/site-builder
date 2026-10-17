@@ -15,13 +15,13 @@ The goal is a launch-ready v1.0. docs/ROADMAP.md is the plan: "Now", milestones 
 - When a step doesn't need my input, keep going. Put a one-line status note in the same message as your next action.
 - Stop and ask only when you can't continue without me, or before anything destructive or costly:
   - deleting data, or files you didn't create in this run; deleting any Railway service, database, volume or bucket
-  - force-pushing, rewriting history, pushing to main (except the first push that creates the repo), merging into main
+  - force-pushing, rewriting history, pushing to main (except the first push that creates the repo)
   - changing anything outside this repository, except this product's own GitHub repo and Railway project
   - touching any other repo on my GitHub or any other Railway project
   - creating accounts, upgrading plans, entering payment details, buying anything
   - any paid model, image or eval call the development budget in Stranko HQ doesn't allow (see "Stranko HQ" below)
   - anything that pushes the estimated Railway bill above €50/month
-- Work on a feature branch in a git worktree and open a pull request. I review and merge manually.
+- Work on a feature branch in a git worktree and open a pull request with auto-merge on (`gh pr merge --auto --merge`): it merges into main by itself once the required CI checks are green (owner, 2026-10-17). Leave auto-merge off, and say why in the PR, when a PR needs my look first: anything touching money, legal pages, the live spend cap, or a change I asked to review.
 - Keep the task list in TASKS.md (the detailed engineering checklist). Tick items when done, add anything new you find. Read it at the start of every session.
 
 ## Stranko HQ (my control panel)
@@ -71,7 +71,7 @@ Before any paid call (evals, judge runs, generated pictures, smoke tests on the 
 - Log tokens and € cost per pipeline stage for every real model call.
 - Check the current Anthropic API docs for parameter names (effort, structured outputs, prompt caching). Don't guess field names.
 - Secrets in .env locally and in Railway variables when deployed. .env.example documents every variable. Never print secret values in messages or reports.
-- Every PR runs CI: typecheck, lint, `pnpm test` (fast tier) and `pnpm test:slow` (slow tier). Never make CI pass by skipping or deleting tests.
+- Every PR runs CI: typecheck, lint, `pnpm test` (fast tier) and `pnpm test:slow` (slow tier); a PR that changes only docs (.md files, docs/) runs typecheck, lint, the build and migrations only. Never make CI pass by skipping or deleting tests.
 - Deployed environments are public URLs: keep the dashboard and API behind the access password, send noindex, and enforce the daily model-spend cap.
 
 ## Rules for generated sites

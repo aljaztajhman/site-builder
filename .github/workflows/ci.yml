@@ -12,6 +12,29 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Docs-only pull requests (only .md files, docs/ or TASKS.md changed) skip the test, slow, motion and eval jobs;
+  # typecheck, lint, the build and migrations still run. On other pull requests the slow tier and the motion suite
+  # run only the test files related to the change (vitest --changed), unless shared config, the lockfile, test setup
+  # or CI changed (full). Pushes to main always run everything, so main's own CI is the full net.
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      code: ${{ steps.diff.outputs.code }}
+      full: ${{ steps.diff.outputs.full }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: diff
+        run: |
+          if [ "${{ github.event_name }}" != "pull_request" ]; then echo "code=true" >> "$GITHUB_OUTPUT"; echo "full=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          files=$(git diff --name-only ${{ github.event.pull_request.base.sha }} HEAD)
+          echo "$files"
+          if echo "$files" | grep -qvE '^(docs/.*|.*\.md)$'; then echo "code=true" >> "$GITHUB_OUTPUT"; else echo "code=false" >> "$GITHUB_OUTPUT"; fi
+          # Files the module graph can't see (JSON config read at runtime, the lockfile, test setup, CI): run every test.
+          if echo "$files" | grep -qE '^(config/|\.github/|pnpm-lock\.yaml$|package\.json$|vitest\.config\.ts$|test-setup\.ts$|tsconfig.*\.json$|.*/package\.json$)'; then echo "full=true" >> "$GITHUB_OUTPUT"; else echo "full=false" >> "$GITHUB_OUTPUT"; fi
+
   check:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -28,6 +51,8 @@ jobs:
   # Tests in two tiers (vitest.config.ts; docs/dev/agent-team.md, "Test tiers"); both run on every PR. The fast tier
   # (`pnpm test`: unit tests and cheap browser checks) on one runner.
   test:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -37,27 +62,42 @@ jobs:
           node-version: 24
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - name: Install Chromium for render checks
         run: pnpm --filter @sb/engine exec playwright install --with-deps chromium
       - run: pnpm test
 
   # The slow tier (`pnpm test:slow`: files marked `// @module-tag slow`, the browser suites and generation replays),
-  # split over three runners by file (vitest --shard): on one runner they take far longer than the job's limit.
+  # split over five runners by file (vitest --shard): on one runner they take far longer than the job's limit. The motion
+  # suite (CPU-throttled timing measurements, 12 min alone) runs in test-motion instead (SB_MOTION_OWN_JOB).
   test-slow:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3]
-    name: test-slow (${{ matrix.shard }}/3)
+        shard: [1, 2, 3, 4, 5]
+    name: test-slow (${{ matrix.shard }}/5)
+    env:
+      SB_MOTION_OWN_JOB: "1"
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 24
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - name: Install Chromium for render checks
         run: pnpm --filter @sb/engine exec playwright install --with-deps chromium
       # Processed fixture photos (test-setup.ts): a re-run on the same encode settings and sharp build skips the AVIF/WebP work.
@@ -65,20 +105,53 @@ jobs:
         with:
           path: node_modules/.cache/sb-test-media
           key: test-media-${{ matrix.shard }}-${{ hashFiles('pnpm-lock.yaml', 'packages/engine/src/images.ts', 'packages/engine/src/photo-cache.ts', 'packages/render/src/images.ts', 'config/app.config.json') }}
-      - run: pnpm test:slow --shard=${{ matrix.shard }}/3
+      - run: pnpm test:slow --shard=${{ matrix.shard }}/5 ${{ needs.changes.outputs.full != 'true' && format('--changed {0} --passWithNoTests', github.event.pull_request.base.sha) || '' }}
+
+  # The motion presets in a browser (tools/eval/test/motion.test.ts), every third preset per runner: its LCP and CLS
+  # measurements run on a runner of their own, not beside other browser suites.
+  test-motion:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        slice: [1, 2, 3]
+    name: test-motion (${{ matrix.slice }}/3)
+    env:
+      SB_MOTION_SLICE: ${{ matrix.slice }}/3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+      - name: Install Chromium for render checks
+        run: pnpm --filter @sb/engine exec playwright install --with-deps chromium
+      - run: pnpm exec vitest run --project slow tools/eval/test/motion.test.ts ${{ needs.changes.outputs.full != 'true' && format('--changed {0} --passWithNoTests', github.event.pull_request.base.sha) || '' }}
 
   # docs/dev/workflow.md §6, CI additions: the hand-authored golden specs through every automated check (render,
   # axe, Lighthouse, 360 px, facts, placeholders, export). No model calls, free. --strict fails the job when a
   # fixture fails a check; the report and sheets are uploaded when it does. Two runners, five fixtures each: on one
   # runner the ten took 15 minutes of the 20-minute limit (2026-10-07).
   eval-offline:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2]
-    name: eval-offline (${{ matrix.shard }}/2)
+        shard: [1, 2, 3, 4]
+    name: eval-offline (${{ matrix.shard }}/4)
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -86,9 +159,13 @@ jobs:
           node-version: 24
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - name: Install Chromium for render checks
         run: pnpm --filter @sb/engine exec playwright install --with-deps chromium
-      - run: pnpm eval --offline --strict --shard ${{ matrix.shard }}/2
+      - run: pnpm eval --offline --strict --shard ${{ matrix.shard }}/4
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
