@@ -11,8 +11,8 @@ Written on 2026-10-16 from an inventory of TASKS.md (263 done, 158 open), HQ, do
 ## Now
 
 - **Current milestone:** M1 Design good enough. Design 5 Wave P ran on 2026-10-16 and **failed** the bar (variety 3/3/2 and 2/2/2; Review 50's overall dropped). Next: the owner decides the §6 plan (type voice, scale, CTA and chrome, imagery) that replaces U1–U5; meanwhile the headline-fitting defect and the open reviewer blockers.
-- **Owner, in parallel (long lead times):** register the company (M3), buy the platform domain (M5), find a lawyer for the legal pages (M3).
-- **Last updated:** 2026-10-16.
+- **Owner, in parallel (long lead times):** register the company (M3), find a lawyer for the legal pages (M3). New name Postavi; postavi.si bought 2026-10-17 (M5).
+- **Last updated:** 2026-10-17.
 
 ---
 
@@ -81,7 +81,7 @@ Exit criteria:
 A customer's site can live on their own domain, or on a Stranko subdomain.
 
 Exit criteria:
-- [ ] Platform domain bought (owner; stranko.eu looked free on 3 Oct) and set as `PLATFORM_DOMAIN` on web and worker (TASKS:384, :393–395).
+- [ ] Platform domain bought (owner: postavi.si, bought 2026-10-17) and set as `PLATFORM_DOMAIN` on web and worker (TASKS:384, :393–395).
 - [ ] Registrar (Openprovider) and Cloudflare for SaaS adapters wired, and the edge Worker deployed (TASKS:388, :390).
 - [ ] End-to-end on live: buy or connect a test domain → TLS → the site serves. `domains.enabled` true, and `seo.indexSiteHosts` decided (TASKS:398).
 - [ ] Who pays for a domain before billing is answered (TASKS:392). The d.o.o. contact person is set (TASKS:391).
