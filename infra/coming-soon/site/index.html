@@ -180,42 +180,67 @@ h2{font:800 clamp(32px,4.2vw,58px)/1.02 var(--display);letter-spacing:-.035em;ma
 .js .rv.in{opacity:1;transform:none}
 .d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}
 
-/* why: a statement, the argument, and the two roads */
-.why{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:64px;align-items:start}
+/* examples: real pages the engine made, scrolling inside their frames */
+.sub{color:var(--ink-2);font-size:18px;max-width:34em;margin-top:18px}
+.gallery{display:flex;gap:24px;margin:48px -40px 0;padding:0 40px 18px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:40px;scrollbar-width:thin}
+.ex{flex:0 0 min(560px,80vw);scroll-snap-align:start;margin:0}
+.frame{border:1px solid var(--line-2);border-radius:8px;overflow:hidden;background:#fff;box-shadow:0 30px 60px -40px rgb(15 31 34/.45)}
+.frame .chrome{height:32px}
+.frame .url{max-width:60%}
+.shot{position:relative;aspect-ratio:960/660;overflow:hidden;background:var(--surface-2)}
+.shot img{display:block;width:100%;height:auto;transition:transform 8s linear}
+.shot .m{display:none}
+@media (hover:hover){.ex:hover .shot img{transform:translateY(calc(-100% + 44%))}}
+@media (hover:none){.shot{overflow-y:auto;-webkit-overflow-scrolling:touch}.shot img{transition:none}}
+.ex figcaption{margin-top:14px;font-size:14px;color:var(--ink-3)}
+.ex figcaption b{display:block;font:600 16px/1.3 var(--ui);color:var(--ink)}
+.fine{margin-top:22px;font-size:14px;color:var(--ink-3);max-width:40em}
+
+/* why: a phone where someone searches, and how long a page takes */
+.why{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:72px;align-items:start}
 .why p{color:var(--ink-2);font-size:18px;max-width:30em}
 .why p+p{margin-top:18px}
 .why p strong{color:var(--ink);font-weight:600}
-.srch{margin-top:36px;max-width:420px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);overflow:hidden}
-.srch .q{display:flex;align-items:center;gap:10px;padding:12px 16px;font-size:15px;color:var(--ink);border-bottom:1px solid var(--line)}
-.srch svg{flex:none;width:16px;height:16px;color:var(--ink-3)}
-.hit{padding:14px 16px;border-bottom:1px solid var(--line);display:grid;gap:6px}
-.hit:last-child{border-bottom:0}
-.js .hit{opacity:0}
-.hit i{display:block;height:8px;border-radius:2px;background:var(--surface-2)}
-.hit i:first-child{width:52%;background:var(--line-2)}.hit i:nth-child(2){width:34%}.hit i:last-child{width:80%}
-.hit.you{background:var(--accent-soft);gap:3px}
-.hit.you b{font:600 15px/1.3 var(--ui);color:var(--ink)}
-.hit.you .u{font-size:13px;color:var(--accent-text)}
-.hit.you .s{font-size:14px;color:var(--ink-2)}
-.js .in .hit{opacity:1;animation:fade .6s var(--ease) both}
-.in .hit:nth-child(3){animation-delay:.2s}.in .hit.you{animation:pop .7s .9s var(--spring) both}
-@keyframes pop{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-.roads{margin-top:72px;display:grid;gap:34px}
-.road{display:grid;grid-template-columns:160px 1fr;gap:28px;align-items:baseline}
-.road h3{font:600 16px/1.3 var(--ui);color:var(--ink-2)}
-.road.ok h3{color:var(--accent-text)}
-.path{display:flex;flex-wrap:wrap;align-items:center;row-gap:10px;font:500 15px/1.2 var(--ui);color:var(--ink-3)}
-.path span{position:relative;padding:4px 0}
-.path span+span{margin-left:40px}
-.path span+span::before{content:"";position:absolute;left:-34px;top:50%;width:28px;border-top:1px dashed var(--line-2)}
-.road.ok .path{color:var(--ink);font-weight:600}
-.road.ok .path span+span::before{border-top:2px solid var(--accent);margin-top:-1px}
-.path .fin{font-weight:600;color:var(--ink-2)}
-.road.ok .path .fin{color:var(--accent-text)}
-.js .path span{opacity:0;transform:translateX(-8px);transition:opacity .5s var(--ease),transform .5s var(--ease)}
-.js .in .path span{opacity:1;transform:none}
-.path span:nth-child(2){transition-delay:.15s}.path span:nth-child(3){transition-delay:.3s}.path span:nth-child(4){transition-delay:.45s}.path span:nth-child(5){transition-delay:.6s}.path span:nth-child(6){transition-delay:.75s}.path span:nth-child(7){transition-delay:.9s}
-.road.ok .path span:nth-child(2){transition-delay:.4s}.road.ok .path span:nth-child(3){transition-delay:.55s}.road.ok .path span:nth-child(4){transition-delay:.7s}
+.why .cols{margin-top:28px}
+.phone{position:relative;width:300px;max-width:100%;margin:0 auto;border:1px solid var(--line-2);border-radius:28px;background:var(--surface);padding:18px 14px 22px;box-shadow:0 30px 60px -40px rgb(15 31 34/.45)}
+.ph-bar{display:flex;align-items:center;gap:8px;border:1px solid var(--line-2);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--ink);min-height:40px}
+.ph-bar svg{flex:none;width:14px;height:14px;color:var(--ink-3)}
+.ph-list{margin-top:14px;display:grid;gap:10px}
+.ph-hit{border:1px solid var(--line);border-radius:8px;padding:12px}
+.ph-hit.sk{display:grid;gap:7px}
+.ph-hit.sk i{display:block;height:8px;border-radius:2px;background:var(--surface-2)}
+.ph-hit.sk i:first-child{width:56%;background:var(--line-2)}.ph-hit.sk i:nth-child(2){width:36%}.ph-hit.sk i:last-child{width:84%}
+.ph-hit.you{background:var(--accent-soft);border-color:rgb(13 122 132/.3);display:grid;gap:7px}
+.ph-hit.you b{font:600 15px/1.3 var(--ui);color:var(--ink);display:block}
+.ph-hit.you .u{font-size:12px;color:var(--accent-text)}
+.ph-hit.you .s{font-size:13px;color:var(--ink-2);line-height:1.4}
+.ph-hit.you .call{justify-self:start;margin-top:4px;background:var(--accent);color:#fff;font:700 13px/1 var(--display);padding:9px 14px;border-radius:6px}
+.js .ph-hit{opacity:0;transform:translateY(8px);transition:opacity .5s var(--ease),transform .5s var(--ease)}
+.js .ph-hit.on{opacity:1;transform:none}
+.js .ph-hit.you{max-height:0;padding-top:0;padding-bottom:0;border-width:0;margin-bottom:-10px;overflow:hidden;transition:max-height .7s var(--ease),padding .7s var(--ease),margin .7s var(--ease),opacity .6s .25s var(--ease),transform .6s .25s var(--ease)}
+.js .ph-hit.you.on{max-height:240px;padding:12px;border-width:1px;margin-bottom:0}
+.cap{margin-top:18px;text-align:center;font-size:15px;color:var(--ink-2);min-height:3.1em;line-height:1.5}
+.cap b{color:var(--ink);font-weight:600}
+.time{margin-top:96px}
+.time h3{font:700 clamp(22px,2vw,28px)/1.15 var(--display);letter-spacing:-.02em;max-width:22em}
+.tr{display:grid;grid-template-columns:200px minmax(0,1fr);gap:24px;align-items:start;margin-top:40px}
+.tr h4{font:600 16px/1.3 var(--ui);color:var(--ink-2);padding-top:1px}
+.tr.ok h4{color:var(--accent-text)}
+.track{position:relative;height:10px;border-radius:3px;background:var(--surface-2)}
+.track i{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:var(--line-2);width:var(--w)}
+.js .track i{width:0;transition:width 2.8s var(--ease)}
+.tr.ok .track i{background:var(--accent)}
+.js .tr.ok .track i{transition-duration:.8s;transition-delay:.3s}
+.js .in .track i{width:var(--w)}
+.marks{position:relative;height:40px;margin-top:8px;font:500 13px/1.2 var(--ui);color:var(--ink-3)}
+.marks span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap;padding-top:11px}
+.marks span::before{content:"";position:absolute;left:50%;top:0;width:1px;height:7px;background:var(--line-2)}
+.js .marks span{opacity:0;transition:opacity .4s var(--ease)}
+.js .in .marks span{opacity:1}
+.fin{position:absolute;top:-4px;left:calc(var(--w) + 14px);white-space:nowrap;font:600 15px/1.2 var(--ui);color:var(--ink-2)}
+.tr.ok .fin{color:var(--accent-text)}
+.js .fin{opacity:0;transition:opacity .5s var(--ease)}
+.js .in .fin{opacity:1}
 
 /* how it works: three rows on hairlines, a big numeral each */
 .steps{margin-top:56px;border-top:1px solid var(--line)}
@@ -248,7 +273,6 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
 @media (max-width:980px){
   .step{grid-template-columns:80px minmax(0,1fr);row-gap:22px}
   .step .viz{grid-column:2;justify-content:flex-start}
-  .road{grid-template-columns:1fr;gap:10px}
 }
 @media (max-width:860px){
   .wrap{padding:0 16px}
@@ -259,8 +283,16 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
   .browser{aspect-ratio:4/3}
   .txt{min-height:96px}
   section{padding:72px 0}
-  .why{grid-template-columns:1fr;gap:32px}
-  .roads{margin-top:48px}
+  .why{grid-template-columns:1fr;gap:40px}
+  .why .cols{margin-top:20px}
+  .time{margin-top:64px}
+  .tr{grid-template-columns:1fr;gap:12px;margin-top:32px}
+  .tr{--w:62%!important}.tr.ok{--w:7%!important}
+  .marks span:nth-child(2),.marks span:nth-child(4){display:none}
+  .gallery{margin:36px -16px 0;padding:0 16px 14px;scroll-padding:16px;gap:14px}
+  .ex{flex-basis:min(300px,78vw)}
+  .shot{aspect-ratio:585/760}
+  .shot .d{display:none}.shot .m{display:block}
   .steps{margin-top:36px}
   .step{grid-template-columns:56px minmax(0,1fr);gap:16px;padding:32px 0}
   .num{font-size:52px}
@@ -287,7 +319,7 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
 <div class="wrap">
   <header>
     <a class="brand" href="#" aria-label="Postavi, na vrh"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Postavi</a>
-    <nav aria-label="Na tej strani"><a href="#zakaj">Zakaj</a><a href="#kako">Kako deluje</a></nav>
+    <nav aria-label="Na tej strani"><a href="#primeri">Primeri</a><a href="#zakaj">Zakaj</a><a href="#kako">Kako deluje</a></nav>
     <span class="soon">Odpremo kmalu</span>
   </header>
 
@@ -354,31 +386,79 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
   </div>
   </div>
 
+  <section id="primeri">
+    <h2 class="rv">Nekaj strani, ki jih je postavil Postavi.</h2>
+    <p class="sub rv d1">Štiri izmišljena podjetja, štiri različne strani. Zapeljite miško čez stran, da se pomakne.</p>
+    <div class="gallery rv d2">
+      <figure class="ex">
+        <div class="frame" aria-hidden="true">
+          <div class="chrome"><i></i><i></i><i></i><div class="url"><span class="lock"></span>Turistična kmetija Grabnar</div></div>
+          <div class="shot"><img class="d" src="primeri/kmetija-desk.jpg" width="960" height="1500" alt="" loading="lazy" decoding="async"><img class="m" src="primeri/kmetija-phone.jpg" width="585" height="1266" alt="" loading="lazy" decoding="async"></div>
+        </div>
+        <figcaption><b>Turistična kmetija Grabnar</b>Turistična kmetija, Zgornja Savinjska dolina</figcaption>
+      </figure>
+      <figure class="ex">
+        <div class="frame" aria-hidden="true">
+          <div class="chrome"><i></i><i></i><i></i><div class="url"><span class="lock"></span>Frizerstvo Lana</div></div>
+          <div class="shot"><img class="d" src="primeri/frizer-desk.jpg" width="960" height="1500" alt="" loading="lazy" decoding="async"><img class="m" src="primeri/frizer-phone.jpg" width="585" height="1266" alt="" loading="lazy" decoding="async"></div>
+        </div>
+        <figcaption><b>Frizerstvo Lana</b>Frizerski salon, Celje</figcaption>
+      </figure>
+      <figure class="ex">
+        <div class="frame" aria-hidden="true">
+          <div class="chrome"><i></i><i></i><i></i><div class="url"><span class="lock"></span>Oljka in sol</div></div>
+          <div class="shot"><img class="d" src="primeri/trgovina-desk.jpg" width="960" height="1500" alt="" loading="lazy" decoding="async"><img class="m" src="primeri/trgovina-phone.jpg" width="585" height="1266" alt="" loading="lazy" decoding="async"></div>
+        </div>
+        <figcaption><b>Oljka in sol</b>Trgovina z istrskimi dobrotami, Koper</figcaption>
+      </figure>
+      <figure class="ex">
+        <div class="frame" aria-hidden="true">
+          <div class="chrome"><i></i><i></i><i></i><div class="url"><span class="lock"></span>Pekarna Kvas</div></div>
+          <div class="shot"><img class="d" src="primeri/pekarna-desk.jpg" width="960" height="1500" alt="" loading="lazy" decoding="async"><img class="m" src="primeri/pekarna-phone.jpg" width="585" height="1266" alt="" loading="lazy" decoding="async"></div>
+        </div>
+        <figcaption><b>Pekarna Kvas</b>Družinska pekarna, Kamnik</figcaption>
+      </figure>
+    </div>
+    <p class="fine rv">Podjetja na slikah so izmišljena. Vaša stran nastane iz vašega opisa in vaših fotografij in bo drugačna.</p>
+  </section>
+
   <section id="zakaj">
     <div class="why">
       <div>
         <h2 class="rv">Stranke vas iščejo na spletu. Naj vas tam tudi najdejo.</h2>
-        <div class="srch rv d1" aria-hidden="true">
-          <div class="q"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4.5 4.5"/></svg><span id="sq">pekarna Kamnik</span></div>
-          <div class="hit"><i></i><i></i><i></i></div>
-          <div class="hit"><i></i><i></i><i></i></div>
-          <div class="hit you"><b id="hit-t">Pekarna Skorja · Kamnik</b><span class="u" id="hit-u">pekarna-skorja.si</span><span class="s" id="hit-s">Pečemo kruh z drožmi, pecivo in torte po naročilu.</span></div>
+        <div class="cols rv d1">
+          <p>Ko vas nekdo priporoči, vas najprej poišče na spletu. <strong>Če tam ni ničesar, pokliče naslednjega na seznamu.</strong></p>
+          <p>Stran pri agenciji pomeni sestanke, ponudbe, osnutke in popravke. S predlogami pa se sami ukvarjate večere in vikende, in stran nikoli ni čisto končana.</p>
+          <p>Postavi to opravi namesto vas. Poveste, kaj delate. Postavi napiše in postavi stran, vi jo pregledate, po želji popravite in objavite.</p>
         </div>
       </div>
       <div class="rv d2">
-        <p>Ko vas nekdo priporoči, vas najprej poišče na spletu. <strong>Če tam ni ničesar, pokliče naslednjega na seznamu.</strong></p>
-        <p>Stran pri agenciji pomeni sestanke, ponudbe, osnutke in popravke. S predlogami pa se sami ukvarjate večere in vikende, in stran nikoli ni čisto končana.</p>
-        <p>Postavi to opravi namesto vas. Poveste, kaj delate. Postavi napiše in postavi stran, vi jo pregledate, po želji popravite in objavite.</p>
+        <div class="phone" id="phone" aria-hidden="true">
+          <div class="ph-bar"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4.5 4.5"/></svg><span id="sq">pekarna Kamnik</span><span class="caret" id="caret3" hidden></span></div>
+          <div class="ph-list">
+            <div class="ph-hit you"><b id="hit-t">Pekarna Skorja · Kamnik</b><span class="u" id="hit-u">pekarna-skorja.si</span><span class="s" id="hit-s">Pečemo kruh z drožmi, pecivo in torte po naročilu.</span><span class="call">Pokličite</span></div>
+            <div class="ph-hit sk"><i></i><i></i><i></i></div>
+            <div class="ph-hit sk"><i></i><i></i><i></i></div>
+            <div class="ph-hit sk"><i></i><i></i><i></i></div>
+          </div>
+        </div>
+        <p class="cap" id="cap"><b>S stranjo vas najde. In pokliče.</b></p>
       </div>
     </div>
-    <div class="roads">
-      <div class="road rv">
-        <h3>Z agencijo ali predlogo</h3>
-        <div class="path"><span>sestanek</span><span>ponudba</span><span>osnutek</span><span>popravki</span><span>še popravki</span><span>čakanje</span><span class="fin">čez nekaj tednov</span></div>
+    <div class="time rv">
+      <h3>Koliko časa mine, preden je stran na spletu</h3>
+      <div class="tr" style="--w:86%">
+        <h4>Z agencijo ali predlogo</h4>
+        <div>
+          <div class="track"><i></i><span class="fin">nekaj tednov</span></div>
+          <div class="marks" aria-hidden="true"><span style="left:3%;transition-delay:.1s">sestanek</span><span style="left:19%;transition-delay:.6s">ponudba</span><span style="left:36%;transition-delay:1.15s">osnutek</span><span style="left:52%;transition-delay:1.7s">popravki</span><span style="left:67%;transition-delay:2.2s">še popravki</span><span style="left:82%;transition-delay:2.7s">čakanje</span></div>
+        </div>
       </div>
-      <div class="road ok rv d1">
-        <h3>S Postavi</h3>
-        <div class="path"><span>opišete</span><span>pregledate</span><span>objavite</span><span class="fin">čez nekaj minut</span></div>
+      <div class="tr ok" style="--w:7%">
+        <h4>S Postavi</h4>
+        <div>
+          <div class="track"><i></i><span class="fin" style="transition-delay:.9s">nekaj minut</span></div>
+        </div>
       </div>
     </div>
   </section>
@@ -484,7 +564,16 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
     if(typedUpTo>0)sents[0].textContent=sent(0)+" ";
     setHit();
   }
-  function setHit(){var n=name(),l=looks[cur];$("#sq").textContent=l.q;$("#hit-t").textContent=n+" · "+l.city;$("#hit-u").textContent=slug(n)+".si";$("#hit-s").textContent=l.s[1]}
+  function setHit(){var n=name(),l=looks[cur];if(phoneDone)$("#sq").textContent=l.q;$("#hit-t").textContent=n+" · "+l.city;$("#hit-u").textContent=slug(n)+".si";$("#hit-s").textContent=l.s[1]}
+  var phoneEl=$("#phone"),capEl=$("#cap"),sqEl=$("#sq"),caret3=$("#caret3"),phoneDone=false;
+  function playPhone(){
+    var q=looks[cur].q,hits=$$(".ph-hit",phoneEl);
+    hits.forEach(function(x){x.classList.remove("on")});sqEl.textContent="";caret3.hidden=false;capEl.textContent="";
+    var n=0;(function t(){sqEl.textContent=q.slice(0,++n);if(n<q.length)setTimeout(t,42);else{caret3.hidden=true;
+      $$(".ph-hit.sk",phoneEl).forEach(function(x,i){setTimeout(function(){x.classList.add("on")},350+i*200)});
+      setTimeout(function(){capEl.innerHTML="Nekdo išče. <b>Brez spletne strani vas na seznamu ni.</b>"},400);
+      setTimeout(function(){$(".ph-hit.you",phoneEl).classList.add("on");capEl.innerHTML="<b>S stranjo vas najde. In pokliče.</b>";phoneDone=true},3000)}})();
+  }
   function show(i){
     clearAll();cur=i;typedUpTo=0;
     tbtns.forEach(function(b,k){b.setAttribute("aria-pressed",k===i?"true":"false")});moveInd();
@@ -573,12 +662,13 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
 
   // scroll: reveal, and build the small site when it comes into view
   var mini=$("#mini"),typed=$("#typed"),caret2=$("#caret2"),story=typed.textContent;
-  mini.classList.add("anim");typed.textContent="";
+  mini.classList.add("anim");typed.textContent="";sqEl.textContent="";
   var seen={};
   function hit(el){
     el.classList.add("in");
     if(el.contains(typed)&&!seen.t){seen.t=1;caret2.hidden=false;var n=0;(function t(){typed.textContent=story.slice(0,++n);if(n<story.length)setTimeout(t,26);else caret2.hidden=true})()}
     if(el.contains(mini)&&!seen.m){seen.m=1;setTimeout(function(){build(mini,.7)},300)}
+    if(el.contains(phoneEl)&&!seen.p){seen.p=1;setTimeout(playPhone,250)}
   }
   var rv=$$(".rv");
   if(!("IntersectionObserver" in window)){rv.forEach(hit)}
