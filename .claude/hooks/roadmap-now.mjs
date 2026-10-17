@@ -18,4 +18,4 @@ ${now}
 Milestones (Claude's track: M1 → M2 → M4 → M5 → M6 → M7; M3 is the owner's, in parallel):
 ${milestones}
 
-Rule: before starting any work that is not "Now" or an open exit criterion on the roadmap, whether the owner asked for it or not, say "this is off the roadmap" and ask "park it or switch?" first. Ideas go to the parking lot. Start your first reply with one line: where we are and what's next. At the end of a run, update "Now", tick the criteria and the counts.`);
+Rule: before starting any work that is not "Now" or an open exit criterion on the roadmap, whether the owner asked for it or not, say "this is off the roadmap" and ask "park it or switch?" first. Ideas go to the parking lot. Start your first reply with one line: where we are and what's next. When something meaningful lands (criterion met, PR merged, decision, spend), update "Now", tick the criteria and the counts. One working session at a time.`);

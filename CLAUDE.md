@@ -7,7 +7,8 @@ AI website builder for Slovenian small businesses. Product brief: docs/PRODUCT.m
 The goal is a launch-ready v1.0. docs/ROADMAP.md is the plan: "Now", milestones M1–M7 with exit criteria, and a parking lot. A SessionStart hook prints "Now"; the first reply of a session opens with one line on where we are and what's next.
 - Before starting anything that isn't "Now" or an open exit criterion, whether I asked for it or you're drifting into it, say it's off the roadmap and ask "park it or switch?". Wait for my answer.
 - Finish open criteria before opening new fronts. New ideas and half-built extras go to the parking lot.
-- At the end of a run, tick the criteria that landed, update "Now" and the counts. Only I move milestones or criteria; you propose.
+- When something meaningful lands (a criterion met, a PR merged, a decision made, money spent), tick the criteria, update "Now" and the counts. Only I move milestones or criteria; you propose.
+- One working session at a time: finish it (or hand it back to me) before starting the next. Sessions that only read can run alongside.
 
 ## How to work
 
@@ -29,7 +30,7 @@ One screen for me: where the project is, what we did lately, what's next, what n
 
 - **Session start**, before other work: read `.hq/data.js` (budget, open decisions, approvals) and TASKS.md.
 - **Write for a CEO, not an engineer.** Short plain sentences: outcome, € if any, what's next. Commits, token counts, test output and file paths go in the PR or TASKS.md, never in HQ.
-- **End of every run, rewrite `.hq/data.js`**: headline (one line), summary (2–3 sentences), phases with %, 5–9 workstreams with %, status (moving, waiting, paused, done), what's left and last activity, the last ~7 shipped things with PR numbers, 3–5 next steps (who, € if paid), what needs me, and `team` from `node tools/hq/agent-stats.mjs`. A % is ticked TASKS.md boxes or your honest estimate of the work, never inflated. Keep my answers: a decision I made in chat leaves `decisions` and is noted in TASKS.md.
+- **Rewrite `.hq/data.js` when something meaningful lands** (a PR merged, a milestone criterion met, a decision made, money spent), not after every run: headline (one line), summary (2–3 sentences), phases with %, 5–9 workstreams with %, status (moving, waiting, paused, done), what's left and last activity, the last ~7 shipped things with PR numbers, 3–5 next steps (who, € if paid), what needs me, and `team` from `node tools/hq/agent-stats.mjs`. A % is ticked TASKS.md boxes or your honest estimate of the work, never inflated. Keep my answers: a decision I made in chat leaves `decisions` and is noted in TASKS.md.
 - **Decisions** I must make go in `decisions` (title, options, recommendation) and in the chat. Every "Blocked on me" line in a report must also be in `decisions`, `approvals` or `needs`.
 - No overnight plans: development no longer runs in unattended cloud sessions.
 
@@ -42,9 +43,10 @@ Before any paid call (evals, judge runs, generated pictures, smoke tests on the 
 - Right after each paid run, add it to `spend` (`at`, `eur` actual from the cost log, `what`). Estimates are not spend.
 - Subagents get the remaining allowance stated in their prompt and report what they spent; check it.
 - `liveDailyCap` is the live app's daily cap. When I change it, set `DAILY_SPEND_CAP_EUR` on Railway (web and worker).
-- Work as a team by docs/dev/agent-team.md and its procedure, the `delegate` skill. Before any non-trivial task, write `Mode S|D|W · score n/5 · team: …` in the status note. A Haiku scout maps before any builder. Every agent gets an explicit model and an effort of medium, high or xhigh (never low or max): Fable only, and sparingly, for a project's overall design and structure at its start and the highest-level architecture decisions; Opus at xhigh for phase design, phase review, ceiling decisions and escalation; Opus for directing, building, taste and review; Sonnet at medium as the implementer of test-covered units; Haiku for reading and mechanical work. Verify every package a change touches before accepting a worker's result. A hook (.claude/hooks/delegation.mjs) blocks agent launches that break these rules and logs them. Workflows only when I ask for one.
+- Work as a team by docs/dev/agent-team.md and its procedure, the `delegate` skill. **Small work goes light:** a change of roughly 50 lines or less that touches no money, spec version, security or publishing rule is done directly, with its test, and no Mode line, scout or reviewer. For anything bigger, write `Mode S|D|W · score n/5 · team: …` in the status note, and a Haiku scout maps before any builder. Every agent gets an explicit model and an effort of medium, high or xhigh (never low or max): Fable only, and sparingly, for a project's overall design and structure at its start and the highest-level architecture decisions; Opus at xhigh for phase design, phase review, ceiling decisions and escalation; Opus for directing, building, taste and review; Sonnet at medium as the implementer of test-covered units; Haiku for reading and mechanical work. Verify every package a change touches before accepting a worker's result. A hook (.claude/hooks/delegation.mjs) blocks agent launches that break these rules and logs them. Workflows only when I ask for one.
 - Give every change a way to be checked: a test, a build, the eval script. Don't mark anything done that you haven't run.
 - If a target can't be met, don't loosen the check or the threshold. Report the real number.
+- The outside AI reviewers (pnpm outside-review) are one final gate per milestone, not a design compass. Don't run judging rounds to steer design between gates; my eye decides taste, and later real customers do.
 - While iterating on generation quality, run `pnpm eval --only <fixture>` instead of the full suite.
 - Before the final report, review the full diff against main and fix anything you'd block a merge for.
 
