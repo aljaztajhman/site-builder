@@ -10,7 +10,7 @@ Written on 2026-10-16 from an inventory of TASKS.md (263 done, 158 open), HQ, do
 
 ## Now
 
-- **Current milestone:** M2 Launch gate: accounts, editor, email. M1 is done (2026-10-17, the owner's approval; the final check scored 6 of 10 against a bar of 8, see M1). Next: free-preview limits live and the Railway smoke test with sign-in and limits, then e-mail from our own domain.
+- **Current milestone:** M1 Design good enough: approved by the owner on 2026-10-17 ("letsgo"), 3 of 4 criteria met. One step is left before M2: branch `claude/m1-final-hero` (commit 87c8b61b) holds three fixes from the final check that pass their tests (desktop hero card inside the first screen, number-plate style only for vehicle trades, filled buttons keep their padding). Its fourth fix, the hours badge under the phone buttons on slaščičarna-pri-zofki, still fails its test at 360×640. Make that test pass and merge the branch into main. Then M2: free-preview limits live and the Railway smoke test with sign-in and limits, then e-mail from our own domain.
 - **Owner, in parallel (long lead times):** register the company (M3), find a lawyer for the legal pages (M3). New name Postavi; postavi.si bought 2026-10-17 (M5).
 - **Last updated:** 2026-10-17.
 
@@ -22,14 +22,14 @@ Claude's track runs in order: M1 → M2 → M4 → M5 → M6 → M7. M3 is mostl
 
 Each milestone has exit criteria. A milestone is done only when every criterion is met and checked. No "80 %" milestones: half-done work stays open on this page, and is not quietly left behind for something new.
 
-### M1 · Design good enough (Claude) — done 2026-10-17 (4 of 4, criterion 3 closed by the owner below its bar)
+### M1 · Design good enough (Claude) — 3 of 4 met, approved by the owner 2026-10-17; one branch to merge (criterion 1)
 
 Sites pass the three outside reviewers and the owner's eye. Set variety is not a v1.0 goal (owner, 2026-10-17).
 
 Decision 2026-10-17 (owner): lock today's design (Design 3 + the Review 50 fixes; it beat both AI studios: 28 of 50 pages pass all three reviewers, 7 of 10 new businesses). Two cheap variety proofs failed to move set variety (Wave P layouts, PR #220; type and details, PR #221), so variety work goes to the parking lot. The six earlier criteria (Wave P, Design 5 waves U1–U9, the blocker list, the owner's critiques, G2 on 20 businesses, the town in the hero) are replaced by these three.
 
 Exit criteria:
-- [x] Every known blocker is fixed in code, with a test that failed before (PR #222):
+- [ ] Every known blocker is fixed in code, with a test that failed before. The eight listed below are fixed and merged in PR #222. The final check's own defects are only partly merged: footer wordmark size and the name printed three times are in PR #222; the hero card, plate style and filled buttons are on branch `claude/m1-final-hero` (tests pass), and the slaščičarna hours badge under the phone buttons still fails its test there (kolesarski-servis-ovinek too).
   - AI label clipped in arched photo crops;
   - arched photo cut at the phone edge;
   - č/š/ž touching the line above in the footer wordmark;
@@ -42,7 +42,7 @@ Exit criteria:
   - The arched photo at the phone edge did not reproduce: every picture stays inside 360 px on all goldens, Review 50 and fresh 10 pages; a test now guards it. What reviewers saw was the first screen and the phone bar cutting the arch.
 - [x] Six prompt fixes are on (owner, 2026-10-17: turned on directly, without per-fix evals; CI's offline eval is the guard): `promptFixes.directions` (no B&W or duotone promises, editorial photo hero), `beige` and `warmSurface` (no cream or beige page backgrounds), `catalogue` (incl. the call-button rule), `oneHero` (one main heading per page), `sloveneStyle` (formal vi, Slovene typography, no English words). The final check runs with them on.
 - [x] Final check on 10 brand-new businesses (never tested; new trades and towns; with and without photos): at least 8 of 10 pass all three reviewers (Gemini, GPT, Fable), scored per page.
-  - 2026-10-17: **6 of 10** passed all three reviewers (bar 8; all 10 pass the two-of-three filter). Means Gemini 4.09, GPT 3.64, Fable 3.52 (the earlier fresh 10: 3.99, 3.34, 3.39). The 4 held pages' defects (desktop hero card below the first screen, number-plate styling outside car trades, oversized footer wordmark, the name three times in the footer) and the hours badge under the phone buttons were fixed with tests and **not re-scored**: owner's decision 2026-10-17 ("no rescore, just fix and letsgo"). Cost €3.89 (photos €1.02, generation €1.66, scoring €1.21). eval/outside-review/final10.
+  - 2026-10-17: **6 of 10** passed all three reviewers (bar 8; all 10 pass the two-of-three filter). Means Gemini 4.09, GPT 3.64, Fable 3.52 (the earlier fresh 10: 3.99, 3.34, 3.39). Owner's decision 2026-10-17 ("no rescore, just fix and letsgo"): fix the 4 held pages' defects with tests and **don't re-score**. The criterion is ticked by that decision, not by the number. Where the fixes stand: see criterion 1. Cost €3.89 (photos €1.02, generation €1.66, scoring €1.21). eval/outside-review/final10.
 - [x] The owner looks at the pages (desktop and phone contact sheets) and approves them: 2026-10-17, "letsgo" (claude.ai artifact "Stranko M1 Final Check").
 
 ### M2 · Launch gate: accounts, editor, email (Claude + an owner check) — 0 of 6 met (much of the work under them is built)
