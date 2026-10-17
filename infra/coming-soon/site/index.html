@@ -128,6 +128,8 @@ h1 em{font-style:normal;color:var(--accent)}
 @keyframes shine{to{transform:translateX(100%)}}
 /* services: a row of names on a hairline, as a site lists what it does */
 .m-list{display:flex;border-top:1px solid var(--lm)}
+.js .anim .m-list{border-color:transparent;transition:border-color .4s}
+.js .anim .m-list:has(.on){border-color:var(--lm)}
 .m-item{flex:1;padding:2.2cqw 0 0;font-size:max(9px,2cqw);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .m-item+.m-item{padding-left:2.4cqw;margin-left:2.4cqw;border-left:1px solid var(--lm)}
 .m-foot{display:flex;justify-content:space-between;gap:2cqw;font-size:max(8px,1.8cqw);color:var(--t2);white-space:nowrap;overflow:hidden}
@@ -155,6 +157,21 @@ h1 em{font-style:normal;color:var(--accent)}
   --photo:linear-gradient(120deg,#bfe0cc,#3f8a6e 50%,#17382c);--motif:radial-gradient(ellipse at 15% 100%,rgb(255 255 255/.32) 0 30%,transparent 31%),radial-gradient(ellipse at 85% 0%,rgb(255 255 255/.2) 0 25%,transparent 26%)}
 .v3{--bg:#15181b;--t:#f1f3f5;--t2:#9aa5ad;--a:#f0b323;--ai:#15181b;--lm:rgb(241 243 245/.16);--r:4px;--pr:6px;--hf:var(--ui);--hw:900;--hls:-.02em;--htt:uppercase;
   --photo:linear-gradient(140deg,#5a6570,#2a3138 60%,#0f1214);--motif:repeating-linear-gradient(90deg,rgb(240 179 35/.35) 0 3px,transparent 3px 26px)}
+
+/* the scroll intro (wide screens, full motion): the hero stays pinned while your words turn into the site */
+.intro .pin{height:calc(100vh + 150vh)}
+.intro .hero{position:sticky;top:0;min-height:100vh;padding:0;display:flex;flex-direction:column;justify-content:center}
+.intro .work{margin-top:32px}
+.intro h1{width:max-content;max-width:100%}
+.intro h1,.intro .say,.intro #stage{transform-origin:0 0;will-change:transform}
+.intro .hero{animation:fadeIn .8s var(--ease) both}
+@keyframes fadeIn{from{opacity:0}}
+.intro .who,.intro .lead,.intro .try,.intro .tabs-w,.intro .more,.intro .note{opacity:0;animation:none}
+.intro .ln>span{animation:none}
+.cue{display:none;position:absolute;left:50%;bottom:28px;transform:translateX(-50%);align-items:center;gap:8px;font:500 14px/1 var(--ui);color:var(--ink-3);white-space:nowrap}
+.cue svg{width:14px;height:14px;animation:nudge 1.6s var(--ease) infinite}
+@keyframes nudge{50%{transform:translateY(4px)}}
+.intro .cue{display:inline-flex}
 
 /* sections */
 section{padding:110px 0;border-top:1px solid var(--line)}
@@ -271,7 +288,8 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
   </header>
 
   <main>
-  <div class="hero">
+  <div class="pin" id="pin">
+  <div class="hero" id="hero">
     <p class="who">Za obrtnike, salone, gostilne in trgovine</p>
     <h1><span class="ln"><span>Vaše podjetje na spletu.</span></span><span class="ln"><span><em>V nekaj minutah.</em></span></span></h1>
 
@@ -327,6 +345,9 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
         <p class="note" id="note">Topel, mehek videz z zaobljenimi oblikami in pisavo, ki diši po pekarni.</p>
       </div>
     </div>
+    <span class="cue" id="cue" aria-hidden="true">Pomaknite se
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4v12M5 11l5 5 5-5"/></svg></span>
+  </div>
   </div>
 
   <section id="zakaj">
@@ -470,13 +491,14 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
       var full=sent(k);n++;sents[k].textContent=full.slice(0,n)+(n<full.length?"":" ");
       if(n<full.length)typing=setTimeout(step,speed);
       else{typedUpTo=k+1;if(++k<3){n=0;typing=setTimeout(step,220)}
+      else if(intro&&!introDone){caret.hidden=true}
       else{caret.hidden=true;timers=build(mock,1,function(ev,j){
         if(ev==="s")sents.forEach(function(s,q){s.classList.toggle("hl",q===j)});
         else{timers.push(setTimeout(function(){sents.forEach(function(s){s.classList.remove("hl")})},900));
           if(auto)cycle=setTimeout(function(){show((cur+1)%looks.length)},4600)}})}}
     })();
   }
-  function stopAuto(){auto=false;clearTimeout(cycle)}
+  function stopAuto(){auto=false;clearTimeout(cycle);introDone=true}
   tbtns.forEach(function(b){b.addEventListener("click",function(){stopAuto();show(+b.dataset.v);b.scrollIntoView({block:"nearest",inline:"nearest"})})});
   input.addEventListener("focus",stopAuto);
   input.addEventListener("input",function(){userName=input.value.trim();stopAuto();setName()});
@@ -485,9 +507,63 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
   $$("[data-focus]").forEach(function(a){a.addEventListener("click",function(e){e.preventDefault();stopAuto();
     input.scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"});setTimeout(function(){input.focus({preventScroll:true})},reduce?0:500)})});
   addEventListener("resize",moveInd);
-  document.addEventListener("visibilitychange",function(){if(document.hidden)clearTimeout(cycle);else if(auto&&!timers.length)cycle=setTimeout(function(){show((cur+1)%looks.length)},1500)});
+  document.addEventListener("visibilitychange",function(){if(document.hidden)clearTimeout(cycle);else if(auto&&introDone&&!timers.length)cycle=setTimeout(function(){show((cur+1)%looks.length)},1500)});
   document.fonts&&document.fonts.ready.then(moveInd);
+
+  // the scroll intro: on a wide screen the hero is pinned for a screen and a half; scrolling moves the
+  // headline and your words into place, brings the browser up from below and puts the site up block by
+  // block. Once it is built the demo behaves as usual (tabs, your name, the cycle of looks).
+  var intro=false,introDone=true,hero=$("#hero"),pinEl=$("#pin"),cueEl=$("#cue"),sayEl=$(".say"),h1=$("h1"),
+      fadeEls=$$(".who,.lead,.try,.tabs-w,.more,.note"),geo=null,html=document.documentElement;
+  function ease(x){return x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2}
+  function clamp(x){return x<0?0:x>1?1:x}
+  function tf(el,g,t){el.style.transform=t<=0?"":"translate("+(g.dx*t).toFixed(1)+"px,"+(g.dy*t).toFixed(1)+"px) scale("+(1+(g.s-1)*t).toFixed(4)+")"}
+  function measure(){
+    [h1,sayEl,stage].forEach(function(e){e.style.transform=""});
+    var vw=innerWidth,vh=innerHeight,ht=hero.getBoundingClientRect().top;
+    function r(e){var b=e.getBoundingClientRect();return{l:b.left,t:b.top-ht,w:b.width,h:b.height}}
+    var a=r(h1),b=r(sayEl),c=r(stage);
+    var s0=Math.min(1.18,(vw-80)/a.w),cy=vh*.42;
+    var g0={s:s0,dx:vw/2-a.l-a.w*s0/2,dy:cy-a.t-a.h*s0/2};
+    var s1=Math.min(1.08,(vw-80)/b.w),by=cy+a.h*s0/2+36;
+    var g1={s:s1,dx:vw/2-b.l-b.w*s1/2,dy:by-b.t};
+    var s2=.88;
+    var g2={s:s2,dx:vw/2-c.l-c.w*s2/2,dy:vh+24-c.t};
+    geo={h1:g0,say:g1,stage:g2};
+  }
+  function progress(){var top=pinEl.getBoundingClientRect().top,len=pinEl.offsetHeight-innerHeight;return len>0?clamp(-top/len):1}
+  function applyIntro(){
+    if(!geo)measure();
+    var p=progress(),r=ease(clamp(p/.6)),q=ease(clamp((p-.08)/.5)),o=clamp((p-.78)/.22);
+    tf(h1,geo.h1,1-r);tf(sayEl,geo.say,1-r);tf(stage,geo.stage,1-q);
+    fadeEls.forEach(function(e){e.style.opacity=o;e.style.transform=o<1?"translateY("+((1-o)*16).toFixed(1)+"px)":""});
+    cueEl.style.opacity=clamp(1-p*5);
+    if(p>.05&&typing){clearTimeout(typing);typing=0;for(var k=0;k<3;k++)sents[k].textContent=sent(k)+(k<2?" ":"");typedUpTo=3;caret.hidden=true}
+    if(!introDone){
+      var ld=$(".ld",mock),n=0;
+      SEQ.forEach(function(s,i){var on=p>=.42+i*(.5/(SEQ.length-1)),el=$('[data-b="'+s[0]+'"]',mock);if(el)el.classList.toggle("on",on);if(on){n=i+1;if(s[2]!=null)sents.forEach(function(x,q2){x.classList.toggle("hl",q2===s[2])})}});
+      if(ld){ld.classList.remove("done");ld.style.width=n?Math.round(n/SEQ.length*92)+"%":"0"}
+      if(!n)sents.forEach(function(x){x.classList.remove("hl")});
+      if(p>=.999){introDone=true;finish(mock);sents.forEach(function(x){x.classList.remove("hl")});if(auto)cycle=setTimeout(function(){show((cur+1)%looks.length)},4600)}
+    }
+  }
+  var introRaf=0;
+  function onScroll(){if(introRaf)return;introRaf=requestAnimationFrame(function(){introRaf=0;applyIntro()})}
+  function setupIntro(){
+    if(reduce||!matchMedia("(min-width: 981px) and (min-height: 680px) and (pointer: fine)").matches)return;
+    html.classList.add("intro");
+    if(hero.offsetHeight>innerHeight+8){html.classList.remove("intro");return}
+    intro=true;introDone=false;measure();applyIntro();
+    addEventListener("scroll",onScroll,{passive:true});
+    addEventListener("resize",function(){if(!intro)return;if(hero.offsetHeight>innerHeight+8||!matchMedia("(min-width: 981px)").matches){
+      intro=false;introDone=true;html.classList.remove("intro");[h1,sayEl,stage].concat(fadeEls).forEach(function(e){e.style.transform="";e.style.opacity=""});finish(mock);
+      if(auto)cycle=setTimeout(function(){show((cur+1)%looks.length)},2000);return}
+      measure();applyIntro()});
+  }
+  setupIntro();
   show(0);requestAnimationFrame(function(){tabs.classList.add("ready")});
+  if(intro)applyIntro();
+  if(intro)document.fonts&&document.fonts.ready.then(function(){measure();applyIntro()});
 
   // scroll: reveal, and build the small site when it comes into view
   var mini=$("#mini"),typed=$("#typed"),caret2=$("#caret2"),story=typed.textContent;
