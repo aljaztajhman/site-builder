@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="sl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Postavi · spletna stran za vaše podjetje · kmalu</title>
+<meta name="description" content="Postavi: opišete svoje podjetje, mi postavimo spletno stran. Za male podjetnike v Sloveniji. Kmalu.">
+<meta name="theme-color" content="#0f1f22">
+<meta property="og:title" content="Postavi · kmalu">
+<meta property="og:description" content="Opišete svoje podjetje, mi postavimo spletno stran. Kmalu.">
+<meta property="og:url" content="https://postavi.si/">
+<meta property="og:locale" content="sl_SI">
+<link rel="canonical" href="https://postavi.si/">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preload" href="fonts/bricolage-grotesque.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:"Bricolage Grotesque";src:url("fonts/bricolage-grotesque.woff2") format("woff2");font-weight:200 800;font-display:swap}
+@font-face{font-family:"Figtree";src:url("fonts/figtree.woff2") format("woff2");font-weight:300 900;font-display:swap}
+:root{
+  --canvas:#0f1f22;--ink:#f2f7f7;--ink-2:#a9bcbf;--ink-3:#7c9195;
+  --accent:#3fc1c9;--accent-deep:#0d7a84;--line:rgb(255 255 255/.10);
+  --display:"Bricolage Grotesque",system-ui,sans-serif;--ui:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --ease:cubic-bezier(.2,.7,.2,1);--spring:cubic-bezier(.34,1.56,.64,1);
+}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:var(--canvas);color:var(--ink);font:400 17px/1.55 var(--ui);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+/* blueprint grid that drifts slowly: the site is being "drawn" */
+body::before{content:"";position:fixed;inset:-80px;pointer-events:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:40px 40px;mask-image:radial-gradient(ellipse 70% 60% at 65% 45%,#000 20%,transparent 75%);
+  animation:drift 30s linear infinite;opacity:.55}
+@keyframes drift{to{transform:translate(40px,40px)}}
+body::after{content:"";position:fixed;width:60vmax;height:60vmax;right:-15vmax;top:-20vmax;pointer-events:none;
+  background:radial-gradient(circle,rgb(63 193 201/.18),transparent 65%);filter:blur(10px)}
+
+.wrap{position:relative;z-index:1;min-height:100%;min-height:100svh;display:grid;grid-template-rows:auto 1fr auto;max-width:1240px;margin:0 auto;padding:28px 40px}
+header{display:flex;align-items:center;justify-content:space-between}
+.brand{display:inline-flex;align-items:center;gap:11px;font:700 22px/1 var(--display);letter-spacing:-.02em}
+.mark{display:grid;grid-template-columns:repeat(2,8px);gap:3px}
+.mark i{width:8px;height:8px;border-radius:2px;background:var(--accent);animation:tile .6s var(--spring) both}
+.mark i:nth-child(2){animation-delay:.12s}.mark i:nth-child(3){animation-delay:.24s;opacity:.55}.mark i:nth-child(4){animation-delay:.36s;opacity:.3}
+@keyframes tile{from{transform:translateY(-14px) scale(.4);opacity:0}}
+.chip{display:inline-flex;align-items:center;gap:8px;font:600 13px/1 var(--ui);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);
+  border:1px solid var(--line);border-radius:99px;padding:9px 14px;background:rgb(255 255 255/.03)}
+.chip b{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 0 rgb(63 193 201/.6);animation:pulse 2s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 9px rgb(63 193 201/0)}100%{box-shadow:0 0 0 0 rgb(63 193 201/0)}}
+
+main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);gap:64px;align-items:center;padding:48px 0}
+h1{font:800 clamp(52px,7.4vw,104px)/.92 var(--display);letter-spacing:-.045em;margin-bottom:28px}
+h1 .w{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.08em}
+h1 .w span{display:inline-block;animation:rise .9s var(--ease) both}
+h1 .w:nth-child(2) span{animation-delay:.1s}h1 .w:nth-child(3) span{animation-delay:.2s}
+h1 em{font-style:normal;color:var(--accent)}
+@keyframes rise{from{transform:translateY(105%)}}
+.lead{font-size:clamp(17px,1.5vw,20px);color:var(--ink-2);max-width:31em;animation:fade 1s .45s var(--ease) both}
+.lead strong{color:var(--ink);font-weight:600}
+.soon{margin-top:36px;display:flex;align-items:center;gap:16px;animation:fade 1s .65s var(--ease) both}
+.soon span{font:700 15px/1 var(--display);letter-spacing:.01em;white-space:nowrap}
+.bar{flex:0 1 220px;height:4px;border-radius:4px;background:rgb(255 255 255/.08);overflow:hidden}
+.bar i{display:block;height:100%;width:40%;border-radius:4px;background:var(--accent);animation:load 2.8s var(--ease) infinite}
+@keyframes load{0%{transform:translateX(-100%)}100%{transform:translateX(260%)}}
+@keyframes fade{from{opacity:0;transform:translateY(12px)}}
+
+/* the browser in which a site puts itself up */
+.stage{position:relative;animation:fade 1.1s .3s var(--ease) both}
+.browser{position:relative;border-radius:14px;background:#fff;color:#14272a;overflow:hidden;aspect-ratio:16/11;
+  box-shadow:0 40px 80px -20px rgb(0 0 0/.55),0 0 0 1px rgb(255 255 255/.08);transform:perspective(1600px) rotateY(-7deg) rotateX(3deg);transition:transform .8s var(--ease)}
+.stage:hover .browser{transform:perspective(1600px) rotateY(-2deg) rotateX(1deg)}
+.chrome{display:flex;align-items:center;gap:7px;height:36px;padding:0 14px;background:#e9eff0;border-bottom:1px solid #d6e0e2}
+.chrome>i{width:10px;height:10px;border-radius:50%;background:#c7d3d5}
+.url{margin-left:12px;flex:1;max-width:300px;height:22px;border-radius:6px;background:#fff;font:500 12px/22px var(--ui);color:#4a5f63;padding:0 10px;white-space:nowrap;overflow:hidden}
+.url b{font-weight:500;color:#14272a}
+.url .caret{display:inline-block;width:1px;height:12px;background:#14272a;vertical-align:-2px;margin-left:1px;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.page{position:absolute;inset:36px 0 0;background:var(--bg);transition:background .5s}
+.page>*{position:absolute;opacity:0}
+.build .page>*{animation:put .7s var(--spring) both}
+@keyframes put{from{opacity:0;transform:translateY(-26px) scale(.96)}to{opacity:1;transform:none}}
+.p-nav{left:5%;right:5%;top:5%;height:6%;display:flex;align-items:center;gap:3%}
+.p-logo{width:9%;height:100%;border-radius:4px;background:var(--a)}
+.p-name{width:18%;height:45%;border-radius:3px;background:var(--t)}
+.p-links{margin-left:auto;display:flex;gap:8px;width:34%}.p-links i{flex:1;height:6px;border-radius:3px;background:var(--t);opacity:.35}
+.p-photo{left:5%;width:52%;top:17%;bottom:24%;border-radius:8px;background:var(--photo);background-size:cover;overflow:hidden}
+.p-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgb(255 255 255/.35) 50%,transparent 70%);transform:translateX(-100%)}
+.build .p-photo::after{animation:shine 1.2s 1.6s var(--ease) both}
+@keyframes shine{to{transform:translateX(100%)}}
+.p-h{left:61%;right:5%;top:20%;display:grid;gap:7px}
+.p-h i{height:clamp(10px,1.6vw,18px);border-radius:3px;background:var(--t)}
+.p-h i:nth-child(2){width:78%}
+.p-txt{left:61%;right:5%;top:42%;display:grid;gap:6px}
+.p-txt i{height:5px;border-radius:3px;background:var(--t);opacity:.3}.p-txt i:nth-child(3){width:60%}
+.p-btn{left:61%;top:60%;width:24%;height:9%;border-radius:var(--r);background:var(--a);display:grid;place-items:center}
+.p-btn::after{content:"";width:50%;height:4px;border-radius:2px;background:#fff;opacity:.9}
+.p-cards{left:5%;right:5%;bottom:5%;height:14%;display:grid;grid-template-columns:repeat(3,1fr);gap:3%}
+.p-cards i{border-radius:6px;background:var(--card)}
+.build .p-nav{animation-delay:.9s}.build .p-photo{animation-delay:1.2s}.build .p-h{animation-delay:1.55s}
+.build .p-txt{animation-delay:1.8s}.build .p-btn{animation-delay:2.05s}.build .p-cards{animation-delay:2.3s}
+/* a cursor that "places" each block */
+.hand{position:absolute;z-index:3;width:22px;height:22px;left:50%;top:50%;opacity:0;pointer-events:none;filter:drop-shadow(0 3px 6px rgb(0 0 0/.35))}
+.build .hand{animation:hand 2.4s .8s var(--ease) both}
+@keyframes hand{0%{opacity:0;left:80%;top:90%}10%{opacity:1;left:12%;top:16%}30%{left:28%;top:45%}48%{left:72%;top:28%}64%{left:66%;top:42%}80%{left:70%;top:62%}96%{opacity:1;left:50%;top:86%}100%{opacity:0;left:52%;top:90%}}
+.tag{position:absolute;right:-14px;bottom:-18px;z-index:4;background:var(--accent);color:#06292c;font:700 14px/1 var(--display);padding:11px 15px;border-radius:10px;
+  box-shadow:0 14px 30px -10px rgb(0 0 0/.5);opacity:0}
+.build .tag{animation:pop .6s 2.7s var(--spring) both}
+@keyframes pop{from{opacity:0;transform:scale(.6) rotate(-6deg)}to{opacity:1;transform:rotate(-3deg)}}
+
+/* three businesses, three looks */
+.v0{--bg:#fbf6ee;--t:#3a2a1c;--a:#b5562b;--card:#efe3d1;--r:99px;--photo:linear-gradient(135deg,#e9b77d,#a8582e 60%,#5b2f1a)}
+.v1{--bg:#f4f1f6;--t:#2b2233;--a:#7a3d8c;--card:#e6dcea;--r:4px;--photo:linear-gradient(160deg,#d9c3e3,#9c6fb0 55%,#45284f)}
+.v2{--bg:#eef2f1;--t:#15211f;--a:#1f6f5c;--card:#d8e4e0;--r:8px;--photo:linear-gradient(120deg,#9fc7b5,#3f7f6a 50%,#1a3a31)}
+
+footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);font-size:14px;border-top:1px solid var(--line);padding-top:20px}
+
+@media (max-width:900px){
+  .wrap{padding:20px 16px}
+  main{grid-template-columns:1fr;gap:44px;padding:36px 0 44px}
+  .browser{transform:none}.stage:hover .browser{transform:none}
+  .tag{right:8px;bottom:-14px;font-size:13px}
+  .chip{font-size:11px;padding:8px 11px}
+  footer{flex-direction:column;gap:4px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .page>*,.tag{opacity:1}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="brand" aria-label="Postavi"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Postavi</span>
+    <span class="chip"><b aria-hidden="true"></b>Kmalu</span>
+  </header>
+
+  <main>
+    <section>
+      <h1><span class="w"><span>Postavi</span></span> <span class="w"><span>si</span></span> <span class="w"><span><em>stran.</em></span></span></h1>
+      <p class="lead">Opišete svoje podjetje, mi postavimo <strong>spletno stran, ki je videti narejena po meri</strong>. Za obrtnike, frizerje, gostilne in vse male podjetnike v Sloveniji.</p>
+      <div class="soon" role="status"><span>Gradimo. Odpremo kmalu.</span><div class="bar" aria-hidden="true"><i></i></div></div>
+    </section>
+
+    <div class="stage" aria-hidden="true">
+      <div class="browser v0" id="browser">
+        <div class="chrome"><i></i><i></i><i></i><div class="url"><b id="host"></b><span class="caret"></span></div></div>
+        <div class="page">
+          <div class="p-nav"><span class="p-logo"></span><span class="p-name"></span><span class="p-links"><i></i><i></i><i></i></span></div>
+          <div class="p-photo"></div>
+          <div class="p-h"><i></i><i></i></div>
+          <div class="p-txt"><i></i><i></i><i></i></div>
+          <div class="p-btn"></div>
+          <div class="p-cards"><i></i><i></i><i></i></div>
+        </div>
+        <svg class="hand" viewBox="0 0 24 24"><path d="M5 2l14 11-6.2.9L16 21l-3 1.3-3.2-7.2L5 19z" fill="#fff" stroke="#14272a" stroke-width="1.4" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="tag" id="tag">Postavljeno ✓</div>
+    </div>
+  </main>
+
+  <footer><span>© 2026 Postavi</span><span>postavi.si</span></footer>
+</div>
+<script>
+(function(){
+  var hosts=["pekarna.postavi.si","frizerka.postavi.si","vrtnar.postavi.si"];
+  var b=document.getElementById("browser"),h=document.getElementById("host"),stage=b.parentNode;
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches){h.textContent=hosts[0];return}
+  var i=0,timer,typing;
+  function type(s,done){var n=0;h.textContent="";(function step(){h.textContent=s.slice(0,++n);n<s.length?typing=setTimeout(step,38):done()})()}
+  function run(){
+    stage.classList.remove("build");b.className="browser v"+i;
+    void b.offsetWidth;
+    type(hosts[i],function(){stage.classList.add("build")});
+    i=(i+1)%hosts.length;
+    timer=setTimeout(run,9000);
+  }
+  document.addEventListener("visibilitychange",function(){clearTimeout(timer);clearTimeout(typing);if(!document.hidden)run()});
+  run();
+})();
+</script>
+</body>
+</html>
