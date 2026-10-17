@@ -303,6 +303,13 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
 @media (max-width:420px){
   .field{flex-direction:column}
   .field .btn{border-radius:0;width:100%}
+  .field input{flex:none}
+}
+/* the phone intro (see the script): the preview holds still mid-screen while the site goes up */
+.pin-sp{display:none}
+@media (max-width:860px){
+  .pintro .demo{position:sticky;top:12px;top:max(12px,calc((100svh - var(--dh))/2))}
+  .pintro .pin-sp{display:block;height:80svh}
 }
 /* reduced motion: the page still builds and reveals itself, but nothing loops or jumps */
 @media (prefers-reduced-motion:reduce){
@@ -586,7 +593,7 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
       var full=sent(k);n++;sents[k].textContent=full.slice(0,n)+(n<full.length?"":" ");
       if(n<full.length)typing=setTimeout(step,speed);
       else{typedUpTo=k+1;if(++k<3){n=0;typing=setTimeout(step,220)}
-      else if(intro&&!introDone){caret.hidden=true}
+      else if(!introDone){caret.hidden=true}
       else{caret.hidden=true;timers=build(mock,1,function(ev,j){
         if(ev==="s")sents.forEach(function(s,q){s.classList.toggle("hl",q===j)});
         else{timers.push(setTimeout(function(){sents.forEach(function(s){s.classList.remove("hl")})},900));
@@ -633,17 +640,21 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
     tf(h1,geo.h1,1-r);tf(sayEl,geo.say,1-r);tf(stage,geo.stage,1-q);
     fadeEls.forEach(function(e){e.style.opacity=o;e.style.transform=o<1?"translateY("+((1-o)*16).toFixed(1)+"px)":""});
     cueEl.style.opacity=clamp(1-p*5);
-    if(p>.05&&typing){clearTimeout(typing);typing=0;for(var k=0;k<3;k++)sents[k].textContent=sent(k)+(k<2?" ":"");typedUpTo=3;caret.hidden=true}
-    if(!introDone){
-      var ld=$(".ld",mock),n=0;
-      SEQ.forEach(function(s,i){var on=p>=.42+i*(.5/(SEQ.length-1)),el=$('[data-b="'+s[0]+'"]',mock);if(el)el.classList.toggle("on",on);if(on){n=i+1;if(s[2]!=null)sents.forEach(function(x,q2){x.classList.toggle("hl",q2===s[2])})}});
-      if(ld){ld.classList.remove("done");ld.style.width=n?Math.round(n/SEQ.length*92)+"%":"0"}
-      if(!n)sents.forEach(function(x){x.classList.remove("hl")});
-      if(p>=.999){introDone=true;finish(mock);sents.forEach(function(x){x.classList.remove("hl")});if(auto)cycle=setTimeout(function(){show((cur+1)%looks.length)},4600)}
-    }
+    if(p>.05)endTyping();
+    scrub((p-.42)/.5,p>=.999);
+  }
+  function endTyping(){if(!typing)return;clearTimeout(typing);typing=0;for(var k=0;k<3;k++)sents[k].textContent=sent(k)+(k<2?" ":"");typedUpTo=3;caret.hidden=true}
+  // scroll-driven build: t runs 0..1 over the blocks; done hands the demo back to the usual cycle
+  function scrub(t,done){
+    if(introDone)return;
+    var ld=$(".ld",mock),n=0;
+    SEQ.forEach(function(s,i){var on=t>=i/(SEQ.length-1),el=$('[data-b="'+s[0]+'"]',mock);if(el)el.classList.toggle("on",on);if(on){n=i+1;if(s[2]!=null)sents.forEach(function(x,q2){x.classList.toggle("hl",q2===s[2])})}});
+    if(ld){ld.classList.remove("done");ld.style.width=n?Math.round(n/SEQ.length*92)+"%":"0"}
+    if(!n)sents.forEach(function(x){x.classList.remove("hl")});
+    if(done){introDone=true;finish(mock);sents.forEach(function(x){x.classList.remove("hl")});if(auto)cycle=setTimeout(function(){show((cur+1)%looks.length)},4600)}
   }
   var introRaf=0;
-  function onScroll(){if(introRaf)return;introRaf=requestAnimationFrame(function(){introRaf=0;applyIntro()})}
+  function onScroll(){if(introRaf)return;introRaf=requestAnimationFrame(function(){introRaf=0;if(intro)applyIntro();else if(phone)applyPhone()})}
   function setupIntro(){
     if(reduce||!matchMedia("(min-width: 981px) and (min-height: 680px) and (pointer: fine)").matches)return;
     html.classList.add("intro");
@@ -656,6 +667,27 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
       measure();applyIntro()});
   }
   setupIntro();
+
+  // the phone intro: in one column the preview stays in the middle of the screen for about a screen of
+  // scrolling while the site goes up block by block; then it scrolls on and behaves as usual
+  var phone=false,demoEl=$(".demo"),work=$(".work"),pinSp=null,pgap=0,narrow=matchMedia("(max-width: 860px)");
+  function applyPhone(){
+    var d=demoEl.getBoundingClientRect(),s=pinSp.getBoundingClientRect(),p=clamp((d.bottom-s.top+pgap)/(pinSp.offsetHeight+pgap));
+    if(p>.02)endTyping();
+    scrub((p-.08)/.72,p>=.9);
+  }
+  function setupPhone(){
+    if(intro||reduce||!narrow.matches||demoEl.offsetHeight+24>innerHeight)return;
+    pinSp=document.createElement("div");pinSp.className="pin-sp";pinSp.setAttribute("aria-hidden","true");work.appendChild(pinSp);
+    html.classList.add("pintro");html.style.setProperty("--dh",demoEl.offsetHeight+"px");
+    pgap=parseFloat(getComputedStyle(work).rowGap)||0;
+    phone=true;introDone=false;
+    addEventListener("scroll",onScroll,{passive:true});
+    addEventListener("resize",function(){if(!phone)return;
+      if(!narrow.matches||demoEl.offsetHeight+24>innerHeight){phone=false;html.classList.remove("pintro");pinSp.remove();endTyping();scrub(1,true);return}
+      html.style.setProperty("--dh",demoEl.offsetHeight+"px");applyPhone()});
+  }
+  setupPhone();
   show(0);requestAnimationFrame(function(){tabs.classList.add("ready")});
   if(intro)applyIntro();
   if(intro)document.fonts&&document.fonts.ready.then(function(){measure();applyIntro()});
