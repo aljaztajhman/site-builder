@@ -269,7 +269,7 @@ describe("composed sections render", () => {
       }
       // The composed sheet moves the label where a mask would cut it, and never hides it.
       const { css } = composedStylesheet();
-      expect(css).toMatch(/\.cx-mask-stamp \.media--ai::after\{[^}]*top:/);
+      expect(css).toMatch(/\.cx-mask-circle \.media--ai::after\{[^}]*bottom:/);
       expect(css).not.toMatch(/media(--ai)?::after\{[^}]*content:\s*none/);
     });
   });

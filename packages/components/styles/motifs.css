@@ -703,6 +703,7 @@ a.plate:hover .plate__num {
 /* .media.x: outranks the imagery treatments' own radius on photos ([data-imagery] .media). */
 .arch-top,
 .media.arch-top {
+  --cuts-top: 1;
   border-radius: 100vw 100vw 0 0;
 }
 .disc,
@@ -1050,10 +1051,12 @@ a.plate:hover .plate__num {
   order: -1;
 }
 [data-motif="mirror"] .team-photo__media {
+  --cuts-top: 1;
   aspect-ratio: 4 / 3;
   border-radius: 10rem 10rem 0.5rem 0.5rem;
 }
 [data-motif="mirror"] .team-photo__inset {
+  --cuts-top: 1;
   border-radius: 100vw 100vw 1rem 1rem;
 }
 [data-motif="mirror"] .team-rows__name {
@@ -1122,8 +1125,10 @@ a.plate:hover .plate__num {
 [data-motif="smile"] .team-photo__media {
   aspect-ratio: 1;
 }
+/* In the figure's flow, but still the box its label is placed in (static, the label sat on the page's corner). */
 [data-motif="smile"] .team-photo__inset {
-  position: static;
+  position: relative;
+  inset: auto;
   width: auto;
   aspect-ratio: 3 / 5;
   border: 0;

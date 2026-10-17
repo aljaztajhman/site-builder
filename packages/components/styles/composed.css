@@ -611,10 +611,6 @@ body:not([data-motif="plate"]) .cx-prices--plates .plate__eu {
   left: 50%;
   translate: -50% 0;
 }
-.cx-mask-stamp .media--ai::after {
-  top: 0.5rem;
-  right: 0.5rem;
-}
 /* Treatments: shaped by the palette's roles, never a gradient. */
 .cx-tr-duotone {
   background: var(--c-primary);
