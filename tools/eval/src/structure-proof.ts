@@ -311,7 +311,7 @@ export function applyStructure(input: SiteSpec, s: Structure, chrome: ProofChrom
 
 export type ProofSet = "review50" | "fresh10";
 
-interface SourcePage {
+export interface SourcePage {
   id: string;
   business: string;
   trade: string;
@@ -348,7 +348,7 @@ async function loadReview50(config: AppConfig): Promise<SourcePage[]> {
   return pages;
 }
 
-async function loadFresh10(config: AppConfig, browser: CheckBrowser, freshDir: string, print: (l: string) => void): Promise<SourcePage[]> {
+export async function loadFresh10(config: AppConfig, browser: CheckBrowser, freshDir: string, print: (l: string) => void): Promise<SourcePage[]> {
   const pages: SourcePage[] = [];
   for (const id of knownFixtures().fresh) {
     const fx = await replayedFixture(id, "fresh", config, browser, false);
