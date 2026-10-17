@@ -2,13 +2,13 @@
  * Room for a capital with a mark above it (Č Š Ž Ć …) on a display line. The mark rises above the cap height, up to
  * 1.09 em (Oswald, Unbounded), so on display line-heights (0.84–1.12) it touched the line above (review 50, "HITRO /
  * POŠTENO"; fresh 10, "Sirarna Pr' / Šimnu"). A display block with such a capital in its text (site.tsx markMarkedLines)
- * takes a line-height that clears it and the deepest descender of the line above: --lh-marks (--lh-marks-caps when it is
- * set in capitals), per heading face (tokens.ts).
+ * takes a line-height that clears it and, up to MARK_ROOM_CAP, the deepest descender of the line above: --lh-marks
+ * (--lh-marks-caps when it is set in capitals), per heading face (tokens.ts).
  */
 
 /**
  * Ink in em of each heading face, measured in Chromium on the shipped woff2 at weight 400 and the face's heaviest (the
- * larger of each): mark, the ink top of the tallest marked capital above the baseline; desc, the deepest lower-case
+ * larger of each; where Windows and Linux Chromium differ, the larger): mark, the ink top of the tallest marked capital above the baseline; desc, the deepest lower-case
  * descender (g j p q y , ; ą ę ç ş) below it; capsDesc, the same for capitals (Q J , ; Ą Ę Ç Ş). `pnpm exec tsx tools/eval/src/mark-metrics-print.ts`
  * prints it again (tools/eval/src/mark-metrics-print.ts); the slow test m1-chrome-blockers holds it to the browser.
  */
@@ -32,7 +32,8 @@ export const MARK_INK: Record<string, { mark: number; desc: number; capsDesc: nu
   "eb-garamond": { mark: 0.86, desc: 0.297, capsDesc: 0.297 },
   epilogue: { mark: 1.016, desc: 0.235, capsDesc: 0.235 },
   figtree: { mark: 0.985, desc: 0.219, capsDesc: 0.219 },
-  fraunces: { mark: 0.954, desc: 0.25, capsDesc: 0.235 },
+  // capsDesc: 0.235 on Windows Chromium, 0.25 on Linux (CI): the larger, so no platform under-reserves.
+  fraunces: { mark: 0.954, desc: 0.25, capsDesc: 0.25 },
   "ibm-plex-sans": { mark: 1.016, desc: 0.219, capsDesc: 0.219 },
   "instrument-sans": { mark: 0.985, desc: 0.219, capsDesc: 0.219 },
   "inter-tight": { mark: 0.985, desc: 0.25, capsDesc: 0.25 },
@@ -63,18 +64,27 @@ export const MARK_INK: Record<string, { mark: number; desc: number; capsDesc: nu
 /** Air between the mark's ink and the descender's, in em (and the measurement's 1/64 em steps). */
 const AIR = 0.04 + 1 / 64;
 
+/**
+ * The most a display line with a marked capital gets (director, M1): full room above a descender took a three-line hero
+ * heading 40–70 % taller at 360 px and could push its button off the first screen. Within it the mark always clears
+ * the line above's capitals and ascenders (mark + air <= 1.19 in every face); the descender only as far as it fits.
+ */
+export const MARK_ROOM_CAP = 1.25;
+
 /** The line-height (unitless) a display line with a marked capital takes in this heading face, mixed case or in capitals. */
 export function markRoom(file: string, caps: boolean): number {
   const all = Object.values(MARK_INK);
   const ink = MARK_INK[file] ?? { mark: Math.max(...all.map((m) => m.mark)), desc: Math.max(...all.map((m) => m.desc)), capsDesc: Math.max(...all.map((m) => m.capsDesc)) };
-  return Math.ceil((ink.mark + (caps ? ink.capsDesc : ink.desc) + AIR) * 100) / 100;
+  const full = Math.ceil((ink.mark + (caps ? ink.capsDesc : ink.desc) + AIR) * 100) / 100;
+  return Math.max(Math.ceil((ink.mark + AIR) * 100) / 100, Math.min(MARK_ROOM_CAP, full));
 }
 
 const MARK_ABOVE = /[̀-̽̕̚-̈́͆͊-͌]/u;
 
 /** Whether `text`, as set (caps: in capitals), has a capital with a mark above it (Č Š Ž Ć Á …). */
 export function hasMarkedCapital(text: string, caps: boolean): boolean {
-  for (const ch of caps ? text.toLocaleUpperCase("sl") : text) {
+  // Composed first: a name typed as S + combining caron is one marked capital.
+  for (const ch of (caps ? text.toLocaleUpperCase("sl") : text).normalize("NFC")) {
     const parts = ch.normalize("NFD");
     if (parts.length > 1 && /\p{Lu}/u.test(parts[0]!) && MARK_ABOVE.test(parts.slice(1))) return true;
   }
@@ -88,6 +98,18 @@ const RAW = new Set(["script", "style", "svg", "noscript", "template", "textarea
 const CAPS_CLASS = /(?:^|\s)cx-h--uppercase(?:\s|$)/;
 const NORMAL_CLASS = /(?:^|\s)cx-h--normal(?:\s|$)/;
 const SITE_CAPS_CLASS = /(?:^|\s)(?:site-header__name|site-footer__wordmark)(?:\s|$)/;
+/**
+ * Wordmark styles that set the name in capitals (vocab/wordmarks/*.css text-transform: uppercase): [the style's class on
+ * an ancestor or the element itself, the element's own class] ("Košir" is set "KOŠIR").
+ */
+const WORDMARK_CAPS: [string, string | null][] = [
+  ["wm-stacked-caps", null],
+  ["wm-plate", "wm__box"],
+  ["wm-stamp", "wm__box"],
+  ["wm-lockup", "wm__b"],
+  ["wm-circle", "wm__rt"],
+];
+const hasClass = (cls: string, name: string) => ` ${cls} `.includes(` ${name} `);
 
 interface Frame {
   tag: string;
@@ -108,10 +130,16 @@ export function markMarkedLines(html: string, upperSite: boolean): string {
   const tagRe = /<(\/?)([a-zA-Z][a-zA-Z0-9-]*)((?:[^>"']|"[^"]*"|'[^']*')*)>/g;
   let last = 0;
   let changed = false;
+  const classOf = (f: Frame) => / class="([^"]*)"/.exec(f.attrs)?.[1] ?? "";
   const caps = (): boolean => {
+    const classes = stack.map(classOf);
+    for (const [style, own] of WORDMARK_CAPS) {
+      const at = classes.findIndex((c) => hasClass(c, style));
+      if (at >= 0 && (own === null || classes.slice(at).some((c) => hasClass(c, own)))) return true;
+    }
     for (let i = stack.length - 1; i >= 0; i--) {
       const f = stack[i]!;
-      const cls = / class="([^"]*)"/.exec(f.attrs)?.[1] ?? "";
+      const cls = classes[i]!;
       if (NORMAL_CLASS.test(cls)) return false;
       if (CAPS_CLASS.test(cls)) return true;
       if (upperSite && (/^h[1-4]$/.test(f.tag) || SITE_CAPS_CLASS.test(cls))) return true;
