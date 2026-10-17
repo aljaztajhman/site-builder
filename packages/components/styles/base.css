@@ -77,14 +77,14 @@ main {
 }
 /*
  * A block whose text has a capital with a mark above it, as set (Č Š Ž Ć …; render markMarkedLines): its lines far
- * enough apart that the mark clears the deepest descender of the line above (tokens.ts --lh-marks, per heading face).
+ * enough apart that the mark clears the line above (tokens.ts --lh-marks, per heading face; at most 1.25).
  * Every display line-height takes max(var(--lh-floor, 0), its own value), so only these lines move.
  */
 [data-marks] {
-  --lh-floor: var(--lh-marks, 1.43) !important;
+  --lh-floor: var(--lh-marks, 1.25) !important;
 }
 [data-marks="caps"] {
-  --lh-floor: var(--lh-marks-caps, 1.47) !important;
+  --lh-floor: var(--lh-marks-caps, 1.25) !important;
 }
 :where(h1, h2, h3, h4) {
   font-family: var(--font-heading);

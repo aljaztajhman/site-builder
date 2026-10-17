@@ -85,20 +85,22 @@ describe("the call and the directions at most twice on a phone (markRepeatedActi
     expect(renderPage(spec, spec.pages[0]!)).not.toContain("data-repeat");
   });
 
-  it("at every width when the header carries the action (review 50 at 1280 px), on phones only when only the bar does", () => {
-    // instalacije-rebernik: the chrome header's call button is there at desktop width too.
+  it("at every width when a sticky header carries the action (review 50 at 1280 px), on phones only when only the bar does", () => {
+    // instalacije-rebernik: the chrome header's call button scrolls away with the header, so at desktop width the page's
+    // own calls stay (review: the closing band lost its call).
     const spec = golden("instalacije-rebernik");
-    expect(renderPage(spec, spec.pages[0]!)).toContain('data-repeat="all"');
-    spec.chrome.header.cta = "none";
-    const barOnly = renderPage(spec, spec.pages[0]!);
-    expect(barOnly).toContain('data-repeat=""');
-    expect(barOnly).not.toContain('data-repeat="all"');
+    const chrome = renderPage(spec, spec.pages[0]!);
+    expect(chrome).toContain('data-repeat=""');
+    expect(chrome).not.toContain('data-repeat="all"');
     // The header that carries call and directions (actions "header"): both kinds at every width.
     const header = golden("pekarna-kvas");
     header.design.skeleton = { header: "bar", actions: "header", footer: "columns", footerTone: "alt", width: "contained", cards: "filled", buttons: "soft", dividers: "motif", photoRatio: "standard" };
     const out = renderPage(header, header.pages[0]!);
     const repeats = [...out.matchAll(/<a data-repeat="([^"]*)"[^>]*>/g)];
     expect(repeats.some((m) => m[0].includes("google.com/maps"))).toBe(true);
-    expect(repeats.every((m) => m[1] === "all")).toBe(true);
+    // Except in a closing band, which keeps its button at desktop width (hidden on phones only).
+    const band = out.slice(out.search(/<section\b[^>]*\bs-cta\b/));
+    expect(repeats.filter((m) => !band.includes(m[0])).every((m) => m[1] === "all")).toBe(true);
+    expect(band).not.toContain('data-repeat="all"');
   });
 });

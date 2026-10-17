@@ -35,7 +35,15 @@ export function openerOffersCallAndDirections(first: Opener): boolean {
 }
 
 /** The page's first section shows a directions link (an action, the facts of hero-type with-facts, a phone hero's link). */
-const openerOffersDirections = (first: Opener): boolean => openerActions(first).includes("directions") || openerOffersCallAndDirections(first);
+export const openerOffersDirections = (first: Opener): boolean => openerActions(first).includes("directions") || openerOffersCallAndDirections(first);
+
+/** The phone header family's number row carries the directions on phones (the bar or the floating button carries the call). */
+export function phoneRowDirections(ctx: RenderCtx): boolean {
+  const skeleton = ctx.site.design.skeleton;
+  if (!skeleton) return false;
+  const { family, inHeader, callHref, directionsHref } = skeletonParts(ctx, skeleton);
+  return family === "phone" && callHref !== null && !inHeader && directionsHref !== null;
+}
 
 /**
  * Marks the document as JS-capable before the header paints, so the mobile menu starts collapsed
@@ -134,20 +142,22 @@ const composedOpenerCarries = (first: Opener, cta: string): boolean =>
   cta !== "none" && first?.type === "composed" && composedActions(first as SectionOf<"composed">).includes(cta);
 
 /**
- * The call and the directions the header shows at desktop width on this page: the header that carries them (actions
- * "header"), the phone family's number, a chrome header's call or directions button. The page repeats each at most once
- * after it, at every width (site.tsx markRepeatedActions; review 50: "Navodila za pot" three times at 1280 px).
+ * The call and the directions a sticky header shows at desktop width on this page, on every screen: the header that
+ * carries them (actions "header"), the compact family's call button. The page repeats each at most once after it, at
+ * every width (site.tsx markRepeatedActions; review 50: "Navodila za pot" three times at 1280 px).
  */
 export function headerCarriesWide(ctx: RenderCtx): { call: boolean; directions: boolean } {
   const skeleton = ctx.site.design.skeleton;
-  if (!skeleton) {
-    const { cta } = ctx.site.chrome.header;
-    const shows = (a: "call" | "directions") => cta === a && ctx.href({ action: a }) !== null && !composedOpenerCarries(ctx.page.sections[0], a);
-    return { call: shows("call"), directions: shows("directions") };
-  }
+  // Only a sticky header carries an action down the page: after a header that scrolls away the page's own buttons are
+  // the only ones left (review: instalacije-rebernik's closing band lost its call at 1280 px).
+  if (!skeleton) return { call: false, directions: false };
   const { family, inHeader, callHref, directionsHref, button } = skeletonParts(ctx, skeleton);
+  if (!stickyHeader(family, inHeader)) return { call: false, directions: false };
   return { call: (family === "phone" && callHref !== null) || button === "call", directions: inHeader && directionsHref !== null };
 }
+
+/** The compact header and the one that carries the call stay on screen (skeleton.css .site-header--sticky). */
+const stickyHeader = (family: HeaderFamily, inHeader: boolean): boolean => family === "compact" || inHeader;
 
 function SkeletonHeader({ ctx, skeleton }: { ctx: RenderCtx; skeleton: Skeleton }) {
   const { site, page } = ctx;
@@ -155,7 +165,7 @@ function SkeletonHeader({ ctx, skeleton }: { ctx: RenderCtx; skeleton: Skeleton 
   const home = site.pages.find((p) => p.kind === "home");
   const navPages = menuPages(site);
   const logo = site.assets.logo;
-  const sticky = family === "compact" || inHeader;
+  const sticky = stickyHeader(family, inHeader);
   const toggle = TOGGLE[family];
   const tone = family === "overlay" ? undefined : site.chrome.header.tone;
   // The hero's call object owns the call on the first screen: the header's call waits until it has gone (reveal.js).
@@ -194,10 +204,11 @@ function SkeletonHeader({ ctx, skeleton }: { ctx: RenderCtx; skeleton: Skeleton 
             {formatPhone(site.business.phone as string)}
           </a>
         )}
-        {family === "phone" && callHref && !inHeader && directionsHref && !openerOffersDirections(page.sections[0]) && (
+        {phoneRowDirections(ctx) && directionsHref && (
           // Phones only: the number's own row carries the directions too, so they are in the first screen however tall
-          // the hero is (the bar or the floating button carries them once the hero's call has gone). Not when the page
-          // opens with its own directions link: two on the first screen (review 50).
+          // the hero is (the bar or the floating button carries them once the hero's call has gone). When the page opens
+          // with its own directions link, that one is hidden on phones instead (site.tsx header-covers-hero-directions;
+          // review 50: two on the first screen). Leaving this row out put the only one below the first screen (CI).
           <a className="text-link site-header__directions site-header__directions--phone-row" href={directionsHref} rel="noopener" target="_blank">
             <Icon name="map-pin" />
             {ctx.t("directions")}
