@@ -1,0 +1,17 @@
+{
+  "id": "dimnikarstvo-vidmar",
+  "businessType": "builder",
+  "trade": "dimnikar",
+  "description": "Dimnikarstvo Vidmar, Litija in okolica.\n\nSem Tomaž Vidmar, dimnikar. Skrbim, da vaš dimnik varno vleče in da vam kurilna naprava ne dela težav v sredini zime.\n\nOpravljamo:\n- redno čiščenje dimnikov in kurilnih naprav,\n- letni pregled kurilnih naprav na trda goriva, olje in plin,\n- meritve emisij in izdajo zapisnika,\n- pregled prezračevanja,\n- svetovanje pri vgradnji peči in zamenjavi dimniške cevi.\n\nObiščemo hiše, bloke in tudi vikende v Litiji, Šmartnem pri Litiji in Dolu pri Ljubljani. Termin se dogovorimo po telefonu, najlažje me ujamete zjutraj med 6.30 in 7.30.\n\nPisarna: Jerebova ulica 12, 1270 Litija. Telefon 031 555 204.\n\nDimnikarstvo Vidmar d.o.o., matična številka 8234567000, davčna številka 61234567.",
+  "logo": "logo.svg",
+  "photos": [],
+  "facts": {
+    "name": "Dimnikarstvo Vidmar",
+    "phone": "+38631555204",
+    "address": { "street": "Jerebova ulica 12", "postalCode": "1270", "city": "Litija" },
+    "people": [{ "name": "Tomaž Vidmar", "role": "dimnikar" }],
+    "legal": { "legalName": "Dimnikarstvo Vidmar d.o.o.", "registrationNumber": "8234567000", "taxNumber": "61234567" },
+    "other": ["meritve emisij", "pregled prezračevanja", "Šmartnem pri Litiji", "Dolu pri Ljubljani", "zjutraj med 6.30 in 7.30"]
+  },
+  "missing": ["prices", "hours", "photos", "email"]
+}

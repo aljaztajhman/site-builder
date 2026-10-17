@@ -1,0 +1,14 @@
+{
+  "id": "klavirji-urbanc",
+  "businessType": "shop",
+  "trade": "klavirji",
+  "description": "Uglaševanje klavirjev Urbanc, Brežice in okolica.\n\nUglašujem klavirje in pianine že več kot dvajset let. Hodim po domovih, šolah in društvih, delam pa tudi za glasbeno šolo. Če vam klavir po selitvi ali po daljšem času nenadoma zveni drugače, ga pridem pogledat.\n\nPoleg uglaševanja opravim manjša popravila: lepljenje tipk, nastavitev mehanike, zamenjavo strun in filca. Če klavir potrebuje večji poseg, vam povem odkrito, ali se splača. Kupcem pomagam pri izbiri rabljenega klavirja in ga pred nakupom pregledam. Dela ne hitim, ker se klavir uglasi dobro samo, če imam zanj čas, in na koncu vedno preverim vsako tipko.\n\nPokličite me na 051 555 742 in se dogovoriva za termin.",
+  "logo": null,
+  "photos": [],
+  "facts": {
+    "name": "Uglaševanje klavirjev Urbanc",
+    "phone": "+38651555742",
+    "other": ["več kot dvajset let", "Brežice in okolica", "pomagam pri izbiri rabljenega klavirja"]
+  },
+  "missing": ["prices", "hours", "photos", "email", "address", "legal", "people"]
+}

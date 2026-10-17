@@ -1,0 +1,22 @@
+{
+  "id": "knjigoveznica-kras",
+  "businessType": "shop",
+  "trade": "knjigoveznica",
+  "description": "Knjigoveznica Kras, Sežana.\n\nSem Tanja Gržina, knjigovez. V delavnici na Krasu ročno vežem knjige, ki bodo preživele vaše vnuke: zaključna dela in doktorske disertacije, družinske kronike, goste knjige, fotoalbume, kuharske zvezke in obrabljene molitvenike. Stare in poškodovane knjige popravim, tako da se zdržijo še sto let. Hrbet, platnice in listi se vežejo z nitjo, ne z lepilom iz vrečke.\n\nNaredim tudi zapisnike in dnevnike po meri, z usnjenimi ali platnenimi platnicami, z vašimi začetnicami ali posvetilom v zlatem tisku. Cene so odvisne od velikosti in količine dela, zato jih povem po ogledu knjige.\n\nDelavnica: Partizanska cesta 12, 6210 Sežana. Sprejemam od srede do petka 10.00–17.00. E-pošta tanja@knjigoveznica-kras.example. Knjigoveznica Kras d.o.o., matična številka 5234567000, davčna številka 71234567.",
+  "logo": null,
+  "photos": [
+    { "file": "photos/01.jpg", "subject": "ročno vezana knjiga z usnjenimi platnicami na leseni mizi" },
+    { "file": "photos/02.jpg", "subject": "knjigovezka šiva liste knjige z nitjo v delavnici" },
+    { "file": "photos/03.jpg", "subject": "police z vezanimi zvezki in kosi papirja različnih barv" }
+  ],
+  "facts": {
+    "name": "Knjigoveznica Kras",
+    "email": "tanja@knjigoveznica-kras.example",
+    "address": { "street": "Partizanska cesta 12", "postalCode": "6210", "city": "Sežana" },
+    "hours": [{ "from": "wed", "to": "fri", "open": "10:00", "close": "17:00" }],
+    "people": [{ "name": "Tanja Gržina", "role": "knjigovez" }],
+    "legal": { "legalName": "Knjigoveznica Kras d.o.o.", "registrationNumber": "5234567000", "taxNumber": "71234567" },
+    "other": ["doktorske disertacije", "družinske kronike", "popravim", "zlatem tisku", "po ogledu knjige"]
+  },
+  "missing": ["prices", "phone"]
+}
