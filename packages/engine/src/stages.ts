@@ -203,7 +203,7 @@ export async function chooseDesign(
     schema: toModelJsonSchema(DesignChoice),
   }, (d) => DesignChoice.parse(d));
   // A template's motif only for the trades it fits (the plate is car repair's): another trade gets its own direction.
-  const choice = { ...data, direction: tradeFitDirection(data.direction, input.brief.businessType, pictures) };
+  const choice = { ...data, direction: tradeFitDirection(data.direction, input.brief.businessType, pictures, briefWords(input.brief)) };
   const r = designWithVariety(choice, input.variety ? { ...input.variety, swatches: input.swatches } : undefined, input.holdPrimary === true, designRepair(client.promptFixes));
   return { design: r.design, reason: choice.reason, ...(r.hero ? { hero: r.hero } : {}) };
 }
@@ -211,14 +211,21 @@ export async function chooseDesign(
 /**
  * The chosen direction when its template motif fits the trade (MOTIF_TRADES); otherwise the trade's own template
  * (when the pictures allow it and its motif fits), else the first direction made for the trade, else the first plain
- * direction. A locksmith (builder) who was given the car-repair template gets builder's direction instead.
+ * direction. A locksmith (builder) who was given the car-repair template gets builder's direction instead. With
+ * `words` (the brief's own, briefWords), the plate also needs them to name vehicles: an appliance repairer the
+ * classifier filed as car-repair (M1 final check, servis-aparatov-rebec) gets a plain direction made for the trade.
  */
-export function tradeFitDirection(directionId: string, type: BusinessType, pictures: number): string {
-  if (directionFitsTrade(directionId, type)) return directionId;
+export function tradeFitDirection(directionId: string, type: BusinessType, pictures: number, words?: string): string {
+  if (directionFitsTrade(directionId, type, words)) return directionId;
   const own = templateFor(type, pictures);
-  if (own && directionFitsTrade(own.id, type)) return own.id;
+  if (own && directionFitsTrade(own.id, type, words)) return own.id;
   const plain = DIRECTIONS.filter((d) => !d.template);
   return (plain.find((d) => (d.bestFor as readonly string[]).includes(type)) ?? plain[0]!).id;
+}
+
+/** The brief's own words about the business: its name, summary, offerings and highlights (for tradeFitDirection). */
+export function briefWords(brief: Pick<Brief, "name" | "summary"> & Partial<Pick<Brief, "offerings" | "highlights">>): string {
+  return [brief.name, brief.summary, ...(brief.offerings ?? []).flatMap((o) => [o.group ?? "", o.name, o.description ?? ""]), ...(brief.highlights ?? [])].join(" ");
 }
 
 /**

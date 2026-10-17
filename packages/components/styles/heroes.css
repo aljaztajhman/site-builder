@@ -93,12 +93,28 @@
     padding: 2.5rem;
     border-radius: var(--radius);
   }
+  /* overlay-bottom: the panel stands on the photo's bottom edge and hangs a fixed step below it, and the photo is never
+     taller than the first screen leaves room for, so panel and link end on it (M1 final check, kamp-soska: the panel
+     hung 15rem below a 2:1 photo, its link under the fold at 1280 × 800). A panel taller than the photo stretches it. */
+  .s-hero-image--overlay-bottom .hero-image {
+    --hang: 6rem;
+    grid-template-rows: auto var(--hang);
+  }
   .s-hero-image--overlay-bottom .hero-image__media {
+    grid-area: 1 / 1 / 2 / 2;
+    align-self: stretch;
+    justify-self: stretch;
+    width: 100%;
     aspect-ratio: 16 / 9;
+    min-height: 20rem;
+    max-height: calc(100vh - 10rem - var(--hang));
+    max-height: calc(100svh - 10rem - var(--hang));
   }
   .s-hero-image--overlay-bottom .hero-image__panel {
+    grid-area: 1 / 1 / 3 / 2;
+    align-self: end;
     width: min(40rem, calc(100% - 4rem));
-    margin-top: -7rem;
+    margin-top: 3rem;
     margin-left: 2rem;
   }
   /* overlay-left: panel and photo share one grid cell; the photo fills whatever height the row gets. */
@@ -126,7 +142,6 @@
     aspect-ratio: 2 / 1;
   }
   .s-hero-image--overlay-bottom .hero-image__panel {
-    margin-top: -9rem;
     margin-left: 3rem;
   }
   .s-hero-image--overlay-left .hero-image__media {
@@ -432,10 +447,24 @@ main > .s-hero-signature:first-child {
 .hsig__arch > .hsig__arch-media::before {
   content: none;
 }
+/* On phones the seal sits on the arch's right shoulder, mostly above it, as high as the text above allows: the bottom of
+   the first phone screen belongs to the phone bar or the floating call buttons, which covered its time at the arch's
+   foot (M1 final check, slascicarna-pri-zofki: "8.00" under the buttons at 360 × 800). */
 .hsig__arch .hsig__seal {
   position: absolute;
-  left: -3.75rem;
-  bottom: 2rem;
+  z-index: 1;
+  top: -4.75rem;
+  right: 0;
+}
+@media (max-width: 63.99rem) {
+  .hsig__arch .hsig__seal {
+    width: 8rem;
+    height: 8rem;
+    padding: 0.75rem;
+  }
+  .hsig__arch .hsig__seal .seal__time {
+    font-size: 2.5rem;
+  }
 }
 @media (min-width: 64rem) {
   .hsig--arch {
@@ -451,6 +480,8 @@ main > .s-hero-signature:first-child {
     width: 100%;
   }
   .hsig__arch .hsig__seal {
+    top: auto;
+    right: auto;
     left: -4.5rem;
     bottom: 4.5rem;
   }
@@ -626,7 +657,9 @@ main > .s-hero-signature:first-child {
   .hsig--card.hsig--has-image {
     display: flex;
     align-items: flex-end;
-    min-height: 45rem;
+    /* No taller than the first screen leaves for the header and the card's hang, so the card ends on it. */
+    min-height: min(45rem, calc(100vh - 10rem));
+    min-height: min(45rem, calc(100svh - 10rem));
     padding-top: 6rem;
   }
   .hsig--card .hsig__body {

@@ -143,7 +143,22 @@ describe("motifs only for their trades (outside review 2026-10-14)", () => {
     const html = renderPage(lock, lock.pages[0]!);
     expect(html).not.toContain('data-motif="plate"');
     expect(html).not.toContain('class="plate');
-    const car = { ...lock, business: { ...lock.business, type: "car-repair" as const } };
+    const car = { ...lock, business: { ...lock.business, type: "car-repair" as const, name: "Avtoservis Hrovat" } };
     expect(renderPage(car, car.pages[0]!)).toContain('data-motif="plate"');
+  });
+
+  // M1 final check: an appliance repairer the classifier filed as car-repair, on tablica: the phone and prices as plates.
+  it("servis-aparatov-rebec (car-repair, tablica, appliances): no plate, no SLO strip; the same site as a car service keeps them", () => {
+    const rebec = migrateSpec(JSON.parse(readFileSync(new URL("../../../tools/eval/test/fixtures/m1/servis-aparatov-rebec.json", import.meta.url), "utf8")) as unknown) as SiteSpec;
+    expect(rebec.business.type).toBe("car-repair");
+    expect(DIRECTIONS.find((d) => d.id === rebec.design.direction)?.template?.motif).toBe("plate");
+    const html = renderPage(rebec, rebec.pages[0]!);
+    expect(html).not.toContain('data-motif="plate"');
+    expect(html).not.toMatch(/class="[^"]*\bplate\b/);
+    expect(html).not.toMatch(/>SLO</);
+    const car = { ...rebec, business: { ...rebec.business, name: "Avtoservis Rebec" } };
+    const carHtml = renderPage(car, car.pages[0]!);
+    expect(carHtml).toContain('data-motif="plate"');
+    expect(carHtml).toMatch(/>SLO</);
   });
 });
