@@ -387,8 +387,9 @@ describe("4. display lines with a marked capital clear it, in every heading face
     ink = await measureMarkInk(browser);
   }, 120_000);
 
-  // Never under the ink this browser measures (Windows and Linux Chromium differ by up to 0.015 em: the table holds the
-  // larger), and not much over it.
+  // Never under the ink this browser measures, and not much over it. Chromium measures in 1/64-em steps and Windows and
+  // Linux differ by up to one step either way, so the table holds Windows' measurement plus one step (0.016): never under
+  // either platform, at most two steps over the lower one.
   it("the table of mark room (packages/render) covers the ink measured in Chromium, for every heading face", () => {
     for (const f of headingFaces()) {
       const m = ink[f.file]!;
@@ -396,7 +397,7 @@ describe("4. display lines with a marked capital clear it, in every heading face
       expect(t, f.file).toBeDefined();
       for (const k of ["mark", "desc", "capsDesc"] as const) {
         expect(t![k], `${f.file} ${k}`).toBeGreaterThanOrEqual(m[k] - 0.002);
-        expect(t![k], `${f.file} ${k}`).toBeLessThanOrEqual(m[k] + 0.03);
+        expect(t![k], `${f.file} ${k}`).toBeLessThanOrEqual(m[k] + 0.035);
       }
     }
   });
