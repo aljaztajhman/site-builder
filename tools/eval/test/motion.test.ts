@@ -32,7 +32,7 @@ describe("motion presets in a browser", () => {
         const r = await harness.measure(preset, width);
         runs.push(r);
         console.log(`motion ${preset} ${width}px: CLS ${r.cls}, LCP ${Math.round(r.lcpMs)} ms vs ${Math.round(r.lcpOffMs)} ms off (delta ${Math.round(r.lcpDelta)} ms), animations ${r.animations}, reduced: ${r.reducedRunning} running, ${(r.reducedDiff * 100).toFixed(4)} % pixels differ`);
-        expect(r.cls, "CLS").toBe(0);
+        expect(r.cls, `CLS; shifts: ${r.shifts.join(" | ")}`).toBe(0);
         expect(r.lcpDelta, "LCP delta").toBeLessThanOrEqual(LCP_BUDGET_MS);
         // sticky-stack is desktop only: on a phone it is an ordinary static section (nothing animates, nothing pins).
         if (preset === "sticky-stack" && width < 1024) expect(r.animations, "static on a phone").toBe(0);

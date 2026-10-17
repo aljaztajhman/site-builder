@@ -103,6 +103,8 @@ export interface MotionRun {
   preset: string;
   width: Width;
   cls: number;
+  /** The layout shifts behind cls (value, element, rect before → after), empty when cls is 0. */
+  shifts: string[];
   lcpMs: number;
   lcpOffMs: number;
   lcpDelta: number;
@@ -131,6 +133,7 @@ declare global {
   interface Window {
     __cls: number;
     __lcp: number;
+    __shifts: string[];
   }
 }
 
@@ -149,17 +152,27 @@ export async function startHarness(presets: readonly string[] = MOTIONS): Promis
   const url = (v: string) => `${server.url}/${v.replace(":", "-")}/${slugs.get(v)}/index.html`;
 
   /** One load with the CPU throttled: LCP first (before any input), then the page scrolled through for CLS. */
-  async function load(v: string, width: Width): Promise<{ lcp: number; cls: number; animations: number }> {
+  async function load(v: string, width: Width): Promise<{ lcp: number; cls: number; animations: number; shifts: string[] }> {
     const ctx = await browser.newContext({ viewport: { width, height: 800 }, deviceScaleFactor: 1, reducedMotion: "no-preference" });
     try {
       const page = await ctx.newPage();
       await page.addInitScript(() => {
         window.__cls = 0;
         window.__lcp = 0;
+        window.__shifts = [];
         new PerformanceObserver((list) => {
           for (const e of list.getEntries()) {
             const s = e as PerformanceEntry & { value: number; hadRecentInput: boolean };
-            if (!s.hadRecentInput) window.__cls += s.value;
+            if (s.hadRecentInput) continue;
+            window.__cls += s.value;
+            // Which elements moved, so a failing run names its cause: tag.class, and the rect before → after.
+            const sources = (e as PerformanceEntry & { sources?: { node?: Node; previousRect: DOMRectReadOnly; currentRect: DOMRectReadOnly }[] }).sources ?? [];
+            for (const src of sources) {
+              const el = src.node instanceof Element ? src.node : src.node?.parentElement;
+              const name = el ? `${el.tagName.toLowerCase()}${el.className && typeof el.className === "string" ? `.${el.className.trim().split(/\s+/).join(".")}` : ""}` : "?";
+              const r = (x: DOMRectReadOnly) => `${Math.round(x.x)},${Math.round(x.y)} ${Math.round(x.width)}×${Math.round(x.height)}`;
+              window.__shifts.push(`${s.value.toFixed(5)} ${name} ${r(src.previousRect)} → ${r(src.currentRect)}`);
+            }
           }
         }).observe({ type: "layout-shift", buffered: true });
         new PerformanceObserver((list) => {
@@ -181,7 +194,8 @@ export async function startHarness(presets: readonly string[] = MOTIONS): Promis
       await page.evaluate(() => window.scrollTo(0, 0));
       await page.waitForTimeout(200);
       const cls = await page.evaluate(() => window.__cls);
-      return { lcp, cls, animations };
+      const shifts = await page.evaluate(() => window.__shifts);
+      return { lcp, cls, animations, shifts };
     } finally {
       await ctx.close();
     }
@@ -215,19 +229,21 @@ export async function startHarness(presets: readonly string[] = MOTIONS): Promis
       const off: number[] = [];
       let cls = 0;
       let animations = 0;
+      const shifts: string[] = [];
       for (let i = 0; i < RUNS; i++) {
         const a = await load(preset, width);
         const b = await load(`off:${preset}`, width);
         on.push(a.lcp);
         off.push(b.lcp);
         cls = Math.max(cls, a.cls);
+        shifts.push(...a.shifts);
         animations = Math.max(animations, a.animations);
       }
       const motion = await reduced(preset, width);
       const still = await reduced(`off:${preset}`, width);
       const lcpMs = median(on);
       const lcpOffMs = median(off);
-      return { preset, width, cls, lcpMs, lcpOffMs, lcpDelta: lcpMs - lcpOffMs, animations, reducedRunning: motion.running, reducedDiff: await pixelDiff(motion.png, still.png) };
+      return { preset, width, cls, shifts, lcpMs, lcpOffMs, lcpDelta: lcpMs - lcpOffMs, animations, reducedRunning: motion.running, reducedDiff: await pixelDiff(motion.png, still.png) };
     },
     async counter(reduce) {
       const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, reducedMotion: reduce ? "reduce" : "no-preference" });
