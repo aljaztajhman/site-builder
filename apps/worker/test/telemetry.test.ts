@@ -203,8 +203,8 @@ describe("a generation job's events", () => {
 
   it("writes nothing with analytics.events off", async () => {
     const { siteId } = await siteWithJob("anonymous");
-    await recordGeneration(platform, loaded, { siteId, jobId: "x", scope: "home", tier: "anonymous", accountId: null, startedAt: Date.now(), outcome: "done", saved: true });
-    expect(loaded.analytics.events).toBe(false);
+    const off = { ...loaded, analytics: { ...loaded.analytics, events: false } };
+    await recordGeneration(platform, off, { siteId, jobId: "x", scope: "home", tier: "anonymous", accountId: null, startedAt: Date.now(), outcome: "done", saved: true });
     expect(await platform.repo.events.list()).toEqual([]);
   });
 });

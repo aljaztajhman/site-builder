@@ -11,7 +11,7 @@ Written on 2026-10-16 from an inventory of TASKS.md (263 done, 158 open), HQ, do
 ## Now
 
 - **Current milestone:** M1 Design good enough. On 2026-10-17 the owner locked the design: today's pipeline (Design 3) plus the Review 50 fixes. Now: polish it. Six prompt fixes are on. Fix the known blockers, then a final check on 10 new businesses and the owner's approval. Variety work is parked.
-- **Owner, in parallel (long lead times):** register the company (M3), buy the platform domain (M5), find a lawyer for the legal pages (M3).
+- **Owner, in parallel (long lead times):** register the company (M3), find a lawyer for the legal pages (M3). New name Postavi; postavi.si bought 2026-10-17 (M5).
 - **Last updated:** 2026-10-17.
 
 ---
@@ -22,7 +22,7 @@ Claude's track runs in order: M1 → M2 → M4 → M5 → M6 → M7. M3 is mostl
 
 Each milestone has exit criteria. A milestone is done only when every criterion is met and checked. No "80 %" milestones: half-done work stays open on this page, and is not quietly left behind for something new.
 
-### M1 · Design good enough (Claude) — 0 of 4 criteria met
+### M1 · Design good enough (Claude) — 1 of 4 criteria met
 
 Sites pass the three outside reviewers and the owner's eye. Set variety is not a v1.0 goal (owner, 2026-10-17).
 
@@ -80,12 +80,12 @@ Exit criteria:
 A customer's site can live on their own domain, or on a Stranko subdomain.
 
 Exit criteria:
-- [ ] Platform domain bought (owner; stranko.eu looked free on 3 Oct) and set as `PLATFORM_DOMAIN` on web and worker (TASKS:384, :393–395).
+- [ ] Platform domain bought (owner: postavi.si, bought 2026-10-17) and set as `PLATFORM_DOMAIN` on web and worker (TASKS:384, :393–395).
 - [ ] Registrar (Openprovider) and Cloudflare for SaaS adapters wired, and the edge Worker deployed (TASKS:388, :390).
 - [ ] End-to-end on live: buy or connect a test domain → TLS → the site serves. `domains.enabled` true, and `seo.indexSiteHosts` decided (TASKS:398).
 - [ ] Who pays for a domain before billing is answered (TASKS:392). The d.o.o. contact person is set (TASKS:391).
 
-### M6 · Operations (Claude) — 0 of 6 met
+### M6 · Operations (Claude) — 1 of 6 met
 
 It keeps running, and we know when it doesn't.
 
@@ -94,7 +94,7 @@ Exit criteria:
 - [ ] Repository protection on main (TASKS:352).
 - [ ] Backups with a restore drill done once (TASKS:353).
 - [ ] Monitoring and alerts on errors and spend (TASKS:358). Daily spend cap set on Railway.
-- [ ] Analytics events on (TASKS:360, `analytics.events`).
+- [x] Analytics events on (TASKS:360, `analytics.events`; PR #224, 2026-10-17).
 - [ ] **Switches cleaned up** (owner, 2026-10-17: must happen before launch). All remaining `promptFixes` (pictures, critique, altText, judge, brief, classifier, edit) and the cost and speed switches (`costCuts.secondCritiqueOnlyOnFailures`, `costCuts.contentRetryAsPatch`, `prompts.compactCatalogue`, `pipeline.homepageFirst`, `structuredOutputForContent`) are turned on after an eval. The experiments (`designer.agent` studio, `variety.genome`, `useFullBuildModel`) are deleted with their code. No dead switches at launch.
 
 ### M7 · Launch (owner + Claude) — 0 of 5 met
