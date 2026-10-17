@@ -10,7 +10,7 @@ Written on 2026-10-16 from an inventory of TASKS.md (263 done, 158 open), HQ, do
 
 ## Now
 
-- **Current milestone:** M1 Design good enough. On 2026-10-17 the owner locked the design: today's pipeline (Design 3) plus the Review 50 fixes. Now: polish it. Six prompt fixes are on. Fix the known blockers, then a final check on 10 new businesses and the owner's approval. Variety work is parked.
+- **Current milestone:** M2 Launch gate: accounts, editor, email. M1 is done (2026-10-17, the owner's approval; the final check scored 6 of 10 against a bar of 8, see M1). Next: free-preview limits live and the Railway smoke test with sign-in and limits, then e-mail from our own domain.
 - **Owner, in parallel (long lead times):** register the company (M3), find a lawyer for the legal pages (M3). New name Postavi; postavi.si bought 2026-10-17 (M5).
 - **Last updated:** 2026-10-17.
 
@@ -22,14 +22,14 @@ Claude's track runs in order: M1 → M2 → M4 → M5 → M6 → M7. M3 is mostl
 
 Each milestone has exit criteria. A milestone is done only when every criterion is met and checked. No "80 %" milestones: half-done work stays open on this page, and is not quietly left behind for something new.
 
-### M1 · Design good enough (Claude) — 1 of 4 criteria met
+### M1 · Design good enough (Claude) — done 2026-10-17 (4 of 4, criterion 3 closed by the owner below its bar)
 
 Sites pass the three outside reviewers and the owner's eye. Set variety is not a v1.0 goal (owner, 2026-10-17).
 
 Decision 2026-10-17 (owner): lock today's design (Design 3 + the Review 50 fixes; it beat both AI studios: 28 of 50 pages pass all three reviewers, 7 of 10 new businesses). Two cheap variety proofs failed to move set variety (Wave P layouts, PR #220; type and details, PR #221), so variety work goes to the parking lot. The six earlier criteria (Wave P, Design 5 waves U1–U9, the blocker list, the owner's critiques, G2 on 20 businesses, the town in the hero) are replaced by these three.
 
 Exit criteria:
-- [ ] Every known blocker is fixed in code, with a test that failed before:
+- [x] Every known blocker is fixed in code, with a test that failed before (PR #222):
   - AI label clipped in arched photo crops;
   - arched photo cut at the phone edge;
   - č/š/ž touching the line above in the footer wordmark;
@@ -39,9 +39,11 @@ Exit criteria:
   - call action shown three times on phones;
   - lone "Domov" in the nav on single-page sites;
   - any other open reviewer blocker in eval/outside-review (fresh10, review50-after) that is still real.
+  - The arched photo at the phone edge did not reproduce: every picture stays inside 360 px on all goldens, Review 50 and fresh 10 pages; a test now guards it. What reviewers saw was the first screen and the phone bar cutting the arch.
 - [x] Six prompt fixes are on (owner, 2026-10-17: turned on directly, without per-fix evals; CI's offline eval is the guard): `promptFixes.directions` (no B&W or duotone promises, editorial photo hero), `beige` and `warmSurface` (no cream or beige page backgrounds), `catalogue` (incl. the call-button rule), `oneHero` (one main heading per page), `sloveneStyle` (formal vi, Slovene typography, no English words). The final check runs with them on.
-- [ ] Final check on 10 brand-new businesses (never tested; new trades and towns; with and without photos): at least 8 of 10 pass all three reviewers (Gemini, GPT, Fable), scored per page.
-- [ ] The owner looks at the pages (desktop and phone contact sheets) and approves them.
+- [x] Final check on 10 brand-new businesses (never tested; new trades and towns; with and without photos): at least 8 of 10 pass all three reviewers (Gemini, GPT, Fable), scored per page.
+  - 2026-10-17: **6 of 10** passed all three reviewers (bar 8; all 10 pass the two-of-three filter). Means Gemini 4.09, GPT 3.64, Fable 3.52 (the earlier fresh 10: 3.99, 3.34, 3.39). The 4 held pages' defects (desktop hero card below the first screen, number-plate styling outside car trades, oversized footer wordmark, the name three times in the footer) and the hours badge under the phone buttons were fixed with tests and **not re-scored**: owner's decision 2026-10-17 ("no rescore, just fix and letsgo"). Cost €3.89 (photos €1.02, generation €1.66, scoring €1.21). eval/outside-review/final10.
+- [x] The owner looks at the pages (desktop and phone contact sheets) and approves them: 2026-10-17, "letsgo" (claude.ai artifact "Stranko M1 Final Check").
 
 ### M2 · Launch gate: accounts, editor, email (Claude + an owner check) — 0 of 6 met (much of the work under them is built)
 
