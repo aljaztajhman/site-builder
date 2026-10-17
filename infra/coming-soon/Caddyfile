@@ -13,7 +13,7 @@
 		X-Content-Type-Options nosniff
 		Referrer-Policy strict-origin-when-cross-origin
 		Strict-Transport-Security "max-age=31536000"
-		Cache-Control "public, max-age=300"
+		?Cache-Control "public, max-age=300"
 	}
 	header /fonts/* Cache-Control "public, max-age=31536000, immutable"
 	try_files {path} /index.html
