@@ -185,17 +185,21 @@ h2{font:800 clamp(32px,4.2vw,58px)/1.02 var(--display);letter-spacing:-.035em;ma
 .why p{color:var(--ink-2);font-size:18px;max-width:30em}
 .why p+p{margin-top:18px}
 .why p strong{color:var(--ink);font-weight:600}
-.srch{margin-top:34px;max-width:360px}
-.srch .q{display:flex;align-items:center;gap:10px;border:1px solid var(--line-2);border-radius:6px;padding:10px 14px;font-size:15px;color:var(--ink);background:var(--surface)}
+.srch{margin-top:36px;max-width:420px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);overflow:hidden}
+.srch .q{display:flex;align-items:center;gap:10px;padding:12px 16px;font-size:15px;color:var(--ink);border-bottom:1px solid var(--line)}
 .srch svg{flex:none;width:16px;height:16px;color:var(--ink-3)}
-.res{display:grid;gap:6px;padding:14px 14px 0}
-.js .res{opacity:0}
-.res i{display:block;height:8px;border-radius:2px;background:var(--surface-2)}
-.res i:first-child{width:46%;background:var(--line-2)}.res i:last-child{width:72%}
-.res.you{border:1.5px dashed var(--accent);border-radius:6px;padding:8px 12px;margin:14px 14px 0;font:600 14px/1.2 var(--ui);color:var(--accent-text)}
-.js .in .res{opacity:1;animation:fade .6s var(--ease) both}
-.in .res:nth-child(3){animation-delay:.2s}.in .res:nth-child(4){animation-delay:.35s}.in .res.you{animation:pop .7s .9s var(--spring) both}
-@keyframes pop{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
+.hit{padding:14px 16px;border-bottom:1px solid var(--line);display:grid;gap:6px}
+.hit:last-child{border-bottom:0}
+.js .hit{opacity:0}
+.hit i{display:block;height:8px;border-radius:2px;background:var(--surface-2)}
+.hit i:first-child{width:52%;background:var(--line-2)}.hit i:nth-child(2){width:34%}.hit i:last-child{width:80%}
+.hit.you{background:var(--accent-soft);gap:3px}
+.hit.you b{font:600 15px/1.3 var(--ui);color:var(--ink)}
+.hit.you .u{font-size:13px;color:var(--accent-text)}
+.hit.you .s{font-size:14px;color:var(--ink-2)}
+.js .in .hit{opacity:1;animation:fade .6s var(--ease) both}
+.in .hit:nth-child(3){animation-delay:.2s}.in .hit.you{animation:pop .7s .9s var(--spring) both}
+@keyframes pop{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .roads{margin-top:72px;display:grid;gap:34px}
 .road{display:grid;grid-template-columns:160px 1fr;gap:28px;align-items:baseline}
 .road h3{font:600 16px/1.3 var(--ui);color:var(--ink-2)}
@@ -203,11 +207,11 @@ h2{font:800 clamp(32px,4.2vw,58px)/1.02 var(--display);letter-spacing:-.035em;ma
 .path{display:flex;flex-wrap:wrap;align-items:center;row-gap:10px;font:500 15px/1.2 var(--ui);color:var(--ink-3)}
 .path span{position:relative;padding:4px 0}
 .path span+span{margin-left:40px}
-.path span+span::before{content:"";position:absolute;left:-34px;top:50%;width:28px;height:1px;background:var(--line-2)}
+.path span+span::before{content:"";position:absolute;left:-34px;top:50%;width:28px;border-top:1px dashed var(--line-2)}
 .road.ok .path{color:var(--ink);font-weight:600}
-.road.ok .path span+span::before{background:var(--accent)}
-.path .end{font-weight:600;color:var(--ink-3)}
-.road.ok .path .end{color:var(--accent-text)}
+.road.ok .path span+span::before{border-top:2px solid var(--accent);margin-top:-1px}
+.path .fin{font-weight:600;color:var(--ink-2)}
+.road.ok .path .fin{color:var(--accent-text)}
 .js .path span{opacity:0;transform:translateX(-8px);transition:opacity .5s var(--ease),transform .5s var(--ease)}
 .js .in .path span{opacity:1;transform:none}
 .path span:nth-child(2){transition-delay:.15s}.path span:nth-child(3){transition-delay:.3s}.path span:nth-child(4){transition-delay:.45s}.path span:nth-child(5){transition-delay:.6s}.path span:nth-child(6){transition-delay:.75s}.path span:nth-child(7){transition-delay:.9s}
@@ -355,10 +359,10 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
       <div>
         <h2 class="rv">Stranke vas iščejo na spletu. Naj vas tam tudi najdejo.</h2>
         <div class="srch rv d1" aria-hidden="true">
-          <div class="q"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4.5 4.5"/></svg>mizar v bližini</div>
-          <div class="res"><i></i><i></i></div>
-          <div class="res"><i></i><i></i></div>
-          <div class="res you">Vaše podjetje?</div>
+          <div class="q"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4.5 4.5"/></svg><span id="sq">pekarna Kamnik</span></div>
+          <div class="hit"><i></i><i></i><i></i></div>
+          <div class="hit"><i></i><i></i><i></i></div>
+          <div class="hit you"><b id="hit-t">Pekarna Skorja · Kamnik</b><span class="u" id="hit-u">pekarna-skorja.si</span><span class="s" id="hit-s">Pečemo kruh z drožmi, pecivo in torte po naročilu.</span></div>
         </div>
       </div>
       <div class="rv d2">
@@ -370,11 +374,11 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
     <div class="roads">
       <div class="road rv">
         <h3>Z agencijo ali predlogo</h3>
-        <div class="path"><span>sestanek</span><span>ponudba</span><span>osnutek</span><span>popravki</span><span>še popravki</span><span>čakanje</span><span class="end">…</span></div>
+        <div class="path"><span>sestanek</span><span>ponudba</span><span>osnutek</span><span>popravki</span><span>še popravki</span><span>čakanje</span><span class="fin">čez nekaj tednov</span></div>
       </div>
       <div class="road ok rv d1">
         <h3>S Postavi</h3>
-        <div class="path"><span>opišete</span><span>pregledate</span><span>objavite</span><span class="end">na spletu</span></div>
+        <div class="path"><span>opišete</span><span>pregledate</span><span>objavite</span><span class="fin">čez nekaj minut</span></div>
       </div>
     </div>
   </section>
@@ -432,16 +436,16 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
   var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
   // the four example businesses (fictional) and how each one's site looks
   var looks=[
-    {name:"Pekarna Skorja",cls:"v0 lay-a",links:["Kruh","Pecivo","Kontakt"],h:"Kruh z drožmi, pečen vsako jutro.",cta:"Naročite kruh",items:["Kruh","Pecivo","Torte po naročilu"],hours:"Tor–sob 6.00–13.00",city:"Kamnik",
+    {name:"Pekarna Skorja",q:"pekarna Kamnik",cls:"v0 lay-a",links:["Kruh","Pecivo","Kontakt"],h:"Kruh z drožmi, pečen vsako jutro.",cta:"Naročite kruh",items:["Kruh","Pecivo","Torte po naročilu"],hours:"Tor–sob 6.00–13.00",city:"Kamnik",
      s:["{n} iz Kamnika.","Pečemo kruh z drožmi, pecivo in torte po naročilu.","Odprto od torka do sobote, od 6. do 13. ure."],
      note:"Topel, mehek videz z zaobljenimi oblikami in pisavo, ki diši po pekarni."},
-    {name:"Salon Ostrina",cls:"v1 lay-b",links:["Storitve","Salon","Kontakt"],h:"Striženje, barvanje in nega las.",cta:"Naročite se",items:["Striženje","Barvanje","Nega las"],hours:"Pon–pet 8.00–19.00",city:"Ljubljana",
+    {name:"Salon Ostrina",q:"frizer Ljubljana",cls:"v1 lay-b",links:["Storitve","Salon","Kontakt"],h:"Striženje, barvanje in nega las.",cta:"Naročite se",items:["Striženje","Barvanje","Nega las"],hours:"Pon–pet 8.00–19.00",city:"Ljubljana",
      s:["{n}, frizerski salon v Ljubljani.","Striženje, barvanje in nega las za ženske in moške.","Odprto od ponedeljka do petka, od 8. do 19. ure."],
      note:"Eleganten, zračen videz s tanko pisavo in fotografijo čez celo širino."},
-    {name:"Vrtnarstvo Zelenka",cls:"v2 lay-c",links:["Storitve","Vrtovi","Kontakt"],h:"Vrt, ki ga boste imeli radi.",cta:"Pošljite povpraševanje",items:["Načrtovanje","Zasaditev","Vzdrževanje"],hours:"Ogled po dogovoru",city:"Maribor",
+    {name:"Vrtnarstvo Zelenka",q:"vrtnar Maribor",cls:"v2 lay-c",links:["Storitve","Vrtovi","Kontakt"],h:"Vrt, ki ga boste imeli radi.",cta:"Pošljite povpraševanje",items:["Načrtovanje","Zasaditev","Vzdrževanje"],hours:"Ogled po dogovoru",city:"Maribor",
      s:["{n} iz Maribora.","Načrtujemo in zasadimo vrtove ter skrbimo za njihovo vzdrževanje.","Na ogled pridemo po dogovoru."],
      note:"Zelen, zaobljen videz s fotografijo spredaj, kot vrt pred hišo."},
-    {name:"Avtoservis Jeklo",cls:"v3 lay-a",links:["Servis","Gume","Kontakt"],h:"Servis, gume in diagnostika za vse znamke.",cta:"Pokličite nas",items:["Servis","Vulkanizerstvo","Diagnostika"],hours:"Pon–pet 7.00–17.00",city:"Celje",
+    {name:"Avtoservis Jeklo",q:"avtoservis Celje",cls:"v3 lay-a",links:["Servis","Gume","Kontakt"],h:"Servis, gume in diagnostika za vse znamke.",cta:"Pokličite nas",items:["Servis","Vulkanizerstvo","Diagnostika"],hours:"Pon–pet 7.00–17.00",city:"Celje",
      s:["{n}, avtoservis v Celju.","Servis, vulkanizerstvo in diagnostika za vse znamke.","Odprto od ponedeljka do petka, od 7. do 17. ure."],
      note:"Temen, odločen videz z velikim napisom in gumbom, ki ga ni mogoče zgrešiti."}
   ];
@@ -478,11 +482,13 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
     $$(".m-sub,.m-who",mock).forEach(function(e){e.textContent=n+" · "+l.city});
     $(".host",mock).textContent=slug(n)+".si";
     if(typedUpTo>0)sents[0].textContent=sent(0)+" ";
+    setHit();
   }
+  function setHit(){var n=name(),l=looks[cur];$("#sq").textContent=l.q;$("#hit-t").textContent=n+" · "+l.city;$("#hit-u").textContent=slug(n)+".si";$("#hit-s").textContent=l.s[1]}
   function show(i){
     clearAll();cur=i;typedUpTo=0;
     tbtns.forEach(function(b,k){b.setAttribute("aria-pressed",k===i?"true":"false")});moveInd();
-    noteEl.textContent=looks[i].note;
+    noteEl.textContent=looks[i].note;setHit();
     mock.className="browser "+looks[i].cls+" anim";mock.innerHTML=mockHTML(looks[i],name());
     sents.forEach(function(s){s.textContent="";s.classList.remove("hl")});
     caret.hidden=false;
