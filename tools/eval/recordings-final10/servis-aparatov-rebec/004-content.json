@@ -1,0 +1,18 @@
+{
+  "seq": 4,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "3e25624b780188b4",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Servis gospodinjskih aparatov Rebec, Ilirska Bistrica\",\"description\":\"Popravilo pralnih in pomivalnih strojev, štedilnikov in hladilnikov na vašem domu v Ilirski Bistrici in okolici do 30 km. Ogled za 20 €.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"photo\",\"tone\":\"inverse\",\"props\":{\"headline\":\"Popravilo aparatov na vašem domu\",\"intro\":\"Pridem v Ilirsko Bistrico in okolico do 30 km. Popravljam pralne in pomivalne stroje, štedilnike in hladilnike večine znanih znamk.\",\"fact\":\"phone\",\"factLabel\":\"Najhitreje me dobite po telefonu\",\"factNote\":\"Če se popravilo ne splača, vam to povem takoj in plačate samo ogled.\",\"secondary\":{\"label\":\"Poglejte cene\",\"target\":{\"page\":\"p_home\",\"section\":\"s_cene\"}},\"image\":\"img_g1\"}},{\"id\":\"s_obmocje\",\"type\":\"service-area\",\"variant\":\"list\",\"tone\":\"default\",\"props\":{\"title\":\"Pridem do vas, do 30 km daleč\",\"intro\":\"Delam v Ilirski Bistrici in okolici, do 30 km. Male aparate sprejmem tudi v delavnici.\"}},{\"id\":\"s_storitve\",\"type\":\"services-list\",\"variant\":\"two-column\",\"tone\":\"alt\",\"props\":{\"title\":\"Kaj popravljam\",\"items\":[{\"name\":\"Pralni stroji\",\"description\":\"Popravilo na vašem domu, menjava črpalke ali grelca.\"},{\"name\":\"Pomivalni stroji\",\"description\":\"Diagnostika in popravilo pri vas doma.\"},{\"name\":\"Štedilniki\",\"description\":\"Popravilo in menjava okvarjenih delov.\"},{\"name\":\"Hladilniki\",\"description\":\"Popravilo hladilnika na domu.\"},{\"name\":\"Mali aparati\",\"description\":\"Te sprejmem v delavnici.\"}]}},{\"id\":\"s_potek\",\"type\":\"steps\",\"variant\":\"vertical\",\"tone\":\"default\",\"props\":{\"heading\":\"Kako poteka popravilo\",\"steps\":[{\"title\":\"Pokličete me\",\"text\":\"Povete, kateri aparat se je pokvaril in kaj se dogaja.\"},{\"title\":\"Pridem na dom\",\"text\":\"Aparat pregledam in ugotovim okvaro. Če se popravilo ne splača, vam to povem takoj.\"},{\"title\":\"Popravilo ali naročilo dela\",\"text\":\"Če dela nimam v kombiju, ga naročim in pridem drugič, brez dodatnega plačila poti.\"}]}},{\"id\":\"s_cene\",\"type\":\"price-list\",\"variant\":\"tags\",\"tone\":\"inverse\",\"props\":{\"title\":\"Cene popravil na domu\",\"groups\":[{\"items\":[{\"name\":\"Ogled in diagnostika\",\"price\":{\"amount\":20}},{\"name\":\"Menjava črpalke\",\"price\":{\"amount\":45}},{\"name\":\"Menjava grelca\",\"price\":{\"amount\":55}},{\"name\":\"Popravilo hladilnika\",\"price\":{\"amount\":60,\"from\":true}}]}],\"footnote\":\"Rezervni deli se plačajo posebej.\"}},{\"id\":\"s_kontakt\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"band\",\"props\":{\"title\":\"Pokličite me, pridem k vam\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 3020,
+      "output_tokens": 1251,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 22549
+    }
+  }
+}

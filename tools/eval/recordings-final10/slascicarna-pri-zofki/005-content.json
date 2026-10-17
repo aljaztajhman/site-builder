@@ -1,0 +1,18 @@
+{
+  "seq": 5,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "3aa79c0a240ce93e",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Slaščičarna Pri Zofki, Slovenske Konjice\",\"description\":\"Domače slaščice po receptih Zofijine mame, torte po naročilu in kava v lokalu na Starem trgu v Slovenskih Konjicah.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"arch\",\"tone\":\"inverse\",\"props\":{\"headline\":\"Slaščice po receptih Zofijine mame\",\"intro\":\"Ob torkih in petkih pečemo kremšnite, potico in jabolčni zavitek. Torte pripravimo po naročilu, kavo postrežemo v lokalu ali na vrtu.\",\"fact\":\"opening\",\"factLabel\":\"Zjutraj smo odprti od\",\"image\":\"img_01\",\"primary\":{\"label\":\"Poglejte ponudbo\",\"target\":{\"page\":\"p_home\",\"section\":\"s_offer\"}},\"secondary\":{\"label\":\"Naročite torto\",\"target\":{\"action\":\"email\"}}}},{\"id\":\"s_about\",\"type\":\"about\",\"variant\":\"text-only\",\"tone\":\"default\",\"props\":{\"heading\":\"Pečemo tako, kot je pekla Zofijina mama za konjiške poroke.\",\"paragraphs\":[\"Recepte smo podedovali od mame, ki je slaščice delala za vse konjiške poroke. Vse naredimo sami, brez polnil iz vrečk.\"],\"ownerName\":\"Zofija Kolar\",\"ownerRole\":\"lastnica\"}},{\"id\":\"s_making\",\"type\":\"image-text\",\"variant\":\"image-left\",\"tone\":\"inverse\",\"props\":{\"heading\":\"Vse naredimo sami\",\"paragraphs\":[\"Kremšnite, potico in jabolčni zavitek pečemo ob torkih in petkih. Torte naredimo po naročilu, zato jih naročite vsaj dva dni prej.\",\"Kavo kuhamo na stari mašini. Spijete jo lahko pri nas, v lokalu s šestimi mizami, ali na majhnem vrtu.\"],\"image\":\"img_02\"}},{\"id\":\"s_offer\",\"type\":\"services-list\",\"variant\":\"rows\",\"tone\":\"default\",\"props\":{\"title\":\"Kaj pečemo in kuhamo\",\"items\":[{\"name\":\"Kremšnita\",\"description\":\"Pečemo ob torkih in petkih.\",\"price\":{\"amount\":3.2}},{\"name\":\"Potica\",\"description\":\"Pečemo ob torkih in petkih. Cena velja za rezino.\",\"price\":{\"amount\":2.5,\"unit\":\"rezina\"}},{\"name\":\"Jabolčni zavitek\",\"description\":\"Pečemo ob torkih in petkih.\",\"price\":{\"amount\":2.8}},{\"name\":\"Torta za osem oseb\",\"description\":\"Za rojstne dneve, krste in obletnice. Naročila sprejemamo vsaj dva dni prej.\",\"price\":{\"amount\":32}},{\"name\":\"Kava\",\"description\":\"Kuhamo jo na stari mašini, pijete jo lahko v lokalu ali na vrtu.\"}]}},{\"id\":\"s_points\",\"type\":\"highlights\",\"variant\":\"list\",\"tone\":\"alt\",\"props\":{\"heading\":\"Zakaj k nam\",\"items\":[{\"title\":\"Recepti Zofijine mame\",\"text\":\"Slaščice je delala za vse konjiške poroke.\"},{\"title\":\"Brez polnil iz vrečk\",\"text\":\"Vse naredimo sami.\"},{\"title\":\"Kava s stare mašine\",\"text\":\"Kuhamo jo na stari mašini.\"},{\"title\":\"Šest miz in majhen vrt\",\"text\":\"Posedite pri nas ob kavi in slaščici.\"}]}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"inverse\",\"props\":{\"title\":\"Pokličite za torto ali obisk\",\"intro\":\"Torte sprejemamo po naročilu vsaj dva dni prej.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2868,
+      "output_tokens": 1388,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 22549
+    }
+  }
+}

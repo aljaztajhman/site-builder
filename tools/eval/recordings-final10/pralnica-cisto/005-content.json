@@ -1,0 +1,18 @@
+{
+  "seq": 5,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "c6d4ba2a59374e70",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Pralnica in likalnica Čisto, Logatec\",\"description\":\"Pralnica in likalnica v Logatcu. Perilo operemo, posušimo in zložimo. Sprejemamo tudi odeje, preproge in zavese. Tržaška cesta 36.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"label\",\"tone\":\"inverse\",\"props\":{\"headline\":\"Perilo operemo, posušimo in zložimo\",\"intro\":\"Prinesite perilo, mi poskrbimo za ostalo. Sprejemamo tudi odeje, preproge in zavese za težje madeže.\",\"fact\":\"address\",\"image\":\"img_g2\",\"primary\":{\"label\":\"Poglejte cene\",\"target\":{\"page\":\"p_home\",\"section\":\"s_cene\"}},\"secondary\":{\"label\":\"Kdaj smo odprti\",\"target\":{\"page\":\"p_home\",\"section\":\"s_ure\"}}}},{\"id\":\"s_cene\",\"type\":\"price-list\",\"variant\":\"tags\",\"props\":{\"title\":\"Cene na kratko\",\"intro\":\"Za večje količine in redne stranke se dogovorimo za posebno ceno.\",\"groups\":[{\"items\":[{\"name\":\"Pranje in sušenje perila\",\"note\":\"na kilogram, zloženo\",\"price\":{\"amount\":3,\"unit\":\"kg\"}},{\"name\":\"Likanje srajce\",\"note\":\"na srajco\",\"price\":{\"amount\":2,\"unit\":\"srajca\"}},{\"name\":\"Pranje odeje\",\"note\":\"na odejo\",\"price\":{\"amount\":12,\"unit\":\"odeja\"}},{\"name\":\"Pranje zaves\",\"price\":{\"amount\":6}}]}]}},{\"id\":\"s_ure\",\"type\":\"opening-hours\",\"variant\":\"table\",\"tone\":\"alt\",\"props\":{\"title\":\"Delovni čas\"}},{\"id\":\"s_obrtniki\",\"type\":\"image-text\",\"variant\":\"round\",\"props\":{\"heading\":\"Čiste delovne obleke za obrtnike\",\"paragraphs\":[\"Majhnim obrtnikom operemo delovne obleke. Za redne stranke se dogovorimo za posebno ceno.\",\"Sprejemamo tudi odeje, preproge in zavese v čiščenje težjih madežev.\"],\"image\":\"img_g1\",\"link\":{\"label\":\"Dogovorite se z nami\",\"target\":{\"action\":\"call\"}}}},{\"id\":\"s_kontakt\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"inverse\",\"props\":{\"title\":\"Pokličite za pranje in likanje\",\"intro\":\"Za večje količine, odeje, preproge in zavese nas pokličite ali se oglasite v Logatcu.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 3937,
+      "output_tokens": 1465,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 22549
+    }
+  }
+}

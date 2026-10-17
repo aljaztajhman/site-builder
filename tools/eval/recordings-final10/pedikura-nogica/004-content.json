@@ -1,0 +1,18 @@
+{
+  "seq": 4,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "a11d14b5da67d51b",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Nogica – medicinska pedikura, Ravne na Koroškem\",\"description\":\"Studio za medicinsko pedikuro in nego stopal v Ravnah na Koroškem. Delam počasi in nežno, sprejemam samo po naročilu. Pokličite za termin.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-split\",\"variant\":\"image-left\",\"tone\":\"default\",\"props\":{\"headline\":\"Nežna nega za boleče noge\",\"intro\":\"Sem Kristina Dolinšek, medicinska pedikerka. Delam počasi in si za vsako stranko vzamem čas. Pomagam vam pri vraščenih nohtih, trdi koži in kurjih očesih.\",\"primary\":{\"label\":\"Poglejte storitve\",\"target\":{\"page\":\"p_home\",\"section\":\"s_services\"}},\"image\":\"img_g1\"}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"week\",\"tone\":\"alt\",\"props\":{\"title\":\"Kdaj vas sprejmem\",\"note\":\"Sprejemam samo po naročilu. Če ne dvignem, ker sem pri stranki, pustite sporočilo in vas pokličem nazaj.\"}},{\"id\":\"s_about\",\"type\":\"image-text\",\"variant\":\"image-right\",\"tone\":\"default\",\"props\":{\"heading\":\"Za stopala, ki potrebujejo več pozornosti\",\"paragraphs\":[\"K meni prihajajo ljudje z vraščenimi nohti, trdo kožo, kurjimi očesi ali glivičnimi spremembami.\",\"Imam veliko sladkornih bolnikov, ki morajo za stopala skrbeti posebej. Delam počasi in nežno.\"],\"image\":\"img_g2\"}},{\"id\":\"s_services\",\"type\":\"services-list\",\"variant\":\"rows\",\"tone\":\"alt\",\"props\":{\"title\":\"Storitve in cene\",\"intro\":\"Pedikura in nega stopal, vedno po naročilu.\",\"items\":[{\"name\":\"Medicinska pedikura\",\"description\":\"Skrbna nega stopal in nohtov.\",\"price\":{\"amount\":28}},{\"name\":\"Pedikura z lakiranjem\",\"description\":\"Medicinska pedikura z lakiranjem nohtov.\",\"price\":{\"amount\":33}},{\"name\":\"Zdravljenje vraščenega nohta\",\"description\":\"Nežna obravnava vraščenega nohta.\",\"price\":{\"amount\":20,\"from\":true}},{\"name\":\"Masaža stopal\",\"description\":\"Sproščujoča masaža za utrujena stopala.\",\"price\":{\"amount\":12}}]}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2537,
+      "output_tokens": 957,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 22549
+    }
+  }
+}

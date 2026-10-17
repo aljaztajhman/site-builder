@@ -1,0 +1,18 @@
+{
+  "seq": 4,
+  "stage": "altText",
+  "model": "claude-sonnet-5-5",
+  "hash": "7fd4ad657c1b2e6d",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"images\":[{\"index\":0,\"alt\":\"Šopki sušeče se sivke, rman in mete visijo z lesenega trama v kamniti sobi z oknom.\",\"focalX\":0.5,\"focalY\":0.45,\"heroSuitable\":true},{\"index\":1,\"alt\":\"Lesena polica s stekleniimi kozarci posušenih zelišč, papirnatimi vrečkami čaja in temnimi stekleničkami tinktur.\",\"focalX\":0.4,\"focalY\":0.5,\"heroSuitable\":false},{\"index\":2,\"alt\":\"Skodelica dišečega zeliščnega čaja in lonček na leseni mizi ob oknu z razgledom na vas s cerkvijo in griči.\",\"focalX\":0.45,\"focalY\":0.62,\"heroSuitable\":true}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2218,
+      "output_tokens": 278,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

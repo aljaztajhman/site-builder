@@ -1,0 +1,18 @@
+{
+  "seq": 4,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "452ba3fee9b28814",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Dimnikarstvo Vidmar, Litija – dimnikar\",\"description\":\"Čiščenje dimnikov, letni pregledi, meritve emisij in pregled prezračevanja v Litiji, Šmartnem pri Litiji in Dolu pri Ljubljani. Pokličite zjutraj.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"drawing\",\"props\":{\"headline\":\"Varen dimnik, zanesljiva peč\",\"intro\":\"Čistimo dimnike in pregledujemo kurilne naprave v hišah, blokih in vikendih v Litiji in okolici. Termin se dogovorimo po telefonu.\",\"fact\":\"phone\",\"factLabel\":\"Pokličite za dogovor o terminu\",\"factNote\":\"Najlažje me ujamete zjutraj med 6.30 in 7.30.\",\"secondary\":{\"label\":\"Poglejte storitve\",\"target\":{\"page\":\"p_home\",\"section\":\"s_services\"}}}},{\"id\":\"s_services\",\"type\":\"services-list\",\"variant\":\"rows\",\"props\":{\"title\":\"Kaj vse naredim\",\"items\":[{\"name\":\"Redno čiščenje dimnikov\",\"description\":\"Čiščenje dimnikov in kurilnih naprav, da vleka ostane varna.\"},{\"name\":\"Letni pregled kurilnih naprav\",\"description\":\"Pregledam naprave na trda goriva, olje in plin.\"},{\"name\":\"Meritve emisij in zapisnik\",\"description\":\"Izmerim emisije in izdam zapisnik.\"},{\"name\":\"Pregled prezračevanja\",\"description\":\"Preverim, ali prezračevanje deluje, kot mora.\"},{\"name\":\"Svetovanje pri vgradnji peči\",\"description\":\"Svetujem tudi pri zamenjavi dimniške cevi.\"}]}},{\"id\":\"s_area\",\"type\":\"service-area\",\"variant\":\"list\",\"props\":{\"title\":\"Kje delam\",\"intro\":\"Obiskujem hiše, bloke in vikende.\"}},{\"id\":\"s_steps\",\"type\":\"steps\",\"variant\":\"horizontal\",\"tone\":\"alt\",\"props\":{\"heading\":\"Kako poteka delo\",\"steps\":[{\"title\":\"Pokličete me\",\"text\":\"Najlažje zjutraj med 6.30 in 7.30. Povejte, kaj potrebujete.\"},{\"title\":\"Dogovoriva se za termin\",\"text\":\"Termin se dogovorimo po telefonu.\"},{\"title\":\"Pridem na ogled in delo\",\"text\":\"Obiščem vašo hišo, blok ali vikend in opravim delo.\"}]}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"inverse\",\"props\":{\"title\":\"Pokličite me, da se dogovoriva\",\"intro\":\"Najlažje me dobite zjutraj med 6.30 in 7.30.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2332,
+      "output_tokens": 1054,
+      "cache_creation_input_tokens": 22549,
+      "cache_read_input_tokens": 0
+    }
+  }
+}
