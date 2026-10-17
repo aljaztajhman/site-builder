@@ -455,6 +455,11 @@ body[data-skeleton] .site-footer--tone-band :focus-visible {
   overflow-wrap: normal;
   hyphens: manual;
 }
+/* A name with Č Š Ž (as set): the caron rises above the cap height, up to 1.08 em (Oswald), so on the wordmark's
+   tight lines it would touch the line above (fresh 10, sirarna-pr-simnu). Lines this far apart clear it in every face. */
+.site-footer__wordmark--marks {
+  line-height: max(var(--lh-floor, 0), 1.12);
+}
 @media (min-width: 48rem) {
   .site-footer__wordmark {
     font-size: min(9rem, calc((min(100vw, 76rem) - 4rem) / (var(--wm-chars, 10) * 0.74)));

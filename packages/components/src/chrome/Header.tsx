@@ -2,13 +2,40 @@ import type { CSSProperties } from "react";
 import { formatPhone, headerFamilyFor, type HeaderFamily, type Page, type SectionOf, type Skeleton } from "@sb/spec";
 import type { RenderCtx } from "../types.ts";
 import { Icon, cx } from "../primitives/index.tsx";
-import { heroOwnsCall } from "../groups/heroes/HeroSignature.tsx";
+import { heroOwnsCall, signatureActions, signatureOffersDirections } from "../groups/heroes/HeroSignature.tsx";
 import { composedActions } from "../groups/composed/index.tsx";
 import type { UiKey } from "../i18n.ts";
-import { nameEm, navFit, type NavRow } from "./nav-fit.ts";
+import { menuPages, nameEm, navFit, type NavRow } from "./nav-fit.ts";
 import { ChromeWordmark } from "../groups/composed/kinds/wordmark.tsx";
 
 const CTA_LABEL: Record<"call" | "booking" | "directions", UiKey> = { call: "call", booking: "book", directions: "directions" };
+
+type Opener = { type: string; variant: string; props: unknown } | undefined;
+
+/** The actions the page's first section offers as buttons or links (call, booking, directions, e-mail). */
+export function openerActions(first: Opener): string[] {
+  if (!first) return [];
+  if (first.type === "hero-signature") return signatureActions(first as SectionOf<"hero-signature">);
+  if (first.type === "composed") return composedActions(first as SectionOf<"composed">);
+  const p = first.props as { primary?: { target?: { action?: string } }; secondary?: { target?: { action?: string } } };
+  return [p.primary?.target?.action, p.secondary?.target?.action].filter((a): a is string => a !== undefined);
+}
+
+/**
+ * The page's first section puts both a phone link and a directions link on screen (its two actions, or
+ * the facts of hero-type with-facts), so the call bar can wait until it has scrolled away without
+ * breaking "call and directions in one tap".
+ */
+export function openerOffersCallAndDirections(first: Opener): boolean {
+  if (!first) return false;
+  if (first.type === "hero-type" && first.variant === "with-facts") return true;
+  if (first.type === "hero-signature") return signatureOffersDirections(first as SectionOf<"hero-signature">);
+  const actions = openerActions(first);
+  return actions.includes("call") && actions.includes("directions");
+}
+
+/** The page's first section shows a directions link (an action, the facts of hero-type with-facts, a phone hero's link). */
+const openerOffersDirections = (first: Opener): boolean => openerActions(first).includes("directions") || openerOffersCallAndDirections(first);
 
 /**
  * Marks the document as JS-capable before the header paints, so the mobile menu starts collapsed
@@ -25,7 +52,7 @@ export function Header({ ctx }: { ctx: RenderCtx }) {
   const { site, page } = ctx;
   const { variant, cta } = site.chrome.header;
   const home = site.pages.find((p) => p.kind === "home");
-  const navPages = site.pages.filter((p) => p.nav.show);
+  const navPages = menuPages(site);
   const ctaHref = cta === "none" ? null : ctx.href({ action: cta });
   // On phones, don't repeat an action that is already on screen: the action bar carries call and
   // directions, and the page's first section often opens with the same action (e.g. booking).
@@ -107,7 +134,7 @@ function SkeletonHeader({ ctx, skeleton }: { ctx: RenderCtx; skeleton: Skeleton 
   const { site, page } = ctx;
   const { family, inHeader, callHref, directionsHref, button } = skeletonParts(ctx, skeleton);
   const home = site.pages.find((p) => p.kind === "home");
-  const navPages = site.pages.filter((p) => p.nav.show);
+  const navPages = menuPages(site);
   const logo = site.assets.logo;
   const sticky = family === "compact" || inHeader;
   const toggle = TOGGLE[family];
@@ -148,9 +175,10 @@ function SkeletonHeader({ ctx, skeleton }: { ctx: RenderCtx; skeleton: Skeleton 
             {formatPhone(site.business.phone as string)}
           </a>
         )}
-        {family === "phone" && callHref && !inHeader && directionsHref && (
+        {family === "phone" && callHref && !inHeader && directionsHref && !openerOffersDirections(page.sections[0]) && (
           // Phones only: the number's own row carries the directions too, so they are in the first screen however tall
-          // the hero is (the bar or the floating button carries them once the hero's call has gone).
+          // the hero is (the bar or the floating button carries them once the hero's call has gone). Not when the page
+          // opens with its own directions link: two on the first screen (review 50).
           <a className="text-link site-header__directions site-header__directions--phone-row" href={directionsHref} rel="noopener" target="_blank">
             <Icon name="map-pin" />
             {ctx.t("directions")}
@@ -225,7 +253,7 @@ const navFits = (ctx: RenderCtx, navPages: Page[]) =>
 export function navHasMore(ctx: RenderCtx): boolean {
   return navFits(
     ctx,
-    ctx.site.pages.filter((p) => p.nav.show),
+    menuPages(ctx.site),
   ).some((f) => f !== undefined);
 }
 
