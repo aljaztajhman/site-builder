@@ -1,8 +1,5 @@
 /* arch-low: a shallow (elliptical) arch, the old-town doorway; it rises a fifth of the height at every ratio. */
 .cx-mask-arch-low {
+  --cuts-top: 1;
   border-radius: 50% 50% 0 0 / 22% 22% 0 0;
-}
-.cx-mask-arch-low .media--ai::after {
-  top: auto;
-  bottom: 0.5rem;
 }

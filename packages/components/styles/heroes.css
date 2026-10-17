@@ -311,6 +311,7 @@ main > .s-hero-signature:first-child {
   overflow: hidden;
 }
 .hsig .hsig__bg {
+  --cuts-top: 0;
   position: absolute;
   inset: 0;
   margin: 0;
@@ -318,6 +319,16 @@ main > .s-hero-signature:first-child {
 }
 .hsig .hsig__bg::before {
   content: none;
+}
+/* Under a header laid over the photo (skeleton.css, overlay) the label clears the header: it sits in the gap above the
+   text, which that header pads down by 6.5 rem (9 rem on desktop). */
+.site-header--overlay ~ main > .s-hero-signature:first-child .hsig__bg.media--ai::after {
+  top: 4.75rem;
+}
+@media (min-width: 64rem) {
+  .site-header--overlay ~ main > .s-hero-signature:first-child .hsig__bg.media--ai::after {
+    top: 6.5rem;
+  }
 }
 .hsig__shade {
   position: absolute;
@@ -412,6 +423,7 @@ main > .s-hero-signature:first-child {
   justify-self: end;
 }
 .hsig__arch > .hsig__arch-media {
+  --cuts-top: 1;
   display: block;
   aspect-ratio: 5 / 6;
   margin: 0;

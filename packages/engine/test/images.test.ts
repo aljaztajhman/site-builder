@@ -121,7 +121,7 @@ describe("processLogo", () => {
     const { processLogo } = await import("../src/index.ts");
     const file = new Uint8Array(readFileSync(path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../tools/eval/fixtures/pekarna-kvas/logo.svg")));
     const out = await processLogo(file, "image/svg+xml");
-    // The drawing is wider than the file's own 280 × 96 box.
+    // The drawing is wider than the 280 × 96 box the file had until its box was fixed (tools/eval/test/fixture-logos.test.ts).
     expect(out.width / out.height).toBeGreaterThan(280 / 96 + 0.05);
     // The tagline's colour (#9a5a1f) ends inside the picture, with room after it, not at the cut.
     const tag = await columnsWith(out.data, [0x9a, 0x5a, 0x1f]);

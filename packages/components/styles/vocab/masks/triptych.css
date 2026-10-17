@@ -6,4 +6,6 @@
 .cx-mask-triptych .media--ai::after {
   inset: 0.5rem auto auto 50%;
   translate: -50%;
+  /* Inside the middle panel: a small frame wraps the label rather than run it over the gaps. */
+  max-width: calc(32.4% - 0.5rem);
 }

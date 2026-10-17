@@ -5,4 +5,5 @@
 }
 .cx-mask-tab .media--ai::after {
   top: 2rem;
+  translate: none;
 }
