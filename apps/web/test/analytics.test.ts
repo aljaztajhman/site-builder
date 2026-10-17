@@ -288,12 +288,12 @@ describe("/admin/funnel and /admin/engine", () => {
   });
 });
 
-describe("with analytics.events off (the default)", () => {
-  it("writes nothing and the privacy page doesn't mention it", async () => {
-    expect(base.analytics.events).toBe(false);
+describe("with analytics.events off", () => {
+  it("is on by default (owner 2026-10-17); switched off, writes nothing and the privacy page doesn't mention it", async () => {
+    expect(base.analytics.events).toBe(true);
     const off = await makePlatform();
     try {
-      const app = createApp({ platform: off, config: { ...structuredClone(base), limits: { ...base.limits, dailyModelSpendCapEur: 100 } }, auth: { password: PASSWORD, secret: SECRET, secureCookies: false }, mailer: mail, appUrl: "https://stranko.example", botCheck: skipBotCheck });
+      const app = createApp({ platform: off, config: { ...structuredClone(base), analytics: { ...base.analytics, events: false }, limits: { ...base.limits, dailyModelSpendCapEur: 100 } }, auth: { password: PASSWORD, secret: SECRET, secureCookies: false }, mailer: mail, appUrl: "https://stranko.example", botCheck: skipBotCheck });
       const r: Req = (p, init) => app.request(p, init);
       const b = await newBrowser(r);
       await r("/", { headers: { cookie: b.cookie, "user-agent": UA } });
