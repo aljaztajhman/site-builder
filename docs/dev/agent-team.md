@@ -63,7 +63,9 @@ These are the starting rules from research. Which model gets which kind of unit 
 
 ## 5. Triage: every task gets a mode first
 
-Before any work, the director writes one status line: `Mode S|D|W · score n/5 · team: <roles × model>`.
+Before any work bigger than a small change, the director writes one status line: `Mode S|D|W · score n/5 · team: <roles × model>`.
+
+**Small changes skip the team** (owner, 2026-10-17): roughly 50 lines or less, touching no money, spec version, security or publishing rule. The director makes them directly with their test: no Mode line, no scout, no reviewer. One working session runs at a time; sessions that only read can run alongside.
 
 | Mode | Shape | Use when |
 |---|---|---|
