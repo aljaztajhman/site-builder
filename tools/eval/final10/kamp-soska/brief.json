@@ -1,0 +1,28 @@
+{
+  "id": "kamp-soska",
+  "businessType": "tourist-farm",
+  "trade": "kamp",
+  "description": "Kamp Soška, Kobarid.\n\nMajhen družinski kamp ob reki Soči, deset minut peš od središča Kobarida. Imamo prostor za dvajset šotorov in deset avtodomov, trato za otroke, skupno kuhinjo, tople tuše in pralni stroj. Ob večerih zakurimo ognjišče, kjer se zbirajo planinci, kolesarji in kajakaši. Pse sprejmemo, če so na povodcu.\n\nCene na noč: odrasla oseba 12 €, otrok do 12 let 6 €, šotor 4 €, avtodom 18 €. Zajtrk po naročilu 7 € na osebo.\n\nKamp je odprt od aprila do oktobra, recepcija od 8.00 do 20.00. Naslov: Gregorčičeva ulica 24, 5222 Kobarid. Rezervacije: 040 555 619 ali info@kamp-soska.example.",
+  "logo": null,
+  "photos": [
+    { "file": "photos/01.jpg", "subject": "šotor na travniku ob smaragdni reki Soči, v ozadju hribi" },
+    { "file": "photos/02.jpg", "subject": "avtodom na kamnitem parkirišču kampa pod drevesi" },
+    { "file": "photos/03.jpg", "subject": "skupna kuhinja kampa z lesenim stolom in lonci na polici" }
+  ],
+  "facts": {
+    "name": "Kamp Soška",
+    "phone": "+38640555619",
+    "email": "info@kamp-soska.example",
+    "address": { "street": "Gregorčičeva ulica 24", "postalCode": "5222", "city": "Kobarid" },
+    "hours": [{ "from": "mon", "to": "sun", "open": "08:00", "close": "20:00" }],
+    "prices": [
+      { "item": "odrasla oseba", "amount": 12 },
+      { "item": "otrok do 12 let", "amount": 6 },
+      { "item": "šotor", "amount": 4 },
+      { "item": "avtodom", "amount": 18 },
+      { "item": "zajtrk po naročilu", "amount": 7 }
+    ],
+    "other": ["prostor za dvajset šotorov in deset avtodomov", "skupno kuhinjo", "od aprila do oktobra", "Pse sprejmemo, če so na povodcu"]
+  },
+  "missing": ["legal", "people"]
+}

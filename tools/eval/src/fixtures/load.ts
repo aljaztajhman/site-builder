@@ -73,9 +73,14 @@ export function loadTwins(): Fixture[] {
   return loadAll(TWINS_DIR);
 }
 
-/** The fresh businesses, sorted by id (no edits, no recordings, no goldens: live or --record-missing only). */
-export function loadFresh(): Fixture[] {
-  return loadAll(FRESH_DIR);
+/** The fresh businesses (or the ones in `dir`, e.g. tools/eval/final10), sorted by id (no edits, no recordings, no goldens: live or --record-missing only). */
+export function loadFresh(dir: string = FRESH_DIR): Fixture[] {
+  return loadAll(dir);
+}
+
+/** `pnpm eval --fresh --fresh-dir <dir>`: the folder the fresh businesses are read from (default tools/eval/fresh). */
+export function resolveFreshDir(arg?: string): string {
+  return arg ? path.resolve(arg) : FRESH_DIR;
 }
 
 /** The hard fixtures, sorted by id. Their photos exist only after `pnpm fixtures:ai-photos generate --hard`. */

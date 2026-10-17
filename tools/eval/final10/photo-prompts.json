@@ -1,0 +1,22 @@
+{
+  "$comment": "Shot list for the final-check businesses (tools/eval/final10): English image-model prompts, keys <fixture id>/<NN>, the subject in brief.json is the source. Not generated yet: `pnpm fixtures:ai-photos generate --model gpt-image-2.5 --dir tools/eval/final10` makes them (paid, 15 pictures). `style` is appended to every prompt.",
+  "style": "Realistic photograph taken with a good smartphone by the owner of a small business in Slovenia, for their own website. Natural available light, unstaged, true-to-life colours, ordinary everyday setting with small imperfections. No text, no lettering on signs or packaging, no logos, no watermark, no borders.",
+  "compare": [],
+  "photos": {
+    "kamp-soska/01": "A small orange tent pitched on a meadow right beside a clear emerald-green mountain river with white pebbles, forested hills behind, early morning light.",
+    "kamp-soska/02": "A white motorhome parked on a gravel pitch under tall deciduous trees at a small family campsite, a folding chair and a small table beside it, dappled sunlight.",
+    "kamp-soska/03": "A shared campsite kitchen: a long worn wooden table, a shelf with pots and pans, a two-ring gas cooker and a window with a view of trees, clean and simple.",
+    "knjigoveznica-kras/01": "A hand-bound book with a dark brown leather cover and visible stitched spine lying on a wooden workbench, a bone folder and a ball of linen thread next to it.",
+    "knjigoveznica-kras/02": "Hands of a bookbinder sewing the pages of a book with thread on a wooden sewing frame in a small workshop, close view, soft window light.",
+    "knjigoveznica-kras/03": "A workshop shelf with stacks of hand-made notebooks and sheets of coloured paper in muted tones, a press in the background.",
+    "slascicarna-pri-zofki/01": "Two cream slices with a golden crust on a white plate beside a cup of coffee on a wooden counter of a small pastry shop, morning light.",
+    "slascicarna-pri-zofki/02": "A round homemade cake with whipped cream and fresh strawberries on a cake stand, plain tablecloth, a window behind it.",
+    "slascicarna-pri-zofki/03": "A glass display counter of a small pastry shop with trays of homemade cakes, a rolled walnut pastry cut in slices and apple strudel, warm indoor light.",
+    "tapetnistvo-lesjak/01": "An old armchair in an upholsterer's workshop with the worn fabric half torn off, the wooden frame and springs visible, tools on a workbench behind it.",
+    "tapetnistvo-lesjak/02": "A freshly reupholstered green fabric corner sofa in a tidy living room, afternoon light from a window, no people.",
+    "tapetnistvo-lesjak/03": "A workbench with fabric sample books, a pair of large scissors, a tape measure and an upholstery hammer, a few rolls of cloth leaning against the wall.",
+    "zeliscarna-pri-lipi/01": "Bunches of dried herbs hanging upside down from a wooden beam in a rustic room, lavender, yarrow and mint, soft side light.",
+    "zeliscarna-pri-lipi/02": "A wooden shelf in a small herb shop with glass jars of loose tea blends and herbs, paper bags and small dark tincture bottles, warm light.",
+    "zeliscarna-pri-lipi/03": "A cup of herbal tea with steam on a small wooden table by a window in a cosy tea room, a teapot and a sprig of dried flowers beside it."
+  }
+}

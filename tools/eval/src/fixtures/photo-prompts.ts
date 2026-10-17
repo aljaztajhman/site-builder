@@ -23,6 +23,11 @@ export const PROMPTS_FILE = path.join(FIXTURES_DIR, "photo-prompts.json");
 /** The hard fixtures' shot list (tools/eval/hard), same format. */
 export const HARD_PROMPTS_FILE = path.join(HARD_DIR, "photo-prompts.json");
 
+/** The shot list of a fixture folder (`pnpm fixtures:ai-photos generate --dir <dir>`): <dir>/photo-prompts.json. */
+export function promptsFileIn(dir: string): string {
+  return path.join(dir, "photo-prompts.json");
+}
+
 export function loadPhotoPrompts(file = PROMPTS_FILE): PhotoPrompts {
   return PhotoPrompts.parse(JSON.parse(readFileSync(file, "utf8")));
 }

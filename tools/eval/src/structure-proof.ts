@@ -233,7 +233,7 @@ const EVAL_DIR = path.join(repoRoot, "tools/eval");
 
 /** The trade from the eval fixture's brief by business id, else the slug's first word. */
 export function tradeOf(business: string, evalDir = EVAL_DIR): string {
-  for (const g of ["fixtures", "twins", "hard", "fresh"]) {
+  for (const g of ["fixtures", "twins", "hard", "fresh", "final10"]) {
     const file = path.join(evalDir, g, business, "brief.json");
     if (!existsSync(file)) continue;
     const b = JSON.parse(readFileSync(file, "utf8")) as { trade?: string; businessType?: string };

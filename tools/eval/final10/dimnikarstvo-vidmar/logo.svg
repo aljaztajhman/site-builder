@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 72" width="190" height="72" role="img" aria-label="Dimnikarstvo Vidmar">
+  <rect x="8" y="26" width="30" height="42" fill="#3d2b24"/>
+  <rect x="4" y="18" width="38" height="10" fill="#c1432d"/>
+  <path d="M16 14 C12 9 20 6 16 3 M30 14 C26 9 34 6 30 3" stroke="#8a8a8a" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <text x="54" y="40" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#3d2b24">VIDMAR</text>
+  <text x="55" y="60" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#c1432d" letter-spacing="2">DIMNIKARSTVO</text>
+</svg>

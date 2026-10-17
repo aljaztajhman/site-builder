@@ -1,0 +1,25 @@
+{
+  "id": "pralnica-cisto",
+  "businessType": "shop",
+  "trade": "pralnica",
+  "description": "Pralnica in likalnica Čisto, Logatec.\n\nPerete doma, pa vam zmanjka časa ali prostora za sušenje? Prinesite nam perilo, mi ga operemo, posušimo in zložimo. Pomagamo družinam, gostom v apartmajih in majhnim obrtnikom, ki potrebujejo čiste delovne obleke.\n\nCenik: pranje in sušenje 1 kg perila 3 €, likanje srajce 2 €, pranje odeje 12 €, pranje zaves 6 €. Za večje količine in redne stranke se lahko dogovorimo za posebno ceno. Odeje, preproge in zavese sprejemamo tudi v čiščenje na težje madeže.\n\nLokal: Tržaška cesta 36, 1370 Logatec. Odprto od ponedeljka do petka 7.00–18.00, ob sobotah 8.00–12.00. Telefon 01 555 41 63.",
+  "logo": null,
+  "photos": [],
+  "facts": {
+    "name": "Pralnica in likalnica Čisto",
+    "phone": "+38615554163",
+    "address": { "street": "Tržaška cesta 36", "postalCode": "1370", "city": "Logatec" },
+    "hours": [
+      { "from": "mon", "to": "fri", "open": "07:00", "close": "18:00" },
+      { "from": "sat", "to": "sat", "open": "08:00", "close": "12:00" }
+    ],
+    "prices": [
+      { "item": "pranje in sušenje 1 kg perila", "amount": 3 },
+      { "item": "likanje srajce", "amount": 2 },
+      { "item": "pranje odeje", "amount": 12 },
+      { "item": "pranje zaves", "amount": 6 }
+    ],
+    "other": ["gostom v apartmajih", "delovne obleke", "redne stranke"]
+  },
+  "missing": ["photos", "email", "legal", "people"]
+}
