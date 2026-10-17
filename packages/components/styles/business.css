@@ -613,7 +613,16 @@
   width: max-content;
   translate: -50% 0;
 }
+.week__ticks {
+  position: relative;
+}
 .week__ticks span:first-child {
+  translate: 0 0;
+}
+/* The closing hour of the scale, at its right edge, so both ends of the axis are named. */
+.week__ticks .week__end {
+  position: absolute;
+  right: 0;
   translate: 0 0;
 }
 .week__days {
@@ -674,9 +683,16 @@
   margin-top: 1.25rem;
 }
 @media (max-width: 47.99rem) {
-  /* On a phone the scale goes; each bar keeps its times, so the chart still reads. */
+  /* On a phone the scale keeps only its two ends (first and closing hour) above the first day; each bar keeps its
+     times too, so a bar never floats on an unlabelled track. */
   .week__scale {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .week__scale > span {
     display: none;
+  }
+  .week__ticks span:not(:first-child):not(.week__end) {
+    visibility: hidden;
   }
   .week__day {
     grid-template-columns: minmax(0, 1fr);

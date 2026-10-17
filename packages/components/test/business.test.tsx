@@ -446,6 +446,14 @@ describe("opening-hours", () => {
     expect(render({ ...fixtures["opening-hours"], variant: "week" }, sparseCtx())).toContain('data-ph="hours"');
   });
 
+  it("week: the scale names its first and last hour, and phones keep it (a bar alone has no axis)", () => {
+    const out = render({ ...fixtures["opening-hours"], variant: "week" });
+    expect(out).toMatch(/<div class="week__ticks"><span>8\.00<\/span>[\s\S]*?<span class="week__end">19\.00<\/span><\/div>/);
+    const css = readFileSync(path.join(here, "../styles/business.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(css).not.toMatch(/\.week__scale\s*\{\s*display:\s*none/);
+    expect(css).toMatch(/\.week__ticks span:not\(:first-child\):not\(\.week__end\)\s*\{\s*visibility:\s*hidden/);
+  });
+
   it("has no props that duplicate the hours", () => {
     const bad = { ...fixtures["opening-hours"], props: { title: "Ure", hours: "8-16" } };
     expect(openingHoursSection.schema.safeParse(bad).success).toBe(false);

@@ -65,8 +65,9 @@ const textOf = (req: ModelRequest) =>
 const png = (w: number, h: number) => sharp({ create: { width: w, height: h, channels: 3, background: "#ffffff" } }).png().toBuffer().then((b) => new Uint8Array(b));
 
 describe("prompt fixes, all switches off", () => {
-  it("the config ships with every switch off", () => {
-    expect(Object.entries(config.promptFixes).filter(([k, v]) => k !== "$comment" && v !== false)).toEqual([]);
+  it("the config ships with exactly the six fixes the owner turned on (2026-10-17) and the rest off", () => {
+    const on = Object.entries(config.promptFixes).filter(([k, v]) => k !== "$comment" && v !== false).map(([k]) => k);
+    expect(on.sort()).toEqual(["beige", "catalogue", "directions", "oneHero", "sloveneStyle", "warmSurface"]);
   });
 
   it("the config ships with the compact catalogue and homepage-first switches off too", () => {
