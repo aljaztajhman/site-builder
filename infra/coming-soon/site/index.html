@@ -1,180 +1,663 @@
 <!doctype html>
-<html lang="sl">
+<html lang="sl" class="no-js">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Postavi · spletna stran za vaše podjetje · kmalu</title>
-<meta name="description" content="Postavi: opišete svoje podjetje, mi postavimo spletno stran. Za male podjetnike v Sloveniji. Kmalu.">
-<meta name="theme-color" content="#0f1f22">
-<meta property="og:title" content="Postavi · kmalu">
-<meta property="og:description" content="Opišete svoje podjetje, mi postavimo spletno stran. Kmalu.">
+<title>Postavi · spletna stran za vaše podjetje v nekaj minutah</title>
+<meta name="description" content="Opišete, kaj delate, Postavi pa iz tega sestavi celo spletno stran: besedila v slovenščini, barve, pisave in razporeditev, ki pristajajo vašemu podjetju. Za obrtnike, salone, gostilne in trgovine. Odpremo kmalu.">
+<meta name="theme-color" content="#eef3f4">
+<meta property="og:title" content="Postavi · vaše podjetje na spletu v nekaj minutah">
+<meta property="og:description" content="Opišete, kaj delate, mi postavimo spletno stran. Odpremo kmalu.">
 <meta property="og:url" content="https://postavi.si/">
 <meta property="og:locale" content="sl_SI">
 <link rel="canonical" href="https://postavi.si/">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preload" href="fonts/bricolage-grotesque.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/figtree.woff2" as="font" type="font/woff2" crossorigin>
+<script>document.documentElement.className="js"</script>
 <style>
 @font-face{font-family:"Bricolage Grotesque";src:url("fonts/bricolage-grotesque.woff2") format("woff2");font-weight:200 800;font-display:swap}
 @font-face{font-family:"Figtree";src:url("fonts/figtree.woff2") format("woff2");font-weight:300 900;font-display:swap}
+/* the product UI's palette (apps/web/src/ui/app.css), kept from Stranko */
 :root{
-  --canvas:#0f1f22;--ink:#f2f7f7;--ink-2:#a9bcbf;--ink-3:#7c9195;
-  --accent:#3fc1c9;--accent-deep:#0d7a84;--line:rgb(255 255 255/.10);
+  --canvas:#eef3f4;--surface:#fff;--surface-2:#dfe8ea;
+  --ink:#0f1f22;--ink-2:#3d5257;--ink-3:#53676c;
+  --line:#cfdbde;--line-2:#b4c5c9;
+  --accent:#0d7a84;--accent-hover:#0a636b;--accent-ink:#fff;--accent-text:#0d6a73;--accent-soft:#dbeef0;
+  --glass:rgb(255 255 255/.72);
+  --shadow:0 18px 40px -18px rgb(15 31 34/.28),0 1px 2px rgb(15 31 34/.06);
   --display:"Bricolage Grotesque",system-ui,sans-serif;--ui:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
   --ease:cubic-bezier(.2,.7,.2,1);--spring:cubic-bezier(.34,1.56,.64,1);
+  --mx:72%;--my:28%;--lift:28px;--drop:-26px;
 }
-*{box-sizing:border-box;margin:0}
-html,body{height:100%}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth;scroll-padding-top:24px}
 body{background:var(--canvas);color:var(--ink);font:400 17px/1.55 var(--ui);-webkit-font-smoothing:antialiased;overflow-x:hidden}
-/* blueprint grid that drifts slowly: the site is being "drawn" */
-body::before{content:"";position:fixed;inset:-80px;pointer-events:none;
-  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
-  background-size:40px 40px;mask-image:radial-gradient(ellipse 70% 60% at 65% 45%,#000 20%,transparent 75%);
-  animation:drift 30s linear infinite;opacity:.55}
-@keyframes drift{to{transform:translate(40px,40px)}}
-body::after{content:"";position:fixed;width:60vmax;height:60vmax;right:-15vmax;top:-20vmax;pointer-events:none;
-  background:radial-gradient(circle,rgb(63 193 201/.18),transparent 65%);filter:blur(10px)}
+a{color:inherit}
+::selection{background:var(--accent);color:var(--accent-ink)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
-.wrap{position:relative;z-index:1;min-height:100%;min-height:100svh;display:grid;grid-template-rows:auto 1fr auto;max-width:1240px;margin:0 auto;padding:28px 40px}
-header{display:flex;align-items:center;justify-content:space-between}
-.brand{display:inline-flex;align-items:center;gap:11px;font:700 22px/1 var(--display);letter-spacing:-.02em}
+/* backdrop: a blueprint grid lit around the pointer, two soft tints */
+.bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.bg::before{content:"";position:absolute;inset:-80px;
+  background-image:linear-gradient(rgb(15 31 34/.07) 1px,transparent 1px),linear-gradient(90deg,rgb(15 31 34/.07) 1px,transparent 1px);
+  background-size:40px 40px;mask-image:radial-gradient(ellipse 60% 55% at var(--mx) var(--my),#000 15%,transparent 72%);-webkit-mask-image:radial-gradient(ellipse 60% 55% at var(--mx) var(--my),#000 15%,transparent 72%);
+  animation:drift 30s linear infinite}
+.bg::after{content:"";position:absolute;width:56vmax;height:56vmax;left:calc(var(--mx) - 28vmax);top:calc(var(--my) - 28vmax);
+  background:radial-gradient(circle,rgb(13 122 132/.14),transparent 62%);transition:left .9s var(--ease),top .9s var(--ease)}
+.bg i{position:absolute;border-radius:50%;filter:blur(60px);opacity:.7}
+.bg i:first-child{width:40vmax;height:40vmax;right:-12vmax;top:-14vmax;background:radial-gradient(circle,var(--accent-soft),transparent 65%);animation:float 18s ease-in-out infinite alternate}
+.bg i:last-child{width:34vmax;height:34vmax;left:-10vmax;top:60vh;background:radial-gradient(circle,var(--surface-2),transparent 65%);animation:float 22s ease-in-out infinite alternate-reverse}
+@keyframes drift{to{transform:translate(40px,40px)}}
+@keyframes float{to{transform:translate(-6vmax,5vmax)}}
+
+.wrap{position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:0 40px}
+
+/* header */
+header{display:flex;align-items:center;gap:28px;padding:26px 0}
+.brand{display:inline-flex;align-items:center;gap:11px;font:700 22px/1 var(--display);letter-spacing:-.02em;text-decoration:none;margin-right:auto}
 .mark{display:grid;grid-template-columns:repeat(2,8px);gap:3px}
 .mark i{width:8px;height:8px;border-radius:2px;background:var(--accent);animation:tile .6s var(--spring) both}
 .mark i:nth-child(2){animation-delay:.12s}.mark i:nth-child(3){animation-delay:.24s;opacity:.55}.mark i:nth-child(4){animation-delay:.36s;opacity:.3}
 @keyframes tile{from{transform:translateY(-14px) scale(.4);opacity:0}}
-.chip{display:inline-flex;align-items:center;gap:8px;font:600 13px/1 var(--ui);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);
-  border:1px solid var(--line);border-radius:99px;padding:9px 14px;background:rgb(255 255 255/.03)}
-.chip b{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 0 rgb(63 193 201/.6);animation:pulse 2s infinite}
-@keyframes pulse{70%{box-shadow:0 0 0 9px rgb(63 193 201/0)}100%{box-shadow:0 0 0 0 rgb(63 193 201/0)}}
+nav{display:flex;gap:24px;font-weight:500;font-size:15px;color:var(--ink-2)}
+nav a{text-decoration:none;position:relative;padding:6px 0;transition:color .2s}
+nav a::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;border-radius:2px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .35s var(--ease)}
+nav a:hover{color:var(--ink)}nav a:hover::after{transform:scaleX(1)}
+.chip{display:inline-flex;align-items:center;gap:8px;font:600 12px/1 var(--ui);letter-spacing:.08em;text-transform:uppercase;color:var(--accent-text);
+  border:1px solid var(--line);border-radius:99px;padding:9px 14px;background:var(--glass);backdrop-filter:blur(8px)}
+.chip b{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgb(13 122 132/.5)}70%,100%{box-shadow:0 0 0 9px rgb(13 122 132/0)}}
 
-main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);gap:64px;align-items:center;padding:48px 0}
-h1{font:800 clamp(52px,7.4vw,104px)/.92 var(--display);letter-spacing:-.045em;margin-bottom:28px}
-h1 .w{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.08em}
-h1 .w span{display:inline-block;animation:rise .9s var(--ease) both}
-h1 .w:nth-child(2) span{animation-delay:.1s}h1 .w:nth-child(3) span{animation-delay:.2s}
+/* hero: one big line, then the workbench (what you write, what you get) */
+.hero{padding:36px 0 96px}
+.eyebrow{display:block;font:600 13px/1.4 var(--ui);letter-spacing:.08em;text-transform:uppercase;color:var(--accent-text);animation:fade .8s var(--ease) both}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(44px,6.4vw,92px);line-height:.95;letter-spacing:-.045em;margin:16px 0 0}
+.ln{display:block;overflow:hidden;padding-bottom:.08em;margin-bottom:-.08em}
+.ln>span{display:block;animation:rise .95s var(--ease) both}
+.ln:nth-child(2)>span{animation-delay:.12s}
 h1 em{font-style:normal;color:var(--accent)}
-@keyframes rise{from{transform:translateY(105%)}}
-.lead{font-size:clamp(17px,1.5vw,20px);color:var(--ink-2);max-width:31em;animation:fade 1s .45s var(--ease) both}
+@keyframes rise{from{transform:translateY(105%);opacity:0}}
+@keyframes fade{from{opacity:0;transform:translateY(var(--lift))}}
+.work{display:grid;grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);gap:56px;align-items:start;margin-top:40px}
+.lead{font-size:clamp(17px,1.4vw,19px);color:var(--ink-2);max-width:30em;animation:fade 1s .35s var(--ease) both}
 .lead strong{color:var(--ink);font-weight:600}
-.soon{margin-top:36px;display:flex;align-items:center;gap:16px;animation:fade 1s .65s var(--ease) both}
-.soon span{font:700 15px/1 var(--display);letter-spacing:.01em;white-space:nowrap}
-.bar{flex:0 1 220px;height:4px;border-radius:4px;background:rgb(255 255 255/.08);overflow:hidden}
+.try{margin-top:28px;animation:fade 1s .5s var(--ease) both}
+.try label{display:block;font:700 14px/1.3 var(--ui);margin-bottom:10px}
+.box{display:flex;gap:6px;padding:6px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);transition:border-color .25s,box-shadow .25s}
+.box:focus-within{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft),var(--shadow)}
+.box input{flex:1;min-width:0;height:48px;border:0;background:transparent;font:500 17px var(--ui);padding:0 12px;color:var(--ink);border-radius:10px}
+.box input::placeholder{color:var(--ink-3)}
+.box input:focus-visible{outline:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 22px;border-radius:11px;font:700 16px/1 var(--display);letter-spacing:.005em;text-decoration:none;cursor:pointer;border:0;
+  transition:transform .25s var(--ease),box-shadow .25s var(--ease),background .25s}
+.btn svg{width:18px;height:18px;flex:none;transition:transform .3s var(--ease)}
+.btn-1{background:var(--accent);color:var(--accent-ink);box-shadow:0 10px 26px -10px rgb(13 122 132/.6)}
+.btn-1:hover{background:var(--accent-hover);transform:translateY(-2px);box-shadow:0 16px 32px -10px rgb(13 122 132/.7)}
+.btn-1:hover svg{transform:translateX(4px)}
+.btn-1:active{transform:translateY(0) scale(.97)}
+.btn-2{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:99px;min-height:52px;padding:0 24px}
+.btn-2:hover{border-color:var(--line-2);transform:translateY(-2px);box-shadow:var(--shadow)}
+.btn-2:hover svg{transform:translateY(3px)}
+.hint{margin-top:10px;font-size:13px;color:var(--ink-3)}
+.pickrow{margin-top:22px;animation:fade 1s .65s var(--ease) both}
+.pickrow>span{display:block;font:700 14px/1.3 var(--ui);margin-bottom:10px}
+.pick{position:relative;display:inline-flex;flex-wrap:wrap;gap:2px;padding:4px;border:1px solid var(--line);border-radius:99px;background:var(--glass);backdrop-filter:blur(10px);max-width:100%}
+.pick .ind{position:absolute;top:4px;height:calc(100% - 8px);border-radius:99px;background:var(--ink);opacity:0}
+.pick.ready .ind{opacity:1;transition:transform .45s var(--spring),width .45s var(--spring)}
+.pick button{position:relative;z-index:1;font:600 14px/1 var(--ui);color:var(--ink-2);background:none;border:0;border-radius:99px;min-height:40px;padding:0 15px;cursor:pointer;transition:color .25s}
+.pick button:hover{color:var(--ink)}
+.pick button[aria-pressed="true"]{color:#fff}
+.pick:not(.ready) button[aria-pressed="true"]{background:var(--ink)}
+.more{margin-top:26px;animation:fade 1s .8s var(--ease) both}
+.more a{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:15px;color:var(--ink-2);text-decoration:none;min-height:44px}
+.more a svg{width:16px;height:16px;transition:transform .3s var(--ease)}
+.more a:hover{color:var(--ink)}.more a:hover svg{transform:translateY(3px)}
+
+/* the demo: your description, then the site that comes out of it */
+.demo{animation:fade 1.1s .3s var(--ease) both}
+.say{display:flex;gap:12px;align-items:flex-start;margin-bottom:18px}
+.who{flex:none;width:34px;height:34px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font:700 12px/1 var(--display)}
+.txt{flex:1;min-height:72px;background:var(--surface);border:1px solid var(--line);border-radius:4px 16px 16px 16px;padding:12px 16px;font-size:15px;line-height:1.55;color:var(--ink-2);box-shadow:var(--shadow)}
+.sent{border-radius:4px;padding:1px 3px;margin:0 -3px;transition:background .4s,color .4s}
+.sent.hl{background:var(--accent-soft);color:var(--ink)}
+.caret{display:inline-block;width:1px;height:1em;background:currentColor;vertical-align:-.15em;margin-left:1px;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.stage{position:relative}
+.stage::before{content:"";position:absolute;inset:12% -4% -10%;border-radius:50%;background:radial-gradient(closest-side,rgb(13 122 132/.26),transparent);filter:blur(28px);z-index:-1}
+.browser{position:relative;container-type:inline-size;border-radius:14px;background:#fff;color:#14272a;overflow:hidden;aspect-ratio:16/10;
+  box-shadow:0 44px 80px -34px rgb(15 31 34/.5),0 0 0 1px var(--line)}
+.stage .browser{transform:perspective(1600px) rotateY(var(--ry,-6deg)) rotateX(var(--rx,2deg));transition:transform .6s var(--ease)}
+.chrome{display:flex;align-items:center;gap:7px;height:34px;padding:0 12px;background:#e9eff0;border-bottom:1px solid #d6e0e2}
+.chrome>i{width:9px;height:9px;border-radius:50%;background:#c7d3d5}
+.url{margin-left:10px;flex:1;max-width:46%;height:22px;border-radius:6px;background:#fff;font:500 12px/22px var(--ui);color:#14272a;padding:0 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lock{display:inline-block;width:9px;height:9px;margin-right:6px;border:1.6px solid #1f8a5c;border-radius:2px;position:relative;vertical-align:-1px}
+.lock::before{content:"";position:absolute;left:1px;top:-5px;width:4px;height:4px;border:1.6px solid #1f8a5c;border-bottom:0;border-radius:3px 3px 0 0}
+.page{position:absolute;inset:34px 0 0;padding:3.5cqw 5cqw 4cqw;display:flex;flex-direction:column;gap:3.2cqw;background:var(--bg);color:var(--t);transition:background .5s}
+.m-nav{display:flex;align-items:center;gap:2cqw;font-size:max(9px,2.2cqw)}
+.m-logo{width:4.2cqw;height:4.2cqw;border-radius:30%;background:var(--a)}
+.m-name{font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:46%}
+.m-links{margin-left:auto;display:flex;gap:3cqw;font-size:max(8px,1.9cqw);color:var(--t2);font-weight:500}
+.m-links i{font-style:normal}
+.m-hero{display:grid;grid-template-columns:1.1fr 1fr;gap:4cqw;flex:1;min-height:0;position:relative}
+.m-txt{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:1.6cqw;min-width:0}
+.m-h{font-family:var(--hf);font-weight:var(--hw);font-size:max(13px,4.6cqw);line-height:1.04;letter-spacing:var(--hls);text-transform:var(--htt,none)}
+.m-sub{font-size:max(9px,2cqw);color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.m-btn{margin-top:.8cqw;padding:1.6cqw 3cqw;border-radius:var(--r);background:var(--a);color:var(--ai);font-size:max(9px,1.9cqw);font-weight:700;white-space:nowrap}
+.m-photo{position:relative;border-radius:var(--pr);background:var(--photo);min-height:0;overflow:hidden}
+.m-photo::before{content:"";position:absolute;inset:0;background:var(--motif);opacity:.55}
+.m-photo .sh{position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgb(255 255 255/.38) 50%,transparent 70%);transform:translateX(-100%)}
+.m-photo.on .sh{animation:shine 1.2s .2s var(--ease) both}
+@keyframes shine{to{transform:translateX(100%)}}
+.m-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:2.4cqw}
+.m-card{display:flex;align-items:center;gap:1.6cqw;padding:2.2cqw 2.4cqw;border-radius:var(--pr);background:var(--card);font-size:max(9px,2cqw);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.m-card::before{content:"";flex:none;width:2.2cqw;height:2.2cqw;border-radius:50%;background:var(--a)}
+.m-foot{display:flex;justify-content:space-between;gap:2cqw;font-size:max(8px,1.8cqw);color:var(--t2);white-space:nowrap;overflow:hidden}
+.m-foot span{overflow:hidden;text-overflow:ellipsis}
+/* layout b: photo across the whole hero, text on top of it. c: photo first */
+.lay-b .m-hero{grid-template-columns:1fr}
+.lay-b .m-photo{position:absolute;inset:0}
+.lay-b .m-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 35%,rgb(20 10 30/.62))}
+.lay-b .m-txt{position:relative;z-index:1;justify-content:flex-end;padding:4cqw;color:#fff}
+.lay-b .m-sub{color:rgb(255 255 255/.82)}
+.lay-b .m-btn{background:#fff;color:var(--t)}
+.lay-c .m-hero{grid-template-columns:1fr 1.1fr}
+.lay-c .m-photo{order:-1}
+/* status pill: sits in the browser's chrome, where a page's loading state belongs */
+.st{position:absolute;right:8px;top:5px;z-index:3;display:inline-flex;align-items:center;gap:6px;height:24px;background:#fff;color:#14272a;font:600 12px/1 var(--ui);padding:0 10px;border-radius:99px;box-shadow:0 1px 2px rgb(0 0 0/.08),0 0 0 1px #d6e0e2;white-space:nowrap;transition:background .35s,color .35s,box-shadow .35s}
+.st b{width:10px;height:10px;border-radius:50%;border:2px solid var(--accent);border-right-color:transparent;animation:spin .8s linear infinite}
+.st.done{background:var(--accent);color:#fff;box-shadow:0 1px 2px rgb(0 0 0/.08),0 0 0 1px var(--accent)}
+.st.done b{border:0;background:#fff;animation:none;width:7px;height:7px}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* blocks: hidden until "put up" (only once JS runs, so nothing is ever lost) */
+.js .anim [data-b]{opacity:0}
+.js .anim [data-b].on{animation:put .65s var(--spring) both}
+@keyframes put{from{opacity:0;transform:translateY(var(--drop)) scale(.96)}to{opacity:1;transform:none}}
+.note{margin-top:22px;font-size:14px;color:var(--ink-3);min-height:1.55em}
+/* four businesses, four looks (each demo site has its own palette) */
+.v0{--bg:#fbf6ee;--t:#3a2a1c;--t2:#7d6854;--a:#b5562b;--ai:#fff;--card:#f1e6d4;--r:99px;--pr:14px;--hf:var(--display);--hw:700;--hls:-.025em;
+  --photo:linear-gradient(135deg,#f3c98f,#b8622f 55%,#5b2f1a);--motif:radial-gradient(circle at 30% 70%,rgb(255 255 255/.45) 0 9%,transparent 10%),radial-gradient(circle at 64% 38%,rgb(255 255 255/.3) 0 14%,transparent 15%),radial-gradient(circle at 80% 80%,rgb(255 255 255/.25) 0 7%,transparent 8%)}
+.v1{--bg:#f7f4f9;--t:#241c2b;--t2:#6d6276;--a:#241c2b;--ai:#fff;--card:#ece5f0;--r:0;--pr:0;--hf:var(--display);--hw:300;--hls:0;
+  --photo:linear-gradient(160deg,#e6d3ec,#9b6db0 55%,#3d2446);--motif:repeating-linear-gradient(115deg,rgb(255 255 255/.22) 0 2px,transparent 2px 18px)}
+.v2{--bg:#eff4f1;--t:#15261f;--t2:#4f6a5e;--a:#1f6f5c;--ai:#fff;--card:#dcebe3;--r:12px;--pr:22px;--hf:var(--display);--hw:800;--hls:-.035em;
+  --photo:linear-gradient(120deg,#bfe0cc,#3f8a6e 50%,#17382c);--motif:radial-gradient(ellipse at 15% 100%,rgb(255 255 255/.32) 0 30%,transparent 31%),radial-gradient(ellipse at 85% 0%,rgb(255 255 255/.2) 0 25%,transparent 26%)}
+.v3{--bg:#15181b;--t:#f1f3f5;--t2:#9aa5ad;--a:#f0b323;--ai:#15181b;--card:#22272c;--r:4px;--pr:6px;--hf:var(--ui);--hw:900;--hls:-.02em;--htt:uppercase;
+  --photo:linear-gradient(140deg,#5a6570,#2a3138 60%,#0f1214);--motif:repeating-linear-gradient(90deg,rgb(240 179 35/.35) 0 3px,transparent 3px 26px)}
+
+/* sections */
+section{padding:120px 0}
+.kicker{font:700 13px/1 var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--accent-text)}
+h2{font:800 clamp(34px,4.4vw,60px)/1 var(--display);letter-spacing:-.035em;margin:16px 0 20px;max-width:15em}
+.sub{color:var(--ink-2);max-width:36em;font-size:18px}
+.js .rv{opacity:0;transform:translateY(var(--lift))}
+.js .rv{transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.js .rv.in{opacity:1;transform:none}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}
+
+/* why: problem, obstacle, answer */
+.pas{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:56px}
+.card{position:relative;border:1px solid var(--line);border-radius:18px;padding:26px 26px 30px;background:var(--surface);overflow:hidden;transition:transform .35s var(--ease),box-shadow .35s var(--ease),border-color .35s}
+.card:hover{transform:translateY(-4px);box-shadow:var(--shadow);border-color:var(--line-2)}
+.card .n{font:700 12px/1 var(--display);color:var(--ink-3);letter-spacing:.1em}
+.card h3{font:700 23px/1.15 var(--display);letter-spacing:-.02em;margin:14px 0 10px}
+.card p{color:var(--ink-2);font-size:16px}
+.card.yes{background:linear-gradient(160deg,var(--accent-soft),#fff 85%);border-color:rgb(13 122 132/.35)}
+.card.yes .n{color:var(--accent-text)}
+.vig{height:150px;margin-bottom:8px;display:flex;flex-direction:column;justify-content:center;gap:8px}
+/* 1: the search that doesn't find you */
+.srch{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:99px;padding:8px 14px;font-size:14px;color:var(--ink);background:var(--canvas)}
+.srch svg{flex:none;width:15px;height:15px;color:var(--ink-3)}
+.res{display:grid;gap:5px;padding:0 14px}
+.js .res{opacity:0}
+.res i{display:block;height:7px;border-radius:4px;background:var(--surface-2)}
+.res i:first-child{width:46%;background:var(--line-2)}.res i:last-child{width:72%}
+.res.you{border:1.5px dashed var(--accent);border-radius:8px;padding:6px 12px;font:600 13px/1.2 var(--ui);color:var(--accent-text);transform:none}
+.js .in .res{opacity:1;animation:fade .6s var(--ease) both}
+.in .res:nth-child(3){animation-delay:.2s}.in .res:nth-child(4){animation-delay:.35s}.in .res.you{animation:pop .7s .9s var(--spring) both}
+@keyframes pop{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:none}}
+/* 2 and 3: the long way round vs the straight line */
+.vig>svg{width:100%;height:100%;overflow:visible}
+.vig text{font:600 11px var(--ui);fill:var(--ink-3)}
+.js .drw{stroke-dasharray:420;stroke-dashoffset:420}
+.in .drw{animation:draw 1.8s .3s var(--ease) forwards}
+.js .yes .drw{stroke-dasharray:300;stroke-dashoffset:300}
+.in.yes .drw{animation-duration:.9s}
+@keyframes draw{to{stroke-dashoffset:0}}
+.dot{transform-box:fill-box;transform-origin:center}
+.js .dot{transform:scale(0)}
+.in .dot{animation:pop .5s var(--spring) both}
+
+/* how it works */
+.line{height:2px;border-radius:2px;background:var(--surface-2);margin:52px 0 -34px;overflow:hidden}
+.line i{display:block;height:100%;background:var(--accent);transition:width 1.8s .2s var(--ease)}
+.js .line i{width:0}
+.line.in i{width:100%}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:52px;counter-reset:s}
+.step{border:1px solid var(--line);border-radius:18px;background:var(--surface);overflow:hidden;transition:transform .35s var(--ease),box-shadow .35s var(--ease)}
+.step:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.viz{height:210px;display:grid;place-items:center;background:radial-gradient(circle at 50% 120%,rgb(13 122 132/.16),transparent 62%),var(--canvas);border-bottom:1px solid var(--line);padding:22px}
+.step .tx{padding:24px 26px 28px}
+.step h3{font:700 22px/1.15 var(--display);letter-spacing:-.02em;margin-bottom:8px}
+.step h3::before{counter-increment:s;content:counter(s);display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-size:14px;margin-right:10px;vertical-align:3px}
+.step p{color:var(--ink-2);font-size:16px}
+.field{width:100%;max-width:290px;background:#fff;color:#14272a;border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:14px;line-height:1.45;min-height:96px;box-shadow:var(--shadow)}
+.field small{display:block;font-size:11px;font-weight:600;color:var(--ink-3);margin-bottom:4px;letter-spacing:.02em}
+.sm{width:100%;max-width:250px;aspect-ratio:4/3;border-radius:10px}
+.sm .chrome{height:22px;gap:5px;padding:0 8px}.sm .chrome>i{width:6px;height:6px}.sm .url{height:14px;font-size:8px;line-height:14px;padding:0 6px}.sm .lock{transform:scale(.7);margin-right:2px}
+.sm .page{inset:22px 0 0}.sm .st{top:3px;right:5px;height:16px;font-size:9px;padding:0 7px;gap:4px}.sm .st b{width:7px;height:7px;border-width:1.5px}.sm .st.done b{width:5px;height:5px}
+.live{display:grid;gap:12px;justify-items:center}
+.pair{display:flex;gap:8px}
+.pair span{font:600 13px/1 var(--ui);padding:9px 14px;border-radius:99px;border:1px solid var(--line);background:#fff;color:#14272a}
+.pair span+span{background:var(--accent);color:#fff;border-color:var(--accent)}
+.in .pair span+span{animation:press .5s .5s var(--ease) both}
+@keyframes press{50%{transform:scale(.92);background:var(--accent-hover)}}
+.pill{display:inline-flex;align-items:center;background:#fff;color:#14272a;border:1px solid var(--line);border-radius:99px;padding:11px 18px;font:600 15px/1 var(--ui);box-shadow:var(--shadow)}
+.ok{display:inline-flex;align-items:center;gap:8px;font:700 14px/1 var(--display);color:var(--accent-text)}
+.js .in .ok{animation:pop .6s 1.1s var(--spring) both}
+.ok b{width:9px;height:9px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+
+/* looks: the four side by side */
+.looks{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:52px}
+.look{margin:0}
+.look .browser{aspect-ratio:4/3;border-radius:10px;transition:transform .4s var(--ease),box-shadow .4s var(--ease)}
+.look:hover .browser{transform:translateY(-6px) scale(1.02);box-shadow:0 44px 80px -30px rgb(15 31 34/.5),0 0 0 1px var(--line-2)}
+.look figcaption{margin-top:12px;font-size:14px;color:var(--ink-3)}
+.look figcaption b{display:block;color:var(--ink);font-weight:600}
+
+/* closing */
+.end{text-align:center;padding:110px 0 130px}
+.end h2{margin:16px auto 22px;max-width:13em;font-size:clamp(40px,6vw,84px)}
+.end .sub{margin:0 auto}
+.end .ctas{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin-top:34px}
+.bar{width:min(320px,70%);height:4px;border-radius:4px;background:var(--surface-2);overflow:hidden;margin:36px auto 0}
 .bar i{display:block;height:100%;width:40%;border-radius:4px;background:var(--accent);animation:load 2.8s var(--ease) infinite}
 @keyframes load{0%{transform:translateX(-100%)}100%{transform:translateX(260%)}}
-@keyframes fade{from{opacity:0;transform:translateY(12px)}}
 
-/* the browser in which a site puts itself up */
-.stage{position:relative;animation:fade 1.1s .3s var(--ease) both}
-.browser{position:relative;border-radius:14px;background:#fff;color:#14272a;overflow:hidden;aspect-ratio:16/11;
-  box-shadow:0 40px 80px -20px rgb(0 0 0/.55),0 0 0 1px rgb(255 255 255/.08);transform:perspective(1600px) rotateY(-7deg) rotateX(3deg);transition:transform .8s var(--ease)}
-.stage:hover .browser{transform:perspective(1600px) rotateY(-2deg) rotateX(1deg)}
-.chrome{display:flex;align-items:center;gap:7px;height:36px;padding:0 14px;background:#e9eff0;border-bottom:1px solid #d6e0e2}
-.chrome>i{width:10px;height:10px;border-radius:50%;background:#c7d3d5}
-.url{margin-left:12px;flex:1;max-width:300px;height:22px;border-radius:6px;background:#fff;font:500 12px/22px var(--ui);color:#4a5f63;padding:0 10px;white-space:nowrap;overflow:hidden}
-.url b{font-weight:500;color:#14272a}
-.url .caret{display:inline-block;width:1px;height:12px;background:#14272a;vertical-align:-2px;margin-left:1px;animation:blink 1s steps(2) infinite}
-@keyframes blink{50%{opacity:0}}
-.page{position:absolute;inset:36px 0 0;background:var(--bg);transition:background .5s}
-.page>*{position:absolute;opacity:0}
-.build .page>*{animation:put .7s var(--spring) both}
-@keyframes put{from{opacity:0;transform:translateY(-26px) scale(.96)}to{opacity:1;transform:none}}
-.p-nav{left:5%;right:5%;top:5%;height:6%;display:flex;align-items:center;gap:3%}
-.p-logo{width:9%;height:100%;border-radius:4px;background:var(--a)}
-.p-name{width:18%;height:45%;border-radius:3px;background:var(--t)}
-.p-links{margin-left:auto;display:flex;gap:8px;width:34%}.p-links i{flex:1;height:6px;border-radius:3px;background:var(--t);opacity:.35}
-.p-photo{left:5%;width:52%;top:17%;bottom:24%;border-radius:8px;background:var(--photo);background-size:cover;overflow:hidden}
-.p-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgb(255 255 255/.35) 50%,transparent 70%);transform:translateX(-100%)}
-.build .p-photo::after{animation:shine 1.2s 1.6s var(--ease) both}
-@keyframes shine{to{transform:translateX(100%)}}
-.p-h{left:61%;right:5%;top:20%;display:grid;gap:7px}
-.p-h i{height:clamp(10px,1.6vw,18px);border-radius:3px;background:var(--t)}
-.p-h i:nth-child(2){width:78%}
-.p-txt{left:61%;right:5%;top:42%;display:grid;gap:6px}
-.p-txt i{height:5px;border-radius:3px;background:var(--t);opacity:.3}.p-txt i:nth-child(3){width:60%}
-.p-btn{left:61%;top:60%;width:24%;height:9%;border-radius:var(--r);background:var(--a);display:grid;place-items:center}
-.p-btn::after{content:"";width:50%;height:4px;border-radius:2px;background:#fff;opacity:.9}
-.p-cards{left:5%;right:5%;bottom:5%;height:14%;display:grid;grid-template-columns:repeat(3,1fr);gap:3%}
-.p-cards i{border-radius:6px;background:var(--card)}
-.build .p-nav{animation-delay:.9s}.build .p-photo{animation-delay:1.2s}.build .p-h{animation-delay:1.55s}
-.build .p-txt{animation-delay:1.8s}.build .p-btn{animation-delay:2.05s}.build .p-cards{animation-delay:2.3s}
-/* a cursor that "places" each block */
-.hand{position:absolute;z-index:3;width:22px;height:22px;left:50%;top:50%;opacity:0;pointer-events:none;filter:drop-shadow(0 3px 6px rgb(0 0 0/.35))}
-.build .hand{animation:hand 2.4s .8s var(--ease) both}
-@keyframes hand{0%{opacity:0;left:80%;top:90%}10%{opacity:1;left:12%;top:16%}30%{left:28%;top:45%}48%{left:72%;top:28%}64%{left:66%;top:42%}80%{left:70%;top:62%}96%{opacity:1;left:50%;top:86%}100%{opacity:0;left:52%;top:90%}}
-.tag{position:absolute;right:-14px;bottom:-18px;z-index:4;background:var(--accent);color:#06292c;font:700 14px/1 var(--display);padding:11px 15px;border-radius:10px;
-  box-shadow:0 14px 30px -10px rgb(0 0 0/.5);opacity:0}
-.build .tag{animation:pop .6s 2.7s var(--spring) both}
-@keyframes pop{from{opacity:0;transform:scale(.6) rotate(-6deg)}to{opacity:1;transform:rotate(-3deg)}}
+footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);font-size:14px;border-top:1px solid var(--line);padding:22px 0 30px}
 
-/* three businesses, three looks */
-.v0{--bg:#fbf6ee;--t:#3a2a1c;--a:#b5562b;--card:#efe3d1;--r:99px;--photo:linear-gradient(135deg,#e9b77d,#a8582e 60%,#5b2f1a)}
-.v1{--bg:#f4f1f6;--t:#2b2233;--a:#7a3d8c;--card:#e6dcea;--r:4px;--photo:linear-gradient(160deg,#d9c3e3,#9c6fb0 55%,#45284f)}
-.v2{--bg:#eef2f1;--t:#15211f;--a:#1f6f5c;--card:#d8e4e0;--r:8px;--photo:linear-gradient(120deg,#9fc7b5,#3f7f6a 50%,#1a3a31)}
-
-footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);font-size:14px;border-top:1px solid var(--line);padding-top:20px}
-
-@media (max-width:900px){
-  .wrap{padding:20px 16px}
-  main{grid-template-columns:1fr;gap:44px;padding:36px 0 44px}
-  .browser{transform:none}.stage:hover .browser{transform:none}
-  .tag{right:8px;bottom:-14px;font-size:13px}
-  .chip{font-size:11px;padding:8px 11px}
+@media (max-width:1100px){
+  .pas,.steps{grid-template-columns:1fr 1fr}
+  .looks{grid-template-columns:1fr 1fr}
+}
+@media (max-width:860px){
+  .wrap{padding:0 16px}
+  header{padding:18px 0;gap:14px}
+  nav{display:none}
+  .hero{padding:24px 0 72px}
+  .work{grid-template-columns:1fr;gap:36px;margin-top:28px}
+  .stage .browser{transform:none}
+  .browser{aspect-ratio:4/3}
+  .txt{min-height:96px}
+  .pas,.steps{grid-template-columns:1fr;gap:14px;margin-top:40px}
+  .line{margin:40px 0 -26px}
+  section{padding:80px 0}
+  .looks{display:flex;gap:12px;margin:40px -16px 0;padding:0 16px 12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:16px;-webkit-overflow-scrolling:touch}
+  .look{flex:0 0 78%;scroll-snap-align:start}
+  .end{padding:80px 0 96px}
   footer{flex-direction:column;gap:4px}
 }
+@media (max-width:420px){
+  .pick{border-radius:16px}
+  .pick .ind{border-radius:12px}
+  .pick button{padding:0 11px;font-size:13px}
+  .box{flex-direction:column}
+  .box .btn{width:100%}
+  .btn-2{width:100%}
+}
+/* reduced motion: the page still builds and reveals itself, but nothing drifts, loops, tilts or jumps */
 @media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation:none!important;transition:none!important}
-  .page>*,.tag{opacity:1}
+  html{scroll-behavior:auto}
+  :root{--lift:0px;--drop:-6px}
+  .bg::before,.bg i,.chip b,.ok b,.bar i,.caret{animation:none}
+  .bg::after{transition:none}
+  .bar i{width:60%;transform:none}
+  .stage .browser{transform:none;transition:none}
+  .ln>span{animation:fade .6s var(--ease) both}
+  .js .anim [data-b].on{animation-duration:.45s}
+  .card,.step,.look .browser,.btn,.pick .ind{transition:none}
+  .look:hover .browser,.card:hover,.step:hover,.btn:hover{transform:none}
 }
 </style>
 </head>
 <body>
+<div class="bg" aria-hidden="true"><i></i><i></i></div>
 <div class="wrap">
   <header>
-    <span class="brand" aria-label="Postavi"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Postavi</span>
-    <span class="chip"><b aria-hidden="true"></b>Kmalu</span>
+    <a class="brand" href="#" aria-label="Postavi, na vrh"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Postavi</a>
+    <nav aria-label="Na tej strani"><a href="#zakaj">Zakaj</a><a href="#kako">Kako deluje</a><a href="#videzi">Videzi</a></nav>
+    <span class="chip"><b aria-hidden="true"></b>Odpremo kmalu</span>
   </header>
 
   <main>
-    <section>
-      <h1><span class="w"><span>Postavi</span></span> <span class="w"><span>si</span></span> <span class="w"><span><em>stran.</em></span></span></h1>
-      <p class="lead">Opišete svoje podjetje, mi postavimo <strong>spletno stran, ki je videti narejena po meri</strong>. Za obrtnike, frizerje, gostilne in vse male podjetnike v Sloveniji.</p>
-      <div class="soon" role="status"><span>Gradimo. Odpremo kmalu.</span><div class="bar" aria-hidden="true"><i></i></div></div>
-    </section>
+  <div class="hero">
+    <span class="eyebrow">Za obrtnike, salone, gostilne in trgovine</span>
+    <h1><span class="ln"><span>Vaše podjetje na spletu.</span></span><span class="ln"><span><em>V nekaj minutah.</em></span></span></h1>
 
-    <div class="stage" aria-hidden="true">
-      <div class="browser v0" id="browser">
-        <div class="chrome"><i></i><i></i><i></i><div class="url"><b id="host"></b><span class="caret"></span></div></div>
-        <div class="page">
-          <div class="p-nav"><span class="p-logo"></span><span class="p-name"></span><span class="p-links"><i></i><i></i><i></i></span></div>
-          <div class="p-photo"></div>
-          <div class="p-h"><i></i><i></i></div>
-          <div class="p-txt"><i></i><i></i><i></i></div>
-          <div class="p-btn"></div>
-          <div class="p-cards"><i></i><i></i><i></i></div>
+    <div class="work">
+      <div>
+        <p class="lead">Opišete, kaj delate. <strong>Postavi napiše besedila v slovenščini, izbere barve in pisave, ki pristajajo vašemu podjetju, in sestavi celo spletno stran.</strong> Vi jo pregledate, po želji popravite in objavite na svojem naslovu.</p>
+
+        <form class="try" id="try" autocomplete="off">
+          <label for="ime">Preizkusite s svojim imenom</label>
+          <div class="box">
+            <input id="ime" type="text" maxlength="40" placeholder="npr. Mizarstvo Novak" spellcheck="false">
+            <button class="btn btn-1" type="submit">Postavi
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg></button>
+          </div>
+          <p class="hint">Ime se pojavi v predogledu. Nič se ne pošilja, vse se zgodi v vašem brskalniku.</p>
+        </form>
+
+        <div class="pickrow">
+          <span id="pick-l">Vrsta podjetja</span>
+          <div class="pick" role="group" aria-labelledby="pick-l">
+            <span class="ind" aria-hidden="true"></span>
+            <button type="button" data-v="0" aria-pressed="true">Pekarna</button>
+            <button type="button" data-v="1" aria-pressed="false">Frizerski salon</button>
+            <button type="button" data-v="2" aria-pressed="false">Vrtnarstvo</button>
+            <button type="button" data-v="3" aria-pressed="false">Avtoservis</button>
+          </div>
         </div>
-        <svg class="hand" viewBox="0 0 24 24"><path d="M5 2l14 11-6.2.9L16 21l-3 1.3-3.2-7.2L5 19z" fill="#fff" stroke="#14272a" stroke-width="1.4" stroke-linejoin="round"/></svg>
+
+        <p class="more"><a href="#kako">Kako deluje
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 4v12M5 11l5 5 5-5"/></svg></a></p>
       </div>
-      <div class="tag" id="tag">Postavljeno ✓</div>
+
+      <div class="demo" id="predogled">
+        <div class="say">
+          <span class="who" aria-hidden="true">Vi</span>
+          <p class="txt"><span class="sr">Vaš opis: </span><span class="sent">Pekarna Skorja iz Kamnika. </span><span class="sent">Pečemo kruh z drožmi, pecivo in torte po naročilu. </span><span class="sent">Odprto od torka do sobote, od 6. do 13. ure.</span><span class="caret" id="caret" hidden></span></p>
+        </div>
+        <div class="stage" id="stage">
+          <!-- the hero mock is written out so it shows without JS; JS re-renders it from the same data -->
+          <div class="browser v0 lay-a" id="mock" aria-hidden="true">
+            <div class="chrome"><i></i><i></i><i></i><div class="url"><span class="lock"></span><span class="host">pekarna-skorja.si</span></div></div>
+            <div class="page">
+              <div class="m-nav" data-b="nav"><span class="m-logo"></span><span class="m-name">Pekarna Skorja</span><span class="m-links"><i>Kruh</i><i>Pecivo</i><i>Kontakt</i></span></div>
+              <div class="m-hero">
+                <div class="m-txt"><div class="m-h" data-b="h">Kruh z drožmi, pečen vsako jutro.</div><div class="m-sub" data-b="sub">Pekarna Skorja · Kamnik</div><div class="m-btn" data-b="btn">Naročite kruh</div></div>
+                <div class="m-photo" data-b="photo"><i class="sh"></i></div>
+              </div>
+              <div class="m-cards"><div class="m-card" data-b="c0">Kruh</div><div class="m-card" data-b="c1">Pecivo</div><div class="m-card" data-b="c2">Torte po naročilu</div></div>
+              <div class="m-foot" data-b="foot"><span>Tor–sob 6.00–13.00</span><span class="m-who">Pekarna Skorja · Kamnik</span></div>
+            </div>
+            <div class="st done"><b></b><span>Postavljeno</span></div>
+          </div>
+        </div>
+        <p class="note" id="note">Topel, mehek videz z zaobljenimi oblikami in pisavo, ki diši po pekarni.</p>
+      </div>
     </div>
+  </div>
+
+  <section id="zakaj">
+    <p class="kicker rv">Zakaj Postavi</p>
+    <h2 class="rv d1">Stranke vas iščejo na spletu. Naj vas tam tudi najdejo.</h2>
+    <p class="sub rv d2">Preden pokličejo, ljudje pogledajo na splet. Kdor tam nima ničesar, zanje ne obstaja.</p>
+    <div class="pas">
+      <div class="card rv">
+        <div class="vig" aria-hidden="true">
+          <div class="srch"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4.5 4.5"/></svg>mizar v bližini</div>
+          <div class="res"><i></i><i></i></div>
+          <div class="res"><i></i><i></i></div>
+          <div class="res you">Vaše podjetje?</div>
+        </div>
+        <span class="n">TEŽAVA</span>
+        <h3>Brez strani vas ne najdejo</h3>
+        <p>Ko vas nekdo priporoči, vas najprej poišče na spletu. Če tam ni ničesar, pokliče naslednjega na seznamu.</p>
+      </div>
+      <div class="card rv d1">
+        <div class="vig" aria-hidden="true">
+          <svg viewBox="0 0 320 130">
+            <path d="M16 96L70 34 120 78 168 108 212 56 258 24 304 70" fill="none" stroke="var(--line-2)" stroke-width="2" stroke-dasharray="3 6" stroke-linejoin="round"/>
+            <path class="drw" d="M16 96L70 34 120 78 168 108 212 56 258 24 304 70" fill="none" stroke="var(--ink-3)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+            <g fill="var(--ink-3)"><circle class="dot" cx="16" cy="96" r="5" style="animation-delay:.3s"/><circle class="dot" cx="70" cy="34" r="5" style="animation-delay:.6s"/><circle class="dot" cx="120" cy="78" r="5" style="animation-delay:.9s"/><circle class="dot" cx="168" cy="108" r="5" style="animation-delay:1.2s"/><circle class="dot" cx="212" cy="56" r="5" style="animation-delay:1.5s"/><circle class="dot" cx="258" cy="24" r="5" style="animation-delay:1.8s"/><circle class="dot" cx="304" cy="70" r="5" style="animation-delay:2.1s"/></g>
+            <text x="16" y="118" text-anchor="middle">sestanek</text><text x="70" y="20" text-anchor="middle">ponudba</text><text x="120" y="100" text-anchor="middle">osnutek</text><text x="168" y="126" text-anchor="middle">popravki</text><text x="212" y="42" text-anchor="middle">še popravki</text><text x="258" y="10" text-anchor="middle">čakanje</text><text x="304" y="92" text-anchor="middle">…</text>
+          </svg>
+        </div>
+        <span class="n">OVIRA</span>
+        <h3>Izdelava je počasna in draga</h3>
+        <p>Agencija pomeni sestanke, ponudbe, osnutke in popravke. S predlogami pa se sami ukvarjate večere in vikende, in stran nikoli ni čisto končana.</p>
+      </div>
+      <div class="card yes rv d2">
+        <div class="vig" aria-hidden="true">
+          <svg viewBox="0 0 320 130">
+            <path d="M16 62H304" fill="none" stroke="var(--line-2)" stroke-width="2" stroke-dasharray="3 6"/>
+            <path class="drw" d="M16 62H304" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+            <g fill="var(--accent)"><circle class="dot" cx="48" cy="62" r="6" style="animation-delay:.3s"/><circle class="dot" cx="160" cy="62" r="6" style="animation-delay:.6s"/><circle class="dot" cx="272" cy="62" r="6" style="animation-delay:.9s"/></g>
+            <g class="dot" style="animation-delay:1.15s"><circle cx="304" cy="62" r="11" fill="var(--accent)"/><path d="M298.5 62.5l3.5 3.5 7-7" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></g>
+            <text x="48" y="90" text-anchor="middle">opišete</text><text x="160" y="90" text-anchor="middle">pregledate</text><text x="272" y="90" text-anchor="middle">objavite</text>
+          </svg>
+        </div>
+        <span class="n">REŠITEV</span>
+        <h3>Postavi to opravi namesto vas</h3>
+        <p>Poveste, kaj delate. Postavi napiše in postavi stran, vi jo pregledate, po želji popravite in objavite.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="kako">
+    <p class="kicker rv">Kako deluje</p>
+    <h2 class="rv d1">Trije koraki do vaše strani.</h2>
+    <p class="sub rv d2">Brez predlog, ki jih morate sami polniti. Stran nastane iz tega, kar poveste o svojem podjetju.</p>
+    <div class="line rv" aria-hidden="true"><i></i></div>
+    <div class="steps">
+      <div class="step rv">
+        <div class="viz"><div class="field"><small>Opišite svoje podjetje</small><span id="typed">Mizarstvo Novak iz Škofje Loke. Izdelujemo kuhinje in vgradne omare po meri.</span><span class="caret" id="caret2" hidden></span></div></div>
+        <div class="tx"><h3>Opišete podjetje</h3><p>Nekaj stavkov: kaj delate, kje ste in kako vas stranke dobijo. Brez tehničnih izrazov.</p></div>
+      </div>
+      <div class="step rv d1">
+        <div class="viz">
+          <div class="browser sm v2 lay-c" id="mini" aria-hidden="true">
+            <div class="chrome"><i></i><i></i><i></i><div class="url"><span class="lock"></span><span class="host">mizarstvo-novak.si</span></div></div>
+            <div class="page">
+              <div class="m-nav" data-b="nav"><span class="m-logo"></span><span class="m-name">Mizarstvo Novak</span><span class="m-links"><i>Kuhinje</i><i>Omare</i><i>Kontakt</i></span></div>
+              <div class="m-hero">
+                <div class="m-txt"><div class="m-h" data-b="h">Pohištvo po meri, iz masivnega lesa.</div><div class="m-sub" data-b="sub">Mizarstvo Novak · Škofja Loka</div><div class="m-btn" data-b="btn">Pošljite povpraševanje</div></div>
+                <div class="m-photo" data-b="photo"><i class="sh"></i></div>
+              </div>
+              <div class="m-cards"><div class="m-card" data-b="c0">Kuhinje</div><div class="m-card" data-b="c1">Omare</div><div class="m-card" data-b="c2">Po meri</div></div>
+              <div class="m-foot" data-b="foot"><span>Ogled po dogovoru</span><span class="m-who">Mizarstvo Novak · Škofja Loka</span></div>
+            </div>
+            <div class="st done"><b></b><span>Postavljeno</span></div>
+          </div>
+        </div>
+        <div class="tx"><h3>Postavi sestavi stran</h3><p>Besedila v slovenščini, razporeditev, barve in pisave, izbrane za vaše podjetje.</p></div>
+      </div>
+      <div class="step rv d2">
+        <div class="viz"><div class="live" aria-hidden="true"><div class="pair"><span>Popravi</span><span>Objavi</span></div><span class="pill"><span class="lock"></span>mizarstvo-novak.si</span><span class="ok"><b></b>Na spletu</span></div></div>
+        <div class="tx"><h3>Pregledate in objavite</h3><p>Kar vam ni všeč, popravite. Nato stran objavite na svojem naslovu.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="videzi">
+    <p class="kicker rv">Vsako podjetje svoj videz</p>
+    <h2 class="rv d1">Nobena predloga. Štiri podjetja, štirje videzi.</h2>
+    <p class="sub rv d2">Pekarna ne sme biti videti kot avtoservis. Postavi izbere barve, pisave in razporeditev glede na to, kaj delate.</p>
+    <div class="looks rv" id="looks">
+      <figure class="look">
+        <div class="browser v0 lay-a" aria-hidden="true">
+          <div class="chrome"><i></i><i></i><i></i><div class="url"><span class="lock"></span><span class="host">pekarna-skorja.si</span></div></div>
+          <div class="page">
+            <div class="m-nav" data-b="nav"><span class="m-logo"></span><span class="m-name">Pekarna Skorja</span><span class="m-links"><i>Kruh</i><i>Pecivo</i><i>Kontakt</i></span></div>
+            <div class="m-hero"><div class="m-txt"><div class="m-h" data-b="h">Kruh z drožmi, pečen vsako jutro.</div><div class="m-sub" data-b="sub">Pekarna Skorja · Kamnik</div><div class="m-btn" data-b="btn">Naročite kruh</div></div><div class="m-photo" data-b="photo"><i class="sh"></i></div></div>
+            <div class="m-cards"><div class="m-card" data-b="c0">Kruh</div><div class="m-card" data-b="c1">Pecivo</div><div class="m-card" data-b="c2">Torte po naročilu</div></div>
+            <div class="m-foot" data-b="foot"><span>Tor–sob 6.00–13.00</span><span class="m-who">Pekarna Skorja · Kamnik</span></div>
+          </div>
+          <div class="st done"><b></b><span>Postavljeno</span></div>
+        </div>
+        <figcaption><b>Pekarna</b>topel, mehek, zaobljen</figcaption>
+      </figure>
+      <figure class="look">
+        <div class="browser v1 lay-b" aria-hidden="true">
+          <div class="chrome"><i></i><i></i><i></i><div class="url"><span class="lock"></span><span class="host">salon-ostrina.si</span></div></div>
+          <div class="page">
+            <div class="m-nav" data-b="nav"><span class="m-logo"></span><span class="m-name">Salon Ostrina</span><span class="m-links"><i>Storitve</i><i>Salon</i><i>Kontakt</i></span></div>
+            <div class="m-hero"><div class="m-txt"><div class="m-h" data-b="h">Striženje, barvanje in nega las.</div><div class="m-sub" data-b="sub">Salon Ostrina · Ljubljana</div><div class="m-btn" data-b="btn">Naročite se</div></div><div class="m-photo" data-b="photo"><i class="sh"></i></div></div>
+            <div class="m-cards"><div class="m-card" data-b="c0">Striženje</div><div class="m-card" data-b="c1">Barvanje</div><div class="m-card" data-b="c2">Nega las</div></div>
+            <div class="m-foot" data-b="foot"><span>Pon–pet 8.00–19.00</span><span class="m-who">Salon Ostrina · Ljubljana</span></div>
+          </div>
+          <div class="st done"><b></b><span>Postavljeno</span></div>
+        </div>
+        <figcaption><b>Frizerski salon</b>eleganten, zračen, tanek</figcaption>
+      </figure>
+      <figure class="look">
+        <div class="browser v2 lay-c" aria-hidden="true">
+          <div class="chrome"><i></i><i></i><i></i><div class="url"><span class="lock"></span><span class="host">vrtnarstvo-zelenka.si</span></div></div>
+          <div class="page">
+            <div class="m-nav" data-b="nav"><span class="m-logo"></span><span class="m-name">Vrtnarstvo Zelenka</span><span class="m-links"><i>Storitve</i><i>Vrtovi</i><i>Kontakt</i></span></div>
+            <div class="m-hero"><div class="m-txt"><div class="m-h" data-b="h">Vrt, ki ga boste imeli radi.</div><div class="m-sub" data-b="sub">Vrtnarstvo Zelenka · Maribor</div><div class="m-btn" data-b="btn">Pošljite povpraševanje</div></div><div class="m-photo" data-b="photo"><i class="sh"></i></div></div>
+            <div class="m-cards"><div class="m-card" data-b="c0">Načrtovanje</div><div class="m-card" data-b="c1">Zasaditev</div><div class="m-card" data-b="c2">Vzdrževanje</div></div>
+            <div class="m-foot" data-b="foot"><span>Ogled po dogovoru</span><span class="m-who">Vrtnarstvo Zelenka · Maribor</span></div>
+          </div>
+          <div class="st done"><b></b><span>Postavljeno</span></div>
+        </div>
+        <figcaption><b>Vrtnarstvo</b>zelen, zaobljen, fotografija spredaj</figcaption>
+      </figure>
+      <figure class="look">
+        <div class="browser v3 lay-a" aria-hidden="true">
+          <div class="chrome"><i></i><i></i><i></i><div class="url"><span class="lock"></span><span class="host">avtoservis-jeklo.si</span></div></div>
+          <div class="page">
+            <div class="m-nav" data-b="nav"><span class="m-logo"></span><span class="m-name">Avtoservis Jeklo</span><span class="m-links"><i>Servis</i><i>Gume</i><i>Kontakt</i></span></div>
+            <div class="m-hero"><div class="m-txt"><div class="m-h" data-b="h">Servis, gume in diagnostika za vse znamke.</div><div class="m-sub" data-b="sub">Avtoservis Jeklo · Celje</div><div class="m-btn" data-b="btn">Pokličite nas</div></div><div class="m-photo" data-b="photo"><i class="sh"></i></div></div>
+            <div class="m-cards"><div class="m-card" data-b="c0">Servis</div><div class="m-card" data-b="c1">Vulkanizerstvo</div><div class="m-card" data-b="c2">Diagnostika</div></div>
+            <div class="m-foot" data-b="foot"><span>Pon–pet 7.00–17.00</span><span class="m-who">Avtoservis Jeklo · Celje</span></div>
+          </div>
+          <div class="st done"><b></b><span>Postavljeno</span></div>
+        </div>
+        <figcaption><b>Avtoservis</b>temen, odločen, velik napis</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <div class="end">
+    <p class="kicker rv">postavi.si</p>
+    <h2 class="rv d1">Gradimo. Odpremo kmalu.</h2>
+    <p class="sub rv d2">Zaključujemo zadnje podrobnosti. Medtem preizkusite predogled s svojim imenom.</p>
+    <div class="ctas rv d3"><a class="btn btn-1" href="#ime" data-focus>Preizkusite s svojim imenom
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 16V4M5 9l5-5 5 5"/></svg></a></div>
+    <div class="bar" aria-hidden="true"><i></i></div>
+  </div>
   </main>
 
   <footer><span>© 2026 Postavi</span><span>postavi.si</span></footer>
 </div>
 <script>
 (function(){
-  var hosts=["pekarna.postavi.si","frizerka.postavi.si","vrtnar.postavi.si"];
-  var b=document.getElementById("browser"),h=document.getElementById("host"),stage=b.parentNode;
-  if(matchMedia("(prefers-reduced-motion: reduce)").matches){h.textContent=hosts[0];return}
-  var i=0,timer,typing;
-  function type(s,done){var n=0;h.textContent="";(function step(){h.textContent=s.slice(0,++n);n<s.length?typing=setTimeout(step,38):done()})()}
-  function run(){
-    stage.classList.remove("build");b.className="browser v"+i;
-    void b.offsetWidth;
-    type(hosts[i],function(){stage.classList.add("build")});
-    i=(i+1)%hosts.length;
-    timer=setTimeout(run,9000);
+  "use strict";
+  var $=function(s,c){return (c||document).querySelector(s)},$$=function(s,c){return [].slice.call((c||document).querySelectorAll(s))};
+  var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // the four example businesses (fictional) and how each one's site looks
+  var looks=[
+    {name:"Pekarna Skorja",cls:"v0 lay-a",links:["Kruh","Pecivo","Kontakt"],h:"Kruh z drožmi, pečen vsako jutro.",cta:"Naročite kruh",cards:["Kruh","Pecivo","Torte po naročilu"],hours:"Tor–sob 6.00–13.00",city:"Kamnik",
+     s:["{n} iz Kamnika.","Pečemo kruh z drožmi, pecivo in torte po naročilu.","Odprto od torka do sobote, od 6. do 13. ure."],
+     note:"Topel, mehek videz z zaobljenimi oblikami in pisavo, ki diši po pekarni."},
+    {name:"Salon Ostrina",cls:"v1 lay-b",links:["Storitve","Salon","Kontakt"],h:"Striženje, barvanje in nega las.",cta:"Naročite se",cards:["Striženje","Barvanje","Nega las"],hours:"Pon–pet 8.00–19.00",city:"Ljubljana",
+     s:["{n}, frizerski salon v Ljubljani.","Striženje, barvanje in nega las za ženske in moške.","Odprto od ponedeljka do petka, od 8. do 19. ure."],
+     note:"Eleganten, zračen videz s tanko pisavo in fotografijo čez celo širino."},
+    {name:"Vrtnarstvo Zelenka",cls:"v2 lay-c",links:["Storitve","Vrtovi","Kontakt"],h:"Vrt, ki ga boste imeli radi.",cta:"Pošljite povpraševanje",cards:["Načrtovanje","Zasaditev","Vzdrževanje"],hours:"Ogled po dogovoru",city:"Maribor",
+     s:["{n} iz Maribora.","Načrtujemo in zasadimo vrtove ter skrbimo za njihovo vzdrževanje.","Na ogled pridemo po dogovoru."],
+     note:"Zelen, zaobljen videz s fotografijo spredaj, kot vrt pred hišo."},
+    {name:"Avtoservis Jeklo",cls:"v3 lay-a",links:["Servis","Gume","Kontakt"],h:"Servis, gume in diagnostika za vse znamke.",cta:"Pokličite nas",cards:["Servis","Vulkanizerstvo","Diagnostika"],hours:"Pon–pet 7.00–17.00",city:"Celje",
+     s:["{n}, avtoservis v Celju.","Servis, vulkanizerstvo in diagnostika za vse znamke.","Odprto od ponedeljka do petka, od 7. do 17. ure."],
+     note:"Temen, odločen videz z velikim napisom in gumbom, ki ga ni mogoče zgrešiti."}
+  ];
+  function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+  function slug(s){return s.toLowerCase().replace(/đ/g,"d").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"")||"vase-podjetje"}
+  function mockHTML(l,n){
+    var li=l.links.map(function(x){return"<i>"+x+"</i>"}).join(""),cd=l.cards.map(function(x,i){return'<div class="m-card" data-b="c'+i+'">'+x+"</div>"}).join("");
+    return'<div class="chrome"><i></i><i></i><i></i><div class="url"><span class="lock"></span><span class="host">'+slug(n)+'.si</span></div></div>'+
+      '<div class="page"><div class="m-nav" data-b="nav"><span class="m-logo"></span><span class="m-name">'+esc(n)+'</span><span class="m-links">'+li+'</span></div>'+
+      '<div class="m-hero"><div class="m-txt"><div class="m-h" data-b="h">'+l.h+'</div><div class="m-sub" data-b="sub">'+esc(n)+' · '+l.city+'</div><div class="m-btn" data-b="btn">'+l.cta+'</div></div><div class="m-photo" data-b="photo"><i class="sh"></i></div></div>'+
+      '<div class="m-cards">'+cd+'</div><div class="m-foot" data-b="foot"><span>'+l.hours+'</span><span class="m-who">'+esc(n)+' · '+l.city+'</span></div></div>'+
+      '<div class="st"><b></b><span>Berem opis</span></div>';
   }
-  document.addEventListener("visibilitychange",function(){clearTimeout(timer);clearTimeout(typing);if(!document.hidden)run()});
-  run();
+  // the build: blocks land in order, the status pill narrates, and the hero's sentences light up as their block lands
+  var SEQ=[["nav",0,0],["sub",300],["h",620,1],["photo",900],["c0",1200],["c1",1330],["c2",1460],["btn",1750,2],["foot",1950]];
+  var STAT=[[0,"Pišem besedila"],[900,"Izbiram barve in pisave"],[1750,"Postavljam stran"]],DONE=2450;
+  function finish(root){$$("[data-b]",root).forEach(function(e){e.classList.add("on")});var st=$(".st",root);if(st){st.classList.add("done");$("span",st).textContent="Postavljeno"}}
+  function build(root,k,cb){
+    var t=[],st=$(".st",root);k=k||1;
+    SEQ.forEach(function(s){t.push(setTimeout(function(){var el=$('[data-b="'+s[0]+'"]',root);if(el)el.classList.add("on");if(cb&&s[2]!=null)cb("s",s[2])},s[1]*k))});
+    STAT.forEach(function(s){t.push(setTimeout(function(){if(st)$("span",st).textContent=s[1]},s[0]*k))});
+    t.push(setTimeout(function(){finish(root);if(cb)cb("done")},DONE*k));
+    return t;
+  }
+
+  // hero controller
+  var mock=$("#mock"),sents=$$(".sent"),caret=$("#caret"),input=$("#ime"),pick=$(".pick"),pbtns=$$(".pick button"),ind=$(".ind",pick),noteEl=$("#note"),stage=$("#stage");
+  var cur=0,auto=true,timers=[],cycle=0,typing=0,userName="",typedUpTo=0;
+  function name(){return userName||looks[cur].name}
+  function sent(k){return looks[cur].s[k].replace("{n}",name())}
+  function clearAll(){timers.forEach(clearTimeout);timers=[];clearTimeout(typing);clearTimeout(cycle)}
+  function moveInd(){var b=pbtns[cur];ind.style.transform="translateX("+b.offsetLeft+"px)";ind.style.width=b.offsetWidth+"px";ind.style.top=b.offsetTop+"px";ind.style.height=b.offsetHeight+"px"}
+  function setName(){
+    var n=name(),l=looks[cur];
+    $$(".m-name",mock).forEach(function(e){e.textContent=n});
+    $$(".m-sub,.m-who",mock).forEach(function(e){e.textContent=n+" · "+l.city});
+    $(".host",mock).textContent=slug(n)+".si";
+    if(typedUpTo>0)sents[0].textContent=sent(0)+" ";
+  }
+  function show(i){
+    clearAll();cur=i;typedUpTo=0;
+    pbtns.forEach(function(b,k){b.setAttribute("aria-pressed",k===i?"true":"false")});moveInd();
+    noteEl.textContent=looks[i].note;
+    mock.className="browser "+looks[i].cls+" anim";mock.innerHTML=mockHTML(looks[i],name());
+    sents.forEach(function(s){s.textContent="";s.classList.remove("hl")});
+    caret.hidden=false;
+    var k=0,n=0,speed=reduce?12:16;
+    (function step(){
+      var full=sent(k);n++;sents[k].textContent=full.slice(0,n)+(n<full.length?"":" ");
+      if(n<full.length)typing=setTimeout(step,speed);
+      else{typedUpTo=k+1;if(++k<3){n=0;typing=setTimeout(step,220)}
+      else{caret.hidden=true;timers=build(mock,1,function(ev,j){
+        if(ev==="s")sents.forEach(function(s,q){s.classList.toggle("hl",q===j)});
+        else{timers.push(setTimeout(function(){sents.forEach(function(s){s.classList.remove("hl")})},900));
+          if(auto)cycle=setTimeout(function(){show((cur+1)%looks.length)},4600)}})}}
+    })();
+  }
+  function stopAuto(){auto=false;clearTimeout(cycle)}
+  pbtns.forEach(function(b){b.addEventListener("click",function(){stopAuto();show(+b.dataset.v)})});
+  input.addEventListener("focus",stopAuto);
+  input.addEventListener("input",function(){userName=input.value.trim();stopAuto();setName()});
+  $("#try").addEventListener("submit",function(e){e.preventDefault();stopAuto();show(cur);
+    if(matchMedia("(max-width: 860px)").matches)stage.scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"})});
+  $$("[data-focus]").forEach(function(a){a.addEventListener("click",function(e){e.preventDefault();stopAuto();
+    input.scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"});setTimeout(function(){input.focus({preventScroll:true})},reduce?0:500)})});
+  addEventListener("resize",moveInd);
+  document.addEventListener("visibilitychange",function(){if(document.hidden)clearTimeout(cycle);else if(auto&&!timers.length)cycle=setTimeout(function(){show((cur+1)%looks.length)},1500)});
+  document.fonts&&document.fonts.ready.then(moveInd);
+  show(0);requestAnimationFrame(function(){pick.classList.add("ready")});
+
+  // scroll: reveal, and build the small sites when they come into view
+  var mini=$("#mini"),typed=$("#typed"),caret2=$("#caret2"),story=typed.textContent,strip=$$("#looks .browser");
+  mini.classList.add("anim");strip.forEach(function(b){b.classList.add("anim");$(".st span",b).textContent="Postavljam"});$(".st",mini).classList.remove("done");$(".st span",mini).textContent="Postavljam";
+  strip.forEach(function(b){$(".st",b).classList.remove("done")});
+  typed.textContent="";
+  var seen={};
+  function hit(el){
+    el.classList.add("in");
+    if(el.contains(typed)&&!seen.t){seen.t=1;caret2.hidden=false;var n=0;(function t(){typed.textContent=story.slice(0,++n);if(n<story.length)setTimeout(t,26);else caret2.hidden=true})()}
+    if(el.contains(mini)&&!seen.m){seen.m=1;setTimeout(function(){build(mini,.7)},300)}
+    if(el.id==="looks"&&!seen.l){seen.l=1;strip.forEach(function(b,i){setTimeout(function(){build(b,.6)},250+i*260)})}
+  }
+  var rv=$$(".rv");
+  if(!("IntersectionObserver" in window)){rv.forEach(hit)}
+  else{
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(!e.isIntersecting)return;hit(e.target);io.unobserve(e.target)})},{threshold:.15,rootMargin:"0px 0px -6% 0px"});
+    rv.forEach(function(e){io.observe(e)});
+  }
+
+  // pointer: the glow follows, the browser tilts toward it (wide screens with a mouse, full motion only)
+  if(!reduce&&matchMedia("(pointer: fine) and (min-width: 861px)").matches){
+    var root=document.documentElement,raf=0;
+    addEventListener("pointermove",function(e){if(raf)return;raf=requestAnimationFrame(function(){raf=0;
+      root.style.setProperty("--mx",(e.clientX/innerWidth*100)+"%");root.style.setProperty("--my",(e.clientY/innerHeight*100)+"%");
+      var r=mock.getBoundingClientRect(),dx=(e.clientX-(r.left+r.width/2))/r.width,dy=(e.clientY-(r.top+r.height/2))/r.height;
+      if(Math.abs(dx)<1.2&&Math.abs(dy)<1.2){mock.style.setProperty("--ry",(dx*7-2).toFixed(2)+"deg");mock.style.setProperty("--rx",(-dy*5).toFixed(2)+"deg")}
+      else{mock.style.removeProperty("--ry");mock.style.removeProperty("--rx")}})},{passive:true});
+  }
 })();
 </script>
 </body>
