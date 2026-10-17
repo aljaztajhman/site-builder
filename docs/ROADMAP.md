@@ -10,7 +10,7 @@ Written on 2026-10-16 from an inventory of TASKS.md (263 done, 158 open), HQ, do
 
 ## Now
 
-- **Current milestone:** M1 Design good enough. On 2026-10-17 the owner locked the design: today's pipeline (Design 3) plus the Review 50 fixes. Now: polish it. Check fonts and details (PR #221) per page, turn on six prompt fixes after their evals, fix the known blockers, then a final check on 10 new businesses and the owner's approval. Variety work is parked.
+- **Current milestone:** M1 Design good enough. On 2026-10-17 the owner locked the design: today's pipeline (Design 3) plus the Review 50 fixes. Now: polish it. Six prompt fixes are on. Fix the known blockers, then a final check on 10 new businesses and the owner's approval. Variety work is parked.
 - **Owner, in parallel (long lead times):** register the company (M3), buy the platform domain (M5), find a lawyer for the legal pages (M3).
 - **Last updated:** 2026-10-17.
 
@@ -39,7 +39,7 @@ Exit criteria:
   - call action shown three times on phones;
   - lone "Domov" in the nav on single-page sites;
   - any other open reviewer blocker in eval/outside-review (fresh10, review50-after) that is still real.
-- [ ] Six prompt fixes are on after their evals (owner, 2026-10-17), or a measured reason why one stays off: `promptFixes.directions` (no B&W or duotone promises, editorial photo hero), `beige` and `warmSurface` (no cream or beige page backgrounds), `catalogue` (incl. the call-button rule), `oneHero` (one main heading per page), `sloveneStyle` (formal vi, Slovene typography, no English words). The final check runs with them on.
+- [x] Six prompt fixes are on (owner, 2026-10-17: turned on directly, without per-fix evals; CI's offline eval is the guard): `promptFixes.directions` (no B&W or duotone promises, editorial photo hero), `beige` and `warmSurface` (no cream or beige page backgrounds), `catalogue` (incl. the call-button rule), `oneHero` (one main heading per page), `sloveneStyle` (formal vi, Slovene typography, no English words). The final check runs with them on.
 - [ ] Final check on 10 brand-new businesses (never tested; new trades and towns; with and without photos): at least 8 of 10 pass all three reviewers (Gemini, GPT, Fable), scored per page.
 - [ ] The owner looks at the pages (desktop and phone contact sheets) and approves them.
 
@@ -113,6 +113,7 @@ Exit criteria:
 Ideas and half-built things that are **not** on the way to 1.0. Something leaves the parking lot only when the owner moves it into a milestone.
 
 - **Set variety for v1.0 (owner, 2026-10-17).** Set variety ≥ 4 from 2 of 3 reviewers, the rest of Design 5 (U1–U7, incl. Wave P's structure presets, off since PR #220), option B "pictures lead every first screen", new hero structures, direction §6, and the AI studios (picture studio, Fable studio). Why: two cheap proofs (layouts, PR #220; type and details, PR #221) did not move the reviewers' variety score (2–3), while today's per-page quality already beats both studios. Revisit after launch.
+- Fonts and details (PR #221, closed 2026-10-17: seven type voices, header, CTA, AI caption, headline fit; switches off): nicer per the contact sheets, not needed for launch. Before any revival, fix the Opus review's findings (AI label lost on collection pages, voices undone by `enforceDesign`, headline fit collapsing in pinned columns, config switches not wired, voice fonts in every export).
 - Town in the hero lead (Review 50 item 15), G2 on 20 businesses, the owner's preset critiques (heroes and drawings too basic, the yellow background, direction summaries promising B&W photos) unless the final check's approval names them.
 - Studio 1.0 (S0–S7 tournament), the hybrid designer (Design 5 U6/U7, G3), the Fable studio, the picture studio.
 - Okus round 3 ratings. Rate them if an M1 decision needs the owner's taste.
@@ -134,4 +135,5 @@ Ideas and half-built things that are **not** on the way to 1.0. Something leaves
    - Claude ticks what landed here and in TASKS.md, and updates "Now" and the milestone %.
    - The % is the share of exit criteria met, never inflated.
    - HQ phases mirror the milestones.
-5. **Changing the plan:** only the owner moves milestones, exit criteria or parking-lot items. Claude proposes; the owner decides in chat. The decision is noted here with its date.
+5. **Checking work (owner, 2026-10-17):** one paid judging check per milestone, at its end. In between, build, with CI (typecheck, lint, tests, the offline eval) as the guard.
+6. **Changing the plan:** only the owner moves milestones, exit criteria or parking-lot items. Claude proposes; the owner decides in chat. The decision is noted here with its date.
