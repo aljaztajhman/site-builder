@@ -27,6 +27,8 @@ Billing, custom domains, domain registration (phase 3), CMS collections (phase 4
 
 ## Done means
 
+Status 2026-10-18 (M2): items 3, 4, 5 and 6 are covered by tests and CI (`limits-browser.test.ts` paid owner at 360 px, `business.test.tsx` consent link, `limits.test.ts` per-IP cap, `accounts.test.ts`, `forms*.test.ts`, `versions.test.ts`; offline eval 10/10) and the live smoke run (16/16). Items 1 and 2 close with the owner's phone run (first preview time from a phone, the anonymous preview through the real bot check, the watermark, publish refused before sign-in).
+
 - Sign up from a phone at 360 px: email → magic link → intake → homepage preview in ≤ 60 s, ≤ €0.30 (median of the eval, homepage scope). Owner, 2026-10-18: the 60 s is the time to the first preview the visitor sees; the whole job's speed is an M7 target.
 - Preview limits hold: a second email from the same IP within the limit window is refused; watermark present; publish refused.
 - An allow-listed account can generate the full site, edit it (chat and editor), publish and export, all at 360 px.
