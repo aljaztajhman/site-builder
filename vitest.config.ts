@@ -15,6 +15,10 @@ export const testFiles = globSync(include, { cwd: root })
   .map((file) => file.replaceAll("\\", "/"))
   .sort();
 export const slowFiles = testFiles.filter((file) => SLOW_MARKER.test(readFileSync(`${root}/${file}`, "utf8")));
+// CI runs the timing-sensitive motion suite (12 min, CPU-throttled LCP/CLS measurements) in its own sliced job
+// (.github/workflows/ci.yml, test-motion), so the test-slow shards leave it out when SB_MOTION_OWN_JOB is set.
+const MOTION_SUITE = "tools/eval/test/motion.test.ts";
+const slowInclude = process.env.SB_MOTION_OWN_JOB === "1" ? slowFiles.filter((f) => f !== MOTION_SUITE) : slowFiles;
 
 export default defineConfig({
   test: {
@@ -28,7 +32,7 @@ export default defineConfig({
     tags: [{ name: "slow", description: "Launches a browser or replays a generation and takes seconds; CI's test-slow job runs it." }],
     projects: [
       { extends: true, test: { name: "fast", include, exclude: [...configDefaults.exclude, ...slowFiles] } },
-      { extends: true, test: { name: "slow", include: slowFiles } },
+      { extends: true, test: { name: "slow", include: slowInclude } },
     ],
   },
 });
