@@ -13,6 +13,7 @@ import type { SiteSpec } from "@sb/spec";
 import { createApp } from "../src/app.ts";
 import { SITEVERIFY_URL, turnstile } from "../src/turnstile.ts";
 import { linkFor } from "./session-helpers.ts";
+import { fillPlaceholderOps } from "../../../tools/eval/src/placeholder-fill.ts";
 
 /**
  * The free limits end to end in Chromium, as a visitor meets them: anonymous → one preview → the second
@@ -214,6 +215,51 @@ describe("free limits in a browser", () => {
     } finally {
       await paid.close();
       await anon.close();
+    }
+  }, 120_000);
+});
+
+describe.each([1280, 360])("allow-listed (paid-tier) owner: whole site, publish and export at %i px", (width) => {
+  it("generates the full site, publishes it and downloads the export, with no sideways scroll", async () => {
+    const email = `paid-${width}@siol.net`;
+    await platform.repo.accounts.allow(email, email, "paid-tier at both widths");
+    const context = await cb.browser.newContext({ viewport: { width, height: width > 900 ? 900 : 780 }, reducedMotion: "reduce", acceptDownloads: true });
+    const page = await context.newPage();
+    const noSideScroll = () => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
+    const frame = () => page.frameLocator("iframe[title='Predogled strani']").locator("main");
+    try {
+      await signIn(page, email);
+      // The bakery's own brief: every fact the stand-in worker's golden site states is in the client's input.
+      const brief = JSON.parse(await readFile(path.join(here, "../../../tools/eval/fixtures/pekarna-kvas/brief.json"), "utf8")) as { description: string };
+      await create(page, brief.description, "full");
+      expect(page.url()).toMatch(/\/sites\/site_/);
+      const id = page.url().split("/").at(-1)!;
+      expect((await platform.repo.getSite(id))!.intake.scope).toBe("full");
+      await frame().waitFor({ timeout: 30_000 });
+      expect(await noSideScroll()).toBe(true);
+
+      // What the golden bakery still lacks (provider data, a price) is typed by the owner, here as one patch.
+      const saved = (await platform.repo.getSpec(id))!;
+      const r = await page.request.post(`${base}/api/sites/${id}/patch`, { data: { baseVersion: saved.version, ops: fillPlaceholderOps(saved.spec), message: "facts" } });
+      expect(r.status(), await r.text()).toBe(200);
+      await page.reload();
+      await frame().waitFor();
+      const blockers = ((await (await page.request.get(`${base}/api/sites/${id}`)).json()) as { blockers?: string[] }).blockers;
+      expect(await page.locator("#checklist-summary").count(), JSON.stringify(blockers)).toBe(0);
+
+      // Publish: the button is there at this width and the site goes live.
+      await page.getByRole("button", { name: "Objavi", exact: true }).click();
+      await expect.poll(async () => (await platform.repo.getSite(id))?.published_version ?? null, { timeout: 30_000 }).not.toBeNull();
+      expect(await noSideScroll()).toBe(true);
+      await shot(page, `limits-5-published-${width}`);
+
+      // Export: the menu offers the zip to a paid owner and the download is the site's archive.
+      await page.locator("details.menu > summary").click();
+      const [download] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Prenesi stran (.zip)" }).click()]);
+      expect(download.suggestedFilename()).toMatch(/\.zip$/);
+      expect(await noSideScroll()).toBe(true);
+    } finally {
+      await context.close();
     }
   }, 120_000);
 });
