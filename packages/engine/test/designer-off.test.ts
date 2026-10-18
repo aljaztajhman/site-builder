@@ -40,7 +40,8 @@ const V19: Record<string, string> = {
   briefConceptJsonSchema: "eabe408a89006b0b",
   briefJsonSchema: "4a6415ed8e903caf",
   businessSchema: "4e0f96995bd0d4be",
-  classificationJsonSchema: "9157abaf228dacc2",
+  // Changed on purpose 2026-10-18 (not by v20): the classifier answers isBusiness (junk check, M2).
+  classificationJsonSchema: "a85ca5fbb17ac872",
   compactBusinessSchema: "39c33ff035bf679e",
   compactSectionCatalogue: "83edb6f9a878712d",
   compactSectionCatalogueFixed: "c58b299b17e9cc71",

@@ -2,15 +2,15 @@
   "seq": 4,
   "stage": "classify",
   "model": "claude-haiku-4-5-20251001",
-  "hash": "a23224934a4c7ffa",
+  "hash": "c3acc6dfab510fec",
   "origin": "recorded",
   "response": {
-    "text": "{\"businessType\": \"hairdresser\", \"confidence\": 0.1}",
+    "text": "{\"isBusiness\": false, \"businessType\": \"shop\", \"confidence\": 0.95}",
     "stopReason": "end_turn",
     "model": "claude-haiku-4-5-20251001",
     "usage": {
-      "input_tokens": 493,
-      "output_tokens": 21,
+      "input_tokens": 648,
+      "output_tokens": 25,
       "cache_creation_input_tokens": 0,
       "cache_read_input_tokens": 0
     }

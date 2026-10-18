@@ -9,7 +9,7 @@ import { classifyCases, junkReport, loadCases, separate, type JunkCase, type Jun
 
 /**
  * The junk check's calibration set and command (it-junk-threshold), without the API: the answers here are scripted
- * stand-ins (a confidence per case id), not real classifier answers. The real run is `pnpm eval:junk --record`.
+ * stand-ins (isBusiness and a confidence per case id), not real classifier answers. The real run is `pnpm eval:junk --record`.
  */
 const config = loadConfig();
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -18,8 +18,8 @@ afterAll(async () => {
   for (const d of dirs) await rm(d, { recursive: true, force: true });
 });
 
-/** Answers each classify call with the scripted type and confidence of the case whose description it carries. */
-function scripted(cases: JunkCase[], answer: (c: JunkCase) => { businessType: string; confidence: number }): ModelTransport & { calls: string[] } {
+/** Answers each classify call with the scripted answer of the case whose description it carries. */
+function scripted(cases: JunkCase[], answer: (c: JunkCase) => { isBusiness: boolean; businessType: string; confidence: number }): ModelTransport & { calls: string[] } {
   const calls: string[] = [];
   return {
     calls,
@@ -47,7 +47,14 @@ describe("the junk calibration set", () => {
 });
 
 describe("separate", () => {
-  const r = (id: string, expect: "junk" | "real", confidence: number | null): JunkResult => ({ id, expect, description: id, businessType: confidence === null ? null : "shop", confidence });
+  const r = (id: string, expect: "junk" | "real", confidence: number | null, isBusiness = expect === "real"): JunkResult => ({
+    id,
+    expect,
+    description: id,
+    businessType: confidence === null ? null : "shop",
+    confidence,
+    isBusiness: confidence === null ? null : isBusiness,
+  });
 
   it("finds the gap between the most confident junk and the least confident real business", () => {
     const s = separate([r("a", "junk", 0.1), r("b", "junk", 0.32), r("c", "real", 0.71), r("d", "real", 0.95), r("e", "junk", null)]);
@@ -62,12 +69,23 @@ describe("separate", () => {
     expect(s.suggested).toBeNull();
     expect(s.wrongAt(0.5)).toEqual({ passedJunk: ["junk-high"], refusedReal: ["real-low", "real-short"] });
   });
+
+  it("says whether isBusiness alone sorts the cases, and the check refuses on either", () => {
+    const sorted = separate([r("spam", "junk", 0.95), r("tutoring", "real", 0.25), r("short", "junk", null)]);
+    expect(sorted.separable).toBe(false);
+    expect(sorted.byField).toEqual({ separable: true, passedJunk: [], refusedReal: [] });
+    expect(sorted.checkAt(0)).toEqual({ passedJunk: [], refusedReal: [] });
+    expect(sorted.checkAt(0.5)).toEqual({ passedJunk: [], refusedReal: ["tutoring"] });
+    const wrong = separate([r("spam", "junk", 0.95, true), r("vet", "real", 0.6, false)]);
+    expect(wrong.byField).toEqual({ separable: false, passedJunk: ["spam"], refusedReal: ["vet"] });
+  });
 });
 
 describe("pnpm eval:junk on scripted answers", () => {
   const cases = loadCases();
   // Stand-in answers: junk is unsure, real businesses are placed, the ones outside the ten types less surely.
-  const answer = (c: JunkCase) => (c.expect === "junk" ? { businessType: "shop", confidence: 0.15 } : { businessType: "shop", confidence: ["florist", "yoga", "locksmith"].includes(c.id) ? 0.55 : 0.9 });
+  const answer = (c: JunkCase) =>
+    c.expect === "junk" ? { isBusiness: false, businessType: "shop", confidence: 0.15 } : { isBusiness: true, businessType: "shop", confidence: ["florist", "yoga", "locksmith"].includes(c.id) ? 0.55 : 0.9 };
 
   it("classifies every case long enough, skips the rest without a call, logs each call's cost, and reports", async () => {
     const t = scripted(cases, answer);
@@ -82,10 +100,11 @@ describe("pnpm eval:junk on scripted answers", () => {
     expect(calls.every((c) => c.stage === "classify" && c.costEur > 0)).toBe(true);
     const eur = calls.reduce((a, c) => a + c.costEur, 0);
     const md = junkReport(results, { threshold: 0, minChars, model: config.models.classify.model, eur, mode: "scripted" });
-    expect(md).toContain("| florist | real | shop | 0.55 |");
+    expect(md).toContain("| florist | real | yes | shop | 0.55 |");
+    expect(md).toContain("isBusiness alone: separates every case.");
     expect(md).toContain("refused by length");
     expect(md).toContain("separable; suggested tiers.junk.minClassifierConfidence 0.35.");
-    expect(md).toMatch(/Today's threshold 0: junk let through [a-z-]+(, [a-z-]+)*; real refused none\./);
+    expect(md).toContain("Today's check (isBusiness false or confidence below 0): junk let through none; real refused none.");
   });
 
   it("replays what --record wrote, call for call, and refuses a description changed since", async () => {
@@ -99,13 +118,15 @@ describe("pnpm eval:junk on scripted answers", () => {
   });
 });
 
-describe("the recorded calibration run (2026-10-07, Haiku 4.5)", () => {
-  it("with config's threshold refuses no real business and most junk", async () => {
+describe("the recorded calibration run (2026-10-18, Haiku 4.5)", () => {
+  // The honest result, holdout included: one real business (an owner asking "can you make a site for my salon?")
+  // is called no business. Confidence separates even less. A change here is a new measurement, not a fix.
+  it("isBusiness sorts 29 of the 30 cases, which confidence can't; config's check lets no junk through", async () => {
     const recorded = await classifyCases(client(new ReplayTransport(path.join(here, "../recordings/junk"), true)), loadCases(), config.tiers.junk.minDescriptionChars);
-    const min = config.tiers.junk.minClassifierConfidence;
-    const refused = (r: JunkResult) => r.confidence === null || r.confidence < min;
-    expect(recorded.filter((r) => r.expect === "real" && refused(r)).map((r) => r.id)).toEqual([]);
-    expect(recorded.filter((r) => r.expect === "junk" && !refused(r)).map((r) => r.id)).toEqual(["injection", "curious"]);
-    expect(recorded.filter((r) => r.expect === "junk" && refused(r))).toHaveLength(8);
+    expect(recorded).toHaveLength(30);
+    const s = separate(recorded);
+    expect(s.byField).toEqual({ separable: false, passedJunk: [], refusedReal: ["holdout-question-salon"] });
+    expect(s.separable).toBe(false);
+    expect(s.checkAt(config.tiers.junk.minClassifierConfidence)).toEqual({ passedJunk: [], refusedReal: ["holdout-question-salon"] });
   });
 });

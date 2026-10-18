@@ -2,8 +2,9 @@
  * pnpm eval:junk [--record | --replay] [--max-eur 0.10]
  *
  * Classifies tools/eval/junk/cases.json with the configured classifier (config models.classify) and reports, per
- * case, the business type and confidence, the confidence that separates junk from real businesses, and what today's
- * tiers.junk.minClassifierConfidence gets wrong (it-junk-threshold). Live and --record make real calls (about
+ * case, isBusiness, the business type and confidence, whether isBusiness alone separates junk from real businesses,
+ * the confidence that would, and what today's check (isBusiness, tiers.junk.minClassifierConfidence) gets wrong
+ * (it-junk-threshold). Live and --record make real calls (about
  * €0.01 for the set); --record also writes them to tools/eval/recordings/junk/ for --replay and the tests. Every
  * call's cost is logged and the run stops at --max-eur. Report: eval/runs/junk-<mode>.md.
  */
@@ -50,4 +51,4 @@ const out = path.join(repoRoot, `eval/runs/junk-${mode}.md`);
 await writeFile(out, report);
 console.log(report);
 const s = separate(results);
-console.log(`Wrote ${path.relative(repoRoot, out)}. ${s.separable ? `Suggested threshold ${s.suggested!.toFixed(2)}.` : "Not separable by confidence alone."} Model spend €${eur.toFixed(4)}${mode === "replay" ? " (as recorded)" : ""}.`);
+console.log(`Wrote ${path.relative(repoRoot, out)}. isBusiness ${s.byField.separable ? "separates every case" : "does not separate every case"}; ${s.separable ? `suggested threshold ${s.suggested!.toFixed(2)}` : "not separable by confidence alone"}. Model spend €${eur.toFixed(4)}${mode === "replay" ? " (as recorded)" : ""}.`);

@@ -19,7 +19,7 @@ export function syntheticRecordings(fixture: Fixture, golden: SiteSpec, edits: {
   const generated = plannedPages.map((p) => ({ ...p, sections: p.sections.filter((s) => !SECTION_DEFS.find((d) => d.type === s.type)?.ownerOnly) }));
   const contentPages = scope === "home" ? generated.filter((p) => p.kind === "home") : generated;
   const out: { stage: ModelStageName; body: unknown }[] = [
-    { stage: "classify", body: { businessType: fixture.brief.businessType, confidence: 0.95 } },
+    { stage: "classify", body: { businessType: fixture.brief.businessType, confidence: 0.95, isBusiness: true } },
     {
       stage: "brief",
       body: {

@@ -100,7 +100,8 @@ describe("prompt fixes, all switches off", () => {
       patchFormat: sha(PATCH_FORMAT),
     }).toEqual({
       rules: "d703efadefad08ff",
-      classify: "b1bd01e5e1030730",
+      // Changed on purpose 2026-10-18: the classifier answers isBusiness (junk check, M2).
+      classify: "62752e560716a695",
       brief: "09d3b4c10486cd56",
       design: "55d0fb4d0c56f39f",
       alt: "8d0646c0aef58daf",

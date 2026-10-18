@@ -8,6 +8,7 @@ import { ModelOutputError, SpendCapError, type ModelClient } from "./llm/client.
 import { classify, makeBrief, chooseDesign, altTexts, generateContent, critique, applyPatches, editSpec, drawsInsteadOfPhotos, type VarietyInput } from "./stages.ts";
 import { keyOf, lookKey, siteSeed } from "./variety.ts";
 import { conceptPlan } from "./concept.ts";
+import { isJunkClassification } from "./brief.ts";
 import { applySkeleton, preferPhotoHero } from "./skeleton.ts";
 import { applyGenome } from "./genome.ts";
 import { extractSwatches, type Swatch } from "./palette.ts";
@@ -61,10 +62,13 @@ export const OWNER_TEXT_NOTE = "Kept the texts the owner typed";
  */
 export const HOMEPAGE_READY = "Homepage ready; writing the other pages";
 
-/** The classifier couldn't place the description (below tiers.junk.minClassifierConfidence): stopped before the brief. */
+/** The classifier says the description isn't a business, or can't place it (below tiers.junk.minClassifierConfidence): stopped before the brief. */
 export class JunkIntakeError extends Error {
-  constructor(readonly confidence: number) {
-    super(`The classifier couldn't place the description (confidence ${confidence.toFixed(2)}); stopped before any further model call`);
+  constructor(
+    readonly confidence: number,
+    readonly isBusiness = true,
+  ) {
+    super(`The classifier ${isBusiness ? "couldn't place the description" : "says the description isn't a business"} (confidence ${confidence.toFixed(2)}); stopped before any further model call`);
     this.name = "JunkIntakeError";
   }
 }
@@ -178,10 +182,10 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
       throw e;
     });
   // 1. Classify first. The intake may have asked the classifier already (its junk check). Junk, a
-  // description the classifier can't place (config tiers.junk), gets no Sonnet or image call: the brief
+  // description the classifier says isn't a business, or can't place (config tiers.junk), gets no Sonnet or image call: the brief
   // and the photos' alt texts both wait for this.
   const classified = stageTime("classify", async () => intake.classification ?? (await classify(client, intake.description))).then((cls) => {
-    if (cls.confidence < config.tiers.junk.minClassifierConfidence) throw new JunkIntakeError(cls.confidence);
+    if (isJunkClassification(cls, config.tiers.junk.minClassifierConfidence)) throw new JunkIntakeError(cls.confidence, cls.isBusiness !== false);
     return cls;
   });
   // Awaited below by both branches; without a handler now, an early rejection would be unhandled.
