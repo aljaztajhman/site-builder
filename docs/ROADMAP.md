@@ -10,9 +10,9 @@ Written on 2026-10-16 from an inventory of TASKS.md (263 done, 158 open), HQ, do
 
 ## Now
 
-- **Current milestone:** M1 Design good enough: approved by the owner on 2026-10-17 ("letsgo"), 3 of 4 criteria met. One step is left before M2: branch `claude/m1-final-hero` (commit 87c8b61b) holds three fixes from the final check that pass their tests (desktop hero card inside the first screen, number-plate style only for vehicle trades, filled buttons keep their padding). Its fourth fix, the hours badge under the phone buttons on slaščičarna-pri-zofki, still fails its test at 360×640. Make that test pass and merge the branch into main. Then M2: free-preview limits live and the Railway smoke test with sign-in and limits, then e-mail from our own domain.
+- **Current milestone:** M2 Launch gate: accounts, editor, email. M1 closed on 2026-10-18 (owner: "close M1"; final check 6 of 10 against a bar of 8, not re-scored by the owner's decision). A new session plans and runs M2. One M1 follow-up for M2's first week: the slaščičarna hours badge under the phone buttons (TASKS).
 - **Owner, in parallel (long lead times):** register the company (M3), find a lawyer for the legal pages (M3). New name Postavi; postavi.si bought 2026-10-17 (M5).
-- **Last updated:** 2026-10-17.
+- **Last updated:** 2026-10-18.
 
 ---
 
@@ -22,14 +22,14 @@ Claude's track runs in order: M1 → M2 → M4 → M5 → M6 → M7. M3 is mostl
 
 Each milestone has exit criteria. A milestone is done only when every criterion is met and checked. No "80 %" milestones: half-done work stays open on this page, and is not quietly left behind for something new.
 
-### M1 · Design good enough (Claude) — 3 of 4 met, approved by the owner 2026-10-17; one branch to merge (criterion 1)
+### M1 · Design good enough (Claude) — done 2026-10-18 (4 of 4 by the owner's decision; the final check scored 6 of 10 against a bar of 8)
 
 Sites pass the three outside reviewers and the owner's eye. Set variety is not a v1.0 goal (owner, 2026-10-17).
 
 Decision 2026-10-17 (owner): lock today's design (Design 3 + the Review 50 fixes; it beat both AI studios: 28 of 50 pages pass all three reviewers, 7 of 10 new businesses). Two cheap variety proofs failed to move set variety (Wave P layouts, PR #220; type and details, PR #221), so variety work goes to the parking lot. The six earlier criteria (Wave P, Design 5 waves U1–U9, the blocker list, the owner's critiques, G2 on 20 businesses, the town in the hero) are replaced by these three.
 
 Exit criteria:
-- [ ] Every known blocker is fixed in code, with a test that failed before. The eight listed below are fixed and merged in PR #222. The final check's own defects are only partly merged: footer wordmark size and the name printed three times are in PR #222; the hero card, plate style and filled buttons are on branch `claude/m1-final-hero` (tests pass), and the slaščičarna hours badge under the phone buttons still fails its test there (kolesarski-servis-ovinek too).
+- [x] Every known blocker is fixed in code, with a test that failed before (PR #222). The eight listed below, and the final check's held-page defects: the desktop hero card inside the first screen, number-plate style only for vehicle trades, filled buttons that keep their padding, the footer wordmark size and the name printed three times. One follow-up stays open for M2's first week (owner, 2026-10-18): the slaščičarna hours badge under the phone buttons at 360 px; its fix (branch `claude/m1-final-hero`) still failed its test at 360×640, so it was left out. kolesarski-servis-ovinek's hero list meets the bar at 390×844 too (todo in tools/eval/test/m1-chrome-blockers.test.ts).
   - AI label clipped in arched photo crops;
   - arched photo cut at the phone edge;
   - č/š/ž touching the line above in the footer wordmark;
