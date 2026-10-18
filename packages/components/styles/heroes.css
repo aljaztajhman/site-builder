@@ -452,6 +452,24 @@ main > .s-hero-signature:first-child {
   left: -3.75rem;
   bottom: 2rem;
 }
+/* With the floating call button (phones only, anchored bottom right), the seal stands in the column the arch leaves
+   free on the left, from the content's edge, and is small enough to end left of the button: at the arch's foot the
+   first phone screen's bottom meets it at some height, and there the button sat over its time (M1, slascicarna-pri-zofki
+   "8.00" at 390 × 844). The arch is 78 % of the content, so the content's edge is 22/78 of the arch's width to its left. */
+@media (max-width: 47.99rem) {
+  body.has-call-float .hsig__arch .hsig__seal {
+    left: calc(-100% * 22 / 78);
+    width: 6.25rem;
+    height: 6.25rem;
+    padding: 0.5rem;
+  }
+  body.has-call-float .hsig__arch .hsig__seal .seal__days {
+    font-size: 0.75rem;
+  }
+  body.has-call-float .hsig__arch .hsig__seal .seal__time {
+    font-size: 2rem;
+  }
+}
 @media (min-width: 64rem) {
   .hsig--arch {
     grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
