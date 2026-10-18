@@ -6,13 +6,13 @@ Write down anything odd as you go (a screenshot is enough): slow, confusing, wro
 
 ## Before you start
 - [ ] Have 3–6 photos of a business on the phone (yours, a friend's, or any real one you know).
-- [ ] Claude has put your email on the allow-list (so you can make the whole site and publish), or you add it yourself at `/admin`.
+- [x] Your email is on the allow-list (plan Osnovni, done 2026-10-18), so you can make the whole site and publish.
 
 ## The run
-1. [ ] Open https://web-preview-31c6.up.railway.app on the phone. The first screen makes sense without zooming.
-2. [ ] Sign in with your email. The sign-in email arrives within a minute, from `prijava@mail.postavi.si`, and is not in spam. Tap the link and confirm.
-3. [ ] Fill in the business: name, a few sentences about it, phone, town. Add your photos from the gallery (or take one with the camera). Every photo is accepted. If a photo is refused, note which phone and what it said (iPhone photos are HEIC).
-4. [ ] Tap "Ustvari stran". The first preview appears within about a minute. Note the seconds if you can.
+1. [ ] Open https://stranko.einvoicecheck.eu on the phone (not signed in; use a private tab if you were signed in before). The first screen makes sense without zooming.
+2. [ ] Without signing in, fill in the business: name, a few sentences about it, phone, town. Add your photos from the gallery (or take one with the camera). Every photo is accepted. If a photo is refused, note which phone and what it said (iPhone photos are HEIC). If a "Preverjamo, da niste robot" check appears, it passes.
+3. [ ] Tap "Ustvari stran". The first preview appears within a minute. Note the seconds. The preview has the small "Predogled" badge, and publishing asks you to sign in.
+4. [ ] Sign in with your email to keep the preview. The sign-in email arrives within a minute, from `prijava@mail.postavi.si`, and is not in spam. Tap the link and confirm. Your preview is now in your account.
 5. [ ] Look at the page on the phone: your photos are used, nothing is invented (no fake reviews, prices, hours or names you didn't give), the text reads like Slovene.
 6. [ ] Make the whole site (all pages), if it asks.
 7. [ ] Change something by chat, e.g. "Dodaj delovni čas: pon–pet 8–16" or "Naj bo glava temnejša". The change shows and the reply makes sense.
