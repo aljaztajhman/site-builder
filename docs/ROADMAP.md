@@ -12,6 +12,7 @@ Written on 2026-10-16 from an inventory of TASKS.md (263 done, 158 open), HQ, do
 
 - **Current milestone:** M2 Launch gate: accounts, editor, email. M1 closed on 2026-10-18 (owner: "close M1"; final check 6 of 10 against a bar of 8, not re-scored by the owner's decision). M2 planned (docs/plans/m2-launch-gate.md, owner OK 2026-10-18); editor decided (keep today's). Next: the junk-check field, the missing PHASE-2 tests and the phone checklist, email from mail.postavi.si, then the live smoke test (€0.42, ask). One M1 follow-up for M2's first week: the slaščičarna hours badge under the phone buttons (TASKS).
 - **Owner, in parallel (long lead times):** register the company (M3), find a lawyer for the legal pages (M3). New name Postavi; postavi.si bought 2026-10-17 (M5).
+- **Side work (owner switched to it, 2026-10-18):** the postavi.si coming-soon page: phone intro, the description → build → review → publish → edit demo, the search story, the time band, "live site with an editor" copy (#231, #233, #238, this PR).
 - **Last updated:** 2026-10-18.
 
 ---
