@@ -764,4 +764,22 @@ describe("contact-form", () => {
     expect(tag(out, /<p class="cform__privacy">.*?<\/p>/s)).toContain(`${"Varstvo osebnih podatkov"}</a>`);
     expect(render(fixtures["contact-form"])).not.toMatch(/cform__privacy[^<]*<a /);
   });
+
+  it("shows the consent text beside the submit button and a link that goes to the privacy page (phase 2 done-means)", () => {
+    const privacyPage = { ...testSpec().pages[0]!, id: "p_privacy", kind: "privacy" as const, slug: "zasebnost" };
+    const ctx = testCtx(testSpec({ pages: [...testSpec().pages, privacyPage] }));
+    const out = render(fixtures["contact-form"], ctx);
+    const note = tag(out, /<p class="cform__privacy">.*?<\/p>/s);
+    expect(note).toContain("Podatke uporabimo samo za odgovor na vaše sporočilo.");
+    const href = /<a href="([^"]+)">Varstvo osebnih podatkov<\/a>/.exec(note)?.[1];
+    expect(href).toBe(ctx.pageHref("p_privacy"));
+    expect(href).toContain("zasebnost");
+    // It sits in the form, before the submit button (the visitor reads it before sending).
+    expect(out.indexOf("cform__privacy")).toBeGreaterThan(out.indexOf("<form "));
+    expect(out.indexOf("cform__privacy")).toBeLessThan(out.indexOf("cform__submit"));
+    // Without a privacy page the consent text still shows, with no dead link.
+    const bare = tag(render(fixtures["contact-form"]), /<p class="cform__privacy">.*?<\/p>/s);
+    expect(bare).toContain("Podatke uporabimo samo za odgovor na vaše sporočilo.");
+    expect(bare).not.toContain("<a ");
+  });
 });
