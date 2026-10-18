@@ -10,7 +10,7 @@ Written on 2026-10-16 from an inventory of TASKS.md (263 done, 158 open), HQ, do
 
 ## Now
 
-- **Current milestone:** M2 Launch gate: accounts, editor, email. M1 closed on 2026-10-18 (owner: "close M1"; final check 6 of 10 against a bar of 8, not re-scored by the owner's decision). A new session plans and runs M2. One M1 follow-up for M2's first week: the slaščičarna hours badge under the phone buttons (TASKS).
+- **Current milestone:** M2 Launch gate: accounts, editor, email. M1 closed on 2026-10-18 (owner: "close M1"; final check 6 of 10 against a bar of 8, not re-scored by the owner's decision). M2 planned (docs/plans/m2-launch-gate.md, owner OK 2026-10-18); editor decided (keep today's). Next: the junk-check field, the missing PHASE-2 tests and the phone checklist, email from mail.postavi.si, then the live smoke test (€0.42, ask). One M1 follow-up for M2's first week: the slaščičarna hours badge under the phone buttons (TASKS).
 - **Owner, in parallel (long lead times):** register the company (M3), find a lawyer for the legal pages (M3). New name Postavi; postavi.si bought 2026-10-17 (M5).
 - **Last updated:** 2026-10-18.
 
@@ -45,15 +45,17 @@ Exit criteria:
   - 2026-10-17: **6 of 10** passed all three reviewers (bar 8; all 10 pass the two-of-three filter). Means Gemini 4.09, GPT 3.64, Fable 3.52 (the earlier fresh 10: 3.99, 3.34, 3.39). Owner's decision 2026-10-17 ("no rescore, just fix and letsgo"): fix the 4 held pages' defects with tests and **don't re-score**. The criterion is ticked by that decision, not by the number. Where the fixes stand: see criterion 1. Cost €3.89 (photos €1.02, generation €1.66, scoring €1.21). eval/outside-review/final10.
 - [x] The owner looks at the pages (desktop and phone contact sheets) and approves them: 2026-10-17, "letsgo" (claude.ai artifact "Stranko M1 Final Check").
 
-### M2 · Launch gate: accounts, editor, email (Claude + an owner check) — 0 of 6 met (much of the work under them is built)
+### M2 · Launch gate: accounts, editor, email (Claude + an owner check) — 1 of 6 met (much of the work under them is built)
+
+Plan: docs/plans/m2-launch-gate.md (owner OK 2026-10-18). Decisions 2026-10-18 (owner): keep today's editor, Puck parked; PHASE-2's "≤ 60 s" means the first preview (the whole job's speed stays an M7 target); sign-in and form emails send from `mail.postavi.si`.
 
 A new visitor can try it, sign up, edit and publish on the live app without help.
 
 Exit criteria:
 - [ ] Free-preview limits are live and the Railway smoke test passes with sign-in and limits (TASKS:49, :104; about €0.42, ask).
-- [ ] Sign-in and form emails go through Resend from Stranko's own sending domain, and a real send is verified (TASKS:87, :102).
+- [ ] Sign-in and form emails go through Resend from Stranko's own sending domain (`mail.postavi.si`, owner 2026-10-18), and a real send is verified (TASKS:87, :102).
 - [ ] "Real business" junk check as its own field (TASKS:55).
-- [ ] Editor decision: keep today's editor for 1.0 or adopt Puck (TASKS:94). Recommendation: keep today's and park Puck.
+- [x] Editor decision: keep today's editor for 1.0 or adopt Puck (TASKS:94). Owner, 2026-10-18: keep today's editor; Puck parked.
 - [ ] Owner's own run on a phone: their photos, generate, edit, publish (TASKS:77).
 - [ ] PHASE-2 exit criteria ticked.
 
@@ -119,7 +121,7 @@ Ideas and half-built things that are **not** on the way to 1.0. Something leaves
 - Town in the hero lead (Review 50 item 15), G2 on 20 businesses, the owner's preset critiques (heroes and drawings too basic, the yellow background, direction summaries promising B&W photos) unless the final check's approval names them.
 - Studio 1.0 (S0–S7 tournament), the hybrid designer (Design 5 U6/U7, G3), the Fable studio, the picture studio.
 - Okus round 3 ratings. Rate them if an M1 decision needs the owner's taste.
-- Puck editor (unless M2's decision picks it). Section AI actions (TASKS:136), the Slovene copy judge (TASKS:137), editor keyboard paths (TASKS:564).
+- Puck editor (owner, 2026-10-18: today's editor for 1.0). Section AI actions (TASKS:136), the Slovene copy judge (TASKS:137), editor keyboard paths (TASKS:564).
 - CMS extras: English entry pages in eval (TASKS:464), spec size on long blogs (TASKS:467).
 - Analytics steps beyond "events on" (TASKS:349+).
 - Agent-team tooling (TASKS:338+).
