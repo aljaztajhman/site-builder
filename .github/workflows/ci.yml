@@ -186,6 +186,45 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @sb/web build
 
+  # Required checks are matched by name, and a skipped matrix job never expands into its named shards, so a docs-only
+  # pull request would wait forever for "test-slow (1/5)" and the rest. These stand-ins report those names as passed
+  # when only docs changed; on code changes they are skipped and the real jobs report.
+  test-slow-docs:
+    needs: changes
+    if: needs.changes.outputs.code == 'false'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    strategy:
+      matrix:
+        shard: [1, 2, 3, 4, 5]
+    name: test-slow (${{ matrix.shard }}/5)
+    steps:
+      - run: echo "Docs-only pull request; test-slow not needed."
+
+  test-motion-docs:
+    needs: changes
+    if: needs.changes.outputs.code == 'false'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    strategy:
+      matrix:
+        slice: [1, 2, 3]
+    name: test-motion (${{ matrix.slice }}/3)
+    steps:
+      - run: echo "Docs-only pull request; test-motion not needed."
+
+  eval-offline-docs:
+    needs: changes
+    if: needs.changes.outputs.code == 'false'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    strategy:
+      matrix:
+        shard: [1, 2, 3, 4]
+    name: eval-offline (${{ matrix.shard }}/4)
+    steps:
+      - run: echo "Docs-only pull request; eval-offline not needed."
+
   # Migration smoke and migrate-check (docs/dev/workflow.md §4, §6) on Postgres 17 (as docker-compose.yml):
   # 1. every migration on an empty database, then pg-boss's schema;
   # 2. the base commit's code (the PR's target, or main before this push) migrates a database and seeds two
