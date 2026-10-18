@@ -50,11 +50,10 @@ nav a{text-decoration:none;padding:6px 0;border-bottom:2px solid transparent;tra
 nav a:hover{color:var(--ink);border-color:var(--accent)}
 .soon{font-size:15px;font-weight:500;color:var(--ink-2)}
 
-/* hero: one statement across the width, what Postavi does, and the film of it running on its own */
-.hero{padding:44px 0 88px}
-.hero .work{grid-template-columns:1fr 1fr;gap:56px;margin-top:36px}
+/* hero: one statement across the width, then what you write and what you get */
+.hero{padding:56px 0 96px}
 .who{font-size:16px;color:var(--ink-2);animation:fade .8s var(--ease) both}
-h1{font-family:var(--display);font-weight:800;font-size:clamp(44px,5.8vw,84px);line-height:.95;letter-spacing:-.045em;margin:14px 0 0}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(44px,6.4vw,92px);line-height:.95;letter-spacing:-.045em;margin:14px 0 0}
 .ln{display:block;overflow:hidden;padding-bottom:.08em;margin-bottom:-.08em}
 .ln>span{display:block;animation:rise .95s var(--ease) both}
 .ln:nth-child(2)>span{animation-delay:.12s}
@@ -64,25 +63,18 @@ h1 em{font-style:normal;color:var(--accent)}
 .work{display:grid;grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);gap:64px;align-items:start;margin-top:44px}
 .lead{font-size:clamp(17px,1.4vw,19px);color:var(--ink-2);max-width:30em;animation:fade 1s .35s var(--ease) both}
 .lead strong{color:var(--ink);font-weight:600}
-.acts{display:flex;flex-wrap:wrap;align-items:center;gap:12px 22px;margin-top:30px;animation:fade 1s .5s var(--ease) both}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:50px;padding:0 22px;border-radius:6px;font:700 16px/1 var(--display);text-decoration:none;cursor:pointer;border:0;background:var(--accent);color:var(--accent-ink);transition:background .2s,transform .2s var(--ease)}
-.btn:hover{background:var(--accent-hover)}
-.btn:active{transform:scale(.98)}
-.btn svg{width:18px;height:18px;flex:none;transition:transform .3s var(--ease)}
-.btn:hover svg{transform:translateX(4px)}
-.acts .btn:hover svg{transform:translateY(3px)}
-.lnk{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:15px;color:var(--ink);text-decoration:underline;text-decoration-color:var(--line-2);text-underline-offset:5px;min-height:44px;transition:text-decoration-color .25s}
-.lnk:hover{text-decoration-color:var(--accent)}
-.lnk svg{width:16px;height:16px;transition:transform .3s var(--ease)}
-.lnk:hover svg{transform:translateY(3px)}
-.more{margin-top:28px}
-/* try it: your name, the kind of business, one click */
+.try{margin-top:30px;animation:fade 1s .5s var(--ease) both}
 .try label,.tabs-l{display:block;font:600 14px/1.3 var(--ui);margin-bottom:10px}
 .field{display:flex;border:1px solid var(--line-2);border-radius:6px;background:var(--surface);overflow:hidden;transition:border-color .2s,box-shadow .2s}
 .field:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
 .field input{flex:1;min-width:0;height:50px;border:0;background:transparent;font:500 17px var(--ui);padding:0 14px;color:var(--ink)}
 .field input::placeholder{color:var(--ink-3)}
 .field input:focus-visible{outline:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:50px;padding:0 22px;border-radius:6px;font:700 16px/1 var(--display);text-decoration:none;cursor:pointer;border:0;background:var(--accent);color:var(--accent-ink);transition:background .2s,transform .2s var(--ease)}
+.btn:hover{background:var(--accent-hover)}
+.btn:active{transform:scale(.98)}
+.btn svg{width:18px;height:18px;flex:none;transition:transform .3s var(--ease)}
+.btn:hover svg{transform:translateX(4px)}
 .field .btn{border-radius:0}
 /* until someone uses the form, the button nudges: the arrow pushes forward and a soft ring pulses */
 .field:has(.nudge){animation:ring 2.4s 1.6s var(--ease) infinite}
@@ -91,7 +83,7 @@ h1 em{font-style:normal;color:var(--accent)}
 @keyframes push{0%,100%{transform:none}20%{transform:translateX(6px)}35%{transform:none}48%{transform:translateX(3px)}60%{transform:none}}
 @media (prefers-reduced-motion:reduce){.field:has(.nudge),.btn.nudge svg{animation:none}}
 .hint{margin-top:10px;font-size:13px;color:var(--ink-3)}
-.tabs-w{margin-top:26px}
+.tabs-w{margin-top:26px;animation:fade 1s .65s var(--ease) both}
 .tabs{position:relative;display:flex;gap:22px;border-bottom:1px solid var(--line-2);max-width:100%;overflow-x:auto;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
 .tabs button{flex:none;font:600 15px/1 var(--ui);color:var(--ink-3);background:none;border:0;min-height:44px;padding:0 2px;cursor:pointer;transition:color .25s;white-space:nowrap}
@@ -99,13 +91,15 @@ h1 em{font-style:normal;color:var(--accent)}
 .tabs button[aria-pressed="true"]{color:var(--ink)}
 .tabs .ind{position:absolute;bottom:-1px;left:0;height:2px;background:var(--accent);opacity:0}
 .tabs.ready .ind{opacity:1;transition:transform .4s var(--ease),width .4s var(--ease)}
-.no-js #preizkus,.no-js .nav-try{display:none}
+.no-js .tabs button[aria-pressed="true"]{box-shadow:inset 0 -2px 0 var(--accent)}
+.more{margin-top:28px;animation:fade 1s .8s var(--ease) both}
+.lnk{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:15px;color:var(--ink);text-decoration:underline;text-decoration-color:var(--line-2);text-underline-offset:5px;min-height:44px;transition:text-decoration-color .25s}
+.lnk:hover{text-decoration-color:var(--accent)}
+.lnk svg{width:16px;height:16px;transition:transform .3s var(--ease)}
+.lnk:hover svg{transform:translateY(3px)}
 
 /* the demo: your description, then the site that comes out of it */
-.demo{animation:fade 1.1s .3s var(--ease) backwards;transition:opacity .45s var(--ease)}
-.demo.out{opacity:0}
-.scap{margin-top:14px;font-size:15px;color:var(--ink-2);min-height:1.55em}
-.scap b{color:var(--ink);font-weight:600}
+.demo{animation:fade 1.1s .3s var(--ease) both}
 .say{margin-bottom:18px}
 .say .l{display:block;font:600 14px/1.3 var(--ui);margin-bottom:8px}
 .txt{min-height:72px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px 16px;font-size:15px;line-height:1.55;color:var(--ink-2)}
@@ -201,7 +195,20 @@ h1 em{font-style:normal;color:var(--accent)}
 .v3{--bg:#15181b;--t:#f1f3f5;--t2:#9aa5ad;--a:#f0b323;--ai:#15181b;--lm:rgb(241 243 245/.16);--r:4px;--pr:6px;--hf:var(--ui);--hw:900;--hls:-.02em;--htt:uppercase;
   --photo:linear-gradient(140deg,#5a6570,#2a3138 60%,#0f1214);--motif:repeating-linear-gradient(90deg,rgb(240 179 35/.35) 0 3px,transparent 3px 26px)}
 
-
+/* the scroll intro (wide screens, full motion): the hero stays pinned while your words turn into the site */
+.intro .pin{height:calc(100vh + 380vh)}
+.intro .hero{position:sticky;top:0;min-height:100vh;padding:0;display:flex;flex-direction:column;justify-content:center}
+.intro .work{margin-top:32px}
+.intro h1{width:max-content;max-width:100%}
+.intro h1,.intro .say,.intro #stage{transform-origin:0 0;will-change:transform}
+.intro .hero{animation:fadeIn .8s var(--ease) both}
+@keyframes fadeIn{from{opacity:0}}
+.intro .who,.intro .lead,.intro .try,.intro .tabs-w,.intro .more,.intro .note{opacity:0;animation:none}
+.intro .ln>span{animation:none}
+.cue{display:none;position:absolute;left:50%;bottom:28px;transform:translateX(-50%);align-items:center;gap:8px;font:500 14px/1 var(--ui);color:var(--ink-3);white-space:nowrap}
+.cue svg{width:14px;height:14px;animation:nudge 1.6s var(--ease) infinite}
+@keyframes nudge{50%{transform:translateY(4px)}}
+.intro .cue{display:inline-flex}
 
 /* sections */
 section{padding:110px 0;border-top:1px solid var(--line)}
@@ -423,8 +430,8 @@ h2{font:800 clamp(32px,4.2vw,58px)/1.02 var(--display);letter-spacing:-.035em;ma
 .ed-i em{font:600 12px/1 var(--ui);font-style:normal;color:var(--accent-text);text-decoration:underline;text-underline-offset:3px}
 .ed-s{justify-self:start;margin-top:6px;background:var(--accent);color:#fff;font:700 13px/1 var(--display);padding:9px 14px;border-radius:5px}
 .js .in .ed-s{animation:press .5s 1.6s var(--ease) both}
-.pv{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;overflow:hidden;align-content:start;width:100%;max-width:140px;justify-self:end;aspect-ratio:9/17;padding:14px 9px;border:1px solid var(--line-2);border-radius:20px;background:#eff4f1;box-shadow:0 24px 50px -30px rgb(15 31 34/.55)}
-.pv>span{display:block;border-radius:3px}
+.pvw{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;overflow:hidden;align-content:start;width:100%;max-width:140px;justify-self:end;aspect-ratio:9/17;padding:14px 9px;border:1px solid var(--line-2);border-radius:20px;background:#eff4f1;box-shadow:0 24px 50px -30px rgb(15 31 34/.55)}
+.pvw>span{display:block;border-radius:3px}
 .pv-n{height:6px;width:45%;background:#c9d8d0}
 .pv-ph{display:grid!important;margin:2px 0}.pv-ph i{grid-area:1/1;height:62px}
 .pv-h{height:8px;background:#1f3a2f}.pv-h2{height:8px;width:70%;background:#1f3a2f}
@@ -451,9 +458,7 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
   header{padding:16px 0;gap:14px}
   nav{display:none}
   .hero{padding:32px 0 72px}
-  .work,.hero .work{grid-template-columns:minmax(0,1fr);gap:36px;margin-top:30px}
-  .hero .work{gap:28px}
-  .hero .demo{order:-1}
+  .work{grid-template-columns:minmax(0,1fr);gap:36px;margin-top:30px}
   .browser{aspect-ratio:4/3}
   .txt{min-height:96px}
   section{padding:72px 0}
@@ -490,7 +495,17 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
   .field .btn{border-radius:0;width:100%}
   .field input{flex:none}
 }
-
+/* the phone intro (see the script): a pinned first screen with the headline and your words */
+.ph{height:430vh;height:calc(100svh + 330svh)}
+.ph-st{position:sticky;top:0;height:100vh;height:100svh;display:flex;flex-direction:column;justify-content:center}
+.ph h1{margin:0}
+.ph .demo{margin-top:26px}
+.ph .note{display:none}
+.ph #stage{margin:0 auto}
+.ph h1,.ph .say,.ph #stage{will-change:transform}
+.ph .cue{display:inline-flex;position:fixed;bottom:24px;pointer-events:none}
+.phi .work .who{margin-bottom:14px}
+.phi .work{margin-top:0}
 /* reduced motion: the page still builds and reveals itself, but nothing loops or jumps */
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
@@ -507,11 +522,12 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
 <div class="wrap">
   <header>
     <a class="brand" href="#" aria-label="Postavi, na vrh"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Postavi</a>
-    <nav aria-label="Na tej strani"><a href="#primeri">Primeri</a><a href="#zakaj">Zakaj</a><a href="#kako">Kako deluje</a><a class="nav-try" href="#preizkus">Preizkus</a></nav>
+    <nav aria-label="Na tej strani"><a href="#primeri">Primeri</a><a href="#zakaj">Zakaj</a><a href="#kako">Kako deluje</a></nav>
     <span class="soon">Odpremo kmalu</span>
   </header>
 
   <main>
+  <div class="pin" id="pin">
   <div class="hero" id="hero">
     <p class="who">Za obrtnike, salone, gostilne in trgovine</p>
     <h1><span class="ln"><span>Vaše podjetje na spletu.</span></span><span class="ln"><span><em>V nekaj minutah.</em></span></span></h1>
@@ -519,22 +535,41 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
     <div class="work">
       <div>
         <p class="lead">Opišete, kaj delate. <strong>Postavi napiše besedila v slovenščini, izbere barve in pisave, ki pristajajo vašemu podjetju, in sestavi celo spletno stran.</strong> Vi jo pregledate in objavite na svojem naslovu, <strong>potem pa jo sami urejate v preprostem urejevalniku.</strong></p>
-        <p class="acts"><a class="btn" href="#preizkus">Preizkusite s svojim imenom
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 4v12M5 11l5 5 5-5"/></svg></a>
-          <a class="lnk" href="#kako">Kako deluje
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 4v12M5 11l5 5 5-5"/></svg></a></p>
+
+        <form class="try" id="try" autocomplete="off">
+          <label for="ime">Preizkusite na primeru ali s svojim imenom</label>
+          <div class="field">
+            <input id="ime" type="text" maxlength="40" value="Mizarstvo Novak" placeholder="npr. Mizarstvo Novak" spellcheck="false">
+            <button class="btn nudge" type="submit">Postavi
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg></button>
+          </div>
+          <p class="hint">Ime se pojavi v predogledu. Nič se ne pošilja, vse se zgodi v vašem brskalniku.</p>
+        </form>
+
+        <div class="tabs-w">
+          <span class="tabs-l" id="tabs-l">Vrsta podjetja</span>
+          <div class="tabs" role="group" aria-labelledby="tabs-l">
+            <button type="button" data-v="0" aria-pressed="true">Pekarna</button>
+            <button type="button" data-v="1" aria-pressed="false">Frizerski salon</button>
+            <button type="button" data-v="2" aria-pressed="false">Vrtnarstvo</button>
+            <button type="button" data-v="3" aria-pressed="false">Avtoservis</button>
+            <span class="ind" aria-hidden="true"></span>
+          </div>
+        </div>
+
+        <p class="more"><a class="lnk" href="#kako">Kako deluje
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 4v12M5 11l5 5 5-5"/></svg></a></p>
       </div>
 
-      <!-- the film: a description is typed, the site goes up, is checked, published and edited; then the next business -->
-      <div class="demo" id="film" aria-label="Kako nastane stran: primer">
+      <div class="demo" id="predogled">
         <div class="say">
           <span class="l">Vaš opis</span>
-          <p class="txt"><span class="sent">Pekarna Skorja iz Kamnika. </span><span class="sent">Pečemo kruh z drožmi, pecivo in torte po naročilu. </span><span class="sent">Odprto od torka do sobote, od 6. do 13. ure.</span><span class="caret" hidden></span></p>
+          <p class="txt"><span class="sent">Pekarna Skorja iz Kamnika. </span><span class="sent">Pečemo kruh z drožmi, pecivo in torte po naročilu. </span><span class="sent">Odprto od torka do sobote, od 6. do 13. ure.</span><span class="caret" id="caret" hidden></span></p>
         </div>
-        <div class="stage">
+        <div id="stage">
           <ol class="flow" aria-label="Od opisa do objave"><li class="on">Opis</li><li class="on">Postavljanje</li><li class="on">Pregled</li><li class="on">Objava</li><li class="on now">Urejanje</li></ol>
-          <!-- the mock is written out so it shows without JS; JS re-renders it from the same data -->
-          <div class="browser mock v0 lay-a" aria-hidden="true">
+          <!-- the hero mock is written out so it shows without JS; JS re-renders it from the same data -->
+          <div class="browser v0 lay-a" id="mock" aria-hidden="true">
             <div class="chrome"><i></i><i></i><i></i><div class="url"><span class="lock"></span><span class="draft">postavi.si/osnutek/</span><span class="host">pekarna-skorja</span><span class="tld">.si</span></div><span class="pub">Objavljeno</span><i class="ld done"></i></div>
             <div class="page">
               <div class="m-nav" data-b="nav"><span class="m-logo"></span><span class="m-name">Pekarna Skorja</span><span class="m-links"><i>Kruh</i><i>Pecivo</i><i>Kontakt</i></span></div>
@@ -547,9 +582,12 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
             </div>
           </div>
         </div>
-        <p class="scap"><b>Spremembe vnesete sami.</b> Takoj so na spletu.</p>
+        <p class="note" id="note">Topel, mehek videz z zaobljenimi oblikami in pisavo, ki diši po pekarni.</p>
       </div>
     </div>
+    <span class="cue" id="cue" aria-hidden="true">Pomaknite se
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4v12M5 11l5 5 5-5"/></svg></span>
+  </div>
   </div>
 
   <section id="primeri">
@@ -701,7 +739,7 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
             <span class="ed-i"><span class="sw" style="--d:1.2s"><i class="o"></i><i class="n"></i></span><em>Zamenjaj</em></span>
             <span class="ed-s">Shrani</span>
           </div>
-          <div class="pv">
+          <div class="pvw">
             <span class="pv-n"></span>
             <span class="pv-ph sw" style="--d:2s"><i class="o"></i><i class="n"></i></span>
             <span class="pv-h"></span><span class="pv-h2"></span><span class="pv-b"></span>
@@ -709,46 +747,6 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
           </div>
           <span class="ok">Shranjeno. Stran je posodobljena.</span>
         </div></div>
-      </div>
-    </div>
-  </section>
-
-  <section id="preizkus">
-    <h2 class="rv">Preizkusite s svojim imenom.</h2>
-    <p class="sub rv d1">Vpišite ime podjetja, izberite vrsto in kliknite Postavi. Nič se ne pošilja, vse se zgodi v vašem brskalniku.</p>
-    <div class="work rv d1">
-      <div>
-        <form class="try" id="try" autocomplete="off">
-          <label for="ime">Ime podjetja</label>
-          <div class="field">
-            <input id="ime" type="text" maxlength="40" value="Mizarstvo Novak" placeholder="npr. Mizarstvo Novak" spellcheck="false">
-            <button class="btn nudge" type="submit">Postavi
-              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg></button>
-          </div>
-          <p class="hint">Primer je izmišljen. Prava stran nastane iz vašega opisa in vaših fotografij.</p>
-        </form>
-        <div class="tabs-w">
-          <span class="tabs-l" id="tabs-l">Vrsta podjetja</span>
-          <div class="tabs" role="group" aria-labelledby="tabs-l">
-            <button type="button" data-v="0" aria-pressed="true">Pekarna</button>
-            <button type="button" data-v="1" aria-pressed="false">Frizerski salon</button>
-            <button type="button" data-v="2" aria-pressed="false">Vrtnarstvo</button>
-            <button type="button" data-v="3" aria-pressed="false">Avtoservis</button>
-            <span class="ind" aria-hidden="true"></span>
-          </div>
-        </div>
-        <p class="note" id="note">Topel, mehek videz z zaobljenimi oblikami in pisavo, ki diši po pekarni.</p>
-      </div>
-      <div class="demo" id="trial" aria-live="polite">
-        <div class="say">
-          <span class="l">Vaš opis</span>
-          <p class="txt"><span class="sent"></span><span class="sent"></span><span class="sent"></span><span class="caret" hidden></span></p>
-        </div>
-        <div class="stage">
-          <ol class="flow" aria-label="Od opisa do objave"><li>Opis</li><li>Postavljanje</li><li>Pregled</li><li>Objava</li><li>Urejanje</li></ol>
-          <div class="browser mock v0 lay-a" aria-hidden="true"></div>
-        </div>
-        <p class="scap"></p>
       </div>
     </div>
   </section>
@@ -811,8 +809,22 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
     return t;
   }
 
-
-  function setHit(){var d=active(),n=d.name(),l=looks[d.cur];if(phoneDone&&!phonePlaying)sqEl.textContent=l.q;$("#hit-t").textContent=n+" · "+l.city;$("#hit-u").textContent=slug(n)+".si";$("#hit-s").textContent=l.s[1];
+  // hero controller
+  var mock=$("#mock"),sents=$$(".sent"),caret=$("#caret"),input=$("#ime"),tabs=$(".tabs"),tbtns=$$(".tabs button"),ind=$(".ind",tabs),noteEl=$("#note"),stage=$("#stage");
+  var cur=0,auto=true,timers=[],cycle=0,typing=0,userName="",typedUpTo=0;
+  function name(){return userName||looks[cur].name}
+  function sent(k){return looks[cur].s[k].replace("{n}",name())}
+  function clearAll(){timers.forEach(clearTimeout);timers=[];clearTimeout(typing);clearTimeout(cycle)}
+  function moveInd(){var b=tbtns[cur];ind.style.transform="translateX("+b.offsetLeft+"px)";ind.style.width=b.offsetWidth+"px"}
+  function setName(){
+    var n=name(),l=looks[cur];
+    $$(".m-name",mock).forEach(function(e){e.textContent=n});
+    $$(".m-sub,.m-who",mock).forEach(function(e){e.textContent=n+" · "+l.city});
+    $(".host",mock).textContent=slug(n);
+    if(typedUpTo>0)sents[0].textContent=sent(0)+" ";
+    setHit();
+  }
+  function setHit(){var n=name(),l=looks[cur];if(phoneDone&&!phonePlaying)sqEl.textContent=l.q;$("#hit-t").textContent=n+" · "+l.city;$("#hit-u").textContent=slug(n)+".si";$("#hit-s").textContent=l.s[1];
     $("#pg-n").textContent=n;$("#call-n").textContent=n;$("#pg-hd").textContent=l.h;$("#pg-i").textContent=l.items.join(" · ");$("#pg-h").textContent=l.hours;$("#pg-c").textContent=l.city}
   var phoneEl=$("#phone"),capEl=$("#cap"),sqEl=$("#sq"),caret3=$("#caret3"),beatsEl=$("#beats"),beatBtns=$$("#beats button"),phoneDone=false,phonePlaying=false,beatT=0;
   // the four beats on the phone: someone searches, your page is found, they check it, they call. Each beat
@@ -828,98 +840,173 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
   function playPhone(){
     setHit();phoneDone=true;
     if(reduce){goBeat(3);return}
-    var q=looks[active().cur].q,n=0;
+    var q=looks[cur].q,n=0;
     phonePlaying=true;goBeat(0);phoneEl.className="phone s1";sqEl.textContent="";caret3.hidden=false;
     (function t(){sqEl.textContent=q.slice(0,++n);if(n<q.length)beatT=setTimeout(t,45);else{caret3.hidden=true;phonePlaying=false;phoneEl.classList.add("typed");beatT=setTimeout(function(){goBeat(1,true)},3200)}})();
   }
-  beatBtns.forEach(function(b,i){b.addEventListener("click",function(){if(phonePlaying){phonePlaying=false;caret3.hidden=true;sqEl.textContent=looks[active().cur].q}goBeat(i,false)})});
-  // a demo: the description is typed, the site goes up block by block, is checked, published and edited.
-  // The hero's film runs one on its own and loops over the looks; the try-it section runs one on request
-  // with your name. With reduced motion both show the finished site at once.
-  var STEP=["Opišete, kaj delate.","Postavi napiše besedila in sestavi stran.","Pregled: naslov in opis za Google, telefon, dostopnost, hitrost.","Objavljeno na vašem naslovu.","Spremembe vnesete sami. Takoj so na spletu."];
-  function Demo(root,auto){
-    var d={root:root,auto:auto,cur:0,userName:"",used:false,busy:false,timers:[],typing:0,cycle:0,typedUpTo:0,
-      mock:$(".mock",root),sents:$$(".sent",root),caret:$(".caret",root),flowEls:$$(".flow li",root),cap:$(".scap",root)};
-    d.name=function(){return d.userName||looks[d.cur].name};
-    d.sent=function(k){return looks[d.cur].s[k].replace("{n}",d.name())};
-    d.clear=function(){d.timers.forEach(clearTimeout);d.timers=[];clearTimeout(d.typing);clearTimeout(d.cycle);d.typing=0;d.busy=false};
-    d.flow=function(k){d.flowEls.forEach(function(li,i){li.classList.toggle("on",i<=k);li.classList.toggle("now",i===k)});d.cap.textContent=STEP[k]};
-    d.checks=function(n,vis){var c=$(".chk",d.mock);if(!c)return;c.classList.toggle("on",!!vis);$$("li",c).forEach(function(li,i){li.classList.toggle("y",i<n)})};
-    d.publish=function(on){d.mock.classList.toggle("drf",!on)};
-    d.edit=function(k,open){
-      var c=$(".cms",d.mock),f=$(".m-foot span",d.mock),to=EDITS[d.cur],from=looks[d.cur].hours;if(!c)return;
-      c.classList.toggle("on",!!open);
-      var t=to.slice(0,Math.max(0,Math.min(to.length,k)));$(".inp",c).textContent=k<0?from:t;
-      if(k>=to.length&&!open&&f.textContent!==to){f.textContent=to;f.classList.remove("flash");void f.offsetWidth;f.classList.add("flash")}
-      if(k<to.length&&f.textContent!==from){f.textContent=from;f.classList.remove("flash")}
-    };
-    d.render=function(cls){d.mock.className="browser mock "+looks[d.cur].cls+(cls||"");d.mock.innerHTML=mockHTML(looks[d.cur],d.name())};
-    d.setName=function(){
-      var n=d.name(),l=looks[d.cur];
-      $$(".m-name",d.mock).forEach(function(e){e.textContent=n});
-      $$(".m-sub,.m-who",d.mock).forEach(function(e){e.textContent=n+" · "+l.city});
-      $(".host",d.mock).textContent=slug(n);
-      if(d.typedUpTo>0)d.sents[0].textContent=d.sent(0)+" ";
-    };
-    // the finished site, no motion
-    d.still=function(){
-      d.clear();d.render("");d.sents.forEach(function(s,k){s.textContent=d.sent(k)+(k<2?" ":"");s.classList.remove("hl")});d.caret.hidden=true;d.typedUpTo=3;
-      finish(d.mock);d.checks(CHECKS.length,false);d.publish(true);d.edit(EDITS[d.cur].length,false);d.flow(4);
-    };
-    d.review=function(){
-      d.flow(2);d.checks(0,true);
-      CHECKS.forEach(function(c,i){d.timers.push(setTimeout(function(){d.checks(i+1,true)},500+i*480))});
-      var t0=500+CHECKS.length*480+700;
-      d.timers.push(setTimeout(function(){d.checks(CHECKS.length,false);d.publish(true);d.flow(3)},t0));
-      var to=EDITS[d.cur],t1=t0+2000,t2=t1+600+to.length*50;
-      d.timers.push(setTimeout(function(){d.flow(4);d.edit(-1,true)},t1));
-      for(var k=0;k<=to.length;k++)(function(k){d.timers.push(setTimeout(function(){d.edit(k,true)},t1+600+k*50))})(k);
-      d.timers.push(setTimeout(function(){var b=$(".cms .sv",d.mock);if(b)b.classList.add("press")},t2+300));
-      d.timers.push(setTimeout(function(){d.edit(to.length,false);d.busy=false;if(d.auto)d.cycle=setTimeout(d.next,5000)},t2+650));
-    };
-    // the whole story for look i
-    d.show=function(i){
-      d.clear();d.cur=i;d.typedUpTo=0;
-      if(reduce){d.still();return}
-      d.busy=true;d.render(" anim drf");d.flow(0);
-      d.sents.forEach(function(s){s.textContent="";s.classList.remove("hl")});d.caret.hidden=false;
-      var k=0,n=0;
-      (function step(){
-        var full=d.sent(k);n++;d.sents[k].textContent=full.slice(0,n)+(n<full.length?"":" ");
-        if(n<full.length)d.typing=setTimeout(step,20);
-        else{d.typedUpTo=k+1;if(++k<3){n=0;d.typing=setTimeout(step,260)}
-        else{d.caret.hidden=true;d.typing=setTimeout(function(){d.flow(1);d.timers=build(d.mock,1,function(ev,j){
-          if(ev==="s")d.sents.forEach(function(s,q){s.classList.toggle("hl",q===j)});
-          else{d.timers.push(setTimeout(function(){d.sents.forEach(function(s){s.classList.remove("hl")})},900));d.review()}})},500)}}
-      })();
-    };
-    // the next look: a short fade, then the story again
-    d.next=function(){
-      if(!d.auto)return;root.classList.add("out");
-      d.cycle=setTimeout(function(){d.show((d.cur+1)%looks.length);setHit();root.classList.remove("out")},450);
-    };
-    return d;
+  beatBtns.forEach(function(b,i){b.addEventListener("click",function(){if(phonePlaying){phonePlaying=false;caret3.hidden=true;sqEl.textContent=looks[cur].q}goBeat(i,false)})});
+  var flowEls=$$(".flow li");
+  function flow(k){flowEls.forEach(function(li,i){li.classList.toggle("on",i<=k);li.classList.toggle("now",i===k)})}
+  function checks(n,vis){var c=$(".chk",mock);if(!c)return;c.classList.toggle("on",!!vis);$$("li",c).forEach(function(li,i){li.classList.toggle("y",i<n)})}
+  function publish(on){mock.classList.toggle("drf",!on)}
+  function edit(k,open){
+    var c=$(".cms",mock),f=$(".m-foot span",mock),to=EDITS[cur],from=looks[cur].hours;if(!c)return;
+    c.classList.toggle("on",!!open);
+    var t=to.slice(0,Math.max(0,Math.min(to.length,k)));$(".inp",c).textContent=k<0?from:t;
+    if(k>=to.length&&!open&&f.textContent!==to){f.textContent=to;f.classList.remove("flash");void f.offsetWidth;f.classList.add("flash")}
+    if(k<to.length&&f.textContent!==from){f.textContent=from;f.classList.remove("flash")}
   }
-  var film=Demo($("#film"),true),trial=Demo($("#trial"),false);
-  function active(){return trial.used?trial:film}
-  // the hero's film: pause while the tab is hidden
-  film.show(0);
-  document.addEventListener("visibilitychange",function(){if(document.hidden)clearTimeout(film.cycle);else if(!film.busy&&!reduce)film.cycle=setTimeout(film.next,1500)});
-
-  // try it: your name, the kind of business, one click. The example starts finished; "Postavi" runs the story
-  var input=$("#ime"),goBtn=$("#try .btn"),tabs=$(".tabs"),tbtns=$$(".tabs button"),ind=$(".ind",tabs),noteEl=$("#note");
-  function moveInd(){var b=tbtns[trial.cur];ind.style.transform="translateX("+b.offsetLeft+"px)";ind.style.width=b.offsetWidth+"px"}
-  function pick(i){trial.cur=i;tbtns.forEach(function(b,k){b.setAttribute("aria-pressed",k===i?"true":"false")});moveInd();noteEl.textContent=looks[i].note}
-  trial.userName=input.value.trim();pick(0);trial.still();requestAnimationFrame(function(){tabs.classList.add("ready")});
-  tbtns.forEach(function(b){b.addEventListener("click",function(){pick(+b.dataset.v);if(trial.used)trial.show(trial.cur);else trial.still();setHit();b.scrollIntoView({block:"nearest",inline:"nearest"})})});
-  input.addEventListener("focus",function(){goBtn.classList.remove("nudge");input.select()});
-  input.addEventListener("input",function(){trial.userName=input.value.trim();trial.setName();if(trial.used)setHit()});
-  $("#try").addEventListener("submit",function(e){e.preventDefault();goBtn.classList.remove("nudge");trial.userName=input.value.trim();trial.used=true;trial.show(trial.cur);setHit();
-    if(matchMedia("(max-width: 860px)").matches)trial.root.scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"})});
-  $$("[data-focus]").forEach(function(a){a.addEventListener("click",function(e){e.preventDefault();
+  function review(){
+    flow(2);checks(0,true);
+    CHECKS.forEach(function(c,i){timers.push(setTimeout(function(){checks(i+1,true)},400+i*420))});
+    var t0=400+CHECKS.length*420+550;
+    timers.push(setTimeout(function(){checks(CHECKS.length,false);publish(true);flow(3)},t0));
+    var to=EDITS[cur],t1=t0+1700,t2=t1+600+to.length*45;
+    timers.push(setTimeout(function(){flow(4);edit(-1,true)},t1));
+    for(var k=0;k<=to.length;k++)(function(k){timers.push(setTimeout(function(){edit(k,true)},t1+600+k*45))})(k);
+    timers.push(setTimeout(function(){var b=$(".cms .sv",mock);if(b)b.classList.add("press")},t2+250));
+    timers.push(setTimeout(function(){edit(to.length,false);
+      if(auto)cycle=setTimeout(function(){show((cur+1)%looks.length)},3600)},t2+550));
+  }
+  function show(i){
+    clearAll();cur=i;typedUpTo=0;
+    tbtns.forEach(function(b,k){b.setAttribute("aria-pressed",k===i?"true":"false")});moveInd();
+    noteEl.textContent=looks[i].note;setHit();
+    mock.className="browser "+looks[i].cls+" anim drf";mock.innerHTML=mockHTML(looks[i],name());flow(0);
+    sents.forEach(function(s){s.textContent="";s.classList.remove("hl")});
+    caret.hidden=false;
+    var k=0,n=0,speed=reduce?12:16;
+    (function step(){
+      var full=sent(k);n++;sents[k].textContent=full.slice(0,n)+(n<full.length?"":" ");
+      if(n<full.length)typing=setTimeout(step,speed);
+      else{typedUpTo=k+1;if(++k<3){n=0;typing=setTimeout(step,220)}
+      else if(!introDone){caret.hidden=true}
+      else{caret.hidden=true;flow(1);timers=build(mock,1,function(ev,j){
+        if(ev==="s")sents.forEach(function(s,q){s.classList.toggle("hl",q===j)});
+        else{timers.push(setTimeout(function(){sents.forEach(function(s){s.classList.remove("hl")})},900));review()}})}}
+    })();
+  }
+  function stopAuto(){auto=false;clearTimeout(cycle);introDone=true}
+  tbtns.forEach(function(b){b.addEventListener("click",function(){stopAuto();show(+b.dataset.v);b.scrollIntoView({block:"nearest",inline:"nearest"})})});
+  var goBtn=$("#try .btn");
+  input.addEventListener("focus",function(){stopAuto();goBtn.classList.remove("nudge");input.select()});
+  input.addEventListener("input",function(){userName=input.value.trim();stopAuto();setName()});
+  // one click is enough: the filled-in name (or whatever was typed) goes into the example
+  $("#try").addEventListener("submit",function(e){e.preventDefault();goBtn.classList.remove("nudge");userName=input.value.trim();stopAuto();setName();show(cur);
+    if(matchMedia("(max-width: 860px)").matches)toPreview()});
+  $$("[data-focus]").forEach(function(a){a.addEventListener("click",function(e){e.preventDefault();stopAuto();
     input.scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"});setTimeout(function(){input.focus({preventScroll:true})},reduce?0:500)})});
   addEventListener("resize",moveInd);
+  document.addEventListener("visibilitychange",function(){if(document.hidden)clearTimeout(cycle);else if(auto&&introDone&&!timers.length)cycle=setTimeout(function(){show((cur+1)%looks.length)},1500)});
   document.fonts&&document.fonts.ready.then(moveInd);
+
+  // the scroll intro: on a wide screen the hero is pinned for a screen and a half; scrolling moves the
+  // headline and your words into place, brings the browser up from below and puts the site up block by
+  // block. Once it is built the demo behaves as usual (tabs, your name, the cycle of looks).
+  var intro=false,introDone=true,hero=$("#hero"),pinEl=$("#pin"),cueEl=$("#cue"),sayEl=$(".say"),h1=$("h1"),
+      fadeEls=$$(".who,.lead,.try,.tabs-w,.more,.note"),geo=null,html=document.documentElement;
+  function ease(x){return x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2}
+  function clamp(x){return x<0?0:x>1?1:x}
+  function tf(el,g,t){el.style.transform=t<=0?"":"translate("+(g.dx*t).toFixed(1)+"px,"+(g.dy*t).toFixed(1)+"px) scale("+(1+(g.s-1)*t).toFixed(4)+")"}
+  function measure(){
+    [h1,sayEl,stage].forEach(function(e){e.style.transform=""});
+    var vw=innerWidth,vh=innerHeight,ht=hero.getBoundingClientRect().top;
+    function r(e){var b=e.getBoundingClientRect();return{l:b.left,t:b.top-ht,w:b.width,h:b.height}}
+    var a=r(h1),b=r(sayEl),c=r(stage);
+    var s0=Math.min(1.18,(vw-80)/a.w),cy=vh*.42;
+    var g0={s:s0,dx:vw/2-a.l-a.w*s0/2,dy:cy-a.t-a.h*s0/2};
+    var s1=Math.min(1.08,(vw-80)/b.w),by=cy+a.h*s0/2+36;
+    var g1={s:s1,dx:vw/2-b.l-b.w*s1/2,dy:by-b.t};
+    var s2=.88;
+    var g2={s:s2,dx:vw/2-c.l-c.w*s2/2,dy:vh+24-c.t};
+    geo={h1:g0,say:g1,stage:g2};
+  }
+  function progress(){var top=pinEl.getBoundingClientRect().top,len=pinEl.offsetHeight-innerHeight;return len>0?clamp(-top/len):1}
+  function applyIntro(){
+    if(!geo)measure();
+    var p=progress(),r=ease(clamp(p/.16)),q=ease(clamp((p-.03)/.15)),o=clamp((p-.9)/.1);
+    tf(h1,geo.h1,1-r);tf(sayEl,geo.say,1-r);tf(stage,geo.stage,1-q);
+    fadeEls.forEach(function(e){e.style.opacity=o;e.style.transform=o<1?"translateY("+((1-o)*16).toFixed(1)+"px)":""});
+    cueEl.style.opacity=clamp(1-p*12);
+    if(!introDone&&p>.02)endTyping();
+    scrub((p-.2)/.68,p>=.999);
+  }
+  function endTyping(){if(!typing)return;clearTimeout(typing);typing=0;for(var k=0;k<3;k++)sents[k].textContent=sent(k)+(k<2?" ":"");typedUpTo=3;caret.hidden=true}
+  // scroll-driven build: t runs 0..1 over the blocks; done hands the demo back to the usual cycle
+  function scrub(t,done){
+    if(introDone)return;
+    var ld=$(".ld",mock),n=0,b=t/.46,c=clamp((t-.5)/.16),e=clamp((t-.84)/.12);
+    flow(t<=0?0:t<.48?1:t<.68?2:t<.8?3:4);checks(Math.floor(c*CHECKS.length+1e-6),t>=.48&&t<.68);publish(t>=.68);
+    edit(t<.8?-1:Math.floor(e*EDITS[cur].length+1e-6),t>=.8&&t<.97);
+    var sv=$(".cms .sv",mock);if(sv)sv.classList.toggle("press",t>=.95&&t<.97);
+    SEQ.forEach(function(s,i){var on=b>=i/(SEQ.length-1),el=$('[data-b="'+s[0]+'"]',mock);if(el)el.classList.toggle("on",on);if(on){n=i+1;if(s[2]!=null)sents.forEach(function(x,q2){x.classList.toggle("hl",q2===s[2])})}});
+    if(ld){ld.classList.remove("done");ld.style.width=n?Math.round(n/SEQ.length*92)+"%":"0"}
+    if(!n)sents.forEach(function(x){x.classList.remove("hl")});
+    if(done){introDone=true;finish(mock);checks(CHECKS.length,false);publish(true);edit(EDITS[cur].length,false);flow(4);sents.forEach(function(x){x.classList.remove("hl")});if(auto)cycle=setTimeout(function(){show((cur+1)%looks.length)},4600)}
+  }
+  var introRaf=0;
+  function onScroll(){if(introRaf)return;introRaf=requestAnimationFrame(function(){introRaf=0;if(intro)applyIntro();else if(phone)applyPhone()})}
+  function setupIntro(){
+    if(reduce||!matchMedia("(min-width: 981px) and (min-height: 680px) and (pointer: fine)").matches)return;
+    html.classList.add("intro");
+    if(hero.offsetHeight>innerHeight+8){html.classList.remove("intro");return}
+    intro=true;introDone=false;measure();applyIntro();
+    addEventListener("scroll",onScroll,{passive:true});
+    addEventListener("resize",function(){if(!intro)return;if(hero.offsetHeight>innerHeight+8||!matchMedia("(min-width: 981px)").matches){
+      intro=false;introDone=true;html.classList.remove("intro");[h1,sayEl,stage].concat(fadeEls).forEach(function(e){e.style.transform="";e.style.opacity=""});finish(mock);
+      if(auto)cycle=setTimeout(function(){show((cur+1)%looks.length)},2000);return}
+      measure();applyIntro()});
+  }
+  setupIntro();
+
+  // the phone intro: like the wide screen, the first screen is only the headline and your words. The
+  // headline and your words sit in a pinned screen; scrolling brings the browser up from below and puts
+  // the site up block by block, then the page scrolls on (the try-it form, the tabs, the rest).
+  var phone=false,narrow=matchMedia("(max-width: 860px)"),demoEl=$(".demo"),work=$(".work"),whoEl=$(".who"),ph=null,phSt=null,pg=null;
+  function measurePhone(){
+    [h1,sayEl,stage].forEach(function(e){e.style.transform=""});stage.style.maxWidth="";
+    var vh=innerHeight,top=phSt.getBoundingClientRect().top,gap=parseFloat(getComputedStyle(sayEl).marginBottom)||0;
+    var over=h1.offsetHeight+parseFloat(getComputedStyle(demoEl).marginTop)+demoEl.offsetHeight+72-vh;
+    if(over>0){var w=Math.floor(stage.offsetWidth*(1-over/stage.offsetHeight));if(w<220)return false;stage.style.maxWidth=w+"px"}
+    pg={shift:(stage.offsetHeight+gap)/2,drop:vh+24-(stage.getBoundingClientRect().top-top)};
+    return true;
+  }
+  function applyPhone(){
+    var len=ph.offsetHeight-innerHeight,p=len>0?clamp(-ph.getBoundingClientRect().top/len):1,r=ease(clamp(p/.1)),s=pg.shift*(1-r);
+    h1.style.transform=sayEl.style.transform=s>.5?"translateY("+s.toFixed(1)+"px)":"";
+    stage.style.transform=r<1?"translateY("+(pg.drop*(1-r)).toFixed(1)+"px)":"";
+    cueEl.style.opacity=clamp(1-p*15);
+    if(!introDone&&p>.01)endTyping();
+    scrub((p-.12)/.8,p>=.95);
+  }
+  function undoPhone(){
+    phone=false;html.classList.remove("phi");
+    hero.insertBefore(whoEl,ph);hero.insertBefore(h1,ph);work.appendChild(demoEl);hero.appendChild(cueEl);ph.remove();
+    [h1,sayEl,stage].forEach(function(e){e.style.transform=""});stage.style.maxWidth="";cueEl.style.opacity="";
+  }
+  function setupPhone(){
+    if(intro||reduce||!narrow.matches)return;
+    ph=document.createElement("div");ph.className="ph";phSt=document.createElement("div");phSt.className="ph-st";ph.appendChild(phSt);
+    hero.insertBefore(ph,work);phSt.appendChild(h1);phSt.appendChild(demoEl);phSt.appendChild(cueEl);
+    work.firstElementChild.insertBefore(whoEl,work.firstElementChild.firstChild);
+    html.classList.add("phi");
+    if(!measurePhone()){undoPhone();return}
+    phone=true;introDone=false;applyPhone();
+    addEventListener("scroll",onScroll,{passive:true});
+    addEventListener("resize",function(){if(!phone)return;
+      if(!narrow.matches||!measurePhone()){undoPhone();endTyping();scrub(1,true);return}
+      applyPhone()});
+    document.fonts&&document.fonts.ready.then(function(){if(phone&&measurePhone())applyPhone()});
+  }
+  // after "Postavi" on a phone, show the finished preview (the end of the pinned screen)
+  function toPreview(){
+    if(phone){var y=ph.getBoundingClientRect().top+scrollY+ph.offsetHeight-innerHeight;scrollTo({top:y,behavior:reduce?"auto":"smooth"})}
+    else stage.scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"});
+  }
+  setupPhone();
+  show(0);requestAnimationFrame(function(){tabs.classList.add("ready")});
+  if(intro)applyIntro();
+  if(intro)document.fonts&&document.fonts.ready.then(function(){measure();applyIntro()});
 
   // scroll: reveal, and build the small site when it comes into view
   var mini=$("#mini"),typed=$("#typed"),caret2=$("#caret2"),story=typed.textContent;
