@@ -11,6 +11,7 @@ Written on 2026-10-16 from an inventory of TASKS.md (263 done, 158 open), HQ, do
 ## Now
 
 - **Current milestone:** M2 Launch gate: accounts, editor, email. M1 closed on 2026-10-18 (owner: "close M1"; final check 6 of 10 against a bar of 8, not re-scored by the owner's decision). M2 (docs/plans/m2-launch-gate.md): 2 of 6 met (editor kept, junk field live). Live since 2026-10-18: email from mail.postavi.si, the missing PHASE-2 tests, the live smoke (16/16). Next: **the owner's phone run** (docs/owner-phone-run.md), which closes criteria 1, 2, 5 and 6. One M1 follow-up for M2's first week: the slaščičarna hours badge under the phone buttons (TASKS).
+- **Order (owner, 2026-10-18):** company registration comes last; next after M2 are M5 (domains, with the Postavi rename) and M6 (operations), then M4 in test mode and M7a, a free beta.
 - **Owner, in parallel (long lead times):** register the company (M3), find a lawyer for the legal pages (M3). New name Postavi; postavi.si bought 2026-10-17 (M5).
 - **Side work (owner switched to it, 2026-10-18):** the postavi.si coming-soon page: phone intro, the description → build → review → publish → edit demo, the search story, the time band, "live site with an editor" copy (#231, #233, #238, this PR).
 - **Last updated:** 2026-10-18.
@@ -19,7 +20,7 @@ Written on 2026-10-16 from an inventory of TASKS.md (263 done, 158 open), HQ, do
 
 ## Milestones
 
-Claude's track runs in order: M1 → M2 → M4 → M5 → M6 → M7. M3 is mostly the owner's and runs alongside from today, because company registration and the lawyer take weeks.
+Claude's track runs in order (owner, 2026-10-18: the company is registered last, so everything that doesn't need it comes first): M1 → M2 → M5 → M6 → M4 built in test mode → M7a free beta → (company registered, M3) → M7b paid launch. M3's company and lawyer are the last switch before charging money; M3's drafts (terms, privacy) are written before that with the company details as marked placeholders.
 
 Each milestone has exit criteria. A milestone is done only when every criterion is met and checked. No "80 %" milestones: half-done work stays open on this page, and is not quietly left behind for something new.
 
@@ -70,7 +71,7 @@ Exit criteria:
 - [ ] AI-label wording checked by the owner (D1: caption + file mark).
 - [ ] The launch check (apps/web/src/legal.tsx) passes.
 
-### M4 · Payments (Claude, after M3's company) — 0 of 4 met
+### M4 · Payments (Claude; built and tested in test mode before the company exists, switched on with it) — 0 of 5 met
 
 A customer can pay and we can account for it.
 
@@ -78,6 +79,7 @@ Exit criteria:
 - [ ] Decision on the 1.0 payment path. Recommendation: yearly plans by invoice + bank transfer (UPN QR) first, Stripe for monthly after launch (TASKS:368–370, :405).
 - [ ] Plans from config charged correctly: Osnovni €15/€150, Plus €29/€290, founding €99, setup €79. Invoices are numbered and legal. `plans.billingEnabled` true.
 - [ ] Publishing a site requires an active plan. A test payment end to end on the live app (provider test mode).
+- [ ] A switch-on checklist for the day the company exists: the config fields, live keys and the one live payment test, each step written down; built and tested on placeholder company data before then.
 - [ ] Upsells that need billing (TASKS:374) are done or parked.
 
 ### M5 · Domains (Claude + owner purchases) — 0 of 4 met (adapters and UI built on fakes)
@@ -102,13 +104,17 @@ Exit criteria:
 - [x] Analytics events on (TASKS:360, `analytics.events`; PR #224, 2026-10-17).
 - [ ] **Switches cleaned up** (owner, 2026-10-17: must happen before launch). All remaining `promptFixes` (pictures, critique, altText, judge, brief, classifier, edit) and the cost and speed switches (`costCuts.secondCritiqueOnlyOnFailures`, `costCuts.contentRetryAsPatch`, `prompts.compactCatalogue`, `pipeline.homepageFirst`, `structuredOutputForContent`) are turned on after an eval. The experiments (`designer.agent` studio, `variety.genome`, `useFullBuildModel`) are deleted with their code. No dead switches at launch.
 
-### M7 · Launch (owner + Claude) — 0 of 5 met
+### M7 · Launch (owner + Claude), in two steps (owner, 2026-10-18) — 0 of 5 met
 
-Exit criteria:
+**M7a · Free beta (no company needed):** the first real businesses use Postavi free; no money changes hands. The owner checks with an accountant or lawyer that a free beta under their own name is fine.
+
+- [ ] First 3 real businesses onboarded (owner's network) and happy.
+- [ ] Lighthouse mobile ≥ 90 performance and 100 accessibility on generated sites. Targets: homepage ≤ €0.30 and ≤ 60 s, full site ≤ €1.50 and ≤ 4 min (PRODUCT.md).
+
+**M7b · Paid launch (after the company, M3 and M4 switched on):**
+
 - [ ] Landing page and pricing page match config and the legal pages.
 - [ ] Founding offer (first 100) works end to end.
-- [ ] Lighthouse mobile ≥ 90 performance and 100 accessibility on generated sites. Targets: homepage ≤ €0.30 and ≤ 60 s, full site ≤ €1.50 and ≤ 4 min (PRODUCT.md).
-- [ ] First 3 real businesses onboarded (owner's network) and happy.
 - [ ] Go-to-market items needed on day one (TASKS:469+, the owner picks which).
 
 ---
