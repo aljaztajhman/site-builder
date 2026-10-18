@@ -311,6 +311,9 @@ describe("anonymous: one homepage per device", () => {
     const { rows } = await platform.db.query<{ ip_key: string }>("select ip_key from ai_jobs where ip_key <> ''");
     expect(rows.length).toBeGreaterThan(0);
     expect(JSON.stringify(rows)).not.toContain(ip);
+    // The cap is per network: the (n+1)th stays refused, another address still gets its preview (phase 2 done-means).
+    expect((await intake(req, await newBrowser(req), { ip })).status).toBe(429);
+    expect((await intake(req, await newBrowser(req), { ip: "198.51.100.78" })).status).toBe(303);
     await runQueued();
   });
 });
