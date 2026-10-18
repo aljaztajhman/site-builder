@@ -1484,6 +1484,22 @@ a.plate:hover .plate__num {
   }
 }
 
+/* A primary action a direction fills (above) stays a button under the skeleton's underline buttons: the fill beats the
+   underline style's transparent ground, so the padding, the centred label and the plain label come back with it (M1
+   final check: "Poglejte cene" as a filled block with an underlined label against its left edge). */
+body[data-buttons="underline"] main :is(.tone-inverse, .tone-band) .label-card .btn--primary,
+body[data-buttons="underline"][data-motif="crust"] main :is(.tone-inverse, .tone-band) .btn--primary,
+body[data-buttons="underline"][data-motif="spoon"] main .tone-inverse .btn--primary,
+body[data-buttons="underline"][data-motif="trail"] main .btn--primary,
+body[data-buttons="underline"][data-motif="bend"] main .btn--primary {
+  justify-content: center;
+  min-width: 3rem;
+  padding-inline: 1.25rem;
+  border-radius: var(--radius);
+  font-size: var(--fs-base);
+  text-decoration: none;
+}
+
 /* ---------- sub-trade motifs (spec v15 business.subtype): a trade's own pieces on its template's layout ---------- */
 /* Every rule names its [data-submotif]: the stylesheets of sites without one stay as they were (render shared.ts). */
 

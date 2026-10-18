@@ -31,7 +31,8 @@ function templateDesign(id: string): Design {
   };
 }
 
-const KRANJ: Business = { ...FULL_BUSINESS, type: "car-repair", phone: "+38641555730", address: { street: "Savska cesta 52", postalCode: "4000", city: "Kranj" } };
+// A car repair shop by name: the plate needs the site's words to name vehicles (spec worksOnVehicles).
+const KRANJ: Business = { ...FULL_BUSINESS, name: "Avtoservis Mrak", type: "car-repair", phone: "+38641555730", address: { street: "Savska cesta 52", postalCode: "4000", city: "Kranj" } };
 const ctxFor = (dir: string, business: Business = KRANJ) => testCtx(testSpec({ design: templateDesign(dir), business }));
 
 const hero = (variant: SectionOf<"hero-signature">["variant"], props: Partial<SectionOf<"hero-signature">["props"]> = {}): SectionOf<"hero-signature"> =>

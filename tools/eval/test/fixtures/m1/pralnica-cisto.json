@@ -1,0 +1,307 @@
+{
+  "slug": "pralnica-cisto",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Pralnica in likalnica Čisto, Logatec",
+        "description": "Pralnica in likalnica v Logatcu. Perilo operemo, posušimo in zložimo. Sprejemamo tudi odeje, preproge in zavese. Tržaška cesta 36."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "tone": "inverse",
+          "type": "hero-signature",
+          "props": {
+            "fact": "address",
+            "image": "img_g2",
+            "intro": "Prinesite perilo, mi poskrbimo za ostalo. Sprejemamo tudi odeje, preproge in zavese za težje madeže.",
+            "primary": {
+              "label": "Poglejte cene",
+              "target": {
+                "page": "p_home",
+                "section": "s_cene"
+              }
+            },
+            "headline": "Perilo operemo, posušimo in zložimo",
+            "secondary": {
+              "label": "Kdaj smo odprti",
+              "target": {
+                "page": "p_home",
+                "section": "s_ure"
+              }
+            }
+          },
+          "variant": "label"
+        },
+        {
+          "id": "s_cene",
+          "type": "price-list",
+          "props": {
+            "intro": "Za večje količine in redne stranke se dogovorimo za posebno ceno.",
+            "title": "Cene na kratko",
+            "groups": [
+              {
+                "items": [
+                  {
+                    "name": "Pranje in sušenje perila",
+                    "note": "na kilogram, zloženo",
+                    "price": {
+                      "amount": 3
+                    }
+                  },
+                  {
+                    "name": "Likanje srajce",
+                    "note": "na srajco",
+                    "price": {
+                      "amount": 2
+                    }
+                  },
+                  {
+                    "name": "Pranje odeje",
+                    "note": "na odejo",
+                    "price": {
+                      "amount": 12
+                    }
+                  },
+                  {
+                    "name": "Pranje zaves",
+                    "price": {
+                      "amount": 6
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "variant": "tags"
+        },
+        {
+          "id": "s_ure",
+          "tone": "alt",
+          "type": "opening-hours",
+          "props": {
+            "title": "Delovni čas"
+          },
+          "variant": "table"
+        },
+        {
+          "id": "s_obrtniki",
+          "type": "image-text",
+          "props": {
+            "image": "img_g1",
+            "heading": "Čiste delovne obleke za obrtnike",
+            "paragraphs": [
+              "Pomagamo majhnim obrtnikom, ki potrebujejo čiste delovne obleke. Operemo jih, posušimo in zložimo."
+            ]
+          },
+          "variant": "round"
+        },
+        {
+          "id": "s_kontakt",
+          "tone": "inverse",
+          "type": "contact",
+          "props": {
+            "intro": "Za večje količine, odeje, preproge in zavese nas pokličite ali se oglasite v Logatcu.",
+            "title": "Pokličite za pranje in likanje"
+          },
+          "variant": "call-out"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Pralnica in likalnica Čisto",
+        "description": "Kako Pralnica in likalnica Čisto obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Pralnica in likalnica Čisto",
+        "description": "Izjava o dostopnosti spletne strani Pralnica in likalnica Čisto."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-17",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Pralnica in likalnica Čisto",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "images": [
+      {
+        "id": "img_g1",
+        "alt": "Zloženi čisti brisači na leseni polici",
+        "src": "sites/site_295556361da4ee2d/generated/img_g1.jpg",
+        "width": 1536,
+        "height": 1024,
+        "origin": "generated"
+      },
+      {
+        "id": "img_g2",
+        "alt": "Bele srajce na obešalnikih ob oknu",
+        "src": "sites/site_295556361da4ee2d/generated/img_g2.jpg",
+        "width": 1536,
+        "height": 1024,
+        "origin": "generated"
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "compact"
+    },
+    "header": {
+      "cta": "call",
+      "tone": "inverse",
+      "variant": "bar"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.25,
+    "colors": {
+      "band": "#1f5f7a",
+      "text": "#23281a",
+      "muted": "#4d5440",
+      "accent": "#b07a22",
+      "border": "#cadde4",
+      "onBand": "#ffffff",
+      "inverse": "#12384a",
+      "primary": "#1f5f7a",
+      "surface": "#e2eef2",
+      "onInverse": "#f5f5f5",
+      "onPrimary": "#ffffff",
+      "background": "#ffffff"
+    },
+    "radius": 6,
+    "shadow": "none",
+    "density": "regular",
+    "imagery": "natural",
+    "fontPair": "newsreader-libre-franklin",
+    "skeleton": {
+      "cards": "filled",
+      "width": "contained",
+      "footer": "visit",
+      "header": "compact",
+      "actions": "bar",
+      "buttons": "underline",
+      "dividers": "none",
+      "footerTone": "inverse",
+      "photoRatio": "landscape"
+    },
+    "direction": "etiketa",
+    "headingCase": "normal",
+    "baseFontSize": 17,
+    "headingWeight": 700,
+    "headingTracking": -0.025
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Pralnica in likalnica Čisto",
+    "type": "shop",
+    "email": {
+      "$placeholder": "email"
+    },
+    "hours": {
+      "entries": [
+        {
+          "to": "fri",
+          "from": "mon",
+          "open": "07:00",
+          "close": "18:00"
+        },
+        {
+          "to": "sat",
+          "from": "sat",
+          "open": "08:00",
+          "close": "12:00"
+        }
+      ]
+    },
+    "phone": "+38615554163",
+    "address": {
+      "city": "Logatec",
+      "street": "Tržaška cesta 36",
+      "postalCode": "1370"
+    },
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      }
+    }
+  },
+  "specVersion": 21
+}

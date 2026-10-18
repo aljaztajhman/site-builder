@@ -1,0 +1,316 @@
+{
+  "slug": "kamp-soska",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Kamp Soška, kamp ob Soči pri Kobaridu",
+        "description": "Majhen družinski kamp ob reki Soči, deset minut peš od središča Kobarida. Prostor za dvajset šotorov in deset avtodomov. Psi so dobrodošli."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "type": "hero-image",
+          "props": {
+            "image": "img_01",
+            "intro": "Majhen družinski kamp za planince, kolesarje, kajakaše in družine. Zvečer zakurimo ognjišče.",
+            "eyebrow": "Odprto od aprila do oktobra",
+            "primary": {
+              "label": "Poglejte cene",
+              "target": {
+                "page": "p_home",
+                "section": "s_prices"
+              }
+            },
+            "headline": "Šotor ob smaragdni Soči, mesto pa deset minut stran"
+          },
+          "variant": "overlay-bottom"
+        },
+        {
+          "id": "s_contact",
+          "tone": "alt",
+          "type": "contact-strip",
+          "props": {
+            "title": "Obiščite nas"
+          },
+          "variant": "cards"
+        },
+        {
+          "id": "s_about",
+          "type": "image-text",
+          "props": {
+            "image": "img_02",
+            "heading": "Majhen kamp, kjer se hitro počutite doma",
+            "paragraphs": [
+              "Prostora imamo za dvajset šotorov in deset avtodomov. Otroci se lahko igrajo na trati, vi pa si ob večerih ogrejete ob ognjišču.",
+              "Psi so pri nas dobrodošli, če so na povodcu."
+            ]
+          },
+          "variant": "image-left"
+        },
+        {
+          "id": "s_kitchen",
+          "type": "image-text",
+          "props": {
+            "image": "img_03",
+            "heading": "Skupna kuhinja z mizo za vse",
+            "paragraphs": [
+              "Dolga lesena miza, police s posodo in plinski kuhalnik. Skuhate lahko tudi, ko vreme ni najboljše."
+            ]
+          },
+          "variant": "image-right"
+        },
+        {
+          "id": "s_prices",
+          "tone": "alt",
+          "type": "price-list",
+          "props": {
+            "title": "Cene na noč",
+            "groups": [
+              {
+                "name": "Nočitev",
+                "items": [
+                  {
+                    "name": "Odrasla oseba",
+                    "price": {
+                      "unit": "na noč",
+                      "amount": 12
+                    }
+                  },
+                  {
+                    "name": "Otrok do 12 let",
+                    "price": {
+                      "unit": "na noč",
+                      "amount": 6
+                    }
+                  },
+                  {
+                    "name": "Šotor",
+                    "price": {
+                      "unit": "na noč",
+                      "amount": 4
+                    }
+                  },
+                  {
+                    "name": "Avtodom",
+                    "price": {
+                      "unit": "na noč",
+                      "amount": 18
+                    }
+                  }
+                ]
+              },
+              {
+                "name": "Dodatno",
+                "items": [
+                  {
+                    "name": "Zajtrk po naročilu",
+                    "note": "Zajtrk naročite vnaprej.",
+                    "price": {
+                      "unit": "na osebo",
+                      "amount": 7
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "variant": "table"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Kamp Soška",
+        "description": "Kako Kamp Soška obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Kamp Soška",
+        "description": "Izjava o dostopnosti spletne strani Kamp Soška."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-17",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Kamp Soška",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "images": [
+      {
+        "id": "img_01",
+        "alt": "Oranžen šotor na travniku ob smaragdno zeleni gorski reki, v ozadju gozdnata pobočja in gore.",
+        "src": "sites/site_7d6b64724c0ade0a/uploads/photo0.jpg",
+        "focal": {
+          "x": 0.25,
+          "y": 0.6
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_02",
+        "alt": "Bel avtodom na makadamu med drevesi na kampirnem mestu, pred njim zložljiva miza in stol.",
+        "src": "sites/site_7d6b64724c0ade0a/uploads/photo1.jpg",
+        "focal": {
+          "x": 0.6,
+          "y": 0.55
+        },
+        "width": 1024,
+        "height": 1536
+      },
+      {
+        "id": "img_03",
+        "alt": "Skupna kuhinja z dolgo leseno mizo, policami s posodo, plinskim kuhalnikom in oknom s pogledom na gozd.",
+        "src": "sites/site_7d6b64724c0ade0a/uploads/photo2.jpg",
+        "focal": {
+          "x": 0.45,
+          "y": 0.5
+        },
+        "width": 1536,
+        "height": 1024
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "columns"
+    },
+    "header": {
+      "cta": "call",
+      "variant": "bar"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.25,
+    "colors": {
+      "text": "#13261a",
+      "muted": "#44574a",
+      "accent": "#96602f",
+      "border": "#cfdcd2",
+      "inverse": "#12241a",
+      "primary": "#374b2b",
+      "surface": "#ffffff",
+      "onInverse": "#f5f5f5",
+      "onPrimary": "#ffffff",
+      "background": "#eef5ef"
+    },
+    "radius": 4,
+    "shadow": "none",
+    "density": "regular",
+    "imagery": "full-bleed",
+    "fontPair": "bitter-nunito-sans",
+    "skeleton": {
+      "cards": "bordered",
+      "width": "wide",
+      "footer": "wordmark",
+      "header": "centred",
+      "actions": "float",
+      "buttons": "underline",
+      "dividers": "none",
+      "footerTone": "default",
+      "photoRatio": "standard"
+    },
+    "direction": "alpine-nature",
+    "headingCase": "normal",
+    "baseFontSize": 17,
+    "headingWeight": 700,
+    "headingTracking": -0.01
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Kamp Soška",
+    "type": "tourist-farm",
+    "email": "info@kamp-soska.example",
+    "hours": {
+      "$placeholder": "hours"
+    },
+    "phone": "+386040555619",
+    "address": {
+      "city": "Kobarid",
+      "street": "Gregorčičeva ulica 24",
+      "postalCode": "5222"
+    },
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      }
+    }
+  },
+  "specVersion": 21
+}

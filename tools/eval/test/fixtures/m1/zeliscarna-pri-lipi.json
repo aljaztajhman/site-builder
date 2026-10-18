@@ -1,0 +1,331 @@
+{
+  "slug": "zeliscarna-pri-lipi",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Zeliščarna in čajnica Pri Lipi, Ribnica",
+        "description": "Domača zelišča, čaji, tinkture, mazila in sirupi iz Ribnice. Postanite ob skodelici čaja v čajnici za osem ljudi. Odprto od torka do sobote."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "tone": "inverse",
+          "type": "hero-signature",
+          "props": {
+            "fact": "opening",
+            "image": "img_01",
+            "inset": "img_02",
+            "intro": "Zelišča nabiramo na Kočevskem in Veliki gori, jih posušimo v senci in zmešamo v čaje po babičinih receptih.",
+            "primary": {
+              "label": "Poglejte izbor izdelkov",
+              "target": {
+                "page": "p_home",
+                "section": "s_izdelki"
+              }
+            },
+            "headline": "Zelišča z Gore v vaši skodelici",
+            "factLabel": "Vrata trgovinice odpiramo",
+            "secondary": {
+              "label": "Obiščite nas",
+              "target": {
+                "action": "directions"
+              }
+            }
+          },
+          "variant": "label"
+        },
+        {
+          "id": "s_hours",
+          "tone": "alt",
+          "type": "opening-hours",
+          "props": {
+            "note": "V čajnici je prostor za osem ljudi, zato se lahko ob skodelici čaja ustavite tudi samo za trenutek.",
+            "title": "Kdaj vas pričakamo v trgovinici"
+          },
+          "variant": "table"
+        },
+        {
+          "id": "s_cajnica",
+          "tone": "band",
+          "type": "image-text",
+          "props": {
+            "link": {
+              "label": "Pokličite nas",
+              "target": {
+                "action": "call"
+              }
+            },
+            "image": "img_03",
+            "heading": "Postanek ob skodelici čaja",
+            "paragraphs": [
+              "V čajnici je prostor za osem ljudi. Skodelica čaja stane 2,50 €, pogled skozi okno pa je brezplačen.",
+              "Za večjo družbo nas raje vnaprej pokličite, da pripravimo mizo."
+            ]
+          },
+          "variant": "round"
+        },
+        {
+          "id": "s_izdelki",
+          "type": "price-list",
+          "props": {
+            "intro": "Zelišča nabiramo na Kočevskem in Veliki gori, nekaj jih pridelamo na vrtu za hišo. Sušimo jih v senci, brez umetnih dodatkov.",
+            "title": "Iz naše trgovinice",
+            "groups": [
+              {
+                "items": [
+                  {
+                    "name": "Čaj za prehlad",
+                    "price": {
+                      "amount": 4
+                    }
+                  },
+                  {
+                    "name": "Zeliščna tinktura",
+                    "price": {
+                      "amount": 9
+                    }
+                  },
+                  {
+                    "name": "Mazilo iz nevena",
+                    "price": {
+                      "amount": 7
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "variant": "tags"
+        },
+        {
+          "id": "s_contact",
+          "tone": "inverse",
+          "type": "contact",
+          "props": {
+            "intro": "Za naročila, vprašanja o zeliščih ali rezervacijo mize v čajnici nas pokličite ali se oglasite.",
+            "title": "Pokličite za naročilo ali obisk"
+          },
+          "variant": "call-out"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov | Zeliščarna in čajnica Pri Lipi",
+        "description": "Kako Zeliščarna in čajnica Pri Lipi obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Zeliščarna in čajnica Pri Lipi",
+        "description": "Izjava o dostopnosti spletne strani Zeliščarna in čajnica Pri Lipi."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-17",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Zeliščarna in čajnica Pri Lipi",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "logo": {
+      "src": "sites/site_a9fe0b764bae1266/uploads/logo.svg",
+      "file": "logo.png",
+      "width": 152,
+      "height": 48
+    },
+    "images": [
+      {
+        "id": "img_01",
+        "alt": "Šopki sušeče se sivke, rman in mete visijo z lesenega trama v kamniti sobi z oknom.",
+        "src": "sites/site_a9fe0b764bae1266/uploads/photo0.jpg",
+        "focal": {
+          "x": 0.5,
+          "y": 0.45
+        },
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "id": "img_02",
+        "alt": "Lesena polica s stekleniimi kozarci posušenih zelišč, papirnatimi vrečkami čaja in temnimi stekleničkami tinktur.",
+        "src": "sites/site_a9fe0b764bae1266/uploads/photo1.jpg",
+        "focal": {
+          "x": 0.4,
+          "y": 0.5
+        },
+        "width": 1024,
+        "height": 1536
+      },
+      {
+        "id": "img_03",
+        "alt": "Skodelica dišečega zeliščnega čaja in lonček na leseni mizi ob oknu z razgledom na vas s cerkvijo in griči.",
+        "src": "sites/site_a9fe0b764bae1266/uploads/photo2.jpg",
+        "focal": {
+          "x": 0.45,
+          "y": 0.62
+        },
+        "width": 1536,
+        "height": 1024
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "compact"
+    },
+    "header": {
+      "cta": "call",
+      "variant": "bar"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.25,
+    "colors": {
+      "band": "#577a38",
+      "text": "#23281a",
+      "muted": "#4d5440",
+      "accent": "#709d48",
+      "border": "#cfd6bb",
+      "onBand": "#ffffff",
+      "inverse": "#3b4819",
+      "primary": "#577a38",
+      "surface": "#e3ebd3",
+      "onInverse": "#f5f5f5",
+      "onPrimary": "#ffffff",
+      "background": "#ffffff"
+    },
+    "radius": 6,
+    "shadow": "none",
+    "density": "airy",
+    "imagery": "natural",
+    "fontPair": "lora-karla",
+    "skeleton": {
+      "cards": "bordered",
+      "width": "wide",
+      "footer": "wordmark",
+      "header": "compact",
+      "actions": "float",
+      "buttons": "underline",
+      "centred": [
+        "s_galerija"
+      ],
+      "dividers": "rule",
+      "footerTone": "inverse",
+      "photoRatio": "standard"
+    },
+    "direction": "etiketa",
+    "headingCase": "normal",
+    "baseFontSize": 17,
+    "headingWeight": 700,
+    "headingTracking": -0.025
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Zeliščarna in čajnica Pri Lipi",
+    "type": "shop",
+    "email": "lipa@zeliscarna-lipa.example",
+    "hours": {
+      "entries": [
+        {
+          "to": "fri",
+          "from": "tue",
+          "open": "09:00",
+          "close": "17:00"
+        },
+        {
+          "to": "sat",
+          "from": "sat",
+          "open": "09:00",
+          "close": "12:00"
+        }
+      ]
+    },
+    "phone": "+38631555477",
+    "address": {
+      "city": "Ribnica",
+      "street": "Škrabčev trg 4",
+      "postalCode": "1310"
+    },
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      }
+    }
+  },
+  "specVersion": 21
+}
