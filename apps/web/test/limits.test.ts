@@ -22,7 +22,8 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const PASSWORD = "test-password-1234";
 // A higher daily cap, so the pools (shares of it) have room for every test in this file; the shares are config's.
 const config = structuredClone(loadConfig());
-// The junk check is off in production config (owner, 2026-10-01); the mechanism is still tested at these values.
+// Production config refuses junk on the classifier's isBusiness alone (minClassifierConfidence 0); the length and
+// confidence minimums are tested at these values too.
 config.tiers.junk = { minDescriptionChars: 40, minClassifierConfidence: 0.5 };
 config.limits.dailyModelSpendCapEur = 100;
 // A small per-account cap on photo descriptions, so the loop below stays short; the mechanism is config's.
@@ -47,11 +48,12 @@ const siteverify = (async (url: string, init: RequestInit) => {
   return new Response(JSON.stringify(ok ? { success: true } : { success: false, "error-codes": ["invalid-input-response"] }));
 }) as unknown as typeof fetch;
 
-/** The classifier stand-in: "junk" text can't be placed; its call is logged like the real one (€0.0006). */
+/** The classifier stand-in: "asdf" text can't be placed, "bitcoin" is sure of a type but no business; its call is logged like the real one (€0.0006). */
 const classifyIntake: ClassifyIntake = async (description, ctx) => {
   await platform.repo.logModelCall({ siteId: ctx.siteId, jobId: null, stage: "classify", model: "claude-haiku-4-5-20251001", inputTokens: 600, outputTokens: 20, cacheCreationTokens: 0, cacheReadTokens: 0, costEur: 0.0006, durationMs: 1, ok: true, tier: ctx.tier, accountId: ctx.accountId, aiJobId: ctx.aiJobId });
   if (/kaboom/.test(description)) throw new Error("API unreachable");
-  return /asdf/.test(description) ? { businessType: "shop", confidence: 0.12 } : { businessType: "bakery", confidence: 0.97 };
+  if (/bitcoin/.test(description)) return { isBusiness: false, businessType: "shop", confidence: 0.95 };
+  return /asdf/.test(description) ? { isBusiness: true, businessType: "shop", confidence: 0.12 } : { isBusiness: true, businessType: "bakery", confidence: 0.97 };
 };
 
 function makeApp(botCheck: BotCheck, secureCookies = false) {
@@ -176,7 +178,7 @@ describe("anonymous: one homepage per device", () => {
     expect(site.account_id).toBeNull();
     expect(site.device_id).toMatch(/^[0-9a-f]{32}$/);
     // The classifier's answer rides along, so the pipeline doesn't ask again.
-    expect(site.intake.classification).toEqual({ businessType: "bakery", confidence: 0.97 });
+    expect(site.intake.classification).toEqual({ isBusiness: true, businessType: "bakery", confidence: 0.97 });
     const job = sent.at(-1)!;
     expect(job.name).toBe("generate");
     const aiJobId = (job.data as { aiJobId: string }).aiJobId;
@@ -356,6 +358,10 @@ describe("junk intake", () => {
     const junk = await intake(req, b, { description: "asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf" });
     expect(junk.status).toBe(400);
     expect(await junk.text()).toContain("Iz opisa ne znamo razbrati, kakšno podjetje imate.");
+    // Not a business, however sure the classifier is of a type: refused with the same message.
+    const spam = await intake(req, b, { description: "Kupi bitcoin zdaj!!! Zaslužek 1000 % zagotovljen, klikni povezavo v profilu." });
+    expect(spam.status).toBe(400);
+    expect(await spam.text()).toContain("Iz opisa ne znamo razbrati, kakšno podjetje imate.");
     expect(sent).toHaveLength(0);
     // The classifier's cost is logged against the refused job, in the anonymous pool.
     const { rows } = await platform.db.query<{ status: string; cost: string | number; tier: string }>(

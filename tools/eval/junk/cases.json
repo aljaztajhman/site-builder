@@ -1,5 +1,5 @@
 {
-  "$comment": "it-junk-threshold. Descriptions the intake's junk check must sort: 'junk' (no business to make a site for) is refused before any Sonnet or image call, 'real' must go through, including trades outside the classifier's ten types. Real businesses here are invented examples, none of them the 10 eval fixtures. `pnpm eval:junk` classifies them and reports the threshold that separates them (tiers.junk.minClassifierConfidence).",
+  "$comment": "it-junk-threshold. Descriptions the intake's junk check must sort: 'junk' (no business to make a site for) is refused before any Sonnet or image call, 'real' must go through, including trades outside the classifier's ten types. Real businesses here are invented examples, none of them the 10 eval fixtures. `pnpm eval:junk` classifies them and reports whether the classifier's isBusiness sorts them and the confidence that would (tiers.junk.minClassifierConfidence).",
   "cases": [
     { "id": "keyboard-mash", "expect": "junk", "description": "asdf qwer zxcv asdf qwer zxcv asdf" },
     { "id": "test-words", "expect": "junk", "description": "test test test preizkus test test test" },

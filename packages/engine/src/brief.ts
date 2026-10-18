@@ -6,10 +6,20 @@ import { Concept } from "./concept.ts";
 const Time = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/);
 
 export const Classification = z.strictObject({
+  isBusiness: z.boolean(),
   businessType: BusinessType,
   confidence: z.number().min(0).max(1),
 });
 export type Classification = z.infer<typeof Classification>;
+
+/**
+ * The junk check (config tiers.junk), at the intake and in the pipeline: refused when the classifier says the text
+ * isn't a business, or its confidence is below the minimum. A classification stored before isBusiness existed
+ * (an intake or a ticket from before 2026-10-18) counts as a business.
+ */
+export function isJunkClassification(cls: { confidence: number; isBusiness?: boolean }, minConfidence: number): boolean {
+  return cls.isBusiness === false || cls.confidence < minConfidence;
+}
 
 const PriceFact = z.strictObject({
   amount: z.number().nonnegative(),

@@ -49,7 +49,7 @@ export interface Intake {
   /** Facts the client typed in structured fields, if any (none in phase 1's form). */
   scope: "home" | "full";
   /** The classifier's answer when the intake already asked it (junk check); the pipeline then doesn't ask again. */
-  classification?: { businessType: string; confidence: number };
+  classification?: { businessType: string; confidence: number; isBusiness?: boolean };
 }
 
 export interface AssetRow {

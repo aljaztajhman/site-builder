@@ -375,7 +375,7 @@ export async function startWorker(platform: Platform, config = loadConfig(), job
       if (e instanceof JunkIntakeError) {
         // Refused, not failed: it doesn't use up the visitor's free generation.
         await repo.setStatus(job.siteId, "failed");
-        await repo.addEvent({ siteId: job.siteId, jobId, stage: "error", level: "error", message: JUNK_REPLY, data: { confidence: e.confidence } });
+        await repo.addEvent({ siteId: job.siteId, jobId, stage: "error", level: "error", message: JUNK_REPLY, data: { confidence: e.confidence, isBusiness: e.isBusiness } });
         await finish(ctx.aiJobId, "refused");
         await telemetry({ outcome: "refused", saved: false, error: e });
         return;

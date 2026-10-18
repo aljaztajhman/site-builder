@@ -2,15 +2,15 @@
   "seq": 0,
   "stage": "classify",
   "model": "claude-haiku-4-5-20251001",
-  "hash": "54bb10f36e17bcef",
+  "hash": "9746a449f1c16cbe",
   "origin": "recorded",
   "response": {
-    "text": "{\"businessType\": \"bakery\", \"confidence\": 0.99}",
+    "text": "{\"isBusiness\":true,\"businessType\":\"bakery\",\"confidence\":0.99}",
     "stopReason": "end_turn",
     "model": "claude-haiku-4-5-20251001",
     "usage": {
-      "input_tokens": 911,
-      "output_tokens": 19,
+      "input_tokens": 1059,
+      "output_tokens": 22,
       "cache_creation_input_tokens": 0,
       "cache_read_input_tokens": 0
     }

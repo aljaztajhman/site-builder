@@ -20,7 +20,7 @@ export interface UploadTicket {
   /** Expires (ms since epoch). */
   e: number;
   /** The classifier's answer, when it was asked. */
-  c?: { businessType: string; confidence: number };
+  c?: { businessType: string; confidence: number; isBusiness?: boolean };
 }
 
 const mac = (secret: string, body: string) => createHmac("sha256", secret).update(`ticket:${body}`).digest("base64url");

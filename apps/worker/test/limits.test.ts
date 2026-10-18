@@ -14,7 +14,8 @@ import { cleanupExpired, spendMonitor } from "../src/housekeeping.ts";
  * The model is a replay transport with no recordings: any call that reaches it fails.
  */
 const config = structuredClone(loadConfig());
-// The junk check is off in production config (owner, 2026-10-01); the mechanism is still tested at these values.
+// Production config refuses junk on the classifier's isBusiness alone (minClassifierConfidence 0); the confidence
+// minimum is tested at these values.
 config.tiers.junk = { minDescriptionChars: 40, minClassifierConfidence: 0.5 };
 let platform: Platform;
 let dir: string;

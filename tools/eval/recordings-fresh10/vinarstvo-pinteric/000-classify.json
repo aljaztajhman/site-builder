@@ -2,15 +2,15 @@
   "seq": 0,
   "stage": "classify",
   "model": "claude-haiku-4-5-20251001",
-  "hash": "b0ef26284890af59",
+  "hash": "4d194a20f16e8b78",
   "origin": "recorded",
   "response": {
-    "text": "{\"businessType\": \"tourist-farm\", \"confidence\": 0.75}",
+    "text": "{\"isBusiness\": true, \"businessType\": \"shop\", \"confidence\": 0.6}",
     "stopReason": "end_turn",
     "model": "claude-haiku-4-5-20251001",
     "usage": {
-      "input_tokens": 788,
-      "output_tokens": 20,
+      "input_tokens": 936,
+      "output_tokens": 25,
       "cache_creation_input_tokens": 0,
       "cache_read_input_tokens": 0
     }

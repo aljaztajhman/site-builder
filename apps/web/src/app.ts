@@ -30,6 +30,7 @@ import {
   addPhotos,
   PhotoError,
   limitBreach,
+  isJunkClassification,
   picturesNotice,
   type Operation,
   type Resolve,
@@ -102,7 +103,7 @@ export interface AppOptions {
   version?: RunningVersion;
 }
 
-export type ClassifyIntake = (description: string, ctx: { siteId: string; tier: Tier; accountId: string | null; aiJobId: string }) => Promise<{ businessType: string; confidence: number }>;
+export type ClassifyIntake = (description: string, ctx: { siteId: string; tier: Tier; accountId: string | null; aiJobId: string }) => Promise<{ businessType: string; confidence: number; isBusiness?: boolean }>;
 
 const SAFE_SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const SAFE_HASH = /^[0-9a-f]{10}$/;
@@ -372,18 +373,18 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   // The landing page's prompt box is the only intake; old links land on it.
   app.get("/new", (c) => c.redirect("/#zacni"));
 
-  // Junk: the classifier can't place it. Its cost is logged against the job; the job is refused, so it
+  // Junk: the classifier says it isn't a business, or can't place it (config tiers.junk). Its cost is logged against the job; the job is refused, so it
   // doesn't use up the visitor's preview. If the classifier can't be asked, the pipeline asks it again.
   const JUNK = "Iz opisa ne znamo razbrati, kakšno podjetje imate. Napišite, kaj ponujate, kje ste in kako vas dosežejo.";
   const classifyFor = async (description: string, ctx: { siteId: string; tier: Tier; accountId: string | null; aiJobId: string }) => {
     if (!opts.classifyIntake) return { classification: undefined, junk: false };
-    let classification: { businessType: string; confidence: number } | undefined;
+    let classification: { businessType: string; confidence: number; isBusiness?: boolean } | undefined;
     try {
       classification = await opts.classifyIntake(description, ctx);
     } catch (e) {
       console.warn("[web] intake classification failed; the pipeline classifies again:", (e as Error).message.slice(0, 200));
     }
-    const junk = !!classification && classification.confidence < config.tiers.junk.minClassifierConfidence;
+    const junk = !!classification && isJunkClassification(classification, config.tiers.junk.minClassifierConfidence);
     if (junk) await repo.usage.finishJob(ctx.aiJobId, "refused");
     return { classification, junk };
   };
@@ -469,7 +470,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     const accountId = viewer.kind === "account" ? viewer.account.id : null;
     let siteId: string;
     let aiJobId: string;
-    let classification: { businessType: string; confidence: number } | undefined;
+    let classification: { businessType: string; confidence: number; isBusiness?: boolean } | undefined;
     if (ticket) {
       siteId = ticket.s;
       aiJobId = ticket.j;

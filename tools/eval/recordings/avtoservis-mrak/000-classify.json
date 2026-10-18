@@ -2,15 +2,15 @@
   "seq": 0,
   "stage": "classify",
   "model": "claude-haiku-4-5-20251001",
-  "hash": "74eb00d475fb2fc4",
+  "hash": "b972890ac58f3298",
   "origin": "recorded",
   "response": {
-    "text": "{\"businessType\": \"car-repair\", \"confidence\": 0.99}",
+    "text": "{\"isBusiness\": true, \"businessType\": \"car-repair\", \"confidence\": 0.99}",
     "stopReason": "end_turn",
     "model": "claude-haiku-4-5-20251001",
     "usage": {
-      "input_tokens": 818,
-      "output_tokens": 20,
+      "input_tokens": 966,
+      "output_tokens": 27,
       "cache_creation_input_tokens": 0,
       "cache_read_input_tokens": 0
     }
