@@ -76,6 +76,12 @@ h1 em{font-style:normal;color:var(--accent)}
 .btn svg{width:18px;height:18px;flex:none;transition:transform .3s var(--ease)}
 .btn:hover svg{transform:translateX(4px)}
 .field .btn{border-radius:0}
+/* until someone uses the form, the button nudges: the arrow pushes forward and a soft ring pulses */
+.field:has(.nudge){animation:ring 2.4s 1.6s var(--ease) infinite}
+.btn.nudge svg{animation:push 2.4s 1.6s var(--ease) infinite}
+@keyframes ring{0%{box-shadow:0 0 0 0 rgb(13 122 132/.45)}60%,100%{box-shadow:0 0 0 12px rgb(13 122 132/0)}}
+@keyframes push{0%,100%{transform:none}20%{transform:translateX(6px)}35%{transform:none}48%{transform:translateX(3px)}60%{transform:none}}
+@media (prefers-reduced-motion:reduce){.field:has(.nudge),.btn.nudge svg{animation:none}}
 .hint{margin-top:10px;font-size:13px;color:var(--ink-3)}
 .tabs-w{margin-top:26px;animation:fade 1s .65s var(--ease) both}
 .tabs{position:relative;display:flex;gap:22px;border-bottom:1px solid var(--line-2);max-width:100%;overflow-x:auto;scrollbar-width:none}
@@ -265,28 +271,36 @@ h2{font:800 clamp(32px,4.2vw,58px)/1.02 var(--display);letter-spacing:-.035em;ma
 .time h3{font:800 clamp(34px,4.8vw,64px)/1 var(--display);letter-spacing:-.04em;max-width:14em}
 .time h3 em{font-style:normal;color:var(--accent-text)}
 .time .sub{margin-top:18px;font-size:18px;color:var(--ink-2);max-width:34em}
-.tr{display:grid;grid-template-columns:220px minmax(0,1fr);gap:24px;align-items:start;margin-top:56px}
-.tr h4{font:600 17px/1.3 var(--ui);color:var(--ink-2);padding-top:4px}
+.tr{display:grid;grid-template-columns:240px minmax(0,1fr);gap:28px;align-items:start;margin-top:56px}
+.tr h4{font:600 16px/1.3 var(--ui);color:var(--ink-2)}
 .tr.ok h4{color:var(--accent-text)}
-.track{position:relative;height:16px;border-radius:4px;background:var(--surface-2)}
-.track i{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:var(--line-2);width:var(--w)}
-.js .track i{width:0;transition:width 5.5s cubic-bezier(.4,.1,.6,1)}
-.tr.ok .track i{background:var(--accent)}
-.js .tr.ok .track i{transition-duration:.8s;transition-delay:.3s}
+.cnt{display:block;margin-top:6px;font:800 clamp(28px,3vw,40px)/1 var(--display);letter-spacing:-.03em;color:var(--ink);font-variant-numeric:tabular-nums}
+.tr.ok .cnt{color:var(--accent-text)}
+.track{position:relative;height:18px;border-radius:5px;background:var(--surface-2)}
+.track i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;width:var(--w)}
+.ag .track i{background:#5b6e70 repeating-linear-gradient(-45deg,rgb(255 255 255/.16) 0 8px,transparent 8px 16px);background-size:22.63px 22.63px;animation:barber 1.1s linear infinite}
+@keyframes barber{to{background-position:22.63px 0}}
+.ok .track i{background:linear-gradient(90deg,#2bb5a7,#6fe3d5);box-shadow:0 0 22px rgb(43 181 167/.65)}
+.ok .track i::after{content:"";position:absolute;right:-4px;top:50%;width:26px;height:26px;margin-top:-13px;border-radius:50%;border:2px solid #6fe3d5;opacity:0}
+.js .track i{width:0;transition:width 5.4s cubic-bezier(.4,.1,.6,1)}
+.js .ok .track i{transition-duration:.7s;transition-delay:.25s}
 .js .in .track i{width:var(--w)}
-.marks{position:relative;width:var(--w);height:40px;margin-top:8px;font:500 13px/1.2 var(--ui);color:var(--ink-3)}
-.marks span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap;padding-top:11px}
-.marks span::before{content:"";position:absolute;left:50%;top:0;width:1px;height:7px;background:var(--line-2)}
-.marks span:first-child{transform:none}.marks span:first-child::before{left:0}
-.js .marks span{opacity:0;transition:opacity .4s var(--ease)}
-.js .in .marks span{opacity:1}
-.fin{position:absolute;top:50%;transform:translateY(-50%);left:calc(var(--w) + 16px);white-space:nowrap;font:800 clamp(18px,2vw,26px)/1 var(--display);letter-spacing:-.02em;color:var(--ink-2)}
-.done-b{display:inline-flex;align-items:center;gap:6px;margin-left:12px;vertical-align:middle;font:700 13px/1 var(--ui);letter-spacing:0;color:#0e2326;background:var(--accent-text);border-radius:99px;padding:6px 10px}
-.js .done-b{opacity:0;transform:scale(.8);transition:opacity .4s 1.3s var(--ease),transform .5s 1.3s var(--spring)}
-.js .in .done-b{opacity:1;transform:none}
-.tr.ok .fin{color:var(--accent-text)}
-.js .fin{opacity:0;transition:opacity .5s var(--ease)}
-.js .in .fin{opacity:1}
+.js .in.ok .track i::after,.js .in .ok .track i::after{animation:burst .9s 1s var(--ease) both}
+@keyframes burst{0%{opacity:1;transform:scale(.4)}100%{opacity:0;transform:scale(2.4)}}
+.pills{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:16px 0 0;padding:0}
+.pills li{display:inline-flex;align-items:center;gap:6px;font:600 13px/1 var(--ui);color:var(--ink-2);background:rgb(255 255 255/.06);border:1px solid rgb(255 255 255/.14);border-radius:99px;padding:7px 11px}
+.ag .pills li::before{content:"";width:6px;height:6px;border-radius:50%;background:#8aa3a2}
+.ok .pills li{color:#0e2326;background:var(--accent-text);border-color:transparent}
+.ok .pills li::before{content:"";width:12px;height:12px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 6.2l2 2 4-4.4' fill='none' stroke='%230e2326' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/100% no-repeat}
+.js .pills li{opacity:0;transform:translateY(8px) scale(.9);transition:opacity .35s var(--ease),transform .45s var(--spring);transition-delay:var(--d)}
+.js .in .pills li{opacity:1;transform:none}
+.row{display:flex;flex-wrap:wrap;align-items:flex-start;gap:12px 16px}
+.win{display:inline-flex;align-items:center;gap:8px;margin-top:16px;padding:8px 8px 8px 14px;border-radius:10px;background:#fff;color:#14272a;font:600 15px/1 var(--ui);box-shadow:0 0 0 1px rgb(255 255 255/.2),0 14px 40px -10px rgb(43 181 167/.55)}
+.win .lock{margin-right:0}
+.win .done-b{margin-left:6px;color:#fff;background:#1f8a5c}
+.js .win{opacity:0;transform:translateY(10px) scale(.92);transition:opacity .4s 1.15s var(--ease),transform .6s 1.15s var(--spring)}
+.js .in .win{opacity:1;transform:none}
+.done-b{display:inline-flex;align-items:center;gap:6px;font:700 12px/1 var(--ui);border-radius:99px;padding:6px 10px}
 
 /* how it works: three rows on hairlines, a big numeral each */
 .steps{margin-top:56px;border-top:1px solid var(--line)}
@@ -335,7 +349,8 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
   .why{grid-template-columns:1fr;gap:40px}
   .why .cols{margin-top:20px}
   .time{margin-top:64px}
-  .tr{grid-template-columns:1fr;gap:12px;margin-top:32px}
+  .tr{grid-template-columns:1fr;gap:12px;margin-top:36px}
+  .cnt{font-size:30px}
   .tr{--w:50%!important}.tr.ok{--w:7%!important}
   .time{padding:64px 0 70px;margin-top:80px}
   .fin{font-size:18px}
@@ -397,10 +412,10 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
         <p class="lead">Opišete, kaj delate. <strong>Postavi napiše besedila v slovenščini, izbere barve in pisave, ki pristajajo vašemu podjetju, in sestavi celo spletno stran.</strong> Vi jo pregledate in objavite na svojem naslovu, <strong>potem pa jo sami urejate v preprostem urejevalniku.</strong></p>
 
         <form class="try" id="try" autocomplete="off">
-          <label for="ime">Preizkusite s svojim imenom</label>
+          <label for="ime">Preizkusite na primeru ali s svojim imenom</label>
           <div class="field">
-            <input id="ime" type="text" maxlength="40" placeholder="npr. Mizarstvo Novak" spellcheck="false">
-            <button class="btn" type="submit">Postavi
+            <input id="ime" type="text" maxlength="40" value="Mizarstvo Novak" placeholder="npr. Mizarstvo Novak" spellcheck="false">
+            <button class="btn nudge" type="submit">Postavi
               <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg></button>
           </div>
           <p class="hint">Ime se pojavi v predogledu. Nič se ne pošilja, vse se zgodi v vašem brskalniku.</p>
@@ -512,17 +527,21 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
     <div class="time rv">
       <h3>Agencija še pripravlja ponudbo. <em>Vaša stran je že na spletu.</em></h3>
       <p class="sub">Koliko časa mine, preden je stran na spletu, in kdo jo potem ureja.</p>
-      <div class="tr" style="--w:74%">
-        <h4>Z agencijo ali predlogo</h4>
+      <div class="tr ag" style="--w:74%">
+        <div class="who-l"><h4>Z agencijo ali predlogo</h4><b class="cnt" id="cnt-ag" aria-live="off">nekaj tednov</b></div>
         <div>
-          <div class="track"><i></i><span class="fin">nekaj tednov</span></div>
-          <div class="marks" aria-hidden="true"><span style="left:3%;transition-delay:0.2s">sestanek</span><span style="left:22%;transition-delay:1.2s">ponudba</span><span style="left:42%;transition-delay:2.3s">osnutek</span><span style="left:60%;transition-delay:3.4s">popravki</span><span style="left:78%;transition-delay:4.4s">še popravki</span><span style="left:95%;transition-delay:5.4s">čakanje</span></div>
+          <div class="track"><i></i></div>
+          <ol class="pills" aria-label="Kaj se zgodi vmes"><li style="--d:.2s">Sestanek</li><li style="--d:1.1s">Ponudba</li><li style="--d:2s">Osnutek</li><li style="--d:2.9s">Popravki</li><li style="--d:3.8s">Še popravki</li><li style="--d:4.7s">Čakanje</li></ol>
         </div>
       </div>
       <div class="tr ok" style="--w:7%">
-        <h4>S Postavi</h4>
+        <div class="who-l"><h4>S Postavi</h4><b class="cnt">nekaj minut</b></div>
         <div>
-          <div class="track"><i></i><span class="fin" style="transition-delay:.9s">nekaj minut<span class="done-b">Na spletu</span></span></div>
+          <div class="track"><i></i></div>
+          <div class="row">
+            <ol class="pills" aria-label="Kaj se zgodi vmes"><li style="--d:.35s">Opis</li><li style="--d:.5s">Stran</li><li style="--d:.65s">Pregled</li><li style="--d:.8s">Objava</li></ol>
+            <span class="win"><span class="lock"></span>vase-podjetje.si<span class="done-b">Na spletu</span></span>
+          </div>
         </div>
       </div>
     </div>
@@ -709,9 +728,11 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
   }
   function stopAuto(){auto=false;clearTimeout(cycle);introDone=true}
   tbtns.forEach(function(b){b.addEventListener("click",function(){stopAuto();show(+b.dataset.v);b.scrollIntoView({block:"nearest",inline:"nearest"})})});
-  input.addEventListener("focus",stopAuto);
+  var goBtn=$("#try .btn");
+  input.addEventListener("focus",function(){stopAuto();goBtn.classList.remove("nudge");input.select()});
   input.addEventListener("input",function(){userName=input.value.trim();stopAuto();setName()});
-  $("#try").addEventListener("submit",function(e){e.preventDefault();stopAuto();show(cur);
+  // one click is enough: the filled-in name (or whatever was typed) goes into the example
+  $("#try").addEventListener("submit",function(e){e.preventDefault();goBtn.classList.remove("nudge");userName=input.value.trim();stopAuto();setName();show(cur);
     if(matchMedia("(max-width: 860px)").matches)toPreview()});
   $$("[data-focus]").forEach(function(a){a.addEventListener("click",function(e){e.preventDefault();stopAuto();
     input.scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"});setTimeout(function(){input.focus({preventScroll:true})},reduce?0:500)})});
@@ -831,8 +852,13 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
   var mini=$("#mini"),typed=$("#typed"),caret2=$("#caret2"),story=typed.textContent;
   mini.classList.add("anim");typed.textContent="";sqEl.textContent="";
   var seen={};
+  function race(){
+    var c=$("#cnt-ag");if(!c||reduce)return;var t0=performance.now(),T=5200;
+    (function f(now){var x=Math.min(1,(now-t0)/T);c.textContent="dan "+Math.max(1,Math.round(30*(x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2)));
+      if(x<1)requestAnimationFrame(f);else c.textContent="nekaj tednov"})(t0);
+  }
   function hit(el){
-    el.classList.add("in");
+    el.classList.add("in");if(el.classList.contains("time"))race();
     if(el.contains(typed)&&!seen.t){seen.t=1;caret2.hidden=false;var n=0;(function t(){typed.textContent=story.slice(0,++n);if(n<story.length)setTimeout(t,26);else caret2.hidden=true})()}
     if(el.contains(mini)&&!seen.m){seen.m=1;setTimeout(function(){build(mini,.7)},300)}
     if(el.contains(phoneEl)&&!seen.p){seen.p=1;setTimeout(playPhone,250)}
