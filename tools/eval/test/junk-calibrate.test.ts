@@ -119,12 +119,14 @@ describe("pnpm eval:junk on scripted answers", () => {
 });
 
 describe("the recorded calibration run (2026-10-18, Haiku 4.5)", () => {
-  it("isBusiness sorts all 22 cases, which confidence can't, and config's check refuses every junk case and no real business", async () => {
+  // The honest result, holdout included: one real business (an owner asking "can you make a site for my salon?")
+  // is called no business. Confidence separates even less. A change here is a new measurement, not a fix.
+  it("isBusiness sorts 29 of the 30 cases, which confidence can't; config's check lets no junk through", async () => {
     const recorded = await classifyCases(client(new ReplayTransport(path.join(here, "../recordings/junk"), true)), loadCases(), config.tiers.junk.minDescriptionChars);
-    expect(recorded).toHaveLength(22);
+    expect(recorded).toHaveLength(30);
     const s = separate(recorded);
-    expect(s.byField).toEqual({ separable: true, passedJunk: [], refusedReal: [] });
+    expect(s.byField).toEqual({ separable: false, passedJunk: [], refusedReal: ["holdout-question-salon"] });
     expect(s.separable).toBe(false);
-    expect(s.checkAt(config.tiers.junk.minClassifierConfidence)).toEqual({ passedJunk: [], refusedReal: [] });
+    expect(s.checkAt(config.tiers.junk.minClassifierConfidence)).toEqual({ passedJunk: [], refusedReal: ["holdout-question-salon"] });
   });
 });

@@ -1,5 +1,5 @@
 {
-  "$comment": "it-junk-threshold. Descriptions the intake's junk check must sort: 'junk' (no business to make a site for) is refused before any Sonnet or image call, 'real' must go through, including trades outside the classifier's ten types. Real businesses here are invented examples, none of them the 10 eval fixtures. `pnpm eval:junk` classifies them and reports whether the classifier's isBusiness sorts them and the confidence that would (tiers.junk.minClassifierConfidence).",
+  "$comment": "it-junk-threshold. Descriptions the intake's junk check must sort: 'junk' (no business to make a site for) is refused before any Sonnet or image call, 'real' must go through, including trades outside the classifier's ten types. Real businesses here are invented examples, none of them the 10 eval fixtures. Cases with ids starting 'holdout-' were added 2026-10-18 after the classifier prompt's isBusiness line was written, as a holdout (not used to tune it). `pnpm eval:junk` classifies them and reports whether the classifier's isBusiness sorts them and the confidence that would (tiers.junk.minClassifierConfidence).",
   "cases": [
     { "id": "keyboard-mash", "expect": "junk", "description": "asdf qwer zxcv asdf qwer zxcv asdf" },
     { "id": "test-words", "expect": "junk", "description": "test test test preizkus test test test" },
@@ -22,6 +22,14 @@
     { "id": "dog-grooming", "expect": "real", "description": "Salon za pse Kodrček v Domžalah: striženje, kopanje in nega krempljev za vse pasme." },
     { "id": "driving-school", "expect": "real", "description": "Avtošola Zebra v Mariboru: tečaji za B in A kategorijo, teorija vsak torek, vožnje tudi ob sobotah." },
     { "id": "cleaning", "expect": "real", "description": "Čiščenje stanovanj in poslovnih prostorov v Ljubljani in okolici, tudi po selitvi in prenovi." },
-    { "id": "vet", "expect": "real", "description": "Veterinarska ambulanta Šapa v Ptuju: cepljenja, pregledi in manjši posegi za male živali. Nujne primere sprejmemo tudi ob nedeljah." }
+    { "id": "vet", "expect": "real", "description": "Veterinarska ambulanta Šapa v Ptuju: cepljenja, pregledi in manjši posegi za male živali. Nujne primere sprejmemo tudi ob nedeljah." },
+    { "id": "holdout-self-intro-tailor", "expect": "real", "description": "Sem Maja, stara 40 let, doma v Šentjurju šivam obleke po meri in delam popravila oblačil. Stranke pridejo k meni domov." },
+    { "id": "holdout-question-salon", "expect": "real", "description": "Ali mi lahko naredite stran za moj kozmetični salon v Celju? Delam manikuro, pedikuro in depilacijo." },
+    { "id": "holdout-informal-typos", "expect": "real", "description": "zdravo, mava z bratom mal servis za kosilnice pa motorne zage v slovenj gradcu, rabva neki da nas ljudje najdejo" },
+    { "id": "holdout-english-guesthouse", "expect": "real", "description": "We are a small family guesthouse near Lake Bohinj with four rooms, breakfast included, open all year." },
+    { "id": "holdout-online-bookkeeping", "expect": "real", "description": "Knjigovodstvo za s.p.-je in mala društva, vse delam od doma prek spleta, za stranke po celi Sloveniji." },
+    { "id": "holdout-seasonal-honey", "expect": "real", "description": "Čez leto sem v službi, ob sobotah pa na tržnici v Kranju prodajam med, propolis in cvetni prah od svojih čebel." },
+    { "id": "holdout-essay", "expect": "junk", "description": "Napiši spis o Sloveniji za šolo, približno 300 besed, o gorah, morju in zgodovini." },
+    { "id": "holdout-fake-doo", "expect": "junk", "description": "asdf d.o.o. test test, naslov test 1, telefon 000 000 000" }
   ]
 }

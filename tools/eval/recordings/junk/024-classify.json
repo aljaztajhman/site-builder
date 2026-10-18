@@ -1,0 +1,18 @@
+{
+  "seq": 24,
+  "stage": "classify",
+  "model": "claude-haiku-4-5-20251001",
+  "hash": "f95a129eb833ede7",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"isBusiness\":true,\"businessType\":\"car-repair\",\"confidence\":0.65}",
+    "stopReason": "end_turn",
+    "model": "claude-haiku-4-5-20251001",
+    "usage": {
+      "input_tokens": 660,
+      "output_tokens": 23,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

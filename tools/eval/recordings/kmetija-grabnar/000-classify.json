@@ -2,14 +2,14 @@
   "seq": 0,
   "stage": "classify",
   "model": "claude-haiku-4-5-20251001",
-  "hash": "7d11677d4f38b210",
+  "hash": "e365a543ebd4c0e8",
   "origin": "recorded",
   "response": {
     "text": "{\"isBusiness\": true, \"businessType\": \"tourist-farm\", \"confidence\": 0.99}",
     "stopReason": "end_turn",
     "model": "claude-haiku-4-5-20251001",
     "usage": {
-      "input_tokens": 1058,
+      "input_tokens": 1065,
       "output_tokens": 27,
       "cache_creation_input_tokens": 0,
       "cache_read_input_tokens": 0

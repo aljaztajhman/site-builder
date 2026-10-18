@@ -2,15 +2,15 @@
   "seq": 0,
   "stage": "classify",
   "model": "claude-haiku-4-5-20251001",
-  "hash": "1c82969016161902",
+  "hash": "63c500cc0ce1fe45",
   "origin": "recorded",
   "response": {
-    "text": "{\"isBusiness\":true,\"businessType\":\"physio\",\"confidence\":0.98}",
+    "text": "{\"isBusiness\": true, \"businessType\": \"physio\", \"confidence\": 0.99}",
     "stopReason": "end_turn",
     "model": "claude-haiku-4-5-20251001",
     "usage": {
-      "input_tokens": 1007,
-      "output_tokens": 22,
+      "input_tokens": 1014,
+      "output_tokens": 26,
       "cache_creation_input_tokens": 0,
       "cache_read_input_tokens": 0
     }

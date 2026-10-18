@@ -2,14 +2,14 @@
   "seq": 0,
   "stage": "classify",
   "model": "claude-haiku-4-5-20251001",
-  "hash": "381dc3084ef6be9b",
+  "hash": "3dc0fa904caadee8",
   "origin": "recorded",
   "response": {
     "text": "{\"isBusiness\":true,\"businessType\":\"hairdresser\",\"confidence\":0.99}",
     "stopReason": "end_turn",
     "model": "claude-haiku-4-5-20251001",
     "usage": {
-      "input_tokens": 1001,
+      "input_tokens": 1008,
       "output_tokens": 24,
       "cache_creation_input_tokens": 0,
       "cache_read_input_tokens": 0

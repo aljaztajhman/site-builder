@@ -2,15 +2,15 @@
   "seq": 0,
   "stage": "classify",
   "model": "claude-haiku-4-5-20251001",
-  "hash": "56260c595bf0ef1d",
+  "hash": "5536f88f903914d9",
   "origin": "recorded",
   "response": {
-    "text": "{\"isBusiness\": true, \"businessType\": \"dental\", \"confidence\": 0.99}",
+    "text": "{\"isBusiness\":true,\"businessType\":\"dental\",\"confidence\":0.99}",
     "stopReason": "end_turn",
     "model": "claude-haiku-4-5-20251001",
     "usage": {
-      "input_tokens": 1040,
-      "output_tokens": 25,
+      "input_tokens": 1047,
+      "output_tokens": 21,
       "cache_creation_input_tokens": 0,
       "cache_read_input_tokens": 0
     }
