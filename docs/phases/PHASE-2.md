@@ -8,7 +8,7 @@ Goal: a business owner can sign up from their phone, get a free homepage preview
 
 - [x] **Sign-in method.** Proposal: email magic link only (no passwords to store, works on phones). Alternative: magic link + Google. Decided (`sb-signin`): magic link only.
 - [x] **Who gets a full site in phase 2**, with no billing yet. Proposal: an allow-list of emails the owner manages; everyone else gets the free homepage preview only. Decided (`sb-full-access`): the allow-list, with paid-tier rights.
-- [ ] **Visual editor.** Evaluate Puck against extending the current direct editor (schema-driven forms plus inline text in the preview). Proposal: a 1-day spike on Puck, then decide on evidence: does it keep every edit a spec change, and does it work at 360 px?
+- [x] **Visual editor.** Decided 2026-10-18 (owner, M2): keep today's direct editor for 1.0; Puck parked. Was: evaluate Puck against extending the current direct editor (schema-driven forms plus inline text in the preview). Proposal: a 1-day spike on Puck, then decide on evidence: does it keep every edit a spec change, and does it work at 360 px?
 - [x] **Email provider and sending domain.** PRODUCT.md names Resend. It needs a domain we control for SPF/DKIM, which means buying one (the owner's call and payment). Decided (`sb-email-domain`): Resend, sending from a subdomain of the owner's einvoicecheck.eu (DNS records in TASKS.md).
 - [x] **Production environment.** Decided (`sb-production-env`, 2026-09-30): keep the one `preview` environment (tracking `main`) until the first real customer gets a real site; create `production` then.
 
@@ -27,7 +27,7 @@ Billing, custom domains, domain registration (phase 3), CMS collections (phase 4
 
 ## Done means
 
-- Sign up from a phone at 360 px: email → magic link → intake → homepage preview in ≤ 60 s, ≤ €0.30 (median of the eval, homepage scope).
+- Sign up from a phone at 360 px: email → magic link → intake → homepage preview in ≤ 60 s, ≤ €0.30 (median of the eval, homepage scope). Owner, 2026-10-18: the 60 s is the time to the first preview the visitor sees; the whole job's speed is an M7 target.
 - Preview limits hold: a second email from the same IP within the limit window is refused; watermark present; publish refused.
 - An allow-listed account can generate the full site, edit it (chat and editor), publish and export, all at 360 px.
 - The contact form on a published site delivers to the owner's inbox and is stored; the honeypot and rate limit are covered by tests.
