@@ -1,0 +1,31 @@
+{
+  "id": "slascicarna-pri-zofki",
+  "businessType": "bakery",
+  "trade": "slaščičarna",
+  "description": "Slaščičarna Pri Zofki, Slovenske Konjice.\n\nPečem po receptih svoje mame, ki je slaščice delala za vse konjiške poroke. Ob torkih in petkih pečem kremšnite, potico in jabolčni zavitek, po naročilu pa torte za rojstne dneve, krste in obletnice. Vse naredimo sami, brez polnil iz vrečk. Kavo kuhamo na stari mašini in jo pijete lahko kar v lokalu, saj imamo šest miz in majhen vrt.\n\nCene: kremšnita 3,20 €, rezina potice 2,50 €, jabolčni zavitek 2,80 €, torta za osem oseb 32 €. Naročila za torte sprejemamo vsaj dva dni prej.\n\nNaslov: Stari trg 18, 3210 Slovenske Konjice. Odprto od ponedeljka do sobote 8.00–19.00, ob nedeljah 9.00–13.00. Telefon 031 555 936, pošta zofka@slascicarna-zofka.example.\n\nLastnica Zofija Kolar.",
+  "logo": "logo.svg",
+  "photos": [
+    { "file": "photos/01.jpg", "subject": "kremšnite na belem krožniku ob skodelici kave na lesenem pultu" },
+    { "file": "photos/02.jpg", "subject": "okrogla torta z jagodami in belo kremo na stojalu" },
+    { "file": "photos/03.jpg", "subject": "steklena vitrina slaščičarne s pecivom in rezinami potice" }
+  ],
+  "facts": {
+    "name": "Slaščičarna Pri Zofki",
+    "phone": "+38631555936",
+    "email": "zofka@slascicarna-zofka.example",
+    "address": { "street": "Stari trg 18", "postalCode": "3210", "city": "Slovenske Konjice" },
+    "hours": [
+      { "from": "mon", "to": "sat", "open": "08:00", "close": "19:00" },
+      { "from": "sun", "to": "sun", "open": "09:00", "close": "13:00" }
+    ],
+    "prices": [
+      { "item": "kremšnita", "amount": 3.2 },
+      { "item": "rezina potice", "amount": 2.5 },
+      { "item": "jabolčni zavitek", "amount": 2.8 },
+      { "item": "torta za osem oseb", "amount": 32 }
+    ],
+    "people": [{ "name": "Zofija Kolar", "role": "lastnica" }],
+    "other": ["šest miz in majhen vrt", "ob torkih in petkih", "vsaj dva dni prej", "brez polnil iz vrečk"]
+  },
+  "missing": ["legal"]
+}

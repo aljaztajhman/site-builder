@@ -1,0 +1,27 @@
+{
+  "id": "tapetnistvo-lesjak",
+  "businessType": "builder",
+  "trade": "tapetnik",
+  "description": "Tapetništvo Lesjak, Sevnica.\n\nSem Marjan Lesjak, tapetnik že 26 let. V delavnici oživim staro pohištvo: veliko strank mi pripelje fotelj ali kavč, ki je v ogrodju še popolnoma dober, samo prevleka je že obrabljena. Škoda bi ga bilo zavreči.\n\nKaj delam: prevleke za stole, fotelje in kotne garniture, zamenjavo vzmeti in polnila, ročno šivane blazine ter klopi za gostilne in vinotoče. Blago izberete iz vzorčnika ali ga prinesete sami.\n\nOkvirne cene: prevleka stola 45 €, prevleka dvosedeža 280 €, prevleka trosedeža 390 €. Natančno ceno povem po ogledu.\n\nDelavnica: Trg svobode 4, 8290 Sevnica. Odprto od ponedeljka do petka 7.00–15.00. Telefon 041 555 318, e-pošta marjan@tapetnistvo-lesjak.example. Za večje kose pridem na ogled tudi na dom.",
+  "logo": null,
+  "photos": [
+    { "file": "photos/01.jpg", "subject": "stara fotelja z na pol odstranjeno prevleko v delavnici tapetnika" },
+    { "file": "photos/02.jpg", "subject": "na novo prevlečena zelena kotna garnitura v dnevni sobi" },
+    { "file": "photos/03.jpg", "subject": "vzorčnik blaga in tapetniški pribor na delovni mizi" }
+  ],
+  "facts": {
+    "name": "Tapetništvo Lesjak",
+    "phone": "+38641555318",
+    "email": "marjan@tapetnistvo-lesjak.example",
+    "address": { "street": "Trg svobode 4", "postalCode": "8290", "city": "Sevnica" },
+    "hours": [{ "from": "mon", "to": "fri", "open": "07:00", "close": "15:00" }],
+    "prices": [
+      { "item": "prevleka stola", "amount": 45 },
+      { "item": "prevleka dvosedeža", "amount": 280 },
+      { "item": "prevleka trosedeža", "amount": 390 }
+    ],
+    "people": [{ "name": "Marjan Lesjak", "role": "tapetnik" }],
+    "other": ["26 let", "zamenjavo vzmeti in polnila", "klopi za gostilne in vinotoče", "pridem na ogled tudi na dom"]
+  },
+  "missing": ["legal"]
+}

@@ -163,7 +163,7 @@
 /* figures: each title one short word or number at poster size, its label under it on a rule; the heading is a small label. */
 .s-highlights--figures .section-title {
   font-size: var(--fs-lg);
-  line-height: 1.3;
+  line-height: max(var(--lh-floor, 0), 1.3);
 }
 .s-highlights--figures .highlights {
   display: flex;
@@ -444,7 +444,7 @@
 }
 .about--figure .section-title {
   font-size: calc(var(--fs-h2) * 0.64);
-  line-height: 1.08;
+  line-height: max(var(--lh-floor, 0), 1.08);
 }
 .about--figure .about__owner {
   max-width: none;
@@ -480,7 +480,7 @@
 }
 .announcement__title {
   font-size: var(--fs-base);
-  line-height: 1.4;
+  line-height: max(var(--lh-floor, 0), 1.4);
 }
 .s-announcement--bar .announcement__text {
   flex: 1 1 18rem;
@@ -496,7 +496,7 @@
 }
 .s-announcement--card .announcement__title {
   font-size: var(--fs-h3);
-  line-height: 1.25;
+  line-height: max(var(--lh-floor, 0), 1.25);
 }
 @media (min-width: 48rem) {
   .s-announcement--card .announcement {

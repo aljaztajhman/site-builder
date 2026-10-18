@@ -11,27 +11,27 @@
   height: 100%;
   object-fit: cover;
 }
-/* AI-generated pictures are labelled on the page (EU AI Act Art. 50); the alt text says it too. */
+/* AI-generated pictures are labelled on the page (EU AI Act Art. 50); the alt text says it too.
+   Top right by default: hero overlay panels sit at the bottom or the left and would hide it. A shape that cuts the
+   picture's top corners (an arch, a rounded or pointed top, a roof) says so where it sets its radius or clip-path:
+   `--cuts-top: 1`, on the picture or on a frame round it (custom properties inherit). Every label inside then sits at
+   the bottom right, so a new top-cut shape needs that one declaration, never a label rule of its own. A small picture
+   wraps the label rather than letting it run off its left edge. tools/eval/test/review50-ai-labels.test.ts hit-tests
+   the label of every picture the saved pages and every imagery treatment make, at 1280 and 360 px. */
 .media--ai::after {
   content: attr(data-ai-label);
   position: absolute;
   z-index: 2;
-  /* Top right: hero overlay panels sit at the bottom or the left and would hide it. */
-  top: 0.5rem;
+  top: calc(var(--cuts-top, 0) * 100% + (1 - 2 * var(--cuts-top, 0)) * 0.5rem);
   right: 0.5rem;
+  translate: 0 calc(var(--cuts-top, 0) * -100%);
+  max-width: calc(100% - 1rem);
   padding: 0.15rem 0.45rem;
   border-radius: 3px;
   background: rgb(0 0 0 / 0.65);
   color: #fff;
   font: 600 0.75rem/1.3 var(--font-body);
   pointer-events: none;
-}
-/* An arched top (mirrors, the arch hero) cuts the top-right corner off: the label goes to the bottom right, which no
-   seal or panel covers there. */
-.arch-top.media--ai::after,
-.hsig__arch-media.media--ai::after {
-  top: auto;
-  bottom: 0.5rem;
 }
 /* A round picture (a disc, or a picture inside one) cuts every corner (review 50: the label clipped on a small round
    inset): the label sits centred a fifth up from the bottom, where the circle is wide enough for it, a size smaller.
@@ -76,7 +76,13 @@
 }
 
 [data-imagery="arched"] .media {
+  --cuts-top: 1;
   border-radius: 50% 50% var(--radius) var(--radius) / 30% 30% var(--radius) var(--radius);
+}
+/* The pair's inset covers the photo's bottom right: the label sits bottom left. */
+[data-imagery="arched"] .image-text__pair > .image-text__media.media--ai::after {
+  right: auto;
+  left: 0.5rem;
 }
 
 [data-imagery="offset-block"] .media {

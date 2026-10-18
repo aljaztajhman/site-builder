@@ -13,6 +13,10 @@
  *     The same for the hard fixtures (tools/eval/hard): their shot list in tools/eval/hard/photo-prompts.json (the
  *     dark phone photos get its `poorStyle`), photos into tools/eval/hard/<id>/photos/, tools/eval/hard/photo-manifest.json.
  *
+ *   pnpm fixtures:ai-photos generate --model <name> --dir <dir> [--only <id>] [--max-eur 5]
+ *     The same for any fixture folder holding briefs and a photo-prompts.json (tools/eval/final10): photos into
+ *     <dir>/<id>/photos/, <dir>/photo-manifest.json.
+ *
  * Needs FAL_KEY. States the € estimate first and stops before starting if it exceeds --max-eur.
  * Every call logs model, seconds and € (from config prices); the manifest records model, prompt and cost.
  */
@@ -22,7 +26,7 @@ import { pathToFileURL } from "node:url";
 import sharp from "sharp";
 import { chromium } from "playwright";
 import { loadConfig, repoRoot, type AppConfig } from "@sb/config";
-import { FIXTURES_DIR, HARD_DIR, loadFixtures, loadHard } from "./load.ts";
+import { FIXTURES_DIR, HARD_DIR, loadFixtures, loadFresh, loadHard } from "./load.ts";
 import {
   estimateEur,
   fullPrompt,
@@ -34,6 +38,7 @@ import {
   requestBody,
   HARD_PROMPTS_FILE,
   PROMPTS_FILE,
+  promptsFileIn,
   type ImageGenModelConfig,
   type ManifestEntry,
   type PhotoPrompts,
@@ -188,11 +193,19 @@ async function main() {
   }
   // --hard: the hard fixtures' shot list (tools/eval/hard/photo-prompts.json) into tools/eval/hard/<id>/photos/.
   const hard = args.includes("--hard");
-  manifestFile = path.join(hard ? HARD_DIR : FIXTURES_DIR, "photo-manifest.json");
+  // --dir <dir>: any fixture folder with a photo-prompts.json (tools/eval/final10); like --hard, without a stand-in set.
+  const dirArg = arg(args, "--dir");
+  if (dirArg !== undefined && (hard || !dirArg || dirArg.startsWith("--"))) {
+    console.error("--dir <dir> names one fixture folder and does not go with --hard.");
+    process.exit(2);
+  }
+  const customDir = dirArg ? path.resolve(dirArg) : undefined;
+  const photoDir = customDir ?? (hard ? HARD_DIR : FIXTURES_DIR);
+  manifestFile = path.join(photoDir, "photo-manifest.json");
   const config = loadConfig();
-  const prompts = loadPhotoPrompts(hard ? HARD_PROMPTS_FILE : PROMPTS_FILE);
+  const prompts = loadPhotoPrompts(customDir ? promptsFileIn(customDir) : hard ? HARD_PROMPTS_FILE : PROMPTS_FILE);
   const maxEur = Number(arg(args, "--max-eur") ?? 5);
-  const subjects = new Map((hard ? loadHard() : loadFixtures()).flatMap((f) => f.photos.map((p) => [photoKey(f.id, p.file), { subject: p.subject, path: p.path }] as const)));
+  const subjects = new Map((customDir ? loadFresh(customDir) : hard ? loadHard() : loadFixtures()).flatMap((f) => f.photos.map((p) => [photoKey(f.id, p.file), { subject: p.subject, path: p.path }] as const)));
 
   const pickModel = (name: string): ImageGenModelConfig => {
     const m = config.imageGen.models[name];
@@ -219,7 +232,7 @@ async function main() {
     const model = pickModel(name);
     const only = arg(args, "--only");
     const force = args.includes("--force");
-    outDir = hard ? HARD_DIR : FIXTURES_DIR;
+    outDir = photoDir;
     const manifest = readManifest();
     jobs = [...subjects.entries()]
       .filter(([key]) => !only || key.startsWith(`${only}/`))

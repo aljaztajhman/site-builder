@@ -1,0 +1,346 @@
+{
+  "items": [
+    "dimnikarstvo-vidmar",
+    "kamp-soska",
+    "klavirji-urbanc",
+    "knjigoveznica-kras",
+    "pedikura-nogica",
+    "pralnica-cisto",
+    "servis-aparatov-rebec",
+    "slascicarna-pri-zofki",
+    "tapetnistvo-lesjak",
+    "zeliscarna-pri-lipi"
+  ],
+  "reviewers": {
+    "gemini": {
+      "model": "google/gemini-4-argon",
+      "scored": [
+        "dimnikarstvo-vidmar",
+        "kamp-soska",
+        "klavirji-urbanc",
+        "knjigoveznica-kras",
+        "pedikura-nogica",
+        "pralnica-cisto",
+        "servis-aparatov-rebec",
+        "slascicarna-pri-zofki",
+        "tapetnistvo-lesjak",
+        "zeliscarna-pri-lipi"
+      ],
+      "failed": [],
+      "skipped": [],
+      "vsOwner": null
+    },
+    "gpt": {
+      "model": "openai/gpt-6.1-sol",
+      "scored": [
+        "dimnikarstvo-vidmar",
+        "kamp-soska",
+        "klavirji-urbanc",
+        "knjigoveznica-kras",
+        "pedikura-nogica",
+        "pralnica-cisto",
+        "servis-aparatov-rebec",
+        "slascicarna-pri-zofki",
+        "tapetnistvo-lesjak",
+        "zeliscarna-pri-lipi"
+      ],
+      "failed": [],
+      "skipped": [],
+      "vsOwner": null
+    },
+    "claude": {
+      "model": "claude-fable-5-1",
+      "scored": [
+        "dimnikarstvo-vidmar",
+        "kamp-soska",
+        "klavirji-urbanc",
+        "knjigoveznica-kras",
+        "pedikura-nogica",
+        "pralnica-cisto",
+        "servis-aparatov-rebec",
+        "slascicarna-pri-zofki",
+        "tapetnistvo-lesjak",
+        "zeliscarna-pri-lipi"
+      ],
+      "failed": [],
+      "skipped": [],
+      "vsOwner": null
+    }
+  },
+  "reviewerPairs": [
+    {
+      "a": "gemini",
+      "b": "gpt",
+      "pairwise": {
+        "agreement": 0.5595238095238095,
+        "pairs": 42,
+        "agreed": 23.5,
+        "judgeTies": 1
+      },
+      "spearman": 0.13803940759355818,
+      "n": 10
+    },
+    {
+      "a": "gemini",
+      "b": "claude",
+      "pairwise": {
+        "agreement": 0.6071428571428571,
+        "pairs": 42,
+        "agreed": 25.5,
+        "judgeTies": 1
+      },
+      "spearman": 0.20859288258582126,
+      "n": 10
+    },
+    {
+      "a": "gpt",
+      "b": "claude",
+      "pairwise": {
+        "agreement": 0.7386363636363636,
+        "pairs": 44,
+        "agreed": 32.5,
+        "judgeTies": 1
+      },
+      "spearman": 0.6097560975609756,
+      "n": 10
+    }
+  ],
+  "spentEur": 1.20939736,
+  "calls": 31,
+  "stoppedByBudget": false,
+  "rows": [
+    {
+      "itemId": "dimnikarstvo-vidmar",
+      "owner": null,
+      "scores": {
+        "gemini": 4.166666666666667,
+        "gpt": 3.6666666666666665,
+        "claude": 3.583333333333333
+      },
+      "topFix": {
+        "gemini": "Replace the hero radiator vector with an illustration of a chimney, stove, or flue system to better match the chimney sweep trade.",
+        "gpt": "Replace the dominant radiator with a chimney-and-brush illustration that retains the existing pipe-line style and more directly identifies the trade.",
+        "claude": "Swap the radiator for a chimney/roof illustration (or a real photo of the sweep at work) and on phone shrink it so it sits beside or just under the headline inside the first screen."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [],
+        "claude": []
+      }
+    },
+    {
+      "itemId": "kamp-soska",
+      "owner": null,
+      "scores": {
+        "gemini": 4.166666666666666,
+        "gpt": 3.916666666666667,
+        "claude": 3.833333333333333
+      },
+      "topFix": {
+        "gemini": "Reduce the desktop hero image height or overlap the dark text card higher up so the full intro text and 'Poglejte cene' link fit inside the first screen.",
+        "gpt": "Reduce the desktop hero height and move its text panel upward so the full introduction and price link are visible within the first 800 pixels.",
+        "claude": "Desktop hero: shift the text panel right or shorten the photo so the headline, intro and 'Poglejte cene' sit fully within the first screen and the orange tent is not covered."
+      },
+      "blockers": {
+        "gemini": [
+          "On the desktop first screen, the hero text card extends past the bottom of the viewport, cutting off the descriptive copy and hiding the call-to-action link."
+        ],
+        "gpt": [],
+        "claude": []
+      }
+    },
+    {
+      "itemId": "klavirji-urbanc",
+      "owner": null,
+      "scores": {
+        "gemini": 4.083333333333334,
+        "gpt": 4,
+        "claude": 3.4166666666666665
+      },
+      "topFix": {
+        "gemini": "Put the business name and a compact 'Pokličite' button on a single header row on mobile instead of stacking a full-width button at the very top.",
+        "gpt": "Reduce desktop section padding, especially around the services list, working approach and credentials, to remove the repeated empty bands.",
+        "claude": "Tighten section padding on desktop: cut the empty bands below the hero, services table, Zakaj me pokličejo and Kje delam to a consistent rhythm."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [],
+        "claude": []
+      }
+    },
+    {
+      "itemId": "knjigoveznica-kras",
+      "owner": null,
+      "scores": {
+        "gemini": 4.416666666666666,
+        "gpt": 3.916666666666667,
+        "claude": 3.75
+      },
+      "topFix": {
+        "gemini": "Center the arched hero image on mobile or make it span the full width of the text card above it so it doesn't hug the right edge.",
+        "gpt": "Shorten the phone hero by reducing the decorative sprig and card padding, bringing a recognisable portion of the bound book above the fixed directions bar.",
+        "claude": "On phone, shorten the hero card (smaller leaf ornament, tighter padding) so the arched book photo appears in the first screen instead of a thin sliver under the fixed bar."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [],
+        "claude": []
+      }
+    },
+    {
+      "itemId": "pedikura-nogica",
+      "owner": null,
+      "scores": {
+        "gemini": 3.8333333333333335,
+        "gpt": 3.083333333333333,
+        "claude": 3.333333333333333
+      },
+      "topFix": {
+        "gemini": "Replace the second mood photo (mountain landscape) with an image relevant to foot care, hygiene, or a calm studio interior.",
+        "gpt": "Compress the phone header into a compact brand-and-contact layout, and place the town beside the introductory text on both screens so visitors can immediately locate the business.",
+        "claude": "Replace the mountain landscape in 'Za stopala, ki potrebujejo več pozornosti' with a photo of the studio, tools or a treatment; it currently reads as a tourist-farm image."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [],
+        "claude": []
+      }
+    },
+    {
+      "itemId": "pralnica-cisto",
+      "owner": null,
+      "scores": {
+        "gemini": 4.166666666666666,
+        "gpt": 3.25,
+        "claude": 3.5
+      },
+      "topFix": {
+        "gemini": "Add proper horizontal padding (e.g., 20px–24px) to the 'Poglejte cene' button and remove the text underline so it looks like a proper button.",
+        "gpt": "Compress the phone hero by reducing the decorative sprig, internal padding and button spacing so a meaningful portion of the laundry photo appears above the fixed bar.",
+        "claude": "Replace the repeated olive-branch ornament on hero and price cards with laundry-specific icons (shirt, duvet, curtain) or drop it entirely."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [],
+        "claude": []
+      }
+    },
+    {
+      "itemId": "servis-aparatov-rebec",
+      "owner": null,
+      "scores": {
+        "gemini": 3.583333333333333,
+        "gpt": 3.416666666666667,
+        "claude": 3.5833333333333335
+      },
+      "topFix": {
+        "gemini": "Replace the car license plate styling (blue 'SLO' strip) on the phone number and price badges with a motif that fits appliance repair, such as an appliance rating label or clean industrial tag.",
+        "gpt": "Reduce the desktop hero headline to roughly 64–72px and tighten its vertical spacing so the service area, complete call button and pricing link fit comfortably within the first screen.",
+        "claude": "Desktop hero: shrink the headline by about a third so the phone-number plate and the price link fit inside the first screen, and cut the empty photo band below it."
+      },
+      "blockers": {
+        "gemini": [
+          "On both phone and desktop, phone numbers and prices are styled as Slovenian car license plates ('SLO' blue strip), which makes no sense for a home appliance repair business."
+        ],
+        "gpt": [],
+        "claude": []
+      }
+    },
+    {
+      "itemId": "slascicarna-pri-zofki",
+      "owner": null,
+      "scores": {
+        "gemini": 4.25,
+        "gpt": 3.75,
+        "claude": 3.5833333333333335
+      },
+      "topFix": {
+        "gemini": "Add proper horizontal padding (at least 24px) to the yellow 'Poglejte ponudbo' button, center its text on mobile, and remove the underline inside the button.",
+        "gpt": "Compact the phone hero’s text and action spacing, and move the photograph higher so the pastry is clearly visible above the fixed contact bar.",
+        "claude": "Phone hero: move the kremšnita photo up (above or beside the buttons) and keep the hours badge inside the arch so the first screen shows the product, not an empty dark band."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [],
+        "claude": [
+          "Phone footer: the business name „Slaščičarna Pri Zofki"
+        ]
+      }
+    },
+    {
+      "itemId": "tapetnistvo-lesjak",
+      "owner": null,
+      "scores": {
+        "gemini": 4.083333333333334,
+        "gpt": 4.083333333333334,
+        "claude": 3.666666666666667
+      },
+      "topFix": {
+        "gemini": "Add the phone number and workshop address (or a direct contact CTA) to the right side of the desktop header so desktop visitors don't have to scroll to the footer to call.",
+        "gpt": "Add a clearly visible click-to-call link in the desktop header so visitors can contact the workshop without scrolling to the footer.",
+        "claude": "Shrink the footer wordmark on desktop to a normal heading size; it currently swallows the screen and looks like a rendering error."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [],
+        "claude": [
+          "Desktop footer: the 'Tapetništvo Lesjak' wordmark is rendered at an absurd size, dominating the viewport and looking broken."
+        ]
+      }
+    },
+    {
+      "itemId": "zeliscarna-pri-lipi",
+      "owner": null,
+      "scores": {
+        "gemini": 4.166666666666667,
+        "gpt": 3.333333333333333,
+        "claude": 2.916666666666667
+      },
+      "topFix": {
+        "gemini": "Center the text inside the primary green CTA button ('Poglejte izbor izdelkov'), remove its underline, and add horizontal padding on desktop so the text doesn't touch the button edges.",
+        "gpt": "Compact the phone hero by reducing decorative space and stacking fewer actions, bring the herb photograph clearly into the first screen, and add a short location line near the introduction on both ⇢.",
+        "claude": "Give the three products real photos and shrink the cards so icon, name and price sit together instead of floating in a tall empty box."
+      },
+      "blockers": {
+        "gemini": [],
+        "gpt": [],
+        "claude": []
+      }
+    }
+  ],
+  "filter": {
+    "passed": [
+      "dimnikarstvo-vidmar",
+      "klavirji-urbanc",
+      "knjigoveznica-kras",
+      "pedikura-nogica",
+      "pralnica-cisto",
+      "zeliscarna-pri-lipi"
+    ],
+    "held": [
+      "kamp-soska",
+      "servis-aparatov-rebec",
+      "slascicarna-pri-zofki",
+      "tapetnistvo-lesjak"
+    ],
+    "unreviewed": []
+  },
+  "agreedFilter": {
+    "rule": "two-of-three",
+    "needed": 2,
+    "passed": [
+      "dimnikarstvo-vidmar",
+      "kamp-soska",
+      "klavirji-urbanc",
+      "knjigoveznica-kras",
+      "pedikura-nogica",
+      "pralnica-cisto",
+      "servis-aparatov-rebec",
+      "slascicarna-pri-zofki",
+      "tapetnistvo-lesjak",
+      "zeliscarna-pri-lipi"
+    ],
+    "held": [],
+    "unreviewed": []
+  }
+}

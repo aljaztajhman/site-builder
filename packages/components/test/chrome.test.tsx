@@ -119,6 +119,27 @@ describe("Header", () => {
     expect(out).not.toContain("nav-toggle");
     expect(out).not.toContain("<nav");
   });
+
+  it("has no menu on a one-page site: no lone \"Domov\" in the header or the footer (M1 blocker)", () => {
+    const s = spec();
+    const onePage = { ...s, pages: s.pages.filter((p) => p.id !== "p_storitve") };
+    const skeleton = { header: "centred", actions: "bar", footer: "columns", footerTone: "alt", width: "contained", cards: "filled", buttons: "soft", dividers: "motif", photoRatio: "standard" } as const;
+    for (const site of [onePage, { ...onePage, design: { ...onePage.design, skeleton } }]) {
+      const ctx = testCtx(site);
+      const header = html(<Header ctx={ctx} />);
+      expect(header).not.toContain(">Domov<");
+      expect(header).not.toContain("nav-toggle");
+      expect(header).not.toContain('id="site-nav"');
+      expect(header).toContain('class="site-header__brand" href="index.html"');
+      const footer = html(<Footer ctx={ctx} />);
+      expect(footer).not.toContain(">Domov<");
+      // The legal pages stay linked.
+      expect(footer).toContain('href="zasebnost.html">Zasebnost</a>');
+    }
+    // Two menu pages keep the menu, the homepage included.
+    expect(html(<Header ctx={testCtx(s)} />)).toContain(">Domov</a>");
+    expect(html(<Footer ctx={testCtx(s)} />)).toContain(">Domov</a>");
+  });
 });
 
 describe("Footer", () => {
@@ -159,6 +180,23 @@ describe("Footer", () => {
     expect(out).toContain('href="https://www.instagram.com/salonlipa" rel="noopener">Instagram</a>');
     expect(out).toContain(">Družbena omrežja</h2>");
     expect(out).not.toContain("<script");
+  });
+
+  it("wordmark family prints the name twice, the wordmark and the ©, not a third time as a bold name line (M1 final check)", () => {
+    const skeleton = { header: "bar", actions: "bar", footer: "wordmark", footerTone: "inverse", width: "contained", cards: "bordered", buttons: "soft", dividers: "none", photoRatio: "standard" } as const;
+    const s = spec();
+    const b = { ...SPARSE_BUSINESS, name: "Slaščičarna Pri Zofki" };
+    const out = html(<Footer ctx={testCtx({ ...s, business: b, design: { ...s.design, skeleton } })} />);
+    // Shown copies: the markup with the screen-reader-only elements taken out.
+    const shown = out.replace(/<(p|span) class="[^"]*visually-hidden[^"]*">[\s\S]*?<\/\1>/g, "");
+    expect(count(shown, /Slaščičarna Pri Zofki/g)).toBe(2);
+    expect(shown).toMatch(/<p class="site-footer__wordmark" aria-hidden="true" style="--wm-chars:11;--wm-line:21">Slaščičarna Pri Zofki<\/p>/);
+    expect(shown).toContain("© ");
+    // Screen readers still read the name once: the wordmark is aria-hidden, the name line stays for them.
+    expect(out).toContain('<p class="site-footer__name visually-hidden">Slaščičarna Pri Zofki</p>');
+    // Without the wordmark the bold name line stays visible.
+    const columns = html(<Footer ctx={testCtx({ ...s, business: b })} />);
+    expect(columns).toContain('<p class="site-footer__name">Slaščičarna Pri Zofki</p>');
   });
 
   describe("visit footer says each fact once (review 50: address and hours printed two or three times)", () => {

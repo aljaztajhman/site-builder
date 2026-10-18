@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The tall framed hero pushes the laundry photo almost entirely below the first screen, while oversized price cards make the page unnecessarily long.\",\n  \"desktopNote\": \"The coordinated colours and framing feel considered, but oversized headings and generously padded sections overwhelm the straightforward service information.\",\n  \"phone\": {\n    \"impression\": 3,\n    \"hierarchy\": 3,\n    \"imagery\": 2,\n    \"spacing\": 3,\n    \"clutter\": 4,\n    \"distinctiveness\": 3\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 3,\n    \"imagery\": 4,\n    \"spacing\": 3,\n    \"clutter\": 4,\n    \"distinctiveness\": 3\n  },\n  \"fixes\": [\n    \"Compress the phone hero by reducing the decorative sprig, internal padding and button spacing so a meaningful portion of the laundry photo appears above the fixed bar.\",\n    \"Replace the tall phone price cards with compact service-and-price rows; on desktop, reduce card padding and secondary heading sizes to tighten the page’s rhythm.\",\n    \"Use a workwear image beside the work-clothes section instead of folded towels so the photograph supports that specific service.\"\n  ],\n  \"blockers\": []\n}",
+  "usage": {
+    "prompt_tokens": 8700,
+    "completion_tokens": 436,
+    "cost": 0.0261085
+  }
+}

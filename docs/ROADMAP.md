@@ -10,9 +10,9 @@ Written on 2026-10-16 from an inventory of TASKS.md (263 done, 158 open), HQ, do
 
 ## Now
 
-- **Current milestone:** M1 Design good enough. Design 5 Wave P ran on 2026-10-16 and **failed** the bar (variety 3/3/2 and 2/2/2; Review 50's overall dropped). Next: the owner decides the §6 plan (type voice, scale, CTA and chrome, imagery) that replaces U1–U5; meanwhile the headline-fitting defect and the open reviewer blockers.
+- **Current milestone:** M2 Launch gate: accounts, editor, email. M1 closed on 2026-10-18 (owner: "close M1"; final check 6 of 10 against a bar of 8, not re-scored by the owner's decision). A new session plans and runs M2. One M1 follow-up for M2's first week: the slaščičarna hours badge under the phone buttons (TASKS).
 - **Owner, in parallel (long lead times):** register the company (M3), find a lawyer for the legal pages (M3). New name Postavi; postavi.si bought 2026-10-17 (M5).
-- **Last updated:** 2026-10-17.
+- **Last updated:** 2026-10-18.
 
 ---
 
@@ -22,27 +22,28 @@ Claude's track runs in order: M1 → M2 → M4 → M5 → M6 → M7. M3 is mostl
 
 Each milestone has exit criteria. A milestone is done only when every criterion is met and checked. No "80 %" milestones: half-done work stays open on this page, and is not quietly left behind for something new.
 
-### M1 · Design good enough (Claude) — 0 of 6 criteria met
+### M1 · Design good enough (Claude) — done 2026-10-18 (4 of 4 by the owner's decision; the final check scored 6 of 10 against a bar of 8)
 
-Sites pass the three outside reviewers and the owner's eye, with a set of ten that reads as ten designs.
+Sites pass the three outside reviewers and the owner's eye. Set variety is not a v1.0 goal (owner, 2026-10-17).
+
+Decision 2026-10-17 (owner): lock today's design (Design 3 + the Review 50 fixes; it beat both AI studios: 28 of 50 pages pass all three reviewers, 7 of 10 new businesses). Two cheap variety proofs failed to move set variety (Wave P layouts, PR #220; type and details, PR #221), so variety work goes to the parking lot. The six earlier criteria (Wave P, Design 5 waves U1–U9, the blocker list, the owner's critiques, G2 on 20 businesses, the town in the hero) are replaced by these three.
 
 Exit criteria:
-- [ ] Design 5 Wave P passes: set variety ≥ 3.5 from 2 of 3 reviewers on both proof sets, and the owner agrees on the contact sheets. If it fails, the plan switches to §6 of the direction (scale, type, second moment). M1 continues either way.
-  - 2026-10-16: **failed** (€0.21). fresh 10 variety 3/3/2, Review 50 2/2/2, Review 50 overall 3 → 2 for Gemini and GPT. eval/outside-review/wave-p-sets/README.md. The switch to §6 and what happens to the next criterion (U1–U9) is the owner's call.
-- [ ] Design 5 waves needed for launch are built and on. U1 is v22, the gate and the structures; U2 is the page gate on every path; U3–U5 bring presets, photo grade and the variety rule; U8 is chrome and the single-page nav; U9 is the AI caption. U6/U7 (studio wiring, hybrid designer) are parking lot, not M1.
-- [ ] Every open reviewer blocker is fixed in code, with a test:
-  - AI label clipped by arched crops;
+- [x] Every known blocker is fixed in code, with a test that failed before (PR #222). The eight listed below, and the final check's held-page defects: the desktop hero card inside the first screen, number-plate style only for vehicle trades, filled buttons that keep their padding, the footer wordmark size and the name printed three times. One follow-up stays open for M2's first week (owner, 2026-10-18): the slaščičarna hours badge under the phone buttons at 360 px; its fix (branch `claude/m1-final-hero`) still failed its test at 360×640, so it was left out. kolesarski-servis-ovinek's hero list meets the bar at 390×844 too (todo in tools/eval/test/m1-chrome-blockers.test.ts).
+  - AI label clipped in arched photo crops;
   - arched photo cut at the phone edge;
-  - caron touching the line above in the footer wordmark;
+  - č/š/ž touching the line above in the footer wordmark;
   - phone bar over a hero link;
   - week chart without hour labels;
   - logo viewBox clipped;
   - call action shown three times on phones;
-  - lone "Domov" in the nav;
-  - Review 50 items 9–13 (compact hours, two-column desktop variants, headline and wordmark caps, phone hero button).
-- [ ] The owner's critiques are closed: heroes and drawings too basic (9 of 20 presets rejected), the yellow background, direction summaries that promise B&W photos.
-- [ ] G2 measured on 20 new businesses. Per page ≥ 3.6 (today 3.47), all three reviewers pass ≥ 8 of 10, set variety ≥ 4 from 2 of 3, and fewer than 5 agreed blockers per 10 pages.
-- [ ] Owner decides on the town in the hero (Review 50 item 15).
+  - lone "Domov" in the nav on single-page sites;
+  - any other open reviewer blocker in eval/outside-review (fresh10, review50-after) that is still real.
+  - The arched photo at the phone edge did not reproduce: every picture stays inside 360 px on all goldens, Review 50 and fresh 10 pages; a test now guards it. What reviewers saw was the first screen and the phone bar cutting the arch.
+- [x] Six prompt fixes are on (owner, 2026-10-17: turned on directly, without per-fix evals; CI's offline eval is the guard): `promptFixes.directions` (no B&W or duotone promises, editorial photo hero), `beige` and `warmSurface` (no cream or beige page backgrounds), `catalogue` (incl. the call-button rule), `oneHero` (one main heading per page), `sloveneStyle` (formal vi, Slovene typography, no English words). The final check runs with them on.
+- [x] Final check on 10 brand-new businesses (never tested; new trades and towns; with and without photos): at least 8 of 10 pass all three reviewers (Gemini, GPT, Fable), scored per page.
+  - 2026-10-17: **6 of 10** passed all three reviewers (bar 8; all 10 pass the two-of-three filter). Means Gemini 4.09, GPT 3.64, Fable 3.52 (the earlier fresh 10: 3.99, 3.34, 3.39). Owner's decision 2026-10-17 ("no rescore, just fix and letsgo"): fix the 4 held pages' defects with tests and **don't re-score**. The criterion is ticked by that decision, not by the number. Where the fixes stand: see criterion 1. Cost €3.89 (photos €1.02, generation €1.66, scoring €1.21). eval/outside-review/final10.
+- [x] The owner looks at the pages (desktop and phone contact sheets) and approves them: 2026-10-17, "letsgo" (claude.ai artifact "Stranko M1 Final Check").
 
 ### M2 · Launch gate: accounts, editor, email (Claude + an owner check) — 0 of 6 met (much of the work under them is built)
 
@@ -86,7 +87,7 @@ Exit criteria:
 - [ ] End-to-end on live: buy or connect a test domain → TLS → the site serves. `domains.enabled` true, and `seo.indexSiteHosts` decided (TASKS:398).
 - [ ] Who pays for a domain before billing is answered (TASKS:392). The d.o.o. contact person is set (TASKS:391).
 
-### M6 · Operations (Claude) — 0 of 6 met
+### M6 · Operations (Claude) — 1 of 6 met
 
 It keeps running, and we know when it doesn't.
 
@@ -95,8 +96,8 @@ Exit criteria:
 - [ ] Repository protection on main (TASKS:352).
 - [ ] Backups with a restore drill done once (TASKS:353).
 - [ ] Monitoring and alerts on errors and spend (TASKS:358). Daily spend cap set on Railway.
-- [ ] Analytics events on (TASKS:360, `analytics.events`).
-- [ ] **Switches cleaned up.** Every feature flag that is off (config: promptFixes ×13, costCuts, compactCatalogue, homepageFirst, structuredOutputForContent, genome, useFullBuildModel, designer studio) is either turned on after an eval or deleted with its code. No dead switches at launch.
+- [x] Analytics events on (TASKS:360, `analytics.events`; PR #224, 2026-10-17).
+- [ ] **Switches cleaned up** (owner, 2026-10-17: must happen before launch). All remaining `promptFixes` (pictures, critique, altText, judge, brief, classifier, edit) and the cost and speed switches (`costCuts.secondCritiqueOnlyOnFailures`, `costCuts.contentRetryAsPatch`, `prompts.compactCatalogue`, `pipeline.homepageFirst`, `structuredOutputForContent`) are turned on after an eval. The experiments (`designer.agent` studio, `variety.genome`, `useFullBuildModel`) are deleted with their code. No dead switches at launch.
 
 ### M7 · Launch (owner + Claude) — 0 of 5 met
 
@@ -113,6 +114,9 @@ Exit criteria:
 
 Ideas and half-built things that are **not** on the way to 1.0. Something leaves the parking lot only when the owner moves it into a milestone.
 
+- **Set variety for v1.0 (owner, 2026-10-17).** Set variety ≥ 4 from 2 of 3 reviewers, the rest of Design 5 (U1–U7, incl. Wave P's structure presets, off since PR #220), option B "pictures lead every first screen", new hero structures, direction §6, and the AI studios (picture studio, Fable studio). Why: two cheap proofs (layouts, PR #220; type and details, PR #221) did not move the reviewers' variety score (2–3), while today's per-page quality already beats both studios. Revisit after launch.
+- Fonts and details (PR #221, closed 2026-10-17: seven type voices, header, CTA, AI caption, headline fit; switches off): nicer per the contact sheets, not needed for launch. Before any revival, fix the Opus review's findings (AI label lost on collection pages, voices undone by `enforceDesign`, headline fit collapsing in pinned columns, config switches not wired, voice fonts in every export).
+- Town in the hero lead (Review 50 item 15), G2 on 20 businesses, the owner's preset critiques (heroes and drawings too basic, the yellow background, direction summaries promising B&W photos) unless the final check's approval names them.
 - Studio 1.0 (S0–S7 tournament), the hybrid designer (Design 5 U6/U7, G3), the Fable studio, the picture studio.
 - Okus round 3 ratings. Rate them if an M1 decision needs the owner's taste.
 - Puck editor (unless M2's decision picks it). Section AI actions (TASKS:136), the Slovene copy judge (TASKS:137), editor keyboard paths (TASKS:564).
@@ -133,4 +137,5 @@ Ideas and half-built things that are **not** on the way to 1.0. Something leaves
    - Claude ticks what landed here and in TASKS.md, and updates "Now" and the milestone %.
    - The % is the share of exit criteria met, never inflated.
    - HQ phases mirror the milestones.
-5. **Changing the plan:** only the owner moves milestones, exit criteria or parking-lot items. Claude proposes; the owner decides in chat. The decision is noted here with its date.
+5. **Checking work (owner, 2026-10-17):** one paid judging check per milestone, at its end. In between, build, with CI (typecheck, lint, tests, the offline eval) as the guard.
+6. **Changing the plan:** only the owner moves milestones, exit criteria or parking-lot items. Claude proposes; the owner decides in chat. The decision is noted here with its date.

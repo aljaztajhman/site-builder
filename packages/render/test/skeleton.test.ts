@@ -38,7 +38,7 @@ describe("the skeleton in the page", () => {
     expect(html).toContain('class="site-header site-header--centred"');
     expect(html).toContain('class="nav-toggle nav-toggle--icon"');
     expect(html).toContain('class="site-footer site-footer--compact site-footer--wordmark site-footer--tone-inverse"');
-    expect(html).toMatch(/<p class="site-footer__wordmark" aria-hidden="true" style="--wm-chars:\d+">Avtoservis Mrak<\/p>/);
+    expect(html).toMatch(/<p class="site-footer__wordmark" aria-hidden="true" style="--wm-chars:\d+;--wm-line:15">Avtoservis Mrak<\/p>/);
   });
 
   it("draws the menu as a word, an icon or today's box by header family", () => {
@@ -141,7 +141,7 @@ describe("the skeleton in the page", () => {
     expect(footer).toContain("Obiščite nas");
     expect(footer).toContain("site-footer__directions");
     expect(footer).toContain("Delovni čas");
-    expect(footer.match(/<address>/g)).toHaveLength(1);
+    expect(footer.match(/<address[ >]/g)).toHaveLength(1);
   });
 
   it("footer visit under a contact section: no second address or hours, the provider rows stay (review 50)", () => {

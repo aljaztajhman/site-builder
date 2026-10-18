@@ -1,0 +1,27 @@
+{
+  "id": "pedikura-nogica",
+  "businessType": "hairdresser",
+  "trade": "pedikura",
+  "description": "Studio za medicinsko pedikuro in nego stopal Nogica, Ravne na Koroškem.\n\nSem Kristina Dolinšek, medicinska pedikerka. Pridejo k meni ljudje, ki jih bolijo noge: z vraščenimi nohti, trdo kožo, kurjimi očesi ali z glivičnimi spremembami. Veliko je tudi sladkornih bolnikov, ki morajo za stopala posebej skrbeti. Delam počasi in nežno, z vsakim si vzamem čas.\n\nCenik: medicinska pedikura 28 €, pedikura z lakiranjem 33 €, zdravljenje vraščenega nohta od 20 €, masaža stopal 12 €.\n\nSprejemam samo po naročilu, in sicer torek, četrtek in petek od 9.00 do 17.00. Naslov: Koroška cesta 5, 2390 Ravne na Koroškem. Naročila po telefonu 070 555 128 (če ne dvignem, ker sem pri stranki, pustite sporočilo in vas pokličem nazaj).\n\nKristina Dolinšek s.p.",
+  "logo": null,
+  "photos": [],
+  "facts": {
+    "name": "Studio za medicinsko pedikuro in nego stopal Nogica",
+    "phone": "+38670555128",
+    "address": { "street": "Koroška cesta 5", "postalCode": "2390", "city": "Ravne na Koroškem" },
+    "hours": [
+      { "from": "tue", "to": "tue", "open": "09:00", "close": "17:00" },
+      { "from": "thu", "to": "fri", "open": "09:00", "close": "17:00" }
+    ],
+    "prices": [
+      { "item": "medicinska pedikura", "amount": 28 },
+      { "item": "pedikura z lakiranjem", "amount": 33 },
+      { "item": "zdravljenje vraščenega nohta", "amount": 20, "from": true },
+      { "item": "masaža stopal", "amount": 12 }
+    ],
+    "people": [{ "name": "Kristina Dolinšek", "role": "medicinska pedikerka" }],
+    "legal": { "legalName": "Kristina Dolinšek s.p." },
+    "other": ["sladkornih bolnikov", "samo po naročilu", "pustite sporočilo"]
+  },
+  "missing": ["photos", "email"]
+}

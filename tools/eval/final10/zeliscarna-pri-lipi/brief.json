@@ -1,0 +1,31 @@
+{
+  "id": "zeliscarna-pri-lipi",
+  "businessType": "shop",
+  "trade": "zeliščarstvo",
+  "description": "Zeliščarna in čajnica Pri Lipi, Ribnica.\n\nSem Neža Lavrič, zeliščarka. Zelišča nabiram na Kočevskem in Veliki gori, nekaj jih pridelam na vrtu za hišo. Sušim jih v senci, brez umetnih dodatkov, in jih mešam v čaje po receptih, ki sem se jih naučila od babice.\n\nV trgovinici dobite suha zelišča, čaje, tinkture, mazila in domače sirupe. V čajnici zraven je prostor za osem ljudi, kjer si lahko ob topli skodelici odpočijete in pokramljate.\n\nCenik: čaj za prehlad 4 €, zeliščna tinktura 9 €, mazilo iz nevena 7 €, skodelica čaja v čajnici 2,50 €.\n\nNaslov: Škrabčev trg 4, 1310 Ribnica. Odprto torek–petek 9.00–17.00, ob sobotah 9.00–12.00. Telefon 031 555 477, e-pošta lipa@zeliscarna-lipa.example.",
+  "logo": "logo.svg",
+  "photos": [
+    { "file": "photos/01.jpg", "subject": "šopi sušenih zelišč, obešeni na leseni gredi pod stropom" },
+    { "file": "photos/02.jpg", "subject": "steklenice čajnih mešanic na leseni polici trgovinice" },
+    { "file": "photos/03.jpg", "subject": "skodelica zeliščnega čaja na mizi v čajnici ob oknu" }
+  ],
+  "facts": {
+    "name": "Zeliščarna in čajnica Pri Lipi",
+    "phone": "+38631555477",
+    "email": "lipa@zeliscarna-lipa.example",
+    "address": { "street": "Škrabčev trg 4", "postalCode": "1310", "city": "Ribnica" },
+    "hours": [
+      { "from": "tue", "to": "fri", "open": "09:00", "close": "17:00" },
+      { "from": "sat", "to": "sat", "open": "09:00", "close": "12:00" }
+    ],
+    "prices": [
+      { "item": "čaj za prehlad", "amount": 4 },
+      { "item": "zeliščna tinktura", "amount": 9 },
+      { "item": "mazilo iz nevena", "amount": 7 },
+      { "item": "skodelica čaja v čajnici", "amount": 2.5 }
+    ],
+    "people": [{ "name": "Neža Lavrič", "role": "zeliščarka" }],
+    "other": ["na Kočevskem in Veliki gori", "brez umetnih dodatkov", "prostor za osem ljudi", "od babice"]
+  },
+  "missing": ["legal"]
+}

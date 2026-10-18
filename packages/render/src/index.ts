@@ -7,3 +7,4 @@ export * from "./jsonld.ts";
 export * from "./not-found.ts";
 export * from "./seo.ts";
 export * from "./feed.ts";
+export * from "./mark-room.ts";

@@ -1,0 +1,137 @@
+{
+  "kamp-soska/01": {
+    "model": "gpt-image-2.5",
+    "endpoint": "openai/gpt-image-2.5/flare/text-to-image",
+    "prompt": "A small orange tent pitched on a meadow right beside a clear emerald-green mountain river with white pebbles, forested hills behind, early morning light. Realistic photograph taken with a good smartphone by the owner of a small business in Slovenia, for their own website. Natural available light, unstaged, true-to-life colours, ordinary everyday setting with small imperfections. No text, no lettering on signs or packaging, no logos, no watermark, no borders.",
+    "width": 1536,
+    "height": 1024,
+    "eur": 0.0679,
+    "createdAt": "2026-10-17T19:37:31.223Z"
+  },
+  "kamp-soska/02": {
+    "model": "gpt-image-2.5",
+    "endpoint": "openai/gpt-image-2.5/flare/text-to-image",
+    "prompt": "A white motorhome parked on a gravel pitch under tall deciduous trees at a small family campsite, a folding chair and a small table beside it, dappled sunlight. Realistic photograph taken with a good smartphone by the owner of a small business in Slovenia, for their own website. Natural available light, unstaged, true-to-life colours, ordinary everyday setting with small imperfections. No text, no lettering on signs or packaging, no logos, no watermark, no borders.",
+    "width": 1024,
+    "height": 1536,
+    "eur": 0.0679,
+    "createdAt": "2026-10-17T19:37:31.223Z"
+  },
+  "kamp-soska/03": {
+    "model": "gpt-image-2.5",
+    "endpoint": "openai/gpt-image-2.5/flare/text-to-image",
+    "prompt": "A shared campsite kitchen: a long worn wooden table, a shelf with pots and pans, a two-ring gas cooker and a window with a view of trees, clean and simple. Realistic photograph taken with a good smartphone by the owner of a small business in Slovenia, for their own website. Natural available light, unstaged, true-to-life colours, ordinary everyday setting with small imperfections. No text, no lettering on signs or packaging, no logos, no watermark, no borders.",
+    "width": 1536,
+    "height": 1024,
+    "eur": 0.0679,
+    "createdAt": "2026-10-17T19:37:31.223Z"
+  },
+  "knjigoveznica-kras/01": {
+    "model": "gpt-image-2.5",
+    "endpoint": "openai/gpt-image-2.5/flare/text-to-image",
+    "prompt": "A hand-bound book with a dark brown leather cover and visible stitched spine lying on a wooden workbench, a bone folder and a ball of linen thread next to it. Realistic photograph taken with a good smartphone by the owner of a small business in Slovenia, for their own website. Natural available light, unstaged, true-to-life colours, ordinary everyday setting with small imperfections. No text, no lettering on signs or packaging, no logos, no watermark, no borders.",
+    "width": 1536,
+    "height": 1024,
+    "eur": 0.0679,
+    "createdAt": "2026-10-17T19:37:31.223Z"
+  },
+  "knjigoveznica-kras/02": {
+    "model": "gpt-image-2.5",
+    "endpoint": "openai/gpt-image-2.5/flare/text-to-image",
+    "prompt": "Hands of a bookbinder sewing the pages of a book with thread on a wooden sewing frame in a small workshop, close view, soft window light. Realistic photograph taken with a good smartphone by the owner of a small business in Slovenia, for their own website. Natural available light, unstaged, true-to-life colours, ordinary everyday setting with small imperfections. No text, no lettering on signs or packaging, no logos, no watermark, no borders.",
+    "width": 1024,
+    "height": 1536,
+    "eur": 0.0679,
+    "createdAt": "2026-10-17T19:37:31.223Z"
+  },
+  "knjigoveznica-kras/03": {
+    "model": "gpt-image-2.5",
+    "endpoint": "openai/gpt-image-2.5/flare/text-to-image",
+    "prompt": "A workshop shelf with stacks of hand-made notebooks and sheets of coloured paper in muted tones, a press in the background. Realistic photograph taken with a good smartphone by the owner of a small business in Slovenia, for their own website. Natural available light, unstaged, true-to-life colours, ordinary everyday setting with small imperfections. No text, no lettering on signs or packaging, no logos, no watermark, no borders.",
+    "width": 1536,
+    "height": 1024,
+    "eur": 0.0679,
+    "createdAt": "2026-10-17T19:37:31.223Z"
+  },
+  "slascicarna-pri-zofki/01": {
+    "model": "gpt-image-2.5",
+    "endpoint": "openai/gpt-image-2.5/flare/text-to-image",
+    "prompt": "Two cream slices with a golden crust on a white plate beside a cup of coffee on a wooden counter of a small pastry shop, morning light. Realistic photograph taken with a good smartphone by the owner of a small business in Slovenia, for their own website. Natural available light, unstaged, true-to-life colours, ordinary everyday setting with small imperfections. No text, no lettering on signs or packaging, no logos, no watermark, no borders.",
+    "width": 1536,
+    "height": 1024,
+    "eur": 0.0679,
+    "createdAt": "2026-10-17T19:37:31.223Z"
+  },
+  "slascicarna-pri-zofki/02": {
+    "model": "gpt-image-2.5",
+    "endpoint": "openai/gpt-image-2.5/flare/text-to-image",
+    "prompt": "A round homemade cake with whipped cream and fresh strawberries on a cake stand, plain tablecloth, a window behind it. Realistic photograph taken with a good smartphone by the owner of a small business in Slovenia, for their own website. Natural available light, unstaged, true-to-life colours, ordinary everyday setting with small imperfections. No text, no lettering on signs or packaging, no logos, no watermark, no borders.",
+    "width": 1024,
+    "height": 1536,
+    "eur": 0.0679,
+    "createdAt": "2026-10-17T19:37:31.223Z"
+  },
+  "slascicarna-pri-zofki/03": {
+    "model": "gpt-image-2.5",
+    "endpoint": "openai/gpt-image-2.5/flare/text-to-image",
+    "prompt": "A glass display counter of a small pastry shop with trays of homemade cakes, a rolled walnut pastry cut in slices and apple strudel, warm indoor light. Realistic photograph taken with a good smartphone by the owner of a small business in Slovenia, for their own website. Natural available light, unstaged, true-to-life colours, ordinary everyday setting with small imperfections. No text, no lettering on signs or packaging, no logos, no watermark, no borders.",
+    "width": 1536,
+    "height": 1024,
+    "eur": 0.0679,
+    "createdAt": "2026-10-17T19:37:31.224Z"
+  },
+  "tapetnistvo-lesjak/01": {
+    "model": "gpt-image-2.5",
+    "endpoint": "openai/gpt-image-2.5/flare/text-to-image",
+    "prompt": "An old armchair in an upholsterer's workshop with the worn fabric half torn off, the wooden frame and springs visible, tools on a workbench behind it. Realistic photograph taken with a good smartphone by the owner of a small business in Slovenia, for their own website. Natural available light, unstaged, true-to-life colours, ordinary everyday setting with small imperfections. No text, no lettering on signs or packaging, no logos, no watermark, no borders.",
+    "width": 1536,
+    "height": 1024,
+    "eur": 0.0679,
+    "createdAt": "2026-10-17T19:37:31.224Z"
+  },
+  "tapetnistvo-lesjak/02": {
+    "model": "gpt-image-2.5",
+    "endpoint": "openai/gpt-image-2.5/flare/text-to-image",
+    "prompt": "A freshly reupholstered green fabric corner sofa in a tidy living room, afternoon light from a window, no people. Realistic photograph taken with a good smartphone by the owner of a small business in Slovenia, for their own website. Natural available light, unstaged, true-to-life colours, ordinary everyday setting with small imperfections. No text, no lettering on signs or packaging, no logos, no watermark, no borders.",
+    "width": 1024,
+    "height": 1536,
+    "eur": 0.0679,
+    "createdAt": "2026-10-17T19:37:31.224Z"
+  },
+  "tapetnistvo-lesjak/03": {
+    "model": "gpt-image-2.5",
+    "endpoint": "openai/gpt-image-2.5/flare/text-to-image",
+    "prompt": "A workbench with fabric sample books, a pair of large scissors, a tape measure and an upholstery hammer, a few rolls of cloth leaning against the wall. Realistic photograph taken with a good smartphone by the owner of a small business in Slovenia, for their own website. Natural available light, unstaged, true-to-life colours, ordinary everyday setting with small imperfections. No text, no lettering on signs or packaging, no logos, no watermark, no borders.",
+    "width": 1536,
+    "height": 1024,
+    "eur": 0.0679,
+    "createdAt": "2026-10-17T19:37:31.224Z"
+  },
+  "zeliscarna-pri-lipi/01": {
+    "model": "gpt-image-2.5",
+    "endpoint": "openai/gpt-image-2.5/flare/text-to-image",
+    "prompt": "Bunches of dried herbs hanging upside down from a wooden beam in a rustic room, lavender, yarrow and mint, soft side light. Realistic photograph taken with a good smartphone by the owner of a small business in Slovenia, for their own website. Natural available light, unstaged, true-to-life colours, ordinary everyday setting with small imperfections. No text, no lettering on signs or packaging, no logos, no watermark, no borders.",
+    "width": 1536,
+    "height": 1024,
+    "eur": 0.0679,
+    "createdAt": "2026-10-17T19:37:31.224Z"
+  },
+  "zeliscarna-pri-lipi/02": {
+    "model": "gpt-image-2.5",
+    "endpoint": "openai/gpt-image-2.5/flare/text-to-image",
+    "prompt": "A wooden shelf in a small herb shop with glass jars of loose tea blends and herbs, paper bags and small dark tincture bottles, warm light. Realistic photograph taken with a good smartphone by the owner of a small business in Slovenia, for their own website. Natural available light, unstaged, true-to-life colours, ordinary everyday setting with small imperfections. No text, no lettering on signs or packaging, no logos, no watermark, no borders.",
+    "width": 1024,
+    "height": 1536,
+    "eur": 0.0679,
+    "createdAt": "2026-10-17T19:37:31.224Z"
+  },
+  "zeliscarna-pri-lipi/03": {
+    "model": "gpt-image-2.5",
+    "endpoint": "openai/gpt-image-2.5/flare/text-to-image",
+    "prompt": "A cup of herbal tea with steam on a small wooden table by a window in a cosy tea room, a teapot and a sprig of dried flowers beside it. Realistic photograph taken with a good smartphone by the owner of a small business in Slovenia, for their own website. Natural available light, unstaged, true-to-life colours, ordinary everyday setting with small imperfections. No text, no lettering on signs or packaging, no logos, no watermark, no borders.",
+    "width": 1536,
+    "height": 1024,
+    "eur": 0.0679,
+    "createdAt": "2026-10-17T19:37:31.224Z"
+  }
+}

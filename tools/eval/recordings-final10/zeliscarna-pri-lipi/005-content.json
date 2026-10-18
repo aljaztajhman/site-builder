@@ -1,0 +1,18 @@
+{
+  "seq": 5,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "13e842767f25f11e",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"compact\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Zeliščarna in čajnica Pri Lipi, Ribnica\",\"description\":\"Domača zelišča, čaji, tinkture, mazila in sirupi iz Ribnice. Postanite ob skodelici čaja v čajnici za osem ljudi. Odprto od torka do sobote.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-signature\",\"variant\":\"label\",\"tone\":\"inverse\",\"props\":{\"headline\":\"Zelišča z Gore v vaši skodelici\",\"intro\":\"Zelišča nabiramo na Kočevskem in Veliki gori, jih posušimo v senci in zmešamo v čaje po babičinih receptih.\",\"fact\":\"opening\",\"factLabel\":\"Vrata trgovinice odpiramo\",\"primary\":{\"label\":\"Poglejte izbor izdelkov\",\"target\":{\"page\":\"p_home\",\"section\":\"s_izdelki\"}},\"secondary\":{\"label\":\"Obiščite nas\",\"target\":{\"action\":\"directions\"}},\"image\":\"img_01\",\"inset\":\"img_02\"}},{\"id\":\"s_hours\",\"type\":\"opening-hours\",\"variant\":\"photo\",\"tone\":\"alt\",\"props\":{\"title\":\"Kdaj vas pričakamo v trgovinici\",\"note\":\"V čajnici je prostor za osem ljudi, zato se lahko ob skodelici čaja ustavite tudi samo za trenutek.\",\"image\":\"img_03\",\"inset\":\"img_02\"}},{\"id\":\"s_cajnica\",\"type\":\"image-text\",\"variant\":\"round\",\"tone\":\"band\",\"props\":{\"heading\":\"Postanek ob skodelici čaja\",\"paragraphs\":[\"V čajnici je prostor za osem ljudi. Skodelica čaja stane 2,50 €, pogled skozi okno pa je brezplačen.\",\"Za večjo družbo nas raje vnaprej pokličite, da pripravimo mizo.\"],\"image\":\"img_03\",\"link\":{\"label\":\"Pokličite nas\",\"target\":{\"action\":\"call\"}}}},{\"id\":\"s_izdelki\",\"type\":\"price-list\",\"variant\":\"tags\",\"props\":{\"title\":\"Iz naše trgovinice\",\"intro\":\"Zelišča nabiramo na Kočevskem in Veliki gori, nekaj jih pridelamo na vrtu za hišo. Sušimo jih v senci, brez umetnih dodatkov.\",\"groups\":[{\"items\":[{\"name\":\"Čaj za prehlad\",\"price\":{\"amount\":4}},{\"name\":\"Zeliščna tinktura\",\"price\":{\"amount\":9}},{\"name\":\"Mazilo iz nevena\",\"price\":{\"amount\":7}}]}]}},{\"id\":\"s_galerija\",\"type\":\"gallery\",\"variant\":\"grid\",\"props\":{\"title\":\"Utrinki iz zeliščarne\",\"images\":[{\"image\":\"img_01\",\"caption\":\"Zelišča se sušijo na lesenem tramu\"},{\"image\":\"img_02\",\"caption\":\"Police s kozarci zelišč, čaji in tinkturami\"},{\"image\":\"img_03\",\"caption\":\"Skodelica čaja ob oknu čajnice\"}]}},{\"id\":\"s_contact\",\"type\":\"contact\",\"variant\":\"call-out\",\"tone\":\"inverse\",\"props\":{\"title\":\"Pokličite za naročilo ali obisk\",\"intro\":\"Za naročila, vprašanja o zeliščih ali rezervacijo mize v čajnici nas pokličite ali se oglasite.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2896,
+      "output_tokens": 1228,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 22549
+    }
+  }
+}

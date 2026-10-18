@@ -52,8 +52,9 @@ function WeekChart({ hours, ctx, labelledBy }: { hours: Hours; ctx: RenderCtx; l
         <span />
         <div className="week__ticks">
           {hoursOnScale.map((h, i) => (
-            <span key={h}>{i % 2 === 0 ? `${h}.00` : ""}</span>
+            <span key={h}>{i % 2 === 0 && i < hoursOnScale.length - 1 ? `${h}.00` : ""}</span>
           ))}
+          <span className="week__end">{`${chart.end}.00`}</span>
         </div>
       </div>
       <dl className="week__days" aria-labelledby={labelledBy}>

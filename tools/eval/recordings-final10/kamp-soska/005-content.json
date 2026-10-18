@@ -1,0 +1,18 @@
+{
+  "seq": 5,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "0dd7241af079afc9",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"columns\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Kamp Soška, kamp ob Soči pri Kobaridu\",\"description\":\"Majhen družinski kamp ob reki Soči, deset minut peš od središča Kobarida. Prostor za dvajset šotorov in deset avtodomov. Psi so dobrodošli.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-image\",\"variant\":\"overlay-bottom\",\"props\":{\"eyebrow\":\"Odprto od aprila do oktobra\",\"headline\":\"Šotor ob smaragdni Soči, mesto pa deset minut stran\",\"intro\":\"Majhen družinski kamp za planince, kolesarje, kajakaše in družine. Zvečer zakurimo ognjišče.\",\"primary\":{\"label\":\"Poglejte cene\",\"target\":{\"section\":\"cene\",\"page\":\"p_home\"}},\"image\":\"img_01\"}},{\"id\":\"s_contact\",\"type\":\"contact-strip\",\"variant\":\"cards\",\"tone\":\"alt\",\"props\":{\"title\":\"Obiščite nas\"}},{\"id\":\"s_about\",\"type\":\"image-text\",\"variant\":\"image-left\",\"props\":{\"heading\":\"Majhen kamp, kjer se hitro počutite doma\",\"paragraphs\":[\"Prostora imamo za dvajset šotorov in deset avtodomov. Otroci se lahko igrajo na trati, vi pa si ob večerih ogrejete ob ognjišču.\",\"Psi so pri nas dobrodošli, če so na povodcu.\"],\"image\":\"img_02\"}},{\"id\":\"s_highlights\",\"type\":\"highlights\",\"variant\":\"columns\",\"tone\":\"alt\",\"props\":{\"heading\":\"Kaj najdete v kampu\",\"items\":[{\"title\":\"Deset minut peš\",\"text\":\"Do središča Kobarida pridete peš v desetih minutah.\"},{\"title\":\"Dvajset šotorov, deset avtodomov\",\"text\":\"Kamp je majhen, zato je v njem mirno.\"},{\"title\":\"Trata za otroke\",\"text\":\"Prostor za igro, medtem ko vi počivate.\"},{\"title\":\"Skupna kuhinja, prhe, pralni stroj\",\"text\":\"Skupna kuhinja, tople prhe in pralni stroj so vam na voljo.\"},{\"title\":\"Večerno ognjišče\",\"text\":\"Zakurimo ga za planince, kolesarje in kajakaše.\"},{\"title\":\"Psi na povodcu\",\"text\":\"Pse sprejmemo, če so na povodcu.\"}]}},{\"id\":\"s_kitchen\",\"type\":\"image-text\",\"variant\":\"image-right\",\"props\":{\"heading\":\"Skupna kuhinja z mizo za vse\",\"paragraphs\":[\"Dolga lesena miza, police s posodo in plinski kuhalnik. Skuhate lahko tudi, ko vreme ni najboljše.\",\"Zajtrk lahko naročite vnaprej, 7 € na osebo.\"],\"image\":\"img_03\"}},{\"id\":\"s_prices\",\"type\":\"price-list\",\"variant\":\"table\",\"tone\":\"alt\",\"props\":{\"title\":\"Cene na noč\",\"groups\":[{\"name\":\"Cena na noč\",\"items\":[{\"name\":\"Odrasla oseba\",\"price\":{\"amount\":12,\"unit\":\"na noč\"}},{\"name\":\"Otrok do 12 let\",\"price\":{\"amount\":6,\"unit\":\"na noč\"}},{\"name\":\"Šotor\",\"price\":{\"amount\":4,\"unit\":\"na noč\"}},{\"name\":\"Avtodom\",\"price\":{\"amount\":18,\"unit\":\"na noč\"}}]},{\"name\":\"Dodatno\",\"items\":[{\"name\":\"Zajtrk po naročilu\",\"note\":\"Zajtrk naročite vnaprej.\",\"price\":{\"amount\":7,\"unit\":\"na osebo\"}}]}]}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2229,
+      "output_tokens": 1334,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 22549
+    }
+  }
+}

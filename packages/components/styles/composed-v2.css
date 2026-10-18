@@ -616,7 +616,7 @@ body[data-hdr="over"] .site-header--sticky::before {
   font-family: var(--font-heading);
   font-size: var(--fs-lg);
   font-weight: var(--fw-heading);
-  line-height: 1.3;
+  line-height: max(var(--lh-floor, 0), 1.3);
 }
 .cx-rb__t,
 .cx-rb__run {
@@ -720,7 +720,7 @@ body[data-hdr="over"] .site-header--sticky::before {
   font-family: var(--font-heading);
   font-size: var(--fs-lg);
   font-weight: 700;
-  line-height: 1.15;
+  line-height: max(var(--lh-floor, 0), 1.15);
   text-align: center;
   text-wrap: balance;
 }
@@ -802,7 +802,7 @@ body[data-hdr="over"] .site-header--sticky::before {
   bottom: calc(var(--ly) * 1% + 0.75rem);
   font-size: var(--fs-sm);
   font-weight: 600;
-  line-height: 1.2;
+  line-height: max(var(--lh-floor, 0), 1.2);
   max-width: 36%;
 }
 .cx-map__cap {
@@ -860,7 +860,7 @@ body[data-hdr="over"] .site-header--sticky::before {
   max-width: 34em;
   font-family: var(--font-heading);
   font-weight: var(--fw-heading);
-  line-height: 1.25;
+  line-height: max(var(--lh-floor, 0), 1.25);
   text-wrap: pretty;
   hyphens: manual;
 }

@@ -13,11 +13,12 @@ import {
   lcpImageFor,
   rendererFor,
   barActions,
-  composedActions,
+  headerCarriesWide,
+  phoneRowDirections,
   heroOwnsCall,
   navHasMore,
-  signatureActions,
-  signatureOffersDirections,
+  openerActions,
+  openerOffersCallAndDirections,
   uiStrings,
   type LcpImage,
   type RenderCtx,
@@ -55,32 +56,61 @@ import { entryJsonLd, faqJsonLd, jsonLd } from "./jsonld.ts";
 import { feedOf, rssXml } from "./feed.ts";
 import { OG_LOCALE, SHARE_IMAGE, indexable, normaliseSiteUrl, pagePath, robotsTxt, shareImageOf, sitemapEntries, sitemapXml } from "./seo.ts";
 import { landmarkSuffixes } from "./landmarks.ts";
+import { markMarkedLines } from "./mark-room.ts";
 
-/** The actions the page's first section offers as buttons or links (call, booking, directions, e-mail). */
-function heroActions(first: { type: string; variant: string; props: unknown } | undefined): string[] {
-  if (!first) return [];
-  if (first.type === "hero-signature") return signatureActions(first as SectionOf<"hero-signature">);
-  if (first.type === "composed") return composedActions(first as SectionOf<"composed">);
-  const p = first.props as { primary?: { target?: { action?: string } }; secondary?: { target?: { action?: string } } };
-  return [p.primary?.target?.action, p.secondary?.target?.action].filter((a): a is string => a !== undefined);
-}
+const unescapeAttr = (v: string) => v.replace(/&quot;/g, '"').replace(/&#x27;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
+
+/** Where a fixed element carries an action: at every width (a sticky header), on phones only (the bar, the floating button). */
+export type Carried = "all" | "phone" | null;
 
 /**
- * The page's first section puts both a phone link and a directions link on screen (its two actions, or
- * the facts of hero-type with-facts), so the call bar can wait until it has scrolled away without
- * breaking "call and directions in one tap".
+ * A page shows the call and the directions a fixed element carries (the bar, the floating button, a sticky header) at
+ * most twice: there, and once in the page (M1: the call three times, "Navodila za pot" three times, on phones and at
+ * 1280 px). Every later call action (data-action="call") and directions link (a button or text link to the
+ * directions) in the page and the footer is marked data-repeat: "all" when a sticky header carries it (chrome.css hides
+ * it at every width), "" when only the bar or the floating button does (hidden below 48rem). Phone numbers, and the fact
+ * objects that call (a plate, a big number), are facts and stay; a closing band keeps its button at desktop width, and
+ * a later section with a call object keeps what steps aside for it (reveal.js). Marked on the rendered markup, in
+ * document order, so the links of every section kind count, whichever component drew them.
  */
-function heroOffersCallAndDirections(first: { type: string; variant: string; props: unknown } | undefined): boolean {
-  if (!first) return false;
-  if (first.type === "hero-type" && first.variant === "with-facts") return true;
-  if (first.type === "hero-signature") return signatureOffersDirections(first as SectionOf<"hero-signature">);
-  if (first.type === "composed") {
-    const actions = composedActions(first as SectionOf<"composed">);
-    return actions.includes("call") && actions.includes("directions");
-  }
-  const p = first.props as { primary?: { target?: { action?: string } }; secondary?: { target?: { action?: string } } };
-  const actions = [p.primary?.target?.action, p.secondary?.target?.action];
-  return actions.includes("call") && actions.includes("directions");
+export function markRepeatedActions(html: string, carried: { call: Carried; directions: Carried; directionsHref: string | null }): string {
+  const start = html.indexOf("<main");
+  const dirs = carried.directionsHref === null ? null : carried.directions;
+  if (start < 0 || (!carried.call && !dirs)) return html;
+  const close = html.lastIndexOf("</footer>");
+  const stop = close < start ? html.length : close;
+  const seen = new Set<string>();
+  const kindOf = (attrs: string): "call" | "directions" | null => {
+    if (carried.call && / data-action="call"/.test(attrs)) return "call";
+    if (!dirs || !/ class="[^"]*\b(btn|text-link|contact-strip__action)\b/.test(attrs)) return null;
+    const href = / href="([^"]*)"/.exec(attrs)?.[1];
+    return href !== undefined && unescapeAttr(href) === carried.directionsHref ? "directions" : null;
+  };
+  const slice = html.slice(start, stop);
+  // A closing band (s-cta) is the page's last ask: it keeps its button at desktop width whatever the header carries.
+  // A later section with a call object (a plate, a call block, a big number; not the opener's) keeps its call, and its
+  // directions when only the bar or the floating button carries them: while it is on screen those and the header's call
+  // step aside (reveal.js). A sticky header's directions stay.
+  const sections = [...slice.matchAll(/<section\b[^>]*>/g)].map((m, i) => {
+    const end = slice.indexOf("</section>", m.index);
+    const body = slice.slice(m.index, end < 0 ? slice.length : end);
+    const opener = i === 0;
+    return { from: m.index, to: m.index + body.length, band: /\bclass="[^"]*\bs-cta\b/.test(m[0]), callObject: !opener && /<a\b[^>]*\bclass="[^"]*\b(plate|callblock|bignum)\b/.test(body) };
+  });
+  const sectionAt = (at: number) => sections.find((s) => at > s.from && at < s.to);
+  const region = slice.replace(/<a\b([^>]*)>/g, (tag, attrs: string, at: number) => {
+    const kind = kindOf(attrs);
+    if (kind === null) return tag;
+    if (!seen.has(kind)) {
+      seen.add(kind);
+      return tag;
+    }
+    const s = sectionAt(at);
+    const scope = kind === "call" ? carried.call : dirs;
+    if (s?.callObject && (kind === "call" || scope === "phone")) return tag;
+    return `<a data-repeat="${scope === "all" && !s?.band ? "all" : ""}"${attrs}>`;
+  });
+  return html.slice(0, start) + region + html.slice(stop);
 }
 
 export interface RenderOptions {
@@ -330,22 +360,48 @@ function renderDocument(spec: SiteSpec, localized: SiteSpec, opts: RenderOptions
   const bar = localized.chrome.mobileActionBar === true;
   // Bar on screen from the start with an action the hero also offers (its call, a booking): on a phone the hero's
   // one is hidden (chrome.css), so one screen never shows two of the same.
-  const afterHero = heroOffersCallAndDirections(first);
-  const shown = heroActions(first);
+  const afterHero = openerOffersCallAndDirections(first);
+  const shown = openerActions(first);
+  // The first phone screen offers call and directions without the fixed element: the opener itself, or the phone family's
+  // number row (M1: the bar sat over pekarna's hours badge and repeated that row right above it). The bar or the floating
+  // button then waits for the opener to scroll away, so nothing designed into the first screen is under it.
+  const barWaits = afterHero || phoneRowDirections(ctx);
   // Spec v15: the site's skeleton says where the call lives on phones: the bar, one floating call button, or the header
   // (no fixed element). Either fixed one waits for a hero that offers call and directions itself (reveal.js), so a screen
   // never shows two call buttons; skeleton.css turns every other call button into a text link.
   const skeleton = design.skeleton;
   const fixed = !bar || !skeleton ? (bar ? "bar" : null) : skeleton.actions === "header" ? null : skeleton.actions;
-  const covered = fixed === "bar" && !afterHero ? barActions(ctx).filter((a) => a !== "directions" && shown.includes(a)) : [];
+  // The directions too (M1, pivovarna-rov): the hero's directions link sat under the bar's on the first phone screen.
+  const covered = fixed === "bar" && !barWaits ? barActions(ctx).filter((a) => shown.includes(a)) : [];
+  // The header that carries the call and the directions (actions "header") is on every screen from the start, its call
+  // unless it waits for the hero's call object: on a phone the hero's own ones would repeat it right below.
+  const inHeader = skeleton?.actions === "header";
+  // (A phone hero's own directions link is not among its given actions: afterHero says it shows one.)
+  const offers = (a: "call" | "directions") => shown.includes(a) || (a === "directions" && afterHero);
+  const headerCovers = inHeader
+    ? (["call", "directions"] as const).filter((a) => offers(a) && ctx.href({ action: a }) !== null && !(a === "call" && heroOwnsCall(first)))
+    : // The phone family's number row carries the directions on phones (in the first screen however tall the opener): the
+      // opener's own directions button goes there instead (review 50: two on the first screen).
+      phoneRowDirections(ctx) && offers("directions")
+      ? (["directions"] as const)
+      : [];
   const bodyClass =
-    fixed === "bar" ? ["has-action-bar", ...covered.map((a) => `bar-covers-hero-${a}`)].join(" ") : fixed === "float" ? "has-call-float" : undefined;
+    [
+      ...(fixed === "bar" ? ["has-action-bar", ...covered.map((a) => `bar-covers-hero-${a}`)] : fixed === "float" ? ["has-call-float"] : []),
+      ...headerCovers.map((a) => `header-covers-hero-${a}`),
+    ].join(" ") || undefined;
+  // What the bar, the floating button or the header carries on phones, and what the header carries at desktop width: the
+  // page repeats each at most once (markRepeatedActions).
+  const carriedActions: string[] = fixed === "bar" ? barActions(ctx) : fixed === "float" || inHeader ? ["call", "directions"] : [];
+  const wide = headerCarriesWide(ctx);
+  const scope = (a: "call" | "directions"): Carried => (ctx.href({ action: a }) === null ? null : wide[a] ? "all" : carriedActions.includes(a) ? "phone" : null);
+  const carried = { call: scope("call"), directions: scope("directions"), directionsHref: ctx.href({ action: "directions" }) };
   // A hero whose call object owns the call (a plate, a call block): only the fixed element's call waits for it.
   // Without a skeleton a composed opener's fact object that calls (a plate) still makes the bar's call wait: the bar may
   // be on screen from the start (with reduced motion, or a browser without scroll timelines, even after a hero that
   // offers call and directions), and the plate can't be turned into a text link.
-  const waitCall = heroOwnsCall(first) && (skeleton !== undefined ? !afterHero : first?.type === "composed");
-  const reveal = skeleton ? (fixed !== null && (afterHero || waitCall)) || (skeleton.actions === "header" && heroOwnsCall(first)) : fixed !== null && waitCall;
+  const waitCall = heroOwnsCall(first) && (skeleton !== undefined ? !barWaits : first?.type === "composed");
+  const reveal = skeleton ? (fixed !== null && (barWaits || waitCall)) || (skeleton.actions === "header" && heroOwnsCall(first)) : fixed !== null && waitCall;
   // A page with a composed fact that calls loads the composed bar.js instead (composedIslands): reveal.js with those facts
   // among its call objects, on the same marks, so one script runs them and the shared reveal.js keeps its bytes.
   if (reveal && !hasComposedCallFact(doc.sections)) islands.add("reveal.js");
@@ -379,8 +435,8 @@ function renderDocument(spec: SiteSpec, localized: SiteSpec, opts: RenderOptions
         </LandmarkSuffixes.Provider>
       </main>
       <Footer ctx={ctx} />
-      {fixed === "bar" && <MobileActionBar ctx={ctx} afterHero={afterHero} reveal={skeleton !== undefined} waitCall={waitCall} />}
-      {fixed === "float" && <CallFloat ctx={ctx} reveal={afterHero} waitCall={waitCall} />}
+      {fixed === "bar" && <MobileActionBar ctx={ctx} afterHero={barWaits} reveal={skeleton !== undefined} waitCall={waitCall} />}
+      {fixed === "float" && <CallFloat ctx={ctx} reveal={barWaits} waitCall={waitCall} />}
       {needsConsent && <CookieConsent ctx={ctx} onRequest={consentOnRequest} />}
       {[...islands].sort().map((f) => (
         <script key={f} src={ctx.shared(`js/${f}`)} defer />
@@ -391,7 +447,8 @@ function renderDocument(spec: SiteSpec, localized: SiteSpec, opts: RenderOptions
   // from an edit), render again with a hidden "(2)" on the repeat so every landmark name stays unique.
   const firstBody = renderBody(new Map());
   const suffixes = landmarkSuffixes(firstBody, doc.landmarks);
-  const body = suffixes.size ? renderBody(suffixes) : firstBody;
+  // Display lines with Č Š Ž (as set) get room for the marks (mark-room.ts).
+  const body = markMarkedLines(markRepeatedActions(suffixes.size ? renderBody(suffixes) : firstBody, carried), localized.design.headingCase === "uppercase");
 
   // Search and sharing (seo.ts). A 404 page is never indexed and has no address of its own.
   const siteUrl = normaliseSiteUrl(opts.siteUrl);

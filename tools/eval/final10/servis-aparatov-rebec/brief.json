@@ -1,0 +1,24 @@
+{
+  "id": "servis-aparatov-rebec",
+  "businessType": "builder",
+  "trade": "servis aparatov",
+  "description": "Servis gospodinjskih aparatov Rebec, Ilirska Bistrica.\n\nPokvarila se vam je pralni stroj, pomivalni stroj, štedilnik ali hladilnik? Pokličite, pridem na dom. Sem Boštjan Rebec, serviser z dolgoletnimi izkušnjami, in popravljam večino znanih znamk. Če rezervnega dela nimam v kombiju, ga naročim in pridem drugič, brez dodatnega plačila poti.\n\nCene: ogled in diagnostika 20 €, menjava črpalke 45 €, menjava grelca 55 €, popravilo hladilnika od 60 €. Rezervni deli se plačajo posebej. Če se popravilo ne splača, vam povem takoj in vas ogled stane samo 20 €.\n\nDelam od ponedeljka do petka od 7.00 do 16.00 v Ilirski Bistrici in okolici, do 30 km. Delavnica in prevzem malih aparatov: Bazoviška ulica 9, 6250 Ilirska Bistrica. Telefon 041 555 893, pošta bostjan@servis-rebec.example.",
+  "logo": null,
+  "photos": [],
+  "facts": {
+    "name": "Servis gospodinjskih aparatov Rebec",
+    "phone": "+38641555893",
+    "email": "bostjan@servis-rebec.example",
+    "address": { "street": "Bazoviška ulica 9", "postalCode": "6250", "city": "Ilirska Bistrica" },
+    "hours": [{ "from": "mon", "to": "fri", "open": "07:00", "close": "16:00" }],
+    "prices": [
+      { "item": "ogled in diagnostika", "amount": 20 },
+      { "item": "menjava črpalke", "amount": 45 },
+      { "item": "menjava grelca", "amount": 55 },
+      { "item": "popravilo hladilnika", "amount": 60, "from": true }
+    ],
+    "people": [{ "name": "Boštjan Rebec", "role": "serviser" }],
+    "other": ["pridem na dom", "do 30 km", "Rezervni deli se plačajo posebej"]
+  },
+  "missing": ["photos", "legal"]
+}

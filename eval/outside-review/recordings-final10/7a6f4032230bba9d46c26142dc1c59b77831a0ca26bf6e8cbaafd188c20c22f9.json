@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"The hero card fills the whole first screen and the arched book photo is cut off below it, so on phone the photo only shows as a sliver above the fixed bar.\",\"desktopNote\":\"The hero works well with the framed card beside the arched photo, but the arch is cropped flush to the section bottom and the large dark gap on the right of the card feels unbalanced.\",\"phone\":{\"impression\":4,\"hierarchy\":4,\"imagery\":3,\"spacing\":3,\"clutter\":4,\"distinctiveness\":4},\"desktop\":{\"impression\":4,\"hierarchy\":4,\"imagery\":4,\"spacing\":3,\"clutter\":4,\"distinctiveness\":4},\"fixes\":[\"On phone, shorten the hero card (smaller leaf ornament, tighter padding) so the arched book photo appears in the first screen instead of a thin sliver under the fixed bar.\",\"Let the arched photo stand free of the section edge on both viewports (bottom margin) so the arch is not cut flat, and balance desktop hero widths.\",\"Tighten vertical rhythm around the opening-hours and about sections on desktop; the whitespace before the maroon band and under the hours table reads as dead space.\"],\"blockers\":[]}",
+  "usage": {
+    "prompt_tokens": 12598,
+    "completion_tokens": 402
+  },
+  "batch": true
+}

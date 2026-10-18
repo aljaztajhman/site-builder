@@ -3,7 +3,7 @@
   display: block;
   font-size: calc(var(--fz) * 0.7);
   font-weight: 800;
-  line-height: 1.15;
+  line-height: max(var(--lh-floor, 0), 1.15);
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }

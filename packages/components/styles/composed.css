@@ -293,11 +293,11 @@
 .cx-h {
   font-size: var(--fz, var(--fs-h2));
   font-weight: var(--w, var(--fw-heading));
-  line-height: 1.12;
+  line-height: max(var(--lh-floor, 0), 1.12);
 }
 .cx-h[data-sz="4"],
 .cx-h[data-sz="5"] {
-  line-height: 1.08;
+  line-height: max(var(--lh-floor, 0), 1.08);
 }
 .cx-h[data-sz="6"],
 .cx-h[data-sz="7"],
@@ -409,7 +409,7 @@
 .cx-fact__label {
   max-width: 30ch;
   font-size: var(--fs-base);
-  line-height: 1.35;
+  line-height: max(var(--lh-floor, 0), 1.35);
 }
 /* plate: motifs.css's .plate; on sites without the plate motif the plate takes the palette's roles. */
 body:not([data-motif="plate"]) .cx-fact--plate,
@@ -611,10 +611,6 @@ body:not([data-motif="plate"]) .cx-prices--plates .plate__eu {
   left: 50%;
   translate: -50% 0;
 }
-.cx-mask-stamp .media--ai::after {
-  top: 0.5rem;
-  right: 0.5rem;
-}
 /* Treatments: shaped by the palette's roles, never a gradient. */
 .cx-tr-duotone {
   background: var(--c-primary);
@@ -689,7 +685,7 @@ body:not([data-motif="plate"]) .cx-prices--plates .plate__eu {
 .cx-tag__price {
   font-family: var(--font-heading);
   font-size: var(--fs-h3);
-  line-height: 1.2;
+  line-height: max(var(--lh-floor, 0), 1.2);
 }
 .cx-decor svg {
   width: 100%;

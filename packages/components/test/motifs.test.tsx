@@ -31,7 +31,8 @@ function templateDesign(id: string): Design {
   };
 }
 
-const KRANJ: Business = { ...FULL_BUSINESS, type: "car-repair", phone: "+38641555730", address: { street: "Savska cesta 52", postalCode: "4000", city: "Kranj" } };
+// A car repair shop by name: the plate needs the site's words to name vehicles (spec worksOnVehicles).
+const KRANJ: Business = { ...FULL_BUSINESS, name: "Avtoservis Mrak", type: "car-repair", phone: "+38641555730", address: { street: "Savska cesta 52", postalCode: "4000", city: "Kranj" } };
 const ctxFor = (dir: string, business: Business = KRANJ) => testCtx(testSpec({ design: templateDesign(dir), business }));
 
 const hero = (variant: SectionOf<"hero-signature">["variant"], props: Partial<SectionOf<"hero-signature">["props"]> = {}): SectionOf<"hero-signature"> =>
@@ -478,11 +479,18 @@ describe("motifs.css", () => {
 });
 
 describe("AI label on arched pictures", () => {
-  it("an arched top (mirrors, the arch hero) moves the label to the bottom, where the arch doesn't cut it off", () => {
-    const css = readFileSync(path.join(here, "../styles/imagery.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
-    const rule = /\.arch-top\.media--ai::after,\s*\.hsig__arch-media\.media--ai::after\s*\{([^}]*)\}/.exec(css);
-    expect(rule).not.toBeNull();
-    expect(rule![1]).toMatch(/top:\s*auto/);
-    expect(rule![1]).toMatch(/bottom:\s*0\.5rem/);
+  it("an arched top (mirrors, the arch hero, arched imagery) says so with --cuts-top, which moves the label to the bottom", () => {
+    const read = (f: string) => readFileSync(path.join(here, "../styles", f), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    const label = /\.media--ai::after\s*\{([^}]*)\}/.exec(read("imagery.css"))![1]!;
+    // --cuts-top 1: top at 100% − 0.5rem, lifted by the label's own height; 0: top 0.5rem as before.
+    expect(label).toMatch(/top:\s*calc\(var\(--cuts-top, 0\) \* 100% \+ \(1 - 2 \* var\(--cuts-top, 0\)\) \* 0\.5rem\)/);
+    expect(label).toMatch(/translate:\s*0 calc\(var\(--cuts-top, 0\) \* -100%\)/);
+    for (const [file, selector] of [
+      ["motifs.css", /\.arch-top,\s*\.media\.arch-top\s*\{([^}]*)\}/],
+      ["heroes.css", /\.hsig__arch > \.hsig__arch-media\s*\{([^}]*)\}/],
+      ["imagery.css", /\[data-imagery="arched"\] \.media\s*\{([^}]*)\}/],
+    ] as const) {
+      expect(selector.exec(read(file))?.[1], `${file} ${selector}`).toMatch(/--cuts-top:\s*1/);
+    }
   });
 });

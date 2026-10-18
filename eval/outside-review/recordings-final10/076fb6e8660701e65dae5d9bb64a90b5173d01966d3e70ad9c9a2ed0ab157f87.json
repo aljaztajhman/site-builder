@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The phone layout is readable and trade-specific, but the heavily darkened, tightly cropped tool photo contributes little to the first screen.\",\n  \"desktopNote\": \"The oversized headline dominates the desktop hero, pushing the main phone action against the fold and setting an unnecessarily inflated scale throughout the page.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 3,\n    \"spacing\": 4,\n    \"clutter\": 4,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 3,\n    \"hierarchy\": 2,\n    \"imagery\": 3,\n    \"spacing\": 2,\n    \"clutter\": 4,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Reduce the desktop hero headline to roughly 64–72px and tighten its vertical spacing so the service area, complete call button and pricing link fit comfortably within the first screen.\",\n    \"Give the tool image a clearer focal crop on phones, keep recognizable equipment visible beside rather than behind dense text, and change the blue call-introduction text to a higher-contrast color.\",\n    \"Reduce desktop section headings and vertical padding, and arrange the repair-process steps across three columns to eliminate the large unused area on the right.\"\n  ],\n  \"blockers\": []\n}",
+  "usage": {
+    "prompt_tokens": 9710,
+    "completion_tokens": 454,
+    "cost": 0.0288135
+  }
+}

@@ -93,12 +93,28 @@
     padding: 2.5rem;
     border-radius: var(--radius);
   }
+  /* overlay-bottom: the panel stands on the photo's bottom edge and hangs a fixed step below it, and the photo is never
+     taller than the first screen leaves room for, so panel and link end on it (M1 final check, kamp-soska: the panel
+     hung 15rem below a 2:1 photo, its link under the fold at 1280 × 800). A panel taller than the photo stretches it. */
+  .s-hero-image--overlay-bottom .hero-image {
+    --hang: 6rem;
+    grid-template-rows: auto var(--hang);
+  }
   .s-hero-image--overlay-bottom .hero-image__media {
+    grid-area: 1 / 1 / 2 / 2;
+    align-self: stretch;
+    justify-self: stretch;
+    width: 100%;
     aspect-ratio: 16 / 9;
+    min-height: 20rem;
+    max-height: calc(100vh - 10rem - var(--hang));
+    max-height: calc(100svh - 10rem - var(--hang));
   }
   .s-hero-image--overlay-bottom .hero-image__panel {
+    grid-area: 1 / 1 / 3 / 2;
+    align-self: end;
     width: min(40rem, calc(100% - 4rem));
-    margin-top: -7rem;
+    margin-top: 3rem;
     margin-left: 2rem;
   }
   /* overlay-left: panel and photo share one grid cell; the photo fills whatever height the row gets. */
@@ -126,7 +142,6 @@
     aspect-ratio: 2 / 1;
   }
   .s-hero-image--overlay-bottom .hero-image__panel {
-    margin-top: -9rem;
     margin-left: 3rem;
   }
   .s-hero-image--overlay-left .hero-image__media {
@@ -311,6 +326,7 @@ main > .s-hero-signature:first-child {
   overflow: hidden;
 }
 .hsig .hsig__bg {
+  --cuts-top: 0;
   position: absolute;
   inset: 0;
   margin: 0;
@@ -318,6 +334,16 @@ main > .s-hero-signature:first-child {
 }
 .hsig .hsig__bg::before {
   content: none;
+}
+/* Under a header laid over the photo (skeleton.css, overlay) the label clears the header: it sits in the gap above the
+   text, which that header pads down by 6.5 rem (9 rem on desktop). */
+.site-header--overlay ~ main > .s-hero-signature:first-child .hsig__bg.media--ai::after {
+  top: 4.75rem;
+}
+@media (min-width: 64rem) {
+  .site-header--overlay ~ main > .s-hero-signature:first-child .hsig__bg.media--ai::after {
+    top: 6.5rem;
+  }
 }
 .hsig__shade {
   position: absolute;
@@ -349,7 +375,7 @@ main > .s-hero-signature:first-child {
   max-width: none;
   font-weight: 600;
   font-size: var(--fs-lg);
-  line-height: 1.3;
+  line-height: max(var(--lh-floor, 0), 1.3);
 }
 .hsig__strip .hours__row {
   border-color: currentColor;
@@ -412,6 +438,7 @@ main > .s-hero-signature:first-child {
   justify-self: end;
 }
 .hsig__arch > .hsig__arch-media {
+  --cuts-top: 1;
   display: block;
   aspect-ratio: 5 / 6;
   margin: 0;
@@ -614,7 +641,9 @@ main > .s-hero-signature:first-child {
   .hsig--card.hsig--has-image {
     display: flex;
     align-items: flex-end;
-    min-height: 45rem;
+    /* No taller than the first screen leaves for the header and the card's hang, so the card ends on it. */
+    min-height: min(45rem, calc(100vh - 10rem));
+    min-height: min(45rem, calc(100svh - 10rem));
     padding-top: 6rem;
   }
   .hsig--card .hsig__body {
@@ -768,7 +797,7 @@ main > .s-hero-signature:first-child {
   background: var(--c-inverse);
   color: var(--c-on-inverse);
   font-weight: 700;
-  line-height: 1.25;
+  line-height: max(var(--lh-floor, 0), 1.25);
   rotate: -4deg;
 }
 .hsig__chip--alone {
@@ -861,7 +890,7 @@ main > .s-hero-signature:first-child {
   font-family: var(--font-heading);
   font-weight: var(--fw-heading);
   font-size: 1.3125rem;
-  line-height: 1.05;
+  line-height: max(var(--lh-floor, 0), 1.05);
   clip-path: var(--shape-sign);
 }
 .hsig__sign:nth-child(1) {
@@ -998,7 +1027,7 @@ main > .s-hero-signature:first-child {
   text-align: center;
   font-size: 1rem;
   font-weight: 700;
-  line-height: 1.15;
+  line-height: max(var(--lh-floor, 0), 1.15);
 }
 .seal__days {
   font-size: 0.875rem;

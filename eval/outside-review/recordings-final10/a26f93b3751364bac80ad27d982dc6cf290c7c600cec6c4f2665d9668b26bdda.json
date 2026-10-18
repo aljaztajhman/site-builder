@@ -1,0 +1,8 @@
+{
+  "content": "{\n  \"phoneNote\": \"The clear headline and prominent phone number work well, but the tall hero delays the services while the radiator illustration suggests heating installation more than chimney sweeping.\",\n  \"desktopNote\": \"The pipe graphics and strong colours create a coherent identity, but oversized typography and generous vertical bands make the lower page unnecessarily sprawling.\",\n  \"phone\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 3,\n    \"spacing\": 3,\n    \"clutter\": 4,\n    \"distinctiveness\": 4\n  },\n  \"desktop\": {\n    \"impression\": 4,\n    \"hierarchy\": 4,\n    \"imagery\": 3,\n    \"spacing\": 3,\n    \"clutter\": 4,\n    \"distinctiveness\": 4\n  },\n  \"fixes\": [\n    \"Replace the dominant radiator with a chimney-and-brush illustration that retains the existing pipe-line style and more directly identifies the trade.\",\n    \"Shorten the phone hero by reducing the illustration height and gaps around the call panel and services link, bringing the services heading closer to the first screen.\",\n    \"Reduce the desktop contact number and footer wordmark, and tighten padding around the service-area, process and contact sections for a more consistent vertical rhythm.\"\n  ],\n  \"blockers\": []\n}",
+  "usage": {
+    "prompt_tokens": 9340,
+    "completion_tokens": 402,
+    "cost": 0.0273685
+  }
+}

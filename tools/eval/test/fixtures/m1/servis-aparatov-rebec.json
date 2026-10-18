@@ -1,0 +1,329 @@
+{
+  "slug": "servis-aparatov-rebec",
+  "pages": [
+    {
+      "id": "p_home",
+      "nav": {
+        "show": true,
+        "label": "Domov"
+      },
+      "seo": {
+        "title": "Servis gospodinjskih aparatov Rebec, Ilirska Bistrica",
+        "description": "Popravilo pralnih in pomivalnih strojev, štedilnikov in hladilnikov na vašem domu v Ilirski Bistrici in okolici do 30 km. Ogled za 20 €."
+      },
+      "kind": "home",
+      "slug": "",
+      "sections": [
+        {
+          "id": "s_hero",
+          "tone": "inverse",
+          "type": "hero-signature",
+          "props": {
+            "fact": "phone",
+            "image": "img_g1",
+            "intro": "Pridem v Ilirsko Bistrico in okolico do 30 km. Popravljam pralne in pomivalne stroje, štedilnike in hladilnike večine znanih znamk.",
+            "factNote": "Če se popravilo ne splača, vam to povem takoj in plačate samo ogled.",
+            "headline": "Popravilo aparatov na vašem domu",
+            "factLabel": "Najhitreje me dobite po telefonu",
+            "secondary": {
+              "label": "Poglejte cene",
+              "target": {
+                "page": "p_home",
+                "section": "s_cene"
+              }
+            }
+          },
+          "variant": "photo"
+        },
+        {
+          "id": "s_storitve",
+          "tone": "alt",
+          "type": "services-list",
+          "props": {
+            "items": [
+              {
+                "name": "Pralni stroji",
+                "description": "Popravilo na vašem domu, menjava črpalke ali grelca."
+              },
+              {
+                "name": "Pomivalni stroji",
+                "description": "Diagnostika in popravilo pri vas doma."
+              },
+              {
+                "name": "Štedilniki",
+                "description": "Popravilo in menjava okvarjenih delov."
+              },
+              {
+                "name": "Hladilniki",
+                "description": "Popravilo hladilnika na domu."
+              },
+              {
+                "name": "Mali aparati",
+                "description": "Male aparate sprejmem tudi v delavnici."
+              }
+            ],
+            "title": "Kaj popravljam"
+          },
+          "variant": "two-column"
+        },
+        {
+          "id": "s_potek",
+          "tone": "default",
+          "type": "steps",
+          "props": {
+            "steps": [
+              {
+                "text": "Povete, kateri aparat se je pokvaril in kaj se dogaja.",
+                "title": "Pokličete me"
+              },
+              {
+                "text": "Aparat pregledam in ugotovim okvaro. Če se popravilo ne splača, vam to povem takoj.",
+                "title": "Pridem na dom"
+              },
+              {
+                "text": "Če dela nimam v kombiju, ga naročim in pridem drugič, brez dodatnega plačila poti.",
+                "title": "Popravilo ali naročilo dela"
+              }
+            ],
+            "heading": "Kako poteka popravilo"
+          },
+          "variant": "vertical"
+        },
+        {
+          "id": "s_cene",
+          "tone": "inverse",
+          "type": "price-list",
+          "props": {
+            "title": "Cene popravil na domu",
+            "groups": [
+              {
+                "items": [
+                  {
+                    "name": "Ogled in diagnostika",
+                    "price": {
+                      "amount": 20
+                    }
+                  },
+                  {
+                    "name": "Menjava črpalke",
+                    "price": {
+                      "amount": 45
+                    }
+                  },
+                  {
+                    "name": "Menjava grelca",
+                    "price": {
+                      "amount": 55
+                    }
+                  },
+                  {
+                    "name": "Popravilo hladilnika",
+                    "price": {
+                      "from": true,
+                      "amount": 60
+                    }
+                  }
+                ]
+              }
+            ],
+            "footnote": "Rezervni deli se plačajo posebej."
+          },
+          "variant": "tags"
+        },
+        {
+          "id": "s_kontakt",
+          "tone": "band",
+          "type": "contact",
+          "props": {
+            "title": "Pokličite me, pridem k vam"
+          },
+          "variant": "call-out"
+        }
+      ]
+    },
+    {
+      "id": "p_zasebnost",
+      "nav": {
+        "show": false,
+        "label": "Zasebnost"
+      },
+      "seo": {
+        "title": "Varstvo osebnih podatkov",
+        "description": "Kako Servis gospodinjskih aparatov Rebec obdeluje osebne podatke obiskovalcev spletne strani."
+      },
+      "kind": "privacy",
+      "slug": "zasebnost",
+      "sections": [
+        {
+          "id": "s_legal_privacy",
+          "type": "legal",
+          "props": {
+            "kind": "privacy"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_dostopnost",
+      "nav": {
+        "show": false,
+        "label": "Dostopnost"
+      },
+      "seo": {
+        "title": "Izjava o dostopnosti | Servis gospodinjskih aparatov Rebec",
+        "description": "Izjava o dostopnosti spletne strani Servis gospodinjskih aparatov Rebec."
+      },
+      "kind": "accessibility",
+      "slug": "dostopnost",
+      "sections": [
+        {
+          "id": "s_legal_accessibility",
+          "type": "legal",
+          "props": {
+            "date": "2026-10-17",
+            "kind": "accessibility"
+          },
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "p_404",
+      "nav": {
+        "show": false,
+        "label": "Ni najdeno"
+      },
+      "seo": {
+        "title": "Strani ni mogoče najti | Servis gospodinjskih aparatov Rebec",
+        "description": "Iskane strani ni. Vrnite se na domačo stran."
+      },
+      "kind": "not-found",
+      "slug": "404",
+      "sections": [
+        {
+          "id": "s_not_found",
+          "type": "not-found",
+          "props": {
+            "body": "Morda je bila premaknjena ali pa je naslov napačen. Na domači strani najdete vse ostalo.",
+            "title": "Te strani ni mogoče najti"
+          },
+          "variant": "default"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "images": [
+      {
+        "id": "img_g1",
+        "alt": "Izvijači, klešče in multimeter na lesenem delovnem pultu",
+        "src": "sites/site_d4251f78313180a5/generated/img_g1.jpg",
+        "width": 1536,
+        "height": 1024,
+        "origin": "generated"
+      },
+      {
+        "id": "img_g2",
+        "alt": "Zelena pokrajina v okolici Ilirske Bistrice zjutraj",
+        "src": "sites/site_d4251f78313180a5/generated/img_g2.jpg",
+        "width": 1536,
+        "height": 1024,
+        "origin": "generated"
+      }
+    ]
+  },
+  "chrome": {
+    "footer": {
+      "year": 2026,
+      "variant": "compact"
+    },
+    "header": {
+      "cta": "none",
+      "tone": "inverse",
+      "variant": "bar"
+    },
+    "mobileActionBar": true
+  },
+  "design": {
+    "scale": 1.28,
+    "colors": {
+      "band": "#3d8bfd",
+      "text": "#15181c",
+      "muted": "#4a525c",
+      "accent": "#3d8bfd",
+      "border": "#d9dee4",
+      "onBand": "#15181c",
+      "inverse": "#15181c",
+      "primary": "#15181c",
+      "surface": "#e9eef6",
+      "onInverse": "#f5f5f5",
+      "onPrimary": "#ffffff",
+      "background": "#ffffff"
+    },
+    "radius": 5,
+    "shadow": "none",
+    "density": "regular",
+    "imagery": "natural",
+    "fontPair": "archivo-archivo",
+    "skeleton": {
+      "cards": "none",
+      "width": "full",
+      "footer": "visit",
+      "header": "phone",
+      "actions": "header",
+      "buttons": "soft",
+      "dividers": "motif",
+      "footerTone": "inverse",
+      "photoRatio": "portrait"
+    },
+    "direction": "tablica",
+    "headingCase": "uppercase",
+    "baseFontSize": 17,
+    "headingWeight": 850,
+    "headingTracking": -0.02
+  },
+  "locales": {
+    "default": "sl",
+    "enabled": [
+      "sl"
+    ]
+  },
+  "business": {
+    "name": "Servis gospodinjskih aparatov Rebec",
+    "type": "car-repair",
+    "email": "bostjan@servis-rebec.example",
+    "hours": {
+      "note": "Delam v Ilirski Bistrici in okolici, do 30 km.",
+      "entries": [
+        {
+          "to": "fri",
+          "from": "mon",
+          "open": "07:00",
+          "close": "16:00"
+        }
+      ]
+    },
+    "phone": "+38641555893",
+    "address": {
+      "city": "Ilirska Bistrica",
+      "street": "Bazoviška ulica 9",
+      "postalCode": "6250"
+    },
+    "provider": {
+      "legalName": {
+        "$placeholder": "legalName"
+      },
+      "taxNumber": {
+        "$placeholder": "taxNumber"
+      },
+      "registrationNumber": {
+        "$placeholder": "registrationNumber"
+      }
+    },
+    "serviceArea": [
+      "Ilirska Bistrica in okolica do 30 km"
+    ]
+  },
+  "specVersion": 21
+}

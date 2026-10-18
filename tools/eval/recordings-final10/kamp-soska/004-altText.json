@@ -1,0 +1,18 @@
+{
+  "seq": 4,
+  "stage": "altText",
+  "model": "claude-sonnet-5-5",
+  "hash": "0a0da7c7a7d789d9",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"images\":[{\"index\":0,\"alt\":\"Oranžen šotor na travniku ob smaragdno zeleni gorski reki, v ozadju gozdnata pobočja in gore.\",\"focalX\":0.25,\"focalY\":0.6,\"heroSuitable\":true},{\"index\":1,\"alt\":\"Bel avtodom na makadamu med drevesi na kampirnem mestu, pred njim zložljiva miza in stol.\",\"focalX\":0.6,\"focalY\":0.55,\"heroSuitable\":false},{\"index\":2,\"alt\":\"Skupna kuhinja z dolgo leseno mizo, policami s posodo, plinskim kuhalnikom in oknom s pogledom na gozd.\",\"focalX\":0.45,\"focalY\":0.5,\"heroSuitable\":true}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2218,
+      "output_tokens": 268,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

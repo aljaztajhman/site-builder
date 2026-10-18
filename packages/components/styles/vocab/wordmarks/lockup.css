@@ -5,7 +5,7 @@
 .wm-lockup .wm__a {
   display: block;
   font-weight: 800;
-  line-height: 1.1;
+  line-height: max(var(--lh-floor, 0), 1.1);
   letter-spacing: -0.01em;
 }
 .wm-lockup .wm__b {
@@ -13,7 +13,7 @@
   margin-top: 0.3em;
   font-size: 0.45em;
   font-weight: 500;
-  line-height: 1.25;
+  line-height: max(var(--lh-floor, 0), 1.25);
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }

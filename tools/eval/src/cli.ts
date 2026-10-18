@@ -26,6 +26,7 @@
  *                   name, 20 prices, tourism with English, new trades; no scripted edits). Like --twins: no recordings or
  *                   goldens, so live, --record or --record-missing only, and their photos must be generated first
  *                   (`pnpm fixtures:ai-photos generate --model <name> --hard`). --offline and CI never load them.
+ * --fresh-dir <dir>: with --fresh, read the businesses from <dir> instead (e.g. tools/eval/final10); their photos must exist.
  * --fresh:          also run the fresh businesses (tools/eval/fresh: never generated before, no photos given, no
  *                   scripted edits). Like --twins: live, --record or --record-missing only; --offline and CI never load them.
  * --prompt-fixes all|<name>[,<name>]: turns those config promptFixes switches on for this run (docs/dev/prompt-fixes.md),
@@ -65,7 +66,7 @@ import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
 import { loadConfig } from "@sb/config";
 import { BatchTransport, NO_PROMPT_FIXES, launchCheckBrowser } from "@sb/engine";
-import { loadFixtures, loadFresh, loadHard, loadTwins } from "./fixtures/load.ts";
+import { loadFixtures, loadFresh, loadHard, loadTwins, resolveFreshDir } from "./fixtures/load.ts";
 import { VARIETY_SWITCHES, renderVariety, varietyData } from "./variety-report.ts";
 import { runFixture, type FixtureResult, type Mode } from "./runner.ts";
 import { contactSheet, renderReport } from "./report.ts";
@@ -132,9 +133,15 @@ if (fresh && !paid) {
   console.error("--fresh needs real generations (live, --record or --record-missing): the fresh businesses have no recordings or golden specs.");
   process.exit(2);
 }
+const freshDirArg = value("fresh-dir");
+if (freshDirArg !== undefined && (!fresh || !freshDirArg || freshDirArg.startsWith("--"))) {
+  console.error("--fresh-dir <dir> goes with --fresh and names the folder of businesses to run (default tools/eval/fresh).");
+  process.exit(2);
+}
 const hardFixtures = hard ? loadHard() : [];
+const freshFixtures = fresh ? loadFresh(resolveFreshDir(freshDirArg)) : [];
 const photoLimit = value("photos") === undefined ? undefined : Number(value("photos"));
-const fixtures = [...loadFixtures(), ...(twins ? loadTwins() : []), ...hardFixtures, ...(fresh ? loadFresh() : [])]
+const fixtures = [...loadFixtures(), ...(twins ? loadTwins() : []), ...hardFixtures, ...freshFixtures]
   .filter((f) => !onlyArg || onlyArg.includes(f.id))
   .filter((_, i) => !shard || i % Number(shard[2]) === Number(shard[1]) - 1)
   .map((f) => (photoLimit === undefined ? f : { ...f, photos: f.photos.slice(0, photoLimit) }));
@@ -147,6 +154,13 @@ const hardIds = new Set(hardFixtures.map((f) => f.id));
 const hardWithoutPhotos = fixtures.filter((f) => hardIds.has(f.id) && f.photos.some((p) => !existsSync(p.path))).map((f) => f.id);
 if (hardWithoutPhotos.length) {
   console.error(`--hard: photos not generated yet for ${hardWithoutPhotos.join(", ")}. Run \`pnpm fixtures:ai-photos generate --model <name> --hard\` first (paid), or --only the ones without photos.`);
+  process.exit(2);
+}
+// A --fresh-dir folder's photos come from `pnpm fixtures:ai-photos generate --dir <dir>` too, never from the stand-in generator.
+const freshIds = new Set(freshDirArg ? freshFixtures.map((f) => f.id) : []);
+const freshWithoutPhotos = fixtures.filter((f) => freshIds.has(f.id) && f.photos.some((p) => !existsSync(p.path))).map((f) => f.id);
+if (freshWithoutPhotos.length) {
+  console.error(`--fresh-dir: photos not generated yet for ${freshWithoutPhotos.join(", ")}. Run \`pnpm fixtures:ai-photos generate --model <name> --dir ${freshDirArg}\` first (paid), or --only the ones without photos.`);
   process.exit(2);
 }
 const missingPhotos = fixtures.some((f) => f.photos.some((p) => !existsSync(p.path)));

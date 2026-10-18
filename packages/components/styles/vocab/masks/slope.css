@@ -1,9 +1,6 @@
 /* slope: the top edge falls from right to left, as a section edge does. */
 .cx-mask-slope {
+  --cuts-top: 1;
   --shape-slope: polygon(0 14%, 100% 0, 100% 100%, 0 100%);
   clip-path: var(--shape-slope);
-}
-.cx-mask-slope .media--ai::after {
-  top: auto;
-  bottom: 0.5rem;
 }

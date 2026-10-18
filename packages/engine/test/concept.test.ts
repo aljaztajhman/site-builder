@@ -215,7 +215,9 @@ describe("the signature device", () => {
 });
 
 describe("the brief and design requests", () => {
-  const config = loadConfig();
+  // Pinned to the prompt fixes off: these requests are compared with BRIEF_SYSTEM as it was before the fixes.
+  const live = loadConfig();
+  const config = { ...live, promptFixes: Object.fromEntries(Object.entries(live.promptFixes).map(([k, v]) => [k, k === "$comment" ? v : false])) as typeof live.promptFixes };
   const answer = (b: unknown) => ({ text: JSON.stringify(b), stopReason: "end_turn", model: "m", usage: { input_tokens: 1, output_tokens: 1, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 } });
   async function briefRequest(on: boolean | undefined, reply: unknown): Promise<{ req: ModelRequest; out: Awaited<ReturnType<typeof makeBrief>> }> {
     const seen: ModelRequest[] = [];

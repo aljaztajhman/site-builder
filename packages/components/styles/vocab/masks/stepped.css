@@ -5,4 +5,5 @@
 }
 .cx-mask-stepped .media--ai::after {
   top: 3rem;
+  translate: none;
 }

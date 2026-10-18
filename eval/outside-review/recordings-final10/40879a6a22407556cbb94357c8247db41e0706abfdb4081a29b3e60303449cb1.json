@@ -1,0 +1,8 @@
+{
+  "content": "{\"phoneNote\":\"The hero card is the standard eyebrow–headline–two buttons stack with the photo pushed to the bottom of the first screen, and the three product cards below are tall, photo-less boxes with the same branch icon repeated.\",\"desktopNote\":\"The scale runs wild below the hero: the hours heading, the phone number and the footer brand name are all poster-sized, the hours band ends in a dead cream strip and the product cards are mostly empty space around an icon and a price.\",\"phone\":{\"impression\":3,\"hierarchy\":3,\"imagery\":3,\"spacing\":3,\"clutter\":3,\"distinctiveness\":3},\"desktop\":{\"impression\":3,\"hierarchy\":2,\"imagery\":4,\"spacing\":2,\"clutter\":3,\"distinctiveness\":3},\"fixes\":[\"Give the three products real photos (or one shared product shot) and shrink the cards so icon, name and price sit together instead of floating in a tall empty box.\",\"Tame the type scale: footer brand name and phone number should be one step above body, and the hours heading should not outweigh the hero headline; remove the duplicated small company name under the giant one.\",\"Fix the hours section on desktop by aligning heading and table to one baseline and removing the empty cream band beneath; let the hero photo also peek higher on phone so the first screen isn't only a card.\"],\"blockers\":[]}",
+  "usage": {
+    "prompt_tokens": 11985,
+    "completion_tokens": 1837
+  },
+  "batch": true
+}

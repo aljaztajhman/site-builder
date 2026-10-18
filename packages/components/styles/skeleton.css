@@ -239,7 +239,7 @@ html:has(.site-header--sticky) {
   }
   .site-header__name-text {
     font-size: max(var(--fs-sm), min(1em, 100cqi / var(--name-em, 10)));
-    line-height: 1.2;
+    line-height: max(var(--lh-floor, 0), 1.2);
   }
   .site-header--centred .site-header__brand {
     flex: 1 1 0;
@@ -442,8 +442,13 @@ body[data-skeleton] .site-footer--tone-band :focus-visible {
   outline-color: currentColor;
 }
 
-/* wordmark: the name as the page's last, wall-sized word, sized from its longest word so it never overflows. */
+/* wordmark: the name as the page's last word, set on one line where the name allows (--wm-line: its characters) and
+   never larger than a display line: at most 6rem and twice the page's h2 (Fable, M1 final check: a ~141 px two-line
+   name "dominating the viewport"; review 50 item 11). A long name keeps at least 1.75rem and wraps between words, and
+   its longest word (--wm-chars) always fits the width, so no word breaks or overflows. 0.74 em per letter is the
+   estimate the family has always used; a face wider than that wraps between words, never inside one. */
 .site-footer__wordmark {
+  --wm-room: calc(100vw - 2rem);
   max-width: none;
   margin-bottom: 2rem;
   font-family: var(--font-heading);
@@ -451,13 +456,18 @@ body[data-skeleton] .site-footer--tone-band :focus-visible {
   text-transform: var(--case-heading);
   letter-spacing: -0.02em;
   line-height: max(var(--lh-floor, 0), 0.92);
-  font-size: min(9rem, calc((100vw - 2rem) / (var(--wm-chars, 10) * 0.74)));
+  font-size: min(
+    6rem,
+    calc(var(--fs-h2, 2.5rem) * 2),
+    max(1.75rem, calc(var(--wm-room) / (var(--wm-line, 20) * 0.74))),
+    calc(var(--wm-room) / (var(--wm-chars, 10) * 0.74))
+  );
   overflow-wrap: normal;
   hyphens: manual;
 }
 @media (min-width: 48rem) {
   .site-footer__wordmark {
-    font-size: min(9rem, calc((min(100vw, 76rem) - 4rem) / (var(--wm-chars, 10) * 0.74)));
+    --wm-room: calc(min(100vw, 76rem) - 4rem);
   }
 }
 
@@ -476,7 +486,7 @@ body[data-skeleton] .site-footer--tone-band :focus-visible {
 }
 .site-footer__visit-where address {
   font-size: var(--fs-lg);
-  line-height: 1.4;
+  line-height: max(var(--lh-floor, 0), 1.4);
 }
 .site-footer__directions {
   gap: 0.4rem;
