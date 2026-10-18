@@ -107,9 +107,10 @@ describe("1. the phone bar over the first section", () => {
     { width: 390, height: 844 },
   ];
   // The fixed element must be on the first screen here (nothing else there calls): at 390 × 844 the composed hero's
-  // list (kolesarski) and the arch's hours seal (slascicarna) end in its strip. A flowing hero meets that strip at some
-  // phone height whatever its layout; open for the director (M1). Their links and buttons are held below.
-  const open = new Set(["kolesarski-servis-ovinek", "slascicarna-pri-zofki"]);
+  // ribbon (kolesarski) ends in the full-width bar's strip. A flowing hero meets that strip at some phone height whatever
+  // its layout; open for the director (M1). Its links and buttons are held below. The arch's hours seal (slascicarna)
+  // stands left of the floating call button on phones (heroes.css) and is held with the rest.
+  const open = new Set(["kolesarski-servis-ovinek"]);
   for (const [id, spec] of pages) {
     it(`${id}: no ${open.has(id) ? "link or button" : "link, button or worded object"} of the first section under the bar or the floating button on the first phone screen`, async () => {
       const s = await spec();
