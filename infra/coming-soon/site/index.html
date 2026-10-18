@@ -110,6 +110,27 @@ h1 em{font-style:normal;color:var(--accent)}
 /* the loading bar a browser shows while a page comes in */
 .ld{position:absolute;left:0;bottom:-1px;height:2px;width:0;background:var(--accent);transition:width .5s var(--ease),opacity .4s}
 .ld.done{opacity:0}
+/* the flow: description, build, review, publish. Draft address until published, then the domain with a lock */
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;list-style:none;margin:0 0 12px;padding:0;font:600 12px/1.2 var(--ui);color:var(--ink-3)}
+.flow li{position:relative;padding-top:10px;white-space:nowrap;transition:color .3s}
+.flow li::before,.flow li::after{content:"";position:absolute;left:0;right:0;top:0;height:2px;border-radius:2px;background:var(--line-2)}
+.flow li::after{background:var(--accent);transform:scaleX(0);transform-origin:0 50%;transition:transform .5s var(--ease)}
+.flow li.on{color:var(--ink-2)}.flow li.on::after{transform:none}
+.flow li.now{color:var(--ink)}
+.draft{display:none;color:#6b7c80}
+.drf .draft{display:inline}.drf .url{max-width:64%}.drf .lock,.drf .tld{display:none}
+.pub{display:inline-flex;align-items:center;gap:5px;margin-left:auto;height:20px;padding:0 9px;border-radius:99px;background:#e3f3ea;color:#17683f;font:600 11px/1 var(--ui);white-space:nowrap}
+.pub::before{content:"";width:6px;height:6px;border-radius:50%;background:#1f8a5c}
+.js .anim .pub{animation:put .5s var(--spring) both}
+.drf .pub{display:none}
+.chk{position:absolute;z-index:2;right:3cqw;bottom:3cqw;width:max-content;max-width:calc(100% - 6cqw);white-space:nowrap;padding:10px 12px;border-radius:8px;background:#fff;color:#14272a;border:1px solid #d6e0e2;box-shadow:0 18px 40px -18px rgb(15 31 34/.45);font:500 clamp(11px,2.2cqw,13px)/1.3 var(--ui);opacity:0;transform:translateY(10px);transition:opacity .35s var(--ease),transform .35s var(--ease);pointer-events:none}
+.chk.on{opacity:1;transform:none}
+.chk b{display:block;font-weight:700;margin-bottom:6px}
+.chk ul{list-style:none;margin:0;padding:0;display:grid;gap:5px}
+.chk li{display:flex;align-items:center;gap:7px;color:#6b7c80;transition:color .3s}
+.chk li::before{content:"";flex:none;width:12px;height:12px;border-radius:50%;border:1.5px solid #c7d3d5;box-sizing:border-box;transition:background .3s,border-color .3s}
+.chk li.y{color:#14272a}
+.chk li.y::before{border-color:#1f8a5c;background:#1f8a5c url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 6.2l2 2 4-4.4' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/100% no-repeat}
 .page{position:absolute;inset:34px 0 0;padding:3.5cqw 5cqw 4cqw;display:flex;flex-direction:column;gap:3.2cqw;background:var(--bg);color:var(--t);transition:background .5s}
 .m-nav{display:flex;align-items:center;gap:2cqw;font-size:max(9px,2.2cqw)}
 .m-logo{width:4.2cqw;height:4.2cqw;border-radius:30%;background:var(--a)}
@@ -214,6 +235,13 @@ h2{font:800 clamp(32px,4.2vw,58px)/1.02 var(--display);letter-spacing:-.035em;ma
 .ph-hit.you b{font:600 15px/1.3 var(--ui);color:var(--ink);display:block}
 .ph-hit.you .u{font-size:12px;color:var(--accent-text)}
 .ph-hit.you .s{font-size:13px;color:var(--ink-2);line-height:1.4}
+.ph-hit.you{position:relative;z-index:1}
+.seo{display:flex;flex-wrap:wrap;gap:6px}
+.seo i{display:inline-flex;align-items:center;gap:5px;font:600 11px/1 var(--ui);font-style:normal;color:var(--ink-3);background:var(--surface);border:1px solid var(--line-2);border-radius:99px;padding:4px 8px 4px 5px;transition:color .3s,border-color .3s}
+.seo i::before{content:"";width:11px;height:11px;border-radius:50%;border:1.5px solid var(--line-2);box-sizing:border-box;transition:background .3s,border-color .3s}
+.seo i.y{color:#17683f;border-color:rgb(31 138 92/.35)}
+.seo i.y::before{border-color:#1f8a5c;background:#1f8a5c url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 6.2l2 2 4-4.4' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/100% no-repeat}
+.ph-hit.you.low .call{display:none}
 .ph-hit.you .call{justify-self:start;margin-top:4px;background:var(--accent);color:#fff;font:700 13px/1 var(--display);padding:9px 14px;border-radius:6px}
 .js .ph-hit{opacity:0;transform:translateY(8px);transition:opacity .5s var(--ease),transform .5s var(--ease)}
 .js .ph-hit.on{opacity:1;transform:none}
@@ -376,9 +404,10 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
           <p class="txt"><span class="sent">Pekarna Skorja iz Kamnika. </span><span class="sent">Pečemo kruh z drožmi, pecivo in torte po naročilu. </span><span class="sent">Odprto od torka do sobote, od 6. do 13. ure.</span><span class="caret" id="caret" hidden></span></p>
         </div>
         <div id="stage">
+          <ol class="flow" aria-label="Od opisa do objave"><li class="on">Opis</li><li class="on">Postavljanje</li><li class="on">Pregled</li><li class="on now">Objava</li></ol>
           <!-- the hero mock is written out so it shows without JS; JS re-renders it from the same data -->
           <div class="browser v0 lay-a" id="mock" aria-hidden="true">
-            <div class="chrome"><i></i><i></i><i></i><div class="url"><span class="lock"></span><span class="host">pekarna-skorja.si</span></div><i class="ld done"></i></div>
+            <div class="chrome"><i></i><i></i><i></i><div class="url"><span class="lock"></span><span class="draft">postavi.si/osnutek/</span><span class="host">pekarna-skorja</span><span class="tld">.si</span></div><span class="pub">Objavljeno</span><i class="ld done"></i></div>
             <div class="page">
               <div class="m-nav" data-b="nav"><span class="m-logo"></span><span class="m-name">Pekarna Skorja</span><span class="m-links"><i>Kruh</i><i>Pecivo</i><i>Kontakt</i></span></div>
               <div class="m-hero">
@@ -448,7 +477,7 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
         <div class="phone" id="phone" aria-hidden="true">
           <div class="ph-bar"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4.5 4.5"/></svg><span id="sq">pekarna Kamnik</span><span class="caret" id="caret3" hidden></span></div>
           <div class="ph-list">
-            <div class="ph-hit you"><b id="hit-t">Pekarna Skorja · Kamnik</b><span class="u" id="hit-u">pekarna-skorja.si</span><span class="s" id="hit-s">Pečemo kruh z drožmi, pecivo in torte po naročilu.</span><span class="call">Pokličite</span></div>
+            <div class="ph-hit you"><b id="hit-t">Pekarna Skorja · Kamnik</b><span class="u" id="hit-u">pekarna-skorja.si</span><span class="s" id="hit-s">Pečemo kruh z drožmi, pecivo in torte po naročilu.</span><span class="seo"><i class="y">Naslov</i><i class="y">Opis</i><i class="y">Hitrost</i></span><span class="call">Pokličite</span></div>
             <div class="ph-hit sk"><i></i><i></i><i></i></div>
             <div class="ph-hit sk"><i></i><i></i><i></i></div>
             <div class="ph-hit sk"><i></i><i></i><i></i></div>
@@ -545,11 +574,14 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
   function slug(s){return s.toLowerCase().replace(/đ/g,"d").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"")||"vase-podjetje"}
   function mockHTML(l,n){
     var li=l.links.map(function(x){return"<i>"+x+"</i>"}).join(""),it=l.items.map(function(x,i){return'<div class="m-item" data-b="c'+i+'">'+x+"</div>"}).join("");
-    return'<div class="chrome"><i></i><i></i><i></i><div class="url"><span class="lock"></span><span class="host">'+slug(n)+'.si</span></div><i class="ld"></i></div>'+
+    return'<div class="chrome"><i></i><i></i><i></i><div class="url"><span class="lock"></span><span class="draft">postavi.si/osnutek/</span><span class="host">'+slug(n)+'</span><span class="tld">.si</span></div><span class="pub">Objavljeno</span><i class="ld"></i></div>'+
       '<div class="page"><div class="m-nav" data-b="nav"><span class="m-logo"></span><span class="m-name">'+esc(n)+'</span><span class="m-links">'+li+'</span></div>'+
       '<div class="m-hero"><div class="m-txt"><div class="m-h" data-b="h">'+l.h+'</div><div class="m-sub" data-b="sub">'+esc(n)+' · '+l.city+'</div><div class="m-btn" data-b="btn">'+l.cta+'</div></div><div class="m-photo" data-b="photo"><i class="sh"></i></div></div>'+
-      '<div class="m-list">'+it+'</div><div class="m-foot" data-b="foot"><span>'+l.hours+'</span><span class="m-who">'+esc(n)+' · '+l.city+'</span></div></div>';
+      '<div class="m-list">'+it+'</div><div class="m-foot" data-b="foot"><span>'+l.hours+'</span><span class="m-who">'+esc(n)+' · '+l.city+'</span></div></div>'+
+      '<div class="chk"><b>Pregled pred objavo</b><ul>'+CHECKS.map(function(c){return"<li>"+c+"</li>"}).join("")+'</ul></div>';
   }
+  // what the review shows: the checks the pipeline really runs (SEO fields, phone layout, axe-core, Lighthouse)
+  var CHECKS=["Naslov in opis za Google","Berljivo na telefonu","Dostopnost po WCAG 2.2 AA","Hitrost nalaganja"];
   // the build: blocks land in order, the browser's loading bar fills, and the description's sentences light up as their block lands
   var SEQ=[["nav",0,0],["sub",300],["h",620,1],["photo",900],["c0",1200],["c1",1330],["c2",1460],["btn",1750,2],["foot",1950]],DONE=2450;
   function finish(root){$$("[data-b]",root).forEach(function(e){e.classList.add("on")});var ld=$(".ld",root);if(ld){ld.style.width="100%";ld.classList.add("done")}}
@@ -572,25 +604,51 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
     var n=name(),l=looks[cur];
     $$(".m-name",mock).forEach(function(e){e.textContent=n});
     $$(".m-sub,.m-who",mock).forEach(function(e){e.textContent=n+" · "+l.city});
-    $(".host",mock).textContent=slug(n)+".si";
+    $(".host",mock).textContent=slug(n);
     if(typedUpTo>0)sents[0].textContent=sent(0)+" ";
     setHit();
   }
-  function setHit(){var n=name(),l=looks[cur];if(phoneDone)$("#sq").textContent=l.q;$("#hit-t").textContent=n+" · "+l.city;$("#hit-u").textContent=slug(n)+".si";$("#hit-s").textContent=l.s[1]}
-  var phoneEl=$("#phone"),capEl=$("#cap"),sqEl=$("#sq"),caret3=$("#caret3"),phoneDone=false;
+  function setHit(){if(phonePlaying)return;var n=name(),l=looks[cur];if(phoneDone)$("#sq").textContent=l.q;$("#hit-t").textContent=n+" · "+l.city;$("#hit-u").textContent=slug(n)+".si";$("#hit-s").textContent=l.s[1]}
+  var phoneEl=$("#phone"),capEl=$("#cap"),sqEl=$("#sq"),caret3=$("#caret3"),phoneDone=false,phonePlaying=false;
   function playPhone(){
-    var q=looks[cur].q,hits=$$(".ph-hit",phoneEl);
-    hits.forEach(function(x){x.classList.remove("on")});sqEl.textContent="";caret3.hidden=false;capEl.textContent="";
+    var q=looks[cur].q,list=$(".ph-list",phoneEl),you=$(".ph-hit.you",phoneEl),sk=$$(".ph-hit.sk",phoneEl),chips=$$(".seo i",you);
+    setHit();phonePlaying=true;
+    sk.concat(you).forEach(function(x){x.classList.remove("on")});
+    list.appendChild(you);you.classList.add("low");chips.forEach(function(c){c.classList.remove("y")});
+    sqEl.textContent="";caret3.hidden=false;capEl.textContent="";
     var n=0;(function t(){sqEl.textContent=q.slice(0,++n);if(n<q.length)setTimeout(t,42);else{caret3.hidden=true;
-      $$(".ph-hit.sk",phoneEl).forEach(function(x,i){setTimeout(function(){x.classList.add("on")},350+i*200)});
+      sk.forEach(function(x,i){setTimeout(function(){x.classList.add("on")},350+i*200)});
       setTimeout(function(){capEl.innerHTML="Nekdo išče. <b>Brez spletne strani vas na seznamu ni.</b>"},400);
-      setTimeout(function(){$(".ph-hit.you",phoneEl).classList.add("on");capEl.innerHTML="<b>S stranjo vas najde. In pokliče.</b>";phoneDone=true},3000)}})();
+      setTimeout(function(){you.classList.add("on");capEl.innerHTML="Vaša nova stran se pojavi v iskanju."},2700);
+      chips.forEach(function(c,i){setTimeout(function(){c.classList.add("y")},3700+i*380)});
+      setTimeout(function(){capEl.innerHTML="Urejen naslov, opis in hitra stran <b>vam pomagajo višje.</b>";rise()},5100);
+      setTimeout(function(){you.classList.remove("low");capEl.innerHTML="<b>S stranjo vas najde. In pokliče.</b>";phonePlaying=false;phoneDone=true;setHit()},6500)}})();
+    // move your result to the top: measure, reorder, then slide each card from where it was
+    function rise(){
+      var els=[you].concat(sk),before=els.map(function(e){return e.getBoundingClientRect().top});
+      list.insertBefore(you,list.firstChild);
+      if(reduce)return;
+      els.forEach(function(e,i){var d=before[i]-e.getBoundingClientRect().top;if(Math.abs(d)<1)return;e.style.transition="none";e.style.transform="translateY("+d.toFixed(1)+"px)"});
+      void list.offsetHeight;
+      els.forEach(function(e){if(!e.style.transform)return;e.style.transition="transform .9s var(--ease)";e.style.transform=""});
+      setTimeout(function(){els.forEach(function(e){e.style.transition=""})},1000);
+    }
+  }
+  var flowEls=$$(".flow li");
+  function flow(k){flowEls.forEach(function(li,i){li.classList.toggle("on",i<=k);li.classList.toggle("now",i===k)})}
+  function checks(n,vis){var c=$(".chk",mock);if(!c)return;c.classList.toggle("on",!!vis);$$("li",c).forEach(function(li,i){li.classList.toggle("y",i<n)})}
+  function publish(on){mock.classList.toggle("drf",!on)}
+  function review(){
+    flow(2);checks(0,true);
+    CHECKS.forEach(function(c,i){timers.push(setTimeout(function(){checks(i+1,true)},400+i*420))});
+    timers.push(setTimeout(function(){checks(CHECKS.length,false);publish(true);flow(3);
+      if(auto)cycle=setTimeout(function(){show((cur+1)%looks.length)},3800)},400+CHECKS.length*420+550));
   }
   function show(i){
     clearAll();cur=i;typedUpTo=0;
     tbtns.forEach(function(b,k){b.setAttribute("aria-pressed",k===i?"true":"false")});moveInd();
     noteEl.textContent=looks[i].note;setHit();
-    mock.className="browser "+looks[i].cls+" anim";mock.innerHTML=mockHTML(looks[i],name());
+    mock.className="browser "+looks[i].cls+" anim drf";mock.innerHTML=mockHTML(looks[i],name());flow(0);
     sents.forEach(function(s){s.textContent="";s.classList.remove("hl")});
     caret.hidden=false;
     var k=0,n=0,speed=reduce?12:16;
@@ -599,10 +657,9 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
       if(n<full.length)typing=setTimeout(step,speed);
       else{typedUpTo=k+1;if(++k<3){n=0;typing=setTimeout(step,220)}
       else if(!introDone){caret.hidden=true}
-      else{caret.hidden=true;timers=build(mock,1,function(ev,j){
+      else{caret.hidden=true;flow(1);timers=build(mock,1,function(ev,j){
         if(ev==="s")sents.forEach(function(s,q){s.classList.toggle("hl",q===j)});
-        else{timers.push(setTimeout(function(){sents.forEach(function(s){s.classList.remove("hl")})},900));
-          if(auto)cycle=setTimeout(function(){show((cur+1)%looks.length)},4600)}})}}
+        else{timers.push(setTimeout(function(){sents.forEach(function(s){s.classList.remove("hl")})},900));review()}})}}
     })();
   }
   function stopAuto(){auto=false;clearTimeout(cycle);introDone=true}
@@ -652,11 +709,12 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
   // scroll-driven build: t runs 0..1 over the blocks; done hands the demo back to the usual cycle
   function scrub(t,done){
     if(introDone)return;
-    var ld=$(".ld",mock),n=0;
-    SEQ.forEach(function(s,i){var on=t>=i/(SEQ.length-1),el=$('[data-b="'+s[0]+'"]',mock);if(el)el.classList.toggle("on",on);if(on){n=i+1;if(s[2]!=null)sents.forEach(function(x,q2){x.classList.toggle("hl",q2===s[2])})}});
+    var ld=$(".ld",mock),n=0,b=t/.6,c=clamp((t-.64)/.26);
+    flow(t<=0?0:t<.62?1:t<.96?2:3);checks(Math.floor(c*CHECKS.length+1e-6),t>=.62&&t<.96);publish(t>=.96);
+    SEQ.forEach(function(s,i){var on=b>=i/(SEQ.length-1),el=$('[data-b="'+s[0]+'"]',mock);if(el)el.classList.toggle("on",on);if(on){n=i+1;if(s[2]!=null)sents.forEach(function(x,q2){x.classList.toggle("hl",q2===s[2])})}});
     if(ld){ld.classList.remove("done");ld.style.width=n?Math.round(n/SEQ.length*92)+"%":"0"}
     if(!n)sents.forEach(function(x){x.classList.remove("hl")});
-    if(done){introDone=true;finish(mock);sents.forEach(function(x){x.classList.remove("hl")});if(auto)cycle=setTimeout(function(){show((cur+1)%looks.length)},4600)}
+    if(done){introDone=true;finish(mock);checks(CHECKS.length,false);publish(true);flow(3);sents.forEach(function(x){x.classList.remove("hl")});if(auto)cycle=setTimeout(function(){show((cur+1)%looks.length)},4600)}
   }
   var introRaf=0;
   function onScroll(){if(introRaf)return;introRaf=requestAnimationFrame(function(){introRaf=0;if(intro)applyIntro();else if(phone)applyPhone()})}
