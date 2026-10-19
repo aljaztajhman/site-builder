@@ -102,7 +102,7 @@ describe("generated pictures per job", () => {
     await madePictures(osnovni.accountId, 1);
     const used = await picturesForJob(platform, config, ctx, "full");
     expect(used.pictures.max).toBe(0);
-    expect(used.pictures.note).toMatch(/^Ta mesec ste porabili vse ustvarjene slike paketa Osnovni \(3\), zato jih nova različica strani ne dobi\. Nove so na voljo \d+\. \d+\. \d{4}\. Paket Plus \(29 € na mesec\) vključuje 10 ustvarjenih slik na mesec\.$/);
+    expect(used.pictures.note).toMatch(/^Ta mesec ste porabili vse ustvarjene slike paketa Osnovni \(3\), zato jih nova različica strani ne dobi\. Nove so na voljo \d+\. \d+\. \d{4}\. Paket Plus \(39 € na mesec\) vključuje 10 ustvarjenih slik na mesec\.$/);
     expect(used.pictureCap?.max).toBe(3);
     const plus = await account("premium");
     await madePictures(plus.accountId, 3);
@@ -132,7 +132,7 @@ describe("generated pictures per job", () => {
     const aiJobId = await platform.repo.usage.insertJob({ kind: "generate", scope: "full", tier: "paid", accountId, siteId, estimateEur: 0.5 });
     await handlers.generate!({ siteId, scope: "full", aiJobId }, "job-1");
     expect(seen?.deps.pictures?.max).toBe(0);
-    expect(seen?.deps.pictures?.note).toContain("Paket Plus (29 € na mesec)");
+    expect(seen?.deps.pictures?.note).toContain("Paket Plus (39 € na mesec)");
     // The stand-in generator refuses past the month's pictures at its reservation.
     await expect(seen!.deps.images!.generate("bread on a board")).rejects.toBeInstanceOf(PictureLimitError);
   });

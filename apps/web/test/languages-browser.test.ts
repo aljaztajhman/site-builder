@@ -99,7 +99,7 @@ describe.each([1280, 360])("the second language at %i px", (width) => {
       await page.getByRole("button", { name: /^Strani/ }).click();
       const note = page.locator("#locales-limit");
       await note.waitFor();
-      expect(await note.textContent()).toBe("Paket Osnovni ima stran v enem jeziku. Paket Plus (29 € na mesec) ima stran v dveh jezikih, na primer v slovenščini in angleščini. Plus");
+      expect(await note.textContent()).toBe("Paket Osnovni ima stran v enem jeziku. Paket Plus (39 € na mesec) ima stran v dveh jezikih, na primer v slovenščini in angleščini. Plus");
       expect(await page.locator("#add-locale-en").count()).toBe(0);
       expect(await page.locator(".lang-switch").count()).toBe(0);
       expect(await noSidewaysScroll(page)).toBe(true);

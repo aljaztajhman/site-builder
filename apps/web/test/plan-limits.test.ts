@@ -95,8 +95,8 @@ describe("pages", () => {
     expect(ninth.status).toBe(403);
     const body = (await ninth.json()) as Refused;
     expect(body.code).toBe("plan_pages");
-    expect(body.message).toBe("Paket Osnovni ima največ 8 strani. Paket Plus (29 € na mesec) jih ima do 20.");
-    expect(body.upgrade).toEqual({ plan: "premium", name: "Plus", monthlyEur: 29 });
+    expect(body.message).toBe("Paket Osnovni ima največ 8 strani. Paket Plus (39 € na mesec) jih ima do 20.");
+    expect(body.upgrade).toEqual({ plan: "premium", name: "Plus", monthlyEur: 39 });
     // The generic patch path is held to the same limit (a copied page).
     const spec = (await platform.repo.getSpec(siteId))!.spec;
     const copy = { ...spec.pages[1]!, id: "p_kopija", slug: "kopija", nav: { label: "Kopija", show: true }, sections: spec.pages[1]!.sections.map((s) => ({ ...s, id: `${s.id}_kopija` })) };
@@ -123,7 +123,7 @@ describe("pages", () => {
     const r = await addPage(b, siteId, 2);
     expect(r.status).toBe(403);
     const body = (await r.json()) as Refused;
-    expect(body.message).toMatch(/^Brezplačni predogled je domača stran\. Z naročnino Osnovni \(15 € na mesec\) dobite do 8 strani/);
+    expect(body.message).toMatch(/^Brezplačni predogled je domača stran\. Z naročnino Osnovni \(19 € na mesec\) dobite do 8 strani/);
     expect(body.upgrade?.plan).toBe("standard");
     // Text edits are never limited.
     expect((await patch(b, siteId, [{ op: "replace", path: "/pages/0/nav/label", value: "Domov" }])).status).toBe(200);
@@ -136,7 +136,7 @@ describe("languages", () => {
     const osnovni = await owner("standard");
     const r = await patch(osnovni.b, osnovni.siteId, english);
     expect(r.status).toBe(403);
-    expect(((await r.json()) as Refused).message).toBe("Paket Osnovni ima stran v enem jeziku. Paket Plus (29 € na mesec) ima stran v dveh jezikih, na primer v slovenščini in angleščini.");
+    expect(((await r.json()) as Refused).message).toBe("Paket Osnovni ima stran v enem jeziku. Paket Plus (39 € na mesec) ima stran v dveh jezikih, na primer v slovenščini in angleščini.");
     const plus = await owner("premium");
     expect((await patch(plus.b, plus.siteId, english)).status).toBe(200);
     expect((await platform.repo.getSpec(plus.siteId))!.spec.locales.enabled).toEqual(["sl", "en"]);
@@ -148,7 +148,7 @@ describe("collections (Plus)", () => {
     const osnovni = await owner("standard");
     const r = await req(`/api/sites/${osnovni.siteId}/collections`, { method: "POST", headers: json(osnovni.b), body: JSON.stringify({ baseVersion: await version(osnovni.siteId), kind: "blog" }) });
     expect(r.status).toBe(403);
-    expect(((await r.json()) as Refused).message).toBe("Novice so v paketu Plus (29 € na mesec).");
+    expect(((await r.json()) as Refused).message).toBe("Novice so v paketu Plus (39 € na mesec).");
     const plus = await owner("premium");
     const ok = await req(`/api/sites/${plus.siteId}/collections`, { method: "POST", headers: json(plus.b), body: JSON.stringify({ baseVersion: await version(plus.siteId), kind: "blog" }) });
     expect(ok.status).toBe(200);
@@ -166,7 +166,7 @@ describe("collections (Plus)", () => {
   };
 
   describe("a blog kept from Plus is read-only on Osnovni (sb-collection-downgrade)", () => {
-    const READ_ONLY = "Vnosi zbirke Novice ostanejo na strani, kot so. Dodajate, urejate, brišete in razvrščate jih lahko na paketu Plus (29 € na mesec).";
+    const READ_ONLY = "Vnosi zbirke Novice ostanejo na strani, kot so. Dodajate, urejate, brišete in razvrščate jih lahko na paketu Plus (39 € na mesec).";
     const open = { title: "Dan odprtih vrat", date: "2026-11-07", summary: "Ogled peči.", body: ["Pridite v soboto."] };
     /** Osnovni with the news as Plus left them: two posts. */
     const kept = async (plan: "standard" | "premium" = "standard") => {
@@ -179,7 +179,7 @@ describe("collections (Plus)", () => {
     const titles = async (siteId: string) => (await platform.repo.getSpec(siteId))!.spec.collections!.blog!.items.map((i) => i.title);
     const refusedAs = async (r: Response) => {
       expect(r.status).toBe(403);
-      expect((await r.json()) as Refused).toEqual({ error: "plan_collections", code: "plan_collections", message: READ_ONLY, upgrade: { plan: "premium", name: "Plus", monthlyEur: 29 } });
+      expect((await r.json()) as Refused).toEqual({ error: "plan_collections", code: "plan_collections", message: READ_ONLY, upgrade: { plan: "premium", name: "Plus", monthlyEur: 39 } });
     };
 
     it("refuses adding, editing, deleting and reordering posts, naming Plus; nothing changes", async () => {
@@ -254,7 +254,7 @@ describe("collections (Plus)", () => {
       const limits = (await state(b, siteId)).access.limits!;
       expect(limits.readOnlyNotes).toMatchObject({ blog: { message: READ_ONLY, upgrade: { name: "Plus" } } });
       // The switch-on button's note for a collection the site doesn't have is unchanged.
-      expect(limits.collectionNotes).toMatchObject({ events: { message: "Dogodki so v paketu Plus (29 € na mesec)." } });
+      expect(limits.collectionNotes).toMatchObject({ events: { message: "Dogodki so v paketu Plus (39 € na mesec)." } });
     });
   });
 
@@ -270,7 +270,7 @@ describe("collections (Plus)", () => {
       expect(r.status, plan).toBe(status);
       if (status === 403) {
         const body = (await r.json()) as Refused;
-        expect(body).toMatchObject({ code: "plan_collections", message: "Novice so v paketu Plus (29 € na mesec).", upgrade: { plan: "premium" } });
+        expect(body).toMatchObject({ code: "plan_collections", message: "Novice so v paketu Plus (39 € na mesec).", upgrade: { plan: "premium" } });
         expect((await platform.repo.getSpec(siteId))!.spec.collections).toBeUndefined();
       } else expect((await platform.repo.getSpec(siteId))!.spec.collections?.blog).toBeDefined();
     }
@@ -346,7 +346,7 @@ describe("generated pictures per month", () => {
     await picture(accountId);
     const s = await state(b, siteId);
     expect(s.access.pictures).toMatchObject({ used: 3, left: 0 });
-    expect(s.access.pictures!.notice).toMatch(/Paket Plus \(29 € na mesec\) vključuje 10 ustvarjenih slik na mesec\.$/);
+    expect(s.access.pictures!.notice).toMatch(/Paket Plus \(39 € na mesec\) vključuje 10 ustvarjenih slik na mesec\.$/);
     const none = await regenerate(b, siteId);
     expect(none.status).toBe(200);
     expect(((await none.json()) as { notice?: string }).notice).toMatch(/^Ta mesec ste porabili vse ustvarjene slike paketa Osnovni \(3\), zato jih nova različica strani ne dobi\./);
@@ -376,7 +376,7 @@ describe("free → Osnovni", () => {
     const free = await owner(null);
     const s = await state(free.b, free.siteId);
     expect(s.access.lockedPages).toEqual(["Ponudba", "O nas", "Kontakt"]);
-    expect(s.access.offer?.text).toBe("Osnovni: 15 € na mesec ali 150 € na leto, domena je vključena v letno ceno.");
+    expect(s.access.offer?.text).toBe("Osnovni: 19 € na mesec ali 190 € na leto, domena je vključena v letno ceno.");
     expect(s.access.limits).toMatchObject({ maxPages: 1, locales: 1, collections: [], planName: null });
     const paid = await owner("standard");
     const p = await state(paid.b, paid.siteId);
@@ -389,14 +389,14 @@ describe("free → Osnovni", () => {
     const { b, siteId } = await owner(null);
     const r = await req(`/api/sites/${siteId}/publish`, { method: "POST", headers: json(b), body: "{}" });
     expect(r.status).toBe(403);
-    expect(((await r.json()) as Refused).message).toBe("Objava in prenos strani sta del naročnine Osnovni (15 € na mesec). Predogled lahko še naprej urejate.");
+    expect(((await r.json()) as Refused).message).toBe("Objava in prenos strani sta del naročnine Osnovni (19 € na mesec). Predogled lahko še naprej urejate.");
   });
 
   it("the landing page shows the founding offer's places left, from the places the admin gave", async () => {
     const offer = config.plans.standard.foundingOffer!;
     // The page's text, tags dropped.
     const landing = async () => (await (await req("/", { headers: { cookie: (await newBrowser(req)).cookie } })).text()).replace(/<[^>]+>/g, "");
-    expect(await landing()).toContain(`Prvo leto za prvih ${offer.customers} strank · še ${offer.customers} prostih mest`);
+    expect(await landing()).toContain(`Za prvih ${offer.customers} strank · še ${offer.customers} prostih mest`);
     const admin = await adminBrowser(req, PASSWORD);
     const give = await req("/admin/allow-list", { method: "POST", headers: { cookie: admin.cookie }, body: new URLSearchParams({ _csrf: admin.csrf, email: "ustanovni@siol.net", plan: "standard", founding: "on" }) });
     expect(await give.text()).toContain("ima zdaj paket Osnovni z ustanovno ceno");
@@ -408,7 +408,7 @@ describe("free → Osnovni", () => {
     // All places taken: the founding line goes.
     await platform.db.query("insert into allow_list (email_key, email, plan, founding_at) select 'f' || g || '@x.si', 'f' || g || '@x.si', 'standard', now() from generate_series(1, $1::int) g", [offer.customers]);
     const full = await landing();
-    expect(full).not.toContain(`Prvo leto za prvih ${offer.customers} strank`);
+    expect(full).not.toContain(`Za prvih ${offer.customers} strank`);
     expect(full).toContain("Postavitev skupaj z vami");
   });
 });
@@ -421,9 +421,9 @@ describe("the monthly report about Plus (it-upsells)", () => {
   });
 
   it("speaks only where it fits: near Osnovni's page limit, or a one-language tourist farm; never on Plus or free", () => {
-    expect(plusNote(config, "standard", spec(7))).toBe("Stran ima 7 od 8 strani, kolikor jih vključuje paket Osnovni. Paket Plus (29 € na mesec) jih ima do 20.");
+    expect(plusNote(config, "standard", spec(7))).toBe("Stran ima 7 od 8 strani, kolikor jih vključuje paket Osnovni. Paket Plus (39 € na mesec) jih ima do 20.");
     expect(plusNote(config, "standard", spec(3))).toBeNull();
-    expect(plusNote(config, "standard", spec(3, "tourist-farm"))).toBe("Če vas obiskujejo tudi gostje iz tujine: paket Plus (29 € na mesec) ima stran v dveh jezikih, na primer v slovenščini in angleščini.");
+    expect(plusNote(config, "standard", spec(3, "tourist-farm"))).toBe("Če vas obiskujejo tudi gostje iz tujine: paket Plus (39 € na mesec) ima stran v dveh jezikih, na primer v slovenščini in angleščini.");
     expect(plusNote(config, "premium", spec(19, "tourist-farm"))).toBeNull();
     expect(plusNote(config, null, spec(7))).toBeNull();
   });

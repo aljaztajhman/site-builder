@@ -149,7 +149,7 @@ describe("the email's wording", () => {
         "Če ga želite obdržati, se prijavite s tem e-poštnim naslovom. Predogled ostane vaš, urejate ga naprej in z brezplačnim računom dobite še 1 domačo stran in 5 sprememb s pomočnikom.",
         "https://postavi.example/predogled/site_0123456789abcdef/abc",
         "",
-        "Z naročnino Osnovni (15 € na mesec) naredimo celotno stran (Ponudba, Kontakt) in jo objavite na svoji domeni.",
+        "Z naročnino Osnovni (19 € na mesec) naredimo celotno stran (Ponudba, Kontakt) in jo objavite na svoji domeni.",
         "",
         "To sporočilo smo poslali, ker ste ga zahtevali pri predogledu. Drugih ne pošiljamo, naslov pa izbrišemo skupaj s predogledom.",
       ].join("\n"),

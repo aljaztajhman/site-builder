@@ -77,7 +77,7 @@ A customer can pay and we can account for it.
 
 Exit criteria:
 - [ ] Decision on the 1.0 payment path. Recommendation: yearly plans by invoice + bank transfer (UPN QR) first, Stripe for monthly after launch (TASKS:368–370, :405).
-- [ ] Plans from config charged correctly: Osnovni €15/€150, Plus €29/€290, founding €99, setup €79. Invoices are numbered and legal. `plans.billingEnabled` true.
+- [ ] Plans from config charged correctly: Osnovni €19/€190, Plus €39/€390, founding €99 then 20 % off for life, setup €149 (`sb-pricing-2`). Invoices are numbered and legal. `plans.billingEnabled` true.
 - [ ] Publishing a site requires an active plan. A test payment end to end on the live app (provider test mode).
 - [ ] A switch-on checklist for the day the company exists: the config fields, live keys and the one live payment test, each step written down; built and tested on placeholder company data before then.
 - [ ] Upsells that need billing (TASKS:374) are done or parked.

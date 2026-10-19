@@ -76,8 +76,8 @@ describe("pages", () => {
     expect(limitBreach(config, "paid", "standard", withPages(7), withPages(8))).toBeNull();
     const b = limitBreach(config, "paid", "standard", withPages(8), withPages(9))!;
     expect(b.code).toBe("plan_pages");
-    expect(b.upgrade).toEqual({ plan: "premium", name: "Plus", monthlyEur: 29 });
-    expect(b.message).toBe("Paket Osnovni ima največ 8 strani. Paket Plus (29 € na mesec) jih ima do 20.");
+    expect(b.upgrade).toEqual({ plan: "premium", name: "Plus", monthlyEur: 39 });
+    expect(b.message).toBe("Paket Osnovni ima največ 8 strani. Paket Plus (39 € na mesec) jih ima do 20.");
   });
 
   it("Plus: the 20th page is fine, the 21st is refused with nothing more to sell", () => {
@@ -92,7 +92,7 @@ describe("pages", () => {
     for (const tier of ["anonymous", "free"] as const) {
       const b = limitBreach(config, tier, null, withPages(1), withPages(2))!;
       expect(b.upgrade?.plan).toBe("standard");
-      expect(b.message).toBe("Brezplačni predogled je domača stran. Z naročnino Osnovni (15 € na mesec) dobite do 8 strani, objavo na svoji domeni in pomočnika vsak mesec.");
+      expect(b.message).toBe("Brezplačni predogled je domača stran. Z naročnino Osnovni (19 € na mesec) dobite do 8 strani, objavo na svoji domeni in pomočnika vsak mesec.");
     }
   });
 
@@ -113,14 +113,14 @@ describe("languages", () => {
   it("Osnovni: one language; a second one is refused and names Plus; Plus takes it", () => {
     const b = limitBreach(config, "paid", "standard", golden, withEnglish(golden))!;
     expect(b.code).toBe("plan_locales");
-    expect(b.message).toBe("Paket Osnovni ima stran v enem jeziku. Paket Plus (29 € na mesec) ima stran v dveh jezikih, na primer v slovenščini in angleščini.");
+    expect(b.message).toBe("Paket Osnovni ima stran v enem jeziku. Paket Plus (39 € na mesec) ima stran v dveh jezikih, na primer v slovenščini in angleščini.");
     expect(limitBreach(config, "paid", "premium", golden, withEnglish(golden))).toBeNull();
   });
 
   it("a free preview in a second language names Plus, the first plan with two", () => {
     const b = limitBreach(config, "free", null, golden, withEnglish(golden))!;
     expect(b.upgrade?.plan).toBe("premium");
-    expect(b.message).toBe("Brezplačni predogled je v enem jeziku. Paket Plus (29 € na mesec) ima stran v dveh jezikih, na primer v slovenščini in angleščini.");
+    expect(b.message).toBe("Brezplačni predogled je v enem jeziku. Paket Plus (39 € na mesec) ima stran v dveh jezikih, na primer v slovenščini in angleščini.");
   });
 });
 
@@ -128,15 +128,15 @@ describe("collections (the blog and the rest are Plus)", () => {
   it("Osnovni switching the blog on is refused and names Plus; Plus may", () => {
     const b = limitBreach(config, "paid", "standard", golden, withBlog(golden))!;
     expect(b.code).toBe("plan_collections");
-    expect(b.message).toBe("Novice so v paketu Plus (29 € na mesec).");
+    expect(b.message).toBe("Novice so v paketu Plus (39 € na mesec).");
     expect(limitBreach(config, "paid", "premium", golden, withBlog(golden))).toBeNull();
     // A blog that is already there (switched on before) and left as it is doesn't stop other edits.
     expect(limitBreach(config, "paid", "standard", withBlog(golden), withBlog(golden))).toBeNull();
   });
 
   it("names each collection in Slovene, for a free preview too", () => {
-    expect(limitMessage(config, "paid", "standard", "collections", "team").message).toBe("Ekipa kot seznam je v paketu Plus (29 € na mesec).");
-    expect(limitMessage(config, "free", null, "collections", "events").message).toBe("Brezplačni predogled je domača stran. Dogodki so v paketu Plus (29 € na mesec).");
+    expect(limitMessage(config, "paid", "standard", "collections", "team").message).toBe("Ekipa kot seznam je v paketu Plus (39 € na mesec).");
+    expect(limitMessage(config, "free", null, "collections", "events").message).toBe("Brezplačni predogled je domača stran. Dogodki so v paketu Plus (39 € na mesec).");
   });
 
   it("the editor's notes: what each button reads at its limit", () => {
@@ -147,8 +147,8 @@ describe("collections (the blog and the rest are Plus)", () => {
     expect(Object.keys(info.collectionNotes).sort()).toEqual(["blog", "events", "services", "team"]);
     expect(Object.keys(info.readOnlyNotes).sort()).toEqual(["blog", "events", "services", "team"]);
     expect(info.readOnlyNotes.team).toEqual({
-      message: "Vnosi zbirke Ekipa ostanejo na strani, kot so. Dodajate, urejate, brišete in razvrščate jih lahko na paketu Plus (29 € na mesec).",
-      upgrade: { plan: "premium", name: "Plus", monthlyEur: 29 },
+      message: "Vnosi zbirke Ekipa ostanejo na strani, kot so. Dodajate, urejate, brišete in razvrščate jih lahko na paketu Plus (39 € na mesec).",
+      upgrade: { plan: "premium", name: "Plus", monthlyEur: 39 },
     });
     const top = limitsInfo(config, "paid", "premium")!;
     expect(top.collectionNotes).toEqual({});
@@ -165,7 +165,7 @@ describe("a collection kept from Plus is read-only below Plus (sb-collection-dow
     collections: { blog: { page: golden.pages[0]!.id, items: titles.map(post) } } as unknown as SiteSpec["collections"],
     ...(english ? { translations: { en: { "/collections/blog/items/0/title": english } } } : {}),
   });
-  const READ_ONLY = "Vnosi zbirke Novice ostanejo na strani, kot so. Dodajate, urejate, brišete in razvrščate jih lahko na paketu Plus (29 € na mesec).";
+  const READ_ONLY = "Vnosi zbirke Novice ostanejo na strani, kot so. Dodajate, urejate, brišete in razvrščate jih lahko na paketu Plus (39 € na mesec).";
   const refused = (before: SiteSpec, after: SiteSpec) => limitBreach(config, "paid", "standard", before, after);
 
   it("refuses adding, editing, deleting and reordering entries on Osnovni, naming Plus; Plus and the admin may", () => {
@@ -178,7 +178,7 @@ describe("a collection kept from Plus is read-only below Plus (sb-collection-dow
     };
     for (const [what, after] of Object.entries(cases)) {
       const b = refused(base, after);
-      expect(b, what).toMatchObject({ what: "collections", code: "plan_collections", message: READ_ONLY, upgrade: { plan: "premium", name: "Plus", monthlyEur: 29 } });
+      expect(b, what).toMatchObject({ what: "collections", code: "plan_collections", message: READ_ONLY, upgrade: { plan: "premium", name: "Plus", monthlyEur: 39 } });
       expect(limitBreach(config, "paid", "premium", base, after), what).toBeNull();
       expect(limitBreach(config, "admin", null, base, after), what).toBeNull();
     }
@@ -205,7 +205,7 @@ describe("a collection kept from Plus is read-only below Plus (sb-collection-dow
 
   it("words each collection, and a plan that has none above it", () => {
     for (const [kind, name] of [["events", "Dogodki"], ["services", "Storitve"]] as const)
-      expect(limitsInfo(config, "paid", "standard")!.readOnlyNotes[kind]?.message).toBe(`Vnosi zbirke ${name} ostanejo na strani, kot so. Dodajate, urejate, brišete in razvrščate jih lahko na paketu Plus (29 € na mesec).`);
+      expect(limitsInfo(config, "paid", "standard")!.readOnlyNotes[kind]?.message).toBe(`Vnosi zbirke ${name} ostanejo na strani, kot so. Dodajate, urejate, brišete in razvrščate jih lahko na paketu Plus (39 € na mesec).`);
     // A config where no plan has the blog: nothing to sell.
     const none = structuredClone(config);
     none.plans.premium.site.collections = none.plans.premium.site.collections.filter((k) => k !== "blog");
@@ -232,7 +232,7 @@ describe("generated pictures", () => {
 
   it("words the owner's note and names Plus while Osnovni's month is used up", () => {
     expect(picturesNotice(config, "standard", 0, "4. 11. 2026")).toBe(
-      "Ta mesec ste porabili vse ustvarjene slike paketa Osnovni (3), zato jih nova različica strani ne dobi. Nove so na voljo 4. 11. 2026. Paket Plus (29 € na mesec) vključuje 10 ustvarjenih slik na mesec.",
+      "Ta mesec ste porabili vse ustvarjene slike paketa Osnovni (3), zato jih nova različica strani ne dobi. Nove so na voljo 4. 11. 2026. Paket Plus (39 € na mesec) vključuje 10 ustvarjenih slik na mesec.",
     );
     expect(picturesNotice(config, "standard", 1, "4. 11. 2026")).toContain("zato ima nova različica strani le 1 ustvarjeno sliko.");
     expect(picturesNotice(config, "premium", 0, "4. 11. 2026")).not.toContain("Paket Plus");
@@ -271,7 +271,7 @@ describe("a chat edit past the plan's limit", () => {
     const msg = await repo.addChat(site.id, "user", "Dodaj angleščino");
     const refused = await applyChatEdit({ repo, client }, site.id, Number(msg.id), guard("standard"));
     expect(refused.version).toBeNull();
-    expect(refused.reply).toMatch(/^Paket Osnovni ima stran v enem jeziku\. Paket Plus \(29 € na mesec\)/);
+    expect(refused.reply).toMatch(/^Paket Osnovni ima stran v enem jeziku\. Paket Plus \(39 € na mesec\)/);
     expect((await repo.getSpec(site.id))!.spec.locales.enabled).toEqual(["sl"]);
     const again = await repo.addChat(site.id, "user", "Dodaj angleščino");
     const saved = await applyChatEdit({ repo, client }, site.id, Number(again.id), guard("premium"));
@@ -299,7 +299,7 @@ describe("a chat edit past the plan's limit", () => {
     // The post's English: refused by the plan, the reply names Plus.
     const english = await chat("Prevedi naslov novice", [{ op: "replace", path: enTitle, value: "Rye bread on Fridays" }]);
     expect(english.version).toBeNull();
-    expect(english.reply).toBe("Vnosi zbirke Novice ostanejo na strani, kot so. Dodajate, urejate, brišete in razvrščate jih lahko na paketu Plus (29 € na mesec).");
+    expect(english.reply).toBe("Vnosi zbirke Novice ostanejo na strani, kot so. Dodajate, urejate, brišete in razvrščate jih lahko na paketu Plus (39 € na mesec).");
     // The post itself: chat never edits collections (any plan); not saved either.
     const entry = await chat("Spremeni naslov novice", [{ op: "replace", path: "/collections/blog/items/0/title", value: "Rženi kruh ob petkih" }]);
     expect(entry.version).toBeNull();

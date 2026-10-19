@@ -472,7 +472,7 @@ describe("free account", () => {
     const third = await intake(req, owner);
     expect(third.status).toBe(429);
     // The refusal names the plan that adds what's missing (sb-tiers upsell).
-    expect(await third.text()).toContain("Porabili ste 1 brezplačno ustvarjanje domače strani. Stran lahko še naprej urejate neposredno. Z naročnino Osnovni (15 € na mesec) dobite celotno stran, objavo na svoji domeni in pomočnika vsak mesec.");
+    expect(await third.text()).toContain("Porabili ste 1 brezplačno ustvarjanje domače strani. Stran lahko še naprej urejate neposredno. Z naročnino Osnovni (19 € na mesec) dobite celotno stran, objavo na svoji domeni in pomočnika vsak mesec.");
     const again = await regenerate(owner, preview);
     expect(await again.json()).toMatchObject({ code: "free_homepages_used" });
 
@@ -481,7 +481,7 @@ describe("free account", () => {
     expect(oneMore.status).toBe(429);
     expect(await oneMore.json()).toMatchObject({
       code: "free_edits_used",
-      message: "Porabili ste vseh 5 sprememb s pomočnikom. Stran lahko še naprej urejate neposredno. Z naročnino Osnovni (15 € na mesec) dobite celotno stran, objavo na svoji domeni in pomočnika vsak mesec.",
+      message: "Porabili ste vseh 5 sprememb s pomočnikom. Stran lahko še naprej urejate neposredno. Z naročnino Osnovni (19 € na mesec) dobite celotno stran, objavo na svoji domeni in pomočnika vsak mesec.",
     });
     // A failed edit doesn't count.
     const edits = sent.filter((j) => j.name === "edit");
@@ -540,7 +540,7 @@ describe("paid (allow-listed) monthly allowance", () => {
     expect(refused.status).toBe(429);
     const body = (await refused.json()) as { code: string; message: string };
     expect(body.code).toBe("allowance_used");
-    expect(body.message).toMatch(/^Pomočnik je ta mesec porabil vse, kar vključuje naročnina\. Stran lahko še naprej urejate neposredno; pomočnik spet deluje \d+\. \d+\. \d{4}\. Paket Plus \(29 € na mesec\) vključuje več pomoči vsak mesec\.$/);
+    expect(body.message).toMatch(/^Pomočnik je ta mesec porabil vse, kar vključuje naročnina\. Stran lahko še naprej urejate neposredno; pomočnik spet deluje \d+\. \d+\. \d{4}\. Paket Plus \(39 € na mesec\) vključuje več pomoči vsak mesec\.$/);
 
     // A month later the allowance is new (without the first month's extra) and last month's spend is gone.
     const account = (await platform.repo.accounts.byKey("partner@siol.net"))!;

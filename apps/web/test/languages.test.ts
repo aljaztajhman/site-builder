@@ -74,7 +74,7 @@ describe("the second language in the editor", () => {
     expect(r.status).toBe(403);
     const body = (await r.json()) as { code: string; message: string; upgrade: { plan: string; name: string } | null };
     expect(body.code).toBe("plan_locales");
-    expect(body.message).toBe("Paket Osnovni ima stran v enem jeziku. Paket Plus (29 € na mesec) ima stran v dveh jezikih, na primer v slovenščini in angleščini.");
+    expect(body.message).toBe("Paket Osnovni ima stran v enem jeziku. Paket Plus (39 € na mesec) ima stran v dveh jezikih, na primer v slovenščini in angleščini.");
     expect(body.upgrade).toMatchObject({ plan: "premium", name: "Plus" });
     const after = await current(siteId);
     expect(after.version).toBe(before.version);
