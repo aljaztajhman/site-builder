@@ -10,11 +10,11 @@ Written on 2026-10-16 from an inventory of TASKS.md (263 done, 158 open), HQ, do
 
 ## Now
 
-- **Current milestone:** M2 Launch gate: accounts, editor, email. M1 closed on 2026-10-18 (owner: "close M1"; final check 6 of 10 against a bar of 8, not re-scored by the owner's decision). M2 (docs/plans/m2-launch-gate.md): 2 of 6 met (editor kept, junk field live). Live since 2026-10-18: email from mail.postavi.si, the missing PHASE-2 tests, the live smoke (16/16). Next: **the owner's phone run** (docs/owner-phone-run.md), which closes criteria 1, 2, 5 and 6. One M1 follow-up for M2's first week: the slaščičarna hours badge under the phone buttons (TASKS).
+- **Current milestone:** M5 Domains with the Postavi rename (owner, 2026-10-19), while M2 waits for the rest of the owner's phone run (docs/owner-phone-run.md; criteria 1, 2, 5 and 6; M2 is 2 of 6). M5 plan: `.claude/plans/m5-postavi.md`. Layout: the homepage stays on postavi.si, the app moves to app.postavi.si, customer sites at <name>.postavi.si. Next: the rename and edge Worker PR, then postavi.si's DNS moves to Cloudflare. One M1 follow-up for M2's first week: the slaščičarna hours badge under the phone buttons (TASKS).
 - **Order (owner, 2026-10-18):** company registration comes last; next after M2 are M5 (domains, with the Postavi rename) and M6 (operations), then M4 in test mode and M7a, a free beta.
 - **Owner, in parallel (long lead times):** register the company (M3), find a lawyer for the legal pages (M3). New name Postavi; postavi.si bought 2026-10-17 (M5).
 - **Side work (owner switched to it, 2026-10-18):** the postavi.si coming-soon page: phone intro, the description → build → review → publish → edit demo, the search story, the time band, "live site with an editor" copy (#231, #233, #238, this PR).
-- **Last updated:** 2026-10-18.
+- **Last updated:** 2026-10-19.
 
 ---
 
@@ -82,15 +82,17 @@ Exit criteria:
 - [ ] A switch-on checklist for the day the company exists: the config fields, live keys and the one live payment test, each step written down; built and tested on placeholder company data before then.
 - [ ] Upsells that need billing (TASKS:374) are done or parked.
 
-### M5 · Domains (Claude + owner purchases) — 0 of 4 met (adapters and UI built on fakes)
+### M5 · Domains (Claude + owner purchases) — 1 of 4 met (adapters and UI built on fakes)
 
-A customer's site can live on their own domain, or on a Stranko subdomain.
+A customer's site can live on a Postavi subdomain or on a domain its owner already has.
+
+Decisions 2026-10-19 (owner): postavi.si's DNS moves from Namecheap to Cloudflare, with every record copied first. In the free beta, sites live at <name>.postavi.si, and owners can connect a domain they already have. Buying domains for customers (Openprovider) waits for paid plans and moves to M7b.
 
 Exit criteria:
 - [ ] Platform domain bought (owner: postavi.si, bought 2026-10-17) and set as `PLATFORM_DOMAIN` on web and worker (TASKS:384, :393–395).
-- [ ] Registrar (Openprovider) and Cloudflare for SaaS adapters wired, and the edge Worker deployed (TASKS:388, :390).
-- [ ] End-to-end on live: buy or connect a test domain → TLS → the site serves. `domains.enabled` true, and `seo.indexSiteHosts` decided (TASKS:398).
-- [ ] Who pays for a domain before billing is answered (TASKS:392). The d.o.o. contact person is set (TASKS:391).
+- [ ] Cloudflare for SaaS adapter wired and the edge Worker deployed (TASKS:388, :390). Openprovider moved to M7b (owner, 2026-10-19).
+- [ ] End-to-end on live: connect a test domain → TLS → the site serves. Connecting is switched on (registering stays off), and `seo.indexSiteHosts` decided (TASKS:398).
+- [x] Who pays for a domain before billing: nobody; no domains are bought before paid plans (owner, 2026-10-19). The d.o.o. contact person (TASKS:391) moves to M7b with registering.
 
 ### M6 · Operations (Claude) — 1 of 6 met
 
@@ -116,6 +118,7 @@ Exit criteria:
 - [ ] Landing page and pricing page match config and the legal pages.
 - [ ] Founding offer (first 100) works end to end.
 - [ ] Go-to-market items needed on day one (TASKS:469+, the owner picks which).
+- [ ] Customers can buy a domain with their plan: Openprovider wired with recorded responses, a prepaid balance, the d.o.o. contact person, one real registration end to end (moved from M5, owner 2026-10-19).
 
 ---
 
