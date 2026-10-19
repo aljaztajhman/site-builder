@@ -115,7 +115,7 @@ export async function picturesForJob(
   now = new Date(),
 ): Promise<{ pictures: { fillTo: number; max: number; note: string | null }; pictureCap?: { since: Date; max: number } }> {
   const tier = ctx.tier ?? "admin";
-  const plan = tier === "paid" && ctx.accountId ? await platform.repo.accounts.planOf(ctx.accountId) : null;
+  const plan = tier === "paid" && ctx.accountId ? await platform.repo.accounts.planOf(ctx.accountId, config.billing.pastDueGraceDays) : null;
   if (!plan || !ctx.accountId) return { pictures: { ...pictureBudget(config, tier === "paid" ? "admin" : tier, scope), note: null } };
   const period = allowancePeriod(new Date(plan.since), now);
   const used = await platform.repo.usage.generatedPictures(ctx.accountId, period.start);
@@ -130,7 +130,7 @@ export async function picturesForJob(
 async function chatEditGuard(platform: Pick<Platform, "repo">, config: AppConfig, ctx: CallContext): Promise<((before: SiteSpec, after: SiteSpec) => string | null) | undefined> {
   const tier = ctx.tier ?? "admin";
   if (tier === "admin") return undefined;
-  const plan = tier === "paid" && ctx.accountId ? ((await platform.repo.accounts.planOf(ctx.accountId))?.plan ?? "standard") : null;
+  const plan = tier === "paid" && ctx.accountId ? ((await platform.repo.accounts.planOf(ctx.accountId, config.billing.pastDueGraceDays))?.plan ?? "standard") : null;
   return (before, after) => limitBreach(config, tier, plan, before, after)?.message ?? null;
 }
 

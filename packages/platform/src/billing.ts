@@ -94,17 +94,24 @@ export function foundingCoupon(config: AppConfig): { id: string; name: string; a
   return { id: `${config.billing.lookupKeyPrefix}_founding_first_year_${config.billing.lookupKeyVersion}`, name: "Ustanovna cena, prvo leto", amountOffCents: cents(renewal - f.firstYearEur) };
 }
 
-/** What a lookup key sells, or null when it isn't one of ours. */
+/**
+ * What a lookup key sells, or null when it isn't one of ours. Any version counts (`…_v1`, `…_v2`): a subscription
+ * keeps the price it was sold at after the prices move on.
+ */
 export function slotOfLookupKey(config: AppConfig, key: string | null | undefined): { plan: PlanKey; interval: BillingInterval; founding: boolean } | "setup" | null {
-  if (!key) return null;
-  for (const d of desiredPrices(config)) {
-    if (d.lookupKey !== key) continue;
-    if (d.slot === "setup") return "setup";
-    if (d.slot === "standard_year_founding") return { plan: "standard", interval: "year", founding: true };
-    const [plan, interval] = d.slot.split("_") as [PlanKey, BillingInterval];
-    return { plan, interval, founding: false };
-  }
-  return null;
+  if (!key || !key.startsWith(`${config.billing.lookupKeyPrefix}_`)) return null;
+  const rest = key.slice(config.billing.lookupKeyPrefix.length + 1);
+  if (/^setup_v\d+$/.test(rest)) return "setup";
+  const m = /^(standard|premium)_(month|year)(_founding)?_v\d+$/.exec(rest);
+  if (!m || (m[3] && (m[1] !== "standard" || m[2] !== "year"))) return null;
+  return { plan: m[1] as PlanKey, interval: m[2] as BillingInterval, founding: !!m[3] };
+}
+
+/** Seller details still holding a `[[…]]` placeholder (the company doesn't exist yet). */
+export function companyPlaceholders(config: AppConfig): string[] {
+  return Object.entries(config.billing.company)
+    .filter(([, v]) => typeof v === "string" && v.includes("[["))
+    .map(([k]) => k);
 }
 
 // ---------- Rights ----------
@@ -115,8 +122,12 @@ export function mapStatus(s: string): SubscriptionStatus {
   return "incomplete";
 }
 
-/** Paid rights hold: active or trialing, or past_due for at most `graceDays` since the failed payment. */
-export function isEntitled(sub: { status: SubscriptionStatus; past_due_since: string | Date | null }, now: Date, graceDays: number): boolean {
+/**
+ * Paid rights hold: active or trialing, or past_due for at most `graceDays` since the failed payment; and never once
+ * the paid period ended more than a day ago (a lost event can't leave rights open forever).
+ */
+export function isEntitled(sub: { status: SubscriptionStatus; past_due_since: string | Date | null; current_period_end?: string | Date | null }, now: Date, graceDays: number): boolean {
+  if (sub.current_period_end && new Date(sub.current_period_end).getTime() < now.getTime() - 86400_000) return false;
   if (sub.status === "active" || sub.status === "trialing") return true;
   if (sub.status !== "past_due") return false;
   const since = sub.past_due_since ? new Date(sub.past_due_since).getTime() : now.getTime();
@@ -321,6 +332,19 @@ export class BillingStore {
     return s && isEntitled(s, now, graceDays) ? { plan: s.plan, since: isoOf(s.created_at)!, founding: s.founding } : null;
   }
 
+  /**
+   * The account had the founding price before (a founding subscription in any state) or paid us anything: the founding
+   * coupon is for a first purchase only. Stripe can't limit a coupon per customer (max_redemptions counts everyone), so
+   * this check is the limit.
+   */
+  async foundingUsedOrPaid(accountId: string): Promise<boolean> {
+    const { rows } = await this.db.query(
+      "select 1 from subscriptions where account_id = $1 and founding union all select 1 from invoices where account_id = $1 limit 1",
+      [accountId],
+    );
+    return rows.length > 0;
+  }
+
   async invoicesOf(accountId: string): Promise<InvoiceListItem[]> {
     const { rows } = await this.db.query<InvoiceRow>("select * from invoices where account_id = $1 order by issued_at desc, seq desc", [accountId]);
     return rows.map((r) => ({ id: r.id, number: r.number, issuedAt: isoOf(r.issued_at)!, totalEur: Number(r.total_eur), url: `/racun/${r.id}` }));
@@ -366,17 +390,21 @@ const SUBSCRIPTION_EVENTS = new Set(["customer.subscription.created", "customer.
 
 /** A subscription as we store it, from Stripe's object. Null when it sells nothing of ours (another product). */
 function subscriptionFields(config: AppConfig, sub: StripeSubscription): { plan: PlanKey; interval: BillingInterval; founding: boolean; start: string | null; end: string } | null {
-  const item = sub.items.data[0];
-  let slot = slotOfLookupKey(config, item?.price.lookup_key);
-  if (slot === "setup") slot = null;
-  const meta = sub.metadata ?? {};
-  const plan = slot?.plan ?? (meta.plan === "standard" || meta.plan === "premium" ? meta.plan : null);
-  const interval = slot?.interval ?? (meta.interval === "month" || meta.interval === "year" ? meta.interval : null);
-  if (!plan || !interval) return null;
-  const endSec = item?.current_period_end ?? sub.current_period_end;
-  const startSec = item?.current_period_start ?? sub.current_period_start;
+  // The plan comes from what the subscription's price sells (its lookup key, any version), never from metadata.
+  const item = sub.items.data.map((i) => ({ i, slot: slotOfLookupKey(config, i.price.lookup_key) })).find((x) => x.slot && x.slot !== "setup");
+  if (!item || !item.slot || item.slot === "setup") return null;
+  const endSec = item.i.current_period_end ?? sub.current_period_end;
+  const startSec = item.i.current_period_start ?? sub.current_period_start;
   if (!endSec) return null;
-  return { plan, interval, founding: slot?.founding ?? meta.founding === "true", start: startSec ? iso(startSec) : null, end: iso(endSec) };
+  return { plan: item.slot.plan, interval: item.slot.interval, founding: item.slot.founding, start: startSec ? iso(startSec) : null, end: iso(endSec) };
+}
+
+/** An event about a Stripe customer no account of ours is known for: thrown so the webhook answers 500 and Stripe retries. */
+export class UnknownCustomerError extends Error {
+  constructor(customerId: string) {
+    super(`Stripe customer ${customerId} belongs to no account`);
+    this.name = "UnknownCustomerError";
+  }
 }
 
 async function accountOfCustomer(q: Query, customerId: string): Promise<string | null> {
@@ -384,14 +412,14 @@ async function accountOfCustomer(q: Query, customerId: string): Promise<string |
   return rows[0]?.account_id ?? null;
 }
 
-async function upsertSubscription(q: Query, config: AppConfig, sub: StripeSubscription, at: Date): Promise<boolean> {
+/** `now`: when we handle it; a newly past_due subscription's grace counts from the first failure we see. */
+async function upsertSubscription(q: Query, config: AppConfig, sub: StripeSubscription, now: Date): Promise<boolean> {
   const f = subscriptionFields(config, sub);
   if (!f) return false;
-  const accountId = (await accountOfCustomer(q, sub.customer)) ?? sub.metadata?.account_id ?? null;
-  if (!accountId) return false;
-  const { rows: known } = await q("select 1 from accounts where id = $1", [accountId]);
-  if (!known.length) return false;
+  const accountId = await accountOfCustomer(q, sub.customer);
+  if (!accountId) throw new UnknownCustomerError(sub.customer);
   const status = mapStatus(sub.status);
+  const at = now;
   await q(
     `insert into subscriptions (id, account_id, stripe_customer_id, plan, billing_interval, status, current_period_start, current_period_end,
         cancel_at_period_end, founding, past_due_since, updated_at)
@@ -413,14 +441,17 @@ const newInvoiceId = (): string => `inv_${randomBytes(8).toString("hex")}`;
  * Numbers and stores Postavi's invoice for a paid Stripe invoice, in the caller's transaction: the year's counter row
  * is taken (and locked) by the upsert, so concurrent invoices queue up and a rollback gives the number back.
  */
-async function issueInvoice(q: Query, deps: BillingDeps, inv: StripeInvoice, priceKeys: Map<string, string | null>, at: Date): Promise<string | null> {
+async function issueInvoice(q: Query, deps: BillingDeps, inv: StripeInvoice, priceKeys: Map<string, string | null>): Promise<string | null> {
   if (inv.amount_paid <= 0) return null;
   const { rows: exists } = await q("select 1 from invoices where stripe_invoice_id = $1", [inv.id]);
   if (exists.length) return null;
   const accountId = await accountOfCustomer(q, inv.customer);
+  if (!accountId) throw new UnknownCustomerError(inv.customer);
   const subId = subscriptionIdOf(inv);
   const { rows: subRows } = subId ? await q<{ founding: boolean }>("select founding from subscriptions where id = $1", [subId]) : { rows: [] };
+  // Issued on the day it was paid (Stripe's paid_at), and numbered in that day's year in Ljubljana, however late we handle it.
   const paidAt = new Date((inv.status_transitions?.paid_at ?? inv.created) * 1000);
+  const at = paidAt;
   const year = invoiceYear(paidAt);
   const { rows: counter } = await q<{ last: number }>(
     "insert into invoice_counters (year, last) values ($1, 1) on conflict (year) do update set last = invoice_counters.last + 1 returning last",
@@ -440,9 +471,11 @@ async function issueInvoice(q: Query, deps: BillingDeps, inv: StripeInvoice, pri
 }
 
 /**
- * Handles one verified webhook event. Stripe is asked for the subscription's current state (so events arriving out
- * of order can't roll it back); then, in one transaction, the event id is recorded (a replay returns "duplicate") and
- * the subscription and any invoice are written. A throw leaves nothing behind and Stripe delivers again.
+ * Handles one verified webhook event in one transaction: the event id is recorded (a replay returns "duplicate"); the
+ * Stripe subscription's lock is taken (a transaction-scoped advisory lock on its id), and only then is Stripe asked
+ * for its current state, so two events about one subscription run one after the other and the later one writes the
+ * later state (an "active" snapshot fetched before a deletion can't land after it). Then the subscription and any
+ * invoice are written. A throw (Stripe down, a customer we don't know) leaves nothing behind and Stripe delivers again.
  */
 export async function handleStripeEvent(deps: BillingDeps, event: StripeEvent, now = new Date()): Promise<EventResult> {
   const { db, config, stripe } = deps;
@@ -457,25 +490,28 @@ export async function handleStripeEvent(deps: BillingDeps, event: StripeEvent, n
     subId = subscriptionIdOf(invoice);
   }
   const known = subId !== null || invoice !== null;
-  const sub = subId ? await stripe.getSubscription(subId) : null;
-  const priceKeys = new Map<string, string | null>();
-  if (event.type === "invoice.paid" && invoice) {
-    for (const p of await stripe.pricesByLookupKeys(desiredPrices(config).map((d) => d.lookupKey))) priceKeys.set(p.id, p.lookup_key);
-    // Prices replaced by a later sync still name their slot through the subscription's own item.
-    for (const it of sub?.items.data ?? []) if (!priceKeys.has(it.price.id)) priceKeys.set(it.price.id, it.price.lookup_key);
-  }
-  const at = new Date(event.created * 1000);
   return db.transaction(async (q) => {
     const { rows } = await q("insert into stripe_events (id, type) values ($1, $2) on conflict (id) do nothing returning id", [event.id, event.type]);
     if (!rows.length) return "duplicate";
     if (!known) return "ignored";
+    if (subId) await q("select pg_advisory_xact_lock($1, hashtext($2))", [SUBSCRIPTION_LOCK, subId]);
+    const sub = subId ? await stripe.getSubscription(subId) : null;
     // A checkout's customer may be new to us when the session was made elsewhere (the dashboard): remember it.
     if (event.type === "checkout.session.completed" && typeof obj.customer === "string" && typeof obj.client_reference_id === "string") {
       const { rows: acc } = await q("select 1 from accounts where id = $1", [obj.client_reference_id]);
       if (acc.length) await q("insert into billing_customers (account_id, stripe_customer_id) values ($1, $2) on conflict do nothing", [obj.client_reference_id, obj.customer]);
     }
-    if (sub) await upsertSubscription(q, config, sub, at);
-    if (event.type === "invoice.paid" && invoice) await issueInvoice(q, deps, invoice, priceKeys, now);
+    if (sub) await upsertSubscription(q, config, sub, now);
+    if (event.type === "invoice.paid" && invoice) {
+      const priceKeys = new Map<string, string | null>();
+      for (const p of await stripe.pricesByLookupKeys(desiredPrices(config).map((d) => d.lookupKey))) priceKeys.set(p.id, p.lookup_key);
+      // Prices replaced by a later sync still name their slot through the subscription's own item.
+      for (const it of sub?.items.data ?? []) if (!priceKeys.has(it.price.id)) priceKeys.set(it.price.id, it.price.lookup_key);
+      await issueInvoice(q, deps, invoice, priceKeys);
+    }
     return "handled";
   });
 }
+
+/** The advisory lock class for one Stripe subscription's events (the other key is its id's hash). */
+const SUBSCRIPTION_LOCK = 727_274_025;

@@ -248,7 +248,7 @@ export async function sendMonthlyReports(deps: ReportDeps, now = new Date(), lim
           before: hadEarlier ? earlier : null,
           siteUrl: origin ? `${origin}/s/${site.slug}/` : null,
           dashboardUrl: origin ? `${origin}/sites/${site.id}` : null,
-          plusNote: plusNote(config, site.account_id ? ((await repo.accounts.planOf(site.account_id))?.plan ?? null) : null, spec),
+          plusNote: plusNote(config, site.account_id ? ((await repo.accounts.planOf(site.account_id, config.billing.pastDueGraceDays))?.plan ?? null) : null, spec),
         }),
       );
       await repo.stats.setReport(site.id, p.month, "sent");

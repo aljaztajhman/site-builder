@@ -12,6 +12,7 @@ import {
   handleStripeEvent,
   invoiceNumber,
   invoiceYear,
+  UnknownCustomerError,
   isEntitled,
   lookupKey,
   mapStatus,
@@ -47,7 +48,10 @@ describe("prices from config", () => {
     expect(renewal - foundingCoupon(config)!.amountOffCents).toBe(f.firstYearEur * 100);
   });
 
-  it("maps a lookup key back to what it sells", () => {
+  it("maps a lookup key of any version back to what it sells", () => {
+    expect(slotOfLookupKey(config, "postavi_premium_month_v2")).toEqual({ plan: "premium", interval: "month", founding: false });
+    expect(slotOfLookupKey(config, "postavi_setup_v3")).toBe("setup");
+    expect(slotOfLookupKey(config, "postavi_premium_year_founding_v1")).toBeNull();
     expect(slotOfLookupKey(config, lookupKey(config, "premium_month"))).toEqual({ plan: "premium", interval: "month", founding: false });
     expect(slotOfLookupKey(config, lookupKey(config, "standard_year_founding"))).toEqual({ plan: "standard", interval: "year", founding: true });
     expect(slotOfLookupKey(config, lookupKey(config, "setup"))).toBe("setup");
@@ -104,6 +108,9 @@ describe("rights and numbers", () => {
     expect(isEntitled({ status: "canceled", past_due_since: null }, now, 7)).toBe(false);
     expect(isEntitled({ status: "incomplete", past_due_since: null }, now, 7)).toBe(false);
     expect(mapStatus("unpaid")).toBe("canceled");
+    // A period that ended more than a day ago gives nothing, whatever the status says (a lost deletion event).
+    expect(isEntitled({ status: "active", past_due_since: null, current_period_end: "2026-10-18T11:00:00Z" }, now, 7)).toBe(false);
+    expect(isEntitled({ status: "active", past_due_since: null, current_period_end: "2026-10-18T13:00:00Z" }, now, 7)).toBe(true);
     expect(mapStatus("paused")).toBe("incomplete");
   });
 
@@ -197,7 +204,7 @@ describe("webhook events in the database", () => {
     const store = new BillingStore(db);
     const sub = (await store.subscriptionOf(accountId))!;
     expect(sub).toMatchObject({ plan: "standard", billing_interval: "year", status: "active", founding: true });
-    expect(await repo.accounts.planOf(accountId)).toMatchObject({ plan: "standard" });
+    expect(await repo.accounts.planOf(accountId, 7)).toMatchObject({ plan: "standard" });
     expect(await repo.accounts.foundingTaken()).toBe(1);
 
     const paid = event("evt_2", "invoice.paid", invoiceFor("cus_eva", "sub_eva", { lines: { data: [{ description: "x", amount: 15200, quantity: 1, price: { id: foundingPrice.id }, period: { start: sec("2026-10-19T10:00:00Z"), end: sec("2027-10-19T10:00:00Z") } }] } }) as unknown as Record<string, unknown>);
@@ -227,7 +234,7 @@ describe("webhook events in the database", () => {
   it("marks a failed renewal past_due from Stripe's state, and a deletion canceled", async () => {
     const store = new BillingStore(db);
     stripe.subscriptions.get("sub_eva")!.status = "past_due";
-    await handleStripeEvent(deps(), event("evt_f", "invoice.payment_failed", invoiceFor("cus_eva", "sub_eva", { id: "in_failed", amount_paid: 0 }) as unknown as Record<string, unknown>, sec("2026-10-20T10:00:00Z")));
+    await handleStripeEvent(deps(), event("evt_f", "invoice.payment_failed", invoiceFor("cus_eva", "sub_eva", { id: "in_failed", amount_paid: 0 }) as unknown as Record<string, unknown>, sec("2026-10-19T00:00:00Z")), new Date("2026-10-20T10:00:00Z"));
     const s = (await store.subscriptionOf(accountId))!;
     expect(s.status).toBe("past_due");
     expect(new Date(s.past_due_since!).toISOString()).toBe("2026-10-20T10:00:00.000Z");
@@ -236,8 +243,72 @@ describe("webhook events in the database", () => {
     stripe.subscriptions.get("sub_eva")!.status = "canceled";
     await handleStripeEvent(deps(), event("evt_d", "customer.subscription.deleted", { id: "sub_eva", customer: "cus_eva" }));
     expect((await store.subscriptionOf(accountId))!.status).toBe("canceled");
-    expect(await repo.accounts.planOf(accountId)).toBeNull();
+    expect(await repo.accounts.planOf(accountId, 7)).toBeNull();
     expect(await repo.accounts.foundingTaken()).toBe(0);
+  });
+
+  it("takes the plan from the price's lookup key, not the checkout's metadata", async () => {
+    const store = new BillingStore(db);
+    const ana = (await repo.accounts.signIn("ana@example.si", "ana@example.si")).id;
+    await store.saveCustomer(ana, "cus_ana");
+    const plus = (await stripe.pricesByLookupKeys([lookupKey(config, "premium_month")]))[0]!;
+    stripe.subscriptions.set("sub_ana", { id: "sub_ana", customer: "cus_ana", status: "active", cancel_at_period_end: false, metadata: { plan: "standard", interval: "year", founding: "true" }, items: { data: [{ price: plus, current_period_start: sec("2026-10-19T10:00:00Z"), current_period_end: sec("2026-11-19T10:00:00Z") }] } });
+    await handleStripeEvent(deps(), event("evt_ana", "customer.subscription.created", { id: "sub_ana" }));
+    expect(await store.subscriptionOf(ana)).toMatchObject({ plan: "premium", billing_interval: "month", founding: false });
+  });
+
+  it("writes the later state when two events about one subscription overlap (a slow 'active' fetch and a deletion)", async () => {
+    const store = new BillingStore(db);
+    const tom = (await repo.accounts.signIn("tom@example.si", "tom@example.si")).id;
+    await store.saveCustomer(tom, "cus_tom");
+    const price = (await stripe.pricesByLookupKeys([lookupKey(config, "standard_month")]))[0]!;
+    stripe.subscriptions.set("sub_tom", { id: "sub_tom", customer: "cus_tom", status: "active", cancel_at_period_end: false, metadata: {}, items: { data: [{ price, current_period_start: sec("2026-10-19T10:00:00Z"), current_period_end: sec("2026-11-19T10:00:00Z") }] } });
+    // Event A's fetch sees "active" and answers slowly; meanwhile the owner cancels and event B (deleted) arrives.
+    let fetched!: () => void;
+    const aFetched = new Promise<void>((res) => (fetched = res));
+    const slow = { ...stripe, getSubscription: async (id: string) => {
+      const snap = await stripe.getSubscription(id);
+      fetched();
+      await new Promise((res) => setTimeout(res, 150));
+      return snap;
+    } };
+    const a = handleStripeEvent({ db, config, stripe: slow }, event("evt_tom_a", "customer.subscription.updated", { id: "sub_tom" }));
+    await aFetched;
+    stripe.subscriptions.get("sub_tom")!.status = "canceled";
+    const b = handleStripeEvent(deps(), event("evt_tom_b", "customer.subscription.deleted", { id: "sub_tom" }));
+    await Promise.all([a, b]);
+    expect((await store.subscriptionOf(tom))!.status).toBe("canceled");
+  });
+
+  it("dates and numbers an invoice by its payment: paid 31.12. 23:59:50 in Ljubljana, handled on 1.1., is last year's", async () => {
+    const store = new BillingStore(db);
+    const paid = sec("2026-12-31T22:59:50Z");
+    const late = invoiceFor("cus_eva", "sub_eva", { id: "in_newyear", created: paid, status_transitions: { paid_at: paid } });
+    await handleStripeEvent(deps(), event("evt_newyear", "invoice.paid", late as unknown as Record<string, unknown>, sec("2027-01-01T07:00:00Z")), new Date("2027-01-01T07:00:00Z"));
+    const { rows } = await db.query<{ id: string; number: string; issued_at: string }>("select id, number, issued_at from invoices where stripe_invoice_id = 'in_newyear'");
+    expect(rows[0]!.number).toMatch(/^2026-\d{5}$/);
+    expect(new Date(rows[0]!.issued_at).toISOString()).toBe("2026-12-31T22:59:50.000Z");
+    expect((await store.invoice(rows[0]!.id))!.view.issuedAt).toBe("2026-12-31T22:59:50.000Z");
+  });
+
+  it("fails (so Stripe retries) an event about a customer no account is known for, and keeps nothing", async () => {
+    const price = (await stripe.pricesByLookupKeys([lookupKey(config, "standard_month")]))[0]!;
+    stripe.subscriptions.set("sub_ghost", { id: "sub_ghost", customer: "cus_ghost", status: "active", cancel_at_period_end: false, metadata: {}, items: { data: [{ price, current_period_end: sec("2026-11-19T10:00:00Z") }] } });
+    await expect(handleStripeEvent(deps(), event("evt_ghost", "customer.subscription.created", { id: "sub_ghost" }))).rejects.toBeInstanceOf(UnknownCustomerError);
+    await expect(handleStripeEvent(deps(), event("evt_ghost_inv", "invoice.paid", invoiceFor("cus_ghost", "sub_none", { id: "in_ghost", parent: null }) as unknown as Record<string, unknown>))).rejects.toBeInstanceOf(UnknownCustomerError);
+    expect(await new BillingStore(db).eventSeen("evt_ghost")).toBe(false);
+  });
+
+  it("ranks a past_due subscription beyond its grace days below the allow-list plan", async () => {
+    const zala = (await repo.accounts.signIn("zala@example.si", "zala@example.si")).id;
+    await repo.accounts.allow("zala@example.si", "zala@example.si", null, "premium");
+    await db.query(
+      `insert into subscriptions (id, account_id, stripe_customer_id, plan, billing_interval, status, current_period_end, past_due_since)
+       values ('sub_zala', $1, 'cus_zala', 'standard', 'month', 'past_due', now() + interval '20 days', now() - interval '10 days')`,
+      [zala],
+    );
+    expect((await repo.accounts.planOf(zala, 7))!.plan).toBe("premium");
+    expect((await repo.accounts.planOf(zala, 30))!.plan).toBe("standard");
   });
 
   it("records events it doesn't act on, once", async () => {

@@ -641,6 +641,9 @@ export const AppConfigSchema = z.object({
 }).refine((c) => c.domains.tlds.every((t) => t.maxCostEur <= c.plans.costs.domainEurPerYear), {
   // The yearly plans include the domain: the margin check counts plans.costs.domainEurPerYear for it.
   message: "a domain's maxCostEur may not exceed plans.costs.domainEurPerYear (the margin check counts that)",
+}).refine((c) => !c.plans.billingEnabled || !Object.values(c.billing.company).some((v) => typeof v === "string" && v.includes("[[")), {
+  // Invoices print the seller: no billing while the company's details are placeholders (docs/billing-switch-on.md).
+  message: "plans.billingEnabled needs the real company details: billing.company still has a [[…]] placeholder",
 });
 export type AppConfig = z.infer<typeof AppConfigSchema>;
 export type ModelStageName = keyof AppConfig["models"];

@@ -130,18 +130,21 @@ export class Accounts {
   }
 
   /**
-   * An account's plan and since when it has paid rights, or null for a free account: an open subscription
-   * (billing.ts; whether a past_due one is still within its grace days is the web's call) before its allow-list entry.
+   * An account's plan and since when it has paid rights, or null for a free account. First a subscription that holds
+   * rights (active, trialing, or past_due within `graceDays`: config billing.pastDueGraceDays), then the allow-list
+   * entry, then a past_due subscription beyond its grace days.
    */
-  async planOf(accountId: string): Promise<{ plan: PaidPlanKey; since: string } | null> {
+  async planOf(accountId: string, graceDays: number): Promise<{ plan: PaidPlanKey; since: string } | null> {
     const { rows } = await this.db.query<{ plan: PaidPlanKey; added_at: string }>(
       `select plan, added_at from (
-         select s.plan, s.created_at as added_at, 0 as rank from subscriptions s
+         select s.plan, s.created_at as added_at,
+                case when s.status = 'past_due' and coalesce(s.past_due_since, now()) < now() - make_interval(days => $2::int) then 2 else 0 end as rank
+           from subscriptions s
           where s.account_id = $1 and s.status in ('active', 'trialing', 'past_due')
          union all
          select l.plan, l.added_at, 1 as rank from accounts a join allow_list l on l.email_key = a.email_key where a.id = $1
        ) t order by rank, added_at desc limit 1`,
-      [accountId],
+      [accountId, graceDays],
     );
     return rows[0] ? { plan: rows[0].plan, since: rows[0].added_at } : null;
   }

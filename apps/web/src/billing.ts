@@ -3,6 +3,7 @@ import { bodyLimit } from "hono/body-limit";
 import type { AppConfig } from "@sb/config";
 import {
   BillingStore,
+  companyPlaceholders,
   renderInvoiceHtml,
   OPEN_STATUSES,
   billingEnabled,
@@ -99,7 +100,8 @@ export function registerBillingRoutes(app: Hono<AppEnv>, deps: BillingRouteDeps)
     const sub = v.kind === "account" ? await store.subscriptionOf(v.account.id) : null;
     const now = new Date();
     const allowed = v.kind === "account" ? await repo.accounts.allowed(v.account.email_key) : null;
-    const left = enabled ? await foundingLeft() : null;
+    // The founding offer is for a first purchase: not shown to an account that had it or paid before.
+    const left = enabled && !(v.kind === "account" && (await store.foundingUsedOrPaid(v.account.id))) ? await foundingLeft() : null;
     const f = config.plans.standard.foundingOffer;
     return {
       enabled,
@@ -146,10 +148,18 @@ export function registerBillingRoutes(app: Hono<AppEnv>, deps: BillingRouteDeps)
     if (sub && OPEN_STATUSES.includes(sub.status)) return refuse(c, 409, "already_subscribed");
     const stripe = deps.stripe;
     if (!stripe) return refuse(c, 503, "provider_error");
+    // Real money while the seller on the invoice is still a placeholder (BILLING_ENABLED with a live key): refused.
+    const placeholders = companyPlaceholders(config);
+    if (stripe.mode === "live" && placeholders.length) {
+      console.error(`[billing] checkout refused: live Stripe key while billing.company still has placeholders (${placeholders.join(", ")})`);
+      return refuse(c, 503, "provider_error");
+    }
 
-    // Founding: Osnovni yearly while places are left; the renewal price, and a one-time coupon for year one.
+    // Founding: Osnovni yearly while places are left, for a first purchase only (no earlier founding subscription,
+    // nothing paid before); the renewal price, and a one-time coupon for year one.
     const coupon = foundingCoupon(config);
-    const founding = plan === "standard" && interval === "year" && coupon !== null && ((await foundingLeft()) ?? 0) > 0;
+    const founding =
+      plan === "standard" && interval === "year" && coupon !== null && ((await foundingLeft()) ?? 0) > 0 && !(await store.foundingUsedOrPaid(v.account.id));
     const slots: PriceSlot[] = [founding ? "standard_year_founding" : `${plan}_${interval}`];
     const setupIncluded = interval === "year" && config.plans[plan].setupService.includedYearly;
     if (body.setup === true && !setupIncluded) slots.push("setup");
@@ -176,6 +186,8 @@ export function registerBillingRoutes(app: Hono<AppEnv>, deps: BillingRouteDeps)
         clientReferenceId: v.account.id,
         metadata: { account_id: v.account.id, plan, interval, founding: String(founding) },
         ...(founding ? { couponId: coupon!.id } : {}),
+        // A double click (or a retry) within the same 10 minutes gets the same Checkout page, not a second one.
+        idempotencyKey: `checkout-${v.account.id}-${slots.join("+")}-${Math.floor(Date.now() / 600_000)}`,
       });
       return c.json({ url: session.url });
     } catch (e) {

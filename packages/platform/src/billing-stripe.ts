@@ -87,6 +87,8 @@ export interface CheckoutParams {
 }
 
 export interface StripeApi {
+  /** "live" for an sk_live_ key: real money (checkout is refused while the invoice seller is a placeholder). */
+  mode: "live" | "test";
   createCustomer(p: { email: string; accountId: string }): Promise<{ id: string }>;
   pricesByLookupKeys(keys: string[]): Promise<StripePrice[]>;
   createCheckoutSession(p: CheckoutParams): Promise<{ id: string; url: string }>;
@@ -153,6 +155,7 @@ export function stripeRest(opts: { secretKey: string; fetch?: typeof fetch; time
     }
   };
   return {
+    mode: opts.secretKey.startsWith("sk_live_") ? "live" : "test",
     createCustomer: (p) => call("POST", "/customers", { email: p.email, metadata: { account_id: p.accountId } }, `customer-${p.accountId}`),
     async pricesByLookupKeys(keys) {
       if (!keys.length) return [];
@@ -231,6 +234,7 @@ export function memoryStripe(): StripeApi & {
   };
   return {
     ...s,
+    mode: "test" as "live" | "test",
     async createCustomer(p) {
       s.calls.push("createCustomer");
       const c = { id: id("cus"), email: p.email, accountId: p.accountId };

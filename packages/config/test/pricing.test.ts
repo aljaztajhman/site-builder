@@ -12,6 +12,16 @@ const withPlan = (key: "standard" | "premium", patch: Record<string, unknown>) =
 };
 const parses = (c: unknown) => AppConfigSchema.safeParse(c).success;
 
+describe("billing switch", () => {
+  it("refuses billingEnabled while billing.company still has a [[…]] placeholder", () => {
+    const on = raw() as Raw & { billing: { company: Record<string, unknown> } };
+    on.plans.billingEnabled = true;
+    expect(parses(on)).toBe(false);
+    on.billing.company = { name: "Postavi d.o.o.", address: "Trubarjeva 1, 1000 Ljubljana", taxId: "SI12345678", registrationNo: "1234567000", iban: null, email: "racuni@postavi.si" };
+    expect(parses(on)).toBe(true);
+  });
+});
+
 describe("plans (sb-pricing, sb-tiers)", () => {
   it("keeps billing off: nothing is charged before the legal entity exists (sb-legal-entity)", () => {
     expect(loadConfig().plans.billingEnabled).toBe(false);

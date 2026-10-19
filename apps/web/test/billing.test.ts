@@ -116,6 +116,7 @@ describe("billing flow with a fake Stripe", () => {
     const byId = new Map(stripe.prices.map((p) => [p.id, p]));
     expect(session.lineItems.map((l) => byId.get(l.price)!.lookup_key)).toEqual([lookupKey(config, "standard_year_founding"), lookupKey(config, "setup")]);
     expect(session.couponId).toBe("postavi_founding_first_year_v1");
+    expect(session.idempotencyKey).toMatch(/^checkout-.+-standard_year_founding\+setup-\d+$/);
     expect(session).toMatchObject({ successUrl: "https://postavi.example/narocnina?uspeh=1", cancelUrl: "https://postavi.example/narocnina?preklic=1", metadata: { plan: "standard", interval: "year", founding: "true" } });
     price = byId.get(session.lineItems[0]!.price)!;
     // Stripe makes the subscription when the card is paid.
@@ -166,7 +167,9 @@ describe("billing flow with a fake Stripe", () => {
     const s = await summary(eva);
     expect(s.subscription).toMatchObject({ plan: "standard", interval: "year", status: "active", founding: true, entitled: true, cancelAtPeriodEnd: false, currentPeriodEnd: periodEnd.toISOString() });
     expect(s.invoices.map((i) => [i.number, i.totalEur])).toEqual([["2026-00001", 248]]);
-    expect(s.founding?.left).toBe(99);
+    // Her place is taken (99 left for others); the offer isn't shown to her again.
+    expect(await platform.repo.accounts.foundingTaken()).toBe(1);
+    expect(s.founding).toBeNull();
     const plan = await req("/narocnina?uspeh=1", { headers: { cookie: eva.cookie } });
     expect(plan.status).toBe(200);
     expect(await plan.text()).toContain("2026-00001");
@@ -213,6 +216,34 @@ describe("billing flow with a fake Stripe", () => {
     const refused = await publish(eva);
     expect(refused.status).toBe(403);
     expect(await refused.json()).toMatchObject({ checkout: "/api/billing/checkout" });
+  });
+
+  it("offers the founding price only once: after a canceled founding plan, checkout has no coupon and the full price", async () => {
+    expect((await summary(eva)).founding).toBeNull();
+    const res = await req("/api/billing/checkout", json(eva, { plan: "standard", interval: "year" }));
+    expect(res.status).toBe(200);
+    const session = stripe.sessions.at(-1)!;
+    expect(session.couponId).toBeUndefined();
+    expect(session.metadata.founding).toBe("false");
+    expect(session.lineItems.map((l) => stripe.prices.find((p) => p.id === l.price)!.lookup_key)).toEqual([lookupKey(config, "standard_year")]);
+  });
+});
+
+describe("a live Stripe key while the seller is a placeholder", () => {
+  it("refuses checkout with provider_error (BILLING_ENABLED on, sk_live_ key, [[…]] in billing.company)", async () => {
+    const db = await createDb("pglite://memory");
+    await migrate(db);
+    const live = memoryStripe();
+    live.mode = "live";
+    await syncStripePrices(live, config);
+    const app = createApp({ platform: { db, repo: new Repo(db), storage: createFsStorage(dir), queue, close: () => db.close() }, config, auth: { password: PASSWORD, secret: "s".repeat(32), secureCookies: false }, mailer: mail, stripe: live, stripeWebhookSecret: WHSEC, billingEnv: { BILLING_ENABLED: "true" } });
+    const r: Req = (p, init) => app.request(p, init);
+    const b = await ownerSignIn(r, mail.sent, "live@example.si");
+    const res = await r("/api/billing/checkout", json(b, { plan: "standard", interval: "month" }));
+    expect(res.status).toBe(503);
+    expect(((await res.json()) as { code: string }).code).toBe("provider_error");
+    expect(live.sessions).toHaveLength(0);
+    await db.close();
   });
 });
 
