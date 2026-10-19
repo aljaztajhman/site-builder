@@ -1,4 +1,5 @@
 import type { AppConfig } from "@sb/config";
+import { billingEnabled } from "@sb/platform";
 import { html } from "./pages.tsx";
 import { uiUrl } from "./ui/assets.ts";
 import { PRODUCT_NAME } from "./ui/labels.ts";
@@ -375,7 +376,7 @@ export const faq = (config: AppConfig): [string, string][] => [
   ],
   [
     "Kako plačam in kako prekličem?",
-    config.plans.billingEnabled
+    billingEnabled(config)
       ? "S kartico, mesečno ali letno. Plačilo obdela Stripe, stran pa objavite takoj po plačilu. Naročnino prekličete kadarkoli na strani Naročnina in velja do konca plačanega obdobja. Račun dobite po e-pošti."
       : "Ko bo plačevanje na voljo, boste plačali s kartico, mesečno ali letno, in stran objavili takoj po plačilu. Naročnino boste lahko kadarkoli preklicali; veljala bo do konca plačanega obdobja.",
   ],

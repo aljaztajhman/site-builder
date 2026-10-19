@@ -3,6 +3,7 @@ import { bodyLimit } from "hono/body-limit";
 import type { AppConfig } from "@sb/config";
 import {
   BillingStore,
+  renderInvoiceHtml,
   OPEN_STATUSES,
   billingEnabled,
   foundingCoupon,
@@ -23,7 +24,6 @@ import {
   type StripeEvent,
 } from "@sb/platform";
 import { STRIPE_WEBHOOK_PATH, type AppEnv, type Viewer } from "./access.ts";
-import { renderInvoiceHtml } from "./invoice-view.tsx";
 import { narocninaNotice, renderNarocnina } from "./narocnina.tsx";
 
 /**
@@ -36,7 +36,7 @@ import { narocninaNotice, renderNarocnina } from "./narocnina.tsx";
  * - POST /api/billing/portal    → { url } of the Stripe Customer Portal
  * - POST /api/billing/stripe    Stripe's webhook: raw body, Stripe-Signature checked; 200 handled or replayed, 400 bad signature/body
  * - GET  /narocnina             the owner's plan page (narocnina.tsx) from the same summary
- * - GET  /racun/:id, /racun/:id.pdf   an invoice (its owner and the admin; invoice-view.tsx)
+ * - GET  /racun/:id, /racun/:id.pdf   an invoice (its owner and the admin; platform billing-invoice-html.ts)
  */
 
 export interface BillingRouteDeps {

@@ -1,9 +1,9 @@
 // @module-tag slow
 import { describe, expect, it } from "vitest";
 import { loadConfig } from "@sb/config";
-import { buildInvoiceView } from "@sb/platform";
+import { buildInvoiceView, renderInvoiceHtml } from "@sb/platform";
 import { pdfRenderer } from "../src/invoices.ts";
-import { renderInvoiceHtml } from "../src/invoice-html-fallback.ts";
+
 
 /** The invoice PDF comes out of Chromium as one A4 page (595 × 842 pt). */
 describe("invoice PDF", () => {
@@ -30,7 +30,11 @@ describe("invoice PDF", () => {
     });
     const pdf = await pdfRenderer();
     try {
-      const bytes = await pdf.render(renderInvoiceHtml(view));
+      // The designed invoice (platform billing-invoice-html.ts), without the on-screen "Prenesi PDF" bar.
+      const html = renderInvoiceHtml(view, { pdfLink: false });
+      expect(html).toContain('<main class="sheet">');
+      expect(html).not.toContain("Prenesi PDF");
+      const bytes = await pdf.render(html);
       const text = Buffer.from(bytes).toString("latin1");
       expect(text.startsWith("%PDF-")).toBe(true);
       // A4 in points (Chromium writes 594.95996 × 841.91998), one page.

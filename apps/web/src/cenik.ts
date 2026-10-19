@@ -1,6 +1,6 @@
 import type { Hono } from "hono";
 import type { AppConfig } from "@sb/config";
-import type { Repo } from "@sb/platform";
+import { billingEnabled, type Repo } from "@sb/platform";
 import type { AppEnv } from "./access.ts";
 import { chatEdits, count, moreHomepages } from "./limits.ts";
 import { faq } from "./home.tsx";
@@ -49,7 +49,7 @@ export function pricing(config: AppConfig, foundingLeft: number | null): Pricing
   }
   extras.push({ label: "Postavitev skupaj z vami, po želji", value: `${wholeEur.format(std.setupService.eur)} enkratno` });
   return {
-    billingEnabled: plans.billingEnabled,
+    billingEnabled: billingEnabled(config),
     plans: [
       {
         key: "preview",
@@ -104,8 +104,8 @@ export function pricing(config: AppConfig, foundingLeft: number | null): Pricing
         featured: false,
       },
     ],
-    // No billing until the legal entity exists (config plans.billingEnabled).
-    note: plans.billingEnabled
+    // No billing until the legal entity exists (config plans.billingEnabled; env BILLING_ENABLED=true on staging).
+    note: billingEnabled(config)
       ? "Cene so z DDV. Plačate s kartico, mesečno ali letno, in stran objavite takoj po plačilu. Naročnino lahko kadarkoli prekličete, velja do konca plačanega obdobja."
       : "Načrtovane cene z DDV. Zaenkrat ničesar ne zaračunamo. Plačevali boste s kartico, mesečno ali letno; naročnino boste lahko kadarkoli preklicali do konca plačanega obdobja.",
     faq: faq(config).map(([q, a]) => ({ q, a })),

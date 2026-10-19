@@ -34,13 +34,10 @@ import {
   type SpendLedger,
   type UrlCheckResult,
 } from "@sb/engine";
-import { INTERRUPTED_MESSAGE, OpsState, SPEND_CAP_REFUSAL, WORKER_HEARTBEAT, domainProvidersFor, mailerFromEnv, type DomainProviders, type Mailer, type Platform, type Tier } from "@sb/platform";
+import { INTERRUPTED_MESSAGE, OpsState, SPEND_CAP_REFUSAL, WORKER_HEARTBEAT, domainProvidersFor, mailerFromEnv, renderInvoiceHtml, type DomainProviders, type Mailer, type Platform, type Tier } from "@sb/platform";
 import type { SiteSpec } from "@sb/spec";
 import { cleanupExpired, spendMonitor } from "./housekeeping.ts";
 import { sendInvoiceDocuments, type InvoiceDocumentDeps } from "./invoices.ts";
-// The invoice page as the PDF prints it. PLACEHOLDER: the designed view is apps/web/src/invoice-view.tsx (Unit B); the worker
-// can't import from @sb/web (web depends on the worker), so the director moves that renderer to a shared package or wires it.
-import { renderInvoiceHtml } from "./invoice-html-fallback.ts";
 import { recordGeneration, type GenerationOutcome } from "./telemetry.ts";
 
 /** Replies to the owner when a chat edit fails outright (the details go to the event log). */
@@ -486,7 +483,8 @@ export async function startWorker(platform: Platform, config = loadConfig(), job
     db: platform.db,
     storage,
     mailer: opts.mailer ?? mailerFromEnv(),
-    renderHtml: renderInvoiceHtml,
+    // The printed invoice: the same page as /racun/:id without its "Prenesi PDF" bar.
+    renderHtml: (view) => renderInvoiceHtml(view, { pdfLink: false }),
     appUrl: process.env.APP_URL || null,
     ...(opts.openPdf ? { openPdf: opts.openPdf } : {}),
   };

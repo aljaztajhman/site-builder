@@ -26,3 +26,4 @@ export * from "./billing-types.ts";
 export * from "./billing-stripe.ts";
 export * from "./billing.ts";
 export * from "./billing-sync.ts";
+export * from "./billing-invoice-html.ts";

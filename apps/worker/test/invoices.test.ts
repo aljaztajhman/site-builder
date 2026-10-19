@@ -3,9 +3,9 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { loadConfig } from "@sb/config";
-import { BillingStore, MailUnavailableError, Repo, createDb, createFsStorage, handleStripeEvent, memoryMailer, memoryStripe, migrate, syncStripePrices, type Db, type Mailer, type Storage } from "@sb/platform";
+import { BillingStore, MailUnavailableError, renderInvoiceHtml, Repo, createDb, createFsStorage, handleStripeEvent, memoryMailer, memoryStripe, migrate, syncStripePrices, type Db, type Mailer, type Storage } from "@sb/platform";
 import { invoiceEmail, invoicePdfKey, sendInvoiceDocuments } from "../src/invoices.ts";
-import { renderInvoiceHtml } from "../src/invoice-html-fallback.ts";
+
 
 /** The worker's invoice job: a PDF per paid invoice, kept in the bucket, emailed once as "Račun <number>". */
 const config = loadConfig();

@@ -15,6 +15,9 @@ numbered invoices. Plan: `.claude/plans/m4-payments.md`. Contract types: `packag
   `POST /api/billing/stripe` (webhook), `GET /narocnina`, `GET /racun/:id` and `/racun/:id.pdf`.
 - `apps/web/src/access.ts`: paid rights = an entitled subscription or an allow-list row; `publishRefusal` gives
   `checkout` (no plan) or `portal` (renewal failed past the grace days) when billing is on.
+- `packages/platform/src/billing-invoice-html.ts`: the invoice page (Unit B's design as a string template), used by
+  `/racun/:id` and by the worker's PDF (without the "Prenesi PDF" bar). It lives in platform because web depends on
+  the worker, so neither app can import the other's file.
 - `apps/worker/src/invoices.ts`: every `billing.invoicePdf.sweepSeconds`, new invoices are rendered to an A4 PDF
   (Playwright), stored at `invoices/<year>/<number>.pdf` and emailed as "Račun <number>" with the PDF attached.
 
@@ -40,3 +43,12 @@ The web service names missing Stripe variables at startup while `BILLING_ENABLED
    `invoice.payment_failed`. Put its signing secret in `STRIPE_WEBHOOK_SECRET`.
 3. Customer Portal (Stripe dashboard): allow plan switching between the four prices, card updates and cancelling at
    period end.
+
+## Known limits
+
+- **Founding places can overrun by a few.** A place counts once its subscription is active (`accounts.foundingTaken`:
+  open founding subscriptions plus the admin's founding allow-list rows), not when checkout opens. Two owners who open
+  checkout while one place is left both pay the founding price, so place 101 can be taken. Left as is (director,
+  2026-10-19).
+- **One setup price** (`postavi_setup_v1`, from `plans.standard.setupService.eur`): both plans charge the same €149 today;
+  different amounts per plan would need a price per plan.

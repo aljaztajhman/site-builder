@@ -1,6 +1,7 @@
 import type { Hono } from "hono";
 import type { ReactNode } from "react";
 import type { AppConfig } from "@sb/config";
+import { billingEnabled } from "@sb/platform";
 import type { AppEnv } from "./access.ts";
 import { Brand, Doc, html } from "./pages.tsx";
 import { PRODUCT_NAME, formatEur } from "./ui/labels.ts";
@@ -102,7 +103,7 @@ function Point({ config, point }: { config: AppConfig; point: TermsPoint }): Rea
 export function termsPage(config: AppConfig): string {
   const { standard, premium } = config.plans;
   const t = config.tiers;
-  const billing = config.plans.billingEnabled;
+  const billing = billingEnabled(config);
   const plan = (p: typeof standard) => (
     <li>
       <strong>{p.name}</strong>

@@ -13,7 +13,7 @@ import { Repo, createDb, createFsStorage, memoryMailer, migrate, type BillingSum
 import type { SiteSpec } from "@sb/spec";
 import { createApp } from "../src/app.ts";
 import { renderNarocnina, type NarocninaProps } from "../src/narocnina.tsx";
-import { renderInvoiceHtml } from "../src/invoice-view.tsx";
+import { renderInvoiceHtml } from "@sb/platform";
 import { linkFor } from "./session-helpers.ts";
 
 /**
