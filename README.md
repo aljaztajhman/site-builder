@@ -1,6 +1,6 @@
 # site-builder
 
-AI website builder for Slovenian small businesses. Product brief: `docs/PRODUCT.md`. Phase plans: `docs/phases/`. Tasks: `TASKS.md`.
+**Postavi** (postavi.si; renamed from Stranko on 2026-10-17): AI website builder for Slovenian small businesses. Product brief: `docs/PRODUCT.md`. Phase plans: `docs/phases/`. Tasks: `TASKS.md`.
 
 ## Setup
 

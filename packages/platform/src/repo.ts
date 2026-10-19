@@ -9,6 +9,7 @@ import { SiteDomains } from "./domains.ts";
 import { ProductEvents } from "./events.ts";
 import { LookFingerprints } from "./looks.ts";
 import { Usage, type Tier } from "./usage.ts";
+import { isReservedLabel } from "./reserved-labels.ts";
 
 export type SiteStatus = "new" | "generating" | "ready" | "editing" | "publishing" | "failed";
 
@@ -171,7 +172,7 @@ export class Repo {
   readonly stats: SiteStats;
   /** Sites' own domain names. */
   readonly domains: SiteDomains;
-  /** Stranko's own funnel and engine events (it-analytics). */
+  /** Postavi's own funnel and engine events (it-analytics). */
   readonly events: ProductEvents;
   /** Model and image spend over time, for the admin. */
   readonly costs: CostHistory;
@@ -198,10 +199,12 @@ export class Repo {
     return rows[0]!;
   }
 
+  /** A free site slug from `base`: never one of the platform's own names (RESERVED_SITE_LABELS; "mail" → "mail-2"). */
   async uniqueSlug(base: string): Promise<string> {
     const clean = base.slice(0, 40).replace(/-+$/g, "") || "stran";
     for (let i = 0; i < 50; i++) {
       const slug = i === 0 ? clean : `${clean}-${i + 1}`;
+      if (isReservedLabel(slug)) continue;
       const { rows } = await this.db.query("select 1 from sites where slug = $1", [slug]);
       if (rows.length === 0) return slug;
     }

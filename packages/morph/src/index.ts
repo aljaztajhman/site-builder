@@ -1,5 +1,5 @@
 /**
- * @sb/morph: the Stranko landing demo's animation engine, made reusable. No dependencies, any framework.
+ * @sb/morph: the Postavi landing demo's animation engine, made reusable. No dependencies, any framework.
  * - morph(): one screen becomes the next part by part ("Transformer"), on a same-document view transition.
  * - morphFrame() / fadeFrame(): the same for whole pages in an iframe.
  * - prepareBuild() / runBuild(): a page builds itself (structure, colours, photos, text).

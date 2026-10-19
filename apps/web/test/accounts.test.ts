@@ -36,7 +36,7 @@ beforeAll(async () => {
     stop: async () => undefined,
   };
   platform = { db, repo: new Repo(db), storage: createFsStorage(dir), queue, close: () => db.close() };
-  app = createApp({ platform, config, auth: { password: PASSWORD, secret: "s".repeat(32), secureCookies: false }, mailer: mail, appUrl: "https://stranko.example" });
+  app = createApp({ platform, config, auth: { password: PASSWORD, secret: "s".repeat(32), secureCookies: false }, mailer: mail, appUrl: "https://postavi.example" });
   req = (p, init) => app.request(p, init);
 });
 afterAll(async () => {
@@ -62,10 +62,10 @@ describe("magic-link sign-in", () => {
     expect(asked.status).toBe(200);
     expect(await asked.text()).toContain("Preverite e-pošto");
     const url = new URL(linkFor(mail.sent, "ana.novak@siol.net"));
-    expect(url.origin).toBe("https://stranko.example");
+    expect(url.origin).toBe("https://postavi.example");
     const token = url.searchParams.get("t")!;
     expect(token).toMatch(/^[A-Za-z0-9_-]{43}$/);
-    expect(mail.sent.at(-1)!.subject).toBe("Prijava v Stranko");
+    expect(mail.sent.at(-1)!.subject).toBe("Prijava v Postavi");
     // Only the hash is stored.
     const { rows } = await platform.db.query<{ token_hash: string }>("select token_hash from login_tokens");
     expect(rows.map((r) => r.token_hash)).toContain(hashToken(token));
@@ -178,7 +178,7 @@ describe("sessions", () => {
   });
 
   it("are Secure when deployed", async () => {
-    const deployed = createApp({ platform, config, auth: { password: PASSWORD, secret: "s".repeat(32), secureCookies: true }, mailer: mail, appUrl: "https://stranko.example" });
+    const deployed = createApp({ platform, config, auth: { password: PASSWORD, secret: "s".repeat(32), secureCookies: true }, mailer: mail, appUrl: "https://postavi.example" });
     const dreq: Req = (p, init) => deployed.request(p, init);
     const res = await dreq("/login");
     expect(res.headers.getSetCookie().find((c) => c.startsWith("sb_device="))).toMatch(/Secure/);
@@ -302,7 +302,7 @@ describe("allow-list (full sites before billing)", () => {
     const admin = await adminBrowser(req, PASSWORD);
     const made = await req("/admin/login-link", { method: "POST", headers: { cookie: admin.cookie, "content-type": "application/json" }, body: JSON.stringify({ email: "podpora@siol.net" }) });
     const { url } = (await made.json()) as { url: string };
-    expect(url).toMatch(/^https:\/\/stranko\.example\/login\/link\?t=/);
+    expect(url).toMatch(/^https:\/\/postavi\.example\/login\/link\?t=/);
     expect((await req("/admin/login-link", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email: "x@siol.net" }) })).status).toBe(302);
   });
 });
@@ -310,11 +310,11 @@ describe("allow-list (full sites before billing)", () => {
 describe("cross-site requests", () => {
   it("are refused when the browser says they come from another site, or the Origin names another host", async () => {
     const admin = await adminBrowser(req, PASSWORD);
-    const post = (headers: Record<string, string>) => req("/logout", { method: "POST", body: new URLSearchParams({ _csrf: admin.csrf }), headers: { cookie: admin.cookie, host: "stranko.example", ...headers } });
+    const post = (headers: Record<string, string>) => req("/logout", { method: "POST", body: new URLSearchParams({ _csrf: admin.csrf }), headers: { cookie: admin.cookie, host: "postavi.example", ...headers } });
     expect((await post({ "sec-fetch-site": "cross-site" })).status).toBe(403);
     expect((await post({ "sec-fetch-site": "same-site" })).status).toBe(403);
     expect((await post({ origin: "https://evil.example" })).status).toBe(403);
-    expect((await post({ origin: "https://stranko.example", "sec-fetch-site": "same-origin" })).status).toBe(303);
+    expect((await post({ origin: "https://postavi.example", "sec-fetch-site": "same-origin" })).status).toBe(303);
     // The published sites' contact form is exempt (posted from the site itself, later from other domains).
     expect((await req("/s/nope/_submit", { method: "POST", headers: { "sec-fetch-site": "cross-site" }, body: new URLSearchParams({}) })).status).toBe(404);
   });

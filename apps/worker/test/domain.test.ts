@@ -58,7 +58,7 @@ beforeAll(async () => {
   await platform.repo.saveSpec(s.id, filled as unknown as SiteSpec, "manual", "facts", ops);
   await publishSite({ repo: platform.repo, storage: platform.storage, config, platformDomain: null }, s.id);
   const edge = fakeEdge();
-  handle = await startWorker(platform, config, {}, { platformDomain: "stranko.example", domainProviders: { registrar: fakeRegistrar(), edge, dns: fakeDns({}, { anyCnameTo: edge.cnameTarget }) } });
+  handle = await startWorker(platform, config, {}, { platformDomain: "postavi.example", domainProviders: { registrar: fakeRegistrar(), edge, dns: fakeDns({}, { anyCnameTo: edge.cnameTarget }) } });
 }, 60_000);
 
 afterAll(async () => {
@@ -69,11 +69,11 @@ afterAll(async () => {
 
 describe("worker: domains", () => {
   it("republishes a site with its platform address when it starts with PLATFORM_DOMAIN", async () => {
-    await expect.poll(async () => (await platform.repo.getSite(siteId))!.published_address, { timeout: 15_000 }).toBe(`https://${slug}.stranko.example/`);
+    await expect.poll(async () => (await platform.repo.getSite(siteId))!.published_address, { timeout: 15_000 }).toBe(`https://${slug}.postavi.example/`);
   });
 
   it("runs the domain job: an owner's domain goes live and the site carries its address", async () => {
-    await platform.repo.domains.start(siteId, "www.seliskar.si", "connected", { record: { type: "CNAME", name: "www", value: "povezava.stranko.example" } });
+    await platform.repo.domains.start(siteId, "www.seliskar.si", "connected", { record: { type: "CNAME", name: "www", value: "povezava.postavi.example" } });
     await handlers.domain!({ hostname: "www.seliskar.si" }, "job-domain");
     expect((await platform.repo.domains.get("www.seliskar.si"))!).toMatchObject({ status: "active", notify: "pending" });
     expect((await platform.repo.getSite(siteId))!.published_address).toBe("https://www.seliskar.si/");

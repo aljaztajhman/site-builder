@@ -6,7 +6,7 @@ import { tierOf, type AppEnv } from "./access.ts";
 import { NOT_A_VISITOR } from "./stats.ts";
 
 /**
- * Stranko's own funnel events from the web process (docs/plans/analytics.md Step 1, config `analytics`). Each is
+ * Postavi's own funnel events from the web process (docs/plans/analytics.md Step 1, config `analytics`). Each is
  * written where its step happens, after the step itself, and never stands in its way: with `analytics.events` off
  * nothing is written, and a failed write is logged and ignored. The device is named only by a keyed hash of its
  * cookie; no IP and no email ever go into an event. The admin's own clicks are not the funnel's: skipped.

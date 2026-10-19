@@ -1,7 +1,7 @@
 /** Slovene labels and formats shared by the server-rendered pages and the editor bundle (no Node imports). */
 
-/** The product name the owner chose (`sb-brand-name`, 2026-09-30). Trademark search and domains still to do. */
-export const PRODUCT_NAME = "Stranko";
+/** The product name: Postavi (owner, 2026-10-17; postavi.si bought), renamed from the first choice (`sb-brand-name`, 2026-09-30). */
+export const PRODUCT_NAME = "Postavi";
 
 /** The small badge beside a free, unpublished preview (`sb-preview-watermark`): app chrome, never in the site's HTML. */
 export const PREVIEW_BADGE = `Predogled · ${PRODUCT_NAME}`;

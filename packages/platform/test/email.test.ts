@@ -31,13 +31,13 @@ describe("mail transports", () => {
       calls.push({ url, init });
       return new Response(JSON.stringify({ id: "49a3999c" }), { status: 200 });
     }) as unknown as typeof fetch;
-    const m = resendMailer({ apiKey: "re_test_key", from: "Stranko <prijava@stranko.example>", fetch: fake });
+    const m = resendMailer({ apiKey: "re_test_key", from: "Postavi <prijava@postavi.example>", fetch: fake });
     await m.send({ to: "ana@siol.net", subject: "Prijava", text: "povezava", html: "<p>povezava</p>", idempotencyKey: "k1" });
     expect(calls[0]!.url).toBe(RESEND_ENDPOINT);
     const headers = calls[0]!.init.headers as Record<string, string>;
     expect(headers.authorization).toBe("Bearer re_test_key");
     expect(headers["idempotency-key"]).toBe("k1");
-    expect(JSON.parse(String(calls[0]!.init.body))).toEqual({ from: "Stranko <prijava@stranko.example>", to: ["ana@siol.net"], subject: "Prijava", text: "povezava", html: "<p>povezava</p>" });
+    expect(JSON.parse(String(calls[0]!.init.body))).toEqual({ from: "Postavi <prijava@postavi.example>", to: ["ana@siol.net"], subject: "Prijava", text: "povezava", html: "<p>povezava</p>" });
     // Reply-To is Resend's `reply_to` (POST /emails), sent only when given.
     await m.send({ to: "owner@siol.net", subject: "Novo sporočilo", text: "t", replyTo: "ana@primer.si" });
     expect(JSON.parse(String(calls[1]!.init.body))).toMatchObject({ to: ["owner@siol.net"], reply_to: "ana@primer.si" });

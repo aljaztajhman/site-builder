@@ -36,7 +36,7 @@ afterAll(async () => {
   await rm(dir, { recursive: true, force: true });
 });
 
-const appWith = (mailer: Mailer = memoryMailer()) => createApp({ platform, config, mailer, appUrl: "https://stranko.example", auth: { password: "pw-123456789012", secret: "s".repeat(32), secureCookies: false } });
+const appWith = (mailer: Mailer = memoryMailer()) => createApp({ platform, config, mailer, appUrl: "https://postavi.example", auth: { password: "pw-123456789012", secret: "s".repeat(32), secureCookies: false } });
 
 /** A published site (owned by OWNER unless `owner` is false) with two pages and a picture in its live release. */
 async function site(slug: string, o: { owner?: boolean; publish?: boolean } = {}): Promise<string> {
@@ -162,8 +162,8 @@ describe("monthly report", () => {
       month: "2026-10",
       totals: { visits: 1203, calls: 14, directions: 9, forms: 2 },
       before: { visits: 980, calls: 11, directions: 4, forms: 0 },
-      siteUrl: "https://stranko.example/s/pekarna-kvas/",
-      dashboardUrl: "https://stranko.example/sites/site_0123456789abcdef",
+      siteUrl: "https://postavi.example/s/pekarna-kvas/",
+      dashboardUrl: "https://postavi.example/sites/site_0123456789abcdef",
     });
     // Slovene groups digits from five up (CLDR): 1203, 12.030.
     expect(m.subject).toBe("Pekarna Kvas: 1203 ogledi v oktobru");
@@ -196,7 +196,7 @@ describe("monthly report", () => {
         sent.push(m);
       },
     };
-    const deps = { repo: platform.repo, config, mailer, appUrl: "https://stranko.example", log: () => undefined };
+    const deps = { repo: platform.repo, config, mailer, appUrl: "https://postavi.example", log: () => undefined };
     // Before 08:00 on the 1st, and after the 5th: nothing.
     expect(await sendMonthlyReports(deps, new Date("2026-11-01T05:00:00Z"))).toBe(0);
     expect(await sendMonthlyReports(deps, new Date("2026-11-06T10:00:00Z"))).toBe(0);
@@ -216,7 +216,7 @@ describe("monthly report", () => {
     expect(mine[0]!.to).toBe(OWNER);
     expect(mine[0]!.text).toContain("Ogledi strani: 2");
     expect(mine[0]!.text).toContain("Tapi na klic: 1");
-    expect(mine[0]!.text).toContain("https://stranko.example/s/porocilo-lastnik/");
+    expect(mine[0]!.text).toContain("https://postavi.example/s/porocilo-lastnik/");
     // Never twice.
     expect(await sendMonthlyReports(deps, new Date("2026-11-02T10:00:00Z"))).toBe(0);
     expect(await platform.repo.stats.report(owned, "2026-10")).toEqual({ status: "sent", attempts: 2 });

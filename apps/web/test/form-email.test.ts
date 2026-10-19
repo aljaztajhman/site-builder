@@ -12,7 +12,7 @@ import { adminBrowser } from "./session-helpers.ts";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const PASSWORD = "test-password-1234";
-const APP_URL = "https://stranko.example";
+const APP_URL = "https://postavi.example";
 const OWNER = "Lastnica.Kvas@primer.si";
 let platform: Platform;
 let dir: string;
@@ -98,7 +98,7 @@ describe("formNotificationMail", () => {
     expect(m.replyTo).toBe("ana@primer.si");
     expect(m.idempotencyKey).toBe("form-message-site_0123456789abcdef-7");
     expect(m.text).toContain("ste prejeli novo sporočilo");
-    expect(m.text).toContain("Ime: Ana Novak\nE-pošta: ana@primer.si\nTelefon: 041 555 906\nStran: Domov, https://stranko.example/s/pekarna-kvas/");
+    expect(m.text).toContain("Ime: Ana Novak\nE-pošta: ana@primer.si\nTelefon: 041 555 906\nStran: Domov, https://postavi.example/s/pekarna-kvas/");
     expect(m.text).toContain("Sporočilo:\nZanima me ponudba.\nLep pozdrav");
     expect(m.text).toContain("gre vaš odgovor na naslov ana@primer.si");
     for (const part of [m.subject, m.text, m.html!]) expect(part).not.toMatch(/[–—]/);
@@ -142,7 +142,7 @@ describe("contact form email to the owner", () => {
     expect(m!.to).toBe(OWNER);
     expect(m!.replyTo).toBe("ana@primer.si");
     expect(m!.subject).toBe("Novo sporočilo s spletne strani Pekarna Kvas");
-    expect(m!.text).toContain("Stran: Domov, https://stranko.example/s/mail-a/");
+    expect(m!.text).toContain("Stran: Domov, https://postavi.example/s/mail-a/");
     expect(m!.text).toContain(`${APP_URL}/sites/${id}/messages`);
     expect(m!.text).toContain("Telefon: 041 555 906");
     expect(m!.html).toContain("Ali imate &lt;script&gt;x&lt;/script&gt; pirin kruh?");

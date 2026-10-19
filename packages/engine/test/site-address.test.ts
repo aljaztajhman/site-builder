@@ -10,9 +10,9 @@ const repoWith = (rows: Partial<SiteDomainRow>[]) => ({ domains: { forSite: asyn
 
 describe("siteAddress (canonical URLs and the sitemap)", () => {
   it("is the active primary domain, else the platform subdomain, else none", async () => {
-    expect(await siteAddress(repoWith([{ hostname: "pekarnakvas.si", is_primary: true, status: "active" }]), "s", "pekarna", "stranko.si")).toBe("https://pekarnakvas.si/");
+    expect(await siteAddress(repoWith([{ hostname: "pekarnakvas.si", is_primary: true, status: "active" }]), "s", "pekarna", "postavi.si")).toBe("https://pekarnakvas.si/");
     // A domain still being set up doesn't count yet.
-    expect(await siteAddress(repoWith([{ hostname: "pekarnakvas.si", is_primary: true, status: "pending" }]), "s", "pekarna", "Stranko.si")).toBe("https://pekarna.stranko.si/");
+    expect(await siteAddress(repoWith([{ hostname: "pekarnakvas.si", is_primary: true, status: "pending" }]), "s", "pekarna", "Postavi.si")).toBe("https://pekarna.postavi.si/");
     expect(await siteAddress(repoWith([]), "s", "pekarna", null)).toBeNull();
   });
 });

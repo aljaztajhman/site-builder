@@ -443,7 +443,7 @@ export const AppConfigSchema = z.object({
     /** Lighthouse mobile performance in the report (off in tests: it needs a debugging port and takes ~20 s). */
     lighthouse: z.boolean(),
   }),
-  /** Stranko's own funnel and engine events (product_events; see config $comment). */
+  /** Postavi's own funnel and engine events (product_events; see config $comment). */
   analytics: z.object({
     events: z.boolean(),
     keepDays: z.number().int().min(1).max(400),

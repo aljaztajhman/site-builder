@@ -31,7 +31,7 @@ describe("test tiers", () => {
     expect(config.test?.include).toBeUndefined();
     const fast = project("fast");
     const slow = project("slow");
-    expect(fast.include).toEqual(["packages/*/test/**/*.test.{ts,tsx}", "apps/*/test/**/*.test.{ts,tsx}", "tools/*/test/**/*.test.{ts,tsx}"]);
+    expect(fast.include).toEqual(["packages/*/test/**/*.test.{ts,tsx}", "apps/*/test/**/*.test.{ts,tsx}", "tools/*/test/**/*.test.{ts,tsx}", "infra/*/test/**/*.test.{ts,tsx}"]);
     expect(fast.exclude).toEqual([...configDefaults.exclude, ...slowFiles]);
     expect(slow.include).toEqual(slowFiles);
     expect(slow.exclude).toBeUndefined();

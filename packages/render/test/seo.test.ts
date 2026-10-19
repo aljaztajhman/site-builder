@@ -17,7 +17,7 @@ const meta = (html: string, prop: string) => html.match(new RegExp(`<meta (?:pro
 describe("site address", () => {
   it("is normalised to an origin or path ending in /, and refuses anything but http(s)", () => {
     expect(normaliseSiteUrl("https://pekarnakvas.si")).toBe("https://pekarnakvas.si/");
-    expect(normaliseSiteUrl("https://pekarna.stranko.si/?x=1#a")).toBe("https://pekarna.stranko.si/");
+    expect(normaliseSiteUrl("https://pekarna.postavi.si/?x=1#a")).toBe("https://pekarna.postavi.si/");
     expect(normaliseSiteUrl("javascript:alert(1)")).toBeNull();
     expect(normaliseSiteUrl("")).toBeNull();
     expect(normaliseSiteUrl("not a url")).toBeNull();

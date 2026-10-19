@@ -259,11 +259,11 @@ export function fakeEdge(o: { cnameTarget?: string; nameservers?: string[]; scri
   return {
     kind: "fake",
     calls,
-    cnameTarget: o.cnameTarget ?? "povezava.stranko.example",
+    cnameTarget: o.cnameTarget ?? "povezava.postavi.example",
     async addZone(domain) {
       calls.push({ method: "addZone", args: [domain] });
       behave(script, counts, "addZone");
-      return { zoneId: `zone-${lower(domain)}`, nameservers: o.nameservers ?? ["ana.ns.stranko.example", "bor.ns.stranko.example"] };
+      return { zoneId: `zone-${lower(domain)}`, nameservers: o.nameservers ?? ["ana.ns.postavi.example", "bor.ns.postavi.example"] };
     },
     async zone(zoneId) {
       calls.push({ method: "zone", args: [zoneId] });

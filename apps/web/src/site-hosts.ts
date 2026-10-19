@@ -1,6 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 import type { Hono, MiddlewareHandler } from "hono";
-import { normaliseHostname, type Repo } from "@sb/platform";
+import { isReservedLabel, normaliseHostname, type Repo } from "@sb/platform";
 import type { AppEnv } from "./access.ts";
 
 /**
@@ -43,6 +43,8 @@ export function siteHostResolver(o: SiteHostOptions): (rawHost: string) => Promi
     if (app.has(host)) return null;
     if (platform && host.endsWith(`.${platform}`)) {
       const label = host.slice(0, -platform.length - 1);
+      // app., mail., www. … are the platform's own names (another service or the app), never a site.
+      if (isReservedLabel(label)) return null;
       if (!SAFE_SLUG.test(label)) return { missing: true };
       const site = await o.repo.getSiteBySlug(label);
       return site?.published_version ? { slug: site.slug } : { missing: true };
@@ -75,9 +77,9 @@ export function sitePath(slug: string, path: string): string {
 }
 
 /** The visitor's hostname as the edge Worker forwards it (Railway routes by Host, so the Worker can't keep it). */
-export const SITE_HOST_HEADER = "x-stranko-site-host";
+export const SITE_HOST_HEADER = "x-postavi-site-host";
 /** Proves the forwarded hostname came from our Worker: SITE_PROXY_SECRET. */
-export const SITE_PROXY_SECRET_HEADER = "x-stranko-proxy-secret";
+export const SITE_PROXY_SECRET_HEADER = "x-postavi-proxy-secret";
 
 const sameSecret = (a: string, b: string) => {
   const x = Buffer.from(a);
@@ -88,6 +90,10 @@ const sameSecret = (a: string, b: string) => {
 /** Requests the app answers for a site's own hostname (siteHosts), for the indexing header (config seo). */
 const siteHostRequests = new WeakSet<Request>();
 export const servedForSiteHost = (req: Request) => siteHostRequests.has(req);
+
+/** The visitor's hostname of a request the edge Worker forwarded with the right secret, for the Origin check (access.ts). */
+const proxiedHosts = new WeakMap<Request, string>();
+export const trustedForwardedHost = (req: Request): string | null => proxiedHosts.get(req) ?? null;
 
 /**
  * First middleware of the app: a site host's request is answered by the app itself at the site's
@@ -112,6 +118,11 @@ export function siteHosts(app: Hono<AppEnv>, resolve: (host: string) => Promise<
     const req = new Request(new URL(`${sitePath(answer.slug, url.pathname)}${url.search}`, url), c.req.raw);
     inner.add(req);
     siteHostRequests.add(req);
+    // Behind the Worker the Host is Railway's while the browser's Origin is the site's own hostname.
+    if (trusted) {
+      const host = normaliseHostname(forwarded!);
+      if (host) proxiedHosts.set(req, host);
+    }
     return app.fetch(req, c.env);
   };
 }

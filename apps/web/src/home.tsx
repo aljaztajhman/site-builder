@@ -25,7 +25,7 @@ const pictures = (n: number) => count(n, { one: "ustvarjena slika", two: "ustvar
 /** "še 100 prostih mest", "še 1 prosto mesto". */
 const placesLeft = (n: number) => `še ${count(n, { one: "prosto mesto", two: "prosti mesti", few: "prosta mesta", other: "prostih mest" })}`;
 
-/** The product's slogan (HQ decision sb-slogan): the hero's h1, the page title and the footer. Stran, stranke, Stranko. */
+/** The product's slogan (HQ decision sb-slogan): the hero's h1, the page title and the footer. Kept after the rename to Postavi (2026-10-17): stran, stranke. */
 export const SLOGAN = "Stran za vaše stranke.";
 
 const Brand = () => (

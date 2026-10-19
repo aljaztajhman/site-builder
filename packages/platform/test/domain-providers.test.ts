@@ -73,10 +73,10 @@ describe("fakes", () => {
   });
 
   it("DNS answers [] for what doesn't exist; anyCnameTo stands in for the owner's record in development", async () => {
-    const dns = fakeDns({ mx: { "a.si": ["mx.a.si"] } }, { anyCnameTo: "povezava.stranko.example" });
+    const dns = fakeDns({ mx: { "a.si": ["mx.a.si"] } }, { anyCnameTo: "povezava.postavi.example" });
     expect(await dns.mx("A.si.")).toEqual(["mx.a.si"]);
     expect(await dns.ns("a.si")).toEqual([]);
-    expect(await dns.cname("www.a.si")).toEqual(["povezava.stranko.example"]);
+    expect(await dns.cname("www.a.si")).toEqual(["povezava.postavi.example"]);
   });
 
   it("names the DNS host from its nameservers, or nothing", () => {
@@ -185,7 +185,7 @@ describe("Openprovider adapter (skeleton, documented shapes)", () => {
 
 describe("Cloudflare adapter (skeleton, documented shapes)", () => {
   const env = (result: unknown) => ({ success: true, errors: [], messages: [], result });
-  const opts = { apiToken: "t", accountId: "acc", saasZoneId: "saas", cnameTarget: "povezava.stranko.example", workerScript: "stranko-edge" };
+  const opts = { apiToken: "t", accountId: "acc", saasZoneId: "saas", cnameTarget: "povezava.postavi.example", workerScript: "postavi-edge" };
 
   it("adds a zone with originless proxied records and the Worker's routes, and reads zone + certificate status", async () => {
     const f = fakeFetch({
@@ -199,12 +199,12 @@ describe("Cloudflare adapter (skeleton, documented shapes)", () => {
     expect(await cf.addZone("pekarnakvas.si")).toEqual({ zoneId: "z1", nameservers: ["ana.ns.cloudflare.com", "bob.ns.cloudflare.com"] });
     expect(f.seen[0]!.body).toEqual({ account: { id: "acc" }, name: "pekarnakvas.si", type: "full" });
     expect(f.seen.filter((s) => s.url.endsWith("/dns_records")).map((s) => s.body)).toEqual([
-      { type: "AAAA", content: "100::", proxied: true, ttl: 1, name: "pekarnakvas.si", comment: "Stranko: spletna stran" },
-      { type: "AAAA", content: "100::", proxied: true, ttl: 1, name: "www.pekarnakvas.si", comment: "Stranko: spletna stran" },
+      { type: "AAAA", content: "100::", proxied: true, ttl: 1, name: "pekarnakvas.si", comment: "Postavi: spletna stran" },
+      { type: "AAAA", content: "100::", proxied: true, ttl: 1, name: "www.pekarnakvas.si", comment: "Postavi: spletna stran" },
     ]);
     expect(f.seen.filter((s) => s.url.endsWith("/workers/routes")).map((s) => s.body)).toEqual([
-      { pattern: "pekarnakvas.si/*", script: "stranko-edge" },
-      { pattern: "www.pekarnakvas.si/*", script: "stranko-edge" },
+      { pattern: "pekarnakvas.si/*", script: "postavi-edge" },
+      { pattern: "www.pekarnakvas.si/*", script: "postavi-edge" },
     ]);
     expect(f.seen[0]!.headers.authorization).toBe("Bearer t");
     expect(await cf.zone("z1")).toEqual({ status: "active", certificate: "active" });
@@ -230,7 +230,7 @@ describe("Cloudflare adapter (skeleton, documented shapes)", () => {
     expect(await cf.addHostname("www.a.si")).toEqual({ id: "ch1" });
     expect(f.seen[0]!.body).toEqual({ hostname: "www.a.si", ssl: { method: "http", type: "dv" } });
     expect(await cf.hostname("ch1")).toEqual({ status: "pending", certificate: "failed", errors: ["custom hostname does not CNAME to this zone.", "CAA blocks"] });
-    expect(cf.cnameTarget).toBe("povezava.stranko.example");
+    expect(cf.cnameTarget).toBe("povezava.postavi.example");
   });
 });
 

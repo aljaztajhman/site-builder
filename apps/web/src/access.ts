@@ -5,6 +5,7 @@ import type { AppConfig } from "@sb/config";
 import { planOffer } from "@sb/engine";
 import type { AccountRow, PaidPlanKey, Repo, SiteRow, Tier } from "@sb/platform";
 import { hasSession, type AuthSettings } from "./auth.ts";
+import { trustedForwardedHost } from "./site-hosts.ts";
 import type { UploadTicket } from "./upload-ticket.ts";
 
 /** Same-origin path only: "/x" but not "//host", "/\host" or anything with whitespace. Default: the landing page. */
@@ -124,7 +125,8 @@ export function csrfOk(c: Context<AppEnv>, body: Record<string, unknown>): boole
 /**
  * Rejects state-changing requests that a browser marks as coming from another site (Sec-Fetch-Site),
  * or whose Origin names another host. Requests without either header aren't from a browser page, so
- * they can't be cross-site forgeries. The public form endpoint of published sites is exempt.
+ * they can't be cross-site forgeries. The public form endpoint of published sites is exempt. Behind the
+ * edge Worker the Host is Railway's, so an Origin of the site hostname it forwarded (secret checked) is ours.
  */
 export const sameOriginOnly: MiddlewareHandler = async (c, next) => {
   if (c.req.method === "GET" || c.req.method === "HEAD" || c.req.method === "OPTIONS" || /^\/s\/[^/]+\/_submit$/.test(c.req.path)) return next();
@@ -134,7 +136,8 @@ export const sameOriginOnly: MiddlewareHandler = async (c, next) => {
   if (fetchSite) cross = fetchSite !== "same-origin" && fetchSite !== "none";
   else if (origin) {
     try {
-      cross = new URL(origin).host !== c.req.header("host");
+      const from = new URL(origin);
+      cross = from.host !== c.req.header("host") && from.hostname.toLowerCase() !== trustedForwardedHost(c.req.raw);
     } catch {
       cross = true;
     }

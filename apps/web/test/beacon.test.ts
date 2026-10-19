@@ -20,7 +20,7 @@ import { adminBrowser } from "./session-helpers.ts";
  * editor, admin, previews, published sites (a golden, rendered and published) or the landing's example sites.
  */
 const here = path.dirname(fileURLToPath(import.meta.url));
-const HOST = "stranko.einvoicecheck.eu";
+const HOST = "app.postavi.si";
 const TOKEN = "3fad897f56c14335aaccffae0a58ad9b";
 const PASSWORD = "pw-123456789012";
 const SNIPPET = `<script type="module" src="${CF_BEACON_SCRIPT}" data-cf-beacon="{&quot;token&quot;:&quot;${TOKEN}&quot;}"></script>`;
@@ -58,7 +58,7 @@ const makeApp = (o: { cloudflare?: AppConfig["analytics"]["cloudflare"]; appUrl?
     config: { ...config, analytics: { ...config.analytics, cloudflare: o.cloudflare ?? { token: TOKEN, hosts: [HOST] } } },
     mailer: memoryMailer(),
     appUrl: o.appUrl ?? `https://${HOST}`,
-    platformDomain: "stranko.example",
+    platformDomain: "postavi.example",
     siteHostCacheMs: 0,
     auth: { password: PASSWORD, secret: "s".repeat(32), secureCookies: false },
     ...(o.botCheck ? { botCheck: o.botCheck } : {}),
@@ -76,7 +76,8 @@ async function none(r: Response, what: string) {
 
 describe("Cloudflare Web Analytics beacon", () => {
   it("is in config: the token and the one hostname", () => {
-    expect(config.analytics.cloudflare).toEqual({ token: TOKEN, hosts: [HOST] });
+    // The old address stays until the app has moved to app.postavi.si.
+    expect(config.analytics.cloudflare).toEqual({ token: TOKEN, hosts: [HOST, "stranko.einvoicecheck.eu"] });
   });
 
   it("is on the landing page, the login page and the privacy policy on the configured host, with the CSP it needs", async () => {
@@ -138,7 +139,7 @@ describe("Cloudflare Web Analytics beacon", () => {
       ["/pregled", HOST],
       [`/preview/${siteId}/index.html`, HOST, cookie],
       ["/s/pekarna-kvas/", HOST],
-      ["/", "pekarna-kvas.stranko.example"],
+      ["/", "pekarna-kvas.postavi.example"],
       [uiUrl("examples/primer-frizer/index.html"), HOST],
     ];
     for (const [p, host, c] of pages) {

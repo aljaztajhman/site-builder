@@ -33,7 +33,7 @@ beforeAll(async () => {
   await migrate(db);
   const queue: Queue = { send: async () => "job", work: async () => undefined, ping: async () => undefined, stop: async () => undefined };
   platform = { db, repo: new Repo(db), storage: createFsStorage(dir), queue, close: () => db.close() };
-  const make = (config: AppConfig) => createApp({ platform, config, auth: { password: PASSWORD, secret: "s".repeat(32), secureCookies: false }, mailer: mail, appUrl: "https://stranko.example" });
+  const make = (config: AppConfig) => createApp({ platform, config, auth: { password: PASSWORD, secret: "s".repeat(32), secureCookies: false }, mailer: mail, appUrl: "https://postavi.example" });
   apps.on = make(on);
   apps.off = make(base);
   apps.skeleton = make({ ...on, variety: { ...on.variety, skeleton: true } });

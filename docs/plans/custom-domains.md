@@ -16,9 +16,16 @@ The owner writes a short description of what they do and gets a site that is ful
 
 Target: Publish → live in 3 taps plus payment when the facts are filled. A browser test counts them (as `owner-tasks-browser.test.ts` does for edits).
 
+## Hostnames (owner, 2026-10-19; product renamed Postavi on 2026-10-17)
+
+- `postavi.si`, `www.postavi.si`: the homepage (`infra/coming-soon`).
+- `app.postavi.si`: the app (dashboard, editor, API, admin), `APP_URL`.
+- `<slug>.postavi.si`: published sites through the edge Worker, `PLATFORM_DOMAIN=postavi.si`. A slug is never one of the platform's own names (`RESERVED_SITE_LABELS` in `packages/platform/src/reserved-labels.ts`: www, app, mail, api, admin …); the resolver treats such a label as the app's, and the Worker answers 404 for it and for the apex.
+- `mail.postavi.si`: Resend sending.
+
 ## Architecture (researched 2026-10-03; sources in the HQ item notes)
 
-- **Edge**: one Cloudflare Worker in front of every published site. It forwards each request to the Railway web service, naming the site's hostname in `x-stranko-site-host` with a shared secret (`SITE_PROXY_SECRET`); Railway routes by Host, and overriding Host at Cloudflare is Enterprise-only. The web service serves the site's live release for that hostname (`apps/web/src/site-hosts.ts`, done). Free plan: 100k requests/day; Workers Paid ($5/month) when traffic nears that.
+- **Edge**: one Cloudflare Worker in front of every published site. It forwards each request to the Railway web service, naming the site's hostname in `x-postavi-site-host` with a shared secret (`x-postavi-proxy-secret`: `SITE_PROXY_SECRET`) (`SITE_PROXY_SECRET`); Railway routes by Host, and overriding Host at Cloudflare is Enterprise-only. The web service serves the site's live release for that hostname (`apps/web/src/site-hosts.ts`, done). Free plan: 100k requests/day; Workers Paid ($5/month) when traffic nears that.
 - **Platform subdomains**: `*.<platform domain>` in our Cloudflare zone, proxied, Worker route; Universal SSL covers one wildcard level. Served by `PLATFORM_DOMAIN` (done).
 - **Domains we register** (Openprovider API `/v1`, prepaid balance, free account): check with price → create the customer handle with the owner's own data (the domain is theirs) → DNS zone → register with `owner_handle` → add the domain as a zone in our Cloudflare account, switch nameservers, Worker route. Free DNS, free certificates, apex works. .si: any person or company may register; the registry asks name, address, email, phone and person/company, and verifies email or phone within 21 days (NIS2).
 - **Domains the owner already has**: Cloudflare for SaaS on our zone (first 100 hostnames free, then $0.10/month each; enabling needs a payment method on the account). The owner adds one CNAME (`www`) and we verify by HTTP; an apex works only where their DNS host flattens CNAMEs, otherwise `www` plus a redirect, or moving nameservers to us. Their email (MX) is never touched. Domain Connect would automate the DNS step, but no Slovene host supports it yet.
@@ -41,7 +48,7 @@ Done (branch claude/domain-flow, overnight plan `on-domain-flow`), all against i
 6. Adapter skeletons from the current docs, not wired (`packages/platform/src/openprovider.ts`, `cloudflare-saas.ts`), tested against documented response shapes, not recordings.
 
 Still free, not done:
-- The Worker script (`infra/edge/`) with tests; not deployed.
+- ~~The Worker script~~ Done 2026-10-19 (branch claude/m5-postavi-rename): `infra/edge/` (Cloudflare module Worker, `wrangler.toml` with placeholder routes, README with deploy steps), tests in `infra/edge/test/` in the fast tier. Not deployed. The beacon check of step 5 is done: an Origin equal to the hostname the Worker forwarded (secret matched) passes the cross-site check (`apps/web/src/access.ts`, test in `apps/web/test/site-hosts.test.ts`).
 
 Needs the owner (HQ "Needs you"):
 - Buy the platform domain (`stranko.si` and `stranko.com` are taken; decision `sb-email-spam`, item `it-trademark-domains`).

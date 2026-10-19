@@ -1,5 +1,5 @@
 /**
- * Default timings. They are the values the Stranko landing demo was tuned to by eye (owner, 2026-10-04),
+ * Default timings. They are the values the Postavi landing demo was tuned to by eye (owner, 2026-10-04),
  * so they are a good starting point anywhere: change `tempo` first, the phases only if a step feels wrong.
  */
 

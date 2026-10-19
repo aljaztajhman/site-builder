@@ -1,6 +1,6 @@
 # @sb/morph
 
-The animation engine behind the Stranko landing page's trade demo, made reusable. No runtime
+The animation engine behind the Postavi landing page's trade demo, made reusable. No runtime
 dependencies, no framework, about 30 KB unminified. Three effects:
 
 | Effect | What it looks like | API |
@@ -99,7 +99,7 @@ How to write a good one:
 `morphFrame(main, stage, url, { parts })` turns the page in iframe `main` into the page at `url` (same
 origin). `stage` is a second iframe of the same size, layered under `main`, where the next page loads
 first so its fonts and photos are warm. The head is diffed (shared stylesheets stay loaded), the body
-swapped, scripts re-run. This is what the Stranko landing does (`apps/web/src/client/demo-transform.ts`).
+swapped, scripts re-run. This is what the Postavi landing does (`apps/web/src/client/demo-transform.ts`).
 With reduced motion it cross-fades the two frames (`fadeFrame`).
 
 ### The build
@@ -121,7 +121,7 @@ scrolls in), then `runBuild` when it should play. The last frame of the build eq
 
 ### Timing
 
-Defaults (`MORPH_TIMING`, `BUILD_TIMING`) are the values the Stranko landing was tuned to by eye. Change
+Defaults (`MORPH_TIMING`, `BUILD_TIMING`) are the values the Postavi landing was tuned to by eye. Change
 `tempo` first (`timing: { tempo: 1 }` makes a switch a third shorter than the default 1.5); change a phase only if one
 step feels wrong.
 

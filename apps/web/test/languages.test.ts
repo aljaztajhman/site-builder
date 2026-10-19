@@ -32,7 +32,7 @@ beforeAll(async () => {
   await migrate(db);
   const queue: Queue = { send: async () => "job", work: async () => undefined, ping: async () => undefined, stop: async () => undefined };
   platform = { db, repo: new Repo(db), storage: createFsStorage(dir), queue, close: () => db.close() };
-  const app = createApp({ platform, config, platformDomain: "stranko.example", auth: { password: "test-password-1234", secret: "s".repeat(32), secureCookies: false }, mailer: mail, appUrl: "https://stranko.example" });
+  const app = createApp({ platform, config, platformDomain: "postavi.example", auth: { password: "test-password-1234", secret: "s".repeat(32), secureCookies: false }, mailer: mail, appUrl: "https://postavi.example" });
   req = (p, init) => app.request(p, init);
   golden = JSON.parse(await readFile(path.join(here, "../../../tools/eval/golden/avtoservis-mrak.json"), "utf8")) as SiteSpec;
   brief = JSON.parse(await readFile(path.join(here, "../../../tools/eval/fixtures/avtoservis-mrak/brief.json"), "utf8")) as { description: string };

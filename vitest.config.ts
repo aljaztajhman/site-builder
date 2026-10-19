@@ -3,7 +3,7 @@ import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { configDefaults, defineConfig } from "vitest/config";
 
-const include = ["packages/*/test/**/*.test.{ts,tsx}", "apps/*/test/**/*.test.{ts,tsx}", "tools/*/test/**/*.test.{ts,tsx}"];
+const include = ["packages/*/test/**/*.test.{ts,tsx}", "apps/*/test/**/*.test.{ts,tsx}", "tools/*/test/**/*.test.{ts,tsx}", "infra/*/test/**/*.test.{ts,tsx}"];
 
 // Test tiers (docs/dev/agent-team.md, "Test tiers"). A test file whose source carries `// @module-tag slow` (first
 // line by convention) is in the `slow` project; every other file is in `fast`. `pnpm test` runs fast, `pnpm test:slow`

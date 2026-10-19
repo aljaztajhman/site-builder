@@ -7,7 +7,7 @@ import { Doc, TopBar, html } from "./pages.tsx";
 import { formatDateTime, formatEur } from "./ui/labels.ts";
 
 /**
- * The admin's view of Stranko's own events (docs/plans/analytics.md Steps 1 and 3, it-analytics; admin only, see
+ * The admin's view of Postavi's own events (docs/plans/analytics.md Steps 1 and 3, it-analytics; admin only, see
  * access.ts): /admin/funnel, how far people get and how long each step takes; /admin/engine, what generation jobs
  * took, cost and where they failed (per job; the € per stage over time is the cost history's). Both read
  * product_events for the last 7 or 30 days (?dni=30), one query per table, and are there whether or not
