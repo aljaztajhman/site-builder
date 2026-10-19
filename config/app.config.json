@@ -129,7 +129,9 @@
     "jobConcurrency": 2,
     "formMessagesPerSenderPer10Min": 5,
     "formMessagesPerSitePerDay": 100,
-    "formMessagesPerSenderPerDay": 30
+    "formMessagesPerSenderPerDay": 30,
+    "waitlistPerSenderPer10Min": 5,
+    "waitlistPerSenderPerDay": 20
   },
   "checker": {
     "$comment": "Public website checker (/pregled): a URL in, a report in plain Slovene out (mobile speed, tap targets, cookies before consent, the ZEPT company details). No model calls. Runs in the worker, one at a time (Chromium + Lighthouse, like a generation's checks). perIpPerDay per keyed IP hash (cleared after a day), perDay for everyone together; reports and URLs are deleted after keepDays. Only public http(s) addresses on ports 80/443; every redirect hop and every browser request to a private address is refused.",

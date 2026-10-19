@@ -430,6 +430,9 @@ export const AppConfigSchema = z.object({
     formMessagesPerSitePerDay: z.number().int().positive(),
     /** Per visitor (hashed IP) across every site, so one sender can't flood many owners' inboxes. */
     formMessagesPerSenderPerDay: z.number().int().positive(),
+    /** Pre-launch waitlist sign-ups (POST /api/waitlist) per visitor (hashed IP). */
+    waitlistPerSenderPer10Min: z.number().int().positive(),
+    waitlistPerSenderPerDay: z.number().int().positive(),
   }),
   /** The owner's email about each contact-form message (see config $comment). */
   checker: z.object({

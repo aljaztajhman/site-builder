@@ -545,6 +545,29 @@ export class Repo {
     return rows.map((r) => ({ ...r, id: String(r.id) }));
   }
 
+  // ---------- The pre-launch waitlist (apps/web/src/waitlist.ts) ----------
+
+  /** Adds an address with consent now. False when it was already on the list (any case): the first sign-up is kept. */
+  async addToWaitlist(w: { email: string; source: string; senderKey: string }): Promise<boolean> {
+    const { rows } = await this.db.query("insert into waitlist (email, source, sender_key) values ($1, $2, $3) on conflict (lower(email)) do nothing returning id", [
+      w.email,
+      w.source,
+      w.senderKey,
+    ]);
+    // Like form_messages: the sender key only serves the rate limits, and /zasebnost promises it's gone after a day.
+    await this.db.query("update waitlist set sender_key = '' where sender_key <> '' and consented_at < now() - interval '1 day'");
+    return rows.length > 0;
+  }
+
+  /** Sign-ups from one sender (keyed IP hash) in the last `minutes` (rate limits). */
+  async countWaitlistFromSender(senderKey: string, minutes: number): Promise<number> {
+    const { rows } = await this.db.query<{ n: string | number }>(
+      "select count(*) as n from waitlist where sender_key = $1 and consented_at > now() - make_interval(mins => $2::integer)",
+      [senderKey, minutes],
+    );
+    return Number(rows[0]?.n ?? 0);
+  }
+
   // ---------- The reminder before an anonymous preview is deleted (it-upsells) ----------
 
   /** The visitor's address for the one reminder, only on an unclaimed anonymous preview whose reminder wasn't sent. */

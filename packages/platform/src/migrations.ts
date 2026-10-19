@@ -537,6 +537,24 @@ export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
       );
     `,
   },
+  {
+    id: 24,
+    name: "waitlist",
+    // The pre-launch waitlist (apps/web/src/waitlist.ts, sign-ups from the postavi.si homepage): one email at launch,
+    // then the addresses are deleted. One row per address (any case). sender_key: keyed IP hash for the rate limits,
+    // cleared after a day like form_messages.
+    sql: `
+      create table waitlist (
+        id bigserial primary key,
+        email text not null,
+        source text not null default '',
+        sender_key text not null default '',
+        consented_at timestamptz not null default now()
+      );
+      create unique index waitlist_email on waitlist(lower(email));
+      create index waitlist_sender on waitlist(sender_key, consented_at);
+    `,
+  },
 ];
 
 type Query = (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>;

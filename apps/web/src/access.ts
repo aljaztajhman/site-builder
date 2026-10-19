@@ -63,8 +63,9 @@ export const clientIp = (c: Context): string =>
 /** A keyed hash of the client's IP for rate limits; the IP itself is never stored (cleared after a day). */
 export const ipKey = (secret: string, ip: string): string => createHmac("sha256", secret).update(`ip:${ip}`).digest("hex").slice(0, 32);
 
-/** Paths that never get a cookie or a viewer: published client sites stay cookie-free. */
-const NO_IDENTITY = (path: string) => path.startsWith("/s/") || path.startsWith("/assets/") || path === "/health" || path === "/favicon.ico" || path.startsWith("/preview/_shared/");
+/** Paths that never get a cookie or a viewer: published client sites stay cookie-free, and so does a waitlist sign-up. */
+const NO_IDENTITY = (path: string) =>
+  path.startsWith("/s/") || path.startsWith("/assets/") || path === "/health" || path === "/favicon.ico" || path.startsWith("/preview/_shared/") || path === "/api/waitlist";
 
 export interface AccessDeps {
   repo: Repo;
@@ -127,11 +128,12 @@ export function csrfOk(c: Context<AppEnv>, body: Record<string, unknown>): boole
 /**
  * Rejects state-changing requests that a browser marks as coming from another site (Sec-Fetch-Site),
  * or whose Origin names another host. Requests without either header aren't from a browser page, so
- * they can't be cross-site forgeries. The public form endpoint of published sites is exempt. Behind the
+ * they can't be cross-site forgeries. The public form endpoint of published sites is exempt, and so is the
+ * waitlist, which checks the Origin itself (waitlist.ts: the platform domain's homepage posts to it). Behind the
  * edge Worker the Host is Railway's, so an Origin of the site hostname it forwarded (secret checked) is ours.
  */
 export const sameOriginOnly: MiddlewareHandler = async (c, next) => {
-  if (c.req.method === "GET" || c.req.method === "HEAD" || c.req.method === "OPTIONS" || /^\/s\/[^/]+\/_submit$/.test(c.req.path)) return next();
+  if (c.req.method === "GET" || c.req.method === "HEAD" || c.req.method === "OPTIONS" || /^\/s\/[^/]+\/_submit$/.test(c.req.path) || c.req.path === "/api/waitlist") return next();
   const fetchSite = c.req.header("sec-fetch-site");
   const origin = c.req.header("origin");
   let cross = false;
@@ -167,6 +169,8 @@ const PUBLIC = (path: string) =>
   // The intake: the first homepage needs no account (the limits decide who may generate).
   path === "/api/sites" ||
   path === "/api/intake/ticket" ||
+  // The pre-launch waitlist, posted from the postavi.si homepage (waitlist.ts).
+  path === "/api/waitlist" ||
   // The reminder email's link (reminder.tsx checks its token, then sign-in).
   /^\/predogled\/[^/]+\/[^/]+$/.test(path) ||
   path.startsWith("/s/") ||
