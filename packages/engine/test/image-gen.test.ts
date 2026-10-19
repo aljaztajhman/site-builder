@@ -5,6 +5,7 @@ import { FalImageTransport, ImageBilledError, ImageGenerator, SpendCapError, gen
 
 const config = loadConfig();
 const model = config.imageGen.models[config.imageGen.pipeline.model]!;
+const pipelineStyle = config.promptFixes.pictures ? config.imageGen.pipeline.unstagedStyle : config.imageGen.pipeline.style;
 
 describe("image generation", () => {
   it("asks fal for a landscape image with the pipeline style appended, priced from config", async () => {
@@ -13,8 +14,8 @@ describe("image generation", () => {
     const calls: CallRecord[] = [];
     const gen = new ImageGenerator({ config, transport, spentToday: async () => 0, onCall: async (r) => void calls.push(r) });
     const img = await gen.generate("Copper pipes on a workbench");
-    expect(seen[0]!.prompt).toBe(`Copper pipes on a workbench ${config.imageGen.pipeline.style}`);
-    expect(seen[0]).toMatchObject(requestBody(config, model, `Copper pipes on a workbench ${config.imageGen.pipeline.style}`, false));
+    expect(seen[0]!.prompt).toBe(`Copper pipes on a workbench ${pipelineStyle}`);
+    expect(seen[0]).toMatchObject(requestBody(config, model, `Copper pipes on a workbench ${pipelineStyle}`, false));
     expect([img.width, img.height]).toEqual([config.imageGen.landscape.width, config.imageGen.landscape.height]);
     expect(img.costEur).toBeCloseTo(imageCostEur(config, model, img.width, img.height));
     expect(calls).toEqual([expect.objectContaining({ stage: "imageGen", model: config.imageGen.pipeline.model, ok: true, costEur: img.costEur })]);
