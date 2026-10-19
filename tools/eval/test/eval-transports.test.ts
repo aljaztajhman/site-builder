@@ -8,7 +8,9 @@ import { ImageGenerator, imageCostEur, requestBody, type ImageTransport, type Mo
 import { CachedImageTransport, meteredImages, meteredModel, pictureKey, type Meter } from "../src/eval-transports.ts";
 
 /** fal pictures cached by request in eval runs, and what a run really paid (it-eval-cost-cuts). */
-const config = loadConfig();
+// Pinned to the config the pictures were cached with (promptFixes.pictures off): this tests the transport, not the prompt.
+const shipped = loadConfig();
+const config = { ...shipped, promptFixes: { ...shipped.promptFixes, pictures: false } };
 const model = config.imageGen.models[config.imageGen.pipeline.model]!;
 let dir: string;
 beforeEach(() => {

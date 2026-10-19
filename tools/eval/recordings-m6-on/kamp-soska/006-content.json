@@ -1,0 +1,18 @@
+{
+  "seq": 6,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "1b8fc8a827808ce7",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"bar\",\"cta\":\"call\"},\"footer\":{\"variant\":\"columns\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Kamp Soška, družinski kamp ob Soči v Kobaridu\",\"description\":\"Majhen družinski kamp ob reki Soči, deset minut hoje od središča Kobarida. Prostor za šotore in avtodome, skupna kuhinja, topli tuši in večerno ognjišče.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-image\",\"variant\":\"overlay-bottom\",\"props\":{\"headline\":\"Kampiranje ob Soči, deset minut od Kobarida\",\"intro\":\"Majhen družinski kamp s prostorom za dvajset šotorov in deset avtodomov. Ob večerih zakurimo ognjišče.\",\"primary\":{\"label\":\"Oglejte si cene\",\"target\":{\"page\":\"p_home\",\"section\":\"s_cene\"}},\"image\":\"img_01\"}},{\"id\":\"s_prednosti\",\"type\":\"highlights\",\"variant\":\"columns\",\"tone\":\"alt\",\"props\":{\"heading\":\"Kaj vas čaka v kampu\",\"items\":[{\"title\":\"Ob reki Soči\",\"text\":\"Družinski kamp je deset minut peš od središča Kobarida.\"},{\"title\":\"Prostor za šotore in avtodome\",\"text\":\"Na voljo je prostor za dvajset šotorov in deset avtodomov.\"},{\"title\":\"Trata za otroke\",\"text\":\"Otroci se lahko igrajo na travi tik ob kampu.\"},{\"title\":\"Skupna kuhinja in sanitarije\",\"text\":\"Imamo skupno kuhinjo, tople tuše in pralni stroj.\"},{\"title\":\"Večerno ognjišče\",\"text\":\"Ob večerih zakurimo ognjišče za planince, kolesarje in kajakaše.\"},{\"title\":\"Psi so dobrodošli\",\"text\":\"Psi so pri nas dobrodošli, če so na povodcu.\"}]}},{\"id\":\"s_kuhinja\",\"type\":\"image-text\",\"variant\":\"image-left\",\"props\":{\"heading\":\"Skupna kuhinja z dolgo leseno mizo\",\"paragraphs\":[\"Za kuhanje imate skupno kuhinjo z lonci in ponvami. Za dolgo mizo se zvečer zbere vsa družba.\",\"Po vročem tušu in večerji pridite k ognjišču.\"],\"image\":\"img_03\"}},{\"id\":\"s_cene\",\"type\":\"price-list\",\"variant\":\"table\",\"tone\":\"alt\",\"props\":{\"title\":\"Cene na noč\",\"intro\":\"Kamp je odprt od aprila do oktobra.\",\"groups\":[{\"name\":\"Cene na noč\",\"items\":[{\"name\":\"Odrasla oseba\",\"price\":{\"amount\":12,\"unit\":\"noč\"}},{\"name\":\"Otrok do 12 let\",\"price\":{\"amount\":6,\"unit\":\"noč\"}},{\"name\":\"Šotor\",\"price\":{\"amount\":4,\"unit\":\"noč\"}},{\"name\":\"Avtodom\",\"price\":{\"amount\":18,\"unit\":\"noč\"}}]},{\"name\":\"Dodatno\",\"items\":[{\"name\":\"Zajtrk po naročilu\",\"price\":{\"amount\":7,\"unit\":\"osebo\"}}]}]}},{\"id\":\"s_kontakt\",\"type\":\"contact\",\"variant\":\"split-map\",\"props\":{\"title\":\"Kako do nas in kdaj nas najdete\",\"intro\":\"Kamp je odprt od aprila do oktobra, recepcija od 8.00 do 20.00. Za rezervacijo nas pokličite ali nam pišite.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2294,
+      "output_tokens": 1248,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 12416
+    }
+  }
+}

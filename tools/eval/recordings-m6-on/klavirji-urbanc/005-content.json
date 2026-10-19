@@ -1,0 +1,18 @@
+{
+  "seq": 5,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "7511af2d5b35168f",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"split-cta\",\"cta\":\"call\"},\"footer\":{\"variant\":\"columns\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Uglaševanje klavirjev in pianin, Brežice\",\"description\":\"Uglaševanje klavirjev in pianin v Brežicah in okolici že več kot dvajset let. Obiski na domovih, v šolah in društvih, popravila in pregled rabljenih klavirjev.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-split\",\"variant\":\"image-left\",\"props\":{\"headline\":\"Klavir, ki spet zveni, kot mora\",\"intro\":\"Klavirje in pianine uglašujem v Brežicah in okolici že več kot dvajset let. Pridem k vam domov, v šolo ali v društvo, na koncu pa preverim vsako tipko.\",\"primary\":{\"label\":\"Oglejte si storitve\",\"target\":{\"page\":\"p_home\",\"section\":\"s_services\"}},\"image\":\"img_g1\"}},{\"id\":\"s_services\",\"type\":\"services-list\",\"variant\":\"rows\",\"tone\":\"alt\",\"props\":{\"title\":\"Kaj vse naredim\",\"intro\":\"Poleg uglaševanja poskrbim tudi za manjša popravila in pomagam pri izbiri rabljenega klavirja.\",\"items\":[{\"name\":\"Uglaševanje klavirjev in pianin\",\"description\":\"Pridem na dom, v šolo ali v društvo. Na koncu preverim vsako tipko.\"},{\"name\":\"Lepljenje tipk\",\"description\":\"Manjše popravilo, ki ga opravim na mestu.\"},{\"name\":\"Nastavitev mehanike\",\"description\":\"Popravilo za enakomeren in zanesljiv odziv tipk.\"},{\"name\":\"Zamenjava strun in filca\",\"description\":\"Popravilo strun in filca, kadar je to potrebno.\"},{\"name\":\"Pregled rabljenega klavirja pred nakupom\",\"description\":\"Pomagam vam pri izbiri rabljenega klavirja.\"}]}},{\"id\":\"s_about\",\"type\":\"image-text\",\"variant\":\"image-right\",\"props\":{\"eyebrow\":\"Brez naglice\",\"heading\":\"Delo opravim počasi in natančno\",\"paragraphs\":[\"Dela ne hitim. Na koncu vedno preverim vsako tipko, da je klavir res pripravljen za igranje.\",\"Če se večji poseg ne splača, vam to povem odkrito. Pri rabljenem klavirju vam svetujem pred nakupom.\"],\"link\":{\"label\":\"Pokličite za termin\",\"target\":{\"action\":\"call\"}},\"image\":\"img_g2\"}},{\"id\":\"s_points\",\"type\":\"highlights\",\"variant\":\"list\",\"tone\":\"alt\",\"props\":{\"heading\":\"Za koga delam\",\"items\":[{\"title\":\"Več kot dvajset let\",\"text\":\"Klavirje uglašujem že več kot dvajset let.\"},{\"title\":\"Domovi, šole in društva\",\"text\":\"Delam tudi za glasbeno šolo, društva in zasebne lastnike.\"},{\"title\":\"Odkrito svetovanje\",\"text\":\"Povem vam, ali se večji poseg splača.\"}]}},{\"id\":\"s_area\",\"type\":\"service-area\",\"variant\":\"inline\",\"props\":{\"title\":\"Kje delam\",\"intro\":\"Obiskujem stranke v Brežicah in okolici.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2327,
+      "output_tokens": 1167,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 12416
+    }
+  }
+}

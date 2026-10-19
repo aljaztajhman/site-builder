@@ -13,7 +13,8 @@ import { syntheticRecordings } from "../src/synthetic.ts";
 import { goldenContent, goldenOf } from "./homepage-first-content.ts";
 
 const config = loadConfig();
-const homepageFirst: AppConfig = { ...config, pipeline: { homepageFirst: true } };
+// Pinned: homepage-first on, structured output off (the recordings were made so); another PR deletes homepageFirst.
+const homepageFirst: AppConfig = { ...config, pipeline: { homepageFirst: true }, structuredOutputForContent: false };
 
 describe("pipeline, homepage first", () => {
   let db: Db;

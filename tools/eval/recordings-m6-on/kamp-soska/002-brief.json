@@ -1,0 +1,18 @@
+{
+  "seq": 2,
+  "stage": "brief",
+  "model": "claude-sonnet-5-5",
+  "hash": "60717624392fcd37",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"businessType\":\"tourist-farm\",\"name\":\"Kamp Soška\",\"town\":\"Kobarid\",\"summary\":\"Majhen družinski kamp ob reki Soči, deset minut hoje od središča Kobarida. Na voljo je prostor za dvajset šotorov in deset avtodomov, trata za otroke, skupna kuhinja, topli tuši in pralni stroj. Ob večerih zakurijo ognjišče.\",\"audience\":\"Planinci, kolesarji, kajakaši in družine, ki iščejo mirno kampiranje ob Soči.\",\"tone\":\"friendly\",\"offerings\":[{\"group\":\"Cene na noč\",\"name\":\"Odrasla oseba\",\"description\":null,\"price\":{\"amount\":12,\"from\":false,\"unit\":\"noč\"}},{\"group\":\"Cene na noč\",\"name\":\"Otrok do 12 let\",\"description\":null,\"price\":{\"amount\":6,\"from\":false,\"unit\":\"noč\"}},{\"group\":\"Cene na noč\",\"name\":\"Šotor\",\"description\":null,\"price\":{\"amount\":4,\"from\":false,\"unit\":\"noč\"}},{\"group\":\"Cene na noč\",\"name\":\"Avtodom\",\"description\":null,\"price\":{\"amount\":18,\"from\":false,\"unit\":\"noč\"}},{\"group\":\"Dodatno\",\"name\":\"Zajtrk po naročilu\",\"description\":null,\"price\":{\"amount\":7,\"from\":false,\"unit\":\"osebo\"}}],\"highlights\":[\"Družinski kamp ob reki Soči\",\"Deset minut peš od središča Kobarida\",\"Prostor za dvajset šotorov in deset avtodomov\",\"Trata za otroke\",\"Skupna kuhinja, topli tuši in pralni stroj\",\"Večerno ognjišče za planince, kolesarje in kajakaše\",\"Psi so dobrodošli na povodcu\"],\"facts\":{\"phone\":\"+38640555619\",\"email\":\"info@kamp-soska.example\",\"address\":{\"street\":\"Gregorčičeva ulica 24\",\"postalCode\":\"5222\",\"city\":\"Kobarid\"},\"hours\":null,\"hoursNote\":\"Kamp je odprt od aprila do oktobra, recepcija od 8.00 do 20.00.\",\"bookingUrl\":null,\"social\":[],\"legalName\":null,\"registrationNumber\":null,\"taxNumber\":null,\"vatPayer\":null,\"serviceArea\":[],\"people\":[]},\"pages\":[{\"kind\":\"home\",\"slug\":\"\",\"navLabel\":\"Domov\",\"purpose\":\"Predstavitev kampa, ključne ugodnosti, cene in poziv k rezervaciji.\"},{\"kind\":\"standard\",\"slug\":\"cenik\",\"navLabel\":\"Cenik\",\"purpose\":\"Cene na noč za odrasle, otroke, šotor, avtodom in zajtrk.\"},{\"kind\":\"standard\",\"slug\":\"o-kampu\",\"navLabel\":\"O kampu\",\"purpose\":\"Opis kampa, opreme, ognjišča in pravil za pse.\"},{\"kind\":\"standard\",\"slug\":\"galerija\",\"navLabel\":\"Galerija\",\"purpose\":\"Fotografije kampa in okolice.\"},{\"kind\":\"standard\",\"slug\":\"kontakt\",\"navLabel\":\"Kontakt\",\"purpose\":\"Naslov, telefon, e-pošta, delovni čas recepcije in rezervacije.\"}],\"missing\":[\"točni datumi odprtja in zaprtja kampa\",\"spletna stran ali obrazec za rezervacije\",\"družbene mreže\",\"pravila kampa (mirni čas, prihod in odhod)\"],\"imageIdeas\":[],\"concept\":{\"subtype\":null,\"goal\":\"book\",\"angle\":\"place\",\"signatureFact\":\"distance\",\"materials\":[\"šotori\",\"avtodomi\",\"ognjišče\",\"skupna kuhinja\"],\"localAnchor\":\"Kobarid\"}}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 4215,
+      "output_tokens": 1255,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}
