@@ -1,0 +1,46 @@
+# Backup service: Railway cron job (nightly 03:00 UTC) that runs `pnpm db:backup` inside Railway, so the
+# database URL never leaves it, then exits. The same image runs the restore drill by hand (start command below).
+# Same base and layout as Dockerfile.worker, plus the PostgreSQL 18 client (pg_dump/psql must be at least the
+# server's major version; production runs PostgreSQL 18) from the PGDG apt repository.
+#
+# Start commands (working directory /app/apps/worker):
+#   backup (the cron's default): node --import tsx ../../packages/platform/scripts/backup.ts
+#   restore drill (one-off):     node --import tsx ../../packages/platform/scripts/restore-drill.ts
+
+FROM mcr.microsoft.com/playwright:v1.63.0-noble AS deps
+RUN corepack enable
+WORKDIR /app
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/web/package.json apps/web/
+COPY apps/worker/package.json apps/worker/
+COPY packages/components/package.json packages/components/
+COPY packages/config/package.json packages/config/
+COPY packages/engine/package.json packages/engine/
+COPY packages/inventory/package.json packages/inventory/
+COPY packages/platform/package.json packages/platform/
+COPY packages/render/package.json packages/render/
+COPY packages/spec/package.json packages/spec/
+COPY tools/eval/package.json tools/eval/
+# The worker's dependency set (it includes @sb/platform, @sb/config and tsx); the same lockfile slice as the
+# worker, so the two images never disagree on a version.
+RUN pnpm install --frozen-lockfile --prod --filter "@sb/worker..."
+
+FROM mcr.microsoft.com/playwright:v1.63.0-noble
+# PostgreSQL 18 client only (no server), from PGDG; apt lists removed so the layer stays small.
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ca-certificates curl \
+  && install -d /usr/share/postgresql-common/pgdg \
+  && curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+  && . /etc/os-release \
+  && echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt ${VERSION_CODENAME}-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
+  && apt-get update \
+  && apt-get install -y --no-install-recommends postgresql-client-18 \
+  && rm -rf /var/lib/apt/lists/*
+ENV PATH=/usr/lib/postgresql/18/bin:$PATH
+ENV NODE_ENV=production
+WORKDIR /app
+COPY --from=deps /app /app
+COPY . .
+USER pwuser
+WORKDIR /app/apps/worker
+CMD ["node", "--import", "tsx", "../../packages/platform/scripts/backup.ts"]

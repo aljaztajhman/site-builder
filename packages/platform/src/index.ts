@@ -19,5 +19,6 @@ export * from "./openprovider.ts";
 export * from "./cloudflare-saas.ts";
 export * from "./version.ts";
 export * from "./backups.ts";
+export * from "./restore-drill.ts";
 export * from "./events.ts";
 export * from "./looks.ts";

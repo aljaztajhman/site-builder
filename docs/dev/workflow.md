@@ -40,7 +40,9 @@ Rules
 - Database migrations run at startup today (web and worker). From 1.0 they must be safe while the previous version is still serving: additive first (new column, new table, backfill), the old column dropped in a later release once nothing reads it ("expand, then contract"). A migration that rewrites or drops data needs the owner's approval in HQ before the promote.
 - Spec migrations keep today's rule: version bump, migration, test, and the published sites republished by the worker when the rendering changed.
 - Before every promote, CI restores the latest production backup into a throwaway database and runs the pending migrations against it (a `migrate-check` job). This catches a migration that fails on real data before it reaches production.
-- Backups: Railway's Postgres backups where the plan has them, plus our own nightly `pg_dump` to the bucket (`backups/<date>.sql.gz`, kept 30 days) and the bucket itself versioned. A restore drill every quarter: restore into staging, open three sites, publish one. Unconfirmed: whether the Hobby plan includes Railway-side backups; checked in the implementation PR.
+- Backups: Railway's Postgres backups where the plan has them, plus our own nightly `pg_dump` to the bucket (`backups/<date>.sql.gz`, kept 30 days) and the bucket itself versioned. Unconfirmed: whether the Hobby plan includes Railway-side backups; checked in the implementation PR.
+  - The nightly backup runs inside Railway, not in GitHub Actions, so the database URL never leaves Railway: a cron service `backup` in the production environment, built from `Dockerfile.backup` (the worker's base plus the PostgreSQL 18 client, since production runs PostgreSQL 18 and `pg_dump` must be at least the server's version), schedule `0 3 * * *` (03:00 UTC), default start command `pnpm db:backup` (`node --import tsx ../../packages/platform/scripts/backup.ts`): dump, upload, prune, check, one summary line, exit 1 on failure. Variables: `DATABASE_URL` (the private one) and the storage variables the app uses (`STORAGE_DRIVER=s3`, `S3_*`).
+  - Restore drill, from the same image as a one-off (start command `node --import tsx ../../packages/platform/scripts/restore-drill.ts`, or `pnpm db:restore-drill` anywhere with the PostgreSQL 18 client): the newest backup is restored into a throwaway database `drill_<UTC timestamp>` on the same server, every table's row count compared with the live database (same tables; live ≥ backup, pg-boss's tables only reported), a short report printed, the throwaway database always dropped; exit 1 on a mismatch. Every quarter, and after any change to the backup path, followed by a look in staging: open three sites, publish one.
 - Customer files (originals, published releases) live only in the bucket; a site export is the owner's own backup and stays one click away.
 
 ## 5. Pull requests
@@ -61,7 +63,7 @@ Every PR, human or agent:
 | `ci` (today) | every PR, push to `main` | typecheck, lint, `pnpm test` (fast tier, one runner), `pnpm test:slow` (slow tier, three shards; agent-team.md "Test tiers") |
 | `ci` additions | every PR | `pnpm eval --offline` (free: golden specs through every check), `pnpm --filter @sb/web build` so a broken editor bundle fails before deploy, migration smoke (`migrate` on an empty Postgres) |
 | `promote` (new) | by hand | §3: fast-forward `release`, tag, release notes, migrate-check, deployed smoke test |
-| `nightly` (new) | 03:00 | dependency audit (`pnpm audit --prod`), the backup's existence and size checked, stale-branch report (merged branches older than 7 days deleted) |
+| `nightly` (new) | 03:00 | dependency audit (`pnpm audit --prod`), stale-branch report (merged branches older than 7 days deleted); the backup and its check run in Railway's `backup` cron service instead (§4) |
 | `eval` (today) | by hand | real model calls, costs money, budget rule |
 | Dependabot | weekly, grouped | one PR for dev dependencies, one for runtime; Playwright and Node pinned to the versions the Dockerfiles use |
 
@@ -90,7 +92,7 @@ A change is done when: the tests that cover it ran green, the thing was looked a
 
 ## Implementation (2026-10-07, HQ `it-dev-workflow`)
 
-In code: the version on `/health` (`version: {sha, tag}`) and `/admin`; CI jobs `eval-offline`, `web-build`, `migrations` (empty-database migration smoke plus a migrate-check from the base commit's seeded database); `.github/workflows/promote.yml` and `nightly.yml`; `pnpm db:migrate`, `pnpm db:backup [--check]`, `pnpm db:migrate-check` (config `backups`). Neither new workflow does anything until the owner sets the repository variables and secrets listed at the top of each file (`PRODUCTION_READY`, `NIGHTLY_ENABLED`, …).
+In code: the version on `/health` (`version: {sha, tag}`) and `/admin`; CI jobs `eval-offline`, `web-build`, `migrations` (empty-database migration smoke plus a migrate-check from the base commit's seeded database); `.github/workflows/promote.yml` and `nightly.yml`; `pnpm db:migrate`, `pnpm db:backup [--check]`, `pnpm db:migrate-check`, `pnpm db:restore-drill` (config `backups`); `Dockerfile.backup` for Railway's `backup` cron service. Neither new workflow does anything until the owner sets the repository variables and secrets listed at the top of each file (`PRODUCTION_READY`, `NIGHTLY_ENABLED`, …).
 
 Differences from the text above, for the owner to confirm:
 - Release notes go to the GitHub release of each tag; that page is the changelog. A generated CHANGELOG.md would need a commit on `release` that main lacks (no more fast-forwards) or a push to `main`.
