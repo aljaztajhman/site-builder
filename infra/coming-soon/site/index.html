@@ -79,9 +79,24 @@ nav a:hover{color:var(--ink);border-color:var(--accent)}
 .reel-b .url{height:28px;font-size:14px;line-height:28px;max-width:44%;padding:0 12px}
 .reel-b .pub{height:24px;font-size:12px;padding:0 11px}
 .reel-vp{position:relative;flex:1;overflow:hidden;background:#fff}
-.reel-pg{position:absolute;left:0;top:0;width:100%;aspect-ratio:1440/2300;display:grid;grid-template-rows:repeat(8,1fr)}
-.reel-pg.whole{background:url(primeri/kvas-reel-desk.webp) 0 0/100% auto no-repeat}.reel-pg.whole i{visibility:hidden}
-.reel-pg i{display:block;margin-bottom:-1px;background:url(primeri/kvas-reel-desk.webp) 0 calc(var(--k)*100%/7)/100% auto no-repeat}
+/* the builder screen inside the reel: the chat (your description, what Postavi.si is doing) and the page */
+.reel-ui{position:absolute;inset:0;display:grid;grid-template-columns:minmax(230px,30%) 1fr}
+.rc{display:flex;flex-direction:column;gap:14px;padding:18px;background:#f5f8f8;border-right:1px solid #dde6e8;overflow:hidden;font:500 13px/1.45 var(--ui);color:#14272a}
+.rc-hd{display:flex;align-items:center;gap:8px;font:800 15px/1 var(--display);letter-spacing:-.02em}.rc-hd .pm{width:20px;height:20px}
+.rc-you{align-self:flex-end;max-width:100%;padding:10px 12px;border-radius:14px 14px 4px 14px;background:var(--accent);color:#fff}
+.rc-you small{display:block;margin-bottom:5px;font:600 11px/1 var(--ui);opacity:.75}
+.rc-you p{font-size:12.5px;line-height:1.45}
+.rc-steps{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+.rc-steps li{display:flex;align-items:center;gap:9px;transition:opacity .3s,transform .3s var(--ease)}
+.rc-steps li::before{content:"";flex:none;width:16px;height:16px;border-radius:50%;box-sizing:border-box;border:2px solid #c7d3d5;border-top-color:var(--accent);animation:rc-spin .8s linear infinite}
+.rc-steps li.y::before{animation:none;border-color:#1f8a5c;background:#1f8a5c url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 6.2l2 2 4-4.4' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/100% no-repeat}
+@keyframes rc-spin{to{transform:rotate(360deg)}}
+.reeling .rc-steps li:not(.on){opacity:0;transform:translateY(6px)}
+.rp{position:relative;overflow:hidden;background:#fff}
+.reel-pg{position:absolute;left:0;top:0;width:100%;aspect-ratio:1440/2300;transform-origin:50% 0}
+.reel-pg i{position:absolute;left:0;width:100%;top:calc(var(--t)*1%);height:calc(var(--h)*1%);background:linear-gradient(#dfe7e9,#dfe7e9) 8% 32%/34% 9% no-repeat,linear-gradient(#e7eeef,#e7eeef) 8% 52%/22% 7% no-repeat,linear-gradient(#e7eeef,#e7eeef) 92% 50%/36% 56% no-repeat,#f1f5f6;transform-origin:50% 50%}
+.reel-pg i b{position:absolute;inset:0;background:url(primeri/kvas-reel-desk.webp) 0 calc(var(--y)*1%)/100% auto no-repeat}
+.reel-b.apart,.reel-b.apart .reel-vp,.reel-b.apart .rp{overflow:visible}
 .reel-app{display:none}
 .reel-end{display:flex;flex-direction:column;align-items:center;gap:18px;margin-top:36px}
 .reel-end-h{font:800 clamp(34px,4.6vw,64px)/1 var(--display);letter-spacing:-.04em}
@@ -92,7 +107,7 @@ nav a:hover{color:var(--ink);border-color:var(--accent)}
 .reel-cue{display:none}
 /* scrolling version */
 section.reel{padding:0}
-.reeling .reel{height:calc(100vh + 380vh)}
+.reeling .reel{height:calc(100vh + 480vh)}
 .reeling .reel-st{position:sticky;top:0;height:100vh;padding:0;overflow:hidden;display:block}
 .reeling .reel-hd{position:absolute;left:0;right:0;top:calc(50% - 44px);transform:translateY(-50%);will-change:transform,opacity}
 .reeling .reel-g{position:absolute;left:0;right:0;top:50%;margin:0;transform:translateY(-50%);will-change:transform,opacity}
@@ -109,7 +124,7 @@ section.reel{padding:0}
 .ra-btn{display:inline-flex;align-items:center;gap:10px;margin-top:16px;background:var(--accent);color:#fff;font:700 16px/1 var(--display);padding:14px 20px;border-radius:8px;transition:transform .15s,background .15s}
 .ra-btn svg{width:18px;height:18px}
 .ra-btn.press{transform:scale(.94);background:var(--accent-hover)}
-.reeling .reel-pg i{will-change:transform,opacity}
+.reeling .reel-pg{will-change:transform}
 .reeling .reel-cta{will-change:transform,opacity}
 .reel-cta.cta-on{animation:ring 2.4s .4s var(--ease) infinite}
 .reeling .reel-cue{display:inline-flex;position:absolute;left:50%;bottom:26px;transform:translateX(-50%);align-items:center;gap:8px;font:500 14px/1 var(--ui);color:var(--ink-3);white-space:nowrap}
@@ -120,12 +135,19 @@ section.reel{padding:0}
   .reel-b .url{margin-left:0;max-width:100%;font-size:12px}
   .reel-b .pub{display:none!important}
   .reel-pg{aspect-ratio:390/2000}
-  .reel-pg i,.reel-pg.whole{background-image:url(primeri/kvas-reel-phone.webp)}
+  .reel-pg i{top:calc(var(--tm)*1%);height:calc(var(--hm)*1%)}
+  .reel-pg i b{background-image:url(primeri/kvas-reel-phone.webp);background-position:0 calc(var(--ym)*1%)}
+  .reel-ui{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+  .rc{gap:8px;padding:10px 12px;border-right:0;border-bottom:1px solid #dde6e8}
+  .rc-hd{display:none}
+  .rc-you{align-self:stretch;padding:8px 10px}.rc-you small{display:none}
+  .rc-you p{font-size:11.5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .rc-steps li:not(.cur){display:none}
   .ra-in{padding:16px}.ra-t{font-size:14px;min-height:9em}
   .reel-cta{font-size:16px;min-height:52px}
   .logo-big{margin-bottom:22px;gap:12px}
   .reeling .reel-hd{top:calc(50% - 28px)}
-  .reeling .reel{height:calc(100vh + 360vh);height:calc(100svh + 360svh)}
+  .reeling .reel{height:calc(100vh + 450vh);height:calc(100svh + 450svh)}
   .reeling .reel-st{height:100vh;height:100svh}
 }
 .who{font-size:16px;color:var(--ink-2);animation:fade .8s var(--ease) both}
@@ -171,6 +193,7 @@ h1 em{font-style:normal;color:var(--accent)}
 .ld.done{opacity:0}
 /* the flow: description, build, review, publish. Draft address until published, then the domain with a lock */
 .try-h{font:800 clamp(30px,3.4vw,46px)/1.02 var(--display);letter-spacing:-.035em}
+.try-sub{margin-top:12px;font-size:18px;color:var(--ink-2)}
 .work:has(.h-cta){grid-template-areas:"l d" "c d";row-gap:32px}
 .work:has(.h-cta)>div:first-child{grid-area:l}.work:has(.h-cta)>.demo{grid-area:d}
 .h-cta{grid-area:c}
@@ -179,14 +202,16 @@ h1 em{font-style:normal;color:var(--accent)}
 .vsteps li{counter-increment:v;position:relative;display:grid;grid-template-columns:44px 1fr;column-gap:16px;padding:14px 16px;border-radius:14px;color:var(--ink-3);transition:background .35s,box-shadow .35s,transform .35s var(--ease),color .3s}
 .vsteps li::before{content:counter(v);grid-row:1/3;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;box-sizing:border-box;background:var(--surface);border:2px solid var(--line-2);font:800 18px/1 var(--display);color:var(--ink-3);transition:background-color .3s,border-color .3s,box-shadow .3s,color .3s}
 .vsteps li:not(:last-child)::after{content:"";position:absolute;left:37px;top:60px;height:calc(100% - 52px);width:2px;background:var(--line-2);transition:background .4s}
+.tg{display:inline-block;margin-left:10px;padding:4px 9px;border-radius:99px;font:700 11px/1 var(--ui);font-style:normal;letter-spacing:.01em;vertical-align:3px}
+.tg.you{background:var(--accent-soft);color:var(--accent-text)}.tg.pv{background:#14272a;color:#fff}
 .vsteps b{align-self:end;font:700 20px/1.2 var(--display);letter-spacing:-.01em;color:inherit}
-.vsteps span{align-self:start;margin-top:3px;font-size:15px;line-height:1.4;max-height:0;opacity:0;overflow:hidden;transition:max-height .4s var(--ease),opacity .35s}
+.vsteps span{align-self:start;margin-top:3px;font-size:15px;line-height:1.4;max-height:0;opacity:0;overflow:hidden;transition:max-height .35s .12s var(--ease),opacity .12s}
 .vsteps li.on{color:var(--ink-2)}
 .vsteps li.on::before{content:"";background:var(--accent) var(--tick) center/20px no-repeat;border-color:var(--accent)}
 .vsteps li.on:not(.now)::after{background:var(--accent)}
 .vsteps li.now{color:var(--ink);background:var(--surface);box-shadow:0 18px 40px -24px rgb(15 31 34/.35);transform:translateX(6px)}
 .vsteps li.now::before{content:counter(v);background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 0 0 7px var(--accent-soft)}
-.vsteps li.now span{max-height:3em;opacity:1}
+.vsteps li.now span{max-height:3em;opacity:1;transition:max-height .4s var(--ease),opacity .3s .15s}
 @media (min-width:861px){.demo .flow{display:none}}
 @media (max-width:860px){.vsteps{display:none}.work:has(.h-cta){grid-template-areas:"l" "d" "c"}.h-cta .btn{width:100%}}
 .flow{display:flex;list-style:none;margin:0 0 20px;padding:0;counter-reset:f}
@@ -481,7 +506,7 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
 <div class="wrap">
   <header>
     <a class="brand" href="#" aria-label="Postavi.si, na vrh"><svg class="pm" viewBox="0 0 48 48" aria-hidden="true"><rect class="pm-s" x="9" y="5" width="11" height="38" rx="3.5"/><path class="pm-b" d="M20 5h7a12 12 0 0 1 0 24h-7z"/><rect class="pm-d" x="27" y="33" width="10" height="10" rx="2.5"/></svg><span class="wm">Postavi<em>.si</em></span></a>
-    <nav aria-label="Na tej strani"><a href="#primeri">Primeri</a><a href="#zakaj">Zakaj</a><a href="#hero">Kako poteka</a></nav>
+    <nav aria-label="Na tej strani"><a href="#primeri">Primeri</a><a href="#zakaj">Zakaj</a><a href="#hero">Kako začnete</a></nav>
     <span class="soon">Odpremo kmalu</span>
   </header>
 
@@ -499,14 +524,14 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
         <div class="reel-b" aria-hidden="true">
           <div class="chrome"><i></i><i></i><i></i><div class="url"><span class="lock"></span><span class="draft">postavi.si/osnutek/</span><span class="host">pekarna-kvas</span><span class="tld">.si</span></div><span class="pub">Objavljeno</span><i class="ld done"></i></div>
           <div class="reel-vp">
-            <div class="reel-pg"><i style="--k:0"></i><i style="--k:1"></i><i style="--k:2"></i><i style="--k:3"></i><i style="--k:4"></i><i style="--k:5"></i><i style="--k:6"></i><i style="--k:7"></i></div>
+            <div class="reel-ui"><aside class="rc"><div class="rc-hd"><svg class="pm" viewBox="0 0 48 48" aria-hidden="true"><rect class="pm-s" x="9" y="5" width="11" height="38" rx="3.5"/><path class="pm-b" d="M20 5h7a12 12 0 0 1 0 24h-7z"/><rect class="pm-d" x="27" y="33" width="10" height="10" rx="2.5"/></svg><b>Postavi.si</b></div><div class="rc-you"><small>Vi</small><p>Pekarna Kvas je naša mala družinska pekarna v Kamniku. Kruh pečemo samo z drožmi in ga pustimo vzhajati čez noč. Vsak dan imamo pirin in rženi kruh, rogljičke z maslom in cimetove polže. Odprto od ponedeljka do petka od 6.30 do 18.00.</p></div><ul class="rc-steps"><li class="on y">Pišem besedila v slovenščini</li><li class="on y">Izbiram barve in pisave</li><li class="on y">Sestavljam stran</li><li class="on y cur">Preverjam za Google in telefon</li></ul></aside><div class="rp"><div class="reel-pg"><i style="--t:0.00;--h:3.94;--y:0.000;--tm:0.00;--hm:3.59;--ym:0.000"><b></b></i><i style="--t:3.94;--h:27.13;--y:5.407;--tm:3.59;--hm:15.25;--ym:4.236"><b></b></i><i style="--t:31.07;--h:14.82;--y:36.476;--tm:18.84;--hm:13.69;--ym:21.828"><b></b></i><i style="--t:45.89;--h:24.19;--y:60.533;--tm:32.53;--hm:12.40;--ym:37.135"><b></b></i><i style="--t:70.08;--h:23.53;--y:91.644;--tm:44.93;--hm:21.74;--ym:57.411"><b></b></i><i style="--t:93.61;--h:3.34;--y:96.845;--tm:66.67;--hm:16.62;--ym:79.959"><b></b></i><i style="--t:96.95;--h:3.05;--y:100.000;--tm:83.29;--hm:16.71;--ym:100.000"><b></b></i></div></div></div>
             <div class="reel-app"><div class="ra-in"><small>Opišite svoje podjetje</small><p class="ra-t"><span id="reel-typed">Pekarna Kvas je naša mala družinska pekarna v Kamniku. Kruh pečemo samo z drožmi in ga pustimo vzhajati čez noč. Vsak dan imamo pirin in rženi kruh, rogljičke z maslom in cimetove polže. Odprto od ponedeljka do petka od 6.30 do 18.00.</span><span class="caret"></span></p><span class="ra-btn">Postavi stran<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h12M11 5l5 5-5 5"/></svg></span></div></div>
           </div>
         </div>
       </div>
       <div class="reel-end">
         <p class="reel-end-h">Zdaj pa <em>vaša</em> stran.</p>
-          <a class="btn reel-cta" href="#hero">Poglejte, kako poteka<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 4v12M5 11l5 5 5-5"/></svg></a>
+          <a class="btn reel-cta" href="#hero">Poglejte, kako začnete<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 4v12M5 11l5 5 5-5"/></svg></a>
           <p class="reel-note">Stran v primeru je Postavi.si res naredil iz tega opisa. Podjetje je izmišljeno.</p>
       </div>
       <span class="reel-cue" aria-hidden="true">Pomaknite se<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4v12M5 11l5 5 5-5"/></svg></span>
@@ -517,13 +542,14 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
 
     <div class="work">
       <div>
-        <h2 class="try-h">Kako poteka.</h2>
+        <h2 class="try-h">Začnete v nekaj minutah.</h2>
+        <p class="try-sub">Vi naredite dva koraka. Vse ostalo naredi Postavi.si.</p>
         <ol class="vsteps">
-          <li><b>Opis</b><span>Napišete nekaj stavkov o podjetju.</span></li>
-          <li><b>Postavljanje</b><span>Postavi.si napiše besedila in sestavi stran.</span></li>
-          <li><b>Pregled</b><span>Preveri naslov za Google, telefon, dostopnost in hitrost.</span></li>
-          <li><b>Objava</b><span>Stran je na spletu, na vašem naslovu.</span></li>
-          <li class="on now"><b>Urejanje</b><span>Spremembe vnašate sami. Takoj so na spletu.</span></li>
+          <li><b>Opis<em class="tg you">Vi</em></b><span>Napišete nekaj stavkov o podjetju. Brez tehničnih izrazov.</span></li>
+          <li><b>Postavljanje<em class="tg pv">Postavi.si</em></b><span>Napiše besedila, izbere barve in pisave, sestavi stran.</span></li>
+          <li><b>Pregled<em class="tg pv">Postavi.si</em></b><span>Preveri naslov za Google, telefon, dostopnost in hitrost.</span></li>
+          <li><b>Objava<em class="tg you">Vi</em></b><span>Potrdite in stran je na spletu, na vašem naslovu.</span></li>
+          <li class="on now"><b>Urejanje<em class="tg you">Vi</em></b><span>Kadar želite, spremembe vnesete sami. Takoj so na spletu.</span></li>
         </ol>
       </div>
       <div class="h-cta"><a class="btn" href="#primeri">Poglejte primere strani<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 4v12M5 11l5 5 5-5"/></svg></a></div>
@@ -652,8 +678,8 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
   <div class="end">
     <h2 class="rv">Gradimo. Odpremo kmalu.</h2>
     <div class="rv d1">
-      <p>Zaključujemo zadnje podrobnosti. Medtem si poglejte, kako poteka.</p>
-      <p class="more"><a class="lnk" href="#hero">Kako poteka
+      <p>Zaključujemo zadnje podrobnosti. Medtem si poglejte, kako začnete.</p>
+      <p class="more"><a class="lnk" href="#hero">Kako začnete
         <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 16V4M5 9l5-5 5 5"/></svg></a></p>
     </div>
   </div>
@@ -796,7 +822,7 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
   (function(){
     var reel=$("#reel");if(!reel||reduce)return;
     var hd=$(".reel-hd",reel),g=$(".reel-g",reel),capB=$(".reel-cap b",reel),capT=$(".reel-cap span",reel),b=$(".reel-b",reel),
-        app=$(".reel-app",reel),tx=$("#reel-typed"),rb=$(".ra-btn",reel),pg=$(".reel-pg",reel),vp=$(".reel-vp",reel),sl=$$(".reel-pg i",reel),
+        app=$(".reel-app",reel),tx=$("#reel-typed"),rb=$(".ra-btn",reel),pg=$(".reel-pg",reel),vp=$(".rp",reel),rc=$(".rc",reel),you=$(".rc-you",reel),steps=$$(".rc-steps li",reel),secs=$$(".reel-pg i",reel),cap=$(".reel-cap",reel),card=$(".ra-in",reel),chrome=$(".chrome",reel),geo=null,
         ld=$(".ld",b),cta=$(".reel-cta"),end=$(".reel-end"),cue=$(".reel-cue",reel),full=tx.textContent,raf=0,lastCap=-1;
     var CAPS=[["1","Opišete, kaj delate."],["2","Postavi.si sestavi stran."],["3","Stran je na spletu, na vašem naslovu."]];
     html.classList.add("reeling");
@@ -813,20 +839,40 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
       // 1: the description is typed and the button pressed
       var ty=clamp((p-.12)/.14);tx.textContent=full.slice(0,Math.round(full.length*ty));
       rb.classList.toggle("press",p>=.265&&p<.29);
-      // 2: the page assembles strip by strip, then a look further down it
-      var a=clamp((p-.29)/.2);
-      app.style.opacity=(1-clamp((p-.29)/.04)).toFixed(3);app.style.visibility=p>=.33?"hidden":"";
-      sl.forEach(function(s,k){var q=ease(clamp((a-k*(.6/(sl.length-1)))/.4)),dx=(k%2?1:-1)*(1-q)*48;
-        s.style.opacity=q.toFixed(3);s.style.transform=q>=1?"":"translate("+dx.toFixed(1)+"px,"+((1-q)*70).toFixed(1)+"px) scale("+(.96+.04*q).toFixed(3)+")"});
-      pg.classList.toggle("whole",a>=1);ld.classList.toggle("done",a>=1||a<=0);ld.style.width=(a*92).toFixed(1)+"%";
-      var sc=ease(clamp((p-.47)/.07));pg.style.transform=sc?"translateY("+(-(pg.offsetHeight-vp.offsetHeight)*.32*sc).toFixed(1)+"px)":"";
+      // 2: the description card becomes your message in the chat; Postavi.si answers step by step while the page is built beside it
+      var m=ease(clamp((p-.29)/.05));
+      if(!geo&&m<=0){card.style.transform="";var cr=card.getBoundingClientRect(),br=you.getBoundingClientRect();geo={dx:br.left-cr.left,dy:br.top-cr.top,s:br.width/cr.width}}
+      if(!geo){var t0=card.style.transform;card.style.transform="";var cr2=card.getBoundingClientRect(),br2=you.getBoundingClientRect();geo={dx:br2.left-cr2.left,dy:br2.top-cr2.top,s:br2.width/cr2.width};card.style.transform=t0}
+      card.style.transformOrigin="0 0";
+      card.style.transform=m?"translate("+(geo.dx*m).toFixed(1)+"px,"+(geo.dy*m).toFixed(1)+"px) scale("+(1+(geo.s-1)*m).toFixed(4)+")":"";
+      card.style.opacity=(1-clamp((m-.6)/.4)).toFixed(3);
+      app.style.background=m?"rgb(238 244 245/"+(1-clamp(m/.5)).toFixed(3)+")":"";
+      app.style.visibility=m>=1?"hidden":"";
+      you.style.opacity=clamp((m-.55)/.45).toFixed(3);
+      var ST=[.335,.375,.415,.455],cur=-1;
+      steps.forEach(function(li,i){var on=p>=ST[i],y=p>=ST[i]+.035;li.classList.toggle("on",on);li.classList.toggle("y",y);if(on)cur=i});
+      steps.forEach(function(li,i){li.classList.toggle("cur",i===Math.max(0,cur))});
+      // the page: each section shows as a grey placeholder, then its real content comes in
+      secs.forEach(function(x,k){var q=clamp((p-(.335+k*.022))/.06);x.style.opacity=clamp(q*3).toFixed(3);x.firstChild.style.opacity=clamp((q-.45)/.45).toFixed(3);x.dataset.q=q});
+      var a=clamp((p-.335)/.15);ld.classList.toggle("done",a>=1||a<=0);ld.style.width=(a*92).toFixed(1)+"%";
+      var sc=ease(clamp((p-.47)/.07)),shift=-(pg.offsetHeight-vp.offsetHeight)*.32*sc;
+      pg.style.transform=sc?"translateY("+shift.toFixed(1)+"px)":"";
       // 3: live on its own address
       b.classList.toggle("drf",p<.53);
       var ci=p<.29?0:p<.53?1:2;if(ci!==lastCap){lastCap=ci;capB.textContent=CAPS[ci][0];capT.textContent=CAPS[ci][1]}
-      // the finished page lifts up and away, tipping back
-      var o=ease(clamp((p-.56)/.12));
-      g.style.opacity=(clamp((p-.02)/.06)*(1-clamp((o-.6)/.4))).toFixed(3);
-      g.style.transform="translateY(calc(-50% + "+((1-rise)*innerHeight*.7-o*innerHeight*1.05).toFixed(1)+"px))"+(o>0?" rotateX("+(o*24).toFixed(1)+"deg) scale("+(1-.12*o).toFixed(3)+")":"");
+      // the finished page comes apart: its sections fly off, the chat slides away, the frame dissolves
+      var o=ease(clamp((p-.56)/.1)),vh=vp.offsetHeight,ph=pg.offsetHeight;
+      b.classList.toggle("apart",o>0);
+      b.style.background=o>0?"rgb(255 255 255/"+(1-o).toFixed(3)+")":"";b.style.borderColor=o>0?"rgb(200 214 216/"+(1-o).toFixed(3)+")":"";b.style.boxShadow=o>0?"none":"";
+      vp.style.background=o>0?"transparent":"";chrome.style.opacity=(1-o).toFixed(3);cap.style.opacity=(1-o).toFixed(3);
+      rc.style.opacity=(1-clamp(o/.45)).toFixed(3);rc.style.transform=o?"translateX("+(-30*o).toFixed(1)+"px)":"";
+      secs.forEach(function(x,k){
+        var top=parseFloat(getComputedStyle(x).top)+shift,vis=top<vh;x.style.visibility=o>0&&!vis?"hidden":"";
+        if(o<=0){x.style.transform=x.dataset.q<1?"translateY("+((1-ease(+x.dataset.q))*16).toFixed(1)+"px)":"";return}
+        var d=k%2?1:-1;x.style.transform="translate("+(d*(120+60*k)*o).toFixed(1)+"px,"+((-90-50*k)*o).toFixed(1)+"px) rotate("+(d*(7+5*k)*o).toFixed(2)+"deg) scale("+(1-.15*o).toFixed(3)+")";
+        x.style.opacity=(1-clamp((o-.25)/.75)).toFixed(3)});
+      g.style.opacity=(clamp((p-.02)/.06)*(1-clamp((o-.7)/.3))).toFixed(3);
+      g.style.transform="translateY(calc(-50% + "+((1-rise)*innerHeight*.7).toFixed(1)+"px))";
       // "Zdaj pa vaša stran." takes the screen; when the demo below slides over it, it sinks back
       var c=clamp((p-.65)/.08),cb=back(c),k=ease(clamp((p-.8)/.18));
       end.style.opacity=(c*(1-.85*k)).toFixed(3);end.classList.toggle("on",c>.5&&k<.5);
@@ -842,7 +888,7 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
       if(shown!==t)raf=requestAnimationFrame(tick);
     }
     function onS(){if(!raf)raf=requestAnimationFrame(tick)}
-    addEventListener("scroll",onS,{passive:true});addEventListener("resize",function(){shown=null;onS()});
+    addEventListener("scroll",onS,{passive:true});addEventListener("resize",function(){shown=null;geo=null;onS()});
     document.fonts&&document.fonts.ready.then(function(){shown=null;onS()});
     tick();
   })();
