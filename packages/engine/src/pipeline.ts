@@ -2,7 +2,7 @@ import type { AppConfig } from "@sb/config";
 import { VersionConflictError, normaliseHostname, type Repo, type Storage } from "@sb/platform";
 import { contentType } from "@sb/platform";
 import { mediaFiles, siteFiles, exportZip, renderPage, shareImageOf, variantFile, variantWidths } from "@sb/render";
-import { blockerText, direction as directionById, genomeOfLook, keepUnchangedOwnerEdits, publishChecklist, templateFor, validateSite, type ImageAsset, type PublishBlocker, type SiteSpec } from "@sb/spec";
+import { blockerText, direction as directionById, keepUnchangedOwnerEdits, publishChecklist, templateFor, validateSite, type ImageAsset, type PublishBlocker, type SiteSpec } from "@sb/spec";
 import type { Operation } from "fast-json-patch";
 import { ModelOutputError, SpendCapError, type ModelClient } from "./llm/client.ts";
 import { classify, makeBrief, chooseDesign, altTexts, generateContent, critique, applyPatches, editSpec, drawsInsteadOfPhotos, type VarietyInput } from "./stages.ts";
@@ -10,7 +10,6 @@ import { keyOf, lookKey, siteSeed } from "./variety.ts";
 import { conceptPlan } from "./concept.ts";
 import { isJunkClassification } from "./brief.ts";
 import { applySkeleton, preferPhotoHero } from "./skeleton.ts";
-import { applyGenome } from "./genome.ts";
 import { extractSwatches, type Swatch } from "./palette.ts";
 import { processLogo, processPhoto, shareJpeg, visionJpeg } from "./images.ts";
 import type { ImageGenerator } from "./image-gen.ts";
@@ -22,8 +21,6 @@ import { keepOwnerFacts } from "./owner-facts.ts";
 import { keepOwnerText } from "./owner-text.ts";
 import { claimImageIds } from "./image-ids.ts";
 import { STORAGE_CONCURRENCY, mapLimit } from "./parallel.ts";
-import { runStudio, studioSeed } from "./studio/run.ts";
-import type { MockupDeps } from "./studio/mockup.ts";
 
 export interface PipelineDeps {
   config: AppConfig;
@@ -44,11 +41,6 @@ export interface PipelineDeps {
   pictures?: { fillTo?: number; max?: number; note?: string | null };
   /** Called once the brief (with the business name) is saved, beside the rest of the generation; not awaited. */
   onBrief?: () => void;
-  /**
-   * Design studio 0.5 (docs/plans/studio-0.5.md): recompose the homepage with the director and the approved presets after
-   * the content is merged. The worker sets it from config designer.agent (studioEnabled). Any failure keeps today's spec.
-   */
-  studio?: boolean;
 }
 
 /** The event a regeneration logs with the owner's texts it kept and those it couldn't (the editor words it). */
@@ -122,14 +114,7 @@ export interface GenerateResult {
   homepageMs?: number;
   /** The job finished with the critique skipped: the daily spend cap was reached after the version was saved. */
   critiqueSkipped?: "spend_cap";
-  /** Studio 0.5 ran: the director's idea and stance when the composed homepage was kept, or why today's was kept. */
-  studio?: { composed: true; idea: string; stance: string } | { composed: false; reason: string; idea?: string };
 }
-
-/** The log line of a homepage the studio composed. */
-export const STUDIO_COMPOSED = "Design studio composed the homepage";
-/** The log line when the studio kept today's homepage. */
-export const STUDIO_FELL_BACK = "Design studio kept today's homepage";
 
 /** The editor's log line when the spend cap skipped the critique (the site itself is ready). */
 export const CRITIQUE_SKIPPED_NOTE = "Današnja omejitev porabe je dosežena, zato zadnjega pregleda strani nismo naredili. Stran je pripravljena in jo lahko urejate.";
@@ -222,7 +207,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
       // regeneration replaces (it moves the seed too).
       // The skeleton (config variety.skeleton, Step 4) uses the same seed and the neighbours' skeletons.
       const around =
-        config.variety.families || config.variety.skeleton || config.variety.genome
+        config.variety.families || config.variety.skeleton
           ? await (async () => {
               const previous = (await repo.getSpec(siteId))?.spec;
               const previousKey = previous ? lookKey(previous) : undefined;
@@ -242,8 +227,6 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
           : undefined;
       const skeleton =
         config.variety.skeleton && around ? { seed: around.seed, neighbours: around.looks.flatMap((n) => (n.design.skeleton ? [n.design.skeleton] : [])) } : undefined;
-      // The genome (config variety.genome, Step 5) uses the same seed and the neighbours' genomes.
-      const genome = config.variety.genome && around ? { seed: around.seed, neighbours: around.looks.map((n) => genomeOfLook(n.design, n.hero)) } : undefined;
       const { design, hero } = await stageTime("design", () =>
         chooseDesign(client, { brief, swatches, photoCount: photos.length, generatedCount: ideas.length + reuse.length, ...(variety ? { variety } : {}), ...(skeleton ? { holdPrimary: true } : {}), ...(config.variety.concept ? { concept: true } : {}) }),
       );
@@ -255,7 +238,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
         if (drawsInsteadOfPhotos(directionById(design.direction))) await log("imageGen", `${design.direction} draws the trade instead of showing pictures; no pictures generated`);
         else generating = startImages();
       }
-      return { brief, design, hero, skeleton, genome, generated: await generating };
+      return { brief, design, hero, skeleton, generated: await generating };
     } catch (e) {
       // Pictures not yet sent don't start; ones already sent finish (fal bills them anyway) before the
       // failure is passed on, so nothing of this job runs on behind it.
@@ -300,7 +283,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
   const [planned, imaged] = await Promise.allSettled([planning, imaging]);
   if (planned.status === "rejected") throw planned.reason;
   if (imaged.status === "rejected") throw imaged.reason;
-  const { brief, design, skeleton, genome, generated } = planned.value;
+  const { brief, design, skeleton, generated } = planned.value;
   let hero = planned.value.hero;
   // Not for a template that draws the trade instead of showing pictures (template S).
   if (reuse.length && !drawsInsteadOfPhotos(directionById(design.direction))) {
@@ -376,16 +359,6 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     spec = applied.spec;
     await log("content", "Skeleton", { skeleton: applied.skeleton, neighbours: skeleton.neighbours.length, changes: applied.changes });
   }
-  // The site's design genome (config variety.genome): each axis picked in code away from the neighbours, the written
-  // content dressed in it without a content call. Kept only when the dressed site still validates.
-  if (genome) {
-    const applied = applyGenome(spec, genome);
-    const v = validateSite(applied.spec);
-    if (v.ok) {
-      spec = v.spec;
-      await log("content", "Design genome", { genome: applied.genome, neighbours: genome.neighbours.length, distance: applied.distance });
-    } else await log("content", "Design genome left out: the dressed site doesn't validate", { genome: applied.genome, issues: v.issues.slice(0, 5) });
-  }
   // A regeneration keeps the business facts of the version it replaces (typed in the editor since the intake).
   const replaced = await repo.getSpec(siteId);
   if (replaced) {
@@ -400,25 +373,6 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     const text = keepOwnerText(replaced.spec, spec);
     spec = text.spec;
     if (text.kept.length || text.dropped.length) await log("content", OWNER_TEXT_NOTE, { kept: text.kept, dropped: text.dropped });
-  }
-  // Design studio 0.5: the director and the approved presets recompose the homepage; any failure keeps today's spec.
-  let studio: GenerateResult["studio"];
-  if (deps.studio) {
-    const today = spec;
-    // A business the classifier wasn't sure of (outside the ten trades) gets the shortlist for any trade.
-    const general = (await classified).confidence < config.studio.generalBelowConfidence;
-    const mockup = deps.images ? studioMockupDeps(deps, siteId, today) : undefined;
-    const r = await stageTime("studio", () => runStudio(client, config, { spec: today, brief, corpus, seed: studioSeed(siteId), ...(general ? { general } : {}), ...(mockup ? { mockup } : {}) }));
-    // The mockup path's own line (studio 0.5b): its idea, or why it fell back to the picker, and € by stage.
-    const mockupLog = r.mockup ? { mockup: { ok: r.mockup.ok, reason: r.mockup.reason ?? null, idea: r.mockup.idea ?? null, direction: r.mockup.direction ?? null, sections: r.mockup.sections ?? null, crops: r.mockup.crops, eur: r.mockup.eur } } : {};
-    if (r.ok) {
-      spec = r.spec;
-      studio = { composed: true, idea: r.idea, stance: r.stance };
-      await log("studio", STUDIO_COMPOSED, { path: r.path, idea: r.idea, stance: r.stance, presets: r.used.presets, palette: r.used.palette, pairing: r.used.pairing, wordmark: r.used.wordmark, dropped: r.dropped, eur: r.costEur, ...mockupLog });
-    } else {
-      studio = { composed: false, reason: r.mockup && !r.mockup.ok ? `mockup: ${r.mockup.reason ?? "failed"}; picker: ${r.reason}` : r.reason, ...(r.idea ? { idea: r.idea } : {}) };
-      await log("studio", STUDIO_FELL_BACK, { reason: r.reason, idea: r.idea ?? r.mockup?.idea ?? null, eur: r.costEur, ...mockupLog });
-    }
   }
   let version = await repo.saveSpec(siteId, spec, "generate");
   const firstVersionMs = Date.now() - started;
@@ -445,7 +399,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     // runs its own checklist), it just gets no critique.
     await log("check", "Checks failed to run; kept the saved version without critique", (e as Error).message.slice(0, 300));
     await repo.setStatus(siteId, "ready");
-    return { version, check: null, critiqueRounds: 0, timings, firstVersionMs, ...(homepageMs !== undefined ? { homepageMs } : {}), ...(studio ? { studio } : {}) };
+    return { version, check: null, critiqueRounds: 0, timings, firstVersionMs, ...(homepageMs !== undefined ? { homepageMs } : {}) };
   }
   await log("check", check.failures.length ? "Checks found problems" : "All checks passed", { failures: check.failures, lighthouse: check.lighthouse });
   // A page that scrolls sideways at 360 px is repaired in code when a heading causes it (a lower type scale, re-checked
@@ -467,9 +421,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
       await log("check", e instanceof VersionConflictError ? "Site changed during the overflow repair; repair not applied" : "Overflow repair failed to run", (e as Error).message.slice(0, 300));
     }
   }
-  // The critique can only fix copy: a composed homepage skips it (studio 0.5).
-  if (studio?.composed) await log("critique", "Skipped: the design studio composed the homepage");
-  while (!studio?.composed && rounds < config.limits.critiqueIterations) {
+  while (rounds < config.limits.critiqueIterations) {
     rounds++;
     let c: Awaited<ReturnType<typeof critique>>;
     try {
@@ -525,7 +477,7 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     }
   }
   await repo.setStatus(siteId, "ready");
-  return { version, check, critiqueRounds: rounds, timings, firstVersionMs, ...(homepageMs !== undefined ? { homepageMs } : {}), ...(critiqueSkipped ? { critiqueSkipped } : {}), ...(studio ? { studio } : {}) };
+  return { version, check, critiqueRounds: rounds, timings, firstVersionMs, ...(homepageMs !== undefined ? { homepageMs } : {}), ...(critiqueSkipped ? { critiqueSkipped } : {}) };
 }
 
 /**
@@ -547,31 +499,6 @@ export function generatedImageCount(
   // The plan's pictures for this month ran short: fewer than the site would get, and the caller says why.
   if (missing > max) return { wanted: max, skipped: null, limited: { wanted: missing } };
   return { wanted: missing, skipped: null };
-}
-
-/**
- * The studio's mockup path on this site's storage (studio 0.5b): the client's photos as their largest WebP variant, the
- * logo as rendered, fresh "generated" image ids for the crops, each crop stored and processed like a generated picture.
- */
-function studioMockupDeps(deps: PipelineDeps, siteId: string, today: SiteSpec): MockupDeps {
-  const { config, storage, repo } = deps;
-  return {
-    painter: deps.images!,
-    photo: async (id) => {
-      const img = today.assets.images.find((i) => i.id === id);
-      const w = img ? Math.max(...variantWidths(img, config.images.widths)) : undefined;
-      return img && w ? ((await storage.get(mediaKey(siteId, variantFile(id, w, "webp")))) ?? undefined) : undefined;
-    },
-    logo: async () => (today.assets.logo ? ((await storage.get(mediaKey(siteId, today.assets.logo.file))) ?? undefined) : undefined),
-    imageIds: (n) => claimImageIds(repo, siteId, "generated", n, today.assets.images),
-    store: async (id, jpeg) => {
-      const key = `sites/${siteId}/generated/${id}.jpg`;
-      await storage.put(key, jpeg, "image/jpeg");
-      const processed = await processPhoto(id, jpeg, config.images.widths, { avif: config.images.avifQuality, webp: config.images.webpQuality });
-      await mapLimit(processed.variants, STORAGE_CONCURRENCY, (v) => storage.put(mediaKey(siteId, v.file), v.data, contentType(v.file)));
-      return key;
-    },
-  };
 }
 
 /**

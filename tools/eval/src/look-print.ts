@@ -1,21 +1,20 @@
 /**
- * The uniqueness registry's look distance and gate (docs/plans/design-studio.md §5.4). Today's look distance (the
- * genome's axes, spec genome-rules.ts; the palette in Lab, tools/eval look-distance.ts) extended with the composition
- * signature (the homepage's intents and layouts in order) and a perceptual hash of the first screens at 360 and 1280 px.
- * Weights and thresholds come from config `studio.uniqueness`, never from code. Pure; the platform's look_fingerprints
- * table stores the prints (Repo.looks).
+ * The look distance `pnpm variety` (set-variety.ts) measures a set by: the genome's axes (spec genome-rules.ts), the
+ * homepage's composition signature (its intents and layouts in order), the palette in Lab and a perceptual hash of the
+ * first screens at 360 and 1280 px. Free and local: no model call. Moved here from the engine's design studio when the
+ * studio was removed (2026-10-19); nothing at runtime uses it. LOOK_WEIGHTS are the studio's calibrated weights.
  */
-import type { AppConfig } from "@sb/config";
+import sharp from "sharp";
 import { GENOME_AXES, genomeDistance, genomeOf, hexToLab, intentOfSection, type GenomeView, type SiteSpec } from "@sb/spec";
-import { PHASH_BITS, hamming } from "./phash.ts";
 
-export type UniquenessConfig = AppConfig["studio"]["uniqueness"];
+/** How much each part counts in the distance (calibrated 2026-10-10 on the goldens and twins). */
+export const LOOK_WEIGHTS = { genome: 1, composition: 1, palette: 1, phash: 1, stance: 0.5 } as const;
+export type LookWeights = Record<keyof typeof LOOK_WEIGHTS, number>;
 
 /** The colour roles a look's palette is compared by. */
 export const PALETTE_ROLES = ["background", "primary", "band", "accent"] as const;
 export type PaletteLab = Record<(typeof PALETTE_ROLES)[number], [number, number, number]>;
 
-/** What the registry keeps of a look (a look_fingerprints row without its ids). */
 export interface LookPrint {
   trade: string;
   town: string | null;
@@ -28,7 +27,34 @@ export interface LookPrint {
   phash1280: string | null;
 }
 
-/** One section's place in the composition signature. */
+export const PHASH_BITS = 64;
+
+/**
+ * dHash of a first screen: the screenshot in grey at 9 × 8, one bit per pair of horizontal neighbours (is the left one
+ * brighter), 64 bits as 16 hex characters. It keeps the layout's large light and dark blocks and ignores colour.
+ */
+export async function phash(png: Uint8Array): Promise<string> {
+  const px = await sharp(png).flatten({ background: "#ffffff" }).greyscale().resize(9, 8, { fit: "fill", kernel: "lanczos3" }).raw().toBuffer();
+  let hex = "";
+  for (let y = 0; y < 8; y++) {
+    let byte = 0;
+    for (let x = 0; x < 8; x++) byte = (byte << 1) | (px[y * 9 + x]! > px[y * 9 + x + 1]! ? 1 : 0);
+    hex += byte.toString(16).padStart(2, "0");
+  }
+  return hex;
+}
+
+/** The number of bits two hashes differ in (0 to 64). */
+export function hamming(a: string, b: string): number {
+  if (a.length !== b.length) throw new Error(`hashes of different lengths: ${a.length} and ${b.length}`);
+  let d = 0;
+  for (let i = 0; i < a.length; i++) {
+    let x = Number.parseInt(a[i]!, 16) ^ Number.parseInt(b[i]!, 16);
+    for (; x; x &= x - 1) d++;
+  }
+  return d;
+}
+
 function sectionToken(s: SiteSpec["pages"][number]["sections"][number]): string {
   const intent = intentOfSection(s) ?? "none";
   const layout = s.type === "composed" ? `composed/${(s.props as { width: string }).width}` : `${s.type}/${s.variant}`;
@@ -64,10 +90,7 @@ export function lookPrintOf(spec: SiteSpec, o: { trade: string; town: string | n
   };
 }
 
-/**
- * 0..1: the edit distance of two composition signatures over the longer one. Replacing a section by another layout of
- * the same intent costs half; by another intent, one.
- */
+/** 0..1: the edit distance of two composition signatures over the longer one; another layout of the same intent costs half. */
 export function compositionDistance(a: string, b: string): number {
   const x = a ? a.split(" ") : [];
   const y = b ? b.split(" ") : [];
@@ -83,7 +106,7 @@ export function compositionDistance(a: string, b: string): number {
   return prev[y.length]! / Math.max(x.length, y.length);
 }
 
-/** ΔE at which two colours count as entirely different (as tools/eval look-distance.ts). */
+/** ΔE at which two colours count as entirely different (as look-distance.ts). */
 const DELTA_E_FULL = 50;
 
 /** 0..1: the mean over the palette roles of ΔE76, capped at DELTA_E_FULL. */
@@ -106,7 +129,7 @@ export interface LookDistance {
   parts: { genome: number; composition: number; palette: number; phash: number | null; stance: number | null };
 }
 
-export function lookDistance(a: LookPrint, b: LookPrint, weights: UniquenessConfig["weights"]): LookDistance {
+export function lookDistance(a: LookPrint, b: LookPrint, weights: LookWeights = LOOK_WEIGHTS): LookDistance {
   const parts: LookDistance["parts"] = {
     genome: genomeDistance(a.genome, b.genome) / GENOME_AXES.length,
     composition: compositionDistance(a.composition, b.composition),
@@ -123,42 +146,4 @@ export function lookDistance(a: LookPrint, b: LookPrint, weights: UniquenessConf
     wsum += weights[k];
   }
   return { total: wsum ? sum / wsum : 0, parts };
-}
-
-const sameTown = (a: string | null, b: string | null) => !!a && !!b && a.trim().toLocaleLowerCase("sl") === b.trim().toLocaleLowerCase("sl");
-
-/** The distance a neighbour must keep: sameTownMin in the same town, sameTradeMin in the same trade (the stricter of both); null: neither. */
-export function requiredDistance(candidate: Pick<LookPrint, "trade" | "town">, neighbour: Pick<LookPrint, "trade" | "town">, config: UniquenessConfig): number | null {
-  const mins: number[] = [];
-  if (candidate.trade === neighbour.trade) mins.push(config.sameTradeMin);
-  if (sameTown(candidate.town, neighbour.town)) mins.push(config.sameTownMin);
-  return mins.length ? Math.max(...mins) : null;
-}
-
-export interface UniqueVerdict<N extends LookPrint> {
-  ok: boolean;
-  /** The neighbour of the same trade or town that comes closest (null: none). */
-  closest: N | null;
-  distance: number | null;
-  /** The neighbours it is too close to, closest first. */
-  tooClose: { neighbour: N; distance: number; required: number }[];
-}
-
-/** The gate (§5.4): a look is unique enough when it keeps the required distance from every same-trade and same-town neighbour. */
-export function uniqueEnough<N extends LookPrint>(candidate: LookPrint, neighbours: readonly N[], config: UniquenessConfig): UniqueVerdict<N> {
-  let closest: N | null = null;
-  let distance: number | null = null;
-  const tooClose: UniqueVerdict<N>["tooClose"] = [];
-  for (const n of neighbours) {
-    const required = requiredDistance(candidate, n, config);
-    if (required === null) continue;
-    const d = lookDistance(candidate, n, config.weights).total;
-    if (distance === null || d < distance) {
-      closest = n;
-      distance = d;
-    }
-    if (d < required) tooClose.push({ neighbour: n, distance: d, required });
-  }
-  tooClose.sort((x, y) => x.distance - y.distance);
-  return { ok: tooClose.length === 0, closest, distance, tooClose };
 }

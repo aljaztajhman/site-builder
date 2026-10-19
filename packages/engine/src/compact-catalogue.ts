@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { Business, ColorRole, ElementId, ImageRef, Link, LinkTarget, PageRef, PhonePlace, Place, Placeholder, Price, Scrim, VOCAB_KEY, canonicalJson, toModelJsonSchema, withoutDescription, type SharedDef } from "@sb/spec";
+import { Business, ImageRef, Link, LinkTarget, PageRef, Placeholder, Price, VOCAB_KEY, canonicalJson, toModelJsonSchema, withoutDescription } from "@sb/spec";
 
 /**
  * The compact catalogue notation (config prompts.compactCatalogue, HQ it-compact-catalogue): the props of each section
@@ -29,25 +29,6 @@ const CATALOGUE_SHARED: [string, z.ZodType][] = [
 
 export function catalogueAliases(): CompactAlias[] {
   return CATALOGUE_SHARED.map(([name, schema]) => ({ name, schema: toModelJsonSchema(schema) }));
-}
-
-/**
- * The shapes the designer's composed section repeats across its element kinds (HQ it-studio-catalogue-aliases): the
- * catalogue's shared shapes plus the composition's own, each written once. Only the designer's catalogue uses them
- * (compact and JSON); the designer-off catalogues keep catalogueAliases() and stay byte-identical. Vocabulary fields
- * are named by their list (VOCABS), not listed here.
- */
-export const COMPOSED_SHARED: SharedDef[] = [
-  ...CATALOGUE_SHARED.map(([name, schema]) => ({ name, schema })),
-  { name: "ColorRole", schema: ColorRole },
-  { name: "Scrim", schema: Scrim },
-  { name: "ElementId", schema: ElementId },
-  { name: "Place", schema: Place },
-  { name: "PhonePlace", schema: PhonePlace },
-];
-
-export function composedAliases(): CompactAlias[] {
-  return COMPOSED_SHARED.map(({ name, schema }) => ({ name, schema: toModelJsonSchema(schema) }));
 }
 
 /** What the notation means, for the model (the header of the compact catalogue). */

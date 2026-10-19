@@ -80,8 +80,8 @@ export interface ModelResponse {
 }
 
 export interface CallRecord {
-  /** A model stage, "imageGen" for a generated site picture, or "mockup" for the studio's homepage mockup (no tokens, priced per image). */
-  stage: ModelStageName | "imageGen" | "mockup";
+  /** A model stage, or "imageGen" for a generated site picture (no tokens, priced per image). */
+  stage: ModelStageName | "imageGen";
   model: string;
   usage: ModelUsage;
   costEur: number;
@@ -331,9 +331,6 @@ export class ModelClient {
   /** The settings a stage's calls are sent with (config models, then the model's traits: see `effectiveStage`). */
   stageConfig(stage: ModelStageName): ModelStageConfig {
     const { config } = this.opts;
-    if (config.useFullBuildModel && (stage === "content" || stage === "brief")) {
-      return effectiveStage(config, { ...config.models[stage], model: config.models.fullBuild.model, effort: config.models.fullBuild.effort });
-    }
     return effectiveStage(config, config.models[stage]);
   }
 
