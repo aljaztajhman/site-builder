@@ -16,7 +16,15 @@ import type { Fixture } from "../src/fixtures/schema.ts";
  * and the homepage is page 0 in the spec the critique patched, as in what it read.
  */
 const here = path.dirname(fileURLToPath(import.meta.url));
-const config = loadConfig();
+// Pinned to the config the runs were recorded with (the 2026-10-17 prompt fixes, none of the 2026-10-19 switches): this tests that recorded patches apply.
+const shipped = loadConfig();
+const config = {
+  ...shipped,
+  promptFixes: { ...shipped.promptFixes, pictures: false, critique: false, altText: false, judge: false, brief: false, classifier: false, edit: false },
+  costCuts: { ...shipped.costCuts, secondCritiqueOnlyOnFailures: false, contentRetryAsPatch: false },
+  prompts: { ...shipped.prompts, compactCatalogue: false },
+  structuredOutputForContent: false,
+};
 const recordingsDir = path.join(here, "../recordings");
 let db: Db;
 let repo: Repo;

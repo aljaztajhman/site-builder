@@ -1,0 +1,18 @@
+{
+  "seq": 7,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "c23065ac2baa9f5a",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"patches\":[{\"op\":\"replace\",\"path\":\"/pages/0/sections/1/props/items/5/title\",\"value\":\"Psi na povodcu\"},{\"op\":\"replace\",\"path\":\"/pages/0/sections/1/props/items/5/text\",\"value\":\"Psi lahko ostanejo z vami, če so na povodcu.\"}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 3739,
+      "output_tokens": 110,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 12416
+    }
+  }
+}

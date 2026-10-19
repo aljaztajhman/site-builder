@@ -1,0 +1,18 @@
+{
+  "seq": 4,
+  "stage": "altText",
+  "model": "claude-sonnet-5-5",
+  "hash": "3bca57c0a0ea994d",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"images\":[{\"index\":0,\"alt\":\"Star fotelj z odstranjeno prevleko, vidnimi vzmetmi in jutino v tapetniški delavnici z orodjem na steni in delovno mizo.\",\"focalX\":0.4,\"focalY\":0.55,\"heroSuitable\":true},{\"index\":1,\"alt\":\"Zelena kotna sedežna garnitura z blazinami v svetli dnevni sobi z leseno klubsko mizico in pleteno preprogo.\",\"focalX\":0.45,\"focalY\":0.55,\"heroSuitable\":false},{\"index\":2,\"alt\":\"Vzorčniki blaga, centimeter, kladivo in škarje na leseni delovni mizi, zadaj zvitki blaga različnih barv in vzorcev.\",\"focalX\":0.4,\"focalY\":0.55,\"heroSuitable\":true}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2807,
+      "output_tokens": 296,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

@@ -41,7 +41,9 @@ import {
   type PromptFixes,
 } from "../src/index.ts";
 
-const config = loadConfig();
+const shipped = loadConfig();
+// The tests below pin each switch's own effect against "all off"; the compact catalogue is a switch of its own.
+const config: AppConfig = { ...shipped, prompts: { ...shipped.prompts, compactCatalogue: false } };
 const evalDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../tools/eval");
 const golden = (id: string) => JSON.parse(readFileSync(path.join(evalDir, "golden", `${id}.json`), "utf8")) as SiteSpec;
 const corpus = (id: string) => (JSON.parse(readFileSync(path.join(evalDir, "fixtures", id, "brief.json"), "utf8")) as { description: string }).description;
@@ -65,13 +67,16 @@ const textOf = (req: ModelRequest) =>
 const png = (w: number, h: number) => sharp({ create: { width: w, height: h, channels: 3, background: "#ffffff" } }).png().toBuffer().then((b) => new Uint8Array(b));
 
 describe("prompt fixes, all switches off", () => {
-  it("the config ships with exactly the six fixes the owner turned on (2026-10-17) and the rest off", () => {
-    const on = Object.entries(config.promptFixes).filter(([k, v]) => k !== "$comment" && v !== false).map(([k]) => k);
-    expect(on.sort()).toEqual(["beige", "catalogue", "directions", "oneHero", "sloveneStyle", "warmSurface"]);
+  it("the config ships with every prompt fix on (the six of 2026-10-17, the rest after the 2026-10-19 homepage eval)", () => {
+    const off = Object.entries(shipped.promptFixes).filter(([k, v]) => k !== "$comment" && v !== true).map(([k]) => k);
+    expect(off).toEqual([]);
   });
 
-  it("the config ships with the compact catalogue switch off too", () => {
-    expect(config.prompts.compactCatalogue).toBe(false);
+  it("the config ships with the compact catalogue, structured content and both cost cuts on too", () => {
+    expect(shipped.prompts.compactCatalogue).toBe(true);
+    expect(shipped.structuredOutputForContent).toBe(true);
+    expect(shipped.costCuts.secondCritiqueOnlyOnFailures).toBe(true);
+    expect(shipped.costCuts.contentRetryAsPatch).toBe(true);
   });
 
   it("with prompts.compactCatalogue off the catalogue and business schema are the same bytes as before", () => {
@@ -210,7 +215,7 @@ describe("fix: pictures (brief imageIdeas and the picture style)", () => {
   });
   it("generated pictures get the unstaged phone-photo style", async () => {
     expect(pipelineStyle({ ...config, promptFixes: on })).toBe(config.imageGen.pipeline.unstagedStyle);
-    expect(pipelineStyle(config)).toBe(config.imageGen.pipeline.style);
+    expect(pipelineStyle({ ...config, promptFixes: NO_PROMPT_FIXES })).toBe(config.imageGen.pipeline.style);
     expect(config.imageGen.pipeline.unstagedStyle).toMatch(/Unstaged photo/);
     expect(config.imageGen.pipeline.unstagedStyle).toMatch(/no part of a person/);
     const seen: Record<string, unknown>[] = [];
