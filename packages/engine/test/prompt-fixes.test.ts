@@ -70,9 +70,8 @@ describe("prompt fixes, all switches off", () => {
     expect(on.sort()).toEqual(["beige", "catalogue", "directions", "oneHero", "sloveneStyle", "warmSurface"]);
   });
 
-  it("the config ships with the compact catalogue and homepage-first switches off too", () => {
+  it("the config ships with the compact catalogue switch off too", () => {
     expect(config.prompts.compactCatalogue).toBe(false);
-    expect(config.pipeline.homepageFirst).toBe(false);
   });
 
   it("with prompts.compactCatalogue off the catalogue and business schema are the same bytes as before", () => {

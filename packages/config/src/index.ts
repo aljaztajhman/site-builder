@@ -314,13 +314,6 @@ export const AppConfigSchema = z.object({
    * from the same schemas, about half the tokens. Off: every prompt is byte-identical to before.
    */
   prompts: z.object({ compactCatalogue: z.boolean() }),
-  /**
-   * Generation pipeline (see config $comment). homepageFirst (HQ it-homepage-first): a full-site content step writes the
-   * homepage in one call, then every other page in its own call, side by side, each with the cached catalogue and the
-   * homepage for its facts and voice; the parts are merged into one spec with the same repairs, validation, fact check and
-   * retries (per part). Off: one content call for the whole site.
-   */
-  pipeline: z.object({ homepageFirst: z.boolean() }),
   structuredOutputForContent: z.boolean(),
   pricesUsdPerMTok: z.record(z.string(), Price),
   /** Per-model needs of the client (ModelTraits). Optional: no entry, no change to what a stage is sent. */
