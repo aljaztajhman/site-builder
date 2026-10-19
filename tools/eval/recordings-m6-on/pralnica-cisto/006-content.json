@@ -1,0 +1,18 @@
+{
+  "seq": 6,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "fe17c8ec22e0eb82",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"patches\":[{\"op\":\"replace\",\"path\":\"/pages/0/seo/description\",\"value\":\"Pralnica in likalnica v Logatcu. Perilo operemo, posušimo in zložimo, likamo srajce, peremo odeje in zavese. Posebna cena za večje količine.\"}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 4252,
+      "output_tokens": 101,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 12416
+    }
+  }
+}

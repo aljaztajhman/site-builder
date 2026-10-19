@@ -1,0 +1,18 @@
+{
+  "seq": 0,
+  "stage": "classify",
+  "model": "claude-haiku-4-5-20251001",
+  "hash": "ca95e4aa104617cc",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"isBusiness\":true,\"businessType\":\"physio\",\"confidence\":0.7}",
+    "stopReason": "end_turn",
+    "model": "claude-haiku-4-5-20251001",
+    "usage": {
+      "input_tokens": 1020,
+      "output_tokens": 22,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "seq": 5,
+  "stage": "content",
+  "model": "claude-sonnet-5-5",
+  "hash": "df7f85ee61a7183a",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"chrome\":{\"header\":{\"variant\":\"split-cta\",\"cta\":\"call\"},\"footer\":{\"variant\":\"columns\"},\"mobileActionBar\":true},\"pages\":[{\"id\":\"p_home\",\"kind\":\"home\",\"slug\":\"\",\"nav\":{\"label\":\"Domov\",\"show\":true},\"seo\":{\"title\":\"Dimnikarstvo Vidmar Litija – čiščenje in pregledi dimnikov\",\"description\":\"Čiščenje dimnikov, pregledi kurilnih naprav, meritve emisij in svetovanje pri vgradnji peči v Litiji, Šmartnem pri Litiji in Dolu pri Ljubljani.\"},\"sections\":[{\"id\":\"s_hero\",\"type\":\"hero-split\",\"variant\":\"image-right\",\"tone\":\"default\",\"props\":{\"headline\":\"Dimnik, ki varno vleče, in peč brez težav\",\"intro\":\"Čistimo dimnike, pregledujemo kurilne naprave in merimo emisije v Litiji in okolici. Obiščemo hiše, bloke in vikende.\",\"primary\":{\"label\":\"Oglejte si storitve\",\"target\":{\"page\":\"p_home\",\"section\":\"s_storitve\"}},\"image\":\"img_g1\"}},{\"id\":\"s_strip\",\"type\":\"contact-strip\",\"variant\":\"bar\",\"tone\":\"band\",\"props\":{\"title\":\"Termin po telefonu\"}},{\"id\":\"s_storitve\",\"type\":\"services-cards\",\"variant\":\"compact\",\"tone\":\"default\",\"props\":{\"title\":\"Kaj vse naredimo\",\"intro\":\"Od rednega čiščenja do nasveta pred vgradnjo nove peči.\",\"items\":[{\"title\":\"Redno čiščenje dimnikov in kurilnih naprav\",\"text\":\"Poskrbimo, da je dimnik čist in da kurilna naprava deluje, kot mora.\"},{\"title\":\"Letni pregled kurilnih naprav\",\"text\":\"Pregledamo kurilne naprave na trda goriva, olje in plin.\"},{\"title\":\"Meritve emisij in zapisnik\",\"text\":\"Izmerimo emisije in izdamo zapisnik o meritvah.\"},{\"title\":\"Pregled prezračevanja\",\"text\":\"Preverimo, ali prezračevanje deluje pravilno.\"},{\"title\":\"Vgradnja peči in dimniška cev\",\"text\":\"Svetujemo pri vgradnji peči in zamenjavi dimniške cevi.\"}]}},{\"id\":\"s_peč\",\"type\":\"image-text\",\"variant\":\"image-left\",\"tone\":\"alt\",\"props\":{\"heading\":\"Pred zimo preverite peč\",\"paragraphs\":[\"Kurilna naprava naj ne zataji sredi zime. Pregledamo jo in po potrebi očistimo dimnik, da gorivo gori varno in dimnik dobro vleče.\",\"Pregledujemo naprave na trda goriva, olje in plin.\"],\"image\":\"img_g2\"}},{\"id\":\"s_koraki\",\"type\":\"steps\",\"variant\":\"horizontal\",\"tone\":\"default\",\"props\":{\"heading\":\"Kako do termina\",\"intro\":\"Najlažje nas dobite zjutraj med 6.30 in 7.30.\",\"steps\":[{\"title\":\"Pokličite nas\",\"text\":\"Povejte, ali gre za čiščenje, pregled ali meritve.\"},{\"title\":\"Dogovorimo termin\",\"text\":\"Pridemo v hišo, blok ali vikend.\"},{\"title\":\"Opravimo delo\",\"text\":\"Dimnik in kurilna naprava sta očiščena in pregledana.\"}]}},{\"id\":\"s_obmocje\",\"type\":\"service-area\",\"variant\":\"inline\",\"tone\":\"inverse\",\"props\":{\"title\":\"Kje delamo\",\"intro\":\"Obiščemo vas na naslednjih območjih.\"}}]}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2416,
+      "output_tokens": 1245,
+      "cache_creation_input_tokens": 12416,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

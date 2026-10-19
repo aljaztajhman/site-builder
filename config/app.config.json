@@ -52,13 +52,13 @@
   },
   "promptFixes": {
     "$comment": "The audit's prompt fixes (docs/plans/audit-2026-10-01.md, 'Prompts'; docs/dev/prompt-fixes.md), one switch each. Off: prompts, requests and repairs are byte-identical to before. On since 2026-10-17 (owner, turned on without per-fix evals; CI's offline eval is the guard): directions, warmSurface, oneHero, beige, catalogue, sloveneStyle. Each changes model output: turn one on, run its pnpm eval --only fixtures (record-missing), compare, then keep it on. pictures: brief imageIdeas + imageGen.pipeline.unstagedStyle; critique; altText; judge (eval only); brief: no full RULES in the brief; classifier: confidence defined; edit: the editor's section names; directions: no b/w or duotone promises, editorial photo hero, no Avoid list; warmSurface: warm non-cream surfaces for warm directions; oneHero: one main heading per page (validation + safe repair); beige: beige page backgrounds count as cream in repair; catalogue: eyebrow/contact-strip/cta wording, responsive rule, call-button rule; sloveneStyle: Slovene style block (formal vi, typography, no English words, word order) in the content, edit and critique prompts.",
-    "pictures": false,
-    "critique": false,
-    "altText": false,
-    "judge": false,
-    "brief": false,
-    "classifier": false,
-    "edit": false,
+    "pictures": true,
+    "critique": true,
+    "altText": true,
+    "judge": true,
+    "brief": true,
+    "classifier": true,
+    "edit": true,
     "directions": true,
     "warmSurface": true,
     "oneHero": true,
@@ -68,18 +68,18 @@
   },
   "costCuts": {
     "$comment": "Generation cost cuts (docs/plans/cost-cuts.md items 1 and 7). secondCritiqueOnlyOnFailures: with limits.critiqueIterations 2, the second critique round runs only when the checks after the first round's patches still report failures (3 of 4 recorded second rounds returned no patches, ≈ €0.022 and 40–60 s of checks each); otherwise the job ends after round 1 and logs why. contentRetryAsPatch: a content answer that still fails validation after the code repairs gets an RFC 6902 patch fixing only the listed issues (≈ 300 output tokens instead of 3–5k), applied in code; a patch that doesn't apply or leaves issues falls back to the whole-JSON retry, all within limits.contentRetries. Both off until the 3-fixture critique eval and a full-scope eval on the fixtures that retried (gostilna, kmetija, instalacije) confirm them.",
-    "secondCritiqueOnlyOnFailures": false,
-    "contentRetryAsPatch": false
+    "secondCritiqueOnlyOnFailures": true,
+    "contentRetryAsPatch": true
   },
   "prompts": {
     "$comment": "compactCatalogue (HQ it-compact-catalogue, docs/plans/cost-cuts.md item 6): the section catalogue (first cached system block of content, critique and edit) and the edit's business schema in a TypeScript-like notation (`headline: text≤70`, shared shapes such as Link and Placeholder named once) instead of JSON Schema, generated from the same zod schemas; carries the promptFixes.catalogue wording when that is on. 54.6k → 28.6k characters: ≈ 15.6k → ≈ 8.2k tokens at the JSON form's recorded 3.5 characters per token (6.6k–8.8k at the 3.24–4.34 of the other recorded system blocks), ≈ −€0.018 per cold homepage and ≈ −€0.019 per cold edit (business schema 5.0k → 1.6k characters). The directions catalogue is prose and stays as it is. Off until `pnpm eval --scope home --judge` on all 10 fixtures shows checkpoint passes, retries and judge medians hold (≈ €1.5): the model follows the props from this notation instead of JSON Schema.",
-    "compactCatalogue": false
+    "compactCatalogue": true
   },
   "pipeline": {
     "$comment": "homepageFirst (HQ it-homepage-first): a full-site content step writes the homepage first (one call, the whole page list for nav and links), then every other page in its own call side by side, each with the cached catalogue and the homepage's JSON for facts and voice; merged into one spec through the same repairs, validation, fact check and retries, retried per part (a part's own issues). The first version is still saved once, after the merge (the homepage alone links to pages that don't exist yet, so it doesn't validate); the 'Homepage ready' event carries that homepage (the other pages as empty stand-ins for its nav and links) and a first generation's editor shows it read-only, rendered by the preview (?draft=homepage), until the first version is saved; never a version, never publishable. Costs ≈ €0.007–0.009 more per extra page (each page call re-sends the brief and the homepage, ≈ 3k uncached tokens, and reads the cached catalogue). Ignored with structuredOutputForContent on and for homepage-scope jobs; with it on, costCuts.contentRetryAsPatch doesn't apply (parts retry as whole parts, each ≈ 1k output tokens). Off until a paid full-scope eval on 3 fixtures compares wall time, retries and the voice across pages.",
-    "homepageFirst": false
+    "homepageFirst": true
   },
-  "structuredOutputForContent": false,
+  "structuredOutputForContent": true,
   "pricesUsdPerMTok": {
     "claude-haiku-4-5-20251001": { "input": 1.0, "output": 5.0, "cacheWrite5m": 1.25, "cacheRead": 0.1 },
     "claude-sonnet-5-5": { "input": 2.0, "output": 10.0, "cacheWrite5m": 2.5, "cacheRead": 0.2 },

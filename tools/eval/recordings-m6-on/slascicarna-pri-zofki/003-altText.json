@@ -1,0 +1,18 @@
+{
+  "seq": 3,
+  "stage": "altText",
+  "model": "claude-sonnet-5-5",
+  "hash": "75f222742c8588d5",
+  "origin": "recorded",
+  "response": {
+    "text": "{\"images\":[{\"index\":0,\"alt\":\"Dve kremšnити s sladkorno ometko na belem krožniku, ob skodelici kave na lesenem pultu slaščičarne.\",\"focalX\":0.4,\"focalY\":0.6,\"heroSuitable\":true},{\"index\":1,\"alt\":\"Smetanova torta, okrašena z narezanimi jagodami, na beli stojali za torte na mizi ob oknu.\",\"focalX\":0.5,\"focalY\":0.5,\"heroSuitable\":true},{\"index\":2,\"alt\":\"Steklena vitrina slaščičarne z rezinami kremnih rezin, potico in jabolčnim zavitkom na pladnjih.\",\"focalX\":0.45,\"focalY\":0.6,\"heroSuitable\":true}]}",
+    "stopReason": "end_turn",
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 2800,
+      "output_tokens": 264,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}
