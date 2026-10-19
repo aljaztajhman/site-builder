@@ -165,10 +165,10 @@ describe("landing page", () => {
     expect(page).toContain(`<h3>${std.name}</h3>`);
     expect(page).toContain(`<h3>${plus.name}</h3>`);
     // Yearly first and big, the monthly price in small print (sb-pricing-2).
-    expect(page).toContain(`${eur(std.yearlyEur)} <small>na leto, domena vključena</small>`);
-    expect(page).toContain(`${eur(plus.yearlyEur)} <small>na leto, domena vključena</small>`);
-    expect(page).toContain(`ali ${eur(std.monthlyEur)} na mesec`);
-    expect(page).toContain(`ali ${eur(plus.monthlyEur)} na mesec`);
+    expect(page).toContain(`${eur(std.yearlyEur)} <small>na leto</small>`);
+    expect(page).toContain(`${eur(plus.yearlyEur)} <small>na leto</small>`);
+    expect(page).toContain(`Domena vključena · ali ${eur(std.monthlyEur)} na mesec`);
+    expect(page).toContain(`Domena vključena · ali ${eur(plus.monthlyEur)} na mesec`);
     // The founding offer with its places left (none given yet in this database: all of them; it-upsells).
     expect(page).toContain(`<dt>Za prvih ${std.foundingOffer!.customers} strank<span class="left"> · še ${std.foundingOffer!.customers} prostih mest</span></dt><dd>Prvo leto ${eur(std.foundingOffer!.firstYearEur)}, nato ${std.foundingOffer!.renewalDiscountPercent} % popusta za vedno</dd>`);
     expect(page).toContain(`<dd>${eur(std.setupService.eur)} enkratno</dd>`);
@@ -225,7 +225,7 @@ describe("landing page", () => {
     expect(page).toContain("Pri letnem paketu bo domena vključena v ceno.");
     const noDomain = { ...config, plans: { ...config.plans, standard: { ...config.plans.standard, yearlyIncludesDomain: false }, premium: { ...config.plans.premium, yearlyIncludesDomain: false } } };
     const page2 = homePage({ config: noDomain, signedIn: false, csrf: "t", fullSite: false, allowance: "", botSiteKey: null });
-    expect(page2).not.toContain("domena vključena");
+    expect(page2).not.toContain("Domena vključena");
     expect(page2).not.toContain("Pri letnem paketu bo domena");
   });
 

@@ -500,9 +500,9 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
                   <h3>{std.name}</h3>
                   <div className="amt">
                     {`${wholeEur.format(std.yearlyEur)} `}
-                    <small>{`na leto${std.yearlyIncludesDomain ? ", domena vključena" : ""}`}</small>
+                    <small>na leto</small>
                   </div>
-                  <p className="yearly">{`ali ${wholeEur.format(std.monthlyEur)} na mesec`}</p>
+                  <p className="yearly">{`${std.yearlyIncludesDomain ? "Domena vključena · " : ""}ali ${wholeEur.format(std.monthlyEur)} na mesec`}</p>
                   <p className="muted">Celotna stran, ki jo vodite sami.</p>
                   <ul>
                     <li>{`Do ${std.site.maxPages} strani: ponudba, cenik, o nas, kontakt`}</li>
@@ -540,9 +540,9 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
                   <h3>{plus.name}</h3>
                   <div className="amt">
                     {`${wholeEur.format(plus.yearlyEur)} `}
-                    <small>{`na leto${plus.yearlyIncludesDomain ? ", domena vključena" : ""}`}</small>
+                    <small>na leto</small>
                   </div>
-                  <p className="yearly">{`ali ${wholeEur.format(plus.monthlyEur)} na mesec`}</p>
+                  <p className="yearly">{`${plus.yearlyIncludesDomain ? "Domena vključena · " : ""}ali ${wholeEur.format(plus.monthlyEur)} na mesec`}</p>
                   <p className="muted">{`Vse iz paketa ${std.name} in še:`}</p>
                   <ul>
                     <li>{`Do ${plus.site.maxPages} strani`}</li>
