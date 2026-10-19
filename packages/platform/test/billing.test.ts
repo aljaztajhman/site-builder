@@ -251,7 +251,8 @@ describe("webhook events in the database", () => {
     const store = new BillingStore(db);
     const ana = (await repo.accounts.signIn("ana@example.si", "ana@example.si")).id;
     await store.saveCustomer(ana, "cus_ana");
-    const plus = (await stripe.pricesByLookupKeys([lookupKey(config, "premium_month")]))[0]!;
+    // A later price version (v2) than config names today: still Plus monthly, whatever the metadata says.
+    const plus = { ...(await stripe.pricesByLookupKeys([lookupKey(config, "premium_month")]))[0]!, id: "price_plus_v2", lookup_key: "postavi_premium_month_v2" };
     stripe.subscriptions.set("sub_ana", { id: "sub_ana", customer: "cus_ana", status: "active", cancel_at_period_end: false, metadata: { plan: "standard", interval: "year", founding: "true" }, items: { data: [{ price: plus, current_period_start: sec("2026-10-19T10:00:00Z"), current_period_end: sec("2026-11-19T10:00:00Z") }] } });
     await handleStripeEvent(deps(), event("evt_ana", "customer.subscription.created", { id: "sub_ana" }));
     expect(await store.subscriptionOf(ana)).toMatchObject({ plan: "premium", billing_interval: "month", founding: false });

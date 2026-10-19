@@ -44,6 +44,19 @@ The web service names missing Stripe variables at startup while `BILLING_ENABLED
 3. Customer Portal (Stripe dashboard): allow plan switching between the four prices, card updates and cancelling at
    period end.
 
+## Guards
+
+- **Event order:** each event takes a transaction-scoped advisory lock on its Stripe subscription id, and only then
+  fetches the subscription from Stripe; events about one subscription run one after the other and the later one writes
+  the later state. Rights also end when the paid period ended more than a day ago, whatever the status says.
+- **Founding once per account:** no founding price or coupon for an account with any earlier founding subscription or
+  any invoice. Stripe can't limit a coupon per customer (`max_redemptions` counts all customers; only promotion codes
+  have `restrictions.first_time_transaction`), so our check is the limit.
+- **Placeholders:** config refuses `plans.billingEnabled: true` while `billing.company` has a `[[…]]`; with
+  `BILLING_ENABLED=true` and an `sk_live_` key, checkout answers `provider_error` (and logs why) while any remains.
+- **Unknown customer:** an event about a Stripe customer no account is known for answers 500 (Stripe retries) and logs.
+- **Invoice date:** issued on Stripe's `paid_at`, numbered in that date's year in Ljubljana.
+
 ## Known limits
 
 - **Founding places can overrun by a few.** A place counts once its subscription is active (`accounts.foundingTaken`:
