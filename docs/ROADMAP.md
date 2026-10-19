@@ -10,7 +10,7 @@ Written on 2026-10-16 from an inventory of TASKS.md (263 done, 158 open), HQ, do
 
 ## Now
 
-- **Current milestone:** M5 Domains with the Postavi rename (owner, 2026-10-19), while M2 waits for the rest of the owner's phone run (docs/owner-phone-run.md; criteria 1, 2, 5 and 6; M2 is 2 of 6). M5 plan: `.claude/plans/m5-postavi.md`. Layout: the homepage stays on postavi.si, the app moves to app.postavi.si, customer sites at <name>.postavi.si. Live since 2026-10-19: DNS on Cloudflare, sites at <name>.postavi.si, the Postavi name (PR #252). The app runs at app.postavi.si since 2026-10-19 (APP_URL; the old address still answers). Next: Cloudflare for SaaS (needs the owner's payment method on Cloudflare) and one connected test domain. One M1 follow-up for M2's first week: the slaščičarna hours badge under the phone buttons (TASKS).
+- **Current milestone:** none started (owner, 2026-10-19: "Close M6, but don't start anything new yet"). M6 closed 2026-10-19 (production, backups with a restore drill, alerts, clean switches, promote; first release v0.1.0). Waiting on the owner: M5 (2 of 4) needs a payment method on Cloudflare for customers' own domains; M2 (2 of 6) needs the rest of the phone run (docs/owner-phone-run.md, starts at app.postavi.si). Next in the order: M4 payments, built in test mode, when the owner says go.
 - **Order (owner, 2026-10-18):** company registration comes last; next after M2 are M5 (domains, with the Postavi rename) and M6 (operations), then M4 in test mode and M7a, a free beta.
 - **Owner, in parallel (long lead times):** register the company (M3), find a lawyer for the legal pages (M3). New name Postavi; postavi.si bought 2026-10-17 (M5).
 - **Side work (owner switched to it, 2026-10-18):** the postavi.si coming-soon page: phone intro, the description → build → review → publish → edit demo, the search story, the time band, "live site with an editor" copy (#231, #233, #238, this PR).
@@ -96,7 +96,7 @@ Exit criteria:
 - [ ] End-to-end on live: connect a test domain → TLS → the site serves. Connecting is switched on (registering stays off), and `seo.indexSiteHosts` decided (TASKS:398).
 - [x] Who pays for a domain before billing: nobody; no domains are bought before paid plans (owner, 2026-10-19). The d.o.o. contact person (TASKS:391) moves to M7b with registering.
 
-### M6 · Operations (Claude) — 6 of 6 met (Claude proposes closing it; the owner decides)
+### M6 · Operations (Claude) — done 2026-10-19 (6 of 6; owner: "Close M6")
 
 It keeps running, and we know when it doesn't.
 
