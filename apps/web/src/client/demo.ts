@@ -4,7 +4,7 @@
  * through the trades by itself, each site turning into the next piece by piece. Tabs pick a trade, the
  * view switch shows the phone or the computer, the pause button stops the moving on (WCAG 2.2.2).
  * With reduced motion it all still plays, in fades: nothing slides, scales or scrolls (owner, PR #51).
- * Without JavaScript the tabs are links (/?primer=<id>) and the device shows that trade's site.
+ * Without JavaScript the tabs are links (/nova?primer=<id>) and the device shows that trade's site.
  */
 import { prepareBuild, runBuild, type Build } from "./demo-build.ts";
 import { DEMO } from "./demo-timing.ts";
@@ -281,7 +281,7 @@ export function startDemo(): void {
     restEl.textContent = prompt;
     placeCard();
   } else {
-    // A trade chosen in the address (/?primer=): the site at once, no intro.
+    // A trade chosen in the address (/nova?primer=): the site at once, no intro.
     introDone = true;
     devbox.dataset.step = "site";
     const chosen = byId(tabs.find((b) => b.getAttribute("aria-selected") === "true")?.dataset.id) ?? first;

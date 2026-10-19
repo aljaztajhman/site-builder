@@ -142,7 +142,7 @@ export function sitesPage({ sites, spendToday, cap, csrf, admin, account, badgeF
         <div className="head">
           <h1>{admin ? "Strani" : "Moje strani"}</h1>
           <span className="muted num">{sites.length}</span>
-          <a className="btn primary" href="/#zacni">
+          <a className="btn primary" href="/nova#zacni">
             Nova stran
           </a>
         </div>
@@ -154,7 +154,7 @@ export function sitesPage({ sites, spendToday, cap, csrf, admin, account, badgeF
           </ul>
         ) : (
           <p className="empty-list">
-            Še nimate nobene strani. <a href="/#zacni">Opišite svoje podjetje</a> na domači strani in predogled je narejen v približno dveh minutah.
+            Še nimate nobene strani. <a href="/nova#zacni">Opišite svoje podjetje</a> in predogled je narejen v približno dveh minutah.
           </p>
         )}
       </main>

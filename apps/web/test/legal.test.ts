@@ -86,7 +86,7 @@ describe("the launch check", () => {
 
 describe("the legal pages", () => {
   it("show every provider fact as a marked placeholder while the config has none", async () => {
-    const home = await page(today, "/");
+    const home = await page(today, "/nova");
     const footer = home.slice(home.indexOf("<footer"));
     expect(marks(footer)).toEqual(["e-pošta", "polno ime podjetja", "naslov", "matična številka", "davčna številka", "polno ime podjetja"]);
     // The footer links to all three legal pages; none of them is a dead label any more.
@@ -121,7 +121,7 @@ describe("the legal pages", () => {
   });
 
   it("show the facts and lose the draft notes once the config is filled", async () => {
-    const home = await page(FILLED, "/");
+    const home = await page(FILLED, "/nova");
     const footer = home.slice(home.indexOf("<footer"));
     expect(marks(footer)).toEqual([]);
     for (const v of ["Testno podjetje d.o.o.", "Testna ulica 1, 1000 Ljubljana", "1234567000", "SI12345678", 'href="mailto:info@primer.si"']) expect(footer).toContain(v);

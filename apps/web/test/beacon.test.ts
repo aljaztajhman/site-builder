@@ -82,7 +82,7 @@ describe("Cloudflare Web Analytics beacon", () => {
 
   it("is on the landing page, the login page and the privacy policy on the configured host, with the CSP it needs", async () => {
     const app = makeApp();
-    for (const p of ["/", "/?primer=gostilna", "/login", "/zasebnost"]) {
+    for (const p of ["/nova", "/nova?primer=gostilna", "/login", "/zasebnost"]) {
       const r = await get(app, HOST, p);
       expect(r.status, p).toBe(200);
       const body = await r.text();
@@ -99,7 +99,7 @@ describe("Cloudflare Web Analytics beacon", () => {
   });
 
   it("adds to Turnstile's sources on the landing page instead of replacing them", async () => {
-    const r = await get(makeApp({ botCheck: botOn }), HOST, "/");
+    const r = await get(makeApp({ botCheck: botOn }), HOST, "/nova");
     expect(directive(r, "script-src")).toBe(`script-src 'self' https://challenges.cloudflare.com ${CF_BEACON_SCRIPT}`);
     expect(directive(r, "frame-src")).toBe("frame-src 'self' https://challenges.cloudflare.com");
     expect(directive(r, "connect-src")).toBe(`connect-src 'self' ${CF_BEACON_ENDPOINT}`);
@@ -112,7 +112,7 @@ describe("Cloudflare Web Analytics beacon", () => {
       [makeApp(), "127.0.0.1"],
       [makeApp({ appUrl: "https://web-production-1234.up.railway.app" }), "web-production-1234.up.railway.app"],
     ] as const) {
-      for (const p of ["/", "/login", "/zasebnost"]) {
+      for (const p of ["/nova", "/login", "/zasebnost"]) {
         const r = await get(app, host, p);
         expect(r.status, `${host}${p}`).toBe(200);
         await none(r, `${host}${p}`);
@@ -123,7 +123,7 @@ describe("Cloudflare Web Analytics beacon", () => {
 
   it("is not there without a token, even on the configured host", async () => {
     const app = makeApp({ cloudflare: { token: null, hosts: [HOST] } });
-    for (const p of ["/", "/login", "/zasebnost"]) await none(await get(app, HOST, p), p);
+    for (const p of ["/nova", "/login", "/zasebnost"]) await none(await get(app, HOST, p), p);
     expect(await (await get(app, HOST, "/zasebnost")).text()).not.toContain("Cloudflare Web Analytics");
   });
 

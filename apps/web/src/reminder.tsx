@@ -158,7 +158,7 @@ export function registerReminderRoutes(app: Hono<AppEnv>, deps: Pick<ReminderDep
     if (site && viewer.kind === "account" && site.account_id === viewer.account.id) return c.redirect(`/sites/${site.id}`, 303);
     const email = site?.reminder_email && site.account_id === null ? normaliseEmail(site.reminder_email) : null;
     if (!site || !email || !/^[A-Za-z0-9_-]{32}$/.test(token) || !same(token, reminderToken(secret, site.id, email.key))) {
-      return c.html(notice("Predogleda ni več", "Predogled je bil izbrisan ali pa je že shranjen v računu. Novega naredite na prvi strani.", { href: "/", label: "Na prvo stran" }), 404);
+      return c.html(notice("Predogleda ni več", "Predogled je bil izbrisan ali pa je že shranjen v računu. Novega naredite na začetni strani.", { href: "/nova", label: "Naredite novega" }), 404);
     }
     if (viewer.kind !== "account") return c.redirect(signInUrl(c.req.path), 303);
     if (viewer.account.email_key !== email.key) {

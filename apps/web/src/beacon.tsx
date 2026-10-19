@@ -10,7 +10,7 @@ import { servedForSiteHost } from "./site-hosts.ts";
  * dashboard, the editor, admin, previews, published sites or the example sites the landing page frames.
  * The beacon is cookieless; its token is public (it is in the page) and lives in config.
  */
-export const BEACON_PATHS: ReadonlySet<string> = new Set(["/", "/login", "/zasebnost"]);
+export const BEACON_PATHS: ReadonlySet<string> = new Set(["/nova", "/login", "/zasebnost"]);
 
 /** Where the beacon script comes from, and where it sends its measurements (Cloudflare's CSP FAQ). */
 export const CF_BEACON_SCRIPT = "https://static.cloudflareinsights.com/beacon.min.js";

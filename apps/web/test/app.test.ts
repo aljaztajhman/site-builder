@@ -7,8 +7,8 @@ import { loadConfig } from "@sb/config";
 import { Repo, createDb, createFsStorage, migrate, runningVersion, type Platform, type Queue } from "@sb/platform";
 import { EXPORT_CHECKLIST_MESSAGE, createApp } from "../src/app.ts";
 import { SESSION_COOKIE, loginThrottle } from "../src/auth.ts";
-import { homePage } from "../src/home.tsx";
-import { adminBrowser, type Browser } from "./session-helpers.ts";
+import { pricing, type Pricing } from "../src/cenik.ts";
+import { adminBrowser, newBrowser, type Browser } from "./session-helpers.ts";
 
 const PASSWORD = "test-password-1234";
 let platform: Platform;
@@ -82,9 +82,9 @@ describe("access control", () => {
     const cookie = `${SESSION_COOKIE}=9999999999.forged`;
     expect((await app.request("/new", { headers: { cookie } })).status).toBe(302);
     expect((await app.request("/sites", { headers: { cookie } })).status).toBe(302);
-    // A forged session doesn't count as signed in on the landing page either.
-    const home = await (await app.request("/", { headers: { cookie } })).text();
-    expect(home).toContain('href="/login"');
+    // A forged session doesn't count as signed in on the start page either.
+    const home = await (await app.request("/nova", { headers: { cookie } })).text();
+    expect(home).toContain('href="/login?next=/nova"');
     expect(home).not.toContain("Moje strani");
   });
 });
@@ -113,15 +113,15 @@ describe("product UI", () => {
     expect(login).not.toContain("<style");
   });
 
-  it("has one intake, the landing page's prompt: /new and the empty sites list lead there", async () => {
+  it("has one intake, the start page's prompt: /new and the empty sites list lead there", async () => {
     const { cookie } = await login();
     const moved = await app.request("/new", { headers: { cookie } });
     expect(moved.status).toBe(302);
-    expect(moved.headers.get("location")).toBe("/#zacni");
+    expect(moved.headers.get("location")).toBe("/nova#zacni");
     const sites = await (await app.request("/sites", { headers: { cookie } })).text();
     expect(sites).not.toContain('action="/api/sites"');
-    expect(sites).toContain('href="/#zacni"');
-    const home = await (await app.request("/", { headers: { cookie } })).text();
+    expect(sites).toContain('href="/nova#zacni"');
+    const home = await (await app.request("/nova", { headers: { cookie } })).text();
     const formTag = home.match(/<form class="prompt"[^>]*>/)?.[0] ?? "";
     expect(formTag).toContain('action="/api/sites"');
     expect(formTag).toContain('method="post"');
@@ -148,40 +148,43 @@ describe("product UI", () => {
   });
 });
 
-describe("landing page", () => {
-  it("is / without a session: the designed page, its own stylesheet and script, price from config", async () => {
-    const res = await app.request("/");
+describe("app root, start page and plans", () => {
+  it("sends / where each visitor belongs: the sites list, an open free preview, the homepage, or the start page", async () => {
+    // Without a homepage address (local, these tests) an anonymous visitor gets the start page.
+    const anon = await app.request("/");
+    expect(anon.status).toBe(302);
+    expect(anon.headers.get("location")).toBe("/nova");
+    // With one (production: PLATFORM_DOMAIN), the homepage; a campaign tag goes along.
+    const withHome = createApp({ platform, config: loadConfig(), auth: { password: PASSWORD, secret: "s".repeat(32), secureCookies: false }, platformDomain: "postavi.si" });
+    expect((await withHome.request("/")).headers.get("location")).toBe("https://postavi.si/");
+    expect((await withHome.request("/?utm_source=fb")).headers.get("location")).toBe("https://postavi.si/?utm_source=fb");
+    // Signed in: the sites list.
+    const { cookie } = await login();
+    const signed = await app.request("/", { headers: { cookie } });
+    expect(signed.status).toBe(302);
+    expect(signed.headers.get("location")).toBe("/sites");
+    // The editor's "Paketi in cene": the homepage's plans; without a homepage address, the price list itself.
+    expect((await withHome.request("/cenik")).headers.get("location")).toBe("https://postavi.si/#cenik");
+    expect((await app.request("/cenik")).headers.get("location")).toBe("/api/cenik");
+    // A device that already made a free preview (not yet in an account) goes back to it, also with a homepage address.
+    const visitor = await newBrowser(withHome.request.bind(withHome));
+    const device = /sb_device=([0-9a-f]{32})\./.exec(visitor.cookie)![1]!;
+    const site = await platform.repo.createSite({ name: "Pekarna", slug: "pekarna-root", deviceId: device, intake: { description: "x", photoAssetIds: [], scope: "home" } });
+    const back = await withHome.request("/", { headers: { cookie: visitor.cookie } });
+    expect(back.headers.get("location")).toBe(`/sites/${site.id}`);
+  });
+
+  it("is /nova without a session: the start page, its own stylesheet and script, the intake", async () => {
+    const res = await app.request("/nova");
     expect(res.status).toBe(200);
     expect(res.headers.get("x-robots-tag")).toContain("noindex");
     const page = await res.text();
-    // The slogan is the h1 and the title (sb-slogan); one short line under it.
+    // The slogan is the h1 and the title (sb-slogan).
     expect(page).toContain('<h1 id="h1">Stran za vaše stranke.</h1>');
     expect(page).toContain("<title>Postavi · Stran za vaše stranke.</title>");
-    for (const id of ["zacni", "kaj", "kako", "primer", "cena", "vprasanja"]) expect(page, id).toContain(`id="${id}"`);
-    const plans = loadConfig().plans;
-    const std = plans.standard;
-    const plus = plans.premium;
-    const eur = (n: number) => `${n}\u00a0€`;
-    expect(page).toContain(`<h3>${std.name}</h3>`);
-    expect(page).toContain(`<h3>${plus.name}</h3>`);
-    // Yearly first and big, the monthly price in small print (sb-pricing-2).
-    expect(page).toContain(`${eur(std.yearlyEur)} <small>na leto</small>`);
-    expect(page).toContain(`${eur(plus.yearlyEur)} <small>na leto</small>`);
-    expect(page).toContain(`Domena vključena · ali ${eur(std.monthlyEur)} na mesec`);
-    expect(page).toContain(`Domena vključena · ali ${eur(plus.monthlyEur)} na mesec`);
-    // The founding offer with its places left (none given yet in this database: all of them; it-upsells).
-    expect(page).toContain(`<dt>Za prvih ${std.foundingOffer!.customers} strank<span class="left"> · še ${std.foundingOffer!.customers} prostih mest</span></dt><dd>Prvo leto ${eur(std.foundingOffer!.firstYearEur)}, nato ${std.foundingOffer!.renewalDiscountPercent} % popusta za vedno</dd>`);
-    expect(page).toContain(`<dd>${eur(std.setupService.eur)} enkratno</dd>`);
-    expect(page).toContain(`Do ${std.site.maxPages} strani`);
-    expect(page).toContain(`Do ${plus.site.maxPages} strani`);
-    // Collections and a second language are built (spec v12, Jeziki in the editor): no "v pripravi" on them.
-    expect(page).toContain("<li>Novice, dogodki, storitve in ekipa</li>");
-    expect(page).not.toContain("dogodki (v pripravi)");
-    // No billing yet: the prices are planned and nothing is charged.
-    expect(plans.billingEnabled).toBe(false);
-    expect(page).toContain("Načrtovane cene z DDV. Zaenkrat ničesar ne zaračunamo.");
-    // The comparison with a designer names the cheapest plan as "from".
-    expect(page).toContain(`<b>od ${eur(std.monthlyEur)}</b> na mesec (načrtovana cena)`);
+    expect(page).toContain('id="zacni"');
+    // The story, the plans and the questions are on the homepage, not here.
+    for (const id of ["kaj", "kako", "primer", "cena", "vprasanja"]) expect(page, id).not.toContain(`id="${id}"`);
     // Signed out the prompt is the intake too (the first homepage needs no account): a POST, never the URL.
     const formTag = page.match(/<form class="prompt"[^>]*>/)?.[0] ?? "";
     expect(formTag).toContain('action="/api/sites"');
@@ -194,12 +197,12 @@ describe("landing page", () => {
     expect(page).not.toContain("Potrebujete le e-poštni naslov");
     expect(page).not.toContain("vodnim žigom");
     expect(page).toContain('href="/zasebnost"');
-    expect(page).toContain('href="/login"');
+    expect(page).toContain('href="/login?next=/nova"');
     expect(page).not.toContain("<style");
     expect(page).not.toMatch(/<script>(?!<\/script>)/);
 
     const css = page.match(/href="(\/assets\/ui\/([0-9a-f]{10})\/home\.css)"/);
-    expect(css, "landing page links its stylesheet").not.toBeNull();
+    expect(css, "start page links its stylesheet").not.toBeNull();
     const cssRes = await app.request(css![1]!);
     expect(cssRes.status).toBe(200);
     expect(await cssRes.text()).toContain(".win{");
@@ -215,35 +218,72 @@ describe("landing page", () => {
     expect(hashed.headers.get("cache-control")).toBe("public, max-age=31536000, immutable");
   });
 
+  it("gives the homepage the plans from config at /api/cenik, readable by postavi.si only", async () => {
+    const plans = loadConfig().plans;
+    const std = plans.standard;
+    const plus = plans.premium;
+    const eur = (n: number) => `${n}\u00a0€`;
+    const withHome = createApp({ platform, config: loadConfig(), auth: { password: PASSWORD, secret: "s".repeat(32), secureCookies: false }, platformDomain: "postavi.si" });
+    const res = await withHome.request("/api/cenik", { headers: { origin: "https://postavi.si" } });
+    expect(res.status).toBe(200);
+    expect(res.headers.get("access-control-allow-origin")).toBe("https://postavi.si");
+    expect(res.headers.get("set-cookie")).toBeNull();
+    const other = await withHome.request("/api/cenik", { headers: { origin: "https://evil.example" } });
+    expect(other.headers.get("access-control-allow-origin")).toBeNull();
+    const body = (await res.json()) as Pricing;
+    const [preview, osnovni, plusPlan] = body.plans;
+    expect(preview!.price).toBe(eur(0));
+    expect(osnovni!.name).toBe(std.name);
+    expect(plusPlan!.name).toBe(plus.name);
+    // Yearly first and big, the monthly price in small print (sb-pricing-2).
+    expect(osnovni!.price).toBe(eur(std.yearlyEur));
+    expect(osnovni!.per).toBe("na leto");
+    expect(osnovni!.alt).toBe(`Domena vključena · ali ${eur(std.monthlyEur)} na mesec`);
+    expect(plusPlan!.alt).toBe(`Domena vključena · ali ${eur(plus.monthlyEur)} na mesec`);
+    // The founding offer with its places left (none given yet in this database: all of them; it-upsells), and the setup service.
+    expect(osnovni!.extras).toContainEqual({
+      label: `Za prvih ${std.foundingOffer!.customers} strank · še ${std.foundingOffer!.customers} prostih mest`,
+      value: `Prvo leto ${eur(std.foundingOffer!.firstYearEur)}, nato ${std.foundingOffer!.renewalDiscountPercent} % popusta za vedno`,
+    });
+    expect(osnovni!.extras).toContainEqual({ label: "Postavitev skupaj z vami, po želji", value: `${eur(std.setupService.eur)} enkratno` });
+    expect(osnovni!.lines).toContain(`Do ${std.site.maxPages} strani: ponudba, cenik, o nas, kontakt`);
+    expect(plusPlan!.lines).toContain(`Do ${plus.site.maxPages} strani`);
+    // Collections and a second language are built (spec v12): no "v pripravi" on them.
+    expect(plusPlan!.lines).toContain("Novice, dogodki, storitve in ekipa");
+    // No billing yet: the prices are planned and nothing is charged.
+    expect(plans.billingEnabled).toBe(false);
+    expect(body.billingEnabled).toBe(false);
+    expect(body.note).toContain("Načrtovane cene z DDV. Zaenkrat ničesar ne zaračunamo.");
+    expect(body.faq.length).toBeGreaterThan(3);
+  });
+
   it("calls the prices planned only while billing is off", () => {
     const config = loadConfig();
     const withBilling = { ...config, plans: { ...config.plans, billingEnabled: true } };
-    const page = homePage({ config: withBilling, signedIn: false, csrf: "t", fullSite: false, allowance: "", botSiteKey: null });
-    expect(page).not.toContain("Načrtovane cene");
-    expect(page).not.toContain("Plačevanja še ni");
-    expect(page).toContain("Cene so z DDV. Letni paket plačate po računu z bančnim nakazilom.");
-    expect(page).toContain("Pri letnem paketu bo domena vključena v ceno.");
+    const p1 = pricing(withBilling, null);
+    expect(p1.note).not.toContain("Načrtovane cene");
+    expect(p1.note).toBe("Cene so z DDV. Letni paket plačate po računu z bančnim nakazilom.");
+    expect(p1.faq.map((f) => f.a).join(" ")).toContain("Pri letnem paketu bo domena vključena v ceno.");
     const noDomain = { ...config, plans: { ...config.plans, standard: { ...config.plans.standard, yearlyIncludesDomain: false }, premium: { ...config.plans.premium, yearlyIncludesDomain: false } } };
-    const page2 = homePage({ config: noDomain, signedIn: false, csrf: "t", fullSite: false, allowance: "", botSiteKey: null });
-    expect(page2).not.toContain("Domena vključena");
-    expect(page2).not.toContain("Pri letnem paketu bo domena");
+    const p2 = pricing(noDomain, null);
+    expect(JSON.stringify(p2)).not.toContain("Domena vključena");
+    expect(JSON.stringify(p2)).not.toContain("Pri letnem paketu bo domena");
   });
 
   it("says in the FAQ which versions can be restored, from the retention settings, not 'every change' forever", () => {
     const config = loadConfig();
-    const page = homePage({ config, signedIn: false, csrf: "t", fullSite: false, allowance: "", botSiteKey: null });
-    expect(page).not.toContain("Vsaka sprememba je shranjena kot različica, ki jo lahko obnovite.");
-    expect(page).toContain(`Obnovite lahko vsako različico, ki ni starejša od ${config.versions.retention.keepAllDays} dni, iz starejših dni zadnjo različico dneva, objavljene pa vedno.`);
+    const answers = (c: typeof config) => pricing(c, null).faq.map((f) => f.a).join(" ");
+    expect(answers(config)).not.toContain("Vsaka sprememba je shranjena kot različica, ki jo lahko obnovite.");
+    expect(answers(config)).toContain(`Obnovite lahko vsako različico, ki ni starejša od ${config.versions.retention.keepAllDays} dni, iz starejših dni zadnjo različico dneva, objavljene pa vedno.`);
     const oneDay = { ...config, versions: { ...config.versions, retention: { ...config.versions.retention, keepAllDays: 1 } } };
-    expect(homePage({ config: oneDay, signedIn: false, csrf: "t", fullSite: false, allowance: "", botSiteKey: null })).toContain("ni starejša od 1 dneva,");
+    expect(answers(oneDay)).toContain("ni starejša od 1 dneva,");
   });
 
-  it("serves the example site so the landing page can frame it, and nothing else may be framed", async () => {
-    const page = await (await app.request("/")).text();
-    // The "Primer" section: Pekarna Kvas rendered by our engine, the cinnamon rolls' price marked as missing.
-    const src = page.match(/<iframe src="(\/assets\/ui\/([0-9a-f]{10})\/examples\/primer\/index\.html)"/);
-    expect(src).not.toBeNull();
-    const ex = await app.request(src![1]!);
+  it("serves the example sites the start page frames, and nothing else may be framed", async () => {
+    const page = await (await app.request("/nova")).text();
+    const hash = page.match(/\/assets\/ui\/([0-9a-f]{10})\/home\.css/)![1];
+    const src = `/assets/ui/${hash}/examples/primer/index.html`;
+    const ex = await app.request(src);
     expect(ex.status).toBe(200);
     expect(ex.headers.get("content-type")).toContain("text/html");
     expect(ex.headers.get("content-security-policy")).toContain("frame-ancestors 'self'");
@@ -252,21 +292,21 @@ describe("landing page", () => {
     // Its stylesheet resolves next to it.
     const css = /href="\.\.\/(_shared\/[0-9a-f]+\/site(?:-[a-z-]+)?\.css)"/.exec(html);
     expect(css, "the example links its stylesheet").not.toBeNull();
-    expect((await app.request(`/assets/ui/${src![2]}/examples/${css![1]}`)).status).toBe(200);
-    for (const p of ["/", "/login"]) expect((await app.request(p)).headers.get("content-security-policy"), p).toContain("frame-ancestors 'none'");
+    expect((await app.request(`/assets/ui/${hash}/examples/${css![1]}`)).status).toBe(200);
+    for (const p of ["/nova", "/login"]) expect((await app.request(p)).headers.get("content-security-policy"), p).toContain("frame-ancestors 'none'");
   });
 
-  it("stays the landing page with a session, linking to the sites list; the dashboard is /sites", async () => {
+  it("keeps the start page with a session, linking to the sites list; the dashboard is /sites", async () => {
     const { cookie, csrf } = await login();
-    const home = await (await app.request("/", { headers: { cookie } })).text();
+    const home = await (await app.request("/nova", { headers: { cookie } })).text();
     expect(home).toContain('data-home-intake=""');
     expect(home).toMatch(/<a class="btn quiet sm login" href="\/sites">Moje strani<\/a>/);
-    expect(home).not.toContain('href="/login"');
+    expect(home).not.toContain('href="/login');
     const dashboard = await (await app.request("/sites", { headers: { cookie } })).text();
     expect(dashboard).not.toContain("data-home-intake");
     expect(dashboard).toContain('action="/logout"');
     expect(dashboard).toContain('class="brand" href="/sites"');
-    // Signing in without a destination lands on the landing page, as does signing out.
+    // Signing in without a destination goes to / (which sends a signed-in owner to the sites list), as does signing out.
     const signIn = await app.request("/login", { method: "POST", body: new URLSearchParams({ password: PASSWORD }) });
     expect(signIn.headers.get("location")).toBe("/");
     // Signing out is a form with the CSRF token; without it nothing happens.

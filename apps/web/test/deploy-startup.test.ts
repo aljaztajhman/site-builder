@@ -90,7 +90,7 @@ describe("deployed without the new optional variables", () => {
     expect(await email.text()).toContain("Prijava po e-pošti trenutno ni na voljo.");
 
     // Previews without an account refuse (no Turnstile keys), up front on the page and at the intake.
-    expect(await (await fetch(`${base}/`, { headers: { cookie: `sb_device=${device}` } })).text()).toContain("Predogled brez prijave trenutno ni na voljo.");
+    expect(await (await fetch(`${base}/nova`, { headers: { cookie: `sb_device=${device}` } })).text()).toContain("Predogled brez prijave trenutno ni na voljo.");
     const ticket = await fetch(`${base}/api/intake/ticket`, {
       method: "POST",
       body: new URLSearchParams({ _csrf: csrf, description: "Pekarna Kvas v Kamniku, Šutna 30. Kruh z drožmi, rogljički in potica." }),

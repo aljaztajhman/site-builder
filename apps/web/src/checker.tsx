@@ -168,7 +168,7 @@ export function reportPage(row: UrlCheckRow): string {
               <p>
                 <strong>Kako bi lahko izgledala vaša stran?</strong> Opišite podjetje v nekaj stavkih in v minuti dobite brezplačen predogled nove strani, ki na telefonu deluje dobro.
               </p>
-              <a className="btn primary block" href="/#zacni">
+              <a className="btn primary block" href="/nova#zacni">
                 Naredi predogled
               </a>
             </div>

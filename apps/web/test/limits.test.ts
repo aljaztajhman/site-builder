@@ -164,7 +164,7 @@ const state = async (b: Browser, id: string) =>
 describe("anonymous: one homepage per device", () => {
   it("makes the first preview without an account, refuses the second and keeps the text", async () => {
     const b = await newBrowser(req);
-    const home = await req("/", { headers: { cookie: b.cookie } });
+    const home = await req("/nova", { headers: { cookie: b.cookie } });
     const page = await home.text();
     // Turnstile's widget and the CSP that lets its script and frame load.
     expect(page).toContain(`data-sitekey="${SITE_KEY}"`);
@@ -207,9 +207,9 @@ describe("anonymous: one homepage per device", () => {
     // Refused at the ticket, before any file is sent (the page keeps the text: limits-browser.test.ts).
     const second = await intake(req, b, { description: `${DESCRIPTION} Druga.` });
     expect(second.status).toBe(429);
-    expect(await second.json()).toMatchObject({ code: "anonymous_used", message: expect.stringContaining("Brezplačni predogled brez prijave ste že naredili."), signIn: "/login?next=%2F%23zacni" });
-    // The landing page links the preview it already made.
-    expect(await (await req("/", { headers: { cookie: b.cookie } })).text()).toContain(`href="/sites/${id}"`);
+    expect(await second.json()).toMatchObject({ code: "anonymous_used", message: expect.stringContaining("Brezplačni predogled brez prijave ste že naredili."), signIn: "/login?next=%2Fnova%23zacni" });
+    // The start page links the preview it already made.
+    expect(await (await req("/nova", { headers: { cookie: b.cookie } })).text()).toContain(`href="/sites/${id}"`);
     expect(sent).toHaveLength(0);
   });
 
@@ -334,7 +334,7 @@ describe("bot check (Turnstile)", () => {
   it("is skipped in development without keys, and refuses previews without an account when deployed without keys", async () => {
     const dev = makeApp({ mode: "skip", siteKey: null, verify: async () => true });
     const dreq: Req = (p, init) => dev.request(p, init);
-    const devPage = await dreq("/");
+    const devPage = await dreq("/nova");
     expect(await devPage.text()).not.toContain("cf-turnstile");
     expect(devPage.headers.get("content-security-policy")).not.toContain("challenges.cloudflare.com");
     expect((await intake(dreq, await newBrowser(dreq), { token: null })).status).toBe(303);
@@ -342,7 +342,7 @@ describe("bot check (Turnstile)", () => {
 
     const deployed = makeApp({ mode: "unavailable", siteKey: null, verify: async () => false });
     const preq: Req = (p, init) => deployed.request(p, init);
-    expect(await (await preq("/")).text()).toContain("Predogled brez prijave trenutno ni na voljo.");
+    expect(await (await preq("/nova")).text()).toContain("Predogled brez prijave trenutno ni na voljo.");
     const refused = await intake(preq, await newBrowser(preq), { token: null });
     expect(refused.status).toBe(503);
     // Signed-in owners aren't affected.
