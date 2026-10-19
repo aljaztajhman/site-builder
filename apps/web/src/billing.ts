@@ -15,7 +15,6 @@ import {
   type BillingErrorCode,
   type BillingInterval,
   type BillingSummary,
-  type InvoiceView,
   type PlanKey,
   type PriceSlot,
   type Repo,
@@ -23,7 +22,9 @@ import {
   type StripeApi,
   type StripeEvent,
 } from "@sb/platform";
-import { STRIPE_WEBHOOK_PATH, type AppEnv } from "./access.ts";
+import { STRIPE_WEBHOOK_PATH, type AppEnv, type Viewer } from "./access.ts";
+import { renderInvoiceHtml } from "./invoice-view.tsx";
+import { narocninaNotice, renderNarocnina } from "./narocnina.tsx";
 
 /**
  * Billing API (.claude/plans/m4-payments.md; contract in packages/platform/src/billing-types.ts). Card payments through
@@ -34,7 +35,8 @@ import { STRIPE_WEBHOOK_PATH, type AppEnv } from "./access.ts";
  * - POST /api/billing/checkout  { plan, interval, setup? } → { url } of a Stripe Checkout page
  * - POST /api/billing/portal    → { url } of the Stripe Customer Portal
  * - POST /api/billing/stripe    Stripe's webhook: raw body, Stripe-Signature checked; 200 handled or replayed, 400 bad signature/body
- * - GET  /racun/:id, /racun/:id.pdf   an invoice (its owner and the admin)
+ * - GET  /narocnina             the owner's plan page (narocnina.tsx) from the same summary
+ * - GET  /racun/:id, /racun/:id.pdf   an invoice (its owner and the admin; invoice-view.tsx)
  */
 
 export interface BillingRouteDeps {
@@ -47,8 +49,6 @@ export interface BillingRouteDeps {
   webhookSecret: string | null;
   /** Public origin for Stripe's return links; the request's own origin when not given (development). */
   appUrl?: string;
-  /** The invoice page (Unit B's invoice-view.tsx once merged). */
-  renderInvoiceHtml: (view: InvoiceView) => string;
   /** BILLING_ENABLED and the like (tests). */
   env?: Record<string, string | undefined>;
   /** How long found Stripe price ids are reused, ms (tests: 0). */
@@ -94,16 +94,14 @@ export function registerBillingRoutes(app: Hono<AppEnv>, deps: BillingRouteDeps)
     return Math.max(0, f.customers - (await repo.accounts.foundingTaken()));
   }
 
-  app.get("/api/billing", async (c) => {
-    const v = c.get("viewer");
-    if (v.kind === "anonymous") return refuse(c, 401, "not_signed_in");
+  async function summaryFor(v: Exclude<Viewer, { kind: "anonymous" }>): Promise<BillingSummary> {
     const enabled = on();
     const sub = v.kind === "account" ? await store.subscriptionOf(v.account.id) : null;
     const now = new Date();
     const allowed = v.kind === "account" ? await repo.accounts.allowed(v.account.email_key) : null;
     const left = enabled ? await foundingLeft() : null;
     const f = config.plans.standard.foundingOffer;
-    const summary: BillingSummary = {
+    return {
       enabled,
       subscription: sub ? subscriptionView(sub, now, grace) : null,
       grantedByAdmin: !!allowed && !(sub && isEntitled(sub, now, grace)),
@@ -115,8 +113,24 @@ export function registerBillingRoutes(app: Hono<AppEnv>, deps: BillingRouteDeps)
       founding: f && left ? { left, firstYearEur: f.firstYearEur, renewalEur: foundingRenewalEur(config)! } : null,
       setup: { eur: config.plans.standard.setupService.eur, includedYearly: { standard: config.plans.standard.setupService.includedYearly, premium: config.plans.premium.setupService.includedYearly } },
     };
+  }
+
+  app.get("/api/billing", async (c) => {
+    const v = c.get("viewer");
+    if (v.kind === "anonymous") return refuse(c, 401, "not_signed_in");
     c.header("cache-control", "private, no-store");
-    return c.json(summary);
+    return c.json(await summaryFor(v));
+  });
+
+  // The owner's plan page (anonymous visitors are sent to sign in by siteAccess; the admin has no plan).
+  app.get("/narocnina", async (c) => {
+    const v = c.get("viewer");
+    if (v.kind !== "account") return c.redirect("/");
+    const summary = await summaryFor(v);
+    c.header("cache-control", "private, no-store");
+    return c.html(
+      renderNarocnina({ summary, email: v.account.email, csrf: c.get("csrf"), notice: narocninaNotice((k) => c.req.query(k)), graceEndsAt: summary.subscription?.graceEndsAt ?? null }),
+    );
   });
 
   app.use("/api/billing/checkout", bodyLimit({ maxSize: 4 * 1024 }));
@@ -221,7 +235,7 @@ export function registerBillingRoutes(app: Hono<AppEnv>, deps: BillingRouteDeps)
     if (!inv || !(v.kind === "admin" || (v.kind === "account" && inv.account_id === v.account.id))) return c.notFound();
     c.header("cache-control", "private, no-store");
     c.header("x-robots-tag", "noindex");
-    if (!m[2]) return c.html(deps.renderInvoiceHtml(inv.view));
+    if (!m[2]) return c.html(renderInvoiceHtml(inv.view, { pdfLink: true }));
     const pdf = inv.pdf_key ? await storage.get(inv.pdf_key) : null;
     if (!pdf) return c.text("Račun v PDF še pripravljamo. Poskusite znova čez minuto.", 404);
     c.header("content-type", "application/pdf");

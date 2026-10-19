@@ -285,6 +285,7 @@ export function subscriptionView(row: SubscriptionRow, now: Date, graceDays: num
     cancelAtPeriodEnd: row.cancel_at_period_end,
     founding: row.founding,
     entitled: isEntitled(row, now, graceDays),
+    ...(row.status === "past_due" ? { graceEndsAt: new Date(new Date(row.past_due_since ?? now).getTime() + graceDays * 86400_000).toISOString() } : {}),
   };
 }
 

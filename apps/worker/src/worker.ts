@@ -38,9 +38,9 @@ import { INTERRUPTED_MESSAGE, OpsState, SPEND_CAP_REFUSAL, WORKER_HEARTBEAT, dom
 import type { SiteSpec } from "@sb/spec";
 import { cleanupExpired, spendMonitor } from "./housekeeping.ts";
 import { sendInvoiceDocuments, type InvoiceDocumentDeps } from "./invoices.ts";
-// PLACEHOLDER until apps/web/src/invoice-view.tsx (Unit B) is merged; then import renderInvoiceHtml from there.
+// The invoice page as the PDF prints it. PLACEHOLDER: the designed view is apps/web/src/invoice-view.tsx (Unit B); the worker
+// can't import from @sb/web (web depends on the worker), so the director moves that renderer to a shared package or wires it.
 import { renderInvoiceHtml } from "./invoice-html-fallback.ts";
-export { renderInvoiceHtml };
 import { recordGeneration, type GenerationOutcome } from "./telemetry.ts";
 
 /** Replies to the owner when a chat edit fails outright (the details go to the event log). */

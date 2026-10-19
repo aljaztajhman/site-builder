@@ -62,8 +62,6 @@ import { registerWaitlistRoutes } from "./waitlist.ts";
 import { domainsInfo, registerDomainRoutes } from "./domains.ts";
 import { registerCompanyLookupRoute } from "./company-lookup.ts";
 import { registerBillingRoutes } from "./billing.ts";
-// PLACEHOLDER until Unit B's apps/web/src/invoice-view.tsx is merged; then import renderInvoiceHtml from there.
-import { renderInvoiceHtml } from "@sb/worker/worker";
 import { createHash } from "node:crypto";
 import { campaignSource, isPageView, tracker } from "./analytics.ts";
 import { CF_BEACON_ENDPOINT, CF_BEACON_SCRIPT, cloudflareBeacon } from "./beacon.tsx";
@@ -281,7 +279,6 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
     config,
     stripe: opts.stripe !== undefined ? opts.stripe : stripeFromEnv(),
     webhookSecret: opts.stripeWebhookSecret !== undefined ? opts.stripeWebhookSecret : process.env.STRIPE_WEBHOOK_SECRET || null,
-    renderInvoiceHtml,
     ...(opts.appUrl ? { appUrl: opts.appUrl } : {}),
     ...(opts.billingEnv ? { env: opts.billingEnv } : {}),
   });
@@ -399,7 +396,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
         csrf: c.get("csrf"),
         admin,
         // M4 billing UI: "Naročnina" in an owner's bar while billing is on.
-        billing: config.plans.billingEnabled,
+        billing: billingOn(),
         // Free, unpublished previews carry the small badge beside their thumbnail (never inside it).
         badgeFor: (site) => previewBadge(config, tierOf(viewer), site),
         // An owner sees what is left of their allowance (limits.ts), in Slovene.

@@ -167,6 +167,10 @@ describe("billing flow with a fake Stripe", () => {
     expect(s.subscription).toMatchObject({ plan: "standard", interval: "year", status: "active", founding: true, entitled: true, cancelAtPeriodEnd: false, currentPeriodEnd: periodEnd.toISOString() });
     expect(s.invoices.map((i) => [i.number, i.totalEur])).toEqual([["2026-00001", 248]]);
     expect(s.founding?.left).toBe(99);
+    const plan = await req("/narocnina?uspeh=1", { headers: { cookie: eva.cookie } });
+    expect(plan.status).toBe(200);
+    expect(await plan.text()).toContain("2026-00001");
+    expect((await req("/narocnina", { redirect: "manual" })).status).toBe(302);
     expect((await publish(eva)).status).not.toBe(403);
 
     // The invoice page: its owner sees it; another owner gets a 404; the PDF waits for the worker.
@@ -190,7 +194,9 @@ describe("billing flow with a fake Stripe", () => {
   it("keeps rights for the grace days after a failed renewal, then points to the portal", async () => {
     stripe.subscriptions.get("sub_flow")!.status = "past_due";
     await deliver("invoice.payment_failed", { id: "in_flow_2", customer, amount_paid: 0, currency: "eur", created: sec(new Date()), parent: { subscription_details: { subscription: "sub_flow" } }, lines: { data: [] } });
-    expect((await summary(eva)).subscription).toMatchObject({ status: "past_due", entitled: true });
+    const due = (await summary(eva)).subscription!;
+    expect(due).toMatchObject({ status: "past_due", entitled: true });
+    expect(Date.parse(due.graceEndsAt!) - Date.now()).toBeGreaterThan(6.9 * 86400_000);
     expect((await publish(eva)).status).not.toBe(403);
     // Eight days later.
     await platform.db.query("update subscriptions set past_due_since = now() - interval '8 days' where id = 'sub_flow'");
