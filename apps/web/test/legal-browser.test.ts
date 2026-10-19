@@ -15,7 +15,7 @@ import { createApp } from "../src/app.ts";
  * says they are checked: axe (WCAG 2.2 A and AA rules) finds nothing, nothing scrolls sideways, and the landing
  * footer's links are at least 24 px tall (WCAG 2.5.8) and lead to their pages.
  */
-const PAGES = ["/", "/login", "/zasebnost", "/pogoji", "/dostopnost"];
+const PAGES = ["/nova", "/login", "/zasebnost", "/pogoji", "/dostopnost"];
 let platform: Platform;
 let dir: string;
 let server: ServerType;
@@ -58,15 +58,15 @@ describe("the product's public pages", () => {
       }
     }, 120_000);
 
-    it(`at ${width} px: the landing footer's legal links are big enough and open their pages`, async () => {
+    it(`at ${width} px: the start page footer's legal links are big enough and open their pages`, async () => {
       const context = await cb.browser.newContext({ viewport: { width, height: 800 }, reducedMotion: "reduce" });
       try {
         const page = await context.newPage();
-        await page.goto(`${base}/`);
+        await page.goto(`${base}/nova`);
         const sizes = await page.locator("footer a").evaluateAll((els) => els.map((e) => ({ text: e.textContent, h: e.getBoundingClientRect().height })));
         for (const s of sizes) expect(s.h, s.text ?? "").toBeGreaterThanOrEqual(24);
         for (const [name, h1] of [["Pogoji uporabe", "Pogoji uporabe"], ["Izjava o dostopnosti", "Izjava o dostopnosti"], ["Zasebnost", "Zasebnost"]] as const) {
-          await page.goto(`${base}/`);
+          await page.goto(`${base}/nova`);
           await page.locator("footer").getByRole("link", { name, exact: true }).click();
           await expect.poll(() => page.locator("h1").textContent()).toBe(h1);
         }

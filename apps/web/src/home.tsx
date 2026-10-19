@@ -4,13 +4,14 @@ import { uiUrl } from "./ui/assets.ts";
 import { PRODUCT_NAME } from "./ui/labels.ts";
 import { Provider } from "./legal.tsx";
 import { TURNSTILE_SCRIPT } from "./turnstile.ts";
-import { chatEdits, count, daysAfterOd, moreHomepages } from "./limits.ts";
+import { chatEdits, daysAfterOd, moreHomepages } from "./limits.ts";
 import { tradeCaption, tradeClientData, tradeShowcases, tradeTitle } from "./showcase.ts";
 import { clientScriptUrl } from "./client-bundle.ts";
 import { Beacon } from "./beacon.tsx";
 
 /**
- * The product's landing page at / (docs/design/homepage.html), for everyone; signed in, the header
+ * The start page at /nova: the description form (the intake) and the demo beside it. The story, the plans and the
+ * questions are on the homepage, postavi.si (infra/coming-soon), which reads the plans from /api/cenik. Signed in, the header
  * links to the sites list instead of the login.
  * Stylesheet ui/home.css, script client/home.ts; the example sites are rendered by our engine into ui/examples/ (pnpm examples:build).
  * The prompt box is the intake, the only way to start a site, signed in or not: it posts the
@@ -18,12 +19,6 @@ import { Beacon } from "./beacon.tsx";
  * Without an account the form carries the Turnstile widget. Going to the login from here, home.ts
  * carries the typed text across it (sessionStorage, never the URL) back to this page.
  */
-
-const wholeEur = new Intl.NumberFormat("sl-SI", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
-/** "3 ustvarjene slike", "10 ustvarjenih slik". */
-const pictures = (n: number) => count(n, { one: "ustvarjena slika", two: "ustvarjeni sliki", few: "ustvarjene slike", other: "ustvarjenih slik" });
-/** "še 100 prostih mest", "še 1 prosto mesto". */
-const placesLeft = (n: number) => `še ${count(n, { one: "prosto mesto", two: "prosti mesti", few: "prosta mesta", other: "prostih mest" })}`;
 
 /** The product's slogan (HQ decision sb-slogan): the hero's h1, the page title and the footer. Kept after the rename to Postavi (2026-10-17): stran, stranke. */
 export const SLOGAN = "Stran za vaše stranke.";
@@ -69,25 +64,21 @@ export interface HomeProps {
   /** A refused intake: the reason, shown above the prompt, and the description, kept. */
   error?: string;
   description?: string;
-  /** `/?primer=<id>`: the demo opens on that trade's site, without the intro. */
+  /** `/nova?primer=<id>`: the demo opens on that trade's site, without the intro. */
   showcase?: string;
-  /** The founding offer's places left (its size in config minus the places given); null without an offer. */
-  foundingLeft?: number | null;
+  /** The homepage (https://<PLATFORM_DOMAIN>/), where the menu and footer point. */
+  homeUrl?: string | null;
   /** Cloudflare Web Analytics token for this response (beacon.tsx), or none. */
   beacon?: string | null;
   /** The visit's campaign (`?utm_source=`, analytics.ts campaignSource), carried by the intake form to intake_submitted. */
   source?: string | null;
 }
 
-export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteKey, anonymousClosed, previous, anonymousUpload, error, description, showcase, foundingLeft = null, beacon = null, source = null }: HomeProps): string {
-  const plans = config.plans;
-  const std = plans.standard;
-  const plus = plans.premium;
-  const example = uiUrl("examples/primer/index.html");
-  // Example sites rendered by our engine (pnpm examples:build): a different business in each place.
-  const dentistExample = uiUrl("examples/zobozdravstvo-lebar/index.html");
+export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteKey, anonymousClosed, previous, anonymousUpload, error, description, showcase, homeUrl = null, beacon = null, source = null }: HomeProps): string {
+  // The homepage (postavi.si) carries the story, the plans and the questions; this page is only the start.
+  const home = homeUrl ?? "/";
   const trades = tradeShowcases();
-  // The trade the demo opens on: /?primer=<id>, else the first, which the intro types and builds.
+  // The trade the demo opens on: /nova?primer=<id>, else the first, which the intro types and builds.
   const chosen = trades.find((t) => t.id === showcase);
   const shown = chosen ?? trades[0]!;
   return html(
@@ -110,14 +101,12 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
           <div className="wrap">
             <Brand />
             <nav aria-label="Glavni meni">
-              <a href="#kaj">Kaj dobite</a>
-              <a href="#kako">Kako deluje</a>
-              <a href="#primer">Primer</a>
-              <a href="#cena">Cena</a>
-              <a href="#vprasanja">Vprašanja</a>
+              <a href={`${home}#zakaj`}>Zakaj</a>
+              <a href={`${home}#hero`}>Kako začnete</a>
+              <a href={`${home}#cenik`}>Cenik</a>
             </nav>
             <span className="sp" />
-            <a className="btn quiet sm login" href={signedIn ? "/sites" : "/login"}>
+            <a className="btn quiet sm login" href={signedIn ? "/sites" : "/login?next=/nova"}>
               {signedIn ? "Moje strani" : "Prijava"}
             </a>
             <a className="btn primary sm" href="#zacni">
@@ -144,13 +133,13 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
                 )}
                 {previous && !error && (
                   <p className="note">
-                    Brezplačni predogled ste že naredili: <a href={previous}>odprite ga</a>. <a href="/login">Prijavite se z e-pošto</a>
+                    Brezplačni predogled ste že naredili: <a href={previous}>odprite ga</a>. <a href="/login?next=/nova">Prijavite se z e-pošto</a>
                     {`: predogled ostane vaš in naredite lahko še ${moreHomepages(config.tiers.free.homepages)}.`}
                   </p>
                 )}
                 {anonymousClosed && (
                   <p className="note">
-                    Predogled brez prijave trenutno ni na voljo. <a href="/login">Prijavite se z e-pošto</a> in ga naredite po prijavi.
+                    Predogled brez prijave trenutno ni na voljo. <a href="/login?next=/nova">Prijavite se z e-pošto</a> in ga naredite po prijavi.
                   </p>
                 )}
                 {/* One intake for everyone: the first homepage needs no account; the server decides what is left. */}
@@ -241,7 +230,7 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
                         key={t.id}
                         className="tab"
                         role="tab"
-                        href={`/?primer=${t.id}#zacni`}
+                        href={`/nova?primer=${t.id}#zacni`}
                         aria-selected={t === shown ? "true" : "false"}
                         aria-controls="demo"
                         tabIndex={t === shown ? 0 : -1}
@@ -295,291 +284,6 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
             </div>
           </section>
 
-          <section id="kaj" aria-labelledby="h-kaj">
-            <div className="wrap">
-              <h2 id="h-kaj">Kaj dobite</h2>
-
-              {/* Three outcomes, each shown with the real example site or the real editor, played once in view. */}
-              <div className="win">
-                <div className="win-vis call-vis" aria-hidden="true">
-                  <div className="phone-wrap">
-                    <div className="phone sm" inert>
-                      <iframe src={dentistExample} title="" tabIndex={-1} loading="lazy" />
-                    </div>
-                    <i className="tap" />
-                    <div className="calling">
-                      <b>Klicanje …</b>
-                      <span>Zobozdravstvo Lebar</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="win-text">
-                  <h3>Stranka vas pokliče z enim dotikom</h3>
-                  <p>Gumba za klic in pot sta na telefonu vedno na dnu zaslona. Delovni čas in naslov sta takoj na vrhu.</p>
-                  <p className="proof">Vsako stran preverimo na telefonu, preden jo vidite.</p>
-                </div>
-              </div>
-
-              <div className="win flip">
-                <div className="win-vis search-vis" aria-hidden="true">
-                  <div className="q">
-                    <svg viewBox="0 0 24 24">
-                      <circle cx="11" cy="11" r="6" />
-                      <path d="M20 20l-4.5-4.5" />
-                    </svg>
-                    <span className="typed">pekarna kamnik</span>
-                  </div>
-                  <div className="result">
-                    <span className="url">Pekarna Kvas › Kamnik</span>
-                    <span className="title">Pekarna Kvas · Kruh z drožmi, Kamnik</span>
-                    <span className="desc">Kruh z lastnimi drožmi, pečen vsak dan. Mala družinska pekarna na začetku stare ulice Šutna.</span>
-                    <span className="facts">
-                      <b>Odprto</b> · zapre ob 18.00 · Šutna 30, Kamnik
-                    </span>
-                  </div>
-                </div>
-                <div className="win-text">
-                  <h3>Pripravljena za Google</h3>
-                  <p>Ime, naslov, telefon, delovni čas in ponudba so zapisani tako, da jih Google in pomočniki z umetno inteligenco preberejo. Brez dodatnega dela.</p>
-                  <p className="proof">Uvrstitev določi Google. Vse, kar je odvisno od strani, uredimo mi.</p>
-                </div>
-              </div>
-
-              <div className="win">
-                <div className="win-vis edit-vis" aria-hidden="true">
-                  <div className="hours">
-                    <span className="h">Delovni čas</span>
-                    <span className="row">
-                      <span>Pon–pet</span>
-                      <span>6.30–18.00</span>
-                    </span>
-                    <span className="row sat">
-                      <span>Sobota</span>
-                      <span className="val">
-                        <s>6.30–12.00</s>
-                        <b>7.00–12.00</b>
-                      </span>
-                    </span>
-                    <span className="row">
-                      <span>Nedelja</span>
-                      <span>7.00–10.00</span>
-                    </span>
-                  </div>
-                  <div className="say">Ob sobotah odpiramo ob sedmih</div>
-                  <div className="done">Spremenjeno na strani</div>
-                </div>
-                <div className="win-text">
-                  <h3>Spremembe naredite sami</h3>
-                  <p>Tapnite besedilo in ga popravite. Ali napišite, kaj naj spremenimo: nov delovni čas, nova cena, dopust.</p>
-                  <p className="proof">Prejšnjo različico obnovite z enim klikom.</p>
-                </div>
-              </div>
-
-              {/* The assurances, in the owner's words: no jargon, each one checkable on the example. */}
-              <ul className="promises">
-                <li>
-                  <b>Slovenščina, ne prevod.</b> Tudi datumi, cene in telefonske številke.
-                </li>
-                <li>
-                  <b>Nič izmišljenega.</b> Cene, ure in imena so samo vaši. Kar manjka, označimo.
-                </li>
-                <li>
-                  <b>Hitra in dostopna.</b> Naloži se tudi na slabem signalu in je berljiva za vse.
-                </li>
-                <li>
-                  <b>Brez sledenja.</b> Nobenih sledilnih piškotkov brez privolitve obiskovalca.
-                </li>
-                <li>
-                  <b>Vaša tudi, ko odidete.</b> Stran kadarkoli prenesete in jo objavite drugje.
-                </li>
-              </ul>
-
-              {/* Primerjam.si (2026): business-card site from a freelancer €500–810, average €690; maintenance average €63/month (docs/GO-TO-MARKET.md §15). */}
-              <div className="versus">
-                <div>
-                  <h3>Pri oblikovalcu</h3>
-                  <ul>
-                    <li>
-                      <b>{wholeEur.format(690)}</b> povprečno za izdelavo
-                    </li>
-                    <li>
-                      <b>{wholeEur.format(63)}</b> na mesec za vzdrževanje
-                    </li>
-                    <li>Popravke naročite in počakate</li>
-                  </ul>
-                </div>
-                <div className="us">
-                  <h3>{PRODUCT_NAME}</h3>
-                  <ul>
-                    <li>
-                      <b>Brezplačen</b> predogled v minuti
-                    </li>
-                    <li>
-                      <b>{`od ${wholeEur.format(std.monthlyEur)}`}</b> na mesec{plans.billingEnabled ? "" : " (načrtovana cena)"}
-                    </li>
-                    <li>Popravke naredite sami, takoj</li>
-                  </ul>
-                  <a className="btn primary" href="#zacni">
-                    Poskusite brezplačno
-                  </a>
-                </div>
-              </div>
-              <p className="src">Cene pri oblikovalcu: povprečje za predstavitveno stran, primerjam.si, 2026.</p>
-            </div>
-          </section>
-
-          <section id="kako" className="how-sec" aria-labelledby="h-kako">
-            <div className="wrap">
-              <h2 id="h-kako">Kako deluje</h2>
-              <div className="how">
-                <div>
-                  <h3>Opišete</h3>
-                  <p>Nekaj stavkov o podjetju, logotip in fotografije. Če fotografij nimate, dodamo največ dve, ustvarjeni z umetno inteligenco, in ju označimo.</p>
-                </div>
-                <div>
-                  <h3>Naredimo stran</h3>
-                  <p>Iz opisa vzamemo ponudbo, kontakt in delovni čas, barve pa iz logotipa in fotografij. Česar v opisu ni, označimo.</p>
-                </div>
-                <div>
-                  <h3>Preverimo</h3>
-                  <p>Preden jo vidite, stran preverimo na telefonu in računalniku: hitrost, berljivost, gumbi.</p>
-                </div>
-                <div>
-                  <h3>Uredite in objavite</h3>
-                  <p>Popravite s klikom ali napišite, kaj naj spremenimo. Objavite, ko ste zadovoljni.</p>
-                </div>
-                {/* eval/report-home.md, 2026-09-30: 10 fixtures, median time to first preview 23.4 s, whole checked job 73 s. */}
-                <p className="note">Preizkus na desetih podjetjih (30. 9. 2026): predogled je bil običajno gotov v 23 sekundah, preverjena stran v 73.</p>
-              </div>
-            </div>
-          </section>
-
-          <section id="primer" aria-labelledby="h-primer">
-            <div className="wrap">
-              <h2 id="h-primer">Primer</h2>
-              <p className="lead">Izmišljena Pekarna Kvas iz Kamnika. Cena cimetovih polžev manjka, zato je označena. Dokler je ne vpišete, strani ni mogoče objaviti.</p>
-              <div className="ex">
-                <div className="deskwrap" inert>
-                  <iframe src={example} title="Primer strani na namizju" loading="lazy" />
-                </div>
-                <div className="chat" aria-label="Primer urejanja s pogovorom">
-                  <h3>Ali pa napišite, kaj spremeniti</h3>
-                  <div className="msg user">Spremeni telefonsko na 041 555 731</div>
-                  <div className="msg">
-                    Urejeno. Nova številka je povsod na strani.<small>različica 13</small>
-                  </div>
-                  <div className="msg user">Dodaj pogosta vprašanja o naročanju potice</div>
-                  <div className="msg">
-                    Dodali smo tri vprašanja pod Ponudbo. Preverite odgovore, preden objavite.<small>različica 14</small>
-                  </div>
-                  <p className="muted">Prejšnjo različico obnovite z enim klikom.</p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section id="cena" aria-labelledby="h-cena">
-            <div className="wrap">
-              <h2 id="h-cena">Cene z DDV</h2>
-              <div className="price">
-                <div className="plan">
-                  <h3>Predogled</h3>
-                  <div className="amt">{wholeEur.format(0)}</div>
-                  <p className="muted">Da vidite, kaj dobite. Za objavo izberite paket.</p>
-                  <ul>
-                    <li>Prva domača stran brez prijave</li>
-                    <li>{`Z e-pošto še ${moreHomepages(config.tiers.free.homepages)} in ${chatEdits(config.tiers.free.chatEdits)}`}</li>
-                    <li>Ogled na telefonu in računalniku</li>
-                    <li>Kartice ne potrebujete</li>
-                  </ul>
-                  <a className="btn" href="#zacni">
-                    Poskusite brezplačno
-                  </a>
-                </div>
-                <div className="plan">
-                  <h3>{std.name}</h3>
-                  <div className="amt">
-                    {`${wholeEur.format(std.yearlyEur)} `}
-                    <small>na leto</small>
-                  </div>
-                  <p className="yearly">{`${std.yearlyIncludesDomain ? "Domena vključena · " : ""}ali ${wholeEur.format(std.monthlyEur)} na mesec`}</p>
-                  <p className="muted">Celotna stran, ki jo vodite sami.</p>
-                  <ul>
-                    <li>{`Do ${std.site.maxPages} strani: ponudba, cenik, o nas, kontakt`}</li>
-                    <li>Neomejeno urejanje, pomočnik vsak mesec</li>
-                    <li>Objava in gostovanje</li>
-                    <li>Stran lahko kadarkoli prenesete</li>
-                    <li>{`${pictures(std.site.generatedPicturesPerMonth)} na mesec, kjer fotografij manjka`}</li>
-                  </ul>
-                  {std.foundingOffer && (
-                    <dl className="extra">
-                      {foundingLeft !== 0 && (
-                        <div id="founding">
-                          <dt>
-                            {`${std.foundingOffer.renewalDiscountPercent ? "Za" : "Prvo leto za"} prvih ${std.foundingOffer.customers} strank`}
-                            {foundingLeft !== null && <span className="left">{` · ${placesLeft(foundingLeft)}`}</span>}
-                          </dt>
-                          <dd>
-                            {std.foundingOffer.renewalDiscountPercent
-                              ? `Prvo leto ${wholeEur.format(std.foundingOffer.firstYearEur)}, nato ${std.foundingOffer.renewalDiscountPercent} % popusta za vedno`
-                              : wholeEur.format(std.foundingOffer.firstYearEur)}
-                          </dd>
-                        </div>
-                      )}
-                      <div>
-                        <dt>Postavitev skupaj z vami, po želji</dt>
-                        <dd>{`${wholeEur.format(std.setupService.eur)} enkratno`}</dd>
-                      </div>
-                    </dl>
-                  )}
-                  <a className="btn primary" href="#zacni">
-                    Začnite s predogledom
-                  </a>
-                </div>
-                <div className="plan">
-                  <h3>{plus.name}</h3>
-                  <div className="amt">
-                    {`${wholeEur.format(plus.yearlyEur)} `}
-                    <small>na leto</small>
-                  </div>
-                  <p className="yearly">{`${plus.yearlyIncludesDomain ? "Domena vključena · " : ""}ali ${wholeEur.format(plus.monthlyEur)} na mesec`}</p>
-                  <p className="muted">{`Vse iz paketa ${std.name} in še:`}</p>
-                  <ul>
-                    <li>{`Do ${plus.site.maxPages} strani`}</li>
-                    <li>{`${pictures(plus.site.generatedPicturesPerMonth)} na mesec`}</li>
-                    <li>Več sprememb s pomočnikom vsak mesec</li>
-                    {plus.setupService.includedYearly && <li>Letni paket: postavitev skupaj z vami vključena</li>}
-                    <li>Odgovor na vprašanja isti dan</li>
-                    <li>{`Stran v ${plus.site.locales} jezikih`}</li>
-                    <li>Novice, dogodki, storitve in ekipa</li>
-                  </ul>
-                  <a className="btn" href="#zacni">
-                    Začnite s predogledom
-                  </a>
-                </div>
-              </div>
-              {/* No billing until the legal entity exists (config plans.billingEnabled, TASKS: billing phase). */}
-              <p className="muted fine">
-                {plans.billingEnabled
-                  ? "Cene so z DDV. Letni paket plačate po računu z bančnim nakazilom."
-                  : "Načrtovane cene z DDV. Zaenkrat ničesar ne zaračunamo. Letni paket bo plačljiv po računu z bančnim nakazilom."}
-              </p>
-            </div>
-          </section>
-
-          <section id="vprasanja" aria-labelledby="h-faq">
-            <div className="wrap">
-              <h2 id="h-faq">Pogosta vprašanja</h2>
-              <div className="faq">
-                {faq(config).map(([q, a]) => (
-                  <details key={q}>
-                    <summary>{q}</summary>
-                    <p>{a}</p>
-                  </details>
-                ))}
-              </div>
-            </div>
-          </section>
         </main>
 
         <footer>
@@ -593,13 +297,13 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
                 <h2>Izdelek</h2>
                 <ul>
                   <li>
-                    <a href="#kaj">Kaj dobite</a>
+                    <a href={`${home}#zakaj`}>Zakaj spletna stran</a>
                   </li>
                   <li>
-                    <a href="#kako">Kako deluje</a>
+                    <a href={`${home}#hero`}>Kako začnete</a>
                   </li>
                   <li>
-                    <a href="#cena">Cena</a>
+                    <a href={`${home}#cenik`}>Cenik</a>
                   </li>
                   <li>
                     <a href="/pregled">Brezplačen pregled strani</a>
@@ -610,7 +314,7 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
                 <h2>Pomoč</h2>
                 <ul>
                   <li>
-                    <a href="#vprasanja">Pogosta vprašanja</a>
+                    <a href={`${home}#vprasanja`}>Pogosta vprašanja</a>
                   </li>
                   <li>
                     Pišite nam: <Provider config={config} field="email" />
@@ -653,7 +357,7 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
   );
 }
 
-const faq = (config: AppConfig): [string, string][] => [
+export const faq = (config: AppConfig): [string, string][] => [
   [
     "Koliko predogledov lahko naredim brezplačno?",
     `Prvo domačo stran naredite brez prijave; hranimo jo ${config.tiers.anonymous.keepDays} dni. Ko se prijavite z e-pošto, ostane vaša, naredite pa lahko še ${moreHomepages(config.tiers.free.homepages)} in ${chatEdits(config.tiers.free.chatEdits)}. Besedila in fotografije urejate sami, brez omejitev. Celotna stran, objava in prenos so del naročnine.`,

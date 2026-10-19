@@ -115,11 +115,11 @@ async function shot(page: Page, name: string) {
 }
 
 /**
- * Types a description on the landing page and presses "Ustvari stran". Resolves when the next page has loaded,
+ * Types a description on the start page and presses "Ustvari stran". Resolves when the next page has loaded,
  * or (without an account, refused at the ticket) when the refusal shows above the form on the same page.
  */
 async function create(page: Page, description: string, scope?: "full") {
-  await page.goto(`${base}/#zacni`);
+  await page.goto(`${base}/nova#zacni`);
   await page.locator("#opis").fill(description);
   if (scope) await page.locator("label[for=scope-full]").click();
   const navigated = page.waitForNavigation({ timeout: 30_000 }).then(() => "page");
@@ -146,7 +146,7 @@ describe("free limits in a browser", () => {
   it("anonymous preview, refused second, sign-up claims it, two more, refused (phone width)", async () => {
     const { page, turnstileRequests, close } = await browser(360);
     try {
-      await page.goto(`${base}/`);
+      await page.goto(`${base}/nova`);
       // Cloudflare's script isn't loaded for a mere visit, only once the visitor starts on the form.
       await page.waitForTimeout(300);
       expect(turnstileRequests).toEqual([]);
@@ -159,8 +159,8 @@ describe("free limits in a browser", () => {
       expect((await platform.repo.getSite(first))!.device_id).not.toBeNull();
       await shot(page, "limits-1-anonymous-preview-360");
 
-      // The landing page now links the preview and refuses another, keeping the text.
-      await page.goto(`${base}/`);
+      // The start page now links the preview and refuses another, keeping the text.
+      await page.goto(`${base}/nova`);
       expect(await page.locator(".hero .note").first().textContent()).toContain("Brezplačni predogled ste že naredili");
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
       await create(page, `${DESCRIPTION} Še ena.`);
@@ -170,14 +170,14 @@ describe("free limits in a browser", () => {
 
       // Sign up with a magic link on the same phone: the preview becomes the account's.
       await signIn(page, "ana.pekarna@siol.net");
-      expect(page.url()).toBe(`${base}/`);
+      expect(page.url()).toBe(`${base}/sites`);
       await page.goto(`${base}/sites`);
       expect(await page.locator(".site-card h2 a").getAttribute("href")).toBe(`/sites/${first}`);
       expect(await page.locator("main.sites > p.muted").textContent()).toContain("Še 1 brezplačno ustvarjanje domače strani in 5 sprememb s pomočnikom.");
       expect((await platform.repo.getSite(first))!.device_id).toBeNull();
 
       // One more homepage, then no more; the refusal names the plan that adds more (sb-tiers).
-      await page.goto(`${base}/`);
+      await page.goto(`${base}/nova`);
       expect(await page.locator("[data-allowance]").textContent()).toContain("Še 1 brezplačno ustvarjanje domače strani in 5 sprememb s pomočnikom.");
       await create(page, `${DESCRIPTION} Druga.`);
       expect(page.url()).toMatch(/\/sites\/site_/);

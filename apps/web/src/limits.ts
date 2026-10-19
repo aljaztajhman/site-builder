@@ -192,7 +192,7 @@ export async function reserveJob(deps: LimitDeps, c: Context<AppEnv>, ask: JobAs
     tier,
     deviceId: c.get("deviceId"),
     ipKey: ipKey(deps.secret, clientIp(c)),
-    signIn: signInUrl(ask.siteId ? `/sites/${ask.siteId}` : "/#zacni"),
+    signIn: signInUrl(ask.siteId ? `/sites/${ask.siteId}` : "/nova#zacni"),
     now,
   };
   const result = await deps.repo.usage.withQuotaLock(async (u) => {

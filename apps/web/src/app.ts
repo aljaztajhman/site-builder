@@ -57,6 +57,7 @@ import { homePage } from "./home.tsx";
 import { clientBundle, warmClientBundles } from "./client-bundle.ts";
 import { uiAssets } from "./ui/assets.ts";
 import { registerFormRoutes } from "./forms.tsx";
+import { registerPricingRoutes } from "./cenik.ts";
 import { registerWaitlistRoutes } from "./waitlist.ts";
 import { domainsInfo, registerDomainRoutes } from "./domains.ts";
 import { registerCompanyLookupRoute } from "./company-lookup.ts";
@@ -131,7 +132,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   // Postavi's own funnel events (analytics.ts; config analytics.events, off by default).
   const track = tracker(limits);
   // The landing page and the intake's refusal page carry the Turnstile widget (its script and frame).
-  const turnstileCsp = (path: string) => botCheck.mode === "on" && (path === "/" || path === "/api/sites" || path === "/pregled");
+  const turnstileCsp = (path: string) => botCheck.mode === "on" && (path === "/nova" || path === "/api/sites" || path === "/pregled");
   // The app's own pages: script and frame sources beyond 'self' for Turnstile, and the Cloudflare Web Analytics
   // beacon's script on the few pages that carry it (beacon.tsx; its measurements go to connect-src below).
   const appScriptCsp = (c: Context<AppEnv>) => {
@@ -225,6 +226,8 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   registerFormRoutes(app, { repo, config, secret: auth.secret, mailer, ...(opts.appUrl ? { appUrl: opts.appUrl } : {}) });
   // The pre-launch waitlist: the platform domain's homepage posts addresses here.
   registerWaitlistRoutes(app, { repo, config, secret: auth.secret, platformDomain: opts.platformDomain ?? null });
+  // The plans and questions for the homepage (postavi.si reads them; prices live in config only).
+  registerPricingRoutes(app, { repo, config, platformDomain: opts.platformDomain ?? null });
   // Sign-in (magic link for owners, password for the admin) and the admin's page.
   registerLoginRoutes(app, {
     repo,
@@ -324,20 +327,36 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       anonymousClosed: anonymous && botCheck.mode === "unavailable",
       ...(anonymous ? { anonymousUpload: { ticketUrl: "/api/intake/ticket", maxPhotos: config.tiers.anonymous.uploads.maxPhotos, maxTotalBytes: config.tiers.anonymous.uploads.maxTotalBytes } } : {}),
       ...(previous ? { previous: `/sites/${previous.id}` } : {}),
-      // The founding offer's places left: its size (config) minus the places the admin gave (allow_list.founding_at).
-      foundingLeft: config.plans.standard.foundingOffer ? Math.max(0, config.plans.standard.foundingOffer.customers - (await repo.accounts.foundingTaken())) : null,
+      homeUrl: homeUrl(),
       beacon: cloudflareBeacon(c, config),
       source: campaignSource(c.req.query("utm_source")),
       ...extra,
     });
   };
+  /** The homepage, postavi.si (PLATFORM_DOMAIN), or this app's start page where there is none (local, tests). */
+  const homeUrl = () => (opts.platformDomain ? `https://${opts.platformDomain}/` : null);
+  // The app's root is no homepage (owner, 2026-10-19: postavi.si is): signed in, your sites; a device that already made a free
+  // preview, that preview; everyone else the homepage. Without a homepage address the start page answers here.
   app.get("/", async (c) => {
-    // A landing view (once per device in analytics.landingDedupeMinutes), and the editor's "Paketi in cene" link (?ref=upsell).
-    if (isPageView(c)) {
-      await track(c, { kind: "landing_view", source: campaignSource(c.req.query("utm_source")) }, { onceMinutes: config.analytics.landingDedupeMinutes });
-      if (c.req.query("ref") === "upsell") await track(c, { kind: "upsell_clicked", props: { where: "plans" } });
-    }
+    const viewer = c.get("viewer");
+    if (signedIn(viewer)) return c.redirect(DASHBOARD);
+    const previous = (await repo.usage.deviceSites(c.get("deviceId")))[0];
+    if (previous) return c.redirect(`/sites/${previous.id}`);
+    const home = homeUrl();
+    if (home) return c.redirect(`${home}${c.req.query("utm_source") ? `?utm_source=${encodeURIComponent(c.req.query("utm_source")!)}` : ""}`);
+    return c.redirect("/nova");
+  });
+  // The start page: the description form (the intake), for everyone.
+  app.get("/nova", async (c) => {
+    // A start-page view (once per device in analytics.landingDedupeMinutes).
+    if (isPageView(c)) await track(c, { kind: "landing_view", source: campaignSource(c.req.query("utm_source")) }, { onceMinutes: config.analytics.landingDedupeMinutes });
     return c.html(await landing(c, { showcase: c.req.query("primer") }));
+  });
+  // The editor's "Paketi in cene" link: counted, then the plans on the homepage.
+  app.get("/cenik", async (c) => {
+    if (isPageView(c)) await track(c, { kind: "upsell_clicked", props: { where: "plans" } });
+    const home = homeUrl();
+    return c.redirect(home ? `${home}#cenik` : "/api/cenik");
   });
 
   // ---------- Dashboard ----------
@@ -364,8 +383,8 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
       }),
     );
   });
-  // The landing page's prompt box is the only intake; old links land on it.
-  app.get("/new", (c) => c.redirect("/#zacni"));
+  // The start page's prompt box is the only intake; old links land on it.
+  app.get("/new", (c) => c.redirect("/nova#zacni"));
 
   // Junk: the classifier says it isn't a business, or can't place it (config tiers.junk). Its cost is logged against the job; the job is refused, so it
   // doesn't use up the visitor's preview. If the classifier can't be asked, the pipeline asks it again.

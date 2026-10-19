@@ -63,9 +63,9 @@ export const clientIp = (c: Context): string =>
 /** A keyed hash of the client's IP for rate limits; the IP itself is never stored (cleared after a day). */
 export const ipKey = (secret: string, ip: string): string => createHmac("sha256", secret).update(`ip:${ip}`).digest("hex").slice(0, 32);
 
-/** Paths that never get a cookie or a viewer: published client sites stay cookie-free, and so does a waitlist sign-up. */
+/** Paths that never get a cookie or a viewer: published client sites stay cookie-free, and so do a waitlist sign-up and the homepage's price list. */
 const NO_IDENTITY = (path: string) =>
-  path.startsWith("/s/") || path.startsWith("/assets/") || path === "/health" || path === "/favicon.ico" || path.startsWith("/preview/_shared/") || path === "/api/waitlist";
+  path.startsWith("/s/") || path.startsWith("/assets/") || path === "/health" || path === "/favicon.ico" || path.startsWith("/preview/_shared/") || path === "/api/waitlist" || path === "/api/cenik";
 
 export interface AccessDeps {
   repo: Repo;
@@ -166,11 +166,15 @@ const PUBLIC = (path: string) =>
   // The public website checker and its reports (an unguessable id each).
   path === "/pregled" ||
   /^\/pregled\/[^/]+$/.test(path) ||
-  // The intake: the first homepage needs no account (the limits decide who may generate).
+  // The intake: the start page and the first homepage need no account (the limits decide who may generate).
+  path === "/nova" ||
+  path === "/new" ||
   path === "/api/sites" ||
   path === "/api/intake/ticket" ||
-  // The pre-launch waitlist, posted from the postavi.si homepage (waitlist.ts).
+  // The pre-launch waitlist, posted from the postavi.si homepage (waitlist.ts), and the plans it shows (cenik.ts).
   path === "/api/waitlist" ||
+  path === "/api/cenik" ||
+  path === "/cenik" ||
   // The reminder email's link (reminder.tsx checks its token, then sign-in).
   /^\/predogled\/[^/]+\/[^/]+$/.test(path) ||
   path.startsWith("/s/") ||

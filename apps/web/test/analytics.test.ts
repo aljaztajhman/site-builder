@@ -103,24 +103,24 @@ let anonSite: string;
 describe("the funnel's steps write their events", () => {
   it("landing_view: once per device in the window, not for bots or prefetches; upsell_clicked from the editor's link", async () => {
     anon = await newBrowser(req);
-    for (let i = 0; i < 2; i++) expect((await req("/", { headers: { cookie: anon.cookie, "user-agent": UA, "x-real-ip": freshIp() } })).status).toBe(200);
-    await req("/", { headers: { cookie: anon.cookie, "user-agent": "Googlebot/2.1" } });
+    for (let i = 0; i < 2; i++) expect((await req("/nova", { headers: { cookie: anon.cookie, "user-agent": UA, "x-real-ip": freshIp() } })).status).toBe(200);
+    await req("/nova", { headers: { cookie: anon.cookie, "user-agent": "Googlebot/2.1" } });
     const other = await newBrowser(req);
-    await req("/", { headers: { cookie: other.cookie, "user-agent": UA, "sec-purpose": "prefetch" } });
+    await req("/nova", { headers: { cookie: other.cookie, "user-agent": UA, "sec-purpose": "prefetch" } });
     const views = await eventsOf("landing_view");
     expect(views).toHaveLength(1);
     expect(views[0]).toMatchObject({ device_key: deviceKey(SECRET, deviceOf(anon)), tier: "anonymous", account_id: null, site_id: null });
 
-    await req("/?ref=upsell", { headers: { cookie: anon.cookie, "user-agent": UA } });
+    await req("/cenik", { headers: { cookie: anon.cookie, "user-agent": UA } });
     expect((await eventsOf("upsell_clicked")).map((e) => e.props)).toEqual([{ where: "plans" }]);
   });
 
-  it("landing_view keeps a campaign's utm_source, and the landing page's form carries it to the intake", async () => {
+  it("landing_view keeps a campaign's utm_source, and the start page's form carries it to the intake", async () => {
     const card = await newBrowser(req);
-    const page = await req("/?utm_source=Letak-Ljubljana&utm_medium=print", { headers: { cookie: card.cookie, "user-agent": UA } });
+    const page = await req("/nova?utm_source=Letak-Ljubljana&utm_medium=print", { headers: { cookie: card.cookie, "user-agent": UA } });
     expect(await page.text()).toContain('<input type="hidden" name="source" value="letak-ljubljana"/>');
     const odd = await newBrowser(req);
-    const oddPage = await req(`/?utm_source=${encodeURIComponent("<script>")}`, { headers: { cookie: odd.cookie, "user-agent": UA } });
+    const oddPage = await req(`/nova?utm_source=${encodeURIComponent("<script>")}`, { headers: { cookie: odd.cookie, "user-agent": UA } });
     expect(await oddPage.text()).not.toContain('name="source"');
     const views = await eventsOf("landing_view");
     expect(views.find((v) => v.device_key === deviceKey(SECRET, deviceOf(card)))?.source).toBe("letak-ljubljana");
@@ -236,7 +236,7 @@ describe("the funnel's steps write their events", () => {
   it("the admin's own clicks are not the funnel's", async () => {
     const admin = await adminBrowser(req, PASSWORD);
     const before = (await platform.repo.events.list()).length;
-    await req("/", { headers: { cookie: admin.cookie, "user-agent": UA } });
+    await req("/nova", { headers: { cookie: admin.cookie, "user-agent": UA } });
     await req(`/preview/${anonSite}/index.html`, { headers: { cookie: admin.cookie } });
     expect((await platform.repo.events.list()).length).toBe(before);
   });
@@ -296,13 +296,13 @@ describe("with analytics.events off", () => {
       const app = createApp({ platform: off, config: { ...structuredClone(base), analytics: { ...base.analytics, events: false }, limits: { ...base.limits, dailyModelSpendCapEur: 100 } }, auth: { password: PASSWORD, secret: SECRET, secureCookies: false }, mailer: mail, appUrl: "https://postavi.example", botCheck: skipBotCheck });
       const r: Req = (p, init) => app.request(p, init);
       const b = await newBrowser(r);
-      await r("/", { headers: { cookie: b.cookie, "user-agent": UA } });
+      await r("/nova", { headers: { cookie: b.cookie, "user-agent": UA } });
       const ticket = await r("/api/intake/ticket", { method: "POST", body: new URLSearchParams({ _csrf: b.csrf, description: DESCRIPTION }), headers: { cookie: b.cookie } });
       expect(ticket.status).toBe(200);
       await r("/api/intake/ticket", { method: "POST", body: new URLSearchParams({ _csrf: b.csrf, description: "kratko" }), headers: { cookie: b.cookie } });
       expect(await off.repo.events.list()).toEqual([]);
       expect(await (await r("/zasebnost")).text()).not.toContain("product-events");
-      expect(setCookies(await r("/")).sb_device).toBeTruthy();
+      expect(setCookies(await r("/nova")).sb_device).toBeTruthy();
     } finally {
       await off.close();
     }

@@ -88,7 +88,7 @@ async function open(width: number, opts: { reducedMotion?: "reduce" | "no-prefer
     await page.clock.install({ time: CLOCK_START });
     await page.clock.pauseAt(CLOCK_START + 1000);
   }
-  await page.goto(`${base}${opts.path ?? "/"}`);
+  await page.goto(`${base}${opts.path ?? "/nova"}`);
   return { page, problems, close: () => context.close() };
 }
 
@@ -206,7 +206,7 @@ describe("landing trade demo", () => {
     }, 90_000);
 
     it(`at ${width} px: moves on by itself, by tab and by arrow key; pause stops it; the view switch resizes the device`, async () => {
-      const { page, problems, close } = await open(width, { clock: true, path: "/?primer=frizer" });
+      const { page, problems, close } = await open(width, { clock: true, path: "/nova?primer=frizer" });
       try {
         await page.locator(".devwrap").scrollIntoViewIfNeeded();
         expect(await step(page)).toBe("site");
@@ -229,7 +229,7 @@ describe("landing trade demo", () => {
         await switched(page);
         expect(await frameTitle(page)).toBe(tradeTitle(byId("avtoservis")));
         expect(await page.locator("[data-demo-status]").textContent()).toBe(tradeCaption(byId("avtoservis")));
-        expect(page.url()).toBe(`${base}/?primer=frizer`);
+        expect(page.url()).toBe(`${base}/nova?primer=frizer`);
 
         // Arrow keys, Home and End: focus and selection move together (a roving tabindex).
         await page.locator('.tab[data-id="avtoservis"]').focus();
@@ -282,7 +282,7 @@ describe("landing trade demo", () => {
     }, 90_000);
 
     it(`at ${width} px: Gostilna's label card stays above its photo while transforming, on the phone`, async () => {
-      const { page, problems, close } = await open(width, { path: "/?primer=frizer" });
+      const { page, problems, close } = await open(width, { path: "/nova?primer=frizer" });
       try {
         await page.locator(".devwrap").scrollIntoViewIfNeeded();
         await page.locator(".pause").click();
@@ -419,7 +419,7 @@ describe("landing trade demo", () => {
     }, 120_000);
 
     it(`at ${width} px: reduced motion with ?primer= shows that trade at once`, async () => {
-      const { page, problems, close } = await open(width, { reducedMotion: "reduce", path: "/?primer=gostilna", clock: true });
+      const { page, problems, close } = await open(width, { reducedMotion: "reduce", path: "/nova?primer=gostilna", clock: true });
       try {
         await page.locator(".devwrap").scrollIntoViewIfNeeded();
         expect(await step(page)).toBe("site");
@@ -439,7 +439,7 @@ describe("landing trade demo", () => {
       const { page, problems, close } = await open(width, { javaScriptEnabled: false });
       try {
         const tabs = page.locator(".tab");
-        expect(await tabs.evaluateAll((as) => as.map((a) => [a.tagName, a.getAttribute("href")]))).toEqual(trades.map((t) => ["A", `/?primer=${t.id}#zacni`]));
+        expect(await tabs.evaluateAll((as) => as.map((a) => [a.tagName, a.getAttribute("href")]))).toEqual(trades.map((t) => ["A", `/nova?primer=${t.id}#zacni`]));
         expect(await page.locator(".demo-tools").isVisible()).toBe(false);
         expect(await page.locator(".dev").evaluate((el) => getComputedStyle(el).opacity)).toBe("1");
         expect(await page.locator(".ask").isVisible()).toBe(false);

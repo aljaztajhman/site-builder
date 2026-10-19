@@ -10,7 +10,7 @@ import { Repo, createDb, createFsStorage, memoryMailer, migrate, type JobData, t
 import type { SiteSpec } from "@sb/spec";
 import { createApp } from "../src/app.ts";
 import { monthlyReportMail, plusNote } from "../src/stats.ts";
-import { adminBrowser, newBrowser, ownerSignIn, type Browser, type Req } from "./session-helpers.ts";
+import { adminBrowser, ownerSignIn, type Browser, type Req } from "./session-helpers.ts";
 
 /**
  * Per-plan limits at the API (it-plan-limits) and the upsells that name the next plan (it-upsells): pages (Osnovni 8,
@@ -392,10 +392,10 @@ describe("free → Osnovni", () => {
     expect(((await r.json()) as Refused).message).toBe("Objava in prenos strani sta del naročnine Osnovni (19 € na mesec). Predogled lahko še naprej urejate.");
   });
 
-  it("the landing page shows the founding offer's places left, from the places the admin gave", async () => {
+  it("the price list shows the founding offer's places left, from the places the admin gave", async () => {
     const offer = config.plans.standard.foundingOffer!;
-    // The page's text, tags dropped.
-    const landing = async () => (await (await req("/", { headers: { cookie: (await newBrowser(req)).cookie } })).text()).replace(/<[^>]+>/g, "");
+    // The homepage's price list (/api/cenik), as text.
+    const landing = async () => JSON.stringify(await (await req("/api/cenik")).json());
     expect(await landing()).toContain(`Za prvih ${offer.customers} strank · še ${offer.customers} prostih mest`);
     const admin = await adminBrowser(req, PASSWORD);
     const give = await req("/admin/allow-list", { method: "POST", headers: { cookie: admin.cookie }, body: new URLSearchParams({ _csrf: admin.csrf, email: "ustanovni@siol.net", plan: "standard", founding: "on" }) });
