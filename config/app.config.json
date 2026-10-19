@@ -171,6 +171,16 @@
     "maxAttempts": 5,
     "retryWithinHours": 23
   },
+  "alerts": {
+    "$comment": "Admin alerts by email to ALERT_EMAIL (off when unset), plain English, subject 'Postavi alert: …'. The web service checks every everyMinutes: /health's checks (database, storage, queue), generation/edit jobs failed in the last failedJobs.windowMinutes (at least threshold), no worker heartbeat for workerSilentMinutes (the worker writes one every heartbeatSeconds), today's model spend at spendWarnShare of the daily cap, and the cap reached. The cap also counts as reached when it refused a call today (it refuses a call whose estimate doesn't fit, so spend can stay just under it); jobs it stopped are 'refused', not failed. Each kind at most once per cooldownMinutes while it keeps failing (the spend ones once per UTC day); a kind that clears sends one 'resolved' email, and its next failure alerts at once. Each check and query has checkTimeoutMs (also /health's); a check still running skips the next. Sent alerts are stored (ops_alerts), so a restart doesn't resend.",
+    "everyMinutes": 5,
+    "checkTimeoutMs": 10000,
+    "heartbeatSeconds": 60,
+    "workerSilentMinutes": 10,
+    "failedJobs": { "windowMinutes": 60, "threshold": 3 },
+    "spendWarnShare": 0.8,
+    "cooldownMinutes": { "health": 60, "failedJobs": 180, "workerSilent": 60 }
+  },
   "targets": {
     "homepagePreviewEur": 0.3,
     "homepagePreviewSeconds": 60,

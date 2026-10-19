@@ -21,6 +21,7 @@ export function missingEnv(env: NodeJS.ProcessEnv = process.env): MissingVar[] {
   if (!env.TURNSTILE_SITE_KEY) out.push({ name: "TURNSTILE_SITE_KEY", effect: bot });
   if (!env.TURNSTILE_SECRET_KEY) out.push({ name: "TURNSTILE_SECRET_KEY", effect: bot });
   if (!env.ANTHROPIC_API_KEY) out.push({ name: "ANTHROPIC_API_KEY", effect: "the intake's junk check runs in the worker's pipeline instead (after queueing)" });
+  if (!env.ALERT_EMAIL) out.push({ name: "ALERT_EMAIL", effect: "no admin alert emails (health, failed jobs, worker, spend cap)" });
   if (!env.APP_URL && !env.RAILWAY_PUBLIC_DOMAIN) {
     out.push({ name: "APP_URL", effect: deployed ? "no public address for sign-in links, so email sign-in is refused" : "sign-in links use the request's own address" });
   }

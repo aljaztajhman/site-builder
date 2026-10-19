@@ -10,6 +10,7 @@ import { sendPreviewReminders } from "./reminder.tsx";
 import { authSettingsFromEnv } from "./auth.ts";
 import { missingEnv, missingEnvLine } from "./env-check.ts";
 import { launchLine, launchProblems } from "./legal.tsx";
+import { startAlerts } from "./alerts.ts";
 
 const config = loadConfig();
 const auth = authSettingsFromEnv();
@@ -61,6 +62,9 @@ const reminders = setInterval(
 );
 reminders.unref();
 
+// Admin alerts by email to ALERT_EMAIL (alerts.ts): health, failed jobs, a silent worker, the daily spend cap.
+const alerts = startAlerts({ platform, config, mailer, to: process.env.ALERT_EMAIL });
+
 // In-process job handlers drain like the worker service's (apps/worker/src/main.ts) before the database closes.
 let stopping = false;
 for (const sig of ["SIGINT", "SIGTERM"] as const) {
@@ -71,6 +75,7 @@ for (const sig of ["SIGINT", "SIGTERM"] as const) {
     clearInterval(reportTimer);
     clearInterval(domainMail);
     clearInterval(reminders);
+    if (alerts) clearInterval(alerts);
     void (worker ? worker.shutdown(drainMs(config)).catch((e: unknown) => console.error("[web] worker shutdown", e)) : Promise.resolve())
       .finally(() => void platform.close().finally(() => process.exit(0)));
   });
