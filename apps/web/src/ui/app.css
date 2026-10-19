@@ -126,6 +126,19 @@ legend{padding:0 4px;font-weight:600;font-size:13px;color:var(--ink-2)}
 .toast a{color:#fff}
 .toast-close{flex:none;min-width:32px;min-height:32px;margin:-6px 0;border:0;border-radius:var(--r-1);background:none;color:#fff;font:inherit;cursor:pointer}
 .toast-close:hover{background:rgb(255 255 255/.12)}
+/* "Razveljavi" after a delete. */
+.toast-action{flex:none;min-height:32px;margin:-6px 0;padding:0 10px;border:1px solid rgb(255 255 255/.5);border-radius:var(--r-1);background:none;color:#fff;font:600 14px/1 var(--font-ui);cursor:pointer}
+.toast-action[hidden]{display:none}
+.toast-action:hover{background:rgb(255 255 255/.12)}
+.toast-action:focus-visible,.toast-close:focus-visible{outline:2px solid #fff;outline-offset:2px}
+@media (pointer:coarse){.toast-action{min-height:44px}}
+/* Desktop: over the top of the preview, not over the assistant's box at the bottom of the canvas. */
+@media (min-width:901px){.toast{top:calc(var(--top-h,56px) + 64px);bottom:auto;left:calc(50% + 200px);max-width:min(560px,calc(100vw - 432px))}}
+/* "Shranjujem…" / "Shranjeno" in the app bar: quiet, instead of a toast per autosave. */
+.save-status{display:inline-flex;align-items:center;gap:4px;color:var(--ink-3);font-size:13px;white-space:nowrap}
+.save-status[data-state=idle]{display:none}
+.save-status[data-state=error]{color:#9b1c13}
+.save-status .ico{font-weight:700}
 
 /* ---------- App bar ---------- */
 .top{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;min-height:var(--top);padding:8px 16px;border-bottom:1px solid var(--line);background:var(--canvas)}
@@ -376,6 +389,14 @@ details.more>summary{padding:12px 0;font-weight:600;cursor:pointer}
 .colors .row{gap:10px}
 .colors .hex{font-size:13px;color:var(--ink-3);font-variant-numeric:tabular-nums}
 .sheet-handle{display:none}
+/* The selected section's strip: phones only (below). */
+.sel-strip{display:none}
+/* "Še to potrebujemo": how far along, and the facts grouped by page and section. */
+.ask-progress{margin:0 0 12px}
+.ask-count{margin:0 0 6px;font-size:14px;font-weight:600;color:var(--ink-2)}
+.bar-track{height:8px;border-radius:999px;background:var(--surface-2);overflow:hidden}
+.bar-fill{height:100%;border-radius:999px;background:var(--accent);transition:width .3s ease-out}
+.ed .pane h3.ask-group{margin:18px 0 4px;font-size:15px;color:var(--ink)}
 /* Phones and narrow windows: the preview fills the screen, the editor is a bottom sheet over it
    (peek: tabs and the start of the form; full: almost the whole screen). */
 @media (max-width:900px){
@@ -402,6 +423,12 @@ details.more>summary{padding:12px 0;font-weight:600;cursor:pointer}
   .top .site-name{flex:1;font-size:16px}
   .top>.pill,.top .back .label,.top .chip .label,.top .publish .label,.top>.sp{display:none}
   .top .actions{flex:none;gap:2px}
+  /* The save status as its sign alone (the words stay for screen readers). */
+  .save-status .label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  /* Closed or peeking with a section selected: its name, ↑ ↓ and "Uredi" right under the handle. */
+  .sel-strip{display:flex;align-items:center;gap:4px;min-height:48px;padding:0 12px 4px 16px;background:var(--surface)}
+  .sel-strip p{margin:0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:15px}
+  .ed .panel[data-sheet=full] .sel-strip{display:none}
   .chip{padding:0 10px}
   /* A phone shows the phone layout; the size switch and the suggestions would only take preview space. */
   .ed .canvas .bar,.sugg{display:none}
