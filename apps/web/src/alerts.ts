@@ -1,5 +1,5 @@
 import type { AppConfig } from "@sb/config";
-import { OpsState, Usage, WORKER_HEARTBEAT, type Mailer, type Platform } from "@sb/platform";
+import { OpsState, SPEND_CAP_REFUSAL, Usage, WORKER_HEARTBEAT, type Mailer, type Platform } from "@sb/platform";
 
 /**
  * Admin alerts: the owner hears about trouble by email within one check interval, without another account.
@@ -7,31 +7,42 @@ import { OpsState, Usage, WORKER_HEARTBEAT, type Mailer, type Platform } from "@
  * ALERT_EMAIL, and without it nothing runs. Plain English, subject "Postavi alert: …".
  *
  * Kinds: health (the /health checks: database, storage, queue), failed-jobs (generation and chat-edit jobs failed in
- * the last window), worker-silent (no worker heartbeat), spend-warning (today's model spend at a share of the daily
- * cap) and spend-cap (the cap reached). A kind that keeps failing emails again only after its cooldown; the spend
- * kinds once per UTC day. A kind that was emailed and clears sends one "resolved" email. What was sent is stored
- * (ops_alerts), so a restart doesn't resend; when the database itself is down, this process remembers instead.
+ * the last window; jobs the spend cap stopped are "refused", not failed), worker-silent (no worker heartbeat),
+ * spend-warning (today's model spend at a share of the daily cap) and spend-cap (the cap reached, or a call refused
+ * by it today: the cap refuses a call whose estimate doesn't fit, so spend can stay just under it). A kind that keeps
+ * failing emails again only after its cooldown; the spend kinds once per UTC day. A kind that was emailed and clears
+ * sends one "resolved" email, and its next failure is a new alert at once. What was sent is stored (ops_alerts), so a
+ * restart doesn't resend; when the database itself is down, this process remembers instead. Every check and query
+ * has a time limit (a hung database or bucket counts as failing), and a round still running skips the next one.
  */
 
 export type AlertKind = "health" | "failed-jobs" | "worker-silent" | "spend-warning" | "spend-cap";
 
 type HealthDeps = Pick<Platform, "db" | "storage" | "queue">;
 
-/** The checks /health runs: name → null when fine, or the error message (for the log and the owner's alert only). */
-export async function healthChecks({ db, storage, queue }: HealthDeps): Promise<Record<string, string | null>> {
-  const out: Record<string, string | null> = {};
-  const run = async (name: string, fn: () => Promise<unknown>) => {
+/** `p`, or a rejection after `ms` (the work itself can't be cancelled; its late answer is ignored). */
+export function within<T>(ms: number, what: string, p: Promise<T>): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`${what}: no answer within ${ms / 1000} s`)), ms);
+  });
+  return Promise.race([p, timeout]).finally(() => clearTimeout(timer));
+}
+
+/**
+ * The checks /health runs, together, each within `timeoutMs`: name → null when fine, or the error message (for the
+ * log and the owner's alert only).
+ */
+export async function healthChecks({ db, storage, queue }: HealthDeps, timeoutMs: number): Promise<Record<string, string | null>> {
+  const run = async (name: string, fn: () => Promise<unknown>): Promise<[string, string | null]> => {
     try {
-      await fn();
-      out[name] = null;
+      await within(timeoutMs, name, Promise.resolve().then(fn));
+      return [name, null];
     } catch (e) {
-      out[name] = (e as Error).message || String(e);
+      return [name, (e as Error).message || String(e)];
     }
   };
-  await run("database", () => db.query("select 1"));
-  await run("storage", () => storage.ping());
-  await run("queue", () => queue.ping());
-  return out;
+  return Object.fromEntries(await Promise.all([run("database", () => db.query("select 1")), run("storage", () => storage.ping()), run("queue", () => queue.ping())]));
 }
 
 export interface AlertDeps {
@@ -68,6 +79,8 @@ export function alertWatchdog(deps: AlertDeps) {
   const log = deps.log ?? ((l: string) => console.warn(l));
   const ops = new OpsState(deps.platform.db);
   const usage = new Usage(deps.platform.db);
+  const limit = <T>(what: string, p: Promise<T>) => within(a.checkTimeoutMs, what, p);
+  let running = false;
   // Fallback state when the database is unreachable (it is the likeliest reason for a health alert).
   const memory = new Map<string, { sentAt: Date; firing: boolean }>();
 
@@ -76,10 +89,10 @@ export function alertWatchdog(deps: AlertDeps) {
 
   async function stateOf(kind: AlertKind): Promise<{ sentAt: Date; firing: boolean } | null> {
     try {
-      const s = await ops.alert(kind);
+      const s = await limit("alert state", ops.alert(kind));
       const m = memory.get(kind);
-      // Whichever is newer: an email sent while the database was down is only in memory.
-      if (m && (!s || m.sentAt > s.sentAt)) return m;
+      // Whichever is newer (this process's own on a tie): an email or recovery the database missed is only in memory.
+      if (m && (!s || m.sentAt >= s.sentAt)) return m;
       return s;
     } catch {
       return memory.get(kind) ?? null;
@@ -91,7 +104,7 @@ export function alertWatchdog(deps: AlertDeps) {
     // Kinds whose condition could be evaluated this round (only those can recover).
     const checked = new Set<AlertKind>();
 
-    const health = await healthChecks(deps.platform);
+    const health = await healthChecks(deps.platform, a.checkTimeoutMs);
     checked.add("health");
     const failed = Object.entries(health).filter(([, e]) => e !== null);
     if (failed.length) {
@@ -105,7 +118,7 @@ export function alertWatchdog(deps: AlertDeps) {
 
     try {
       const since = new Date(at.getTime() - a.failedJobs.windowMinutes * 60_000);
-      const n = await ops.failedJobsSince(since);
+      const n = await limit("failed jobs", ops.failedJobsSince(since));
       checked.add("failed-jobs");
       if (n >= a.failedJobs.threshold) {
         firing.push({
@@ -119,7 +132,7 @@ export function alertWatchdog(deps: AlertDeps) {
     }
 
     try {
-      const beat = await ops.lastBeat(WORKER_HEARTBEAT);
+      const beat = await limit("worker heartbeat", ops.lastBeat(WORKER_HEARTBEAT));
       checked.add("worker-silent");
       const silentMs = a.workerSilentMinutes * 60_000;
       if (!beat || at.getTime() - beat.getTime() >= silentMs) {
@@ -137,12 +150,15 @@ export function alertWatchdog(deps: AlertDeps) {
     try {
       const cap = config.limits.dailyModelSpendCapEur;
       if (cap > 0) {
-        const spent = await usage.spentToday();
+        const spent = await limit("spend today", usage.spentToday());
+        const refusal = await limit("spend-cap refusal", ops.lastBeat(SPEND_CAP_REFUSAL));
         checked.add("spend-warning");
         checked.add("spend-cap");
         const line = `Model spend today (UTC ${utcDay(at)}): ${eur(spent)} of the ${eur(cap)} daily cap (${Math.round((spent / cap) * 100)}%).`;
-        if (spent >= cap) {
-          firing.push({ kind: "spend-cap", title: `daily spend cap reached (${eur(spent)} of ${eur(cap)})`, detail: `${line}\nNew generations and chat edits are refused until UTC midnight. The cap is DAILY_SPEND_CAP_EUR on Railway (web and worker).` });
+        const refusedToday = refusal !== null && utcDay(refusal) === utcDay(at);
+        if (spent >= cap || refusedToday) {
+          const why = spent >= cap ? "" : `\nThe cap refused a model call at ${refusal!.toISOString()}: its estimated cost didn't fit in what is left today.`;
+          firing.push({ kind: "spend-cap", title: `daily spend cap reached (${eur(spent)} of ${eur(cap)})`, detail: `${line}${why}\nNew generations and chat edits are refused until UTC midnight. The cap is DAILY_SPEND_CAP_EUR on Railway (web and worker).` });
         } else if (spent >= a.spendWarnShare * cap) {
           firing.push({ kind: "spend-warning", title: `${Math.round((spent / cap) * 100)}% of the daily spend cap used`, detail: `${line}\nAt the cap, new generations and chat edits are refused until UTC midnight.` });
         }
@@ -155,55 +171,70 @@ export function alertWatchdog(deps: AlertDeps) {
 
   async function record(kind: AlertKind, at: Date, detail: string) {
     memory.set(kind, { sentAt: at, firing: true });
-    await ops.alertSent(kind, at, detail).catch((e: unknown) => log(`[alerts] storing ${kind}: ${(e as Error).message}`));
+    await limit("storing the alert", ops.alertSent(kind, at, detail)).catch((e: unknown) => log(`[alerts] storing ${kind}: ${(e as Error).message}`));
   }
 
   async function send(subject: string, text: string) {
     await mailer.send({ to, subject: `Postavi alert: ${subject}`, text });
   }
 
+  async function round(): Promise<string[]> {
+    const at = now();
+    const { firing, checked } = await findings(at);
+    const sent: string[] = [];
+    // The cap reached says everything the warning would.
+    const capHit = firing.some((f) => f.kind === "spend-cap");
+    for (const f of firing) {
+      const s = await stateOf(f.kind);
+      // After a "resolved" email (firing false) a new failure is news: no cooldown.
+      const due = SPEND_KINDS.has(f.kind) ? !s || utcDay(s.sentAt) !== utcDay(at) : !s || !s.firing || at.getTime() - s.sentAt.getTime() >= cooldownMs(f.kind);
+      if (!due) continue;
+      if (f.kind === "spend-warning" && capHit) continue;
+      try {
+        await send(f.title, `${f.detail}\n\nSent ${at.toISOString()} by the Postavi web service. This kind of alert is sent again ${SPEND_KINDS.has(f.kind) ? "tomorrow at the earliest" : `after ${cooldownMs(f.kind) / 60_000} minutes if it keeps failing`}.`);
+      } catch (e) {
+        log(`[alerts] email for ${f.kind} not sent: ${(e as Error).message}`);
+        continue;
+      }
+      log(`[alerts] sent ${f.kind}: ${f.title}`);
+      await record(f.kind, at, f.detail);
+      // Once the cap is reached today, today's warning would be old news.
+      if (f.kind === "spend-cap") await record("spend-warning", at, "covered by spend-cap");
+      sent.push(f.kind);
+    }
+    // Kinds that were emailed and now pass: one "resolved" email each (the spend ones reset with the day instead).
+    const firingNow = new Set(firing.map((f) => f.kind));
+    for (const kind of ["health", "failed-jobs", "worker-silent"] as const) {
+      if (firingNow.has(kind) || !checked.has(kind)) continue;
+      const s = await stateOf(kind);
+      if (!s?.firing) continue;
+      try {
+        await send(`${kind} resolved`, `The ${kind} alert sent ${s.sentAt.toISOString()} no longer applies (checked ${at.toISOString()}).`);
+      } catch (e) {
+        log(`[alerts] resolved email for ${kind} not sent: ${(e as Error).message}`);
+        continue;
+      }
+      log(`[alerts] ${kind} resolved`);
+      memory.set(kind, { sentAt: s.sentAt, firing: false });
+      await limit("storing the recovery", ops.alertRecovered(kind)).catch((e: unknown) => log(`[alerts] storing ${kind} resolved: ${(e as Error).message}`));
+      sent.push(`${kind}:resolved`);
+    }
+    return sent;
+  }
+
   return {
+    /** One round; returns [] at once while the previous round still runs (no overlapping rounds, no double emails). */
     async check(): Promise<string[]> {
-      const at = now();
-      const { firing, checked } = await findings(at);
-      const sent: string[] = [];
-      // The cap reached says everything the warning would.
-      const capHit = firing.some((f) => f.kind === "spend-cap");
-      for (const f of firing) {
-        const s = await stateOf(f.kind);
-        const due = SPEND_KINDS.has(f.kind) ? !s || utcDay(s.sentAt) !== utcDay(at) : !s || at.getTime() - s.sentAt.getTime() >= cooldownMs(f.kind);
-        if (!due) continue;
-        if (f.kind === "spend-warning" && capHit) continue;
-        try {
-          await send(f.title, `${f.detail}\n\nSent ${at.toISOString()} by the Postavi web service. This kind of alert is sent again ${SPEND_KINDS.has(f.kind) ? "tomorrow at the earliest" : `after ${cooldownMs(f.kind) / 60_000} minutes if it keeps failing`}.`);
-        } catch (e) {
-          log(`[alerts] email for ${f.kind} not sent: ${(e as Error).message}`);
-          continue;
-        }
-        log(`[alerts] sent ${f.kind}: ${f.title}`);
-        await record(f.kind, at, f.detail);
-        // Once the cap is reached today, today's warning would be old news.
-        if (f.kind === "spend-cap") await record("spend-warning", at, "covered by spend-cap");
-        sent.push(f.kind);
+      if (running) {
+        log("[alerts] previous check still running; skipped");
+        return [];
       }
-      // Kinds that were emailed and now pass: one "resolved" email each (the spend ones reset with the day instead).
-      const firingNow = new Set(firing.map((f) => f.kind));
-      for (const kind of ["health", "failed-jobs", "worker-silent"] as const) {
-        if (firingNow.has(kind) || !checked.has(kind)) continue;
-        const s = await stateOf(kind);
-        if (!s?.firing) continue;
-        try {
-          await send(`${kind} resolved`, `The ${kind} alert sent ${s.sentAt.toISOString()} no longer applies (checked ${at.toISOString()}).`);
-        } catch (e) {
-          log(`[alerts] resolved email for ${kind} not sent: ${(e as Error).message}`);
-          continue;
-        }
-        log(`[alerts] ${kind} resolved`);
-        memory.set(kind, { sentAt: s.sentAt, firing: false });
-        await ops.alertRecovered(kind).catch((e: unknown) => log(`[alerts] storing ${kind} resolved: ${(e as Error).message}`));
-        sent.push(`${kind}:resolved`);
+      running = true;
+      try {
+        return await round();
+      } finally {
+        running = false;
       }
-      return sent;
     },
   };
 }

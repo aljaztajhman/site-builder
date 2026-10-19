@@ -5,7 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadConfig } from "@sb/config";
 import { FalImageTransport, ImageBilledError, ImageGenerator, SpendCapError, estimateCallEur, imageCostEur, type ModelRequest, type ModelTransport } from "@sb/engine";
-import { Repo, createDb, createFsStorage, migrate, type JobData, type Platform, type Queue } from "@sb/platform";
+import { OpsState, Repo, SPEND_CAP_REFUSAL, createDb, createFsStorage, migrate, type JobData, type Platform, type Queue } from "@sb/platform";
 import type { SiteSpec } from "@sb/spec";
 import { modelClientFor, spendLedgerFor, startWorker, type WorkerJobs } from "../src/worker.ts";
 
@@ -77,6 +77,8 @@ describe("daily spend cap", () => {
     expect(results.map((r) => r.status).sort()).toEqual(["fulfilled", "rejected"]);
     expect((results.find((r) => r.status === "rejected") as PromiseRejectedResult).reason).toBeInstanceOf(SpendCapError);
     expect(sent).toEqual(["brief"]);
+    // The refusal is marked for the admin's spend-cap alert (spend itself stays under the cap).
+    expect(await new OpsState(platform.db).lastBeat(SPEND_CAP_REFUSAL)).not.toBeNull();
     // The call that went through is settled to its real tokens and cost, tagged with its job and tier.
     const { rows } = await platform.db.query<{ job_id: string; tier: string; input_tokens: number; output_tokens: number; pending: boolean; cost_eur: string }>(
       "select job_id, tier, input_tokens, output_tokens, pending, cost_eur from model_calls where stage = 'brief'",
@@ -143,6 +145,8 @@ describe("a generation that fails", () => {
     await handlers.generate!({ siteId: id, scope: "home", aiJobId }, "job-2");
     expect((await platform.repo.getSite(id))?.status).toBe("failed");
     expect((await events(id)).at(-1)).toMatchObject({ stage: "error", level: "error", message: expect.stringContaining("spend cap") });
-    expect((await platform.repo.usage.getJob(aiJobId))?.status).toBe("failed");
+    // Stopped by the cap: "refused" (like "failed", it doesn't count against allowances), so the admin's
+    // failed-jobs alert counts only real failures.
+    expect((await platform.repo.usage.getJob(aiJobId))?.status).toBe("refused");
   });
 });

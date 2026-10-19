@@ -59,7 +59,7 @@ describe("migration look_fingerprints", () => {
   it("creates the table, and running migrations again changes nothing", async () => {
     const m = MIGRATIONS.find((x) => x.name === "look_fingerprints");
     expect(m).toBeDefined();
-    expect(m!.id).toBe(Math.max(...MIGRATIONS.map((x) => x.id)));
+    expect(m!.id).toBe(22);
     const fresh = await createDb("pglite://memory");
     try {
       const ran = await migrate(fresh);

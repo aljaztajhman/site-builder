@@ -263,7 +263,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   // ---------- Health ----------
   app.get("/health", async (c) => {
     const checks: Record<string, string> = {};
-    for (const [name, error] of Object.entries(await healthChecks({ db, storage, queue }))) {
+    for (const [name, error] of Object.entries(await healthChecks({ db, storage, queue }, config.alerts.checkTimeoutMs))) {
       checks[name] = error === null ? "ok" : "error";
       // Public URL: the detail (hostnames, driver messages) goes to the log only.
       if (error !== null) console.error(`[health] ${name}:`, error);

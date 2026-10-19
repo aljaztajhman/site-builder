@@ -35,7 +35,7 @@ import {
   type SpendLedger,
   type UrlCheckResult,
 } from "@sb/engine";
-import { INTERRUPTED_MESSAGE, OpsState, WORKER_HEARTBEAT, domainProvidersFor, type DomainProviders, type Platform, type Tier } from "@sb/platform";
+import { INTERRUPTED_MESSAGE, OpsState, SPEND_CAP_REFUSAL, WORKER_HEARTBEAT, domainProvidersFor, type DomainProviders, type Platform, type Tier } from "@sb/platform";
 import type { SiteSpec } from "@sb/spec";
 import { cleanupExpired, spendMonitor } from "./housekeeping.ts";
 import { recordGeneration, type GenerationOutcome } from "./telemetry.ts";
@@ -68,7 +68,11 @@ export function spendLedgerFor(platform: Pick<Platform, "repo">, ctx: CallContex
     async reserve({ stage, model, estimateEur, capEur }) {
       const r = await usage.reserveCall({ ...owner(ctx), siteId: ctx.siteId, jobId: ctx.jobId, stage, model, estimateEur, capEur, ...(stage === "imageGen" && pictureCap ? { pictureCap } : {}) });
       if ("pictures" in r) throw new PictureLimitError(r.pictures, pictureCap?.max ?? 0);
-      if (!("id" in r)) throw new SpendCapError(r.spent, capEur);
+      if (!("id" in r)) {
+        // The cap refuses a call whose estimate doesn't fit, so spend can stay just under it: the admin alert reads this.
+        await new OpsState(platform.repo.db).beat(SPEND_CAP_REFUSAL).catch((e: unknown) => console.error("[worker] spend-cap mark", e));
+        throw new SpendCapError(r.spent, capEur);
+      }
       return {
         async settle(c) {
           const u = c.usage;
@@ -400,7 +404,8 @@ export async function startWorker(platform: Platform, config = loadConfig(), job
       }
       await repo.setStatus(job.siteId, "failed");
       await repo.addEvent({ siteId: job.siteId, jobId, stage: "error", level: "error", message: (e as Error).message });
-      await finish(ctx.aiJobId, "failed");
+      // Stopped by the daily spend cap: "refused", so the admin's failed-jobs alert counts only real failures (neither counts against allowances).
+      await finish(ctx.aiJobId, e instanceof SpendCapError ? "refused" : "failed");
       await telemetry({ outcome: "failed", saved: false, error: e });
     }
   }), { concurrency: config.limits.jobConcurrency });
@@ -419,7 +424,7 @@ export async function startWorker(platform: Platform, config = loadConfig(), job
       const reply = e instanceof SpendCapError ? EDIT_SPEND_CAP_REPLY : EDIT_ERROR_REPLY;
       await repo.addChat(job.siteId, "assistant", reply, { error: true });
       await repo.addEvent({ siteId: job.siteId, jobId, stage: "edit", level: "error", message: `Edit failed: ${(e as Error).message.slice(0, 300)}` });
-      await finish(ctx.aiJobId, "failed");
+      await finish(ctx.aiJobId, e instanceof SpendCapError ? "refused" : "failed");
       console.error("[edit]", e);
     }
   }));

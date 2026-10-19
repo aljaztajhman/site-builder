@@ -8,6 +8,8 @@ import type { Db } from "./db.ts";
 
 /** The name the worker's heartbeat is stored under. */
 export const WORKER_HEARTBEAT = "worker";
+/** The name under which the last paid call refused by the daily spend cap is stored (the cap refuses before spend reaches it). */
+export const SPEND_CAP_REFUSAL = "spend-cap-refusal";
 
 export interface AlertState {
   kind: string;
@@ -20,7 +22,7 @@ export interface AlertState {
 export class OpsState {
   constructor(private readonly db: Db) {}
 
-  /** Records that `name` (e.g. "worker") is alive at `at`. */
+  /** Records that `name` (e.g. "worker", or SPEND_CAP_REFUSAL) happened at `at`; a later time never moves back. */
   async beat(name: string, at: Date = new Date()): Promise<void> {
     await this.db.query(
       "insert into ops_heartbeats (name, beat_at) values ($1, $2) on conflict (name) do update set beat_at = greatest(ops_heartbeats.beat_at, excluded.beat_at)",
@@ -28,7 +30,7 @@ export class OpsState {
     );
   }
 
-  /** The last heartbeat of `name`, or null when it never wrote one. */
+  /** The last time of `name`, or null when it never happened. */
   async lastBeat(name: string): Promise<Date | null> {
     const { rows } = await this.db.query<{ beat_at: string | Date }>("select beat_at from ops_heartbeats where name = $1", [name]);
     return rows[0] ? new Date(rows[0].beat_at) : null;

@@ -93,6 +93,15 @@ describe("edit job that fails", () => {
     expect(r.reply.content).toMatch(/omejitev porabe/);
     expect(r.status).toBe("ready");
   });
+
+  it("marks its job refused, not failed, when the spend cap stopped it (the admin's failed-jobs alert counts real failures only)", async () => {
+    const id = await site("urejanje-omejitev-job", "ready");
+    await platform.repo.logModelCall({ siteId: id, jobId: null, stage: "edit", model: "test", inputTokens: 0, outputTokens: 0, cacheCreationTokens: 0, cacheReadTokens: 0, costEur: config.limits.dailyModelSpendCapEur + 1, durationMs: 0, ok: true });
+    const capped = await platform.repo.usage.insertJob({ kind: "edit", scope: null, tier: "free", accountId: "acct_cap", siteId: id, estimateEur: 0.05 });
+    const msg = await platform.repo.addChat(id, "user", "Dodaj pogosta vprašanja o parkiranju");
+    await handlers.edit!({ siteId: id, messageId: Number(msg.id), aiJobId: capped }, "job-edit-cap");
+    expect((await platform.repo.usage.getJob(capped))?.status).toBe("refused");
+  });
 });
 
 describe("prune job (nightly version retention)", () => {

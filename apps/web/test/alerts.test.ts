@@ -3,7 +3,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { loadConfig, type AppConfig } from "@sb/config";
-import { MIGRATIONS, OpsState, WORKER_HEARTBEAT, createDb, createFsStorage, memoryMailer, migrate, type Db, type MailMessage, type Mailer, type Queue, type Storage } from "@sb/platform";
+import { MIGRATIONS, OpsState, SPEND_CAP_REFUSAL, WORKER_HEARTBEAT, createDb, createFsStorage, memoryMailer, migrate, type Db, type MailMessage, type Mailer, type Queue, type Storage } from "@sb/platform";
 import { alertWatchdog, startAlerts } from "../src/alerts.ts";
 
 /**
@@ -17,8 +17,8 @@ const MIN = 60_000;
 let real: Db;
 let dir: string;
 let storage: Storage;
-/** Switches the database, storage and queue between working and failing. */
-const down = { db: false, storage: false, queue: false };
+/** Switches the database, storage and queue between working, failing and (storage) hanging. */
+const down = { db: false, storage: false, queue: false, hang: false };
 let db: Db;
 const queue: Queue = {
   send: async () => "job",
@@ -37,6 +37,7 @@ beforeAll(async () => {
   storage = {
     ...fs,
     ping: async () => {
+      if (down.hang) return new Promise<void>(() => undefined);
       if (down.storage) throw new Error("S3: 403 Forbidden");
       return fs.ping();
     },
@@ -53,7 +54,7 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-  Object.assign(down, { db: false, storage: false, queue: false });
+  Object.assign(down, { db: false, storage: false, queue: false, hang: false });
   for (const t of ["ops_alerts", "ops_heartbeats", "ai_jobs", "model_calls"]) await real.query(`delete from ${t}`);
 });
 
@@ -71,10 +72,10 @@ function watchdog(c: ReturnType<typeof clock>, mailer: Mailer = memoryMailer(), 
 const subjects = (m: { sent: MailMessage[] }) => m.sent.map((x) => x.subject);
 const beat = (at: Date) => new OpsState(real).beat(WORKER_HEARTBEAT, at);
 
-async function failedJob(finishedAt: Date, started = true): Promise<void> {
+async function failedJob(finishedAt: Date, started = true, status: "failed" | "refused" = "failed"): Promise<void> {
   await real.query(
-    "insert into ai_jobs (kind, tier, pool, estimate_eur, status, started_at, finished_at) values ('generate', 'free', 'free', 0.3, 'failed', $1, $2)",
-    [started ? new Date(finishedAt.getTime() - MIN).toISOString() : null, finishedAt.toISOString()],
+    "insert into ai_jobs (kind, tier, pool, estimate_eur, status, started_at, finished_at) values ('generate', 'free', 'free', 0.3, $3, $1, $2)",
+    [started ? new Date(finishedAt.getTime() - MIN).toISOString() : null, finishedAt.toISOString(), status],
   );
 }
 
@@ -174,6 +175,8 @@ describe("alert watchdog", () => {
     const { threshold, windowMinutes } = config.alerts.failedJobs;
     for (let i = 0; i < threshold - 1; i++) await failedJob(new Date(c.now().getTime() - 5 * MIN));
     await failedJob(new Date(c.now().getTime() - 5 * MIN), false);
+    // Stopped by the spend cap (the worker marks those refused): the spend-cap alert's business, not this one's.
+    await failedJob(new Date(c.now().getTime() - 5 * MIN), true, "refused");
     await failedJob(new Date(c.now().getTime() - (windowMinutes + 5) * MIN));
     expect(await w.check()).toEqual([]);
 
@@ -203,12 +206,52 @@ describe("alert watchdog", () => {
 
     c.advance(config.alerts.workerSilentMinutes - 2);
     expect(await w.check()).toEqual([]);
-    // Silent again, but within the cooldown of the first email.
+    // Silent again, within the cooldown of the first email: after its "resolved" email it is a new alert at once.
+    c.advance(5);
+    expect(await w.check()).toEqual(["worker-silent"]);
     c.advance(5);
     expect(await w.check()).toEqual([]);
     c.advance(config.alerts.cooldownMinutes.workerSilent);
     expect(await w.check()).toEqual(["worker-silent"]);
-    expect(subjects(mail)).toEqual(["Postavi alert: the worker is not running", "Postavi alert: worker-silent resolved", "Postavi alert: the worker is not running"]);
+    expect(subjects(mail)).toEqual([
+      "Postavi alert: the worker is not running",
+      "Postavi alert: worker-silent resolved",
+      "Postavi alert: the worker is not running",
+      "Postavi alert: the worker is not running",
+    ]);
+  });
+
+  it("after a 'resolved' email the first new failure alerts at once, also for a restarted service", async () => {
+    const c = clock();
+    await beat(c.now());
+    const mail = memoryMailer();
+    down.queue = true;
+    expect(await watchdog(c, mail).w.check()).toEqual(["health"]);
+    down.queue = false;
+    c.advance(5);
+    await beat(c.now());
+    expect(await watchdog(c, mail).w.check()).toEqual(["health:resolved"]);
+    down.storage = true;
+    c.advance(5);
+    await beat(c.now());
+    expect(await watchdog(c, mail).w.check()).toEqual(["health"]);
+    expect(subjects(mail)).toEqual(["Postavi alert: queue failing", "Postavi alert: health resolved", "Postavi alert: storage failing"]);
+  });
+
+  it("a hung check counts as failing after checkTimeoutMs, and a round still running skips the next", async () => {
+    const c = clock();
+    await beat(c.now());
+    const mail = memoryMailer();
+    const quick: AppConfig = { ...config, alerts: { ...config.alerts, checkTimeoutMs: 200 } };
+    const { w, lines } = watchdog(c, mail, quick);
+    down.hang = true;
+    const first = w.check();
+    expect(await w.check()).toEqual([]);
+    expect(lines).toContain("[alerts] previous check still running; skipped");
+    expect(await first).toEqual(["health"]);
+    expect(mail.sent).toHaveLength(1);
+    expect(mail.sent[0]!.subject).toBe("Postavi alert: storage failing");
+    expect(mail.sent[0]!.text).toContain("storage: no answer within 0.2 s");
   });
 
   it("spend: the warning at 80 % once a day, the cap once a day (and no warning after it)", async () => {
@@ -237,6 +280,21 @@ describe("alert watchdog", () => {
     await beat(c.now());
     expect(await w.check()).toEqual(["spend-cap"]);
     expect(mail.sent).toHaveLength(3);
+  });
+
+  it("spend just under the cap counts as the cap reached when the cap refused a call today (not yesterday)", async () => {
+    const c = clock();
+    await beat(c.now());
+    const mail = memoryMailer();
+    await spend(9.95);
+    await new OpsState(real).beat(SPEND_CAP_REFUSAL, new Date(c.now().getTime() - 24 * 60 * MIN));
+    expect(await watchdog(c, mail).w.check()).toEqual(["spend-warning"]);
+    await new OpsState(real).beat(SPEND_CAP_REFUSAL, c.now());
+    c.advance(5);
+    await beat(c.now());
+    expect(await watchdog(c, mail).w.check()).toEqual(["spend-cap"]);
+    expect(mail.sent[1]!.subject).toBe("Postavi alert: daily spend cap reached (€9.95 of €10.00)");
+    expect(mail.sent[1]!.text).toContain("The cap refused a model call at");
   });
 
   it("the cap reached at the first check sends only the cap alert", async () => {

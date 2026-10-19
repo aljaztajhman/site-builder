@@ -505,6 +505,8 @@ export const AppConfigSchema = z.object({
    */
   alerts: z.object({
     everyMinutes: z.number().int().positive(),
+    /** Time limit of each health check and query (also /health's): a hung database or bucket counts as failing. */
+    checkTimeoutMs: z.number().int().positive(),
     /** How often the worker writes its heartbeat. */
     heartbeatSeconds: z.number().int().positive(),
     /** No worker heartbeat for this long is an alert. */
