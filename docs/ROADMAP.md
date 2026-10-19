@@ -10,7 +10,7 @@ Written on 2026-10-16 from an inventory of TASKS.md (263 done, 158 open), HQ, do
 
 ## Now
 
-- **Current milestone:** none started (owner, 2026-10-19: "Close M6, but don't start anything new yet"). M6 closed 2026-10-19 (production, backups with a restore drill, alerts, clean switches, promote; first release v0.1.0). Waiting on the owner: M5 (2 of 4) needs a payment method on Cloudflare for customers' own domains; M2 (2 of 6) needs the rest of the phone run (docs/owner-phone-run.md, starts at app.postavi.si). Next in the order: M4 payments, built in test mode, when the owner says go.
+- **Current milestone:** M4 Payments, 3 of 5 (owner said go 2026-10-19; PR #273 merged). Waiting on the owner: a Stripe test key in .env for the test-mode payment on staging (criteria 2 and 3), the accountant's answer on fiscal verification. Also waiting: M5 (Cloudflare payment method), M2 (the phone run at app.postavi.si). M6 closed 2026-10-19.
 - **Editor (owner, 2026-10-19, after seeing a POC):** five editor UX changes join M2 as criterion 7 (PR #269, a draft until the architecture note and a review are in). Eleven more editor ideas are parked as "Editor 2.0" below; nothing else from that list is 1.0 work.
 - **Order (owner, 2026-10-18):** company registration comes last; next after M2 are M5 (domains, with the Postavi rename) and M6 (operations), then M4 in test mode and M7a, a free beta.
 - **Owner, in parallel (long lead times):** register the company (M3), find a lawyer for the legal pages (M3). New name Postavi; postavi.si bought 2026-10-17 (M5).
@@ -73,16 +73,18 @@ Exit criteria:
 - [ ] AI-label wording checked by the owner (D1: caption + file mark).
 - [ ] The launch check (apps/web/src/legal.tsx) passes.
 
-### M4 · Payments (Claude; built and tested in test mode before the company exists, switched on with it) — 0 of 5 met
+### M4 · Payments (Claude; built and tested in test mode before the company exists, switched on with it) — 3 of 5 met
 
 A customer can pay and we can account for it.
 
+Built 2026-10-19 (PR #273, plan .claude/plans/m4-payments.md): Stripe Checkout for Osnovni/Plus monthly and yearly, webhooks (signed, idempotent, ordered by a per-subscription lock), subscriptions with a 7-day grace, own gap-free invoices (`2026-00001`, PDF by email, /racun), the Naročnina page and the plan sheet on Objavi, /pogoji payment section (owner approved). Off in production until the company exists; staging can run it with `BILLING_ENABLED=true`.
+
 Exit criteria:
-- [ ] Decision on the 1.0 payment path. Recommendation: yearly plans by invoice + bank transfer (UPN QR) first, Stripe for monthly after launch (TASKS:368–370, :405).
-- [ ] Plans from config charged correctly: Osnovni €19/€190, Plus €39/€390, founding €99 then 20 % off for life, setup €149 (`sb-pricing-2`). Invoices are numbered and legal. `plans.billingEnabled` true.
-- [ ] Publishing a site requires an active plan. A test payment end to end on the live app (provider test mode).
-- [ ] A switch-on checklist for the day the company exists: the config fields, live keys and the one live payment test, each step written down; built and tested on placeholder company data before then.
-- [ ] Upsells that need billing (TASKS:374) are done or parked.
+- [x] Decision on the 1.0 payment path (owner, 2026-10-19): card payments through Stripe from day one, monthly and yearly; a site is published only after payment; Postavi issues its own invoices. Fiscal verification (FURS) probably not needed with Stripe as a licensed payment institution; the accountant confirms.
+- [ ] Plans from config charged correctly: Osnovni €19/€190, Plus €39/€390, founding €99 then 20 % off for life, setup €149 (`sb-pricing-2`). Invoices are numbered and legal. `plans.billingEnabled` true. Built and tested on a fake Stripe; `billingEnabled` goes true at switch-on (docs/billing-switch-on.md).
+- [ ] Publishing a site requires an active plan. A test payment end to end on the live app (provider test mode). The gate is built; the test-mode payment on staging waits for the owner's Stripe test key.
+- [x] A switch-on checklist for the day the company exists (docs/billing-switch-on.md, PR #274): the config fields, live keys and the one live payment test, each step written down; built and tested on placeholder company data before then.
+- [x] Upsells that need billing (TASKS:374) are done or parked: plan changes through Stripe's portal (prorated), founding places counted from paid founding subscriptions; the AI top-up (€5) is parked.
 
 ### M5 · Domains (Claude + owner purchases) — 2 of 4 met (adapters and UI built on fakes)
 
