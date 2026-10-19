@@ -4,13 +4,13 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { loadConfig } from "@sb/config";
+import { LOOK_WEIGHTS } from "../src/look-print.ts";
 import type { SiteSpec } from "@sb/spec";
 import { chromeTupleOf, loadPrint, loadVarietyEntries, markdownLine, varietyOf } from "../src/set-variety.ts";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const GOLDEN = ["pekarna-kvas", "avtoservis-mrak", "instalacije-rebernik"] as const;
-const weights = loadConfig().studio.uniqueness.weights;
+const weights = LOOK_WEIGHTS;
 
 let dir: string;
 beforeAll(() => {

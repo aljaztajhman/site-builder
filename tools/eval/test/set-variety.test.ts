@@ -4,12 +4,12 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { loadConfig } from "@sb/config";
+import { LOOK_WEIGHTS } from "../src/look-print.ts";
 import { loadVarietyEntries, loadPrint, main, markdownLine, varietyOf } from "../src/set-variety.ts";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const GOLDEN = ["pekarna-kvas", "avtoservis-mrak", "instalacije-rebernik"] as const;
-const weights = loadConfig().studio.uniqueness.weights;
+const weights = LOOK_WEIGHTS;
 
 let dir: string;
 beforeAll(() => {

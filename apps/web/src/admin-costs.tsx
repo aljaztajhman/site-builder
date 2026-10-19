@@ -27,7 +27,6 @@ const STAGE_LABEL: Record<string, string> = {
   critique: "Kritika",
   edit: "Urejanje v klepetu",
   altText: "Opisi fotografij",
-  fullBuild: "Celotna stran",
   imageGen: "Generirane slike",
   judge: "Ocenjevanje (eval)",
 };

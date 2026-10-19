@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { loadConfig, type AppConfig } from "@sb/config";
 import { NO_FAMILY_MESSAGE, lookKey, sameLook } from "@sb/engine";
 import { Repo, createDb, createFsStorage, memoryMailer, migrate, type Platform, type Queue } from "@sb/platform";
-import { genomeOf, migrateSpec, validateSite, type SiteSpec } from "@sb/spec";
+import { migrateSpec, validateSite, type SiteSpec } from "@sb/spec";
 import { createApp } from "../src/app.ts";
 import { adminBrowser, ownerSignIn, type Browser, type Req } from "./session-helpers.ts";
 
@@ -18,14 +18,14 @@ import { adminBrowser, ownerSignIn, type Browser, type Req } from "./session-hel
 const here = path.dirname(fileURLToPath(import.meta.url));
 const PASSWORD = "test-password-1234";
 // Every variety switch pinned off here (the repo config has families, skeleton and concept on since sb-variety-switches):
-// "off" is all off, "on" families alone, "skeleton" families + skeleton, "genome" genome alone.
+// "off" is all off, "on" families alone, "skeleton" families + skeleton.
 const repoConfig = loadConfig();
-const base: AppConfig = { ...repoConfig, variety: { ...repoConfig.variety, families: false, skeleton: false, concept: false, genome: false } };
+const base: AppConfig = { ...repoConfig, variety: { ...repoConfig.variety, families: false, skeleton: false, concept: false } };
 const on: AppConfig = { ...base, variety: { ...base.variety, families: true } };
 const mail = memoryMailer();
 let platform: Platform;
 let dir: string;
-const apps: Record<"on" | "off" | "skeleton" | "genome", ReturnType<typeof createApp>> = {} as never;
+const apps: Record<"on" | "off" | "skeleton", ReturnType<typeof createApp>> = {} as never;
 
 beforeAll(async () => {
   dir = await mkdtemp(path.join(tmpdir(), "sb-look-"));
@@ -37,7 +37,6 @@ beforeAll(async () => {
   apps.on = make(on);
   apps.off = make(base);
   apps.skeleton = make({ ...on, variety: { ...on.variety, skeleton: true } });
-  apps.genome = make({ ...base, variety: { ...base.variety, genome: true } });
 });
 afterAll(async () => {
   await platform.close();
@@ -173,29 +172,6 @@ describe("POST /api/sites/:id/look", () => {
     expect((await platform.repo.getSpec(id))!.version).toBe(v);
     const state = (await (await req("off")(`/api/sites/${id}`, { headers: { cookie: admin.cookie } })).json()) as { anotherLook: boolean };
     expect(state.anotherLook).toBe(false);
-  });
-
-  it("with variety.genome on: every style, a style without a family included, moves along the genome's axes; texts, photos and facts untouched", async () => {
-    const id = await site("avtoservis-mrak");
-    const start = (await platform.repo.getSpec(id))!;
-    const money = await spent();
-    const props = (s: SiteSpec) => JSON.stringify({ business: s.business, assets: s.assets, ownerEdits: s.ownerEdits, pages: s.pages.map((p) => p.sections.map((x) => [x.id, x.props])) });
-    const genomes = new Set([JSON.stringify(genomeOf(start.spec))]);
-    for (let i = 0; i < 3; i++) {
-      const res = await look("genome", id, admin, { "sec-fetch-site": "same-origin" });
-      expect(res.status, await res.clone().text()).toBe(200);
-      const s = (await platform.repo.getSpec(id))!.spec;
-      const v = validateSite(s);
-      expect(v.ok ? [] : v.issues).toEqual([]);
-      expect(s.design.genome?.source).toBe("picked");
-      expect(props(s)).toBe(props(start.spec));
-      genomes.add(JSON.stringify(genomeOf(s)));
-    }
-    expect(genomes.size).toBe(4);
-    expect(await spent()).toEqual(money);
-    expect((await platform.repo.listVersions(id))[0]!.message).toMatch(/^druga podoba: /);
-    const state = (await (await req("genome")(`/api/sites/${id}`, { headers: { cookie: admin.cookie } })).json()) as { anotherLook: boolean };
-    expect(state.anotherLook).toBe(true);
   });
 
   it("only the site's owner (any tier, free included) or the admin; never from another site", async () => {

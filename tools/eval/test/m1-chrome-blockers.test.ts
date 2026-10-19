@@ -39,7 +39,8 @@ const load = async (rel: string, slug: string): Promise<SiteSpec> => {
   spec.slug = slug;
   return spec;
 };
-const studio = (id: string) => load(`packages/engine/test/fixtures/studio-pages/${id}.json`, `m1-${id}`);
+// Real homepages from the retired design studio trial (M1 blockers were found on them); kept as fixtures here.
+const studio = (id: string) => load(`tools/eval/test/fixtures/m1-pages/${id}.json`, `m1-${id}`);
 const review = (id: string) => load(`eval/outside-review/review50-specs/${id}/spec-generated.json`, `m1-${id}`);
 
 const shot = async (page: Page, name: string) => {

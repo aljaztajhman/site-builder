@@ -30,7 +30,6 @@ import {
   pruneAllSites,
   pruneSite,
   republishStaleAddresses,
-  studioEnabled,
   type ModelTransport,
   type SpendLedger,
   type UrlCheckResult,
@@ -159,21 +158,6 @@ export function defaultTransport(job: "generate" | "edit", editIndex = 0, scope:
   if (job !== "edit" || !recordings.length) return new ReplayTransport(recordings);
   const n = editIndex % recordings.length;
   return new ReplayTransport([...recordings.slice(n), ...recordings.slice(0, n)]);
-}
-
-/**
- * Design studio 0.5 (docs/plans/studio-0.5.md): whether this job's homepage goes through the studio. Config designer.agent
- * "on": every job; "trial": only a signed-in account whose email is in DESIGNER_TRIAL_EMAILS, plus the admin password
- * session's sites (tier "admin", no account) when DESIGNER_TRIAL_ADMIN is "1"; a guest never; "off": never.
- */
-export async function studioForJob(platform: Pick<Platform, "repo">, config: AppConfig, ctx: CallContext, trialEmails = process.env.DESIGNER_TRIAL_EMAILS, trialAdmin = process.env.DESIGNER_TRIAL_ADMIN): Promise<boolean> {
-  const mode = config.designer.agent;
-  if (mode === "off") return false;
-  if (mode === "on") return true;
-  if (!ctx.accountId && ctx.tier === "admin" && trialAdmin?.trim() === "1") return true;
-  if (!ctx.accountId || !trialEmails?.trim()) return false;
-  const account = await platform.repo.accounts.get(ctx.accountId);
-  return studioEnabled(mode, account?.email, trialEmails);
 }
 
 /** A site's scope as its intake says (what the pipeline builds): which recordings a replayed job gets. */
@@ -373,12 +357,8 @@ export async function startWorker(platform: Platform, config = loadConfig(), job
       const images = imageGeneratorFor(platform, config, ctx, pictureCap);
       // The domain step's names are asked while the site generates (it-zero-to-live).
       const onBrief = () => void warmDomainSuggestions(domainDeps, job.siteId);
-      const studio = await studioForJob(platform, config, ctx);
-      // Studio 0.5 trial: why a job did or didn't go through the studio (no email, only whether one is set).
-      if (config.designer.agent === "trial") console.log(`[studio] ${job.siteId}: ${studio ? "on" : "off"} (tier ${ctx.tier ?? "none"}, account ${ctx.accountId ? "yes" : "no"})`);
-      const r = await run.generateSite({ config, repo, storage, client, pictures, onBrief, ...(images ? { images } : {}), ...(studio ? { studio } : {}) }, job.siteId, jobId);
+      const r = await run.generateSite({ config, repo, storage, client, pictures, onBrief, ...(images ? { images } : {}) }, job.siteId, jobId);
       if (r.critiqueSkipped) console.log(`[generate] ${job.siteId}: finished with the critique skipped (${r.critiqueSkipped})`);
-      if (r.studio) console.log(`[studio] ${job.siteId}: ${r.studio.composed ? `composed: ${r.studio.idea}` : `kept today's homepage: ${r.studio.reason}`}`.slice(0, 500));
       await finish(ctx.aiJobId, "done");
       await telemetry({ outcome: "done", saved: true, result: r });
     } catch (e) {

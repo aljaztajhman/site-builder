@@ -3,7 +3,7 @@
  *
  * Free variety numbers for a set of site specs (no model call, no network): how many distinct directions, font pairs,
  * hero variants and primary colours the set uses, and the mean and smallest pairwise look distance, from the engine's
- * own look functions (packages/engine/src/studio/look.ts, weights from config studio.uniqueness: genome axes,
+ * look functions (look-print.ts, weights LOOK_WEIGHTS: genome axes,
  * composition signature, palette in Lab, perceptual hash of the first screens, stance). The perceptual hash needs
  * first-screen pictures: a manifest entry's `desk` and `phone`, or `<id>-desk.png` / `<id>-phone.png` /
  * `<id>-1280-first.png` / `<id>-360-first.png` beside the spec; a page without them is compared by its spec alone, and
@@ -18,10 +18,9 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { z } from "zod";
-import { loadConfig, type AppConfig } from "@sb/config";
-import { lookDistance, lookPrintOf, phash, type LookPrint } from "@sb/engine";
 import { migrateSpec, type SiteSpec } from "@sb/spec";
 import { lookFeatures } from "./look-distance.ts";
+import { LOOK_WEIGHTS, lookDistance, lookPrintOf, phash, type LookPrint, type LookWeights } from "./look-print.ts";
 
 export interface VarietyEntry {
   id: string;
@@ -147,7 +146,7 @@ export function chromeTupleOf(spec: SiteSpec): string {
   return `${spec.design.skeleton?.header ?? spec.chrome.header.variant}|${spec.chrome.header.tone ?? "default"}|${spec.design.skeleton?.actions ?? "bar"}`;
 }
 
-export function varietyOf(pages: VarietyPage[], weights: AppConfig["studio"]["uniqueness"]["weights"]): VarietyReport {
+export function varietyOf(pages: VarietyPage[], weights: LookWeights = LOOK_WEIGHTS): VarietyReport {
   const feats = pages.map((p) => lookFeatures(p.spec));
   const group = (xs: string[]) => ({ distinct: new Set(xs).size, counts: counts(xs) });
   const ds: { a: string; b: string; distance: number; phash: boolean }[] = [];
@@ -204,14 +203,13 @@ export async function main(argv: string[], print: (line: string) => void = conso
     print("Usage: pnpm variety <name>=<manifest.json|glob|dir|a,b> [...] [--json <file>]");
     return 2;
   }
-  const weights = loadConfig().studio.uniqueness.weights;
   const result: Record<string, VarietyReport> = {};
   try {
     for (const arg of v.positionals) {
       const eq = arg.indexOf("=");
       const [name, source] = eq > 0 && !/[\\/*]/.test(arg.slice(0, eq)) ? [arg.slice(0, eq), arg.slice(eq + 1)] : [path.basename(arg).replace(/[*?]/g, "") || "set", arg];
       const pages = await Promise.all(loadVarietyEntries(source).map(loadPrint));
-      result[name] = varietyOf(pages, weights);
+      result[name] = varietyOf(pages);
       print(markdownLine(name, result[name]));
     }
   } catch (e) {

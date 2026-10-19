@@ -67,7 +67,7 @@ export const Design = z.strictObject({
   /** Spec v19: the AI designer's art direction (design-studio.md §6). Metadata for regenerations, neighbours and the editor; never changes rendering. */
   art: Art.optional().describe("Set by the system; leave out."),
   /**
-   * Spec v19: the design seed (design-studio.md §5.1), from the site id and the generation (engine studio designSeed).
+   * Spec v19: the design seed (design-studio.md §5.1), from the site id and the generation (set by the design studio, removed 2026-10-19).
    * It deals the stances, constraint cards and references and breaks code's ties, so a run replays. Never rendered.
    */
   seed: DesignSeed.optional().describe("Set by the system; leave out."),

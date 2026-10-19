@@ -239,21 +239,9 @@ export const AppConfigSchema = z.object({
     content: ModelStage,
     critique: ModelStage,
     edit: ModelStage,
-    fullBuild: ModelStage,
     /** Eval only: scores generated homepages from screenshots (tools/eval/src/judge.ts). */
     judge: ModelStage,
-    /** Design studio 0.5 (docs/plans/studio-0.5.md): the director picks the homepage's stance, presets, palette and hero copy. */
-    director: ModelStage,
-    /** Studio 0.5b mockup pipeline: the art director (vision) writes one direction and the mockup's image prompt. */
-    artDirector: ModelStage,
-    /** Studio 0.5b mockup pipeline: rebuilds the mockup (vision) into composed sections, facts through slots. */
-    rebuild: ModelStage,
-    /** Studio direct (the Fable studio): the art director, writing for direct composition (no image model). */
-    artDirectorDirect: ModelStage,
-    /** Studio direct: composes the homepage from the art direction in the rebuild's answer format (no mockup, no crops). */
-    composeDirect: ModelStage,
   }),
-  useFullBuildModel: z.boolean(),
   /**
    * The variety engine (docs/plans/variety-engine.md, Steps 1–2). families: a trade template is offered beside two
    * fitting directions instead of forced, with its family of palettes, font pairs and heroes; logo colours go into its
@@ -266,82 +254,8 @@ export const AppConfigSchema = z.object({
    * concept (Step 3, engine concept.ts): the brief adds subtype, goal, angle, signature fact, materials and local
    * anchor; the homepage follows a blueprint by goal; a signature device by fact; the subtype picks the motif. Off:
    * every request is today's.
-   * genome (Step 5, engine genome.ts): after the content step, code picks the site's design genome (type, palette and
-   * ground, hero, header, footer, rhythm, imagery, shape, density; the motif follows the preset) from the site seed, away
-   * from the neighbours' genomes and inside the compatibility rules (spec genome-rules.ts), and dresses the written
-   * content in it with no content call; "Druga podoba" moves along the axes for every style, not only template families.
-   * Off: no genome is picked and every request is today's.
    */
-  variety: z.object({ families: z.boolean(), skeleton: z.boolean(), neighbours: z.number().int().min(0).max(500), concept: z.boolean(), genome: z.boolean() }),
-  /**
-   * The design studio (docs/plans/design-studio.md). uniqueness (§5.4, engine studio/look.ts): the look distance's part
-   * weights (genome axes, composition signature, palette in Lab, perceptual hash of the first screens, stance) and the
-   * gate: a look closer than sameTradeMin to a site of the same trade, or than sameTownMin to a site in the same town,
-   * is not unique enough. Calibrated offline on the goldens and twins (switches off: known look-alikes).
-   */
-  /**
-   * The AI designer (docs/plans/design-studio.md, studio-0.5.md): agent switches the studio on for new homepages. "off":
-   * every request and rendered byte is as before; "trial": only for accounts whose email is in DESIGNER_TRIAL_EMAILS
-   * (comma list); "on": every generation. The old boolean is read as "off" (false) or "on" (true).
-   */
-  designer: z.strictObject({
-    $comment: z.string().optional(),
-    agent: z.preprocess((v) => (v === false ? "off" : v === true ? "on" : v), z.enum(["off", "trial", "on"])),
-    /**
-     * Prompt size budgets of the designer, in tokens estimated as characters / charsPerToken (Haiku 5.5 counts about 30 %
-     * more tokens than the old chars / 4 rule). catalogue: the static designer catalogue (a cached system block, so the cap
-     * protects attention, not money); moodboard and examples: the per-call parts; request: all text of one designer request.
-     */
-    budgets: z.strictObject({
-      charsPerToken: z.number().positive(),
-      catalogue: z.number().int().positive(),
-      moodboard: z.number().int().positive(),
-      examples: z.number().int().positive(),
-      request: z.number().int().positive(),
-    }),
-  }),
-  studio: z.strictObject({
-    $comment: z.string().optional(),
-    $perRunMaxEurComment: z.string().optional(),
-    $generalBelowConfidenceComment: z.string().optional(),
-    /** Studio 0.5: € one studio run may spend, all its calls together (each is sent only when its estimate still fits; no retries). */
-    perRunMaxEur: z.number().positive(),
-    $modeComment: z.string().optional(),
-    /**
-     * Studio 0.5b: "mockup" (art director → mockup image → rebuild, falling back to the picker), "picker" (the 0.5 preset
-     * picker only) or "direct" (the Fable studio: art director → composer from the direction, no image model, falling
-     * back to the picker).
-     */
-    mode: z.enum(["mockup", "picker", "direct"]).default("mockup"),
-    $directComment: z.string().optional(),
-    /**
-     * studio.mode "direct": the whole direct path's time limit (past it the picker runs), and the € one direct run may
-     * spend, all its calls together (used instead of perRunMaxEur in direct mode: two Fable calls at full maxTokens
-     * cost more than the mockup path, whose cap stays as it is).
-     */
-    direct: z.strictObject({ timeoutSeconds: z.number().positive(), perRunMaxEur: z.number().positive() }),
-    $mockupComment: z.string().optional(),
-    /** Studio 0.5b: the mockup image (keys of imageGen.models), its size and quality, the decorative crops and the mockup path's time limit. */
-    mockup: z.strictObject({
-      model: z.string(),
-      textModel: z.string(),
-      width: z.number().int().min(512).max(2048),
-      height: z.number().int().min(512).max(2048),
-      quality: z.enum(["low", "medium", "high"]),
-      refMaxSide: z.number().int().min(256).max(2048),
-      maxCrops: z.number().int().min(0).max(6),
-      timeoutSeconds: z.number().positive(),
-    }),
-    /** Studio 0.5: below this classifier confidence the business is treated as outside the ten trades (general stances and presets only). */
-    generalBelowConfidence: z.number().min(0).max(1),
-    uniqueness: z.strictObject({
-      sameTradeMin: z.number().min(0).max(1),
-      sameTownMin: z.number().min(0).max(1),
-      weights: z
-        .strictObject({ genome: z.number().min(0), composition: z.number().min(0), palette: z.number().min(0), phash: z.number().min(0), stance: z.number().min(0) })
-        .refine((w) => w.genome + w.composition + w.palette > 0, { message: "the spec parts (genome, composition, palette) need some weight: they are always there" }),
-    }),
-  }),
+  variety: z.object({ families: z.boolean(), skeleton: z.boolean(), neighbours: z.number().int().min(0).max(500), concept: z.boolean() }),
   /**
    * The audit's prompt fixes (docs/plans/audit-2026-10-01.md, "Prompts"), one switch each so a paid eval can measure
    * them one at a time. All off: every prompt, request and repair is byte-identical to before (see config $comment).
