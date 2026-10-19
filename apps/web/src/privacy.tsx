@@ -50,6 +50,10 @@ export function privacyPage(config: AppConfig, beacon: string | null = null): st
             {config.analytics.events && (
               <li id="product-events">{`Da vidimo, kje se izdelek zatika, štejemo korake v njem (ogled prve strani, oddan opis, prijava, objava) po napravi, ki jo označimo samo z zgoščenim zapisom naključne oznake brskalnika, brez naslova IP in e-pošte, in te zapise po ${config.analytics.keepDays} dneh združimo v dnevna števila.`}</li>
             )}
+            <li id="waitlist">
+              Če se prijavite na obvestilo ob odprtju, z vašim soglasjem hranimo vaš e-poštni naslov in čas prijave. Ob odprtju vam pošljemo eno sporočilo, nato naslov
+              izbrišemo. Prijavo lahko kadarkoli prekličete s sporočilom na <Provider config={config} field="email" />.
+            </li>
             <li>{`Pri brezplačnem pregledu spletne strani naslov strani in rezultat pregleda, ${config.checker.keepDays} dni, da lahko povezavo do rezultata delite. Vsebine pregledane strani ne shranimo.`}</li>
           </ul>
         </section>
@@ -74,7 +78,7 @@ export function privacyPage(config: AppConfig, beacon: string | null = null): st
         <section className="message">
           <h2>Naslov IP</h2>
           <p>
-            Vašega naslova IP ne shranjujemo. Za omejitve števila zahtev (prijavne povezave, brezplačni predogledi, pregledi spletnih strani) hranimo samo njegov ključni zgoščeni zapis (hash), iz katerega
+            Vašega naslova IP ne shranjujemo. Za omejitve števila zahtev (prijavne povezave, brezplačni predogledi, pregledi spletnih strani, prijave na obvestilo ob odprtju) hranimo samo njegov ključni zgoščeni zapis (hash), iz katerega
             naslova ni mogoče razbrati, in ga po enem dnevu izbrišemo.
           </p>
         </section>
@@ -93,7 +97,7 @@ export function privacyPage(config: AppConfig, beacon: string | null = null): st
               </li>
             )}
             <li>
-              <strong>Resend</strong> pošlje e-pošto s povezavo za prijavo in sporočila iz kontaktnih obrazcev lastnikom strani.
+              <strong>Resend</strong> pošlje e-pošto s povezavo za prijavo, obvestilo ob odprtju in sporočila iz kontaktnih obrazcev lastnikom strani.
             </li>
             <li>
               <strong>Anthropic</strong> (jezikovni model) in <strong>fal.ai</strong> (ustvarjanje slik) obdelata opis in fotografije, da naredimo stran.

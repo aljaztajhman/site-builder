@@ -482,6 +482,34 @@ h2{font:800 clamp(32px,4.2vw,58px)/1.02 var(--display);letter-spacing:-.035em;ma
 /* steps 3 and 4: small scenes that play when the step scrolls in (the end state shows without JS) */
 .sc{width:100%;max-width:420px;display:grid;gap:14px;justify-items:start}
 
+/* the waitlist: an address and consent, posted to the app (app.postavi.si/api/waitlist). Without JS the form posts as a page; with JS the answer shows in place */
+.wl{display:grid;gap:12px;max-width:560px}
+.wl-h{font-size:17px;color:var(--ink-2)}
+.wl-h b{color:var(--ink);font-weight:700}
+.wl-l{font:600 14px/1.3 var(--ui);color:var(--ink)}
+.wl-in{width:100%;min-height:56px;padding:0 16px;border:1px solid var(--line-2);border-radius:6px;background:var(--surface);color:var(--ink);font:400 17px/1.2 var(--ui)}
+.wl-in::placeholder{color:var(--ink-3)}
+.wl-in:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-color:var(--accent)}
+.wl-in[aria-invalid=true]{border-color:#b3261e}
+.wl .btn{justify-self:start;min-height:56px;padding:0 26px;font-size:17px}
+.wl .btn[disabled]{opacity:.75;cursor:progress}
+.wl-c{display:flex;align-items:flex-start;gap:12px;padding:4px 0;font-size:15px;line-height:1.45;color:var(--ink-2);cursor:pointer}
+.wl-c input{flex:none;width:22px;height:22px;margin:0;accent-color:var(--accent);cursor:pointer}
+.wl-c a{color:var(--accent-text);text-underline-offset:3px}
+.wl-hp{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
+.wl-msg{font-size:15px;font-weight:600;color:var(--ink)}
+.wl-msg:empty{position:absolute}
+.wl-msg.err{color:#b3261e}
+.wl-done{font:700 clamp(20px,1.8vw,24px)/1.25 var(--display);letter-spacing:-.01em;color:var(--ink);outline:0}
+.wl-done::before{content:"";display:inline-block;width:26px;height:26px;margin-right:10px;vertical-align:-5px;border-radius:50%;background:var(--accent) var(--tick) center/18px no-repeat}
+.end .wl{margin-top:28px}
+.end .wl-in{background:rgb(255 255 255/.06)}
+.end .btn{color:#0e2326}.end .btn:hover{background:var(--accent-text)}
+.end .wl-msg.err{color:#ffb4a8}
+.end .wl-done::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.3l2.6 2.6L12 5.4' fill='none' stroke='%230e2326' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+@media (max-width:860px){.wl .btn{width:100%}}
+.no-js #start,.js .h-cta:not(.open) .wl,.js .h-cta.open #start{display:none}
+
 /* closing */
 #zakaj{padding-bottom:0}
 .end,footer{position:relative;isolation:isolate;--ink:#eef5f4;--ink-2:#b9cbca;--ink-3:#8aa3a2;--line:rgb(255 255 255/.12);--line-2:rgb(255 255 255/.28);--accent:#2bb5a7;--accent-text:#5fd8ca;color:var(--ink)}
@@ -594,7 +622,19 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
           <li class="on now"><b>Urejanje</b><span>Kadar želite, spremembe vnesete sami. Takoj so na spletu.</span></li>
         </ol>
       </div>
-      <div class="h-cta"><button class="btn" type="button" id="start">Začnite zdaj<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg></button></div>
+      <div class="h-cta">
+        <button class="btn" type="button" id="start">Začnite zdaj<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg></button>
+        <form class="wl" id="wl-start" action="https://app.postavi.si/api/waitlist" method="post">
+          <p class="wl-h"><b>Odpremo kmalu.</b> Pustite e-poštni naslov in obvestimo vas, ko lahko začnete.</p>
+          <label class="wl-l" for="wl-e1">E-poštni naslov</label>
+          <input class="wl-in" id="wl-e1" aria-describedby="wl-m1" type="email" name="email" required maxlength="254" autocomplete="email" placeholder="ime@podjetje.si">
+          <label class="wl-c"><input type="checkbox" name="consent" value="1" required aria-describedby="wl-m1"><span>Strinjam se, da mi Postavi.si ob odprtju pošlje e-pošto. <a href="https://app.postavi.si/zasebnost#waitlist">Zasebnost</a></span></label>
+          <button class="btn" type="submit">Obvestite me ob odprtju</button>
+          <input type="hidden" name="source" value="homepage">
+          <div class="wl-hp" aria-hidden="true"><label>Spletna stran <input name="website" tabindex="-1" autocomplete="off"></label></div>
+          <p class="wl-msg" id="wl-m1" aria-live="polite"></p>
+        </form>
+      </div>
 
       <div class="demo" id="predogled">
         <div class="say">
@@ -698,6 +738,15 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
       <p>Zaključujemo zadnje podrobnosti. Medtem si poglejte, kako začnete.</p>
       <p class="more"><a class="lnk" href="#hero">Kako začnete
         <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 16V4M5 9l5-5 5 5"/></svg></a></p>
+      <form class="wl" action="https://app.postavi.si/api/waitlist" method="post">
+        <label class="wl-l" for="wl-e2">E-poštni naslov</label>
+        <input class="wl-in" id="wl-e2" aria-describedby="wl-m2" type="email" name="email" required maxlength="254" autocomplete="email" placeholder="ime@podjetje.si">
+        <label class="wl-c"><input type="checkbox" name="consent" value="1" required aria-describedby="wl-m2"><span>Strinjam se, da mi Postavi.si ob odprtju pošlje e-pošto. <a href="https://app.postavi.si/zasebnost#waitlist">Zasebnost</a></span></label>
+        <button class="btn" type="submit">Obvestite me ob odprtju</button>
+        <input type="hidden" name="source" value="homepage">
+        <div class="wl-hp" aria-hidden="true"><label>Spletna stran <input name="website" tabindex="-1" autocomplete="off"></label></div>
+        <p class="wl-msg" id="wl-m2" aria-live="polite"></p>
+      </form>
     </div>
   </div>
   </main>
@@ -959,6 +1008,57 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
     var io=new IntersectionObserver(function(es){es.forEach(function(e){if(!e.isIntersecting)return;hit(e.target);io.unobserve(e.target)})},{threshold:.15,rootMargin:"0px 0px -6% 0px"});
     rv.forEach(function(e){io.observe(e)});
   }
+})();
+</script>
+<script>
+// the waitlist forms: posted with fetch (urlencoded, a CORS simple request), the answer shown in place, errors in Slovene.
+// Without JS the same forms post as pages. ?waitlist=<url> points them elsewhere, on localhost only (local checks).
+(function(){
+  "use strict";
+  var api="https://app.postavi.si/api/waitlist";
+  if(location.hostname==="localhost"||location.hostname==="127.0.0.1"){var o=new URLSearchParams(location.search).get("waitlist");if(o)api=o}
+  var start=document.getElementById("start");
+  if(start)start.addEventListener("click",function(){var c=start.parentNode;c.classList.add("open");var e=c.querySelector("input[type=email]")||c.querySelector(".wl-done");if(e)e.focus()});
+  var forms=[].slice.call(document.querySelectorAll("form.wl"));
+  if(!forms.length||!window.fetch||!window.URLSearchParams)return;
+  var DONE="Hvala. Ko odpremo, vam pišemo.";
+  var ERR={
+    invalid_email:"Vpišite veljaven e-poštni naslov, na primer ime@podjetje.si.",
+    consent_required:"Označite soglasje, da vam ob odprtju lahko pošljemo e-pošto.",
+    rate_limited:"Iz vašega omrežja je bilo pravkar preveč prijav. Poskusite znova čez nekaj minut.",
+    network:"Prijava ni uspela, ker ni povezave. Preverite internet in poskusite znova.",
+    other:"Prijava ta trenutek ni uspela. Poskusite znova čez nekaj minut."
+  };
+  function done(f,focus){
+    f.innerHTML='<p class="wl-done" tabindex="-1" role="status">'+DONE+"</p>";
+    if(focus)f.firstChild.focus();
+  }
+  forms.forEach(function(f){
+    f.noValidate=true;
+    var email=f.elements.email,consent=f.elements.consent,btn=f.querySelector("button"),msg=f.querySelector(".wl-msg"),label=btn.textContent;
+    function say(text,field){
+      msg.textContent=text;msg.className="wl-msg"+(field===undefined?"":" err");
+      email.removeAttribute("aria-invalid");
+      if(field){if(field===email)email.setAttribute("aria-invalid","true");field.focus()}
+    }
+    email.addEventListener("input",function(){if(email.hasAttribute("aria-invalid"))say("")});
+    f.addEventListener("submit",function(e){
+      e.preventDefault();
+      if(btn.disabled)return;
+      email.value=email.value.trim();
+      if(!email.value||!email.checkValidity())return say(ERR.invalid_email,email);
+      if(!consent.checked)return say(ERR.consent_required,consent);
+      say("");btn.disabled=true;btn.textContent="Pošiljamo …";
+      fetch(api,{method:"POST",headers:{"Accept":"application/json"},body:new URLSearchParams(new FormData(f))})
+        .then(function(r){return r.json().catch(function(){return{}}).then(function(j){return{ok:r.ok,j:j}})},function(){return{net:true}})
+        .then(function(a){
+          btn.disabled=false;btn.textContent=label;
+          if(a.ok&&a.j.ok){forms.forEach(function(g){done(g,g===f)});return}
+          var code=a.net?"network":a.j&&a.j.error;
+          say(ERR[code]||ERR.other,code==="invalid_email"?email:code==="consent_required"?consent:null);
+        });
+    });
+  });
 })();
 </script>
 </body>

@@ -58,6 +58,7 @@ import { homePage } from "./home.tsx";
 import { clientBundle, warmClientBundles } from "./client-bundle.ts";
 import { uiAssets } from "./ui/assets.ts";
 import { registerFormRoutes } from "./forms.tsx";
+import { registerWaitlistRoutes } from "./waitlist.ts";
 import { domainsInfo, registerDomainRoutes } from "./domains.ts";
 import { registerCompanyLookupRoute } from "./company-lookup.ts";
 import { createHash } from "node:crypto";
@@ -223,6 +224,8 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   );
   // Contact forms: public submit next to published sites, owner's messages in the dashboard.
   registerFormRoutes(app, { repo, config, secret: auth.secret, mailer, ...(opts.appUrl ? { appUrl: opts.appUrl } : {}) });
+  // The pre-launch waitlist: the platform domain's homepage posts addresses here.
+  registerWaitlistRoutes(app, { repo, config, secret: auth.secret, platformDomain: opts.platformDomain ?? null });
   // Sign-in (magic link for owners, password for the admin) and the admin's page.
   registerLoginRoutes(app, {
     repo,

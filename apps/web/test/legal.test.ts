@@ -91,7 +91,7 @@ describe("the legal pages", () => {
     expect(marks(footer)).toEqual(["e-pošta", "polno ime podjetja", "naslov", "matična številka", "davčna številka", "polno ime podjetja"]);
     // The footer links to all three legal pages; none of them is a dead label any more.
     for (const href of ["/zasebnost", "/pogoji", "/dostopnost"]) expect(footer).toContain(`href="${href}"`);
-    expect(marks(await page(today, "/zasebnost"))).toEqual(["polno ime podjetja", "naslov", "e-pošta"]);
+    expect(marks(await page(today, "/zasebnost"))).toEqual(["polno ime podjetja", "naslov", "e-pošta", "e-pošta"]);
     const terms = await page(today, "/pogoji");
     expect(terms).toContain("Osnutek za pravni pregled");
     expect(marks(terms)).toEqual([
