@@ -123,7 +123,11 @@ let device: "mobile" | "desktop" = "mobile";
 /** Tapping the preview always edits; "Predogled v novem zavihku" (⋯ menu) shows the clean page. */
 const editMode = true;
 let toast = "";
+/** A button in the toast ("Razveljavi" after a delete), shown while the toast still says `text`. */
+let toastAction: { text: string; label: string; run: () => void } | null = null;
 let pollTimer: number | undefined;
+/** Versions an undo went back from, newest last: ↷ Ponovi reverts to them. Any other save clears them. */
+let redoStack: number[] = [];
 
 // ---------- DOM helper ----------
 type Child = Node | string | null | undefined | false;
@@ -269,6 +273,7 @@ async function load(rerender = true): Promise<void> {
     // A form autosave keeps the panel (and the owner's typing) as it is; the top bar still follows the
     // new version (undo, "Še N do objave"), or undo stayed disabled after the first edit.
     if (shell) shell.top.replaceChildren(...topItems().filter((c): c is Node => c instanceof Node));
+    updateAskProgress();
     showToast();
   }
   schedulePoll();
@@ -397,9 +402,37 @@ function debounced(save: (v: Json | undefined) => void, delay = 700): { push(v: 
       };
       pendingSaves.set(key, go);
       timer = window.setTimeout(go, delay);
+      setSaveStatus("saving");
     },
-    cancel,
+    cancel: () => {
+      cancel();
+      settleSaveStatus();
+    },
   };
+}
+
+// ---------- Save status in the app bar: "Shranjujem…" → "Shranjeno", quietly (no toast per autosave) ----------
+type SaveStatus = "idle" | "saving" | "saved" | "error";
+let saveStatus: SaveStatus = "idle";
+/** Patches on their way to the server. */
+let savesInFlight = 0;
+let saveTimer: number | undefined;
+/** One element for the session, moved into each new app bar, so screen readers keep announcing it. */
+const saveEl = h("span", { class: "save-status", "aria-live": "polite", "data-state": "idle" });
+
+function setSaveStatus(next: SaveStatus): void {
+  window.clearTimeout(saveTimer);
+  saveStatus = next;
+  saveEl.dataset.state = next;
+  const words: Record<SaveStatus, [string, string]> = { idle: ["", ""], saving: ["…", "Shranjujem…"], saved: ["✓", "Shranjeno"], error: ["!", "Ni shranjeno"] };
+  const [icon, text] = words[next];
+  saveEl.replaceChildren(...(text ? [h("span", { class: "ico", "aria-hidden": "true" }, icon), h("span", { class: "label" }, text)] : []));
+  if (next === "saved") saveTimer = window.setTimeout(() => saveStatus === "saved" && setSaveStatus("idle"), 2000);
+}
+
+/** A pending save was dropped (an invalid value): back to quiet when nothing else is on its way. */
+function settleSaveStatus(): void {
+  if (saveStatus === "saving" && !pendingSaves.size && !savesInFlight) setSaveStatus("idle");
 }
 
 /**
@@ -451,20 +484,33 @@ async function sendPatch(opsOrFn: Op[] | (() => Op[] | null), message: string, r
   const ops = typeof opsOrFn === "function" ? opsOrFn() : opsOrFn;
   if (!ops) {
     toast = "Tega dela strani ni več, sprememba ni shranjena.";
+    setSaveStatus("error");
     await load();
     return false;
   }
   // Nothing to change (e.g. an optional field emptied that was already empty).
-  if (ops.every((o) => o.op === "test")) return true;
+  if (ops.every((o) => o.op === "test")) {
+    settleSaveStatus();
+    return true;
+  }
+  savesInFlight++;
+  setSaveStatus("saving");
   try {
     const r = await api<{ version: number; adjustments: string[] }>("/patch", { method: "POST", body: JSON.stringify({ baseVersion: state.version, ops, message }) });
-    toast = r.adjustments.length ? `Shranjeno. ${r.adjustments.join("; ")}` : "Shranjeno.";
-    // Form autosaves keep the form (and its focus) in place; everything else re-renders.
+    savesInFlight--;
+    redoStack = [];
+    // A save is said quietly in the app bar; the toast only when the server changed something the owner should know.
+    if (r.adjustments.length) toast = `Shranjeno. ${r.adjustments.join("; ")}`;
+    if (!savesInFlight && !pendingSaves.size) setSaveStatus("saved");
+    // Form autosaves keep the form (and its focus) in place; everything else re-renders. Adjustments may have
+    // changed the design elsewhere: then the whole preview reloads.
     await load(rerender || r.adjustments.length > 0);
-    if (section) await refreshSection(section);
+    if (section && !r.adjustments.length) await refreshSection(section);
     else reloadPreview();
     return true;
   } catch (e) {
+    savesInFlight--;
+    setSaveStatus("error");
     toast = rerender ? `Ni shranjeno. ${(e as Error).message}` : `Še ni shranjeno: ${(e as Error).message}`;
     await load(rerender);
     return false;
@@ -477,6 +523,7 @@ function post(path: string, body: unknown, ok: string): Promise<void> {
       // A server notice (a plan's pictures used up) replaces the plain confirmation.
       const r = await api<{ notice?: string }>(path, { method: "POST", body: JSON.stringify({ baseVersion: state.version, ...(body as object) }) });
       toast = r.notice ?? ok;
+      redoStack = [];
     } catch (e) {
       toast = (e as Error).message;
     }
@@ -825,9 +872,10 @@ function fieldBody(schema: Schema, rootSchema: Schema, value: Json | undefined, 
  * Form root at a spec pointer: a live copy of the value; edits are debounced and saved without
  * re-rendering (focus stays), structural changes save at once and re-render.
  */
-function formAt(where: Where, schema: Schema, value: Json, title: string, message: string): HTMLElement {
+function formAt(where: Where, schema: Schema, value: Json, title: string, message: string, section?: string): HTMLElement {
   const live = structuredClone(value);
-  const send = (v: Json | undefined, rerender: boolean) => patch(() => opsAt(where, v), message, rerender);
+  // A section's form swaps only that section in the preview (no reload); other forms reload it.
+  const send = (v: Json | undefined, rerender: boolean) => patch(() => opsAt(where, v), message, rerender, section);
   const later = debounced((v) => void send(v, false));
   return field(schema, schema, live, title, {
     edit: (v) => later.push(v),
@@ -930,7 +978,7 @@ function sectionPane(si: number): HTMLElement {
     pane.append(h("p", { class: "help" }, "Besedilo popravite tukaj ali kar na strani. Postavitev, velikosti in barve tega razdelka so del oblikovanja."), ...composedForms(s, info));
     return pane;
   }
-  const tone = labelled("Ozadje", h("select", { onChange: (e: Event) => { const v = (e.target as HTMLSelectElement).value; void patch([isSection(pi, si, String(s.id)), s.tone === undefined ? { op: "add", path: `${base}/tone`, value: v } : { op: "replace", path: `${base}/tone`, value: v }], "ozadje"); } },
+  const tone = labelled("Ozadje", h("select", { onChange: (e: Event) => { const v = (e.target as HTMLSelectElement).value; void patch([isSection(pi, si, String(s.id)), s.tone === undefined ? { op: "add", path: `${base}/tone`, value: v } : { op: "replace", path: `${base}/tone`, value: v }], "ozadje", true, String(s.id)); } },
     ...["default", "alt", "inverse", "band"].map((t) => h("option", { value: t, selected: (s.tone ?? "default") === t }, TONE[t]!))));
   // Price lists and menus: groups and items in their own editor, the list first (that is what owners come to change).
   if (isPriceListType(s.type)) {
@@ -941,7 +989,7 @@ function sectionPane(si: number): HTMLElement {
     h("p", { class: "help" }, "Besedilo popravite kar na strani: tapnite ga. Premik, podvajanje in brisanje so na vrhu razdelka v predogledu."),
     variantPicker(s, pi, si, offeredVariants(s, info)),
     tone,
-    formAt(inSection(String(s.id), "/props"), info.props, s.props as Json, "props", `urejen razdelek ${s.type}`),
+    formAt(inSection(String(s.id), "/props"), info.props, s.props as Json, "props", `urejen razdelek ${s.type}`, String(s.id)),
   );
   return pane;
 }
@@ -971,7 +1019,7 @@ function composedForms(s: Obj, info: SectionInfo): HTMLElement[] {
       const { kind: _kind, ...copy } = (member?.properties ?? {}) as Record<string, Schema>;
       if (!member || !Object.keys(copy).length) return [];
       const schema: Schema = { ...member, properties: copy, required: ((member.required ?? []) as string[]).filter((k) => k !== "kind"), $defs: root.$defs };
-      return [formAt(inSection(String(s.id), `/props/elements/${i}`), schema, el as Json, ENUM_LABEL[String(el.kind)] ?? fieldLabel(String(el.kind)), "urejen oblikovan razdelek")];
+      return [formAt(inSection(String(s.id), `/props/elements/${i}`), schema, el as Json, ENUM_LABEL[String(el.kind)] ?? fieldLabel(String(el.kind)), "urejen oblikovan razdelek", String(s.id))];
     });
 }
 
@@ -1013,12 +1061,15 @@ async function refreshSection(id: string): Promise<void> {
   const doc = frame?.contentDocument;
   const old = doc?.getElementById(id);
   if (!frame || !doc || !old) return reloadPreview();
+  // This version is on its way into the frame: a poll landing meanwhile must not reload it as well.
+  frameVersion = state.version;
   try {
     const r = await fetch(previewUrl(), { cache: "no-store" });
     const fresh = r.ok ? new DOMParser().parseFromString(await r.text(), "text/html").getElementById(id) : null;
     if (!fresh) return reloadPreview();
     old.replaceWith(doc.importNode(fresh, true));
     frameVersion = state.version;
+    // The selection, its toolbar and the edit marks come back on the new copy.
     decorate();
   } catch {
     reloadPreview();
@@ -1124,7 +1175,7 @@ function variantPicker(s: Obj, pi: number, si: number, variants: string[]): HTML
         class: "variant",
         "aria-pressed": String(chosen),
         onClick: () => {
-          if (!chosen) void patch([isSection(pi, si, String(s.id)), { op: "replace", path: `/pages/${pi}/sections/${si}/variant`, value: v }], "postavitev");
+          if (!chosen) void patch([isSection(pi, si, String(s.id)), { op: "replace", path: `/pages/${pi}/sections/${si}/variant`, value: v }], "postavitev", true, String(s.id));
         },
       }, thumb, h("span", { class: "name" }, name)),
     );
@@ -1352,7 +1403,13 @@ function pagesPane(): HTMLElement {
         h("div", { class: "row" },
           h("button", { class: "btn sm", type: "button", "aria-label": `Premakni stran ${nav.label} gor`, disabled: i <= 1 || p.kind === "home", onClick: () => void patch([isPage(i, String(p.id)), { op: "move", from: `/pages/${i}`, path: `/pages/${i - 1}` }], "vrstni red strani") }, "↑ Gor"),
           h("button", { class: "btn sm", type: "button", "aria-label": `Premakni stran ${nav.label} dol`, disabled: p.kind === "home" || pages()[i + 1]?.kind !== "standard", onClick: () => void patch([isPage(i, String(p.id)), { op: "move", from: `/pages/${i}`, path: `/pages/${i + 1}` }], "vrstni red strani") }, "↓ Dol"),
-          p.kind === "standard" && h("button", { class: "btn sm danger", type: "button", onClick: () => { if (confirm(`Izbrišem stran ${nav.label}?`)) { pageIndex = 0; void patch([isPage(i, String(p.id)), { op: "remove", path: `/pages/${i}` }], "izbrisana stran"); } } }, "Izbriši stran"),
+          p.kind === "standard" && h("button", { class: "btn sm danger", type: "button", onClick: () => {
+            // No "are you sure?": it goes at once, and the toast offers "Razveljavi".
+            pageIndex = 0;
+            void patch([isPage(i, String(p.id)), { op: "remove", path: `/pages/${i}` }], "izbrisana stran").then((ok) => {
+              if (ok) undoToast(`Stran »${String(nav.label)}« izbrisana.`);
+            });
+          } }, "Izbriši stran"),
         ),
       );
     }
@@ -2179,6 +2236,7 @@ function reloadPreview(): void {
 const EDIT_CSS = `main section{cursor:pointer} main section:hover{outline:2px dashed #0d7a84;outline-offset:-2px}
 main section[data-sb-selected]{position:relative;outline:3px solid #0d7a84;outline-offset:-3px}
 [contenteditable]{outline:2px solid #9a5b00!important;outline-offset:2px;cursor:text}
+@media (hover:hover){main section[data-sb-selected] [data-sb-edit]:hover{outline:1px dashed #9a5b00;outline-offset:2px;cursor:text}}
 .sb-tools{position:absolute;top:8px;left:8px;z-index:2147483000;display:flex;gap:2px;padding:4px;background:#fff;border:1px solid #b4c5c9;border-radius:8px;box-shadow:0 8px 24px rgb(15 31 34/.16)}
 .sb-tools button,.sb-add{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;min-width:40px;min-height:40px;padding:0 10px;border-radius:6px;font:600 14px/1 system-ui,-apple-system,"Segoe UI",sans-serif;color:#0f1f22;cursor:pointer}
 .sb-tools button:hover{background:#dfe8ea}
@@ -2206,6 +2264,8 @@ function attachEditing(): void {
   decorate();
   frame?.contentWindow?.addEventListener("scroll", placeTools, { passive: true });
   frame?.contentWindow?.addEventListener("resize", placeTools);
+  // The preview takes focus after a click: Ctrl+Z / Ctrl+Y work there too.
+  doc.addEventListener("keydown", undoKeys);
   doc.addEventListener("click", (e) => {
     const t = e.target as HTMLElement;
     if (t.closest("[contenteditable], .sb-tools, .sb-add")) return;
@@ -2279,6 +2339,7 @@ function decorate(): void {
   if (!doc?.body) return;
   doc.querySelectorAll(".sb-tools, .sb-add").forEach((n) => n.remove());
   doc.querySelectorAll("[data-sb-selected]").forEach((n) => n.removeAttribute("data-sb-selected"));
+  doc.querySelectorAll("[data-sb-edit]").forEach((n) => n.removeAttribute("data-sb-edit"));
   const secs = sections();
   const si = secs.findIndex((s) => s.id === selected);
   const s = secs[si];
@@ -2286,6 +2347,7 @@ function decorate(): void {
   if (!el || !s) return;
   el.setAttribute("data-sb-selected", "");
   if (s.type === "legal" || s.type === "not-found") return;
+  if (!editingIn()) markEditable(el, s);
   const pi = pageIndex;
   const id = String(s.id);
   const name = label(String(s.type));
@@ -2308,13 +2370,15 @@ function decorate(): void {
   tools.setAttribute("role", "toolbar");
   tools.setAttribute("aria-label", `Razdelek ${name}`);
   tools.append(
-    button("↑", `Premakni gor: ${name}`, () => void patch([isSection(pi, si, id), { op: "move", from: `/pages/${pi}/sections/${si}`, path: `/pages/${pi}/sections/${si - 1}` }], "premik"), si === 0),
-    button("↓", `Premakni dol: ${name}`, () => void patch([isSection(pi, si, id), { op: "move", from: `/pages/${pi}/sections/${si}`, path: `/pages/${pi}/sections/${si + 1}` }], "premik"), si === secs.length - 1),
+    button("↑", `Premakni gor: ${name}`, () => moveSection(pi, si, id, -1), si === 0),
+    button("↓", `Premakni dol: ${name}`, () => moveSection(pi, si, id, 1), si === secs.length - 1),
     button("Podvoji", `Podvoji: ${name}`, () => void patch([isSection(pi, si, id), { op: "add", path: `/pages/${pi}/sections/${si + 1}`, value: { ...structuredClone(s), id: newSectionId(String(s.type)) } }], "podvojen razdelek")),
+    // No "are you sure?": it goes at once, and the toast offers "Razveljavi".
     button("Izbriši", `Izbriši: ${name}`, () => {
-      if (!confirm(`Izbrišem razdelek »${name}«?`)) return;
       selected = null;
-      void patch([isSection(pi, si, id), { op: "remove", path: `/pages/${pi}/sections/${si}` }], "izbrisan razdelek");
+      void patch([isSection(pi, si, id), { op: "remove", path: `/pages/${pi}/sections/${si}` }], "izbrisan razdelek").then((ok) => {
+        if (ok) undoToast(`Razdelek »${name}« izbrisan.`);
+      });
     }),
   );
   el.prepend(tools);
@@ -2327,6 +2391,11 @@ function decorate(): void {
     el.append(add);
   }
   placeTools();
+}
+
+/** ↑ / ↓ on a section (the preview's toolbar and the phone's strip). */
+function moveSection(pi: number, si: number, id: string, by: -1 | 1): void {
+  void patch([isSection(pi, si, id), { op: "move", from: `/pages/${pi}/sections/${si}`, path: `/pages/${pi}/sections/${si + by}` }], "premik");
 }
 
 /**
@@ -2367,6 +2436,35 @@ function openPriceItem(sec: Element, row: Element): void {
 /** Elements whose text can be edited in place. */
 const INLINE_TEXT = "h1,h2,h3,h4,p,li,dt,dd,summary,a,span,figcaption,th,td";
 
+/** Every string in a section's props, trimmed, with the pointers it sits at (text shown once can be edited in place). */
+function propStrings(props: Json, base: string): Map<string, string[]> {
+  const out = new Map<string, string[]>();
+  const walk = (v: Json, ptr: string) => {
+    if (typeof v === "string") {
+      const t = v.trim();
+      if (t) out.set(t, [...(out.get(t) ?? []), ptr]);
+    } else if (Array.isArray(v)) v.forEach((x, i) => walk(x, `${ptr}/${i}`));
+    else if (v && typeof v === "object") for (const [k, x] of Object.entries(v)) walk(x, `${ptr}/${esc(k)}`);
+  };
+  walk(props, base);
+  return out;
+}
+
+/**
+ * Marks the text of the selected section that a tap edits in place (data-sb-edit, in the frame's DOM only; the
+ * rendered HTML is unchanged), so hovering it shows that it can be edited.
+ */
+function markEditable(el: Element, s: Obj): void {
+  const strings = propStrings(s.props as Json, "");
+  const marked: Element[] = [];
+  for (const t of el.querySelectorAll(INLINE_TEXT)) {
+    if (t.closest(".sb-tools, .sb-add")) continue;
+    if (strings.get((t.textContent ?? "").trim())?.length === 1) marked.push(t);
+  }
+  // The innermost one is what a tap edits (inlineEdit takes the closest match to the tapped node).
+  for (const t of marked) if (!marked.some((o) => o !== t && t.contains(o))) t.setAttribute("data-sb-edit", "");
+}
+
 /** Text tapped in the selected section: find the string in the section's props that it shows, edit it in place. */
 function inlineEdit(el: HTMLElement): void {
   const sec = el.closest("main section[id]");
@@ -2376,14 +2474,7 @@ function inlineEdit(el: HTMLElement): void {
   const target = el.closest(INLINE_TEXT) as HTMLElement | null;
   if (!target || target.isContentEditable) return;
   const text = (target.textContent ?? "").trim();
-  const matches: string[] = [];
-  const walk = (v: Json, ptr: string) => {
-    if (typeof v === "string") {
-      if (v.trim() === text) matches.push(ptr);
-    } else if (Array.isArray(v)) v.forEach((x, i) => walk(x, `${ptr}/${i}`));
-    else if (v && typeof v === "object") for (const [k, x] of Object.entries(v)) walk(x, `${ptr}/${esc(k)}`);
-  };
-  walk(sections()[si]!.props as Json, `/pages/${pageIndex}/sections/${si}/props`);
+  const matches = propStrings(sections()[si]!.props as Json, `/pages/${pageIndex}/sections/${si}/props`).get(text) ?? [];
   if (matches.length !== 1) {
     select(sec.id);
     toast = "To besedilo uredite v obrazcu razdelka.";
@@ -2404,7 +2495,7 @@ function inlineEdit(el: HTMLElement): void {
     target.removeEventListener("keydown", onKey);
     target.removeAttribute("contenteditable");
     const next = (target.textContent ?? "").replace(/\s+/g, " ").trim();
-    if (save && next && next !== text) void patch([isSection(pageIndex, si, sec.id), { op: "replace", path: ptr, value: next }], "urejeno besedilo");
+    if (save && next && next !== text) void patch([isSection(pageIndex, si, sec.id), { op: "replace", path: ptr, value: next }], "urejeno besedilo", true, sec.id);
     else target.textContent = text;
   };
   target.addEventListener("blur", () => finish(true), { once: true });
@@ -2438,8 +2529,40 @@ function setSheet(next: "closed" | "peek" | "full"): void {
   const handle = shell.panel.querySelector<HTMLButtonElement>(".sheet-handle");
   handle?.setAttribute("aria-expanded", String(next === "full"));
   handle?.setAttribute("aria-label", handleLabel());
+  // Closed shows only its first line: the selected section's strip (or the hint), from the top.
+  if (next === "closed") shell.panel.scrollTop = 0;
   // The preview gets the room the sheet leaves; resize it once the sheet has moved.
   if (changed && narrowScreen()) window.setTimeout(sizeFrame, 220);
+}
+
+/**
+ * Phones: what is selected, under the sheet's handle while the sheet is closed or peeking (app.css shows it on
+ * narrow screens only): the section's name, ↑ ↓, and "Uredi", which opens its form in one tap.
+ */
+function selectedStrip(): HTMLElement | null {
+  if (!state.spec || !can("edit") || askOpen || tab !== "content") return null;
+  const secs = sections();
+  const si = secs.findIndex((s) => s.id === selected);
+  const s = secs[si];
+  if (!s) return null;
+  const pi = pageIndex;
+  const id = String(s.id);
+  const name = label(String(s.type));
+  const fixed = s.type === "legal" || s.type === "not-found";
+  return h("div", { class: "sel-strip" },
+    h("p", { class: "sp" }, h("span", { class: "muted" }, "Izbrano: "), h("strong", {}, name)),
+    fixed ? null : h("button", { class: "btn quiet sm icon-btn", type: "button", "aria-label": `Premakni gor: ${name}`, disabled: si === 0, onClick: () => moveSection(pi, si, id, -1) }, "↑"),
+    fixed ? null : h("button", { class: "btn quiet sm icon-btn", type: "button", "aria-label": `Premakni dol: ${name}`, disabled: si === secs.length - 1, onClick: () => moveSection(pi, si, id, 1) }, "↓"),
+    h("button", {
+      class: "btn sm primary",
+      type: "button",
+      onClick: () => {
+        setSheet("full");
+        document.getElementById("selected-head")?.scrollIntoView({ block: "start" });
+        document.querySelector<HTMLElement>("#selected-head [data-pane-title]")?.focus({ preventScroll: true });
+      },
+    }, "Uredi"),
+  );
 }
 
 /** Tap opens it fully, or closes it from full; dragging up or down moves it one step. Hidden on wide screens. */
@@ -2483,6 +2606,7 @@ function topItems(): Child[] {
     h("a", { class: "btn quiet sm back", href: "/sites", "aria-label": "Moje strani" }, h("span", { "aria-hidden": "true" }, "←"), h("span", { class: "label" }, " Moje strani")),
     h("h1", { class: "site-name" }, ((state.spec?.business as Obj | undefined)?.name as string | undefined) ?? s.name),
     h("span", { class: `pill ${status.tone}` }, status.label),
+    state.spec && can("edit") ? saveEl : null,
     h("span", { class: "sp" }),
   ];
   // Nothing to undo, open or publish before the first version exists.
@@ -2493,6 +2617,7 @@ function topItems(): Child[] {
     ...head,
     h("span", { class: "actions" },
       h("button", { class: "btn quiet sm icon-btn", type: "button", "aria-label": "Razveljavi", title: "Razveljavi", disabled: prev === null, onClick: () => void undo() }, "↶"),
+      h("button", { class: "btn quiet sm icon-btn redo", type: "button", "aria-label": "Ponovi", title: "Ponovi", disabled: !redoStack.length, onClick: () => void redo() }, "↷"),
       // What is left before publishing, as one chip instead of a banner on every screen.
       todo ? h("button", { class: "chip warn", type: "button", id: "checklist-summary", "aria-label": `Še ${todo} do objave`, onClick: () => openChecklist() }, `Še ${todo}`, h("span", { class: "label" }, " do objave")) : null,
       moreMenu(),
@@ -2654,6 +2779,7 @@ function render(): void {
   shell.panel.replaceChildren(
     ...[
       state.spec ? sheetHandle() : null,
+      selectedStrip(),
       statusBlock(),
       keptBlock(),
       askPane(),
@@ -2770,15 +2896,63 @@ function undo(): Promise<void> {
     // Read when the turn comes: text typed just before is saved first, and that is what gets undone.
     const target = undoTarget(state.versions, state.version);
     if (target === null) return;
+    const from = state.version;
     try {
       await api("/revert", { method: "POST", body: JSON.stringify({ version: target }) });
       toast = "Razveljavljeno.";
+      if (from !== null) redoStack.push(from);
     } catch (e) {
       toast = (e as Error).message;
     }
     await load();
     reloadPreview();
   });
+}
+
+/** ↷ Ponovi: back to the version the last undo left (a revert, like undo: a new version). */
+function redo(): Promise<void> {
+  return queued(async () => {
+    const target = redoStack.at(-1);
+    if (target === undefined) return;
+    try {
+      await api("/revert", { method: "POST", body: JSON.stringify({ version: target }) });
+      redoStack.pop();
+      toast = "Ponovljeno.";
+    } catch (e) {
+      toast = (e as Error).message;
+    }
+    await load();
+    reloadPreview();
+  });
+}
+
+/** Whether a key press goes to something the owner types in (then Ctrl+Z is the field's own undo). */
+const typingIn = (el: EventTarget | null): boolean => {
+  // Elements of the preview's document belong to another window: no instanceof.
+  const e = el as HTMLElement | null;
+  return !!e && typeof e.matches === "function" && (e.matches("input, textarea, select") || e.isContentEditable);
+};
+
+/** Ctrl+Z undoes, Ctrl+Y and Ctrl+Shift+Z redo, on the editor and in the preview, while no field has focus. */
+function undoKeys(e: KeyboardEvent): void {
+  if (!(e.ctrlKey || e.metaKey) || e.altKey || typingIn(e.target) || typingIn(document.activeElement)) return;
+  if (typeof state === "undefined" || !state.spec || !can("edit")) return;
+  const key = e.key.toLowerCase();
+  if (key === "z" && !e.shiftKey) {
+    e.preventDefault();
+    void undo();
+  } else if (key === "y" || (key === "z" && e.shiftKey)) {
+    e.preventDefault();
+    void redo();
+  }
+}
+document.addEventListener("keydown", undoKeys);
+
+/** A toast that offers "Razveljavi" (after a delete). */
+function undoToast(text: string): void {
+  toast = text;
+  toastAction = { text, label: "Razveljavi", run: () => void undo() };
+  showToast();
 }
 
 let labelSeq = 0;
@@ -2902,7 +3076,10 @@ function ownerOf(path: string): string | null {
 /** A fact's form, named by where it shows when it belongs to something on the page (a price, a name). */
 function askBox(f: MissingFact, first: boolean, el: HTMLElement): HTMLElement {
   const owner = f.path.startsWith("/business/") ? null : ownerOf(f.path);
-  const where = f.path.startsWith("/business/") || !state.spec ? null : owner ? `${describePath(state.spec, f.path.split("/").slice(0, 5).join("/"))} › ${owner}` : describePath(state.spec, f.path);
+  const full = f.path.startsWith("/business/") || !state.spec ? null : owner ? `${describePath(state.spec, f.path.split("/").slice(0, 5).join("/"))} › ${owner}` : describePath(state.spec, f.path);
+  // The page and section are the group's heading above (askGroup); the field says only what is left.
+  const group = `${askGroup(f)} › `;
+  const where = full?.startsWith(group) ? full.slice(group.length) : full;
   const box = h("div", { class: "ask-fact", "data-ask": f.path }, where ? h("p", { class: "help where" }, where) : null, el);
   if (first) box.dataset.first = "true";
   return box;
@@ -2958,6 +3135,18 @@ function askPane(): HTMLElement | null {
     askOpen = false;
     render();
   };
+  // Grouped by page and section ("Domov › Izdelki"), the business's own facts first under "Podatki o podjetju".
+  const allOnRequest = allOnRequestButton(facts);
+  const firstPrice = facts.findIndex((f) => f.kind === "price");
+  const body: (HTMLElement | null)[] = [];
+  let group: string | null = null;
+  facts.forEach((f, i) => {
+    const g = askGroup(f);
+    if (g !== group) body.push(h("h3", { class: "ask-group" }, g));
+    group = g;
+    if (i === firstPrice) body.push(allOnRequest);
+    body.push(askField(f, i === 0));
+  });
   return h("div", { class: "pane", id: "facts-ask" },
     h("div", { class: "row" },
       h("h2", { class: "sp" }, "Še to potrebujemo"),
@@ -2966,8 +3155,9 @@ function askPane(): HTMLElement | null {
     h("p", { class: "help" }, facts.length
       ? "Teh podatkov si ne izmišljujemo. Vpišite jih in stran lahko objavite."
       : "Vsi podatki so vpisani."),
-    ...withAllOnRequest(facts, facts.map((f, i) => askField(f, i === 0))),
-    other ? h("p", { class: "note warn" }, `Pred objavo preverite še ${items(other)}.`, " ", h("button", { class: "linkish", type: "button", onClick: () => { askOpen = false; openChecklist("publish", false); } }, "Pokaži")) : null,
+    askProgress(),
+    ...body,
+    other ?h("p", { class: "note warn" }, `Pred objavo preverite še ${items(other)}.`, " ", h("button", { class: "linkish", type: "button", onClick: () => { askOpen = false; openChecklist("publish", false); } }, "Pokaži")) : null,
     h("div", { class: "row" },
       h("button", { class: "btn primary", type: "button", id: "ask-publish", onClick: () => void askPublish() }, can("publish") ? "Objavi" : "Shrani"),
       h("button", { class: "btn quiet", type: "button", onClick: close }, "Kasneje"),
@@ -2975,15 +3165,54 @@ function askPane(): HTMLElement | null {
   );
 }
 
+/** The heading a missing fact is listed under: "Podatki o podjetju", or its page and section ("Domov › Izdelki"). */
+function askGroup(f: MissingFact): string {
+  if (f.path.startsWith("/business/") || !state.spec) return "Podatki o podjetju";
+  const segs = f.path.split("/");
+  return segs[1] === "pages" && segs[3] === "sections" ? describePath(state.spec, segs.slice(0, 5).join("/")) : describePath(state.spec, f.path);
+}
+
+/** How many facts the screen asked for when it opened: the total doesn't shrink as they are filled in. */
+let askTotal = 0;
+
+/** "Vpisano 3 od 22" and a bar; counts what is saved. */
+function askCounts(): { filled: number; total: number } {
+  const missing = missingFacts(state.checklist).length;
+  const total = Math.max(askTotal, missing);
+  return { filled: total - missing, total };
+}
+
+function askProgress(): HTMLElement | null {
+  const { filled, total } = askCounts();
+  if (!total) return null;
+  const pct = Math.round((filled / total) * 100);
+  return h("div", { class: "ask-progress", id: "ask-progress" },
+    h("p", { class: "ask-count" }, `Vpisano ${filled} od ${total}`),
+    h("div", { class: "bar-track", role: "progressbar", "aria-label": "Vpisani podatki", "aria-valuemin": "0", "aria-valuemax": String(total), "aria-valuenow": String(filled) },
+      h("div", { class: "bar-fill", style: { width: `${pct}%` } })),
+  );
+}
+
+/** After an autosave (the screen isn't redrawn, the owner may be typing): the count and the bar follow. */
+function updateAskProgress(): void {
+  const el = document.getElementById("ask-progress");
+  if (!el) return;
+  const { filled, total } = askCounts();
+  el.querySelector(".ask-count")!.textContent = `Vpisano ${filled} od ${total}`;
+  const bar = el.querySelector<HTMLElement>("[role=progressbar]")!;
+  bar.setAttribute("aria-valuemax", String(total));
+  bar.setAttribute("aria-valuenow", String(filled));
+  (bar.firstElementChild as HTMLElement).style.width = `${total ? Math.round((filled / total) * 100) : 0}%`;
+}
+
 /**
  * "Cena po dogovoru" for every missing price on the screen in one tap, before the first of them; only with
  * two or more (one has its own tick).
  */
-function withAllOnRequest(facts: MissingFact[], boxes: (HTMLElement | null)[]): (HTMLElement | null)[] {
+function allOnRequestButton(facts: MissingFact[]): HTMLElement | null {
   const prices = facts.filter((f) => f.kind === "price");
-  const first = facts.findIndex((f) => f.kind === "price");
-  if (!priceOnRequestOn() || prices.length < 2) return boxes;
-  const all = h("div", { class: "row" },
+  if (!priceOnRequestOn() || prices.length < 2) return null;
+  return h("div", { class: "row" },
     h("button", {
       class: "btn sm ask-onreq-all",
       type: "button",
@@ -2994,9 +3223,6 @@ function withAllOnRequest(facts: MissingFact[], boxes: (HTMLElement | null)[]): 
       },
     }, "Vse manjkajoče cene po dogovoru"),
   );
-  const out = boxes.slice();
-  out.splice(first, 0, all);
-  return out;
 }
 
 /** Objavi under the form: what was typed is saved first, then the usual publish (or what is still missing). */
@@ -3033,6 +3259,7 @@ function maybeAsk(): void {
 }
 
 function openAsk(): void {
+  if (!askOpen) askTotal = missingFacts(state.checklist).length;
   askOpen = true;
   checklistOpen = false;
   setSheet("full");
@@ -3326,12 +3553,20 @@ function missingPhrase(n: number): string {
 
 /** One live region for the whole session, shown and hidden, so screen readers keep announcing it. */
 const toastText = h("span", { class: "toast-text" });
+const toastButton = h("button", { class: "toast-action", type: "button", hidden: true });
 const toastClose = h("button", { class: "toast-close", type: "button", "aria-label": "Zapri obvestilo" }, "✕");
-const toastEl = document.body.appendChild(h("div", { class: "toast", role: "status", hidden: true }, toastText, toastClose));
-toastClose.addEventListener("click", () => {
+const toastEl = document.body.appendChild(h("div", { class: "toast", role: "status", hidden: true }, toastText, toastButton, toastClose));
+const hideToast = (): void => {
   window.clearTimeout(toastTimer);
   toast = "";
+  toastAction = null;
   toastEl.hidden = true;
+};
+toastClose.addEventListener("click", hideToast);
+toastButton.addEventListener("click", () => {
+  const run = toastAction?.run;
+  hideToast();
+  run?.();
 });
 let toastTimer: number | undefined;
 
@@ -3347,14 +3582,16 @@ function showToast(): void {
   toastText.replaceChildren(...toastContent(toast).filter((c): c is Node | string => c !== null && c !== false && c !== undefined).map((c) => (c instanceof Node ? c : document.createTextNode(String(c)))));
   toastEl.hidden = false;
   const t = toast;
+  // The action belongs to its own message: a newer toast drops it.
+  const action = toastAction?.text === t ? toastAction : null;
+  if (!action) toastAction = null;
+  toastButton.hidden = !action;
+  toastButton.textContent = action?.label ?? "";
   window.clearTimeout(toastTimer);
-  // Long enough to read: 4 s, plus a little per character for longer messages (at most 12 s).
+  // Long enough to read: 4 s, plus a little per character for longer messages (at most 12 s); 8 s at least with a button.
   toastTimer = window.setTimeout(() => {
-    if (toast === t) {
-      toast = "";
-      toastEl.hidden = true;
-    }
-  }, Math.min(12_000, Math.max(4000, 1500 + t.length * 60)));
+    if (toast === t) hideToast();
+  }, Math.min(12_000, Math.max(action ? 8000 : 4000, 1500 + t.length * 60)));
 }
 
 load()
