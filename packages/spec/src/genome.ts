@@ -11,11 +11,11 @@
  * home: where the palette came from, the section rhythm, the shape language, and whether the axes were picked
  * independently (`source`).
  *
- * - source "preset": the genome is the direction's own (a migrated site, a site made with config `variety.genome` off, a
- *   style switched in the editor). The direction's token ranges hold the design, exactly as before v18, and nothing renders
- *   differently.
- * - source "picked": the axes were chosen independently (config `variety.genome`). The genome's compatibility rules hold
- *   the design instead of the direction's ranges (genome-rules.ts), and the shape language renders (`data-shape`).
+ * - source "preset": the genome is the direction's own (a migrated site, a generated site, a style switched in the
+ *   editor). The direction's token ranges hold the design, exactly as before v18, and nothing renders differently.
+ * - source "picked": the axes were chosen independently (the config `variety.genome` experiment, removed 2026-10-19; a
+ *   stored site may still carry one). The genome's compatibility rules hold the design instead of the direction's ranges
+ *   (genome-rules.ts), and the shape language renders (`data-shape`).
  */
 import { z } from "zod";
 

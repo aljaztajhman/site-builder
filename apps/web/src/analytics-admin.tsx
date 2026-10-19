@@ -352,21 +352,6 @@ export function enginePage({ csrf, days, on, summary: s }: { csrf: string; days:
             <p className="muted">Ni opravil.</p>
           )}
         </section>
-        <section className="message" aria-labelledby="h-studio">
-          <h2 id="h-studio">Oblikovalski studio</h2>
-          {s.studio.length ? (
-            <ol>
-              {s.studio.map((j) => (
-                <li key={`${j.at}-${j.siteId}`}>
-                  {j.siteId ? <a href={`/sites/${j.siteId}`}>{formatDateTime(j.at)}</a> : formatDateTime(j.at)}
-                  {j.composed ? ` · ${j.stance ?? ""}: ${j.idea ?? ""}` : ` · ostala je današnja stran: ${j.reason ?? ""}${j.idea ? ` (zamisel: ${j.idea})` : ""}`}
-                </li>
-              ))}
-            </ol>
-          ) : (
-            <p className="muted">Studio še ni tekel.</p>
-          )}
-        </section>
         <section className="message" aria-labelledby="h-dir">
           <h2 id="h-dir">Smeri</h2>
           <CountTable caption="Izbrane smeri" head="Smer" rows={s.directions.map((d) => ({ value: d.direction, n: d.n }))} />
