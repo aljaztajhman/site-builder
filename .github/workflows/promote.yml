@@ -135,7 +135,7 @@ jobs:
     timeout-minutes: 20
     services:
       postgres:
-        image: postgres:17-alpine
+        image: postgres:18-alpine
         env:
           POSTGRES_USER: sb
           POSTGRES_PASSWORD: sb
@@ -155,12 +155,12 @@ jobs:
           node-version: 24
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
-      - name: Install the PostgreSQL 17 client
+      - name: Install the PostgreSQL 18 client
         run: |
           [ -x /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh ] || { sudo apt-get update -qq; sudo apt-get install -y -qq postgresql-common; }
           sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
-          sudo apt-get install -y -qq postgresql-client-17
-          echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
+          sudo apt-get install -y -qq postgresql-client-18
+          echo "/usr/lib/postgresql/18/bin" >> "$GITHUB_PATH"
       - name: Restore production's newest backup and run this commit's migrations on it
         env:
           MIGRATE_CHECK_DATABASE_URL: postgres://sb:sb@localhost:5432/migcheck

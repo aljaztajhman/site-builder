@@ -53,7 +53,8 @@
     "smoke:launch": "tsx --env-file-if-exists=.env tools/eval/src/smoke-launch.ts",
     "db:migrate": "tsx --env-file-if-exists=.env packages/platform/scripts/migrate.ts",
     "db:backup": "tsx --env-file-if-exists=.env packages/platform/scripts/backup.ts",
-    "db:migrate-check": "tsx --env-file-if-exists=.env packages/platform/scripts/migrate-check.ts"
+    "db:migrate-check": "tsx --env-file-if-exists=.env packages/platform/scripts/migrate-check.ts",
+    "db:restore-drill": "tsx --env-file-if-exists=.env packages/platform/scripts/restore-drill.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
