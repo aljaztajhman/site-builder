@@ -130,7 +130,7 @@ export async function openPublicUrl(start: URL, o: OpenOptions): Promise<{ url: 
 }
 
 const USER_AGENT =
-  "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36 StrankoPregled/1.0";
+  "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36 PostaviPregled/1.0";
 
 // ---------- What the page says about the company (ZEPT) ----------
 

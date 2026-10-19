@@ -5,6 +5,7 @@ import type { AppConfig } from "@sb/config";
 import { planOffer } from "@sb/engine";
 import type { AccountRow, PaidPlanKey, Repo, SiteRow, Tier } from "@sb/platform";
 import { hasSession, type AuthSettings } from "./auth.ts";
+import { trustedForwardedHost, trustedVisitorIp } from "./site-hosts.ts";
 import type { UploadTicket } from "./upload-ticket.ts";
 
 /** Same-origin path only: "/x" but not "//host", "/\host" or anything with whitespace. Default: the landing page. */
@@ -56,6 +57,8 @@ const same = (a: string, b: string): boolean => a.length === b.length && timingS
  * The rightmost X-Forwarded-For entry is Railway's edge, so it is only a fallback for local runs without X-Real-IP.
  */
 export const clientIp = (c: Context): string =>
+  // Behind the edge Worker (secret checked in site-hosts.ts) Railway sees Cloudflare; the Worker names the visitor.
+  trustedVisitorIp(c.req.raw) ||
   c.req.header("x-real-ip")?.trim() || c.req.header("x-forwarded-for")?.split(",").at(-1)?.trim() || "local";
 /** A keyed hash of the client's IP for rate limits; the IP itself is never stored (cleared after a day). */
 export const ipKey = (secret: string, ip: string): string => createHmac("sha256", secret).update(`ip:${ip}`).digest("hex").slice(0, 32);
@@ -124,7 +127,8 @@ export function csrfOk(c: Context<AppEnv>, body: Record<string, unknown>): boole
 /**
  * Rejects state-changing requests that a browser marks as coming from another site (Sec-Fetch-Site),
  * or whose Origin names another host. Requests without either header aren't from a browser page, so
- * they can't be cross-site forgeries. The public form endpoint of published sites is exempt.
+ * they can't be cross-site forgeries. The public form endpoint of published sites is exempt. Behind the
+ * edge Worker the Host is Railway's, so an Origin of the site hostname it forwarded (secret checked) is ours.
  */
 export const sameOriginOnly: MiddlewareHandler = async (c, next) => {
   if (c.req.method === "GET" || c.req.method === "HEAD" || c.req.method === "OPTIONS" || /^\/s\/[^/]+\/_submit$/.test(c.req.path)) return next();
@@ -134,7 +138,8 @@ export const sameOriginOnly: MiddlewareHandler = async (c, next) => {
   if (fetchSite) cross = fetchSite !== "same-origin" && fetchSite !== "none";
   else if (origin) {
     try {
-      cross = new URL(origin).host !== c.req.header("host");
+      const from = new URL(origin);
+      cross = from.host !== c.req.header("host") && from.hostname.toLowerCase() !== trustedForwardedHost(c.req.raw);
     } catch {
       cross = true;
     }

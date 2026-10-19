@@ -2,7 +2,7 @@ import type { PRACTICAL_FACTS } from "@sb/spec";
 
 /**
  * The practical-fact icons (batch I9-p, docs/plans/studio-phase1-design.md §5): one line icon per PRACTICAL_FACTS key,
- * drawn new for Stranko on a 24 grid. Each is one path's data, stroked in currentColor at ICON_STROKE with round caps
+ * drawn new for Postavi on a 24 grid. Each is one path's data, stroked in currentColor at ICON_STROKE with round caps
  * and joins, never filled; the geometry stays inside 2–22 so the stroke never clips (components icons test). Inventory
  * ids `icon/line/<fact>` (packages/inventory/src/icons.ts registers them as drafts). The solid and cut styles are batch
  * I9c; until then every `iconFacts.icons` style renders these.

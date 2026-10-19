@@ -1,0 +1,21 @@
+# The edge Worker in front of every published site (README.md). No secrets here:
+# SITE_PROXY_SECRET is set with `wrangler secret put SITE_PROXY_SECRET`.
+name = "postavi-edge"
+main = "src/worker.ts"
+compatibility_date = "2026-10-01"
+workers_dev = false
+
+[vars]
+# Railway's own address of the web service (not app.postavi.si: Railway routes by Host). Placeholder.
+ORIGIN = "https://REPLACE-with-railway-web-domain.up.railway.app"
+PLATFORM_DOMAIN = "postavi.si"
+
+# Routes are placeholders until DNS moves to Cloudflare (docs/plans/custom-domains.md):
+# - every site subdomain of the platform zone; app., mail., www. and the apex are refused by the Worker
+#   itself, and should not be routed here in the first place.
+# - the Cloudflare for SaaS fallback: customers' own hostnames (CNAME to the fallback origin) reach the
+#   Worker through a route on the SaaS zone, added by the provisioning job per hostname
+#   (packages/platform/src/cloudflare-saas.ts) or as one wildcard route "*/*" on that zone.
+# routes = [
+#   { pattern = "*.postavi.si/*", zone_name = "postavi.si" },
+# ]

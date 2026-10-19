@@ -84,7 +84,7 @@ export function cloudflareEdge(o: {
       );
       // The site's records and the Worker's routes; existing ones are refused and left as they are.
       for (const name of [domain, `www.${domain}`]) {
-        await call("POST", `/zones/${zone.id}/dns_records`, { ...ORIGINLESS, name, comment: "Stranko: spletna stran" });
+        await call("POST", `/zones/${zone.id}/dns_records`, { ...ORIGINLESS, name, comment: "Postavi: spletna stran" });
         await call("POST", `/zones/${zone.id}/workers/routes`, { pattern: `${name}/*`, script: o.workerScript });
       }
       return { zoneId: zone.id, nameservers: zone.name_servers };

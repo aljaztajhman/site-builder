@@ -461,7 +461,7 @@ export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
   {
     id: 21,
     name: "product_events",
-    // it-analytics (docs/plans/analytics.md Steps 1 and 3): Stranko's own funnel and engine events. device_key is a
+    // it-analytics (docs/plans/analytics.md Steps 1 and 3): Postavi's own funnel and engine events. device_key is a
     // keyed hash of the device cookie (never an IP, never an email); site_id and account_id are our opaque ids, kept
     // without a foreign key so the counts outlive a deleted preview. Raw rows are kept analytics.keepDays, then
     // rolled into product_events_daily (kept): counts per day, kind, tier, plan and source ('' for none).

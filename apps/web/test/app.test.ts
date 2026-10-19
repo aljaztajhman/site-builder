@@ -156,7 +156,7 @@ describe("landing page", () => {
     const page = await res.text();
     // The slogan is the h1 and the title (sb-slogan); one short line under it.
     expect(page).toContain('<h1 id="h1">Stran za vaše stranke.</h1>');
-    expect(page).toContain("<title>Stranko · Stran za vaše stranke.</title>");
+    expect(page).toContain("<title>Postavi · Stran za vaše stranke.</title>");
     for (const id of ["zacni", "kaj", "kako", "primer", "cena", "vprasanja"]) expect(page, id).toContain(`id="${id}"`);
     const plans = loadConfig().plans;
     const std = plans.standard;

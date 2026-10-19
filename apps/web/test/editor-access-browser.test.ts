@@ -181,7 +181,7 @@ describe("free-preview badge (sb-preview-watermark)", () => {
   const badge = (page: Awaited<ReturnType<CheckBrowser["browser"]["newPage"]>>) => page.locator(".frame-box > .preview-badge");
 
   for (const width of [1280, 360]) {
-    it(`a preview without an account shows "Predogled · Stranko" beside the frame, not inside the site (${width} px)`, async () => {
+    it(`a preview without an account shows "Predogled · Postavi" beside the frame, not inside the site (${width} px)`, async () => {
       const context = await cb.browser.newContext({ viewport: { width, height: width > 900 ? 900 : 780 }, reducedMotion: "reduce" });
       const page = await context.newPage();
       try {
@@ -191,11 +191,11 @@ describe("free-preview badge (sb-preview-watermark)", () => {
         await page.goto(`${base}/sites/${id}`);
         await preview(page).locator("main").waitFor();
         await badge(page).waitFor();
-        expect(await badge(page).textContent()).toBe("Predogled · Stranko");
+        expect(await badge(page).textContent()).toBe("Predogled · Postavi");
         // Not in the site: neither the frame's document nor the preview HTML carries it.
-        expect(await preview(page).locator("body").textContent()).not.toContain("Predogled · Stranko");
+        expect(await preview(page).locator("body").textContent()).not.toContain("Predogled · Postavi");
         const html = await (await page.request.get(`${base}/preview/${id}/index.html`)).text();
-        expect(html).not.toContain("Predogled · Stranko");
+        expect(html).not.toContain("Predogled · Postavi");
         // A tab on the frame's top-right corner: it ends where the frame begins (covers nothing of the site)
         // and starts inside the stage.
         const b = (await badge(page).boundingBox())!;
@@ -236,7 +236,7 @@ describe("free-preview badge (sb-preview-watermark)", () => {
       await preview(page).locator("main").waitFor();
       await badge(page).waitFor();
       await page.goto(`${base}/sites`);
-      expect(await page.locator(".site-card .preview-badge").textContent()).toBe("Predogled · Stranko");
+      expect(await page.locator(".site-card .preview-badge").textContent()).toBe("Predogled · Postavi");
       // The badge covers nothing of the thumbnail, on a wide and on a narrow card.
       for (const w of [1280, 360]) {
         await page.setViewportSize({ width: w, height: 900 });

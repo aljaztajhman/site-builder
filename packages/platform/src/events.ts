@@ -2,7 +2,7 @@ import type { AppConfig } from "@sb/config";
 import type { Db } from "./db.ts";
 
 /**
- * Stranko's own product analytics (docs/plans/analytics.md Steps 1 and 3, it-analytics): one row per step a
+ * Postavi's own product analytics (docs/plans/analytics.md Steps 1 and 3, it-analytics): one row per step a
  * visitor takes in the product, and one `generation` row per generation job. Rows name the device only by a
  * keyed hash of its cookie (`device_key`), never by an IP or an email. Raw rows are kept `analytics.keepDays`,
  * then rolled into daily counts (`rollUp`, the worker's housekeeping).

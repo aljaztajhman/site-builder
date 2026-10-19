@@ -63,7 +63,7 @@ beforeAll(async () => {
   golden = JSON.parse(await readFile(path.join(here, "../../../tools/eval/golden/instalacije-rebernik.json"), "utf8")) as SiteSpec;
   const base = loadConfig();
   config = { ...base, domains: { ...base.domains, enabled: true } };
-  const edge = fakeEdge({ cnameTarget: "povezava.stranko.example" });
+  const edge = fakeEdge({ cnameTarget: "povezava.postavi.example" });
   providers = {
     registrar: fakeRegistrar({ taken: ["instalacijerebernik.si"] }),
     edge,
@@ -81,8 +81,8 @@ const app = (o: { mailer?: Mailer; enabled?: boolean } = {}) =>
     platform,
     config: o.enabled === false ? { ...config, domains: { ...config.domains, enabled: false } } : config,
     mailer: o.mailer ?? mail,
-    appUrl: "https://app.stranko.example",
-    platformDomain: "stranko.example",
+    appUrl: "https://app.postavi.example",
+    platformDomain: "postavi.example",
     siteHostCacheMs: 0,
     domainProviders: providers,
     auth: { password: PASSWORD, secret: "s".repeat(32), secureCookies: false },
@@ -117,7 +117,7 @@ describe("the domain step's API", () => {
     expect(sugg.suggestions.map((x) => x.name)).toEqual(["instalacije-rebernik.si", "instalacijerebernik-celje.si", "instalacijerebernikcelje.si"]);
     expect(sugg.suggestions.every((x) => x.priceEurPerYear === config.domains.tlds[0]!.priceEurPerYear)).toBe(true);
     const info = (await (await api(admin, `/api/sites/${s.id}/domains`)).json()) as { enabled: boolean; domains: unknown[]; registrant: Record<string, string>; missing: string[]; platformAddress: string };
-    expect(info).toMatchObject({ enabled: true, domains: [], missing: [], platformAddress: `https://${s.slug}.stranko.example/` });
+    expect(info).toMatchObject({ enabled: true, domains: [], missing: [], platformAddress: `https://${s.slug}.postavi.example/` });
     expect(info.registrant).toEqual({ kind: "person", firstName: "Matej", lastName: "Rebernik", street: "Cesta 1", postalCode: "3000", city: "Celje", country: "SI", phone: "+38641123456", email: "info@rebernik.si" });
     expect((info as unknown as { holder: string }).holder).toBe("Matej Rebernik · Cesta 1, 3000 Celje · +386 41 123 456 · info@rebernik.si");
     // Off in config: no suggestions, and starting is refused.
@@ -186,15 +186,15 @@ describe("the domain step's API", () => {
   it("'Že imam domeno' shows the one record, the DNS host and that email stays; never our own domains", async () => {
     const s = await site();
     const plan = await (await api(admin, `/api/sites/${s.id}/domains/inspect`, { method: "POST", body: { hostname: "Rebernik.si" } })).json();
-    expect(plan).toEqual({ hostname: "www.rebernik.si", apex: "rebernik.si", record: { type: "CNAME", name: "www", value: "povezava.stranko.example" }, dnsHost: "Namecheap", hasMail: true, pointing: false });
-    for (const h of ["shop.stranko.example", "app.stranko.example"]) {
+    expect(plan).toEqual({ hostname: "www.rebernik.si", apex: "rebernik.si", record: { type: "CNAME", name: "www", value: "povezava.postavi.example" }, dnsHost: "Namecheap", hasMail: true, pointing: false });
+    for (const h of ["shop.postavi.example", "app.postavi.example"]) {
       const r = await api(admin, `/api/sites/${s.id}/domains/inspect`, { method: "POST", body: { hostname: h } });
       expect(r.status).toBe(400);
     }
     const r = await api(admin, `/api/sites/${s.id}/domains`, { method: "POST", body: { kind: "connected", hostname: "rebernik.si" } });
     expect(r.status).toBe(200);
     const state = (await (await api(admin, `/api/sites/${s.id}/domains`)).json()) as { domains: { label: string; connect: unknown }[] };
-    expect(state.domains[0]).toMatchObject({ label: "Čakamo na zapis DNS…", connect: { record: { type: "CNAME", name: "www", value: "povezava.stranko.example" }, dnsHost: "Namecheap", hasMail: true, seen: [] } });
+    expect(state.domains[0]).toMatchObject({ label: "Čakamo na zapis DNS…", connect: { record: { type: "CNAME", name: "www", value: "povezava.postavi.example" }, dnsHost: "Namecheap", hasMail: true, seen: [] } });
   });
 
   it("'Preveri zdaj' runs the job now; 'Poskusi znova' starts a failed domain again", async () => {
@@ -228,12 +228,12 @@ describe("the owner's 'live' email", () => {
     await platform.repo.domains.start(s.id, "rebernik-zivo.si", "registered", {});
     await platform.repo.domains.progress("rebernik-zivo.si", { status: "active", step: "live", notify: "pending", nextInSeconds: null });
     const m = memoryMailer();
-    expect(await sendDomainLiveEmails({ repo: platform.repo, config, mailer: m, appUrl: "https://app.stranko.example" })).toBe(1);
+    expect(await sendDomainLiveEmails({ repo: platform.repo, config, mailer: m, appUrl: "https://app.postavi.example" })).toBe(1);
     expect(m.sent).toHaveLength(1);
     expect(m.sent[0]).toMatchObject({ to: OWNER, subject: "Stran je objavljena na rebernik-zivo.si", idempotencyKey: "domain-live-rebernik-zivo.si" });
     expect(m.sent[0]!.text).toContain("https://rebernik-zivo.si/");
     expect(m.sent[0]!.text).toContain("registrirana na vaše ime");
-    expect(m.sent[0]!.text).toContain(`https://app.stranko.example/sites/${s.id}`);
+    expect(m.sent[0]!.text).toContain(`https://app.postavi.example/sites/${s.id}`);
     expect(await sendDomainLiveEmails({ repo: platform.repo, config, mailer: m })).toBe(0);
     expect((await platform.repo.domains.get("rebernik-zivo.si"))!.notify).toBe("sent");
   });
@@ -275,10 +275,10 @@ describe("cookieless counts on a site's own domain", () => {
     }
     expect(await totals()).toMatchObject({ visits: 1, calls: 2, directions: 1 });
     // The platform subdomain counts too; the app's own host has no /_hit.
-    const sub = `${s.slug}.stranko.example`;
+    const sub = `${s.slug}.postavi.example`;
     await a.request(`http://${sub}/_hit`, { method: "POST", headers: { host: sub, "user-agent": PHONE_UA }, body: "call" });
     expect((await totals()).calls).toBe(3);
-    const appHost = await a.request("http://app.stranko.example/_hit", { method: "POST", headers: { host: "app.stranko.example", "user-agent": PHONE_UA, cookie: admin.cookie }, body: "call" });
+    const appHost = await a.request("http://app.postavi.example/_hit", { method: "POST", headers: { host: "app.postavi.example", "user-agent": PHONE_UA, cookie: admin.cookie }, body: "call" });
     expect(appHost.status).toBe(404);
     expect((await totals()).calls).toBe(3);
   });

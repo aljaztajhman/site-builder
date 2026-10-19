@@ -1,5 +1,5 @@
 /**
- * The iframe flavour: one whole page in a frame becomes another page (the Stranko landing demo, a
+ * The iframe flavour: one whole page in a frame becomes another page (the Postavi landing demo, a
  * template gallery, a before/after viewer). A second frame of the same size (`stage`, kept under the
  * visible one) loads the next page first, so its fonts and photos are warm when the morph measures it.
  */

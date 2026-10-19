@@ -61,7 +61,7 @@ async function makePlatform(): Promise<Platform> {
 beforeAll(async () => {
   dir = await mkdtemp(path.join(tmpdir(), "sb-analytics-"));
   platform = await makePlatform();
-  const app = createApp({ platform, config, auth: { password: PASSWORD, secret: SECRET, secureCookies: false }, mailer: mail, appUrl: "https://stranko.example", botCheck: skipBotCheck });
+  const app = createApp({ platform, config, auth: { password: PASSWORD, secret: SECRET, secureCookies: false }, mailer: mail, appUrl: "https://postavi.example", botCheck: skipBotCheck });
   req = (p, init) => app.request(p, init);
 }, 60_000);
 afterAll(async () => {
@@ -293,7 +293,7 @@ describe("with analytics.events off", () => {
     expect(base.analytics.events).toBe(true);
     const off = await makePlatform();
     try {
-      const app = createApp({ platform: off, config: { ...structuredClone(base), analytics: { ...base.analytics, events: false }, limits: { ...base.limits, dailyModelSpendCapEur: 100 } }, auth: { password: PASSWORD, secret: SECRET, secureCookies: false }, mailer: mail, appUrl: "https://stranko.example", botCheck: skipBotCheck });
+      const app = createApp({ platform: off, config: { ...structuredClone(base), analytics: { ...base.analytics, events: false }, limits: { ...base.limits, dailyModelSpendCapEur: 100 } }, auth: { password: PASSWORD, secret: SECRET, secureCookies: false }, mailer: mail, appUrl: "https://postavi.example", botCheck: skipBotCheck });
       const r: Req = (p, init) => app.request(p, init);
       const b = await newBrowser(r);
       await r("/", { headers: { cookie: b.cookie, "user-agent": UA } });

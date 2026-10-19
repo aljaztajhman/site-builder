@@ -1,6 +1,6 @@
 ---
 name: morph-animation
-description: Add a part-by-part "Transformer" screen transition (one layout's header, headline, buttons, photos and cards fly apart, travel, flip and lock into the next layout), a self-building page reveal, or a text-decode effect to a web UI, using the @sb/morph engine. Use when someone wants switching between states, tabs, themes, templates or pages to look like the Stranko landing demo, or wants a page to "build itself" on screen.
+description: Add a part-by-part "Transformer" screen transition (one layout's header, headline, buttons, photos and cards fly apart, travel, flip and lock into the next layout), a self-building page reveal, or a text-decode effect to a web UI, using the @sb/morph engine. Use when someone wants switching between states, tabs, themes, templates or pages to look like the Postavi landing demo, or wants a page to "build itself" on screen.
 ---
 
 # Morph animation (@sb/morph)

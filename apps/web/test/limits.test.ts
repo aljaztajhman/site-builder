@@ -57,7 +57,7 @@ const classifyIntake: ClassifyIntake = async (description, ctx) => {
 };
 
 function makeApp(botCheck: BotCheck, secureCookies = false) {
-  return createApp({ platform, config, auth: { password: PASSWORD, secret: "s".repeat(32), secureCookies }, mailer: mail, appUrl: "https://stranko.example", botCheck, classifyIntake });
+  return createApp({ platform, config, auth: { password: PASSWORD, secret: "s".repeat(32), secureCookies }, mailer: mail, appUrl: "https://postavi.example", botCheck, classifyIntake });
 }
 let app: ReturnType<typeof createApp>;
 let req: Req;
@@ -388,8 +388,8 @@ describe("junk intake", () => {
 describe("free-preview badge (sb-preview-watermark)", () => {
   it("only free tiers' unpublished previews get it, config switches it, and the site's HTML never carries it", async () => {
     const draft = { published_version: null };
-    expect(previewBadge(config, "anonymous", draft)).toBe("Predogled · Stranko");
-    expect(previewBadge(config, "free", draft)).toBe("Predogled · Stranko");
+    expect(previewBadge(config, "anonymous", draft)).toBe("Predogled · Postavi");
+    expect(previewBadge(config, "free", draft)).toBe("Predogled · Postavi");
     expect(previewBadge(config, "paid", draft)).toBeNull();
     expect(previewBadge(config, "admin", draft)).toBeNull();
     expect(previewBadge(config, "free", { published_version: 3 })).toBeNull();
@@ -402,10 +402,10 @@ describe("free-preview badge (sb-preview-watermark)", () => {
     const b = await newBrowser(req);
     const id = siteOf(await intake(req, b));
     await runQueued();
-    expect((await state(b, id)).access.badge).toBe("Predogled · Stranko");
+    expect((await state(b, id)).access.badge).toBe("Predogled · Postavi");
     const html = await (await req(`/preview/${id}/index.html`, { headers: { cookie: b.cookie } })).text();
     expect(html).toContain("<html");
-    expect(html).not.toContain("Predogled · Stranko");
+    expect(html).not.toContain("Predogled · Postavi");
     expect(html).not.toContain("preview-badge");
     // The admin sees the same preview without it.
     const admin = await adminBrowser(req, PASSWORD);
@@ -462,7 +462,7 @@ describe("free account", () => {
     // The claimed preview doesn't use up the one more.
     expect(list).toContain("Še 1 brezplačno ustvarjanje domače strani in 5 sprememb s pomočnikom.");
     const s = await state(owner, preview);
-    expect(s.access).toMatchObject({ viewer: "free", expiresAt: null, signIn: null, badge: "Predogled · Stranko", can: { edit: true, chat: true, regenerate: true, publish: false, fullSite: false } });
+    expect(s.access).toMatchObject({ viewer: "free", expiresAt: null, signIn: null, badge: "Predogled · Postavi", can: { edit: true, chat: true, regenerate: true, publish: false, fullSite: false } });
     expect(s.access.allowance).toMatchObject({ homepagesLeft: 1, homepagesTotal: 1, chatEditsLeft: 5, chatEditsTotal: 5 });
 
     // A whole site isn't a free right; one more homepage is.

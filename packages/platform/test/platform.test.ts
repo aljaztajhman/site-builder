@@ -64,6 +64,10 @@ describe("repo", () => {
     const site = await repo.createSite({ name: "Salon Lipa", slug, intake: { description: "x", photoAssetIds: [], scope: "home" } });
     expect(site.status).toBe("new");
     expect(await repo.uniqueSlug("salon-lipa")).toBe("salon-lipa-2");
+    // The platform's own names are never a site's slug (app.postavi.si, mail.postavi.si …).
+    expect(await repo.uniqueSlug("mail")).toBe("mail-2");
+    expect(await repo.uniqueSlug("app")).toBe("app-2");
+    expect(await repo.uniqueSlug("postavi")).toBe("postavi-2");
 
     const v1 = await repo.saveSpec(site.id, { specVersion: 1 } as never, "generate");
     const v2 = await repo.saveSpec(site.id, { specVersion: 1, slug: "b" } as never, "edit", "temnejša glava");

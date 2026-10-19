@@ -33,7 +33,7 @@ beforeAll(async () => {
   await migrate(db);
   const queue: Queue = { send: async () => "job", work: async () => undefined, ping: async () => undefined, stop: async () => undefined };
   platform = { db, repo: new Repo(db), storage: createFsStorage(dir), queue, close: () => db.close() };
-  const app = createApp({ platform, config, auth: { password: "test-password-1234", secret: SECRET, secureCookies: false }, mailer: mail, appUrl: "https://stranko.example" });
+  const app = createApp({ platform, config, auth: { password: "test-password-1234", secret: SECRET, secureCookies: false }, mailer: mail, appUrl: "https://postavi.example" });
   req = (p, init) => app.request(p, init);
   golden = JSON.parse(await readFile(path.join(here, "../../../tools/eval/golden/pekarna-kvas.json"), "utf8")) as SiteSpec;
 });
@@ -57,7 +57,7 @@ async function preview(b: Browser, ageDays = 0): Promise<string> {
   return s.id;
 }
 const remind = (b: Browser, siteId: string, email: string) => req(`/api/sites/${siteId}/reminder`, { method: "POST", headers: { cookie: b.cookie, "content-type": "application/json" }, body: JSON.stringify({ email }) });
-const send = (mailer: Mailer = mail, log?: (l: string) => void) => sendPreviewReminders({ repo: platform.repo, config, mailer, appUrl: "https://stranko.example", secret: SECRET, ...(log ? { log } : {}) });
+const send = (mailer: Mailer = mail, log?: (l: string) => void) => sendPreviewReminders({ repo: platform.repo, config, mailer, appUrl: "https://postavi.example", secret: SECRET, ...(log ? { log } : {}) });
 const to = (address: string) => mail.sent.filter((m) => m.to === address);
 
 describe("leaving an address on the preview", () => {
@@ -136,9 +136,9 @@ describe("the email's wording", () => {
       createdAt: "2026-10-01T08:00:00Z",
       deletesAt: "2026-10-08T08:00:00Z",
       lockedPages: ["Ponudba", "Kontakt"],
-      url: "https://stranko.example/predogled/site_0123456789abcdef/abc",
+      url: "https://postavi.example/predogled/site_0123456789abcdef/abc",
     });
-    expect(m.subject).toBe("Vaš predogled v Stranko izbrišemo čez 2 dneva");
+    expect(m.subject).toBe("Vaš predogled v Postavi izbrišemo čez 2 dneva");
     expect(m.idempotencyKey).toBe("preview-reminder-site_0123456789abcdef");
     expect(m.text).toBe(
       [
@@ -147,14 +147,14 @@ describe("the email's wording", () => {
         "predogled spletne strani Pekarna Kvas, ki ste ga naredili 1. 10. 2026, brez prijave hranimo 7 dni, zato ga izbrišemo 8. 10. 2026.",
         "",
         "Če ga želite obdržati, se prijavite s tem e-poštnim naslovom. Predogled ostane vaš, urejate ga naprej in z brezplačnim računom dobite še 1 domačo stran in 5 sprememb s pomočnikom.",
-        "https://stranko.example/predogled/site_0123456789abcdef/abc",
+        "https://postavi.example/predogled/site_0123456789abcdef/abc",
         "",
         "Z naročnino Osnovni (15 € na mesec) naredimo celotno stran (Ponudba, Kontakt) in jo objavite na svoji domeni.",
         "",
         "To sporočilo smo poslali, ker ste ga zahtevali pri predogledu. Drugih ne pošiljamo, naslov pa izbrišemo skupaj s predogledom.",
       ].join("\n"),
     );
-    expect(m.html).toContain('<a href="https://stranko.example/predogled/site_0123456789abcdef/abc">Obdrži predogled</a>');
+    expect(m.html).toContain('<a href="https://postavi.example/predogled/site_0123456789abcdef/abc">Obdrži predogled</a>');
     expect(`${m.subject}${m.text}${m.html}`).not.toMatch(/—/);
     // A name with markup is escaped in HTML; without a name it still reads.
     expect(reminderMail(config, { to: "a@b.si", siteId: "s", siteName: "<b>X</b>", createdAt: "2026-10-01T08:00:00Z", deletesAt: "2026-10-08T08:00:00Z", lockedPages: [], url: "u" }).html).toContain("&lt;b&gt;X&lt;/b&gt;");
@@ -168,7 +168,7 @@ describe("the email's wording", () => {
     await send();
     const m = to("povezava@siol.net")[0]!;
     expect(m.text).toContain("celotno stran (Ponudba, Kontakt)");
-    expect(m.text).toContain(`https://stranko.example/predogled/${id}/${reminderToken(SECRET, id, "povezava@siol.net")}`);
+    expect(m.text).toContain(`https://postavi.example/predogled/${id}/${reminderToken(SECRET, id, "povezava@siol.net")}`);
   });
 });
 

@@ -78,7 +78,7 @@ export interface AppOptions {
   auth: AuthSettings;
   /** Sends sign-in links and contact-form emails; from env (Resend, or the console in development) when not given. */
   mailer?: Mailer;
-  /** Public origin for links in emails, e.g. https://stranko.example (APP_URL, or Railway's public domain). */
+  /** Public origin for links in emails, e.g. https://postavi.example (APP_URL, or Railway's public domain). */
   appUrl?: string;
   /** Bot check on the anonymous intake (Turnstile); from env when not given. */
   botCheck?: BotCheck;
@@ -128,7 +128,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   const mailer = opts.mailer ?? mailerFromEnv();
   const botCheck = opts.botCheck ?? botCheckFromEnv(process.env, auth.secureCookies);
   const limits = { repo, config, secret: auth.secret };
-  // Stranko's own funnel events (analytics.ts; config analytics.events, off by default).
+  // Postavi's own funnel events (analytics.ts; config analytics.events, off by default).
   const track = tracker(limits);
   // The landing page and the intake's refusal page carry the Turnstile widget (its script and frame).
   const turnstileCsp = (path: string) => botCheck.mode === "on" && (path === "/" || path === "/api/sites" || path === "/pregled");

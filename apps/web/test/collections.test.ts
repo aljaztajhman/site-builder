@@ -22,7 +22,7 @@ beforeAll(async () => {
   await migrate(db);
   const queue: Queue = { send: async () => "job", work: async () => undefined, ping: async () => undefined, stop: async () => undefined };
   platform = { db, repo: new Repo(db), storage: createFsStorage(dir), queue, close: () => db.close() };
-  app = createApp({ platform, config: loadConfig(), platformDomain: "stranko.example", auth: { password: PASSWORD, secret: "s".repeat(32), secureCookies: false } });
+  app = createApp({ platform, config: loadConfig(), platformDomain: "postavi.example", auth: { password: PASSWORD, secret: "s".repeat(32), secureCookies: false } });
 });
 afterAll(async () => {
   await platform.close();
@@ -61,7 +61,7 @@ describe("collections in the editor's API", () => {
     expect(preview.status).toBe(200);
     const html = await preview.text();
     expect(html).toContain(">Zimske gume do konca novembra</h1>");
-    expect(html).toContain('<link rel="canonical" href="https://avtoservis-zbirke.stranko.example/novice/zimske-gume-do-konca-novembra.html"/>');
+    expect(html).toContain('<link rel="canonical" href="https://avtoservis-zbirke.postavi.example/novice/zimske-gume-do-konca-novembra.html"/>');
     expect((await app.request(`/preview/${site.id}/novice/nope.html`, { headers: { cookie } })).status).toBe(404);
 
     // Publishing writes the entry pages, robots.txt, the sitemap and the feed with the platform subdomain.
@@ -76,8 +76,8 @@ describe("collections in the editor's API", () => {
       return data ? new TextDecoder().decode(data) : null;
     };
     expect(await file("novice/zimske-gume-do-konca-novembra.html")).toContain("<h1");
-    expect(await file("robots.txt")).toContain("Sitemap: https://avtoservis-zbirke.stranko.example/sitemap.xml");
-    expect(await file("sitemap.xml")).toContain("<loc>https://avtoservis-zbirke.stranko.example/novice/zimske-gume-do-konca-novembra.html</loc>");
+    expect(await file("robots.txt")).toContain("Sitemap: https://avtoservis-zbirke.postavi.example/sitemap.xml");
+    expect(await file("sitemap.xml")).toContain("<loc>https://avtoservis-zbirke.postavi.example/novice/zimske-gume-do-konca-novembra.html</loc>");
     expect(await file("novice/rss.xml")).toContain("<title>Zimske gume do konca novembra</title>");
     // Served at the app's /s/ path too (still noindex there).
     const served = await app.request("/s/avtoservis-zbirke/novice/rss.xml");

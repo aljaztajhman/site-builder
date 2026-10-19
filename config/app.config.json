@@ -142,15 +142,15 @@
     "lighthouse": true
   },
   "analytics": {
-    "$comment": "Stranko's own product analytics (docs/plans/analytics.md Steps 1 and 3, HQ sb-analytics = own-plus-cf). events: write product_events rows where a funnel step happens (landing view, intake, preview ready and opened, sign-in, claim, full site, publish, export, plan change, limit hit, upsell, domain) and one 'generation' row per generation job (stage seconds and EUR, checks, pictures, cap hits, direction). Rows carry a keyed hash of the device cookie, never an IP or an email; nothing reaches generation, specs or rendered sites. On since 2026-10-17: the owner read and approved the /zasebnost sentence it adds (shown only while on); /admin/funnel and /admin/engine are always there and read empty without it. keepDays: raw rows are kept this long, then the worker's hourly housekeeping rolls them into daily counts (product_events_daily, kept). landingDedupeMinutes: one landing view per device in this window (like site visits). onceMinutes: an upsell shown or a preview opened counts once per device and site in this window.",
+    "$comment": "Postavi's own product analytics (docs/plans/analytics.md Steps 1 and 3, HQ sb-analytics = own-plus-cf). events: write product_events rows where a funnel step happens (landing view, intake, preview ready and opened, sign-in, claim, full site, publish, export, plan change, limit hit, upsell, domain) and one 'generation' row per generation job (stage seconds and EUR, checks, pictures, cap hits, direction). Rows carry a keyed hash of the device cookie, never an IP or an email; nothing reaches generation, specs or rendered sites. On since 2026-10-17: the owner read and approved the /zasebnost sentence it adds (shown only while on); /admin/funnel and /admin/engine are always there and read empty without it. keepDays: raw rows are kept this long, then the worker's hourly housekeeping rolls them into daily counts (product_events_daily, kept). landingDedupeMinutes: one landing view per device in this window (like site visits). onceMinutes: an upsell shown or a preview opened counts once per device and site in this window.",
     "events": true,
     "keepDays": 90,
     "landingDedupeMinutes": 30,
     "onceMinutes": 1440,
     "cloudflare": {
-      "$comment": "Cloudflare Web Analytics (docs/plans/analytics.md Step 2; sb-analytics = own-plus-cf; the owner created the site and sent the token). Cookieless beacon, only on /, /login and /zasebnost and only when the request's hostname is one of hosts, so local runs, tests and the railway.app address get none; never on the dashboard, editor, admin, previews or published sites. The token is public (it is in the page). token null turns it off everywhere.",
+      "$comment": "Cloudflare Web Analytics (docs/plans/analytics.md Step 2; sb-analytics = own-plus-cf; the owner created the site and sent the token). Cookieless beacon, only on /, /login and /zasebnost and only when the request's hostname is one of hosts, so local runs, tests and the railway.app address get none; never on the dashboard, editor, admin, previews or published sites. The token is public (it is in the page). token null turns it off everywhere. app.postavi.si is the app's address after the rename to Postavi (2026-10-19); the old stranko.einvoicecheck.eu stays until the app has moved.",
       "token": "3fad897f56c14335aaccffae0a58ad9b",
-      "hosts": ["stranko.einvoicecheck.eu"]
+      "hosts": ["app.postavi.si", "stranko.einvoicecheck.eu"]
     }
   },
   "stats": {
@@ -318,7 +318,7 @@
   "plans": {
     "$comment": "Phase 1 has no billing; kept here so later phases read from config.",
     "freePreview": {
-      "$comment": "watermark (owner's decision sb-preview-watermark, 2026-10-02): \"app-badge\" = a small \"Predogled · Stranko\" badge in the app beside the preview frame (editor, guest preview, sites list) while the viewer has no paid plan and the site isn't published; never in the site's own HTML, so preview stays equal to published output. \"off\" = no badge.",
+      "$comment": "watermark (owner's decision sb-preview-watermark, 2026-10-02): \"app-badge\" = a small \"Predogled · Postavi\" badge in the app beside the preview frame (editor, guest preview, sites list) while the viewer has no paid plan and the site isn't published; never in the site's own HTML, so preview stays equal to published output. \"off\" = no badge.",
       "pages": ["home"],
       "locales": 1,
       "model": "claude-sonnet-5-5",

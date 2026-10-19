@@ -107,7 +107,7 @@ describe("a domain we register for the owner", () => {
     expect(p.registrar.calls.map((c) => c.method)).toEqual(["check", "createContact", "check", "register"]);
     expect(p.edge.calls.map((c) => c.method)).toEqual(["addZone", "zone"]);
     // Registered with our edge's nameservers and the holder's handle.
-    expect(p.registrar.calls.find((c) => c.method === "register")!.args[0]).toMatchObject({ name: "seliskar-racunovodstvo.si", ownerHandle: expect.stringMatching(/^FK/), years: 1, nameservers: ["ana.ns.stranko.example", "bor.ns.stranko.example"] });
+    expect(p.registrar.calls.find((c) => c.method === "register")!.args[0]).toMatchObject({ name: "seliskar-racunovodstvo.si", ownerHandle: expect.stringMatching(/^FK/), years: 1, nameservers: ["ana.ns.postavi.example", "bor.ns.postavi.example"] });
     const done = (await repo.domains.get(row.hostname))!;
     expect(done).toMatchObject({ status: "active", step: "live", is_primary: true, notify: "pending", failure: null, next_at: null });
     // The holder's personal details went to the registrar; we keep only its handle.
@@ -347,9 +347,9 @@ describe("a domain the owner already has", () => {
     const s = await site();
     const now = Date.now();
     const dns = fakeDns({ ns: { "seliskar.si": ["ns1.neoserv.si", "ns2.neoserv.si"] }, mx: { "seliskar.si": ["mx.seliskar.si"] } });
-    const p = providers({ dns, edge: { cnameTarget: "povezava.stranko.example", script: { hostname: { pending: 1 } } } });
+    const p = providers({ dns, edge: { cnameTarget: "povezava.postavi.example", script: { hostname: { pending: 1 } } } });
     const plan = await planOwnDomain({ providers: p }, "https://Seliskar.si/");
-    expect(plan).toEqual({ hostname: "www.seliskar.si", apex: "seliskar.si", record: { type: "CNAME", name: "www", value: "povezava.stranko.example" }, dnsHost: "Neoserv", hasMail: true, pointing: false });
+    expect(plan).toEqual({ hostname: "www.seliskar.si", apex: "seliskar.si", record: { type: "CNAME", name: "www", value: "povezava.postavi.example" }, dnsHost: "Neoserv", hasMail: true, pointing: false });
     const row = await startDomain(deps(p), s.id, { kind: "connected", hostname: "seliskar.si" });
     expect(row.hostname).toBe("www.seliskar.si");
     const d = deps(p, { now: () => now });
@@ -358,7 +358,7 @@ describe("a domain the owner already has", () => {
     expect(st.label).toBe("Čakamo na zapis DNS…");
     expect(st.connect).toEqual({ record: plan.record, dnsHost: "Neoserv", hasMail: true, seen: [] });
     // The owner adds the record; their MX stays as it was (we only ever read DNS).
-    dns.records.cname!["www.seliskar.si"] = ["povezava.stranko.example"];
+    dns.records.cname!["www.seliskar.si"] = ["povezava.postavi.example"];
     expect(await provisionDomain(d, row.hostname, { force: true })).toEqual({ status: "pending", step: "certificate" });
     st = domainState((await repo.domains.get(row.hostname))!, config);
     expect(st.label).toBe("Varujemo povezavo…");
@@ -385,7 +385,7 @@ describe("a domain the owner already has", () => {
 
   it("a certificate the edge can't issue is retried, then reported", async () => {
     const s = await site();
-    const p = providers({ dns: fakeDns({}, { anyCnameTo: "povezava.stranko.example" }), edge: { script: { hostname: { permanent: true } } } });
+    const p = providers({ dns: fakeDns({}, { anyCnameTo: "povezava.postavi.example" }), edge: { script: { hostname: { permanent: true } } } });
     const row = await startDomain(deps(p), s.id, { kind: "connected", hostname: "seliskar-cert.si" });
     expect(await provisionDomain(deps(p), row.hostname)).toMatchObject({ status: "failed", failure: "refused" });
   });
@@ -397,7 +397,7 @@ describe("a domain the owner already has", () => {
     await startDomain(deps(p), a.id, { kind: "connected", hostname: "seliskar-druga.si" });
     await expect(startDomain(deps(p), b.id, { kind: "connected", hostname: "www.seliskar-druga.si" })).rejects.toThrow(DomainStartError);
     await expect(startDomain(deps(p), a.id, { kind: "connected", hostname: "seliskar-tretja.si" })).rejects.toThrow("Stran že ima domeno.");
-    await expect(planOwnDomain({ providers: p }, "pekarna.stranko.example", { refuse: ["stranko.example"] })).rejects.toThrow(OwnDomainError);
+    await expect(planOwnDomain({ providers: p }, "pekarna.postavi.example", { refuse: ["postavi.example"] })).rejects.toThrow(OwnDomainError);
     await expect(planOwnDomain({ providers: p }, "ni domena")).rejects.toThrow("To ni veljavno ime domene");
   });
 });
@@ -408,16 +408,16 @@ describe("the address check", () => {
     const unpublished = await site({ publish: false });
     const before = (await repo.getSite(s.id))!;
     expect(before.published_address).toBeNull();
-    const r = await republishStaleAddresses({ repo, storage, config, platformDomain: "stranko.example" });
+    const r = await republishStaleAddresses({ repo, storage, config, platformDomain: "postavi.example" });
     expect(r.republished).toContain(s.id);
     expect(r.republished).not.toContain(unpublished.id);
     const after = (await repo.getSite(s.id))!;
-    expect(after.published_address).toBe(`https://${s.slug}.stranko.example/`);
+    expect(after.published_address).toBe(`https://${s.slug}.postavi.example/`);
     // The published version, not a newer draft.
     expect(after.published_version).toBe(before.published_version);
-    expect(await sitemap(s.slug)).toContain(`<loc>https://${s.slug}.stranko.example/</loc>`);
-    expect((await republishStaleAddresses({ repo, storage, config, platformDomain: "stranko.example" })).republished).not.toContain(s.id);
-    expect(await republishForAddress({ repo, storage, config, platformDomain: "stranko.example" }, s.id)).toBe("unchanged");
+    expect(await sitemap(s.slug)).toContain(`<loc>https://${s.slug}.postavi.example/</loc>`);
+    expect((await republishStaleAddresses({ repo, storage, config, platformDomain: "postavi.example" })).republished).not.toContain(s.id);
+    expect(await republishForAddress({ repo, storage, config, platformDomain: "postavi.example" }, s.id)).toBe("unchanged");
     expect(await storage.get(livePointerKey(s.slug))).not.toBeNull();
   });
 });

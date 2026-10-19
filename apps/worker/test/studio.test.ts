@@ -20,7 +20,7 @@ import { startWorker, studioForJob } from "../src/worker.ts";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const recordings = path.join(here, "../../../tools/eval/recordings");
 const config: AppConfig = { ...loadConfig(), designer: { ...loadConfig().designer, agent: "trial" } };
-const OWNER = "lastnik@stranko.example";
+const OWNER = "lastnik@postavi.example";
 let platform: Platform;
 let dir: string;
 let browser: CheckBrowser;
@@ -135,7 +135,7 @@ describe("a homepage job with the studio", () => {
   it("an account that isn't listed gets today's homepage, no director call", async () => {
     process.env.MODEL_REPLAY_DIR = await replayDir("not-listed", path.join(recordings, "../recordings-studio/pekarna-kvas/000-director.json"));
     process.env.DESIGNER_TRIAL_EMAILS = OWNER;
-    const id = await site("drug@stranko.example");
+    const id = await site("drug@postavi.example");
     await handlers.generate!({ siteId: id, scope: "home" }, "studio-2");
     const spec = (await platform.repo.getSpec(id))!.spec as SiteSpec;
     expect(spec.pages.find((p) => p.kind === "home")!.sections.some((s) => s.type === "composed")).toBe(false);
