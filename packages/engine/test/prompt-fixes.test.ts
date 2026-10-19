@@ -43,7 +43,7 @@ import {
 
 const shipped = loadConfig();
 // The tests below pin each switch's own effect against "all off"; the compact catalogue is a switch of its own.
-const config: AppConfig = { ...shipped, prompts: { ...shipped.prompts, compactCatalogue: false }, pipeline: { ...shipped.pipeline, homepageFirst: false } };
+const config: AppConfig = { ...shipped, prompts: { ...shipped.prompts, compactCatalogue: false } };
 const evalDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../tools/eval");
 const golden = (id: string) => JSON.parse(readFileSync(path.join(evalDir, "golden", `${id}.json`), "utf8")) as SiteSpec;
 const corpus = (id: string) => (JSON.parse(readFileSync(path.join(evalDir, "fixtures", id, "brief.json"), "utf8")) as { description: string }).description;
@@ -72,9 +72,8 @@ describe("prompt fixes, all switches off", () => {
     expect(off).toEqual([]);
   });
 
-  it("the config ships with the compact catalogue, homepage-first, structured content and both cost cuts on too", () => {
+  it("the config ships with the compact catalogue, structured content and both cost cuts on too", () => {
     expect(shipped.prompts.compactCatalogue).toBe(true);
-    expect(shipped.pipeline.homepageFirst).toBe(true);
     expect(shipped.structuredOutputForContent).toBe(true);
     expect(shipped.costCuts.secondCritiqueOnlyOnFailures).toBe(true);
     expect(shipped.costCuts.contentRetryAsPatch).toBe(true);

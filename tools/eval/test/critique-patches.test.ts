@@ -23,7 +23,6 @@ const config = {
   promptFixes: { ...shipped.promptFixes, pictures: false, critique: false, altText: false, judge: false, brief: false, classifier: false, edit: false },
   costCuts: { ...shipped.costCuts, secondCritiqueOnlyOnFailures: false, contentRetryAsPatch: false },
   prompts: { ...shipped.prompts, compactCatalogue: false },
-  pipeline: { ...shipped.pipeline, homepageFirst: false },
   structuredOutputForContent: false,
 };
 const recordingsDir = path.join(here, "../recordings");

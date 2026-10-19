@@ -34,9 +34,6 @@
  *                   many requests changed since the recording (a changed prompt still replays the recorded answer).
  * --compact-catalogue: turns config prompts.compactCatalogue on for this run (the section catalogue and business schema in the
  *                   compact notation; HQ it-compact-catalogue). --replay counts the changed requests as with --prompt-fixes.
- * --homepage-first: turns config pipeline.homepageFirst on for this run (full scope: the homepage, then the other pages side
- *                   by side; HQ it-homepage-first). The recordings hold one content answer per site, so --replay runs out of
- *                   content recordings for the page calls until they are recorded with it on.
  * --cost-cuts all|<name>[,<name>]: turns those config costCuts switches on for this run (secondCritiqueOnlyOnFailures,
  *                   contentRetryAsPatch; docs/plans/cost-cuts.md).
  * --variety all|<name>[,<name>]: turns those config variety switches on for this run (families, skeleton, concept;
@@ -187,10 +184,6 @@ if (fixesArg) {
 if (flag("compact-catalogue")) {
   config.prompts.compactCatalogue = true;
   console.log("Compact catalogue on (prompts.compactCatalogue)");
-}
-if (flag("homepage-first")) {
-  config.pipeline.homepageFirst = true;
-  console.log("Homepage first on (pipeline.homepageFirst)");
 }
 // --cost-cuts all | secondCritiqueOnlyOnFailures,contentRetryAsPatch: turns those config costCuts switches on for this run.
 const cutsArg = value("cost-cuts");
