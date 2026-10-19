@@ -113,6 +113,11 @@ describe("editor UX in a browser", () => {
       await expect.poll(() => page.frameLocator(PREVIEW).locator("#s_about[data-sb-selected] > .sb-tools").count()).toBe(1);
       // No toast for a plain save.
       expect(await page.locator(".toast").isVisible()).toBe(false);
+      // The marks live in the frame's DOM only: the page the swap copies from (and that publishing renders, byte for
+      // byte the same) carries no editor attribute.
+      const served = await (await fetch(`${base}/preview/${id}/index.html`, { headers: { cookie } })).text();
+      expect(served).toContain("Naše drožmi");
+      expect(served).not.toMatch(/data-sb-|contenteditable|sb-tools/);
     } finally {
       await close();
     }
@@ -169,6 +174,58 @@ describe("editor UX in a browser", () => {
     }
   }, 60_000);
 
+  it("Razveljavi after a delete goes back to the version before it, and not after another save landed meanwhile", async () => {
+    const id = await bakery("ux-razveljavi");
+    const { page, close } = await open(id);
+    try {
+      await page.locator(".outline li", { hasText: "O nas" }).click();
+      await page.frameLocator(PREVIEW).getByRole("button", { name: "Izbriši: O nas" }).click();
+      await expect.poll(() => hasAbout(id), { timeout: 10_000 }).toBe(false);
+      await expect.poll(() => page.locator(".toast .toast-text").textContent()).toBe("Razdelek »O nas« izbrisan.");
+      // Typing elsewhere before the tap (saved within the toast's 8 s): the toast says so and undoes nothing.
+      await page.locator(".shortcut", { hasText: "Podatki" }).click();
+      await page.locator('[data-path="/business/name"] input').fill("Pekarna Kvas in sin");
+      await expect.poll(async () => (await spec(id)).business.name, { timeout: 10_000 }).toBe("Pekarna Kvas in sin");
+      await page.locator(".toast .toast-action").click();
+      await expect.poll(() => page.locator(".toast .toast-text").textContent(), { timeout: 10_000 }).toContain("Medtem je bilo shranjeno še kaj");
+      await page.waitForTimeout(500);
+      expect(await hasAbout(id)).toBe(false);
+      expect((await spec(id)).business.name).toBe("Pekarna Kvas in sin");
+    } finally {
+      await close();
+    }
+  }, 60_000);
+
+  it("↷ Ponovi goes away once a version from elsewhere lands", async () => {
+    const id = await bakery("ux-ponovi");
+    const { page, close } = await open(id);
+    try {
+      await page.locator(".outline li", { hasText: "O nas" }).click();
+      await page.frameLocator(PREVIEW).getByRole("button", { name: "Izbriši: O nas" }).click();
+      await expect.poll(() => hasAbout(id), { timeout: 10_000 }).toBe(false);
+      await page.locator("h1.site-name").click();
+      await page.keyboard.press("Control+z");
+      await expect.poll(() => hasAbout(id), { timeout: 10_000 }).toBe(true);
+      const redo = page.getByRole("button", { name: "Ponovi" });
+      await expect.poll(() => redo.count(), { timeout: 10_000 }).toBe(1);
+      // A version from elsewhere (here: the first one restored from the history): redoing would throw it away, so
+      // there is nothing to redo any more.
+      const versionBefore = (await platform.repo.getSpec(id))!.version;
+      await page.locator("details.menu > summary").click();
+      await page.getByRole("button", { name: "Zgodovina sprememb" }).click();
+      await page.getByRole("button", { name: "Obnovi različico 1", exact: true }).click();
+      await expect.poll(async () => (await platform.repo.getSpec(id))!.version, { timeout: 10_000 }).toBeGreaterThan(versionBefore);
+      await expect.poll(() => redo.count(), { timeout: 10_000 }).toBe(0);
+      const versionAfter = (await platform.repo.getSpec(id))!.version;
+      await page.locator("h1.site-name").click();
+      await page.keyboard.press("Control+y");
+      await page.waitForTimeout(800);
+      expect((await platform.repo.getSpec(id))!.version).toBe(versionAfter);
+    } finally {
+      await close();
+    }
+  }, 60_000);
+
   it("deletes a page without a dialog and offers Razveljavi", async () => {
     const id = await bakery("ux-stran");
     const s = await spec(id);
@@ -210,6 +267,12 @@ describe("editor UX in a browser", () => {
       await expect.poll(() => count.textContent(), { timeout: 10_000 }).toBe(`Vpisano 1 od ${total}`);
       expect(await page.locator("#facts-ask [role=progressbar]").getAttribute("aria-valuenow")).toBe("1");
       await expect.poll(async () => Number(/\d+/.exec((await chip.textContent())!)![0])).toBe(before - 1);
+      // A value typed and taken back before it was saved (nothing to save): the bar goes quiet, not "Shranjujem…" for good.
+      const status = page.locator("header.top .save-status");
+      const tax = page.locator('#facts-ask [data-ask="/business/provider/taxNumber"] input');
+      await tax.fill("1");
+      await tax.fill("");
+      await expect.poll(() => status.getAttribute("data-state"), { timeout: 5000 }).toBe("idle");
     } finally {
       await close();
     }

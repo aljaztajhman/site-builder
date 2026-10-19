@@ -126,8 +126,15 @@ let toast = "";
 /** A button in the toast ("Razveljavi" after a delete), shown while the toast still says `text`. */
 let toastAction: { text: string; label: string; run: () => void } | null = null;
 let pollTimer: number | undefined;
-/** Versions an undo went back from, newest last: ↷ Ponovi reverts to them. Any other save clears them. */
+/** Versions an undo went back from, newest last: ↷ Ponovi reverts to them. Any other new version drops them. */
 let redoStack: number[] = [];
+/** The version the stack is good for (the one the last undo or redo made); null while that revert is still loading. */
+let redoAt: number | null = null;
+
+/** A version from elsewhere (the assistant, a photo, a restore, another tab): what an undo left is no longer the way back. */
+function pruneRedo(): void {
+  if (redoStack.length && redoAt !== null && state.version !== redoAt) redoStack = [];
+}
 
 // ---------- DOM helper ----------
 type Child = Node | string | null | undefined | false;
@@ -260,6 +267,7 @@ async function load(rerender = true): Promise<void> {
     if (!loaded) throw e;
     toast ||= `Povezave ni. ${(e as Error).message}`;
   }
+  pruneRedo();
   void freeDomainLookup();
   // A generation that just finished with facts missing: "Še to potrebujemo" opens (it renders itself).
   const asking = askOpen;
@@ -351,6 +359,7 @@ async function poll(): Promise<void> {
     pollTimer = window.setTimeout(() => void poll(), 5000);
     return;
   }
+  pruneRedo();
   if (pollSignature() !== before) {
     // A generation just finished with facts missing: "Še to potrebujemo" opens (it renders itself).
     const asking = askOpen;
@@ -399,6 +408,8 @@ function debounced(save: (v: Json | undefined) => void, delay = 700): { push(v: 
       const go = () => {
         cancel();
         save(v);
+        // The callback may have dropped the value (incomplete, invalid): then nothing is on its way.
+        settleSaveStatus();
       };
       pendingSaves.set(key, go);
       timer = window.setTimeout(go, delay);
@@ -416,6 +427,8 @@ type SaveStatus = "idle" | "saving" | "saved" | "error";
 let saveStatus: SaveStatus = "idle";
 /** Patches on their way to the server. */
 let savesInFlight = 0;
+/** Patches waiting their turn in the save chain (queued, not yet sent). */
+let savesQueued = 0;
 let saveTimer: number | undefined;
 /** One element for the session, moved into each new app bar, so screen readers keep announcing it. */
 const saveEl = h("span", { class: "save-status", "aria-live": "polite", "data-state": "idle" });
@@ -432,7 +445,7 @@ function setSaveStatus(next: SaveStatus): void {
 
 /** A pending save was dropped (an invalid value): back to quiet when nothing else is on its way. */
 function settleSaveStatus(): void {
-  if (saveStatus === "saving" && !pendingSaves.size && !savesInFlight) setSaveStatus("idle");
+  if (saveStatus === "saving" && !pendingSaves.size && !savesInFlight && !savesQueued) setSaveStatus("idle");
 }
 
 /**
@@ -476,7 +489,11 @@ function opsAt(where: Where, v: Json | undefined): Op[] | null {
  * `section`, only that section of the preview is swapped for its re-rendered HTML (no reload, no flash).
  */
 function patch(ops: Op[] | (() => Op[] | null), message: string, rerender = true, section?: string): Promise<boolean> {
-  return queued(() => sendPatch(ops, message, rerender, section));
+  savesQueued++;
+  return queued(() => {
+    savesQueued--;
+    return sendPatch(ops, message, rerender, section);
+  });
 }
 
 async function sendPatch(opsOrFn: Op[] | (() => Op[] | null), message: string, rerender: boolean, section?: string): Promise<boolean> {
@@ -501,7 +518,7 @@ async function sendPatch(opsOrFn: Op[] | (() => Op[] | null), message: string, r
     redoStack = [];
     // A save is said quietly in the app bar; the toast only when the server changed something the owner should know.
     if (r.adjustments.length) toast = `Shranjeno. ${r.adjustments.join("; ")}`;
-    if (!savesInFlight && !pendingSaves.size) setSaveStatus("saved");
+    if (!savesInFlight && !pendingSaves.size && !savesQueued) setSaveStatus("saved");
     // Form autosaves keep the form (and its focus) in place; everything else re-renders. Adjustments may have
     // changed the design elsewhere: then the whole preview reloads.
     await load(rerender || r.adjustments.length > 0);
@@ -1062,13 +1079,19 @@ async function refreshSection(id: string): Promise<void> {
   const old = doc?.getElementById(id);
   if (!frame || !doc || !old) return reloadPreview();
   // This version is on its way into the frame: a poll landing meanwhile must not reload it as well.
-  frameVersion = state.version;
+  const version = state.version;
+  frameVersion = version;
   try {
     const r = await fetch(previewUrl(), { cache: "no-store" });
-    const fresh = r.ok ? new DOMParser().parseFromString(await r.text(), "text/html").getElementById(id) : null;
-    if (!fresh) return reloadPreview();
+    const page = r.ok ? new DOMParser().parseFromString(await r.text(), "text/html") : null;
+    const fresh = page?.getElementById(id);
+    if (!page || !fresh) return reloadPreview();
+    // A page links only the stylesheets its sections need (composed families, a scrim): a section that now needs
+    // another one gets it with a whole reload, or it would arrive unstyled.
+    const sheets = (d: Document) => [...d.querySelectorAll('link[rel="stylesheet"]')].map((l) => l.getAttribute("href")).join("\n");
+    if (sheets(page) !== sheets(doc)) return reloadPreview();
     old.replaceWith(doc.importNode(fresh, true));
-    frameVersion = state.version;
+    frameVersion = version;
     // The selection, its toolbar and the edit marks come back on the new copy.
     decorate();
   } catch {
@@ -1406,8 +1429,9 @@ function pagesPane(): HTMLElement {
           p.kind === "standard" && h("button", { class: "btn sm danger", type: "button", onClick: () => {
             // No "are you sure?": it goes at once, and the toast offers "Razveljavi".
             pageIndex = 0;
+            const before = state.version;
             void patch([isPage(i, String(p.id)), { op: "remove", path: `/pages/${i}` }], "izbrisana stran").then((ok) => {
-              if (ok) undoToast(`Stran »${String(nav.label)}« izbrisana.`);
+              if (ok) undoToast(`Stran »${String(nav.label)}« izbrisana.`, before);
             });
           } }, "Izbriši stran"),
         ),
@@ -2376,8 +2400,9 @@ function decorate(): void {
     // No "are you sure?": it goes at once, and the toast offers "Razveljavi".
     button("Izbriši", `Izbriši: ${name}`, () => {
       selected = null;
+      const before = state.version;
       void patch([isSection(pi, si, id), { op: "remove", path: `/pages/${pi}/sections/${si}` }], "izbrisan razdelek").then((ok) => {
-        if (ok) undoToast(`Razdelek »${name}« izbrisan.`);
+        if (ok) undoToast(`Razdelek »${name}« izbrisan.`, before);
       });
     }),
   );
@@ -2897,16 +2922,39 @@ function undo(): Promise<void> {
     // Read when the turn comes: text typed just before is saved first, and that is what gets undone.
     const target = undoTarget(state.versions, state.version);
     if (target === null) return;
-    const from = state.version;
-    try {
-      await api("/revert", { method: "POST", body: JSON.stringify({ version: target }) });
-      toast = "Razveljavljeno.";
-      if (from !== null) redoStack.push(from);
-    } catch (e) {
-      toast = (e as Error).message;
+    await revertTo(target);
+  });
+}
+
+/** Back to `target` (a revert: a new version), the way undo does it; ↷ can come back from it. */
+async function revertTo(target: number): Promise<void> {
+  const from = state.version;
+  try {
+    await api("/revert", { method: "POST", body: JSON.stringify({ version: target }) });
+    toast = "Razveljavljeno.";
+    if (from !== null) redoStack.push(from);
+  } catch (e) {
+    toast = (e as Error).message;
+  }
+  redoAt = null;
+  await load();
+  redoAt = state.version;
+  reloadPreview();
+}
+
+/**
+ * "Razveljavi" in a delete's toast: back to the version before the delete, while the delete is still the last
+ * change. After another save meanwhile (typing, the assistant) the owner is sent to the history instead, so the
+ * tap never undoes something else.
+ */
+function undoDelete(before: number | null, after: number | null): Promise<void> {
+  return queued(async () => {
+    if (before === null || state.version !== after) {
+      toast = "Medtem je bilo shranjeno še kaj. Izbrisano vrnete v Zgodovini sprememb (⋯).";
+      showToast();
+      return;
     }
-    await load();
-    reloadPreview();
+    await revertTo(before);
   });
 }
 
@@ -2922,7 +2970,9 @@ function redo(): Promise<void> {
     } catch (e) {
       toast = (e as Error).message;
     }
+    redoAt = null;
     await load();
+    redoAt = state.version;
     reloadPreview();
   });
 }
@@ -2949,10 +2999,11 @@ function undoKeys(e: KeyboardEvent): void {
 }
 document.addEventListener("keydown", undoKeys);
 
-/** A toast that offers "Razveljavi" (after a delete). */
-function undoToast(text: string): void {
+/** A toast that offers "Razveljavi" after a delete: back to `before`, the version the delete replaced. */
+function undoToast(text: string, before: number | null): void {
+  const after = state.version;
   toast = text;
-  toastAction = { text, label: "Razveljavi", run: () => void undo() };
+  toastAction = { text, label: "Razveljavi", run: () => void undoDelete(before, after) };
   showToast();
 }
 
