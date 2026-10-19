@@ -3,7 +3,7 @@ import type { Context, MiddlewareHandler } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import type { AppConfig } from "@sb/config";
 import { planOffer } from "@sb/engine";
-import type { AccountRow, PaidPlanKey, Repo, SiteRow, Tier } from "@sb/platform";
+import { BillingStore, billingEnabled, isEntitled, type AccountRow, type PaidPlanKey, type Repo, type SiteRow, type Tier } from "@sb/platform";
 import { hasSession, type AuthSettings } from "./auth.ts";
 import { trustedForwardedHost, trustedVisitorIp } from "./site-hosts.ts";
 import type { UploadTicket } from "./upload-ticket.ts";
@@ -16,8 +16,9 @@ export function safeNext(v: unknown): string {
 /**
  * Who is asking, and what they may do. Three kinds of visitor:
  * - admin: the product owner, signed in with ACCESS_PASSWORD (auth.ts); sees and manages everything.
- * - account: a business owner signed in by magic link; sees only their own sites. Allow-listed
- *   accounts (sb-full-access) have paid-tier rights: full sites, publishing, export.
+ * - account: a business owner signed in by magic link; sees only their own sites. Paid-tier rights (full sites,
+ *   publishing, export) come from a subscription that holds them now (billing.ts: active, or past_due within the
+ *   grace days) or from the admin's allow-list (sb-full-access, design partners).
  * - anonymous: no session.
  * Every visitor to the product (not to published sites) gets a signed device cookie: it anchors the
  * CSRF token of every form.
@@ -26,7 +27,17 @@ export function safeNext(v: unknown): string {
 export const DEVICE_COOKIE = "sb_device";
 export const ACCOUNT_COOKIE = "sb_account";
 
-export type Viewer = { kind: "admin" } | { kind: "account"; account: AccountRow; paidSince: string | null; plan: PaidPlanKey | null } | { kind: "anonymous" };
+export type Viewer =
+  | { kind: "admin" }
+  | {
+      kind: "account";
+      account: AccountRow;
+      paidSince: string | null;
+      plan: PaidPlanKey | null;
+      /** A subscription whose payment failed past the grace days: the card needs updating (the refusal says so). */
+      lapsed?: boolean;
+    }
+  | { kind: "anonymous" };
 export type { Tier };
 
 export const tierOf = (v: Viewer): Tier => (v.kind === "admin" ? "admin" : v.kind === "account" ? (v.paidSince ? "paid" : "free") : "anonymous");
@@ -65,7 +76,10 @@ export const ipKey = (secret: string, ip: string): string => createHmac("sha256"
 
 /** Paths that never get a cookie or a viewer: published client sites stay cookie-free, and so do a waitlist sign-up and the homepage's price list. */
 const NO_IDENTITY = (path: string) =>
-  path.startsWith("/s/") || path.startsWith("/assets/") || path === "/health" || path === "/favicon.ico" || path.startsWith("/preview/_shared/") || path === "/api/waitlist" || path === "/api/cenik";
+  path.startsWith("/s/") || path.startsWith("/assets/") || path === "/health" || path === "/favicon.ico" || path.startsWith("/preview/_shared/") || path === "/api/waitlist" || path === "/api/cenik" || path === STRIPE_WEBHOOK_PATH;
+
+/** Stripe posts its events here (billing.ts in apps/web): no cookie, no session; the signature is the check. */
+export const STRIPE_WEBHOOK_PATH = "/api/billing/stripe";
 
 export interface AccessDeps {
   repo: Repo;
@@ -90,7 +104,7 @@ export function identity({ repo, auth, config }: AccessDeps): MiddlewareHandler<
     }
     c.set("deviceId", deviceId);
     c.set("csrf", mac(auth.secret, `csrf:${deviceId}`).slice(0, 32));
-    c.set("viewer", await resolveViewer(c, repo, auth));
+    c.set("viewer", await resolveViewer(c, repo, auth, config));
     return next();
   };
 }
@@ -101,14 +115,18 @@ function readSigned(value: string | undefined, secret: string): string | null {
   return same(sig, mac(secret, `device:${id}`)) ? id : null;
 }
 
-async function resolveViewer(c: Context, repo: Repo, auth: AuthSettings): Promise<Viewer> {
+async function resolveViewer(c: Context, repo: Repo, auth: AuthSettings, config: AppConfig): Promise<Viewer> {
   if (hasSession(c, auth)) return { kind: "admin" };
   const token = getCookie(c, ACCOUNT_COOKIE);
   if (!token || token.length > 100) return { kind: "anonymous" };
   const account = await repo.accounts.sessionAccount(hashToken(token));
   if (!account) return { kind: "anonymous" };
+  const sub = await new BillingStore(repo.db).subscriptionOf(account.id);
+  if (sub && isEntitled(sub, new Date(), config.billing.pastDueGraceDays)) {
+    return { kind: "account", account, paidSince: new Date(sub.created_at).toISOString(), plan: sub.plan };
+  }
   const allowed = await repo.accounts.allowed(account.email_key);
-  return { kind: "account", account, paidSince: allowed?.added_at ?? null, plan: allowed?.plan ?? null };
+  return { kind: "account", account, paidSince: allowed?.added_at ?? null, plan: allowed?.plan ?? null, ...(sub?.status === "past_due" && !allowed ? { lapsed: true } : {}) };
 }
 
 export function issueAccountSession(c: Context, token: string, auth: AuthSettings, config: AppConfig): void {
@@ -175,6 +193,8 @@ const PUBLIC = (path: string) =>
   path === "/api/waitlist" ||
   path === "/api/cenik" ||
   path === "/cenik" ||
+  // Stripe's webhook (signature-checked in billing.ts).
+  path === STRIPE_WEBHOOK_PATH ||
   // The reminder email's link (reminder.tsx checks its token, then sign-in).
   /^\/predogled\/[^/]+\/[^/]+$/.test(path) ||
   path.startsWith("/s/") ||
@@ -242,14 +262,30 @@ export interface Refusal {
   message: string;
   /** Where signing in would help (anonymous visitors): the sign-in page, coming back here. */
   signIn?: string;
+  /** Billing on and no plan: the plan sheet posts { plan, interval, setup? } here (POST /api/billing/checkout). */
+  checkout?: string;
+  /** Billing on and the renewal failed: the card is updated in Stripe's portal (POST /api/billing/portal). */
+  portal?: string;
 }
 
-export const refusalJson = (c: Context, r: Refusal) => c.json({ error: r.code, code: r.code, message: r.message, ...(r.signIn ? { signIn: r.signIn } : {}) }, r.status);
+export const refusalJson = (c: Context, r: Refusal) =>
+  c.json({ error: r.code, code: r.code, message: r.message, ...(r.signIn ? { signIn: r.signIn } : {}), ...(r.checkout ? { checkout: r.checkout } : {}), ...(r.portal ? { portal: r.portal } : {}) }, r.status);
 
-/** Publishing and export are paid-tier rights (allow-listed accounts before billing) and the admin's; the refusal names the plan (it-upsells). */
-export function publishRefusal(v: Viewer, config: AppConfig): Refusal | null {
+export const CHECKOUT_PATH = "/api/billing/checkout";
+export const PORTAL_PATH = "/api/billing/portal";
+
+/**
+ * Publishing and export are paid-tier rights and the admin's. With billing on, a signed-in owner without a plan is
+ * pointed to checkout (the plan sheet), one whose renewal failed past the grace days to Stripe's portal; with billing
+ * off (before the company exists) the refusal names the plan (it-upsells) and the allow-list is the only way in.
+ */
+export function publishRefusal(v: Viewer, config: AppConfig, billingOn = billingEnabled(config)): Refusal | null {
   const tier = tierOf(v);
   if (tier === "admin" || tier === "paid") return null;
+  if (billingOn && v.kind === "account") {
+    if (v.lapsed) return { status: 403, code: "paid_only", message: "Plačilo naročnine ni uspelo. Posodobite kartico, pa lahko stran spet objavite. Objavljena stran ostaja na spletu.", portal: PORTAL_PATH };
+    return { status: 403, code: "paid_only", message: `Stran objavite z naročnino ${planOffer(config, "standard")}. Izberite paket in plačajte s kartico; stran gre na splet takoj po plačilu.`, checkout: CHECKOUT_PATH };
+  }
   return { status: 403, code: "paid_only", message: `Objava in prenos strani sta del naročnine ${planOffer(config, "standard")}. Predogled lahko še naprej urejate.` };
 }
 

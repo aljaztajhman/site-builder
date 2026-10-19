@@ -34,9 +34,10 @@ import {
   type SpendLedger,
   type UrlCheckResult,
 } from "@sb/engine";
-import { INTERRUPTED_MESSAGE, OpsState, SPEND_CAP_REFUSAL, WORKER_HEARTBEAT, domainProvidersFor, type DomainProviders, type Platform, type Tier } from "@sb/platform";
+import { INTERRUPTED_MESSAGE, OpsState, SPEND_CAP_REFUSAL, WORKER_HEARTBEAT, domainProvidersFor, mailerFromEnv, renderInvoiceHtml, type DomainProviders, type Mailer, type Platform, type Tier } from "@sb/platform";
 import type { SiteSpec } from "@sb/spec";
 import { cleanupExpired, spendMonitor } from "./housekeeping.ts";
+import { sendInvoiceDocuments, type InvoiceDocumentDeps } from "./invoices.ts";
 import { recordGeneration, type GenerationOutcome } from "./telemetry.ts";
 
 /** Replies to the owner when a chat edit fails outright (the details go to the event log). */
@@ -114,7 +115,7 @@ export async function picturesForJob(
   now = new Date(),
 ): Promise<{ pictures: { fillTo: number; max: number; note: string | null }; pictureCap?: { since: Date; max: number } }> {
   const tier = ctx.tier ?? "admin";
-  const plan = tier === "paid" && ctx.accountId ? await platform.repo.accounts.planOf(ctx.accountId) : null;
+  const plan = tier === "paid" && ctx.accountId ? await platform.repo.accounts.planOf(ctx.accountId, config.billing.pastDueGraceDays) : null;
   if (!plan || !ctx.accountId) return { pictures: { ...pictureBudget(config, tier === "paid" ? "admin" : tier, scope), note: null } };
   const period = allowancePeriod(new Date(plan.since), now);
   const used = await platform.repo.usage.generatedPictures(ctx.accountId, period.start);
@@ -129,7 +130,7 @@ export async function picturesForJob(
 async function chatEditGuard(platform: Pick<Platform, "repo">, config: AppConfig, ctx: CallContext): Promise<((before: SiteSpec, after: SiteSpec) => string | null) | undefined> {
   const tier = ctx.tier ?? "admin";
   if (tier === "admin") return undefined;
-  const plan = tier === "paid" && ctx.accountId ? ((await platform.repo.accounts.planOf(ctx.accountId))?.plan ?? "standard") : null;
+  const plan = tier === "paid" && ctx.accountId ? ((await platform.repo.accounts.planOf(ctx.accountId, config.billing.pastDueGraceDays))?.plan ?? "standard") : null;
   return (before, after) => limitBreach(config, tier, plan, before, after)?.message ?? null;
 }
 
@@ -243,6 +244,10 @@ export async function recoverInterrupted(platform: Pick<Platform, "repo">, grace
 export interface WorkerOptions {
   platformDomain?: string | null;
   domainProviders?: DomainProviders;
+  /** Sends the invoice emails (billing); from env (Resend) when not given. */
+  mailer?: Mailer;
+  /** The invoice PDF renderer (tests: a fake); Playwright when not given. */
+  openPdf?: InvoiceDocumentDeps["openPdf"];
 }
 
 /** Registers the job handlers. Used by the worker service and, with PGlite, in-process by the web service. */
@@ -473,6 +478,28 @@ export async function startWorker(platform: Platform, config = loadConfig(), job
   // Not awaited: republishing many sites must not hold up the worker's start.
   void addresses().catch((e: unknown) => console.error("[worker] address check", e));
   timers.push(setInterval(() => void addresses().catch((e: unknown) => console.error("[worker] address check", e)), 60 * 60_000));
+  // Invoices Stripe reported paid (billing.ts numbered them): rendered to PDF, kept in the bucket and emailed (invoices.ts).
+  const invoiceDeps: InvoiceDocumentDeps = {
+    db: platform.db,
+    storage,
+    mailer: opts.mailer ?? mailerFromEnv(),
+    // The printed invoice: the same page as /racun/:id without its "Prenesi PDF" bar.
+    renderHtml: (view) => renderInvoiceHtml(view, { pdfLink: false }),
+    appUrl: process.env.APP_URL || null,
+    ...(opts.openPdf ? { openPdf: opts.openPdf } : {}),
+  };
+  let invoicesBusy = false;
+  const invoices = async () => {
+    if (invoicesBusy) return;
+    invoicesBusy = true;
+    try {
+      const r = await sendInvoiceDocuments(invoiceDeps);
+      if (r.rendered || r.emailed || r.failed) console.log(`[worker] invoices: ${r.rendered} rendered, ${r.emailed} emailed, ${r.failed} failed`);
+    } finally {
+      invoicesBusy = false;
+    }
+  };
+  timers.push(setInterval(() => void invoices().catch((e: unknown) => console.error("[worker] invoices", e)), config.billing.invoicePdf.sweepSeconds * 1000));
   for (const t of timers) t.unref();
 
   let stopping: Promise<{ interrupted: RunningJob[] }> | null = null;

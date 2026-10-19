@@ -4,7 +4,9 @@ import { fileURLToPath } from "node:url";
 import { build } from "esbuild";
 
 const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), "client");
-type Name = "editor" | "home";
+/** The dashboard scripts: the editor, the start page, and /narocnina (client/billing.ts). */
+export const CLIENT_BUNDLES = ["editor", "home", "billing"] as const;
+type Name = (typeof CLIENT_BUNDLES)[number];
 export interface ClientBundle {
   text: string;
   /** Content hash: the script's URL carries it, so a cached copy is never stale. */
@@ -35,10 +37,10 @@ export function clientBundle(name: Name): Promise<ClientBundle> {
   return out;
 }
 
-/** Builds both scripts now, so the first visitor doesn't wait for esbuild (production). */
+/** Builds the scripts now, so the first visitor doesn't wait for esbuild (production). */
 export function warmClientBundles(): void {
   if (!production()) return;
-  for (const name of ["editor", "home"] as const) clientBundle(name).catch((e: unknown) => console.error(`[web] building ${name}.js failed:`, (e as Error).message));
+  for (const name of CLIENT_BUNDLES) clientBundle(name).catch((e: unknown) => console.error(`[web] building ${name}.js failed:`, (e as Error).message));
 }
 
 /** The script's URL: with its content hash once built (cached for good), plain before that and in development. */

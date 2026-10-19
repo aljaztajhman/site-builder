@@ -311,7 +311,6 @@
       "monthlyEur": 19,
       "yearlyEur": 190,
       "yearlyIncludesDomain": true,
-      "yearlyPayment": "invoice-bank-transfer",
       "foundingOffer": { "customers": 100, "firstYearEur": 99, "renewalDiscountPercent": 20 },
       "setupService": { "eur": 149, "includedYearly": false },
       "ai": { "allowanceEurPerMonth": 1.5, "firstMonthExtraEur": 3 },
@@ -322,7 +321,6 @@
       "monthlyEur": 39,
       "yearlyEur": 390,
       "yearlyIncludesDomain": true,
-      "yearlyPayment": "invoice-bank-transfer",
       "setupService": { "eur": 149, "includedYearly": true },
       "ai": { "allowanceEurPerMonth": 3.5, "firstMonthExtraEur": 3 },
       "site": { "maxPages": 20, "locales": 2, "generatedPicturesPerMonth": 10, "collections": ["blog", "events", "services", "team"] }
@@ -337,5 +335,24 @@
       "allowanceEur": 2.5,
       "maxPerMonth": 2
     }
+  },
+  "billing": {
+    "$comment": "Card payments through Stripe, monthly and yearly (owner, 2026-10-19; .claude/plans/m4-payments.md). Off while plans.billingEnabled is false; staging turns it on with env BILLING_ENABLED=true (Stripe test mode). Prices come from plans.*; pnpm billing:sync-prices creates the Stripe Price objects by lookup key (<lookupKeyPrefix>_<plan>_<interval>_<lookupKeyVersion>, the founding renewal price, the setup service) and the founding coupon (one-time amount_off so the first year costs plans.standard.foundingOffer.firstYearEur). pastDueGraceDays: a failed renewal keeps paid rights this many days, then new publishes are refused (published sites stay up). vat.mode: prices are gross; 'included' prints net + VAT at vat.rate on the invoice, 'exempt' prints no VAT line and the ZDDV-1 sentence. company: the seller on every invoice; placeholders [[…]] until the company exists (the switch-on checklist refuses billing while any remains). fiscal.mode: FURS fiscal verification, 'none' (Stripe is a licensed payment institution, FURS FAQ 220; the accountant confirms). invoicePdf.sweepSeconds: how often the worker renders new invoices to PDF and emails them. webhookToleranceSeconds: the oldest Stripe-Signature timestamp accepted. founding.places counts paid founding subscriptions plus the admin's founding allow-list rows.",
+    "lookupKeyPrefix": "postavi",
+    "lookupKeyVersion": "v1",
+    "currency": "eur",
+    "pastDueGraceDays": 7,
+    "vat": { "mode": "included", "rate": 0.22 },
+    "company": {
+      "name": "[[ime podjetja]]",
+      "address": "[[naslov podjetja]]",
+      "taxId": "[[davčna številka]]",
+      "registrationNo": "[[matična številka]]",
+      "iban": null,
+      "email": "[[e-pošta za račune]]"
+    },
+    "fiscal": { "mode": "none" },
+    "invoicePdf": { "sweepSeconds": 60 },
+    "webhookToleranceSeconds": 300
   }
 }

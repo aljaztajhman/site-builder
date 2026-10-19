@@ -1,6 +1,7 @@
 import type { Hono } from "hono";
 import type { ReactNode } from "react";
 import type { AppConfig } from "@sb/config";
+import { billingEnabled } from "@sb/platform";
 import type { AppEnv } from "./access.ts";
 import { Brand, Doc, html } from "./pages.tsx";
 import { PRODUCT_NAME, formatEur } from "./ui/labels.ts";
@@ -102,7 +103,7 @@ function Point({ config, point }: { config: AppConfig; point: TermsPoint }): Rea
 export function termsPage(config: AppConfig): string {
   const { standard, premium } = config.plans;
   const t = config.tiers;
-  const billing = config.plans.billingEnabled;
+  const billing = billingEnabled(config);
   const plan = (p: typeof standard) => (
     <li>
       <strong>{p.name}</strong>
@@ -156,12 +157,28 @@ export function termsPage(config: AppConfig): string {
           {plan(premium)}
         </ul>
         <ul>
-          <li>Cene vključujejo DDV.</li>
-          <li>Letno naročnino plačate po računu z bančnim nakazilom.</li>
-          {standard.foundingOffer && <li>{`Prvih ${standard.foundingOffer.customers} strank plača za prvo leto naročnine ${standard.name} ${euros(standard.foundingOffer.firstYearEur)}.`}</li>}
+          <li>{config.plans.vatIncluded ? "Cene vključujejo DDV." : "Cene so končne."}</li>
+          {standard.foundingOffer && (
+            <li>
+              {`Prvih ${standard.foundingOffer.customers} strank plača za prvo leto letne naročnine ${standard.name} ${euros(standard.foundingOffer.firstYearEur)}${
+                standard.foundingOffer.renewalDiscountPercent ? `, nato letno naročnino z ${standard.foundingOffer.renewalDiscountPercent} % popusta, dokler je ne prekličejo` : ""
+              }.`}
+            </li>
+          )}
           <li>{`Postavitev skupaj z vami (»Uredimo namesto vas«) stane enkratno ${euros(standard.setupService.eur)}${premium.setupService.includedYearly ? `, pri letni naročnini ${premium.name} je vključena` : ""}.`}</li>
-          <li>Ko preidete na dražjo naročnino, vam neporabljene cele mesece dosedanje naročnine odštejemo od cene nove.</li>
           <li>Ko porabite mesečni znesek za pomočnika, pomočnik do naslednjega meseca počiva. Neposredno urejanje v urejevalniku je vedno brezplačno in neomejeno.</li>
+        </ul>
+      </section>
+      <section className="message">
+        <h2>Plačilo, podaljšanje in preklic</h2>
+        <ul>
+          <li>Naročnino plačate s plačilno kartico, mesečno ali letno. Plačila obdeluje Stripe, licencirana plačilna institucija. Podatkov o vaši kartici ne vidimo in jih ne hranimo.</li>
+          <li>Stran lahko objavite, ko je plačilo uspelo.</li>
+          <li>Naročnina se samodejno podaljša za enako obdobje (mesec ali leto), znesek pa bremenimo na isto kartico, dokler naročnine ne prekličete.</li>
+          <li>Naročnino prekličete kadarkoli na strani Naročnina. Preklic velja ob koncu plačanega obdobja; do takrat stran objavljate in urejate kot doslej.</li>
+          <li>Paket ali obdobje lahko kadarkoli spremenite. Razliko sorazmerno obračuna Stripe: neporabljeni del dosedanje naročnine upošteva pri ceni nove.</li>
+          <li>Če plačilo ob podaljšanju ne uspe, vas obvestimo po e-pošti in imate nekaj dni časa, da posodobite kartico. Potem strani ne morete več objavljati, dokler plačilo ni urejeno.</li>
+          <li>Za vsako plačilo izdamo račun in ga pošljemo po e-pošti. Vse račune najdete tudi na strani Naročnina.</li>
           <li>
             <Point config={config} point="cancellation" />
           </li>

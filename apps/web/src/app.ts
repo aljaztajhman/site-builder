@@ -34,7 +34,7 @@ import {
   type Operation,
   type Resolve,
 } from "@sb/engine";
-import { VersionConflictError, contentType, domainProvidersFor, mailerFromEnv, newId, runningVersion, type DomainProviders, type Mailer, type Platform, type RunningVersion, type SiteStatus, type Tier } from "@sb/platform";
+import { VersionConflictError, billingEnabled, contentType, domainProvidersFor, mailerFromEnv, newId, runningVersion, stripeFromEnv, type DomainProviders, type Mailer, type Platform, type RunningVersion, type SiteStatus, type StripeApi, type Tier } from "@sb/platform";
 import { renderPage, renderPath, sharedBundle, pageFile, notFoundPlacement, rebaseRelativeUrls } from "@sb/render";
 import { CollectionKind, addedOnRequest, blockerText, collectPlaceholders, markOwnerEdits, sectionDef, type SiteSpec } from "@sb/spec";
 import type { AuthSettings } from "./auth.ts";
@@ -54,13 +54,14 @@ import { descriptionHash, readTicket, signTicket } from "./upload-ticket.ts";
 import { slugify } from "./slug.ts";
 import { DASHBOARD, sitesPage, sitePage } from "./pages.tsx";
 import { homePage } from "./home.tsx";
-import { clientBundle, warmClientBundles } from "./client-bundle.ts";
+import { CLIENT_BUNDLES, clientBundle, warmClientBundles } from "./client-bundle.ts";
 import { uiAssets } from "./ui/assets.ts";
 import { registerFormRoutes } from "./forms.tsx";
 import { registerPricingRoutes } from "./cenik.ts";
 import { registerWaitlistRoutes } from "./waitlist.ts";
 import { domainsInfo, registerDomainRoutes } from "./domains.ts";
 import { registerCompanyLookupRoute } from "./company-lookup.ts";
+import { registerBillingRoutes } from "./billing.ts";
 import { createHash } from "node:crypto";
 import { campaignSource, isPageView, tracker } from "./analytics.ts";
 import { CF_BEACON_ENDPOINT, CF_BEACON_SCRIPT, cloudflareBeacon } from "./beacon.tsx";
@@ -102,6 +103,12 @@ export interface AppOptions {
   viesFetch?: typeof fetch;
   /** The running version shown on /health and /admin; from env (and git locally) when not given. */
   version?: RunningVersion;
+  /** Stripe's API for billing (tests: memoryStripe); from STRIPE_SECRET_KEY when not given, null without it. */
+  stripe?: StripeApi | null;
+  /** STRIPE_WEBHOOK_SECRET when not given. */
+  stripeWebhookSecret?: string | null;
+  /** BILLING_ENABLED and the like for billing (tests); process.env when not given. */
+  billingEnv?: Record<string, string | undefined>;
 }
 
 export type ClassifyIntake = (description: string, ctx: { siteId: string; tier: Tier; accountId: string | null; aiJobId: string }) => Promise<{ businessType: string; confidence: number; isBusiness?: boolean }>;
@@ -129,6 +136,8 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   const mailer = opts.mailer ?? mailerFromEnv();
   const botCheck = opts.botCheck ?? botCheckFromEnv(process.env, auth.secureCookies);
   const limits = { repo, config, secret: auth.secret };
+  // Billing on (config, or BILLING_ENABLED on staging): the publish refusal points to checkout.
+  const billingOn = () => billingEnabled(config, opts.billingEnv ?? process.env);
   // Postavi's own funnel events (analytics.ts; config analytics.events, off by default).
   const track = tracker(limits);
   // The landing page and the intake's refusal page carry the Turnstile widget (its script and frame).
@@ -263,6 +272,16 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   registerReminderRoutes(app, { repo, config, secret: auth.secret, track });
   // Legal name and address from the tax number the owner types (EU VIES); nothing of the answer is stored.
   registerCompanyLookupRoute(app, { config, ...(opts.viesFetch ? { fetch: opts.viesFetch } : {}) });
+  // Card payments through Stripe (billing.ts): the owner's plan, checkout, portal, Stripe's webhook, invoices.
+  registerBillingRoutes(app, {
+    repo,
+    storage,
+    config,
+    stripe: opts.stripe !== undefined ? opts.stripe : stripeFromEnv(),
+    webhookSecret: opts.stripeWebhookSecret !== undefined ? opts.stripeWebhookSecret : process.env.STRIPE_WEBHOOK_SECRET || null,
+    ...(opts.appUrl ? { appUrl: opts.appUrl } : {}),
+    ...(opts.billingEnv ? { env: opts.billingEnv } : {}),
+  });
 
   // ---------- Health ----------
   app.get("/health", async (c) => {
@@ -282,7 +301,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   // The editor's and landing page's scripts: linked with their content hash (pages use clientScriptUrl) and
   // then cached for good; a plain or old URL is revalidated by ETag.
   warmClientBundles();
-  for (const name of ["editor", "home"] as const) {
+  for (const name of CLIENT_BUNDLES) {
     app.get(`/assets/${name}.js`, async (c) => {
       const b = await clientBundle(name);
       const etag = `"${b.hash}"`;
@@ -376,6 +395,8 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
         cap: config.limits.dailyModelSpendCapEur,
         csrf: c.get("csrf"),
         admin,
+        // M4 billing UI: "Naročnina" in an owner's bar while billing is on.
+        billing: billingOn(),
         // Free, unpublished previews carry the small badge beside their thumbnail (never inside it).
         badgeFor: (site) => previewBadge(config, tierOf(viewer), site),
         // An owner sees what is left of their allowance (limits.ts), in Slovene.
@@ -911,7 +932,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   };
 
   app.post("/api/sites/:id/publish", async (c) => {
-    const denied = publishRefusal(c.get("viewer"), config);
+    const denied = publishRefusal(c.get("viewer"), config, billingOn());
     if (denied) return refusalJson(c, denied);
     try {
       const first = c.get("site")?.published_version == null;
@@ -930,7 +951,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   // Export runs the publish checklist as a warning (`sb-export-checklist` = warn): with something on it the
   // zip comes only after the owner confirmed ("Izvozi vseeno", ?anyway=1). The checked version is the one exported.
   app.get("/api/sites/:id/export", async (c) => {
-    const denied = publishRefusal(c.get("viewer"), config);
+    const denied = publishRefusal(c.get("viewer"), config, billingOn());
     if (denied) return refusalJson(c, denied);
     const id = c.req.param("id");
     const current = await repo.getSpec(id);

@@ -23,6 +23,8 @@ export interface SubscriptionView {
   founding: boolean;
   /** Paid rights hold now: active/trialing, or past_due within the grace days. */
   entitled: boolean;
+  /** past_due only: when paid rights end (the failed payment plus config `billing.pastDueGraceDays`), ISO 8601. */
+  graceEndsAt?: string;
 }
 
 export interface InvoiceListItem {

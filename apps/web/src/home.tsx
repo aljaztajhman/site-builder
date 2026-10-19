@@ -1,4 +1,5 @@
 import type { AppConfig } from "@sb/config";
+import { billingEnabled } from "@sb/platform";
 import { html } from "./pages.tsx";
 import { uiUrl } from "./ui/assets.ts";
 import { PRODUCT_NAME } from "./ui/labels.ts";
@@ -373,7 +374,13 @@ export const faq = (config: AppConfig): [string, string][] => [
     // each older day, every published one. The old wording ("every change, restorable") read as forever.
     `Da. Besedilo popravite s klikom, večje spremembe opišete pomočniku. Obnovite lahko vsako različico, ki ni starejša od ${daysAfterOd(config.versions.retention.keepAllDays)}, iz starejših dni zadnjo različico dneva, objavljene pa vedno.`,
   ],
-  ["Kaj, če želim oditi?", "Stran prenesete kot datoteke, ki delujejo na katerem koli gostovanju. Nič ni zaklenjeno."],
+  [
+    "Kako plačam in kako prekličem?",
+    billingEnabled(config)
+      ? "S kartico, mesečno ali letno. Plačilo obdela Stripe, stran pa objavite takoj po plačilu. Naročnino prekličete kadarkoli na strani Naročnina in velja do konca plačanega obdobja. Račun dobite po e-pošti."
+      : "Ko bo plačevanje na voljo, boste plačali s kartico, mesečno ali letno, in stran objavili takoj po plačilu. Naročnino boste lahko kadarkoli preklicali; veljala bo do konca plačanega obdobja.",
+  ],
+  ["Kaj, če želim oditi?","Stran prenesete kot datoteke, ki delujejo na katerem koli gostovanju. Nič ni zaklenjeno."],
   [
     "Kaj je s piškotki in GDPR?",
     "Stran ne naloži nobenih sledilnih skript, dokler obiskovalec ne privoli. Pisave so na našem strežniku, zemljevidi se naložijo šele po kliku. Politiko zasebnosti in izjavo o dostopnosti pripravimo kot predlogo, ki jo pregledate sami.",

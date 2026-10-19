@@ -14,6 +14,8 @@ export interface MailMessage {
   replyTo?: string;
   /** Resend drops a second send with the same key within 24 h. */
   idempotencyKey?: string;
+  /** Files sent with the message (the invoice PDF); Resend takes them base64-encoded. */
+  attachments?: { filename: string; content: Uint8Array }[];
 }
 
 export interface Mailer {
@@ -44,7 +46,9 @@ export function resendMailer(opts: { apiKey: string; from: string; fetch?: typeo
           "content-type": "application/json",
           ...(m.idempotencyKey ? { "idempotency-key": m.idempotencyKey } : {}),
         },
-        body: JSON.stringify({ from: opts.from, to: [m.to], subject: m.subject, text: m.text, ...(m.html ? { html: m.html } : {}), ...(m.replyTo ? { reply_to: m.replyTo } : {}) }),
+        body: JSON.stringify({ from: opts.from, to: [m.to], subject: m.subject, text: m.text, ...(m.html ? { html: m.html } : {}), ...(m.replyTo ? { reply_to: m.replyTo } : {}),
+          ...(m.attachments?.length ? { attachments: m.attachments.map((a) => ({ filename: a.filename, content: Buffer.from(a.content).toString("base64") })) } : {}),
+        }),
         // A hung connection must not hold a visitor's form submit (or a sign-in) open.
         signal: AbortSignal.timeout(opts.timeoutMs ?? 10_000),
       });

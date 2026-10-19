@@ -16,6 +16,7 @@ import { isoDay } from "@sb/spec/format";
 import { itemKeyForPath, priceEditor, type PriceEditorState } from "./price-editor.ts";
 import { domainStatus, domainStep, newDomainStepUi, openDomainStep, type DomainChoice, type DomainStepDeps, type DomainsInfo } from "./domain-step.ts";
 import { lockedPagesBlock, planTag, reminderBlock, type Limits, type Note, type Upgrade } from "./upsell.ts";
+import { loadBilling, openPlanSheet } from "./plan-sheet.ts";
 
 type Json = null | boolean | number | string | Json[] | { [k: string]: Json };
 type Obj = { [k: string]: Json };
@@ -952,7 +953,7 @@ function homePane(): HTMLElement {
     );
   }
   // A free account's preview: the rest of the site, locked, with the first plan's price (it-upsells).
-  if (freeViewer()) pane.append(...[lockedPages(h("a", { class: "btn sm", href: "/cenik" }, "Paketi in cene"))].filter((x): x is HTMLElement => !!x));
+  if (freeViewer()) pane.append(...[lockedPages(plansLink())].filter((x): x is HTMLElement => !!x));
   const secs = sections();
   // A list of buttons: the item carries the button role (an <li> itself may not), Enter and Space select.
   const open = (id: string) => {
@@ -1443,7 +1444,7 @@ function pagesPane(): HTMLElement {
   const limits = state.access?.limits ?? null;
   // A free account's preview is its homepage: the rest of the site is listed, locked, instead of a form that can't save.
   if (freeViewer()) {
-    const locked = lockedPages(h("a", { class: "btn sm", href: "/cenik" }, "Paketi in cene"));
+    const locked = lockedPages(plansLink());
     if (locked) pane.append(locked);
     return pane;
   }
@@ -2659,11 +2660,39 @@ function topItems(): Child[] {
   ];
 }
 
+/**
+ * Opens "Izberite paket" when billing is on for this signed-in owner; false when it isn't (no account, billing off,
+ * /api/billing unreachable), and the caller says what it said before billing.
+ */
+async function choosePlan(reason?: string): Promise<boolean> {
+  const billing = await loadBilling();
+  if (!billing?.enabled) return false;
+  void openPlanSheet(billing, reason ? { reason } : {});
+  return true;
+}
+
+/** "Paketi in cene": the plan sheet for a signed-in owner while billing is on, else the plans on the homepage. */
+function plansLink(): HTMLElement {
+  return h("a", {
+    class: "btn sm",
+    href: "/cenik",
+    onClick: (e: MouseEvent) => {
+      if (state.access?.viewer !== "free") return;
+      e.preventDefault();
+      void choosePlan().then((opened) => {
+        if (!opened) location.assign("/cenik");
+      });
+    },
+  }, "Paketi in cene");
+}
+
 /** Objavi, from the top bar or the "Še to potrebujemo" screen. */
 async function startPublish(): Promise<void> {
   // A free account can build and edit, not publish yet: say so instead of a refusal after the tap, with the
   // plan and, when the domain check found one, the address the site would have (it-upsells).
   if (!can("publish")) {
+    // A signed-in owner while billing is on: the plan sheet, then Stripe Checkout (M4 payments).
+    if (state.access?.viewer === "free" && (await choosePlan("Za objavo izberite paket. Stran objavite takoj po plačilu."))) return;
     const offer = state.access?.offer;
     toast = offer
       ? `${freeDomain ? `Objava na ${freeDomain}` : "Objava"} je del naročnine ${offer.text} Predogled lahko še naprej urejate.`

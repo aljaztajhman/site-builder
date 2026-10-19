@@ -12,15 +12,25 @@ const withPlan = (key: "standard" | "premium", patch: Record<string, unknown>) =
 };
 const parses = (c: unknown) => AppConfigSchema.safeParse(c).success;
 
+describe("billing switch", () => {
+  it("refuses billingEnabled while billing.company still has a [[…]] placeholder", () => {
+    const on = raw() as Raw & { billing: { company: Record<string, unknown> } };
+    on.plans.billingEnabled = true;
+    expect(parses(on)).toBe(false);
+    on.billing.company = { name: "Postavi d.o.o.", address: "Trubarjeva 1, 1000 Ljubljana", taxId: "SI12345678", registrationNo: "1234567000", iban: null, email: "racuni@postavi.si" };
+    expect(parses(on)).toBe(true);
+  });
+});
+
 describe("plans (sb-pricing, sb-tiers)", () => {
   it("keeps billing off: nothing is charged before the legal entity exists (sb-legal-entity)", () => {
     expect(loadConfig().plans.billingEnabled).toBe(false);
   });
 
-  it("parses the repo's plans: Osnovni and a dearer Plus, VAT included, yearly by bank transfer", () => {
+  it("parses the repo's plans: Osnovni and a dearer Plus, VAT included, both paid by card", () => {
     const plans = AppConfigSchema.parse(raw()).plans;
     expect(plans.vatIncluded).toBe(true);
-    expect(plans.standard.yearlyPayment).toBe("invoice-bank-transfer");
+    expect("yearlyPayment" in plans.standard).toBe(false);
     expect(plans.premium.monthlyEur).toBeGreaterThan(plans.standard.monthlyEur);
   });
 
@@ -35,14 +45,16 @@ describe("plans (sb-pricing, sb-tiers)", () => {
     }
     // Plus earns more per year than Osnovni.
     expect(planMargins(plans.premium, plans.costs).yearly).toBeGreaterThan(planMargins(plans.standard, plans.costs).yearly);
-    // Worked by hand for Osnovni yearly (sb-pricing-2): 190 / 1.22 = 155.74, minus 12 × 1.50 + 3 (AI), 6 (hosting), 13 (domain) = 115.74.
-    expect(planMargins(plans.standard, plans.costs).yearly).toBeCloseTo(190 / 1.22 - 40, 6);
-    // Plus yearly: 390 / 1.22 = 319.67, minus 12 × 3.50 + 3 (AI), 6, 13 = 255.67.
-    expect(planMargins(plans.premium, plans.costs).yearly).toBeCloseTo(390 / 1.22 - 64, 6);
-    // Founding year: 99 / 1.22 = 81.15, minus the same 40 = 41.15.
-    expect(planMargins(plans.standard, plans.costs).foundingYear).toBeCloseTo(99 / 1.22 - 40, 6);
-    // Founding renewal (20 % off for life): 190 × 0.8 = 152 / 1.22 = 124.59, minus 40 = 84.59. Plus has no founding offer.
-    expect(planMargins(plans.standard, plans.costs).foundingRenewalYear).toBeCloseTo(152 / 1.22 - 40, 6);
+    // Every price is paid by card (Stripe, 2026-10-19): 1.5 % + €0.25 of the gross comes off too.
+    const card = (gross: number) => gross * 0.015 + 0.25;
+    // Worked by hand for Osnovni yearly (sb-pricing-2): 190 / 1.22 = 155.74, minus the card fee 3.10, minus 12 × 1.50 + 3 (AI), 6 (hosting), 13 (domain) = 112.64.
+    expect(planMargins(plans.standard, plans.costs).yearly).toBeCloseTo(190 / 1.22 - card(190) - 40, 6);
+    // Plus yearly: 390 / 1.22 = 319.67, minus 6.10 (card), minus 12 × 3.50 + 3 (AI), 6, 13 = 249.57.
+    expect(planMargins(plans.premium, plans.costs).yearly).toBeCloseTo(390 / 1.22 - card(390) - 64, 6);
+    // Founding year: 99 / 1.22 = 81.15, minus 1.74 (card), minus the same 40 = 39.41.
+    expect(planMargins(plans.standard, plans.costs).foundingYear).toBeCloseTo(99 / 1.22 - card(99) - 40, 6);
+    // Founding renewal (20 % off for life): 190 × 0.8 = 152 / 1.22 = 124.59, minus 2.53 (card), minus 40 = 82.06. Plus has no founding offer.
+    expect(planMargins(plans.standard, plans.costs).foundingRenewalYear).toBeCloseTo(152 / 1.22 - card(152) - 40, 6);
     expect(planMargins(plans.premium, plans.costs).foundingRenewalYear).toBeNull();
   });
 
