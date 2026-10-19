@@ -22,6 +22,11 @@ export function missingEnv(env: NodeJS.ProcessEnv = process.env): MissingVar[] {
   if (!env.TURNSTILE_SECRET_KEY) out.push({ name: "TURNSTILE_SECRET_KEY", effect: bot });
   if (!env.ANTHROPIC_API_KEY) out.push({ name: "ANTHROPIC_API_KEY", effect: "the intake's junk check runs in the worker's pipeline instead (after queueing)" });
   if (!env.ALERT_EMAIL) out.push({ name: "ALERT_EMAIL", effect: "no admin alert emails (health, failed jobs, worker, spend cap)" });
+  // Billing switched on by env (staging, Stripe test mode); with config plans.billingEnabled the same keys are needed.
+  if (env.BILLING_ENABLED === "true") {
+    if (!env.STRIPE_SECRET_KEY) out.push({ name: "STRIPE_SECRET_KEY", effect: "checkout and the billing portal answer that payments are unavailable" });
+    if (!env.STRIPE_WEBHOOK_SECRET) out.push({ name: "STRIPE_WEBHOOK_SECRET", effect: "Stripe's events are refused, so paid subscriptions and invoices are not recorded" });
+  }
   if (!env.APP_URL && !env.RAILWAY_PUBLIC_DOMAIN) {
     out.push({ name: "APP_URL", effect: deployed ? "no public address for sign-in links, so email sign-in is refused" : "sign-in links use the request's own address" });
   }

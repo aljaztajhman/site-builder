@@ -59,8 +59,8 @@ const CompositionTarget = z.object({
 
 /**
  * A paid plan (owner's decisions `sb-pricing` and `sb-tiers`, docs/plans/pricing-tiers.md). Prices in
- * euros, VAT included. No billing code exists yet: `plans.billingEnabled` stays false until the legal
- * entity is registered, and the landing page shows these as planned prices.
+ * euros, VAT included, paid by card through Stripe monthly or yearly (config `billing`). `plans.billingEnabled`
+ * stays false until the legal entity is registered, and the landing page shows these as planned prices.
  */
 const PaidPlan = z
   .strictObject({
@@ -70,8 +70,6 @@ const PaidPlan = z
     yearlyEur: z.number().positive(),
     /** The yearly plan includes the customer's domain. */
     yearlyIncludesDomain: z.boolean(),
-    /** How the yearly plan is paid: an invoice settled by bank transfer. */
-    yearlyPayment: z.enum(["invoice-bank-transfer"]),
     /**
      * The first `customers` customers pay `firstYearEur` for their first year, then the yearly price, less
      * `renewalDiscountPercent` for life when it is set (sb-pricing-2, 2026-10-19).
@@ -116,8 +114,8 @@ type PlanCostsConfig = z.infer<typeof PlanCosts>;
 
 /**
  * What a plan earns in the worst case: its price without VAT and card fees, minus the most it can cost
- * us (the whole AI allowance, the first month's extra, the domain when included, hosting). Yearly is
- * paid by bank transfer (no card fee); monthly by card.
+ * us (the whole AI allowance, the first month's extra, the domain when included, hosting). Monthly and
+ * yearly are both paid by card (Stripe, 2026-10-19), so every price pays the card fee.
  */
 export function planMargins(p: PaidPlanConfig, c: PlanCostsConfig): { monthly: number; yearly: number; foundingYear: number | null; foundingRenewalYear: number | null } {
   const net = (gross: number, card: boolean) => gross / (1 + c.vatRate) - (card ? (gross * c.cardFeePercent) / 100 + c.cardFeeFixedEur : 0);
@@ -127,11 +125,11 @@ export function planMargins(p: PaidPlanConfig, c: PlanCostsConfig): { monthly: n
   return {
     // The first month is the dearest: the allowance plus its one-off extra.
     monthly: net(p.monthlyEur, true) - (p.ai.allowanceEurPerMonth + p.ai.firstMonthExtraEur + hostingMonth),
-    yearly: net(p.yearlyEur, false) - yearCost,
-    foundingYear: p.foundingOffer ? net(p.foundingOffer.firstYearEur, false) - yearCost : null,
+    yearly: net(p.yearlyEur, true) - yearCost,
+    foundingYear: p.foundingOffer ? net(p.foundingOffer.firstYearEur, true) - yearCost : null,
     // A founding customer's later years: the yearly price less the lifetime discount (null without one).
     foundingRenewalYear:
-      p.foundingOffer?.renewalDiscountPercent !== undefined ? net((p.yearlyEur * (100 - p.foundingOffer.renewalDiscountPercent)) / 100, false) - yearCost : null,
+      p.foundingOffer?.renewalDiscountPercent !== undefined ? net((p.yearlyEur * (100 - p.foundingOffer.renewalDiscountPercent)) / 100, true) - yearCost : null,
   };
 }
 
@@ -620,6 +618,26 @@ export const AppConfigSchema = z.object({
         p.standard.site.locales >= p.freePreview.locales,
       { message: "each plan must allow at least what the one below it does (free preview < Osnovni < Plus), or the upsell would name a plan that adds nothing" },
     ),
+  /** Card payments through Stripe (.claude/plans/m4-payments.md); see the config's $comment. */
+  billing: z.strictObject({
+    $comment: z.string().optional(),
+    lookupKeyPrefix: z.string().regex(/^[a-z][a-z0-9]*$/),
+    lookupKeyVersion: z.string().regex(/^v\d+$/),
+    currency: z.literal("eur"),
+    pastDueGraceDays: z.number().int().min(0).max(30),
+    vat: z.strictObject({ mode: z.enum(["included", "exempt"]), rate: z.number().min(0).max(1) }),
+    company: z.strictObject({
+      name: z.string().min(1),
+      address: z.string().min(1),
+      taxId: z.string().min(1),
+      registrationNo: z.string().min(1),
+      iban: z.string().min(1).nullable(),
+      email: z.string().min(1),
+    }),
+    fiscal: z.strictObject({ mode: z.enum(["none"]) }),
+    invoicePdf: z.strictObject({ sweepSeconds: z.number().int().min(5) }),
+    webhookToleranceSeconds: z.number().int().min(30).max(3600),
+  }),
 }).refine((c) => c.domains.tlds.every((t) => t.maxCostEur <= c.plans.costs.domainEurPerYear), {
   // The yearly plans include the domain: the margin check counts plans.costs.domainEurPerYear for it.
   message: "a domain's maxCostEur may not exceed plans.costs.domainEurPerYear (the margin check counts that)",

@@ -34,9 +34,13 @@ import {
   type SpendLedger,
   type UrlCheckResult,
 } from "@sb/engine";
-import { INTERRUPTED_MESSAGE, OpsState, SPEND_CAP_REFUSAL, WORKER_HEARTBEAT, domainProvidersFor, type DomainProviders, type Platform, type Tier } from "@sb/platform";
+import { INTERRUPTED_MESSAGE, OpsState, SPEND_CAP_REFUSAL, WORKER_HEARTBEAT, domainProvidersFor, mailerFromEnv, type DomainProviders, type Mailer, type Platform, type Tier } from "@sb/platform";
 import type { SiteSpec } from "@sb/spec";
 import { cleanupExpired, spendMonitor } from "./housekeeping.ts";
+import { sendInvoiceDocuments, type InvoiceDocumentDeps } from "./invoices.ts";
+// PLACEHOLDER until apps/web/src/invoice-view.tsx (Unit B) is merged; then import renderInvoiceHtml from there.
+import { renderInvoiceHtml } from "./invoice-html-fallback.ts";
+export { renderInvoiceHtml };
 import { recordGeneration, type GenerationOutcome } from "./telemetry.ts";
 
 /** Replies to the owner when a chat edit fails outright (the details go to the event log). */
@@ -243,6 +247,10 @@ export async function recoverInterrupted(platform: Pick<Platform, "repo">, grace
 export interface WorkerOptions {
   platformDomain?: string | null;
   domainProviders?: DomainProviders;
+  /** Sends the invoice emails (billing); from env (Resend) when not given. */
+  mailer?: Mailer;
+  /** The invoice PDF renderer (tests: a fake); Playwright when not given. */
+  openPdf?: InvoiceDocumentDeps["openPdf"];
 }
 
 /** Registers the job handlers. Used by the worker service and, with PGlite, in-process by the web service. */
@@ -473,6 +481,27 @@ export async function startWorker(platform: Platform, config = loadConfig(), job
   // Not awaited: republishing many sites must not hold up the worker's start.
   void addresses().catch((e: unknown) => console.error("[worker] address check", e));
   timers.push(setInterval(() => void addresses().catch((e: unknown) => console.error("[worker] address check", e)), 60 * 60_000));
+  // Invoices Stripe reported paid (billing.ts numbered them): rendered to PDF, kept in the bucket and emailed (invoices.ts).
+  const invoiceDeps: InvoiceDocumentDeps = {
+    db: platform.db,
+    storage,
+    mailer: opts.mailer ?? mailerFromEnv(),
+    renderHtml: renderInvoiceHtml,
+    appUrl: process.env.APP_URL || null,
+    ...(opts.openPdf ? { openPdf: opts.openPdf } : {}),
+  };
+  let invoicesBusy = false;
+  const invoices = async () => {
+    if (invoicesBusy) return;
+    invoicesBusy = true;
+    try {
+      const r = await sendInvoiceDocuments(invoiceDeps);
+      if (r.rendered || r.emailed || r.failed) console.log(`[worker] invoices: ${r.rendered} rendered, ${r.emailed} emailed, ${r.failed} failed`);
+    } finally {
+      invoicesBusy = false;
+    }
+  };
+  timers.push(setInterval(() => void invoices().catch((e: unknown) => console.error("[worker] invoices", e)), config.billing.invoicePdf.sweepSeconds * 1000));
   for (const t of timers) t.unref();
 
   let stopping: Promise<{ interrupted: RunningJob[] }> | null = null;

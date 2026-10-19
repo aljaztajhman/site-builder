@@ -559,6 +559,65 @@ export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
       create index waitlist_attempts_sender on waitlist_attempts(sender_key, at);
     `,
   },
+  {
+    id: 25,
+    name: "billing",
+    // Card payments through Stripe (packages/platform/src/billing.ts, .claude/plans/m4-payments.md). billing_customers:
+    // an account's Stripe customer. subscriptions: Stripe's subscription as last reported by a webhook (id = Stripe's);
+    // past_due_since starts the grace days. invoices: Postavi's own numbered invoices, one per paid Stripe invoice,
+    // with the printed view frozen at issue (kept even when the account goes: account_id set null). invoice_counters:
+    // the last number per year, taken in the invoice's own transaction so numbers have no gaps. stripe_events: every
+    // webhook event handled, by id, so a replay does nothing.
+    sql: `
+      create table billing_customers (
+        account_id text primary key references accounts(id) on delete cascade,
+        stripe_customer_id text not null unique,
+        created_at timestamptz not null default now()
+      );
+      create table subscriptions (
+        id text primary key,
+        account_id text not null references accounts(id) on delete cascade,
+        stripe_customer_id text not null,
+        plan text not null check (plan in ('standard', 'premium')),
+        billing_interval text not null check (billing_interval in ('month', 'year')),
+        status text not null check (status in ('active', 'trialing', 'past_due', 'canceled', 'incomplete')),
+        current_period_start timestamptz,
+        current_period_end timestamptz not null,
+        cancel_at_period_end boolean not null default false,
+        founding boolean not null default false,
+        past_due_since timestamptz,
+        created_at timestamptz not null default now(),
+        updated_at timestamptz not null default now()
+      );
+      create index subscriptions_account on subscriptions(account_id);
+      create table invoice_counters (
+        year integer primary key,
+        last integer not null
+      );
+      create table invoices (
+        id text primary key,
+        stripe_invoice_id text not null unique,
+        account_id text references accounts(id) on delete set null,
+        subscription_id text,
+        number text not null unique,
+        year integer not null,
+        seq integer not null,
+        issued_at timestamptz not null default now(),
+        total_eur numeric(12, 2) not null,
+        view jsonb not null,
+        pdf_key text,
+        emailed_at timestamptz,
+        unique (year, seq)
+      );
+      create index invoices_account on invoices(account_id, issued_at);
+      create index invoices_pending on invoices(issued_at) where emailed_at is null;
+      create table stripe_events (
+        id text primary key,
+        type text not null,
+        received_at timestamptz not null default now()
+      );
+    `,
+  },
 ];
 
 type Query = (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>;
