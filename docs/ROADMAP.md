@@ -11,6 +11,7 @@ Written on 2026-10-16 from an inventory of TASKS.md (263 done, 158 open), HQ, do
 ## Now
 
 - **Current milestone:** none started (owner, 2026-10-19: "Close M6, but don't start anything new yet"). M6 closed 2026-10-19 (production, backups with a restore drill, alerts, clean switches, promote; first release v0.1.0). Waiting on the owner: M5 (2 of 4) needs a payment method on Cloudflare for customers' own domains; M2 (2 of 6) needs the rest of the phone run (docs/owner-phone-run.md, starts at app.postavi.si). Next in the order: M4 payments, built in test mode, when the owner says go.
+- **Editor (owner, 2026-10-19, after seeing a POC):** five editor UX changes join M2 as criterion 7 (PR #269, a draft until the architecture note and a review are in). Eleven more editor ideas are parked as "Editor 2.0" below; nothing else from that list is 1.0 work.
 - **Order (owner, 2026-10-18):** company registration comes last; next after M2 are M5 (domains, with the Postavi rename) and M6 (operations), then M4 in test mode and M7a, a free beta.
 - **Owner, in parallel (long lead times):** register the company (M3), find a lawyer for the legal pages (M3). New name Postavi; postavi.si bought 2026-10-17 (M5).
 - **Side work (owner switched to it, 2026-10-18):** the postavi.si coming-soon page: phone intro, the description → build → review → publish → edit demo, the search story, the time band, "live site with an editor" copy (#231, #233, #238, this PR).
@@ -47,7 +48,7 @@ Exit criteria:
   - 2026-10-17: **6 of 10** passed all three reviewers (bar 8; all 10 pass the two-of-three filter). Means Gemini 4.09, GPT 3.64, Fable 3.52 (the earlier fresh 10: 3.99, 3.34, 3.39). Owner's decision 2026-10-17 ("no rescore, just fix and letsgo"): fix the 4 held pages' defects with tests and **don't re-score**. The criterion is ticked by that decision, not by the number. Where the fixes stand: see criterion 1. Cost €3.89 (photos €1.02, generation €1.66, scoring €1.21). eval/outside-review/final10.
 - [x] The owner looks at the pages (desktop and phone contact sheets) and approves them: 2026-10-17, "letsgo" (claude.ai artifact "Stranko M1 Final Check").
 
-### M2 · Launch gate: accounts, editor, email (Claude + an owner check) — 2 of 6 met; the rest closes with the owner's phone run
+### M2 · Launch gate: accounts, editor, email (Claude + an owner check) — 2 of 7 met; the rest closes with the owner's phone run and the editor package
 
 Plan: docs/plans/m2-launch-gate.md (owner OK 2026-10-18). Decisions 2026-10-18 (owner): keep today's editor, Puck parked; PHASE-2's "≤ 60 s" means the first preview (the whole job's speed stays an M7 target); sign-in and form emails send from `mail.postavi.si`.
 
@@ -60,6 +61,7 @@ Exit criteria:
 - [x] Editor decision: keep today's editor for 1.0 or adopt Puck (TASKS:94). Owner, 2026-10-18: keep today's editor; Puck parked.
 - [ ] Owner's own run on a phone: their photos, generate, edit, publish (TASKS:77). Checklist: docs/owner-phone-run.md (about 15 minutes; owner allow-listed).
 - [ ] PHASE-2 exit criteria ticked. 2026-10-18: four of six covered by tests, CI and the live smoke; the other two close with the phone run (docs/phases/PHASE-2.md).
+- [ ] Editor UX package (owner, 2026-10-19, after seeing the POC; TASKS "Editor UX package"): (1) an edit swaps only its section in the preview, no reload; (2) a quiet save status in the app bar instead of a toast per autosave; (3) an edit hint on text that can be edited in place (hover on desktop, an "Izbrano … Uredi" strip on phones); (4) section and page delete without a dialog, with "Razveljavi" in the toast, plus Redo and Ctrl+Z / Ctrl+Y; (5) "Še to potrebujemo" with progress and fields grouped by section. Built as PR #269 (draft, 2026-10-19: typecheck, lint, build and 74 browser tests green in the worktree). Met when the PR is merged with the architecture note and a review.
 
 ### M3 · Company and legal (owner, Claude prepares) — 0 of 4 met
 
@@ -134,6 +136,7 @@ Ideas and half-built things that are **not** on the way to 1.0. Something leaves
 - Studio 1.0 (S0–S7 tournament), the hybrid designer (Design 5 U6/U7, G3), the Fable studio, the picture studio.
 - Okus round 3 ratings. Rate them if an M1 decision needs the owner's taste.
 - Puck editor (owner, 2026-10-18: today's editor for 1.0). Section AI actions (TASKS:136), the Slovene copy judge (TASKS:137), editor keyboard paths (TASKS:564).
+- **Editor 2.0 (owner, 2026-10-19).** Eleven ideas from the editor review of 2026-10-19 that stay out of 1.0 (the five that went in are M2 criterion 7). Full list with sizes in TASKS "Editor 2.0 (parked)". Quick: ↑ ↓ ⋯ in the "Na tej strani" list; the Telefon/Računalnik choice reset at narrow widths. Medium: a fixed tab strip (Vsebina · Oblika · Fotografije · Strani · Podatki, a bottom bar on phones); "Dodaj razdelek" with search, most-used first and an assistant suggestion; drag-and-drop, paste and "Slikaj" for photos, drop onto a picture to replace it; the assistant bound to the selected section (section chips, change limited to it, the changed section flashes, "Razveljavi" in the reply); job progress without polling (SSE) and a "traja dlje" notice after 30 s instead of a 3-minute wait. Larger: design as "try, then apply" (hover previews a style or palette without a version, palettes from the owner's photos, a morph transition for "Druga podoba"); a lighter section panel (text first, layout and background under "Videz", static layout thumbnails); first-visit coach marks; splitting `editor.ts` into modules before any of the larger ones.
 - CMS extras: English entry pages in eval (TASKS:464), spec size on long blogs (TASKS:467).
 - Analytics steps beyond "events on" (TASKS:349+).
 - Agent-team tooling (TASKS:338+).
