@@ -18,6 +18,7 @@ export * from "./domain-providers.ts";
 export * from "./openprovider.ts";
 export * from "./cloudflare-saas.ts";
 export * from "./version.ts";
+export * from "./ops.ts";
 export * from "./backups.ts";
 export * from "./restore-drill.ts";
 export * from "./events.ts";

@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadConfig } from "@sb/config";
-import { Repo, createDb, createFsStorage, migrate, type JobData, type Platform, type Queue } from "@sb/platform";
+import { OpsState, Repo, WORKER_HEARTBEAT, createDb, createFsStorage, migrate, type JobData, type Platform, type Queue } from "@sb/platform";
 import type { SiteSpec } from "@sb/spec";
 import { startWorker } from "../src/worker.ts";
 
@@ -57,6 +57,19 @@ async function failedEdit(siteId: string) {
   return { status: (await platform.repo.getSite(siteId))?.status, reply: (await platform.repo.listChat(siteId)).at(-1)! };
 }
 
+describe("heartbeat (admin alerts)", () => {
+  it("writes the worker's heartbeat when it starts, and a later beat moves it forward but never back", async () => {
+    const ops = new OpsState(platform.db);
+    const first = await ops.lastBeat(WORKER_HEARTBEAT);
+    expect(first).not.toBeNull();
+    expect(Date.now() - first!.getTime()).toBeLessThan(5 * 60_000);
+    const later = new Date(first!.getTime() + 60_000);
+    await ops.beat(WORKER_HEARTBEAT, later);
+    await ops.beat(WORKER_HEARTBEAT, first!);
+    expect((await ops.lastBeat(WORKER_HEARTBEAT))!.getTime()).toBe(later.getTime());
+  });
+});
+
 describe("edit job that fails", () => {
   it("leaves a running generation's status alone", async () => {
     const id = await site("urejanje-med-ustvarjanjem", "generating");
@@ -79,6 +92,15 @@ describe("edit job that fails", () => {
     const r = await failedEdit(id);
     expect(r.reply.content).toMatch(/omejitev porabe/);
     expect(r.status).toBe("ready");
+  });
+
+  it("marks its job refused, not failed, when the spend cap stopped it (the admin's failed-jobs alert counts real failures only)", async () => {
+    const id = await site("urejanje-omejitev-job", "ready");
+    await platform.repo.logModelCall({ siteId: id, jobId: null, stage: "edit", model: "test", inputTokens: 0, outputTokens: 0, cacheCreationTokens: 0, cacheReadTokens: 0, costEur: config.limits.dailyModelSpendCapEur + 1, durationMs: 0, ok: true });
+    const capped = await platform.repo.usage.insertJob({ kind: "edit", scope: null, tier: "free", accountId: "acct_cap", siteId: id, estimateEur: 0.05 });
+    const msg = await platform.repo.addChat(id, "user", "Dodaj pogosta vprašanja o parkiranju");
+    await handlers.edit!({ siteId: id, messageId: Number(msg.id), aiJobId: capped }, "job-edit-cap");
+    expect((await platform.repo.usage.getJob(capped))?.status).toBe("refused");
   });
 });
 

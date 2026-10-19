@@ -64,6 +64,7 @@ Every PR, human or agent:
 | `ci` additions | every PR | `pnpm eval --offline` (free: golden specs through every check), `pnpm --filter @sb/web build` so a broken editor bundle fails before deploy, migration smoke (`migrate` on an empty Postgres) |
 | `promote` (new) | by hand | §3: fast-forward `release`, tag, release notes, migrate-check, deployed smoke test |
 | `nightly` (new) | 03:00 | dependency audit (`pnpm audit --prod`), stale-branch report (merged branches older than 7 days deleted); the backup and its check run in Railway's `backup` cron service instead (§4) |
+| `uptime` | every 15 min, once `UPTIME_ENABLED=true` | §7: `/health` of `UPTIME_APP_URL` (default https://app.postavi.si) and the published site `UPTIME_SITE_URL`; a failed run is the alert (GitHub emails failed scheduled runs) |
 | `eval` (today) | by hand | real model calls, costs money, budget rule |
 | Dependabot | weekly, grouped | one PR for dev dependencies, one for runtime; Playwright and Node pinned to the versions the Dockerfiles use |
 
@@ -72,7 +73,9 @@ Repository settings to turn on at 1.0 (owner, in GitHub settings): branch protec
 ## 7. Monitoring
 
 Keep it small; nothing here needs a new paid account.
-- `/health` already checks the database and storage. A free external monitor (Better Stack, Uptime Kuma on Railway, or cron-job.org) hits production `/health` every 5 minutes and emails the owner on two failures. Creating the account is the owner's step (HQ item).
+- **Admin alerts by email** (apps/web/src/alerts.ts, config `alerts`): the web service checks every 5 minutes and emails `ALERT_EMAIL` (plain English, subject "Postavi alert: …"; no variable, no alerts). Kinds: `health` (database, storage or queue failing; again after 60 min while it lasts), `failed-jobs` (3 or more generation/chat-edit jobs failed in the last 60 min; jobs the spend cap stopped are "refused" and don't count; again after 180 min), `worker-silent` (no worker heartbeat for 10 min; the worker writes one every minute; again after 60 min), `spend-warning` (today's model spend at 80 % of the daily cap; once per UTC day) and `spend-cap` (the cap reached, or the cap refused a call today, since it refuses a call whose estimate doesn't fit; once per UTC day). A kind that was emailed and clears sends one "… resolved" email; its next failure alerts at once. Every check has a 10 s limit (a hung database or bucket counts as failing; /health too), and a round still running skips the next. Sent alerts are stored (`ops_alerts`), so a restart doesn't resend. It needs `ALERT_EMAIL` on the **web** service and the mail settings it already has (`RESEND_API_KEY`, `EMAIL_FROM`).
+- **Uptime from outside** (`.github/workflows/uptime.yml`): when the whole web service is down its watchdog can't email, so GitHub checks `/health` and one published site every 15 minutes. Turn on with repository variables `UPTIME_ENABLED=true`, optionally `UPTIME_APP_URL` and `UPTIME_SITE_URL`.
+- `/health` checks the database, storage and the queue (the alerts above run the same checks).
 - Failed jobs, today's spend, the pools and the queue depth are on `/admin`. Add: last 24 h failures by stage, the slowest generation, and the share of generations that hit the spend cap, so the owner sees the pipeline's health without the logs.
 - Railway's own alerts (deploy failed, service crashed) go to the owner's email.
 - Logs stay in Railway. Every log line that matters already carries the site id and job id; the rule continues: structured `key=value` fields, no secrets, no visitor IPs.
