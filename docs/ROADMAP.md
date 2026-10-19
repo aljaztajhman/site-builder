@@ -142,6 +142,7 @@ Ideas and half-built things that are **not** on the way to 1.0. Something leaves
 - Agent-team tooling (TASKS:338+).
 - Pictures for photo-less businesses beyond D2 (Review 50 item 14), paraphrased repeats (TASKS:525).
 - Stripe monthly subscriptions (after the M4 decision).
+- **CI speed-up (owner parked it, 2026-10-19).** Main's full CI takes ~10 min, pull requests 1–12 min. One unbalanced slow-test shard sets the pace (test-slow 3/5 took 10.3 min, the other four 4–6). Rebalance it by moving or splitting its heaviest files: main to ~6 min, no cost. Going further (caching the install and browser setup every job repeats) isn't worth it.
 - **"Narejeno s Postavi" footer credit (owner parked it, 2026-10-19).** Decision sb-pricing-2 (PR #261): Osnovni keeps a small link to postavi.si in every published site's footer, Plus removes it, free previews always carry it. Plan when it is picked up: a render-time input from `plans.<plan>.site.footerCredit` in config (no spec migration), one link in every footer family styled from the site's tokens, identical in preview, publish and export, tests at 360 and 1280 px, the two pricing lines on the landing page from config. Belongs with M7 (pricing) once the owner moves it.
 
 ---
