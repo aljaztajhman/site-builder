@@ -139,7 +139,7 @@ describe("product pages in the UI colours", () => {
       const ctx = await context(width);
       try {
         const page = await ctx.newPage();
-        await page.goto(`${base}/`, { waitUntil: "load", timeout: 90_000 });
+        await page.goto(`${base}/nova`, { waitUntil: "load", timeout: 90_000 });
         await page.waitForTimeout(500);
         await page.screenshot({ path: path.join(shots!, `landing-${width}.png`) });
         await page.screenshot({ path: path.join(shots!, `landing-full-${width}.png`), fullPage: true });

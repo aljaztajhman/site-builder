@@ -275,10 +275,10 @@ describe("allow-list (full sites before billing)", () => {
     const queued = await req(`/api/sites/${site}/chat`, { method: "POST", headers: { cookie: eva.cookie, "content-type": "application/json" }, body: JSON.stringify({ message: "Temnejša glava" }) });
     expect(queued.status).toBe(200);
     expect(sent.at(-1)).toMatchObject({ name: "edit", data: { siteId: site } });
-    // The landing page offers the whole site to her.
-    expect(await (await req("/", { headers: { cookie: eva.cookie } })).text()).toContain('id="scope-full"');
+    // The start page offers the whole site to her.
+    expect(await (await req("/nova", { headers: { cookie: eva.cookie } })).text()).toContain('id="scope-full"');
 
-    // A new site from the landing page belongs to her.
+    // A new site from the start page belongs to her.
     const form = new FormData();
     form.set("_csrf", eva.csrf);
     form.set("description", "Pekarna na vasi v Mengšu, kruh z drožmi, odprto vsak dan od 7.00 do 13.00.");
@@ -295,7 +295,7 @@ describe("allow-list (full sites before billing)", () => {
 
   it("free owners can't ask for a whole site", async () => {
     const o = await ownerSignIn(req, mail.sent, "brez.celotne@siol.net");
-    expect(await (await req("/", { headers: { cookie: o.cookie } })).text()).not.toContain('id="scope-full"');
+    expect(await (await req("/nova", { headers: { cookie: o.cookie } })).text()).not.toContain('id="scope-full"');
   });
 
   it("lets the admin make a sign-in link (support, deployed smoke test), nobody else", async () => {

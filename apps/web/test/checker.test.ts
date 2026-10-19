@@ -113,7 +113,7 @@ describe("/pregled", () => {
     expect(page).toContain("Premajhni gumbi za prst");
     expect(page).toContain("Ni klica s tapom");
     expect(page).toContain("Na prvi strani nismo našli: matična številka");
-    expect(page).toContain('href="/#zacni"');
+    expect(page).toContain('href="/nova#zacni"');
     // Fixes first, then what's fine.
     expect(page.indexOf("Popravite")).toBeLessThan(page.indexOf("V redu"));
 
