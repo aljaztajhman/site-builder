@@ -225,7 +225,7 @@ jobs:
     steps:
       - run: echo "Docs-only pull request; eval-offline not needed."
 
-  # Migration smoke and migrate-check (docs/dev/workflow.md §4, §6) on Postgres 17 (as docker-compose.yml):
+  # Migration smoke and migrate-check (docs/dev/workflow.md §4, §6) on Postgres 18 (as production, postgres-ssl:18):
   # 1. every migration on an empty database, then pg-boss's schema;
   # 2. the base commit's code (the PR's target, or main before this push) migrates a database and seeds two
   #    golden sites into it; `pnpm db:backup` dumps it; `pnpm db:migrate-check` restores that dump into an
@@ -236,7 +236,7 @@ jobs:
     timeout-minutes: 20
     services:
       postgres:
-        image: postgres:17-alpine
+        image: postgres:18-alpine
         env:
           POSTGRES_USER: sb
           POSTGRES_PASSWORD: sb
@@ -262,12 +262,12 @@ jobs:
           node-version: 24
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
-      - name: Install the PostgreSQL 17 client (pg_dump and psql at the server's version)
+      - name: Install the PostgreSQL 18 client (pg_dump and psql at the server's version)
         run: |
           [ -x /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh ] || { sudo apt-get update -qq; sudo apt-get install -y -qq postgresql-common; }
           sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
-          sudo apt-get install -y -qq postgresql-client-17
-          echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
+          sudo apt-get install -y -qq postgresql-client-18
+          echo "/usr/lib/postgresql/18/bin" >> "$GITHUB_PATH"
       - name: Create the databases
         run: |
           pg_dump --version
