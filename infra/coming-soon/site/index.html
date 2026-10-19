@@ -127,7 +127,14 @@ section.reel{padding:0}
 .reeling .reel-pg{will-change:transform}
 .reeling .reel-cta{will-change:transform,opacity}
 .reel-cta.cta-on{animation:ring 2.4s .4s var(--ease) infinite}
-.reeling .reel-cue{display:inline-flex;position:absolute;left:50%;bottom:26px;transform:translateX(-50%);align-items:center;gap:8px;font:500 14px/1 var(--ui);color:var(--ink-3);white-space:nowrap}
+.reeling .reel-cue{display:flex;flex-direction:column;align-items:center;gap:10px;position:fixed;z-index:5;left:50%;bottom:30px;transform:translateX(-50%);pointer-events:none;color:var(--ink);animation:cue-in .8s 1.1s var(--ease) both}
+@keyframes cue-in{from{opacity:0;transform:translate(-50%,14px)}}
+.reel-cue .mouse{position:relative;width:26px;height:40px;border:2px solid var(--ink);border-radius:14px}
+.reel-cue .mouse b{position:absolute;left:50%;top:8px;width:4px;height:8px;margin-left:-2px;border-radius:2px;background:var(--accent);animation:wheel 1.6s var(--ease) infinite}
+@keyframes wheel{0%{transform:none;opacity:1}70%{transform:translateY(9px);opacity:0}71%,100%{transform:none;opacity:0}}
+.reel-cue .chev{width:20px;height:24px;color:var(--accent);animation:chev 1.6s var(--ease) infinite}
+@keyframes chev{0%,100%{transform:none;opacity:.5}50%{transform:translateY(6px);opacity:1}}
+@media (pointer:coarse){.reel-cue .mouse{display:none}.reel-cue .chev{width:28px;height:34px}}
 .reel-cue svg{width:14px;height:14px;animation:nudge 1.6s var(--ease) infinite}
 @media (max-width:860px){
   .reel-b{--bw:min(330px,82vw);height:min(calc(100vh - 230px),calc(var(--bw)*2));border-radius:22px;border-width:6px;border-color:#1b2b2e}
@@ -199,7 +206,7 @@ h1 em{font-style:normal;color:var(--accent)}
 .h-cta{grid-area:c}
 .h-cta .btn{min-height:56px;padding:0 26px;font-size:17px;box-shadow:0 18px 40px -18px rgb(13 122 132/.7)}
 .vsteps{list-style:none;margin:28px 0 0;padding:0;counter-reset:v;display:grid;gap:6px}
-.vsteps li{counter-increment:v;position:relative;display:grid;grid-template-columns:44px 1fr;column-gap:16px;padding:14px 16px;border-radius:14px;color:var(--ink-3);transition:background .35s,box-shadow .35s,transform .35s var(--ease),color .3s}
+.vsteps li{cursor:pointer;counter-increment:v;position:relative;display:grid;grid-template-columns:44px 1fr;column-gap:16px;padding:14px 16px;border-radius:14px;color:var(--ink-3);transition:background .35s,box-shadow .35s,transform .35s var(--ease),color .3s}
 .vsteps li::before{content:counter(v);grid-row:1/3;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;box-sizing:border-box;background:var(--surface);border:2px solid var(--line-2);font:800 18px/1 var(--display);color:var(--ink-3);transition:background-color .3s,border-color .3s,box-shadow .3s,color .3s}
 .vsteps li:not(:last-child)::after{content:"";position:absolute;left:37px;top:60px;height:calc(100% - 52px);width:2px;background:var(--line-2);transition:background .4s}
 .tg{display:inline-block;margin-left:10px;padding:4px 9px;border-radius:99px;font:700 11px/1 var(--ui);font-style:normal;letter-spacing:.01em;vertical-align:3px}
@@ -209,13 +216,15 @@ h1 em{font-style:normal;color:var(--accent)}
 .vsteps li.on{color:var(--ink-2)}
 .vsteps li.on::before{content:"";background:var(--accent) var(--tick) center/20px no-repeat;border-color:var(--accent)}
 .vsteps li.on:not(.now)::after{background:var(--accent)}
+.vsteps li:hover:not(.now){background:rgb(255 255 255/.55)}
+.vsteps li:focus-visible,.flow li:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .vsteps li.now{color:var(--ink);background:var(--surface);box-shadow:0 18px 40px -24px rgb(15 31 34/.35);transform:translateX(6px)}
 .vsteps li.now::before{content:counter(v);background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 0 0 7px var(--accent-soft)}
 .vsteps li.now span{max-height:3em;opacity:1;transition:max-height .4s var(--ease),opacity .3s .15s}
 @media (min-width:861px){.demo .flow{display:none}}
 @media (max-width:860px){.vsteps{display:none}.work:has(.h-cta){grid-template-areas:"l" "d" "c"}.h-cta .btn{width:100%}}
 .flow{display:flex;list-style:none;margin:0 0 20px;padding:0;counter-reset:f}
-.flow li{counter-increment:f;flex:1;position:relative;display:flex;flex-direction:column;align-items:center;gap:9px;font:600 13px/1.2 var(--ui);color:var(--ink-3);white-space:nowrap;transition:color .3s}
+.flow li{cursor:pointer;counter-increment:f;flex:1;position:relative;display:flex;flex-direction:column;align-items:center;gap:9px;font:600 13px/1.2 var(--ui);color:var(--ink-3);white-space:nowrap;transition:color .3s}
 .flow li::before{content:counter(f);position:relative;z-index:1;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;box-sizing:border-box;background:var(--surface);border:2px solid var(--line-2);font:800 15px/1 var(--display);color:var(--ink-3);transition:background-color .3s,border-color .3s,box-shadow .3s,color .3s}
 .flow li::after{content:"";position:absolute;top:16px;left:calc(-50% + 17px);right:calc(50% + 17px);height:2px;background:linear-gradient(90deg,var(--accent) 50%,var(--line-2) 50%) 100% 0/200% 100% no-repeat;transition:background-position .5s var(--ease)}
 .flow li:first-child::after{display:none}
@@ -366,6 +375,39 @@ h2{font:800 clamp(32px,4.2vw,58px)/1.02 var(--display);letter-spacing:-.035em;ma
 .cap{display:none;margin-top:18px;text-align:center;font-size:15px;color:var(--ink-2);min-height:3.1em;line-height:1.5}
 .cap b{color:var(--ink);font-weight:600}
 /* time: the same calendar for both. An agency crosses off the days; with Postavi the site is up on day one */
+/* why: the same search without a page and with one (drag to compare), then the doubts answered */
+.why2{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:56px;align-items:center}
+.why-hd .sub{margin-top:18px}
+.ba{--x:50%;position:relative;border-radius:16px;border:1px solid var(--line-2);background:#fff;box-shadow:0 40px 80px -50px rgb(15 31 34/.45);overflow:hidden;touch-action:pan-y;user-select:none}
+.ba-pane{padding:22px 24px 26px;display:grid;gap:12px;background:#fff;font:400 14px/1.4 var(--ui);color:#14272a}
+.ba-with{position:absolute;inset:0;clip-path:inset(0 0 0 var(--x));background:#fbfefd}
+.sr-bar{display:flex;align-items:center;gap:10px;height:44px;padding:0 16px;border:1px solid #dfe6e8;border-radius:99px;font-weight:500;box-shadow:0 2px 6px rgb(15 31 34/.06)}
+.sr-bar svg{width:16px;height:16px;color:#6b7c80}
+.sr{padding:10px 2px}
+.sr small{display:block;font-size:12px;color:#51656a}
+.sr b{display:block;margin-top:3px;font:600 17px/1.25 var(--ui);color:#1a4fb4}
+.sr p{margin-top:4px;font-size:13.5px;color:#46585c}
+.ba-without .sr:not(.sk) p{color:#8a3b2a}
+.sr.sk{display:grid;gap:7px}.sr.sk i{display:block;height:9px;border-radius:3px;background:#e7edee}.sr.sk i:first-child{width:34%}.sr.sk i:nth-child(2){width:58%;height:12px;background:#dfe7e9}.sr.sk i:last-child{width:86%}
+.sr.you{display:grid;grid-template-columns:96px 1fr;gap:14px;align-items:start;padding:12px;margin:0 -10px;border-radius:12px;background:#eef7f6;box-shadow:inset 0 0 0 1px #cfe6e3}
+.sr-th{width:96px;height:96px;border-radius:10px;background:url(primeri/kvas-reel-desk.webp) 30% 12%/420% auto no-repeat}
+.sr-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.sr-chips em{font:600 12px/1 var(--ui);font-style:normal;padding:7px 10px;border-radius:99px;background:#fff;border:1px solid #cfe0e2;color:#14272a}
+.sr-chips em.open{background:#e3f3ea;border-color:#bfe2cd;color:#17683f}
+.ba-tag{position:absolute;top:84px;z-index:2;font:700 12px/1 var(--ui);letter-spacing:.04em;text-transform:uppercase;padding:7px 10px;border-radius:99px;background:#14272a;color:#fff;pointer-events:none}
+.ba-tag.l{left:14px;background:#8a3b2a}.ba-tag.r{right:14px;background:var(--accent)}
+.ba-line{position:absolute;z-index:3;top:0;bottom:0;left:var(--x);width:2px;margin-left:-1px;background:#14272a;pointer-events:none}
+.ba-line i{position:absolute;top:50%;left:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:#14272a;box-shadow:0 10px 24px -8px rgb(15 31 34/.6)}
+.ba-line i::before,.ba-line i::after{content:"";position:absolute;top:50%;width:8px;height:8px;margin-top:-4px;border:solid #fff;border-width:0 0 2px 2px}
+.ba-line i::before{left:12px;transform:rotate(45deg)}.ba-line i::after{right:12px;transform:rotate(-135deg)}
+.ba-range{position:absolute;inset:0;z-index:4;width:100%;height:100%;margin:0;opacity:0;cursor:ew-resize}
+.ba-range:focus-visible+*,.ba:has(.ba-range:focus-visible){outline:3px solid var(--accent);outline-offset:4px}
+.doubts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;margin-top:56px}
+.dbt{padding:22px 22px 24px;border-radius:14px;background:var(--surface);border:1px solid var(--line);box-shadow:0 20px 40px -32px rgb(15 31 34/.35)}
+.dq{font:800 21px/1.15 var(--display);letter-spacing:-.02em;color:var(--ink-3)}
+.da{margin-top:12px;font-size:15.5px;line-height:1.5;color:var(--ink-2)}
+@media (max-width:980px){.doubts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:860px){.why2{grid-template-columns:1fr;gap:28px}.ba-pane{padding:16px 14px 18px;gap:9px}.sr b{font-size:15px}.sr.you{grid-template-columns:64px 1fr;gap:10px}.sr-th{width:64px;height:64px}.ba-tag{top:72px}.doubts{grid-template-columns:1fr;margin-top:36px}}
 .time{position:relative;isolation:isolate;margin-top:110px;padding:84px 0 92px;color:var(--ink);
   --ink:#eef5f4;--ink-2:#b9cbca;--ink-3:#8aa3a2;--surface-2:rgb(255 255 255/.09);--line-2:rgb(255 255 255/.28);--accent:#2bb5a7;--accent-text:#5fd8ca}
 .time::before{content:"";position:absolute;z-index:-1;top:0;bottom:0;left:calc(50% - 50vw);right:calc(50% - 50vw);background:#0e2326}
@@ -534,7 +576,7 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
           <a class="btn reel-cta" href="#hero">Poglejte, kako začnete<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 4v12M5 11l5 5 5-5"/></svg></a>
           <p class="reel-note">Stran v primeru je Postavi.si res naredil iz tega opisa. Podjetje je izmišljeno.</p>
       </div>
-      <span class="reel-cue" aria-hidden="true">Pomaknite se<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4v12M5 11l5 5 5-5"/></svg></span>
+      <span class="reel-cue" aria-hidden="true"><i class="mouse"><b></b></i><svg class="chev" viewBox="0 0 20 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5l5 5 5-5"/><path d="M5 13l5 5 5-5"/></svg></span>
     </div>
   </section>
   <div class="pin" id="pin">
@@ -543,16 +585,16 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
     <div class="work">
       <div>
         <h2 class="try-h">Začnete v nekaj minutah.</h2>
-        <p class="try-sub">Vi naredite dva koraka. Vse ostalo naredi Postavi.si.</p>
+        <p class="try-sub">Vi napišete nekaj stavkov. Vse ostalo naredi Postavi.si.</p>
         <ol class="vsteps">
           <li><b>Opis<em class="tg you">Vi</em></b><span>Napišete nekaj stavkov o podjetju. Brez tehničnih izrazov.</span></li>
-          <li><b>Postavljanje<em class="tg pv">Postavi.si</em></b><span>Napiše besedila, izbere barve in pisave, sestavi stran.</span></li>
-          <li><b>Pregled<em class="tg pv">Postavi.si</em></b><span>Preveri naslov za Google, telefon, dostopnost in hitrost.</span></li>
-          <li><b>Objava<em class="tg you">Vi</em></b><span>Potrdite in stran je na spletu, na vašem naslovu.</span></li>
-          <li class="on now"><b>Urejanje<em class="tg you">Vi</em></b><span>Kadar želite, spremembe vnesete sami. Takoj so na spletu.</span></li>
+          <li><b>Postavljanje<em class="tg pv">Samodejno</em></b><span>Postavi.si napiše besedila, izbere barve in pisave in sestavi stran.</span></li>
+          <li><b>Pregled<em class="tg pv">Samodejno</em></b><span>Preveri naslov za Google, telefon, dostopnost in hitrost.</span></li>
+          <li><b>Objava<em class="tg pv">Samodejno</em></b><span>Stran gre na splet, na vaš naslov. Vi jo le potrdite.</span></li>
+          <li class="on now"><b>Urejanje</b><span>Kadar želite, spremembe vnesete sami. Takoj so na spletu.</span></li>
         </ol>
       </div>
-      <div class="h-cta"><a class="btn" href="#primeri">Poglejte primere strani<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 4v12M5 11l5 5 5-5"/></svg></a></div>
+      <div class="h-cta"><button class="btn" type="button" id="start">Začnite zdaj<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg></button></div>
 
       <div class="demo" id="predogled">
         <div class="say">
@@ -613,46 +655,21 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
   </section>
 
   <section id="zakaj">
-    <div class="why">
-      <div>
+    <div class="why2">
+      <div class="why-hd">
         <p class="kick rv">Zakaj spletna stran</p>
         <h2 class="rv">Preden vas pokliče, vas poišče na spletu.</h2>
-        <p class="sub rv d1">Spletna stran je, kjer vas stranka preveri: kaj delate, kdaj ste odprti in kako vas dobi. Brez nje pokliče naslednjega na seznamu.</p>
-        <ol class="beats rv d1" id="beats" aria-label="Kaj naredi stranka">
-          <li><button type="button" aria-pressed="false"><b>Nekdo vas išče.</b><span>Priporočili so vas ali pa potrebuje ravno to, kar delate. Poišče vas na telefonu. Brez strani vas na seznamu ni in pokliče naslednjega.</span></button></li>
-          <li><button type="button" aria-pressed="true"><b>S stranjo vas najde.</b><span>Vaša stran se pojavi v iskanju. Urejen naslov, opis in hitra stran ji pomagajo, da je višje.</span></button></li>
-          <li><button type="button" aria-pressed="false"><b>Preveri, kar ga zanima.</b><span>Kaj ponujate, kdaj ste odprti in kje ste. Tudi zvečer in ob nedeljah, ko ne dvigujete telefona.</span></button></li>
-          <li><button type="button" aria-pressed="false"><b>In pokliče.</b><span>Klic ali povpraševanje naravnost s strani. Tako stran prinaša delo.</span></button></li>
-        </ol>
+        <p class="sub rv d1">Tako vas vidi nekdo, ki išče »pekarna Kamnik«. Povlecite in primerjajte: brez strani in s stranjo.</p>
       </div>
-      <div class="rv d2">
-        <div class="phone" id="phone" aria-hidden="true">
-          <div class="scr scr-s">
-            <div class="ph-bar"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4.5 4.5"/></svg><span id="sq">pekarna Kamnik</span><span class="caret" id="caret3" hidden></span></div>
-            <div class="ph-list">
-              <div class="ph-hit you"><b id="hit-t">Pekarna Skorja · Kamnik</b><span class="u" id="hit-u">pekarna-skorja.si</span><span class="s" id="hit-s">Pečemo kruh z drožmi, pecivo in torte po naročilu.</span></div>
-              <div class="ph-hit sk"><i></i><i></i><i></i></div>
-              <div class="ph-hit sk"><i></i><i></i><i></i></div>
-              <div class="ph-hit sk"><i></i><i></i><i></i></div>
-              <p class="ph-none">Vašega podjetja ni na seznamu.</p>
-            </div>
-          </div>
-          <div class="scr scr-p">
-            <div class="pg-top"><i></i><span id="pg-n">Pekarna Skorja</span></div>
-            <div class="pg-hd" id="pg-hd">Kruh z drožmi, pečen vsako jutro.</div>
-            <dl class="facts">
-              <div class="fact"><dt>Ponudba</dt><dd id="pg-i">Kruh · Pecivo · Torte po naročilu</dd></div>
-              <div class="fact"><dt>Delovni čas</dt><dd id="pg-h">Tor–sob 6.00–13.00</dd></div>
-              <div class="fact"><dt>Kje</dt><dd id="pg-c">Kamnik</dd></div>
-            </dl>
-            <span class="call">Pokličite</span>
-            <div class="pg-map"></div>
-            <div class="sheet"><i><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h3l1.5 4-2 1.2a10 10 0 0 0 5.3 5.3L13 11.5l4 1.5v3a1.5 1.5 0 0 1-1.6 1.5A14 14 0 0 1 2.5 4.6 1.5 1.5 0 0 1 4 3z"/></svg></i><div><b id="call-n">Pekarna Skorja</b><small>Klic</small></div></div>
-          </div>
-        </div>
-        <p class="cap" id="cap"></p>
+      <div class="ba rv d2" style="--x:50%">
+        <div class="ba-pane ba-without" aria-hidden="true"><div class="sr-bar"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4.5 4.5"/></svg>pekarna Kamnik</div><div class="sr sk"><i></i><i></i><i></i></div><div class="sr"><small>facebook.com › pekarnakvas</small><b>Pekarna Kvas | Facebook</b><p>»Danes zaradi dopusta zaprto. Hvala za razumevanje!« · objava iz leta 2023</p></div><div class="sr"><small>imenik › Kamnik › pekarne</small><b>Pekarna Kvas, Kamnik</b><p>Delovni čas: ni podatka. Telefon: ni podatka.</p></div><div class="sr sk"><i></i><i></i><i></i></div></div>
+        <div class="ba-pane ba-with" aria-hidden="true"><div class="sr-bar"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4.5 4.5"/></svg>pekarna Kamnik</div><div class="sr sk"><i></i><i></i><i></i></div><div class="sr you"><span class="sr-th"></span><div><small>pekarna-kvas.si</small><b>Pekarna Kvas · Kruh z drožmi v Kamniku</b><p>Družinska pekarna na začetku Šutne. Pirin in rženi kruh, potica po naročilu.</p><span class="sr-chips"><em class="open">Odprto · pon–pet 6.30–18.00</em><em>Pokličite</em><em>Pot do nas</em></span></div></div><div class="sr"><small>imenik › Kamnik › pekarne</small><b>Pekarna Kvas, Kamnik</b><p>Šutna 30, Kamnik · pekarna-kvas.si</p></div><div class="sr sk"><i></i><i></i><i></i></div></div>
+        <span class="ba-tag l" aria-hidden="true">Brez strani</span><span class="ba-tag r" aria-hidden="true">S stranjo</span>
+        <span class="ba-line" aria-hidden="true"><i></i></span>
+        <input class="ba-range" type="range" min="0" max="100" value="50" aria-label="Primerjava iskanja: levo brez strani, desno s stranjo">
       </div>
     </div>
+    <div class="doubts"><article class="dbt rv d0"><p class="dq">»Saj imam Facebook.«</p><p class="da">Facebook je za novice. Delovni čas, cenik, naslov in fotografije vašega dela so na strani na enem mestu, brez prijave in brez brskanja po starih objavah. In stran je vaša: ne more je zakleniti ali skriti nihče drug.</p></article><article class="dbt rv d1"><p class="dq">»Saj me priporočajo.«</p><p class="da">Priporočilo pripelje stranko do vas. Pogosto ima samo vaše ime. Stran ji da vse ostalo: telefon, naslov, kdaj ste odprti in kaj točno delate.</p></article><article class="dbt rv d2"><p class="dq">»Telefon mi itak zvoni.«</p><p class="da">Ravno zato. Ali ste odprti v soboto, kje lahko parkiram, ali delate tudi …: na to stran odgovori namesto vas, tudi ob desetih zvečer.</p></article><article class="dbt rv d3"><p class="dq">»Nimam časa za to.«</p><p class="da">Nekaj stavkov o podjetju in stran je narejena. Ko se kaj spremeni, to vnesete sami, kot sporočilo. Brez agencije in sestankov.</p></article></div>
     <div class="time rv">
       <p class="kick">Kako hitro je na spletu</p>
       <h3>Agencija še pripravlja ponudbo. <em>Vaša stran je že na spletu.</em></h3>
@@ -740,27 +757,6 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
   function name(){return userName||looks[cur].name}
   function sent(k){return looks[cur].s[k].replace("{n}",name())}
   function clearAll(){timers.forEach(clearTimeout);timers=[];clearTimeout(typing);clearTimeout(cycle)}
-  function setHit(){var n=name(),l=looks[cur];if(phoneDone&&!phonePlaying)sqEl.textContent=l.q;$("#hit-t").textContent=n+" · "+l.city;$("#hit-u").textContent=slug(n)+".si";$("#hit-s").textContent=l.s[1];
-    $("#pg-n").textContent=n;$("#call-n").textContent=n;$("#pg-hd").textContent=l.h;$("#pg-i").textContent=l.items.join(" · ");$("#pg-h").textContent=l.hours;$("#pg-c").textContent=l.city}
-  var phoneEl=$("#phone"),capEl=$("#cap"),sqEl=$("#sq"),caret3=$("#caret3"),beatsEl=$("#beats"),beatBtns=$$("#beats button"),phoneDone=false,phonePlaying=false,beatT=0;
-  // the four beats on the phone: someone searches, your page is found, they check it, they call. Each beat
-  // holds long enough to be read; a click on a beat shows it and stops the automatic run
-  var BEAT=[0,3200,3800,0];
-  function goBeat(i,auto){
-    clearTimeout(beatT);phoneEl.className="phone typed s"+(i+1);
-    beatBtns.forEach(function(b,k){b.setAttribute("aria-pressed",k===i?"true":"false")});
-    beatsEl.scrollTo({left:Math.max(0,beatBtns[i].offsetLeft-16),behavior:reduce?"auto":"smooth"});
-    capEl.textContent=$("span",beatBtns[i]).textContent;
-    if(auto&&BEAT[i])beatT=setTimeout(function(){goBeat(i+1,true)},BEAT[i]);
-  }
-  function playPhone(){
-    setHit();phoneDone=true;
-    if(reduce){goBeat(3);return}
-    var q=looks[cur].q,n=0;
-    phonePlaying=true;goBeat(0);phoneEl.className="phone s1";sqEl.textContent="";caret3.hidden=false;
-    (function t(){sqEl.textContent=q.slice(0,++n);if(n<q.length)beatT=setTimeout(t,45);else{caret3.hidden=true;phonePlaying=false;phoneEl.classList.add("typed");beatT=setTimeout(function(){goBeat(1,true)},3200)}})();
-  }
-  beatBtns.forEach(function(b,i){b.addEventListener("click",function(){if(phonePlaying){phonePlaying=false;caret3.hidden=true;sqEl.textContent=looks[cur].q}goBeat(i,false)})});
   var flowEls=$$(".flow li,.vsteps li"),half=$$(".flow li").length;
   function flow(k){flowEls.forEach(function(li,i){var j=i%half;li.classList.toggle("on",j<=k);li.classList.toggle("now",j===k)})}
   function checks(n,vis){var c=$(".chk",mock);if(!c)return;c.classList.toggle("on",!!vis);$$("li",c).forEach(function(li,i){li.classList.toggle("y",i<n)})}
@@ -773,36 +769,58 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
     var t=$(".saved",mock),ld=$(".ld",mock);if(t)t.classList.toggle("on",!!on);
     if(on&&ld){ld.classList.remove("done");ld.style.width="0";void ld.offsetWidth;ld.style.width="100%";timers.push(setTimeout(function(){ld.classList.add("done")},600))}
   }
+  // the whole demo runs at this multiple of its base timings (owner: slower, 2026-10-19)
+  var PACE=1.6;
+  function afterBuild(){timers.push(setTimeout(function(){sents.forEach(function(s){s.classList.remove("hl")})},900));review()}
+  // step 3: the checks tick one by one, then the page goes live
   function review(){
     flow(2);checks(0,true);
-    CHECKS.forEach(function(c,i){timers.push(setTimeout(function(){checks(i+1,true)},400+i*420))});
-    var t0=400+CHECKS.length*420+550;
-    timers.push(setTimeout(function(){checks(CHECKS.length,false);publish(true);flow(3)},t0));
-    var to=looks[cur].edit.to,t1=t0+1700,t2=t1+600+to.length*45;
-    timers.push(setTimeout(function(){flow(4);edit(-1,true)},t1));
-    for(var k=0;k<=to.length;k++)(function(k){timers.push(setTimeout(function(){edit(k,true)},t1+600+k*45))})(k);
-    timers.push(setTimeout(function(){var b=$(".cms .sv",mock);if(b)b.classList.add("press")},t2+250));
-    timers.push(setTimeout(function(){edit(to.length,false);saved(true);
-      if(auto)cycle=setTimeout(function(){show((cur+1)%looks.length)},3600)},t2+550));
+    CHECKS.forEach(function(c,i){timers.push(setTimeout(function(){checks(i+1,true)},(400+i*420)*PACE))});
+    timers.push(setTimeout(goLive,(400+CHECKS.length*420+550)*PACE));
   }
+  // step 4: live on its own address, then the editing
+  function goLive(){checks(CHECKS.length,false);publish(true);flow(3);timers.push(setTimeout(editing,1700*PACE))}
+  // step 5: the editor opens, the change is typed and saved, the page says it is updated
+  function editing(){
+    var to=looks[cur].edit.to,ch=45*PACE,t2=600*PACE+to.length*ch;
+    flow(4);edit(-1,true);
+    for(var k=0;k<=to.length;k++)(function(k){timers.push(setTimeout(function(){edit(k,true)},600*PACE+k*ch))})(k);
+    timers.push(setTimeout(function(){var b=$(".cms .sv",mock);if(b)b.classList.add("press")},t2+250*PACE));
+    timers.push(setTimeout(function(){edit(to.length,false);saved(true);
+      if(auto)cycle=setTimeout(function(){show((cur+1)%looks.length)},3600*PACE)},t2+550*PACE));
+  }
+  function fresh(){mock.className="browser anim drf";mock.innerHTML=mockHTML(looks[cur],name());sizeStrips()}
   function show(i){
     clearAll();cur=i;typedUpTo=0;
-
-    setHit();
-    mock.className="browser anim drf";mock.innerHTML=mockHTML(looks[i],name());sizeStrips();flow(0);
+    fresh();flow(0);
     sents.forEach(function(s){s.textContent="";s.classList.remove("hl")});
     caret.hidden=false;
-    var k=0,n=0,speed=reduce?12:16;
+    var k=0,n=0,speed=reduce?12:16*PACE;
     (function step(){
       var full=sent(k);n++;sents[k].textContent=full.slice(0,n)+(n<full.length?"":" ");
       if(n<full.length)typing=setTimeout(step,speed);
-      else{typedUpTo=k+1;if(++k<3){n=0;typing=setTimeout(step,220)}
+      else{typedUpTo=k+1;if(++k<3){n=0;typing=setTimeout(step,220*PACE)}
       else if(!introDone){caret.hidden=true}
-      else{caret.hidden=true;flow(1);timers=build(mock,1,function(ev,j){
-        if(ev==="s")sents.forEach(function(s,q){s.classList.toggle("hl",q===j)});
-        else{timers.push(setTimeout(function(){sents.forEach(function(s){s.classList.remove("hl")})},900));review()}})}}
+      else{caret.hidden=true;flow(1);timers=build(mock,PACE,function(ev,j){
+        if(ev==="s")sents.forEach(function(s,q){s.classList.toggle("hl",q===j)});else afterBuild()})}}
     })();
   }
+  // a click on a step plays the demo from that step, for the same business; it then stays on it
+  function goStep(k){
+    clearAll();auto=false;
+    if(k===0){show(cur);return}
+    fresh();typedUpTo=3;caret.hidden=true;
+    sents.forEach(function(s,i){s.textContent=sent(i)+(i<2?" ":"");s.classList.remove("hl")});
+    if(k===1){flow(1);timers=build(mock,PACE,function(ev,j){if(ev==="s")sents.forEach(function(s,q){s.classList.toggle("hl",q===j)});else afterBuild()});return}
+    finish(mock);
+    if(k===2)review();else if(k===3)goLive();else{checks(CHECKS.length,false);publish(true);editing()}
+  }
+  flowEls.forEach(function(li,i){
+    li.setAttribute("role","button");li.tabIndex=0;li.setAttribute("aria-label","Pokaži korak: "+($("b",li)||li).firstChild.textContent.trim());
+    var go=function(){goStep(i%half)};
+    li.addEventListener("click",go);
+    li.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}});
+  });
   addEventListener("resize",sizeStrips);
   document.addEventListener("visibilitychange",function(){if(document.hidden)clearTimeout(cycle);else if(auto&&introDone&&!timers.length)cycle=setTimeout(function(){show((cur+1)%looks.length)},1500)});
 
@@ -907,13 +925,25 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
   })();
   // the demo waits on step 1 and starts when it comes into view; it stops when it leaves and starts over on return
   var demoBox=$(".demo");
+  // the comparison: the range input drives the divider; once in view it shows itself off once, until touched
+  (function(){
+    var ba=$(".ba");if(!ba)return;var r=$(".ba-range",ba),touched=false;
+    function set(v){ba.style.setProperty("--x",v+"%");r.value=v}
+    r.addEventListener("input",function(){touched=true;set(+r.value)});
+    if(reduce||!("IntersectionObserver" in window))return;
+    var io=new IntersectionObserver(function(es){if(!es[0].isIntersecting)return;io.disconnect();
+      var t0=performance.now(),keys=[[0,50],[900,22],[1900,78],[2800,50]];
+      (function f(now){if(touched)return;var t=now-t0,i=1;while(i<keys.length-1&&t>keys[i][0])i++;
+        var a=keys[i-1],b=keys[i],q=Math.min(1,Math.max(0,(t-a[0])/(b[0]-a[0]))),e=q<.5?2*q*q:1-Math.pow(-2*q+2,2)/2;
+        set(a[1]+(b[1]-a[1])*e);if(t<keys[keys.length-1][0])requestAnimationFrame(f)})(t0);
+    },{threshold:.5});io.observe(ba);
+  })();
   show(0);clearAll();sents.forEach(function(x){x.textContent=""});caret.hidden=false;
   if("IntersectionObserver" in window&&demoBox){
     new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){auto=true;show(0)}else clearAll()})},{threshold:.35}).observe(demoBox);
   }else show(0);
 
   // scroll: reveal, and build the small site when it comes into view
-  sqEl.textContent="";
   var seen={};
   function race(){
     var c=$("#cnt-ag");if(!c||reduce)return;var t0=performance.now(),T=5200;
@@ -922,7 +952,6 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
   }
   function hit(el){
     el.classList.add("in");if(el.classList.contains("time"))race();
-    if(el.contains(phoneEl)&&!seen.p){seen.p=1;setTimeout(playPhone,250)}
   }
   var rv=$$(".rv");
   if(!("IntersectionObserver" in window)){rv.forEach(hit)}
