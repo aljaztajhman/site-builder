@@ -54,7 +54,7 @@ import { descriptionHash, readTicket, signTicket } from "./upload-ticket.ts";
 import { slugify } from "./slug.ts";
 import { DASHBOARD, sitesPage, sitePage } from "./pages.tsx";
 import { homePage } from "./home.tsx";
-import { clientBundle, warmClientBundles } from "./client-bundle.ts";
+import { CLIENT_BUNDLES, clientBundle, warmClientBundles } from "./client-bundle.ts";
 import { uiAssets } from "./ui/assets.ts";
 import { registerFormRoutes } from "./forms.tsx";
 import { registerPricingRoutes } from "./cenik.ts";
@@ -282,7 +282,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   // The editor's and landing page's scripts: linked with their content hash (pages use clientScriptUrl) and
   // then cached for good; a plain or old URL is revalidated by ETag.
   warmClientBundles();
-  for (const name of ["editor", "home"] as const) {
+  for (const name of CLIENT_BUNDLES) {
     app.get(`/assets/${name}.js`, async (c) => {
       const b = await clientBundle(name);
       const etag = `"${b.hash}"`;
@@ -376,6 +376,8 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
         cap: config.limits.dailyModelSpendCapEur,
         csrf: c.get("csrf"),
         admin,
+        // M4 billing UI: "Naročnina" in an owner's bar while billing is on.
+        billing: config.plans.billingEnabled,
         // Free, unpublished previews carry the small badge beside their thumbnail (never inside it).
         badgeFor: (site) => previewBadge(config, tierOf(viewer), site),
         // An owner sees what is left of their allowance (limits.ts), in Slovene.

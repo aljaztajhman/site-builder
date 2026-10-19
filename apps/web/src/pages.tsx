@@ -47,9 +47,10 @@ export const Brand = ({ href = DASHBOARD }: { href?: string }) => (
 
 /**
  * App bar: wordmark, then page-specific items; sign-out on every dashboard page. The admin also sees
- * today's model spend against the cap and a link to the admin page; owners never see internal numbers.
+ * today's model spend against the cap and a link to the admin page; owners never see internal numbers. `billing`:
+ * a signed-in owner while billing is on gets "Naročnina" (/narocnina).
  */
-export function TopBar({ children, spend, csrf, admin }: { children?: ReactNode; spend?: { today: number; cap: number }; csrf: string; admin?: boolean }) {
+export function TopBar({ children, spend, csrf, admin, billing }: { children?: ReactNode; spend?: { today: number; cap: number }; csrf: string; admin?: boolean; billing?: boolean }) {
   return (
     <header className="top">
       <Brand />
@@ -59,6 +60,11 @@ export function TopBar({ children, spend, csrf, admin }: { children?: ReactNode;
         <span className="pill plain spend num" title="Poraba modela danes in dnevna omejitev">
           {`${formatEur(spend.today)} / ${formatEur(spend.cap)} danes`}
         </span>
+      )}
+      {billing && !admin && (
+        <a className="btn quiet sm" href="/narocnina">
+          Naročnina
+        </a>
       )}
       {admin && (
         <a className="btn quiet sm" href="/admin">
@@ -126,12 +132,14 @@ export interface SitesPageProps {
   badgeFor?: (site: SiteRow) => string | null;
   /** A published site's last 30 days (cookieless counts); null for one not published. */
   statsFor?: (site: SiteRow) => StatTotals | null;
+  /** Billing is on: an owner's bar links to /narocnina. */
+  billing?: boolean;
 }
 
-export function sitesPage({ sites, spendToday, cap, csrf, admin, account, badgeFor, statsFor }: SitesPageProps): string {
+export function sitesPage({ sites, spendToday, cap, csrf, admin, account, badgeFor, statsFor, billing }: SitesPageProps): string {
   return html(
     <Doc title={admin ? "Strani" : "Moje strani"}>
-      <TopBar spend={{ today: spendToday, cap }} csrf={csrf} admin={admin} />
+      <TopBar spend={{ today: spendToday, cap }} csrf={csrf} admin={admin} billing={billing === true && !!account} />
       <main className="wrap sites">
         {account && (
           <p className="muted">

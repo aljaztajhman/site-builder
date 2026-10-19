@@ -106,8 +106,8 @@ export function pricing(config: AppConfig, foundingLeft: number | null): Pricing
     ],
     // No billing until the legal entity exists (config plans.billingEnabled).
     note: plans.billingEnabled
-      ? "Cene so z DDV. Letni paket plačate po računu z bančnim nakazilom."
-      : "Načrtovane cene z DDV. Zaenkrat ničesar ne zaračunamo. Letni paket bo plačljiv po računu z bančnim nakazilom.",
+      ? "Cene so z DDV. Plačate s kartico, mesečno ali letno, in stran objavite takoj po plačilu. Naročnino lahko kadarkoli prekličete, velja do konca plačanega obdobja."
+      : "Načrtovane cene z DDV. Zaenkrat ničesar ne zaračunamo. Plačevali boste s kartico, mesečno ali letno; naročnino boste lahko kadarkoli preklicali do konca plačanega obdobja.",
     faq: faq(config).map(([q, a]) => ({ q, a })),
   };
 }
