@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadConfig } from "@sb/config";
-import { Repo, createDb, createFsStorage, migrate, type JobData, type Platform, type Queue } from "@sb/platform";
+import { OpsState, Repo, WORKER_HEARTBEAT, createDb, createFsStorage, migrate, type JobData, type Platform, type Queue } from "@sb/platform";
 import type { SiteSpec } from "@sb/spec";
 import { startWorker } from "../src/worker.ts";
 
@@ -56,6 +56,19 @@ async function failedEdit(siteId: string) {
   await handlers.edit!({ siteId, messageId: Number(msg.id) }, "job-edit");
   return { status: (await platform.repo.getSite(siteId))?.status, reply: (await platform.repo.listChat(siteId)).at(-1)! };
 }
+
+describe("heartbeat (admin alerts)", () => {
+  it("writes the worker's heartbeat when it starts, and a later beat moves it forward but never back", async () => {
+    const ops = new OpsState(platform.db);
+    const first = await ops.lastBeat(WORKER_HEARTBEAT);
+    expect(first).not.toBeNull();
+    expect(Date.now() - first!.getTime()).toBeLessThan(5 * 60_000);
+    const later = new Date(first!.getTime() + 60_000);
+    await ops.beat(WORKER_HEARTBEAT, later);
+    await ops.beat(WORKER_HEARTBEAT, first!);
+    expect((await ops.lastBeat(WORKER_HEARTBEAT))!.getTime()).toBe(later.getTime());
+  });
+});
 
 describe("edit job that fails", () => {
   it("leaves a running generation's status alone", async () => {

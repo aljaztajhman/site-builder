@@ -1,0 +1,41 @@
+# Uptime from outside (docs/dev/workflow.md §7): every 15 minutes, the app's /health and one published site. A failed
+# run is the alert: GitHub emails a failed scheduled run to whoever last changed this workflow's schedule.
+# The web service's own watchdog (apps/web/src/alerts.ts) can't email when the whole service is down; this can.
+#
+# Off until the owner turns it on, so nothing fails before the addresses answer:
+# - repository variable UPTIME_ENABLED=true: the check runs on the schedule (by hand it always runs);
+# - UPTIME_APP_URL (default https://app.postavi.si): its /health must answer 200 with "status":"ok";
+# - UPTIME_SITE_URL (optional): one published site's address, which must answer 200.
+name: Uptime
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: uptime
+  cancel-in-progress: true
+
+jobs:
+  check:
+    if: vars.UPTIME_ENABLED == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      APP_URL: ${{ vars.UPTIME_APP_URL || 'https://app.postavi.si' }}
+      SITE_URL: ${{ vars.UPTIME_SITE_URL }}
+    steps:
+      - name: App health
+        run: |
+          body=$(curl -sS --fail --max-time 20 --retry 2 --retry-delay 15 --retry-all-errors "${APP_URL%/}/health") || { echo "::error::${APP_URL%/}/health did not answer 200"; exit 1; }
+          echo "$body"
+          echo "$body" | grep -q '"status":"ok"' || { echo "::error::${APP_URL%/}/health is not ok"; exit 1; }
+      - name: Published site
+        if: env.SITE_URL != ''
+        run: |
+          code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 --retry 2 --retry-delay 15 --retry-all-errors "$SITE_URL") || code="none"
+          echo "$SITE_URL answered $code"
+          [ "$code" = "200" ] || { echo "::error::$SITE_URL answered $code, not 200"; exit 1; }

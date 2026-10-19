@@ -519,6 +519,24 @@ export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
       create index look_fingerprints_town on look_fingerprints(lower(town), created_at) where town is not null;
     `,
   },
+  {
+    id: 23,
+    name: "ops_alerts",
+    // The admin alerts (apps/web/src/alerts.ts): ops_heartbeats, one row per process that reports it is alive (the
+    // worker, every minute); ops_alerts, the last email per alert kind, so a restart never sends one twice.
+    sql: `
+      create table ops_heartbeats (
+        name text primary key,
+        beat_at timestamptz not null
+      );
+      create table ops_alerts (
+        kind text primary key,
+        sent_at timestamptz not null,
+        firing boolean not null default true,
+        detail text
+      );
+    `,
+  },
 ];
 
 type Query = (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>;

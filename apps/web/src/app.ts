@@ -65,6 +65,7 @@ import { createHash } from "node:crypto";
 import { campaignSource, isPageView, tracker } from "./analytics.ts";
 import { CF_BEACON_ENDPOINT, CF_BEACON_SCRIPT, cloudflareBeacon } from "./beacon.tsx";
 import { registerAnalyticsAdminRoutes } from "./analytics-admin.tsx";
+import { healthChecks } from "./alerts.ts";
 import { JS_FLAG } from "@sb/components";
 
 export { safeNext } from "./access.ts";
@@ -262,19 +263,11 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   // ---------- Health ----------
   app.get("/health", async (c) => {
     const checks: Record<string, string> = {};
-    const run = async (name: string, fn: () => Promise<unknown>) => {
-      try {
-        await fn();
-        checks[name] = "ok";
-      } catch (e) {
-        // Public URL: the detail (hostnames, driver messages) goes to the log only.
-        checks[name] = "error";
-        console.error(`[health] ${name}:`, (e as Error).message);
-      }
-    };
-    await run("database", () => db.query("select 1"));
-    await run("storage", () => storage.ping());
-    await run("queue", () => queue.ping());
+    for (const [name, error] of Object.entries(await healthChecks({ db, storage, queue }))) {
+      checks[name] = error === null ? "ok" : "error";
+      // Public URL: the detail (hostnames, driver messages) goes to the log only.
+      if (error !== null) console.error(`[health] ${name}:`, error);
+    }
     const ok = Object.values(checks).every((v) => v === "ok");
     // `?ip=1` echoes the caller's own address as the IP limits see it, so the proxy setup can be checked from outside.
     const you = c.req.query("ip") === "1" ? { you: { ip: clientIp(c), forwarded: (c.req.header("x-forwarded-for") ?? "").split(",").map((s) => s.trim()).filter(Boolean), realIp: c.req.header("x-real-ip") ?? null } } : {};

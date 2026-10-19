@@ -35,7 +35,7 @@ import {
   type SpendLedger,
   type UrlCheckResult,
 } from "@sb/engine";
-import { INTERRUPTED_MESSAGE, domainProvidersFor, type DomainProviders, type Platform, type Tier } from "@sb/platform";
+import { INTERRUPTED_MESSAGE, OpsState, WORKER_HEARTBEAT, domainProvidersFor, type DomainProviders, type Platform, type Tier } from "@sb/platform";
 import type { SiteSpec } from "@sb/spec";
 import { cleanupExpired, spendMonitor } from "./housekeeping.ts";
 import { recordGeneration, type GenerationOutcome } from "./telemetry.ts";
@@ -273,6 +273,12 @@ export async function startWorker(platform: Platform, config = loadConfig(), job
   };
   logRecovery(await recover());
   timers.push(setInterval(() => void recoverInterrupted(platform, 2).then(logRecovery).catch((e: unknown) => console.error("[worker]", e)), 60_000));
+
+  // A sign of life for the admin alerts (apps/web/src/alerts.ts): no heartbeat for alerts.workerSilentMinutes emails the owner.
+  const ops = new OpsState(platform.db);
+  const beat = () => ops.beat(WORKER_HEARTBEAT).catch((e: unknown) => console.error("[worker] heartbeat", e));
+  await beat();
+  timers.push(setInterval(() => void beat(), config.alerts.heartbeatSeconds * 1000));
 
   if (config.imageGen.pipeline.enabled && !process.env.FAL_KEY && !process.env.MODEL_REPLAY_DIR) {
     console.warn("[worker] FAL_KEY not set: sites with too few photos get no generated pictures");
