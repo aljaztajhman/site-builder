@@ -152,10 +152,11 @@ describe("editor UX in a browser", () => {
       await expect.poll(() => hasAbout(id), { timeout: 10_000 }).toBe(true);
       // Redo: the delete again.
       const redo = page.getByRole("button", { name: "Ponovi" });
-      await expect.poll(() => redo.isEnabled(), { timeout: 10_000 }).toBe(true);
+      await expect.poll(() => redo.count(), { timeout: 10_000 }).toBe(1);
       await redo.click();
       await expect.poll(() => hasAbout(id), { timeout: 10_000 }).toBe(false);
-      await expect.poll(() => redo.isEnabled(), { timeout: 10_000 }).toBe(false);
+      // Nothing left to redo: the button goes away (it shows only while it can do something).
+      await expect.poll(() => redo.count(), { timeout: 10_000 }).toBe(0);
       // The keyboard, with no field focused.
       await page.locator("h1.site-name").click();
       await page.keyboard.press("Control+z");

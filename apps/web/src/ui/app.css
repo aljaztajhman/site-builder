@@ -423,8 +423,7 @@ details.more>summary{padding:12px 0;font-weight:600;cursor:pointer}
   .top .site-name{flex:1;font-size:16px}
   .top>.pill,.top .back .label,.top .chip .label,.top .publish .label,.top>.sp{display:none}
   .top .actions{flex:none;gap:2px}
-  /* Redo only when there is something to redo; the save status as its sign alone (the words stay for screen readers). */
-  .top .redo:disabled{display:none}
+  /* The save status as its sign alone (the words stay for screen readers). */
   .save-status .label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
   /* Closed or peeking with a section selected: its name, ↑ ↓ and "Uredi" right under the handle. */
   .sel-strip{display:flex;align-items:center;gap:4px;min-height:48px;padding:0 12px 4px 16px;background:var(--surface)}

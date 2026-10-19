@@ -2617,7 +2617,8 @@ function topItems(): Child[] {
     ...head,
     h("span", { class: "actions" },
       h("button", { class: "btn quiet sm icon-btn", type: "button", "aria-label": "Razveljavi", title: "Razveljavi", disabled: prev === null, onClick: () => void undo() }, "↶"),
-      h("button", { class: "btn quiet sm icon-btn redo", type: "button", "aria-label": "Ponovi", title: "Ponovi", disabled: !redoStack.length, onClick: () => void redo() }, "↷"),
+      // Only while there is something to redo: the first screen keeps its number of controls (owner-tasks budget).
+      redoStack.length ? h("button", { class: "btn quiet sm icon-btn redo", type: "button", "aria-label": "Ponovi", title: "Ponovi", onClick: () => void redo() }, "↷") : null,
       // What is left before publishing, as one chip instead of a banner on every screen.
       todo ? h("button", { class: "chip warn", type: "button", id: "checklist-summary", "aria-label": `Še ${todo} do objave`, onClick: () => openChecklist() }, `Še ${todo}`, h("span", { class: "label" }, " do objave")) : null,
       moreMenu(),
