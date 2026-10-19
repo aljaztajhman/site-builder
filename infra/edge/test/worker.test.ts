@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { RESERVED_SITE_LABELS } from "../../../packages/platform/src/reserved-labels.ts";
-import worker, { RESERVED_LABELS, SITE_HOST_HEADER, SITE_PROXY_SECRET_HEADER, handle, isPlatformOwnHost, type Env } from "../src/worker.ts";
-import { SITE_HOST_HEADER as APP_HOST_HEADER, SITE_PROXY_SECRET_HEADER as APP_SECRET_HEADER } from "../../../apps/web/src/site-hosts.ts";
+import worker, { RESERVED_LABELS, SITE_HOST_HEADER, SITE_PROXY_SECRET_HEADER, SITE_VISITOR_IP_HEADER, handle, isPlatformOwnHost, type Env } from "../src/worker.ts";
+import { SITE_HOST_HEADER as APP_HOST_HEADER, SITE_PROXY_SECRET_HEADER as APP_SECRET_HEADER, SITE_VISITOR_IP_HEADER as APP_IP_HEADER } from "../../../apps/web/src/site-hosts.ts";
 
 const env: Env = { ORIGIN: "https://web-production.up.railway.app", SITE_PROXY_SECRET: "s3cret-for-tests", PLATFORM_DOMAIN: "postavi.si" };
 
@@ -38,7 +38,7 @@ describe("edge Worker", () => {
     expect(sent.headers.get(SITE_PROXY_SECRET_HEADER)).toBe("s3cret-for-tests");
     expect(sent.headers.get("x-forwarded-proto")).toBe("https");
     expect(sent.headers.get("x-forwarded-host")).toBe("www.pekarnakvas.si");
-    expect(sent.headers.get("x-real-ip")).toBe("203.0.113.7");
+    expect(sent.headers.get(SITE_VISITOR_IP_HEADER)).toBe("203.0.113.7");
     expect(sent.headers.get("content-type")).toBe("application/x-www-form-urlencoded");
     expect(sent.headers.get("origin")).toBe("https://www.pekarnakvas.si");
     expect(sent.headers.get("user-agent")).toBe("Telefon");
@@ -51,6 +51,25 @@ describe("edge Worker", () => {
     expect(seen[0]!.method).toBe("GET");
     expect(seen[0]!.body).toBeNull();
     expect(seen[0]!.headers.get(SITE_HOST_HEADER)).toBe("pekarna-kvas.postavi.si");
+  });
+
+  it("never sends the request (or the secret) to another host, whatever the path", async () => {
+    for (const path of ["//attacker.example/steal", "///attacker.example/x", "/\\attacker.example/x", "/%2F%2Fattacker.example/x"]) {
+      const { seen, fetcher } = recorder();
+      await handle(new Request(`https://pekarna-kvas.postavi.si${path}?a=1`), env, fetcher);
+      const target = new URL(seen[0]!.url);
+      expect(target.origin, path).toBe(env.ORIGIN);
+      expect(target.search).toBe("?a=1");
+    }
+  });
+
+  it("passes the visitor's IP in its own header and drops a forged one", async () => {
+    const { seen, fetcher } = recorder();
+    await handle(new Request("https://pekarnakvas.si/", { headers: { "cf-connecting-ip": "203.0.113.7", [SITE_VISITOR_IP_HEADER]: "1.1.1.1" } }), env, fetcher);
+    expect(seen[0]!.headers.get(SITE_VISITOR_IP_HEADER)).toBe("203.0.113.7");
+    const other = recorder();
+    await handle(new Request("https://pekarnakvas.si/", { headers: { [SITE_VISITOR_IP_HEADER]: "1.1.1.1" } }), env, other.fetcher);
+    expect(other.seen[0]!.headers.get(SITE_VISITOR_IP_HEADER)).toBeNull();
   });
 
   it("drops incoming copies of the site-host and secret headers", async () => {
@@ -102,5 +121,6 @@ describe("edge Worker", () => {
     expect([...RESERVED_LABELS].sort()).toEqual([...RESERVED_SITE_LABELS].sort());
     expect(SITE_HOST_HEADER).toBe(APP_HOST_HEADER);
     expect(SITE_PROXY_SECRET_HEADER).toBe(APP_SECRET_HEADER);
+    expect(SITE_VISITOR_IP_HEADER).toBe(APP_IP_HEADER);
   });
 });

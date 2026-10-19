@@ -19,6 +19,7 @@ export interface Env {
 /** Same names as apps/web/src/site-hosts.ts. */
 export const SITE_HOST_HEADER = "x-postavi-site-host";
 export const SITE_PROXY_SECRET_HEADER = "x-postavi-proxy-secret";
+export const SITE_VISITOR_IP_HEADER = "x-postavi-visitor-ip";
 
 /** A copy of RESERVED_SITE_LABELS (packages/platform/src/reserved-labels.ts); the test keeps them equal. */
 export const RESERVED_LABELS: readonly string[] = [
@@ -45,18 +46,23 @@ export async function handle(request: Request, env: Env, fetcher: typeof fetch =
   if (isPlatformOwnHost(url.hostname, env.PLATFORM_DOMAIN || "postavi.si")) return notFound();
   if (!env.ORIGIN || !env.SITE_PROXY_SECRET) return new Response("Edge not configured.", { status: 503 });
 
-  const target = new URL(`${url.pathname}${url.search}`, env.ORIGIN);
+  // Path and query set on the origin's URL, never resolved against it: a path like //evil.example/x stays a path.
+  const target = new URL(env.ORIGIN);
+  target.pathname = url.pathname;
+  target.search = url.search;
   const headers = new Headers(request.headers);
   // Only this Worker names the site: incoming copies are dropped before ours are set.
   headers.delete(SITE_HOST_HEADER);
   headers.delete(SITE_PROXY_SECRET_HEADER);
+  headers.delete(SITE_VISITOR_IP_HEADER);
   headers.delete("host");
   headers.set(SITE_HOST_HEADER, url.hostname);
   headers.set(SITE_PROXY_SECRET_HEADER, env.SITE_PROXY_SECRET);
   headers.set("x-forwarded-proto", "https");
   headers.set("x-forwarded-host", url.hostname);
   const visitor = request.headers.get("cf-connecting-ip");
-  if (visitor) headers.set("x-real-ip", visitor);
+  // Railway's edge overwrites X-Real-IP with the connecting (Cloudflare) address, so the visitor goes in our own header.
+  if (visitor) headers.set(SITE_VISITOR_IP_HEADER, visitor);
 
   // Bodies on site hosts are small (contact forms, the stats beacon): read whole, no streaming duplex needed.
   const body = request.method === "GET" || request.method === "HEAD" ? null : await request.arrayBuffer();

@@ -5,7 +5,7 @@ import type { AppConfig } from "@sb/config";
 import { planOffer } from "@sb/engine";
 import type { AccountRow, PaidPlanKey, Repo, SiteRow, Tier } from "@sb/platform";
 import { hasSession, type AuthSettings } from "./auth.ts";
-import { trustedForwardedHost } from "./site-hosts.ts";
+import { trustedForwardedHost, trustedVisitorIp } from "./site-hosts.ts";
 import type { UploadTicket } from "./upload-ticket.ts";
 
 /** Same-origin path only: "/x" but not "//host", "/\host" or anything with whitespace. Default: the landing page. */
@@ -57,6 +57,8 @@ const same = (a: string, b: string): boolean => a.length === b.length && timingS
  * The rightmost X-Forwarded-For entry is Railway's edge, so it is only a fallback for local runs without X-Real-IP.
  */
 export const clientIp = (c: Context): string =>
+  // Behind the edge Worker (secret checked in site-hosts.ts) Railway sees Cloudflare; the Worker names the visitor.
+  trustedVisitorIp(c.req.raw) ||
   c.req.header("x-real-ip")?.trim() || c.req.header("x-forwarded-for")?.split(",").at(-1)?.trim() || "local";
 /** A keyed hash of the client's IP for rate limits; the IP itself is never stored (cleared after a day). */
 export const ipKey = (secret: string, ip: string): string => createHmac("sha256", secret).update(`ip:${ip}`).digest("hex").slice(0, 32);

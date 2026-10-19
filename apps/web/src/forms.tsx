@@ -7,7 +7,7 @@ import { uiStrings } from "@sb/components";
 import type { Mailer, Repo, SiteRow } from "@sb/platform";
 import type { SiteSpec } from "@sb/spec";
 import { Doc, TopBar, html } from "./pages.tsx";
-import { csrfOk, type AppEnv } from "./access.ts";
+import { clientIp, csrfOk, type AppEnv } from "./access.ts";
 import { formatDateTime } from "./ui/labels.ts";
 import { EMAIL, notifyOwner } from "./form-email.ts";
 import { dayIn } from "./stats.ts";
@@ -121,8 +121,8 @@ export function registerFormRoutes(app: Hono<AppEnv>, deps: { repo: Repo; config
     // Bots fill every field; answer as if it worked so they don't learn anything.
     if (parsed.value.website) return reply(200, "formSent");
 
-    // The rightmost X-Forwarded-For entry is the one our proxy added; the left ones are client-controlled.
-    const ip = c.req.header("x-forwarded-for")?.split(",").at(-1)?.trim() ?? "local";
+    // The visitor as Railway (or, with the secret, the edge Worker) names it; access.ts clientIp.
+    const ip = clientIp(c);
     const key = senderKey(ip);
     const limits = config.limits;
     if (

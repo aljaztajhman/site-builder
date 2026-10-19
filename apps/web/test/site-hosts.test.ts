@@ -154,6 +154,16 @@ describe("behind the edge Worker", () => {
     for (const wrong of ["", "x", "q".repeat(40)]) expect(await (await via(wrong)).text()).not.toContain("prek-workerja kontakt");
   });
 
+  it("never serves the app through the Worker: a pending domain or an unknown name is a 404", async () => {
+    const id = await site("na-cakanju");
+    await platform.repo.domains.add(id, "nacakanju.si", "connected");
+    for (const host of ["nacakanju.si", "neznano.example", "app.postavi.example"]) {
+      const res = await get("app.postavi.example", "/prijava", { headers: { "x-postavi-site-host": host, "x-postavi-proxy-secret": PROXY_SECRET } });
+      expect(res.status, host).toBe(404);
+      expect(res.headers.get("set-cookie"), host).toBeNull();
+    }
+  });
+
   it("uses the x-postavi-* header names", () => {
     expect([SITE_HOST_HEADER, SITE_PROXY_SECRET_HEADER]).toEqual(["x-postavi-site-host", "x-postavi-proxy-secret"]);
   });
@@ -198,11 +208,16 @@ describe("platform subdomains", () => {
     // A slug from before the reserved list (uniqueSlug no longer gives one out).
     await site("mail");
     const resolve = siteHostResolver({ repo: platform.repo, platformDomain: "postavi.example", appHosts: [], cacheMs: 0 });
-    for (const host of ["mail.postavi.example", "www.postavi.example", "APP.postavi.example", "api.postavi.example"]) expect(await resolve(host), host).toBeNull();
+    for (const host of ["mail.postavi.example", "www.postavi.example", "APP.postavi.example", "api.postavi.example"]) expect(await resolve(host), host).toEqual({ missing: true });
     expect(await resolve("poddomena.postavi.example")).not.toBeNull();
     const r = await get("mail.postavi.example", "/");
     expect(await r.text()).not.toContain("mail domov");
-    expect((await get("mail.postavi.example", "/health")).status).toBe(200);
+    // Not the app either: a DNS slip that sends www. or admin. here gets a 404, never the dashboard or a cookie.
+    for (const host of ["mail.postavi.example", "www.postavi.example", "admin.postavi.example"]) {
+      const res = await get(host, "/prijava");
+      expect(res.status, host).toBe(404);
+      expect(res.headers.get("set-cookie"), host).toBeNull();
+    }
   });
 
   it("leave the app's own hosts alone", async () => {
