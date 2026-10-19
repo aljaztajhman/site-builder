@@ -13,7 +13,7 @@ import { EMAIL } from "./form-email.ts";
  * A plain urlencoded POST, so the homepage's fetch is a CORS simple request (no preflight). Without JavaScript the
  * form posts as a page and gets a short Slovene page back. The platform domain's origins may read the answer; any
  * other browser origin is refused (requests without an Origin aren't from a page on another site). The IP is kept
- * only as a keyed hash for the rate limits, cleared after a day (Repo.addToWaitlist).
+ * only as a keyed hash for the rate limits, deleted after a day (Repo.joinWaitlist).
  */
 
 export const WAITLIST_PATH = "/api/waitlist";
@@ -70,14 +70,15 @@ export function registerWaitlistRoutes(app: Hono<AppEnv>, deps: { repo: Repo; co
     if (str("consent") !== "1") return reply(400, "consent_required");
     const source = SOURCE.test(str("source")) ? str("source") : "";
 
-    const key = senderKey(clientIp(c));
-    const limits = config.limits;
-    if ((await repo.countWaitlistFromSender(key, 10)) >= limits.waitlistPerSenderPer10Min || (await repo.countWaitlistFromSender(key, 24 * 60)) >= limits.waitlistPerSenderPerDay) {
-      return reply(429, "rate_limited");
-    }
-    // An address already on the list gets the same answer: nobody learns who signed up.
-    await repo.addToWaitlist({ email, source, senderKey: key });
-    return reply(200);
+    const joined = await repo.joinWaitlist({
+      email,
+      source,
+      senderKey: senderKey(clientIp(c)),
+      per10Min: config.limits.waitlistPerSenderPer10Min,
+      perDay: config.limits.waitlistPerSenderPerDay,
+    });
+    // An address already on the list gets the same answer and uses up the same limit: nobody learns who signed up.
+    return joined === "limited" ? reply(429, "rate_limited") : reply(200);
   });
 }
 

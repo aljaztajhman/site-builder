@@ -27,6 +27,7 @@ export async function cleanupExpired(platform: Pick<Platform, "repo" | "storage"
   }
   const staleJobs = await repo.usage.endStaleJobs(30);
   await repo.usage.clearOldIpKeys();
+  await repo.clearOldWaitlistAttempts();
   await repo.accounts.cleanup();
   await repo.checks.cleanup(config.checker.keepDays);
   // Product events past analytics.keepDays become daily counts (idempotent: one cutoff, one transaction).

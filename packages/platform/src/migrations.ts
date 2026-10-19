@@ -541,18 +541,22 @@ export const MIGRATIONS: { id: number; name: string; sql: string }[] = [
     id: 24,
     name: "waitlist",
     // The pre-launch waitlist (apps/web/src/waitlist.ts, sign-ups from the postavi.si homepage): one email at launch,
-    // then the addresses are deleted. One row per address (any case). sender_key: keyed IP hash for the rate limits,
-    // cleared after a day like form_messages.
+    // then the addresses are deleted. One row per address (any case), with no trace of the sender. waitlist_attempts:
+    // every accepted sign-up, a repeat included (so the limit says nothing about who is on the list), by keyed IP hash,
+    // for the rate limits; rows are deleted after a day (Repo.joinWaitlist and the worker's housekeeping).
     sql: `
       create table waitlist (
         id bigserial primary key,
         email text not null,
         source text not null default '',
-        sender_key text not null default '',
         consented_at timestamptz not null default now()
       );
       create unique index waitlist_email on waitlist(lower(email));
-      create index waitlist_sender on waitlist(sender_key, consented_at);
+      create table waitlist_attempts (
+        sender_key text not null,
+        at timestamptz not null default now()
+      );
+      create index waitlist_attempts_sender on waitlist_attempts(sender_key, at);
     `,
   },
 ];

@@ -431,7 +431,7 @@ h2{font:800 clamp(32px,4.2vw,58px)/1.02 var(--display);letter-spacing:-.035em;ma
 .wl-c a{color:var(--accent-text);text-underline-offset:3px}
 .wl-hp{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
 .wl-msg{font-size:15px;font-weight:600;color:var(--ink)}
-.wl-msg:empty{display:none}
+.wl-msg:empty{position:absolute}
 .wl-msg.err{color:#b3261e}
 .wl-done{font:700 clamp(20px,1.8vw,24px)/1.25 var(--display);letter-spacing:-.01em;color:var(--ink);outline:0}
 .wl-done::before{content:"";display:inline-block;width:26px;height:26px;margin-right:10px;vertical-align:-5px;border-radius:50%;background:var(--accent) var(--tick) center/18px no-repeat}
@@ -557,12 +557,12 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
         <form class="wl" action="https://app.postavi.si/api/waitlist" method="post">
           <p class="wl-h"><b>Odpremo kmalu.</b> Pustite e-poštni naslov in obvestimo vas, ko lahko začnete.</p>
           <label class="wl-l" for="wl-e1">E-poštni naslov</label>
-          <input class="wl-in" id="wl-e1" type="email" name="email" required maxlength="254" autocomplete="email" placeholder="ime@podjetje.si">
-          <label class="wl-c"><input type="checkbox" name="consent" value="1" required><span>Strinjam se, da mi Postavi.si ob odprtju pošlje e-pošto. <a href="https://app.postavi.si/zasebnost#waitlist">Zasebnost</a></span></label>
+          <input class="wl-in" id="wl-e1" aria-describedby="wl-m1" type="email" name="email" required maxlength="254" autocomplete="email" placeholder="ime@podjetje.si">
+          <label class="wl-c"><input type="checkbox" name="consent" value="1" required aria-describedby="wl-m1"><span>Strinjam se, da mi Postavi.si ob odprtju pošlje e-pošto. <a href="https://app.postavi.si/zasebnost#waitlist">Zasebnost</a></span></label>
           <button class="btn" type="submit">Obvestite me ob odprtju</button>
           <input type="hidden" name="source" value="homepage">
           <div class="wl-hp" aria-hidden="true"><label>Spletna stran <input name="website" tabindex="-1" autocomplete="off"></label></div>
-          <p class="wl-msg" aria-live="polite"></p>
+          <p class="wl-msg" id="wl-m1" aria-live="polite"></p>
         </form>
       </div>
 
@@ -695,12 +695,12 @@ footer{display:flex;justify-content:space-between;gap:16px;color:var(--ink-3);fo
         <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 16V4M5 9l5-5 5 5"/></svg></a></p>
       <form class="wl" action="https://app.postavi.si/api/waitlist" method="post">
         <label class="wl-l" for="wl-e2">E-poštni naslov</label>
-        <input class="wl-in" id="wl-e2" type="email" name="email" required maxlength="254" autocomplete="email" placeholder="ime@podjetje.si">
-        <label class="wl-c"><input type="checkbox" name="consent" value="1" required><span>Strinjam se, da mi Postavi.si ob odprtju pošlje e-pošto. <a href="https://app.postavi.si/zasebnost#waitlist">Zasebnost</a></span></label>
+        <input class="wl-in" id="wl-e2" aria-describedby="wl-m2" type="email" name="email" required maxlength="254" autocomplete="email" placeholder="ime@podjetje.si">
+        <label class="wl-c"><input type="checkbox" name="consent" value="1" required aria-describedby="wl-m2"><span>Strinjam se, da mi Postavi.si ob odprtju pošlje e-pošto. <a href="https://app.postavi.si/zasebnost#waitlist">Zasebnost</a></span></label>
         <button class="btn" type="submit">Obvestite me ob odprtju</button>
         <input type="hidden" name="source" value="homepage">
         <div class="wl-hp" aria-hidden="true"><label>Spletna stran <input name="website" tabindex="-1" autocomplete="off"></label></div>
-        <p class="wl-msg" aria-live="polite"></p>
+        <p class="wl-msg" id="wl-m2" aria-live="polite"></p>
       </form>
     </div>
   </div>

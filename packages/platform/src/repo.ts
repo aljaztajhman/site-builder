@@ -160,6 +160,9 @@ export interface FormMessageRow {
 /** 'none': nobody to email; 'pending': being sent or waiting for a retry; 'sent'; 'failed': attempts used up. */
 export type FormNotifyStatus = "none" | "pending" | "sent" | "failed";
 
+/** Advisory lock for waitlist sign-ups (Repo.joinWaitlist); next to migrations' and usage's locks. */
+const WAITLIST_LOCK = 727_274_004;
+
 export class Repo {
   /** Accounts, allow-list, magic-link tokens and sessions. */
   readonly accounts: Accounts;
@@ -547,25 +550,30 @@ export class Repo {
 
   // ---------- The pre-launch waitlist (apps/web/src/waitlist.ts) ----------
 
-  /** Adds an address with consent now. False when it was already on the list (any case): the first sign-up is kept. */
-  async addToWaitlist(w: { email: string; source: string; senderKey: string }): Promise<boolean> {
-    const { rows } = await this.db.query("insert into waitlist (email, source, sender_key) values ($1, $2, $3) on conflict (lower(email)) do nothing returning id", [
-      w.email,
-      w.source,
-      w.senderKey,
-    ]);
-    // Like form_messages: the sender key only serves the rate limits, and /zasebnost promises it's gone after a day.
-    await this.db.query("update waitlist set sender_key = '' where sender_key <> '' and consented_at < now() - interval '1 day'");
-    return rows.length > 0;
+  /**
+   * A sign-up with consent now, under the sender's limits (keyed IP hash): "limited" when this sender already made
+   * `per10Min` attempts in 10 minutes or `perDay` in a day; otherwise the attempt is counted, a repeat included (so the
+   * limit says nothing about who is on the list), and the address is added unless it is there already (any case: the
+   * first sign-up is kept). One lock across processes: parallel requests can't all read the same count.
+   */
+  async joinWaitlist(w: { email: string; source: string; senderKey: string; per10Min: number; perDay: number }): Promise<"added" | "repeat" | "limited"> {
+    return this.db.transaction(async (q) => {
+      await q("select pg_advisory_xact_lock($1)", [WAITLIST_LOCK]);
+      // /zasebnost promises the hash is gone after a day; the worker's housekeeping deletes them too.
+      await q("delete from waitlist_attempts where at < now() - interval '1 day'");
+      const { rows: n } = await q("select count(*) filter (where at > now() - interval '10 minutes') as recent, count(*) as day from waitlist_attempts where sender_key = $1", [
+        w.senderKey,
+      ]);
+      if (Number(n[0]?.recent ?? 0) >= w.per10Min || Number(n[0]?.day ?? 0) >= w.perDay) return "limited";
+      await q("insert into waitlist_attempts (sender_key) values ($1)", [w.senderKey]);
+      const { rows } = await q("insert into waitlist (email, source) values ($1, $2) on conflict (lower(email)) do nothing returning id", [w.email, w.source]);
+      return rows.length ? "added" : "repeat";
+    });
   }
 
-  /** Sign-ups from one sender (keyed IP hash) in the last `minutes` (rate limits). */
-  async countWaitlistFromSender(senderKey: string, minutes: number): Promise<number> {
-    const { rows } = await this.db.query<{ n: string | number }>(
-      "select count(*) as n from waitlist where sender_key = $1 and consented_at > now() - make_interval(mins => $2::integer)",
-      [senderKey, minutes],
-    );
-    return Number(rows[0]?.n ?? 0);
+  /** Waitlist attempts older than a day (housekeeping): the keyed IP hashes go with them. */
+  async clearOldWaitlistAttempts(): Promise<void> {
+    await this.db.query("delete from waitlist_attempts where at < now() - interval '1 day'");
   }
 
   // ---------- The reminder before an anonymous preview is deleted (it-upsells) ----------

@@ -26,7 +26,8 @@ const signUp = (fields: Record<string, string> = {}, o: { ip?: string; origin?: 
     },
   });
 
-const rows = async () => (await platform.db.query<{ email: string; source: string; sender_key: string }>("select email, source, sender_key from waitlist order by id")).rows;
+const rows = async () => (await platform.db.query<{ email: string; source: string }>("select email, source from waitlist order by id")).rows;
+const senderKeys = async () => (await platform.db.query<{ sender_key: string }>("select sender_key from waitlist_attempts")).rows.map((r) => r.sender_key);
 
 beforeAll(async () => {
   dir = await mkdtemp(path.join(tmpdir(), "sb-waitlist-"));
@@ -47,10 +48,11 @@ describe("POST /api/waitlist", () => {
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ ok: true, message: "Hvala. Ko odpremo, vam pišemo." });
     expect(res.headers.getSetCookie()).toEqual([]);
-    const [row] = await rows();
-    expect(row).toMatchObject({ email: "ana@primer.si", source: "homepage" });
-    expect(row!.sender_key).toMatch(/^[0-9a-f]{32}$/);
-    expect(JSON.stringify(row)).not.toContain("203.0.113.1");
+    expect(await rows()).toEqual([{ email: "ana@primer.si", source: "homepage" }]);
+    const keys = await senderKeys();
+    expect(keys).toHaveLength(1);
+    expect(keys[0]).toMatch(/^[0-9a-f]{32}$/);
+    expect(keys[0]).not.toContain("203.0.113.1");
   });
 
   it("answers a repeat sign-up (any case) the same and keeps one row", async () => {
@@ -93,6 +95,15 @@ describe("POST /api/waitlist", () => {
     expect(((await blocked.json()) as { error: string }).error).toBe("rate_limited");
     expect((await rows()).some((r) => r.email === "r-next@primer.si")).toBe(false);
     expect((await signUp({ email: "r-other@primer.si" }, { ip: "198.51.100.2" })).status).toBe(200);
+  });
+
+  it("counts a repeat against the limit and holds it under parallel requests", async () => {
+    const limit = config.limits.waitlistPerSenderPer10Min;
+    for (let i = 0; i < limit; i++) expect((await signUp({ email: "ana@primer.si" }, { ip: "198.51.100.3" })).status).toBe(200);
+    expect((await signUp({ email: "nova@primer.si" }, { ip: "198.51.100.3" })).status).toBe(429);
+    const all = await Promise.all(Array.from({ length: 3 * limit }, (_, i) => signUp({ email: `p${i}@primer.si` }, { ip: "198.51.100.4" })));
+    expect(all.filter((r) => r.status === 200)).toHaveLength(limit);
+    expect(all.filter((r) => r.status === 429)).toHaveLength(2 * limit);
   });
 
   it("lets postavi.si and www read the answer (CORS) and refuses other origins", async () => {
