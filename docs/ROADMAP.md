@@ -10,7 +10,7 @@ Written on 2026-10-16 from an inventory of TASKS.md (263 done, 158 open), HQ, do
 
 ## Now
 
-- **Current milestone:** M5 Domains with the Postavi rename (owner, 2026-10-19), while M2 waits for the rest of the owner's phone run (docs/owner-phone-run.md; criteria 1, 2, 5 and 6; M2 is 2 of 6). M5 plan: `.claude/plans/m5-postavi.md`. Layout: the homepage stays on postavi.si, the app moves to app.postavi.si, customer sites at <name>.postavi.si. Next: the rename and edge Worker PR, then postavi.si's DNS moves to Cloudflare. One M1 follow-up for M2's first week: the slaščičarna hours badge under the phone buttons (TASKS).
+- **Current milestone:** M5 Domains with the Postavi rename (owner, 2026-10-19), while M2 waits for the rest of the owner's phone run (docs/owner-phone-run.md; criteria 1, 2, 5 and 6; M2 is 2 of 6). M5 plan: `.claude/plans/m5-postavi.md`. Layout: the homepage stays on postavi.si, the app moves to app.postavi.si, customer sites at <name>.postavi.si. Live since 2026-10-19: DNS on Cloudflare, sites at <name>.postavi.si, the Postavi name (PR #252). Next: the app moves to app.postavi.si, then Cloudflare for SaaS (needs the owner's payment method on Cloudflare) and one connected test domain. One M1 follow-up for M2's first week: the slaščičarna hours badge under the phone buttons (TASKS).
 - **Order (owner, 2026-10-18):** company registration comes last; next after M2 are M5 (domains, with the Postavi rename) and M6 (operations), then M4 in test mode and M7a, a free beta.
 - **Owner, in parallel (long lead times):** register the company (M3), find a lawyer for the legal pages (M3). New name Postavi; postavi.si bought 2026-10-17 (M5).
 - **Side work (owner switched to it, 2026-10-18):** the postavi.si coming-soon page: phone intro, the description → build → review → publish → edit demo, the search story, the time band, "live site with an editor" copy (#231, #233, #238, this PR).
@@ -82,15 +82,17 @@ Exit criteria:
 - [ ] A switch-on checklist for the day the company exists: the config fields, live keys and the one live payment test, each step written down; built and tested on placeholder company data before then.
 - [ ] Upsells that need billing (TASKS:374) are done or parked.
 
-### M5 · Domains (Claude + owner purchases) — 1 of 4 met (adapters and UI built on fakes)
+### M5 · Domains (Claude + owner purchases) — 2 of 4 met (adapters and UI built on fakes)
 
 A customer's site can live on a Postavi subdomain or on a domain its owner already has.
 
 Decisions 2026-10-19 (owner): postavi.si's DNS moves from Namecheap to Cloudflare, with every record copied first. In the free beta, sites live at <name>.postavi.si, and owners can connect a domain they already have. Buying domains for customers (Openprovider) waits for paid plans and moves to M7b.
 
+**Live 2026-10-19:** postavi.si's DNS is on Cloudflare (all 9 Namecheap records copied and compared first; nameservers switched, delegated in ~54 min; email and the homepage unaffected). The edge Worker `postavi-edge` is deployed through the Cloudflare API (ORIGIN `https://web-preview-31c6.up.railway.app`, route `*.postavi.si/*`, proxied wildcard `*` AAAA 100::; the apex, www, app and the mail records stay DNS-only, so they never pass the Worker). Railway: `PLATFORM_DOMAIN=postavi.si` on web and worker, `SITE_PROXY_SECRET` on web, `EMAIL_FROM` "Postavi <prijava@mail.postavi.si>", custom domain app.postavi.si added (certificate waits for resolvers to drop a cached NXDOMAIN; then APP_URL moves). Checked: https://gostilna-pri-zlati.postavi.si/ serves over HTTPS through the Worker with no cookie and noindex; an unknown name and admin.postavi.si answer 404; the worker republished 1 site for its new address (1 blocked by the checklist).
+
 Exit criteria:
-- [ ] Platform domain bought (owner: postavi.si, bought 2026-10-17) and set as `PLATFORM_DOMAIN` on web and worker (TASKS:384, :393–395).
-- [ ] Cloudflare for SaaS adapter wired and the edge Worker deployed (TASKS:388, :390). Openprovider moved to M7b (owner, 2026-10-19).
+- [x] Platform domain bought (owner: postavi.si, bought 2026-10-17) and set as `PLATFORM_DOMAIN` on web and worker (TASKS:384, :393–395). Done 2026-10-19: sites live at <name>.postavi.si through the edge Worker.
+- [ ] Cloudflare for SaaS adapter wired and the edge Worker deployed (TASKS:388, :390). Openprovider moved to M7b (owner, 2026-10-19). Worker deployed 2026-10-19; SaaS needs a payment method on the Cloudflare account (owner).
 - [ ] End-to-end on live: connect a test domain → TLS → the site serves. Connecting is switched on (registering stays off), and `seo.indexSiteHosts` decided (TASKS:398).
 - [x] Who pays for a domain before billing: nobody; no domains are bought before paid plans (owner, 2026-10-19). The d.o.o. contact person (TASKS:391) moves to M7b with registering.
 

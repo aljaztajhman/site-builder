@@ -7,7 +7,7 @@ workers_dev = false
 
 [vars]
 # Railway's own address of the web service (not app.postavi.si: Railway routes by Host). Placeholder.
-ORIGIN = "https://REPLACE-with-railway-web-domain.up.railway.app"
+ORIGIN = "https://web-preview-31c6.up.railway.app"
 PLATFORM_DOMAIN = "postavi.si"
 
 # Routes are placeholders until DNS moves to Cloudflare (docs/plans/custom-domains.md):
@@ -16,6 +16,6 @@ PLATFORM_DOMAIN = "postavi.si"
 # - the Cloudflare for SaaS fallback: customers' own hostnames (CNAME to the fallback origin) reach the
 #   Worker through a route on the SaaS zone, added by the provisioning job per hostname
 #   (packages/platform/src/cloudflare-saas.ts) or as one wildcard route "*/*" on that zone.
-# routes = [
-#   { pattern = "*.postavi.si/*", zone_name = "postavi.si" },
-# ]
+routes = [
+  { pattern = "*.postavi.si/*", zone_name = "postavi.si" },
+]

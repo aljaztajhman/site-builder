@@ -32,6 +32,8 @@ the app (APP_URL), `<slug>.postavi.si` published sites (PLATFORM_DOMAIN=postavi.
 
 ## Deploy
 
+Deployed 2026-10-19 as `postavi-edge` through the Cloudflare API (no wrangler on the dev PC): the module compiled with esbuild, uploaded with `PUT /accounts/{id}/workers/scripts/postavi-edge` (bindings ORIGIN and PLATFORM_DOMAIN as plain text, SITE_PROXY_SECRET as a secret), the route `*.postavi.si/*` and a proxied wildcard `*` AAAA `100::` on the zone. ORIGIN is `https://web-preview-31c6.up.railway.app`. The wrangler way below does the same.
+
 ```sh
 cd infra/edge
 npx wrangler login
