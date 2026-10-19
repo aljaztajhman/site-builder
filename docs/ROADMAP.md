@@ -96,12 +96,12 @@ Exit criteria:
 - [ ] End-to-end on live: connect a test domain → TLS → the site serves. Connecting is switched on (registering stays off), and `seo.indexSiteHosts` decided (TASKS:398).
 - [x] Who pays for a domain before billing: nobody; no domains are bought before paid plans (owner, 2026-10-19). The d.o.o. contact person (TASKS:391) moves to M7b with registering.
 
-### M6 · Operations (Claude) — 5 of 6 met
+### M6 · Operations (Claude) — 6 of 6 met (Claude proposes closing it; the owner decides)
 
 It keeps running, and we know when it doesn't.
 
 Exit criteria:
-- [ ] Production environment separate from staging, with a promote workflow (TASKS:351). Production exists since 2026-10-19 (Railway env `production`, own Postgres 18 and bucket, deploys branch `release`; app.postavi.si and the edge Worker point at it; `preview` is staging at its Railway address). `release` was fast-forwarded by hand once to bootstrap. Open: the promote workflow needs `PRODUCTION_READY`, `PRODUCTION_URL` and the production bucket secrets in GitHub for its migrate-check.
+- [x] Production environment separate from staging, with a promote workflow (TASKS:351). Production exists since 2026-10-19 (Railway env `production`, own Postgres 18 and bucket, deploys branch `release`; app.postavi.si and the edge Worker point at it; `preview` is staging at its Railway address). `release` was fast-forwarded by hand once to bootstrap. First promote 2026-10-19: v0.1.0 (main 37cf19a), migrate-check restored production's backup and ran the migrations, release fast-forwarded, production healthy on it. The bucket secrets went from Railway to GitHub by script, never displayed.
 - [x] Repository protection on main (TASKS:352): 17 required checks, no force pushes, no deletions (checked 2026-10-19).
 - [x] Backups with a restore drill done once (TASKS:353). 2026-10-19: Railway cron service `backup` in production (03:00 UTC, PostgreSQL 18 client, `Dockerfile.backup`, PR #256); first backup `backups/2026-10-19.sql.gz` written and checked; restore drill into a throwaway database: 36 tables, 60 of 60 rows, dropped after (`pnpm db:restore-drill`).
 - [x] Monitoring and alerts on errors and spend (TASKS:358). Daily spend cap set on Railway. 2026-10-19 (PR #255): the web process emails ALERT_EMAIL on failed health checks, failed jobs, a silent worker, spend at 80 % and at the cap; GitHub `uptime` checks app.postavi.si and postavi.si every 15 min; cap €3/day on both environments.
