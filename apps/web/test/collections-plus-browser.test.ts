@@ -54,7 +54,7 @@ afterAll(async () => {
 });
 
 /** The note on a collection kept from Plus (read-only). */
-const READ_ONLY = "Vnosi zbirke Novice ostanejo na strani, kot so. Dodajate, urejate, brišete in razvrščate jih lahko na paketu Plus (29 € na mesec).";
+const READ_ONLY = "Vnosi zbirke Novice ostanejo na strani, kot so. Dodajate, urejate, brišete in razvrščate jih lahko na paketu Plus (39 € na mesec).";
 
 const POSTS = [
   { title: "Odprli smo", date: "2026-09-01", summary: "Prvi dan v pekarni.", body: ["Vrata smo odprli v ponedeljek."] },

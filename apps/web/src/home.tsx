@@ -499,10 +499,10 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
                 <div className="plan">
                   <h3>{std.name}</h3>
                   <div className="amt">
-                    {`${wholeEur.format(std.monthlyEur)} `}
-                    <small>na mesec</small>
+                    {`${wholeEur.format(std.yearlyEur)} `}
+                    <small>{`na leto${std.yearlyIncludesDomain ? ", domena vključena" : ""}`}</small>
                   </div>
-                  <p className="yearly">{`ali ${wholeEur.format(std.yearlyEur)} na leto${std.yearlyIncludesDomain ? ", domena vključena" : ""}`}</p>
+                  <p className="yearly">{`ali ${wholeEur.format(std.monthlyEur)} na mesec`}</p>
                   <p className="muted">Celotna stran, ki jo vodite sami.</p>
                   <ul>
                     <li>{`Do ${std.site.maxPages} strani: ponudba, cenik, o nas, kontakt`}</li>
@@ -516,10 +516,14 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
                       {foundingLeft !== 0 && (
                         <div id="founding">
                           <dt>
-                            {`Prvo leto za prvih ${std.foundingOffer.customers} strank`}
+                            {`${std.foundingOffer.renewalDiscountPercent ? "Za" : "Prvo leto za"} prvih ${std.foundingOffer.customers} strank`}
                             {foundingLeft !== null && <span className="left">{` · ${placesLeft(foundingLeft)}`}</span>}
                           </dt>
-                          <dd>{wholeEur.format(std.foundingOffer.firstYearEur)}</dd>
+                          <dd>
+                            {std.foundingOffer.renewalDiscountPercent
+                              ? `Prvo leto ${wholeEur.format(std.foundingOffer.firstYearEur)}, nato ${std.foundingOffer.renewalDiscountPercent} % popusta za vedno`
+                              : wholeEur.format(std.foundingOffer.firstYearEur)}
+                          </dd>
                         </div>
                       )}
                       <div>
@@ -535,10 +539,10 @@ export function homePage({ config, signedIn, csrf, fullSite, allowance, botSiteK
                 <div className="plan">
                   <h3>{plus.name}</h3>
                   <div className="amt">
-                    {`${wholeEur.format(plus.monthlyEur)} `}
-                    <small>na mesec</small>
+                    {`${wholeEur.format(plus.yearlyEur)} `}
+                    <small>{`na leto${plus.yearlyIncludesDomain ? ", domena vključena" : ""}`}</small>
                   </div>
-                  <p className="yearly">{`ali ${wholeEur.format(plus.yearlyEur)} na leto${plus.yearlyIncludesDomain ? ", domena vključena" : ""}`}</p>
+                  <p className="yearly">{`ali ${wholeEur.format(plus.monthlyEur)} na mesec`}</p>
                   <p className="muted">{`Vse iz paketa ${std.name} in še:`}</p>
                   <ul>
                     <li>{`Do ${plus.site.maxPages} strani`}</li>

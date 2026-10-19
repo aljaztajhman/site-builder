@@ -336,7 +336,7 @@
       "watermark": "app-badge",
       "publishable": false
     },
-    "$comment2": "Paid plans (sb-pricing 2026-10-01 for Osnovni; sb-tiers proposed 2026-10-03 adds Plus). Whole euros, VAT included, the same whether or not we're VAT-registered. billingEnabled stays false until the legal entity exists (sb-legal-entity); while it's false the landing page calls these planned prices. Every plan must make money even when its owner uses the whole AI allowance: the schema checks each price against `costs` (VAT taken off, the domain, hosting, card fees) and refuses a config where any plan, the founding year or the AI top-up could lose money.",
+    "$comment2": "Paid plans (sb-pricing 2026-10-01 for Osnovni; sb-tiers proposed 2026-10-03 adds Plus; sb-pricing-2 2026-10-19 sets today's prices and the founding renewal discount: the first customers pay foundingOffer.firstYearEur for year one, then the yearly price less renewalDiscountPercent for life). Whole euros, VAT included, the same whether or not we're VAT-registered. billingEnabled stays false until the legal entity exists (sb-legal-entity); while it's false the landing page calls these planned prices. Every plan must make money even when its owner uses the whole AI allowance: the schema checks each price against `costs` (VAT taken off, the domain, hosting, card fees) and refuses a config where any plan, the founding year or the AI top-up could lose money.",
     "billingEnabled": false,
     "vatIncluded": true,
     "costs": {
@@ -349,22 +349,22 @@
     },
     "standard": {
       "name": "Osnovni",
-      "monthlyEur": 15,
-      "yearlyEur": 150,
+      "monthlyEur": 19,
+      "yearlyEur": 190,
       "yearlyIncludesDomain": true,
       "yearlyPayment": "invoice-bank-transfer",
-      "foundingOffer": { "customers": 100, "firstYearEur": 99 },
-      "setupService": { "eur": 79, "includedYearly": false },
+      "foundingOffer": { "customers": 100, "firstYearEur": 99, "renewalDiscountPercent": 20 },
+      "setupService": { "eur": 149, "includedYearly": false },
       "ai": { "allowanceEurPerMonth": 1.5, "firstMonthExtraEur": 3 },
       "site": { "maxPages": 8, "locales": 1, "generatedPicturesPerMonth": 3, "collections": [] }
     },
     "premium": {
       "name": "Plus",
-      "monthlyEur": 29,
-      "yearlyEur": 290,
+      "monthlyEur": 39,
+      "yearlyEur": 390,
       "yearlyIncludesDomain": true,
       "yearlyPayment": "invoice-bank-transfer",
-      "setupService": { "eur": 79, "includedYearly": true },
+      "setupService": { "eur": 149, "includedYearly": true },
       "ai": { "allowanceEurPerMonth": 3.5, "firstMonthExtraEur": 3 },
       "site": { "maxPages": 20, "locales": 2, "generatedPicturesPerMonth": 10, "collections": ["blog", "events", "services", "team"] }
     },

@@ -260,7 +260,7 @@ export interface AccessInfo {
   reminder: { email: string | null; status: "none" | "pending" | "sent" | "failed"; sendsAt: string } | null;
 }
 
-/** "Osnovni: 15 € na mesec ali 150 € na leto, domena je vključena v letno ceno." */
+/** "Osnovni: 19 € na mesec ali 190 € na leto, domena je vključena v letno ceno." */
 export function offerText(config: AppConfig, plan: PlanKey = "standard"): string {
   const p = config.plans[plan];
   return `${p.name}: ${p.monthlyEur} € na mesec ali ${p.yearlyEur} € na leto${p.yearlyIncludesDomain ? ", domena je vključena v letno ceno" : ""}.`;

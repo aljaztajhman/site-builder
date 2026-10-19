@@ -72,8 +72,17 @@ const PaidPlan = z
     yearlyIncludesDomain: z.boolean(),
     /** How the yearly plan is paid: an invoice settled by bank transfer. */
     yearlyPayment: z.enum(["invoice-bank-transfer"]),
-    /** The first `customers` customers pay `firstYearEur` for their first year, then the yearly price. */
-    foundingOffer: z.strictObject({ customers: z.number().int().positive(), firstYearEur: z.number().positive() }).optional(),
+    /**
+     * The first `customers` customers pay `firstYearEur` for their first year, then the yearly price, less
+     * `renewalDiscountPercent` for life when it is set (sb-pricing-2, 2026-10-19).
+     */
+    foundingOffer: z
+      .strictObject({
+        customers: z.number().int().positive(),
+        firstYearEur: z.number().positive(),
+        renewalDiscountPercent: z.number().int().min(0).max(99).optional(),
+      })
+      .optional(),
     /** The one-off "we set it up with you" service, and whether the yearly plan includes it. */
     setupService: z.strictObject({ eur: z.number().positive(), includedYearly: z.boolean() }),
     /** A hard monthly € limit on AI work, counted from real costs; direct editing is never limited. */
@@ -110,7 +119,7 @@ type PlanCostsConfig = z.infer<typeof PlanCosts>;
  * us (the whole AI allowance, the first month's extra, the domain when included, hosting). Yearly is
  * paid by bank transfer (no card fee); monthly by card.
  */
-export function planMargins(p: PaidPlanConfig, c: PlanCostsConfig): { monthly: number; yearly: number; foundingYear: number | null } {
+export function planMargins(p: PaidPlanConfig, c: PlanCostsConfig): { monthly: number; yearly: number; foundingYear: number | null; foundingRenewalYear: number | null } {
   const net = (gross: number, card: boolean) => gross / (1 + c.vatRate) - (card ? (gross * c.cardFeePercent) / 100 + c.cardFeeFixedEur : 0);
   const hostingMonth = c.hostingEurPerSitePerYear / 12;
   const aiYear = 12 * p.ai.allowanceEurPerMonth + p.ai.firstMonthExtraEur;
@@ -120,6 +129,9 @@ export function planMargins(p: PaidPlanConfig, c: PlanCostsConfig): { monthly: n
     monthly: net(p.monthlyEur, true) - (p.ai.allowanceEurPerMonth + p.ai.firstMonthExtraEur + hostingMonth),
     yearly: net(p.yearlyEur, false) - yearCost,
     foundingYear: p.foundingOffer ? net(p.foundingOffer.firstYearEur, false) - yearCost : null,
+    // A founding customer's later years: the yearly price less the lifetime discount (null without one).
+    foundingRenewalYear:
+      p.foundingOffer?.renewalDiscountPercent !== undefined ? net((p.yearlyEur * (100 - p.foundingOffer.renewalDiscountPercent)) / 100, false) - yearCost : null,
   };
 }
 
@@ -679,7 +691,7 @@ export const AppConfigSchema = z.object({
     /** "AI paket": more allowance for this month, sold when a plan's is used up. */
     aiTopUp: z.object({ eur: z.number().positive(), allowanceEur: z.number().positive(), maxPerMonth: z.number().int().min(0) }),
   })
-    .refine((p) => PLAN_KEYS.every((k) => { const m = planMargins(p[k], p.costs); return m.monthly > 0 && m.yearly > 0 && (m.foundingYear ?? 1) > 0; }), {
+    .refine((p) => PLAN_KEYS.every((k) => { const m = planMargins(p[k], p.costs); return m.monthly > 0 && m.yearly > 0 && (m.foundingYear ?? 1) > 0 && (m.foundingRenewalYear ?? 1) > 0; }), {
       message: "a paid plan could lose money: its price without VAT and fees must cover the whole AI allowance, the domain and hosting (planMargins)",
     })
     .refine((p) => p.aiTopUp.eur / (1 + p.costs.vatRate) - (p.aiTopUp.eur * p.costs.cardFeePercent) / 100 - p.costs.cardFeeFixedEur > p.aiTopUp.allowanceEur, {

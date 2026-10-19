@@ -40,7 +40,7 @@ export const collectionKinds = (spec: Pick<SiteSpec, "collections">): Collection
     .filter(([, v]) => v !== undefined && v !== null)
     .map(([k]) => k as CollectionKey);
 
-/** "Plus (29 € na mesec)": the plan an upsell points to. */
+/** "Plus (39 € na mesec)": the plan an upsell points to. */
 export const planOffer = (config: AppConfig, plan: PlanKey): string => `${config.plans[plan].name} (${config.plans[plan].monthlyEur} € na mesec)`;
 
 export interface PlanUpgrade {

@@ -115,7 +115,7 @@ describe.each([1280, 360])("upsells at %i px", (width) => {
       await locked.waitFor();
       expect(await locked.locator("li .name").allTextContents()).toEqual(["Ponudba", "O nas", "Kontakt"]);
       expect(await locked.locator("li .plan-tag").first().textContent()).toBe("Osnovni");
-      expect(await locked.locator(".price-line").textContent()).toBe("Osnovni: 15 € na mesec ali 150 € na leto, domena je vključena v letno ceno.");
+      expect(await locked.locator(".price-line").textContent()).toBe("Osnovni: 19 € na mesec ali 190 € na leto, domena je vključena v letno ceno.");
       // The domain the publish step would offer (the fake registrar's check), named before any account.
       await expect.poll(() => locked.textContent()).toMatch(/Domena [a-z0-9-]+\.si je prosta\. Objava na njej je del naročnine Osnovni\./);
       // The reminder: one address, said back with the day it goes.
@@ -151,7 +151,7 @@ describe.each([1280, 360])("upsells at %i px", (width) => {
       // On a phone the bar has room for "Objavi" only; the panel names the domain.
       expect(await publish.locator(".label").isVisible()).toBe(width > 900);
       await publish.click();
-      await expect.poll(() => page.locator(".toast-text").textContent()).toBe(`Objava na ${domain} je del naročnine Osnovni: 15 € na mesec ali 150 € na leto, domena je vključena v letno ceno. Predogled lahko še naprej urejate.`);
+      await expect.poll(() => page.locator(".toast-text").textContent()).toBe(`Objava na ${domain} je del naročnine Osnovni: 19 € na mesec ali 190 € na leto, domena je vključena v letno ceno. Predogled lahko še naprej urejate.`);
       expect(await noSidewaysScroll(page)).toBe(true);
       if (SHOTS) await page.screenshot({ path: path.join(SHOTS, `upsell-free-${width}.png`) });
     } finally {
@@ -173,15 +173,15 @@ describe.each([1280, 360])("upsells at %i px", (width) => {
       const add = page.locator("#add-page");
       await add.waitFor();
       expect(await add.locator(".plan-tag").textContent()).toBe("Plus");
-      expect(await page.locator("#pages-limit").textContent()).toBe("Paket Osnovni ima največ 8 strani. Paket Plus (29 € na mesec) jih ima do 20.");
+      expect(await page.locator("#pages-limit").textContent()).toBe("Paket Osnovni ima največ 8 strani. Paket Plus (39 € na mesec) jih ima do 20.");
       await add.click();
-      await expect.poll(() => page.locator(".toast").textContent()).toContain("Paket Plus (29 € na mesec) jih ima do 20.");
+      await expect.poll(() => page.locator(".toast").textContent()).toContain("Paket Plus (39 € na mesec) jih ima do 20.");
       expect((await platform.repo.getSpec(id))!.spec.pages.filter((p) => p.kind === "standard").length).toBe(7);
       // Collections are Plus: each button names it, and a tap says so.
       expect(await page.locator("[data-locked] .plan-tag").allTextContents()).toEqual(["Plus", "Plus", "Plus", "Plus"]);
       await page.locator('[data-locked="blog"]').click();
-      await expect.poll(() => page.locator(".toast-text").textContent()).toBe("Novice so v paketu Plus (29 € na mesec).");
-      expect(await page.locator("#locales-limit").textContent()).toBe("Paket Osnovni ima stran v enem jeziku. Paket Plus (29 € na mesec) ima stran v dveh jezikih, na primer v slovenščini in angleščini. Plus");
+      await expect.poll(() => page.locator(".toast-text").textContent()).toBe("Novice so v paketu Plus (39 € na mesec).");
+      expect(await page.locator("#locales-limit").textContent()).toBe("Paket Osnovni ima stran v enem jeziku. Paket Plus (39 € na mesec) ima stran v dveh jezikih, na primer v slovenščini in angleščini. Plus");
       expect(await noSidewaysScroll(page)).toBe(true);
       if (SHOTS) {
         await add.scrollIntoViewIfNeeded();

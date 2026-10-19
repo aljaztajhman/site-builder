@@ -125,13 +125,13 @@ Before buying: a trademark search for "Izvesek" at SIPO and EUIPO TMview, classe
 Decided (`sb-pricing`, 2026-10-01); the numbers live in config (`plans.standard`; a second plan, Plus, is proposed in `sb-tiers`, docs/plans/pricing-tiers.md). Billing isn't built yet and stays switched off in config until the legal entity exists (`sb-legal-entity`), so until then these are planned prices and the landing page says so.
 
 - **One plan.** Full site, edits (chat, editor, phone), hosting, SSL, forms, export. No tier table; the decision is yes or no.
-- **€15/month or €150/year, VAT included, the domain included on yearly.** Many s.p. aren't VAT-registered (threshold €60,000) and can't deduct it, and ZEPT requires prices on websites to include tax anyway. Same price whether or not we're VAT-registered.
+- **€19/month or €190/year, VAT included, the domain included on yearly** (`sb-pricing-2`, 2026-10-19; was €15 and €150). The landing page shows the yearly price first and the monthly in small print. Many s.p. aren't VAT-registered (threshold €60,000) and can't deduct it, and ZEPT requires prices on websites to include tax anyway. Same price whether or not we're VAT-registered.
 - **Yearly by invoice and bank transfer (UPN QR).** Slovenian small businesses are used to a yearly hosting invoice. Bank transfers also avoid the fiscal-verification question that online card payments raise (section 9). Card/SEPA for monthly later, with Stripe.
-- **Founding customers** (first 100): first year €99, then the normal price. Reserved on the waitlist before the entity exists (no payment), paid by invoice after.
-- **"Uredimo namesto vas"** (we set it up with you): €79 one-off, optional. A 20-minute call, we fill the missing facts, connect the domain, set up the Google Business Profile. For owners who won't self-serve; during launch it's also the best customer research we can get.
+- **Founding customers** (first 100): first year €99, then the yearly price with 20 % off for life (`sb-pricing-2`). Reserved on the waitlist before the entity exists (no payment), paid by invoice after.
+- **"Uredimo namesto vas"** (we set it up with you): €149 one-off (was €79), optional. A 20-minute call, we fill the missing facts, connect the domain, set up the Google Business Profile. For owners who won't self-serve; during launch it's also the best customer research we can get.
 - *Proposals, not part of the decision:* **free until you publish** (the preview and editing are free; payment starts at publish); **30 days money back**, and "cancel any time, take your site with you".
 
-**Unit economics** (*assumptions* until billing runs). €150/year incl. VAT is €123 net. AI edits, domain, payment costs and a share of hosting ≈ €20–25/year per customer, so ~€100/year gross margin. Infrastructure (~€15–50/month) is covered by 5 customers. **~450 customers ≈ one founder's full-time income.** ~15 % of s.p. close every year, so even a perfect product loses customers. At a 2–3 year life a customer is worth ~€200–300 margin, so channels must acquire one for **≤ €60–80**.
+**Unit economics** (*assumptions* until billing runs). €190/year incl. VAT is €155.74 net. AI edits, domain, payment costs and a share of hosting ≈ €20–25/year per customer, so ~€130/year gross margin. Infrastructure (~€15–50/month) is covered by 5 customers. **~350 customers ≈ one founder's full-time income.** ~15 % of s.p. close every year, so even a perfect product loses customers. At a 2–3 year life a customer is worth ~€260–390 margin, so channels must acquire one for **≤ €60–80**.
 
 ## 6. Channels, in order
 
@@ -201,7 +201,7 @@ Decided (`sb-pricing`, 2026-10-01); the numbers live in config (`plans.standard`
 | "Nečak mi bo naredil." | And when he's busy? Here you change the hours yourself from the phone in 10 seconds. |
 | "Nimam časa." | Five photos and two sentences. We'll do the rest with you by phone. |
 | "Nimam dobrih fotografij." | The design works with text; a partner photographer can shoot ten photos. |
-| "Predrago." | €12.50 a month on yearly, domain included. One new customer a year pays for it. |
+| "Predrago." | €15.83 a month on yearly (€190), domain included. One new customer a year pays for it. |
 | "AI si izmišljuje." | Ours doesn't: whatever you didn't tell us stays empty until you fill it. Show them the gaps. |
 | "Kaj če nehate delati?" | Download the whole site today; it runs anywhere without us. The domain is in your name. |
 | "Že imam domeno in e-pošto." | Keep both; we point the domain and don't touch your email. (Needs custom domains: section 12.) |
@@ -287,7 +287,8 @@ In the Decision Inbox, each with a recommendation:
 - `sb-brand-name`: the name (Izvesek recommended)
 - `sb-first-market`: decided 2026-10-01, one town in person, 3 verticals (restaurants, hairdressers, tradespeople). **Open: the town, to be named by the owner**
 - `sb-roadmap-order`: decided 2026-10-01, billing and custom domains before CMS collections; only price-list/menu editing comes forward
-- `sb-pricing`: decided 2026-10-01, €15/month or €150/year incl. VAT, domain included on yearly, yearly by invoice and bank transfer, founding first year €99 for the first 100, optional €79 setup (section 5)
+- `sb-pricing`: decided 2026-10-01, €15/month or €150/year incl. VAT, domain included on yearly, yearly by invoice and bank transfer, founding first year €99 for the first 100, optional €79 setup (section 5). Superseded for the numbers by `sb-pricing-2`
+- `sb-pricing-2`: decided 2026-10-19, Osnovni €19/month or €190/year, Plus €39/month or €390/year, setup service €149, founding first year €99 then 20 % off the yearly price for life; the landing page shows the yearly price first (section 5)
 - `sb-preview-gate`: email confirmation before or after the preview
 - `sb-legal-entity`: decided 2026-10-01, register after billing is built, before the first charge
 - `sb-gtm-budget`: decided 2026-09-30, minimal: domains and trademark only (~€40 + SIPO fee)
