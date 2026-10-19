@@ -262,7 +262,7 @@ describe("app root, start page and plans", () => {
     const withBilling = { ...config, plans: { ...config.plans, billingEnabled: true } };
     const p1 = pricing(withBilling, null);
     expect(p1.note).not.toContain("Načrtovane cene");
-    expect(p1.note).toBe("Cene so z DDV. Letni paket plačate po računu z bančnim nakazilom.");
+    expect(p1.note).toBe("Cene so z DDV. Plačate s kartico, mesečno ali letno, in stran objavite takoj po plačilu. Naročnino lahko kadarkoli prekličete, velja do konca plačanega obdobja.");
     expect(p1.faq.map((f) => f.a).join(" ")).toContain("Pri letnem paketu bo domena vključena v ceno.");
     const noDomain = { ...config, plans: { ...config.plans, standard: { ...config.plans.standard, yearlyIncludesDomain: false }, premium: { ...config.plans.premium, yearlyIncludesDomain: false } } };
     const p2 = pricing(noDomain, null);
