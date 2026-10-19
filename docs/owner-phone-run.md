@@ -9,7 +9,7 @@ Write down anything odd as you go (a screenshot is enough): slow, confusing, wro
 - [x] Your email is on the allow-list (plan Osnovni, done 2026-10-18), so you can make the whole site and publish.
 
 ## The run
-1. [ ] Open https://stranko.einvoicecheck.eu on the phone (not signed in; use a private tab if you were signed in before). The first screen makes sense without zooming.
+1. [ ] Open https://app.postavi.si on the phone (the app moved there on 2026-10-19; sign-in links point there) (not signed in; use a private tab if you were signed in before). The first screen makes sense without zooming.
 2. [ ] Without signing in, fill in the business: name, a few sentences about it, phone, town. Add your photos from the gallery (or take one with the camera). Every photo is accepted. If a photo is refused, note which phone and what it said (iPhone photos are HEIC). If a "Preverjamo, da niste robot" check appears, it passes.
 3. [ ] Tap "Ustvari stran". The first preview appears within a minute. Note the seconds. The preview has the small "Predogled" badge, and publishing asks you to sign in.
 4. [ ] Sign in with your email to keep the preview. The sign-in email arrives within a minute, from `prijava@mail.postavi.si`, and is not in spam. Tap the link and confirm. Your preview is now in your account.
