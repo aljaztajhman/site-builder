@@ -499,6 +499,24 @@ export const AppConfigSchema = z.object({
     /** Below Resend's 24 h idempotency window, so a retry never sends twice. */
     retryWithinHours: z.number().int().min(1).max(23),
   }),
+  /**
+   * Admin alerts (apps/web/src/alerts.ts): a watchdog in the web service emails ALERT_EMAIL (off when unset) every
+   * `everyMinutes` check; each kind at most once per its cooldown (the spend ones once per UTC day).
+   */
+  alerts: z.object({
+    everyMinutes: z.number().int().positive(),
+    /** Time limit of each health check and query (also /health's): a hung database or bucket counts as failing. */
+    checkTimeoutMs: z.number().int().positive(),
+    /** How often the worker writes its heartbeat. */
+    heartbeatSeconds: z.number().int().positive(),
+    /** No worker heartbeat for this long is an alert. */
+    workerSilentMinutes: z.number().int().positive(),
+    /** At least `threshold` generation or chat-edit jobs failed within `windowMinutes`. */
+    failedJobs: z.object({ windowMinutes: z.number().int().positive(), threshold: z.number().int().positive() }),
+    /** Share of the daily spend cap at which the warning goes out (the cap itself is a second alert). */
+    spendWarnShare: z.number().gt(0).lt(1),
+    cooldownMinutes: z.object({ health: z.number().int().positive(), failedJobs: z.number().int().positive(), workerSilent: z.number().int().positive() }),
+  }),
   targets: z.object({
     homepagePreviewEur: z.number(),
     homepagePreviewSeconds: z.number(),
