@@ -1,0 +1,48 @@
+{
+  "$comment": "Storyboard stills for the promo video (docs/plans/promo-video.md, step 2). One still per generated shot of the picked concepts (1 Pod umivalnikom, 4 Imate spletno stran?); concept 8 has no generated shots. `style` is appended to every prompt. People and faces are allowed here, unlike site pictures. Screens are asked blank so the real app can be composited in.",
+  "style": "Realistic photograph, vertical 9:16 framing, natural available light, true-to-life slightly muted colours, an ordinary present-day Slovenian setting with small imperfections and signs of use, candid documentary feel, shallow depth of field. No text or lettering anywhere, no logos, no watermark, no borders.",
+  "shots": [
+    {
+      "id": "1a-sink",
+      "concept": 1,
+      "subject": "Under the sink: the phone rings, he can't pick up",
+      "prompt": "A plumber in his forties lying on his back under a kitchen sink, worn work trousers and a grey t-shirt, pipe wrench in one hand, face half-lit, a smartphone on the tiled floor beside him lit up with an incoming call, warm kitchen light, low camera angle from the floor.",
+      "variants": 2
+    },
+    {
+      "id": "1b-caller",
+      "concept": 1,
+      "subject": "The caller finds nothing and calls the next name",
+      "prompt": "A woman in her fifties at a kitchen table at dusk, phone in hand, scrolling with a tired, unimpressed expression, a dripping tap and a bucket blurred in the background, cool evening light from a window.",
+      "variants": 1
+    },
+    {
+      "id": "1c-van",
+      "concept": 1,
+      "subject": "Lunch in the van: he types five sentences",
+      "prompt": "The same plumber in the driver's seat of a white work van parked at the edge of a field, a half-eaten sandwich on the dashboard, phone in both hands, typing with his thumbs, midday light through the windscreen, seen from the passenger seat.",
+      "variants": 1
+    },
+    {
+      "id": "1d-evening",
+      "concept": 1,
+      "subject": "Evening: he calls back and has the job",
+      "prompt": "The same plumber at home at a kitchen table in the evening, phone to his ear, a small satisfied smile, writing in a paper notebook with a pencil, warm lamp light, dinner plates pushed aside.",
+      "variants": 2
+    },
+    {
+      "id": "4a-counter",
+      "concept": 4,
+      "subject": "\"Imate spletno stran?\" An awkward pause at the counter",
+      "prompt": "A small-town hair salon, a customer with a coat on standing at the reception counter asking something with raised eyebrows, the hairdresser behind the counter caught mid-shrug with an awkward apologetic smile, mirrors, chairs and hairdryers behind them, daylight from the shop window.",
+      "variants": 2
+    },
+    {
+      "id": "4b-phone",
+      "concept": 4,
+      "subject": "A minute later: the phone is turned to the customer",
+      "prompt": "The same hairdresser holding her phone out across the counter toward the customer, the screen facing the camera and glowing plain white, both of them looking at it, the salon soft in the background, daylight.",
+      "variants": 1
+    }
+  ]
+}

@@ -22,6 +22,7 @@
     "fonts:inventory": "tsx packages/render/scripts/build-inventory-fonts.ts",
     "fixtures:photos": "tsx tools/eval/src/fixtures/generate-photos.ts",
     "fixtures:ai-photos": "tsx tools/eval/src/fixtures/ai-photos.ts",
+    "promo:stills": "tsx tools/promo/stills.ts",
     "examples:build": "tsx tools/eval/src/examples/build.ts",
     "dev:lite": "pnpm --filter @sb/web dev",
     "seed": "tsx --env-file-if-exists=.env tools/eval/src/seed.ts",

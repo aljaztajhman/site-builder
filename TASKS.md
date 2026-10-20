@@ -490,9 +490,9 @@ Before CMS collections (`sb-roadmap-order` = swap, 2026-10-01).
 
 ## Go-to-market (docs/GO-TO-MARKET.md; decisions in the Decision Inbox)
 Promo video (owner switched to it 2026-10-20; plan docs/plans/promo-video.md; ceiling €60, every paid step needs the owner's OK; ad spend is the owner's):
-- [x] Step 1: three concepts with Slovene scripts, shot lists and VO (A "Pod umivalnikom", B "60 sekund", C "Deset obrti"); recommendation A for 30 s, C for 15 s
-- [ ] Owner: pick a concept and mark lines to change
-- [ ] Step 2: storyboard stills, one per shot, plus real product frames (≈ €1)
+- [x] Step 1: eight concepts (artifact), shot lists in the plan. Owner 2026-10-20: 1 "Pod umivalnikom" (30 s promo), 4 "Imate spletno stran?" (15 s ad), 8 "Stran iz leta 2009" (15 s retargeting)
+- [x] Step 2: storyboard stills: `pnpm promo:stills` (tools/promo, test tools/promo/test/stills.test.ts), 9 stills on nano-banana-2, €0.62, eval/runs/promo/2026-10-20T20-16-28/
+- [ ] Owner: approve the stills' look (or say what is off) before the rough cut
 - [ ] Step 3: `tools/promo` capture (Playwright, 1080×1920, phone mode, bundled ffmpeg) and assemble (edit list → captions, VO, music, end card); rough cut on the cheap model (≈ €5)
 - [ ] Step 4: finals on Kling 3 Pro after one test shot; two VO voices; music (€15–40; stop rule at €30 without the look)
 - [ ] Step 5: 15/30/60 s cuts, with and without VO, 1:1 variant, thumbnails, AI note; files in eval/promo/<date>/

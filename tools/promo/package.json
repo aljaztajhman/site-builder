@@ -1,0 +1,12 @@
+{
+  "name": "@sb/promo",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@sb/config": "workspace:*",
+    "@sb/engine": "workspace:*",
+    "playwright": "1.63.0",
+    "sharp": "^0.35.5"
+  }
+}
