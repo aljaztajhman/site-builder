@@ -1,0 +1,30 @@
+{
+  "$comment": "Concept 1 'Pod umivalnikom', rough cut (owner 2026-10-20: a customer searches, doesn't find him, calls someone else; he makes the site in the van; the site; this time she calls him; the job in his notebook). Media from plumber-30.media.json and tools/promo/capture.ts, all in eval/runs/promo/plumber-30 (pass --assets). VO lengths are estimates from file size; adjust after the first render.",
+  "size": [1080, 1920],
+  "fps": 30,
+  "shots": [
+    { "src": "clip-1b.mp4", "in": 0.2, "dur": 4.8 },
+    { "src": "clip-1c.mp4", "in": 0.5, "dur": 3.0 },
+    { "src": "reel/frames", "fps": 30, "dur": 10 },
+    { "src": "site/frames", "fps": 30, "dur": 4 },
+    { "src": "clip-1a.mp4", "in": 0.5, "dur": 3.5 },
+    { "src": "clip-1d.mp4", "in": 1.0, "dur": 2.0 },
+    { "card": { "title": "postavi.si", "line": "Spletna stran v minuti.", "note": "Vizualije ustvarjene z AI. Podjetje v primeru je izmišljeno." }, "dur": 3.2 }
+  ],
+  "captions": [
+    { "at": 0.2, "dur": 2.3, "text": "Stranka vas išče na spletu.", "pos": "top" },
+    { "at": 2.6, "dur": 2.1, "text": "Ne najde vas. Pokliče drugega.", "pos": "top" },
+    { "at": 4.9, "dur": 2.8, "text": "Med malico, v kombiju.", "pos": "top" },
+    { "at": 21.9, "dur": 3.3, "text": "Tokrat pokliče vas.", "pos": "bottom" },
+    { "at": 25.4, "dur": 1.8, "text": "Nova stranka.", "pos": "bottom" }
+  ],
+  "audio": [
+    { "src": "vo-1b.mp3", "at": 0.3, "gain": 1.0, "role": "vo" },
+    { "src": "vo-2.mp3", "at": 6.1, "gain": 1.0, "role": "vo" },
+    { "src": "vo-3.mp3", "at": 12.5, "gain": 1.0, "role": "vo" },
+    { "src": "vo-4b.mp3", "at": 17.9, "gain": 1.0, "role": "vo" },
+    { "src": "vo-5.mp3", "at": 27.5, "gain": 1.0, "role": "vo" },
+    { "src": "music.wav", "at": 0, "gain": 0.22, "role": "music", "duckTo": 0.45 }
+  ],
+  "fadeOut": 0.6
+}

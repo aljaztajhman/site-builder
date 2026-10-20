@@ -16,7 +16,7 @@ One professional 9:16 spot for Postavi, delivered as three cuts (15 s ad, 30 s p
 |---|------|-----|---|------------|
 | 1 | Script: eight concepts, hook, shot list, VO text (below) | Claude | 0 | done: owner picked 1, 4 and 8 |
 | 2 | Storyboard stills: one generated still per shot, as a contact sheet | Claude | 0.62 spent | owner approves the look |
-| 3 | Rough cut: draft shots on the cheap model, real captures, temp VO and music, assembled by `tools/promo` into the 30 s with burned-in captions | Claude | ≈ 5 | owner watches it on a phone, gives notes |
+| 3 | Rough cut: draft shots, real captures, temp VO and music, assembled by `tools/promo` into the 30 s with burned-in captions | Claude | 1.12 spent | done for concept 1; owner watches it on a phone, gives notes |
 | 4 | Finals: surviving shots on Kling 3 Pro (one test shot first, ≈ €0.70; Veo 3.1 only if Kling disappoints, ≈ 3× the price), push-ins on real renders checked frame by frame, final VO (two voices to choose from), final music | Claude | 15–40 | owner picks the voice, approves the shots |
 | 5 | Three cuts (15/30/60 s), with and without VO, 1:1 variant, thumbnails, AI note | Claude | 0–2 | files in `eval/runs/promo/<date>/` (gitignored) and sent to the owner |
 | 6 | Ads: 15 s cut with two hooks for a week; rebuild the losing hook (≈ €5) | owner (ad account) + Claude | ad budget, owner's | cost per sign-up known |
@@ -44,18 +44,9 @@ Legend: [GEN] generated video, [CAP] real capture of the app, [I2V] image-to-vid
 
 ### 1 · "Pod umivalnikom" (30 s promo)
 
-The missed call is not the problem; being unfindable is. Two missed calls, two endings.
+What the site solves (owner, 2026-10-20, after two wrong drafts): not missed calls. Someone who doesn't know you yet looks you up before calling ("Preden vas pokliče, vas poišče na spletu"); whoever shows up, looks real and answers what, where and how to call gets the job.
 
-| Time | Shot | Caption | VO |
-|------|------|---------|----|
-| 0–3 | [GEN] Inštalater pod umivalnikom, telefon na tleh zvoni, ne more dvigniti. | Še vedno brez spletne strani? | — |
-| 3–6 | [GEN] Klicateljica za kuhinjsko mizo išče po telefonu, ne najde nič, pokliče naslednjega. | Stranka vas išče. Ne najde vas. | Ko ne morete dvigniti, vas stranka poišče. Če vas ne najde, pokliče naslednjega. |
-| 6–9 | [GEN] V kombiju med malico, telefon v rokah, tipka. | Opišite podjetje v nekaj stavkih. | Opišite, kaj delate in kje. |
-| 9–15 | [CAP] Tipkanje opisa (showcase Inštalater), Ustvari, gradnja v štirih korakih; majhen števec časa v kotu. | V minuti vidite svojo stran. | V minuti imate stran, ki jo stranke najdejo na telefonu. |
-| 15–20 | [I2V] Končana stran, počasen zoom; [CAP] drsenje: storitve, območje, Pokličite, obrazec. | Pokličejo vas. Ali pa pustijo sporočilo. | Pokličejo vas z enim dotikom. Če ne morete dvigniti, pustijo sporočilo. |
-| 20–24 | [CAP] Urejanje na mestu: dotik na ceno, popravek, Objavi. | Popravite sami. Brez agencije. | Spremembe naredite sami, kadar hočete. |
-| 24–27 | [GEN] Zvečer za mizo, telefon pri ušesu, zapisuje v beležko. | Pokliče nazaj. Delo je njegovo. | — |
-| 27–30 | [MG] End card: postavi.si · "Spletna stran v minuti." · AI note | postavi.si | Postavi. Spletna stran v minuti. |
+Order (rough cut 2026-10-20, tools/promo/cuts/plumber-30.json): a woman with a leaking tap searches, doesn't find him, calls someone else · he types a few sentences in the van at lunch · the real reel: his description typed, his example site built, live on its own address · his site: what, where, call bar · next time his phone rings under a sink ("Tokrat pokliče vas.") · evening, the job in his notebook ("Nova stranka.") · end card.
 
 ### 4 · "Imate spletno stran?" (15 s ad)
 
@@ -92,3 +83,11 @@ No generated people. A dated fictional site (built by us in HTML: tiny text, no 
 ## Not in scope
 
 Real customer footage (comes with the free beta, M7a, and beats everything here), a presenter or talking avatar, English versions.
+
+## Tools (tools/promo)
+
+- `pnpm promo:stills`: storyboard stills (storyboard.json).
+- `tsx tools/promo/media.ts <cut>.media.json --max-eur N`: keyframes (image edit from one reference still, so a person stays the same), image-to-video clips (MiniMax H3 Max 768P), voice-over lines (ElevenLabs v4, sl, voice Brian), music (Stable Audio 2.5). Prices in models.json; estimate first, cap, outputs never re-run.
+- `tsx tools/promo/capture.ts reel|site --primer <trade> --out <dir> [--to <selector>]`: the homepage's phone reel with that trade swapped in, or its example site scrolled; frame-exact 1080×1920 JPEGs.
+- `pnpm promo:cut <edit.json> --assets <dir>`: the edit list to H.264/AAC MP4 (ffmpeg from @ffmpeg-installer), captions and card in the postavi.si fonts, music ducked under the voice, loudness −14 LUFS, plus a review strip.
+- Claude can't watch or hear video: it reviews frames (the strip, exact frames) and measures loudness. Motion, AI glitches between frames, the voice and the music are the owner's check on a phone.

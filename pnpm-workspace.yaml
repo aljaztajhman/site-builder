@@ -5,6 +5,11 @@ packages:
 allowBuilds:
   esbuild: true
   sharp: true
+  # tools/promo's ffmpeg: its only script is `chmod u+x ffmpeg` (the binary must be executable on Linux CI).
+  '@ffmpeg-installer/linux-x64': true
+  '@ffmpeg-installer/linux-arm64': true
+  '@ffmpeg-installer/darwin-x64': true
+  '@ffmpeg-installer/darwin-arm64': true
 minimumReleaseAgeExclude:
   - '@typescript-eslint/eslint-plugin@8.71.0'
   - '@typescript-eslint/parser@8.71.0'

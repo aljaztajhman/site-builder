@@ -1,0 +1,8 @@
+{
+  "$comment": "fal endpoints and prices for the promo media (docs/plans/promo-video.md). Prices in USD from fal's pricing API, checked 2026-10-20. i2v may return up to ~0.7 s more than requested; estimates add that.",
+  "edit": { "endpoint": "fal-ai/nano-banana-2/edit", "usdPerImage": 0.08, "params": { "resolution": "1K", "output_format": "jpeg", "num_images": 1 } },
+  "i2v": { "endpoint": "minimax/h3-max/image-to-video", "usdPerSecond": 0.0325, "extraSeconds": 0.7, "params": { "resolution": "768P", "prompt_expansion_mode": "balanced" } },
+  "i2vDraft": { "endpoint": "minimax/h3-max-turbo/image-to-video", "usdPerSecond": 0.01625, "extraSeconds": 0.7, "params": { "resolution": "768P", "prompt_expansion_mode": "balanced" } },
+  "tts": { "endpoint": "elevenlabs/tts/eleven-v4", "usdPer1000Chars": 0.08, "params": { "language_code": "sl", "output_format": "mp3_44100_128", "stability": 0.55, "similarity_boost": 0.75 } },
+  "music": { "endpoint": "fal-ai/stable-audio-25/text-to-audio", "usdPerAudio": 0.2, "params": {} }
+}

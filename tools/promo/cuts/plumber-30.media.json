@@ -1,0 +1,102 @@
+{
+  "$comment": "Concept 1 'Pod umivalnikom', rough cut media (docs/plans/promo-video.md). Keyframes keep one plumber: every plumber shot is an edit of the same reference still (1a-sink-2). Clips on H3 Max 768P. VO: one male voice, one file per line so each line can be placed on the timeline. Story (owner 2026-10-20): a customer searches, doesn't find him, calls someone else; he makes the site in the van; the site; next time his phone rings; evening, the job in his notebook.",
+  "out": "eval/runs/promo/plumber-30",
+  "jobs": [
+    {
+      "id": "key-1a",
+      "kind": "edit",
+      "images": [
+        "eval/runs/promo/2026-10-20T20-16-28/1a-sink-2.jpg"
+      ],
+      "prompt": "Recompose this exact scene as a vertical 9:16 photo: the same plumber, same face, same grey t-shirt and work trousers, lying on his back under the same kitchen sink, wrench raised to the pipes; his smartphone lies on the tiled floor in the foreground, its screen lit with an incoming call. Low camera angle from the floor, warm kitchen light. Realistic photograph, true-to-life colours. No text or lettering anywhere."
+    },
+    {
+      "id": "key-1b",
+      "kind": "edit",
+      "images": [
+        "eval/runs/promo/2026-10-20T20-16-28/1b-caller-1.jpg"
+      ],
+      "prompt": "Recompose this exact scene as a vertical 9:16 photo: the same woman, same face and cardigan, at the same kitchen table at dusk, holding her phone and looking at it with a tired, unimpressed expression; a dripping tap and a bucket under the sink blurred behind her. Cool evening window light. Realistic photograph. No text or lettering anywhere."
+    },
+    {
+      "id": "key-1c",
+      "kind": "edit",
+      "images": [
+        "eval/runs/promo/2026-10-20T20-16-28/1a-sink-2.jpg"
+      ],
+      "prompt": "The same man as in the reference photo (same face, same short greying hair and stubble, same grey t-shirt) now sitting in the driver's seat of a white work van parked at the edge of a field at midday, a half-eaten sandwich on the dashboard, holding his phone in both hands and typing with his thumbs, concentrated. Seen from the passenger seat. Vertical 9:16 photo, realistic, natural light through the windscreen. No text or lettering anywhere, the phone screen not visible."
+    },
+    {
+      "id": "key-1d",
+      "kind": "edit",
+      "images": [
+        "eval/runs/promo/2026-10-20T20-16-28/1a-sink-2.jpg"
+      ],
+      "prompt": "The same man as in the reference photo (same face, same short greying hair and stubble), now clean and in a plain checked shirt, sitting at his kitchen table at home in the evening, phone to his ear, a small satisfied smile, writing a note in a paper notebook with a pencil; warm lamp light, dinner plates pushed aside. Vertical 9:16 photo, realistic. No text or lettering anywhere."
+    },
+    {
+      "id": "clip-1a",
+      "kind": "i2v",
+      "image": "key-1a",
+      "duration": 5,
+      "prompt": "The phone on the floor keeps ringing and buzzing. The plumber glances at it, can't reach it, and goes back to tightening the pipe with the wrench. Static camera, slight handheld feel, natural motion."
+    },
+    {
+      "id": "clip-1b",
+      "kind": "i2v",
+      "image": "key-1b",
+      "duration": 5,
+      "prompt": "She scrolls on her phone, shakes her head slightly, sighs, then lifts the phone to her ear to call someone else. Slow gentle push-in, natural motion."
+    },
+    {
+      "id": "clip-1c",
+      "kind": "i2v",
+      "image": "key-1c",
+      "duration": 5,
+      "prompt": "He types on the phone with both thumbs, pauses to think, then keeps typing. Light shifts slightly through the windscreen. Static camera, natural motion."
+    },
+    {
+      "id": "clip-1d",
+      "kind": "i2v",
+      "image": "key-1d",
+      "duration": 5,
+      "prompt": "He listens on the phone, nods, writes a short note in the notebook, and smiles. Warm lamp light. Very slow push-in, natural motion."
+    },
+    {
+      "id": "vo-1b",
+      "kind": "tts",
+      "voice": "Brian",
+      "text": "Preden vas stranka pokliče, vas poišče na spletu. Če vas ne najde, pokliče drugega."
+    },
+    {
+      "id": "vo-2",
+      "kind": "tts",
+      "voice": "Brian",
+      "text": "Opišite, kaj delate in kje."
+    },
+    {
+      "id": "vo-3",
+      "kind": "tts",
+      "voice": "Brian",
+      "text": "V minuti imate stran, ki jo stranke najdejo na telefonu."
+    },
+    {
+      "id": "vo-4b",
+      "kind": "tts",
+      "voice": "Brian",
+      "text": "Kaj delate, kje delate in klic z enim dotikom."
+    },
+    {
+      "id": "vo-5",
+      "kind": "tts",
+      "voice": "Brian",
+      "text": "Postavi. Spletna stran v minuti."
+    },
+    {
+      "id": "music",
+      "kind": "music",
+      "seconds": 32,
+      "prompt": "Warm, hopeful background music for a short advert: fingerpicked acoustic guitar, soft piano, light shaker, gentle steady build, 96 BPM, major key, no vocals, clean ending."
+    }
+  ]
+}
