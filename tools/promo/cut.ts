@@ -86,6 +86,8 @@ export const PUSH_END_ZOOM = 1.06;
 /** Seconds the music takes to dip and to come back around a voice-over. */
 export const DUCK_RAMP = 0.15;
 export const STRIP_STEP = 1.5;
+/** Target loudness of the mix: -14 LUFS integrated, true peak under -1.5 dBTP (what the short-video feeds play at). */
+export const LOUDNORM = "loudnorm=I=-14:TP=-1.5:LRA=11";
 
 const VIDEO_EXT = new Set([".mp4", ".mov", ".m4v", ".webm", ".mkv"]);
 const IMAGE_EXT = new Set([".jpg", ".jpeg", ".png", ".webp"]);
@@ -232,7 +234,8 @@ function shotFilter(shot: Shot, r: ResolvedShot, input: number, index: number, s
 function duckExpr(duckTo: number, windows: Span[]): string {
   const r = n(DUCK_RAMP);
   const terms = windows.map((s) => `min(max((t-${n(s.start - DUCK_RAMP)})/${r},0),1)*min(max((${n(s.end + DUCK_RAMP)}-t)/${r},0),1)`);
-  const env = terms.length === 1 ? terms[0] : `max(${terms.join(",")})`;
+  // ffmpeg's max() takes exactly two arguments: nest them for more windows.
+  const env = terms.reduceRight((acc, term) => `max(${term},${acc})`);
   return `1-${n(1 - duckTo)}*${env}`;
 }
 
@@ -300,7 +303,8 @@ export function buildFfmpegArgs(plan: RenderPlan, out: string): string[] {
     // ffmpeg 4.1's amix divides by the input count and has no normalize option: multiply it back.
     const mix = count === 1 ? "anull" : `amix=inputs=${count}:duration=first:dropout_transition=0,volume=${count}`;
     const afade = edit.fadeOut > 0 ? `,afade=t=out:st=${n(total - edit.fadeOut)}:d=${n(edit.fadeOut)}` : "";
-    filters.push(`${labels}${mix},alimiter=limit=0.95:level=disabled${afade}[aout]`);
+    // Loudness for social feeds (they play at about -14 LUFS); loudnorm resamples, so back to 48 kHz after it.
+    filters.push(`${labels}${mix},alimiter=limit=0.95:level=disabled,${LOUDNORM},aresample=48000${afade}[aout]`);
   }
 
   args.push(
@@ -487,17 +491,19 @@ export async function cut(editFile: string, opts: Partial<CutOptions> = {}): Pro
 
     const duration = probeDuration(out);
     const strip = `${out}.strip.jpg`;
-    await renderStrip(out, strip, tmp);
+    await renderStrip(out, strip, tmp, r.fps);
     return { out, strip, duration, command };
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }
 }
 
-async function renderStrip(video: string, strip: string, tmp: string): Promise<void> {
+async function renderStrip(video: string, strip: string, tmp: string, fps: number): Promise<void> {
   const dir = path.join(tmp, "strip");
   mkdirSync(dir);
-  runFfmpeg(["-y", "-hide_banner", "-i", video, "-vf", `fps=1/${STRIP_STEP},scale=270:480`, "-q:v", "3", path.join(dir, "s%04d.jpg")]);
+  // Every Nth frame exactly (the fps filter at low rates picks the middle of each interval, so labels ran late).
+  const every = Math.max(1, Math.round(STRIP_STEP * fps));
+  runFfmpeg(["-y", "-hide_banner", "-i", video, "-vf", `select=not(mod(n\\,${every})),scale=270:480`, "-vsync", "vfr", "-q:v", "3", path.join(dir, "s%04d.jpg")]);
   const files = readdirSync(dir).filter((f) => f.endsWith(".jpg")).sort();
   const frames = files.map((f, i) => ({ file: path.join(dir, f), t: i * STRIP_STEP }));
   const probe = frames.length;

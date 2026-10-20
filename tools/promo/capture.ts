@@ -7,7 +7,8 @@
  *         swapped in: its description is typed, its own example page (apps/web/src/ui/examples/primer-<id>) is built.
  *         The page copy is made in <out>/site/; the reel's scroll smoothing is switched off there, so each frame is
  *         the exact state for its scroll position.
- *   site  The trade's example page itself at phone size, scrolled top to bottom with an ease-in-out.
+ *   site  The trade's example page itself at phone size, scrolled with an ease-in-out from the top to --to <css
+ *         selector> (that element at the top of the screen), or to the bottom without it.
  *
  * Frames: <out>/frames/00001.jpg … at 1080×1920 (360×640 CSS px at 3×), for `pnpm promo:cut` to play at --fps.
  * Free: no model calls. Never touches the real site; the copies live under <out>.
@@ -140,7 +141,7 @@ async function main() {
   const [mode, ...args] = process.argv.slice(2);
   const primer = arg(args, "--primer");
   const out = arg(args, "--out");
-  if ((mode !== "reel" && mode !== "site") || !primer || !out) throw new Error("usage: capture.ts reel|site --primer <id> --out <dir> [--seconds N] [--fps 30]");
+  if ((mode !== "reel" && mode !== "site") || !primer || !out) throw new Error("usage: capture.ts reel|site --primer <id> --out <dir> [--seconds N] [--fps 30] [--to <css selector>]");
   const seconds = Number(arg(args, "--seconds") ?? (mode === "reel" ? 11 : 5));
   const fps = Number(arg(args, "--fps") ?? 30);
   const showcase = JSON.parse(readFileSync(path.join(EXAMPLES, "showcase.json"), "utf8")) as Showcase[];
@@ -160,10 +161,14 @@ async function main() {
     await page.evaluate(() => document.fonts.ready);
     if (mode === "reel") await page.addStyleTag({ content: "body header:not(.section-head), nav[aria-label=\"Na tej strani\"]{visibility:hidden!important} .reel-cue{display:none!important}" });
     const n = Math.round(seconds * fps);
-    const geo = await page.evaluate(() => {
+    const to = arg(args, "--to");
+    const geo = await page.evaluate((sel) => {
       const reel = document.getElementById("reel");
-      return { reelTop: reel ? reel.getBoundingClientRect().top + scrollY : 0, reelLen: reel ? reel.offsetHeight - innerHeight : 0, docLen: document.documentElement.scrollHeight - innerHeight };
-    });
+      const max = document.documentElement.scrollHeight - innerHeight;
+      const target = sel ? document.querySelector(sel) : null;
+      if (sel && !target) throw new Error(`--to: no element matches ${sel}`);
+      return { reelTop: reel ? reel.getBoundingClientRect().top + scrollY : 0, reelLen: reel ? reel.offsetHeight - innerHeight : 0, docLen: target ? Math.min(max, target.getBoundingClientRect().top + scrollY) : max };
+    }, to ?? null);
     for (let i = 0; i < n; i++) {
       const t = i / fps;
       const y = mode === "reel" ? geo.reelTop + reelScrollFraction(reelProgress(t, seconds)) * geo.reelLen : easeInOut(Math.min(1, t / seconds)) * geo.docLen;

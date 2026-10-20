@@ -147,6 +147,7 @@ describe("buildFfmpegArgs", () => {
   it("compensates amix's division and limits", () => {
     expect(g).toContain("amix=inputs=3:duration=first:dropout_transition=0,volume=3");
     expect(g).toContain("alimiter=limit=0.95");
+    expect(g).toContain("loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000");
   });
 
   it("ducks the music while either voice-over plays, and only the music", () => {
@@ -156,6 +157,35 @@ describe("buildFfmpegArgs", () => {
     expect(ducks[0]).toContain("1-0.55*max(");
     for (const edge of ["3.05", "5.35", "7.85", "9.65"]) expect(ducks[0]).toContain(edge);
     expect(g.split(";").find((l) => l.startsWith("[8:a]"))).toContain("eval=frame");
+  });
+
+  it("nests max() for three or more voice-overs (ffmpeg's max takes exactly two arguments)", () => {
+    const e = base();
+    e.audio = [
+      { src: "audio/vo-1.mp3", at: 0.5, role: "vo" },
+      { src: "audio/vo-2.mp3", at: 4, role: "vo" },
+      { src: "audio/vo-3.mp3", at: 8, role: "vo" },
+      { src: "audio/music.mp3", at: 0, gain: 0.25, role: "music", duckTo: 0.45 },
+    ];
+    const p = { ...plan(e), audioDurations: [1, 1, 1, 12] };
+    const duck = graph(buildFfmpegArgs(p, "out.mp4")).match(/volume='([^']*)':eval=frame/)![1]!;
+    let calls = 0;
+    for (let i = duck.indexOf("max("); i >= 0; i = duck.indexOf("max(", i + 1)) {
+      if (i > 0 && /[a-z]/.test(duck[i - 1]!)) continue;
+      calls++;
+      let depth = 0;
+      let args = 1;
+      for (let j = i + 4; j < duck.length; j++) {
+        const c = duck[j];
+        if (c === "(") depth++;
+        else if (c === ")") {
+          if (depth === 0) break;
+          depth--;
+        } else if (c === "," && depth === 0) args++;
+      }
+      expect(args).toBe(2);
+    }
+    expect(calls).toBeGreaterThanOrEqual(2);
   });
 
   it("writes silent stereo audio when there are no audio entries", () => {
