@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { loadConfig } from "@sb/config";
 import { estimateUsd, extension, MODELS, requestBody, waves, type Job, type JobsFile } from "../media.ts";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -17,7 +18,7 @@ describe("promo media", () => {
 
   it("keeps the plumber rough cut under the plan's €5", () => {
     const usd = plumber.jobs.reduce((s, j) => s + estimateUsd(j), 0);
-    expect(usd * 0.86).toBeLessThan(5);
+    expect(usd * loadConfig().eurPerUsd).toBeLessThan(5);
   });
 
   it("runs edits before the clips that start from them", () => {
@@ -35,6 +36,7 @@ describe("promo media", () => {
     expect(requestBody({ id: "m", kind: "music", prompt: "p", seconds: 32 }, () => "")).toMatchObject({ prompt: "p", seconds_total: 32 });
     expect(extension("i2v")).toBe("mp4");
     expect(extension("edit")).toBe("jpg");
+    expect(extension("music")).toBe("wav");
   });
 
   it("references only jobs or files in the stills folder", () => {

@@ -55,7 +55,8 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 export const MODELS = JSON.parse(readFileSync(path.join(HERE, "models.json"), "utf8")) as Record<Kind, Model>;
 
 export function extension(kind: Kind): string {
-  return kind === "edit" ? "jpg" : kind === "tts" || kind === "music" ? "mp3" : "mp4";
+  // Stable Audio answers with PCM WAV, ElevenLabs with MP3.
+  return kind === "edit" ? "jpg" : kind === "tts" ? "mp3" : kind === "music" ? "wav" : "mp4";
 }
 
 /** USD for one job at the model's price; i2v includes the possible extra length. */
@@ -153,6 +154,7 @@ async function main() {
   const only = arg(args, "--only") ?? "";
   const force = arg(args, "--force");
   const maxEur = Number(arg(args, "--max-eur") ?? 2);
+  if (!Number.isFinite(maxEur) || maxEur <= 0) throw new Error(`--max-eur must be a number above 0 with a decimal point (got "${arg(args, "--max-eur")}")`);
   const outFile = (j: Job) => path.join(outDir, `${j.id}.${extension(j.kind)}`);
   const byId = new Map(spec.jobs.map((j) => [j.id, j]));
   const resolve = (ref: string) => (byId.has(ref) ? outFile(byId.get(ref)!) : path.resolve(repoRoot, ref));
@@ -172,12 +174,17 @@ async function main() {
       wave.map(async (j) => {
         const t0 = Date.now();
         const m = MODELS[j.kind];
+        let submitted = false;
         try {
           for (const ref of [...(j.images ?? []), ...(j.image ? [j.image] : [])]) if (!existsSync(resolve(ref))) throw new Error(`missing input ${ref}`);
-          const result = await runOnFal(key, m.endpoint, requestBody(j, resolve));
+          const body = requestBody(j, resolve);
+          submitted = true;
+          const result = await runOnFal(key, m.endpoint, body);
           const url = outputUrl(j.kind, result);
           if (!url) throw new Error(`no output URL in ${JSON.stringify(result).slice(0, 300)}`);
-          const bytes = Buffer.from(await (await fetch(url, { signal: AbortSignal.timeout(180_000) })).arrayBuffer());
+          const got = await fetch(url, { signal: AbortSignal.timeout(180_000) });
+          if (!got.ok) throw new Error(`download HTTP ${got.status}`);
+          const bytes = Buffer.from(await got.arrayBuffer());
           writeFileSync(outFile(j), bytes);
           const eur = estimateUsd(j) * eurPerUsd;
           spent += eur;
@@ -186,12 +193,18 @@ async function main() {
           console.log(`${j.kind} ${j.id} ok ${seconds.toFixed(0)} s €${eur.toFixed(3)} (run €${spent.toFixed(2)})`);
         } catch (e) {
           failed++;
+          if (submitted) {
+            // Sent to fal: it may have run and billed. Book the estimate so the month's spend isn't understated.
+            const eur = estimateUsd(j) * eurPerUsd;
+            spent += eur;
+            appendFileSync(costs, JSON.stringify({ at: new Date().toISOString(), id: j.id, kind: j.kind, endpoint: m.endpoint, eur: Number(eur.toFixed(4)), status: "failed-after-submit", error: (e as Error).message.slice(0, 300) }) + "\n");
+          }
           console.error(`${j.kind} ${j.id} FAILED after ${((Date.now() - t0) / 1000).toFixed(0)} s: ${(e as Error).message}`);
         }
       }),
     );
   }
-  console.log(`\nSpend €${spent.toFixed(2)} (config prices; i2v at the requested length plus ${MODELS.i2v.extraSeconds} s), ${failed} failed.`);
+  console.log(`\nSpend €${spent.toFixed(2)} (config prices; i2v at the requested length plus ${MODELS.i2v.extraSeconds} s; failed jobs sent to fal booked at their estimate), ${failed} failed.`);
   if (failed) process.exit(1);
 }
 

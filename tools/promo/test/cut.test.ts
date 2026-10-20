@@ -125,6 +125,8 @@ describe("buildFfmpegArgs", () => {
 
   it("plays frame directories through the concat demuxer", () => {
     expect(args.join(" ")).toContain("-f concat -safe 0 -i /tmp/frames-2.txt");
+    // frames are re-timed from their index at the shot's own rate (the concat demuxer's 1/25 base dropped frames)
+    expect(graph(args)).toContain("[2:v]settb=1/90000,setpts=N/12/TB,");
   });
 
   it("overlays each caption in its window", () => {

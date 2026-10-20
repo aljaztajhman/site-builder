@@ -118,13 +118,17 @@ async function reelSite(browser: Awaited<ReturnType<typeof chromium.launch>>, sh
   const description = show.intro.replace(/\s*…$/, ".");
   html = replaceOnce(html, typed, description, "the reel's description");
   // The chat bubble shows the same description (possibly shortened); replace its paragraph whole.
-  html = html.replace(/(<div class="rc-you"><small>Vi<\/small><p>)[^<]*(<\/p>)/, `$1${description}$2`);
+  const bubble = /(<div class="rc-you"><small>Vi<\/small><p>)[^<]*(<\/p>)/;
+  if (!bubble.test(html)) throw new Error("Reel copy: the chat bubble (.rc-you p) not found; the homepage changed, update capture.ts");
+  html = html.replace(bubble, `$1${description}$2`);
   const reelStart = html.indexOf('<section class="reel"');
   const reelEnd = html.indexOf("</section>", reelStart);
   const reel = html.slice(reelStart, reelEnd);
   const strip = vars.map((v) => `<i style="--t:${v.tm.toFixed(2)};--h:${v.hm.toFixed(2)};--y:${v.ym.toFixed(3)};--tm:${v.tm.toFixed(2)};--hm:${v.hm.toFixed(2)};--ym:${v.ym.toFixed(3)}"><b></b></i>`).join("");
-  const newReel = reel.split(`<span class="host">${KVAS_SLUG}</span>`).join(`<span class="host">${slugOf(show.name)}</span>`).replace(/<div class="reel-pg">(?:<i [^>]*><b><\/b><\/i>)+<\/div>/, `<div class="reel-pg">${strip}</div>`);
-  if (newReel === reel) throw new Error("Reel copy: slug or page strip not replaced");
+  const host = `<span class="host">${KVAS_SLUG}</span>`;
+  const pgRe = /<div class="reel-pg">(?:<i [^>]*><b><\/b><\/i>)+<\/div>/;
+  if (reelStart < 0 || !reel.includes(host) || !pgRe.test(reel)) throw new Error("Reel copy: the reel, its address or its page strip not found; the homepage changed, update capture.ts");
+  const newReel = reel.split(host).join(`<span class="host">${slugOf(show.name)}</span>`).replace(pgRe, `<div class="reel-pg">${strip}</div>`);
   html = html.slice(0, reelStart) + newReel + html.slice(reelEnd);
   // Exact frames: no easing between the scroll position and what is drawn.
   html = replaceOnce(html, "shown=shown===null?t:shown+(t-shown)*.14;", "shown=t;", "the reel's scroll smoothing");
@@ -148,6 +152,9 @@ async function main() {
   const show = showcase.find((s) => s.id === primer);
   if (!show) throw new Error(`No showcase trade "${primer}"; have ${showcase.map((s) => s.id).join(", ")}`);
   const outDir = path.resolve(out);
+  for (const guarded of [path.join(repoRoot, "infra"), path.join(repoRoot, "apps")]) {
+    if (!path.relative(guarded, outDir).startsWith("..")) throw new Error(`--out must not be inside ${guarded}: capture deletes and rewrites <out>/site and <out>/frames`);
+  }
   const frames = path.join(outDir, "frames");
   rmSync(frames, { recursive: true, force: true });
   mkdirSync(frames, { recursive: true });
@@ -167,8 +174,9 @@ async function main() {
       const max = document.documentElement.scrollHeight - innerHeight;
       const target = sel ? document.querySelector(sel) : null;
       if (sel && !target) throw new Error(`--to: no element matches ${sel}`);
-      return { reelTop: reel ? reel.getBoundingClientRect().top + scrollY : 0, reelLen: reel ? reel.offsetHeight - innerHeight : 0, docLen: target ? Math.min(max, target.getBoundingClientRect().top + scrollY) : max };
+      return { hasReel: !!reel, reelTop: reel ? reel.getBoundingClientRect().top + scrollY : 0, reelLen: reel ? reel.offsetHeight - innerHeight : 0, docLen: target ? Math.min(max, target.getBoundingClientRect().top + scrollY) : max };
     }, to ?? null);
+    if (mode === "reel" && (!geo.hasReel || geo.reelLen <= 0)) throw new Error("No #reel to scroll through on the copied homepage");
     for (let i = 0; i < n; i++) {
       const t = i / fps;
       const y = mode === "reel" ? geo.reelTop + reelScrollFraction(reelProgress(t, seconds)) * geo.reelLen : easeInOut(Math.min(1, t / seconds)) * geo.docLen;

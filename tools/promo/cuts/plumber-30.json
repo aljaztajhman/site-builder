@@ -24,7 +24,7 @@
     { "src": "vo-3.mp3", "at": 12.5, "gain": 1.0, "role": "vo" },
     { "src": "vo-4b.mp3", "at": 17.9, "gain": 1.0, "role": "vo" },
     { "src": "vo-5.mp3", "at": 27.5, "gain": 1.0, "role": "vo" },
-    { "src": "music.mp3", "at": 0, "gain": 0.22, "role": "music", "duckTo": 0.45 }
+    { "src": "music.wav", "at": 0, "gain": 0.22, "role": "music", "duckTo": 0.45 }
   ],
   "fadeOut": 0.6
 }

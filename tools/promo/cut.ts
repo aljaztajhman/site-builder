@@ -224,6 +224,11 @@ function shotFilter(shot: Shot, r: ResolvedShot, input: number, index: number, s
     chain = `scale=${w * 2}:${h * 2}:force_original_aspect_ratio=increase,crop=${w * 2}:${h * 2},zoompan=z='${z}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=${w}x${h}:fps=${fps},setsar=1,${tail}`;
   } else if (r.kind === "image") {
     chain = `${cover},${tail}`;
+  } else if (r.kind === "frames") {
+    // Frame folders come through the concat demuxer on a 1/25 time base, which snaps 1/30 s steps to 0.04 s
+    // (a frame dropped and one doubled every few frames). Re-time them from their index at their own rate.
+    const rate = ("fps" in shot ? shot.fps : undefined) ?? fps;
+    chain = `settb=1/90000,setpts=N/${n(rate)}/TB,${cover},${pad},${tail}`;
   } else {
     chain = `${cover},${pad},${tail}`;
   }
@@ -338,7 +343,8 @@ const FONT_FACES = `@font-face{font-family:"Bricolage Grotesque";src:url("${FONT
 export function captionHtml(c: Caption, size: [number, number] = DEFAULT_SIZE): string {
   const [w, h] = size;
   const pos = c.pos ?? "bottom";
-  const place = pos === "top" ? "top:300px" : pos === "center" ? "top:50%;transform:translateY(-50%)" : `bottom:${h - 1440}px`;
+  // Positions are fractions of the height, tuned at 1920 (top 300 px, bottom edge at 1440 px).
+  const place = pos === "top" ? `top:${Math.round(h * (300 / 1920))}px` : pos === "center" ? "top:50%;transform:translateY(-50%)" : `bottom:${Math.round(h * (480 / 1920))}px`;
   return `<!doctype html><html lang="sl"><meta charset="utf-8"><style>
 ${FONT_FACES}
 html,body{margin:0;width:${w}px;height:${h}px;background:transparent;overflow:hidden}
@@ -353,11 +359,11 @@ export function cardHtml(card: CardSpec, size: [number, number] = DEFAULT_SIZE):
   return `<!doctype html><html lang="sl"><meta charset="utf-8"><style>
 ${FONT_FACES}
 html,body{margin:0;width:${w}px;height:${h}px;background:${BRAND.canvas};overflow:hidden}
-.m{position:absolute;inset:0 0 ${h - 1500}px 0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 90px;color:${BRAND.ink}}
+.m{position:absolute;inset:0 0 ${Math.round(h * (420 / 1920))}px 0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 90px;color:${BRAND.ink}}
 .t{font:800 120px/1 "Bricolage Grotesque",system-ui,sans-serif;letter-spacing:-.035em}
 .si{color:${BRAND.accent}}
 .l{margin-top:36px;font:500 56px/1.2 "Figtree",system-ui,sans-serif;text-wrap:balance}
-.n{position:absolute;left:90px;right:90px;bottom:${h - 1500}px;text-align:center;font:400 30px/1.4 "Figtree",system-ui,sans-serif;color:${BRAND.note}}
+.n{position:absolute;left:90px;right:90px;bottom:${Math.round(h * (420 / 1920))}px;text-align:center;font:400 30px/1.4 "Figtree",system-ui,sans-serif;color:${BRAND.note}}
 </style><div class="m"><div class="t">${title}</div>${card.line ? `<div class="l">${escapeHtml(card.line)}</div>` : ""}</div>${card.note ? `<div class="n">${escapeHtml(card.note)}</div>` : ""}</html>`;
 }
 
