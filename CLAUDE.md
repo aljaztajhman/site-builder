@@ -53,6 +53,7 @@ Before any paid call (evals, judge runs, generated pictures, smoke tests on the 
 ## How to communicate
 
 - Write only what I need to know. No restating the task, no step-by-step recap, no praise, no filler.
+- Short and concise overall (owner, 2026-10-20): a few lines where a few lines do; long detail goes in the plan file, PR or TASKS.md.
 - Status notes: one line.
 - End every run with exactly these three headings and nothing after them:
   - **Blocked on me**: decisions or actions only I can take. "None" if none.
