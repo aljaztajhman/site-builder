@@ -14,8 +14,9 @@ Written on 2026-10-16 from an inventory of TASKS.md (263 done, 158 open), HQ, do
 - **Editor (owner, 2026-10-19, after seeing a POC):** five editor UX changes join M2 as criterion 7 (PR #269, a draft until the architecture note and a review are in). Eleven more editor ideas are parked as "Editor 2.0" below; nothing else from that list is 1.0 work.
 - **Order (owner, 2026-10-18):** company registration comes last; next after M2 are M5 (domains, with the Postavi rename) and M6 (operations), then M4 in test mode and M7a, a free beta.
 - **Owner, in parallel (long lead times):** register the company (M3), find a lawyer for the legal pages (M3). New name Postavi; postavi.si bought 2026-10-17 (M5).
-- **Side work (owner switched to it, 2026-10-18):** the postavi.si coming-soon page: phone intro, the description → build → review → publish → edit demo, the search story, the time band, "live site with an editor" copy (#231, #233, #238, this PR).
-- **Last updated:** 2026-10-19.
+- **Side work (owner switched to it, 2026-10-20): the promo video.** One professional 9:16 spot in three cuts, launch material for M7; plan and three concepts in docs/plans/promo-video.md; ceiling €60 from the development budget, each paid step with the owner's OK ("let's be careful with money"). Proposed as an M7b criterion (owner moves it). Step 1 (concepts) done; waiting on the owner's pick.
+- **Earlier side work (owner, 2026-10-18):** the postavi.si coming-soon page: phone intro, the description → build → review → publish → edit demo, the search story, the time band, "live site with an editor" copy (#231, #233, #238, this PR).
+- **Last updated:** 2026-10-20.
 
 ---
 

@@ -489,6 +489,14 @@ Before CMS collections (`sb-roadmap-order` = swap, 2026-10-01).
 - [ ] Spec size with a long blog: 60 posts × 20 paragraphs fit the schema; every version stores the whole spec. Measure on a real blog before raising limits
 
 ## Go-to-market (docs/GO-TO-MARKET.md; decisions in the Decision Inbox)
+Promo video (owner switched to it 2026-10-20; plan docs/plans/promo-video.md; ceiling €60, every paid step needs the owner's OK; ad spend is the owner's):
+- [x] Step 1: three concepts with Slovene scripts, shot lists and VO (A "Pod umivalnikom", B "60 sekund", C "Deset obrti"); recommendation A for 30 s, C for 15 s
+- [ ] Owner: pick a concept and mark lines to change
+- [ ] Step 2: storyboard stills, one per shot, plus real product frames (≈ €1)
+- [ ] Step 3: `tools/promo` capture (Playwright, 1080×1920, phone mode, bundled ffmpeg) and assemble (edit list → captions, VO, music, end card); rough cut on the cheap model (≈ €5)
+- [ ] Step 4: finals on Kling 3 Pro after one test shot; two VO voices; music (€15–40; stop rule at €30 without the look)
+- [ ] Step 5: 15/30/60 s cuts, with and without VO, 1:1 variant, thumbnails, AI note; files in eval/promo/<date>/
+- [ ] Step 6 (owner): run the 15 s cut with two hooks for a week; Claude rebuilds the losing hook (≈ €5)
 Owner:
 - [ ] Name: changed from Stranko to **Postavi** (owner, 2026-10-17; stranko.si taken). postavi.si bought (unblocks `sb-email-domain`). Still to do: trademark search at SIPO/EUIPO; rename Stranko → Postavi in the product UI, emails and docs (timing in HQ decisions). Done in code 2026-10-19 (branch claude/m5-postavi-rename): PRODUCT_NAME, emails, comments, test hosts, proxy headers `x-postavi-*`, url-check agent `PostaviPregled/1.0`; analytics host `app.postavi.si` added. Left: `.env.example` (APP_URL/PLATFORM_DOMAIN examples), Railway `EMAIL_FROM` name, the old analytics host until the move, the generated landing examples, history in docs
 - [x] Decided (2026-10-01; budget 2026-09-30): first market one town in person, restaurants, hairdressers and tradespeople (`sb-first-market`); billing and domains before CMS (`sb-roadmap-order`); €15/month or €150/year (`sb-pricing`); entity after billing is built, before the first charge (`sb-legal-entity`); 90-day budget minimal, domains and trademark only, ~€40 + SIPO fee (`sb-gtm-budget`). Applied in docs/GO-TO-MARKET.md, docs/PRODUCT.md and config
