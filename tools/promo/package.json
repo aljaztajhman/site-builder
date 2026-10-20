@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "1.1.0",
     "@sb/config": "workspace:*",
     "@sb/engine": "workspace:*",
     "playwright": "1.63.0",
